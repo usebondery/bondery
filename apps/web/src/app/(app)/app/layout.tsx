@@ -2,6 +2,8 @@ import { AppShell, AppShellMain, AppShellNavbar } from "@mantine/core";
 import { NavigationSidebarContent } from "@/components/NavigationSidebar";
 import { getBaseUrl } from "@/lib/config";
 import { headers } from "next/headers";
+import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { redirect } from "next/navigation";
 
 async function getUserData() {
   try {
@@ -30,9 +32,7 @@ async function getUserData() {
     const firstName = user.user_metadata?.name || "";
     const middleName = user.user_metadata?.middlename || "";
     const lastName = user.user_metadata?.surname || "";
-    const fullName = [firstName, middleName, lastName]
-      .filter(Boolean)
-      .join(" ");
+    const fullName = [firstName, middleName, lastName].filter(Boolean).join(" ");
 
     return {
       userName: fullName || user.email || "User",
@@ -47,11 +47,22 @@ async function getUserData() {
   }
 }
 
-export default async function AppLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+/**
+ * Force dynamic rendering for all authenticated routes
+ * These routes require headers() for authentication checks
+ */
+export const dynamic = "force-dynamic";
+
+export default async function AppLayout({ children }: { children: React.ReactNode }) {
+  const supabase = await createServerSupabaseClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect("/login");
+  }
+
   const { userName, avatarUrl } = await getUserData();
 
   return (

@@ -1,6 +1,5 @@
 import { Container, Title, Stack, Group } from "@mantine/core";
 import { IconSettings } from "@tabler/icons-react";
-import { redirect } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { getTranslations } from "next-intl/server";
 import { ProfileCard } from "./components/ProfileCard";
@@ -20,9 +19,6 @@ export default async function SettingsPage() {
   });
 
   if (!response.ok) {
-    if (response.status === 401) {
-      redirect("/login");
-    }
     console.error("Failed to fetch settings:", response.statusText);
   }
 
