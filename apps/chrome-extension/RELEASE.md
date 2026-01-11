@@ -1,10 +1,18 @@
 # Chrome Extension Releases
 
+## Version Naming Convention
+
+The Chrome Extension uses **separate versioning** from the web app:
+- Extension releases use tags like `ext-v1.0.0`, `ext-v1.2.3`
+- Web app releases use tags like `v1.0.0`, `v1.2.3`
+
+This allows independent version numbering for each component.
+
 ## Creating a New Release
 
 To create a new release of the Bondee Chrome Extension:
 
-1. **Update the version** in `apps/chrome-extension/package.json`
+1. **Update the version** in `apps/chrome-extension/package.json` and `apps/chrome-extension/scripts/generate-manifest.ts`
 
 2. **Commit your changes**:
    ```bash
@@ -12,14 +20,14 @@ To create a new release of the Bondee Chrome Extension:
    git commit -m "Bump extension version to X.Y.Z"
    ```
 
-3. **Create and push a version tag**:
+3. **Create and push an extension version tag**:
    ```bash
-   git tag v1.0.0
-   git push origin v1.0.0
+   git tag ext-v0.2.0
+   git push origin ext-v0.2.0
    ```
 
 4. **GitHub Actions will automatically**:
-   - Build the extension in production mode
+   - Build the extension in production mode (extension only, not the web app)
    - Create a GitHub release
    - Upload the extension as a downloadable `.zip` file
 
@@ -33,10 +41,8 @@ You can also trigger a release manually from the GitHub Actions tab:
 
 ## Environment Variables
 
-The workflow uses these environment variables:
-- `APP_URL`: Production app URL
-
-To override these, add them as repository secrets in GitHub Settings → Secrets and variables → Actions.
+The workflow uses these repository variables:
+- `APP_URL`: Production app URL (configured in GitHub Settings → Secrets and variables → Actions → Variables)
 
 ## Installation for End Users
 

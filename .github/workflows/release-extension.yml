@@ -3,7 +3,7 @@ name: Release Chrome Extension
 on:
   push:
     tags:
-      - "v*.*.*" # Trigger on version tags like v1.0.0, v1.2.3
+      - "ext-v*.*.*" # Trigger on extension version tags like ext-v1.0.0, ext-v1.2.3
   workflow_dispatch: # Allow manual triggering
 
 jobs:
@@ -40,7 +40,9 @@ jobs:
 
       - name: Get version from tag
         id: get_version
-        run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/ext-}
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
 
       - name: Create Release
         id: create_release
