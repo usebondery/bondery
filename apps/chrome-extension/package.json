@@ -15,6 +15,7 @@
     "lint": "eslint src"
   },
   "devDependencies": {
+    "@bondee/icon-generator": "*",
     "@eslint/eslintrc": "^3.3.3",
     "@eslint/js": "^9.39.2",
     "@parcel/config-webextension": "^2.16.3",
