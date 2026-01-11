@@ -1,0 +1,73 @@
+name: Release Chrome Extension
+
+on:
+  push:
+    tags:
+      - "v*.*.*" # Trigger on version tags like v1.0.0, v1.2.3
+  workflow_dispatch: # Allow manual triggering
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build Chrome Extension
+        run: npm run build --filter=chrome-extension
+        env:
+          NODE_ENV: production
+          APP_URL: ${{ secrets.APP_URL }}
+
+      - name: Create zip archive
+        run: |
+          cd apps/chrome-extension/dist
+          zip -r ../../../bondee-extension-${{ github.ref_name }}.zip .
+          cd ../../..
+
+      - name: Get version from tag
+        id: get_version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Bondee Extension ${{ steps.get_version.outputs.VERSION }}
+          body: |
+            ## Bondee Chrome Extension Release ${{ steps.get_version.outputs.VERSION }}
+
+            ### Installation Instructions
+            1. Download the `bondee-extension-${{ steps.get_version.outputs.VERSION }}.zip` file below
+            2. Extract the zip file to a folder
+            3. Open Chrome and navigate to `chrome://extensions/`
+            4. Enable "Developer mode" in the top right corner
+            5. Click "Load unpacked" and select the extracted folder
+
+            ### Changes
+            See the commit history for details on what's included in this release.
+          draft: false
+          prerelease: false
+
+      - name: Upload Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./bondee-extension-${{ github.ref_name }}.zip
+          asset_name: bondee-extension-${{ steps.get_version.outputs.VERSION }}.zip
+          asset_content_type: application/zip
