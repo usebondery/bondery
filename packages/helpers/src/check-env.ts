@@ -74,20 +74,18 @@ export function checkEnvVariables(config: EnvCheckConfig): void {
     `\n${colors.blue}🔍 Checking environment variables...${colors.reset}`
   );
   console.log(`   Environment: ${colors.green}${environment}${colors.reset}`);
-  console.log(`   File: ${colors.green}${envFile}${colors.reset}\n`);
 
-  // Check if env file exists
-  if (!existsSync(envFilePath)) {
-    console.error(`${colors.red}❌ Error: ${envFile} not found${colors.reset}`);
-    console.error(`   Expected location: ${envFilePath}`);
-    console.error(
-      `\n${colors.yellow}Please create ${envFile} in your app directory${colors.reset}`
-    );
-    process.exit(1);
+  // Check if env file exists (optional for CI/CD environments like Vercel)
+  const fileExists = existsSync(envFilePath);
+  
+  if (fileExists) {
+    console.log(`   Source: ${colors.green}${envFile}${colors.reset}\n`);
+  } else {
+    console.log(`   Source: ${colors.yellow}process.env (CI/CD mode)${colors.reset}\n`);
   }
 
-  // Parse env file
-  const envVars = parseEnvFile(envFilePath);
+  // Parse env file if it exists
+  const envVars = fileExists ? parseEnvFile(envFilePath) : {};
 
   // Merge with process.env (process.env takes precedence for CI/CD)
   const allEnv = { ...envVars, ...process.env };
@@ -109,9 +107,16 @@ export function checkEnvVariables(config: EnvCheckConfig): void {
     missing.forEach((varName) => {
       console.error(`   ${colors.red}✗${colors.reset} ${varName}`);
     });
-    console.error(
-      `\n${colors.yellow}Please add these variables to ${envFile}${colors.reset}`
-    );
+    
+    if (fileExists) {
+      console.error(
+        `\n${colors.yellow}Please add these variables to ${envFile} or set them in your environment${colors.reset}`
+      );
+    } else {
+      console.error(
+        `\n${colors.yellow}Please set these variables in your CI/CD environment (e.g., Vercel dashboard)${colors.reset}`
+      );
+    }
     process.exit(1);
   }
 
