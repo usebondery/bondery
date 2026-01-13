@@ -97,11 +97,7 @@ export default function Home() {
   return (
     <div className="relative min-h-screen overflow-hidden bg-linear-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-gray-900 dark:via-slate-900 dark:to-indigo-950">
       {/* Animated background */}
-      <canvas
-        ref={canvasRef}
-        className="absolute inset-0 z-0"
-        aria-hidden="true"
-      />
+      <canvas ref={canvasRef} className="absolute inset-0 z-0" aria-hidden="true" />
 
       {/* Hero Section */}
       <Container size="xl" className="relative z-10">
@@ -125,9 +121,8 @@ export default function Home() {
                 mt={"md"}
                 className="mx-auto w-full text-xl text-gray-600 dark:text-gray-400"
               >
-                Bondery helps you nurture the connections that matter most.
-                Remember important moments, visualize your network, and never
-                miss a chance to stay in touch.
+                Bondery helps you nurture the connections that matter most. Remember important
+                moments, visualize your network, and never miss a chance to stay in touch.
               </Text>
             </div>
 
@@ -148,15 +143,12 @@ export default function Home() {
                     stroke={2}
                   />
                 </div>
-                <Title
-                  order={3}
-                  className="mb-3 text-xl font-bold text-gray-900 dark:text-white"
-                >
+                <Title order={3} className="mb-3 text-xl font-bold text-gray-900 dark:text-white">
                   Visualize Your Network
                 </Title>
                 <Text className="text-gray-600 dark:text-gray-400">
-                  See your network as an interactive map. Discover patterns and
-                  connections you never knew existed.
+                  See your network as an interactive map. Discover patterns and connections you
+                  never knew existed.
                 </Text>
               </div>
 
@@ -168,15 +160,12 @@ export default function Home() {
                     stroke={2}
                   />
                 </div>
-                <Title
-                  order={3}
-                  className="mb-3 text-xl font-bold text-gray-900 dark:text-white"
-                >
+                <Title order={3} className="mb-3 text-xl font-bold text-gray-900 dark:text-white">
                   Remember What Matters
                 </Title>
                 <Text className="text-gray-600 dark:text-gray-400">
-                  Track birthdays, anniversaries, and special moments. Get
-                  timely reminders so you never miss an important date.
+                  Track birthdays, anniversaries, and special moments. Get timely reminders so you
+                  never miss an important date.
                 </Text>
               </div>
 
@@ -188,15 +177,12 @@ export default function Home() {
                     stroke={2}
                   />
                 </div>
-                <Title
-                  order={3}
-                  className="mb-3 text-xl font-bold text-gray-900 dark:text-white"
-                >
+                <Title order={3} className="mb-3 text-xl font-bold text-gray-900 dark:text-white">
                   Stay Organized
                 </Title>
                 <Text className="text-gray-600 dark:text-gray-400">
-                  All your contacts, notes, and important details in one
-                  beautiful, intuitive interface. Simple yet powerful.
+                  All your contacts, notes, and important details in one beautiful, intuitive
+                  interface. Simple yet powerful.
                 </Text>
               </div>
             </div>

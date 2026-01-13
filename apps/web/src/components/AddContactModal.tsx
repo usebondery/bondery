@@ -7,10 +7,7 @@ import { useForm } from "@mantine/form";
 import { modals } from "@mantine/modals";
 import { notifications } from "@mantine/notifications";
 import { IconInfoCircle, IconUserPlus } from "@tabler/icons-react";
-import {
-  SocialMediaInput,
-  validateSocialMediaInput,
-} from "@/components/SocialMediaInput";
+import { SocialMediaInput, validateSocialMediaInput } from "@/components/SocialMediaInput";
 import { INPUT_MAX_LENGTHS } from "@/lib/config";
 import { getRandomExampleName } from "@/lib/randomNameHelpers";
 
@@ -49,8 +46,8 @@ function AddContactForm() {
         value.trim().length === 0
           ? "Please add a first name"
           : value.length > INPUT_MAX_LENGTHS.firstName
-          ? `First name must be ${INPUT_MAX_LENGTHS.firstName} characters or less`
-          : null,
+            ? `First name must be ${INPUT_MAX_LENGTHS.firstName} characters or less`
+            : null,
       middleName: (value) =>
         value.length > INPUT_MAX_LENGTHS.middleName
           ? `Middle name must be ${INPUT_MAX_LENGTHS.middleName} characters or less`
@@ -59,8 +56,8 @@ function AddContactForm() {
         value.trim().length === 0
           ? "Please add a last name"
           : value.length > INPUT_MAX_LENGTHS.lastName
-          ? `Last name must be ${INPUT_MAX_LENGTHS.lastName} characters or less`
-          : null,
+            ? `Last name must be ${INPUT_MAX_LENGTHS.lastName} characters or less`
+            : null,
       linkedin: (value) => {
         if (value.length > 50) {
           return "LinkedIn must be 50 characters or less";
@@ -125,9 +122,7 @@ function AddContactForm() {
       notifications.show({
         title: "Error",
         message:
-          error instanceof Error
-            ? error.message
-            : "Failed to create contact. Please try again.",
+          error instanceof Error ? error.message : "Failed to create contact. Please try again.",
         color: "red",
       });
 
@@ -204,21 +199,13 @@ function AddContactForm() {
           displayLabel
           disabled={isSubmitting}
         />
-        <Alert
-          variant="info"
-          icon={<IconInfoCircle />}
-          title="Want to add more info?"
-        >
-          You can add more details like phone, email, and other social media
-          after creating the contact.
+        <Alert variant="info" icon={<IconInfoCircle />} title="Want to add more info?">
+          You can add more details like phone, email, and other social media after creating the
+          contact.
         </Alert>
 
         <Group justify="flex-end" mt="md">
-          <Button
-            variant="default"
-            onClick={() => modals.closeAll()}
-            disabled={isSubmitting}
-          >
+          <Button variant="default" onClick={() => modals.closeAll()} disabled={isSubmitting}>
             Cancel
           </Button>
           <Button

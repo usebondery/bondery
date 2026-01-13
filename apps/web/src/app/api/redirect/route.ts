@@ -17,8 +17,17 @@ interface ProfileData {
 export async function POST(request: NextRequest) {
   try {
     const body: ProfileData = await request.json();
-    const { instagram, linkedin, facebook, firstName, middleName, lastName, profileImageUrl, title, place } =
-      body;
+    const {
+      instagram,
+      linkedin,
+      facebook,
+      firstName,
+      middleName,
+      lastName,
+      profileImageUrl,
+      title,
+      place,
+    } = body;
 
     if (!instagram && !linkedin && !facebook) {
       return NextResponse.json(
@@ -278,7 +287,8 @@ export async function GET(request: NextRequest) {
       updated_at: string;
     } = {
       user_id: user.id,
-      first_name: firstName || instagramUsername || linkedinUsername || facebookUsername || "Unknown",
+      first_name:
+        firstName || instagramUsername || linkedinUsername || facebookUsername || "Unknown",
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     };

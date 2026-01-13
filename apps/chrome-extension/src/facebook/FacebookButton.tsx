@@ -73,23 +73,23 @@ const FacebookButton: React.FC<FacebookButtonProps> = ({ username }) => {
     // Find SVG images - profile photos are in SVG image elements
     const svgImages = document.querySelectorAll("svg image[xlink\\:href]");
     const validPhotos: { href: string; size: number; inArticle: boolean; index: number }[] = [];
-    
+
     let index = 0;
     for (const image of Array.from(svgImages)) {
       const href = (image as SVGImageElement).getAttribute("xlink:href");
-      
+
       if (href && !href.includes("data:image") && href.includes("scontent")) {
         const inArticle = image.closest('[role="article"]') !== null;
-        
+
         // Check the image element's style attribute for dimensions
         const imageStyle = (image as SVGImageElement).getAttribute("style") || "";
         let width = 0;
         let height = 0;
-        
+
         // Extract from inline style (e.g., "height: 168px; width: 168px;")
         const styleWidthMatch = imageStyle.match(/width:\s*(\d+)px/);
         const styleHeightMatch = imageStyle.match(/height:\s*(\d+)px/);
-        
+
         if (styleWidthMatch && styleHeightMatch) {
           width = parseInt(styleWidthMatch[1]);
           height = parseInt(styleHeightMatch[1]);
@@ -102,15 +102,15 @@ const FacebookButton: React.FC<FacebookButtonProps> = ({ username }) => {
             height = parseInt(attrHeight);
           }
         }
-        
-        console.log(`Facebook: SVG image #${index}:`, { 
-          href: href.substring(0, 80), 
-          width, 
-          height, 
+
+        console.log(`Facebook: SVG image #${index}:`, {
+          href: href.substring(0, 80),
+          width,
+          height,
           inArticle,
-          index
+          index,
         });
-        
+
         // Only collect images that are:
         // 1. Square-ish (ratio between 0.8 and 1.2)
         // 2. At least 100px (profile photos, not tiny avatars)
@@ -121,11 +121,11 @@ const FacebookButton: React.FC<FacebookButtonProps> = ({ username }) => {
             validPhotos.push({ href, size: width, inArticle, index });
           }
         }
-        
+
         index++;
       }
     }
-    
+
     // Sort by: 1) larger size, 2) earlier in document
     validPhotos.sort((a, b) => {
       // Prefer larger sizes
@@ -133,16 +133,18 @@ const FacebookButton: React.FC<FacebookButtonProps> = ({ username }) => {
       // Then prefer images that appear earlier in the DOM
       return a.index - b.index;
     });
-    
+
     console.log("Facebook: Valid profile photos (100px+, not in articles):", validPhotos);
-    
+
     if (validPhotos.length > 0) {
       console.log("Facebook: Selected profile photo:", validPhotos[0]);
       return validPhotos[0].href;
     }
 
     // Fallback: Look for large img elements
-    const allImages = document.querySelectorAll("img[src*='scontent']") as NodeListOf<HTMLImageElement>;
+    const allImages = document.querySelectorAll(
+      "img[src*='scontent']",
+    ) as NodeListOf<HTMLImageElement>;
     const largestSquareImages: { img: HTMLImageElement; size: number }[] = [];
 
     for (const img of Array.from(allImages)) {
@@ -153,9 +155,9 @@ const FacebookButton: React.FC<FacebookButtonProps> = ({ username }) => {
         }
       }
     }
-    
+
     largestSquareImages.sort((a, b) => b.size - a.size);
-    
+
     if (largestSquareImages.length > 0) {
       console.log("Facebook: Found profile photo (img):", largestSquareImages[0].img.src);
       return largestSquareImages[0].img.src;

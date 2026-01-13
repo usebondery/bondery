@@ -6,22 +6,20 @@ import { MantineWrapper } from "../shared/MantineWrapper";
 // Extract Facebook username from URL
 function getFacebookUsername(): string | null {
   const pathname = window.location.pathname;
-  
+
   // Handle different Facebook URL patterns
   // /username or /profile.php?id=123456
   if (pathname.startsWith("/profile.php")) {
     const params = new URLSearchParams(window.location.search);
     return params.get("id");
   }
-  
+
   const match = pathname.match(/^\/([^\/]+)\/?$/);
-  
+
   if (
     match &&
     match[1] &&
-    !["marketplace", "groups", "watch", "gaming", "pages", "events", "messages"].includes(
-      match[1]
-    )
+    !["marketplace", "groups", "watch", "gaming", "pages", "events", "messages"].includes(match[1])
   ) {
     return match[1];
   }
@@ -40,12 +38,16 @@ function injectBonderyButton() {
     return;
   }
 
-  const targetSection = document.querySelector(".x1ifrov1.x1i1uccp.x1stjdt1.x1yaem6q.x4ckvhe.x2k3zez.xjbssrd.x1ltux0g.xrafsqe.xc9uqle.x17quhge");
+  const targetSection = document.querySelector(
+    ".x1ifrov1.x1i1uccp.x1stjdt1.x1yaem6q.x4ckvhe.x2k3zez.xjbssrd.x1ltux0g.xrafsqe.xc9uqle.x17quhge",
+  );
 
   console.log("Bondery Facebook: Target section found:", !!targetSection, targetSection);
 
   if (!targetSection) {
-    console.log("Bondery Facebook: Target section not found. Searching for alternative selectors...");
+    console.log(
+      "Bondery Facebook: Target section not found. Searching for alternative selectors...",
+    );
     return;
   }
 
@@ -66,7 +68,7 @@ function injectBonderyButton() {
       <MantineWrapper>
         <FacebookButton username={username} />
       </MantineWrapper>
-    </StrictMode>
+    </StrictMode>,
   );
 
   console.log("Bondery Extension: Button injected successfully on Facebook");
@@ -92,7 +94,7 @@ function setupObserver() {
 // Initialize
 function init() {
   // Safety check: only run on Facebook
-  if (!window.location.hostname.includes('facebook.com')) {
+  if (!window.location.hostname.includes("facebook.com")) {
     return;
   }
 
