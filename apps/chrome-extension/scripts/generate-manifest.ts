@@ -40,7 +40,6 @@ const manifest = {
   version: "0.4.0",
   description: "Import Instagram, LinkedIn, and Facebook contacts directly to Bondery",
   permissions: ["storage"],
-  default_locale: "en",
   host_permissions: [
     "https://www.instagram.com/*",
 
