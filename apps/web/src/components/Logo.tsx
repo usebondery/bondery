@@ -5,6 +5,10 @@ import Link from "next/link";
 type LogoProps = {
   /** Size of the logotype in pixels */
   size?: number;
+  /** @deprecated Use size instead */
+  iconSize?: number;
+  /** @deprecated Not used anymore, text is part of logotype */
+  textSize?: string;
   /** URL to link to (defaults to "/") */
   href?: string;
 };
@@ -13,11 +17,14 @@ type LogoProps = {
  * Reusable Logo component displaying the Bondery white logotype
  * Can be used throughout the application with consistent branding
  */
-export function Logo({ size = 120, href = "/" }: LogoProps) {
+export function Logo({ size, iconSize, href = "/" }: LogoProps) {
+  // Support legacy iconSize prop
+  const logoSize = size ?? iconSize ?? 120;
+
   return (
     <Link href={href} style={{ textDecoration: "none", color: "inherit" }}>
       <Flex align="center" gap="xs">
-        <BonderyLogotypeWhite width={size} height={size * 0.3} />
+        <BonderyLogotypeWhite width={logoSize * 3} height={logoSize} />
       </Flex>
     </Link>
   );
