@@ -13,6 +13,16 @@ const svgFiles = [
     output: "src/react/BonderyIconWhite.tsx",
     componentName: "BonderyIconWhite",
   },
+  {
+    input: "src/assets/logotype-black.svg",
+    output: "src/react/BonderyLogotypeBlack.tsx",
+    componentName: "BonderyLogotypeBlack",
+  },
+  {
+    input: "src/assets/logotype-white.svg",
+    output: "src/react/BonderyLogotypeWhite.tsx",
+    componentName: "BonderyLogotypeWhite",
+  },
 ];
 
 async function generateReactIcons() {
