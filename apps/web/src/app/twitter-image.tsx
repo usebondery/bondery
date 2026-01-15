@@ -22,7 +22,7 @@ export default async function Image() {
         justifyContent: "center",
       }}
     >
-      <BonderyLogotypeBlack width={600} height={600} />
+      <BonderyLogotypeBlack width={600} />
     </div>,
     {
       ...size,
