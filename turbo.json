@@ -22,6 +22,7 @@
       "dependsOn": ["^build"],
       "outputs": [".next/**", "!.next/cache/**", "dist/**", "public/**"]
     },
+
     "check-types": {
       "dependsOn": ["^check-types"]
     },
@@ -60,5 +61,16 @@
       "persistent": true,
       "cache": false
     }
-  }
+  },
+  "globalPassThroughEnv": [
+    "APP_URL",
+    "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY",
+    "NEXT_PUBLIC_SUPABASE_URL",
+    "SUPABASE_SECRET_KEY",
+    "GITHUB_CLIENT_ID",
+    "GITHUB_CLIENT_SECRET",
+    "LINKEDIN_CLIENT_ID",
+    "LINKEDIN_CLIENT_SECRET",
+    "NEXT_PUBLIC_APP_URL"
+  ]
 }
