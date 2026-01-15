@@ -1,6 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "buildCommand": "npx next telemetry disable && npx turbo run build --filter=web",
+  "buildCommand": "npx turbo run build --filter=web",
   "outputDirectory": "apps/web/.next",
   "framework": "nextjs",
   "devCommand": "npm run dev"
