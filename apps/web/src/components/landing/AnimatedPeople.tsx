@@ -29,6 +29,11 @@ const people: PersonContent[] = [
     name: "Schoolmate's address",
     quote: "Put onto a searchable map",
   },
+  {
+    src: "/images/persons/person_restaurant.jpg",
+    name: "Friend's favorite bistro",
+    quote: "Sometimes it's the details that matter",
+  },
 ];
 
 export function AnimatedPeople() {
