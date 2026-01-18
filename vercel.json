@@ -1,7 +1,0 @@
-{
-  "$schema": "https://openapi.vercel.sh/vercel.json",
-  "buildCommand": "npx turbo run build --filter=website",
-  "outputDirectory": "apps/website/.next",
-  "framework": "nextjs",
-  "devCommand": "npm run dev"
-}
