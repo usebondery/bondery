@@ -27,28 +27,6 @@ const svgFiles = [
   },
 ];
 
-// Custom template that injects a unique ID to prevent collisions when multiple instances are rendered
-const template = (variables: any, { tpl }: any) => {
-  const isLogotype = variables.componentName.startsWith("BonderyLogotype");
-  return tpl`
-${variables.imports};
-
-import type { SVGProps } from "react";
-
-interface ${variables.componentName}Props extends SVGProps<SVGSVGElement> {}
-
-const ${variables.componentName} = (props: ${variables.componentName}Props) => {
-  ${isLogotype ? "const uniqueId = `paint0_linear_12_150-${Math.random().toString(36).substr(2, 9)}-${Date.now()}`;" : ""}
-
-  return (
-    ${variables.jsx}
-  );
-};
-
-${variables.exports};
-`;
-};
-
 async function generateReactIcons() {
   console.log("🎨 Generating React icons from SVG...");
 
@@ -77,11 +55,6 @@ async function generateReactIcons() {
         memo: false,
       };
 
-      // Only use custom template if IDs need to be scoped
-      if (hasIds) {
-        options.template = template;
-      }
-
       let jsCode = await transform(svgCode, options, {
         componentName: file.componentName,
       });
@@ -93,8 +66,24 @@ async function generateReactIcons() {
           jsCode = jsCode.replace(/="url\(#([^)]+)\)"/g, "={'url(#paint0_linear_12_150)'}");
         } else {
           // Replace static IDs with dynamic ones using the injected uniqueId
-          jsCode = jsCode.replace(/id="([^"]+)"/g, "id={`$1-${uniqueId}`}");
-          jsCode = jsCode.replace(/="url\(#([^)]+)\)"/g, "={`url(#$1-${uniqueId})`}");
+          jsCode = jsCode.replace(
+            /id="([^"]+)"/g,
+            (_match, id) => `id={\`${id}-\${uniqueId}\`}`,
+          );
+          jsCode = jsCode.replace(
+            /="url\(#([^)]+)\)"/g,
+            (_match, id) => `={\`url(#${id}-\${uniqueId})\`}`,
+          );
+
+          // Inject uniqueId declaration into the component body
+          jsCode = jsCode.replace(
+            /=>\s*\(\s*\n/,
+            '=> {\n  const uniqueId = React.useId().replace(/:/g, "");\n\n  return (\n',
+          );
+          jsCode = jsCode.replace(
+            /\);\s*\nexport \{/, // close the newly opened block before exports
+            ');\n};\n\nexport {',
+          );
         }
       }
 
