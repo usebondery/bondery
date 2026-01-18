@@ -25,13 +25,13 @@ jobs:
 
       - name: Create production environment file
         run: |
-          echo "APP_URL=${{ vars.APP_URL }}" > apps/chrome-extension/.env.production.local
+          echo "NEXT_PUBLIC_WEBAPP_URL=${{ vars.NEXT_PUBLIC_WEBAPP_URL }}" > apps/chrome-extension/.env.production.local
 
       - name: Build Chrome Extension
         run: npx turbo build --filter=chrome-extension... --filter=\!web
         env:
           NODE_ENV: production
-          APP_URL: ${{ vars.APP_URL }}
+          NEXT_PUBLIC_WEBAPP_URL: ${{ vars.NEXT_PUBLIC_WEBAPP_URL }}
 
       - name: Create zip archive
         run: |

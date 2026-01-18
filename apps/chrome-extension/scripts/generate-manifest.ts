@@ -21,8 +21,8 @@ if (existsSync(localEnvPath)) {
   process.exit(1);
 }
 
-// Get APP_URL from environment
-const APP_URL = process.env.APP_URL;
+// Get NEXT_PUBLIC_WEBAPP_URL from environment
+const NEXT_PUBLIC_WEBAPP_URL = process.env.NEXT_PUBLIC_WEBAPP_URL;
 
 // Extract origin from URL for host permissions
 const getOrigin = (url: string) => {
@@ -45,7 +45,7 @@ const manifest = {
 
     "https://www.linkedin.com/*",
     "https://www.facebook.com/*",
-    getOrigin(APP_URL!),
+    getOrigin(NEXT_PUBLIC_WEBAPP_URL!),
   ],
   icons: {
     "16": "../public/icons/icon16.png",
@@ -71,12 +71,14 @@ const manifest = {
 // Write manifest.json
 const manifestPath = resolve(__dirname, "../src/manifest.json");
 
-if (!APP_URL) {
-  console.error(`❌ Error: APP_URL is not defined in ${envFile}`);
-  console.error(`   Please create ${envFile} with APP_URL variable`);
+if (!NEXT_PUBLIC_WEBAPP_URL) {
+  console.error(`❌ Error: NEXT_PUBLIC_WEBAPP_URL is not defined in ${envFile}`);
+  console.error(`   Please create ${envFile} with NEXT_PUBLIC_WEBAPP_URL variable`);
   process.exit(1);
 }
 
 writeFileSync(manifestPath, JSON.stringify(manifest, null, 2) + "\n");
 
-console.log(`✅ Generated manifest.json with host permission: ${getOrigin(APP_URL)}`);
+console.log(
+  `✅ Generated manifest.json with host permission: ${getOrigin(NEXT_PUBLIC_WEBAPP_URL)}`,
+);

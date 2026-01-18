@@ -4,7 +4,7 @@
   "tasks": {
     "build": {
       "env": [
-        "APP_URL",
+        "NEXT_PUBLIC_WEBAPP_URL",
         "WEBSITE_URL",
         "API_URL",
         "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY",
@@ -41,7 +41,7 @@
       "persistent": true,
       "cache": false,
       "env": [
-        "APP_URL",
+        "NEXT_PUBLIC_WEBAPP_URL",
         "WEBSITE_URL",
         "API_URL",
         "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY",
@@ -83,7 +83,7 @@
     }
   },
   "globalPassThroughEnv": [
-    "APP_URL",
+    "NEXT_PUBLIC_WEBAPP_URL",
     "WEBSITE_URL",
     "API_URL",
     "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY",

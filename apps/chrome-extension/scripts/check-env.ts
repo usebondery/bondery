@@ -6,5 +6,5 @@ const environment = (process.env.NODE_ENV || "development") as "production" | "d
 checkEnvVariables({
   environment,
   appPath: resolve(__dirname, ".."),
-  requiredVars: ["APP_URL"],
+  requiredVars: ["NEXT_PUBLIC_WEBAPP_URL"],
 });

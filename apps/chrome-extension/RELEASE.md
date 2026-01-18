@@ -66,7 +66,7 @@ You can also trigger a release manually from the GitHub Actions tab:
 ## Environment Variables
 
 The workflow uses these repository variables:
-- `APP_URL`: Production app URL (configured in GitHub Settings → Secrets and variables → Actions → Variables)
+- `NEXT_PUBLIC_WEBAPP_URL`: Production app URL (configured in GitHub Settings → Secrets and variables → Actions → Variables)
 
 ## Installation for End Users
 

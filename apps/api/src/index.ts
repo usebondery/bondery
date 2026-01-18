@@ -17,7 +17,7 @@ import { redirectRoutes } from "./routes/redirect.js";
 // Environment variable schema
 const envSchema = {
   type: "object",
-  required: ["SUPABASE_URL", "SUPABASE_PUBLISHABLE_KEY", "SUPABASE_SECRET_KEY"],
+  required: ["SUPABASE_URL", "PUBLIC_SUPABASE_PUBLISHABLE_KEY", "PRIVATE_SUPABASE_SECRET_KEY"],
   properties: {
     PORT: {
       type: "number",
@@ -34,19 +34,17 @@ const envSchema = {
     SUPABASE_URL: {
       type: "string",
     },
-    SUPABASE_PUBLISHABLE_KEY: {
+    PUBLIC_SUPABASE_PUBLISHABLE_KEY: {
       type: "string",
     },
-    SUPABASE_SECRET_KEY: {
+    PRIVATE_SUPABASE_SECRET_KEY: {
       type: "string",
     },
-    WEBAPP_URL: {
+    NEXT_PUBLIC_WEBAPP_URL: {
       type: "string",
-      default: "https://app.usebondery.com",
     },
-    WEBSITE_URL: {
+    NEXT_PUBLIC_WEBSITE_URL: {
       type: "string",
-      default: "https://usebondery.com",
     },
   },
 } as const;
@@ -58,10 +56,10 @@ declare module "fastify" {
       HOST: string;
       LOG_LEVEL: string;
       SUPABASE_URL: string;
-      SUPABASE_PUBLISHABLE_KEY: string;
-      SUPABASE_SECRET_KEY: string;
-      WEBAPP_URL: string;
-      WEBSITE_URL: string;
+      PUBLIC_SUPABASE_PUBLISHABLE_KEY: string;
+      PRIVATE_SUPABASE_SECRET_KEY: string;
+      NEXT_PUBLIC_WEBAPP_URL: string;
+      NEXT_PUBLIC_WEBSITE_URL: string;
     };
   }
 }
@@ -84,8 +82,8 @@ async function buildServer() {
 
   // Allowed origins for CORS
   const ALLOWED_ORIGINS = [
-    fastify.config.WEBAPP_URL,
-    fastify.config.WEBSITE_URL,
+    fastify.config.NEXT_PUBLIC_WEBAPP_URL,
+    fastify.config.NEXT_PUBLIC_WEBSITE_URL,
     // Development origins
     "http://localhost:3000",
     "http://localhost:3002",
@@ -127,7 +125,7 @@ async function start() {
   const server = await buildServer();
 
   try {
-    await server.listen({ port: server.config.PORT, host: server.config.HOST });
+    await server.listen({});
     console.log(
       `🚀 Bondery API Server running at http://${server.config.HOST}:${server.config.PORT}`,
     );
