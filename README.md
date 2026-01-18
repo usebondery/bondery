@@ -49,6 +49,6 @@ You are welcome to contribute to Bondery! Please read our [Contributing Guide](C
 Bondery is open-source software licensed under the [AGPL-3.0 license](LICENSE).
 
 ## 📧 Get in touch with us
-If you have any questions, feedback, or need support, feel free to reach out to us at our page: [https://bondery.com](https://bondery.com).
+If you have any questions, feedback, or need support, feel free to reach out to us at our page: [https://usebondery.com](https://usebondery.com).
 
 If you encounter any issues or have feature requests, please open an issue on our [GitHub repository](https://github.com/sveetya/bondery).
