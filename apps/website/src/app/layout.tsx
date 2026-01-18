@@ -42,7 +42,7 @@ export default function RootLayout({
         <ColorSchemeScript nonce="8IBTHwOdqNKAWeKl7plt8g==" defaultColorScheme="auto" />
       </Head>
       <body>
-        <MantineProvider defaultColorScheme="auto" theme={bonderyTheme}>
+        <MantineProvider defaultColorScheme="dark" theme={bonderyTheme}>
           <Notifications autoClose={5000} position="top-center" />
           <Header />
           <main>{children}</main>

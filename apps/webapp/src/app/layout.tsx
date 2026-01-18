@@ -24,10 +24,10 @@ export default async function RootLayout({
   return (
     <html lang="en" {...mantineHtmlProps} className={lexend.variable}>
       <head>
-        <ColorSchemeScript nonce="8IBTHwOdqNKAWeKl7plt8g==" defaultColorScheme="auto" />
+        <ColorSchemeScript nonce="8IBTHwOdqNKAWeKl7plt8g==" defaultColorScheme="dark" />
       </head>
       <body>
-        <MantineProvider defaultColorScheme="auto" theme={bonderyTheme}>
+        <MantineProvider defaultColorScheme="dark" theme={bonderyTheme}>
           <ModalsProvider>
             <Notifications autoClose={5000} position="top-center" />
             {children}
