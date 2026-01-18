@@ -5,6 +5,8 @@
     "build": {
       "env": [
         "APP_URL",
+        "WEBSITE_URL",
+        "API_URL",
         "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY",
         "NEXT_PUBLIC_SUPABASE_URL",
         "SUPABASE_SECRET_KEY",
@@ -13,12 +15,17 @@
         "LINKEDIN_CLIENT_ID",
         "LINKEDIN_CLIENT_SECRET",
         "NEXT_PUBLIC_APP_URL",
+        "NEXT_PUBLIC_API_URL",
+        "NEXT_PUBLIC_WEBSITE_URL",
         "DO_NOT_TRACK"
       ],
       "inputs": [
         "$TURBO_DEFAULT$",
         "apps/chrome-extension/.env.production.local",
-        "apps/web/.env.production.local"
+        "apps/web/.env.production.local",
+        "apps/webapp/.env.production.local",
+        "apps/website/.env.production.local",
+        "apps/server/.env.production.local"
       ],
       "dependsOn": ["^build"],
       "outputs": [".next/**", "!.next/cache/**", "dist/**", "public/**"]
@@ -35,6 +42,8 @@
       "cache": false,
       "env": [
         "APP_URL",
+        "WEBSITE_URL",
+        "API_URL",
         "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY",
         "NEXT_PUBLIC_SUPABASE_URL",
         "SUPABASE_SECRET_KEY",
@@ -43,12 +52,17 @@
         "LINKEDIN_CLIENT_ID",
         "LINKEDIN_CLIENT_SECRET",
         "NEXT_PUBLIC_APP_URL",
+        "NEXT_PUBLIC_API_URL",
+        "NEXT_PUBLIC_WEBSITE_URL",
         "DO_NOT_TRACK"
       ],
       "inputs": [
         "$TURBO_DEFAULT$",
         "apps/chrome-extension/.env.development.local",
-        "apps/web/.env.development.local"
+        "apps/web/.env.development.local",
+        "apps/webapp/.env.development.local",
+        "apps/website/.env.development.local",
+        "apps/server/.env.development.local"
       ]
     },
     "@bondery/branding#build": {
@@ -59,6 +73,10 @@
       "outputs": [],
       "env": []
     },
+    "@bondery/types#build": {
+      "outputs": ["dist/**"],
+      "env": []
+    },
     "start": {
       "persistent": true,
       "cache": false
@@ -66,6 +84,8 @@
   },
   "globalPassThroughEnv": [
     "APP_URL",
+    "WEBSITE_URL",
+    "API_URL",
     "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY",
     "NEXT_PUBLIC_SUPABASE_URL",
     "SUPABASE_SECRET_KEY",
@@ -74,6 +94,8 @@
     "LINKEDIN_CLIENT_ID",
     "LINKEDIN_CLIENT_SECRET",
     "NEXT_PUBLIC_APP_URL",
+    "NEXT_PUBLIC_API_URL",
+    "NEXT_PUBLIC_WEBSITE_URL",
     "DO_NOT_TRACK"
   ]
 }

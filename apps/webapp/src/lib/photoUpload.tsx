@@ -1,0 +1,157 @@
+/**
+ * Shared photo upload functionality
+ * Can be used for both user profile photos and contact photos
+ */
+
+"use client";
+
+import { modals } from "@mantine/modals";
+import { notifications } from "@mantine/notifications";
+import { Group, Text } from "@mantine/core";
+import { IconPhoto } from "@tabler/icons-react";
+
+export interface PhotoUploadTranslations {
+  TitleModal: string;
+  AttachProfilePhoto: string;
+  UpdateError: string;
+  InvalidFile: string;
+  DragImageHere: string;
+  UpdateProfilePhoto: string;
+  Cancel: string;
+  ConfirmPhoto: string;
+  UploadingPhoto: string;
+  PleaseWait: string;
+  UpdateSuccess: string;
+  PhotoUpdateSuccess: string;
+  PhotoUpdateError: string;
+}
+
+export interface PhotoUploadConfig {
+  /** API endpoint to upload the photo to */
+  uploadEndpoint: string;
+  /** Callback after successful upload */
+  onSuccess?: () => void;
+  /** Current avatar URL for preview */
+  avatarUrl?: string | null;
+  /** Name for avatar display */
+  displayName?: string;
+}
+
+/**
+ * Opens a photo upload modal flow with preview and confirmation
+ * @param config - Upload configuration including endpoint and callbacks
+ * @param translations - Translation strings for the modal
+ * @param PhotoUploadModal - The upload modal component
+ * @param PhotoConfirmModal - The confirmation modal component
+ */
+export async function openPhotoUploadModal(
+  config: PhotoUploadConfig,
+  translations: PhotoUploadTranslations,
+  PhotoUploadModal: React.ComponentType<any>,
+  PhotoConfirmModal: React.ComponentType<any>,
+) {
+  const modalId = "photo-upload-modal";
+
+  const handlePhotoSelect = (file: File, preview: string) => {
+    // Update the existing modal to show confirmation step
+    modals.open({
+      modalId,
+      title: (
+        <Group gap="xs">
+          <IconPhoto size={20} stroke={1.5} />
+          <Text fw={600}>{translations.UpdateProfilePhoto}</Text>
+        </Group>
+      ),
+      children: (
+        <PhotoConfirmModal
+          preview={preview}
+          onCancel={() => modals.close(modalId)}
+          onConfirm={() => handlePhotoConfirm(file)}
+          translations={{
+            UpdateProfilePhoto: translations.UpdateProfilePhoto,
+            Cancel: translations.Cancel,
+            ConfirmPhoto: translations.ConfirmPhoto,
+          }}
+        />
+      ),
+      centered: true,
+      size: "md",
+      withCloseButton: true,
+    });
+  };
+
+  const handlePhotoConfirm = async (file: File) => {
+    modals.close(modalId);
+
+    const loadingNotification = notifications.show({
+      title: translations.UploadingPhoto,
+      message: translations.PleaseWait,
+      loading: true,
+      autoClose: false,
+      withCloseButton: false,
+    });
+
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const response = await fetch(config.uploadEndpoint, {
+        method: "POST",
+        body: formData,
+      });
+
+      notifications.hide(loadingNotification);
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || "Failed to upload photo");
+      }
+
+      notifications.show({
+        title: translations.UpdateSuccess,
+        message: translations.PhotoUpdateSuccess,
+        color: "green",
+      });
+
+      // Call success callback or reload page
+      if (config.onSuccess) {
+        config.onSuccess();
+      } else {
+        setTimeout(() => {
+          window.location.reload();
+        }, 500);
+      }
+    } catch (error) {
+      notifications.show({
+        title: translations.UpdateError,
+        message: error instanceof Error ? error.message : translations.PhotoUpdateError,
+        color: "red",
+      });
+    }
+  };
+
+  modals.open({
+    modalId,
+    title: (
+      <Group gap="xs">
+        <IconPhoto size={20} stroke={1.5} />
+        <Text fw={600}>{translations.TitleModal}</Text>
+      </Group>
+    ),
+    children: (
+      <PhotoUploadModal
+        onPhotoSelect={(file: File, preview: string) => handlePhotoSelect(file, preview)}
+        translations={{
+          TitleModal: translations.TitleModal,
+          AttachProfilePhoto: translations.AttachProfilePhoto,
+          UpdateError: translations.UpdateError,
+          InvalidFile: translations.InvalidFile,
+          DragImageHere: translations.DragImageHere,
+        }}
+      />
+    ),
+    centered: true,
+    size: "lg",
+    withCloseButton: true,
+  });
+}

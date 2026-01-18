@@ -2,6 +2,7 @@
 
 # dependencies
 /node_modules
+**/node_modules
 /.pnp
 .pnp.*
 .yarn/*
@@ -10,11 +11,13 @@
 !.yarn/releases
 !.yarn/versions
 
+/web
+
 # testing
 /coverage
 
 # next.js
-/.next/
+**/.next/
 /out/
 
 # production
