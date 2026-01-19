@@ -1,3 +1,10 @@
+---
+icon: terminal
+metaLinks:
+  alternates:
+    - https://app.gitbook.com/s/M9ty6FYa3j98VSBHF9LN/
+---
+
 # Bondery API Server
 
 Fastify-based REST API server for the Bondery application.
@@ -6,14 +13,14 @@ Fastify-based REST API server for the Bondery application.
 
 This server handles all API requests for the Bondery webapp, including:
 
-- **Contacts** - CRUD operations for contacts/people
-- **Account** - User account management and profile photos
-- **Settings** - User preferences and settings
-- **Redirect** - Browser extension integration endpoint
+* **Contacts** - CRUD operations for contacts/people
+* **Account** - User account management and profile photos
+* **Settings** - User preferences and settings
+* **Redirect** - Browser extension integration endpoint
 
 ## Deployment
 
-- **Production URL**: `api.usebondery.com`
+* **Production URL**: `api.usebondery.com`
 
 ## Environment Variables
 
@@ -61,32 +68,32 @@ npm start
 
 ### Contacts
 
-- `GET /api/contacts` - List all contacts
-- `POST /api/contacts` - Create a new contact
-- `DELETE /api/contacts` - Delete multiple contacts
-- `GET /api/contacts/:id` - Get a single contact
-- `PATCH /api/contacts/:id` - Update a contact
-- `POST /api/contacts/:id/photo` - Upload contact photo
-- `DELETE /api/contacts/:id/photo` - Delete contact photo
+* `GET /api/contacts` - List all contacts
+* `POST /api/contacts` - Create a new contact
+* `DELETE /api/contacts` - Delete multiple contacts
+* `GET /api/contacts/:id` - Get a single contact
+* `PATCH /api/contacts/:id` - Update a contact
+* `POST /api/contacts/:id/photo` - Upload contact photo
+* `DELETE /api/contacts/:id/photo` - Delete contact photo
 
 ### Account
 
-- `GET /api/account` - Get current user account
-- `PATCH /api/account` - Update account metadata
-- `DELETE /api/account` - Delete user account
-- `POST /api/account/signout` - Sign out user
-- `POST /api/account/photo` - Upload profile photo
-- `DELETE /api/account/photo` - Delete profile photo
+* `GET /api/account` - Get current user account
+* `PATCH /api/account` - Update account metadata
+* `DELETE /api/account` - Delete user account
+* `POST /api/account/signout` - Sign out user
+* `POST /api/account/photo` - Upload profile photo
+* `DELETE /api/account/photo` - Delete profile photo
 
 ### Settings
 
-- `GET /api/settings` - Get user settings
-- `PATCH /api/settings` - Update user settings
+* `GET /api/settings` - Get user settings
+* `PATCH /api/settings` - Update user settings
 
 ### Redirect (Browser Extension)
 
-- `GET /api/redirect` - Create/find contact and redirect
-- `POST /api/redirect` - Create/find contact (JSON response)
+* `GET /api/redirect` - Create/find contact and redirect
+* `POST /api/redirect` - Create/find contact (JSON response)
 
 ## Authentication
 
@@ -105,17 +112,19 @@ The server authenticates requests using Supabase session cookies. Cookies are pa
 
 Full API documentation is available in OpenAPI 3.0 format:
 
-- **OpenAPI Specification**: [`openapi.yaml`](./openapi.yaml)
-- **GitBook Integration**: Configured via [`.gitbook.yaml`](./.gitbook.yaml)
+* **OpenAPI Specification**: [`openapi.yaml`](openapi.yaml)
+* **GitBook Integration**: Configured via [`.gitbook.yaml`](.gitbook.yaml)
 
 The OpenAPI specification includes:
-- Complete endpoint documentation with request/response schemas
-- Authentication requirements
-- Example requests and responses
-- Error responses
-- Schema definitions for all data types
+
+* Complete endpoint documentation with request/response schemas
+* Authentication requirements
+* Example requests and responses
+* Error responses
+* Schema definitions for all data types
 
 To view the documentation:
+
 1. Use any OpenAPI viewer (e.g., [Swagger Editor](https://editor.swagger.io/))
 2. View on GitBook (once published)
 3. Import into tools like Postman, Insomnia, or Bruno
@@ -123,6 +132,7 @@ To view the documentation:
 ### Keeping Documentation Updated
 
 When adding or modifying endpoints:
+
 1. Update the route implementation in `src/routes/`
 2. Update the corresponding TypeScript types in `@bondery/types`
 3. Update the OpenAPI specification in `openapi.yaml`

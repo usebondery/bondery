@@ -6,8 +6,8 @@ This document explains how to work with the Bondery API documentation.
 
 The Bondery API documentation is written in **OpenAPI 3.0.3** format and configured for publication on **GitBook**.
 
-- **Spec File**: [`openapi.yaml`](./openapi.yaml)
-- **GitBook Config**: [`.gitbook.yaml`](./.gitbook.yaml)
+* **Spec File**: [`openapi.yaml`](../openapi.yaml)
+* **GitBook Config**: [`.gitbook.yaml`](../.gitbook.yaml)
 
 ## Viewing the Documentation
 
@@ -20,8 +20,9 @@ The Bondery API documentation is written in **OpenAPI 3.0.3** format and configu
 ### Option 2: VS Code Extensions
 
 Install one of these VS Code extensions:
-- **OpenAPI (Swagger) Editor** by 42Crunch
-- **Swagger Viewer** by Arjun G
+
+* **OpenAPI (Swagger) Editor** by 42Crunch
+* **Swagger Viewer** by Arjun G
 
 ### Option 3: Postman/Insomnia
 
@@ -64,10 +65,10 @@ For more details, see [GitBook API Reference Documentation](https://docs.gitbook
 1. **Implement the endpoint** in `src/routes/`
 2. **Define types** in `@bondery/types` if needed
 3. **Add to OpenAPI spec**:
-   - Add the path under `paths:`
-   - Define request/response schemas
-   - Add examples
-   - Tag it appropriately
+   * Add the path under `paths:`
+   * Define request/response schemas
+   * Add examples
+   * Tag it appropriately
 4. **Test the endpoint** locally
 5. **Validate the spec** (see below)
 
@@ -76,9 +77,9 @@ For more details, see [GitBook API Reference Documentation](https://docs.gitbook
 1. **Update the implementation** in `src/routes/`
 2. **Update types** in `@bondery/types` if changed
 3. **Update OpenAPI spec**:
-   - Modify the path definition
-   - Update schemas if changed
-   - Update examples
+   * Modify the path definition
+   * Update schemas if changed
+   * Update examples
 4. **Test and validate**
 
 ### Validation
@@ -113,26 +114,29 @@ security:               # Global security
 ### Schema Definitions
 
 All data models are defined under `components/schemas/`:
-- `Contact` - Contact entity
-- `CreateContactInput` - Contact creation
-- `UpdateContactInput` - Contact updates
-- `UserSettings` - User settings
-- `ApiError` - Error responses
+
+* `Contact` - Contact entity
+* `CreateContactInput` - Contact creation
+* `UpdateContactInput` - Contact updates
+* `UserSettings` - User settings
+* `ApiError` - Error responses
 
 ### Tags
 
 Endpoints are organized by tags:
-- `Health` - Health check
-- `Contacts` - Contact management
-- `Account` - User account
-- `Settings` - User settings
-- `Redirect` - Extension integration
+
+* `Health` - Health check
+* `Contacts` - Contact management
+* `Account` - User account
+* `Settings` - User settings
+* `Redirect` - Extension integration
 
 ## Best Practices
 
 ### 1. Keep Spec and Code in Sync
 
 Always update the OpenAPI spec when changing endpoints. Consider this workflow:
+
 1. Update types in `@bondery/types`
 2. Update implementation
 3. Update OpenAPI spec
@@ -141,17 +145,19 @@ Always update the OpenAPI spec when changing endpoints. Consider this workflow:
 ### 2. Use Descriptive Examples
 
 Provide realistic examples for:
-- Request bodies
-- Response bodies
-- Path parameters
-- Query parameters
+
+* Request bodies
+* Response bodies
+* Path parameters
+* Query parameters
 
 ### 3. Document All Responses
 
 Include all possible responses:
-- Success responses (200, 201, etc.)
-- Client errors (400, 401, 404)
-- Server errors (500)
+
+* Success responses (200, 201, etc.)
+* Client errors (400, 401, 404)
+* Server errors (500)
 
 ### 4. Use Components for Reusability
 
@@ -164,9 +170,10 @@ $ref: '#/components/schemas/Contact'
 ### 5. Security Documentation
 
 Document authentication requirements:
-- Which endpoints require auth
-- How to authenticate
-- Cookie/token format
+
+* Which endpoints require auth
+* How to authenticate
+* Cookie/token format
 
 ## Troubleshooting
 
@@ -180,10 +187,11 @@ Document authentication requirements:
 ### Validation Errors
 
 Common issues:
-- **Invalid $ref**: Check that referenced schema exists
-- **Missing required fields**: Ensure all required fields are defined
-- **Invalid format**: Check date-time, email, uri formats
-- **YAML syntax**: Check indentation and structure
+
+* **Invalid $ref**: Check that referenced schema exists
+* **Missing required fields**: Ensure all required fields are defined
+* **Invalid format**: Check date-time, email, uri formats
+* **YAML syntax**: Check indentation and structure
 
 ### Examples Not Showing
 
@@ -198,14 +206,15 @@ examples:               # For multiple examples
 
 ## Resources
 
-- [OpenAPI 3.0.3 Specification](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md)
-- [GitBook OpenAPI Integration](https://docs.gitbook.com/product-tour/integrations/openapi)
-- [Swagger Editor](https://editor.swagger.io/)
-- [OpenAPI Guide](https://swagger.io/docs/specification/about/)
+* [OpenAPI 3.0.3 Specification](https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md)
+* [GitBook OpenAPI Integration](https://docs.gitbook.com/product-tour/integrations/openapi)
+* [Swagger Editor](https://editor.swagger.io/)
+* [OpenAPI Guide](https://swagger.io/docs/specification/about/)
 
 ## Questions?
 
 If you have questions about the API documentation:
+
 1. Check the [OpenAPI specification](https://github.com/OAI/OpenAPI-Specification)
 2. Review the [GitBook docs](https://docs.gitbook.com/)
 3. Look at existing endpoint definitions as examples
