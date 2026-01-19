@@ -39,6 +39,8 @@ const navLinks = [
 export function NavigationSidebarContent({ userName, avatarUrl }: NavigationSidebarContentProps) {
   const pathname = usePathname();
 
+  console.log("NavigationSidebar - Props:", { userName, avatarUrl });
+
   return (
     <>
       {/* Branding Card */}

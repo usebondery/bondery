@@ -100,3 +100,31 @@ The server authenticates requests using Supabase session cookies. Cookies are pa
 4. Server extracts tokens from cookies
 5. Server validates tokens with Supabase
 6. Authenticated requests proceed with user context
+
+## API Documentation
+
+Full API documentation is available in OpenAPI 3.0 format:
+
+- **OpenAPI Specification**: [`openapi.yaml`](./openapi.yaml)
+- **GitBook Integration**: Configured via [`.gitbook.yaml`](./.gitbook.yaml)
+
+The OpenAPI specification includes:
+- Complete endpoint documentation with request/response schemas
+- Authentication requirements
+- Example requests and responses
+- Error responses
+- Schema definitions for all data types
+
+To view the documentation:
+1. Use any OpenAPI viewer (e.g., [Swagger Editor](https://editor.swagger.io/))
+2. View on GitBook (once published)
+3. Import into tools like Postman, Insomnia, or Bruno
+
+### Keeping Documentation Updated
+
+When adding or modifying endpoints:
+1. Update the route implementation in `src/routes/`
+2. Update the corresponding TypeScript types in `@bondery/types`
+3. Update the OpenAPI specification in `openapi.yaml`
+4. Test the changes locally
+5. Commit all changes together

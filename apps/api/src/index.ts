@@ -8,6 +8,7 @@ import cors from "@fastify/cors";
 import cookie from "@fastify/cookie";
 import multipart from "@fastify/multipart";
 import fastifyEnv from "@fastify/env";
+import { createRequire } from "module";
 
 import { contactRoutes } from "./routes/contacts.js";
 import { accountRoutes } from "./routes/account.js";
@@ -17,21 +18,18 @@ import { redirectRoutes } from "./routes/redirect.js";
 // Environment variable schema
 const envSchema = {
   type: "object",
-  required: ["SUPABASE_URL", "PUBLIC_SUPABASE_PUBLISHABLE_KEY", "PRIVATE_SUPABASE_SECRET_KEY"],
+  required: [
+    "PUBLIC_SUPABASE_URL",
+    "PUBLIC_SUPABASE_PUBLISHABLE_KEY",
+    "PRIVATE_SUPABASE_SECRET_KEY",
+    "NEXT_PUBLIC_API_URL",
+  ],
   properties: {
-    PORT: {
-      type: "number",
-      default: 3001,
-    },
-    HOST: {
-      type: "string",
-      default: "0.0.0.0",
-    },
     LOG_LEVEL: {
       type: "string",
       default: "info",
     },
-    SUPABASE_URL: {
+    PUBLIC_SUPABASE_URL: {
       type: "string",
     },
     PUBLIC_SUPABASE_PUBLISHABLE_KEY: {
@@ -46,29 +44,89 @@ const envSchema = {
     NEXT_PUBLIC_WEBSITE_URL: {
       type: "string",
     },
+    NEXT_PUBLIC_API_URL: {
+      type: "string",
+    },
+    API_PORT: {
+      type: "number",
+      default: 3001,
+    },
+    API_HOST: {
+      type: "string",
+      default: "0.0.0.0",
+    },
   },
 } as const;
 
 declare module "fastify" {
   interface FastifyInstance {
     config: {
-      PORT: number;
-      HOST: string;
       LOG_LEVEL: string;
-      SUPABASE_URL: string;
+      PUBLIC_SUPABASE_URL: string;
       PUBLIC_SUPABASE_PUBLISHABLE_KEY: string;
       PRIVATE_SUPABASE_SECRET_KEY: string;
       NEXT_PUBLIC_WEBAPP_URL: string;
       NEXT_PUBLIC_WEBSITE_URL: string;
+      NEXT_PUBLIC_API_URL: string;
+      API_PORT: number;
+      API_HOST: string;
     };
   }
 }
 
+function resolveListenAddress(config: {
+  NEXT_PUBLIC_API_URL: string;
+  API_PORT: number;
+  API_HOST: string;
+}) {
+  const fallbackPort = Number(process.env.PORT) || Number(config.API_PORT) || 3001;
+  const fallbackHost = config.API_HOST || "0.0.0.0";
+
+  try {
+    const url = new URL(config.NEXT_PUBLIC_API_URL);
+    const urlPort = url.port ? Number(url.port) : undefined;
+    return {
+      port: urlPort || fallbackPort,
+      host: fallbackHost,
+    };
+  } catch (error) {
+    console.warn("Invalid NEXT_PUBLIC_API_URL, using defaults", error);
+    return { port: fallbackPort, host: fallbackHost };
+  }
+}
+
+const require = createRequire(import.meta.url);
+
+function getLoggerConfig(env: string) {
+  if (env === "test") return false;
+
+  if (env === "development") {
+    try {
+      // Pino v9+ pretty logging via transport
+      const target = require.resolve("pino-pretty");
+      return {
+        level: "info",
+        transport: {
+          target,
+          options: {
+            translateTime: "HH:MM:ss Z",
+            ignore: "pid,hostname",
+            colorize: true,
+          },
+        },
+      };
+    } catch (error) {
+      console.warn("pino-pretty not available, falling back to default logger", error);
+    }
+  }
+
+  return { level: "info" };
+}
+
 async function buildServer() {
+  const environment = process.env.NODE_ENV || "development";
   const fastify = Fastify({
-    logger: {
-      level: "info",
-    },
+    logger: getLoggerConfig(environment),
   });
 
   // Register environment variable validation
@@ -84,10 +142,8 @@ async function buildServer() {
   const ALLOWED_ORIGINS = [
     fastify.config.NEXT_PUBLIC_WEBAPP_URL,
     fastify.config.NEXT_PUBLIC_WEBSITE_URL,
-    // Development origins
-    "http://localhost:3000",
-    "http://localhost:3002",
-  ];
+    fastify.config.NEXT_PUBLIC_API_URL,
+  ].filter(Boolean);
 
   // Register CORS
   await fastify.register(cors, {
@@ -123,12 +179,11 @@ async function buildServer() {
 
 async function start() {
   const server = await buildServer();
+  const { port, host } = resolveListenAddress(server.config);
 
   try {
-    await server.listen({});
-    console.log(
-      `🚀 Bondery API Server running at http://${server.config.HOST}:${server.config.PORT}`,
-    );
+    await server.listen({ port, host });
+    console.log(`🚀 Bondery API Server running at http://${host}:${port}`);
   } catch (err) {
     server.log.error(err);
     process.exit(1);

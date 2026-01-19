@@ -1,0 +1,1145 @@
+openapi: 3.0.3
+info:
+  title: Bondery API
+  description: |
+    REST API for the Bondery application - a contact and relationship management platform.
+    
+    ## Authentication
+    
+    This API uses cookie-based authentication with Supabase. After authenticating through the webapp,
+    your session cookie will be included in subsequent requests to authenticate API calls.
+    
+    All endpoints (except `/health` and `/api/redirect` GET) require authentication.
+    
+  version: 1.0.0
+  contact:
+    name: Bondery Support
+    url: https://bondery.com
+  license:
+    name: Proprietary
+servers:
+  - url: http://localhost:3001
+    description: Local development server
+  - url: https://api.bondery.com
+    description: Production server
+
+tags:
+  - name: Health
+    description: Server health check endpoints
+  - name: Contacts
+    description: Contact management operations
+  - name: Account
+    description: User account operations
+  - name: Settings
+    description: User settings and preferences
+  - name: Redirect
+    description: Browser extension integration endpoints
+
+paths:
+  /health:
+    get:
+      summary: Health check
+      description: Check if the API server is running and responsive
+      operationId: getHealth
+      tags:
+        - Health
+      security: []
+      responses:
+        '200':
+          description: Server is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+                  timestamp:
+                    type: string
+                    format: date-time
+                    example: '2026-01-18T12:00:00.000Z'
+
+  /api/contacts:
+    get:
+      summary: List all contacts
+      description: Retrieve all contacts for the authenticated user (excludes the user's own profile)
+      operationId: listContacts
+      tags:
+        - Contacts
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          description: List of contacts
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  contacts:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Contact'
+                  totalCount:
+                    type: integer
+                    description: Total number of contacts
+                    example: 42
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    post:
+      summary: Create a new contact
+      description: Create a new contact for the authenticated user
+      operationId: createContact
+      tags:
+        - Contacts
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateContactInput'
+      responses:
+        '201':
+          description: Contact created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    format: uuid
+                    example: 123e4567-e89b-12d3-a456-426614174000
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    delete:
+      summary: Delete multiple contacts
+      description: Delete multiple contacts by their IDs
+      operationId: deleteContacts
+      tags:
+        - Contacts
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - ids
+              properties:
+                ids:
+                  type: array
+                  items:
+                    type: string
+                    format: uuid
+                  minItems: 1
+                  example: ['123e4567-e89b-12d3-a456-426614174000', '987e6543-e21b-12d3-a456-426614174999']
+      responses:
+        '200':
+          description: Contacts deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Contacts deleted successfully
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/contacts/{id}:
+    get:
+      summary: Get a single contact
+      description: Retrieve details of a specific contact by ID
+      operationId: getContact
+      tags:
+        - Contacts
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Contact ID
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Contact details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  contact:
+                    $ref: '#/components/schemas/Contact'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          description: Contact not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    patch:
+      summary: Update a contact
+      description: Update an existing contact's information
+      operationId: updateContact
+      tags:
+        - Contacts
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Contact ID
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateContactInput'
+      responses:
+        '200':
+          description: Contact updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Contact updated successfully
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/contacts/{id}/photo:
+    post:
+      summary: Upload contact photo
+      description: Upload a profile photo for a contact
+      operationId: uploadContactPhoto
+      tags:
+        - Contacts
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Contact ID
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: Image file (JPEG, PNG, GIF, WebP, max 5MB)
+      responses:
+        '200':
+          description: Photo uploaded successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  avatarUrl:
+                    type: string
+                    format: uri
+                    example: https://storage.example.com/avatars/user123/contact456.jpg?t=1234567890
+        '400':
+          description: Invalid file or file too large
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          description: Contact not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    delete:
+      summary: Delete contact photo
+      description: Remove the profile photo from a contact
+      operationId: deleteContactPhoto
+      tags:
+        - Contacts
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Contact ID
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Photo deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          description: Contact not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/account:
+    patch:
+      summary: Update user account
+      description: Update the authenticated user's account metadata
+      operationId: updateAccount
+      tags:
+        - Account
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: User's first name
+                  example: John
+                middlename:
+                  type: string
+                  description: User's middle name
+                  example: Michael
+                surname:
+                  type: string
+                  description: User's surname/last name
+                  example: Doe
+      responses:
+        '200':
+          description: Account updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    description: Updated user object
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    delete:
+      summary: Delete user account
+      description: Permanently delete the authenticated user's account and all associated data
+      operationId: deleteAccount
+      tags:
+        - Account
+      security:
+        - cookieAuth: []
+      responses:
+        '302':
+          description: Account deleted, redirect to website
+          headers:
+            Location:
+              schema:
+                type: string
+                example: https://bondery.com
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/account/signout:
+    post:
+      summary: Sign out
+      description: Sign out the authenticated user
+      operationId: signOut
+      tags:
+        - Account
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          description: Signed out successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Signed out successfully
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/account/photo:
+    post:
+      summary: Upload profile photo
+      description: Upload a profile photo for the authenticated user
+      operationId: uploadProfilePhoto
+      tags:
+        - Account
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: Image file (JPEG, PNG, GIF, WebP, max 5MB)
+      responses:
+        '200':
+          description: Photo uploaded successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      avatarUrl:
+                        type: string
+                        format: uri
+                        example: https://storage.example.com/profile-photos/user123/profile.jpg?t=1234567890
+        '400':
+          description: Invalid file or file too large
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    delete:
+      summary: Delete profile photo
+      description: Remove the profile photo from the authenticated user's account
+      operationId: deleteProfilePhoto
+      tags:
+        - Account
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          description: Photo deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/settings:
+    get:
+      summary: Get user settings
+      description: Retrieve the authenticated user's settings and preferences
+      operationId: getSettings
+      tags:
+        - Settings
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          description: User settings
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/UserSettings'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    patch:
+      summary: Update user settings
+      description: Update the authenticated user's settings and preferences
+      operationId: updateSettings
+      tags:
+        - Settings
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: User's first name
+                  example: John
+                middlename:
+                  type: string
+                  description: User's middle name
+                  example: Michael
+                surname:
+                  type: string
+                  description: User's surname/last name
+                  example: Doe
+                timezone:
+                  type: string
+                  description: User's timezone
+                  example: America/New_York
+                language:
+                  type: string
+                  description: Preferred language code
+                  enum: [en, cs]
+                  example: en
+      responses:
+        '200':
+          description: Settings updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/UserSettings'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/redirect:
+    get:
+      summary: Browser redirect endpoint
+      description: |
+        Create or find a contact from browser extension data and redirect to the webapp.
+        If the user is not authenticated, redirects to login with a return URL.
+      operationId: redirectGet
+      tags:
+        - Redirect
+      security: []
+      parameters:
+        - name: instagram
+          in: query
+          description: Instagram username
+          schema:
+            type: string
+            example: johndoe
+        - name: linkedin
+          in: query
+          description: LinkedIn profile ID
+          schema:
+            type: string
+            example: john-doe-123456
+        - name: facebook
+          in: query
+          description: Facebook profile ID
+          schema:
+            type: string
+            example: john.doe.123
+        - name: firstName
+          in: query
+          description: First name
+          schema:
+            type: string
+            example: John
+        - name: middleName
+          in: query
+          description: Middle name
+          schema:
+            type: string
+            example: Michael
+        - name: lastName
+          in: query
+          description: Last name
+          schema:
+            type: string
+            example: Doe
+        - name: profileImageUrl
+          in: query
+          description: URL of profile image
+          schema:
+            type: string
+            format: uri
+            example: https://example.com/photo.jpg
+        - name: title
+          in: query
+          description: Job title or position
+          schema:
+            type: string
+            example: Software Engineer
+        - name: place
+          in: query
+          description: Location or workplace
+          schema:
+            type: string
+            example: San Francisco, CA
+      responses:
+        '302':
+          description: Redirect to contact page or login
+          headers:
+            Location:
+              schema:
+                type: string
+                example: https://app.bondery.com/app/person?person_id=123e4567-e89b-12d3-a456-426614174000
+        '400':
+          description: Missing required parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    post:
+      summary: Create or find contact (API)
+      description: |
+        Create or find a contact from browser extension data via API.
+        Returns the contact ID and whether it already existed.
+      operationId: redirectPost
+      tags:
+        - Redirect
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                instagram:
+                  type: string
+                  description: Instagram username
+                  example: johndoe
+                linkedin:
+                  type: string
+                  description: LinkedIn profile ID
+                  example: john-doe-123456
+                facebook:
+                  type: string
+                  description: Facebook profile ID
+                  example: john.doe.123
+                firstName:
+                  type: string
+                  description: First name
+                  example: John
+                middleName:
+                  type: string
+                  description: Middle name
+                  example: Michael
+                lastName:
+                  type: string
+                  description: Last name
+                  example: Doe
+                profileImageUrl:
+                  type: string
+                  format: uri
+                  description: URL of profile image
+                  example: https://example.com/photo.jpg
+                title:
+                  type: string
+                  description: Job title or position
+                  example: Software Engineer
+                place:
+                  type: string
+                  description: Location or workplace
+                  example: San Francisco, CA
+      responses:
+        '200':
+          description: Contact created or found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  contactId:
+                    type: string
+                    format: uuid
+                    example: 123e4567-e89b-12d3-a456-426614174000
+                  existed:
+                    type: boolean
+                    description: Whether the contact already existed
+                    example: false
+        '400':
+          description: Missing required parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+components:
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: sb-access-token
+      description: Supabase session cookie for authentication
+
+  schemas:
+    Contact:
+      type: object
+      description: A contact/person in the user's network
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 123e4567-e89b-12d3-a456-426614174000
+        firstName:
+          type: string
+          example: John
+        middleName:
+          type: string
+          nullable: true
+          example: Michael
+        lastName:
+          type: string
+          nullable: true
+          example: Doe
+        title:
+          type: string
+          nullable: true
+          description: Job title or position
+          example: Software Engineer
+        place:
+          type: string
+          nullable: true
+          description: Location or workplace
+          example: San Francisco, CA
+        description:
+          type: string
+          nullable: true
+          description: Brief description
+          example: Met at tech conference
+        notes:
+          type: string
+          nullable: true
+          description: Personal notes
+          example: Interested in AI and machine learning
+        avatarColor:
+          type: string
+          nullable: true
+          description: Avatar background color
+          example: blue
+        avatar:
+          type: string
+          format: uri
+          nullable: true
+          description: URL to profile photo
+          example: https://storage.example.com/avatars/contact123.jpg
+        lastInteraction:
+          type: string
+          format: date-time
+          nullable: true
+          description: Date of last interaction
+          example: '2026-01-15T10:30:00.000Z'
+        createdAt:
+          type: string
+          format: date-time
+          nullable: true
+          example: '2026-01-01T00:00:00.000Z'
+        connections:
+          type: array
+          items:
+            type: string
+          nullable: true
+          description: Array of connection IDs
+        phone:
+          type: string
+          nullable: true
+          example: '+1234567890'
+        email:
+          type: string
+          format: email
+          nullable: true
+          example: john.doe@example.com
+        linkedin:
+          type: string
+          nullable: true
+          description: LinkedIn profile ID
+          example: john-doe-123456
+        instagram:
+          type: string
+          nullable: true
+          description: Instagram username
+          example: johndoe
+        whatsapp:
+          type: string
+          nullable: true
+          description: WhatsApp number
+          example: '+1234567890'
+        facebook:
+          type: string
+          nullable: true
+          description: Facebook profile ID
+          example: john.doe.123
+        website:
+          type: string
+          format: uri
+          nullable: true
+          example: https://johndoe.com
+        signal:
+          type: string
+          nullable: true
+          description: Signal number
+          example: '+1234567890'
+        birthdate:
+          type: string
+          format: date
+          nullable: true
+          example: '1990-01-01'
+        notifyBirthday:
+          type: boolean
+          nullable: true
+          description: Whether to notify about birthday
+          example: true
+        importantDates:
+          nullable: true
+          description: Array of important dates
+          oneOf:
+            - type: array
+              items:
+                $ref: '#/components/schemas/ImportantDate'
+            - type: object
+        myself:
+          type: boolean
+          nullable: true
+          description: Whether this contact represents the user
+          example: false
+        position:
+          nullable: true
+          description: Geographic position
+          oneOf:
+            - $ref: '#/components/schemas/Position'
+            - type: object
+
+    ImportantDate:
+      type: object
+      properties:
+        id:
+          type: string
+          example: anniversary-2024
+        name:
+          type: string
+          example: Anniversary
+        date:
+          type: string
+          format: date
+          example: '2024-06-15'
+        notify:
+          type: boolean
+          example: true
+
+    Position:
+      type: object
+      description: Geographic coordinates
+      properties:
+        lat:
+          type: number
+          format: double
+          example: 37.7749
+        lng:
+          type: number
+          format: double
+          example: -122.4194
+
+    CreateContactInput:
+      type: object
+      required:
+        - firstName
+        - lastName
+      properties:
+        firstName:
+          type: string
+          minLength: 1
+          example: John
+        lastName:
+          type: string
+          minLength: 1
+          example: Doe
+        linkedin:
+          type: string
+          description: LinkedIn profile ID (optional)
+          example: john-doe-123456
+
+    UpdateContactInput:
+      type: object
+      description: All fields are optional for updating a contact
+      properties:
+        firstName:
+          type: string
+          minLength: 1
+          example: John
+        middleName:
+          type: string
+          nullable: true
+          example: Michael
+        lastName:
+          type: string
+          nullable: true
+          example: Doe
+        title:
+          type: string
+          nullable: true
+          example: Software Engineer
+        place:
+          type: string
+          nullable: true
+          example: San Francisco, CA
+        description:
+          type: string
+          nullable: true
+          example: Met at tech conference
+        notes:
+          type: string
+          nullable: true
+          example: Interested in AI
+        avatarColor:
+          type: string
+          nullable: true
+          example: blue
+        avatar:
+          type: string
+          format: uri
+          nullable: true
+          example: https://example.com/avatar.jpg
+        connections:
+          type: array
+          items:
+            type: string
+          nullable: true
+        phone:
+          type: string
+          nullable: true
+          example: '+1234567890'
+        email:
+          type: string
+          format: email
+          nullable: true
+          example: john@example.com
+        linkedin:
+          type: string
+          nullable: true
+          example: john-doe-123456
+        instagram:
+          type: string
+          nullable: true
+          example: johndoe
+        whatsapp:
+          type: string
+          nullable: true
+          example: '+1234567890'
+        facebook:
+          type: string
+          nullable: true
+          example: john.doe.123
+        website:
+          type: string
+          format: uri
+          nullable: true
+          example: https://johndoe.com
+        signal:
+          type: string
+          nullable: true
+          example: '+1234567890'
+        birthdate:
+          type: string
+          format: date
+          nullable: true
+          example: '1990-01-01'
+        notifyBirthday:
+          type: boolean
+          nullable: true
+          example: true
+        importantDates:
+          nullable: true
+          oneOf:
+            - type: array
+              items:
+                $ref: '#/components/schemas/ImportantDate'
+            - type: object
+        position:
+          nullable: true
+          oneOf:
+            - $ref: '#/components/schemas/Position'
+            - type: object
+
+    UserSettings:
+      type: object
+      properties:
+        user_id:
+          type: string
+          format: uuid
+          example: 123e4567-e89b-12d3-a456-426614174000
+        name:
+          type: string
+          nullable: true
+          example: John
+        middlename:
+          type: string
+          nullable: true
+          example: Michael
+        surname:
+          type: string
+          nullable: true
+          example: Doe
+        timezone:
+          type: string
+          nullable: true
+          example: America/New_York
+        language:
+          type: string
+          nullable: true
+          enum: [en, cs]
+          example: en
+        email:
+          type: string
+          format: email
+          description: User's email (from auth)
+          example: john.doe@example.com
+        avatar_url:
+          type: string
+          format: uri
+          nullable: true
+          description: URL to user's profile photo
+          example: https://storage.example.com/profile-photos/user123/profile.jpg
+        providers:
+          type: array
+          items:
+            type: string
+          description: Authentication providers used
+          example: ['google', 'email']
+
+    ApiError:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error message
+          example: Invalid request
+        description:
+          type: string
+          description: Additional error details
+          example: First name is required
+
+  responses:
+    UnauthorizedError:
+      description: Authentication required or session expired
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+          example:
+            error: Unauthorized
+
+    InternalServerError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+          example:
+            error: Internal server error
+            description: An unexpected error occurred
+
+security:
+  - cookieAuth: []

@@ -25,7 +25,7 @@
         "apps/web/.env.production.local",
         "apps/webapp/.env.production.local",
         "apps/website/.env.production.local",
-        "apps/server/.env.production.local"
+        "apps/api/.env.production.local"
       ],
       "dependsOn": ["^build"],
       "outputs": [".next/**", "!.next/cache/**", "dist/**", "public/**"]
@@ -62,7 +62,7 @@
         "apps/web/.env.development.local",
         "apps/webapp/.env.development.local",
         "apps/website/.env.development.local",
-        "apps/server/.env.development.local"
+        "apps/api/.env.development.local"
       ]
     },
     "@bondery/branding#build": {

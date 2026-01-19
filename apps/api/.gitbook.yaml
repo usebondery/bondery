@@ -1,0 +1,9 @@
+root: ./
+
+structure:
+  readme: README.md
+
+integrations:
+  openapi:
+    - id: bondery-api
+      file: ./openapi.yaml

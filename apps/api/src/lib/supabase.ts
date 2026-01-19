@@ -12,47 +12,39 @@ import type { FastifyRequest, FastifyReply } from "fastify";
  * These will be validated by @fastify/env at startup
  */
 function getSupabaseConfig() {
-  const SUPABASE_URL_RAW = process.env.SUPABASE_URL;
-  const SUPABASE_ANON_KEY = process.env.SUPABASE_PUBLISHABLE_KEY;
-  const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SECRET_KEY;
+  const PUBLIC_SUPABASE_URL = process.env.PUBLIC_SUPABASE_URL;
+  const PUBLIC_SUPABASE_PUBLISHABLE_KEY = process.env.PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+  const PRIVATE_SUPABASE_SECRET_KEY = process.env.PRIVATE_SUPABASE_SECRET_KEY;
 
-  if (!SUPABASE_URL_RAW || !SUPABASE_ANON_KEY || !SUPABASE_SERVICE_KEY) {
+  if (!PUBLIC_SUPABASE_URL) {
     throw new Error(
       "Missing required Supabase environment variables. " +
-        "Ensure SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, and SUPABASE_SECRET_KEY are set.",
+        "Ensure PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_PUBLISHABLE_KEY, and PRIVATE_SUPABASE_SECRET_KEY are set.",
     );
+  } else if (!PUBLIC_SUPABASE_PUBLISHABLE_KEY) {
+    throw new Error("Missing PUBLIC_SUPABASE_PUBLISHABLE_KEY environment variable.");
+  } else if (!PRIVATE_SUPABASE_SECRET_KEY) {
+    throw new Error("Missing PRIVATE_SUPABASE_SECRET_KEY environment variable.");
   }
 
-  // Normalize: Supabase client expects base url (no /rest/v1)
-  const SUPABASE_URL = SUPABASE_URL_RAW.replace(/\/rest\/v1\/?$/, "");
-
-  if (SUPABASE_URL !== SUPABASE_URL_RAW) {
-    console.log(
-      "[getSupabaseConfig] Normalized SUPABASE_URL from",
-      SUPABASE_URL_RAW,
-      "to",
-      SUPABASE_URL,
-    );
-  }
-
-  return { SUPABASE_URL, SUPABASE_ANON_KEY, SUPABASE_SERVICE_KEY };
+  return { PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_PUBLISHABLE_KEY, PRIVATE_SUPABASE_SECRET_KEY };
 }
 
 /**
  * Creates an anonymous Supabase client (for public endpoints)
  */
 export function createAnonClient(): SupabaseClient<Database> {
-  const { SUPABASE_URL, SUPABASE_ANON_KEY } = getSupabaseConfig();
-  console.log("Creating anon client with URL:", SUPABASE_URL);
-  return createClient<Database>(SUPABASE_URL, SUPABASE_ANON_KEY);
+  const { PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_PUBLISHABLE_KEY } = getSupabaseConfig();
+  console.log("Creating anon client with URL:", PUBLIC_SUPABASE_URL);
+  return createClient<Database>(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_PUBLISHABLE_KEY);
 }
 
 /**
  * Creates an admin Supabase client (for privileged operations)
  */
 export function createAdminClient(): SupabaseClient<Database> {
-  const { SUPABASE_URL, SUPABASE_SERVICE_KEY } = getSupabaseConfig();
-  return createClient<Database>(SUPABASE_URL, SUPABASE_SERVICE_KEY);
+  const { PUBLIC_SUPABASE_URL, PRIVATE_SUPABASE_SECRET_KEY } = getSupabaseConfig();
+  return createClient<Database>(PUBLIC_SUPABASE_URL, PRIVATE_SUPABASE_SECRET_KEY);
 }
 
 /**
@@ -119,8 +111,8 @@ function getAuthTokensFromCookies(request: FastifyRequest): {
   accessToken?: string;
   refreshToken?: string;
 } {
-  const { SUPABASE_URL } = getSupabaseConfig();
-  const projectRef = getSupabaseProjectRef(SUPABASE_URL);
+  const { PUBLIC_SUPABASE_URL } = getSupabaseConfig();
+  const projectRef = getSupabaseProjectRef(PUBLIC_SUPABASE_URL);
 
   // First try Fastify's parsed cookies (from browser requests)
   let cookies = request.cookies || {};
@@ -204,10 +196,10 @@ function getAuthTokensFromCookies(request: FastifyRequest): {
 export async function createAuthenticatedClient(
   request: FastifyRequest,
 ): Promise<{ client: SupabaseClient<Database>; user: { id: string; email: string } | null }> {
-  const { SUPABASE_URL, SUPABASE_ANON_KEY } = getSupabaseConfig();
+  const { PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_PUBLISHABLE_KEY } = getSupabaseConfig();
   const { accessToken, refreshToken } = getAuthTokensFromCookies(request);
   console.log("Creating authenticated client. Access token present:", !!accessToken);
-  const client = createClient<Database>(SUPABASE_URL, SUPABASE_ANON_KEY, {
+  const client = createClient<Database>(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_PUBLISHABLE_KEY, {
     auth: {
       autoRefreshToken: false,
       persistSession: false,

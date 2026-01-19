@@ -10,45 +10,6 @@ import type { UpdateAccountInput } from "@bondery/types";
 
 export async function accountRoutes(fastify: FastifyInstance) {
   /**
-   * GET /api/account - Get current user account data
-   */
-  fastify.get("/", async (request: FastifyRequest, reply: FastifyReply) => {
-    const auth = await requireAuth(request, reply);
-    if (!auth) return;
-
-    const { client, user } = auth;
-
-    // Get full user data
-    const { data: userData, error } = await client.auth.getUser();
-
-    if (error || !userData.user) {
-      return reply.status(500).send({ error: "Failed to retrieve user data" });
-    }
-
-    // Get user settings
-    const { data: settings } = await client
-      .from("user_settings")
-      .select("*")
-      .eq("user_id", user.id)
-      .single();
-
-    // Return merged data
-    return {
-      success: true,
-      data: {
-        ...userData.user,
-        user_metadata: {
-          ...userData.user.user_metadata,
-          name: settings?.name || userData.user.user_metadata?.name || "",
-          middlename: settings?.middlename || userData.user.user_metadata?.middlename || "",
-          surname: settings?.surname || userData.user.user_metadata?.surname || "",
-          avatar_url: settings?.avatar_url || userData.user.user_metadata?.avatar_url || null,
-        },
-      },
-    };
-  });
-
-  /**
    * PATCH /api/account - Update user account metadata
    */
   fastify.patch(

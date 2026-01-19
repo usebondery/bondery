@@ -40,14 +40,24 @@ export async function updateSession(request: NextRequest) {
 
   const user = data?.claims;
 
-  if (
-    !user &&
-    !request.nextUrl.pathname.startsWith(ROUTES.LOGIN) &&
-    !request.nextUrl.pathname.startsWith("/auth")
-  ) {
-    // no user, potentially respond by redirecting the user to the login page
+  // 1. If user is logged in and visiting login page, redirect to app
+  if (user && request.nextUrl.pathname.startsWith(ROUTES.LOGIN)) {
+    const url = request.nextUrl.clone();
+    url.pathname = ROUTES.DEFAULT_PAGE_AFTER_LOGIN;
+    return NextResponse.redirect(url);
+  }
+
+  // 2. If no user and trying to access protected routes (/app/*), redirect to login
+  if (!user && request.nextUrl.pathname.startsWith(ROUTES.APP_GROUP)) {
     const url = request.nextUrl.clone();
     url.pathname = ROUTES.LOGIN;
+    return NextResponse.redirect(url);
+  }
+
+  // 3. Redirect /app to /app/relationships
+  if (user && request.nextUrl.pathname === ROUTES.APP_GROUP) {
+    const url = request.nextUrl.clone();
+    url.pathname = ROUTES.DEFAULT_PAGE_AFTER_LOGIN;
     return NextResponse.redirect(url);
   }
 

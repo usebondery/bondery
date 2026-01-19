@@ -38,7 +38,7 @@ export function validateImageUpload(file: { type: string; size: number }): {
  * URLs for redirects
  */
 export const URLS = {
-  webapp: process.env.WEBAPP_URL || "https://app.usebondery.com",
-  website: process.env.WEBSITE_URL || "https://usebondery.com",
+  webapp: process.env.WEBAPP_URL,
+  website: process.env.WEBSITE_URL,
   login: "/login",
 } as const;

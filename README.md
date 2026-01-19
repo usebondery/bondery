@@ -37,7 +37,7 @@ Apps will be available at:
 Bondery is split into multiple deployable units:
 - **apps/website** - Public landing page
 - **apps/webapp** - Authenticated application
-- **apps/server** - Fastify REST API
+- **apps/api** - Fastify REST API
 - **packages/types** - Shared TypeScript types
 
 See [ARCHITECTURE.md](./ARCHITECTURE.md) for detailed architecture documentation.

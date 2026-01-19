@@ -1,7 +1,7 @@
 import { AppShell, AppShellMain, AppShellNavbar } from "@mantine/core";
 import { NavigationSidebarContent } from "@/components/NavigationSidebar";
 import { LocaleProvider } from "@/components/UserLocaleProvider";
-import { getBaseUrl } from "@/lib/config";
+import { getApiUrl } from "@/lib/config";
 import { getAuthHeaders } from "@/lib/authHeaders";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
@@ -9,50 +9,11 @@ import { ROUTES } from "@/lib/config";
 import * as translations from "@bondery/translations";
 
 /**
- * Fetches user data from the internal API.
- */
-async function getUserData() {
-  try {
-    const baseUrl = getBaseUrl();
-    const headers = await getAuthHeaders();
-
-    const response = await fetch(`${baseUrl}/api/account`, {
-      cache: "no-store",
-      headers,
-    });
-
-    if (!response.ok) {
-      throw new Error("Failed to fetch user data");
-    }
-
-    const result = await response.json();
-    const user = result.data;
-
-    if (!user) {
-      return { userName: "User", avatarUrl: null };
-    }
-
-    const firstName = user.user_metadata?.name || "";
-    const middleName = user.user_metadata?.middlename || "";
-    const lastName = user.user_metadata?.surname || "";
-    const fullName = [firstName, middleName, lastName].filter(Boolean).join(" ");
-
-    return {
-      userName: fullName || user.email || "User",
-      avatarUrl: user.user_metadata?.avatar_url || null,
-    };
-  } catch (error) {
-    console.error("Error fetching user data:", error);
-    return { userName: "User", avatarUrl: null };
-  }
-}
-
-/**
- * Fetches user locale settings from the internal API.
+ * Fetches user settings and data from the internal API.
  */
 async function getUserSettings() {
   try {
-    const baseUrl = getBaseUrl();
+    const baseUrl = getApiUrl();
     const headers = await getAuthHeaders();
 
     const response = await fetch(`${baseUrl}/api/settings`, {
@@ -62,16 +23,43 @@ async function getUserSettings() {
 
     if (response.ok) {
       const result = await response.json();
+      console.log("Layout - API Response:", JSON.stringify(result, null, 2));
+      const settings = result?.data || {};
+      console.log("Layout - Settings data:", JSON.stringify(settings, null, 2));
+
+      const firstName = settings.name || "";
+      const middleName = settings.middlename || "";
+      const lastName = settings.surname || "";
+      const fullName = [firstName, middleName, lastName].filter(Boolean).join(" ");
+
+      console.log("Layout - Computed values:", {
+        firstName,
+        middleName,
+        lastName,
+        fullName,
+        email: settings.email,
+        avatar_url: settings.avatar_url,
+      });
+
       return {
-        locale: result?.data?.language || "en",
-        timezone: result?.data?.timezone || "UTC",
+        userName: fullName || settings.email || "User",
+        avatarUrl: settings.avatar_url || null,
+        locale: settings.language || "en",
+        timezone: settings.timezone || "UTC",
       };
+    } else {
+      console.error("Layout - API response not OK:", response.status, response.statusText);
     }
   } catch (error) {
     console.error("Error fetching user settings:", error);
   }
 
-  return { locale: "en", timezone: "UTC" };
+  return {
+    userName: "User",
+    avatarUrl: null,
+    locale: "en",
+    timezone: "UTC",
+  };
 }
 
 export const dynamic = "force-dynamic";
@@ -86,10 +74,9 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     redirect(ROUTES.LOGIN);
   }
 
-  const [{ userName, avatarUrl }, { locale, timezone }] = await Promise.all([
-    getUserData(),
-    getUserSettings(),
-  ]);
+  const { userName, avatarUrl, locale, timezone } = await getUserSettings();
+
+  console.log("Layout - User data:", { userName, avatarUrl, locale, timezone });
 
   const messages = translations[locale as keyof typeof translations] || translations.en;
 

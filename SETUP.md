@@ -7,7 +7,7 @@ This guide explains how to set up and run the Bondery monorepo after the archite
 The monorepo consists of:
 - **apps/website** - Public landing page at `usebondery.com`
 - **apps/webapp** - Authenticated app at `app.usebondery.com`
-- **apps/server** - REST API server at `api.usebondery.com`
+- **apps/api** - REST API server at `api.usebondery.com`
 - **packages/types** - Shared TypeScript types
 - **packages/branding** - Brand assets and theme
 - **packages/helpers** - Utility functions
@@ -82,7 +82,7 @@ pnpm dev
 
 This starts:
 - Website on http://localhost:3000
-- Server on http://localhost:3001
+- API Server on http://localhost:3001
 - Webapp on http://localhost:3002
 
 ### Individual Apps
@@ -91,8 +91,8 @@ This starts:
 # Website only
 pnpm dev --filter=website
 
-# Server only
-pnpm dev --filter=server
+# API Server only
+pnpm dev --filter=api
 
 # Webapp only
 pnpm dev --filter=webapp
