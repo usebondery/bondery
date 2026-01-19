@@ -3,14 +3,14 @@ info:
   title: Bondery API
   description: |
     REST API for the Bondery application - a contact and relationship management platform.
-    
+
     ## Authentication
-    
+
     This API uses cookie-based authentication with Supabase. After authenticating through the webapp,
     your session cookie will be included in subsequent requests to authenticate API calls.
-    
+
     All endpoints (except `/health` and `/api/redirect` GET) require authentication.
-    
+
   version: 1.0.0
   contact:
     name: Bondery Support
@@ -45,7 +45,7 @@ paths:
         - Health
       security: []
       responses:
-        '200':
+        "200":
           description: Server is healthy
           content:
             application/json:
@@ -58,7 +58,7 @@ paths:
                   timestamp:
                     type: string
                     format: date-time
-                    example: '2026-01-18T12:00:00.000Z'
+                    example: "2026-01-18T12:00:00.000Z"
 
   /api/contacts:
     get:
@@ -70,7 +70,7 @@ paths:
       security:
         - cookieAuth: []
       responses:
-        '200':
+        "200":
           description: List of contacts
           content:
             application/json:
@@ -80,15 +80,15 @@ paths:
                   contacts:
                     type: array
                     items:
-                      $ref: '#/components/schemas/Contact'
+                      $ref: "#/components/schemas/Contact"
                   totalCount:
                     type: integer
                     description: Total number of contacts
                     example: 42
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
 
     post:
       summary: Create a new contact
@@ -103,9 +103,9 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateContactInput'
+              $ref: "#/components/schemas/CreateContactInput"
       responses:
-        '201':
+        "201":
           description: Contact created successfully
           content:
             application/json:
@@ -116,16 +116,16 @@ paths:
                     type: string
                     format: uuid
                     example: 123e4567-e89b-12d3-a456-426614174000
-        '400':
+        "400":
           description: Invalid input
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ApiError'
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
+                $ref: "#/components/schemas/ApiError"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
 
     delete:
       summary: Delete multiple contacts
@@ -150,9 +150,10 @@ paths:
                     type: string
                     format: uuid
                   minItems: 1
-                  example: ['123e4567-e89b-12d3-a456-426614174000', '987e6543-e21b-12d3-a456-426614174999']
+                  example:
+                    ["123e4567-e89b-12d3-a456-426614174000", "987e6543-e21b-12d3-a456-426614174999"]
       responses:
-        '200':
+        "200":
           description: Contacts deleted successfully
           content:
             application/json:
@@ -162,16 +163,16 @@ paths:
                   message:
                     type: string
                     example: Contacts deleted successfully
-        '400':
+        "400":
           description: Invalid input
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ApiError'
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
+                $ref: "#/components/schemas/ApiError"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
 
   /api/contacts/{id}:
     get:
@@ -191,7 +192,7 @@ paths:
             type: string
             format: uuid
       responses:
-        '200':
+        "200":
           description: Contact details
           content:
             application/json:
@@ -199,17 +200,17 @@ paths:
                 type: object
                 properties:
                   contact:
-                    $ref: '#/components/schemas/Contact'
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '404':
+                    $ref: "#/components/schemas/Contact"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "404":
           description: Contact not found
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ApiError'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
+                $ref: "#/components/schemas/ApiError"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
 
     patch:
       summary: Update a contact
@@ -232,9 +233,9 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UpdateContactInput'
+              $ref: "#/components/schemas/UpdateContactInput"
       responses:
-        '200':
+        "200":
           description: Contact updated successfully
           content:
             application/json:
@@ -244,16 +245,16 @@ paths:
                   message:
                     type: string
                     example: Contact updated successfully
-        '400':
+        "400":
           description: Invalid input
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ApiError'
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
+                $ref: "#/components/schemas/ApiError"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
 
   /api/contacts/{id}/photo:
     post:
@@ -284,7 +285,7 @@ paths:
                   format: binary
                   description: Image file (JPEG, PNG, GIF, WebP, max 5MB)
       responses:
-        '200':
+        "200":
           description: Photo uploaded successfully
           content:
             application/json:
@@ -298,22 +299,22 @@ paths:
                     type: string
                     format: uri
                     example: https://storage.example.com/avatars/user123/contact456.jpg?t=1234567890
-        '400':
+        "400":
           description: Invalid file or file too large
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ApiError'
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '404':
+                $ref: "#/components/schemas/ApiError"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "404":
           description: Contact not found
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ApiError'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
+                $ref: "#/components/schemas/ApiError"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
 
     delete:
       summary: Delete contact photo
@@ -332,7 +333,7 @@ paths:
             type: string
             format: uuid
       responses:
-        '200':
+        "200":
           description: Photo deleted successfully
           content:
             application/json:
@@ -342,16 +343,16 @@ paths:
                   success:
                     type: boolean
                     example: true
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '404':
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "404":
           description: Contact not found
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ApiError'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
+                $ref: "#/components/schemas/ApiError"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
 
   /api/account:
     patch:
@@ -382,7 +383,7 @@ paths:
                   description: User's surname/last name
                   example: Doe
       responses:
-        '200':
+        "200":
           description: Account updated successfully
           content:
             application/json:
@@ -395,10 +396,10 @@ paths:
                   data:
                     type: object
                     description: Updated user object
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
 
     delete:
       summary: Delete user account
@@ -409,17 +410,17 @@ paths:
       security:
         - cookieAuth: []
       responses:
-        '302':
+        "302":
           description: Account deleted, redirect to website
           headers:
             Location:
               schema:
                 type: string
                 example: https://bondery.com
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
 
   /api/account/signout:
     post:
@@ -431,7 +432,7 @@ paths:
       security:
         - cookieAuth: []
       responses:
-        '200':
+        "200":
           description: Signed out successfully
           content:
             application/json:
@@ -444,10 +445,10 @@ paths:
                   message:
                     type: string
                     example: Signed out successfully
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
 
   /api/account/photo:
     post:
@@ -470,7 +471,7 @@ paths:
                   format: binary
                   description: Image file (JPEG, PNG, GIF, WebP, max 5MB)
       responses:
-        '200':
+        "200":
           description: Photo uploaded successfully
           content:
             application/json:
@@ -487,16 +488,16 @@ paths:
                         type: string
                         format: uri
                         example: https://storage.example.com/profile-photos/user123/profile.jpg?t=1234567890
-        '400':
+        "400":
           description: Invalid file or file too large
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ApiError'
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
+                $ref: "#/components/schemas/ApiError"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
 
     delete:
       summary: Delete profile photo
@@ -507,7 +508,7 @@ paths:
       security:
         - cookieAuth: []
       responses:
-        '200':
+        "200":
           description: Photo deleted successfully
           content:
             application/json:
@@ -517,10 +518,10 @@ paths:
                   success:
                     type: boolean
                     example: true
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
 
   /api/settings:
     get:
@@ -532,7 +533,7 @@ paths:
       security:
         - cookieAuth: []
       responses:
-        '200':
+        "200":
           description: User settings
           content:
             application/json:
@@ -543,11 +544,11 @@ paths:
                     type: boolean
                     example: true
                   data:
-                    $ref: '#/components/schemas/UserSettings'
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
+                    $ref: "#/components/schemas/UserSettings"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
 
     patch:
       summary: Update user settings
@@ -586,7 +587,7 @@ paths:
                   enum: [en, cs]
                   example: en
       responses:
-        '200':
+        "200":
           description: Settings updated successfully
           content:
             application/json:
@@ -597,11 +598,11 @@ paths:
                     type: boolean
                     example: true
                   data:
-                    $ref: '#/components/schemas/UserSettings'
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
+                    $ref: "#/components/schemas/UserSettings"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
 
   /api/redirect:
     get:
@@ -670,21 +671,21 @@ paths:
             type: string
             example: San Francisco, CA
       responses:
-        '302':
+        "302":
           description: Redirect to contact page or login
           headers:
             Location:
               schema:
                 type: string
                 example: https://app.bondery.com/app/person?person_id=123e4567-e89b-12d3-a456-426614174000
-        '400':
+        "400":
           description: Missing required parameters
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ApiError'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
+                $ref: "#/components/schemas/ApiError"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
 
     post:
       summary: Create or find contact (API)
@@ -741,7 +742,7 @@ paths:
                   description: Location or workplace
                   example: San Francisco, CA
       responses:
-        '200':
+        "200":
           description: Contact created or found
           content:
             application/json:
@@ -756,16 +757,16 @@ paths:
                     type: boolean
                     description: Whether the contact already existed
                     example: false
-        '400':
+        "400":
           description: Missing required parameters
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ApiError'
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
+                $ref: "#/components/schemas/ApiError"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
 
 components:
   securitySchemes:
@@ -831,12 +832,12 @@ components:
           format: date-time
           nullable: true
           description: Date of last interaction
-          example: '2026-01-15T10:30:00.000Z'
+          example: "2026-01-15T10:30:00.000Z"
         createdAt:
           type: string
           format: date-time
           nullable: true
-          example: '2026-01-01T00:00:00.000Z'
+          example: "2026-01-01T00:00:00.000Z"
         connections:
           type: array
           items:
@@ -846,7 +847,7 @@ components:
         phone:
           type: string
           nullable: true
-          example: '+1234567890'
+          example: "+1234567890"
         email:
           type: string
           format: email
@@ -866,7 +867,7 @@ components:
           type: string
           nullable: true
           description: WhatsApp number
-          example: '+1234567890'
+          example: "+1234567890"
         facebook:
           type: string
           nullable: true
@@ -881,12 +882,12 @@ components:
           type: string
           nullable: true
           description: Signal number
-          example: '+1234567890'
+          example: "+1234567890"
         birthdate:
           type: string
           format: date
           nullable: true
-          example: '1990-01-01'
+          example: "1990-01-01"
         notifyBirthday:
           type: boolean
           nullable: true
@@ -898,7 +899,7 @@ components:
           oneOf:
             - type: array
               items:
-                $ref: '#/components/schemas/ImportantDate'
+                $ref: "#/components/schemas/ImportantDate"
             - type: object
         myself:
           type: boolean
@@ -909,7 +910,7 @@ components:
           nullable: true
           description: Geographic position
           oneOf:
-            - $ref: '#/components/schemas/Position'
+            - $ref: "#/components/schemas/Position"
             - type: object
 
     ImportantDate:
@@ -924,7 +925,7 @@ components:
         date:
           type: string
           format: date
-          example: '2024-06-15'
+          example: "2024-06-15"
         notify:
           type: boolean
           example: true
@@ -1010,7 +1011,7 @@ components:
         phone:
           type: string
           nullable: true
-          example: '+1234567890'
+          example: "+1234567890"
         email:
           type: string
           format: email
@@ -1027,7 +1028,7 @@ components:
         whatsapp:
           type: string
           nullable: true
-          example: '+1234567890'
+          example: "+1234567890"
         facebook:
           type: string
           nullable: true
@@ -1040,12 +1041,12 @@ components:
         signal:
           type: string
           nullable: true
-          example: '+1234567890'
+          example: "+1234567890"
         birthdate:
           type: string
           format: date
           nullable: true
-          example: '1990-01-01'
+          example: "1990-01-01"
         notifyBirthday:
           type: boolean
           nullable: true
@@ -1055,12 +1056,12 @@ components:
           oneOf:
             - type: array
               items:
-                $ref: '#/components/schemas/ImportantDate'
+                $ref: "#/components/schemas/ImportantDate"
             - type: object
         position:
           nullable: true
           oneOf:
-            - $ref: '#/components/schemas/Position'
+            - $ref: "#/components/schemas/Position"
             - type: object
 
     UserSettings:
@@ -1107,7 +1108,7 @@ components:
           items:
             type: string
           description: Authentication providers used
-          example: ['google', 'email']
+          example: ["google", "email"]
 
     ApiError:
       type: object
@@ -1127,7 +1128,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/ApiError'
+            $ref: "#/components/schemas/ApiError"
           example:
             error: Unauthorized
 
@@ -1136,7 +1137,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/ApiError'
+            $ref: "#/components/schemas/ApiError"
           example:
             error: Internal server error
             description: An unexpected error occurred
