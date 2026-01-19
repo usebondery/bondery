@@ -20,13 +20,14 @@ export function Hero() {
             <Stack gap="lg">
               {/* Title */}
               <Title order={1} className="text-5xl md:text-6xl font-extrabold leading-tight ">
-                Never forget the details about people who matter
+                Build meaningful bonds that last forever
               </Title>
 
               {/* Description */}
               <Text size="lg" c="dimmed" maw={500}>
-                Track relationships, remember details, and stay connected with the people in your
-                life, all in one place.
+                Build your network with ease. Bondery is an open-source personal relationship
+                manager, that helps you remember the details, centralizes your connections, and
+                nurtures your relationships.
               </Text>
 
               {/* CTA Buttons */}
