@@ -34,11 +34,11 @@ export async function GET(request: Request) {
     const { error } = await supabase.auth.exchangeCodeForSession(code);
 
     if (!error) {
-      return NextResponse.redirect(`${origin}/app`);
+      return NextResponse.redirect(`${process.env.NEXT_PUBLIC_WEBSITE_URL}/app`);
     } else {
       console.error("Error exchanging code for session:", error.message);
     }
   }
 
-  return NextResponse.redirect(`${origin}${ROUTES.LOGIN}`);
+  return NextResponse.redirect(`${process.env.NEXT_PUBLIC_WEBSITE_URL}${ROUTES.LOGIN}`);
 }
