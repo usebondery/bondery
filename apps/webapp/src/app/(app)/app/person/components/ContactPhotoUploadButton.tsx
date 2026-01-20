@@ -1,6 +1,6 @@
 "use client";
 
-import { ContactAvatar } from "@/components/ContactAvatar";
+import { ContactAvatar } from "./ContactAvatar";
 import { openPhotoUploadModal } from "@/lib/photoUpload";
 import { PhotoUploadModal } from "@/app/(app)/app/settings/components/PhotoUploadModal";
 import { PhotoConfirmModal } from "@/app/(app)/app/settings/components/PhotoConfirmModal";

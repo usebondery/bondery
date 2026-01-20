@@ -1,6 +1,6 @@
 import { Container, Stack, Title, Text } from "@mantine/core";
 import { getBaseUrl } from "@/lib/config";
-import type { Contact } from "@/lib/mockData";
+import type { Contact } from "@bondery/types";
 import PersonClient from "./PersonClient";
 import { getAuthHeaders } from "@/lib/authHeaders";
 

@@ -28,16 +28,16 @@ import {
   IconBrandLinkedin,
 } from "@tabler/icons-react";
 import { notifications } from "@mantine/notifications";
-import { StatsCard } from "@/components/StatsCard";
+import { StatsCard } from "./components/StatsCard";
 import { useState, useDeferredValue } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { useDebouncedCallback } from "@mantine/hooks";
 import ContactsTable, { ColumnConfig } from "@/components/ContactsTable";
 import { ColumnVisibilityMenu } from "./components/ColumnVisibilityMenu";
 import { SortMenu, SortOrder } from "./components/SortMenu";
-import { openAddContactModal } from "@/components/AddContactModal";
+import { openAddContactModal } from "./components/AddContactModal";
 
-import type { Contact } from "@/lib/mockData";
+import type { Contact } from "@bondery/types";
 
 interface Stats {
   totalContacts: number;

@@ -39,7 +39,7 @@ export interface Contact {
   avatarColor: string | null;
   avatar: string | null;
   lastInteraction: string | null;
-  createdAt: string | null;
+  createdAt: string;
   connections: string[] | null;
   phone: string | null;
   email: string | null;

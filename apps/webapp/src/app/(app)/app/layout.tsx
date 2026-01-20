@@ -1,5 +1,5 @@
 import { AppShell, AppShellMain, AppShellNavbar } from "@mantine/core";
-import { NavigationSidebarContent } from "@/components/NavigationSidebar";
+import { NavigationSidebarContent } from "./components/NavigationSidebar";
 import { LocaleProvider } from "@/components/UserLocaleProvider";
 import { getApiUrl } from "@/lib/config";
 import { getAuthHeaders } from "@/lib/authHeaders";

@@ -89,7 +89,7 @@ export async function contactRoutes(fastify: FastifyInstance) {
       }
 
       // Prepare insert data
-      const insertData: Record<string, unknown> = {
+      const insertData: any = {
         user_id: user.id,
         first_name: body.firstName.trim(),
         last_name: body.lastName.trim(),

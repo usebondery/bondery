@@ -1,0 +1,156 @@
+/**
+ * Bondery API Server
+ * Fastify-based REST API for Bondery application
+ */
+import Fastify from "fastify";
+import cors from "@fastify/cors";
+import cookie from "@fastify/cookie";
+import multipart from "@fastify/multipart";
+import fastifyEnv from "@fastify/env";
+import { createRequire } from "module";
+import { contactRoutes } from "./routes/contacts.js";
+import { accountRoutes } from "./routes/account.js";
+import { settingsRoutes } from "./routes/settings.js";
+import { redirectRoutes } from "./routes/redirect.js";
+// Environment variable schema
+const envSchema = {
+    type: "object",
+    required: [
+        "PUBLIC_SUPABASE_URL",
+        "PUBLIC_SUPABASE_PUBLISHABLE_KEY",
+        "PRIVATE_SUPABASE_SECRET_KEY",
+        "NEXT_PUBLIC_API_URL",
+    ],
+    properties: {
+        LOG_LEVEL: {
+            type: "string",
+            default: "info",
+        },
+        PUBLIC_SUPABASE_URL: {
+            type: "string",
+        },
+        PUBLIC_SUPABASE_PUBLISHABLE_KEY: {
+            type: "string",
+        },
+        PRIVATE_SUPABASE_SECRET_KEY: {
+            type: "string",
+        },
+        NEXT_PUBLIC_WEBAPP_URL: {
+            type: "string",
+        },
+        NEXT_PUBLIC_WEBSITE_URL: {
+            type: "string",
+        },
+        NEXT_PUBLIC_API_URL: {
+            type: "string",
+        },
+        API_PORT: {
+            type: "number",
+            default: 3001,
+        },
+        API_HOST: {
+            type: "string",
+            default: "0.0.0.0",
+        },
+    },
+};
+function resolveListenAddress(config) {
+    const fallbackPort = Number(process.env.PORT) || Number(config.API_PORT) || 3001;
+    const fallbackHost = config.API_HOST || "0.0.0.0";
+    try {
+        const url = new URL(config.NEXT_PUBLIC_API_URL);
+        const urlPort = url.port ? Number(url.port) : undefined;
+        return {
+            port: urlPort || fallbackPort,
+            host: fallbackHost,
+        };
+    }
+    catch (error) {
+        console.warn("Invalid NEXT_PUBLIC_API_URL, using defaults", error);
+        return { port: fallbackPort, host: fallbackHost };
+    }
+}
+const require = createRequire(import.meta.url);
+function getLoggerConfig(env) {
+    if (env === "test")
+        return false;
+    if (env === "development") {
+        try {
+            // Pino v9+ pretty logging via transport
+            const target = require.resolve("pino-pretty");
+            return {
+                level: "info",
+                transport: {
+                    target,
+                    options: {
+                        translateTime: "HH:MM:ss Z",
+                        ignore: "pid,hostname",
+                        colorize: true,
+                    },
+                },
+            };
+        }
+        catch (error) {
+            console.warn("pino-pretty not available, falling back to default logger", error);
+        }
+    }
+    return { level: "info" };
+}
+async function buildServer() {
+    const environment = process.env.NODE_ENV || "development";
+    const fastify = Fastify({
+        logger: getLoggerConfig(environment),
+    });
+    // Register environment variable validation
+    await fastify.register(fastifyEnv, {
+        schema: envSchema,
+        dotenv: {
+            path: `${process.cwd()}/.env.development.local`,
+            debug: true,
+        },
+    });
+    // Allowed origins for CORS
+    const ALLOWED_ORIGINS = [
+        fastify.config.NEXT_PUBLIC_WEBAPP_URL,
+        fastify.config.NEXT_PUBLIC_WEBSITE_URL,
+        fastify.config.NEXT_PUBLIC_API_URL,
+    ].filter(Boolean);
+    // Register CORS
+    await fastify.register(cors, {
+        origin: ALLOWED_ORIGINS,
+        credentials: true,
+        methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+        allowedHeaders: ["Content-Type", "Authorization", "Cookie"],
+    });
+    // Register cookie parser
+    await fastify.register(cookie);
+    // Register multipart for file uploads
+    await fastify.register(multipart, {
+        limits: {
+            fileSize: 5 * 1024 * 1024, // 5MB max
+        },
+    });
+    // Health check endpoint
+    fastify.get("/health", async () => {
+        return { status: "ok", timestamp: new Date().toISOString() };
+    });
+    // Register route modules
+    await fastify.register(contactRoutes, { prefix: "/api/contacts" });
+    await fastify.register(accountRoutes, { prefix: "/api/account" });
+    await fastify.register(settingsRoutes, { prefix: "/api/settings" });
+    await fastify.register(redirectRoutes, { prefix: "/api/redirect" });
+    return fastify;
+}
+async function start() {
+    const server = await buildServer();
+    const { port, host } = resolveListenAddress(server.config);
+    try {
+        await server.listen({ port, host });
+        console.log(`🚀 Bondery API Server running at http://${host}:${port}`);
+    }
+    catch (err) {
+        server.log.error(err);
+        process.exit(1);
+    }
+}
+start();

@@ -48,22 +48,15 @@ import {
 } from "@tabler/icons-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import dynamic from "next/dynamic";
 import ContactsTable from "@/components/ContactsTable";
-import NetworkGraph from "@/components/NetworkGraph";
-import DateWithNotification from "@/components/DateWithNotification";
+import DateWithNotification from "./components/DateWithNotification";
 import { extractUsername, createSocialMediaUrl } from "@/lib/socialMediaHelpers";
 import { INPUT_MAX_LENGTHS, LIMITS } from "@/lib/config";
 import { countryCodes, parsePhoneNumber, combinePhoneNumber } from "@/lib/phoneHelpers";
 import { formatContactName } from "@/lib/nameHelpers";
-import type { Contact } from "@/lib/mockData";
+import type { Contact } from "@bondery/types";
 import Image from "next/image";
-import { ContactPhotoUploadButton } from "@/components/ContactPhotoUploadButton";
-
-// Dynamic import for map component to avoid SSR issues
-const MapComponent = dynamic(() => import("@/app/(app)/app/map/MapComponent"), {
-  ssr: false,
-});
+import { ContactPhotoUploadButton } from "./components/ContactPhotoUploadButton";
 
 interface PersonClientProps {
   initialContact: Contact;
@@ -79,7 +72,6 @@ export default function PersonClient({
   const router = useRouter();
 
   const [contact, setContact] = useState<Contact>(initialContact);
-  const [connectedContacts, setConnectedContacts] = useState<Contact[]>(initialConnectedContacts);
   const [savingField, setSavingField] = useState<string | null>(null);
   const [editedValues, setEditedValues] = useState<{
     [key: string]: string;
@@ -136,9 +128,13 @@ export default function PersonClient({
       setNotifyBirthday(contact.notifyBirthday || false);
 
       // Set important dates
-      if (contact.importantDates && contact.importantDates.length > 0) {
+      if (
+        contact.importantDates &&
+        Array.isArray(contact.importantDates) &&
+        contact.importantDates.length > 0
+      ) {
         setImportantDates(
-          contact.importantDates.map((d) => ({
+          contact.importantDates.map((d: any) => ({
             date: new Date(d.date),
             name: d.name,
             notify: d.notify,
@@ -1017,7 +1013,7 @@ export default function PersonClient({
                       setContact({
                         ...contact,
                         notifyBirthday: false,
-                        birthdate: undefined,
+                        birthdate: null,
                       });
                       notifications.show({
                         title: "Success",
@@ -1035,7 +1031,7 @@ export default function PersonClient({
                 if (contact && personId && date) {
                   setSavingField("birthday");
                   setTimeout(() => {
-                    setContact({ ...contact, birthdate: date });
+                    setContact({ ...contact, birthdate: date.toISOString().split("T")[0] });
                     notifications.show({
                       title: "Success",
                       message: "Birthday updated successfully",
@@ -1136,73 +1132,17 @@ export default function PersonClient({
                 </Text>
               </Group>
               <Text size="sm" c="dimmed">
-                {contact.lastInteraction.toLocaleDateString("en-US", {
-                  year: "numeric",
-                  month: "long",
-                  day: "numeric",
-                })}
+                {contact.lastInteraction
+                  ? new Date(contact.lastInteraction).toLocaleDateString("en-US", {
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                    })
+                  : "No interaction recorded"}
               </Text>
             </div>
           </Stack>
         </Paper>
-
-        {contact.position && (
-          <Paper withBorder shadow="sm" radius="md" p="md">
-            <Stack gap="md">
-              <Text size="sm" fw={600}>
-                Location Map
-              </Text>
-
-              <div
-                style={{
-                  width: "100%",
-                  height: "400px",
-                  position: "relative",
-                  zIndex: 1,
-                }}
-              >
-                <MapComponent
-                  contacts={[contact, ...connectedContacts.filter((c) => c.position)]}
-                  focusContactId={contact.id}
-                />
-              </div>
-            </Stack>
-          </Paper>
-        )}
-
-        {connectedContacts.length > 0 && (
-          <>
-            <Paper withBorder shadow="sm" radius="md" p="md">
-              <Stack gap="md">
-                <Text size="sm" fw={600}>
-                  Network Visualization
-                </Text>
-
-                <NetworkGraph
-                  contacts={[contact, ...connectedContacts]}
-                  height={400}
-                  centerNodeId={contact.id}
-                />
-              </Stack>
-            </Paper>
-
-            <Paper withBorder shadow="sm" radius="md" p="md">
-              <Stack gap="md">
-                <Group justify="space-between">
-                  <Text size="sm" fw={600}>
-                    Connections ({connectedContacts.length})
-                  </Text>
-                </Group>
-
-                <ContactsTable
-                  contacts={connectedContacts}
-                  visibleColumns={["avatar", "name", "title", "place", "shortNote", "social"]}
-                  showSelection={false}
-                />
-              </Stack>
-            </Paper>
-          </>
-        )}
       </Stack>
     </Container>
   );

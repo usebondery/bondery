@@ -8,7 +8,7 @@ import { createBrowswerSupabaseClient } from "@/lib/supabase/client";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { INTEGRATION_PROVIDERS, getWebsiteUrl } from "@/lib/config";
-import { Logo } from "@/components/Logo";
+import { Logo } from "./components/Logo";
 
 export default function LoginPage() {
   const t = useTranslations("LoginPage");

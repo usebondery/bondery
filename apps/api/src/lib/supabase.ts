@@ -123,8 +123,14 @@ function getAuthTokensFromCookies(request: FastifyRequest): {
     cookies = parseCookieHeader(request.headers.cookie);
   }
 
-  // Combine chunked cookies
-  cookies = combineChunkedCookies(cookies);
+  // Combine chunked cookies - filter out undefined values
+  const filteredCookies: Record<string, string> = {};
+  for (const [key, value] of Object.entries(cookies)) {
+    if (value !== undefined) {
+      filteredCookies[key] = value;
+    }
+  }
+  cookies = combineChunkedCookies(filteredCookies);
 
   console.log("[getAuthTokensFromCookies] Combined cookie keys:", Object.keys(cookies));
   console.log("[getAuthTokensFromCookies] Using projectRef:", projectRef);
@@ -166,7 +172,10 @@ function getAuthTokensFromCookies(request: FastifyRequest): {
           console.log("[getAuthTokensFromCookies] Found refresh_token in parsed JSON");
         }
       } catch (e) {
-        console.log("[getAuthTokensFromCookies] Failed to parse as JSON:", e.message);
+        console.log(
+          "[getAuthTokensFromCookies] Failed to parse as JSON:",
+          e instanceof Error ? e.message : String(e),
+        );
         // If not JSON, might be direct token
         if (key.includes("access")) accessToken = value;
         if (key.includes("refresh")) refreshToken = value;

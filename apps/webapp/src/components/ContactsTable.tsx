@@ -30,7 +30,7 @@ import { useFormatter } from "next-intl";
 import Image from "next/image";
 import { formatContactName } from "@/lib/nameHelpers";
 import Link from "next/link";
-import type { Contact } from "@/lib/mockData";
+import type { Contact } from "@bondery/types";
 
 // Column definitions with labels and icons
 const COLUMN_DEFINITIONS: Record<ColumnKey, { label: string; icon: React.ReactNode }> = {
@@ -69,35 +69,35 @@ function ContactSocialIcons({ contact }: { contact: Contact }) {
     },
     {
       icon: <IconBrandLinkedin size={18} />,
-      href: contact.linkedin,
+      href: contact.linkedin || undefined,
       color: "blue",
       label: "LinkedIn",
       disabled: !contact.linkedin,
     },
     {
       icon: <IconBrandInstagram size={18} />,
-      href: contact.instagram,
+      href: contact.instagram || undefined,
       color: "pink",
       label: "Instagram",
       disabled: !contact.instagram,
     },
     {
       icon: <IconBrandWhatsapp size={18} />,
-      href: contact.whatsapp,
+      href: contact.whatsapp || undefined,
       color: "green",
       label: "WhatsApp",
       disabled: !contact.whatsapp,
     },
     {
       icon: <IconBrandFacebook size={18} />,
-      href: contact.facebook,
+      href: contact.facebook || undefined,
       color: "blue",
       label: "Facebook",
       disabled: !contact.facebook,
     },
     {
       icon: <Image src="/icons/signal.svg" alt="Signal" width={18} height={18} />,
-      href: contact.signal,
+      href: contact.signal || undefined,
       color: "indigo",
       label: "Signal",
       disabled: !contact.signal,
@@ -226,7 +226,7 @@ export default function ContactsTable({
                       <TableTd key={col.key}>
                         <Avatar
                           src={contact.avatar || undefined}
-                          color={contact.avatarColor}
+                          color={contact.avatarColor || undefined}
                           radius="xl"
                           size="md"
                           name={formatContactName(contact)}
@@ -262,9 +262,11 @@ export default function ContactsTable({
                   case "lastInteraction":
                     return (
                       <TableTd key={col.key}>
-                        {format.dateTime(new Date(contact.lastInteraction), {
-                          dateStyle: "short",
-                        })}
+                        {contact.lastInteraction
+                          ? format.dateTime(new Date(contact.lastInteraction), {
+                              dateStyle: "short",
+                            })
+                          : "-"}
                       </TableTd>
                     );
                   case "social":

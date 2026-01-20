@@ -60,7 +60,7 @@ export async function accountRoutes(fastify: FastifyInstance) {
       }
 
       // Redirect to website home
-      return reply.redirect(URLS.website);
+      return reply.redirect(URLS.website || "/");
     } catch (error) {
       return reply.status(500).send({
         error: "Internal server error",

@@ -1,0 +1,35 @@
+/**
+ * Shared configuration for the API server
+ */
+export const AVATAR_UPLOAD = {
+    allowedMimeTypes: ["image/jpeg", "image/jpg", "image/png", "image/gif", "image/webp"],
+    maxFileSize: 5 * 1024 * 1024, // 5MB
+    maxFileSizeMB: 5,
+};
+/**
+ * Validates image upload
+ */
+export function validateImageUpload(file) {
+    const isValidType = AVATAR_UPLOAD.allowedMimeTypes.includes(file.type);
+    if (!isValidType) {
+        return {
+            isValid: false,
+            error: `Invalid file type. Only images are allowed (${AVATAR_UPLOAD.allowedMimeTypes.join(", ")}).`,
+        };
+    }
+    if (file.size > AVATAR_UPLOAD.maxFileSize) {
+        return {
+            isValid: false,
+            error: `File too large. Maximum size is ${AVATAR_UPLOAD.maxFileSizeMB}MB.`,
+        };
+    }
+    return { isValid: true };
+}
+/**
+ * URLs for redirects
+ */
+export const URLS = {
+    webapp: process.env.WEBAPP_URL,
+    website: process.env.WEBSITE_URL,
+    login: "/login",
+};

@@ -1,4 +1,4 @@
-import type { Contact } from "./mockData";
+import type { Contact } from "@bondery/types";
 
 /**
  * Formats a contact's full name with proper spacing

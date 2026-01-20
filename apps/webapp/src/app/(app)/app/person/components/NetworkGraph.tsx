@@ -3,7 +3,7 @@
 import { useEffect, useRef } from "react";
 import * as d3 from "d3";
 
-import type { Contact } from "@/lib/mockData";
+import type { Contact } from "@bondery/types";
 
 interface GraphNode extends d3.SimulationNodeDatum {
   id: string;
@@ -23,11 +23,7 @@ interface NetworkGraphProps {
   centerNodeId?: string;
 }
 
-export default function NetworkGraph({
-  contacts,
-  height = 400,
-  centerNodeId,
-}: NetworkGraphProps) {
+export default function NetworkGraph({ contacts, height = 400, centerNodeId }: NetworkGraphProps) {
   const svgRef = useRef<SVGSVGElement>(null);
 
   useEffect(() => {
@@ -55,11 +51,9 @@ export default function NetworkGraph({
     // Prepare nodes
     const nodes: GraphNode[] = contacts.map((contact) => ({
       id: contact.id,
-      name: `${contact.firstName} ${contact.lastName}${
-        contact.myself ? " (me)" : ""
-      }`,
-      color: contact.avatarColor,
-      initials: `${contact.firstName[0]}${contact.lastName[0]}`,
+      name: `${contact.firstName} ${contact.lastName || ""}${contact.myself ? " (me)" : ""}`,
+      color: contact.avatarColor || "blue",
+      initials: `${contact.firstName[0]}${contact.lastName?.[0] || ""}`,
     }));
 
     // Prepare links
@@ -75,7 +69,7 @@ export default function NetworkGraph({
           const linkExists = links.some(
             (link) =>
               (link.source === contact.id && link.target === targetId) ||
-              (link.source === targetId && link.target === contact.id)
+              (link.source === targetId && link.target === contact.id),
           );
           if (!linkExists) {
             links.push({
@@ -112,7 +106,7 @@ export default function NetworkGraph({
       .forceSimulation(nodes)
       .force(
         "link",
-        d3.forceLink<GraphNode, GraphLink>(links).id((d) => d.id)
+        d3.forceLink<GraphNode, GraphLink>(links).id((d) => d.id),
       )
       .force("charge", d3.forceManyBody().strength(-300))
       .force("center", d3.forceCenter(width / 2, height / 2))
@@ -143,25 +137,27 @@ export default function NetworkGraph({
       .attr("height", nodeHeight)
       .attr("x", -nodeWidth / 2)
       .attr("y", -nodeHeight / 2)
-      .style("cursor", "pointer")
-      .call(
-        d3
-          .drag<SVGForeignObjectElement, GraphNode>()
-          .on("start", (event) => {
-            if (!event.active) simulation.alphaTarget(0.3).restart();
-            event.subject.fx = event.subject.x;
-            event.subject.fy = event.subject.y;
-          })
-          .on("drag", (event) => {
-            event.subject.fx = event.x;
-            event.subject.fy = event.y;
-          })
-          .on("end", (event) => {
-            if (!event.active) simulation.alphaTarget(0);
-            event.subject.fx = null;
-            event.subject.fy = null;
-          })
-      );
+      .style("cursor", "pointer");
+
+    // Add drag behavior
+    const dragBehavior = d3
+      .drag<SVGForeignObjectElement, GraphNode>()
+      .on("start", (event) => {
+        if (!event.active) simulation.alphaTarget(0.3).restart();
+        event.subject.fx = event.subject.x;
+        event.subject.fy = event.subject.y;
+      })
+      .on("drag", (event) => {
+        event.subject.fx = event.x;
+        event.subject.fy = event.y;
+      })
+      .on("end", (event) => {
+        if (!event.active) simulation.alphaTarget(0);
+        event.subject.fx = null;
+        event.subject.fy = null;
+      });
+
+    node.call(dragBehavior as any);
 
     // Add custom HTML content to each node
     node
@@ -173,7 +169,7 @@ export default function NetworkGraph({
       .style("align-items", "center")
       .style("justify-content", "center")
       .style("cursor", "pointer")
-      .html((d) => {
+      .html((d: GraphNode) => {
         const isCenter = centerNodeId && d.id === centerNodeId;
         const size = isCenter ? 50 : 40;
         const fontSize = isCenter ? 16 : 14;
@@ -216,7 +212,7 @@ export default function NetworkGraph({
         .attr("x2", (d) => (d.target as GraphNode).x || 0)
         .attr("y2", (d) => (d.target as GraphNode).y || 0);
 
-      node.attr("transform", (d) => `translate(${d.x || 0},${d.y || 0})`);
+      node.attr("transform", (d: GraphNode) => `translate(${d.x || 0},${d.y || 0})`);
     });
 
     // Cleanup

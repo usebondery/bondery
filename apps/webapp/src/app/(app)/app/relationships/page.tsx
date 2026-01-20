@@ -1,6 +1,6 @@
 import { RelationshipsClient } from "./RelationshipsClient";
 import { getBaseUrl } from "@/lib/config";
-import type { Contact } from "@/lib/mockData";
+import type { Contact } from "@bondery/types";
 import { getAuthHeaders } from "@/lib/authHeaders";
 
 type SortOrder =
@@ -28,8 +28,8 @@ async function getContacts(query?: string, sort?: SortOrder) {
     // Ensure lastInteraction is a Date object
     let contacts = data.contacts.map((contact: Contact) => ({
       ...contact,
-      lastInteraction: new Date(contact.lastInteraction),
-      createdAt: contact.createdAt ? new Date(contact.createdAt) : undefined,
+      lastInteraction: contact.lastInteraction ? new Date(contact.lastInteraction) : null,
+      createdAt: contact.createdAt ? new Date(contact.createdAt) : null,
     }));
 
     // Server-side filtering
@@ -49,13 +49,19 @@ async function getContacts(query?: string, sort?: SortOrder) {
           case "nameDesc":
             return b.firstName.localeCompare(a.firstName);
           case "surnameAsc":
-            return a.lastName.localeCompare(b.lastName);
+            return (a.lastName || "").localeCompare(b.lastName || "");
           case "surnameDesc":
-            return b.lastName.localeCompare(a.lastName);
+            return (b.lastName || "").localeCompare(a.lastName || "");
           case "interactionAsc":
-            return a.lastInteraction.getTime() - b.lastInteraction.getTime();
+            return (
+              (a.lastInteraction ? new Date(a.lastInteraction).getTime() : 0) -
+              (b.lastInteraction ? new Date(b.lastInteraction).getTime() : 0)
+            );
           case "interactionDesc":
-            return b.lastInteraction.getTime() - a.lastInteraction.getTime();
+            return (
+              (b.lastInteraction ? new Date(b.lastInteraction).getTime() : 0) -
+              (a.lastInteraction ? new Date(a.lastInteraction).getTime() : 0)
+            );
           default:
             return 0;
         }
@@ -86,16 +92,16 @@ function calculateStats(contacts: Contact[]) {
 
   // This month's interactions (contacts with lastInteraction in current month)
   const thisMonthInteractions = contacts.filter((contact) => {
-    const interactionDate = contact.lastInteraction;
-    return (
-      interactionDate.getMonth() === currentMonth && interactionDate.getFullYear() === currentYear
-    );
+    if (!contact.lastInteraction) return false;
+    const date = new Date(contact.lastInteraction);
+    return date.getMonth() === currentMonth && date.getFullYear() === currentYear;
   }).length;
 
   // New contacts this year (contacts created in current year)
   const newContactsThisYear = contacts.filter((contact) => {
     if (!contact.createdAt) return false;
-    return contact.createdAt.getFullYear() === currentYear;
+    const date = new Date(contact.createdAt);
+    return date.getFullYear() === currentYear;
   }).length;
 
   return {

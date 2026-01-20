@@ -7,7 +7,7 @@ import { useForm } from "@mantine/form";
 import { modals } from "@mantine/modals";
 import { notifications } from "@mantine/notifications";
 import { IconInfoCircle, IconUserPlus } from "@tabler/icons-react";
-import { SocialMediaInput, validateSocialMediaInput } from "@/components/SocialMediaInput";
+import { SocialMediaInput, validateSocialMediaInput } from "./SocialMediaInput";
 import { INPUT_MAX_LENGTHS } from "@/lib/config";
 import { getRandomExampleName } from "@/lib/randomNameHelpers";
 

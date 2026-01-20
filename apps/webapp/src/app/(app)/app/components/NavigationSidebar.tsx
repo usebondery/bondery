@@ -4,7 +4,7 @@ import { Group, Text, Stack, Box } from "@mantine/core";
 import { IconSettings, IconTopologyFull, IconChartDots3, IconMap } from "@tabler/icons-react";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
-import { NavLinkItem } from "@/components/NavLinkItem";
+import { NavLinkItem } from "./NavLinkItem";
 import { UserAvatar } from "@/components/UserAvatar";
 
 interface NavigationSidebarContentProps {

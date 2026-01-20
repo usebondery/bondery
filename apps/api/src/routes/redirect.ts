@@ -79,7 +79,7 @@ export async function redirectRoutes(fastify: FastifyInstance) {
       }
 
       // Create new contact
-      const insertData: Record<string, unknown> = {
+      const insertData: any = {
         user_id: user.id,
         first_name: firstName || instagram || linkedin || facebook || "Unknown",
         created_at: new Date().toISOString(),
@@ -180,7 +180,7 @@ export async function redirectRoutes(fastify: FastifyInstance) {
     }
 
     // Create new contact
-    const insertData: Record<string, unknown> = {
+    const insertData: any = {
       user_id: user.id,
       first_name: firstName || instagram || linkedin || facebook || "Unknown",
       created_at: new Date().toISOString(),
