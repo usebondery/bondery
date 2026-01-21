@@ -15,6 +15,11 @@ const nextConfig: NextConfig = {
         permanent: false,
       },
       {
+        source: "/auth/callback/:path*",
+        destination: `${WEBAPP_URL}/auth/callback/:path*`,
+        permanent: false,
+      },
+      {
         source: "/app/:path*",
         destination: `${WEBAPP_URL}/app/:path*`,
         permanent: false,
