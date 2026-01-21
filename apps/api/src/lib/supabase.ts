@@ -35,7 +35,6 @@ function getSupabaseConfig() {
  */
 export function createAnonClient(): SupabaseClient<Database> {
   const { PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_PUBLISHABLE_KEY } = getSupabaseConfig();
-  console.log("Creating anon client with URL:", PUBLIC_SUPABASE_URL);
   return createClient<Database>(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_PUBLISHABLE_KEY);
 }
 
@@ -119,7 +118,6 @@ function getAuthTokensFromCookies(request: FastifyRequest): {
 
   // If no cookies parsed, try to parse from Cookie header (from server-to-server requests)
   if (Object.keys(cookies).length === 0 && request.headers.cookie) {
-    console.log("[getAuthTokensFromCookies] Manually parsing Cookie header");
     cookies = parseCookieHeader(request.headers.cookie);
   }
 
@@ -132,9 +130,6 @@ function getAuthTokensFromCookies(request: FastifyRequest): {
   }
   cookies = combineChunkedCookies(filteredCookies);
 
-  console.log("[getAuthTokensFromCookies] Combined cookie keys:", Object.keys(cookies));
-  console.log("[getAuthTokensFromCookies] Using projectRef:", projectRef);
-
   // Supabase stores tokens in cookies with project-specific names
   // Format: sb-<project-ref>-auth-token
   let accessToken: string | undefined;
@@ -145,12 +140,6 @@ function getAuthTokensFromCookies(request: FastifyRequest): {
     if (!isAuthCookie) continue;
 
     if (value) {
-      console.log(`[getAuthTokensFromCookies] Found auth cookie: ${key}`);
-      console.log(
-        `[getAuthTokensFromCookies] Cookie value (first 100 chars):`,
-        value.substring(0, 100),
-      );
-
       // Supabase sets base64-prefixed JSON strings for auth cookies
       const decodedValue = value.startsWith("base64-")
         ? Buffer.from(value.slice(7), "base64").toString("utf-8")
@@ -159,17 +148,11 @@ function getAuthTokensFromCookies(request: FastifyRequest): {
       try {
         // The cookie might be a JSON object with access_token and refresh_token
         const parsed = JSON.parse(decodedValue);
-        console.log(
-          "[getAuthTokensFromCookies] Successfully parsed JSON, keys:",
-          Object.keys(parsed),
-        );
         if (parsed.access_token) {
           accessToken = parsed.access_token;
-          console.log("[getAuthTokensFromCookies] Found access_token in parsed JSON");
         }
         if (parsed.refresh_token) {
           refreshToken = parsed.refresh_token;
-          console.log("[getAuthTokensFromCookies] Found refresh_token in parsed JSON");
         }
       } catch (e) {
         console.log(
@@ -187,15 +170,8 @@ function getAuthTokensFromCookies(request: FastifyRequest): {
   const authHeader = request.headers.authorization;
   if (authHeader?.startsWith("Bearer ")) {
     accessToken = authHeader.substring(7);
-    console.log("[getAuthTokensFromCookies] Found Bearer token in Authorization header");
   }
 
-  console.log(
-    "[getAuthTokensFromCookies] Result - accessToken:",
-    !!accessToken,
-    "refreshToken:",
-    !!refreshToken,
-  );
   return { accessToken, refreshToken };
 }
 
@@ -207,7 +183,6 @@ export async function createAuthenticatedClient(
 ): Promise<{ client: SupabaseClient<Database>; user: { id: string; email: string } | null }> {
   const { PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_PUBLISHABLE_KEY } = getSupabaseConfig();
   const { accessToken, refreshToken } = getAuthTokensFromCookies(request);
-  console.log("Creating authenticated client. Access token present:", !!accessToken);
   const client = createClient<Database>(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_PUBLISHABLE_KEY, {
     auth: {
       autoRefreshToken: false,
@@ -255,8 +230,6 @@ export async function requireAuth(
   request: FastifyRequest,
   reply: FastifyReply,
 ): Promise<AuthResult | null> {
-  console.log("Requiring authentication for request");
-
   const { client, user } = await createAuthenticatedClient(request);
 
   if (!user) {

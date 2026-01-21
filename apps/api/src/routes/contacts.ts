@@ -48,6 +48,7 @@ export async function contactRoutes(fastify: FastifyInstance) {
    */
   fastify.get("/", async (request: FastifyRequest, reply: FastifyReply) => {
     const auth = await requireAuth(request, reply);
+    console.log("Auth result:", auth);
     if (!auth) return;
 
     const { client } = auth;
@@ -60,6 +61,7 @@ export async function contactRoutes(fastify: FastifyInstance) {
     if (error) {
       return reply.status(500).send({ error: error.message });
     }
+    console.log("Fetched contacts:", contacts);
 
     return {
       contacts,

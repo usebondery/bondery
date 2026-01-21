@@ -12,17 +12,10 @@ export async function settingsRoutes(fastify: FastifyInstance) {
    * GET /api/settings - Get user settings
    */
   fastify.get("/", async (request: FastifyRequest, reply: FastifyReply) => {
-    console.log("Received request for /api/settings");
-    console.log("Request cookies:", request.cookies);
-    console.log("Request headers:", request.headers);
-    console.log("Cookie header:", request.headers.cookie);
-
     const auth = await requireAuth(request, reply);
     if (!auth) return;
 
     const { client, user } = auth;
-
-    console.log("Fetching settings for user:", user.id);
 
     // Get user info for email/providers
     const { data: userData } = await client.auth.getUser();

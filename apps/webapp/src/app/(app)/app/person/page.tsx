@@ -1,5 +1,5 @@
 import { Container, Stack, Title, Text } from "@mantine/core";
-import { getBaseUrl } from "@/lib/config";
+import { getApiUrl } from "@/lib/config";
 import type { Contact } from "@bondery/types";
 import PersonClient from "./PersonClient";
 import { getAuthHeaders } from "@/lib/authHeaders";
@@ -8,7 +8,7 @@ async function getPersonData(personId: string) {
   const headers = await getAuthHeaders();
 
   // Fetch individual contact via API
-  const contactResponse = await fetch(`${getBaseUrl()}/api/contacts/${personId}`, {
+  const contactResponse = await fetch(`${getApiUrl()}/api/contacts/${personId}`, {
     cache: "no-store",
     headers,
   });
@@ -28,7 +28,7 @@ async function getPersonData(personId: string) {
   let connectedContacts: Contact[] = [];
   if (contact.connections && contact.connections.length > 0) {
     const connectionPromises = contact.connections.map((id: string) =>
-      fetch(`${getBaseUrl()}/api/contacts/${id}`, {
+      fetch(`${getApiUrl()}/api/contacts/${id}`, {
         cache: "no-store",
         headers,
       }).then((res) => res.json()),

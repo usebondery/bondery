@@ -4,6 +4,7 @@
   "private": true,
   "description": "Supabase database setup, migrations, and edge functions",
   "scripts": {
+    "dev": "powershell -ExecutionPolicy Bypass -File ./scripts/dev.ps1",
     "start": "npx supabase start",
     "stop": "npx supabase stop",
     "reset": "npx supabase db reset",

@@ -1,5 +1,5 @@
 import { RelationshipsClient } from "./RelationshipsClient";
-import { getBaseUrl } from "@/lib/config";
+import { getApiUrl } from "@/lib/config";
 import type { Contact } from "@bondery/types";
 import { getAuthHeaders } from "@/lib/authHeaders";
 
@@ -14,10 +14,12 @@ type SortOrder =
 async function getContacts(query?: string, sort?: SortOrder) {
   try {
     const headers = await getAuthHeaders();
-    const res = await fetch(`${getBaseUrl()}/api/contacts`, {
+    const res = await fetch(`${getApiUrl()}/api/contacts`, {
       cache: "no-store",
       headers,
     });
+
+    console.log("Fetched contacts response:", res);
 
     if (!res.ok) {
       throw new Error(`Failed to fetch contacts: ${res.status} ${res.statusText}`);
