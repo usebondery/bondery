@@ -1,4 +1,20 @@
 {
+  "FeedbackPage": {
+    "Title": "Feedback",
+    "Description": "Help us improve Bondery by sharing your thoughts",
+    "NpsLabel": "How likely are you to recommend Bondery to a friend or colleague?",
+    "NpsReasonLabel": "Why did you pick the score of {score}?",
+    "NpsReasonPlaceholder": "Tell us why you chose this score...",
+    "GeneralFeedbackLabel": "Any feedback, tips, or bugs you would like to share?",
+    "GeneralFeedbackPlaceholder": "Share your thoughts, suggestions, or report any issues...",
+    "SubmitButton": "Send feedback to the Bondery team",
+    "SubmittingTitle": "Submitting feedback...",
+    "SubmittingMessage": "Please wait while we send your feedback",
+    "SuccessTitle": "Thank you!",
+    "SuccessMessage": "Your feedback has been received",
+    "ErrorTitle": "Error",
+    "ErrorMessage": "Failed to submit feedback. Please try again."
+  },
   "ContactPage": {
     "Title": "Contact us",
     "Description": "If you have any questions, please feel free to contact us.",

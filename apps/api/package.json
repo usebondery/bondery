@@ -7,19 +7,24 @@
     "dev": "tsx watch src/index.ts",
     "build": "tsc",
     "start": "node dist/index.js",
-    "check-types": "tsc --noEmit"
+    "check-types": "tsc --noEmit",
+    "check-env": "tsx scripts/check-env.ts"
   },
   "dependencies": {
+    "@bondery/emails": "*",
     "@bondery/types": "*",
     "@fastify/cookie": "^11.0.2",
     "@fastify/cors": "^10.0.2",
     "@fastify/env": "^5.0.3",
     "@fastify/multipart": "^9.0.4",
+    "@react-email/render": "^1.0.4",
     "@supabase/supabase-js": "^2.89.0",
-    "fastify": "^5.3.2"
+    "fastify": "^5.3.2",
+    "nodemailer": "^7.0.12"
   },
   "devDependencies": {
     "@types/node": "^20",
+    "@types/nodemailer": "^6.4.17",
     "pino-pretty": "^11.3.0",
     "tsx": "^4.19.0",
     "typescript": "^5"

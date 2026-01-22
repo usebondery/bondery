@@ -9,6 +9,7 @@
   ],
   "scripts": {
     "dev": "turbo dev",
+    "dev:core": "turbo dev --filter=webapp --filter=api --filter=@bondery/emails",
     "build": "turbo build",
     "start": "turbo start",
     "lint": "turbo lint",

@@ -84,3 +84,5 @@ export const bonderyTheme = createTheme({
     },
   },
 });
+
+export const primaryColor = "#a34bcb";

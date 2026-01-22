@@ -1,0 +1,39 @@
+{
+  "name": "@bondery/emails",
+  "version": "0.1.0",
+  "description": "Bondery email templates using React Email",
+  "type": "module",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "exports": {
+    ".": {
+      "import": "./src/index.ts",
+      "require": "./src/index.ts"
+    }
+  },
+  "files": [
+    "src"
+  ],
+  "scripts": {
+    "dev": "email dev --dir ./src --port 3004",
+    "build": "tsc"
+  },
+  "dependencies": {
+    "@bondery/branding": "^0.1.0",
+    "@react-email/components": "^1.0.6",
+    "@react-email/render": "^1.0.4",
+    "@react-email/tailwind": "^2.0.3"
+  },
+  "peerDependencies": {
+    "react": "^18.0.0 || ^19.0.0",
+    "react-dom": "^18.0.0 || ^19.0.0"
+  },
+  "devDependencies": {
+    "@react-email/preview-server": "5.2.5",
+    "@types/react": "^19",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "react-email": "5.2.5",
+    "typescript": "^5"
+  }
+}

@@ -1,7 +1,13 @@
 "use client";
 
 import { Group, Text, Stack, Box } from "@mantine/core";
-import { IconSettings, IconTopologyFull, IconChartDots3, IconMap } from "@tabler/icons-react";
+import {
+  IconSettings,
+  IconTopologyFull,
+  IconChartDots3,
+  IconMap,
+  IconMessageCircle,
+} from "@tabler/icons-react";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
 import { NavLinkItem } from "./NavLinkItem";
@@ -29,6 +35,11 @@ const navLinks = [
   //   label: "Map",
   //   icon: IconMap,
   // },
+  {
+    href: "/app/feedback",
+    label: "Feedback",
+    icon: IconMessageCircle,
+  },
   {
     href: "/app/settings",
     label: "Settings",
