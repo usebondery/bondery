@@ -42,7 +42,7 @@ export async function redirectRoutes(fastify: FastifyInstance) {
       }
 
       // Build query to look up contact
-      let query = client.from("contacts").select("id, avatar, title, place").eq("user_id", user.id);
+      let query = client.from("people").select("id, avatar, title, place").eq("user_id", user.id);
 
       if (instagram) {
         query = query.eq("instagram", instagram);
@@ -67,12 +67,12 @@ export async function redirectRoutes(fastify: FastifyInstance) {
 
         // Update title if provided and contact doesn't have one
         if (title && !existingContact.title) {
-          await client.from("contacts").update({ title }).eq("id", existingContact.id);
+          await client.from("people").update({ title }).eq("id", existingContact.id);
         }
 
         // Update place if provided and contact doesn't have one
         if (place && !existingContact.place) {
-          await client.from("contacts").update({ place }).eq("id", existingContact.id);
+          await client.from("people").update({ place }).eq("id", existingContact.id);
         }
 
         return { contactId: existingContact.id, existed: true };
@@ -95,7 +95,7 @@ export async function redirectRoutes(fastify: FastifyInstance) {
       if (place) insertData.place = place;
 
       const { data: newContact, error: createError } = await client
-        .from("contacts")
+        .from("people")
         .insert(insertData)
         .select("id")
         .single();
@@ -148,7 +148,7 @@ export async function redirectRoutes(fastify: FastifyInstance) {
     }
 
     // Build query to look up contact
-    let dbQuery = client.from("contacts").select("id, avatar, title, place").eq("user_id", user.id);
+    let dbQuery = client.from("people").select("id, avatar, title, place").eq("user_id", user.id);
 
     if (instagram) {
       dbQuery = dbQuery.eq("instagram", instagram);
@@ -170,10 +170,10 @@ export async function redirectRoutes(fastify: FastifyInstance) {
         await updateContactPhoto(client, existingContact.id, user.id, profileImageUrl);
       }
       if (title && !existingContact.title) {
-        await client.from("contacts").update({ title }).eq("id", existingContact.id);
+        await client.from("people").update({ title }).eq("id", existingContact.id);
       }
       if (place && !existingContact.place) {
-        await client.from("contacts").update({ place }).eq("id", existingContact.id);
+        await client.from("people").update({ place }).eq("id", existingContact.id);
       }
 
       return reply.redirect(`${URLS.webapp}/app/person?person_id=${existingContact.id}`);
@@ -196,7 +196,7 @@ export async function redirectRoutes(fastify: FastifyInstance) {
     if (place) insertData.place = place;
 
     const { data: newContact, error: createError } = await client
-      .from("contacts")
+      .from("people")
       .insert(insertData)
       .select("id")
       .single();
@@ -248,7 +248,7 @@ async function updateContactPhoto(
     const { data: urlData } = supabase.storage.from("avatars").getPublicUrl(fileName);
 
     if (urlData?.publicUrl) {
-      await supabase.from("contacts").update({ avatar: urlData.publicUrl }).eq("id", contactId);
+      await supabase.from("people").update({ avatar: urlData.publicUrl }).eq("id", contactId);
     }
   } catch (error) {
     console.error("Error in updateContactPhoto:", error);
