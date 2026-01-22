@@ -46,8 +46,8 @@ NEXT_PUBLIC_WEBSITE_URL=https://usebondery.com
 - `/login` - Authentication page
 
 ### Authenticated Routes (require login)
-- `/app` - Redirects to relationships
-- `/app/relationships` - Main contacts view
+- `/app` - Redirects to people
+- `/app/people` - Main contacts view
 - `/app/person` - Individual contact detail
 - `/app/network` - Network graph visualization
 - `/app/map` - Map view of contacts

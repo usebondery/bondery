@@ -31,7 +31,7 @@ export default function LoginPage() {
       const { error } = await supabase.auth.signInWithOAuth({
         provider,
         options: {
-          redirectTo: `${process.env.NEXT_PUBLIC_WEBSITE_URL}/auth/callback`,
+          redirectTo: `${process.env.NEXT_PUBLIC_WEBAPP_URL}/auth/callback`,
         },
       });
 

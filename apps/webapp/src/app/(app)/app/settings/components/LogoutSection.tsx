@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { notifications } from "@mantine/notifications";
 import { useTranslations } from "next-intl";
 import { ROUTES } from "@/lib/config";
+import { createBrowswerSupabaseClient } from "@/lib/supabase/client";
 
 export function LogoutSection() {
   const router = useRouter();
@@ -21,15 +22,13 @@ export function LogoutSection() {
         withCloseButton: false,
       });
 
-      const response = await fetch("/api/account/signout", {
-        method: "POST",
-      });
+      const supabase = createBrowswerSupabaseClient();
+      const { error } = await supabase.auth.signOut();
 
       notifications.hide(loadingNotification);
 
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || "Failed to sign out");
+      if (error) {
+        throw new Error(error.message || "Failed to sign out");
       }
 
       router.push(ROUTES.LOGIN);

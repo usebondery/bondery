@@ -70,24 +70,6 @@ export async function accountRoutes(fastify: FastifyInstance) {
   });
 
   /**
-   * POST /api/account/signout - Sign out user
-   */
-  fastify.post("/signout", async (request: FastifyRequest, reply: FastifyReply) => {
-    const auth = await requireAuth(request, reply);
-    if (!auth) return;
-
-    const { client } = auth;
-
-    const { error } = await client.auth.signOut();
-
-    if (error) {
-      return reply.status(500).send({ error: "Failed to sign out" });
-    }
-
-    return { success: true, message: "Signed out successfully" };
-  });
-
-  /**
    * POST /api/account/photo - Upload profile photo
    */
   fastify.post("/photo", async (request: FastifyRequest, reply: FastifyReply) => {

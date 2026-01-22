@@ -12,7 +12,6 @@ import {
   SimpleGrid,
 } from "@mantine/core";
 import {
-  IconTopologyFull,
   IconSearch,
   IconPlus,
   IconUsers,
@@ -36,6 +35,7 @@ import ContactsTable, { ColumnConfig } from "@/components/ContactsTable";
 import { ColumnVisibilityMenu } from "./components/ColumnVisibilityMenu";
 import { SortMenu, SortOrder } from "./components/SortMenu";
 import { openAddContactModal } from "./components/AddContactModal";
+import { PageHeader } from "@/components/PageHeader";
 
 import type { Contact } from "@bondery/types";
 
@@ -45,17 +45,17 @@ interface Stats {
   newContactsThisYear: number;
 }
 
-interface RelationshipsClientProps {
+interface PeopleClientProps {
   initialContacts: Contact[];
   totalCount: number;
   stats: Stats;
 }
 
-export function RelationshipsClient({
+export function PeopleClient({
   initialContacts,
   totalCount,
   stats,
-}: RelationshipsClientProps) {
+}: PeopleClientProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -191,10 +191,7 @@ export function RelationshipsClient({
     <Container size="xl">
       <Stack gap="xl">
         <Group justify="space-between">
-          <Group gap="sm">
-            <IconTopologyFull size={32} stroke={1.5} />
-            <Title order={1}>My relationships</Title>
-          </Group>
+          <PageHeader icon={IconUsers} title="People" />
           <Button size="md" leftSection={<IconPlus size={16} />} onClick={openAddContactModal}>
             Add new contact
           </Button>

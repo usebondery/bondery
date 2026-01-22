@@ -6,6 +6,7 @@ import { DataManagementCard } from "./components/DataManagementCard";
 import { getApiUrl } from "@/lib/config";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { getAuthHeaders } from "@/lib/authHeaders";
+import { PageHeader } from "@/components/PageHeader";
 
 export default async function SettingsPage() {
   const baseUrl = getApiUrl();
@@ -43,10 +44,7 @@ export default async function SettingsPage() {
   return (
     <Container size="md">
       <Stack gap="xl">
-        <Group gap="sm">
-          <IconSettings size={32} stroke={1.5} />
-          <Title order={1}>{t("Title")}</Title>
-        </Group>
+        <PageHeader icon={IconSettings} title={t("Title")} />
 
         <ProfileCard
           initialName={name}

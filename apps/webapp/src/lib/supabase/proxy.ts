@@ -54,7 +54,7 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  // 3. Redirect /app to /app/relationships
+  // 3. Redirect /app to /app/people
   if (user && request.nextUrl.pathname === ROUTES.APP_GROUP) {
     const url = request.nextUrl.clone();
     url.pathname = ROUTES.DEFAULT_PAGE_AFTER_LOGIN;

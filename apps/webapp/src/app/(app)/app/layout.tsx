@@ -23,35 +23,18 @@ async function getUserSettings() {
 
     if (response.ok) {
       const result = await response.json();
-      console.log("Layout - API Response:", JSON.stringify(result, null, 2));
       const settings = result?.data || {};
-      console.log("Layout - Settings data:", JSON.stringify(settings, null, 2));
 
       const firstName = settings.name || "";
-      const middleName = settings.middlename || "";
-      const lastName = settings.surname || "";
-      const fullName = [firstName, middleName, lastName].filter(Boolean).join(" ");
-
-      console.log("Layout - Computed values:", {
-        firstName,
-        middleName,
-        lastName,
-        fullName,
-        email: settings.email,
-        avatar_url: settings.avatar_url,
-      });
 
       return {
-        userName: fullName || settings.email || "User",
+        userName: firstName || settings.email || "User",
         avatarUrl: settings.avatar_url || null,
         locale: settings.language || "en",
         timezone: settings.timezone || "UTC",
       };
-    } else {
-      console.error("Layout - API response not OK:", response.status, response.statusText);
     }
   } catch (error) {
-    console.error("Error fetching user settings:", error);
   }
 
   return {
@@ -75,8 +58,6 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   }
 
   const { userName, avatarUrl, locale, timezone } = await getUserSettings();
-
-  console.log("Layout - User data:", { userName, avatarUrl, locale, timezone });
 
   const messages = translations[locale as keyof typeof translations] || translations.en;
 

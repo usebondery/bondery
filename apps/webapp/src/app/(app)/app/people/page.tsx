@@ -1,4 +1,4 @@
-import { RelationshipsClient } from "./RelationshipsClient";
+import { PeopleClient } from "./PeopleClient";
 import { getApiUrl } from "@/lib/config";
 import type { Contact } from "@bondery/types";
 import { getAuthHeaders } from "@/lib/authHeaders";
@@ -18,8 +18,6 @@ async function getContacts(query?: string, sort?: SortOrder) {
       cache: "no-store",
       headers,
     });
-
-    console.log("Fetched contacts response:", res);
 
     if (!res.ok) {
       throw new Error(`Failed to fetch contacts: ${res.status} ${res.statusText}`);
@@ -113,7 +111,7 @@ function calculateStats(contacts: Contact[]) {
   };
 }
 
-export default async function RelationshipsPage({
+export default async function PeoplePage({
   searchParams,
 }: {
   searchParams: Promise<{ q?: string; sort?: string }>;
@@ -125,5 +123,5 @@ export default async function RelationshipsPage({
   const { contacts, totalCount } = await getContacts(query, sort);
   const stats = calculateStats(contacts);
 
-  return <RelationshipsClient initialContacts={contacts} totalCount={totalCount} stats={stats} />;
+  return <PeopleClient initialContacts={contacts} totalCount={totalCount} stats={stats} />;
 }

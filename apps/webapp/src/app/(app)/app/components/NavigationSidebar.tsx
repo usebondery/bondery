@@ -3,7 +3,7 @@
 import { Group, Text, Stack, Box } from "@mantine/core";
 import {
   IconSettings,
-  IconTopologyFull,
+  IconUsers,
   IconChartDots3,
   IconMap,
   IconMessageCircle,
@@ -20,9 +20,9 @@ interface NavigationSidebarContentProps {
 
 const navLinks = [
   {
-    href: "/app/relationships",
-    label: "Relationships",
-    icon: IconTopologyFull,
+    href: "/app/people",
+    label: "People",
+    icon: IconUsers,
   },
   // TODO: Enable when feature is ready
   // {
@@ -49,8 +49,6 @@ const navLinks = [
 
 export function NavigationSidebarContent({ userName, avatarUrl }: NavigationSidebarContentProps) {
   const pathname = usePathname();
-
-  console.log("NavigationSidebar - Props:", { userName, avatarUrl });
 
   return (
     <>

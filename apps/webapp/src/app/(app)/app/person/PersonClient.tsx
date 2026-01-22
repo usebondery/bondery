@@ -412,9 +412,9 @@ export default function PersonClient({
             icon: <IconCheck size={18} />,
           });
 
-          // Redirect to relationships page
+          // Redirect to people page
           setTimeout(() => {
-            router.push("/app/relationships");
+            router.push("/app/people");
           }, 500);
         } catch {
           // Error - hide loading notification

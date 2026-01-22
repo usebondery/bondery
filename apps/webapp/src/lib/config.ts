@@ -100,6 +100,6 @@ export const SOCIAL_LINKS = {
  */
 export const ROUTES = {
   LOGIN: "/login",
-  DEFAULT_PAGE_AFTER_LOGIN: "/app/relationships",
+  DEFAULT_PAGE_AFTER_LOGIN: "/app/people",
   APP_GROUP: "/app",
 } as const;

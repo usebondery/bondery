@@ -31,17 +31,34 @@ export async function settingsRoutes(fastify: FastifyInstance) {
       return reply.status(500).send({ error: "Failed to fetch settings" });
     }
 
-    // Return defaults if no settings exist
+    // Insert defaults if no settings exist
     if (!settings) {
-      return {
-        success: true,
-        data: {
+      // Get name from user metadata if available
+      const defaultName = userData?.user?.user_metadata?.name || 
+                         userData?.user?.user_metadata?.full_name || 
+                         "";
+
+      const { data: newSettings, error: insertError } = await client
+        .from("user_settings")
+        .insert({
           user_id: user.id,
-          name: "",
+          name: defaultName,
           middlename: "",
           surname: "",
           timezone: "UTC",
           language: "en",
+        })
+        .select()
+        .single();
+
+      if (insertError) {
+        return reply.status(500).send({ error: "Failed to create default settings" });
+      }
+
+      return {
+        success: true,
+        data: {
+          ...newSettings,
           email: userData?.user?.email,
           avatar_url: userData?.user?.user_metadata?.avatar_url || null,
           providers: userData?.user?.app_metadata?.providers || [],
