@@ -34,8 +34,7 @@ async function getUserSettings() {
         timezone: settings.timezone || "UTC",
       };
     }
-  } catch (error) {
-  }
+  } catch (error) {}
 
   return {
     userName: "User",

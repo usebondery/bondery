@@ -51,11 +51,7 @@ interface PeopleClientProps {
   stats: Stats;
 }
 
-export function PeopleClient({
-  initialContacts,
-  totalCount,
-  stats,
-}: PeopleClientProps) {
+export function PeopleClient({ initialContacts, totalCount, stats }: PeopleClientProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();

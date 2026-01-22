@@ -34,9 +34,8 @@ export async function settingsRoutes(fastify: FastifyInstance) {
     // Insert defaults if no settings exist
     if (!settings) {
       // Get name from user metadata if available
-      const defaultName = userData?.user?.user_metadata?.name || 
-                         userData?.user?.user_metadata?.full_name || 
-                         "";
+      const defaultName =
+        userData?.user?.user_metadata?.name || userData?.user?.user_metadata?.full_name || "";
 
       const { data: newSettings, error: insertError } = await client
         .from("user_settings")
