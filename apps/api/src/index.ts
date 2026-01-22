@@ -14,6 +14,7 @@ import { contactRoutes } from "./routes/contacts.js";
 import { accountRoutes } from "./routes/account.js";
 import { settingsRoutes } from "./routes/settings.js";
 import { redirectRoutes } from "./routes/redirect.js";
+import { feedbackRoutes } from "./routes/feedback.js";
 
 // Environment variable schema
 const envSchema = {
@@ -23,6 +24,11 @@ const envSchema = {
     "PUBLIC_SUPABASE_PUBLISHABLE_KEY",
     "PRIVATE_SUPABASE_SECRET_KEY",
     "NEXT_PUBLIC_API_URL",
+    "PRIVATE_EMAIL_HOST",
+    "PRIVATE_EMAIL_USER",
+    "PRIVATE_EMAIL_PASS",
+    "PRIVATE_EMAIL_ADDRESS",
+    "PRIVATE_EMAIL_PORT",
   ],
   properties: {
     LOG_LEVEL: {
@@ -55,6 +61,21 @@ const envSchema = {
       type: "string",
       default: "0.0.0.0",
     },
+    PRIVATE_EMAIL_HOST: {
+      type: "string",
+    },
+    PRIVATE_EMAIL_USER: {
+      type: "string",
+    },
+    PRIVATE_EMAIL_PASS: {
+      type: "string",
+    },
+    PRIVATE_EMAIL_ADDRESS: {
+      type: "string",
+    },
+    PRIVATE_EMAIL_PORT: {
+      type: "number",
+    },
   },
 } as const;
 
@@ -70,6 +91,11 @@ declare module "fastify" {
       NEXT_PUBLIC_API_URL: string;
       API_PORT: number;
       API_HOST: string;
+      PRIVATE_EMAIL_HOST: string;
+      PRIVATE_EMAIL_USER: string;
+      PRIVATE_EMAIL_PASS: string;
+      PRIVATE_EMAIL_ADDRESS: string;
+      PRIVATE_EMAIL_PORT: number;
     };
   }
 }
@@ -164,7 +190,7 @@ async function buildServer() {
   });
 
   // Health check endpoint
-  fastify.get("/health", async () => {
+  fastify.get("/status", async () => {
     return { status: "ok", timestamp: new Date().toISOString() };
   });
 
@@ -173,6 +199,7 @@ async function buildServer() {
   await fastify.register(accountRoutes, { prefix: "/api/account" });
   await fastify.register(settingsRoutes, { prefix: "/api/settings" });
   await fastify.register(redirectRoutes, { prefix: "/api/redirect" });
+  await fastify.register(feedbackRoutes, { prefix: "/api/feedback" });
 
   return fastify;
 }

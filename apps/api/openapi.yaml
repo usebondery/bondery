@@ -9,18 +9,18 @@ info:
     This API uses cookie-based authentication with Supabase. After authenticating through the webapp,
     your session cookie will be included in subsequent requests to authenticate API calls.
 
-    All endpoints (except `/health` and `/api/redirect` GET) require authentication.
+    All endpoints (except `/status` and `/api/redirect` GET) require authentication.
 
   version: 1.0.0
   contact:
     name: Bondery Support
-    url: https://bondery.com
+    url: https://usebondery.com
   license:
     name: Proprietary
 servers:
   - url: http://localhost:3001
     description: Local development server
-  - url: https://api.bondery.com
+  - url: https://api.usebondery.com
     description: Production server
 
 tags:
@@ -36,7 +36,7 @@ tags:
     description: Browser extension integration endpoints
 
 paths:
-  /health:
+  /status:
     get:
       summary: Health check
       description: Check if the API server is running and responsive
@@ -416,7 +416,7 @@ paths:
             Location:
               schema:
                 type: string
-                example: https://bondery.com
+                example: https://usebondery.com
         "401":
           $ref: "#/components/responses/UnauthorizedError"
         "500":
@@ -677,7 +677,7 @@ paths:
             Location:
               schema:
                 type: string
-                example: https://app.bondery.com/app/person?person_id=123e4567-e89b-12d3-a456-426614174000
+                example: https://app.usebondery.com/app/person?person_id=123e4567-e89b-12d3-a456-426614174000
         "400":
           description: Missing required parameters
           content:

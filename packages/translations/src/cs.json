@@ -1,4 +1,20 @@
 {
+  "FeedbackPage": {
+    "Title": "Zpětná vazba",
+    "Description": "Pomozte nám vylepšit Bondery sdílením vašich názorů",
+    "NpsLabel": "Jak pravděpodobně byste doporučili Bondery příteli nebo kolegovi?",
+    "NpsReasonLabel": "Proč jste zvolili skóre {score}?",
+    "NpsReasonPlaceholder": "Řekněte nám, proč jste zvolili toto skóre...",
+    "GeneralFeedbackLabel": "Máte nějakou zpětnou vazbu, tipy nebo chyby, které byste chtěli sdílet?",
+    "GeneralFeedbackPlaceholder": "Sdílejte své myšlenky, návrhy nebo nahlaste problémy...",
+    "SubmitButton": "Odeslat zpětnou vazbu týmu Bondery",
+    "SubmittingTitle": "Odesílání zpětné vazby...",
+    "SubmittingMessage": "Prosím čekejte, než odešleme vaši zpětnou vazbu",
+    "SuccessTitle": "Děkujeme!",
+    "SuccessMessage": "Vaše zpětná vazba byla přijata",
+    "ErrorTitle": "Chyba",
+    "ErrorMessage": "Nepodařilo se odeslat zpětnou vazbu. Zkuste to prosím znovu."
+  },
   "ContactPage": {
     "Title": "Kontaktujte nás",
     "Description": "Máte-li jakékoli dotazy, neváhejte nás kontaktovat.",

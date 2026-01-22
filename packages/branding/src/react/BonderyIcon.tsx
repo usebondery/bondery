@@ -4,159 +4,159 @@ const BonderyIcon = (props: SVGProps<SVGSVGElement>) => {
   const uniqueId = React.useId().replace(/:/g, "");
 
   return (
-  <svg
-    width={512}
-    height={512}
-    viewBox="0 0 512 512"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-    {...props}
-  >
-    <path
-      d="M0 40C0 17.9086 17.9086 0 40 0H352C440.366 0 512 71.6344 512 160V352C512 440.366 440.366 512 352 512H40C17.9086 512 0 494.091 0 472V40Z"
-      fill={`url(#paint0_linear_6_416-${uniqueId})`}
-    />
-    <path
-      d="M231 343.5C231 336.87 228.366 330.511 223.678 325.822C218.989 321.134 212.63 318.5 206 318.5C199.37 318.5 193.011 321.134 188.322 325.822C183.634 330.511 181 336.87 181 343.5C181 350.13 183.634 356.489 188.322 361.178C193.011 365.866 199.37 368.5 206 368.5C212.63 368.5 218.989 365.866 223.678 361.178C228.366 356.489 231 350.13 231 343.5Z"
-      fill="white"
-      stroke="white"
-      strokeWidth={25.5833}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-    <path
-      d="M331 168.5C331 161.87 328.366 155.511 323.678 150.822C318.989 146.134 312.63 143.5 306 143.5C299.37 143.5 293.011 146.134 288.322 150.822C283.634 155.511 281 161.87 281 168.5C281 175.13 283.634 181.489 288.322 186.178C293.011 190.866 299.37 193.5 306 193.5C312.63 193.5 318.989 190.866 323.678 186.178C328.366 181.489 331 175.13 331 168.5Z"
-      fill="white"
-      stroke="white"
-      strokeWidth={25.5833}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-    <path
-      d="M231 168.5C231 161.87 228.366 155.511 223.678 150.822C218.989 146.134 212.63 143.5 206 143.5C199.37 143.5 193.011 146.134 188.322 150.822C183.634 155.511 181 161.87 181 168.5C181 175.13 183.634 181.489 188.322 186.178C193.011 190.866 199.37 193.5 206 193.5C212.63 193.5 218.989 190.866 223.678 186.178C228.366 181.489 231 175.13 231 168.5Z"
-      fill="white"
-      stroke="white"
-      strokeWidth={25.5833}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-    <path
-      d="M181 256C181 249.37 178.366 243.011 173.678 238.322C168.989 233.634 162.63 231 156 231C149.37 231 143.011 233.634 138.322 238.322C133.634 243.011 131 249.37 131 256C131 262.63 133.634 268.989 138.322 273.678C143.011 278.366 149.37 281 156 281C162.63 281 168.989 278.366 173.678 273.678C178.366 268.989 181 262.63 181 256Z"
-      fill="white"
-      stroke="white"
-      strokeWidth={25.5833}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-    <path
-      d="M331 343.5C331 336.87 328.366 330.511 323.678 325.822C318.989 321.134 312.63 318.5 306 318.5C299.37 318.5 293.011 321.134 288.322 325.822C283.634 330.511 281 336.87 281 343.5C281 350.13 283.634 356.489 288.322 361.178C293.011 365.866 299.37 368.5 306 368.5C312.63 368.5 318.989 365.866 323.678 361.178C328.366 356.489 331 350.13 331 343.5Z"
-      fill="white"
-      stroke="white"
-      strokeWidth={25.5833}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-    <path
-      d="M381 256C381 249.37 378.366 243.011 373.678 238.322C368.989 233.634 362.63 231 356 231C349.37 231 343.011 233.634 338.322 238.322C333.634 243.011 331 249.37 331 256C331 262.63 333.634 268.989 338.322 273.678C343.011 278.366 349.37 281 356 281C362.63 281 368.989 278.366 373.678 273.678C378.366 268.989 381 262.63 381 256Z"
-      fill="white"
-      stroke="white"
-      strokeWidth={25.5833}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-    <path
-      d="M181 256H231"
-      stroke="white"
-      strokeWidth={25.5833}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-    <path
-      d="M156.357 256H355.643"
-      stroke="white"
-      strokeWidth={25.5833}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-    <path
-      d="M293.5 193.5L268.5 231"
-      stroke="white"
-      strokeWidth={25.5833}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-    <path
-      d="M306.357 168.143L205.643 343.857"
-      stroke="white"
-      strokeWidth={25.5833}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-    <path
-      d="M205.643 168.143L306.357 343.857"
-      stroke="white"
-      strokeWidth={25.5833}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-    <path
-      d="M231 168.5H281"
-      stroke="white"
-      strokeWidth={25.5833}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-    <path
-      d="M231 343.5H281"
-      stroke="white"
-      strokeWidth={25.5833}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-    <path
-      d="M318.5 318.5L343.5 281"
-      stroke="white"
-      strokeWidth={25.5833}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-    <path
-      d="M343.5 231L318.5 193.5"
-      stroke="white"
-      strokeWidth={25.5833}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-    <path
-      d="M193.5 193.5L168.5 231"
-      stroke="white"
-      strokeWidth={25.5833}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-    <path
-      d="M168.5 281L193.5 318.5"
-      stroke="white"
-      strokeWidth={25.5833}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-    <rect x={181} y={161.714} width={150} height={182.143} fill="white" />
-    <defs>
-      <linearGradient
-        id={`paint0_linear_6_416-${uniqueId}`}
-        x1={0}
-        y1={0}
-        x2={512}
-        y2={512}
-        gradientUnits="userSpaceOnUse"
-      >
-        <stop stopColor="#7C3AED" />
-        <stop offset={1} stopColor="#C026D3" />
-      </linearGradient>
-    </defs>
-  </svg>
-);
+    <svg
+      width={512}
+      height={512}
+      viewBox="0 0 512 512"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      {...props}
+    >
+      <path
+        d="M0 40C0 17.9086 17.9086 0 40 0H352C440.366 0 512 71.6344 512 160V352C512 440.366 440.366 512 352 512H40C17.9086 512 0 494.091 0 472V40Z"
+        fill={`url(#paint0_linear_6_416-${uniqueId})`}
+      />
+      <path
+        d="M231 343.5C231 336.87 228.366 330.511 223.678 325.822C218.989 321.134 212.63 318.5 206 318.5C199.37 318.5 193.011 321.134 188.322 325.822C183.634 330.511 181 336.87 181 343.5C181 350.13 183.634 356.489 188.322 361.178C193.011 365.866 199.37 368.5 206 368.5C212.63 368.5 218.989 365.866 223.678 361.178C228.366 356.489 231 350.13 231 343.5Z"
+        fill="white"
+        stroke="white"
+        strokeWidth={25.5833}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M331 168.5C331 161.87 328.366 155.511 323.678 150.822C318.989 146.134 312.63 143.5 306 143.5C299.37 143.5 293.011 146.134 288.322 150.822C283.634 155.511 281 161.87 281 168.5C281 175.13 283.634 181.489 288.322 186.178C293.011 190.866 299.37 193.5 306 193.5C312.63 193.5 318.989 190.866 323.678 186.178C328.366 181.489 331 175.13 331 168.5Z"
+        fill="white"
+        stroke="white"
+        strokeWidth={25.5833}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M231 168.5C231 161.87 228.366 155.511 223.678 150.822C218.989 146.134 212.63 143.5 206 143.5C199.37 143.5 193.011 146.134 188.322 150.822C183.634 155.511 181 161.87 181 168.5C181 175.13 183.634 181.489 188.322 186.178C193.011 190.866 199.37 193.5 206 193.5C212.63 193.5 218.989 190.866 223.678 186.178C228.366 181.489 231 175.13 231 168.5Z"
+        fill="white"
+        stroke="white"
+        strokeWidth={25.5833}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M181 256C181 249.37 178.366 243.011 173.678 238.322C168.989 233.634 162.63 231 156 231C149.37 231 143.011 233.634 138.322 238.322C133.634 243.011 131 249.37 131 256C131 262.63 133.634 268.989 138.322 273.678C143.011 278.366 149.37 281 156 281C162.63 281 168.989 278.366 173.678 273.678C178.366 268.989 181 262.63 181 256Z"
+        fill="white"
+        stroke="white"
+        strokeWidth={25.5833}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M331 343.5C331 336.87 328.366 330.511 323.678 325.822C318.989 321.134 312.63 318.5 306 318.5C299.37 318.5 293.011 321.134 288.322 325.822C283.634 330.511 281 336.87 281 343.5C281 350.13 283.634 356.489 288.322 361.178C293.011 365.866 299.37 368.5 306 368.5C312.63 368.5 318.989 365.866 323.678 361.178C328.366 356.489 331 350.13 331 343.5Z"
+        fill="white"
+        stroke="white"
+        strokeWidth={25.5833}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M381 256C381 249.37 378.366 243.011 373.678 238.322C368.989 233.634 362.63 231 356 231C349.37 231 343.011 233.634 338.322 238.322C333.634 243.011 331 249.37 331 256C331 262.63 333.634 268.989 338.322 273.678C343.011 278.366 349.37 281 356 281C362.63 281 368.989 278.366 373.678 273.678C378.366 268.989 381 262.63 381 256Z"
+        fill="white"
+        stroke="white"
+        strokeWidth={25.5833}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M181 256H231"
+        stroke="white"
+        strokeWidth={25.5833}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M156.357 256H355.643"
+        stroke="white"
+        strokeWidth={25.5833}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M293.5 193.5L268.5 231"
+        stroke="white"
+        strokeWidth={25.5833}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M306.357 168.143L205.643 343.857"
+        stroke="white"
+        strokeWidth={25.5833}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M205.643 168.143L306.357 343.857"
+        stroke="white"
+        strokeWidth={25.5833}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M231 168.5H281"
+        stroke="white"
+        strokeWidth={25.5833}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M231 343.5H281"
+        stroke="white"
+        strokeWidth={25.5833}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M318.5 318.5L343.5 281"
+        stroke="white"
+        strokeWidth={25.5833}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M343.5 231L318.5 193.5"
+        stroke="white"
+        strokeWidth={25.5833}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M193.5 193.5L168.5 231"
+        stroke="white"
+        strokeWidth={25.5833}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M168.5 281L193.5 318.5"
+        stroke="white"
+        strokeWidth={25.5833}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <rect x={181} y={161.714} width={150} height={182.143} fill="white" />
+      <defs>
+        <linearGradient
+          id={`paint0_linear_6_416-${uniqueId}`}
+          x1={0}
+          y1={0}
+          x2={512}
+          y2={512}
+          gradientUnits="userSpaceOnUse"
+        >
+          <stop stopColor="#7C3AED" />
+          <stop offset={1} stopColor="#C026D3" />
+        </linearGradient>
+      </defs>
+    </svg>
+  );
 };
 
-export { BonderyIcon };
+export default BonderyIcon;

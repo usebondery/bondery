@@ -11,7 +11,7 @@ const BonderyLogotypeBlack = (props: SVGProps<SVGSVGElement>) => (
   >
     <path
       d="M0 20C0 8.95431 8.9543 0 20 0H176C220.183 0 256 35.8172 256 80V176C256 220.183 220.183 256 176 256H20C8.95431 256 0 247.046 0 236V20Z"
-      fill={'url(#paint0_linear_12_150)'}
+      fill={"url(#paint0_linear_12_150)"}
     />
     <path
       d="M115.5 171.75C115.5 168.435 114.183 165.255 111.839 162.911C109.495 160.567 106.315 159.25 103 159.25C99.6848 159.25 96.5054 160.567 94.1612 162.911C91.817 165.255 90.5 168.435 90.5 171.75C90.5 175.065 91.817 178.245 94.1612 180.589C96.5054 182.933 99.6848 184.25 103 184.25C106.315 184.25 109.495 182.933 111.839 180.589C114.183 178.245 115.5 175.065 115.5 171.75Z"
@@ -145,7 +145,7 @@ const BonderyLogotypeBlack = (props: SVGProps<SVGSVGElement>) => (
     />
     <defs>
       <linearGradient
-        id={'paint0_linear_12_150'}
+        id={"paint0_linear_12_150"}
         x1={0}
         y1={0}
         x2={256}
@@ -158,4 +158,4 @@ const BonderyLogotypeBlack = (props: SVGProps<SVGSVGElement>) => (
     </defs>
   </svg>
 );
-export { BonderyLogotypeBlack };
+export default BonderyLogotypeBlack;

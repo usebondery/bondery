@@ -77,9 +77,6 @@
       "outputs": ["dist/**"],
       "env": []
     },
-    "api#dev": {
-      "dependsOn": ["supabase-db#dev"]
-    },
     "start": {
       "persistent": true,
       "cache": false
