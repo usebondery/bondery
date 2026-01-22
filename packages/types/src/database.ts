@@ -37,7 +37,7 @@ export type Database = {
   };
   public: {
     Tables: {
-      contacts: {
+      people: {
         Row: {
           avatar: string | null;
           avatar_color: string | null;

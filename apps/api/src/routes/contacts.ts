@@ -48,20 +48,18 @@ export async function contactRoutes(fastify: FastifyInstance) {
    */
   fastify.get("/", async (request: FastifyRequest, reply: FastifyReply) => {
     const auth = await requireAuth(request, reply);
-    console.log("Auth result:", auth);
     if (!auth) return;
 
     const { client } = auth;
 
     const { data: contacts, error } = await client
-      .from("contacts")
+      .from("people")
       .select(CONTACT_SELECT)
       .eq("myself", false);
 
     if (error) {
       return reply.status(500).send({ error: error.message });
     }
-    console.log("Fetched contacts:", contacts);
 
     return {
       contacts,
@@ -108,7 +106,7 @@ export async function contactRoutes(fastify: FastifyInstance) {
 
       // Insert contact
       const { data: newContact, error } = await client
-        .from("contacts")
+        .from("people")
         .insert(insertData)
         .select("id")
         .single();
@@ -139,7 +137,7 @@ export async function contactRoutes(fastify: FastifyInstance) {
         });
       }
 
-      const { error } = await client.from("contacts").delete().in("id", ids);
+      const { error } = await client.from("people").delete().in("id", ids);
 
       if (error) {
         return reply.status(500).send({ error: error.message });
@@ -162,7 +160,7 @@ export async function contactRoutes(fastify: FastifyInstance) {
       const { id } = request.params;
 
       const { data: contact, error } = await client
-        .from("contacts")
+        .from("people")
         .select(CONTACT_SELECT)
         .eq("id", id)
         .single();
@@ -224,7 +222,7 @@ export async function contactRoutes(fastify: FastifyInstance) {
 
       updates.updated_at = new Date().toISOString();
 
-      const { error } = await client.from("contacts").update(updates).eq("id", id);
+      const { error } = await client.from("people").update(updates).eq("id", id);
 
       if (error) {
         return reply.status(500).send({ error: error.message });
@@ -261,7 +259,7 @@ export async function contactRoutes(fastify: FastifyInstance) {
 
       // Verify contact belongs to user
       const { data: contact, error: contactError } = await client
-        .from("contacts")
+        .from("people")
         .select("id")
         .eq("id", contactId)
         .eq("user_id", user.id)
@@ -296,7 +294,7 @@ export async function contactRoutes(fastify: FastifyInstance) {
 
       // Update contact
       const { error: updateError } = await client
-        .from("contacts")
+        .from("people")
         .update({ avatar: avatarUrl })
         .eq("id", contactId);
 
@@ -322,7 +320,7 @@ export async function contactRoutes(fastify: FastifyInstance) {
 
       // Verify contact belongs to user
       const { data: contact, error: contactError } = await client
-        .from("contacts")
+        .from("people")
         .select("id, avatar")
         .eq("id", contactId)
         .eq("user_id", user.id)
@@ -337,7 +335,7 @@ export async function contactRoutes(fastify: FastifyInstance) {
       await client.storage.from("avatars").remove([fileName]);
 
       // Update contact
-      await client.from("contacts").update({ avatar: null }).eq("id", contactId);
+      await client.from("people").update({ avatar: null }).eq("id", contactId);
 
       return { success: true };
     },
