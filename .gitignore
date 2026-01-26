@@ -47,3 +47,6 @@ next-env.d.ts
 
 # turborepo
 .turbo
+
+# dist
+**/dist/**
