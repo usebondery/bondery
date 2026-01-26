@@ -70,7 +70,7 @@
       "env": []
     },
     "@bondery/helpers#build": {
-      "outputs": [],
+      "outputs": ["dist/**"],
       "env": []
     },
     "@bondery/types#build": {
