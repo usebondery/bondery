@@ -1,6 +1,10 @@
 import { transform } from "@svgr/core";
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from "fs";
 import { join, dirname } from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 const svgFiles = [
   {
@@ -66,10 +70,7 @@ async function generateReactIcons() {
           jsCode = jsCode.replace(/="url\(#([^)]+)\)"/g, "={'url(#paint0_linear_12_150)'}");
         } else {
           // Replace static IDs with dynamic ones using the injected uniqueId
-          jsCode = jsCode.replace(
-            /id="([^"]+)"/g,
-            (_match, id) => `id={\`${id}-\${uniqueId}\`}`,
-          );
+          jsCode = jsCode.replace(/id="([^"]+)"/g, (_match, id) => `id={\`${id}-\${uniqueId}\`}`);
           jsCode = jsCode.replace(
             /="url\(#([^)]+)\)"/g,
             (_match, id) => `={\`url(#${id}-\${uniqueId})\`}`,
@@ -82,7 +83,7 @@ async function generateReactIcons() {
           );
           jsCode = jsCode.replace(
             /\);\s*\nexport \{/, // close the newly opened block before exports
-            ');\n};\n\nexport {',
+            ");\n};\n\nexport {",
           );
         }
       }

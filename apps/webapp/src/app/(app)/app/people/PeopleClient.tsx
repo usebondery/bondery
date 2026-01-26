@@ -28,7 +28,7 @@ import ContactsTable, {
 } from "@/app/(app)/app/components/ContactsTable";
 import { ColumnVisibilityMenu } from "@/app/(app)/app/components/contacts/ColumnVisibilityMenu";
 import { SortMenu, SortOrder } from "@/app/(app)/app/components/contacts/SortMenu";
-import { API_ROUTES } from "@bondery/helpers";
+import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import { openAddContactModal } from "./components/AddContactModal";
 import { PageHeader } from "@/app/(app)/app/components/PageHeader";
 import { PageWrapper } from "@/app/(app)/app/components/PageWrapper";

@@ -9,7 +9,7 @@ import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { INTEGRATION_PROVIDERS, WEBSITE_URL } from "@/lib/config";
 import { Logo } from "./components/Logo";
-import { WEBSITE_ROUTES } from "@bondery/helpers";
+import { WEBSITE_ROUTES } from "@bondery/helpers/globals/paths";
 
 export default function LoginPage() {
   const t = useTranslations("LoginPage");

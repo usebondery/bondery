@@ -6,7 +6,7 @@ import { API_URL } from "@/lib/config";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { getAuthHeaders } from "@/lib/authHeaders";
 import { ErrorPageHeader } from "@/app/(app)/app/components/ErrorPageHeader";
-import { API_ROUTES } from "@bondery/helpers";
+import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import { PageWrapper } from "../components/PageWrapper";
 
 export default async function SettingsPage() {

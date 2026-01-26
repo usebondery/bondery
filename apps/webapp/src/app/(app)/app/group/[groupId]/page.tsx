@@ -3,7 +3,7 @@ import { API_URL } from "@/lib/config";
 import type { Contact, Group } from "@bondery/types";
 import { getAuthHeaders } from "@/lib/authHeaders";
 import { notFound } from "next/navigation";
-import { API_ROUTES } from "@bondery/helpers";
+import { API_ROUTES } from "@bondery/helpers/globals/paths";
 
 interface GroupContactsResponse {
   group: { id: string; label: string };

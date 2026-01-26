@@ -4,7 +4,7 @@ import { ContactAvatar } from "./ContactAvatar";
 import { openPhotoUploadModal } from "@/lib/photoUpload";
 import { PhotoUploadModal } from "@/app/(app)/app/settings/components/PhotoUploadModal";
 import { PhotoConfirmModal } from "@/app/(app)/app/settings/components/PhotoConfirmModal";
-import { API_ROUTES } from "@bondery/helpers";
+import { API_ROUTES } from "@bondery/helpers/globals/paths";
 
 interface ContactPhotoUploadButtonProps {
   avatarUrl: string | null;

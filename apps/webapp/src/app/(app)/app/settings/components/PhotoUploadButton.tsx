@@ -5,7 +5,7 @@ import { PhotoUploadModal } from "./PhotoUploadModal";
 import { PhotoConfirmModal } from "./PhotoConfirmModal";
 import { UserAvatar } from "@/app/(app)/app/components/UserAvatar";
 import { openPhotoUploadModal } from "@/lib/photoUpload";
-import { API_ROUTES } from "@bondery/helpers";
+import { API_ROUTES } from "@bondery/helpers/globals/paths";
 
 interface PhotoUploadButtonProps {
   avatarUrl: string | null;

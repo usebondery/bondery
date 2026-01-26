@@ -5,7 +5,7 @@ import { IconWorld } from "@tabler/icons-react";
 import { useState, useEffect, forwardRef } from "react";
 import { notifications } from "@mantine/notifications";
 import { useTranslations } from "next-intl";
-import { API_ROUTES } from "@bondery/helpers";
+import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import {
   getGroupedTimezones,
   getCurrentTimeInTimezone,

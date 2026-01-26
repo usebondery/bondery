@@ -25,9 +25,9 @@ import { useDeferredValue, useMemo, useState } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { useDebouncedCallback } from "@mantine/hooks";
 import { openAddContactsToGroupModal } from "./components/AddContactsToGroupModal";
-import { WEBAPP_ROUTES } from "@bondery/helpers";
+import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import { formatContactName } from "@/lib/nameHelpers";
-import { API_ROUTES } from "@bondery/helpers";
+import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import { notifications } from "@mantine/notifications";
 
 interface GroupDetailClientProps {

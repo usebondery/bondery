@@ -5,7 +5,7 @@ import { useForm } from "@mantine/form";
 import { notifications } from "@mantine/notifications";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
-import { API_ROUTES } from "@bondery/helpers";
+import { API_ROUTES } from "@bondery/helpers/globals/paths";
 
 interface FeedbackFormValues {
   npsScore: number;

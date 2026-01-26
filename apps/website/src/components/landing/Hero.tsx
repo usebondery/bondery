@@ -4,7 +4,7 @@ import { Box, Button, Container, Flex, Grid, Group, Stack, Text, Title } from "@
 import { IconTopologyStar } from "@tabler/icons-react";
 import Link from "next/link";
 import { AnimatedPeople } from "@/components/landing/AnimatedPeople";
-import { WEBSITE_ROUTES } from "@bondery/helpers";
+import { WEBSITE_ROUTES } from "@bondery/helpers/globals/paths";
 
 export function Hero() {
   return (

@@ -17,7 +17,7 @@ import { modals } from "@mantine/modals";
 import { notifications } from "@mantine/notifications";
 import { IconUsersGroup } from "@tabler/icons-react";
 import { EmojiPicker, getRandomEmoji } from "@/app/(app)/app/components/EmojiPicker";
-import { API_ROUTES } from "@bondery/helpers";
+import { API_ROUTES } from "@bondery/helpers/globals/paths";
 
 // Predefined color swatches
 const COLOR_SWATCHES = [

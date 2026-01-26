@@ -4,7 +4,7 @@ import { notifications } from "@mantine/notifications";
 import { useTranslations } from "next-intl";
 import { LanguagePicker as SharedLanguagePicker } from "@/components/shared/LanguagePicker";
 import { APP_LANGUAGES_DATA } from "@/lib/languages";
-import { API_ROUTES } from "@bondery/helpers";
+import { API_ROUTES } from "@bondery/helpers/globals/paths";
 
 interface LanguagePickerProps {
   initialValue: string;

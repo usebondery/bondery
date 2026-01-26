@@ -5,7 +5,7 @@ import { IconSettings, IconUsers, IconUsersGroup, IconMessageCircle } from "@tab
 import { usePathname } from "next/navigation";
 import { NavLinkItem } from "./NavLinkItem";
 import { UserAvatar } from "@/app/(app)/app/components/UserAvatar";
-import { WEBAPP_ROUTES } from "@bondery/helpers";
+import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import { BonderyLogotypeBlack, BonderyLogotypeWhite } from "@bondery/branding";
 
 interface NavigationSidebarContentProps {

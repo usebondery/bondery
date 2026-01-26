@@ -16,7 +16,7 @@ import {
 } from "@mantine/core";
 import { IconNetwork, IconCalendar, IconUsers, IconTopologyStar } from "@tabler/icons-react";
 import Link from "next/link";
-import { WEBSITE_ROUTES } from "@bondery/helpers";
+import { WEBSITE_ROUTES } from "@bondery/helpers/globals/paths";
 
 export function Pricing() {
   return (

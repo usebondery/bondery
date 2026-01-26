@@ -6,6 +6,7 @@
 import type { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
 import { requireAuth } from "../lib/supabase.js";
 import { generateVCard } from "../lib/vcard.js";
+import { GROUP_SELECT } from "./groups.js";
 import type {
   Contact,
   CreateContactInput,

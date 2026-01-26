@@ -2,7 +2,7 @@
  * Application configuration constants for website
  */
 
-import { WEBSITE_ROUTES } from "@bondery/helpers";
+import { WEBSITE_ROUTES } from "@bondery/helpers/globals/paths";
 
 /**
  * Web app URL

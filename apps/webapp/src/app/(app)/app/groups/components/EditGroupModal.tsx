@@ -17,7 +17,7 @@ import { modals } from "@mantine/modals";
 import { notifications } from "@mantine/notifications";
 import { IconUsersGroup, IconDeviceFloppy } from "@tabler/icons-react";
 import { EmojiPicker } from "@/app/(app)/app/components/EmojiPicker";
-import { API_ROUTES } from "@bondery/helpers";
+import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import type { GroupWithCount } from "@bondery/types";
 
 // Predefined color swatches

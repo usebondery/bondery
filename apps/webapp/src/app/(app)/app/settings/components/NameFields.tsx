@@ -5,7 +5,7 @@ import { IconUser } from "@tabler/icons-react";
 import { useState } from "react";
 import { notifications } from "@mantine/notifications";
 import { useTranslations } from "next-intl";
-import { API_ROUTES } from "@bondery/helpers";
+import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import { useRouter } from "next/navigation";
 import { INPUT_MAX_LENGTHS } from "@/lib/config";
 

@@ -4,7 +4,7 @@ import { Stack, Text } from "@mantine/core";
 import type { Contact } from "@bondery/types";
 import PersonClient from "./PersonClient";
 import { getAuthHeaders } from "@/lib/authHeaders";
-import { API_ROUTES } from "@bondery/helpers";
+import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import { PageWrapper } from "@/app/(app)/app/components/PageWrapper";
 import { ErrorPageHeader } from "@/app/(app)/app/components/ErrorPageHeader";
 import type { Group } from "@bondery/types";

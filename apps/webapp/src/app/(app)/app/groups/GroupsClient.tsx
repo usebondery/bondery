@@ -9,7 +9,7 @@ import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { PageHeader } from "@/app/(app)/app/components/PageHeader";
 import { PageWrapper } from "@/app/(app)/app/components/PageWrapper";
 import type { GroupWithCount } from "@bondery/types";
-import { API_ROUTES } from "@bondery/helpers";
+import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import { openAddGroupModal } from "./components/AddGroupModal";
 import { openEditGroupModal } from "./components/EditGroupModal";
 import { SortMenu, type SortOption } from "./components/SortMenu";

@@ -39,7 +39,7 @@ import Image from "next/image";
 import { formatContactName } from "@/lib/nameHelpers";
 import Link from "next/link";
 import type { Contact } from "@bondery/types";
-import { WEBAPP_ROUTES } from "@bondery/helpers";
+import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 
 // Column definitions with labels and icons
 const COLUMN_DEFINITIONS: Record<ColumnKey, { label: string; icon: React.ReactNode }> = {

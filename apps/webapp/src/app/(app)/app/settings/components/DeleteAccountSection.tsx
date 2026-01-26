@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { modals } from "@mantine/modals";
 import { notifications } from "@mantine/notifications";
 import { useTranslations } from "next-intl";
-import { API_ROUTES } from "@bondery/helpers";
+import { API_ROUTES } from "@bondery/helpers/globals/paths";
 
 export function DeleteAccountSection() {
   const router = useRouter();

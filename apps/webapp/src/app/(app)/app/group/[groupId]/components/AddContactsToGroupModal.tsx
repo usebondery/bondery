@@ -20,7 +20,7 @@ import { IconUserPlus, IconSearch } from "@tabler/icons-react";
 import { useDebouncedValue } from "@mantine/hooks";
 import type { Contact } from "@bondery/types";
 import { formatContactName } from "@/lib/nameHelpers";
-import { API_ROUTES } from "@bondery/helpers";
+import { API_ROUTES } from "@bondery/helpers/globals/paths";
 
 interface AddContactsToGroupModalProps {
   groupId: string;

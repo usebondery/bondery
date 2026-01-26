@@ -1,6 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
-import { WEBAPP_ROUTES } from "@bondery/helpers";
+import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({

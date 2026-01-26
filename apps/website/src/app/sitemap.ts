@@ -1,5 +1,5 @@
 import { WEBSITE_URL } from "@/lib/config";
-import { WEBSITE_ROUTES } from "@bondery/helpers";
+import { WEBSITE_ROUTES } from "@bondery/helpers/globals/paths";
 import { MetadataRoute } from "next";
 
 export default function sitemap(): MetadataRoute.Sitemap {

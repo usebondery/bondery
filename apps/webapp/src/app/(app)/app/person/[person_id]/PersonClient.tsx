@@ -26,7 +26,7 @@ import { LIMITS } from "@/lib/config";
 import { parsePhoneNumber, combinePhoneNumber } from "@/lib/phoneHelpers";
 import { formatContactName } from "@/lib/nameHelpers";
 import type { Contact, Group as GroupType, PhoneEntry, EmailEntry } from "@bondery/types";
-import type { ComboboxItem, MultiSelectValueProps } from "@mantine/core";
+import type { ComboboxItem, MultiSelectProps } from "@mantine/core";
 import { ContactActionMenu } from "./components/ContactActionMenu";
 import { ContactIdentitySection } from "./components/ContactIdentitySection";
 import { ContactBioSection } from "./components/ContactBioSection";
@@ -37,8 +37,8 @@ import { SocialMediaSection } from "./components/SocialMediaSection";
 import { ContactImportantDatesSection } from "./components/ContactImportantDatesSection";
 import { LastInteractionSection } from "./components/LastInteractionSection";
 // import { ContactPGPSection } from "./components/ContactPGPSection";
-import { API_ROUTES } from "@bondery/helpers";
-import { WEBAPP_ROUTES } from "@bondery/helpers";
+import { API_ROUTES } from "@bondery/helpers/globals/paths";
+import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import { PageWrapper } from "@/app/(app)/app/components/PageWrapper";
 import { PageHeader } from "@/app/(app)/app/components/PageHeader";
 
@@ -542,7 +542,7 @@ export default function PersonClient({
 
   type GroupSelectItem = ComboboxItem & { color?: string | null; emoji?: string | null };
 
-  const GroupValue = ({ value, onRemove }: MultiSelectValueProps) => {
+  const GroupValue = ({ value, onRemove }: { value: string; onRemove?: () => void }) => {
     const group = allGroups.find((g) => g.id === value);
     if (!group) return null;
 

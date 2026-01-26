@@ -16,7 +16,7 @@ import type {
 } from "@bondery/types";
 
 // Group fields selection query for Supabase
-const GROUP_SELECT = `
+export const GROUP_SELECT = `
   id,
   userId:user_id,
   label,

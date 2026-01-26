@@ -6,7 +6,7 @@ import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import * as translations from "@bondery/translations";
 import "leaflet/dist/leaflet.css";
-import { API_ROUTES, WEBSITE_ROUTES } from "@bondery/helpers";
+import { API_ROUTES, WEBSITE_ROUTES } from "@bondery/helpers/globals/paths";
 import { API_URL } from "@/lib/config";
 
 /**

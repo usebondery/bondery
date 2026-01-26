@@ -1,7 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { WEBAPP_ROUTES, WEBSITE_ROUTES } from "@bondery/helpers";
+import { WEBAPP_ROUTES, WEBSITE_ROUTES } from "@bondery/helpers/globals/paths";
 
 export async function GET(request: Request) {
   const requestUrl = new URL(request.url);

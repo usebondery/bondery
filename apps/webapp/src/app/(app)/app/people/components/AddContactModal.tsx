@@ -10,7 +10,7 @@ import { IconInfoCircle, IconUserPlus } from "@tabler/icons-react";
 import { SocialMediaInput, validateSocialMediaInput } from "./SocialMediaInput";
 import { INPUT_MAX_LENGTHS } from "@/lib/config";
 import { getRandomExampleName } from "@/lib/randomNameHelpers";
-import { API_ROUTES, WEBAPP_ROUTES } from "@bondery/helpers";
+import { API_ROUTES, WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 
 export function openAddContactModal() {
   modals.open({

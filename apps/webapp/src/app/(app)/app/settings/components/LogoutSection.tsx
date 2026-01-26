@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { notifications } from "@mantine/notifications";
 import { useTranslations } from "next-intl";
 import { createBrowswerSupabaseClient } from "@/lib/supabase/client";
-import { WEBSITE_ROUTES } from "@bondery/helpers";
+import { WEBSITE_ROUTES } from "@bondery/helpers/globals/paths";
 
 export function LogoutSection() {
   const router = useRouter();

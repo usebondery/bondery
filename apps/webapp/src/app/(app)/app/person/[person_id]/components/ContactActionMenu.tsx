@@ -2,7 +2,7 @@ import { Button, Menu, MenuItem } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { IconCheck, IconDotsVertical, IconId, IconTrash, IconX } from "@tabler/icons-react";
 import type { Contact } from "@bondery/types";
-import { API_ROUTES } from "@bondery/helpers";
+import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import { useState } from "react";
 
 interface ContactActionMenuProps {

@@ -2,7 +2,7 @@ import { GroupsClient } from "./GroupsClient";
 import { API_URL } from "@/lib/config";
 import type { GroupWithCount } from "@bondery/types";
 import { getAuthHeaders } from "@/lib/authHeaders";
-import { API_ROUTES } from "@bondery/helpers";
+import { API_ROUTES } from "@bondery/helpers/globals/paths";
 
 async function getGroups() {
   try {
