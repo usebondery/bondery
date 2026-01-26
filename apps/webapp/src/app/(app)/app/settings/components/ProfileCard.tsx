@@ -3,8 +3,8 @@ import { IconMail, IconUserCircle } from "@tabler/icons-react";
 import { useTranslations } from "next-intl";
 import { PhotoUploadButton } from "./PhotoUploadButton";
 import { NameFields } from "./NameFields";
-import { LanguagePicker } from "./LanguagePicker";
-import { TimezonePicker } from "./TimezonePicker";
+import { LanguagePicker } from "@/components/shared/LanguagePicker";
+import { TimezonePicker } from "@/components/shared/TimezonePicker";
 import { ProviderIntegrations } from "./ProviderIntegrations";
 
 interface ProfileCardProps {
@@ -73,18 +73,9 @@ export function ProfileCard({
           disabled
           readOnly
         />
-      </CardSection>
-
-      <Divider />
-
-      <CardSection inheritPadding py="md">
-        <LanguagePicker initialValue={initialLanguage} />
-      </CardSection>
-
-      <Divider />
-
-      <CardSection inheritPadding py="md">
-        <TimezonePicker initialValue={initialTimezone} />
+        {/* TODO: language and timezone support */}
+        {/* <LanguagePicker initialValue={initialLanguage} /> */}
+        {/* <TimezonePicker initialValue={initialTimezone} /> */}
       </CardSection>
 
       <Divider />

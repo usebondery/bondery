@@ -4,6 +4,7 @@ import { ContactAvatar } from "./ContactAvatar";
 import { openPhotoUploadModal } from "@/lib/photoUpload";
 import { PhotoUploadModal } from "@/app/(app)/app/settings/components/PhotoUploadModal";
 import { PhotoConfirmModal } from "@/app/(app)/app/settings/components/PhotoConfirmModal";
+import { API_ROUTES } from "@bondery/helpers";
 
 interface ContactPhotoUploadButtonProps {
   avatarUrl: string | null;
@@ -23,7 +24,7 @@ export function ContactPhotoUploadButton({
   const openUploadModal = () => {
     openPhotoUploadModal(
       {
-        uploadEndpoint: `/api/contacts/${contactId}/photo`,
+        uploadEndpoint: `${API_ROUTES.CONTACTS}/${contactId}/photo`,
         avatarUrl,
         displayName: contactName,
         // Reload page after successful upload

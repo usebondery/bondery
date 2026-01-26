@@ -33,27 +33,6 @@ export const AVATAR_UPLOAD = {
   maxFileSizeMB: 5,
 } as const;
 
-/**
- * Get the base URL based on the current environment
- */
-export function getBaseUrl(): string {
-  return process.env.NEXT_PUBLIC_APP_URL || "https://app.usebondery.com";
-}
-
-/**
- * Get the API URL
- */
-export function getApiUrl(): string {
-  return process.env.NEXT_PUBLIC_API_URL || "https://api.usebondery.com";
-}
-
-/**
- * Get the website URL
- */
-export function getWebsiteUrl(): string {
-  return process.env.NEXT_PUBLIC_WEBSITE_URL || "https://usebondery.com";
-}
-
 // Doherty threshold, used for max function reply time
 export const MAX_DOHERTY_THRESHOLD = 0.7;
 
@@ -93,13 +72,4 @@ export const SOCIAL_LINKS = {
   github: "https://github.com/sveetya/bondery",
   linkedin: "https://www.linkedin.com/company/bondery",
   email: "team@usebondery.com",
-} as const;
-
-/**
- * Routes used across the app
- */
-export const ROUTES = {
-  LOGIN: "/login",
-  DEFAULT_PAGE_AFTER_LOGIN: "/app/people",
-  APP_GROUP: "/app",
 } as const;

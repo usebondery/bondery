@@ -1,22 +1,22 @@
 import { AppShell, AppShellMain, AppShellNavbar } from "@mantine/core";
 import { NavigationSidebarContent } from "./components/NavigationSidebar";
-import { LocaleProvider } from "@/components/UserLocaleProvider";
-import { getApiUrl } from "@/lib/config";
+import { LocaleProvider } from "@/app/(app)/app/components/UserLocaleProvider";
 import { getAuthHeaders } from "@/lib/authHeaders";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
-import { ROUTES } from "@/lib/config";
 import * as translations from "@bondery/translations";
+import "leaflet/dist/leaflet.css";
+import { API_ROUTES, WEBSITE_ROUTES } from "@bondery/helpers";
+import { API_URL } from "@/lib/config";
 
 /**
  * Fetches user settings and data from the internal API.
  */
 async function getUserSettings() {
   try {
-    const baseUrl = getApiUrl();
     const headers = await getAuthHeaders();
 
-    const response = await fetch(`${baseUrl}/api/settings`, {
+    const response = await fetch(`${API_URL}${API_ROUTES.SETTINGS}`, {
       cache: "no-store",
       headers,
     });
@@ -53,7 +53,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   } = await supabase.auth.getUser();
 
   if (!user) {
-    redirect(ROUTES.LOGIN);
+    redirect(WEBSITE_ROUTES.LOGIN);
   }
 
   const { userName, avatarUrl, locale, timezone } = await getUserSettings();

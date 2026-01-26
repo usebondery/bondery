@@ -3,8 +3,9 @@
 import { useTranslations } from "next-intl";
 import { PhotoUploadModal } from "./PhotoUploadModal";
 import { PhotoConfirmModal } from "./PhotoConfirmModal";
-import { UserAvatar } from "@/components/UserAvatar";
+import { UserAvatar } from "@/app/(app)/app/components/UserAvatar";
 import { openPhotoUploadModal } from "@/lib/photoUpload";
+import { API_ROUTES } from "@bondery/helpers";
 
 interface PhotoUploadButtonProps {
   avatarUrl: string | null;
@@ -17,7 +18,7 @@ export function PhotoUploadButton({ avatarUrl, userName }: PhotoUploadButtonProp
   const openUploadModal = () => {
     openPhotoUploadModal(
       {
-        uploadEndpoint: "/api/account/photo",
+        uploadEndpoint: API_ROUTES.ACCOUNT_PHOTO,
         avatarUrl,
         displayName: userName,
       },
@@ -46,6 +47,7 @@ export function PhotoUploadButton({ avatarUrl, userName }: PhotoUploadButtonProp
       avatarUrl={avatarUrl}
       userName={userName}
       size="lg"
+      radius={"xl"}
       style={{ cursor: "pointer" }}
       onClick={openUploadModal}
     />

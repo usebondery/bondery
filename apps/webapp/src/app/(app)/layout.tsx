@@ -1,4 +1,4 @@
-import { LocaleProvider } from "@/components/UserLocaleProvider";
+import { LocaleProvider } from "@/app/(app)/app/components/UserLocaleProvider";
 import { getLocaleFromHeaders } from "@/lib/i18n/getLocaleFromHeaders";
 import * as translations from "@bondery/translations";
 

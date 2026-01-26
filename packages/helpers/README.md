@@ -10,7 +10,7 @@ Shared helper functions and utilities for the Bondery monorepo.
 ## Usage
 
 ```typescript
-import { checkEnvVariables } from '@bondery/helpers';
+import { checkEnvVariables } from '@bondery/helpers/check-env';
 
 checkEnvVariables({
   environment: 'production',

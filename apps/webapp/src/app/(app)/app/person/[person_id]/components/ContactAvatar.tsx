@@ -26,14 +26,6 @@ export function ContactAvatar({
   onClick,
   style,
 }: ContactAvatarProps) {
-  const getInitials = (name: string) => {
-    const parts = name.trim().split(" ");
-    if (parts.length >= 2) {
-      return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase();
-    }
-    return name.substring(0, 2).toUpperCase();
-  };
-
   if (avatarUrl) {
     return (
       <Avatar size={size} radius="xl" style={{ overflow: "hidden", ...style }} onClick={onClick}>
@@ -50,8 +42,13 @@ export function ContactAvatar({
   }
 
   return (
-    <Avatar size={size} radius="xl" color="initials" onClick={onClick} style={style}>
-      {getInitials(contactName)}
-    </Avatar>
+    <Avatar
+      size={size}
+      radius="xl"
+      color="initials"
+      onClick={onClick}
+      style={style}
+      name={contactName}
+    />
   );
 }

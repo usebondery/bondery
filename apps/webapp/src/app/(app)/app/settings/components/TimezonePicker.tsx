@@ -5,6 +5,7 @@ import { IconWorld } from "@tabler/icons-react";
 import { useState, useEffect, forwardRef } from "react";
 import { notifications } from "@mantine/notifications";
 import { useTranslations } from "next-intl";
+import { API_ROUTES } from "@bondery/helpers";
 import {
   getGroupedTimezones,
   getCurrentTimeInTimezone,
@@ -118,7 +119,7 @@ export function TimezonePicker({ initialValue }: TimezonePickerProps) {
     });
 
     try {
-      const response = await fetch("/api/settings", {
+      const response = await fetch(API_ROUTES.SETTINGS, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",

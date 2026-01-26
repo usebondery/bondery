@@ -1,6 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
-import { ROUTES } from "@/lib/config";
+import { WEBAPP_ROUTES } from "@bondery/helpers";
 
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
@@ -41,23 +41,23 @@ export async function updateSession(request: NextRequest) {
   const user = data?.claims;
 
   // 1. If user is logged in and visiting login page, redirect to app
-  if (user && request.nextUrl.pathname.startsWith(ROUTES.LOGIN)) {
+  if (user && request.nextUrl.pathname.startsWith(WEBAPP_ROUTES.LOGIN)) {
     const url = request.nextUrl.clone();
-    url.pathname = ROUTES.DEFAULT_PAGE_AFTER_LOGIN;
+    url.pathname = WEBAPP_ROUTES.DEFAULT_PAGE_AFTER_LOGIN;
     return NextResponse.redirect(url);
   }
 
   // 2. If no user and trying to access protected routes (/app/*), redirect to login
-  if (!user && request.nextUrl.pathname.startsWith(ROUTES.APP_GROUP)) {
+  if (!user && request.nextUrl.pathname.startsWith(WEBAPP_ROUTES.APP_GROUP)) {
     const url = request.nextUrl.clone();
-    url.pathname = ROUTES.LOGIN;
+    url.pathname = WEBAPP_ROUTES.LOGIN;
     return NextResponse.redirect(url);
   }
 
-  // 3. Redirect /app to /app/people
-  if (user && request.nextUrl.pathname === ROUTES.APP_GROUP) {
+  // 3. Redirect /app to /app/relationships
+  if (user && request.nextUrl.pathname === WEBAPP_ROUTES.APP_GROUP) {
     const url = request.nextUrl.clone();
-    url.pathname = ROUTES.DEFAULT_PAGE_AFTER_LOGIN;
+    url.pathname = WEBAPP_ROUTES.DEFAULT_PAGE_AFTER_LOGIN;
     return NextResponse.redirect(url);
   }
 

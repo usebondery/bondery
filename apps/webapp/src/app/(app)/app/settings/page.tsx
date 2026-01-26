@@ -1,19 +1,18 @@
 import { Container, Title, Stack, Group } from "@mantine/core";
-import { IconSettings } from "@tabler/icons-react";
 import { getTranslations } from "next-intl/server";
 import { ProfileCard } from "./components/ProfileCard";
 import { DataManagementCard } from "./components/DataManagementCard";
-import { getApiUrl } from "@/lib/config";
+import { API_URL } from "@/lib/config";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { getAuthHeaders } from "@/lib/authHeaders";
-import { PageHeader } from "@/components/PageHeader";
+import { ErrorPageHeader } from "@/app/(app)/app/components/ErrorPageHeader";
+import { API_ROUTES } from "@bondery/helpers";
+import { PageWrapper } from "../components/PageWrapper";
 
 export default async function SettingsPage() {
-  const baseUrl = getApiUrl();
-
   const headers = await getAuthHeaders();
 
-  const response = await fetch(`${baseUrl}/api/settings`, {
+  const response = await fetch(`${API_URL}${API_ROUTES.SETTINGS}`, {
     cache: "no-store",
     headers,
   });
@@ -42,10 +41,9 @@ export default async function SettingsPage() {
   const t = await getTranslations("SettingsPage");
 
   return (
-    <Container size="md">
+    <PageWrapper>
+      <ErrorPageHeader iconType="settings" title={t("Title")} />
       <Stack gap="xl">
-        <PageHeader icon={IconSettings} title={t("Title")} />
-
         <ProfileCard
           initialName={name}
           initialMiddlename={middlename}
@@ -60,6 +58,6 @@ export default async function SettingsPage() {
 
         <DataManagementCard />
       </Stack>
-    </Container>
+    </PageWrapper>
   );
 }

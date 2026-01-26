@@ -1,7 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { ROUTES } from "@/lib/config";
+import { WEBAPP_ROUTES, WEBSITE_ROUTES } from "@bondery/helpers";
 
 export async function GET(request: Request) {
   const requestUrl = new URL(request.url);
@@ -34,11 +34,11 @@ export async function GET(request: Request) {
     const { error } = await supabase.auth.exchangeCodeForSession(code);
 
     if (!error) {
-      return NextResponse.redirect(`${process.env.NEXT_PUBLIC_WEBSITE_URL}/app`);
+      return NextResponse.redirect(`${process.env.NEXT_PUBLIC_WEBAPP_URL}/app`);
     } else {
       console.error("Error exchanging code for session:", error.message);
     }
   }
 
-  return NextResponse.redirect(`${process.env.NEXT_PUBLIC_WEBSITE_URL}${ROUTES.LOGIN}`);
+  return NextResponse.redirect(`${process.env.NEXT_PUBLIC_WEBAPP_URL}${WEBAPP_ROUTES.LOGIN}`);
 }

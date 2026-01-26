@@ -9,6 +9,7 @@ import { validateImageUpload, URLS } from "../lib/config.js";
 import type { RedirectRequest } from "@bondery/types";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@bondery/types/database";
+import { API_ROUTES, WEBAPP_ROUTES } from "@bondery/helpers";
 
 export async function redirectRoutes(fastify: FastifyInstance) {
   /**
@@ -141,7 +142,7 @@ export async function redirectRoutes(fastify: FastifyInstance) {
     if (!user) {
       // Redirect to login with return URL
       const searchParams = new URLSearchParams(query);
-      const returnUrl = `/api/redirect?${searchParams.toString()}`;
+      const returnUrl = `${API_ROUTES.REDIRECT}?${searchParams.toString()}`;
       return reply.redirect(
         `${URLS.webapp}${URLS.login}?returnUrl=${encodeURIComponent(returnUrl)}`,
       );
@@ -176,7 +177,7 @@ export async function redirectRoutes(fastify: FastifyInstance) {
         await client.from("people").update({ place }).eq("id", existingContact.id);
       }
 
-      return reply.redirect(`${URLS.webapp}/app/person?person_id=${existingContact.id}`);
+      return reply.redirect(`${URLS.webapp}${WEBAPP_ROUTES.PERSON}/${existingContact.id}`);
     }
 
     // Create new contact
@@ -209,7 +210,7 @@ export async function redirectRoutes(fastify: FastifyInstance) {
       await updateContactPhoto(client, newContact.id, user.id, profileImageUrl);
     }
 
-    return reply.redirect(`${URLS.webapp}/app/person?person_id=${newContact.id}`);
+    return reply.redirect(`${URLS.webapp}${WEBAPP_ROUTES.PERSON}/${newContact.id}`);
   });
 }
 

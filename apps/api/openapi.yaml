@@ -677,7 +677,7 @@ paths:
             Location:
               schema:
                 type: string
-                example: https://app.usebondery.com/app/person?person_id=123e4567-e89b-12d3-a456-426614174000
+                example: https://app.usebondery.com/app/person/123e4567-e89b-12d3-a456-426614174000
         "400":
           description: Missing required parameters
           content:

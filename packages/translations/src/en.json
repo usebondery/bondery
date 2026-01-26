@@ -2,18 +2,48 @@
   "FeedbackPage": {
     "Title": "Feedback",
     "Description": "Help us improve Bondery by sharing your thoughts",
-    "NpsLabel": "How likely are you to recommend Bondery to a friend or colleague?",
+    "NpsLabel": "From 0 to 10, how likely are you to recommend Bondery to a friend or colleague?",
     "NpsReasonLabel": "Why did you pick the score of {score}?",
-    "NpsReasonPlaceholder": "Tell us why you chose this score...",
+    "NpsReasonPlaceholder": "Because I found this feature useful/buggy/missing...",
     "GeneralFeedbackLabel": "Any feedback, tips, or bugs you would like to share?",
-    "GeneralFeedbackPlaceholder": "Share your thoughts, suggestions, or report any issues...",
-    "SubmitButton": "Send feedback to the Bondery team",
+    "GeneralFeedbackPlaceholder": "I love/hate this part of the app.. I would like to see this added.. I have struggled with..",
+    "SubmitButton": "Send feedback to the developers",
     "SubmittingTitle": "Submitting feedback...",
     "SubmittingMessage": "Please wait while we send your feedback",
     "SuccessTitle": "Thank you!",
     "SuccessMessage": "Your feedback has been received",
     "ErrorTitle": "Error",
     "ErrorMessage": "Failed to submit feedback. Please try again."
+  },
+  "ContactInfo": {
+    "Title": "Contact Information",
+    "PhoneNumbers": "Phone Numbers",
+    "EmailAddresses": "Email Addresses",
+    "AddPhone": "Add phone number",
+    "AddEmail": "Add email address",
+    "MaxPhonesReached": "Maximum of {max} phone numbers allowed",
+    "MaxEmailsReached": "Maximum of {max} email addresses allowed",
+    "NoPhones": "No phone numbers added",
+    "NoEmails": "No email addresses added",
+    "PhonePlaceholder": "Phone number",
+    "EmailPlaceholder": "Email address",
+    "TypeHome": "Home",
+    "TypeWork": "Work",
+    "Preferred": "Preferred",
+    "SetAsPreferred": "Set as preferred",
+    "PhonesUpdated": "Phone numbers updated successfully",
+    "PhonesUpdateError": "Failed to update phone numbers",
+    "EmailsUpdated": "Email addresses updated successfully",
+    "EmailsUpdateError": "Failed to update email addresses"
+  },
+  "SocialMedia": {
+    "Title": "Social Media",
+    "LinkedInPlaceholder": "LinkedIn username or URL",
+    "InstagramPlaceholder": "Instagram username or URL",
+    "FacebookPlaceholder": "Facebook username or URL",
+    "WhatsAppPlaceholder": "WhatsApp number or URL",
+    "SignalPlaceholder": "Signal number",
+    "WebsitePlaceholder": "Website URL"
   },
   "ContactPage": {
     "Title": "Contact us",
@@ -127,5 +157,30 @@
       "PleaseWait": "Please wait...",
       "UpdateError": "Error"
     }
+  },
+  "GroupsPage": {
+    "Title": "Groups",
+    "Subtitle": "Organize your contacts into labeled groups.",
+    "Table": {
+      "Emoji": "Emoji",
+      "Label": "Label",
+      "Color": "Color",
+      "Contacts": "Contacts"
+    },
+    "Empty": "No groups yet. Create one to start organizing your contacts."
+  },
+  "GroupDetailPage": {
+    "Title": "Group: {label}",
+    "Subtitle": "Contacts assigned to this group.",
+    "ColorLabel": "Color",
+    "ContactCount": "Contacts",
+    "Table": {
+      "Avatar": "Avatar",
+      "Name": "Name",
+      "Title": "Title",
+      "Place": "Place",
+      "LastInteraction": "Last interaction"
+    },
+    "Empty": "No contacts are linked to this group yet."
   }
 }

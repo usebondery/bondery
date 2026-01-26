@@ -65,7 +65,7 @@ export async function feedbackRoutes(fastify: FastifyInstance) {
           to: `Robot from Bondery <${fastify.config.PRIVATE_EMAIL_ADDRESS}>`,
           cc: userEmail,
           replyTo: userEmail,
-          subject: `New feedback`,
+          subject: `New feedback about Bondery`,
           html: emailHtml,
         });
       } catch (emailError) {

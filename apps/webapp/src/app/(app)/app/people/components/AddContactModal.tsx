@@ -10,6 +10,7 @@ import { IconInfoCircle, IconUserPlus } from "@tabler/icons-react";
 import { SocialMediaInput, validateSocialMediaInput } from "./SocialMediaInput";
 import { INPUT_MAX_LENGTHS } from "@/lib/config";
 import { getRandomExampleName } from "@/lib/randomNameHelpers";
+import { API_ROUTES, WEBAPP_ROUTES } from "@bondery/helpers";
 
 export function openAddContactModal() {
   modals.open({
@@ -17,7 +18,7 @@ export function openAddContactModal() {
       <Group gap="xs">
         <IconUserPlus size={24} />
         <Text fw={600} size="lg">
-          Add a new contact
+          Add new person
         </Text>
       </Group>
     ),
@@ -80,7 +81,7 @@ function AddContactForm() {
     });
 
     try {
-      const res = await fetch("/api/contacts", {
+      const res = await fetch(API_ROUTES.CONTACTS, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -113,7 +114,7 @@ function AddContactForm() {
       modals.closeAll();
 
       // Redirect to person page
-      router.push(`/app/person?person_id=${newContactId}`);
+      router.push(`${WEBAPP_ROUTES.PERSON}/${newContactId}`);
     } catch (error) {
       // Hide loading notification
       notifications.hide(loadingNotification);

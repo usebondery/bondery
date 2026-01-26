@@ -1,7 +1,7 @@
 "use client";
 
 import { Button, Group, Stack } from "@mantine/core";
-import { UserAvatar } from "@/components/UserAvatar";
+import { UserAvatar } from "@/app/(app)/app/components/UserAvatar";
 
 interface PhotoConfirmModalProps {
   preview: string;

@@ -1,4 +1,4 @@
-import { checkEnvVariables } from "@bondery/helpers";
+import { checkEnvVariables } from "@bondery/helpers/check-env";
 import { resolve } from "path";
 
 const environment = (process.env.NODE_ENV || "development") as "production" | "development";

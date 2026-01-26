@@ -9,12 +9,14 @@ import cookie from "@fastify/cookie";
 import multipart from "@fastify/multipart";
 import fastifyEnv from "@fastify/env";
 import { createRequire } from "module";
+import { API_ROUTES } from "@bondery/helpers";
 
 import { contactRoutes } from "./routes/contacts.js";
 import { accountRoutes } from "./routes/account.js";
 import { settingsRoutes } from "./routes/settings.js";
 import { redirectRoutes } from "./routes/redirect.js";
 import { feedbackRoutes } from "./routes/feedback.js";
+import { groupRoutes } from "./routes/groups.js";
 
 // Environment variable schema
 const envSchema = {
@@ -195,11 +197,12 @@ async function buildServer() {
   });
 
   // Register route modules
-  await fastify.register(contactRoutes, { prefix: "/api/contacts" });
-  await fastify.register(accountRoutes, { prefix: "/api/account" });
-  await fastify.register(settingsRoutes, { prefix: "/api/settings" });
-  await fastify.register(redirectRoutes, { prefix: "/api/redirect" });
-  await fastify.register(feedbackRoutes, { prefix: "/api/feedback" });
+  await fastify.register(contactRoutes, { prefix: API_ROUTES.CONTACTS });
+  await fastify.register(groupRoutes, { prefix: API_ROUTES.GROUPS });
+  await fastify.register(accountRoutes, { prefix: API_ROUTES.ACCOUNT });
+  await fastify.register(settingsRoutes, { prefix: API_ROUTES.SETTINGS });
+  await fastify.register(redirectRoutes, { prefix: API_ROUTES.REDIRECT });
+  await fastify.register(feedbackRoutes, { prefix: API_ROUTES.FEEDBACK });
 
   return fastify;
 }

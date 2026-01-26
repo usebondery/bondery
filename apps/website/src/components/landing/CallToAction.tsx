@@ -3,7 +3,7 @@
 import { Button, Card, Container, Stack, Title } from "@mantine/core";
 import { IconArrowUpRight } from "@tabler/icons-react";
 import Link from "next/link";
-import { ROUTES } from "@/lib/config";
+import { WEBSITE_ROUTES } from "@bondery/helpers";
 
 export function CallToAction() {
   return (
@@ -41,7 +41,7 @@ export function CallToAction() {
           </Title>
           <Button
             component={Link}
-            href={ROUTES.LOGIN}
+            href={WEBSITE_ROUTES.LOGIN}
             size="lg"
             rightSection={<IconArrowUpRight />}
             variant="white"

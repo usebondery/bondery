@@ -35,9 +35,7 @@ export default function FeedbackEmail({
     <EmailWrapper preview={previewText}>
       <Body className="bg-gray-50 ">
         <Container className="mx-auto mt-4 rounded-lg bg-white p-6 shadow-sm">
-          <Heading className="mb-8 text-md font-bold text-gray-900">
-            New Bondery Feedback Received
-          </Heading>
+          <Heading className="mb-8 text-md font-bold text-gray-900">New Feedback Received</Heading>
 
           <Section className="mb-4 rounded-lg bg-gray-50 p-4">
             <Text className="mb-1 text-sm font-semibold text-gray-700">User Email:</Text>
