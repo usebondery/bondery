@@ -6,6 +6,30 @@
 import type { Json } from "./database";
 
 /**
+ * Contact type for phone/email entries
+ */
+export type ContactType = "home" | "work";
+
+/**
+ * Phone entry with prefix, value, type and preferred flag
+ */
+export interface PhoneEntry {
+  prefix: string;
+  value: string;
+  type: ContactType;
+  preferred: boolean;
+}
+
+/**
+ * Email entry with type and preferred flag
+ */
+export interface EmailEntry {
+  value: string;
+  type: ContactType;
+  preferred: boolean;
+}
+
+/**
  * Important date associated with a contact
  */
 export interface ImportantDate {
@@ -29,6 +53,7 @@ export interface Position {
  */
 export interface Contact {
   id: string;
+  userId: string;
   firstName: string;
   middleName: string | null;
   lastName: string | null;
@@ -41,8 +66,10 @@ export interface Contact {
   lastInteraction: string | null;
   createdAt: string;
   connections: string[] | null;
-  phone: string | null;
-  email: string | null;
+  /** Array of phone entries with type and preferred flag */
+  phones: PhoneEntry[] | Json | null;
+  /** Array of email entries with type and preferred flag */
+  emails: EmailEntry[] | Json | null;
   linkedin: string | null;
   instagram: string | null;
   whatsapp: string | null;
@@ -54,6 +81,25 @@ export interface Contact {
   importantDates: ImportantDate[] | Json | null;
   myself: boolean | null;
   position: Position | Json | null;
+  gender: string | null;
+  language: string | null;
+  timezone: string | null;
+  nickname: string | null;
+  pgpPublicKey: string | null;
+  location: string | null;
+  latitude: number | null;
+  longitude: number | null;
+}
+
+/**
+ * Lightweight contact preview for list aggregations
+ */
+export interface ContactPreview {
+  id: string;
+  firstName: string;
+  lastName: string | null;
+  avatar: string | null;
+  avatarColor: string | null;
 }
 
 /**

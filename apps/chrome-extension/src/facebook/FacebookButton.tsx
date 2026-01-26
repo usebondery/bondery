@@ -3,6 +3,7 @@ import { Button } from "@mantine/core";
 import { config } from "../config";
 import { BonderyIconWhite } from "@bondery/branding";
 import { sanitizeName } from "../utils/nameHelpers";
+import { API_ROUTES } from "@bondery/helpers";
 
 interface FacebookButtonProps {
   username: string;
@@ -193,7 +194,7 @@ const FacebookButton: React.FC<FacebookButtonProps> = ({ username }) => {
       });
 
       // Single redirect with all data
-      window.open(`${config.appUrl}/api/redirect?${params.toString()}`, "_blank");
+      window.open(`${config.appUrl}${API_ROUTES.REDIRECT}?${params.toString()}`, "_blank");
     } catch (error) {
       console.error("Error opening in Bondery:", error);
     } finally {

@@ -1,19 +1,18 @@
-import { Container, Title, Stack, Group, Text } from "@mantine/core";
-import { IconMessageCircle } from "@tabler/icons-react";
+import { Container, Title, Stack, Group, Text, Box } from "@mantine/core";
 import { getTranslations } from "next-intl/server";
 import { FeedbackForm } from "./components/FeedbackForm";
-import { PageHeader } from "@/components/PageHeader";
+import { ErrorPageHeader } from "@/app/(app)/app/components/ErrorPageHeader";
+import { PageWrapper } from "../components/PageWrapper";
 
 export default async function FeedbackPage() {
   const t = await getTranslations("FeedbackPage");
 
   return (
-    <Container size="md">
-      <Stack gap="xl">
-        <PageHeader icon={IconMessageCircle} title={t("Title")} />
-
+    <PageWrapper>
+      <ErrorPageHeader iconType="message-circle" title={t("Title")} />
+      <Stack align="center">
         <FeedbackForm />
       </Stack>
-    </Container>
+    </PageWrapper>
   );
 }

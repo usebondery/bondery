@@ -1,7 +1,8 @@
 import { PeopleClient } from "./PeopleClient";
-import { getApiUrl } from "@/lib/config";
+import { API_URL } from "@/lib/config";
 import type { Contact } from "@bondery/types";
 import { getAuthHeaders } from "@/lib/authHeaders";
+import { API_ROUTES } from "@bondery/helpers";
 
 type SortOrder =
   | "nameAsc"
@@ -14,7 +15,7 @@ type SortOrder =
 async function getContacts(query?: string, sort?: SortOrder) {
   try {
     const headers = await getAuthHeaders();
-    const res = await fetch(`${getApiUrl()}/api/contacts`, {
+    const res = await fetch(`${API_URL}${API_ROUTES.CONTACTS}`, {
       cache: "no-store",
       headers,
     });

@@ -5,8 +5,8 @@ import { IconLogout } from "@tabler/icons-react";
 import { useRouter } from "next/navigation";
 import { notifications } from "@mantine/notifications";
 import { useTranslations } from "next-intl";
-import { ROUTES } from "@/lib/config";
 import { createBrowswerSupabaseClient } from "@/lib/supabase/client";
+import { WEBSITE_ROUTES } from "@bondery/helpers";
 
 export function LogoutSection() {
   const router = useRouter();
@@ -31,7 +31,7 @@ export function LogoutSection() {
         throw new Error(error.message || "Failed to sign out");
       }
 
-      router.push(ROUTES.LOGIN);
+      router.push(WEBSITE_ROUTES.LOGIN);
     } catch (error) {
       notifications.show({
         title: t("UpdateError"),

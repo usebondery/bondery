@@ -5,6 +5,7 @@ import { useForm } from "@mantine/form";
 import { notifications } from "@mantine/notifications";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
+import { API_ROUTES } from "@bondery/helpers";
 
 interface FeedbackFormValues {
   npsScore: number;
@@ -13,15 +14,8 @@ interface FeedbackFormValues {
 }
 
 const SLIDER_MARKS = [
-  { value: 1, label: "1" },
-  { value: 2, label: "2" },
-  { value: 3, label: "3" },
-  { value: 4, label: "4" },
+  { value: 0, label: "0" },
   { value: 5, label: "5" },
-  { value: 6, label: "6" },
-  { value: 7, label: "7" },
-  { value: 8, label: "8" },
-  { value: 9, label: "9" },
   { value: 10, label: "10" },
 ];
 
@@ -50,7 +44,7 @@ export function FeedbackForm() {
     });
 
     try {
-      const response = await fetch("/api/feedback", {
+      const response = await fetch(API_ROUTES.FEEDBACK, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -84,16 +78,17 @@ export function FeedbackForm() {
   };
 
   return (
-    <Card p="xl" className="max-w-2/3">
+    <Card p="xl" className="max-w-xl" ta="left">
       <form onSubmit={form.onSubmit(handleSubmit)}>
         <Stack gap="xl">
           {/* NPS Score Slider */}
           <Stack gap="md">
             <Text fw={500}>{t("NpsLabel")}</Text>
             <Slider
-              min={1}
+              min={0}
               max={10}
               step={1}
+              size={"xl"}
               marks={SLIDER_MARKS}
               label={(value) => value.toString()}
               {...form.getInputProps("npsScore")}

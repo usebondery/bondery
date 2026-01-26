@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { modals } from "@mantine/modals";
 import { notifications } from "@mantine/notifications";
 import { useTranslations } from "next-intl";
+import { API_ROUTES } from "@bondery/helpers";
 
 export function DeleteAccountSection() {
   const router = useRouter();
@@ -45,7 +46,7 @@ export function DeleteAccountSection() {
             withCloseButton: false,
           });
 
-          const response = await fetch("/api/account", {
+          const response = await fetch(API_ROUTES.ACCOUNT, {
             method: "DELETE",
           });
 

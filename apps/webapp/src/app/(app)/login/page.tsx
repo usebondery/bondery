@@ -1,14 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import { Container, Paper, Text, Button, Stack, Anchor, Space } from "@mantine/core";
+import { Text, Button, Stack, Anchor, Card } from "@mantine/core";
 import { IconBrandGithubFilled, IconBrandLinkedin, IconX } from "@tabler/icons-react";
 import { notifications } from "@mantine/notifications";
 import { createBrowswerSupabaseClient } from "@/lib/supabase/client";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
-import { INTEGRATION_PROVIDERS, getWebsiteUrl } from "@/lib/config";
+import { INTEGRATION_PROVIDERS, WEBSITE_URL } from "@/lib/config";
 import { Logo } from "./components/Logo";
+import { WEBSITE_ROUTES } from "@bondery/helpers";
 
 export default function LoginPage() {
   const t = useTranslations("LoginPage");
@@ -56,85 +57,57 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center px-4">
-      <Container size={460} p={0}>
-        <Stack align="center">
-          <Logo size={60} href={getWebsiteUrl()} />
-          <Space />
-
-          {/* Mobile Not Available Message */}
-          <Paper
-            withBorder
-            shadow="lg"
-            p="xl"
-            w="100%"
-            style={{
-              backgroundColor:
-                "light-dark(var(--mantine-color-white), var(--mantine-color-dark-6))",
-            }}
-            hiddenFrom="sm"
-          >
-            <Stack gap="md">
-              <Text size="lg" fw={600} ta="center">
-                {t("MobileNotAvailable")}
-              </Text>
-              <Text size="md" c="dimmed" ta="center">
-                {t("MobileNotAvailableMessage")}
-              </Text>
-            </Stack>
-          </Paper>
-
-          {/* Desktop Login Card */}
-          <Paper
-            withBorder
-            shadow="lg"
-            p="xl"
-            radius="lg"
-            w="100%"
-            style={{
-              backgroundColor:
-                "light-dark(var(--mantine-color-white), var(--mantine-color-dark-6))",
-            }}
-            visibleFrom="sm"
-          >
-            <Stack gap="md">
-              <Text size="md" c="dimmed" ta="center">
-                {t("Description")}
-              </Text>
-
-              {activeProviders.map((provider) => {
-                const IconComponent = getProviderIcon(provider.icon);
-                return (
-                  <Button
-                    key={provider.provider}
-                    size="lg"
-                    leftSection={<IconComponent size={20} />}
-                    onClick={() =>
-                      handleOAuthLogin(provider.providerKey as "github" | "linkedin_oidc")
-                    }
-                    loading={loading}
-                    fullWidth
-                    color={provider.backgroundColor}
-                  >
-                    {t("ContinueWith", { provider: provider.displayName })}
-                  </Button>
-                );
-              })}
-
-              <Text size="xs" c="dimmed" ta="center">
-                {t("TermsAgreement")}{" "}
-                <Anchor component={Link} href={`${getWebsiteUrl()}/#terms`} size="xs">
-                  {t("TermsOfService")}
-                </Anchor>{" "}
-                {t("And")}{" "}
-                <Anchor component={Link} href={`${getWebsiteUrl()}/#privacy`} size="xs">
-                  {t("PrivacyPolicy")}
-                </Anchor>
-              </Text>
-            </Stack>
-          </Paper>
+    <div className="flex min-h-screen items-center justify-center ">
+      <Card p="xl" className="max-w-md">
+        <Stack gap="lg" align="center" hiddenFrom="md">
+          <Logo size={60} href={WEBSITE_URL} />
+          <Stack gap="0" align="center">
+            <Text size="lg" fw={600} ta="center">
+              {t("MobileNotAvailable")}
+            </Text>
+            <Text size="md" c="dimmed" ta="center">
+              {t("MobileNotAvailableMessage")}
+            </Text>
+          </Stack>
         </Stack>
-      </Container>
+        <Stack gap="md" align="center" visibleFrom="md">
+          <Logo size={60} href={WEBSITE_URL} />
+          <Text size="md" ta="center">
+            {t("Description")}
+          </Text>
+
+          <Stack gap="xs" w="100%">
+            {activeProviders.map((provider) => {
+              const IconComponent = getProviderIcon(provider.icon);
+              return (
+                <Button
+                  key={provider.provider}
+                  size="lg"
+                  leftSection={<IconComponent size={20} />}
+                  onClick={() =>
+                    handleOAuthLogin(provider.providerKey as "github" | "linkedin_oidc")
+                  }
+                  loading={loading}
+                  fullWidth
+                  color={provider.backgroundColor}
+                >
+                  {t("ContinueWith", { provider: provider.displayName })}
+                </Button>
+              );
+            })}
+          </Stack>
+          <Text size="xs" c="dimmed" ta="center">
+            {t("TermsAgreement")}{" "}
+            <Anchor component={Link} href={`${WEBSITE_URL}${WEBSITE_ROUTES.TERMS}`} size="xs">
+              {t("TermsOfService")}
+            </Anchor>{" "}
+            {t("And")}{" "}
+            <Anchor component={Link} href={`${WEBSITE_URL}${WEBSITE_ROUTES.PRIVACY}`} size="xs">
+              {t("PrivacyPolicy")}
+            </Anchor>
+          </Text>
+        </Stack>
+      </Card>
     </div>
   );
 }

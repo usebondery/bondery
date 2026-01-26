@@ -17,7 +17,8 @@ import { IconBrandGithub, IconTopologyStar, IconX } from "@tabler/icons-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Logo } from "@/components/Logo";
-import { SOCIAL_LINKS, ROUTES } from "@/lib/config";
+import { SOCIAL_LINKS } from "@/lib/config";
+import { GITHUB_REPO_URL, WEBSITE_ROUTES } from "@bondery/helpers";
 
 const navLinks = [
   { label: "Features", href: "/#features" },
@@ -29,7 +30,7 @@ export function Header() {
   const [drawerOpened, { toggle: toggleDrawer, close: closeDrawer }] = useDisclosure(false);
 
   useEffect(() => {
-    fetch("https://api.github.com/repos/sveetya/bondery")
+    fetch(GITHUB_REPO_URL)
       .then((res) => res.json())
       .then((data) => setStars(data.stargazers_count))
       .catch(() => setStars(null));
@@ -71,7 +72,7 @@ export function Header() {
             {/* CTA Button */}
             <Button
               component={Link}
-              href={ROUTES.LOGIN}
+              href={WEBSITE_ROUTES.LOGIN}
               size="md"
               leftSection={<IconTopologyStar size={20} />}
             >
@@ -142,7 +143,7 @@ export function Header() {
                 {/* CTA Button */}
                 <Button
                   component={Link}
-                  href={ROUTES.LOGIN}
+                  href={WEBSITE_ROUTES.LOGIN}
                   size="md"
                   leftSection={<IconTopologyStar size={20} />}
                   fullWidth

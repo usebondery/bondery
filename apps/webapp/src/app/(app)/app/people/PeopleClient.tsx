@@ -1,16 +1,6 @@
 "use client";
 
-import {
-  Container,
-  Title,
-  Text,
-  Button,
-  Stack,
-  Group,
-  TextInput,
-  Paper,
-  SimpleGrid,
-} from "@mantine/core";
+import { Title, Text, Button, Stack, Group, TextInput, Paper, SimpleGrid } from "@mantine/core";
 import {
   IconSearch,
   IconPlus,
@@ -31,11 +21,17 @@ import { StatsCard } from "./components/StatsCard";
 import { useState, useDeferredValue } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { useDebouncedCallback } from "@mantine/hooks";
-import ContactsTable, { ColumnConfig } from "@/components/ContactsTable";
-import { ColumnVisibilityMenu } from "./components/ColumnVisibilityMenu";
-import { SortMenu, SortOrder } from "./components/SortMenu";
+import ContactsTable, {
+  ColumnConfig,
+  MenuAction,
+  BulkSelectionAction,
+} from "@/app/(app)/app/components/ContactsTable";
+import { ColumnVisibilityMenu } from "@/app/(app)/app/components/contacts/ColumnVisibilityMenu";
+import { SortMenu, SortOrder } from "@/app/(app)/app/components/contacts/SortMenu";
+import { API_ROUTES } from "@bondery/helpers";
 import { openAddContactModal } from "./components/AddContactModal";
-import { PageHeader } from "@/components/PageHeader";
+import { PageHeader } from "@/app/(app)/app/components/PageHeader";
+import { PageWrapper } from "@/app/(app)/app/components/PageWrapper";
 
 import type { Contact } from "@bondery/types";
 
@@ -49,9 +45,15 @@ interface PeopleClientProps {
   initialContacts: Contact[];
   totalCount: number;
   stats: Stats;
+  layout?: "stack" | "container";
 }
 
-export function PeopleClient({ initialContacts, totalCount, stats }: PeopleClientProps) {
+export function PeopleClient({
+  initialContacts,
+  totalCount,
+  stats,
+  layout = "stack",
+}: PeopleClientProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -68,8 +70,15 @@ export function PeopleClient({ initialContacts, totalCount, stats }: PeopleClien
       label: "Avatar",
       visible: true,
       icon: <IconPhoto size={16} />,
+      fixed: true,
     },
-    { key: "name", label: "Name", visible: true, icon: <IconUser size={16} /> },
+    { 
+      key: "name", 
+      label: "Name", 
+      visible: true, 
+      icon: <IconUser size={16} />,
+      fixed: true,
+    },
     {
       key: "title",
       label: "Title",
@@ -124,6 +133,10 @@ export function PeopleClient({ initialContacts, totalCount, stats }: PeopleClien
     router.replace(`${pathname}?${params.toString()}`);
   };
 
+  const handleDeleteContact = async (contactId: string) => {
+    await handleDelete([contactId]);
+  };
+
   const handleSelectAll = () => {
     if (selectedIds.size === initialContacts.length) {
       setSelectedIds(new Set());
@@ -142,16 +155,17 @@ export function PeopleClient({ initialContacts, totalCount, stats }: PeopleClien
     setSelectedIds(newSelected);
   };
 
-  const handleDelete = async () => {
-    if (selectedIds.size === 0) return;
+  const handleDelete = async (idsOverride?: string[]) => {
+    const ids = idsOverride ?? Array.from(selectedIds);
+    if (ids.length === 0) return;
 
     setIsDeleting(true);
 
     try {
-      const res = await fetch("/api/contacts", {
+      const res = await fetch(API_ROUTES.CONTACTS, {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ids: Array.from(selectedIds) }),
+        body: JSON.stringify({ ids }),
       });
 
       if (!res.ok) {
@@ -160,7 +174,7 @@ export function PeopleClient({ initialContacts, totalCount, stats }: PeopleClien
 
       notifications.show({
         title: "Success",
-        message: `${selectedIds.size} contact(s) deleted successfully`,
+        message: `${ids.length} contact(s) deleted successfully`,
         color: "green",
       });
 
@@ -183,15 +197,44 @@ export function PeopleClient({ initialContacts, totalCount, stats }: PeopleClien
   const allSelected = initialContacts.length > 0 && selectedIds.size === initialContacts.length;
   const someSelected = selectedIds.size > 0 && selectedIds.size < initialContacts.length;
 
+  // Define menu actions for individual contacts
+  const menuActions: MenuAction[] = [
+    {
+      key: "deleteContact",
+      label: "Delete contact",
+      icon: <IconTrash size={14} />,
+      color: "red",
+      onClick: handleDeleteContact,
+    },
+  ];
+
+  // Define bulk selection actions
+  const bulkSelectionActions: BulkSelectionAction[] = [
+    {
+      key: "deleteSelected",
+      label: "Delete contacts",
+      icon: <IconTrash size={16} />,
+      color: "red",
+      variant: "light",
+      onClick: () => handleDelete(),
+      loading: isDeleting,
+    },
+  ];
+
+  const WrapperComponent = layout === "container" ? Group : Stack;
+
   return (
-    <Container size="xl">
-      <Stack gap="xl">
-        <Group justify="space-between">
-          <PageHeader icon={IconUsers} title="People" />
-          <Button size="md" leftSection={<IconPlus size={16} />} onClick={openAddContactModal}>
-            Add new contact
-          </Button>
-        </Group>
+    <PageWrapper>
+      <WrapperComponent gap="xl" {...(layout === "container" ? { justify: "space-between" } : {})}>
+        <PageHeader
+          icon={IconUsers}
+          title="People"
+          action={
+            <Button size="md" leftSection={<IconPlus size={16} />} onClick={openAddContactModal}>
+              Add new person
+            </Button>
+          }
+        />
 
         <SimpleGrid cols={{ base: 1, sm: 3 }} spacing="md">
           <StatsCard
@@ -230,24 +273,6 @@ export function PeopleClient({ initialContacts, totalCount, stats }: PeopleClien
               <ColumnVisibilityMenu columns={columns} setColumns={setColumns} />
               <SortMenu sortOrder={initialSort} setSortOrder={handleSort} />
             </Group>
-            <Group>
-              {selectedIds.size > 0 && (
-                <>
-                  <Text size="sm" c="dimmed">
-                    {selectedIds.size} selected
-                  </Text>
-                  <Button
-                    color="red"
-                    variant="light"
-                    leftSection={<IconTrash size={16} />}
-                    onClick={handleDelete}
-                    loading={isDeleting}
-                  >
-                    Delete contacts
-                  </Button>
-                </>
-              )}
-            </Group>
 
             <ContactsTable
               contacts={initialContacts}
@@ -258,10 +283,12 @@ export function PeopleClient({ initialContacts, totalCount, stats }: PeopleClien
               allSelected={allSelected}
               someSelected={someSelected}
               showSelection={true}
+              menuActions={menuActions}
+              bulkSelectionActions={bulkSelectionActions}
             />
           </Stack>
         </Paper>
-      </Stack>
-    </Container>
+      </WrapperComponent>
+    </PageWrapper>
   );
 }

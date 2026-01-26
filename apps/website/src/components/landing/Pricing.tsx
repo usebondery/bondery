@@ -16,8 +16,7 @@ import {
 } from "@mantine/core";
 import { IconNetwork, IconCalendar, IconUsers, IconTopologyStar } from "@tabler/icons-react";
 import Link from "next/link";
-import { ROUTES } from "@/lib/config";
-import type { ReactNode } from "react";
+import { WEBSITE_ROUTES } from "@bondery/helpers";
 
 export function Pricing() {
   return (
@@ -119,7 +118,7 @@ export function Pricing() {
           <Box>
             <Button
               component={Link}
-              href={ROUTES.LOGIN}
+              href={WEBSITE_ROUTES.LOGIN}
               size="lg"
               fullWidth
               variant="primary"

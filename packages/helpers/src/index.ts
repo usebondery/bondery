@@ -1,2 +1,1 @@
-export { checkEnvVariables } from "./check-env";
-export type { EnvCheckConfig } from "./check-env";
+export { WEBSITE_ROUTES, API_ROUTES, WEBAPP_ROUTES, GITHUB_REPO_URL } from "./globals/paths";

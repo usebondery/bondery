@@ -1,0 +1,33 @@
+export const WEBSITE_ROUTES = {
+  HOME: "/",
+  PRIVACY: "/privacy",
+  TERMS: "/terms",
+  LOGIN: "/login",
+  CONTACT: "/contact",
+  APP_GROUP: "/app",
+};
+
+export const API_ROUTES = {
+  CONTACTS: "/api/contacts",
+  GROUPS: "/api/groups",
+  SETTINGS: "/api/settings",
+  ACCOUNT: "/api/account",
+  ACCOUNT_PERSON: "/api/account/person",
+  ACCOUNT_PHOTO: "/api/account/photo",
+  FEEDBACK: "/api/feedback",
+  REDIRECT: "/api/redirect",
+} as const;
+
+export const GITHUB_REPO_URL = "https://api.github.com/repos/sveetya/bondery";
+
+export const WEBAPP_ROUTES = {
+  PEOPLE: "/app/people",
+  GROUPS: "/app/groups",
+  PERSON: "/app/person",
+  SETTINGS: "/app/settings",
+  ACCOUNT: "/app/account",
+  FEEDBACK: "/app/feedback",
+  LOGIN: "/login",
+  APP_GROUP: "/app",
+  DEFAULT_PAGE_AFTER_LOGIN: "/app/people",
+};

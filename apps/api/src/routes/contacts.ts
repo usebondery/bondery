@@ -5,16 +5,19 @@
 
 import type { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
 import { requireAuth } from "../lib/supabase.js";
+import { generateVCard } from "../lib/vcard.js";
 import type {
   Contact,
   CreateContactInput,
   UpdateContactInput,
   DeleteContactsRequest,
+  Database,
 } from "@bondery/types";
 
 // Contact fields selection query for Supabase
-const CONTACT_SELECT = `
+export const CONTACT_SELECT = `
   id,
+  userId:user_id,
   firstName:first_name,
   middleName:middle_name,
   lastName:last_name,
@@ -27,8 +30,8 @@ const CONTACT_SELECT = `
   lastInteraction:last_interaction,
   createdAt:created_at,
   connections,
-  phone,
-  email,
+  phones,
+  emails,
   linkedin,
   instagram,
   whatsapp,
@@ -39,7 +42,15 @@ const CONTACT_SELECT = `
   notifyBirthday:notify_birthday,
   importantDates:important_dates,
   myself,
-  position
+  position,
+  gender,
+  language,
+  timezone,
+  nickname,
+  pgpPublicKey:pgp_public_key,
+  location,
+  latitude,
+  longitude
 `;
 
 export async function contactRoutes(fastify: FastifyInstance) {
@@ -58,6 +69,7 @@ export async function contactRoutes(fastify: FastifyInstance) {
       .eq("myself", false);
 
     if (error) {
+      console.log("Error fetching contacts:", error);
       return reply.status(500).send({ error: error.message });
     }
 
@@ -165,11 +177,54 @@ export async function contactRoutes(fastify: FastifyInstance) {
         .eq("id", id)
         .single();
 
+      console.log("Fetched contact:", contact);
+
       if (error) {
         return reply.status(404).send({ error: error.message });
       }
 
       return { contact };
+    },
+  );
+
+  /**
+   * GET /api/contacts/:id/groups - Get groups a contact belongs to
+   */
+  fastify.get(
+    "/:id/groups",
+    async (request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+      const auth = await requireAuth(request, reply);
+      if (!auth) return;
+
+      const { client } = auth;
+      const { id: personId } = request.params;
+
+      const { data: memberships, error: membershipsError } = await client
+        .from("people_groups")
+        .select("group_id")
+        .eq("person_id", personId);
+
+      if (membershipsError) {
+        return reply.status(500).send({ error: membershipsError.message });
+      }
+
+      const groupIds = (memberships || []).map((m) => m.group_id);
+
+      if (groupIds.length === 0) {
+        return { groups: [] };
+      }
+
+      const { data: groups, error: groupsError } = await client
+        .from("groups")
+        .select(GROUP_SELECT)
+        .in("id", groupIds)
+        .order("label", { ascending: true });
+
+      if (groupsError) {
+        return reply.status(500).send({ error: groupsError.message });
+      }
+
+      return { groups };
     },
   );
 
@@ -207,8 +262,8 @@ export async function contactRoutes(fastify: FastifyInstance) {
       if (body.avatarColor !== undefined) updates.avatar_color = body.avatarColor;
       if (body.avatar !== undefined) updates.avatar = body.avatar;
       if (body.connections !== undefined) updates.connections = body.connections;
-      if (body.phone !== undefined) updates.phone = body.phone;
-      if (body.email !== undefined) updates.email = body.email;
+      if (body.phones !== undefined) updates.phones = body.phones;
+      if (body.emails !== undefined) updates.emails = body.emails;
       if (body.linkedin !== undefined) updates.linkedin = body.linkedin;
       if (body.instagram !== undefined) updates.instagram = body.instagram;
       if (body.whatsapp !== undefined) updates.whatsapp = body.whatsapp;
@@ -219,6 +274,12 @@ export async function contactRoutes(fastify: FastifyInstance) {
       if (body.notifyBirthday !== undefined) updates.notify_birthday = body.notifyBirthday;
       if (body.importantDates !== undefined) updates.important_dates = body.importantDates;
       if (body.position !== undefined) updates.position = body.position;
+      if (body.gender !== undefined) updates.gender = body.gender;
+      if (body.language !== undefined) updates.language = body.language;
+      if (body.timezone !== undefined) updates.timezone = body.timezone;
+      if (body.nickname !== undefined) updates.nickname = body.nickname;
+      if (body.pgpPublicKey !== undefined) updates.pgp_public_key = body.pgpPublicKey;
+      if (body.location !== undefined) updates.location = body.location;
 
       updates.updated_at = new Date().toISOString();
 
@@ -338,6 +399,47 @@ export async function contactRoutes(fastify: FastifyInstance) {
       await client.from("people").update({ avatar: null }).eq("id", contactId);
 
       return { success: true };
+    },
+  );
+
+  /**
+   * GET /api/contacts/:id/vcard - Export contact as vCard file
+   */
+  fastify.get(
+    "/:id/vcard",
+    async (request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+      const auth = await requireAuth(request, reply);
+      if (!auth) return;
+
+      const { client } = auth;
+      const { id } = request.params;
+
+      // Fetch contact
+      const { data: contact, error } = await client
+        .from("people")
+        .select(CONTACT_SELECT)
+        .eq("id", id)
+        .single();
+
+      if (error || !contact) {
+        return reply.status(404).send({ error: "Contact not found" });
+      }
+
+      // Generate vCard
+      const vcard = await generateVCard(contact as Contact);
+
+      console.log("Generated vCard:\n", vcard);
+
+      // Create filename
+      const firstName = contact.firstName || "contact";
+      const lastName = contact.lastName || "";
+      const filename = lastName ? `${firstName}_${lastName}.vcf` : `${firstName}.vcf`;
+
+      // Set response headers for file download
+      reply.header("Content-Type", "text/vcard; charset=utf-8");
+      reply.header("Content-Disposition", `attachment; filename="${filename}"`);
+
+      return vcard;
     },
   );
 }

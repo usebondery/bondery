@@ -31,11 +31,11 @@ export const bonderyTheme = createTheme({
         className: "button-scale-effect",
       },
     },
-    Input: {
-      defaultProps: {
-        className: "input-scale-effect",
-      },
-    },
+    // Input: {
+    //   defaultProps: {
+    //     className: "input-scale-effect",
+    //   },
+    // },
     Checkbox: {
       defaultProps: {
         className: {

@@ -15,6 +15,36 @@
     "ErrorTitle": "Chyba",
     "ErrorMessage": "Nepodařilo se odeslat zpětnou vazbu. Zkuste to prosím znovu."
   },
+  "ContactInfo": {
+    "Title": "Kontaktní informace",
+    "PhoneNumbers": "Telefonní čísla",
+    "EmailAddresses": "E-mailové adresy",
+    "AddPhone": "Přidat telefonní číslo",
+    "AddEmail": "Přidat e-mailovou adresu",
+    "MaxPhonesReached": "Maximálně {max} telefonních čísel povoleno",
+    "MaxEmailsReached": "Maximálně {max} e-mailových adres povoleno",
+    "NoPhones": "Žádná telefonní čísla nepřidána",
+    "NoEmails": "Žádné e-mailové adresy nepřidány",
+    "PhonePlaceholder": "Telefonní číslo",
+    "EmailPlaceholder": "E-mailová adresa",
+    "TypeHome": "Domácí",
+    "TypeWork": "Pracovní",
+    "Preferred": "Preferované",
+    "SetAsPreferred": "Nastavit jako preferované",
+    "PhonesUpdated": "Telefonní čísla úspěšně aktualizována",
+    "PhonesUpdateError": "Nepodařilo se aktualizovat telefonní čísla",
+    "EmailsUpdated": "E-mailové adresy úspěšně aktualizovány",
+    "EmailsUpdateError": "Nepodařilo se aktualizovat e-mailové adresy"
+  },
+  "SocialMedia": {
+    "Title": "Sociální sítě",
+    "LinkedInPlaceholder": "LinkedIn uživatelské jméno nebo URL",
+    "InstagramPlaceholder": "Instagram uživatelské jméno nebo URL",
+    "FacebookPlaceholder": "Facebook uživatelské jméno nebo URL",
+    "WhatsAppPlaceholder": "WhatsApp číslo nebo URL",
+    "SignalPlaceholder": "Signal číslo",
+    "WebsitePlaceholder": "URL webové stránky"
+  },
   "ContactPage": {
     "Title": "Kontaktujte nás",
     "Description": "Máte-li jakékoli dotazy, neváhejte nás kontaktovat.",
@@ -126,5 +156,30 @@
       "PleaseWait": "Prosím čekejte...",
       "UpdateError": "Chyba"
     }
+  },
+  "GroupsPage": {
+    "Title": "Skupiny",
+    "Subtitle": "Organizujte své kontakty do pojmenovaných skupin.",
+    "Table": {
+      "Emoji": "Emoji",
+      "Label": "Název",
+      "Color": "Barva",
+      "Contacts": "Kontakty"
+    },
+    "Empty": "Zatím žádné skupiny. Vytvořte novou a začněte organizovat kontakty."
+  },
+  "GroupDetailPage": {
+    "Title": "Skupina: {label}",
+    "Subtitle": "Kontakty přiřazené do této skupiny.",
+    "ColorLabel": "Barva",
+    "ContactCount": "Kontakty",
+    "Table": {
+      "Avatar": "Avatar",
+      "Name": "Jméno",
+      "Title": "Titul",
+      "Place": "Místo",
+      "LastInteraction": "Poslední interakce"
+    },
+    "Empty": "Do této skupiny zatím nejsou přidány žádné kontakty."
   }
 }
