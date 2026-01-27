@@ -220,4 +220,15 @@ async function start() {
   }
 }
 
-start();
+// Export for Vercel serverless
+export { buildServer };
+export default async function handler(req: any, res: any) {
+  const server = await buildServer();
+  await server.ready();
+  server.server.emit("request", req, res);
+}
+
+// Start server in non-serverless environments
+if (process.env.NODE_ENV !== "production" || !process.env.VERCEL) {
+  start();
+}
