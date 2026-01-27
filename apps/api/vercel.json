@@ -1,15 +1,17 @@
 {
   "version": 2,
+  "buildCommand": "npx turbo build",
+  "outputDirectory": "dist",
   "builds": [
     {
-      "src": "dist/index.js",
+      "src": "src/index.ts",
       "use": "@vercel/node"
     }
   ],
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "dist/index.js"
+      "dest": "src/index.ts"
     }
   ]
 }

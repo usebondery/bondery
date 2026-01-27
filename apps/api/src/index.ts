@@ -222,8 +222,16 @@ async function start() {
 
 // Export for Vercel serverless
 export { buildServer };
+
+// Vercel serverless handler
+let serverPromise: ReturnType<typeof buildServer> | null = null;
+
 export default async function handler(req: any, res: any) {
-  const server = await buildServer();
+  // Reuse server instance for warm starts
+  if (!serverPromise) {
+    serverPromise = buildServer();
+  }
+  const server = await serverPromise;
   await server.ready();
   server.server.emit("request", req, res);
 }
