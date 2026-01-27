@@ -8,14 +8,17 @@
   "exports": {
     ".": {
       "import": "./dist/index.js",
+      "require": "./dist/index.js",
       "types": "./dist/index.d.ts"
     },
     "./globals/paths": {
       "import": "./dist/globals/paths.js",
+      "require": "./dist/globals/paths.js",
       "types": "./dist/globals/paths.d.ts"
     },
     "./check-env": {
       "import": "./dist/check-env.js",
+      "require": "./dist/check-env.js",
       "types": "./dist/check-env.d.ts"
     }
   },
