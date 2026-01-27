@@ -73,7 +73,12 @@
       ]
     },
     "@bondery/branding#build": {
-      "outputs": [],
+      "outputs": ["dist/**"],
+      "env": []
+    },
+    "@bondery/emails#build": {
+      "dependsOn": ["@bondery/branding#build"],
+      "outputs": ["dist/**"],
       "env": []
     },
     "@bondery/helpers#build": {
