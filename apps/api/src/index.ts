@@ -57,7 +57,7 @@ const envSchema = {
     },
     API_PORT: {
       type: "number",
-      default: 3001,
+      default: 3000,
     },
     API_HOST: {
       type: "string",
@@ -107,7 +107,7 @@ function resolveListenAddress(config: {
   API_PORT: number;
   API_HOST: string;
 }) {
-  const fallbackPort = Number(process.env.PORT) || Number(config.API_PORT) || 3001;
+  const fallbackPort = Number(process.env.PORT) || Number(config.API_PORT) || 3000;
   const fallbackHost = config.API_HOST || "0.0.0.0";
 
   try {
