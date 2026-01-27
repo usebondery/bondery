@@ -49,7 +49,7 @@
     "src/assets"
   ],
   "scripts": {
-    "build": "npm run generate-react-icons && tsc",
+    "build": "tsc",
     "generate-react-icons": "tsx scripts/generate-react-icons.ts"
   },
   "dependencies": {
