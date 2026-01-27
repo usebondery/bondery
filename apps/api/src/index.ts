@@ -220,4 +220,28 @@ async function start() {
   }
 }
 
-start();
+// In Vercel/serverless we should not call listen; instead export a handler that proxies requests
+// to the Fastify instance. For local/dev, continue to start the server normally.
+let cachedServer: ReturnType<typeof buildServer> | null = null;
+
+async function getServerInstance() {
+  if (!cachedServer) {
+    cachedServer = buildServer();
+  }
+  return cachedServer;
+}
+
+// Vercel sets the VERCEL env var inside functions
+const isVercel = !!process.env.VERCEL;
+
+if (isVercel) {
+  const serverPromise = getServerInstance();
+
+  export default async function handler(req: any, res: any) {
+    const server = await serverPromise;
+    await server.ready();
+    server.server.emit("request", req, res);
+  }
+} else {
+  start();
+}
