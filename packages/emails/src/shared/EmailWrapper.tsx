@@ -7,9 +7,9 @@ import {
   Container,
   Font,
 } from "@react-email/components";
-import { primaryColor } from "@bondery/branding/theme";
+import { primaryColor } from "@bondery/branding/theme/src";
 import * as React from "react";
-import { BonderyLogotypeBlack } from "@bondery/branding/react";
+import { BonderyLogotypeBlack } from "@bondery/branding/react/src";
 
 export const EmailWrapper = ({
   children,

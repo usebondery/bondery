@@ -1,4 +1,4 @@
-import { BonderyLogotypeBlack, BonderyLogotypeWhite } from "@bondery/branding";
+import { BonderyLogotypeBlack, BonderyLogotypeWhite } from "@bondery/branding/src";
 import { Flex } from "@mantine/core";
 import Link from "next/link";
 

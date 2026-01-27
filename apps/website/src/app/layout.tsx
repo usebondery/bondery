@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { Notifications } from "@mantine/notifications";
-import { bonderyTheme } from "@bondery/branding/theme";
+import { bonderyTheme } from "@bondery/branding/theme/src";
 import { Lexend } from "next/font/google";
 import { ColorSchemeScript, MantineProvider, mantineHtmlProps } from "@mantine/core";
 import { Footer, Header } from "@/components/landing";
