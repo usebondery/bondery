@@ -1,7 +1,7 @@
 "use server";
 
 import { Stack, Text } from "@mantine/core";
-import type { Contact } from "@bondery/types";
+import type { Contact, Activity } from "@bondery/types";
 import PersonClient from "./PersonClient";
 import { getAuthHeaders } from "@/lib/authHeaders";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
@@ -28,10 +28,16 @@ async function getPersonData(personId: string) {
     headers,
   });
 
-  const [contactResponse, groupsResponse, membershipResponse] = await Promise.all([
+  const activitiesPromise = fetch(`${API_URL}${API_ROUTES.ACTIVITIES}`, {
+    cache: "no-store",
+    headers,
+  });
+
+  const [contactResponse, groupsResponse, membershipResponse, activitiesResponse] = await Promise.all([
     contactPromise,
     groupsPromise,
     membershipPromise,
+    activitiesPromise,
   ]);
 
   if (!contactResponse.ok) {
@@ -47,6 +53,11 @@ async function getPersonData(personId: string) {
 
   const groupsData = groupsResponse.ok ? await groupsResponse.json() : { groups: [] };
   const personGroupsData = membershipResponse.ok ? await membershipResponse.json() : { groups: [] };
+  const activitiesData = activitiesResponse.ok ? await activitiesResponse.json() : { activities: [] };
+
+  const personActivities = activitiesData.activities?.filter((a: any) => 
+    a.participants?.some((p: any) => p.id === personId)
+  ) || [];
 
   // Fetch connected contacts if they exist
   let connectedContacts: Contact[] = [];
@@ -73,6 +84,7 @@ async function getPersonData(personId: string) {
     connectedContacts,
     groups: (groupsData.groups as Group[]) || [],
     personGroups: (personGroupsData.groups as Group[]) || [],
+    activities: (personActivities as Activity[]) || [],
   };
 }
 
@@ -109,6 +121,7 @@ export default async function PersonPage({ params }: { params: Promise<{ person_
       initialConnectedContacts={data.connectedContacts}
       initialGroups={data.groups}
       initialPersonGroups={data.personGroups}
+      initialActivities={data.activities}
       personId={personId}
     />
   );

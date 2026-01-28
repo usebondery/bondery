@@ -11,6 +11,7 @@ import {
   Badge,
   CloseButton,
   rem,
+  Button,
 } from "@mantine/core";
 import { modals } from "@mantine/modals";
 import { Link } from "@mantine/tiptap";
@@ -25,7 +26,7 @@ import { extractUsername } from "@/lib/socialMediaHelpers";
 import { LIMITS } from "@/lib/config";
 import { parsePhoneNumber, combinePhoneNumber } from "@/lib/phoneHelpers";
 import { formatContactName } from "@/lib/nameHelpers";
-import type { Contact, Group as GroupType, PhoneEntry, EmailEntry } from "@bondery/types";
+import type { Contact, Group as GroupType, PhoneEntry, EmailEntry, Activity } from "@bondery/types";
 import type { ComboboxItem, MultiSelectProps } from "@mantine/core";
 import { ContactActionMenu } from "./components/ContactActionMenu";
 import { ContactIdentitySection } from "./components/ContactIdentitySection";
@@ -36,6 +37,7 @@ import { ContactInfoSection } from "./components/ContactInfoSection";
 import { SocialMediaSection } from "./components/SocialMediaSection";
 import { ContactImportantDatesSection } from "./components/ContactImportantDatesSection";
 import { LastInteractionSection } from "./components/LastInteractionSection";
+import { PersonTimelineSection } from "./components/PersonTimelineSection";
 // import { ContactPGPSection } from "./components/ContactPGPSection";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
@@ -52,14 +54,16 @@ interface PersonClientProps {
   initialConnectedContacts: Contact[];
   initialGroups: GroupType[];
   initialPersonGroups: GroupType[];
+  initialActivities: Activity[];
   personId: string;
 }
 
 export default function PersonClient({
   initialContact,
-  initialConnectedContacts: _initialConnectedContacts,
+  initialConnectedContacts,
   initialGroups,
   initialPersonGroups,
+  initialActivities = [],
   personId,
 }: PersonClientProps) {
   const router = useRouter();
@@ -82,7 +86,7 @@ export default function PersonClient({
   >([]);
   const [focusedField, setFocusedField] = useState<string | null>(null);
   const [groupsSaving, setGroupsSaving] = useState(false);
-
+  
   const hasCoordinates = Number.isFinite(contact?.latitude) && Number.isFinite(contact?.longitude);
 
   const groupSelectData = allGroups.map((group) => ({
@@ -900,6 +904,14 @@ export default function PersonClient({
             <Divider /> */}
 
             <LastInteractionSection contact={contact} />
+            
+            <Divider />
+
+            <PersonTimelineSection 
+              activities={initialActivities} 
+              contact={contact} 
+              connectedContacts={initialConnectedContacts || []} 
+            />
 
             {hasCoordinates && (
               <>
