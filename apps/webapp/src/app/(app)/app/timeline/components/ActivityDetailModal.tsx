@@ -111,26 +111,34 @@ export function ActivityDetailModal({ activity, opened, onClose, contacts }: Act
       onClose={onClose} 
       withCloseButton={true}
       size="lg"
-      padding="xl"
+      padding="lg"
       radius="md"
-      title={null} // Custom title
+      styles={{
+        header: {
+            alignItems: 'flex-start',
+        },
+      }}
+      title={ (
+        <Group gap="xs">
+          <div className="flex flex-col gap-1">
+            <div className="flex items-center gap-2">
+            <IconCalendar size={24} />
+            <Text fw={600} size="lg">
+              {activity.type}
+            </Text>
+            </div>
+            <Text c="dimmed">
+                {date.toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                {", "}
+                {date.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}
+            </Text>
+          </div>
+        </Group>
+      )}
     >
       <Stack gap="lg">
         {/* Header */}
-        <Group justify="space-between" align="flex-start">
-            <Stack gap={4}>
-                <Text fw={700} size="xl">{activity.type}</Text>
-                <Text c="dimmed">
-                    {date.toLocaleDateString("en-US", { month: "short", day: "numeric" })}
-                    {", "}
-                    {date.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}
-                </Text>
-            </Stack>
-            {/* <ActionIcon variant="subtle" color="red" onClick={handleDelete}>
-                <IconTrash size={18} />
-            </ActionIcon> */}
-        </Group>
-
+        
         {/* Google Calendar Link (Placeholder) */}
         {/* <Group gap="xs" style={{ cursor: 'pointer' }}>
             <IconExternalLink size={16} />
@@ -231,7 +239,7 @@ export function ActivityDetailModal({ activity, opened, onClose, contacts }: Act
 
         {/* Footer Actions */}
         <Group justify="flex-end" mt="md">
-            <Button variant="subtle" color="gray" onClick={onClose}>
+            <Button variant="default" color="gray" onClick={onClose}>
                 Cancel
             </Button>
             <Button onClick={handleSave} loading={loading}>

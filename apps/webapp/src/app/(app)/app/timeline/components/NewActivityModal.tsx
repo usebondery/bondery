@@ -121,7 +121,7 @@ export function NewActivityModal({ opened, onClose, contacts }: NewActivityModal
       title={<Text fw={600} size="lg">Who are you meeting?</Text>}
       size="lg"
       radius="md"
-      padding="xl"
+      padding="lg"
     >
       <form onSubmit={form.onSubmit(handleSubmit)}>
         <Stack gap="md">
@@ -174,7 +174,7 @@ export function NewActivityModal({ opened, onClose, contacts }: NewActivityModal
           </Group>
 
           <Group justify="flex-end" mt="xl">
-            <Button variant="subtle" color="gray" onClick={onClose}>
+            <Button variant="default" color="gray" onClick={onClose}>
               Cancel
             </Button>
             <Button type="submit" loading={loading}>
