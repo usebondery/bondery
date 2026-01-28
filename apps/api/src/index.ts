@@ -17,6 +17,7 @@ import { settingsRoutes } from "./routes/settings.js";
 import { redirectRoutes } from "./routes/redirect.js";
 import { feedbackRoutes } from "./routes/feedback.js";
 import { groupRoutes } from "./routes/groups.js";
+import { activityRoutes } from "./routes/activities.js";
 
 // Environment variable schema
 const envSchema = {
@@ -203,6 +204,7 @@ async function buildServer() {
   await fastify.register(settingsRoutes, { prefix: API_ROUTES.SETTINGS });
   await fastify.register(redirectRoutes, { prefix: API_ROUTES.REDIRECT });
   await fastify.register(feedbackRoutes, { prefix: API_ROUTES.FEEDBACK });
+  await fastify.register(activityRoutes, { prefix: API_ROUTES.ACTIVITIES });
 
   return fastify;
 }

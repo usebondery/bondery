@@ -10,6 +10,7 @@ export const WEBSITE_ROUTES = {
 export const API_ROUTES = {
   CONTACTS: "/api/contacts",
   GROUPS: "/api/groups",
+  ACTIVITIES: "/api/activities",
   SETTINGS: "/api/settings",
   ACCOUNT: "/api/account",
   ACCOUNT_PERSON: "/api/account/person",
@@ -23,6 +24,7 @@ export const GITHUB_REPO_URL = "https://api.github.com/repos/sveetya/bondery";
 export const WEBAPP_ROUTES = {
   PEOPLE: "/app/people",
   GROUPS: "/app/groups",
+  TIMELINE: "/app/timeline",
   PERSON: "/app/person",
   SETTINGS: "/app/settings",
   ACCOUNT: "/app/account",

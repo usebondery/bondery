@@ -281,6 +281,7 @@ export async function contactRoutes(fastify: FastifyInstance) {
       if (body.nickname !== undefined) updates.nickname = body.nickname;
       if (body.pgpPublicKey !== undefined) updates.pgp_public_key = body.pgpPublicKey;
       if (body.location !== undefined) updates.location = body.location;
+      if (body.lastInteraction !== undefined) updates.last_interaction = body.lastInteraction;
 
       updates.updated_at = new Date().toISOString();
 
