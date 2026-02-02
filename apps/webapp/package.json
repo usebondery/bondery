@@ -2,6 +2,7 @@
   "name": "webapp",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "check-env": "tsx scripts/check-env.ts",
     "generate-icons": "tsx scripts/generate-icons.ts",

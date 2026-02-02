@@ -4,17 +4,20 @@
   "tasks": {
     "build": {
       "env": [
-        "NEXT_PUBLIC_WEBAPP_URL",
-        "WEBSITE_URL",
-        "API_URL",
         "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY",
         "NEXT_PUBLIC_SUPABASE_URL",
+        "PUBLIC_SUPABASE_URL",
+        "PUBLIC_SUPABASE_PUBLISHABLE_KEY",
+        "PRIVATE_SUPABASE_SECRET_KEY",
+        "PRIVATE_EMAIL_HOST",
+        "PRIVATE_EMAIL_PORT",
+        "PRIVATE_EMAIL_USER",
+        "PRIVATE_EMAIL_PASS",
+        "PRIVATE_EMAIL_ADDRESS",
         "SUPABASE_SECRET_KEY",
         "GITHUB_CLIENT_ID",
         "GITHUB_CLIENT_SECRET",
-        "LINKEDIN_CLIENT_ID",
-        "LINKEDIN_CLIENT_SECRET",
-        "NEXT_PUBLIC_APP_URL",
+        "NEXT_PUBLIC_WEBAPP_URL",
         "NEXT_PUBLIC_API_URL",
         "NEXT_PUBLIC_WEBSITE_URL",
         "DO_NOT_TRACK"
@@ -42,16 +45,20 @@
       "cache": false,
       "env": [
         "NEXT_PUBLIC_WEBAPP_URL",
-        "WEBSITE_URL",
-        "API_URL",
         "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY",
         "NEXT_PUBLIC_SUPABASE_URL",
+        "PUBLIC_SUPABASE_URL",
+        "PUBLIC_SUPABASE_PUBLISHABLE_KEY",
+        "PRIVATE_SUPABASE_SECRET_KEY",
+        "PRIVATE_EMAIL_HOST",
+        "PRIVATE_EMAIL_PORT",
+        "PRIVATE_EMAIL_USER",
+        "PRIVATE_EMAIL_PASS",
+        "PRIVATE_EMAIL_ADDRESS",
         "SUPABASE_SECRET_KEY",
         "GITHUB_CLIENT_ID",
         "GITHUB_CLIENT_SECRET",
-        "LINKEDIN_CLIENT_ID",
-        "LINKEDIN_CLIENT_SECRET",
-        "NEXT_PUBLIC_APP_URL",
+        "NEXT_PUBLIC_WEBAPP_URL",
         "NEXT_PUBLIC_API_URL",
         "NEXT_PUBLIC_WEBSITE_URL",
         "DO_NOT_TRACK"
@@ -66,7 +73,12 @@
       ]
     },
     "@bondery/branding#build": {
-      "outputs": [],
+      "outputs": ["dist/**"],
+      "env": []
+    },
+    "@bondery/emails#build": {
+      "dependsOn": ["@bondery/branding#build"],
+      "outputs": ["dist/**"],
       "env": []
     },
     "@bondery/helpers#build": {
@@ -83,17 +95,20 @@
     }
   },
   "globalPassThroughEnv": [
-    "NEXT_PUBLIC_WEBAPP_URL",
-    "WEBSITE_URL",
-    "API_URL",
     "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY",
     "NEXT_PUBLIC_SUPABASE_URL",
+    "PUBLIC_SUPABASE_URL",
+    "PUBLIC_SUPABASE_PUBLISHABLE_KEY",
+    "PRIVATE_SUPABASE_SECRET_KEY",
+    "PRIVATE_EMAIL_HOST",
+    "PRIVATE_EMAIL_PORT",
+    "PRIVATE_EMAIL_USER",
+    "PRIVATE_EMAIL_PASS",
+    "PRIVATE_EMAIL_ADDRESS",
     "SUPABASE_SECRET_KEY",
     "GITHUB_CLIENT_ID",
     "GITHUB_CLIENT_SECRET",
-    "LINKEDIN_CLIENT_ID",
-    "LINKEDIN_CLIENT_SECRET",
-    "NEXT_PUBLIC_APP_URL",
+    "NEXT_PUBLIC_WEBAPP_URL",
     "NEXT_PUBLIC_API_URL",
     "NEXT_PUBLIC_WEBSITE_URL",
     "DO_NOT_TRACK"

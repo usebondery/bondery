@@ -5,13 +5,19 @@
     "module": "ESNext",
     "jsx": "react-jsx",
     "moduleResolution": "bundler",
+    "allowImportingTsExtensions": false,
+    "noEmit": false,
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "declaration": true,
     "declarationMap": true,
-    "outDir": "dist"
+    "outDir": "dist",
+    "rootDir": "src"
   },
-  "include": ["src/**/*", "scripts/**/*"],
+  "ts-node": {
+    "esm": true
+  },
+  "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]
 }

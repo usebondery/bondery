@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "@bondery/branding": "*",
+    "@bondery/helpers": "*",
     "@bondery/translations": "*",
     "@mantine/core": "^8.3.11",
     "@mantine/hooks": "^8.3.11",

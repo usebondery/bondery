@@ -3,12 +3,18 @@
   "version": "0.1.0",
   "type": "module",
   "description": "Bondery branding assets and icons",
-  "main": "src/index.ts",
-  "types": "src/index.ts",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "import": "./src/index.ts",
-      "require": "./src/index.ts"
+      "import": "./dist/index.js",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./src": {
+      "types": "./src/index.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.js"
     },
     "./icon-generator": {
       "import": "./scripts/generate-icons.ts",
@@ -16,18 +22,29 @@
       "types": "./scripts/icon-generator.d.ts"
     },
     "./icons": {
-      "import": "./src/react/index.ts",
-      "require": "./src/react/index.ts",
-      "types": "./src/react/index.d.ts"
+      "import": "./dist/react/index.js",
+      "require": "./dist/react/index.js",
+      "types": "./dist/react/index.d.ts"
     },
     "./react": {
-      "types": "./src/react/index.d.ts",
-      "import": "./src/react/index.ts",
-      "require": "./src/react/index.ts"
+      "types": "./dist/react/index.d.ts",
+      "import": "./dist/react/index.js",
+      "require": "./dist/react/index.js"
+    },
+    "./react/src": {
+      "types": "./src/react/index.ts",
+      "import": "./dist/react/index.js",
+      "require": "./dist/react/index.js"
     },
     "./theme": {
-      "import": "./src/theme.ts",
-      "require": "./src/theme.ts"
+      "import": "./dist/theme.js",
+      "require": "./dist/theme.js",
+      "types": "./dist/theme.d.ts"
+    },
+    "./theme/src": {
+      "types": "./src/theme.ts",
+      "import": "./dist/theme.js",
+      "require": "./dist/theme.js"
     },
     "./styles": {
       "style": "./src/styles.css",
@@ -41,11 +58,13 @@
     }
   },
   "files": [
-    "src",
-    "scripts"
+    "dist",
+    "scripts",
+    "src/styles.css",
+    "src/assets"
   ],
   "scripts": {
-    "build": "npm run generate-react-icons",
+    "build": "tsc",
     "generate-react-icons": "tsx scripts/generate-react-icons.ts"
   },
   "dependencies": {
