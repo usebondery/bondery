@@ -1,7 +1,7 @@
 "use client";
 
 import { Group, Text, Stack, Box } from "@mantine/core";
-import { IconSettings, IconUsers, IconUsersGroup, IconMessageCircle } from "@tabler/icons-react";
+import { IconSettings, IconUsers, IconUsersGroup, IconMessageCircle, IconTimeline } from "@tabler/icons-react";
 import { usePathname } from "next/navigation";
 import { NavLinkItem } from "./NavLinkItem";
 import { UserAvatar } from "@/app/(app)/app/components/UserAvatar";
@@ -16,6 +16,7 @@ interface NavigationSidebarContentProps {
 const primaryLinks = [
   { href: WEBAPP_ROUTES.PEOPLE, label: "People", icon: IconUsers },
   { href: WEBAPP_ROUTES.GROUPS, label: "Groups", icon: IconUsersGroup },
+  { href: WEBAPP_ROUTES.TIMELINE, label: "Timeline", icon: IconTimeline },
 ];
 
 const secondaryLinks = [
