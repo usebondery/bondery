@@ -10,8 +10,8 @@
     "generate-manifest": "tsx scripts/generate-manifest.ts",
     "prebuild": "cross-env NODE_ENV=production npm run check-env && npm run generate-icons && cross-env NODE_ENV=production npm run generate-manifest",
     "predev": "cross-env NODE_ENV=development npm run check-env && npm run generate-icons && cross-env NODE_ENV=development npm run generate-manifest",
-    "dev": "parcel watch --cache-dir .parcel-cache",
-    "build": "parcel build --cache-dir .parcel-cache",
+    "dev": "dotenv -e .env.development.local -- parcel watch --cache-dir .parcel-cache",
+    "build": "dotenv -e .env.production.local -- parcel build --cache-dir .parcel-cache",
     "check-types": "tsc --noEmit",
     "lint": "eslint src"
   },
@@ -23,6 +23,7 @@
     "@types/node": "^20",
     "cross-env": "^10.1.0",
     "dotenv": "^16.4.7",
+    "dotenv-cli": "^11.0.0",
     "eslint": "^9",
     "eslint-config-airbnb": "^19.0.4",
     "eslint-config-prettier": "^10.1.8",
