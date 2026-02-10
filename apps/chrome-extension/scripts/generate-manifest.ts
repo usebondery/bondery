@@ -46,9 +46,7 @@ const manifest = {
   permissions: ["storage"],
   host_permissions: [
     "https://www.instagram.com/*",
-
     "https://www.linkedin.com/*",
-    "https://www.facebook.com/*",
     getOrigin(NEXT_PUBLIC_WEBAPP_URL!),
   ],
   icons: {
@@ -64,10 +62,6 @@ const manifest = {
     {
       matches: ["https://www.linkedin.com/*"],
       js: ["linkedin/index.tsx"],
-    },
-    {
-      matches: ["https://www.facebook.com/*"],
-      js: ["facebook/index.tsx"],
     },
   ],
 };
