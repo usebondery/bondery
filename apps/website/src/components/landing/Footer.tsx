@@ -67,8 +67,8 @@ export function Footer() {
               title="About us"
               links={[
                 { title: "Contact us", href: "/contact" },
-                { title: "Privacy Policy", href: "#privacy" },
-                { title: "Terms of Service", href: "#terms" },
+                { title: "Privacy Policy", href: "/privacy" },
+                { title: "Terms of Service", href: "/terms" },
               ]}
             />
           </Box>
