@@ -68,14 +68,14 @@
     "generate-react-icons": "tsx scripts/generate-react-icons.ts"
   },
   "dependencies": {
-    "sharp": "^0.33.5"
+    "sharp": "^0.34.5"
   },
   "devDependencies": {
     "@svgr/core": "^8.1.0",
     "@svgr/plugin-jsx": "^8.1.0",
     "@svgr/plugin-prettier": "^8.1.0",
-    "@types/node": "^20",
-    "tsx": "^4.19.2",
+    "@types/node": "^25",
+    "tsx": "^4.21.0",
     "typescript": "^5"
   },
   "peerDependencies": {

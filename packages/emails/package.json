@@ -21,20 +21,20 @@
   },
   "dependencies": {
     "@bondery/branding": "^0.1.0",
-    "@react-email/components": "^1.0.6",
-    "@react-email/render": "^1.0.4",
-    "@react-email/tailwind": "^2.0.3"
+    "@react-email/components": "^1.0.7",
+    "@react-email/render": "^2.0.4",
+    "@react-email/tailwind": "^2.0.4"
   },
   "peerDependencies": {
     "react": "^18.0.0 || ^19.0.0",
     "react-dom": "^18.0.0 || ^19.0.0"
   },
   "devDependencies": {
-    "@react-email/preview-server": "5.2.5",
+    "@react-email/preview-server": "5.2.8",
     "@types/react": "^19",
-    "react": "^19.2.0",
-    "react-dom": "^19.2.0",
-    "react-email": "5.2.5",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "react-email": "5.2.8",
     "typescript": "^5"
   }
 }

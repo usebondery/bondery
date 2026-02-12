@@ -26,6 +26,6 @@
     "build": "tsc"
   },
   "devDependencies": {
-    "dotenv": "^16.4.5"
+    "dotenv": "^17.3.1"
   }
 }
