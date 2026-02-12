@@ -1,6 +1,5 @@
 # Chrome Extension Releases
 
-## Current Version: 0.4.0
 
 ## Version Naming Convention
 
@@ -17,8 +16,8 @@ To create a new release of the Bondery Chrome Extension:
 ### 1. Update Version Numbers
 
 Update the version in **both** of these files:
-- `apps/chrome-extension/package.json` → `"version": "X.Y.Z"`
-- `apps/chrome-extension/scripts/generate-manifest.ts` → `version: "X.Y.Z"`
+1. `apps/chrome-extension/package.json` → `"version": "X.Y.Z"`
+2. `apps/chrome-extension/scripts/generate-manifest.ts` → `version: "X.Y.Z"`
 
 ### 2. Regenerate Manifest
 

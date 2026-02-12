@@ -42,8 +42,8 @@ HOST=0.0.0.0                              # Default: 0.0.0.0
 LOG_LEVEL=info                            # Default: info
 
 # CORS Origins
-WEBAPP_URL=https://app.usebondery.com     # Default: https://app.usebondery.com
-WEBSITE_URL=https://usebondery.com        # Default: https://usebondery.com
+NEXT_PUBLIC_WEBAPP_URL=https://app.usebondery.com     # Default: https://app.usebondery.com
+NEXT_PUBLIC_WEBSITE_URL=https://usebondery.com        # Default: https://usebondery.com
 ```
 
 The server uses `@fastify/env` to validate environment variables at startup. If any required variables are missing, the server will fail immediately with a clear error message.

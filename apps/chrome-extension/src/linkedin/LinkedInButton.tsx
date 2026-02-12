@@ -35,9 +35,8 @@ const LinkedInButton: React.FC<LinkedInButtonProps> = ({ username }) => {
     middleName?: string;
     lastName?: string;
   } | null => {
-    const nameElement = document.querySelector(
-      ".c60ffaab._366d02d6.ac0607af.d51d7eb8._11a23dae._2c1226b1._76473fa0._5355b5e1._6c707a2b.a464cddf",
-    );
+    const topCard = document.querySelector("section[data-member-id]") || document;
+    const nameElement = topCard.querySelector("a[aria-label] > h1") || topCard.querySelector("h1");
 
     console.log("LinkedIn: Name element found:", !!nameElement, nameElement?.textContent);
 
@@ -99,9 +98,8 @@ const LinkedInButton: React.FC<LinkedInButtonProps> = ({ username }) => {
   };
 
   const extractTitle = (): string | null => {
-    const titleElement = document.querySelector(
-      ".c60ffaab._11719c59._6c492f0e._37f22e5b.d51d7eb8._11a23dae.be840cb5._76473fa0._5355b5e1._6c707a2b.a464cddf",
-    );
+    const topCard = document.querySelector("section[data-member-id]") || document;
+    const titleElement = topCard.querySelector("div[data-generated-suggestion-target]");
 
     console.log("LinkedIn: Title element found:", !!titleElement, titleElement?.textContent);
 
@@ -131,9 +129,9 @@ const LinkedInButton: React.FC<LinkedInButtonProps> = ({ username }) => {
   };
 
   const extractPlace = (): string | null => {
-    const placeElement = document.querySelector(
-      ".c60ffaab.e07d664e.d51d7eb8._11a23dae.be840cb5._76473fa0._5355b5e1.a4423918.a464cddf",
-    );
+    const topCard = document.querySelector("section[data-member-id]") || document;
+    const contactInfoLink = topCard.querySelector("#top-card-text-details-contact-info");
+    const placeElement = contactInfoLink?.parentElement?.previousElementSibling || null;
 
     console.log("LinkedIn: Place element found:", !!placeElement, placeElement?.textContent);
 
@@ -163,6 +161,19 @@ const LinkedInButton: React.FC<LinkedInButtonProps> = ({ username }) => {
   };
 
   const extractProfilePhotoUrl = (): string | null => {
+    const topCard = document.querySelector("section[data-member-id]") || document;
+    const profilePhotoImg = topCard.querySelector(
+      "button[aria-label*='profile picture'] img",
+    ) as HTMLImageElement | null;
+
+    if (profilePhotoImg?.src && !profilePhotoImg.src.includes("data:image")) {
+      console.log(
+        "LinkedIn: Profile photo element found (profile-picture button):",
+        true,
+        profilePhotoImg.src,
+      );
+      return profilePhotoImg.src;
+    }
     // Find image inside element with data-view-name="profile-top-card-member-photo"
     const memberPhotoContainer = document.querySelector(
       '[data-view-name="profile-top-card-member-photo"]',

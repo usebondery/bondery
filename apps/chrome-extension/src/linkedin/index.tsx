@@ -26,49 +26,62 @@ function injectBonderyButton() {
     return;
   }
 
-  const targetSection = document.querySelector(
-    "._50293d6d._3ef9a4ba._1937a38e._55f344ac.a66c3ac6.c67a4f8b._528d5339._08542c3e.f7152e2e._58ae5fa6._17943a0d._951ee4c0",
-  );
+  const targetSection = (() => {
+    const profileSection = document.querySelector("section[data-member-id]") || document.body;
+    const messageButton = profileSection.querySelector("button[aria-label^='Message']");
+
+    if (!messageButton) {
+      return null;
+    }
+
+    let actionButtonsContainer = messageButton.closest("div");
+
+    while (actionButtonsContainer && actionButtonsContainer !== profileSection) {
+      const hasMessage = !!actionButtonsContainer.querySelector("button[aria-label^='Message']");
+      const hasMoreActions = !!actionButtonsContainer.querySelector(
+        "button[aria-label='More actions']",
+      );
+
+      if (hasMessage && hasMoreActions) {
+        break;
+      }
+
+      actionButtonsContainer = actionButtonsContainer.parentElement;
+    }
+
+    if (!actionButtonsContainer || actionButtonsContainer === profileSection) {
+      return null;
+    }
+
+    const insertParent = actionButtonsContainer.parentElement;
+
+    if (!insertParent) {
+      return null;
+    }
+
+    const existing = insertParent.querySelector("#bondery-li-button-root");
+    if (existing) {
+      return existing;
+    }
+
+    const container = document.createElement("div");
+    container.id = "bondery-li-button-root";
+    container.style.display = "flex";
+    container.style.flexDirection = "column";
+
+    insertParent.insertBefore(container, actionButtonsContainer.nextSibling);
+    return container;
+  })();
 
   console.log("Bondery LinkedIn: Target section found:", !!targetSection, targetSection);
 
   if (!targetSection) {
-    console.log(
-      "Bondery LinkedIn: Target section not found. Searching for alternative selectors...",
-    );
-    // Try alternative selectors
-    const alternatives = [
-      ".pv-top-card-v2-ctas",
-      ".pvs-profile-actions",
-      "[data-view-name='profile-top-card-actions']",
-      ".artdeco-card .pvs-profile-actions",
-      ".c67a4f8b._929976ad._08542c3e.f7152e2e._58ae5fa6._1163ca8d._7e4f556f",
-    ];
-
-    for (const selector of alternatives) {
-      const altSection = document.querySelector(selector);
-      if (altSection) {
-        console.log(
-          `Bondery LinkedIn: Found alternative section with selector: ${selector}`,
-          altSection,
-        );
-      }
-    }
+    console.log("Bondery LinkedIn: Target section not found.");
     return;
   }
-
-  // Check if button already exists
-  if (document.querySelector("#bondery-li-button-root")) {
-    return;
-  }
-
-  // Create container for React component
-  const container = document.createElement("div");
-  container.id = "bondery-li-button-root";
-  targetSection.appendChild(container);
 
   // Render React component
-  const root = ReactDOM.createRoot(container);
+  const root = ReactDOM.createRoot(targetSection);
   root.render(
     <StrictMode>
       <MantineWrapper>

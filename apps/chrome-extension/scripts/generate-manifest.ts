@@ -41,8 +41,8 @@ const getOrigin = (url: string) => {
 const manifest = {
   manifest_version: 3,
   name: "Bondery Social Integration",
-  version: "0.5.0",
-  description: "Import Instagram and LinkedIn contacts directly to Bondery",
+  version: "0.5.5",
+  description: "Import contacts from social media directly to Bondery",
   permissions: ["storage"],
   host_permissions: [
     "https://www.instagram.com/*",
