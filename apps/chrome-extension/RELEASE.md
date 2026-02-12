@@ -77,3 +77,13 @@ Once a release is created, users can:
 4. Open Chrome and go to `chrome://extensions/`
 5. Enable "Developer mode"
 6. Click "Load unpacked" and select the extracted folder
+
+# Tips
+When you want to push an update, don't bundling listing updates along with your package updated. Eg: don't make listing changes like, title, description, banner images along with your code updates.
+
+If you're rolling out hotfixes, don't bundle manifest permission updates, nor listing updates along with it.
+
+If you want to update your extension's listing, do it separately from your package updates.
+
+Avoid pushing out updates on Friday. Especially manifest permission updates and listing updates.
+
