@@ -68,19 +68,6 @@ jobs:
       #     refresh-token: ${{ secrets.CHROME_REFRESH_TOKEN }}
       #     publish: true
 
-      - name: Delete previous extension releases
-        run: |
-          # Get all releases with extension tags (ext-v*)
-          gh release list --limit 100 | grep "^ext-v" | awk '{print $1}' | while read tag; do
-            # Skip the current tag we're about to create
-            if [ "$tag" != "${{ github.ref_name }}" ]; then
-              echo "Deleting release: $tag"
-              gh release delete "$tag" --yes --cleanup-tag || true
-            fi
-          done
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
@@ -118,3 +105,23 @@ jobs:
           asset_path: ./bondery-extension-${{ github.ref_name }}.zip
           asset_name: bondery-extension-${{ steps.get_version.outputs.VERSION }}.zip
           asset_content_type: application/zip
+
+      - name: Delete previous extension releases and tags
+        run: |
+          # Delete previous extension releases
+          gh release list --limit 100 | grep "^ext-v" | awk '{print $1}' | while read tag; do
+            if [ "$tag" != "${{ github.ref_name }}" ]; then
+              echo "Deleting release: $tag"
+              gh release delete "$tag" --yes || true
+            fi
+          done
+
+          # Delete previous extension tags (keep current tag)
+          git ls-remote --tags origin "ext-v*" | awk -F/ '{print $3}' | while read tag; do
+            if [ "$tag" != "${{ github.ref_name }}" ]; then
+              echo "Deleting tag: $tag"
+              gh api -X DELETE "/repos/${{ github.repository }}/git/refs/tags/$tag" || true
+            fi
+          done
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
