@@ -28,7 +28,7 @@ jobs:
           echo "NEXT_PUBLIC_WEBAPP_URL=${{ vars.NEXT_PUBLIC_WEBAPP_URL }}" > apps/chrome-extension/.env.production.local
 
       - name: Build Chrome Extension
-        run: npx turbo build --filter=chrome-extension... --filter=\!web
+        run: npx turbo build --filter=chrome-extension...
         env:
           NODE_ENV: production
           NEXT_PUBLIC_WEBAPP_URL: ${{ vars.NEXT_PUBLIC_WEBAPP_URL }}
@@ -44,6 +44,30 @@ jobs:
         run: |
           VERSION=${GITHUB_REF#refs/tags/ext-}
           echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Sign extension
+        run: |
+          # Create signed extension package
+          npx chrome-webstore-upload-cli \
+            --source ./apps/chrome-extension/dist \
+            --extension-id ${{ secrets.PRIVATE_CHROME_EXTENSION_ID }} \
+            --client-id ${{ secrets.PRIVATE_CHROME_CLIENT_ID }} \
+            --client-secret ${{ secrets.PRIVATE_CHROME_CLIENT_SECRET }} \
+            --refresh-token ${{ secrets.PRIVATE_CHROME_REFRESH_TOKEN }} \
+            --auto-publish false \
+            --upload-only
+        env:
+          PRIVATE_SIGNING_KEY: ${{ secrets.PRIVATE_CHROME_PRIVATE_SIGNING_KEY }}
+
+      # - name: Publish to Chrome Web Store
+      #   uses: mnao305/chrome-extension-upload@v5.0.0
+      #   with:
+      #     file-path: ./bondery-extension-${{ github.ref_name }}.zip
+      #     extension-id: ${{ secrets.CHROME_EXTENSION_ID }}
+      #     client-id: ${{ secrets.CHROME_CLIENT_ID }}
+      #     client-secret: ${{ secrets.CHROME_CLIENT_SECRET }}
+      #     refresh-token: ${{ secrets.CHROME_REFRESH_TOKEN }}
+      #     publish: true
 
       - name: Delete previous extension releases
         run: |
@@ -69,7 +93,12 @@ jobs:
           body: |
             ## Bondery Chrome Extension Release ${{ steps.get_version.outputs.VERSION }}
 
-            ### Installation Instructions
+            ### 🎉 Automatic Chrome Web Store Publishing
+            This version has been automatically published to the Chrome Web Store! You can install it directly from:
+            [Bondery Social Integration - Chrome Web Store](https://chrome.google.com/webstore/detail/bondery-social-integration/${{ secrets.CHROME_EXTENSION_ID }})
+
+            ### Manual Installation (Development/Testing)
+            If you need to install manually for development or testing:
             1. Download the `bondery-extension-${{ steps.get_version.outputs.VERSION }}.zip` file below
             2. Extract the zip file to a folder
             3. Open Chrome and navigate to `chrome://extensions/`
