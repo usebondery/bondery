@@ -32,6 +32,10 @@ jobs:
         env:
           NODE_ENV: production
           NEXT_PUBLIC_WEBAPP_URL: ${{ vars.NEXT_PUBLIC_WEBAPP_URL }}
+          PRIVATE_CHROME_EXTENSION_ID: ${{ secrets.PRIVATE_CHROME_EXTENSION_ID }}
+          PRIVATE_CHROME_CLIENT_ID: ${{ secrets.PRIVATE_CHROME_CLIENT_ID }}
+          PRIVATE_CHROME_CLIENT_SECRET: ${{ secrets.PRIVATE_CHROME_CLIENT_SECRET }}
+          PRIVATE_CHROME_REFRESH_TOKEN: ${{ secrets.PRIVATE_CHROME_REFRESH_TOKEN }}
 
       - name: Create zip archive
         run: |
@@ -45,19 +49,14 @@ jobs:
           VERSION=${GITHUB_REF#refs/tags/ext-}
           echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
 
-      - name: Sign extension
+      - name: Upload extension to Chrome Web Store
         run: |
-          # Create signed extension package
-          npx chrome-webstore-upload-cli \
-            --source ./apps/chrome-extension/dist \
+          npx chrome-webstore-upload upload \
+            --source ./bondery-extension-${{ github.ref_name }}.zip \
             --extension-id ${{ secrets.PRIVATE_CHROME_EXTENSION_ID }} \
             --client-id ${{ secrets.PRIVATE_CHROME_CLIENT_ID }} \
             --client-secret ${{ secrets.PRIVATE_CHROME_CLIENT_SECRET }} \
-            --refresh-token ${{ secrets.PRIVATE_CHROME_REFRESH_TOKEN }} \
-            --auto-publish false \
-            --upload-only
-        env:
-          PRIVATE_SIGNING_KEY: ${{ secrets.PRIVATE_CHROME_PRIVATE_SIGNING_KEY }}
+            --refresh-token ${{ secrets.PRIVATE_CHROME_REFRESH_TOKEN }}
 
       # - name: Publish to Chrome Web Store
       #   uses: mnao305/chrome-extension-upload@v5.0.0
