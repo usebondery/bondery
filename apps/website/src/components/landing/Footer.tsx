@@ -5,6 +5,7 @@ import { IconBrandGithubFilled, IconBrandLinkedinFilled } from "@tabler/icons-re
 import type { ReactNode } from "react";
 import { Logo } from "@/components/Logo";
 import { SOCIAL_LINKS } from "@/lib/config";
+import { WEBSITE_ROUTES } from "@bondery/helpers";
 
 type LinkItem = {
   title: ReactNode;
@@ -66,9 +67,9 @@ export function Footer() {
             <LinkGroup
               title="About us"
               links={[
-                { title: "Contact us", href: "/contact" },
-                { title: "Privacy Policy", href: "/privacy" },
-                { title: "Terms of Service", href: "/terms" },
+                { title: "Contact us", href: WEBSITE_ROUTES.CONTACT },
+                { title: "Privacy Policy", href: WEBSITE_ROUTES.PRIVACY },
+                { title: "Terms of Service", href: WEBSITE_ROUTES.TERMS },
               ]}
             />
           </Box>
