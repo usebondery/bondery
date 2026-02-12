@@ -40,6 +40,7 @@
   },
   "dependencies": {
     "@bondery/branding": "*",
+    "@bondery/helpers": "*",
     "@mantine/core": "^8.3.11",
     "@mantine/hooks": "^8.3.11",
     "@types/react": "^19.2.7",
