@@ -42,7 +42,7 @@ const manifest = {
   manifest_version: 3,
   name: "Bondery Social Integration",
   version: "0.4.0",
-  description: "Import Instagram, LinkedIn, and Facebook contacts directly to Bondery",
+  description: "Import contacts from social media directly to Bondery",
   permissions: ["storage"],
   host_permissions: [
     "https://www.instagram.com/*",
