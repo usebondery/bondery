@@ -9,16 +9,18 @@ export type ActivityType =
   | "Email"
   | "Meal"
   | "Meeting"
-  | "Networking"
+  | "Networking event"
   | "Note"
   | "Other"
   | "Party/Social"
   | "Text/Messaging"
+  | "Competition/Hackathon"
   | "Custom";
 
 export interface Activity {
   id: string;
   userId: string;
+  title: string | null;
   type: ActivityType; // Stored as text in DB but typed here
   description: string | null;
   location: string | null;
@@ -31,6 +33,7 @@ export interface Activity {
 }
 
 export interface CreateActivityInput {
+  title?: string;
   type: string; // Allow string for flexibility
   description?: string;
   location?: string;
@@ -40,6 +43,7 @@ export interface CreateActivityInput {
 }
 
 export interface UpdateActivityInput {
+  title?: string;
   type?: string;
   description?: string;
   location?: string;

@@ -10,12 +10,12 @@ import {
   MenuDropdown,
   MenuItem,
   Avatar,
-  AvatarGroup,
   Stack,
 } from "@mantine/core";
 import { IconDotsVertical, IconEdit, IconTrash } from "@tabler/icons-react";
 import { useMemo, useState, type MouseEvent } from "react";
 import type { GroupWithCount } from "@bondery/types";
+import { PeopleAvatarChips } from "../../components/timeline/PeopleAvatarChips";
 
 interface GroupCardProps {
   group: GroupWithCount;
@@ -28,7 +28,6 @@ export function GroupCard({ group, onEdit, onDelete, onClick }: GroupCardProps) 
   const [menuOpened, setMenuOpened] = useState(false);
   const peopleLabel = `${group.contactCount} ${group.contactCount === 1 ? "person" : "people"}`;
   const previewContacts = group.previewContacts || [];
-  const remainingCount = Math.max(0, group.contactCount - previewContacts.length);
 
   const formatName = useMemo(
     () => (firstName: string, lastName?: string | null) =>
@@ -62,25 +61,17 @@ export function GroupCard({ group, onEdit, onDelete, onClick }: GroupCardProps) 
                 {group.label}
               </Text>
               {previewContacts.length > 0 ? (
-                <AvatarGroup spacing="sm">
-                  {previewContacts.map((contact) => (
-                    <Avatar
-                      key={contact.id}
-                      size="md"
-                      radius="xl"
-                      src={contact.avatar || undefined}
-                      color={contact.avatarColor || "blue"}
-                      name={formatName(contact.firstName, contact.lastName)}
-                    >
-                      {!contact.avatar && contact.firstName?.[0]}
-                    </Avatar>
-                  ))}
-                  {remainingCount > 0 && (
-                    <Avatar size="md" radius="xl" color="gray">
-                      +{remainingCount}
-                    </Avatar>
-                  )}
-                </AvatarGroup>
+                <PeopleAvatarChips
+                  people={previewContacts.map((contact) => ({
+                    id: contact.id,
+                    firstName: contact.firstName,
+                    lastName: contact.lastName,
+                    avatar: contact.avatar,
+                    avatarColor: contact.avatarColor,
+                  }))}
+                  totalCount={group.contactCount}
+                  size="md"
+                />
               ) : (
                 <Text size="sm" c="dimmed">
                   {peopleLabel}

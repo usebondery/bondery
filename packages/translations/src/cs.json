@@ -181,5 +181,32 @@
       "LastInteraction": "Poslední interakce"
     },
     "Empty": "Do této skupiny zatím nejsou přidány žádné kontakty."
+  },
+  "TimelinePage": {
+    "WhoAreYouMeeting": "S kým se setkáváte?",
+    "Title": "Název",
+    "TitlePlaceholder": "Název události",
+    "TitleRequired": "Název je povinný",
+    "AddContactsPlaceholder": "Přidat kontakty...",
+    "NoContactsFound": "Žádné kontakty nenalezeny",
+    "AlreadySelected": "již vybráno",
+    "Note": "Poznámka",
+    "DescriptionPlaceholder": "Důležité informace, například co jste probírali, důležité momenty, URL na fotoalba...",
+    "PickDate": "Vybrat datum",
+    "Type": "Typ",
+    "Cancel": "Zrušit",
+    "AddActivity": "Přidat aktivitu",
+    "SaveChanges": "Uložit změny",
+    "SearchPlaceholder": "Hledat...",
+    "EditAction": "Upravit",
+    "DeleteAction": "Smazat",
+    "DeleteConfirmTitle": "Smazat aktivitu?",
+    "DeleteConfirmMessage": "Opravdu chcete tuto aktivitu smazat? Tuto akci nelze vrátit zpět.",
+    "NoActivitiesFound": "Žádné aktivity nenalezeny.",
+    "NoActivitiesWithPerson": "S touto osobou zatím nejsou žádné aktivity.",
+    "ActivityCreated": "Aktivita byla úspěšně vytvořena",
+    "ActivityUpdated": "Aktivita byla úspěšně aktualizována",
+    "ActivityDeleted": "Aktivita byla úspěšně smazána",
+    "DeleteFailed": "Aktivitu se nepodařilo smazat"
   }
 }

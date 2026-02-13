@@ -19,7 +19,8 @@ export async function activityRoutes(fastify: FastifyInstance) {
 
     const { data: activities, error } = await client
       .from("activities")
-      .select(`
+      .select(
+        `
         *,
         participants:activity_participants(
           person:people(
@@ -30,7 +31,8 @@ export async function activityRoutes(fastify: FastifyInstance) {
             avatar_color
           )
         )
-      `)
+      `,
+      )
       .order("date", { ascending: false });
 
     if (error) {
@@ -80,6 +82,7 @@ export async function activityRoutes(fastify: FastifyInstance) {
         .from("activities")
         .insert({
           user_id: user.id,
+          title: body.title || null,
           type: body.type,
           description: body.description || null,
           location: body.location || null,
@@ -107,11 +110,11 @@ export async function activityRoutes(fastify: FastifyInstance) {
 
         if (participantsError) {
           console.error("Error adding participants:", participantsError);
-          // Don't fail the whole request, but log it. 
-          // Ideally we might want to transaction this, but supabase-js via HTTP doesn't do transactions easily 
+          // Don't fail the whole request, but log it.
+          // Ideally we might want to transaction this, but supabase-js via HTTP doesn't do transactions easily
           // without RPC.
         }
-        
+
         // Also update last_interaction for these contacts
         await client
           .from("people")
@@ -150,7 +153,10 @@ export async function activityRoutes(fastify: FastifyInstance) {
    */
   fastify.patch(
     "/:id",
-    async (request: FastifyRequest<{ Params: { id: string }; Body: UpdateActivityInput }>, reply: FastifyReply) => {
+    async (
+      request: FastifyRequest<{ Params: { id: string }; Body: UpdateActivityInput }>,
+      reply: FastifyReply,
+    ) => {
       const auth = await requireAuth(request, reply);
       if (!auth) return;
 
@@ -160,18 +166,49 @@ export async function activityRoutes(fastify: FastifyInstance) {
 
       // Update fields
       const updates: any = {};
+      if (body.title !== undefined) updates.title = body.title;
       if (body.description !== undefined) updates.description = body.description;
       if (body.type !== undefined) updates.type = body.type;
       if (body.date !== undefined) updates.date = body.date;
       if (body.location !== undefined) updates.location = body.location;
-      
-      const { error } = await client
-        .from("activities")
-        .update(updates)
-        .eq("id", id);
+
+      const { error } = await client.from("activities").update(updates).eq("id", id);
 
       if (error) {
         return reply.status(500).send({ error: error.message });
+      }
+
+      if (body.participantIds) {
+        const { error: deleteParticipantsError } = await client
+          .from("activity_participants")
+          .delete()
+          .eq("activity_id", id);
+
+        if (deleteParticipantsError) {
+          return reply.status(500).send({ error: deleteParticipantsError.message });
+        }
+
+        if (body.participantIds.length > 0) {
+          const participantsData = body.participantIds.map((personId) => ({
+            activity_id: id,
+            person_id: personId,
+          }));
+
+          const { error: insertParticipantsError } = await client
+            .from("activity_participants")
+            .insert(participantsData);
+
+          if (insertParticipantsError) {
+            return reply.status(500).send({ error: insertParticipantsError.message });
+          }
+
+          if (body.date) {
+            await client
+              .from("people")
+              .update({ last_interaction: body.date })
+              .in("id", body.participantIds);
+          }
+        }
       }
 
       return { message: "Activity updated successfully" };

@@ -1,4 +1,13 @@
-import { Avatar, Card, createTheme, MantineTheme, Title } from "@mantine/core";
+import {
+  Avatar,
+  Card,
+  createTheme,
+  MantineTheme,
+  PillsInput,
+  Textarea,
+  TextInput,
+  Title,
+} from "@mantine/core";
 
 export const bonderyTheme = createTheme({
   cursorType: "pointer",
@@ -36,6 +45,21 @@ export const bonderyTheme = createTheme({
     //     className: "input-scale-effect",
     //   },
     // },
+    TextInput: {
+      defaultProps: {
+        variant: "filled",
+      },
+    },
+    PillsInput: {
+      defaultProps: {
+        variant: "filled",
+      },
+    },
+    Textarea: {
+      defaultProps: {
+        variant: "filled",
+      },
+    },
     Checkbox: {
       defaultProps: {
         className: {
