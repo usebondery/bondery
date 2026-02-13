@@ -289,6 +289,7 @@ export type Database = {
       user_settings: {
         Row: {
           avatar_url: string | null;
+          color_scheme: "light" | "dark" | "auto";
           created_at: string | null;
           id: string;
           language: string | null;
@@ -301,6 +302,7 @@ export type Database = {
         };
         Insert: {
           avatar_url?: string | null;
+          color_scheme?: "light" | "dark" | "auto";
           created_at?: string | null;
           id?: string;
           language?: string | null;
@@ -313,6 +315,7 @@ export type Database = {
         };
         Update: {
           avatar_url?: string | null;
+          color_scheme?: "light" | "dark" | "auto";
           created_at?: string | null;
           id?: string;
           language?: string | null;
@@ -333,7 +336,7 @@ export type Database = {
       [_ in never]: never;
     };
     Enums: {
-      [_ in never]: never;
+      color_scheme: "light" | "dark" | "auto";
     };
     CompositeTypes: {
       [_ in never]: never;

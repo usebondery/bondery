@@ -135,6 +135,19 @@
       "ClickToLink": "Click to link your {provider} account",
       "ClickToUnlink": "Click to unlink your {provider} account"
     },
+    "Preferences": {
+      "Title": "Preferences",
+      "Theme": "Theme",
+      "Light": "Light",
+      "Dark": "Dark",
+      "System": "System",
+      "UpdatingTheme": "Updating theme...",
+      "ThemeUpdateSuccess": "Theme updated successfully",
+      "ThemeUpdateError": "Failed to update theme",
+      "UpdateSuccess": "Updated successfully",
+      "UpdateError": "Failed to update",
+      "PleaseWait": "Please wait"
+    },
     "DataManagement": {
       "Title": "Data management",
       "SignOut": "Sign out",

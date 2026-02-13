@@ -134,6 +134,19 @@
       "ClickToLink": "Klikněte pro propojení vašeho účtu {provider}",
       "ClickToUnlink": "Klikněte pro odpojení vašeho účtu {provider}"
     },
+    "Preferences": {
+      "Title": "Předvolby",
+      "Theme": "Motiv",
+      "Light": "Světlý",
+      "Dark": "Tmavý",
+      "System": "Systém",
+      "UpdatingTheme": "Aktualizace motivu...",
+      "ThemeUpdateSuccess": "Motiv byl úspěšně aktualizován",
+      "ThemeUpdateError": "Aktualizace motivu selhala",
+      "UpdateSuccess": "Úspěšně aktualizováno",
+      "UpdateError": "Aktualizace selhala",
+      "PleaseWait": "Prosím čekejte"
+    },
     "DataManagement": {
       "Title": "Správa dat",
       "SignOut": "Odhlásit se",

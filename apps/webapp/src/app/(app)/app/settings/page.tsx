@@ -8,6 +8,7 @@ import { getAuthHeaders } from "@/lib/authHeaders";
 import { ErrorPageHeader } from "@/app/(app)/app/components/ErrorPageHeader";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import { PageWrapper } from "../components/PageWrapper";
+import { PreferencesCard } from "./components/PreferencesCard";
 
 export default async function SettingsPage() {
   const headers = await getAuthHeaders();
@@ -29,6 +30,12 @@ export default async function SettingsPage() {
   const surname = settings.surname || "";
   const timezone = settings.timezone || "UTC";
   const language = settings.language || "en";
+  const colorScheme =
+    settings.color_scheme === "light" ||
+    settings.color_scheme === "dark" ||
+    settings.color_scheme === "auto"
+      ? settings.color_scheme
+      : "auto";
   const email = settings.email || "";
   const avatarUrl = settings.avatar_url || null;
   const providers = settings.providers || [];
@@ -55,6 +62,8 @@ export default async function SettingsPage() {
           providers={providers}
           userIdentities={userIdentities}
         />
+
+        <PreferencesCard initialColorScheme={colorScheme} />
 
         <DataManagementCard />
       </Stack>

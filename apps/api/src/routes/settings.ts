@@ -46,6 +46,7 @@ export async function settingsRoutes(fastify: FastifyInstance) {
           surname: "",
           timezone: "UTC",
           language: "en",
+          color_scheme: "auto",
         })
         .select()
         .single();
@@ -86,7 +87,20 @@ export async function settingsRoutes(fastify: FastifyInstance) {
       if (!auth) return;
 
       const { client, user } = auth;
-      const { name, middlename, surname, timezone, language } = request.body;
+      const { name, middlename, surname, timezone, language, color_scheme } = request.body || {};
+
+      const updatePayload: UpdateUserSettingsInput = {};
+
+      if (name !== undefined) updatePayload.name = name;
+      if (middlename !== undefined) updatePayload.middlename = middlename;
+      if (surname !== undefined) updatePayload.surname = surname;
+      if (timezone !== undefined) updatePayload.timezone = timezone;
+      if (language !== undefined) updatePayload.language = language;
+      if (color_scheme !== undefined) updatePayload.color_scheme = color_scheme;
+
+      if (Object.keys(updatePayload).length === 0) {
+        return reply.status(400).send({ error: "No settings fields provided" });
+      }
 
       // Check if settings exist
       const { data: existingSettings } = await client
@@ -101,7 +115,7 @@ export async function settingsRoutes(fastify: FastifyInstance) {
         // Update existing
         const { data, error } = await client
           .from("user_settings")
-          .update({ name, middlename, surname, timezone, language })
+          .update(updatePayload)
           .eq("user_id", user.id)
           .select()
           .single();
@@ -114,7 +128,7 @@ export async function settingsRoutes(fastify: FastifyInstance) {
         // Insert new
         const { data, error } = await client
           .from("user_settings")
-          .insert({ user_id: user.id, name, middlename, surname, timezone, language })
+          .insert({ user_id: user.id, ...updatePayload })
           .select()
           .single();
 

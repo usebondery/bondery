@@ -6,6 +6,8 @@
 /**
  * User settings stored in database
  */
+export type ColorSchemePreference = "light" | "dark" | "auto";
+
 export interface UserSettings {
   id?: string;
   user_id: string;
@@ -14,6 +16,7 @@ export interface UserSettings {
   surname: string | null;
   timezone: string | null;
   language: string | null;
+  color_scheme: ColorSchemePreference;
   avatar_url: string | null;
   created_at?: string | null;
   updated_at?: string | null;
@@ -39,6 +42,7 @@ export interface UpdateUserSettingsInput {
   surname?: string;
   timezone?: string;
   language?: string;
+  color_scheme?: ColorSchemePreference;
 }
 
 /**

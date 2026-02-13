@@ -8,6 +8,16 @@ import * as translations from "@bondery/translations";
 import "leaflet/dist/leaflet.css";
 import { API_ROUTES, WEBSITE_ROUTES } from "@bondery/helpers/globals/paths";
 import { API_URL } from "@/lib/config";
+import { ColorSchemeSync } from "./components/ColorSchemeSync";
+import type { ColorSchemePreference } from "@bondery/types";
+
+interface UserSettingsLayoutData {
+  userName: string;
+  avatarUrl: string | null;
+  locale: string;
+  timezone: string;
+  colorScheme: ColorSchemePreference;
+}
 
 /**
  * Fetches user settings and data from the internal API.
@@ -27,12 +37,20 @@ async function getUserSettings() {
 
       const firstName = settings.name || "";
 
+      const colorScheme: ColorSchemePreference =
+        settings.color_scheme === "light" ||
+        settings.color_scheme === "dark" ||
+        settings.color_scheme === "auto"
+          ? settings.color_scheme
+          : "auto";
+
       return {
         userName: firstName || settings.email || "User",
         avatarUrl: settings.avatar_url || null,
         locale: settings.language || "en",
         timezone: settings.timezone || "UTC",
-      };
+        colorScheme,
+      } satisfies UserSettingsLayoutData;
     }
   } catch (error) {}
 
@@ -41,7 +59,8 @@ async function getUserSettings() {
     avatarUrl: null,
     locale: "en",
     timezone: "UTC",
-  };
+    colorScheme: "auto",
+  } satisfies UserSettingsLayoutData;
 }
 
 export const dynamic = "force-dynamic";
@@ -56,12 +75,13 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     redirect(WEBSITE_ROUTES.LOGIN);
   }
 
-  const { userName, avatarUrl, locale, timezone } = await getUserSettings();
+  const { userName, avatarUrl, locale, timezone, colorScheme } = await getUserSettings();
 
   const messages = translations[locale as keyof typeof translations] || translations.en;
 
   return (
     <LocaleProvider locale={locale} timezone={timezone} messages={messages}>
+      <ColorSchemeSync colorScheme={colorScheme} />
       <AppShell
         padding="md"
         navbar={{
