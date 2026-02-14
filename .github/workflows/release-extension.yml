@@ -91,15 +91,37 @@ jobs:
           zip -r ../../../bondery-extension-${{ steps.release_meta.outputs.tag }}.zip .
           cd ../../..
 
-      - name: Upload and publish to Chrome Web Store
+      - name: Upload CRX to Chrome Web Store
         run: |
-          npx chrome-webstore-upload-cli@3 upload \
-            --source ./apps/chrome-extension/bondery-extension-${{ steps.release_meta.outputs.tag }}.crx \
-            --extension-id ${{ secrets.PRIVATE_CHROME_EXTENSION_ID }} \
-            --client-id ${{ secrets.PRIVATE_CHROME_CLIENT_ID }} \
-            --client-secret ${{ secrets.PRIVATE_CHROME_CLIENT_SECRET }} \
-            --refresh-token ${{ secrets.PRIVATE_CHROME_REFRESH_TOKEN }} \
-            --auto-publish
+          ACCESS_TOKEN=$(curl -sS -X POST https://oauth2.googleapis.com/token \
+            -d client_id=${{ secrets.PRIVATE_CHROME_CLIENT_ID }} \
+            -d client_secret=${{ secrets.PRIVATE_CHROME_CLIENT_SECRET }} \
+            -d refresh_token=${{ secrets.PRIVATE_CHROME_REFRESH_TOKEN }} \
+            -d grant_type=refresh_token | node -e "const fs=require('fs'); const input=fs.readFileSync(0,'utf8'); const data=JSON.parse(input); if(!data.access_token){ console.error(input); process.exit(1);} process.stdout.write(data.access_token);")
+
+          UPLOAD_RESPONSE=$(curl -sS -X PUT \
+            "https://www.googleapis.com/upload/chromewebstore/v1.1/items/${{ secrets.PRIVATE_CHROME_EXTENSION_ID }}" \
+            -H "Authorization: Bearer $ACCESS_TOKEN" \
+            -H "x-goog-api-version: 2" \
+            -H "Content-Type: application/x-chrome-extension" \
+            --data-binary @./apps/chrome-extension/bondery-extension-${{ steps.release_meta.outputs.tag }}.crx)
+
+          echo "$UPLOAD_RESPONSE" | node -e "const fs=require('fs'); const input=fs.readFileSync(0,'utf8'); const data=JSON.parse(input); if(data.uploadState!=='SUCCESS'){ console.error(input); process.exit(1);}"
+
+      - name: Publish Chrome Web Store item
+        run: |
+          ACCESS_TOKEN=$(curl -sS -X POST https://oauth2.googleapis.com/token \
+            -d client_id=${{ secrets.PRIVATE_CHROME_CLIENT_ID }} \
+            -d client_secret=${{ secrets.PRIVATE_CHROME_CLIENT_SECRET }} \
+            -d refresh_token=${{ secrets.PRIVATE_CHROME_REFRESH_TOKEN }} \
+            -d grant_type=refresh_token | node -e "const fs=require('fs'); const input=fs.readFileSync(0,'utf8'); const data=JSON.parse(input); if(!data.access_token){ console.error(input); process.exit(1);} process.stdout.write(data.access_token);")
+
+          PUBLISH_RESPONSE=$(curl -sS -X POST \
+            "https://www.googleapis.com/chromewebstore/v1.1/items/${{ secrets.PRIVATE_CHROME_EXTENSION_ID }}/publish" \
+            -H "Authorization: Bearer $ACCESS_TOKEN" \
+            -H "x-goog-api-version: 2")
+
+          echo "$PUBLISH_RESPONSE" | node -e "const fs=require('fs'); const input=fs.readFileSync(0,'utf8'); const data=JSON.parse(input); const ok = data.status && (Array.isArray(data.status) ? data.status.includes('OK') : data.status==='OK'); if(!ok){ console.error(input); process.exit(1);}"
 
       - name: Create Release
         id: create_release
