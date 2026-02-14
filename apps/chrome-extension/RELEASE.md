@@ -69,11 +69,12 @@ The workflow uses these repository variables:
 - `NEXT_PUBLIC_WEBAPP_URL`: Production app URL (configured in GitHub Settings → Secrets and variables → Actions → Variables)
 - `PRIVATE_CHROME_PUBLISHER_ID`: Chrome Web Store publisher ID used for V2 API upload/publish endpoints
 
-The workflow also requires these repository secrets for `chrome-webstore-upload`:
+The workflow also requires these repository secrets for Chrome Web Store upload/publish:
 - `PRIVATE_CHROME_EXTENSION_ID`
-- `PRIVATE_CHROME_CLIENT_ID`
-- `PRIVATE_CHROME_CLIENT_SECRET`
-- `PRIVATE_CHROME_REFRESH_TOKEN`
+- `PRIVATE_CHROME_PUBLISHER_ID`
+- `PRIVATE_CHROME_PROJECT_ID`
+- `PRIVATE_CHROME_SERVICE_ACCOUNT_EMAIL`
+- `PRIVATE_CHROME_WORKLOAD_IDENTITY_PROVIDER`
 - `PRIVATE_CHROME_PRIVATE_SIGNING_KEY` (PEM private key used to sign CRX packages)
 - `PRIVATE_CHROME_PUBLIC_SIGNING_KEY` (PEM public key used to verify CRX signing key pair and extension ID)
 
