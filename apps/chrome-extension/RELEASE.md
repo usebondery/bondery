@@ -72,9 +72,7 @@ The workflow uses these repository variables:
 The workflow also requires these repository secrets for Chrome Web Store upload/publish:
 - `PRIVATE_CHROME_EXTENSION_ID`
 - `PRIVATE_CHROME_PUBLISHER_ID`
-- `PRIVATE_CHROME_PROJECT_ID`
-- `PRIVATE_CHROME_SERVICE_ACCOUNT_EMAIL`
-- `PRIVATE_CHROME_WORKLOAD_IDENTITY_PROVIDER`
+- `PRIVATE_CHROME_SERVICE_ACCOUNT_KEY_JSON` (entire service account JSON from Google Cloud)
 - `PRIVATE_CHROME_PRIVATE_SIGNING_KEY` (PEM private key used to sign CRX packages)
 - `PRIVATE_CHROME_PUBLIC_SIGNING_KEY` (PEM public key used to verify CRX signing key pair and extension ID)
 

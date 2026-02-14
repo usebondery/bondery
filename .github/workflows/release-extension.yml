@@ -96,38 +96,23 @@ jobs:
           NEXT_PUBLIC_WEBAPP_URL: ${{ vars.NEXT_PUBLIC_WEBAPP_URL }}
           PRIVATE_CHROME_EXTENSION_ID: ${{ secrets.PRIVATE_CHROME_EXTENSION_ID }}
           PRIVATE_CHROME_PUBLISHER_ID: ${{ secrets.PRIVATE_CHROME_PUBLISHER_ID }}
-          PRIVATE_CHROME_PROJECT_ID: ${{ secrets.PRIVATE_CHROME_PROJECT_ID }}
-          PRIVATE_CHROME_SERVICE_ACCOUNT_EMAIL: ${{ secrets.PRIVATE_CHROME_SERVICE_ACCOUNT_EMAIL }}
-          PRIVATE_CHROME_WORKLOAD_IDENTITY_PROVIDER: ${{ secrets.PRIVATE_CHROME_WORKLOAD_IDENTITY_PROVIDER }}
+          PRIVATE_CHROME_SERVICE_ACCOUNT_KEY_JSON: ${{ secrets.PRIVATE_CHROME_SERVICE_ACCOUNT_KEY_JSON }}
           PRIVATE_CHROME_PRIVATE_SIGNING_KEY: ${{ secrets.PRIVATE_CHROME_PRIVATE_SIGNING_KEY }}
           PRIVATE_CHROME_PUBLIC_SIGNING_KEY: ${{ secrets.PRIVATE_CHROME_PUBLIC_SIGNING_KEY }}
 
       - name: Authenticate to Google Cloud
+        id: gcp_auth
         uses: google-github-actions/auth@v2
         with:
-          workload_identity_provider: ${{ secrets.PRIVATE_CHROME_WORKLOAD_IDENTITY_PROVIDER }}
-          service_account: ${{ secrets.PRIVATE_CHROME_SERVICE_ACCOUNT_EMAIL }}
-
-      - name: Setup gcloud
-        uses: google-github-actions/setup-gcloud@v2
-        with:
-          project_id: ${{ secrets.PRIVATE_CHROME_PROJECT_ID }}
-
-      - name: Get Chrome Web Store access token
-        id: cws_token
-        run: |
-          ACCESS_TOKEN=$(gcloud auth print-access-token \
-            --impersonate-service-account=${{ secrets.PRIVATE_CHROME_SERVICE_ACCOUNT_EMAIL }} \
-            --scopes=https://www.googleapis.com/auth/chromewebstore)
-
-          echo "::add-mask::$ACCESS_TOKEN"
-          echo "access_token=$ACCESS_TOKEN" >> "$GITHUB_OUTPUT"
+          credentials_json: ${{ secrets.PRIVATE_CHROME_SERVICE_ACCOUNT_KEY_JSON }}
+          token_format: access_token
+          access_token_scopes: https://www.googleapis.com/auth/chromewebstore
 
       - name: Fetch Chrome Web Store item status
         run: |
           STATUS_RESPONSE=$(curl -sS -X GET \
             "https://chromewebstore.googleapis.com/v2/publishers/${{ secrets.PRIVATE_CHROME_PUBLISHER_ID }}/items/${{ secrets.PRIVATE_CHROME_EXTENSION_ID }}:fetchStatus" \
-            -H "Authorization: Bearer ${{ steps.cws_token.outputs.access_token }}")
+            -H "Authorization: Bearer ${{ steps.gcp_auth.outputs.access_token }}")
 
           echo "$STATUS_RESPONSE" | node -e "const fs=require('fs'); const input=fs.readFileSync(0,'utf8'); const data=JSON.parse(input); if(data.error){ console.error('❌ fetchStatus failed'); console.error(input); process.exit(1);} const itemState = data.itemState || 'UNKNOWN'; const uploadState = data.uploadState || 'UNKNOWN'; console.log(`✅ fetchStatus OK | itemState=${itemState} uploadState=${uploadState}`);"
 
@@ -160,7 +145,7 @@ jobs:
         run: |
           UPLOAD_RESPONSE=$(curl -sS -X POST \
             "https://chromewebstore.googleapis.com/upload/v2/publishers/${{ secrets.PRIVATE_CHROME_PUBLISHER_ID }}/items/${{ secrets.PRIVATE_CHROME_EXTENSION_ID }}:upload" \
-            -H "Authorization: Bearer ${{ steps.cws_token.outputs.access_token }}" \
+            -H "Authorization: Bearer ${{ steps.gcp_auth.outputs.access_token }}" \
             -H "Content-Type: application/x-chrome-extension" \
             --data-binary @./apps/chrome-extension/bondery-extension-${{ steps.release_meta.outputs.tag }}.crx)
 
@@ -170,7 +155,7 @@ jobs:
         run: |
           PUBLISH_RESPONSE=$(curl -sS -X POST \
             "https://chromewebstore.googleapis.com/v2/publishers/${{ secrets.PRIVATE_CHROME_PUBLISHER_ID }}/items/${{ secrets.PRIVATE_CHROME_EXTENSION_ID }}:publish" \
-            -H "Authorization: Bearer ${{ steps.cws_token.outputs.access_token }}")
+            -H "Authorization: Bearer ${{ steps.gcp_auth.outputs.access_token }}")
 
           echo "$PUBLISH_RESPONSE" | node -e "const fs=require('fs'); const input=fs.readFileSync(0,'utf8'); const data=JSON.parse(input); const ok = data.status && (Array.isArray(data.status) ? data.status.includes('OK') : data.status==='OK'); if(!ok){ console.error(input); process.exit(1);}"
 
