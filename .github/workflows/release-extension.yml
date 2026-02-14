@@ -40,7 +40,9 @@ jobs:
           openssl pkey -pubin -in apps/chrome-extension/public-key-check.pem -outform DER > apps/chrome-extension/public-key-check.der
           openssl pkey -pubin -in apps/chrome-extension/derived-public-key-check.pem -outform DER > apps/chrome-extension/derived-public-key-check.der
 
-          if ! cmp -s apps/chrome-extension/public-key-check.der apps/chrome-extension/derived-public-key-check.der; then
+          if cmp -s apps/chrome-extension/public-key-check.der apps/chrome-extension/derived-public-key-check.der; then
+            echo "✅ PRIVATE_CHROME_PRIVATE_SIGNING_KEY and PRIVATE_CHROME_PUBLIC_SIGNING_KEY match"
+          else
             echo "❌ PRIVATE_CHROME_PRIVATE_SIGNING_KEY and PRIVATE_CHROME_PUBLIC_SIGNING_KEY do not match"
             exit 1
           fi
