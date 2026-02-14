@@ -74,6 +74,7 @@ The workflow also requires these repository secrets for `chrome-webstore-upload`
 - `PRIVATE_CHROME_CLIENT_SECRET`
 - `PRIVATE_CHROME_REFRESH_TOKEN`
 - `PRIVATE_CHROME_PRIVATE_SIGNING_KEY` (PEM private key used to sign CRX packages)
+- `PRIVATE_CHROME_PUBLIC_SIGNING_KEY` (PEM public key used to verify CRX signing key pair and extension ID)
 
 ## Installation for End Users
 

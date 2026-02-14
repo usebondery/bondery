@@ -83,6 +83,28 @@ jobs:
             -p apps/chrome-extension/private-key.pem \
             -o apps/chrome-extension/bondery-extension-${{ steps.release_meta.outputs.tag }}.crx \
             apps/chrome-extension/dist
+
+      - name: Verify CRX signature inputs
+        run: |
+          printf "%b" "${{ secrets.PRIVATE_CHROME_PUBLIC_SIGNING_KEY }}" > apps/chrome-extension/public-key.pem
+
+          openssl pkey -in apps/chrome-extension/private-key.pem -pubout -out apps/chrome-extension/derived-public-key.pem
+          openssl pkey -pubin -in apps/chrome-extension/public-key.pem -outform DER > apps/chrome-extension/public-key.der
+          openssl pkey -pubin -in apps/chrome-extension/derived-public-key.pem -outform DER > apps/chrome-extension/derived-public-key.der
+          cmp -s apps/chrome-extension/public-key.der apps/chrome-extension/derived-public-key.der
+
+          node -e "const fs=require('fs'); const crx=fs.readFileSync('apps/chrome-extension/bondery-extension-${{ steps.release_meta.outputs.tag }}.crx'); if(crx.subarray(0,4).toString()!=='Cr24'){ console.error('Invalid CRX header'); process.exit(1);}"
+
+          EXPECTED_ID="${{ secrets.PRIVATE_CHROME_EXTENSION_ID }}"
+          COMPUTED_ID=$(node -e "const fs=require('fs'); const crypto=require('crypto'); const der=fs.readFileSync('apps/chrome-extension/public-key.der'); const hex=crypto.createHash('sha256').update(der).digest('hex').slice(0,32); const map='abcdefghijklmnop'; let id=''; for (const ch of hex) id += map[parseInt(ch,16)]; process.stdout.write(id);")
+          if [ "$COMPUTED_ID" != "$EXPECTED_ID" ]; then
+            echo "❌ Signing key does not match extension id"
+            echo "Computed: $COMPUTED_ID"
+            echo "Expected: $EXPECTED_ID"
+            exit 1
+          fi
+
+          rm -f apps/chrome-extension/public-key.pem apps/chrome-extension/derived-public-key.pem apps/chrome-extension/public-key.der apps/chrome-extension/derived-public-key.der
           rm -f apps/chrome-extension/private-key.pem
 
       - name: Create zip archive
