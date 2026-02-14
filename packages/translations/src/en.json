@@ -129,11 +129,14 @@
       "UnlinkError": "Failed to unlink {provider}",
       "GitHub": "GitHub",
       "LinkedIn": "LinkedIn",
+      "BonderyChromeExtension": "Bondery extension",
       "Connected": "Connected",
       "NotConnected": "Not connected",
       "LinkedButCannotUnlink": "Linked, but cannot unlink as it's the only provider",
       "ClickToLink": "Click to link your {provider} account",
-      "ClickToUnlink": "Click to unlink your {provider} account"
+      "ClickToUnlink": "Click to unlink your {provider} account",
+      "ExtensionLinkedDescription": "Installed",
+      "ExtensionInstallDescription": "Click to install from Chrome Web Store"
     },
     "Preferences": {
       "Title": "Preferences",

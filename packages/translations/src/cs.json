@@ -128,11 +128,14 @@
       "UnlinkError": "Nepodařilo se odpojit {provider}",
       "GitHub": "GitHub",
       "LinkedIn": "LinkedIn",
+      "BonderyChromeExtension": "Bondery Chrome rozšíření",
       "Connected": "Připojeno",
       "NotConnected": "Nepřipojeno",
       "LinkedButCannotUnlink": "Propojeno, ale nelze odpojit, protože je to jediný poskytovatel",
       "ClickToLink": "Klikněte pro propojení vašeho účtu {provider}",
-      "ClickToUnlink": "Klikněte pro odpojení vašeho účtu {provider}"
+      "ClickToUnlink": "Klikněte pro odpojení vašeho účtu {provider}",
+      "ExtensionLinkedDescription": "Propojeno",
+      "ExtensionInstallDescription": "Klikněte pro instalaci z Chrome Web Store"
     },
     "Preferences": {
       "Title": "Předvolby",

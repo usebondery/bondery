@@ -19,6 +19,9 @@ export const API_ROUTES = {
   REDIRECT: "/api/redirect",
 } as const;
 
+export const CHROME_EXTENSION_URL =
+  "https://chromewebstore.google.com/detail/lpcmokfekjjejnpobhbkgmjkodfhpmha";
+
 export const GITHUB_REPO_URL = "https://api.github.com/repos/sveetya/bondery";
 
 export const WEBAPP_ROUTES = {

@@ -41,7 +41,7 @@ const getOrigin = (url: string) => {
 const manifest = {
   manifest_version: 3,
   name: "Bondery Social Integration",
-  version: "0.5.5",
+  version: "0.5.6",
   description: "Import contacts from social media directly to Bondery",
   permissions: ["storage"],
   host_permissions: [
@@ -62,6 +62,10 @@ const manifest = {
     {
       matches: ["https://www.linkedin.com/*"],
       js: ["linkedin/index.tsx"],
+    },
+    {
+      matches: [getOrigin(NEXT_PUBLIC_WEBAPP_URL!)],
+      js: ["webapp/bridge.ts"],
     },
   ],
 };

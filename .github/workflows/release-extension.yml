@@ -43,20 +43,20 @@ jobs:
           zip -r ../../../bondery-extension-${{ github.ref_name }}.zip .
           cd ../../..
 
+      - name: Upload and publish to Chrome Web Store
+        run: |
+          npx chrome-webstore-upload \
+            --source ./bondery-extension-${{ github.ref_name }}.zip \
+            --extension-id ${{ secrets.PRIVATE_CHROME_EXTENSION_ID }} \
+            --client-id ${{ secrets.PRIVATE_CHROME_CLIENT_ID }} \
+            --client-secret ${{ secrets.PRIVATE_CHROME_CLIENT_SECRET }} \
+            --refresh-token ${{ secrets.PRIVATE_CHROME_REFRESH_TOKEN }}
+
       - name: Get version from tag
         id: get_version
         run: |
           VERSION=${GITHUB_REF#refs/tags/ext-}
           echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
-
-      # - name: Upload extension to Chrome Web Store
-      #   run: |
-      #     npx chrome-webstore-upload upload \
-      #       --source ./bondery-extension-${{ github.ref_name }}.zip \
-      #       --extension-id ${{ secrets.PRIVATE_CHROME_EXTENSION_ID }} \
-      #       --client-id ${{ secrets.PRIVATE_CHROME_CLIENT_ID }} \
-      #       --client-secret ${{ secrets.PRIVATE_CHROME_CLIENT_SECRET }} \
-      #       --refresh-token ${{ secrets.PRIVATE_CHROME_REFRESH_TOKEN }}
 
       - name: Create Release
         id: create_release
@@ -71,7 +71,7 @@ jobs:
 
             ### 🎉 Automatic Chrome Web Store Publishing
             This version has been automatically published to the Chrome Web Store! You can install it directly from:
-            [Bondery Social Integration - Chrome Web Store](https://chrome.google.com/webstore/detail/bondery-social-integration/${{ secrets.CHROME_EXTENSION_ID }})
+            [Bondery Social Integration - Chrome Web Store](https://chrome.google.com/webstore/detail/bondery-social-integration/${{ secrets.PRIVATE_CHROME_EXTENSION_ID }})
 
             ### Manual Installation (Development/Testing)
             If you need to install manually for development or testing:

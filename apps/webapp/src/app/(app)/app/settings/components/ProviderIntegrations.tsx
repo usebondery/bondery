@@ -3,10 +3,13 @@
 import { Group, Stack, Text } from "@mantine/core";
 import { IconUnlink } from "@tabler/icons-react";
 import { IconBrandGithub, IconBrandLinkedin } from "@tabler/icons-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { notifications } from "@mantine/notifications";
 import { useTranslations } from "next-intl";
+import { BonderyIcon } from "@bondery/branding/react";
+import { CHROME_EXTENSION_URL } from "@bondery/helpers";
 import { INTEGRATION_PROVIDERS } from "@/lib/config";
+import { detectBonderyChromeExtension } from "@/lib/extension/detectBonderyChromeExtension";
 import { IntegrationCard } from "./IntegrationCard";
 import { modals } from "@mantine/modals";
 import { createBrowswerSupabaseClient } from "@/lib/supabase/client";
@@ -28,9 +31,26 @@ export function ProviderIntegrations({
   userIdentities,
 }: ProviderIntegrationsProps) {
   const [providers, setProviders] = useState<string[]>(initialProviders);
+  const [isExtensionInstalled, setIsExtensionInstalled] = useState(false);
 
   const t = useTranslations("SettingsPage.Profile");
   const tIntegration = useTranslations("SettingsPage.Integration");
+
+  useEffect(() => {
+    let isMounted = true;
+
+    void detectBonderyChromeExtension().then((state) => {
+      if (!isMounted) {
+        return;
+      }
+
+      setIsExtensionInstalled(state === "installed");
+    });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const linkProvider = async (provider: "github" | "linkedin") => {
     const loadingNotification = notifications.show({
@@ -141,7 +161,7 @@ export function ProviderIntegrations({
         {t("ConnectedAccounts")}
       </Text>
       <Group gap="md">
-        {INTEGRATION_PROVIDERS.map(({ provider, providerKey, displayName, iconColor }) => {
+        {INTEGRATION_PROVIDERS.map(({ provider, providerKey, iconColor }) => {
           const icon = provider === "github" ? IconBrandGithub : IconBrandLinkedin;
           const isConnected = providers.includes(providerKey);
           const isDisabled = providers.length === 1 && isConnected;
@@ -150,11 +170,18 @@ export function ProviderIntegrations({
             <IntegrationCard
               key={provider}
               provider={provider}
-              displayName={displayName}
+              displayName={provider === "github" ? tIntegration("GitHub") : tIntegration("LinkedIn")}
               icon={icon}
               iconColor={iconColor}
               isConnected={isConnected}
               isDisabled={isDisabled}
+              connectedDescription={tIntegration("ClickToUnlink", {
+                provider: provider === "github" ? tIntegration("GitHub") : tIntegration("LinkedIn"),
+              })}
+              unconnectedDescription={tIntegration("ClickToLink", {
+                provider: provider === "github" ? tIntegration("GitHub") : tIntegration("LinkedIn"),
+              })}
+              disabledDescription={tIntegration("LinkedButCannotUnlink")}
               onClick={() => {
                 if (isDisabled) return;
                 if (isConnected) {
@@ -166,6 +193,23 @@ export function ProviderIntegrations({
             />
           );
         })}
+        <IntegrationCard
+          provider="bondery_chrome_extension"
+          displayName={tIntegration("BonderyChromeExtension")}
+          iconNode={<BonderyIcon width={28} height={28} />}
+          iconColor="grape"
+          isConnected={isExtensionInstalled}
+          isDisabled={isExtensionInstalled}
+          connectedDescription={tIntegration("ExtensionLinkedDescription")}
+          unconnectedDescription={tIntegration("ExtensionInstallDescription")}
+          onClick={() => {
+            if (isExtensionInstalled) {
+              return;
+            }
+
+            window.open(CHROME_EXTENSION_URL, "_blank", "noopener,noreferrer");
+          }}
+        />
       </Group>
     </Stack>
   );

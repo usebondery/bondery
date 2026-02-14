@@ -3,26 +3,38 @@
 import { Checkbox, ThemeIcon, Chip, Stack, Text } from "@mantine/core";
 import { IconLink, IconLinkOff } from "@tabler/icons-react";
 import type { Icon as TablerIconType } from "@tabler/icons-react";
-import { color } from "d3";
+import type { ReactNode } from "react";
 
 interface IntegrationCardProps {
   provider: string;
   displayName: string;
-  icon: TablerIconType;
-  iconColor: string;
+  icon?: TablerIconType;
+  iconNode?: ReactNode;
+  iconColor?: string;
   isConnected: boolean;
   isDisabled: boolean;
+  connectedDescription: string;
+  unconnectedDescription: string;
+  disabledDescription?: string;
   onClick: () => void;
 }
 
 export function IntegrationCard({
   displayName,
   icon: Icon,
+  iconNode,
   iconColor,
   isConnected,
   isDisabled,
+  connectedDescription,
+  unconnectedDescription,
+  disabledDescription,
   onClick,
 }: IntegrationCardProps) {
+  const description = isDisabled
+    ? (disabledDescription ?? connectedDescription)
+    : (isConnected ? connectedDescription : unconnectedDescription);
+
   return (
     <Checkbox.Card
       className="button-scale-effect"
@@ -67,17 +79,13 @@ export function IntegrationCard({
 
       <Stack gap="xs" align="center" justify="start" h={"full"} pt={"xs"}>
         <ThemeIcon size={48} variant="filled" color={iconColor}>
-          <Icon size={28} stroke={1.5} />
+          {iconNode ?? (Icon ? <Icon size={28} stroke={1.5} /> : null)}
         </ThemeIcon>
         <Text size="sm" fw={600}>
           {displayName}
         </Text>
         <Text size="xs" ta="center" c="dimmed">
-          {isDisabled
-            ? "Linked, but cannot unlink as it's the only provider"
-            : isConnected
-              ? "Connected, tap to unlink"
-              : "Unconnected, tap to link"}
+          {description}
         </Text>
       </Stack>
     </Checkbox.Card>

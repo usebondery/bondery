@@ -1,6 +1,6 @@
 {
   "name": "chrome-extension",
-  "version": "0.5.5",
+  "version": "0.5.6",
   "private": true,
   "description": "Bondery - browser extension",
   "source": "src/manifest.json",
