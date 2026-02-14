@@ -37,21 +37,20 @@ jobs:
           PRIVATE_CHROME_CLIENT_SECRET: ${{ secrets.PRIVATE_CHROME_CLIENT_SECRET }}
           PRIVATE_CHROME_REFRESH_TOKEN: ${{ secrets.PRIVATE_CHROME_REFRESH_TOKEN }}
 
-      - name: Upload and publish to Chrome Web Store
-        run: |
-          npx chrome-webstore-upload-cli@3 upload \
-            --source apps/chrome-extension/dist \
-            --extension-id ${{ secrets.PRIVATE_CHROME_EXTENSION_ID }} \
-            --client-id ${{ secrets.PRIVATE_CHROME_CLIENT_ID }} \
-            --client-secret ${{ secrets.PRIVATE_CHROME_CLIENT_SECRET }} \
-            --refresh-token ${{ secrets.PRIVATE_CHROME_REFRESH_TOKEN }} \
-            --auto-publish
-
-      - name: Create zip archive for GitHub release
+      - name: Create zip archive
         run: |
           cd apps/chrome-extension/dist
           zip -r ../../../bondery-extension-${{ github.ref_name }}.zip .
           cd ../../..
+
+      - name: Upload and publish to Chrome Web Store
+        run: |
+          npx chrome-webstore-upload-cli@3 upload \
+            --source ./bondery-extension-${{ github.ref_name }}.zip \
+            --extension-id ${{ secrets.PRIVATE_CHROME_EXTENSION_ID }} \
+            --client-id ${{ secrets.PRIVATE_CHROME_CLIENT_ID }} \
+            --client-secret ${{ secrets.PRIVATE_CHROME_CLIENT_SECRET }} \
+            --refresh-token ${{ secrets.PRIVATE_CHROME_REFRESH_TOKEN }} \
 
       - name: Get version from tag
         id: get_version
