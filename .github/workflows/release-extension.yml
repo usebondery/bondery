@@ -119,7 +119,6 @@ jobs:
           echo "$STATUS_RESPONSE" | node -e "const fs=require('fs'); const input=fs.readFileSync(0,'utf8'); const data=JSON.parse(input); if(data.error){ console.error('❌ fetchStatus failed'); console.error(input); process.exit(1);} const itemState = data.itemState || 'UNKNOWN'; const uploadState = data.uploadState || 'UNKNOWN'; console.log(`✅ fetchStatus OK | itemState=${itemState} uploadState=${uploadState}`);"
 
       - name: Create signed CRX package
-        if: false # Temporarily disabled: Chrome Web Store publishing
         run: |
           printf "%b" "${{ secrets.PRIVATE_CHROME_PRIVATE_SIGNING_KEY }}" > apps/chrome-extension/private-key.pem
           npx crx3@2 \
@@ -128,15 +127,15 @@ jobs:
             apps/chrome-extension/dist
 
       - name: Verify CRX signature inputs
-        if: false # Temporarily disabled: Chrome Web Store publishing
         run: |
-          printf "%b" "${{ secrets.PRIVATE_CHROME_PUBLIC_SIGNING_KEY }}" > apps/chrome-extension/public-key.pem
+          PUBLIC_KEY_ASSET_PATH="./bondery-extension-${{ steps.release_meta.outputs.tag }}.public-key.pem"
+          printf "%b" "${{ secrets.PRIVATE_CHROME_PUBLIC_SIGNING_KEY }}" > "$PUBLIC_KEY_ASSET_PATH"
 
-          openssl pkey -pubin -in apps/chrome-extension/public-key.pem -outform DER > apps/chrome-extension/public-key.der
+          openssl pkey -pubin -in "$PUBLIC_KEY_ASSET_PATH" -outform DER > apps/chrome-extension/public-key.der
 
           node -e "const fs=require('fs'); const crx=fs.readFileSync('apps/chrome-extension/bondery-extension-${{ steps.release_meta.outputs.tag }}.crx'); if(crx.subarray(0,4).toString()!=='Cr24'){ console.error('Invalid CRX header'); process.exit(1);}"
 
-          rm -f apps/chrome-extension/public-key.pem apps/chrome-extension/public-key.der
+          rm -f apps/chrome-extension/public-key.der
           rm -f apps/chrome-extension/private-key.pem
 
       - name: Create zip archive
@@ -211,6 +210,26 @@ jobs:
           asset_path: ./bondery-extension-${{ steps.release_meta.outputs.tag }}.zip
           asset_name: bondery-extension-${{ steps.release_meta.outputs.version }}.zip
           asset_content_type: application/zip
+
+      - name: Upload Release Asset (CRX)
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./apps/chrome-extension/bondery-extension-${{ steps.release_meta.outputs.tag }}.crx
+          asset_name: bondery-extension-${{ steps.release_meta.outputs.version }}.crx
+          asset_content_type: application/x-chrome-extension
+
+      - name: Upload Release Asset (Public Key)
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./bondery-extension-${{ steps.release_meta.outputs.tag }}.public-key.pem
+          asset_name: bondery-extension-${{ steps.release_meta.outputs.version }}.public-key.pem
+          asset_content_type: application/x-pem-file
 
       - name: Delete previous extension releases and tags
         run: |
