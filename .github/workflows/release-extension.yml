@@ -17,6 +17,14 @@ on:
 jobs:
   build-and-release:
     runs-on: ubuntu-latest
+    env:
+      NODE_ENV: production
+      NEXT_PUBLIC_WEBAPP_URL: ${{ vars.NEXT_PUBLIC_WEBAPP_URL }}
+      PRIVATE_CHROME_EXTENSION_ID: ${{ secrets.PRIVATE_CHROME_EXTENSION_ID }}
+      PRIVATE_CHROME_PUBLISHER_ID: ${{ secrets.PRIVATE_CHROME_PUBLISHER_ID }}
+      PRIVATE_CHROME_SERVICE_ACCOUNT_KEY_JSON: ${{ secrets.PRIVATE_CHROME_SERVICE_ACCOUNT_KEY_JSON }}
+      PRIVATE_CHROME_PRIVATE_SIGNING_KEY: ${{ secrets.PRIVATE_CHROME_PRIVATE_SIGNING_KEY }}
+      PRIVATE_CHROME_PUBLIC_SIGNING_KEY: ${{ secrets.PRIVATE_CHROME_PUBLIC_SIGNING_KEY }}
 
     steps:
       - name: Checkout code
@@ -29,30 +37,7 @@ jobs:
           cache: "npm"
 
       - name: Install dependencies
-        run: npm install
-
-      - name: Validate signing key pair from secrets
-        run: |
-          printf "%b" "${{ secrets.PRIVATE_CHROME_PRIVATE_SIGNING_KEY }}" > apps/chrome-extension/private-key-check.pem
-          printf "%b" "${{ secrets.PRIVATE_CHROME_PUBLIC_SIGNING_KEY }}" > apps/chrome-extension/public-key-check.pem
-
-          openssl pkey -in apps/chrome-extension/private-key-check.pem -pubout -out apps/chrome-extension/derived-public-key-check.pem
-          openssl pkey -pubin -in apps/chrome-extension/public-key-check.pem -outform DER > apps/chrome-extension/public-key-check.der
-          openssl pkey -pubin -in apps/chrome-extension/derived-public-key-check.pem -outform DER > apps/chrome-extension/derived-public-key-check.der
-
-          if cmp -s apps/chrome-extension/public-key-check.der apps/chrome-extension/derived-public-key-check.der; then
-            echo "✅ PRIVATE_CHROME_PRIVATE_SIGNING_KEY and PRIVATE_CHROME_PUBLIC_SIGNING_KEY match"
-          else
-            echo "❌ PRIVATE_CHROME_PRIVATE_SIGNING_KEY and PRIVATE_CHROME_PUBLIC_SIGNING_KEY do not match"
-            exit 1
-          fi
-
-          rm -f \
-            apps/chrome-extension/private-key-check.pem \
-            apps/chrome-extension/public-key-check.pem \
-            apps/chrome-extension/derived-public-key-check.pem \
-            apps/chrome-extension/public-key-check.der \
-            apps/chrome-extension/derived-public-key-check.der
+        run: npm ci
 
       - name: Resolve release metadata
         id: release_meta
@@ -87,50 +72,66 @@ jobs:
 
       - name: Create production environment file
         run: |
-          echo "NEXT_PUBLIC_WEBAPP_URL=${{ vars.NEXT_PUBLIC_WEBAPP_URL }}" > apps/chrome-extension/.env.production.local
+          echo "NEXT_PUBLIC_WEBAPP_URL=$NEXT_PUBLIC_WEBAPP_URL" > apps/chrome-extension/.env.production.local
 
       - name: Build Chrome Extension
         run: npx turbo build --filter=chrome-extension...
-        env:
-          NODE_ENV: production
-          NEXT_PUBLIC_WEBAPP_URL: ${{ vars.NEXT_PUBLIC_WEBAPP_URL }}
-          PRIVATE_CHROME_EXTENSION_ID: ${{ secrets.PRIVATE_CHROME_EXTENSION_ID }}
-          PRIVATE_CHROME_PUBLISHER_ID: ${{ secrets.PRIVATE_CHROME_PUBLISHER_ID }}
-          PRIVATE_CHROME_SERVICE_ACCOUNT_KEY_JSON: ${{ secrets.PRIVATE_CHROME_SERVICE_ACCOUNT_KEY_JSON }}
-          PRIVATE_CHROME_PRIVATE_SIGNING_KEY: ${{ secrets.PRIVATE_CHROME_PRIVATE_SIGNING_KEY }}
-          PRIVATE_CHROME_PUBLIC_SIGNING_KEY: ${{ secrets.PRIVATE_CHROME_PUBLIC_SIGNING_KEY }}
+
+      - name: Validate keys, create signed CRX, and prepare public key asset
+        run: |
+          PRIVATE_KEY_PATH="apps/chrome-extension/private-key.pem"
+          PUBLIC_KEY_PATH="apps/chrome-extension/public-key.pem"
+          DERIVED_PUBLIC_KEY_PATH="apps/chrome-extension/derived-public-key.pem"
+          PUBLIC_KEY_DER_PATH="apps/chrome-extension/public-key.der"
+          DERIVED_PUBLIC_KEY_DER_PATH="apps/chrome-extension/derived-public-key.der"
+          CRX_PATH="apps/chrome-extension/bondery-extension-${{ steps.release_meta.outputs.tag }}.crx"
+          PUBLIC_KEY_ASSET_PATH="./bondery-extension-${{ steps.release_meta.outputs.tag }}.public-key.pem"
+
+          printf "%b" "$PRIVATE_CHROME_PRIVATE_SIGNING_KEY" > "$PRIVATE_KEY_PATH"
+          printf "%b" "$PRIVATE_CHROME_PUBLIC_SIGNING_KEY" > "$PUBLIC_KEY_PATH"
+
+          openssl pkey -in "$PRIVATE_KEY_PATH" -pubout -out "$DERIVED_PUBLIC_KEY_PATH"
+          openssl pkey -pubin -in "$PUBLIC_KEY_PATH" -outform DER > "$PUBLIC_KEY_DER_PATH"
+          openssl pkey -pubin -in "$DERIVED_PUBLIC_KEY_PATH" -outform DER > "$DERIVED_PUBLIC_KEY_DER_PATH"
+
+          if cmp -s "$PUBLIC_KEY_DER_PATH" "$DERIVED_PUBLIC_KEY_DER_PATH"; then
+            echo "✅ PRIVATE_CHROME_PRIVATE_SIGNING_KEY and PRIVATE_CHROME_PUBLIC_SIGNING_KEY match"
+          else
+            echo "❌ PRIVATE_CHROME_PRIVATE_SIGNING_KEY and PRIVATE_CHROME_PUBLIC_SIGNING_KEY do not match"
+            exit 1
+          fi
+
+          npx crx3@2 \
+            -p "$PRIVATE_KEY_PATH" \
+            -o "$CRX_PATH" \
+            apps/chrome-extension/dist
+
+          cp "$PUBLIC_KEY_PATH" "$PUBLIC_KEY_ASSET_PATH"
+
+          node -e "const fs=require('fs'); const crx=fs.readFileSync(process.argv[1]); if(crx.subarray(0,4).toString()!=='Cr24'){ console.error('Invalid CRX header'); process.exit(1);} " "$CRX_PATH"
+
+          rm -f \
+            "$PRIVATE_KEY_PATH" \
+            "$PUBLIC_KEY_PATH" \
+            "$DERIVED_PUBLIC_KEY_PATH" \
+            "$PUBLIC_KEY_DER_PATH" \
+            "$DERIVED_PUBLIC_KEY_DER_PATH"
 
       - name: Authenticate to Google Cloud
         id: gcp_auth
         uses: google-github-actions/auth@v2
         with:
-          credentials_json: ${{ secrets.PRIVATE_CHROME_SERVICE_ACCOUNT_KEY_JSON }}
+          credentials_json: ${{ env.PRIVATE_CHROME_SERVICE_ACCOUNT_KEY_JSON }}
           token_format: access_token
           access_token_scopes: https://www.googleapis.com/auth/chromewebstore
 
       - name: Fetch Chrome Web Store item status
         run: |
           STATUS_RESPONSE=$(curl -sS -X GET \
-            "https://chromewebstore.googleapis.com/v2/publishers/${{ secrets.PRIVATE_CHROME_PUBLISHER_ID }}/items/${{ secrets.PRIVATE_CHROME_EXTENSION_ID }}:fetchStatus" \
+            "https://chromewebstore.googleapis.com/v2/publishers/$PRIVATE_CHROME_PUBLISHER_ID/items/$PRIVATE_CHROME_EXTENSION_ID:fetchStatus" \
             -H "Authorization: Bearer ${{ steps.gcp_auth.outputs.access_token }}")
 
           echo "$STATUS_RESPONSE" | node -e "const fs=require('fs'); const input=fs.readFileSync(0,'utf8'); const data=JSON.parse(input); if(data.error){ console.error('❌ fetchStatus failed'); console.error(input); process.exit(1);} const itemState = data.itemState || 'UNKNOWN'; const uploadState = data.uploadState || 'UNKNOWN'; console.log(`✅ fetchStatus OK | itemState=${itemState} uploadState=${uploadState}`);"
-
-      - name: Create signed CRX package
-        run: |
-          printf "%b" "${{ secrets.PRIVATE_CHROME_PRIVATE_SIGNING_KEY }}" > apps/chrome-extension/private-key.pem
-          npx crx3@2 \
-            -p apps/chrome-extension/private-key.pem \
-            -o apps/chrome-extension/bondery-extension-${{ steps.release_meta.outputs.tag }}.crx \
-            apps/chrome-extension/dist
-
-      - name: Prepare public key asset and verify CRX header
-        run: |
-          PUBLIC_KEY_ASSET_PATH="./bondery-extension-${{ steps.release_meta.outputs.tag }}.public-key.pem"
-          printf "%b" "${{ secrets.PRIVATE_CHROME_PUBLIC_SIGNING_KEY }}" > "$PUBLIC_KEY_ASSET_PATH"
-
-          node -e "const fs=require('fs'); const crx=fs.readFileSync('apps/chrome-extension/bondery-extension-${{ steps.release_meta.outputs.tag }}.crx'); if(crx.subarray(0,4).toString()!=='Cr24'){ console.error('Invalid CRX header'); process.exit(1);}"
-          rm -f apps/chrome-extension/private-key.pem
 
       - name: Create zip archive
         run: |
@@ -148,7 +149,7 @@ jobs:
           node -e "const fs=require('fs'); const crypto=require('crypto'); const p=process.argv[1]; const b=fs.readFileSync(p); const magic=b.subarray(0,4).toString(); const version=b.readUInt32LE(4); const sha256=crypto.createHash('sha256').update(b).digest('hex'); console.log(JSON.stringify({path:p,sizeBytes:b.length,magic,version,sha256},null,2)); if(magic!=='Cr24'){ process.exit(1);} " "$CRX_PATH"
 
           HTTP_CODE=$(curl -sS -o /tmp/cws-upload-response.json -w "%{http_code}" -X POST \
-            "https://chromewebstore.googleapis.com/upload/v2/publishers/${{ secrets.PRIVATE_CHROME_PUBLISHER_ID }}/items/${{ secrets.PRIVATE_CHROME_EXTENSION_ID }}:upload" \
+            "https://chromewebstore.googleapis.com/upload/v2/publishers/$PRIVATE_CHROME_PUBLISHER_ID/items/$PRIVATE_CHROME_EXTENSION_ID:upload" \
             -H "Authorization: Bearer ${{ steps.gcp_auth.outputs.access_token }}" \
             -H "X-Goog-Upload-Protocol: raw" \
             -H "X-Goog-Upload-File-Name: $CRX_FILE_NAME" \
@@ -163,30 +164,29 @@ jobs:
       - name: Publish Chrome Web Store item
         run: |
           PUBLISH_RESPONSE=$(curl -sS -X POST \
-            "https://chromewebstore.googleapis.com/v2/publishers/${{ secrets.PRIVATE_CHROME_PUBLISHER_ID }}/items/${{ secrets.PRIVATE_CHROME_EXTENSION_ID }}:publish" \
+            "https://chromewebstore.googleapis.com/v2/publishers/$PRIVATE_CHROME_PUBLISHER_ID/items/$PRIVATE_CHROME_EXTENSION_ID:publish" \
             -H "Authorization: Bearer ${{ steps.gcp_auth.outputs.access_token }}")
 
           echo "$PUBLISH_RESPONSE" | node -e "const fs=require('fs'); const input=fs.readFileSync(0,'utf8'); const data=JSON.parse(input); const state=String(data.state||'').toUpperCase(); const status=data.status; const okStatus = Array.isArray(status) ? status.map(String).map(s=>s.toUpperCase()).includes('OK') : String(status||'').toUpperCase()==='OK'; const okState = ['PENDING_REVIEW','PUBLISHED'].includes(state); if(!(okStatus || okState)){ console.error(input); process.exit(1);} console.log('✅ publish accepted | state=' + (state || 'UNKNOWN'));"
 
       - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
+        uses: softprops/action-gh-release@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: ${{ steps.release_meta.outputs.tag }}
-          release_name: Bondery Extension ${{ steps.release_meta.outputs.version }}
+          name: Bondery Extension ${{ steps.release_meta.outputs.version }}
           body: |
             ## Bondery Chrome Extension Release ${{ steps.release_meta.outputs.version }}
 
             ### 🎉 Automatic Chrome Web Store Publishing
             This version has been automatically published to the Chrome Web Store! You can install it directly from:
-            [Bondery Social Integration - Chrome Web Store](https://chrome.google.com/webstore/detail/bondery-social-integration/${{ secrets.PRIVATE_CHROME_EXTENSION_ID }})
+            [Bondery Social Integration - Chrome Web Store](https://chrome.google.com/webstore/detail/bondery-social-integration/${{ env.PRIVATE_CHROME_EXTENSION_ID }})
 
             ### Manual Installation (Development/Testing)
             If you need to install manually for development or testing:
-            1. Download the `bondery-extension-${{ steps.release_meta.outputs.version }}.zip` file below
-            2. Extract the zip file to a folder
+            1. Download the release files below
+            2. For unpacked mode, extract the `.zip` file to a folder
             3. Open Chrome and navigate to `chrome://extensions/`
             4. Enable "Developer mode" in the top right corner
             5. Click "Load unpacked" and select the extracted folder
@@ -195,36 +195,10 @@ jobs:
             See the commit history for details on what's included in this release.
           draft: false
           prerelease: false
-
-      - name: Upload Release Asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./bondery-extension-${{ steps.release_meta.outputs.tag }}.zip
-          asset_name: bondery-extension-${{ steps.release_meta.outputs.version }}.zip
-          asset_content_type: application/zip
-
-      - name: Upload Release Asset (CRX)
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./apps/chrome-extension/bondery-extension-${{ steps.release_meta.outputs.tag }}.crx
-          asset_name: bondery-extension-${{ steps.release_meta.outputs.version }}.crx
-          asset_content_type: application/x-chrome-extension
-
-      - name: Upload Release Asset (Public Key)
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./bondery-extension-${{ steps.release_meta.outputs.tag }}.public-key.pem
-          asset_name: bondery-extension-${{ steps.release_meta.outputs.version }}.public-key.pem
-          asset_content_type: application/x-pem-file
+          files: |
+            ./bondery-extension-${{ steps.release_meta.outputs.tag }}.zip
+            ./apps/chrome-extension/bondery-extension-${{ steps.release_meta.outputs.tag }}.crx
+            ./bondery-extension-${{ steps.release_meta.outputs.tag }}.public-key.pem
 
       - name: Delete previous extension releases and tags
         run: |
