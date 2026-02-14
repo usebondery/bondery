@@ -1,10 +1,18 @@
 name: Release Chrome Extension
 
+permissions:
+  contents: write
+
 on:
   push:
     tags:
       - "ext-v*.*.*" # Trigger on extension version tags like ext-v1.0.0, ext-v1.2.3
   workflow_dispatch: # Allow manual triggering
+    inputs:
+      release_tag:
+        description: "Extension tag to release (format: ext-vX.Y.Z)"
+        required: true
+        type: string
 
 jobs:
   build-and-release:
@@ -23,6 +31,37 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      - name: Resolve release metadata
+        id: release_meta
+        run: |
+          if [ "${GITHUB_EVENT_NAME}" = "workflow_dispatch" ]; then
+            TAG="${{ inputs.release_tag }}"
+          else
+            TAG="${GITHUB_REF_NAME}"
+          fi
+
+          if ! echo "$TAG" | grep -Eq '^ext-v[0-9]+\.[0-9]+\.[0-9]+$'; then
+            echo "❌ Invalid release tag: $TAG"
+            echo "Expected format: ext-vX.Y.Z"
+            exit 1
+          fi
+
+          VERSION="${TAG#ext-v}"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Ensure release tag exists for manual runs
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          TAG="${{ steps.release_meta.outputs.tag }}"
+          git fetch --tags
+          if git rev-parse "$TAG" >/dev/null 2>&1; then
+            echo "Tag already exists: $TAG"
+          else
+            git tag "$TAG" "$GITHUB_SHA"
+            git push origin "$TAG"
+          fi
+
       - name: Create production environment file
         run: |
           echo "NEXT_PUBLIC_WEBAPP_URL=${{ vars.NEXT_PUBLIC_WEBAPP_URL }}" > apps/chrome-extension/.env.production.local
@@ -37,26 +76,30 @@ jobs:
           PRIVATE_CHROME_CLIENT_SECRET: ${{ secrets.PRIVATE_CHROME_CLIENT_SECRET }}
           PRIVATE_CHROME_REFRESH_TOKEN: ${{ secrets.PRIVATE_CHROME_REFRESH_TOKEN }}
 
+      - name: Create signed CRX package
+        run: |
+          printf "%b" "${{ secrets.PRIVATE_CHROME_PRIVATE_SIGNING_KEY }}" > apps/chrome-extension/private-key.pem
+          npx crx3@2 \
+            -p apps/chrome-extension/private-key.pem \
+            -o apps/chrome-extension/bondery-extension-${{ steps.release_meta.outputs.tag }}.crx \
+            apps/chrome-extension/dist
+          rm -f apps/chrome-extension/private-key.pem
+
       - name: Create zip archive
         run: |
           cd apps/chrome-extension/dist
-          zip -r ../../../bondery-extension-${{ github.ref_name }}.zip .
+          zip -r ../../../bondery-extension-${{ steps.release_meta.outputs.tag }}.zip .
           cd ../../..
 
       - name: Upload and publish to Chrome Web Store
         run: |
           npx chrome-webstore-upload-cli@3 upload \
-            --source ./bondery-extension-${{ github.ref_name }}.zip \
+            --source ./apps/chrome-extension/bondery-extension-${{ steps.release_meta.outputs.tag }}.crx \
             --extension-id ${{ secrets.PRIVATE_CHROME_EXTENSION_ID }} \
             --client-id ${{ secrets.PRIVATE_CHROME_CLIENT_ID }} \
             --client-secret ${{ secrets.PRIVATE_CHROME_CLIENT_SECRET }} \
             --refresh-token ${{ secrets.PRIVATE_CHROME_REFRESH_TOKEN }} \
-
-      - name: Get version from tag
-        id: get_version
-        run: |
-          VERSION=${GITHUB_REF#refs/tags/ext-}
-          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+            --auto-publish
 
       - name: Create Release
         id: create_release
@@ -64,10 +107,10 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ github.ref }}
-          release_name: Bondery Extension ${{ steps.get_version.outputs.VERSION }}
+          tag_name: ${{ steps.release_meta.outputs.tag }}
+          release_name: Bondery Extension ${{ steps.release_meta.outputs.version }}
           body: |
-            ## Bondery Chrome Extension Release ${{ steps.get_version.outputs.VERSION }}
+            ## Bondery Chrome Extension Release ${{ steps.release_meta.outputs.version }}
 
             ### 🎉 Automatic Chrome Web Store Publishing
             This version has been automatically published to the Chrome Web Store! You can install it directly from:
@@ -75,7 +118,7 @@ jobs:
 
             ### Manual Installation (Development/Testing)
             If you need to install manually for development or testing:
-            1. Download the `bondery-extension-${{ steps.get_version.outputs.VERSION }}.zip` file below
+            1. Download the `bondery-extension-${{ steps.release_meta.outputs.version }}.zip` file below
             2. Extract the zip file to a folder
             3. Open Chrome and navigate to `chrome://extensions/`
             4. Enable "Developer mode" in the top right corner
@@ -92,15 +135,15 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./bondery-extension-${{ github.ref_name }}.zip
-          asset_name: bondery-extension-${{ steps.get_version.outputs.VERSION }}.zip
+          asset_path: ./bondery-extension-${{ steps.release_meta.outputs.tag }}.zip
+          asset_name: bondery-extension-${{ steps.release_meta.outputs.version }}.zip
           asset_content_type: application/zip
 
       - name: Delete previous extension releases and tags
         run: |
           # Delete previous extension releases
           gh release list --limit 100 | grep "^ext-v" | awk '{print $1}' | while read tag; do
-            if [ "$tag" != "${{ github.ref_name }}" ]; then
+            if [ "$tag" != "${{ steps.release_meta.outputs.tag }}" ]; then
               echo "Deleting release: $tag"
               gh release delete "$tag" --yes || true
             fi
@@ -108,7 +151,7 @@ jobs:
 
           # Delete previous extension tags (keep current tag)
           git ls-remote --tags origin "ext-v*" | awk -F/ '{print $3}' | while read tag; do
-            if [ "$tag" != "${{ github.ref_name }}" ]; then
+            if [ "$tag" != "${{ steps.release_meta.outputs.tag }}" ]; then
               echo "Deleting tag: $tag"
               gh api -X DELETE "/repos/${{ github.repository }}/git/refs/tags/$tag" || true
             fi

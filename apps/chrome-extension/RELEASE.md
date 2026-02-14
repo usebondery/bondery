@@ -60,7 +60,8 @@ You can also trigger a release manually from the GitHub Actions tab:
 1. Go to the "Release Chrome Extension" workflow
 2. Click "Run workflow"
 3. Select the branch
-4. Click "Run workflow"
+4. Set `release_tag` in format `ext-vX.Y.Z` (example: `ext-v0.5.7`)
+5. Click "Run workflow"
 
 ## Environment Variables
 
@@ -72,6 +73,7 @@ The workflow also requires these repository secrets for `chrome-webstore-upload`
 - `PRIVATE_CHROME_CLIENT_ID`
 - `PRIVATE_CHROME_CLIENT_SECRET`
 - `PRIVATE_CHROME_REFRESH_TOKEN`
+- `PRIVATE_CHROME_PRIVATE_SIGNING_KEY` (PEM private key used to sign CRX packages)
 
 ## Installation for End Users
 
