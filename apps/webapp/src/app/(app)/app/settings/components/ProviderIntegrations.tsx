@@ -170,7 +170,9 @@ export function ProviderIntegrations({
             <IntegrationCard
               key={provider}
               provider={provider}
-              displayName={provider === "github" ? tIntegration("GitHub") : tIntegration("LinkedIn")}
+              displayName={
+                provider === "github" ? tIntegration("GitHub") : tIntegration("LinkedIn")
+              }
               icon={icon}
               iconColor={iconColor}
               isConnected={isConnected}

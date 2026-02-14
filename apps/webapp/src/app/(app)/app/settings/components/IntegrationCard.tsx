@@ -33,7 +33,9 @@ export function IntegrationCard({
 }: IntegrationCardProps) {
   const description = isDisabled
     ? (disabledDescription ?? connectedDescription)
-    : (isConnected ? connectedDescription : unconnectedDescription);
+    : isConnected
+      ? connectedDescription
+      : unconnectedDescription;
 
   return (
     <Checkbox.Card
