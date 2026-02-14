@@ -18,7 +18,6 @@ jobs:
   build-and-release:
     runs-on: ubuntu-latest
     env:
-      NODE_ENV: production
       NEXT_PUBLIC_WEBAPP_URL: ${{ vars.NEXT_PUBLIC_WEBAPP_URL }}
       PRIVATE_CHROME_EXTENSION_ID: ${{ secrets.PRIVATE_CHROME_EXTENSION_ID }}
       PRIVATE_CHROME_PUBLISHER_ID: ${{ secrets.PRIVATE_CHROME_PUBLISHER_ID }}
@@ -75,6 +74,8 @@ jobs:
           echo "NEXT_PUBLIC_WEBAPP_URL=$NEXT_PUBLIC_WEBAPP_URL" > apps/chrome-extension/.env.production.local
 
       - name: Build Chrome Extension
+        env:
+          NODE_ENV: production
         run: npx turbo build --filter=chrome-extension...
 
       - name: Validate keys, create signed CRX, and prepare public key asset
