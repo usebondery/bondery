@@ -31,6 +31,27 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      - name: Validate signing key pair from secrets
+        run: |
+          printf "%b" "${{ secrets.PRIVATE_CHROME_PRIVATE_SIGNING_KEY }}" > apps/chrome-extension/private-key-check.pem
+          printf "%b" "${{ secrets.PRIVATE_CHROME_PUBLIC_SIGNING_KEY }}" > apps/chrome-extension/public-key-check.pem
+
+          openssl pkey -in apps/chrome-extension/private-key-check.pem -pubout -out apps/chrome-extension/derived-public-key-check.pem
+          openssl pkey -pubin -in apps/chrome-extension/public-key-check.pem -outform DER > apps/chrome-extension/public-key-check.der
+          openssl pkey -pubin -in apps/chrome-extension/derived-public-key-check.pem -outform DER > apps/chrome-extension/derived-public-key-check.der
+
+          if ! cmp -s apps/chrome-extension/public-key-check.der apps/chrome-extension/derived-public-key-check.der; then
+            echo "❌ PRIVATE_CHROME_PRIVATE_SIGNING_KEY and PRIVATE_CHROME_PUBLIC_SIGNING_KEY do not match"
+            exit 1
+          fi
+
+          rm -f \
+            apps/chrome-extension/private-key-check.pem \
+            apps/chrome-extension/public-key-check.pem \
+            apps/chrome-extension/derived-public-key-check.pem \
+            apps/chrome-extension/public-key-check.der \
+            apps/chrome-extension/derived-public-key-check.der
+
       - name: Resolve release metadata
         id: release_meta
         run: |
@@ -88,10 +109,7 @@ jobs:
         run: |
           printf "%b" "${{ secrets.PRIVATE_CHROME_PUBLIC_SIGNING_KEY }}" > apps/chrome-extension/public-key.pem
 
-          openssl pkey -in apps/chrome-extension/private-key.pem -pubout -out apps/chrome-extension/derived-public-key.pem
           openssl pkey -pubin -in apps/chrome-extension/public-key.pem -outform DER > apps/chrome-extension/public-key.der
-          openssl pkey -pubin -in apps/chrome-extension/derived-public-key.pem -outform DER > apps/chrome-extension/derived-public-key.der
-          cmp -s apps/chrome-extension/public-key.der apps/chrome-extension/derived-public-key.der
 
           node -e "const fs=require('fs'); const crx=fs.readFileSync('apps/chrome-extension/bondery-extension-${{ steps.release_meta.outputs.tag }}.crx'); if(crx.subarray(0,4).toString()!=='Cr24'){ console.error('Invalid CRX header'); process.exit(1);}"
 
@@ -104,7 +122,7 @@ jobs:
             exit 1
           fi
 
-          rm -f apps/chrome-extension/public-key.pem apps/chrome-extension/derived-public-key.pem apps/chrome-extension/public-key.der apps/chrome-extension/derived-public-key.der
+          rm -f apps/chrome-extension/public-key.pem apps/chrome-extension/public-key.der
           rm -f apps/chrome-extension/private-key.pem
 
       - name: Create zip archive
