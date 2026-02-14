@@ -101,7 +101,6 @@ jobs:
           PRIVATE_CHROME_PUBLIC_SIGNING_KEY: ${{ secrets.PRIVATE_CHROME_PUBLIC_SIGNING_KEY }}
 
       - name: Authenticate to Google Cloud
-        if: false # Temporarily disabled: Chrome Web Store publishing
         id: gcp_auth
         uses: google-github-actions/auth@v2
         with:
@@ -110,7 +109,6 @@ jobs:
           access_token_scopes: https://www.googleapis.com/auth/chromewebstore
 
       - name: Fetch Chrome Web Store item status
-        if: false # Temporarily disabled: Chrome Web Store publishing
         run: |
           STATUS_RESPONSE=$(curl -sS -X GET \
             "https://chromewebstore.googleapis.com/v2/publishers/${{ secrets.PRIVATE_CHROME_PUBLISHER_ID }}/items/${{ secrets.PRIVATE_CHROME_EXTENSION_ID }}:fetchStatus" \
@@ -126,16 +124,12 @@ jobs:
             -o apps/chrome-extension/bondery-extension-${{ steps.release_meta.outputs.tag }}.crx \
             apps/chrome-extension/dist
 
-      - name: Verify CRX signature inputs
+      - name: Prepare public key asset and verify CRX header
         run: |
           PUBLIC_KEY_ASSET_PATH="./bondery-extension-${{ steps.release_meta.outputs.tag }}.public-key.pem"
           printf "%b" "${{ secrets.PRIVATE_CHROME_PUBLIC_SIGNING_KEY }}" > "$PUBLIC_KEY_ASSET_PATH"
 
-          openssl pkey -pubin -in "$PUBLIC_KEY_ASSET_PATH" -outform DER > apps/chrome-extension/public-key.der
-
           node -e "const fs=require('fs'); const crx=fs.readFileSync('apps/chrome-extension/bondery-extension-${{ steps.release_meta.outputs.tag }}.crx'); if(crx.subarray(0,4).toString()!=='Cr24'){ console.error('Invalid CRX header'); process.exit(1);}"
-
-          rm -f apps/chrome-extension/public-key.der
           rm -f apps/chrome-extension/private-key.pem
 
       - name: Create zip archive
@@ -145,17 +139,19 @@ jobs:
           cd ../../..
 
       - name: Upload CRX to Chrome Web Store
-        if: false # Temporarily disabled: Chrome Web Store publishing
         run: |
           CRX_PATH="./apps/chrome-extension/bondery-extension-${{ steps.release_meta.outputs.tag }}.crx"
+          CRX_FILE_NAME="bondery-extension-${{ steps.release_meta.outputs.version }}.crx"
 
           echo "CRX file diagnostics:"
           ls -lh "$CRX_PATH"
           node -e "const fs=require('fs'); const crypto=require('crypto'); const p=process.argv[1]; const b=fs.readFileSync(p); const magic=b.subarray(0,4).toString(); const version=b.readUInt32LE(4); const sha256=crypto.createHash('sha256').update(b).digest('hex'); console.log(JSON.stringify({path:p,sizeBytes:b.length,magic,version,sha256},null,2)); if(magic!=='Cr24'){ process.exit(1);} " "$CRX_PATH"
 
           HTTP_CODE=$(curl -sS -o /tmp/cws-upload-response.json -w "%{http_code}" -X POST \
-            "https://chromewebstore.googleapis.com/upload/v2/publishers/${{ secrets.PRIVATE_CHROME_PUBLISHER_ID }}/items/${{ secrets.PRIVATE_CHROME_EXTENSION_ID }}:upload?uploadType=media" \
+            "https://chromewebstore.googleapis.com/upload/v2/publishers/${{ secrets.PRIVATE_CHROME_PUBLISHER_ID }}/items/${{ secrets.PRIVATE_CHROME_EXTENSION_ID }}:upload" \
             -H "Authorization: Bearer ${{ steps.gcp_auth.outputs.access_token }}" \
+            -H "X-Goog-Upload-Protocol: raw" \
+            -H "X-Goog-Upload-File-Name: $CRX_FILE_NAME" \
             -H "Content-Type: application/x-chrome-extension" \
             --data-binary @"$CRX_PATH")
 
@@ -165,7 +161,6 @@ jobs:
           node -e "const fs=require('fs'); const code=Number(process.argv[1]); const input=fs.readFileSync('/tmp/cws-upload-response.json','utf8'); let data; try{ data=JSON.parse(input);} catch { console.error('Non-JSON upload response:', input); process.exit(1);} if(code < 200 || code >= 300){ console.error('Upload request failed with non-2xx status'); process.exit(1);} if(data.uploadState!=='SUCCESS'){ console.error(input); process.exit(1);} " "$HTTP_CODE"
 
       - name: Publish Chrome Web Store item
-        if: false # Temporarily disabled: Chrome Web Store publishing
         run: |
           PUBLISH_RESPONSE=$(curl -sS -X POST \
             "https://chromewebstore.googleapis.com/v2/publishers/${{ secrets.PRIVATE_CHROME_PUBLISHER_ID }}/items/${{ secrets.PRIVATE_CHROME_EXTENSION_ID }}:publish" \
