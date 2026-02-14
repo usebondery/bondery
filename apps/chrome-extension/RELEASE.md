@@ -67,6 +67,7 @@ You can also trigger a release manually from the GitHub Actions tab:
 
 The workflow uses these repository variables:
 - `NEXT_PUBLIC_WEBAPP_URL`: Production app URL (configured in GitHub Settings → Secrets and variables → Actions → Variables)
+- `PRIVATE_CHROME_PUBLISHER_ID`: Chrome Web Store publisher ID used for V2 API upload/publish endpoints
 
 The workflow also requires these repository secrets for `chrome-webstore-upload`:
 - `PRIVATE_CHROME_EXTENSION_ID`
