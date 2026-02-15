@@ -24,13 +24,7 @@ interface SocialMediaSectionProps {
   setSignalPrefix: (value: string) => void;
 }
 
-type SocialFieldKey =
-  | "linkedin"
-  | "instagram"
-  | "facebook"
-  | "website"
-  | "whatsapp"
-  | "signal";
+type SocialFieldKey = "linkedin" | "instagram" | "facebook" | "website" | "whatsapp" | "signal";
 
 type SocialFieldValues = Record<SocialFieldKey, string>;
 

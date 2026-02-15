@@ -497,7 +497,6 @@ export default function PersonClient({
         color: "red",
         icon: <IconX size={18} />,
       });
-
     } finally {
       setSavingField(null);
     }
