@@ -5,7 +5,6 @@
 
 The Chrome Extension uses **separate versioning** from the web app:
 - Extension releases use tags like `ext-v1.0.0`, `ext-v1.2.3`
-- Web app releases use tags like `v1.0.0`, `v1.2.3`
 
 This allows independent version numbering for each component.
 

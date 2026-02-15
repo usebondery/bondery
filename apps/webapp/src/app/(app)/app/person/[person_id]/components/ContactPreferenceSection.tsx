@@ -1,7 +1,6 @@
 "use client";
 
-import { Paper, Divider, Group, Text } from "@mantine/core";
-import { IconGlobe, IconLanguage } from "@tabler/icons-react";
+import { Group } from "@mantine/core";
 import type { Contact } from "@bondery/types";
 import { TimezonePicker } from "@/components/shared/TimezonePicker";
 import { LanguagePicker } from "@/components/shared/LanguagePicker";
@@ -21,34 +20,29 @@ export function ContactPreferenceSection({
   handleBlur,
 }: ContactPreferenceSectionProps) {
   return (
-    <Paper withBorder p="md">
-      <Group gap="xs" mb="md">
-        <IconGlobe size={20} stroke={1.5} />
-        <Text size="lg" fw={600}>
-          Preferences
-        </Text>
-      </Group>
+    <Group align="flex-start" grow wrap="wrap">
+      <div style={{ flex: 1, minWidth: 260 }}>
+        <LanguagePicker
+          value={contact.language || "en"}
+          onChange={(value) => handleChange("language", value)}
+          onBlur={(value) => handleBlur("language", value)}
+          label="Preferred Language"
+          placeholder="Select language..."
+          languages={WORLD_LANGUAGES_DATA}
+          loading={savingField === "language"}
+        />
+      </div>
 
-      <TimezonePicker
-        value={contact.timezone || "UTC"}
-        onChange={(value) => handleChange("timezone", value)}
-        onBlur={(value) => handleBlur("timezone", value)}
-        label="Timezone"
-        placeholder="Select timezone..."
-        loading={savingField === "timezone"}
-      />
-
-      <Divider my="md" />
-
-      <LanguagePicker
-        value={contact.language || "en"}
-        onChange={(value) => handleChange("language", value)}
-        onBlur={(value) => handleBlur("language", value)}
-        label="Preferred Language"
-        placeholder="Select language..."
-        languages={WORLD_LANGUAGES_DATA}
-        loading={savingField === "language"}
-      />
-    </Paper>
+      <div style={{ flex: 1, minWidth: 260 }}>
+        <TimezonePicker
+          value={contact.timezone || "UTC"}
+          onChange={(value) => handleChange("timezone", value)}
+          onBlur={(value) => handleBlur("timezone", value)}
+          label="Timezone"
+          placeholder="Select timezone..."
+          loading={savingField === "timezone"}
+        />
+      </div>
+    </Group>
   );
 }

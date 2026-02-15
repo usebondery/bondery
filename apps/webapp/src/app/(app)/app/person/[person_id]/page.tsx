@@ -1,7 +1,12 @@
 "use server";
 
 import { Stack, Text } from "@mantine/core";
-import type { Contact, Activity } from "@bondery/types";
+import type {
+  Contact,
+  Activity,
+  ContactRelationshipWithPeople,
+  ImportantEvent,
+} from "@bondery/types";
 import PersonClient from "./PersonClient";
 import { getAuthHeaders } from "@/lib/authHeaders";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
@@ -33,11 +38,40 @@ async function getPersonData(personId: string) {
     headers,
   });
 
-  const [contactResponse, groupsResponse, membershipResponse, activitiesResponse] = await Promise.all([
+  const relationshipsPromise = fetch(`${API_URL}${API_ROUTES.CONTACTS}/${personId}/relationships`, {
+    cache: "no-store",
+    headers,
+  });
+
+  const importantEventsPromise = fetch(
+    `${API_URL}${API_ROUTES.CONTACTS}/${personId}/important-events`,
+    {
+      cache: "no-store",
+      headers,
+    },
+  );
+
+  const contactsPromise = fetch(`${API_URL}${API_ROUTES.CONTACTS}`, {
+    cache: "no-store",
+    headers,
+  });
+
+  const [
+    contactResponse,
+    groupsResponse,
+    membershipResponse,
+    activitiesResponse,
+    relationshipsResponse,
+    importantEventsResponse,
+    contactsResponse,
+  ] = await Promise.all([
     contactPromise,
     groupsPromise,
     membershipPromise,
     activitiesPromise,
+    relationshipsPromise,
+    importantEventsPromise,
+    contactsPromise,
   ]);
 
   if (!contactResponse.ok) {
@@ -53,11 +87,21 @@ async function getPersonData(personId: string) {
 
   const groupsData = groupsResponse.ok ? await groupsResponse.json() : { groups: [] };
   const personGroupsData = membershipResponse.ok ? await membershipResponse.json() : { groups: [] };
-  const activitiesData = activitiesResponse.ok ? await activitiesResponse.json() : { activities: [] };
+  const activitiesData = activitiesResponse.ok
+    ? await activitiesResponse.json()
+    : { activities: [] };
+  const relationshipsData = relationshipsResponse.ok
+    ? await relationshipsResponse.json()
+    : { relationships: [] };
+  const importantEventsData = importantEventsResponse.ok
+    ? await importantEventsResponse.json()
+    : { events: [] };
+  const contactsData = contactsResponse.ok ? await contactsResponse.json() : { contacts: [] };
 
-  const personActivities = activitiesData.activities?.filter((a: any) => 
-    a.participants?.some((p: any) => p.id === personId)
-  ) || [];
+  const personActivities =
+    activitiesData.activities?.filter((a: any) =>
+      a.participants?.some((p: any) => p.id === personId),
+    ) || [];
 
   // Fetch connected contacts if they exist
   let connectedContacts: Contact[] = [];
@@ -82,6 +126,12 @@ async function getPersonData(personId: string) {
   return {
     contact,
     connectedContacts,
+    selectableContacts:
+      ((contactsData.contacts as Contact[]) || []).filter(
+        (candidate) => candidate.id !== personId,
+      ) || [],
+    relationships: (relationshipsData.relationships as ContactRelationshipWithPeople[]) || [],
+    importantEvents: (importantEventsData.events as ImportantEvent[]) || [],
     groups: (groupsData.groups as Group[]) || [],
     personGroups: (personGroupsData.groups as Group[]) || [],
     activities: (personActivities as Activity[]) || [],
@@ -119,6 +169,9 @@ export default async function PersonPage({ params }: { params: Promise<{ person_
     <PersonClient
       initialContact={data.contact}
       initialConnectedContacts={data.connectedContacts}
+      initialSelectableContacts={data.selectableContacts}
+      initialRelationships={data.relationships}
+      initialImportantEvents={data.importantEvents}
       initialGroups={data.groups}
       initialPersonGroups={data.personGroups}
       initialActivities={data.activities}

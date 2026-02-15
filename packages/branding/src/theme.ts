@@ -40,11 +40,16 @@ export const bonderyTheme = createTheme({
         className: "button-scale-effect",
       },
     },
-    // Input: {
-    //   defaultProps: {
-    //     className: "input-scale-effect",
-    //   },
-    // },
+    Select: {
+      defaultProps: {
+        variant: "filled",
+      },
+    },
+    Input: {
+      defaultProps: {
+        variant: "filled",
+      },
+    },
     TextInput: {
       defaultProps: {
         variant: "filled",

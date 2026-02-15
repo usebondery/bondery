@@ -2,6 +2,8 @@
  * Application configuration constants
  */
 
+import type { ContactType, ImportantEventType, RelationshipType } from "@bondery/types";
+
 export const WEBAPP_URL = process.env.NEXT_PUBLIC_WEBAPP_URL!;
 export const WEBSITE_URL = process.env.NEXT_PUBLIC_WEBSITE_URL!;
 export const API_URL = process.env.NEXT_PUBLIC_API_URL!;
@@ -21,8 +23,49 @@ export const FEATURES = {
 } as const;
 
 export const LIMITS = {
-  maxImportantDates: 3,
+  maxImportantDates: 5,
 } as const;
+
+export const IMPORTANT_EVENT_TYPE_OPTIONS: ReadonlyArray<{
+  value: ImportantEventType;
+  emoji: string;
+}> = [
+  { value: "birthday", emoji: "🎂" },
+  { value: "anniversary", emoji: "💍" },
+  { value: "nameday", emoji: "🌼" },
+  { value: "graduation", emoji: "🎓" },
+  { value: "other", emoji: "📅" },
+] as const;
+
+export const IMPORTANT_EVENT_NOTIFY_OPTIONS: ReadonlyArray<{
+  value: "none" | "1" | "3" | "7";
+}> = [{ value: "none" }, { value: "1" }, { value: "3" }, { value: "7" }] as const;
+
+export const RELATIONSHIP_TYPE_OPTIONS: ReadonlyArray<{
+  value: RelationshipType;
+  emoji: string;
+}> = [
+  { value: "parent", emoji: "👨‍👩‍👧" },
+  { value: "child", emoji: "🧒" },
+  { value: "spouse", emoji: "💍" },
+  { value: "partner", emoji: "❤️" },
+  { value: "sibling", emoji: "👫" },
+  { value: "friend", emoji: "🤝" },
+  { value: "colleague", emoji: "💼" },
+  { value: "neighbor", emoji: "🏡" },
+  { value: "guardian", emoji: "🛡️" },
+  { value: "dependent", emoji: "🫶" },
+  { value: "other", emoji: "🔗" },
+] as const;
+
+export const CONTACT_METHOD_TYPE_OPTIONS: ReadonlyArray<{
+  value: ContactType;
+  emoji: string;
+  label: string;
+}> = [
+  { value: "home", emoji: "🏠", label: "Home" },
+  { value: "work", emoji: "💼", label: "Work" },
+] as const;
 
 /**
  * Avatar upload configuration

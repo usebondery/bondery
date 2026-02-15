@@ -50,6 +50,7 @@
     "posthog-js": "^1.347.0",
     "react": "19.2.4",
     "react-dom": "19.2.4",
+    "react-imask": "^7.6.1",
     "react-leaflet": "^5.0.0",
     "react-leaflet-cluster": "^4.0.0"
   },

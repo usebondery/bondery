@@ -22,16 +22,27 @@ import { IconCheck, IconX, IconAlertCircle, IconTrash, IconUser } from "@tabler/
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
+import { useTranslations } from "next-intl";
 import { extractUsername } from "@/lib/socialMediaHelpers";
-import { LIMITS } from "@/lib/config";
 import { parsePhoneNumber, combinePhoneNumber } from "@/lib/phoneHelpers";
 import { formatContactName } from "@/lib/nameHelpers";
-import type { Contact, Group as GroupType, PhoneEntry, EmailEntry, Activity } from "@bondery/types";
+import type {
+  Contact,
+  ContactPreview,
+  ContactRelationshipWithPeople,
+  Group as GroupType,
+  PhoneEntry,
+  EmailEntry,
+  Activity,
+  RelationshipType,
+  ImportantEvent,
+} from "@bondery/types";
 import type { ComboboxItem, MultiSelectProps } from "@mantine/core";
 import { ContactActionMenu } from "./components/ContactActionMenu";
 import { ContactIdentitySection } from "./components/ContactIdentitySection";
 import { ContactBioSection } from "./components/ContactBioSection";
 import { ContactPreferenceSection } from "./components/ContactPreferenceSection";
+import { ContactRelationshipsSection } from "./components/ContactRelationshipsSection";
 import { ContactNotesSection } from "./components/ContactNotesSection";
 import { ContactInfoSection } from "./components/ContactInfoSection";
 import { SocialMediaSection } from "./components/SocialMediaSection";
@@ -52,6 +63,9 @@ const PersonMap = dynamic(() => import("./components/PersonMap").then((mod) => m
 interface PersonClientProps {
   initialContact: Contact;
   initialConnectedContacts: Contact[];
+  initialSelectableContacts: Contact[];
+  initialRelationships: ContactRelationshipWithPeople[];
+  initialImportantEvents: ImportantEvent[];
   initialGroups: GroupType[];
   initialPersonGroups: GroupType[];
   initialActivities: Activity[];
@@ -61,12 +75,17 @@ interface PersonClientProps {
 export default function PersonClient({
   initialContact,
   initialConnectedContacts,
+  initialSelectableContacts,
+  initialRelationships,
+  initialImportantEvents,
   initialGroups,
   initialPersonGroups,
   initialActivities = [],
   personId,
 }: PersonClientProps) {
   const router = useRouter();
+  const tRelationships = useTranslations("PersonRelationships");
+  const tImportantDates = useTranslations("ContactImportantDates");
 
   const [contact, setContact] = useState<Contact>(initialContact);
   const [allGroups] = useState<GroupType[]>(initialGroups);
@@ -79,14 +98,13 @@ export default function PersonClient({
   const [emails, setEmails] = useState<EmailEntry[]>([]);
   const [whatsappPrefix, setWhatsappPrefix] = useState("+1");
   const [signalPrefix, setSignalPrefix] = useState("+1");
-  const [birthday, setBirthday] = useState<Date | null>(null);
-  const [notifyBirthday, setNotifyBirthday] = useState(false);
-  const [importantDates, setImportantDates] = useState<
-    Array<{ date: Date | null; name: string; notify: boolean }>
-  >([]);
+  const [importantEvents, setImportantEvents] = useState<ImportantEvent[]>(initialImportantEvents);
   const [focusedField, setFocusedField] = useState<string | null>(null);
   const [groupsSaving, setGroupsSaving] = useState(false);
-  
+  const [relationships, setRelationships] =
+    useState<ContactRelationshipWithPeople[]>(initialRelationships);
+  const [relationshipsSaving, setRelationshipsSaving] = useState(false);
+
   const hasCoordinates = Number.isFinite(contact?.latitude) && Number.isFinite(contact?.longitude);
 
   const groupSelectData = allGroups.map((group) => ({
@@ -97,6 +115,20 @@ export default function PersonClient({
   }));
 
   const selectedGroupIds = personGroups.map((group) => group.id);
+  const selectablePeople: ContactPreview[] = initialSelectableContacts.map((person) => ({
+    id: person.id,
+    firstName: person.firstName,
+    lastName: person.lastName,
+    avatar: person.avatar,
+    avatarColor: person.avatarColor,
+  }));
+  const currentPersonPreview: ContactPreview = {
+    id: contact.id,
+    firstName: contact.firstName,
+    lastName: contact.lastName,
+    avatar: contact.avatar,
+    avatarColor: contact.avatarColor,
+  };
 
   // Initialize edited values when contact loads
   useEffect(() => {
@@ -133,31 +165,6 @@ export default function PersonClient({
           ...prev,
           signal: signalParsed.number,
         }));
-      }
-
-      // Set birthday
-      if (contact.birthdate) {
-        setBirthday(new Date(contact.birthdate));
-      } else {
-        setBirthday(null);
-      }
-      setNotifyBirthday(contact.notifyBirthday || false);
-
-      // Set important dates
-      if (
-        contact.importantDates &&
-        Array.isArray(contact.importantDates) &&
-        contact.importantDates.length > 0
-      ) {
-        setImportantDates(
-          contact.importantDates.map((d: any) => ({
-            date: new Date(d.date),
-            name: d.name,
-            notify: d.notify,
-          })),
-        );
-      } else {
-        setImportantDates([]);
       }
 
       setEditedValues((prev) => ({
@@ -257,11 +264,12 @@ export default function PersonClient({
     }
   };
 
-  const handleSavePhones = async () => {
+  const handleSavePhones = async (phonesOverride?: PhoneEntry[]) => {
     if (!contact || !personId) return;
 
     // Filter out empty phones and ensure we have both prefix and value
-    const phonesToSave = phones
+    const sourcePhones = phonesOverride ?? phones;
+    const phonesToSave = sourcePhones
       .filter((phone) => phone.value && phone.value.trim() !== "")
       .map((phone) => ({
         ...phone,
@@ -309,11 +317,12 @@ export default function PersonClient({
     }
   };
 
-  const handleSaveEmails = async () => {
+  const handleSaveEmails = async (emailsOverride?: EmailEntry[]) => {
     if (!contact || !personId) return;
 
     // Filter out empty emails
-    const emailsToSave = emails.filter((email) => email.value.trim() !== "");
+    const sourceEmails = emailsOverride ?? emails;
+    const emailsToSave = sourceEmails.filter((email) => email.value.trim() !== "");
 
     // Check if changed
     const currentEmails = Array.isArray(contact.emails) ? contact.emails : [];
@@ -355,9 +364,60 @@ export default function PersonClient({
     }
   };
 
-  const handleSaveContactInfo = async () => {
-    await handleSavePhones();
-    await handleSaveEmails();
+  const handleSaveContactInfo = async (payload?: {
+    phones?: PhoneEntry[];
+    emails?: EmailEntry[];
+  }) => {
+    await handleSavePhones(payload?.phones);
+    await handleSaveEmails(payload?.emails);
+  };
+
+  const handleSaveImportantEvents = async (eventsOverride?: ImportantEvent[]) => {
+    if (!contact || !personId) return;
+
+    const sourceEvents = eventsOverride ?? importantEvents;
+    const eventsToSave = sourceEvents
+      .filter((event) => event.eventDate)
+      .map((event) => ({
+        id: event.id,
+        eventType: event.eventType,
+        eventDate: event.eventDate,
+        note: event.note,
+        notifyDaysBefore: event.notifyDaysBefore ?? null,
+      }));
+
+    setSavingField("importantEvents");
+
+    try {
+      const res = await fetch(`${API_ROUTES.CONTACTS}/${personId}/important-events`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ events: eventsToSave }),
+      });
+
+      if (!res.ok) throw new Error("Failed to update important events");
+
+      const data = await res.json();
+      const nextEvents = (data.events || []) as ImportantEvent[];
+
+      setImportantEvents(nextEvents);
+
+      notifications.show({
+        title: tImportantDates("SuccessTitle"),
+        message: tImportantDates("UpdateSuccess"),
+        color: "green",
+        icon: <IconCheck size={18} />,
+      });
+    } catch {
+      notifications.show({
+        title: tImportantDates("ErrorTitle"),
+        message: tImportantDates("UpdateError"),
+        color: "red",
+        icon: <IconX size={18} />,
+      });
+    } finally {
+      setSavingField(null);
+    }
   };
 
   const handleSocialMediaSave = async (field: string, value: string) => {
@@ -384,13 +444,6 @@ export default function PersonClient({
     // Check if value actually changed
     const originalValue = contact[field as keyof Contact] || "";
     if (processedValue === originalValue) {
-      // Update display to show username even if not changed
-      if (field !== "pgpPublicKey") {
-        setEditedValues((prev) => ({
-          ...prev,
-          [field]: processedValue,
-        }));
-      }
       return;
     }
 
@@ -428,14 +481,6 @@ export default function PersonClient({
         [field]: processedValue,
       });
 
-      // Update edited values to show username (except for PGP key)
-      if (field !== "pgpPublicKey") {
-        setEditedValues((prev) => ({
-          ...prev,
-          [field]: processedValue,
-        }));
-      }
-
       const fieldDisplayName =
         field === "pgpPublicKey" ? "PGP key" : field.charAt(0).toUpperCase() + field.slice(1);
 
@@ -453,14 +498,6 @@ export default function PersonClient({
         icon: <IconX size={18} />,
       });
 
-      // Revert to original value on error
-      const revertValue = String(contact[field as keyof Contact] || "");
-      if (field !== "pgpPublicKey") {
-        setEditedValues((prev) => ({
-          ...prev,
-          [field]: revertValue,
-        }));
-      }
     } finally {
       setSavingField(null);
     }
@@ -544,6 +581,137 @@ export default function PersonClient({
     }
   };
 
+  const fetchRelationships = async () => {
+    const response = await fetch(`${API_ROUTES.CONTACTS}/${personId}/relationships`, {
+      cache: "no-store",
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to fetch relationships");
+    }
+
+    const data = await response.json();
+    setRelationships(data.relationships || []);
+  };
+
+  const handleAddRelationship = async (
+    relationshipType: RelationshipType,
+    relatedPersonId: string,
+  ) => {
+    setRelationshipsSaving(true);
+
+    try {
+      const response = await fetch(`${API_ROUTES.CONTACTS}/${personId}/relationships`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ relationshipType, relatedPersonId }),
+      });
+
+      if (!response.ok) {
+        const payload = await response.json().catch(() => ({}));
+        throw new Error(payload.error || tRelationships("CreateError"));
+      }
+
+      await fetchRelationships();
+
+      notifications.show({
+        title: tRelationships("SuccessTitle"),
+        message: tRelationships("CreateSuccess"),
+        color: "green",
+        icon: <IconCheck size={18} />,
+      });
+    } catch (error) {
+      notifications.show({
+        title: tRelationships("ErrorTitle"),
+        message: error instanceof Error ? error.message : tRelationships("CreateError"),
+        color: "red",
+        icon: <IconX size={18} />,
+      });
+    } finally {
+      setRelationshipsSaving(false);
+    }
+  };
+
+  const handleDeleteRelationship = async (relationshipId: string) => {
+    setRelationshipsSaving(true);
+
+    try {
+      const response = await fetch(
+        `${API_ROUTES.CONTACTS}/${personId}/relationships/${relationshipId}`,
+        {
+          method: "DELETE",
+        },
+      );
+
+      if (!response.ok) {
+        const payload = await response.json().catch(() => ({}));
+        throw new Error(payload.error || tRelationships("DeleteError"));
+      }
+
+      setRelationships((previous) =>
+        previous.filter((relationship) => relationship.id !== relationshipId),
+      );
+
+      notifications.show({
+        title: tRelationships("SuccessTitle"),
+        message: tRelationships("DeleteSuccess"),
+        color: "green",
+        icon: <IconCheck size={18} />,
+      });
+    } catch (error) {
+      notifications.show({
+        title: tRelationships("ErrorTitle"),
+        message: error instanceof Error ? error.message : tRelationships("DeleteError"),
+        color: "red",
+        icon: <IconX size={18} />,
+      });
+    } finally {
+      setRelationshipsSaving(false);
+    }
+  };
+
+  const handleUpdateRelationship = async (
+    relationshipId: string,
+    relationshipType: RelationshipType,
+    relatedPersonId: string,
+  ) => {
+    setRelationshipsSaving(true);
+
+    try {
+      const response = await fetch(
+        `${API_ROUTES.CONTACTS}/${personId}/relationships/${relationshipId}`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ relationshipType, relatedPersonId }),
+        },
+      );
+
+      if (!response.ok) {
+        const payload = await response.json().catch(() => ({}));
+        throw new Error(payload.error || tRelationships("UpdateError"));
+      }
+
+      await fetchRelationships();
+
+      notifications.show({
+        title: tRelationships("SuccessTitle"),
+        message: tRelationships("UpdateSuccess"),
+        color: "green",
+        icon: <IconCheck size={18} />,
+      });
+    } catch (error) {
+      notifications.show({
+        title: tRelationships("ErrorTitle"),
+        message: error instanceof Error ? error.message : tRelationships("UpdateError"),
+        color: "red",
+        icon: <IconX size={18} />,
+      });
+    } finally {
+      setRelationshipsSaving(false);
+    }
+  };
+
   type GroupSelectItem = ComboboxItem & { color?: string | null; emoji?: string | null };
 
   const GroupValue = ({ value, onRemove }: { value: string; onRemove?: () => void }) => {
@@ -616,50 +784,6 @@ export default function PersonClient({
       ...prev,
       [field]: value,
     }));
-  };
-
-  const handleAddImportantDate = () => {
-    if (importantDates.length >= LIMITS.maxImportantDates) {
-      notifications.show({
-        title: "Limit reached",
-        message: `You can only add up to ${LIMITS.maxImportantDates} important dates`,
-        color: "orange",
-      });
-      return;
-    }
-    setImportantDates([...importantDates, { date: null, name: "", notify: false }]);
-  };
-
-  const handleRemoveImportantDate = (index: number) => {
-    setImportantDates(importantDates.filter((_, i) => i !== index));
-    // TODO: Save to API
-  };
-
-  const handleImportantDateChange = (index: number, date: Date | null) => {
-    const newDates = [...importantDates];
-    newDates[index] = { ...newDates[index], date };
-
-    // If date is cleared, also clear notify
-    if (!date) {
-      newDates[index].notify = false;
-    }
-
-    setImportantDates(newDates);
-    // TODO: Save to API
-  };
-
-  const handleImportantDateNameChange = (index: number, name: string) => {
-    const newDates = [...importantDates];
-    newDates[index] = { ...newDates[index], name };
-    setImportantDates(newDates);
-    // TODO: Save to API
-  };
-
-  const handleImportantDateNotifyChange = (index: number, notify: boolean) => {
-    const newDates = [...importantDates];
-    newDates[index] = { ...newDates[index], notify };
-    setImportantDates(newDates);
-    // TODO: Save to API
   };
 
   const openDeleteModal = () =>
@@ -810,10 +934,8 @@ export default function PersonClient({
 
             <SocialMediaSection
               contact={contact}
-              editedValues={editedValues}
               savingField={savingField}
-              handleChange={handleChange}
-              handleBlur={handleBlur}
+              onSaveField={handleSocialMediaSave}
               whatsappPrefix={whatsappPrefix}
               signalPrefix={signalPrefix}
               setWhatsappPrefix={setWhatsappPrefix}
@@ -823,72 +945,11 @@ export default function PersonClient({
             <Divider />
 
             <ContactImportantDatesSection
-              birthday={birthday}
-              notifyBirthday={notifyBirthday}
-              onBirthdayChange={(date) => {
-                setBirthday(date);
-
-                if (!date && notifyBirthday) {
-                  setNotifyBirthday(false);
-                  if (contact && personId) {
-                    setSavingField("notifyBirthday");
-                    setTimeout(() => {
-                      setContact({
-                        ...contact,
-                        notifyBirthday: false,
-                        birthdate: null,
-                      });
-                      notifications.show({
-                        title: "Success",
-                        message: "Birthday and notification cleared",
-                        color: "green",
-                        icon: <IconCheck size={18} />,
-                      });
-                      setSavingField(null);
-                    }, 500);
-                  }
-                  return;
-                }
-
-                if (contact && personId && date) {
-                  setSavingField("birthday");
-                  setTimeout(() => {
-                    setContact({ ...contact, birthdate: date.toISOString().split("T")[0] });
-                    notifications.show({
-                      title: "Success",
-                      message: "Birthday updated successfully",
-                      color: "green",
-                      icon: <IconCheck size={18} />,
-                    });
-                    setSavingField(null);
-                  }, 1000);
-                }
-              }}
-              onNotifyBirthdayChange={(checked) => {
-                setNotifyBirthday(checked);
-                if (contact && personId) {
-                  setSavingField("notifyBirthday");
-                  setTimeout(() => {
-                    setContact({ ...contact, notifyBirthday: checked });
-                    notifications.show({
-                      title: "Success",
-                      message: "Notification preference updated",
-                      color: "green",
-                      icon: <IconCheck size={18} />,
-                    });
-                    setSavingField(null);
-                  }, 500);
-                }
-              }}
-              importantDates={importantDates}
-              onAddImportantDate={handleAddImportantDate}
-              onRemoveImportantDate={handleRemoveImportantDate}
-              onImportantDateChange={handleImportantDateChange}
-              onImportantDateNameChange={handleImportantDateNameChange}
-              onImportantDateNotifyChange={handleImportantDateNotifyChange}
+              events={importantEvents}
+              personFirstName={contact.firstName}
               savingField={savingField}
-              focusedField={focusedField}
-              setFocusedField={setFocusedField}
+              onEventsChange={setImportantEvents}
+              onSave={handleSaveImportantEvents}
             />
 
             <Divider />
@@ -903,14 +964,26 @@ export default function PersonClient({
 
             <Divider /> */}
 
-            <LastInteractionSection contact={contact} />
-            
+            <ContactRelationshipsSection
+              currentPerson={currentPersonPreview}
+              selectablePeople={selectablePeople}
+              relationships={relationships}
+              isSubmitting={relationshipsSaving}
+              onAddRelationship={handleAddRelationship}
+              onUpdateRelationship={handleUpdateRelationship}
+              onDeleteRelationship={handleDeleteRelationship}
+            />
+
             <Divider />
 
-            <PersonTimelineSection 
-              activities={initialActivities} 
-              contact={contact} 
-              connectedContacts={initialConnectedContacts || []} 
+            <LastInteractionSection contact={contact} />
+
+            <Divider />
+
+            <PersonTimelineSection
+              activities={initialActivities}
+              contact={contact}
+              connectedContacts={initialConnectedContacts || []}
             />
 
             {hasCoordinates && (

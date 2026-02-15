@@ -10,6 +10,31 @@ import type { RedirectRequest } from "@bondery/types";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@bondery/types/database";
 import { API_ROUTES, WEBAPP_ROUTES } from "@bondery/helpers";
+import {
+  findPersonIdBySocialMedia,
+  type SocialMediaPlatform,
+  upsertContactSocialMedia,
+} from "../lib/social-media.js";
+
+function resolvePrimarySocialMedia(payload: {
+  instagram?: string;
+  linkedin?: string;
+  facebook?: string;
+}): { platform: SocialMediaPlatform; handle: string } | null {
+  if (payload.instagram?.trim()) {
+    return { platform: "instagram", handle: payload.instagram.trim() };
+  }
+
+  if (payload.linkedin?.trim()) {
+    return { platform: "linkedin", handle: payload.linkedin.trim() };
+  }
+
+  if (payload.facebook?.trim()) {
+    return { platform: "facebook", handle: payload.facebook.trim() };
+  }
+
+  return null;
+}
 
 export async function redirectRoutes(fastify: FastifyInstance) {
   /**
@@ -42,21 +67,45 @@ export async function redirectRoutes(fastify: FastifyInstance) {
         });
       }
 
-      // Build query to look up contact
-      let query = client.from("people").select("id, avatar, title, place").eq("user_id", user.id);
-
-      if (instagram) {
-        query = query.eq("instagram", instagram);
-      } else if (linkedin) {
-        query = query.eq("linkedin", linkedin);
-      } else if (facebook) {
-        query = query.eq("facebook", facebook);
+      const primarySocialMedia = resolvePrimarySocialMedia({ instagram, linkedin, facebook });
+      if (!primarySocialMedia) {
+        return reply.status(400).send({
+          error: "Instagram, LinkedIn, or Facebook username is required",
+        });
       }
 
-      const { data: existingContact, error: lookupError } = await query.single();
-
-      if (lookupError && lookupError.code !== "PGRST116") {
+      let existingContactId: string | null = null;
+      try {
+        existingContactId = await findPersonIdBySocialMedia(
+          client,
+          user.id,
+          primarySocialMedia.platform,
+          primarySocialMedia.handle,
+        );
+      } catch {
         return reply.status(500).send({ error: "Failed to look up contact" });
+      }
+
+      let existingContact: {
+        id: string;
+        avatar: string | null;
+        title: string | null;
+        place: string | null;
+      } | null = null;
+
+      if (existingContactId) {
+        const { data: contactData, error: lookupError } = await client
+          .from("people")
+          .select("id, avatar, title, place")
+          .eq("user_id", user.id)
+          .eq("id", existingContactId)
+          .single();
+
+        if (lookupError) {
+          return reply.status(500).send({ error: "Failed to look up contact" });
+        }
+
+        existingContact = contactData;
       }
 
       // If contact exists
@@ -82,14 +131,11 @@ export async function redirectRoutes(fastify: FastifyInstance) {
       // Create new contact
       const insertData: any = {
         user_id: user.id,
-        first_name: firstName || instagram || linkedin || facebook || "Unknown",
+        first_name: firstName || primarySocialMedia.handle || "Unknown",
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       };
 
-      if (instagram) insertData.instagram = instagram;
-      if (linkedin) insertData.linkedin = linkedin;
-      if (facebook) insertData.facebook = facebook;
       if (middleName) insertData.middle_name = middleName;
       if (lastName) insertData.last_name = lastName;
       if (title) insertData.title = title;
@@ -103,6 +149,18 @@ export async function redirectRoutes(fastify: FastifyInstance) {
 
       if (createError || !newContact) {
         return reply.status(500).send({ error: "Failed to create contact" });
+      }
+
+      try {
+        await upsertContactSocialMedia(
+          client,
+          user.id,
+          newContact.id,
+          primarySocialMedia.platform,
+          primarySocialMedia.handle,
+        );
+      } catch {
+        return reply.status(500).send({ error: "Failed to save social media" });
       }
 
       // Upload profile photo if provided
@@ -137,6 +195,13 @@ export async function redirectRoutes(fastify: FastifyInstance) {
       });
     }
 
+    const primarySocialMedia = resolvePrimarySocialMedia({ instagram, linkedin, facebook });
+    if (!primarySocialMedia) {
+      return reply.status(400).send({
+        error: "Instagram, LinkedIn, or Facebook username is required",
+      });
+    }
+
     const { client, user } = await createAuthenticatedClient(request);
 
     if (!user) {
@@ -148,21 +213,38 @@ export async function redirectRoutes(fastify: FastifyInstance) {
       );
     }
 
-    // Build query to look up contact
-    let dbQuery = client.from("people").select("id, avatar, title, place").eq("user_id", user.id);
-
-    if (instagram) {
-      dbQuery = dbQuery.eq("instagram", instagram);
-    } else if (linkedin) {
-      dbQuery = dbQuery.eq("linkedin", linkedin);
-    } else if (facebook) {
-      dbQuery = dbQuery.eq("facebook", facebook);
+    let existingContactId: string | null = null;
+    try {
+      existingContactId = await findPersonIdBySocialMedia(
+        client,
+        user.id,
+        primarySocialMedia.platform,
+        primarySocialMedia.handle,
+      );
+    } catch {
+      return reply.status(500).send({ error: "Failed to look up contact" });
     }
 
-    const { data: existingContact, error: lookupError } = await dbQuery.single();
+    let existingContact: {
+      id: string;
+      avatar: string | null;
+      title: string | null;
+      place: string | null;
+    } | null = null;
 
-    if (lookupError && lookupError.code !== "PGRST116") {
-      return reply.status(500).send({ error: "Failed to look up contact" });
+    if (existingContactId) {
+      const { data: contactData, error: lookupError } = await client
+        .from("people")
+        .select("id, avatar, title, place")
+        .eq("user_id", user.id)
+        .eq("id", existingContactId)
+        .single();
+
+      if (lookupError) {
+        return reply.status(500).send({ error: "Failed to look up contact" });
+      }
+
+      existingContact = contactData;
     }
 
     // If contact exists
@@ -183,14 +265,11 @@ export async function redirectRoutes(fastify: FastifyInstance) {
     // Create new contact
     const insertData: any = {
       user_id: user.id,
-      first_name: firstName || instagram || linkedin || facebook || "Unknown",
+      first_name: firstName || primarySocialMedia.handle || "Unknown",
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     };
 
-    if (instagram) insertData.instagram = instagram;
-    if (linkedin) insertData.linkedin = linkedin;
-    if (facebook) insertData.facebook = facebook;
     if (middleName) insertData.middle_name = middleName;
     if (lastName) insertData.last_name = lastName;
     if (title) insertData.title = title;
@@ -204,6 +283,18 @@ export async function redirectRoutes(fastify: FastifyInstance) {
 
     if (createError || !newContact) {
       return reply.status(500).send({ error: "Failed to create contact" });
+    }
+
+    try {
+      await upsertContactSocialMedia(
+        client,
+        user.id,
+        newContact.id,
+        primarySocialMedia.platform,
+        primarySocialMedia.handle,
+      );
+    } catch {
+      return reply.status(500).send({ error: "Failed to save social media" });
     }
 
     if (profileImageUrl) {

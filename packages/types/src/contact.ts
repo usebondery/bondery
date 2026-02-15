@@ -39,6 +39,22 @@ export interface ImportantDate {
   notify: boolean;
 }
 
+export type ImportantEventType = "birthday" | "anniversary" | "nameday" | "graduation" | "other";
+
+export type ImportantEventNotifyDaysBefore = 1 | 3 | 7 | null;
+
+export interface ImportantEvent {
+  id: string;
+  userId: string;
+  personId: string;
+  eventType: ImportantEventType;
+  eventDate: string;
+  note: string | null;
+  notifyDaysBefore: ImportantEventNotifyDaysBefore;
+  createdAt: string;
+  updatedAt: string;
+}
+
 /**
  * Geographic position for contact
  */
@@ -76,6 +92,7 @@ export interface Contact {
   facebook: string | null;
   website: string | null;
   signal: string | null;
+  importantEvents?: ImportantEvent[] | null;
   birthdate: string | null;
   notifyBirthday: boolean | null;
   importantDates: ImportantDate[] | Json | null;
@@ -100,6 +117,43 @@ export interface ContactPreview {
   lastName: string | null;
   avatar: string | null;
   avatarColor: string | null;
+}
+
+/**
+ * Supported relationship type values for person-to-person relationships
+ */
+export type RelationshipType =
+  | "parent"
+  | "child"
+  | "spouse"
+  | "partner"
+  | "sibling"
+  | "friend"
+  | "colleague"
+  | "neighbor"
+  | "guardian"
+  | "dependent"
+  | "other";
+
+/**
+ * Relationship record between two contacts
+ */
+export interface ContactRelationship {
+  id: string;
+  userId: string;
+  sourcePersonId: string;
+  targetPersonId: string;
+  relationshipType: RelationshipType;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/**
+ * Relationship record with lightweight source/target contact previews
+ */
+export interface ContactRelationshipWithPeople extends ContactRelationship {
+  sourcePerson: ContactPreview;
+  targetPerson: ContactPreview;
 }
 
 /**
@@ -129,6 +183,29 @@ export interface ContactsListResponse {
  */
 export interface ContactResponse {
   contact: Contact;
+}
+
+/**
+ * Request body for creating a person relationship
+ */
+export interface CreateContactRelationshipInput {
+  relatedPersonId: string;
+  relationshipType: RelationshipType;
+}
+
+/**
+ * Request body for updating an existing person relationship
+ */
+export interface UpdateContactRelationshipInput {
+  relatedPersonId: string;
+  relationshipType: RelationshipType;
+}
+
+/**
+ * Response from person relationships endpoint
+ */
+export interface ContactRelationshipsResponse {
+  relationships: ContactRelationshipWithPeople[];
 }
 
 /**

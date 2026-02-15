@@ -7,11 +7,33 @@ export interface CountryCode {
   name: string;
   dialCode: string;
   flag: string;
+  reactMaskExpression?: string;
 }
 
+export interface TelephonePrefixOption {
+  value: string;
+  label: string;
+  flag: string;
+  reactMaskExpression: string;
+}
+
+export const DEFAULT_PHONE_REACT_MASK_EXPRESSION = "000 000 000 000";
+
 export const countryCodes: CountryCode[] = [
-  { code: "US", name: "United States", dialCode: "+1", flag: "us" },
-  { code: "CA", name: "Canada", dialCode: "+1", flag: "ca" },
+  {
+    code: "US",
+    name: "United States",
+    dialCode: "+1",
+    flag: "us",
+    reactMaskExpression: "(000) 000-0000",
+  },
+  {
+    code: "CA",
+    name: "Canada",
+    dialCode: "+1",
+    flag: "ca",
+    reactMaskExpression: "000 000 0000",
+  },
   { code: "AG", name: "Antigua and Barbuda", dialCode: "+1-268", flag: "ag" },
   { code: "AI", name: "Anguilla", dialCode: "+1-264", flag: "ai" },
   { code: "AS", name: "American Samoa", dialCode: "+1-684", flag: "as" },
@@ -58,26 +80,86 @@ export const countryCodes: CountryCode[] = [
     flag: "vg",
   },
   { code: "VI", name: "U.S. Virgin Islands", dialCode: "+1-340", flag: "vi" },
-  { code: "GB", name: "United Kingdom", dialCode: "+44", flag: "gb" },
-  { code: "DE", name: "Germany", dialCode: "+49", flag: "de" },
-  { code: "FR", name: "France", dialCode: "+33", flag: "fr" },
-  { code: "IT", name: "Italy", dialCode: "+39", flag: "it" },
-  { code: "ES", name: "Spain", dialCode: "+34", flag: "es" },
+  {
+    code: "GB",
+    name: "United Kingdom",
+    dialCode: "+44",
+    flag: "gb",
+    reactMaskExpression: "0000 000 000",
+  },
+  {
+    code: "DE",
+    name: "Germany",
+    dialCode: "+49",
+    flag: "de",
+    reactMaskExpression: "0000 0000000",
+  },
+  {
+    code: "FR",
+    name: "France",
+    dialCode: "+33",
+    flag: "fr",
+    reactMaskExpression: "00 00 00 00 00",
+  },
+  {
+    code: "IT",
+    name: "Italy",
+    dialCode: "+39",
+    flag: "it",
+    reactMaskExpression: "000 000 0000",
+  },
+  {
+    code: "ES",
+    name: "Spain",
+    dialCode: "+34",
+    flag: "es",
+    reactMaskExpression: "000 000 000",
+  },
   { code: "RU", name: "Russia", dialCode: "+7", flag: "ru" },
   { code: "KZ", name: "Kazakhstan", dialCode: "+7", flag: "kz" },
   { code: "EG", name: "Egypt", dialCode: "+20", flag: "eg" },
   { code: "ZA", name: "South Africa", dialCode: "+27", flag: "za" },
   { code: "GR", name: "Greece", dialCode: "+30", flag: "gr" },
-  { code: "NL", name: "Netherlands", dialCode: "+31", flag: "nl" },
-  { code: "BE", name: "Belgium", dialCode: "+32", flag: "be" },
-  { code: "PT", name: "Portugal", dialCode: "+351", flag: "pt" },
-  { code: "IE", name: "Ireland", dialCode: "+353", flag: "ie" },
+  {
+    code: "NL",
+    name: "Netherlands",
+    dialCode: "+31",
+    flag: "nl",
+    reactMaskExpression: "00 00000000",
+  },
+  {
+    code: "BE",
+    name: "Belgium",
+    dialCode: "+32",
+    flag: "be",
+    reactMaskExpression: "000 00 00 00",
+  },
+  {
+    code: "PT",
+    name: "Portugal",
+    dialCode: "+351",
+    flag: "pt",
+    reactMaskExpression: "000 000 000",
+  },
+  {
+    code: "IE",
+    name: "Ireland",
+    dialCode: "+353",
+    flag: "ie",
+    reactMaskExpression: "00 000 0000",
+  },
   { code: "LU", name: "Luxembourg", dialCode: "+352", flag: "lu" },
   { code: "IS", name: "Iceland", dialCode: "+354", flag: "is" },
   { code: "AL", name: "Albania", dialCode: "+355", flag: "al" },
   { code: "MT", name: "Malta", dialCode: "+356", flag: "mt" },
   { code: "CY", name: "Cyprus", dialCode: "+357", flag: "cy" },
-  { code: "FI", name: "Finland", dialCode: "+358", flag: "fi" },
+  {
+    code: "FI",
+    name: "Finland",
+    dialCode: "+358",
+    flag: "fi",
+    reactMaskExpression: "00 000 0000",
+  },
   { code: "BG", name: "Bulgaria", dialCode: "+359", flag: "bg" },
   { code: "HU", name: "Hungary", dialCode: "+36", flag: "hu" },
   { code: "LT", name: "Lithuania", dialCode: "+370", flag: "lt" },
@@ -97,37 +179,133 @@ export const countryCodes: CountryCode[] = [
   { code: "SI", name: "Slovenia", dialCode: "+386", flag: "si" },
   { code: "BA", name: "Bosnia and Herzegovina", dialCode: "+387", flag: "ba" },
   { code: "MK", name: "North Macedonia", dialCode: "+389", flag: "mk" },
-  { code: "CZ", name: "Czech Republic", dialCode: "+420", flag: "cz" },
-  { code: "SK", name: "Slovakia", dialCode: "+421", flag: "sk" },
+  {
+    code: "CZ",
+    name: "Czech Republic",
+    dialCode: "+420",
+    flag: "cz",
+    reactMaskExpression: "000 000 000",
+  },
+  {
+    code: "SK",
+    name: "Slovakia",
+    dialCode: "+421",
+    flag: "sk",
+    reactMaskExpression: "000 000 000",
+  },
   { code: "LI", name: "Liechtenstein", dialCode: "+423", flag: "li" },
-  { code: "AT", name: "Austria", dialCode: "+43", flag: "at" },
+  {
+    code: "AT",
+    name: "Austria",
+    dialCode: "+43",
+    flag: "at",
+    reactMaskExpression: "0000 000000",
+  },
   { code: "GB", name: "United Kingdom", dialCode: "+44", flag: "gb" },
-  { code: "DK", name: "Denmark", dialCode: "+45", flag: "dk" },
-  { code: "SE", name: "Sweden", dialCode: "+46", flag: "se" },
-  { code: "NO", name: "Norway", dialCode: "+47", flag: "no" },
-  { code: "PL", name: "Poland", dialCode: "+48", flag: "pl" },
+  {
+    code: "DK",
+    name: "Denmark",
+    dialCode: "+45",
+    flag: "dk",
+    reactMaskExpression: "00 00 00 00",
+  },
+  {
+    code: "SE",
+    name: "Sweden",
+    dialCode: "+46",
+    flag: "se",
+    reactMaskExpression: "00 000 00 00",
+  },
+  {
+    code: "NO",
+    name: "Norway",
+    dialCode: "+47",
+    flag: "no",
+    reactMaskExpression: "000 00 000",
+  },
+  {
+    code: "PL",
+    name: "Poland",
+    dialCode: "+48",
+    flag: "pl",
+    reactMaskExpression: "000 000 000",
+  },
   { code: "DE", name: "Germany", dialCode: "+49", flag: "de" },
   { code: "PE", name: "Peru", dialCode: "+51", flag: "pe" },
-  { code: "MX", name: "Mexico", dialCode: "+52", flag: "mx" },
+  {
+    code: "MX",
+    name: "Mexico",
+    dialCode: "+52",
+    flag: "mx",
+    reactMaskExpression: "000 000 0000",
+  },
   { code: "CU", name: "Cuba", dialCode: "+53", flag: "cu" },
-  { code: "AR", name: "Argentina", dialCode: "+54", flag: "ar" },
-  { code: "BR", name: "Brazil", dialCode: "+55", flag: "br" },
+  {
+    code: "AR",
+    name: "Argentina",
+    dialCode: "+54",
+    flag: "ar",
+    reactMaskExpression: "00 0000 0000",
+  },
+  {
+    code: "BR",
+    name: "Brazil",
+    dialCode: "+55",
+    flag: "br",
+    reactMaskExpression: "00 00000 0000",
+  },
   { code: "CL", name: "Chile", dialCode: "+56", flag: "cl" },
   { code: "CO", name: "Colombia", dialCode: "+57", flag: "co" },
   { code: "VE", name: "Venezuela", dialCode: "+58", flag: "ve" },
   { code: "MY", name: "Malaysia", dialCode: "+60", flag: "my" },
-  { code: "AU", name: "Australia", dialCode: "+61", flag: "au" },
+  {
+    code: "AU",
+    name: "Australia",
+    dialCode: "+61",
+    flag: "au",
+    reactMaskExpression: "0000 000 000",
+  },
   { code: "ID", name: "Indonesia", dialCode: "+62", flag: "id" },
   { code: "PH", name: "Philippines", dialCode: "+63", flag: "ph" },
-  { code: "NZ", name: "New Zealand", dialCode: "+64", flag: "nz" },
+  {
+    code: "NZ",
+    name: "New Zealand",
+    dialCode: "+64",
+    flag: "nz",
+    reactMaskExpression: "000 000 0000",
+  },
   { code: "SG", name: "Singapore", dialCode: "+65", flag: "sg" },
   { code: "TH", name: "Thailand", dialCode: "+66", flag: "th" },
-  { code: "JP", name: "Japan", dialCode: "+81", flag: "jp" },
-  { code: "KR", name: "South Korea", dialCode: "+82", flag: "kr" },
+  {
+    code: "JP",
+    name: "Japan",
+    dialCode: "+81",
+    flag: "jp",
+    reactMaskExpression: "00 0000 0000",
+  },
+  {
+    code: "KR",
+    name: "South Korea",
+    dialCode: "+82",
+    flag: "kr",
+    reactMaskExpression: "00 0000 0000",
+  },
   { code: "VN", name: "Vietnam", dialCode: "+84", flag: "vn" },
-  { code: "CN", name: "China", dialCode: "+86", flag: "cn" },
+  {
+    code: "CN",
+    name: "China",
+    dialCode: "+86",
+    flag: "cn",
+    reactMaskExpression: "000 0000 0000",
+  },
   { code: "TR", name: "Turkey", dialCode: "+90", flag: "tr" },
-  { code: "IN", name: "India", dialCode: "+91", flag: "in" },
+  {
+    code: "IN",
+    name: "India",
+    dialCode: "+91",
+    flag: "in",
+    reactMaskExpression: "00000 00000",
+  },
   { code: "PK", name: "Pakistan", dialCode: "+92", flag: "pk" },
   { code: "AF", name: "Afghanistan", dialCode: "+93", flag: "af" },
   { code: "LK", name: "Sri Lanka", dialCode: "+94", flag: "lk" },
@@ -272,6 +450,43 @@ export const countryCodes: CountryCode[] = [
   // ... (full ITU-T E.164 list continues)
 ];
 
+export const TELEPHONE_PREFIX_OPTIONS: ReadonlyArray<TelephonePrefixOption> = Array.from(
+  (() => {
+    const map = new Map<string, TelephonePrefixOption>();
+
+    countryCodes.forEach((country) => {
+      if (map.has(country.dialCode)) {
+        return;
+      }
+
+      map.set(country.dialCode, {
+        value: country.dialCode,
+        label: country.dialCode,
+        flag: country.flag,
+        reactMaskExpression: country.reactMaskExpression || DEFAULT_PHONE_REACT_MASK_EXPRESSION,
+      });
+    });
+
+    const usPrefix = map.get("+1");
+    if (usPrefix) {
+      usPrefix.flag = "us";
+      map.delete("+1");
+      return [usPrefix, ...Array.from(map.values())];
+    }
+
+    return Array.from(map.values());
+  })(),
+);
+
+const SORTED_COUNTRY_CODES_BY_DIAL_LENGTH = [...countryCodes].sort(
+  (a, b) => b.dialCode.length - a.dialCode.length,
+);
+
+export function getTelephoneReactMaskExpression(prefix: string): string {
+  const option = TELEPHONE_PREFIX_OPTIONS.find((prefixOption) => prefixOption.value === prefix);
+  return option?.reactMaskExpression || DEFAULT_PHONE_REACT_MASK_EXPRESSION;
+}
+
 /**
  * Parse a phone number and extract country code and number
  * @param phoneNumber - Full phone number with or without +
@@ -292,11 +507,7 @@ export function parsePhoneNumber(phoneNumber: string): {
   }
 
   // Try to match against known country codes (longest first)
-  const sortedCodes = [...countryCodes].sort(
-    (a, b) => b.dialCode.length - a.dialCode.length
-  );
-
-  for (const country of sortedCodes) {
+  for (const country of SORTED_COUNTRY_CODES_BY_DIAL_LENGTH) {
     if (cleaned.startsWith(country.dialCode)) {
       return {
         dialCode: country.dialCode,

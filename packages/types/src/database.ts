@@ -134,118 +134,220 @@ export type Database = {
         Row: {
           avatar: string | null;
           avatar_color: string | null;
-          birthdate: string | null;
           connections: string[] | null;
           created_at: string | null;
           description: string | null;
-          emails: Json | null;
-          facebook: string | null;
           first_name: string;
           gender: string | null;
           id: string;
-          important_dates: Json | null;
-          instagram: string | null;
           language: string | null;
           last_interaction: string | null;
           last_name: string | null;
           latitude: number | null;
-          linkedin: string | null;
           location: unknown;
           longitude: number | null;
           middle_name: string | null;
           myself: boolean | null;
           nickname: string | null;
           notes: string | null;
-          notify_birthday: boolean | null;
           pgp_public_key: string | null;
-          phones: Json | null;
           place: string | null;
           position: Json | null;
-          signal: string | null;
           timezone: string | null;
           title: string | null;
           updated_at: string | null;
           user_id: string;
-          website: string | null;
-          whatsapp: string | null;
         };
         Insert: {
           avatar?: string | null;
           avatar_color?: string | null;
-          birthdate?: string | null;
           connections?: string[] | null;
           created_at?: string | null;
           description?: string | null;
-          emails?: Json | null;
-          facebook?: string | null;
           first_name: string;
           gender?: string | null;
           id?: string;
-          important_dates?: Json | null;
-          instagram?: string | null;
           language?: string | null;
           last_interaction?: string | null;
           last_name?: string | null;
           latitude?: number | null;
-          linkedin?: string | null;
           location?: unknown;
           longitude?: number | null;
           middle_name?: string | null;
           myself?: boolean | null;
           nickname?: string | null;
           notes?: string | null;
-          notify_birthday?: boolean | null;
           pgp_public_key?: string | null;
-          phones?: Json | null;
           place?: string | null;
           position?: Json | null;
-          signal?: string | null;
           timezone?: string | null;
           title?: string | null;
           updated_at?: string | null;
           user_id: string;
-          website?: string | null;
-          whatsapp?: string | null;
         };
         Update: {
           avatar?: string | null;
           avatar_color?: string | null;
-          birthdate?: string | null;
           connections?: string[] | null;
           created_at?: string | null;
           description?: string | null;
-          emails?: Json | null;
-          facebook?: string | null;
           first_name?: string;
           gender?: string | null;
           id?: string;
-          important_dates?: Json | null;
-          instagram?: string | null;
           language?: string | null;
           last_interaction?: string | null;
           last_name?: string | null;
           latitude?: number | null;
-          linkedin?: string | null;
           location?: unknown;
           longitude?: number | null;
           middle_name?: string | null;
           myself?: boolean | null;
           nickname?: string | null;
           notes?: string | null;
-          notify_birthday?: boolean | null;
           pgp_public_key?: string | null;
-          phones?: Json | null;
           place?: string | null;
           position?: Json | null;
-          signal?: string | null;
           timezone?: string | null;
           title?: string | null;
           updated_at?: string | null;
           user_id?: string;
-          website?: string | null;
-          whatsapp?: string | null;
         };
         Relationships: [];
+      };
+      people_emails: {
+        Row: {
+          created_at: string;
+          id: string;
+          person_id: string;
+          preferred: boolean;
+          sort_order: number;
+          type: string;
+          updated_at: string;
+          user_id: string;
+          value: string;
+        };
+        Insert: {
+          created_at?: string;
+          id?: string;
+          person_id: string;
+          preferred?: boolean;
+          sort_order?: number;
+          type?: string;
+          updated_at?: string;
+          user_id: string;
+          value: string;
+        };
+        Update: {
+          created_at?: string;
+          id?: string;
+          person_id?: string;
+          preferred?: boolean;
+          sort_order?: number;
+          type?: string;
+          updated_at?: string;
+          user_id?: string;
+          value?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "people_emails_person_id_fkey";
+            columns: ["person_id"];
+            isOneToOne: false;
+            referencedRelation: "people";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      people_important_events: {
+        Row: {
+          created_at: string;
+          event_date: string;
+          event_type: string;
+          id: string;
+          note: string | null;
+          notify_days_before: number | null;
+          person_id: string;
+          updated_at: string;
+          user_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          event_date: string;
+          event_type: string;
+          id?: string;
+          note?: string | null;
+          notify_days_before?: number | null;
+          person_id: string;
+          updated_at?: string;
+          user_id: string;
+        };
+        Update: {
+          created_at?: string;
+          event_date?: string;
+          event_type?: string;
+          id?: string;
+          note?: string | null;
+          notify_days_before?: number | null;
+          person_id?: string;
+          updated_at?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "people_important_events_person_id_fkey";
+            columns: ["person_id"];
+            isOneToOne: false;
+            referencedRelation: "people";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      people_phones: {
+        Row: {
+          created_at: string;
+          id: string;
+          person_id: string;
+          preferred: boolean;
+          prefix: string;
+          sort_order: number;
+          type: string;
+          updated_at: string;
+          user_id: string;
+          value: string;
+        };
+        Insert: {
+          created_at?: string;
+          id?: string;
+          person_id: string;
+          preferred?: boolean;
+          prefix?: string;
+          sort_order?: number;
+          type?: string;
+          updated_at?: string;
+          user_id: string;
+          value: string;
+        };
+        Update: {
+          created_at?: string;
+          id?: string;
+          person_id?: string;
+          preferred?: boolean;
+          prefix?: string;
+          sort_order?: number;
+          type?: string;
+          updated_at?: string;
+          user_id?: string;
+          value?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "people_phones_person_id_fkey";
+            columns: ["person_id"];
+            isOneToOne: false;
+            referencedRelation: "people";
+            referencedColumns: ["id"];
+          },
+        ];
       };
       people_groups: {
         Row: {
@@ -280,6 +382,89 @@ export type Database = {
           {
             foreignKeyName: "people_groups_person_id_fkey";
             columns: ["person_id"];
+            isOneToOne: false;
+            referencedRelation: "people";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      people_social_media: {
+        Row: {
+          created_at: string;
+          handle: string;
+          id: string;
+          person_id: string;
+          platform: string;
+          updated_at: string;
+          user_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          handle: string;
+          id?: string;
+          person_id: string;
+          platform: string;
+          updated_at?: string;
+          user_id: string;
+        };
+        Update: {
+          created_at?: string;
+          handle?: string;
+          id?: string;
+          person_id?: string;
+          platform?: string;
+          updated_at?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "people_social_media_person_id_fkey";
+            columns: ["person_id"];
+            isOneToOne: false;
+            referencedRelation: "people";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      people_relationships: {
+        Row: {
+          created_at: string;
+          id: string;
+          relationship_type: string;
+          source_person_id: string;
+          target_person_id: string;
+          updated_at: string;
+          user_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          id?: string;
+          relationship_type: string;
+          source_person_id: string;
+          target_person_id: string;
+          updated_at?: string;
+          user_id: string;
+        };
+        Update: {
+          created_at?: string;
+          id?: string;
+          relationship_type?: string;
+          source_person_id?: string;
+          target_person_id?: string;
+          updated_at?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "people_relationships_source_person_id_fkey";
+            columns: ["source_person_id"];
+            isOneToOne: false;
+            referencedRelation: "people";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "people_relationships_target_person_id_fkey";
+            columns: ["target_person_id"];
             isOneToOne: false;
             referencedRelation: "people";
             referencedColumns: ["id"];

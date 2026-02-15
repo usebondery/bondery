@@ -5,6 +5,8 @@
 
 import type { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
 import { requireAuth } from "../lib/supabase.js";
+import { attachContactChannels } from "../lib/contact-channels.js";
+import { attachContactSocialMedia } from "../lib/social-media.js";
 import type {
   Group,
   GroupWithCount,
@@ -42,17 +44,6 @@ const CONTACT_SELECT = `
   lastInteraction:last_interaction,
   createdAt:created_at,
   connections,
-  linkedin,
-  phones,
-  emails,
-  instagram,
-  whatsapp,
-  facebook,
-  website,
-  signal,
-  birthdate,
-  notifyBirthday:notify_birthday,
-  importantDates:important_dates,
   myself,
   position,
   gender,
@@ -333,7 +324,7 @@ export async function groupRoutes(fastify: FastifyInstance) {
       const auth = await requireAuth(request, reply);
       if (!auth) return;
 
-      const { client } = auth;
+      const { client, user } = auth;
       const { id: groupId } = request.params;
 
       // First verify the group exists
@@ -378,10 +369,42 @@ export async function groupRoutes(fastify: FastifyInstance) {
         return reply.status(500).send({ error: contactsError.message });
       }
 
+      let contactsWithChannels = contacts || [];
+      try {
+        contactsWithChannels = await attachContactChannels(client, user.id, contacts || []);
+      } catch (channelError) {
+        fastify.log.error({ channelError }, "Failed to attach contact channels for group contacts");
+        contactsWithChannels = (contacts || []).map((contact) => ({
+          ...contact,
+          phones: [],
+          emails: [],
+        }));
+      }
+
+      let contactsWithSocialMedia = contactsWithChannels;
+      try {
+        contactsWithSocialMedia = await attachContactSocialMedia(
+          client,
+          user.id,
+          contactsWithChannels,
+        );
+      } catch (socialError) {
+        fastify.log.error({ socialError }, "Failed to attach social media for group contacts");
+        contactsWithSocialMedia = contactsWithChannels.map((contact) => ({
+          ...contact,
+          linkedin: null,
+          instagram: null,
+          whatsapp: null,
+          facebook: null,
+          website: null,
+          signal: null,
+        }));
+      }
+
       return {
         group: { id: group.id, label: group.label },
-        contacts: contacts || [],
-        totalCount: contacts?.length || 0,
+        contacts: contactsWithSocialMedia,
+        totalCount: contactsWithSocialMedia.length,
       };
     },
   );

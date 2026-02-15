@@ -24,7 +24,7 @@ import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import type { Contact, Activity } from "@bondery/types";
 import { useTranslations } from "next-intl";
 import { DatePickerWithPresets } from "../../components/timeline/DatePickerWithPresets";
-import { ParticipantAvatarPill } from "../../components/timeline/ParticipantAvatarPill";
+import { ParticipantAvatarPill } from "../../components/shared/ParticipantAvatarPill";
 import { ACTIVITY_TYPE_OPTIONS } from "@/lib/activityTypes";
 import { getActivityTypeConfig } from "@/lib/activityTypes";
 

@@ -9,21 +9,30 @@ import {
   IconWorld,
 } from "@tabler/icons-react";
 import Image from "next/image";
+import { useEffect, useState } from "react";
 import type { Contact } from "@bondery/types";
 import { countryCodes, parsePhoneNumber } from "@/lib/phoneHelpers";
 import { createSocialMediaUrl } from "@/lib/socialMediaHelpers";
 
 interface SocialMediaSectionProps {
   contact: Contact;
-  editedValues: Record<string, string>;
   savingField: string | null;
-  handleChange: (field: string, value: string) => void;
-  handleBlur: (field: string) => void;
+  onSaveField: (field: string, value: string) => void;
   whatsappPrefix: string;
   signalPrefix: string;
   setWhatsappPrefix: (value: string) => void;
   setSignalPrefix: (value: string) => void;
 }
+
+type SocialFieldKey =
+  | "linkedin"
+  | "instagram"
+  | "facebook"
+  | "website"
+  | "whatsapp"
+  | "signal";
+
+type SocialFieldValues = Record<SocialFieldKey, string>;
 
 function PrefixSelect({ value, onChange }: { value: string; onChange: (v: string) => void }) {
   const options = Array.from(
@@ -64,15 +73,59 @@ function PrefixSelect({ value, onChange }: { value: string; onChange: (v: string
 
 export function SocialMediaSection({
   contact,
-  editedValues,
   savingField,
-  handleChange,
-  handleBlur,
+  onSaveField,
   whatsappPrefix,
   signalPrefix,
   setWhatsappPrefix,
   setSignalPrefix,
 }: SocialMediaSectionProps) {
+  const [values, setValues] = useState<SocialFieldValues>({
+    linkedin: contact.linkedin || "",
+    instagram: contact.instagram || "",
+    facebook: contact.facebook || "",
+    website: contact.website || "",
+    whatsapp: contact.whatsapp || "",
+    signal: contact.signal || "",
+  });
+
+  useEffect(() => {
+    setValues({
+      linkedin: contact.linkedin || "",
+      instagram: contact.instagram || "",
+      facebook: contact.facebook || "",
+      website: contact.website || "",
+      whatsapp: contact.whatsapp || "",
+      signal: contact.signal || "",
+    });
+  }, [
+    contact.linkedin,
+    contact.instagram,
+    contact.facebook,
+    contact.website,
+    contact.whatsapp,
+    contact.signal,
+  ]);
+
+  const handleValueChange = (field: SocialFieldKey, value: string) => {
+    setValues((previous) => ({
+      ...previous,
+      [field]: value,
+    }));
+  };
+
+  const getWebsiteUrl = (website: string | null): string | undefined => {
+    if (!website) {
+      return undefined;
+    }
+
+    if (website.startsWith("http://") || website.startsWith("https://")) {
+      return website;
+    }
+
+    return `https://${website}`;
+  };
+
   const handleNumberChange = (
     field: "whatsapp" | "signal",
     value: string,
@@ -81,10 +134,10 @@ export function SocialMediaSection({
     const parsed = parsePhoneNumber(value);
     if (parsed && value.includes("+")) {
       prefixSetter(parsed.dialCode);
-      handleChange(field, parsed.number);
+      handleValueChange(field, parsed.number);
       return;
     }
-    handleChange(field, value);
+    handleValueChange(field, value);
   };
 
   return (
@@ -107,9 +160,9 @@ export function SocialMediaSection({
           </ActionIcon>
           <TextInput
             placeholder="LinkedIn username or URL"
-            value={editedValues.linkedin || ""}
-            onChange={(e) => handleChange("linkedin", e.target.value)}
-            onBlur={() => handleBlur("linkedin")}
+            value={values.linkedin}
+            onChange={(e) => handleValueChange("linkedin", e.target.value)}
+            onBlur={() => onSaveField("linkedin", values.linkedin)}
             style={{ flex: 1 }}
             rightSection={savingField === "linkedin" ? <Loader size="xs" /> : null}
             disabled={savingField === "linkedin"}
@@ -132,9 +185,9 @@ export function SocialMediaSection({
           </ActionIcon>
           <TextInput
             placeholder="Instagram username or URL"
-            value={editedValues.instagram || ""}
-            onChange={(e) => handleChange("instagram", e.target.value)}
-            onBlur={() => handleBlur("instagram")}
+            value={values.instagram}
+            onChange={(e) => handleValueChange("instagram", e.target.value)}
+            onBlur={() => onSaveField("instagram", values.instagram)}
             style={{ flex: 1 }}
             rightSection={savingField === "instagram" ? <Loader size="xs" /> : null}
             disabled={savingField === "instagram"}
@@ -155,9 +208,9 @@ export function SocialMediaSection({
           </ActionIcon>
           <TextInput
             placeholder="Facebook username or URL"
-            value={editedValues.facebook || ""}
-            onChange={(e) => handleChange("facebook", e.target.value)}
-            onBlur={() => handleBlur("facebook")}
+            value={values.facebook}
+            onChange={(e) => handleValueChange("facebook", e.target.value)}
+            onBlur={() => onSaveField("facebook", values.facebook)}
             style={{ flex: 1 }}
             rightSection={savingField === "facebook" ? <Loader size="xs" /> : null}
             disabled={savingField === "facebook"}
@@ -179,9 +232,9 @@ export function SocialMediaSection({
           <PrefixSelect value={whatsappPrefix} onChange={setWhatsappPrefix} />
           <TextInput
             placeholder="WhatsApp number or URL"
-            value={editedValues.whatsapp || ""}
+            value={values.whatsapp}
             onChange={(e) => handleNumberChange("whatsapp", e.target.value, setWhatsappPrefix)}
-            onBlur={() => handleBlur("whatsapp")}
+            onBlur={() => onSaveField("whatsapp", values.whatsapp)}
             style={{ flex: 1 }}
             rightSection={savingField === "whatsapp" ? <Loader size="xs" /> : null}
             disabled={savingField === "whatsapp"}
@@ -206,9 +259,9 @@ export function SocialMediaSection({
           <PrefixSelect value={signalPrefix} onChange={setSignalPrefix} />
           <TextInput
             placeholder="Signal number"
-            value={editedValues.signal || ""}
+            value={values.signal}
             onChange={(e) => handleNumberChange("signal", e.target.value, setSignalPrefix)}
-            onBlur={() => handleBlur("signal")}
+            onBlur={() => onSaveField("signal", values.signal)}
             style={{ flex: 1 }}
             rightSection={savingField === "signal" ? <Loader size="xs" /> : null}
             disabled={savingField === "signal"}
@@ -221,7 +274,7 @@ export function SocialMediaSection({
             variant="light"
             color="gray"
             component="a"
-            href={contact.website || undefined}
+            href={getWebsiteUrl(contact.website)}
             target="_blank"
             disabled={!contact.website}
           >
@@ -229,9 +282,9 @@ export function SocialMediaSection({
           </ActionIcon>
           <TextInput
             placeholder="Website URL"
-            value={editedValues.website || ""}
-            onChange={(e) => handleChange("website", e.target.value)}
-            onBlur={() => handleBlur("website")}
+            value={values.website}
+            onChange={(e) => handleValueChange("website", e.target.value)}
+            onBlur={() => onSaveField("website", values.website)}
             style={{ flex: 1 }}
             rightSection={savingField === "website" ? <Loader size="xs" /> : null}
             disabled={savingField === "website"}
