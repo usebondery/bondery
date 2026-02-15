@@ -64,6 +64,10 @@ export function PeopleClient({
 
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [contacts, setContacts] = useState<Contact[]>(initialContacts);
+  const [loadedCount, setLoadedCount] = useState(initialContacts.length);
+  const [totalAvailableCount, setTotalAvailableCount] = useState(totalCount);
   const [columns, setColumns] = useState<ColumnConfig[]>([
     {
       key: "avatar",
@@ -138,10 +142,10 @@ export function PeopleClient({
   };
 
   const handleSelectAll = () => {
-    if (selectedIds.size === initialContacts.length) {
+    if (selectedIds.size === contacts.length) {
       setSelectedIds(new Set());
     } else {
-      setSelectedIds(new Set(initialContacts.map((c) => c.id)));
+      setSelectedIds(new Set(contacts.map((c) => c.id)));
     }
   };
 
@@ -153,6 +157,51 @@ export function PeopleClient({
       newSelected.add(id);
     }
     setSelectedIds(newSelected);
+  };
+
+  const handleLoadMore = async () => {
+    if (isLoadingMore) {
+      return;
+    }
+
+    setIsLoadingMore(true);
+
+    try {
+      const params = new URLSearchParams();
+      params.set("limit", "50");
+      params.set("offset", String(loadedCount));
+
+      if (initialSearch) {
+        params.set("q", initialSearch);
+      }
+
+      if (initialSort) {
+        params.set("sort", initialSort);
+      }
+
+      const response = await fetch(`${API_ROUTES.CONTACTS}?${params.toString()}`);
+
+      if (!response.ok) {
+        throw new Error("Failed to load more contacts");
+      }
+
+      const data = await response.json();
+      const fetchedContacts = (data.contacts || []) as Contact[];
+
+      setContacts((prev) => [...prev, ...fetchedContacts]);
+      setLoadedCount((prev) => prev + fetchedContacts.length);
+      if (Number.isFinite(data.totalCount)) {
+        setTotalAvailableCount(data.totalCount);
+      }
+    } catch {
+      notifications.show({
+        title: "Error",
+        message: "Failed to load more contacts. Please try again.",
+        color: "red",
+      });
+    } finally {
+      setIsLoadingMore(false);
+    }
   };
 
   const handleDelete = async (idsOverride?: string[]) => {
@@ -180,6 +229,9 @@ export function PeopleClient({
 
       // Clear selection
       setSelectedIds(new Set());
+      setContacts((prev) => prev.filter((contact) => !ids.includes(contact.id)));
+      setLoadedCount((prev) => Math.max(0, prev - ids.length));
+      setTotalAvailableCount((prev) => Math.max(0, prev - ids.length));
 
       // Refresh the page to show updated data
       router.refresh();
@@ -194,8 +246,8 @@ export function PeopleClient({
     }
   };
 
-  const allSelected = initialContacts.length > 0 && selectedIds.size === initialContacts.length;
-  const someSelected = selectedIds.size > 0 && selectedIds.size < initialContacts.length;
+  const allSelected = contacts.length > 0 && selectedIds.size === contacts.length;
+  const someSelected = selectedIds.size > 0 && selectedIds.size < contacts.length;
 
   // Define menu actions for individual contacts
   const menuActions: MenuAction[] = [
@@ -275,7 +327,7 @@ export function PeopleClient({
             </Group>
 
             <ContactsTable
-              contacts={initialContacts}
+              contacts={contacts}
               selectedIds={selectedIds}
               visibleColumns={visibleColumns}
               onSelectAll={handleSelectAll}
@@ -286,6 +338,14 @@ export function PeopleClient({
               menuActions={menuActions}
               bulkSelectionActions={bulkSelectionActions}
             />
+
+            {contacts.length < totalAvailableCount ? (
+              <Group justify="center" pt="sm">
+                <Button variant="light" onClick={handleLoadMore} loading={isLoadingMore}>
+                  Load another 50 contacts
+                </Button>
+              </Group>
+            ) : null}
           </Stack>
         </Paper>
       </WrapperComponent>

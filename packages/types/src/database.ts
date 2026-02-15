@@ -390,6 +390,7 @@ export type Database = {
       };
       people_social_media: {
         Row: {
+          connected_at: string | null;
           created_at: string;
           handle: string;
           id: string;
@@ -399,6 +400,7 @@ export type Database = {
           user_id: string;
         };
         Insert: {
+          connected_at?: string | null;
           created_at?: string;
           handle: string;
           id?: string;
@@ -408,6 +410,7 @@ export type Database = {
           user_id: string;
         };
         Update: {
+          connected_at?: string | null;
           created_at?: string;
           handle?: string;
           id?: string;

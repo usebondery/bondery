@@ -201,7 +201,36 @@
       "SignOutWait": "Please wait while we sign you out",
       "SignOutError": "Failed to sign out",
       "PleaseWait": "Please wait...",
-      "UpdateError": "Error"
+      "UpdateError": "Error",
+      "LinkedInImport": {
+        "SectionTitle": "Import contacts",
+        "ModalTitle": "Import LinkedIn contacts",
+        "LinkedIn": "LinkedIn",
+        "CardDescription": "Import contacts from your LinkedIn data export",
+        "InstructionStep1Prefix": "Go to",
+        "InstructionStep1LinkLabel": "Download my data in LinkedIn settings",
+        "InstructionStep2": "Wait for the email that your data is ready",
+        "InstructionStep3": "Download the ZIP file",
+        "HaveZipFile": "I have the ZIP file",
+        "DropzoneTitle": "Drop the LinkedIn ZIP",
+        "DropzoneDescription": "We will locate Connections.csv, validate the format, and prepare contacts for import.",
+        "SelectFolder": "Select folder",
+        "UploadAnother": "Upload a different file",
+        "Total": "Total: {count}",
+        "Valid": "Valid: {count}",
+        "Invalid": "Invalid: {count}",
+        "InvalidRowsHint": "Some rows are invalid and can be deselected before import.",
+        "ImportSelected": "Import selected ({count})",
+        "ImportSuccess": "Imported: {imported}, updated: {updated}, skipped: {skipped}",
+        "NoContactsSelected": "Select at least one contact to import.",
+        "ParseError": "Failed to parse LinkedIn export.",
+        "ImportError": "Failed to import selected contacts.",
+        "InvalidFile": "Invalid file. Upload a LinkedIn ZIP export or folder containing Connections.csv.",
+        "Back": "Back",
+        "Cancel": "Cancel",
+        "SuccessTitle": "Import completed",
+        "ErrorTitle": "Import failed"
+      }
     }
   },
   "GroupsPage": {

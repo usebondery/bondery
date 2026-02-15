@@ -34,7 +34,6 @@ import {
   IconTrash,
   IconUserMinus,
 } from "@tabler/icons-react";
-import { useFormatter } from "next-intl";
 import Image from "next/image";
 import { formatContactName } from "@/lib/nameHelpers";
 import Link from "next/link";
@@ -199,6 +198,8 @@ interface ContactsTableProps {
   showSelection?: boolean;
   menuActions?: MenuAction[];
   bulkSelectionActions?: BulkSelectionAction[];
+  disableNameLink?: boolean;
+  dateLocale?: string;
 }
 
 export default function ContactsTable({
@@ -212,8 +213,12 @@ export default function ContactsTable({
   showSelection,
   menuActions,
   bulkSelectionActions,
+  disableNameLink,
+  dateLocale,
 }: ContactsTableProps) {
-  const format = useFormatter();
+  const dateFormatter = new Intl.DateTimeFormat(dateLocale || "en-US", {
+    dateStyle: "short",
+  });
 
   // Use provided menu actions or empty array
   const effectiveMenuActions: MenuAction[] = menuActions || [];
@@ -330,14 +335,18 @@ export default function ContactsTable({
                     case "name":
                       return (
                         <TableTd key={col.key}>
-                          <Anchor
-                            component={Link}
-                            href={`${WEBAPP_ROUTES.PERSON}/${contact.id}`}
-                            c="blue"
-                            underline="hover"
-                          >
-                            {formatContactName(contact)}
-                          </Anchor>
+                          {disableNameLink ? (
+                            <Text>{formatContactName(contact)}</Text>
+                          ) : (
+                            <Anchor
+                              component={Link}
+                              href={`${WEBAPP_ROUTES.PERSON}/${contact.id}`}
+                              c="blue"
+                              underline="hover"
+                            >
+                              {formatContactName(contact)}
+                            </Anchor>
+                          )}
                         </TableTd>
                       );
                     case "title":
@@ -350,9 +359,7 @@ export default function ContactsTable({
                       return (
                         <TableTd key={col.key}>
                           {contact.lastInteraction
-                            ? format.dateTime(new Date(contact.lastInteraction), {
-                                dateStyle: "short",
-                              })
+                            ? dateFormatter.format(new Date(contact.lastInteraction))
                             : "-"}
                         </TableTd>
                       );

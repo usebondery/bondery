@@ -9,6 +9,7 @@ export const WEBSITE_ROUTES = {
 
 export const API_ROUTES = {
   CONTACTS: "/api/contacts",
+  CONTACTS_IMPORT_LINKEDIN: "/api/contacts/import/linkedin",
   GROUPS: "/api/groups",
   ACTIVITIES: "/api/activities",
   SETTINGS: "/api/settings",

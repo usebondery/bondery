@@ -58,3 +58,36 @@ export interface RedirectResponse {
   contactId: string;
   existed: boolean;
 }
+
+export interface LinkedInPreparedContact {
+  tempId: string;
+  firstName: string;
+  middleName: string | null;
+  lastName: string;
+  linkedinUrl: string;
+  linkedinUsername: string;
+  email: string | null;
+  company: string | null;
+  position: string | null;
+  connectedAt: string | null;
+  connectedOnRaw: string | null;
+  isValid: boolean;
+  issues: string[];
+}
+
+export interface LinkedInParseResponse {
+  contacts: LinkedInPreparedContact[];
+  totalCount: number;
+  validCount: number;
+  invalidCount: number;
+}
+
+export interface LinkedInImportCommitRequest {
+  contacts: LinkedInPreparedContact[];
+}
+
+export interface LinkedInImportCommitResponse {
+  importedCount: number;
+  updatedCount: number;
+  skippedCount: number;
+}

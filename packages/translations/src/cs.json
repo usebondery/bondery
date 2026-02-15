@@ -200,7 +200,36 @@
       "SignOutWait": "Prosím čekejte, než vás odhlásíme",
       "SignOutError": "Odhlášení selhalo",
       "PleaseWait": "Prosím čekejte...",
-      "UpdateError": "Chyba"
+      "UpdateError": "Chyba",
+      "LinkedInImport": {
+        "SectionTitle": "Import kontaktů",
+        "ModalTitle": "Import kontaktů z LinkedIn",
+        "LinkedIn": "LinkedIn",
+        "CardDescription": "Importujte kontakty z LinkedIn datového exportu",
+        "InstructionStep1Prefix": "Přejděte na",
+        "InstructionStep1LinkLabel": "Stáhnout má data v nastavení LinkedIn",
+        "InstructionStep2": "Počkejte na e-mail, že jsou data připravena",
+        "InstructionStep3": "Stáhněte ZIP soubor",
+        "HaveZipFile": "Mám ZIP soubor",
+        "DropzoneTitle": "Přetáhněte LinkedIn ZIP nebo exportovanou složku",
+        "DropzoneDescription": "Najdeme Connections.csv, ověříme formát a připravíme kontakty k importu.",
+        "SelectFolder": "Vybrat složku",
+        "UploadAnother": "Nahrát jiný soubor",
+        "Total": "Celkem: {count}",
+        "Valid": "Platné: {count}",
+        "Invalid": "Neplatné: {count}",
+        "InvalidRowsHint": "Některé řádky jsou neplatné a můžete je před importem odznačit.",
+        "ImportSelected": "Importovat vybrané ({count})",
+        "ImportSuccess": "Importováno: {imported}, aktualizováno: {updated}, přeskočeno: {skipped}",
+        "NoContactsSelected": "Vyberte alespoň jeden kontakt k importu.",
+        "ParseError": "Nepodařilo se zpracovat LinkedIn export.",
+        "ImportError": "Nepodařilo se importovat vybrané kontakty.",
+        "InvalidFile": "Neplatný soubor. Nahrajte ZIP export z LinkedIn nebo složku obsahující Connections.csv.",
+        "Back": "Zpět",
+        "Cancel": "Zrušit",
+        "SuccessTitle": "Import dokončen",
+        "ErrorTitle": "Import selhal"
+      }
     }
   },
   "GroupsPage": {

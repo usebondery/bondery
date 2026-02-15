@@ -27,6 +27,7 @@ type SocialRow = {
   person_id: string;
   platform: string;
   handle: string;
+  connected_at: string | null;
 };
 
 function emptySocialShape(): SocialMediaShape {
@@ -69,7 +70,7 @@ export async function attachContactSocialMedia<T extends ContactWithId>(
 
   const { data: socialRows, error } = await client
     .from("people_social_media")
-    .select("person_id, platform, handle")
+    .select("person_id, platform, handle, connected_at")
     .eq("user_id", userId)
     .in("person_id", personIds);
 
@@ -117,6 +118,7 @@ export async function upsertContactSocialMedia(
   personId: string,
   platform: SocialMediaPlatform,
   handle: string | null | undefined,
+  connectedAt?: string | null,
 ): Promise<void> {
   const normalizedHandle = typeof handle === "string" ? handle.trim() : "";
 
@@ -141,6 +143,7 @@ export async function upsertContactSocialMedia(
       person_id: personId,
       platform,
       handle: normalizedHandle,
+      connected_at: connectedAt ?? null,
     },
     {
       onConflict: "user_id,person_id,platform",

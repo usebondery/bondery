@@ -3,6 +3,7 @@ import { IconDatabase } from "@tabler/icons-react";
 import { useTranslations } from "next-intl";
 import { LogoutSection } from "./LogoutSection";
 import { DeleteAccountSection } from "./DeleteAccountSection";
+import { LinkedInImportSection } from "./LinkedInImportSection";
 
 export function DataManagementCard() {
   const t = useTranslations("SettingsPage.DataManagement");
@@ -20,6 +21,12 @@ export function DataManagementCard() {
 
       <CardSection inheritPadding py="md">
         <LogoutSection />
+      </CardSection>
+
+      <Divider />
+
+      <CardSection inheritPadding py="md">
+        <LinkedInImportSection />
       </CardSection>
 
       <Divider />

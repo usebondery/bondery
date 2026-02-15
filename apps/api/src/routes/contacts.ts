@@ -196,16 +196,110 @@ export async function contactRoutes(fastify: FastifyInstance) {
   /**
    * GET /api/contacts - List all contacts
    */
-  fastify.get("/", async (request: FastifyRequest, reply: FastifyReply) => {
+  fastify.get(
+    "/",
+    async (
+      request: FastifyRequest<{
+        Querystring: {
+          limit?: string;
+          offset?: string;
+          q?: string;
+          sort?:
+            | "nameAsc"
+            | "nameDesc"
+            | "surnameAsc"
+            | "surnameDesc"
+            | "interactionAsc"
+            | "interactionDesc";
+        };
+      }>,
+      reply: FastifyReply,
+    ) => {
     const auth = await requireAuth(request, reply);
     if (!auth) return;
 
     const { client, user } = auth;
+    const query = request.query || {};
 
-    const { data: contacts, error } = await client
+    const parsedLimit = Number.parseInt(query.limit || "", 10);
+    const parsedOffset = Number.parseInt(query.offset || "", 10);
+    const limit = Number.isFinite(parsedLimit) && parsedLimit > 0 ? parsedLimit : null;
+    const offset = Number.isFinite(parsedOffset) && parsedOffset >= 0 ? parsedOffset : 0;
+    const search = typeof query.q === "string" ? query.q.trim() : "";
+
+    const now = new Date();
+    const monthStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
+    const nextMonthStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 1));
+    const yearStart = new Date(Date.UTC(now.getUTCFullYear(), 0, 1));
+    const nextYearStart = new Date(Date.UTC(now.getUTCFullYear() + 1, 0, 1));
+
+    const [
+      { count: totalContactsCount },
+      { count: monthInteractionsCount },
+      { count: newContactsYearCount },
+    ] = await Promise.all([
+      client
+        .from("people")
+        .select("id", { head: true, count: "exact" })
+        .eq("user_id", user.id)
+        .eq("myself", false),
+      client
+        .from("people")
+        .select("id", { head: true, count: "exact" })
+        .eq("user_id", user.id)
+        .eq("myself", false)
+        .not("last_interaction", "is", null)
+        .gte("last_interaction", monthStart.toISOString())
+        .lt("last_interaction", nextMonthStart.toISOString()),
+      client
+        .from("people")
+        .select("id", { head: true, count: "exact" })
+        .eq("user_id", user.id)
+        .eq("myself", false)
+        .not("created_at", "is", null)
+        .gte("created_at", yearStart.toISOString())
+        .lt("created_at", nextYearStart.toISOString()),
+    ]);
+
+    let peopleQuery = client
       .from("people")
-      .select(CONTACT_SELECT)
+      .select(CONTACT_SELECT, { count: "exact" })
+      .eq("user_id", user.id)
       .eq("myself", false);
+
+    if (search) {
+      peopleQuery = peopleQuery.or(`first_name.ilike.%${search}%,last_name.ilike.%${search}%`);
+    }
+
+    switch (query.sort) {
+      case "nameAsc":
+        peopleQuery = peopleQuery.order("first_name", { ascending: true });
+        break;
+      case "nameDesc":
+        peopleQuery = peopleQuery.order("first_name", { ascending: false });
+        break;
+      case "surnameAsc":
+        peopleQuery = peopleQuery.order("last_name", { ascending: true, nullsFirst: true });
+        break;
+      case "surnameDesc":
+        peopleQuery = peopleQuery.order("last_name", { ascending: false, nullsFirst: false });
+        break;
+      case "interactionAsc":
+        peopleQuery = peopleQuery.order("last_interaction", { ascending: true, nullsFirst: true });
+        break;
+      case "interactionDesc":
+        peopleQuery = peopleQuery.order("last_interaction", { ascending: false, nullsFirst: false });
+        break;
+      default:
+        peopleQuery = peopleQuery.order("first_name", { ascending: true });
+        break;
+    }
+
+    if (limit !== null) {
+      peopleQuery = peopleQuery.range(offset, offset + limit - 1);
+    }
+
+    const { data: contacts, error, count } = await peopleQuery;
 
     if (error) {
       console.log("Error fetching contacts:", error);
@@ -236,9 +330,15 @@ export async function contactRoutes(fastify: FastifyInstance) {
 
     return {
       contacts: contactsWithSocialMedia,
-      totalCount: contactsWithSocialMedia.length,
+      totalCount: typeof count === "number" ? count : contactsWithSocialMedia.length,
+      stats: {
+        totalContacts: totalContactsCount || 0,
+        thisMonthInteractions: monthInteractionsCount || 0,
+        newContactsThisYear: newContactsYearCount || 0,
+      },
     };
-  });
+    },
+  );
 
   /**
    * POST /api/contacts - Create a new contact

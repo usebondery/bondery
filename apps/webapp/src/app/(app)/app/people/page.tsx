@@ -15,7 +15,17 @@ type SortOrder =
 async function getContacts(query?: string, sort?: SortOrder) {
   try {
     const headers = await getAuthHeaders();
-    const res = await fetch(`${API_URL}${API_ROUTES.CONTACTS}`, {
+    const params = new URLSearchParams();
+    params.set("limit", "50");
+    params.set("offset", "0");
+    if (query) {
+      params.set("q", query);
+    }
+    if (sort) {
+      params.set("sort", sort);
+    }
+
+    const res = await fetch(`${API_URL}${API_ROUTES.CONTACTS}?${params.toString()}`, {
       cache: "no-store",
       headers,
     });
@@ -26,53 +36,15 @@ async function getContacts(query?: string, sort?: SortOrder) {
 
     const data = await res.json();
 
-    // Ensure lastInteraction is a Date object
-    let contacts = data.contacts.map((contact: Contact) => ({
-      ...contact,
-      lastInteraction: contact.lastInteraction ? new Date(contact.lastInteraction) : null,
-      createdAt: contact.createdAt ? new Date(contact.createdAt) : null,
-    }));
-
-    // Server-side filtering
-    if (query) {
-      const lowerQuery = query.toLowerCase();
-      contacts = contacts.filter((contact: Contact) =>
-        `${contact.firstName} ${contact.lastName}`.toLowerCase().includes(lowerQuery),
-      );
-    }
-
-    // Server-side sorting
-    if (sort) {
-      contacts.sort((a: Contact, b: Contact) => {
-        switch (sort) {
-          case "nameAsc":
-            return a.firstName.localeCompare(b.firstName);
-          case "nameDesc":
-            return b.firstName.localeCompare(a.firstName);
-          case "surnameAsc":
-            return (a.lastName || "").localeCompare(b.lastName || "");
-          case "surnameDesc":
-            return (b.lastName || "").localeCompare(a.lastName || "");
-          case "interactionAsc":
-            return (
-              (a.lastInteraction ? new Date(a.lastInteraction).getTime() : 0) -
-              (b.lastInteraction ? new Date(b.lastInteraction).getTime() : 0)
-            );
-          case "interactionDesc":
-            return (
-              (b.lastInteraction ? new Date(b.lastInteraction).getTime() : 0) -
-              (a.lastInteraction ? new Date(a.lastInteraction).getTime() : 0)
-            );
-          default:
-            return 0;
-        }
-      });
-    } else {
-      // Default sort
-      contacts.sort((a: Contact, b: Contact) => a.firstName.localeCompare(b.firstName));
-    }
-
-    return { contacts, totalCount: contacts.length };
+    return {
+      contacts: (data.contacts || []) as Contact[],
+      totalCount: Number.isFinite(data.totalCount) ? data.totalCount : (data.contacts || []).length,
+      stats: {
+        totalContacts: data?.stats?.totalContacts ?? data.totalCount ?? 0,
+        thisMonthInteractions: data?.stats?.thisMonthInteractions ?? 0,
+        newContactsThisYear: data?.stats?.newContactsThisYear ?? 0,
+      },
+    };
   } catch (error) {
     console.error("Error fetching contacts:", error);
     throw new Error(
@@ -81,35 +53,6 @@ async function getContacts(query?: string, sort?: SortOrder) {
         : "An unexpected error occurred while fetching contacts",
     );
   }
-}
-
-function calculateStats(contacts: Contact[]) {
-  const now = new Date();
-  const currentMonth = now.getMonth();
-  const currentYear = now.getFullYear();
-
-  // Total contacts
-  const totalContacts = contacts.length;
-
-  // This month's interactions (contacts with lastInteraction in current month)
-  const thisMonthInteractions = contacts.filter((contact) => {
-    if (!contact.lastInteraction) return false;
-    const date = new Date(contact.lastInteraction);
-    return date.getMonth() === currentMonth && date.getFullYear() === currentYear;
-  }).length;
-
-  // New contacts this year (contacts created in current year)
-  const newContactsThisYear = contacts.filter((contact) => {
-    if (!contact.createdAt) return false;
-    const date = new Date(contact.createdAt);
-    return date.getFullYear() === currentYear;
-  }).length;
-
-  return {
-    totalContacts,
-    thisMonthInteractions,
-    newContactsThisYear,
-  };
 }
 
 export default async function PeoplePage({
@@ -121,8 +64,7 @@ export default async function PeoplePage({
   const query = params.q;
   const sort = params.sort as SortOrder | undefined;
 
-  const { contacts, totalCount } = await getContacts(query, sort);
-  const stats = calculateStats(contacts);
+  const { contacts, totalCount, stats } = await getContacts(query, sort);
 
   return <PeopleClient initialContacts={contacts} totalCount={totalCount} stats={stats} />;
 }
