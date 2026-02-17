@@ -183,7 +183,7 @@ export async function settingsRoutes(fastify: FastifyInstance) {
       resolvedSettings = newSettings;
     }
 
-    const hydrationUpdates: Record<string, string> = {};
+    const hydrationUpdates: Record<string, string | null> = {};
 
     if (!resolvedSettings.name?.trim() && metadataName.name) {
       hydrationUpdates.name = metadataName.name;
@@ -193,9 +193,16 @@ export async function settingsRoutes(fastify: FastifyInstance) {
       hydrationUpdates.surname = metadataName.surname;
     }
 
-    if (!resolvedSettings.avatar_url?.trim() && metadataAvatarUrl) {
-      const storedAvatarUrl = await importMetadataAvatarToStorage(user.id, metadataAvatarUrl);
-      hydrationUpdates.avatar_url = storedAvatarUrl || metadataAvatarUrl;
+    const currentAvatarUrl = resolvedSettings.avatar_url?.trim() || "";
+    const hasManagedAvatar = currentAvatarUrl.includes("/avatars/");
+
+    if (!hasManagedAvatar) {
+      if (metadataAvatarUrl) {
+        const storedAvatarUrl = await importMetadataAvatarToStorage(user.id, metadataAvatarUrl);
+        hydrationUpdates.avatar_url = storedAvatarUrl;
+      } else if (currentAvatarUrl) {
+        hydrationUpdates.avatar_url = null;
+      }
     }
 
     if (Object.keys(hydrationUpdates).length > 0) {
@@ -216,7 +223,7 @@ export async function settingsRoutes(fastify: FastifyInstance) {
       data: {
         ...resolvedSettings,
         email: userData?.user?.email,
-        avatar_url: resolvedSettings.avatar_url || metadataAvatarUrl,
+        avatar_url: resolvedSettings.avatar_url || null,
         providers: userData?.user?.app_metadata?.providers || [],
       },
     };
