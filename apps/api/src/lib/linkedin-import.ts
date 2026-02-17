@@ -80,10 +80,7 @@ function normalizeNullableString(value: string | null | undefined): string | nul
 }
 
 function normalizeNameToken(token: string): string {
-  return token
-    .trim()
-    .replace(/,$/, "")
-    .toLowerCase();
+  return token.trim().replace(/,$/, "").toLowerCase();
 }
 
 function stripNameTitles(rawName: string): string {
@@ -103,7 +100,10 @@ function stripNameTitles(rawName: string): string {
     end -= 1;
   }
 
-  return words.slice(start, end + 1).join(" ").trim();
+  return words
+    .slice(start, end + 1)
+    .join(" ")
+    .trim();
 }
 
 function extractNameParts(lastNameInput: string): { middleName: string | null; lastName: string } {
@@ -145,7 +145,8 @@ function parseLinkedInUsername(rawUrl: string): { username: string | null; norma
       username = segments[segments.length - 1];
     }
 
-    const cleaned = normalizeNullableString(username?.replace(/\?.*$/, "").replace(/#.*$/, "")) || null;
+    const cleaned =
+      normalizeNullableString(username?.replace(/\?.*$/, "").replace(/#.*$/, "")) || null;
 
     if (!cleaned) {
       return { username: null, normalizedUrl: fallback };
@@ -225,7 +226,9 @@ function validateLinkedInHeaders(headers: string[]): void {
   const normalizedHeaders = headers.map(normalizeHeader);
   const isValid =
     normalizedHeaders.length === LINKEDIN_REQUIRED_HEADERS.length &&
-    LINKEDIN_REQUIRED_HEADERS.every((header, index) => normalizeHeader(header) === normalizedHeaders[index]);
+    LINKEDIN_REQUIRED_HEADERS.every(
+      (header, index) => normalizeHeader(header) === normalizedHeaders[index],
+    );
 
   if (!isValid) {
     throw new Error(
@@ -239,7 +242,10 @@ function extractLinkedInCsvDataSection(csvContent: string): string {
   const lines = normalizedContent.split(/\r?\n/);
 
   const headerIndex = lines.findIndex((line) => {
-    const normalizedLine = line.replace(/^\uFEFF/, "").trim().toLowerCase();
+    const normalizedLine = line
+      .replace(/^\uFEFF/, "")
+      .trim()
+      .toLowerCase();
     return normalizedLine === LINKEDIN_HEADER_SIGNATURE;
   });
 

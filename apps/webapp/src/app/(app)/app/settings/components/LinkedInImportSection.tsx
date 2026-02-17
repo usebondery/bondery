@@ -1,6 +1,6 @@
 "use client";
 
-import { Group, Stack, Text } from "@mantine/core";
+import { Group, Text } from "@mantine/core";
 import { IconBrandLinkedin, IconDownload } from "@tabler/icons-react";
 import { useTranslations } from "next-intl";
 import { modals } from "@mantine/modals";
@@ -25,22 +25,17 @@ export function LinkedInImportSection() {
   };
 
   return (
-    <Stack gap="sm">
-      <Text size="sm" fw={500}>
-        {t("SectionTitle")}
-      </Text>
-      <IntegrationCard
-        provider="linkedin_import"
-        displayName={t("LinkedIn")}
-        icon={IconBrandLinkedin}
-        iconColor="blue"
-        isConnected={false}
-        isDisabled={false}
-        isLinkable={false}
-        connectedDescription={t("CardDescription")}
-        unconnectedDescription={t("CardDescription")}
-        onClick={openImporter}
-      />
-    </Stack>
+    <IntegrationCard
+      provider="linkedin_import"
+      displayName={t("LinkedIn")}
+      icon={IconBrandLinkedin}
+      iconColor="blue"
+      isConnected={false}
+      isDisabled={false}
+      isLinkable={false}
+      connectedDescription={t("CardDescription")}
+      unconnectedDescription={t("CardDescription")}
+      onClick={openImporter}
+    />
   );
 }

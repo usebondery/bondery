@@ -19,6 +19,7 @@ import { feedbackRoutes } from "./routes/feedback.js";
 import { groupRoutes } from "./routes/groups.js";
 import { activityRoutes } from "./routes/activities.js";
 import { linkedInImportRoutes } from "./routes/linkedin-import.js";
+import { instagramImportRoutes } from "./routes/instagram-import.js";
 
 // Environment variable schema
 const envSchema = {
@@ -189,7 +190,7 @@ async function buildServer() {
   // Register multipart for file uploads
   await fastify.register(multipart, {
     limits: {
-      fileSize: 30 * 1024 * 1024, // 30MB max
+      fileSize: 300 * 1024 * 1024, // 300MB max
     },
   });
 
@@ -201,6 +202,7 @@ async function buildServer() {
   // Register route modules
   await fastify.register(contactRoutes, { prefix: API_ROUTES.CONTACTS });
   await fastify.register(linkedInImportRoutes, { prefix: API_ROUTES.CONTACTS_IMPORT_LINKEDIN });
+  await fastify.register(instagramImportRoutes, { prefix: API_ROUTES.CONTACTS_IMPORT_INSTAGRAM });
   await fastify.register(groupRoutes, { prefix: API_ROUTES.GROUPS });
   await fastify.register(accountRoutes, { prefix: API_ROUTES.ACCOUNT });
   await fastify.register(settingsRoutes, { prefix: API_ROUTES.SETTINGS });

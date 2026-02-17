@@ -135,19 +135,21 @@ function ContactSocialIcons({ contact }: { contact: Contact }) {
   ];
   return (
     <Group gap="xs">
-      {socials.filter(s => !s.disabled).map((s) => (
-        <ActionIcon
-          key={s.label}
-          variant="light"
-          color={s.color}
-          component="a"
-          href={s.href}
-          target={s.href && s.href.startsWith("http") ? "_blank" : undefined}
-          aria-label={s.label}
-        >
-          {s.icon}
-        </ActionIcon>
-      ))}
+      {socials
+        .filter((s) => !s.disabled)
+        .map((s) => (
+          <ActionIcon
+            key={s.label}
+            variant="light"
+            color={s.color}
+            component="a"
+            href={s.href}
+            target={s.href && s.href.startsWith("http") ? "_blank" : undefined}
+            aria-label={s.label}
+          >
+            {s.icon}
+          </ActionIcon>
+        ))}
     </Group>
   );
 }
@@ -271,7 +273,7 @@ export default function ContactsTable({
             )}
             {visibleColumns.map((col) => (
               <TableTh key={col.key} style={col.key === "avatar" ? { width: 60 } : undefined}>
-                {col.key === 'avatar' || col.key === 'name' ? (
+                {col.key === "avatar" || col.key === "name" ? (
                   <span></span>
                 ) : (
                   <Group gap="xs" wrap="nowrap">
