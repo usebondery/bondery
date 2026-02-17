@@ -233,7 +233,10 @@ export function InstagramImportModal({
     [parsedContacts],
   );
   const nonSelectableIds = useMemo(
-    () => new Set(parsedContacts.filter((contact) => contact.alreadyExists).map((contact) => contact.tempId)),
+    () =>
+      new Set(
+        parsedContacts.filter((contact) => contact.alreadyExists).map((contact) => contact.tempId),
+      ),
     [parsedContacts],
   );
   const selectableIds = useMemo(
