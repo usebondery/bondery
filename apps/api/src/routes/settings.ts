@@ -7,6 +7,55 @@ import type { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
 import { requireAuth } from "../lib/supabase.js";
 import type { UpdateUserSettingsInput } from "@bondery/types";
 
+type UserMetadata = {
+  name?: string;
+  full_name?: string;
+  given_name?: string;
+  family_name?: string;
+  avatar_url?: string;
+  picture?: string;
+};
+
+/**
+ * Normalizes auth provider metadata into first name and surname values used by user settings.
+ */
+function getMetadataNameParts(userMetadata: UserMetadata | undefined): {
+  name: string;
+  surname: string;
+} {
+  const givenName = userMetadata?.given_name?.trim() || "";
+  const familyName = userMetadata?.family_name?.trim() || "";
+
+  if (givenName || familyName) {
+    return {
+      name: givenName,
+      surname: familyName,
+    };
+  }
+
+  const fullName = (userMetadata?.name || userMetadata?.full_name || "").trim();
+  if (!fullName) {
+    return { name: "", surname: "" };
+  }
+
+  const parts = fullName.split(/\s+/).filter(Boolean);
+  if (parts.length === 1) {
+    return { name: parts[0], surname: "" };
+  }
+
+  return {
+    name: parts[0],
+    surname: parts.slice(1).join(" "),
+  };
+}
+
+/**
+ * Returns avatar URL from auth metadata, including provider-specific keys.
+ */
+function getMetadataAvatarUrl(userMetadata: UserMetadata | undefined): string | null {
+  return userMetadata?.avatar_url || userMetadata?.picture || null;
+}
+
 export async function settingsRoutes(fastify: FastifyInstance) {
   /**
    * GET /api/settings - Get user settings
@@ -19,6 +68,9 @@ export async function settingsRoutes(fastify: FastifyInstance) {
 
     // Get user info for email/providers
     const { data: userData } = await client.auth.getUser();
+    const userMetadata = userData?.user?.user_metadata as UserMetadata | undefined;
+    const metadataName = getMetadataNameParts(userMetadata);
+    const metadataAvatarUrl = getMetadataAvatarUrl(userMetadata);
 
     // Get settings from database
     const { data: settings, error } = await client
@@ -33,17 +85,13 @@ export async function settingsRoutes(fastify: FastifyInstance) {
 
     // Insert defaults if no settings exist
     if (!settings) {
-      // Get name from user metadata if available
-      const defaultName =
-        userData?.user?.user_metadata?.name || userData?.user?.user_metadata?.full_name || "";
-
       const { data: newSettings, error: insertError } = await client
         .from("user_settings")
         .insert({
           user_id: user.id,
-          name: defaultName,
+          name: metadataName.name,
           middlename: "",
-          surname: "",
+          surname: metadataName.surname,
           timezone: "UTC",
           language: "en",
           color_scheme: "auto",
@@ -60,7 +108,7 @@ export async function settingsRoutes(fastify: FastifyInstance) {
         data: {
           ...newSettings,
           email: userData?.user?.email,
-          avatar_url: userData?.user?.user_metadata?.avatar_url || null,
+          avatar_url: metadataAvatarUrl,
           providers: userData?.user?.app_metadata?.providers || [],
         },
       };
@@ -71,7 +119,7 @@ export async function settingsRoutes(fastify: FastifyInstance) {
       data: {
         ...settings,
         email: userData?.user?.email,
-        avatar_url: settings.avatar_url || userData?.user?.user_metadata?.avatar_url || null,
+        avatar_url: settings.avatar_url || metadataAvatarUrl,
         providers: userData?.user?.app_metadata?.providers || [],
       },
     };
