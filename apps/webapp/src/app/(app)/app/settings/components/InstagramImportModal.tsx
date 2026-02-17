@@ -2,17 +2,7 @@
 
 import { useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import {
-  Alert,
-  Anchor,
-  Badge,
-  Button,
-  Group,
-  List,
-  Select,
-  Stack,
-  Text,
-} from "@mantine/core";
+import { Alert, Anchor, Badge, Button, Group, List, Select, Stack, Text } from "@mantine/core";
 import { Dropzone } from "@mantine/dropzone";
 import {
   IconAlertTriangle,
@@ -259,7 +249,9 @@ export function InstagramImportModal({
       const contacts = (data?.contacts || []) as InstagramPreparedContact[];
       setParsedContacts(contacts);
       setSelectedIds(
-        new Set(contacts.filter((item) => item.isValid && item.likelyPerson).map((item) => item.tempId)),
+        new Set(
+          contacts.filter((item) => item.isValid && item.likelyPerson).map((item) => item.tempId),
+        ),
       );
       setStep("preview");
     } catch (error) {
@@ -368,7 +360,7 @@ export function InstagramImportModal({
       <Stack gap="md">
         <List type="ordered" listStyleType="decimal" withPadding spacing="sm">
           <List.Item>
-            {t("InstructionStep1Prefix")} {" "}
+            {t("InstructionStep1Prefix")}{" "}
             <Anchor
               href="https://accountscenter.instagram.com/info_and_permissions/dyi/"
               target="_blank"
@@ -470,7 +462,9 @@ export function InstagramImportModal({
           label={t("StrategyLabel")}
           data={strategyOptions(t)}
           value={strategy}
-          onChange={(value) => setStrategy((value as InstagramImportStrategy) || "following_and_followers")}
+          onChange={(value) =>
+            setStrategy((value as InstagramImportStrategy) || "following_and_followers")
+          }
           allowDeselect={false}
         />
 
