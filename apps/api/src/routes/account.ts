@@ -47,18 +47,18 @@ export async function accountRoutes(fastify: FastifyInstance) {
     if (!auth) return;
 
     const { client, user } = auth;
+    const adminClient = createAdminClient();
 
     try {
       // Delete user's storage files first
-      const { data: files } = await client.storage.from(AVATARS_BUCKET).list(user.id);
+      const { data: files } = await adminClient.storage.from(AVATARS_BUCKET).list(user.id);
 
       if (files && files.length > 0) {
         const filePaths = files.map((file) => `${user.id}/${file.name}`);
-        await client.storage.from(AVATARS_BUCKET).remove(filePaths);
+        await adminClient.storage.from(AVATARS_BUCKET).remove(filePaths);
       }
 
       // Delete user using admin client
-      const adminClient = createAdminClient();
       const { error } = await adminClient.auth.admin.deleteUser(user.id);
 
       if (error) {
@@ -83,13 +83,15 @@ export async function accountRoutes(fastify: FastifyInstance) {
     if (!auth) return;
 
     const { client, user } = auth;
+    const adminClient = createAdminClient();
 
     const data = await request.file();
     if (!data) {
       return reply.status(400).send({ error: "No file provided" });
     }
 
-    const validation = validateImageUpload({ type: data.mimetype, size: 0 });
+    const buffer = await data.toBuffer();
+    const validation = validateImageUpload({ type: data.mimetype, size: buffer.length });
     if (!validation.isValid) {
       return reply.status(400).send({ error: validation.error });
     }
@@ -97,12 +99,10 @@ export async function accountRoutes(fastify: FastifyInstance) {
     const fileName = getAccountAvatarFileName(user.id);
 
     // Delete existing account photo
-    await client.storage.from(AVATARS_BUCKET).remove([fileName]);
+    await adminClient.storage.from(AVATARS_BUCKET).remove([fileName]);
 
     // Upload new file
-    const buffer = await data.toBuffer();
-
-    const { error: uploadError } = await client.storage
+    const { error: uploadError } = await adminClient.storage
       .from(AVATARS_BUCKET)
       .upload(fileName, buffer, {
         contentType: data.mimetype,
@@ -110,11 +110,14 @@ export async function accountRoutes(fastify: FastifyInstance) {
       });
 
     if (uploadError) {
-      return reply.status(500).send({ error: "Failed to upload profile photo" });
+      return reply.status(500).send({
+        error: "Failed to upload profile photo",
+        description: uploadError.message,
+      });
     }
 
     // Get public URL
-    const { data: publicUrlData } = client.storage.from(AVATARS_BUCKET).getPublicUrl(fileName);
+    const { data: publicUrlData } = adminClient.storage.from(AVATARS_BUCKET).getPublicUrl(fileName);
 
     const avatarUrl = publicUrlData?.publicUrl
       ? `${publicUrlData.publicUrl}?t=${Date.now()}`
@@ -144,11 +147,12 @@ export async function accountRoutes(fastify: FastifyInstance) {
     if (!auth) return;
 
     const { client, user } = auth;
+    const adminClient = createAdminClient();
 
     const fileName = getAccountAvatarFileName(user.id);
 
     // Delete account photo
-    await client.storage.from(AVATARS_BUCKET).remove([fileName]);
+    await adminClient.storage.from(AVATARS_BUCKET).remove([fileName]);
 
     // Update user_settings
     await client.from("user_settings").update({ avatar_url: null }).eq("user_id", user.id);

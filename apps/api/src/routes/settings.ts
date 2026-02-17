@@ -4,8 +4,15 @@
  */
 
 import type { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
-import { requireAuth } from "../lib/supabase.js";
+import { createAdminClient, requireAuth } from "../lib/supabase.js";
 import type { UpdateUserSettingsInput } from "@bondery/types";
+import { validateImageUpload } from "../lib/config.js";
+
+const AVATARS_BUCKET = "avatars";
+
+function getAccountAvatarFileName(userId: string): string {
+  return `${userId}/${userId}.jpg`;
+}
 
 type UserMetadata = {
   name?: string;
@@ -77,6 +84,53 @@ function getMetadataAvatarUrl(userMetadata: UserMetadata | undefined): string | 
   return userMetadata?.avatar_url || userMetadata?.picture || null;
 }
 
+async function importMetadataAvatarToStorage(
+  userId: string,
+  avatarUrl: string,
+): Promise<string | null> {
+  try {
+    const response = await fetch(avatarUrl);
+    if (!response.ok) {
+      return null;
+    }
+
+    const contentType = response.headers.get("content-type")?.split(";")[0]?.trim() || "";
+    const arrayBuffer = await response.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
+
+    const validation = validateImageUpload({
+      type: contentType,
+      size: buffer.length,
+    });
+
+    if (!validation.isValid) {
+      return null;
+    }
+
+    const fileName = getAccountAvatarFileName(userId);
+    const adminClient = createAdminClient();
+
+    await adminClient.storage.from(AVATARS_BUCKET).remove([fileName]);
+
+    const { error: uploadError } = await adminClient.storage
+      .from(AVATARS_BUCKET)
+      .upload(fileName, buffer, {
+        contentType,
+        upsert: true,
+      });
+
+    if (uploadError) {
+      return null;
+    }
+
+    const { data: publicUrlData } = adminClient.storage.from(AVATARS_BUCKET).getPublicUrl(fileName);
+
+    return publicUrlData?.publicUrl ? `${publicUrlData.publicUrl}?t=${Date.now()}` : null;
+  } catch {
+    return null;
+  }
+}
+
 export async function settingsRoutes(fastify: FastifyInstance) {
   /**
    * GET /api/settings - Get user settings
@@ -104,8 +158,10 @@ export async function settingsRoutes(fastify: FastifyInstance) {
       return reply.status(500).send({ error: "Failed to fetch settings" });
     }
 
+    let resolvedSettings = settings;
+
     // Insert defaults if no settings exist
-    if (!settings) {
+    if (!resolvedSettings) {
       const { data: newSettings, error: insertError } = await client
         .from("user_settings")
         .insert({
@@ -124,18 +180,9 @@ export async function settingsRoutes(fastify: FastifyInstance) {
         return reply.status(500).send({ error: "Failed to create default settings" });
       }
 
-      return {
-        success: true,
-        data: {
-          ...newSettings,
-          email: userData?.user?.email,
-          avatar_url: metadataAvatarUrl,
-          providers: userData?.user?.app_metadata?.providers || [],
-        },
-      };
+      resolvedSettings = newSettings;
     }
 
-    let resolvedSettings = settings;
     const hydrationUpdates: Record<string, string> = {};
 
     if (!resolvedSettings.name?.trim() && metadataName.name) {
@@ -147,7 +194,8 @@ export async function settingsRoutes(fastify: FastifyInstance) {
     }
 
     if (!resolvedSettings.avatar_url?.trim() && metadataAvatarUrl) {
-      hydrationUpdates.avatar_url = metadataAvatarUrl;
+      const storedAvatarUrl = await importMetadataAvatarToStorage(user.id, metadataAvatarUrl);
+      hydrationUpdates.avatar_url = storedAvatarUrl || metadataAvatarUrl;
     }
 
     if (Object.keys(hydrationUpdates).length > 0) {
