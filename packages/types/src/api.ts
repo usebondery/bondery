@@ -66,6 +66,7 @@ export interface LinkedInPreparedContact {
   lastName: string;
   linkedinUrl: string;
   linkedinUsername: string;
+  alreadyExists: boolean;
   email: string | null;
   company: string | null;
   position: string | null;
@@ -106,6 +107,7 @@ export interface InstagramPreparedContact {
   lastName: string;
   instagramUrl: string;
   instagramUsername: string;
+  alreadyExists: boolean;
   likelyPerson: boolean;
   connectedAt: string | null;
   connectedOnRaw: number | null;

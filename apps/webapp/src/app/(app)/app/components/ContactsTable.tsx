@@ -16,6 +16,7 @@ import {
   MenuDropdown,
   MenuItem,
   Button,
+  Tooltip,
 } from "@mantine/core";
 import {
   IconBrandLinkedin,
@@ -198,6 +199,8 @@ interface ContactsTableProps {
   allSelected?: boolean;
   someSelected?: boolean;
   showSelection?: boolean;
+  nonSelectableIds?: Set<string>;
+  nonSelectableTooltip?: string;
   menuActions?: MenuAction[];
   bulkSelectionActions?: BulkSelectionAction[];
   disableNameLink?: boolean;
@@ -213,6 +216,8 @@ export default function ContactsTable({
   allSelected,
   someSelected,
   showSelection,
+  nonSelectableIds,
+  nonSelectableTooltip,
   menuActions,
   bulkSelectionActions,
   disableNameLink,
@@ -306,11 +311,23 @@ export default function ContactsTable({
               <TableTr key={contact.id}>
                 {showSelection && (
                   <TableTd>
-                    <Checkbox
-                      checked={selectedIds?.has(contact.id)}
-                      onChange={() => onSelectOne?.(contact.id)}
-                      aria-label={`Select ${formatContactName(contact)}`}
-                    />
+                    {nonSelectableIds?.has(contact.id) ? (
+                      <Tooltip label={nonSelectableTooltip} withArrow>
+                        <span>
+                          <Checkbox
+                            checked={selectedIds?.has(contact.id)}
+                            disabled
+                            aria-label={`Select ${formatContactName(contact)}`}
+                          />
+                        </span>
+                      </Tooltip>
+                    ) : (
+                      <Checkbox
+                        checked={selectedIds?.has(contact.id)}
+                        onChange={() => onSelectOne?.(contact.id)}
+                        aria-label={`Select ${formatContactName(contact)}`}
+                      />
+                    )}
                   </TableTd>
                 )}
                 {visibleColumns.map((col) => {
