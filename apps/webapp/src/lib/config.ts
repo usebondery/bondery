@@ -113,6 +113,6 @@ export const STATUS_URL = "https://bondery.openstatus.dev/";
  */
 export const SOCIAL_LINKS = {
   github: "https://github.com/usebondery/bondery",
-  linkedin: "https://www.linkedin.com/company/bondery",
+  linkedin: "https://linkedin.com/company/bondery",
   email: "team@usebondery.com",
 } as const;
