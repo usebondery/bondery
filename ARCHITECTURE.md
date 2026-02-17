@@ -145,7 +145,7 @@ pnpm dev --filter=server
 | PUT | `/api/contacts/:id` | Update contact |
 | DELETE | `/api/contacts` | Delete contacts (batch) |
 | GET | `/api/account` | Get current user |
-| PUT | `/api/account/photo` | Upload user photo |
+| POST | `/api/account/photo` | Upload user photo |
 | DELETE | `/api/account` | Delete user account |
 | GET | `/api/settings` | Get user settings |
 | PUT | `/api/settings` | Update user settings |

@@ -8,6 +8,12 @@ import { requireAuth, createAdminClient } from "../lib/supabase.js";
 import { validateImageUpload, URLS } from "../lib/config.js";
 import type { UpdateAccountInput } from "@bondery/types";
 
+const AVATARS_BUCKET = "avatars";
+
+function getAccountAvatarFileName(userId: string): string {
+  return `${userId}/${userId}.jpg`;
+}
+
 export async function accountRoutes(fastify: FastifyInstance) {
   /**
    * PATCH /api/account - Update user account metadata
@@ -44,11 +50,11 @@ export async function accountRoutes(fastify: FastifyInstance) {
 
     try {
       // Delete user's storage files first
-      const { data: files } = await client.storage.from("profile-photos").list(user.id);
+      const { data: files } = await client.storage.from(AVATARS_BUCKET).list(user.id);
 
       if (files && files.length > 0) {
         const filePaths = files.map((file) => `${user.id}/${file.name}`);
-        await client.storage.from("profile-photos").remove(filePaths);
+        await client.storage.from(AVATARS_BUCKET).remove(filePaths);
       }
 
       // Delete user using admin client
@@ -88,21 +94,16 @@ export async function accountRoutes(fastify: FastifyInstance) {
       return reply.status(400).send({ error: validation.error });
     }
 
-    // Delete existing photos
-    const { data: existingFiles } = await client.storage.from("profile-photos").list(user.id);
+    const fileName = getAccountAvatarFileName(user.id);
 
-    if (existingFiles && existingFiles.length > 0) {
-      const filesToDelete = existingFiles.map((f) => `${user.id}/${f.name}`);
-      await client.storage.from("profile-photos").remove(filesToDelete);
-    }
+    // Delete existing account photo
+    await client.storage.from(AVATARS_BUCKET).remove([fileName]);
 
     // Upload new file
     const buffer = await data.toBuffer();
-    const fileExt = data.filename.split(".").pop();
-    const fileName = `${user.id}/profile.${fileExt}`;
 
     const { error: uploadError } = await client.storage
-      .from("profile-photos")
+      .from(AVATARS_BUCKET)
       .upload(fileName, buffer, {
         contentType: data.mimetype,
         upsert: true,
@@ -113,7 +114,7 @@ export async function accountRoutes(fastify: FastifyInstance) {
     }
 
     // Get public URL
-    const { data: publicUrlData } = client.storage.from("profile-photos").getPublicUrl(fileName);
+    const { data: publicUrlData } = client.storage.from(AVATARS_BUCKET).getPublicUrl(fileName);
 
     const avatarUrl = publicUrlData?.publicUrl
       ? `${publicUrlData.publicUrl}?t=${Date.now()}`
@@ -144,13 +145,10 @@ export async function accountRoutes(fastify: FastifyInstance) {
 
     const { client, user } = auth;
 
-    // Delete files
-    const { data: files } = await client.storage.from("profile-photos").list(user.id);
+    const fileName = getAccountAvatarFileName(user.id);
 
-    if (files && files.length > 0) {
-      const filesToDelete = files.map((f) => `${user.id}/${f.name}`);
-      await client.storage.from("profile-photos").remove(filesToDelete);
-    }
+    // Delete account photo
+    await client.storage.from(AVATARS_BUCKET).remove([fileName]);
 
     // Update user_settings
     await client.from("user_settings").update({ avatar_url: null }).eq("user_id", user.id);

@@ -487,7 +487,7 @@ paths:
                       avatarUrl:
                         type: string
                         format: uri
-                        example: https://storage.example.com/profile-photos/user123/profile.jpg?t=1234567890
+                        example: https://storage.example.com/avatars/user123/user123.jpg?t=1234567890
         "400":
           description: Invalid file or file too large
           content:
@@ -1102,7 +1102,7 @@ components:
           format: uri
           nullable: true
           description: URL to user's profile photo
-          example: https://storage.example.com/profile-photos/user123/profile.jpg
+          example: https://storage.example.com/avatars/user123/user123.jpg
         providers:
           type: array
           items:
