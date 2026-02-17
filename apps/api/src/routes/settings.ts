@@ -16,6 +16,27 @@ type UserMetadata = {
   picture?: string;
 };
 
+type SupabaseUserWithMetadata = {
+  user_metadata?: UserMetadata;
+  identities?: Array<{
+    provider?: string;
+    identity_data?: UserMetadata;
+  }>;
+};
+
+function getEffectiveUserMetadata(user: SupabaseUserWithMetadata | undefined): UserMetadata {
+  const baseMetadata = user?.user_metadata || {};
+  const linkedInIdentity = (user?.identities || []).find(
+    (identity) => identity.provider === "linkedin_oidc",
+  );
+  const identityMetadata = linkedInIdentity?.identity_data || {};
+
+  return {
+    ...identityMetadata,
+    ...baseMetadata,
+  };
+}
+
 /**
  * Normalizes auth provider metadata into first name and surname values used by user settings.
  */
@@ -68,7 +89,7 @@ export async function settingsRoutes(fastify: FastifyInstance) {
 
     // Get user info for email/providers
     const { data: userData } = await client.auth.getUser();
-    const userMetadata = userData?.user?.user_metadata as UserMetadata | undefined;
+    const userMetadata = getEffectiveUserMetadata(userData?.user as SupabaseUserWithMetadata);
     const metadataName = getMetadataNameParts(userMetadata);
     const metadataAvatarUrl = getMetadataAvatarUrl(userMetadata);
 
@@ -114,12 +135,40 @@ export async function settingsRoutes(fastify: FastifyInstance) {
       };
     }
 
+    let resolvedSettings = settings;
+    const hydrationUpdates: Record<string, string> = {};
+
+    if (!resolvedSettings.name?.trim() && metadataName.name) {
+      hydrationUpdates.name = metadataName.name;
+    }
+
+    if (!resolvedSettings.surname?.trim() && metadataName.surname) {
+      hydrationUpdates.surname = metadataName.surname;
+    }
+
+    if (!resolvedSettings.avatar_url?.trim() && metadataAvatarUrl) {
+      hydrationUpdates.avatar_url = metadataAvatarUrl;
+    }
+
+    if (Object.keys(hydrationUpdates).length > 0) {
+      const { data: hydratedSettings, error: hydrateError } = await client
+        .from("user_settings")
+        .update(hydrationUpdates)
+        .eq("user_id", user.id)
+        .select()
+        .single();
+
+      if (!hydrateError && hydratedSettings) {
+        resolvedSettings = hydratedSettings;
+      }
+    }
+
     return {
       success: true,
       data: {
-        ...settings,
+        ...resolvedSettings,
         email: userData?.user?.email,
-        avatar_url: settings.avatar_url || metadataAvatarUrl,
+        avatar_url: resolvedSettings.avatar_url || metadataAvatarUrl,
         providers: userData?.user?.app_metadata?.providers || [],
       },
     };
