@@ -24,7 +24,7 @@ export const API_ROUTES = {
 export const CHROME_EXTENSION_URL =
   "https://chromewebstore.google.com/detail/lpcmokfekjjejnpobhbkgmjkodfhpmha";
 
-export const GITHUB_REPO_URL = "https://api.github.com/repos/sveetya/bondery";
+export const GITHUB_REPO_URL = "https://api.github.com/repos/usebondery/bondery";
 
 export const WEBAPP_ROUTES = {
   PEOPLE: "/app/people",

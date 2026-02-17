@@ -20,7 +20,7 @@ export const WEBSITE_URL = process.env.NEXT_PUBLIC_WEBSITE_URL!;
  * Social media links
  */
 export const SOCIAL_LINKS = {
-  github: "https://github.com/sveetya/bondery",
+  github: "https://github.com/usebondery/bondery",
   linkedin: "https://www.linkedin.com/company/bondery",
   email: "team@usebondery.com",
 } as const;

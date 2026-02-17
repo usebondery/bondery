@@ -20,7 +20,7 @@ const CONTACT_METHODS = [
   },
   {
     text: "Star us on GitHub",
-    href: "https://github.com/sveetya/bondery",
+    href: "https://github.com/usebondery/bondery",
     icon: IconBrandGithub,
     color: "dark",
     target: "_blank" as const,

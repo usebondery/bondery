@@ -38,7 +38,7 @@ The monorepo has shared packages in the `packages/` directory, which include:
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/sveetya/bondery
+git clone https://github.com/usebondery/bondery
 cd bondery
 ```
 
