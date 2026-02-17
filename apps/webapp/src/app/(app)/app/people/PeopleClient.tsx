@@ -76,10 +76,10 @@ export function PeopleClient({
       icon: <IconPhoto size={16} />,
       fixed: true,
     },
-    { 
-      key: "name", 
-      label: "Name", 
-      visible: true, 
+    {
+      key: "name",
+      label: "Name",
+      visible: true,
       icon: <IconUser size={16} />,
       fixed: true,
     },

@@ -215,128 +215,134 @@ export async function contactRoutes(fastify: FastifyInstance) {
       }>,
       reply: FastifyReply,
     ) => {
-    const auth = await requireAuth(request, reply);
-    if (!auth) return;
+      const auth = await requireAuth(request, reply);
+      if (!auth) return;
 
-    const { client, user } = auth;
-    const query = request.query || {};
+      const { client, user } = auth;
+      const query = request.query || {};
 
-    const parsedLimit = Number.parseInt(query.limit || "", 10);
-    const parsedOffset = Number.parseInt(query.offset || "", 10);
-    const limit = Number.isFinite(parsedLimit) && parsedLimit > 0 ? parsedLimit : null;
-    const offset = Number.isFinite(parsedOffset) && parsedOffset >= 0 ? parsedOffset : 0;
-    const search = typeof query.q === "string" ? query.q.trim() : "";
+      const parsedLimit = Number.parseInt(query.limit || "", 10);
+      const parsedOffset = Number.parseInt(query.offset || "", 10);
+      const limit = Number.isFinite(parsedLimit) && parsedLimit > 0 ? parsedLimit : null;
+      const offset = Number.isFinite(parsedOffset) && parsedOffset >= 0 ? parsedOffset : 0;
+      const search = typeof query.q === "string" ? query.q.trim() : "";
 
-    const now = new Date();
-    const monthStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
-    const nextMonthStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 1));
-    const yearStart = new Date(Date.UTC(now.getUTCFullYear(), 0, 1));
-    const nextYearStart = new Date(Date.UTC(now.getUTCFullYear() + 1, 0, 1));
+      const now = new Date();
+      const monthStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
+      const nextMonthStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 1));
+      const yearStart = new Date(Date.UTC(now.getUTCFullYear(), 0, 1));
+      const nextYearStart = new Date(Date.UTC(now.getUTCFullYear() + 1, 0, 1));
 
-    const [
-      { count: totalContactsCount },
-      { count: monthInteractionsCount },
-      { count: newContactsYearCount },
-    ] = await Promise.all([
-      client
+      const [
+        { count: totalContactsCount },
+        { count: monthInteractionsCount },
+        { count: newContactsYearCount },
+      ] = await Promise.all([
+        client
+          .from("people")
+          .select("id", { head: true, count: "exact" })
+          .eq("user_id", user.id)
+          .eq("myself", false),
+        client
+          .from("people")
+          .select("id", { head: true, count: "exact" })
+          .eq("user_id", user.id)
+          .eq("myself", false)
+          .not("last_interaction", "is", null)
+          .gte("last_interaction", monthStart.toISOString())
+          .lt("last_interaction", nextMonthStart.toISOString()),
+        client
+          .from("people")
+          .select("id", { head: true, count: "exact" })
+          .eq("user_id", user.id)
+          .eq("myself", false)
+          .not("created_at", "is", null)
+          .gte("created_at", yearStart.toISOString())
+          .lt("created_at", nextYearStart.toISOString()),
+      ]);
+
+      let peopleQuery = client
         .from("people")
-        .select("id", { head: true, count: "exact" })
+        .select(CONTACT_SELECT, { count: "exact" })
         .eq("user_id", user.id)
-        .eq("myself", false),
-      client
-        .from("people")
-        .select("id", { head: true, count: "exact" })
-        .eq("user_id", user.id)
-        .eq("myself", false)
-        .not("last_interaction", "is", null)
-        .gte("last_interaction", monthStart.toISOString())
-        .lt("last_interaction", nextMonthStart.toISOString()),
-      client
-        .from("people")
-        .select("id", { head: true, count: "exact" })
-        .eq("user_id", user.id)
-        .eq("myself", false)
-        .not("created_at", "is", null)
-        .gte("created_at", yearStart.toISOString())
-        .lt("created_at", nextYearStart.toISOString()),
-    ]);
+        .eq("myself", false);
 
-    let peopleQuery = client
-      .from("people")
-      .select(CONTACT_SELECT, { count: "exact" })
-      .eq("user_id", user.id)
-      .eq("myself", false);
+      if (search) {
+        peopleQuery = peopleQuery.or(`first_name.ilike.%${search}%,last_name.ilike.%${search}%`);
+      }
 
-    if (search) {
-      peopleQuery = peopleQuery.or(`first_name.ilike.%${search}%,last_name.ilike.%${search}%`);
-    }
+      switch (query.sort) {
+        case "nameAsc":
+          peopleQuery = peopleQuery.order("first_name", { ascending: true });
+          break;
+        case "nameDesc":
+          peopleQuery = peopleQuery.order("first_name", { ascending: false });
+          break;
+        case "surnameAsc":
+          peopleQuery = peopleQuery.order("last_name", { ascending: true, nullsFirst: true });
+          break;
+        case "surnameDesc":
+          peopleQuery = peopleQuery.order("last_name", { ascending: false, nullsFirst: false });
+          break;
+        case "interactionAsc":
+          peopleQuery = peopleQuery.order("last_interaction", {
+            ascending: true,
+            nullsFirst: true,
+          });
+          break;
+        case "interactionDesc":
+          peopleQuery = peopleQuery.order("last_interaction", {
+            ascending: false,
+            nullsFirst: false,
+          });
+          break;
+        default:
+          peopleQuery = peopleQuery.order("first_name", { ascending: true });
+          break;
+      }
 
-    switch (query.sort) {
-      case "nameAsc":
-        peopleQuery = peopleQuery.order("first_name", { ascending: true });
-        break;
-      case "nameDesc":
-        peopleQuery = peopleQuery.order("first_name", { ascending: false });
-        break;
-      case "surnameAsc":
-        peopleQuery = peopleQuery.order("last_name", { ascending: true, nullsFirst: true });
-        break;
-      case "surnameDesc":
-        peopleQuery = peopleQuery.order("last_name", { ascending: false, nullsFirst: false });
-        break;
-      case "interactionAsc":
-        peopleQuery = peopleQuery.order("last_interaction", { ascending: true, nullsFirst: true });
-        break;
-      case "interactionDesc":
-        peopleQuery = peopleQuery.order("last_interaction", { ascending: false, nullsFirst: false });
-        break;
-      default:
-        peopleQuery = peopleQuery.order("first_name", { ascending: true });
-        break;
-    }
+      if (limit !== null) {
+        peopleQuery = peopleQuery.range(offset, offset + limit - 1);
+      }
 
-    if (limit !== null) {
-      peopleQuery = peopleQuery.range(offset, offset + limit - 1);
-    }
+      const { data: contacts, error, count } = await peopleQuery;
 
-    const { data: contacts, error, count } = await peopleQuery;
+      if (error) {
+        console.log("Error fetching contacts:", error);
+        return reply.status(500).send({ error: error.message });
+      }
 
-    if (error) {
-      console.log("Error fetching contacts:", error);
-      return reply.status(500).send({ error: error.message });
-    }
+      let contactsWithChannels = [] as Awaited<ReturnType<typeof attachContactChannels>>;
+      try {
+        contactsWithChannels = await attachContactChannels(client, user.id, contacts || []);
+      } catch (channelError) {
+        fastify.log.error({ channelError }, "Failed to attach contact channels for contact list");
+        contactsWithChannels = withEmptyChannels(contacts || []);
+      }
 
-    let contactsWithChannels = [] as Awaited<ReturnType<typeof attachContactChannels>>;
-    try {
-      contactsWithChannels = await attachContactChannels(client, user.id, contacts || []);
-    } catch (channelError) {
-      fastify.log.error({ channelError }, "Failed to attach contact channels for contact list");
-      contactsWithChannels = withEmptyChannels(contacts || []);
-    }
+      let contactsWithSocialMedia = [] as Awaited<
+        ReturnType<typeof attachContactSocialMedia<(typeof contactsWithChannels)[number]>>
+      >;
+      try {
+        contactsWithSocialMedia = await attachContactSocialMedia(
+          client,
+          user.id,
+          contactsWithChannels,
+        );
+      } catch (socialError) {
+        fastify.log.error({ socialError }, "Failed to attach social media for contact list");
+        contactsWithSocialMedia = withEmptySocialMedia(contactsWithChannels);
+      }
 
-    let contactsWithSocialMedia = [] as Awaited<
-      ReturnType<typeof attachContactSocialMedia<(typeof contactsWithChannels)[number]>>
-    >;
-    try {
-      contactsWithSocialMedia = await attachContactSocialMedia(
-        client,
-        user.id,
-        contactsWithChannels,
-      );
-    } catch (socialError) {
-      fastify.log.error({ socialError }, "Failed to attach social media for contact list");
-      contactsWithSocialMedia = withEmptySocialMedia(contactsWithChannels);
-    }
-
-    return {
-      contacts: contactsWithSocialMedia,
-      totalCount: typeof count === "number" ? count : contactsWithSocialMedia.length,
-      stats: {
-        totalContacts: totalContactsCount || 0,
-        thisMonthInteractions: monthInteractionsCount || 0,
-        newContactsThisYear: newContactsYearCount || 0,
-      },
-    };
+      return {
+        contacts: contactsWithSocialMedia,
+        totalCount: typeof count === "number" ? count : contactsWithSocialMedia.length,
+        stats: {
+          totalContacts: totalContactsCount || 0,
+          thisMonthInteractions: monthInteractionsCount || 0,
+          newContactsThisYear: newContactsYearCount || 0,
+        },
+      };
     },
   );
 

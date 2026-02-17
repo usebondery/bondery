@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl";
 import { LogoutSection } from "./LogoutSection";
 import { DeleteAccountSection } from "./DeleteAccountSection";
 import { LinkedInImportSection } from "./LinkedInImportSection";
+import { InstagramImportSection } from "./InstagramImportSection";
 
 export function DataManagementCard() {
   const t = useTranslations("SettingsPage.DataManagement");
@@ -26,7 +27,13 @@ export function DataManagementCard() {
       <Divider />
 
       <CardSection inheritPadding py="md">
-        <LinkedInImportSection />
+        <Text size="sm" fw={500} mb="sm">
+          {t("LinkedInImport.SectionTitle")}
+        </Text>
+        <Group align="flex-start" gap="md" wrap="wrap">
+          <LinkedInImportSection />
+          <InstagramImportSection />
+        </Group>
       </CardSection>
 
       <Divider />

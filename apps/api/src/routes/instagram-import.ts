@@ -1,33 +1,32 @@
 import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import { requireAuth } from "../lib/supabase.js";
-import { parseLinkedInCsvUpload } from "../lib/linkedin-import.js";
 import { findPersonIdBySocialMedia, upsertContactSocialMedia } from "../lib/social-media.js";
+import { parseInstagramExportUpload } from "../lib/instagram-import.js";
 import type {
-  LinkedInImportCommitRequest,
-  LinkedInImportCommitResponse,
-  LinkedInParseResponse,
+  InstagramImportCommitRequest,
+  InstagramImportCommitResponse,
+  InstagramImportStrategy,
+  InstagramParseResponse,
 } from "@bondery/types";
 
-function buildImportedTitle(position: string | null, company: string | null): string | null {
-  const normalizedPosition = typeof position === "string" ? position.trim() : "";
-  const normalizedCompany = typeof company === "string" ? company.trim() : "";
+const SUPPORTED_STRATEGIES: InstagramImportStrategy[] = [
+  "close_friends",
+  "following",
+  "followers",
+  "following_and_followers",
+  "mutual_following",
+];
 
-  if (normalizedPosition && normalizedCompany) {
-    return `${normalizedPosition} @${normalizedCompany}`;
+function resolveStrategy(input: unknown): InstagramImportStrategy {
+  if (typeof input !== "string") {
+    return "following_and_followers";
   }
 
-  if (normalizedPosition) {
-    return normalizedPosition;
-  }
-
-  if (normalizedCompany) {
-    return `@${normalizedCompany}`;
-  }
-
-  return null;
+  const normalized = input.trim() as InstagramImportStrategy;
+  return SUPPORTED_STRATEGIES.includes(normalized) ? normalized : "following_and_followers";
 }
 
-export async function linkedInImportRoutes(fastify: FastifyInstance) {
+export async function instagramImportRoutes(fastify: FastifyInstance) {
   fastify.post("/parse", async (request: FastifyRequest, reply: FastifyReply) => {
     const auth = await requireAuth(request, reply);
     if (!auth) {
@@ -36,25 +35,31 @@ export async function linkedInImportRoutes(fastify: FastifyInstance) {
 
     try {
       const files: Array<{ fileName: string; content: Buffer }> = [];
+      let strategy: InstagramImportStrategy = "following_and_followers";
 
       for await (const part of request.parts()) {
-        if (part.type !== "file") {
+        if (part.type === "file") {
+          const content = await part.toBuffer();
+          if (!content || !part.filename) {
+            continue;
+          }
+
+          files.push({
+            fileName: part.filename,
+            content,
+          });
+
           continue;
         }
 
-        const content = await part.toBuffer();
-        if (!content || !part.filename) {
-          continue;
+        if (part.fieldname === "strategy") {
+          strategy = resolveStrategy(part.value);
         }
-
-        files.push({
-          fileName: part.filename,
-          content,
-        });
       }
 
-      const contacts = parseLinkedInCsvUpload(files);
-      const response: LinkedInParseResponse = {
+      const contacts = parseInstagramExportUpload(files, strategy);
+
+      const response: InstagramParseResponse = {
         contacts,
         totalCount: contacts.length,
         validCount: contacts.filter((item) => item.isValid).length,
@@ -63,14 +68,17 @@ export async function linkedInImportRoutes(fastify: FastifyInstance) {
 
       return response;
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Failed to parse LinkedIn export";
+      const message = error instanceof Error ? error.message : "Failed to parse Instagram export";
       return reply.status(400).send({ error: message });
     }
   });
 
   fastify.post(
     "/commit",
-    async (request: FastifyRequest<{ Body: LinkedInImportCommitRequest }>, reply: FastifyReply) => {
+    async (
+      request: FastifyRequest<{ Body: InstagramImportCommitRequest }>,
+      reply: FastifyReply,
+    ) => {
       const auth = await requireAuth(request, reply);
       if (!auth) {
         return;
@@ -90,12 +98,12 @@ export async function linkedInImportRoutes(fastify: FastifyInstance) {
       const seenHandles = new Set<string>();
 
       for (const contact of contacts) {
-        if (!contact.isValid || !contact.linkedinUsername) {
+        if (!contact.isValid || !contact.instagramUsername) {
           skippedCount += 1;
           continue;
         }
 
-        const handle = contact.linkedinUsername.trim();
+        const handle = contact.instagramUsername.trim().toLowerCase();
         if (!handle || seenHandles.has(handle)) {
           skippedCount += 1;
           continue;
@@ -107,10 +115,9 @@ export async function linkedInImportRoutes(fastify: FastifyInstance) {
           const existingPersonId = await findPersonIdBySocialMedia(
             client,
             user.id,
-            "linkedin",
+            "instagram",
             handle,
           );
-          const importedTitle = buildImportedTitle(contact.position, contact.company);
 
           let personId = existingPersonId;
 
@@ -122,9 +129,8 @@ export async function linkedInImportRoutes(fastify: FastifyInstance) {
                 first_name: contact.firstName,
                 middle_name: contact.middleName,
                 last_name: contact.lastName,
-                title: importedTitle,
                 myself: false,
-                avatar_color: "blue",
+                avatar_color: "pink",
                 last_interaction: new Date().toISOString(),
               })
               .select("id")
@@ -144,7 +150,6 @@ export async function linkedInImportRoutes(fastify: FastifyInstance) {
                 first_name: contact.firstName,
                 middle_name: contact.middleName,
                 last_name: contact.lastName,
-                title: importedTitle,
               })
               .eq("user_id", user.id)
               .eq("id", personId);
@@ -161,49 +166,16 @@ export async function linkedInImportRoutes(fastify: FastifyInstance) {
             client,
             user.id,
             personId,
-            "linkedin",
+            "instagram",
             handle,
             contact.connectedAt,
           );
-
-          if (contact.email) {
-            const { data: existingEmails, error: emailFetchError } = await client
-              .from("people_emails")
-              .select("id, value")
-              .eq("user_id", user.id)
-              .eq("person_id", personId);
-
-            if (emailFetchError) {
-              skippedCount += 1;
-              continue;
-            }
-
-            const hasEmail = (existingEmails || []).some(
-              (email) => email.value.trim().toLowerCase() === contact.email?.trim().toLowerCase(),
-            );
-
-            if (!hasEmail) {
-              const { error: emailInsertError } = await client.from("people_emails").insert({
-                user_id: user.id,
-                person_id: personId,
-                value: contact.email,
-                type: "work",
-                preferred: (existingEmails || []).length === 0,
-                sort_order: (existingEmails || []).length,
-              });
-
-              if (emailInsertError) {
-                skippedCount += 1;
-                continue;
-              }
-            }
-          }
         } catch {
           skippedCount += 1;
         }
       }
 
-      const response: LinkedInImportCommitResponse = {
+      const response: InstagramImportCommitResponse = {
         importedCount,
         updatedCount,
         skippedCount,

@@ -91,3 +91,41 @@ export interface LinkedInImportCommitResponse {
   updatedCount: number;
   skippedCount: number;
 }
+
+export type InstagramImportStrategy =
+  | "close_friends"
+  | "following"
+  | "followers"
+  | "following_and_followers"
+  | "mutual_following";
+
+export interface InstagramPreparedContact {
+  tempId: string;
+  firstName: string;
+  middleName: string | null;
+  lastName: string;
+  instagramUrl: string;
+  instagramUsername: string;
+  likelyPerson: boolean;
+  connectedAt: string | null;
+  connectedOnRaw: number | null;
+  isValid: boolean;
+  issues: string[];
+}
+
+export interface InstagramParseResponse {
+  contacts: InstagramPreparedContact[];
+  totalCount: number;
+  validCount: number;
+  invalidCount: number;
+}
+
+export interface InstagramImportCommitRequest {
+  contacts: InstagramPreparedContact[];
+}
+
+export interface InstagramImportCommitResponse {
+  importedCount: number;
+  updatedCount: number;
+  skippedCount: number;
+}

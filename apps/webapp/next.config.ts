@@ -3,6 +3,9 @@ import type { NextConfig } from "next";
 import createNextIntlPlugin from "next-intl/plugin";
 
 const nextConfig: NextConfig = {
+  experimental: {
+    middlewareClientMaxBodySize: "300mb",
+  },
   // API calls go to the Fastify server
   async rewrites() {
     const apiUrl = API_URL;

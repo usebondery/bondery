@@ -10,6 +10,7 @@ export const WEBSITE_ROUTES = {
 export const API_ROUTES = {
   CONTACTS: "/api/contacts",
   CONTACTS_IMPORT_LINKEDIN: "/api/contacts/import/linkedin",
+  CONTACTS_IMPORT_INSTAGRAM: "/api/contacts/import/instagram",
   GROUPS: "/api/groups",
   ACTIVITIES: "/api/activities",
   SETTINGS: "/api/settings",
