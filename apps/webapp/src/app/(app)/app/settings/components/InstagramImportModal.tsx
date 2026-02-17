@@ -56,7 +56,10 @@ interface InstagramImportTranslations {
   Total: string;
   Valid: string;
   Invalid: string;
+  AlreadyExists: string;
+  LikelyInfluencers: string;
   InvalidRowsHint: string;
+  ExistingHandleTooltip: string;
   ImportSelected: string;
   ImportSuccess: string;
   NoContactsSelected: string;
@@ -114,6 +117,8 @@ function isZipFile(file: File | null): file is File {
 }
 
 function toPreviewContact(contact: InstagramPreparedContact): Contact {
+  const avatarColor = contact.alreadyExists ? "gray" : contact.likelyPerson ? "pink" : "violet";
+
   return {
     id: contact.tempId,
     userId: "",
@@ -124,7 +129,7 @@ function toPreviewContact(contact: InstagramPreparedContact): Contact {
     place: null,
     description: null,
     notes: null,
-    avatarColor: "pink",
+    avatarColor,
     avatar: null,
     lastInteraction: null,
     createdAt: new Date().toISOString(),
@@ -166,6 +171,36 @@ function strategyOptions(
   ];
 }
 
+function sortInstagramContactsForPreview(
+  contacts: InstagramPreparedContact[],
+): InstagramPreparedContact[] {
+  return contacts
+    .map((contact, index) => ({ contact, index }))
+    .sort((left, right) => {
+      const leftRank = left.contact.alreadyExists
+        ? 0
+        : left.contact.isValid && left.contact.likelyPerson
+          ? 1
+          : !left.contact.likelyPerson
+            ? 2
+            : 3;
+      const rightRank = right.contact.alreadyExists
+        ? 0
+        : right.contact.isValid && right.contact.likelyPerson
+          ? 1
+          : !right.contact.likelyPerson
+            ? 2
+            : 3;
+
+      if (leftRank !== rightRank) {
+        return leftRank - rightRank;
+      }
+
+      return left.index - right.index;
+    })
+    .map((entry) => entry.contact);
+}
+
 export function InstagramImportModal({
   t,
 }: {
@@ -189,8 +224,24 @@ export function InstagramImportModal({
   );
 
   const invalidContactsCount = parsedContacts.length - validContactsCount;
+  const alreadyExistsCount = useMemo(
+    () => parsedContacts.filter((contact) => contact.alreadyExists).length,
+    [parsedContacts],
+  );
+  const likelyInfluencersCount = useMemo(
+    () => parsedContacts.filter((contact) => !contact.likelyPerson).length,
+    [parsedContacts],
+  );
+  const nonSelectableIds = useMemo(
+    () => new Set(parsedContacts.filter((contact) => contact.alreadyExists).map((contact) => contact.tempId)),
+    [parsedContacts],
+  );
+  const selectableIds = useMemo(
+    () => previewContacts.map((contact) => contact.id).filter((id) => !nonSelectableIds.has(id)),
+    [previewContacts, nonSelectableIds],
+  );
 
-  const allSelected = previewContacts.length > 0 && selectedIds.size === previewContacts.length;
+  const allSelected = selectableIds.length > 0 && selectableIds.every((id) => selectedIds.has(id));
   const someSelected = selectedIds.size > 0 && !allSelected;
 
   const handleToggleAll = () => {
@@ -199,10 +250,14 @@ export function InstagramImportModal({
       return;
     }
 
-    setSelectedIds(new Set(previewContacts.map((contact) => contact.id)));
+    setSelectedIds(new Set(selectableIds));
   };
 
   const handleToggleOne = (id: string) => {
+    if (nonSelectableIds.has(id)) {
+      return;
+    }
+
     const next = new Set(selectedIds);
     if (next.has(id)) {
       next.delete(id);
@@ -247,10 +302,14 @@ export function InstagramImportModal({
       }
 
       const contacts = (data?.contacts || []) as InstagramPreparedContact[];
-      setParsedContacts(contacts);
+      const sortedContacts = sortInstagramContactsForPreview(contacts);
+
+      setParsedContacts(sortedContacts);
       setSelectedIds(
         new Set(
-          contacts.filter((item) => item.isValid && item.likelyPerson).map((item) => item.tempId),
+          sortedContacts
+            .filter((item) => item.isValid && item.likelyPerson && !item.alreadyExists)
+            .map((item) => item.tempId),
         ),
       );
       setStep("preview");
@@ -503,6 +562,16 @@ export function InstagramImportModal({
               {t("Invalid", { count: invalidContactsCount })}
             </Badge>
           ) : null}
+          {alreadyExistsCount > 0 ? (
+            <Badge color="gray" variant="light">
+              {t("AlreadyExists", { count: alreadyExistsCount })}
+            </Badge>
+          ) : null}
+          {likelyInfluencersCount > 0 ? (
+            <Badge color="violet" variant="light">
+              {t("LikelyInfluencers", { count: likelyInfluencersCount })}
+            </Badge>
+          ) : null}
         </Group>
         <Button variant="subtle" onClick={() => setStep("strategy")}>
           {t("UploadAnother")}
@@ -517,13 +586,15 @@ export function InstagramImportModal({
 
       <ContactsTable
         contacts={previewContacts}
-        visibleColumns={["avatar", "name", "title", "social"]}
+        visibleColumns={["avatar", "name", "social"]}
         selectedIds={selectedIds}
         showSelection
         allSelected={allSelected}
         someSelected={someSelected}
         onSelectAll={handleToggleAll}
         onSelectOne={handleToggleOne}
+        nonSelectableIds={nonSelectableIds}
+        nonSelectableTooltip={t("ExistingHandleTooltip")}
         disableNameLink
       />
 

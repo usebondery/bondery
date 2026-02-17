@@ -695,6 +695,7 @@ function toPreparedContacts(records: ParsedRecord[]): InstagramPreparedContact[]
       lastName: parsedName.lastName,
       instagramUrl: `https://www.instagram.com/${record.username}`,
       instagramUsername: record.username,
+      alreadyExists: false,
       likelyPerson,
       connectedAt: record.connectedAt,
       connectedOnRaw: record.connectedOnRaw,

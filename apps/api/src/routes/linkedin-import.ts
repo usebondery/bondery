@@ -8,6 +8,8 @@ import type {
   LinkedInParseResponse,
 } from "@bondery/types";
 
+const HANDLE_LOOKUP_CHUNK_SIZE = 150;
+
 function buildImportedTitle(position: string | null, company: string | null): string | null {
   const normalizedPosition = typeof position === "string" ? position.trim() : "";
   const normalizedCompany = typeof company === "string" ? company.trim() : "";
@@ -54,11 +56,57 @@ export async function linkedInImportRoutes(fastify: FastifyInstance) {
       }
 
       const contacts = parseLinkedInCsvUpload(files);
+      const normalizedHandles = Array.from(
+        new Set(
+          contacts
+            .map((contact) => contact.linkedinUsername.trim().toLowerCase())
+            .filter((handle) => handle.length > 0),
+        ),
+      );
+
+      const existingHandleSet = new Set<string>();
+
+      if (normalizedHandles.length > 0) {
+        for (let index = 0; index < normalizedHandles.length; index += HANDLE_LOOKUP_CHUNK_SIZE) {
+          const handleChunk = normalizedHandles.slice(index, index + HANDLE_LOOKUP_CHUNK_SIZE);
+
+          const { data: existingRows, error: existingError } = await auth.client
+            .from("people_social_media")
+            .select("handle")
+            .eq("user_id", auth.user.id)
+            .eq("platform", "linkedin")
+            .in("handle", handleChunk);
+
+          if (existingError) {
+            throw new Error(existingError.message);
+          }
+
+          for (const row of existingRows || []) {
+            if (typeof row.handle !== "string") {
+              continue;
+            }
+
+            const normalizedHandle = row.handle.trim().toLowerCase();
+            if (normalizedHandle.length > 0) {
+              existingHandleSet.add(normalizedHandle);
+            }
+          }
+        }
+      }
+
+      const contactsWithExistingState = contacts.map((contact) => {
+        const normalizedHandle = contact.linkedinUsername.trim().toLowerCase();
+        return {
+          ...contact,
+          alreadyExists: normalizedHandle.length > 0 && existingHandleSet.has(normalizedHandle),
+        };
+      });
+
       const response: LinkedInParseResponse = {
-        contacts,
-        totalCount: contacts.length,
-        validCount: contacts.filter((item) => item.isValid).length,
-        invalidCount: contacts.filter((item) => !item.isValid).length,
+        contacts: contactsWithExistingState,
+        totalCount: contactsWithExistingState.length,
+        validCount: contactsWithExistingState.filter((item) => item.isValid).length,
+        invalidCount: contactsWithExistingState.filter((item) => !item.isValid).length,
       };
 
       return response;

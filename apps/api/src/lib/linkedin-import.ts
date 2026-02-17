@@ -314,6 +314,7 @@ export function parseLinkedInCsvUpload(files: UploadFile[]): LinkedInPreparedCon
       lastName: nameParts.lastName,
       linkedinUrl: normalizedUrl,
       linkedinUsername: linkedinUsername || "",
+      alreadyExists: false,
       email,
       company,
       position,

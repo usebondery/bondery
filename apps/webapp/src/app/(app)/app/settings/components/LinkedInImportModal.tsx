@@ -40,7 +40,9 @@ interface LinkedInImportTranslations {
   Total: string;
   Valid: string;
   Invalid: string;
+  AlreadyExists: string;
   InvalidRowsHint: string;
+  ExistingHandleTooltip: string;
   ImportSelected: string;
   ImportSuccess: string;
   NoContactsSelected: string;
@@ -79,7 +81,7 @@ function toPreviewContact(contact: LinkedInPreparedContact): Contact {
     place: null,
     description: null,
     notes: null,
-    avatarColor: "blue",
+    avatarColor: contact.alreadyExists ? "gray" : "blue",
     avatar: null,
     lastInteraction: null,
     createdAt: new Date().toISOString(),
@@ -107,6 +109,24 @@ function toPreviewContact(contact: LinkedInPreparedContact): Contact {
     latitude: null,
     longitude: null,
   };
+}
+
+function sortLinkedInContactsForPreview(
+  contacts: LinkedInPreparedContact[],
+): LinkedInPreparedContact[] {
+  return contacts
+    .map((contact, index) => ({ contact, index }))
+    .sort((left, right) => {
+      const leftRank = left.contact.alreadyExists ? 0 : left.contact.isValid ? 1 : 2;
+      const rightRank = right.contact.alreadyExists ? 0 : right.contact.isValid ? 1 : 2;
+
+      if (leftRank !== rightRank) {
+        return leftRank - rightRank;
+      }
+
+      return left.index - right.index;
+    })
+    .map((entry) => entry.contact);
 }
 
 export function LinkedInImportModal({
@@ -139,8 +159,20 @@ export function LinkedInImportModal({
   );
 
   const invalidContactsCount = parsedContacts.length - validContactsCount;
+  const alreadyExistsCount = useMemo(
+    () => parsedContacts.filter((contact) => contact.alreadyExists).length,
+    [parsedContacts],
+  );
+  const nonSelectableIds = useMemo(
+    () => new Set(parsedContacts.filter((contact) => contact.alreadyExists).map((contact) => contact.tempId)),
+    [parsedContacts],
+  );
+  const selectableIds = useMemo(
+    () => previewContacts.map((contact) => contact.id).filter((id) => !nonSelectableIds.has(id)),
+    [previewContacts, nonSelectableIds],
+  );
 
-  const allSelected = previewContacts.length > 0 && selectedIds.size === previewContacts.length;
+  const allSelected = selectableIds.length > 0 && selectableIds.every((id) => selectedIds.has(id));
   const someSelected = selectedIds.size > 0 && !allSelected;
 
   const handleToggleAll = () => {
@@ -149,10 +181,14 @@ export function LinkedInImportModal({
       return;
     }
 
-    setSelectedIds(new Set(previewContacts.map((contact) => contact.id)));
+    setSelectedIds(new Set(selectableIds));
   };
 
   const handleToggleOne = (id: string) => {
+    if (nonSelectableIds.has(id)) {
+      return;
+    }
+
     const next = new Set(selectedIds);
     if (next.has(id)) {
       next.delete(id);
@@ -188,8 +224,16 @@ export function LinkedInImportModal({
       }
 
       const contacts = (result.contacts || []) as LinkedInPreparedContact[];
-      setParsedContacts(contacts);
-      setSelectedIds(new Set(contacts.filter((item) => item.isValid).map((item) => item.tempId)));
+      const sortedContacts = sortLinkedInContactsForPreview(contacts);
+
+      setParsedContacts(sortedContacts);
+      setSelectedIds(
+        new Set(
+          sortedContacts
+            .filter((item) => item.isValid && !item.alreadyExists)
+            .map((item) => item.tempId),
+        ),
+      );
       setStep("preview");
     } catch (error) {
       notifications.show({
@@ -367,6 +411,11 @@ export function LinkedInImportModal({
               {t("Invalid", { count: invalidContactsCount })}
             </Badge>
           ) : null}
+          {alreadyExistsCount > 0 ? (
+            <Badge color="gray" variant="light">
+              {t("AlreadyExists", { count: alreadyExistsCount })}
+            </Badge>
+          ) : null}
         </Group>
         <Button variant="subtle" onClick={() => setStep("upload")}>
           {t("UploadAnother")}
@@ -388,6 +437,8 @@ export function LinkedInImportModal({
         someSelected={someSelected}
         onSelectAll={handleToggleAll}
         onSelectOne={handleToggleOne}
+        nonSelectableIds={nonSelectableIds}
+        nonSelectableTooltip={t("ExistingHandleTooltip")}
         disableNameLink
       />
 
