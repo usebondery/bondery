@@ -1,6 +1,7 @@
 "use client";
 
-import { Box, Container, Grid, Stack, Text, Title } from "@mantine/core";
+import { Box, Container, Grid, Image, Stack, Text, Title } from "@mantine/core";
+import NextImage from "next/image";
 
 type FeatureSectionProps = {
   title: string;
@@ -100,7 +101,24 @@ export function Features() {
         title="Effortlessly sync your connections"
         description="Stop keeping all the information in your brain. Or manually typing them into phone notes. Bondery connects to LinkedIn and other sources to automatically keep your contacts up-to-date. Have more time for your relationships."
         imagePosition="right"
-        imagePlaceholder={<ImagePlaceholder color="blue" />}
+        imagePlaceholder={
+          <Image
+            component={NextImage}
+            src="/images/hero/integrations.png"
+            alt="Integrations overview"
+            width={1200}
+            height={900}
+            sizes="(max-width: 768px) 100vw, 500px"
+            radius={"lg"}
+            style={{
+              width: "100%",
+              maxWidth: 500,
+              height: "auto",
+              aspectRatio: "4/3",
+              objectFit: "contain",
+            }}
+          />
+        }
       />
 
       <FeatureSection
@@ -114,7 +132,24 @@ export function Features() {
         title="Never forget what matters"
         description="When was the last time you forgot something important about a person? With Bondery all the important details about the people in your life and get reminded about them. From birthdays and anniversaries to how you met, education history, work details, family info, gift ideas, and anything else you don't want to forget. Your memory, on steroids."
         imagePosition="right"
-        imagePlaceholder={<ImagePlaceholder color="violet" />}
+        imagePlaceholder={
+          <Image
+            component={NextImage}
+            src="/images/hero/details.png"
+            alt="Integrations overview"
+            width={1200}
+            height={900}
+            sizes="(max-width: 768px) 100vw, 500px"
+            radius={"lg"}
+            style={{
+              width: "100%",
+              maxWidth: 500,
+              height: "auto",
+              aspectRatio: "4/3",
+              objectFit: "contain",
+            }}
+          />
+        }
       />
 
       <FeatureSection
