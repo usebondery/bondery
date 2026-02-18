@@ -2,14 +2,13 @@
 
 import { Text, Button, Group } from "@mantine/core";
 import { IconTrash, IconAlertCircle } from "@tabler/icons-react";
-import { useRouter } from "next/navigation";
 import { modals } from "@mantine/modals";
 import { notifications } from "@mantine/notifications";
 import { useTranslations } from "next-intl";
-import { API_ROUTES } from "@bondery/helpers/globals/paths";
+import { API_ROUTES, WEBSITE_ROUTES } from "@bondery/helpers/globals/paths";
+import { createBrowswerSupabaseClient } from "@/lib/supabase/client";
 
 export function DeleteAccountSection() {
-  const router = useRouter();
   const t = useTranslations("SettingsPage.DataManagement");
 
   const handleDeleteAccount = () => {
@@ -62,7 +61,10 @@ export function DeleteAccountSection() {
             color: "green",
           });
 
-          router.push("/");
+          const supabase = createBrowswerSupabaseClient();
+          await supabase.auth.signOut({ scope: "local" });
+
+          window.location.assign(WEBSITE_ROUTES.LOGIN);
         } catch (error) {
           notifications.hide("delete-account");
           notifications.show({

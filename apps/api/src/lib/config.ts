@@ -3,7 +3,16 @@
  */
 
 export const AVATAR_UPLOAD = {
-  allowedMimeTypes: ["image/jpeg", "image/jpg", "image/png", "image/gif", "image/webp"] as const,
+  allowedMimeTypes: [
+    "image/jpeg",
+    "image/jpg",
+    "image/png",
+    "image/gif",
+    "image/webp",
+    "image/avif",
+    "image/heic",
+    "image/heif",
+  ] as const,
   maxFileSize: 5 * 1024 * 1024, // 5MB
   maxFileSizeMB: 5,
 } as const;
