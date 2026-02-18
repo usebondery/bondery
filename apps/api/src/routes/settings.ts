@@ -89,8 +89,19 @@ async function importMetadataAvatarToStorage(
   avatarUrl: string,
 ): Promise<string | null> {
   try {
-    const response = await fetch(avatarUrl);
+    const response = await fetch(avatarUrl, {
+      headers: {
+        Accept: "image/avif,image/webp,image/apng,image/*,*/*;q=0.8",
+        "User-Agent":
+          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36",
+      },
+    });
     if (!response.ok) {
+      console.warn("[settings] Failed to fetch provider avatar", {
+        userId,
+        avatarUrl,
+        status: response.status,
+      });
       return null;
     }
 
@@ -98,12 +109,22 @@ async function importMetadataAvatarToStorage(
     const arrayBuffer = await response.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
 
+    const normalizedType = contentType.toLowerCase();
+    const validationType =
+      normalizedType.startsWith("image/") || normalizedType === "" ? "image/jpeg" : contentType;
+
     const validation = validateImageUpload({
-      type: contentType,
+      type: validationType,
       size: buffer.length,
     });
 
     if (!validation.isValid) {
+      console.warn("[settings] Provider avatar failed validation", {
+        userId,
+        avatarUrl,
+        contentType,
+        size: buffer.length,
+      });
       return null;
     }
 
@@ -115,18 +136,28 @@ async function importMetadataAvatarToStorage(
     const { error: uploadError } = await adminClient.storage
       .from(AVATARS_BUCKET)
       .upload(fileName, buffer, {
-        contentType,
+        contentType: validationType,
         upsert: true,
       });
 
     if (uploadError) {
+      console.warn("[settings] Failed to upload provider avatar", {
+        userId,
+        fileName,
+        message: uploadError.message,
+      });
       return null;
     }
 
     const { data: publicUrlData } = adminClient.storage.from(AVATARS_BUCKET).getPublicUrl(fileName);
 
     return publicUrlData?.publicUrl ? `${publicUrlData.publicUrl}?t=${Date.now()}` : null;
-  } catch {
+  } catch (error) {
+    console.warn("[settings] Provider avatar import crashed", {
+      userId,
+      avatarUrl,
+      message: error instanceof Error ? error.message : String(error),
+    });
     return null;
   }
 }

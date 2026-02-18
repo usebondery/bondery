@@ -5,7 +5,7 @@
 
 import type { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
 import { requireAuth, createAdminClient } from "../lib/supabase.js";
-import { validateImageUpload, URLS } from "../lib/config.js";
+import { validateImageUpload } from "../lib/config.js";
 import type { UpdateAccountInput } from "@bondery/types";
 
 const AVATARS_BUCKET = "avatars";
@@ -65,8 +65,7 @@ export async function accountRoutes(fastify: FastifyInstance) {
         return reply.status(500).send({ error: "Failed to delete account" });
       }
 
-      // Redirect to website home
-      return reply.redirect(URLS.website || "/");
+      return { success: true };
     } catch (error) {
       return reply.status(500).send({
         error: "Internal server error",
