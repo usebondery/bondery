@@ -18,6 +18,7 @@ export const API_ROUTES = {
   ACCOUNT_PERSON: "/api/account/person",
   ACCOUNT_PHOTO: "/api/account/photo",
   FEEDBACK: "/api/feedback",
+  REMINDERS: "/api/reminders",
   REDIRECT: "/api/redirect",
 } as const;
 

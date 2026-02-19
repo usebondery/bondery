@@ -88,6 +88,7 @@ const IMPORTANT_EVENT_SELECT = `
   event_type,
   event_date,
   note,
+  notify_on,
   notify_days_before,
   created_at,
   updated_at
@@ -138,6 +139,7 @@ function toImportantEvent(event: {
   event_type: string;
   event_date: string;
   note: string | null;
+  notify_on: string | null;
   notify_days_before: number | null;
   created_at: string;
   updated_at: string;
@@ -149,6 +151,7 @@ function toImportantEvent(event: {
     eventType: event.event_type,
     eventDate: event.event_date,
     note: event.note,
+    notifyOn: event.notify_on,
     notifyDaysBefore: event.notify_days_before,
     createdAt: event.created_at,
     updatedAt: event.updated_at,
@@ -448,8 +451,6 @@ export async function contactRoutes(fastify: FastifyInstance) {
         .select(CONTACT_SELECT)
         .eq("id", id)
         .single();
-
-      console.log("Fetched contact:", contact);
 
       if (error) {
         return reply.status(404).send({ error: error.message });

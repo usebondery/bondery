@@ -4,7 +4,7 @@
  */
 
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
-import type { Database } from "@bondery/types/database";
+import type { Database } from "@bondery/types/supabase.types";
 import type { FastifyRequest, FastifyReply } from "fastify";
 
 /**

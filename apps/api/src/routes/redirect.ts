@@ -8,7 +8,7 @@ import { createAuthenticatedClient } from "../lib/supabase.js";
 import { validateImageUpload, URLS } from "../lib/config.js";
 import type { RedirectRequest } from "@bondery/types";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import type { Database } from "@bondery/types/database";
+import type { Database } from "@bondery/types/supabase.types";
 import { API_ROUTES, WEBAPP_ROUTES } from "@bondery/helpers";
 import {
   findPersonIdBySocialMedia,

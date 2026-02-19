@@ -46,7 +46,6 @@ export async function activityRoutes(fastify: FastifyInstance) {
       userId: activity.user_id,
       createdAt: activity.created_at,
       updatedAt: activity.updated_at,
-      attachmentPath: activity.attachment_path,
       participants: activity.participants.map((p: any) => p.person),
     }));
 
@@ -85,9 +84,7 @@ export async function activityRoutes(fastify: FastifyInstance) {
           title: body.title || null,
           type: body.type,
           description: body.description || null,
-          location: body.location || null,
           date: body.date,
-          attachment_path: body.attachmentPath || null,
         })
         .select()
         .single();
@@ -170,7 +167,6 @@ export async function activityRoutes(fastify: FastifyInstance) {
       if (body.description !== undefined) updates.description = body.description;
       if (body.type !== undefined) updates.type = body.type;
       if (body.date !== undefined) updates.date = body.date;
-      if (body.location !== undefined) updates.location = body.location;
 
       const { error } = await client.from("activities").update(updates).eq("id", id);
 
