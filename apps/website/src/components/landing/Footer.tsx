@@ -1,5 +1,10 @@
 import { Box, Divider, Flex, Paper, Text, Title } from "@mantine/core";
-import { IconBrandGithubFilled, IconBrandLinkedinFilled } from "@tabler/icons-react";
+import {
+  IconBrandGithubFilled,
+  IconBrandLinkedinFilled,
+  IconBrandReddit,
+  IconBrandX,
+} from "@tabler/icons-react";
 import { AnchorLink } from "@bondery/mantine-next";
 import type { ReactNode } from "react";
 import { Logo } from "@/components/Logo";
@@ -92,6 +97,24 @@ export function Footer() {
                     </Flex>
                   ),
                   href: SOCIAL_LINKS.linkedin,
+                  target: "_blank",
+                },
+                {
+                  title: (
+                    <Flex align="center" gap={4}>
+                      <IconBrandReddit size={16} /> Reddit
+                    </Flex>
+                  ),
+                  href: SOCIAL_LINKS.reddit,
+                  target: "_blank",
+                },
+                {
+                  title: (
+                    <Flex align="center" gap={4}>
+                      <IconBrandX size={16} /> X
+                    </Flex>
+                  ),
+                  href: SOCIAL_LINKS.x,
                   target: "_blank",
                 },
               ]}
