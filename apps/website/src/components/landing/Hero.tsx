@@ -1,6 +1,6 @@
 import { ButtonLink } from "@bondery/mantine-next";
-import { Box, Container, Flex, Grid, GridCol, Stack, Text, Title } from "@mantine/core";
-import { IconTopologyStar } from "@tabler/icons-react";
+import { Badge, Box, Container, Flex, Grid, GridCol, Stack, Text, Title } from "@mantine/core";
+import { IconArrowDown, IconTopologyStar } from "@tabler/icons-react";
 import { AnimatedPeople } from "@/components/landing/AnimatedPeople";
 import { WEBAPP_URL } from "@/lib/config";
 
@@ -16,16 +16,18 @@ export function Hero() {
           {/* Left Content */}
           <GridCol span={{ base: 12, md: 6 }}>
             <Stack gap="lg">
+              <Badge variant="light" size="lg" w="fit-content">
+                Open-source personal CRM
+              </Badge>
+
               {/* Title */}
               <Title order={1} className="text-5xl md:text-6xl font-extrabold leading-tight ">
-                Build meaningful bonds that last forever
+                Build a network that lasts
               </Title>
 
               {/* Description */}
               <Text size="lg" c="var(--mantine-color-text)" maw={500}>
-                Build your network with ease. Bondery is an open-source personal relationship
-                manager, that helps you remember the details, centralizes your connections, and
-                nurtures your relationships.
+                Capture the little things that make your connections feel personal in one place.
               </Text>
 
               {/* CTA Buttons */}
@@ -37,7 +39,12 @@ export function Hero() {
                 >
                   Get started
                 </ButtonLink>
-                <ButtonLink href="#features" size="lg" variant="default">
+                <ButtonLink
+                  href="#features"
+                  size="lg"
+                  variant="default"
+                  leftSection={<IconArrowDown size={20} />}
+                >
                   Learn more
                 </ButtonLink>
               </Flex>
