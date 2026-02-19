@@ -3,7 +3,7 @@ import { BonderyLogotypeBlack } from "@bondery/branding";
 
 export const runtime = "edge";
 
-export const alt = "Bondery - Manage your personal and professional relationships";
+export const alt = "Bondery: Manage your personal and professional relationships";
 export const size = {
   width: 1200,
   height: 630,

@@ -36,7 +36,7 @@ export const metadata: Metadata = {
         url: "/opengraph-image",
         width: 1200,
         height: 630,
-        alt: "Bondery - Build bonds that last forever",
+        alt: "Bondery: Build bonds that last forever",
       },
     ],
   },
