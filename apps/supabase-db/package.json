@@ -10,7 +10,7 @@
     "reset": "npx supabase db reset",
     "migration:new": "npx supabase migration new",
     "db:seed": "npx supabase db seed",
-    "gen-types": "npx supabase gen types typescript --local > ../webapp/types/supabase.types.ts && npx supabase gen types typescript --local > ../../web/types/supabase.types.ts",
+    "gen-types": "npx supabase gen types typescript --local > ../../packages/types/src/supabase.types.ts",
     "link": "npx supabase link",
     "push": "npx supabase db push",
     "pull": "npx supabase db pull"
