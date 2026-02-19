@@ -16,8 +16,8 @@ const nextConfig: NextConfig = {
             value: "DENY",
           },
           {
-            key: "Content-Security-Policy",
-            value: "frame-ancestors 'none'",
+            key: "Cross-Origin-Opener-Policy",
+            value: "same-origin",
           },
         ],
       },

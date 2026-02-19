@@ -32,6 +32,8 @@ export const SUPPORT_EMAIL = "team@usebondery.com";
 export const SOCIAL_LINKS = {
   github: "https://github.com/usebondery/bondery",
   linkedin: "https://www.linkedin.com/company/bondery",
+  reddit: "https://www.reddit.com/r/bondery",
+  x: "https://x.com/usebondery",
 } as const;
 
 export const WEBAPP_ROUTES = {
