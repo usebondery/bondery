@@ -76,8 +76,10 @@ interface TimezonePickerProps {
   onChange?: (value: string) => void;
   onBlur?: (value: string) => void;
   label?: string;
+  description?: string;
   placeholder?: string;
   loading?: boolean;
+  disabled?: boolean;
 }
 
 export function TimezonePicker({
@@ -86,8 +88,10 @@ export function TimezonePicker({
   onChange,
   onBlur,
   label,
+  description,
   placeholder,
   loading = false,
+  disabled = false,
 }: TimezonePickerProps) {
   const currentValue = value ?? initialValue;
   const [timezone, setTimezone] = useState(currentValue);
@@ -147,15 +151,27 @@ export function TimezonePicker({
           {label}
         </Text>
       )}
+      {description && (
+        <Text size="xs" c="dimmed">
+          {description}
+        </Text>
+      )}
       <Combobox store={combobox} onOptionSubmit={handleChange}>
         <Combobox.Target>
           <Input
             component="button"
             type="button"
             pointer
+            disabled={disabled || loading}
             leftSection={<IconWorld size={16} />}
             rightSection={<Combobox.Chevron />}
-            onClick={() => combobox.toggleDropdown()}
+            onClick={() => {
+              if (disabled || loading) {
+                return;
+              }
+
+              combobox.toggleDropdown();
+            }}
             rightSectionPointerEvents="none"
             styles={{
               input: {

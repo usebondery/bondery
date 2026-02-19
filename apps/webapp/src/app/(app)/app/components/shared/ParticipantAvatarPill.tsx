@@ -37,9 +37,7 @@ export function ParticipantAvatarPill({ person, onRemove }: ParticipantAvatarPil
           radius="xl"
           color={person.avatarColor || "blue"}
           name={`${person.firstName}${person.lastName ? ` ${person.lastName}` : ""}`.trim()}
-        >
-          {!person.avatar && person.firstName?.[0]}
-        </Avatar>
+        />
         <Text size="sm" fw={500}>
           {person.firstName} {person.lastName || ""}
         </Text>

@@ -433,9 +433,11 @@ export function InstagramImportModal({
           </List.Item>
           <List.Item>{t("InstructionStep2")}</List.Item>
           <List.Item>{t("InstructionStep3")}</List.Item>
-          <List.Item>{t("InstructionStep4")}</List.Item>
-          <List.Item>{t("InstructionStep5")}</List.Item>
-          <List.Item>{t("InstructionStep6")}</List.Item>
+          <List>
+            <List.Item>{t("InstructionStep4")}</List.Item>
+            <List.Item>{t("InstructionStep5")}</List.Item>
+            <List.Item>{t("InstructionStep6")}</List.Item>
+          </List>
           <List.Item>{t("InstructionStep7")}</List.Item>
           <List.Item>{t("InstructionStep8")}</List.Item>
           <List.Item>{t("InstructionStep9")}</List.Item>

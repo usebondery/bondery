@@ -323,6 +323,7 @@ export function LinkedInImportModal({
               {t("InstructionStep1LinkLabel")}
             </Anchor>
           </List.Item>
+
           <List.Item>{t("InstructionStep2")}</List.Item>
           <List.Item>{t("InstructionStep3")}</List.Item>
         </List>

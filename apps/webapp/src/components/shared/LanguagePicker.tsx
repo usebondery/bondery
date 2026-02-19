@@ -12,9 +12,11 @@ interface LanguagePickerProps {
   onChange?: (value: string) => void;
   onBlur?: (value: string) => void;
   label?: string;
+  description?: string;
   placeholder?: string;
   languages?: LanguageData[];
   loading?: boolean;
+  disabled?: boolean;
 }
 
 export function LanguagePicker({
@@ -23,9 +25,11 @@ export function LanguagePicker({
   onChange,
   onBlur,
   label,
+  description,
   placeholder,
   languages = APP_LANGUAGES_DATA,
   loading = false,
+  disabled = false,
 }: LanguagePickerProps) {
   const currentValue = value ?? initialValue;
   const [language, setLanguage] = useState(currentValue);
@@ -75,15 +79,27 @@ export function LanguagePicker({
           {label}
         </Text>
       )}
+      {description && (
+        <Text size="xs" c="dimmed">
+          {description}
+        </Text>
+      )}
       <Combobox store={combobox} onOptionSubmit={handleChange}>
         <Combobox.Target>
           <Input
             component="button"
             type="button"
             pointer
+            disabled={disabled || loading}
             leftSection={<IconLanguage size={16} />}
             rightSection={<Combobox.Chevron />}
-            onClick={() => combobox.toggleDropdown()}
+            onClick={() => {
+              if (disabled || loading) {
+                return;
+              }
+
+              combobox.toggleDropdown();
+            }}
             rightSectionPointerEvents="none"
             styles={{
               input: {

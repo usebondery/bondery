@@ -341,14 +341,7 @@ export default function ContactsTable({
                             radius="xl"
                             size="md"
                             name={formatContactName(contact)}
-                          >
-                            {!contact.avatar && (
-                              <>
-                                {contact.firstName[0]}
-                                {contact.lastName?.[0]}
-                              </>
-                            )}
-                          </Avatar>
+                          />
                         </TableTd>
                       );
                     case "name":

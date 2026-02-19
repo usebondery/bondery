@@ -11,12 +11,12 @@ import {
   TextInput,
   Tooltip,
 } from "@mantine/core";
-import { DatePickerInput } from "@mantine/dates";
 import { notifications } from "@mantine/notifications";
 import { IconBell, IconCalendarEvent, IconPlus, IconTrash } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import type { ImportantEvent, ImportantEventType } from "@bondery/types";
+import { DatePickerWithPresets } from "../../../components/timeline/DatePickerWithPresets";
 import {
   IMPORTANT_EVENT_NOTIFY_OPTIONS,
   IMPORTANT_EVENT_TYPE_OPTIONS,
@@ -106,6 +106,28 @@ function parseEventDate(date: string): Date | null {
   return new Date(year, month - 1, day);
 }
 
+function normalizePickerDate(value: Date | string | null): Date | null {
+  if (!value) {
+    return null;
+  }
+
+  if (value instanceof Date) {
+    return new Date(value.getFullYear(), value.getMonth(), value.getDate());
+  }
+
+  const [year, month, day] = value.split("-").map(Number);
+  if (year && month && day) {
+    return new Date(year, month - 1, day);
+  }
+
+  const parsedDate = new Date(value);
+  if (Number.isNaN(parsedDate.getTime())) {
+    return null;
+  }
+
+  return new Date(parsedDate.getFullYear(), parsedDate.getMonth(), parsedDate.getDate());
+}
+
 function parseNotifyValue(value: string | null): 1 | 3 | 7 | null {
   if (value === "1" || value === "3" || value === "7") {
     return Number(value) as 1 | 3 | 7;
@@ -166,10 +188,10 @@ function ImportantEventRowCard({
       <Group gap="xs" align="center" wrap="nowrap">
         {leftAction}
 
-        <DatePickerInput
+        <DatePickerWithPresets
           placeholder={datePlaceholder}
           value={eventDate}
-          onChange={(value) => onDateChange(value ? new Date(value) : null)}
+          onChange={(value) => onDateChange(normalizePickerDate(value as Date | string | null))}
           valueFormat="MMMM D, YYYY"
           leftSection={<IconCalendarEvent size={16} />}
           className="min-w-44"
@@ -344,6 +366,7 @@ export function ContactImportantDatesSection({
         eventType: nextDraftEvent.eventType,
         eventDate: formattedDate,
         note: nextDraftEvent.note.trim() || null,
+        notifyOn: null,
         notifyDaysBefore: nextDraftEvent.notifyDaysBefore,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),

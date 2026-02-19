@@ -29,6 +29,11 @@ export default async function SettingsPage() {
   const middlename = settings.middlename || "";
   const surname = settings.surname || "";
   const timezone = settings.timezone || "UTC";
+  const reminderSendHour =
+    typeof settings.reminder_send_hour === "string" &&
+    /^([01]\d|2[0-3]):[0-5]\d(:[0-5]\d)?$/.test(settings.reminder_send_hour)
+      ? settings.reminder_send_hour
+      : "08:00:00";
   const language = settings.language || "en";
   const colorScheme =
     settings.color_scheme === "light" ||
@@ -63,7 +68,12 @@ export default async function SettingsPage() {
           userIdentities={userIdentities}
         />
 
-        <PreferencesCard initialColorScheme={colorScheme} />
+        <PreferencesCard
+          initialColorScheme={colorScheme}
+          initialLanguage={language}
+          initialTimezone={timezone}
+          initialReminderSendHour={reminderSendHour}
+        />
 
         <DataManagementCard />
       </Stack>
