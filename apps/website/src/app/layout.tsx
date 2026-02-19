@@ -80,6 +80,28 @@ const websiteSchema = {
   },
 } as const;
 
+const softwareApplicationSchema = {
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "@id": `${WEBSITE_URL}#software-application`,
+  name: "Bondery",
+  description: ogDescription,
+  applicationCategory: "SocialNetworkingApplication",
+  applicationSubCategory: "Personal Relationship Manager",
+  operatingSystem: "Web",
+  url: WEBSITE_URL,
+  inLanguage: "en-US",
+  publisher: {
+    "@id": `${WEBSITE_URL}#organization`,
+  },
+  offers: {
+    "@type": "Offer",
+    price: "0",
+    priceCurrency: "USD",
+    category: "Free",
+  },
+} as const;
+
 const lexend = Lexend({
   subsets: ["latin"],
   variable: "--font-lexend",
@@ -109,6 +131,12 @@ export default async function RootLayout({
           type="application/ld+json"
           nonce={nonce}
           dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }}
+        />
+        <Script
+          id="schema-software-application"
+          type="application/ld+json"
+          nonce={nonce}
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareApplicationSchema) }}
         />
         <MantineProvider defaultColorScheme="dark" theme={bonderyTheme}>
           <Notifications autoClose={5000} position="top-center" />
