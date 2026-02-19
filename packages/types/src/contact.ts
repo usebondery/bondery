@@ -3,7 +3,7 @@
  * Types for contact/person management
  */
 
-import type { Json } from "./database";
+import type { Json } from "./supabase.types";
 
 /**
  * Contact type for phone/email entries
@@ -50,6 +50,7 @@ export interface ImportantEvent {
   eventType: ImportantEventType;
   eventDate: string;
   note: string | null;
+  notifyOn: string | null;
   notifyDaysBefore: ImportantEventNotifyDaysBefore;
   createdAt: string;
   updatedAt: string;

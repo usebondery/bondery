@@ -23,9 +23,7 @@ export interface Activity {
   title: string | null;
   type: ActivityType; // Stored as text in DB but typed here
   description: string | null;
-  location: string | null;
   date: string; // ISO string
-  attachmentPath: string | null;
   createdAt: string;
   updatedAt: string;
   /** Array of participant IDs (fetched separately or joined) */
@@ -36,9 +34,7 @@ export interface CreateActivityInput {
   title?: string;
   type: string; // Allow string for flexibility
   description?: string;
-  location?: string;
   date: string;
-  attachmentPath?: string;
   participantIds: string[];
 }
 
@@ -46,8 +42,6 @@ export interface UpdateActivityInput {
   title?: string;
   type?: string;
   description?: string;
-  location?: string;
   date?: string;
-  attachmentPath?: string;
   participantIds?: string[]; // If provided, replaces existing participants
 }

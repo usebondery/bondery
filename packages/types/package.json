@@ -11,9 +11,14 @@
       "require": "./src/index.ts"
     },
     "./database": {
-      "types": "./src/database.ts",
-      "import": "./src/database.ts",
-      "require": "./src/database.ts"
+      "types": "./src/supabase.types.ts",
+      "import": "./src/supabase.types.ts",
+      "require": "./src/supabase.types.ts"
+    },
+    "./supabase.types": {
+      "types": "./src/supabase.types.ts",
+      "import": "./src/supabase.types.ts",
+      "require": "./src/supabase.types.ts"
     }
   },
   "scripts": {
