@@ -1,5 +1,5 @@
 import { WEBSITE_URL } from "@/lib/config";
-import { WEBSITE_ROUTES } from "@bondery/helpers/globals/paths";
+import { WEBSITE_ROUTES } from "@bondery/helpers";
 import { MetadataRoute } from "next";
 
 export default function sitemap(): MetadataRoute.Sitemap {
@@ -14,8 +14,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     {
       url: `${WEBSITE_URL}${WEBSITE_ROUTES.LOGIN}`,
       lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.8,
+      changeFrequency: "yearly",
+      priority: 0.3,
     },
     {
       url: `${WEBSITE_URL}${WEBSITE_ROUTES.CONTACT}`,

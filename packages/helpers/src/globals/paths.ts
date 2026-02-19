@@ -27,6 +27,13 @@ export const CHROME_EXTENSION_URL =
 
 export const GITHUB_REPO_URL = "https://api.github.com/repos/usebondery/bondery";
 
+export const SUPPORT_EMAIL = "team@usebondery.com";
+
+export const SOCIAL_LINKS = {
+  github: "https://github.com/usebondery/bondery",
+  linkedin: "https://www.linkedin.com/company/bondery",
+} as const;
+
 export const WEBAPP_ROUTES = {
   PEOPLE: "/app/people",
   GROUPS: "/app/groups",

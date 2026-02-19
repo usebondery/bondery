@@ -2,8 +2,6 @@
  * Application configuration constants for website
  */
 
-import { WEBSITE_ROUTES } from "@bondery/helpers/globals/paths";
-
 /**
  * Web app URL
  * Uses environment variable
@@ -16,11 +14,3 @@ export const WEBAPP_URL = process.env.NEXT_PUBLIC_WEBAPP_URL!;
  * Uses environment variable
  * */
 export const WEBSITE_URL = process.env.NEXT_PUBLIC_WEBSITE_URL!;
-/**
- * Social media links
- */
-export const SOCIAL_LINKS = {
-  github: "https://github.com/usebondery/bondery",
-  linkedin: "https://www.linkedin.com/company/bondery",
-  email: "team@usebondery.com",
-} as const;

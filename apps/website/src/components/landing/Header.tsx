@@ -17,8 +17,7 @@ import { IconBrandGithub, IconTopologyStar, IconX } from "@tabler/icons-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Logo } from "@/components/Logo";
-import { SOCIAL_LINKS } from "@/lib/config";
-import { GITHUB_REPO_URL, WEBSITE_ROUTES } from "@bondery/helpers/globals/paths";
+import { GITHUB_REPO_URL, SOCIAL_LINKS, WEBSITE_ROUTES } from "@bondery/helpers";
 
 const navLinks = [
   { label: "Features", href: "/#features" },

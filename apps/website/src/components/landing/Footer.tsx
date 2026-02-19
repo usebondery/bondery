@@ -4,8 +4,7 @@ import { Anchor, Box, Divider, Flex, Paper, Text, Title } from "@mantine/core";
 import { IconBrandGithubFilled, IconBrandLinkedinFilled } from "@tabler/icons-react";
 import type { ReactNode } from "react";
 import { Logo } from "@/components/Logo";
-import { SOCIAL_LINKS } from "@/lib/config";
-import { WEBSITE_ROUTES } from "@bondery/helpers";
+import { SOCIAL_LINKS, WEBSITE_ROUTES } from "@bondery/helpers";
 
 type LinkItem = {
   title: ReactNode;

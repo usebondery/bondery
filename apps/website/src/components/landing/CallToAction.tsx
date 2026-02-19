@@ -3,7 +3,7 @@
 import { Button, Card, Container, Stack, Title } from "@mantine/core";
 import { IconArrowUpRight } from "@tabler/icons-react";
 import Link from "next/link";
-import { WEBSITE_ROUTES } from "@bondery/helpers/globals/paths";
+import { WEBSITE_ROUTES } from "@bondery/helpers";
 
 export function CallToAction() {
   return (
