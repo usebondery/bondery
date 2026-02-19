@@ -127,9 +127,14 @@ export async function accountRoutes(fastify: FastifyInstance) {
     }
 
     // Store in user_settings
-    const { error: updateError } = await client
-      .from("user_settings")
-      .upsert({ user_id: user.id, avatar_url: avatarUrl }, { onConflict: "user_id" });
+    const { error: updateError } = await client.from("user_settings").upsert(
+      {
+        user_id: user.id,
+        avatar_url: avatarUrl,
+        next_reminder_at_utc: new Date().toISOString(),
+      },
+      { onConflict: "user_id" },
+    );
 
     if (updateError) {
       return reply.status(500).send({ error: "Failed to update user profile" });

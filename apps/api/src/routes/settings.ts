@@ -222,6 +222,7 @@ export async function settingsRoutes(fastify: FastifyInstance) {
           reminder_send_hour: DEFAULT_REMINDER_SEND_HOUR,
           language: "en",
           color_scheme: "auto",
+          next_reminder_at_utc: new Date().toISOString(),
         })
         .select()
         .single();
@@ -340,7 +341,11 @@ export async function settingsRoutes(fastify: FastifyInstance) {
         // Insert new
         const { data, error } = await client
           .from("user_settings")
-          .insert({ user_id: user.id, ...updatePayload })
+          .insert({
+            user_id: user.id,
+            ...updatePayload,
+            next_reminder_at_utc: new Date().toISOString(),
+          })
           .select()
           .single();
 
