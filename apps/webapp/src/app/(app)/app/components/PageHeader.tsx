@@ -1,10 +1,10 @@
 "use client";
 
-import { Group, Title, ActionIcon, Anchor } from "@mantine/core";
+import { Group, Title } from "@mantine/core";
 import { IconArrowLeft } from "@tabler/icons-react";
 import type { Icon } from "@tabler/icons-react";
 import type { ReactNode } from "react";
-import Link from "next/link";
+import { ActionIconLink } from "@bondery/mantine-next";
 
 interface PageHeaderProps {
   icon: Icon;
@@ -18,11 +18,9 @@ export function PageHeader({ icon: Icon, title, action, backHref }: PageHeaderPr
     <Group justify={action ? "space-between" : "flex-start"} gap="sm" mb={"xl"}>
       <Group gap="sm">
         {backHref && (
-          <Anchor component={Link} href={backHref}>
-            <ActionIcon variant="default" size="xl">
-              <IconArrowLeft size={20} />
-            </ActionIcon>
-          </Anchor>
+          <ActionIconLink href={backHref} ariaLabel="Back" variant="default" size="xl">
+            <IconArrowLeft size={20} />
+          </ActionIconLink>
         )}
         <Icon size={32} stroke={1.5} />
         <Title order={1}>{title}</Title>

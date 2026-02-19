@@ -5,7 +5,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 
 export type ActionIconLinkProps = Omit<ActionIconProps, "component" | "href" | "children"> & {
-  href: string;
+  href?: string;
   ariaLabel: string;
   children: ReactNode;
   target?: "_blank" | "_self" | "_parent" | "_top";
@@ -26,6 +26,14 @@ export function ActionIconLink({
   rel,
   ...actionIconProps
 }: ActionIconLinkProps) {
+  if (!href) {
+    return (
+      <ActionIcon aria-label={ariaLabel} {...actionIconProps}>
+        {children}
+      </ActionIcon>
+    );
+  }
+
   return (
     <ActionIcon
       component={Link}

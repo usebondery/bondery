@@ -10,27 +10,15 @@ import {
   Textarea,
   ActionIcon,
   Box,
-  ThemeIcon,
-  Divider,
 } from "@mantine/core";
-import {
-  IconCalendar,
-  IconMail,
-  IconBrandLinkedin,
-  IconBrandGoogle,
-  IconX,
-  IconTrash,
-  IconExternalLink,
-  IconUserPlus,
-} from "@tabler/icons-react";
+import { IconCalendar, IconMail, IconBrandLinkedin } from "@tabler/icons-react";
 import { BonderyIcon } from "@bondery/branding/react";
 import type { Activity, Contact } from "@bondery/types";
 import { useState, useEffect } from "react";
-import Link from "next/link";
 import { notifications } from "@mantine/notifications";
 import { API_ROUTES, WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import { useRouter } from "next/navigation";
-import { BonderyIconWhite, BonderyLogotypeWhite } from "@bondery/branding";
+import { ActionIconLink } from "@bondery/mantine-next";
 
 interface ActivityDetailModalProps {
   activity: Activity | null;
@@ -208,41 +196,41 @@ export function ActivityDetailModal({
                     </Stack>
                   </Group>
                   <Group gap="xs">
-                    <ActionIcon
+                    <ActionIconLink
                       variant="light"
                       color="blue"
                       radius="xl"
                       size="sm"
-                      component={Link}
                       href={`${WEBAPP_ROUTES.PERSON}/${participant.id}`}
+                      ariaLabel={`Open ${participant.firstName} ${participant.lastName || ""}`.trim()}
                     >
                       <BonderyIcon width={14} height={14} />
-                    </ActionIcon>
+                    </ActionIconLink>
                     {participant.linkedin && (
-                      <ActionIcon
-                        component="a"
+                      <ActionIconLink
                         href={participant.linkedin}
                         target="_blank"
                         variant="light"
                         color="blue"
                         radius="xl"
                         size="sm"
+                        ariaLabel="Open LinkedIn profile"
                       >
                         <IconBrandLinkedin size={14} />
-                      </ActionIcon>
+                      </ActionIconLink>
                     )}
                     {/* Email Action */}
                     {(participant.emails as any)?.[0]?.value && (
-                      <ActionIcon
-                        component="a"
+                      <ActionIconLink
                         href={`mailto:${(participant.emails as any)?.[0]?.value}`}
                         variant="light"
                         color="gray"
                         radius="xl"
                         size="sm"
+                        ariaLabel="Send email"
                       >
                         <IconMail size={14} />
-                      </ActionIcon>
+                      </ActionIconLink>
                     )}
                   </Group>
                 </Group>

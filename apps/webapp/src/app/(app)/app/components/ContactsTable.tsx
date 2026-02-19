@@ -9,7 +9,6 @@ import {
   Avatar,
   Group,
   Text,
-  Anchor,
   ActionIcon,
   Menu,
   MenuTarget,
@@ -37,9 +36,9 @@ import {
 } from "@tabler/icons-react";
 import Image from "next/image";
 import { formatContactName } from "@/lib/nameHelpers";
-import Link from "next/link";
 import type { Contact } from "@bondery/types";
 import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
+import { ActionIconLink, AnchorLink } from "@bondery/mantine-next";
 
 // Column definitions with labels and icons
 const COLUMN_DEFINITIONS: Record<ColumnKey, { label: string; icon: React.ReactNode }> = {
@@ -139,17 +138,16 @@ function ContactSocialIcons({ contact }: { contact: Contact }) {
       {socials
         .filter((s) => !s.disabled)
         .map((s) => (
-          <ActionIcon
+          <ActionIconLink
             key={s.label}
             variant="light"
             color={s.color}
-            component="a"
             href={s.href}
             target={s.href && s.href.startsWith("http") ? "_blank" : undefined}
-            aria-label={s.label}
+            ariaLabel={s.label}
           >
             {s.icon}
-          </ActionIcon>
+          </ActionIconLink>
         ))}
     </Group>
   );
@@ -350,14 +348,13 @@ export default function ContactsTable({
                           {disableNameLink ? (
                             <Text>{formatContactName(contact)}</Text>
                           ) : (
-                            <Anchor
-                              component={Link}
+                            <AnchorLink
                               href={`${WEBAPP_ROUTES.PERSON}/${contact.id}`}
                               c="blue"
                               underline="hover"
                             >
                               {formatContactName(contact)}
-                            </Anchor>
+                            </AnchorLink>
                           )}
                         </TableTd>
                       );

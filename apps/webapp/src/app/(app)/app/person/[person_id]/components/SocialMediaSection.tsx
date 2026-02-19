@@ -13,6 +13,7 @@ import { useEffect, useState } from "react";
 import type { Contact } from "@bondery/types";
 import { countryCodes, parsePhoneNumber } from "@/lib/phoneHelpers";
 import { createSocialMediaUrl } from "@/lib/socialMediaHelpers";
+import { ActionIconLink } from "@bondery/mantine-next";
 
 interface SocialMediaSectionProps {
   contact: Contact;
@@ -142,16 +143,16 @@ export function SocialMediaSection({
       <Stack gap="sm">
         {/* LinkedIn */}
         <Group gap="sm" align="center">
-          <ActionIcon
+          <ActionIconLink
             variant="light"
             color="blue"
-            component="a"
             href={contact.linkedin ? createSocialMediaUrl("linkedin", contact.linkedin) : undefined}
             target="_blank"
             disabled={!contact.linkedin}
+            ariaLabel="LinkedIn"
           >
             <IconBrandLinkedin size={18} />
-          </ActionIcon>
+          </ActionIconLink>
           <TextInput
             placeholder="LinkedIn username or URL"
             value={values.linkedin}
@@ -165,18 +166,18 @@ export function SocialMediaSection({
 
         {/* Instagram */}
         <Group gap="sm" align="center">
-          <ActionIcon
+          <ActionIconLink
             variant="light"
             color="pink"
-            component="a"
             href={
               contact.instagram ? createSocialMediaUrl("instagram", contact.instagram) : undefined
             }
             target="_blank"
             disabled={!contact.instagram}
+            ariaLabel="Instagram"
           >
             <IconBrandInstagram size={18} />
-          </ActionIcon>
+          </ActionIconLink>
           <TextInput
             placeholder="Instagram username or URL"
             value={values.instagram}
@@ -190,16 +191,16 @@ export function SocialMediaSection({
 
         {/* Facebook */}
         <Group gap="sm" align="center">
-          <ActionIcon
+          <ActionIconLink
             variant="light"
             color="blue"
-            component="a"
             href={contact.facebook ? createSocialMediaUrl("facebook", contact.facebook) : undefined}
             target="_blank"
             disabled={!contact.facebook}
+            ariaLabel="Facebook"
           >
             <IconBrandFacebook size={18} />
-          </ActionIcon>
+          </ActionIconLink>
           <TextInput
             placeholder="Facebook username or URL"
             value={values.facebook}
@@ -213,16 +214,16 @@ export function SocialMediaSection({
 
         {/* WhatsApp */}
         <Group gap="sm" align="center" wrap="nowrap">
-          <ActionIcon
+          <ActionIconLink
             variant="light"
             color="green"
-            component="a"
             href={contact.whatsapp ? createSocialMediaUrl("whatsapp", contact.whatsapp) : undefined}
             target="_blank"
             disabled={!contact.whatsapp}
+            ariaLabel="WhatsApp"
           >
             <IconBrandWhatsapp size={18} />
-          </ActionIcon>
+          </ActionIconLink>
           <PrefixSelect value={whatsappPrefix} onChange={setWhatsappPrefix} />
           <TextInput
             placeholder="WhatsApp number or URL"
@@ -237,19 +238,19 @@ export function SocialMediaSection({
 
         {/* Signal */}
         <Group gap="sm" align="center" wrap="nowrap">
-          <ActionIcon
+          <ActionIconLink
             variant="light"
             color="cyan"
-            component="a"
             href={
               contact.signal
                 ? `signal://signal.me/#p/${contact.signal.replace(/\D/g, "")}`
                 : undefined
             }
             disabled={!contact.signal}
+            ariaLabel="Signal"
           >
             <Image src="/icons/signal.svg" alt="Signal" width={18} height={18} />
-          </ActionIcon>
+          </ActionIconLink>
           <PrefixSelect value={signalPrefix} onChange={setSignalPrefix} />
           <TextInput
             placeholder="Signal number"
@@ -264,16 +265,16 @@ export function SocialMediaSection({
 
         {/* Website */}
         <Group gap="sm" align="center">
-          <ActionIcon
+          <ActionIconLink
             variant="light"
             color="gray"
-            component="a"
             href={getWebsiteUrl(contact.website)}
             target="_blank"
             disabled={!contact.website}
+            ariaLabel="Website"
           >
             <IconWorld size={18} />
-          </ActionIcon>
+          </ActionIconLink>
           <TextInput
             placeholder="Website URL"
             value={values.website}

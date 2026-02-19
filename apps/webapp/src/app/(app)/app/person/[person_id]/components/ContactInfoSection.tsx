@@ -34,6 +34,7 @@ import {
   parsePhoneNumber,
 } from "@/lib/phoneHelpers";
 import { CONTACT_METHOD_TYPE_OPTIONS } from "@/lib/config";
+import { ActionIconLink } from "@bondery/mantine-next";
 
 const MAX_ENTRIES = 5;
 
@@ -300,17 +301,17 @@ export function ContactInfoSection({
               }}
             >
               <Group gap="xs" align="center" wrap="nowrap">
-                <ActionIcon
+                <ActionIconLink
                   variant="light"
                   color={phone.preferred ? "orange" : "blue"}
-                  component="a"
                   href={
                     phone.prefix && phone.value ? `tel:${phone.prefix}${phone.value}` : undefined
                   }
                   disabled={!phone.value}
+                  ariaLabel={t("PhoneNumbers")}
                 >
                   {phone.preferred ? <IconPhoneSpark size={18} /> : <IconPhone size={18} />}
-                </ActionIcon>
+                </ActionIconLink>
 
                 <PrefixSelect
                   value={phone.prefix || "+1"}
@@ -444,15 +445,15 @@ export function ContactInfoSection({
               }}
             >
               <Group gap="xs" align="center" wrap="nowrap">
-                <ActionIcon
+                <ActionIconLink
                   variant="light"
                   color={email.preferred ? "orange" : "red"}
-                  component="a"
                   href={email.value ? `mailto:${email.value}` : undefined}
                   disabled={!email.value}
+                  ariaLabel={t("EmailAddresses")}
                 >
                   {email.preferred ? <IconMailSpark size={18} /> : <IconMail size={18} />}
-                </ActionIcon>
+                </ActionIconLink>
 
                 <TextInput
                   placeholder={t("EmailPlaceholder")}

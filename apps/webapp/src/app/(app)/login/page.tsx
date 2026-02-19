@@ -1,15 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import { Text, Button, Stack, Anchor, Card } from "@mantine/core";
+import { Text, Button, Stack, Card } from "@mantine/core";
 import { IconBrandGithubFilled, IconBrandLinkedin, IconX } from "@tabler/icons-react";
 import { notifications } from "@mantine/notifications";
 import { createBrowswerSupabaseClient } from "@/lib/supabase/client";
 import { useTranslations } from "next-intl";
-import Link from "next/link";
 import { INTEGRATION_PROVIDERS, WEBSITE_URL } from "@/lib/config";
 import { Logo } from "./components/Logo";
 import { WEBSITE_ROUTES } from "@bondery/helpers/globals/paths";
+import { AnchorLink } from "@bondery/mantine-next";
 
 export default function LoginPage() {
   const t = useTranslations("LoginPage");
@@ -98,13 +98,13 @@ export default function LoginPage() {
           </Stack>
           <Text size="xs" c="dimmed" ta="center">
             {t("TermsAgreement")}{" "}
-            <Anchor component={Link} href={`${WEBSITE_URL}${WEBSITE_ROUTES.TERMS}`} size="xs">
+            <AnchorLink href={`${WEBSITE_URL}${WEBSITE_ROUTES.TERMS}`} size="xs">
               {t("TermsOfService")}
-            </Anchor>{" "}
+            </AnchorLink>{" "}
             {t("And")}{" "}
-            <Anchor component={Link} href={`${WEBSITE_URL}${WEBSITE_ROUTES.PRIVACY}`} size="xs">
+            <AnchorLink href={`${WEBSITE_URL}${WEBSITE_ROUTES.PRIVACY}`} size="xs">
               {t("PrivacyPolicy")}
-            </Anchor>
+            </AnchorLink>
           </Text>
         </Stack>
       </Card>
