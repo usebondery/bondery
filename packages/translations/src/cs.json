@@ -80,6 +80,22 @@
     "Description": "Máte-li jakékoli dotazy, neváhejte nás kontaktovat.",
     "EmailText": "Kontaktujte nás na team@usebondery.com"
   },
+  "AboutPage": {
+    "Title": "O nás",
+    "Description": "Kdo jsme, proč Bondery existuje a kde nás najdete.",
+    "WhyBonderyExists": "Proč Bondery existuje",
+    "Story": "Ahoj! Jsme Marek a Martin, zakladatelé Bondery. Bondery jsme vytvořili, abychom lidem pomohli budovat hlubší a dlouhodobé vztahy bez ztráty drobných detailů, na kterých záleží. Naší vizí je stát se otevřenou platformou pro kontakty a začínáme s PRM.",
+    "FoundersPhotoAlt": "Marek a Martin na hackathonu",
+    "OurTeam": "Náš tým",
+    "Communities": "Komunity",
+    "CommunityDescription": "Připojte se ke komunitě a sledujte naši cestu.",
+    "Links": {
+      "Reddit": "Reddit",
+      "LinkedIn": "LinkedIn",
+      "GitHub": "GitHub",
+      "X": "X"
+    }
+  },
   "SingleContactPage": {
     "Title": "Detaily kontaktu",
     "Description": "Zobrazit a spravovat detaily vašeho kontaktu."
