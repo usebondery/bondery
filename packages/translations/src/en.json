@@ -80,6 +80,22 @@
     "Description": "If you have any questions, please feel free to contact us.",
     "EmailText": "team@usebondery.com"
   },
+  "AboutPage": {
+    "Title": "About us",
+    "Description": "Who we are, why Bondery exists, and where to find us.",
+    "WhyBonderyExists": "Why Bondery exists",
+    "Story": "Hey! We're Marek and Martin, the founders of Bondery. We created Bondery to help people build deeper, lasting relationships without losing the small details that matter. Our vision is to become the open platform for contacts, and we're starting with a PRM.",
+    "FoundersPhotoAlt": "Marek and Martin at a hackathon",
+    "OurTeam": "Our team",
+    "Communities": "Communities",
+    "CommunityDescription": "Join the community and follow our journey.",
+    "Links": {
+      "Reddit": "Reddit",
+      "LinkedIn": "LinkedIn",
+      "GitHub": "GitHub",
+      "X": "X"
+    }
+  },
   "SingleContactPage": {
     "Title": "Contact Details",
     "Description": "View and manage details of your contact."
