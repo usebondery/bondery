@@ -67,6 +67,7 @@ export function Footer() {
               title="About us"
               links={[
                 { title: "Contact us", href: WEBSITE_ROUTES.CONTACT },
+                { title: "Status", href: "/status", target: "_blank" },
                 { title: "Privacy Policy", href: WEBSITE_ROUTES.PRIVACY },
                 { title: "Terms of Service", href: WEBSITE_ROUTES.TERMS },
               ]}

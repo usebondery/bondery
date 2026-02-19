@@ -17,7 +17,8 @@ import { IconBrandGithub, IconTopologyStar, IconX } from "@tabler/icons-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Logo } from "@/components/Logo";
-import { GITHUB_REPO_URL, SOCIAL_LINKS, WEBSITE_ROUTES } from "@bondery/helpers";
+import { GITHUB_REPO_URL, SOCIAL_LINKS } from "@bondery/helpers";
+import { WEBAPP_URL } from "@/lib/config";
 
 const navLinks = [
   { label: "Features", href: "/#features" },
@@ -71,7 +72,7 @@ export function Header() {
             {/* CTA Button */}
             <Button
               component={Link}
-              href={WEBSITE_ROUTES.LOGIN}
+              href={`${WEBAPP_URL}/login`}
               size="md"
               leftSection={<IconTopologyStar size={20} />}
             >
@@ -83,7 +84,11 @@ export function Header() {
         {/* Mobile Layout */}
         <Flex justify="space-between" align="center" px="md" hiddenFrom="sm">
           <Logo size={32} />
-          <Burger opened={drawerOpened} onClick={toggleDrawer} />
+          <Burger
+            opened={drawerOpened}
+            onClick={toggleDrawer}
+            aria-label={drawerOpened ? "Close navigation menu" : "Open navigation menu"}
+          />
         </Flex>
       </Paper>
 
@@ -142,7 +147,7 @@ export function Header() {
                 {/* CTA Button */}
                 <Button
                   component={Link}
-                  href={WEBSITE_ROUTES.LOGIN}
+                  href={`${WEBAPP_URL}/login`}
                   size="md"
                   leftSection={<IconTopologyStar size={20} />}
                   fullWidth

@@ -104,6 +104,8 @@ export function AnimatedPeople() {
                     alt={person.name}
                     width={340}
                     height={320}
+                    loading="eager"
+                    fetchPriority="high"
                     draggable={false}
                     className="h-full w-full rounded-3xl object-cover object-center"
                     radius="lg"

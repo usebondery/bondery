@@ -2,9 +2,8 @@
 
 import { Box, Button, Container, Flex, Grid, Group, Stack, Text, Title } from "@mantine/core";
 import { IconTopologyStar } from "@tabler/icons-react";
-import Link from "next/link";
 import { AnimatedPeople } from "@/components/landing/AnimatedPeople";
-import { WEBSITE_ROUTES } from "@bondery/helpers";
+import { WEBAPP_URL } from "@/lib/config";
 
 export function Hero() {
   return (
@@ -33,8 +32,8 @@ export function Hero() {
               {/* CTA Buttons */}
               <Flex mt="md" gap="md" wrap="wrap">
                 <Button
-                  component={Link}
-                  href={WEBSITE_ROUTES.LOGIN}
+                  component="a"
+                  href={`${WEBAPP_URL}/login`}
                   size="lg"
                   leftSection={<IconTopologyStar size={20} />}
                 >

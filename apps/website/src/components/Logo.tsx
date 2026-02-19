@@ -20,7 +20,11 @@ export function Logo({ size, iconSize, href = "/" }: LogoProps) {
   const logoSize = size ?? iconSize ?? 120;
 
   return (
-    <Link href={href} style={{ textDecoration: "none", color: "inherit" }}>
+    <Link
+      href={href}
+      aria-label="Bondery homepage"
+      style={{ textDecoration: "none", color: "inherit" }}
+    >
       <Flex align="center" gap="xs" darkHidden>
         <BonderyLogotypeBlack width={logoSize * 3} height={logoSize} />
       </Flex>
