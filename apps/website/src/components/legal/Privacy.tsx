@@ -1,7 +1,7 @@
 "use client";
 
-import { Anchor, Box, Divider, List, Table, Text, Title } from "@mantine/core";
-import Link from "next/link";
+import { Box, Divider, List, Table, Text, Title } from "@mantine/core";
+import { AnchorLink } from "@bondery/mantine-next";
 import { type ReactNode } from "react";
 import { LegalDocumentLayout } from "./shared/LegalDocumentLayout";
 
@@ -529,9 +529,9 @@ export function Privacy() {
         <Text>Pplk. Sochora 27</Text>
         <Text>170 00 Praha 7</Text>
         <Text>Czech Republic</Text>
-        <Anchor href="https://www.uoou.cz" component={Link} target="_blank">
+        <AnchorLink href="https://www.uoou.cz" target="_blank">
           https://www.uoou.cz
-        </Anchor>
+        </AnchorLink>
       </Box>
 
       <Title order={3} mt="lg" mb="sm">
@@ -539,11 +539,8 @@ export function Privacy() {
       </Title>
       <Text mb="lg">
         To exercise any of these rights, please contact us at{" "}
-        <Anchor href="mailto:team@usebondery.com" component={Link}>
-          team@usebondery.com
-        </Anchor>
-        . We will respond to your request within 30 days (or within the timeframe required by
-        applicable law).
+        <AnchorLink href="mailto:team@usebondery.com">team@usebondery.com</AnchorLink>. We will
+        respond to your request within 30 days (or within the timeframe required by applicable law).
       </Text>
       <Text mb="lg">
         We may need to verify your identity before processing your request. In some cases, we may
@@ -625,9 +622,9 @@ export function Privacy() {
               <Table.Td>{provider.name}</Table.Td>
               <Table.Td>{provider.useCase}</Table.Td>
               <Table.Td>
-                <Anchor href={provider.privacy} component={Link} target="_blank">
+                <AnchorLink href={provider.privacy} target="_blank">
                   {provider.privacy}
-                </Anchor>
+                </AnchorLink>
               </Table.Td>
               <Table.Td>{provider.location}</Table.Td>
             </Table.Tr>
@@ -664,16 +661,16 @@ export function Privacy() {
       <Text mb="md">
         If you have any questions about this Privacy Policy or how we process your information and
         data, please email us at{" "}
-        <Anchor href="mailto:team@usebondery.com" component={Link} target="_blank">
+        <AnchorLink href="mailto:team@usebondery.com" target="_blank">
           team@usebondery.com
-        </Anchor>
+        </AnchorLink>
         . We&apos;ll be happy to help!
       </Text>
       <Text mb="md">
         Or you can reach us by mail at our postal address:{" "}
-        <Anchor href="https://mapy.com/s/fovafaduso" component={Link} target="_blank">
+        <AnchorLink href="https://mapy.com/s/fovafaduso" target="_blank">
           PixelDev s.r.o., Bělehradská 858/23, Prague 120 00, Czech Republic
-        </Anchor>
+        </AnchorLink>
         .
       </Text>
     </LegalDocumentLayout>

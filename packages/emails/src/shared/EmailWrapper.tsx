@@ -7,7 +7,7 @@ import {
   Container,
   Font,
 } from "@react-email/components";
-import { primaryColor } from "@bondery/branding/theme/src";
+import { primaryColor } from "@bondery/mantine-next";
 import * as React from "react";
 import { BonderyLogotypeBlack } from "@bondery/branding/react/src";
 

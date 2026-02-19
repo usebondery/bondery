@@ -1,6 +1,4 @@
-"use client";
-
-import { Box, Container, Grid, Image, Stack, Text, Title } from "@mantine/core";
+import { Box, Container, Grid, GridCol, Image, Stack, Text, Title } from "@mantine/core";
 import NextImage from "next/image";
 
 type FeatureSectionProps = {
@@ -62,17 +60,17 @@ const FeatureSection = ({
         <Grid gutter="calc(var(--mantine-spacing-xl) * 3)" align="center">
           {imagePosition === "left" ? (
             <>
-              <Grid.Col span={{ base: 12, md: 6 }} order={{ base: 2, md: 1 }}>
+              <GridCol span={{ base: 12, md: 6 }} order={{ base: 2, md: 1 }}>
                 {image}
-              </Grid.Col>
-              <Grid.Col span={{ base: 12, md: 6 }} order={{ base: 1, md: 2 }}>
+              </GridCol>
+              <GridCol span={{ base: 12, md: 6 }} order={{ base: 1, md: 2 }}>
                 {content}
-              </Grid.Col>
+              </GridCol>
             </>
           ) : (
             <>
-              <Grid.Col span={{ base: 12, md: 6 }}>{content}</Grid.Col>
-              <Grid.Col span={{ base: 12, md: 6 }}>{image}</Grid.Col>
+              <GridCol span={{ base: 12, md: 6 }}>{content}</GridCol>
+              <GridCol span={{ base: 12, md: 6 }}>{image}</GridCol>
             </>
           )}
         </Grid>

@@ -1,6 +1,5 @@
-"use client";
-
-import { Button, Card, Container, Stack, Title } from "@mantine/core";
+import { ButtonLink } from "@bondery/mantine-next";
+import { Card, Container, Stack, Title } from "@mantine/core";
 import { IconArrowUpRight } from "@tabler/icons-react";
 import { WEBAPP_URL } from "@/lib/config";
 
@@ -38,15 +37,14 @@ export function CallToAction() {
             </Container>
             Start building meaningful connections today.
           </Title>
-          <Button
-            component="a"
+          <ButtonLink
             href={`${WEBAPP_URL}/login`}
             size="lg"
             rightSection={<IconArrowUpRight />}
             variant="white"
           >
             Start for free
-          </Button>
+          </ButtonLink>
         </Stack>
       </Card>
     </Container>

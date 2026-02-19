@@ -1,8 +1,8 @@
 "use client";
 
-import { Button, Container, Stack, Text, Title } from "@mantine/core";
+import { ButtonLink } from "@bondery/mantine-next";
+import { Container, Stack, Text, Title } from "@mantine/core";
 import { IconHome } from "@tabler/icons-react";
-import Link from "next/link";
 
 export default function Page() {
   return (
@@ -16,9 +16,9 @@ export default function Page() {
             The page you are looking for does not exist.
           </Text>
         </Stack>
-        <Button component={Link} href="/" size="lg" leftSection={<IconHome size={20} />}>
+        <ButtonLink href="/" size="lg" leftSection={<IconHome size={20} />}>
           Back to Home
-        </Button>
+        </ButtonLink>
       </Stack>
     </Container>
   );

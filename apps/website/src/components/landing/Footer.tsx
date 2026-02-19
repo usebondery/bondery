@@ -1,7 +1,6 @@
-"use client";
-
-import { Anchor, Box, Divider, Flex, Paper, Text, Title } from "@mantine/core";
+import { Box, Divider, Flex, Paper, Text, Title } from "@mantine/core";
 import { IconBrandGithubFilled, IconBrandLinkedinFilled } from "@tabler/icons-react";
+import { AnchorLink } from "@bondery/mantine-next";
 import type { ReactNode } from "react";
 import { Logo } from "@/components/Logo";
 import { SOCIAL_LINKS, WEBSITE_ROUTES } from "@bondery/helpers";
@@ -23,7 +22,7 @@ const LinkGroup = ({ title, links }: LinkGroupItem) => (
       {title}
     </Title>
     {links.map((link) => (
-      <Anchor
+      <AnchorLink
         c="dimmed"
         target={link.target}
         display="block"
@@ -33,7 +32,7 @@ const LinkGroup = ({ title, links }: LinkGroupItem) => (
         py={4}
       >
         {link.title}
-      </Anchor>
+      </AnchorLink>
     ))}
   </Box>
 );

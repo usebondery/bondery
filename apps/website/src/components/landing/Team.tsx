@@ -1,17 +1,6 @@
-"use client";
-import {
-  Avatar,
-  Card,
-  Container,
-  Group,
-  Text,
-  Title,
-  ActionIcon,
-  Stack,
-  Flex,
-} from "@mantine/core";
+import { Avatar, Card, Container, Group, Text, Title, Stack, Flex } from "@mantine/core";
 import { IconBrandLinkedin } from "@tabler/icons-react";
-import Link from "next/link";
+import { ActionIconLink } from "@bondery/mantine-next";
 
 interface TeamMember {
   name: string;
@@ -56,16 +45,17 @@ function TeamCard({ member }: { member: TeamMember }) {
             {member.description}
           </Text>
 
-          <ActionIcon
+          <ActionIconLink
             size="lg"
             variant="subtle"
             color="gray"
-            component={Link}
             href={member.linkedin}
             target="_blank"
+            rel="noopener noreferrer"
+            ariaLabel={`${member.name} on LinkedIn`}
           >
             <IconBrandLinkedin />
-          </ActionIcon>
+          </ActionIconLink>
         </Stack>
       </Group>
     </Card>

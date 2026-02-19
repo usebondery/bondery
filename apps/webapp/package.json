@@ -17,6 +17,7 @@
   "dependencies": {
     "@bondery/branding": "*",
     "@bondery/helpers": "*",
+    "@bondery/mantine-next": "*",
     "@bondery/translations": "*",
     "@bondery/types": "*",
     "@dnd-kit/core": "^6.3.1",
