@@ -9,6 +9,24 @@ import type { UpdateUserSettingsInput } from "@bondery/types";
 import { validateImageUpload } from "../lib/config.js";
 
 const AVATARS_BUCKET = "avatars";
+const DEFAULT_REMINDER_SEND_HOUR = "08:00:00";
+
+function isValidReminderSendHour(value: unknown): value is string {
+  if (typeof value !== "string") {
+    return false;
+  }
+
+  return /^([01]\d|2[0-3]):[0-5]\d(:[0-5]\d)?$/.test(value.trim());
+}
+
+function normalizeReminderSendHour(value: string): string {
+  const [hourPart, minutePart, secondPart] = value.trim().split(":");
+  const normalizedHour = hourPart.padStart(2, "0");
+  const normalizedMinute = minutePart.padStart(2, "0");
+  const normalizedSecond = (secondPart || "00").padStart(2, "0");
+
+  return `${normalizedHour}:${normalizedMinute}:${normalizedSecond}`;
+}
 
 function getAccountAvatarFileName(userId: string): string {
   return `${userId}/${userId}.jpg`;
@@ -201,6 +219,7 @@ export async function settingsRoutes(fastify: FastifyInstance) {
           middlename: "",
           surname: metadataName.surname,
           timezone: "UTC",
+          reminder_send_hour: DEFAULT_REMINDER_SEND_HOUR,
           language: "en",
           color_scheme: "auto",
         })
@@ -253,6 +272,7 @@ export async function settingsRoutes(fastify: FastifyInstance) {
       success: true,
       data: {
         ...resolvedSettings,
+        reminder_send_hour: resolvedSettings.reminder_send_hour ?? DEFAULT_REMINDER_SEND_HOUR,
         email: userData?.user?.email,
         avatar_url: resolvedSettings.avatar_url || null,
         providers: userData?.user?.app_metadata?.providers || [],
@@ -270,7 +290,8 @@ export async function settingsRoutes(fastify: FastifyInstance) {
       if (!auth) return;
 
       const { client, user } = auth;
-      const { name, middlename, surname, timezone, language, color_scheme } = request.body || {};
+      const { name, middlename, surname, timezone, reminder_send_hour, language, color_scheme } =
+        request.body || {};
 
       const updatePayload: UpdateUserSettingsInput = {};
 
@@ -278,6 +299,14 @@ export async function settingsRoutes(fastify: FastifyInstance) {
       if (middlename !== undefined) updatePayload.middlename = middlename;
       if (surname !== undefined) updatePayload.surname = surname;
       if (timezone !== undefined) updatePayload.timezone = timezone;
+      if (reminder_send_hour !== undefined) {
+        if (!isValidReminderSendHour(reminder_send_hour)) {
+          return reply
+            .status(400)
+            .send({ error: "reminder_send_hour must be a valid time in HH:mm or HH:mm:ss format" });
+        }
+        updatePayload.reminder_send_hour = normalizeReminderSendHour(reminder_send_hour);
+      }
       if (language !== undefined) updatePayload.language = language;
       if (color_scheme !== undefined) updatePayload.color_scheme = color_scheme;
 

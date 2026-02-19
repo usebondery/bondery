@@ -16,6 +16,7 @@ import { accountRoutes } from "./routes/account.js";
 import { settingsRoutes } from "./routes/settings.js";
 import { redirectRoutes } from "./routes/redirect.js";
 import { feedbackRoutes } from "./routes/feedback.js";
+import { reminderRoutes } from "./routes/reminders.js";
 import { groupRoutes } from "./routes/groups.js";
 import { activityRoutes } from "./routes/activities.js";
 import { linkedInImportRoutes } from "./routes/linkedin-import.js";
@@ -34,6 +35,7 @@ const envSchema = {
     "PRIVATE_EMAIL_PASS",
     "PRIVATE_EMAIL_ADDRESS",
     "PRIVATE_EMAIL_PORT",
+    "PRIVATE_BONDERY_SUPABASE_HTTP_KEY",
   ],
   properties: {
     LOG_LEVEL: {
@@ -81,6 +83,9 @@ const envSchema = {
     PRIVATE_EMAIL_PORT: {
       type: "number",
     },
+    PRIVATE_BONDERY_SUPABASE_HTTP_KEY: {
+      type: "string",
+    },
   },
 } as const;
 
@@ -101,6 +106,7 @@ declare module "fastify" {
       PRIVATE_EMAIL_PASS: string;
       PRIVATE_EMAIL_ADDRESS: string;
       PRIVATE_EMAIL_PORT: number;
+      PRIVATE_BONDERY_SUPABASE_HTTP_KEY: string;
     };
   }
 }
@@ -208,6 +214,7 @@ async function buildServer() {
   await fastify.register(settingsRoutes, { prefix: API_ROUTES.SETTINGS });
   await fastify.register(redirectRoutes, { prefix: API_ROUTES.REDIRECT });
   await fastify.register(feedbackRoutes, { prefix: API_ROUTES.FEEDBACK });
+  await fastify.register(reminderRoutes, { prefix: API_ROUTES.REMINDERS });
   await fastify.register(activityRoutes, { prefix: API_ROUTES.ACTIVITIES });
 
   return fastify;

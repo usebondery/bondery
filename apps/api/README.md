@@ -48,6 +48,14 @@ NEXT_PUBLIC_WEBSITE_URL=https://usebondery.com        # Default: https://usebond
 
 The server uses `@fastify/env` to validate environment variables at startup. If any required variables are missing, the server will fail immediately with a clear error message.
 
+### Reminder job secret
+
+For internal reminder dispatch endpoint authentication:
+
+```bash
+PRIVATE_BONDERY_SUPABASE_HTTP_KEY=your-shared-secret
+```
+
 ## Development
 
 ```bash
@@ -94,6 +102,10 @@ npm start
 
 * `GET /api/redirect` - Create/find contact and redirect
 * `POST /api/redirect` - Create/find contact (JSON response)
+
+### Reminders (Internal)
+
+* `POST /api/reminders/daily-digest` - Receive hourly timezone-aware reminders payload and send one digest email per user
 
 ## Authentication
 
