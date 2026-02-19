@@ -55,9 +55,8 @@ export function PeopleAvatarChips({
                 src={person.avatar || undefined}
                 color={person.avatarColor || "blue"}
                 name={`${person.firstName}${person.lastName ? ` ${person.lastName}` : ""}`.trim()}
-              >
-                {!person.avatar && person.firstName?.[0]}
-              </Avatar>
+              />
+
               <Text size="sm" fw={500}>
                 {`${person.firstName}${person.lastName ? ` ${person.lastName}` : ""}`.trim()}
               </Text>
@@ -95,9 +94,7 @@ export function PeopleAvatarChips({
           src={person.avatar || undefined}
           color={person.avatarColor || "blue"}
           name={`${person.firstName}${person.lastName ? ` ${person.lastName}` : ""}`.trim()}
-        >
-          {!person.avatar && person.firstName?.[0]}
-        </Avatar>
+        />
       ))}
       {remainingCount > 0 && (
         <Avatar size={size} radius="xl" color="gray">

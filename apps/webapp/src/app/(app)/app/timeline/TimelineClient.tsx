@@ -1,28 +1,7 @@
 "use client";
 
-import {
-  Button,
-  Stack,
-  Group,
-  Text,
-  Paper,
-  Avatar,
-  TextInput,
-  ActionIcon,
-  Badge,
-  Menu,
-  MenuDropdown,
-  MenuItem,
-  MenuTarget,
-} from "@mantine/core";
-import {
-  IconPlus,
-  IconSearch,
-  IconTimeline,
-  IconDotsVertical,
-  IconEdit,
-  IconTrash,
-} from "@tabler/icons-react";
+import { Button, Stack, Group, Text, Paper, TextInput } from "@mantine/core";
+import { IconPlus, IconSearch, IconTimeline } from "@tabler/icons-react";
 import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { PageWrapper } from "@/app/(app)/app/components/PageWrapper";
@@ -33,8 +12,7 @@ import { PageHeader } from "../components/PageHeader";
 import { useTranslations } from "next-intl";
 import { modals } from "@mantine/modals";
 import { notifications } from "@mantine/notifications";
-import { PeopleAvatarChips } from "../components/timeline/PeopleAvatarChips";
-import { getActivityTypeConfig } from "@/lib/activityTypes";
+import { ActivityCard } from "../components/timeline/ActivityCard";
 
 interface TimelineClientProps {
   initialContacts: Contact[];
@@ -140,11 +118,6 @@ export function TimelineClient({ initialContacts, initialActivities }: TimelineC
     return groups;
   }, [filteredActivities]);
 
-  const getNotesPreview = (notes: string | null | undefined) => {
-    if (!notes) return "";
-    return notes.length > 50 ? `${notes.slice(0, 50)}...` : notes;
-  };
-
   return (
     <PageWrapper>
       <Stack gap="lg">
@@ -194,101 +167,22 @@ export function TimelineClient({ initialContacts, initialActivities }: TimelineC
               </Text>
               <Stack gap="sm">
                 {activities.map((activity) => {
-                  const date = new Date(activity.date);
                   const participants = resolveParticipants(activity);
-                  const typeConfig = getActivityTypeConfig(activity.type);
 
                   return (
-                    <Paper
+                    <ActivityCard
                       key={activity.id}
-                      p="md"
-                      withBorder
-                      radius="md"
-                      onClick={() => handleActivityClick(activity)}
-                      style={{ cursor: "pointer", transition: "border-color 0.2s" }}
-                      className="hover:border-blue-500"
-                    >
-                      <Group justify="space-between" wrap="nowrap" align="center">
-                        <Group wrap="nowrap">
-                          <Avatar color={typeConfig.color} size="lg" radius="xl">
-                            {typeConfig.emoji}
-                          </Avatar>
-                          <Stack gap={2}>
-                            <Group gap="xs" align="center">
-                              <Text fw={600} size="md">
-                                {activity.title || activity.type}
-                              </Text>
-                              <Badge color={typeConfig.color} variant="light" radius="xl" size="sm">
-                                {activity.type}
-                              </Badge>
-                            </Group>
-                            {activity.description && (
-                              <Text size="sm" c="dimmed">
-                                {getNotesPreview(activity.description)}
-                              </Text>
-                            )}
-                            {participants.length > 0 && (
-                              <Group mt={4}>
-                                <PeopleAvatarChips
-                                  people={participants.map((participant) => ({
-                                    id: participant.id,
-                                    firstName: participant.firstName,
-                                    lastName: participant.lastName,
-                                    avatar: participant.avatar,
-                                    avatarColor: participant.avatarColor,
-                                  }))}
-                                  totalCount={participants.length}
-                                  variant="preview"
-                                  maxDisplay={3}
-                                  previewVariant="outline"
-                                />
-                              </Group>
-                            )}
-                          </Stack>
-                        </Group>
-                        <Group gap="xs" align="center" style={{ alignSelf: "center" }}>
-                          <Text c="dimmed" size="sm" style={{ whiteSpace: "nowrap" }}>
-                            {date.toLocaleDateString("en-US", {
-                              month: "short",
-                              day: "numeric",
-                              year: "numeric",
-                            })}
-                          </Text>
-                          <Menu position="bottom-end" shadow="md">
-                            <MenuTarget>
-                              <ActionIcon
-                                variant="subtle"
-                                onClick={(event) => event.stopPropagation()}
-                              >
-                                <IconDotsVertical size={16} />
-                              </ActionIcon>
-                            </MenuTarget>
-                            <MenuDropdown>
-                              <MenuItem
-                                leftSection={<IconEdit size={14} />}
-                                onClick={(event) => {
-                                  event.stopPropagation();
-                                  setEditingActivity(activity);
-                                  setModalOpened(true);
-                                }}
-                              >
-                                {t("EditAction")}
-                              </MenuItem>
-                              <MenuItem
-                                color="red"
-                                leftSection={<IconTrash size={14} />}
-                                onClick={(event) => {
-                                  event.stopPropagation();
-                                  handleDelete(activity);
-                                }}
-                              >
-                                {t("DeleteAction")}
-                              </MenuItem>
-                            </MenuDropdown>
-                          </Menu>
-                        </Group>
-                      </Group>
-                    </Paper>
+                      activity={activity}
+                      participants={participants}
+                      editLabel={t("EditAction")}
+                      deleteLabel={t("DeleteAction")}
+                      onOpen={() => handleActivityClick(activity)}
+                      onEdit={() => {
+                        setEditingActivity(activity);
+                        setModalOpened(true);
+                      }}
+                      onDelete={() => handleDelete(activity)}
+                    />
                   );
                 })}
               </Stack>

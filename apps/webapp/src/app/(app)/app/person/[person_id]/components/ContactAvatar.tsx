@@ -26,24 +26,10 @@ export function ContactAvatar({
   onClick,
   style,
 }: ContactAvatarProps) {
-  if (avatarUrl) {
-    return (
-      <Avatar size={size} radius="xl" style={{ overflow: "hidden", ...style }} onClick={onClick}>
-        <Image
-          src={avatarUrl}
-          alt={contactName}
-          width={size}
-          height={size}
-          style={{ objectFit: "cover" }}
-          unoptimized
-        />
-      </Avatar>
-    );
-  }
-
   return (
     <Avatar
       size={size}
+      src={avatarUrl}
       radius="xl"
       color="initials"
       onClick={onClick}

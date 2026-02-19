@@ -3,6 +3,7 @@
  */
 
 import type { ContactType, ImportantEventType, RelationshipType } from "@bondery/types";
+import { IMPORTANT_EVENT_TYPE_META } from "@bondery/helpers";
 
 export const WEBAPP_URL = process.env.NEXT_PUBLIC_WEBAPP_URL!;
 export const WEBSITE_URL = process.env.NEXT_PUBLIC_WEBSITE_URL!;
@@ -30,11 +31,11 @@ export const IMPORTANT_EVENT_TYPE_OPTIONS: ReadonlyArray<{
   value: ImportantEventType;
   emoji: string;
 }> = [
-  { value: "birthday", emoji: "🎂" },
-  { value: "anniversary", emoji: "💍" },
-  { value: "nameday", emoji: "🌼" },
-  { value: "graduation", emoji: "🎓" },
-  { value: "other", emoji: "📅" },
+  { value: "birthday", emoji: IMPORTANT_EVENT_TYPE_META.birthday.emoji },
+  { value: "anniversary", emoji: IMPORTANT_EVENT_TYPE_META.anniversary.emoji },
+  { value: "nameday", emoji: IMPORTANT_EVENT_TYPE_META.nameday.emoji },
+  { value: "graduation", emoji: IMPORTANT_EVENT_TYPE_META.graduation.emoji },
+  { value: "other", emoji: IMPORTANT_EVENT_TYPE_META.other.emoji },
 ] as const;
 
 export const IMPORTANT_EVENT_NOTIFY_OPTIONS: ReadonlyArray<{

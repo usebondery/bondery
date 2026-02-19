@@ -68,9 +68,12 @@ export function PersonChip({
   const fullName = getDisplayName(person);
 
   const leftAvatar = person ? (
-    <Avatar src={person.avatar || undefined} size={20} radius="xl">
-      {person.firstName[0]}
-    </Avatar>
+    <Avatar
+      src={person.avatar || undefined}
+      size={20}
+      radius="xl"
+      name={`${person.firstName} ${person.lastName || ""}`.trim()}
+    />
   ) : null;
 
   const renderBadge = () => (
@@ -148,9 +151,8 @@ export function PersonChip({
                       size="sm"
                       radius="xl"
                       color={candidate.avatarColor || "blue"}
-                    >
-                      {candidate.firstName[0]}
-                    </Avatar>
+                      name={`${candidate.firstName} ${candidate.lastName || ""}`.trim()}
+                    />
                     <Text size="sm" fw={500}>
                       {candidateName}
                     </Text>

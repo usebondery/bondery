@@ -1,20 +1,7 @@
 "use client";
 
-import {
-  Stack,
-  Group,
-  Text,
-  Button,
-  Paper,
-  Avatar,
-  Badge,
-  ActionIcon,
-  Menu,
-  MenuDropdown,
-  MenuItem,
-  MenuTarget,
-} from "@mantine/core";
-import { IconTimeline, IconPlus, IconDotsVertical, IconEdit, IconTrash } from "@tabler/icons-react";
+import { Stack, Group, Text, Button } from "@mantine/core";
+import { IconTimeline, IconPlus } from "@tabler/icons-react";
 import { useState, useMemo } from "react";
 import type { Activity, Contact } from "@bondery/types";
 import { NewActivityModal } from "../../../timeline/components/NewActivityModal";
@@ -25,6 +12,7 @@ import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import { notifications } from "@mantine/notifications";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
+import { ActivityCard } from "../../../components/timeline/ActivityCard";
 
 interface PersonTimelineSectionProps {
   activities: Activity[];
@@ -61,11 +49,6 @@ export function PersonTimelineSection({
       });
     return groups;
   }, [activities]);
-
-  const getNotesPreview = (notes: string | null | undefined) => {
-    if (!notes) return "";
-    return notes.length > 50 ? `${notes.slice(0, 50)}...` : notes;
-  };
 
   const handleActivityClick = (activity: Activity) => {
     setEditingActivity(activity);
@@ -170,115 +153,22 @@ export function PersonTimelineSection({
               </Text>
               <Stack gap="sm">
                 {groupActivities.map((activity) => {
-                  const date = new Date(activity.date);
                   const participants = resolveParticipants(activity);
-                  const typeConfig = getActivityTypeConfig(activity.type);
 
                   return (
-                    <Paper
+                    <ActivityCard
                       key={activity.id}
-                      p="md"
-                      withBorder
-                      radius="md"
-                      onClick={() => handleActivityClick(activity)}
-                      style={{ cursor: "pointer", transition: "all 0.2s" }}
-                      className="hover:border-blue-500 hover:shadow-sm"
-                    >
-                      <Group justify="space-between" wrap="nowrap" align="center">
-                        <Group wrap="nowrap" align="flex-start">
-                          <Avatar color={typeConfig.color} size="lg" radius="xl">
-                            {typeConfig.emoji}
-                          </Avatar>
-                          <Stack gap={2}>
-                            <Group gap="xs" align="center">
-                              <Text fw={600} size="md">
-                                {activity.title || activity.type}
-                              </Text>
-                              <Badge color={typeConfig.color} variant="light" radius="xl" size="sm">
-                                {activity.type}
-                              </Badge>
-                            </Group>
-                            {activity.description && (
-                              <Text size="sm" c="dimmed">
-                                {getNotesPreview(activity.description)}
-                              </Text>
-                            )}
-                            {participants.length > 0 && (
-                                                <Group mt={4}>
-                                                  <PeopleAvatarChips
-                                                    people={participants.map((participant) => ({
-                                                      id: participant.id,
-                                                      firstName: participant.firstName,
-                                                      lastName: participant.lastName,
-                                                      avatar: participant.avatar,
-                                                      avatarColor: participant.avatarColor,
-                                                    }))}
-                                                    totalCount={participants.length}
-                                                    variant="preview"
-                                                    maxDisplay={3}
-                                                    previewVariant="outline"
-                                                  />
-                                                </Group>
-                            )}
-                            <Group gap={6}>
-                              <Text size="xs" c="dimmed" tt="uppercase" fw={700}>
-                                {activity.type}
-                              </Text>
-                              {activity.location && (
-                                <>
-                                  <Text size="xs" c="dimmed">
-                                    •
-                                  </Text>
-                                  <Text size="xs" c="dimmed">
-                                    {activity.location}
-                                  </Text>
-                                </>
-                              )}
-                            </Group>
-                          </Stack>
-                        </Group>
-                        <Group gap="xs" align="center" style={{ alignSelf: "center" }}>
-                          <Text c="dimmed" size="xs">
-                            {date.toLocaleTimeString("en-US", {
-                              hour: "numeric",
-                              minute: "2-digit",
-                            })}
-                          </Text>
-                          <Menu position="bottom-end" shadow="md">
-                            <MenuTarget>
-                              <ActionIcon
-                                variant="subtle"
-                                onClick={(event) => event.stopPropagation()}
-                              >
-                                <IconDotsVertical size={16} />
-                              </ActionIcon>
-                            </MenuTarget>
-                            <MenuDropdown>
-                              <MenuItem
-                                leftSection={<IconEdit size={14} />}
-                                onClick={(event) => {
-                                  event.stopPropagation();
-                                  setEditingActivity(activity);
-                                  setActivityModalOpened(true);
-                                }}
-                              >
-                                {t("EditAction")}
-                              </MenuItem>
-                              <MenuItem
-                                color="red"
-                                leftSection={<IconTrash size={14} />}
-                                onClick={(event) => {
-                                  event.stopPropagation();
-                                  handleDelete(activity);
-                                }}
-                              >
-                                {t("DeleteAction")}
-                              </MenuItem>
-                            </MenuDropdown>
-                          </Menu>
-                        </Group>
-                      </Group>
-                    </Paper>
+                      activity={activity}
+                      participants={participants}
+                      editLabel={t("EditAction")}
+                      deleteLabel={t("DeleteAction")}
+                      onOpen={() => handleActivityClick(activity)}
+                      onEdit={() => {
+                        setEditingActivity(activity);
+                        setActivityModalOpened(true);
+                      }}
+                      onDelete={() => handleDelete(activity)}
+                    />
                   );
                 })}
               </Stack>

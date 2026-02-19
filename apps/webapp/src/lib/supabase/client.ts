@@ -1,5 +1,5 @@
 import { createBrowserClient } from "@supabase/ssr";
-import type { Database } from "@bondery/types/database";
+import type { Database } from "@bondery/types/supabase.types";
 
 export function createBrowswerSupabaseClient() {
   return createBrowserClient<Database>(

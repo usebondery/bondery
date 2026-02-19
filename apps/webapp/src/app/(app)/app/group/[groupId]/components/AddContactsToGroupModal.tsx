@@ -239,14 +239,8 @@ function AddContactsToGroupForm({
                   radius="xl"
                   size="sm"
                   name={formatContactName(contact)}
-                >
-                  {!contact.avatar && (
-                    <>
-                      {contact.firstName[0]}
-                      {contact.lastName?.[0]}
-                    </>
-                  )}
-                </Avatar>
+                />
+
                 <Stack gap={0}>
                   <Text size="sm" fw={500}>
                     {formatContactName(contact)}

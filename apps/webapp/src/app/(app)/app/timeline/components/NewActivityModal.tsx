@@ -94,7 +94,6 @@ export function NewActivityModal({
       date: toLocalDateInputValue(new Date()),
       type: "Call" as string,
       description: "",
-      location: "",
     },
     validate: {
       title: (value) => (value.trim().length > 0 ? null : t("TitleRequired")),
@@ -172,7 +171,6 @@ export function NewActivityModal({
         date: toLocalDateInputValue(new Date(activity.date)),
         type: activity.type,
         description: activity.description || "",
-        location: activity.location || "",
       });
 
       lastSyncKeyRef.current = syncKey;

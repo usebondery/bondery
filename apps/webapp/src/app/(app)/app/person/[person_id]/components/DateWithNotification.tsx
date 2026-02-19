@@ -1,9 +1,9 @@
 "use client";
 
 import { Group, Checkbox, TextInput, Text, Loader } from "@mantine/core";
-import { DatePickerInput } from "@mantine/dates";
 import { IconGift } from "@tabler/icons-react";
 import { INPUT_MAX_LENGTHS } from "@/lib/config";
+import { DatePickerWithPresets } from "../../../components/timeline/DatePickerWithPresets";
 
 interface DateWithNotificationProps {
   title: string;
@@ -21,6 +21,28 @@ interface DateWithNotificationProps {
   onFocus?: (field: string) => void;
   onBlur?: (field: string) => void;
   fieldPrefix?: string;
+}
+
+function normalizePickerDate(value: Date | string | null): Date | null {
+  if (!value) {
+    return null;
+  }
+
+  if (value instanceof Date) {
+    return new Date(value.getFullYear(), value.getMonth(), value.getDate());
+  }
+
+  const [year, month, day] = value.split("-").map(Number);
+  if (year && month && day) {
+    return new Date(year, month - 1, day);
+  }
+
+  const parsedDate = new Date(value);
+  if (Number.isNaN(parsedDate.getTime())) {
+    return null;
+  }
+
+  return new Date(parsedDate.getFullYear(), parsedDate.getMonth(), parsedDate.getDate());
 }
 
 export default function DateWithNotification({
@@ -49,13 +71,10 @@ export default function DateWithNotification({
         {title}
       </Text>
       <Group gap="sm" align="flex-start">
-        <DatePickerInput
+        <DatePickerWithPresets
           placeholder={dateLabel}
           value={dateValue}
-          onChange={(value) => {
-            const date = value ? new Date(value) : null;
-            onDateChange(date);
-          }}
+          onChange={(value) => onDateChange(normalizePickerDate(value as Date | string | null))}
           valueFormat="MMMM D, YYYY"
           maxDate={new Date()}
           leftSection={<IconGift size={18} />}
