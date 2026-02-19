@@ -57,8 +57,8 @@ export function Footer() {
             <LinkGroup
               title="About app"
               links={[
-                { title: "Features", href: "#features" },
-                { title: "Pricing", href: "#pricing" },
+                { title: "Features", href: "/#features" },
+                { title: "Pricing", href: "/#pricing" },
               ]}
             />
           </Box>

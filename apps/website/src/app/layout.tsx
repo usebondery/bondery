@@ -5,7 +5,6 @@ import { bonderyTheme } from "@bondery/branding/theme/src";
 import { Lexend } from "next/font/google";
 import { ColorSchemeScript, MantineProvider, mantineHtmlProps } from "@mantine/core";
 import { Footer, Header } from "@/components/landing";
-import Head from "next/head";
 import Script from "next/script";
 import { WEBSITE_URL } from "@/lib/config";
 import { SOCIAL_LINKS, SUPPORT_EMAIL } from "@bondery/helpers";
@@ -51,7 +50,9 @@ export const metadata: Metadata = {
 const organizationSchema = {
   "@context": "https://schema.org",
   "@type": "Organization",
+  "@id": `${WEBSITE_URL}#organization`,
   name: "Bondery",
+  description: ogDescription,
   url: WEBSITE_URL,
   logo: `${WEBSITE_URL}/logo.svg`,
   sameAs: [SOCIAL_LINKS.github, SOCIAL_LINKS.linkedin],
@@ -68,9 +69,14 @@ const organizationSchema = {
 const websiteSchema = {
   "@context": "https://schema.org",
   "@type": "WebSite",
+  "@id": `${WEBSITE_URL}#website`,
   name: "Bondery",
+  description: ogDescription,
   url: WEBSITE_URL,
-  inLanguage: "en",
+  inLanguage: "en-US",
+  publisher: {
+    "@id": `${WEBSITE_URL}#organization`,
+  },
 } as const;
 
 const lexend = Lexend({
@@ -85,9 +91,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" {...mantineHtmlProps} className={lexend.variable}>
-      <Head>
+      <head>
         <ColorSchemeScript nonce="8IBTHwOdqNKAWeKl7plt8g==" defaultColorScheme="auto" />
-      </Head>
+      </head>
       <body>
         <Script
           id="schema-organization"
