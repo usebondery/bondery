@@ -1,164 +1,34 @@
-"use client";
+import { GITHUB_REPO_URL } from "@bondery/helpers";
+import { HeaderClient } from "./HeaderClient";
 
-import {
-  Anchor,
-  Box,
-  Button,
-  Flex,
-  Group,
-  Paper,
-  ActionIcon,
-  Drawer,
-  Stack,
-  Burger,
-} from "@mantine/core";
-import { useDisclosure } from "@mantine/hooks";
-import { IconBrandGithub, IconTopologyStar, IconX } from "@tabler/icons-react";
-import Link from "next/link";
-import { useEffect, useState } from "react";
-import { Logo } from "@/components/Logo";
-import { GITHUB_REPO_URL, SOCIAL_LINKS } from "@bondery/helpers";
-import { WEBAPP_URL } from "@/lib/config";
+const FALLBACK_STARS = 3;
 
-const navLinks = [
-  { label: "Features", href: "/#features" },
-  { label: "Pricing", href: "/#pricing" },
-];
+type GithubRepoResponse = {
+  stargazers_count?: number;
+};
 
-export function Header() {
-  const [stars, setStars] = useState<number | null>(null);
-  const [drawerOpened, { toggle: toggleDrawer, close: closeDrawer }] = useDisclosure(false);
+/**
+ * Fetches GitHub stars for the configured repository using Next.js fetch cache.
+ * Falls back to a default value when the API is unavailable.
+ */
+async function getGithubStars(): Promise<number> {
+  try {
+    const response = await fetch(GITHUB_REPO_URL, {
+      next: { revalidate: 3600 },
+    });
 
-  useEffect(() => {
-    fetch(GITHUB_REPO_URL)
-      .then((res) => res.json())
-      .then((data) => setStars(data.stargazers_count))
-      .catch(() => setStars(null));
-  }, []);
+    if (!response.ok) {
+      return FALLBACK_STARS;
+    }
 
-  return (
-    <Box component="header" className="sticky top-6 z-50 ">
-      <Paper maw={1440} mx={{ base: "xs", md: "xl" }} shadow="md" py={"md"} px={"xs"}>
-        {/* Desktop Layout */}
-        <Flex align="center" px="md" visibleFrom="sm">
-          {/* Logo - Left */}
-          <Box style={{ flex: 1 }}>
-            <Logo size={32} />
-          </Box>
+    const data = (await response.json()) as GithubRepoResponse;
+    return typeof data.stargazers_count === "number" ? data.stargazers_count : FALLBACK_STARS;
+  } catch {
+    return FALLBACK_STARS;
+  }
+}
 
-          {/* Navigation Links - Center */}
-          <Group gap="xl" style={{ flex: "0 0 auto" }}>
-            {navLinks.map((link) => (
-              <Anchor key={link.label} href={link.href} c="var(--mantine-color-default-color)">
-                {link.label}
-              </Anchor>
-            ))}
-          </Group>
-
-          {/* Right section - Desktop */}
-          <Flex align="center" gap="md" justify="flex-end" style={{ flex: 1 }}>
-            {/* GitHub Stars */}
-            <Button
-              component={Link}
-              href={SOCIAL_LINKS.github}
-              target="_blank"
-              variant="default"
-              leftSection={<IconBrandGithub size={20} />}
-              loading={stars === null}
-            >
-              {stars !== null ? stars.toLocaleString() : "Loading..."}
-            </Button>
-
-            {/* CTA Button */}
-            <Button
-              component={Link}
-              href={`${WEBAPP_URL}/login`}
-              size="md"
-              leftSection={<IconTopologyStar size={20} />}
-            >
-              Go to app
-            </Button>
-          </Flex>
-        </Flex>
-
-        {/* Mobile Layout */}
-        <Flex justify="space-between" align="center" px="md" hiddenFrom="sm">
-          <Logo size={32} />
-          <Burger
-            opened={drawerOpened}
-            onClick={toggleDrawer}
-            aria-label={drawerOpened ? "Close navigation menu" : "Open navigation menu"}
-          />
-        </Flex>
-      </Paper>
-
-      {/* Mobile Drawer */}
-      <Drawer.Root
-        opened={drawerOpened}
-        onClose={closeDrawer}
-        position="right"
-        hiddenFrom="sm"
-        size="xs"
-      >
-        <Drawer.Overlay />
-        <Drawer.Content>
-          <Drawer.Header>
-            <Drawer.Title />
-            <ActionIcon
-              variant="default"
-              size="xl"
-              aria-label="Close menu"
-              onClick={closeDrawer}
-              mt={"md"}
-            >
-              <IconX size={24} />
-            </ActionIcon>
-          </Drawer.Header>
-          <Drawer.Body>
-            <Flex direction="column" gap="lg">
-              {/* Navigation Links */}
-              {navLinks.map((link) => (
-                <Anchor
-                  key={link.label}
-                  href={link.href}
-                  c="var(--mantine-color-default-color)"
-                  size="lg"
-                  onClick={closeDrawer}
-                >
-                  {link.label}
-                </Anchor>
-              ))}
-
-              {/* Buttons Stack */}
-              <Stack gap="xs">
-                {/* GitHub Stars */}
-                <Button
-                  component={Link}
-                  href={SOCIAL_LINKS.github}
-                  target="_blank"
-                  variant="default"
-                  leftSection={<IconBrandGithub size={20} />}
-                  loading={stars === null}
-                  fullWidth
-                >
-                  {stars !== null ? stars.toLocaleString() : "Loading..."}
-                </Button>
-
-                {/* CTA Button */}
-                <Button
-                  component={Link}
-                  href={`${WEBAPP_URL}/login`}
-                  size="md"
-                  leftSection={<IconTopologyStar size={20} />}
-                  fullWidth
-                >
-                  Go to app
-                </Button>
-              </Stack>
-            </Flex>
-          </Drawer.Body>
-        </Drawer.Content>
-      </Drawer.Root>
-    </Box>
-  );
+export async function Header() {
+  const initialStars = await getGithubStars();
+  return <HeaderClient initialStars={initialStars} />;
 }
