@@ -21,6 +21,7 @@ type FaqProps = {
 export function Faq({ items }: FaqProps) {
   return (
     <Container
+      px={"0"}
       id="faq"
       bg="var(--mantine-color-body)"
       py={{
@@ -36,7 +37,7 @@ export function Faq({ items }: FaqProps) {
           </Title>
         </Stack>
 
-        <Accordion variant="separated" radius="md" className="max-w-xl mx-auto">
+        <Accordion variant="separated" radius="md" className="w-full md:max-w-xl mx-auto">
           {items.map((item) => (
             <AccordionItem key={item.question} value={item.question}>
               <AccordionControl>{item.question}</AccordionControl>
