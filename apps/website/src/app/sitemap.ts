@@ -12,12 +12,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 1,
     },
     {
-      url: `${WEBSITE_URL}${WEBSITE_ROUTES.LOGIN}`,
-      lastModified: now,
-      changeFrequency: "yearly",
-      priority: 0.3,
-    },
-    {
       url: `${WEBSITE_URL}${WEBSITE_ROUTES.CONTACT}`,
       lastModified: now,
       changeFrequency: "monthly",
