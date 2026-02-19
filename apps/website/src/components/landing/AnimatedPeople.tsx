@@ -1,6 +1,6 @@
 "use client";
 
-import { ActionIcon, Box, Card, Group, Image, Stack, Text, Title } from "@mantine/core";
+import { ActionIcon, Box, Card, Group, Image, Title } from "@mantine/core";
 import { IconArrowLeft, IconArrowRight } from "@tabler/icons-react";
 import { motion, AnimatePresence } from "motion/react";
 import NextImage from "next/image";
@@ -64,11 +64,17 @@ export function AnimatedPeople() {
   };
 
   return (
-    <Card shadow="md" padding="xl" withBorder className="mx-auto w-full max-w-4xl">
-      <div className="relative grid grid-cols-1 gap-6 md:gap-10 md:grid-cols-2 md:items-center">
-        <div>
-          <div className="relative mx-auto w-full max-w-[320px] md:max-w-[340px] min-h-[260px] md:min-h-[320px]">
-            <AnimatePresence>
+    <Card
+      shadow="sm"
+      padding="xl"
+      radius="lg"
+      withBorder
+      className="mx-auto w-full md:w-[600px] h-full"
+    >
+      <div className="relative grid grid-cols-1 gap-6 md:gap-8 md:grid-cols-[200px_1fr] items-center">
+        <div className="flex justify-center md:block">
+          <div className="relative w-[280px] md:w-[200px] aspect-[3/4] md:h-[267px]">
+            <AnimatePresence mode="popLayout">
               {people.map((person, index) => (
                 <motion.div
                   key={person.src}
@@ -102,8 +108,8 @@ export function AnimatedPeople() {
                     component={NextImage}
                     src={person.src}
                     alt={person.name}
-                    width={340}
-                    height={320}
+                    width={200}
+                    height={267}
                     loading={isActive(index) ? "eager" : "lazy"}
                     fetchPriority={isActive(index) ? "high" : "auto"}
                     draggable={false}
@@ -115,65 +121,27 @@ export function AnimatedPeople() {
             </AnimatePresence>
           </div>
         </div>
-        <div className="flex flex-col justify-between py-4 md:pl-6 lg:pl-2">
-          <motion.div
-            key={active}
-            initial={{
-              y: 20,
-              opacity: 0,
-            }}
-            animate={{
-              y: 0,
-              opacity: 1,
-            }}
-            exit={{
-              y: -20,
-              opacity: 0,
-            }}
-            transition={{
-              duration: 0.2,
-              ease: "easeInOut",
-            }}
-          >
-            <Title order={2} className="text-2xl font-bold">
-              {people[active].name}
-            </Title>
+        <div className="flex flex-col h-[267px] justify-center py-4 pl-4 text-center md:text-left">
+          <div className="h-[140px] flex flex-col justify-center">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={active}
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                transition={{ duration: 0.3 }}
+              >
+                <Title order={3} className="text-xl md:text-2xl font-bold mb-2">
+                  {people[active].name}
+                </Title>
+                <Box>
+                  <p className="text-lg text-gray-600 dark:text-gray-300">{people[active].quote}</p>
+                </Box>
+              </motion.div>
+            </AnimatePresence>
+          </div>
 
-            <Box mt="xs">
-              <motion.p className="text-lg">
-                {people[active].quote.split(" ").map((word, index) => (
-                  <motion.span
-                    key={index}
-                    initial={{
-                      filter: "blur(10px)",
-                      opacity: 0,
-                      y: 5,
-                    }}
-                    animate={{
-                      filter: "blur(0px)",
-                      opacity: 1,
-                      y: 0,
-                    }}
-                    transition={{
-                      duration: 0.2,
-                      ease: "easeInOut",
-                      delay: 0.02 * index,
-                    }}
-                    className="inline-block"
-                  >
-                    {word}&nbsp;
-                  </motion.span>
-                ))}
-              </motion.p>
-            </Box>
-          </motion.div>
-          <Group
-            gap="md"
-            pt="xl"
-            justify={isDesktop ? "flex-start" : "center"}
-            align="center"
-            className="w-full"
-          >
+          <Group gap="md" mt="md" justify={isDesktop ? "flex-start" : "center"}>
             <ActionIcon
               onClick={handlePrev}
               variant="default"
@@ -181,7 +149,7 @@ export function AnimatedPeople() {
               radius="xl"
               aria-label="Previous"
             >
-              <IconArrowLeft style={{ width: "60%", height: "60%" }} />
+              <IconArrowLeft size={18} />
             </ActionIcon>
             <ActionIcon
               onClick={handleNext}
@@ -190,7 +158,7 @@ export function AnimatedPeople() {
               radius="xl"
               aria-label="Next"
             >
-              <IconArrowRight style={{ width: "60%", height: "60%" }} />
+              <IconArrowRight size={18} />
             </ActionIcon>
           </Group>
         </div>
