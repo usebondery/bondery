@@ -14,6 +14,21 @@
     "lint": "eslint",
     "check-types": "tsc --noEmit"
   },
+  "browserslist": {
+    "production": [
+      "chrome >= 111",
+      "edge >= 111",
+      "firefox >= 113",
+      "safari >= 16.4",
+      "ios_saf >= 16.4",
+      "and_chr >= 111"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
   "dependencies": {
     "@bondery/branding": "*",
     "@bondery/helpers": "*",

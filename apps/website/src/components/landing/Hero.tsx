@@ -22,7 +22,7 @@ export function Hero() {
               </Title>
 
               {/* Description */}
-              <Text size="lg" c="dimmed" maw={500}>
+              <Text size="lg" c="var(--mantine-color-text)" maw={500}>
                 Build your network with ease. Bondery is an open-source personal relationship
                 manager, that helps you remember the details, centralizes your connections, and
                 nurtures your relationships.
