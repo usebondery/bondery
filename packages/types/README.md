@@ -10,5 +10,5 @@ This package is automatically available in all workspace packages.
 
 ```typescript
 import { Contact, UserSettings, ApiErrorResponse } from "@bondery/types";
-import { Database, Tables } from "@bondery/types/database";
+import { Database, Tables } from "@bondery/types/supabase.types";
 ```

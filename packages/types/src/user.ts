@@ -15,6 +15,7 @@ export interface UserSettings {
   middlename: string | null;
   surname: string | null;
   timezone: string | null;
+  reminder_send_hour: string;
   language: string | null;
   color_scheme: ColorSchemePreference;
   avatar_url: string | null;
@@ -41,6 +42,7 @@ export interface UpdateUserSettingsInput {
   middlename?: string;
   surname?: string;
   timezone?: string;
+  reminder_send_hour?: string;
   language?: string;
   color_scheme?: ColorSchemePreference;
 }

@@ -30,36 +30,30 @@ export type Database = {
     Tables: {
       activities: {
         Row: {
-          attachment_path: string | null;
           created_at: string;
           date: string;
           description: string | null;
           id: string;
-          location: string | null;
           title: string | null;
           type: string;
           updated_at: string;
           user_id: string;
         };
         Insert: {
-          attachment_path?: string | null;
           created_at?: string;
           date?: string;
           description?: string | null;
           id?: string;
-          location?: string | null;
           title?: string | null;
           type: string;
           updated_at?: string;
           user_id: string;
         };
         Update: {
-          attachment_path?: string | null;
           created_at?: string;
           date?: string;
           description?: string | null;
           id?: string;
-          location?: string | null;
           title?: string | null;
           type?: string;
           updated_at?: string;
@@ -265,6 +259,7 @@ export type Database = {
           event_type: string;
           id: string;
           note: string | null;
+          notify_on: string | null;
           notify_days_before: number | null;
           person_id: string;
           updated_at: string;
@@ -276,6 +271,7 @@ export type Database = {
           event_type: string;
           id?: string;
           note?: string | null;
+          notify_on?: string | null;
           notify_days_before?: number | null;
           person_id: string;
           updated_at?: string;
@@ -287,6 +283,7 @@ export type Database = {
           event_type?: string;
           id?: string;
           note?: string | null;
+          notify_on?: string | null;
           notify_days_before?: number | null;
           person_id?: string;
           updated_at?: string;
@@ -483,6 +480,8 @@ export type Database = {
           language: string | null;
           middlename: string | null;
           name: string | null;
+          next_reminder_at_utc: string;
+          reminder_send_hour: string;
           surname: string | null;
           timezone: string | null;
           updated_at: string | null;
@@ -496,6 +495,8 @@ export type Database = {
           language?: string | null;
           middlename?: string | null;
           name?: string | null;
+          next_reminder_at_utc?: string;
+          reminder_send_hour?: string;
           surname?: string | null;
           timezone?: string | null;
           updated_at?: string | null;
@@ -509,6 +510,8 @@ export type Database = {
           language?: string | null;
           middlename?: string | null;
           name?: string | null;
+          next_reminder_at_utc?: string;
+          reminder_send_hour?: string;
           surname?: string | null;
           timezone?: string | null;
           updated_at?: string | null;

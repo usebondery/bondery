@@ -4,7 +4,7 @@
  */
 
 // Database types
-export * from "./database";
+export * from "./supabase.types";
 
 // Domain types
 export * from "./contact";
