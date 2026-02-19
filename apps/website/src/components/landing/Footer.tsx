@@ -11,8 +11,9 @@ import { Logo } from "@/components/Logo";
 import { SOCIAL_LINKS, WEBSITE_ROUTES } from "@bondery/helpers";
 
 type LinkItem = {
+  key: string;
   title: ReactNode;
-  href: string;
+  href?: string;
   target?: string;
 };
 
@@ -21,19 +22,23 @@ type LinkGroupItem = {
   links: LinkItem[];
 };
 
+function hasHref(link: LinkItem): link is LinkItem & { href: string } {
+  return typeof link.href === "string" && link.href.length > 0;
+}
+
 const LinkGroup = ({ title, links }: LinkGroupItem) => (
   <Box>
     <Title fw="bold" mb="xs" order={3}>
       {title}
     </Title>
-    {links.map((link) => (
+    {links.filter(hasHref).map((link) => (
       <AnchorLink
         c="dimmed"
         target={link.target}
         display="block"
         fz="sm"
         href={link.href}
-        key={link.href}
+        key={link.key}
         py={4}
       >
         {link.title}
@@ -61,8 +66,8 @@ export function Footer() {
             <LinkGroup
               title="About app"
               links={[
-                { title: "Features", href: "/#features" },
-                { title: "Pricing", href: "/#pricing" },
+                { key: "features", title: "Features", href: "/#features" },
+                { key: "pricing", title: "Pricing", href: "/#pricing" },
               ]}
             />
           </Box>
@@ -70,10 +75,10 @@ export function Footer() {
             <LinkGroup
               title="About us"
               links={[
-                { title: "Contact us", href: WEBSITE_ROUTES.CONTACT },
-                { title: "Status", href: "/status", target: "_blank" },
-                { title: "Privacy Policy", href: WEBSITE_ROUTES.PRIVACY },
-                { title: "Terms of Service", href: WEBSITE_ROUTES.TERMS },
+                { key: "contact", title: "Contact us", href: WEBSITE_ROUTES.CONTACT },
+                { key: "status", title: "Status", href: "/status", target: "_blank" },
+                { key: "privacy", title: "Privacy Policy", href: WEBSITE_ROUTES.PRIVACY },
+                { key: "terms", title: "Terms of Service", href: WEBSITE_ROUTES.TERMS },
               ]}
             />
           </Box>
@@ -82,6 +87,7 @@ export function Footer() {
               title="Connect with us"
               links={[
                 {
+                  key: "github",
                   title: (
                     <Flex align="center" gap={4}>
                       <IconBrandGithubFilled size={16} /> GitHub
@@ -91,6 +97,7 @@ export function Footer() {
                   target: "_blank",
                 },
                 {
+                  key: "linkedin",
                   title: (
                     <Flex align="center" gap={4}>
                       <IconBrandLinkedinFilled size={16} /> LinkedIn
@@ -100,6 +107,7 @@ export function Footer() {
                   target: "_blank",
                 },
                 {
+                  key: "reddit",
                   title: (
                     <Flex align="center" gap={4}>
                       <IconBrandReddit size={16} /> Reddit
@@ -109,6 +117,7 @@ export function Footer() {
                   target: "_blank",
                 },
                 {
+                  key: "x",
                   title: (
                     <Flex align="center" gap={4}>
                       <IconBrandX size={16} /> X
