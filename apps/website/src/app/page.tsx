@@ -19,7 +19,8 @@ const faqItems = [
   },
   {
     question: "Can I self-host Bondery?",
-    answer: "Self-hosting is planned. Bondery is open source, and a self-hosting option is coming soon.",
+    answer:
+      "Self-hosting is planned. Bondery is open source, and a self-hosting option is coming soon.",
   },
 ] as const;
 
