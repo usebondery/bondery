@@ -11,7 +11,7 @@ export const metadata: Metadata = {
     title: "Privacy Policy | Bondery",
     description: "Learn how Bondery collects, uses, and protects your data.",
     url: "/privacy",
-    type: "article",
+    type: "website",
   },
   twitter: {
     title: "Privacy Policy | Bondery",
