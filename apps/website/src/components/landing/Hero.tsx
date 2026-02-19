@@ -1,6 +1,5 @@
-"use client";
-
-import { Box, Button, Container, Flex, Grid, Group, Stack, Text, Title } from "@mantine/core";
+import { ButtonLink } from "@bondery/mantine-next";
+import { Box, Container, Flex, Grid, GridCol, Stack, Text, Title } from "@mantine/core";
 import { IconTopologyStar } from "@tabler/icons-react";
 import { AnimatedPeople } from "@/components/landing/AnimatedPeople";
 import { WEBAPP_URL } from "@/lib/config";
@@ -15,7 +14,7 @@ export function Hero() {
       >
         <Grid gutter={{ base: "xl", md: "calc(var(--mantine-spacing-xl) * 2)" }} align="center">
           {/* Left Content */}
-          <Grid.Col span={{ base: 12, md: 6 }}>
+          <GridCol span={{ base: 12, md: 6 }}>
             <Stack gap="lg">
               {/* Title */}
               <Title order={1} className="text-5xl md:text-6xl font-extrabold leading-tight ">
@@ -31,25 +30,24 @@ export function Hero() {
 
               {/* CTA Buttons */}
               <Flex mt="md" gap="md" wrap="wrap">
-                <Button
-                  component="a"
+                <ButtonLink
                   href={`${WEBAPP_URL}/login`}
                   size="lg"
                   leftSection={<IconTopologyStar size={20} />}
                 >
                   Get started
-                </Button>
-                <Button component="a" href="#features" size="lg" variant="default">
+                </ButtonLink>
+                <ButtonLink href="#features" size="lg" variant="default">
                   Learn more
-                </Button>
+                </ButtonLink>
               </Flex>
             </Stack>
-          </Grid.Col>
+          </GridCol>
 
           {/* Right Content - Animated People Examples */}
-          <Grid.Col span={{ base: 12, md: 6 }}>
+          <GridCol span={{ base: 12, md: 6 }}>
             <AnimatedPeople />
-          </Grid.Col>
+          </GridCol>
         </Grid>
       </Container>
     </Box>

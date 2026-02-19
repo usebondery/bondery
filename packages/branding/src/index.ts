@@ -1,7 +1,7 @@
 /**
  * Bondery branding package
  *
- * Exports brand assets including icons and shared Mantine theme
+ * Exports brand assets including icons
  */
 
 export {
@@ -10,4 +10,3 @@ export {
   BonderyLogotypeBlack,
   BonderyLogotypeWhite,
 } from "./react/index";
-export { bonderyTheme } from "./theme";

@@ -35,32 +35,11 @@
       "types": "./src/react/index.ts",
       "import": "./dist/react/index.js",
       "require": "./dist/react/index.js"
-    },
-    "./theme": {
-      "import": "./dist/theme.js",
-      "require": "./dist/theme.js",
-      "types": "./dist/theme.d.ts"
-    },
-    "./theme/src": {
-      "types": "./src/theme.ts",
-      "import": "./dist/theme.js",
-      "require": "./dist/theme.js"
-    },
-    "./styles": {
-      "style": "./src/styles.css",
-      "import": "./src/styles.css",
-      "require": "./src/styles.css"
-    },
-    "./src/styles.css": {
-      "style": "./src/styles.css",
-      "import": "./src/styles.css",
-      "require": "./src/styles.css"
     }
   },
   "files": [
     "dist",
     "scripts",
-    "src/styles.css",
     "src/assets"
   ],
   "scripts": {
@@ -77,9 +56,6 @@
     "@types/node": "^25",
     "tsx": "^4.21.0",
     "typescript": "^5"
-  },
-  "peerDependencies": {
-    "@mantine/core": "^8.3.11"
   },
   "keywords": [
     "branding",

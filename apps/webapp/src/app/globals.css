@@ -2,6 +2,7 @@
 
 /* Scan branding package for Tailwind classes */
 @source "@bondery/branding/**/*.{ts,tsx}";
+@source "@bondery/mantine-next/**/*.{ts,tsx}";
 
 @import "@mantine/core/styles.css";
 @import "@mantine/notifications/styles.css";
@@ -9,6 +10,6 @@
 @import "@mantine/tiptap/styles.css";
 @import "@mantine/dropzone/styles.css";
 @import "flag-icons/css/flag-icons.min.css";
-@import "@bondery/branding/styles";
+@import "@bondery/mantine-next/styles";
 
 /* Additional webapp-specific styles */

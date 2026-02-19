@@ -1,10 +1,7 @@
-"use client";
-
 import {
   Box,
-  Button,
   Card,
-  Center,
+  CardSection,
   Container,
   Divider,
   Flex,
@@ -14,6 +11,7 @@ import {
   ThemeIcon,
   Title,
 } from "@mantine/core";
+import { ButtonLink } from "@bondery/mantine-next";
 import { IconNetwork, IconCalendar, IconUsers, IconTopologyStar } from "@tabler/icons-react";
 import { WEBAPP_URL } from "@/lib/config";
 
@@ -70,9 +68,9 @@ export function Pricing() {
             </Title>
           </Flex>
 
-          <Card.Section my="lg">
+          <CardSection my="lg">
             <Divider />
-          </Card.Section>
+          </CardSection>
 
           <Stack>
             <Group gap="xs" align="start">
@@ -110,13 +108,12 @@ export function Pricing() {
             </Group>
           </Stack>
 
-          <Card.Section my="lg">
+          <CardSection my="lg">
             <Divider />
-          </Card.Section>
+          </CardSection>
 
           <Box>
-            <Button
-              component="a"
+            <ButtonLink
               href={`${WEBAPP_URL}/login`}
               size="lg"
               fullWidth
@@ -124,7 +121,7 @@ export function Pricing() {
               leftSection={<IconTopologyStar size={18} />}
             >
               Get started
-            </Button>
+            </ButtonLink>
           </Box>
         </Card>
       </Group>

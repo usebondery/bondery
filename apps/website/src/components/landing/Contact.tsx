@@ -1,7 +1,6 @@
-"use client";
-
-import { Anchor, Container, Stack, Text, Title, Paper, Group, ThemeIcon } from "@mantine/core";
+import { Container, Stack, Text, Title, Paper, Group, ThemeIcon } from "@mantine/core";
 import { IconMail, IconBrandLinkedin, IconBrandGithub } from "@tabler/icons-react";
+import { AnchorLink } from "@bondery/mantine-next";
 
 const CONTACT_METHODS = [
   {
@@ -55,7 +54,7 @@ export function Contact() {
                 <ThemeIcon size={48} radius="md" variant="light" color={method.color}>
                   <method.icon size={24} />
                 </ThemeIcon>
-                <Anchor
+                <AnchorLink
                   href={method.href}
                   target={method.target}
                   size="lg"
@@ -63,7 +62,7 @@ export function Contact() {
                   c={"var(--mantine-color-text)"}
                 >
                   {method.text}
-                </Anchor>
+                </AnchorLink>
               </Group>
             ))}
           </Stack>

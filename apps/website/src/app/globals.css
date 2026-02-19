@@ -2,7 +2,8 @@
 
 /* Scan branding package for Tailwind classes */
 @source "@bondery/branding/**/*.{ts,tsx}";
+@source "@bondery/mantine-next/**/*.{ts,tsx}";
 
 @import "@mantine/core/styles.css";
 @import "@mantine/notifications/styles.css";
-@import "@bondery/branding/styles";
+@import "@bondery/mantine-next/styles";

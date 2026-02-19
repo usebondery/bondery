@@ -1,19 +1,13 @@
 :root {
-  /* Transition timing */
   --transition-time: 200ms;
   --transition-ease: ease-in-out;
   --transition-ease-out: ease-out;
   --transition-time-quick: 100ms;
-
-  /* Scale factors */
   --scale-grow: 1.02;
   --scale-shrink: 0.98;
-
-  /* Active state filter */
   --active-filter: brightness(0.9);
 }
 
-/* Button hover/active effects */
 .button-scale-effect:not(:disabled):not([data-disabled]):not([disabled]) {
   transition:
     transform var(--transition-time) var(--transition-ease),
@@ -56,11 +50,11 @@
 .card-scale-effect {
   transition: transform var(--transition-time) var(--transition-ease);
 }
+
 .card-scale-effect:hover {
   transform: scale(var(--scale-grow));
 }
 
-/* Timezone picker active option styling */
 .mantine-Combobox-option[data-combobox-selected="true"] .mantine-Text-root {
   color: white !important;
 }
@@ -81,7 +75,6 @@
   transform: none !important;
 }
 
-/* Combobox search: disable transition while focused, apply transition when losing focus */
 .mantine-Combobox-search {
   transition: none;
 }

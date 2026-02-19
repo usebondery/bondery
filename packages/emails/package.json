@@ -21,6 +21,7 @@
   },
   "dependencies": {
     "@bondery/branding": "^0.1.0",
+    "@bondery/mantine-next": "*",
     "@react-email/components": "^1.0.7",
     "@react-email/render": "^2.0.4",
     "@react-email/tailwind": "^2.0.4"
