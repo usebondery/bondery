@@ -134,7 +134,7 @@ export function Features() {
           <Image
             component={NextImage}
             src="/images/hero/details.png"
-            alt="Integrations overview"
+            alt="Contact detail view with reminders and personal notes"
             width={1200}
             height={900}
             sizes="(max-width: 768px) 100vw, 500px"
