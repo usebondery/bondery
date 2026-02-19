@@ -10,7 +10,7 @@ This allows independent version numbering for each component.
 
 ## Creating a New Release
 
-To create a new release of the Bondery Chrome Extension:
+To create a new release of the Bondery Chrome Extension (only if there are updates to the extension):
 
 ### 1. Update Version Numbers
 
