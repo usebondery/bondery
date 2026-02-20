@@ -127,7 +127,6 @@ export type Database = {
       people: {
         Row: {
           avatar: string | null;
-          avatar_color: string | null;
           connections: string[] | null;
           created_at: string | null;
           description: string | null;
@@ -154,7 +153,6 @@ export type Database = {
         };
         Insert: {
           avatar?: string | null;
-          avatar_color?: string | null;
           connections?: string[] | null;
           created_at?: string | null;
           description?: string | null;
@@ -181,7 +179,6 @@ export type Database = {
         };
         Update: {
           avatar?: string | null;
-          avatar_color?: string | null;
           connections?: string[] | null;
           created_at?: string | null;
           description?: string | null;

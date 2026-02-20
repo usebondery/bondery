@@ -55,6 +55,7 @@ import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import { ModalTitle } from "@bondery/mantine-next";
 import { PageWrapper } from "@/app/(app)/app/components/PageWrapper";
 import { PageHeader } from "@/app/(app)/app/components/PageHeader";
+import { revalidateContacts } from "../../actions";
 
 const PersonMap = dynamic(() => import("./components/PersonMap").then((mod) => mod.PersonMap), {
   ssr: false,
@@ -121,14 +122,12 @@ export default function PersonClient({
     firstName: person.firstName,
     lastName: person.lastName,
     avatar: person.avatar,
-    avatarColor: person.avatarColor,
   }));
   const currentPersonPreview: ContactPreview = {
     id: contact.id,
     firstName: contact.firstName,
     lastName: contact.lastName,
     avatar: contact.avatar,
-    avatarColor: contact.avatarColor,
   };
 
   // Initialize edited values when contact loads
@@ -838,6 +837,7 @@ export default function PersonClient({
           });
 
           // Redirect to people page
+          await revalidateContacts();
           setTimeout(() => {
             router.push(WEBAPP_ROUTES.PEOPLE);
           }, 500);

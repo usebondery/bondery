@@ -176,7 +176,6 @@ export async function instagramImportRoutes(fastify: FastifyInstance) {
                 middle_name: contact.middleName,
                 last_name: contact.lastName,
                 myself: false,
-                avatar_color: "pink",
                 last_interaction: new Date().toISOString(),
               })
               .select("id")

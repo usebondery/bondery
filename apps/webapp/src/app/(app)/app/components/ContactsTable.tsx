@@ -37,6 +37,7 @@ import {
 import Image from "next/image";
 import { formatContactName } from "@/lib/nameHelpers";
 import { createSocialMediaUrl } from "@/lib/socialMediaHelpers";
+import { getAvatarColorFromName } from "@/lib/avatarColor";
 import type { Contact } from "@bondery/types";
 import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import { ActionIconLink, AnchorLink } from "@bondery/mantine-next";
@@ -71,7 +72,6 @@ function ContactSocialIcons({ contact }: { contact: Contact }) {
           const phone = preferredPhone as any;
           return `tel:${phone.prefix || ""}${phone.value}`;
         }
-        return undefined;
       })(),
       color: "blue",
       label: "Phone",
@@ -336,7 +336,7 @@ export default function ContactsTable({
                         <TableTd key={col.key}>
                           <Avatar
                             src={contact.avatar || undefined}
-                            color={contact.avatarColor || undefined}
+                            color={getAvatarColorFromName(contact.firstName, contact.lastName)}
                             radius="xl"
                             size="md"
                             name={formatContactName(contact)}

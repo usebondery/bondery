@@ -20,8 +20,10 @@ import { IconUserPlus, IconSearch } from "@tabler/icons-react";
 import { ModalTitle } from "@bondery/mantine-next";
 import { useDebouncedValue } from "@mantine/hooks";
 import type { Contact } from "@bondery/types";
+import { getAvatarColorFromName } from "@/lib/avatarColor";
 import { formatContactName } from "@/lib/nameHelpers";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
+import { revalidateGroups } from "../../../actions";
 
 interface AddContactsToGroupModalProps {
   groupId: string;
@@ -146,6 +148,7 @@ function AddContactsToGroupForm({
       });
 
       modals.closeAll();
+      await revalidateGroups();
       router.refresh();
     } catch (error) {
       notifications.hide(loadingNotification);
@@ -231,7 +234,7 @@ function AddContactsToGroupForm({
                 />
                 <Avatar
                   src={contact.avatar || undefined}
-                  color={contact.avatarColor || undefined}
+                  color={getAvatarColorFromName(contact.firstName, contact.lastName)}
                   radius="xl"
                   size="sm"
                   name={formatContactName(contact)}

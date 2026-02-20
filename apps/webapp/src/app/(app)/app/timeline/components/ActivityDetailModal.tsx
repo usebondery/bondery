@@ -19,6 +19,8 @@ import { notifications } from "@mantine/notifications";
 import { API_ROUTES, WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import { useRouter } from "next/navigation";
 import { ActionIconLink, ModalTitle } from "@bondery/mantine-next";
+import { getAvatarColorFromName } from "@/lib/avatarColor";
+import { revalidateEvents } from "../../actions";
 
 interface ActivityDetailModalProps {
   activity: Activity | null;
@@ -76,6 +78,7 @@ export function ActivityDetailModal({
         color: "green",
       });
 
+      await revalidateEvents();
       router.refresh();
       onClose();
     } catch (error) {
@@ -108,6 +111,7 @@ export function ActivityDetailModal({
         color: "green",
       });
 
+      await revalidateEvents();
       router.refresh();
       onClose();
     } catch (error) {
@@ -174,7 +178,7 @@ export function ActivityDetailModal({
                       src={participant.avatar}
                       size="md"
                       radius="xl"
-                      color={participant.avatarColor || "blue"}
+                      color={getAvatarColorFromName(participant.firstName, participant.lastName)}
                       name={`${participant.firstName} ${participant.lastName || ""}`.trim()}
                     />
 

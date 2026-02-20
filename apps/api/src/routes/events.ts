@@ -27,8 +27,7 @@ export async function eventRoutes(fastify: FastifyInstance) {
             id,
             first_name,
             last_name,
-            avatar,
-            avatar_color
+            avatar
           )
         )
       `,
