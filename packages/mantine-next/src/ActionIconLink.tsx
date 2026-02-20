@@ -2,7 +2,7 @@
 
 import { ActionIcon, type ActionIconProps } from "@mantine/core";
 import Link from "next/link";
-import type { ReactNode } from "react";
+import type { ElementType, ReactNode } from "react";
 
 export type ActionIconLinkProps = Omit<ActionIconProps, "component" | "href" | "children"> & {
   href?: string;
@@ -36,7 +36,7 @@ export function ActionIconLink({
 
   return (
     <ActionIcon
-      component={Link}
+      component={Link as ElementType}
       href={href}
       target={target}
       rel={rel}
