@@ -8,6 +8,7 @@ import { Logo } from "@/components/Logo";
 import { SOCIAL_LINKS } from "@bondery/helpers";
 import { WEBAPP_URL } from "@/lib/config";
 
+
 const navLinks = [
   { label: "Features", href: "/#features" },
   { label: "Pricing", href: "/#pricing" },
@@ -28,7 +29,12 @@ export function HeaderClient({ initialStars }: HeaderClientProps) {
             <Logo size={32} />
           </Box>
 
-          <Group gap="xl" style={{ flex: "0 0 auto" }}>
+          <Group
+            component="nav"
+            aria-label="Primary navigation"
+            gap="xl"
+            style={{ flex: "0 0 auto" }}
+          >
             {navLinks.map((link) => (
               <AnchorLink key={link.label} href={link.href} c="var(--mantine-color-default-color)">
                 {link.label}
@@ -76,7 +82,7 @@ export function HeaderClient({ initialStars }: HeaderClientProps) {
         <Drawer.Overlay />
         <Drawer.Content>
           <Drawer.Header>
-            <Drawer.Title />
+            <Drawer.Title>Navigation</Drawer.Title>
             <ActionIcon
               variant="default"
               size="xl"
@@ -88,7 +94,7 @@ export function HeaderClient({ initialStars }: HeaderClientProps) {
             </ActionIcon>
           </Drawer.Header>
           <Drawer.Body>
-            <Flex direction="column" gap="lg">
+            <Flex component="nav" aria-label="Mobile navigation" direction="column" gap="lg">
               {navLinks.map((link) => (
                 <AnchorLink
                   key={link.label}

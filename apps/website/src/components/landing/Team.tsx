@@ -10,6 +10,10 @@ interface TeamMember {
   linkedin: string;
 }
 
+interface TeamProps {
+  title?: string;
+}
+
 const TEAM_MEMBERS: TeamMember[] = [
   {
     name: "Marek",
@@ -62,11 +66,11 @@ function TeamCard({ member }: { member: TeamMember }) {
   );
 }
 
-export function Team() {
+export function Team({ title }: TeamProps) {
   return (
     <Container size="lg" py="xl" mb={"xl"}>
       <Title order={2} ta="center" className="text-3xl! mb-12!">
-        Our team
+        {title ?? "Who will answer your questions?"}
       </Title>
       <Flex justify={"center"} gap={"xl"} wrap={"wrap"}>
         {TEAM_MEMBERS.map((member) => (

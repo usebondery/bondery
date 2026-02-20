@@ -64,7 +64,7 @@ export function Footer() {
         <Flex gap={{ base: "lg" }} mb="xl" wrap="wrap" px="md">
           <Box style={{ minWidth: "200px" }}>
             <LinkGroup
-              title="About app"
+              title="Product"
               links={[
                 { key: "features", title: "Features", href: "/#features" },
                 { key: "pricing", title: "Pricing", href: "/#pricing" },
@@ -73,10 +73,17 @@ export function Footer() {
           </Box>
           <Box style={{ minWidth: "200px" }}>
             <LinkGroup
-              title="About us"
+              title="Company"
               links={[
                 { key: "contact", title: "Contact us", href: WEBSITE_ROUTES.CONTACT },
                 { key: "status", title: "Status", href: "/status", target: "_blank" },
+              ]}
+            />
+          </Box>
+          <Box style={{ minWidth: "200px" }}>
+            <LinkGroup
+              title="Legal"
+              links={[
                 { key: "privacy", title: "Privacy Policy", href: WEBSITE_ROUTES.PRIVACY },
                 { key: "terms", title: "Terms of Service", href: WEBSITE_ROUTES.TERMS },
               ]}

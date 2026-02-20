@@ -1,5 +1,9 @@
 import { Box, Container, Grid, GridCol, Image, Stack, Text, Title } from "@mantine/core";
 import NextImage from "next/image";
+import { PrivacyCodeAnimation } from "./PrivacyCodeAnimation";
+import { PersonEncryptionAnimation } from "./PersonEncryptionAnimation";
+import { SyncedConnectionsAnimation } from "./SyncedConnectionsAnimation";
+import { TimelineAnimation } from "./TimelineAnimation";
 
 type FeatureSectionProps = {
   title: string;
@@ -37,10 +41,12 @@ const FeatureSection = ({
   const image = (
     <Box
       style={{
+        width: "100%",
         height: "100%",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
+        paddingTop: "var(--mantine-spacing-md)",
       }}
     >
       {imagePlaceholder}
@@ -53,11 +59,12 @@ const FeatureSection = ({
         minHeight: "100vh",
         display: "flex",
         alignItems: "center",
+        overflowX: "clip",
         backgroundColor: "light-dark(var(--mantine-color-gray-0), var(--mantine-color-dark-8))",
       }}
     >
-      <Container size="xl" py="xl">
-        <Grid gutter="calc(var(--mantine-spacing-xl) * 3)" align="center">
+      <Container size="xl" py={{ base: "xl", md: "calc(var(--mantine-spacing-xl) * 2)" }}>
+        <Grid gutter={{ base: "xl", md: "calc(var(--mantine-spacing-xl) * 3)" }} align="center">
           {imagePosition === "left" ? (
             <>
               <GridCol span={{ base: 12, md: 6 }} order={{ base: 2, md: 1 }}>
@@ -96,65 +103,31 @@ export function Features() {
   return (
     <Box id="features">
       <FeatureSection
-        title="Effortlessly sync your connections"
-        description="Stop keeping all the information in your brain. Or manually typing them into phone notes. Bondery connects to LinkedIn and other sources to automatically keep your contacts up-to-date. Have more time for your relationships."
+        title="Designed for human connections, not sales leads"
+        description="Your personal connections deserve better than a sales bloated CRM. Bondery is built specifically for maintaining authentic relationships. Simple, intuitive interface with no complicated pipelines or sales jargon."
         imagePosition="right"
-        imagePlaceholder={
-          <Image
-            component={NextImage}
-            src="/images/hero/integrations.png"
-            alt="Integrations overview"
-            width={1200}
-            height={900}
-            sizes="(max-width: 768px) 100vw, 500px"
-            radius={"lg"}
-            style={{
-              width: "100%",
-              maxWidth: 500,
-              height: "auto",
-              aspectRatio: "4/3",
-              objectFit: "contain",
-            }}
-          />
-        }
+        imagePlaceholder={<PersonEncryptionAnimation />}
       />
 
       <FeatureSection
-        title="Designed for human connections, not sales leads"
-        description="Your personal connections deserve better than a sales bloated CRM. Bondery is built specifically for maintaining authentic relationships. Simple, intuitive interface with no complicated pipelines or sales jargon. Just you and your network, connected."
+        title="The contact hub that updates itself"
+        description="Stop juggling notes, apps, and memory. Bondery is the one place to store and manage your contacts across your entire workflow. It automatically fetches updates from LinkedIn and other sources, so you can stop maintaining data by hand. Open it on web, use it on mobile, or plug it into your custom app via API."
         imagePosition="left"
-        imagePlaceholder={<ImagePlaceholder color="pink" />}
+        imagePlaceholder={<SyncedConnectionsAnimation />}
       />
 
       <FeatureSection
         title="Never forget what matters"
-        description="When was the last time you forgot something important about a person? With Bondery all the important details about the people in your life and get reminded about them. From birthdays and anniversaries to how you met, education history, work details, family info, gift ideas, and anything else you don't want to forget. Your memory, on steroids."
+        description="When was the last time you forgot something important about a person? With Bondery, keep all the details in one place and get reminded when it matters. From birthdays and gift ideas to how you met and family info. Your memory, on steroids."
         imagePosition="right"
-        imagePlaceholder={
-          <Image
-            component={NextImage}
-            src="/images/hero/details.png"
-            alt="Contact detail view with reminders and personal notes"
-            width={1200}
-            height={900}
-            sizes="(max-width: 768px) 100vw, 500px"
-            radius={"lg"}
-            style={{
-              width: "100%",
-              maxWidth: 500,
-              height: "auto",
-              aspectRatio: "4/3",
-              objectFit: "contain",
-            }}
-          />
-        }
+        imagePlaceholder={<TimelineAnimation />}
       />
 
       <FeatureSection
         title="Open-source and privacy-first"
         description="Your contacts are precious and should not be shared for profit. Bondery is fully open-source and hosted on EU servers, with data that stays in Europe. Self-hosting option coming soon. You own your data, always."
         imagePosition="left"
-        imagePlaceholder={<ImagePlaceholder color="green" />}
+        imagePlaceholder={<PrivacyCodeAnimation />}
       />
     </Box>
   );
