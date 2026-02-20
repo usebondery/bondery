@@ -1,5 +1,3 @@
-"use server";
-
 import { Stack, Text } from "@mantine/core";
 import type {
   Contact,

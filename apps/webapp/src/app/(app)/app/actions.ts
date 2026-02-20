@@ -9,7 +9,7 @@ import { updateTag } from "next/cache";
  * matching revalidation helper so the Next.js Data Cache serves fresh
  * responses on the next render while still caching between mutations.
  */
-export const CACHE_TAGS = {
+const CACHE_TAGS = {
   settings: "settings",
   contacts: "contacts",
   events: "events",
