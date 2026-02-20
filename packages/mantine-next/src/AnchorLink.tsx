@@ -2,7 +2,7 @@
 
 import { Anchor, type AnchorProps } from "@mantine/core";
 import NextLink from "next/link";
-import type { ReactNode } from "react";
+import type { ElementType, ReactNode } from "react";
 
 export type AnchorLinkProps = Omit<AnchorProps, "component" | "href" | "children"> & {
   href: string;
@@ -19,7 +19,7 @@ export type AnchorLinkProps = Omit<AnchorProps, "component" | "href" | "children
  */
 export function AnchorLink({ href, children, ...anchorProps }: AnchorLinkProps) {
   return (
-    <Anchor component={NextLink} href={href} {...anchorProps}>
+    <Anchor component={NextLink as ElementType} href={href} {...anchorProps}>
       {children}
     </Anchor>
   );
