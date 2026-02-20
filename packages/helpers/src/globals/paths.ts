@@ -1,5 +1,6 @@
 export const WEBSITE_ROUTES = {
   HOME: "/",
+  ABOUT: "/about",
   PRIVACY: "/privacy",
   TERMS: "/terms",
   LOGIN: "/login",
@@ -9,10 +10,11 @@ export const WEBSITE_ROUTES = {
 
 export const API_ROUTES = {
   CONTACTS: "/api/contacts",
+  CONTACTS_UPCOMING_REMINDERS: "/api/contacts/important-events/upcoming",
   CONTACTS_IMPORT_LINKEDIN: "/api/contacts/import/linkedin",
   CONTACTS_IMPORT_INSTAGRAM: "/api/contacts/import/instagram",
   GROUPS: "/api/groups",
-  ACTIVITIES: "/api/activities",
+  EVENTS: "/api/events",
   SETTINGS: "/api/settings",
   ACCOUNT: "/api/account",
   ACCOUNT_PERSON: "/api/account/person",
@@ -37,6 +39,7 @@ export const SOCIAL_LINKS = {
 } as const;
 
 export const WEBAPP_ROUTES = {
+  HOME: "/app/home",
   PEOPLE: "/app/people",
   GROUPS: "/app/groups",
   TIMELINE: "/app/timeline",
@@ -46,5 +49,5 @@ export const WEBAPP_ROUTES = {
   FEEDBACK: "/app/feedback",
   LOGIN: "/login",
   APP_GROUP: "/app",
-  DEFAULT_PAGE_AFTER_LOGIN: "/app/people",
+  DEFAULT_PAGE_AFTER_LOGIN: "/app/home",
 };

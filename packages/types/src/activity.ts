@@ -1,9 +1,9 @@
 /**
- * Activity Domain Types
- * Types for activity management
+ * Event Domain Types
+ * Types for event management
  */
 
-export type ActivityType =
+export type EventType =
   | "Call"
   | "Coffee"
   | "Email"
@@ -17,11 +17,11 @@ export type ActivityType =
   | "Competition/Hackathon"
   | "Custom";
 
-export interface Activity {
+export interface Event {
   id: string;
   userId: string;
   title: string | null;
-  type: ActivityType; // Stored as text in DB but typed here
+  type: EventType; // Stored as text in DB but typed here
   description: string | null;
   date: string; // ISO string
   createdAt: string;
@@ -30,7 +30,7 @@ export interface Activity {
   participants?: string[];
 }
 
-export interface CreateActivityInput {
+export interface CreateEventInput {
   title?: string;
   type: string; // Allow string for flexibility
   description?: string;
@@ -38,10 +38,15 @@ export interface CreateActivityInput {
   participantIds: string[];
 }
 
-export interface UpdateActivityInput {
+export interface UpdateEventInput {
   title?: string;
   type?: string;
   description?: string;
   date?: string;
   participantIds?: string[]; // If provided, replaces existing participants
 }
+
+export type ActivityType = EventType;
+export type Activity = Event;
+export type CreateActivityInput = CreateEventInput;
+export type UpdateActivityInput = UpdateEventInput;
