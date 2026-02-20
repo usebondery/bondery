@@ -7,7 +7,7 @@ import {
   Container,
   Font,
 } from "@react-email/components";
-import { primaryColor } from "@bondery/mantine-next";
+import { BRAND_PRIMARY_COLOR } from "@bondery/branding/src";
 import * as React from "react";
 import { BonderyLogotypeBlack } from "@bondery/branding/react/src";
 
@@ -39,7 +39,7 @@ export const EmailWrapper = ({
           theme: {
             extend: {
               colors: {
-                brand: primaryColor,
+                brand: BRAND_PRIMARY_COLOR,
               },
             },
           },
