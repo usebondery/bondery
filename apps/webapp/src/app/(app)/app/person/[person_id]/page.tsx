@@ -33,7 +33,7 @@ async function getPersonData(personId: string) {
     headers,
   });
 
-  const activitiesPromise = fetch(`${API_URL}${API_ROUTES.ACTIVITIES}`, {
+  const eventsPromise = fetch(`${API_URL}${API_ROUTES.EVENTS}`, {
     cache: "no-store",
     headers,
   });
@@ -60,7 +60,7 @@ async function getPersonData(personId: string) {
     contactResponse,
     groupsResponse,
     membershipResponse,
-    activitiesResponse,
+    eventsResponse,
     relationshipsResponse,
     importantEventsResponse,
     contactsResponse,
@@ -68,7 +68,7 @@ async function getPersonData(personId: string) {
     contactPromise,
     groupsPromise,
     membershipPromise,
-    activitiesPromise,
+    eventsPromise,
     relationshipsPromise,
     importantEventsPromise,
     contactsPromise,
@@ -87,9 +87,7 @@ async function getPersonData(personId: string) {
 
   const groupsData = groupsResponse.ok ? await groupsResponse.json() : { groups: [] };
   const personGroupsData = membershipResponse.ok ? await membershipResponse.json() : { groups: [] };
-  const activitiesData = activitiesResponse.ok
-    ? await activitiesResponse.json()
-    : { activities: [] };
+  const eventsData = eventsResponse.ok ? await eventsResponse.json() : { events: [] };
   const relationshipsData = relationshipsResponse.ok
     ? await relationshipsResponse.json()
     : { relationships: [] };
@@ -99,9 +97,8 @@ async function getPersonData(personId: string) {
   const contactsData = contactsResponse.ok ? await contactsResponse.json() : { contacts: [] };
 
   const personActivities =
-    activitiesData.activities?.filter((a: any) =>
-      a.participants?.some((p: any) => p.id === personId),
-    ) || [];
+    eventsData.events?.filter((a: any) => a.participants?.some((p: any) => p.id === personId)) ||
+    [];
 
   // Fetch connected contacts if they exist
   let connectedContacts: Contact[] = [];

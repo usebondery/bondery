@@ -17,6 +17,7 @@ import {
 import { modals } from "@mantine/modals";
 import { notifications } from "@mantine/notifications";
 import { IconUserPlus, IconSearch } from "@tabler/icons-react";
+import { ModalTitle } from "@bondery/mantine-next";
 import { useDebouncedValue } from "@mantine/hooks";
 import type { Contact } from "@bondery/types";
 import { formatContactName } from "@/lib/nameHelpers";
@@ -31,12 +32,7 @@ interface AddContactsToGroupModalProps {
 export function openAddContactsToGroupModal(props: AddContactsToGroupModalProps) {
   modals.open({
     title: (
-      <Group gap="xs">
-        <IconUserPlus size={24} />
-        <Text fw={600} size="lg">
-          Add people to {props.groupLabel}
-        </Text>
-      </Group>
+      <ModalTitle text={`Add people to ${props.groupLabel}`} icon={<IconUserPlus size={24} />} />
     ),
     trapFocus: true,
     size: "md",

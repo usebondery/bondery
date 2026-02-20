@@ -7,8 +7,8 @@
 
 import { modals } from "@mantine/modals";
 import { notifications } from "@mantine/notifications";
-import { Group, Text } from "@mantine/core";
 import { IconPhoto } from "@tabler/icons-react";
+import { ModalTitle } from "@bondery/mantine-next";
 
 export interface PhotoUploadTranslations {
   TitleModal: string;
@@ -57,10 +57,10 @@ export async function openPhotoUploadModal(
     modals.open({
       modalId,
       title: (
-        <Group gap="xs">
-          <IconPhoto size={20} stroke={1.5} />
-          <Text fw={600}>{translations.UpdateProfilePhoto}</Text>
-        </Group>
+        <ModalTitle
+          text={translations.UpdateProfilePhoto}
+          icon={<IconPhoto size={20} stroke={1.5} />}
+        />
       ),
       children: (
         <PhotoConfirmModal
@@ -133,10 +133,7 @@ export async function openPhotoUploadModal(
   modals.open({
     modalId,
     title: (
-      <Group gap="xs">
-        <IconPhoto size={20} stroke={1.5} />
-        <Text fw={600}>{translations.TitleModal}</Text>
-      </Group>
+      <ModalTitle text={translations.TitleModal} icon={<IconPhoto size={20} stroke={1.5} />} />
     ),
     children: (
       <PhotoUploadModal

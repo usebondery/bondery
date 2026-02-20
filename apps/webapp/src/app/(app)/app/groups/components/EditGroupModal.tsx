@@ -16,6 +16,7 @@ import { useForm } from "@mantine/form";
 import { modals } from "@mantine/modals";
 import { notifications } from "@mantine/notifications";
 import { IconUsersGroup, IconDeviceFloppy } from "@tabler/icons-react";
+import { ModalTitle } from "@bondery/mantine-next";
 import { EmojiPicker } from "@/app/(app)/app/components/EmojiPicker";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import type { GroupWithCount } from "@bondery/types";
@@ -45,14 +46,7 @@ interface EditGroupModalProps {
 
 export function openEditGroupModal(props: EditGroupModalProps) {
   modals.open({
-    title: (
-      <Group gap="xs">
-        <IconUsersGroup size={24} />
-        <Text fw={600} size="lg">
-          Edit group
-        </Text>
-      </Group>
-    ),
+    title: <ModalTitle text="Edit group" icon={<IconUsersGroup size={24} />} />,
     trapFocus: true,
     size: "md",
     children: <EditGroupForm {...props} />,

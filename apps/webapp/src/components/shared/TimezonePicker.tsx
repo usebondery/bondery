@@ -3,6 +3,7 @@
 import { Text, Stack, Combobox, useCombobox, Input, ScrollArea, Group } from "@mantine/core";
 import { IconWorld } from "@tabler/icons-react";
 import { useState, useEffect, forwardRef } from "react";
+import type { ReactNode } from "react";
 import { useTranslations } from "next-intl";
 import {
   getGroupedTimezones,
@@ -75,8 +76,8 @@ interface TimezonePickerProps {
   initialValue?: string;
   onChange?: (value: string) => void;
   onBlur?: (value: string) => void;
-  label?: string;
-  description?: string;
+  label?: ReactNode;
+  description?: ReactNode;
   placeholder?: string;
   loading?: boolean;
   disabled?: boolean;

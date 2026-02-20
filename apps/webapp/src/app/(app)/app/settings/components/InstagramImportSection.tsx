@@ -1,9 +1,10 @@
 "use client";
 
-import { Group, Stack, Text } from "@mantine/core";
+import { Stack } from "@mantine/core";
 import { IconBrandInstagram, IconDownload } from "@tabler/icons-react";
 import { useTranslations } from "next-intl";
 import { modals } from "@mantine/modals";
+import { ModalTitle } from "@bondery/mantine-next";
 import { IntegrationCard } from "@/components/shared/IntegrationCard";
 import { InstagramImportModal } from "@/app/(app)/app/settings/components/InstagramImportModal";
 
@@ -12,12 +13,7 @@ export function InstagramImportSection() {
 
   const openImporter = () => {
     modals.open({
-      title: (
-        <Group gap="xs">
-          <IconDownload size={20} stroke={1.5} />
-          <Text fw={600}>{t("ModalTitle")}</Text>
-        </Group>
-      ),
+      title: <ModalTitle text={t("ModalTitle")} icon={<IconDownload size={20} stroke={1.5} />} />,
       centered: true,
       size: "xl",
       children: <InstagramImportModal t={t} />,

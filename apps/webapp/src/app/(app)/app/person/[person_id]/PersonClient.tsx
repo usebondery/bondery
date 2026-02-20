@@ -52,6 +52,7 @@ import { PersonTimelineSection } from "./components/PersonTimelineSection";
 // import { ContactPGPSection } from "./components/ContactPGPSection";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
+import { ModalTitle } from "@bondery/mantine-next";
 import { PageWrapper } from "@/app/(app)/app/components/PageWrapper";
 import { PageHeader } from "@/app/(app)/app/components/PageHeader";
 
@@ -788,12 +789,11 @@ export default function PersonClient({
   const openDeleteModal = () =>
     modals.openConfirmModal({
       title: (
-        <Group gap="xs">
-          <IconAlertCircle size={24} color="red" />
-          <Text fw={600} size="lg" c={"red"}>
-            Delete {formatContactName(contact)}?
-          </Text>
-        </Group>
+        <ModalTitle
+          text={`Delete ${formatContactName(contact)}?`}
+          icon={<IconAlertCircle size={24} />}
+          isDangerous={true}
+        />
       ),
       children: (
         <Text size="sm">
@@ -862,7 +862,13 @@ export default function PersonClient({
         <PageHeader
           icon={IconUser}
           title="Person's details"
-          backHref={WEBAPP_ROUTES.PEOPLE}
+          backOnClick={() => {
+            if (typeof window !== "undefined" && window.history.length > 1) {
+              router.back();
+              return;
+            }
+            router.push(WEBAPP_ROUTES.PEOPLE);
+          }}
           action={
             <ContactActionMenu contact={contact} personId={personId} onDelete={openDeleteModal} />
           }

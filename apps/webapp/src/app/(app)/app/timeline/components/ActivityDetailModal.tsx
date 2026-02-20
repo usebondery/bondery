@@ -18,7 +18,7 @@ import { useState, useEffect } from "react";
 import { notifications } from "@mantine/notifications";
 import { API_ROUTES, WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import { useRouter } from "next/navigation";
-import { ActionIconLink } from "@bondery/mantine-next";
+import { ActionIconLink, ModalTitle } from "@bondery/mantine-next";
 
 interface ActivityDetailModalProps {
   activity: Activity | null;
@@ -58,7 +58,7 @@ export function ActivityDetailModal({
   const handleSave = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`${API_ROUTES.ACTIVITIES}/${activity.id}`, {
+      const res = await fetch(`${API_ROUTES.EVENTS}/${activity.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -67,12 +67,12 @@ export function ActivityDetailModal({
       });
 
       if (!res.ok) {
-        throw new Error("Failed to update activity");
+        throw new Error("Failed to update event");
       }
 
       notifications.show({
         title: "Success",
-        message: "Activity updated successfully",
+        message: "Event updated successfully",
         color: "green",
       });
 
@@ -81,7 +81,7 @@ export function ActivityDetailModal({
     } catch (error) {
       notifications.show({
         title: "Error",
-        message: "Failed to update activity",
+        message: "Failed to update event",
         color: "red",
       });
     } finally {
@@ -90,21 +90,21 @@ export function ActivityDetailModal({
   };
 
   const handleDelete = async () => {
-    if (!confirm("Are you sure you want to delete this activity?")) return;
+    if (!confirm("Are you sure you want to delete this event?")) return;
 
     setLoading(true);
     try {
-      const res = await fetch(`${API_ROUTES.ACTIVITIES}/${activity.id}`, {
+      const res = await fetch(`${API_ROUTES.EVENTS}/${activity.id}`, {
         method: "DELETE",
       });
 
       if (!res.ok) {
-        throw new Error("Failed to delete activity");
+        throw new Error("Failed to delete event");
       }
 
       notifications.show({
         title: "Success",
-        message: "Activity deleted successfully",
+        message: "Event deleted successfully",
         color: "green",
       });
 
@@ -113,7 +113,7 @@ export function ActivityDetailModal({
     } catch (error) {
       notifications.show({
         title: "Error",
-        message: "Failed to delete activity",
+        message: "Failed to delete event",
         color: "red",
       });
     } finally {
@@ -135,21 +135,14 @@ export function ActivityDetailModal({
         },
       }}
       title={
-        <Group gap="xs">
-          <div className="flex flex-col gap-1">
-            <div className="flex items-center gap-2">
-              <IconCalendar size={24} />
-              <Text fw={600} size="lg">
-                {activity.type}
-              </Text>
-            </div>
-            <Text c="dimmed">
-              {date.toLocaleDateString("en-US", { month: "short", day: "numeric" })}
-              {", "}
-              {date.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}
-            </Text>
-          </div>
-        </Group>
+        <Stack gap={2}>
+          <ModalTitle text={activity.type} icon={<IconCalendar size={24} />} />
+          <Text c="dimmed">
+            {date.toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+            {", "}
+            {date.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}
+          </Text>
+        </Stack>
       }
     >
       <Stack gap="lg">

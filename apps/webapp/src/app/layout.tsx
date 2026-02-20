@@ -5,6 +5,7 @@ import { Notifications } from "@mantine/notifications";
 import { ModalsProvider } from "@mantine/modals";
 import { Lexend } from "next/font/google";
 import { ColorSchemeScript, MantineProvider, mantineHtmlProps } from "@mantine/core";
+import { headers } from "next/headers";
 
 export const metadata: Metadata = {
   title: "Bondery",
@@ -21,10 +22,12 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const nonce = (await headers()).get("x-nonce") ?? undefined;
+
   return (
     <html lang="en" {...mantineHtmlProps} className={lexend.variable}>
       <head>
-        <ColorSchemeScript nonce="8IBTHwOdqNKAWeKl7plt8g==" defaultColorScheme="auto" />
+        <ColorSchemeScript nonce={nonce} defaultColorScheme="auto" />
       </head>
       <body>
         <MantineProvider defaultColorScheme="auto" theme={bonderyTheme}>

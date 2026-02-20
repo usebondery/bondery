@@ -16,6 +16,7 @@ import { useForm } from "@mantine/form";
 import { modals } from "@mantine/modals";
 import { notifications } from "@mantine/notifications";
 import { IconUsersGroup } from "@tabler/icons-react";
+import { ModalTitle } from "@bondery/mantine-next";
 import { EmojiPicker, getRandomEmoji } from "@/app/(app)/app/components/EmojiPicker";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
 
@@ -42,14 +43,7 @@ function getRandomColor(): string {
 
 export function openAddGroupModal() {
   modals.open({
-    title: (
-      <Group gap="xs">
-        <IconUsersGroup size={24} />
-        <Text fw={600} size="lg">
-          Add new group
-        </Text>
-      </Group>
-    ),
+    title: <ModalTitle text="Add new group" icon={<IconUsersGroup size={24} />} />,
     trapFocus: true,
     size: "md",
     children: <AddGroupForm />,

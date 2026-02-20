@@ -17,12 +17,13 @@ import {
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { notifications } from "@mantine/notifications";
-import { IconCheck, IconX } from "@tabler/icons-react";
+import { IconCalendarPlus, IconCheck, IconDeviceFloppy, IconX } from "@tabler/icons-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import type { Contact, Activity } from "@bondery/types";
 import { useTranslations } from "next-intl";
+import { ModalTitle } from "@bondery/mantine-next";
 import { DatePickerWithPresets } from "../../components/timeline/DatePickerWithPresets";
 import { ParticipantAvatarPill } from "../../components/shared/ParticipantAvatarPill";
 import { ACTIVITY_TYPE_OPTIONS } from "@/lib/activityTypes";
@@ -188,7 +189,7 @@ export function NewActivityModal({
       const fallbackTime = activity ? new Date(activity.date) : new Date();
       const normalizedDate = withFallbackTime(dateValue, fallbackTime);
 
-      const endpoint = activity ? `${API_ROUTES.ACTIVITIES}/${activity.id}` : API_ROUTES.ACTIVITIES;
+      const endpoint = activity ? `${API_ROUTES.EVENTS}/${activity.id}` : API_ROUTES.EVENTS;
       const method = activity ? "PATCH" : "POST";
 
       const res = await fetch(endpoint, {
@@ -201,9 +202,9 @@ export function NewActivityModal({
       });
 
       if (!res.ok) {
-        console.error("Failed to create activity:", res.statusText);
+        console.error("Failed to create event:", res.statusText);
         const errorData = await res.json().catch(() => ({}));
-        throw new Error(errorData.error || errorData.message || "Failed to create activity");
+        throw new Error(errorData.error || errorData.message || "Failed to create event");
       }
 
       notifications.show({
@@ -221,7 +222,7 @@ export function NewActivityModal({
       notifications.show({
         title: "Error",
         message:
-          error instanceof Error ? error.message : "Failed to create activity. Please try again.",
+          error instanceof Error ? error.message : "Failed to create event. Please try again.",
         color: "red",
         icon: <IconX size={18} />,
       });
@@ -234,11 +235,7 @@ export function NewActivityModal({
     <Modal
       opened={opened}
       onClose={onClose}
-      title={
-        <Text fw={600} size="lg">
-          {t("WhoAreYouMeeting")}
-        </Text>
-      }
+      title={<ModalTitle text={t("WhoAreYouMeeting")} icon={<IconCalendarPlus size={24} />} />}
       size="lg"
       radius="md"
       padding="lg"
@@ -410,7 +407,13 @@ export function NewActivityModal({
             <Button variant="default" color="gray" onClick={onClose}>
               {t("Cancel")}
             </Button>
-            <Button type="submit" loading={loading}>
+            <Button
+              type="submit"
+              loading={loading}
+              leftSection={
+                isEditMode ? <IconDeviceFloppy size={16} /> : <IconCalendarPlus size={16} />
+              }
+            >
               {isEditMode ? t("SaveChanges") : t("AddActivity")}
             </Button>
           </Group>

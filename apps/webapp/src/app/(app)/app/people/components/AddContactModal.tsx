@@ -7,6 +7,7 @@ import { useForm } from "@mantine/form";
 import { modals } from "@mantine/modals";
 import { notifications } from "@mantine/notifications";
 import { IconInfoCircle, IconUserPlus } from "@tabler/icons-react";
+import { ModalTitle } from "@bondery/mantine-next";
 import { SocialMediaInput, validateSocialMediaInput } from "./SocialMediaInput";
 import { INPUT_MAX_LENGTHS } from "@/lib/config";
 import { getRandomExampleName } from "@/lib/randomNameHelpers";
@@ -14,14 +15,7 @@ import { API_ROUTES, WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 
 export function openAddContactModal() {
   modals.open({
-    title: (
-      <Group gap="xs">
-        <IconUserPlus size={24} />
-        <Text fw={600} size="lg">
-          Add new person
-        </Text>
-      </Group>
-    ),
+    title: <ModalTitle text="Add new person" icon={<IconUserPlus size={24} />} />,
     trapFocus: true,
     children: <AddContactForm />,
   });

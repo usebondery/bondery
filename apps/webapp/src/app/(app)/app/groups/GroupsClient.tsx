@@ -4,7 +4,7 @@ import { useMemo } from "react";
 import { Text, Button, Stack, Group, Paper, SimpleGrid } from "@mantine/core";
 import { modals } from "@mantine/modals";
 import { notifications } from "@mantine/notifications";
-import { IconPlus, IconUsersGroup } from "@tabler/icons-react";
+import { IconTrash, IconUsersGroup, IconUsersPlus } from "@tabler/icons-react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { PageHeader } from "@/app/(app)/app/components/PageHeader";
 import { PageWrapper } from "@/app/(app)/app/components/PageWrapper";
@@ -14,6 +14,7 @@ import { openAddGroupModal } from "./components/AddGroupModal";
 import { openEditGroupModal } from "./components/EditGroupModal";
 import { SortMenu, type SortOption } from "./components/SortMenu";
 import { GroupCard } from "./components/GroupCard";
+import { ModalTitle } from "@bondery/mantine-next";
 
 interface GroupsClientProps {
   initialGroups: GroupWithCount[];
@@ -73,7 +74,7 @@ export function GroupsClient({ initialGroups, totalCount }: GroupsClientProps) {
     if (!group) return;
 
     modals.openConfirmModal({
-      title: "Delete group?",
+      title: <ModalTitle text="Delete group?" icon={<IconTrash size={20} />} isDangerous={true} />,
       children: (
         <Text size="sm">
           Are you sure you want to delete "{group.label}"? This action cannot be undone. The
@@ -133,7 +134,7 @@ export function GroupsClient({ initialGroups, totalCount }: GroupsClientProps) {
           icon={IconUsersGroup}
           title="Groups"
           action={
-            <Button size="md" leftSection={<IconPlus size={16} />} onClick={openAddGroupModal}>
+            <Button size="md" leftSection={<IconUsersPlus size={16} />} onClick={openAddGroupModal}>
               Add new group
             </Button>
           }
