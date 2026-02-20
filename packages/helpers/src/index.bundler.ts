@@ -3,6 +3,8 @@ export {
   API_ROUTES,
   WEBAPP_ROUTES,
   GITHUB_REPO_URL,
+  HELP_DOCS_URL,
+  STATUS_PAGE_URL,
   SUPPORT_EMAIL,
   SOCIAL_LINKS,
 } from "./globals/paths";

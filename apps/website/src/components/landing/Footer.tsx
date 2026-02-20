@@ -8,7 +8,7 @@ import {
 import { AnchorLink } from "@bondery/mantine-next";
 import type { ReactNode } from "react";
 import { Logo } from "@/components/Logo";
-import { SOCIAL_LINKS, WEBSITE_ROUTES } from "@bondery/helpers";
+import { HELP_DOCS_URL, SOCIAL_LINKS, WEBSITE_ROUTES } from "@bondery/helpers";
 
 type LinkItem = {
   key: string;
@@ -68,6 +68,7 @@ export function Footer() {
               links={[
                 { key: "features", title: "Features", href: "/#features" },
                 { key: "pricing", title: "Pricing", href: "/#pricing" },
+                { key: "help-docs", title: "Help Docs", href: HELP_DOCS_URL, target: "_blank" },
               ]}
             />
           </Box>

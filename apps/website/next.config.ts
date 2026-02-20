@@ -1,4 +1,5 @@
 import { WEBAPP_URL } from "@/lib/config";
+import { HELP_DOCS_URL, STATUS_PAGE_URL } from "@bondery/helpers";
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
@@ -27,8 +28,18 @@ const nextConfig: NextConfig = {
     return [
       {
         source: "/status",
-        destination: "https://bondery.openstatus.dev/",
+        destination: STATUS_PAGE_URL,
         permanent: false,
+      },
+      {
+        source: "/help",
+        destination: HELP_DOCS_URL,
+        permanent: true,
+      },
+      {
+        source: "/docs",
+        destination: HELP_DOCS_URL,
+        permanent: true,
       },
       {
         source: "/login",
