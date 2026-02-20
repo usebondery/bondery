@@ -10,7 +10,7 @@ export function DataManagementCard() {
   const t = useTranslations("SettingsPage.DataManagement");
 
   return (
-    <Card withBorder shadow="sm">
+    <Card id="data-management" withBorder shadow="sm">
       <CardSection withBorder inheritPadding py="md">
         <Group gap="xs">
           <IconDatabase size={20} stroke={1.5} />
@@ -27,8 +27,11 @@ export function DataManagementCard() {
       <Divider />
 
       <CardSection inheritPadding py="md">
-        <Text size="sm" fw={500} mb="sm">
+        <Text size="sm" fw={500} mb={4}>
           {t("LinkedInImport.SectionTitle")}
+        </Text>
+        <Text size="xs" c="dimmed" mb="md">
+          {t("ImportContactsDescription")}
         </Text>
         <Group align="flex-start" gap="md" wrap="wrap">
           <LinkedInImportSection />

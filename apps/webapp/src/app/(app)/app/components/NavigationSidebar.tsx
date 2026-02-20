@@ -1,7 +1,14 @@
 "use client";
 
 import { Group, Text, Stack, Box } from "@mantine/core";
-import { IconSettings, IconUsers, IconUsersGroup, IconMessageCircle, IconTimeline } from "@tabler/icons-react";
+import {
+  IconHome,
+  IconSettings,
+  IconUsers,
+  IconUsersGroup,
+  IconMessageCircle,
+  IconTimelineEventText,
+} from "@tabler/icons-react";
 import { usePathname } from "next/navigation";
 import { NavLinkItem } from "./NavLinkItem";
 import { UserAvatar } from "@/app/(app)/app/components/UserAvatar";
@@ -14,9 +21,10 @@ interface NavigationSidebarContentProps {
 }
 
 const primaryLinks = [
+  { href: WEBAPP_ROUTES.HOME, label: "Home", icon: IconHome },
+  { href: WEBAPP_ROUTES.TIMELINE, label: "Timeline", icon: IconTimelineEventText },
   { href: WEBAPP_ROUTES.PEOPLE, label: "People", icon: IconUsers },
   { href: WEBAPP_ROUTES.GROUPS, label: "Groups", icon: IconUsersGroup },
-  { href: WEBAPP_ROUTES.TIMELINE, label: "Timeline", icon: IconTimeline },
 ];
 
 const secondaryLinks = [
@@ -39,14 +47,14 @@ export function NavigationSidebarContent({ userName, avatarUrl }: NavigationSide
       </Group>
 
       <Stack gap="xs">
-        {primaryLinks.map((link) => (
-          <NavLinkItem key={link.href} {...link} active={pathname === link.href} />
+        {primaryLinks.map((link, index) => (
+          <NavLinkItem key={`${link.href}-${index}`} {...link} active={pathname === link.href} />
         ))}
       </Stack>
 
       <Stack gap="xs" mt="auto">
-        {secondaryLinks.map((link) => (
-          <NavLinkItem key={link.href} {...link} active={pathname === link.href} />
+        {secondaryLinks.map((link, index) => (
+          <NavLinkItem key={`${link.href}-${index}`} {...link} active={pathname === link.href} />
         ))}
       </Stack>
 

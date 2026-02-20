@@ -4,11 +4,13 @@ import { Stack, Text } from "@mantine/core";
 import { TimePicker } from "@mantine/dates";
 import { notifications } from "@mantine/notifications";
 import { useState } from "react";
+import type { ReactNode } from "react";
 import { useTranslations } from "next-intl";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
 
 interface ReminderTimePickerProps {
   initialTime: string;
+  label?: ReactNode;
   description?: string;
 }
 
@@ -67,7 +69,7 @@ function toInputTime(value: string): string {
   return `${hourPart}:${minutePart}`;
 }
 
-export function ReminderTimePicker({ initialTime, description }: ReminderTimePickerProps) {
+export function ReminderTimePicker({ initialTime, label, description }: ReminderTimePickerProps) {
   const t = useTranslations("SettingsPage.Preferences");
   const initialHourValue = roundToHourValue(toInputTime(initialTime));
   const [value, setValue] = useState(initialHourValue);
@@ -149,7 +151,7 @@ export function ReminderTimePicker({ initialTime, description }: ReminderTimePic
   return (
     <Stack gap={4}>
       <Text size="sm" fw={500}>
-        {t("ReminderTime")}
+        {label ?? t("ReminderTime")}
       </Text>
       {description && (
         <Text size="xs" c="dimmed">

@@ -2,10 +2,24 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 
-export async function updateSession(request: NextRequest) {
-  let supabaseResponse = NextResponse.next({
-    request,
-  });
+/**
+ * Synchronizes Supabase auth cookies for the current request and applies route-based redirects.
+ *
+ * @param request - Incoming Next.js request used for auth checks and route evaluation.
+ * @param requestHeaders - Optional request headers forwarded to NextResponse.next for middleware context.
+ * @returns A NextResponse that preserves Supabase session cookies.
+ */
+export async function updateSession(request: NextRequest, requestHeaders?: Headers) {
+  const buildNextResponse = () =>
+    NextResponse.next({
+      request: requestHeaders
+        ? {
+            headers: requestHeaders,
+          }
+        : request,
+    });
+
+  let supabaseResponse = buildNextResponse();
 
   // With Fluid compute, don't put this client in a global environment
   // variable. Always create a new one on each request.
@@ -19,9 +33,7 @@ export async function updateSession(request: NextRequest) {
         },
         setAll(cookiesToSet) {
           cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
-          supabaseResponse = NextResponse.next({
-            request,
-          });
+          supabaseResponse = buildNextResponse();
           cookiesToSet.forEach(({ name, value, options }) =>
             supabaseResponse.cookies.set(name, value, options),
           );
@@ -54,7 +66,7 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  // 3. Redirect /app to /app/relationships
+  // 3. Redirect /app to the default app page
   if (user && request.nextUrl.pathname === WEBAPP_ROUTES.APP_GROUP) {
     const url = request.nextUrl.clone();
     url.pathname = WEBAPP_ROUTES.DEFAULT_PAGE_AFTER_LOGIN;

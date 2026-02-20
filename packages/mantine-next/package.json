@@ -27,6 +27,9 @@
       "require": "./src/styles.css"
     }
   },
+  "dependencies": {
+    "@bondery/branding": "*"
+  },
   "peerDependencies": {
     "@mantine/core": "^8.3.11",
     "next": "^16.0.0",

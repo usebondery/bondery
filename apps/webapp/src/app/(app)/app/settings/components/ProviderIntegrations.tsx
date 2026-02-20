@@ -13,6 +13,7 @@ import { detectBonderyChromeExtension } from "@/lib/extension/detectBonderyChrom
 import { IntegrationCard } from "./IntegrationCard";
 import { modals } from "@mantine/modals";
 import { createBrowswerSupabaseClient } from "@/lib/supabase/client";
+import { ModalTitle } from "@bondery/mantine-next";
 
 interface UserIdentity {
   id: string;
@@ -99,10 +100,7 @@ export function ProviderIntegrations({
 
     modals.openConfirmModal({
       title: (
-        <Group gap="xs">
-          <IconUnlink size={20} stroke={1.5} />
-          <Text>{t("UnlinkAccountTitle")}</Text>
-        </Group>
+        <ModalTitle text={t("UnlinkAccountTitle")} icon={<IconUnlink size={20} stroke={1.5} />} />
       ),
       children: (
         <Text size="sm">
@@ -156,10 +154,15 @@ export function ProviderIntegrations({
   };
 
   return (
-    <Stack gap="sm">
-      <Text size="sm" fw={500}>
-        {t("ConnectedAccounts")}
-      </Text>
+    <Stack gap="md">
+      <div>
+        <Text size="sm" fw={500} mb={4}>
+          {t("ConnectedAccounts")}
+        </Text>
+        <Text size="xs" c="dimmed">
+          {t("ConnectedAccountsDescription")}
+        </Text>
+      </div>
       <Group gap="md">
         {INTEGRATION_PROVIDERS.map(({ provider, providerKey, iconColor }) => {
           const icon = provider === "github" ? IconBrandGithub : IconBrandLinkedin;

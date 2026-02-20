@@ -39,13 +39,13 @@ interface ContactImportantDatesSectionProps {
   onSave: (events: ImportantEvent[]) => void;
 }
 
-type EventTypeOption = {
+export type EventTypeOption = {
   value: string;
   label: string;
   disabled?: boolean;
 };
 
-interface ImportantEventRowCardProps {
+export interface ImportantEventRowCardProps {
   eventType: ImportantEventType | null;
   eventDate: Date | null;
   note: string;
@@ -69,6 +69,7 @@ interface ImportantEventRowCardProps {
   onNotifyChange: (value: string | null) => void;
   onDelete: () => void;
   hideDeleteIcon?: boolean;
+  hideNotifySelect?: boolean;
   leftAction?: React.ReactNode;
 }
 
@@ -157,7 +158,7 @@ function areEventsEqual(first: ImportantEvent[], second: ImportantEvent[]): bool
   });
 }
 
-function ImportantEventRowCard({
+export function ImportantEventRowCard({
   eventType,
   eventDate,
   note,
@@ -181,6 +182,7 @@ function ImportantEventRowCard({
   onNotifyChange,
   onDelete,
   hideDeleteIcon = false,
+  hideNotifySelect = false,
   leftAction,
 }: ImportantEventRowCardProps) {
   return (
@@ -245,15 +247,17 @@ function ImportantEventRowCard({
           rightSection={loading ? <Loader size="xs" /> : null}
         />
 
-        <Select
-          value={notifyDaysBefore ? String(notifyDaysBefore) : "none"}
-          onChange={onNotifyChange}
-          data={notifyOptions}
-          leftSection={<IconBell size={16} />}
-          size="sm"
-          className="max-w-52"
-          disabled={disabled}
-        />
+        {!hideNotifySelect ? (
+          <Select
+            value={notifyDaysBefore ? String(notifyDaysBefore) : "none"}
+            onChange={onNotifyChange}
+            data={notifyOptions}
+            leftSection={<IconBell size={16} />}
+            size="sm"
+            className="max-w-52"
+            disabled={disabled}
+          />
+        ) : null}
 
         {!hideDeleteIcon ? (
           <ActionIcon

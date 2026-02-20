@@ -1,12 +1,11 @@
 "use client";
 
-import { Title, Text, Button, Stack, Group, TextInput, Paper, SimpleGrid } from "@mantine/core";
+import { Title, Text, Button, Stack, Group, TextInput, Paper } from "@mantine/core";
 import {
+  IconAddressBook,
   IconSearch,
-  IconPlus,
-  IconUsers,
-  IconMessageCircle,
   IconUserPlus,
+  IconUsers,
   IconTrash,
   IconPhoto,
   IconUser,
@@ -17,7 +16,6 @@ import {
   IconBrandLinkedin,
 } from "@tabler/icons-react";
 import { notifications } from "@mantine/notifications";
-import { StatsCard } from "./components/StatsCard";
 import { useState, useDeferredValue } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { useDebouncedCallback } from "@mantine/hooks";
@@ -28,32 +26,20 @@ import ContactsTable, {
 } from "@/app/(app)/app/components/ContactsTable";
 import { ColumnVisibilityMenu } from "@/app/(app)/app/components/contacts/ColumnVisibilityMenu";
 import { SortMenu, SortOrder } from "@/app/(app)/app/components/contacts/SortMenu";
-import { API_ROUTES } from "@bondery/helpers/globals/paths";
+import { API_ROUTES, WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import { openAddContactModal } from "./components/AddContactModal";
 import { PageHeader } from "@/app/(app)/app/components/PageHeader";
 import { PageWrapper } from "@/app/(app)/app/components/PageWrapper";
 
 import type { Contact } from "@bondery/types";
 
-interface Stats {
-  totalContacts: number;
-  thisMonthInteractions: number;
-  newContactsThisYear: number;
-}
-
 interface PeopleClientProps {
   initialContacts: Contact[];
   totalCount: number;
-  stats: Stats;
   layout?: "stack" | "container";
 }
 
-export function PeopleClient({
-  initialContacts,
-  totalCount,
-  stats,
-  layout = "stack",
-}: PeopleClientProps) {
+export function PeopleClient({ initialContacts, totalCount, layout = "stack" }: PeopleClientProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -281,36 +267,26 @@ export function PeopleClient({
         <PageHeader
           icon={IconUsers}
           title="People"
-          action={
-            <Button size="md" leftSection={<IconPlus size={16} />} onClick={openAddContactModal}>
+          secondaryAction={
+            <Button
+              variant="outline"
+              size="md"
+              leftSection={<IconAddressBook size={16} />}
+              onClick={() => router.push(`${WEBAPP_ROUTES.SETTINGS}#data-management`)}
+            >
+              Import contacts
+            </Button>
+          }
+          primaryAction={
+            <Button
+              size="md"
+              leftSection={<IconUserPlus size={16} />}
+              onClick={openAddContactModal}
+            >
               Add new person
             </Button>
           }
         />
-
-        <SimpleGrid cols={{ base: 1, sm: 3 }} spacing="md">
-          <StatsCard
-            title="Total Contacts"
-            value={stats.totalContacts}
-            description="People in your network"
-            icon={<IconUsers size={32} stroke={1.5} />}
-            color="blue"
-          />
-          <StatsCard
-            title="This Month's Interactions"
-            value={stats.thisMonthInteractions}
-            description="Contacts you've interacted with"
-            icon={<IconMessageCircle size={32} stroke={1.5} />}
-            color="green"
-          />
-          <StatsCard
-            title="New Contacts This Year"
-            value={stats.newContactsThisYear}
-            description="Added in 2026"
-            icon={<IconUserPlus size={32} stroke={1.5} />}
-            color="violet"
-          />
-        </SimpleGrid>
 
         <Paper withBorder shadow="sm" radius="md" p="md">
           <Stack>

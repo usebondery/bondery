@@ -1,9 +1,9 @@
 "use client";
 
-import { Group, Text } from "@mantine/core";
 import { IconBrandLinkedin, IconDownload } from "@tabler/icons-react";
 import { useTranslations } from "next-intl";
 import { modals } from "@mantine/modals";
+import { ModalTitle } from "@bondery/mantine-next";
 import { IntegrationCard } from "@/components/shared/IntegrationCard";
 import { LinkedInImportModal } from "./LinkedInImportModal";
 
@@ -12,12 +12,7 @@ export function LinkedInImportSection() {
 
   const openImporter = () => {
     modals.open({
-      title: (
-        <Group gap="xs">
-          <IconDownload size={20} stroke={1.5} />
-          <Text fw={600}>{t("ModalTitle")}</Text>
-        </Group>
-      ),
+      title: <ModalTitle text={t("ModalTitle")} icon={<IconDownload size={20} stroke={1.5} />} />,
       centered: true,
       size: "xl",
       children: <LinkedInImportModal t={t} />,

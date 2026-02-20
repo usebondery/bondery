@@ -6,6 +6,7 @@ import { modals } from "@mantine/modals";
 import { notifications } from "@mantine/notifications";
 import { useTranslations } from "next-intl";
 import { API_ROUTES, WEBSITE_ROUTES } from "@bondery/helpers/globals/paths";
+import { ModalTitle } from "@bondery/mantine-next";
 import { createBrowswerSupabaseClient } from "@/lib/supabase/client";
 
 export function DeleteAccountSection() {
@@ -14,12 +15,11 @@ export function DeleteAccountSection() {
   const handleDeleteAccount = () => {
     modals.openConfirmModal({
       title: (
-        <Group gap="xs">
-          <IconAlertCircle size={24} color="red" />
-          <Text fw={600} size="lg" c={"red"}>
-            {t("DeleteConfirmTitle")}
-          </Text>
-        </Group>
+        <ModalTitle
+          text={t("DeleteConfirmTitle")}
+          icon={<IconAlertCircle size={24} />}
+          isDangerous={true}
+        />
       ),
       children: (
         <Text size="sm">

@@ -1,5 +1,14 @@
-import { Text, TextInput, Group, Divider, Card, CardSection } from "@mantine/core";
-import { IconMail, IconUserCircle } from "@tabler/icons-react";
+import {
+  ActionIcon,
+  Text,
+  TextInput,
+  Group,
+  Divider,
+  Card,
+  CardSection,
+  Tooltip,
+} from "@mantine/core";
+import { IconHelpCircle, IconMail, IconUserCircle } from "@tabler/icons-react";
 import { useTranslations } from "next-intl";
 import { PhotoUploadButton } from "./PhotoUploadButton";
 import { NameFields } from "./NameFields";
@@ -65,7 +74,18 @@ export function ProfileCard({
 
       <CardSection inheritPadding py="md">
         <TextInput
-          label={t("Email")}
+          label={
+            <Group gap={4} align="center">
+              <Text size="sm" fw={500}>
+                {t("Email")}
+              </Text>
+              <Tooltip label={t("EmailDisabledTooltip")} multiline maw={360}>
+                <ActionIcon variant="subtle" color="gray" size="sm" aria-label="Email information">
+                  <IconHelpCircle size={14} />
+                </ActionIcon>
+              </Tooltip>
+            </Group>
+          }
           placeholder={t("EmailPlaceholder")}
           type="email"
           value={email}

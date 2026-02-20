@@ -4,6 +4,8 @@ import { Avatar, Badge, Combobox, Group, Text, UnstyledButton, useCombobox } fro
 import { IconChevronDown } from "@tabler/icons-react";
 import { useMemo, useRef, useState } from "react";
 import type { ContactPreview } from "@bondery/types";
+import Link from "next/link";
+import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 
 function formatPersonName(candidate: ContactPreview): string {
   return `${candidate.firstName}${candidate.lastName ? ` ${candidate.lastName}` : ""}`.trim();
@@ -19,6 +21,8 @@ interface PersonChipProps {
   searchPlaceholder?: string;
   noResultsLabel?: string;
   onSelectPerson?: (personId: string) => void;
+  isClickable?: boolean;
+  href?: string;
 }
 
 export function PersonChip({
@@ -31,6 +35,8 @@ export function PersonChip({
   searchPlaceholder = "Search...",
   noResultsLabel = "No people found",
   onSelectPerson,
+  isClickable = false,
+  href,
 }: PersonChipProps) {
   const getDisplayName = (candidate: ContactPreview | null) => {
     if (!candidate) {
@@ -66,6 +72,7 @@ export function PersonChip({
   }, [people, search]);
 
   const fullName = getDisplayName(person);
+  const resolvedHref = href || (person ? `${WEBAPP_ROUTES.PERSON}/${person.id}` : undefined);
 
   const leftAvatar = person ? (
     <Avatar
@@ -87,7 +94,7 @@ export function PersonChip({
       }
       styles={{
         root: {
-          cursor: isSelectable && !disabled ? "pointer" : "default",
+          cursor: (isSelectable || isClickable) && !disabled ? "pointer" : "default",
           opacity: disabled ? 0.6 : 1,
         },
         label: {
@@ -102,6 +109,10 @@ export function PersonChip({
   );
 
   if (!isSelectable) {
+    if (isClickable && !disabled && resolvedHref) {
+      return <Link href={resolvedHref}>{renderBadge()}</Link>;
+    }
+
     return renderBadge();
   }
 

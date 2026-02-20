@@ -3,6 +3,7 @@
 import { Text, Stack, Combobox, useCombobox, Input, ScrollArea, Group } from "@mantine/core";
 import { IconLanguage } from "@tabler/icons-react";
 import { useState, useEffect } from "react";
+import type { ReactNode } from "react";
 import { useTranslations } from "next-intl";
 import { APP_LANGUAGES_DATA, WORLD_LANGUAGES_DATA, LanguageData } from "@/lib/languages";
 
@@ -11,8 +12,8 @@ interface LanguagePickerProps {
   initialValue?: string;
   onChange?: (value: string) => void;
   onBlur?: (value: string) => void;
-  label?: string;
-  description?: string;
+  label?: ReactNode;
+  description?: ReactNode;
   placeholder?: string;
   languages?: LanguageData[];
   loading?: boolean;

@@ -1,7 +1,7 @@
 "use client";
 
-import { Card, CardSection, Group, Text } from "@mantine/core";
-import { IconAdjustmentsHorizontal } from "@tabler/icons-react";
+import { ActionIcon, Card, CardSection, Group, Text, Tooltip } from "@mantine/core";
+import { IconAdjustmentsHorizontal, IconHelpCircle } from "@tabler/icons-react";
 import { useTranslations } from "next-intl";
 import type { ColorSchemePreference } from "@bondery/types";
 import { notifications } from "@mantine/notifications";
@@ -29,6 +29,19 @@ export function PreferencesCard({
   const t = useTranslations("SettingsPage.Preferences");
   const [timezone, setTimezone] = useState(initialTimezone);
   const [savedTimezone, setSavedTimezone] = useState(initialTimezone);
+
+  const renderFieldLabel = (label: string, tooltip: string) => (
+    <Group component="span" gap={4} align="center" wrap="nowrap">
+      <Text component="span" size="sm" fw={500}>
+        {label}
+      </Text>
+      <Tooltip label={tooltip} multiline maw={320}>
+        <ActionIcon variant="subtle" color="gray" size="sm" aria-label={`${label} information`}>
+          <IconHelpCircle size={14} />
+        </ActionIcon>
+      </Tooltip>
+    </Group>
+  );
 
   const persistTimezone = async (nextTimezone: string) => {
     if (!nextTimezone || nextTimezone === savedTimezone) {
@@ -98,9 +111,8 @@ export function PreferencesCard({
           <div style={{ flex: 1, minWidth: 260 }}>
             <LanguagePicker
               initialValue={initialLanguage}
-              label={t("Language")}
+              label={renderFieldLabel(t("Language"), t("LanguageTooltip"))}
               placeholder={t("LanguageSearch")}
-              description={t("LanguageDescription")}
               languages={APP_LANGUAGES_DATA}
               disabled
             />
@@ -113,9 +125,8 @@ export function PreferencesCard({
               onBlur={(value) => {
                 void persistTimezone(value);
               }}
-              label={t("Timezone")}
+              label={renderFieldLabel(t("Timezone"), t("TimezoneTooltip"))}
               placeholder={t("TimezoneSearch")}
-              description={t("TimezoneDescription")}
             />
           </div>
         </Group>
@@ -124,7 +135,7 @@ export function PreferencesCard({
       <CardSection inheritPadding pb="md">
         <ReminderTimePicker
           initialTime={initialReminderSendHour}
-          description={t("ReminderTimeDescription")}
+          label={renderFieldLabel(t("ReminderTime"), t("ReminderTimeTooltip"))}
         />
       </CardSection>
     </Card>

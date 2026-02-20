@@ -1,7 +1,7 @@
 "use client";
 
 import { Stack, Group, Text, Button } from "@mantine/core";
-import { IconTimeline, IconPlus } from "@tabler/icons-react";
+import { IconTimelineEventText, IconPlus, IconTrash } from "@tabler/icons-react";
 import { useState, useMemo } from "react";
 import type { Activity, Contact } from "@bondery/types";
 import { NewActivityModal } from "../../../timeline/components/NewActivityModal";
@@ -13,6 +13,7 @@ import { notifications } from "@mantine/notifications";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { ActivityCard } from "../../../components/timeline/ActivityCard";
+import { ModalTitle } from "@bondery/mantine-next";
 
 interface PersonTimelineSectionProps {
   activities: Activity[];
@@ -79,18 +80,24 @@ export function PersonTimelineSection({
 
   const handleDelete = (activity: Activity) => {
     modals.openConfirmModal({
-      title: t("DeleteConfirmTitle"),
+      title: (
+        <ModalTitle
+          text={t("DeleteConfirmTitle")}
+          icon={<IconTrash size={20} />}
+          isDangerous={true}
+        />
+      ),
       children: <Text size="sm">{t("DeleteConfirmMessage")}</Text>,
       labels: { confirm: t("DeleteAction"), cancel: t("Cancel") },
       confirmProps: { color: "red" },
       onConfirm: async () => {
         try {
-          const response = await fetch(`${API_ROUTES.ACTIVITIES}/${activity.id}`, {
+          const response = await fetch(`${API_ROUTES.EVENTS}/${activity.id}`, {
             method: "DELETE",
           });
 
           if (!response.ok) {
-            throw new Error("Failed to delete activity");
+            throw new Error("Failed to delete event");
           }
 
           notifications.show({
@@ -121,7 +128,7 @@ export function PersonTimelineSection({
       <Stack gap="md">
         <Group justify="space-between" align="center">
           <Group gap="xs">
-            <IconTimeline size={16} />
+            <IconTimelineEventText size={16} />
             <Text fw={600} size="sm">
               Timeline
             </Text>

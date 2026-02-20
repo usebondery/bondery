@@ -1,7 +1,7 @@
 "use client";
 
 import { Button, Stack, Group, Text, Paper, TextInput } from "@mantine/core";
-import { IconPlus, IconSearch, IconTimeline } from "@tabler/icons-react";
+import { IconCalendarPlus, IconSearch, IconTimelineEventText } from "@tabler/icons-react";
 import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { PageWrapper } from "@/app/(app)/app/components/PageWrapper";
@@ -13,6 +13,8 @@ import { useTranslations } from "next-intl";
 import { modals } from "@mantine/modals";
 import { notifications } from "@mantine/notifications";
 import { ActivityCard } from "../components/timeline/ActivityCard";
+import { IconTrash } from "@tabler/icons-react";
+import { ModalTitle } from "@bondery/mantine-next";
 
 interface TimelineClientProps {
   initialContacts: Contact[];
@@ -63,18 +65,24 @@ export function TimelineClient({ initialContacts, initialActivities }: TimelineC
 
   const handleDelete = (activity: Activity) => {
     modals.openConfirmModal({
-      title: t("DeleteConfirmTitle"),
+      title: (
+        <ModalTitle
+          text={t("DeleteConfirmTitle")}
+          icon={<IconTrash size={20} />}
+          isDangerous={true}
+        />
+      ),
       children: <Text size="sm">{t("DeleteConfirmMessage")}</Text>,
       labels: { confirm: t("DeleteAction"), cancel: t("Cancel") },
       confirmProps: { color: "red" },
       onConfirm: async () => {
         try {
-          const response = await fetch(`${API_ROUTES.ACTIVITIES}/${activity.id}`, {
+          const response = await fetch(`${API_ROUTES.EVENTS}/${activity.id}`, {
             method: "DELETE",
           });
 
           if (!response.ok) {
-            throw new Error("Failed to delete activity");
+            throw new Error("Failed to delete event");
           }
 
           notifications.show({
@@ -123,11 +131,11 @@ export function TimelineClient({ initialContacts, initialActivities }: TimelineC
       <Stack gap="lg">
         <PageHeader
           title="Timeline"
-          icon={IconTimeline}
+          icon={IconTimelineEventText}
           action={
             <Button
               size="md"
-              leftSection={<IconPlus size={16} />}
+              leftSection={<IconCalendarPlus size={16} />}
               onClick={() => {
                 setEditingActivity(null);
                 setModalOpened(true);
