@@ -56,6 +56,11 @@ export interface ImportantEvent {
   updatedAt: string;
 }
 
+export interface UpcomingReminder {
+  event: ImportantEvent;
+  person: ContactPreview;
+}
+
 /**
  * Geographic position for contact
  */

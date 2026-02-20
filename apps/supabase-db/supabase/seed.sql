@@ -14,10 +14,16 @@ DECLARE
   seed_user_id uuid := '11111111-1111-1111-1111-111111111111';
   person_ada_id uuid := '22222222-2222-2222-2222-222222222222';
   person_grace_id uuid := '33333333-3333-3333-3333-333333333333';
+  person_katherine_id uuid := '12121212-1212-1212-1212-121212121212';
+  person_turing_id uuid := '13131313-1313-1313-1313-131313131313';
   group_family_id uuid := '66666666-6666-6666-6666-666666666666';
   group_work_id uuid := '77777777-7777-7777-7777-777777777777';
+  group_friends_id uuid := '78787878-7878-7878-7878-787878787878';
   activity_coffee_id uuid := '88888888-8888-8888-8888-888888888888';
   activity_meeting_id uuid := '99999999-9999-9999-9999-999999999999';
+  activity_walk_id uuid := '98989898-9898-9898-9898-989898989898';
+  activity_lunch_id uuid := '97979797-9797-9797-9797-979797979797';
+  activity_hackathon_id uuid := '96969696-9696-9696-9696-969696969696';
 BEGIN
   INSERT INTO auth.users (
     instance_id,
@@ -150,6 +156,56 @@ BEGIN
       'Sample seeded contact with rich profile data',
       '2026-01-20T13:30:00+00',
       '2026-02-18T10:05:00+00'
+    ),
+    (
+      person_katherine_id,
+      seed_user_id,
+      'Ms.',
+      'Katherine',
+      NULL,
+      'Johnson',
+      '/avatars/11111111-1111-1111-1111-111111111111/katherine.jpg',
+      '#F59E0B',
+      '2026-02-14T16:20:00+00',
+      ARRAY['nasa', 'apollo-program'],
+      false,
+      '{"company":"NASA","role":"Mathematician"}'::jsonb,
+      'female',
+      'en',
+      'America/New_York',
+      'Kay',
+      '-----BEGIN PGP PUBLIC KEY BLOCK-----\nSEED-KATHERINE\n-----END PGP PUBLIC KEY BLOCK-----',
+      extensions.ST_GeogFromText('POINT(-77.4605 37.5407)'),
+      'Richmond',
+      'Orbital mechanics specialist',
+      'Prefers morning check-ins and concise notes',
+      '2026-01-25T10:10:00+00',
+      '2026-02-18T10:10:00+00'
+    ),
+    (
+      person_turing_id,
+      seed_user_id,
+      NULL,
+      'Alan',
+      'M.',
+      'Turing',
+      '/avatars/11111111-1111-1111-1111-111111111111/alan.jpg',
+      '#14B8A6',
+      '2026-02-16T08:45:00+00',
+      ARRAY['cryptography', 'ai-research'],
+      false,
+      '{"company":"Bletchley Labs","role":"Researcher"}'::jsonb,
+      'male',
+      'en',
+      'Europe/London',
+      'Al',
+      '-----BEGIN PGP PUBLIC KEY BLOCK-----\nSEED-TURING\n-----END PGP PUBLIC KEY BLOCK-----',
+      extensions.ST_GeogFromText('POINT(-1.2577 51.7520)'),
+      'Oxford',
+      'Computing theorist and cryptanalyst',
+      'Interested in AI safety updates',
+      '2026-01-28T09:00:00+00',
+      '2026-02-18T10:20:00+00'
     )
   ON CONFLICT (id) DO UPDATE
   SET
@@ -203,6 +259,15 @@ BEGIN
       '#10B981',
       '2026-01-15T11:05:00+00',
       '2026-02-01T10:00:00+00'
+    ),
+    (
+      group_friends_id,
+      seed_user_id,
+      'Friends',
+      '🧑‍🤝‍🧑',
+      '#6366F1',
+      '2026-01-18T09:10:00+00',
+      '2026-02-01T10:10:00+00'
     )
   ON CONFLICT (id) DO UPDATE
   SET
@@ -234,6 +299,20 @@ BEGIN
       group_work_id,
       seed_user_id,
       '2026-01-16T08:05:00+00'
+    ),
+    (
+      'bcbcbcbc-2323-2323-2323-232323232323',
+      person_katherine_id,
+      group_work_id,
+      seed_user_id,
+      '2026-01-26T08:00:00+00'
+    ),
+    (
+      'cacacaca-2424-2424-2424-242424242424',
+      person_turing_id,
+      group_friends_id,
+      seed_user_id,
+      '2026-01-29T08:15:00+00'
     )
   ON CONFLICT (id) DO UPDATE
   SET
@@ -278,6 +357,30 @@ BEGIN
       1,
       '2026-01-15T11:11:00+00',
       '2026-02-01T11:01:00+00'
+    ),
+    (
+      'cdcdcdcd-2525-2525-2525-252525252525',
+      seed_user_id,
+      person_katherine_id,
+      '+1',
+      '8045550102',
+      'work',
+      true,
+      0,
+      '2026-01-25T10:15:00+00',
+      '2026-02-01T11:11:00+00'
+    ),
+    (
+      'cececece-2626-2626-2626-262626262626',
+      seed_user_id,
+      person_turing_id,
+      '+44',
+      '7900123456',
+      'home',
+      false,
+      0,
+      '2026-01-28T09:05:00+00',
+      '2026-02-01T11:12:00+00'
     )
   ON CONFLICT (id) DO UPDATE
   SET
@@ -324,6 +427,28 @@ BEGIN
       0,
       '2026-01-15T11:13:00+00',
       '2026-02-01T11:03:00+00'
+    ),
+    (
+      'f1f1f1f1-2727-2727-2727-272727272727',
+      seed_user_id,
+      person_katherine_id,
+      'katherine@nasa.example',
+      'work',
+      true,
+      0,
+      '2026-01-25T10:18:00+00',
+      '2026-02-01T11:13:00+00'
+    ),
+    (
+      'f2f2f2f2-2828-2828-2828-282828282828',
+      seed_user_id,
+      person_turing_id,
+      'alan@bletchley.example',
+      'work',
+      true,
+      0,
+      '2026-01-28T09:08:00+00',
+      '2026-02-01T11:14:00+00'
     )
   ON CONFLICT (id) DO UPDATE
   SET
@@ -366,6 +491,26 @@ BEGIN
       '2026-01-11T09:00:00+00',
       '2026-01-15T11:15:00+00',
       '2026-02-01T11:05:00+00'
+    ),
+    (
+      '21212121-8989-8989-8989-898989898989',
+      seed_user_id,
+      person_katherine_id,
+      'linkedin',
+      'katherine-johnson',
+      '2026-01-25T10:20:00+00',
+      '2026-01-25T10:20:00+00',
+      '2026-02-01T11:15:00+00'
+    ),
+    (
+      '22222222-9090-9090-9090-909090909090',
+      seed_user_id,
+      person_turing_id,
+      'website',
+      'https://turing.example',
+      '2026-01-28T09:10:00+00',
+      '2026-01-28T09:10:00+00',
+      '2026-02-01T11:16:00+00'
     )
   ON CONFLICT (id) DO UPDATE
   SET
@@ -395,6 +540,24 @@ BEGIN
       'colleague',
       '2026-01-17T12:00:00+00',
       '2026-02-01T11:06:00+00'
+    ),
+    (
+      '31313131-9191-9191-9191-919191919191',
+      seed_user_id,
+      person_katherine_id,
+      person_grace_id,
+      'colleague',
+      '2026-01-27T12:00:00+00',
+      '2026-02-01T11:17:00+00'
+    ),
+    (
+      '32323232-9292-9292-9292-929292929292',
+      seed_user_id,
+      person_turing_id,
+      person_ada_id,
+      'friend',
+      '2026-01-30T12:00:00+00',
+      '2026-02-01T11:18:00+00'
     )
   ON CONFLICT (id) DO UPDATE
   SET
@@ -438,6 +601,28 @@ BEGIN
       'Plan dinner',
       '2026-01-20T08:05:00+00',
       '2026-02-01T11:08:00+00'
+    ),
+    (
+      '56565656-5656-5656-5656-565656565656',
+      seed_user_id,
+      person_katherine_id,
+      'graduation',
+      DATE '2026-03-03',
+      7,
+      'Send congratulations card',
+      '2026-01-25T08:00:00+00',
+      '2026-02-01T11:19:00+00'
+    ),
+    (
+      '57575757-5757-5757-5757-575757575757',
+      seed_user_id,
+      person_turing_id,
+      'birthday',
+      DATE '1912-06-23',
+      1,
+      'Book lunch reservation',
+      '2026-01-28T08:00:00+00',
+      '2026-02-01T11:20:00+00'
     )
   ON CONFLICT (id) DO UPDATE
   SET
@@ -450,7 +635,7 @@ BEGIN
     created_at = EXCLUDED.created_at,
     updated_at = EXCLUDED.updated_at;
 
-  INSERT INTO public.activities (
+  INSERT INTO public.events (
     id,
     user_id,
     type,
@@ -480,6 +665,36 @@ BEGIN
       '2026-02-07T15:00:00+00',
       '2026-02-07T15:30:00+00',
       '2026-02-07T15:30:00+00'
+    ),
+    (
+      activity_walk_id,
+      seed_user_id,
+      'Other',
+      'Weekend walk',
+      'Quick catch-up during city walk and discussed travel plans',
+      '2026-02-10T10:00:00+00',
+      '2026-02-10T10:30:00+00',
+      '2026-02-10T10:30:00+00'
+    ),
+    (
+      activity_lunch_id,
+      seed_user_id,
+      'Meal',
+      'Working lunch',
+      'Aligned on upcoming roadmap and next networking event attendance',
+      '2026-02-12T12:30:00+00',
+      '2026-02-12T13:30:00+00',
+      '2026-02-12T13:30:00+00'
+    ),
+    (
+      activity_hackathon_id,
+      seed_user_id,
+      'Competition/Hackathon',
+      'Prototype hackathon',
+      'Built reminder digest prototype and reviewed follow-up actions',
+      '2026-02-15T09:00:00+00',
+      '2026-02-15T18:00:00+00',
+      '2026-02-15T18:00:00+00'
     )
   ON CONFLICT (id) DO UPDATE
   SET
@@ -491,8 +706,8 @@ BEGIN
     created_at = EXCLUDED.created_at,
     updated_at = EXCLUDED.updated_at;
 
-  INSERT INTO public.activity_participants (
-    activity_id,
+  INSERT INTO public.event_participants (
+    event_id,
     person_id,
     created_at
   )
@@ -506,8 +721,33 @@ BEGIN
       activity_meeting_id,
       person_grace_id,
       '2026-02-07T15:35:00+00'
+    ),
+    (
+      activity_walk_id,
+      person_turing_id,
+      '2026-02-10T10:32:00+00'
+    ),
+    (
+      activity_lunch_id,
+      person_katherine_id,
+      '2026-02-12T13:35:00+00'
+    ),
+    (
+      activity_lunch_id,
+      person_grace_id,
+      '2026-02-12T13:36:00+00'
+    ),
+    (
+      activity_hackathon_id,
+      person_ada_id,
+      '2026-02-15T18:05:00+00'
+    ),
+    (
+      activity_hackathon_id,
+      person_turing_id,
+      '2026-02-15T18:06:00+00'
     )
-  ON CONFLICT (activity_id, person_id) DO UPDATE
+  ON CONFLICT (event_id, person_id) DO UPDATE
   SET
     created_at = EXCLUDED.created_at;
 

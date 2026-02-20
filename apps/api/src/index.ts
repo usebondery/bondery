@@ -18,7 +18,7 @@ import { redirectRoutes } from "./routes/redirect.js";
 import { feedbackRoutes } from "./routes/feedback.js";
 import { reminderRoutes } from "./routes/reminders.js";
 import { groupRoutes } from "./routes/groups.js";
-import { activityRoutes } from "./routes/activities.js";
+import { eventRoutes } from "./routes/events.js";
 import { linkedInImportRoutes } from "./routes/linkedin-import.js";
 import { instagramImportRoutes } from "./routes/instagram-import.js";
 
@@ -215,7 +215,7 @@ async function buildServer() {
   await fastify.register(redirectRoutes, { prefix: API_ROUTES.REDIRECT });
   await fastify.register(feedbackRoutes, { prefix: API_ROUTES.FEEDBACK });
   await fastify.register(reminderRoutes, { prefix: API_ROUTES.REMINDERS });
-  await fastify.register(activityRoutes, { prefix: API_ROUTES.ACTIVITIES });
+  await fastify.register(eventRoutes, { prefix: API_ROUTES.EVENTS });
 
   return fastify;
 }

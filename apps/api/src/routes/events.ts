@@ -1,15 +1,15 @@
 /**
- * Activities API Routes
- * Handles CRUD operations for activities
+ * Events API Routes
+ * Handles CRUD operations for events
  */
 
 import type { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
 import { requireAuth } from "../lib/supabase.js";
-import type { CreateActivityInput, UpdateActivityInput } from "@bondery/types";
+import type { CreateEventInput, UpdateEventInput } from "@bondery/types";
 
-export async function activityRoutes(fastify: FastifyInstance) {
+export async function eventRoutes(fastify: FastifyInstance) {
   /**
-   * GET /api/activities - List all activities
+   * GET /api/events - List all events
    */
   fastify.get("/", async (request: FastifyRequest, reply: FastifyReply) => {
     const auth = await requireAuth(request, reply);
@@ -17,12 +17,12 @@ export async function activityRoutes(fastify: FastifyInstance) {
 
     const { client } = auth;
 
-    const { data: activities, error } = await client
-      .from("activities")
+    const { data: events, error } = await client
+      .from("events")
       .select(
         `
         *,
-        participants:activity_participants(
+        participants:event_participants(
           person:people(
             id,
             first_name,
@@ -36,38 +36,36 @@ export async function activityRoutes(fastify: FastifyInstance) {
       .order("date", { ascending: false });
 
     if (error) {
-      console.error("Error fetching activities:", error);
+      console.error("Error fetching events:", error);
       return reply.status(500).send({ error: error.message });
     }
 
-    // Transform data to match frontend expectations (flatten participants)
-    const formattedActivities = activities.map((activity: any) => ({
-      ...activity,
-      userId: activity.user_id,
-      createdAt: activity.created_at,
-      updatedAt: activity.updated_at,
-      participants: activity.participants.map((p: any) => p.person),
+    const formattedEvents = events.map((event: any) => ({
+      ...event,
+      userId: event.user_id,
+      createdAt: event.created_at,
+      updatedAt: event.updated_at,
+      participants: event.participants.map((participant: any) => participant.person),
     }));
 
     return {
-      activities: formattedActivities,
-      totalCount: activities.length,
+      events: formattedEvents,
+      totalCount: events.length,
     };
   });
 
   /**
-   * POST /api/activities - Create a new activity
+   * POST /api/events - Create a new event
    */
   fastify.post(
     "/",
-    async (request: FastifyRequest<{ Body: CreateActivityInput }>, reply: FastifyReply) => {
+    async (request: FastifyRequest<{ Body: CreateEventInput }>, reply: FastifyReply) => {
       const auth = await requireAuth(request, reply);
       if (!auth) return;
 
       const { client, user } = auth;
       const body = request.body;
 
-      // Validation
       if (!body.type) {
         return reply.status(400).send({ error: "Type is required" });
       }
@@ -76,9 +74,8 @@ export async function activityRoutes(fastify: FastifyInstance) {
         return reply.status(400).send({ error: "Date is required" });
       }
 
-      // 1. Insert activity
-      const { data: activity, error: activityError } = await client
-        .from("activities")
+      const { data: event, error: eventError } = await client
+        .from("events")
         .insert({
           user_id: user.id,
           title: body.title || null,
@@ -89,42 +86,37 @@ export async function activityRoutes(fastify: FastifyInstance) {
         .select()
         .single();
 
-      if (activityError) {
-        console.error("Error creating activity:", activityError);
-        return reply.status(500).send({ error: activityError.message });
+      if (eventError) {
+        console.error("Error creating event:", eventError);
+        return reply.status(500).send({ error: eventError.message });
       }
 
-      // 2. Insert participants if any
       if (body.participantIds && body.participantIds.length > 0) {
         const participantsData = body.participantIds.map((personId) => ({
-          activity_id: activity.id,
+          event_id: event.id,
           person_id: personId,
         }));
 
         const { error: participantsError } = await client
-          .from("activity_participants")
+          .from("event_participants")
           .insert(participantsData);
 
         if (participantsError) {
           console.error("Error adding participants:", participantsError);
-          // Don't fail the whole request, but log it.
-          // Ideally we might want to transaction this, but supabase-js via HTTP doesn't do transactions easily
-          // without RPC.
         }
 
-        // Also update last_interaction for these contacts
         await client
           .from("people")
           .update({ last_interaction: body.date })
           .in("id", body.participantIds);
       }
 
-      return reply.status(201).send({ id: activity.id });
+      return reply.status(201).send({ id: event.id });
     },
   );
 
   /**
-   * DELETE /api/activities/:id - Delete an activity
+   * DELETE /api/events/:id - Delete an event
    */
   fastify.delete(
     "/:id",
@@ -135,23 +127,23 @@ export async function activityRoutes(fastify: FastifyInstance) {
       const { client } = auth;
       const { id } = request.params;
 
-      const { error } = await client.from("activities").delete().eq("id", id);
+      const { error } = await client.from("events").delete().eq("id", id);
 
       if (error) {
         return reply.status(500).send({ error: error.message });
       }
 
-      return { message: "Activity deleted successfully" };
+      return { message: "Event deleted successfully" };
     },
   );
 
   /**
-   * PATCH /api/activities/:id - Update an activity
+   * PATCH /api/events/:id - Update an event
    */
   fastify.patch(
     "/:id",
     async (
-      request: FastifyRequest<{ Params: { id: string }; Body: UpdateActivityInput }>,
+      request: FastifyRequest<{ Params: { id: string }; Body: UpdateEventInput }>,
       reply: FastifyReply,
     ) => {
       const auth = await requireAuth(request, reply);
@@ -161,14 +153,13 @@ export async function activityRoutes(fastify: FastifyInstance) {
       const { id } = request.params;
       const body = request.body;
 
-      // Update fields
       const updates: any = {};
       if (body.title !== undefined) updates.title = body.title;
       if (body.description !== undefined) updates.description = body.description;
       if (body.type !== undefined) updates.type = body.type;
       if (body.date !== undefined) updates.date = body.date;
 
-      const { error } = await client.from("activities").update(updates).eq("id", id);
+      const { error } = await client.from("events").update(updates).eq("id", id);
 
       if (error) {
         return reply.status(500).send({ error: error.message });
@@ -176,9 +167,9 @@ export async function activityRoutes(fastify: FastifyInstance) {
 
       if (body.participantIds) {
         const { error: deleteParticipantsError } = await client
-          .from("activity_participants")
+          .from("event_participants")
           .delete()
-          .eq("activity_id", id);
+          .eq("event_id", id);
 
         if (deleteParticipantsError) {
           return reply.status(500).send({ error: deleteParticipantsError.message });
@@ -186,12 +177,12 @@ export async function activityRoutes(fastify: FastifyInstance) {
 
         if (body.participantIds.length > 0) {
           const participantsData = body.participantIds.map((personId) => ({
-            activity_id: id,
+            event_id: id,
             person_id: personId,
           }));
 
           const { error: insertParticipantsError } = await client
-            .from("activity_participants")
+            .from("event_participants")
             .insert(participantsData);
 
           if (insertParticipantsError) {
@@ -207,7 +198,7 @@ export async function activityRoutes(fastify: FastifyInstance) {
         }
       }
 
-      return { message: "Activity updated successfully" };
+      return { message: "Event updated successfully" };
     },
   );
 }

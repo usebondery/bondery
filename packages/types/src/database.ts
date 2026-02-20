@@ -28,7 +28,7 @@ export type Database = {
   };
   public: {
     Tables: {
-      activities: {
+      events: {
         Row: {
           created_at: string;
           date: string;
@@ -61,32 +61,32 @@ export type Database = {
         };
         Relationships: [];
       };
-      activity_participants: {
+      event_participants: {
         Row: {
-          activity_id: string;
+          event_id: string;
           created_at: string;
           person_id: string;
         };
         Insert: {
-          activity_id: string;
+          event_id: string;
           created_at?: string;
           person_id: string;
         };
         Update: {
-          activity_id?: string;
+          event_id?: string;
           created_at?: string;
           person_id?: string;
         };
         Relationships: [
           {
-            foreignKeyName: "activity_participants_activity_id_fkey";
-            columns: ["activity_id"];
+            foreignKeyName: "event_participants_event_id_fkey";
+            columns: ["event_id"];
             isOneToOne: false;
-            referencedRelation: "activities";
+            referencedRelation: "events";
             referencedColumns: ["id"];
           },
           {
-            foreignKeyName: "activity_participants_person_id_fkey";
+            foreignKeyName: "event_participants_person_id_fkey";
             columns: ["person_id"];
             isOneToOne: false;
             referencedRelation: "people";

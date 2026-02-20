@@ -26,6 +26,7 @@ import type {
   UpdateContactRelationshipInput,
   RelationshipType,
   ImportantEventType,
+  UpcomingReminder,
   Database,
 } from "@bondery/types";
 
@@ -346,6 +347,60 @@ export async function contactRoutes(fastify: FastifyInstance) {
           newContactsThisYear: newContactsYearCount || 0,
         },
       };
+    },
+  );
+
+  /**
+   * GET /api/contacts/important-events/upcoming - List upcoming reminders with notification configured
+   */
+  fastify.get(
+    "/important-events/upcoming",
+    async (request: FastifyRequest, reply: FastifyReply) => {
+      const auth = await requireAuth(request, reply);
+      if (!auth) return;
+
+      const { client, user } = auth;
+
+      const today = new Date();
+      const startDate = new Date(
+        Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate()),
+      );
+      const endDate = new Date(startDate);
+      endDate.setUTCDate(endDate.getUTCDate() + 14);
+
+      const startDateIso = startDate.toISOString().slice(0, 10);
+      const endDateIso = endDate.toISOString().slice(0, 10);
+
+      const { data: rows, error } = await client
+        .from("people_important_events")
+        .select(
+          `${IMPORTANT_EVENT_SELECT}, person:people!inner(id, first_name, last_name, avatar, avatar_color)`,
+        )
+        .eq("user_id", user.id)
+        .not("notify_days_before", "is", null)
+        .gte("event_date", startDateIso)
+        .lte("event_date", endDateIso)
+        .order("event_date", { ascending: true });
+
+      if (error) {
+        return reply.status(500).send({ error: error.message });
+      }
+
+      const reminders: UpcomingReminder[] = (rows || [])
+        .map((row) => {
+          const person = row.person;
+          if (!person) {
+            return null;
+          }
+
+          return {
+            event: toImportantEvent(row),
+            person: toContactPreview(person),
+          };
+        })
+        .filter((value): value is UpcomingReminder => Boolean(value));
+
+      return { reminders };
     },
   );
 
