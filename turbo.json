@@ -84,7 +84,7 @@
       "env": []
     },
     "@bondery/emails#build": {
-      "dependsOn": ["@bondery/branding#build"],
+      "dependsOn": ["@bondery/branding#build", "@bondery/mantine-next#build"],
       "outputs": ["dist/**"],
       "env": []
     },
