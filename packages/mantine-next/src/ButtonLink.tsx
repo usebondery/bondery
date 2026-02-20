@@ -2,7 +2,7 @@
 
 import { Button, type ButtonProps } from "@mantine/core";
 import Link from "next/link";
-import type { ElementType, ReactNode } from "react";
+import type { ReactNode } from "react";
 
 export type ButtonLinkProps = Omit<ButtonProps, "component" | "href" | "children"> & {
   href: string;
@@ -19,7 +19,8 @@ export type ButtonLinkProps = Omit<ButtonProps, "component" | "href" | "children
  */
 export function ButtonLink({ href, children, target, rel, ...buttonProps }: ButtonLinkProps) {
   return (
-    <Button component={Link as ElementType} href={href} target={target} rel={rel} {...buttonProps}>
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    <Button component={Link as any} href={href} target={target} rel={rel} {...buttonProps}>
       {children}
     </Button>
   );

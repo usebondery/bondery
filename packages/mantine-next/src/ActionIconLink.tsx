@@ -2,7 +2,7 @@
 
 import { ActionIcon, type ActionIconProps } from "@mantine/core";
 import Link from "next/link";
-import type { ElementType, ReactNode } from "react";
+import type { ReactNode } from "react";
 
 export type ActionIconLinkProps = Omit<ActionIconProps, "component" | "href" | "children"> & {
   href?: string;
@@ -36,7 +36,8 @@ export function ActionIconLink({
 
   return (
     <ActionIcon
-      component={Link as ElementType}
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      component={Link as any}
       href={href}
       target={target}
       rel={rel}
