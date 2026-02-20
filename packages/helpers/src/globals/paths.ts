@@ -27,8 +27,10 @@ export const API_ROUTES = {
 export const CHROME_EXTENSION_URL =
   "https://chromewebstore.google.com/detail/lpcmokfekjjejnpobhbkgmjkodfhpmha";
 
-export const GITHUB_REPO_URL = "https://api.github.com/repos/usebondery/bondery";
+export const HELP_DOCS_URL = "https://bondery.gitbook.io";
 
+export const GITHUB_REPO_URL = "https://api.github.com/repos/usebondery/bondery";
+export const STATUS_PAGE_URL = "https://bondery.openstatus.dev/";
 export const SUPPORT_EMAIL = "team@usebondery.com";
 
 export const SOCIAL_LINKS = {
