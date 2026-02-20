@@ -19,6 +19,7 @@ import { IconUsersGroup } from "@tabler/icons-react";
 import { ModalTitle } from "@bondery/mantine-next";
 import { EmojiPicker, getRandomEmoji } from "@/app/(app)/app/components/EmojiPicker";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
+import { revalidateGroups } from "../../actions";
 
 // Predefined color swatches
 const COLOR_SWATCHES = [
@@ -109,6 +110,7 @@ function AddGroupForm() {
       });
 
       modals.closeAll();
+      await revalidateGroups();
       router.refresh();
     } catch (error) {
       notifications.hide(loadingNotification);

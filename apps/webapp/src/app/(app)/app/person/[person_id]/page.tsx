@@ -19,40 +19,40 @@ async function getPersonData(personId: string) {
   const headers = await getAuthHeaders();
 
   const contactPromise = fetch(`${API_URL}${API_ROUTES.CONTACTS}/${personId}`, {
-    cache: "no-store",
+    next: { tags: ["contacts"] },
     headers,
   });
 
   const groupsPromise = fetch(`${API_URL}${API_ROUTES.GROUPS}`, {
-    cache: "no-store",
+    next: { tags: ["groups"] },
     headers,
   });
 
   const membershipPromise = fetch(`${API_URL}${API_ROUTES.CONTACTS}/${personId}/groups`, {
-    cache: "no-store",
+    next: { tags: ["groups", "contacts"] },
     headers,
   });
 
   const eventsPromise = fetch(`${API_URL}${API_ROUTES.EVENTS}`, {
-    cache: "no-store",
+    next: { tags: ["events"] },
     headers,
   });
 
   const relationshipsPromise = fetch(`${API_URL}${API_ROUTES.CONTACTS}/${personId}/relationships`, {
-    cache: "no-store",
+    next: { tags: ["relationships", "contacts"] },
     headers,
   });
 
   const importantEventsPromise = fetch(
     `${API_URL}${API_ROUTES.CONTACTS}/${personId}/important-events`,
     {
-      cache: "no-store",
+      next: { tags: ["important-events", "contacts"] },
       headers,
     },
   );
 
   const contactsPromise = fetch(`${API_URL}${API_ROUTES.CONTACTS}`, {
-    cache: "no-store",
+    next: { tags: ["contacts"] },
     headers,
   });
 
@@ -105,7 +105,7 @@ async function getPersonData(personId: string) {
   if (contact.connections && contact.connections.length > 0) {
     const connectionPromises = contact.connections.map((id: string) =>
       fetch(`${API_URL}${API_ROUTES.CONTACTS}/${id}`, {
-        cache: "no-store",
+        next: { tags: ["contacts"] },
         headers,
       }).then((res) => res.json()),
     );

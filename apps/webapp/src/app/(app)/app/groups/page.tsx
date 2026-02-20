@@ -8,7 +8,7 @@ async function getGroups() {
   try {
     const headers = await getAuthHeaders();
     const res = await fetch(`${API_URL}${API_ROUTES.GROUPS}?previewLimit=3`, {
-      cache: "no-store",
+      next: { tags: ["groups"] },
       headers,
     });
 

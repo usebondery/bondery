@@ -14,7 +14,7 @@ export default async function SettingsPage() {
   const headers = await getAuthHeaders();
 
   const response = await fetch(`${API_URL}${API_ROUTES.SETTINGS}`, {
-    cache: "no-store",
+    next: { tags: ["settings"] },
     headers,
   });
 

@@ -15,7 +15,7 @@ async function getGroupContacts(groupId: string): Promise<GroupContactsResponse>
   try {
     const headers = await getAuthHeaders();
     const res = await fetch(`${API_URL}${API_ROUTES.GROUPS}/${groupId}/contacts`, {
-      cache: "no-store",
+      next: { tags: ["groups", "contacts"] },
       headers,
     });
 

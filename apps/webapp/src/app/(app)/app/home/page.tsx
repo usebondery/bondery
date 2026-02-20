@@ -10,7 +10,7 @@ async function getUpcomingReminders(): Promise<UpcomingReminder[]> {
   try {
     const headers = await getAuthHeaders();
     const response = await fetch(`${API_URL}${API_ROUTES.CONTACTS_UPCOMING_REMINDERS}`, {
-      cache: "no-store",
+      next: { tags: ["reminders", "contacts"] },
       headers,
     });
 

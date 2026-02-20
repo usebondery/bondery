@@ -14,7 +14,7 @@ import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { ActivityCard } from "../../../components/timeline/ActivityCard";
 import { ModalTitle } from "@bondery/mantine-next";
-import { revalidateEvents } from "../../../../actions";
+import { revalidateEvents } from "../../../actions";
 
 interface PersonTimelineSectionProps {
   activities: Activity[];

@@ -331,12 +331,7 @@ export function NewActivityModal({
                       <Combobox.Option value={option.value} key={option.value} active={isSelected}>
                         <Group justify="space-between" wrap="nowrap" px="xs" py={6}>
                           <Group gap="sm" wrap="nowrap">
-                            <Avatar
-                              src={option.avatar}
-                              size="sm"
-                              radius="xl"
-                              color={option.color}
-                            >
+                            <Avatar src={option.avatar} size="sm" radius="xl" color={option.color}>
                               {option.initials}
                             </Avatar>
                             <Text size="sm" fw={isSelected ? 700 : 500}>
