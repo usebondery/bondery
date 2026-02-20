@@ -36,6 +36,7 @@ import {
 } from "@tabler/icons-react";
 import Image from "next/image";
 import { formatContactName } from "@/lib/nameHelpers";
+import { createSocialMediaUrl } from "@/lib/socialMediaHelpers";
 import type { Contact } from "@bondery/types";
 import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import { ActionIconLink, AnchorLink } from "@bondery/mantine-next";
@@ -99,28 +100,28 @@ function ContactSocialIcons({ contact }: { contact: Contact }) {
     },
     {
       icon: <IconBrandLinkedin size={18} />,
-      href: contact.linkedin || undefined,
+      href: contact.linkedin ? createSocialMediaUrl("linkedin", contact.linkedin) : undefined,
       color: "blue",
       label: "LinkedIn",
       disabled: !contact.linkedin,
     },
     {
       icon: <IconBrandInstagram size={18} />,
-      href: contact.instagram || undefined,
+      href: contact.instagram ? createSocialMediaUrl("instagram", contact.instagram) : undefined,
       color: "pink",
       label: "Instagram",
       disabled: !contact.instagram,
     },
     {
       icon: <IconBrandWhatsapp size={18} />,
-      href: contact.whatsapp || undefined,
+      href: contact.whatsapp ? createSocialMediaUrl("whatsapp", contact.whatsapp) : undefined,
       color: "green",
       label: "WhatsApp",
       disabled: !contact.whatsapp,
     },
     {
       icon: <IconBrandFacebook size={18} />,
-      href: contact.facebook || undefined,
+      href: contact.facebook ? createSocialMediaUrl("facebook", contact.facebook) : undefined,
       color: "blue",
       label: "Facebook",
       disabled: !contact.facebook,
