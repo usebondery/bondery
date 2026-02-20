@@ -29,6 +29,7 @@ import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import { formatContactName } from "@/lib/nameHelpers";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import { notifications } from "@mantine/notifications";
+import { revalidateContacts, revalidateGroups } from "../../actions";
 
 interface GroupDetailClientProps {
   groupId: string;
@@ -232,6 +233,7 @@ export function GroupDetailClient({
       });
 
       setSelectedIds(new Set());
+      await revalidateGroups();
       router.refresh();
     } catch (error) {
       console.error("Error removing contacts from group", error);
@@ -271,6 +273,8 @@ export function GroupDetailClient({
       });
 
       setSelectedIds(new Set());
+      await revalidateContacts();
+      await revalidateGroups();
       router.refresh();
     } catch (error) {
       notifications.show({
@@ -313,6 +317,7 @@ export function GroupDetailClient({
         withCloseButton: true,
       });
 
+      await revalidateGroups();
       router.refresh();
     } catch (error) {
       console.error("Error removing contact from group", error);
@@ -362,6 +367,8 @@ export function GroupDetailClient({
         withCloseButton: true,
       });
 
+      await revalidateContacts();
+      await revalidateGroups();
       router.refresh();
     } catch (error) {
       console.error("Error deleting contact", error);

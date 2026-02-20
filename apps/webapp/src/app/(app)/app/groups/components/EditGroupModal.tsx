@@ -20,6 +20,7 @@ import { ModalTitle } from "@bondery/mantine-next";
 import { EmojiPicker } from "@/app/(app)/app/components/EmojiPicker";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import type { GroupWithCount } from "@bondery/types";
+import { revalidateGroups } from "../../actions";
 
 // Predefined color swatches
 const COLOR_SWATCHES = [
@@ -112,6 +113,7 @@ function EditGroupForm({ groupId, initialLabel, initialEmoji, initialColor }: Ed
       });
 
       modals.closeAll();
+      await revalidateGroups();
       router.refresh();
     } catch (error) {
       notifications.hide(loadingNotification);

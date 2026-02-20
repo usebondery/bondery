@@ -12,6 +12,7 @@ import { SocialMediaInput, validateSocialMediaInput } from "./SocialMediaInput";
 import { INPUT_MAX_LENGTHS } from "@/lib/config";
 import { getRandomExampleName } from "@/lib/randomNameHelpers";
 import { API_ROUTES, WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
+import { revalidateContacts } from "../../actions";
 
 export function openAddContactModal() {
   modals.open({
@@ -108,6 +109,7 @@ function AddContactForm() {
       modals.closeAll();
 
       // Redirect to person page
+      await revalidateContacts();
       router.push(`${WEBAPP_ROUTES.PERSON}/${newContactId}`);
     } catch (error) {
       // Hide loading notification

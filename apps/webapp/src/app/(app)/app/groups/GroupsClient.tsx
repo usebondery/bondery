@@ -15,6 +15,7 @@ import { openEditGroupModal } from "./components/EditGroupModal";
 import { SortMenu, type SortOption } from "./components/SortMenu";
 import { GroupCard } from "./components/GroupCard";
 import { ModalTitle } from "@bondery/mantine-next";
+import { revalidateGroups } from "../actions";
 
 interface GroupsClientProps {
   initialGroups: GroupWithCount[];
@@ -110,7 +111,8 @@ export function GroupsClient({ initialGroups, totalCount }: GroupsClientProps) {
           });
 
           // Refresh the page to update the groups list
-          window.location.reload();
+          await revalidateGroups();
+          router.refresh();
         } catch (error) {
           console.error("Error deleting group:", error);
           notifications.update({

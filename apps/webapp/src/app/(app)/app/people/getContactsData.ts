@@ -52,7 +52,7 @@ export async function getContactsData(
   }
 
   const response = await fetch(`${API_URL}${API_ROUTES.CONTACTS}?${params.toString()}`, {
-    cache: "no-store",
+    next: { tags: ["contacts"] },
     headers,
   });
 

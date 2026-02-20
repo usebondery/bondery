@@ -8,6 +8,7 @@ import { useTranslations } from "next-intl";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import { useRouter } from "next/navigation";
 import { INPUT_MAX_LENGTHS } from "@/lib/config";
+import { revalidateSettings } from "../../actions";
 
 interface NameFieldsProps {
   initialName: string;
@@ -83,7 +84,8 @@ export function NameFields({ initialName, initialMiddlename, initialSurname }: N
         color: "green",
       });
 
-      setTimeout(() => {
+      setTimeout(async () => {
+        await revalidateSettings();
         router.refresh();
       }, 500);
     } catch {

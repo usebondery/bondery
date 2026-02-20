@@ -18,12 +18,12 @@ export async function getTimelineData(): Promise<TimelineDataResult> {
     const headers = await getAuthHeaders();
 
     const contactsRes = await fetch(`${API_URL}${API_ROUTES.CONTACTS}`, {
-      cache: "no-store",
+      next: { tags: ["contacts"] },
       headers,
     });
 
     const eventsRes = await fetch(`${API_URL}${API_ROUTES.EVENTS}`, {
-      cache: "no-store",
+      next: { tags: ["events"] },
       headers,
     });
 

@@ -27,7 +27,7 @@ async function getUserSettings() {
     const headers = await getAuthHeaders();
 
     const response = await fetch(`${API_URL}${API_ROUTES.SETTINGS}`, {
-      cache: "no-store",
+      next: { tags: ["settings"] },
       headers,
     });
 
@@ -62,8 +62,6 @@ async function getUserSettings() {
     colorScheme: "auto",
   } satisfies UserSettingsLayoutData;
 }
-
-export const dynamic = "force-dynamic";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createServerSupabaseClient();

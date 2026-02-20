@@ -55,7 +55,7 @@ import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import { ModalTitle } from "@bondery/mantine-next";
 import { PageWrapper } from "@/app/(app)/app/components/PageWrapper";
 import { PageHeader } from "@/app/(app)/app/components/PageHeader";
-import { revalidateContacts } from "../../actions";
+import { revalidateContacts, revalidateRelationships } from "../../actions";
 
 const PersonMap = dynamic(() => import("./components/PersonMap").then((mod) => mod.PersonMap), {
   ssr: false,
@@ -106,6 +106,11 @@ export default function PersonClient({
   const [relationships, setRelationships] =
     useState<ContactRelationshipWithPeople[]>(initialRelationships);
   const [relationshipsSaving, setRelationshipsSaving] = useState(false);
+
+  // Sync relationships state when server data changes (after router.refresh())
+  useEffect(() => {
+    setRelationships(initialRelationships);
+  }, [initialRelationships]);
 
   const hasCoordinates = Number.isFinite(contact?.latitude) && Number.isFinite(contact?.longitude);
 
@@ -580,19 +585,6 @@ export default function PersonClient({
     }
   };
 
-  const fetchRelationships = async () => {
-    const response = await fetch(`${API_ROUTES.CONTACTS}/${personId}/relationships`, {
-      cache: "no-store",
-    });
-
-    if (!response.ok) {
-      throw new Error("Failed to fetch relationships");
-    }
-
-    const data = await response.json();
-    setRelationships(data.relationships || []);
-  };
-
   const handleAddRelationship = async (
     relationshipType: RelationshipType,
     relatedPersonId: string,
@@ -611,7 +603,8 @@ export default function PersonClient({
         throw new Error(payload.error || tRelationships("CreateError"));
       }
 
-      await fetchRelationships();
+      await revalidateRelationships();
+      router.refresh();
 
       notifications.show({
         title: tRelationships("SuccessTitle"),
@@ -650,6 +643,8 @@ export default function PersonClient({
       setRelationships((previous) =>
         previous.filter((relationship) => relationship.id !== relationshipId),
       );
+
+      await revalidateRelationships();
 
       notifications.show({
         title: tRelationships("SuccessTitle"),
@@ -691,7 +686,8 @@ export default function PersonClient({
         throw new Error(payload.error || tRelationships("UpdateError"));
       }
 
-      await fetchRelationships();
+      await revalidateRelationships();
+      router.refresh();
 
       notifications.show({
         title: tRelationships("SuccessTitle"),

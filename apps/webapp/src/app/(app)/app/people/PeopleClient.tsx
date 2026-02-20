@@ -32,6 +32,7 @@ import { PageHeader } from "@/app/(app)/app/components/PageHeader";
 import { PageWrapper } from "@/app/(app)/app/components/PageWrapper";
 
 import type { Contact } from "@bondery/types";
+import { revalidateContacts } from "../actions";
 
 interface PeopleClientProps {
   initialContacts: Contact[];
@@ -220,6 +221,7 @@ export function PeopleClient({ initialContacts, totalCount, layout = "stack" }: 
       setTotalAvailableCount((prev) => Math.max(0, prev - ids.length));
 
       // Refresh the page to show updated data
+      await revalidateContacts();
       router.refresh();
     } catch (error) {
       notifications.show({
