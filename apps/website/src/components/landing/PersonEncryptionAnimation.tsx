@@ -7,7 +7,7 @@ import { motion } from "motion/react";
 export function PersonEncryptionAnimation() {
   return (
     <Card
-      padding={{ base: "md", sm: "xl" }}
+      p="xl"
       radius="lg"
       className="mx-auto w-full max-w-[500px] bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 shadow-xl overflow-hidden relative"
       style={{
