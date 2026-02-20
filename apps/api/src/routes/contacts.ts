@@ -370,9 +370,7 @@ export async function contactRoutes(fastify: FastifyInstance) {
 
       const { data: rows, error } = await client
         .from("people_important_events")
-        .select(
-          `${IMPORTANT_EVENT_SELECT}, person:people!inner(id, first_name, last_name, avatar)`,
-        )
+        .select(`${IMPORTANT_EVENT_SELECT}, person:people!inner(id, first_name, last_name, avatar)`)
         .eq("user_id", user.id)
         .not("notify_days_before", "is", null)
         .gte("event_date", startDateIso)

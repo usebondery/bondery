@@ -162,7 +162,7 @@ export function PersonChip({
                       src={candidate.avatar || undefined}
                       size="sm"
                       radius="xl"
-                        color={getAvatarColorFromName(candidate.firstName, candidate.lastName)}
+                      color={getAvatarColorFromName(candidate.firstName, candidate.lastName)}
                       name={`${candidate.firstName} ${candidate.lastName || ""}`.trim()}
                     />
                     <Text size="sm" fw={500}>
