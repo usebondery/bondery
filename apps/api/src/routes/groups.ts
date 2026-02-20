@@ -39,7 +39,6 @@ const CONTACT_SELECT = `
   place,
   description,
   notes,
-  avatarColor:avatar_color,
   avatar,
   lastInteraction:last_interaction,
   createdAt:created_at,
@@ -119,9 +118,7 @@ export async function groupRoutes(fastify: FastifyInstance) {
         if (previewIds.length > 0) {
           const { data: previewContacts, error: previewError } = await client
             .from("people")
-            .select(
-              `id, firstName:first_name, lastName:last_name, avatar, avatarColor:avatar_color`,
-            )
+            .select(`id, firstName:first_name, lastName:last_name, avatar`)
             .in("id", previewIds)
             .eq("myself", false);
 

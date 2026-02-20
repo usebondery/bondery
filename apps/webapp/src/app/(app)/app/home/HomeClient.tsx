@@ -17,6 +17,7 @@ import { modals } from "@mantine/modals";
 import { notifications } from "@mantine/notifications";
 import { useRouter } from "next/navigation";
 import { ModalTitle } from "@bondery/mantine-next";
+import { revalidateEvents } from "../actions";
 
 interface HomeClientProps {
   stats: {
@@ -88,7 +89,6 @@ export function HomeClient({
           firstName: participant.firstName || participant.first_name || "Unknown",
           lastName: participant.lastName || participant.last_name || null,
           avatar: participant.avatar || null,
-          avatarColor: participant.avatarColor || participant.avatar_color || "blue",
         } as Contact;
       })
       .filter((participant): participant is Contact => Boolean(participant));
@@ -127,6 +127,7 @@ export function HomeClient({
             color: "green",
           });
 
+          await revalidateEvents();
           router.refresh();
         } catch {
           notifications.show({

@@ -1,13 +1,13 @@
 "use client";
 
 import { Avatar, Group, Pill, Text } from "@mantine/core";
+import { getAvatarColorFromName } from "@/lib/avatarColor";
 
 type ParticipantAvatarPillPerson = {
   id: string;
   firstName: string;
   lastName?: string | null;
   avatar?: string | null;
-  avatarColor?: string | null;
 };
 
 interface ParticipantAvatarPillProps {
@@ -35,7 +35,7 @@ export function ParticipantAvatarPill({ person, onRemove }: ParticipantAvatarPil
           src={person.avatar || undefined}
           size={22}
           radius="xl"
-          color={person.avatarColor || "blue"}
+          color={getAvatarColorFromName(person.firstName, person.lastName)}
           name={`${person.firstName}${person.lastName ? ` ${person.lastName}` : ""}`.trim()}
         />
         <Text size="sm" fw={500}>

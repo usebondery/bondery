@@ -41,7 +41,6 @@ export const CONTACT_SELECT = `
   place,
   description,
   notes,
-  avatarColor:avatar_color,
   avatar,
   lastInteraction:last_interaction,
   createdAt:created_at,
@@ -122,14 +121,12 @@ function toContactPreview(person: {
   first_name: string;
   last_name: string | null;
   avatar: string | null;
-  avatar_color: string | null;
 }) {
   return {
     id: person.id,
     firstName: person.first_name,
     lastName: person.last_name,
     avatar: person.avatar,
-    avatarColor: person.avatar_color,
   };
 }
 
@@ -374,7 +371,7 @@ export async function contactRoutes(fastify: FastifyInstance) {
       const { data: rows, error } = await client
         .from("people_important_events")
         .select(
-          `${IMPORTANT_EVENT_SELECT}, person:people!inner(id, first_name, last_name, avatar, avatar_color)`,
+          `${IMPORTANT_EVENT_SELECT}, person:people!inner(id, first_name, last_name, avatar)`,
         )
         .eq("user_id", user.id)
         .not("notify_days_before", "is", null)
@@ -431,7 +428,6 @@ export async function contactRoutes(fastify: FastifyInstance) {
         first_name: body.firstName.trim(),
         last_name: body.lastName.trim(),
         description: "",
-        avatar_color: "blue",
         last_interaction: new Date().toISOString(),
         myself: false,
       };
@@ -617,7 +613,7 @@ export async function contactRoutes(fastify: FastifyInstance) {
 
       const { data: peopleRows, error: peopleError } = await client
         .from("people")
-        .select("id, first_name, last_name, avatar, avatar_color")
+        .select("id, first_name, last_name, avatar")
         .in("id", personIds)
         .eq("user_id", user.id);
 
@@ -1057,7 +1053,6 @@ export async function contactRoutes(fastify: FastifyInstance) {
       if (body.place !== undefined) updates.place = body.place;
       if (body.description !== undefined) updates.description = body.description;
       if (body.notes !== undefined) updates.notes = body.notes;
-      if (body.avatarColor !== undefined) updates.avatar_color = body.avatarColor;
       if (body.avatar !== undefined) updates.avatar = body.avatar;
       if (body.connections !== undefined) updates.connections = body.connections;
       if (body.position !== undefined) updates.position = body.position;

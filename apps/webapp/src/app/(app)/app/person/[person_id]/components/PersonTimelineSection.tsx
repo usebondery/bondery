@@ -14,6 +14,7 @@ import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { ActivityCard } from "../../../components/timeline/ActivityCard";
 import { ModalTitle } from "@bondery/mantine-next";
+import { revalidateEvents } from "../../../../actions";
 
 interface PersonTimelineSectionProps {
   activities: Activity[];
@@ -72,7 +73,6 @@ export function PersonTimelineSection({
           firstName: participant.firstName || participant.first_name || "Unknown",
           lastName: participant.lastName || participant.last_name || null,
           avatar: participant.avatar || null,
-          avatarColor: participant.avatarColor || participant.avatar_color || "blue",
         } as Contact;
       })
       .filter((participant): participant is Contact => Boolean(participant));
@@ -106,6 +106,7 @@ export function PersonTimelineSection({
             color: "green",
           });
 
+          await revalidateEvents();
           router.refresh();
         } catch {
           notifications.show({

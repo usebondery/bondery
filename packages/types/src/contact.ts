@@ -83,7 +83,6 @@ export interface Contact {
   place: string | null;
   description: string | null;
   notes: string | null;
-  avatarColor: string | null;
   avatar: string | null;
   lastInteraction: string | null;
   createdAt: string;
@@ -122,7 +121,6 @@ export interface ContactPreview {
   firstName: string;
   lastName: string | null;
   avatar: string | null;
-  avatarColor: string | null;
 }
 
 /**

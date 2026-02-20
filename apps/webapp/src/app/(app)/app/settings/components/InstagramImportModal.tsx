@@ -17,6 +17,7 @@ import { modals } from "@mantine/modals";
 import type { Contact, InstagramImportStrategy, InstagramPreparedContact } from "@bondery/types";
 import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import ContactsTable from "@/app/(app)/app/components/ContactsTable";
+import { revalidateAll } from "../../actions";
 
 type Step = "instructions" | "upload" | "strategy" | "preview";
 
@@ -117,8 +118,6 @@ function isZipFile(file: File | null): file is File {
 }
 
 function toPreviewContact(contact: InstagramPreparedContact): Contact {
-  const avatarColor = contact.alreadyExists ? "gray" : contact.likelyPerson ? "pink" : "violet";
-
   return {
     id: contact.tempId,
     userId: "",
@@ -129,7 +128,6 @@ function toPreviewContact(contact: InstagramPreparedContact): Contact {
     place: null,
     description: null,
     notes: null,
-    avatarColor,
     avatar: null,
     lastInteraction: null,
     createdAt: new Date().toISOString(),
@@ -405,6 +403,7 @@ export function InstagramImportModal({
       });
 
       modals.closeAll();
+      await revalidateAll();
       router.push(WEBAPP_ROUTES.PEOPLE);
     } catch (error) {
       notifications.show({

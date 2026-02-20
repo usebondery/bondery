@@ -67,7 +67,6 @@ export function GroupCard({ group, onEdit, onDelete, onClick }: GroupCardProps) 
                     firstName: contact.firstName,
                     lastName: contact.lastName,
                     avatar: contact.avatar,
-                    avatarColor: contact.avatarColor,
                   }))}
                   totalCount={group.contactCount}
                   size="md"

@@ -84,7 +84,6 @@ export function ActivityCard({
                     firstName: participant.firstName,
                     lastName: participant.lastName,
                     avatar: participant.avatar,
-                    avatarColor: participant.avatarColor,
                   }))}
                   totalCount={participants.length}
                   variant="preview"

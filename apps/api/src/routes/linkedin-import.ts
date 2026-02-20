@@ -172,7 +172,6 @@ export async function linkedInImportRoutes(fastify: FastifyInstance) {
                 last_name: contact.lastName,
                 title: importedTitle,
                 myself: false,
-                avatar_color: "blue",
                 last_interaction: new Date().toISOString(),
               })
               .select("id")

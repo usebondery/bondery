@@ -17,6 +17,7 @@ import { modals } from "@mantine/modals";
 import type { Contact, LinkedInPreparedContact } from "@bondery/types";
 import { API_ROUTES, WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import ContactsTable from "@/app/(app)/app/components/ContactsTable";
+import { revalidateAll } from "../../actions";
 
 type Step = "instructions" | "upload" | "preview";
 
@@ -81,7 +82,6 @@ function toPreviewContact(contact: LinkedInPreparedContact): Contact {
     place: null,
     description: null,
     notes: null,
-    avatarColor: contact.alreadyExists ? "gray" : "blue",
     avatar: null,
     lastInteraction: null,
     createdAt: new Date().toISOString(),
@@ -297,6 +297,7 @@ export function LinkedInImportModal({
       });
 
       modals.closeAll();
+      await revalidateAll();
       router.push(WEBAPP_ROUTES.PEOPLE);
     } catch (error) {
       notifications.show({

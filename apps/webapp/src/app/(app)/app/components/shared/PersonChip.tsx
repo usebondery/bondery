@@ -6,6 +6,7 @@ import { useMemo, useRef, useState } from "react";
 import type { ContactPreview } from "@bondery/types";
 import Link from "next/link";
 import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
+import { getAvatarColorFromName } from "@/lib/avatarColor";
 
 function formatPersonName(candidate: ContactPreview): string {
   return `${candidate.firstName}${candidate.lastName ? ` ${candidate.lastName}` : ""}`.trim();
@@ -161,7 +162,7 @@ export function PersonChip({
                       src={candidate.avatar || undefined}
                       size="sm"
                       radius="xl"
-                      color={candidate.avatarColor || "blue"}
+                        color={getAvatarColorFromName(candidate.firstName, candidate.lastName)}
                       name={`${candidate.firstName} ${candidate.lastName || ""}`.trim()}
                     />
                     <Text size="sm" fw={500}>

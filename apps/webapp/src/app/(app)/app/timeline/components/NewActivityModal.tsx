@@ -23,11 +23,13 @@ import { useRouter } from "next/navigation";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import type { Contact, Activity } from "@bondery/types";
 import { useTranslations } from "next-intl";
+import { revalidateEvents } from "../../actions";
 import { ModalTitle } from "@bondery/mantine-next";
 import { DatePickerWithPresets } from "../../components/timeline/DatePickerWithPresets";
 import { ParticipantAvatarPill } from "../../components/shared/ParticipantAvatarPill";
 import { ACTIVITY_TYPE_OPTIONS } from "@/lib/activityTypes";
 import { getActivityTypeConfig } from "@/lib/activityTypes";
+import { getAvatarColorFromName } from "@/lib/avatarColor";
 
 interface NewActivityModalProps {
   opened: boolean;
@@ -110,7 +112,7 @@ export function NewActivityModal({
         value: contact.id,
         label: `${contact.firstName} ${contact.lastName || ""}`.trim(),
         avatar: contact.avatar,
-        avatarColor: contact.avatarColor,
+        color: getAvatarColorFromName(contact.firstName, contact.lastName),
         initials: contact.firstName[0],
       })),
     [contacts],
@@ -216,6 +218,7 @@ export function NewActivityModal({
 
       onClose();
       form.reset();
+      await revalidateEvents();
       router.refresh();
     } catch (error) {
       console.error("Error submitting form:", error);
@@ -332,7 +335,7 @@ export function NewActivityModal({
                               src={option.avatar}
                               size="sm"
                               radius="xl"
-                              color={option.avatarColor || "blue"}
+                              color={option.color}
                             >
                               {option.initials}
                             </Avatar>

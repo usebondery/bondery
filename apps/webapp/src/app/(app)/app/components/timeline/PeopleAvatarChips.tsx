@@ -1,13 +1,13 @@
 "use client";
 
 import { Avatar, AvatarGroup, Group, Pill, Text } from "@mantine/core";
+import { getAvatarColorFromName } from "@/lib/avatarColor";
 
 type PersonChip = {
   id: string;
   firstName: string;
   lastName?: string | null;
   avatar?: string | null;
-  avatarColor?: string | null;
 };
 
 interface PeopleAvatarChipsProps {
@@ -53,7 +53,7 @@ export function PeopleAvatarChips({
                 size={22}
                 radius="xl"
                 src={person.avatar || undefined}
-                color={person.avatarColor || "blue"}
+                color={getAvatarColorFromName(person.firstName, person.lastName)}
                 name={`${person.firstName}${person.lastName ? ` ${person.lastName}` : ""}`.trim()}
               />
 
@@ -92,7 +92,7 @@ export function PeopleAvatarChips({
           size={size}
           radius="xl"
           src={person.avatar || undefined}
-          color={person.avatarColor || "blue"}
+          color={getAvatarColorFromName(person.firstName, person.lastName)}
           name={`${person.firstName}${person.lastName ? ` ${person.lastName}` : ""}`.trim()}
         />
       ))}
