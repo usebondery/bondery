@@ -29,11 +29,10 @@ const nextConfig: NextConfig = {
   },
   // API calls go to the Fastify server
   async rewrites() {
-    const apiUrl = API_URL;
     return [
       {
         source: "/api/:path*",
-        destination: `${apiUrl}/api/:path*`,
+        destination: `${API_URL}/api/:path*`,
       },
     ];
   },
