@@ -16,7 +16,12 @@ import { useForm } from "@mantine/form";
 import { modals } from "@mantine/modals";
 import { notifications } from "@mantine/notifications";
 import { IconUsersGroup, IconDeviceFloppy } from "@tabler/icons-react";
-import { ModalTitle } from "@bondery/mantine-next";
+import {
+  errorNotificationTemplate,
+  loadingNotificationTemplate,
+  ModalTitle,
+  successNotificationTemplate,
+} from "@bondery/mantine-next";
 import { EmojiPicker } from "@/app/(app)/app/components/EmojiPicker";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import type { GroupWithCount } from "@bondery/types";
@@ -81,11 +86,10 @@ function EditGroupForm({ groupId, initialLabel, initialEmoji, initialColor }: Ed
     setIsSubmitting(true);
 
     const loadingNotification = notifications.show({
-      title: "Saving...",
-      message: "Please wait while we save the changes",
-      loading: true,
-      autoClose: false,
-      withCloseButton: false,
+      ...loadingNotificationTemplate({
+        title: "Saving...",
+        description: "Please wait while we save the changes",
+      }),
     });
 
     try {
@@ -106,11 +110,12 @@ function EditGroupForm({ groupId, initialLabel, initialEmoji, initialColor }: Ed
 
       notifications.hide(loadingNotification);
 
-      notifications.show({
-        title: "Success",
-        message: "Group updated successfully",
-        color: "green",
-      });
+      notifications.show(
+        successNotificationTemplate({
+          title: "Success",
+          description: "Group updated successfully",
+        }),
+      );
 
       modals.closeAll();
       await revalidateGroups();
@@ -118,11 +123,12 @@ function EditGroupForm({ groupId, initialLabel, initialEmoji, initialColor }: Ed
     } catch (error) {
       notifications.hide(loadingNotification);
 
-      notifications.show({
-        title: "Error",
-        message: error instanceof Error ? error.message : "Failed to update group",
-        color: "red",
-      });
+      notifications.show(
+        errorNotificationTemplate({
+          title: "Error",
+          description: error instanceof Error ? error.message : "Failed to update group",
+        }),
+      );
     } finally {
       setIsSubmitting(false);
     }

@@ -7,7 +7,12 @@ import { useForm } from "@mantine/form";
 import { modals } from "@mantine/modals";
 import { notifications } from "@mantine/notifications";
 import { IconInfoCircle, IconUserPlus } from "@tabler/icons-react";
-import { ModalTitle } from "@bondery/mantine-next";
+import {
+  errorNotificationTemplate,
+  loadingNotificationTemplate,
+  ModalTitle,
+  successNotificationTemplate,
+} from "@bondery/mantine-next";
 import { SocialMediaInput, validateSocialMediaInput } from "./SocialMediaInput";
 import { INPUT_MAX_LENGTHS } from "@/lib/config";
 import { getRandomExampleName } from "@/lib/randomNameHelpers";
@@ -68,11 +73,10 @@ function AddContactForm() {
 
     // Show loading notification
     const loadingNotification = notifications.show({
-      title: "Creating contact...",
-      message: "Please wait while we create the new contact",
-      loading: true,
-      autoClose: false,
-      withCloseButton: false,
+      ...loadingNotificationTemplate({
+        title: "Creating contact...",
+        description: "Please wait while we create the new contact",
+      }),
     });
 
     try {
@@ -99,11 +103,12 @@ function AddContactForm() {
       notifications.hide(loadingNotification);
 
       // Show success notification
-      notifications.show({
-        title: "Success",
-        message: "Contact created successfully",
-        color: "green",
-      });
+      notifications.show(
+        successNotificationTemplate({
+          title: "Success",
+          description: "Contact created successfully",
+        }),
+      );
 
       // Close modal
       modals.closeAll();
@@ -116,12 +121,13 @@ function AddContactForm() {
       notifications.hide(loadingNotification);
 
       // Show error notification
-      notifications.show({
-        title: "Error",
-        message:
-          error instanceof Error ? error.message : "Failed to create contact. Please try again.",
-        color: "red",
-      });
+      notifications.show(
+        errorNotificationTemplate({
+          title: "Error",
+          description:
+            error instanceof Error ? error.message : "Failed to create contact. Please try again.",
+        }),
+      );
 
       setIsSubmitting(false);
     }

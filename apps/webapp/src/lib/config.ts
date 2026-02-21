@@ -7,7 +7,17 @@ import { IMPORTANT_EVENT_TYPE_META } from "@bondery/helpers";
 
 export const WEBAPP_URL = process.env.NEXT_PUBLIC_WEBAPP_URL!;
 export const WEBSITE_URL = process.env.NEXT_PUBLIC_WEBSITE_URL!;
-export const API_URL = process.env.NEXT_PUBLIC_API_URL!;
+
+/**
+ * Normalizes the API base URL to origin-only format.
+ * This prevents accidental `/api/api/...` requests when `NEXT_PUBLIC_API_URL`
+ * is configured with a trailing `/api` segment.
+ */
+function normalizeApiBaseUrl(rawUrl: string): string {
+  return rawUrl.replace(/\/+$/, "").replace(/\/api$/, "");
+}
+
+export const API_URL = normalizeApiBaseUrl(process.env.NEXT_PUBLIC_API_URL!);
 
 export const INPUT_MAX_LENGTHS = {
   firstName: 50,

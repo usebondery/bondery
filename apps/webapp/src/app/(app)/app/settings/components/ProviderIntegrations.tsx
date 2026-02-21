@@ -13,7 +13,12 @@ import { detectBonderyChromeExtension } from "@/lib/extension/detectBonderyChrom
 import { IntegrationCard } from "./IntegrationCard";
 import { modals } from "@mantine/modals";
 import { createBrowswerSupabaseClient } from "@/lib/supabase/client";
-import { ModalTitle } from "@bondery/mantine-next";
+import {
+  errorNotificationTemplate,
+  loadingNotificationTemplate,
+  ModalTitle,
+  successNotificationTemplate,
+} from "@bondery/mantine-next";
 
 interface UserIdentity {
   id: string;
@@ -55,13 +60,12 @@ export function ProviderIntegrations({
 
   const linkProvider = async (provider: "github" | "linkedin") => {
     const loadingNotification = notifications.show({
-      title: tIntegration("LinkingAccount"),
-      message: tIntegration("Connecting", {
-        provider: provider === "github" ? "GitHub" : "LinkedIn",
+      ...loadingNotificationTemplate({
+        title: tIntegration("LinkingAccount"),
+        description: tIntegration("Connecting", {
+          provider: provider === "github" ? "GitHub" : "LinkedIn",
+        }),
       }),
-      loading: true,
-      autoClose: false,
-      withCloseButton: false,
     });
 
     try {
@@ -80,21 +84,24 @@ export function ProviderIntegrations({
       }
     } catch (error) {
       notifications.hide(loadingNotification);
-      notifications.show({
-        title: "Error",
-        message: error instanceof Error ? error.message : tIntegration("LinkError", { provider }),
-        color: "red",
-      });
+      notifications.show(
+        errorNotificationTemplate({
+          title: "Error",
+          description:
+            error instanceof Error ? error.message : tIntegration("LinkError", { provider }),
+        }),
+      );
     }
   };
 
   const handleUnlinkClick = (provider: "github" | "linkedin") => {
     if (providers.length <= 1) {
-      notifications.show({
-        title: tIntegration("CannotUnlink"),
-        message: tIntegration("MustHaveOneMethod"),
-        color: "red",
-      });
+      notifications.show(
+        errorNotificationTemplate({
+          title: tIntegration("CannotUnlink"),
+          description: tIntegration("MustHaveOneMethod"),
+        }),
+      );
       return;
     }
 
@@ -139,17 +146,20 @@ export function ProviderIntegrations({
 
       setProviders((prev) => prev.filter((p) => p !== providerName));
 
-      notifications.show({
-        title: t("UpdateSuccess"),
-        message: tIntegration("UnlinkSuccess", { provider }),
-        color: "green",
-      });
+      notifications.show(
+        successNotificationTemplate({
+          title: t("UpdateSuccess"),
+          description: tIntegration("UnlinkSuccess", { provider }),
+        }),
+      );
     } catch (error) {
-      notifications.show({
-        title: "Error",
-        message: error instanceof Error ? error.message : tIntegration("UnlinkError", { provider }),
-        color: "red",
-      });
+      notifications.show(
+        errorNotificationTemplate({
+          title: "Error",
+          description:
+            error instanceof Error ? error.message : tIntegration("UnlinkError", { provider }),
+        }),
+      );
     }
   };
 

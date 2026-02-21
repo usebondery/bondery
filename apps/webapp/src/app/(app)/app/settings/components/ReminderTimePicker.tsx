@@ -7,6 +7,11 @@ import { useState } from "react";
 import type { ReactNode } from "react";
 import { useTranslations } from "next-intl";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
+import {
+  errorNotificationTemplate,
+  loadingNotificationTemplate,
+  successNotificationTemplate,
+} from "@bondery/mantine-next";
 
 interface ReminderTimePickerProps {
   initialTime: string;
@@ -91,11 +96,12 @@ export function ReminderTimePicker({ initialTime, label, description }: Reminder
     setValue(normalizedInputTime);
 
     if (!apiTime) {
-      notifications.show({
-        title: t("UpdateError"),
-        message: t("InvalidReminderTime"),
-        color: "red",
-      });
+      notifications.show(
+        errorNotificationTemplate({
+          title: t("UpdateError"),
+          description: t("InvalidReminderTime"),
+        }),
+      );
       setValue(savedTime);
       return;
     }
@@ -105,11 +111,10 @@ export function ReminderTimePicker({ initialTime, label, description }: Reminder
     }
 
     const loadingNotification = notifications.show({
-      title: t("UpdatingReminderTime"),
-      message: t("PleaseWait"),
-      loading: true,
-      autoClose: false,
-      withCloseButton: false,
+      ...loadingNotificationTemplate({
+        title: t("UpdatingReminderTime"),
+        description: t("PleaseWait"),
+      }),
     });
 
     try {
@@ -131,20 +136,22 @@ export function ReminderTimePicker({ initialTime, label, description }: Reminder
       setValue(normalizedInputTime);
 
       notifications.hide(loadingNotification);
-      notifications.show({
-        title: t("UpdateSuccess"),
-        message: t("ReminderTimeUpdateSuccess"),
-        color: "green",
-      });
+      notifications.show(
+        successNotificationTemplate({
+          title: t("UpdateSuccess"),
+          description: t("ReminderTimeUpdateSuccess"),
+        }),
+      );
     } catch {
       setValue(savedTime);
 
       notifications.hide(loadingNotification);
-      notifications.show({
-        title: t("UpdateError"),
-        message: t("ReminderTimeUpdateError"),
-        color: "red",
-      });
+      notifications.show(
+        errorNotificationTemplate({
+          title: t("UpdateError"),
+          description: t("ReminderTimeUpdateError"),
+        }),
+      );
     }
   };
 

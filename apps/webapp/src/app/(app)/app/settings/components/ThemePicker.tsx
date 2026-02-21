@@ -8,6 +8,11 @@ import type { ColorSchemePreference } from "@bondery/types";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import { useState } from "react";
 import { useTranslations } from "next-intl";
+import {
+  errorNotificationTemplate,
+  loadingNotificationTemplate,
+  successNotificationTemplate,
+} from "@bondery/mantine-next";
 
 interface ThemePickerProps {
   initialValue: ColorSchemePreference;
@@ -28,11 +33,10 @@ export function ThemePicker({ initialValue }: ThemePickerProps) {
     setColorScheme(nextValue);
 
     const loadingNotification = notifications.show({
-      title: t("UpdatingTheme"),
-      message: t("PleaseWait"),
-      loading: true,
-      autoClose: false,
-      withCloseButton: false,
+      ...loadingNotificationTemplate({
+        title: t("UpdatingTheme"),
+        description: t("PleaseWait"),
+      }),
     });
 
     try {
@@ -51,11 +55,12 @@ export function ThemePicker({ initialValue }: ThemePickerProps) {
       }
 
       notifications.hide(loadingNotification);
-      notifications.show({
-        title: t("UpdateSuccess"),
-        message: t("ThemeUpdateSuccess"),
-        color: "green",
-      });
+      notifications.show(
+        successNotificationTemplate({
+          title: t("UpdateSuccess"),
+          description: t("ThemeUpdateSuccess"),
+        }),
+      );
 
       setTimeout(() => {
         window.location.reload();
@@ -65,11 +70,12 @@ export function ThemePicker({ initialValue }: ThemePickerProps) {
       setColorScheme(previousValue);
 
       notifications.hide(loadingNotification);
-      notifications.show({
-        title: t("UpdateError"),
-        message: t("ThemeUpdateError"),
-        color: "red",
-      });
+      notifications.show(
+        errorNotificationTemplate({
+          title: t("UpdateError"),
+          description: t("ThemeUpdateError"),
+        }),
+      );
     }
   };
 

@@ -3,7 +3,6 @@
 import { Text, Stack, Group, Paper, Button, TextInput } from "@mantine/core";
 import {
   IconUsersGroup,
-  IconPhoto,
   IconUser,
   IconBriefcase,
   IconMapPin,
@@ -29,6 +28,11 @@ import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import { formatContactName } from "@/lib/nameHelpers";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import { notifications } from "@mantine/notifications";
+import {
+  errorNotificationTemplate,
+  loadingNotificationTemplate,
+  successNotificationTemplate,
+} from "@bondery/mantine-next";
 import { revalidateContacts, revalidateGroups } from "../../actions";
 
 interface GroupDetailClientProps {
@@ -63,13 +67,6 @@ export function GroupDetailClient({
   const [isDeleting, setIsDeleting] = useState(false);
 
   const [columns, setColumns] = useState<ColumnConfig[]>([
-    {
-      key: "avatar",
-      label: "Avatar",
-      visible: true,
-      icon: <IconPhoto size={16} />,
-      fixed: true,
-    },
     {
       key: "name",
       label: "Name",
@@ -204,11 +201,10 @@ export function GroupDetailClient({
     if (ids.length === 0) return;
 
     const loadingId = notifications.show({
-      title: "Removing contacts",
-      message: "Updating group members...",
-      loading: true,
-      autoClose: false,
-      withCloseButton: false,
+      ...loadingNotificationTemplate({
+        title: "Removing contacts",
+        description: "Updating group members...",
+      }),
     });
 
     try {
@@ -223,13 +219,11 @@ export function GroupDetailClient({
       }
 
       notifications.update({
+        ...successNotificationTemplate({
+          title: "Success",
+          description: `${ids.length} contact(s) removed from group successfully`,
+        }),
         id: loadingId,
-        title: "Success",
-        message: `${ids.length} contact(s) removed from group successfully`,
-        color: "green",
-        loading: false,
-        autoClose: 2500,
-        withCloseButton: true,
       });
 
       setSelectedIds(new Set());
@@ -238,13 +232,11 @@ export function GroupDetailClient({
     } catch (error) {
       console.error("Error removing contacts from group", error);
       notifications.update({
+        ...errorNotificationTemplate({
+          title: "Error",
+          description: "Could not remove contacts from group. Please try again.",
+        }),
         id: loadingId,
-        title: "Error",
-        message: "Could not remove contacts from group. Please try again.",
-        color: "red",
-        loading: false,
-        autoClose: 4000,
-        withCloseButton: true,
       });
     }
   };
@@ -266,22 +258,24 @@ export function GroupDetailClient({
         throw new Error("Failed to delete contacts");
       }
 
-      notifications.show({
-        title: "Success",
-        message: `${ids.length} contact(s) deleted successfully`,
-        color: "green",
-      });
+      notifications.show(
+        successNotificationTemplate({
+          title: "Success",
+          description: `${ids.length} contact(s) deleted successfully`,
+        }),
+      );
 
       setSelectedIds(new Set());
       await revalidateContacts();
       await revalidateGroups();
       router.refresh();
     } catch (error) {
-      notifications.show({
-        title: "Error",
-        message: "Failed to delete contacts. Please try again.",
-        color: "red",
-      });
+      notifications.show(
+        errorNotificationTemplate({
+          title: "Error",
+          description: "Failed to delete contacts. Please try again.",
+        }),
+      );
     } finally {
       setIsDeleting(false);
     }
@@ -289,11 +283,10 @@ export function GroupDetailClient({
 
   const removeFromGroup = async (contactId: string) => {
     const loadingId = notifications.show({
-      title: "Removing contact",
-      message: "Updating group members...",
-      loading: true,
-      autoClose: false,
-      withCloseButton: false,
+      ...loadingNotificationTemplate({
+        title: "Removing contact",
+        description: "Updating group members...",
+      }),
     });
 
     try {
@@ -308,13 +301,11 @@ export function GroupDetailClient({
       }
 
       notifications.update({
+        ...successNotificationTemplate({
+          title: "Success",
+          description: "Contact removed from group successfully",
+        }),
         id: loadingId,
-        title: "Success",
-        message: "Contact removed from group successfully",
-        color: "green",
-        loading: false,
-        autoClose: 2500,
-        withCloseButton: true,
       });
 
       await revalidateGroups();
@@ -322,13 +313,11 @@ export function GroupDetailClient({
     } catch (error) {
       console.error("Error removing contact from group", error);
       notifications.update({
+        ...errorNotificationTemplate({
+          title: "Error",
+          description: "Could not remove contact from group. Please try again.",
+        }),
         id: loadingId,
-        title: "Error",
-        message: "Could not remove contact from group. Please try again.",
-        color: "red",
-        loading: false,
-        autoClose: 4000,
-        withCloseButton: true,
       });
     }
   };
@@ -339,11 +328,10 @@ export function GroupDetailClient({
     );
 
     const loadingId = notifications.show({
-      title: "Deleting contact",
-      message: `Deleting ${contactName}...`,
-      loading: true,
-      autoClose: false,
-      withCloseButton: false,
+      ...loadingNotificationTemplate({
+        title: "Deleting contact",
+        description: `Deleting ${contactName}...`,
+      }),
     });
 
     try {
@@ -358,13 +346,11 @@ export function GroupDetailClient({
       }
 
       notifications.update({
+        ...successNotificationTemplate({
+          title: "Success",
+          description: `${contactName} deleted successfully`,
+        }),
         id: loadingId,
-        title: "Success",
-        message: `${contactName} deleted successfully`,
-        color: "green",
-        loading: false,
-        autoClose: 2500,
-        withCloseButton: true,
       });
 
       await revalidateContacts();
@@ -373,13 +359,11 @@ export function GroupDetailClient({
     } catch (error) {
       console.error("Error deleting contact", error);
       notifications.update({
+        ...errorNotificationTemplate({
+          title: "Error",
+          description: "Could not delete contact. Please try again.",
+        }),
         id: loadingId,
-        title: "Error",
-        message: "Could not delete contact. Please try again.",
-        color: "red",
-        loading: false,
-        autoClose: 4000,
-        withCloseButton: true,
       });
     }
   };

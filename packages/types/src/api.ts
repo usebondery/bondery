@@ -52,11 +52,19 @@ export interface RedirectRequest {
 }
 
 /**
- * Redirect endpoint response
+ * Redirect endpoint response.
+ * When `existed` is true, preview fields (firstName, lastName, avatar) are included
+ * so the extension can display a person preview without an extra API call.
  */
 export interface RedirectResponse {
   contactId: string;
   existed: boolean;
+  /** Included when `existed` is true */
+  firstName?: string;
+  /** Included when `existed` is true */
+  lastName?: string | null;
+  /** Included when `existed` is true */
+  avatar?: string | null;
 }
 
 export interface LinkedInPreparedContact {

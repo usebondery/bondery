@@ -52,7 +52,12 @@ import { PersonTimelineSection } from "./components/PersonTimelineSection";
 // import { ContactPGPSection } from "./components/ContactPGPSection";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
-import { ModalTitle } from "@bondery/mantine-next";
+import {
+  errorNotificationTemplate,
+  loadingNotificationTemplate,
+  ModalTitle,
+  successNotificationTemplate,
+} from "@bondery/mantine-next";
 import { PageWrapper } from "@/app/(app)/app/components/PageWrapper";
 import { PageHeader } from "@/app/(app)/app/components/PageHeader";
 import { revalidateContacts, revalidateRelationships } from "../../actions";
@@ -249,20 +254,20 @@ export default function PersonClient({
       } as Contact);
 
       console.log("[DEBUG] Showing success notification");
-      notifications.show({
-        title: "Success",
-        message: `${field === "timezone" ? "Timezone" : "Language"} updated successfully`,
-        color: "green",
-        icon: <IconCheck size={18} />,
-      });
+      notifications.show(
+        successNotificationTemplate({
+          title: "Success",
+          description: `${field === "timezone" ? "Timezone" : "Language"} updated successfully`,
+        }),
+      );
     } catch (error) {
       console.error("[DEBUG] API call failed:", error);
-      notifications.show({
-        title: "Error",
-        message: `Failed to update ${field === "timezone" ? "timezone" : "language"}`,
-        color: "red",
-        icon: <IconX size={18} />,
-      });
+      notifications.show(
+        errorNotificationTemplate({
+          title: "Error",
+          description: `Failed to update ${field === "timezone" ? "timezone" : "language"}`,
+        }),
+      );
     } finally {
       console.log("[DEBUG] API call finished, clearing saving field");
       setSavingField(null);
@@ -304,19 +309,19 @@ export default function PersonClient({
         phones: phonesToSave,
       });
 
-      notifications.show({
-        title: "Success",
-        message: "Phone numbers updated successfully",
-        color: "green",
-        icon: <IconCheck size={18} />,
-      });
+      notifications.show(
+        successNotificationTemplate({
+          title: "Success",
+          description: "Phone numbers updated successfully",
+        }),
+      );
     } catch {
-      notifications.show({
-        title: "Error",
-        message: "Failed to update phone numbers",
-        color: "red",
-        icon: <IconX size={18} />,
-      });
+      notifications.show(
+        errorNotificationTemplate({
+          title: "Error",
+          description: "Failed to update phone numbers",
+        }),
+      );
     } finally {
       setSavingField(null);
     }
@@ -351,19 +356,19 @@ export default function PersonClient({
         emails: emailsToSave,
       });
 
-      notifications.show({
-        title: "Success",
-        message: "Email addresses updated successfully",
-        color: "green",
-        icon: <IconCheck size={18} />,
-      });
+      notifications.show(
+        successNotificationTemplate({
+          title: "Success",
+          description: "Email addresses updated successfully",
+        }),
+      );
     } catch {
-      notifications.show({
-        title: "Error",
-        message: "Failed to update email addresses",
-        color: "red",
-        icon: <IconX size={18} />,
-      });
+      notifications.show(
+        errorNotificationTemplate({
+          title: "Error",
+          description: "Failed to update email addresses",
+        }),
+      );
     } finally {
       setSavingField(null);
     }
@@ -407,19 +412,19 @@ export default function PersonClient({
 
       setImportantEvents(nextEvents);
 
-      notifications.show({
-        title: tImportantDates("SuccessTitle"),
-        message: tImportantDates("UpdateSuccess"),
-        color: "green",
-        icon: <IconCheck size={18} />,
-      });
+      notifications.show(
+        successNotificationTemplate({
+          title: tImportantDates("SuccessTitle"),
+          description: tImportantDates("UpdateSuccess"),
+        }),
+      );
     } catch {
-      notifications.show({
-        title: tImportantDates("ErrorTitle"),
-        message: tImportantDates("UpdateError"),
-        color: "red",
-        icon: <IconX size={18} />,
-      });
+      notifications.show(
+        errorNotificationTemplate({
+          title: tImportantDates("ErrorTitle"),
+          description: tImportantDates("UpdateError"),
+        }),
+      );
     } finally {
       setSavingField(null);
     }
@@ -454,12 +459,13 @@ export default function PersonClient({
 
     // Validation
     if (field === "firstName" && (!processedValue || processedValue.trim() === "")) {
-      notifications.show({
-        title: "Validation Error",
-        message: "First name is required",
-        color: "red",
-        icon: <IconX size={18} />,
-      });
+      notifications.show(
+        errorNotificationTemplate({
+          title: "Validation Error",
+          description: "First name is required",
+          
+        }),
+      );
       // Revert to original value
       setEditedValues((prev) => ({
         ...prev,
@@ -489,19 +495,21 @@ export default function PersonClient({
       const fieldDisplayName =
         field === "pgpPublicKey" ? "PGP key" : field.charAt(0).toUpperCase() + field.slice(1);
 
-      notifications.show({
-        title: "Success",
-        message: `${fieldDisplayName} updated successfully`,
-        color: "green",
-        icon: <IconCheck size={18} />,
-      });
+      notifications.show(
+        successNotificationTemplate({
+          title: "Success",
+          description: `${fieldDisplayName} updated successfully`,
+          
+        }),
+      );
     } catch {
-      notifications.show({
-        title: "Error",
-        message: `Failed to update ${field === "pgpPublicKey" ? "PGP key" : field}`,
-        color: "red",
-        icon: <IconX size={18} />,
-      });
+      notifications.show(
+        errorNotificationTemplate({
+          title: "Error",
+          description: `Failed to update ${field === "pgpPublicKey" ? "PGP key" : field}`,
+          
+        }),
+      );
     } finally {
       setSavingField(null);
     }
@@ -566,20 +574,22 @@ export default function PersonClient({
       const updatedGroups = allGroups.filter((group) => nextIds.has(group.id));
       setPersonGroups(updatedGroups);
 
-      notifications.show({
-        title: "Groups updated",
-        message: "Contact groups have been updated",
-        color: "green",
-        icon: <IconCheck size={18} />,
-      });
+      notifications.show(
+        successNotificationTemplate({
+          title: "Groups updated",
+          description: "Contact groups have been updated",
+          
+        }),
+      );
     } catch (error) {
       console.error("Failed to update groups", error);
-      notifications.show({
-        title: "Error",
-        message: "Could not update groups. Please try again.",
-        color: "red",
-        icon: <IconX size={18} />,
-      });
+      notifications.show(
+        errorNotificationTemplate({
+          title: "Error",
+          description: "Could not update groups. Please try again.",
+          
+        }),
+      );
     } finally {
       setGroupsSaving(false);
     }
@@ -606,19 +616,21 @@ export default function PersonClient({
       await revalidateRelationships();
       router.refresh();
 
-      notifications.show({
-        title: tRelationships("SuccessTitle"),
-        message: tRelationships("CreateSuccess"),
-        color: "green",
-        icon: <IconCheck size={18} />,
-      });
+      notifications.show(
+        successNotificationTemplate({
+          title: tRelationships("SuccessTitle"),
+          description: tRelationships("CreateSuccess"),
+          
+        }),
+      );
     } catch (error) {
-      notifications.show({
-        title: tRelationships("ErrorTitle"),
-        message: error instanceof Error ? error.message : tRelationships("CreateError"),
-        color: "red",
-        icon: <IconX size={18} />,
-      });
+      notifications.show(
+        errorNotificationTemplate({
+          title: tRelationships("ErrorTitle"),
+          description: error instanceof Error ? error.message : tRelationships("CreateError"),
+          
+        }),
+      );
     } finally {
       setRelationshipsSaving(false);
     }
@@ -646,19 +658,21 @@ export default function PersonClient({
 
       await revalidateRelationships();
 
-      notifications.show({
-        title: tRelationships("SuccessTitle"),
-        message: tRelationships("DeleteSuccess"),
-        color: "green",
-        icon: <IconCheck size={18} />,
-      });
+      notifications.show(
+        successNotificationTemplate({
+          title: tRelationships("SuccessTitle"),
+          description: tRelationships("DeleteSuccess"),
+          
+        }),
+      );
     } catch (error) {
-      notifications.show({
-        title: tRelationships("ErrorTitle"),
-        message: error instanceof Error ? error.message : tRelationships("DeleteError"),
-        color: "red",
-        icon: <IconX size={18} />,
-      });
+      notifications.show(
+        errorNotificationTemplate({
+          title: tRelationships("ErrorTitle"),
+          description: error instanceof Error ? error.message : tRelationships("DeleteError"),
+          
+        }),
+      );
     } finally {
       setRelationshipsSaving(false);
     }
@@ -689,19 +703,21 @@ export default function PersonClient({
       await revalidateRelationships();
       router.refresh();
 
-      notifications.show({
-        title: tRelationships("SuccessTitle"),
-        message: tRelationships("UpdateSuccess"),
-        color: "green",
-        icon: <IconCheck size={18} />,
-      });
+      notifications.show(
+        successNotificationTemplate({
+          title: tRelationships("SuccessTitle"),
+          description: tRelationships("UpdateSuccess"),
+          
+        }),
+      );
     } catch (error) {
-      notifications.show({
-        title: tRelationships("ErrorTitle"),
-        message: error instanceof Error ? error.message : tRelationships("UpdateError"),
-        color: "red",
-        icon: <IconX size={18} />,
-      });
+      notifications.show(
+        errorNotificationTemplate({
+          title: tRelationships("ErrorTitle"),
+          description: error instanceof Error ? error.message : tRelationships("UpdateError"),
+          
+        }),
+      );
     } finally {
       setRelationshipsSaving(false);
     }
@@ -804,11 +820,11 @@ export default function PersonClient({
 
         // Show loading notification
         const loadingNotification = notifications.show({
-          title: "Deleting contact...",
-          message: "Please wait while we delete this contact",
-          loading: true,
-          autoClose: false,
-          withCloseButton: false,
+          ...loadingNotificationTemplate({
+            title: "Deleting contact...",
+            description: "Please wait while we delete this contact",
+          }),
+          
         });
 
         try {
@@ -825,12 +841,13 @@ export default function PersonClient({
           notifications.hide(loadingNotification);
 
           // Show success notification
-          notifications.show({
-            title: "Success",
-            message: "Contact deleted successfully",
-            color: "green",
-            icon: <IconCheck size={18} />,
-          });
+          notifications.show(
+            successNotificationTemplate({
+              title: "Success",
+              description: "Contact deleted successfully",
+              
+            }),
+          );
 
           // Redirect to people page
           await revalidateContacts();
@@ -842,12 +859,13 @@ export default function PersonClient({
           notifications.hide(loadingNotification);
 
           // Show error notification
-          notifications.show({
-            title: "Error",
-            message: "Failed to delete contact. Please try again.",
-            color: "red",
-            icon: <IconX size={18} />,
-          });
+          notifications.show(
+            errorNotificationTemplate({
+              title: "Error",
+              description: "Failed to delete contact. Please try again.",
+              
+            }),
+          );
         }
       },
     });

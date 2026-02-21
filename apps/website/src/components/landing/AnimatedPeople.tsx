@@ -69,11 +69,11 @@ export function AnimatedPeople() {
       padding="xl"
       radius="lg"
       withBorder
-      className="mx-auto w-full md:w-[600px] h-full"
+      className="mx-auto w-full md:w-150 h-full"
     >
       <div className="relative grid grid-cols-1 gap-6 md:gap-8 md:grid-cols-[200px_1fr] items-center">
         <div className="flex justify-center md:block">
-          <div className="relative w-[280px] md:w-[200px] aspect-[3/4] md:h-[267px]">
+          <div className="relative w-70 md:w-50 aspect-3/4 md:h-66">
             <AnimatePresence mode="popLayout">
               {people.map((person, index) => (
                 <motion.div
@@ -121,8 +121,8 @@ export function AnimatedPeople() {
             </AnimatePresence>
           </div>
         </div>
-        <div className="flex flex-col h-[267px] justify-center py-4 pl-4 text-center md:text-left">
-          <div className="h-[140px] flex flex-col justify-center">
+        <div className="flex flex-col h-66 justify-center py-4 pl-4 text-center md:text-left">
+          <div className="h-35 flex flex-col justify-center">
             <AnimatePresence mode="wait">
               <motion.div
                 key={active}

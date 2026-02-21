@@ -9,6 +9,7 @@ import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import { useRouter } from "next/navigation";
 import { INPUT_MAX_LENGTHS } from "@/lib/config";
 import { revalidateSettings } from "../../actions";
+import { errorNotificationTemplate, successNotificationTemplate } from "@bondery/mantine-next";
 
 interface NameFieldsProps {
   initialName: string;
@@ -78,22 +79,24 @@ export function NameFields({ initialName, initialMiddlename, initialSurname }: N
       if (field === "middlename") setOriginalMiddlename(value);
       if (field === "surname") setOriginalSurname(value);
 
-      notifications.show({
-        title: t("UpdateSuccess"),
-        message: t("NameUpdateSuccess"),
-        color: "green",
-      });
+      notifications.show(
+        successNotificationTemplate({
+          title: t("UpdateSuccess"),
+          description: t("NameUpdateSuccess"),
+        }),
+      );
 
       setTimeout(async () => {
         await revalidateSettings();
         router.refresh();
       }, 500);
     } catch {
-      notifications.show({
-        title: t("UpdateError"),
-        message: t("NameUpdateError"),
-        color: "red",
-      });
+      notifications.show(
+        errorNotificationTemplate({
+          title: t("UpdateError"),
+          description: t("NameUpdateError"),
+        }),
+      );
     }
   };
 

@@ -59,6 +59,8 @@ export interface ImportantEvent {
 export interface UpcomingReminder {
   event: ImportantEvent;
   person: ContactPreview;
+  notificationSent: boolean;
+  notificationSentAt: string | null;
 }
 
 /**

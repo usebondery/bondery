@@ -1,7 +1,7 @@
 "use client";
 
 import { Button, Group, Paper, Stack, Text, Title } from "@mantine/core";
-import { IconCalendarPlus, IconHome, IconTrash, IconUserPlus } from "@tabler/icons-react";
+import { IconCalendarPlus, IconCopy, IconHome, IconTrash, IconUserPlus } from "@tabler/icons-react";
 import { useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import type { Activity, Contact, UpcomingReminder } from "@bondery/types";
@@ -10,13 +10,17 @@ import { PageHeader } from "@/app/(app)/app/components/PageHeader";
 import { HomeStatsGrid } from "@/app/(app)/app/components/home/HomeStatsGrid";
 import { UpcomingReminderCard } from "@/app/(app)/app/components/home/UpcomingReminderCard";
 import { openAddContactModal } from "@/app/(app)/app/people/components/AddContactModal";
-import { ActivityCard } from "@/app/(app)/app/components/timeline/ActivityCard";
+import { TimelineEventsList } from "@/app/(app)/app/components/timeline/TimelineEventsList";
 import { NewActivityModal } from "@/app/(app)/app/timeline/components/NewActivityModal";
 import { API_ROUTES, WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import { modals } from "@mantine/modals";
 import { notifications } from "@mantine/notifications";
 import { useRouter } from "next/navigation";
-import { ModalTitle } from "@bondery/mantine-next";
+import {
+  errorNotificationTemplate,
+  ModalTitle,
+  successNotificationTemplate,
+} from "@bondery/mantine-next";
 import { revalidateEvents } from "../actions";
 
 interface HomeClientProps {
@@ -54,21 +58,6 @@ export function HomeClient({
         .slice(0, 5),
     [timelineActivities],
   );
-
-  const groupedActivities = useMemo(() => {
-    const groups: Record<string, Activity[]> = {};
-
-    compactActivities.forEach((activity) => {
-      const date = new Date(activity.date);
-      const key = date.toLocaleDateString("en-US", { month: "long", year: "numeric" });
-      if (!groups[key]) {
-        groups[key] = [];
-      }
-      groups[key].push(activity);
-    });
-
-    return groups;
-  }, [compactActivities]);
 
   const resolveParticipants = (activity: Activity): Contact[] => {
     return (activity.participants || [])
@@ -121,23 +110,67 @@ export function HomeClient({
             throw new Error("Failed to delete event");
           }
 
-          notifications.show({
-            title: "Success",
-            message: timelineT("ActivityDeleted"),
-            color: "green",
-          });
+          notifications.show(
+            successNotificationTemplate({
+              title: "Success",
+              description: timelineT("ActivityDeleted"),
+            }),
+          );
 
           await revalidateEvents();
           router.refresh();
         } catch {
-          notifications.show({
-            title: "Error",
-            message: timelineT("DeleteFailed"),
-            color: "red",
-          });
+          notifications.show(
+            errorNotificationTemplate({
+              title: "Error",
+              description: timelineT("DeleteFailed"),
+            }),
+          );
         }
       },
     });
+  };
+
+  const handleDuplicate = async (activity: Activity) => {
+    const participantIds = (activity.participants || [])
+      .map((participant: any) => (typeof participant === "string" ? participant : participant.id))
+      .filter((id): id is string => Boolean(id));
+
+    try {
+      const response = await fetch(API_ROUTES.EVENTS, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: activity.title || "",
+          type: activity.type,
+          description: activity.description || "",
+          date: activity.date,
+          participantIds,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to duplicate event");
+      }
+
+      notifications.show(
+        successNotificationTemplate({
+          title: "Success",
+          description: timelineT("ActivityDuplicated"),
+          icon: <IconCopy size={18} />,
+        }),
+      );
+
+      await revalidateEvents();
+      router.refresh();
+    } catch {
+      notifications.show(
+        errorNotificationTemplate({
+          title: "Error",
+          description: timelineT("DuplicateFailed"),
+        }),
+      );
+    }
   };
 
   return (
@@ -236,33 +269,17 @@ export function HomeClient({
               </Text>
             </Paper>
           ) : (
-            <Stack gap="lg">
-              {Object.entries(groupedActivities).map(([dateGroup, activities]) => (
-                <div key={dateGroup}>
-                  <Text c="dimmed" size="sm" mb="md">
-                    {dateGroup}
-                  </Text>
-                  <Stack gap="sm">
-                    {activities.map((activity) => {
-                      const participants = resolveParticipants(activity);
-
-                      return (
-                        <ActivityCard
-                          key={activity.id}
-                          activity={activity}
-                          participants={participants}
-                          editLabel={timelineT("EditAction")}
-                          deleteLabel={timelineT("DeleteAction")}
-                          onOpen={() => handleActivityOpen(activity)}
-                          onEdit={() => handleActivityOpen(activity)}
-                          onDelete={() => handleDelete(activity)}
-                        />
-                      );
-                    })}
-                  </Stack>
-                </div>
-              ))}
-            </Stack>
+            <TimelineEventsList
+              activities={compactActivities}
+              resolveParticipants={resolveParticipants}
+              editLabel={timelineT("EditAction")}
+              duplicateLabel={timelineT("DuplicateAction")}
+              deleteLabel={timelineT("DeleteAction")}
+              onOpen={handleActivityOpen}
+              onEdit={handleActivityOpen}
+              onDuplicate={handleDuplicate}
+              onDelete={handleDelete}
+            />
           )}
         </Stack>
       </Stack>

@@ -15,6 +15,7 @@ import {
 import { notifications } from "@mantine/notifications";
 import { modals } from "@mantine/modals";
 import type { Contact, InstagramImportStrategy, InstagramPreparedContact } from "@bondery/types";
+import { errorNotificationTemplate, successNotificationTemplate } from "@bondery/mantine-next";
 import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import ContactsTable from "@/app/(app)/app/components/ContactsTable";
 import { revalidateAll } from "../../actions";
@@ -315,11 +316,12 @@ export function InstagramImportModal({
       );
       setStep("preview");
     } catch (error) {
-      notifications.show({
-        title: t("ErrorTitle"),
-        message: error instanceof Error ? error.message : t("ParseError"),
-        color: "red",
-      });
+      notifications.show(
+        errorNotificationTemplate({
+          title: t("ErrorTitle"),
+          description: error instanceof Error ? error.message : t("ParseError"),
+        }),
+      );
     } finally {
       setIsParsing(false);
     }
@@ -327,11 +329,12 @@ export function InstagramImportModal({
 
   const handleZipSelected = (file: File | null) => {
     if (!isZipFile(file)) {
-      notifications.show({
-        title: t("ErrorTitle"),
-        message: t("InvalidFile"),
-        color: "red",
-      });
+      notifications.show(
+        errorNotificationTemplate({
+          title: t("ErrorTitle"),
+          description: t("InvalidFile"),
+        }),
+      );
 
       return;
     }
@@ -348,11 +351,12 @@ export function InstagramImportModal({
 
   const handleZipDrop = (files: File[]) => {
     if (files.length !== 1) {
-      notifications.show({
-        title: t("ErrorTitle"),
-        message: t("InvalidFile"),
-        color: "red",
-      });
+      notifications.show(
+        errorNotificationTemplate({
+          title: t("ErrorTitle"),
+          description: t("InvalidFile"),
+        }),
+      );
 
       return;
     }
@@ -392,25 +396,27 @@ export function InstagramImportModal({
         throw new Error(apiError || text || `${t("ImportError")} (HTTP ${response.status})`);
       }
 
-      notifications.show({
-        title: t("SuccessTitle"),
-        message: t("ImportSuccess", {
-          imported: readNumberField(data, "importedCount"),
-          updated: readNumberField(data, "updatedCount"),
-          skipped: readNumberField(data, "skippedCount"),
+      notifications.show(
+        successNotificationTemplate({
+          title: t("SuccessTitle"),
+          description: t("ImportSuccess", {
+            imported: readNumberField(data, "importedCount"),
+            updated: readNumberField(data, "updatedCount"),
+            skipped: readNumberField(data, "skippedCount"),
+          }),
         }),
-        color: "green",
-      });
+      );
 
       modals.closeAll();
       await revalidateAll();
       router.push(WEBAPP_ROUTES.PEOPLE);
     } catch (error) {
-      notifications.show({
-        title: t("ErrorTitle"),
-        message: error instanceof Error ? error.message : t("ImportError"),
-        color: "red",
-      });
+      notifications.show(
+        errorNotificationTemplate({
+          title: t("ErrorTitle"),
+          description: error instanceof Error ? error.message : t("ImportError"),
+        }),
+      );
     } finally {
       setIsImporting(false);
     }
@@ -459,11 +465,12 @@ export function InstagramImportModal({
         <Dropzone
           onDrop={handleZipDrop}
           onReject={() => {
-            notifications.show({
-              title: t("ErrorTitle"),
-              message: t("InvalidFile"),
-              color: "red",
-            });
+            notifications.show(
+              errorNotificationTemplate({
+                title: t("ErrorTitle"),
+                description: t("InvalidFile"),
+              }),
+            );
           }}
           loading={isParsing}
         >
@@ -590,7 +597,7 @@ export function InstagramImportModal({
 
       <ContactsTable
         contacts={previewContacts}
-        visibleColumns={["avatar", "name", "social"]}
+        visibleColumns={["name", "social"]}
         selectedIds={selectedIds}
         showSelection
         allSelected={allSelected}

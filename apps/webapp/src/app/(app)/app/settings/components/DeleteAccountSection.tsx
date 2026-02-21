@@ -6,7 +6,12 @@ import { modals } from "@mantine/modals";
 import { notifications } from "@mantine/notifications";
 import { useTranslations } from "next-intl";
 import { API_ROUTES, WEBSITE_ROUTES } from "@bondery/helpers/globals/paths";
-import { ModalTitle } from "@bondery/mantine-next";
+import {
+  errorNotificationTemplate,
+  loadingNotificationTemplate,
+  ModalTitle,
+  successNotificationTemplate,
+} from "@bondery/mantine-next";
 import { createBrowswerSupabaseClient } from "@/lib/supabase/client";
 
 export function DeleteAccountSection() {
@@ -37,12 +42,11 @@ export function DeleteAccountSection() {
       onConfirm: async () => {
         try {
           notifications.show({
+            ...loadingNotificationTemplate({
+              title: t("DeletingAccount"),
+              description: t("PleaseWait"),
+            }),
             id: "delete-account",
-            title: t("DeletingAccount"),
-            message: t("PleaseWait"),
-            loading: true,
-            autoClose: false,
-            withCloseButton: false,
           });
 
           const response = await fetch(API_ROUTES.ACCOUNT, {
@@ -55,11 +59,12 @@ export function DeleteAccountSection() {
           }
 
           notifications.hide("delete-account");
-          notifications.show({
-            title: t("DeleteSuccess"),
-            message: t("AccountDeleted"),
-            color: "green",
-          });
+          notifications.show(
+            successNotificationTemplate({
+              title: t("DeleteSuccess"),
+              description: t("AccountDeleted"),
+            }),
+          );
 
           const supabase = createBrowswerSupabaseClient();
           await supabase.auth.signOut({ scope: "local" });
@@ -67,11 +72,12 @@ export function DeleteAccountSection() {
           window.location.assign(WEBSITE_ROUTES.LOGIN);
         } catch (error) {
           notifications.hide("delete-account");
-          notifications.show({
-            title: t("UpdateError"),
-            message: error instanceof Error ? error.message : t("DeleteError"),
-            color: "red",
-          });
+          notifications.show(
+            errorNotificationTemplate({
+              title: t("UpdateError"),
+              description: error instanceof Error ? error.message : t("DeleteError"),
+            }),
+          );
         }
       },
     });

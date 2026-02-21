@@ -1,19 +1,21 @@
 "use client";
 
 import { Stack, Group, Text, Button } from "@mantine/core";
-import { IconTimelineEventText, IconPlus, IconTrash } from "@tabler/icons-react";
+import { IconCopy, IconTimelineEventText, IconTrash } from "@tabler/icons-react";
 import { useState, useMemo } from "react";
 import type { Activity, Contact } from "@bondery/types";
 import { NewActivityModal } from "../../../timeline/components/NewActivityModal";
-import { getActivityTypeConfig } from "@/lib/activityTypes";
-import { PeopleAvatarChips } from "../../../components/timeline/PeopleAvatarChips";
 import { modals } from "@mantine/modals";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import { notifications } from "@mantine/notifications";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { ActivityCard } from "../../../components/timeline/ActivityCard";
-import { ModalTitle } from "@bondery/mantine-next";
+import { TimelineEventsList } from "../../../components/timeline/TimelineEventsList";
+import {
+  errorNotificationTemplate,
+  ModalTitle,
+  successNotificationTemplate,
+} from "@bondery/mantine-next";
 import { revalidateEvents } from "../../../actions";
 
 interface PersonTimelineSectionProps {
@@ -37,20 +39,10 @@ export function PersonTimelineSection({
     return new Map(allContacts.map((item) => [item.id, item]));
   }, [contact, connectedContacts]);
 
-  const groupedActivities = useMemo(() => {
-    const groups: Record<string, Activity[]> = {};
-    activities
-      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-      .forEach((activity) => {
-        const date = new Date(activity.date);
-        const key = date.toLocaleDateString("en-US", { month: "long", year: "numeric" });
-        if (!groups[key]) {
-          groups[key] = [];
-        }
-        groups[key].push(activity);
-      });
-    return groups;
-  }, [activities]);
+  const sortedActivities = useMemo(
+    () => [...activities].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()),
+    [activities],
+  );
 
   const handleActivityClick = (activity: Activity) => {
     setEditingActivity(activity);
@@ -100,23 +92,67 @@ export function PersonTimelineSection({
             throw new Error("Failed to delete event");
           }
 
-          notifications.show({
-            title: "Success",
-            message: t("ActivityDeleted"),
-            color: "green",
-          });
+          notifications.show(
+            successNotificationTemplate({
+              title: "Success",
+              description: t("ActivityDeleted"),
+            }),
+          );
 
           await revalidateEvents();
           router.refresh();
         } catch {
-          notifications.show({
-            title: "Error",
-            message: t("DeleteFailed"),
-            color: "red",
-          });
+          notifications.show(
+            errorNotificationTemplate({
+              title: "Error",
+              description: t("DeleteFailed"),
+            }),
+          );
         }
       },
     });
+  };
+
+  const handleDuplicate = async (activity: Activity) => {
+    const participantIds = (activity.participants || [])
+      .map((participant: any) => (typeof participant === "string" ? participant : participant.id))
+      .filter((id): id is string => Boolean(id));
+
+    try {
+      const response = await fetch(API_ROUTES.EVENTS, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: activity.title || "",
+          type: activity.type,
+          description: activity.description || "",
+          date: activity.date,
+          participantIds,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to duplicate event");
+      }
+
+      notifications.show(
+        successNotificationTemplate({
+          title: "Success",
+          description: t("ActivityDuplicated"),
+          icon: <IconCopy size={18} />,
+        }),
+      );
+
+      await revalidateEvents();
+      router.refresh();
+    } catch {
+      notifications.show(
+        errorNotificationTemplate({
+          title: "Error",
+          description: t("DuplicateFailed"),
+        }),
+      );
+    }
   };
 
   const handleActivityModalClose = () => {
@@ -147,41 +183,20 @@ export function PersonTimelineSection({
         </Group>
 
         <Stack gap="xl">
-          {Object.entries(groupedActivities).map(([dateGroup, groupActivities]) => (
-            <div key={dateGroup}>
-              <Text
-                c="dimmed"
-                size="xs"
-                tt="uppercase"
-                fw={700}
-                mb="sm"
-                style={{ letterSpacing: "0.5px" }}
-              >
-                {dateGroup}
-              </Text>
-              <Stack gap="sm">
-                {groupActivities.map((activity) => {
-                  const participants = resolveParticipants(activity);
-
-                  return (
-                    <ActivityCard
-                      key={activity.id}
-                      activity={activity}
-                      participants={participants}
-                      editLabel={t("EditAction")}
-                      deleteLabel={t("DeleteAction")}
-                      onOpen={() => handleActivityClick(activity)}
-                      onEdit={() => {
-                        setEditingActivity(activity);
-                        setActivityModalOpened(true);
-                      }}
-                      onDelete={() => handleDelete(activity)}
-                    />
-                  );
-                })}
-              </Stack>
-            </div>
-          ))}
+          <TimelineEventsList
+            activities={sortedActivities}
+            resolveParticipants={resolveParticipants}
+            editLabel={t("EditAction")}
+            duplicateLabel={t("DuplicateAction")}
+            deleteLabel={t("DeleteAction")}
+            onOpen={handleActivityClick}
+            onEdit={(activity) => {
+              setEditingActivity(activity);
+              setActivityModalOpened(true);
+            }}
+            onDuplicate={handleDuplicate}
+            onDelete={handleDelete}
+          />
 
           {activities.length === 0 && (
             <Text c="dimmed" size="sm" ta="center" py="xl">

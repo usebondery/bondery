@@ -6,15 +6,20 @@ import { IconBrandGithubFilled, IconBrandLinkedin, IconX } from "@tabler/icons-r
 import { notifications } from "@mantine/notifications";
 import { createBrowswerSupabaseClient } from "@/lib/supabase/client";
 import { useTranslations } from "next-intl";
+import { useSearchParams } from "next/navigation";
 import { INTEGRATION_PROVIDERS, WEBSITE_URL } from "@/lib/config";
 import { Logo } from "./components/Logo";
 import { WEBSITE_ROUTES } from "@bondery/helpers/globals/paths";
-import { AnchorLink } from "@bondery/mantine-next";
+import { AnchorLink, errorNotificationTemplate } from "@bondery/mantine-next";
 
 export default function LoginPage() {
   const t = useTranslations("LoginPage");
   const [loading, setLoading] = useState(false);
   const supabase = createBrowswerSupabaseClient();
+  const searchParams = useSearchParams();
+
+  // Preserve redirect parameter for post-login navigation (e.g., OAuth consent flow)
+  const redirectParam = searchParams.get("redirect") ?? searchParams.get("returnUrl");
 
   const getProviderIcon = (iconName: string) => {
     const icons: Record<string, React.ComponentType<{ size?: number }>> = {
@@ -29,28 +34,37 @@ export default function LoginPage() {
   const handleOAuthLogin = async (provider: "github" | "linkedin_oidc") => {
     try {
       setLoading(true);
+
+      // Build callback URL, including the redirect param if present
+      let callbackUrl = `${process.env.NEXT_PUBLIC_WEBAPP_URL}/auth/callback`;
+      if (redirectParam) {
+        callbackUrl += `?redirect=${encodeURIComponent(redirectParam)}`;
+      }
+
       const { error } = await supabase.auth.signInWithOAuth({
         provider,
         options: {
-          redirectTo: `${process.env.NEXT_PUBLIC_WEBAPP_URL}/auth/callback`,
+          redirectTo: callbackUrl,
         },
       });
 
       if (error) {
-        notifications.show({
-          title: t("AuthenticationError"),
-          message: error.message,
-          color: "red",
-          icon: <IconX size={18} />,
-        });
+        notifications.show(
+          errorNotificationTemplate({
+            title: t("AuthenticationError"),
+            description: error.message,
+            
+          }),
+        );
       }
     } catch (err) {
-      notifications.show({
-        title: t("UnexpectedError"),
-        message: err instanceof Error ? err.message : t("UnexpectedErrorMessage"),
-        color: "red",
-        icon: <IconX size={18} />,
-      });
+      notifications.show(
+        errorNotificationTemplate({
+          title: t("UnexpectedError"),
+          description: err instanceof Error ? err.message : t("UnexpectedErrorMessage"),
+          
+        }),
+      );
     } finally {
       setLoading(false);
     }

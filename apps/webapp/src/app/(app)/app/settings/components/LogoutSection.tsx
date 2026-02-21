@@ -7,6 +7,7 @@ import { notifications } from "@mantine/notifications";
 import { useTranslations } from "next-intl";
 import { createBrowswerSupabaseClient } from "@/lib/supabase/client";
 import { WEBSITE_ROUTES } from "@bondery/helpers/globals/paths";
+import { errorNotificationTemplate, loadingNotificationTemplate } from "@bondery/mantine-next";
 
 export function LogoutSection() {
   const router = useRouter();
@@ -15,11 +16,10 @@ export function LogoutSection() {
   const handleLogout = async () => {
     try {
       const loadingNotification = notifications.show({
-        title: t("SigningOut"),
-        message: t("SignOutWait"),
-        loading: true,
-        autoClose: false,
-        withCloseButton: false,
+        ...loadingNotificationTemplate({
+          title: t("SigningOut"),
+          description: t("SignOutWait"),
+        }),
       });
 
       const supabase = createBrowswerSupabaseClient();
@@ -33,11 +33,12 @@ export function LogoutSection() {
 
       router.push(WEBSITE_ROUTES.LOGIN);
     } catch (error) {
-      notifications.show({
-        title: t("UpdateError"),
-        message: error instanceof Error ? error.message : t("SignOutError"),
-        color: "red",
-      });
+      notifications.show(
+        errorNotificationTemplate({
+          title: t("UpdateError"),
+          description: error instanceof Error ? error.message : t("SignOutError"),
+        }),
+      );
     }
   };
 

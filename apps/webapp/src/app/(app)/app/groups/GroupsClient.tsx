@@ -14,7 +14,12 @@ import { openAddGroupModal } from "./components/AddGroupModal";
 import { openEditGroupModal } from "./components/EditGroupModal";
 import { SortMenu, type SortOption } from "./components/SortMenu";
 import { GroupCard } from "./components/GroupCard";
-import { ModalTitle } from "@bondery/mantine-next";
+import {
+  errorNotificationTemplate,
+  loadingNotificationTemplate,
+  ModalTitle,
+  successNotificationTemplate,
+} from "@bondery/mantine-next";
 import { revalidateGroups } from "../actions";
 
 interface GroupsClientProps {
@@ -86,11 +91,10 @@ export function GroupsClient({ initialGroups, totalCount }: GroupsClientProps) {
       confirmProps: { color: "red" },
       onConfirm: async () => {
         const loadingNotification = notifications.show({
-          title: "Deleting...",
-          message: `Deleting group "${group.label}"`,
-          loading: true,
-          autoClose: false,
-          withCloseButton: false,
+          ...loadingNotificationTemplate({
+            title: "Deleting...",
+            description: `Deleting group "${group.label}"`,
+          }),
         });
 
         try {
@@ -101,13 +105,11 @@ export function GroupsClient({ initialGroups, totalCount }: GroupsClientProps) {
           if (!res.ok) throw new Error("Failed to delete group");
 
           notifications.update({
+            ...successNotificationTemplate({
+              title: "Success",
+              description: "Group deleted successfully",
+            }),
             id: loadingNotification,
-            title: "Success",
-            message: "Group deleted successfully",
-            color: "green",
-            loading: false,
-            autoClose: 3000,
-            withCloseButton: true,
           });
 
           // Refresh the page to update the groups list
@@ -116,13 +118,11 @@ export function GroupsClient({ initialGroups, totalCount }: GroupsClientProps) {
         } catch (error) {
           console.error("Error deleting group:", error);
           notifications.update({
+            ...errorNotificationTemplate({
+              title: "Error",
+              description: "Failed to delete group. Please try again.",
+            }),
             id: loadingNotification,
-            title: "Error",
-            message: "Failed to delete group. Please try again.",
-            color: "red",
-            loading: false,
-            autoClose: 5000,
-            withCloseButton: true,
           });
         }
       },

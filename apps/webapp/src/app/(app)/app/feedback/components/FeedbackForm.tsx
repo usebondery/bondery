@@ -6,6 +6,11 @@ import { notifications } from "@mantine/notifications";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
+import {
+  errorNotificationTemplate,
+  loadingNotificationTemplate,
+  successNotificationTemplate,
+} from "@bondery/mantine-next";
 
 interface FeedbackFormValues {
   npsScore: number;
@@ -36,11 +41,10 @@ export function FeedbackForm() {
     setIsSubmitting(true);
 
     const loadingNotification = notifications.show({
-      title: t("SubmittingTitle"),
-      message: t("SubmittingMessage"),
-      loading: true,
-      autoClose: false,
-      withCloseButton: false,
+      ...loadingNotificationTemplate({
+        title: t("SubmittingTitle"),
+        description: t("SubmittingMessage"),
+      }),
     });
 
     try {
@@ -57,21 +61,23 @@ export function FeedbackForm() {
       }
 
       notifications.hide(loadingNotification);
-      notifications.show({
-        title: t("SuccessTitle"),
-        message: t("SuccessMessage"),
-        color: "green",
-      });
+      notifications.show(
+        successNotificationTemplate({
+          title: t("SuccessTitle"),
+          description: t("SuccessMessage"),
+        }),
+      );
 
       // Reset form after successful submission
       form.reset();
     } catch (error) {
       notifications.hide(loadingNotification);
-      notifications.show({
-        title: t("ErrorTitle"),
-        message: t("ErrorMessage"),
-        color: "red",
-      });
+      notifications.show(
+        errorNotificationTemplate({
+          title: t("ErrorTitle"),
+          description: t("ErrorMessage"),
+        }),
+      );
     } finally {
       setIsSubmitting(false);
     }

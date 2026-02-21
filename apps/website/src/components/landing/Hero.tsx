@@ -31,11 +31,12 @@ export function Hero() {
               </Text>
 
               {/* CTA Buttons */}
-              <Flex mt="md" gap="md" wrap="wrap">
+              <Flex mt="md" gap="md" wrap="wrap" align="stretch" w="100%">
                 <ButtonLink
                   href={`${WEBAPP_URL}/login`}
                   size="lg"
                   leftSection={<IconTopologyStar size={20} />}
+                  className="w-full sm:w-auto"
                 >
                   Get started
                 </ButtonLink>
@@ -44,6 +45,7 @@ export function Hero() {
                   size="lg"
                   variant="default"
                   leftSection={<IconArrowDown size={20} />}
+                  className="w-full sm:w-auto"
                 >
                   Learn more
                 </ButtonLink>

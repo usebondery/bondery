@@ -34,6 +34,11 @@ export async function GET(request: Request) {
     const { error } = await supabase.auth.exchangeCodeForSession(code);
 
     if (!error) {
+      // Support post-login redirect (e.g., OAuth consent flow)
+      const redirectPath = requestUrl.searchParams.get("redirect");
+      if (redirectPath && redirectPath.startsWith("/")) {
+        return NextResponse.redirect(`${process.env.NEXT_PUBLIC_WEBAPP_URL}${redirectPath}`);
+      }
       return NextResponse.redirect(`${process.env.NEXT_PUBLIC_WEBAPP_URL}/app`);
     } else {
       console.error("Error exchanging code for session:", error.message);

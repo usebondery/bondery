@@ -8,7 +8,12 @@
 import { modals } from "@mantine/modals";
 import { notifications } from "@mantine/notifications";
 import { IconPhoto } from "@tabler/icons-react";
-import { ModalTitle } from "@bondery/mantine-next";
+import {
+  errorNotificationTemplate,
+  loadingNotificationTemplate,
+  ModalTitle,
+  successNotificationTemplate,
+} from "@bondery/mantine-next";
 
 export interface PhotoUploadTranslations {
   TitleModal: string;
@@ -84,11 +89,11 @@ export async function openPhotoUploadModal(
     modals.close(modalId);
 
     const loadingNotification = notifications.show({
-      title: translations.UploadingPhoto,
-      message: translations.PleaseWait,
-      loading: true,
-      autoClose: false,
-      withCloseButton: false,
+      ...loadingNotificationTemplate({
+        title: translations.UploadingPhoto,
+        description: translations.PleaseWait,
+      }),
+      
     });
 
     try {
@@ -107,11 +112,12 @@ export async function openPhotoUploadModal(
         throw new Error(error.error || "Failed to upload photo");
       }
 
-      notifications.show({
-        title: translations.UpdateSuccess,
-        message: translations.PhotoUpdateSuccess,
-        color: "green",
-      });
+      notifications.show(
+        successNotificationTemplate({
+          title: translations.UpdateSuccess,
+          description: translations.PhotoUpdateSuccess,
+        }),
+      );
 
       // Call success callback or reload page
       if (config.onSuccess) {
@@ -122,11 +128,12 @@ export async function openPhotoUploadModal(
         }, 500);
       }
     } catch (error) {
-      notifications.show({
-        title: translations.UpdateError,
-        message: error instanceof Error ? error.message : translations.PhotoUpdateError,
-        color: "red",
-      });
+      notifications.show(
+        errorNotificationTemplate({
+          title: translations.UpdateError,
+          description: error instanceof Error ? error.message : translations.PhotoUpdateError,
+        }),
+      );
     }
   };
 

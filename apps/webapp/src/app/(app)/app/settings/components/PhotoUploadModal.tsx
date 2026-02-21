@@ -5,6 +5,7 @@ import { IconUpload, IconPhoto, IconX } from "@tabler/icons-react";
 import { notifications } from "@mantine/notifications";
 import { Stack, Text, Group } from "@mantine/core";
 import { AVATAR_UPLOAD } from "@/lib/config";
+import { errorNotificationTemplate } from "@bondery/mantine-next";
 
 interface PhotoUploadModalProps {
   onPhotoSelect: (file: File, preview: string) => void;
@@ -35,11 +36,12 @@ export function PhotoUploadModal({ onPhotoSelect, translations }: PhotoUploadMod
       <Dropzone
         onDrop={handleDrop}
         onReject={(files) => {
-          notifications.show({
-            title: translations.UpdateError,
-            message: files[0]?.errors[0]?.message || translations.InvalidFile,
-            color: "red",
-          });
+          notifications.show(
+            errorNotificationTemplate({
+              title: translations.UpdateError,
+              description: files[0]?.errors[0]?.message || translations.InvalidFile,
+            }),
+          );
         }}
         maxSize={AVATAR_UPLOAD.maxFileSize}
         accept={AVATAR_UPLOAD.allowedMimeTypes as unknown as string[]}
