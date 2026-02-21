@@ -7,7 +7,6 @@ import {
   IconUserPlus,
   IconUsers,
   IconTrash,
-  IconPhoto,
   IconUser,
   IconBriefcase,
   IconMapPin,
@@ -30,6 +29,7 @@ import { API_ROUTES, WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import { openAddContactModal } from "./components/AddContactModal";
 import { PageHeader } from "@/app/(app)/app/components/PageHeader";
 import { PageWrapper } from "@/app/(app)/app/components/PageWrapper";
+import { errorNotificationTemplate, successNotificationTemplate } from "@bondery/mantine-next";
 
 import type { Contact } from "@bondery/types";
 import { revalidateContacts } from "../actions";
@@ -56,13 +56,6 @@ export function PeopleClient({ initialContacts, totalCount, layout = "stack" }: 
   const [loadedCount, setLoadedCount] = useState(initialContacts.length);
   const [totalAvailableCount, setTotalAvailableCount] = useState(totalCount);
   const [columns, setColumns] = useState<ColumnConfig[]>([
-    {
-      key: "avatar",
-      label: "Avatar",
-      visible: true,
-      icon: <IconPhoto size={16} />,
-      fixed: true,
-    },
     {
       key: "name",
       label: "Name",
@@ -181,11 +174,12 @@ export function PeopleClient({ initialContacts, totalCount, layout = "stack" }: 
         setTotalAvailableCount(data.totalCount);
       }
     } catch {
-      notifications.show({
-        title: "Error",
-        message: "Failed to load more contacts. Please try again.",
-        color: "red",
-      });
+      notifications.show(
+        errorNotificationTemplate({
+          title: "Error",
+          description: "Failed to load more contacts. Please try again.",
+        }),
+      );
     } finally {
       setIsLoadingMore(false);
     }
@@ -208,11 +202,12 @@ export function PeopleClient({ initialContacts, totalCount, layout = "stack" }: 
         throw new Error("Failed to delete contacts");
       }
 
-      notifications.show({
-        title: "Success",
-        message: `${ids.length} contact(s) deleted successfully`,
-        color: "green",
-      });
+      notifications.show(
+        successNotificationTemplate({
+          title: "Success",
+          description: `${ids.length} contact(s) deleted successfully`,
+        }),
+      );
 
       // Clear selection
       setSelectedIds(new Set());
@@ -224,11 +219,12 @@ export function PeopleClient({ initialContacts, totalCount, layout = "stack" }: 
       await revalidateContacts();
       router.refresh();
     } catch (error) {
-      notifications.show({
-        title: "Error",
-        message: "Failed to delete contacts. Please try again.",
-        color: "red",
-      });
+      notifications.show(
+        errorNotificationTemplate({
+          title: "Error",
+          description: "Failed to delete contacts. Please try again.",
+        }),
+      );
     } finally {
       setIsDeleting(false);
     }

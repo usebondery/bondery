@@ -15,6 +15,7 @@ import {
 import { notifications } from "@mantine/notifications";
 import { modals } from "@mantine/modals";
 import type { Contact, LinkedInPreparedContact } from "@bondery/types";
+import { errorNotificationTemplate, successNotificationTemplate } from "@bondery/mantine-next";
 import { API_ROUTES, WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import ContactsTable from "@/app/(app)/app/components/ContactsTable";
 import { revalidateAll } from "../../actions";
@@ -239,11 +240,12 @@ export function LinkedInImportModal({
       );
       setStep("preview");
     } catch (error) {
-      notifications.show({
-        title: t("ErrorTitle"),
-        message: error instanceof Error ? error.message : t("ParseError"),
-        color: "red",
-      });
+      notifications.show(
+        errorNotificationTemplate({
+          title: t("ErrorTitle"),
+          description: error instanceof Error ? error.message : t("ParseError"),
+        }),
+      );
     } finally {
       setIsParsing(false);
     }
@@ -286,25 +288,27 @@ export function LinkedInImportModal({
         throw new Error(result.error || t("ImportError"));
       }
 
-      notifications.show({
-        title: t("SuccessTitle"),
-        message: t("ImportSuccess", {
-          imported: result.importedCount ?? 0,
-          updated: result.updatedCount ?? 0,
-          skipped: result.skippedCount ?? 0,
+      notifications.show(
+        successNotificationTemplate({
+          title: t("SuccessTitle"),
+          description: t("ImportSuccess", {
+            imported: result.importedCount ?? 0,
+            updated: result.updatedCount ?? 0,
+            skipped: result.skippedCount ?? 0,
+          }),
         }),
-        color: "green",
-      });
+      );
 
       modals.closeAll();
       await revalidateAll();
       router.push(WEBAPP_ROUTES.PEOPLE);
     } catch (error) {
-      notifications.show({
-        title: t("ErrorTitle"),
-        message: error instanceof Error ? error.message : t("ImportError"),
-        color: "red",
-      });
+      notifications.show(
+        errorNotificationTemplate({
+          title: t("ErrorTitle"),
+          description: error instanceof Error ? error.message : t("ImportError"),
+        }),
+      );
     } finally {
       setIsImporting(false);
     }
@@ -346,11 +350,12 @@ export function LinkedInImportModal({
             void parseUpload(files);
           }}
           onReject={() => {
-            notifications.show({
-              title: t("ErrorTitle"),
-              message: t("InvalidFile"),
-              color: "red",
-            });
+            notifications.show(
+              errorNotificationTemplate({
+                title: t("ErrorTitle"),
+                description: t("InvalidFile"),
+              }),
+            );
           }}
           loading={isParsing}
           maxSize={30 * 1024 * 1024}
@@ -435,7 +440,7 @@ export function LinkedInImportModal({
 
       <ContactsTable
         contacts={previewContacts}
-        visibleColumns={["avatar", "name", "title", "social"]}
+        visibleColumns={["name", "title", "social"]}
         selectedIds={selectedIds}
         showSelection
         allSelected={allSelected}

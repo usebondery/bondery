@@ -6,7 +6,6 @@ import {
   TableTh,
   TableTd,
   Checkbox,
-  Avatar,
   Group,
   Text,
   ActionIcon,
@@ -24,7 +23,6 @@ import {
   IconBrandFacebook,
   IconPhone,
   IconMail,
-  IconPhoto,
   IconUser,
   IconBriefcase,
   IconMapPin,
@@ -37,14 +35,12 @@ import {
 import Image from "next/image";
 import { formatContactName } from "@/lib/nameHelpers";
 import { createSocialMediaUrl } from "@/lib/socialMediaHelpers";
-import { getAvatarColorFromName } from "@/lib/avatarColor";
 import type { Contact } from "@bondery/types";
-import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
-import { ActionIconLink, AnchorLink } from "@bondery/mantine-next";
+import { ActionIconLink } from "@bondery/mantine-next";
+import { PersonChip } from "./shared/PersonChip";
 
 // Column definitions with labels and icons
 const COLUMN_DEFINITIONS: Record<ColumnKey, { label: string; icon: React.ReactNode }> = {
-  avatar: { label: "Avatar", icon: <IconPhoto size={16} /> },
   name: { label: "Name", icon: <IconUser size={16} /> },
   title: { label: "Title", icon: <IconBriefcase size={16} /> },
   place: { label: "Place", icon: <IconMapPin size={16} /> },
@@ -154,14 +150,7 @@ function ContactSocialIcons({ contact }: { contact: Contact }) {
   );
 }
 
-export type ColumnKey =
-  | "avatar"
-  | "name"
-  | "title"
-  | "place"
-  | "shortNote"
-  | "lastInteraction"
-  | "social";
+export type ColumnKey = "name" | "title" | "place" | "shortNote" | "lastInteraction" | "social";
 
 export interface ColumnConfig {
   key: ColumnKey;
@@ -276,8 +265,8 @@ export default function ContactsTable({
               </TableTh>
             )}
             {visibleColumns.map((col) => (
-              <TableTh key={col.key} style={col.key === "avatar" ? { width: 60 } : undefined}>
-                {col.key === "avatar" || col.key === "name" ? (
+              <TableTh key={col.key} className={`min-w-${col.key === "name" ? "60" : "24"}`}>
+                {col.key === "name" ? (
                   <span></span>
                 ) : (
                   <Group gap="xs" wrap="nowrap">
@@ -331,32 +320,20 @@ export default function ContactsTable({
                 )}
                 {visibleColumns.map((col) => {
                   switch (col.key) {
-                    case "avatar":
-                      return (
-                        <TableTd key={col.key}>
-                          <Avatar
-                            src={contact.avatar || undefined}
-                            color={getAvatarColorFromName(contact.firstName, contact.lastName)}
-                            radius="xl"
-                            size="md"
-                            name={formatContactName(contact)}
-                          />
-                        </TableTd>
-                      );
                     case "name":
                       return (
-                        <TableTd key={col.key}>
-                          {disableNameLink ? (
-                            <Text>{formatContactName(contact)}</Text>
-                          ) : (
-                            <AnchorLink
-                              href={`${WEBAPP_ROUTES.PERSON}/${contact.id}`}
-                              c="blue"
-                              underline="hover"
-                            >
-                              {formatContactName(contact)}
-                            </AnchorLink>
-                          )}
+                        <TableTd key={col.key} className="min-w-60">
+                          <PersonChip
+                            person={{
+                              id: contact.id,
+                              firstName: contact.firstName,
+                              middleName: contact.middleName,
+                              lastName: contact.lastName,
+                              avatar: contact.avatar,
+                            }}
+                            isClickable={!disableNameLink}
+                            size="md"
+                          />
                         </TableTd>
                       );
                     case "title":

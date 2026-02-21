@@ -7,6 +7,11 @@ import type { ColorSchemePreference } from "@bondery/types";
 import { notifications } from "@mantine/notifications";
 import { useState } from "react";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
+import {
+  errorNotificationTemplate,
+  loadingNotificationTemplate,
+  successNotificationTemplate,
+} from "@bondery/mantine-next";
 import { ThemePicker } from "./ThemePicker";
 import { ReminderTimePicker } from "./ReminderTimePicker";
 import { LanguagePicker } from "@/components/shared/LanguagePicker";
@@ -49,11 +54,10 @@ export function PreferencesCard({
     }
 
     const loadingNotification = notifications.show({
-      title: t("UpdatingTimezone"),
-      message: t("PleaseWait"),
-      loading: true,
-      autoClose: false,
-      withCloseButton: false,
+      ...loadingNotificationTemplate({
+        title: t("UpdatingTimezone"),
+        description: t("PleaseWait"),
+      }),
     });
 
     try {
@@ -74,20 +78,22 @@ export function PreferencesCard({
       setSavedTimezone(nextTimezone);
 
       notifications.hide(loadingNotification);
-      notifications.show({
-        title: t("UpdateSuccess"),
-        message: t("TimezoneUpdateSuccess"),
-        color: "green",
-      });
+      notifications.show(
+        successNotificationTemplate({
+          title: t("UpdateSuccess"),
+          description: t("TimezoneUpdateSuccess"),
+        }),
+      );
     } catch {
       setTimezone(savedTimezone);
 
       notifications.hide(loadingNotification);
-      notifications.show({
-        title: t("UpdateError"),
-        message: t("TimezoneUpdateError"),
-        color: "red",
-      });
+      notifications.show(
+        errorNotificationTemplate({
+          title: t("UpdateError"),
+          description: t("TimezoneUpdateError"),
+        }),
+      );
     }
   };
 

@@ -16,6 +16,7 @@ import { IconBell, IconCalendarEvent, IconPlus, IconTrash } from "@tabler/icons-
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import type { ImportantEvent, ImportantEventType } from "@bondery/types";
+import { errorNotificationTemplate } from "@bondery/mantine-next";
 import { DatePickerWithPresets } from "../../../components/timeline/DatePickerWithPresets";
 import {
   IMPORTANT_EVENT_NOTIFY_OPTIONS,
@@ -352,10 +353,11 @@ export function ContactImportantDatesSection({
       localEvents.some((eventItem) => eventItem.eventType === nextDraftEvent.eventType)
     ) {
       notifications.show({
-        color: "red",
-        title: t("ErrorTitle"),
-        message: t("UniqueTypeError", {
-          type: t(`Types.${nextDraftEvent.eventType}`),
+        ...errorNotificationTemplate({
+          title: t("ErrorTitle"),
+          description: t("UniqueTypeError", {
+            type: t(`Types.${nextDraftEvent.eventType}`),
+          }),
         }),
       });
       return;
@@ -426,10 +428,11 @@ export function ContactImportantDatesSection({
       )
     ) {
       notifications.show({
-        color: "red",
-        title: t("ErrorTitle"),
-        message: t("UniqueTypeError", {
-          type: t(`Types.${eventType}`),
+        ...errorNotificationTemplate({
+          title: t("ErrorTitle"),
+          description: t("UniqueTypeError", {
+            type: t(`Types.${eventType}`),
+          }),
         }),
       });
       return;

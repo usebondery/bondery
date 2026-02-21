@@ -18,7 +18,12 @@ import { useState, useEffect } from "react";
 import { notifications } from "@mantine/notifications";
 import { API_ROUTES, WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import { useRouter } from "next/navigation";
-import { ActionIconLink, ModalTitle } from "@bondery/mantine-next";
+import {
+  ActionIconLink,
+  errorNotificationTemplate,
+  ModalTitle,
+  successNotificationTemplate,
+} from "@bondery/mantine-next";
 import { getAvatarColorFromName } from "@/lib/avatarColor";
 import { revalidateEvents } from "../../actions";
 
@@ -72,21 +77,23 @@ export function ActivityDetailModal({
         throw new Error("Failed to update event");
       }
 
-      notifications.show({
-        title: "Success",
-        message: "Event updated successfully",
-        color: "green",
-      });
+      notifications.show(
+        successNotificationTemplate({
+          title: "Success",
+          description: "Event updated successfully",
+        }),
+      );
 
       await revalidateEvents();
       router.refresh();
       onClose();
     } catch (error) {
-      notifications.show({
-        title: "Error",
-        message: "Failed to update event",
-        color: "red",
-      });
+      notifications.show(
+        errorNotificationTemplate({
+          title: "Error",
+          description: "Failed to update event",
+        }),
+      );
     } finally {
       setLoading(false);
     }
@@ -105,21 +112,23 @@ export function ActivityDetailModal({
         throw new Error("Failed to delete event");
       }
 
-      notifications.show({
-        title: "Success",
-        message: "Event deleted successfully",
-        color: "green",
-      });
+      notifications.show(
+        successNotificationTemplate({
+          title: "Success",
+          description: "Event deleted successfully",
+        }),
+      );
 
       await revalidateEvents();
       router.refresh();
       onClose();
     } catch (error) {
-      notifications.show({
-        title: "Error",
-        message: "Failed to delete event",
-        color: "red",
-      });
+      notifications.show(
+        errorNotificationTemplate({
+          title: "Error",
+          description: "Failed to delete event",
+        }),
+      );
     } finally {
       setLoading(false);
     }

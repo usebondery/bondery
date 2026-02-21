@@ -17,7 +17,12 @@ import {
 import { modals } from "@mantine/modals";
 import { notifications } from "@mantine/notifications";
 import { IconUserPlus, IconSearch } from "@tabler/icons-react";
-import { ModalTitle } from "@bondery/mantine-next";
+import {
+  errorNotificationTemplate,
+  loadingNotificationTemplate,
+  ModalTitle,
+  successNotificationTemplate,
+} from "@bondery/mantine-next";
 import { useDebouncedValue } from "@mantine/hooks";
 import type { Contact } from "@bondery/types";
 import { getAvatarColorFromName } from "@/lib/avatarColor";
@@ -68,11 +73,12 @@ function AddContactsToGroupForm({
         );
         setContacts(availableContacts);
       } catch (error) {
-        notifications.show({
-          title: "Error",
-          message: "Failed to load contacts",
-          color: "red",
-        });
+        notifications.show(
+          errorNotificationTemplate({
+            title: "Error",
+            description: "Failed to load contacts",
+          }),
+        );
       } finally {
         setIsLoading(false);
       }
@@ -118,11 +124,10 @@ function AddContactsToGroupForm({
     setIsSubmitting(true);
 
     const loadingNotification = notifications.show({
-      title: "Adding contacts...",
-      message: "Please wait while we add contacts to the group",
-      loading: true,
-      autoClose: false,
-      withCloseButton: false,
+      ...loadingNotificationTemplate({
+        title: "Adding contacts...",
+        description: "Please wait while we add contacts to the group",
+      }),
     });
 
     try {
@@ -141,11 +146,12 @@ function AddContactsToGroupForm({
 
       notifications.hide(loadingNotification);
 
-      notifications.show({
-        title: "Success",
-        message: `${selectedIds.size} contact${selectedIds.size !== 1 ? "s" : ""} added to ${groupLabel}`,
-        color: "green",
-      });
+      notifications.show(
+        successNotificationTemplate({
+          title: "Success",
+          description: `${selectedIds.size} contact${selectedIds.size !== 1 ? "s" : ""} added to ${groupLabel}`,
+        }),
+      );
 
       modals.closeAll();
       await revalidateGroups();
@@ -153,11 +159,12 @@ function AddContactsToGroupForm({
     } catch (error) {
       notifications.hide(loadingNotification);
 
-      notifications.show({
-        title: "Error",
-        message: error instanceof Error ? error.message : "Failed to add contacts",
-        color: "red",
-      });
+      notifications.show(
+        errorNotificationTemplate({
+          title: "Error",
+          description: error instanceof Error ? error.message : "Failed to add contacts",
+        }),
+      );
     } finally {
       setIsSubmitting(false);
     }

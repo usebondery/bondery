@@ -1,19 +1,36 @@
 "use client";
 
-import { Avatar, Badge, Combobox, Group, Text, UnstyledButton, useCombobox } from "@mantine/core";
-import { IconChevronDown } from "@tabler/icons-react";
+import {
+  Avatar,
+  Badge,
+  Combobox,
+  Group,
+  Text,
+  UnstyledButton,
+  useCombobox,
+  type MantineColor,
+} from "@mantine/core";
+import { IconChevronDown, IconX } from "@tabler/icons-react";
 import { useMemo, useRef, useState } from "react";
 import type { ContactPreview } from "@bondery/types";
 import Link from "next/link";
 import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import { getAvatarColorFromName } from "@/lib/avatarColor";
 
-function formatPersonName(candidate: ContactPreview): string {
-  return `${candidate.firstName}${candidate.lastName ? ` ${candidate.lastName}` : ""}`.trim();
+type PersonChipIdentity = ContactPreview & {
+  middleName?: string | null;
+};
+
+function formatPersonName(candidate: PersonChipIdentity): string {
+  return [candidate.firstName, candidate.middleName, candidate.lastName].filter(Boolean).join(" ");
 }
 
 interface PersonChipProps {
-  person: ContactPreview | null;
+  person: PersonChipIdentity | null;
+  size?: "sm" | "md";
+  color?: MantineColor;
+  avatarEdge?: boolean;
+  onClear?: () => void;
   isSelectable?: boolean;
   showChevronWhenEmpty?: boolean;
   disabled?: boolean;
@@ -28,6 +45,10 @@ interface PersonChipProps {
 
 export function PersonChip({
   person,
+  size = "md",
+  color,
+  avatarEdge = true,
+  onClear,
   isSelectable = false,
   showChevronWhenEmpty = true,
   disabled = false,
@@ -39,7 +60,13 @@ export function PersonChip({
   isClickable = false,
   href,
 }: PersonChipProps) {
-  const getDisplayName = (candidate: ContactPreview | null) => {
+  const avatarSize = size === "sm" ? 16 : 20;
+  const avatarEdgeSize = size === "sm" ? 26 : 32;
+  const badgeSize = size === "sm" ? "lg" : "xl";
+  const chevronSize = size === "sm" ? 12 : 14;
+  const clearSize = size === "sm" ? 12 : 14;
+
+  const getDisplayName = (candidate: PersonChipIdentity | null) => {
     if (!candidate) {
       return placeholder;
     }
@@ -74,29 +101,68 @@ export function PersonChip({
 
   const fullName = getDisplayName(person);
   const resolvedHref = href || (person ? `${WEBAPP_ROUTES.PERSON}/${person.id}` : undefined);
+  const personAvatarColor = person
+    ? getAvatarColorFromName(person.firstName, person.lastName)
+    : undefined;
 
   const leftAvatar = person ? (
-    <Avatar
-      src={person.avatar || undefined}
-      size={20}
-      radius="xl"
-      name={`${person.firstName} ${person.lastName || ""}`.trim()}
-    />
+    <span
+      style={{
+        display: "inline-flex",
+        alignItems: "center",
+      }}
+    >
+      <Avatar
+        src={person.avatar || undefined}
+        size={avatarEdge ? avatarEdgeSize : avatarSize}
+        radius="xl"
+        color={personAvatarColor}
+        name={`${person.firstName} ${person.lastName || ""}`.trim()}
+      />
+    </span>
   ) : null;
 
   const renderBadge = () => (
     <Badge
       variant="light"
-      color={person ? undefined : "gray"}
-      size="xl"
+      color={person ? color : "gray"}
+      size={badgeSize}
       leftSection={leftAvatar}
       rightSection={
-        isSelectable && (person || showChevronWhenEmpty) ? <IconChevronDown size={14} /> : undefined
+        onClear && person ? (
+          <span
+            onMouseDown={(event) => {
+              event.preventDefault();
+              event.stopPropagation();
+            }}
+            onClick={(event) => {
+              event.preventDefault();
+              event.stopPropagation();
+              onClear();
+            }}
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              cursor: "pointer",
+              marginInlineEnd: -2,
+            }}
+          >
+            <IconX size={clearSize} />
+          </span>
+        ) : isSelectable && (person || showChevronWhenEmpty) ? (
+          <span style={{ display: "inline-flex", alignItems: "center", marginInlineEnd: -2 }}>
+            <IconChevronDown size={chevronSize} />
+          </span>
+        ) : undefined
       }
       styles={{
         root: {
           cursor: (isSelectable || isClickable) && !disabled ? "pointer" : "default",
           opacity: disabled ? 0.6 : 1,
+          paddingInlineStart: person && avatarEdge ? 0 : undefined,
+          paddingInlineEnd:
+            person && (onClear || isSelectable) ? (size === "sm" ? 8 : 10) : undefined,
+          overflow: person && avatarEdge ? "hidden" : undefined,
         },
         label: {
           textTransform: "none",

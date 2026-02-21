@@ -1,9 +1,10 @@
 import { Button, Menu, MenuItem } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
-import { IconCheck, IconDotsVertical, IconId, IconTrash, IconX } from "@tabler/icons-react";
+import { IconDotsVertical, IconId, IconTrash } from "@tabler/icons-react";
 import type { Contact } from "@bondery/types";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import { useState } from "react";
+import { errorNotificationTemplate, successNotificationTemplate } from "@bondery/mantine-next";
 
 interface ContactActionMenuProps {
   contact: Contact;
@@ -29,20 +30,20 @@ export function ContactActionMenu({ contact, personId, onDelete }: ContactAction
       document.body.removeChild(a);
       window.URL.revokeObjectURL(url);
 
-      notifications.show({
-        title: "Success",
-        message: "Contact exported as vCard",
-        color: "green",
-        icon: <IconCheck size={18} />,
-      });
+      notifications.show(
+        successNotificationTemplate({
+          title: "Success",
+          description: "Contact exported as vCard",
+        }),
+      );
     } catch (error) {
       console.error("Failed to export vCard:", error);
-      notifications.show({
-        title: "Error",
-        message: "Failed to export contact. Please try again.",
-        color: "red",
-        icon: <IconX size={18} />,
-      });
+      notifications.show(
+        errorNotificationTemplate({
+          title: "Error",
+          description: "Failed to export contact. Please try again.",
+        }),
+      );
     }
   };
 

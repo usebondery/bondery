@@ -1,7 +1,7 @@
 "use client";
 
 import { Badge, Card, Divider, Group, Stack, Text, Tooltip } from "@mantine/core";
-import { IconBell } from "@tabler/icons-react";
+import { IconBell, IconCircleCheck } from "@tabler/icons-react";
 import { IMPORTANT_EVENT_TYPE_OPTIONS } from "@/lib/config";
 import type { ImportantEventType, UpcomingReminder } from "@bondery/types";
 import { useLocale, useTranslations } from "next-intl";
@@ -99,6 +99,7 @@ export function UpcomingReminderCard({ reminder, onClick }: UpcomingReminderCard
   const locale = useLocale();
   const t = useTranslations("HomePage");
   const eventT = useTranslations("ContactImportantDates");
+  const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
   const eventDate = parseDateOnly(reminder.event.eventDate) ?? getTodayUtc();
   const eventMonth = eventDate
@@ -109,21 +110,40 @@ export function UpcomingReminderCard({ reminder, onClick }: UpcomingReminderCard
   const eventTypeLabel = eventT(`Types.${reminder.event.eventType}`);
   const eventEmoji = getEventEmoji(reminder.event.eventType);
   const notificationInDays = getDaysUntilNotification(reminder);
-  const notificationColor = getNotificationBadgeColor(notificationInDays);
+  const isNotificationSent = reminder.notificationSent;
+  const notificationColor = isNotificationSent
+    ? "gray"
+    : getNotificationBadgeColor(notificationInDays);
   const personName =
     `${reminder.person.firstName}${reminder.person.lastName ? ` ${reminder.person.lastName}` : ""}`.trim();
-  const notificationLabel =
-    notificationInDays === 0
+  const sentAtLabel = reminder.notificationSentAt
+    ? new Intl.DateTimeFormat(locale, {
+        dateStyle: "medium",
+        timeStyle: "short",
+        timeZone: userTimeZone,
+      }).format(new Date(reminder.notificationSentAt))
+    : null;
+  const notificationLabel = isNotificationSent
+    ? t("NotificationSent")
+    : notificationInDays === 0
       ? t("NotificationToday")
       : notificationInDays === 1
         ? t("NotificationTomorrow")
         : t("NotificationInDays", { count: notificationInDays });
-  const notificationTooltip =
-    notificationInDays === 0
+  const notificationTooltip = isNotificationSent
+    ? sentAtLabel
+      ? t("NotificationTooltipSentAt", { sentAt: sentAtLabel })
+      : t("NotificationSent")
+    : notificationInDays === 0
       ? t("NotificationTooltipToday")
       : notificationInDays === 1
         ? t("NotificationTooltipTomorrow")
         : t("NotificationTooltipInDays", { count: notificationInDays });
+  const notificationAriaLabel = isNotificationSent
+    ? sentAtLabel
+      ? t("NotificationTooltipSentAt", { sentAt: sentAtLabel })
+      : t("NotificationSent")
+    : notificationLabel;
 
   return (
     <Card
@@ -133,7 +153,7 @@ export function UpcomingReminderCard({ reminder, onClick }: UpcomingReminderCard
       component="button"
       onClick={onClick}
       style={{ cursor: "pointer", width: "100%", textAlign: "left" }}
-      aria-label={`${eventTypeLabel}, ${personName || t("UnknownPerson")}, ${notificationLabel}`}
+      aria-label={`${eventTypeLabel}, ${personName || t("UnknownPerson")}, ${notificationAriaLabel}`}
     >
       {/* Main row: date | divider | event info | divider | person | notification */}
       <Group wrap="nowrap" gap={0} align="stretch">
@@ -195,7 +215,13 @@ export function UpcomingReminderCard({ reminder, onClick }: UpcomingReminderCard
               variant="light"
               radius="xl"
               size="md"
-              leftSection={<IconBell size={14} aria-hidden />}
+              leftSection={
+                isNotificationSent ? (
+                  <IconCircleCheck size={14} aria-hidden />
+                ) : (
+                  <IconBell size={14} aria-hidden />
+                )
+              }
               styles={{
                 label: {
                   textTransform: "none",

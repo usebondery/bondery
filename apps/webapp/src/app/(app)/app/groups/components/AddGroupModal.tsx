@@ -16,7 +16,12 @@ import { useForm } from "@mantine/form";
 import { modals } from "@mantine/modals";
 import { notifications } from "@mantine/notifications";
 import { IconUsersGroup } from "@tabler/icons-react";
-import { ModalTitle } from "@bondery/mantine-next";
+import {
+  errorNotificationTemplate,
+  loadingNotificationTemplate,
+  ModalTitle,
+  successNotificationTemplate,
+} from "@bondery/mantine-next";
 import { EmojiPicker, getRandomEmoji } from "@/app/(app)/app/components/EmojiPicker";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import { revalidateGroups } from "../../actions";
@@ -78,11 +83,10 @@ function AddGroupForm() {
     setIsSubmitting(true);
 
     const loadingNotification = notifications.show({
-      title: "Creating group...",
-      message: "Please wait while we create the new group",
-      loading: true,
-      autoClose: false,
-      withCloseButton: false,
+      ...loadingNotificationTemplate({
+        title: "Creating group...",
+        description: "Please wait while we create the new group",
+      }),
     });
 
     try {
@@ -103,11 +107,12 @@ function AddGroupForm() {
 
       notifications.hide(loadingNotification);
 
-      notifications.show({
-        title: "Success",
-        message: "Group created successfully",
-        color: "green",
-      });
+      notifications.show(
+        successNotificationTemplate({
+          title: "Success",
+          description: "Group created successfully",
+        }),
+      );
 
       modals.closeAll();
       await revalidateGroups();
@@ -115,11 +120,12 @@ function AddGroupForm() {
     } catch (error) {
       notifications.hide(loadingNotification);
 
-      notifications.show({
-        title: "Error",
-        message: error instanceof Error ? error.message : "Failed to create group",
-        color: "red",
-      });
+      notifications.show(
+        errorNotificationTemplate({
+          title: "Error",
+          description: error instanceof Error ? error.message : "Failed to create group",
+        }),
+      );
     } finally {
       setIsSubmitting(false);
     }

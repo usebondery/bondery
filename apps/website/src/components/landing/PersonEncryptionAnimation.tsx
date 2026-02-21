@@ -9,7 +9,7 @@ export function PersonEncryptionAnimation() {
     <Card
       p="xl"
       radius="lg"
-      className="mx-auto w-full max-w-[500px] bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 shadow-xl overflow-hidden relative"
+      className="mx-auto w-full max-w-125 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 shadow-xl overflow-hidden relative"
       style={{
         aspectRatio: "4/3",
         display: "flex",
@@ -18,7 +18,7 @@ export function PersonEncryptionAnimation() {
         alignItems: "center",
       }}
     >
-      <div className="absolute inset-0 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-zinc-900 dark:to-zinc-950 -z-10" />
+      <div className="absolute inset-0 bg-linear-to-br from-gray-50 to-gray-100 dark:from-zinc-900 dark:to-zinc-950 -z-10" />
 
       <div className="relative z-10 w-full max-w-[320px] rounded-xl border border-gray-100 bg-white p-3 shadow-sm dark:border-zinc-700 dark:bg-zinc-800 sm:p-4">
         <div className="flex flex-col items-center gap-3 pb-4 border-b border-gray-100 dark:border-zinc-700">

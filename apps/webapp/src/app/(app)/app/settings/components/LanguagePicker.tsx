@@ -5,6 +5,11 @@ import { useTranslations } from "next-intl";
 import { LanguagePicker as SharedLanguagePicker } from "@/components/shared/LanguagePicker";
 import { APP_LANGUAGES_DATA } from "@/lib/languages";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
+import {
+  errorNotificationTemplate,
+  loadingNotificationTemplate,
+  successNotificationTemplate,
+} from "@bondery/mantine-next";
 
 interface LanguagePickerProps {
   initialValue: string;
@@ -15,11 +20,10 @@ export function LanguagePicker({ initialValue }: LanguagePickerProps) {
 
   const handleChange = async (val: string) => {
     const loadingNotification = notifications.show({
-      title: t("UpdatingLanguage"),
-      message: t("PleaseWait"),
-      loading: true,
-      autoClose: false,
-      withCloseButton: false,
+      ...loadingNotificationTemplate({
+        title: t("UpdatingLanguage"),
+        description: t("PleaseWait"),
+      }),
     });
 
     try {
@@ -38,22 +42,24 @@ export function LanguagePicker({ initialValue }: LanguagePickerProps) {
       }
 
       notifications.hide(loadingNotification);
-      notifications.show({
-        title: t("UpdateSuccess"),
-        message: t("LanguageUpdateSuccess"),
-        color: "green",
-      });
+      notifications.show(
+        successNotificationTemplate({
+          title: t("UpdateSuccess"),
+          description: t("LanguageUpdateSuccess"),
+        }),
+      );
 
       setTimeout(() => {
         window.location.reload();
       }, 500);
     } catch {
       notifications.hide(loadingNotification);
-      notifications.show({
-        title: t("UpdateError"),
-        message: t("LanguageUpdateError"),
-        color: "red",
-      });
+      notifications.show(
+        errorNotificationTemplate({
+          title: t("UpdateError"),
+          description: t("LanguageUpdateError"),
+        }),
+      );
     }
   };
 

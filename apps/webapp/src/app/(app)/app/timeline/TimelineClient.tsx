@@ -1,7 +1,7 @@
 "use client";
 
 import { Button, Stack, Group, Text, Paper, TextInput } from "@mantine/core";
-import { IconCalendarPlus, IconSearch, IconTimelineEventText } from "@tabler/icons-react";
+import { IconCalendarPlus, IconCopy, IconSearch, IconTimelineEventText } from "@tabler/icons-react";
 import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { PageWrapper } from "@/app/(app)/app/components/PageWrapper";
@@ -12,10 +12,11 @@ import { PageHeader } from "../components/PageHeader";
 import { useTranslations } from "next-intl";
 import { modals } from "@mantine/modals";
 import { notifications } from "@mantine/notifications";
-import { ActivityCard } from "../components/timeline/ActivityCard";
 import { IconTrash } from "@tabler/icons-react";
 import { ModalTitle } from "@bondery/mantine-next";
 import { revalidateEvents } from "../actions";
+import { errorNotificationTemplate, successNotificationTemplate } from "@bondery/mantine-next";
+import { TimelineEventsList } from "../components/timeline/TimelineEventsList";
 
 interface TimelineClientProps {
   initialContacts: Contact[];
@@ -85,23 +86,67 @@ export function TimelineClient({ initialContacts, initialActivities }: TimelineC
             throw new Error("Failed to delete event");
           }
 
-          notifications.show({
-            title: "Success",
-            message: t("ActivityDeleted"),
-            color: "green",
-          });
+          notifications.show(
+            successNotificationTemplate({
+              title: "Success",
+              description: t("ActivityDeleted"),
+            }),
+          );
 
           await revalidateEvents();
           router.refresh();
         } catch {
-          notifications.show({
-            title: "Error",
-            message: t("DeleteFailed"),
-            color: "red",
-          });
+          notifications.show(
+            errorNotificationTemplate({
+              title: "Error",
+              description: t("DeleteFailed"),
+            }),
+          );
         }
       },
     });
+  };
+
+  const handleDuplicate = async (activity: Activity) => {
+    const participantIds = (activity.participants || [])
+      .map((participant: any) => (typeof participant === "string" ? participant : participant.id))
+      .filter((id): id is string => Boolean(id));
+
+    try {
+      const response = await fetch(API_ROUTES.EVENTS, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: activity.title || "",
+          type: activity.type,
+          description: activity.description || "",
+          date: activity.date,
+          participantIds,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to duplicate event");
+      }
+
+      notifications.show(
+        successNotificationTemplate({
+          title: "Success",
+          description: t("ActivityDuplicated"),
+          icon: <IconCopy size={18} />,
+        }),
+      );
+
+      await revalidateEvents();
+      router.refresh();
+    } catch {
+      notifications.show(
+        errorNotificationTemplate({
+          title: "Error",
+          description: t("DuplicateFailed"),
+        }),
+      );
+    }
   };
 
   const filteredActivities = useMemo(() => {
@@ -113,19 +158,6 @@ export function TimelineClient({ initialContacts, initialActivities }: TimelineC
       )
       .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   }, [initialActivities, search]);
-
-  const groupedActivities = useMemo(() => {
-    const groups: Record<string, Activity[]> = {};
-    filteredActivities.forEach((activity) => {
-      const date = new Date(activity.date);
-      const key = date.toLocaleDateString("en-US", { month: "long", year: "numeric" });
-      if (!groups[key]) {
-        groups[key] = [];
-      }
-      groups[key].push(activity);
-    });
-    return groups;
-  }, [filteredActivities]);
 
   return (
     <PageWrapper>
@@ -147,14 +179,14 @@ export function TimelineClient({ initialContacts, initialActivities }: TimelineC
           }
         />
 
-        <Group justify="flex-end">
+        <Group justify="flex-start">
           {/* <Button variant="default" leftSection={<IconFilter size={16} />}>Filter</Button> */}
           <TextInput
             placeholder={t("SearchPlaceholder")}
             leftSection={<IconSearch size={16} />}
             value={search}
             onChange={(e) => setSearch(e.currentTarget.value)}
-            w={300}
+            className="w-lg"
           />
         </Group>
 
@@ -169,34 +201,20 @@ export function TimelineClient({ initialContacts, initialActivities }: TimelineC
         />
 
         <Stack gap="xl">
-          {Object.entries(groupedActivities).map(([dateGroup, activities]) => (
-            <div key={dateGroup}>
-              <Text c="dimmed" size="sm" mb="md">
-                {dateGroup}
-              </Text>
-              <Stack gap="sm">
-                {activities.map((activity) => {
-                  const participants = resolveParticipants(activity);
-
-                  return (
-                    <ActivityCard
-                      key={activity.id}
-                      activity={activity}
-                      participants={participants}
-                      editLabel={t("EditAction")}
-                      deleteLabel={t("DeleteAction")}
-                      onOpen={() => handleActivityClick(activity)}
-                      onEdit={() => {
-                        setEditingActivity(activity);
-                        setModalOpened(true);
-                      }}
-                      onDelete={() => handleDelete(activity)}
-                    />
-                  );
-                })}
-              </Stack>
-            </div>
-          ))}
+          <TimelineEventsList
+            activities={filteredActivities}
+            resolveParticipants={resolveParticipants}
+            editLabel={t("EditAction")}
+            duplicateLabel={t("DuplicateAction")}
+            deleteLabel={t("DeleteAction")}
+            onOpen={handleActivityClick}
+            onEdit={(activity) => {
+              setEditingActivity(activity);
+              setModalOpened(true);
+            }}
+            onDuplicate={handleDuplicate}
+            onDelete={handleDelete}
+          />
 
           {filteredActivities.length === 0 && (
             <Paper p="xl" withBorder radius="md" ta="center">

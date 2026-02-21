@@ -17,16 +17,20 @@ import {
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { notifications } from "@mantine/notifications";
-import { IconCalendarPlus, IconCheck, IconDeviceFloppy, IconX } from "@tabler/icons-react";
+import { IconCalendarPlus, IconDeviceFloppy } from "@tabler/icons-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import type { Contact, Activity } from "@bondery/types";
 import { useTranslations } from "next-intl";
 import { revalidateEvents } from "../../actions";
-import { ModalTitle } from "@bondery/mantine-next";
+import {
+  errorNotificationTemplate,
+  ModalTitle,
+  successNotificationTemplate,
+} from "@bondery/mantine-next";
 import { DatePickerWithPresets } from "../../components/timeline/DatePickerWithPresets";
-import { ParticipantAvatarPill } from "../../components/shared/ParticipantAvatarPill";
+import { PersonChip } from "../../components/shared/PersonChip";
 import { ACTIVITY_TYPE_OPTIONS } from "@/lib/activityTypes";
 import { getActivityTypeConfig } from "@/lib/activityTypes";
 import { getAvatarColorFromName } from "@/lib/avatarColor";
@@ -209,12 +213,12 @@ export function NewActivityModal({
         throw new Error(errorData.error || errorData.message || "Failed to create event");
       }
 
-      notifications.show({
-        title: "Success",
-        message: activity ? t("ActivityUpdated") : t("ActivityCreated"),
-        color: "green",
-        icon: <IconCheck size={18} />,
-      });
+      notifications.show(
+        successNotificationTemplate({
+          title: "Success",
+          description: activity ? t("ActivityUpdated") : t("ActivityCreated"),
+        }),
+      );
 
       onClose();
       form.reset();
@@ -222,13 +226,13 @@ export function NewActivityModal({
       router.refresh();
     } catch (error) {
       console.error("Error submitting form:", error);
-      notifications.show({
-        title: "Error",
-        message:
-          error instanceof Error ? error.message : "Failed to create event. Please try again.",
-        color: "red",
-        icon: <IconX size={18} />,
-      });
+      notifications.show(
+        errorNotificationTemplate({
+          title: "Error",
+          description:
+            error instanceof Error ? error.message : "Failed to create event. Please try again.",
+        }),
+      );
     } finally {
       setLoading(false);
     }
@@ -278,10 +282,11 @@ export function NewActivityModal({
               >
                 <Pill.Group>
                   {selectedContacts.map((contact) => (
-                    <ParticipantAvatarPill
+                    <PersonChip
                       key={contact.id}
                       person={contact}
-                      onRemove={() => {
+                      size="sm"
+                      onClear={() => {
                         form.setFieldValue(
                           "participantIds",
                           form.values.participantIds.filter((id) => id !== contact.id),
