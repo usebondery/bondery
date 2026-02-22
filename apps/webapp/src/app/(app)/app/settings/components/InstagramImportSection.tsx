@@ -12,11 +12,13 @@ export function InstagramImportSection() {
   const t = useTranslations("SettingsPage.DataManagement.InstagramImport");
 
   const openImporter = () => {
+    const modalId = "instagram-import-modal";
     modals.open({
+      modalId,
       title: <ModalTitle text={t("ModalTitle")} icon={<IconDownload size={20} stroke={1.5} />} />,
       centered: true,
-      size: "xl",
-      children: <InstagramImportModal t={t} />,
+      size: "lg",
+      children: <InstagramImportModal t={t} modalId={modalId} />,
     });
   };
 

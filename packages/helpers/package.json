@@ -25,6 +25,9 @@
   "scripts": {
     "build": "tsc"
   },
+  "dependencies": {
+    "transliteration": "^2.6.1"
+  },
   "devDependencies": {
     "dotenv": "^17.3.1"
   }

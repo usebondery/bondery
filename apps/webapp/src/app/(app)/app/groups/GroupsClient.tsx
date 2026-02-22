@@ -12,6 +12,7 @@ import type { GroupWithCount } from "@bondery/types";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import { openAddGroupModal } from "./components/AddGroupModal";
 import { openEditGroupModal } from "./components/EditGroupModal";
+import { openAddPeopleToGroupModal } from "./components/AddPeopleToGroupModal";
 import { SortMenu, type SortOption } from "./components/SortMenu";
 import { GroupCard } from "./components/GroupCard";
 import {
@@ -72,6 +73,13 @@ export function GroupsClient({ initialGroups, totalCount }: GroupsClientProps) {
       initialLabel: group.label,
       initialEmoji: group.emoji || "",
       initialColor: group.color || "",
+    });
+  };
+
+  const handleAddPeopleToGroup = (group: GroupWithCount) => {
+    openAddPeopleToGroupModal({
+      groupId: group.id,
+      groupLabel: group.label,
     });
   };
 
@@ -210,7 +218,7 @@ export function GroupsClient({ initialGroups, totalCount }: GroupsClientProps) {
           title="Groups"
           action={
             <Button size="md" leftSection={<IconUsersPlus size={16} />} onClick={openAddGroupModal}>
-              Add new group
+              Create new group
             </Button>
           }
         />
@@ -233,6 +241,7 @@ export function GroupsClient({ initialGroups, totalCount }: GroupsClientProps) {
                     key={group.id}
                     group={group}
                     onClick={handleCardClick}
+                    onAddPeople={handleAddPeopleToGroup}
                     onEdit={handleEditGroup}
                     onDuplicate={handleDuplicateGroup}
                     onDelete={handleDeleteGroup}

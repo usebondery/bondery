@@ -2,18 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import {
-  Stack,
-  Button,
-  Group,
-  Text,
-  Checkbox,
-  Avatar,
-  ScrollArea,
-  TextInput,
-  Loader,
-  Center,
-} from "@mantine/core";
+import { Stack, Button, Group, Text, Checkbox, ScrollArea, TextInput, Loader, Center } from "@mantine/core";
 import { modals } from "@mantine/modals";
 import { notifications } from "@mantine/notifications";
 import { IconUserPlus, IconSearch } from "@tabler/icons-react";
@@ -25,33 +14,31 @@ import {
 } from "@bondery/mantine-next";
 import { useDebouncedValue } from "@mantine/hooks";
 import type { Contact } from "@bondery/types";
-import { getAvatarColorFromName } from "@/lib/avatarColor";
 import { formatContactName } from "@/lib/nameHelpers";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
-import { revalidateGroups } from "../../../actions";
+import { revalidateGroups } from "../../actions";
+import { PersonChip } from "@/app/(app)/app/components/shared/PersonChip";
 
-interface AddContactsToGroupModalProps {
+interface AddPeopleToGroupModalProps {
   groupId: string;
   groupLabel: string;
-  existingContactIds: string[];
 }
 
-export function openAddContactsToGroupModal(props: AddContactsToGroupModalProps) {
+/**
+ * Opens a modal that lets user select and add contacts to the provided group.
+ */
+export function openAddPeopleToGroupModal(props: AddPeopleToGroupModalProps) {
   modals.open({
     title: (
       <ModalTitle text={`Add people to ${props.groupLabel}`} icon={<IconUserPlus size={24} />} />
     ),
     trapFocus: true,
     size: "md",
-    children: <AddContactsToGroupForm {...props} />,
+    children: <AddPeopleToGroupForm {...props} />,
   });
 }
 
-function AddContactsToGroupForm({
-  groupId,
-  groupLabel,
-  existingContactIds,
-}: AddContactsToGroupModalProps) {
+function AddPeopleToGroupForm({ groupId, groupLabel }: AddPeopleToGroupModalProps) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -60,18 +47,23 @@ function AddContactsToGroupForm({
   const [search, setSearch] = useState("");
   const [debouncedSearch] = useDebouncedValue(search, 200);
 
-  // Fetch all contacts
   useEffect(() => {
-    async function fetchContacts() {
+    async function fetchAvailableContacts() {
       try {
-        const res = await fetch(API_ROUTES.CONTACTS);
-        if (!res.ok) throw new Error("Failed to fetch contacts");
-        const data = await res.json();
-        // Filter out contacts already in the group
-        const availableContacts = data.contacts.filter(
-          (c: Contact) => !existingContactIds.includes(c.id),
-        );
-        setContacts(availableContacts);
+        const [allContactsRes, groupContactsRes] = await Promise.all([
+          fetch(API_ROUTES.CONTACTS),
+          fetch(`${API_ROUTES.GROUPS}/${groupId}/contacts`),
+        ]);
+
+        if (!allContactsRes.ok || !groupContactsRes.ok) {
+          throw new Error("Failed to fetch contacts");
+        }
+
+        const allContactsData = (await allContactsRes.json()) as { contacts: Contact[] };
+        const groupContactsData = (await groupContactsRes.json()) as { contacts: Contact[] };
+
+        const existingIds = new Set(groupContactsData.contacts.map((contact) => contact.id));
+        setContacts(allContactsData.contacts.filter((contact) => !existingIds.has(contact.id)));
       } catch (error) {
         notifications.show(
           errorNotificationTemplate({
@@ -83,13 +75,13 @@ function AddContactsToGroupForm({
         setIsLoading(false);
       }
     }
-    fetchContacts();
-  }, [existingContactIds]);
 
-  // Filter contacts by search
+    fetchAvailableContacts();
+  }, [groupId]);
+
   const filteredContacts = debouncedSearch
-    ? contacts.filter((c) =>
-        formatContactName(c).toLowerCase().includes(debouncedSearch.toLowerCase()),
+    ? contacts.filter((contact) =>
+        formatContactName(contact).toLowerCase().includes(debouncedSearch.toLowerCase()),
       )
     : contacts;
 
@@ -107,7 +99,7 @@ function AddContactsToGroupForm({
     if (selectedIds.size === filteredContacts.length) {
       setSelectedIds(new Set());
     } else {
-      setSelectedIds(new Set(filteredContacts.map((c) => c.id)));
+      setSelectedIds(new Set(filteredContacts.map((contact) => contact.id)));
     }
   };
 
@@ -199,7 +191,7 @@ function AddContactsToGroupForm({
         placeholder="Search contacts..."
         leftSection={<IconSearch size={16} />}
         value={search}
-        onChange={(e) => setSearch(e.currentTarget.value)}
+        onChange={(event) => setSearch(event.currentTarget.value)}
       />
 
       <Group justify="space-between">
@@ -237,26 +229,9 @@ function AddContactsToGroupForm({
                 <Checkbox
                   checked={selectedIds.has(contact.id)}
                   onChange={() => handleToggle(contact.id)}
-                  onClick={(e) => e.stopPropagation()}
+                  onClick={(event) => event.stopPropagation()}
                 />
-                <Avatar
-                  src={contact.avatar || undefined}
-                  color={getAvatarColorFromName(contact.firstName, contact.lastName)}
-                  radius="xl"
-                  size="sm"
-                  name={formatContactName(contact)}
-                />
-
-                <Stack gap={0}>
-                  <Text size="sm" fw={500}>
-                    {formatContactName(contact)}
-                  </Text>
-                  {contact.title && (
-                    <Text size="xs" c="dimmed">
-                      {contact.title}
-                    </Text>
-                  )}
-                </Stack>
+                <PersonChip person={contact} size="sm" />
               </Group>
             ))
           )}
@@ -273,10 +248,7 @@ function AddContactsToGroupForm({
           disabled={selectedIds.size === 0}
           leftSection={<IconUserPlus size={16} />}
         >
-          Add{" "}
-          {selectedIds.size > 0
-            ? `${selectedIds.size} contact${selectedIds.size !== 1 ? "s" : ""}`
-            : "contacts"}
+          Add {selectedIds.size > 0 ? `${selectedIds.size} contact${selectedIds.size !== 1 ? "s" : ""}` : "contacts"}
         </Button>
       </Group>
     </Stack>

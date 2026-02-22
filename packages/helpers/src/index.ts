@@ -10,3 +10,8 @@ export {
   SOCIAL_LINKS,
 } from "./globals/paths.js";
 export { IMPORTANT_EVENT_TYPE_META } from "./globals/important-events.js";
+export { parseInstagramUsername } from "./instagram/parseInstagramUsername.js";
+export type {
+  ParseInstagramUsernameInput,
+  ParsedInstagramName,
+} from "./instagram/parseInstagramUsername.js";

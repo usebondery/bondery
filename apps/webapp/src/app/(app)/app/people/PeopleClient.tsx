@@ -6,6 +6,7 @@ import {
   IconSearch,
   IconUserPlus,
   IconUsers,
+  IconUsersGroup,
   IconTrash,
   IconUser,
   IconBriefcase,
@@ -30,6 +31,9 @@ import { openAddContactModal } from "./components/AddContactModal";
 import { PageHeader } from "@/app/(app)/app/components/PageHeader";
 import { PageWrapper } from "@/app/(app)/app/components/PageWrapper";
 import { errorNotificationTemplate, successNotificationTemplate } from "@bondery/mantine-next";
+import { formatContactName } from "@/lib/nameHelpers";
+import { openDeleteContactModal } from "@/app/(app)/app/components/contacts/openDeleteContactModal";
+import { openAddPeopleToGroupSelectionModal } from "./components/AddPeopleToGroupSelectionModal";
 
 import type { Contact } from "@bondery/types";
 import { revalidateContacts } from "../actions";
@@ -117,8 +121,30 @@ export function PeopleClient({ initialContacts, totalCount, layout = "stack" }: 
     router.replace(`${pathname}?${params.toString()}`);
   };
 
-  const handleDeleteContact = async (contactId: string) => {
-    await handleDelete([contactId]);
+  const handleDeleteContact = (contactId: string) => {
+    const targetContact = contacts.find((contact) => contact.id === contactId);
+    const contactName = targetContact ? formatContactName(targetContact) : "this contact";
+
+    openDeleteContactModal({
+      contactId,
+      contactName,
+      onDeleted: async () => {
+        setSelectedIds(new Set());
+        setContacts((prev) => prev.filter((contact) => contact.id !== contactId));
+        setLoadedCount((prev) => Math.max(0, prev - 1));
+        setTotalAvailableCount((prev) => Math.max(0, prev - 1));
+        await revalidateContacts();
+        router.refresh();
+      },
+    });
+  };
+
+  const handleAddToGroup = (personIds: string[]) => {
+    if (personIds.length === 0) {
+      return;
+    }
+
+    openAddPeopleToGroupSelectionModal({ personIds });
   };
 
   const handleSelectAll = () => {
@@ -236,6 +262,12 @@ export function PeopleClient({ initialContacts, totalCount, layout = "stack" }: 
   // Define menu actions for individual contacts
   const menuActions: MenuAction[] = [
     {
+      key: "addToGroup",
+      label: "Add to group",
+      icon: <IconUsersGroup size={14} />,
+      onClick: (contactId) => handleAddToGroup([contactId]),
+    },
+    {
       key: "deleteContact",
       label: "Delete contact",
       icon: <IconTrash size={14} />,
@@ -246,6 +278,15 @@ export function PeopleClient({ initialContacts, totalCount, layout = "stack" }: 
 
   // Define bulk selection actions
   const bulkSelectionActions: BulkSelectionAction[] = [
+    {
+      key: "addSelectedToGroup",
+      label: "Add to group",
+      icon: <IconUsersGroup size={16} />,
+      variant: "light",
+      onClick: (currentSelectedIds) => {
+        handleAddToGroup(Array.from(currentSelectedIds));
+      },
+    },
     {
       key: "deleteSelected",
       label: "Delete contacts",

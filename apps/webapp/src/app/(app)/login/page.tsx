@@ -36,7 +36,7 @@ export default function LoginPage() {
       setLoading(true);
 
       // Build callback URL, including the redirect param if present
-      let callbackUrl = `${process.env.NEXT_PUBLIC_WEBAPP_URL}/auth/callback`;
+      let callbackUrl = `${window.location.origin}/auth/callback`;
       if (redirectParam) {
         callbackUrl += `?redirect=${encodeURIComponent(redirectParam)}`;
       }

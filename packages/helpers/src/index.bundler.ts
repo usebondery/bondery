@@ -9,3 +9,8 @@ export {
   SOCIAL_LINKS,
 } from "./globals/paths";
 export { IMPORTANT_EVENT_TYPE_META } from "./globals/important-events";
+export { parseInstagramUsername } from "./instagram/parseInstagramUsername";
+export type {
+  ParseInstagramUsernameInput,
+  ParsedInstagramName,
+} from "./instagram/parseInstagramUsername";

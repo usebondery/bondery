@@ -13,12 +13,11 @@ import {
   rem,
   Button,
 } from "@mantine/core";
-import { modals } from "@mantine/modals";
 import { Link } from "@mantine/tiptap";
 import { useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import { notifications } from "@mantine/notifications";
-import { IconCheck, IconX, IconAlertCircle, IconTrash, IconUser } from "@tabler/icons-react";
+import { IconCheck, IconX, IconUser } from "@tabler/icons-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
@@ -54,13 +53,12 @@ import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import {
   errorNotificationTemplate,
-  loadingNotificationTemplate,
-  ModalTitle,
   successNotificationTemplate,
 } from "@bondery/mantine-next";
 import { PageWrapper } from "@/app/(app)/app/components/PageWrapper";
 import { PageHeader } from "@/app/(app)/app/components/PageHeader";
 import { revalidateContacts, revalidateRelationships } from "../../actions";
+import { openDeleteContactModal } from "@/app/(app)/app/components/contacts/openDeleteContactModal";
 
 const PersonMap = dynamic(() => import("./components/PersonMap").then((mod) => mod.PersonMap), {
   ssr: false,
@@ -798,75 +796,12 @@ export default function PersonClient({
   };
 
   const openDeleteModal = () =>
-    modals.openConfirmModal({
-      title: (
-        <ModalTitle
-          text={`Delete ${formatContactName(contact)}?`}
-          icon={<IconAlertCircle size={24} />}
-          isDangerous={true}
-        />
-      ),
-      children: (
-        <Text size="sm">
-          Are you sure you want to delete <strong>{formatContactName(contact)}</strong>? This
-          person&apos;s data, mentions, and related information will be deleted. And this action
-          cannot be restored.
-        </Text>
-      ),
-      labels: { confirm: "Yes, delete", cancel: "No, cancel" },
-      confirmProps: { color: "red", leftSection: <IconTrash size={16} /> },
-      onConfirm: async () => {
-        if (!contact || !personId) return;
-
-        // Show loading notification
-        const loadingNotification = notifications.show({
-          ...loadingNotificationTemplate({
-            title: "Deleting contact...",
-            description: "Please wait while we delete this contact",
-          }),
-          
-        });
-
-        try {
-          // API call
-          const res = await fetch(`${API_ROUTES.CONTACTS}/${personId}`, {
-            method: "DELETE",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ ids: [personId] }),
-          });
-
-          if (!res.ok) throw new Error("Failed to delete contact");
-
-          // Success - hide loading notification
-          notifications.hide(loadingNotification);
-
-          // Show success notification
-          notifications.show(
-            successNotificationTemplate({
-              title: "Success",
-              description: "Contact deleted successfully",
-              
-            }),
-          );
-
-          // Redirect to people page
-          await revalidateContacts();
-          setTimeout(() => {
-            router.push(WEBAPP_ROUTES.PEOPLE);
-          }, 500);
-        } catch {
-          // Error - hide loading notification
-          notifications.hide(loadingNotification);
-
-          // Show error notification
-          notifications.show(
-            errorNotificationTemplate({
-              title: "Error",
-              description: "Failed to delete contact. Please try again.",
-              
-            }),
-          );
-        }
+    openDeleteContactModal({
+      contactId: personId,
+      contactName: formatContactName(contact),
+      onDeleted: async () => {
+        await revalidateContacts();
+        router.push(WEBAPP_ROUTES.PEOPLE);
       },
     });
 

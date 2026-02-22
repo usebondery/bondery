@@ -1,6 +1,6 @@
 "use client";
 
-import { Text, Stack, Group, Paper, Button, TextInput } from "@mantine/core";
+import { Text, Stack, Group, Paper, Button, TextInput, Box } from "@mantine/core";
 import {
   IconUsersGroup,
   IconUser,
@@ -23,17 +23,23 @@ import type { Contact } from "@bondery/types";
 import { useDeferredValue, useMemo, useState } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { useDebouncedCallback } from "@mantine/hooks";
-import { openAddContactsToGroupModal } from "./components/AddContactsToGroupModal";
+import { openAddPeopleToGroupModal } from "../../groups/components/AddPeopleToGroupModal";
 import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import { formatContactName } from "@/lib/nameHelpers";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import { notifications } from "@mantine/notifications";
+import { modals } from "@mantine/modals";
 import {
   errorNotificationTemplate,
   loadingNotificationTemplate,
+  ModalTitle,
   successNotificationTemplate,
 } from "@bondery/mantine-next";
 import { revalidateContacts, revalidateGroups } from "../../actions";
+import { openDeleteContactModal } from "@/app/(app)/app/components/contacts/openDeleteContactModal";
+import { GroupCard } from "../../groups/components/GroupCard";
+import { openEditGroupModal } from "../../groups/components/EditGroupModal";
+import type { GroupWithCount } from "@bondery/types";
 
 interface GroupDetailClientProps {
   groupId: string;
@@ -109,8 +115,6 @@ export function GroupDetailClient({
   // Defer the columns update to prevent UI freezing
   const deferredColumns = useDeferredValue(columns);
   const visibleColumns = deferredColumns.filter((c) => c.visible);
-
-  const existingContactIds = initialContacts.map((c) => c.id);
 
   const handleSortChange = (order: SortOrder) => {
     const params = new URLSearchParams(searchParams);
@@ -322,50 +326,19 @@ export function GroupDetailClient({
     }
   };
 
-  const deleteContact = async (contactId: string) => {
-    const contactName = formatContactName(
-      initialContacts.find((c) => c.id === contactId) || ({} as Contact),
-    );
+  const deleteContact = (contactId: string) => {
+    const targetContact = initialContacts.find((contact) => contact.id === contactId);
+    const contactName = targetContact ? formatContactName(targetContact) : "this contact";
 
-    const loadingId = notifications.show({
-      ...loadingNotificationTemplate({
-        title: "Deleting contact",
-        description: `Deleting ${contactName}...`,
-      }),
+    openDeleteContactModal({
+      contactId,
+      contactName,
+      onDeleted: async () => {
+        await revalidateContacts();
+        await revalidateGroups();
+        router.refresh();
+      },
     });
-
-    try {
-      const res = await fetch(API_ROUTES.CONTACTS, {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ids: [contactId] }),
-      });
-
-      if (!res.ok) {
-        throw new Error("Failed to delete contact");
-      }
-
-      notifications.update({
-        ...successNotificationTemplate({
-          title: "Success",
-          description: `${contactName} deleted successfully`,
-        }),
-        id: loadingId,
-      });
-
-      await revalidateContacts();
-      await revalidateGroups();
-      router.refresh();
-    } catch (error) {
-      console.error("Error deleting contact", error);
-      notifications.update({
-        ...errorNotificationTemplate({
-          title: "Error",
-          description: "Could not delete contact. Please try again.",
-        }),
-        id: loadingId,
-      });
-    }
   };
 
   // Computed selection values
@@ -411,11 +384,155 @@ export function GroupDetailClient({
   ];
 
   const handleAddContacts = () => {
-    openAddContactsToGroupModal({
+    openAddPeopleToGroupModal({
       groupId,
       groupLabel,
-      existingContactIds,
     });
+  };
+
+  const groupCardData = useMemo<GroupWithCount>(
+    () => ({
+      id: groupId,
+      userId: "",
+      label: groupLabel,
+      emoji: "👥",
+      color: "",
+      createdAt: "",
+      updatedAt: "",
+      contactCount: totalCount,
+      previewContacts: initialContacts.slice(0, 3).map((contact) => ({
+        id: contact.id,
+        firstName: contact.firstName,
+        lastName: contact.lastName,
+        avatar: contact.avatar,
+      })),
+    }),
+    [groupId, groupLabel, initialContacts, totalCount],
+  );
+
+  const handleEditGroup = (group: GroupWithCount) => {
+    openEditGroupModal({
+      groupId: group.id,
+      initialLabel: group.label,
+      initialEmoji: group.emoji || "",
+      initialColor: group.color || "",
+    });
+  };
+
+  const handleDeleteGroup = (targetGroupId: string) => {
+    modals.openConfirmModal({
+      title: <ModalTitle text="Delete group?" icon={<IconTrash size={20} />} isDangerous={true} />,
+      children: (
+        <Text size="sm">
+          Are you sure you want to delete "{groupLabel}"? This action cannot be undone. The contacts
+          in this group will not be deleted.
+        </Text>
+      ),
+      labels: { confirm: "Delete", cancel: "Cancel" },
+      confirmProps: { color: "red" },
+      onConfirm: async () => {
+        const loadingNotification = notifications.show({
+          ...loadingNotificationTemplate({
+            title: "Deleting...",
+            description: `Deleting group "${groupLabel}"`,
+          }),
+        });
+
+        try {
+          const res = await fetch(`${API_ROUTES.GROUPS}/${targetGroupId}`, {
+            method: "DELETE",
+          });
+
+          if (!res.ok) throw new Error("Failed to delete group");
+
+          notifications.update({
+            ...successNotificationTemplate({
+              title: "Success",
+              description: "Group deleted successfully",
+            }),
+            id: loadingNotification,
+          });
+
+          await revalidateGroups();
+          router.push(WEBAPP_ROUTES.GROUPS);
+        } catch (error) {
+          console.error("Error deleting group:", error);
+          notifications.update({
+            ...errorNotificationTemplate({
+              title: "Error",
+              description: "Failed to delete group. Please try again.",
+            }),
+            id: loadingNotification,
+          });
+        }
+      },
+    });
+  };
+
+  const handleDuplicateGroup = async (group: GroupWithCount) => {
+    const loadingNotification = notifications.show({
+      ...loadingNotificationTemplate({
+        title: "Duplicating...",
+        description: `Duplicating group "${group.label}"`,
+      }),
+    });
+
+    try {
+      const duplicateLabel = `${group.label} (Copy)`;
+      const personIds = initialContacts.map((contact) => contact.id);
+
+      const res = await fetch(API_ROUTES.GROUPS, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          label: duplicateLabel,
+          emoji: group.emoji || "",
+          color: group.color || "",
+        }),
+      });
+
+      if (!res.ok) throw new Error("Failed to duplicate group");
+
+      const createdGroupPayload = (await res.json()) as { id?: string };
+      if (!createdGroupPayload.id) throw new Error("Failed to parse duplicated group id");
+
+      if (personIds.length > 0) {
+        const membershipRes = await fetch(
+          `${API_ROUTES.GROUPS}/${createdGroupPayload.id}/contacts`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ personIds }),
+          },
+        );
+
+        if (!membershipRes.ok) throw new Error("Failed to duplicate group members");
+      }
+
+      notifications.update({
+        ...successNotificationTemplate({
+          title: "Success",
+          description: "Group duplicated successfully",
+        }),
+        id: loadingNotification,
+      });
+
+      await revalidateGroups();
+      router.refresh();
+    } catch (error) {
+      console.error("Error duplicating group:", error);
+      notifications.update({
+        ...errorNotificationTemplate({
+          title: "Error",
+          description: "Failed to duplicate group. Please try again.",
+        }),
+        id: loadingNotification,
+      });
+    }
   };
 
   return (
@@ -423,13 +540,23 @@ export function GroupDetailClient({
       <Stack gap="xl">
         <PageHeader
           icon={IconUsersGroup}
-          title={groupLabel}
+          title="Group"
           backHref={WEBAPP_ROUTES.GROUPS}
           action={
             <Button size="md" leftSection={<IconUserPlus size={16} />} onClick={handleAddContacts}>
               Add people to group
             </Button>
           }
+        />
+
+        <GroupCard
+          group={groupCardData}
+          onClick={() => {}}
+          onAddPeople={handleAddContacts}
+          onEdit={handleEditGroup}
+          onDuplicate={handleDuplicateGroup}
+          onDelete={handleDeleteGroup}
+          interactive={false}
         />
 
         <Paper withBorder shadow="sm" radius="md" p="md">

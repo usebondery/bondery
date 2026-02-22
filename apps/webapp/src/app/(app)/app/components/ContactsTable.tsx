@@ -38,6 +38,7 @@ import { createSocialMediaUrl } from "@/lib/socialMediaHelpers";
 import type { Contact } from "@bondery/types";
 import { ActionIconLink } from "@bondery/mantine-next";
 import { PersonChip } from "./shared/PersonChip";
+import { useState } from "react";
 
 // Column definitions with labels and icons
 const COLUMN_DEFINITIONS: Record<ColumnKey, { label: string; icon: React.ReactNode }> = {
@@ -211,6 +212,8 @@ export default function ContactsTable({
   disableNameLink,
   dateLocale,
 }: ContactsTableProps) {
+  const [openedMenuContactId, setOpenedMenuContactId] = useState<string | null>(null);
+
   const dateFormatter = new Intl.DateTimeFormat(dateLocale || "en-US", {
     dateStyle: "short",
   });
@@ -331,6 +334,7 @@ export default function ContactsTable({
                               lastName: contact.lastName,
                               avatar: contact.avatar,
                             }}
+                            color={nonSelectableIds?.has(contact.id) ? "gray" : undefined}
                             isClickable={!disableNameLink}
                             size="md"
                           />
@@ -362,9 +366,22 @@ export default function ContactsTable({
                 })}
                 {effectiveMenuActions.length > 0 && (
                   <TableTd>
-                    <Menu shadow="md" position="bottom-end">
+                    <Menu
+                      shadow="md"
+                      position="bottom-end"
+                      opened={openedMenuContactId === contact.id}
+                      onChange={(opened) => setOpenedMenuContactId(opened ? contact.id : null)}
+                    >
                       <MenuTarget>
-                        <ActionIcon variant="default" aria-label="Contact actions">
+                        <ActionIcon
+                          variant="default"
+                          aria-label="Contact actions"
+                          className={
+                            openedMenuContactId === contact.id
+                              ? "button-scale-effect-active"
+                              : "button-scale-effect"
+                          }
+                        >
                           <IconDotsVertical size={16} />
                         </ActionIcon>
                       </MenuTarget>

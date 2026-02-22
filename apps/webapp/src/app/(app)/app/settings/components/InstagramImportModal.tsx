@@ -1,28 +1,46 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Alert, Anchor, Badge, Button, Group, List, Select, Stack, Text } from "@mantine/core";
+import {
+  Alert,
+  Anchor,
+  Badge,
+  Button,
+  Center,
+  Group,
+  Loader,
+  List,
+  Select,
+  Stepper,
+  Stack,
+  Text,
+  ThemeIcon,
+} from "@mantine/core";
 import { Dropzone } from "@mantine/dropzone";
 import {
   IconAlertTriangle,
+  IconArrowLeft,
   IconBrandInstagram,
+  IconChevronRight,
   IconCircleCheck,
   IconFileZip,
+  IconPlayerPlay,
   IconUpload,
   IconX,
 } from "@tabler/icons-react";
 import { notifications } from "@mantine/notifications";
 import { modals } from "@mantine/modals";
 import type { Contact, InstagramImportStrategy, InstagramPreparedContact } from "@bondery/types";
-import { errorNotificationTemplate, successNotificationTemplate } from "@bondery/mantine-next";
+import { errorNotificationTemplate, ModalTitle, successNotificationTemplate } from "@bondery/mantine-next";
 import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import ContactsTable from "@/app/(app)/app/components/ContactsTable";
 import { revalidateAll } from "../../actions";
 
-type Step = "instructions" | "upload" | "strategy" | "preview";
+type Step = "intro" | "instructions" | "upload" | "strategy" | "processing" | "preview";
 
 const INSTAGRAM_IMPORT_ROUTE = "/api/contacts/import/instagram";
+const INSTAGRAM_STEPPER_STEPS = 5;
 
 interface InstagramImportTranslations {
   SectionTitle: string;
@@ -73,6 +91,17 @@ interface InstagramImportTranslations {
   Cancel: string;
   SuccessTitle: string;
   ErrorTitle: string;
+  IntroTitle: string;
+  IntroDescription1: string;
+  IntroDescription2: string;
+  IntroDescription3: string;
+  Continue: string;
+  FilesAlertTitle: string;
+  FilesAlertDescription: string;
+  FilesAlertFileFollowing: string;
+  FilesAlertFileFollowers: string;
+  FilesAlertFileCloseFriends: string;
+  ProcessingConnections: string;
 }
 
 async function readApiResponse(response: Response): Promise<{
@@ -202,11 +231,13 @@ function sortInstagramContactsForPreview(
 
 export function InstagramImportModal({
   t,
+  modalId,
 }: {
   t: (key: keyof InstagramImportTranslations, values?: Record<string, string | number>) => string;
+  modalId?: string;
 }) {
   const router = useRouter();
-  const [step, setStep] = useState<Step>("instructions");
+  const [step, setStep] = useState<Step>("intro");
   const [isParsing, setIsParsing] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
   const [uploadedZip, setUploadedZip] = useState<File | null>(null);
@@ -246,6 +277,50 @@ export function InstagramImportModal({
   const allSelected = selectableIds.length > 0 && selectableIds.every((id) => selectedIds.has(id));
   const someSelected = selectedIds.size > 0 && !allSelected;
 
+  const activeStep =
+    step === "instructions"
+      ? 0
+      : step === "upload"
+        ? 1
+        : step === "strategy"
+          ? 2
+          : step === "processing"
+            ? 3
+            : step === "preview"
+              ? 4
+              : null;
+
+  useEffect(() => {
+    if (!modalId) {
+      return;
+    }
+
+    modals.updateModal({
+      modalId,
+      size:
+        step === "preview"
+          ? "80rem"
+          : step === "intro" || step === "instructions" || step === "upload"
+            ? "lg"
+            : "xl",
+      title: (
+        <ModalTitle
+          text={t("ModalTitle")}
+          icon={<IconBrandInstagram size={20} stroke={1.5} />}
+          rightContent={
+            activeStep !== null ? (
+              <Stepper active={activeStep} allowNextStepsSelect={false} iconSize={28}>
+                {Array.from({ length: INSTAGRAM_STEPPER_STEPS }).map((_, index) => (
+                  <Stepper.Step key={index} label=" " />
+                ))}
+              </Stepper>
+            ) : null
+          }
+        />
+      ),
+    });
+  }, [activeStep, modalId, step, t]);
+
   const handleToggleAll = () => {
     if (allSelected) {
       setSelectedIds(new Set());
@@ -280,6 +355,7 @@ export function InstagramImportModal({
     }
 
     setIsParsing(true);
+    setStep("processing");
 
     const formData = new FormData();
     formData.append("files", uploadedZip, uploadedZip.name);
@@ -322,6 +398,7 @@ export function InstagramImportModal({
           description: error instanceof Error ? error.message : t("ParseError"),
         }),
       );
+      setStep("strategy");
     } finally {
       setIsParsing(false);
     }
@@ -422,38 +499,103 @@ export function InstagramImportModal({
     }
   };
 
+  if (step === "intro") {
+    return (
+      <Stack gap="md">
+        <Group align="center" wrap="nowrap" gap="xl">
+          <ThemeIcon size={92} radius="xl" variant="light" color="pink">
+            <IconBrandInstagram size={56} />
+          </ThemeIcon>
+          <Stack gap="md">
+            <Text fw={600}>{t("IntroTitle")}</Text>
+            <Text size="sm" c="dimmed">
+              {t("IntroDescription1")}
+            </Text>
+            <Text size="sm" c="dimmed">
+              {t("IntroDescription2")}
+            </Text>
+            <Text size="sm" c="dimmed">
+              {t("IntroDescription3")}
+            </Text>
+          </Stack>
+        </Group>
+
+        <Group justify="flex-end">
+          <Button
+            onClick={() => setStep("instructions")}
+            rightSection={<IconChevronRight size={16} />}
+          >
+            {t("Continue")}
+          </Button>
+        </Group>
+      </Stack>
+    );
+  }
+
   if (step === "instructions") {
     return (
       <Stack gap="md">
-        <List type="ordered" listStyleType="decimal" withPadding spacing="sm">
-          <List.Item>
-            {t("InstructionStep1Prefix")}{" "}
-            <Anchor
-              href="https://accountscenter.instagram.com/info_and_permissions/dyi/"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              {t("InstructionStep1LinkLabel")}
-            </Anchor>
-          </List.Item>
-          <List.Item>{t("InstructionStep2")}</List.Item>
-          <List.Item>{t("InstructionStep3")}</List.Item>
-          <List>
-            <List.Item>{t("InstructionStep4")}</List.Item>
-            <List.Item>{t("InstructionStep5")}</List.Item>
-            <List.Item>{t("InstructionStep6")}</List.Item>
-          </List>
-          <List.Item>{t("InstructionStep7")}</List.Item>
-          <List.Item>{t("InstructionStep8")}</List.Item>
-          <List.Item>{t("InstructionStep9")}</List.Item>
-          <List.Item>{t("InstructionStep10")}</List.Item>
-          <List.Item>{t("InstructionStep11")}</List.Item>
-        </List>
-        <Group justify="flex-end">
-          <Button variant="default" onClick={() => modals.closeAll()}>
-            {t("Cancel")}
-          </Button>
-          <Button onClick={() => setStep("upload")}>{t("HaveZipFile")}</Button>
+        <Group align="flex-start" wrap="nowrap" gap="lg">
+          <ThemeIcon size={92} radius="xl" variant="light" color="pink">
+            <IconBrandInstagram size={56} />
+          </ThemeIcon>
+          <Stack gap="md" flex={1}>
+            <List type="ordered" listStyleType="decimal" withPadding spacing="xs" size="sm">
+              <List.Item>
+                {t("InstructionStep1Prefix")} {" "}
+                <Anchor
+                  href="https://accountscenter.instagram.com/info_and_permissions/dyi/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {t("InstructionStep1LinkLabel")}
+                </Anchor>
+              </List.Item>
+              <List.Item>{t("InstructionStep2")}</List.Item>
+              <List.Item>
+                {t("InstructionStep3")}
+                <List withPadding listStyleType="disc" spacing="xs" size="sm" mt="xs">
+                  <List.Item>{t("InstructionStep4")}</List.Item>
+                  <List.Item>{t("InstructionStep5")}</List.Item>
+                  <List.Item>{t("InstructionStep6")}</List.Item>
+                </List>
+              </List.Item>
+              <List.Item>{t("InstructionStep7")}</List.Item>
+              <List.Item>{t("InstructionStep8")}</List.Item>
+              <List.Item>{t("InstructionStep9")}</List.Item>
+              <List.Item>{t("InstructionStep10")}</List.Item>
+              <List.Item>{t("InstructionStep11")}</List.Item>
+            </List>
+
+            <Alert color="blue" variant="light">
+              <Stack gap={4}>
+                <Text size="sm" fw={600}>
+                  {t("FilesAlertTitle")}
+                </Text>
+                <Text size="sm">{t("FilesAlertDescription")}</Text>
+                <List spacing={2} size="sm">
+                  <List.Item>{t("FilesAlertFileFollowing")}</List.Item>
+                  <List.Item>{t("FilesAlertFileFollowers")}</List.Item>
+                  <List.Item>{t("FilesAlertFileCloseFriends")}</List.Item>
+                </List>
+              </Stack>
+            </Alert>
+
+            <Group justify="flex-end">
+              <Group gap="xs">
+                <Button
+                  variant="subtle"
+                  onClick={() => setStep("intro")}
+                  leftSection={<IconArrowLeft size={16} />}
+                >
+                  {t("Back")}
+                </Button>
+                <Button onClick={() => setStep("upload")} rightSection={<IconChevronRight size={16} />}>
+                  {t("HaveZipFile")}
+                </Button>
+              </Group>
+            </Group>
+          </Stack>
         </Group>
       </Stack>
     );
@@ -504,11 +646,19 @@ export function InstagramImportModal({
           onChange={handleZipInputChange}
         />
 
-        <Group justify="space-between">
-          <Button variant="subtle" onClick={() => setStep("instructions")}>
-            {t("Back")}
-          </Button>
-          <Button onClick={() => zipInputRef.current?.click()}>{t("SelectZipFile")}</Button>
+        <Group justify="flex-end">
+          <Group gap="xs">
+            <Button
+              variant="subtle"
+              onClick={() => setStep("instructions")}
+              leftSection={<IconArrowLeft size={16} />}
+            >
+              {t("Back")}
+            </Button>
+            <Button onClick={() => zipInputRef.current?.click()} leftSection={<IconFileZip size={16} />}>
+              {t("SelectZipFile")}
+            </Button>
+          </Group>
         </Group>
       </Stack>
     );
@@ -538,22 +688,37 @@ export function InstagramImportModal({
           allowDeselect={false}
         />
 
-        <Group justify="space-between">
-          <Button variant="subtle" onClick={() => setStep("upload")}>
-            {t("Back")}
-          </Button>
-          <Group>
-            <Button variant="default" onClick={() => modals.closeAll()}>
-              {t("Cancel")}
+        <Group justify="flex-end">
+          <Group gap="xs">
+            <Button
+              variant="subtle"
+              onClick={() => setStep("upload")}
+              leftSection={<IconArrowLeft size={16} />}
+            >
+              {t("Back")}
             </Button>
-            <Button variant="default" onClick={() => setStep("upload")}>
-              {t("UploadAnother")}
-            </Button>
-            <Button loading={isParsing} onClick={() => void parseUpload()}>
+            <Button
+              loading={isParsing}
+              onClick={() => void parseUpload()}
+              rightSection={<IconPlayerPlay size={16} />}
+            >
               {t("ParseUploaded")}
             </Button>
           </Group>
         </Group>
+      </Stack>
+    );
+  }
+
+  if (step === "processing") {
+    return (
+      <Stack gap="lg" py="md">
+        <Center>
+          <Stack align="center" gap="sm">
+            <Loader size="md" />
+            <Text>{t("ProcessingConnections")}</Text>
+          </Stack>
+        </Center>
       </Stack>
     );
   }
@@ -584,9 +749,6 @@ export function InstagramImportModal({
             </Badge>
           ) : null}
         </Group>
-        <Button variant="subtle" onClick={() => setStep("strategy")}>
-          {t("UploadAnother")}
-        </Button>
       </Group>
 
       {invalidContactsCount > 0 ? (
@@ -609,13 +771,14 @@ export function InstagramImportModal({
         disableNameLink
       />
 
-      <Group justify="space-between">
-        <Button variant="subtle" onClick={() => setStep("strategy")}>
-          {t("Back")}
-        </Button>
-        <Group>
-          <Button variant="default" onClick={() => modals.closeAll()}>
-            {t("Cancel")}
+      <Group justify="flex-end">
+        <Group gap="xs">
+          <Button
+            variant="subtle"
+            onClick={() => setStep("strategy")}
+            leftSection={<IconArrowLeft size={16} />}
+          >
+            {t("Back")}
           </Button>
           <Button
             leftSection={<IconBrandInstagram size={16} />}

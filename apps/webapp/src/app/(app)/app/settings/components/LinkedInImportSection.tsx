@@ -11,11 +11,13 @@ export function LinkedInImportSection() {
   const t = useTranslations("SettingsPage.DataManagement.LinkedInImport");
 
   const openImporter = () => {
+    const modalId = "linkedin-import-modal";
     modals.open({
+      modalId,
       title: <ModalTitle text={t("ModalTitle")} icon={<IconDownload size={20} stroke={1.5} />} />,
       centered: true,
-      size: "xl",
-      children: <LinkedInImportModal t={t} />,
+      size: "lg",
+      children: <LinkedInImportModal t={t} modalId={modalId} />,
     });
   };
 

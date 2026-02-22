@@ -102,7 +102,9 @@ export function PersonChip({
   const fullName = getDisplayName(person);
   const resolvedHref = href || (person ? `${WEBAPP_ROUTES.PERSON}/${person.id}` : undefined);
   const personAvatarColor = person
-    ? getAvatarColorFromName(person.firstName, person.lastName)
+    ? color === "gray"
+      ? "gray"
+      : getAvatarColorFromName(person.firstName, person.lastName)
     : undefined;
 
   const leftAvatar = person ? (

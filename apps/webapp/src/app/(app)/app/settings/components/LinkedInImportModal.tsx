@@ -2,25 +2,41 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Button, Group, Stack, Text, Alert, Badge, List, Anchor } from "@mantine/core";
+import {
+  Button,
+  Group,
+  Stack,
+  Text,
+  Alert,
+  Badge,
+  List,
+  Anchor,
+  ThemeIcon,
+  Stepper,
+  Center,
+  Loader,
+} from "@mantine/core";
 import { Dropzone } from "@mantine/dropzone";
 import {
+  IconArrowLeft,
   IconUpload,
   IconX,
   IconFileZip,
   IconBrandLinkedin,
+  IconChevronRight,
   IconCircleCheck,
   IconAlertTriangle,
 } from "@tabler/icons-react";
 import { notifications } from "@mantine/notifications";
 import { modals } from "@mantine/modals";
 import type { Contact, LinkedInPreparedContact } from "@bondery/types";
-import { errorNotificationTemplate, successNotificationTemplate } from "@bondery/mantine-next";
+import { errorNotificationTemplate, ModalTitle, successNotificationTemplate } from "@bondery/mantine-next";
 import { API_ROUTES, WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import ContactsTable from "@/app/(app)/app/components/ContactsTable";
 import { revalidateAll } from "../../actions";
 
-type Step = "instructions" | "upload" | "preview";
+type Step = "intro" | "instructions" | "upload" | "processing" | "preview";
+const LINKEDIN_STEPPER_STEPS = 4;
 
 const LINKEDIN_ACCEPTED_MIME_TYPES = [
   "application/zip",
@@ -30,6 +46,7 @@ const LINKEDIN_ACCEPTED_MIME_TYPES = [
 ] as const;
 
 interface LinkedInImportTranslations {
+  ModalTitle: string;
   InstructionStep1Prefix: string;
   InstructionStep1LinkLabel: string;
   InstructionStep2: string;
@@ -55,6 +72,15 @@ interface LinkedInImportTranslations {
   Cancel: string;
   SuccessTitle: string;
   ErrorTitle: string;
+  IntroTitle: string;
+  IntroDescription1: string;
+  IntroDescription2: string;
+  IntroDescription3: string;
+  Continue: string;
+  FilesAlertTitle: string;
+  FilesAlertDescription: string;
+  FilesAlertFileConnections: string;
+  ProcessingConnections: string;
 }
 
 function buildImportedTitle(position: string | null, company: string | null): string | null {
@@ -132,11 +158,13 @@ function sortLinkedInContactsForPreview(
 
 export function LinkedInImportModal({
   t,
+  modalId,
 }: {
   t: (key: keyof LinkedInImportTranslations, values?: Record<string, string | number>) => string;
+  modalId?: string;
 }) {
   const router = useRouter();
-  const [step, setStep] = useState<Step>("instructions");
+  const [step, setStep] = useState<Step>("intro");
   const [isParsing, setIsParsing] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
   const [parsedContacts, setParsedContacts] = useState<LinkedInPreparedContact[]>([]);
@@ -179,6 +207,48 @@ export function LinkedInImportModal({
   const allSelected = selectableIds.length > 0 && selectableIds.every((id) => selectedIds.has(id));
   const someSelected = selectedIds.size > 0 && !allSelected;
 
+  const activeStep =
+    step === "instructions"
+      ? 0
+      : step === "upload"
+        ? 1
+        : step === "processing"
+          ? 2
+          : step === "preview"
+            ? 3
+            : null;
+
+  useEffect(() => {
+    if (!modalId) {
+      return;
+    }
+
+    modals.updateModal({
+      modalId,
+      size:
+        step === "preview"
+          ? "80rem"
+          : step === "intro" || step === "instructions" || step === "upload"
+            ? "lg"
+            : "xl",
+      title: (
+        <ModalTitle
+          text={t("ModalTitle")}
+          icon={<IconBrandLinkedin size={20} stroke={1.5} />}
+          rightContent={
+            activeStep !== null ? (
+              <Stepper active={activeStep} allowNextStepsSelect={false} iconSize={28}>
+                {Array.from({ length: LINKEDIN_STEPPER_STEPS }).map((_, index) => (
+                  <Stepper.Step key={index} label=" " />
+                ))}
+              </Stepper>
+            ) : null
+          }
+        />
+      ),
+    });
+  }, [activeStep, modalId, step, t]);
+
   const handleToggleAll = () => {
     if (allSelected) {
       setSelectedIds(new Set());
@@ -208,6 +278,7 @@ export function LinkedInImportModal({
     }
 
     setIsParsing(true);
+    setStep("processing");
 
     const formData = new FormData();
     files.forEach((file) => {
@@ -246,6 +317,7 @@ export function LinkedInImportModal({
           description: error instanceof Error ? error.message : t("ParseError"),
         }),
       );
+      setStep("upload");
     } finally {
       setIsParsing(false);
     }
@@ -314,29 +386,87 @@ export function LinkedInImportModal({
     }
   };
 
+  if (step === "intro") {
+    return (
+      <Stack gap="md">
+        <Group align="flex-start" wrap="nowrap" gap="lg">
+          <ThemeIcon size={92} radius="xl" variant="light" color="blue">
+            <IconBrandLinkedin size={56} />
+          </ThemeIcon>
+          <Stack gap="md">
+            <Text fw={600}>{t("IntroTitle")}</Text>
+            <Text size="sm" c="dimmed">
+              {t("IntroDescription1")}
+            </Text>
+            <Text size="sm" c="dimmed">
+              {t("IntroDescription2")}
+            </Text>
+            <Text size="sm" c="dimmed">
+              {t("IntroDescription3")}
+            </Text>
+          </Stack>
+        </Group>
+
+        <Group justify="flex-end">
+          <Button onClick={() => setStep("instructions")} rightSection={<IconChevronRight size={16} />}>
+            {t("Continue")}
+          </Button>
+        </Group>
+      </Stack>
+    );
+  }
+
   if (step === "instructions") {
     return (
       <Stack gap="md">
-        <List type="ordered" listStyleType="decimal" withPadding spacing="sm">
-          <List.Item>
-            {t("InstructionStep1Prefix")}{" "}
-            <Anchor
-              href="https://www.linkedin.com/mypreferences/d/download-my-data"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              {t("InstructionStep1LinkLabel")}
-            </Anchor>
-          </List.Item>
+        <Group align="center" wrap="nowrap" gap="xl">
+          <ThemeIcon size={92} radius="xl" variant="light" color="blue">
+            <IconBrandLinkedin size={56} />
+          </ThemeIcon>
+          <Stack gap="md" flex={1}>
+            <List type="ordered" listStyleType="decimal" withPadding spacing="xs" size="sm">
+              <List.Item>
+                {t("InstructionStep1Prefix")} {" "}
+                <Anchor
+                  href="https://www.linkedin.com/mypreferences/d/download-my-data"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {t("InstructionStep1LinkLabel")}
+                </Anchor>
+              </List.Item>
 
-          <List.Item>{t("InstructionStep2")}</List.Item>
-          <List.Item>{t("InstructionStep3")}</List.Item>
-        </List>
-        <Group justify="flex-end">
-          <Button variant="default" onClick={() => modals.closeAll()}>
-            {t("Cancel")}
-          </Button>
-          <Button onClick={() => setStep("upload")}>{t("HaveZipFile")}</Button>
+              <List.Item>{t("InstructionStep2")}</List.Item>
+              <List.Item>{t("InstructionStep3")}</List.Item>
+            </List>
+
+            <Alert color="blue" variant="light">
+              <Stack gap={4}>
+                <Text size="sm" fw={600}>
+                  {t("FilesAlertTitle")}
+                </Text>
+                <Text size="sm">{t("FilesAlertDescription")}</Text>
+                <List spacing={2} size="sm">
+                  <List.Item>{t("FilesAlertFileConnections")}</List.Item>
+                </List>
+              </Stack>
+            </Alert>
+
+            <Group justify="flex-end">
+              <Group gap="xs">
+                <Button
+                  variant="subtle"
+                  onClick={() => setStep("intro")}
+                  leftSection={<IconArrowLeft size={16} />}
+                >
+                  {t("Back")}
+                </Button>
+                <Button onClick={() => setStep("upload")} rightSection={<IconChevronRight size={16} />}>
+                  {t("HaveZipFile")}
+                </Button>
+              </Group>
+            </Group>
+          </Stack>
         </Group>
       </Stack>
     );
@@ -391,17 +521,33 @@ export function LinkedInImportModal({
           onChange={handleFolderChange}
         />
 
-        <Group justify="space-between">
-          <Button variant="subtle" onClick={() => setStep("instructions")}>
-            {t("Back")}
-          </Button>
-          <Group>
-            <Button variant="default" onClick={() => modals.closeAll()}>
-              {t("Cancel")}
+        <Group justify="flex-end">
+          <Group gap="xs">
+            <Button
+              variant="subtle"
+              onClick={() => setStep("instructions")}
+              leftSection={<IconArrowLeft size={16} />}
+            >
+              {t("Back")}
             </Button>
-            <Button onClick={() => folderInputRef.current?.click()}>{t("SelectFolder")}</Button>
+            <Button onClick={() => folderInputRef.current?.click()} leftSection={<IconFileZip size={16} />}>
+              {t("SelectFolder")}
+            </Button>
           </Group>
         </Group>
+      </Stack>
+    );
+  }
+
+  if (step === "processing") {
+    return (
+      <Stack gap="lg" py="md">
+        <Center>
+          <Stack align="center" gap="sm">
+            <Loader size="md" />
+            <Text>{t("ProcessingConnections")}</Text>
+          </Stack>
+        </Center>
       </Stack>
     );
   }
@@ -427,9 +573,6 @@ export function LinkedInImportModal({
             </Badge>
           ) : null}
         </Group>
-        <Button variant="subtle" onClick={() => setStep("upload")}>
-          {t("UploadAnother")}
-        </Button>
       </Group>
 
       {invalidContactsCount > 0 ? (
@@ -452,13 +595,14 @@ export function LinkedInImportModal({
         disableNameLink
       />
 
-      <Group justify="space-between">
-        <Button variant="subtle" onClick={() => setStep("upload")}>
-          {t("Back")}
-        </Button>
-        <Group>
-          <Button variant="default" onClick={() => modals.closeAll()}>
-            {t("Cancel")}
+      <Group justify="flex-end">
+        <Group gap="xs">
+          <Button
+            variant="subtle"
+            onClick={() => setStep("upload")}
+            leftSection={<IconArrowLeft size={16} />}
+          >
+            {t("Back")}
           </Button>
           <Button
             leftSection={<IconBrandLinkedin size={16} />}
