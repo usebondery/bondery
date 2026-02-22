@@ -13,7 +13,11 @@ import {
   replaceContactEmails,
   replaceContactPhones,
 } from "../lib/contact-channels.js";
-import { attachContactSocialMedia, upsertContactSocialMedia } from "../lib/social-media.js";
+import {
+  attachContactSocialMedia,
+  findPersonIdBySocialMedia,
+  upsertContactSocialMedia,
+} from "../lib/social-media.js";
 import { GROUP_SELECT } from "./groups.js";
 import type {
   Contact,
@@ -28,6 +32,7 @@ import type {
   ImportantEventType,
   UpcomingReminder,
   Database,
+  SocialMediaPlatform,
 } from "@bondery/types";
 
 // Contact fields selection query for Supabase
@@ -104,6 +109,12 @@ const IMPORTANT_EVENT_TYPES: ImportantEventType[] = [
 
 const IMPORTANT_EVENT_NOTIFY_VALUES = [1, 3, 7] as const;
 
+const LOOKUP_SOCIAL_PLATFORMS: SocialMediaPlatform[] = ["instagram", "linkedin", "facebook"];
+
+function isLookupPlatform(value: string): value is (typeof LOOKUP_SOCIAL_PLATFORMS)[number] {
+  return LOOKUP_SOCIAL_PLATFORMS.includes(value as (typeof LOOKUP_SOCIAL_PLATFORMS)[number]);
+}
+
 function isRelationshipType(value: string): value is RelationshipType {
   return RELATIONSHIP_TYPES.includes(value as RelationshipType);
 }
@@ -156,6 +167,46 @@ function toImportantEvent(event: {
   };
 }
 
+function toIsoDateKey(value: string): string | null {
+  const dateOnly = value.slice(0, 10);
+  const [year, month, day] = dateOnly.split("-").map(Number);
+
+  if (!year || !month || !day) {
+    return null;
+  }
+
+  return `${year.toString().padStart(4, "0")}-${month.toString().padStart(2, "0")}-${day.toString().padStart(2, "0")}`;
+}
+
+function deriveReminderDateKey(event: {
+  event_date: string;
+  notify_on: string | null;
+  notify_days_before: number | null;
+}): string | null {
+  if (event.notify_on) {
+    return toIsoDateKey(event.notify_on);
+  }
+
+  if (event.notify_days_before === null) {
+    return null;
+  }
+
+  const eventDateKey = toIsoDateKey(event.event_date);
+  if (!eventDateKey) {
+    return null;
+  }
+
+  const [year, month, day] = eventDateKey.split("-").map(Number);
+  if (!year || !month || !day) {
+    return null;
+  }
+
+  const notificationDate = new Date(Date.UTC(year, month - 1, day));
+  notificationDate.setUTCDate(notificationDate.getUTCDate() - event.notify_days_before);
+
+  return notificationDate.toISOString().slice(0, 10);
+}
+
 function withEmptyChannels<T extends { id: string }>(
   rows: T[],
 ): Array<T & { phones: []; emails: [] }> {
@@ -191,6 +242,106 @@ function withEmptySocialMedia<
     website: null,
     signal: null,
   }));
+}
+
+/**
+ * Deletes events that would be left without participants after removing the given contacts.
+ *
+ * It only affects events owned by the current user and only events that currently include
+ * at least one of the contacts being deleted.
+ */
+async function deleteOrphanedEventsForDeletedContacts(
+  client: any,
+  userId: string,
+  contactIds: string[],
+) {
+  if (!Array.isArray(contactIds) || contactIds.length === 0) {
+    return;
+  }
+
+  const uniqueContactIds = Array.from(new Set(contactIds.filter(Boolean)));
+  if (uniqueContactIds.length === 0) {
+    return;
+  }
+
+  const { data: impactedMemberships, error: impactedMembershipsError } = await client
+    .from("event_participants")
+    .select("event_id, person_id")
+    .in("person_id", uniqueContactIds);
+
+  if (impactedMembershipsError) {
+    throw new Error(impactedMembershipsError.message);
+  }
+
+  const impactedEventIds = Array.from(
+    new Set(
+      (impactedMemberships || []).map((membership: { event_id: string }) => membership.event_id),
+    ),
+  );
+
+  if (impactedEventIds.length === 0) {
+    return;
+  }
+
+  const { data: ownedEvents, error: ownedEventsError } = await client
+    .from("events")
+    .select("id")
+    .eq("user_id", userId)
+    .in("id", impactedEventIds);
+
+  if (ownedEventsError) {
+    throw new Error(ownedEventsError.message);
+  }
+
+  const ownedEventIds = (ownedEvents || []).map((event: { id: string }) => event.id);
+
+  if (ownedEventIds.length === 0) {
+    return;
+  }
+
+  const { data: allMemberships, error: allMembershipsError } = await client
+    .from("event_participants")
+    .select("event_id, person_id")
+    .in("event_id", ownedEventIds);
+
+  if (allMembershipsError) {
+    throw new Error(allMembershipsError.message);
+  }
+
+  const deleteIdSet = new Set<string>();
+
+  for (const eventId of ownedEventIds) {
+    const participants = (allMemberships || []).filter(
+      (membership: { event_id: string; person_id: string }) => membership.event_id === eventId,
+    );
+
+    if (participants.length === 0) {
+      continue;
+    }
+
+    const allParticipantsDeleted = participants.every((membership: { person_id: string }) =>
+      uniqueContactIds.includes(membership.person_id),
+    );
+
+    if (allParticipantsDeleted) {
+      deleteIdSet.add(eventId);
+    }
+  }
+
+  const eventIdsToDelete = Array.from(deleteIdSet);
+
+  if (eventIdsToDelete.length === 0) {
+    return;
+  }
+
+  const { error: deleteEventsError } = await client
+    .from("events")
+    .delete()
+    .in("id", eventIdsToDelete);
+
+  if (deleteEventsError) {
+    throw new Error(deleteEventsError.message);
+  }
 }
 
 export async function contactRoutes(fastify: FastifyInstance) {
@@ -381,6 +532,41 @@ export async function contactRoutes(fastify: FastifyInstance) {
         return reply.status(500).send({ error: error.message });
       }
 
+      const reminderDateKeys = Array.from(
+        new Set(
+          (rows || [])
+            .map((row) => deriveReminderDateKey(row))
+            .filter((value): value is string => Boolean(value)),
+        ),
+      );
+
+      let latestDispatchByReminderDate = new Map<string, string>();
+      if (reminderDateKeys.length > 0) {
+        const { data: dispatchRows, error: dispatchError } = await client
+          .from("reminder_dispatch_log")
+          .select("reminder_date, created_at")
+          .eq("user_id", user.id)
+          .in("reminder_date", reminderDateKeys)
+          .order("created_at", { ascending: false });
+
+        if (dispatchError) {
+          return reply.status(500).send({ error: dispatchError.message });
+        }
+
+        latestDispatchByReminderDate = (dispatchRows || []).reduce((accumulator, row) => {
+          const typedRow = row as Pick<
+            Database["public"]["Tables"]["reminder_dispatch_log"]["Row"],
+            "reminder_date" | "created_at"
+          >;
+
+          if (!accumulator.has(typedRow.reminder_date)) {
+            accumulator.set(typedRow.reminder_date, typedRow.created_at);
+          }
+
+          return accumulator;
+        }, new Map<string, string>());
+      }
+
       const reminders: UpcomingReminder[] = (rows || [])
         .map((row) => {
           const person = row.person;
@@ -388,9 +574,16 @@ export async function contactRoutes(fastify: FastifyInstance) {
             return null;
           }
 
+          const reminderDateKey = deriveReminderDateKey(row);
+          const notificationSentAt = reminderDateKey
+            ? latestDispatchByReminderDate.get(reminderDateKey) || null
+            : null;
+
           return {
             event: toImportantEvent(row),
             person: toContactPreview(person),
+            notificationSent: Boolean(notificationSentAt),
+            notificationSentAt,
           };
         })
         .filter((value): value is UpcomingReminder => Boolean(value));
@@ -464,7 +657,7 @@ export async function contactRoutes(fastify: FastifyInstance) {
       const auth = await requireAuth(request, reply);
       if (!auth) return;
 
-      const { client } = auth;
+      const { client, user } = auth;
       const { ids } = request.body;
 
       if (!Array.isArray(ids) || ids.length === 0) {
@@ -473,13 +666,121 @@ export async function contactRoutes(fastify: FastifyInstance) {
         });
       }
 
-      const { error } = await client.from("people").delete().in("id", ids);
+      const uniqueIds = Array.from(new Set(ids.filter(Boolean)));
+
+      try {
+        await deleteOrphanedEventsForDeletedContacts(client, user.id, uniqueIds);
+      } catch (cleanupError) {
+        const message =
+          cleanupError instanceof Error
+            ? cleanupError.message
+            : "Failed to clean up events for deleted contacts";
+        return reply.status(500).send({ error: message });
+      }
+
+      const { error } = await client
+        .from("people")
+        .delete()
+        .eq("user_id", user.id)
+        .in("id", uniqueIds);
 
       if (error) {
         return reply.status(500).send({ error: error.message });
       }
 
       return { message: "Contacts deleted successfully" };
+    },
+  );
+
+  /**
+   * DELETE /api/contacts/:id - Delete a single contact
+   */
+  fastify.delete(
+    "/:id",
+    async (request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+      const auth = await requireAuth(request, reply);
+      if (!auth) return;
+
+      const { client, user } = auth;
+      const { id } = request.params;
+
+      try {
+        await deleteOrphanedEventsForDeletedContacts(client, user.id, [id]);
+      } catch (cleanupError) {
+        const message =
+          cleanupError instanceof Error
+            ? cleanupError.message
+            : "Failed to clean up events for deleted contact";
+        return reply.status(500).send({ error: message });
+      }
+
+      const { data: deletedContact, error } = await client
+        .from("people")
+        .delete()
+        .eq("id", id)
+        .eq("user_id", user.id)
+        .select("id")
+        .single();
+
+      if (error || !deletedContact) {
+        return reply.status(404).send({ error: "Contact not found" });
+      }
+
+      return { message: "Contact deleted successfully" };
+    },
+  );
+
+  /**
+   * GET /api/contacts/by-social - Find contact by social media platform + handle
+   */
+  fastify.get(
+    "/by-social",
+    async (
+      request: FastifyRequest<{
+        Querystring: {
+          platform?: string;
+          handle?: string;
+        };
+      }>,
+      reply: FastifyReply,
+    ) => {
+      const auth = await requireAuth(request, reply);
+      if (!auth) return;
+
+      const { client, user } = auth;
+      const platform = request.query.platform?.trim() ?? "";
+      const handle = request.query.handle?.trim() ?? "";
+
+      if (!platform || !handle || !isLookupPlatform(platform)) {
+        return reply.status(400).send({ error: "Invalid platform or handle" });
+      }
+
+      const personId = await findPersonIdBySocialMedia(client, user.id, platform, handle);
+
+      if (!personId) {
+        return { exists: false };
+      }
+
+      const { data: person, error } = await client
+        .from("people")
+        .select("id, first_name, last_name, avatar")
+        .eq("user_id", user.id)
+        .eq("id", personId)
+        .single();
+
+      if (error || !person) {
+        return reply.status(500).send({ error: error?.message ?? "Failed to find contact" });
+      }
+
+      return {
+        exists: true,
+        contact: {
+          id: person.id,
+          firstName: person.first_name,
+          lastName: person.last_name,
+          avatar: person.avatar,
+        },
+      };
     },
   );
 
