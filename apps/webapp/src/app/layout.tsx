@@ -31,7 +31,7 @@ export default async function RootLayout({
       </head>
       <body>
         <MantineProvider defaultColorScheme="auto" theme={bonderyTheme}>
-          <ModalsProvider>
+          <ModalsProvider modalProps={{ centered: true }}>
             <Notifications autoClose={5000} position="top-center" />
             {children}
           </ModalsProvider>

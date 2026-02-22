@@ -1,8 +1,10 @@
 import {
   Avatar,
   Card,
+  CloseButton,
   createTheme,
   MantineTheme,
+  Modal,
   PillsInput,
   Textarea,
   TextInput,
@@ -48,6 +50,18 @@ export const bonderyTheme = createTheme({
     Input: {
       defaultProps: {
         variant: "filled",
+      },
+    },
+    CloseButton: {
+      defaultProps: {
+        className: "button-scale-effect",
+      },
+    },
+    Modal: {
+      defaultProps: {
+        closeButtonProps: {
+          className: "button-scale-effect ",
+        },
       },
     },
     TextInput: {

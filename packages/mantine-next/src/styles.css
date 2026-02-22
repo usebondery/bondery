@@ -30,6 +30,13 @@
   filter: var(--active-filter);
 }
 
+/* .button-scale-effect:hover,
+.button-scale-effect:focus,
+.button-scale-effect:active {
+  top: 0 !important;
+  translate: 0 !important;
+} */
+
 .input-scale-effect:not(:disabled):not([data-disabled]):not([disabled]) {
   transition:
     transform var(--transition-time) var(--transition-ease),
