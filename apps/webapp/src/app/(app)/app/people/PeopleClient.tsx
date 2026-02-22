@@ -59,6 +59,7 @@ export function PeopleClient({ initialContacts, totalCount, layout = "stack" }: 
   const [contacts, setContacts] = useState<Contact[]>(initialContacts);
   const [loadedCount, setLoadedCount] = useState(initialContacts.length);
   const [totalAvailableCount, setTotalAvailableCount] = useState(totalCount);
+  const [lastSelectedIndex, setLastSelectedIndex] = useState<number | null>(null);
   const [columns, setColumns] = useState<ColumnConfig[]>([
     {
       key: "name",
@@ -155,7 +156,28 @@ export function PeopleClient({ initialContacts, totalCount, layout = "stack" }: 
     }
   };
 
-  const handleSelectOne = (id: string) => {
+  const handleSelectOne = (id: string, options?: { shiftKey?: boolean; index?: number }) => {
+    const currentIndex = options?.index ?? contacts.findIndex((contact) => contact.id === id);
+
+    if (options?.shiftKey && lastSelectedIndex !== null && currentIndex >= 0) {
+      const shouldSelect = !selectedIds.has(id);
+      const start = Math.min(lastSelectedIndex, currentIndex);
+      const end = Math.max(lastSelectedIndex, currentIndex);
+      const rangeIds = contacts.slice(start, end + 1).map((contact) => contact.id);
+
+      const newSelected = new Set(selectedIds);
+
+      if (shouldSelect) {
+        rangeIds.forEach((rangeId) => newSelected.add(rangeId));
+      } else {
+        rangeIds.forEach((rangeId) => newSelected.delete(rangeId));
+      }
+
+      setSelectedIds(newSelected);
+      setLastSelectedIndex(currentIndex);
+      return;
+    }
+
     const newSelected = new Set(selectedIds);
     if (newSelected.has(id)) {
       newSelected.delete(id);
@@ -163,6 +185,10 @@ export function PeopleClient({ initialContacts, totalCount, layout = "stack" }: 
       newSelected.add(id);
     }
     setSelectedIds(newSelected);
+
+    if (currentIndex >= 0) {
+      setLastSelectedIndex(currentIndex);
+    }
   };
 
   const handleLoadMore = async () => {

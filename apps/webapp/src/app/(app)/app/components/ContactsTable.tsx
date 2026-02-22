@@ -184,7 +184,7 @@ interface ContactsTableProps {
   selectedIds?: Set<string>;
   visibleColumns: ColumnKey[] | ColumnConfig[];
   onSelectAll?: () => void;
-  onSelectOne?: (id: string) => void;
+  onSelectOne?: (id: string, options?: { shiftKey?: boolean; index?: number }) => void;
   allSelected?: boolean;
   someSelected?: boolean;
   showSelection?: boolean;
@@ -272,10 +272,11 @@ export default function ContactsTable({
                 {col.key === "name" ? (
                   <span></span>
                 ) : (
-                  <Group gap="xs" wrap="nowrap">
-                    {col.icon}
-                    <Text>{col.label}</Text>
-                  </Group>
+                  <Tooltip label={col.label} withArrow>
+                    <Group gap="xs" wrap="nowrap" style={{ width: "fit-content" }}>
+                      {col.icon}
+                    </Group>
+                  </Tooltip>
                 )}
               </TableTh>
             ))}
@@ -298,7 +299,7 @@ export default function ContactsTable({
               </TableTd>
             </TableTr>
           ) : (
-            contacts.map((contact) => (
+            contacts.map((contact, rowIndex) => (
               <TableTr key={contact.id}>
                 {showSelection && (
                   <TableTd>
@@ -307,6 +308,7 @@ export default function ContactsTable({
                         <span>
                           <Checkbox
                             checked={selectedIds?.has(contact.id)}
+                            indeterminate
                             disabled
                             aria-label={`Select ${formatContactName(contact)}`}
                           />
@@ -315,7 +317,12 @@ export default function ContactsTable({
                     ) : (
                       <Checkbox
                         checked={selectedIds?.has(contact.id)}
-                        onChange={() => onSelectOne?.(contact.id)}
+                        onChange={(event) =>
+                          onSelectOne?.(contact.id, {
+                            shiftKey: (event.nativeEvent as MouseEvent).shiftKey,
+                            index: rowIndex,
+                          })
+                        }
                         aria-label={`Select ${formatContactName(contact)}`}
                       />
                     )}

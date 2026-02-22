@@ -51,10 +51,7 @@ import { PersonTimelineSection } from "./components/PersonTimelineSection";
 // import { ContactPGPSection } from "./components/ContactPGPSection";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
-import {
-  errorNotificationTemplate,
-  successNotificationTemplate,
-} from "@bondery/mantine-next";
+import { errorNotificationTemplate, successNotificationTemplate } from "@bondery/mantine-next";
 import { PageWrapper } from "@/app/(app)/app/components/PageWrapper";
 import { PageHeader } from "@/app/(app)/app/components/PageHeader";
 import { revalidateContacts, revalidateRelationships } from "../../actions";
@@ -461,7 +458,6 @@ export default function PersonClient({
         errorNotificationTemplate({
           title: "Validation Error",
           description: "First name is required",
-          
         }),
       );
       // Revert to original value
@@ -497,7 +493,6 @@ export default function PersonClient({
         successNotificationTemplate({
           title: "Success",
           description: `${fieldDisplayName} updated successfully`,
-          
         }),
       );
     } catch {
@@ -505,7 +500,6 @@ export default function PersonClient({
         errorNotificationTemplate({
           title: "Error",
           description: `Failed to update ${field === "pgpPublicKey" ? "PGP key" : field}`,
-          
         }),
       );
     } finally {
@@ -576,7 +570,6 @@ export default function PersonClient({
         successNotificationTemplate({
           title: "Groups updated",
           description: "Contact groups have been updated",
-          
         }),
       );
     } catch (error) {
@@ -585,7 +578,6 @@ export default function PersonClient({
         errorNotificationTemplate({
           title: "Error",
           description: "Could not update groups. Please try again.",
-          
         }),
       );
     } finally {
@@ -618,7 +610,6 @@ export default function PersonClient({
         successNotificationTemplate({
           title: tRelationships("SuccessTitle"),
           description: tRelationships("CreateSuccess"),
-          
         }),
       );
     } catch (error) {
@@ -626,7 +617,6 @@ export default function PersonClient({
         errorNotificationTemplate({
           title: tRelationships("ErrorTitle"),
           description: error instanceof Error ? error.message : tRelationships("CreateError"),
-          
         }),
       );
     } finally {
@@ -660,7 +650,6 @@ export default function PersonClient({
         successNotificationTemplate({
           title: tRelationships("SuccessTitle"),
           description: tRelationships("DeleteSuccess"),
-          
         }),
       );
     } catch (error) {
@@ -668,7 +657,6 @@ export default function PersonClient({
         errorNotificationTemplate({
           title: tRelationships("ErrorTitle"),
           description: error instanceof Error ? error.message : tRelationships("DeleteError"),
-          
         }),
       );
     } finally {
@@ -705,7 +693,6 @@ export default function PersonClient({
         successNotificationTemplate({
           title: tRelationships("SuccessTitle"),
           description: tRelationships("UpdateSuccess"),
-          
         }),
       );
     } catch (error) {
@@ -713,7 +700,6 @@ export default function PersonClient({
         errorNotificationTemplate({
           title: tRelationships("ErrorTitle"),
           description: error instanceof Error ? error.message : tRelationships("UpdateError"),
-          
         }),
       );
     } finally {

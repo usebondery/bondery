@@ -27,6 +27,8 @@ interface GroupCardProps {
   interactive?: boolean;
   selected?: boolean;
   showMenu?: boolean;
+  variant?: "default" | "small";
+  cursorType?: "pointer" | "default";
 }
 
 export function GroupCard({
@@ -39,8 +41,11 @@ export function GroupCard({
   interactive = true,
   selected = false,
   showMenu = true,
+  variant = "default",
+  cursorType,
 }: GroupCardProps) {
   const [menuOpened, setMenuOpened] = useState(false);
+  const isSmallVariant = variant === "small";
   const peopleLabel = `${group.contactCount} ${group.contactCount === 1 ? "person" : "people"}`;
   const previewContacts = group.previewContacts || [];
 
@@ -65,20 +70,25 @@ export function GroupCard({
   return (
     <Card
       shadow="sm"
-      style={{ cursor: interactive ? "pointer" : "default" }}
-      className={`max-w-88 ${interactive ? "card-scale-effect" : undefined}`}
+      p={isSmallVariant ? "sm" : undefined}
+      style={{ cursor: cursorType || (interactive ? "pointer" : "default") }}
+      className={`${isSmallVariant ? "w-full max-w-none" : "max-w-88"} ${interactive ? "card-scale-effect" : undefined}`}
       bd={selected ? "1px solid var(--mantine-primary-color-filled)" : undefined}
       bg={selected ? "var(--mantine-primary-color-light)" : undefined}
       onClick={handleCardClick}
     >
       <Stack gap="sm">
-        <Group justify="space-between" align="flex-start">
-          <Group gap="sm" align="flex-start" style={{ flex: 1 }}>
-            <Avatar size="xl" color={group.color} style={{ backgroundColor: group.color }}>
+        <Group justify="space-between" align={isSmallVariant ? "center" : "flex-start"}>
+          <Group gap="sm" align={isSmallVariant ? "center" : "flex-start"} style={{ flex: 1 }}>
+            <Avatar
+              size={isSmallVariant ? "md" : "xl"}
+              color={group.color}
+              style={{ backgroundColor: group.color }}
+            >
               {group.emoji}
             </Avatar>
             <Stack gap={6} justify="flex-start" style={{ flex: 1 }}>
-              <Text fw={600} size="xl">
+              <Text fw={600} size={isSmallVariant ? "md" : "xl"}>
                 {group.label}
               </Text>
               {previewContacts.length > 0 ? (
@@ -90,7 +100,7 @@ export function GroupCard({
                     avatar: contact.avatar,
                   }))}
                   totalCount={group.contactCount}
-                  size="md"
+                  size={isSmallVariant ? "sm" : "md"}
                 />
               ) : (
                 <Text size="sm" c="dimmed">

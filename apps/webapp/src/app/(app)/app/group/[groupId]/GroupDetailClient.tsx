@@ -40,6 +40,7 @@ import { openDeleteContactModal } from "@/app/(app)/app/components/contacts/open
 import { GroupCard } from "../../groups/components/GroupCard";
 import { openEditGroupModal } from "../../groups/components/EditGroupModal";
 import type { GroupWithCount } from "@bondery/types";
+import { openAddPeopleToGroupSelectionModal } from "../../people/components/AddPeopleToGroupSelectionModal";
 
 interface GroupDetailClientProps {
   groupId: string;
@@ -71,6 +72,7 @@ export function GroupDetailClient({
   const [searchValue, setSearchValue] = useState(initialSearch);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [isDeleting, setIsDeleting] = useState(false);
+  const [lastSelectedIndex, setLastSelectedIndex] = useState<number | null>(null);
 
   const [columns, setColumns] = useState<ColumnConfig[]>([
     {
@@ -190,7 +192,29 @@ export function GroupDetailClient({
     }
   };
 
-  const handleSelectOne = (id: string) => {
+  const handleSelectOne = (id: string, options?: { shiftKey?: boolean; index?: number }) => {
+    const currentIndex =
+      options?.index ?? filteredAndSortedContacts.findIndex((contact) => contact.id === id);
+
+    if (options?.shiftKey && lastSelectedIndex !== null && currentIndex >= 0) {
+      const shouldSelect = !selectedIds.has(id);
+      const start = Math.min(lastSelectedIndex, currentIndex);
+      const end = Math.max(lastSelectedIndex, currentIndex);
+      const rangeIds = filteredAndSortedContacts.slice(start, end + 1).map((contact) => contact.id);
+
+      const newSelected = new Set(selectedIds);
+
+      if (shouldSelect) {
+        rangeIds.forEach((rangeId) => newSelected.add(rangeId));
+      } else {
+        rangeIds.forEach((rangeId) => newSelected.delete(rangeId));
+      }
+
+      setSelectedIds(newSelected);
+      setLastSelectedIndex(currentIndex);
+      return;
+    }
+
     const newSelected = new Set(selectedIds);
     if (newSelected.has(id)) {
       newSelected.delete(id);
@@ -198,6 +222,10 @@ export function GroupDetailClient({
       newSelected.add(id);
     }
     setSelectedIds(newSelected);
+
+    if (currentIndex >= 0) {
+      setLastSelectedIndex(currentIndex);
+    }
   };
 
   const handleBulkRemoveFromGroup = async () => {
@@ -341,6 +369,14 @@ export function GroupDetailClient({
     });
   };
 
+  const handleAddToGroups = (personIds: string[]) => {
+    if (personIds.length === 0) {
+      return;
+    }
+
+    openAddPeopleToGroupSelectionModal({ personIds });
+  };
+
   // Computed selection values
   const allSelected =
     filteredAndSortedContacts.length > 0 && selectedIds.size === filteredAndSortedContacts.length;
@@ -348,6 +384,13 @@ export function GroupDetailClient({
 
   // Define bulk selection actions
   const bulkSelectionActions = [
+    {
+      key: "addToGroups",
+      label: "Add to groups",
+      icon: <IconUsersGroup size={16} />,
+      variant: "light" as const,
+      onClick: () => handleAddToGroups(Array.from(selectedIds)),
+    },
     {
       key: "removeFromGroup",
       label: "Remove from group",
@@ -368,6 +411,12 @@ export function GroupDetailClient({
 
   // Define menu actions for individual contacts
   const menuActions: MenuAction[] = [
+    {
+      key: "addToGroups",
+      label: "Add to groups",
+      icon: <IconUsersGroup size={14} />,
+      onClick: (contactId) => handleAddToGroups([contactId]),
+    },
     {
       key: "removeFromGroup",
       label: "Remove from group",
