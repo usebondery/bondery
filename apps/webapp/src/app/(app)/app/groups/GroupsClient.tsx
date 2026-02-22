@@ -4,7 +4,7 @@ import { useMemo } from "react";
 import { Text, Button, Stack, Group, Paper, SimpleGrid } from "@mantine/core";
 import { modals } from "@mantine/modals";
 import { notifications } from "@mantine/notifications";
-import { IconTrash, IconUsersGroup, IconUsersPlus } from "@tabler/icons-react";
+import { IconCopy, IconTrash, IconUsersGroup, IconUsersPlus } from "@tabler/icons-react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { PageHeader } from "@/app/(app)/app/components/PageHeader";
 import { PageWrapper } from "@/app/(app)/app/components/PageWrapper";
@@ -129,6 +129,79 @@ export function GroupsClient({ initialGroups, totalCount }: GroupsClientProps) {
     });
   };
 
+  const handleDuplicateGroup = async (group: GroupWithCount) => {
+    const loadingNotification = notifications.show({
+      ...loadingNotificationTemplate({
+        title: "Duplicating...",
+        description: `Duplicating group "${group.label}"`,
+      }),
+    });
+
+    try {
+      const duplicateLabel = `${group.label} (Copy)`;
+
+      const groupContactsRes = await fetch(`${API_ROUTES.GROUPS}/${group.id}/contacts`);
+      if (!groupContactsRes.ok) throw new Error("Failed to fetch group members");
+
+      const groupContactsPayload = (await groupContactsRes.json()) as {
+        contacts?: Array<{ id: string }>;
+      };
+      const personIds = (groupContactsPayload.contacts || []).map((contact) => contact.id);
+
+      const res = await fetch(API_ROUTES.GROUPS, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          label: duplicateLabel,
+          emoji: group.emoji || "",
+          color: group.color || "",
+        }),
+      });
+
+      if (!res.ok) throw new Error("Failed to duplicate group");
+
+      const createdGroupPayload = (await res.json()) as { id?: string };
+      if (!createdGroupPayload.id) throw new Error("Failed to parse duplicated group id");
+
+      if (personIds.length > 0) {
+        const membershipRes = await fetch(
+          `${API_ROUTES.GROUPS}/${createdGroupPayload.id}/contacts`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ personIds }),
+          },
+        );
+
+        if (!membershipRes.ok) throw new Error("Failed to duplicate group members");
+      }
+
+      notifications.update({
+        ...successNotificationTemplate({
+          title: "Success",
+          description: "Group duplicated successfully",
+        }),
+        id: loadingNotification,
+      });
+
+      await revalidateGroups();
+      router.refresh();
+    } catch (error) {
+      console.error("Error duplicating group:", error);
+      notifications.update({
+        ...errorNotificationTemplate({
+          title: "Error",
+          description: "Failed to duplicate group. Please try again.",
+        }),
+        id: loadingNotification,
+      });
+    }
+  };
+
   return (
     <PageWrapper>
       <Stack gap="xl">
@@ -161,6 +234,7 @@ export function GroupsClient({ initialGroups, totalCount }: GroupsClientProps) {
                     group={group}
                     onClick={handleCardClick}
                     onEdit={handleEditGroup}
+                    onDuplicate={handleDuplicateGroup}
                     onDelete={handleDeleteGroup}
                   />
                 ))}

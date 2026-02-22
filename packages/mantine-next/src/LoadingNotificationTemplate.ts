@@ -24,6 +24,5 @@ export function loadingNotificationTemplate({
     color: "blue",
     icon,
     loading: true,
-    autoClose: false,
   };
 }

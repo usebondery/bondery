@@ -12,7 +12,7 @@ import {
   Avatar,
   Stack,
 } from "@mantine/core";
-import { IconDotsVertical, IconEdit, IconTrash } from "@tabler/icons-react";
+import { IconCopy, IconDotsVertical, IconEdit, IconTrash } from "@tabler/icons-react";
 import { useMemo, useState, type MouseEvent } from "react";
 import type { GroupWithCount } from "@bondery/types";
 import { PeopleAvatarChips } from "../../components/timeline/PeopleAvatarChips";
@@ -20,11 +20,12 @@ import { PeopleAvatarChips } from "../../components/timeline/PeopleAvatarChips";
 interface GroupCardProps {
   group: GroupWithCount;
   onEdit: (group: GroupWithCount) => void;
+  onDuplicate: (group: GroupWithCount) => void;
   onDelete: (groupId: string) => void;
   onClick: (groupId: string) => void;
 }
 
-export function GroupCard({ group, onEdit, onDelete, onClick }: GroupCardProps) {
+export function GroupCard({ group, onEdit, onDuplicate, onDelete, onClick }: GroupCardProps) {
   const [menuOpened, setMenuOpened] = useState(false);
   const peopleLabel = `${group.contactCount} ${group.contactCount === 1 ? "person" : "people"}`;
   const previewContacts = group.previewContacts || [];
@@ -102,6 +103,16 @@ export function GroupCard({ group, onEdit, onDelete, onClick }: GroupCardProps) 
                 }}
               >
                 Edit
+              </MenuItem>
+              <MenuItem
+                leftSection={<IconCopy size={16} />}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setMenuOpened(false);
+                  onDuplicate(group);
+                }}
+              >
+                Duplicate
               </MenuItem>
               <MenuItem
                 leftSection={<IconTrash size={16} />}
