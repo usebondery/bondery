@@ -806,11 +806,6 @@ components:
           nullable: true
           description: Location or workplace
           example: San Francisco, CA
-        description:
-          type: string
-          nullable: true
-          description: Brief description
-          example: Met at tech conference
         notes:
           type: string
           nullable: true
@@ -986,10 +981,6 @@ components:
           type: string
           nullable: true
           example: San Francisco, CA
-        description:
-          type: string
-          nullable: true
-          example: Met at tech conference
         notes:
           type: string
           nullable: true

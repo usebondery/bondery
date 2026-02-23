@@ -37,7 +37,6 @@ const CONTACT_SELECT = `
   lastName:last_name,
   title,
   place,
-  description,
   notes,
   avatar,
   lastInteraction:last_interaction,
