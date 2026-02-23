@@ -100,7 +100,6 @@ BEGIN
     pgp_public_key,
     location,
     place,
-    description,
     notes,
     created_at,
     updated_at
@@ -125,8 +124,7 @@ BEGIN
       '-----BEGIN PGP PUBLIC KEY BLOCK-----\nSEED-ADA\n-----END PGP PUBLIC KEY BLOCK-----',
       extensions.ST_GeogFromText('POINT(-0.1278 51.5074)'),
       'London',
-      'Early computing pioneer',
-      'Sample seeded contact with rich profile data',
+      'Sample seeded contact with rich profile data\n\nEarly computing pioneer',
       '2026-01-15T11:00:00+00',
       '2026-02-18T10:00:00+00'
     ),
@@ -149,8 +147,7 @@ BEGIN
       '-----BEGIN PGP PUBLIC KEY BLOCK-----\nSEED-GRACE\n-----END PGP PUBLIC KEY BLOCK-----',
       extensions.ST_GeogFromText('POINT(-74.0060 40.7128)'),
       'New York',
-      'Invented one of the first compilers',
-      'Sample seeded contact with rich profile data',
+      'Sample seeded contact with rich profile data\n\nInvented one of the first compilers',
       '2026-01-20T13:30:00+00',
       '2026-02-18T10:05:00+00'
     ),
@@ -173,8 +170,7 @@ BEGIN
       '-----BEGIN PGP PUBLIC KEY BLOCK-----\nSEED-KATHERINE\n-----END PGP PUBLIC KEY BLOCK-----',
       extensions.ST_GeogFromText('POINT(-77.4605 37.5407)'),
       'Richmond',
-      'Orbital mechanics specialist',
-      'Prefers morning check-ins and concise notes',
+      'Prefers morning check-ins and concise notes\n\nOrbital mechanics specialist',
       '2026-01-25T10:10:00+00',
       '2026-02-18T10:10:00+00'
     ),
@@ -197,8 +193,7 @@ BEGIN
       '-----BEGIN PGP PUBLIC KEY BLOCK-----\nSEED-TURING\n-----END PGP PUBLIC KEY BLOCK-----',
       extensions.ST_GeogFromText('POINT(-1.2577 51.7520)'),
       'Oxford',
-      'Computing theorist and cryptanalyst',
-      'Interested in AI safety updates',
+      'Interested in AI safety updates\n\nComputing theorist and cryptanalyst',
       '2026-01-28T09:00:00+00',
       '2026-02-18T10:20:00+00'
     )
@@ -221,7 +216,6 @@ BEGIN
     pgp_public_key = EXCLUDED.pgp_public_key,
     location = EXCLUDED.location,
     place = EXCLUDED.place,
-    description = EXCLUDED.description,
     notes = EXCLUDED.notes,
     created_at = EXCLUDED.created_at,
     updated_at = EXCLUDED.updated_at;

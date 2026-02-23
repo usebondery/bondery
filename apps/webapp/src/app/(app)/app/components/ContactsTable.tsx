@@ -26,7 +26,6 @@ import {
   IconUser,
   IconBriefcase,
   IconMapPin,
-  IconNote,
   IconClock,
   IconDotsVertical,
   IconTrash,
@@ -45,7 +44,6 @@ const COLUMN_DEFINITIONS: Record<ColumnKey, { label: string; icon: React.ReactNo
   name: { label: "Name", icon: <IconUser size={16} /> },
   title: { label: "Title", icon: <IconBriefcase size={16} /> },
   place: { label: "Place", icon: <IconMapPin size={16} /> },
-  shortNote: { label: "Short Note", icon: <IconNote size={16} /> },
   lastInteraction: { label: "Last Interaction", icon: <IconClock size={16} /> },
   social: { label: "Social Media", icon: <IconBrandLinkedin size={16} /> },
 };
@@ -151,7 +149,7 @@ function ContactSocialIcons({ contact }: { contact: Contact }) {
   );
 }
 
-export type ColumnKey = "name" | "title" | "place" | "shortNote" | "lastInteraction" | "social";
+export type ColumnKey = "name" | "title" | "place" | "lastInteraction" | "social";
 
 export interface ColumnConfig {
   key: ColumnKey;
@@ -351,8 +349,6 @@ export default function ContactsTable({
                       return <TableTd key={col.key}>{contact.title || "-"}</TableTd>;
                     case "place":
                       return <TableTd key={col.key}>{contact.place || "-"}</TableTd>;
-                    case "shortNote":
-                      return <TableTd key={col.key}>{contact.description}</TableTd>;
                     case "lastInteraction":
                       return (
                         <TableTd key={col.key}>

@@ -11,7 +11,6 @@ import {
   IconUser,
   IconBriefcase,
   IconMapPin,
-  IconNote,
   IconClock,
   IconBrandLinkedin,
 } from "@tabler/icons-react";
@@ -79,12 +78,6 @@ export function PeopleClient({ initialContacts, totalCount, layout = "stack" }: 
       label: "Place",
       visible: true,
       icon: <IconMapPin size={16} />,
-    },
-    {
-      key: "shortNote",
-      label: "Short Note",
-      visible: true,
-      icon: <IconNote size={16} />,
     },
     {
       key: "lastInteraction",

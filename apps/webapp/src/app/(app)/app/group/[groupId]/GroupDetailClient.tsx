@@ -6,7 +6,6 @@ import {
   IconUser,
   IconBriefcase,
   IconMapPin,
-  IconNote,
   IconClock,
   IconBrandLinkedin,
   IconUserPlus,
@@ -93,12 +92,6 @@ export function GroupDetailClient({
       label: "Place",
       visible: true,
       icon: <IconMapPin size={16} />,
-    },
-    {
-      key: "shortNote",
-      label: "Short Note",
-      visible: true,
-      icon: <IconNote size={16} />,
     },
     {
       key: "lastInteraction",

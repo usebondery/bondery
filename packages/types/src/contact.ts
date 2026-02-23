@@ -83,7 +83,6 @@ export interface Contact {
   lastName: string | null;
   title: string | null;
   place: string | null;
-  description: string | null;
   notes: string | null;
   avatar: string | null;
   lastInteraction: string | null;

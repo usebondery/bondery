@@ -27,7 +27,6 @@ import type {
 } from "@bondery/types";
 import { ContactActionMenu } from "./components/ContactActionMenu";
 import { ContactIdentitySection } from "./components/ContactIdentitySection";
-import { ContactBioSection } from "./components/ContactBioSection";
 import { ContactPreferenceSection } from "./components/ContactPreferenceSection";
 import { ContactRelationshipsSection } from "./components/ContactRelationshipsSection";
 import { ContactNotesSection } from "./components/ContactNotesSection";
@@ -164,7 +163,6 @@ export default function PersonClient({
         lastName: contact.lastName || "",
         title: contact.title || "",
         place: contact.place || "",
-        description: contact.description || "",
         notes: contact.notes || "",
         linkedin: contact.linkedin || "",
         instagram: contact.instagram || "",
@@ -786,18 +784,6 @@ export default function PersonClient({
             </Stack>
 
             <Divider />
-
-            <ContactBioSection
-              editedValues={editedValues}
-              savingField={savingField}
-              focusedField={focusedField}
-              setFocusedField={setFocusedField}
-              handleChange={handleChange}
-              handleBlur={handleBlur}
-            />
-
-            <Divider />
-
             <ContactPreferenceSection
               contact={contact}
               savingField={savingField}

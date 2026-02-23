@@ -129,7 +129,6 @@ export type Database = {
           avatar: string | null;
           connections: string[] | null;
           created_at: string | null;
-          description: string | null;
           first_name: string;
           gender: string | null;
           id: string;
@@ -155,7 +154,6 @@ export type Database = {
           avatar?: string | null;
           connections?: string[] | null;
           created_at?: string | null;
-          description?: string | null;
           first_name: string;
           gender?: string | null;
           id?: string;
@@ -181,7 +179,6 @@ export type Database = {
           avatar?: string | null;
           connections?: string[] | null;
           created_at?: string | null;
-          description?: string | null;
           first_name?: string;
           gender?: string | null;
           id?: string;
