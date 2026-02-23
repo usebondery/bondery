@@ -9,6 +9,7 @@ export {
   STATUS_PAGE_URL,
   SOCIAL_LINKS,
 } from "./globals/paths.js";
+export { SOCIAL_PLATFORM_URL_DETAILS } from "./globals/social-platform-urls.js";
 export { IMPORTANT_EVENT_TYPE_META } from "./globals/important-events.js";
 export { parseInstagramUsername } from "./instagram/parseInstagramUsername.js";
 export type {

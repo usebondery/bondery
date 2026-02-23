@@ -48,6 +48,7 @@ import { revalidateContacts, revalidateRelationships } from "../../actions";
 import { openDeleteContactModal } from "@/app/(app)/app/components/contacts/openDeleteContactModal";
 import { GroupCard } from "../../groups/components/GroupCard";
 import { openAddPeopleToGroupSelectionModal } from "../../people/components/AddPeopleToGroupSelectionModal";
+import { openMergeWithModal } from "../../people/components/MergeWithModal";
 
 const PersonMap = dynamic(() => import("./components/PersonMap").then((mod) => mod.PersonMap), {
   ssr: false,
@@ -80,6 +81,7 @@ export default function PersonClient({
   const router = useRouter();
   const tRelationships = useTranslations("PersonRelationships");
   const tImportantDates = useTranslations("ContactImportantDates");
+  const tMerge = useTranslations("MergeWithModal");
 
   const [contact, setContact] = useState<Contact>(initialContact);
   const [personGroups, setPersonGroups] = useState<GroupType[]>(initialPersonGroups);
@@ -686,6 +688,22 @@ export default function PersonClient({
       },
     });
 
+  const openMergeWithModalForCurrentPerson = () => {
+    const mergeContacts = [contact, ...initialSelectableContacts].reduce<Contact[]>((acc, item) => {
+      if (!acc.some((existing) => existing.id === item.id)) {
+        acc.push(item);
+      }
+      return acc;
+    }, []);
+
+    openMergeWithModal({
+      contacts: mergeContacts,
+      leftPersonId: contact.id,
+      disableLeftPicker: true,
+      titleText: tMerge("ActionLabel"),
+    });
+  };
+
   return (
     <PageWrapper>
       <Stack gap="xl">
@@ -700,7 +718,12 @@ export default function PersonClient({
             router.push(WEBAPP_ROUTES.PEOPLE);
           }}
           action={
-            <ContactActionMenu contact={contact} personId={personId} onDelete={openDeleteModal} />
+            <ContactActionMenu
+              contact={contact}
+              personId={personId}
+              onDelete={openDeleteModal}
+              onMergeWith={openMergeWithModalForCurrentPerson}
+            />
           }
         />
 
