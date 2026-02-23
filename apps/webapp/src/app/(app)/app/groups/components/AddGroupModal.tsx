@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   Stack,
@@ -19,6 +19,7 @@ import { IconUsersGroup } from "@tabler/icons-react";
 import {
   errorNotificationTemplate,
   loadingNotificationTemplate,
+  ModalFooter,
   ModalTitle,
   successNotificationTemplate,
 } from "@bondery/mantine-next";
@@ -48,17 +49,29 @@ function getRandomColor(): string {
 }
 
 export function openAddGroupModal() {
+  const modalId = `add-group-${Math.random().toString(36).slice(2)}`;
+
   modals.open({
+    modalId,
     title: <ModalTitle text="Add new group" icon={<IconUsersGroup size={24} />} />,
     trapFocus: true,
     size: "md",
-    children: <AddGroupForm />,
+    children: <AddGroupForm modalId={modalId} />,
   });
 }
 
-function AddGroupForm() {
+function AddGroupForm({ modalId }: { modalId: string }) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    modals.updateModal({
+      modalId,
+      closeOnEscape: !isSubmitting,
+      closeOnClickOutside: !isSubmitting,
+      withCloseButton: !isSubmitting,
+    });
+  }, [isSubmitting, modalId]);
 
   const form = useForm({
     mode: "controlled",
@@ -114,7 +127,7 @@ function AddGroupForm() {
         }),
       );
 
-      modals.closeAll();
+      modals.close(modalId);
       await revalidateGroups();
       router.refresh();
     } catch (error) {
@@ -165,14 +178,16 @@ function AddGroupForm() {
           {...form.getInputProps("color")}
         />
 
-        <Group justify="flex-end" gap="sm" mt="md">
-          <Button variant="default" onClick={() => modals.closeAll()} disabled={isSubmitting}>
-            Cancel
-          </Button>
-          <Button type="submit" loading={isSubmitting} leftSection={<IconUsersGroup size={16} />}>
-            Create group
-          </Button>
-        </Group>
+        <ModalFooter
+          cancelLabel="Cancel"
+          onCancel={() => modals.close(modalId)}
+          cancelDisabled={isSubmitting}
+          actionLabel="Create group"
+          actionType="submit"
+          actionLoading={isSubmitting}
+          actionDisabled={isSubmitting}
+          actionLeftSection={<IconUsersGroup size={16} />}
+        />
       </Stack>
     </form>
   );

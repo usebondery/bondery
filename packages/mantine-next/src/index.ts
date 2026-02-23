@@ -3,6 +3,7 @@ export { ActionIconLink, type ActionIconLinkProps } from "./ActionIconLink";
 export { ButtonLink, type ButtonLinkProps } from "./ButtonLink";
 export { LogoIcon, type LogoIconProps } from "./LogoIcon";
 export { ModalTitle, type ModalTitleProps } from "./ModalTitle";
+export { ModalFooter, type ModalFooterProps } from "./ModalFooter";
 export {
   successNotificationTemplate,
   type SuccessNotificationTemplateProps,

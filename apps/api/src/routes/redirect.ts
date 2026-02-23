@@ -88,6 +88,8 @@ export async function redirectRoutes(fastify: FastifyInstance) {
 
       let existingContact: {
         id: string;
+        first_name: string | null;
+        last_name: string | null;
         avatar: string | null;
         title: string | null;
         place: string | null;
@@ -96,7 +98,7 @@ export async function redirectRoutes(fastify: FastifyInstance) {
       if (existingContactId) {
         const { data: contactData, error: lookupError } = await client
           .from("people")
-          .select("id, avatar, title, place")
+          .select("id, first_name, last_name, avatar, title, place")
           .eq("user_id", user.id)
           .eq("id", existingContactId)
           .single();
@@ -125,7 +127,13 @@ export async function redirectRoutes(fastify: FastifyInstance) {
           await client.from("people").update({ place }).eq("id", existingContact.id);
         }
 
-        return { contactId: existingContact.id, existed: true };
+        return {
+          contactId: existingContact.id,
+          existed: true,
+          firstName: existingContact.first_name ?? undefined,
+          lastName: existingContact.last_name,
+          avatar: existingContact.avatar,
+        };
       }
 
       // Create new contact

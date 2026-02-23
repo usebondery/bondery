@@ -33,6 +33,7 @@ import { notifications } from "@mantine/notifications";
 import { modals } from "@mantine/modals";
 import type { Contact, InstagramImportStrategy, InstagramPreparedContact } from "@bondery/types";
 import {
+  ModalFooter,
   errorNotificationTemplate,
   ModalTitle,
   successNotificationTemplate,
@@ -300,6 +301,9 @@ export function InstagramImportModal({
 
     modals.updateModal({
       modalId,
+      closeOnEscape: !(isParsing || isImporting || step === "processing"),
+      closeOnClickOutside: !(isParsing || isImporting || step === "processing"),
+      withCloseButton: !(isParsing || isImporting || step === "processing"),
       size:
         step === "preview"
           ? "80rem"
@@ -322,7 +326,7 @@ export function InstagramImportModal({
         />
       ),
     });
-  }, [activeStep, modalId, step, t]);
+  }, [activeStep, isImporting, isParsing, modalId, step, t]);
 
   const handleToggleAll = () => {
     if (allSelected) {
@@ -523,14 +527,11 @@ export function InstagramImportModal({
           </Stack>
         </Group>
 
-        <Group justify="flex-end">
-          <Button
-            onClick={() => setStep("instructions")}
-            rightSection={<IconChevronRight size={16} />}
-          >
-            {t("Continue")}
-          </Button>
-        </Group>
+        <ModalFooter
+          actionLabel={t("Continue")}
+          onAction={() => setStep("instructions")}
+          actionRightSection={<IconChevronRight size={16} />}
+        />
       </Stack>
     );
   }
@@ -584,23 +585,13 @@ export function InstagramImportModal({
               </Stack>
             </Alert>
 
-            <Group justify="flex-end">
-              <Group gap="xs">
-                <Button
-                  variant="subtle"
-                  onClick={() => setStep("intro")}
-                  leftSection={<IconArrowLeft size={16} />}
-                >
-                  {t("Back")}
-                </Button>
-                <Button
-                  onClick={() => setStep("upload")}
-                  rightSection={<IconChevronRight size={16} />}
-                >
-                  {t("HaveZipFile")}
-                </Button>
-              </Group>
-            </Group>
+            <ModalFooter
+              backLabel={t("Back")}
+              onBack={() => setStep("intro")}
+              actionLabel={t("HaveZipFile")}
+              onAction={() => setStep("upload")}
+              actionRightSection={<IconChevronRight size={16} />}
+            />
           </Stack>
         </Group>
       </Stack>
@@ -652,23 +643,13 @@ export function InstagramImportModal({
           onChange={handleZipInputChange}
         />
 
-        <Group justify="flex-end">
-          <Group gap="xs">
-            <Button
-              variant="subtle"
-              onClick={() => setStep("instructions")}
-              leftSection={<IconArrowLeft size={16} />}
-            >
-              {t("Back")}
-            </Button>
-            <Button
-              onClick={() => zipInputRef.current?.click()}
-              leftSection={<IconFileZip size={16} />}
-            >
-              {t("SelectZipFile")}
-            </Button>
-          </Group>
-        </Group>
+        <ModalFooter
+          backLabel={t("Back")}
+          onBack={() => setStep("instructions")}
+          actionLabel={t("SelectZipFile")}
+          onAction={() => zipInputRef.current?.click()}
+          actionLeftSection={<IconFileZip size={16} />}
+        />
       </Stack>
     );
   }
@@ -697,24 +678,18 @@ export function InstagramImportModal({
           allowDeselect={false}
         />
 
-        <Group justify="flex-end">
-          <Group gap="xs">
-            <Button
-              variant="subtle"
-              onClick={() => setStep("upload")}
-              leftSection={<IconArrowLeft size={16} />}
-            >
-              {t("Back")}
-            </Button>
-            <Button
-              loading={isParsing}
-              onClick={() => void parseUpload()}
-              rightSection={<IconPlayerPlay size={16} />}
-            >
-              {t("ParseUploaded")}
-            </Button>
-          </Group>
-        </Group>
+        <ModalFooter
+          backLabel={t("Back")}
+          onBack={() => setStep("upload")}
+          backDisabled={isParsing}
+          actionLabel={t("ParseUploaded")}
+          onAction={() => {
+            void parseUpload();
+          }}
+          actionLoading={isParsing}
+          actionDisabled={isParsing}
+          actionRightSection={!isParsing ? <IconPlayerPlay size={16} /> : undefined}
+        />
       </Stack>
     );
   }
@@ -780,24 +755,18 @@ export function InstagramImportModal({
         disableNameLink
       />
 
-      <Group justify="flex-end">
-        <Group gap="xs">
-          <Button
-            variant="subtle"
-            onClick={() => setStep("strategy")}
-            leftSection={<IconArrowLeft size={16} />}
-          >
-            {t("Back")}
-          </Button>
-          <Button
-            leftSection={<IconBrandInstagram size={16} />}
-            loading={isImporting}
-            onClick={handleImport}
-          >
-            {t("ImportSelected", { count: selectedIds.size })}
-          </Button>
-        </Group>
-      </Group>
+      <ModalFooter
+        backLabel={t("Back")}
+        onBack={() => setStep("strategy")}
+        backDisabled={isImporting}
+        actionLabel={t("ImportSelected", { count: selectedIds.size })}
+        onAction={() => {
+          void handleImport();
+        }}
+        actionLeftSection={!isImporting ? <IconBrandInstagram size={16} /> : undefined}
+        actionLoading={isImporting}
+        actionDisabled={isImporting}
+      />
     </Stack>
   );
 }

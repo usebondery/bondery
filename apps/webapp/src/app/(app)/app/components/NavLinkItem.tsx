@@ -6,7 +6,7 @@ import { ComponentType } from "react";
 import { useHover } from "@mantine/hooks";
 
 export interface NavLinkItemProps {
-  href: string;
+  href?: string;
   label: string;
   icon: ComponentType<{ size?: number; stroke?: number }>;
   active: boolean;
@@ -14,6 +14,10 @@ export interface NavLinkItemProps {
 
 export function NavLinkItem({ href, label, icon: Icon, active }: NavLinkItemProps) {
   const { hovered, ref } = useHover();
+
+  if (!href) {
+    return null;
+  }
 
   return (
     <NavLink

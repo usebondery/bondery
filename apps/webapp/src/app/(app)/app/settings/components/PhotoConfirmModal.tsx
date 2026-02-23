@@ -1,6 +1,7 @@
 "use client";
 
-import { Button, Group, Stack } from "@mantine/core";
+import { Group, Stack } from "@mantine/core";
+import { ModalFooter } from "@bondery/mantine-next";
 import { UserAvatar } from "@/app/(app)/app/components/UserAvatar";
 
 interface PhotoConfirmModalProps {
@@ -25,12 +26,12 @@ export function PhotoConfirmModal({
       <Group justify="center">
         <UserAvatar avatarUrl={preview} userName="Preview" size={200} />
       </Group>
-      <Group justify="flex-end">
-        <Button variant="default" onClick={onCancel}>
-          {translations.Cancel}
-        </Button>
-        <Button onClick={onConfirm}>{translations.ConfirmPhoto}</Button>
-      </Group>
+      <ModalFooter
+        cancelLabel={translations.Cancel}
+        onCancel={onCancel}
+        actionLabel={translations.ConfirmPhoto}
+        onAction={onConfirm}
+      />
     </Stack>
   );
 }

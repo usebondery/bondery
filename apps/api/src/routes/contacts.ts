@@ -4,6 +4,7 @@
  */
 
 import type { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { requireAuth } from "../lib/supabase.js";
 import { generateVCard } from "../lib/vcard.js";
 import {
@@ -33,6 +34,13 @@ import type {
   UpcomingReminder,
   Database,
   SocialMediaPlatform,
+  MergeContactsRequest,
+  MergeContactsResponse,
+  MergeConflictField,
+  MergeConflictChoice,
+  MergeRecommendationReason,
+  MergeRecommendationsResponse,
+  RefreshMergeRecommendationsResponse,
 } from "@bondery/types";
 
 // Contact fields selection query for Supabase
@@ -109,6 +117,417 @@ const IMPORTANT_EVENT_TYPES: ImportantEventType[] = [
 const IMPORTANT_EVENT_NOTIFY_VALUES = [1, 3, 7] as const;
 
 const LOOKUP_SOCIAL_PLATFORMS: SocialMediaPlatform[] = ["instagram", "linkedin", "facebook"];
+
+const MERGEABLE_SCALAR_FIELDS = {
+  firstName: "first_name",
+  middleName: "middle_name",
+  lastName: "last_name",
+  title: "title",
+  place: "place",
+  notes: "notes",
+  lastInteraction: "last_interaction",
+  connections: "connections",
+  position: "position",
+  gender: "gender",
+  language: "language",
+  timezone: "timezone",
+  nickname: "nickname",
+  pgpPublicKey: "pgp_public_key",
+  location: "location",
+  latitude: "latitude",
+  longitude: "longitude",
+} as const;
+
+const MERGEABLE_SOCIAL_FIELDS: Record<
+  Extract<
+    MergeConflictField,
+    "linkedin" | "instagram" | "whatsapp" | "facebook" | "website" | "signal"
+  >,
+  SocialMediaPlatform
+> = {
+  linkedin: "linkedin",
+  instagram: "instagram",
+  whatsapp: "whatsapp",
+  facebook: "facebook",
+  website: "website",
+  signal: "signal",
+};
+
+const MERGEABLE_FIELDS = new Set<MergeConflictField>([
+  ...Object.keys(MERGEABLE_SCALAR_FIELDS),
+  ...Object.keys(MERGEABLE_SOCIAL_FIELDS),
+] as MergeConflictField[]);
+
+const MERGE_RECOMMENDATION_ALGORITHM_VERSION = "v1";
+
+function normalizeDiacritics(value: string): string {
+  return value.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+}
+
+function normalizeNamePart(value: string | null | undefined): string {
+  if (!value) {
+    return "";
+  }
+
+  return normalizeDiacritics(value)
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "")
+    .trim();
+}
+
+function normalizeEmailValue(value: string): string {
+  return value.trim().toLowerCase();
+}
+
+function normalizePhoneValue(prefix: string | null | undefined, value: string): string {
+  const normalized = `${prefix || ""}${value}`.replace(/\D+/g, "");
+  return normalized.replace(/^00/, "");
+}
+
+function normalizeSocialHandle(value: string | null | undefined): string {
+  if (!value) {
+    return "";
+  }
+
+  return normalizeDiacritics(value)
+    .trim()
+    .toLowerCase()
+    .replace(/^https?:\/\//, "")
+    .replace(/^www\./, "")
+    .replace(/\/$/, "");
+}
+
+function toFullNameKey(person: { first_name: string; last_name: string | null }): string {
+  return `${normalizeNamePart(person.first_name)} ${normalizeNamePart(person.last_name)}`.trim();
+}
+
+function toBigrams(value: string): string[] {
+  if (value.length < 2) {
+    return value.length === 1 ? [value] : [];
+  }
+
+  const result: string[] = [];
+  for (let index = 0; index < value.length - 1; index += 1) {
+    result.push(value.slice(index, index + 2));
+  }
+
+  return result;
+}
+
+function diceCoefficient(left: string, right: string): number {
+  if (!left || !right) {
+    return 0;
+  }
+
+  if (left === right) {
+    return 1;
+  }
+
+  const leftBigrams = toBigrams(left);
+  const rightBigrams = toBigrams(right);
+
+  if (!leftBigrams.length || !rightBigrams.length) {
+    return 0;
+  }
+
+  const counts = new Map<string, number>();
+  for (const bigram of leftBigrams) {
+    counts.set(bigram, (counts.get(bigram) || 0) + 1);
+  }
+
+  let intersection = 0;
+  for (const bigram of rightBigrams) {
+    const count = counts.get(bigram) || 0;
+    if (count > 0) {
+      intersection += 1;
+      counts.set(bigram, count - 1);
+    }
+  }
+
+  return (2 * intersection) / (leftBigrams.length + rightBigrams.length);
+}
+
+function countSetOverlap(left: Set<string>, right: Set<string>): number {
+  if (!left.size || !right.size) {
+    return 0;
+  }
+
+  let overlap = 0;
+  const [smallSet, largeSet] = left.size <= right.size ? [left, right] : [right, left];
+  for (const value of smallSet) {
+    if (largeSet.has(value)) {
+      overlap += 1;
+    }
+  }
+
+  return overlap;
+}
+
+type MergeRecommendationCandidate = {
+  leftPersonId: string;
+  rightPersonId: string;
+  score: number;
+  reasons: MergeRecommendationReason[];
+};
+
+async function recomputeMergeRecommendations(
+  client: SupabaseClient<Database>,
+  userId: string,
+): Promise<number> {
+  const [
+    { data: peopleRows, error: peopleError },
+    { data: emailRows, error: emailError },
+    { data: phoneRows, error: phoneError },
+    { data: socialRows, error: socialError },
+    { data: existingRows, error: existingError },
+  ] = await Promise.all([
+    client.from("people").select("id, first_name, last_name").eq("user_id", userId),
+    client.from("people_emails").select("person_id, value").eq("user_id", userId),
+    client.from("people_phones").select("person_id, prefix, value").eq("user_id", userId),
+    client
+      .from("people_social_media")
+      .select("person_id, platform, handle")
+      .eq("user_id", userId)
+      .in("platform", ["linkedin", "facebook"]),
+    client
+      .from("people_merge_recommendations")
+      .select("id, left_person_id, right_person_id, is_declined")
+      .eq("user_id", userId),
+  ]);
+
+  if (peopleError || emailError || phoneError || socialError || existingError) {
+    throw new Error(
+      peopleError?.message ||
+        emailError?.message ||
+        phoneError?.message ||
+        socialError?.message ||
+        existingError?.message ||
+        "Failed to recompute merge recommendations",
+    );
+  }
+
+  const people = peopleRows || [];
+  if (people.length < 2) {
+    if ((existingRows || []).length > 0) {
+      const { error: clearError } = await client
+        .from("people_merge_recommendations")
+        .delete()
+        .eq("user_id", userId)
+        .eq("is_declined", false);
+
+      if (clearError) {
+        throw new Error(clearError.message);
+      }
+    }
+
+    return 0;
+  }
+
+  const emailsByPerson = new Map<string, Set<string>>();
+  for (const row of emailRows || []) {
+    const normalized = normalizeEmailValue(row.value || "");
+    if (!normalized) {
+      continue;
+    }
+
+    const bucket = emailsByPerson.get(row.person_id) || new Set<string>();
+    bucket.add(normalized);
+    emailsByPerson.set(row.person_id, bucket);
+  }
+
+  const phonesByPerson = new Map<string, Set<string>>();
+  for (const row of phoneRows || []) {
+    const normalized = normalizePhoneValue(row.prefix, row.value || "");
+    if (!normalized) {
+      continue;
+    }
+
+    const bucket = phonesByPerson.get(row.person_id) || new Set<string>();
+    bucket.add(normalized);
+    phonesByPerson.set(row.person_id, bucket);
+  }
+
+  const socialByPerson = new Map<string, { linkedin: string; facebook: string }>();
+  for (const row of socialRows || []) {
+    const normalized = normalizeSocialHandle(row.handle || "");
+    if (!normalized) {
+      continue;
+    }
+
+    const existing = socialByPerson.get(row.person_id) || { linkedin: "", facebook: "" };
+    if (row.platform === "linkedin") {
+      existing.linkedin = normalized;
+    }
+
+    if (row.platform === "facebook") {
+      existing.facebook = normalized;
+    }
+
+    socialByPerson.set(row.person_id, existing);
+  }
+
+  const candidates: MergeRecommendationCandidate[] = [];
+  for (let leftIndex = 0; leftIndex < people.length; leftIndex += 1) {
+    const leftPerson = people[leftIndex];
+    const leftName = toFullNameKey(leftPerson);
+    const leftEmails = emailsByPerson.get(leftPerson.id) || new Set<string>();
+    const leftPhones = phonesByPerson.get(leftPerson.id) || new Set<string>();
+    const leftSocial = socialByPerson.get(leftPerson.id) || { linkedin: "", facebook: "" };
+
+    for (let rightIndex = leftIndex + 1; rightIndex < people.length; rightIndex += 1) {
+      const rightPerson = people[rightIndex];
+      const rightName = toFullNameKey(rightPerson);
+      const rightEmails = emailsByPerson.get(rightPerson.id) || new Set<string>();
+      const rightPhones = phonesByPerson.get(rightPerson.id) || new Set<string>();
+      const rightSocial = socialByPerson.get(rightPerson.id) || { linkedin: "", facebook: "" };
+
+      const hasLinkedinConflict =
+        Boolean(leftSocial.linkedin) &&
+        Boolean(rightSocial.linkedin) &&
+        leftSocial.linkedin !== rightSocial.linkedin;
+      const hasFacebookConflict =
+        Boolean(leftSocial.facebook) &&
+        Boolean(rightSocial.facebook) &&
+        leftSocial.facebook !== rightSocial.facebook;
+
+      if (hasLinkedinConflict || hasFacebookConflict) {
+        continue;
+      }
+
+      const fullNameScore = diceCoefficient(leftName, rightName);
+      const emailOverlapCount = countSetOverlap(leftEmails, rightEmails);
+      const phoneOverlapCount = countSetOverlap(leftPhones, rightPhones);
+
+      const reasons: MergeRecommendationReason[] = [];
+      const hasFullNameMatch = fullNameScore >= 0.84;
+
+      if (hasFullNameMatch) {
+        reasons.push("fullName");
+      }
+
+      if (emailOverlapCount > 0) {
+        reasons.push("email");
+      }
+
+      if (phoneOverlapCount > 0) {
+        reasons.push("phone");
+      }
+
+      if (reasons.length === 0) {
+        continue;
+      }
+
+      const leftPersonId = leftPerson.id < rightPerson.id ? leftPerson.id : rightPerson.id;
+      const rightPersonId = leftPerson.id < rightPerson.id ? rightPerson.id : leftPerson.id;
+
+      const score = Math.min(
+        1,
+        fullNameScore * 0.6 +
+          Math.min(emailOverlapCount, 1) * 0.25 +
+          Math.min(phoneOverlapCount, 1) * 0.2,
+      );
+
+      candidates.push({
+        leftPersonId,
+        rightPersonId,
+        score,
+        reasons,
+      });
+    }
+  }
+
+  const existingByPair = new Map(
+    (existingRows || []).map((row) => [`${row.left_person_id}|${row.right_person_id}`, row]),
+  );
+  const nextPairKeys = new Set(
+    candidates.map((candidate) => `${candidate.leftPersonId}|${candidate.rightPersonId}`),
+  );
+  const newCandidatesCount = candidates.filter(
+    (candidate) => !existingByPair.has(`${candidate.leftPersonId}|${candidate.rightPersonId}`),
+  ).length;
+
+  if (candidates.length > 0) {
+    const rowsToUpsert = candidates.map((candidate) => {
+      const key = `${candidate.leftPersonId}|${candidate.rightPersonId}`;
+      const existing = existingByPair.get(key);
+
+      return {
+        user_id: userId,
+        left_person_id: candidate.leftPersonId,
+        right_person_id: candidate.rightPersonId,
+        score: candidate.score,
+        reasons: candidate.reasons,
+        algorithm_version: MERGE_RECOMMENDATION_ALGORITHM_VERSION,
+        is_declined: existing?.is_declined || false,
+      };
+    });
+
+    const { error: upsertError } = await client
+      .from("people_merge_recommendations")
+      .upsert(rowsToUpsert, {
+        onConflict: "user_id,left_person_id,right_person_id",
+      });
+
+    if (upsertError) {
+      throw new Error(upsertError.message);
+    }
+  }
+
+  const staleActiveIds = (existingRows || [])
+    .filter((row) => !row.is_declined)
+    .filter((row) => !nextPairKeys.has(`${row.left_person_id}|${row.right_person_id}`))
+    .map((row) => row.id);
+
+  if (staleActiveIds.length > 0) {
+    const { error: deleteStaleError } = await client
+      .from("people_merge_recommendations")
+      .delete()
+      .eq("user_id", userId)
+      .in("id", staleActiveIds);
+
+    if (deleteStaleError) {
+      throw new Error(deleteStaleError.message);
+    }
+  }
+
+  return newCandidatesCount;
+}
+
+function hasMeaningfulValue(value: unknown): boolean {
+  if (value === null || value === undefined) {
+    return false;
+  }
+
+  if (typeof value === "string") {
+    return value.trim().length > 0;
+  }
+
+  if (Array.isArray(value)) {
+    return value.length > 0;
+  }
+
+  if (typeof value === "number") {
+    return Number.isFinite(value);
+  }
+
+  return true;
+}
+
+function areValuesEquivalent(left: unknown, right: unknown): boolean {
+  if (typeof left === "string" && typeof right === "string") {
+    return left.trim() === right.trim();
+  }
+
+  return JSON.stringify(left) === JSON.stringify(right);
+}
+
+function resolveConflictChoice(
+  conflictResolutions: Partial<Record<MergeConflictField, MergeConflictChoice>>,
+  field: MergeConflictField,
+): MergeConflictChoice {
+  const candidate = conflictResolutions[field];
+  return candidate === "right" ? "right" : "left";
+}
 
 function isLookupPlatform(value: string): value is (typeof LOOKUP_SOCIAL_PLATFORMS)[number] {
   return LOOKUP_SOCIAL_PLATFORMS.includes(value as (typeof LOOKUP_SOCIAL_PLATFORMS)[number]);
@@ -723,6 +1142,737 @@ export async function contactRoutes(fastify: FastifyInstance) {
       }
 
       return { message: "Contact deleted successfully" };
+    },
+  );
+
+  /**
+   * GET /api/contacts/merge-recommendations - List merge recommendations
+   */
+  fastify.get(
+    "/merge-recommendations",
+    async (
+      request: FastifyRequest<{ Querystring: { declined?: string | boolean } }>,
+      reply: FastifyReply,
+    ) => {
+      const auth = await requireAuth(request, reply);
+      if (!auth) return;
+
+      const { client, user } = auth;
+      const declinedQuery = request.query?.declined;
+      const showDeclined =
+        typeof declinedQuery === "boolean"
+          ? declinedQuery
+          : typeof declinedQuery === "string"
+            ? declinedQuery.toLowerCase() === "true"
+            : false;
+
+      let { data: recommendationRows, error: recommendationsError } = await client
+        .from("people_merge_recommendations")
+        .select("id, left_person_id, right_person_id, score, reasons")
+        .eq("user_id", user.id)
+        .eq("is_declined", showDeclined)
+        .order("score", { ascending: false })
+        .order("created_at", { ascending: false });
+
+      if (recommendationsError) {
+        return reply.status(500).send({ error: recommendationsError.message });
+      }
+
+      if (!showDeclined && (!recommendationRows || recommendationRows.length === 0)) {
+        const { data: existingRows, error: existingRowsError } = await client
+          .from("people_merge_recommendations")
+          .select("id")
+          .eq("user_id", user.id)
+          .limit(1);
+
+        if (existingRowsError) {
+          return reply.status(500).send({ error: existingRowsError.message });
+        }
+
+        if (!existingRows || existingRows.length === 0) {
+          try {
+            await recomputeMergeRecommendations(client, user.id);
+          } catch (recomputeError) {
+            const message =
+              recomputeError instanceof Error
+                ? recomputeError.message
+                : "Failed to generate merge recommendations";
+            return reply.status(500).send({ error: message });
+          }
+
+          const refreshed = await client
+            .from("people_merge_recommendations")
+            .select("id, left_person_id, right_person_id, score, reasons")
+            .eq("user_id", user.id)
+            .eq("is_declined", false)
+            .order("score", { ascending: false })
+            .order("created_at", { ascending: false });
+
+          recommendationRows = refreshed.data || [];
+          recommendationsError = refreshed.error;
+
+          if (recommendationsError) {
+            return reply.status(500).send({ error: recommendationsError.message });
+          }
+        }
+      }
+
+      const personIds = Array.from(
+        new Set(
+          (recommendationRows || []).flatMap((row) => [row.left_person_id, row.right_person_id]),
+        ),
+      );
+
+      if (personIds.length === 0) {
+        const emptyResponse: MergeRecommendationsResponse = { recommendations: [] };
+        return emptyResponse;
+      }
+
+      const { data: personRows, error: personRowsError } = await client
+        .from("people")
+        .select(CONTACT_SELECT)
+        .eq("user_id", user.id)
+        .in("id", personIds);
+
+      if (personRowsError) {
+        return reply.status(500).send({ error: personRowsError.message });
+      }
+
+      let contactsWithChannels = [] as Awaited<ReturnType<typeof attachContactChannels>>;
+      try {
+        contactsWithChannels = await attachContactChannels(client, user.id, personRows || []);
+      } catch (channelError) {
+        fastify.log.error({ channelError }, "Failed to attach channels for merge recommendations");
+        contactsWithChannels = withEmptyChannels(personRows || []);
+      }
+
+      let contacts = [] as Awaited<
+        ReturnType<typeof attachContactSocialMedia<(typeof contactsWithChannels)[number]>>
+      >;
+      try {
+        contacts = await attachContactSocialMedia(client, user.id, contactsWithChannels);
+      } catch (socialError) {
+        fastify.log.error(
+          { socialError },
+          "Failed to attach social media for merge recommendations",
+        );
+        contacts = withEmptySocialMedia(contactsWithChannels);
+      }
+
+      const contactsById = new Map(contacts.map((contact) => [contact.id, contact]));
+
+      const allowedReasons: MergeRecommendationReason[] = ["fullName", "email", "phone"];
+      const recommendations: MergeRecommendationsResponse["recommendations"] = [];
+
+      for (const row of recommendationRows || []) {
+        const leftPerson = contactsById.get(row.left_person_id);
+        const rightPerson = contactsById.get(row.right_person_id);
+
+        if (!leftPerson || !rightPerson) {
+          continue;
+        }
+
+        const reasons = (Array.isArray(row.reasons) ? row.reasons : []).filter((reason) =>
+          allowedReasons.includes(reason as MergeRecommendationReason),
+        ) as MergeRecommendationReason[];
+
+        recommendations.push({
+          id: row.id,
+          leftPerson: leftPerson as Contact,
+          rightPerson: rightPerson as Contact,
+          score: Number(row.score) || 0,
+          reasons,
+        });
+      }
+
+      const response: MergeRecommendationsResponse = {
+        recommendations,
+      };
+
+      return response;
+    },
+  );
+
+  /**
+   * POST /api/contacts/merge-recommendations/refresh - Recompute merge recommendations
+   */
+  fastify.post(
+    "/merge-recommendations/refresh",
+    async (request: FastifyRequest, reply: FastifyReply) => {
+      const auth = await requireAuth(request, reply);
+      if (!auth) return;
+
+      const { client, user } = auth;
+
+      try {
+        const recommendationsCount = await recomputeMergeRecommendations(client, user.id);
+        const response: RefreshMergeRecommendationsResponse = {
+          success: true,
+          recommendationsCount,
+        };
+
+        return response;
+      } catch (error) {
+        const message =
+          error instanceof Error ? error.message : "Failed to refresh merge recommendations";
+        return reply.status(500).send({ error: message });
+      }
+    },
+  );
+
+  /**
+   * PATCH /api/contacts/merge-recommendations/:id/decline - Decline recommendation
+   */
+  fastify.patch(
+    "/merge-recommendations/:id/decline",
+    async (request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+      const auth = await requireAuth(request, reply);
+      if (!auth) return;
+
+      const { client, user } = auth;
+      const recommendationId = request.params.id?.trim();
+
+      if (!recommendationId) {
+        return reply.status(400).send({ error: "Recommendation id is required" });
+      }
+
+      const { data, error } = await client
+        .from("people_merge_recommendations")
+        .update({
+          is_declined: true,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", recommendationId)
+        .eq("user_id", user.id)
+        .select("id")
+        .maybeSingle();
+
+      if (error) {
+        return reply.status(500).send({ error: error.message });
+      }
+
+      if (!data) {
+        return reply.status(404).send({ error: "Recommendation not found" });
+      }
+
+      return { success: true };
+    },
+  );
+
+  /**
+   * PATCH /api/contacts/merge-recommendations/:id/restore - Restore recommendation
+   */
+  fastify.patch(
+    "/merge-recommendations/:id/restore",
+    async (request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+      const auth = await requireAuth(request, reply);
+      if (!auth) return;
+
+      const { client, user } = auth;
+      const recommendationId = request.params.id?.trim();
+
+      if (!recommendationId) {
+        return reply.status(400).send({ error: "Recommendation id is required" });
+      }
+
+      const { data, error } = await client
+        .from("people_merge_recommendations")
+        .update({
+          is_declined: false,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", recommendationId)
+        .eq("user_id", user.id)
+        .select("id")
+        .maybeSingle();
+
+      if (error) {
+        return reply.status(500).send({ error: error.message });
+      }
+
+      if (!data) {
+        return reply.status(404).send({ error: "Recommendation not found" });
+      }
+
+      return { success: true };
+    },
+  );
+
+  /**
+   * POST /api/contacts/merge - Merge duplicate contacts
+   * Left person survives and absorbs data from right person.
+   */
+  fastify.post(
+    "/merge",
+    async (request: FastifyRequest<{ Body: MergeContactsRequest }>, reply: FastifyReply) => {
+      const auth = await requireAuth(request, reply);
+      if (!auth) return;
+
+      const { client, user } = auth;
+      const leftPersonId = request.body?.leftPersonId?.trim();
+      const rightPersonId = request.body?.rightPersonId?.trim();
+      const conflictResolutions = request.body?.conflictResolutions || {};
+
+      if (!leftPersonId || !rightPersonId) {
+        return reply.status(400).send({ error: "leftPersonId and rightPersonId are required" });
+      }
+
+      if (leftPersonId === rightPersonId) {
+        return reply.status(400).send({ error: "Cannot merge the same contact" });
+      }
+
+      for (const [field, choice] of Object.entries(conflictResolutions)) {
+        if (!MERGEABLE_FIELDS.has(field as MergeConflictField)) {
+          return reply.status(400).send({ error: `Unsupported conflict field: ${field}` });
+        }
+
+        if (choice !== "left" && choice !== "right") {
+          return reply.status(400).send({ error: `Invalid conflict choice for field: ${field}` });
+        }
+      }
+
+      const { data: peopleRows, error: peopleError } = await client
+        .from("people")
+        .select("*")
+        .eq("user_id", user.id)
+        .in("id", [leftPersonId, rightPersonId]);
+
+      if (peopleError) {
+        return reply.status(500).send({ error: peopleError.message });
+      }
+
+      if (!peopleRows || peopleRows.length !== 2) {
+        return reply.status(404).send({ error: "One or both contacts were not found" });
+      }
+
+      const leftPerson = peopleRows.find((person) => person.id === leftPersonId);
+      const rightPerson = peopleRows.find((person) => person.id === rightPersonId);
+
+      if (!leftPerson || !rightPerson) {
+        return reply.status(404).send({ error: "One or both contacts were not found" });
+      }
+
+      const scalarUpdates: Record<string, unknown> = {};
+
+      for (const [field, dbColumn] of Object.entries(MERGEABLE_SCALAR_FIELDS)) {
+        const mergeField = field as MergeConflictField;
+        const leftValue = (leftPerson as Record<string, unknown>)[dbColumn];
+        const rightValue = (rightPerson as Record<string, unknown>)[dbColumn];
+
+        if (!hasMeaningfulValue(rightValue)) {
+          continue;
+        }
+
+        if (!hasMeaningfulValue(leftValue)) {
+          scalarUpdates[dbColumn] = rightValue;
+          continue;
+        }
+
+        if (areValuesEquivalent(leftValue, rightValue)) {
+          continue;
+        }
+
+        if (resolveConflictChoice(conflictResolutions, mergeField) === "right") {
+          scalarUpdates[dbColumn] = rightValue;
+        }
+      }
+
+      scalarUpdates.updated_at = new Date().toISOString();
+
+      const { error: updateLeftPersonError } = await client
+        .from("people")
+        .update(scalarUpdates)
+        .eq("id", leftPersonId)
+        .eq("user_id", user.id);
+
+      if (updateLeftPersonError) {
+        return reply.status(500).send({ error: updateLeftPersonError.message });
+      }
+
+      const [
+        { data: leftPhones, error: leftPhonesError },
+        { data: rightPhones, error: rightPhonesError },
+      ] = await Promise.all([
+        client
+          .from("people_phones")
+          .select("prefix, value, type, preferred")
+          .eq("user_id", user.id)
+          .eq("person_id", leftPersonId)
+          .order("sort_order", { ascending: true }),
+        client
+          .from("people_phones")
+          .select("prefix, value, type, preferred")
+          .eq("user_id", user.id)
+          .eq("person_id", rightPersonId)
+          .order("sort_order", { ascending: true }),
+      ]);
+
+      if (leftPhonesError || rightPhonesError) {
+        return reply
+          .status(500)
+          .send({ error: leftPhonesError?.message || rightPhonesError?.message });
+      }
+
+      const phoneMap = new Map<
+        string,
+        { prefix: string; value: string; type: string; preferred: boolean }
+      >();
+      for (const phone of [...(leftPhones || []), ...(rightPhones || [])]) {
+        const key = `${phone.prefix || ""}|${String(phone.value || "").trim()}|${phone.type || "home"}`;
+        const existingPhone = phoneMap.get(key);
+
+        if (!existingPhone) {
+          phoneMap.set(key, {
+            prefix: phone.prefix || "+1",
+            value: String(phone.value || "").trim(),
+            type: phone.type || "home",
+            preferred: Boolean(phone.preferred),
+          });
+          continue;
+        }
+
+        existingPhone.preferred = existingPhone.preferred || Boolean(phone.preferred);
+      }
+
+      const mergedPhones = Array.from(phoneMap.values()).filter((phone) => phone.value.length > 0);
+
+      try {
+        await replaceContactPhones(client, user.id, leftPersonId, mergedPhones as PhoneEntry[]);
+      } catch (phoneError) {
+        const message = phoneError instanceof Error ? phoneError.message : "Failed to merge phones";
+        return reply.status(500).send({ error: message });
+      }
+
+      const [
+        { data: leftEmails, error: leftEmailsError },
+        { data: rightEmails, error: rightEmailsError },
+      ] = await Promise.all([
+        client
+          .from("people_emails")
+          .select("value, type, preferred")
+          .eq("user_id", user.id)
+          .eq("person_id", leftPersonId)
+          .order("sort_order", { ascending: true }),
+        client
+          .from("people_emails")
+          .select("value, type, preferred")
+          .eq("user_id", user.id)
+          .eq("person_id", rightPersonId)
+          .order("sort_order", { ascending: true }),
+      ]);
+
+      if (leftEmailsError || rightEmailsError) {
+        return reply
+          .status(500)
+          .send({ error: leftEmailsError?.message || rightEmailsError?.message });
+      }
+
+      const emailMap = new Map<string, { value: string; type: string; preferred: boolean }>();
+      for (const email of [...(leftEmails || []), ...(rightEmails || [])]) {
+        const normalizedValue = String(email.value || "")
+          .trim()
+          .toLowerCase();
+        const key = `${normalizedValue}|${email.type || "home"}`;
+
+        const existingEmail = emailMap.get(key);
+        if (!existingEmail) {
+          emailMap.set(key, {
+            value: String(email.value || "").trim(),
+            type: email.type || "home",
+            preferred: Boolean(email.preferred),
+          });
+          continue;
+        }
+
+        existingEmail.preferred = existingEmail.preferred || Boolean(email.preferred);
+      }
+
+      const mergedEmails = Array.from(emailMap.values()).filter((email) => email.value.length > 0);
+
+      try {
+        await replaceContactEmails(client, user.id, leftPersonId, mergedEmails as EmailEntry[]);
+      } catch (emailError) {
+        const message = emailError instanceof Error ? emailError.message : "Failed to merge emails";
+        return reply.status(500).send({ error: message });
+      }
+
+      const { data: socialRows, error: socialRowsError } = await client
+        .from("people_social_media")
+        .select("id, person_id, platform, handle, connected_at")
+        .eq("user_id", user.id)
+        .in("person_id", [leftPersonId, rightPersonId]);
+
+      if (socialRowsError) {
+        return reply.status(500).send({ error: socialRowsError.message });
+      }
+
+      const leftSocialByPlatform = new Map(
+        (socialRows || [])
+          .filter((row) => row.person_id === leftPersonId)
+          .map((row) => [row.platform, row]),
+      );
+
+      const rightSocialByPlatform = new Map(
+        (socialRows || [])
+          .filter((row) => row.person_id === rightPersonId)
+          .map((row) => [row.platform, row]),
+      );
+
+      for (const [field, platform] of Object.entries(MERGEABLE_SOCIAL_FIELDS)) {
+        const leftSocial = leftSocialByPlatform.get(platform);
+        const rightSocial = rightSocialByPlatform.get(platform);
+
+        if (!rightSocial || !hasMeaningfulValue(rightSocial.handle)) {
+          continue;
+        }
+
+        if (!leftSocial) {
+          const { error: insertSocialError } = await client.from("people_social_media").insert({
+            user_id: user.id,
+            person_id: leftPersonId,
+            platform,
+            handle: rightSocial.handle,
+            connected_at: rightSocial.connected_at,
+          });
+
+          if (insertSocialError) {
+            if (insertSocialError.code !== "23505") {
+              return reply.status(500).send({ error: insertSocialError.message });
+            }
+          }
+
+          continue;
+        }
+
+        if (areValuesEquivalent(leftSocial.handle, rightSocial.handle)) {
+          continue;
+        }
+
+        const choice = resolveConflictChoice(conflictResolutions, field as MergeConflictField);
+        if (choice !== "right") {
+          continue;
+        }
+
+        const { error: updateSocialError } = await client
+          .from("people_social_media")
+          .update({
+            handle: rightSocial.handle,
+            connected_at: rightSocial.connected_at,
+            updated_at: new Date().toISOString(),
+          })
+          .eq("id", leftSocial.id)
+          .eq("user_id", user.id);
+
+        if (updateSocialError) {
+          return reply.status(500).send({ error: updateSocialError.message });
+        }
+      }
+
+      const { data: rightGroupMemberships, error: rightGroupMembershipsError } = await client
+        .from("people_groups")
+        .select("group_id")
+        .eq("user_id", user.id)
+        .eq("person_id", rightPersonId);
+
+      if (rightGroupMembershipsError) {
+        return reply.status(500).send({ error: rightGroupMembershipsError.message });
+      }
+
+      if ((rightGroupMemberships || []).length > 0) {
+        const { error: groupMergeError } = await client.from("people_groups").upsert(
+          (rightGroupMemberships || []).map((membership) => ({
+            user_id: user.id,
+            person_id: leftPersonId,
+            group_id: membership.group_id,
+          })),
+          {
+            onConflict: "person_id,group_id",
+            ignoreDuplicates: true,
+          },
+        );
+
+        if (groupMergeError) {
+          return reply.status(500).send({ error: groupMergeError.message });
+        }
+      }
+
+      const { data: rightParticipants, error: rightParticipantsError } = await client
+        .from("event_participants")
+        .select("event_id")
+        .eq("person_id", rightPersonId);
+
+      if (rightParticipantsError) {
+        return reply.status(500).send({ error: rightParticipantsError.message });
+      }
+
+      if ((rightParticipants || []).length > 0) {
+        const { error: participantsMergeError } = await client.from("event_participants").upsert(
+          (rightParticipants || []).map((participant) => ({
+            event_id: participant.event_id,
+            person_id: leftPersonId,
+          })),
+          {
+            onConflict: "event_id,person_id",
+            ignoreDuplicates: true,
+          },
+        );
+
+        if (participantsMergeError) {
+          return reply.status(500).send({ error: participantsMergeError.message });
+        }
+      }
+
+      const [
+        { data: leftImportantEvents, error: leftImportantEventsError },
+        { data: rightImportantEvents, error: rightImportantEventsError },
+      ] = await Promise.all([
+        client
+          .from("people_important_events")
+          .select("event_type, event_date, note, notify_days_before")
+          .eq("user_id", user.id)
+          .eq("person_id", leftPersonId)
+          .order("created_at", { ascending: true }),
+        client
+          .from("people_important_events")
+          .select("event_type, event_date, note, notify_days_before")
+          .eq("user_id", user.id)
+          .eq("person_id", rightPersonId)
+          .order("created_at", { ascending: true }),
+      ]);
+
+      if (leftImportantEventsError || rightImportantEventsError) {
+        return reply
+          .status(500)
+          .send({ error: leftImportantEventsError?.message || rightImportantEventsError?.message });
+      }
+
+      const importantEventMap = new Map<
+        string,
+        {
+          event_type: string;
+          event_date: string;
+          note: string | null;
+          notify_days_before: number | null;
+        }
+      >();
+
+      const toImportantEventKey = (event: {
+        event_type: string;
+        event_date: string;
+        note: string | null;
+      }) => {
+        if (event.event_type === "birthday") {
+          return "birthday";
+        }
+
+        return `${event.event_type}|${event.event_date}|${(event.note || "").trim()}`;
+      };
+
+      for (const event of [...(leftImportantEvents || []), ...(rightImportantEvents || [])]) {
+        const key = toImportantEventKey(event);
+        if (!importantEventMap.has(key)) {
+          importantEventMap.set(key, {
+            event_type: event.event_type,
+            event_date: event.event_date,
+            note: event.note,
+            notify_days_before: event.notify_days_before,
+          });
+        }
+      }
+
+      const { error: deleteLeftImportantEventsError } = await client
+        .from("people_important_events")
+        .delete()
+        .eq("user_id", user.id)
+        .eq("person_id", leftPersonId);
+
+      if (deleteLeftImportantEventsError) {
+        return reply.status(500).send({ error: deleteLeftImportantEventsError.message });
+      }
+
+      const mergedImportantEvents = Array.from(importantEventMap.values());
+      if (mergedImportantEvents.length > 0) {
+        const { error: insertImportantEventsError } = await client
+          .from("people_important_events")
+          .insert(
+            mergedImportantEvents.map((event) => ({
+              user_id: user.id,
+              person_id: leftPersonId,
+              event_type: event.event_type,
+              event_date: event.event_date,
+              note: event.note,
+              notify_days_before: event.notify_days_before,
+            })),
+          );
+
+        if (insertImportantEventsError) {
+          return reply.status(500).send({ error: insertImportantEventsError.message });
+        }
+      }
+
+      const { data: relationshipsToTransfer, error: relationshipsToTransferError } = await client
+        .from("people_relationships")
+        .select("relationship_type, source_person_id, target_person_id")
+        .eq("user_id", user.id)
+        .or(`source_person_id.eq.${rightPersonId},target_person_id.eq.${rightPersonId}`);
+
+      if (relationshipsToTransferError) {
+        return reply.status(500).send({ error: relationshipsToTransferError.message });
+      }
+
+      for (const relationship of relationshipsToTransfer || []) {
+        const nextSourcePersonId =
+          relationship.source_person_id === rightPersonId
+            ? leftPersonId
+            : relationship.source_person_id;
+        const nextTargetPersonId =
+          relationship.target_person_id === rightPersonId
+            ? leftPersonId
+            : relationship.target_person_id;
+
+        if (nextSourcePersonId === nextTargetPersonId) {
+          continue;
+        }
+
+        const { error: insertRelationshipError } = await client
+          .from("people_relationships")
+          .insert({
+            user_id: user.id,
+            source_person_id: nextSourcePersonId,
+            target_person_id: nextTargetPersonId,
+            relationship_type: relationship.relationship_type,
+          });
+
+        if (insertRelationshipError) {
+          if (
+            insertRelationshipError.code === "23505" ||
+            insertRelationshipError.code === "23514"
+          ) {
+            continue;
+          }
+
+          return reply.status(500).send({ error: insertRelationshipError.message });
+        }
+      }
+
+      const { error: deleteMergedPersonError } = await client
+        .from("people")
+        .delete()
+        .eq("id", rightPersonId)
+        .eq("user_id", user.id);
+
+      if (deleteMergedPersonError) {
+        return reply.status(500).send({ error: deleteMergedPersonError.message });
+      }
+
+      const response: MergeContactsResponse = {
+        personId: leftPersonId,
+        userId: user.id,
+        mergedIntoPersonId: leftPersonId,
+        mergedFromPersonId: rightPersonId,
+      };
+
+      return response;
     },
   );
 

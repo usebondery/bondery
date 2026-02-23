@@ -8,6 +8,7 @@ import {
   IconUsersGroup,
   IconMessageCircle,
   IconTimelineEventText,
+  IconArrowMerge,
 } from "@tabler/icons-react";
 import { usePathname } from "next/navigation";
 import { NavLinkItem } from "./NavLinkItem";
@@ -29,6 +30,7 @@ const primaryLinks = [
 
 const secondaryLinks = [
   { href: WEBAPP_ROUTES.FEEDBACK, label: "Feedback", icon: IconMessageCircle },
+  { href: "/app/fix", label: "Fix", icon: IconArrowMerge },
   { href: WEBAPP_ROUTES.SETTINGS, label: "Settings", icon: IconSettings },
 ];
 

@@ -11,7 +11,6 @@ import { CHROME_EXTENSION_URL } from "@bondery/helpers";
 import { INTEGRATION_PROVIDERS } from "@/lib/config";
 import { detectBonderyChromeExtension } from "@/lib/extension/detectBonderyChromeExtension";
 import { IntegrationCard } from "./IntegrationCard";
-import { modals } from "@mantine/modals";
 import { createBrowswerSupabaseClient } from "@/lib/supabase/client";
 import {
   errorNotificationTemplate,
@@ -19,6 +18,7 @@ import {
   ModalTitle,
   successNotificationTemplate,
 } from "@bondery/mantine-next";
+import { openStandardConfirmModal } from "../../components/modals/openStandardConfirmModal";
 
 interface UserIdentity {
   id: string;
@@ -105,11 +105,11 @@ export function ProviderIntegrations({
       return;
     }
 
-    modals.openConfirmModal({
+    openStandardConfirmModal({
       title: (
         <ModalTitle text={t("UnlinkAccountTitle")} icon={<IconUnlink size={20} stroke={1.5} />} />
       ),
-      children: (
+      message: (
         <Text size="sm">
           {t.rich("UnlinkAccountMessage", {
             provider: provider === "github" ? "GitHub" : "LinkedIn",
@@ -118,11 +118,9 @@ export function ProviderIntegrations({
         </Text>
       ),
       centered: true,
-      labels: {
-        confirm: t("UnlinkAccountButton"),
-        cancel: t("Cancel"),
-      },
-      confirmProps: { color: "red" },
+      confirmLabel: t("UnlinkAccountButton"),
+      cancelLabel: t("Cancel"),
+      confirmColor: "red",
       onConfirm: () => confirmUnlinkProvider(provider),
     });
   };

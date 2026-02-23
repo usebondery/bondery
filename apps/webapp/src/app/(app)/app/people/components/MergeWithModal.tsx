@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   Button,
@@ -11,14 +11,13 @@ import {
   Paper,
   SimpleGrid,
   Stack,
-  Stepper,
   Text,
 } from "@mantine/core";
 import { modals } from "@mantine/modals";
 import { notifications } from "@mantine/notifications";
-import { IconGitMerge, IconUsers } from "@tabler/icons-react";
-import { useTranslations } from "next-intl";
+import { IconArrowLeft, IconArrowMerge, IconArrowRight } from "@tabler/icons-react";
 import {
+  ModalFooter,
   errorNotificationTemplate,
   loadingNotificationTemplate,
   ModalTitle,
@@ -40,12 +39,14 @@ interface OpenMergeWithModalParams {
   rightPersonId?: string;
   disableLeftPicker?: boolean;
   disableRightPicker?: boolean;
-  titleText?: string;
+  redirectToMergedPerson?: boolean;
+  titleText: string;
+  texts: MergeWithModalTexts;
 }
 
 type Step = "pick" | "resolve" | "processing";
 
-const CONFLICT_FIELDS: MergeConflictField[] = [
+export const MERGE_CONFLICT_FIELDS: MergeConflictField[] = [
   "firstName",
   "middleName",
   "lastName",
@@ -70,6 +71,34 @@ const CONFLICT_FIELDS: MergeConflictField[] = [
   "website",
   "signal",
 ];
+
+export interface MergeWithModalTexts {
+  errorTitle: string;
+  successTitle: string;
+  selectBothPeopleError: string;
+  differentPeopleError: string;
+  mergingTitle: string;
+  mergingDescription: string;
+  mergeSuccess: string;
+  mergeFailed: string;
+  mergeWithLabel: string;
+  selectLeftPerson: string;
+  selectRightPerson: string;
+  searchPeople: string;
+  noPeopleFound: string;
+  cancel: string;
+  continue: string;
+  back: string;
+  merge: string;
+  noConflicts: string;
+  processing: string;
+  steps: {
+    pick: string;
+    resolve: string;
+    process: string;
+  };
+  fields: Record<MergeConflictField, string>;
+}
 
 function hasMeaningfulValue(value: unknown): boolean {
   if (value === null || value === undefined) {
@@ -143,12 +172,18 @@ export function openMergeWithModal({
   rightPersonId,
   disableLeftPicker = true,
   disableRightPicker = false,
+  redirectToMergedPerson = true,
   titleText,
+  texts,
 }: OpenMergeWithModalParams) {
+  const modalId = `merge-with-${Math.random().toString(36).slice(2)}`;
+
   modals.open({
+    modalId,
     trapFocus: true,
-    size: "48rem",
-    title: <ModalTitle text={titleText || "Merge with"} icon={<IconGitMerge size={22} />} />,
+    className: "min-h-80",
+    size: "lg",
+    title: <ModalTitle text={titleText} icon={<IconArrowMerge size={22} />} />,
     children: (
       <MergeWithModal
         contacts={contacts}
@@ -156,6 +191,9 @@ export function openMergeWithModal({
         initialRightPersonId={rightPersonId}
         disableLeftPicker={disableLeftPicker}
         disableRightPicker={disableRightPicker}
+        redirectToMergedPerson={redirectToMergedPerson}
+        modalId={modalId}
+        texts={texts}
       />
     ),
   });
@@ -167,6 +205,9 @@ interface MergeWithModalProps {
   initialRightPersonId?: string;
   disableLeftPicker: boolean;
   disableRightPicker: boolean;
+  redirectToMergedPerson: boolean;
+  modalId: string;
+  texts: MergeWithModalTexts;
 }
 
 function MergeWithModal({
@@ -175,9 +216,11 @@ function MergeWithModal({
   initialRightPersonId,
   disableLeftPicker,
   disableRightPicker,
+  redirectToMergedPerson,
+  modalId,
+  texts,
 }: MergeWithModalProps) {
   const router = useRouter();
-  const t = useTranslations("MergeWithModal");
 
   const [step, setStep] = useState<Step>("pick");
   const [leftPersonId, setLeftPersonId] = useState(initialLeftPersonId);
@@ -186,6 +229,15 @@ function MergeWithModal({
   const [conflictChoices, setConflictChoices] = useState<
     Partial<Record<MergeConflictField, MergeConflictChoice>>
   >({});
+
+  useEffect(() => {
+    modals.updateModal({
+      modalId,
+      closeOnEscape: !isSubmitting,
+      closeOnClickOutside: !isSubmitting,
+      withCloseButton: !isSubmitting,
+    });
+  }, [isSubmitting, modalId]);
 
   const peopleOptions = useMemo(
     () =>
@@ -223,7 +275,7 @@ function MergeWithModal({
       return [] as Array<{ field: MergeConflictField; leftValue: unknown; rightValue: unknown }>;
     }
 
-    return CONFLICT_FIELDS.map((field) => ({
+    return MERGE_CONFLICT_FIELDS.map((field) => ({
       field,
       leftValue: leftContact[field],
       rightValue: rightContact[field],
@@ -235,14 +287,12 @@ function MergeWithModal({
     );
   }, [leftContact, rightContact]);
 
-  const activeStep = step === "pick" ? 0 : step === "resolve" ? 1 : 2;
-
   const goToResolve = () => {
     if (!leftPersonId || !rightPersonId) {
       notifications.show(
         errorNotificationTemplate({
-          title: t("ErrorTitle"),
-          description: t("SelectBothPeopleError"),
+          title: texts.errorTitle,
+          description: texts.selectBothPeopleError,
         }),
       );
       return;
@@ -251,8 +301,8 @@ function MergeWithModal({
     if (leftPersonId === rightPersonId) {
       notifications.show(
         errorNotificationTemplate({
-          title: t("ErrorTitle"),
-          description: t("DifferentPeopleError"),
+          title: texts.errorTitle,
+          description: texts.differentPeopleError,
         }),
       );
       return;
@@ -271,8 +321,8 @@ function MergeWithModal({
 
     const loadingNotificationId = notifications.show({
       ...loadingNotificationTemplate({
-        title: t("MergingTitle"),
-        description: t("MergingDescription"),
+        title: texts.mergingTitle,
+        description: texts.mergingDescription,
       }),
     });
 
@@ -290,27 +340,29 @@ function MergeWithModal({
       const result = (await response.json()) as MergeContactsResponse | { error?: string };
 
       if (!response.ok || !("personId" in result)) {
-        throw new Error((result as { error?: string }).error || t("MergeFailed"));
+        throw new Error((result as { error?: string }).error || texts.mergeFailed);
       }
 
       notifications.hide(loadingNotificationId);
       notifications.show(
         successNotificationTemplate({
-          title: t("SuccessTitle"),
-          description: t("MergeSuccess"),
+          title: texts.successTitle,
+          description: texts.mergeSuccess,
         }),
       );
 
-      modals.closeAll();
+      modals.close(modalId);
       await revalidateAll();
-      router.push(`${WEBAPP_ROUTES.PERSON}/${result.personId}`);
+      if (redirectToMergedPerson) {
+        router.push(`${WEBAPP_ROUTES.PERSON}/${result.personId}`);
+      }
       router.refresh();
     } catch (error) {
       notifications.hide(loadingNotificationId);
       notifications.show(
         errorNotificationTemplate({
-          title: t("ErrorTitle"),
-          description: error instanceof Error ? error.message : t("MergeFailed"),
+          title: texts.errorTitle,
+          description: error instanceof Error ? error.message : texts.mergeFailed,
         }),
       );
       setStep("resolve");
@@ -321,58 +373,51 @@ function MergeWithModal({
 
   return (
     <Stack gap="md">
-      <Stepper active={activeStep} allowNextStepsSelect={false} iconSize={26}>
-        <Stepper.Step label={t("Steps.Pick")} />
-        <Stepper.Step label={t("Steps.Resolve")} />
-        <Stepper.Step label={t("Steps.Process")} />
-      </Stepper>
-
       {step === "pick" ? (
-        <Paper withBorder radius="md" p="md">
-          <Stack gap="md">
-            <Group align="center" justify="space-between" wrap="nowrap">
-              <PersonChip
-                person={toPersonPreview(leftContact)}
-                isSelectable
-                people={leftSelectablePeople}
-                onSelectPerson={(personId) => {
-                  setLeftPersonId(personId);
-                  if (personId === rightPersonId) {
-                    setRightPersonId("");
-                  }
-                }}
-                disabled={disableLeftPicker}
-                placeholder={t("SelectLeftPerson")}
-                searchPlaceholder={t("SearchPeople")}
-                noResultsLabel={t("NoPeopleFound")}
-              />
+        <Stack gap="md">
+          <Group align="center" justify="space-between" wrap="nowrap">
+            <PersonChip
+              person={toPersonPreview(leftContact)}
+              isSelectable
+              people={leftSelectablePeople}
+              onSelectPerson={(personId) => {
+                setLeftPersonId(personId);
+                if (personId === rightPersonId) {
+                  setRightPersonId("");
+                }
+              }}
+              disabled={disableLeftPicker}
+              placeholder={texts.selectLeftPerson}
+              searchPlaceholder={texts.searchPeople}
+              noResultsLabel={texts.noPeopleFound}
+            />
 
-              <Text c="dimmed" size="sm" fw={500}>
-                {t("MergeWithLabel")}
-              </Text>
+            <Text c="dimmed" size="sm" fw={500}>
+              {texts.mergeWithLabel}
+            </Text>
 
-              <PersonChip
-                person={toPersonPreview(rightContact)}
-                isSelectable
-                people={rightSelectablePeople}
-                onSelectPerson={(personId) => setRightPersonId(personId)}
-                disabled={disableRightPicker}
-                placeholder={t("SelectRightPerson")}
-                searchPlaceholder={t("SearchPeople")}
-                noResultsLabel={t("NoPeopleFound")}
-              />
-            </Group>
+            <PersonChip
+              person={toPersonPreview(rightContact)}
+              isSelectable
+              people={rightSelectablePeople}
+              onSelectPerson={(personId) => setRightPersonId(personId)}
+              disabled={disableRightPicker}
+              placeholder={texts.selectRightPerson}
+              searchPlaceholder={texts.searchPeople}
+              noResultsLabel={texts.noPeopleFound}
+            />
+          </Group>
 
-            <Group justify="flex-end">
-              <Button variant="default" onClick={() => modals.closeAll()}>
-                {t("Cancel")}
-              </Button>
-              <Button leftSection={<IconUsers size={16} />} onClick={goToResolve}>
-                {t("Continue")}
-              </Button>
-            </Group>
-          </Stack>
-        </Paper>
+          <ModalFooter
+            cancelLabel={texts.cancel}
+            onCancel={() => modals.close(modalId)}
+            cancelDisabled={isSubmitting}
+            actionLabel={texts.continue}
+            onAction={goToResolve}
+            actionRightSection={<IconArrowRight size={16} />}
+            actionDisabled={isSubmitting}
+          />
+        </Stack>
       ) : null}
 
       {step === "resolve" ? (
@@ -380,7 +425,7 @@ function MergeWithModal({
           {conflicts.length === 0 ? (
             <Paper withBorder radius="md" p="md">
               <Text size="sm" c="dimmed">
-                {t("NoConflicts")}
+                {texts.noConflicts}
               </Text>
             </Paper>
           ) : (
@@ -391,7 +436,7 @@ function MergeWithModal({
                 <Paper key={conflict.field} withBorder radius="md" p="md">
                   <Stack gap="sm">
                     <Text size="sm" fw={600}>
-                      {t(`Fields.${conflict.field}`)}
+                      {texts.fields[conflict.field]}
                     </Text>
                     <SimpleGrid cols={2} spacing="sm">
                       <Button
@@ -425,24 +470,22 @@ function MergeWithModal({
 
           <Divider />
 
-          <Group justify="space-between">
-            <Button variant="default" onClick={() => setStep("pick")}>
-              {t("Back")}
-            </Button>
-            <Group>
-              <Button variant="default" onClick={() => modals.closeAll()}>
-                {t("Cancel")}
-              </Button>
-              <Button
-                color="red"
-                leftSection={<IconGitMerge size={16} />}
-                onClick={handleMerge}
-                loading={isSubmitting}
-              >
-                {t("Merge")}
-              </Button>
-            </Group>
-          </Group>
+          <ModalFooter
+            backLabel={texts.back}
+            backLeftSection={<IconArrowLeft size={16} />}
+            onBack={() => setStep("pick")}
+            backDisabled={isSubmitting}
+            cancelLabel={texts.cancel}
+            onCancel={() => modals.close(modalId)}
+            cancelDisabled={isSubmitting}
+            actionLabel={texts.merge}
+            onAction={() => {
+              void handleMerge();
+            }}
+            actionLeftSection={<IconArrowMerge size={16} />}
+            actionLoading={isSubmitting}
+            actionDisabled={isSubmitting}
+          />
         </Stack>
       ) : null}
 
@@ -451,7 +494,7 @@ function MergeWithModal({
           <Stack align="center" gap="sm">
             <Loader />
             <Text size="sm" c="dimmed">
-              {t("Processing")}
+              {texts.processing}
             </Text>
           </Stack>
         </Center>

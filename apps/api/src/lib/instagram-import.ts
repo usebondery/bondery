@@ -1,5 +1,6 @@
 import AdmZip from "adm-zip";
 import type { InstagramImportStrategy, InstagramPreparedContact } from "@bondery/types";
+import { parseInstagramUsername, SOCIAL_PLATFORM_URL_DETAILS } from "@bondery/helpers";
 
 type UploadFile = {
   fileName: string;
@@ -627,56 +628,9 @@ function toMap(records: ParsedRecord[]): Map<string, ParsedRecord> {
   return map;
 }
 
-function parseNameFromUsername(username: string): {
-  firstName: string;
-  middleName: string | null;
-  lastName: string;
-} {
-  const stripped = username.trim().replace(/^_+|_+$/g, "");
-  const noNumbers = stripped.replace(/\d+/g, "");
-
-  const tokens = noNumbers
-    .split(/[._]+/)
-    .map((token) => token.trim())
-    .filter(Boolean)
-    .map((token) => toTitleCase(token));
-
-  if (tokens.length === 0) {
-    return {
-      firstName: "Instagram",
-      middleName: null,
-      lastName: "Contact",
-    };
-  }
-
-  if (tokens.length === 1) {
-    const compactSplit = splitCompactUsernameToken(tokens[0].toLowerCase());
-
-    if (compactSplit) {
-      return {
-        firstName: compactSplit[0],
-        middleName: null,
-        lastName: compactSplit[1],
-      };
-    }
-
-    return {
-      firstName: tokens[0],
-      middleName: null,
-      lastName: tokens[0],
-    };
-  }
-
-  return {
-    firstName: tokens[0],
-    middleName: tokens.length > 2 ? tokens.slice(1, -1).join(" ") : null,
-    lastName: tokens[tokens.length - 1],
-  };
-}
-
 function toPreparedContacts(records: ParsedRecord[]): InstagramPreparedContact[] {
   return records.map((record, index) => {
-    const parsedName = parseNameFromUsername(record.username);
+    const parsedName = parseInstagramUsername({ username: record.username });
     const issues: string[] = [];
     const likelyPerson = isLikelyPersonUsername(record.username);
 
@@ -684,7 +638,7 @@ function toPreparedContacts(records: ParsedRecord[]): InstagramPreparedContact[]
       issues.push("Missing Instagram username");
     }
 
-    if (!parsedName.firstName || !parsedName.lastName) {
+    if (!parsedName.firstName) {
       issues.push("Missing name derived from username");
     }
 
@@ -692,8 +646,8 @@ function toPreparedContacts(records: ParsedRecord[]): InstagramPreparedContact[]
       tempId: `instagram-row-${index + 1}`,
       firstName: parsedName.firstName,
       middleName: parsedName.middleName,
-      lastName: parsedName.lastName,
-      instagramUrl: `https://www.instagram.com/${record.username}`,
+      lastName: parsedName.lastName ?? "",
+      instagramUrl: `${SOCIAL_PLATFORM_URL_DETAILS.instagram.profileBaseUrlWithWww}${record.username}`,
       instagramUsername: record.username,
       alreadyExists: false,
       likelyPerson,

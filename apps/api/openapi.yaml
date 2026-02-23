@@ -256,6 +256,128 @@ paths:
         "500":
           $ref: "#/components/responses/InternalServerError"
 
+  /api/contacts/merge:
+    post:
+      summary: Merge duplicate contacts
+      description: Merge the right contact into the left contact. The left contact survives.
+      operationId: mergeContacts
+      tags:
+        - Contacts
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MergeContactsRequest"
+      responses:
+        "200":
+          description: Contacts merged successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MergeContactsResponse"
+        "400":
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "404":
+          description: One or both contacts were not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+  /api/contacts/merge-recommendations:
+    get:
+      summary: List active merge recommendations
+      description: Returns persisted active merge recommendations for the authenticated user.
+      operationId: listMergeRecommendations
+      tags:
+        - Contacts
+      security:
+        - cookieAuth: []
+      responses:
+        "200":
+          description: Merge recommendations fetched successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MergeRecommendationsResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+  /api/contacts/merge-recommendations/refresh:
+    post:
+      summary: Refresh merge recommendations
+      description: Recomputes and persists merge recommendations for the authenticated user.
+      operationId: refreshMergeRecommendations
+      tags:
+        - Contacts
+      security:
+        - cookieAuth: []
+      responses:
+        "200":
+          description: Merge recommendations refreshed successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RefreshMergeRecommendationsResponse"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+  /api/contacts/merge-recommendations/{id}/decline:
+    patch:
+      summary: Decline merge recommendation
+      description: Marks one merge recommendation as declined.
+      operationId: declineMergeRecommendation
+      tags:
+        - Contacts
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Recommendation ID
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Recommendation declined successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DeclineMergeRecommendationResponse"
+        "400":
+          description: Invalid recommendation id
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "404":
+          description: Recommendation not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
   /api/contacts/{id}/photo:
     post:
       summary: Upload contact photo
@@ -1054,6 +1176,109 @@ components:
           oneOf:
             - $ref: "#/components/schemas/Position"
             - type: object
+
+    MergeContactsRequest:
+      type: object
+      required:
+        - leftPersonId
+        - rightPersonId
+      properties:
+        leftPersonId:
+          type: string
+          format: uuid
+        rightPersonId:
+          type: string
+          format: uuid
+        conflictResolutions:
+          type: object
+          additionalProperties:
+            type: string
+            enum:
+              - left
+              - right
+
+    MergeContactsResponse:
+      type: object
+      required:
+        - personId
+        - userId
+        - mergedIntoPersonId
+        - mergedFromPersonId
+      properties:
+        personId:
+          type: string
+          format: uuid
+        userId:
+          type: string
+          format: uuid
+        mergedIntoPersonId:
+          type: string
+          format: uuid
+        mergedFromPersonId:
+          type: string
+          format: uuid
+
+    MergeRecommendationReason:
+      type: string
+      enum:
+        - fullName
+        - email
+        - phone
+
+    MergeRecommendation:
+      type: object
+      required:
+        - id
+        - leftPerson
+        - rightPerson
+        - score
+        - reasons
+      properties:
+        id:
+          type: string
+          format: uuid
+        leftPerson:
+          $ref: "#/components/schemas/Contact"
+        rightPerson:
+          $ref: "#/components/schemas/Contact"
+        score:
+          type: number
+        reasons:
+          type: array
+          items:
+            $ref: "#/components/schemas/MergeRecommendationReason"
+
+    MergeRecommendationsResponse:
+      type: object
+      required:
+        - recommendations
+      properties:
+        recommendations:
+          type: array
+          items:
+            $ref: "#/components/schemas/MergeRecommendation"
+
+    DeclineMergeRecommendationResponse:
+      type: object
+      required:
+        - success
+      properties:
+        success:
+          type: boolean
+          example: true
+
+    RefreshMergeRecommendationsResponse:
+      type: object
+      required:
+        - success
+        - recommendationsCount
+      properties:
+        success:
+          type: boolean
+          example: true
+        recommendationsCount:
+          type: integer
+          minimum: 0
 
     UserSettings:
       type: object

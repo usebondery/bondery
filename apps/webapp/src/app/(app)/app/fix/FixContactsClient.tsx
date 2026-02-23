@@ -1,0 +1,320 @@
+"use client";
+
+import { useMemo, useState } from "react";
+import { Button, Group, Paper, Stack, Text } from "@mantine/core";
+import { notifications } from "@mantine/notifications";
+import {
+  IconArrowMerge,
+  IconCheck,
+  IconEye,
+  IconEyeOff,
+  IconRefresh,
+  IconX,
+} from "@tabler/icons-react";
+import { useTranslations } from "next-intl";
+import { API_ROUTES } from "@bondery/helpers/globals/paths";
+import type {
+  MergeConflictField,
+  MergeRecommendation,
+  MergeRecommendationsResponse,
+  RefreshMergeRecommendationsResponse,
+} from "@bondery/types";
+import { errorNotificationTemplate, successNotificationTemplate } from "@bondery/mantine-next";
+import { PageWrapper } from "@/app/(app)/app/components/PageWrapper";
+import { PageHeader } from "@/app/(app)/app/components/PageHeader";
+import { PersonChip } from "@/app/(app)/app/components/shared/PersonChip";
+import { MERGE_CONFLICT_FIELDS, openMergeWithModal } from "../people/components/MergeWithModal";
+
+interface FixContactsClientProps {
+  initialRecommendations: MergeRecommendation[];
+}
+
+export function FixContactsClient({ initialRecommendations }: FixContactsClientProps) {
+  const t = useTranslations("FixContactsPage");
+  const tMerge = useTranslations("MergeWithModal");
+  const [recommendations, setRecommendations] = useState(initialRecommendations);
+  const [decliningIds, setDecliningIds] = useState<Set<string>>(new Set());
+  const [restoringIds, setRestoringIds] = useState<Set<string>>(new Set());
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [showDeclined, setShowDeclined] = useState(false);
+
+  const fetchRecommendations = async (includeDeclined: boolean) => {
+    const listResponse = await fetch(
+      `${API_ROUTES.CONTACTS}/merge-recommendations${includeDeclined ? "?declined=true" : ""}`,
+    );
+
+    if (!listResponse.ok) {
+      throw new Error(t("RefreshError"));
+    }
+
+    const payload = (await listResponse.json()) as MergeRecommendationsResponse;
+    setRecommendations(payload.recommendations || []);
+  };
+
+  const mergeTexts = useMemo(
+    () => ({
+      errorTitle: tMerge("ErrorTitle"),
+      successTitle: tMerge("SuccessTitle"),
+      selectBothPeopleError: tMerge("SelectBothPeopleError"),
+      differentPeopleError: tMerge("DifferentPeopleError"),
+      mergingTitle: tMerge("MergingTitle"),
+      mergingDescription: tMerge("MergingDescription"),
+      mergeSuccess: tMerge("MergeSuccess"),
+      mergeFailed: tMerge("MergeFailed"),
+      mergeWithLabel: tMerge("MergeWithLabel"),
+      selectLeftPerson: tMerge("SelectLeftPerson"),
+      selectRightPerson: tMerge("SelectRightPerson"),
+      searchPeople: tMerge("SearchPeople"),
+      noPeopleFound: tMerge("NoPeopleFound"),
+      cancel: tMerge("Cancel"),
+      continue: tMerge("Continue"),
+      back: tMerge("Back"),
+      merge: tMerge("Merge"),
+      noConflicts: tMerge("NoConflicts"),
+      processing: tMerge("Processing"),
+      steps: {
+        pick: tMerge("Steps.Pick"),
+        resolve: tMerge("Steps.Resolve"),
+        process: tMerge("Steps.Process"),
+      },
+      fields: Object.fromEntries(
+        MERGE_CONFLICT_FIELDS.map((field) => [field, tMerge(`Fields.${field}`)]),
+      ) as Record<MergeConflictField, string>,
+    }),
+    [tMerge],
+  );
+
+  const handleAccept = (recommendation: MergeRecommendation) => {
+    openMergeWithModal({
+      contacts: [recommendation.leftPerson, recommendation.rightPerson],
+      leftPersonId: recommendation.leftPerson.id,
+      rightPersonId: recommendation.rightPerson.id,
+      disableLeftPicker: true,
+      disableRightPicker: true,
+      redirectToMergedPerson: false,
+      titleText: tMerge("ActionLabel"),
+      texts: mergeTexts,
+    });
+  };
+
+  const handleDecline = async (recommendationId: string) => {
+    setDecliningIds((prev) => new Set(prev).add(recommendationId));
+
+    try {
+      const response = await fetch(
+        `${API_ROUTES.CONTACTS}/merge-recommendations/${recommendationId}/decline`,
+        {
+          method: "PATCH",
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error(t("DeclineError"));
+      }
+
+      setRecommendations((prev) => prev.filter((item) => item.id !== recommendationId));
+      notifications.show(
+        successNotificationTemplate({
+          title: t("SuccessTitle"),
+          description: t("DeclineSuccess"),
+        }),
+      );
+    } catch (error) {
+      notifications.show(
+        errorNotificationTemplate({
+          title: t("ErrorTitle"),
+          description: error instanceof Error ? error.message : t("DeclineError"),
+        }),
+      );
+    } finally {
+      setDecliningIds((prev) => {
+        const next = new Set(prev);
+        next.delete(recommendationId);
+        return next;
+      });
+    }
+  };
+
+  const handleRefreshSuggestions = async () => {
+    setIsRefreshing(true);
+
+    try {
+      const refreshResponse = await fetch(`${API_ROUTES.CONTACTS}/merge-recommendations/refresh`, {
+        method: "POST",
+      });
+
+      if (!refreshResponse.ok) {
+        throw new Error(t("RefreshError"));
+      }
+
+      const refreshPayload =
+        (await refreshResponse.json()) as RefreshMergeRecommendationsResponse;
+      const recommendationsCount = Math.max(0, Number(refreshPayload.recommendationsCount) || 0);
+
+      await fetchRecommendations(false);
+      setShowDeclined(false);
+
+      notifications.show(
+        successNotificationTemplate({
+          title: t("SuccessTitle"),
+          description:
+            recommendationsCount === 0
+              ? t("NoNewSuggestionsFound")
+              : t("NewSuggestionsFound", { count: recommendationsCount }),
+        }),
+      );
+    } catch (error) {
+      notifications.show(
+        errorNotificationTemplate({
+          title: t("ErrorTitle"),
+          description: error instanceof Error ? error.message : t("RefreshError"),
+        }),
+      );
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
+  const handleToggleDeclined = async () => {
+    const nextShowDeclined = !showDeclined;
+    setIsRefreshing(true);
+
+    try {
+      await fetchRecommendations(nextShowDeclined);
+      setShowDeclined(nextShowDeclined);
+    } catch (error) {
+      notifications.show(
+        errorNotificationTemplate({
+          title: t("ErrorTitle"),
+          description: error instanceof Error ? error.message : t("RefreshError"),
+        }),
+      );
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
+  const handleRestore = async (recommendationId: string) => {
+    setRestoringIds((prev) => new Set(prev).add(recommendationId));
+
+    try {
+      const response = await fetch(
+        `${API_ROUTES.CONTACTS}/merge-recommendations/${recommendationId}/restore`,
+        {
+          method: "PATCH",
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error(t("RestoreError"));
+      }
+
+      setRecommendations((prev) => prev.filter((item) => item.id !== recommendationId));
+      notifications.show(
+        successNotificationTemplate({
+          title: t("SuccessTitle"),
+          description: t("RestoreSuccess"),
+        }),
+      );
+    } catch (error) {
+      notifications.show(
+        errorNotificationTemplate({
+          title: t("ErrorTitle"),
+          description: error instanceof Error ? error.message : t("RestoreError"),
+        }),
+      );
+    } finally {
+      setRestoringIds((prev) => {
+        const next = new Set(prev);
+        next.delete(recommendationId);
+        return next;
+      });
+    }
+  };
+
+  return (
+    <PageWrapper>
+      <Stack gap="xl">
+        <PageHeader
+          icon={IconArrowMerge}
+          title={t("Title")}
+          secondaryAction={
+            <Button
+              variant="outline"
+              size="md"
+              leftSection={showDeclined ? <IconEye size={16} /> : <IconEyeOff size={16} />}
+              onClick={handleToggleDeclined}
+              loading={isRefreshing}
+            >
+              {showDeclined ? t("ShowActiveSuggestions") : t("ShowDeclinedSuggestions")}
+            </Button>
+          }
+          primaryAction={
+            <Button
+              size="md"
+              leftSection={<IconRefresh size={16} />}
+              onClick={handleRefreshSuggestions}
+              loading={isRefreshing}
+            >
+              {t("RefreshSuggestions")}
+            </Button>
+          }
+        />
+
+        {recommendations.length === 0 ? (
+          <Paper withBorder radius="md" p="md">
+            <Text c="dimmed" size="sm">
+              {showDeclined ? t("DeclinedEmpty") : t("Empty")}
+            </Text>
+          </Paper>
+        ) : (
+          <Stack gap="sm">
+            {recommendations.map((recommendation) => (
+              <Paper key={recommendation.id} withBorder radius="md" p="md">
+                <Group justify="space-between" align="center" wrap="nowrap">
+                  <Group align="center" wrap="nowrap">
+                    <PersonChip person={recommendation.leftPerson} isClickable />
+                    <Text c="dimmed" size="sm" fw={500}>
+                      {tMerge("MergeWithLabel")}
+                    </Text>
+                    <PersonChip person={recommendation.rightPerson} isClickable />
+                  </Group>
+
+                  <Group>
+                    {showDeclined ? (
+                      <Button
+                        variant="default"
+                        leftSection={<IconRefresh size={16} />}
+                        onClick={() => handleRestore(recommendation.id)}
+                        loading={restoringIds.has(recommendation.id)}
+                      >
+                        {t("RestoreSuggestion")}
+                      </Button>
+                    ) : (
+                      <>
+                        <Button
+                          variant="default"
+                          leftSection={<IconX size={16} />}
+                          onClick={() => handleDecline(recommendation.id)}
+                          loading={decliningIds.has(recommendation.id)}
+                        >
+                          {t("DeclineMerge")}
+                        </Button>
+                        <Button
+                          leftSection={<IconCheck size={16} />}
+                          onClick={() => handleAccept(recommendation)}
+                        >
+                          {t("AcceptMerge")}
+                        </Button>
+                      </>
+                    )}
+                  </Group>
+                </Group>
+              </Paper>
+            ))}
+          </Stack>
+        )}
+      </Stack>
+    </PageWrapper>
+  );
+}

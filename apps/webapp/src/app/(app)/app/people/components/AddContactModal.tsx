@@ -1,8 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Stack, TextInput, Button, Group, Text, Alert } from "@mantine/core";
+import { Stack, TextInput, Text, Alert } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { modals } from "@mantine/modals";
 import { notifications } from "@mantine/notifications";
@@ -10,6 +10,7 @@ import { IconInfoCircle, IconUserPlus } from "@tabler/icons-react";
 import {
   errorNotificationTemplate,
   loadingNotificationTemplate,
+  ModalFooter,
   ModalTitle,
   successNotificationTemplate,
 } from "@bondery/mantine-next";
@@ -20,17 +21,29 @@ import { API_ROUTES, WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import { revalidateContacts } from "../../actions";
 
 export function openAddContactModal() {
+  const modalId = `add-contact-${Math.random().toString(36).slice(2)}`;
+
   modals.open({
+    modalId,
     title: <ModalTitle text="Add new person" icon={<IconUserPlus size={24} />} />,
     trapFocus: true,
-    children: <AddContactForm />,
+    children: <AddContactForm modalId={modalId} />,
   });
 }
 
-function AddContactForm() {
+function AddContactForm({ modalId }: { modalId: string }) {
   const router = useRouter();
   const [focusedField, setFocusedField] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    modals.updateModal({
+      modalId,
+      closeOnEscape: !isSubmitting,
+      closeOnClickOutside: !isSubmitting,
+      withCloseButton: !isSubmitting,
+    });
+  }, [isSubmitting, modalId]);
 
   const exampleName = useMemo(() => getRandomExampleName(), []);
 
@@ -111,7 +124,7 @@ function AddContactForm() {
       );
 
       // Close modal
-      modals.closeAll();
+      modals.close(modalId);
 
       // Redirect to person page
       await revalidateContacts();
@@ -207,18 +220,16 @@ function AddContactForm() {
           contact.
         </Alert>
 
-        <Group justify="flex-end" mt="md">
-          <Button variant="default" onClick={() => modals.closeAll()} disabled={isSubmitting}>
-            Cancel
-          </Button>
-          <Button
-            type="submit"
-            loading={isSubmitting}
-            leftSection={!isSubmitting && <IconUserPlus size={16} />}
-          >
-            Add {form.getValues().firstName} to Bondery
-          </Button>
-        </Group>
+        <ModalFooter
+          cancelLabel="Cancel"
+          onCancel={() => modals.close(modalId)}
+          cancelDisabled={isSubmitting}
+          actionLabel={`Add ${form.getValues().firstName} to Bondery`}
+          actionType="submit"
+          actionLoading={isSubmitting}
+          actionDisabled={isSubmitting}
+          actionLeftSection={!isSubmitting ? <IconUserPlus size={16} /> : undefined}
+        />
       </Stack>
     </form>
   );

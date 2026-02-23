@@ -5,18 +5,18 @@ import { IconCalendarPlus, IconCopy, IconSearch, IconTimelineEventText } from "@
 import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { PageWrapper } from "@/app/(app)/app/components/PageWrapper";
-import { NewActivityModal } from "./components/NewActivityModal";
+import { openNewActivityModal } from "./components/NewActivityModal";
 import type { Contact, Activity } from "@bondery/types";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import { PageHeader } from "../components/PageHeader";
 import { useTranslations } from "next-intl";
-import { modals } from "@mantine/modals";
 import { notifications } from "@mantine/notifications";
 import { IconTrash } from "@tabler/icons-react";
 import { ModalTitle } from "@bondery/mantine-next";
 import { revalidateEvents } from "../actions";
 import { errorNotificationTemplate, successNotificationTemplate } from "@bondery/mantine-next";
 import { TimelineEventsList } from "../components/timeline/TimelineEventsList";
+import { openStandardConfirmModal } from "../components/modals/openStandardConfirmModal";
 
 interface TimelineClientProps {
   initialContacts: Contact[];
@@ -26,8 +26,6 @@ interface TimelineClientProps {
 export function TimelineClient({ initialContacts, initialActivities }: TimelineClientProps) {
   const router = useRouter();
   const t = useTranslations("TimelinePage");
-  const [modalOpened, setModalOpened] = useState(false);
-  const [editingActivity, setEditingActivity] = useState<Activity | null>(null);
   const [search, setSearch] = useState("");
 
   const contactsById = useMemo(
@@ -60,12 +58,14 @@ export function TimelineClient({ initialContacts, initialActivities }: TimelineC
   };
 
   const handleActivityClick = (activity: Activity) => {
-    setEditingActivity(activity);
-    setModalOpened(true);
+    openNewActivityModal({
+      contacts: initialContacts,
+      activity,
+    });
   };
 
   const handleDelete = (activity: Activity) => {
-    modals.openConfirmModal({
+    openStandardConfirmModal({
       title: (
         <ModalTitle
           text={t("DeleteConfirmTitle")}
@@ -73,9 +73,10 @@ export function TimelineClient({ initialContacts, initialActivities }: TimelineC
           isDangerous={true}
         />
       ),
-      children: <Text size="sm">{t("DeleteConfirmMessage")}</Text>,
-      labels: { confirm: t("DeleteAction"), cancel: t("Cancel") },
-      confirmProps: { color: "red" },
+      message: <Text size="sm">{t("DeleteConfirmMessage")}</Text>,
+      confirmLabel: t("DeleteAction"),
+      cancelLabel: t("Cancel"),
+      confirmColor: "red",
       onConfirm: async () => {
         try {
           const response = await fetch(`${API_ROUTES.EVENTS}/${activity.id}`, {
@@ -170,8 +171,9 @@ export function TimelineClient({ initialContacts, initialActivities }: TimelineC
               size="md"
               leftSection={<IconCalendarPlus size={16} />}
               onClick={() => {
-                setEditingActivity(null);
-                setModalOpened(true);
+                openNewActivityModal({
+                  contacts: initialContacts,
+                });
               }}
             >
               {t("AddActivity")}
@@ -190,16 +192,6 @@ export function TimelineClient({ initialContacts, initialActivities }: TimelineC
           />
         </Group>
 
-        <NewActivityModal
-          opened={modalOpened}
-          onClose={() => {
-            setModalOpened(false);
-            setEditingActivity(null);
-          }}
-          contacts={initialContacts}
-          activity={editingActivity}
-        />
-
         <Stack gap="xl">
           <TimelineEventsList
             activities={filteredActivities}
@@ -209,8 +201,10 @@ export function TimelineClient({ initialContacts, initialActivities }: TimelineC
             deleteLabel={t("DeleteAction")}
             onOpen={handleActivityClick}
             onEdit={(activity) => {
-              setEditingActivity(activity);
-              setModalOpened(true);
+              openNewActivityModal({
+                contacts: initialContacts,
+                activity,
+              });
             }}
             onDuplicate={handleDuplicate}
             onDelete={handleDelete}

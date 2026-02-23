@@ -2,13 +2,24 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Stack, Button, Group, Text, Checkbox, ScrollArea, TextInput, Loader, Center } from "@mantine/core";
+import {
+  Stack,
+  Button,
+  Group,
+  Text,
+  Checkbox,
+  ScrollArea,
+  TextInput,
+  Loader,
+  Center,
+} from "@mantine/core";
 import { modals } from "@mantine/modals";
 import { notifications } from "@mantine/notifications";
 import { IconUserPlus, IconSearch } from "@tabler/icons-react";
 import {
   errorNotificationTemplate,
   loadingNotificationTemplate,
+  ModalFooter,
   ModalTitle,
   successNotificationTemplate,
 } from "@bondery/mantine-next";
@@ -24,21 +35,28 @@ interface AddPeopleToGroupModalProps {
   groupLabel: string;
 }
 
+interface AddPeopleToGroupFormProps extends AddPeopleToGroupModalProps {
+  modalId: string;
+}
+
 /**
  * Opens a modal that lets user select and add contacts to the provided group.
  */
 export function openAddPeopleToGroupModal(props: AddPeopleToGroupModalProps) {
+  const modalId = `add-people-to-group-${Math.random().toString(36).slice(2)}`;
+
   modals.open({
+    modalId,
     title: (
       <ModalTitle text={`Add people to ${props.groupLabel}`} icon={<IconUserPlus size={24} />} />
     ),
     trapFocus: true,
     size: "md",
-    children: <AddPeopleToGroupForm {...props} />,
+    children: <AddPeopleToGroupForm {...props} modalId={modalId} />,
   });
 }
 
-function AddPeopleToGroupForm({ groupId, groupLabel }: AddPeopleToGroupModalProps) {
+function AddPeopleToGroupForm({ groupId, groupLabel, modalId }: AddPeopleToGroupFormProps) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -46,6 +64,15 @@ function AddPeopleToGroupForm({ groupId, groupLabel }: AddPeopleToGroupModalProp
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [search, setSearch] = useState("");
   const [debouncedSearch] = useDebouncedValue(search, 200);
+
+  useEffect(() => {
+    modals.updateModal({
+      modalId,
+      closeOnEscape: !isSubmitting,
+      closeOnClickOutside: !isSubmitting,
+      withCloseButton: !isSubmitting,
+    });
+  }, [isSubmitting, modalId]);
 
   useEffect(() => {
     async function fetchAvailableContacts() {
@@ -145,7 +172,7 @@ function AddPeopleToGroupForm({ groupId, groupLabel }: AddPeopleToGroupModalProp
         }),
       );
 
-      modals.closeAll();
+      modals.close(modalId);
       await revalidateGroups();
       router.refresh();
     } catch (error) {
@@ -176,11 +203,7 @@ function AddPeopleToGroupForm({ groupId, groupLabel }: AddPeopleToGroupModalProp
         <Text c="dimmed" ta="center">
           All your contacts are already in this group, or you don&apos;t have any contacts yet.
         </Text>
-        <Group justify="flex-end">
-          <Button variant="default" onClick={() => modals.closeAll()}>
-            Close
-          </Button>
-        </Group>
+        <ModalFooter cancelLabel="Close" onCancel={() => modals.close(modalId)} />
       </Stack>
     );
   }
@@ -238,19 +261,18 @@ function AddPeopleToGroupForm({ groupId, groupLabel }: AddPeopleToGroupModalProp
         </Stack>
       </ScrollArea>
 
-      <Group justify="flex-end" gap="sm">
-        <Button variant="subtle" onClick={() => modals.closeAll()} disabled={isSubmitting}>
-          Cancel
-        </Button>
-        <Button
-          onClick={handleSubmit}
-          loading={isSubmitting}
-          disabled={selectedIds.size === 0}
-          leftSection={<IconUserPlus size={16} />}
-        >
-          Add {selectedIds.size > 0 ? `${selectedIds.size} contact${selectedIds.size !== 1 ? "s" : ""}` : "contacts"}
-        </Button>
-      </Group>
+      <ModalFooter
+        cancelLabel="Cancel"
+        onCancel={() => modals.close(modalId)}
+        cancelDisabled={isSubmitting}
+        actionLabel={`Add ${selectedIds.size > 0 ? `${selectedIds.size} contact${selectedIds.size !== 1 ? "s" : ""}` : "contacts"}`}
+        onAction={() => {
+          void handleSubmit();
+        }}
+        actionLoading={isSubmitting}
+        actionDisabled={selectedIds.size === 0 || isSubmitting}
+        actionLeftSection={<IconUserPlus size={16} />}
+      />
     </Stack>
   );
 }

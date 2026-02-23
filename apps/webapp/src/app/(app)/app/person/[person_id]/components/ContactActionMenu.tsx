@@ -1,6 +1,6 @@
 import { Button, Menu, MenuItem } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
-import { IconDotsVertical, IconId, IconTrash, IconUsersGroup } from "@tabler/icons-react";
+import { IconArrowMerge, IconDotsVertical, IconId, IconTrash } from "@tabler/icons-react";
 import type { Contact } from "@bondery/types";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import { useState } from "react";
@@ -75,7 +75,7 @@ export function ContactActionMenu({
       </Menu.Target>
 
       <Menu.Dropdown>
-        <MenuItem leftSection={<IconUsersGroup size={16} />} onClick={onMergeWith}>
+        <MenuItem leftSection={<IconArrowMerge size={16} />} onClick={onMergeWith}>
           {tMerge("ActionLabel")}
         </MenuItem>
         <MenuItem leftSection={<IconId size={16} />} onClick={handleExport}>

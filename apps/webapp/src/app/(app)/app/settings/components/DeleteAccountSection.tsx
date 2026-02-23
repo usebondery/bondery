@@ -2,7 +2,6 @@
 
 import { Text, Button, Group } from "@mantine/core";
 import { IconTrash, IconAlertCircle } from "@tabler/icons-react";
-import { modals } from "@mantine/modals";
 import { notifications } from "@mantine/notifications";
 import { useTranslations } from "next-intl";
 import { API_ROUTES, WEBSITE_ROUTES } from "@bondery/helpers/globals/paths";
@@ -13,12 +12,13 @@ import {
   successNotificationTemplate,
 } from "@bondery/mantine-next";
 import { createBrowswerSupabaseClient } from "@/lib/supabase/client";
+import { openStandardConfirmModal } from "../../components/modals/openStandardConfirmModal";
 
 export function DeleteAccountSection() {
   const t = useTranslations("SettingsPage.DataManagement");
 
   const handleDeleteAccount = () => {
-    modals.openConfirmModal({
+    openStandardConfirmModal({
       title: (
         <ModalTitle
           text={t("DeleteConfirmTitle")}
@@ -26,7 +26,7 @@ export function DeleteAccountSection() {
           isDangerous={true}
         />
       ),
-      children: (
+      message: (
         <Text size="sm">
           {t.rich("DeleteConfirmMessage", {
             b: (chunks) => <b>{chunks}</b>,
@@ -34,11 +34,10 @@ export function DeleteAccountSection() {
         </Text>
       ),
       centered: true,
-      labels: {
-        confirm: t("DeleteConfirmButton"),
-        cancel: t("DeleteCancelButton"),
-      },
-      confirmProps: { color: "red", leftSection: <IconTrash size={16} /> },
+      confirmLabel: t("DeleteConfirmButton"),
+      cancelLabel: t("DeleteCancelButton"),
+      confirmColor: "red",
+      confirmLeftSection: <IconTrash size={16} />,
       onConfirm: async () => {
         try {
           notifications.show({

@@ -21,6 +21,7 @@ import { IconMinus, IconPlus, IconSearch, IconUsersGroup } from "@tabler/icons-r
 import {
   errorNotificationTemplate,
   loadingNotificationTemplate,
+  ModalFooter,
   ModalTitle,
   successNotificationTemplate,
 } from "@bondery/mantine-next";
@@ -34,16 +35,23 @@ interface AddPeopleToGroupSelectionModalProps {
   personIds: string[];
 }
 
+interface AddPeopleToGroupSelectionFormProps extends AddPeopleToGroupSelectionModalProps {
+  modalId: string;
+}
+
 export function openAddPeopleToGroupSelectionModal(props: AddPeopleToGroupSelectionModalProps) {
+  const modalId = `edit-groups-${Math.random().toString(36).slice(2)}`;
+
   modals.open({
+    modalId,
     title: <ModalTitle text="Edit groups" icon={<IconUsersGroup size={24} />} />,
     trapFocus: true,
     size: "xl",
-    children: <AddPeopleToGroupSelectionForm {...props} />,
+    children: <AddPeopleToGroupSelectionForm {...props} modalId={modalId} />,
   });
 }
 
-function AddPeopleToGroupSelectionForm({ personIds }: AddPeopleToGroupSelectionModalProps) {
+function AddPeopleToGroupSelectionForm({ personIds, modalId }: AddPeopleToGroupSelectionFormProps) {
   const router = useRouter();
   const [groups, setGroups] = useState<GroupWithCount[]>([]);
   const [isLoadingGroups, setIsLoadingGroups] = useState(true);
@@ -54,6 +62,15 @@ function AddPeopleToGroupSelectionForm({ personIds }: AddPeopleToGroupSelectionM
   const [selectedPeople, setSelectedPeople] = useState<ContactPreview[]>([]);
 
   const deduplicatedPersonIds = useMemo(() => Array.from(new Set(personIds)), [personIds]);
+
+  useEffect(() => {
+    modals.updateModal({
+      modalId,
+      closeOnEscape: !isSubmitting,
+      closeOnClickOutside: !isSubmitting,
+      withCloseButton: !isSubmitting,
+    });
+  }, [isSubmitting, modalId]);
 
   useEffect(() => {
     async function fetchGroupsAndMemberships() {
@@ -208,7 +225,7 @@ function AddPeopleToGroupSelectionForm({ personIds }: AddPeopleToGroupSelectionM
         }),
       );
 
-      modals.closeAll();
+      modals.close(modalId);
       await revalidateGroups();
       router.refresh();
     } catch (error) {
@@ -368,19 +385,18 @@ function AddPeopleToGroupSelectionForm({ personIds }: AddPeopleToGroupSelectionM
         </ScrollArea>
       )}
 
-      <Group justify="flex-end" gap="sm">
-        <Button variant="default" onClick={() => modals.closeAll()} disabled={isSubmitting}>
-          Cancel
-        </Button>
-        <Button
-          onClick={handleSubmit}
-          loading={isSubmitting}
-          disabled={deduplicatedPersonIds.length === 0}
-          leftSection={<IconUsersGroup size={16} />}
-        >
-          Edit groups
-        </Button>
-      </Group>
+      <ModalFooter
+        cancelLabel="Cancel"
+        onCancel={() => modals.close(modalId)}
+        cancelDisabled={isSubmitting}
+        actionLabel="Edit groups"
+        onAction={() => {
+          void handleSubmit();
+        }}
+        actionLoading={isSubmitting}
+        actionDisabled={deduplicatedPersonIds.length === 0 || isSubmitting}
+        actionLeftSection={<IconUsersGroup size={16} />}
+      />
     </Stack>
   );
 }
