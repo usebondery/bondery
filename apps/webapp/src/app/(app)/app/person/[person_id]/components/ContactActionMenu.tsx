@@ -1,18 +1,27 @@
 import { Button, Menu, MenuItem } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
-import { IconDotsVertical, IconId, IconTrash } from "@tabler/icons-react";
+import { IconDotsVertical, IconId, IconTrash, IconUsersGroup } from "@tabler/icons-react";
 import type { Contact } from "@bondery/types";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import { useState } from "react";
 import { errorNotificationTemplate, successNotificationTemplate } from "@bondery/mantine-next";
+import { useTranslations } from "next-intl";
 
 interface ContactActionMenuProps {
   contact: Contact;
   personId: string;
   onDelete: () => void;
+  onMergeWith: () => void;
 }
 
-export function ContactActionMenu({ contact, personId, onDelete }: ContactActionMenuProps) {
+export function ContactActionMenu({
+  contact,
+  personId,
+  onDelete,
+  onMergeWith,
+}: ContactActionMenuProps) {
+  const tMerge = useTranslations("MergeWithModal");
+
   const handleExport = async () => {
     try {
       const response = await fetch(`${API_ROUTES.CONTACTS}/${personId}/vcard`);
@@ -66,6 +75,9 @@ export function ContactActionMenu({ contact, personId, onDelete }: ContactAction
       </Menu.Target>
 
       <Menu.Dropdown>
+        <MenuItem leftSection={<IconUsersGroup size={16} />} onClick={onMergeWith}>
+          {tMerge("ActionLabel")}
+        </MenuItem>
         <MenuItem leftSection={<IconId size={16} />} onClick={handleExport}>
           Download vCard
         </MenuItem>

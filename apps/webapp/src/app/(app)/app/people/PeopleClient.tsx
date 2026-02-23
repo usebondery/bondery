@@ -18,6 +18,7 @@ import { notifications } from "@mantine/notifications";
 import { useEffect, useState, useDeferredValue } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { useDebouncedCallback } from "@mantine/hooks";
+import { useTranslations } from "next-intl";
 import ContactsTable, {
   ColumnConfig,
   MenuAction,
@@ -33,6 +34,7 @@ import { errorNotificationTemplate, successNotificationTemplate } from "@bondery
 import { formatContactName } from "@/lib/nameHelpers";
 import { openDeleteContactModal } from "@/app/(app)/app/components/contacts/openDeleteContactModal";
 import { openAddPeopleToGroupSelectionModal } from "./components/AddPeopleToGroupSelectionModal";
+import { openMergeWithModal } from "./components/MergeWithModal";
 
 import type { Contact } from "@bondery/types";
 import { revalidateContacts } from "../actions";
@@ -47,6 +49,7 @@ export function PeopleClient({ initialContacts, totalCount, layout = "stack" }: 
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const tMerge = useTranslations("MergeWithModal");
 
   // Get initial state from URL params
   const initialSearch = searchParams.get("q") || "";
@@ -147,6 +150,17 @@ export function PeopleClient({ initialContacts, totalCount, layout = "stack" }: 
     }
 
     openAddPeopleToGroupSelectionModal({ personIds });
+  };
+
+  const openMergeModal = (leftPersonId: string, rightPersonId?: string, lockBoth?: boolean) => {
+    openMergeWithModal({
+      contacts,
+      leftPersonId,
+      rightPersonId,
+      disableLeftPicker: true,
+      disableRightPicker: Boolean(lockBoth),
+      titleText: tMerge("ActionLabel"),
+    });
   };
 
   const handleSelectAll = () => {
@@ -289,6 +303,12 @@ export function PeopleClient({ initialContacts, totalCount, layout = "stack" }: 
   // Define menu actions for individual contacts
   const menuActions: MenuAction[] = [
     {
+      key: "mergeWith",
+      label: tMerge("ActionLabel"),
+      icon: <IconUsersGroup size={14} />,
+      onClick: (contactId) => openMergeModal(contactId),
+    },
+    {
       key: "addToGroup",
       label: "Add to group",
       icon: <IconUsersGroup size={14} />,
@@ -324,6 +344,20 @@ export function PeopleClient({ initialContacts, totalCount, layout = "stack" }: 
       loading: isDeleting,
     },
   ];
+
+  if (selectedIds.size === 2) {
+    const selectedContacts = contacts.filter((contact) => selectedIds.has(contact.id));
+
+    if (selectedContacts.length === 2) {
+      bulkSelectionActions.unshift({
+        key: "mergeSelected",
+        label: tMerge("ActionLabel"),
+        icon: <IconUsersGroup size={16} />,
+        variant: "light",
+        onClick: () => openMergeModal(selectedContacts[0].id, selectedContacts[1].id, true),
+      });
+    }
+  }
 
   const WrapperComponent = layout === "container" ? Group : Stack;
 

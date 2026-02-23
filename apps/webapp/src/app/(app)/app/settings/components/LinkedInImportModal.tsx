@@ -30,7 +30,11 @@ import {
 import { notifications } from "@mantine/notifications";
 import { modals } from "@mantine/modals";
 import type { Contact, LinkedInPreparedContact } from "@bondery/types";
-import { errorNotificationTemplate, ModalTitle, successNotificationTemplate } from "@bondery/mantine-next";
+import {
+  errorNotificationTemplate,
+  ModalTitle,
+  successNotificationTemplate,
+} from "@bondery/mantine-next";
 import { API_ROUTES, WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import ContactsTable from "@/app/(app)/app/components/ContactsTable";
 import { revalidateAll } from "../../actions";
@@ -407,7 +411,10 @@ export function LinkedInImportModal({
         </Group>
 
         <Group justify="flex-end">
-          <Button onClick={() => setStep("instructions")} rightSection={<IconChevronRight size={16} />}>
+          <Button
+            onClick={() => setStep("instructions")}
+            rightSection={<IconChevronRight size={16} />}
+          >
             {t("Continue")}
           </Button>
         </Group>
@@ -425,7 +432,7 @@ export function LinkedInImportModal({
           <Stack gap="md" flex={1}>
             <List type="ordered" listStyleType="decimal" withPadding spacing="xs" size="sm">
               <List.Item>
-                {t("InstructionStep1Prefix")} {" "}
+                {t("InstructionStep1Prefix")}{" "}
                 <Anchor
                   href="https://www.linkedin.com/mypreferences/d/download-my-data"
                   target="_blank"
@@ -460,7 +467,10 @@ export function LinkedInImportModal({
                 >
                   {t("Back")}
                 </Button>
-                <Button onClick={() => setStep("upload")} rightSection={<IconChevronRight size={16} />}>
+                <Button
+                  onClick={() => setStep("upload")}
+                  rightSection={<IconChevronRight size={16} />}
+                >
                   {t("HaveZipFile")}
                 </Button>
               </Group>
@@ -529,7 +539,10 @@ export function LinkedInImportModal({
             >
               {t("Back")}
             </Button>
-            <Button onClick={() => folderInputRef.current?.click()} leftSection={<IconFileZip size={16} />}>
+            <Button
+              onClick={() => folderInputRef.current?.click()}
+              leftSection={<IconFileZip size={16} />}
+            >
               {t("SelectFolder")}
             </Button>
           </Group>

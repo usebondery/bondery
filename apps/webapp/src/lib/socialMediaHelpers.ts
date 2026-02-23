@@ -2,22 +2,34 @@
  * Social media helper functions for handling usernames and URLs
  */
 
+import { SOCIAL_PLATFORM_URL_DETAILS } from "@bondery/helpers";
+
 export interface SocialMediaPlatform {
   name: string;
   baseUrl: string;
   urlPattern: RegExp;
 }
 
+function escapeRegexValue(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
 export const socialMediaPlatforms: Record<string, SocialMediaPlatform> = {
   linkedin: {
     name: "LinkedIn",
-    baseUrl: "https://linkedin.com/in/",
-    urlPattern: /(?:https?:\/\/)?(?:www\.)?linkedin\.com\/in\/([^\/\?]+)/i,
+    baseUrl: SOCIAL_PLATFORM_URL_DETAILS.linkedin.profileBaseUrl,
+    urlPattern: new RegExp(
+      `(?:https?:\\/\\/)?(?:www\\.)?${escapeRegexValue(SOCIAL_PLATFORM_URL_DETAILS.linkedin.domain)}\\/in\\/([^\\/\\?]+)`,
+      "i",
+    ),
   },
   instagram: {
     name: "Instagram",
-    baseUrl: "https://instagram.com/",
-    urlPattern: /(?:https?:\/\/)?(?:www\.)?instagram\.com\/([^\/\?]+)/i,
+    baseUrl: SOCIAL_PLATFORM_URL_DETAILS.instagram.profileBaseUrl,
+    urlPattern: new RegExp(
+      `(?:https?:\\/\\/)?(?:www\\.)?${escapeRegexValue(SOCIAL_PLATFORM_URL_DETAILS.instagram.domain)}\\/([^\\/\\?]+)`,
+      "i",
+    ),
   },
   facebook: {
     name: "Facebook",

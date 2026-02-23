@@ -6,6 +6,7 @@ import {
   IconBrandFacebook,
   IconWorld,
 } from "@tabler/icons-react";
+import { SOCIAL_PLATFORM_URL_DETAILS } from "@bondery/helpers";
 import { extractUsername, createSocialMediaUrl } from "@/lib/socialMediaHelpers";
 
 type SocialPlatform = "linkedin" | "instagram" | "facebook" | "website";
@@ -50,8 +51,8 @@ export function validateSocialMediaInput(value: string, platform: SocialPlatform
       const domain = urlMatch[3].toLowerCase();
 
       const validDomains: Record<string, string[]> = {
-        linkedin: ["linkedin.com"],
-        instagram: ["instagram.com"],
+        linkedin: [SOCIAL_PLATFORM_URL_DETAILS.linkedin.domain],
+        instagram: [SOCIAL_PLATFORM_URL_DETAILS.instagram.domain],
         facebook: ["facebook.com", "fb.com"],
       };
 

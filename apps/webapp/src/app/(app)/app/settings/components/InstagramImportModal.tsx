@@ -32,7 +32,11 @@ import {
 import { notifications } from "@mantine/notifications";
 import { modals } from "@mantine/modals";
 import type { Contact, InstagramImportStrategy, InstagramPreparedContact } from "@bondery/types";
-import { errorNotificationTemplate, ModalTitle, successNotificationTemplate } from "@bondery/mantine-next";
+import {
+  errorNotificationTemplate,
+  ModalTitle,
+  successNotificationTemplate,
+} from "@bondery/mantine-next";
 import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import ContactsTable from "@/app/(app)/app/components/ContactsTable";
 import { revalidateAll } from "../../actions";
@@ -541,7 +545,7 @@ export function InstagramImportModal({
           <Stack gap="md" flex={1}>
             <List type="ordered" listStyleType="decimal" withPadding spacing="xs" size="sm">
               <List.Item>
-                {t("InstructionStep1Prefix")} {" "}
+                {t("InstructionStep1Prefix")}{" "}
                 <Anchor
                   href="https://accountscenter.instagram.com/info_and_permissions/dyi/"
                   target="_blank"
@@ -589,7 +593,10 @@ export function InstagramImportModal({
                 >
                   {t("Back")}
                 </Button>
-                <Button onClick={() => setStep("upload")} rightSection={<IconChevronRight size={16} />}>
+                <Button
+                  onClick={() => setStep("upload")}
+                  rightSection={<IconChevronRight size={16} />}
+                >
                   {t("HaveZipFile")}
                 </Button>
               </Group>
@@ -654,7 +661,10 @@ export function InstagramImportModal({
             >
               {t("Back")}
             </Button>
-            <Button onClick={() => zipInputRef.current?.click()} leftSection={<IconFileZip size={16} />}>
+            <Button
+              onClick={() => zipInputRef.current?.click()}
+              leftSection={<IconFileZip size={16} />}
+            >
               {t("SelectZipFile")}
             </Button>
           </Group>
