@@ -44,7 +44,6 @@ export const CONTACT_SELECT = `
   lastName:last_name,
   title,
   place,
-  description,
   notes,
   avatar,
   lastInteraction:last_interaction,
@@ -387,7 +386,7 @@ export async function contactRoutes(fastify: FastifyInstance) {
 
       const [
         { count: totalContactsCount },
-        { count: monthInteractionsCount },
+        { count: monthEventsCount },
         { count: newContactsYearCount },
       ] = await Promise.all([
         client
@@ -396,13 +395,11 @@ export async function contactRoutes(fastify: FastifyInstance) {
           .eq("user_id", user.id)
           .eq("myself", false),
         client
-          .from("people")
+          .from("events")
           .select("id", { head: true, count: "exact" })
           .eq("user_id", user.id)
-          .eq("myself", false)
-          .not("last_interaction", "is", null)
-          .gte("last_interaction", monthStart.toISOString())
-          .lt("last_interaction", nextMonthStart.toISOString()),
+          .gte("date", monthStart.toISOString())
+          .lt("date", nextMonthStart.toISOString()),
         client
           .from("people")
           .select("id", { head: true, count: "exact" })
@@ -491,7 +488,7 @@ export async function contactRoutes(fastify: FastifyInstance) {
         totalCount: typeof count === "number" ? count : contactsWithSocialMedia.length,
         stats: {
           totalContacts: totalContactsCount || 0,
-          thisMonthInteractions: monthInteractionsCount || 0,
+          thisMonthInteractions: monthEventsCount || 0,
           newContactsThisYear: newContactsYearCount || 0,
         },
       };
@@ -618,7 +615,6 @@ export async function contactRoutes(fastify: FastifyInstance) {
         user_id: user.id,
         first_name: body.firstName.trim(),
         last_name: body.lastName.trim(),
-        description: "",
         last_interaction: new Date().toISOString(),
         myself: false,
       };
@@ -1350,7 +1346,6 @@ export async function contactRoutes(fastify: FastifyInstance) {
       if (body.lastName !== undefined) updates.last_name = body.lastName;
       if (body.title !== undefined) updates.title = body.title;
       if (body.place !== undefined) updates.place = body.place;
-      if (body.description !== undefined) updates.description = body.description;
       if (body.notes !== undefined) updates.notes = body.notes;
       if (body.avatar !== undefined) updates.avatar = body.avatar;
       if (body.connections !== undefined) updates.connections = body.connections;
