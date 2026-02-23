@@ -143,8 +143,8 @@ export async function generateVCard(contact: Contact): Promise<string> {
     lines.push(`TZ:${contact.timezone}`);
   }
 
-  if (contact.description) {
-    lines.push(`NOTE:${escapeVCardValue(contact.description)}`);
+  if (contact.notes) {
+    lines.push(`NOTE:${escapeVCardValue(contact.notes)}`);
   }
 
   if (contact.language) {
