@@ -13,9 +13,10 @@ import {
   IconMapPin,
   IconClock,
   IconBrandLinkedin,
+  IconArrowMerge,
 } from "@tabler/icons-react";
 import { notifications } from "@mantine/notifications";
-import { useEffect, useState, useDeferredValue } from "react";
+import { useEffect, useState, useDeferredValue, useMemo } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { useDebouncedCallback } from "@mantine/hooks";
 import { useTranslations } from "next-intl";
@@ -34,9 +35,9 @@ import { errorNotificationTemplate, successNotificationTemplate } from "@bondery
 import { formatContactName } from "@/lib/nameHelpers";
 import { openDeleteContactModal } from "@/app/(app)/app/components/contacts/openDeleteContactModal";
 import { openAddPeopleToGroupSelectionModal } from "./components/AddPeopleToGroupSelectionModal";
-import { openMergeWithModal } from "./components/MergeWithModal";
+import { MERGE_CONFLICT_FIELDS, openMergeWithModal } from "./components/MergeWithModal";
 
-import type { Contact } from "@bondery/types";
+import type { Contact, MergeConflictField } from "@bondery/types";
 import { revalidateContacts } from "../actions";
 
 interface PeopleClientProps {
@@ -50,6 +51,38 @@ export function PeopleClient({ initialContacts, totalCount, layout = "stack" }: 
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const tMerge = useTranslations("MergeWithModal");
+  const mergeTexts = useMemo(
+    () => ({
+      errorTitle: tMerge("ErrorTitle"),
+      successTitle: tMerge("SuccessTitle"),
+      selectBothPeopleError: tMerge("SelectBothPeopleError"),
+      differentPeopleError: tMerge("DifferentPeopleError"),
+      mergingTitle: tMerge("MergingTitle"),
+      mergingDescription: tMerge("MergingDescription"),
+      mergeSuccess: tMerge("MergeSuccess"),
+      mergeFailed: tMerge("MergeFailed"),
+      mergeWithLabel: tMerge("MergeWithLabel"),
+      selectLeftPerson: tMerge("SelectLeftPerson"),
+      selectRightPerson: tMerge("SelectRightPerson"),
+      searchPeople: tMerge("SearchPeople"),
+      noPeopleFound: tMerge("NoPeopleFound"),
+      cancel: tMerge("Cancel"),
+      continue: tMerge("Continue"),
+      back: tMerge("Back"),
+      merge: tMerge("Merge"),
+      noConflicts: tMerge("NoConflicts"),
+      processing: tMerge("Processing"),
+      steps: {
+        pick: tMerge("Steps.Pick"),
+        resolve: tMerge("Steps.Resolve"),
+        process: tMerge("Steps.Process"),
+      },
+      fields: Object.fromEntries(
+        MERGE_CONFLICT_FIELDS.map((field) => [field, tMerge(`Fields.${field}`)]),
+      ) as Record<MergeConflictField, string>,
+    }),
+    [tMerge],
+  );
 
   // Get initial state from URL params
   const initialSearch = searchParams.get("q") || "";
@@ -160,6 +193,7 @@ export function PeopleClient({ initialContacts, totalCount, layout = "stack" }: 
       disableLeftPicker: true,
       disableRightPicker: Boolean(lockBoth),
       titleText: tMerge("ActionLabel"),
+      texts: mergeTexts,
     });
   };
 
@@ -305,7 +339,7 @@ export function PeopleClient({ initialContacts, totalCount, layout = "stack" }: 
     {
       key: "mergeWith",
       label: tMerge("ActionLabel"),
-      icon: <IconUsersGroup size={14} />,
+      icon: <IconArrowMerge size={14} />,
       onClick: (contactId) => openMergeModal(contactId),
     },
     {
@@ -352,7 +386,7 @@ export function PeopleClient({ initialContacts, totalCount, layout = "stack" }: 
       bulkSelectionActions.unshift({
         key: "mergeSelected",
         label: tMerge("ActionLabel"),
-        icon: <IconUsersGroup size={16} />,
+        icon: <IconArrowMerge size={16} />,
         variant: "light",
         onClick: () => openMergeModal(selectedContacts[0].id, selectedContacts[1].id, true),
       });

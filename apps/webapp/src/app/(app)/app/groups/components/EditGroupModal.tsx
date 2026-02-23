@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   Stack,
@@ -19,6 +19,7 @@ import { IconUsersGroup, IconDeviceFloppy } from "@tabler/icons-react";
 import {
   errorNotificationTemplate,
   loadingNotificationTemplate,
+  ModalFooter,
   ModalTitle,
   successNotificationTemplate,
 } from "@bondery/mantine-next";
@@ -51,17 +52,35 @@ interface EditGroupModalProps {
 }
 
 export function openEditGroupModal(props: EditGroupModalProps) {
+  const modalId = `edit-group-${Math.random().toString(36).slice(2)}`;
+
   modals.open({
+    modalId,
     title: <ModalTitle text="Edit group" icon={<IconUsersGroup size={24} />} />,
     trapFocus: true,
     size: "md",
-    children: <EditGroupForm {...props} />,
+    children: <EditGroupForm {...props} modalId={modalId} />,
   });
 }
 
-function EditGroupForm({ groupId, initialLabel, initialEmoji, initialColor }: EditGroupModalProps) {
+function EditGroupForm({
+  groupId,
+  initialLabel,
+  initialEmoji,
+  initialColor,
+  modalId,
+}: EditGroupModalProps & { modalId: string }) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    modals.updateModal({
+      modalId,
+      closeOnEscape: !isSubmitting,
+      closeOnClickOutside: !isSubmitting,
+      withCloseButton: !isSubmitting,
+    });
+  }, [isSubmitting, modalId]);
 
   const form = useForm({
     mode: "controlled",
@@ -117,7 +136,7 @@ function EditGroupForm({ groupId, initialLabel, initialEmoji, initialColor }: Ed
         }),
       );
 
-      modals.closeAll();
+      modals.close(modalId);
       await revalidateGroups();
       router.refresh();
     } catch (error) {
@@ -168,14 +187,16 @@ function EditGroupForm({ groupId, initialLabel, initialEmoji, initialColor }: Ed
           {...form.getInputProps("color")}
         />
 
-        <Group justify="flex-end" gap="sm" mt="md">
-          <Button variant="default" onClick={() => modals.closeAll()} disabled={isSubmitting}>
-            Cancel
-          </Button>
-          <Button type="submit" loading={isSubmitting} leftSection={<IconDeviceFloppy size={16} />}>
-            Save changes
-          </Button>
-        </Group>
+        <ModalFooter
+          cancelLabel="Cancel"
+          onCancel={() => modals.close(modalId)}
+          cancelDisabled={isSubmitting}
+          actionLabel="Save changes"
+          actionType="submit"
+          actionLoading={isSubmitting}
+          actionDisabled={isSubmitting}
+          actionLeftSection={<IconDeviceFloppy size={16} />}
+        />
       </Stack>
     </form>
   );

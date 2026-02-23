@@ -10,6 +10,9 @@ export const WEBSITE_ROUTES = {
 
 export const API_ROUTES = {
   CONTACTS: "/api/contacts",
+  CONTACTS_MERGE: "/api/contacts/merge",
+  CONTACTS_MERGE_RECOMMENDATIONS: "/api/contacts/merge-recommendations",
+  CONTACTS_MERGE_RECOMMENDATIONS_REFRESH: "/api/contacts/merge-recommendations/refresh",
   CONTACTS_UPCOMING_REMINDERS: "/api/contacts/important-events/upcoming",
   CONTACTS_IMPORT_LINKEDIN: "/api/contacts/import/linkedin",
   CONTACTS_IMPORT_INSTAGRAM: "/api/contacts/import/instagram",
@@ -43,6 +46,7 @@ export const SOCIAL_LINKS = {
 export const WEBAPP_ROUTES = {
   HOME: "/app/home",
   PEOPLE: "/app/people",
+  FIX_CONTACTS: "/app/fix",
   GROUPS: "/app/groups",
   TIMELINE: "/app/timeline",
   PERSON: "/app/person",

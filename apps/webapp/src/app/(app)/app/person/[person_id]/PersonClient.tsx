@@ -10,7 +10,7 @@ import { TextStyle } from "@tiptap/extension-text-style";
 import { notifications } from "@mantine/notifications";
 import { IconCheck, IconX, IconUser, IconPlus } from "@tabler/icons-react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 import { useTranslations } from "next-intl";
 import { extractUsername } from "@/lib/socialMediaHelpers";
@@ -27,6 +27,7 @@ import type {
   Activity,
   RelationshipType,
   ImportantEvent,
+  MergeConflictField,
 } from "@bondery/types";
 import { ContactActionMenu } from "./components/ContactActionMenu";
 import { ContactIdentitySection } from "./components/ContactIdentitySection";
@@ -48,7 +49,7 @@ import { revalidateContacts, revalidateRelationships } from "../../actions";
 import { openDeleteContactModal } from "@/app/(app)/app/components/contacts/openDeleteContactModal";
 import { GroupCard } from "../../groups/components/GroupCard";
 import { openAddPeopleToGroupSelectionModal } from "../../people/components/AddPeopleToGroupSelectionModal";
-import { openMergeWithModal } from "../../people/components/MergeWithModal";
+import { MERGE_CONFLICT_FIELDS, openMergeWithModal } from "../../people/components/MergeWithModal";
 
 const PersonMap = dynamic(() => import("./components/PersonMap").then((mod) => mod.PersonMap), {
   ssr: false,
@@ -82,6 +83,38 @@ export default function PersonClient({
   const tRelationships = useTranslations("PersonRelationships");
   const tImportantDates = useTranslations("ContactImportantDates");
   const tMerge = useTranslations("MergeWithModal");
+  const mergeTexts = useMemo(
+    () => ({
+      errorTitle: tMerge("ErrorTitle"),
+      successTitle: tMerge("SuccessTitle"),
+      selectBothPeopleError: tMerge("SelectBothPeopleError"),
+      differentPeopleError: tMerge("DifferentPeopleError"),
+      mergingTitle: tMerge("MergingTitle"),
+      mergingDescription: tMerge("MergingDescription"),
+      mergeSuccess: tMerge("MergeSuccess"),
+      mergeFailed: tMerge("MergeFailed"),
+      mergeWithLabel: tMerge("MergeWithLabel"),
+      selectLeftPerson: tMerge("SelectLeftPerson"),
+      selectRightPerson: tMerge("SelectRightPerson"),
+      searchPeople: tMerge("SearchPeople"),
+      noPeopleFound: tMerge("NoPeopleFound"),
+      cancel: tMerge("Cancel"),
+      continue: tMerge("Continue"),
+      back: tMerge("Back"),
+      merge: tMerge("Merge"),
+      noConflicts: tMerge("NoConflicts"),
+      processing: tMerge("Processing"),
+      steps: {
+        pick: tMerge("Steps.Pick"),
+        resolve: tMerge("Steps.Resolve"),
+        process: tMerge("Steps.Process"),
+      },
+      fields: Object.fromEntries(
+        MERGE_CONFLICT_FIELDS.map((field) => [field, tMerge(`Fields.${field}`)]),
+      ) as Record<MergeConflictField, string>,
+    }),
+    [tMerge],
+  );
 
   const [contact, setContact] = useState<Contact>(initialContact);
   const [personGroups, setPersonGroups] = useState<GroupType[]>(initialPersonGroups);
@@ -701,6 +734,7 @@ export default function PersonClient({
       leftPersonId: contact.id,
       disableLeftPicker: true,
       titleText: tMerge("ActionLabel"),
+      texts: mergeTexts,
     });
   };
 

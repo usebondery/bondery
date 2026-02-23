@@ -4,8 +4,7 @@ import { Stack, Group, Text, Button } from "@mantine/core";
 import { IconCopy, IconTimelineEventText, IconTrash } from "@tabler/icons-react";
 import { useState, useMemo } from "react";
 import type { Activity, Contact } from "@bondery/types";
-import { NewActivityModal } from "../../../timeline/components/NewActivityModal";
-import { modals } from "@mantine/modals";
+import { openNewActivityModal } from "../../../timeline/components/NewActivityModal";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import { notifications } from "@mantine/notifications";
 import { useRouter } from "next/navigation";
@@ -17,6 +16,7 @@ import {
   successNotificationTemplate,
 } from "@bondery/mantine-next";
 import { revalidateEvents } from "../../../actions";
+import { openStandardConfirmModal } from "../../../components/modals/openStandardConfirmModal";
 
 interface PersonTimelineSectionProps {
   activities: Activity[];
@@ -31,8 +31,6 @@ export function PersonTimelineSection({
 }: PersonTimelineSectionProps) {
   const router = useRouter();
   const t = useTranslations("TimelinePage");
-  const [activityModalOpened, setActivityModalOpened] = useState(false);
-  const [editingActivity, setEditingActivity] = useState<Activity | null>(null);
 
   const contactsById = useMemo(() => {
     const allContacts = [contact, ...connectedContacts];
@@ -45,8 +43,10 @@ export function PersonTimelineSection({
   );
 
   const handleActivityClick = (activity: Activity) => {
-    setEditingActivity(activity);
-    setActivityModalOpened(true);
+    openNewActivityModal({
+      contacts: [contact, ...connectedContacts],
+      activity,
+    });
   };
 
   const resolveParticipants = (activity: Activity): Contact[] => {
@@ -71,7 +71,7 @@ export function PersonTimelineSection({
   };
 
   const handleDelete = (activity: Activity) => {
-    modals.openConfirmModal({
+    openStandardConfirmModal({
       title: (
         <ModalTitle
           text={t("DeleteConfirmTitle")}
@@ -79,9 +79,10 @@ export function PersonTimelineSection({
           isDangerous={true}
         />
       ),
-      children: <Text size="sm">{t("DeleteConfirmMessage")}</Text>,
-      labels: { confirm: t("DeleteAction"), cancel: t("Cancel") },
-      confirmProps: { color: "red" },
+      message: <Text size="sm">{t("DeleteConfirmMessage")}</Text>,
+      confirmLabel: t("DeleteAction"),
+      cancelLabel: t("Cancel"),
+      confirmColor: "red",
       onConfirm: async () => {
         try {
           const response = await fetch(`${API_ROUTES.EVENTS}/${activity.id}`, {
@@ -155,11 +156,6 @@ export function PersonTimelineSection({
     }
   };
 
-  const handleActivityModalClose = () => {
-    setActivityModalOpened(false);
-    setEditingActivity(null);
-  };
-
   return (
     <>
       <Stack gap="md">
@@ -174,8 +170,9 @@ export function PersonTimelineSection({
             variant="light"
             size="xs"
             onClick={() => {
-              setEditingActivity(null);
-              setActivityModalOpened(true);
+              openNewActivityModal({
+                contacts: [contact, ...connectedContacts],
+              });
             }}
           >
             {t("AddActivity")}
@@ -191,8 +188,10 @@ export function PersonTimelineSection({
             deleteLabel={t("DeleteAction")}
             onOpen={handleActivityClick}
             onEdit={(activity) => {
-              setEditingActivity(activity);
-              setActivityModalOpened(true);
+              openNewActivityModal({
+                contacts: [contact, ...connectedContacts],
+                activity,
+              });
             }}
             onDuplicate={handleDuplicate}
             onDelete={handleDelete}
@@ -205,13 +204,6 @@ export function PersonTimelineSection({
           )}
         </Stack>
       </Stack>
-
-      <NewActivityModal
-        opened={activityModalOpened}
-        onClose={handleActivityModalClose}
-        contacts={[contact, ...connectedContacts]}
-        activity={editingActivity}
-      />
     </>
   );
 }

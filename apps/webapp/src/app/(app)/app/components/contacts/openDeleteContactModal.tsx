@@ -1,7 +1,6 @@
 "use client";
 
 import { Text } from "@mantine/core";
-import { modals } from "@mantine/modals";
 import { notifications } from "@mantine/notifications";
 import { IconAlertCircle, IconTrash } from "@tabler/icons-react";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
@@ -11,6 +10,7 @@ import {
   ModalTitle,
   successNotificationTemplate,
 } from "@bondery/mantine-next";
+import { openStandardConfirmModal } from "../modals/openStandardConfirmModal";
 
 interface OpenDeleteContactModalParams {
   contactId: string;
@@ -29,7 +29,7 @@ export function openDeleteContactModal({
   contactName,
   onDeleted,
 }: OpenDeleteContactModalParams): void {
-  modals.openConfirmModal({
+  openStandardConfirmModal({
     title: (
       <ModalTitle
         text={`Delete ${contactName}?`}
@@ -37,14 +37,16 @@ export function openDeleteContactModal({
         isDangerous={true}
       />
     ),
-    children: (
+    message: (
       <Text size="sm">
         Are you sure you want to delete <strong>{contactName}</strong>? This person&apos;s data,
         mentions, and related information will be deleted. And this action cannot be restored.
       </Text>
     ),
-    labels: { confirm: "Yes, delete", cancel: "No, cancel" },
-    confirmProps: { color: "red", leftSection: <IconTrash size={16} /> },
+    confirmLabel: "Yes, delete",
+    cancelLabel: "No, cancel",
+    confirmColor: "red",
+    confirmLeftSection: <IconTrash size={16} />,
     onConfirm: async () => {
       const loadingNotification = notifications.show({
         ...loadingNotificationTemplate({

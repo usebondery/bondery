@@ -285,6 +285,60 @@ export type Database = {
           },
         ];
       };
+      people_merge_recommendations: {
+        Row: {
+          algorithm_version: string;
+          created_at: string;
+          id: string;
+          is_declined: boolean;
+          left_person_id: string;
+          reasons: string[];
+          right_person_id: string;
+          score: number;
+          updated_at: string;
+          user_id: string;
+        };
+        Insert: {
+          algorithm_version?: string;
+          created_at?: string;
+          id?: string;
+          is_declined?: boolean;
+          left_person_id: string;
+          reasons?: string[];
+          right_person_id: string;
+          score?: number;
+          updated_at?: string;
+          user_id: string;
+        };
+        Update: {
+          algorithm_version?: string;
+          created_at?: string;
+          id?: string;
+          is_declined?: boolean;
+          left_person_id?: string;
+          reasons?: string[];
+          right_person_id?: string;
+          score?: number;
+          updated_at?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "people_merge_recommendations_left_person_id_fkey";
+            columns: ["left_person_id"];
+            isOneToOne: false;
+            referencedRelation: "people";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "people_merge_recommendations_right_person_id_fkey";
+            columns: ["right_person_id"];
+            isOneToOne: false;
+            referencedRelation: "people";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       people_important_events: {
         Row: {
           created_at: string;

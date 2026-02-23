@@ -2,7 +2,6 @@
 
 import { useMemo } from "react";
 import { Text, Button, Stack, Group, Paper, SimpleGrid } from "@mantine/core";
-import { modals } from "@mantine/modals";
 import { notifications } from "@mantine/notifications";
 import { IconCopy, IconTrash, IconUsersGroup, IconUsersPlus } from "@tabler/icons-react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
@@ -22,6 +21,7 @@ import {
   successNotificationTemplate,
 } from "@bondery/mantine-next";
 import { revalidateGroups } from "../actions";
+import { openStandardConfirmModal } from "../components/modals/openStandardConfirmModal";
 
 interface GroupsClientProps {
   initialGroups: GroupWithCount[];
@@ -87,16 +87,17 @@ export function GroupsClient({ initialGroups, totalCount }: GroupsClientProps) {
     const group = initialGroups.find((g) => g.id === groupId);
     if (!group) return;
 
-    modals.openConfirmModal({
+    openStandardConfirmModal({
       title: <ModalTitle text="Delete group?" icon={<IconTrash size={20} />} isDangerous={true} />,
-      children: (
+      message: (
         <Text size="sm">
           Are you sure you want to delete "{group.label}"? This action cannot be undone. The
           contacts in this group will not be deleted.
         </Text>
       ),
-      labels: { confirm: "Delete", cancel: "Cancel" },
-      confirmProps: { color: "red" },
+      confirmLabel: "Delete",
+      cancelLabel: "Cancel",
+      confirmColor: "red",
       onConfirm: async () => {
         const loadingNotification = notifications.show({
           ...loadingNotificationTemplate({

@@ -1,6 +1,7 @@
 import AdmZip from "adm-zip";
 import { parse as parseCsv } from "csv-parse/sync";
 import type { LinkedInPreparedContact } from "@bondery/types";
+import { SOCIAL_PLATFORM_URL_DETAILS } from "@bondery/helpers";
 
 const LINKEDIN_REQUIRED_HEADERS = [
   "First Name",
@@ -154,7 +155,7 @@ function parseLinkedInUsername(rawUrl: string): { username: string | null; norma
 
     return {
       username: cleaned,
-      normalizedUrl: `https://www.linkedin.com/in/${cleaned}`,
+      normalizedUrl: `${SOCIAL_PLATFORM_URL_DETAILS.linkedin.profileBaseUrlWithWww}${cleaned}`,
     };
   } catch {
     return { username: null, normalizedUrl: fallback };

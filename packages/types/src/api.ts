@@ -3,6 +3,8 @@
  * Shared types for API requests and responses
  */
 
+import type { Contact } from "./contact";
+
 /**
  * Standard API error response
  */
@@ -138,4 +140,67 @@ export interface InstagramImportCommitResponse {
   importedCount: number;
   updatedCount: number;
   skippedCount: number;
+}
+
+export type MergeConflictChoice = "left" | "right";
+
+export type MergeConflictField =
+  | "firstName"
+  | "middleName"
+  | "lastName"
+  | "title"
+  | "place"
+  | "notes"
+  | "lastInteraction"
+  | "connections"
+  | "position"
+  | "gender"
+  | "language"
+  | "timezone"
+  | "nickname"
+  | "pgpPublicKey"
+  | "location"
+  | "latitude"
+  | "longitude"
+  | "linkedin"
+  | "instagram"
+  | "whatsapp"
+  | "facebook"
+  | "website"
+  | "signal";
+
+export interface MergeContactsRequest {
+  leftPersonId: string;
+  rightPersonId: string;
+  conflictResolutions?: Partial<Record<MergeConflictField, MergeConflictChoice>>;
+}
+
+export interface MergeContactsResponse {
+  personId: string;
+  userId: string;
+  mergedIntoPersonId: string;
+  mergedFromPersonId: string;
+}
+
+export type MergeRecommendationReason = "fullName" | "email" | "phone";
+
+export interface MergeRecommendation {
+  id: string;
+  leftPerson: Contact;
+  rightPerson: Contact;
+  score: number;
+  reasons: MergeRecommendationReason[];
+}
+
+export interface MergeRecommendationsResponse {
+  recommendations: MergeRecommendation[];
+}
+
+export interface DeclineMergeRecommendationResponse {
+  success: true;
+}
+
+export interface RefreshMergeRecommendationsResponse {
+  success: true;
+  recommendationsCount: number;
 }

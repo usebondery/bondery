@@ -27,13 +27,13 @@ import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import { formatContactName } from "@/lib/nameHelpers";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import { notifications } from "@mantine/notifications";
-import { modals } from "@mantine/modals";
 import {
   errorNotificationTemplate,
   loadingNotificationTemplate,
   ModalTitle,
   successNotificationTemplate,
 } from "@bondery/mantine-next";
+import { openStandardConfirmModal } from "@/app/(app)/app/components/modals/openStandardConfirmModal";
 import { revalidateContacts, revalidateGroups } from "../../actions";
 import { openDeleteContactModal } from "@/app/(app)/app/components/contacts/openDeleteContactModal";
 import { GroupCard } from "../../groups/components/GroupCard";
@@ -462,16 +462,17 @@ export function GroupDetailClient({
   };
 
   const handleDeleteGroup = (targetGroupId: string) => {
-    modals.openConfirmModal({
+    openStandardConfirmModal({
       title: <ModalTitle text="Delete group?" icon={<IconTrash size={20} />} isDangerous={true} />,
-      children: (
+      message: (
         <Text size="sm">
           Are you sure you want to delete "{groupLabel}"? This action cannot be undone. The contacts
           in this group will not be deleted.
         </Text>
       ),
-      labels: { confirm: "Delete", cancel: "Cancel" },
-      confirmProps: { color: "red" },
+      confirmLabel: "Delete",
+      cancelLabel: "Cancel",
+      confirmColor: "red",
       onConfirm: async () => {
         const loadingNotification = notifications.show({
           ...loadingNotificationTemplate({

@@ -17,6 +17,7 @@ const CACHE_TAGS = {
   reminders: "reminders",
   relationships: "relationships",
   importantEvents: "important-events",
+  mergeRecommendations: "merge-recommendations",
 } as const;
 
 /** Invalidate user settings (name, language, timezone, etc.) */
@@ -52,6 +53,11 @@ export async function revalidateRelationships() {
 /** Invalidate important-events data. */
 export async function revalidateImportantEvents() {
   updateTag(CACHE_TAGS.importantEvents);
+}
+
+/** Invalidate merge recommendation data. */
+export async function revalidateMergeRecommendations() {
+  updateTag(CACHE_TAGS.mergeRecommendations);
 }
 
 /**

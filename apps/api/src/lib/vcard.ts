@@ -4,6 +4,7 @@
  */
 
 import type { Contact, PhoneEntry, EmailEntry } from "@bondery/types";
+import { SOCIAL_PLATFORM_URL_DETAILS } from "@bondery/helpers";
 
 /**
  * IMPP (Instant Messaging and Presence Protocol) URI scheme mappings
@@ -16,7 +17,11 @@ const IMPP_MAPPINGS: Record<string, { scheme: string; label: string; urlFormat?:
   whatsapp: { scheme: "whatsapp", label: "WhatsApp", urlFormat: "https://wa.me/" },
   signal: { scheme: "signal", label: "Signal", urlFormat: "https://signal.me/#p/" },
   linkedin: { scheme: "https", label: "LinkedIn" },
-  instagram: { scheme: "instagram", label: "Instagram", urlFormat: "https://instagram.com/" },
+  instagram: {
+    scheme: "instagram",
+    label: "Instagram",
+    urlFormat: SOCIAL_PLATFORM_URL_DETAILS.instagram.profileBaseUrl,
+  },
   facebook: { scheme: "messenger", label: "Messenger", urlFormat: "https://m.me/" },
 };
 
@@ -178,7 +183,7 @@ export async function generateVCard(contact: Contact): Promise<string> {
         // LinkedIn uses https scheme - build full URL
         const linkedinUrl = trimmedValue.startsWith("http")
           ? trimmedValue
-          : `https://linkedin.com/in/${trimmedValue}`;
+          : `${SOCIAL_PLATFORM_URL_DETAILS.linkedin.profileBaseUrl}${trimmedValue}`;
         lines.push(`IMPP:${linkedinUrl}`);
       } else if (platform === "instagram") {
         // Instagram - add both scheme and URL format

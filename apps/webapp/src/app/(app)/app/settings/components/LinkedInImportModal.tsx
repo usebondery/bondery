@@ -31,6 +31,7 @@ import { notifications } from "@mantine/notifications";
 import { modals } from "@mantine/modals";
 import type { Contact, LinkedInPreparedContact } from "@bondery/types";
 import {
+  ModalFooter,
   errorNotificationTemplate,
   ModalTitle,
   successNotificationTemplate,
@@ -228,6 +229,9 @@ export function LinkedInImportModal({
 
     modals.updateModal({
       modalId,
+      closeOnEscape: !(isParsing || isImporting || step === "processing"),
+      closeOnClickOutside: !(isParsing || isImporting || step === "processing"),
+      withCloseButton: !(isParsing || isImporting || step === "processing"),
       size:
         step === "preview"
           ? "80rem"
@@ -250,7 +254,7 @@ export function LinkedInImportModal({
         />
       ),
     });
-  }, [activeStep, modalId, step, t]);
+  }, [activeStep, isImporting, isParsing, modalId, step, t]);
 
   const handleToggleAll = () => {
     if (allSelected) {
@@ -374,7 +378,11 @@ export function LinkedInImportModal({
         }),
       );
 
-      modals.closeAll();
+      if (modalId) {
+        modals.close(modalId);
+      } else {
+        modals.closeAll();
+      }
       await revalidateAll();
       router.push(WEBAPP_ROUTES.PEOPLE);
     } catch (error) {
@@ -410,14 +418,11 @@ export function LinkedInImportModal({
           </Stack>
         </Group>
 
-        <Group justify="flex-end">
-          <Button
-            onClick={() => setStep("instructions")}
-            rightSection={<IconChevronRight size={16} />}
-          >
-            {t("Continue")}
-          </Button>
-        </Group>
+        <ModalFooter
+          actionLabel={t("Continue")}
+          onAction={() => setStep("instructions")}
+          actionRightSection={<IconChevronRight size={16} />}
+        />
       </Stack>
     );
   }
@@ -458,23 +463,13 @@ export function LinkedInImportModal({
               </Stack>
             </Alert>
 
-            <Group justify="flex-end">
-              <Group gap="xs">
-                <Button
-                  variant="subtle"
-                  onClick={() => setStep("intro")}
-                  leftSection={<IconArrowLeft size={16} />}
-                >
-                  {t("Back")}
-                </Button>
-                <Button
-                  onClick={() => setStep("upload")}
-                  rightSection={<IconChevronRight size={16} />}
-                >
-                  {t("HaveZipFile")}
-                </Button>
-              </Group>
-            </Group>
+            <ModalFooter
+              backLabel={t("Back")}
+              onBack={() => setStep("intro")}
+              actionLabel={t("HaveZipFile")}
+              onAction={() => setStep("upload")}
+              actionRightSection={<IconChevronRight size={16} />}
+            />
           </Stack>
         </Group>
       </Stack>
@@ -530,23 +525,13 @@ export function LinkedInImportModal({
           onChange={handleFolderChange}
         />
 
-        <Group justify="flex-end">
-          <Group gap="xs">
-            <Button
-              variant="subtle"
-              onClick={() => setStep("instructions")}
-              leftSection={<IconArrowLeft size={16} />}
-            >
-              {t("Back")}
-            </Button>
-            <Button
-              onClick={() => folderInputRef.current?.click()}
-              leftSection={<IconFileZip size={16} />}
-            >
-              {t("SelectFolder")}
-            </Button>
-          </Group>
-        </Group>
+        <ModalFooter
+          backLabel={t("Back")}
+          onBack={() => setStep("instructions")}
+          actionLabel={t("SelectFolder")}
+          onAction={() => folderInputRef.current?.click()}
+          actionLeftSection={<IconFileZip size={16} />}
+        />
       </Stack>
     );
   }
@@ -607,24 +592,18 @@ export function LinkedInImportModal({
         disableNameLink
       />
 
-      <Group justify="flex-end">
-        <Group gap="xs">
-          <Button
-            variant="subtle"
-            onClick={() => setStep("upload")}
-            leftSection={<IconArrowLeft size={16} />}
-          >
-            {t("Back")}
-          </Button>
-          <Button
-            leftSection={<IconBrandLinkedin size={16} />}
-            loading={isImporting}
-            onClick={handleImport}
-          >
-            {t("ImportSelected", { count: selectedIds.size })}
-          </Button>
-        </Group>
-      </Group>
+      <ModalFooter
+        backLabel={t("Back")}
+        onBack={() => setStep("upload")}
+        backDisabled={isImporting}
+        actionLabel={t("ImportSelected", { count: selectedIds.size })}
+        onAction={() => {
+          void handleImport();
+        }}
+        actionLeftSection={!isImporting ? <IconBrandLinkedin size={16} /> : undefined}
+        actionLoading={isImporting}
+        actionDisabled={isImporting}
+      />
     </Stack>
   );
 }

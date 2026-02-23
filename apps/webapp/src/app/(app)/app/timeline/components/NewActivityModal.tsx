@@ -1,7 +1,6 @@
 "use client";
 
 import {
-  Modal,
   Button,
   TextInput,
   Select,
@@ -18,13 +17,15 @@ import {
 import { useForm } from "@mantine/form";
 import { notifications } from "@mantine/notifications";
 import { IconCalendarPlus, IconDeviceFloppy } from "@tabler/icons-react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { modals } from "@mantine/modals";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import type { Contact, Activity } from "@bondery/types";
 import { useTranslations } from "next-intl";
 import { revalidateEvents } from "../../actions";
 import {
+  ModalFooter,
   errorNotificationTemplate,
   ModalTitle,
   successNotificationTemplate,
@@ -35,11 +36,15 @@ import { ACTIVITY_TYPE_OPTIONS } from "@/lib/activityTypes";
 import { getActivityTypeConfig } from "@/lib/activityTypes";
 import { getAvatarColorFromName } from "@/lib/avatarColor";
 
-interface NewActivityModalProps {
-  opened: boolean;
-  onClose: () => void;
+interface OpenNewActivityModalParams {
   contacts: Contact[];
   activity?: Activity | null;
+}
+
+interface NewActivityFormProps {
+  modalId: string;
+  contacts: Contact[];
+  activity: Activity | null;
 }
 
 function toLocalDateInputValue(value: Date): string {
@@ -75,18 +80,28 @@ function withFallbackTime(date: Date, fallback: Date): Date {
   return normalizedDate;
 }
 
-export function NewActivityModal({
-  opened,
-  onClose,
-  contacts,
-  activity = null,
-}: NewActivityModalProps) {
+function NewActivityModalTitle() {
+  const t = useTranslations("TimelinePage");
+
+  return <ModalTitle text={t("WhoAreYouMeeting")} icon={<IconCalendarPlus size={24} />} />;
+}
+
+function NewActivityForm({ modalId, contacts, activity }: NewActivityFormProps) {
   const router = useRouter();
   const t = useTranslations("TimelinePage");
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
   const isEditMode = Boolean(activity?.id);
-  const lastSyncKeyRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    modals.updateModal({
+      modalId,
+      closeOnEscape: !loading,
+      closeOnClickOutside: !loading,
+      withCloseButton: !loading,
+    });
+  }, [loading, modalId]);
+
   const contactsCombobox = useCombobox({
     onDropdownClose: () => {
       contactsCombobox.resetSelectedOption();
@@ -94,13 +109,21 @@ export function NewActivityModal({
     },
   });
 
+  const initialParticipantIds = useMemo(
+    () =>
+      (activity?.participants || [])
+        .map((participant: any) => (typeof participant === "string" ? participant : participant.id))
+        .filter((id): id is string => Boolean(id)),
+    [activity],
+  );
+
   const form = useForm({
     initialValues: {
-      title: "",
-      participantIds: [] as string[],
-      date: toLocalDateInputValue(new Date()),
-      type: "Call" as string,
-      description: "",
+      title: activity?.title || "",
+      participantIds: initialParticipantIds,
+      date: toLocalDateInputValue(activity ? new Date(activity.date) : new Date()),
+      type: activity?.type || "Call",
+      description: activity?.description || "",
     },
     validate: {
       title: (value) => (value.trim().length > 0 ? null : t("TitleRequired")),
@@ -155,41 +178,9 @@ export function NewActivityModal({
 
   const selectedTypeConfig = getActivityTypeConfig(form.values.type);
 
-  useEffect(() => {
-    if (!opened) {
-      lastSyncKeyRef.current = null;
-      return;
-    }
-
-    const syncKey = activity ? `edit:${activity.id}:${activity.updatedAt}` : "create";
-
-    if (lastSyncKeyRef.current === syncKey) {
-      return;
-    }
-
-    if (activity) {
-      const participantIds = (activity.participants || [])
-        .map((participant: any) => (typeof participant === "string" ? participant : participant.id))
-        .filter((id): id is string => Boolean(id));
-
-      form.setValues({
-        title: activity.title || "",
-        participantIds,
-        date: toLocalDateInputValue(new Date(activity.date)),
-        type: activity.type,
-        description: activity.description || "",
-      });
-
-      lastSyncKeyRef.current = syncKey;
-      return;
-    }
-
-    form.reset();
-    lastSyncKeyRef.current = syncKey;
-  }, [activity, form, opened]);
-
   const handleSubmit = async (values: typeof form.values) => {
     setLoading(true);
+
     try {
       const dateValue = parseLocalDateInputValue(values.date);
       const fallbackTime = activity ? new Date(activity.date) : new Date();
@@ -208,7 +199,6 @@ export function NewActivityModal({
       });
 
       if (!res.ok) {
-        console.error("Failed to create event:", res.statusText);
         const errorData = await res.json().catch(() => ({}));
         throw new Error(errorData.error || errorData.message || "Failed to create event");
       }
@@ -220,12 +210,10 @@ export function NewActivityModal({
         }),
       );
 
-      onClose();
-      form.reset();
+      modals.close(modalId);
       await revalidateEvents();
       router.refresh();
     } catch (error) {
-      console.error("Error submitting form:", error);
       notifications.show(
         errorNotificationTemplate({
           title: "Error",
@@ -239,187 +227,192 @@ export function NewActivityModal({
   };
 
   return (
-    <Modal
-      opened={opened}
-      onClose={onClose}
-      title={<ModalTitle text={t("WhoAreYouMeeting")} icon={<IconCalendarPlus size={24} />} />}
-      size="lg"
-    >
-      <form onSubmit={form.onSubmit(handleSubmit)}>
-        <Stack gap="md">
-          <TextInput
-            label={t("Title")}
-            placeholder={t("TitlePlaceholder")}
-            {...form.getInputProps("title")}
-          />
+    <form onSubmit={form.onSubmit(handleSubmit)}>
+      <Stack gap="md">
+        <TextInput
+          label={t("Title")}
+          placeholder={t("TitlePlaceholder")}
+          {...form.getInputProps("title")}
+        />
 
-          <Combobox
-            store={contactsCombobox}
-            onOptionSubmit={(value: string) => {
-              const alreadySelected = form.values.participantIds.includes(value);
-              const nextParticipantIds = alreadySelected
-                ? form.values.participantIds.filter((id) => id !== value)
-                : [...form.values.participantIds, value];
+        <Combobox
+          store={contactsCombobox}
+          onOptionSubmit={(value: string) => {
+            const alreadySelected = form.values.participantIds.includes(value);
+            const nextParticipantIds = alreadySelected
+              ? form.values.participantIds.filter((id) => id !== value)
+              : [...form.values.participantIds, value];
 
-              form.setFieldValue("participantIds", nextParticipantIds);
-              form.validateField("participantIds");
-              setSearch("");
-            }}
-          >
-            <Combobox.DropdownTarget>
-              <PillsInput
-                onClick={() => contactsCombobox.openDropdown()}
-                error={form.errors.participantIds}
-                styles={{
-                  input: {
-                    minHeight: 34,
-                    display: "flex",
-                    alignItems: "center",
-                  },
-                }}
-              >
-                <Pill.Group>
-                  {selectedContacts.map((contact) => (
-                    <PersonChip
-                      key={contact.id}
-                      person={contact}
-                      size="sm"
-                      onClear={() => {
-                        form.setFieldValue(
-                          "participantIds",
-                          form.values.participantIds.filter((id) => id !== contact.id),
-                        );
-                        form.validateField("participantIds");
-                      }}
-                    />
-                  ))}
-
-                  <Combobox.EventsTarget>
-                    <PillsInput.Field
-                      value={search}
-                      placeholder={
-                        selectedContacts.length === 0 ? t("AddContactsPlaceholder") : undefined
-                      }
-                      onFocus={() => contactsCombobox.openDropdown()}
-                      onBlur={() => contactsCombobox.closeDropdown()}
-                      onChange={(event) => {
-                        setSearch(event.currentTarget.value);
-                        contactsCombobox.openDropdown();
-                      }}
-                      onKeyDown={(event) => {
-                        if (event.key === "Backspace" && search.length === 0) {
-                          const lastSelectedId = form.values.participantIds.at(-1);
-                          if (lastSelectedId) {
-                            form.setFieldValue(
-                              "participantIds",
-                              form.values.participantIds.slice(0, -1),
-                            );
-                            form.validateField("participantIds");
-                          }
-                        }
-                      }}
-                    />
-                  </Combobox.EventsTarget>
-                </Pill.Group>
-              </PillsInput>
-            </Combobox.DropdownTarget>
-
-            <Combobox.Dropdown>
-              <Combobox.Options>
-                {filteredContactOptions.length > 0 ? (
-                  filteredContactOptions.map((option) => {
-                    const isSelected = form.values.participantIds.includes(option.value);
-
-                    return (
-                      <Combobox.Option value={option.value} key={option.value} active={isSelected}>
-                        <Group justify="space-between" wrap="nowrap" px="xs" py={6}>
-                          <Group gap="sm" wrap="nowrap">
-                            <Avatar src={option.avatar} size="sm" radius="xl" color={option.color}>
-                              {option.initials}
-                            </Avatar>
-                            <Text size="sm" fw={isSelected ? 700 : 500}>
-                              {option.label}
-                            </Text>
-                          </Group>
-                        </Group>
-                      </Combobox.Option>
-                    );
-                  })
-                ) : (
-                  <Combobox.Empty>{t("NoContactsFound")}</Combobox.Empty>
-                )}
-              </Combobox.Options>
-            </Combobox.Dropdown>
-          </Combobox>
-
-          <Stack gap="xs">
-            <Group justify="space-between" align="center">
-              <Text size="sm" fw={500}>
-                {t("Note")}
-              </Text>
-            </Group>
-            <Textarea
-              placeholder={t("DescriptionPlaceholder")}
-              minRows={6}
-              {...form.getInputProps("description")}
+            form.setFieldValue("participantIds", nextParticipantIds);
+            form.validateField("participantIds");
+            setSearch("");
+          }}
+        >
+          <Combobox.DropdownTarget>
+            <PillsInput
+              onClick={() => contactsCombobox.openDropdown()}
+              error={form.errors.participantIds}
               styles={{
                 input: {
-                  resize: "vertical",
+                  minHeight: 34,
+                  display: "flex",
+                  alignItems: "center",
                 },
               }}
-            />
-          </Stack>
-
-          <Group mt="md">
-            <Group grow w="100%">
-              <DatePickerWithPresets
-                placeholder={t("PickDate")}
-                {...form.getInputProps("date")}
-                w="100%"
-              />
-              <Select
-                data={activityTypeSelectOptions}
-                placeholder={t("Type")}
-                {...form.getInputProps("type")}
-                w="100%"
-                allowDeselect={false}
-                searchable
-                leftSection={
-                  <Avatar color={selectedTypeConfig.color} size={20} radius="xl">
-                    {selectedTypeConfig.emoji}
-                  </Avatar>
-                }
-                renderOption={({ option }) => {
-                  const typeConfig = getActivityTypeConfig(option.value);
-                  return (
-                    <Group gap="sm" wrap="nowrap">
-                      <Avatar color={typeConfig.color} size={20} radius="xl">
-                        {typeConfig.emoji}
-                      </Avatar>
-                      <Text size="sm">{option.label}</Text>
-                    </Group>
-                  );
-                }}
-              />
-            </Group>
-          </Group>
-
-          <Group justify="flex-end" mt="xl">
-            <Button variant="default" color="gray" onClick={onClose}>
-              {t("Cancel")}
-            </Button>
-            <Button
-              type="submit"
-              loading={loading}
-              leftSection={
-                isEditMode ? <IconDeviceFloppy size={16} /> : <IconCalendarPlus size={16} />
-              }
             >
-              {isEditMode ? t("SaveChanges") : t("AddActivity")}
-            </Button>
+              <Pill.Group>
+                {selectedContacts.map((contact) => (
+                  <PersonChip
+                    key={contact.id}
+                    person={contact}
+                    size="sm"
+                    onClear={() => {
+                      form.setFieldValue(
+                        "participantIds",
+                        form.values.participantIds.filter((id) => id !== contact.id),
+                      );
+                      form.validateField("participantIds");
+                    }}
+                  />
+                ))}
+
+                <Combobox.EventsTarget>
+                  <PillsInput.Field
+                    value={search}
+                    placeholder={
+                      selectedContacts.length === 0 ? t("AddContactsPlaceholder") : undefined
+                    }
+                    onFocus={() => contactsCombobox.openDropdown()}
+                    onBlur={() => contactsCombobox.closeDropdown()}
+                    onChange={(event) => {
+                      setSearch(event.currentTarget.value);
+                      contactsCombobox.openDropdown();
+                    }}
+                    onKeyDown={(event) => {
+                      if (event.key === "Backspace" && search.length === 0) {
+                        const lastSelectedId = form.values.participantIds.at(-1);
+                        if (lastSelectedId) {
+                          form.setFieldValue(
+                            "participantIds",
+                            form.values.participantIds.slice(0, -1),
+                          );
+                          form.validateField("participantIds");
+                        }
+                      }
+                    }}
+                  />
+                </Combobox.EventsTarget>
+              </Pill.Group>
+            </PillsInput>
+          </Combobox.DropdownTarget>
+
+          <Combobox.Dropdown>
+            <Combobox.Options>
+              {filteredContactOptions.length > 0 ? (
+                filteredContactOptions.map((option) => {
+                  const isSelected = form.values.participantIds.includes(option.value);
+
+                  return (
+                    <Combobox.Option value={option.value} key={option.value} active={isSelected}>
+                      <Group justify="space-between" wrap="nowrap" px="xs" py={6}>
+                        <Group gap="sm" wrap="nowrap">
+                          <Avatar src={option.avatar} size="sm" radius="xl" color={option.color}>
+                            {option.initials}
+                          </Avatar>
+                          <Text size="sm" fw={isSelected ? 700 : 500}>
+                            {option.label}
+                          </Text>
+                        </Group>
+                      </Group>
+                    </Combobox.Option>
+                  );
+                })
+              ) : (
+                <Combobox.Empty>{t("NoContactsFound")}</Combobox.Empty>
+              )}
+            </Combobox.Options>
+          </Combobox.Dropdown>
+        </Combobox>
+
+        <Stack gap="xs">
+          <Group justify="space-between" align="center">
+            <Text size="sm" fw={500}>
+              {t("Note")}
+            </Text>
           </Group>
+          <Textarea
+            placeholder={t("DescriptionPlaceholder")}
+            minRows={6}
+            {...form.getInputProps("description")}
+            styles={{
+              input: {
+                resize: "vertical",
+              },
+            }}
+          />
         </Stack>
-      </form>
-    </Modal>
+
+        <Group mt="md">
+          <Group grow w="100%">
+            <DatePickerWithPresets
+              placeholder={t("PickDate")}
+              {...form.getInputProps("date")}
+              w="100%"
+            />
+            <Select
+              data={activityTypeSelectOptions}
+              placeholder={t("Type")}
+              {...form.getInputProps("type")}
+              w="100%"
+              allowDeselect={false}
+              searchable
+              leftSection={
+                <Avatar color={selectedTypeConfig.color} size={20} radius="xl">
+                  {selectedTypeConfig.emoji}
+                </Avatar>
+              }
+              renderOption={({ option }) => {
+                const typeConfig = getActivityTypeConfig(option.value);
+                return (
+                  <Group gap="sm" wrap="nowrap">
+                    <Avatar color={typeConfig.color} size={20} radius="xl">
+                      {typeConfig.emoji}
+                    </Avatar>
+                    <Text size="sm">{option.label}</Text>
+                  </Group>
+                );
+              }}
+            />
+          </Group>
+        </Group>
+
+        <ModalFooter
+          cancelLabel={t("Cancel")}
+          onCancel={() => modals.close(modalId)}
+          cancelDisabled={loading}
+          actionLabel={isEditMode ? t("SaveChanges") : t("AddActivity")}
+          actionType="submit"
+          actionLoading={loading}
+          actionDisabled={loading}
+          actionLeftSection={
+            isEditMode ? <IconDeviceFloppy size={16} /> : <IconCalendarPlus size={16} />
+          }
+        />
+      </Stack>
+    </form>
   );
+}
+
+export function openNewActivityModal({
+  contacts,
+  activity = null,
+}: OpenNewActivityModalParams): void {
+  const modalId = `activity-${Math.random().toString(36).slice(2)}`;
+
+  modals.open({
+    modalId,
+    title: <NewActivityModalTitle />,
+    size: "lg",
+    children: <NewActivityForm modalId={modalId} contacts={contacts} activity={activity} />,
+  });
 }

@@ -2,7 +2,7 @@
 
 import { Button, Group, Paper, Stack, Text, Title } from "@mantine/core";
 import { IconCalendarPlus, IconCopy, IconHome, IconTrash, IconUserPlus } from "@tabler/icons-react";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { useTranslations } from "next-intl";
 import type { Activity, Contact, UpcomingReminder } from "@bondery/types";
 import { PageWrapper } from "@/app/(app)/app/components/PageWrapper";
@@ -11,9 +11,8 @@ import { HomeStatsGrid } from "@/app/(app)/app/components/home/HomeStatsGrid";
 import { UpcomingReminderCard } from "@/app/(app)/app/components/home/UpcomingReminderCard";
 import { openAddContactModal } from "@/app/(app)/app/people/components/AddContactModal";
 import { TimelineEventsList } from "@/app/(app)/app/components/timeline/TimelineEventsList";
-import { NewActivityModal } from "@/app/(app)/app/timeline/components/NewActivityModal";
+import { openNewActivityModal } from "@/app/(app)/app/timeline/components/NewActivityModal";
 import { API_ROUTES, WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
-import { modals } from "@mantine/modals";
 import { notifications } from "@mantine/notifications";
 import { useRouter } from "next/navigation";
 import {
@@ -22,6 +21,7 @@ import {
   successNotificationTemplate,
 } from "@bondery/mantine-next";
 import { revalidateEvents } from "../actions";
+import { openStandardConfirmModal } from "../components/modals/openStandardConfirmModal";
 
 interface HomeClientProps {
   stats: {
@@ -43,8 +43,6 @@ export function HomeClient({
   const router = useRouter();
   const t = useTranslations("HomePage");
   const timelineT = useTranslations("TimelinePage");
-  const [activityModalOpened, setActivityModalOpened] = useState(false);
-  const [editingActivity, setEditingActivity] = useState<Activity | null>(null);
 
   const contactsById = useMemo(
     () => new Map(timelineContacts.map((contact) => [contact.id, contact])),
@@ -84,12 +82,14 @@ export function HomeClient({
   };
 
   const handleActivityOpen = (activity: Activity) => {
-    setEditingActivity(activity);
-    setActivityModalOpened(true);
+    openNewActivityModal({
+      contacts: timelineContacts,
+      activity,
+    });
   };
 
   const handleDelete = (activity: Activity) => {
-    modals.openConfirmModal({
+    openStandardConfirmModal({
       title: (
         <ModalTitle
           text={timelineT("DeleteConfirmTitle")}
@@ -97,9 +97,10 @@ export function HomeClient({
           isDangerous={true}
         />
       ),
-      children: <Text size="sm">{timelineT("DeleteConfirmMessage")}</Text>,
-      labels: { confirm: timelineT("DeleteAction"), cancel: timelineT("Cancel") },
-      confirmProps: { color: "red" },
+      message: <Text size="sm">{timelineT("DeleteConfirmMessage")}</Text>,
+      confirmLabel: timelineT("DeleteAction"),
+      cancelLabel: timelineT("Cancel"),
+      confirmColor: "red",
       onConfirm: async () => {
         try {
           const response = await fetch(`${API_ROUTES.EVENTS}/${activity.id}`, {
@@ -194,23 +195,14 @@ export function HomeClient({
               size="md"
               leftSection={<IconCalendarPlus size={16} />}
               onClick={() => {
-                setEditingActivity(null);
-                setActivityModalOpened(true);
+                openNewActivityModal({
+                  contacts: timelineContacts,
+                });
               }}
             >
               {t("AddEvent")}
             </Button>
           }
-        />
-
-        <NewActivityModal
-          opened={activityModalOpened}
-          onClose={() => {
-            setActivityModalOpened(false);
-            setEditingActivity(null);
-          }}
-          contacts={timelineContacts}
-          activity={editingActivity}
         />
 
         <HomeStatsGrid
