@@ -4,6 +4,9 @@ import { Group, Stack, Paper, Divider, Text, Skeleton, Card, Avatar, Button } fr
 import { Link } from "@mantine/tiptap";
 import { useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
+import Highlight from "@tiptap/extension-highlight";
+import { Color } from "@tiptap/extension-color";
+import { TextStyle } from "@tiptap/extension-text-style";
 import { notifications } from "@mantine/notifications";
 import { IconCheck, IconX, IconUser, IconPlus } from "@tabler/icons-react";
 import { useRouter } from "next/navigation";
@@ -176,10 +179,18 @@ export default function PersonClient({
 
   // Initialize rich text editor
   const editor = useEditor({
-    extensions: [StarterKit, Link],
+    extensions: [StarterKit.configure({ link: false }), Link, Highlight, TextStyle, Color],
     content: contact?.notes || "",
     immediatelyRender: false,
     onBlur: ({ editor }) => {
+      const activeElement = window.document.activeElement;
+      if (
+        activeElement instanceof HTMLElement &&
+        activeElement.closest('[data-notes-editor-toolbar="true"]')
+      ) {
+        return;
+      }
+
       const html = editor.getHTML();
       if (html !== contact?.notes) {
         handleSocialMediaSave("notes", html);
