@@ -156,7 +156,6 @@ function toPreviewContact(contact: InstagramPreparedContact): Contact {
     lastName: contact.lastName,
     title: null,
     place: null,
-    description: null,
     notes: null,
     avatar: null,
     lastInteraction: null,

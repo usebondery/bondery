@@ -107,7 +107,6 @@ function toPreviewContact(contact: LinkedInPreparedContact): Contact {
     lastName: contact.lastName,
     title: buildImportedTitle(contact.position, contact.company),
     place: null,
-    description: null,
     notes: null,
     avatar: null,
     lastInteraction: null,
