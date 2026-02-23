@@ -1,6 +1,15 @@
 "use client";
 
-import { ActionIcon, Group, Loader, Select, Stack, Text, TextInput } from "@mantine/core";
+import {
+  ActionIcon,
+  Group,
+  Loader,
+  Select,
+  SimpleGrid,
+  Stack,
+  Text,
+  TextInput,
+} from "@mantine/core";
 import {
   IconBrandFacebook,
   IconBrandInstagram,
@@ -140,152 +149,156 @@ export function SocialMediaSection({
       <Text size="sm" fw={600} mb="md">
         Social Media
       </Text>
-      <Stack gap="sm">
-        {/* LinkedIn */}
-        <Group gap="sm" align="center">
-          <ActionIconLink
-            variant="light"
-            color="blue"
-            href={contact.linkedin ? createSocialMediaUrl("linkedin", contact.linkedin) : undefined}
-            target="_blank"
-            disabled={!contact.linkedin}
-            ariaLabel="LinkedIn"
-          >
-            <IconBrandLinkedin size={18} />
-          </ActionIconLink>
-          <TextInput
-            placeholder="LinkedIn username or URL"
-            value={values.linkedin}
-            onChange={(e) => handleValueChange("linkedin", e.target.value)}
-            onBlur={() => onSaveField("linkedin", values.linkedin)}
-            style={{ flex: 1 }}
-            rightSection={savingField === "linkedin" ? <Loader size="xs" /> : null}
-            disabled={savingField === "linkedin"}
-          />
-        </Group>
+      <SimpleGrid cols={{ base: 1, md: 2 }} spacing="lg">
+        <Stack gap="sm" style={{ minWidth: 0 }}>
+          <Group gap="sm" align="center">
+            <ActionIconLink
+              variant="light"
+              color="blue"
+              href={
+                contact.linkedin ? createSocialMediaUrl("linkedin", contact.linkedin) : undefined
+              }
+              target="_blank"
+              disabled={!contact.linkedin}
+              ariaLabel="LinkedIn"
+            >
+              <IconBrandLinkedin size={18} />
+            </ActionIconLink>
+            <TextInput
+              placeholder="LinkedIn username or URL"
+              value={values.linkedin}
+              onChange={(e) => handleValueChange("linkedin", e.target.value)}
+              onBlur={() => onSaveField("linkedin", values.linkedin)}
+              style={{ flex: 1 }}
+              rightSection={savingField === "linkedin" ? <Loader size="xs" /> : null}
+              disabled={savingField === "linkedin"}
+            />
+          </Group>
 
-        {/* Instagram */}
-        <Group gap="sm" align="center">
-          <ActionIconLink
-            variant="light"
-            color="pink"
-            href={
-              contact.instagram ? createSocialMediaUrl("instagram", contact.instagram) : undefined
-            }
-            target="_blank"
-            disabled={!contact.instagram}
-            ariaLabel="Instagram"
-          >
-            <IconBrandInstagram size={18} />
-          </ActionIconLink>
-          <TextInput
-            placeholder="Instagram username or URL"
-            value={values.instagram}
-            onChange={(e) => handleValueChange("instagram", e.target.value)}
-            onBlur={() => onSaveField("instagram", values.instagram)}
-            style={{ flex: 1 }}
-            rightSection={savingField === "instagram" ? <Loader size="xs" /> : null}
-            disabled={savingField === "instagram"}
-          />
-        </Group>
+          <Group gap="sm" align="center">
+            <ActionIconLink
+              variant="light"
+              color="pink"
+              href={
+                contact.instagram ? createSocialMediaUrl("instagram", contact.instagram) : undefined
+              }
+              target="_blank"
+              disabled={!contact.instagram}
+              ariaLabel="Instagram"
+            >
+              <IconBrandInstagram size={18} />
+            </ActionIconLink>
+            <TextInput
+              placeholder="Instagram username or URL"
+              value={values.instagram}
+              onChange={(e) => handleValueChange("instagram", e.target.value)}
+              onBlur={() => onSaveField("instagram", values.instagram)}
+              style={{ flex: 1 }}
+              rightSection={savingField === "instagram" ? <Loader size="xs" /> : null}
+              disabled={savingField === "instagram"}
+            />
+          </Group>
 
-        {/* Facebook */}
-        <Group gap="sm" align="center">
-          <ActionIconLink
-            variant="light"
-            color="blue"
-            href={contact.facebook ? createSocialMediaUrl("facebook", contact.facebook) : undefined}
-            target="_blank"
-            disabled={!contact.facebook}
-            ariaLabel="Facebook"
-          >
-            <IconBrandFacebook size={18} />
-          </ActionIconLink>
-          <TextInput
-            placeholder="Facebook username or URL"
-            value={values.facebook}
-            onChange={(e) => handleValueChange("facebook", e.target.value)}
-            onBlur={() => onSaveField("facebook", values.facebook)}
-            style={{ flex: 1 }}
-            rightSection={savingField === "facebook" ? <Loader size="xs" /> : null}
-            disabled={savingField === "facebook"}
-          />
-        </Group>
+          <Group gap="sm" align="center">
+            <ActionIconLink
+              variant="light"
+              color="blue"
+              href={
+                contact.facebook ? createSocialMediaUrl("facebook", contact.facebook) : undefined
+              }
+              target="_blank"
+              disabled={!contact.facebook}
+              ariaLabel="Facebook"
+            >
+              <IconBrandFacebook size={18} />
+            </ActionIconLink>
+            <TextInput
+              placeholder="Facebook username or URL"
+              value={values.facebook}
+              onChange={(e) => handleValueChange("facebook", e.target.value)}
+              onBlur={() => onSaveField("facebook", values.facebook)}
+              style={{ flex: 1 }}
+              rightSection={savingField === "facebook" ? <Loader size="xs" /> : null}
+              disabled={savingField === "facebook"}
+            />
+          </Group>
+        </Stack>
 
-        {/* WhatsApp */}
-        <Group gap="sm" align="center" wrap="nowrap">
-          <ActionIconLink
-            variant="light"
-            color="green"
-            href={contact.whatsapp ? createSocialMediaUrl("whatsapp", contact.whatsapp) : undefined}
-            target="_blank"
-            disabled={!contact.whatsapp}
-            ariaLabel="WhatsApp"
-          >
-            <IconBrandWhatsapp size={18} />
-          </ActionIconLink>
-          <PrefixSelect value={whatsappPrefix} onChange={setWhatsappPrefix} />
-          <TextInput
-            placeholder="WhatsApp number or URL"
-            value={values.whatsapp}
-            onChange={(e) => handleNumberChange("whatsapp", e.target.value, setWhatsappPrefix)}
-            onBlur={() => onSaveField("whatsapp", values.whatsapp)}
-            style={{ flex: 1 }}
-            rightSection={savingField === "whatsapp" ? <Loader size="xs" /> : null}
-            disabled={savingField === "whatsapp"}
-          />
-        </Group>
+        <Stack gap="sm" style={{ minWidth: 0 }}>
+          <Group gap="sm" align="center" wrap="nowrap">
+            <ActionIconLink
+              variant="light"
+              color="green"
+              href={
+                contact.whatsapp ? createSocialMediaUrl("whatsapp", contact.whatsapp) : undefined
+              }
+              target="_blank"
+              disabled={!contact.whatsapp}
+              ariaLabel="WhatsApp"
+            >
+              <IconBrandWhatsapp size={18} />
+            </ActionIconLink>
+            <PrefixSelect value={whatsappPrefix} onChange={setWhatsappPrefix} />
+            <TextInput
+              placeholder="WhatsApp number or URL"
+              value={values.whatsapp}
+              onChange={(e) => handleNumberChange("whatsapp", e.target.value, setWhatsappPrefix)}
+              onBlur={() => onSaveField("whatsapp", values.whatsapp)}
+              style={{ flex: 1 }}
+              rightSection={savingField === "whatsapp" ? <Loader size="xs" /> : null}
+              disabled={savingField === "whatsapp"}
+            />
+          </Group>
 
-        {/* Signal */}
-        <Group gap="sm" align="center" wrap="nowrap">
-          <ActionIconLink
-            variant="light"
-            color="cyan"
-            href={
-              contact.signal
-                ? `signal://signal.me/#p/${contact.signal.replace(/\D/g, "")}`
-                : undefined
-            }
-            disabled={!contact.signal}
-            ariaLabel="Signal"
-          >
-            <Image src="/icons/signal.svg" alt="Signal" width={18} height={18} />
-          </ActionIconLink>
-          <PrefixSelect value={signalPrefix} onChange={setSignalPrefix} />
-          <TextInput
-            placeholder="Signal number"
-            value={values.signal}
-            onChange={(e) => handleNumberChange("signal", e.target.value, setSignalPrefix)}
-            onBlur={() => onSaveField("signal", values.signal)}
-            style={{ flex: 1 }}
-            rightSection={savingField === "signal" ? <Loader size="xs" /> : null}
-            disabled={savingField === "signal"}
-          />
-        </Group>
+          <Group gap="sm" align="center" wrap="nowrap">
+            <ActionIconLink
+              variant="light"
+              color="cyan"
+              href={
+                contact.signal
+                  ? `signal://signal.me/#p/${contact.signal.replace(/\D/g, "")}`
+                  : undefined
+              }
+              disabled={!contact.signal}
+              ariaLabel="Signal"
+            >
+              <Image src="/icons/signal.svg" alt="Signal" width={18} height={18} />
+            </ActionIconLink>
+            <PrefixSelect value={signalPrefix} onChange={setSignalPrefix} />
+            <TextInput
+              placeholder="Signal number"
+              value={values.signal}
+              onChange={(e) => handleNumberChange("signal", e.target.value, setSignalPrefix)}
+              onBlur={() => onSaveField("signal", values.signal)}
+              style={{ flex: 1 }}
+              rightSection={savingField === "signal" ? <Loader size="xs" /> : null}
+              disabled={savingField === "signal"}
+            />
+          </Group>
 
-        {/* Website */}
-        <Group gap="sm" align="center">
-          <ActionIconLink
-            variant="light"
-            color="gray"
-            href={getWebsiteUrl(contact.website)}
-            target="_blank"
-            disabled={!contact.website}
-            ariaLabel="Website"
-          >
-            <IconWorld size={18} />
-          </ActionIconLink>
-          <TextInput
-            placeholder="Website URL"
-            value={values.website}
-            onChange={(e) => handleValueChange("website", e.target.value)}
-            onBlur={() => onSaveField("website", values.website)}
-            style={{ flex: 1 }}
-            rightSection={savingField === "website" ? <Loader size="xs" /> : null}
-            disabled={savingField === "website"}
-          />
-        </Group>
-      </Stack>
+          <Group gap="sm" align="center">
+            <ActionIconLink
+              variant="light"
+              color="gray"
+              href={getWebsiteUrl(contact.website)}
+              target="_blank"
+              disabled={!contact.website}
+              ariaLabel="Website"
+            >
+              <IconWorld size={18} />
+            </ActionIconLink>
+            <TextInput
+              placeholder="Website URL"
+              value={values.website}
+              onChange={(e) => handleValueChange("website", e.target.value)}
+              onBlur={() => onSaveField("website", values.website)}
+              style={{ flex: 1 }}
+              rightSection={savingField === "website" ? <Loader size="xs" /> : null}
+              disabled={savingField === "website"}
+            />
+          </Group>
+        </Stack>
+      </SimpleGrid>
     </div>
   );
 }

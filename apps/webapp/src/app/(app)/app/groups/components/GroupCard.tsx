@@ -29,6 +29,7 @@ interface GroupCardProps {
   showMenu?: boolean;
   variant?: "default" | "small";
   cursorType?: "pointer" | "default";
+  highlightColor?: "primary" | "green" | "red";
 }
 
 export function GroupCard({
@@ -43,6 +44,7 @@ export function GroupCard({
   showMenu = true,
   variant = "default",
   cursorType,
+  highlightColor,
 }: GroupCardProps) {
   const [menuOpened, setMenuOpened] = useState(false);
   const isSmallVariant = variant === "small";
@@ -67,14 +69,30 @@ export function GroupCard({
     onClick(group.id);
   };
 
+  const resolvedHighlightColor = highlightColor || (selected ? "primary" : undefined);
+  const borderColorByHighlight: Record<"primary" | "green" | "red", string> = {
+    primary: "var(--mantine-primary-color-filled)",
+    green: "var(--mantine-color-green-filled)",
+    red: "var(--mantine-color-red-filled)",
+  };
+  const backgroundColorByHighlight: Record<"primary" | "green" | "red", string> = {
+    primary: "var(--mantine-primary-color-light)",
+    green: "var(--mantine-color-green-light)",
+    red: "var(--mantine-color-red-light)",
+  };
+
   return (
     <Card
       shadow="sm"
       p={isSmallVariant ? "sm" : undefined}
       style={{ cursor: cursorType || (interactive ? "pointer" : "default") }}
       className={`${isSmallVariant ? "w-full max-w-none" : "max-w-88"} ${interactive ? "card-scale-effect" : undefined}`}
-      bd={selected ? "1px solid var(--mantine-primary-color-filled)" : undefined}
-      bg={selected ? "var(--mantine-primary-color-light)" : undefined}
+      bd={
+        resolvedHighlightColor
+          ? `1px solid ${borderColorByHighlight[resolvedHighlightColor]}`
+          : undefined
+      }
+      bg={resolvedHighlightColor ? backgroundColorByHighlight[resolvedHighlightColor] : undefined}
       onClick={handleCardClick}
     >
       <Stack gap="sm">

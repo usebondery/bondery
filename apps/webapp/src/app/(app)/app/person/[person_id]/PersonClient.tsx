@@ -1,23 +1,11 @@
 "use client";
 
-import {
-  Group,
-  Stack,
-  Paper,
-  Divider,
-  Text,
-  Skeleton,
-  MultiSelect,
-  Badge,
-  CloseButton,
-  rem,
-  Button,
-} from "@mantine/core";
+import { Group, Stack, Paper, Divider, Text, Skeleton, Card, Avatar, Button } from "@mantine/core";
 import { Link } from "@mantine/tiptap";
 import { useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import { notifications } from "@mantine/notifications";
-import { IconCheck, IconX, IconUser } from "@tabler/icons-react";
+import { IconCheck, IconX, IconUser, IconPlus } from "@tabler/icons-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
@@ -30,13 +18,13 @@ import type {
   ContactPreview,
   ContactRelationshipWithPeople,
   Group as GroupType,
+  GroupWithCount,
   PhoneEntry,
   EmailEntry,
   Activity,
   RelationshipType,
   ImportantEvent,
 } from "@bondery/types";
-import type { ComboboxItem, MultiSelectProps } from "@mantine/core";
 import { ContactActionMenu } from "./components/ContactActionMenu";
 import { ContactIdentitySection } from "./components/ContactIdentitySection";
 import { ContactBioSection } from "./components/ContactBioSection";
@@ -56,6 +44,8 @@ import { PageWrapper } from "@/app/(app)/app/components/PageWrapper";
 import { PageHeader } from "@/app/(app)/app/components/PageHeader";
 import { revalidateContacts, revalidateRelationships } from "../../actions";
 import { openDeleteContactModal } from "@/app/(app)/app/components/contacts/openDeleteContactModal";
+import { GroupCard } from "../../groups/components/GroupCard";
+import { openAddPeopleToGroupSelectionModal } from "../../people/components/AddPeopleToGroupSelectionModal";
 
 const PersonMap = dynamic(() => import("./components/PersonMap").then((mod) => mod.PersonMap), {
   ssr: false,
@@ -90,7 +80,6 @@ export default function PersonClient({
   const tImportantDates = useTranslations("ContactImportantDates");
 
   const [contact, setContact] = useState<Contact>(initialContact);
-  const [allGroups] = useState<GroupType[]>(initialGroups);
   const [personGroups, setPersonGroups] = useState<GroupType[]>(initialPersonGroups);
   const [savingField, setSavingField] = useState<string | null>(null);
   const [editedValues, setEditedValues] = useState<{
@@ -112,16 +101,12 @@ export default function PersonClient({
     setRelationships(initialRelationships);
   }, [initialRelationships]);
 
+  useEffect(() => {
+    setPersonGroups(initialPersonGroups);
+  }, [initialPersonGroups]);
+
   const hasCoordinates = Number.isFinite(contact?.latitude) && Number.isFinite(contact?.longitude);
 
-  const groupSelectData = allGroups.map((group) => ({
-    value: group.id,
-    label: group.label,
-    color: group.color,
-    emoji: group.emoji,
-  }));
-
-  const selectedGroupIds = personGroups.map((group) => group.id);
   const selectablePeople: ContactPreview[] = initialSelectableContacts.map((person) => ({
     id: person.id,
     firstName: person.firstName,
@@ -527,62 +512,8 @@ export default function PersonClient({
     handleContactFieldSave(field, value);
   };
 
-  const updateGroups = async (newGroupIds: string[]) => {
-    const currentIds = new Set(selectedGroupIds);
-    const nextIds = new Set(newGroupIds);
-
-    const toAdd = Array.from(nextIds).filter((id) => !currentIds.has(id));
-    const toRemove = Array.from(currentIds).filter((id) => !nextIds.has(id));
-
-    if (toAdd.length === 0 && toRemove.length === 0) return;
-
-    setGroupsSaving(true);
-
-    try {
-      if (toAdd.length > 0) {
-        await Promise.all(
-          toAdd.map((groupId) =>
-            fetch(`${API_ROUTES.GROUPS}/${groupId}/contacts`, {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ personIds: [personId] }),
-            }),
-          ),
-        );
-      }
-
-      if (toRemove.length > 0) {
-        await Promise.all(
-          toRemove.map((groupId) =>
-            fetch(`${API_ROUTES.GROUPS}/${groupId}/contacts`, {
-              method: "DELETE",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ personIds: [personId] }),
-            }),
-          ),
-        );
-      }
-
-      const updatedGroups = allGroups.filter((group) => nextIds.has(group.id));
-      setPersonGroups(updatedGroups);
-
-      notifications.show(
-        successNotificationTemplate({
-          title: "Groups updated",
-          description: "Contact groups have been updated",
-        }),
-      );
-    } catch (error) {
-      console.error("Failed to update groups", error);
-      notifications.show(
-        errorNotificationTemplate({
-          title: "Error",
-          description: "Could not update groups. Please try again.",
-        }),
-      );
-    } finally {
-      setGroupsSaving(false);
-    }
+  const openAddToGroupsModal = () => {
+    openAddPeopleToGroupSelectionModal({ personIds: [personId] });
   };
 
   const handleAddRelationship = async (
@@ -707,51 +638,6 @@ export default function PersonClient({
     }
   };
 
-  type GroupSelectItem = ComboboxItem & { color?: string | null; emoji?: string | null };
-
-  const GroupValue = ({ value, onRemove }: { value: string; onRemove?: () => void }) => {
-    const group = allGroups.find((g) => g.id === value);
-    if (!group) return null;
-
-    return (
-      <Badge
-        color={group.color || "gray"}
-        leftSection={
-          group.emoji ? <span style={{ fontSize: rem(14) }}>{group.emoji}</span> : undefined
-        }
-        rightSection={
-          onRemove ? (
-            <CloseButton
-              size="xs"
-              onMouseDown={onRemove}
-              aria-label={`Remove ${group.label}`}
-              variant="subtle"
-            />
-          ) : undefined
-        }
-        variant="light"
-        radius="sm"
-      >
-        {group.label}
-      </Badge>
-    );
-  };
-
-  const GroupOption = ({ option }: { option: GroupSelectItem }) => (
-    <Group gap="xs">
-      <Badge
-        color={option.color || "gray"}
-        leftSection={
-          option.emoji ? <span style={{ fontSize: rem(14) }}>{option.emoji}</span> : undefined
-        }
-        variant="light"
-        radius="sm"
-      >
-        {option.label}
-      </Badge>
-    </Group>
-  );
-
   const handleChange = (field: string, value: string) => {
     // Parse full phone number if pasted (for WhatsApp and Signal only)
     if (field === "whatsapp" || field === "signal") {
@@ -822,18 +708,82 @@ export default function PersonClient({
               handleBlur={handleBlur}
             />
 
-            <MultiSelect
-              label="Groups"
-              placeholder="Select groups"
-              data={groupSelectData}
-              value={selectedGroupIds}
-              onChange={updateGroups}
-              searchable
-              clearable
-              disabled={groupsSaving}
-              comboboxProps={{ shadow: "md" }}
-              renderOption={({ option }) => <GroupOption option={option as GroupSelectItem} />}
+            <SocialMediaSection
+              contact={contact}
+              savingField={savingField}
+              onSaveField={handleSocialMediaSave}
+              whatsappPrefix={whatsappPrefix}
+              signalPrefix={signalPrefix}
+              setWhatsappPrefix={setWhatsappPrefix}
+              setSignalPrefix={setSignalPrefix}
             />
+
+            <Divider />
+
+            <Stack gap="xs">
+              <Text size="sm" fw={500}>
+                Groups
+              </Text>
+              <Group gap="sm" align="flex-start" wrap="wrap">
+                {personGroups.map((group) => (
+                  <div
+                    key={group.id}
+                    style={{
+                      flex: "1 1 18rem",
+                      minWidth: "16rem",
+                      maxWidth: "20rem",
+                    }}
+                  >
+                    <GroupCard
+                      group={{
+                        ...(group as GroupWithCount),
+                        contactCount: 1,
+                        previewContacts: [currentPersonPreview],
+                      }}
+                      onClick={(groupId) => router.push(`/app/group/${groupId}`)}
+                      onAddPeople={() => {}}
+                      onEdit={() => {}}
+                      onDuplicate={() => {}}
+                      onDelete={() => {}}
+                      interactive={true}
+                      variant="small"
+                      showMenu={false}
+                    />
+                  </div>
+                ))}
+
+                <div
+                  style={{
+                    flex: "1 1 18rem",
+                    minWidth: "16rem",
+                    maxWidth: "20rem",
+                  }}
+                >
+                  <Card
+                    withBorder
+                    p="sm"
+                    className={`h-full min-h-full ${groupsSaving ? undefined : "card-scale-effect"}`}
+                    style={{
+                      cursor: groupsSaving ? "not-allowed" : "pointer",
+                    }}
+                    onClick={() => {
+                      if (!groupsSaving) {
+                        openAddToGroupsModal();
+                      }
+                    }}
+                  >
+                    <Group gap="sm" align="center" wrap="nowrap">
+                      <Avatar size="md" radius="xl">
+                        <IconPlus size={16} />
+                      </Avatar>
+                      <Text size="md" fw={600}>
+                        Edit groups
+                      </Text>
+                    </Group>
+                  </Card>
+                </div>
+              </Group>
+            </Stack>
 
             <Divider />
 
@@ -868,18 +818,6 @@ export default function PersonClient({
               onPhonesChange={setPhones}
               onEmailsChange={setEmails}
               onSave={handleSaveContactInfo}
-            />
-
-            <Divider />
-
-            <SocialMediaSection
-              contact={contact}
-              savingField={savingField}
-              onSaveField={handleSocialMediaSave}
-              whatsappPrefix={whatsappPrefix}
-              signalPrefix={signalPrefix}
-              setWhatsappPrefix={setWhatsappPrefix}
-              setSignalPrefix={setSignalPrefix}
             />
 
             <Divider />
