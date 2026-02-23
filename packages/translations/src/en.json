@@ -142,6 +142,23 @@
     "MobileNotAvailable": "Mobile App Coming Soon",
     "MobileNotAvailableMessage": "The Bondery app is not yet available on mobile devices. Please visit us on a desktop or laptop computer to get started."
   },
+  "OAuthConsent": {
+    "Title": "Authorize Application",
+    "Description": "{clientName} is requesting access to your Bondery account.",
+    "RequestedPermissions": "Requested permissions",
+    "Approve": "Approve",
+    "Deny": "Deny",
+    "MissingAuthorizationId": "Missing authorization request. Please try again from the application.",
+    "InvalidRequest": "Invalid authorization request.",
+    "UnexpectedError": "An unexpected error occurred. Please try again.",
+    "ErrorTitle": "Authorization Error",
+    "Scopes": {
+      "openid": "Verify your identity",
+      "email": "View your email address",
+      "profile": "View your profile information",
+      "phone": "View your phone number"
+    }
+  },
   "SettingsPage": {
     "Title": "Settings",
     "Profile": {
@@ -266,17 +283,25 @@
       "UpdateError": "Error",
       "LinkedInImport": {
         "SectionTitle": "Import contacts",
-        "ModalTitle": "Import LinkedIn contacts",
+        "ModalTitle": "LinkedIn import",
         "LinkedIn": "LinkedIn",
         "CardDescription": "Import contacts from your LinkedIn data export",
+        "IntroTitle": "How LinkedIn import works",
+        "IntroDescription1": "You can upload connections from your LinkedIn data export.",
+        "IntroDescription2": "After upload, we check which contacts already exist. If they do not exist, you can choose to add them.",
+        "IntroDescription3": "ZIP files are only used for parsing and are not stored on our server.",
+        "Continue": "Continue",
         "InstructionStep1Prefix": "Go to",
         "InstructionStep1LinkLabel": "Download my data in LinkedIn settings",
         "InstructionStep2": "Wait for the email that your data is ready",
         "InstructionStep3": "Download the ZIP file",
+        "FilesAlertTitle": "Import strategy (recommended)",
+        "FilesAlertDescription": "To keep upload small and parsing fast, you can remove all files from the ZIP except:",
+        "FilesAlertFileConnections": "Connections.csv",
         "HaveZipFile": "I have the ZIP file",
         "DropzoneTitle": "Drop the LinkedIn ZIP",
         "DropzoneDescription": "We will locate Connections.csv, validate the format, and prepare contacts for import.",
-        "SelectFolder": "Select folder",
+        "SelectFolder": "Select zip",
         "UploadAnother": "Upload a different file",
         "Total": "Total: {count}",
         "Valid": "Valid: {count}",
@@ -293,13 +318,19 @@
         "Back": "Back",
         "Cancel": "Cancel",
         "SuccessTitle": "Import completed",
-        "ErrorTitle": "Import failed"
+        "ErrorTitle": "Import failed",
+        "ProcessingConnections": "Processing connections"
       },
       "InstagramImport": {
         "SectionTitle": "Import contacts",
-        "ModalTitle": "Import Instagram contacts",
+        "ModalTitle": "Instagram import",
         "Instagram": "Instagram",
         "CardDescription": "Import contacts from your Instagram data export",
+        "IntroTitle": "How Instagram import works",
+        "IntroDescription1": "You can upload followers and following from your Instagram data export.",
+        "IntroDescription2": "After upload, we check which contacts already exist. If they do not exist, you can choose to add them.",
+        "IntroDescription3": "ZIP files are only used for parsing and are not stored on our server.",
+        "Continue": "Continue",
         "InstructionStep1Prefix": "Go to",
         "InstructionStep1LinkLabel": "Download your Instagram data",
         "InstructionStep2": "Select your profile",
@@ -312,6 +343,11 @@
         "InstructionStep9": "Select JSON",
         "InstructionStep10": "Start export",
         "InstructionStep11": "You will receive your information copy in your email when it is ready",
+        "FilesAlertTitle": "Import strategy (recommended)",
+        "FilesAlertDescription": "To keep upload small and parsing fast, you can remove all files from the ZIP except the files needed for your selected strategy:",
+        "FilesAlertFileFollowing": "following.json",
+        "FilesAlertFileFollowers": "followers_*.json",
+        "FilesAlertFileCloseFriends": "close_friends.json",
         "HaveZipFile": "I have the ZIP file",
         "DropzoneTitle": "Drop the Instagram ZIP",
         "DropzoneDescription": "We will validate the data, and prepare contacts for import.",
@@ -343,7 +379,8 @@
         "Back": "Back",
         "Cancel": "Cancel",
         "SuccessTitle": "Import completed",
-        "ErrorTitle": "Import failed"
+        "ErrorTitle": "Import failed",
+        "ProcessingConnections": "Processing connections"
       }
     }
   },
@@ -389,6 +426,7 @@
     "SaveChanges": "Save changes",
     "SearchPlaceholder": "Search...",
     "EditAction": "Edit",
+    "DuplicateAction": "Duplicate",
     "DeleteAction": "Delete",
     "DeleteConfirmTitle": "Delete event?",
     "DeleteConfirmMessage": "Are you sure you want to delete this event? This action cannot be undone.",
@@ -396,8 +434,10 @@
     "NoActivitiesWithPerson": "No events yet with this person.",
     "ActivityCreated": "Event created successfully",
     "ActivityUpdated": "Event updated successfully",
+    "ActivityDuplicated": "Event duplicated successfully",
     "ActivityDeleted": "Event deleted successfully",
-    "DeleteFailed": "Failed to delete event"
+    "DeleteFailed": "Failed to delete event",
+    "DuplicateFailed": "Failed to duplicate event"
   },
   "HomePage": {
     "Title": "Home",
@@ -408,9 +448,11 @@
     "NotificationToday": "Today",
     "NotificationTomorrow": "Tomorrow",
     "NotificationInDays": "In {count} days",
+    "NotificationSent": "Already sent",
     "NotificationTooltipToday": "You will be notified today",
     "NotificationTooltipTomorrow": "You will be notified tomorrow",
     "NotificationTooltipInDays": "You will be notified in {count} days",
+    "NotificationTooltipSentAt": "Notification was already sent at {sentAt}",
     "UnknownPerson": "Unknown person",
     "TimelinePreviewTitle": "Timeline",
     "Stats": {

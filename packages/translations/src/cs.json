@@ -139,6 +139,23 @@
     "MobileNotAvailable": "Mobilní aplikace již brzy",
     "MobileNotAvailableMessage": "Aplikace Bondery zatím není dostupná na mobilních zařízeních. Navštivte nás prosím na počítači nebo notebooku."
   },
+  "OAuthConsent": {
+    "Title": "Autorizace aplikace",
+    "Description": "{clientName} žádá o přístup k vašemu účtu Bondery.",
+    "RequestedPermissions": "Požadovaná oprávnění",
+    "Approve": "Schválit",
+    "Deny": "Zamítnout",
+    "MissingAuthorizationId": "Chybí autorizační požadavek. Zkuste to prosím znovu z aplikace.",
+    "InvalidRequest": "Neplatný autorizační požadavek.",
+    "UnexpectedError": "Došlo k neočekávané chybě. Zkuste to prosím znovu.",
+    "ErrorTitle": "Chyba autorizace",
+    "Scopes": {
+      "openid": "Ověřit vaši identitu",
+      "email": "Zobrazit vaši e-mailovou adresu",
+      "profile": "Zobrazit informace o vašem profilu",
+      "phone": "Zobrazit vaše telefonní číslo"
+    }
+  },
   "SettingsPage": {
     "Title": "Nastavení",
     "Profile": {
@@ -262,17 +279,25 @@
       "UpdateError": "Chyba",
       "LinkedInImport": {
         "SectionTitle": "Import kontaktů",
-        "ModalTitle": "Import kontaktů z LinkedIn",
+        "ModalTitle": "Import LinkedIn",
         "LinkedIn": "LinkedIn",
         "CardDescription": "Importujte kontakty z LinkedIn datového exportu",
+        "IntroTitle": "Jak funguje import z LinkedIn",
+        "IntroDescription1": "Můžete nahrát vaše connections z LinkedIn datového exportu.",
+        "IntroDescription2": "Po nahrání zkontrolujeme, které kontakty už existují. Pokud neexistují, budete mít možnost je přidat.",
+        "IntroDescription3": "ZIP soubory slouží pouze ke zpracování a na serveru je neukládáme.",
+        "Continue": "Pokračovat",
         "InstructionStep1Prefix": "Přejděte na",
         "InstructionStep1LinkLabel": "Stáhnout má data v nastavení LinkedIn",
         "InstructionStep2": "Počkejte na e-mail, že jsou data připravena",
         "InstructionStep3": "Stáhněte ZIP soubor",
+        "FilesAlertTitle": "Strategie importu (doporučeno)",
+        "FilesAlertDescription": "Aby byl upload menší a zpracování rychlejší, můžete ze ZIP odstranit všechny soubory kromě:",
+        "FilesAlertFileConnections": "Connections.csv",
         "HaveZipFile": "Mám ZIP soubor",
         "DropzoneTitle": "Přetáhněte LinkedIn ZIP nebo exportovanou složku",
         "DropzoneDescription": "Najdeme Connections.csv, ověříme formát a připravíme kontakty k importu.",
-        "SelectFolder": "Vybrat složku",
+        "SelectFolder": "Vybrat zip",
         "UploadAnother": "Nahrát jiný soubor",
         "Total": "Celkem: {count}",
         "Valid": "Platné: {count}",
@@ -289,13 +314,19 @@
         "Back": "Zpět",
         "Cancel": "Zrušit",
         "SuccessTitle": "Import dokončen",
-        "ErrorTitle": "Import selhal"
+        "ErrorTitle": "Import selhal",
+        "ProcessingConnections": "Zpracovávám kontakty"
       },
       "InstagramImport": {
         "SectionTitle": "Import kontaktů",
-        "ModalTitle": "Import kontaktů z Instagramu",
+        "ModalTitle": "Import Instagram",
         "Instagram": "Instagram",
         "CardDescription": "Importujte kontakty z Instagram datového exportu",
+        "IntroTitle": "Jak funguje import z Instagramu",
+        "IntroDescription1": "Můžete nahrát followers a following z Instagram datového exportu.",
+        "IntroDescription2": "Po nahrání zkontrolujeme, které kontakty už existují. Pokud neexistují, budete mít možnost je přidat.",
+        "IntroDescription3": "ZIP soubory slouží pouze ke zpracování a na serveru je neukládáme.",
+        "Continue": "Pokračovat",
         "InstructionStep1Prefix": "Přejděte na",
         "InstructionStep1LinkLabel": "Stažení vašich dat z Instagramu",
         "InstructionStep2": "Vyberte svůj profil",
@@ -308,6 +339,11 @@
         "InstructionStep9": "Vyberte JSON",
         "InstructionStep10": "Spustit export",
         "InstructionStep11": "Kopii informací dostanete e-mailem, až bude připravena",
+        "FilesAlertTitle": "Strategie importu (doporučeno)",
+        "FilesAlertDescription": "Aby byl upload menší a zpracování rychlejší, můžete ze ZIP odstranit všechny soubory kromě těch potřebných pro zvolenou strategii:",
+        "FilesAlertFileFollowing": "following.json",
+        "FilesAlertFileFollowers": "followers_*.json",
+        "FilesAlertFileCloseFriends": "close_friends.json",
         "HaveZipFile": "Mám ZIP soubor",
         "DropzoneTitle": "Přetáhněte Instagram ZIP",
         "DropzoneDescription": "Ověříme strukturu JSON a připravíme kontakty podle vybrané strategie.",
@@ -339,7 +375,8 @@
         "Back": "Zpět",
         "Cancel": "Zrušit",
         "SuccessTitle": "Import dokončen",
-        "ErrorTitle": "Import selhal"
+        "ErrorTitle": "Import selhal",
+        "ProcessingConnections": "Zpracovávám kontakty"
       }
     }
   },
@@ -385,6 +422,7 @@
     "SaveChanges": "Uložit změny",
     "SearchPlaceholder": "Hledat...",
     "EditAction": "Upravit",
+    "DuplicateAction": "Duplikovat",
     "DeleteAction": "Smazat",
     "DeleteConfirmTitle": "Smazat událost?",
     "DeleteConfirmMessage": "Opravdu chcete tuto událost smazat? Tuto akci nelze vrátit zpět.",
@@ -392,8 +430,10 @@
     "NoActivitiesWithPerson": "S touto osobou zatím nejsou žádné události.",
     "ActivityCreated": "Událost byla úspěšně vytvořena",
     "ActivityUpdated": "Událost byla úspěšně aktualizována",
+    "ActivityDuplicated": "Událost byla úspěšně duplikována",
     "ActivityDeleted": "Událost byla úspěšně smazána",
-    "DeleteFailed": "Událost se nepodařilo smazat"
+    "DeleteFailed": "Událost se nepodařilo smazat",
+    "DuplicateFailed": "Událost se nepodařilo duplikovat"
   },
   "HomePage": {
     "Title": "Domů",
@@ -404,9 +444,11 @@
     "NotificationToday": "Dnes",
     "NotificationTomorrow": "Zítra",
     "NotificationInDays": "Za {count} dní",
+    "NotificationSent": "Již odesláno",
     "NotificationTooltipToday": "Upozornění přijde dnes",
     "NotificationTooltipTomorrow": "Upozornění přijde zítra",
     "NotificationTooltipInDays": "Upozornění přijde za {count} dní",
+    "NotificationTooltipSentAt": "Upozornění už bylo odesláno {sentAt}",
     "UnknownPerson": "Neznámá osoba",
     "TimelinePreviewTitle": "Timeline",
     "Stats": {
