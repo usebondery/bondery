@@ -53,7 +53,6 @@ export default function LoginPage() {
           errorNotificationTemplate({
             title: t("AuthenticationError"),
             description: error.message,
-            
           }),
         );
       }
@@ -62,7 +61,6 @@ export default function LoginPage() {
         errorNotificationTemplate({
           title: t("UnexpectedError"),
           description: err instanceof Error ? err.message : t("UnexpectedErrorMessage"),
-          
         }),
       );
     } finally {

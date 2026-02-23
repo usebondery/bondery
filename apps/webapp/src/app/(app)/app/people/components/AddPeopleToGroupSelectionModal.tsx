@@ -3,6 +3,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
+  Badge,
+  Box,
   Button,
   Center,
   Group,
@@ -15,7 +17,7 @@ import {
 } from "@mantine/core";
 import { modals } from "@mantine/modals";
 import { notifications } from "@mantine/notifications";
-import { IconSearch, IconUsersGroup } from "@tabler/icons-react";
+import { IconMinus, IconPlus, IconSearch, IconUsersGroup } from "@tabler/icons-react";
 import {
   errorNotificationTemplate,
   loadingNotificationTemplate,
@@ -34,7 +36,7 @@ interface AddPeopleToGroupSelectionModalProps {
 
 export function openAddPeopleToGroupSelectionModal(props: AddPeopleToGroupSelectionModalProps) {
   modals.open({
-    title: <ModalTitle text="Add to group" icon={<IconUsersGroup size={24} />} />,
+    title: <ModalTitle text="Edit groups" icon={<IconUsersGroup size={24} />} />,
     trapFocus: true,
     size: "xl",
     children: <AddPeopleToGroupSelectionForm {...props} />,
@@ -145,7 +147,16 @@ function AddPeopleToGroupSelectionForm({ personIds }: AddPeopleToGroupSelectionM
   };
 
   const handleSubmit = async () => {
-    if (selectedGroupIds.size === 0 || deduplicatedPersonIds.length === 0) {
+    if (deduplicatedPersonIds.length === 0) {
+      return;
+    }
+
+    const targetGroupIds = Array.from(selectedGroupIds);
+    const removedGroupIds = Array.from(initialSelectedGroupIds).filter(
+      (groupId) => !selectedGroupIds.has(groupId),
+    );
+
+    if (targetGroupIds.length === 0 && removedGroupIds.length === 0) {
       return;
     }
 
@@ -159,11 +170,6 @@ function AddPeopleToGroupSelectionForm({ personIds }: AddPeopleToGroupSelectionM
     });
 
     try {
-      const targetGroupIds = Array.from(selectedGroupIds);
-      const removedGroupIds = Array.from(initialSelectedGroupIds).filter(
-        (groupId) => !selectedGroupIds.has(groupId),
-      );
-
       const addResponses = await Promise.all(
         targetGroupIds.map((groupId) =>
           fetch(`${API_ROUTES.GROUPS}/${groupId}/contacts`, {
@@ -268,19 +274,93 @@ function AddPeopleToGroupSelectionForm({ personIds }: AddPeopleToGroupSelectionM
                     maxWidth: "20rem",
                   }}
                 >
-                  <GroupCard
-                    group={group}
-                    onClick={() => {}}
-                    onAddPeople={() => {}}
-                    onEdit={() => {}}
-                    onDuplicate={() => {}}
-                    onDelete={() => {}}
-                    interactive={false}
-                    cursorType="pointer"
-                    variant="small"
-                    showMenu={false}
-                    selected={selectedGroupIds.has(group.id)}
-                  />
+                  {(() => {
+                    const isInitiallySelected = initialSelectedGroupIds.has(group.id);
+                    const isCurrentlySelected = selectedGroupIds.has(group.id);
+
+                    const selectionState = isInitiallySelected
+                      ? isCurrentlySelected
+                        ? "already"
+                        : "remove"
+                      : isCurrentlySelected
+                        ? "add"
+                        : "none";
+
+                    return (
+                      <Box pos="relative">
+                        {selectionState === "remove" && (
+                          <Badge
+                            size="xs"
+                            leftSection={<IconMinus size={10} />}
+                            style={{
+                              position: "absolute",
+                              top: 8,
+                              right: 8,
+                              zIndex: 2,
+                              backgroundColor: "var(--mantine-color-red-filled)",
+                              color: "var(--mantine-color-white)",
+                            }}
+                          >
+                            Remove from
+                          </Badge>
+                        )}
+                        {selectionState === "add" && (
+                          <Badge
+                            size="xs"
+                            leftSection={<IconPlus size={10} />}
+                            style={{
+                              position: "absolute",
+                              top: 8,
+                              right: 8,
+                              zIndex: 2,
+                              backgroundColor: "var(--mantine-color-green-filled)",
+                              color: "var(--mantine-color-white)",
+                            }}
+                          >
+                            Add to
+                          </Badge>
+                        )}
+                        {selectionState === "already" && (
+                          <Badge
+                            size="xs"
+                            style={{
+                              position: "absolute",
+                              top: 8,
+                              right: 8,
+                              zIndex: 2,
+                              backgroundColor: "var(--mantine-primary-color-filled)",
+                              color: "var(--mantine-color-white)",
+                            }}
+                          >
+                            Already part of
+                          </Badge>
+                        )}
+
+                        <GroupCard
+                          group={group}
+                          onClick={() => {}}
+                          onAddPeople={() => {}}
+                          onEdit={() => {}}
+                          onDuplicate={() => {}}
+                          onDelete={() => {}}
+                          interactive={false}
+                          cursorType="pointer"
+                          variant="small"
+                          showMenu={false}
+                          selected={isCurrentlySelected}
+                          highlightColor={
+                            selectionState === "add"
+                              ? "green"
+                              : selectionState === "remove"
+                                ? "red"
+                                : selectionState === "already"
+                                  ? "primary"
+                                  : undefined
+                          }
+                        />
+                      </Box>
+                    );
+                  })()}
                 </UnstyledButton>
               ))
             )}
@@ -295,10 +375,10 @@ function AddPeopleToGroupSelectionForm({ personIds }: AddPeopleToGroupSelectionM
         <Button
           onClick={handleSubmit}
           loading={isSubmitting}
-          disabled={selectedGroupIds.size === 0 || deduplicatedPersonIds.length === 0}
+          disabled={deduplicatedPersonIds.length === 0}
           leftSection={<IconUsersGroup size={16} />}
         >
-          Add to groups
+          Edit groups
         </Button>
       </Group>
     </Stack>

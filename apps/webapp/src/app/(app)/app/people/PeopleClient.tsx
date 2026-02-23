@@ -16,7 +16,7 @@ import {
   IconBrandLinkedin,
 } from "@tabler/icons-react";
 import { notifications } from "@mantine/notifications";
-import { useState, useDeferredValue } from "react";
+import { useEffect, useState, useDeferredValue } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { useDebouncedCallback } from "@mantine/hooks";
 import ContactsTable, {
@@ -103,6 +103,14 @@ export function PeopleClient({ initialContacts, totalCount, layout = "stack" }: 
   // Defer the columns update to prevent UI freezing when toggling visibility
   const deferredColumns = useDeferredValue(columns);
   const visibleColumns = deferredColumns.filter((c) => c.visible);
+
+  useEffect(() => {
+    setContacts(initialContacts);
+    setLoadedCount(initialContacts.length);
+    setTotalAvailableCount(totalCount);
+    setSelectedIds(new Set());
+    setLastSelectedIndex(null);
+  }, [initialContacts, totalCount]);
 
   // Handle search with debounce
   const handleSearch = useDebouncedCallback((query: string) => {

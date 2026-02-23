@@ -244,8 +244,6 @@ export function NewActivityModal({
       onClose={onClose}
       title={<ModalTitle text={t("WhoAreYouMeeting")} icon={<IconCalendarPlus size={24} />} />}
       size="lg"
-      radius="md"
-      padding="lg"
     >
       <form onSubmit={form.onSubmit(handleSubmit)}>
         <Stack gap="md">
