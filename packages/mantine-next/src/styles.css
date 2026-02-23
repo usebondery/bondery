@@ -37,6 +37,16 @@
   translate: 0 !important;
 } */
 
+ul {
+  /* Fix to bug, probably caused by Mantine */
+  list-style-type: disc;
+}
+
+ol {
+  /* Fix to bug, probably caused by Mantine */
+  list-style-type: decimal;
+}
+
 .input-scale-effect:not(:disabled):not([data-disabled]):not([disabled]) {
   transition:
     transform var(--transition-time) var(--transition-ease),
