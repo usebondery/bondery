@@ -110,13 +110,23 @@ SELECT
   us.reminder_send_hour,
   us.next_reminder_at_utc,
   now() AS run_started_at,
-  (us.next_reminder_at_utc <= now()) AS is_due_now,
-  current_setting('app.settings.next_public_api_url', true) AS next_public_api_url,
-  current_setting('app.settings.private_bondery_supabase_http_key', true) IS NOT NULL AS has_supabase_http_key,
-  rtrim(COALESCE(current_setting('app.settings.next_public_api_url', true), ''), '/') || '/api/reminders/daily-digest' AS reminder_digest_url
+  (us.next_reminder_at_utc <= now()) AS is_due_now
 FROM public.user_settings us
 JOIN _test_target_user t
   ON t.user_id = us.user_id;
+
+-- Verify vault secrets are present (secrets are read by send_hourly_reminder_digests via vault.decrypted_secrets)
+SELECT
+  name,
+  description,
+  (decrypted_secret IS NOT NULL AND decrypted_secret <> '') AS has_value,
+  CASE WHEN name = 'next_public_api_url'
+    THEN rtrim(decrypted_secret, '/') || '/api/reminders/daily-digest'
+    ELSE NULL
+  END AS reminder_digest_url,
+  updated_at
+FROM vault.decrypted_secrets
+WHERE name IN ('next_public_api_url', 'private_bondery_supabase_http_key');
 
 SELECT
   e.id,
