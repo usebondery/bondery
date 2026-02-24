@@ -5,6 +5,7 @@ import { Text, Button, Stack, Group, Paper, SimpleGrid } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { IconCopy, IconTrash, IconUsersGroup, IconUsersPlus } from "@tabler/icons-react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { PageHeader } from "@/app/(app)/app/components/PageHeader";
 import { PageWrapper } from "@/app/(app)/app/components/PageWrapper";
 import type { GroupWithCount } from "@bondery/types";
@@ -29,6 +30,7 @@ interface GroupsClientProps {
 }
 
 export function GroupsClient({ initialGroups, totalCount }: GroupsClientProps) {
+  const t = useTranslations("GroupsPage");
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -80,6 +82,32 @@ export function GroupsClient({ initialGroups, totalCount }: GroupsClientProps) {
     openAddPeopleToGroupModal({
       groupId: group.id,
       groupLabel: group.label,
+      texts: {
+        title: t("AddPeopleModal.Title", { groupLabel: group.label }),
+        errorTitle: t("AddPeopleModal.ErrorTitle"),
+        successTitle: t("AddPeopleModal.SuccessTitle"),
+        loadError: t("AddPeopleModal.LoadError"),
+        noSelectionTitle: t("AddPeopleModal.NoSelectionTitle"),
+        noSelectionDescription: t("AddPeopleModal.NoSelectionDescription"),
+        addingTitle: t("AddPeopleModal.AddingTitle"),
+        addingDescription: t("AddPeopleModal.AddingDescription"),
+        addError: t("AddPeopleModal.AddError"),
+        emptyState: t("AddPeopleModal.EmptyState"),
+        close: t("AddPeopleModal.Close"),
+        cancel: t("AddPeopleModal.Cancel"),
+        addContactsPlaceholder: t("AddPeopleModal.AddContactsPlaceholder"),
+        noContactsFound: t("AddPeopleModal.NoContactsFound"),
+        formatActionLabel: (count: number) =>
+          count === 0
+            ? t("AddPeopleModal.ActionDefault")
+            : count === 1
+              ? t("AddPeopleModal.ActionSingular")
+              : t("AddPeopleModal.ActionPlural", { count }),
+        formatSuccessMessage: (count: number, groupLabel: string) =>
+          count === 1
+            ? t("AddPeopleModal.SuccessMessageSingular", { groupLabel })
+            : t("AddPeopleModal.SuccessMessagePlural", { count, groupLabel }),
+      },
     });
   };
 

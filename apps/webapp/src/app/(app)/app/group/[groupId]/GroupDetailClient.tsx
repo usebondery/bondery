@@ -22,6 +22,7 @@ import type { Contact } from "@bondery/types";
 import { useDeferredValue, useMemo, useState } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { useDebouncedCallback } from "@mantine/hooks";
+import { useTranslations } from "next-intl";
 import { openAddPeopleToGroupModal } from "../../groups/components/AddPeopleToGroupModal";
 import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import { formatContactName } from "@/lib/nameHelpers";
@@ -54,6 +55,7 @@ export function GroupDetailClient({
   initialContacts,
   totalCount,
 }: GroupDetailClientProps) {
+  const t = useTranslations("GroupsPage");
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -429,6 +431,35 @@ export function GroupDetailClient({
     openAddPeopleToGroupModal({
       groupId,
       groupLabel,
+      texts: {
+        title: t("AddPeopleModal.Title", { groupLabel }),
+        errorTitle: t("AddPeopleModal.ErrorTitle"),
+        successTitle: t("AddPeopleModal.SuccessTitle"),
+        loadError: t("AddPeopleModal.LoadError"),
+        noSelectionTitle: t("AddPeopleModal.NoSelectionTitle"),
+        noSelectionDescription: t("AddPeopleModal.NoSelectionDescription"),
+        addingTitle: t("AddPeopleModal.AddingTitle"),
+        addingDescription: t("AddPeopleModal.AddingDescription"),
+        addError: t("AddPeopleModal.AddError"),
+        emptyState: t("AddPeopleModal.EmptyState"),
+        close: t("AddPeopleModal.Close"),
+        cancel: t("AddPeopleModal.Cancel"),
+        addContactsPlaceholder: t("AddPeopleModal.AddContactsPlaceholder"),
+        noContactsFound: t("AddPeopleModal.NoContactsFound"),
+        formatActionLabel: (count: number) =>
+          count === 0
+            ? t("AddPeopleModal.ActionDefault")
+            : count === 1
+              ? t("AddPeopleModal.ActionSingular")
+              : t("AddPeopleModal.ActionPlural", { count }),
+        formatSuccessMessage: (count: number, targetGroupLabel: string) =>
+          count === 1
+            ? t("AddPeopleModal.SuccessMessageSingular", { groupLabel: targetGroupLabel })
+            : t("AddPeopleModal.SuccessMessagePlural", {
+                count,
+                groupLabel: targetGroupLabel,
+              }),
+      },
     });
   };
 

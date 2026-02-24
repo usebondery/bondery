@@ -64,6 +64,14 @@ export const bonderyTheme = createTheme({
         },
       },
     },
+    List: {
+      defaultProps: {
+        withPadding: false,
+        spacing: "0",
+        mt: "0",
+        type: "unordered",
+      },
+    },
     TextInput: {
       defaultProps: {
         variant: "filled",

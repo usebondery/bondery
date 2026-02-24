@@ -175,9 +175,6 @@ function toPreviewContact(contact: InstagramPreparedContact): Contact {
     website: null,
     signal: null,
     importantEvents: null,
-    birthdate: null,
-    notifyBirthday: null,
-    importantDates: null,
     myself: false,
     position: null,
     gender: null,
@@ -544,7 +541,7 @@ export function InstagramImportModal({
             <IconBrandInstagram size={56} />
           </ThemeIcon>
           <Stack gap="md" flex={1}>
-            <List type="ordered" listStyleType="decimal" withPadding spacing="xs" size="sm">
+            <List type="ordered">
               <List.Item>
                 {t("InstructionStep1Prefix")}{" "}
                 <Anchor
@@ -556,17 +553,15 @@ export function InstagramImportModal({
                 </Anchor>
               </List.Item>
               <List.Item>{t("InstructionStep2")}</List.Item>
+              <List.Item>{t("InstructionStep3")}</List.Item>
               <List.Item>
-                {t("InstructionStep3")}
-                <List withPadding listStyleType="disc" spacing="xs" size="sm" mt="xs">
-                  <List.Item>{t("InstructionStep4")}</List.Item>
+                {t("InstructionStep4")}
+                <List listStyleType="disc" size="sm">
                   <List.Item>{t("InstructionStep5")}</List.Item>
                   <List.Item>{t("InstructionStep6")}</List.Item>
                 </List>
               </List.Item>
-              <List.Item>{t("InstructionStep7")}</List.Item>
               <List.Item>{t("InstructionStep8")}</List.Item>
-              <List.Item>{t("InstructionStep9")}</List.Item>
               <List.Item>{t("InstructionStep10")}</List.Item>
               <List.Item>{t("InstructionStep11")}</List.Item>
             </List>

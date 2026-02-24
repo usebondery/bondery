@@ -13,8 +13,7 @@
     "build": "turbo build",
     "start": "turbo start",
     "lint": "turbo lint",
-    "check-types": "turbo check-types",
-    "clean": "turbo clean && rm -rf node_modules"
+    "check-types": "turbo check-types"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.3",

@@ -99,9 +99,6 @@ export interface Contact {
   website: string | null;
   signal: string | null;
   importantEvents?: ImportantEvent[] | null;
-  birthdate: string | null;
-  notifyBirthday: boolean | null;
-  importantDates: ImportantDate[] | Json | null;
   myself: boolean | null;
   position: Position | Json | null;
   gender: string | null;

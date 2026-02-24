@@ -135,11 +135,6 @@ export async function generateVCard(contact: Contact): Promise<string> {
     lines.push(`URL:${contact.website}`);
   }
 
-  const birthdate = formatVCardDate(contact.birthdate);
-  if (birthdate) {
-    lines.push(`BDAY:${birthdate}`);
-  }
-
   if (contact.latitude !== null && contact.longitude !== null) {
     lines.push(`GEO:geo:${contact.latitude},${contact.longitude}`);
   }

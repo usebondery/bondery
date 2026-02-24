@@ -28,6 +28,39 @@ export type Database = {
   };
   public: {
     Tables: {
+      event_participants: {
+        Row: {
+          created_at: string;
+          event_id: string;
+          person_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          event_id: string;
+          person_id: string;
+        };
+        Update: {
+          created_at?: string;
+          event_id?: string;
+          person_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "event_participants_event_id_fkey";
+            columns: ["event_id"];
+            isOneToOne: false;
+            referencedRelation: "events";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "event_participants_person_id_fkey";
+            columns: ["person_id"];
+            isOneToOne: false;
+            referencedRelation: "people";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       events: {
         Row: {
           created_at: string;
@@ -60,39 +93,6 @@ export type Database = {
           user_id?: string;
         };
         Relationships: [];
-      };
-      event_participants: {
-        Row: {
-          event_id: string;
-          created_at: string;
-          person_id: string;
-        };
-        Insert: {
-          event_id: string;
-          created_at?: string;
-          person_id: string;
-        };
-        Update: {
-          event_id?: string;
-          created_at?: string;
-          person_id?: string;
-        };
-        Relationships: [
-          {
-            foreignKeyName: "event_participants_event_id_fkey";
-            columns: ["event_id"];
-            isOneToOne: false;
-            referencedRelation: "events";
-            referencedColumns: ["id"];
-          },
-          {
-            foreignKeyName: "event_participants_person_id_fkey";
-            columns: ["person_id"];
-            isOneToOne: false;
-            referencedRelation: "people";
-            referencedColumns: ["id"];
-          },
-        ];
       };
       groups: {
         Row: {
@@ -127,6 +127,7 @@ export type Database = {
       people: {
         Row: {
           avatar: string | null;
+          avatar_color: string | null;
           connections: string[] | null;
           created_at: string | null;
           first_name: string;
@@ -152,6 +153,7 @@ export type Database = {
         };
         Insert: {
           avatar?: string | null;
+          avatar_color?: string | null;
           connections?: string[] | null;
           created_at?: string | null;
           first_name: string;
@@ -177,6 +179,7 @@ export type Database = {
         };
         Update: {
           avatar?: string | null;
+          avatar_color?: string | null;
           connections?: string[] | null;
           created_at?: string | null;
           first_name?: string;
@@ -285,6 +288,53 @@ export type Database = {
           },
         ];
       };
+      people_important_events: {
+        Row: {
+          created_at: string;
+          event_date: string;
+          event_type: string;
+          id: string;
+          note: string | null;
+          notify_days_before: number | null;
+          notify_on: string | null;
+          person_id: string;
+          updated_at: string;
+          user_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          event_date: string;
+          event_type: string;
+          id?: string;
+          note?: string | null;
+          notify_days_before?: number | null;
+          notify_on?: string | null;
+          person_id: string;
+          updated_at?: string;
+          user_id: string;
+        };
+        Update: {
+          created_at?: string;
+          event_date?: string;
+          event_type?: string;
+          id?: string;
+          note?: string | null;
+          notify_days_before?: number | null;
+          notify_on?: string | null;
+          person_id?: string;
+          updated_at?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "people_important_events_person_id_fkey";
+            columns: ["person_id"];
+            isOneToOne: false;
+            referencedRelation: "people";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       people_merge_recommendations: {
         Row: {
           algorithm_version: string;
@@ -333,53 +383,6 @@ export type Database = {
           {
             foreignKeyName: "people_merge_recommendations_right_person_id_fkey";
             columns: ["right_person_id"];
-            isOneToOne: false;
-            referencedRelation: "people";
-            referencedColumns: ["id"];
-          },
-        ];
-      };
-      people_important_events: {
-        Row: {
-          created_at: string;
-          event_date: string;
-          event_type: string;
-          id: string;
-          note: string | null;
-          notify_days_before: number | null;
-          notify_on: string | null;
-          person_id: string;
-          updated_at: string;
-          user_id: string;
-        };
-        Insert: {
-          created_at?: string;
-          event_date: string;
-          event_type: string;
-          id?: string;
-          note?: string | null;
-          notify_days_before?: number | null;
-          notify_on?: string | null;
-          person_id: string;
-          updated_at?: string;
-          user_id: string;
-        };
-        Update: {
-          created_at?: string;
-          event_date?: string;
-          event_type?: string;
-          id?: string;
-          note?: string | null;
-          notify_days_before?: number | null;
-          notify_on?: string | null;
-          person_id?: string;
-          updated_at?: string;
-          user_id?: string;
-        };
-        Relationships: [
-          {
-            foreignKeyName: "people_important_events_person_id_fkey";
-            columns: ["person_id"];
             isOneToOne: false;
             referencedRelation: "people";
             referencedColumns: ["id"];

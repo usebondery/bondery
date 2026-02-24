@@ -1,19 +1,6 @@
 "use client";
 
-import {
-  Button,
-  TextInput,
-  Select,
-  Group,
-  Stack,
-  Textarea,
-  Text,
-  Avatar,
-  Combobox,
-  Pill,
-  PillsInput,
-  useCombobox,
-} from "@mantine/core";
+import { Button, TextInput, Select, Group, Stack, Textarea, Text, Avatar } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { notifications } from "@mantine/notifications";
 import { IconCalendarPlus, IconDeviceFloppy } from "@tabler/icons-react";
@@ -31,10 +18,9 @@ import {
   successNotificationTemplate,
 } from "@bondery/mantine-next";
 import { DatePickerWithPresets } from "../../components/timeline/DatePickerWithPresets";
-import { PersonChip } from "../../components/shared/PersonChip";
+import { PeopleMultiPickerInput } from "../../components/shared/PeopleMultiPickerInput";
 import { ACTIVITY_TYPE_OPTIONS } from "@/lib/activityTypes";
 import { getActivityTypeConfig } from "@/lib/activityTypes";
-import { getAvatarColorFromName } from "@/lib/avatarColor";
 
 interface OpenNewActivityModalParams {
   contacts: Contact[];
@@ -90,7 +76,6 @@ function NewActivityForm({ modalId, contacts, activity }: NewActivityFormProps) 
   const router = useRouter();
   const t = useTranslations("TimelinePage");
   const [loading, setLoading] = useState(false);
-  const [search, setSearch] = useState("");
   const isEditMode = Boolean(activity?.id);
 
   useEffect(() => {
@@ -101,13 +86,6 @@ function NewActivityForm({ modalId, contacts, activity }: NewActivityFormProps) 
       withCloseButton: !loading,
     });
   }, [loading, modalId]);
-
-  const contactsCombobox = useCombobox({
-    onDropdownClose: () => {
-      contactsCombobox.resetSelectedOption();
-      setSearch("");
-    },
-  });
 
   const initialParticipantIds = useMemo(
     () =>
@@ -132,44 +110,6 @@ function NewActivityForm({ modalId, contacts, activity }: NewActivityFormProps) 
       type: (value) => (value ? null : "Please select a type"),
     },
   });
-
-  const contactOptions = useMemo(
-    () =>
-      contacts.map((contact) => ({
-        value: contact.id,
-        label: `${contact.firstName} ${contact.lastName || ""}`.trim(),
-        avatar: contact.avatar,
-        color: getAvatarColorFromName(contact.firstName, contact.lastName),
-        initials: contact.firstName[0],
-      })),
-    [contacts],
-  );
-
-  const contactsById = useMemo(
-    () => new Map(contacts.map((contact) => [contact.id, contact])),
-    [contacts],
-  );
-
-  const selectedContacts = useMemo(
-    () =>
-      form.values.participantIds
-        .map((id) => contactsById.get(id))
-        .filter((contact): contact is Contact => Boolean(contact)),
-    [contactsById, form.values.participantIds],
-  );
-
-  const filteredContactOptions = useMemo(() => {
-    const query = search.trim().toLowerCase();
-    const availableOptions = contactOptions.filter(
-      (option) => !form.values.participantIds.includes(option.value),
-    );
-
-    if (!query) {
-      return availableOptions;
-    }
-
-    return availableOptions.filter((option) => option.label.toLowerCase().includes(query));
-  }, [contactOptions, form.values.participantIds, search]);
 
   const activityTypeSelectOptions = useMemo(
     () => ACTIVITY_TYPE_OPTIONS.map((type) => ({ value: type, label: type })),
@@ -235,104 +175,18 @@ function NewActivityForm({ modalId, contacts, activity }: NewActivityFormProps) 
           {...form.getInputProps("title")}
         />
 
-        <Combobox
-          store={contactsCombobox}
-          onOptionSubmit={(value: string) => {
-            const alreadySelected = form.values.participantIds.includes(value);
-            const nextParticipantIds = alreadySelected
-              ? form.values.participantIds.filter((id) => id !== value)
-              : [...form.values.participantIds, value];
-
-            form.setFieldValue("participantIds", nextParticipantIds);
+        <PeopleMultiPickerInput
+          contacts={contacts}
+          selectedIds={form.values.participantIds}
+          onChange={(ids) => {
+            form.setFieldValue("participantIds", ids);
             form.validateField("participantIds");
-            setSearch("");
           }}
-        >
-          <Combobox.DropdownTarget>
-            <PillsInput
-              onClick={() => contactsCombobox.openDropdown()}
-              error={form.errors.participantIds}
-              styles={{
-                input: {
-                  minHeight: 34,
-                  display: "flex",
-                  alignItems: "center",
-                },
-              }}
-            >
-              <Pill.Group>
-                {selectedContacts.map((contact) => (
-                  <PersonChip
-                    key={contact.id}
-                    person={contact}
-                    size="sm"
-                    onClear={() => {
-                      form.setFieldValue(
-                        "participantIds",
-                        form.values.participantIds.filter((id) => id !== contact.id),
-                      );
-                      form.validateField("participantIds");
-                    }}
-                  />
-                ))}
-
-                <Combobox.EventsTarget>
-                  <PillsInput.Field
-                    value={search}
-                    placeholder={
-                      selectedContacts.length === 0 ? t("AddContactsPlaceholder") : undefined
-                    }
-                    onFocus={() => contactsCombobox.openDropdown()}
-                    onBlur={() => contactsCombobox.closeDropdown()}
-                    onChange={(event) => {
-                      setSearch(event.currentTarget.value);
-                      contactsCombobox.openDropdown();
-                    }}
-                    onKeyDown={(event) => {
-                      if (event.key === "Backspace" && search.length === 0) {
-                        const lastSelectedId = form.values.participantIds.at(-1);
-                        if (lastSelectedId) {
-                          form.setFieldValue(
-                            "participantIds",
-                            form.values.participantIds.slice(0, -1),
-                          );
-                          form.validateField("participantIds");
-                        }
-                      }
-                    }}
-                  />
-                </Combobox.EventsTarget>
-              </Pill.Group>
-            </PillsInput>
-          </Combobox.DropdownTarget>
-
-          <Combobox.Dropdown>
-            <Combobox.Options>
-              {filteredContactOptions.length > 0 ? (
-                filteredContactOptions.map((option) => {
-                  const isSelected = form.values.participantIds.includes(option.value);
-
-                  return (
-                    <Combobox.Option value={option.value} key={option.value} active={isSelected}>
-                      <Group justify="space-between" wrap="nowrap" px="xs" py={6}>
-                        <Group gap="sm" wrap="nowrap">
-                          <Avatar src={option.avatar} size="sm" radius="xl" color={option.color}>
-                            {option.initials}
-                          </Avatar>
-                          <Text size="sm" fw={isSelected ? 700 : 500}>
-                            {option.label}
-                          </Text>
-                        </Group>
-                      </Group>
-                    </Combobox.Option>
-                  );
-                })
-              ) : (
-                <Combobox.Empty>{t("NoContactsFound")}</Combobox.Empty>
-              )}
-            </Combobox.Options>
-          </Combobox.Dropdown>
-        </Combobox>
+          placeholder={t("AddContactsPlaceholder")}
+          noResultsLabel={t("NoContactsFound")}
+          error={form.errors.participantIds}
+          disabled={loading}
+        />
 
         <Stack gap="xs">
           <Group justify="space-between" align="center">

@@ -122,6 +122,7 @@ const MERGEABLE_SCALAR_FIELDS = {
   firstName: "first_name",
   middleName: "middle_name",
   lastName: "last_name",
+  avatar: "avatar",
   title: "title",
   place: "place",
   notes: "notes",
@@ -137,6 +138,10 @@ const MERGEABLE_SCALAR_FIELDS = {
   latitude: "latitude",
   longitude: "longitude",
 } as const;
+
+const MERGEABLE_SET_FIELDS: Array<
+  Extract<MergeConflictField, "phones" | "emails" | "importantEvents">
+> = ["phones", "emails", "importantEvents"];
 
 const MERGEABLE_SOCIAL_FIELDS: Record<
   Extract<
@@ -156,6 +161,7 @@ const MERGEABLE_SOCIAL_FIELDS: Record<
 const MERGEABLE_FIELDS = new Set<MergeConflictField>([
   ...Object.keys(MERGEABLE_SCALAR_FIELDS),
   ...Object.keys(MERGEABLE_SOCIAL_FIELDS),
+  ...MERGEABLE_SET_FIELDS,
 ] as MergeConflictField[]);
 
 const MERGE_RECOMMENDATION_ALGORITHM_VERSION = "v1";
@@ -519,6 +525,82 @@ function areValuesEquivalent(left: unknown, right: unknown): boolean {
   }
 
   return JSON.stringify(left) === JSON.stringify(right);
+}
+
+function normalizePhoneSet(
+  rows:
+    | Array<{ prefix: string; value: string; type: string; preferred: boolean }>
+    | null
+    | undefined,
+): string[] {
+  return (rows || [])
+    .map((phone) => {
+      const prefix = String(phone.prefix || "").trim();
+      const value = String(phone.value || "").trim();
+      const type = String(phone.type || "home")
+        .trim()
+        .toLowerCase();
+      if (!value) {
+        return "";
+      }
+
+      return `${prefix}|${value}|${type}|${phone.preferred ? "1" : "0"}`;
+    })
+    .filter(Boolean)
+    .sort();
+}
+
+function normalizeEmailSet(
+  rows: Array<{ value: string; type: string; preferred: boolean }> | null | undefined,
+): string[] {
+  return (rows || [])
+    .map((email) => {
+      const value = String(email.value || "")
+        .trim()
+        .toLowerCase();
+      const type = String(email.type || "home")
+        .trim()
+        .toLowerCase();
+      if (!value) {
+        return "";
+      }
+
+      return `${value}|${type}|${email.preferred ? "1" : "0"}`;
+    })
+    .filter(Boolean)
+    .sort();
+}
+
+function normalizeImportantEventSet(
+  rows:
+    | Array<{
+        event_type: string;
+        event_date: string;
+        note: string | null;
+        notify_days_before: number | null;
+      }>
+    | null
+    | undefined,
+): string[] {
+  return (rows || [])
+    .map((event) => {
+      const eventType = String(event.event_type || "")
+        .trim()
+        .toLowerCase();
+      const eventDate = String(event.event_date || "")
+        .trim()
+        .slice(0, 10);
+      const note = String(event.note || "").trim();
+      const notifyDaysBefore =
+        typeof event.notify_days_before === "number" ? String(event.notify_days_before) : "";
+      if (!eventType || !eventDate) {
+        return "";
+      }
+
+      return `${eventType}|${eventDate}|${note}|${notifyDaysBefore}`;
+    })
+    .filter(Boolean)
+    .sort();
 }
 
 function resolveConflictChoice(
@@ -1513,28 +1595,35 @@ export async function contactRoutes(fastify: FastifyInstance) {
           .send({ error: leftPhonesError?.message || rightPhonesError?.message });
       }
 
-      const phoneMap = new Map<
-        string,
-        { prefix: string; value: string; type: string; preferred: boolean }
-      >();
-      for (const phone of [...(leftPhones || []), ...(rightPhones || [])]) {
-        const key = `${phone.prefix || ""}|${String(phone.value || "").trim()}|${phone.type || "home"}`;
-        const existingPhone = phoneMap.get(key);
+      const normalizedLeftPhones = (leftPhones || [])
+        .map((phone) => ({
+          prefix: phone.prefix || "+1",
+          value: String(phone.value || "").trim(),
+          type: phone.type || "home",
+          preferred: Boolean(phone.preferred),
+        }))
+        .filter((phone) => phone.value.length > 0);
 
-        if (!existingPhone) {
-          phoneMap.set(key, {
-            prefix: phone.prefix || "+1",
-            value: String(phone.value || "").trim(),
-            type: phone.type || "home",
-            preferred: Boolean(phone.preferred),
-          });
-          continue;
-        }
+      const normalizedRightPhones = (rightPhones || [])
+        .map((phone) => ({
+          prefix: phone.prefix || "+1",
+          value: String(phone.value || "").trim(),
+          type: phone.type || "home",
+          preferred: Boolean(phone.preferred),
+        }))
+        .filter((phone) => phone.value.length > 0);
 
-        existingPhone.preferred = existingPhone.preferred || Boolean(phone.preferred);
+      const phonesEqual =
+        JSON.stringify(normalizePhoneSet(normalizedLeftPhones)) ===
+        JSON.stringify(normalizePhoneSet(normalizedRightPhones));
+
+      let mergedPhones = normalizedLeftPhones;
+      if (!normalizedLeftPhones.length && normalizedRightPhones.length) {
+        mergedPhones = normalizedRightPhones;
+      } else if (normalizedLeftPhones.length && normalizedRightPhones.length && !phonesEqual) {
+        const choice = resolveConflictChoice(conflictResolutions, "phones");
+        mergedPhones = choice === "right" ? normalizedRightPhones : normalizedLeftPhones;
       }
-
-      const mergedPhones = Array.from(phoneMap.values()).filter((phone) => phone.value.length > 0);
 
       try {
         await replaceContactPhones(client, user.id, leftPersonId, mergedPhones as PhoneEntry[]);
@@ -1567,27 +1656,33 @@ export async function contactRoutes(fastify: FastifyInstance) {
           .send({ error: leftEmailsError?.message || rightEmailsError?.message });
       }
 
-      const emailMap = new Map<string, { value: string; type: string; preferred: boolean }>();
-      for (const email of [...(leftEmails || []), ...(rightEmails || [])]) {
-        const normalizedValue = String(email.value || "")
-          .trim()
-          .toLowerCase();
-        const key = `${normalizedValue}|${email.type || "home"}`;
+      const normalizedLeftEmails = (leftEmails || [])
+        .map((email) => ({
+          value: String(email.value || "").trim(),
+          type: email.type || "home",
+          preferred: Boolean(email.preferred),
+        }))
+        .filter((email) => email.value.length > 0);
 
-        const existingEmail = emailMap.get(key);
-        if (!existingEmail) {
-          emailMap.set(key, {
-            value: String(email.value || "").trim(),
-            type: email.type || "home",
-            preferred: Boolean(email.preferred),
-          });
-          continue;
-        }
+      const normalizedRightEmails = (rightEmails || [])
+        .map((email) => ({
+          value: String(email.value || "").trim(),
+          type: email.type || "home",
+          preferred: Boolean(email.preferred),
+        }))
+        .filter((email) => email.value.length > 0);
 
-        existingEmail.preferred = existingEmail.preferred || Boolean(email.preferred);
+      const emailsEqual =
+        JSON.stringify(normalizeEmailSet(normalizedLeftEmails)) ===
+        JSON.stringify(normalizeEmailSet(normalizedRightEmails));
+
+      let mergedEmails = normalizedLeftEmails;
+      if (!normalizedLeftEmails.length && normalizedRightEmails.length) {
+        mergedEmails = normalizedRightEmails;
+      } else if (normalizedLeftEmails.length && normalizedRightEmails.length && !emailsEqual) {
+        const choice = resolveConflictChoice(conflictResolutions, "emails");
+        mergedEmails = choice === "right" ? normalizedRightEmails : normalizedLeftEmails;
       }
-
-      const mergedEmails = Array.from(emailMap.values()).filter((email) => email.value.length > 0);
 
       try {
         await replaceContactEmails(client, user.id, leftPersonId, mergedEmails as EmailEntry[]);
@@ -1746,38 +1841,35 @@ export async function contactRoutes(fastify: FastifyInstance) {
           .send({ error: leftImportantEventsError?.message || rightImportantEventsError?.message });
       }
 
-      const importantEventMap = new Map<
-        string,
-        {
-          event_type: string;
-          event_date: string;
-          note: string | null;
-          notify_days_before: number | null;
-        }
-      >();
+      const normalizedLeftImportantEvents = (leftImportantEvents || []).map((event) => ({
+        event_type: event.event_type,
+        event_date: event.event_date,
+        note: event.note,
+        notify_days_before: event.notify_days_before,
+      }));
 
-      const toImportantEventKey = (event: {
-        event_type: string;
-        event_date: string;
-        note: string | null;
-      }) => {
-        if (event.event_type === "birthday") {
-          return "birthday";
-        }
+      const normalizedRightImportantEvents = (rightImportantEvents || []).map((event) => ({
+        event_type: event.event_type,
+        event_date: event.event_date,
+        note: event.note,
+        notify_days_before: event.notify_days_before,
+      }));
 
-        return `${event.event_type}|${event.event_date}|${(event.note || "").trim()}`;
-      };
+      const importantEventsEqual =
+        JSON.stringify(normalizeImportantEventSet(normalizedLeftImportantEvents)) ===
+        JSON.stringify(normalizeImportantEventSet(normalizedRightImportantEvents));
 
-      for (const event of [...(leftImportantEvents || []), ...(rightImportantEvents || [])]) {
-        const key = toImportantEventKey(event);
-        if (!importantEventMap.has(key)) {
-          importantEventMap.set(key, {
-            event_type: event.event_type,
-            event_date: event.event_date,
-            note: event.note,
-            notify_days_before: event.notify_days_before,
-          });
-        }
+      let mergedImportantEvents = normalizedLeftImportantEvents;
+      if (!normalizedLeftImportantEvents.length && normalizedRightImportantEvents.length) {
+        mergedImportantEvents = normalizedRightImportantEvents;
+      } else if (
+        normalizedLeftImportantEvents.length &&
+        normalizedRightImportantEvents.length &&
+        !importantEventsEqual
+      ) {
+        const choice = resolveConflictChoice(conflictResolutions, "importantEvents");
+        mergedImportantEvents =
+          choice === "right" ? normalizedRightImportantEvents : normalizedLeftImportantEvents;
       }
 
       const { error: deleteLeftImportantEventsError } = await client
@@ -1790,7 +1882,6 @@ export async function contactRoutes(fastify: FastifyInstance) {
         return reply.status(500).send({ error: deleteLeftImportantEventsError.message });
       }
 
-      const mergedImportantEvents = Array.from(importantEventMap.values());
       if (mergedImportantEvents.length > 0) {
         const { error: insertImportantEventsError } = await client
           .from("people_important_events")

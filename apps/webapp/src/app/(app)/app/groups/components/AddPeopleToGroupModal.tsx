@@ -2,20 +2,10 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import {
-  Stack,
-  Button,
-  Group,
-  Text,
-  Checkbox,
-  ScrollArea,
-  TextInput,
-  Loader,
-  Center,
-} from "@mantine/core";
+import { Stack, Text, Loader, Center } from "@mantine/core";
 import { modals } from "@mantine/modals";
 import { notifications } from "@mantine/notifications";
-import { IconUserPlus, IconSearch } from "@tabler/icons-react";
+import { IconUserPlus } from "@tabler/icons-react";
 import {
   errorNotificationTemplate,
   loadingNotificationTemplate,
@@ -23,20 +13,46 @@ import {
   ModalTitle,
   successNotificationTemplate,
 } from "@bondery/mantine-next";
-import { useDebouncedValue } from "@mantine/hooks";
 import type { Contact } from "@bondery/types";
-import { formatContactName } from "@/lib/nameHelpers";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import { revalidateGroups } from "../../actions";
-import { PersonChip } from "@/app/(app)/app/components/shared/PersonChip";
+import { PeopleMultiPickerInput } from "../../components/shared/PeopleMultiPickerInput";
+
+export interface AddPeopleToGroupModalTexts {
+  title: string;
+  errorTitle: string;
+  successTitle: string;
+  loadError: string;
+  noSelectionTitle: string;
+  noSelectionDescription: string;
+  addingTitle: string;
+  addingDescription: string;
+  addError: string;
+  emptyState: string;
+  close: string;
+  cancel: string;
+  addContactsPlaceholder: string;
+  noContactsFound: string;
+  formatActionLabel(count: number): string;
+  formatSuccessMessage(count: number, groupLabel: string): string;
+}
 
 interface AddPeopleToGroupModalProps {
   groupId: string;
   groupLabel: string;
+  texts: AddPeopleToGroupModalTexts;
 }
 
 interface AddPeopleToGroupFormProps extends AddPeopleToGroupModalProps {
   modalId: string;
+}
+
+interface AddPeopleToGroupModalTitleProps {
+  title: string;
+}
+
+function AddPeopleToGroupModalTitle({ title }: AddPeopleToGroupModalTitleProps) {
+  return <ModalTitle text={title} icon={<IconUserPlus size={24} />} />;
 }
 
 /**
@@ -47,23 +63,19 @@ export function openAddPeopleToGroupModal(props: AddPeopleToGroupModalProps) {
 
   modals.open({
     modalId,
-    title: (
-      <ModalTitle text={`Add people to ${props.groupLabel}`} icon={<IconUserPlus size={24} />} />
-    ),
+    title: <AddPeopleToGroupModalTitle title={props.texts.title} />,
     trapFocus: true,
     size: "md",
     children: <AddPeopleToGroupForm {...props} modalId={modalId} />,
   });
 }
 
-function AddPeopleToGroupForm({ groupId, groupLabel, modalId }: AddPeopleToGroupFormProps) {
+function AddPeopleToGroupForm({ groupId, groupLabel, modalId, texts }: AddPeopleToGroupFormProps) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [contacts, setContacts] = useState<Contact[]>([]);
-  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
-  const [search, setSearch] = useState("");
-  const [debouncedSearch] = useDebouncedValue(search, 200);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
   useEffect(() => {
     modals.updateModal({
@@ -94,8 +106,8 @@ function AddPeopleToGroupForm({ groupId, groupLabel, modalId }: AddPeopleToGroup
       } catch (error) {
         notifications.show(
           errorNotificationTemplate({
-            title: "Error",
-            description: "Failed to load contacts",
+            title: texts.errorTitle,
+            description: texts.loadError,
           }),
         );
       } finally {
@@ -104,37 +116,13 @@ function AddPeopleToGroupForm({ groupId, groupLabel, modalId }: AddPeopleToGroup
     }
 
     fetchAvailableContacts();
-  }, [groupId]);
-
-  const filteredContacts = debouncedSearch
-    ? contacts.filter((contact) =>
-        formatContactName(contact).toLowerCase().includes(debouncedSearch.toLowerCase()),
-      )
-    : contacts;
-
-  const handleToggle = (contactId: string) => {
-    const newSelected = new Set(selectedIds);
-    if (newSelected.has(contactId)) {
-      newSelected.delete(contactId);
-    } else {
-      newSelected.add(contactId);
-    }
-    setSelectedIds(newSelected);
-  };
-
-  const handleSelectAll = () => {
-    if (selectedIds.size === filteredContacts.length) {
-      setSelectedIds(new Set());
-    } else {
-      setSelectedIds(new Set(filteredContacts.map((contact) => contact.id)));
-    }
-  };
+  }, [groupId, texts.errorTitle, texts.loadError]);
 
   const handleSubmit = async () => {
-    if (selectedIds.size === 0) {
+    if (selectedIds.length === 0) {
       notifications.show({
-        title: "No contacts selected",
-        message: "Please select at least one contact to add",
+        title: texts.noSelectionTitle,
+        message: texts.noSelectionDescription,
         color: "yellow",
       });
       return;
@@ -144,8 +132,8 @@ function AddPeopleToGroupForm({ groupId, groupLabel, modalId }: AddPeopleToGroup
 
     const loadingNotification = notifications.show({
       ...loadingNotificationTemplate({
-        title: "Adding contacts...",
-        description: "Please wait while we add contacts to the group",
+        title: texts.addingTitle,
+        description: texts.addingDescription,
       }),
     });
 
@@ -154,21 +142,21 @@ function AddPeopleToGroupForm({ groupId, groupLabel, modalId }: AddPeopleToGroup
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          personIds: Array.from(selectedIds),
+          personIds: selectedIds,
         }),
       });
 
       if (!res.ok) {
         const errorData = await res.json();
-        throw new Error(errorData.error || "Failed to add contacts");
+        throw new Error(errorData.error || texts.addError);
       }
 
       notifications.hide(loadingNotification);
 
       notifications.show(
         successNotificationTemplate({
-          title: "Success",
-          description: `${selectedIds.size} contact${selectedIds.size !== 1 ? "s" : ""} added to ${groupLabel}`,
+          title: texts.successTitle,
+          description: texts.formatSuccessMessage(selectedIds.length, groupLabel),
         }),
       );
 
@@ -180,8 +168,8 @@ function AddPeopleToGroupForm({ groupId, groupLabel, modalId }: AddPeopleToGroup
 
       notifications.show(
         errorNotificationTemplate({
-          title: "Error",
-          description: error instanceof Error ? error.message : "Failed to add contacts",
+          title: texts.errorTitle,
+          description: error instanceof Error ? error.message : texts.addError,
         }),
       );
     } finally {
@@ -201,76 +189,36 @@ function AddPeopleToGroupForm({ groupId, groupLabel, modalId }: AddPeopleToGroup
     return (
       <Stack gap="md">
         <Text c="dimmed" ta="center">
-          All your contacts are already in this group, or you don&apos;t have any contacts yet.
+          {texts.emptyState}
         </Text>
-        <ModalFooter cancelLabel="Close" onCancel={() => modals.close(modalId)} />
+        <ModalFooter cancelLabel={texts.close} onCancel={() => modals.close(modalId)} />
       </Stack>
     );
   }
 
+  const actionLabel = texts.formatActionLabel(selectedIds.length);
+
   return (
     <Stack gap="md">
-      <TextInput
-        placeholder="Search contacts..."
-        leftSection={<IconSearch size={16} />}
-        value={search}
-        onChange={(event) => setSearch(event.currentTarget.value)}
+      <PeopleMultiPickerInput
+        contacts={contacts}
+        selectedIds={selectedIds}
+        onChange={setSelectedIds}
+        placeholder={texts.addContactsPlaceholder}
+        noResultsLabel={texts.noContactsFound}
+        disabled={isSubmitting}
       />
 
-      <Group justify="space-between">
-        <Checkbox
-          label="Select all"
-          checked={selectedIds.size === filteredContacts.length && filteredContacts.length > 0}
-          indeterminate={selectedIds.size > 0 && selectedIds.size < filteredContacts.length}
-          onChange={handleSelectAll}
-        />
-        <Text size="sm" c="dimmed">
-          {selectedIds.size} selected
-        </Text>
-      </Group>
-
-      <ScrollArea h={300} type="auto">
-        <Stack gap="xs">
-          {filteredContacts.length === 0 ? (
-            <Text c="dimmed" ta="center" py="md">
-              No contacts found
-            </Text>
-          ) : (
-            filteredContacts.map((contact) => (
-              <Group
-                key={contact.id}
-                p="xs"
-                style={{
-                  cursor: "pointer",
-                  borderRadius: "var(--mantine-radius-sm)",
-                  backgroundColor: selectedIds.has(contact.id)
-                    ? "var(--mantine-color-blue-light)"
-                    : undefined,
-                }}
-                onClick={() => handleToggle(contact.id)}
-              >
-                <Checkbox
-                  checked={selectedIds.has(contact.id)}
-                  onChange={() => handleToggle(contact.id)}
-                  onClick={(event) => event.stopPropagation()}
-                />
-                <PersonChip person={contact} size="sm" />
-              </Group>
-            ))
-          )}
-        </Stack>
-      </ScrollArea>
-
       <ModalFooter
-        cancelLabel="Cancel"
+        cancelLabel={texts.cancel}
         onCancel={() => modals.close(modalId)}
         cancelDisabled={isSubmitting}
-        actionLabel={`Add ${selectedIds.size > 0 ? `${selectedIds.size} contact${selectedIds.size !== 1 ? "s" : ""}` : "contacts"}`}
+        actionLabel={actionLabel}
         onAction={() => {
           void handleSubmit();
         }}
         actionLoading={isSubmitting}
-        actionDisabled={selectedIds.size === 0 || isSubmitting}
+        actionDisabled={selectedIds.length === 0 || isSubmitting}
         actionLeftSection={<IconUserPlus size={16} />}
       />
     </Stack>

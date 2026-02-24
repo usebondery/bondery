@@ -50,11 +50,15 @@ export const MERGE_CONFLICT_FIELDS: MergeConflictField[] = [
   "firstName",
   "middleName",
   "lastName",
+  "avatar",
   "title",
   "place",
   "notes",
   "lastInteraction",
   "connections",
+  "phones",
+  "emails",
+  "importantEvents",
   "position",
   "gender",
   "language",
@@ -120,7 +124,106 @@ function hasMeaningfulValue(value: unknown): boolean {
   return true;
 }
 
-function areValuesEquivalent(left: unknown, right: unknown): boolean {
+function normalizePhoneSet(value: unknown): string[] {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return value
+    .map((entry) => {
+      if (!entry || typeof entry !== "object") {
+        return "";
+      }
+
+      const row = entry as { prefix?: unknown; value?: unknown; type?: unknown };
+      const prefix = String(row.prefix || "").trim();
+      const phone = String(row.value || "").trim();
+      const type = String(row.type || "home")
+        .trim()
+        .toLowerCase();
+      if (!phone) {
+        return "";
+      }
+
+      return `${prefix}|${phone}|${type}`;
+    })
+    .filter(Boolean)
+    .sort();
+}
+
+function normalizeEmailSet(value: unknown): string[] {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return value
+    .map((entry) => {
+      if (!entry || typeof entry !== "object") {
+        return "";
+      }
+
+      const row = entry as { value?: unknown; type?: unknown };
+      const email = String(row.value || "")
+        .trim()
+        .toLowerCase();
+      const type = String(row.type || "home")
+        .trim()
+        .toLowerCase();
+      if (!email) {
+        return "";
+      }
+
+      return `${email}|${type}`;
+    })
+    .filter(Boolean)
+    .sort();
+}
+
+function normalizeImportantEventsSet(value: unknown): string[] {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return value
+    .map((entry) => {
+      if (!entry || typeof entry !== "object") {
+        return "";
+      }
+
+      const row = entry as { eventType?: unknown; eventDate?: unknown; note?: unknown };
+      const eventType = String(row.eventType || "")
+        .trim()
+        .toLowerCase();
+      const eventDate = String(row.eventDate || "")
+        .trim()
+        .slice(0, 10);
+      const note = String(row.note || "").trim();
+      if (!eventType || !eventDate) {
+        return "";
+      }
+
+      return `${eventType}|${eventDate}|${note}`;
+    })
+    .filter(Boolean)
+    .sort();
+}
+
+function areValuesEquivalent(field: MergeConflictField, left: unknown, right: unknown): boolean {
+  if (field === "phones") {
+    return JSON.stringify(normalizePhoneSet(left)) === JSON.stringify(normalizePhoneSet(right));
+  }
+
+  if (field === "emails") {
+    return JSON.stringify(normalizeEmailSet(left)) === JSON.stringify(normalizeEmailSet(right));
+  }
+
+  if (field === "importantEvents") {
+    return (
+      JSON.stringify(normalizeImportantEventsSet(left)) ===
+      JSON.stringify(normalizeImportantEventsSet(right))
+    );
+  }
+
   if (typeof left === "string" && typeof right === "string") {
     return left.trim() === right.trim();
   }
@@ -128,7 +231,22 @@ function areValuesEquivalent(left: unknown, right: unknown): boolean {
   return JSON.stringify(left) === JSON.stringify(right);
 }
 
-function formatConflictValue(value: unknown): string {
+function formatConflictValue(field: MergeConflictField, value: unknown): string {
+  if (field === "phones") {
+    const normalized = normalizePhoneSet(value);
+    return normalized.length > 0 ? normalized.join(", ") : "—";
+  }
+
+  if (field === "emails") {
+    const normalized = normalizeEmailSet(value);
+    return normalized.length > 0 ? normalized.join(", ") : "—";
+  }
+
+  if (field === "importantEvents") {
+    const normalized = normalizeImportantEventsSet(value);
+    return normalized.length > 0 ? normalized.join(", ") : "—";
+  }
+
   if (value === null || value === undefined) {
     return "—";
   }
@@ -283,7 +401,7 @@ function MergeWithModal({
       (entry) =>
         hasMeaningfulValue(entry.leftValue) &&
         hasMeaningfulValue(entry.rightValue) &&
-        !areValuesEquivalent(entry.leftValue, entry.rightValue),
+        !areValuesEquivalent(entry.field, entry.leftValue, entry.rightValue),
     );
   }, [leftContact, rightContact]);
 
@@ -448,7 +566,7 @@ function MergeWithModal({
                           }))
                         }
                       >
-                        {formatConflictValue(conflict.leftValue)}
+                        {formatConflictValue(conflict.field, conflict.leftValue)}
                       </Button>
                       <Button
                         variant={selectedChoice === "right" ? "filled" : "light"}
@@ -459,7 +577,7 @@ function MergeWithModal({
                           }))
                         }
                       >
-                        {formatConflictValue(conflict.rightValue)}
+                        {formatConflictValue(conflict.field, conflict.rightValue)}
                       </Button>
                     </SimpleGrid>
                   </Stack>
