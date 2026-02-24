@@ -34,7 +34,8 @@ export default async function SettingsPage() {
     /^([01]\d|2[0-3]):[0-5]\d(:[0-5]\d)?$/.test(settings.reminder_send_hour)
       ? settings.reminder_send_hour
       : "08:00:00";
-  const language = settings.language || "en";
+  const timeFormat = settings.time_format === "12h" ? "12h" : "24h";
+  const language = "en";
   const colorScheme =
     settings.color_scheme === "light" ||
     settings.color_scheme === "dark" ||
@@ -73,6 +74,7 @@ export default async function SettingsPage() {
           initialLanguage={language}
           initialTimezone={timezone}
           initialReminderSendHour={reminderSendHour}
+          initialTimeFormat={timeFormat}
         />
 
         <DataManagementCard />

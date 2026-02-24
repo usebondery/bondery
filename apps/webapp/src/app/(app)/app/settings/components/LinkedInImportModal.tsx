@@ -3,7 +3,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
-  Button,
   Group,
   Stack,
   Text,
@@ -12,18 +11,17 @@ import {
   List,
   Anchor,
   ThemeIcon,
-  Stepper,
   Center,
   Loader,
 } from "@mantine/core";
 import { Dropzone } from "@mantine/dropzone";
 import {
   IconArrowLeft,
+  IconArrowRight,
   IconUpload,
   IconX,
   IconFileZip,
   IconBrandLinkedin,
-  IconChevronRight,
   IconCircleCheck,
   IconAlertTriangle,
 } from "@tabler/icons-react";
@@ -41,7 +39,6 @@ import ContactsTable from "@/app/(app)/app/components/ContactsTable";
 import { revalidateAll } from "../../actions";
 
 type Step = "intro" | "instructions" | "upload" | "processing" | "preview";
-const LINKEDIN_STEPPER_STEPS = 4;
 
 const LINKEDIN_ACCEPTED_MIME_TYPES = [
   "application/zip",
@@ -59,7 +56,7 @@ interface LinkedInImportTranslations {
   HaveZipFile: string;
   DropzoneTitle: string;
   DropzoneDescription: string;
-  SelectFolder: string;
+  SelectZipFile: string;
   UploadAnother: string;
   Total: string;
   Valid: string;
@@ -208,16 +205,14 @@ export function LinkedInImportModal({
   const allSelected = selectableIds.length > 0 && selectableIds.every((id) => selectedIds.has(id));
   const someSelected = selectedIds.size > 0 && !allSelected;
 
-  const activeStep =
-    step === "instructions"
-      ? 0
-      : step === "upload"
-        ? 1
-        : step === "processing"
-          ? 2
-          : step === "preview"
-            ? 3
-            : null;
+  const closeModal = () => {
+    if (modalId) {
+      modals.close(modalId);
+      return;
+    }
+
+    modals.closeAll();
+  };
 
   useEffect(() => {
     if (!modalId) {
@@ -236,22 +231,10 @@ export function LinkedInImportModal({
             ? "lg"
             : "xl",
       title: (
-        <ModalTitle
-          text={t("ModalTitle")}
-          icon={<IconBrandLinkedin size={20} stroke={1.5} />}
-          rightContent={
-            activeStep !== null ? (
-              <Stepper active={activeStep} allowNextStepsSelect={false} iconSize={28}>
-                {Array.from({ length: LINKEDIN_STEPPER_STEPS }).map((_, index) => (
-                  <Stepper.Step key={index} label=" " />
-                ))}
-              </Stepper>
-            ) : null
-          }
-        />
+        <ModalTitle text={t("ModalTitle")} icon={<IconBrandLinkedin size={20} stroke={1.5} />} />
       ),
     });
-  }, [activeStep, isImporting, isParsing, modalId, step, t]);
+  }, [isImporting, isParsing, modalId, step, t]);
 
   const handleToggleAll = () => {
     if (allSelected) {
@@ -416,9 +399,11 @@ export function LinkedInImportModal({
         </Group>
 
         <ModalFooter
+          cancelLabel={t("Cancel")}
+          onCancel={closeModal}
           actionLabel={t("Continue")}
           onAction={() => setStep("instructions")}
-          actionRightSection={<IconChevronRight size={16} />}
+          actionRightSection={<IconArrowRight size={16} />}
         />
       </Stack>
     );
@@ -459,16 +444,19 @@ export function LinkedInImportModal({
                 </List>
               </Stack>
             </Alert>
-
-            <ModalFooter
-              backLabel={t("Back")}
-              onBack={() => setStep("intro")}
-              actionLabel={t("HaveZipFile")}
-              onAction={() => setStep("upload")}
-              actionRightSection={<IconChevronRight size={16} />}
-            />
           </Stack>
         </Group>
+
+        <ModalFooter
+          backLabel={t("Back")}
+          backLeftSection={<IconArrowLeft size={16} />}
+          onBack={() => setStep("intro")}
+          cancelLabel={t("Cancel")}
+          onCancel={closeModal}
+          actionLabel={t("HaveZipFile")}
+          onAction={() => setStep("upload")}
+          actionRightSection={<IconArrowRight size={16} />}
+        />
       </Stack>
     );
   }
@@ -524,8 +512,11 @@ export function LinkedInImportModal({
 
         <ModalFooter
           backLabel={t("Back")}
+          backLeftSection={<IconArrowLeft size={16} />}
           onBack={() => setStep("instructions")}
-          actionLabel={t("SelectFolder")}
+          cancelLabel={t("Cancel")}
+          onCancel={closeModal}
+          actionLabel={t("SelectZipFile")}
           onAction={() => folderInputRef.current?.click()}
           actionLeftSection={<IconFileZip size={16} />}
         />
@@ -591,8 +582,12 @@ export function LinkedInImportModal({
 
       <ModalFooter
         backLabel={t("Back")}
+        backLeftSection={<IconArrowLeft size={16} />}
         onBack={() => setStep("upload")}
         backDisabled={isImporting}
+        cancelLabel={t("Cancel")}
+        onCancel={closeModal}
+        cancelDisabled={isImporting}
         actionLabel={t("ImportSelected", { count: selectedIds.size })}
         onAction={() => {
           void handleImport();

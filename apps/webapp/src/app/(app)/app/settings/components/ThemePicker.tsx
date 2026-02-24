@@ -7,6 +7,7 @@ import { IconMoon, IconSettings, IconSun } from "@tabler/icons-react";
 import type { ColorSchemePreference } from "@bondery/types";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import { useState } from "react";
+import type { ReactNode } from "react";
 import { useTranslations } from "next-intl";
 import {
   errorNotificationTemplate,
@@ -16,9 +17,10 @@ import {
 
 interface ThemePickerProps {
   initialValue: ColorSchemePreference;
+  label?: ReactNode;
 }
 
-export function ThemePicker({ initialValue }: ThemePickerProps) {
+export function ThemePicker({ initialValue, label }: ThemePickerProps) {
   const t = useTranslations("SettingsPage.Preferences");
   const [value, setValue] = useState<ColorSchemePreference>(initialValue);
   const { setColorScheme } = useMantineColorScheme();
@@ -82,7 +84,7 @@ export function ThemePicker({ initialValue }: ThemePickerProps) {
   return (
     <Stack gap={4}>
       <Text size="sm" fw={500}>
-        {t("Theme")}
+        {label ?? t("Theme")}
       </Text>
       <SegmentedControl
         w={"fit-content"}
