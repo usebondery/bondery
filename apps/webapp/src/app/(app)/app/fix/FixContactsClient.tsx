@@ -92,7 +92,7 @@ export function FixContactsClient({ initialRecommendations }: FixContactsClientP
       disableLeftPicker: true,
       disableRightPicker: true,
       redirectToMergedPerson: false,
-      titleText: tMerge("ActionLabel"),
+      titleText: tMerge("ModalTitle"),
       texts: mergeTexts,
     });
   };
@@ -147,8 +147,7 @@ export function FixContactsClient({ initialRecommendations }: FixContactsClientP
         throw new Error(t("RefreshError"));
       }
 
-      const refreshPayload =
-        (await refreshResponse.json()) as RefreshMergeRecommendationsResponse;
+      const refreshPayload = (await refreshResponse.json()) as RefreshMergeRecommendationsResponse;
       const recommendationsCount = Math.max(0, Number(refreshPayload.recommendationsCount) || 0);
 
       await fetchRecommendations(false);

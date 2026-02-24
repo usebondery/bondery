@@ -76,7 +76,7 @@ export function ContactActionMenu({
 
       <Menu.Dropdown>
         <MenuItem leftSection={<IconArrowMerge size={16} />} onClick={onMergeWith}>
-          {tMerge("ActionLabel")}
+          {tMerge("ActionLabelMenu")}
         </MenuItem>
         <MenuItem leftSection={<IconId size={16} />} onClick={handleExport}>
           Download vCard

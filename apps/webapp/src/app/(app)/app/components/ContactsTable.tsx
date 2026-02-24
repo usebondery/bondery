@@ -174,6 +174,7 @@ export interface BulkSelectionAction {
   color?: string;
   variant?: "filled" | "light" | "outline" | "subtle" | "default";
   onClick: (selectedIds: Set<string>) => void;
+  disabled?: boolean;
   loading?: boolean;
 }
 
@@ -245,6 +246,7 @@ export default function ContactsTable({
               variant={action.variant || "light"}
               leftSection={action.icon}
               onClick={() => action.onClick(selectedIds)}
+              disabled={action.disabled}
               loading={action.loading}
             >
               {action.label}

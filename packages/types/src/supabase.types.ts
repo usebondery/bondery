@@ -558,6 +558,7 @@ export type Database = {
           next_reminder_at_utc: string;
           reminder_send_hour: string;
           surname: string | null;
+          time_format: string;
           timezone: string | null;
           updated_at: string | null;
           user_id: string;
@@ -573,6 +574,7 @@ export type Database = {
           next_reminder_at_utc: string;
           reminder_send_hour?: string;
           surname?: string | null;
+          time_format?: string;
           timezone?: string | null;
           updated_at?: string | null;
           user_id: string;
@@ -588,6 +590,7 @@ export type Database = {
           next_reminder_at_utc?: string;
           reminder_send_hour?: string;
           surname?: string | null;
+          time_format?: string;
           timezone?: string | null;
           updated_at?: string | null;
           user_id?: string;

@@ -12,9 +12,18 @@ import {
   IconSearch,
   IconUserMinus,
   IconTrash,
+  IconArrowMerge,
 } from "@tabler/icons-react";
-import ContactsTable, { ColumnConfig, MenuAction } from "@/app/(app)/app/components/ContactsTable";
+import ContactsTable, {
+  BulkSelectionAction,
+  ColumnConfig,
+  MenuAction,
+} from "@/app/(app)/app/components/ContactsTable";
 import { ColumnVisibilityMenu } from "@/app/(app)/app/components/contacts/ColumnVisibilityMenu";
+import {
+  buildContactBulkActions,
+  buildContactMenuActions,
+} from "@/app/(app)/app/components/contacts/contactActionBuilders";
 import { SortMenu, type SortOrder } from "@/app/(app)/app/components/contacts/SortMenu";
 import { PageHeader } from "@/app/(app)/app/components/PageHeader";
 import { PageWrapper } from "@/app/(app)/app/components/PageWrapper";
@@ -39,8 +48,9 @@ import { revalidateContacts, revalidateGroups } from "../../actions";
 import { openDeleteContactModal } from "@/app/(app)/app/components/contacts/openDeleteContactModal";
 import { GroupCard } from "../../groups/components/GroupCard";
 import { openEditGroupModal } from "../../groups/components/EditGroupModal";
-import type { GroupWithCount } from "@bondery/types";
+import type { GroupWithCount, MergeConflictField } from "@bondery/types";
 import { openAddPeopleToGroupSelectionModal } from "../../people/components/AddPeopleToGroupSelectionModal";
+import { MERGE_CONFLICT_FIELDS, openMergeWithModal } from "../../people/components/MergeWithModal";
 
 interface GroupDetailClientProps {
   groupId: string;
@@ -56,6 +66,39 @@ export function GroupDetailClient({
   totalCount,
 }: GroupDetailClientProps) {
   const t = useTranslations("GroupsPage");
+  const tMerge = useTranslations("MergeWithModal");
+  const mergeTexts = useMemo(
+    () => ({
+      errorTitle: tMerge("ErrorTitle"),
+      successTitle: tMerge("SuccessTitle"),
+      selectBothPeopleError: tMerge("SelectBothPeopleError"),
+      differentPeopleError: tMerge("DifferentPeopleError"),
+      mergingTitle: tMerge("MergingTitle"),
+      mergingDescription: tMerge("MergingDescription"),
+      mergeSuccess: tMerge("MergeSuccess"),
+      mergeFailed: tMerge("MergeFailed"),
+      mergeWithLabel: tMerge("MergeWithLabel"),
+      selectLeftPerson: tMerge("SelectLeftPerson"),
+      selectRightPerson: tMerge("SelectRightPerson"),
+      searchPeople: tMerge("SearchPeople"),
+      noPeopleFound: tMerge("NoPeopleFound"),
+      cancel: tMerge("Cancel"),
+      continue: tMerge("Continue"),
+      back: tMerge("Back"),
+      merge: tMerge("Merge"),
+      noConflicts: tMerge("NoConflicts"),
+      processing: tMerge("Processing"),
+      steps: {
+        pick: tMerge("Steps.Pick"),
+        resolve: tMerge("Steps.Resolve"),
+        process: tMerge("Steps.Process"),
+      },
+      fields: Object.fromEntries(
+        MERGE_CONFLICT_FIELDS.map((field) => [field, tMerge(`Fields.${field}`)]),
+      ) as Record<MergeConflictField, string>,
+    }),
+    [tMerge],
+  );
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -372,60 +415,98 @@ export function GroupDetailClient({
     openAddPeopleToGroupSelectionModal({ personIds });
   };
 
+  const openMergeModal = (leftPersonId: string, rightPersonId?: string, lockBoth?: boolean) => {
+    openMergeWithModal({
+      contacts: initialContacts,
+      leftPersonId,
+      rightPersonId,
+      disableLeftPicker: true,
+      disableRightPicker: Boolean(lockBoth),
+      titleText: tMerge("ModalTitle"),
+      texts: mergeTexts,
+    });
+  };
+
   // Computed selection values
   const allSelected =
     filteredAndSortedContacts.length > 0 && selectedIds.size === filteredAndSortedContacts.length;
   const someSelected = selectedIds.size > 0 && selectedIds.size < filteredAndSortedContacts.length;
 
   // Define bulk selection actions
-  const bulkSelectionActions = [
-    {
+  const bulkSelectionActions: BulkSelectionAction[] = buildContactBulkActions({
+    mergeAction: {
+      key: "mergeSelected",
+      label: tMerge("ActionLabelBulk"),
+      icon: <IconArrowMerge size={16} />,
+      variant: "light",
+      onClick: () => {
+        const selectedContacts = filteredAndSortedContacts.filter((contact) =>
+          selectedIds.has(contact.id),
+        );
+
+        if (selectedContacts.length === 2) {
+          openMergeModal(selectedContacts[0].id, selectedContacts[1].id, true);
+        }
+      },
+      disabled: selectedIds.size !== 2,
+    },
+    addToGroupsAction: {
       key: "addToGroups",
       label: "Add to groups",
       icon: <IconUsersGroup size={16} />,
-      variant: "light" as const,
+      variant: "light",
       onClick: () => handleAddToGroups(Array.from(selectedIds)),
     },
-    {
-      key: "removeFromGroup",
-      label: "Remove from group",
-      icon: <IconUserMinus size={16} />,
-      variant: "light" as const,
-      onClick: () => handleBulkRemoveFromGroup(),
-    },
-    {
-      key: "deleteSelected",
-      label: "Delete contacts",
-      icon: <IconTrash size={16} />,
-      color: "red",
-      variant: "light" as const,
-      onClick: () => handleBulkDelete(),
-      loading: isDeleting,
-    },
-  ];
+    appendActions: [
+      {
+        key: "removeFromGroup",
+        label: "Remove from group",
+        icon: <IconUserMinus size={16} />,
+        variant: "light",
+        onClick: () => handleBulkRemoveFromGroup(),
+      },
+      {
+        key: "deleteSelected",
+        label: "Delete contacts",
+        icon: <IconTrash size={16} />,
+        color: "red",
+        variant: "light",
+        onClick: () => handleBulkDelete(),
+        loading: isDeleting,
+      },
+    ],
+  });
 
   // Define menu actions for individual contacts
-  const menuActions: MenuAction[] = [
-    {
+  const menuActions: MenuAction[] = buildContactMenuActions({
+    mergeAction: {
+      key: "mergeWith",
+      label: tMerge("ActionLabelMenu"),
+      icon: <IconArrowMerge size={14} />,
+      onClick: (contactId) => openMergeModal(contactId),
+    },
+    addToGroupsAction: {
       key: "addToGroups",
-      label: "Add to groups",
+      label: "Add to groups...",
       icon: <IconUsersGroup size={14} />,
       onClick: (contactId) => handleAddToGroups([contactId]),
     },
-    {
-      key: "removeFromGroup",
-      label: "Remove from group",
-      icon: <IconUserMinus size={14} />,
-      onClick: removeFromGroup,
-    },
-    {
-      key: "deleteContact",
-      label: "Delete contact",
-      icon: <IconTrash size={14} />,
-      color: "red",
-      onClick: deleteContact,
-    },
-  ];
+    appendActions: [
+      {
+        key: "removeFromGroup",
+        label: "Remove from group",
+        icon: <IconUserMinus size={14} />,
+        onClick: removeFromGroup,
+      },
+      {
+        key: "deleteContact",
+        label: "Delete contact",
+        icon: <IconTrash size={14} />,
+        color: "red",
+        onClick: deleteContact,
+      },
+    ],
+  });
 
   const handleAddContacts = () => {
     openAddPeopleToGroupModal({

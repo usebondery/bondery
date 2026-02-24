@@ -27,6 +27,13 @@ Import the common ModalTitle from packages/mantine-next to ensure consistent sty
 
 When implementing notifications in your application, utilize the successNotificationTemplate, errorNotificationTemplate, loadingNotificationsTemplate from packages/mantine-next. These templates provide pre-configured styles and structures for success and error notifications, ensuring a consistent look and feel across your application. By using these templates, you can save time on styling and focus on delivering clear and effective notifications to your users.
 
+## Dropdown menus
+
+When creating a dropdown menu, use following rules:
+
+- The action button text should have "..." at the end to indicate that it will open a modal. If it does not open a modal, it should not have "..." at the end.
+- If the modal only has a confirmation step, the action button should not have "..." at the end. If it has more steps, it should have "..." at the end.
+
 # Common mistakes to avoid
 
 ## Not using server component

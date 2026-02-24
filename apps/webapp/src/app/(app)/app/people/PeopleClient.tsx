@@ -26,6 +26,10 @@ import ContactsTable, {
   BulkSelectionAction,
 } from "@/app/(app)/app/components/ContactsTable";
 import { ColumnVisibilityMenu } from "@/app/(app)/app/components/contacts/ColumnVisibilityMenu";
+import {
+  buildContactBulkActions,
+  buildContactMenuActions,
+} from "@/app/(app)/app/components/contacts/contactActionBuilders";
 import { SortMenu, SortOrder } from "@/app/(app)/app/components/contacts/SortMenu";
 import { API_ROUTES, WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import { openAddContactModal } from "./components/AddContactModal";
@@ -192,7 +196,7 @@ export function PeopleClient({ initialContacts, totalCount, layout = "stack" }: 
       rightPersonId,
       disableLeftPicker: true,
       disableRightPicker: Boolean(lockBoth),
-      titleText: tMerge("ActionLabel"),
+      titleText: tMerge("ModalTitle"),
       texts: mergeTexts,
     });
   };
@@ -335,40 +339,40 @@ export function PeopleClient({ initialContacts, totalCount, layout = "stack" }: 
   const someSelected = selectedIds.size > 0 && selectedIds.size < contacts.length;
 
   // Define menu actions for individual contacts
-  const menuActions: MenuAction[] = [
-    {
+  const menuActions: MenuAction[] = buildContactMenuActions({
+    mergeAction: {
       key: "mergeWith",
-      label: tMerge("ActionLabel"),
+      label: tMerge("ActionLabelMenu"),
       icon: <IconArrowMerge size={14} />,
       onClick: (contactId) => openMergeModal(contactId),
     },
-    {
+    addToGroupsAction: {
       key: "addToGroup",
-      label: "Add to group",
+      label: "Add to groups...",
       icon: <IconUsersGroup size={14} />,
       onClick: (contactId) => handleAddToGroup([contactId]),
     },
-    {
+    deleteAction: {
       key: "deleteContact",
       label: "Delete contact",
       icon: <IconTrash size={14} />,
       color: "red",
       onClick: handleDeleteContact,
     },
-  ];
+  });
 
   // Define bulk selection actions
-  const bulkSelectionActions: BulkSelectionAction[] = [
-    {
+  const bulkSelectionActions: BulkSelectionAction[] = buildContactBulkActions({
+    addToGroupsAction: {
       key: "addSelectedToGroup",
-      label: "Add to group",
+      label: "Add to groups",
       icon: <IconUsersGroup size={16} />,
       variant: "light",
       onClick: (currentSelectedIds) => {
         handleAddToGroup(Array.from(currentSelectedIds));
       },
     },
-    {
+    deleteAction: {
       key: "deleteSelected",
       label: "Delete contacts",
       icon: <IconTrash size={16} />,
@@ -377,7 +381,7 @@ export function PeopleClient({ initialContacts, totalCount, layout = "stack" }: 
       onClick: () => handleDelete(),
       loading: isDeleting,
     },
-  ];
+  });
 
   if (selectedIds.size === 2) {
     const selectedContacts = contacts.filter((contact) => selectedIds.has(contact.id));
@@ -385,7 +389,7 @@ export function PeopleClient({ initialContacts, totalCount, layout = "stack" }: 
     if (selectedContacts.length === 2) {
       bulkSelectionActions.unshift({
         key: "mergeSelected",
-        label: tMerge("ActionLabel"),
+        label: tMerge("ActionLabelBulk"),
         icon: <IconArrowMerge size={16} />,
         variant: "light",
         onClick: () => openMergeModal(selectedContacts[0].id, selectedContacts[1].id, true),
