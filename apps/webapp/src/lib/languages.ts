@@ -17,12 +17,6 @@ export const APP_LANGUAGES_DATA: LanguageData[] = [
     flag: "gb",
     nativeName: "English",
   },
-  {
-    value: "cs",
-    label: "Czech",
-    flag: "cz",
-    nativeName: "Čeština",
-  },
 ];
 
 // World languages for contact language preferences

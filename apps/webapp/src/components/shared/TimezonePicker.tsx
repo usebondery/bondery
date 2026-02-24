@@ -4,13 +4,8 @@ import { Text, Stack, Combobox, useCombobox, Input, ScrollArea, Group } from "@m
 import { IconWorld } from "@tabler/icons-react";
 import { useState, useEffect, forwardRef } from "react";
 import type { ReactNode } from "react";
-import { useTranslations } from "next-intl";
-import {
-  getGroupedTimezones,
-  getCurrentTimeInTimezone,
-  formatOffset,
-  TIMEZONES_DATA,
-} from "@/lib/timezones";
+import { useFormatter, useTranslations } from "next-intl";
+import { getGroupedTimezones, formatOffset, TIMEZONES_DATA } from "@/lib/timezones";
 
 const TimezoneItem = forwardRef<
   HTMLDivElement,
@@ -18,19 +13,33 @@ const TimezoneItem = forwardRef<
     label: string;
     flag: string;
     offset: number;
+    timezoneValue: string;
     isSelected?: boolean;
     currentlySelectedText: string;
   }
->(({ label, flag, offset, isSelected, currentlySelectedText, ...others }, ref) => {
-  const [currentTime, setCurrentTime] = useState(() => getCurrentTimeInTimezone(offset));
+>(({ label, flag, offset, timezoneValue, isSelected, currentlySelectedText, ...others }, ref) => {
+  const formatter = useFormatter();
+  const [isMounted, setIsMounted] = useState(false);
+  const [now, setNow] = useState(() => new Date());
+
+  const currentTime = isMounted
+    ? formatter.dateTime(now, {
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        timeZone: timezoneValue,
+      })
+    : "--:--:--";
 
   useEffect(() => {
+    setIsMounted(true);
+
     const interval = setInterval(() => {
-      setCurrentTime(getCurrentTimeInTimezone(offset));
+      setNow(new Date());
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [offset]);
+  }, []);
 
   const utcLabel = formatOffset(offset);
 
@@ -98,10 +107,9 @@ export function TimezonePicker({
   const [timezone, setTimezone] = useState(currentValue);
   const [timezoneSearch, setTimezoneSearch] = useState("");
   const t = useTranslations("SettingsPage.Profile");
-  const [currentTimezoneTime, setCurrentTimezoneTime] = useState(() => {
-    const tzData = TIMEZONES_DATA.find((tz) => tz.value === currentValue);
-    return tzData ? getCurrentTimeInTimezone(tzData.offset) : "";
-  });
+  const formatter = useFormatter();
+  const [isMounted, setIsMounted] = useState(false);
+  const [now, setNow] = useState(() => new Date());
 
   // Update timezone when value or initialValue changes
   useEffect(() => {
@@ -121,15 +129,14 @@ export function TimezonePicker({
   });
 
   useEffect(() => {
-    const tzData = TIMEZONES_DATA.find((tz) => tz.value === timezone);
-    if (!tzData) return;
+    setIsMounted(true);
 
     const interval = setInterval(() => {
-      setCurrentTimezoneTime(getCurrentTimeInTimezone(tzData.offset));
+      setNow(new Date());
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [timezone]);
+  }, []);
 
   const handleChange = (val: string | null) => {
     if (!val) return;
@@ -144,6 +151,15 @@ export function TimezonePicker({
   };
 
   const selectedTimezone = TIMEZONES_DATA.find((tz) => tz.value === timezone);
+  const currentTimezoneTime =
+    selectedTimezone && isMounted
+      ? formatter.dateTime(now, {
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+          timeZone: selectedTimezone.value,
+        })
+      : "--:--:--";
 
   return (
     <Stack gap={4}>
@@ -240,7 +256,10 @@ export function TimezonePicker({
                           }}
                         >
                           <TimezoneItem
-                            {...item}
+                            label={item.label}
+                            flag={item.flag}
+                            offset={item.offset}
+                            timezoneValue={item.value}
                             isSelected={isSelected}
                             currentlySelectedText={t("CurrentlySelected")}
                           />

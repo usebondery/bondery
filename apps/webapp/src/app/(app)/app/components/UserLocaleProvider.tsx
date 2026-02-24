@@ -6,6 +6,7 @@ interface LocaleProviderProps {
   children: ReactNode;
   locale: string;
   timezone: string;
+  timeFormat: "24h" | "12h";
   messages: any;
 }
 
@@ -17,9 +18,17 @@ interface LocaleProviderProps {
  * @param timezone - The timezone (e.g., 'Europe/Prague', 'UTC')
  * @param messages - The translation messages for the locale
  */
-export function LocaleProvider({ children, locale, timezone, messages }: LocaleProviderProps) {
+export function LocaleProvider({
+  children,
+  locale,
+  timezone,
+  timeFormat,
+  messages,
+}: LocaleProviderProps) {
+  const localeWithHourCycle = timeFormat === "12h" ? `${locale}-u-hc-h12` : `${locale}-u-hc-h23`;
+
   return (
-    <NextIntlClientProvider locale={locale} timeZone={timezone} messages={messages}>
+    <NextIntlClientProvider locale={localeWithHourCycle} timeZone={timezone} messages={messages}>
       <DatesProvider settings={{ locale }}>{children}</DatesProvider>
     </NextIntlClientProvider>
   );

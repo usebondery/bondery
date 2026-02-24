@@ -733,7 +733,7 @@ export default function PersonClient({
       contacts: mergeContacts,
       leftPersonId: contact.id,
       disableLeftPicker: true,
-      titleText: tMerge("ActionLabel"),
+      titleText: tMerge("ModalTitle"),
       texts: mergeTexts,
     });
   };
