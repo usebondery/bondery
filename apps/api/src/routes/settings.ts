@@ -10,6 +10,7 @@ import { validateImageUpload } from "../lib/config.js";
 
 const AVATARS_BUCKET = "avatars";
 const DEFAULT_REMINDER_SEND_HOUR = "08:00:00";
+const DEFAULT_TIME_FORMAT = "24h" as const;
 
 function isValidReminderSendHour(value: unknown): value is string {
   if (typeof value !== "string") {
@@ -26,6 +27,10 @@ function normalizeReminderSendHour(value: string): string {
   const normalizedSecond = (secondPart || "00").padStart(2, "0");
 
   return `${normalizedHour}:${normalizedMinute}:${normalizedSecond}`;
+}
+
+function isValidTimeFormat(value: unknown): value is "24h" | "12h" {
+  return value === "24h" || value === "12h";
 }
 
 function getAccountAvatarFileName(userId: string): string {
@@ -220,6 +225,7 @@ export async function settingsRoutes(fastify: FastifyInstance) {
           surname: metadataName.surname,
           timezone: "UTC",
           reminder_send_hour: DEFAULT_REMINDER_SEND_HOUR,
+          time_format: DEFAULT_TIME_FORMAT,
           language: "en",
           color_scheme: "auto",
           next_reminder_at_utc: new Date().toISOString(),
@@ -274,6 +280,8 @@ export async function settingsRoutes(fastify: FastifyInstance) {
       data: {
         ...resolvedSettings,
         reminder_send_hour: resolvedSettings.reminder_send_hour ?? DEFAULT_REMINDER_SEND_HOUR,
+        time_format: resolvedSettings.time_format ?? DEFAULT_TIME_FORMAT,
+        language: "en",
         email: userData?.user?.email,
         avatar_url: resolvedSettings.avatar_url || null,
         providers: userData?.user?.app_metadata?.providers || [],
@@ -293,6 +301,7 @@ export async function settingsRoutes(fastify: FastifyInstance) {
       const { client, user } = auth;
       const { name, middlename, surname, timezone, reminder_send_hour, language, color_scheme } =
         request.body || {};
+      const { time_format } = request.body || {};
 
       const updatePayload: UpdateUserSettingsInput = {};
 
@@ -308,8 +317,21 @@ export async function settingsRoutes(fastify: FastifyInstance) {
         }
         updatePayload.reminder_send_hour = normalizeReminderSendHour(reminder_send_hour);
       }
-      if (language !== undefined) updatePayload.language = language;
+      if (language !== undefined) {
+        if (language !== "en") {
+          return reply.status(400).send({ error: "language must be 'en'" });
+        }
+
+        updatePayload.language = language;
+      }
       if (color_scheme !== undefined) updatePayload.color_scheme = color_scheme;
+      if (time_format !== undefined) {
+        if (!isValidTimeFormat(time_format)) {
+          return reply.status(400).send({ error: "time_format must be '24h' or '12h'" });
+        }
+
+        updatePayload.time_format = time_format;
+      }
 
       if (Object.keys(updatePayload).length === 0) {
         return reply.status(400).send({ error: "No settings fields provided" });

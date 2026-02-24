@@ -6,26 +6,23 @@ import {
   Alert,
   Anchor,
   Badge,
-  Button,
   Center,
   Group,
   Loader,
   List,
   Select,
-  Stepper,
   Stack,
   Text,
   ThemeIcon,
 } from "@mantine/core";
 import { Dropzone } from "@mantine/dropzone";
 import {
-  IconAlertTriangle,
   IconArrowLeft,
+  IconArrowRight,
+  IconAlertTriangle,
   IconBrandInstagram,
-  IconChevronRight,
   IconCircleCheck,
   IconFileZip,
-  IconPlayerPlay,
   IconUpload,
   IconX,
 } from "@tabler/icons-react";
@@ -45,7 +42,6 @@ import { revalidateAll } from "../../actions";
 type Step = "intro" | "instructions" | "upload" | "strategy" | "processing" | "preview";
 
 const INSTAGRAM_IMPORT_ROUTE = "/api/contacts/import/instagram";
-const INSTAGRAM_STEPPER_STEPS = 5;
 
 interface InstagramImportTranslations {
   SectionTitle: string;
@@ -278,18 +274,14 @@ export function InstagramImportModal({
   const allSelected = selectableIds.length > 0 && selectableIds.every((id) => selectedIds.has(id));
   const someSelected = selectedIds.size > 0 && !allSelected;
 
-  const activeStep =
-    step === "instructions"
-      ? 0
-      : step === "upload"
-        ? 1
-        : step === "strategy"
-          ? 2
-          : step === "processing"
-            ? 3
-            : step === "preview"
-              ? 4
-              : null;
+  const closeModal = () => {
+    if (modalId) {
+      modals.close(modalId);
+      return;
+    }
+
+    modals.closeAll();
+  };
 
   useEffect(() => {
     if (!modalId) {
@@ -308,22 +300,10 @@ export function InstagramImportModal({
             ? "lg"
             : "xl",
       title: (
-        <ModalTitle
-          text={t("ModalTitle")}
-          icon={<IconBrandInstagram size={20} stroke={1.5} />}
-          rightContent={
-            activeStep !== null ? (
-              <Stepper active={activeStep} allowNextStepsSelect={false} iconSize={28}>
-                {Array.from({ length: INSTAGRAM_STEPPER_STEPS }).map((_, index) => (
-                  <Stepper.Step key={index} label=" " />
-                ))}
-              </Stepper>
-            ) : null
-          }
-        />
+        <ModalTitle text={t("ModalTitle")} icon={<IconBrandInstagram size={20} stroke={1.5} />} />
       ),
     });
-  }, [activeStep, isImporting, isParsing, modalId, step, t]);
+  }, [isImporting, isParsing, modalId, step, t]);
 
   const handleToggleAll = () => {
     if (allSelected) {
@@ -525,9 +505,11 @@ export function InstagramImportModal({
         </Group>
 
         <ModalFooter
+          cancelLabel={t("Cancel")}
+          onCancel={closeModal}
           actionLabel={t("Continue")}
           onAction={() => setStep("instructions")}
-          actionRightSection={<IconChevronRight size={16} />}
+          actionRightSection={<IconArrowRight size={16} />}
         />
       </Stack>
     );
@@ -579,16 +561,19 @@ export function InstagramImportModal({
                 </List>
               </Stack>
             </Alert>
-
-            <ModalFooter
-              backLabel={t("Back")}
-              onBack={() => setStep("intro")}
-              actionLabel={t("HaveZipFile")}
-              onAction={() => setStep("upload")}
-              actionRightSection={<IconChevronRight size={16} />}
-            />
           </Stack>
         </Group>
+
+        <ModalFooter
+          backLabel={t("Back")}
+          backLeftSection={<IconArrowLeft size={16} />}
+          onBack={() => setStep("intro")}
+          cancelLabel={t("Cancel")}
+          onCancel={closeModal}
+          actionLabel={t("HaveZipFile")}
+          onAction={() => setStep("upload")}
+          actionRightSection={<IconArrowRight size={16} />}
+        />
       </Stack>
     );
   }
@@ -640,7 +625,10 @@ export function InstagramImportModal({
 
         <ModalFooter
           backLabel={t("Back")}
+          backLeftSection={<IconArrowLeft size={16} />}
           onBack={() => setStep("instructions")}
+          cancelLabel={t("Cancel")}
+          onCancel={closeModal}
           actionLabel={t("SelectZipFile")}
           onAction={() => zipInputRef.current?.click()}
           actionLeftSection={<IconFileZip size={16} />}
@@ -675,15 +663,18 @@ export function InstagramImportModal({
 
         <ModalFooter
           backLabel={t("Back")}
+          backLeftSection={<IconArrowLeft size={16} />}
           onBack={() => setStep("upload")}
           backDisabled={isParsing}
+          cancelLabel={t("Cancel")}
+          onCancel={closeModal}
           actionLabel={t("ParseUploaded")}
           onAction={() => {
             void parseUpload();
           }}
           actionLoading={isParsing}
           actionDisabled={isParsing}
-          actionRightSection={!isParsing ? <IconPlayerPlay size={16} /> : undefined}
+          actionRightSection={!isParsing ? <IconArrowRight size={16} /> : undefined}
         />
       </Stack>
     );
@@ -691,9 +682,9 @@ export function InstagramImportModal({
 
   if (step === "processing") {
     return (
-      <Stack gap="lg" py="md">
+      <Stack gap="md">
         <Center>
-          <Stack align="center" gap="sm">
+          <Stack align="center" gap="sm" py="md">
             <Loader size="md" />
             <Text>{t("ProcessingConnections")}</Text>
           </Stack>
@@ -752,8 +743,11 @@ export function InstagramImportModal({
 
       <ModalFooter
         backLabel={t("Back")}
+        backLeftSection={<IconArrowLeft size={16} />}
         onBack={() => setStep("strategy")}
         backDisabled={isImporting}
+        cancelLabel={t("Cancel")}
+        onCancel={closeModal}
         actionLabel={t("ImportSelected", { count: selectedIds.size })}
         onAction={() => {
           void handleImport();

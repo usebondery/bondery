@@ -7,6 +7,7 @@
  * User settings stored in database
  */
 export type ColorSchemePreference = "light" | "dark" | "auto";
+export type TimeFormatPreference = "24h" | "12h";
 
 export interface UserSettings {
   id?: string;
@@ -16,6 +17,7 @@ export interface UserSettings {
   surname: string | null;
   timezone: string | null;
   reminder_send_hour: string;
+  time_format: TimeFormatPreference;
   language: string | null;
   color_scheme: ColorSchemePreference;
   avatar_url: string | null;
@@ -43,6 +45,7 @@ export interface UpdateUserSettingsInput {
   surname?: string;
   timezone?: string;
   reminder_send_hour?: string;
+  time_format?: TimeFormatPreference;
   language?: string;
   color_scheme?: ColorSchemePreference;
 }

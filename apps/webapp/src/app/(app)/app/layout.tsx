@@ -16,6 +16,7 @@ interface UserSettingsLayoutData {
   avatarUrl: string | null;
   locale: string;
   timezone: string;
+  timeFormat: "24h" | "12h";
   colorScheme: ColorSchemePreference;
 }
 
@@ -47,8 +48,9 @@ async function getUserSettings() {
       return {
         userName: firstName || settings.email || "User",
         avatarUrl: settings.avatar_url || null,
-        locale: settings.language || "en",
+        locale: "en",
         timezone: settings.timezone || "UTC",
+        timeFormat: settings.time_format === "12h" ? "12h" : "24h",
         colorScheme,
       } satisfies UserSettingsLayoutData;
     }
@@ -59,6 +61,7 @@ async function getUserSettings() {
     avatarUrl: null,
     locale: "en",
     timezone: "UTC",
+    timeFormat: "24h",
     colorScheme: "auto",
   } satisfies UserSettingsLayoutData;
 }
@@ -73,12 +76,13 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     redirect(WEBSITE_ROUTES.LOGIN);
   }
 
-  const { userName, avatarUrl, locale, timezone, colorScheme } = await getUserSettings();
+  const { userName, avatarUrl, locale, timezone, timeFormat, colorScheme } =
+    await getUserSettings();
 
   const messages = translations[locale as keyof typeof translations] || translations.en;
 
   return (
-    <LocaleProvider locale={locale} timezone={timezone} messages={messages}>
+    <LocaleProvider locale={locale} timezone={timezone} timeFormat={timeFormat} messages={messages}>
       <ColorSchemeSync colorScheme={colorScheme} />
       <AppShell
         padding="md"

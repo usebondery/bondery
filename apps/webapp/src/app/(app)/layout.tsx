@@ -15,10 +15,11 @@ export const dynamic = "force-dynamic";
 export default async function AppGroupLayout({ children }: { children: React.ReactNode }) {
   const locale = await getLocaleFromHeaders();
   const timezone = "UTC";
+  const timeFormat = "24h" as const;
   const messages = translations[locale as keyof typeof translations] || translations.en;
 
   return (
-    <LocaleProvider locale={locale} timezone={timezone} messages={messages}>
+    <LocaleProvider locale={locale} timezone={timezone} timeFormat={timeFormat} messages={messages}>
       {children}
     </LocaleProvider>
   );
