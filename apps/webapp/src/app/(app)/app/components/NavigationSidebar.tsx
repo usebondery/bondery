@@ -6,6 +6,7 @@ import {
   IconSettings,
   IconUsers,
   IconUsersGroup,
+  IconMap2,
   IconMessageCircle,
   IconTimelineEventText,
   IconArrowMerge,
@@ -26,6 +27,7 @@ const primaryLinks = [
   { href: WEBAPP_ROUTES.TIMELINE, label: "Timeline", icon: IconTimelineEventText },
   { href: WEBAPP_ROUTES.PEOPLE, label: "People", icon: IconUsers },
   { href: WEBAPP_ROUTES.GROUPS, label: "Groups", icon: IconUsersGroup },
+  // { href: WEBAPP_ROUTES.MAP, label: "Map", icon: IconMap2 },
 ];
 
 const secondaryLinks = [
