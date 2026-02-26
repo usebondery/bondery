@@ -1,5 +1,4 @@
-import { Group, Text } from "@mantine/core";
-import { IconCalendar } from "@tabler/icons-react";
+import { Text } from "@mantine/core";
 import type { Contact } from "@bondery/types";
 
 interface LastInteractionSectionProps {
@@ -9,12 +8,9 @@ interface LastInteractionSectionProps {
 export function LastInteractionSection({ contact }: LastInteractionSectionProps) {
   return (
     <div>
-      <Group gap="xs" mb="xs">
-        <IconCalendar size={18} stroke={1.5} />
-        <Text size="sm" fw={600}>
-          Last Interaction
-        </Text>
-      </Group>
+      <Text size="sm" fw={600} mb="xs">
+        Last Interaction
+      </Text>
       <Text size="sm" c="dimmed">
         {contact.lastInteraction
           ? new Date(contact.lastInteraction).toLocaleDateString("en-US", {

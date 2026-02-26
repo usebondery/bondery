@@ -9,7 +9,6 @@ import { useRouter } from "next/navigation";
 import { modals } from "@mantine/modals";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import type { Contact, Activity } from "@bondery/types";
-import { useTranslations } from "next-intl";
 import { revalidateEvents } from "../../actions";
 import {
   ModalFooter,
@@ -25,12 +24,17 @@ import { getActivityTypeConfig } from "@/lib/activityTypes";
 interface OpenNewActivityModalParams {
   contacts: Contact[];
   activity?: Activity | null;
+  initialParticipantIds?: string[];
+  titleText?: string;
+  t: (key: string) => string;
 }
 
 interface NewActivityFormProps {
   modalId: string;
   contacts: Contact[];
   activity: Activity | null;
+  initialParticipantIds?: string[];
+  t: (key: string) => string;
 }
 
 function toLocalDateInputValue(value: Date): string {
@@ -66,15 +70,14 @@ function withFallbackTime(date: Date, fallback: Date): Date {
   return normalizedDate;
 }
 
-function NewActivityModalTitle() {
-  const t = useTranslations("TimelinePage");
-
-  return <ModalTitle text={t("WhoAreYouMeeting")} icon={<IconCalendarPlus size={24} />} />;
-}
-
-function NewActivityForm({ modalId, contacts, activity }: NewActivityFormProps) {
+function NewActivityForm({
+  modalId,
+  contacts,
+  activity,
+  initialParticipantIds,
+  t,
+}: NewActivityFormProps) {
   const router = useRouter();
-  const t = useTranslations("TimelinePage");
   const [loading, setLoading] = useState(false);
   const isEditMode = Boolean(activity?.id);
 
@@ -87,18 +90,18 @@ function NewActivityForm({ modalId, contacts, activity }: NewActivityFormProps) 
     });
   }, [loading, modalId]);
 
-  const initialParticipantIds = useMemo(
+  const resolvedInitialParticipantIds = useMemo(
     () =>
-      (activity?.participants || [])
+      (activity?.participants || initialParticipantIds || [])
         .map((participant: any) => (typeof participant === "string" ? participant : participant.id))
         .filter((id): id is string => Boolean(id)),
-    [activity],
+    [activity, initialParticipantIds],
   );
 
   const form = useForm({
     initialValues: {
       title: activity?.title || "",
-      participantIds: initialParticipantIds,
+      participantIds: resolvedInitialParticipantIds,
       date: toLocalDateInputValue(activity ? new Date(activity.date) : new Date()),
       type: activity?.type || "Call",
       description: activity?.description || "",
@@ -260,13 +263,25 @@ function NewActivityForm({ modalId, contacts, activity }: NewActivityFormProps) 
 export function openNewActivityModal({
   contacts,
   activity = null,
+  initialParticipantIds,
+  titleText,
+  t,
 }: OpenNewActivityModalParams): void {
   const modalId = `activity-${Math.random().toString(36).slice(2)}`;
+  const modalTitle = titleText || t("WhoAreYouMeeting");
 
   modals.open({
     modalId,
-    title: <NewActivityModalTitle />,
+    title: <ModalTitle text={modalTitle} icon={<IconCalendarPlus size={24} />} />,
     size: "lg",
-    children: <NewActivityForm modalId={modalId} contacts={contacts} activity={activity} />,
+    children: (
+      <NewActivityForm
+        modalId={modalId}
+        contacts={contacts}
+        activity={activity}
+        initialParticipantIds={initialParticipantIds}
+        t={t}
+      />
+    ),
   });
 }

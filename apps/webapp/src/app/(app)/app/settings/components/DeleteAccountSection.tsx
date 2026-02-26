@@ -33,7 +33,6 @@ export function DeleteAccountSection() {
           })}
         </Text>
       ),
-      centered: true,
       confirmLabel: t("DeleteConfirmButton"),
       cancelLabel: t("DeleteCancelButton"),
       confirmColor: "red",

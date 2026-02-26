@@ -1,6 +1,6 @@
 "use client";
 
-import { Group, Stack, Paper, Divider, Text, Skeleton, Card, Avatar, Button } from "@mantine/core";
+import { Group, Stack, Paper, Text, Card, Avatar, Button } from "@mantine/core";
 import { Link } from "@mantine/tiptap";
 import { useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
@@ -8,16 +8,16 @@ import Highlight from "@tiptap/extension-highlight";
 import { Color } from "@tiptap/extension-color";
 import { TextStyle } from "@tiptap/extension-text-style";
 import { notifications } from "@mantine/notifications";
-import { IconCheck, IconX, IconUser, IconPlus } from "@tabler/icons-react";
+import { IconCheck, IconX, IconUser, IconPlus, IconMapPin } from "@tabler/icons-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
-import dynamic from "next/dynamic";
 import { useTranslations } from "next-intl";
 import { extractUsername } from "@/lib/socialMediaHelpers";
 import { parsePhoneNumber, combinePhoneNumber } from "@/lib/phoneHelpers";
 import { formatContactName } from "@/lib/nameHelpers";
 import type {
   Contact,
+  ContactAddressEntry,
   ContactPreview,
   ContactRelationshipWithPeople,
   Group as GroupType,
@@ -34,27 +34,25 @@ import { ContactIdentitySection } from "./components/ContactIdentitySection";
 import { ContactPreferenceSection } from "./components/ContactPreferenceSection";
 import { ContactRelationshipsSection } from "./components/ContactRelationshipsSection";
 import { ContactNotesSection } from "./components/ContactNotesSection";
-import { ContactInfoSection } from "./components/ContactInfoSection";
-import { SocialMediaSection } from "./components/SocialMediaSection";
+import { ContactAddressSection } from "./components/ContactAddressSection";
 import { ContactImportantDatesSection } from "./components/ContactImportantDatesSection";
-import { LastInteractionSection } from "./components/LastInteractionSection";
 import { PersonTimelineSection } from "./components/PersonTimelineSection";
 // import { ContactPGPSection } from "./components/ContactPGPSection";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
-import { errorNotificationTemplate, successNotificationTemplate } from "@bondery/mantine-next";
+import {
+  errorNotificationTemplate,
+  ModalTitle,
+  successNotificationTemplate,
+} from "@bondery/mantine-next";
 import { PageWrapper } from "@/app/(app)/app/components/PageWrapper";
 import { PageHeader } from "@/app/(app)/app/components/PageHeader";
 import { revalidateContacts, revalidateRelationships } from "../../actions";
 import { openDeleteContactModal } from "@/app/(app)/app/components/contacts/openDeleteContactModal";
+import { openStandardConfirmModal } from "@/app/(app)/app/components/modals/openStandardConfirmModal";
 import { GroupCard } from "../../groups/components/GroupCard";
 import { openAddPeopleToGroupSelectionModal } from "../../people/components/AddPeopleToGroupSelectionModal";
 import { MERGE_CONFLICT_FIELDS, openMergeWithModal } from "../../people/components/MergeWithModal";
-
-const PersonMap = dynamic(() => import("./components/PersonMap").then((mod) => mod.PersonMap), {
-  ssr: false,
-  loading: () => <Skeleton height={360} radius="md" />,
-});
 
 interface PersonClientProps {
   initialContact: Contact;
@@ -83,6 +81,7 @@ export default function PersonClient({
   const tRelationships = useTranslations("PersonRelationships");
   const tImportantDates = useTranslations("ContactImportantDates");
   const tMerge = useTranslations("MergeWithModal");
+  const tAddress = useTranslations("ContactAddress");
   const mergeTexts = useMemo(
     () => ({
       errorTitle: tMerge("ErrorTitle"),
@@ -141,8 +140,6 @@ export default function PersonClient({
   useEffect(() => {
     setPersonGroups(initialPersonGroups);
   }, [initialPersonGroups]);
-
-  const hasCoordinates = Number.isFinite(contact?.latitude) && Number.isFinite(contact?.longitude);
 
   const selectablePeople: ContactPreview[] = initialSelectableContacts.map((person) => ({
     id: person.id,
@@ -317,8 +314,6 @@ export default function PersonClient({
       return;
     }
 
-    setSavingField("phones");
-
     try {
       const res = await fetch(`${API_ROUTES.CONTACTS}/${personId}`, {
         method: "PATCH",
@@ -346,8 +341,6 @@ export default function PersonClient({
           description: "Failed to update phone numbers",
         }),
       );
-    } finally {
-      setSavingField(null);
     }
   };
 
@@ -363,8 +356,6 @@ export default function PersonClient({
     if (JSON.stringify(emailsToSave) === JSON.stringify(currentEmails)) {
       return;
     }
-
-    setSavingField("emails");
 
     try {
       const res = await fetch(`${API_ROUTES.CONTACTS}/${personId}`, {
@@ -393,8 +384,6 @@ export default function PersonClient({
           description: "Failed to update email addresses",
         }),
       );
-    } finally {
-      setSavingField(null);
     }
   };
 
@@ -402,8 +391,22 @@ export default function PersonClient({
     phones?: PhoneEntry[];
     emails?: EmailEntry[];
   }) => {
-    await handleSavePhones(payload?.phones);
-    await handleSaveEmails(payload?.emails);
+    const tasks: Promise<void>[] = [];
+
+    if (payload?.phones) {
+      tasks.push(handleSavePhones(payload.phones));
+    }
+
+    if (payload?.emails) {
+      tasks.push(handleSaveEmails(payload.emails));
+    }
+
+    if (!tasks.length) {
+      tasks.push(handleSavePhones());
+      tasks.push(handleSaveEmails());
+    }
+
+    await Promise.all(tasks);
   };
 
   const handleSaveImportantEvents = async (eventsOverride?: ImportantEvent[]) => {
@@ -447,6 +450,139 @@ export default function PersonClient({
         errorNotificationTemplate({
           title: tImportantDates("ErrorTitle"),
           description: tImportantDates("UpdateError"),
+        }),
+      );
+    } finally {
+      setSavingField(null);
+    }
+  };
+
+  const handleSaveAddress = async (payload: {
+    addresses: Contact["addresses"];
+    suggestedLocation: {
+      place: string;
+      latitude: number | null;
+      longitude: number | null;
+    } | null;
+  }) => {
+    if (!contact || !personId) return;
+
+    setSavingField("address");
+
+    try {
+      const res = await fetch(`${API_ROUTES.CONTACTS}/${personId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ addresses: payload.addresses }),
+      });
+
+      if (!res.ok) {
+        const errorPayload = await res.json().catch(() => null);
+        const serverMessage =
+          errorPayload && typeof errorPayload === "object"
+            ? ((errorPayload as Record<string, unknown>).error as string) ||
+              ((errorPayload as Record<string, unknown>).message as string)
+            : null;
+        throw new Error(serverMessage || "Failed to update address");
+      }
+
+      const addressEntries = Array.isArray(payload.addresses)
+        ? payload.addresses.filter(
+            (entry): entry is ContactAddressEntry =>
+              typeof entry === "object" && entry !== null && !Array.isArray(entry),
+          )
+        : [];
+
+      const preferredAddress =
+        addressEntries.length > 0
+          ? addressEntries.find((entry) => entry.type === "home") || addressEntries[0]
+          : null;
+
+      setContact((previous) => ({
+        ...previous,
+        addresses: payload.addresses,
+        place: preferredAddress?.value ?? null,
+        addressLine1: preferredAddress?.addressLine1 ?? null,
+        addressLine2: preferredAddress?.addressLine2 ?? null,
+        addressCity: preferredAddress?.addressCity ?? null,
+        addressPostalCode: preferredAddress?.addressPostalCode ?? null,
+        addressState: preferredAddress?.addressState ?? null,
+        addressStateCode: preferredAddress?.addressStateCode ?? null,
+        addressCountry: preferredAddress?.addressCountry ?? null,
+        addressCountryCode: preferredAddress?.addressCountryCode ?? null,
+        addressGranularity: preferredAddress?.addressGranularity ?? "address",
+        addressFormatted: preferredAddress?.addressFormatted ?? null,
+        addressGeocodeSource: preferredAddress?.addressGeocodeSource ?? null,
+      }));
+
+      notifications.show(
+        successNotificationTemplate({
+          title: tAddress("SaveSuccessTitle"),
+          description: tAddress("SaveSuccessMessage"),
+        }),
+      );
+
+      if (payload.suggestedLocation) {
+        openStandardConfirmModal({
+          title: (
+            <ModalTitle
+              text={tAddress("LocationUpdateModalTitle")}
+              icon={<IconMapPin size={18} />}
+            />
+          ),
+          message: <Text size="sm">{tAddress("LocationUpdateModalMessage")}</Text>,
+          confirmLabel: tAddress("LocationUpdateConfirm"),
+          cancelLabel: tAddress("LocationUpdateCancel"),
+          onConfirm: async () => {
+            setSavingField("address");
+
+            try {
+              const locationResponse = await fetch(`${API_ROUTES.CONTACTS}/${personId}`, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  place: payload.suggestedLocation?.place,
+                  latitude: payload.suggestedLocation?.latitude,
+                  longitude: payload.suggestedLocation?.longitude,
+                }),
+              });
+
+              if (!locationResponse.ok) {
+                throw new Error("Failed to update location");
+              }
+
+              setContact((previous) => ({
+                ...previous,
+                place: payload.suggestedLocation?.place || previous.place,
+                latitude: payload.suggestedLocation?.latitude ?? previous.latitude,
+                longitude: payload.suggestedLocation?.longitude ?? previous.longitude,
+              }));
+
+              notifications.show(
+                successNotificationTemplate({
+                  title: tAddress("LocationUpdateSuccessTitle"),
+                  description: tAddress("LocationUpdateSuccessMessage"),
+                }),
+              );
+            } catch {
+              notifications.show(
+                errorNotificationTemplate({
+                  title: tAddress("LocationUpdateErrorTitle"),
+                  description: tAddress("LocationUpdateErrorMessage"),
+                }),
+              );
+            } finally {
+              setSavingField(null);
+            }
+          },
+        });
+      }
+    } catch (error) {
+      const message = error instanceof Error ? error.message : tAddress("SaveErrorMessage");
+      notifications.show(
+        errorNotificationTemplate({
+          title: tAddress("SaveErrorTitle"),
+          description: message,
         }),
       );
     } finally {
@@ -766,25 +902,22 @@ export default function PersonClient({
             <ContactIdentitySection
               contact={contact}
               personId={personId}
-              editedValues={editedValues}
+              phones={phones}
+              emails={emails}
               savingField={savingField}
-              focusedField={focusedField}
-              setFocusedField={setFocusedField}
-              handleChange={handleChange}
-              handleBlur={handleBlur}
+              onPhonesChange={setPhones}
+              onEmailsChange={setEmails}
+              onSaveContactInfo={handleSaveContactInfo}
             />
 
-            <SocialMediaSection
+            <ContactNotesSection editor={editor} savingField={savingField} />
+
+            <PersonTimelineSection
+              activities={initialActivities}
               contact={contact}
-              savingField={savingField}
-              onSaveField={handleSocialMediaSave}
-              whatsappPrefix={whatsappPrefix}
-              signalPrefix={signalPrefix}
-              setWhatsappPrefix={setWhatsappPrefix}
-              setSignalPrefix={setSignalPrefix}
+              connectedContacts={initialConnectedContacts || []}
+              selectableContacts={initialSelectableContacts || []}
             />
-
-            <Divider />
 
             <Stack gap="xs">
               <Text size="sm" fw={500}>
@@ -814,6 +947,7 @@ export default function PersonClient({
                       interactive={true}
                       variant="small"
                       showMenu={false}
+                      shadow="none"
                     />
                   </div>
                 ))}
@@ -827,6 +961,7 @@ export default function PersonClient({
                 >
                   <Card
                     withBorder
+                    shadow="none"
                     p="sm"
                     className={`h-full min-h-full ${groupsSaving ? undefined : "card-scale-effect"}`}
                     style={{
@@ -851,7 +986,6 @@ export default function PersonClient({
               </Group>
             </Stack>
 
-            <Divider />
             <ContactPreferenceSection
               contact={contact}
               savingField={savingField}
@@ -859,22 +993,11 @@ export default function PersonClient({
               handleBlur={handleContactFieldBlur}
             />
 
-            <Divider />
-
-            <ContactNotesSection editor={editor} savingField={savingField} />
-
-            <Divider />
-
-            <ContactInfoSection
-              phones={phones}
-              emails={emails}
-              savingField={savingField}
-              onPhonesChange={setPhones}
-              onEmailsChange={setEmails}
-              onSave={handleSaveContactInfo}
+            <ContactAddressSection
+              contact={contact}
+              isSaving={savingField === "address"}
+              onSave={handleSaveAddress}
             />
-
-            <Divider />
 
             <ContactImportantDatesSection
               events={importantEvents}
@@ -883,8 +1006,6 @@ export default function PersonClient({
               onEventsChange={setImportantEvents}
               onSave={handleSaveImportantEvents}
             />
-
-            <Divider />
 
             {/* TODO: PGP keys */}
             {/* <ContactPGPSection
@@ -905,30 +1026,6 @@ export default function PersonClient({
               onUpdateRelationship={handleUpdateRelationship}
               onDeleteRelationship={handleDeleteRelationship}
             />
-
-            <Divider />
-
-            <LastInteractionSection contact={contact} />
-
-            <Divider />
-
-            <PersonTimelineSection
-              activities={initialActivities}
-              contact={contact}
-              connectedContacts={initialConnectedContacts || []}
-            />
-
-            {hasCoordinates && (
-              <>
-                <Divider />
-                <PersonMap
-                  latitude={contact.latitude as number}
-                  longitude={contact.longitude as number}
-                  name={formatContactName(contact)}
-                  avatarUrl={contact.avatar}
-                />
-              </>
-            )}
           </Stack>
         </Paper>
       </Stack>

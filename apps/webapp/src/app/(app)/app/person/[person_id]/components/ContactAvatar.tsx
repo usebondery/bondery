@@ -6,7 +6,8 @@ import Image from "next/image";
 interface ContactAvatarProps {
   avatarUrl: string | null;
   contactName: string;
-  size?: number;
+  size?: number | "xs" | "sm" | "md" | "lg" | "xl";
+  className?: string;
   onClick?: () => void;
   style?: React.CSSProperties;
 }
@@ -22,7 +23,8 @@ interface ContactAvatarProps {
 export function ContactAvatar({
   avatarUrl,
   contactName,
-  size = 120,
+  size,
+  className,
   onClick,
   style,
 }: ContactAvatarProps) {
@@ -31,9 +33,10 @@ export function ContactAvatar({
       size={size}
       src={avatarUrl}
       radius="xl"
-      color="initials"
       onClick={onClick}
       style={style}
+      className={className}
+      color="initials"
       name={contactName}
     />
   );

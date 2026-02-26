@@ -1,6 +1,6 @@
 "use client";
 
-import { Text, Stack, Group, Paper, Button, TextInput, Box } from "@mantine/core";
+import { Text, Stack, Group, Paper, Button, Box } from "@mantine/core";
 import {
   IconUsersGroup,
   IconUser,
@@ -9,22 +9,15 @@ import {
   IconClock,
   IconBrandLinkedin,
   IconUserPlus,
-  IconSearch,
-  IconUserMinus,
+  IconUsersMinus,
   IconTrash,
-  IconArrowMerge,
 } from "@tabler/icons-react";
 import ContactsTable, {
   BulkSelectionAction,
   ColumnConfig,
   MenuAction,
 } from "@/app/(app)/app/components/ContactsTable";
-import { ColumnVisibilityMenu } from "@/app/(app)/app/components/contacts/ColumnVisibilityMenu";
-import {
-  buildContactBulkActions,
-  buildContactMenuActions,
-} from "@/app/(app)/app/components/contacts/contactActionBuilders";
-import { SortMenu, type SortOrder } from "@/app/(app)/app/components/contacts/SortMenu";
+import { type SortOrder } from "@/app/(app)/app/components/contacts/SortMenu";
 import { PageHeader } from "@/app/(app)/app/components/PageHeader";
 import { PageWrapper } from "@/app/(app)/app/components/PageWrapper";
 import type { Contact } from "@bondery/types";
@@ -46,6 +39,7 @@ import {
 import { openStandardConfirmModal } from "@/app/(app)/app/components/modals/openStandardConfirmModal";
 import { revalidateContacts, revalidateGroups } from "../../actions";
 import { openDeleteContactModal } from "@/app/(app)/app/components/contacts/openDeleteContactModal";
+import { openDeleteContactsModal } from "@/app/(app)/app/components/contacts/openDeleteContactsModal";
 import { GroupCard } from "../../groups/components/GroupCard";
 import { openEditGroupModal } from "../../groups/components/EditGroupModal";
 import type { GroupWithCount, MergeConflictField } from "@bondery/types";
@@ -115,7 +109,6 @@ export function GroupDetailClient({
       : "nameAsc";
   const [searchValue, setSearchValue] = useState(initialSearch);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
-  const [isDeleting, setIsDeleting] = useState(false);
   const [lastSelectedIndex, setLastSelectedIndex] = useState<number | null>(null);
 
   const [columns, setColumns] = useState<ColumnConfig[]>([
@@ -311,44 +304,18 @@ export function GroupDetailClient({
     }
   };
 
-  const handleBulkDelete = async () => {
-    const ids = Array.from(selectedIds);
+  const handleBulkDelete = (ids: string[]) => {
     if (ids.length === 0) return;
 
-    setIsDeleting(true);
-
-    try {
-      const res = await fetch(API_ROUTES.CONTACTS, {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ids }),
-      });
-
-      if (!res.ok) {
-        throw new Error("Failed to delete contacts");
-      }
-
-      notifications.show(
-        successNotificationTemplate({
-          title: "Success",
-          description: `${ids.length} contact(s) deleted successfully`,
-        }),
-      );
-
-      setSelectedIds(new Set());
-      await revalidateContacts();
-      await revalidateGroups();
-      router.refresh();
-    } catch (error) {
-      notifications.show(
-        errorNotificationTemplate({
-          title: "Error",
-          description: "Failed to delete contacts. Please try again.",
-        }),
-      );
-    } finally {
-      setIsDeleting(false);
-    }
+    openDeleteContactsModal({
+      contactIds: ids,
+      onDeleted: async () => {
+        setSelectedIds(new Set());
+        await revalidateContacts();
+        await revalidateGroups();
+        router.refresh();
+      },
+    });
   };
 
   const removeFromGroup = async (contactId: string) => {
@@ -432,81 +399,23 @@ export function GroupDetailClient({
     filteredAndSortedContacts.length > 0 && selectedIds.size === filteredAndSortedContacts.length;
   const someSelected = selectedIds.size > 0 && selectedIds.size < filteredAndSortedContacts.length;
 
-  // Define bulk selection actions
-  const bulkSelectionActions: BulkSelectionAction[] = buildContactBulkActions({
-    mergeAction: {
-      key: "mergeSelected",
-      label: tMerge("ActionLabelBulk"),
-      icon: <IconArrowMerge size={16} />,
-      variant: "light",
-      onClick: () => {
-        const selectedContacts = filteredAndSortedContacts.filter((contact) =>
-          selectedIds.has(contact.id),
-        );
+  const bulkSelectionActions: BulkSelectionAction[] = [
+    {
+      key: "removeFromGroup",
+      label: "Remove from group",
+      icon: <IconUsersMinus size={16} />,
+      onClick: () => handleBulkRemoveFromGroup(),
+    },
+  ];
 
-        if (selectedContacts.length === 2) {
-          openMergeModal(selectedContacts[0].id, selectedContacts[1].id, true);
-        }
-      },
-      disabled: selectedIds.size !== 2,
+  const menuActions: MenuAction[] = [
+    {
+      key: "removeFromGroup",
+      label: "Remove from group",
+      icon: <IconUsersMinus size={14} />,
+      onClick: removeFromGroup,
     },
-    addToGroupsAction: {
-      key: "addToGroups",
-      label: "Add to groups",
-      icon: <IconUsersGroup size={16} />,
-      variant: "light",
-      onClick: () => handleAddToGroups(Array.from(selectedIds)),
-    },
-    appendActions: [
-      {
-        key: "removeFromGroup",
-        label: "Remove from group",
-        icon: <IconUserMinus size={16} />,
-        variant: "light",
-        onClick: () => handleBulkRemoveFromGroup(),
-      },
-      {
-        key: "deleteSelected",
-        label: "Delete contacts",
-        icon: <IconTrash size={16} />,
-        color: "red",
-        variant: "light",
-        onClick: () => handleBulkDelete(),
-        loading: isDeleting,
-      },
-    ],
-  });
-
-  // Define menu actions for individual contacts
-  const menuActions: MenuAction[] = buildContactMenuActions({
-    mergeAction: {
-      key: "mergeWith",
-      label: tMerge("ActionLabelMenu"),
-      icon: <IconArrowMerge size={14} />,
-      onClick: (contactId) => openMergeModal(contactId),
-    },
-    addToGroupsAction: {
-      key: "addToGroups",
-      label: "Add to groups...",
-      icon: <IconUsersGroup size={14} />,
-      onClick: (contactId) => handleAddToGroups([contactId]),
-    },
-    appendActions: [
-      {
-        key: "removeFromGroup",
-        label: "Remove from group",
-        icon: <IconUserMinus size={14} />,
-        onClick: removeFromGroup,
-      },
-      {
-        key: "deleteContact",
-        label: "Delete contact",
-        icon: <IconTrash size={14} />,
-        color: "red",
-        onClick: deleteContact,
-      },
-    ],
-  });
+  ];
 
   const handleAddContacts = () => {
     openAddPeopleToGroupModal({
@@ -715,35 +624,37 @@ export function GroupDetailClient({
         />
 
         <Paper withBorder shadow="sm" radius="md" p="md">
-          <Stack>
-            <Group justify="space-between">
-              <TextInput
-                placeholder="Search by name..."
-                leftSection={<IconSearch size={16} />}
-                value={searchValue}
-                onChange={(e) => {
-                  setSearchValue(e.currentTarget.value);
-                  handleSearch(e.currentTarget.value);
-                }}
-                style={{ flex: 1, minWidth: 200 }}
-              />
-              <ColumnVisibilityMenu columns={columns} setColumns={setColumns} />
-              <SortMenu sortOrder={sortOrder} setSortOrder={handleSortChange} />
-            </Group>
-
-            <ContactsTable
-              contacts={filteredAndSortedContacts}
-              selectedIds={selectedIds}
-              visibleColumns={visibleColumns}
-              onSelectAll={handleSelectAll}
-              onSelectOne={handleSelectOne}
-              allSelected={allSelected}
-              someSelected={someSelected}
-              showSelection={true}
-              menuActions={menuActions}
-              bulkSelectionActions={bulkSelectionActions}
-            />
-          </Stack>
+          <ContactsTable
+            contacts={filteredAndSortedContacts}
+            selectedIds={selectedIds}
+            isHeaderShown={true}
+            searchValue={searchValue}
+            onSearchChange={(value) => {
+              setSearchValue(value);
+              handleSearch(value);
+            }}
+            columnsForMenu={columns}
+            setColumnsForMenu={setColumns}
+            sortOrderForMenu={sortOrder}
+            setSortOrderForMenu={handleSortChange}
+            visibleColumns={visibleColumns}
+            onSelectAll={handleSelectAll}
+            onSelectOne={handleSelectOne}
+            allSelected={allSelected}
+            someSelected={someSelected}
+            showSelection={true}
+            standardActions={{
+              onMergeOne: (contactId) => openMergeModal(contactId),
+              onMergeSelected: (leftContactId, rightContactId) =>
+                openMergeModal(leftContactId, rightContactId, true),
+              onAddToGroupsOne: (contactId) => handleAddToGroups([contactId]),
+              onAddToGroupsSelected: (contactIds) => handleAddToGroups(contactIds),
+              onDeleteOne: deleteContact,
+              onDeleteSelected: handleBulkDelete,
+            }}
+            menuActions={menuActions}
+            bulkSelectionActions={bulkSelectionActions}
+          />
         </Paper>
       </Stack>
     </PageWrapper>

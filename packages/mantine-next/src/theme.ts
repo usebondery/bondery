@@ -90,8 +90,10 @@ export const bonderyTheme = createTheme({
     Checkbox: {
       defaultProps: {
         className: {
-          card: "button-scale-effect",
+          card: "checkbox-scale-effect",
         },
+        radius: "xl",
+        size: "md",
       },
     },
     Card: {

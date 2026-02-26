@@ -56,11 +56,11 @@ const TimezoneItem = forwardRef<
         <span className={`fi fi-${flag || "aq"}`} style={{ width: 20, flexShrink: 0 }} />
         <div style={{ flex: 1 }}>
           {isSelected && (
-            <Text component="span" c="var(--mantine-color-default-color)" size="sm" mr={4} fw={700}>
+            <Text component="span" c="var(--mantine-color-default-color)" size="sm" mr={4} fw={400}>
               ✓ {currentlySelectedText}:
             </Text>
           )}
-          <Text component="span" size="sm" fw={isSelected ? 700 : 400}>
+          <Text component="span" size="sm" fw={400}>
             {label}{" "}
           </Text>
           <Text component="span" c={isSelected ? "white" : "dimmed"} size="xs">
@@ -120,7 +120,6 @@ export function TimezonePicker({ initialValue }: TimezonePickerProps) {
         title: t("UpdatingTimezone"),
         description: t("PleaseWait"),
       }),
-      
     });
 
     try {
@@ -198,7 +197,7 @@ export function TimezonePicker({ initialValue }: TimezonePickerProps) {
             {selectedTimezone ? (
               <Group gap="xs" wrap="nowrap" style={{ flex: 1, overflow: "hidden" }}>
                 <span className={`fi fi-${selectedTimezone.flag || "aq"}`} />
-                <Text size="sm" truncate style={{ flex: 1 }} fw={700}>
+                <Text size="sm" truncate style={{ flex: 1 }} fw={400}>
                   {selectedTimezone.city}, {selectedTimezone.country}{" "}
                   <Text component="span" c="var(--mantine-color-default-color)" size="xs" fw={400}>
                     ({formatOffset(selectedTimezone.offset)})

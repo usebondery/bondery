@@ -30,6 +30,7 @@ import { notifications } from "@mantine/notifications";
 import { modals } from "@mantine/modals";
 import type { Contact, InstagramImportStrategy, InstagramPreparedContact } from "@bondery/types";
 import {
+  DropzoneContent,
   ModalFooter,
   errorNotificationTemplate,
   ModalTitle,
@@ -42,6 +43,12 @@ import { revalidateAll } from "../../actions";
 type Step = "intro" | "instructions" | "upload" | "strategy" | "processing" | "preview";
 
 const INSTAGRAM_IMPORT_ROUTE = "/api/contacts/import/instagram";
+const INSTAGRAM_ACCEPTED_MIME_TYPES = [
+  "application/zip",
+  "application/x-zip-compressed",
+  "application/octet-stream",
+] as const;
+const INSTAGRAM_MAX_FILE_SIZE_BYTES = 30 * 1024 * 1024;
 
 interface InstagramImportTranslations {
   SectionTitle: string;
@@ -181,6 +188,17 @@ function toPreviewContact(contact: InstagramPreparedContact): Contact {
     location: null,
     latitude: null,
     longitude: null,
+    addressLine1: null,
+    addressLine2: null,
+    addressCity: null,
+    addressPostalCode: null,
+    addressState: null,
+    addressStateCode: null,
+    addressCountry: null,
+    addressCountryCode: null,
+    addressGranularity: "address",
+    addressFormatted: null,
+    addressGeocodeSource: null,
   };
 }
 
@@ -241,7 +259,7 @@ export function InstagramImportModal({
   const [strategy, setStrategy] = useState<InstagramImportStrategy>("following_and_followers");
   const [parsedContacts, setParsedContacts] = useState<InstagramPreparedContact[]>([]);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
-  const zipInputRef = useRef<HTMLInputElement | null>(null);
+  const openRef = useRef<() => void>(null);
 
   const previewContacts = useMemo(() => parsedContacts.map(toPreviewContact), [parsedContacts]);
 
@@ -328,6 +346,43 @@ export function InstagramImportModal({
     setSelectedIds(next);
   };
 
+  const handleZipSelected = (file: File | null) => {
+    if (!isZipFile(file)) {
+      notifications.show(
+        errorNotificationTemplate({
+          title: t("ErrorTitle"),
+          description: t("InvalidFile"),
+        }),
+      );
+
+      return;
+    }
+
+    setUploadedZip(file);
+    setStep("strategy");
+  };
+
+  const handleZipDrop = (files: File[]) => {
+    if (files.length !== 1) {
+      notifications.show(
+        errorNotificationTemplate({
+          title: t("ErrorTitle"),
+          description: t("InvalidFile"),
+        }),
+      );
+
+      return;
+    }
+
+    handleZipSelected(files[0]);
+  };
+
+  const handleZipInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0] || null;
+    handleZipSelected(file);
+    event.target.value = "";
+  };
+
   const parseUpload = async () => {
     if (!uploadedZip) {
       notifications.show({
@@ -386,43 +441,6 @@ export function InstagramImportModal({
     } finally {
       setIsParsing(false);
     }
-  };
-
-  const handleZipSelected = (file: File | null) => {
-    if (!isZipFile(file)) {
-      notifications.show(
-        errorNotificationTemplate({
-          title: t("ErrorTitle"),
-          description: t("InvalidFile"),
-        }),
-      );
-
-      return;
-    }
-
-    setUploadedZip(file);
-    setStep("strategy");
-  };
-
-  const handleZipInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0] || null;
-    handleZipSelected(file);
-    event.target.value = "";
-  };
-
-  const handleZipDrop = (files: File[]) => {
-    if (files.length !== 1) {
-      notifications.show(
-        errorNotificationTemplate({
-          title: t("ErrorTitle"),
-          description: t("InvalidFile"),
-        }),
-      );
-
-      return;
-    }
-
-    handleZipSelected(files[0]);
   };
 
   const handleImport = async () => {
@@ -582,6 +600,7 @@ export function InstagramImportModal({
     return (
       <Stack gap="md">
         <Dropzone
+          openRef={openRef}
           onDrop={handleZipDrop}
           onReject={() => {
             notifications.show(
@@ -592,36 +611,11 @@ export function InstagramImportModal({
             );
           }}
           loading={isParsing}
+          maxSize={INSTAGRAM_MAX_FILE_SIZE_BYTES}
+          accept={INSTAGRAM_ACCEPTED_MIME_TYPES as unknown as string[]}
         >
-          <Group justify="center" gap="xl" mih={220} style={{ pointerEvents: "none" }}>
-            <Dropzone.Accept>
-              <IconUpload size={52} stroke={1.5} />
-            </Dropzone.Accept>
-            <Dropzone.Reject>
-              <IconX size={52} stroke={1.5} />
-            </Dropzone.Reject>
-            <Dropzone.Idle>
-              <IconFileZip size={52} stroke={1.5} />
-            </Dropzone.Idle>
-
-            <div>
-              <Text size="xl" inline>
-                {t("DropzoneTitle")}
-              </Text>
-              <Text size="sm" c="dimmed" inline mt="xs">
-                {t("DropzoneDescription")}
-              </Text>
-            </div>
-          </Group>
+          <DropzoneContent title={t("DropzoneTitle")} description={t("DropzoneDescription")} />
         </Dropzone>
-
-        <input
-          ref={zipInputRef}
-          type="file"
-          accept=".zip,application/zip,application/x-zip-compressed,application/octet-stream"
-          style={{ display: "none" }}
-          onChange={handleZipInputChange}
-        />
 
         <ModalFooter
           backLabel={t("Back")}
@@ -630,7 +624,7 @@ export function InstagramImportModal({
           cancelLabel={t("Cancel")}
           onCancel={closeModal}
           actionLabel={t("SelectZipFile")}
-          onAction={() => zipInputRef.current?.click()}
+          onAction={() => openRef.current?.()}
           actionLeftSection={<IconFileZip size={16} />}
         />
       </Stack>

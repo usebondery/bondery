@@ -60,7 +60,9 @@ export function ContactRelationshipsSection({
 
   return (
     <Stack gap="sm">
-      <Text fw={600}>{t("Title")}</Text>
+      <Text size="sm" fw={600}>
+        {t("Title")}
+      </Text>
 
       {relationships.length > 0 ? (
         <Stack gap="xs">
@@ -205,7 +207,7 @@ function RelationshipCardRow({
   };
 
   return (
-    <Card withBorder p="md" radius="md">
+    <Card withBorder shadow="none" p="md" radius="md">
       <Group align="center" wrap="wrap" gap="sm">
         {mode === "create" ? (
           <Tooltip label={addActionLabel} withArrow>

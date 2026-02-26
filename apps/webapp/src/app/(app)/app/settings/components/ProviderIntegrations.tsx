@@ -117,7 +117,6 @@ export function ProviderIntegrations({
           })}
         </Text>
       ),
-      centered: true,
       confirmLabel: t("UnlinkAccountButton"),
       cancelLabel: t("Cancel"),
       confirmColor: "red",

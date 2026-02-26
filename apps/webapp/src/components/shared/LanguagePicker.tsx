@@ -113,7 +113,7 @@ export function LanguagePicker({
             {selectedLanguage ? (
               <Group gap="xs" wrap="nowrap">
                 <span className={`fi fi-${selectedLanguage.flag}`} style={{ flexShrink: 0 }} />
-                <Text size="sm" fw={700}>
+                <Text size="sm" fw={400}>
                   {selectedLanguage.label} ({selectedLanguage.nativeName})
                 </Text>
               </Group>
@@ -123,13 +123,7 @@ export function LanguagePicker({
           </Input>
         </Combobox.Target>
 
-        <Combobox.Dropdown
-          styles={{
-            dropdown: {
-              "--combobox-option-active-bg": "var(--mantine-color-branding-primary-filled-hover)",
-            },
-          }}
-        >
+        <Combobox.Dropdown>
           <Combobox.Search
             value={searchValue}
             className="transform-none"
@@ -154,7 +148,6 @@ export function LanguagePicker({
                         backgroundColor: isSelected
                           ? "var(--mantine-color-branding-primary-filled)"
                           : undefined,
-                        color: isSelected ? "white" : undefined,
                       }}
                     >
                       <Group gap="xs" wrap="nowrap">
@@ -169,12 +162,12 @@ export function LanguagePicker({
                               c="var(--mantine-color-default-color)"
                               size="sm"
                               mr={4}
-                              fw={700}
+                              fw={400}
                             >
                               ✓ {t("CurrentlySelected")}:
                             </Text>
                           )}
-                          <Text component="span" size="sm" fw={isSelected ? 700 : 400}>
+                          <Text component="span" size="sm" fw={400}>
                             {lang.label} ({lang.nativeName})
                           </Text>
                         </div>

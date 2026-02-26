@@ -48,6 +48,7 @@ export function ActivityCard({
     <Paper
       p="sm"
       withBorder
+      shadow="none"
       radius="md"
       onClick={onOpen}
       style={{ cursor: "pointer", transition: "border-color 0.2s", position: "relative" }}

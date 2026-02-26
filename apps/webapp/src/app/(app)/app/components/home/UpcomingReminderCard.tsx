@@ -148,6 +148,7 @@ export function UpcomingReminderCard({ reminder, onClick }: UpcomingReminderCard
   return (
     <Card
       withBorder
+      shadow="none"
       radius="md"
       p={0}
       component="button"

@@ -3,13 +3,28 @@
 import { useEffect, useMemo, useState } from "react";
 import { ActionIcon, Button, Card, Group, Menu, Stack, Text, Tooltip } from "@mantine/core";
 import { useTranslations } from "next-intl";
-import { IconDotsVertical, IconMapPin, IconPlus, IconTrash } from "@tabler/icons-react";
+import {
+  IconBrandGoogle,
+  IconBrandWaze,
+  IconChevronRight,
+  IconCopy,
+  IconDotsVertical,
+  IconMapPin,
+  IconMapPinPlus,
+  IconPlus,
+  IconStar,
+  IconTrash,
+} from "@tabler/icons-react";
+import Image from "next/image";
 import type { Contact, ContactAddressEntry, ContactAddressType } from "@bondery/types";
 import { LocationLookupInput } from "@/app/(app)/app/components/LocationLookupInput";
 import type { MapSuggestionItem } from "@/app/(app)/app/map/actions";
 import { TypePicker } from "@/app/(app)/app/components/shared/TypePicker";
-import { ActionIconLink } from "@bondery/mantine-next";
+import { ActionIconLink, successNotificationTemplate } from "@bondery/mantine-next";
 import { ADDRESS_TYPE_OPTIONS } from "@/lib/config";
+import { PeopleMap } from "@/app/(app)/app/components/map/PeopleMap";
+import { formatContactName } from "@/lib/nameHelpers";
+import { notifications } from "@mantine/notifications";
 
 interface ContactAddressSectionProps {
   contact: Contact;
@@ -65,6 +80,62 @@ function normalizeNullableText(value: string): string | null {
   return trimmed.length > 0 ? trimmed : null;
 }
 
+function isValidCoordinatePair(latitude: number, longitude: number): boolean {
+  return (
+    Number.isFinite(latitude) &&
+    Number.isFinite(longitude) &&
+    latitude >= -90 &&
+    latitude <= 90 &&
+    longitude >= -180 &&
+    longitude <= 180
+  );
+}
+
+function isWithinCzechiaBounds(latitude: number, longitude: number): boolean {
+  return latitude >= 48.4 && latitude <= 51.2 && longitude >= 12.0 && longitude <= 19.0;
+}
+
+function normalizeCoordinatePair(
+  latitude: number | null,
+  longitude: number | null,
+  countryCode?: string | null,
+): { latitude: number | null; longitude: number | null } {
+  if (latitude === null || longitude === null) {
+    return { latitude: null, longitude: null };
+  }
+
+  const directValid = isValidCoordinatePair(latitude, longitude);
+  const swappedValid = isValidCoordinatePair(longitude, latitude);
+
+  if (!directValid && !swappedValid) {
+    return { latitude: null, longitude: null };
+  }
+
+  const normalizedCountryCode = String(countryCode || "").toUpperCase();
+  if (normalizedCountryCode === "CZ" && directValid && swappedValid) {
+    const directInside = isWithinCzechiaBounds(latitude, longitude);
+    const swappedInside = isWithinCzechiaBounds(longitude, latitude);
+
+    if (!directInside && swappedInside) {
+      return { latitude: longitude, longitude: latitude };
+    }
+
+    if (directInside && !swappedInside) {
+      return { latitude, longitude };
+    }
+  }
+
+  if (directValid) {
+    return { latitude, longitude };
+  }
+
+  if (swappedValid) {
+    return { latitude: longitude, longitude: latitude };
+  }
+
+  return { latitude: null, longitude: null };
+}
+
 function toAddressFromSuggestion(
   item: MapSuggestionItem,
   type: ContactAddressType,
@@ -73,12 +144,17 @@ function toAddressFromSuggestion(
   const municipalityPart = pickByType(item.regionalStructure, "regional.municipality_part");
   const region = pickLastByType(item.regionalStructure, "regional.region");
   const countryEntry = pickByType(item.regionalStructure, "regional.country");
+  const normalizedCoordinates = normalizeCoordinatePair(
+    item.position.lat,
+    item.position.lon,
+    countryEntry?.isoCode,
+  );
 
   return {
     type,
     value: item.label,
-    latitude: item.position.lat,
-    longitude: item.position.lon,
+    latitude: normalizedCoordinates.latitude,
+    longitude: normalizedCoordinates.longitude,
     addressLine1: item.type === "regional.address" ? item.name : null,
     addressLine2: null,
     addressCity: (municipality?.name || municipalityPart?.name || null) as string | null,
@@ -99,18 +175,45 @@ function toDefaultAddressType(index: number): ContactAddressType {
   return "other";
 }
 
+function normalizeAddressTypes(entries: ContactAddressEntry[]): ContactAddressEntry[] {
+  const availableTypes: ContactAddressType[] = ["home", "work", "other"];
+  const usedTypes = new Set<ContactAddressType>();
+
+  return entries.slice(0, 3).map((entry, index) => {
+    const preferredType = (entry.type || toDefaultAddressType(index)) as ContactAddressType;
+
+    if (!usedTypes.has(preferredType)) {
+      usedTypes.add(preferredType);
+      return {
+        ...entry,
+        type: preferredType,
+      };
+    }
+
+    const fallbackType = availableTypes.find((candidate) => !usedTypes.has(candidate));
+    const resolvedType = fallbackType || preferredType;
+    usedTypes.add(resolvedType);
+
+    return {
+      ...entry,
+      type: resolvedType,
+    };
+  });
+}
+
 function toEditableAddresses(contact: Contact): EditableAddress[] {
   const existing = Array.isArray(contact.addresses)
     ? (contact.addresses as ContactAddressEntry[])
     : [];
 
   if (existing.length > 0) {
-    return existing.slice(0, 3).map((address, index) => ({
+    return normalizeAddressTypes(existing).map((address, index) => ({
       ...address,
+      ...normalizeCoordinatePair(address.latitude, address.longitude, address.addressCountryCode),
       id: `${address.type}-${index}`,
       value:
         address.value || address.addressFormatted || address.addressLine1 || contact.place || "",
-      type: address.type || toDefaultAddressType(index),
+      type: address.type,
     }));
   }
 
@@ -121,13 +224,19 @@ function toEditableAddresses(contact: Contact): EditableAddress[] {
     return [];
   }
 
+  const normalizedFallbackCoordinates = normalizeCoordinatePair(
+    contact.latitude,
+    contact.longitude,
+    contact.addressCountryCode,
+  );
+
   return [
     {
       id: "home-0",
       type: "home",
       value: fallbackValue,
-      latitude: contact.latitude,
-      longitude: contact.longitude,
+      latitude: normalizedFallbackCoordinates.latitude,
+      longitude: normalizedFallbackCoordinates.longitude,
       addressLine1: contact.addressLine1,
       addressLine2: contact.addressLine2,
       addressCity: contact.addressCity,
@@ -165,10 +274,15 @@ export function ContactAddressSection({ contact, isSaving, onSave }: ContactAddr
 
   useEffect(() => {
     const next = toEditableAddresses(contact);
+    const usedTypes = new Set(next.map((entry) => entry.type));
+    const nextDraftType =
+      ["home", "work", "other"].find(
+        (candidate) => !usedTypes.has(candidate as ContactAddressType),
+      ) || "home";
+
     setAddresses(next);
     setDraft({
-      type:
-        next.length === 0 ? "home" : next.some((entry) => entry.type === "home") ? "work" : "home",
+      type: nextDraftType as ContactAddressType,
       value: "",
       suggestion: null,
     });
@@ -183,6 +297,50 @@ export function ContactAddressSection({ contact, isSaving, onSave }: ContactAddr
     }));
 
   const canAddMore = addresses.length < 3;
+
+  const preferredAddressId = addresses[0]?.id;
+
+  const markers = useMemo(() => {
+    const addressMarkers = addresses
+      .map((entry, index) => {
+        const latitude = Number(entry.latitude);
+        const longitude = Number(entry.longitude);
+
+        if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
+          return null;
+        }
+
+        return {
+          id: `${entry.id}-${index}`,
+          name: `${formatContactName(contact)} · ${entry.value}`,
+          firstName: contact.firstName,
+          lastName: contact.lastName,
+          latitude,
+          longitude,
+          avatarUrl: contact.avatar,
+        };
+      })
+      .filter((marker): marker is NonNullable<typeof marker> => Boolean(marker));
+
+    if (addressMarkers.length > 0) {
+      return addressMarkers;
+    }
+
+    return [];
+  }, [addresses, contact]);
+
+  const mapCenter = useMemo<[number, number]>(() => {
+    if (!markers.length) {
+      return [0, 0];
+    }
+
+    const [sumLat, sumLon] = markers.reduce(
+      ([latAcc, lonAcc], marker) => [latAcc + marker.latitude, lonAcc + marker.longitude],
+      [0, 0],
+    );
+
+    return [sumLat / markers.length, sumLon / markers.length];
+  }, [markers]);
 
   const addDraftAddress = () => {
     const normalizedValue = normalizeNullableText(draft.value);
@@ -224,7 +382,7 @@ export function ContactAddressSection({ contact, isSaving, onSave }: ContactAddr
     const nextDraftType =
       ["home", "work", "other"].find(
         (candidate) => !nextAddresses.some((entry) => entry.type === candidate),
-      ) || "home";
+      ) || draft.type;
 
     setDraft({
       type: nextDraftType as ContactAddressType,
@@ -236,7 +394,7 @@ export function ContactAddressSection({ contact, isSaving, onSave }: ContactAddr
   const handleSave = () => {
     const pendingValue = normalizeNullableText(draft.value);
     const canIncludePendingDraft =
-      Boolean(pendingValue) && !usedTypes.has(draft.type) && addresses.length < 3;
+      Boolean(pendingValue) && addresses.length < 3 && !usedTypes.has(draft.type);
 
     const pendingDraftAddress: EditableAddress | null = canIncludePendingDraft
       ? {
@@ -279,8 +437,7 @@ export function ContactAddressSection({ contact, isSaving, onSave }: ContactAddr
       .filter((entry) => entry.value.length > 0)
       .map(({ id, ...rest }) => rest);
 
-    const locationSource =
-      normalized.find((entry) => entry.type === "home") || normalized[0] || null;
+    const locationSource = normalized[0] || null;
 
     const suggestedLocation = locationSource
       ? {
@@ -302,171 +459,296 @@ export function ContactAddressSection({ contact, isSaving, onSave }: ContactAddr
         {t("Title")}
       </Text>
 
-      {addresses.map((entry) => (
-        <Card key={entry.id} withBorder p="sm" radius="md">
-          <Stack gap="xs">
-            <Group gap="xs" wrap="nowrap" align="center">
-              <ActionIconLink
-                variant="light"
-                color="blue"
-                href={
-                  entry.value
-                    ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(entry.value)}`
-                    : undefined
-                }
-                disabled={!entry.value}
-                ariaLabel={t("LookupLabel")}
-              >
-                <IconMapPin size={18} />
-              </ActionIconLink>
-
-              <LocationLookupInput
-                placeholder={t("LookupPlaceholder")}
-                ariaLabel={t("LookupLabel")}
-                value={entry.value}
-                disabled={isSaving}
-                style={{ flex: "1 1 auto" }}
-                onChange={(value) =>
-                  setAddresses((previous) =>
-                    previous.map((address) =>
-                      address.id === entry.id
-                        ? {
-                            ...address,
-                            value,
-                            latitude: null,
-                            longitude: null,
-                            addressFormatted: null,
-                            addressGeocodeSource: "manual",
-                          }
-                        : address,
-                    ),
-                  )
-                }
-                onSuggestionSelect={(selected) => {
-                  const enriched = toAddressFromSuggestion(selected, entry.type);
-                  setAddresses((previous) =>
-                    previous.map((address) =>
-                      address.id === entry.id
-                        ? {
-                            ...address,
-                            ...enriched,
-                          }
-                        : address,
-                    ),
-                  );
-                }}
-              />
-
-              <TypePicker
-                value={entry.type}
-                data={getTypeData(entry.type)}
-                disabled={isSaving}
-                ariaLabel={t("TypeLabel")}
-                onChange={(value) => {
-                  if (!value) return;
-                  setAddresses((previous) =>
-                    previous.map((address) =>
-                      address.id === entry.id
-                        ? { ...address, type: value as ContactAddressType }
-                        : address,
-                    ),
-                  );
-                }}
-                style={{ flex: "0 0 130px" }}
-              />
-
-              <Menu withinPortal position="bottom-end">
-                <Menu.Target>
-                  <ActionIcon variant="subtle" aria-label={t("ActionsLabel")} disabled={isSaving}>
-                    <IconDotsVertical size={16} />
-                  </ActionIcon>
-                </Menu.Target>
-                <Menu.Dropdown>
-                  <Menu.Item
-                    color="red"
-                    leftSection={<IconTrash size={14} />}
-                    onClick={() =>
-                      setAddresses((previous) =>
-                        previous.filter((address) => address.id !== entry.id),
+      <Group align="flex-start" grow wrap="nowrap">
+        <Stack gap="sm" style={{ flex: "1 1 0", minWidth: 0 }}>
+          {addresses.map((entry) => (
+            <Card
+              key={entry.id}
+              withBorder
+              shadow="none"
+              p="sm"
+              radius="md"
+              style={{
+                borderColor:
+                  entry.id === preferredAddressId ? "var(--mantine-color-orange-6)" : undefined,
+              }}
+            >
+              <Stack gap="xs">
+                <Group gap="xs" wrap="nowrap" align="center">
+                  <ActionIconLink
+                    variant="light"
+                    color={entry.id === preferredAddressId ? "orange" : "blue"}
+                    href={
+                      entry.value
+                        ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(entry.value)}`
+                        : undefined
+                    }
+                    disabled={!entry.value}
+                    ariaLabel={t("LookupLabel")}
+                    icon={
+                      entry.id === preferredAddressId ? (
+                        <IconMapPinPlus size={18} />
+                      ) : (
+                        <IconMapPin size={18} />
                       )
                     }
-                  >
-                    {t("DeleteAction")}
-                  </Menu.Item>
-                </Menu.Dropdown>
-              </Menu>
-            </Group>
-          </Stack>
-        </Card>
-      ))}
+                  />
 
-      {/*
-      {canAddMore ? (
-        <Card withBorder p="sm" radius="md">
-          <Stack gap="xs">
-            <Group gap="xs" wrap="nowrap" align="center">
-              <Tooltip label={t("AddAddressAction")} withArrow>
-                <ActionIcon
-                  variant="light"
-                  color="green"
-                  aria-label={t("AddAddressAction")}
-                  onClick={addDraftAddress}
-                  disabled={isSaving}
-                >
-                  <IconPlus size={18} />
-                </ActionIcon>
-              </Tooltip>
+                  <LocationLookupInput
+                    placeholder={t("LookupPlaceholder")}
+                    ariaLabel={t("LookupLabel")}
+                    value={entry.value}
+                    disabled={isSaving}
+                    style={{ flex: "1 1 auto" }}
+                    onChange={(value) =>
+                      setAddresses((previous) =>
+                        previous.map((address) =>
+                          address.id === entry.id
+                            ? {
+                                ...address,
+                                value,
+                                latitude: null,
+                                longitude: null,
+                                addressFormatted: null,
+                                addressGeocodeSource: "manual",
+                              }
+                            : address,
+                        ),
+                      )
+                    }
+                    onSuggestionSelect={(selected) => {
+                      const enriched = toAddressFromSuggestion(selected, entry.type);
+                      setAddresses((previous) =>
+                        previous.map((address) =>
+                          address.id === entry.id
+                            ? {
+                                ...address,
+                                ...enriched,
+                              }
+                            : address,
+                        ),
+                      );
+                    }}
+                  />
 
-              <LocationLookupInput
-                placeholder={t("LookupPlaceholder")}
-                ariaLabel={t("LookupLabel")}
-                value={draft.value}
-                disabled={isSaving}
-                style={{ flex: "1 1 auto" }}
-                onChange={(value) =>
-                  setDraft((previous) => ({
-                    ...previous,
-                    value,
-                    suggestion: null,
-                  }))
-                }
-                onSuggestionSelect={(selected) =>
-                  setDraft((previous) => ({
-                    ...previous,
-                    value: selected.label,
-                    suggestion: selected,
-                  }))
-                }
-              />
+                  <TypePicker
+                    value={entry.type}
+                    data={getTypeData(entry.type)}
+                    disabled={isSaving}
+                    ariaLabel={t("TypeLabel")}
+                    onChange={(value) => {
+                      if (!value) return;
+                      setAddresses((previous) =>
+                        previous.map((address) =>
+                          address.id === entry.id
+                            ? { ...address, type: value as ContactAddressType }
+                            : address,
+                        ),
+                      );
+                    }}
+                    style={{ flex: "0 0 130px" }}
+                  />
 
-              <TypePicker
-                value={draft.type}
-                data={getTypeData()}
-                disabled={isSaving}
-                ariaLabel={t("TypeLabel")}
-                onChange={(value) => {
-                  if (!value) return;
-                  setDraft((previous) => ({
-                    ...previous,
-                    type: value as ContactAddressType,
-                  }));
-                }}
-                style={{ flex: "0 0 130px" }}
-              />
-            </Group>
-          </Stack>
-        </Card>
-      ) : (
-        <Text size="sm" c="dimmed">
-          {t("MaxAddressesReached")}
-        </Text>
-      )}
-      */}
+                  <Menu withinPortal position="bottom-end">
+                    <Menu.Target>
+                      <ActionIcon
+                        variant="subtle"
+                        aria-label={t("ActionsLabel")}
+                        disabled={isSaving}
+                      >
+                        <IconDotsVertical size={16} />
+                      </ActionIcon>
+                    </Menu.Target>
+                    <Menu.Dropdown>
+                      <Menu.Item
+                        leftSection={<IconCopy size={14} />}
+                        disabled={!entry.value}
+                        onClick={() => {
+                          void navigator.clipboard.writeText(entry.value || "");
+                          notifications.show(
+                            successNotificationTemplate({
+                              title: t("CopySuccessTitle"),
+                              description: t("AddressCopiedMessage"),
+                            }),
+                          );
+                        }}
+                      >
+                        {t("CopyAction")}
+                      </Menu.Item>
+                      <Menu.Item
+                        leftSection={<IconStar size={14} />}
+                        disabled={entry.id === preferredAddressId}
+                        onClick={() =>
+                          setAddresses((previous) => {
+                            const selected = previous.find((address) => address.id === entry.id);
+                            if (!selected) return previous;
+                            return [
+                              selected,
+                              ...previous.filter((address) => address.id !== entry.id),
+                            ];
+                          })
+                        }
+                      >
+                        {t("SetAsPreferred")}
+                      </Menu.Item>
+                      <Menu.Sub>
+                        <Menu.Sub.Target>
+                          <Menu.Sub.Item
+                            leftSection={<IconMapPin size={14} />}
+                            rightSection={<IconChevronRight size={14} />}
+                            disabled={!entry.value}
+                          >
+                            {t("OpenInMapsAction")}
+                          </Menu.Sub.Item>
+                        </Menu.Sub.Target>
 
-      <Group justify="flex-end">
-        <Button onClick={handleSave} loading={isSaving} disabled={isSaving}>
-          {t("SaveAction")}
-        </Button>
+                        <Menu.Sub.Dropdown>
+                          <Menu.Item
+                            leftSection={<IconBrandGoogle size={14} />}
+                            onClick={() => {
+                              const query = encodeURIComponent(entry.value);
+                              window.open(
+                                `https://www.google.com/maps/search/?api=1&query=${query}`,
+                                "_blank",
+                                "noopener,noreferrer",
+                              );
+                            }}
+                          >
+                            {t("OpenInGoogleMaps")}
+                          </Menu.Item>
+                          <Menu.Item
+                            leftSection={
+                              <Image src="/icons/mapy.svg" alt="Mapy.com" width={14} height={14} />
+                            }
+                            onClick={() => {
+                              const query = encodeURIComponent(entry.value);
+                              window.open(
+                                `https://mapy.com/en/zakladni?q=${query}`,
+                                "_blank",
+                                "noopener,noreferrer",
+                              );
+                            }}
+                          >
+                            {t("OpenInMapy")}
+                          </Menu.Item>
+                          <Menu.Item
+                            leftSection={<IconBrandWaze size={14} />}
+                            onClick={() => {
+                              const query = encodeURIComponent(entry.value);
+                              window.open(
+                                `https://waze.com/ul?q=${query}&navigate=yes`,
+                                "_blank",
+                                "noopener,noreferrer",
+                              );
+                            }}
+                          >
+                            {t("OpenInWaze")}
+                          </Menu.Item>
+                        </Menu.Sub.Dropdown>
+                      </Menu.Sub>
+                      <Menu.Item
+                        color="red"
+                        leftSection={<IconTrash size={14} />}
+                        onClick={() =>
+                          setAddresses((previous) =>
+                            previous.filter((address) => address.id !== entry.id),
+                          )
+                        }
+                      >
+                        {t("DeleteAction")}
+                      </Menu.Item>
+                    </Menu.Dropdown>
+                  </Menu>
+                </Group>
+              </Stack>
+            </Card>
+          ))}
+
+          {canAddMore ? (
+            <Card withBorder shadow="none" p="sm" radius="md">
+              <Stack gap="xs">
+                <Group gap="xs" wrap="nowrap" align="center">
+                  <Tooltip label={t("AddAddressAction")} withArrow>
+                    <ActionIcon
+                      variant="light"
+                      color="green"
+                      aria-label={t("AddAddressAction")}
+                      onClick={addDraftAddress}
+                      disabled={isSaving}
+                    >
+                      <IconPlus size={18} />
+                    </ActionIcon>
+                  </Tooltip>
+
+                  <LocationLookupInput
+                    placeholder={t("LookupPlaceholder")}
+                    ariaLabel={t("LookupLabel")}
+                    value={draft.value}
+                    disabled={isSaving}
+                    style={{ flex: "1 1 auto" }}
+                    onChange={(value) =>
+                      setDraft((previous) => ({
+                        ...previous,
+                        value,
+                        suggestion: null,
+                      }))
+                    }
+                    onSuggestionSelect={(selected) =>
+                      setDraft((previous) => ({
+                        ...previous,
+                        value: selected.label,
+                        suggestion: selected,
+                      }))
+                    }
+                  />
+
+                  <TypePicker
+                    value={draft.type}
+                    data={getTypeData()}
+                    disabled={isSaving}
+                    ariaLabel={t("TypeLabel")}
+                    onChange={(value) => {
+                      if (!value) return;
+                      setDraft((previous) => ({
+                        ...previous,
+                        type: value as ContactAddressType,
+                      }));
+                    }}
+                    style={{ flex: "0 0 130px" }}
+                  />
+                </Group>
+              </Stack>
+            </Card>
+          ) : (
+            <Text size="sm" c="dimmed">
+              {t("MaxAddressesReached")}
+            </Text>
+          )}
+
+          <Group justify="flex-end">
+            <Button onClick={handleSave} loading={isSaving} disabled={isSaving}>
+              {t("SaveAction")}
+            </Button>
+          </Group>
+        </Stack>
+
+        <Stack gap="xs" style={{ flex: "1 1 0", minWidth: 0 }}>
+          {markers.length > 0 ? (
+            <PeopleMap
+              markers={markers}
+              center={mapCenter}
+              zoom={12}
+              height={420}
+              disableChipNavigation
+            />
+          ) : (
+            <Card withBorder shadow="none" p="md" radius="md">
+              <Text size="sm" c="dimmed">
+                {t("NoResults")}
+              </Text>
+            </Card>
+          )}
+        </Stack>
       </Group>
     </Stack>
   );

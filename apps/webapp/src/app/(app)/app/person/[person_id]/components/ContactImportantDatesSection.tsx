@@ -187,7 +187,7 @@ export function ImportantEventRowCard({
   leftAction,
 }: ImportantEventRowCardProps) {
   return (
-    <Card withBorder p="sm" radius="md">
+    <Card withBorder shadow="none" p="sm" radius="md">
       <Group gap="xs" align="center" wrap="nowrap">
         {leftAction}
 
@@ -506,45 +506,41 @@ export function ContactImportantDatesSection({
       </Text>
 
       <Stack gap="sm">
-        {localEvents.length === 0 ? (
-          <Text size="sm" c="dimmed">
-            {t("Empty")}
-          </Text>
-        ) : (
-          localEvents.map((eventItem, index) => (
-            <ImportantEventRowCard
-              key={eventItem.id || index}
-              eventType={eventItem.eventType}
-              eventDate={parseEventDate(eventItem.eventDate)}
-              note={eventItem.note || ""}
-              notifyDaysBefore={eventItem.notifyDaysBefore}
-              disabled={savingField === "importantEvents"}
-              loading={savingField === "importantEvents"}
-              typeOptions={getTypeOptionsFor(eventItem.eventType)}
-              notifyOptions={notifyOptions}
-              disabledTypeHint={t("TypeDisabledHint", { firstName: personFirstName })}
-              disabledBirthdateTypeHint={t("TypeDisabledBirthdateHint", {
-                firstName: personFirstName,
-              })}
-              disabledNamedateTypeHint={t("TypeDisabledNamedateHint", {
-                firstName: personFirstName,
-              })}
-              noteMaxLength={INPUT_MAX_LENGTHS.dateName}
-              datePlaceholder={t("DatePlaceholder")}
-              notePlaceholder={t("NotePlaceholder")}
-              typePlaceholder={t("TypePlaceholder")}
-              deleteLabel={t("DeleteAction")}
-              onDateChange={(value) => handleEventDateChange(index, value)}
-              onTypeChange={(value) =>
-                value ? handleEventTypeChange(index, value as ImportantEventType) : undefined
-              }
-              onNoteChange={(value) => handleEventNoteChange(index, value)}
-              onNoteCommit={() => handleSaveCurrentEvents(index)}
-              onNotifyChange={(value) => handleEventNotifyChange(index, value)}
-              onDelete={() => handleRemoveEvent(index)}
-            />
-          ))
-        )}
+        {localEvents.length === 0
+          ? null
+          : localEvents.map((eventItem, index) => (
+              <ImportantEventRowCard
+                key={eventItem.id || index}
+                eventType={eventItem.eventType}
+                eventDate={parseEventDate(eventItem.eventDate)}
+                note={eventItem.note || ""}
+                notifyDaysBefore={eventItem.notifyDaysBefore}
+                disabled={savingField === "importantEvents"}
+                loading={savingField === "importantEvents"}
+                typeOptions={getTypeOptionsFor(eventItem.eventType)}
+                notifyOptions={notifyOptions}
+                disabledTypeHint={t("TypeDisabledHint", { firstName: personFirstName })}
+                disabledBirthdateTypeHint={t("TypeDisabledBirthdateHint", {
+                  firstName: personFirstName,
+                })}
+                disabledNamedateTypeHint={t("TypeDisabledNamedateHint", {
+                  firstName: personFirstName,
+                })}
+                noteMaxLength={INPUT_MAX_LENGTHS.dateName}
+                datePlaceholder={t("DatePlaceholder")}
+                notePlaceholder={t("NotePlaceholder")}
+                typePlaceholder={t("TypePlaceholder")}
+                deleteLabel={t("DeleteAction")}
+                onDateChange={(value) => handleEventDateChange(index, value)}
+                onTypeChange={(value) =>
+                  value ? handleEventTypeChange(index, value as ImportantEventType) : undefined
+                }
+                onNoteChange={(value) => handleEventNoteChange(index, value)}
+                onNoteCommit={() => handleSaveCurrentEvents(index)}
+                onNotifyChange={(value) => handleEventNotifyChange(index, value)}
+                onDelete={() => handleRemoveEvent(index)}
+              />
+            ))}
 
         {!isLimitReached ? (
           <ImportantEventRowCard

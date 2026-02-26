@@ -1,7 +1,7 @@
 "use client";
 
 import { Stack, Group, Text, Button } from "@mantine/core";
-import { IconCopy, IconTimelineEventText, IconTrash } from "@tabler/icons-react";
+import { IconCopy, IconTrash } from "@tabler/icons-react";
 import { useState, useMemo } from "react";
 import type { Activity, Contact } from "@bondery/types";
 import { openNewActivityModal } from "../../../timeline/components/NewActivityModal";
@@ -22,12 +22,14 @@ interface PersonTimelineSectionProps {
   activities: Activity[];
   contact: Contact;
   connectedContacts: Contact[];
+  selectableContacts: Contact[];
 }
 
 export function PersonTimelineSection({
   activities,
   contact,
   connectedContacts,
+  selectableContacts,
 }: PersonTimelineSectionProps) {
   const router = useRouter();
   const t = useTranslations("TimelinePage");
@@ -44,8 +46,10 @@ export function PersonTimelineSection({
 
   const handleActivityClick = (activity: Activity) => {
     openNewActivityModal({
-      contacts: [contact, ...connectedContacts],
+      contacts: selectableContacts,
       activity,
+      titleText: t("WhoAreYouMeeting"),
+      t,
     });
   };
 
@@ -160,18 +164,18 @@ export function PersonTimelineSection({
     <>
       <Stack gap="md">
         <Group justify="space-between" align="center">
-          <Group gap="xs">
-            <IconTimelineEventText size={16} />
-            <Text fw={600} size="sm">
-              Timeline
-            </Text>
-          </Group>
+          <Text fw={600} size="sm">
+            Timeline
+          </Text>
           <Button
             variant="light"
             size="xs"
             onClick={() => {
               openNewActivityModal({
-                contacts: [contact, ...connectedContacts],
+                contacts: selectableContacts,
+                initialParticipantIds: [contact.id],
+                titleText: t("WhoAreYouMeeting"),
+                t,
               });
             }}
           >
@@ -189,8 +193,10 @@ export function PersonTimelineSection({
             onOpen={handleActivityClick}
             onEdit={(activity) => {
               openNewActivityModal({
-                contacts: [contact, ...connectedContacts],
+                contacts: selectableContacts,
                 activity,
+                titleText: t("WhoAreYouMeeting"),
+                t,
               });
             }}
             onDuplicate={handleDuplicate}

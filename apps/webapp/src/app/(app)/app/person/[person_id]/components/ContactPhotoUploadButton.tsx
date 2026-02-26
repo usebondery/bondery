@@ -53,8 +53,8 @@ export function ContactPhotoUploadButton({
     <ContactAvatar
       avatarUrl={avatarUrl}
       contactName={contactName}
-      size={120}
-      style={{ cursor: "pointer" }}
+      size={128}
+      className="cursor-pointer rounded-full!"
       onClick={openUploadModal}
     />
   );

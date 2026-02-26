@@ -1,4 +1,5 @@
 import { Button, Group } from "@mantine/core";
+import { IconCheck } from "@tabler/icons-react";
 import type { ReactNode } from "react";
 
 export interface ModalFooterProps {
@@ -41,6 +42,8 @@ export function ModalFooter({
   const showBack = Boolean(backLabel && onBack);
   const showCancel = Boolean(cancelLabel && onCancel);
   const showAction = Boolean(actionLabel);
+  const resolvedActionLeftSection =
+    actionLeftSection || (!actionRightSection && showAction ? <IconCheck size={16} /> : undefined);
 
   return (
     <Group justify={showBack ? "space-between" : "flex-end"} mt="md">
@@ -68,7 +71,7 @@ export function ModalFooter({
               type={actionType}
               color={actionColor}
               variant={actionVariant}
-              leftSection={actionLeftSection}
+              leftSection={resolvedActionLeftSection}
               rightSection={actionRightSection}
               onClick={onAction}
               loading={actionLoading}

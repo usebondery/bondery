@@ -29,6 +29,26 @@ export interface EmailEntry {
   preferred: boolean;
 }
 
+export type ContactAddressType = "home" | "work" | "other";
+
+export interface ContactAddressEntry {
+  value: string;
+  type: ContactAddressType;
+  latitude: number | null;
+  longitude: number | null;
+  addressLine1: string | null;
+  addressLine2: string | null;
+  addressCity: string | null;
+  addressPostalCode: string | null;
+  addressState: string | null;
+  addressStateCode: string | null;
+  addressCountry: string | null;
+  addressCountryCode: string | null;
+  addressGranularity: "address" | "city" | "state" | "country";
+  addressFormatted: string | null;
+  addressGeocodeSource: string | null;
+}
+
 /**
  * Important date associated with a contact
  */
@@ -92,6 +112,8 @@ export interface Contact {
   phones: PhoneEntry[] | Json | null;
   /** Array of email entries with type and preferred flag */
   emails: EmailEntry[] | Json | null;
+  /** Array of address entries with type and structured metadata */
+  addresses?: ContactAddressEntry[] | Json | null;
   linkedin: string | null;
   instagram: string | null;
   whatsapp: string | null;
@@ -109,6 +131,17 @@ export interface Contact {
   location: string | null;
   latitude: number | null;
   longitude: number | null;
+  addressLine1: string | null;
+  addressLine2: string | null;
+  addressCity: string | null;
+  addressPostalCode: string | null;
+  addressState: string | null;
+  addressStateCode: string | null;
+  addressCountry: string | null;
+  addressCountryCode: string | null;
+  addressGranularity: "address" | "city" | "state" | "country";
+  addressFormatted: string | null;
+  addressGeocodeSource: string | null;
 }
 
 /**

@@ -85,6 +85,8 @@ export function HomeClient({
     openNewActivityModal({
       contacts: timelineContacts,
       activity,
+      titleText: timelineT("WhoAreYouMeeting"),
+      t: timelineT,
     });
   };
 
@@ -197,6 +199,8 @@ export function HomeClient({
               onClick={() => {
                 openNewActivityModal({
                   contacts: timelineContacts,
+                  titleText: timelineT("WhoAreYouMeeting"),
+                  t: timelineT,
                 });
               }}
             >

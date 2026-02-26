@@ -45,6 +45,7 @@ export const SOCIAL_LINKS = {
 
 export const WEBAPP_ROUTES = {
   HOME: "/app/home",
+  MAP: "/app/map",
   PEOPLE: "/app/people",
   FIX_CONTACTS: "/app/fix",
   GROUPS: "/app/groups",

@@ -116,7 +116,6 @@ export function TimelineEventsList({
                             avatar: participant.avatar,
                           }}
                           size="sm"
-                          color="gray"
                           avatarEdge
                           isClickable
                         />

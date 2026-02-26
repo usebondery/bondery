@@ -35,6 +35,7 @@ export function SortableColumnItem({ column, onToggle }: SortableColumnItemProps
           <IconGripVertical size={16} />
         </Box>
         <Checkbox
+          size="sm"
           checked={column.visible}
           label={
             <Group gap="xs" wrap="nowrap">

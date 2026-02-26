@@ -1,32 +1,379 @@
-import { Badge, Group, Loader, Stack, TextInput } from "@mantine/core";
+import { Badge, Group, Stack } from "@mantine/core";
 import { IconBriefcase, IconMapPin } from "@tabler/icons-react";
-import type { Contact } from "@bondery/types";
+import type { Contact, EmailEntry, PhoneEntry } from "@bondery/types";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import { notifications } from "@mantine/notifications";
+import { errorNotificationTemplate, successNotificationTemplate } from "@bondery/mantine-next";
+import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import { ContactPhotoUploadButton } from "./ContactPhotoUploadButton";
+import { InlineEditableInput } from "./InlineEditableInput";
+import { SocialMediaSection } from "./SocialMediaSection";
 import { INPUT_MAX_LENGTHS } from "@/lib/config";
+
+type NameField = "firstName" | "middleName" | "lastName";
+type ProfileField = "title" | "place";
 
 interface ContactIdentitySectionProps {
   contact: Contact;
   personId: string;
-  editedValues: Record<string, string>;
+  phones: PhoneEntry[];
+  emails: EmailEntry[];
   savingField: string | null;
-  focusedField: string | null;
-  setFocusedField: (field: string | null) => void;
-  handleChange: (field: string, value: string) => void;
-  handleBlur: (field: string) => void;
+  onPhonesChange: (phones: PhoneEntry[]) => void;
+  onEmailsChange: (emails: EmailEntry[]) => void;
+  onSaveContactInfo: (payload?: { phones?: PhoneEntry[]; emails?: EmailEntry[] }) => void;
 }
+
+interface NameFieldsProps {
+  personId: string;
+  initialFirstName: string;
+  initialMiddleName: string;
+  initialLastName: string;
+}
+
+interface NameFieldConfig {
+  field: NameField;
+  placeholder: string;
+  maxLength: number;
+  required?: boolean;
+  successLabel: string;
+}
+
+interface ProfileFieldConfig {
+  field: ProfileField;
+  placeholder: string;
+  maxLength: number;
+  successLabel: string;
+}
+
+const NAME_FIELD_CONFIGS: NameFieldConfig[] = [
+  {
+    field: "firstName",
+    placeholder: "First name",
+    maxLength: INPUT_MAX_LENGTHS.firstName,
+    required: true,
+    successLabel: "First",
+  },
+  {
+    field: "middleName",
+    placeholder: "Middle name",
+    maxLength: INPUT_MAX_LENGTHS.middleName,
+    successLabel: "Middle",
+  },
+  {
+    field: "lastName",
+    placeholder: "Last name",
+    maxLength: INPUT_MAX_LENGTHS.lastName,
+    successLabel: "Last",
+  },
+];
+
+const PROFILE_FIELD_CONFIGS: ProfileFieldConfig[] = [
+  {
+    field: "title",
+    placeholder: "Title",
+    maxLength: INPUT_MAX_LENGTHS.title,
+    successLabel: "Title",
+  },
+  {
+    field: "place",
+    placeholder: "Location",
+    maxLength: INPUT_MAX_LENGTHS.place,
+    successLabel: "Location",
+  },
+];
+
+/**
+ * Manages inline editable name fields with isolated per-field save lifecycle.
+ * Typing is local-only and each field saves independently on blur.
+ */
+function usePersonNameFields(
+  personId: string,
+  initialValues: Record<NameField, string>,
+  fieldConfigs: NameFieldConfig[],
+) {
+  const [focusedField, setFocusedField] = useState<NameField | null>(null);
+  const [savingByField, setSavingByField] = useState<Record<NameField, boolean>>({
+    firstName: false,
+    middleName: false,
+    lastName: false,
+  });
+  const [values, setValues] = useState<Record<NameField, string>>(initialValues);
+
+  const persistedValuesRef = useRef<Record<NameField, string>>(initialValues);
+
+  const updateField = useCallback((field: NameField, value: string) => {
+    setValues((previous) => ({
+      ...previous,
+      [field]: value,
+    }));
+  }, []);
+
+  const saveField = useCallback(
+    async (field: NameField) => {
+      const config = fieldConfigs.find((item) => item.field === field);
+      if (!config) return;
+
+      const value = values[field];
+      const persistedValue = persistedValuesRef.current[field];
+
+      if (value === persistedValue) return;
+
+      if (config.required && !value.trim()) {
+        notifications.show(
+          errorNotificationTemplate({
+            title: "Validation Error",
+            description: "First name is required",
+          }),
+        );
+        return;
+      }
+
+      setSavingByField((previous) => ({
+        ...previous,
+        [field]: true,
+      }));
+
+      try {
+        const response = await fetch(`${API_ROUTES.CONTACTS}/${personId}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ [field]: value }),
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to update");
+        }
+
+        persistedValuesRef.current[field] = value;
+
+        notifications.show(
+          successNotificationTemplate({
+            title: "Saved",
+            description: `${config.successLabel} name updated`,
+          }),
+        );
+      } catch {
+        notifications.show(
+          errorNotificationTemplate({
+            title: "Error",
+            description: `Failed to update ${field}`,
+          }),
+        );
+      } finally {
+        setSavingByField((previous) => ({
+          ...previous,
+          [field]: false,
+        }));
+      }
+    },
+    [fieldConfigs, personId, values],
+  );
+
+  const handleBlur = useCallback(
+    (field: NameField) => {
+      setFocusedField(null);
+      void saveField(field);
+    },
+    [saveField],
+  );
+
+  return {
+    values,
+    focusedField,
+    savingByField,
+    setFocusedField,
+    updateField,
+    handleBlur,
+  };
+}
+
+/**
+ * Manages inline editable profile fields (title/location) with isolated state.
+ * Keeps focus and typing local to avoid global page rerenders.
+ */
+function usePersonProfileFields(
+  personId: string,
+  initialValues: Record<ProfileField, string>,
+  fieldConfigs: ProfileFieldConfig[],
+) {
+  const [focusedField, setFocusedField] = useState<ProfileField | null>(null);
+  const [savingByField, setSavingByField] = useState<Record<ProfileField, boolean>>({
+    title: false,
+    place: false,
+  });
+  const [values, setValues] = useState<Record<ProfileField, string>>(initialValues);
+
+  const persistedValuesRef = useRef<Record<ProfileField, string>>(initialValues);
+
+  useEffect(() => {
+    setValues(initialValues);
+    persistedValuesRef.current = initialValues;
+  }, [initialValues.place, initialValues.title, personId]);
+
+  const updateField = useCallback((field: ProfileField, value: string) => {
+    setValues((previous) => ({
+      ...previous,
+      [field]: value,
+    }));
+  }, []);
+
+  const saveField = useCallback(
+    async (field: ProfileField) => {
+      const config = fieldConfigs.find((item) => item.field === field);
+      if (!config) return;
+
+      const value = values[field];
+      const persistedValue = persistedValuesRef.current[field];
+
+      if (value === persistedValue) return;
+
+      setSavingByField((previous) => ({
+        ...previous,
+        [field]: true,
+      }));
+
+      try {
+        const response = await fetch(`${API_ROUTES.CONTACTS}/${personId}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ [field]: value }),
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to update");
+        }
+
+        persistedValuesRef.current[field] = value;
+
+        notifications.show(
+          successNotificationTemplate({
+            title: "Saved",
+            description: `${config.successLabel} updated`,
+          }),
+        );
+      } catch {
+        notifications.show(
+          errorNotificationTemplate({
+            title: "Error",
+            description: `Failed to update ${field === "place" ? "location" : field}`,
+          }),
+        );
+      } finally {
+        setSavingByField((previous) => ({
+          ...previous,
+          [field]: false,
+        }));
+      }
+    },
+    [fieldConfigs, personId, values],
+  );
+
+  const handleBlur = useCallback(
+    (field: ProfileField) => {
+      setFocusedField(null);
+      void saveField(field);
+    },
+    [saveField],
+  );
+
+  return {
+    values,
+    focusedField,
+    savingByField,
+    setFocusedField,
+    updateField,
+    handleBlur,
+  };
+}
+
+/**
+ * Fully self-contained name fields that own their own local state and API
+ * persistence. Parent is only notified lazily after a successful save so
+ * the rest of the page tree never re-renders during typing or blur.
+ *
+ * Wrapped in React.memo with a personId-only comparator: any parent
+ * re-render triggered by saving a name is completely ignored here, so
+ * typing in one field while another is saving is never interrupted.
+ */
+const NameFields = React.memo(
+  function NameFields({
+    personId,
+    initialFirstName,
+    initialMiddleName,
+    initialLastName,
+  }: NameFieldsProps) {
+    const { values, focusedField, savingByField, setFocusedField, updateField, handleBlur } =
+      usePersonNameFields(
+        personId,
+        {
+          firstName: initialFirstName,
+          middleName: initialMiddleName,
+          lastName: initialLastName,
+        },
+        NAME_FIELD_CONFIGS,
+      );
+    const [hoveredField, setHoveredField] = useState<NameField | null>(null);
+
+    return (
+      <Group grow gap={"xs"} wrap="nowrap">
+        {NAME_FIELD_CONFIGS.map((config) => (
+          <InlineEditableInput
+            key={config.field}
+            aria-label={config.placeholder}
+            placeholder={
+              focusedField === config.field || hoveredField === config.field
+                ? config.placeholder
+                : ""
+            }
+            value={values[config.field]}
+            maxLength={config.maxLength}
+            isSaving={savingByField[config.field]}
+            isFocused={focusedField === config.field}
+            showCounter
+            size="lg"
+            fw={"bold"}
+            onMouseEnter={() => setHoveredField(config.field)}
+            onMouseLeave={() => setHoveredField(null)}
+            onFocus={() => setFocusedField(config.field)}
+            onChange={(value) => updateField(config.field, value)}
+            onBlur={() => handleBlur(config.field)}
+          />
+        ))}
+      </Group>
+    );
+  },
+  (prev, next) => prev.personId === next.personId,
+);
 
 export function ContactIdentitySection({
   contact,
   personId,
-  editedValues,
+  phones,
+  emails,
   savingField,
-  focusedField,
-  setFocusedField,
-  handleChange,
-  handleBlur,
+  onPhonesChange,
+  onEmailsChange,
+  onSaveContactInfo,
 }: ContactIdentitySectionProps) {
+  const {
+    values: profileValues,
+    focusedField: focusedProfileField,
+    savingByField: savingProfileByField,
+    setFocusedField: setFocusedProfileField,
+    updateField: updateProfileField,
+    handleBlur: handleProfileBlur,
+  } = usePersonProfileFields(
+    personId,
+    {
+      title: contact.title || "",
+      place: contact.place || "",
+    },
+    PROFILE_FIELD_CONFIGS,
+  );
+
   return (
-    <Group align="flex-start">
+    <Group align="center">
       <ContactPhotoUploadButton
         avatarUrl={contact.avatar || null}
         contactName={`${contact.firstName || ""} ${contact.lastName || ""}`.trim() || "Contact"}
@@ -36,83 +383,12 @@ export function ContactIdentitySection({
       <Stack gap="xs" style={{ flex: 1 }}>
         <Group gap="sm" align="flex-start">
           <Stack gap="xs" style={{ flex: 1 }}>
-            <Group gap="xs" wrap="nowrap">
-              <TextInput
-                placeholder="First name"
-                value={editedValues.firstName || ""}
-                onChange={(e) => handleChange("firstName", e.target.value)}
-                onFocus={() => setFocusedField("firstName")}
-                onBlur={() => {
-                  setFocusedField(null);
-                  handleBlur("firstName");
-                }}
-                maxLength={INPUT_MAX_LENGTHS.firstName}
-                styles={{
-                  root: { flex: 1 },
-                  input: { fontSize: "1.5rem", fontWeight: 700 },
-                }}
-                rightSection={
-                  savingField === "firstName" ? (
-                    <Loader size="xs" />
-                  ) : focusedField === "firstName" ? (
-                    <span style={{ fontSize: 10, color: "var(--mantine-color-dimmed)" }}>
-                      {editedValues.firstName?.length || 0}/{INPUT_MAX_LENGTHS.firstName}
-                    </span>
-                  ) : null
-                }
-                disabled={savingField === "firstName"}
-              />
-              <TextInput
-                placeholder="Middle name"
-                value={editedValues.middleName || ""}
-                onChange={(e) => handleChange("middleName", e.target.value)}
-                onFocus={() => setFocusedField("middleName")}
-                onBlur={() => {
-                  setFocusedField(null);
-                  handleBlur("middleName");
-                }}
-                maxLength={INPUT_MAX_LENGTHS.middleName}
-                styles={{
-                  root: { flex: 1 },
-                  input: { fontSize: "1.5rem", fontWeight: 700 },
-                }}
-                rightSection={
-                  savingField === "middleName" ? (
-                    <Loader size="xs" />
-                  ) : focusedField === "middleName" ? (
-                    <span style={{ fontSize: 10, color: "var(--mantine-color-dimmed)" }}>
-                      {editedValues.middleName?.length || 0}/{INPUT_MAX_LENGTHS.middleName}
-                    </span>
-                  ) : null
-                }
-                disabled={savingField === "middleName"}
-              />
-              <TextInput
-                placeholder="Last name"
-                value={editedValues.lastName || ""}
-                onChange={(e) => handleChange("lastName", e.target.value)}
-                onFocus={() => setFocusedField("lastName")}
-                onBlur={() => {
-                  setFocusedField(null);
-                  handleBlur("lastName");
-                }}
-                maxLength={INPUT_MAX_LENGTHS.lastName}
-                styles={{
-                  root: { flex: 1 },
-                  input: { fontSize: "1.5rem", fontWeight: 700 },
-                }}
-                rightSection={
-                  savingField === "lastName" ? (
-                    <Loader size="xs" />
-                  ) : focusedField === "lastName" ? (
-                    <span style={{ fontSize: 10, color: "var(--mantine-color-dimmed)" }}>
-                      {editedValues.lastName?.length || 0}/{INPUT_MAX_LENGTHS.lastName}
-                    </span>
-                  ) : null
-                }
-                disabled={savingField === "lastName"}
-              />
-            </Group>
+            <NameFields
+              personId={personId}
+              initialFirstName={contact.firstName || ""}
+              initialMiddleName={contact.middleName || ""}
+              initialLastName={contact.lastName || ""}
+            />
           </Stack>
           {contact.myself && (
             <Badge color="violet" variant="light">
@@ -121,52 +397,46 @@ export function ContactIdentitySection({
           )}
         </Group>
 
-        <TextInput
-          placeholder="Title"
-          value={editedValues.title || ""}
-          onChange={(e) => handleChange("title", e.target.value)}
-          onFocus={() => setFocusedField("title")}
-          onBlur={() => {
-            setFocusedField(null);
-            handleBlur("title");
-          }}
-          maxLength={INPUT_MAX_LENGTHS.title}
-          size="lg"
-          leftSection={<IconBriefcase size={18} />}
-          styles={{
-            input: { color: "var(--mantine-color-dimmed)" },
-          }}
-          style={{
-            width: "fit-content",
-            minWidth: 200,
-            maxWidth: "100%",
-          }}
-          rightSection={
-            savingField === "title" ? (
-              <Loader size="xs" />
-            ) : focusedField === "title" ? (
-              <span style={{ fontSize: 10, color: "var(--mantine-color-dimmed)" }}>
-                {editedValues.title?.length || 0}/{INPUT_MAX_LENGTHS.title}
-              </span>
-            ) : null
-          }
-          disabled={savingField === "title"}
-        />
+        <Group gap="xs" grow>
+          <InlineEditableInput
+            aria-label="Title"
+            placeholder="Title"
+            value={profileValues.title}
+            onChange={(value) => updateProfileField("title", value)}
+            onFocus={() => setFocusedProfileField("title")}
+            onBlur={() => handleProfileBlur("title")}
+            isSaving={savingProfileByField.title}
+            isFocused={focusedProfileField === "title"}
+            showCounter
+            maxLength={INPUT_MAX_LENGTHS.title}
+            leftSection={<IconBriefcase size={18} />}
+          />
 
-        <TextInput
-          placeholder="Location"
-          value={editedValues.place || ""}
-          onChange={(e) => handleChange("place", e.target.value)}
-          onBlur={() => handleBlur("place")}
-          maxLength={INPUT_MAX_LENGTHS.place}
-          leftSection={<IconMapPin size={18} />}
-          style={{
-            width: "fit-content",
-            minWidth: 200,
-            maxWidth: "100%",
-          }}
-          rightSection={savingField === "place" ? <Loader size="xs" /> : null}
-          disabled={savingField === "place"}
+          <InlineEditableInput
+            aria-label="Location"
+            placeholder="Location"
+            value={profileValues.place}
+            onChange={(value) => updateProfileField("place", value)}
+            onFocus={() => setFocusedProfileField("place")}
+            onBlur={() => handleProfileBlur("place")}
+            isSaving={savingProfileByField.place}
+            isFocused={focusedProfileField === "place"}
+            showCounter
+            className="w-20"
+            maxLength={INPUT_MAX_LENGTHS.place}
+            leftSection={<IconMapPin size={18} />}
+          />
+        </Group>
+
+        <SocialMediaSection
+          contact={contact}
+          personId={personId}
+          phones={phones}
+          emails={emails}
+          savingField={savingField}
+          onPhonesChange={onPhonesChange}
+          onEmailsChange={onEmailsChange}
+          onSaveContactInfo={onSaveContactInfo}
         />
       </Stack>
     </Group>

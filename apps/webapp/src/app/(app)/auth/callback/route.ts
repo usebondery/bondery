@@ -1,7 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { WEBAPP_ROUTES, WEBSITE_ROUTES } from "@bondery/helpers/globals/paths";
+import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 
 export async function GET(request: Request) {
   const requestUrl = new URL(request.url);
@@ -10,6 +10,12 @@ export async function GET(request: Request) {
 
   if (code) {
     const cookieStore = await cookies();
+    const redirectPath = requestUrl.searchParams.get("redirect");
+    const postLoginUrl =
+      redirectPath && redirectPath.startsWith("/") ? `${origin}${redirectPath}` : `${origin}/app`;
+
+    const response = NextResponse.redirect(postLoginUrl);
+
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
@@ -19,13 +25,10 @@ export async function GET(request: Request) {
             return cookieStore.getAll();
           },
           setAll(cookiesToSet) {
-            try {
-              cookiesToSet.forEach(({ name, value, options }) =>
-                cookieStore.set(name, value, options),
-              );
-            } catch {
-              // Ignore errors from Server Component
-            }
+            cookiesToSet.forEach(({ name, value, options }) => {
+              cookieStore.set(name, value, options);
+              response.cookies.set(name, value, options);
+            });
           },
         },
       },
@@ -34,16 +37,11 @@ export async function GET(request: Request) {
     const { error } = await supabase.auth.exchangeCodeForSession(code);
 
     if (!error) {
-      // Support post-login redirect (e.g., OAuth consent flow)
-      const redirectPath = requestUrl.searchParams.get("redirect");
-      if (redirectPath && redirectPath.startsWith("/")) {
-        return NextResponse.redirect(`${process.env.NEXT_PUBLIC_WEBAPP_URL}${redirectPath}`);
-      }
-      return NextResponse.redirect(`${process.env.NEXT_PUBLIC_WEBAPP_URL}/app`);
+      return response;
     } else {
       console.error("Error exchanging code for session:", error.message);
     }
   }
 
-  return NextResponse.redirect(`${process.env.NEXT_PUBLIC_WEBAPP_URL}${WEBAPP_ROUTES.LOGIN}`);
+  return NextResponse.redirect(`${origin}${WEBAPP_ROUTES.LOGIN}`);
 }

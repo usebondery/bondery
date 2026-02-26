@@ -61,6 +61,8 @@ export function TimelineClient({ initialContacts, initialActivities }: TimelineC
     openNewActivityModal({
       contacts: initialContacts,
       activity,
+      titleText: t("WhoAreYouMeeting"),
+      t,
     });
   };
 
@@ -173,6 +175,8 @@ export function TimelineClient({ initialContacts, initialActivities }: TimelineC
               onClick={() => {
                 openNewActivityModal({
                   contacts: initialContacts,
+                  titleText: t("WhoAreYouMeeting"),
+                  t,
                 });
               }}
             >
@@ -204,6 +208,8 @@ export function TimelineClient({ initialContacts, initialActivities }: TimelineC
               openNewActivityModal({
                 contacts: initialContacts,
                 activity,
+                titleText: t("WhoAreYouMeeting"),
+                t,
               });
             }}
             onDuplicate={handleDuplicate}

@@ -8,22 +8,30 @@ import {
   Checkbox,
   Group,
   Text,
+  TextInput,
   ActionIcon,
   Menu,
   MenuTarget,
   MenuDropdown,
   MenuItem,
   Button,
+  ButtonGroup,
+  Stack,
   Tooltip,
+  VisuallyHidden,
+  Space,
 } from "@mantine/core";
 import {
   IconBrandLinkedin,
   IconBrandInstagram,
   IconBrandWhatsapp,
   IconBrandFacebook,
+  IconArrowMerge,
+  IconSearch,
   IconPhone,
   IconMail,
   IconUser,
+  IconUsersPlus,
   IconBriefcase,
   IconMapPin,
   IconClock,
@@ -38,6 +46,8 @@ import type { Contact } from "@bondery/types";
 import { ActionIconLink } from "@bondery/mantine-next";
 import { PersonChip } from "./shared/PersonChip";
 import { useState } from "react";
+import { ColumnVisibilityMenu } from "./contacts/ColumnVisibilityMenu";
+import { SortMenu, type SortOrder } from "./contacts/SortMenu";
 
 // Column definitions with labels and icons
 const COLUMN_DEFINITIONS: Record<ColumnKey, { label: string; icon: React.ReactNode }> = {
@@ -141,9 +151,8 @@ function ContactSocialIcons({ contact }: { contact: Contact }) {
             href={s.href}
             target={s.href && s.href.startsWith("http") ? "_blank" : undefined}
             ariaLabel={s.label}
-          >
-            {s.icon}
-          </ActionIconLink>
+            icon={s.icon}
+          />
         ))}
     </Group>
   );
@@ -175,12 +184,45 @@ export interface BulkSelectionAction {
   variant?: "filled" | "light" | "outline" | "subtle" | "default";
   onClick: (selectedIds: Set<string>) => void;
   disabled?: boolean;
+  disabledTooltip?: string;
+  loading?: boolean;
+}
+
+interface StandardContactActions {
+  onMergeOne?: (contactId: string) => void;
+  onMergeSelected?: (leftContactId: string, rightContactId: string) => void;
+  onAddToGroupsOne?: (contactId: string) => void;
+  onAddToGroupsSelected?: (contactIds: string[]) => void;
+  onDeleteOne?: (contactId: string) => void;
+  onDeleteSelected?: (contactIds: string[]) => void;
+  mergeMenuLabel?: string;
+  mergeBulkLabel?: string;
+  addToGroupsMenuLabel?: string;
+  addToGroupsBulkLabel?: string;
+  deleteMenuLabel?: string;
+  deleteBulkLabel?: string;
+  isDeleteSelectedLoading?: boolean;
+}
+
+interface LoadMoreAction {
+  label: string;
+  onClick: () => void;
   loading?: boolean;
 }
 
 interface ContactsTableProps {
   contacts: Contact[];
   selectedIds?: Set<string>;
+  isHeaderShown?: boolean;
+  headerStickyTop?: number;
+  searchPlaceholder?: string;
+  searchDefaultValue?: string;
+  searchValue?: string;
+  onSearchChange?: (value: string) => void;
+  columnsForMenu?: ColumnConfig[];
+  setColumnsForMenu?: React.Dispatch<React.SetStateAction<ColumnConfig[]>>;
+  sortOrderForMenu?: SortOrder;
+  setSortOrderForMenu?: (order: SortOrder) => void;
   visibleColumns: ColumnKey[] | ColumnConfig[];
   onSelectAll?: () => void;
   onSelectOne?: (id: string, options?: { shiftKey?: boolean; index?: number }) => void;
@@ -189,8 +231,11 @@ interface ContactsTableProps {
   showSelection?: boolean;
   nonSelectableIds?: Set<string>;
   nonSelectableTooltip?: string;
+  standardActions?: StandardContactActions;
   menuActions?: MenuAction[];
   bulkSelectionActions?: BulkSelectionAction[];
+  loadMoreAction?: LoadMoreAction;
+  hasMoreToLoad?: boolean;
   disableNameLink?: boolean;
   dateLocale?: string;
 }
@@ -198,6 +243,16 @@ interface ContactsTableProps {
 export default function ContactsTable({
   contacts,
   selectedIds,
+  isHeaderShown,
+  headerStickyTop = 0,
+  searchPlaceholder = "Search by name...",
+  searchDefaultValue,
+  searchValue,
+  onSearchChange,
+  columnsForMenu,
+  setColumnsForMenu,
+  sortOrderForMenu,
+  setSortOrderForMenu,
   visibleColumns: visibleColumnsProp,
   onSelectAll,
   onSelectOne,
@@ -206,8 +261,11 @@ export default function ContactsTable({
   showSelection,
   nonSelectableIds,
   nonSelectableTooltip,
+  standardActions,
   menuActions,
   bulkSelectionActions,
+  loadMoreAction,
+  hasMoreToLoad,
   disableNameLink,
   dateLocale,
 }: ContactsTableProps) {
@@ -217,8 +275,85 @@ export default function ContactsTable({
     dateStyle: "short",
   });
 
-  // Use provided menu actions or empty array
-  const effectiveMenuActions: MenuAction[] = menuActions || [];
+  const selectedContacts = contacts.filter((contact) => selectedIds?.has(contact.id));
+
+  const standardMenuActions: MenuAction[] = [];
+  if (standardActions?.onMergeOne) {
+    standardMenuActions.push({
+      key: "mergeWith",
+      label: standardActions.mergeMenuLabel || "Merge...",
+      icon: <IconArrowMerge size={14} />,
+      onClick: (contactId) => standardActions.onMergeOne?.(contactId),
+    });
+  }
+  if (standardActions?.onAddToGroupsOne) {
+    standardMenuActions.push({
+      key: "addToGroups",
+      label: standardActions.addToGroupsMenuLabel || "Edit groups...",
+      icon: <IconUsersPlus size={14} />,
+      onClick: (contactId) => standardActions.onAddToGroupsOne?.(contactId),
+    });
+  }
+  const standardDeleteMenuAction: MenuAction | null = standardActions?.onDeleteOne
+    ? {
+        key: "deleteContact",
+        label: standardActions.deleteMenuLabel || "Delete",
+        icon: <IconTrash size={14} />,
+        color: "red",
+        onClick: (contactId) => standardActions.onDeleteOne?.(contactId),
+      }
+    : null;
+
+  const standardBulkSelectionActions: BulkSelectionAction[] = [];
+  if (standardActions?.onMergeSelected) {
+    standardBulkSelectionActions.push({
+      key: "mergeSelected",
+      label: standardActions.mergeBulkLabel || "Merge",
+      icon: <IconArrowMerge size={16} />,
+      onClick: () => {
+        if (selectedContacts.length === 2) {
+          standardActions.onMergeSelected?.(selectedContacts[0].id, selectedContacts[1].id);
+        }
+      },
+      disabled: selectedContacts.length !== 2,
+      disabledTooltip: "Exactly two contacts must be selected.",
+    });
+  }
+  if (standardActions?.onAddToGroupsSelected) {
+    standardBulkSelectionActions.push({
+      key: "addSelectedToGroups",
+      label: standardActions.addToGroupsBulkLabel || "Add to groups",
+      icon: <IconUsersPlus size={16} />,
+      onClick: () => {
+        const ids = selectedContacts.map((contact) => contact.id);
+        standardActions.onAddToGroupsSelected?.(ids);
+      },
+    });
+  }
+  const standardDeleteBulkAction: BulkSelectionAction | null = standardActions?.onDeleteSelected
+    ? {
+        key: "deleteSelected",
+        label: standardActions.deleteBulkLabel || "Delete",
+        icon: <IconTrash size={16} />,
+        color: "red",
+        onClick: () => {
+          const ids = selectedContacts.map((contact) => contact.id);
+          standardActions.onDeleteSelected?.(ids);
+        },
+        loading: standardActions.isDeleteSelectedLoading,
+      }
+    : null;
+
+  const effectiveMenuActions: MenuAction[] = [
+    ...(menuActions || []),
+    ...standardMenuActions,
+    ...(standardDeleteMenuAction ? [standardDeleteMenuAction] : []),
+  ];
+  const effectiveBulkSelectionActions: BulkSelectionAction[] = [
+    ...standardBulkSelectionActions,
+    ...(bulkSelectionActions || []),
+    ...(standardDeleteBulkAction ? [standardDeleteBulkAction] : []),
+  ];
 
   // Normalize visibleColumns to ColumnConfig array
   const visibleColumns: ColumnConfig[] = Array.isArray(visibleColumnsProp)
@@ -232,28 +367,89 @@ export default function ContactsTable({
       : (visibleColumnsProp as ColumnConfig[])
     : [];
 
+  const bulkActionsContent =
+    effectiveBulkSelectionActions.length > 0 && selectedIds ? (
+      <Group justify="space-between" align="center" className="min-h-9">
+        <Text size="sm" c="dimmed">
+          {selectedIds.size > 0
+            ? `${selectedIds.size} selected`
+            : `${contacts.length} total people`}
+        </Text>
+
+        {selectedIds.size > 0 ? (
+          <ButtonGroup>
+            {effectiveBulkSelectionActions.map((action) => (
+              <Tooltip
+                key={action.key}
+                label={action.disabled ? action.disabledTooltip : undefined}
+                disabled={!action.disabled || !action.disabledTooltip}
+                withArrow
+              >
+                <Button
+                  color={action.color}
+                  variant={action.variant || "default"}
+                  leftSection={action.icon}
+                  className="button-scale-effect"
+                  onClick={() => action.onClick(selectedIds)}
+                  disabled={action.disabled}
+                  loading={action.loading}
+                >
+                  {action.label}
+                </Button>
+              </Tooltip>
+            ))}
+          </ButtonGroup>
+        ) : null}
+      </Group>
+    ) : null;
+
+  const builtInHeaderContent =
+    onSearchChange ||
+    (columnsForMenu && setColumnsForMenu) ||
+    (sortOrderForMenu && setSortOrderForMenu) ? (
+      <Group>
+        {onSearchChange ? (
+          <TextInput
+            placeholder={searchPlaceholder}
+            aria-label="Search contacts"
+            leftSection={<IconSearch size={16} />}
+            defaultValue={searchDefaultValue}
+            value={searchValue}
+            onChange={(event) => onSearchChange(event.currentTarget.value)}
+            style={{ flex: 1 }}
+          />
+        ) : null}
+        {columnsForMenu && setColumnsForMenu ? (
+          <ColumnVisibilityMenu columns={columnsForMenu} setColumns={setColumnsForMenu} />
+        ) : null}
+        {sortOrderForMenu && setSortOrderForMenu ? (
+          <SortMenu sortOrder={sortOrderForMenu} setSortOrder={setSortOrderForMenu} />
+        ) : null}
+      </Group>
+    ) : null;
+
+  const effectiveHeaderContent = builtInHeaderContent;
+
   return (
     <>
-      {bulkSelectionActions && selectedIds && selectedIds.size > 0 && (
-        <Group mb="md">
-          <Text size="sm" c="dimmed">
-            {selectedIds.size} selected
-          </Text>
-          {bulkSelectionActions.map((action) => (
-            <Button
-              key={action.key}
-              color={action.color}
-              variant={action.variant || "light"}
-              leftSection={action.icon}
-              onClick={() => action.onClick(selectedIds)}
-              disabled={action.disabled}
-              loading={action.loading}
-            >
-              {action.label}
-            </Button>
-          ))}
-        </Group>
+      {isHeaderShown ? (
+        <Stack
+          gap="md"
+          py="md"
+          style={{
+            position: "sticky",
+            top: headerStickyTop,
+            zIndex: 20,
+            backgroundColor: "var(--mantine-color-body)",
+          }}
+        >
+          {effectiveHeaderContent}
+          {bulkActionsContent}
+        </Stack>
+      ) : (
+        <>{bulkActionsContent ? <>{bulkActionsContent}</> : null}</>
       )}
+
       <Table striped highlightOnHover>
         <TableThead>
           <TableTr>
@@ -270,11 +466,12 @@ export default function ContactsTable({
             {visibleColumns.map((col) => (
               <TableTh key={col.key} className={`min-w-${col.key === "name" ? "60" : "24"}`}>
                 {col.key === "name" ? (
-                  <span></span>
+                  <VisuallyHidden>{col.label}</VisuallyHidden>
                 ) : (
                   <Tooltip label={col.label} withArrow>
                     <Group gap="xs" wrap="nowrap" style={{ width: "fit-content" }}>
                       {col.icon}
+                      <VisuallyHidden>{col.label}</VisuallyHidden>
                     </Group>
                   </Tooltip>
                 )}
@@ -300,7 +497,14 @@ export default function ContactsTable({
             </TableTr>
           ) : (
             contacts.map((contact, rowIndex) => (
-              <TableTr key={contact.id}>
+              <TableTr
+                key={contact.id}
+                style={
+                  selectedIds?.has(contact.id)
+                    ? { backgroundColor: "var(--mantine-primary-color-light)" }
+                    : undefined
+                }
+              >
                 {showSelection && (
                   <TableTd>
                     {nonSelectableIds?.has(contact.id) ? (
@@ -410,6 +614,13 @@ export default function ContactsTable({
           )}
         </TableTbody>
       </Table>
+      {loadMoreAction && hasMoreToLoad ? (
+        <Group justify="center" pt="sm">
+          <Button variant="light" onClick={loadMoreAction.onClick} loading={loadMoreAction.loading}>
+            {loadMoreAction.label}
+          </Button>
+        </Group>
+      ) : null}
     </>
   );
 }

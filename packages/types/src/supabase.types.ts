@@ -126,6 +126,17 @@ export type Database = {
       };
       people: {
         Row: {
+          address_city: string | null;
+          address_country: string | null;
+          address_country_code: string | null;
+          address_formatted: string | null;
+          address_geocode_source: string | null;
+          address_granularity: string;
+          address_line1: string | null;
+          address_line2: string | null;
+          address_postal_code: string | null;
+          address_state: string | null;
+          address_state_code: string | null;
           avatar: string | null;
           avatar_color: string | null;
           connections: string[] | null;
@@ -152,6 +163,17 @@ export type Database = {
           user_id: string;
         };
         Insert: {
+          address_city?: string | null;
+          address_country?: string | null;
+          address_country_code?: string | null;
+          address_formatted?: string | null;
+          address_geocode_source?: string | null;
+          address_granularity?: string;
+          address_line1?: string | null;
+          address_line2?: string | null;
+          address_postal_code?: string | null;
+          address_state?: string | null;
+          address_state_code?: string | null;
           avatar?: string | null;
           avatar_color?: string | null;
           connections?: string[] | null;
@@ -178,6 +200,17 @@ export type Database = {
           user_id: string;
         };
         Update: {
+          address_city?: string | null;
+          address_country?: string | null;
+          address_country_code?: string | null;
+          address_formatted?: string | null;
+          address_geocode_source?: string | null;
+          address_granularity?: string;
+          address_line1?: string | null;
+          address_line2?: string | null;
+          address_postal_code?: string | null;
+          address_state?: string | null;
+          address_state_code?: string | null;
           avatar?: string | null;
           avatar_color?: string | null;
           connections?: string[] | null;
@@ -204,6 +237,86 @@ export type Database = {
           user_id?: string;
         };
         Relationships: [];
+      };
+      people_addresses: {
+        Row: {
+          address_city: string | null;
+          address_country: string | null;
+          address_country_code: string | null;
+          address_formatted: string | null;
+          address_geocode_source: string | null;
+          address_granularity: string;
+          address_line1: string | null;
+          address_line2: string | null;
+          address_postal_code: string | null;
+          address_state: string | null;
+          address_state_code: string | null;
+          created_at: string;
+          id: string;
+          latitude: number | null;
+          longitude: number | null;
+          person_id: string;
+          sort_order: number;
+          type: string;
+          updated_at: string;
+          user_id: string;
+          value: string;
+        };
+        Insert: {
+          address_city?: string | null;
+          address_country?: string | null;
+          address_country_code?: string | null;
+          address_formatted?: string | null;
+          address_geocode_source?: string | null;
+          address_granularity?: string;
+          address_line1?: string | null;
+          address_line2?: string | null;
+          address_postal_code?: string | null;
+          address_state?: string | null;
+          address_state_code?: string | null;
+          created_at?: string;
+          id?: string;
+          latitude?: number | null;
+          longitude?: number | null;
+          person_id: string;
+          sort_order?: number;
+          type?: string;
+          updated_at?: string;
+          user_id: string;
+          value: string;
+        };
+        Update: {
+          address_city?: string | null;
+          address_country?: string | null;
+          address_country_code?: string | null;
+          address_formatted?: string | null;
+          address_geocode_source?: string | null;
+          address_granularity?: string;
+          address_line1?: string | null;
+          address_line2?: string | null;
+          address_postal_code?: string | null;
+          address_state?: string | null;
+          address_state_code?: string | null;
+          created_at?: string;
+          id?: string;
+          latitude?: number | null;
+          longitude?: number | null;
+          person_id?: string;
+          sort_order?: number;
+          type?: string;
+          updated_at?: string;
+          user_id?: string;
+          value?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "people_addresses_person_id_fkey";
+            columns: ["person_id"];
+            isOneToOne: false;
+            referencedRelation: "people";
+            referencedColumns: ["id"];
+          },
+        ];
       };
       people_emails: {
         Row: {

@@ -181,9 +181,8 @@ function ActivityDetailBody({ modalId, activity, contacts }: ActivityDetailBodyP
                     size="sm"
                     href={`${WEBAPP_ROUTES.PERSON}/${participant.id}`}
                     ariaLabel={`Open ${participant.firstName} ${participant.lastName || ""}`.trim()}
-                  >
-                    <BonderyIcon width={14} height={14} />
-                  </ActionIconLink>
+                    icon={<BonderyIcon width={14} height={14} />}
+                  />
                   {participant.linkedin && (
                     <ActionIconLink
                       href={participant.linkedin}
@@ -193,9 +192,8 @@ function ActivityDetailBody({ modalId, activity, contacts }: ActivityDetailBodyP
                       radius="xl"
                       size="sm"
                       ariaLabel="Open LinkedIn profile"
-                    >
-                      <IconBrandLinkedin size={14} />
-                    </ActionIconLink>
+                      icon={<IconBrandLinkedin size={14} />}
+                    />
                   )}
                   {(participant.emails as any)?.[0]?.value && (
                     <ActionIconLink
@@ -205,9 +203,8 @@ function ActivityDetailBody({ modalId, activity, contacts }: ActivityDetailBodyP
                       radius="xl"
                       size="sm"
                       ariaLabel="Send email"
-                    >
-                      <IconMail size={14} />
-                    </ActionIconLink>
+                      icon={<IconMail size={14} />}
+                    />
                   )}
                 </Group>
               </Group>
@@ -265,16 +262,8 @@ export function openActivityDetailModal({
 
   modals.open({
     modalId,
-    withCloseButton: true,
     size: "lg",
-    padding: "lg",
-    radius: "md",
     title: <ActivityDetailModalTitle activity={activity} />,
-    styles: {
-      header: {
-        alignItems: "flex-start",
-      },
-    },
     children: <ActivityDetailBody modalId={modalId} activity={activity} contacts={contacts} />,
   });
 }

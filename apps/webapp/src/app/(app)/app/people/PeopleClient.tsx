@@ -1,43 +1,31 @@
 "use client";
 
-import { Title, Text, Button, Stack, Group, TextInput, Paper } from "@mantine/core";
+import { Button, Stack, Group, Paper } from "@mantine/core";
 import {
   IconAddressBook,
-  IconSearch,
   IconUserPlus,
   IconUsers,
-  IconUsersGroup,
-  IconTrash,
   IconUser,
   IconBriefcase,
   IconMapPin,
   IconClock,
   IconBrandLinkedin,
-  IconArrowMerge,
 } from "@tabler/icons-react";
 import { notifications } from "@mantine/notifications";
 import { useEffect, useState, useDeferredValue, useMemo } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { useDebouncedCallback } from "@mantine/hooks";
 import { useTranslations } from "next-intl";
-import ContactsTable, {
-  ColumnConfig,
-  MenuAction,
-  BulkSelectionAction,
-} from "@/app/(app)/app/components/ContactsTable";
-import { ColumnVisibilityMenu } from "@/app/(app)/app/components/contacts/ColumnVisibilityMenu";
-import {
-  buildContactBulkActions,
-  buildContactMenuActions,
-} from "@/app/(app)/app/components/contacts/contactActionBuilders";
-import { SortMenu, SortOrder } from "@/app/(app)/app/components/contacts/SortMenu";
+import ContactsTable, { ColumnConfig } from "@/app/(app)/app/components/ContactsTable";
+import { type SortOrder } from "@/app/(app)/app/components/contacts/SortMenu";
 import { API_ROUTES, WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import { openAddContactModal } from "./components/AddContactModal";
 import { PageHeader } from "@/app/(app)/app/components/PageHeader";
 import { PageWrapper } from "@/app/(app)/app/components/PageWrapper";
-import { errorNotificationTemplate, successNotificationTemplate } from "@bondery/mantine-next";
+import { errorNotificationTemplate } from "@bondery/mantine-next";
 import { formatContactName } from "@/lib/nameHelpers";
 import { openDeleteContactModal } from "@/app/(app)/app/components/contacts/openDeleteContactModal";
+import { openDeleteContactsModal } from "@/app/(app)/app/components/contacts/openDeleteContactsModal";
 import { openAddPeopleToGroupSelectionModal } from "./components/AddPeopleToGroupSelectionModal";
 import { MERGE_CONFLICT_FIELDS, openMergeWithModal } from "./components/MergeWithModal";
 
@@ -93,7 +81,6 @@ export function PeopleClient({ initialContacts, totalCount, layout = "stack" }: 
   const initialSort = (searchParams.get("sort") as SortOrder) || "nameAsc";
 
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
-  const [isDeleting, setIsDeleting] = useState(false);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [contacts, setContacts] = useState<Contact[]>(initialContacts);
   const [loadedCount, setLoadedCount] = useState(initialContacts.length);
@@ -290,112 +277,22 @@ export function PeopleClient({ initialContacts, totalCount, layout = "stack" }: 
     }
   };
 
-  const handleDelete = async (idsOverride?: string[]) => {
-    const ids = idsOverride ?? Array.from(selectedIds);
-    if (ids.length === 0) return;
-
-    setIsDeleting(true);
-
-    try {
-      const res = await fetch(API_ROUTES.CONTACTS, {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ids }),
-      });
-
-      if (!res.ok) {
-        throw new Error("Failed to delete contacts");
-      }
-
-      notifications.show(
-        successNotificationTemplate({
-          title: "Success",
-          description: `${ids.length} contact(s) deleted successfully`,
-        }),
-      );
-
-      // Clear selection
-      setSelectedIds(new Set());
-      setContacts((prev) => prev.filter((contact) => !ids.includes(contact.id)));
-      setLoadedCount((prev) => Math.max(0, prev - ids.length));
-      setTotalAvailableCount((prev) => Math.max(0, prev - ids.length));
-
-      // Refresh the page to show updated data
-      await revalidateContacts();
-      router.refresh();
-    } catch (error) {
-      notifications.show(
-        errorNotificationTemplate({
-          title: "Error",
-          description: "Failed to delete contacts. Please try again.",
-        }),
-      );
-    } finally {
-      setIsDeleting(false);
-    }
+  const handleDeleteSelected = (ids: string[]) => {
+    openDeleteContactsModal({
+      contactIds: ids,
+      onDeleted: async () => {
+        setSelectedIds(new Set());
+        setContacts((prev) => prev.filter((contact) => !ids.includes(contact.id)));
+        setLoadedCount((prev) => Math.max(0, prev - ids.length));
+        setTotalAvailableCount((prev) => Math.max(0, prev - ids.length));
+        await revalidateContacts();
+        router.refresh();
+      },
+    });
   };
 
   const allSelected = contacts.length > 0 && selectedIds.size === contacts.length;
   const someSelected = selectedIds.size > 0 && selectedIds.size < contacts.length;
-
-  // Define menu actions for individual contacts
-  const menuActions: MenuAction[] = buildContactMenuActions({
-    mergeAction: {
-      key: "mergeWith",
-      label: tMerge("ActionLabelMenu"),
-      icon: <IconArrowMerge size={14} />,
-      onClick: (contactId) => openMergeModal(contactId),
-    },
-    addToGroupsAction: {
-      key: "addToGroup",
-      label: "Add to groups...",
-      icon: <IconUsersGroup size={14} />,
-      onClick: (contactId) => handleAddToGroup([contactId]),
-    },
-    deleteAction: {
-      key: "deleteContact",
-      label: "Delete contact",
-      icon: <IconTrash size={14} />,
-      color: "red",
-      onClick: handleDeleteContact,
-    },
-  });
-
-  // Define bulk selection actions
-  const bulkSelectionActions: BulkSelectionAction[] = buildContactBulkActions({
-    addToGroupsAction: {
-      key: "addSelectedToGroup",
-      label: "Add to groups",
-      icon: <IconUsersGroup size={16} />,
-      variant: "light",
-      onClick: (currentSelectedIds) => {
-        handleAddToGroup(Array.from(currentSelectedIds));
-      },
-    },
-    deleteAction: {
-      key: "deleteSelected",
-      label: "Delete contacts",
-      icon: <IconTrash size={16} />,
-      color: "red",
-      variant: "light",
-      onClick: () => handleDelete(),
-      loading: isDeleting,
-    },
-  });
-
-  if (selectedIds.size === 2) {
-    const selectedContacts = contacts.filter((contact) => selectedIds.has(contact.id));
-
-    if (selectedContacts.length === 2) {
-      bulkSelectionActions.unshift({
-        key: "mergeSelected",
-        label: tMerge("ActionLabelBulk"),
-        icon: <IconArrowMerge size={16} />,
-        variant: "light",
-        onClick: () => openMergeModal(selectedContacts[0].id, selectedContacts[1].id, true),
-      });
-    }
-  }
 
   const WrapperComponent = layout === "container" ? Group : Stack;
 
@@ -427,40 +324,38 @@ export function PeopleClient({ initialContacts, totalCount, layout = "stack" }: 
         />
 
         <Paper withBorder shadow="sm" radius="md" p="md">
-          <Stack>
-            <Group>
-              <TextInput
-                placeholder="Search by name..."
-                leftSection={<IconSearch size={16} />}
-                defaultValue={initialSearch}
-                onChange={(e) => handleSearch(e.currentTarget.value)}
-                style={{ flex: 1 }}
-              />
-              <ColumnVisibilityMenu columns={columns} setColumns={setColumns} />
-              <SortMenu sortOrder={initialSort} setSortOrder={handleSort} />
-            </Group>
-
-            <ContactsTable
-              contacts={contacts}
-              selectedIds={selectedIds}
-              visibleColumns={visibleColumns}
-              onSelectAll={handleSelectAll}
-              onSelectOne={handleSelectOne}
-              allSelected={allSelected}
-              someSelected={someSelected}
-              showSelection={true}
-              menuActions={menuActions}
-              bulkSelectionActions={bulkSelectionActions}
-            />
-
-            {contacts.length < totalAvailableCount ? (
-              <Group justify="center" pt="sm">
-                <Button variant="light" onClick={handleLoadMore} loading={isLoadingMore}>
-                  Load another 50 contacts
-                </Button>
-              </Group>
-            ) : null}
-          </Stack>
+          <ContactsTable
+            contacts={contacts}
+            selectedIds={selectedIds}
+            isHeaderShown={true}
+            searchDefaultValue={initialSearch}
+            onSearchChange={handleSearch}
+            columnsForMenu={columns}
+            setColumnsForMenu={setColumns}
+            sortOrderForMenu={initialSort}
+            setSortOrderForMenu={handleSort}
+            visibleColumns={visibleColumns}
+            onSelectAll={handleSelectAll}
+            onSelectOne={handleSelectOne}
+            allSelected={allSelected}
+            someSelected={someSelected}
+            showSelection={true}
+            standardActions={{
+              onMergeOne: (contactId) => openMergeModal(contactId),
+              onMergeSelected: (leftContactId, rightContactId) =>
+                openMergeModal(leftContactId, rightContactId, true),
+              onAddToGroupsOne: (contactId) => handleAddToGroup([contactId]),
+              onAddToGroupsSelected: (contactIds) => handleAddToGroup(contactIds),
+              onDeleteOne: handleDeleteContact,
+              onDeleteSelected: handleDeleteSelected,
+            }}
+            loadMoreAction={{
+              label: "Load another 50 contacts",
+              onClick: handleLoadMore,
+              loading: isLoadingMore,
+            }}
+            hasMoreToLoad={contacts.length < totalAvailableCount}
+          />
         </Paper>
       </WrapperComponent>
     </PageWrapper>

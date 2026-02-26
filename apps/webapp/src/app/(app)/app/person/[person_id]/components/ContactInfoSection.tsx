@@ -15,28 +15,33 @@ import {
   Tooltip,
 } from "@mantine/core";
 import {
+  IconCopy,
   IconDotsVertical,
   IconMail,
   IconPlus,
   IconMailSpark,
+  IconMessage,
   IconPhone,
   IconPhoneSpark,
-  IconStarFilled,
+  IconStar,
   IconTrash,
 } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
 import { IMaskInput } from "react-imask";
-import { useTranslations } from "next-intl";
 import type { PhoneEntry, EmailEntry, ContactType } from "@bondery/types";
 import {
   TELEPHONE_PREFIX_OPTIONS,
   getTelephoneReactMaskExpression,
   parsePhoneNumber,
 } from "@/lib/phoneHelpers";
-import { CONTACT_METHOD_TYPE_OPTIONS } from "@/lib/config";
+import { EMAIL_TYPE_OPTIONS, PHONE_TYPE_OPTIONS } from "@/lib/config";
 import { ActionIconLink } from "@bondery/mantine-next";
+import { TypePicker } from "@/app/(app)/app/components/shared/TypePicker";
+import { notifications } from "@mantine/notifications";
+import { errorNotificationTemplate, successNotificationTemplate } from "@bondery/mantine-next";
 
 const MAX_ENTRIES = 5;
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 interface ContactInfoSectionProps {
   phones: PhoneEntry[];
@@ -45,7 +50,58 @@ interface ContactInfoSectionProps {
   onPhonesChange: (phones: PhoneEntry[]) => void;
   onEmailsChange: (emails: EmailEntry[]) => void;
   onSave: (payload?: { phones?: PhoneEntry[]; emails?: EmailEntry[] }) => void;
+  mode?: "all" | "phones" | "emails";
+  showTitle?: boolean;
+  labels?: Partial<ContactInfoLabels>;
 }
+
+export interface ContactInfoLabels {
+  title: string;
+  typeHome: string;
+  typeWork: string;
+  phoneNumbers: string;
+  phonePlaceholder: string;
+  typeLabel: string;
+  callAction: string;
+  sendSmsAction: string;
+  copyAction: string;
+  copySuccessTitle: string;
+  phoneCopiedMessage: string;
+  emailCopiedMessage: string;
+  invalidEmailTitle: string;
+  invalidEmailMessage: string;
+  setAsPreferred: string;
+  deleteAction: string;
+  addPhone: string;
+  emailAddresses: string;
+  emailPlaceholder: string;
+  sendEmailAction: string;
+  addEmail: string;
+}
+
+const DEFAULT_CONTACT_INFO_LABELS: ContactInfoLabels = {
+  title: "Contact Info",
+  typeHome: "Home",
+  typeWork: "Work",
+  phoneNumbers: "Phone numbers",
+  phonePlaceholder: "Phone number",
+  typeLabel: "Type",
+  callAction: "Call",
+  sendSmsAction: "Send SMS",
+  copyAction: "Copy",
+  copySuccessTitle: "Success",
+  phoneCopiedMessage: "Phone number copied to clipboard",
+  emailCopiedMessage: "Email address copied to clipboard",
+  invalidEmailTitle: "Invalid email",
+  invalidEmailMessage: "Please enter a valid email address",
+  setAsPreferred: "Set as preferred",
+  deleteAction: "Delete",
+  addPhone: "Add phone",
+  emailAddresses: "Email addresses",
+  emailPlaceholder: "Email address",
+  sendEmailAction: "Send email",
+  addEmail: "Add email",
+};
 
 function createDraftPhone(): PhoneEntry {
   return {
@@ -68,10 +124,12 @@ function PrefixSelect({
   value,
   onChange,
   style,
+  ariaLabel,
 }: {
   value: string;
   onChange: (v: string) => void;
   style?: React.CSSProperties;
+  ariaLabel?: string;
 }) {
   const selected = TELEPHONE_PREFIX_OPTIONS.find((option) => option.value === value);
 
@@ -93,6 +151,7 @@ function PrefixSelect({
       searchable
       size="sm"
       style={style}
+      aria-label={ariaLabel}
     />
   );
 }
@@ -104,18 +163,46 @@ export function ContactInfoSection({
   onPhonesChange,
   onEmailsChange,
   onSave,
+  mode = "all",
+  showTitle = true,
+  labels,
 }: ContactInfoSectionProps) {
-  const t = useTranslations("ContactInfo");
+  const text: ContactInfoLabels = {
+    ...DEFAULT_CONTACT_INFO_LABELS,
+    ...labels,
+  };
 
-  const contactTypeOptions = CONTACT_METHOD_TYPE_OPTIONS.map((option) => ({
+  const phoneTypeOptions = PHONE_TYPE_OPTIONS.map((option) => ({
     value: option.value,
-    label: `${option.emoji} ${option.value === "home" ? t("TypeHome") : t("TypeWork")}`,
+    label: option.value === "home" ? text.typeHome : text.typeWork,
+    emoji: option.emoji,
+  }));
+
+  const emailTypeOptions = EMAIL_TYPE_OPTIONS.map((option) => ({
+    value: option.value,
+    label: option.value === "home" ? text.typeHome : text.typeWork,
+    emoji: option.emoji,
   }));
 
   const [draftPhone, setDraftPhone] = useState<PhoneEntry>(createDraftPhone());
   const [draftEmail, setDraftEmail] = useState<EmailEntry>(createDraftEmail());
   const [localPhones, setLocalPhones] = useState<PhoneEntry[]>(phones);
   const [localEmails, setLocalEmails] = useState<EmailEntry[]>(emails);
+
+  const showInvalidEmailNotification = () => {
+    notifications.show(
+      errorNotificationTemplate({
+        title: text.invalidEmailTitle,
+        description: text.invalidEmailMessage,
+      }),
+    );
+  };
+
+  const hasInvalidEmail = (entries: EmailEntry[]) =>
+    entries.some((email) => {
+      const normalized = email.value.trim();
+      return Boolean(normalized) && !EMAIL_REGEX.test(normalized);
+    });
 
   useEffect(() => {
     setLocalPhones(phones);
@@ -127,6 +214,8 @@ export function ContactInfoSection({
 
   const isPhoneLimitReached = localPhones.length >= MAX_ENTRIES;
   const isEmailLimitReached = localEmails.length >= MAX_ENTRIES;
+  const showPhones = mode !== "emails";
+  const showEmails = mode !== "phones";
 
   const persistPhones = (nextPhones: PhoneEntry[]) => {
     setLocalPhones(nextPhones);
@@ -135,6 +224,11 @@ export function ContactInfoSection({
   };
 
   const persistEmails = (nextEmails: EmailEntry[]) => {
+    if (hasInvalidEmail(nextEmails)) {
+      showInvalidEmailNotification();
+      return;
+    }
+
     setLocalEmails(nextEmails);
     onEmailsChange(nextEmails);
     onSave({ emails: nextEmails });
@@ -146,6 +240,11 @@ export function ContactInfoSection({
   };
 
   const saveCurrentEmails = () => {
+    if (hasInvalidEmail(localEmails)) {
+      showInvalidEmailNotification();
+      return;
+    }
+
     onEmailsChange(localEmails);
     onSave({ emails: localEmails });
   };
@@ -236,6 +335,11 @@ export function ContactInfoSection({
       return;
     }
 
+    if (!EMAIL_REGEX.test(nextValue)) {
+      showInvalidEmailNotification();
+      return;
+    }
+
     const nextEmail: EmailEntry = {
       ...draftEmail,
       value: nextValue,
@@ -278,279 +382,370 @@ export function ContactInfoSection({
 
   return (
     <div>
-      <Text size="sm" fw={600} mb="md">
-        {t("Title")}
-      </Text>
+      {showTitle ? (
+        <Text size="sm" fw={600} mb="md">
+          {text.title}
+        </Text>
+      ) : null}
       <Flex gap="xl" direction={{ base: "column", md: "row" }}>
-        {/* Phones Column */}
-        <Stack gap="sm" style={{ flex: "1 1 0", minWidth: 0 }}>
-          <Text size="sm" c="dimmed">
-            {t("PhoneNumbers")}
-          </Text>
-
-          {localPhones.map((phone, index) => (
-            <Card
-              key={index}
-              withBorder
-              p="sm"
-              radius="md"
-              style={{
-                position: "relative",
-                overflow: "visible",
-                borderColor: phone.preferred ? "var(--mantine-color-orange-6)" : undefined,
-              }}
-            >
-              <Group gap="xs" align="center" wrap="nowrap">
-                <ActionIconLink
-                  variant="light"
-                  color={phone.preferred ? "orange" : "blue"}
-                  href={
-                    phone.prefix && phone.value ? `tel:${phone.prefix}${phone.value}` : undefined
-                  }
-                  disabled={!phone.value}
-                  ariaLabel={t("PhoneNumbers")}
-                >
-                  {phone.preferred ? <IconPhoneSpark size={18} /> : <IconPhone size={18} />}
-                </ActionIconLink>
-
-                <PrefixSelect
-                  value={phone.prefix || "+1"}
-                  onChange={(prefix) => handlePhonePrefixChange(index, prefix)}
-                  style={{ flex: "0 0 110px" }}
-                />
-
-                <Input
-                  component={IMaskInput}
-                  mask={getTelephoneReactMaskExpression(phone.prefix || "+1")}
-                  unmask
-                  placeholder={t("PhonePlaceholder")}
-                  value={phone.value}
-                  onAccept={(value: string) => handlePhoneChange(index, value)}
-                  onBlur={saveCurrentPhones}
-                  onKeyDown={(event) => {
-                    if (event.key === "Enter") {
-                      event.preventDefault();
-                      saveCurrentPhones();
+        {showPhones ? (
+          <Stack gap="sm" style={{ flex: "1 1 0", minWidth: 0 }}>
+            {localPhones.map((phone, index) => (
+              <Card
+                key={index}
+                withBorder
+                p="sm"
+                radius="md"
+                style={{
+                  position: "relative",
+                  overflow: "visible",
+                  borderColor: phone.preferred ? "var(--mantine-color-orange-6)" : undefined,
+                }}
+              >
+                <Group gap="xs" align="center" wrap="nowrap">
+                  <ActionIconLink
+                    variant="light"
+                    color={phone.preferred ? "orange" : "blue"}
+                    href={
+                      phone.prefix && phone.value ? `tel:${phone.prefix}${phone.value}` : undefined
                     }
-                  }}
-                  style={{ flex: "1 1 auto" }}
-                  rightSection={savingField === "phones" ? <Loader size="xs" /> : null}
-                  disabled={savingField === "phones"}
-                  size="sm"
-                />
+                    disabled={!phone.value}
+                    ariaLabel={text.phoneNumbers}
+                    icon={phone.preferred ? <IconPhoneSpark size={18} /> : <IconPhone size={18} />}
+                  />
 
-                <Select
-                  value={phone.type}
-                  onChange={(val) => handlePhoneTypeChange(index, val as ContactType)}
-                  data={contactTypeOptions}
-                  style={{ flex: "0 0 110px" }}
-                  size="sm"
-                />
+                  <PrefixSelect
+                    value={phone.prefix || "+1"}
+                    onChange={(prefix) => handlePhonePrefixChange(index, prefix)}
+                    style={{ flex: "0 0 110px" }}
+                    ariaLabel="Phone prefix"
+                  />
 
-                <Menu withinPortal position="bottom-end">
-                  <Menu.Target>
-                    <ActionIcon ml="auto" variant="subtle" disabled={savingField === "phones"}>
-                      <IconDotsVertical size={16} />
+                  <Input
+                    component={IMaskInput}
+                    mask={getTelephoneReactMaskExpression(phone.prefix || "+1")}
+                    unmask
+                    placeholder={text.phonePlaceholder}
+                    value={phone.value}
+                    onAccept={(value: string) => handlePhoneChange(index, value)}
+                    onBlur={saveCurrentPhones}
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter") {
+                        event.preventDefault();
+                        saveCurrentPhones();
+                      }
+                    }}
+                    style={{ flex: "1 1 auto" }}
+                    rightSection={savingField === "phones" ? <Loader size="xs" /> : null}
+                    disabled={savingField === "phones"}
+                    size="sm"
+                    aria-label={text.phonePlaceholder}
+                  />
+
+                  <TypePicker
+                    value={phone.type}
+                    onChange={(value) => handlePhoneTypeChange(index, value as ContactType)}
+                    data={phoneTypeOptions}
+                    style={{ flex: "0 0 110px" }}
+                    size="sm"
+                    ariaLabel={text.typeLabel}
+                  />
+
+                  <Menu withinPortal position="bottom-end">
+                    <Menu.Target>
+                      <ActionIcon
+                        ml="auto"
+                        variant="subtle"
+                        disabled={savingField === "phones"}
+                        aria-label="Phone actions"
+                      >
+                        <IconDotsVertical size={16} />
+                      </ActionIcon>
+                    </Menu.Target>
+                    <Menu.Dropdown>
+                      <Menu.Item
+                        leftSection={<IconPhone size={14} />}
+                        disabled={!phone.value}
+                        onClick={() => {
+                          if (typeof window !== "undefined" && phone.value) {
+                            window.location.href = `tel:${phone.prefix}${phone.value}`;
+                          }
+                        }}
+                      >
+                        {text.callAction}
+                      </Menu.Item>
+                      <Menu.Item
+                        leftSection={<IconMessage size={14} />}
+                        disabled={!phone.value}
+                        onClick={() => {
+                          if (typeof window !== "undefined" && phone.value) {
+                            window.location.href = `sms:${phone.prefix}${phone.value}`;
+                          }
+                        }}
+                      >
+                        {text.sendSmsAction}
+                      </Menu.Item>
+                      <Menu.Item
+                        leftSection={<IconCopy size={14} />}
+                        disabled={!phone.value}
+                        onClick={() => {
+                          void navigator.clipboard.writeText(
+                            `${phone.prefix || ""}${phone.value || ""}`,
+                          );
+                          notifications.show(
+                            successNotificationTemplate({
+                              title: text.copySuccessTitle,
+                              description: text.phoneCopiedMessage,
+                            }),
+                          );
+                        }}
+                      >
+                        {text.copyAction}
+                      </Menu.Item>
+                      <Menu.Item
+                        leftSection={<IconStar size={14} />}
+                        disabled={phone.preferred}
+                        onClick={() => handlePhonePreferredChange(index)}
+                      >
+                        {text.setAsPreferred}
+                      </Menu.Item>
+                      <Menu.Item
+                        color="red"
+                        leftSection={<IconTrash size={14} />}
+                        onClick={() => handleRemovePhone(index)}
+                      >
+                        {text.deleteAction}
+                      </Menu.Item>
+                    </Menu.Dropdown>
+                  </Menu>
+                </Group>
+              </Card>
+            ))}
+
+            {!isPhoneLimitReached ? (
+              <Card withBorder p="sm" radius="md">
+                <Group gap="xs" align="center" wrap="nowrap">
+                  <Tooltip label={text.addPhone} withArrow>
+                    <ActionIcon
+                      variant="light"
+                      color="green"
+                      aria-label={text.addPhone}
+                      onClick={handleCommitDraftPhone}
+                      disabled={savingField === "phones"}
+                    >
+                      <IconPlus size={18} />
                     </ActionIcon>
-                  </Menu.Target>
-                  <Menu.Dropdown>
-                    <Menu.Item
-                      leftSection={<IconStarFilled size={14} />}
-                      disabled={phone.preferred}
-                      onClick={() => handlePhonePreferredChange(index)}
-                    >
-                      {t("SetAsPreferred")}
-                    </Menu.Item>
-                    <Menu.Item
-                      color="red"
-                      leftSection={<IconTrash size={14} />}
-                      onClick={() => handleRemovePhone(index)}
-                    >
-                      {t("DeleteAction")}
-                    </Menu.Item>
-                  </Menu.Dropdown>
-                </Menu>
-              </Group>
-            </Card>
-          ))}
+                  </Tooltip>
 
-          {!isPhoneLimitReached ? (
-            <Card withBorder p="sm" radius="md">
-              <Group gap="xs" align="center" wrap="nowrap">
-                <Tooltip label={t("AddPhone")} withArrow>
-                  <ActionIcon variant="light" color="green" aria-label={t("AddPhone")}>
-                    <IconPlus size={18} />
-                  </ActionIcon>
-                </Tooltip>
+                  <PrefixSelect
+                    value={draftPhone.prefix || "+1"}
+                    onChange={(prefix) => setDraftPhone((previous) => ({ ...previous, prefix }))}
+                    style={{ flex: "0 0 110px" }}
+                    ariaLabel="Phone prefix"
+                  />
 
-                <PrefixSelect
-                  value={draftPhone.prefix || "+1"}
-                  onChange={(prefix) => setDraftPhone((previous) => ({ ...previous, prefix }))}
-                  style={{ flex: "0 0 110px" }}
-                />
+                  <Input
+                    component={IMaskInput}
+                    mask={getTelephoneReactMaskExpression(draftPhone.prefix || "+1")}
+                    unmask
+                    placeholder={text.phonePlaceholder}
+                    value={draftPhone.value}
+                    onAccept={(value: string) => handleDraftPhoneChange(value)}
+                    onBlur={handleCommitDraftPhone}
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter") {
+                        event.preventDefault();
+                        handleCommitDraftPhone();
+                      }
+                    }}
+                    style={{ flex: "1 1 auto" }}
+                    disabled={savingField === "phones"}
+                    size="sm"
+                    aria-label={text.phonePlaceholder}
+                  />
 
-                <Input
-                  component={IMaskInput}
-                  mask={getTelephoneReactMaskExpression(draftPhone.prefix || "+1")}
-                  unmask
-                  placeholder={t("PhonePlaceholder")}
-                  value={draftPhone.value}
-                  onAccept={(value: string) => handleDraftPhoneChange(value)}
-                  onBlur={handleCommitDraftPhone}
-                  onKeyDown={(event) => {
-                    if (event.key === "Enter") {
-                      event.preventDefault();
-                      handleCommitDraftPhone();
+                  <TypePicker
+                    value={draftPhone.type}
+                    onChange={(value) =>
+                      setDraftPhone((previous) => ({
+                        ...previous,
+                        type: (value as ContactType) || "home",
+                      }))
                     }
-                  }}
-                  style={{ flex: "1 1 auto" }}
-                  disabled={savingField === "phones"}
-                  size="sm"
-                />
+                    data={phoneTypeOptions}
+                    style={{ flex: "0 0 110px" }}
+                    size="sm"
+                    disabled={savingField === "phones"}
+                    ariaLabel={text.typeLabel}
+                  />
+                </Group>
+              </Card>
+            ) : null}
+          </Stack>
+        ) : null}
 
-                <Select
-                  value={draftPhone.type}
-                  onChange={(value) =>
-                    setDraftPhone((previous) => ({
-                      ...previous,
-                      type: (value as ContactType) || "home",
-                    }))
-                  }
-                  data={contactTypeOptions}
-                  style={{ flex: "0 0 110px" }}
-                  size="sm"
-                  disabled={savingField === "phones"}
-                />
-              </Group>
-            </Card>
-          ) : null}
-        </Stack>
+        {showEmails ? (
+          <Stack gap="sm" style={{ flex: "1 1 0", minWidth: 0 }}>
+            {localEmails.map((email, index) => (
+              <Card
+                key={index}
+                withBorder
+                p="sm"
+                radius="md"
+                style={{
+                  position: "relative",
+                  overflow: "visible",
+                  borderColor: email.preferred ? "var(--mantine-color-orange-6)" : undefined,
+                }}
+              >
+                <Group gap="xs" align="center" wrap="nowrap">
+                  <ActionIconLink
+                    variant="light"
+                    color={email.preferred ? "orange" : "red"}
+                    href={email.value ? `mailto:${email.value}` : undefined}
+                    disabled={!email.value}
+                    ariaLabel={text.emailAddresses}
+                    icon={email.preferred ? <IconMailSpark size={18} /> : <IconMail size={18} />}
+                  />
 
-        {/* Emails Column */}
-        <Stack gap="sm" style={{ flex: "1 1 0", minWidth: 0 }}>
-          <Text size="sm" c="dimmed">
-            {t("EmailAddresses")}
-          </Text>
+                  <TextInput
+                    placeholder={text.emailPlaceholder}
+                    value={email.value}
+                    onChange={(e) => handleEmailChange(index, e.target.value)}
+                    onBlur={saveCurrentEmails}
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter") {
+                        event.preventDefault();
+                        saveCurrentEmails();
+                      }
+                    }}
+                    style={{ flex: 1 }}
+                    rightSection={savingField === "emails" ? <Loader size="xs" /> : null}
+                    disabled={savingField === "emails"}
+                    size="sm"
+                    aria-label={text.emailPlaceholder}
+                  />
 
-          {localEmails.map((email, index) => (
-            <Card
-              key={index}
-              withBorder
-              p="sm"
-              radius="md"
-              style={{
-                position: "relative",
-                overflow: "visible",
-                borderColor: email.preferred ? "var(--mantine-color-orange-6)" : undefined,
-              }}
-            >
-              <Group gap="xs" align="center" wrap="nowrap">
-                <ActionIconLink
-                  variant="light"
-                  color={email.preferred ? "orange" : "red"}
-                  href={email.value ? `mailto:${email.value}` : undefined}
-                  disabled={!email.value}
-                  ariaLabel={t("EmailAddresses")}
-                >
-                  {email.preferred ? <IconMailSpark size={18} /> : <IconMail size={18} />}
-                </ActionIconLink>
+                  <TypePicker
+                    value={email.type}
+                    onChange={(value) => handleEmailTypeChange(index, value as ContactType)}
+                    data={emailTypeOptions}
+                    style={{ flex: "0 0 110px" }}
+                    size="sm"
+                    ariaLabel={text.typeLabel}
+                  />
 
-                <TextInput
-                  placeholder={t("EmailPlaceholder")}
-                  value={email.value}
-                  onChange={(e) => handleEmailChange(index, e.target.value)}
-                  onBlur={saveCurrentEmails}
-                  onKeyDown={(event) => {
-                    if (event.key === "Enter") {
-                      event.preventDefault();
-                      saveCurrentEmails();
-                    }
-                  }}
-                  style={{ flex: 1 }}
-                  rightSection={savingField === "emails" ? <Loader size="xs" /> : null}
-                  disabled={savingField === "emails"}
-                  size="sm"
-                />
+                  <Menu withinPortal position="bottom-end">
+                    <Menu.Target>
+                      <ActionIcon
+                        ml="auto"
+                        variant="subtle"
+                        disabled={savingField === "emails"}
+                        aria-label="Email actions"
+                      >
+                        <IconDotsVertical size={16} />
+                      </ActionIcon>
+                    </Menu.Target>
+                    <Menu.Dropdown>
+                      <Menu.Item
+                        leftSection={<IconMail size={14} />}
+                        disabled={!email.value}
+                        onClick={() => {
+                          if (typeof window !== "undefined" && email.value) {
+                            window.location.href = `mailto:${email.value}`;
+                          }
+                        }}
+                      >
+                        {text.sendEmailAction}
+                      </Menu.Item>
+                      <Menu.Item
+                        leftSection={<IconCopy size={14} />}
+                        disabled={!email.value}
+                        onClick={() => {
+                          void navigator.clipboard.writeText(email.value || "");
+                          notifications.show(
+                            successNotificationTemplate({
+                              title: text.copySuccessTitle,
+                              description: text.emailCopiedMessage,
+                            }),
+                          );
+                        }}
+                      >
+                        {text.copyAction}
+                      </Menu.Item>
+                      <Menu.Item
+                        leftSection={<IconStar size={14} />}
+                        disabled={email.preferred}
+                        onClick={() => handleEmailPreferredChange(index)}
+                      >
+                        {text.setAsPreferred}
+                      </Menu.Item>
+                      <Menu.Item
+                        color="red"
+                        leftSection={<IconTrash size={14} />}
+                        onClick={() => handleRemoveEmail(index)}
+                      >
+                        {text.deleteAction}
+                      </Menu.Item>
+                    </Menu.Dropdown>
+                  </Menu>
+                </Group>
+              </Card>
+            ))}
 
-                <Select
-                  value={email.type}
-                  onChange={(val) => handleEmailTypeChange(index, val as ContactType)}
-                  data={contactTypeOptions}
-                  style={{ flex: "0 0 110px" }}
-                  size="sm"
-                />
-
-                <Menu withinPortal position="bottom-end">
-                  <Menu.Target>
-                    <ActionIcon ml="auto" variant="subtle" disabled={savingField === "emails"}>
-                      <IconDotsVertical size={16} />
+            {!isEmailLimitReached ? (
+              <Card withBorder p="sm" radius="md">
+                <Group gap="xs" align="center" wrap="nowrap">
+                  <Tooltip label={text.addEmail} withArrow>
+                    <ActionIcon
+                      variant="light"
+                      color="green"
+                      aria-label={text.addEmail}
+                      onClick={handleCommitDraftEmail}
+                      disabled={savingField === "emails"}
+                    >
+                      <IconPlus size={18} />
                     </ActionIcon>
-                  </Menu.Target>
-                  <Menu.Dropdown>
-                    <Menu.Item
-                      leftSection={<IconStarFilled size={14} />}
-                      disabled={email.preferred}
-                      onClick={() => handleEmailPreferredChange(index)}
-                    >
-                      {t("SetAsPreferred")}
-                    </Menu.Item>
-                    <Menu.Item
-                      color="red"
-                      leftSection={<IconTrash size={14} />}
-                      onClick={() => handleRemoveEmail(index)}
-                    >
-                      {t("DeleteAction")}
-                    </Menu.Item>
-                  </Menu.Dropdown>
-                </Menu>
-              </Group>
-            </Card>
-          ))}
+                  </Tooltip>
 
-          {!isEmailLimitReached ? (
-            <Card withBorder p="sm" radius="md">
-              <Group gap="xs" align="center" wrap="nowrap">
-                <Tooltip label={t("AddEmail")} withArrow>
-                  <ActionIcon variant="light" color="green" aria-label={t("AddEmail")}>
-                    <IconPlus size={18} />
-                  </ActionIcon>
-                </Tooltip>
-
-                <TextInput
-                  placeholder={t("EmailPlaceholder")}
-                  value={draftEmail.value}
-                  onChange={(event) =>
-                    setDraftEmail((previous) => ({ ...previous, value: event.target.value }))
-                  }
-                  onBlur={handleCommitDraftEmail}
-                  onKeyDown={(event) => {
-                    if (event.key === "Enter") {
-                      event.preventDefault();
-                      handleCommitDraftEmail();
+                  <TextInput
+                    placeholder={text.emailPlaceholder}
+                    value={draftEmail.value}
+                    onChange={(event) =>
+                      setDraftEmail((previous) => ({ ...previous, value: event.target.value }))
                     }
-                  }}
-                  style={{ flex: 1 }}
-                  disabled={savingField === "emails"}
-                  size="sm"
-                />
+                    onBlur={handleCommitDraftEmail}
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter") {
+                        event.preventDefault();
+                        handleCommitDraftEmail();
+                      }
+                    }}
+                    style={{ flex: 1 }}
+                    disabled={savingField === "emails"}
+                    size="sm"
+                    aria-label={text.emailPlaceholder}
+                  />
 
-                <Select
-                  value={draftEmail.type}
-                  onChange={(value) =>
-                    setDraftEmail((previous) => ({
-                      ...previous,
-                      type: (value as ContactType) || "home",
-                    }))
-                  }
-                  data={contactTypeOptions}
-                  style={{ flex: "0 0 110px" }}
-                  size="sm"
-                  disabled={savingField === "emails"}
-                />
-              </Group>
-            </Card>
-          ) : null}
-        </Stack>
+                  <TypePicker
+                    value={draftEmail.type}
+                    onChange={(value) =>
+                      setDraftEmail((previous) => ({
+                        ...previous,
+                        type: (value as ContactType) || "home",
+                      }))
+                    }
+                    data={emailTypeOptions}
+                    style={{ flex: "0 0 110px" }}
+                    size="sm"
+                    disabled={savingField === "emails"}
+                    ariaLabel={text.typeLabel}
+                  />
+                </Group>
+              </Card>
+            ) : null}
+          </Stack>
+        ) : null}
       </Flex>
     </div>
   );

@@ -7,11 +7,26 @@ interface StatsCardProps {
   description: string;
   icon: ReactNode;
   color?: string;
+  href?: string;
 }
 
-export function StatsCard({ title, value, description, icon, color = "blue" }: StatsCardProps) {
+export function StatsCard({
+  title,
+  value,
+  description,
+  icon,
+  color = "blue",
+  href,
+}: StatsCardProps) {
   return (
-    <Paper withBorder p="md" shadow="sm" className="card-scale-effect">
+    <Paper
+      component={href ? "a" : "div"}
+      href={href}
+      withBorder
+      p="md"
+      shadow="none"
+      className="card-scale-effect"
+    >
       <Group justify="space-between">
         <div>
           <Text c="dimmed" size="xs" tt="uppercase" fw={700}>

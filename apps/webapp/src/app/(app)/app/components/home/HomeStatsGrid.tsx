@@ -27,6 +27,7 @@ export function HomeStatsGrid({ stats, labels }: HomeStatsGridProps) {
         description={labels.totalContactsDescription}
         icon={<IconUsers size={32} stroke={1.5} />}
         color="blue"
+        href="/app/people"
       />
       <StatsCard
         title={labels.interactionsTitle}
@@ -34,6 +35,7 @@ export function HomeStatsGrid({ stats, labels }: HomeStatsGridProps) {
         description={labels.interactionsDescription}
         icon={<IconMessageCircle size={32} stroke={1.5} />}
         color="green"
+        href="/app/timeline"
       />
       <StatsCard
         title={labels.newContactsTitle}
@@ -41,6 +43,7 @@ export function HomeStatsGrid({ stats, labels }: HomeStatsGridProps) {
         description={labels.newContactsDescription}
         icon={<IconUserPlus size={32} stroke={1.5} />}
         color="violet"
+        href="/app/people"
       />
     </SimpleGrid>
   );

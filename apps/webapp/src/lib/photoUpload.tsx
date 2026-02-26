@@ -22,6 +22,7 @@ export interface PhotoUploadTranslations {
   InvalidFile: string;
   DragImageHere: string;
   UpdateProfilePhoto: string;
+  Back?: string;
   Cancel: string;
   ConfirmPhoto: string;
   UploadingPhoto: string;
@@ -57,8 +58,29 @@ export async function openPhotoUploadModal(
 ) {
   const modalId = "photo-upload-modal";
 
-  const handlePhotoSelect = (file: File, preview: string) => {
-    // Update the existing modal to show confirmation step
+  const openUploadStep = () => {
+    modals.open({
+      modalId,
+      title: (
+        <ModalTitle text={translations.TitleModal} icon={<IconPhoto size={20} stroke={1.5} />} />
+      ),
+      children: (
+        <PhotoUploadModal
+          onPhotoSelect={(file: File, preview: string) => openConfirmStep(file, preview)}
+          translations={{
+            TitleModal: translations.TitleModal,
+            AttachProfilePhoto: translations.AttachProfilePhoto,
+            UpdateError: translations.UpdateError,
+            InvalidFile: translations.InvalidFile,
+            DragImageHere: translations.DragImageHere,
+          }}
+        />
+      ),
+      size: "lg",
+    });
+  };
+
+  const openConfirmStep = (file: File, preview: string) => {
     modals.open({
       modalId,
       title: (
@@ -70,18 +92,18 @@ export async function openPhotoUploadModal(
       children: (
         <PhotoConfirmModal
           preview={preview}
+          onBack={() => openUploadStep()}
           onCancel={() => modals.close(modalId)}
           onConfirm={() => handlePhotoConfirm(file)}
           translations={{
             UpdateProfilePhoto: translations.UpdateProfilePhoto,
+            Back: translations.Back,
             Cancel: translations.Cancel,
             ConfirmPhoto: translations.ConfirmPhoto,
           }}
         />
       ),
-      centered: true,
-      size: "md",
-      withCloseButton: true,
+      size: "lg",
     });
   };
 
@@ -93,7 +115,6 @@ export async function openPhotoUploadModal(
         title: translations.UploadingPhoto,
         description: translations.PleaseWait,
       }),
-      
     });
 
     try {
@@ -137,25 +158,5 @@ export async function openPhotoUploadModal(
     }
   };
 
-  modals.open({
-    modalId,
-    title: (
-      <ModalTitle text={translations.TitleModal} icon={<IconPhoto size={20} stroke={1.5} />} />
-    ),
-    children: (
-      <PhotoUploadModal
-        onPhotoSelect={(file: File, preview: string) => handlePhotoSelect(file, preview)}
-        translations={{
-          TitleModal: translations.TitleModal,
-          AttachProfilePhoto: translations.AttachProfilePhoto,
-          UpdateError: translations.UpdateError,
-          InvalidFile: translations.InvalidFile,
-          DragImageHere: translations.DragImageHere,
-        }}
-      />
-    ),
-    centered: true,
-    size: "lg",
-    withCloseButton: true,
-  });
+  openUploadStep();
 }

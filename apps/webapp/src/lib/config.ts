@@ -2,7 +2,12 @@
  * Application configuration constants
  */
 
-import type { ContactType, ImportantEventType, RelationshipType } from "@bondery/types";
+import type {
+  ContactAddressType,
+  ContactType,
+  ImportantEventType,
+  RelationshipType,
+} from "@bondery/types";
 import { IMPORTANT_EVENT_TYPE_META } from "@bondery/helpers";
 
 export const WEBAPP_URL = process.env.NEXT_PUBLIC_WEBAPP_URL!;
@@ -18,6 +23,7 @@ function normalizeApiBaseUrl(rawUrl: string): string {
 }
 
 export const API_URL = normalizeApiBaseUrl(process.env.NEXT_PUBLIC_API_URL!);
+export const MAPS_URL = process.env.NEXT_PUBLIC_MAPS_URL || "https://api.mapy.com";
 
 export const INPUT_MAX_LENGTHS = {
   firstName: 50,
@@ -76,6 +82,34 @@ export const CONTACT_METHOD_TYPE_OPTIONS: ReadonlyArray<{
 }> = [
   { value: "home", emoji: "🏠", label: "Home" },
   { value: "work", emoji: "💼", label: "Work" },
+] as const;
+
+export const PHONE_TYPE_OPTIONS: ReadonlyArray<{
+  value: ContactType;
+  emoji: string;
+  label: string;
+}> = [
+  { value: "home", emoji: "🏠", label: "Home" },
+  { value: "work", emoji: "💼", label: "Work" },
+] as const;
+
+export const EMAIL_TYPE_OPTIONS: ReadonlyArray<{
+  value: ContactType;
+  emoji: string;
+  label: string;
+}> = [
+  { value: "home", emoji: "🏠", label: "Home" },
+  { value: "work", emoji: "💼", label: "Work" },
+] as const;
+
+export const ADDRESS_TYPE_OPTIONS: ReadonlyArray<{
+  value: ContactAddressType;
+  emoji: string;
+  label: string;
+}> = [
+  { value: "home", emoji: "🏠", label: "Home" },
+  { value: "work", emoji: "💼", label: "Work" },
+  { value: "other", emoji: "📍", label: "Other" },
 ] as const;
 
 /**

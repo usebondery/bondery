@@ -43,9 +43,13 @@ export function PageHeader({
           </ActionIcon>
         ) : null}
         {!backOnClick && backHref && (
-          <ActionIconLink href={backHref} ariaLabel="Back" variant="default" size="xl">
-            <IconArrowLeft size={20} />
-          </ActionIconLink>
+          <ActionIconLink
+            href={backHref}
+            ariaLabel="Back"
+            variant="default"
+            size="xl"
+            icon={<IconArrowLeft size={20} />}
+          />
         )}
         <Icon size={32} stroke={1.5} />
         <Title order={1}>{title}</Title>

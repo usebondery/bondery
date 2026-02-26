@@ -95,7 +95,6 @@ export function openStandardConfirmModal({
     centered,
     closeOnClickOutside: false,
     closeOnEscape: false,
-    withCloseButton: true,
     children: (
       <StandardConfirmModalBody
         modalId={modalId}

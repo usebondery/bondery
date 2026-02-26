@@ -29,6 +29,7 @@ import { notifications } from "@mantine/notifications";
 import { modals } from "@mantine/modals";
 import type { Contact, LinkedInPreparedContact } from "@bondery/types";
 import {
+  DropzoneContent,
   ModalFooter,
   errorNotificationTemplate,
   ModalTitle,
@@ -133,6 +134,17 @@ function toPreviewContact(contact: LinkedInPreparedContact): Contact {
     location: null,
     latitude: null,
     longitude: null,
+    addressLine1: null,
+    addressLine2: null,
+    addressCity: null,
+    addressPostalCode: null,
+    addressState: null,
+    addressStateCode: null,
+    addressCountry: null,
+    addressCountryCode: null,
+    addressGranularity: "address",
+    addressFormatted: null,
+    addressGeocodeSource: null,
   };
 }
 
@@ -167,16 +179,7 @@ export function LinkedInImportModal({
   const [isImporting, setIsImporting] = useState(false);
   const [parsedContacts, setParsedContacts] = useState<LinkedInPreparedContact[]>([]);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
-  const folderInputRef = useRef<HTMLInputElement | null>(null);
-
-  useEffect(() => {
-    if (!folderInputRef.current) {
-      return;
-    }
-
-    folderInputRef.current.setAttribute("webkitdirectory", "");
-    folderInputRef.current.setAttribute("directory", "");
-  }, []);
+  const openRef = useRef<() => void>(null);
 
   const previewContacts = useMemo(() => parsedContacts.map(toPreviewContact), [parsedContacts]);
 
@@ -308,12 +311,6 @@ export function LinkedInImportModal({
     } finally {
       setIsParsing(false);
     }
-  };
-
-  const handleFolderChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(event.target.files || []);
-    void parseUpload(files);
-    event.target.value = "";
   };
 
   const handleImport = async () => {
@@ -465,6 +462,7 @@ export function LinkedInImportModal({
     return (
       <Stack gap="md">
         <Dropzone
+          openRef={openRef}
           onDrop={(files) => {
             void parseUpload(files);
           }}
@@ -480,35 +478,11 @@ export function LinkedInImportModal({
           maxSize={30 * 1024 * 1024}
           accept={LINKEDIN_ACCEPTED_MIME_TYPES as unknown as string[]}
         >
-          <Group justify="center" gap="xl" mih={220} style={{ pointerEvents: "none" }}>
-            <Dropzone.Accept>
-              <IconUpload size={52} stroke={1.5} />
-            </Dropzone.Accept>
-            <Dropzone.Reject>
-              <IconX size={52} stroke={1.5} />
-            </Dropzone.Reject>
-            <Dropzone.Idle>
-              <IconFileZip size={52} stroke={1.5} />
-            </Dropzone.Idle>
-
-            <div>
-              <Text size="xl" inline>
-                {t("DropzoneTitle")}
-              </Text>
-              <Text size="sm" c="dimmed" inline mt="xs">
-                {t("DropzoneDescription")}
-              </Text>
-            </div>
-          </Group>
+          <DropzoneContent
+            title={t("DropzoneTitle")}
+            description={t("DropzoneDescription")}
+          />
         </Dropzone>
-
-        <input
-          ref={folderInputRef}
-          type="file"
-          multiple
-          style={{ display: "none" }}
-          onChange={handleFolderChange}
-        />
 
         <ModalFooter
           backLabel={t("Back")}
@@ -517,7 +491,7 @@ export function LinkedInImportModal({
           cancelLabel={t("Cancel")}
           onCancel={closeModal}
           actionLabel={t("SelectZipFile")}
-          onAction={() => folderInputRef.current?.click()}
+          onAction={() => openRef.current?.()}
           actionLeftSection={<IconFileZip size={16} />}
         />
       </Stack>

@@ -15,6 +15,11 @@ import {
   replaceContactPhones,
 } from "../lib/contact-channels.js";
 import {
+  attachContactAddresses,
+  parseAddressEntries,
+  replaceContactAddresses,
+} from "../lib/contact-addresses.js";
+import {
   attachContactSocialMedia,
   findPersonIdBySocialMedia,
   upsertContactSocialMedia,
@@ -22,6 +27,7 @@ import {
 import { GROUP_SELECT } from "./groups.js";
 import type {
   Contact,
+  ContactAddressEntry,
   CreateContactInput,
   UpdateContactInput,
   DeleteContactsRequest,
@@ -66,7 +72,18 @@ export const CONTACT_SELECT = `
   pgpPublicKey:pgp_public_key,
   location,
   latitude,
-  longitude
+  longitude,
+  addressLine1:address_line1,
+  addressLine2:address_line2,
+  addressCity:address_city,
+  addressPostalCode:address_postal_code,
+  addressState:address_state,
+  addressStateCode:address_state_code,
+  addressCountry:address_country,
+  addressCountryCode:address_country_code,
+  addressGranularity:address_granularity,
+  addressFormatted:address_formatted,
+  addressGeocodeSource:address_geocode_source
 `;
 
 const RELATIONSHIP_SELECT = `
@@ -709,11 +726,12 @@ function deriveReminderDateKey(event: {
 
 function withEmptyChannels<T extends { id: string }>(
   rows: T[],
-): Array<T & { phones: []; emails: [] }> {
+): Array<T & { phones: []; emails: []; addresses: [] }> {
   return rows.map((row) => ({
     ...row,
     phones: [],
     emails: [],
+    addresses: [],
   }));
 }
 
@@ -970,18 +988,31 @@ export async function contactRoutes(fastify: FastifyInstance) {
         contactsWithChannels = withEmptyChannels(contacts || []);
       }
 
+      let contactsWithAddresses = [] as Awaited<
+        ReturnType<typeof attachContactAddresses<(typeof contactsWithChannels)[number]>>
+      >;
+      try {
+        contactsWithAddresses = await attachContactAddresses(client, user.id, contactsWithChannels);
+      } catch (addressError) {
+        fastify.log.error({ addressError }, "Failed to attach contact addresses for contact list");
+        contactsWithAddresses = contactsWithChannels.map((contact) => ({
+          ...contact,
+          addresses: [],
+        }));
+      }
+
       let contactsWithSocialMedia = [] as Awaited<
-        ReturnType<typeof attachContactSocialMedia<(typeof contactsWithChannels)[number]>>
+        ReturnType<typeof attachContactSocialMedia<(typeof contactsWithAddresses)[number]>>
       >;
       try {
         contactsWithSocialMedia = await attachContactSocialMedia(
           client,
           user.id,
-          contactsWithChannels,
+          contactsWithAddresses,
         );
       } catch (socialError) {
         fastify.log.error({ socialError }, "Failed to attach social media for contact list");
-        contactsWithSocialMedia = withEmptySocialMedia(contactsWithChannels);
+        contactsWithSocialMedia = withEmptySocialMedia(contactsWithAddresses);
       }
 
       return {
@@ -1328,17 +1359,30 @@ export async function contactRoutes(fastify: FastifyInstance) {
         contactsWithChannels = withEmptyChannels(personRows || []);
       }
 
-      let contacts = [] as Awaited<
-        ReturnType<typeof attachContactSocialMedia<(typeof contactsWithChannels)[number]>>
+      let contactsWithAddresses = [] as Awaited<
+        ReturnType<typeof attachContactAddresses<(typeof contactsWithChannels)[number]>>
       >;
       try {
-        contacts = await attachContactSocialMedia(client, user.id, contactsWithChannels);
+        contactsWithAddresses = await attachContactAddresses(client, user.id, contactsWithChannels);
+      } catch (addressError) {
+        fastify.log.error({ addressError }, "Failed to attach addresses for merge recommendations");
+        contactsWithAddresses = contactsWithChannels.map((contact) => ({
+          ...contact,
+          addresses: [],
+        }));
+      }
+
+      let contacts = [] as Awaited<
+        ReturnType<typeof attachContactSocialMedia<(typeof contactsWithAddresses)[number]>>
+      >;
+      try {
+        contacts = await attachContactSocialMedia(client, user.id, contactsWithAddresses);
       } catch (socialError) {
         fastify.log.error(
           { socialError },
           "Failed to attach social media for merge recommendations",
         );
-        contacts = withEmptySocialMedia(contactsWithChannels);
+        contacts = withEmptySocialMedia(contactsWithAddresses);
       }
 
       const contactsById = new Map(contacts.map((contact) => [contact.id, contact]));
@@ -2045,8 +2089,11 @@ export async function contactRoutes(fastify: FastifyInstance) {
 
       try {
         const [contactWithChannels] = await attachContactChannels(client, user.id, [contact]);
-        const [contactWithSocialMedia] = await attachContactSocialMedia(client, user.id, [
+        const [contactWithAddresses] = await attachContactAddresses(client, user.id, [
           contactWithChannels,
+        ]);
+        const [contactWithSocialMedia] = await attachContactSocialMedia(client, user.id, [
+          contactWithAddresses,
         ]);
         return { contact: contactWithSocialMedia };
       } catch (channelError) {
@@ -2597,7 +2644,47 @@ export async function contactRoutes(fastify: FastifyInstance) {
       if (body.nickname !== undefined) updates.nickname = body.nickname;
       if (body.pgpPublicKey !== undefined) updates.pgp_public_key = body.pgpPublicKey;
       if (body.location !== undefined) updates.location = body.location;
+      if (body.addressLine1 !== undefined) updates.address_line1 = body.addressLine1;
+      if (body.addressLine2 !== undefined) updates.address_line2 = body.addressLine2;
+      if (body.addressCity !== undefined) updates.address_city = body.addressCity;
+      if (body.addressPostalCode !== undefined)
+        updates.address_postal_code = body.addressPostalCode;
+      if (body.addressState !== undefined) updates.address_state = body.addressState;
+      if (body.addressStateCode !== undefined) updates.address_state_code = body.addressStateCode;
+      if (body.addressCountry !== undefined) updates.address_country = body.addressCountry;
+      if (body.addressCountryCode !== undefined)
+        updates.address_country_code = body.addressCountryCode;
+      if (body.addressGranularity !== undefined)
+        updates.address_granularity = body.addressGranularity;
+      if (body.addressFormatted !== undefined) updates.address_formatted = body.addressFormatted;
+      if (body.addressGeocodeSource !== undefined)
+        updates.address_geocode_source = body.addressGeocodeSource;
       if (body.lastInteraction !== undefined) updates.last_interaction = body.lastInteraction;
+
+      const hasLatitudeField = Object.prototype.hasOwnProperty.call(body, "latitude");
+      const hasLongitudeField = Object.prototype.hasOwnProperty.call(body, "longitude");
+
+      let nextLatitude: number | null | undefined;
+      let nextLongitude: number | null | undefined;
+
+      if (hasLatitudeField || hasLongitudeField) {
+        nextLatitude = (body.latitude as number | null | undefined) ?? null;
+        nextLongitude = (body.longitude as number | null | undefined) ?? null;
+
+        if ((nextLatitude === null) !== (nextLongitude === null)) {
+          return reply
+            .status(400)
+            .send({ error: "Both latitude and longitude must be provided together" });
+        }
+
+        if (
+          nextLatitude !== null &&
+          nextLongitude !== null &&
+          (!Number.isFinite(nextLatitude) || !Number.isFinite(nextLongitude))
+        ) {
+          return reply.status(400).send({ error: "Invalid latitude/longitude values" });
+        }
+      }
 
       let nextPhones: PhoneEntry[] | undefined;
       if (body.phones !== undefined) {
@@ -2619,6 +2706,33 @@ export async function contactRoutes(fastify: FastifyInstance) {
             parseError instanceof Error ? parseError.message : "Invalid emails payload";
           return reply.status(400).send({ error: message });
         }
+      }
+
+      let nextAddresses: ContactAddressEntry[] | undefined;
+      if (body.addresses !== undefined) {
+        try {
+          nextAddresses = parseAddressEntries(body.addresses);
+        } catch (parseError) {
+          const message =
+            parseError instanceof Error ? parseError.message : "Invalid addresses payload";
+          return reply.status(400).send({ error: message });
+        }
+
+        const preferredAddress =
+          nextAddresses.find((entry) => entry.type === "home") || nextAddresses[0] || null;
+
+        updates.place = preferredAddress?.value ?? null;
+        updates.address_line1 = preferredAddress?.addressLine1 ?? null;
+        updates.address_line2 = preferredAddress?.addressLine2 ?? null;
+        updates.address_city = preferredAddress?.addressCity ?? null;
+        updates.address_postal_code = preferredAddress?.addressPostalCode ?? null;
+        updates.address_state = preferredAddress?.addressState ?? null;
+        updates.address_state_code = preferredAddress?.addressStateCode ?? null;
+        updates.address_country = preferredAddress?.addressCountry ?? null;
+        updates.address_country_code = preferredAddress?.addressCountryCode ?? null;
+        updates.address_granularity = preferredAddress?.addressGranularity ?? "address";
+        updates.address_formatted = preferredAddress?.addressFormatted ?? null;
+        updates.address_geocode_source = preferredAddress?.addressGeocodeSource ?? null;
       }
 
       const socialMediaUpdates: Array<{
@@ -2654,12 +2768,29 @@ export async function contactRoutes(fastify: FastifyInstance) {
       }
 
       try {
+        if (hasLatitudeField || hasLongitudeField) {
+          const { error: locationError } = await client.rpc("set_person_location", {
+            p_person_id: id,
+            p_user_id: user.id,
+            p_latitude: nextLatitude ?? null,
+            p_longitude: nextLongitude ?? null,
+          });
+
+          if (locationError) {
+            return reply.status(500).send({ error: locationError.message });
+          }
+        }
+
         if (nextPhones !== undefined) {
           await replaceContactPhones(client, user.id, id, nextPhones);
         }
 
         if (nextEmails !== undefined) {
           await replaceContactEmails(client, user.id, id, nextEmails);
+        }
+
+        if (nextAddresses !== undefined) {
+          await replaceContactAddresses(client, user.id, id, nextAddresses);
         }
 
         if (socialMediaUpdates.length > 0) {
@@ -2814,8 +2945,11 @@ export async function contactRoutes(fastify: FastifyInstance) {
       let contactWithChannels: Contact;
       try {
         const [mappedContact] = await attachContactChannels(client, user.id, [contact]);
-        const [mappedContactWithSocialMedia] = await attachContactSocialMedia(client, user.id, [
+        const [mappedContactWithAddresses] = await attachContactAddresses(client, user.id, [
           mappedContact,
+        ]);
+        const [mappedContactWithSocialMedia] = await attachContactSocialMedia(client, user.id, [
+          mappedContactWithAddresses,
         ]);
         contactWithChannels = mappedContactWithSocialMedia as Contact;
       } catch (channelError) {

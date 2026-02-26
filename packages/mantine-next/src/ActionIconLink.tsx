@@ -1,13 +1,19 @@
 "use client";
 
-import { ActionIcon, type ActionIconProps } from "@mantine/core";
+import { ActionIcon, Center, type ActionIconProps } from "@mantine/core";
 import Link from "next/link";
-import type { ReactNode } from "react";
+import {
+  cloneElement,
+  isValidElement,
+  type CSSProperties,
+  type ReactElement,
+  type ReactNode,
+} from "react";
 
 export type ActionIconLinkProps = Omit<ActionIconProps, "component" | "href" | "children"> & {
   href?: string;
   ariaLabel: string;
-  children: ReactNode;
+  icon: ReactNode;
   target?: "_blank" | "_self" | "_parent" | "_top";
   rel?: string;
 };
@@ -21,15 +27,46 @@ export type ActionIconLinkProps = Omit<ActionIconProps, "component" | "href" | "
 export function ActionIconLink({
   href,
   ariaLabel,
-  children,
+  icon,
   target,
   rel,
   ...actionIconProps
 }: ActionIconLinkProps) {
+  const iconStyle: CSSProperties = {
+    width: "100%",
+    height: "100%",
+    display: "block",
+  };
+
+  const normalizedIcon = isValidElement(icon)
+    ? cloneElement(icon as ReactElement<{ style?: CSSProperties }>, {
+        style: {
+          ...(icon.props as { style?: CSSProperties }).style,
+          ...iconStyle,
+        },
+      })
+    : icon;
+
+  const renderedIcon = (
+    <Center style={{ width: "100%", height: "100%" }}>
+      <span
+        style={{
+          width: "60%",
+          height: "60%",
+          display: "inline-flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        {normalizedIcon}
+      </span>
+    </Center>
+  );
+
   if (!href) {
     return (
       <ActionIcon aria-label={ariaLabel} {...actionIconProps}>
-        {children}
+        {renderedIcon}
       </ActionIcon>
     );
   }
@@ -44,7 +81,7 @@ export function ActionIconLink({
       aria-label={ariaLabel}
       {...actionIconProps}
     >
-      {children}
+      {renderedIcon}
     </ActionIcon>
   );
 }

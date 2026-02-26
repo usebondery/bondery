@@ -30,6 +30,7 @@ interface GroupCardProps {
   variant?: "default" | "small";
   cursorType?: "pointer" | "default";
   highlightColor?: "primary" | "green" | "red";
+  shadow?: string;
 }
 
 export function GroupCard({
@@ -45,6 +46,7 @@ export function GroupCard({
   variant = "default",
   cursorType,
   highlightColor,
+  shadow = "none",
 }: GroupCardProps) {
   const [menuOpened, setMenuOpened] = useState(false);
   const isSmallVariant = variant === "small";
@@ -83,7 +85,7 @@ export function GroupCard({
 
   return (
     <Card
-      shadow="sm"
+      shadow={shadow}
       p={isSmallVariant ? "sm" : undefined}
       style={{ cursor: cursorType || (interactive ? "pointer" : "default") }}
       className={`${isSmallVariant ? "w-full max-w-none" : "max-w-88"} ${interactive ? "card-scale-effect" : undefined}`}

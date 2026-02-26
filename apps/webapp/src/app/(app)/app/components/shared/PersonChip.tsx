@@ -3,6 +3,7 @@
 import {
   Avatar,
   Badge,
+  type BadgeProps,
   Combobox,
   Group,
   Text,
@@ -41,6 +42,7 @@ interface PersonChipProps {
   onSelectPerson?: (personId: string) => void;
   isClickable?: boolean;
   href?: string;
+  badgeVariant?: BadgeProps["variant"];
 }
 
 export function PersonChip({
@@ -59,6 +61,7 @@ export function PersonChip({
   onSelectPerson,
   isClickable = false,
   href,
+  badgeVariant = "light",
 }: PersonChipProps) {
   const avatarSize = size === "sm" ? 16 : 20;
   const avatarEdgeSize = size === "sm" ? 26 : 32;
@@ -126,8 +129,8 @@ export function PersonChip({
 
   const renderBadge = () => (
     <Badge
-      variant="light"
-      color={person ? color : "gray"}
+      variant={badgeVariant}
+      color={person ? color || "branding-primary" : "gray"}
       size={badgeSize}
       leftSection={leftAvatar}
       rightSection={

@@ -30,12 +30,29 @@
   filter: var(--active-filter);
 }
 
-/* .button-scale-effect:hover,
-.button-scale-effect:focus,
-.button-scale-effect:active {
-  top: 0 !important;
-  translate: 0 !important;
-} */
+.checkbox-scale-effect:not(:disabled):not([data-disabled]):not([disabled]) {
+  transition:
+    transform var(--transition-time) var(--transition-ease),
+    filter var(--transition-time) var(--transition-ease),
+    background-color var(--transition-time) var(--transition-ease);
+}
+
+.mantine-Checkbox-input:hover:not(:disabled):not([data-disabled]):not([disabled]),
+.mantine-Checkbox-input:focus:not(:disabled):not([data-disabled]):not([disabled]) {
+  transform: scale(var(--scale-grow)) !important;
+}
+
+.mantine-Checkbox-input:active:not(:disabled):not([data-disabled]):not([disabled]),
+.mantine-Checkbox-input[data-checked="true"]:active:not(:disabled):not([data-disabled]):not(
+    [disabled]
+  ) {
+  transition:
+    transform var(--transition-time) var(--transition-ease),
+    filter var(--transition-time) var(--transition-ease),
+    background-color var(--transition-time) var(--transition-ease);
+  transform: scale(var(--scale-shrink)) !important;
+  filter: var(--active-filter);
+}
 
 ul {
   /* Fix to bug, probably caused by Mantine */
@@ -80,9 +97,9 @@ ol {
   transition: background-color var(--transition-time-quick) var(--transition-ease);
 }
 
-.mantine-Combobox-option[data-combobox-selected="true"] {
+/* .mantine-Combobox-option[data-combobox-selected="true"] {
   background-color: var(--mantine-primary-color-light);
-}
+} */
 
 .mantine-Combobox-option:hover {
   background-color: var(--mantine-primary-color-light);
