@@ -127,7 +127,7 @@ export function GroupDetailClient({
     },
     {
       key: "place",
-      label: "Place",
+      label: "Location",
       visible: true,
       icon: <IconMapPin size={16} />,
     },

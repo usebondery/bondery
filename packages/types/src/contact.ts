@@ -84,14 +84,6 @@ export interface UpcomingReminder {
 }
 
 /**
- * Geographic position for contact
- */
-export interface Position {
-  lat: number;
-  lng: number;
-}
-
-/**
  * Contact entity - represents a person in the user's network
  * Uses camelCase for API/frontend consumption
  */
@@ -107,7 +99,6 @@ export interface Contact {
   avatar: string | null;
   lastInteraction: string | null;
   createdAt: string;
-  connections: string[] | null;
   /** Array of phone entries with type and preferred flag */
   phones: PhoneEntry[] | Json | null;
   /** Array of email entries with type and preferred flag */
@@ -122,12 +113,9 @@ export interface Contact {
   signal: string | null;
   importantEvents?: ImportantEvent[] | null;
   myself: boolean | null;
-  position: Position | Json | null;
-  gender: string | null;
+  position?: Json | null;
   language: string | null;
   timezone: string | null;
-  nickname: string | null;
-  pgpPublicKey: string | null;
   location: string | null;
   latitude: number | null;
   longitude: number | null;

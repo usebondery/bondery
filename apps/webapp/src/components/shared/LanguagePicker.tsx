@@ -42,11 +42,6 @@ export function LanguagePicker({
     setLanguage(currentValue);
   }, [currentValue]);
 
-  // Update internal value when initialValue changes
-  useEffect(() => {
-    setLanguage(initialValue);
-  }, [initialValue]);
-
   const combobox = useCombobox({
     onDropdownClose: () => {
       combobox.resetSelectedOption();

@@ -19,9 +19,9 @@ import { IMaskInput } from "react-imask";
 import { useTranslations } from "next-intl";
 import {
   combinePhoneNumber,
-  countryCodes,
   getTelephoneReactMaskExpression,
   parsePhoneNumber,
+  TELEPHONE_PREFIX_OPTIONS,
 } from "@/lib/phoneHelpers";
 import { createSocialMediaUrl, extractUsername } from "@/lib/socialMediaHelpers";
 import {
@@ -33,6 +33,7 @@ import {
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import { ContactInfoSection, type ContactInfoLabels } from "./ContactInfoSection";
 import { InlineEditableInput } from "./InlineEditableInput";
+import { getSocialActionTooltip } from "@/lib/socialActionTooltips";
 
 interface SocialMediaSectionProps {
   contact: Contact;
@@ -48,24 +49,6 @@ interface SocialMediaSectionProps {
 type SocialFieldKey = "linkedin" | "instagram" | "facebook" | "website" | "whatsapp" | "signal";
 
 type SocialFieldValues = Record<SocialFieldKey, string>;
-
-const PREFIX_OPTIONS = Array.from(
-  new Map(
-    countryCodes.map((country) => [
-      country.dialCode,
-      {
-        value: country.dialCode,
-        label: country.dialCode,
-      },
-    ]),
-  ).values(),
-);
-
-const DIAL_CODE_TO_FLAG = new Map(countryCodes.map((country) => [country.dialCode, country.flag]));
-
-function getFlagForDialCode(dialCode: string): string {
-  return DIAL_CODE_TO_FLAG.get(dialCode) || "us";
-}
 
 function normalizeWebsiteUrl(value: string): string | null {
   const trimmedValue = value.trim();
@@ -122,20 +105,27 @@ const PrefixSelect = memo(function PrefixSelect({
   value: string;
   onChange: (v: string) => void;
 }) {
-  const selectedFlag = useMemo(() => getFlagForDialCode(value), [value]);
+  const selectedOption = useMemo(
+    () => TELEPHONE_PREFIX_OPTIONS.find((option) => option.value === value),
+    [value],
+  );
 
   return (
     <Select
       value={value}
       onChange={(val) => onChange(val || "+1")}
-      data={PREFIX_OPTIONS}
+      data={TELEPHONE_PREFIX_OPTIONS}
       renderOption={({ option }) => (
         <Group gap="xs">
-          <span className={`fi fi-${getFlagForDialCode(option.value)}`} />
+          <span
+            className={`fi fi-${
+              TELEPHONE_PREFIX_OPTIONS.find((item) => item.value === option.value)?.flag || "us"
+            }`}
+          />
           <span>{option.value}</span>
         </Group>
       )}
-      leftSection={<span className={`fi fi-${selectedFlag}`} />}
+      leftSection={<span className={`fi fi-${selectedOption?.flag || "us"}`} />}
       searchable
       style={{ width: 100 }}
       size="sm"
@@ -550,7 +540,7 @@ export function SocialMediaSection({
           isOpen={openField === "phone"}
           color="blue"
           ariaLabel="Phone"
-          tooltipLabel={t("OpenPhone")}
+          tooltipLabel={getSocialActionTooltip("phone", contact.firstName)}
           href={preferredPhoneHref}
           disabled={!preferredPhoneHref}
           onOpen={openPopover}
@@ -567,7 +557,7 @@ export function SocialMediaSection({
           isOpen={openField === "email"}
           color="red"
           ariaLabel="Email"
-          tooltipLabel={t("OpenEmail")}
+          tooltipLabel={getSocialActionTooltip("email", contact.firstName)}
           href={preferredEmailHref}
           disabled={!preferredEmailHref}
           onOpen={openPopover}
@@ -584,7 +574,7 @@ export function SocialMediaSection({
           isOpen={openField === "linkedin"}
           color="blue"
           ariaLabel="LinkedIn"
-          tooltipLabel={t("OpenInLinkedIn")}
+          tooltipLabel={getSocialActionTooltip("linkedin", contact.firstName)}
           href={
             persistedValues.linkedin
               ? createSocialMediaUrl("linkedin", persistedValues.linkedin)
@@ -613,7 +603,7 @@ export function SocialMediaSection({
           isOpen={openField === "instagram"}
           color="pink"
           ariaLabel="Instagram"
-          tooltipLabel={t("OpenInInstagram")}
+          tooltipLabel={getSocialActionTooltip("instagram", contact.firstName)}
           href={
             persistedValues.instagram
               ? createSocialMediaUrl("instagram", persistedValues.instagram)
@@ -642,7 +632,7 @@ export function SocialMediaSection({
           isOpen={openField === "facebook"}
           color="blue"
           ariaLabel="Facebook"
-          tooltipLabel={t("OpenInFacebook")}
+          tooltipLabel={getSocialActionTooltip("facebook", contact.firstName)}
           href={
             persistedValues.facebook
               ? createSocialMediaUrl("facebook", persistedValues.facebook)
@@ -671,7 +661,7 @@ export function SocialMediaSection({
           isOpen={openField === "whatsapp"}
           color="green"
           ariaLabel="WhatsApp"
-          tooltipLabel={t("OpenInWhatsApp")}
+          tooltipLabel={getSocialActionTooltip("whatsapp", contact.firstName)}
           href={
             hasWhatsAppValue
               ? createSocialMediaUrl("whatsapp", persistedValues.whatsapp)
@@ -716,7 +706,7 @@ export function SocialMediaSection({
           isOpen={openField === "signal"}
           color="cyan"
           ariaLabel="Signal"
-          tooltipLabel={t("OpenInSignal")}
+          tooltipLabel={getSocialActionTooltip("signal", contact.firstName)}
           href={
             hasSignalValue
               ? `signal://signal.me/#p/${persistedValues.signal.replace(/\D/g, "")}`

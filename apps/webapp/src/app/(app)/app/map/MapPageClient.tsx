@@ -131,7 +131,8 @@ export function MapPageClient({ contacts }: MapPageClientProps) {
 
   const initialCenter = useMemo<[number, number]>(() => {
     if (markers.length === 0) {
-      return [42.3314, -83.0458];
+      // Atlantic centre – shows USA and Europe simultaneously at zoom 3
+      return [35, -25];
     }
 
     const [sumLat, sumLon] = markers.reduce(
@@ -156,7 +157,7 @@ export function MapPageClient({ contacts }: MapPageClientProps) {
   const [columns, setColumns] = useState<ColumnConfig[]>([
     { key: "name", label: "Name", visible: true, icon: <IconUser size={16} />, fixed: true },
     { key: "title", label: "Title", visible: true, icon: <IconBriefcase size={16} /> },
-    { key: "place", label: "Place", visible: true, icon: <IconMapPin size={16} /> },
+    { key: "place", label: "Location", visible: true, icon: <IconMapPin size={16} /> },
     {
       key: "lastInteraction",
       label: "Last Interaction",
@@ -272,7 +273,7 @@ export function MapPageClient({ contacts }: MapPageClientProps) {
           <PeopleMap
             markers={markers}
             center={initialCenter}
-            zoom={10}
+            zoom={3}
             height={560}
             focus={mapFocus}
             onVisibleMarkerIdsChange={setVisibleMarkerIds}

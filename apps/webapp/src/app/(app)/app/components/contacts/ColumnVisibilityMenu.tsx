@@ -45,15 +45,30 @@ export function ColumnVisibilityMenu({ columns, setColumns }: ColumnVisibilityMe
       return;
     }
 
-    setColumns(() => {
-      const targetColumns = isVisible ? visibleColumns : hiddenColumns;
+    setColumns((currentColumns) => {
+      const fixedColumns = currentColumns.filter((column) => column.fixed);
+      const currentVisibleColumns = currentColumns.filter(
+        (column) => column.visible && !column.fixed,
+      );
+      const currentHiddenColumns = currentColumns.filter(
+        (column) => !column.visible && !column.fixed,
+      );
+
+      const targetColumns = isVisible ? currentVisibleColumns : currentHiddenColumns;
       const oldIndex = targetColumns.findIndex((col) => col.key === active.id);
       const newIndex = targetColumns.findIndex((col) => col.key === over.id);
 
+      if (oldIndex < 0 || newIndex < 0) {
+        return currentColumns;
+      }
+
       const reordered = arrayMove(targetColumns, oldIndex, newIndex);
 
-      const otherColumns = isVisible ? hiddenColumns : visibleColumns;
-      return isVisible ? [...reordered, ...otherColumns] : [...visibleColumns, ...reordered];
+      const otherColumns = isVisible ? currentHiddenColumns : currentVisibleColumns;
+
+      return isVisible
+        ? [...fixedColumns, ...reordered, ...otherColumns]
+        : [...fixedColumns, ...otherColumns, ...reordered];
     });
   };
 

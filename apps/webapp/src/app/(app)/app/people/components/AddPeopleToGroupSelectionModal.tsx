@@ -33,6 +33,7 @@ import { PersonChip } from "../../components/shared/PersonChip";
 
 interface AddPeopleToGroupSelectionModalProps {
   personIds: string[];
+  onUpdated?: () => Promise<void> | void;
 }
 
 interface AddPeopleToGroupSelectionFormProps extends AddPeopleToGroupSelectionModalProps {
@@ -51,7 +52,11 @@ export function openAddPeopleToGroupSelectionModal(props: AddPeopleToGroupSelect
   });
 }
 
-function AddPeopleToGroupSelectionForm({ personIds, modalId }: AddPeopleToGroupSelectionFormProps) {
+function AddPeopleToGroupSelectionForm({
+  personIds,
+  onUpdated,
+  modalId,
+}: AddPeopleToGroupSelectionFormProps) {
   const router = useRouter();
   const [groups, setGroups] = useState<GroupWithCount[]>([]);
   const [isLoadingGroups, setIsLoadingGroups] = useState(true);
@@ -226,8 +231,12 @@ function AddPeopleToGroupSelectionForm({ personIds, modalId }: AddPeopleToGroupS
       );
 
       modals.close(modalId);
-      await revalidateGroups();
-      router.refresh();
+      if (onUpdated) {
+        await onUpdated();
+      } else {
+        await revalidateGroups();
+        router.refresh();
+      }
     } catch (error) {
       notifications.hide(loadingNotification);
 

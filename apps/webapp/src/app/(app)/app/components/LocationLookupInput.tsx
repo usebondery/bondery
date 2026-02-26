@@ -14,6 +14,7 @@ interface LocationLookupInputProps {
   style?: React.CSSProperties;
   onChange: (value: string) => void;
   onSuggestionSelect: (item: MapSuggestionItem) => void;
+  onBlur?: () => void;
 }
 
 function getSuggestionCountryFlag(item: MapSuggestionItem): string {
@@ -31,6 +32,7 @@ export function LocationLookupInput({
   style,
   onChange,
   onSuggestionSelect,
+  onBlur,
 }: LocationLookupInputProps) {
   const [options, setOptions] = useState<string[]>([]);
   const suggestionsByLabel = useRef<Record<string, MapSuggestionItem>>({});
@@ -80,6 +82,7 @@ export function LocationLookupInput({
         onChange(selectedLabel);
         onSuggestionSelect(selected);
       }}
+      onBlur={onBlur}
       filter={({ options: inputOptions }) => inputOptions}
       renderOption={({ option }) => (
         <Group gap="xs" wrap="nowrap">

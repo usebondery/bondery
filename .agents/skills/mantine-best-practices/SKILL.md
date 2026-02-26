@@ -33,6 +33,7 @@ When creating a dropdown menu, use following rules:
 
 - The action button text should have "..." at the end to indicate that it will open a modal. If it does not open a modal, it should not have "..." at the end.
 - If the modal only has a confirmation step, the action button should not have "..." at the end. If it has more steps, it should have "..." at the end.
+- When an option is disabled put a Tooltip with the reason on hover. This helps users understand why an option is not available and can improve the overall user experience.
 
 # Common mistakes to avoid
 

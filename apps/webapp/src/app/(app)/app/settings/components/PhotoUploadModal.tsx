@@ -2,6 +2,7 @@
 
 import { Dropzone } from "@mantine/dropzone";
 import { notifications } from "@mantine/notifications";
+import { IconPhoto } from "@tabler/icons-react";
 import { AVATAR_UPLOAD } from "@/lib/config";
 import { DropzoneContent, errorNotificationTemplate } from "@bondery/mantine-next";
 
@@ -46,6 +47,9 @@ export function PhotoUploadModal({ onPhotoSelect, translations }: PhotoUploadMod
       <DropzoneContent
         title={translations.DragImageHere}
         description={translations.AttachProfilePhoto}
+        idleIcon={<IconPhoto size={52} stroke={1.5} color="var(--mantine-color-dimmed)" />}
+        acceptIcon={<IconPhoto size={52} stroke={1.5} color="var(--mantine-color-green-6)" />}
+        rejectIcon={<IconPhoto size={52} stroke={1.5} color="var(--mantine-color-red-6)" />}
       />
     </Dropzone>
   );

@@ -42,6 +42,11 @@ import {
 import Image from "next/image";
 import { formatContactName } from "@/lib/nameHelpers";
 import { createSocialMediaUrl } from "@/lib/socialMediaHelpers";
+import {
+  getSocialActionTooltip,
+  SOCIAL_ACTION_ORDER,
+  type SocialActionKey,
+} from "@/lib/socialActionTooltips";
 import type { Contact } from "@bondery/types";
 import { ActionIconLink } from "@bondery/mantine-next";
 import { PersonChip } from "./shared/PersonChip";
@@ -53,12 +58,13 @@ import { SortMenu, type SortOrder } from "./contacts/SortMenu";
 const COLUMN_DEFINITIONS: Record<ColumnKey, { label: string; icon: React.ReactNode }> = {
   name: { label: "Name", icon: <IconUser size={16} /> },
   title: { label: "Title", icon: <IconBriefcase size={16} /> },
-  place: { label: "Place", icon: <IconMapPin size={16} /> },
+  place: { label: "Location", icon: <IconMapPin size={16} /> },
   lastInteraction: { label: "Last Interaction", icon: <IconClock size={16} /> },
   social: { label: "Social Media", icon: <IconBrandLinkedin size={16} /> },
 };
 
 interface SocialLink {
+  key: SocialActionKey;
   icon: React.ReactNode;
   href?: string;
   color: string;
@@ -67,8 +73,9 @@ interface SocialLink {
 }
 
 function ContactSocialIcons({ contact }: { contact: Contact }) {
-  const socials: SocialLink[] = [
-    {
+  const socialByKey: Record<SocialActionKey, SocialLink> = {
+    phone: {
+      key: "phone",
       icon: <IconPhone size={18} />,
       href: (() => {
         const phones = Array.isArray(contact.phones) ? contact.phones : [];
@@ -85,7 +92,8 @@ function ContactSocialIcons({ contact }: { contact: Contact }) {
         return phones.length === 0;
       })(),
     },
-    {
+    email: {
+      key: "email",
       icon: <IconMail size={18} />,
       href: (() => {
         const emails = Array.isArray(contact.emails) ? contact.emails : [];
@@ -103,57 +111,83 @@ function ContactSocialIcons({ contact }: { contact: Contact }) {
         return emails.length === 0;
       })(),
     },
-    {
+    linkedin: {
+      key: "linkedin",
       icon: <IconBrandLinkedin size={18} />,
       href: contact.linkedin ? createSocialMediaUrl("linkedin", contact.linkedin) : undefined,
       color: "blue",
       label: "LinkedIn",
       disabled: !contact.linkedin,
     },
-    {
+    instagram: {
+      key: "instagram",
       icon: <IconBrandInstagram size={18} />,
       href: contact.instagram ? createSocialMediaUrl("instagram", contact.instagram) : undefined,
       color: "pink",
       label: "Instagram",
       disabled: !contact.instagram,
     },
-    {
+    whatsapp: {
+      key: "whatsapp",
       icon: <IconBrandWhatsapp size={18} />,
       href: contact.whatsapp ? createSocialMediaUrl("whatsapp", contact.whatsapp) : undefined,
       color: "green",
       label: "WhatsApp",
       disabled: !contact.whatsapp,
     },
-    {
+    facebook: {
+      key: "facebook",
       icon: <IconBrandFacebook size={18} />,
       href: contact.facebook ? createSocialMediaUrl("facebook", contact.facebook) : undefined,
       color: "blue",
       label: "Facebook",
       disabled: !contact.facebook,
     },
-    {
+    signal: {
+      key: "signal",
       icon: <Image src="/icons/signal.svg" alt="Signal" width={18} height={18} />,
       href: contact.signal || undefined,
       color: "indigo",
       label: "Signal",
       disabled: !contact.signal,
     },
-  ];
+  };
+
+  const socials: SocialLink[] = SOCIAL_ACTION_ORDER.map((key) => socialByKey[key]);
+
   return (
-    <Group gap="xs">
-      {socials
-        .filter((s) => !s.disabled)
-        .map((s) => (
-          <ActionIconLink
-            key={s.label}
-            variant="light"
-            color={s.color}
-            href={s.href}
-            target={s.href && s.href.startsWith("http") ? "_blank" : undefined}
-            ariaLabel={s.label}
-            icon={s.icon}
-          />
-        ))}
+    <Group wrap="nowrap" className="gap-1!">
+      {socials.map((social) => {
+        if (!social || social.disabled) {
+          return (
+            <Space
+              key={social.key}
+              w={"calc(1.75rem * var(--mantine-scale))"}
+              h={"calc(1.75rem * var(--mantine-scale))"}
+            />
+          );
+        }
+
+        return (
+          <Tooltip
+            key={social.key}
+            label={getSocialActionTooltip(social.key, contact.firstName)}
+            withArrow
+          >
+            <span>
+              <ActionIconLink
+                variant="light"
+                color={social.color}
+                href={social.href}
+                size="md"
+                target={social.href && social.href.startsWith("http") ? "_blank" : undefined}
+                ariaLabel={social.label}
+                icon={social.icon}
+              />
+            </span>
+          </Tooltip>
+        );
+      })}
     </Group>
   );
 }
@@ -552,9 +586,27 @@ export default function ContactsTable({
                         </TableTd>
                       );
                     case "title":
-                      return <TableTd key={col.key}>{contact.title || "-"}</TableTd>;
+                      const titleValue = contact.title || "-";
+                      return (
+                        <TableTd key={col.key}>
+                          <Tooltip label={titleValue} withArrow>
+                            <Text size="sm" lineClamp={1}>
+                              {titleValue}
+                            </Text>
+                          </Tooltip>
+                        </TableTd>
+                      );
                     case "place":
-                      return <TableTd key={col.key}>{contact.place || "-"}</TableTd>;
+                      const placeValue = contact.place || "-";
+                      return (
+                        <TableTd key={col.key}>
+                          <Tooltip label={placeValue} withArrow>
+                            <Text size="sm" lineClamp={1}>
+                              {placeValue}
+                            </Text>
+                          </Tooltip>
+                        </TableTd>
+                      );
                     case "lastInteraction":
                       return (
                         <TableTd key={col.key}>
@@ -565,7 +617,7 @@ export default function ContactsTable({
                       );
                     case "social":
                       return (
-                        <TableTd key={col.key}>
+                        <TableTd key={col.key} style={{ whiteSpace: "nowrap" }}>
                           <ContactSocialIcons contact={contact} />
                         </TableTd>
                       );

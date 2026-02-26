@@ -207,7 +207,23 @@ export default function PersonClient({
         signal: contact.signal || "",
       }));
     }
-  }, [contact]);
+  }, [
+    contact?.id,
+    contact?.phones,
+    contact?.emails,
+    contact?.whatsapp,
+    contact?.signal,
+    contact?.firstName,
+    contact?.middleName,
+    contact?.lastName,
+    contact?.title,
+    contact?.place,
+    contact?.notes,
+    contact?.linkedin,
+    contact?.instagram,
+    contact?.facebook,
+    contact?.website,
+  ]);
 
   // Initialize rich text editor
   const editor = useEditor({
@@ -238,24 +254,19 @@ export default function PersonClient({
   }, [contact?.notes, editor]);
 
   const handleContactFieldSave = async (field: string, value: string) => {
-    console.log(`[DEBUG] handleContactFieldSave called with field: ${field}, value: ${value}`);
-
     if (!contact || !personId) {
-      console.log("[DEBUG] No contact or personId, returning early");
       return;
     }
 
-    // Check if value actually changed
     const originalValue = contact[field as keyof Contact] || "";
-    console.log(`[DEBUG] Original value: ${originalValue}, New value: ${value}`);
-
     if (value === originalValue) {
-      console.log("[DEBUG] Values are the same, no update needed");
       return;
     }
 
-    console.log("[DEBUG] Starting API call...");
-    setSavingField(field);
+    const shouldTrackGlobalLoading = field !== "language" && field !== "timezone";
+    if (shouldTrackGlobalLoading) {
+      setSavingField(field);
+    }
 
     try {
       const res = await fetch(`${API_ROUTES.CONTACTS}/${personId}`, {
@@ -264,17 +275,18 @@ export default function PersonClient({
         body: JSON.stringify({ [field]: value }),
       });
 
-      console.log("[DEBUG] API call response:", res.status, res.statusText);
-
       if (!res.ok) throw new Error("Failed to update");
 
-      // Update local state
-      setContact({
-        ...contact,
-        [field]: value,
-      } as Contact);
+      if (field !== "language" && field !== "timezone") {
+        setContact(
+          (previous) =>
+            ({
+              ...previous,
+              [field]: value,
+            }) as Contact,
+        );
+      }
 
-      console.log("[DEBUG] Showing success notification");
       notifications.show(
         successNotificationTemplate({
           title: "Success",
@@ -282,7 +294,6 @@ export default function PersonClient({
         }),
       );
     } catch (error) {
-      console.error("[DEBUG] API call failed:", error);
       notifications.show(
         errorNotificationTemplate({
           title: "Error",
@@ -290,8 +301,9 @@ export default function PersonClient({
         }),
       );
     } finally {
-      console.log("[DEBUG] API call finished, clearing saving field");
-      setSavingField(null);
+      if (shouldTrackGlobalLoading) {
+        setSavingField(null);
+      }
     }
   };
 
@@ -502,6 +514,8 @@ export default function PersonClient({
         ...previous,
         addresses: payload.addresses,
         place: preferredAddress?.value ?? null,
+        latitude: preferredAddress?.latitude ?? null,
+        longitude: preferredAddress?.longitude ?? null,
         addressLine1: preferredAddress?.addressLine1 ?? null,
         addressLine2: preferredAddress?.addressLine2 ?? null,
         addressCity: preferredAddress?.addressCity ?? null,
@@ -606,11 +620,6 @@ export default function PersonClient({
       processedValue = combinePhoneNumber(signalPrefix, value);
     }
 
-    // For PGP key, use the value as-is (it's already processed)
-    if (field === "pgpPublicKey") {
-      processedValue = value;
-    }
-
     // Check if value actually changed
     const originalValue = contact[field as keyof Contact] || "";
     if (processedValue === originalValue) {
@@ -651,8 +660,7 @@ export default function PersonClient({
         [field]: processedValue,
       });
 
-      const fieldDisplayName =
-        field === "pgpPublicKey" ? "PGP key" : field.charAt(0).toUpperCase() + field.slice(1);
+      const fieldDisplayName = field.charAt(0).toUpperCase() + field.slice(1);
 
       notifications.show(
         successNotificationTemplate({
@@ -664,7 +672,7 @@ export default function PersonClient({
       notifications.show(
         errorNotificationTemplate({
           title: "Error",
-          description: `Failed to update ${field === "pgpPublicKey" ? "PGP key" : field}`,
+          description: `Failed to update ${field}`,
         }),
       );
     } finally {
@@ -677,23 +685,27 @@ export default function PersonClient({
     handleSocialMediaSave(field, value);
   };
 
-  const handleContactFieldChange = (field: string, value: string) => {
-    console.log(`[DEBUG] handleContactFieldChange called with field: ${field}, value: ${value}`);
-    // For contact fields like timezone and language, update immediately
-    setContact({
-      ...contact,
-      [field]: value,
-    } as Contact);
-  };
-
   const handleContactFieldBlur = (field: string, value: string) => {
-    console.log(`[DEBUG] handleContactFieldBlur called with field: ${field}, value: ${value}`);
-    // Save to database on blur
     handleContactFieldSave(field, value);
   };
 
   const openAddToGroupsModal = () => {
-    openAddPeopleToGroupSelectionModal({ personIds: [personId] });
+    openAddPeopleToGroupSelectionModal({
+      personIds: [personId],
+      onUpdated: async () => {
+        try {
+          const response = await fetch(`${API_ROUTES.CONTACTS}/${personId}/groups`);
+          if (!response.ok) {
+            return;
+          }
+
+          const payload = (await response.json()) as { groups?: GroupType[] };
+          setPersonGroups(payload.groups || []);
+        } catch {
+          // Keep existing state if groups refresh fails
+        }
+      },
+    });
   };
 
   const handleAddRelationship = async (
@@ -989,7 +1001,6 @@ export default function PersonClient({
             <ContactPreferenceSection
               contact={contact}
               savingField={savingField}
-              handleChange={handleContactFieldChange}
               handleBlur={handleContactFieldBlur}
             />
 

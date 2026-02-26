@@ -98,29 +98,9 @@ async function getPersonData(personId: string) {
     eventsData.events?.filter((a: any) => a.participants?.some((p: any) => p.id === personId)) ||
     [];
 
-  // Fetch connected contacts if they exist
-  let connectedContacts: Contact[] = [];
-  if (contact.connections && contact.connections.length > 0) {
-    const connectionPromises = contact.connections.map((id: string) =>
-      fetch(`${API_URL}${API_ROUTES.CONTACTS}/${id}`, {
-        next: { tags: ["contacts"] },
-        headers,
-      }).then((res) => res.json()),
-    );
-
-    const connectionsData = await Promise.all(connectionPromises);
-    connectedContacts = connectionsData
-      .filter((data) => data.contact)
-      .map((data) => ({
-        ...data.contact,
-        lastInteraction: new Date(data.contact.lastInteraction),
-        createdAt: data.contact.createdAt ? new Date(data.contact.createdAt) : undefined,
-      }));
-  }
-
   return {
     contact,
-    connectedContacts,
+    connectedContacts: [],
     selectableContacts:
       ((contactsData.contacts as Contact[]) || []).filter(
         (candidate) => candidate.id !== personId,

@@ -16,62 +16,54 @@ const TimezoneItem = forwardRef<
     timezoneValue: string;
     isSelected?: boolean;
     currentlySelectedText: string;
+    now: Date;
   }
->(({ label, flag, offset, timezoneValue, isSelected, currentlySelectedText, ...others }, ref) => {
-  const formatter = useFormatter();
-  const [isMounted, setIsMounted] = useState(false);
-  const [now, setNow] = useState(() => new Date());
+>(
+  (
+    { label, flag, offset, timezoneValue, isSelected, currentlySelectedText, now, ...others },
+    ref,
+  ) => {
+    const formatter = useFormatter();
 
-  const currentTime = isMounted
-    ? formatter.dateTime(now, {
-        hour: "2-digit",
-        minute: "2-digit",
-        second: "2-digit",
-        timeZone: timezoneValue,
-      })
-    : "--:--:--";
+    const currentTime = formatter.dateTime(now, {
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      timeZone: timezoneValue,
+    });
 
-  useEffect(() => {
-    setIsMounted(true);
+    const utcLabel = formatOffset(offset);
 
-    const interval = setInterval(() => {
-      setNow(new Date());
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, []);
-
-  const utcLabel = formatOffset(offset);
-
-  return (
-    <div
-      ref={ref}
-      {...others}
-      style={{
-        display: "flex",
-        gap: 8,
-        alignItems: "center",
-        justifyContent: "space-between",
-        width: "100%",
-      }}
-    >
-      <div style={{ display: "flex", gap: 8, alignItems: "center", flex: 1 }}>
-        <span className={`fi fi-${flag || "aq"}`} style={{ width: 20, flexShrink: 0 }} />
-        <div style={{ flex: 1 }}>
-          <Text component="span" size="sm" fw={400}>
-            {label}{" "}
-          </Text>
-          <Text component="span" c={isSelected ? "white" : "dimmed"} size="xs">
-            ({utcLabel})
-          </Text>
+    return (
+      <div
+        ref={ref}
+        {...others}
+        style={{
+          display: "flex",
+          gap: 8,
+          alignItems: "center",
+          justifyContent: "space-between",
+          width: "100%",
+        }}
+      >
+        <div style={{ display: "flex", gap: 8, alignItems: "center", flex: 1 }}>
+          <span className={`fi fi-${flag || "aq"}`} style={{ width: 20, flexShrink: 0 }} />
+          <div style={{ flex: 1 }}>
+            <Text component="span" size="sm" fw={400}>
+              {label}{" "}
+            </Text>
+            <Text component="span" c={isSelected ? "white" : "dimmed"} size="xs">
+              ({utcLabel})
+            </Text>
+          </div>
         </div>
+        <Text size="xs" c={isSelected ? "white" : "dimmed"}>
+          {currentTime}
+        </Text>
       </div>
-      <Text size="xs" c={isSelected ? "white" : "dimmed"}>
-        {currentTime}
-      </Text>
-    </div>
-  );
-});
+    );
+  },
+);
 
 TimezoneItem.displayName = "TimezoneItem";
 
@@ -110,6 +102,15 @@ export function TimezonePicker({
   useEffect(() => {
     setTimezone(currentValue);
   }, [currentValue]);
+
+  // Single timer at parent level – all TimezoneItems share this tick
+  useEffect(() => {
+    setIsMounted(true);
+    const interval = setInterval(() => {
+      setNow(new Date());
+    }, 1000);
+    return () => clearInterval(interval);
+  }, []);
 
   const combobox = useCombobox({
     onDropdownClose: () => {
@@ -155,6 +156,9 @@ export function TimezonePicker({
           timeZone: selectedTimezone.value,
         })
       : "--:--:--";
+
+  // Stable reference for the current tick so dropdown items don't need their own timers
+  const nowForItems = isMounted ? now : new Date(0);
 
   return (
     <Stack gap={4}>
@@ -257,6 +261,7 @@ export function TimezonePicker({
                             timezoneValue={item.value}
                             isSelected={isSelected}
                             currentlySelectedText={t("CurrentlySelected")}
+                            now={nowForItems}
                           />
                         </Combobox.Option>
                       );

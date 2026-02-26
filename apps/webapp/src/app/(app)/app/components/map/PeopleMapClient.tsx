@@ -36,7 +36,8 @@ export function PeopleMapClient({
 }: PeopleMapClientProps) {
   const router = useRouter();
 
-  const defaultCenter = center || ([42.3314, -83.0458] as [number, number]);
+  // Default center over the Atlantic so both USA and Europe are visible at low zoom
+  const defaultCenter = center || ([35, -25] as [number, number]);
 
   const iconById = useMemo(() => {
     const map = new Map<string, DivIcon>();
@@ -109,6 +110,7 @@ export function PeopleMapClient({
                   <Avatar
                     size={38}
                     radius="xl"
+                    variant="filled"
                     color="blue"
                     name={String(cluster.getChildCount())}
                   />

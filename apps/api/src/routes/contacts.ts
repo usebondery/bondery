@@ -62,14 +62,9 @@ export const CONTACT_SELECT = `
   avatar,
   lastInteraction:last_interaction,
   createdAt:created_at,
-  connections,
   myself,
-  position,
-  gender,
   language,
   timezone,
-  nickname,
-  pgpPublicKey:pgp_public_key,
   location,
   latitude,
   longitude,
@@ -144,13 +139,8 @@ const MERGEABLE_SCALAR_FIELDS = {
   place: "place",
   notes: "notes",
   lastInteraction: "last_interaction",
-  connections: "connections",
-  position: "position",
-  gender: "gender",
   language: "language",
   timezone: "timezone",
-  nickname: "nickname",
-  pgpPublicKey: "pgp_public_key",
   location: "location",
   latitude: "latitude",
   longitude: "longitude",
@@ -2636,13 +2626,8 @@ export async function contactRoutes(fastify: FastifyInstance) {
       if (body.place !== undefined) updates.place = body.place;
       if (body.notes !== undefined) updates.notes = body.notes;
       if (body.avatar !== undefined) updates.avatar = body.avatar;
-      if (body.connections !== undefined) updates.connections = body.connections;
-      if (body.position !== undefined) updates.position = body.position;
-      if (body.gender !== undefined) updates.gender = body.gender;
       if (body.language !== undefined) updates.language = body.language;
       if (body.timezone !== undefined) updates.timezone = body.timezone;
-      if (body.nickname !== undefined) updates.nickname = body.nickname;
-      if (body.pgpPublicKey !== undefined) updates.pgp_public_key = body.pgpPublicKey;
       if (body.location !== undefined) updates.location = body.location;
       if (body.addressLine1 !== undefined) updates.address_line1 = body.addressLine1;
       if (body.addressLine2 !== undefined) updates.address_line2 = body.addressLine2;
@@ -2712,6 +2697,22 @@ export async function contactRoutes(fastify: FastifyInstance) {
       if (body.addresses !== undefined) {
         try {
           nextAddresses = parseAddressEntries(body.addresses);
+          request.log.info(
+            {
+              route: "PATCH /contacts/:id",
+              personId: id,
+              addressCount: nextAddresses.length,
+              addresses: nextAddresses.map((entry) => ({
+                type: entry.type,
+                value: entry.value,
+                latitude: entry.latitude,
+                longitude: entry.longitude,
+                addressFormatted: entry.addressFormatted,
+                addressGeocodeSource: entry.addressGeocodeSource,
+              })),
+            },
+            "Parsed addresses payload",
+          );
         } catch (parseError) {
           const message =
             parseError instanceof Error ? parseError.message : "Invalid addresses payload";
@@ -2761,10 +2762,20 @@ export async function contactRoutes(fastify: FastifyInstance) {
 
       updates.updated_at = new Date().toISOString();
 
-      const { error } = await client.from("people").update(updates).eq("id", id);
+      const { data: updatedContact, error } = await client
+        .from("people")
+        .update(updates)
+        .eq("id", id)
+        .eq("user_id", user.id)
+        .select("id")
+        .single();
 
       if (error) {
         return reply.status(500).send({ error: error.message });
+      }
+
+      if (!updatedContact) {
+        return reply.status(404).send({ error: "Contact not found" });
       }
 
       try {
@@ -2790,6 +2801,19 @@ export async function contactRoutes(fastify: FastifyInstance) {
         }
 
         if (nextAddresses !== undefined) {
+          request.log.info(
+            {
+              route: "PATCH /contacts/:id",
+              personId: id,
+              addresses: nextAddresses.map((entry) => ({
+                type: entry.type,
+                value: entry.value,
+                latitude: entry.latitude,
+                longitude: entry.longitude,
+              })),
+            },
+            "Upserting contact addresses",
+          );
           await replaceContactAddresses(client, user.id, id, nextAddresses);
         }
 

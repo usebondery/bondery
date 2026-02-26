@@ -138,11 +138,8 @@ export type Database = {
           address_state: string | null;
           address_state_code: string | null;
           avatar: string | null;
-          avatar_color: string | null;
-          connections: string[] | null;
           created_at: string | null;
           first_name: string;
-          gender: string | null;
           id: string;
           language: string | null;
           last_interaction: string | null;
@@ -152,11 +149,8 @@ export type Database = {
           longitude: number | null;
           middle_name: string | null;
           myself: boolean | null;
-          nickname: string | null;
           notes: string | null;
-          pgp_public_key: string | null;
           place: string | null;
-          position: Json | null;
           timezone: string | null;
           title: string | null;
           updated_at: string | null;
@@ -175,11 +169,8 @@ export type Database = {
           address_state?: string | null;
           address_state_code?: string | null;
           avatar?: string | null;
-          avatar_color?: string | null;
-          connections?: string[] | null;
           created_at?: string | null;
           first_name: string;
-          gender?: string | null;
           id?: string;
           language?: string | null;
           last_interaction?: string | null;
@@ -189,11 +180,8 @@ export type Database = {
           longitude?: number | null;
           middle_name?: string | null;
           myself?: boolean | null;
-          nickname?: string | null;
           notes?: string | null;
-          pgp_public_key?: string | null;
           place?: string | null;
-          position?: Json | null;
           timezone?: string | null;
           title?: string | null;
           updated_at?: string | null;
@@ -212,11 +200,8 @@ export type Database = {
           address_state?: string | null;
           address_state_code?: string | null;
           avatar?: string | null;
-          avatar_color?: string | null;
-          connections?: string[] | null;
           created_at?: string | null;
           first_name?: string;
-          gender?: string | null;
           id?: string;
           language?: string | null;
           last_interaction?: string | null;
@@ -226,11 +211,8 @@ export type Database = {
           longitude?: number | null;
           middle_name?: string | null;
           myself?: boolean | null;
-          nickname?: string | null;
           notes?: string | null;
-          pgp_public_key?: string | null;
           place?: string | null;
-          position?: Json | null;
           timezone?: string | null;
           title?: string | null;
           updated_at?: string | null;
@@ -722,6 +704,15 @@ export type Database = {
           input_timezone: string;
         };
         Returns: string;
+      };
+      set_person_location: {
+        Args: {
+          p_person_id: string;
+          p_user_id: string;
+          p_latitude: number | null;
+          p_longitude: number | null;
+        };
+        Returns: undefined;
       };
       send_daily_reminder_digests: {
         Args: { target_date?: string };

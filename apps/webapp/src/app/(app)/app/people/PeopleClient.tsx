@@ -102,7 +102,7 @@ export function PeopleClient({ initialContacts, totalCount, layout = "stack" }: 
     },
     {
       key: "place",
-      label: "Place",
+      label: "Location",
       visible: true,
       icon: <IconMapPin size={16} />,
     },

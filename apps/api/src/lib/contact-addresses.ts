@@ -39,6 +39,25 @@ function normalizeAddressGranularity(value: unknown): "address" | "city" | "stat
   return "address";
 }
 
+function parseCoordinateValue(value: unknown): number | null {
+  if (typeof value === "number" && Number.isFinite(value)) {
+    return value;
+  }
+
+  if (typeof value === "string") {
+    const trimmed = value.trim();
+    if (trimmed.length === 0) {
+      return null;
+    }
+
+    const normalized = trimmed.replace(",", ".");
+    const parsed = Number(normalized);
+    return Number.isFinite(parsed) ? parsed : null;
+  }
+
+  return null;
+}
+
 function isValidCoordinatePair(latitude: number, longitude: number): boolean {
   return (
     Number.isFinite(latitude) &&
@@ -124,10 +143,8 @@ export function parseAddressEntries(input: unknown): ContactAddressEntry[] {
     const maybeLatitude = (item as Record<string, unknown>).latitude;
     const maybeLongitude = (item as Record<string, unknown>).longitude;
 
-    const latitude =
-      typeof maybeLatitude === "number" && Number.isFinite(maybeLatitude) ? maybeLatitude : null;
-    const longitude =
-      typeof maybeLongitude === "number" && Number.isFinite(maybeLongitude) ? maybeLongitude : null;
+    const latitude = parseCoordinateValue(maybeLatitude);
+    const longitude = parseCoordinateValue(maybeLongitude);
 
     const normalizeNullableText = (value: unknown): string | null => {
       if (typeof value !== "string") return null;

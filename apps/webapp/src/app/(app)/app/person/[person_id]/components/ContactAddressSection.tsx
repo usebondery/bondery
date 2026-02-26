@@ -10,8 +10,10 @@ import {
   IconCopy,
   IconDotsVertical,
   IconMapPin,
+  IconMapPinSearch,
   IconMapPinPlus,
   IconPlus,
+  IconRoute,
   IconStar,
   IconTrash,
 } from "@tabler/icons-react";
@@ -22,7 +24,7 @@ import type { MapSuggestionItem } from "@/app/(app)/app/map/actions";
 import { TypePicker } from "@/app/(app)/app/components/shared/TypePicker";
 import { ActionIconLink, successNotificationTemplate } from "@bondery/mantine-next";
 import { ADDRESS_TYPE_OPTIONS } from "@/lib/config";
-import { PeopleMap } from "@/app/(app)/app/components/map/PeopleMap";
+import { PeopleMap, type PeopleMapFocus } from "@/app/(app)/app/components/map/PeopleMap";
 import { formatContactName } from "@/lib/nameHelpers";
 import { notifications } from "@mantine/notifications";
 
@@ -271,6 +273,47 @@ export function ContactAddressSection({ contact, isSaving, onSave }: ContactAddr
 
   const [addresses, setAddresses] = useState<EditableAddress[]>(() => toEditableAddresses(contact));
   const [draft, setDraft] = useState<DraftAddress>({ type: "home", value: "", suggestion: null });
+  const [mapFocus, setMapFocus] = useState<PeopleMapFocus | null>(null);
+  const [suggestionsByValue, setSuggestionsByValue] = useState<Record<string, MapSuggestionItem>>(
+    {},
+  );
+
+  const toSuggestionKey = (value: string) => value.trim().toLowerCase();
+
+  const getSuggestionForValue = (value: string): MapSuggestionItem | null => {
+    if (!value) {
+      return null;
+    }
+
+    return suggestionsByValue[toSuggestionKey(value)] || null;
+  };
+
+  const hasValidCoordinates = (latitude: number | null, longitude: number | null): boolean => {
+    if (latitude === null || longitude === null) {
+      return false;
+    }
+
+    return Number.isFinite(latitude) && Number.isFinite(longitude);
+  };
+
+  const enrichWithSuggestionIfAvailable = <T extends ContactAddressEntry>(entry: T): T => {
+    if (hasValidCoordinates(entry.latitude, entry.longitude)) {
+      return entry;
+    }
+
+    const suggestion = getSuggestionForValue(entry.value);
+    if (!suggestion) {
+      return entry;
+    }
+
+    const enriched = toAddressFromSuggestion(suggestion, entry.type);
+    return {
+      ...entry,
+      ...enriched,
+      type: entry.type,
+      value: entry.value,
+    } as T;
+  };
 
   useEffect(() => {
     const next = toEditableAddresses(contact);
@@ -281,12 +324,29 @@ export function ContactAddressSection({ contact, isSaving, onSave }: ContactAddr
       ) || "home";
 
     setAddresses(next);
+    setSuggestionsByValue({});
     setDraft({
       type: nextDraftType as ContactAddressType,
       value: "",
       suggestion: null,
     });
-  }, [contact]);
+  }, [
+    contact.addresses,
+    contact.place,
+    contact.addressLine1,
+    contact.addressLine2,
+    contact.addressCity,
+    contact.addressPostalCode,
+    contact.addressState,
+    contact.addressStateCode,
+    contact.addressCountry,
+    contact.addressCountryCode,
+    contact.addressGranularity,
+    contact.addressFormatted,
+    contact.addressGeocodeSource,
+    contact.latitude,
+    contact.longitude,
+  ]);
 
   const usedTypes = new Set(addresses.map((entry) => entry.type));
 
@@ -348,33 +408,39 @@ export function ContactAddressSection({ contact, isSaving, onSave }: ContactAddr
       return;
     }
 
-    const nextBase = draft.suggestion
-      ? toAddressFromSuggestion(draft.suggestion, draft.type)
-      : {
-          type: draft.type,
-          value: normalizedValue,
-          latitude: null,
-          longitude: null,
-          addressLine1: null,
-          addressLine2: null,
-          addressCity: null,
-          addressPostalCode: null,
-          addressState: null,
-          addressStateCode: null,
-          addressCountry: null,
-          addressCountryCode: null,
-          addressGranularity: "address" as const,
-          addressFormatted: null,
-          addressGeocodeSource: "manual",
-        };
+    const fallbackSuggestion = getSuggestionForValue(normalizedValue);
+
+    const nextBase =
+      draft.suggestion || fallbackSuggestion
+        ? toAddressFromSuggestion(
+            (draft.suggestion || fallbackSuggestion) as MapSuggestionItem,
+            draft.type,
+          )
+        : {
+            type: draft.type,
+            value: normalizedValue,
+            latitude: null,
+            longitude: null,
+            addressLine1: null,
+            addressLine2: null,
+            addressCity: null,
+            addressPostalCode: null,
+            addressState: null,
+            addressStateCode: null,
+            addressCountry: null,
+            addressCountryCode: null,
+            addressGranularity: "address" as const,
+            addressFormatted: null,
+            addressGeocodeSource: "manual",
+          };
 
     const nextAddresses = [
       ...addresses,
-      {
+      enrichWithSuggestionIfAvailable({
         ...nextBase,
         id: `${draft.type}-${Date.now()}`,
         value: normalizedValue,
-      },
+      }),
     ];
 
     setAddresses(nextAddresses);
@@ -398,8 +464,12 @@ export function ContactAddressSection({ contact, isSaving, onSave }: ContactAddr
 
     const pendingDraftAddress: EditableAddress | null = canIncludePendingDraft
       ? {
-          ...(draft.suggestion
-            ? toAddressFromSuggestion(draft.suggestion, draft.type)
+          ...(draft.suggestion || getSuggestionForValue(pendingValue as string)
+            ? toAddressFromSuggestion(
+                (draft.suggestion ||
+                  getSuggestionForValue(pendingValue as string)) as MapSuggestionItem,
+                draft.type,
+              )
             : {
                 type: draft.type,
                 value: pendingValue as string,
@@ -435,6 +505,7 @@ export function ContactAddressSection({ contact, isSaving, onSave }: ContactAddr
         value: entry.value.trim(),
       }))
       .filter((entry) => entry.value.length > 0)
+      .map((entry) => enrichWithSuggestionIfAvailable(entry))
       .map(({ id, ...rest }) => rest);
 
     const locationSource = normalized[0] || null;
@@ -504,20 +575,26 @@ export function ContactAddressSection({ contact, isSaving, onSave }: ContactAddr
                       setAddresses((previous) =>
                         previous.map((address) =>
                           address.id === entry.id
-                            ? {
-                                ...address,
-                                value,
-                                latitude: null,
-                                longitude: null,
-                                addressFormatted: null,
-                                addressGeocodeSource: "manual",
-                              }
+                            ? value === address.value
+                              ? address
+                              : {
+                                  ...address,
+                                  value,
+                                  latitude: null,
+                                  longitude: null,
+                                  addressFormatted: null,
+                                  addressGeocodeSource: "manual",
+                                }
                             : address,
                         ),
                       )
                     }
                     onSuggestionSelect={(selected) => {
                       const enriched = toAddressFromSuggestion(selected, entry.type);
+                      setSuggestionsByValue((previous) => ({
+                        ...previous,
+                        [toSuggestionKey(selected.label)]: selected,
+                      }));
                       setAddresses((previous) =>
                         previous.map((address) =>
                           address.id === entry.id
@@ -560,46 +637,75 @@ export function ContactAddressSection({ contact, isSaving, onSave }: ContactAddr
                       </ActionIcon>
                     </Menu.Target>
                     <Menu.Dropdown>
-                      <Menu.Item
-                        leftSection={<IconCopy size={14} />}
-                        disabled={!entry.value}
-                        onClick={() => {
-                          void navigator.clipboard.writeText(entry.value || "");
-                          notifications.show(
-                            successNotificationTemplate({
-                              title: t("CopySuccessTitle"),
-                              description: t("AddressCopiedMessage"),
-                            }),
-                          );
-                        }}
+                      <Tooltip
+                        label={t("DisabledReasonEmptyAddress")}
+                        withArrow
+                        disabled={Boolean(entry.value)}
+                        withinPortal
                       >
-                        {t("CopyAction")}
-                      </Menu.Item>
-                      <Menu.Item
-                        leftSection={<IconStar size={14} />}
-                        disabled={entry.id === preferredAddressId}
-                        onClick={() =>
-                          setAddresses((previous) => {
-                            const selected = previous.find((address) => address.id === entry.id);
-                            if (!selected) return previous;
-                            return [
-                              selected,
-                              ...previous.filter((address) => address.id !== entry.id),
-                            ];
-                          })
-                        }
+                        <span>
+                          <Menu.Item
+                            leftSection={<IconCopy size={14} />}
+                            disabled={!entry.value}
+                            onClick={() => {
+                              void navigator.clipboard.writeText(entry.value || "");
+                              notifications.show(
+                                successNotificationTemplate({
+                                  title: t("CopySuccessTitle"),
+                                  description: t("AddressCopiedMessage"),
+                                }),
+                              );
+                            }}
+                          >
+                            {t("CopyAction")}
+                          </Menu.Item>
+                        </span>
+                      </Tooltip>
+                      <Tooltip
+                        label={t("DisabledReasonNoCoordinates")}
+                        withArrow
+                        disabled={hasValidCoordinates(entry.latitude, entry.longitude)}
+                        withinPortal
                       >
-                        {t("SetAsPreferred")}
-                      </Menu.Item>
+                        <span>
+                          <Menu.Item
+                            leftSection={<IconMapPinSearch size={14} />}
+                            disabled={!hasValidCoordinates(entry.latitude, entry.longitude)}
+                            onClick={() => {
+                              if (!hasValidCoordinates(entry.latitude, entry.longitude)) {
+                                return;
+                              }
+
+                              setMapFocus({
+                                latitude: entry.latitude as number,
+                                longitude: entry.longitude as number,
+                                zoom: 14,
+                                token: `${entry.id}-${Date.now()}`,
+                              });
+                            }}
+                          >
+                            {t("ShowOnMapAction")}
+                          </Menu.Item>
+                        </span>
+                      </Tooltip>
                       <Menu.Sub>
                         <Menu.Sub.Target>
-                          <Menu.Sub.Item
-                            leftSection={<IconMapPin size={14} />}
-                            rightSection={<IconChevronRight size={14} />}
-                            disabled={!entry.value}
+                          <Tooltip
+                            label={t("DisabledReasonEmptyAddress")}
+                            withArrow
+                            disabled={Boolean(entry.value)}
+                            withinPortal
                           >
-                            {t("OpenInMapsAction")}
-                          </Menu.Sub.Item>
+                            <span>
+                              <Menu.Sub.Item
+                                leftSection={<IconRoute size={14} />}
+                                rightSection={<IconChevronRight size={14} />}
+                                disabled={!entry.value}
+                              >
+                                {t("OpenInMapsAction")}
+                              </Menu.Sub.Item>
+                            </span>
+                          </Tooltip>
                         </Menu.Sub.Target>
 
                         <Menu.Sub.Dropdown>
@@ -646,6 +752,33 @@ export function ContactAddressSection({ contact, isSaving, onSave }: ContactAddr
                           </Menu.Item>
                         </Menu.Sub.Dropdown>
                       </Menu.Sub>
+                      <Tooltip
+                        label={t("DisabledReasonAlreadyPreferred")}
+                        withArrow
+                        disabled={entry.id !== preferredAddressId}
+                        withinPortal
+                      >
+                        <span>
+                          <Menu.Item
+                            leftSection={<IconStar size={14} />}
+                            disabled={entry.id === preferredAddressId}
+                            onClick={() =>
+                              setAddresses((previous) => {
+                                const selected = previous.find(
+                                  (address) => address.id === entry.id,
+                                );
+                                if (!selected) return previous;
+                                return [
+                                  selected,
+                                  ...previous.filter((address) => address.id !== entry.id),
+                                ];
+                              })
+                            }
+                          >
+                            {t("SetAsPreferred")}
+                          </Menu.Item>
+                        </span>
+                      </Tooltip>
                       <Menu.Item
                         color="red"
                         leftSection={<IconTrash size={14} />}
@@ -690,16 +823,20 @@ export function ContactAddressSection({ contact, isSaving, onSave }: ContactAddr
                       setDraft((previous) => ({
                         ...previous,
                         value,
-                        suggestion: null,
+                        suggestion: value === previous.value ? previous.suggestion : null,
                       }))
                     }
-                    onSuggestionSelect={(selected) =>
+                    onSuggestionSelect={(selected) => {
+                      setSuggestionsByValue((previous) => ({
+                        ...previous,
+                        [toSuggestionKey(selected.label)]: selected,
+                      }));
                       setDraft((previous) => ({
                         ...previous,
                         value: selected.label,
                         suggestion: selected,
-                      }))
-                    }
+                      }));
+                    }}
                   />
 
                   <TypePicker
@@ -738,13 +875,14 @@ export function ContactAddressSection({ contact, isSaving, onSave }: ContactAddr
               markers={markers}
               center={mapCenter}
               zoom={12}
+              focus={mapFocus}
               height={420}
               disableChipNavigation
             />
           ) : (
             <Card withBorder shadow="none" p="md" radius="md">
               <Text size="sm" c="dimmed">
-                {t("NoResults")}
+                {t("MapEmptyState")}
               </Text>
             </Card>
           )}

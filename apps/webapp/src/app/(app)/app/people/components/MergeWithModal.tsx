@@ -73,16 +73,11 @@ export const MERGE_CONFLICT_FIELDS: MergeConflictField[] = [
   "place",
   "notes",
   "lastInteraction",
-  "connections",
   "phones",
   "emails",
   "importantEvents",
-  "position",
-  "gender",
   "language",
   "timezone",
-  "nickname",
-  "pgpPublicKey",
   "location",
   "latitude",
   "longitude",
@@ -458,20 +453,9 @@ function ConflictOptionCard({ selected, sidePerson, onSelect, children }: Confli
 }
 
 function formatConflictDisplayValue(field: MergeConflictField, value: unknown): string {
-  if (field === "connections" && Array.isArray(value)) {
-    return value.filter(Boolean).join(", ");
-  }
-
   if (field === "importantEvents") {
     const count = normalizeImportantEventsSet(value).length;
     return count > 0 ? `${count}` : "";
-  }
-
-  if (field === "position" && value && typeof value === "object") {
-    const row = value as { lat?: unknown; lng?: unknown };
-    const lat = normalizeDisplayText(row.lat);
-    const lng = normalizeDisplayText(row.lng);
-    return lat && lng ? `${lat}, ${lng}` : "";
   }
 
   if (Array.isArray(value)) {

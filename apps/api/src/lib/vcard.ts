@@ -96,10 +96,6 @@ export async function generateVCard(contact: Contact): Promise<string> {
     .join(" ");
   lines.push(`FN:${escapeVCardValue(fullName)}`);
 
-  if (contact.nickname) {
-    lines.push(`NICKNAME:${escapeVCardValue(contact.nickname)}`);
-  }
-
   lines.push(`UID:urn:uuid:${contact.id}`);
 
   if (contact.title) {
@@ -151,10 +147,6 @@ export async function generateVCard(contact: Contact): Promise<string> {
     lines.push(`LANG:${contact.language}`);
   }
 
-  if (contact.gender) {
-    lines.push(`GENDER:${contact.gender}`);
-  }
-
   // Add IMPP properties for social media accounts
   const socialPlatforms = Object.keys(IMPP_MAPPINGS) as Array<keyof Contact>;
   for (const platform of socialPlatforms) {
@@ -202,12 +194,6 @@ export async function generateVCard(contact: Contact): Promise<string> {
         }
       }
     }
-  }
-
-  if (contact.pgpPublicKey) {
-    const pgpKey = contact.pgpPublicKey.trim();
-    const base64Key = Buffer.from(pgpKey).toString("base64");
-    lines.push(`KEY:data:application/pgp-keys;base64,${base64Key}`);
   }
 
   // Add PHOTO property if avatar exists

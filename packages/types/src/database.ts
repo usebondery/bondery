@@ -127,10 +127,8 @@ export type Database = {
       people: {
         Row: {
           avatar: string | null;
-          connections: string[] | null;
           created_at: string | null;
           first_name: string;
-          gender: string | null;
           id: string;
           language: string | null;
           last_interaction: string | null;
@@ -140,11 +138,8 @@ export type Database = {
           longitude: number | null;
           middle_name: string | null;
           myself: boolean | null;
-          nickname: string | null;
           notes: string | null;
-          pgp_public_key: string | null;
           place: string | null;
-          position: Json | null;
           timezone: string | null;
           title: string | null;
           updated_at: string | null;
@@ -152,10 +147,8 @@ export type Database = {
         };
         Insert: {
           avatar?: string | null;
-          connections?: string[] | null;
           created_at?: string | null;
           first_name: string;
-          gender?: string | null;
           id?: string;
           language?: string | null;
           last_interaction?: string | null;
@@ -165,11 +158,8 @@ export type Database = {
           longitude?: number | null;
           middle_name?: string | null;
           myself?: boolean | null;
-          nickname?: string | null;
           notes?: string | null;
-          pgp_public_key?: string | null;
           place?: string | null;
-          position?: Json | null;
           timezone?: string | null;
           title?: string | null;
           updated_at?: string | null;
@@ -177,10 +167,8 @@ export type Database = {
         };
         Update: {
           avatar?: string | null;
-          connections?: string[] | null;
           created_at?: string | null;
           first_name?: string;
-          gender?: string | null;
           id?: string;
           language?: string | null;
           last_interaction?: string | null;
@@ -190,11 +178,8 @@ export type Database = {
           longitude?: number | null;
           middle_name?: string | null;
           myself?: boolean | null;
-          nickname?: string | null;
           notes?: string | null;
-          pgp_public_key?: string | null;
           place?: string | null;
-          position?: Json | null;
           timezone?: string | null;
           title?: string | null;
           updated_at?: string | null;

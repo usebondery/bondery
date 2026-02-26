@@ -2,6 +2,7 @@
 
 import { Group } from "@mantine/core";
 import type { Contact } from "@bondery/types";
+import { useEffect, useState } from "react";
 import { TimezonePicker } from "@/components/shared/TimezonePicker";
 import { LanguagePicker } from "@/components/shared/LanguagePicker";
 import { WORLD_LANGUAGES_DATA } from "@/lib/languages";
@@ -9,22 +10,28 @@ import { WORLD_LANGUAGES_DATA } from "@/lib/languages";
 interface ContactPreferenceSectionProps {
   contact: Contact;
   savingField: string | null;
-  handleChange: (field: string, value: string) => void;
   handleBlur: (field: string, value: string) => void;
 }
 
 export function ContactPreferenceSection({
   contact,
   savingField,
-  handleChange,
   handleBlur,
 }: ContactPreferenceSectionProps) {
+  const [language, setLanguage] = useState(contact.language || "en");
+  const [timezone, setTimezone] = useState(contact.timezone || "UTC");
+
+  useEffect(() => {
+    setLanguage(contact.language || "en");
+    setTimezone(contact.timezone || "UTC");
+  }, [contact.language, contact.timezone]);
+
   return (
     <Group align="flex-start" grow wrap="wrap">
       <div style={{ flex: 1, minWidth: 260 }}>
         <LanguagePicker
-          value={contact.language || "en"}
-          onChange={(value) => handleChange("language", value)}
+          value={language}
+          onChange={(value) => setLanguage(value)}
           onBlur={(value) => handleBlur("language", value)}
           label="Preferred Language"
           placeholder="Select language..."
@@ -35,8 +42,8 @@ export function ContactPreferenceSection({
 
       <div style={{ flex: 1, minWidth: 260 }}>
         <TimezonePicker
-          value={contact.timezone || "UTC"}
-          onChange={(value) => handleChange("timezone", value)}
+          value={timezone}
+          onChange={(value) => setTimezone(value)}
           onBlur={(value) => handleBlur("timezone", value)}
           label="Timezone"
           placeholder="Select timezone..."

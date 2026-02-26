@@ -189,8 +189,6 @@ export async function getMapSuggestions(query: string): Promise<MapSuggestionIte
     "regional.address,regional.municipality,regional.region,regional.country",
   );
 
-  console.log("[getMapSuggestions] fetching:", upstream.toString());
-
   try {
     const response = await fetch(upstream.toString(), {
       method: "GET",
@@ -199,12 +197,10 @@ export async function getMapSuggestions(query: string): Promise<MapSuggestionIte
     });
 
     if (!response.ok) {
-      console.error("[getMapSuggestions] upstream error:", response.status, response.statusText);
       return [];
     }
 
     const payload = await response.json();
-    console.log("[getMapSuggestions] raw server response:", JSON.stringify(payload, null, 2));
     const rawResults = Array.isArray(payload?.items)
       ? payload.items
       : Array.isArray(payload?.result)
@@ -214,10 +210,8 @@ export async function getMapSuggestions(query: string): Promise<MapSuggestionIte
           : [];
 
     const parsed = (rawResults as any[]).map(parseItem).filter((item) => item.label.length > 0);
-    console.log("[getMapSuggestions] parsed results:", parsed);
     return parsed;
   } catch (err) {
-    console.error("[getMapSuggestions] fetch failed:", err);
     return [];
   }
 }
