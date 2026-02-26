@@ -23,6 +23,7 @@ export default [
       "**/.next/**",
       "**/out/**",
       "**/build/**",
+      "**/dist-web/**",
       "**/.parcel-cache/**",
       "**/next-env.d.ts",
     ],
