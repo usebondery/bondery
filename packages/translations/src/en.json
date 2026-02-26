@@ -704,5 +704,52 @@
       "dependent": "Dependent",
       "other": "Other"
     }
+  },
+  "MobileApp": {
+    "Common": {
+      "UnknownError": "Something went wrong.",
+      "ErrorTitle": "Error",
+      "Cancel": "Cancel",
+      "Delete": "Delete",
+      "Retry": "Retry",
+      "Call": "Call",
+      "Message": "Message",
+      "Select": "Select",
+      "Deselect": "Deselect"
+    },
+    "Contacts": {
+      "Title": "Contacts",
+      "SearchPlaceholder": "Search by name, email, or phone",
+      "SortNameAsc": "Name A-Z",
+      "SortNameDesc": "Name Z-A",
+      "SortSurnameAsc": "Surname A-Z",
+      "SortSurnameDesc": "Surname Z-A",
+      "SelectedCount": "{count} selected",
+      "QuickActions": "Quick actions",
+      "DeleteTitle": "Delete contacts",
+      "DeleteMessage": "Do you really want to delete selected contacts?",
+      "DeleteFailed": "Failed to delete selected contacts.",
+      "MissingPhone": "This contact does not have a phone number.",
+      "ActionFailed": "Unable to open phone action.",
+      "Empty": "No contacts found."
+    },
+    "Settings": {
+      "Title": "Settings",
+      "Account": "Account",
+      "NoEmail": "No email available",
+      "SwipeActions": "Swipe actions",
+      "LeftSwipe": "Left swipe",
+      "RightSwipe": "Right swipe",
+      "Language": "Language",
+      "English": "English",
+      "Czech": "Czech"
+    },
+    "Auth": {
+      "MissingConfig": "Missing mobile auth config. Check EXPO_PUBLIC_* variables.",
+      "MissingAuthUrl": "Authentication URL is missing.",
+      "LoginCancelled": "Login was cancelled.",
+      "CompletingLogin": "Completing login...",
+      "MissingCode": "Missing OAuth authorization code."
+    }
   }
 }

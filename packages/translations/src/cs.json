@@ -701,5 +701,52 @@
       "dependent": "Svěřenec",
       "other": "Jiné"
     }
+  },
+  "MobileApp": {
+    "Common": {
+      "UnknownError": "Něco se pokazilo.",
+      "ErrorTitle": "Chyba",
+      "Cancel": "Zrušit",
+      "Delete": "Smazat",
+      "Retry": "Zkusit znovu",
+      "Call": "Volat",
+      "Message": "Zpráva",
+      "Select": "Vybrat",
+      "Deselect": "Odebrat výběr"
+    },
+    "Contacts": {
+      "Title": "Kontakty",
+      "SearchPlaceholder": "Hledat podle jména, e-mailu nebo telefonu",
+      "SortNameAsc": "Jméno A-Z",
+      "SortNameDesc": "Jméno Z-A",
+      "SortSurnameAsc": "Příjmení A-Z",
+      "SortSurnameDesc": "Příjmení Z-A",
+      "SelectedCount": "Vybráno: {count}",
+      "QuickActions": "Rychlé akce",
+      "DeleteTitle": "Smazat kontakty",
+      "DeleteMessage": "Opravdu chcete smazat vybrané kontakty?",
+      "DeleteFailed": "Vybrané kontakty se nepodařilo smazat.",
+      "MissingPhone": "Tento kontakt nemá telefonní číslo.",
+      "ActionFailed": "Telefonní akci se nepodařilo otevřít.",
+      "Empty": "Nenalezeny žádné kontakty."
+    },
+    "Settings": {
+      "Title": "Nastavení",
+      "Account": "Účet",
+      "NoEmail": "E-mail není dostupný",
+      "SwipeActions": "Akce přejetím",
+      "LeftSwipe": "Přejetí doleva",
+      "RightSwipe": "Přejetí doprava",
+      "Language": "Jazyk",
+      "English": "Angličtina",
+      "Czech": "Čeština"
+    },
+    "Auth": {
+      "MissingConfig": "Chybí konfigurace mobilního přihlášení. Zkontrolujte EXPO_PUBLIC_* proměnné.",
+      "MissingAuthUrl": "Chybí URL pro ověření.",
+      "LoginCancelled": "Přihlášení bylo zrušeno.",
+      "CompletingLogin": "Dokončuji přihlášení...",
+      "MissingCode": "Chybí OAuth autorizační kód."
+    }
   }
 }

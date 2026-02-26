@@ -31,6 +31,7 @@ Apps will be available at:
 - Website: http://localhost:3000
 - Server API: http://localhost:3001
 - Webapp: http://localhost:3002
+- Mobile (Expo): run `npm run dev --workspace=mobile` and open from Expo CLI
 
 ## 📐 Architecture
 
@@ -38,6 +39,7 @@ Bondery is split into multiple deployable units:
 - **apps/website** - Public landing page
 - **apps/webapp** - Authenticated application
 - **apps/api** - Fastify REST API
+- **apps/mobile** - Expo mobile app (Contacts + Settings MVP)
 - **packages/types** - Shared TypeScript types
 
 See [ARCHITECTURE.md](./ARCHITECTURE.md) for detailed architecture documentation.

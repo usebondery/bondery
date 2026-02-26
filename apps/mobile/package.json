@@ -1,0 +1,48 @@
+{
+  "name": "mobile",
+  "version": "0.1.0",
+  "private": true,
+  "main": "expo-router/entry",
+  "scripts": {
+    "dev": "expo start",
+    "android": "expo run:android",
+    "ios": "expo run:ios",
+    "web": "expo start --web",
+    "lint": "eslint .",
+    "check-types": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@bondery/helpers": "*",
+    "@bondery/translations": "*",
+    "@bondery/types": "*",
+    "@react-native-async-storage/async-storage": "^2.2.0",
+    "@supabase/supabase-js": "^2.95.3",
+    "@tabler/icons-react-native": "^3.36.1",
+    "@tamagui/config": "^1.132.14",
+    "@tamagui/core": "^1.132.14",
+    "@tamagui/stacks": "^1.132.14",
+    "@tamagui/text": "^1.132.14",
+    "expo": "^53.0.0",
+    "expo-constants": "^17.1.7",
+    "expo-linking": "^7.1.7",
+    "expo-router": "^5.0.4",
+    "expo-secure-store": "~14.2.4",
+    "expo-status-bar": "^2.2.3",
+    "expo-web-browser": "~14.2.0",
+    "react": "19.2.4",
+    "react-dom": "19.0.0",
+    "react-native": "0.79.4",
+    "react-native-gesture-handler": "^2.25.0",
+    "react-native-reanimated": "^3.17.4",
+    "react-native-safe-area-context": "^5.4.0",
+    "react-native-screens": "^4.11.1",
+    "react-native-svg": "^15.15.3",
+    "react-native-web": "^0.20.0",
+    "zustand": "^5.0.8"
+  },
+  "devDependencies": {
+    "@types/react": "^19.1.2",
+    "@types/react-native": "^0.73.0",
+    "typescript": "^5.8.3"
+  }
+}
