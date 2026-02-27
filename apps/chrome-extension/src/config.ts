@@ -9,7 +9,12 @@
  */
 
 export const config = {
-  // App URL - automatically injected by Parcel based on NODE_ENV
-  // INFO: At dev time, using parcel watch the .env variables are not loaded, only at build time? apparently
+  /** Webapp base URL (used for API calls and redirects) */
   appUrl: process.env.NEXT_PUBLIC_WEBAPP_URL || "http://localhost:3000",
+
+  /** Supabase project URL (for OAuth token endpoints) */
+  supabaseUrl: process.env.PUBLIC_SUPABASE_URL || "http://127.0.0.1:54321",
+
+  /** OAuth 2.1 client ID registered in Supabase Dashboard */
+  oauthClientId: process.env.PRIVATE_SUPABASE_OAUTH_CLIENT_ID || "",
 } as const;

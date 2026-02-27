@@ -14,10 +14,5 @@
   },
   "files": [
     "src"
-  ],
-  "keywords": [
-    "translations",
-    "i18n",
-    "intl"
   ]
 }

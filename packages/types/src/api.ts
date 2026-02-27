@@ -51,6 +51,7 @@ export interface RedirectRequest {
   profileImageUrl?: string;
   title?: string;
   place?: string;
+  notes?: string;
 }
 
 /**

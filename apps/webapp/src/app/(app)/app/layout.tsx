@@ -13,6 +13,7 @@ import type { ColorSchemePreference } from "@bondery/types";
 
 interface UserSettingsLayoutData {
   userName: string;
+  userEmail: string;
   avatarUrl: string | null;
   locale: string;
   timezone: string;
@@ -47,6 +48,7 @@ async function getUserSettings() {
 
       return {
         userName: firstName || settings.email || "User",
+        userEmail: settings.email || "",
         avatarUrl: settings.avatar_url || null,
         locale: "en",
         timezone: settings.timezone || "UTC",
@@ -58,6 +60,7 @@ async function getUserSettings() {
 
   return {
     userName: "User",
+    userEmail: "",
     avatarUrl: null,
     locale: "en",
     timezone: "UTC",
@@ -76,7 +79,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     redirect(WEBSITE_ROUTES.LOGIN);
   }
 
-  const { userName, avatarUrl, locale, timezone, timeFormat, colorScheme } =
+  const { userName, userEmail, avatarUrl, locale, timezone, timeFormat, colorScheme } =
     await getUserSettings();
 
   const messages = translations[locale as keyof typeof translations] || translations.en;
@@ -92,7 +95,11 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         }}
       >
         <AppShellNavbar p="md">
-          <NavigationSidebarContent userName={userName} avatarUrl={avatarUrl} />
+          <NavigationSidebarContent
+            userName={userName}
+            userEmail={userEmail}
+            avatarUrl={avatarUrl}
+          />
         </AppShellNavbar>
         <AppShellMain>{children}</AppShellMain>
       </AppShell>

@@ -71,7 +71,7 @@ export default function LoginPage() {
   return (
     <div className="flex min-h-screen items-center justify-center ">
       <Card p="xl" className="max-w-md">
-        <Stack gap="lg" align="center" hiddenFrom="md">
+        <Stack gap="lg" align="center" hiddenFrom="sm">
           <Logo size={60} href={WEBSITE_URL} />
           <Stack gap="0" align="center">
             <Text size="lg" fw={600} ta="center">
@@ -82,7 +82,7 @@ export default function LoginPage() {
             </Text>
           </Stack>
         </Stack>
-        <Stack gap="md" align="center" visibleFrom="md">
+        <Stack gap="md" align="center" visibleFrom="sm">
           <Logo size={60} href={WEBSITE_URL} />
           <Text size="md" ta="center">
             {t("Description")}
