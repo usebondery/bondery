@@ -1,6 +1,6 @@
 import React, { StrictMode } from "react";
 import ReactDOM from "react-dom/client";
-import FacebookButton from "./FacebookButton";
+import FacebookButton from "../facebook/FacebookButton";
 import { MantineWrapper } from "../shared/MantineWrapper";
 
 function getFacebookSnapshot() {
@@ -153,14 +153,19 @@ function init() {
   }, 500);
 }
 
-chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
-  if (message?.type === "GET_SCRAPED_PROFILE") {
-    sendResponse(getFacebookSnapshot());
-  }
-});
+export default defineContentScript({
+  matches: ["https://www.facebook.com/*"],
+  main() {
+    chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
+      if (message?.type === "GET_SCRAPED_PROFILE") {
+        sendResponse(getFacebookSnapshot());
+      }
+    });
 
-if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", init);
-} else {
-  init();
-}
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", init);
+    } else {
+      init();
+    }
+  },
+});

@@ -15,9 +15,10 @@
     "types": ["chrome", "node"],
     "paths": {
       "@bondery/helpers": ["../../packages/helpers/src/index.ts"],
+      "@bondery/branding": ["../../packages/branding/src/index.ts"],
       "@bondery/branding-src": ["../../packages/branding/src/index.ts"]
     }
   },
-  "include": ["src/**/*", "scripts/**/*"],
-  "exclude": ["node_modules", "dist"]
+  "include": ["src/**/*", "scripts/**/*", "wxt.config.ts", ".wxt/wxt.d.ts"],
+  "exclude": ["node_modules", "dist", ".output"]
 }

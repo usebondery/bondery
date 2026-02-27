@@ -1,7 +1,7 @@
 import React, { StrictMode } from "react";
 import ReactDOM from "react-dom/client";
-import { MantineWrapper } from "../shared/MantineWrapper";
-import WelcomeApp from "./WelcomeApp";
+import { MantineWrapper } from "../../shared/MantineWrapper";
+import WelcomeApp from "../../welcome/WelcomeApp";
 
 const root = document.getElementById("welcome-root");
 

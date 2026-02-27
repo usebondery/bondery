@@ -1,7 +1,7 @@
 import React, { StrictMode } from "react";
 import ReactDOM from "react-dom/client";
 import { SOCIAL_PLATFORM_URL_DETAILS } from "@bondery/helpers";
-import LinkedInButton from "./LinkedInButton";
+import LinkedInButton from "../linkedin/LinkedInButton";
 import { MantineWrapper } from "../shared/MantineWrapper";
 
 function getLinkedInSnapshot() {
@@ -176,14 +176,22 @@ function init() {
   }, 500);
 }
 
-chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
-  if (message?.type === "GET_SCRAPED_PROFILE") {
-    sendResponse(getLinkedInSnapshot());
-  }
-});
+export default defineContentScript({
+  matches: [
+    SOCIAL_PLATFORM_URL_DETAILS.linkedin.hostMatchPattern,
+    "https://linkedin.com/*",
+  ],
+  main() {
+    chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
+      if (message?.type === "GET_SCRAPED_PROFILE") {
+        sendResponse(getLinkedInSnapshot());
+      }
+    });
 
-if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", init);
-} else {
-  init();
-}
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", init);
+    } else {
+      init();
+    }
+  },
+});

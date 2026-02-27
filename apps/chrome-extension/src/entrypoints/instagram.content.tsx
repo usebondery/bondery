@@ -1,7 +1,7 @@
 import React, { StrictMode } from "react";
 import ReactDOM from "react-dom/client";
 import { parseInstagramUsername, SOCIAL_PLATFORM_URL_DETAILS } from "@bondery/helpers";
-import InstagramButton from "./InstagramButton";
+import InstagramButton from "../instagram/InstagramButton";
 import { MantineWrapper } from "../shared/MantineWrapper";
 
 interface InstagramNetworkProfileMeta {
@@ -214,14 +214,22 @@ function init() {
   }, 500);
 }
 
-chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
-  if (message?.type === "GET_SCRAPED_PROFILE") {
-    sendResponse(getInstagramSnapshot());
-  }
-});
+export default defineContentScript({
+  matches: [
+    SOCIAL_PLATFORM_URL_DETAILS.instagram.hostMatchPattern,
+    "https://instagram.com/*",
+  ],
+  main() {
+    chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
+      if (message?.type === "GET_SCRAPED_PROFILE") {
+        sendResponse(getInstagramSnapshot());
+      }
+    });
 
-if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", init);
-} else {
-  init();
-}
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", init);
+    } else {
+      init();
+    }
+  },
+});
