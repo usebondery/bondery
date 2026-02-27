@@ -2,6 +2,8 @@ export { AnchorLink, type AnchorLinkProps } from "./AnchorLink";
 export { ActionIconLink, type ActionIconLinkProps } from "./ActionIconLink";
 export { ButtonLink, type ButtonLinkProps } from "./ButtonLink";
 export { LogoIcon, type LogoIconProps } from "./LogoIcon";
+export { ThemePicker, type ThemePickerProps, type ThemePreference } from "./ThemePicker";
+export { UserCard, type UserCardProps } from "./UserCard";
 export { ModalTitle, type ModalTitleProps } from "./ModalTitle";
 export { ModalFooter, type ModalFooterProps } from "./ModalFooter";
 export { DropzoneContent, type DropzoneContentProps } from "./DropzoneContent";

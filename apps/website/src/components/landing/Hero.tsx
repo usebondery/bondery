@@ -36,7 +36,7 @@ export function Hero() {
                   href={`${WEBAPP_URL}/login`}
                   size="lg"
                   leftSection={<IconTopologyStar size={20} />}
-                  className="w-full sm:w-auto"
+                  className="w-full! md:w-auto!"
                 >
                   Get started
                 </ButtonLink>
@@ -45,7 +45,7 @@ export function Hero() {
                   size="lg"
                   variant="default"
                   leftSection={<IconArrowDown size={20} />}
-                  className="w-full sm:w-auto"
+                  className="w-full! md:w-auto!"
                 >
                   Learn more
                 </ButtonLink>

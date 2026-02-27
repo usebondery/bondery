@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import {
   Text,
   Button,
@@ -45,23 +45,63 @@ export default function OAuthConsentPage() {
     redirect_uri: string;
     scope: string;
   } | null>(null);
+  const handledAuthorizationIdRef = useRef<string | null>(null);
+  const redirectingRef = useRef(false);
+
+  function logConsent(event: string, data?: Record<string, unknown>) {
+    console.log("[oauth-consent]", event, data ?? {});
+  }
+
+  function getOAuthRedirectUrl(data: unknown): string | null {
+    if (!data || typeof data !== "object") return null;
+
+    const candidate = data as { redirect_to?: string; redirect_url?: string };
+    return candidate.redirect_to ?? candidate.redirect_url ?? null;
+  }
 
   const fetchDetails = useCallback(async () => {
     if (!authorizationId) {
+      logConsent("missing-authorization-id", {
+        search: typeof window !== "undefined" ? window.location.search : "",
+      });
       setError(t("MissingAuthorizationId"));
       setLoading(false);
       return;
     }
 
     try {
+      if (handledAuthorizationIdRef.current === authorizationId || redirectingRef.current) {
+        logConsent("skip-duplicate-fetch", {
+          authorizationId,
+          alreadyHandled: handledAuthorizationIdRef.current === authorizationId,
+          redirecting: redirectingRef.current,
+        });
+        return;
+      }
+
+      handledAuthorizationIdRef.current = authorizationId;
+      logConsent("fetch-details-start", { authorizationId });
+
       // Check if user is logged in
       const {
         data: { user },
       } = await supabase.auth.getUser();
 
+      logConsent("user-check", {
+        authorizationId,
+        hasUser: Boolean(user),
+        userId: user?.id ?? null,
+      });
+
       if (!user) {
         // Redirect to login, preserving authorization_id
-        router.push(`/login?redirect=/oauth/consent?authorization_id=${authorizationId}`);
+        const consentPath = `/oauth/consent?authorization_id=${authorizationId}`;
+        redirectingRef.current = true;
+        logConsent("redirect-to-login", {
+          authorizationId,
+          redirect: consentPath,
+        });
+        router.push(`/login?redirect=${encodeURIComponent(consentPath)}`);
         return;
       }
 
@@ -69,23 +109,45 @@ export default function OAuthConsentPage() {
       const { data, error: detailsError } =
         await supabase.auth.oauth.getAuthorizationDetails(authorizationId);
 
+      logConsent("authorization-details-response", {
+        authorizationId,
+        hasData: Boolean(data),
+        error: detailsError?.message ?? null,
+      });
+
       if (detailsError || !data) {
         setError(detailsError?.message ?? t("InvalidRequest"));
         setLoading(false);
         return;
       }
 
-      // If user already consented, data is an OAuthRedirect with redirect_url
-      if ("redirect_url" in data) {
-        window.location.href = (data as { redirect_url: string }).redirect_url;
+      // If user already consented, data is an OAuthRedirect
+      const preApprovedRedirect = getOAuthRedirectUrl(data);
+      if (preApprovedRedirect) {
+        redirectingRef.current = true;
+        logConsent("preapproved-redirect", {
+          authorizationId,
+          redirectUrl: preApprovedRedirect,
+        });
+        window.location.href = preApprovedRedirect;
         return;
       }
 
+      logConsent("consent-ready", {
+        authorizationId,
+        clientName: (data as { client?: { name?: string } }).client?.name ?? null,
+      });
       setAuthDetails(data as any);
     } catch (err) {
+      logConsent("fetch-details-error", {
+        authorizationId,
+        error: err instanceof Error ? err.message : String(err),
+      });
       setError(err instanceof Error ? err.message : t("UnexpectedError"));
     } finally {
-      setLoading(false);
+      if (!redirectingRef.current) {
+        setLoading(false);
+      }
     }
   }, [authorizationId, supabase, router, t]);
 
@@ -96,32 +158,49 @@ export default function OAuthConsentPage() {
   async function handleApprove() {
     if (!authorizationId) return;
     setSubmitting(true);
+    logConsent("approve-start", { authorizationId });
 
     try {
       const { data, error: approveError } =
         await supabase.auth.oauth.approveAuthorization(authorizationId);
+
+      logConsent("approve-response", {
+        authorizationId,
+        hasData: Boolean(data),
+        error: approveError?.message ?? null,
+      });
 
       if (approveError) {
         notifications.show(
           errorNotificationTemplate({
             title: t("ErrorTitle"),
             description: approveError.message,
-            
           }),
         );
         return;
       }
 
-      // Redirect back to the client with the authorization code
-      if ((data as any)?.redirect_url) {
-        window.location.href = (data as any).redirect_url;
+      // Redirect back to the OAuth client with authorization result
+      const redirectUrl = getOAuthRedirectUrl(data);
+      if (redirectUrl) {
+        redirectingRef.current = true;
+        logConsent("approve-redirect", {
+          authorizationId,
+          redirectUrl,
+        });
+        window.location.href = redirectUrl;
+      } else {
+        logConsent("approve-missing-redirect", { authorizationId });
       }
     } catch (err) {
+      logConsent("approve-error", {
+        authorizationId,
+        error: err instanceof Error ? err.message : String(err),
+      });
       notifications.show(
         errorNotificationTemplate({
           title: t("ErrorTitle"),
           description: err instanceof Error ? err.message : t("UnexpectedError"),
-          
         }),
       );
     } finally {
@@ -132,31 +211,48 @@ export default function OAuthConsentPage() {
   async function handleDeny() {
     if (!authorizationId) return;
     setSubmitting(true);
+    logConsent("deny-start", { authorizationId });
 
     try {
       const { data, error: denyError } =
         await supabase.auth.oauth.denyAuthorization(authorizationId);
+
+      logConsent("deny-response", {
+        authorizationId,
+        hasData: Boolean(data),
+        error: denyError?.message ?? null,
+      });
 
       if (denyError) {
         notifications.show(
           errorNotificationTemplate({
             title: t("ErrorTitle"),
             description: denyError.message,
-            
           }),
         );
         return;
       }
 
-      if ((data as any)?.redirect_url) {
-        window.location.href = (data as any).redirect_url;
+      const redirectUrl = getOAuthRedirectUrl(data);
+      if (redirectUrl) {
+        redirectingRef.current = true;
+        logConsent("deny-redirect", {
+          authorizationId,
+          redirectUrl,
+        });
+        window.location.href = redirectUrl;
+      } else {
+        logConsent("deny-missing-redirect", { authorizationId });
       }
     } catch (err) {
+      logConsent("deny-error", {
+        authorizationId,
+        error: err instanceof Error ? err.message : String(err),
+      });
       notifications.show(
         errorNotificationTemplate({
           title: t("ErrorTitle"),
           description: err instanceof Error ? err.message : t("UnexpectedError"),
-          
         }),
       );
     } finally {
@@ -195,9 +291,7 @@ export default function OAuthConsentPage() {
   }
 
   // Parse scopes for display
-  const scopes = authDetails.scope
-    ? authDetails.scope.split(" ").filter(Boolean)
-    : [];
+  const scopes = authDetails.scope ? authDetails.scope.split(" ").filter(Boolean) : [];
 
   return (
     <Center mih="100vh">

@@ -59,6 +59,7 @@ export async function redirectRoutes(fastify: FastifyInstance) {
         profileImageUrl,
         title,
         place,
+        notes,
       } = request.body;
 
       if (!instagram && !linkedin && !facebook) {
@@ -93,12 +94,13 @@ export async function redirectRoutes(fastify: FastifyInstance) {
         avatar: string | null;
         title: string | null;
         place: string | null;
+        notes: string | null;
       } | null = null;
 
       if (existingContactId) {
         const { data: contactData, error: lookupError } = await client
           .from("people")
-          .select("id, first_name, last_name, avatar, title, place")
+          .select("id, first_name, last_name, avatar, title, place, notes")
           .eq("user_id", user.id)
           .eq("id", existingContactId)
           .single();
@@ -127,6 +129,11 @@ export async function redirectRoutes(fastify: FastifyInstance) {
           await client.from("people").update({ place }).eq("id", existingContact.id);
         }
 
+        // Update notes if provided and contact doesn't have one
+        if (notes && !existingContact.notes) {
+          await client.from("people").update({ notes }).eq("id", existingContact.id);
+        }
+
         return {
           contactId: existingContact.id,
           existed: true,
@@ -148,6 +155,7 @@ export async function redirectRoutes(fastify: FastifyInstance) {
       if (lastName) insertData.last_name = lastName;
       if (title) insertData.title = title;
       if (place) insertData.place = place;
+      if (notes) insertData.notes = notes;
 
       const { data: newContact, error: createError } = await client
         .from("people")

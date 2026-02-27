@@ -14,7 +14,8 @@
     "isolatedModules": true,
     "types": ["chrome", "node"],
     "paths": {
-      "@bondery/helpers": ["../../packages/helpers/src/index.ts"]
+      "@bondery/helpers": ["../../packages/helpers/src/index.ts"],
+      "@bondery/branding-src": ["../../packages/branding/src/index.ts"]
     }
   },
   "include": ["src/**/*", "scripts/**/*"],

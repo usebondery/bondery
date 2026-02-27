@@ -1,5 +1,3 @@
-import { transliterate } from "transliteration";
-
 export interface ParsedInstagramName {
   firstName: string;
   middleName: string | null;
@@ -102,19 +100,13 @@ function normalizeDisplayName(displayName: string): string {
   const normalized = replaceSmallCaps(displayName)
     .normalize("NFKC")
     .replace(/[\p{Pd}\u2212]/gu, "-")
-    .replace(/[\u2018\u2019\u201A\u201B\u2032\u2035\u0060\u00B4\u02BC\u02BB\uFF07]/gu, "'")
-    .normalize("NFKD")
-    .replace(/\p{M}+/gu, "");
+    .replace(/[\u2018\u2019\u201A\u201B\u2032\u2035\u0060\u00B4\u02BC\u02BB\uFF07]/gu, "'");
 
-  const transliterated = transliterate(normalized, {
-    unknown: "",
-  });
-
-  return transliterated
+  return normalized
     .replace(/[./_+|\\]+/g, " ")
-    .replace(/[^\x00-\x7F]/g, "")
-    .replace(/[^A-Za-z\s'-]/g, " ")
+    .replace(/[^\p{L}\p{M}\s'-]/gu, " ")
     .replace(/\s+/g, " ")
+    .normalize("NFC")
     .trim();
 }
 

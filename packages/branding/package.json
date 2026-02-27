@@ -43,23 +43,14 @@
     "src/assets"
   ],
   "scripts": {
-    "build": "tsc",
-    "generate-react-icons": "tsx scripts/generate-react-icons.ts"
+    "build": "tsc"
   },
   "dependencies": {
     "sharp": "^0.34.5"
   },
   "devDependencies": {
-    "@svgr/core": "^8.1.0",
-    "@svgr/plugin-jsx": "^8.1.0",
-    "@svgr/plugin-prettier": "^8.1.0",
     "@types/node": "^25",
     "tsx": "^4.21.0",
     "typescript": "^5"
-  },
-  "keywords": [
-    "branding",
-    "icons",
-    "assets"
-  ]
+  }
 }

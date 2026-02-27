@@ -1,6 +1,6 @@
 "use client";
 
-import { Group, Text, Stack, Box } from "@mantine/core";
+import { Group, Stack, Box } from "@mantine/core";
 import {
   IconHome,
   IconSettings,
@@ -13,12 +13,13 @@ import {
 } from "@tabler/icons-react";
 import { usePathname } from "next/navigation";
 import { NavLinkItem } from "./NavLinkItem";
-import { UserAvatar } from "@/app/(app)/app/components/UserAvatar";
+import { UserCard } from "@bondery/mantine-next";
 import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
-import { BonderyLogotypeBlack, BonderyLogotypeWhite } from "@bondery/branding";
+import { BonderyLogotypeBlack, BonderyLogotypeWhite } from "@bondery/branding-src";
 
 interface NavigationSidebarContentProps {
   userName: string;
+  userEmail: string;
   avatarUrl: string | null;
 }
 
@@ -36,7 +37,11 @@ const secondaryLinks = [
   { href: WEBAPP_ROUTES.SETTINGS, label: "Settings", icon: IconSettings },
 ];
 
-export function NavigationSidebarContent({ userName, avatarUrl }: NavigationSidebarContentProps) {
+export function NavigationSidebarContent({
+  userName,
+  userEmail,
+  avatarUrl,
+}: NavigationSidebarContentProps) {
   const pathname = usePathname();
 
   return (
@@ -62,12 +67,9 @@ export function NavigationSidebarContent({ userName, avatarUrl }: NavigationSide
         ))}
       </Stack>
 
-      <Group mt="md">
-        <UserAvatar avatarUrl={avatarUrl} userName={userName} size="md" />
-        <Text size="sm" fw={500}>
-          {userName}
-        </Text>
-      </Group>
+      <Box mt="md">
+        <UserCard name={userName} subtitle={userEmail} avatarUrl={avatarUrl} />
+      </Box>
     </Box>
   );
 }
