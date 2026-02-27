@@ -1,6 +1,14 @@
 # Changelog
 All notable changes to this project will be documented in this file. On more information about the format, see [Instructions for changelog](.github/instructions/changelog.instructions.md).
 
+## [0.0.2] - 27.02.2026
+
+### 📝 Documentation
+
+- Added `.github/copilot-instructions.md` with comprehensive coding agent setup, project structure, and code guidelines.
+- Added `SETUP.md` with step-by-step local development setup instructions.
+- Added `ARCHITECTURE.md` with system architecture, data flow diagrams, and key design decisions.
+
 ## [0.0.1] - 15.02.2026
 
 ### ✨ Added
