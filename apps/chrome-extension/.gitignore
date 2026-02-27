@@ -1,11 +1,11 @@
-# parcel
-.parcel-cache
+# wxt
+.wxt
 
 # build output
-dist
+.output
 
 # generated files
-src/manifest.json
+# (none - WXT generates manifest.json internally)
 
 # generated icons
 public/icons/*.png

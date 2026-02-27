@@ -107,7 +107,7 @@ jobs:
           npx crx3@2 \
             -p "$PRIVATE_KEY_PATH" \
             -o "$CRX_PATH" \
-            apps/chrome-extension/dist
+            apps/chrome-extension/.output/chrome-mv3
 
           cp "$PUBLIC_KEY_PATH" "$PUBLIC_KEY_ASSET_PATH"
 
@@ -138,9 +138,9 @@ jobs:
 
       - name: Create zip archive
         run: |
-          cd apps/chrome-extension/dist
-          zip -r ../../../bondery-extension-${{ steps.release_meta.outputs.tag }}.zip .
-          cd ../../..
+          cd apps/chrome-extension/.output/chrome-mv3
+          zip -r ../../../../bondery-extension-${{ steps.release_meta.outputs.tag }}.zip .
+          cd ../../../..
 
       - name: Upload CRX to Chrome Web Store
         run: |

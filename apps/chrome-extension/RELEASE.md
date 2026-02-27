@@ -12,20 +12,13 @@ This allows independent version numbering for each component.
 
 To create a new release of the Bondery Chrome Extension (only if there are updates to the extension):
 
-### 1. Update Version Numbers
+### 1. Update Version Number
 
-Update the version in **both** of these files:
-1. `apps/chrome-extension/package.json` → `"version": "X.Y.Z"`
-2. `apps/chrome-extension/scripts/generate-manifest.ts` → `version: "X.Y.Z"`
+Update the version in `apps/chrome-extension/package.json` → `"version": "X.Y.Z"`
 
-### 2. Regenerate Manifest
+> **Note:** WXT automatically reads the version from `package.json` and injects it into the generated `manifest.json`. No separate manifest update is needed.
 
-```bash
-cd apps/chrome-extension
-npm run generate-manifest
-```
-
-### 3. Commit Changes
+### 2. Commit Changes
 
 ```bash
 git add .
@@ -33,7 +26,7 @@ git commit -m "chore(extension): Bump version to X.Y.Z"
 git push
 ```
 
-### 4. Create and Push Tag
+### 3. Create and Push Tag
 
 ```bash
 # Replace X.Y.Z with your version number (e.g., 0.4.0)
@@ -47,11 +40,40 @@ git tag ext-v0.4.0
 git push origin ext-v0.4.0
 ```
 
-### 5. GitHub Actions Will Automatically
+### 4. GitHub Actions Will Automatically
 
 - Build the extension in production mode (extension only, not the web app)
    - Create a GitHub release
    - Upload the extension as a downloadable `.zip` file
+
+## Local Development
+
+### Prerequisites
+
+Create a local environment file for development:
+
+```bash
+cp .env.development.example .env.development.local
+# Edit .env.development.local with your local settings
+```
+
+### Dev Mode (with HMR)
+
+```bash
+cd apps/chrome-extension
+npm run dev
+```
+
+WXT will start a dev server with Hot Module Replacement. The built extension is placed in `.output/chrome-mv3-dev/`. Load this folder as an unpacked extension in Chrome.
+
+### Production Build
+
+```bash
+cd apps/chrome-extension
+npm run build
+```
+
+The production build is placed in `.output/chrome-mv3/`.
 
 ## Manual Release (Alternative)
 

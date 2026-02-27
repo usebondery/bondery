@@ -1,10 +1,9 @@
 {
+  "extends": "./.wxt/tsconfig.json",
   "compilerOptions": {
     "target": "ES2020",
-    "module": "ESNext",
     "lib": ["ES2020", "DOM"],
     "jsx": "react-jsx",
-    "outDir": "./dist",
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
@@ -14,9 +13,23 @@
     "isolatedModules": true,
     "types": ["chrome", "node"],
     "paths": {
-      "@bondery/helpers": ["../../packages/helpers/src/index.ts"]
+      "@bondery/helpers": ["../../packages/helpers/src/index.ts"],
+      "@bondery/helpers/check-env": ["../../packages/helpers/src/check-env.ts"],
+      "@bondery/helpers/*": ["../../packages/helpers/src/*"],
+      "@bondery/branding": ["../../packages/branding/src/index.ts"],
+      "@bondery/branding/*": ["../../packages/branding/src/*"],
+      "@bondery/mantine-next": ["../../packages/mantine-next/src/index.ts"],
+      "@bondery/mantine-next/*": ["../../packages/mantine-next/src/*"],
+      "@": ["./src"],
+      "@/*": ["./src/*"],
+      "~": ["./src"],
+      "~/*": ["./src/*"],
+      "@@": ["."],
+      "@@/*": ["./*"],
+      "~~": ["."],
+      "~~/*": ["./*"]
     }
   },
-  "include": ["src/**/*", "scripts/**/*"],
-  "exclude": ["node_modules", "dist"]
+  "include": ["src/**/*", "scripts/**/*", "wxt.config.ts", ".wxt/wxt.d.ts"],
+  "exclude": ["node_modules", ".output", ".wxt/tsconfig.json"]
 }

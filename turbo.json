@@ -36,7 +36,7 @@
         "apps/api/.env.production.local"
       ],
       "dependsOn": ["^build"],
-      "outputs": [".next/**", "!.next/cache/**", "dist/**", "public/**"]
+      "outputs": [".next/**", "!.next/cache/**", "dist/**", ".output/**", "public/**"]
     },
 
     "check-types": {

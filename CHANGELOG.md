@@ -1,6 +1,15 @@
 # Changelog
 All notable changes to this project will be documented in this file. On more information about the format, see [Instructions for changelog](.github/instructions/changelog.instructions.md).
 
+## [Unreleased]
+
+### 🔄 Changed
+
+- Migrated Chrome extension build tooling from Parcel to WXT (wxt.dev) framework, replacing `.parcelrc`, `scripts/generate-manifest.ts`, and Parcel CLI with WXT's file-based entrypoints and Vite-powered build pipeline.
+- Chrome extension content scripts are now defined using WXT's `defineContentScript` API in `src/entrypoints/`.
+- Build output moved from `dist/` to `.output/chrome-mv3/` following WXT conventions.
+- Facebook content script is now included in the extension build.
+
 ## [0.0.1] - 15.02.2026
 
 ### ✨ Added
