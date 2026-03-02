@@ -9,6 +9,6 @@ export {
   BonderyIconWhite,
   BonderyLogotypeBlack,
   BonderyLogotypeWhite,
-} from "./react/index";
+} from "./react/index.js";
 
 export const BRAND_PRIMARY_COLOR = "#a34bcb";
