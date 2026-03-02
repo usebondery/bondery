@@ -43,7 +43,7 @@
     "src/assets"
   ],
   "scripts": {
-    "build": "tsc"
+    "build": "tsc && node scripts/fix-esm-imports.mjs"
   },
   "dependencies": {
     "sharp": "^0.34.5"
