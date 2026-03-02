@@ -101,7 +101,23 @@ export function ProfileCard({
       <Divider />
 
       <CardSection inheritPadding py="md">
-        <ProviderIntegrations providers={providers} userIdentities={userIdentities} />
+        <ProviderIntegrations
+          providers={providers}
+          userIdentities={userIdentities}
+          showExtensionProvider={false}
+        />
+      </CardSection>
+
+      <Divider />
+
+      <CardSection inheritPadding py="md">
+        <ProviderIntegrations
+          providers={providers}
+          userIdentities={userIdentities}
+          showOAuthProviders={false}
+          title={t("BonderyApplications")}
+          description={t("BonderyApplicationsDescription")}
+        />
       </CardSection>
     </Card>
   );

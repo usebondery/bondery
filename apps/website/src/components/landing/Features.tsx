@@ -118,7 +118,7 @@ export function Features() {
 
       <FeatureSection
         title="Never forget what matters"
-        description="When was the last time you forgot something important about a person? With Bondery, keep all the details in one place and get reminded when it matters. From birthdays and gift ideas to how you met and family info. Your memory, on steroids."
+        description="When was the last time you forgot something important about a person? With Bondery, keep all the details in one place and get reminded when it matters. From birthdays and gift ideas to how you met and family info."
         imagePosition="right"
         imagePlaceholder={<TimelineAnimation />}
       />

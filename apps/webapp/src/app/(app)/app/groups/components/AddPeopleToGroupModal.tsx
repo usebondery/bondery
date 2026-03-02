@@ -7,6 +7,7 @@ import { modals } from "@mantine/modals";
 import { notifications } from "@mantine/notifications";
 import { IconUserPlus } from "@tabler/icons-react";
 import {
+  PeopleMultiPickerInput,
   errorNotificationTemplate,
   loadingNotificationTemplate,
   ModalFooter,
@@ -16,7 +17,6 @@ import {
 import type { Contact } from "@bondery/types";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import { revalidateGroups } from "../../actions";
-import { PeopleMultiPickerInput } from "../../components/shared/PeopleMultiPickerInput";
 
 export interface AddPeopleToGroupModalTexts {
   title: string;

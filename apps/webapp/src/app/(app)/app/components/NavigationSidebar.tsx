@@ -1,6 +1,6 @@
 "use client";
 
-import { Group, Text, Stack, Box } from "@mantine/core";
+import { Group, Stack, Box } from "@mantine/core";
 import {
   IconHome,
   IconSettings,
@@ -11,15 +11,18 @@ import {
   IconTimelineEventText,
   IconArrowMerge,
 } from "@tabler/icons-react";
+import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { NavLinkItem } from "./NavLinkItem";
-import { UserAvatar } from "@/app/(app)/app/components/UserAvatar";
+import { AnchorLink, UserCard } from "@bondery/mantine-next";
 import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
-import { BonderyLogotypeBlack, BonderyLogotypeWhite } from "@bondery/branding";
+import { BonderyLogotypeBlack, BonderyLogotypeWhite } from "@bondery/branding-src";
 
 interface NavigationSidebarContentProps {
   userName: string;
+  userEmail: string;
   avatarUrl: string | null;
+  hasActiveMergeRecommendations: boolean;
 }
 
 const primaryLinks = [
@@ -32,22 +35,29 @@ const primaryLinks = [
 
 const secondaryLinks = [
   { href: WEBAPP_ROUTES.FEEDBACK, label: "Feedback", icon: IconMessageCircle },
-  { href: "/app/fix", label: "Fix", icon: IconArrowMerge },
+  { href: "/app/fix", label: "Fix & merge", icon: IconArrowMerge },
   { href: WEBAPP_ROUTES.SETTINGS, label: "Settings", icon: IconSettings },
 ];
 
-export function NavigationSidebarContent({ userName, avatarUrl }: NavigationSidebarContentProps) {
+export function NavigationSidebarContent({
+  userName,
+  userEmail,
+  avatarUrl,
+  hasActiveMergeRecommendations,
+}: NavigationSidebarContentProps) {
   const pathname = usePathname();
 
   return (
     <Box style={{ display: "flex", flexDirection: "column", height: "100%" }}>
       <Group mb="md">
-        <Box darkHidden>
-          <BonderyLogotypeBlack width={140} height={36} />
-        </Box>
-        <Box lightHidden>
-          <BonderyLogotypeWhite width={140} height={36} />
-        </Box>
+        <AnchorLink href={WEBAPP_ROUTES.DEFAULT_PAGE_AFTER_LOGIN} underline="never">
+          <Box darkHidden>
+            <BonderyLogotypeBlack width={140} height={36} />
+          </Box>
+          <Box lightHidden>
+            <BonderyLogotypeWhite width={140} height={36} />
+          </Box>
+        </AnchorLink>
       </Group>
 
       <Stack gap="xs">
@@ -58,16 +68,24 @@ export function NavigationSidebarContent({ userName, avatarUrl }: NavigationSide
 
       <Stack gap="xs" mt="auto">
         {secondaryLinks.map((link, index) => (
-          <NavLinkItem key={`${link.href}-${index}`} {...link} active={pathname === link.href} />
+          <NavLinkItem
+            key={`${link.href}-${index}`}
+            {...link}
+            active={pathname === link.href}
+            showIndicator={link.href === "/app/fix" && hasActiveMergeRecommendations}
+          />
         ))}
       </Stack>
 
-      <Group mt="md">
-        <UserAvatar avatarUrl={avatarUrl} userName={userName} size="md" />
-        <Text size="sm" fw={500}>
-          {userName}
-        </Text>
-      </Group>
+      <Box mt="md">
+        <Box
+          component={Link}
+          href={WEBAPP_ROUTES.SETTINGS}
+          style={{ color: "inherit", textDecoration: "none", display: "block" }}
+        >
+          <UserCard name={userName} subtitle={userEmail} avatarUrl={avatarUrl} />
+        </Box>
+      </Box>
     </Box>
   );
 }

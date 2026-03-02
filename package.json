@@ -10,6 +10,8 @@
   "scripts": {
     "dev": "turbo dev",
     "dev:core": "turbo dev --filter=webapp --filter=api --filter=@bondery/emails",
+    "dev:extension": "turbo dev --filter=webapp --filter=api --filter=chrome-extension --filter=website",
+    "dev:supabase": "turbo dev --filter=supabase-db",
     "build": "turbo build",
     "start": "turbo start",
     "lint": "turbo lint",

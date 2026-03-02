@@ -57,8 +57,9 @@ export async function redirectRoutes(fastify: FastifyInstance) {
         middleName,
         lastName,
         profileImageUrl,
-        title,
+        headline,
         place,
+        notes,
       } = request.body;
 
       if (!instagram && !linkedin && !facebook) {
@@ -91,14 +92,15 @@ export async function redirectRoutes(fastify: FastifyInstance) {
         first_name: string | null;
         last_name: string | null;
         avatar: string | null;
-        title: string | null;
+        headline: string | null;
         place: string | null;
+        notes: string | null;
       } | null = null;
 
       if (existingContactId) {
         const { data: contactData, error: lookupError } = await client
           .from("people")
-          .select("id, first_name, last_name, avatar, title, place")
+          .select("id, first_name, last_name, avatar, headline, place, notes")
           .eq("user_id", user.id)
           .eq("id", existingContactId)
           .single();
@@ -117,14 +119,19 @@ export async function redirectRoutes(fastify: FastifyInstance) {
           await updateContactPhoto(client, existingContact.id, user.id, profileImageUrl);
         }
 
-        // Update title if provided and contact doesn't have one
-        if (title && !existingContact.title) {
-          await client.from("people").update({ title }).eq("id", existingContact.id);
+        // Update headline if provided and contact doesn't have one
+        if (headline && !existingContact.headline) {
+          await client.from("people").update({ headline }).eq("id", existingContact.id);
         }
 
         // Update place if provided and contact doesn't have one
         if (place && !existingContact.place) {
           await client.from("people").update({ place }).eq("id", existingContact.id);
+        }
+
+        // Update notes if provided and contact doesn't have one
+        if (notes && !existingContact.notes) {
+          await client.from("people").update({ notes }).eq("id", existingContact.id);
         }
 
         return {
@@ -146,8 +153,9 @@ export async function redirectRoutes(fastify: FastifyInstance) {
 
       if (middleName) insertData.middle_name = middleName;
       if (lastName) insertData.last_name = lastName;
-      if (title) insertData.title = title;
+      if (headline) insertData.headline = headline;
       if (place) insertData.place = place;
+      if (notes) insertData.notes = notes;
 
       const { data: newContact, error: createError } = await client
         .from("people")
@@ -193,7 +201,7 @@ export async function redirectRoutes(fastify: FastifyInstance) {
       middleName,
       lastName,
       profileImageUrl,
-      title,
+      headline,
       place,
     } = query;
 
@@ -236,14 +244,14 @@ export async function redirectRoutes(fastify: FastifyInstance) {
     let existingContact: {
       id: string;
       avatar: string | null;
-      title: string | null;
+      headline: string | null;
       place: string | null;
     } | null = null;
 
     if (existingContactId) {
       const { data: contactData, error: lookupError } = await client
         .from("people")
-        .select("id, avatar, title, place")
+        .select("id, avatar, headline, place")
         .eq("user_id", user.id)
         .eq("id", existingContactId)
         .single();
@@ -260,8 +268,8 @@ export async function redirectRoutes(fastify: FastifyInstance) {
       if (profileImageUrl && !existingContact.avatar) {
         await updateContactPhoto(client, existingContact.id, user.id, profileImageUrl);
       }
-      if (title && !existingContact.title) {
-        await client.from("people").update({ title }).eq("id", existingContact.id);
+      if (headline && !existingContact.headline) {
+        await client.from("people").update({ headline }).eq("id", existingContact.id);
       }
       if (place && !existingContact.place) {
         await client.from("people").update({ place }).eq("id", existingContact.id);
@@ -280,7 +288,7 @@ export async function redirectRoutes(fastify: FastifyInstance) {
 
     if (middleName) insertData.middle_name = middleName;
     if (lastName) insertData.last_name = lastName;
-    if (title) insertData.title = title;
+    if (headline) insertData.headline = headline;
     if (place) insertData.place = place;
 
     const { data: newContact, error: createError } = await client

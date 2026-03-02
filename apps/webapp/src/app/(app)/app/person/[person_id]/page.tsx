@@ -31,8 +31,8 @@ async function getPersonData(personId: string) {
     headers,
   });
 
-  const eventsPromise = fetch(`${API_URL}${API_ROUTES.EVENTS}`, {
-    next: { tags: ["events"] },
+  const interactionsPromise = fetch(`${API_URL}${API_ROUTES.INTERACTIONS}`, {
+    next: { tags: ["interactions"] },
     headers,
   });
 
@@ -58,7 +58,7 @@ async function getPersonData(personId: string) {
     contactResponse,
     groupsResponse,
     membershipResponse,
-    eventsResponse,
+    interactionsResponse,
     relationshipsResponse,
     importantEventsResponse,
     contactsResponse,
@@ -66,7 +66,7 @@ async function getPersonData(personId: string) {
     contactPromise,
     groupsPromise,
     membershipPromise,
-    eventsPromise,
+    interactionsPromise,
     relationshipsPromise,
     importantEventsPromise,
     contactsPromise,
@@ -85,7 +85,9 @@ async function getPersonData(personId: string) {
 
   const groupsData = groupsResponse.ok ? await groupsResponse.json() : { groups: [] };
   const personGroupsData = membershipResponse.ok ? await membershipResponse.json() : { groups: [] };
-  const eventsData = eventsResponse.ok ? await eventsResponse.json() : { events: [] };
+  const interactionsData = interactionsResponse.ok
+    ? await interactionsResponse.json()
+    : { interactions: [] };
   const relationshipsData = relationshipsResponse.ok
     ? await relationshipsResponse.json()
     : { relationships: [] };
@@ -95,8 +97,9 @@ async function getPersonData(personId: string) {
   const contactsData = contactsResponse.ok ? await contactsResponse.json() : { contacts: [] };
 
   const personActivities =
-    eventsData.events?.filter((a: any) => a.participants?.some((p: any) => p.id === personId)) ||
-    [];
+    interactionsData.interactions?.filter((a: any) =>
+      a.participants?.some((p: any) => p.id === personId),
+    ) || [];
 
   return {
     contact,

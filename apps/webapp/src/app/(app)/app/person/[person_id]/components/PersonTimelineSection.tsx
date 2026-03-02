@@ -2,12 +2,12 @@
 
 import { Stack, Group, Text, Button } from "@mantine/core";
 import { IconCopy, IconTrash } from "@tabler/icons-react";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import type { Activity, Contact } from "@bondery/types";
 import { openNewActivityModal } from "../../../timeline/components/NewActivityModal";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import { notifications } from "@mantine/notifications";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { TimelineEventsList } from "../../../components/timeline/TimelineEventsList";
 import {
@@ -15,7 +15,7 @@ import {
   ModalTitle,
   successNotificationTemplate,
 } from "@bondery/mantine-next";
-import { revalidateEvents } from "../../../actions";
+import { revalidateInteractions } from "../../../actions";
 import { openStandardConfirmModal } from "../../../components/modals/openStandardConfirmModal";
 
 interface PersonTimelineSectionProps {
@@ -32,7 +32,10 @@ export function PersonTimelineSection({
   selectableContacts,
 }: PersonTimelineSectionProps) {
   const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const t = useTranslations("TimelinePage");
+  const addEventTriggeredRef = useRef(false);
 
   const contactsById = useMemo(() => {
     const allContacts = [contact, ...connectedContacts];
@@ -44,9 +47,39 @@ export function PersonTimelineSection({
     [activities],
   );
 
+  const activityModalContacts = useMemo(() => {
+    const merged = [contact, ...selectableContacts];
+    const byId = new Map(merged.map((candidate) => [candidate.id, candidate]));
+    return Array.from(byId.values());
+  }, [contact, selectableContacts]);
+
+  useEffect(() => {
+    if (addEventTriggeredRef.current) {
+      return;
+    }
+
+    if (searchParams.get("addEvent") !== "1") {
+      return;
+    }
+
+    addEventTriggeredRef.current = true;
+
+    openNewActivityModal({
+      contacts: activityModalContacts,
+      initialParticipantIds: [contact.id],
+      titleText: t("WhoAreYouMeeting"),
+      t,
+    });
+
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete("addEvent");
+    const nextUrl = params.toString() ? `${pathname}?${params.toString()}` : pathname;
+    router.replace(nextUrl);
+  }, [searchParams, activityModalContacts, contact.id, pathname, router, t]);
+
   const handleActivityClick = (activity: Activity) => {
     openNewActivityModal({
-      contacts: selectableContacts,
+      contacts: activityModalContacts,
       activity,
       titleText: t("WhoAreYouMeeting"),
       t,
@@ -89,7 +122,7 @@ export function PersonTimelineSection({
       confirmColor: "red",
       onConfirm: async () => {
         try {
-          const response = await fetch(`${API_ROUTES.EVENTS}/${activity.id}`, {
+          const response = await fetch(`${API_ROUTES.INTERACTIONS}/${activity.id}`, {
             method: "DELETE",
           });
 
@@ -104,7 +137,7 @@ export function PersonTimelineSection({
             }),
           );
 
-          await revalidateEvents();
+          await revalidateInteractions();
           router.refresh();
         } catch {
           notifications.show(
@@ -124,7 +157,7 @@ export function PersonTimelineSection({
       .filter((id): id is string => Boolean(id));
 
     try {
-      const response = await fetch(API_ROUTES.EVENTS, {
+      const response = await fetch(API_ROUTES.INTERACTIONS, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -148,7 +181,7 @@ export function PersonTimelineSection({
         }),
       );
 
-      await revalidateEvents();
+      await revalidateInteractions();
       router.refresh();
     } catch {
       notifications.show(
@@ -172,7 +205,7 @@ export function PersonTimelineSection({
             size="xs"
             onClick={() => {
               openNewActivityModal({
-                contacts: selectableContacts,
+                contacts: activityModalContacts,
                 initialParticipantIds: [contact.id],
                 titleText: t("WhoAreYouMeeting"),
                 t,
@@ -193,7 +226,7 @@ export function PersonTimelineSection({
             onOpen={handleActivityClick}
             onEdit={(activity) => {
               openNewActivityModal({
-                contacts: selectableContacts,
+                contacts: activityModalContacts,
                 activity,
                 titleText: t("WhoAreYouMeeting"),
                 t,

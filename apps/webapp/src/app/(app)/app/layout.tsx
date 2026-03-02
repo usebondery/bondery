@@ -10,9 +10,11 @@ import { API_ROUTES, WEBSITE_ROUTES } from "@bondery/helpers/globals/paths";
 import { API_URL } from "@/lib/config";
 import { ColorSchemeSync } from "./components/ColorSchemeSync";
 import type { ColorSchemePreference } from "@bondery/types";
+import { getMergeRecommendationsData } from "./fix/getMergeRecommendationsData";
 
 interface UserSettingsLayoutData {
   userName: string;
+  userEmail: string;
   avatarUrl: string | null;
   locale: string;
   timezone: string;
@@ -47,6 +49,7 @@ async function getUserSettings() {
 
       return {
         userName: firstName || settings.email || "User",
+        userEmail: settings.email || "",
         avatarUrl: settings.avatar_url || null,
         locale: "en",
         timezone: settings.timezone || "UTC",
@@ -58,6 +61,7 @@ async function getUserSettings() {
 
   return {
     userName: "User",
+    userEmail: "",
     avatarUrl: null,
     locale: "en",
     timezone: "UTC",
@@ -76,8 +80,14 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     redirect(WEBSITE_ROUTES.LOGIN);
   }
 
-  const { userName, avatarUrl, locale, timezone, timeFormat, colorScheme } =
+  const { userName, userEmail, avatarUrl, locale, timezone, timeFormat, colorScheme } =
     await getUserSettings();
+  let hasActiveMergeRecommendations = false;
+
+  try {
+    const recommendations = await getMergeRecommendationsData();
+    hasActiveMergeRecommendations = recommendations.length > 0;
+  } catch (error) {}
 
   const messages = translations[locale as keyof typeof translations] || translations.en;
 
@@ -92,7 +102,12 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         }}
       >
         <AppShellNavbar p="md">
-          <NavigationSidebarContent userName={userName} avatarUrl={avatarUrl} />
+          <NavigationSidebarContent
+            userName={userName}
+            userEmail={userEmail}
+            avatarUrl={avatarUrl}
+            hasActiveMergeRecommendations={hasActiveMergeRecommendations}
+          />
         </AppShellNavbar>
         <AppShellMain>{children}</AppShellMain>
       </AppShell>

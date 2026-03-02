@@ -52,7 +52,11 @@ export function Footer() {
     <Box component="footer" my={"xl"}>
       <Paper
         maw={1440}
-        mx={{ base: "xs", md: "xl" }}
+        mx="auto"
+        w={{
+          base: "calc(100% - var(--mantine-spacing-xs) * 2)",
+          md: "calc(100% - var(--mantine-spacing-xl) * 2)",
+        }}
         shadow="md"
         radius="md"
         withBorder

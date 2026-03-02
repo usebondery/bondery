@@ -28,7 +28,7 @@ export type Database = {
   };
   public: {
     Tables: {
-      events: {
+      interactions: {
         Row: {
           created_at: string;
           date: string;
@@ -61,32 +61,32 @@ export type Database = {
         };
         Relationships: [];
       };
-      event_participants: {
+      interaction_participants: {
         Row: {
-          event_id: string;
+          interaction_id: string;
           created_at: string;
           person_id: string;
         };
         Insert: {
-          event_id: string;
+          interaction_id: string;
           created_at?: string;
           person_id: string;
         };
         Update: {
-          event_id?: string;
+          interaction_id?: string;
           created_at?: string;
           person_id?: string;
         };
         Relationships: [
           {
-            foreignKeyName: "event_participants_event_id_fkey";
-            columns: ["event_id"];
+            foreignKeyName: "interaction_participants_interaction_id_fkey";
+            columns: ["interaction_id"];
             isOneToOne: false;
-            referencedRelation: "events";
+            referencedRelation: "interactions";
             referencedColumns: ["id"];
           },
           {
-            foreignKeyName: "event_participants_person_id_fkey";
+            foreignKeyName: "interaction_participants_person_id_fkey";
             columns: ["person_id"];
             isOneToOne: false;
             referencedRelation: "people";
@@ -141,7 +141,7 @@ export type Database = {
           notes: string | null;
           place: string | null;
           timezone: string | null;
-          title: string | null;
+          headline: string | null;
           updated_at: string | null;
           user_id: string;
         };
@@ -161,7 +161,7 @@ export type Database = {
           notes?: string | null;
           place?: string | null;
           timezone?: string | null;
-          title?: string | null;
+          headline?: string | null;
           updated_at?: string | null;
           user_id: string;
         };
@@ -181,7 +181,7 @@ export type Database = {
           notes?: string | null;
           place?: string | null;
           timezone?: string | null;
-          title?: string | null;
+          headline?: string | null;
           updated_at?: string | null;
           user_id?: string;
         };

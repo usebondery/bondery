@@ -49,8 +49,9 @@ export interface RedirectRequest {
   middleName?: string;
   lastName?: string;
   profileImageUrl?: string;
-  title?: string;
+  headline?: string;
   place?: string;
+  notes?: string;
 }
 
 /**
@@ -149,7 +150,7 @@ export type MergeConflictField =
   | "middleName"
   | "lastName"
   | "avatar"
-  | "title"
+  | "headline"
   | "place"
   | "notes"
   | "lastInteraction"

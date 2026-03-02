@@ -1,4 +1,4 @@
-import { Container, Title, Stack, Group } from "@mantine/core";
+import { Stack } from "@mantine/core";
 import { getTranslations } from "next-intl/server";
 import { ProfileCard } from "./components/ProfileCard";
 import { DataManagementCard } from "./components/DataManagementCard";

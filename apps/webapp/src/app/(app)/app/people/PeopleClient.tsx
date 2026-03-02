@@ -9,15 +9,17 @@ import {
   IconBriefcase,
   IconMapPin,
   IconClock,
-  IconBrandLinkedin,
+  IconUserCircle,
 } from "@tabler/icons-react";
 import { notifications } from "@mantine/notifications";
 import { useEffect, useState, useDeferredValue, useMemo } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
-import { useDebouncedCallback } from "@mantine/hooks";
 import { useTranslations } from "next-intl";
-import ContactsTable, { ColumnConfig } from "@/app/(app)/app/components/ContactsTable";
-import { type SortOrder } from "@/app/(app)/app/components/contacts/SortMenu";
+import { useDebouncedCallback } from "@mantine/hooks";
+import ContactsTable, {
+  ColumnConfig,
+  type SortOrder,
+} from "@/app/(app)/app/components/contacts/ContactsTableV2";
 import { API_ROUTES, WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import { openAddContactModal } from "./components/AddContactModal";
 import { PageHeader } from "@/app/(app)/app/components/PageHeader";
@@ -28,6 +30,7 @@ import { openDeleteContactModal } from "@/app/(app)/app/components/contacts/open
 import { openDeleteContactsModal } from "@/app/(app)/app/components/contacts/openDeleteContactsModal";
 import { openAddPeopleToGroupSelectionModal } from "./components/AddPeopleToGroupSelectionModal";
 import { MERGE_CONFLICT_FIELDS, openMergeWithModal } from "./components/MergeWithModal";
+import { WEBSITE_URL } from "@/lib/config";
 
 import type { Contact, MergeConflictField } from "@bondery/types";
 import { revalidateContacts } from "../actions";
@@ -42,6 +45,8 @@ export function PeopleClient({ initialContacts, totalCount, layout = "stack" }: 
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const t = useTranslations("PeoplePage");
+  const tHeader = useTranslations("PageHeader");
   const tMerge = useTranslations("MergeWithModal");
   const mergeTexts = useMemo(
     () => ({
@@ -95,8 +100,8 @@ export function PeopleClient({ initialContacts, totalCount, layout = "stack" }: 
       fixed: true,
     },
     {
-      key: "title",
-      label: "Title",
+      key: "headline",
+      label: "Headline",
       visible: true,
       icon: <IconBriefcase size={16} />,
     },
@@ -116,7 +121,7 @@ export function PeopleClient({ initialContacts, totalCount, layout = "stack" }: 
       key: "social",
       label: "Social Media",
       visible: true,
-      icon: <IconBrandLinkedin size={16} />,
+      icon: <IconUserCircle size={16} />,
     },
   ]);
 
@@ -132,7 +137,8 @@ export function PeopleClient({ initialContacts, totalCount, layout = "stack" }: 
     setLastSelectedIndex(null);
   }, [initialContacts, totalCount]);
 
-  // Handle search with debounce
+  // Handle search: debounce the URL update so the server is only re-fetched
+  // after the user pauses, while DataTable keeps the input responsive locally.
   const handleSearch = useDebouncedCallback((query: string) => {
     const params = new URLSearchParams(searchParams);
     if (query) {
@@ -141,7 +147,7 @@ export function PeopleClient({ initialContacts, totalCount, layout = "stack" }: 
       params.delete("q");
     }
     router.replace(`${pathname}?${params.toString()}`);
-  }, 300);
+  }, 500);
 
   // Handle sort
   const handleSort = (order: SortOrder) => {
@@ -301,7 +307,10 @@ export function PeopleClient({ initialContacts, totalCount, layout = "stack" }: 
       <WrapperComponent gap="xl" {...(layout === "container" ? { justify: "space-between" } : {})}>
         <PageHeader
           icon={IconUsers}
-          title="People"
+          title={t("Title")}
+          description={t("HeaderDescription")}
+          helpHref={`${WEBSITE_URL}/docs/core-concepts/people`}
+          helpLabel={tHeader("LearnMoreAbout", { concept: tHeader("Concepts.People") })}
           secondaryAction={
             <Button
               variant="outline"
@@ -309,7 +318,7 @@ export function PeopleClient({ initialContacts, totalCount, layout = "stack" }: 
               leftSection={<IconAddressBook size={16} />}
               onClick={() => router.push(`${WEBAPP_ROUTES.SETTINGS}#data-management`)}
             >
-              Import contacts
+              {t("ImportContacts")}
             </Button>
           }
           primaryAction={
@@ -318,7 +327,7 @@ export function PeopleClient({ initialContacts, totalCount, layout = "stack" }: 
               leftSection={<IconUserPlus size={16} />}
               onClick={openAddContactModal}
             >
-              Add new person
+              {t("AddPerson")}
             </Button>
           }
         />

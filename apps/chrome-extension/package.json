@@ -1,29 +1,30 @@
 {
   "name": "chrome-extension",
-  "version": "0.5.6",
+  "version": "0.6.0",
   "private": true,
+  "type": "module",
   "description": "Bondery: browser extension",
-  "source": "src/manifest.json",
   "scripts": {
+    "dev": "npx wxt",
+    "dev:firefox": "npx wxt -b firefox",
+    "build": "npx wxt build",
+    "build:firefox": "npx wxt build -b firefox",
+    "zip": "npx wxt zip",
+    "zip:firefox": "npx wxt zip -b firefox",
+    "postinstall": "npx wxt prepare",
     "check-env": "tsx scripts/check-env.ts",
     "generate-icons": "tsx scripts/generate-icons.ts",
-    "generate-manifest": "tsx scripts/generate-manifest.ts",
-    "prebuild": "cross-env NODE_ENV=production npm run check-env && npm run generate-icons && cross-env NODE_ENV=production npm run generate-manifest",
-    "predev": "cross-env NODE_ENV=development npm run check-env && npm run generate-icons && cross-env NODE_ENV=development npm run generate-manifest",
-    "dev": "dotenv -e .env.development.local -- parcel watch --cache-dir .parcel-cache",
-    "build": "dotenv -e .env.production.local -- parcel build --cache-dir .parcel-cache",
     "check-types": "tsc --noEmit",
     "lint": "eslint src"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.3",
     "@eslint/js": "^8.57.1",
-    "@parcel/config-webextension": "^2.16.4",
     "@types/chrome": "^0.1.36",
     "@types/node": "^25",
+    "@wxt-dev/module-react": "^1.1.2",
     "cross-env": "^10.1.0",
     "dotenv": "^17.3.1",
-    "dotenv-cli": "^11.0.0",
     "eslint": "^8.57.1",
     "eslint-config-airbnb": "^19.0.4",
     "eslint-config-prettier": "^10.1.8",
@@ -32,26 +33,24 @@
     "eslint-plugin-jsx-a11y": "^6.10.2",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^4.6.2",
-    "parcel": "^2.16.4",
     "prettier": "^3.8.1",
     "sharp": "^0.34.5",
     "tsx": "^4.21.0",
-    "typescript": "^5"
+    "typescript": "^5",
+    "wxt": "^0.20.18"
   },
   "dependencies": {
     "@bondery/branding": "*",
     "@bondery/helpers": "*",
     "@bondery/mantine-next": "*",
+    "@bondery/types": "*",
     "@mantine/core": "^8.3.14",
     "@mantine/hooks": "^8.3.14",
+    "@tabler/icons-react": "^3.36.1",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "react": "^19.2.4",
-    "react-dom": "^19.2.4"
-  },
-  "targets": {
-    "default": {
-      "distDir": "dist"
-    }
+    "react-dom": "^19.2.4",
+    "transliteration": "^2.6.1"
   }
 }

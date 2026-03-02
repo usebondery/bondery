@@ -3,6 +3,40 @@ import ReactDOM from "react-dom/client";
 import FacebookButton from "./FacebookButton";
 import { MantineWrapper } from "../shared/MantineWrapper";
 
+function getFacebookSnapshot() {
+  const username = getFacebookUsername();
+  if (!username) return null;
+
+  const allH1s = document.querySelectorAll("h1");
+  let fullName = username;
+  for (const h1 of Array.from(allH1s)) {
+    const text = h1.textContent?.trim();
+    if (!text) continue;
+    if (["Notifications", "Messages", "Menu", "Settings", "Search"].includes(text)) continue;
+    if (h1.closest('[role="article"]')) continue;
+    fullName = text;
+    break;
+  }
+
+  const nameParts = fullName.split(/\s+/).filter(Boolean);
+  const firstName = nameParts[0] ?? username;
+  const lastName = nameParts.length > 1 ? nameParts[nameParts.length - 1] : undefined;
+  const middleName =
+    nameParts.length > 2 ? nameParts.slice(1, nameParts.length - 1).join(" ") : undefined;
+
+  const image = document.querySelector("svg image[xlink\\:href]") as SVGImageElement | null;
+  const profileImageUrl = image?.getAttribute("xlink:href") || undefined;
+
+  return {
+    platform: "facebook" as const,
+    handle: username,
+    firstName,
+    middleName,
+    lastName,
+    profileImageUrl,
+  };
+}
+
 // Extract Facebook username from URL
 function getFacebookUsername(): string | null {
   const pathname = window.location.pathname;
@@ -118,6 +152,12 @@ function init() {
     }
   }, 500);
 }
+
+chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
+  if (message?.type === "GET_SCRAPED_PROFILE") {
+    sendResponse(getFacebookSnapshot());
+  }
+});
 
 if (document.readyState === "loading") {
   document.addEventListener("DOMContentLoaded", init);

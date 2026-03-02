@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { Button } from "@mantine/core";
-import { config } from "../config";
+import { browser } from "wxt/browser";
+import { Button, Text } from "@mantine/core";
 import { BonderyIconWhite } from "@bondery/branding";
-import { sanitizeName } from "../utils/nameHelpers";
-import { API_ROUTES } from "@bondery/helpers";
+import { WEBAPP_ROUTES } from "@bondery/helpers";
+import { config } from "../config";
+// sanitizeName temporarily disabled – transliteration causes non-UTF-8 bytes in the bundle
+const sanitizeName = (s: string) => s.trim();
+import type { AddPersonResult } from "../utils/messages";
 
 interface LinkedInButtonProps {
   username: string;
@@ -18,13 +21,13 @@ const LinkedInButton: React.FC<LinkedInButtonProps> = ({ username }) => {
     // Log all extracted information immediately on mount
     const profileName = extractProfileName();
     const profilePhotoUrl = extractProfilePhotoUrl();
-    const title = extractTitle();
+    const headline = extractHeadline();
     const place = extractPlace();
 
     console.log("LinkedIn Profile Extraction Results:", {
       username,
       profileName,
-      title,
+      headline,
       place,
       profilePhotoUrl,
     });
@@ -97,7 +100,7 @@ const LinkedInButton: React.FC<LinkedInButtonProps> = ({ username }) => {
     return { firstName, lastName, middleName };
   };
 
-  const extractTitle = (): string | null => {
+  const extractHeadline = (): string | null => {
     const topCard = document.querySelector("section[data-member-id]") || document;
     const titleElement = topCard.querySelector("div[data-generated-suggestion-target]");
 
@@ -118,7 +121,7 @@ const LinkedInButton: React.FC<LinkedInButtonProps> = ({ username }) => {
       const altElement = document.querySelector(selector);
       if (altElement?.textContent) {
         console.log(
-          `LinkedIn: Found title using alternative selector: ${selector}`,
+          `LinkedIn: Found headline using alternative selector: ${selector}`,
           altElement.textContent,
         );
         return altElement.textContent.trim();
@@ -217,57 +220,82 @@ const LinkedInButton: React.FC<LinkedInButtonProps> = ({ username }) => {
     return null;
   };
 
+  const [statusMessage, setStatusMessage] = useState<string | null>(null);
+
   const handleClick = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
 
     setIsLoading(true);
+    setStatusMessage(null);
 
     try {
       const profileName = extractProfileName();
       const profilePhotoUrl = extractProfilePhotoUrl();
-      const title = extractTitle();
+      const headline = extractHeadline();
       const place = extractPlace();
 
-      // Log extracted data
       console.log("LinkedIn Profile Data:", {
         username,
         name: profileName,
-        title,
+        headline,
         place,
         profilePicture: profilePhotoUrl,
       });
 
-      // Build URL with all data as search params
-      const params = new URLSearchParams({
-        linkedin: username,
-        ...(profileName?.firstName && { firstName: profileName.firstName }),
-        ...(profileName?.middleName && { middleName: profileName.middleName }),
-        ...(profileName?.lastName && { lastName: profileName.lastName }),
-        ...(title && { title }),
-        ...(place && { place }),
-        ...(profilePhotoUrl && { profileImageUrl: profilePhotoUrl }),
+      const result: AddPersonResult = await browser.runtime.sendMessage({
+        type: "ADD_PERSON_REQUEST",
+        payload: {
+          platform: "linkedin" as const,
+          handle: username,
+          firstName: profileName?.firstName,
+          middleName: profileName?.middleName,
+          lastName: profileName?.lastName,
+          profileImageUrl: profilePhotoUrl ?? undefined,
+          headline: headline ?? undefined,
+          place: place ?? undefined,
+        },
       });
 
-      // Single redirect with all data
-      window.open(`${config.appUrl}${API_ROUTES.REDIRECT}?${params.toString()}`, "_blank");
+      if (result.payload.success) {
+        window.open(
+          `${config.appUrl}${WEBAPP_ROUTES.PERSON}/${result.payload.contactId}`,
+          "_blank",
+        );
+        return;
+      } else {
+        if (result.payload.requiresAuth) {
+          setStatusMessage("Sign in required — click the Bondery icon");
+        } else {
+          setStatusMessage(result.payload.error ?? "Something went wrong");
+        }
+      }
     } catch (error) {
       console.error("Error opening in Bondery:", error);
+      setStatusMessage("Extension error — try again");
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <Button
-      onClick={handleClick}
-      loading={isLoading}
-      fullWidth
-      size="xl"
-      leftSection={<BonderyIconWhite width={16} height={16} />}
-    >
-      Open in Bondery
-    </Button>
+    <>
+      <Button
+        onClick={handleClick}
+        loading={isLoading}
+        fullWidth
+        radius="xl"
+        size="xl"
+        leftSection={<BonderyIconWhite width={16} height={16} />}
+      >
+        Open in Bondery
+      </Button>
+      {statusMessage && (
+        <Text size="xs" c="dimmed" ta="center" mt={4}>
+          {statusMessage}
+        </Text>
+      )}
+    </>
   );
 };
 

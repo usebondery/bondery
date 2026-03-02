@@ -98,8 +98,8 @@ export async function generateVCard(contact: Contact): Promise<string> {
 
   lines.push(`UID:urn:uuid:${contact.id}`);
 
-  if (contact.title) {
-    lines.push(`TITLE:${escapeVCardValue(contact.title)}`);
+  if (contact.headline) {
+    lines.push(`TITLE:${escapeVCardValue(contact.headline)}`);
   }
 
   // Add emails with TYPE and PREF properties

@@ -19,6 +19,8 @@ jobs:
     runs-on: ubuntu-latest
     env:
       NEXT_PUBLIC_WEBAPP_URL: ${{ vars.NEXT_PUBLIC_WEBAPP_URL }}
+      PUBLIC_SUPABASE_URL: ${{ vars.PUBLIC_SUPABASE_URL }}
+      PRIVATE_SUPABASE_OAUTH_CLIENT_ID: ${{ secrets.PRIVATE_SUPABASE_OAUTH_CLIENT_ID }}
       PRIVATE_CHROME_EXTENSION_ID: ${{ secrets.PRIVATE_CHROME_EXTENSION_ID }}
       PRIVATE_CHROME_PUBLISHER_ID: ${{ secrets.PRIVATE_CHROME_PUBLISHER_ID }}
       PRIVATE_CHROME_SERVICE_ACCOUNT_KEY_JSON: ${{ secrets.PRIVATE_CHROME_SERVICE_ACCOUNT_KEY_JSON }}
@@ -74,6 +76,8 @@ jobs:
       - name: Create production environment file
         run: |
           echo "NEXT_PUBLIC_WEBAPP_URL=$NEXT_PUBLIC_WEBAPP_URL" > apps/chrome-extension/.env.production.local
+          echo "PUBLIC_SUPABASE_URL=$PUBLIC_SUPABASE_URL" >> apps/chrome-extension/.env.production.local
+          echo "PRIVATE_SUPABASE_OAUTH_CLIENT_ID=$PRIVATE_SUPABASE_OAUTH_CLIENT_ID" >> apps/chrome-extension/.env.production.local
 
       - name: Build Chrome Extension
         env:
@@ -107,7 +111,7 @@ jobs:
           npx crx3@2 \
             -p "$PRIVATE_KEY_PATH" \
             -o "$CRX_PATH" \
-            apps/chrome-extension/dist
+            apps/chrome-extension/dist/chrome-mv3
 
           cp "$PUBLIC_KEY_PATH" "$PUBLIC_KEY_ASSET_PATH"
 
@@ -138,8 +142,8 @@ jobs:
 
       - name: Create zip archive
         run: |
-          cd apps/chrome-extension/dist
-          zip -r ../../../bondery-extension-${{ steps.release_meta.outputs.tag }}.zip .
+          cd apps/chrome-extension/dist/chrome-mv3
+          zip -r ../../../../bondery-extension-${{ steps.release_meta.outputs.tag }}.zip .
           cd ../../..
 
       - name: Upload CRX to Chrome Web Store
