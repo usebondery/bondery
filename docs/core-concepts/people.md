@@ -31,5 +31,5 @@ Contacts can be imported directly from LinkedIn and Instagram. The browser exten
 
 * [Groups](groups.md) = organize contacts into labeled categories
 * [Relationships](relationships.md) = define how two contacts relate to each other
-* [Events](events.md) = log interactions you have with a contact
+* [Events](interactions.md) = log interactions you have with a contact
 * [Reminders](reminders.md) = get notified about important dates

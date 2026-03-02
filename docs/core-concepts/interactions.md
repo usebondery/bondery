@@ -2,9 +2,9 @@
 icon: calendar-star
 ---
 
-# Events
+# Interactions
 
-Events are logged interactions between you and one or more contacts. They give you a timeline of how your relationships have developed over time.
+Interactions are logged interactions between you and one or more contacts. They give you a timeline of how your relationships have developed over time.
 
 ## Event types
 
