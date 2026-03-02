@@ -8,7 +8,6 @@ import { Logo } from "@/components/Logo";
 import { SOCIAL_LINKS } from "@bondery/helpers";
 import { WEBAPP_URL } from "@/lib/config";
 
-
 const navLinks = [
   { label: "Features", href: "/#features" },
   { label: "Pricing", href: "/#pricing" },
@@ -23,7 +22,17 @@ export function HeaderClient({ initialStars }: HeaderClientProps) {
 
   return (
     <Box component="header" className="sticky top-6 z-50 ">
-      <Paper maw={1440} mx={{ base: "xs", md: "xl" }} shadow="md" py={"md"} px={"xs"}>
+      <Paper
+        maw={1440}
+        mx="auto"
+        w={{
+          base: "calc(100% - var(--mantine-spacing-xs) * 2)",
+          md: "calc(100% - var(--mantine-spacing-xl) * 2)",
+        }}
+        shadow="md"
+        py={"md"}
+        px={"xs"}
+      >
         <Flex align="center" px="md" visibleFrom="sm">
           <Box style={{ flex: 1 }}>
             <Logo size={32} />

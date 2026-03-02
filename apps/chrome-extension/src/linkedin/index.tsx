@@ -19,7 +19,7 @@ function getLinkedInSnapshot() {
     nameParts.length > 2 ? nameParts.slice(1, nameParts.length - 1).join(" ") : undefined;
 
   const titleElement = topCard.querySelector("div[data-generated-suggestion-target]");
-  const title = titleElement?.textContent?.trim() || undefined;
+  const headline = titleElement?.textContent?.trim() || undefined;
 
   const contactInfoLink = topCard.querySelector("#top-card-text-details-contact-info");
   const placeElement = contactInfoLink?.parentElement?.previousElementSibling || null;
@@ -36,7 +36,7 @@ function getLinkedInSnapshot() {
     middleName,
     lastName,
     profileImageUrl: profilePhotoImg?.src || undefined,
-    title,
+    headline,
     place,
   };
 }

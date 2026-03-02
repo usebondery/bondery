@@ -36,7 +36,7 @@ import {
   successNotificationTemplate,
 } from "@bondery/mantine-next";
 import { API_ROUTES, WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
-import ContactsTable from "@/app/(app)/app/components/ContactsTable";
+import ContactsTable from "@/app/(app)/app/components/contacts/ContactsTableV2";
 import { revalidateAll } from "../../actions";
 
 type Step = "intro" | "instructions" | "upload" | "processing" | "preview";
@@ -54,6 +54,7 @@ interface LinkedInImportTranslations {
   InstructionStep1LinkLabel: string;
   InstructionStep2: string;
   InstructionStep3: string;
+  InstructionStep4: string;
   HaveZipFile: string;
   DropzoneTitle: string;
   DropzoneDescription: string;
@@ -81,8 +82,9 @@ interface LinkedInImportTranslations {
   IntroDescription3: string;
   Continue: string;
   FilesAlertTitle: string;
-  FilesAlertDescription: string;
-  FilesAlertFileConnections: string;
+  FilesAlertDescriptionPrefix: string;
+  FilesAlertFileConnectionsBold: string;
+  FilesAlertDescriptionSuffix: string;
   ProcessingConnections: string;
 }
 
@@ -108,7 +110,7 @@ function toPreviewContact(contact: LinkedInPreparedContact): Contact {
     firstName: contact.firstName,
     middleName: contact.middleName,
     lastName: contact.lastName,
-    title: buildImportedTitle(contact.position, contact.company),
+    headline: buildImportedTitle(contact.position, contact.company),
     place: null,
     notes: null,
     avatar: null,
@@ -409,7 +411,7 @@ export function LinkedInImportModal({
             <IconBrandLinkedin size={56} />
           </ThemeIcon>
           <Stack gap="md" flex={1}>
-            <List type="ordered" listStyleType="decimal" withPadding spacing="xs" size="sm">
+            <List type="ordered" listStyleType="decimal" withPadding size="sm">
               <List.Item>
                 {t("InstructionStep1Prefix")}{" "}
                 <Anchor
@@ -423,6 +425,7 @@ export function LinkedInImportModal({
 
               <List.Item>{t("InstructionStep2")}</List.Item>
               <List.Item>{t("InstructionStep3")}</List.Item>
+              <List.Item>{t("InstructionStep4")}</List.Item>
             </List>
 
             <Alert color="blue" variant="light">
@@ -430,10 +433,13 @@ export function LinkedInImportModal({
                 <Text size="sm" fw={600}>
                   {t("FilesAlertTitle")}
                 </Text>
-                <Text size="sm">{t("FilesAlertDescription")}</Text>
-                <List spacing={2} size="sm">
-                  <List.Item>{t("FilesAlertFileConnections")}</List.Item>
-                </List>
+                <Text size="sm">
+                  {t("FilesAlertDescriptionPrefix")}{" "}
+                  <Text component="span" fw={700}>
+                    {t("FilesAlertFileConnectionsBold")}
+                  </Text>
+                  . {t("FilesAlertDescriptionSuffix")}
+                </Text>
               </Stack>
             </Alert>
           </Stack>
@@ -473,10 +479,7 @@ export function LinkedInImportModal({
           maxSize={30 * 1024 * 1024}
           accept={LINKEDIN_ACCEPTED_MIME_TYPES as unknown as string[]}
         >
-          <DropzoneContent
-            title={t("DropzoneTitle")}
-            description={t("DropzoneDescription")}
-          />
+          <DropzoneContent title={t("DropzoneTitle")} description={t("DropzoneDescription")} />
         </Dropzone>
 
         <ModalFooter
@@ -537,7 +540,7 @@ export function LinkedInImportModal({
 
       <ContactsTable
         contacts={previewContacts}
-        visibleColumns={["name", "title", "social"]}
+        visibleColumns={["name", "headline", "social"]}
         selectedIds={selectedIds}
         showSelection
         allSelected={allSelected}

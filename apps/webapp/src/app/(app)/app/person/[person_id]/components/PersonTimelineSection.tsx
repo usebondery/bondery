@@ -15,7 +15,7 @@ import {
   ModalTitle,
   successNotificationTemplate,
 } from "@bondery/mantine-next";
-import { revalidateEvents } from "../../../actions";
+import { revalidateInteractions } from "../../../actions";
 import { openStandardConfirmModal } from "../../../components/modals/openStandardConfirmModal";
 
 interface PersonTimelineSectionProps {
@@ -122,7 +122,7 @@ export function PersonTimelineSection({
       confirmColor: "red",
       onConfirm: async () => {
         try {
-          const response = await fetch(`${API_ROUTES.EVENTS}/${activity.id}`, {
+          const response = await fetch(`${API_ROUTES.INTERACTIONS}/${activity.id}`, {
             method: "DELETE",
           });
 
@@ -137,7 +137,7 @@ export function PersonTimelineSection({
             }),
           );
 
-          await revalidateEvents();
+          await revalidateInteractions();
           router.refresh();
         } catch {
           notifications.show(
@@ -157,7 +157,7 @@ export function PersonTimelineSection({
       .filter((id): id is string => Boolean(id));
 
     try {
-      const response = await fetch(API_ROUTES.EVENTS, {
+      const response = await fetch(API_ROUTES.INTERACTIONS, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -181,7 +181,7 @@ export function PersonTimelineSection({
         }),
       );
 
-      await revalidateEvents();
+      await revalidateInteractions();
       router.refresh();
     } catch {
       notifications.show(

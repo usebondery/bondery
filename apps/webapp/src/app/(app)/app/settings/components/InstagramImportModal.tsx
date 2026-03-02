@@ -37,7 +37,7 @@ import {
   successNotificationTemplate,
 } from "@bondery/mantine-next";
 import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
-import ContactsTable from "@/app/(app)/app/components/ContactsTable";
+import ContactsTable from "@/app/(app)/app/components/contacts/ContactsTableV2";
 import { revalidateAll } from "../../actions";
 
 type Step = "intro" | "instructions" | "upload" | "strategy" | "processing" | "preview";
@@ -105,10 +105,9 @@ interface InstagramImportTranslations {
   IntroDescription3: string;
   Continue: string;
   FilesAlertTitle: string;
-  FilesAlertDescription: string;
-  FilesAlertFileFollowing: string;
-  FilesAlertFileFollowers: string;
-  FilesAlertFileCloseFriends: string;
+  FilesAlertDescriptionPrefix: string;
+  FilesAlertFilesBold: string;
+  FilesAlertDescriptionSuffix: string;
   ProcessingConnections: string;
 }
 
@@ -162,7 +161,7 @@ function toPreviewContact(contact: InstagramPreparedContact): Contact {
     firstName: contact.firstName,
     middleName: contact.middleName,
     lastName: contact.lastName,
-    title: null,
+    headline: null,
     place: null,
     notes: null,
     avatar: null,
@@ -566,12 +565,13 @@ export function InstagramImportModal({
                 <Text size="sm" fw={600}>
                   {t("FilesAlertTitle")}
                 </Text>
-                <Text size="sm">{t("FilesAlertDescription")}</Text>
-                <List spacing={2} size="sm">
-                  <List.Item>{t("FilesAlertFileFollowing")}</List.Item>
-                  <List.Item>{t("FilesAlertFileFollowers")}</List.Item>
-                  <List.Item>{t("FilesAlertFileCloseFriends")}</List.Item>
-                </List>
+                <Text size="sm">
+                  {t("FilesAlertDescriptionPrefix")}{" "}
+                  <Text component="span" fw={700}>
+                    {t("FilesAlertFilesBold")}
+                  </Text>
+                  . {t("FilesAlertDescriptionSuffix")}
+                </Text>
               </Stack>
             </Alert>
           </Stack>

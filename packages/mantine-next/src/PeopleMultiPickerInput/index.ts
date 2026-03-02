@@ -1,0 +1,1 @@
+export { PeopleMultiPickerInput } from "./PeopleMultiPickerInput";

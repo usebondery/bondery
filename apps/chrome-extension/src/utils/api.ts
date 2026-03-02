@@ -46,7 +46,7 @@ export async function addOrFindPerson(data: RedirectRequest): Promise<RedirectRe
     throw new AuthRequiredError("Not authenticated");
   }
 
-  const response = await fetch(`${config.appUrl}${API_ROUTES.REDIRECT}`, {
+  const response = await fetch(`${config.apiUrl}${API_ROUTES.REDIRECT}`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -82,7 +82,7 @@ export async function findPersonBySocial(
     throw new AuthRequiredError("Not authenticated");
   }
 
-  const url = new URL(`${config.appUrl}${API_ROUTES.CONTACTS}/by-social`);
+  const url = new URL(`${config.apiUrl}${API_ROUTES.CONTACTS}/by-social`);
   url.searchParams.set("platform", platform);
   url.searchParams.set("handle", handle);
 
@@ -121,7 +121,7 @@ export async function fetchPersonPreview(
     throw new AuthRequiredError("Not authenticated");
   }
 
-  const response = await fetch(`${config.appUrl}${API_ROUTES.CONTACTS}/${contactId}`, {
+  const response = await fetch(`${config.apiUrl}${API_ROUTES.CONTACTS}/${contactId}`, {
     method: "GET",
     headers: {
       Authorization: `Bearer ${token}`,
@@ -157,7 +157,7 @@ export async function fetchUserSettings(): Promise<UserSettingsProfile> {
     throw new AuthRequiredError("Not authenticated");
   }
 
-  const response = await fetch(`${config.appUrl}${API_ROUTES.SETTINGS}`, {
+  const response = await fetch(`${config.apiUrl}${API_ROUTES.SETTINGS}`, {
     method: "GET",
     headers: {
       Authorization: `Bearer ${token}`,

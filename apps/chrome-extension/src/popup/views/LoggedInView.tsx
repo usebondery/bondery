@@ -1,7 +1,7 @@
 import React from "react";
 import { Button, Stack, Text } from "@mantine/core";
 import { IconExternalLink, IconSettings } from "@tabler/icons-react";
-import { UserCard } from "@bondery/mantine-next";
+import { UserCard } from "../components/UserCard";
 import { PopupBrandHeader } from "../components/PopupBrandHeader";
 import type { UserInfo } from "../types";
 

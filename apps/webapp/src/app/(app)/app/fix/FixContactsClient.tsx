@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Button, Group, Paper, Stack, Text } from "@mantine/core";
+import { Button, Group, Paper, SegmentedControl, Stack, Text } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import {
   IconArrowMerge,
@@ -19,10 +19,13 @@ import type {
   MergeRecommendationsResponse,
   RefreshMergeRecommendationsResponse,
 } from "@bondery/types";
-import { errorNotificationTemplate, successNotificationTemplate } from "@bondery/mantine-next";
+import {
+  PersonChip,
+  errorNotificationTemplate,
+  successNotificationTemplate,
+} from "@bondery/mantine-next";
 import { PageWrapper } from "@/app/(app)/app/components/PageWrapper";
 import { PageHeader } from "@/app/(app)/app/components/PageHeader";
-import { PersonChip } from "@/app/(app)/app/components/shared/PersonChip";
 import { MERGE_CONFLICT_FIELDS, openMergeWithModal } from "../people/components/MergeWithModal";
 
 interface FixContactsClientProps {
@@ -174,8 +177,13 @@ export function FixContactsClient({ initialRecommendations }: FixContactsClientP
     }
   };
 
-  const handleToggleDeclined = async () => {
-    const nextShowDeclined = !showDeclined;
+  const handleRecommendationViewChange = async (nextView: "active" | "hidden") => {
+    const nextShowDeclined = nextView === "hidden";
+
+    if (showDeclined === nextShowDeclined) {
+      return;
+    }
+
     setIsRefreshing(true);
 
     try {
@@ -238,15 +246,31 @@ export function FixContactsClient({ initialRecommendations }: FixContactsClientP
           icon={IconArrowMerge}
           title={t("Title")}
           secondaryAction={
-            <Button
-              variant="outline"
-              size="md"
-              leftSection={showDeclined ? <IconEye size={16} /> : <IconEyeOff size={16} />}
-              onClick={handleToggleDeclined}
-              loading={isRefreshing}
-            >
-              {showDeclined ? t("ShowActiveSuggestions") : t("ShowDeclinedSuggestions")}
-            </Button>
+            <SegmentedControl
+              value={showDeclined ? "hidden" : "active"}
+              onChange={(value) => handleRecommendationViewChange(value as "active" | "hidden")}
+              disabled={isRefreshing}
+              data={[
+                {
+                  value: "active",
+                  label: (
+                    <Group gap={6} wrap="nowrap">
+                      <IconEye size={14} />
+                      <span>{t("ActiveRecommendations")}</span>
+                    </Group>
+                  ),
+                },
+                {
+                  value: "hidden",
+                  label: (
+                    <Group gap={6} wrap="nowrap">
+                      <IconEyeOff size={14} />
+                      <span>{t("HiddenRecommendations")}</span>
+                    </Group>
+                  ),
+                },
+              ]}
+            />
           }
           primaryAction={
             <Button
@@ -258,6 +282,7 @@ export function FixContactsClient({ initialRecommendations }: FixContactsClientP
               {t("RefreshSuggestions")}
             </Button>
           }
+          description={t("Description")}
         />
 
         {recommendations.length === 0 ? (

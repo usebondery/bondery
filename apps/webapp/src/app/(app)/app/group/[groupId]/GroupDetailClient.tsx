@@ -16,8 +16,8 @@ import ContactsTable, {
   BulkSelectionAction,
   ColumnConfig,
   MenuAction,
-} from "@/app/(app)/app/components/ContactsTable";
-import { type SortOrder } from "@/app/(app)/app/components/contacts/SortMenu";
+  type SortOrder,
+} from "@/app/(app)/app/components/contacts/ContactsTableV2";
 import { PageHeader } from "@/app/(app)/app/components/PageHeader";
 import { PageWrapper } from "@/app/(app)/app/components/PageWrapper";
 import type { Contact } from "@bondery/types";
@@ -27,6 +27,7 @@ import { useDebouncedCallback } from "@mantine/hooks";
 import { useTranslations } from "next-intl";
 import { openAddPeopleToGroupModal } from "../../groups/components/AddPeopleToGroupModal";
 import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
+import { WEBSITE_URL } from "@/lib/config";
 import { formatContactName } from "@/lib/nameHelpers";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import { notifications } from "@mantine/notifications";
@@ -49,6 +50,8 @@ import { MERGE_CONFLICT_FIELDS, openMergeWithModal } from "../../people/componen
 interface GroupDetailClientProps {
   groupId: string;
   groupLabel: string;
+  groupEmoji: string;
+  groupColor: string;
   initialContacts: Contact[];
   totalCount: number;
 }
@@ -56,11 +59,15 @@ interface GroupDetailClientProps {
 export function GroupDetailClient({
   groupId,
   groupLabel,
+  groupEmoji,
+  groupColor,
   initialContacts,
   totalCount,
 }: GroupDetailClientProps) {
   const t = useTranslations("GroupsPage");
+  const tGroupDetail = useTranslations("GroupDetailPage");
   const tMerge = useTranslations("MergeWithModal");
+  const tHeader = useTranslations("PageHeader");
   const mergeTexts = useMemo(
     () => ({
       errorTitle: tMerge("ErrorTitle"),
@@ -120,8 +127,8 @@ export function GroupDetailClient({
       fixed: true,
     },
     {
-      key: "title",
-      label: "Title",
+      key: "headline",
+      label: "Headline",
       visible: true,
       icon: <IconBriefcase size={16} />,
     },
@@ -155,7 +162,11 @@ export function GroupDetailClient({
     router.replace(`${pathname}?${params.toString()}`);
   };
 
-  const handleSearch = useDebouncedCallback((query: string) => {
+  // Debounced: updates both the local filter state and the URL.
+  // SearchInput (inside DataTable) owns its own input value, so this only
+  // controls when the expensive useMemo filter and server URL update fire.
+  const handleSearchChange = useDebouncedCallback((query: string) => {
+    setSearchValue(query);
     const params = new URLSearchParams(searchParams);
     if (query) {
       params.set("q", query);
@@ -458,8 +469,8 @@ export function GroupDetailClient({
       id: groupId,
       userId: "",
       label: groupLabel,
-      emoji: "👥",
-      color: "",
+      emoji: groupEmoji || "👥",
+      color: groupColor || "blue",
       createdAt: "",
       updatedAt: "",
       contactCount: totalCount,
@@ -470,7 +481,7 @@ export function GroupDetailClient({
         avatar: contact.avatar,
       })),
     }),
-    [groupId, groupLabel, initialContacts, totalCount],
+    [groupColor, groupEmoji, groupId, groupLabel, initialContacts, totalCount],
   );
 
   const handleEditGroup = (group: GroupWithCount) => {
@@ -604,7 +615,7 @@ export function GroupDetailClient({
       <Stack gap="xl">
         <PageHeader
           icon={IconUsersGroup}
-          title="Group"
+          title={"Group's details"}
           backHref={WEBAPP_ROUTES.GROUPS}
           action={
             <Button size="md" leftSection={<IconUserPlus size={16} />} onClick={handleAddContacts}>
@@ -630,8 +641,7 @@ export function GroupDetailClient({
             isHeaderShown={true}
             searchValue={searchValue}
             onSearchChange={(value) => {
-              setSearchValue(value);
-              handleSearch(value);
+              handleSearchChange(value);
             }}
             columnsForMenu={columns}
             setColumnsForMenu={setColumns}

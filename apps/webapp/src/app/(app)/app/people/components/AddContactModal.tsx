@@ -2,11 +2,11 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Stack, TextInput, Text, Alert } from "@mantine/core";
+import { Stack, TextInput, Text } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { modals } from "@mantine/modals";
 import { notifications } from "@mantine/notifications";
-import { IconInfoCircle, IconUserPlus } from "@tabler/icons-react";
+import { IconUserPlus } from "@tabler/icons-react";
 import {
   errorNotificationTemplate,
   loadingNotificationTemplate,
@@ -14,7 +14,6 @@ import {
   ModalTitle,
   successNotificationTemplate,
 } from "@bondery/mantine-next";
-import { SocialMediaInput, validateSocialMediaInput } from "./SocialMediaInput";
 import { INPUT_MAX_LENGTHS } from "@/lib/config";
 import { getRandomExampleName } from "@/lib/randomNameHelpers";
 import { API_ROUTES, WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
@@ -53,7 +52,6 @@ function AddContactForm({ modalId }: { modalId: string }) {
       firstName: "",
       middleName: "",
       lastName: "",
-      linkedin: "",
     },
     validate: {
       firstName: (value) =>
@@ -72,12 +70,6 @@ function AddContactForm({ modalId }: { modalId: string }) {
           : value.length > INPUT_MAX_LENGTHS.lastName
             ? `Last name must be ${INPUT_MAX_LENGTHS.lastName} characters or less`
             : null,
-      linkedin: (value) => {
-        if (value.length > 50) {
-          return "LinkedIn must be 50 characters or less";
-        }
-        return validateSocialMediaInput(value, "linkedin");
-      },
     },
   });
 
@@ -100,7 +92,6 @@ function AddContactForm({ modalId }: { modalId: string }) {
           firstName: values.firstName.trim(),
           middleName: values.middleName.trim() || undefined,
           lastName: values.lastName.trim(),
-          linkedin: values.linkedin.trim() || undefined,
         }),
       });
 
@@ -206,19 +197,6 @@ function AddContactForm({ modalId }: { modalId: string }) {
             ) : null
           }
         />
-
-        <SocialMediaInput
-          platform="linkedin"
-          value={form.values.linkedin}
-          onChange={(value) => form.setFieldValue("linkedin", value)}
-          error={form.errors.linkedin}
-          displayLabel
-          disabled={isSubmitting}
-        />
-        <Alert variant="info" icon={<IconInfoCircle />} title="Want to add more info?">
-          You can add more details like phone, email, and other social media after creating the
-          contact.
-        </Alert>
 
         <ModalFooter
           cancelLabel="Cancel"

@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from "react";
+import { browser } from "wxt/browser";
 import { Button, Text } from "@mantine/core";
 import { BonderyIconWhite } from "@bondery/branding";
 import { WEBAPP_ROUTES } from "@bondery/helpers";
 import { config } from "../config";
-import { sanitizeName } from "../utils/nameHelpers";
+// sanitizeName temporarily disabled – transliteration causes non-UTF-8 bytes in the bundle
+const sanitizeName = (s: string) => s.trim();
 import type { AddPersonResult } from "../utils/messages";
 
 interface LinkedInButtonProps {
@@ -19,13 +21,13 @@ const LinkedInButton: React.FC<LinkedInButtonProps> = ({ username }) => {
     // Log all extracted information immediately on mount
     const profileName = extractProfileName();
     const profilePhotoUrl = extractProfilePhotoUrl();
-    const title = extractTitle();
+    const headline = extractHeadline();
     const place = extractPlace();
 
     console.log("LinkedIn Profile Extraction Results:", {
       username,
       profileName,
-      title,
+      headline,
       place,
       profilePhotoUrl,
     });
@@ -98,7 +100,7 @@ const LinkedInButton: React.FC<LinkedInButtonProps> = ({ username }) => {
     return { firstName, lastName, middleName };
   };
 
-  const extractTitle = (): string | null => {
+  const extractHeadline = (): string | null => {
     const topCard = document.querySelector("section[data-member-id]") || document;
     const titleElement = topCard.querySelector("div[data-generated-suggestion-target]");
 
@@ -119,7 +121,7 @@ const LinkedInButton: React.FC<LinkedInButtonProps> = ({ username }) => {
       const altElement = document.querySelector(selector);
       if (altElement?.textContent) {
         console.log(
-          `LinkedIn: Found title using alternative selector: ${selector}`,
+          `LinkedIn: Found headline using alternative selector: ${selector}`,
           altElement.textContent,
         );
         return altElement.textContent.trim();
@@ -230,18 +232,18 @@ const LinkedInButton: React.FC<LinkedInButtonProps> = ({ username }) => {
     try {
       const profileName = extractProfileName();
       const profilePhotoUrl = extractProfilePhotoUrl();
-      const title = extractTitle();
+      const headline = extractHeadline();
       const place = extractPlace();
 
       console.log("LinkedIn Profile Data:", {
         username,
         name: profileName,
-        title,
+        headline,
         place,
         profilePicture: profilePhotoUrl,
       });
 
-      const result: AddPersonResult = await chrome.runtime.sendMessage({
+      const result: AddPersonResult = await browser.runtime.sendMessage({
         type: "ADD_PERSON_REQUEST",
         payload: {
           platform: "linkedin" as const,
@@ -250,7 +252,7 @@ const LinkedInButton: React.FC<LinkedInButtonProps> = ({ username }) => {
           middleName: profileName?.middleName,
           lastName: profileName?.lastName,
           profileImageUrl: profilePhotoUrl ?? undefined,
-          title: title ?? undefined,
+          headline: headline ?? undefined,
           place: place ?? undefined,
         },
       });
@@ -282,6 +284,7 @@ const LinkedInButton: React.FC<LinkedInButtonProps> = ({ username }) => {
         onClick={handleClick}
         loading={isLoading}
         fullWidth
+        radius="xl"
         size="xl"
         leftSection={<BonderyIconWhite width={16} height={16} />}
       >

@@ -8,6 +8,8 @@ import {
   Button,
   Group,
   Text,
+  Center,
+  Loader,
   ColorInput,
   DEFAULT_THEME,
   Box,
@@ -17,13 +19,16 @@ import { modals } from "@mantine/modals";
 import { notifications } from "@mantine/notifications";
 import { IconUsersGroup } from "@tabler/icons-react";
 import {
+  PeopleMultiPickerInput,
+  EmojiPicker,
   errorNotificationTemplate,
+  getRandomEmoji,
   loadingNotificationTemplate,
   ModalFooter,
   ModalTitle,
   successNotificationTemplate,
 } from "@bondery/mantine-next";
-import { EmojiPicker, getRandomEmoji } from "@/app/(app)/app/components/EmojiPicker";
+import type { Contact } from "@bondery/types";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import { revalidateGroups } from "../../actions";
 
@@ -63,6 +68,9 @@ export function openAddGroupModal() {
 function AddGroupForm({ modalId }: { modalId: string }) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoadingContacts, setIsLoadingContacts] = useState(true);
+  const [contacts, setContacts] = useState<Contact[]>([]);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
   useEffect(() => {
     modals.updateModal({
@@ -72,6 +80,31 @@ function AddGroupForm({ modalId }: { modalId: string }) {
       withCloseButton: !isSubmitting,
     });
   }, [isSubmitting, modalId]);
+
+  useEffect(() => {
+    async function fetchContacts() {
+      try {
+        const response = await fetch(API_ROUTES.CONTACTS);
+        if (!response.ok) {
+          throw new Error("Failed to fetch contacts");
+        }
+
+        const data = (await response.json()) as { contacts?: Contact[] };
+        setContacts(data.contacts || []);
+      } catch {
+        notifications.show(
+          errorNotificationTemplate({
+            title: "Error",
+            description: "Failed to load contacts",
+          }),
+        );
+      } finally {
+        setIsLoadingContacts(false);
+      }
+    }
+
+    void fetchContacts();
+  }, []);
 
   const form = useForm({
     mode: "controlled",
@@ -116,6 +149,28 @@ function AddGroupForm({ modalId }: { modalId: string }) {
       if (!res.ok) {
         const errorData = await res.json();
         throw new Error(errorData.error || "Failed to create group");
+      }
+
+      const createdGroupData = (await res.json()) as { id?: string };
+
+      if (!createdGroupData.id) {
+        throw new Error("Failed to parse new group id");
+      }
+
+      if (selectedIds.length > 0) {
+        const addPeopleResponse = await fetch(
+          `${API_ROUTES.GROUPS}/${createdGroupData.id}/contacts`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ personIds: selectedIds }),
+          },
+        );
+
+        if (!addPeopleResponse.ok) {
+          const addPeopleError = await addPeopleResponse.json();
+          throw new Error(addPeopleError.error || "Failed to add contacts to group");
+        }
       }
 
       notifications.hide(loadingNotification);
@@ -177,6 +232,31 @@ function AddGroupForm({ modalId }: { modalId: string }) {
           closeOnColorSwatchClick
           {...form.getInputProps("color")}
         />
+
+        <Stack gap="xs">
+          <Text size="sm" fw={500}>
+            Add people
+          </Text>
+
+          {isLoadingContacts ? (
+            <Center py="xs">
+              <Loader size="sm" />
+            </Center>
+          ) : contacts.length === 0 ? (
+            <Text c="dimmed" size="sm">
+              No contacts found
+            </Text>
+          ) : (
+            <PeopleMultiPickerInput
+              contacts={contacts}
+              selectedIds={selectedIds}
+              onChange={setSelectedIds}
+              placeholder="Add contacts..."
+              noResultsLabel="No contacts found"
+              disabled={isSubmitting}
+            />
+          )}
+        </Stack>
 
         <ModalFooter
           cancelLabel="Cancel"

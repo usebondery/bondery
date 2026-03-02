@@ -12,7 +12,7 @@ import { updateTag } from "next/cache";
 const CACHE_TAGS = {
   settings: "settings",
   contacts: "contacts",
-  events: "events",
+  interactions: "interactions",
   groups: "groups",
   reminders: "reminders",
   relationships: "relationships",
@@ -30,9 +30,9 @@ export async function revalidateContacts() {
   updateTag(CACHE_TAGS.contacts);
 }
 
-/** Invalidate events / activities. */
-export async function revalidateEvents() {
-  updateTag(CACHE_TAGS.events);
+/** Invalidate interactions / activities. */
+export async function revalidateInteractions() {
+  updateTag(CACHE_TAGS.interactions);
 }
 
 /** Invalidate groups list and group membership data. */

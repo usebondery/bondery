@@ -40,6 +40,7 @@ import { PersonTimelineSection } from "./components/PersonTimelineSection";
 // import { ContactPGPSection } from "./components/ContactPGPSection";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
+import { HELP_DOCS_URL } from "@bondery/helpers";
 import {
   errorNotificationTemplate,
   ModalTitle,
@@ -53,6 +54,7 @@ import { openStandardConfirmModal } from "@/app/(app)/app/components/modals/open
 import { GroupCard } from "../../groups/components/GroupCard";
 import { openAddPeopleToGroupSelectionModal } from "../../people/components/AddPeopleToGroupSelectionModal";
 import { MERGE_CONFLICT_FIELDS, openMergeWithModal } from "../../people/components/MergeWithModal";
+import { WEBSITE_URL } from "@/lib/config";
 
 interface PersonClientProps {
   initialContact: Contact;
@@ -80,7 +82,9 @@ export default function PersonClient({
   const router = useRouter();
   const tRelationships = useTranslations("PersonRelationships");
   const tImportantDates = useTranslations("ContactImportantDates");
+  const tPersonPage = useTranslations("SingleContactPage");
   const tMerge = useTranslations("MergeWithModal");
+  const tHeader = useTranslations("PageHeader");
   const tAddress = useTranslations("ContactAddress");
   const mergeTexts = useMemo(
     () => ({
@@ -196,7 +200,7 @@ export default function PersonClient({
         firstName: contact.firstName || "",
         middleName: contact.middleName || "",
         lastName: contact.lastName || "",
-        title: contact.title || "",
+        headline: contact.headline || "",
         place: contact.place || "",
         notes: contact.notes || "",
         linkedin: contact.linkedin || "",
@@ -216,7 +220,7 @@ export default function PersonClient({
     contact?.firstName,
     contact?.middleName,
     contact?.lastName,
-    contact?.title,
+    contact?.headline,
     contact?.place,
     contact?.notes,
     contact?.linkedin,
@@ -891,7 +895,7 @@ export default function PersonClient({
       <Stack gap="xl">
         <PageHeader
           icon={IconUser}
-          title="Person's details"
+          title={"Person's details"}
           backOnClick={() => {
             if (typeof window !== "undefined" && window.history.length > 1) {
               router.back();

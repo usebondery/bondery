@@ -169,7 +169,9 @@ async function getScrapedProfileFromTab(
   }
 }
 
-async function resolvePersonLookup(profile: ScrapedProfileData): Promise<SocialLookupResult | null> {
+async function resolvePersonLookup(
+  profile: ScrapedProfileData,
+): Promise<SocialLookupResult | null> {
   const cacheKey = getPersonExistenceCacheKey(profile);
   const now = Date.now();
   const cached = personExistenceCache.get(cacheKey);
@@ -222,10 +224,7 @@ async function updateActionContextIndicator(): Promise<void> {
     const authenticated = await isAuthenticated();
 
     if (!authenticated) {
-      await setDeterminedBadge(
-        BADGE_COLOR_UNAUTHENTICATED,
-        BADGE_COLOR_UNAUTHENTICATED_FALLBACK,
-      );
+      await setDeterminedBadge(BADGE_COLOR_UNAUTHENTICATED, BADGE_COLOR_UNAUTHENTICATED_FALLBACK);
       return;
     }
 
@@ -252,10 +251,7 @@ async function updateActionContextIndicator(): Promise<void> {
     }
 
     if (exists) {
-      await setDeterminedBadge(
-        BADGE_COLOR_PERSON_EXISTS,
-        BADGE_COLOR_PERSON_EXISTS_FALLBACK,
-      );
+      await setDeterminedBadge(BADGE_COLOR_PERSON_EXISTS, BADGE_COLOR_PERSON_EXISTS_FALLBACK);
       return;
     }
 
@@ -609,7 +605,7 @@ async function handleAddPerson(
       middleName: payload.middleName,
       lastName: payload.lastName,
       profileImageUrl: payload.profileImageUrl,
-      title: payload.title,
+      headline: payload.headline,
       place: payload.place,
       notes: payload.notes,
     });

@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { browser } from "wxt/browser";
 import { Button, Stack, Text, Center, Card, ThemeIcon, Group } from "@mantine/core";
 import { IconCheck, IconBrandChrome } from "@tabler/icons-react";
 import { BonderyIcon } from "@bondery/branding";
@@ -18,7 +19,7 @@ export default function WelcomeApp() {
     setError(null);
 
     try {
-      const result: LoginResult = await chrome.runtime.sendMessage({
+      const result: LoginResult = await browser.runtime.sendMessage({
         type: "LOGIN_REQUEST",
       });
 
@@ -73,27 +74,6 @@ export default function WelcomeApp() {
             <Text size="md" c="dimmed" ta="center">
               Connect your Bondery account to save contacts directly from social media profiles.
             </Text>
-          </Stack>
-
-          <Stack gap="xs" w="100%">
-            <Group gap="sm">
-              <ThemeIcon size={32} radius="xl" variant="light">
-                <IconBrandChrome size={18} />
-              </ThemeIcon>
-              <Text size="sm">Save contacts from Instagram, LinkedIn, and Facebook</Text>
-            </Group>
-            <Group gap="sm">
-              <ThemeIcon size={32} radius="xl" variant="light">
-                <IconCheck size={18} />
-              </ThemeIcon>
-              <Text size="sm">See if a contact already exists in your Bondery</Text>
-            </Group>
-            <Group gap="sm">
-              <ThemeIcon size={32} radius="xl" variant="light">
-                <IconCheck size={18} />
-              </ThemeIcon>
-              <Text size="sm">Quickly open existing contacts in the app</Text>
-            </Group>
           </Stack>
 
           <Button onClick={handleConnect} loading={loading} fullWidth size="lg">

@@ -10,6 +10,7 @@ import { API_ROUTES, WEBSITE_ROUTES } from "@bondery/helpers/globals/paths";
 import { API_URL } from "@/lib/config";
 import { ColorSchemeSync } from "./components/ColorSchemeSync";
 import type { ColorSchemePreference } from "@bondery/types";
+import { getMergeRecommendationsData } from "./fix/getMergeRecommendationsData";
 
 interface UserSettingsLayoutData {
   userName: string;
@@ -81,6 +82,12 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   const { userName, userEmail, avatarUrl, locale, timezone, timeFormat, colorScheme } =
     await getUserSettings();
+  let hasActiveMergeRecommendations = false;
+
+  try {
+    const recommendations = await getMergeRecommendationsData();
+    hasActiveMergeRecommendations = recommendations.length > 0;
+  } catch (error) {}
 
   const messages = translations[locale as keyof typeof translations] || translations.en;
 
@@ -99,6 +106,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
             userName={userName}
             userEmail={userEmail}
             avatarUrl={avatarUrl}
+            hasActiveMergeRecommendations={hasActiveMergeRecommendations}
           />
         </AppShellNavbar>
         <AppShellMain>{children}</AppShellMain>

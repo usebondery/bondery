@@ -9,7 +9,11 @@ export default async function FeedbackPage() {
 
   return (
     <PageWrapper>
-      <ErrorPageHeader iconType="message-circle" title={t("Title")} />
+      <ErrorPageHeader
+        iconType="message-circle"
+        title={t("Title")}
+        description={t("Description")}
+      />
       <Stack align="center">
         <FeedbackForm />
       </Stack>

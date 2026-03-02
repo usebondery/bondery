@@ -13,9 +13,9 @@ import {
   Stack,
 } from "@mantine/core";
 import { IconCopy, IconDotsVertical, IconEdit, IconTrash, IconUserPlus } from "@tabler/icons-react";
-import { useMemo, useState, type MouseEvent } from "react";
+import { useState, type MouseEvent } from "react";
 import type { GroupWithCount } from "@bondery/types";
-import { PeopleAvatarChips } from "../../components/timeline/PeopleAvatarChips";
+import { PersonAvatarGroup } from "@bondery/mantine-next";
 
 interface GroupCardProps {
   group: GroupWithCount;
@@ -52,12 +52,6 @@ export function GroupCard({
   const isSmallVariant = variant === "small";
   const peopleLabel = `${group.contactCount} ${group.contactCount === 1 ? "person" : "people"}`;
   const previewContacts = group.previewContacts || [];
-
-  const formatName = useMemo(
-    () => (firstName: string, lastName?: string | null) =>
-      `${firstName}${lastName ? ` ${lastName}` : ""}`.trim(),
-    [],
-  );
 
   const handleCardClick = (e: MouseEvent) => {
     if (!interactive) {
@@ -112,7 +106,7 @@ export function GroupCard({
                 {group.label}
               </Text>
               {previewContacts.length > 0 ? (
-                <PeopleAvatarChips
+                <PersonAvatarGroup
                   people={previewContacts.map((contact) => ({
                     id: contact.id,
                     firstName: contact.firstName,

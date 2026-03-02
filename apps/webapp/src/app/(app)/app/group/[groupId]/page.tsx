@@ -1,12 +1,12 @@
 import { GroupDetailClient } from "./GroupDetailClient";
 import { API_URL } from "@/lib/config";
-import type { Contact, Group } from "@bondery/types";
+import type { Contact } from "@bondery/types";
 import { getAuthHeaders } from "@/lib/authHeaders";
 import { notFound } from "next/navigation";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
 
 interface GroupContactsResponse {
-  group: { id: string; label: string };
+  group: { id: string; label: string; emoji?: string | null; color?: string | null };
   contacts: Contact[];
   totalCount: number;
 }
@@ -28,6 +28,22 @@ async function getGroupContacts(groupId: string): Promise<GroupContactsResponse>
 
     const data = await res.json();
 
+    const groupRes = await fetch(`${API_URL}${API_ROUTES.GROUPS}/${groupId}`, {
+      next: { tags: ["groups"] },
+      headers,
+    });
+
+    if (!groupRes.ok) {
+      if (groupRes.status === 404) {
+        notFound();
+      }
+      throw new Error(`Failed to fetch group: ${groupRes.status} ${groupRes.statusText}`);
+    }
+
+    const groupData = (await groupRes.json()) as {
+      group?: { id: string; label: string; emoji?: string | null; color?: string | null };
+    };
+
     // Ensure lastInteraction is a Date object
     const contacts = data.contacts.map((contact: Contact) => ({
       ...contact,
@@ -36,7 +52,12 @@ async function getGroupContacts(groupId: string): Promise<GroupContactsResponse>
     }));
 
     return {
-      group: data.group,
+      group: {
+        id: groupData.group?.id || data.group.id,
+        label: groupData.group?.label || data.group.label,
+        emoji: groupData.group?.emoji ?? null,
+        color: groupData.group?.color ?? null,
+      },
       contacts,
       totalCount: data.totalCount,
     };
@@ -58,6 +79,8 @@ export default async function GroupDetailPage({
     <GroupDetailClient
       groupId={groupId}
       groupLabel={group.label}
+      groupEmoji={group.emoji || ""}
+      groupColor={group.color || ""}
       initialContacts={contacts}
       totalCount={totalCount}
     />

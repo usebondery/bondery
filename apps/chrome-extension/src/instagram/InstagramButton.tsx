@@ -1,16 +1,31 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
+import { browser } from "wxt/browser";
 import { Button, Text } from "@mantine/core";
 import { BonderyIconWhite } from "@bondery/branding";
-import { parseInstagramUsername, WEBAPP_ROUTES } from "@bondery/helpers";
-import { config } from "../config";
+import { parseInstagramUsername } from "@bondery/helpers";
 import type { AddPersonResult } from "../utils/messages";
 
 interface InstagramButtonProps {
   username: string;
+  getSnapshot?: () => InstagramProfileSnapshot | null;
 }
 
-const InstagramButton: React.FC<InstagramButtonProps> = ({ username }) => {
+interface InstagramProfileSnapshot {
+  platform: "instagram";
+  handle: string;
+  displayName: string;
+  firstName: string;
+  middleName?: string;
+  lastName?: string;
+  profileImageUrl?: string;
+  headline?: string;
+  place?: string;
+  notes?: string;
+}
+
+const InstagramButton: React.FC<InstagramButtonProps> = ({ username, getSnapshot }) => {
   const [isLoading, setIsLoading] = useState(false);
+  const requestInFlightRef = useRef(false);
 
   const extractProfileName = (): {
     firstName: string;
@@ -43,26 +58,57 @@ const InstagramButton: React.FC<InstagramButtonProps> = ({ username }) => {
     return null;
   };
 
+  const extractBioText = (): string | undefined => {
+    const selectors = [
+      "header section div[dir='auto'] span",
+      "header div[dir='auto'] span",
+      "section main header div[dir='auto'] span",
+    ];
+
+    for (const selector of selectors) {
+      const value = document.querySelector(selector)?.textContent?.trim();
+      if (value) {
+        return value;
+      }
+    }
+
+    return undefined;
+  };
+
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
 
   const handleClick = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
 
+    if (requestInFlightRef.current) {
+      return;
+    }
+
+    requestInFlightRef.current = true;
     setIsLoading(true);
     setStatusMessage(null);
 
     try {
-      const profileName = extractProfileName();
-      const profilePhotoUrl = extractProfilePhotoUrl();
+      const snapshot = getSnapshot?.();
+      const profileName = snapshot
+        ? {
+            firstName: snapshot.firstName,
+            middleName: snapshot.middleName,
+            lastName: snapshot.lastName,
+          }
+        : extractProfileName();
+      const profilePhotoUrl = snapshot?.profileImageUrl ?? extractProfilePhotoUrl();
+      const notes = snapshot?.notes ?? extractBioText();
 
       console.log("Instagram Profile Data:", {
         username,
         name: profileName,
         profilePicture: profilePhotoUrl,
+        notes,
       });
 
-      const result: AddPersonResult = await chrome.runtime.sendMessage({
+      const result: AddPersonResult = await browser.runtime.sendMessage({
         type: "ADD_PERSON_REQUEST",
         payload: {
           platform: "instagram" as const,
@@ -71,14 +117,13 @@ const InstagramButton: React.FC<InstagramButtonProps> = ({ username }) => {
           middleName: profileName?.middleName,
           lastName: profileName?.lastName,
           profileImageUrl: profilePhotoUrl ?? undefined,
+          headline: snapshot?.headline,
+          place: snapshot?.place,
+          notes,
         },
       });
 
       if (result.payload.success) {
-        window.open(
-          `${config.appUrl}${WEBAPP_ROUTES.PERSON}/${result.payload.contactId}`,
-          "_blank",
-        );
         return;
       } else {
         if (result.payload.requiresAuth) {
@@ -92,6 +137,7 @@ const InstagramButton: React.FC<InstagramButtonProps> = ({ username }) => {
       setStatusMessage("Extension error — try again");
     } finally {
       setIsLoading(false);
+      requestInFlightRef.current = false;
     }
   };
 

@@ -1,11 +1,11 @@
 "use client";
 
-import { Badge, Box, Group, Stack, Text, ThemeIcon, Timeline } from "@mantine/core";
+import { Box, Group, Stack, Text, ThemeIcon, Timeline } from "@mantine/core";
 import type { Activity, Contact } from "@bondery/types";
 import { useMemo } from "react";
 import { getActivityTypeConfig } from "@/lib/activityTypes";
+import { PersonAvatarGroup } from "@bondery/mantine-next";
 import { ActivityCard } from "./ActivityCard";
-import { PersonChip } from "../shared/PersonChip";
 
 interface TimelineEventsListProps {
   activities: Activity[];
@@ -72,13 +72,7 @@ export function TimelineEventsList({
             {monthActivities.map((activity) => {
               const participants = resolveParticipants(activity);
               const typeConfig = getActivityTypeConfig(activity.type);
-              const hasOverflowParticipants = participants.length > 3;
-              const visibleParticipants = hasOverflowParticipants
-                ? participants.slice(0, 2)
-                : participants.slice(0, 3);
-              const remainingParticipantsCount = hasOverflowParticipants
-                ? participants.length - visibleParticipants.length
-                : 0;
+              const visibleParticipants = participants.slice(0, 3);
 
               return (
                 <Timeline.Item
@@ -104,50 +98,33 @@ export function TimelineEventsList({
                     </Box>
                   }
                 >
-                  <Group align="flex-start" wrap="nowrap" gap="sm">
-                    <Stack gap={4} className="w-48" style={{ flexShrink: 0 }}>
-                      {visibleParticipants.map((participant) => (
-                        <PersonChip
-                          key={participant.id}
-                          person={{
-                            id: participant.id,
-                            firstName: participant.firstName,
-                            lastName: participant.lastName,
-                            avatar: participant.avatar,
-                          }}
-                          size="sm"
-                          avatarEdge
-                          isClickable
-                        />
-                      ))}
-                      {remainingParticipantsCount > 0 && (
-                        <Badge
-                          size="lg"
-                          variant="light"
-                          color="gray"
-                          radius="xl"
-                          w="fit-content"
-                          fw={600}
-                          tt={"lowercase"}
-                        >
-                          +{remainingParticipantsCount} more
-                        </Badge>
-                      )}
-                    </Stack>
-
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <ActivityCard
-                        activity={activity}
-                        editLabel={editLabel}
-                        duplicateLabel={duplicateLabel}
-                        deleteLabel={deleteLabel}
-                        onOpen={() => onOpen(activity)}
-                        onEdit={() => onEdit(activity)}
-                        onDuplicate={() => onDuplicate(activity)}
-                        onDelete={() => onDelete(activity)}
+                  <ActivityCard
+                    activity={activity}
+                    leftSection={
+                      <PersonAvatarGroup
+                        people={visibleParticipants.map((participant) => ({
+                          id: participant.id,
+                          firstName: participant.firstName,
+                          middleName: participant.middleName,
+                          lastName: participant.lastName,
+                          headline: participant.headline,
+                          avatar: participant.avatar,
+                        }))}
+                        totalCount={participants.length}
+                        size="md"
+                        isClickable
+                        maxDisplayCount={3}
+                        wrap
                       />
-                    </div>
-                  </Group>
+                    }
+                    editLabel={editLabel}
+                    duplicateLabel={duplicateLabel}
+                    deleteLabel={deleteLabel}
+                    onOpen={() => onOpen(activity)}
+                    onEdit={() => onEdit(activity)}
+                    onDuplicate={() => onDuplicate(activity)}
+                    onDelete={() => onDelete(activity)}
+                  />
                 </Timeline.Item>
               );
             })}

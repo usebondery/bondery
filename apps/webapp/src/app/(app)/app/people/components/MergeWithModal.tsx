@@ -32,6 +32,7 @@ import {
 } from "@tabler/icons-react";
 import {
   ModalFooter,
+  PersonChip,
   errorNotificationTemplate,
   loadingNotificationTemplate,
   ModalTitle,
@@ -47,7 +48,6 @@ import type {
   PhoneEntry,
 } from "@bondery/types";
 import { IMaskInput } from "react-imask";
-import { PersonChip } from "@/app/(app)/app/components/shared/PersonChip";
 import { getTelephoneReactMaskExpression } from "@/lib/phoneHelpers";
 import { revalidateAll } from "../../actions";
 
@@ -69,7 +69,7 @@ export const MERGE_CONFLICT_FIELDS: MergeConflictField[] = [
   "middleName",
   "lastName",
   "avatar",
-  "title",
+  "headline",
   "place",
   "notes",
   "lastInteraction",

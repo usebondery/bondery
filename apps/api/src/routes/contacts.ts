@@ -56,7 +56,7 @@ export const CONTACT_SELECT = `
   firstName:first_name,
   middleName:middle_name,
   lastName:last_name,
-  title,
+  headline,
   place,
   notes,
   avatar,
@@ -135,7 +135,7 @@ const MERGEABLE_SCALAR_FIELDS = {
   middleName: "middle_name",
   lastName: "last_name",
   avatar: "avatar",
-  title: "title",
+  headline: "headline",
   place: "place",
   notes: "notes",
   lastInteraction: "last_interaction",
@@ -753,12 +753,12 @@ function withEmptySocialMedia<
 }
 
 /**
- * Deletes events that would be left without participants after removing the given contacts.
+ * Deletes interactions that would be left without participants after removing the given contacts.
  *
- * It only affects events owned by the current user and only events that currently include
+ * It only affects interactions owned by the current user and only interactions that currently include
  * at least one of the contacts being deleted.
  */
-async function deleteOrphanedEventsForDeletedContacts(
+async function deleteOrphanedInteractionsForDeletedContacts(
   client: any,
   userId: string,
   contactIds: string[],
@@ -773,44 +773,48 @@ async function deleteOrphanedEventsForDeletedContacts(
   }
 
   const { data: impactedMemberships, error: impactedMembershipsError } = await client
-    .from("event_participants")
-    .select("event_id, person_id")
+    .from("interaction_participants")
+    .select("interaction_id, person_id")
     .in("person_id", uniqueContactIds);
 
   if (impactedMembershipsError) {
     throw new Error(impactedMembershipsError.message);
   }
 
-  const impactedEventIds = Array.from(
+  const impactedInteractionIds = Array.from(
     new Set(
-      (impactedMemberships || []).map((membership: { event_id: string }) => membership.event_id),
+      (impactedMemberships || []).map(
+        (membership: { interaction_id: string }) => membership.interaction_id,
+      ),
     ),
   );
 
-  if (impactedEventIds.length === 0) {
+  if (impactedInteractionIds.length === 0) {
     return;
   }
 
-  const { data: ownedEvents, error: ownedEventsError } = await client
-    .from("events")
+  const { data: ownedInteractions, error: ownedInteractionsError } = await client
+    .from("interactions")
     .select("id")
     .eq("user_id", userId)
-    .in("id", impactedEventIds);
+    .in("id", impactedInteractionIds);
 
-  if (ownedEventsError) {
-    throw new Error(ownedEventsError.message);
+  if (ownedInteractionsError) {
+    throw new Error(ownedInteractionsError.message);
   }
 
-  const ownedEventIds = (ownedEvents || []).map((event: { id: string }) => event.id);
+  const ownedInteractionIds = (ownedInteractions || []).map(
+    (interaction: { id: string }) => interaction.id,
+  );
 
-  if (ownedEventIds.length === 0) {
+  if (ownedInteractionIds.length === 0) {
     return;
   }
 
   const { data: allMemberships, error: allMembershipsError } = await client
-    .from("event_participants")
-    .select("event_id, person_id")
-    .in("event_id", ownedEventIds);
+    .from("interaction_participants")
+    .select("interaction_id, person_id")
+    .in("interaction_id", ownedInteractionIds);
 
   if (allMembershipsError) {
     throw new Error(allMembershipsError.message);
@@ -818,9 +822,10 @@ async function deleteOrphanedEventsForDeletedContacts(
 
   const deleteIdSet = new Set<string>();
 
-  for (const eventId of ownedEventIds) {
+  for (const interactionId of ownedInteractionIds) {
     const participants = (allMemberships || []).filter(
-      (membership: { event_id: string; person_id: string }) => membership.event_id === eventId,
+      (membership: { interaction_id: string; person_id: string }) =>
+        membership.interaction_id === interactionId,
     );
 
     if (participants.length === 0) {
@@ -832,23 +837,23 @@ async function deleteOrphanedEventsForDeletedContacts(
     );
 
     if (allParticipantsDeleted) {
-      deleteIdSet.add(eventId);
+      deleteIdSet.add(interactionId);
     }
   }
 
-  const eventIdsToDelete = Array.from(deleteIdSet);
+  const interactionIdsToDelete = Array.from(deleteIdSet);
 
-  if (eventIdsToDelete.length === 0) {
+  if (interactionIdsToDelete.length === 0) {
     return;
   }
 
-  const { error: deleteEventsError } = await client
-    .from("events")
+  const { error: deleteInteractionsError } = await client
+    .from("interactions")
     .delete()
-    .in("id", eventIdsToDelete);
+    .in("id", interactionIdsToDelete);
 
-  if (deleteEventsError) {
-    throw new Error(deleteEventsError.message);
+  if (deleteInteractionsError) {
+    throw new Error(deleteInteractionsError.message);
   }
 }
 
@@ -895,7 +900,7 @@ export async function contactRoutes(fastify: FastifyInstance) {
 
       const [
         { count: totalContactsCount },
-        { count: monthEventsCount },
+        { count: monthInteractionsCount },
         { count: newContactsYearCount },
       ] = await Promise.all([
         client
@@ -904,7 +909,7 @@ export async function contactRoutes(fastify: FastifyInstance) {
           .eq("user_id", user.id)
           .eq("myself", false),
         client
-          .from("events")
+          .from("interactions")
           .select("id", { head: true, count: "exact" })
           .eq("user_id", user.id)
           .gte("date", monthStart.toISOString())
@@ -1010,7 +1015,7 @@ export async function contactRoutes(fastify: FastifyInstance) {
         totalCount: typeof count === "number" ? count : contactsWithSocialMedia.length,
         stats: {
           totalContacts: totalContactsCount || 0,
-          thisMonthInteractions: monthEventsCount || 0,
+          thisMonthInteractions: monthInteractionsCount || 0,
           newContactsThisYear: newContactsYearCount || 0,
         },
       };
@@ -1033,7 +1038,7 @@ export async function contactRoutes(fastify: FastifyInstance) {
         Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate()),
       );
       const endDate = new Date(startDate);
-      endDate.setUTCDate(endDate.getUTCDate() + 14);
+      endDate.setUTCMonth(endDate.getUTCMonth() + 1);
 
       const startDateIso = startDate.toISOString().slice(0, 10);
       const endDateIso = endDate.toISOString().slice(0, 10);
@@ -1042,18 +1047,25 @@ export async function contactRoutes(fastify: FastifyInstance) {
         .from("people_important_events")
         .select(`${IMPORTANT_EVENT_SELECT}, person:people!inner(id, first_name, last_name, avatar)`)
         .eq("user_id", user.id)
-        .not("notify_days_before", "is", null)
-        .gte("event_date", startDateIso)
-        .lte("event_date", endDateIso)
+        .or("notify_days_before.not.is.null,notify_on.not.is.null")
         .order("event_date", { ascending: true });
 
       if (error) {
         return reply.status(500).send({ error: error.message });
       }
 
+      const reminderRows = (rows || []).filter((row) => {
+        const reminderDateKey = deriveReminderDateKey(row);
+        if (!reminderDateKey) {
+          return false;
+        }
+
+        return reminderDateKey >= startDateIso && reminderDateKey <= endDateIso;
+      });
+
       const reminderDateKeys = Array.from(
         new Set(
-          (rows || [])
+          reminderRows
             .map((row) => deriveReminderDateKey(row))
             .filter((value): value is string => Boolean(value)),
         ),
@@ -1086,7 +1098,7 @@ export async function contactRoutes(fastify: FastifyInstance) {
         }, new Map<string, string>());
       }
 
-      const reminders: UpcomingReminder[] = (rows || [])
+      const reminders: UpcomingReminder[] = reminderRows
         .map((row) => {
           const person = row.person;
           if (!person) {
@@ -1105,7 +1117,25 @@ export async function contactRoutes(fastify: FastifyInstance) {
             notificationSentAt,
           };
         })
-        .filter((value): value is UpcomingReminder => Boolean(value));
+        .filter((value): value is UpcomingReminder => Boolean(value))
+        .sort((a, b) => {
+          const aReminderDate = deriveReminderDateKey({
+            event_date: a.event.eventDate,
+            notify_on: a.event.notifyOn,
+            notify_days_before: a.event.notifyDaysBefore,
+          });
+          const bReminderDate = deriveReminderDateKey({
+            event_date: b.event.eventDate,
+            notify_on: b.event.notifyOn,
+            notify_days_before: b.event.notifyDaysBefore,
+          });
+
+          if (aReminderDate && bReminderDate && aReminderDate !== bReminderDate) {
+            return aReminderDate.localeCompare(bReminderDate);
+          }
+
+          return a.event.eventDate.localeCompare(b.event.eventDate);
+        });
 
       return { reminders };
     },
@@ -1140,6 +1170,10 @@ export async function contactRoutes(fastify: FastifyInstance) {
         last_interaction: new Date().toISOString(),
         myself: false,
       };
+
+      if (body.middleName && body.middleName.trim().length > 0) {
+        insertData.middle_name = body.middleName.trim();
+      }
 
       // Insert contact
       const { data: newContact, error } = await client
@@ -1187,12 +1221,12 @@ export async function contactRoutes(fastify: FastifyInstance) {
       const uniqueIds = Array.from(new Set(ids.filter(Boolean)));
 
       try {
-        await deleteOrphanedEventsForDeletedContacts(client, user.id, uniqueIds);
+        await deleteOrphanedInteractionsForDeletedContacts(client, user.id, uniqueIds);
       } catch (cleanupError) {
         const message =
           cleanupError instanceof Error
             ? cleanupError.message
-            : "Failed to clean up events for deleted contacts";
+            : "Failed to clean up interactions for deleted contacts";
         return reply.status(500).send({ error: message });
       }
 
@@ -1223,12 +1257,12 @@ export async function contactRoutes(fastify: FastifyInstance) {
       const { id } = request.params;
 
       try {
-        await deleteOrphanedEventsForDeletedContacts(client, user.id, [id]);
+        await deleteOrphanedInteractionsForDeletedContacts(client, user.id, [id]);
       } catch (cleanupError) {
         const message =
           cleanupError instanceof Error
             ? cleanupError.message
-            : "Failed to clean up events for deleted contact";
+            : "Failed to clean up interactions for deleted contact";
         return reply.status(500).send({ error: message });
       }
 
@@ -1826,8 +1860,8 @@ export async function contactRoutes(fastify: FastifyInstance) {
       }
 
       const { data: rightParticipants, error: rightParticipantsError } = await client
-        .from("event_participants")
-        .select("event_id")
+        .from("interaction_participants")
+        .select("interaction_id")
         .eq("person_id", rightPersonId);
 
       if (rightParticipantsError) {
@@ -1835,16 +1869,18 @@ export async function contactRoutes(fastify: FastifyInstance) {
       }
 
       if ((rightParticipants || []).length > 0) {
-        const { error: participantsMergeError } = await client.from("event_participants").upsert(
-          (rightParticipants || []).map((participant) => ({
-            event_id: participant.event_id,
-            person_id: leftPersonId,
-          })),
-          {
-            onConflict: "event_id,person_id",
-            ignoreDuplicates: true,
-          },
-        );
+        const { error: participantsMergeError } = await client
+          .from("interaction_participants")
+          .upsert(
+            (rightParticipants || []).map((participant) => ({
+              interaction_id: participant.interaction_id,
+              person_id: leftPersonId,
+            })),
+            {
+              onConflict: "interaction_id,person_id",
+              ignoreDuplicates: true,
+            },
+          );
 
         if (participantsMergeError) {
           return reply.status(500).send({ error: participantsMergeError.message });
@@ -2622,7 +2658,7 @@ export async function contactRoutes(fastify: FastifyInstance) {
       }
       if (body.middleName !== undefined) updates.middle_name = body.middleName;
       if (body.lastName !== undefined) updates.last_name = body.lastName;
-      if (body.title !== undefined) updates.title = body.title;
+      if (body.headline !== undefined) updates.headline = body.headline;
       if (body.place !== undefined) updates.place = body.place;
       if (body.notes !== undefined) updates.notes = body.notes;
       if (body.avatar !== undefined) updates.avatar = body.avatar;

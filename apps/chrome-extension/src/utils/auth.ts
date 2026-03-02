@@ -1,11 +1,12 @@
 /**
  * OAuth Authentication Utilities for Chrome Extension
  *
- * Handles PKCE generation, token storage/retrieval in chrome.storage.local,
+ * Handles PKCE generation, token storage/retrieval in browser.storage.local,
  * and token refresh logic for the Supabase OAuth 2.1 flow.
  */
 
 import { config } from "../config";
+import { browser } from "wxt/browser";
 
 /** Shape of stored auth tokens */
 export interface StoredTokens {
@@ -57,17 +58,17 @@ function base64URLEncode(buffer: Uint8Array): string {
 const STORAGE_KEY = "bondery_auth_tokens";
 
 /**
- * Persist OAuth tokens in chrome.storage.local.
+ * Persist OAuth tokens in browser.storage.local.
  */
 export async function setTokens(tokens: StoredTokens): Promise<void> {
-  await chrome.storage.local.set({ [STORAGE_KEY]: tokens });
+  await browser.storage.local.set({ [STORAGE_KEY]: tokens });
 }
 
 /**
  * Retrieve stored tokens, or null if none exist.
  */
 export async function getTokens(): Promise<StoredTokens | null> {
-  const result = await chrome.storage.local.get(STORAGE_KEY);
+  const result = await browser.storage.local.get(STORAGE_KEY);
   return (result[STORAGE_KEY] as StoredTokens) ?? null;
 }
 
@@ -75,7 +76,7 @@ export async function getTokens(): Promise<StoredTokens | null> {
  * Clear all stored tokens (logout).
  */
 export async function clearTokens(): Promise<void> {
-  await chrome.storage.local.remove(STORAGE_KEY);
+  await browser.storage.local.remove(STORAGE_KEY);
 }
 
 /**

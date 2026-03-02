@@ -17,7 +17,7 @@ export const API_ROUTES = {
   CONTACTS_IMPORT_LINKEDIN: "/api/contacts/import/linkedin",
   CONTACTS_IMPORT_INSTAGRAM: "/api/contacts/import/instagram",
   GROUPS: "/api/groups",
-  EVENTS: "/api/events",
+  INTERACTIONS: "/api/interactions",
   SETTINGS: "/api/settings",
   ACCOUNT: "/api/account",
   ACCOUNT_PERSON: "/api/account/person",

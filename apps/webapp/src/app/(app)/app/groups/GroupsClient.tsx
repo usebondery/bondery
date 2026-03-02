@@ -10,6 +10,7 @@ import { PageHeader } from "@/app/(app)/app/components/PageHeader";
 import { PageWrapper } from "@/app/(app)/app/components/PageWrapper";
 import type { GroupWithCount } from "@bondery/types";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
+import { WEBSITE_URL } from "@/lib/config";
 import { openAddGroupModal } from "./components/AddGroupModal";
 import { openEditGroupModal } from "./components/EditGroupModal";
 import { openAddPeopleToGroupModal } from "./components/AddPeopleToGroupModal";
@@ -31,6 +32,7 @@ interface GroupsClientProps {
 
 export function GroupsClient({ initialGroups, totalCount }: GroupsClientProps) {
   const t = useTranslations("GroupsPage");
+  const tHeader = useTranslations("PageHeader");
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -244,10 +246,13 @@ export function GroupsClient({ initialGroups, totalCount }: GroupsClientProps) {
       <Stack gap="xl">
         <PageHeader
           icon={IconUsersGroup}
-          title="Groups"
+          title={t("Title")}
+          description={t("HeaderDescription")}
+          helpHref={`${WEBSITE_URL}/docs/core-concepts/groups`}
+          helpLabel={tHeader("LearnMoreAbout", { concept: tHeader("Concepts.Groups") })}
           action={
             <Button size="md" leftSection={<IconUsersPlus size={16} />} onClick={openAddGroupModal}>
-              Create new group
+              {t("CreateNewGroup")}
             </Button>
           }
         />

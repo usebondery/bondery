@@ -1,4 +1,5 @@
 {
+  "extends": "./.wxt/tsconfig.json",
   "compilerOptions": {
     "target": "ES2020",
     "module": "ESNext",
@@ -18,6 +19,6 @@
       "@bondery/branding-src": ["../../packages/branding/src/index.ts"]
     }
   },
-  "include": ["src/**/*", "scripts/**/*"],
-  "exclude": ["node_modules", "dist"]
+  "include": ["src/**/*", "scripts/**/*", "wxt.config.ts"],
+  "exclude": ["node_modules", "dist", ".output", ".wxt"]
 }

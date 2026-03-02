@@ -1,15 +1,15 @@
 /**
- * Event Domain Types
- * Types for event management
+ * Interaction Domain Types
+ * Types for timeline interaction management
  */
 
-export type EventType =
+export type InteractionType =
   | "Call"
   | "Coffee"
   | "Email"
   | "Meal"
   | "Meeting"
-  | "Networking event"
+  | "Networking interaction"
   | "Note"
   | "Other"
   | "Party/Social"
@@ -17,11 +17,11 @@ export type EventType =
   | "Competition/Hackathon"
   | "Custom";
 
-export interface Event {
+export interface Interaction {
   id: string;
   userId: string;
   title: string | null;
-  type: EventType; // Stored as text in DB but typed here
+  type: InteractionType; // Stored as text in DB but typed here
   description: string | null;
   date: string; // ISO string
   createdAt: string;
@@ -30,7 +30,7 @@ export interface Event {
   participants?: string[];
 }
 
-export interface CreateEventInput {
+export interface CreateInteractionInput {
   title?: string;
   type: string; // Allow string for flexibility
   description?: string;
@@ -38,7 +38,7 @@ export interface CreateEventInput {
   participantIds: string[];
 }
 
-export interface UpdateEventInput {
+export interface UpdateInteractionInput {
   title?: string;
   type?: string;
   description?: string;
@@ -46,7 +46,7 @@ export interface UpdateEventInput {
   participantIds?: string[]; // If provided, replaces existing participants
 }
 
-export type ActivityType = EventType;
-export type Activity = Event;
-export type CreateActivityInput = CreateEventInput;
-export type UpdateActivityInput = UpdateEventInput;
+export type ActivityType = InteractionType;
+export type Activity = Interaction;
+export type CreateActivityInput = CreateInteractionInput;
+export type UpdateActivityInput = UpdateInteractionInput;

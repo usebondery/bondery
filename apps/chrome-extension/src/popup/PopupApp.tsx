@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { browser } from "wxt/browser";
 import { config } from "../config";
 import { WEBAPP_ROUTES } from "@bondery/helpers";
 import { useExtensionTheme } from "../shared/MantineWrapper";
@@ -38,7 +39,7 @@ export default function PopupApp() {
 
   async function checkAuthAndPreview() {
     try {
-      const authResponse: AuthStatusResponse = await chrome.runtime.sendMessage({
+      const authResponse: AuthStatusResponse = await browser.runtime.sendMessage({
         type: "AUTH_STATUS_REQUEST",
       });
 
@@ -67,7 +68,7 @@ export default function PopupApp() {
         setUser(fallbackUser);
       }
 
-      const previewResponse: PendingPreviewResult = await chrome.runtime.sendMessage({
+      const previewResponse: PendingPreviewResult = await browser.runtime.sendMessage({
         type: "GET_PENDING_PREVIEW",
       });
 
@@ -76,7 +77,7 @@ export default function PopupApp() {
         setPreview(previewResponse.payload);
         setState("preview");
       } else {
-        const contextResponse: ActiveProfileContextResult = await chrome.runtime.sendMessage({
+        const contextResponse: ActiveProfileContextResult = await browser.runtime.sendMessage({
           type: "GET_ACTIVE_PROFILE_CONTEXT",
         });
 
@@ -109,7 +110,7 @@ export default function PopupApp() {
     setError(null);
 
     try {
-      const result: LoginResult = await chrome.runtime.sendMessage({
+      const result: LoginResult = await browser.runtime.sendMessage({
         type: "LOGIN_REQUEST",
       });
 
@@ -127,7 +128,7 @@ export default function PopupApp() {
 
   async function handleLogout() {
     try {
-      const result: LogoutResult = await chrome.runtime.sendMessage({
+      const result: LogoutResult = await browser.runtime.sendMessage({
         type: "LOGOUT_REQUEST",
       });
 
@@ -144,19 +145,19 @@ export default function PopupApp() {
   }
 
   function openBondery() {
-    chrome.tabs.create({ url: `${config.appUrl}${WEBAPP_ROUTES.HOME}` });
+    browser.tabs.create({ url: `${config.appUrl}${WEBAPP_ROUTES.HOME}` });
     window.close();
   }
 
   function openPerson(contactId: string) {
-    chrome.tabs.create({
+    browser.tabs.create({
       url: `${config.appUrl}${WEBAPP_ROUTES.PERSON}/${contactId}`,
     });
     window.close();
   }
 
   function openPersonWithAddEvent(contactId: string) {
-    chrome.tabs.create({
+    browser.tabs.create({
       url: `${config.appUrl}${WEBAPP_ROUTES.PERSON}/${contactId}?addEvent=1`,
     });
     window.close();
@@ -184,7 +185,7 @@ export default function PopupApp() {
     try {
       let profileToImport = activeProfile;
 
-      const latestContext: ActiveProfileContextResult = await chrome.runtime.sendMessage({
+      const latestContext: ActiveProfileContextResult = await browser.runtime.sendMessage({
         type: "GET_ACTIVE_PROFILE_CONTEXT",
       });
 
@@ -201,7 +202,7 @@ export default function PopupApp() {
         }
       }
 
-      const result: AddPersonResult = await chrome.runtime.sendMessage({
+      const result: AddPersonResult = await browser.runtime.sendMessage({
         type: "ADD_PERSON_REQUEST",
         payload: profileToImport,
       });

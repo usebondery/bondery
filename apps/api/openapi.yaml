@@ -780,9 +780,9 @@ paths:
             type: string
             format: uri
             example: https://example.com/photo.jpg
-        - name: title
+        - name: headline
           in: query
-          description: Job title or position
+          description: Professional headline or short role summary
           schema:
             type: string
             example: Software Engineer
@@ -855,9 +855,9 @@ paths:
                   format: uri
                   description: URL of profile image
                   example: https://example.com/photo.jpg
-                title:
+                headline:
                   type: string
-                  description: Job title or position
+                  description: Professional headline or short role summary
                   example: Software Engineer
                 place:
                   type: string
@@ -918,10 +918,10 @@ components:
           type: string
           nullable: true
           example: Doe
-        title:
+        headline:
           type: string
           nullable: true
-          description: Job title or position
+          description: Professional headline or short role summary
           example: Software Engineer
         place:
           type: string
@@ -1095,7 +1095,7 @@ components:
           type: string
           nullable: true
           example: Doe
-        title:
+        headline:
           type: string
           nullable: true
           example: Software Engineer
