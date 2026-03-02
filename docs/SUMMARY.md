@@ -12,7 +12,7 @@
 * [People](core-concepts/people.md)
 * [Groups](core-concepts/groups.md)
 * [Relationships](core-concepts/relationships.md)
-* [Events](core-concepts/events.md)
+* [Interactions](core-concepts/interactions.md)
 * [Reminders](core-concepts/reminders.md)
 
 ## API
