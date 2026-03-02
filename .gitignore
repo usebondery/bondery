@@ -27,6 +27,9 @@
 .DS_Store
 *.pem
 
+# wxt
+/.wxt
+
 # debug
 npm-debug.log*
 yarn-debug.log*
