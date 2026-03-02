@@ -1,7 +1,8 @@
 import React from "react";
 import { Button, Stack } from "@mantine/core";
 import { IconArrowLeft, IconLogout } from "@tabler/icons-react";
-import { ThemePicker, UserCard } from "@bondery/mantine-next";
+import { ThemePicker } from "../components/ThemePicker";
+import { UserCard } from "../components/UserCard";
 import { PopupBrandHeader } from "../components/PopupBrandHeader";
 import type { UserInfo } from "../types";
 

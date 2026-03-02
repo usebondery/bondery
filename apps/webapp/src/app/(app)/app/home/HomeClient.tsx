@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, Group, Paper, Stack, Text, Title } from "@mantine/core";
+import { Button, Group, Paper, SimpleGrid, Stack, Text, Title } from "@mantine/core";
 import { IconCalendarPlus, IconCopy, IconHome, IconTrash, IconUserPlus } from "@tabler/icons-react";
 import { useMemo } from "react";
 import { useTranslations } from "next-intl";
@@ -20,7 +20,7 @@ import {
   ModalTitle,
   successNotificationTemplate,
 } from "@bondery/mantine-next";
-import { revalidateEvents } from "../actions";
+import { revalidateInteractions } from "../actions";
 import { openStandardConfirmModal } from "../components/modals/openStandardConfirmModal";
 
 interface HomeClientProps {
@@ -105,7 +105,7 @@ export function HomeClient({
       confirmColor: "red",
       onConfirm: async () => {
         try {
-          const response = await fetch(`${API_ROUTES.EVENTS}/${activity.id}`, {
+          const response = await fetch(`${API_ROUTES.INTERACTIONS}/${activity.id}`, {
             method: "DELETE",
           });
 
@@ -120,7 +120,7 @@ export function HomeClient({
             }),
           );
 
-          await revalidateEvents();
+          await revalidateInteractions();
           router.refresh();
         } catch {
           notifications.show(
@@ -140,7 +140,7 @@ export function HomeClient({
       .filter((id): id is string => Boolean(id));
 
     try {
-      const response = await fetch(API_ROUTES.EVENTS, {
+      const response = await fetch(API_ROUTES.INTERACTIONS, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -164,7 +164,7 @@ export function HomeClient({
         }),
       );
 
-      await revalidateEvents();
+      await revalidateInteractions();
       router.refresh();
     } catch {
       notifications.show(
@@ -223,61 +223,66 @@ export function HomeClient({
           }}
         />
 
-        <Stack gap="md">
-          <Group gap="xs">
-            <Title order={2}>{t("UpcomingRemindersTitle")}</Title>
-          </Group>
+        <SimpleGrid cols={{ base: 1, md: 2 }} spacing="xl" verticalSpacing="xl">
+          <Stack gap="md">
+            <Group gap="xs">
+              <Title order={2}>{t("TimelinePreviewTitle")}</Title>
+            </Group>
 
-          {reminders.length === 0 ? (
-            <Paper withBorder radius="md" p="md">
-              <Text c="dimmed" size="sm">
-                {t("NoUpcomingReminders")}
-              </Text>
-            </Paper>
-          ) : (
-            <Stack gap="sm">
-              {reminders.map((reminder) => {
-                const personHref = `${WEBAPP_ROUTES.PERSON}/${reminder.person.id}`;
+            {compactActivities.length === 0 ? (
+              <Paper withBorder radius="md" p="md">
+                <Text c="dimmed" size="sm">
+                  {timelineT("NoActivitiesFound")}
+                </Text>
+              </Paper>
+            ) : (
+              <TimelineEventsList
+                activities={compactActivities}
+                resolveParticipants={resolveParticipants}
+                editLabel={timelineT("EditAction")}
+                duplicateLabel={timelineT("DuplicateAction")}
+                deleteLabel={timelineT("DeleteAction")}
+                onOpen={handleActivityOpen}
+                onEdit={handleActivityOpen}
+                onDuplicate={handleDuplicate}
+                onDelete={handleDelete}
+              />
+            )}
+          </Stack>
 
-                return (
-                  <UpcomingReminderCard
-                    key={reminder.event.id}
-                    reminder={reminder}
-                    onClick={() => {
-                      router.push(personHref);
-                    }}
-                  />
-                );
-              })}
-            </Stack>
-          )}
-        </Stack>
+          <Stack gap="md">
+            <Group gap="xs">
+              <Title order={2}>{t("UpcomingRemindersTitle")}</Title>
+            </Group>
+            <Text c="dimmed" size="sm">
+              {t("UpcomingRemindersMonthInfo")}
+            </Text>
 
-        <Stack gap="md">
-          <Group gap="xs">
-            <Title order={2}>{t("TimelinePreviewTitle")}</Title>
-          </Group>
+            {reminders.length === 0 ? (
+              <Paper withBorder radius="md" p="md">
+                <Text c="dimmed" size="sm">
+                  {t("NoUpcomingReminders")}
+                </Text>
+              </Paper>
+            ) : (
+              <Stack gap="sm">
+                {reminders.map((reminder) => {
+                  const personHref = `${WEBAPP_ROUTES.PERSON}/${reminder.person.id}`;
 
-          {compactActivities.length === 0 ? (
-            <Paper withBorder radius="md" p="md">
-              <Text c="dimmed" size="sm">
-                {timelineT("NoActivitiesFound")}
-              </Text>
-            </Paper>
-          ) : (
-            <TimelineEventsList
-              activities={compactActivities}
-              resolveParticipants={resolveParticipants}
-              editLabel={timelineT("EditAction")}
-              duplicateLabel={timelineT("DuplicateAction")}
-              deleteLabel={timelineT("DeleteAction")}
-              onOpen={handleActivityOpen}
-              onEdit={handleActivityOpen}
-              onDuplicate={handleDuplicate}
-              onDelete={handleDelete}
-            />
-          )}
-        </Stack>
+                  return (
+                    <UpcomingReminderCard
+                      key={reminder.event.id}
+                      reminder={reminder}
+                      onClick={() => {
+                        router.push(personHref);
+                      }}
+                    />
+                  );
+                })}
+              </Stack>
+            )}
+          </Stack>
+        </SimpleGrid>
       </Stack>
     </PageWrapper>
   );

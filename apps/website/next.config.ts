@@ -42,6 +42,11 @@ const nextConfig: NextConfig = {
         permanent: true,
       },
       {
+        source: "/docs/:path*",
+        destination: `${HELP_DOCS_URL}/:path*`,
+        permanent: true,
+      },
+      {
         source: "/login",
         destination: `${WEBAPP_URL}/login`,
         permanent: true,

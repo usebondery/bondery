@@ -3,6 +3,7 @@
 import {
   ActionIcon,
   Badge,
+  Box,
   Group,
   Menu,
   MenuDropdown,
@@ -14,6 +15,7 @@ import {
 } from "@mantine/core";
 import { IconCopy, IconDotsVertical, IconEdit, IconTrash } from "@tabler/icons-react";
 import type { Activity } from "@bondery/types";
+import type { ReactNode } from "react";
 import { getActivityTypeConfig, type ActivityTypeConfig } from "@/lib/activityTypes";
 
 interface ActivityCardProps {
@@ -21,6 +23,7 @@ interface ActivityCardProps {
   editLabel: string;
   duplicateLabel: string;
   deleteLabel: string;
+  leftSection?: ReactNode;
   onOpen: () => void;
   onEdit: () => void;
   onDuplicate: () => void;
@@ -36,6 +39,7 @@ export function ActivityCard({
   editLabel,
   duplicateLabel,
   deleteLabel,
+  leftSection,
   onOpen,
   onEdit,
   onDuplicate,
@@ -46,7 +50,7 @@ export function ActivityCard({
 
   return (
     <Paper
-      p="sm"
+      p={0}
       withBorder
       shadow="none"
       radius="md"
@@ -96,36 +100,53 @@ export function ActivityCard({
         </MenuDropdown>
       </Menu>
 
-      <Stack gap="2" style={{ minWidth: 0, paddingRight: 28 }}>
-        <Group gap="xs" align="center" wrap="nowrap">
-          <Text c="dimmed" size="xs">
-            {date.toLocaleDateString("en-US", {
-              month: "short",
-              day: "numeric",
-              year: "numeric",
-            })}
-          </Text>
-          <Badge
-            color={typeConfig.color}
-            variant="light"
-            radius="xl"
-            size="xs"
-            leftSection={typeConfig.emoji}
+      <Group align="stretch" wrap="nowrap" gap={0}>
+        {leftSection ? (
+          <Box
+            px="sm"
+            style={{
+              flexShrink: 0,
+              minWidth: 96,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
           >
-            {getTypeLabel(activity.type, typeConfig)}
-          </Badge>
-        </Group>
+            {leftSection}
+          </Box>
+        ) : null}
 
-        <Text fw={700} size="md">
-          {activity.title || activity.type}
-        </Text>
+        <Stack gap="2" p="sm" style={{ minWidth: 0, paddingRight: 28, flex: 1 }}>
+          <Group gap="xs" align="center" wrap="nowrap">
+            <Text c="dimmed" size="xs">
+              {date.toLocaleDateString("en-US", {
+                month: "short",
+                day: "numeric",
+                year: "numeric",
+              })}
+            </Text>
+            <Badge
+              color={typeConfig.color}
+              variant="light"
+              radius="xl"
+              size="xs"
+              leftSection={typeConfig.emoji}
+            >
+              {getTypeLabel(activity.type, typeConfig)}
+            </Badge>
+          </Group>
 
-        {activity.description && (
-          <Text size="xs" c="dimmed">
-            {activity.description}
+          <Text fw={700} size="md">
+            {activity.title || activity.type}
           </Text>
-        )}
-      </Stack>
+
+          {activity.description && (
+            <Text size="xs" c="dimmed">
+              {activity.description}
+            </Text>
+          )}
+        </Stack>
+      </Group>
     </Paper>
   );
 }

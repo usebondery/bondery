@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { browser } from "wxt/browser";
 import { MantineProvider } from "@mantine/core";
-import { bonderyTheme } from "@bondery/mantine-next";
+import { bonderyTheme } from "@bondery/mantine-next/theme";
 import "@mantine/core/styles.css";
 import "@mantine/dates/styles.css";
 import "flag-icons/css/flag-icons.min.css";
@@ -20,7 +21,7 @@ const THEME_STORAGE_KEY = "bondery_theme_preference";
 const ExtensionThemeContext = createContext<ExtensionThemeContextValue | null>(null);
 
 /**
- * Provides extension-wide Mantine theme preference with chrome.storage persistence.
+ * Provides extension-wide Mantine theme preference with browser.storage persistence.
  */
 export function useExtensionTheme() {
   const context = useContext(ExtensionThemeContext);
@@ -53,7 +54,7 @@ export function MantineWrapper({ children }: MantineWrapperProps) {
 
     async function loadPreference() {
       try {
-        const result = await chrome.storage.local.get(THEME_STORAGE_KEY);
+        const result = await browser.storage.local.get(THEME_STORAGE_KEY);
         const stored = result[THEME_STORAGE_KEY];
 
         if (mounted && (stored === "light" || stored === "dark" || stored === "auto")) {
@@ -75,7 +76,7 @@ export function MantineWrapper({ children }: MantineWrapperProps) {
     setThemePreferenceState(value);
 
     try {
-      await chrome.storage.local.set({ [THEME_STORAGE_KEY]: value });
+      await browser.storage.local.set({ [THEME_STORAGE_KEY]: value });
     } catch (error) {
       console.error("[theme] Failed to save theme preference:", error);
     }

@@ -29,7 +29,7 @@ export const INPUT_MAX_LENGTHS = {
   firstName: 50,
   middleName: 50,
   lastName: 50,
-  title: 100,
+  headline: 100,
   place: 100,
   description: 500,
   dateName: 50,
@@ -129,21 +129,21 @@ export const MAX_DOHERTY_THRESHOLD = 0.7;
  */
 export const INTEGRATION_PROVIDERS = [
   {
-    provider: "github",
-    providerKey: "github",
-    displayName: "GitHub",
-    iconColor: "dark",
-    backgroundColor: "black",
-    icon: "github",
-    active: true,
-  },
-  {
     provider: "linkedin",
     providerKey: "linkedin_oidc",
     displayName: "LinkedIn",
     iconColor: "#0A66C2",
     backgroundColor: "#0A66C2",
     icon: "linkedin",
+    active: true,
+  },
+  {
+    provider: "github",
+    providerKey: "github",
+    displayName: "GitHub",
+    iconColor: "dark",
+    backgroundColor: "black",
+    icon: "github",
     active: true,
   },
 ] as const;

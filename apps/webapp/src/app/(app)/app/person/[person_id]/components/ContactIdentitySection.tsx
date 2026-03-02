@@ -12,7 +12,7 @@ import { INPUT_MAX_LENGTHS } from "@/lib/config";
 import { LocationLookupInput } from "@/app/(app)/app/components/LocationLookupInput";
 
 type NameField = "firstName" | "middleName" | "lastName";
-type ProfileField = "title" | "place";
+type ProfileField = "headline" | "place";
 
 interface ContactIdentitySectionProps {
   contact: Contact;
@@ -71,10 +71,10 @@ const NAME_FIELD_CONFIGS: NameFieldConfig[] = [
 
 const PROFILE_FIELD_CONFIGS: ProfileFieldConfig[] = [
   {
-    field: "title",
-    placeholder: "Title",
-    maxLength: INPUT_MAX_LENGTHS.title,
-    successLabel: "Title",
+    field: "headline",
+    placeholder: "Headline",
+    maxLength: INPUT_MAX_LENGTHS.headline,
+    successLabel: "Headline",
   },
   {
     field: "place",
@@ -190,7 +190,7 @@ function usePersonNameFields(
 }
 
 /**
- * Manages inline editable profile fields (title/location) with isolated state.
+ * Manages inline editable profile fields (headline/location) with isolated state.
  * Keeps focus and typing local to avoid global page rerenders.
  */
 function usePersonProfileFields(
@@ -200,7 +200,7 @@ function usePersonProfileFields(
 ) {
   const [focusedField, setFocusedField] = useState<ProfileField | null>(null);
   const [savingByField, setSavingByField] = useState<Record<ProfileField, boolean>>({
-    title: false,
+    headline: false,
     place: false,
   });
   const [values, setValues] = useState<Record<ProfileField, string>>(initialValues);
@@ -212,7 +212,7 @@ function usePersonProfileFields(
     setValues(initialValues);
     persistedValuesRef.current = initialValues;
     placeCoordinatesRef.current = null;
-  }, [initialValues.place, initialValues.title, personId]);
+  }, [initialValues.place, initialValues.headline, personId]);
 
   const updateField = useCallback((field: ProfileField, value: string) => {
     setValues((previous) => ({
@@ -444,7 +444,7 @@ export function ContactIdentitySection({
   } = usePersonProfileFields(
     personId,
     {
-      title: contact.title || "",
+      headline: contact.headline || "",
       place: contact.place || "",
     },
     PROFILE_FIELD_CONFIGS,
@@ -477,16 +477,16 @@ export function ContactIdentitySection({
 
         <Group gap="xs" grow>
           <InlineEditableInput
-            aria-label="Title"
-            placeholder="Title"
-            value={profileValues.title}
-            onChange={(value) => updateProfileField("title", value)}
-            onFocus={() => setFocusedProfileField("title")}
-            onBlur={() => handleProfileBlur("title")}
-            isSaving={savingProfileByField.title}
-            isFocused={focusedProfileField === "title"}
+            aria-label="Headline"
+            placeholder="Headline"
+            value={profileValues.headline}
+            onChange={(value) => updateProfileField("headline", value)}
+            onFocus={() => setFocusedProfileField("headline")}
+            onBlur={() => handleProfileBlur("headline")}
+            isSaving={savingProfileByField.headline}
+            isFocused={focusedProfileField === "headline"}
             showCounter
-            maxLength={INPUT_MAX_LENGTHS.title}
+            maxLength={INPUT_MAX_LENGTHS.headline}
             leftSection={<IconBriefcase size={18} />}
           />
 

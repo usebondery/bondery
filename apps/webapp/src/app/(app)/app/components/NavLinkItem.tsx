@@ -1,6 +1,6 @@
 "use client";
 
-import { NavLink } from "@mantine/core";
+import { Indicator, NavLink } from "@mantine/core";
 import Link from "next/link";
 import { ComponentType } from "react";
 import { useHover } from "@mantine/hooks";
@@ -10,9 +10,10 @@ export interface NavLinkItemProps {
   label: string;
   icon: ComponentType<{ size?: number; stroke?: number }>;
   active: boolean;
+  showIndicator?: boolean;
 }
 
-export function NavLinkItem({ href, label, icon: Icon, active }: NavLinkItemProps) {
+export function NavLinkItem({ href, label, icon: Icon, active, showIndicator }: NavLinkItemProps) {
   const { hovered, ref } = useHover();
 
   if (!href) {
@@ -25,7 +26,11 @@ export function NavLinkItem({ href, label, icon: Icon, active }: NavLinkItemProp
       href={href}
       label={label}
       ref={ref}
-      leftSection={<Icon size={20} stroke={1.5} />}
+      leftSection={
+        <Indicator inline disabled={!showIndicator} color="yellow" position="top-end" withBorder>
+          <Icon size={20} stroke={1.5} />
+        </Indicator>
+      }
       active={active}
       variant="filled"
       key={`link-${href}`}

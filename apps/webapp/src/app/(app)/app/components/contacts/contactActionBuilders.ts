@@ -1,4 +1,7 @@
-import type { BulkSelectionAction, MenuAction } from "@/app/(app)/app/components/ContactsTable";
+import type {
+  BulkSelectionAction,
+  MenuAction,
+} from "@/app/(app)/app/components/contacts/ContactsTableV2";
 
 interface BuildContactMenuActionsOptions {
   mergeAction?: MenuAction;

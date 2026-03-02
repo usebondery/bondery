@@ -17,7 +17,7 @@ export interface ScrapedProfileData {
   middleName?: string;
   lastName?: string;
   profileImageUrl?: string;
-  title?: string;
+  headline?: string;
   place?: string;
   notes?: string;
 }

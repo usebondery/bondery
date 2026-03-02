@@ -1,11 +1,11 @@
-# parcel
+# WXT
+.wxt
+
+# parcel (legacy)
 .parcel-cache
 
 # build output
 dist
-
-# generated files
-src/manifest.json
 
 # generated icons
 public/icons/*.png

@@ -35,10 +35,13 @@ import {
   parsePhoneNumber,
 } from "@/lib/phoneHelpers";
 import { EMAIL_TYPE_OPTIONS, PHONE_TYPE_OPTIONS } from "@/lib/config";
-import { ActionIconLink } from "@bondery/mantine-next";
-import { TypePicker } from "@/app/(app)/app/components/shared/TypePicker";
+import {
+  ActionIconLink,
+  TypePicker,
+  errorNotificationTemplate,
+  successNotificationTemplate,
+} from "@bondery/mantine-next";
 import { notifications } from "@mantine/notifications";
-import { errorNotificationTemplate, successNotificationTemplate } from "@bondery/mantine-next";
 
 const MAX_ENTRIES = 5;
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;

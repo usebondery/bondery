@@ -1,21 +1,52 @@
-import {
-  Box,
-  Card,
-  CardSection,
-  Container,
-  Divider,
-  Flex,
-  Group,
-  Stack,
-  Text,
-  ThemeIcon,
-  Title,
-} from "@mantine/core";
+import { Container, Group, Text, Title, Stack } from "@mantine/core";
 import { ButtonLink } from "@bondery/mantine-next";
-import { IconNetwork, IconCalendar, IconUsers, IconTopologyStar } from "@tabler/icons-react";
+import {
+  IconNetwork,
+  IconCalendar,
+  IconUsers,
+  IconTopologyStar,
+  IconHourglass,
+} from "@tabler/icons-react";
 import { WEBAPP_URL } from "@/lib/config";
+import { PricingCard } from "./PricingCard";
 
 export function Pricing() {
+  const freeFeatures = [
+    {
+      icon: <IconUsers />,
+      title: "Contact management",
+      description: "All your contacts organized in one place",
+    },
+    {
+      icon: <IconCalendar />,
+      title: "Log activities",
+      description: "Track interactions and activities with your contacts",
+    },
+    {
+      icon: <IconCalendar />,
+      title: "Smart reminders",
+      description: "Never miss birthdays and important dates",
+    },
+  ];
+
+  const premiumFeatures = [
+    {
+      icon: <IconNetwork />,
+      title: "Smart search",
+      description: "Find the right people instantly with contextual search",
+    },
+    {
+      icon: <IconTopologyStar />,
+      title: "Personalized message writer",
+      description: "Generate tailored outreach drafts for every contact",
+    },
+    {
+      icon: <IconUsers />,
+      title: "Priority support",
+      description: "We will prioritize your feature requests and questions",
+    },
+  ];
+
   return (
     <Container
       id="pricing"
@@ -44,75 +75,14 @@ export function Pricing() {
           lg: "calc(var(--mantine-spacing-lg) * 3)",
         }}
         justify="center"
+        align="stretch"
         gap="xl"
       >
-        <Card
-          radius="lg"
-          shadow="lg"
-          miw={{ base: "100%", sm: 350 }}
-          maw={380}
-          withBorder
-          style={{
-            backgroundColor: "light-dark(var(--mantine-color-white), var(--mantine-color-dark-6))",
-          }}
-        >
-          <Text fz="xl" fw="bold">
-            Beta Access
-          </Text>
-          <Text mb="md" c="dimmed">
-            Get early access to all features
-          </Text>
-          <Flex align="end" gap="xs" mb="sm">
-            <Title order={2} fw={"bold"} fz={"2rem"}>
-              Free
-            </Title>
-          </Flex>
-
-          <CardSection my="lg">
-            <Divider />
-          </CardSection>
-
-          <Stack>
-            <Group gap="xs" align="start">
-              <ThemeIcon variant="default" size={"xl"}>
-                <IconUsers />
-              </ThemeIcon>
-              <Stack gap={0} flex={1}>
-                <Text fw={500}>Contact management</Text>
-                <Text c="dimmed" fz="sm">
-                  All your contacts organized in one place
-                </Text>
-              </Stack>
-            </Group>
-            <Group gap="xs" align="start">
-              <ThemeIcon variant="default" size={"xl"}>
-                <IconCalendar />
-              </ThemeIcon>
-              <Stack gap={0} flex={1}>
-                <Text fw={500}>Smart reminders</Text>
-                <Text c="dimmed" fz="sm">
-                  Never miss birthdays and important dates
-                </Text>
-              </Stack>
-            </Group>
-            <Group gap="xs" align="start">
-              <ThemeIcon variant="default" size={"xl"}>
-                <IconNetwork />
-              </ThemeIcon>
-              <Stack gap={0} flex={1}>
-                <Text fw={500}>Network visualization</Text>
-                <Text c="dimmed" fz="sm">
-                  See your connections in an interactive graph
-                </Text>
-              </Stack>
-            </Group>
-          </Stack>
-
-          <CardSection my="lg">
-            <Divider />
-          </CardSection>
-
-          <Box>
+        <PricingCard
+          title="Free"
+          description="All features are free during the beta phase."
+          features={freeFeatures}
+          action={
             <ButtonLink
               href={`${WEBAPP_URL}/login`}
               size="lg"
@@ -122,8 +92,27 @@ export function Pricing() {
             >
               Get started
             </ButtonLink>
-          </Box>
-        </Card>
+          }
+        />
+
+        <PricingCard
+          title="Premium"
+          oldPrice="$10 USD p.m."
+          description="Premium is currently in development."
+          features={premiumFeatures}
+          action={
+            <ButtonLink
+              href={`${WEBAPP_URL}/login`}
+              disabled
+              size="lg"
+              fullWidth
+              variant="outline"
+              leftSection={<IconHourglass size={18} />}
+            >
+              Coming soon
+            </ButtonLink>
+          }
+        />
       </Group>
     </Container>
   );

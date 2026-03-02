@@ -93,7 +93,7 @@ export interface Contact {
   firstName: string;
   middleName: string | null;
   lastName: string | null;
-  title: string | null;
+  headline: string | null;
   place: string | null;
   notes: string | null;
   avatar: string | null;
@@ -184,7 +184,8 @@ export interface ContactRelationshipWithPeople extends ContactRelationship {
  */
 export interface CreateContactInput {
   firstName: string;
-  lastName: string;
+  middleName?: string;
+  lastName?: string;
   linkedin?: string;
 }
 

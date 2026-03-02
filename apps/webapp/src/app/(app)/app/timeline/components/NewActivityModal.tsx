@@ -9,15 +9,15 @@ import { useRouter } from "next/navigation";
 import { modals } from "@mantine/modals";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import type { Contact, Activity } from "@bondery/types";
-import { revalidateEvents } from "../../actions";
+import { revalidateInteractions } from "../../actions";
 import {
   ModalFooter,
+  PeopleMultiPickerInput,
   errorNotificationTemplate,
   ModalTitle,
   successNotificationTemplate,
 } from "@bondery/mantine-next";
 import { DatePickerWithPresets } from "../../components/timeline/DatePickerWithPresets";
-import { PeopleMultiPickerInput } from "../../components/shared/PeopleMultiPickerInput";
 import { ACTIVITY_TYPE_OPTIONS } from "@/lib/activityTypes";
 import { getActivityTypeConfig } from "@/lib/activityTypes";
 
@@ -129,7 +129,9 @@ function NewActivityForm({
       const fallbackTime = activity ? new Date(activity.date) : new Date();
       const normalizedDate = withFallbackTime(dateValue, fallbackTime);
 
-      const endpoint = activity ? `${API_ROUTES.EVENTS}/${activity.id}` : API_ROUTES.EVENTS;
+      const endpoint = activity
+        ? `${API_ROUTES.INTERACTIONS}/${activity.id}`
+        : API_ROUTES.INTERACTIONS;
       const method = activity ? "PATCH" : "POST";
 
       const res = await fetch(endpoint, {
@@ -154,7 +156,7 @@ function NewActivityForm({
       );
 
       modals.close(modalId);
-      await revalidateEvents();
+      await revalidateInteractions();
       router.refresh();
     } catch (error) {
       notifications.show(
@@ -185,7 +187,7 @@ function NewActivityForm({
             form.setFieldValue("participantIds", ids);
             form.validateField("participantIds");
           }}
-          placeholder={t("AddContactsPlaceholder")}
+          placeholder={t("AddParticipantsPlaceholder")}
           noResultsLabel={t("NoContactsFound")}
           error={form.errors.participantIds}
           disabled={loading}
@@ -200,6 +202,8 @@ function NewActivityForm({
           <Textarea
             placeholder={t("DescriptionPlaceholder")}
             minRows={6}
+            autoFocus
+            data-autofocus
             {...form.getInputProps("description")}
             styles={{
               input: {

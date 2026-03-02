@@ -35,7 +35,7 @@ const CONTACT_SELECT = `
   firstName:first_name,
   middleName:middle_name,
   lastName:last_name,
-  title,
+  headline,
   place,
   notes,
   avatar,

@@ -10,7 +10,7 @@ export interface InputMaxLengths {
   firstName: number;
   middleName: number;
   lastName: number;
-  title: number;
+  headline: number;
   place: number;
   description: number;
   dateName: number;

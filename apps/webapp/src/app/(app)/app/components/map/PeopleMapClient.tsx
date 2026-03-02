@@ -7,10 +7,9 @@ import { DivIcon } from "leaflet";
 import { useRouter } from "next/navigation";
 import { renderToStaticMarkup } from "react-dom/server";
 import MarkerClusterGroup from "react-leaflet-cluster";
-import { bonderyTheme } from "@bondery/mantine-next";
+import { PersonChip, bonderyTheme } from "@bondery/mantine-next";
 import "maplibre-gl/dist/maplibre-gl.css";
 import "leaflet.markercluster/dist/MarkerCluster.css";
-import { PersonChip } from "@/app/(app)/app/components/shared/PersonChip";
 import type { PeopleMapFocus, PeopleMapMarker } from "./PeopleMap";
 
 interface PeopleMapClientProps {

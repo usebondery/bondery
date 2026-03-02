@@ -5,7 +5,7 @@ import { IconBell, IconCircleCheck } from "@tabler/icons-react";
 import { IMPORTANT_EVENT_TYPE_OPTIONS } from "@/lib/config";
 import type { ImportantEventType, UpcomingReminder } from "@bondery/types";
 import { useLocale, useTranslations } from "next-intl";
-import { PersonChip } from "@/app/(app)/app/components/shared/PersonChip";
+import { PersonAvatar } from "@bondery/mantine-next";
 
 const DAY_IN_MS = 24 * 60 * 60 * 1000;
 
@@ -156,8 +156,8 @@ export function UpcomingReminderCard({ reminder, onClick }: UpcomingReminderCard
       style={{ cursor: "pointer", width: "100%", textAlign: "left" }}
       aria-label={`${eventTypeLabel}, ${personName || t("UnknownPerson")}, ${notificationAriaLabel}`}
     >
-      {/* Main row: date | divider | event info | divider | person | notification */}
-      <Group wrap="nowrap" gap={0} align="stretch">
+      {/* Main row: date | divider | avatar | event info | notification */}
+      <Group wrap="nowrap" gap={"0"} align="stretch">
         {/* Date rail */}
         <Stack gap={0} align="center" justify="center" px="md" py="xs" miw={60}>
           <Text fw={700} size="xs" c="var(--mantine-primary-color-filled)" lh={1.3}>
@@ -170,15 +170,13 @@ export function UpcomingReminderCard({ reminder, onClick }: UpcomingReminderCard
 
         <Divider orientation="vertical" my="xs" />
 
+        {/* Avatar */}
+        <Group wrap="nowrap" align="center" px="md" style={{ flexShrink: 0 }}>
+          <PersonAvatar person={reminder.person} size="md" />
+        </Group>
+
         {/* Event content */}
-        <Stack
-          gap={2}
-          justify="center"
-          px="md"
-          py="xs"
-          style={{ flex: "0 1 auto" }}
-          className="min-w-xs"
-        >
+        <Stack gap={2} justify="center" py="xs" style={{ flex: "1 1 0", minWidth: 0 }}>
           <Group gap="xs" wrap="nowrap" align="center">
             <Text fz={18} lh={1} aria-hidden>
               {eventEmoji}
@@ -195,14 +193,7 @@ export function UpcomingReminderCard({ reminder, onClick }: UpcomingReminderCard
           ) : null}
         </Stack>
 
-        <Divider orientation="vertical" my="xs" />
-
-        {/* Person section (inline, right of event info) */}
-        <Group wrap="nowrap" align="center" px="sm" py="xs" style={{ flexShrink: 0 }}>
-          <PersonChip person={reminder.person} isClickable />
-        </Group>
-
-        {/* Notification badge with tooltip */}
+        {/* Notification */}
         <Group
           wrap="nowrap"
           align="center"

@@ -9,9 +9,9 @@ interface TimelineDataResult {
 }
 
 /**
- * Fetches contacts and timeline events for timeline-based views.
+ * Fetches contacts and timeline interactions for timeline-based views.
  *
- * @returns Timeline contacts and events with resilient empty fallback on errors.
+ * @returns Timeline contacts and interactions with resilient empty fallback on errors.
  */
 export async function getTimelineData(): Promise<TimelineDataResult> {
   try {
@@ -22,8 +22,8 @@ export async function getTimelineData(): Promise<TimelineDataResult> {
       headers,
     });
 
-    const eventsRes = await fetch(`${API_URL}${API_ROUTES.EVENTS}`, {
-      next: { tags: ["events"] },
+    const interactionsRes = await fetch(`${API_URL}${API_ROUTES.INTERACTIONS}`, {
+      next: { tags: ["interactions"] },
       headers,
     });
 
@@ -31,8 +31,8 @@ export async function getTimelineData(): Promise<TimelineDataResult> {
       throw new Error(`Failed to fetch contacts: ${contactsRes.status}`);
     }
 
-    if (!eventsRes.ok) {
-      if (eventsRes.status === 404) {
+    if (!interactionsRes.ok) {
+      if (interactionsRes.status === 404) {
         const contactsOnly = await contactsRes.json();
         return {
           contacts: (contactsOnly.contacts || []) as Contact[],
@@ -40,15 +40,15 @@ export async function getTimelineData(): Promise<TimelineDataResult> {
         };
       }
 
-      throw new Error(`Failed to fetch events: ${eventsRes.status}`);
+      throw new Error(`Failed to fetch interactions: ${interactionsRes.status}`);
     }
 
     const contactsData = await contactsRes.json();
-    const eventsData = await eventsRes.json();
+    const interactionsData = await interactionsRes.json();
 
     return {
       contacts: (contactsData.contacts || []) as Contact[],
-      activities: (eventsData.events || []) as Activity[],
+      activities: (interactionsData.interactions || []) as Activity[],
     };
   } catch (error) {
     console.error("Error fetching timeline data:", error);

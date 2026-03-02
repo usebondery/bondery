@@ -9,7 +9,7 @@ import type {
   ContactRelationshipWithPeople,
   RelationshipType,
 } from "@bondery/types";
-import { PersonChip } from "@/app/(app)/app/components/shared/PersonChip";
+import { PersonChip } from "@bondery/mantine-next";
 import { RELATIONSHIP_TYPE_OPTIONS } from "@/lib/config";
 
 interface ContactRelationshipsSectionProps {

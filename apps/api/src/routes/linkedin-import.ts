@@ -158,7 +158,7 @@ export async function linkedInImportRoutes(fastify: FastifyInstance) {
             "linkedin",
             handle,
           );
-          const importedTitle = buildImportedTitle(contact.position, contact.company);
+          const importedHeadline = buildImportedTitle(contact.position, contact.company);
 
           let personId = existingPersonId;
 
@@ -170,7 +170,7 @@ export async function linkedInImportRoutes(fastify: FastifyInstance) {
                 first_name: contact.firstName,
                 middle_name: contact.middleName,
                 last_name: contact.lastName,
-                title: importedTitle,
+                headline: importedHeadline,
                 myself: false,
                 last_interaction: new Date().toISOString(),
               })
@@ -191,7 +191,7 @@ export async function linkedInImportRoutes(fastify: FastifyInstance) {
                 first_name: contact.firstName,
                 middle_name: contact.middleName,
                 last_name: contact.lastName,
-                title: importedTitle,
+                headline: importedHeadline,
               })
               .eq("user_id", user.id)
               .eq("id", personId);

@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from "react";
+import { browser } from "wxt/browser";
 import { Button, Text } from "@mantine/core";
 import { BonderyIconWhite } from "@bondery/branding";
 import { WEBAPP_ROUTES } from "@bondery/helpers";
 import { config } from "../config";
-import { sanitizeName } from "../utils/nameHelpers";
+// sanitizeName temporarily disabled – transliteration causes non-UTF-8 bytes in the bundle
+const sanitizeName = (s: string) => s.trim();
 import type { AddPersonResult } from "../utils/messages";
 
 interface FacebookButtonProps {
@@ -188,7 +190,7 @@ const FacebookButton: React.FC<FacebookButtonProps> = ({ username }) => {
         profilePicture: profilePhotoUrl,
       });
 
-      const result: AddPersonResult = await chrome.runtime.sendMessage({
+      const result: AddPersonResult = await browser.runtime.sendMessage({
         type: "ADD_PERSON_REQUEST",
         payload: {
           platform: "facebook" as const,

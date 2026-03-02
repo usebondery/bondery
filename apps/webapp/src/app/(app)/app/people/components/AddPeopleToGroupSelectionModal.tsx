@@ -19,6 +19,7 @@ import { modals } from "@mantine/modals";
 import { notifications } from "@mantine/notifications";
 import { IconMinus, IconPlus, IconSearch, IconUsersGroup } from "@tabler/icons-react";
 import {
+  PersonChip,
   errorNotificationTemplate,
   loadingNotificationTemplate,
   ModalFooter,
@@ -29,7 +30,6 @@ import type { Contact, ContactPreview, GroupWithCount, GroupsListResponse } from
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import { revalidateGroups } from "../../actions";
 import { GroupCard } from "../../groups/components/GroupCard";
-import { PersonChip } from "../../components/shared/PersonChip";
 
 interface AddPeopleToGroupSelectionModalProps {
   personIds: string[];

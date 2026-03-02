@@ -17,7 +17,7 @@ import {
   successNotificationTemplate,
 } from "@bondery/mantine-next";
 import { getAvatarColorFromName } from "@/lib/avatarColor";
-import { revalidateEvents } from "../../actions";
+import { revalidateInteractions } from "../../actions";
 
 interface OpenActivityDetailModalParams {
   activity: Activity;
@@ -70,7 +70,7 @@ function ActivityDetailBody({ modalId, activity, contacts }: ActivityDetailBodyP
     setLoading(true);
 
     try {
-      const res = await fetch(`${API_ROUTES.EVENTS}/${activity.id}`, {
+      const res = await fetch(`${API_ROUTES.INTERACTIONS}/${activity.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -89,7 +89,7 @@ function ActivityDetailBody({ modalId, activity, contacts }: ActivityDetailBodyP
         }),
       );
 
-      await revalidateEvents();
+      await revalidateInteractions();
       router.refresh();
       modals.close(modalId);
     } catch {
@@ -112,7 +112,7 @@ function ActivityDetailBody({ modalId, activity, contacts }: ActivityDetailBodyP
     setLoading(true);
 
     try {
-      const res = await fetch(`${API_ROUTES.EVENTS}/${activity.id}`, {
+      const res = await fetch(`${API_ROUTES.INTERACTIONS}/${activity.id}`, {
         method: "DELETE",
       });
 
@@ -127,7 +127,7 @@ function ActivityDetailBody({ modalId, activity, contacts }: ActivityDetailBodyP
         }),
       );
 
-      await revalidateEvents();
+      await revalidateInteractions();
       router.refresh();
       modals.close(modalId);
     } catch {
