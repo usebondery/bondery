@@ -6,18 +6,6 @@ import { attachContactSocialMedia } from "./social-media.js";
 
 type ContactWithId = { id: string };
 
-type FullContactExtras = {
-  phones: PhoneEntry[];
-  emails: EmailEntry[];
-  addresses: ContactAddressEntry[];
-  linkedin: string | null;
-  instagram: string | null;
-  whatsapp: string | null;
-  facebook: string | null;
-  website: string | null;
-  signal: string | null;
-};
-
 type ChannelsAndSocialExtras = {
   phones: PhoneEntry[];
   emails: EmailEntry[];
@@ -29,49 +17,80 @@ type ChannelsAndSocialExtras = {
   signal: string | null;
 };
 
+export type FullContactExtras = ChannelsAndSocialExtras & {
+  addresses: ContactAddressEntry[];
+};
+
 /**
- * Loads channels (phones + emails), addresses, and social media for a list of contacts
- * in parallel, then merges everything by person ID.
+ * Enriches a list of contacts with channels (phones + emails), optional addresses,
+ * and social media — all fetched in parallel.
  *
- * @param client Authenticated Supabase client.
- * @param userId Authenticated user id.
- * @param contacts Contacts loaded from `people` table.
- * @returns Contacts with phones, emails, addresses, and social media fields attached.
+ * The overload accepting `{ addresses: true }` widens the return type to include
+ * the `addresses` field, while the default (no option / `{ addresses: false }`)
+ * omits it, skipping the extra DB query.
+ *
+ * @param client  Authenticated Supabase client.
+ * @param userId  Authenticated user ID.
+ * @param contacts  Contacts loaded from the `people` table.
+ * @param options  Optional enrichment flags. Pass `{ addresses: true }` to include addresses.
+ * @returns  Contacts with the requested extra fields attached.
+ *
+ * @example
+ * // All three (channels + addresses + social):
+ * const enriched = await attachContactExtras(client, userId, contacts, { addresses: true });
+ *
+ * @example
+ * // Channels + social only (e.g. group contacts view):
+ * const enriched = await attachContactExtras(client, userId, contacts);
  */
-export async function attachAllContactExtras<T extends ContactWithId>(
+export async function attachContactExtras<T extends ContactWithId>(
   client: SupabaseClient<Database>,
   userId: string,
   contacts: T[],
-): Promise<Array<T & FullContactExtras>> {
+  options: { addresses: true },
+): Promise<Array<T & FullContactExtras>>;
+
+export async function attachContactExtras<T extends ContactWithId>(
+  client: SupabaseClient<Database>,
+  userId: string,
+  contacts: T[],
+  options?: { addresses?: false },
+): Promise<Array<T & ChannelsAndSocialExtras>>;
+
+export async function attachContactExtras<T extends ContactWithId>(
+  client: SupabaseClient<Database>,
+  userId: string,
+  contacts: T[],
+  options?: { addresses?: boolean },
+): Promise<Array<T & ChannelsAndSocialExtras>> {
   if (!contacts.length) {
     return [];
   }
 
-  const [channelsResult, addressesResult, socialResult] = await Promise.all([
+  const includeAddresses = options?.addresses === true;
+
+  const [channelsResult, maybeAddresses, socialResult] = await Promise.all([
     attachContactChannels(client, userId, contacts),
-    attachContactAddresses(client, userId, contacts),
+    includeAddresses ? attachContactAddresses(client, userId, contacts) : Promise.resolve(null),
     attachContactSocialMedia(client, userId, contacts),
   ]);
-
-  // Build lookup maps keyed by person ID for addresses and social media
-  const addressMap = new Map<string, (typeof addressesResult)[number]>();
-  for (const row of addressesResult) {
-    addressMap.set(row.id, row);
-  }
 
   const socialMap = new Map<string, (typeof socialResult)[number]>();
   for (const row of socialResult) {
     socialMap.set(row.id, row);
   }
 
-  // Merge: channels are the base, then layer in addresses + social
-  return channelsResult.map((contact) => {
-    const addr = addressMap.get(contact.id);
-    const social = socialMap.get(contact.id);
+  const addressMap = new Map<string, ContactAddressEntry[]>();
+  if (maybeAddresses) {
+    for (const row of maybeAddresses) {
+      addressMap.set(row.id, row.addresses ?? []);
+    }
+  }
 
-    return {
+  return channelsResult.map((contact) => {
+    const social = socialMap.get(contact.id);
+    const base: T & ChannelsAndSocialExtras = {
       ...contact,
-      addresses: addr?.addresses ?? [],
       linkedin: social?.linkedin ?? null,
       instagram: social?.instagram ?? null,
       whatsapp: social?.whatsapp ?? null,
@@ -79,48 +98,12 @@ export async function attachAllContactExtras<T extends ContactWithId>(
       website: social?.website ?? null,
       signal: social?.signal ?? null,
     };
-  });
-}
 
-/**
- * Loads channels (phones + emails) and social media for a list of contacts
- * in parallel, without addresses. Used by endpoints that don't need address data.
- *
- * @param client Authenticated Supabase client.
- * @param userId Authenticated user id.
- * @param contacts Contacts loaded from `people` table.
- * @returns Contacts with phones, emails, and social media fields attached.
- */
-export async function attachContactChannelsAndSocial<T extends ContactWithId>(
-  client: SupabaseClient<Database>,
-  userId: string,
-  contacts: T[],
-): Promise<Array<T & ChannelsAndSocialExtras>> {
-  if (!contacts.length) {
-    return [];
-  }
-
-  const [channelsResult, socialResult] = await Promise.all([
-    attachContactChannels(client, userId, contacts),
-    attachContactSocialMedia(client, userId, contacts),
-  ]);
-
-  const socialMap = new Map<string, (typeof socialResult)[number]>();
-  for (const row of socialResult) {
-    socialMap.set(row.id, row);
-  }
-
-  return channelsResult.map((contact) => {
-    const social = socialMap.get(contact.id);
+    if (!includeAddresses) return base;
 
     return {
-      ...contact,
-      linkedin: social?.linkedin ?? null,
-      instagram: social?.instagram ?? null,
-      whatsapp: social?.whatsapp ?? null,
-      facebook: social?.facebook ?? null,
-      website: social?.website ?? null,
-      signal: social?.signal ?? null,
+      ...base,
+      addresses: addressMap.get(contact.id) ?? [],
     };
   });
 }

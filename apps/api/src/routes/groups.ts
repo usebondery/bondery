@@ -5,7 +5,7 @@
 
 import type { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
 import { requireAuth } from "../lib/supabase.js";
-import { attachContactChannelsAndSocial } from "../lib/contact-enrichment.js";
+import { attachContactExtras } from "../lib/contact-enrichment.js";
 import type {
   Group,
   GroupWithCount,
@@ -439,7 +439,7 @@ export async function groupRoutes(fastify: FastifyInstance) {
 
       let enrichedContacts = contacts;
       try {
-        enrichedContacts = await attachContactChannelsAndSocial(client, user.id, contacts || []);
+        enrichedContacts = await attachContactExtras(client, user.id, contacts || []);
       } catch (enrichError) {
         fastify.log.error(
           { enrichError },
