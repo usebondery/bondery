@@ -7,6 +7,8 @@ import { getActivityTypeConfig } from "@/lib/activityTypes";
 import { PersonAvatarGroup } from "@bondery/mantine-next";
 import { ActivityCard } from "./ActivityCard";
 
+const TIMELINE_BORDER_COLOR = "var(--mantine-color-default-border)";
+
 interface TimelineEventsListProps {
   activities: Activity[];
   resolveParticipants: (activity: Activity) => Contact[];
@@ -60,7 +62,7 @@ export function TimelineEventsList({
             active={monthActivities.length}
             bulletSize={32}
             lineWidth={2}
-            color="gray.4"
+            style={{ "--tl-color": TIMELINE_BORDER_COLOR } as React.CSSProperties}
             styles={{
               itemBullet: {
                 border: "none",
@@ -85,7 +87,7 @@ export function TimelineEventsList({
                       style={{
                         borderRadius: 999,
                         backgroundColor: "var(--mantine-color-body)",
-                        border: "1px solid var(--mantine-color-default-border)",
+                        border: `1px solid ${TIMELINE_BORDER_COLOR}`,
                         boxSizing: "border-box",
                         display: "flex",
                         alignItems: "center",
