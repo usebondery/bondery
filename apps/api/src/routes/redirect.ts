@@ -133,19 +133,14 @@ export async function redirectRoutes(fastify: FastifyInstance) {
           await updateContactPhoto(client, existingContact.id, user.id, profileImageUrl);
         }
 
-        // Update headline if provided and contact doesn't have one
-        if (headline && !existingContact.headline) {
-          await client.from("people").update({ headline }).eq("id", existingContact.id);
-        }
+        // Consolidate field updates into a single query
+        const fieldUpdates: Record<string, string> = {};
+        if (headline && !existingContact.headline) fieldUpdates.headline = headline;
+        if (place && !existingContact.place) fieldUpdates.place = place;
+        if (notes && !existingContact.notes) fieldUpdates.notes = notes;
 
-        // Update place if provided and contact doesn't have one
-        if (place && !existingContact.place) {
-          await client.from("people").update({ place }).eq("id", existingContact.id);
-        }
-
-        // Update notes if provided and contact doesn't have one
-        if (notes && !existingContact.notes) {
-          await client.from("people").update({ notes }).eq("id", existingContact.id);
+        if (Object.keys(fieldUpdates).length > 0) {
+          await client.from("people").update(fieldUpdates).eq("id", existingContact.id);
         }
 
         return {
@@ -295,11 +290,14 @@ export async function redirectRoutes(fastify: FastifyInstance) {
       if (profileImageUrl && !existingContact.avatar) {
         await updateContactPhoto(client, existingContact.id, user.id, profileImageUrl);
       }
-      if (headline && !existingContact.headline) {
-        await client.from("people").update({ headline }).eq("id", existingContact.id);
-      }
-      if (place && !existingContact.place) {
-        await client.from("people").update({ place }).eq("id", existingContact.id);
+
+      // Consolidate field updates into a single query
+      const fieldUpdates: Record<string, string> = {};
+      if (headline && !existingContact.headline) fieldUpdates.headline = headline;
+      if (place && !existingContact.place) fieldUpdates.place = place;
+
+      if (Object.keys(fieldUpdates).length > 0) {
+        await client.from("people").update(fieldUpdates).eq("id", existingContact.id);
       }
 
       return reply.redirect(`${URLS.webapp}${WEBAPP_ROUTES.PERSON}/${existingContact.id}`);

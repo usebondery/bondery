@@ -35,7 +35,7 @@ export function HomeStatsGrid({ stats, labels }: HomeStatsGridProps) {
         description={labels.interactionsDescription}
         icon={<IconMessageCircle size={32} stroke={1.5} />}
         color="green"
-        href="/app/timeline"
+        href="/app/interactions"
       />
       <StatsCard
         title={labels.newContactsTitle}

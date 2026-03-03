@@ -132,6 +132,12 @@ interface ContactsTableV2Props {
   bulkSelectionActions?: BulkSelectionAction[];
   loadMoreAction?: LoadMoreAction;
   hasMoreToLoad?: boolean;
+  totalCount?: number;
+  onSelectAllTotal?: () => void;
+  /** Whether all items across all pages are selected (filter-scoped sentinel) */
+  isAllTotalSelected?: boolean;
+  /** IDs explicitly excluded from the "all total" selection */
+  excludedIds?: Set<string>;
   disableNameLink?: boolean;
   dateLocale?: string;
 }
@@ -290,6 +296,10 @@ export default function ContactsTableV2({
   bulkSelectionActions,
   loadMoreAction,
   hasMoreToLoad,
+  totalCount,
+  onSelectAllTotal,
+  isAllTotalSelected,
+  excludedIds,
   disableNameLink,
   dateLocale,
 }: ContactsTableV2Props) {
@@ -345,7 +355,7 @@ export default function ContactsTableV2({
   if (standardActions?.onAddToGroupsSelected) {
     standardBulkSelectionActions.push({
       key: "addSelectedToGroups",
-      label: standardActions.addToGroupsBulkLabel || "Add to groups",
+      label: standardActions.addToGroupsBulkLabel || "Edit groups",
       icon: <IconUsersPlus size={16} />,
       onClick: () => {
         const ids = selectedContacts.map((contact) => contact.id);
@@ -368,8 +378,8 @@ export default function ContactsTableV2({
     : null;
 
   const effectiveMenuActions: MenuAction[] = [
-    ...(menuActions || []),
     ...standardMenuActions,
+    ...(menuActions || []),
     ...(standardDeleteMenuAction ? [standardDeleteMenuAction] : []),
   ];
   const effectiveBulkSelectionActions: BulkSelectionAction[] = [
@@ -496,7 +506,7 @@ export default function ContactsTableV2({
     searchPlaceholder,
     emptyStateMessage: "No contacts found",
     loadMoreLabel: loadMoreAction?.label,
-    selectedCountTemplate: "{count} selected",
+    selectedCountTemplate: "{count} people selected",
     totalCountTemplate: "{count} total people",
     actionsAriaLabel: "Contact actions",
     columnVisibility: {
@@ -506,10 +516,15 @@ export default function ContactsTableV2({
       noVisible: "No visible columns",
       noHidden: "No hidden columns",
     },
+    selectAllTotalTemplate: "Select all {count} people",
+    clearAllTotalTemplate: "Clear selection ({count} people)",
     sort: {
       buttonLabel: "Sort",
     },
   };
+
+  // allTotalSelected is now passed from the parent via isAllTotalSelected prop.
+  const allTotalSelected = isAllTotalSelected ?? false;
 
   return (
     <DataTable<Contact, SortOrder>
@@ -548,6 +563,10 @@ export default function ContactsTableV2({
       hasMore={Boolean(loadMoreAction && hasMoreToLoad)}
       onLoadMore={loadMoreAction?.onClick}
       loadMoreLoading={loadMoreAction?.loading}
+      totalCount={totalCount}
+      onSelectAllTotal={onSelectAllTotal}
+      allTotalSelected={allTotalSelected}
+      excludedIds={excludedIds}
       showHeader={isHeaderShown}
       stickyHeaderOffset={headerStickyTop}
       labels={labels}

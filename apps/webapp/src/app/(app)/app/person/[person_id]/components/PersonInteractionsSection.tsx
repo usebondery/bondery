@@ -4,12 +4,12 @@ import { Stack, Group, Text, Button } from "@mantine/core";
 import { IconCopy, IconTrash } from "@tabler/icons-react";
 import { useState, useMemo, useEffect, useRef } from "react";
 import type { Activity, Contact } from "@bondery/types";
-import { openNewActivityModal } from "../../../timeline/components/NewActivityModal";
+import { openNewActivityModal } from "../../../interactions/components/NewActivityModal";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import { notifications } from "@mantine/notifications";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { TimelineEventsList } from "../../../components/timeline/TimelineEventsList";
+import { InteractionsEventsList } from "../../../components/interactions/InteractionsEventsList";
 import {
   errorNotificationTemplate,
   ModalTitle,
@@ -18,23 +18,23 @@ import {
 import { revalidateInteractions } from "../../../actions";
 import { openStandardConfirmModal } from "../../../components/modals/openStandardConfirmModal";
 
-interface PersonTimelineSectionProps {
+interface PersonInteractionsSectionProps {
   activities: Activity[];
   contact: Contact;
   connectedContacts: Contact[];
   selectableContacts: Contact[];
 }
 
-export function PersonTimelineSection({
+export function PersonInteractionsSection({
   activities,
   contact,
   connectedContacts,
   selectableContacts,
-}: PersonTimelineSectionProps) {
+}: PersonInteractionsSectionProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const t = useTranslations("TimelinePage");
+  const t = useTranslations("InteractionsPage");
   const addEventTriggeredRef = useRef(false);
 
   const contactsById = useMemo(() => {
@@ -198,7 +198,7 @@ export function PersonTimelineSection({
       <Stack gap="md">
         <Group justify="space-between" align="center">
           <Text fw={600} size="sm">
-            Timeline
+            Interactions
           </Text>
           <Button
             variant="light"
@@ -217,7 +217,7 @@ export function PersonTimelineSection({
         </Group>
 
         <Stack gap="xl">
-          <TimelineEventsList
+          <InteractionsEventsList
             activities={sortedActivities}
             resolveParticipants={resolveParticipants}
             editLabel={t("EditAction")}

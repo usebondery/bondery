@@ -233,8 +233,24 @@ export interface ContactRelationshipsResponse {
 }
 
 /**
- * Request body for deleting multiple contacts
+ * Filter parameters for selecting contacts without enumerating IDs.
+ * Mirrors the query string accepted by GET /api/contacts.
  */
-export interface DeleteContactsRequest {
-  ids: string[];
+export interface ContactsFilter {
+  q?: string;
+  sort?:
+    | "nameAsc"
+    | "nameDesc"
+    | "surnameAsc"
+    | "surnameDesc"
+    | "interactionAsc"
+    | "interactionDesc";
 }
+
+/**
+ * Request body for deleting multiple contacts.
+ * Supports either an explicit list of IDs or a filter that matches all contacts to delete.
+ */
+export type DeleteContactsRequest =
+  | { ids: string[] }
+  | { filter: ContactsFilter; excludeIds?: string[] };

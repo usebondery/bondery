@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { Stack, Text } from "@mantine/core";
 import type {
   Contact,
@@ -12,6 +13,30 @@ import { PageWrapper } from "@/app/(app)/app/components/PageWrapper";
 import { ErrorPageHeader } from "@/app/(app)/app/components/ErrorPageHeader";
 import type { Group, Tag } from "@bondery/types";
 import { API_URL } from "@/lib/config";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ person_id: string }>;
+}): Promise<Metadata> {
+  try {
+    const { person_id: personId } = await params;
+    const headers = await getAuthHeaders();
+    const res = await fetch(`${API_URL}${API_ROUTES.CONTACTS}/${personId}`, {
+      next: { tags: ["contacts"] },
+      headers,
+    });
+    if (!res.ok) return { title: "Person" };
+    const data = await res.json();
+    const contact = data.contact;
+    const fullName = [contact.firstName, contact.middleName, contact.lastName]
+      .filter(Boolean)
+      .join(" ");
+    return { title: `${fullName} | Bondery` };
+  } catch {
+    return { title: "Person" };
+  }
+}
 
 async function getPersonData(personId: string) {
   const headers = await getAuthHeaders();

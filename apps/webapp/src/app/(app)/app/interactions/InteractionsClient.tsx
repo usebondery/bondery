@@ -26,25 +26,28 @@ import {
   createDefaultEventColumns,
   type EventColumnConfig,
   type EventSortOrder,
-} from "../components/timeline/EventsTableV2";
+} from "../components/interactions/EventsTableV2";
 import { openStandardConfirmModal } from "../components/modals/openStandardConfirmModal";
-import { TimelineEventsList } from "../components/timeline/TimelineEventsList";
+import { InteractionsEventsList } from "../components/interactions/InteractionsEventsList";
 
-interface TimelineClientProps {
+interface InteractionsClientProps {
   initialContacts: Contact[];
   initialActivities: Activity[];
 }
 
-export function TimelineClient({ initialContacts, initialActivities }: TimelineClientProps) {
+export function InteractionsClient({
+  initialContacts,
+  initialActivities,
+}: InteractionsClientProps) {
   const router = useRouter();
-  const t = useTranslations("TimelinePage");
+  const t = useTranslations("InteractionsPage");
   const tHeader = useTranslations("PageHeader");
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [searchValue, setSearchValue] = useState("");
   // Debounced: SearchInput owns its own input state; this only fires the
   // expensive client-side filter in EventsTableV2 after the user pauses.
   const handleSearchChange = useDebouncedCallback(setSearchValue, 300);
-  const [viewMode, setViewMode] = useState<"timeline" | "table">("timeline");
+  const [viewMode, setViewMode] = useState<"interactions" | "table">("interactions");
   const [sortOrder, setSortOrder] = useState<EventSortOrder>("dateDesc");
   const [columns, setColumns] = useState<EventColumnConfig[]>(() =>
     createDefaultEventColumns({
@@ -248,7 +251,7 @@ export function TimelineClient({ initialContacts, initialActivities }: TimelineC
     });
   };
 
-  const sortedTimelineActivities = useMemo(
+  const sortedInteractionsActivities = useMemo(
     () =>
       [...initialActivities].sort(
         (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
@@ -268,10 +271,10 @@ export function TimelineClient({ initialContacts, initialActivities }: TimelineC
           secondaryAction={
             <SegmentedControl
               value={viewMode}
-              onChange={(value) => setViewMode(value as "timeline" | "table")}
+              onChange={(value) => setViewMode(value as "interactions" | "table")}
               data={[
                 {
-                  value: "timeline",
+                  value: "interactions",
                   label: (
                     <Group gap={6} wrap="nowrap">
                       <IconTimelineEventText size={14} />
@@ -308,9 +311,9 @@ export function TimelineClient({ initialContacts, initialActivities }: TimelineC
           }
         />
 
-        {viewMode === "timeline" ? (
-          <TimelineEventsList
-            activities={sortedTimelineActivities}
+        {viewMode === "interactions" ? (
+          <InteractionsEventsList
+            activities={sortedInteractionsActivities}
             resolveParticipants={resolveParticipants}
             editLabel={t("EditAction")}
             duplicateLabel={t("DuplicateAction")}

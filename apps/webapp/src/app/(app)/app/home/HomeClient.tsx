@@ -10,8 +10,8 @@ import { PageHeader } from "@/app/(app)/app/components/PageHeader";
 import { HomeStatsGrid } from "@/app/(app)/app/components/home/HomeStatsGrid";
 import { UpcomingReminderCard } from "@/app/(app)/app/components/home/UpcomingReminderCard";
 import { openAddContactModal } from "@/app/(app)/app/people/components/AddContactModal";
-import { TimelineEventsList } from "@/app/(app)/app/components/timeline/TimelineEventsList";
-import { openNewActivityModal } from "@/app/(app)/app/timeline/components/NewActivityModal";
+import { InteractionsEventsList } from "@/app/(app)/app/components/interactions/InteractionsEventsList";
+import { openNewActivityModal } from "@/app/(app)/app/interactions/components/NewActivityModal";
 import { API_ROUTES, WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import { notifications } from "@mantine/notifications";
 import { useRouter } from "next/navigation";
@@ -42,7 +42,7 @@ export function HomeClient({
 }: HomeClientProps) {
   const router = useRouter();
   const t = useTranslations("HomePage");
-  const timelineT = useTranslations("TimelinePage");
+  const timelineT = useTranslations("InteractionsPage");
 
   const contactsById = useMemo(
     () => new Map(timelineContacts.map((contact) => [contact.id, contact])),
@@ -236,7 +236,7 @@ export function HomeClient({
                 </Text>
               </Paper>
             ) : (
-              <TimelineEventsList
+              <InteractionsEventsList
                 activities={compactActivities}
                 resolveParticipants={resolveParticipants}
                 editLabel={timelineT("EditAction")}

@@ -1,10 +1,13 @@
+import type { Metadata } from "next";
 import { API_URL } from "@/lib/config";
 import { getAuthHeaders } from "@/lib/authHeaders";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import type { UpcomingReminder } from "@bondery/types";
 import { getContactsData } from "../people/getContactsData";
-import { getTimelineData } from "../timeline/getTimelineData";
+import { getInteractionsData } from "../interactions/getInteractionsData";
 import { HomeClient } from "./HomeClient";
+
+export const metadata: Metadata = { title: "Home" };
 
 async function getUpcomingReminders(): Promise<UpcomingReminder[]> {
   try {
@@ -29,7 +32,7 @@ async function getUpcomingReminders(): Promise<UpcomingReminder[]> {
 export default async function HomePage() {
   const [{ stats }, { contacts, activities }, reminders] = await Promise.all([
     getContactsData(undefined, undefined, 1, 0),
-    getTimelineData(),
+    getInteractionsData(),
     getUpcomingReminders(),
   ]);
 
