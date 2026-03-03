@@ -30,6 +30,29 @@
   filter: var(--active-filter);
 }
 
+.button-scale-effect.button-scale-effect-active:not(:disabled):not([data-disabled]):not([disabled]),
+.button-scale-effect.button-scale-effect-active:hover:not(:disabled):not([data-disabled]):not(
+    [disabled]
+  ),
+.button-scale-effect.button-scale-effect-active:focus:not(:disabled):not([data-disabled]):not(
+    [disabled]
+  ) {
+  transform: scale(var(--scale-shrink)) !important;
+  filter: var(--active-filter);
+}
+
+.emoji-picker-trigger {
+  background-color: var(--mantine-color-gray-1) !important;
+}
+
+[data-mantine-color-scheme="light"] .emoji-picker-trigger {
+  background-color: var(--mantine-color-gray-1) !important;
+}
+
+[data-mantine-color-scheme="dark"] .emoji-picker-trigger {
+  background-color: var(--mantine-color-dark-5) !important;
+}
+
 .checkbox-scale-effect:not(:disabled):not([data-disabled]):not([disabled]) {
   transition:
     transform var(--transition-time) var(--transition-ease),

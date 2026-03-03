@@ -932,7 +932,10 @@ export async function contactRoutes(fastify: FastifyInstance) {
         .eq("myself", false);
 
       if (search) {
-        peopleQuery = peopleQuery.or(`first_name.ilike.%${search}%,last_name.ilike.%${search}%`);
+        const searchTokens = search.split(/\s+/).filter(Boolean);
+        for (const token of searchTokens) {
+          peopleQuery = peopleQuery.or(`first_name.ilike.%${token}%,last_name.ilike.%${token}%`);
+        }
       }
 
       switch (query.sort) {

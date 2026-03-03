@@ -18,10 +18,7 @@ import ContactsTable, {
   MenuAction,
   type SortOrder,
 } from "@/app/(app)/app/components/contacts/ContactsTableV2";
-import { PageHeader } from "@/app/(app)/app/components/PageHeader";
-import { PageWrapper } from "@/app/(app)/app/components/PageWrapper";
-import type { Contact } from "@bondery/types";
-import { useDeferredValue, useMemo, useState } from "react";
+import { useEffect, useDeferredValue, useMemo, useState } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { useDebouncedCallback } from "@mantine/hooks";
 import { useTranslations } from "next-intl";
@@ -43,9 +40,11 @@ import { openDeleteContactModal } from "@/app/(app)/app/components/contacts/open
 import { openDeleteContactsModal } from "@/app/(app)/app/components/contacts/openDeleteContactsModal";
 import { GroupCard } from "../../groups/components/GroupCard";
 import { openEditGroupModal } from "../../groups/components/EditGroupModal";
-import type { GroupWithCount, MergeConflictField } from "@bondery/types";
+import type { Contact, GroupWithCount, MergeConflictField } from "@bondery/types";
 import { openAddPeopleToGroupSelectionModal } from "../../people/components/AddPeopleToGroupSelectionModal";
 import { MERGE_CONFLICT_FIELDS, openMergeWithModal } from "../../people/components/MergeWithModal";
+import { PageHeader } from "@/app/(app)/app/components/PageHeader";
+import { PageWrapper } from "@/app/(app)/app/components/PageWrapper";
 
 interface GroupDetailClientProps {
   groupId: string;
@@ -54,6 +53,8 @@ interface GroupDetailClientProps {
   groupColor: string;
   initialContacts: Contact[];
   totalCount: number;
+  initialSearch: string;
+  initialSort: SortOrder;
 }
 
 export function GroupDetailClient({
@@ -63,6 +64,8 @@ export function GroupDetailClient({
   groupColor,
   initialContacts,
   totalCount,
+  initialSearch,
+  initialSort,
 }: GroupDetailClientProps) {
   const t = useTranslations("GroupsPage");
   const tGroupDetail = useTranslations("GroupDetailPage");
@@ -104,20 +107,21 @@ export function GroupDetailClient({
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const initialSearch = searchParams.get("q") || "";
-  const sortParam = searchParams.get("sort") as SortOrder | null;
-  const sortOrder: SortOrder =
-    sortParam === "nameAsc" ||
-    sortParam === "nameDesc" ||
-    sortParam === "surnameAsc" ||
-    sortParam === "surnameDesc" ||
-    sortParam === "interactionAsc" ||
-    sortParam === "interactionDesc"
-      ? sortParam
-      : "nameAsc";
-  const [searchValue, setSearchValue] = useState(initialSearch);
+
+  const [contacts, setContacts] = useState<Contact[]>(initialContacts);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [loadedCount, setLoadedCount] = useState(initialContacts.length);
+  const [totalAvailableCount, setTotalAvailableCount] = useState(totalCount);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [lastSelectedIndex, setLastSelectedIndex] = useState<number | null>(null);
+
+  useEffect(() => {
+    setContacts(initialContacts);
+    setLoadedCount(initialContacts.length);
+    setTotalAvailableCount(totalCount);
+    setSelectedIds(new Set());
+    setLastSelectedIndex(null);
+  }, [initialContacts, totalCount]);
 
   const [columns, setColumns] = useState<ColumnConfig[]>([
     {
@@ -163,11 +167,8 @@ export function GroupDetailClient({
     router.replace(`${pathname}?${params.toString()}`);
   };
 
-  // Debounced: updates both the local filter state and the URL.
-  // SearchInput (inside DataTable) owns its own input value, so this only
-  // controls when the expensive useMemo filter and server URL update fire.
+  // Debounced: updates the URL so the server component re-fetches with the new query.
   const handleSearchChange = useDebouncedCallback((query: string) => {
-    setSearchValue(query);
     const params = new URLSearchParams(searchParams);
     if (query) {
       params.set("q", query);
@@ -177,73 +178,59 @@ export function GroupDetailClient({
     router.replace(`${pathname}?${params.toString()}`);
   }, 300);
 
-  const filteredAndSortedContacts = useMemo(() => {
-    const normalizedQuery = searchValue.trim().toLowerCase();
-    const filtered = normalizedQuery
-      ? initialContacts.filter((contact) =>
-          formatContactName(contact).toLowerCase().includes(normalizedQuery),
-        )
-      : initialContacts;
+  const handleLoadMore = async () => {
+    if (isLoadingMore) return;
+    setIsLoadingMore(true);
+    try {
+      const params = new URLSearchParams();
+      params.set("limit", "50");
+      params.set("offset", String(loadedCount));
+      if (initialSearch) params.set("q", initialSearch);
+      if (initialSort) params.set("sort", initialSort);
 
-    const nameValue = (contact: Contact) => formatContactName(contact).toLowerCase();
-    const surnameValue = (contact: Contact) => contact.lastName?.toLowerCase() || "";
-    const interactionValue = (contact: Contact): number | null => {
-      if (!contact.lastInteraction) return null;
-      return typeof contact.lastInteraction === "string"
-        ? new Date(contact.lastInteraction).getTime()
-        : new Date(contact.lastInteraction).getTime();
-    };
+      const response = await fetch(`${API_ROUTES.GROUPS}/${groupId}/contacts?${params.toString()}`);
+      if (!response.ok) throw new Error("Failed to load more contacts");
 
-    const sorted = [...filtered].sort((a, b) => {
-      switch (sortOrder) {
-        case "nameDesc":
-          return nameValue(b).localeCompare(nameValue(a));
-        case "surnameAsc":
-          return (
-            surnameValue(a).localeCompare(surnameValue(b)) ||
-            nameValue(a).localeCompare(nameValue(b))
-          );
-        case "surnameDesc":
-          return (
-            surnameValue(b).localeCompare(surnameValue(a)) ||
-            nameValue(b).localeCompare(nameValue(a))
-          );
-        case "interactionAsc": {
-          const aVal = interactionValue(a) ?? Infinity;
-          const bVal = interactionValue(b) ?? Infinity;
-          return aVal - bVal;
-        }
-        case "interactionDesc": {
-          const aVal = interactionValue(a) ?? -Infinity;
-          const bVal = interactionValue(b) ?? -Infinity;
-          return bVal - aVal;
-        }
-        case "nameAsc":
-        default:
-          return nameValue(a).localeCompare(nameValue(b));
+      const data = await response.json();
+      const fetchedContacts = ((data.contacts || []) as Contact[]).map((c) => ({
+        ...c,
+        lastInteraction: c.lastInteraction ? new Date(c.lastInteraction) : null,
+        createdAt: c.createdAt ? new Date(c.createdAt) : null,
+      }));
+
+      setContacts((prev) => [...prev, ...fetchedContacts]);
+      setLoadedCount((prev) => prev + fetchedContacts.length);
+      if (Number.isFinite(data.totalCount)) {
+        setTotalAvailableCount(data.totalCount);
       }
-    });
-
-    return sorted;
-  }, [initialContacts, searchValue, sortOrder]);
+    } catch {
+      notifications.show(
+        errorNotificationTemplate({
+          title: "Error",
+          description: "Failed to load more contacts. Please try again.",
+        }),
+      );
+    } finally {
+      setIsLoadingMore(false);
+    }
+  };
 
   const handleSelectAll = () => {
-    if (selectedIds.size === filteredAndSortedContacts.length) {
+    if (selectedIds.size === contacts.length) {
       setSelectedIds(new Set());
     } else {
-      setSelectedIds(new Set(filteredAndSortedContacts.map((c) => c.id)));
+      setSelectedIds(new Set(contacts.map((c) => c.id)));
     }
   };
 
   const handleSelectOne = (id: string, options?: { shiftKey?: boolean; index?: number }) => {
-    const currentIndex =
-      options?.index ?? filteredAndSortedContacts.findIndex((contact) => contact.id === id);
+    const currentIndex = options?.index ?? contacts.findIndex((contact) => contact.id === id);
 
     if (options?.shiftKey && lastSelectedIndex !== null && currentIndex >= 0) {
       const shouldSelect = !selectedIds.has(id);
       const start = Math.min(lastSelectedIndex, currentIndex);
       const end = Math.max(lastSelectedIndex, currentIndex);
-      const rangeIds = filteredAndSortedContacts.slice(start, end + 1).map((contact) => contact.id);
+      const rangeIds = contacts.slice(start, end + 1).map((contact) => contact.id);
 
       const newSelected = new Set(selectedIds);
 
@@ -302,6 +289,9 @@ export function GroupDetailClient({
       });
 
       setSelectedIds(new Set());
+      setContacts((prev) => prev.filter((c) => !ids.includes(c.id)));
+      setLoadedCount((prev) => Math.max(0, prev - ids.length));
+      setTotalAvailableCount((prev) => Math.max(0, prev - ids.length));
       await revalidateGroups();
       router.refresh();
     } catch (error) {
@@ -323,6 +313,9 @@ export function GroupDetailClient({
       contactIds: ids,
       onDeleted: async () => {
         setSelectedIds(new Set());
+        setContacts((prev) => prev.filter((c) => !ids.includes(c.id)));
+        setLoadedCount((prev) => Math.max(0, prev - ids.length));
+        setTotalAvailableCount((prev) => Math.max(0, prev - ids.length));
         await revalidateContacts();
         await revalidateGroups();
         router.refresh();
@@ -357,6 +350,9 @@ export function GroupDetailClient({
         id: loadingId,
       });
 
+      setContacts((prev) => prev.filter((c) => c.id !== contactId));
+      setLoadedCount((prev) => Math.max(0, prev - 1));
+      setTotalAvailableCount((prev) => Math.max(0, prev - 1));
       await revalidateGroups();
       router.refresh();
     } catch (error) {
@@ -372,13 +368,16 @@ export function GroupDetailClient({
   };
 
   const deleteContact = (contactId: string) => {
-    const targetContact = initialContacts.find((contact) => contact.id === contactId);
+    const targetContact = contacts.find((contact) => contact.id === contactId);
     const contactName = targetContact ? formatContactName(targetContact) : "this contact";
 
     openDeleteContactModal({
       contactId,
       contactName,
       onDeleted: async () => {
+        setContacts((prev) => prev.filter((c) => c.id !== contactId));
+        setLoadedCount((prev) => Math.max(0, prev - 1));
+        setTotalAvailableCount((prev) => Math.max(0, prev - 1));
         await revalidateContacts();
         await revalidateGroups();
         router.refresh();
@@ -396,7 +395,7 @@ export function GroupDetailClient({
 
   const openMergeModal = (leftPersonId: string, rightPersonId?: string, lockBoth?: boolean) => {
     openMergeWithModal({
-      contacts: initialContacts,
+      contacts,
       leftPersonId,
       rightPersonId,
       disableLeftPicker: true,
@@ -407,9 +406,8 @@ export function GroupDetailClient({
   };
 
   // Computed selection values
-  const allSelected =
-    filteredAndSortedContacts.length > 0 && selectedIds.size === filteredAndSortedContacts.length;
-  const someSelected = selectedIds.size > 0 && selectedIds.size < filteredAndSortedContacts.length;
+  const allSelected = contacts.length > 0 && selectedIds.size === contacts.length;
+  const someSelected = selectedIds.size > 0 && selectedIds.size < contacts.length;
 
   const bulkSelectionActions: BulkSelectionAction[] = [
     {
@@ -474,15 +472,15 @@ export function GroupDetailClient({
       color: groupColor || "blue",
       createdAt: "",
       updatedAt: "",
-      contactCount: totalCount,
-      previewContacts: initialContacts.slice(0, 3).map((contact) => ({
+      contactCount: totalAvailableCount,
+      previewContacts: contacts.slice(0, 3).map((contact) => ({
         id: contact.id,
         firstName: contact.firstName,
         lastName: contact.lastName,
         avatar: contact.avatar,
       })),
     }),
-    [groupColor, groupEmoji, groupId, groupLabel, initialContacts, totalCount],
+    [groupColor, groupEmoji, groupId, groupLabel, contacts, totalAvailableCount],
   );
 
   const handleEditGroup = (group: GroupWithCount) => {
@@ -555,7 +553,12 @@ export function GroupDetailClient({
 
     try {
       const duplicateLabel = `${group.label} (Copy)`;
-      const personIds = initialContacts.map((contact) => contact.id);
+
+      // Fetch all member IDs from the API (no limit) to ensure we capture every member,
+      // not just the currently loaded page.
+      const allMembersRes = await fetch(`${API_ROUTES.GROUPS}/${group.id}/contacts`);
+      const allMembersData = allMembersRes.ok ? await allMembersRes.json() : { contacts: [] };
+      const personIds = ((allMembersData.contacts || []) as { id: string }[]).map((c) => c.id);
 
       const res = await fetch(API_ROUTES.GROUPS, {
         method: "POST",
@@ -637,16 +640,14 @@ export function GroupDetailClient({
 
         <Paper withBorder shadow="sm" radius="md" p="md">
           <ContactsTable
-            contacts={filteredAndSortedContacts}
+            contacts={contacts}
             selectedIds={selectedIds}
             isHeaderShown={true}
-            searchValue={searchValue}
-            onSearchChange={(value) => {
-              handleSearchChange(value);
-            }}
+            searchDefaultValue={initialSearch}
+            onSearchChange={handleSearchChange}
             columnsForMenu={columns}
             setColumnsForMenu={setColumns}
-            sortOrderForMenu={sortOrder}
+            sortOrderForMenu={initialSort}
             setSortOrderForMenu={handleSortChange}
             visibleColumns={visibleColumns}
             onSelectAll={handleSelectAll}
@@ -665,6 +666,12 @@ export function GroupDetailClient({
             }}
             menuActions={menuActions}
             bulkSelectionActions={bulkSelectionActions}
+            loadMoreAction={{
+              label: "Load another 50 contacts",
+              onClick: handleLoadMore,
+              loading: isLoadingMore,
+            }}
+            hasMoreToLoad={contacts.length < totalAvailableCount}
           />
         </Paper>
       </Stack>

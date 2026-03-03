@@ -88,7 +88,7 @@ function GroupCardMenu({
             e.stopPropagation();
           }}
         >
-          <IconDotsVertical size={16} color="white" style={{ opacity: 0.8 }} />
+          <IconDotsVertical size={16} />
         </ActionIcon>
       </MenuTarget>
       <MenuDropdown>

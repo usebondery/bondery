@@ -319,16 +319,40 @@ export async function groupRoutes(fastify: FastifyInstance) {
   );
 
   /**
-   * GET /api/groups/:id/contacts - Get all contacts in a group
+   * GET /api/groups/:id/contacts - Get paginated contacts in a group
    */
   fastify.get(
     "/:id/contacts",
-    async (request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+    async (
+      request: FastifyRequest<{
+        Params: { id: string };
+        Querystring: {
+          limit?: string;
+          offset?: string;
+          q?: string;
+          sort?:
+            | "nameAsc"
+            | "nameDesc"
+            | "surnameAsc"
+            | "surnameDesc"
+            | "interactionAsc"
+            | "interactionDesc";
+        };
+      }>,
+      reply: FastifyReply,
+    ) => {
       const auth = await requireAuth(request, reply);
       if (!auth) return;
 
       const { client, user } = auth;
       const { id: groupId } = request.params;
+      const query = request.query || {};
+
+      const parsedLimit = Number.parseInt(query.limit || "", 10);
+      const parsedOffset = Number.parseInt(query.offset || "", 10);
+      const limit = Number.isFinite(parsedLimit) && parsedLimit > 0 ? parsedLimit : null;
+      const offset = Number.isFinite(parsedOffset) && parsedOffset >= 0 ? parsedOffset : 0;
+      const search = typeof query.q === "string" ? query.q.trim() : "";
 
       // First verify the group exists
       const { data: group, error: groupError } = await client
@@ -341,13 +365,56 @@ export async function groupRoutes(fastify: FastifyInstance) {
         return reply.status(404).send({ error: "Group not found" });
       }
 
-      // Get contacts in this group using a JOIN to avoid URL-length limits that occur
-      // when passing a large list of person IDs via .in() for groups with many members.
-      const { data: contactRows, error: contactsError } = await client
+      // Build the query using a JOIN to avoid URL-length limits that occur
+      // when passing large lists of person IDs via .in() for groups with many members.
+      let contactsQuery = client
         .from("people")
-        .select(`${CONTACT_SELECT}, people_groups!inner(group_id)`)
+        .select(`${CONTACT_SELECT}, people_groups!inner(group_id)`, { count: "exact" })
         .eq("myself", false)
         .eq("people_groups.group_id", groupId);
+
+      if (search) {
+        const searchTokens = search.split(/\s+/).filter(Boolean);
+        for (const token of searchTokens) {
+          contactsQuery = contactsQuery.or(
+            `first_name.ilike.%${token}%,last_name.ilike.%${token}%`,
+          );
+        }
+      }
+
+      switch (query.sort) {
+        case "nameDesc":
+          contactsQuery = contactsQuery.order("first_name", { ascending: false });
+          break;
+        case "surnameAsc":
+          contactsQuery = contactsQuery.order("last_name", { ascending: true, nullsFirst: true });
+          break;
+        case "surnameDesc":
+          contactsQuery = contactsQuery.order("last_name", { ascending: false, nullsFirst: false });
+          break;
+        case "interactionAsc":
+          contactsQuery = contactsQuery.order("last_interaction", {
+            ascending: true,
+            nullsFirst: true,
+          });
+          break;
+        case "interactionDesc":
+          contactsQuery = contactsQuery.order("last_interaction", {
+            ascending: false,
+            nullsFirst: false,
+          });
+          break;
+        case "nameAsc":
+        default:
+          contactsQuery = contactsQuery.order("first_name", { ascending: true });
+          break;
+      }
+
+      if (limit !== null) {
+        contactsQuery = contactsQuery.range(offset, offset + limit - 1);
+      }
+
+      const { data: contactRows, error: contactsError, count } = await contactsQuery;
 
       if (contactsError) {
         fastify.log.error({ contactsError }, "Failed to fetch contacts for group");
@@ -361,11 +428,13 @@ export async function groupRoutes(fastify: FastifyInstance) {
         return contact;
       });
 
+      const totalCount = typeof count === "number" ? count : contacts.length;
+
       if (contacts.length === 0) {
         return {
           group: { id: group.id, label: group.label },
           contacts: [],
-          totalCount: 0,
+          totalCount,
         };
       }
 
@@ -404,7 +473,7 @@ export async function groupRoutes(fastify: FastifyInstance) {
       return {
         group: { id: group.id, label: group.label },
         contacts: contactsWithSocialMedia,
-        totalCount: contactsWithSocialMedia.length,
+        totalCount,
       };
     },
   );
