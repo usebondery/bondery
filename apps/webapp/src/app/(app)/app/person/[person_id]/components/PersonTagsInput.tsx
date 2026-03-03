@@ -1,6 +1,15 @@
 "use client";
 
-import { Combobox, PillsInput, useCombobox, Text, Group, ScrollArea, Box } from "@mantine/core";
+import {
+  Combobox,
+  PillsInput,
+  useCombobox,
+  Text,
+  Group,
+  ScrollArea,
+  Box,
+  Tooltip,
+} from "@mantine/core";
 import { IconTag } from "@tabler/icons-react";
 import { notifications } from "@mantine/notifications";
 import { useState, useCallback } from "react";
@@ -49,11 +58,15 @@ export function PersonTagsInput({
   });
 
   const personTagIds = new Set(personTags.map((tag) => tag.id));
+  const normalizedSearch = search.toLowerCase().trim();
+
+  const exactAppliedMatch =
+    normalizedSearch.length > 0
+      ? personTags.find((tag) => tag.label.toLowerCase().trim() === normalizedSearch)
+      : undefined;
 
   const filteredOptions = workspaceTags.filter(
-    (tag) =>
-      !personTagIds.has(tag.id) &&
-      tag.label.toLowerCase().trim().includes(search.toLowerCase().trim()),
+    (tag) => !personTagIds.has(tag.id) && tag.label.toLowerCase().trim().includes(normalizedSearch),
   );
 
   const updatePersonTags = useCallback(
@@ -187,25 +200,26 @@ export function PersonTagsInput({
 
   const handleCreateRequest = () => {
     const trimmed = search.trim();
-    if (!trimmed) return;
 
-    const exactMatch = workspaceTags.find(
-      (tag) => tag.label.toLowerCase() === trimmed.toLowerCase(),
-    );
+    if (trimmed) {
+      const exactMatch = workspaceTags.find(
+        (tag) => tag.label.toLowerCase() === trimmed.toLowerCase(),
+      );
 
-    if (exactMatch) {
-      if (personTagIds.has(exactMatch.id)) {
-        notifications.show(
-          warningNotificationTemplate({
-            title: t("TagAlreadyAddedTitle"),
-            description: t("TagAlreadyAddedMessage", { name: exactMatch.label }),
-          }),
-        );
+      if (exactMatch) {
+        if (personTagIds.has(exactMatch.id)) {
+          notifications.show(
+            warningNotificationTemplate({
+              title: t("TagAlreadyAddedTitle"),
+              description: t("TagAlreadyAddedMessage", { name: exactMatch.label }),
+            }),
+          );
+          return;
+        }
+
+        void handleAddExistingTag(exactMatch);
         return;
       }
-
-      void handleAddExistingTag(exactMatch);
-      return;
     }
 
     combobox.closeDropdown();
@@ -268,7 +282,7 @@ export function PersonTagsInput({
   };
 
   const showCreateOption =
-    search.trim().length > 0 &&
+    search.trim().length === 0 ||
     !workspaceTags.some((tag) => tag.label.toLowerCase() === search.trim().toLowerCase());
 
   return (
@@ -346,11 +360,44 @@ export function PersonTagsInput({
                     style={{ padding: 0, background: "transparent" }}
                   >
                     <AddNewTagButton
-                      label={t("AddNewTagOption", { label: search.trim() })}
+                      label={
+                        search.trim()
+                          ? t("CreateNewTagOption", { label: search.trim() })
+                          : t("CreateNewTagEmpty")
+                      }
                       preventInputBlur
                       className="tags-input-add-button"
                       onClick={handleCreateRequest}
                     />
+                  </Combobox.Option>
+                </Box>
+              ) : null}
+
+              {exactAppliedMatch ? (
+                <Box key={`applied-${exactAppliedMatch.id}`}>
+                  <Combobox.Option
+                    value={`__applied__${exactAppliedMatch.id}`}
+                    disabled
+                    className="tags-input-combobox-option"
+                    style={{ padding: 0, background: "transparent" }}
+                  >
+                    <Tooltip label={t("TagAlreadyAppliedTooltip")} withArrow>
+                      <Box
+                        className="tags-input-option-pill"
+                        style={{
+                          borderRadius: 999,
+                          border: `1px solid ${exactAppliedMatch.color ? `${exactAppliedMatch.color}66` : "var(--mantine-color-gray-4)"}`,
+                          backgroundColor: exactAppliedMatch.color
+                            ? `${exactAppliedMatch.color}1a`
+                            : "var(--mantine-color-gray-0)",
+                          padding: "4px 10px",
+                        }}
+                      >
+                        <Text size="xs" fw={500} c={exactAppliedMatch.color || undefined}>
+                          {exactAppliedMatch.label}
+                        </Text>
+                      </Box>
+                    </Tooltip>
                   </Combobox.Option>
                 </Box>
               ) : null}
@@ -379,19 +426,6 @@ export function PersonTagsInput({
               ))}
             </Group>
           </Combobox.Options>
-
-          {filteredOptions.length === 0 && !showCreateOption ? (
-            <Combobox.Empty
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                minHeight: 80,
-              }}
-            >
-              {t("NoTagsFound")}
-            </Combobox.Empty>
-          ) : null}
         </ScrollArea.Autosize>
       </Combobox.Dropdown>
 

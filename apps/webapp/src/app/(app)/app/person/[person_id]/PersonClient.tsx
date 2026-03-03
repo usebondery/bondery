@@ -1,6 +1,6 @@
 "use client";
 
-import { Group, Stack, Paper, Text, Card, Avatar, Button } from "@mantine/core";
+import { Group, Stack, Paper, Text, Button } from "@mantine/core";
 import { Link } from "@mantine/tiptap";
 import { useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
@@ -8,7 +8,7 @@ import Highlight from "@tiptap/extension-highlight";
 import { Color } from "@tiptap/extension-color";
 import { TextStyle } from "@tiptap/extension-text-style";
 import { notifications } from "@mantine/notifications";
-import { IconCheck, IconX, IconUser, IconPlus, IconMapPin } from "@tabler/icons-react";
+import { IconCheck, IconX, IconUser, IconMapPin } from "@tabler/icons-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
@@ -953,64 +953,33 @@ export default function PersonClient({
               </Text>
               <Group gap="sm" align="flex-start" wrap="wrap">
                 {personGroups.map((group) => (
-                  <div
+                  <GroupCard
                     key={group.id}
-                    style={{
-                      flex: "1 1 18rem",
-                      minWidth: "16rem",
-                      maxWidth: "20rem",
+                    group={{
+                      ...(group as GroupWithCount),
+                      contactCount: 1,
+                      previewContacts: [currentPersonPreview],
                     }}
-                  >
-                    <GroupCard
-                      group={{
-                        ...(group as GroupWithCount),
-                        contactCount: 1,
-                        previewContacts: [currentPersonPreview],
-                      }}
-                      onClick={(groupId) => router.push(`/app/group/${groupId}`)}
-                      onAddPeople={() => {}}
-                      onEdit={() => {}}
-                      onDuplicate={() => {}}
-                      onDelete={() => {}}
-                      interactive={true}
-                      variant="small"
-                      showMenu={false}
-                      shadow="none"
-                    />
-                  </div>
+                    onClick={(groupId) => router.push(`/app/group/${groupId}`)}
+                    onAddPeople={() => {}}
+                    onEdit={() => {}}
+                    onDuplicate={() => {}}
+                    onDelete={() => {}}
+                    interactive={true}
+                    variant="small"
+                    showMenu={false}
+                    shadow="none"
+                  />
                 ))}
 
-                <div
-                  style={{
-                    flex: "1 1 18rem",
-                    minWidth: "16rem",
-                    maxWidth: "20rem",
-                  }}
-                >
-                  <Card
-                    withBorder
-                    shadow="none"
-                    p="sm"
-                    className={`h-full min-h-full ${groupsSaving ? undefined : "card-scale-effect"}`}
-                    style={{
-                      cursor: groupsSaving ? "not-allowed" : "pointer",
-                    }}
-                    onClick={() => {
-                      if (!groupsSaving) {
-                        openAddToGroupsModal();
-                      }
-                    }}
-                  >
-                    <Group gap="sm" align="center" wrap="nowrap">
-                      <Avatar size="md" radius="xl">
-                        <IconPlus size={16} />
-                      </Avatar>
-                      <Text size="md" fw={600}>
-                        Edit groups
-                      </Text>
-                    </Group>
-                  </Card>
-                </div>
+                <GroupCard
+                  variant="action"
+                  actionLabel="Edit groups"
+                  shadow="none"
+                  interactive={!groupsSaving}
+                  cursorType={groupsSaving ? "default" : "pointer"}
+                  onActionClick={openAddToGroupsModal}
+                />
               </Group>
             </Stack>
 

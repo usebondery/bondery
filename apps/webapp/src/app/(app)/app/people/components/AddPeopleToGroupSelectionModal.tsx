@@ -29,7 +29,7 @@ import {
 import type { Contact, ContactPreview, GroupWithCount, GroupsListResponse } from "@bondery/types";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import { revalidateGroups } from "../../actions";
-import { GroupCard } from "../../groups/components/GroupCard";
+import { GroupCard, GROUP_CARD_MAX_WIDTH_BY_VARIANT } from "../../groups/components/GroupCard";
 
 interface AddPeopleToGroupSelectionModalProps {
   personIds: string[];
@@ -57,6 +57,8 @@ function AddPeopleToGroupSelectionForm({
   onUpdated,
   modalId,
 }: AddPeopleToGroupSelectionFormProps) {
+  const modalGroupCardVariant = "small" as const;
+  const modalGroupCardWidth = GROUP_CARD_MAX_WIDTH_BY_VARIANT[modalGroupCardVariant];
   const router = useRouter();
   const [groups, setGroups] = useState<GroupWithCount[]>([]);
   const [isLoadingGroups, setIsLoadingGroups] = useState(true);
@@ -283,7 +285,7 @@ function AddPeopleToGroupSelectionForm({
         </Text>
       ) : (
         <ScrollArea h={360} type="auto">
-          <Group gap="sm" align="flex-start" wrap="wrap">
+          <Group gap="sm" align="flex-start" justify="space-between" wrap="wrap" w="full">
             {filteredGroups.length === 0 ? (
               <Text c="dimmed" ta="center" py="lg">
                 No groups match your search
@@ -295,9 +297,9 @@ function AddPeopleToGroupSelectionForm({
                   onClick={() => handleToggleGroup(group.id)}
                   style={{
                     textAlign: "left",
-                    flex: "1 1 18rem",
-                    minWidth: "16rem",
-                    maxWidth: "20rem",
+                    flex: `1 1 ${modalGroupCardWidth}`,
+                    width: modalGroupCardWidth,
+                    maxWidth: modalGroupCardWidth,
                   }}
                 >
                   {(() => {
@@ -318,11 +320,8 @@ function AddPeopleToGroupSelectionForm({
                           <Badge
                             size="xs"
                             leftSection={<IconMinus size={10} />}
+                            className="top-2 absolute right-2 z-10"
                             style={{
-                              position: "absolute",
-                              top: 8,
-                              right: 8,
-                              zIndex: 2,
                               backgroundColor: "var(--mantine-color-red-filled)",
                               color: "var(--mantine-color-white)",
                             }}
@@ -334,11 +333,8 @@ function AddPeopleToGroupSelectionForm({
                           <Badge
                             size="xs"
                             leftSection={<IconPlus size={10} />}
+                            className="top-2 absolute right-2 z-10"
                             style={{
-                              position: "absolute",
-                              top: 8,
-                              right: 8,
-                              zIndex: 2,
                               backgroundColor: "var(--mantine-color-green-filled)",
                               color: "var(--mantine-color-white)",
                             }}
@@ -349,11 +345,8 @@ function AddPeopleToGroupSelectionForm({
                         {selectionState === "already" && (
                           <Badge
                             size="xs"
+                            className="top-2 absolute right-2 z-10"
                             style={{
-                              position: "absolute",
-                              top: 8,
-                              right: 8,
-                              zIndex: 2,
                               backgroundColor: "var(--mantine-primary-color-filled)",
                               color: "var(--mantine-color-white)",
                             }}
@@ -371,7 +364,7 @@ function AddPeopleToGroupSelectionForm({
                           onDelete={() => {}}
                           interactive={false}
                           cursorType="pointer"
-                          variant="small"
+                          variant={modalGroupCardVariant}
                           showMenu={false}
                           selected={isCurrentlySelected}
                           highlightColor={

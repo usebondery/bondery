@@ -28,7 +28,8 @@ export const GROUP_SELECT = `
   updatedAt:updated_at
 `;
 
-// Contact fields selection query for Supabase (same as contacts.ts)
+// Contact fields selection query for Supabase — must be kept in sync with contacts.ts
+// (Cannot import directly from contacts.ts to avoid a circular dependency with GROUP_SELECT)
 const CONTACT_SELECT = `
   id,
   userId:user_id,
@@ -46,7 +47,18 @@ const CONTACT_SELECT = `
   timezone,
   location,
   latitude,
-  longitude
+  longitude,
+  addressLine1:address_line1,
+  addressLine2:address_line2,
+  addressCity:address_city,
+  addressPostalCode:address_postal_code,
+  addressState:address_state,
+  addressStateCode:address_state_code,
+  addressCountry:address_country,
+  addressCountryCode:address_country_code,
+  addressGranularity:address_granularity,
+  addressFormatted:address_formatted,
+  addressGeocodeSource:address_geocode_source
 `;
 
 export async function groupRoutes(fastify: FastifyInstance) {
@@ -329,17 +341,27 @@ export async function groupRoutes(fastify: FastifyInstance) {
         return reply.status(404).send({ error: "Group not found" });
       }
 
-      // Get person IDs in this group
-      const { data: memberships, error: membershipsError } = await client
-        .from("people_groups")
-        .select("person_id")
-        .eq("group_id", groupId);
+      // Get contacts in this group using a JOIN to avoid URL-length limits that occur
+      // when passing a large list of person IDs via .in() for groups with many members.
+      const { data: contactRows, error: contactsError } = await client
+        .from("people")
+        .select(`${CONTACT_SELECT}, people_groups!inner(group_id)`)
+        .eq("myself", false)
+        .eq("people_groups.group_id", groupId);
 
-      if (membershipsError) {
-        return reply.status(500).send({ error: membershipsError.message });
+      if (contactsError) {
+        fastify.log.error({ contactsError }, "Failed to fetch contacts for group");
+        return reply.status(500).send({ error: contactsError.message });
       }
 
-      if (!memberships || memberships.length === 0) {
+      // Strip the join helper field before passing contacts down the pipeline
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const contacts = (contactRows || []).map((row: any) => {
+        const { people_groups: _pg, ...contact } = row;
+        return contact;
+      });
+
+      if (contacts.length === 0) {
         return {
           group: { id: group.id, label: group.label },
           contacts: [],
@@ -347,20 +369,7 @@ export async function groupRoutes(fastify: FastifyInstance) {
         };
       }
 
-      const personIds = memberships.map((m) => m.person_id);
-
-      // Get contacts
-      const { data: contacts, error: contactsError } = await client
-        .from("people")
-        .select(CONTACT_SELECT)
-        .in("id", personIds)
-        .eq("myself", false);
-
-      if (contactsError) {
-        return reply.status(500).send({ error: contactsError.message });
-      }
-
-      let contactsWithChannels = contacts || [];
+      let contactsWithChannels = contacts;
       try {
         contactsWithChannels = await attachContactChannels(client, user.id, contacts || []);
       } catch (channelError) {

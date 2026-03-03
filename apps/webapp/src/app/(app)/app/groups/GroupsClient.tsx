@@ -269,7 +269,7 @@ export function GroupsClient({ initialGroups, totalCount }: GroupsClientProps) {
             </Group>
 
             {sortedGroups.length > 0 ? (
-              <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="md" mt="md">
+              <SimpleGrid cols={{ base: 1, sm: 2, lg: 3, xl: 4 }} spacing="md" mt="md">
                 {sortedGroups.map((group) => (
                   <GroupCard
                     key={group.id}
