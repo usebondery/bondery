@@ -63,7 +63,7 @@ export default defineConfig({
     },
     resolve: {
       alias: {
-        "@bondery/helpers": resolve(__dirname, "../../packages/helpers/src/index.ts"),
+        "@bondery/helpers": resolve(__dirname, "../../packages/helpers/src"),
         "@bondery/branding-src": resolve(__dirname, "../../packages/branding/src/index.ts"),
       },
     },
