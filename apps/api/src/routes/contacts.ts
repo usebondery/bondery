@@ -15,7 +15,7 @@ import {
 } from "../lib/contact-channels.js";
 import { parseAddressEntries, replaceContactAddresses } from "../lib/contact-addresses.js";
 import { findPersonIdBySocialMedia, upsertContactSocialMedia } from "../lib/social-media.js";
-import { attachAllContactExtras } from "../lib/contact-enrichment.js";
+import { attachContactExtras, type FullContactExtras } from "../lib/contact-enrichment.js";
 import { GROUP_SELECT } from "./groups.js";
 import { TAG_SELECT } from "./tags.js";
 import type {
@@ -971,9 +971,9 @@ export async function contactRoutes(fastify: FastifyInstance) {
         return reply.status(500).send({ error: error.message });
       }
 
-      let enrichedContacts = [] as Awaited<ReturnType<typeof attachAllContactExtras>>;
+      let enrichedContacts: Array<{ id: string } & FullContactExtras> = [];
       try {
-        enrichedContacts = await attachAllContactExtras(client, user.id, contacts || []);
+        enrichedContacts = await attachContactExtras(client, user.id, contacts || [], { addresses: true });
       } catch (enrichError) {
         fastify.log.error({ enrichError }, "Failed to attach contact extras for contact list");
         enrichedContacts = withEmptySocialMedia(withEmptyChannels(contacts || []));
@@ -981,7 +981,7 @@ export async function contactRoutes(fastify: FastifyInstance) {
 
       return {
         contacts: enrichedContacts,
-        totalCount: typeof count === "number" ? count : contactsWithSocialMedia.length,
+        totalCount: typeof count === "number" ? count : enrichedContacts.length,
         stats: {
           totalContacts: totalContactsCount || 0,
           thisMonthInteractions: monthInteractionsCount || 0,
@@ -1383,9 +1383,9 @@ export async function contactRoutes(fastify: FastifyInstance) {
         return reply.status(500).send({ error: personRowsError.message });
       }
 
-      let enrichedContacts = [] as Awaited<ReturnType<typeof attachAllContactExtras>>;
+      let enrichedContacts: Array<{ id: string } & FullContactExtras> = [];
       try {
-        enrichedContacts = await attachAllContactExtras(client, user.id, personRows || []);
+        enrichedContacts = await attachContactExtras(client, user.id, personRows || [], { addresses: true });
       } catch (enrichError) {
         fastify.log.error(
           { enrichError },
@@ -1776,7 +1776,7 @@ export async function contactRoutes(fastify: FastifyInstance) {
         handle: string;
         connected_at: string | null;
       }> = [];
-      const socialUpdatePromises: Array<Promise<unknown>> = [];
+      const socialUpdatePromises: Array<PromiseLike<unknown>> = [];
 
       for (const [field, platform] of Object.entries(MERGEABLE_SOCIAL_FIELDS)) {
         const leftSocial = leftSocialByPlatform.get(platform);
@@ -2138,7 +2138,7 @@ export async function contactRoutes(fastify: FastifyInstance) {
       }
 
       try {
-        const [enrichedContact] = await attachAllContactExtras(client, user.id, [contact]);
+        const [enrichedContact] = await attachContactExtras(client, user.id, [contact], { addresses: true });
         return { contact: enrichedContact };
       } catch (channelError) {
         fastify.log.error(
@@ -3137,7 +3137,7 @@ export async function contactRoutes(fastify: FastifyInstance) {
 
       let contactWithChannels: Contact;
       try {
-        const [enrichedContact] = await attachAllContactExtras(client, user.id, [contact]);
+        const [enrichedContact] = await attachContactExtras(client, user.id, [contact], { addresses: true });
         contactWithChannels = enrichedContact as Contact;
       } catch (channelError) {
         fastify.log.error(
