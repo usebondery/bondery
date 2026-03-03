@@ -83,9 +83,15 @@ export function PersonAvatarGroup({
     }
 
     return (
-      <Stack gap={0}>
+      <Stack gap="0">
         {rows.map((row, rowIndex) => (
-          <AvatarGroup key={`row-${rowIndex}`} spacing="sm">
+          <AvatarGroup
+            key={`row-${rowIndex}`}
+            spacing="sm"
+            style={
+              rowIndex === 1 ? { marginTop: "calc(var(--mantine-spacing-sm) * -1)" } : undefined
+            }
+          >
             {row.map((item) => renderItem(item))}
           </AvatarGroup>
         ))}
