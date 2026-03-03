@@ -3,9 +3,9 @@ import { browser } from "wxt/browser";
 import { Button, Text } from "@mantine/core";
 import { BonderyIconWhite } from "@bondery/branding";
 import { WEBAPP_ROUTES } from "@bondery/helpers";
+import { cleanPersonName } from "@bondery/helpers/name-utils";
 import { config } from "../config";
-// sanitizeName temporarily disabled – transliteration causes non-UTF-8 bytes in the bundle
-const sanitizeName = (s: string) => s.trim();
+const sanitizeName = cleanPersonName;
 import type { AddPersonResult } from "../utils/messages";
 
 interface LinkedInButtonProps {

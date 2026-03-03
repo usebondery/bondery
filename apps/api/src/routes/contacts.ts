@@ -25,6 +25,7 @@ import {
   upsertContactSocialMedia,
 } from "../lib/social-media.js";
 import { GROUP_SELECT } from "./groups.js";
+import { TAG_SELECT } from "./tags.js";
 import type {
   Contact,
   ContactAddressEntry,
@@ -2170,6 +2171,111 @@ export async function contactRoutes(fastify: FastifyInstance) {
       }
 
       return { groups };
+    },
+  );
+
+  /**
+   * GET /api/contacts/:id/tags - Get tags for a contact
+   */
+  fastify.get(
+    "/:id/tags",
+    async (request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+      const auth = await requireAuth(request, reply);
+      if (!auth) return;
+
+      const { client } = auth;
+      const { id: personId } = request.params;
+
+      const { data: memberships, error: membershipsError } = await client
+        .from("people_tags")
+        .select("tag_id")
+        .eq("person_id", personId);
+
+      if (membershipsError) {
+        return reply.status(500).send({ error: membershipsError.message });
+      }
+
+      const tagIds = (memberships || []).map((m: { tag_id: string }) => m.tag_id);
+
+      if (tagIds.length === 0) {
+        return { tags: [] };
+      }
+
+      const { data: tags, error: tagsError } = await client
+        .from("tags")
+        .select(TAG_SELECT)
+        .in("id", tagIds)
+        .order("label", { ascending: true });
+
+      if (tagsError) {
+        return reply.status(500).send({ error: tagsError.message });
+      }
+
+      return { tags };
+    },
+  );
+
+  /**
+   * POST /api/contacts/:id/tags - Add a tag to a contact
+   */
+  fastify.post(
+    "/:id/tags",
+    async (
+      request: FastifyRequest<{ Params: { id: string }; Body: { tagId: string } }>,
+      reply: FastifyReply,
+    ) => {
+      const auth = await requireAuth(request, reply);
+      if (!auth) return;
+
+      const { client, user } = auth;
+      const { id: personId } = request.params;
+      const { tagId } = request.body;
+
+      if (!tagId) {
+        return reply.status(400).send({ error: "tagId is required" });
+      }
+
+      const { error } = await client
+        .from("people_tags")
+        .upsert(
+          { person_id: personId, tag_id: tagId, user_id: user.id },
+          { onConflict: "person_id,tag_id", ignoreDuplicates: true },
+        );
+
+      if (error) {
+        return reply.status(500).send({ error: error.message });
+      }
+
+      return reply.status(201).send({ message: "Tag added to contact successfully" });
+    },
+  );
+
+  /**
+   * DELETE /api/contacts/:id/tags/:tagId - Remove a tag from a contact
+   */
+  fastify.delete(
+    "/:id/tags/:tagId",
+    async (
+      request: FastifyRequest<{ Params: { id: string; tagId: string } }>,
+      reply: FastifyReply,
+    ) => {
+      const auth = await requireAuth(request, reply);
+      if (!auth) return;
+
+      const { client } = auth;
+      const { id: personId, tagId } = request.params;
+
+      const { error } = await client
+        .from("people_tags")
+        .delete()
+        .eq("person_id", personId)
+        .eq("tag_id", tagId);
+
+      if (error) {
+        return reply.status(500).send({ error: error.message });
+      }
+
+      return { message: "Tag removed from contact successfully" };
     },
   );
 

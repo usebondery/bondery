@@ -2,6 +2,11 @@ import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import { requireAuth } from "../lib/supabase.js";
 import { findPersonIdBySocialMedia, upsertContactSocialMedia } from "../lib/social-media.js";
 import { parseInstagramExportUpload } from "../lib/instagram-import.js";
+import {
+  assignContactsToDefaultImportGroup,
+  toInstagramImportGroupKeys,
+  type DefaultImportGroupKey,
+} from "../lib/default-import-groups.js";
 import type {
   InstagramImportCommitRequest,
   InstagramImportCommitResponse,
@@ -142,6 +147,7 @@ export async function instagramImportRoutes(fastify: FastifyInstance) {
       let skippedCount = 0;
 
       const seenHandles = new Set<string>();
+      const groupAssignments = new Map<DefaultImportGroupKey, Set<string>>();
 
       for (const contact of contacts) {
         if (!contact.isValid || !contact.instagramUsername) {
@@ -188,6 +194,14 @@ export async function instagramImportRoutes(fastify: FastifyInstance) {
 
             personId = createdPerson.id;
             importedCount += 1;
+
+            const sources = Array.isArray(contact.sources) ? contact.sources : [];
+            const groupKeys = toInstagramImportGroupKeys(sources);
+            for (const groupKey of groupKeys) {
+              const groupMembers = groupAssignments.get(groupKey) ?? new Set<string>();
+              groupMembers.add(personId);
+              groupAssignments.set(groupKey, groupMembers);
+            }
           } else {
             const { error: updateError } = await client
               .from("people")
@@ -218,6 +232,21 @@ export async function instagramImportRoutes(fastify: FastifyInstance) {
         } catch {
           skippedCount += 1;
         }
+      }
+
+      try {
+        for (const [groupKey, personIds] of groupAssignments.entries()) {
+          await assignContactsToDefaultImportGroup(
+            client,
+            user.id,
+            groupKey,
+            Array.from(personIds),
+          );
+        }
+      } catch (groupError) {
+        const message =
+          groupError instanceof Error ? groupError.message : "Failed to assign imported contacts";
+        return reply.status(500).send({ error: message });
       }
 
       const response: InstagramImportCommitResponse = {

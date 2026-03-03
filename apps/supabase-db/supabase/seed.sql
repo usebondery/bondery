@@ -24,6 +24,11 @@ DECLARE
   activity_walk_id uuid := '98989898-9898-9898-9898-989898989898';
   activity_lunch_id uuid := '97979797-9797-9797-9797-979797979797';
   activity_hackathon_id uuid := '96969696-9696-9696-9696-969696969696';
+  tag_programmer_id uuid := 'a1a1a1a1-1111-1111-1111-111111111111';
+  tag_founder_id uuid := 'a2a2a2a2-2222-2222-2222-222222222222';
+  tag_czech_id uuid := 'a3a3a3a3-3333-3333-3333-333333333333';
+  tag_ecommerce_id uuid := 'a4a4a4a4-4444-4444-4444-444444444444';
+  tag_investor_id uuid := 'a5a5a5a5-5555-5555-5555-555555555555';
 BEGIN
   INSERT INTO auth.users (
     instance_id,
@@ -728,6 +733,49 @@ BEGIN
     user_id = EXCLUDED.user_id,
     reminder_date = EXCLUDED.reminder_date,
     timezone = EXCLUDED.timezone,
+    created_at = EXCLUDED.created_at;
+
+  INSERT INTO public.tags (
+    id,
+    user_id,
+    label,
+    color,
+    created_at,
+    updated_at
+  )
+  VALUES
+    (tag_programmer_id, seed_user_id, 'Programmer', '#3B82F6', '2026-01-15T11:05:00+00', '2026-01-15T11:05:00+00'),
+    (tag_founder_id,    seed_user_id, 'Founder',    '#10B981', '2026-01-15T11:05:00+00', '2026-01-15T11:05:00+00'),
+    (tag_czech_id,      seed_user_id, 'Czech',      '#EF4444', '2026-01-15T11:05:00+00', '2026-01-15T11:05:00+00'),
+    (tag_ecommerce_id,  seed_user_id, 'E-commerce', '#F59E0B', '2026-01-15T11:05:00+00', '2026-01-15T11:05:00+00'),
+    (tag_investor_id,   seed_user_id, 'Investor',   '#8B5CF6', '2026-01-15T11:05:00+00', '2026-01-15T11:05:00+00')
+  ON CONFLICT (id) DO UPDATE
+  SET
+    user_id  = EXCLUDED.user_id,
+    label    = EXCLUDED.label,
+    color    = EXCLUDED.color,
+    created_at = EXCLUDED.created_at,
+    updated_at = EXCLUDED.updated_at;
+
+  INSERT INTO public.people_tags (
+    id,
+    person_id,
+    tag_id,
+    user_id,
+    created_at
+  )
+  VALUES
+    ('b1b1b1b1-1111-1111-1111-111111111111', person_ada_id,       tag_programmer_id, seed_user_id, '2026-01-16T08:00:00+00'),
+    ('b2b2b2b2-2222-2222-2222-222222222222', person_ada_id,       tag_founder_id,    seed_user_id, '2026-01-16T08:01:00+00'),
+    ('b3b3b3b3-3333-3333-3333-333333333333', person_grace_id,     tag_programmer_id, seed_user_id, '2026-01-16T08:02:00+00'),
+    ('b4b4b4b4-4444-4444-4444-444444444444', person_katherine_id, tag_ecommerce_id,  seed_user_id, '2026-01-16T08:03:00+00'),
+    ('b5b5b5b5-5555-5555-5555-555555555555', person_turing_id,    tag_investor_id,   seed_user_id, '2026-01-16T08:04:00+00'),
+    ('b6b6b6b6-6666-6666-6666-666666666666', person_turing_id,    tag_programmer_id, seed_user_id, '2026-01-16T08:05:00+00')
+  ON CONFLICT (id) DO UPDATE
+  SET
+    person_id  = EXCLUDED.person_id,
+    tag_id     = EXCLUDED.tag_id,
+    user_id    = EXCLUDED.user_id,
     created_at = EXCLUDED.created_at;
 END;
 $$;

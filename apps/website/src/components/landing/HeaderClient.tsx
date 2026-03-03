@@ -32,6 +32,7 @@ export function HeaderClient({ initialStars }: HeaderClientProps) {
         shadow="md"
         py={"md"}
         px={"xs"}
+        className="rounded-full!"
       >
         <Flex align="center" px="md" visibleFrom="sm">
           <Box style={{ flex: 1 }}>
@@ -64,9 +65,10 @@ export function HeaderClient({ initialStars }: HeaderClientProps) {
             <ButtonLink
               href={`${WEBAPP_URL}/login`}
               size="md"
+              radius={"xl"}
               leftSection={<IconTopologyStar size={20} />}
             >
-              Go to app
+              Login or Sign up
             </ButtonLink>
           </Flex>
         </Flex>
@@ -133,7 +135,7 @@ export function HeaderClient({ initialStars }: HeaderClientProps) {
                   leftSection={<IconTopologyStar size={20} />}
                   fullWidth
                 >
-                  Go to app
+                  Login or Sign up
                 </ButtonLink>
               </Stack>
             </Flex>

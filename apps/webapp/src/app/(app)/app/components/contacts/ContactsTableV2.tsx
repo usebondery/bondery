@@ -18,6 +18,7 @@ import {
   IconUsersPlus,
 } from "@tabler/icons-react";
 import Image from "next/image";
+import { useMemo } from "react";
 import type { ReactNode } from "react";
 import type { Contact } from "@bondery/types";
 import {
@@ -292,9 +293,10 @@ export default function ContactsTableV2({
   disableNameLink,
   dateLocale,
 }: ContactsTableV2Props) {
-  const dateFormatter = new Intl.DateTimeFormat(dateLocale || "en-US", {
-    dateStyle: "short",
-  });
+  const dateFormatter = useMemo(
+    () => new Intl.DateTimeFormat(dateLocale || "en-US", { dateStyle: "short" }),
+    [dateLocale],
+  );
 
   const selectedContacts = contacts.filter((contact) => selectedIds?.has(contact.id));
 
@@ -376,75 +378,90 @@ export default function ContactsTableV2({
     ...(standardDeleteBulkAction ? [standardDeleteBulkAction] : []),
   ];
 
-  const normalizedColumns: ColumnConfig[] = Array.isArray(visibleColumnsProp)
-    ? visibleColumnsProp[0] && typeof visibleColumnsProp[0] === "string"
-      ? (visibleColumnsProp as ColumnKey[]).map((key) => ({
-          key,
-          label: COLUMN_DEFINITIONS[key].label,
-          icon: COLUMN_DEFINITIONS[key].icon,
-          visible: true,
-          fixed: key === "name",
-        }))
-      : (visibleColumnsProp as ColumnConfig[])
-    : [];
+  const normalizedColumns: ColumnConfig[] = useMemo(
+    () =>
+      Array.isArray(visibleColumnsProp)
+        ? visibleColumnsProp[0] && typeof visibleColumnsProp[0] === "string"
+          ? (visibleColumnsProp as ColumnKey[]).map((key) => ({
+              key,
+              label: COLUMN_DEFINITIONS[key].label,
+              icon: COLUMN_DEFINITIONS[key].icon,
+              visible: true,
+              fixed: key === "name",
+            }))
+          : (visibleColumnsProp as ColumnConfig[])
+        : [],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [
+      visibleColumnsProp
+        ?.map((c) => (typeof c === "string" ? c : `${c.key}:${Number(c.visible)}:${c.fixed ?? 0}`))
+        .join(","),
+    ],
+  );
 
   const sourceColumns = columnsForMenu ?? normalizedColumns;
 
-  const tableColumns: DataColumnConfig<Contact>[] = sourceColumns.map((column) => ({
-    key: column.key,
-    label: column.label,
-    icon: column.icon,
-    visible: column.visible,
-    fixed: column.fixed,
-    minWidthClass: column.key === "name" ? "min-w-60" : "min-w-24",
-    render: (contact) => {
-      switch (column.key) {
-        case "name":
-          return (
-            <PersonChip
-              person={{
-                id: contact.id,
-                firstName: contact.firstName,
-                middleName: contact.middleName,
-                lastName: contact.lastName,
-                avatar: contact.avatar,
-              }}
-              color={nonSelectableIds?.has(contact.id) ? "gray" : undefined}
-              isClickable={!disableNameLink}
-              size="md"
-            />
-          );
-        case "headline": {
-          const headlineValue = contact.headline || "-";
-          return (
-            <Tooltip label={headlineValue} withArrow>
-              <Text size="sm" lineClamp={1}>
-                {headlineValue}
-              </Text>
-            </Tooltip>
-          );
-        }
-        case "place": {
-          const placeValue = contact.place || "-";
-          return (
-            <Tooltip label={placeValue} withArrow>
-              <Text size="sm" lineClamp={1}>
-                {placeValue}
-              </Text>
-            </Tooltip>
-          );
-        }
-        case "lastInteraction":
-          return contact.lastInteraction
-            ? dateFormatter.format(new Date(contact.lastInteraction))
-            : "-";
-        case "social":
-          return <ContactSocialIcons contact={contact} />;
-        default:
-          return null;
-      }
-    },
-  }));
+  const tableColumns: DataColumnConfig<Contact>[] = useMemo(
+    () =>
+      sourceColumns.map((column) => ({
+        key: column.key,
+        label: column.label,
+        icon: column.icon,
+        visible: column.visible,
+        fixed: column.fixed,
+        minWidthClass: column.key === "name" ? "min-w-60" : "min-w-24",
+        render: (contact: Contact) => {
+          switch (column.key) {
+            case "name":
+              return (
+                <PersonChip
+                  person={{
+                    id: contact.id,
+                    firstName: contact.firstName,
+                    middleName: contact.middleName,
+                    lastName: contact.lastName,
+                    avatar: contact.avatar,
+                  }}
+                  color={nonSelectableIds?.has(contact.id) ? "gray" : undefined}
+                  isClickable={!disableNameLink}
+                  size="md"
+                />
+              );
+            case "headline": {
+              const headlineValue = contact.headline || "-";
+              return (
+                <Tooltip label={headlineValue} withArrow>
+                  <Text size="sm" lineClamp={1}>
+                    {headlineValue}
+                  </Text>
+                </Tooltip>
+              );
+            }
+            case "place": {
+              const placeValue = contact.place || "-";
+              return (
+                <Tooltip label={placeValue} withArrow>
+                  <Text size="sm" lineClamp={1}>
+                    {placeValue}
+                  </Text>
+                </Tooltip>
+              );
+            }
+            case "lastInteraction":
+              return contact.lastInteraction
+                ? dateFormatter.format(new Date(contact.lastInteraction))
+                : "-";
+            case "social":
+              return <ContactSocialIcons contact={contact} />;
+            default:
+              return null;
+          }
+        },
+      })),
+    // nonSelectableIds and disableNameLink are included because they affect the name column render.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [sourceColumns, nonSelectableIds, disableNameLink, dateFormatter],
+  );
 
   const rowActions: RowAction<Contact>[] = effectiveMenuActions.map((action) => ({
     key: action.key,

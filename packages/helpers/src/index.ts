@@ -16,3 +16,4 @@ export type {
   ParseInstagramUsernameInput,
   ParsedInstagramName,
 } from "./instagram/parseInstagramUsername.js";
+export { stripEmojis, stripNameTitles, extractNameParts, cleanPersonName } from "./name-utils.js";

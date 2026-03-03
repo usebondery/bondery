@@ -16,6 +16,7 @@
     "types": ["chrome", "node"],
     "paths": {
       "@bondery/helpers": ["../../packages/helpers/src/index.ts"],
+      "@bondery/helpers/name-utils": ["../../packages/helpers/src/name-utils.ts"],
       "@bondery/branding-src": ["../../packages/branding/src/index.ts"]
     }
   },

@@ -1,6 +1,14 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import {
+  memo,
+  useCallback,
+  useMemo,
+  useRef,
+  useState,
+  type ReactElement,
+  type ReactNode,
+} from "react";
 import {
   ActionIcon,
   Button,
@@ -57,6 +65,128 @@ function SearchInput({
   );
 }
 import type { BulkAction, DataColumnConfig, DataTableLabels, RowAction, SortOption } from "./types";
+
+interface DataTableRowInternalProps<TRow> {
+  row: TRow;
+  rowId: string;
+  rowIndex: number;
+  isSelected: boolean;
+  isMenuOpen: boolean;
+  isNonSelectable: boolean;
+  showSelection: boolean;
+  showRowActions: boolean;
+  visibleColumns: DataColumnConfig<TRow>[];
+  rowActions?: RowAction<TRow>[];
+  nonSelectableTooltip?: string;
+  rowSelectionAriaLabel: string;
+  onSelectOne: (row: TRow, rowIndex: number, options?: { shiftKey?: boolean }) => void;
+  onMenuOpen: (rowId: string) => void;
+  onMenuClose: () => void;
+  actionsLabel: string;
+}
+
+function DataTableRowComponent<TRow>({
+  row,
+  rowId,
+  rowIndex,
+  isSelected,
+  isMenuOpen,
+  isNonSelectable,
+  showSelection,
+  showRowActions,
+  visibleColumns,
+  rowActions,
+  nonSelectableTooltip,
+  rowSelectionAriaLabel,
+  onSelectOne,
+  onMenuOpen,
+  onMenuClose,
+  actionsLabel,
+}: DataTableRowInternalProps<TRow>): ReactElement | null {
+  return (
+    <TableTr
+      style={isSelected ? { backgroundColor: "var(--mantine-primary-color-light)" } : undefined}
+    >
+      {showSelection ? (
+        <TableTd>
+          {isNonSelectable ? (
+            <Tooltip label={nonSelectableTooltip} withArrow>
+              <span>
+                <Checkbox
+                  checked={isSelected}
+                  indeterminate
+                  disabled
+                  aria-label={rowSelectionAriaLabel}
+                />
+              </span>
+            </Tooltip>
+          ) : (
+            <Checkbox
+              checked={isSelected}
+              aria-label={rowSelectionAriaLabel}
+              onChange={(event) =>
+                onSelectOne(row, rowIndex, {
+                  shiftKey: (event.nativeEvent as MouseEvent).shiftKey,
+                })
+              }
+            />
+          )}
+        </TableTd>
+      ) : null}
+
+      {visibleColumns.map((col) => (
+        <TableTd key={col.key} className={col.minWidthClass}>
+          {col.render(row, rowIndex)}
+        </TableTd>
+      ))}
+
+      {showRowActions ? (
+        <TableTd>
+          <Menu
+            shadow="md"
+            position="bottom-end"
+            opened={isMenuOpen}
+            onChange={(opened) => (opened ? onMenuOpen(rowId) : onMenuClose())}
+          >
+            <MenuTarget>
+              <ActionIcon
+                variant="default"
+                aria-label={actionsLabel}
+                className={isMenuOpen ? "button-scale-effect-active" : "button-scale-effect"}
+              >
+                <IconDotsVertical size={16} />
+              </ActionIcon>
+            </MenuTarget>
+            <MenuDropdown>
+              {rowActions!.map((action) => (
+                <MenuItem
+                  key={action.key}
+                  leftSection={action.icon}
+                  color={action.color}
+                  onClick={() => action.onClick(row)}
+                >
+                  {action.label}
+                </MenuItem>
+              ))}
+            </MenuDropdown>
+          </Menu>
+        </TableTd>
+      ) : null}
+    </TableTr>
+  );
+}
+
+const DataTableRow = memo(
+  DataTableRowComponent,
+  (prev, next) =>
+    prev.rowId === next.rowId &&
+    prev.rowIndex === next.rowIndex &&
+    prev.isSelected === next.isSelected &&
+    prev.isMenuOpen === next.isMenuOpen &&
+    prev.isNonSelectable === next.isNonSelectable &&
+    prev.row === next.row &&
+    prev.visibleColumns === next.visibleColumns,
+) as typeof DataTableRowComponent;
 
 export interface DataTableProps<TRow, TSortKey extends string = string> {
   /** Data rows to display */
@@ -175,13 +305,21 @@ export function DataTable<TRow, TSortKey extends string = string>({
   className,
 }: DataTableProps<TRow, TSortKey>) {
   const [openedMenuRowId, setOpenedMenuRowId] = useState<string | null>(null);
-  const [lastSelectedIndex, setLastSelectedIndex] = useState<number | null>(null);
+  const lastSelectedIndexRef = useRef<number | null>(null);
+
+  const handleMenuOpen = useCallback((menuRowId: string) => {
+    setOpenedMenuRowId(menuRowId);
+  }, []);
+
+  const handleMenuClose = useCallback(() => {
+    setOpenedMenuRowId(null);
+  }, []);
 
   const showSelection =
     selectedIds !== undefined &&
     (onSelectionChange !== undefined || onSelectAll !== undefined || onSelectOne !== undefined);
   const showRowActions = rowActions && rowActions.length > 0;
-  const visibleColumns = columns.filter((col) => col.visible);
+  const visibleColumns = useMemo(() => columns.filter((col) => col.visible), [columns]);
 
   // --- Selection helpers ---
   const selectableData = data.filter((row) => !nonSelectableIds?.has(getRowId(row)));
@@ -221,17 +359,17 @@ export function DataTable<TRow, TSortKey extends string = string>({
         shiftKey: options?.shiftKey,
         index: rowIndex,
       });
-      setLastSelectedIndex(rowIndex);
+      lastSelectedIndexRef.current = rowIndex;
       return;
     }
 
     if (!onSelectionChange || !selectedIds) return;
     const newSelectedIds = new Set(selectedIds);
 
-    if (options?.shiftKey && lastSelectedIndex !== null) {
+    if (options?.shiftKey && lastSelectedIndexRef.current !== null) {
       // Range select
-      const start = Math.min(lastSelectedIndex, rowIndex);
-      const end = Math.max(lastSelectedIndex, rowIndex);
+      const start = Math.min(lastSelectedIndexRef.current, rowIndex);
+      const end = Math.max(lastSelectedIndexRef.current, rowIndex);
 
       for (let i = start; i <= end; i++) {
         const rangeRow = data[i];
@@ -249,7 +387,7 @@ export function DataTable<TRow, TSortKey extends string = string>({
       }
     }
 
-    setLastSelectedIndex(rowIndex);
+    lastSelectedIndexRef.current = rowIndex;
     onSelectionChange(newSelectedIds);
   };
 
@@ -401,89 +539,26 @@ export function DataTable<TRow, TSortKey extends string = string>({
           ) : (
             data.map((row, rowIndex) => {
               const rowId = getRowId(row);
-              const isSelected = selectedIds?.has(rowId);
-              const isNonSelectable = nonSelectableIds?.has(rowId);
-              const rowSelectionAriaLabel = getRowSelectionAriaLabel?.(row) ?? "Select row";
-
               return (
-                <TableTr
+                <DataTableRow
                   key={rowId}
-                  style={
-                    isSelected
-                      ? { backgroundColor: "var(--mantine-primary-color-light)" }
-                      : undefined
-                  }
-                >
-                  {showSelection ? (
-                    <TableTd>
-                      {isNonSelectable ? (
-                        <Tooltip label={nonSelectableTooltip} withArrow>
-                          <span>
-                            <Checkbox
-                              checked={isSelected}
-                              indeterminate
-                              disabled
-                              aria-label={rowSelectionAriaLabel}
-                            />
-                          </span>
-                        </Tooltip>
-                      ) : (
-                        <Checkbox
-                          checked={isSelected}
-                          aria-label={rowSelectionAriaLabel}
-                          onChange={(event) =>
-                            handleSelectOne(row, rowIndex, {
-                              shiftKey: (event.nativeEvent as MouseEvent).shiftKey,
-                            })
-                          }
-                        />
-                      )}
-                    </TableTd>
-                  ) : null}
-
-                  {visibleColumns.map((col) => (
-                    <TableTd key={col.key} className={col.minWidthClass}>
-                      {col.render(row, rowIndex)}
-                    </TableTd>
-                  ))}
-
-                  {showRowActions ? (
-                    <TableTd>
-                      <Menu
-                        shadow="md"
-                        position="bottom-end"
-                        opened={openedMenuRowId === rowId}
-                        onChange={(opened) => setOpenedMenuRowId(opened ? rowId : null)}
-                      >
-                        <MenuTarget>
-                          <ActionIcon
-                            variant="default"
-                            aria-label={labels.actionsAriaLabel ?? "Row actions"}
-                            className={
-                              openedMenuRowId === rowId
-                                ? "button-scale-effect-active"
-                                : "button-scale-effect"
-                            }
-                          >
-                            <IconDotsVertical size={16} />
-                          </ActionIcon>
-                        </MenuTarget>
-                        <MenuDropdown>
-                          {rowActions!.map((action) => (
-                            <MenuItem
-                              key={action.key}
-                              leftSection={action.icon}
-                              color={action.color}
-                              onClick={() => action.onClick(row)}
-                            >
-                              {action.label}
-                            </MenuItem>
-                          ))}
-                        </MenuDropdown>
-                      </Menu>
-                    </TableTd>
-                  ) : null}
-                </TableTr>
+                  row={row}
+                  rowId={rowId}
+                  rowIndex={rowIndex}
+                  isSelected={selectedIds?.has(rowId) ?? false}
+                  isMenuOpen={openedMenuRowId === rowId}
+                  isNonSelectable={nonSelectableIds?.has(rowId) ?? false}
+                  showSelection={showSelection}
+                  showRowActions={Boolean(showRowActions)}
+                  visibleColumns={visibleColumns}
+                  rowActions={rowActions}
+                  nonSelectableTooltip={nonSelectableTooltip}
+                  rowSelectionAriaLabel={getRowSelectionAriaLabel?.(row) ?? "Select row"}
+                  onSelectOne={handleSelectOne}
+                  onMenuOpen={handleMenuOpen}
+                  onMenuClose={handleMenuClose}
+                  actionsLabel={labels.actionsAriaLabel ?? "Actions"}
+                />
               );
             })
           )}

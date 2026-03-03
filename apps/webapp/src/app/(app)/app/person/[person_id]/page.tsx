@@ -10,7 +10,7 @@ import { getAuthHeaders } from "@/lib/authHeaders";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import { PageWrapper } from "@/app/(app)/app/components/PageWrapper";
 import { ErrorPageHeader } from "@/app/(app)/app/components/ErrorPageHeader";
-import type { Group } from "@bondery/types";
+import type { Group, Tag } from "@bondery/types";
 import { API_URL } from "@/lib/config";
 
 async function getPersonData(personId: string) {
@@ -54,6 +54,16 @@ async function getPersonData(personId: string) {
     headers,
   });
 
+  const allTagsPromise = fetch(`${API_URL}${API_ROUTES.TAGS}?previewLimit=0`, {
+    next: { tags: ["tags"] },
+    headers,
+  });
+
+  const personTagsPromise = fetch(`${API_URL}${API_ROUTES.CONTACTS}/${personId}/tags`, {
+    next: { tags: ["tags", "contacts"] },
+    headers,
+  });
+
   const [
     contactResponse,
     groupsResponse,
@@ -62,6 +72,8 @@ async function getPersonData(personId: string) {
     relationshipsResponse,
     importantEventsResponse,
     contactsResponse,
+    allTagsResponse,
+    personTagsResponse,
   ] = await Promise.all([
     contactPromise,
     groupsPromise,
@@ -70,6 +82,8 @@ async function getPersonData(personId: string) {
     relationshipsPromise,
     importantEventsPromise,
     contactsPromise,
+    allTagsPromise,
+    personTagsPromise,
   ]);
 
   if (!contactResponse.ok) {
@@ -96,6 +110,9 @@ async function getPersonData(personId: string) {
     : { events: [] };
   const contactsData = contactsResponse.ok ? await contactsResponse.json() : { contacts: [] };
 
+  const allTagsData = allTagsResponse.ok ? await allTagsResponse.json() : { tags: [] };
+  const personTagsData = personTagsResponse.ok ? await personTagsResponse.json() : { tags: [] };
+
   const personActivities =
     interactionsData.interactions?.filter((a: any) =>
       a.participants?.some((p: any) => p.id === personId),
@@ -112,6 +129,8 @@ async function getPersonData(personId: string) {
     importantEvents: (importantEventsData.events as ImportantEvent[]) || [],
     groups: (groupsData.groups as Group[]) || [],
     personGroups: (personGroupsData.groups as Group[]) || [],
+    allTags: (allTagsData.tags as Tag[]) || [],
+    personTags: (personTagsData.tags as Tag[]) || [],
     activities: (personActivities as Activity[]) || [],
   };
 }
@@ -152,6 +171,8 @@ export default async function PersonPage({ params }: { params: Promise<{ person_
       initialImportantEvents={data.importantEvents}
       initialGroups={data.groups}
       initialPersonGroups={data.personGroups}
+      initialAllTags={data.allTags}
+      initialPersonTags={data.personTags}
       initialActivities={data.activities}
       personId={personId}
     />

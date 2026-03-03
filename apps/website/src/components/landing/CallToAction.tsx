@@ -18,7 +18,7 @@ export function CallToAction() {
         mih={400}
         p="xl"
         bg="var(--mantine-primary-color-filled)"
-        className="flex justify-center items-center max-w-6xl"
+        className="flex justify-center items-center max-w-6xl "
         mx={"auto"}
       >
         <Stack align="center" justify="center" h="100%" flex={1} p="xl" className="gap-y-12!">
@@ -30,6 +30,7 @@ export function CallToAction() {
             size="lg"
             rightSection={<IconArrowUpRight />}
             variant="white"
+            radius={"xl"}
           >
             Start building your network for free
           </ButtonLink>

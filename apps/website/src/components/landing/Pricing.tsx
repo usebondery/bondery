@@ -6,6 +6,8 @@ import {
   IconUsers,
   IconTopologyStar,
   IconHourglass,
+  IconTimeline,
+  IconTimelineEvent,
 } from "@tabler/icons-react";
 import { WEBAPP_URL } from "@/lib/config";
 import { PricingCard } from "./PricingCard";
@@ -18,13 +20,13 @@ export function Pricing() {
       description: "All your contacts organized in one place",
     },
     {
-      icon: <IconCalendar />,
+      icon: <IconTimelineEvent />,
       title: "Log activities",
-      description: "Track interactions and activities with your contacts",
+      description: "Track interactions with your contacts",
     },
     {
       icon: <IconCalendar />,
-      title: "Smart reminders",
+      title: "Reminders",
       description: "Never miss birthdays and important dates",
     },
   ];
@@ -37,7 +39,7 @@ export function Pricing() {
     },
     {
       icon: <IconTopologyStar />,
-      title: "Personalized message writer",
+      title: "Writing copilot",
       description: "Generate tailored outreach drafts for every contact",
     },
     {
@@ -80,7 +82,7 @@ export function Pricing() {
       >
         <PricingCard
           title="Free"
-          description="All features are free during the beta phase."
+          description="All the core features needed."
           features={freeFeatures}
           action={
             <ButtonLink
@@ -98,7 +100,7 @@ export function Pricing() {
         <PricingCard
           title="Premium"
           oldPrice="$10 USD p.m."
-          description="Premium is currently in development."
+          description="Advanced features for power users."
           features={premiumFeatures}
           action={
             <ButtonLink

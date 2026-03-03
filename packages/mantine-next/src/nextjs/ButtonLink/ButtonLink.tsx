@@ -9,6 +9,7 @@ export type ButtonLinkProps = Omit<ButtonProps, "component" | "href" | "children
   children: ReactNode;
   target?: string;
   rel?: string;
+  className?: string;
 };
 
 /**
@@ -17,10 +18,24 @@ export type ButtonLinkProps = Omit<ButtonProps, "component" | "href" | "children
  * @param props Button props with required href and children.
  * @returns A link-compatible Mantine Button component.
  */
-export function ButtonLink({ href, children, target, rel, ...buttonProps }: ButtonLinkProps) {
+export function ButtonLink({
+  href,
+  children,
+  target,
+  rel,
+  className,
+  ...buttonProps
+}: ButtonLinkProps) {
   return (
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    <Button component={Link as any} href={href} target={target} rel={rel} {...buttonProps}>
+    <Button
+      component={Link as any}
+      href={href}
+      target={target}
+      rel={rel}
+      className={className}
+      {...buttonProps}
+    >
       {children}
     </Button>
   );

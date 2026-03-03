@@ -20,6 +20,8 @@ export {
   type ErrorNotificationTemplateProps,
   loadingNotificationTemplate,
   type LoadingNotificationTemplateProps,
+  warningNotificationTemplate,
+  type WarningNotificationTemplateProps,
 } from "./Notifications";
 export { bonderyTheme, primaryColor } from "./theme";
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import {
   Center,
@@ -12,6 +12,7 @@ import {
   SimpleGrid,
   Stack,
   Text,
+  Title,
   UnstyledButton,
 } from "@mantine/core";
 import { modals } from "@mantine/modals";
@@ -60,6 +61,8 @@ interface OpenMergeWithModalParams {
   redirectToMergedPerson?: boolean;
   titleText: string;
   texts: MergeWithModalTexts;
+  onSuccess?: () => void;
+  initialConflictChoices?: Partial<Record<MergeConflictField, MergeConflictChoice>>;
 }
 
 type Step = "pick" | "resolve" | "processing";
@@ -108,6 +111,7 @@ export interface MergeWithModalTexts {
   back: string;
   merge: string;
   noConflicts: string;
+  conflictHint: string;
   processing: string;
   steps: {
     pick: string;
@@ -412,12 +416,12 @@ function toPersonPreview(contact: Contact | null) {
 
 interface ConflictOptionCardProps {
   selected: boolean;
-  sidePerson: Contact | null;
+  fieldLabel: string;
   onSelect: () => void;
   children: ReactNode;
 }
 
-function ConflictOptionCard({ selected, sidePerson, onSelect, children }: ConflictOptionCardProps) {
+function ConflictOptionCard({ selected, fieldLabel, onSelect, children }: ConflictOptionCardProps) {
   return (
     <Paper
       withBorder
@@ -437,12 +441,7 @@ function ConflictOptionCard({ selected, sidePerson, onSelect, children }: Confli
       >
         <Stack gap="xs">
           <Group justify="space-between" wrap="nowrap">
-            <Group gap="xs" wrap="nowrap">
-              <Text size="xs" c="dimmed">
-                Import from
-              </Text>
-              <PersonChip person={toPersonPreview(sidePerson)} size="sm" color="gray" />
-            </Group>
+            <Text fw={"bold"}>{fieldLabel}</Text>
             {selected ? <IconCheck size={14} /> : null}
           </Group>
           <div style={{ pointerEvents: "none" }}>{children}</div>
@@ -640,6 +639,8 @@ export function openMergeWithModal({
   redirectToMergedPerson = true,
   titleText,
   texts,
+  onSuccess,
+  initialConflictChoices,
 }: OpenMergeWithModalParams) {
   const modalId = `merge-with-${Math.random().toString(36).slice(2)}`;
 
@@ -659,6 +660,8 @@ export function openMergeWithModal({
         redirectToMergedPerson={redirectToMergedPerson}
         modalId={modalId}
         texts={texts}
+        onSuccess={onSuccess}
+        initialConflictChoices={initialConflictChoices}
       />
     ),
   });
@@ -673,6 +676,8 @@ interface MergeWithModalProps {
   redirectToMergedPerson: boolean;
   modalId: string;
   texts: MergeWithModalTexts;
+  onSuccess?: () => void;
+  initialConflictChoices?: Partial<Record<MergeConflictField, MergeConflictChoice>>;
 }
 
 function MergeWithModal({
@@ -684,16 +689,21 @@ function MergeWithModal({
   redirectToMergedPerson,
   modalId,
   texts,
+  onSuccess,
+  initialConflictChoices,
 }: MergeWithModalProps) {
   const router = useRouter();
+  const shouldSkipPickStep =
+    disableLeftPicker && disableRightPicker && Boolean(initialRightPersonId);
 
-  const [step, setStep] = useState<Step>("pick");
+  const [step, setStep] = useState<Step>(shouldSkipPickStep ? "resolve" : "pick");
   const [leftPersonId, setLeftPersonId] = useState(initialLeftPersonId);
   const [rightPersonId, setRightPersonId] = useState(initialRightPersonId || "");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const autoMergeRef = useRef(false);
   const [conflictChoices, setConflictChoices] = useState<
     Partial<Record<MergeConflictField, MergeConflictChoice>>
-  >({});
+  >(initialConflictChoices ?? {});
 
   useEffect(() => {
     modals.updateModal({
@@ -786,6 +796,11 @@ function MergeWithModal({
       return;
     }
 
+    if (conflicts.length === 0) {
+      void handleMerge();
+      return;
+    }
+
     setStep("resolve");
   };
 
@@ -830,6 +845,7 @@ function MergeWithModal({
       );
 
       modals.close(modalId);
+      onSuccess?.();
       await revalidateAll();
       if (redirectToMergedPerson) {
         router.push(`${WEBAPP_ROUTES.PERSON}/${result.personId}`);
@@ -848,6 +864,21 @@ function MergeWithModal({
       setIsSubmitting(false);
     }
   };
+
+  useEffect(() => {
+    if (
+      shouldSkipPickStep &&
+      step === "resolve" &&
+      leftPersonId &&
+      rightPersonId &&
+      conflicts.length === 0 &&
+      !isSubmitting &&
+      !autoMergeRef.current
+    ) {
+      autoMergeRef.current = true;
+      void handleMerge();
+    }
+  }, [shouldSkipPickStep, step, leftPersonId, rightPersonId, conflicts.length, isSubmitting]);
 
   return (
     <Stack gap="md">
@@ -907,19 +938,27 @@ function MergeWithModal({
               </Text>
             </Paper>
           ) : (
-            conflicts.map((conflict, index) => {
-              const selectedChoice = conflictChoices[conflict.field] || "left";
+            <Stack gap="sm">
+              <Text size="sm" c="dimmed">
+                {texts.conflictHint}
+              </Text>
+              <SimpleGrid cols={2} spacing="sm" mt={"md"} mb="xs">
+                <Center>
+                  <PersonChip person={toPersonPreview(leftContact)} isClickable />
+                </Center>
+                <Center>
+                  <PersonChip person={toPersonPreview(rightContact)} isClickable />
+                </Center>
+              </SimpleGrid>
+              {conflicts.map((conflict) => {
+                const selectedChoice = conflictChoices[conflict.field] || "left";
 
-              return (
-                <Stack key={conflict.field} gap="sm">
-                  <Stack gap="sm">
-                    <Text size="sm" fw={600} ta="center">
-                      {texts.fields[conflict.field]}
-                    </Text>
+                return (
+                  <Stack key={conflict.field} gap="sm">
                     <SimpleGrid cols={2} spacing="sm">
                       <ConflictOptionCard
                         selected={selectedChoice === "left"}
-                        sidePerson={leftContact}
+                        fieldLabel={texts.fields[conflict.field]}
                         onSelect={() =>
                           setConflictChoices((prev) => ({
                             ...prev,
@@ -931,7 +970,7 @@ function MergeWithModal({
                       </ConflictOptionCard>
                       <ConflictOptionCard
                         selected={selectedChoice === "right"}
-                        sidePerson={rightContact}
+                        fieldLabel={texts.fields[conflict.field]}
                         onSelect={() =>
                           setConflictChoices((prev) => ({
                             ...prev,
@@ -943,16 +982,20 @@ function MergeWithModal({
                       </ConflictOptionCard>
                     </SimpleGrid>
                   </Stack>
-                </Stack>
-              );
-            })
+                );
+              })}
+            </Stack>
           )}
 
           <ModalFooter
-            backLabel={texts.back}
-            backLeftSection={<IconArrowLeft size={16} />}
-            onBack={() => setStep("pick")}
-            backDisabled={isSubmitting}
+            {...(shouldSkipPickStep
+              ? {}
+              : {
+                  backLabel: texts.back,
+                  backLeftSection: <IconArrowLeft size={16} />,
+                  onBack: () => setStep("pick"),
+                  backDisabled: isSubmitting,
+                })}
             cancelLabel={texts.cancel}
             onCancel={() => modals.close(modalId)}
             cancelDisabled={isSubmitting}

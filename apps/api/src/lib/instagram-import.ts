@@ -1,5 +1,9 @@
 import AdmZip from "adm-zip";
-import type { InstagramImportStrategy, InstagramPreparedContact } from "@bondery/types";
+import type {
+  InstagramImportSource,
+  InstagramImportStrategy,
+  InstagramPreparedContact,
+} from "@bondery/types";
 import { parseInstagramUsername, SOCIAL_PLATFORM_URL_DETAILS } from "@bondery/helpers";
 
 type UploadFile = {
@@ -30,6 +34,7 @@ type ParsedRecord = {
   username: string;
   connectedAt: string | null;
   connectedOnRaw: number | null;
+  sources: InstagramImportSource[];
 };
 
 const FOLLOWING_FILE_NAME = "following.json";
@@ -79,6 +84,15 @@ const COMMON_BRANDS_NAME_TOKENS = [
   "umcfe",
   "coach",
   "institute",
+  "clips",
+  "french",
+  "seed",
+  "club",
+  "brycent",
+  "qoves",
+  "music",
+  "school",
+  "institut",
   "brno",
   "city",
   "university",
@@ -111,8 +125,9 @@ const COMMON_BRANDS_NAME_TOKENS = [
   "academy",
   "learning",
   "university",
-  "school",
   "education",
+  "vchq",
+  "bodybuilder",
   "morningbrew",
   "stoic",
   "jaroska",
@@ -139,6 +154,7 @@ const COMMON_BRANDS_NAME_TOKENS = [
   "ycombinator",
   "zmena",
   "chartosaur",
+  "zell",
   "bsecharly",
   "rekrabice",
   "startupy",
@@ -611,7 +627,15 @@ function parseRelationshipItem(item: InstagramRelationshipItem): ParsedRecord | 
     username: normalizedUsername,
     connectedAt: iso,
     connectedOnRaw: raw,
+    sources: [],
   };
+}
+
+function withSource(records: ParsedRecord[], source: InstagramImportSource): ParsedRecord[] {
+  return records.map((record) => ({
+    ...record,
+    sources: [source],
+  }));
 }
 
 function toMap(records: ParsedRecord[]): Map<string, ParsedRecord> {
@@ -653,6 +677,7 @@ function toPreparedContacts(records: ParsedRecord[]): InstagramPreparedContact[]
       likelyPerson,
       connectedAt: record.connectedAt,
       connectedOnRaw: record.connectedOnRaw,
+      sources: record.sources,
       isValid: issues.length === 0,
       issues,
     };
@@ -711,7 +736,11 @@ function parseFollowingRecords(files: UploadFile[], required = true): ParsedReco
   const payload = parseJsonFile<FollowingExport>(followingFile);
   const entries = ensureRelationshipArray(payload, "relationships_following", FOLLOWING_FILE_NAME);
 
-  return entries.map(parseRelationshipItem).filter((item): item is ParsedRecord => item !== null);
+  const parsed = entries
+    .map(parseRelationshipItem)
+    .filter((item): item is ParsedRecord => item !== null);
+
+  return withSource(parsed, "following");
 }
 
 function parseCloseFriendsRecords(files: UploadFile[]): ParsedRecord[] {
@@ -728,7 +757,11 @@ function parseCloseFriendsRecords(files: UploadFile[]): ParsedRecord[] {
     CLOSE_FRIENDS_FILE_NAME,
   );
 
-  return entries.map(parseRelationshipItem).filter((item): item is ParsedRecord => item !== null);
+  const parsed = entries
+    .map(parseRelationshipItem)
+    .filter((item): item is ParsedRecord => item !== null);
+
+  return withSource(parsed, "close_friends");
 }
 
 function parseFollowersRecords(files: UploadFile[], required = true): ParsedRecord[] {
@@ -750,14 +783,46 @@ function parseFollowersRecords(files: UploadFile[], required = true): ParsedReco
     const parsed = entries
       .map(parseRelationshipItem)
       .filter((item): item is ParsedRecord => item !== null);
-    merged.push(...parsed);
+    merged.push(...withSource(parsed, "followers"));
   }
 
   return merged;
 }
 
 function deduplicateRecords(records: ParsedRecord[]): ParsedRecord[] {
-  return Array.from(toMap(records).values());
+  const map = new Map<string, ParsedRecord>();
+
+  for (const record of records) {
+    const existing = map.get(record.username);
+
+    if (!existing) {
+      map.set(record.username, {
+        ...record,
+        sources: Array.from(new Set(record.sources)),
+      });
+      continue;
+    }
+
+    const mergedSources = Array.from(new Set([...existing.sources, ...record.sources]));
+
+    const existingRaw = existing.connectedOnRaw ?? Number.MIN_SAFE_INTEGER;
+    const incomingRaw = record.connectedOnRaw ?? Number.MIN_SAFE_INTEGER;
+
+    if (incomingRaw > existingRaw) {
+      map.set(record.username, {
+        ...record,
+        sources: mergedSources,
+      });
+      continue;
+    }
+
+    map.set(record.username, {
+      ...existing,
+      sources: mergedSources,
+    });
+  }
+
+  return Array.from(map.values());
 }
 
 function buildStrategyRecords(
@@ -785,11 +850,13 @@ function buildStrategyRecords(
     const mutuals: ParsedRecord[] = [];
 
     for (const [username, followingRecord] of followingByUsername.entries()) {
-      if (!followersByUsername.has(username)) {
+      const followerRecord = followersByUsername.get(username);
+      if (!followerRecord) {
         continue;
       }
 
       mutuals.push(followingRecord);
+      mutuals.push(followerRecord);
     }
 
     return deduplicateRecords(mutuals);

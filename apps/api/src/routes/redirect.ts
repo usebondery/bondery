@@ -15,6 +15,8 @@ import {
   type SocialMediaPlatform,
   upsertContactSocialMedia,
 } from "../lib/social-media.js";
+import { cleanPersonName } from "@bondery/helpers/name-utils";
+import { assignContactsToDefaultImportGroup } from "../lib/default-import-groups.js";
 
 function resolvePrimarySocialMedia(payload: {
   instagram?: string;
@@ -31,6 +33,18 @@ function resolvePrimarySocialMedia(payload: {
 
   if (payload.facebook?.trim()) {
     return { platform: "facebook", handle: payload.facebook.trim() };
+  }
+
+  return null;
+}
+
+function resolveExtensionDefaultGroup(platform: SocialMediaPlatform) {
+  if (platform === "linkedin") {
+    return "extension_linkedin" as const;
+  }
+
+  if (platform === "instagram") {
+    return "extension_instagram" as const;
   }
 
   return null;
@@ -146,13 +160,15 @@ export async function redirectRoutes(fastify: FastifyInstance) {
       // Create new contact
       const insertData: any = {
         user_id: user.id,
-        first_name: firstName || primarySocialMedia.handle || "Unknown",
+        first_name: cleanPersonName(firstName) || primarySocialMedia.handle || "Unknown",
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       };
 
-      if (middleName) insertData.middle_name = middleName;
-      if (lastName) insertData.last_name = lastName;
+      const cleanedMiddleName = cleanPersonName(middleName);
+      const cleanedLastName = cleanPersonName(lastName);
+      if (cleanedMiddleName) insertData.middle_name = cleanedMiddleName;
+      if (cleanedLastName) insertData.last_name = cleanedLastName;
       if (headline) insertData.headline = headline;
       if (place) insertData.place = place;
       if (notes) insertData.notes = notes;
@@ -177,6 +193,17 @@ export async function redirectRoutes(fastify: FastifyInstance) {
         );
       } catch {
         return reply.status(500).send({ error: "Failed to save social media" });
+      }
+
+      const extensionGroup = resolveExtensionDefaultGroup(primarySocialMedia.platform);
+      if (extensionGroup) {
+        try {
+          await assignContactsToDefaultImportGroup(client, user.id, extensionGroup, [
+            newContact.id,
+          ]);
+        } catch {
+          return reply.status(500).send({ error: "Failed to assign default group" });
+        }
       }
 
       // Upload profile photo if provided
@@ -281,13 +308,15 @@ export async function redirectRoutes(fastify: FastifyInstance) {
     // Create new contact
     const insertData: any = {
       user_id: user.id,
-      first_name: firstName || primarySocialMedia.handle || "Unknown",
+      first_name: cleanPersonName(firstName) || primarySocialMedia.handle || "Unknown",
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     };
 
-    if (middleName) insertData.middle_name = middleName;
-    if (lastName) insertData.last_name = lastName;
+    const cleanedMiddleName = cleanPersonName(middleName);
+    const cleanedLastName = cleanPersonName(lastName);
+    if (cleanedMiddleName) insertData.middle_name = cleanedMiddleName;
+    if (cleanedLastName) insertData.last_name = cleanedLastName;
     if (headline) insertData.headline = headline;
     if (place) insertData.place = place;
 
@@ -311,6 +340,15 @@ export async function redirectRoutes(fastify: FastifyInstance) {
       );
     } catch {
       return reply.status(500).send({ error: "Failed to save social media" });
+    }
+
+    const extensionGroup = resolveExtensionDefaultGroup(primarySocialMedia.platform);
+    if (extensionGroup) {
+      try {
+        await assignContactsToDefaultImportGroup(client, user.id, extensionGroup, [newContact.id]);
+      } catch {
+        return reply.status(500).send({ error: "Failed to assign default group" });
+      }
     }
 
     if (profileImageUrl) {

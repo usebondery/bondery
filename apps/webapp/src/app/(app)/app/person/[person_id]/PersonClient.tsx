@@ -28,6 +28,7 @@ import type {
   RelationshipType,
   ImportantEvent,
   MergeConflictField,
+  Tag,
 } from "@bondery/types";
 import { ContactActionMenu } from "./components/ContactActionMenu";
 import { ContactIdentitySection } from "./components/ContactIdentitySection";
@@ -52,6 +53,7 @@ import { revalidateContacts, revalidateRelationships } from "../../actions";
 import { openDeleteContactModal } from "@/app/(app)/app/components/contacts/openDeleteContactModal";
 import { openStandardConfirmModal } from "@/app/(app)/app/components/modals/openStandardConfirmModal";
 import { GroupCard } from "../../groups/components/GroupCard";
+import { PersonTagsInput } from "./components/PersonTagsInput";
 import { openAddPeopleToGroupSelectionModal } from "../../people/components/AddPeopleToGroupSelectionModal";
 import { MERGE_CONFLICT_FIELDS, openMergeWithModal } from "../../people/components/MergeWithModal";
 import { WEBSITE_URL } from "@/lib/config";
@@ -64,6 +66,8 @@ interface PersonClientProps {
   initialImportantEvents: ImportantEvent[];
   initialGroups: GroupType[];
   initialPersonGroups: GroupType[];
+  initialAllTags: Tag[];
+  initialPersonTags: Tag[];
   initialActivities: Activity[];
   personId: string;
 }
@@ -76,6 +80,8 @@ export default function PersonClient({
   initialImportantEvents,
   initialGroups,
   initialPersonGroups,
+  initialAllTags,
+  initialPersonTags,
   initialActivities = [],
   personId,
 }: PersonClientProps) {
@@ -106,6 +112,7 @@ export default function PersonClient({
       back: tMerge("Back"),
       merge: tMerge("Merge"),
       noConflicts: tMerge("NoConflicts"),
+      conflictHint: tMerge("ConflictHint"),
       processing: tMerge("Processing"),
       steps: {
         pick: tMerge("Steps.Pick"),
@@ -514,23 +521,11 @@ export default function PersonClient({
           ? addressEntries.find((entry) => entry.type === "home") || addressEntries[0]
           : null;
 
+      // Only update the addresses list — location fields are updated only after
+      // the user confirms the location update modal below.
       setContact((previous) => ({
         ...previous,
         addresses: payload.addresses,
-        place: preferredAddress?.value ?? null,
-        latitude: preferredAddress?.latitude ?? null,
-        longitude: preferredAddress?.longitude ?? null,
-        addressLine1: preferredAddress?.addressLine1 ?? null,
-        addressLine2: preferredAddress?.addressLine2 ?? null,
-        addressCity: preferredAddress?.addressCity ?? null,
-        addressPostalCode: preferredAddress?.addressPostalCode ?? null,
-        addressState: preferredAddress?.addressState ?? null,
-        addressStateCode: preferredAddress?.addressStateCode ?? null,
-        addressCountry: preferredAddress?.addressCountry ?? null,
-        addressCountryCode: preferredAddress?.addressCountryCode ?? null,
-        addressGranularity: preferredAddress?.addressGranularity ?? "address",
-        addressFormatted: preferredAddress?.addressFormatted ?? null,
-        addressGeocodeSource: preferredAddress?.addressGeocodeSource ?? null,
       }));
 
       notifications.show(
@@ -571,9 +566,20 @@ export default function PersonClient({
 
               setContact((previous) => ({
                 ...previous,
-                place: payload.suggestedLocation?.place || previous.place,
-                latitude: payload.suggestedLocation?.latitude ?? previous.latitude,
-                longitude: payload.suggestedLocation?.longitude ?? previous.longitude,
+                place: preferredAddress?.value ?? null,
+                latitude: preferredAddress?.latitude ?? null,
+                longitude: preferredAddress?.longitude ?? null,
+                addressLine1: preferredAddress?.addressLine1 ?? null,
+                addressLine2: preferredAddress?.addressLine2 ?? null,
+                addressCity: preferredAddress?.addressCity ?? null,
+                addressPostalCode: preferredAddress?.addressPostalCode ?? null,
+                addressState: preferredAddress?.addressState ?? null,
+                addressStateCode: preferredAddress?.addressStateCode ?? null,
+                addressCountry: preferredAddress?.addressCountry ?? null,
+                addressCountryCode: preferredAddress?.addressCountryCode ?? null,
+                addressGranularity: preferredAddress?.addressGranularity ?? "address",
+                addressFormatted: preferredAddress?.addressFormatted ?? null,
+                addressGeocodeSource: preferredAddress?.addressGeocodeSource ?? null,
               }));
 
               notifications.show(
@@ -933,6 +939,12 @@ export default function PersonClient({
               contact={contact}
               connectedContacts={initialConnectedContacts || []}
               selectableContacts={initialSelectableContacts || []}
+            />
+
+            <PersonTagsInput
+              personId={personId}
+              initialTags={initialPersonTags}
+              allTags={initialAllTags}
             />
 
             <Stack gap="xs">

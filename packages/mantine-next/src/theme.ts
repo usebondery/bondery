@@ -6,6 +6,7 @@ import {
   MantineTheme,
   Modal,
   PillsInput,
+  Progress,
   Textarea,
   TextInput,
   Title,
@@ -50,6 +51,12 @@ export const bonderyTheme = createTheme({
     Input: {
       defaultProps: {
         variant: "filled",
+      },
+    },
+    Progress: {
+      defaultProps: {
+        radius: "xl",
+        transitionDuration: 500,
       },
     },
     CloseButton: {

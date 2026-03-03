@@ -2,6 +2,7 @@ import AdmZip from "adm-zip";
 import { parse as parseCsv } from "csv-parse/sync";
 import type { LinkedInPreparedContact } from "@bondery/types";
 import { SOCIAL_PLATFORM_URL_DETAILS } from "@bondery/helpers";
+import { stripEmojis, stripNameTitles, extractNameParts } from "@bondery/helpers/name-utils";
 
 const LINKEDIN_REQUIRED_HEADERS = [
   "First Name",
@@ -30,43 +31,6 @@ type RawLinkedInCsvRow = {
   "Connected On": string;
 };
 
-const NAME_TITLE_TOKENS = new Set([
-  "doc",
-  "doc.",
-  "ing",
-  "ing.",
-  "bc",
-  "bc.",
-  "mgr",
-  "mgr.",
-  "judr",
-  "judr.",
-  "mudr",
-  "mudr.",
-  "rndr",
-  "rndr.",
-  "phdr",
-  "phdr.",
-  "phd",
-  "ph.d",
-  "ph.d.",
-  "dphil",
-  "dr",
-  "dr.",
-  "prof",
-  "prof.",
-  "mba",
-  "ma",
-  "msc",
-  "bsc",
-  "cpa",
-  "esq",
-  "esq.",
-  "jd",
-  "md",
-  "dds",
-]);
-
 function normalizeHeader(value: string): string {
   return value.replace(/^\uFEFF/, "").trim();
 }
@@ -78,51 +42,6 @@ function normalizeNullableString(value: string | null | undefined): string | nul
 
   const trimmed = value.trim();
   return trimmed.length > 0 ? trimmed : null;
-}
-
-function normalizeNameToken(token: string): string {
-  return token.trim().replace(/,$/, "").toLowerCase();
-}
-
-function stripNameTitles(rawName: string): string {
-  const words = rawName.split(/\s+/).filter(Boolean);
-  if (words.length === 0) {
-    return "";
-  }
-
-  let start = 0;
-  let end = words.length - 1;
-
-  while (start <= end && NAME_TITLE_TOKENS.has(normalizeNameToken(words[start]))) {
-    start += 1;
-  }
-
-  while (end >= start && NAME_TITLE_TOKENS.has(normalizeNameToken(words[end]))) {
-    end -= 1;
-  }
-
-  return words
-    .slice(start, end + 1)
-    .join(" ")
-    .trim();
-}
-
-function extractNameParts(lastNameInput: string): { middleName: string | null; lastName: string } {
-  const normalized = normalizeNullableString(lastNameInput) || "";
-  const words = normalized.split(/\s+/).filter(Boolean);
-
-  if (words.length === 0) {
-    return { middleName: null, lastName: "" };
-  }
-
-  if (words.length === 1) {
-    return { middleName: null, lastName: words[0] };
-  }
-
-  return {
-    middleName: words[words.length - 2],
-    lastName: words[words.length - 1],
-  };
 }
 
 function parseLinkedInUsername(rawUrl: string): { username: string | null; normalizedUrl: string } {
@@ -285,8 +204,12 @@ export function parseLinkedInCsvUpload(files: UploadFile[]): LinkedInPreparedCon
   }
 
   return parsedRows.map((row, index) => {
-    const firstName = stripNameTitles(normalizeNullableString(row["First Name"]) || "");
+    const firstName = stripEmojis(
+      stripNameTitles(normalizeNullableString(row["First Name"]) || ""),
+    );
     const nameParts = extractNameParts(stripNameTitles(row["Last Name"] || ""));
+    const cleanedMiddleName = nameParts.middleName ? stripEmojis(nameParts.middleName) : null;
+    const cleanedLastName = stripEmojis(nameParts.lastName);
     const { username: linkedinUsername, normalizedUrl } = parseLinkedInUsername(row.URL || "");
     const email = normalizeNullableString(row["Email Address"]);
     const company = normalizeNullableString(row.Company);
@@ -300,7 +223,7 @@ export function parseLinkedInCsvUpload(files: UploadFile[]): LinkedInPreparedCon
       issues.push("Missing first name");
     }
 
-    if (!nameParts.lastName) {
+    if (!cleanedLastName) {
       issues.push("Missing last name");
     }
 
@@ -311,8 +234,8 @@ export function parseLinkedInCsvUpload(files: UploadFile[]): LinkedInPreparedCon
     return {
       tempId: `linkedin-row-${index + 1}`,
       firstName,
-      middleName: nameParts.middleName,
-      lastName: nameParts.lastName,
+      middleName: cleanedMiddleName || null,
+      lastName: cleanedLastName,
       linkedinUrl: normalizedUrl,
       linkedinUsername: linkedinUsername || "",
       alreadyExists: false,
