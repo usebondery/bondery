@@ -112,6 +112,10 @@ export interface DataTableLabels {
   selectedCountTemplate?: string;
   /** Template for total count (e.g., "{count} total items") */
   totalCountTemplate?: string;
+  /** Template for "select all" link (e.g., "Select all {count} people") */
+  selectAllTotalTemplate?: string;
+  /** Template for "clear all" link shown when all pages are selected (e.g., "Clear selection ({count} people)") */
+  clearAllTotalTemplate?: string;
   /** Labels for column visibility menu */
   columnVisibility: ColumnVisibilityLabels;
   /** Labels for sort menu */

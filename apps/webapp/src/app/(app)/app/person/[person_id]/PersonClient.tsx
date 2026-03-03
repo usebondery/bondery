@@ -37,7 +37,7 @@ import { ContactRelationshipsSection } from "./components/ContactRelationshipsSe
 import { ContactNotesSection } from "./components/ContactNotesSection";
 import { ContactAddressSection } from "./components/ContactAddressSection";
 import { ContactImportantDatesSection } from "./components/ContactImportantDatesSection";
-import { PersonTimelineSection } from "./components/PersonTimelineSection";
+import { PersonInteractionsSection } from "./components/PersonInteractionsSection";
 // import { ContactPGPSection } from "./components/ContactPGPSection";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
@@ -934,7 +934,7 @@ export default function PersonClient({
 
             <ContactNotesSection editor={editor} savingField={savingField} />
 
-            <PersonTimelineSection
+            <PersonInteractionsSection
               activities={initialActivities}
               contact={contact}
               connectedContacts={initialConnectedContacts || []}

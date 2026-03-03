@@ -87,6 +87,8 @@ export function PeopleClient({ initialContacts, totalCount, layout = "stack" }: 
   const initialSort = (searchParams.get("sort") as SortOrder) || "nameAsc";
 
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [isAllTotalSelected, setIsAllTotalSelected] = useState(false);
+  const [excludedIds, setExcludedIds] = useState<Set<string>>(new Set());
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [contacts, setContacts] = useState<Contact[]>(initialContacts);
   const [loadedCount, setLoadedCount] = useState(initialContacts.length);
@@ -135,6 +137,8 @@ export function PeopleClient({ initialContacts, totalCount, layout = "stack" }: 
     setLoadedCount(initialContacts.length);
     setTotalAvailableCount(totalCount);
     setSelectedIds(new Set());
+    setIsAllTotalSelected(false);
+    setExcludedIds(new Set());
     setLastSelectedIndex(null);
   }, [initialContacts, totalCount]);
 
@@ -166,9 +170,12 @@ export function PeopleClient({ initialContacts, totalCount, layout = "stack" }: 
       contactName,
       onDeleted: async () => {
         setSelectedIds(new Set());
-        setContacts((prev) => prev.filter((contact) => contact.id !== contactId));
-        setLoadedCount((prev) => Math.max(0, prev - 1));
-        setTotalAvailableCount((prev) => Math.max(0, prev - 1));
+        const remaining = contacts.filter((contact) => contact.id !== contactId);
+        const newTotal = Math.max(0, totalAvailableCount - 1);
+        const refilled = await refillToPageSize(remaining, newTotal);
+        setContacts(refilled);
+        setLoadedCount(refilled.length);
+        setTotalAvailableCount(newTotal);
         await revalidateContacts();
         router.refresh();
       },
@@ -196,6 +203,13 @@ export function PeopleClient({ initialContacts, totalCount, layout = "stack" }: 
   };
 
   const handleSelectAll = () => {
+    if (isAllTotalSelected) {
+      // In filter-mode: clear everything
+      setIsAllTotalSelected(false);
+      setExcludedIds(new Set());
+      setSelectedIds(new Set());
+      return;
+    }
     if (selectedIds.size === contacts.length) {
       setSelectedIds(new Set());
     } else {
@@ -203,8 +217,57 @@ export function PeopleClient({ initialContacts, totalCount, layout = "stack" }: 
     }
   };
 
+  /**
+   * After deleting contacts, if the loaded list drops below PAGE_SIZE and more
+   * contacts remain in the system, automatically fetch enough to fill back up.
+   */
+  const refillToPageSize = async (remaining: Contact[], newTotal: number): Promise<Contact[]> => {
+    const PAGE_SIZE = 50;
+    const needed = Math.min(PAGE_SIZE - remaining.length, newTotal - remaining.length);
+    if (needed <= 0) return remaining;
+
+    try {
+      const params = new URLSearchParams();
+      params.set("limit", String(needed));
+      params.set("offset", String(remaining.length));
+      if (initialSearch) params.set("q", initialSearch);
+      if (initialSort) params.set("sort", initialSort);
+
+      const res = await fetch(`${API_ROUTES.CONTACTS}?${params.toString()}`);
+      if (!res.ok) return remaining;
+
+      const data = await res.json();
+      const extra = (data.contacts || []) as Contact[];
+      const existingIds = new Set(remaining.map((c) => c.id));
+      const uniqueExtra = extra.filter((c) => !existingIds.has(c.id));
+      return [...remaining, ...uniqueExtra];
+    } catch {
+      return remaining;
+    }
+  };
+
   const handleSelectOne = (id: string, options?: { shiftKey?: boolean; index?: number }) => {
     const currentIndex = options?.index ?? contacts.findIndex((contact) => contact.id === id);
+
+    // In filter-mode, toggle via excludedIds instead of selectedIds.
+    if (isAllTotalSelected) {
+      const newExcluded = new Set(excludedIds);
+      if (newExcluded.has(id)) {
+        newExcluded.delete(id);
+      } else {
+        newExcluded.add(id);
+      }
+      // If every single item was excluded, auto-clear filter mode.
+      if (newExcluded.size >= totalAvailableCount) {
+        setIsAllTotalSelected(false);
+        setExcludedIds(new Set());
+        setSelectedIds(new Set());
+      } else {
+        setExcludedIds(newExcluded);
+      }
+      if (currentIndex >= 0) setLastSelectedIndex(currentIndex);
+      return;
+    }
 
     if (options?.shiftKey && lastSelectedIndex !== null && currentIndex >= 0) {
       const shouldSelect = !selectedIds.has(id);
@@ -267,7 +330,11 @@ export function PeopleClient({ initialContacts, totalCount, layout = "stack" }: 
       const data = await response.json();
       const fetchedContacts = (data.contacts || []) as Contact[];
 
-      setContacts((prev) => [...prev, ...fetchedContacts]);
+      setContacts((prev) => {
+        const existingIds = new Set(prev.map((c) => c.id));
+        const uniqueNew = fetchedContacts.filter((c) => !existingIds.has(c.id));
+        return [...prev, ...uniqueNew];
+      });
       setLoadedCount((prev) => prev + fetchedContacts.length);
       if (Number.isFinite(data.totalCount)) {
         setTotalAvailableCount(data.totalCount);
@@ -286,20 +353,45 @@ export function PeopleClient({ initialContacts, totalCount, layout = "stack" }: 
 
   const handleDeleteSelected = (ids: string[]) => {
     openDeleteContactsModal({
-      contactIds: ids,
-      onDeleted: async () => {
+      contactIds: isAllTotalSelected ? [] : ids,
+      filterPayload: isAllTotalSelected
+        ? {
+            filter: { q: initialSearch || undefined, sort: initialSort || undefined },
+            excludeIds: Array.from(excludedIds),
+          }
+        : undefined,
+      onDeleted: async (deletedCount?: number) => {
+        const removedCount = deletedCount ?? ids.length;
+        setIsAllTotalSelected(false);
+        setExcludedIds(new Set());
         setSelectedIds(new Set());
-        setContacts((prev) => prev.filter((contact) => !ids.includes(contact.id)));
-        setLoadedCount((prev) => Math.max(0, prev - ids.length));
-        setTotalAvailableCount((prev) => Math.max(0, prev - ids.length));
+        const remaining = isAllTotalSelected
+          ? contacts.filter((c) => excludedIds.has(c.id))
+          : contacts.filter((contact) => !ids.includes(contact.id));
+        const newTotal = Math.max(0, totalAvailableCount - removedCount);
+        const refilled = await refillToPageSize(remaining, newTotal);
+        setContacts(refilled);
+        setLoadedCount(refilled.length);
+        setTotalAvailableCount(newTotal);
         await revalidateContacts();
         router.refresh();
       },
     });
   };
 
-  const allSelected = contacts.length > 0 && selectedIds.size === contacts.length;
-  const someSelected = selectedIds.size > 0 && selectedIds.size < contacts.length;
+  /** Instant: flip the sentinel flag — no network call. */
+  const handleSelectAllTotal = () => {
+    setIsAllTotalSelected(true);
+    setExcludedIds(new Set());
+    // Keep selectedIds as-is; DataTable will use allTotalSelected for rendering.
+  };
+
+  const allSelected = isAllTotalSelected
+    ? contacts.length > 0 && contacts.every((c) => !excludedIds.has(c.id))
+    : contacts.length > 0 && contacts.every((c) => selectedIds.has(c.id));
+  const someSelected = isAllTotalSelected
+    ? !allSelected && excludedIds.size < totalAvailableCount
+    : !allSelected && selectedIds.size > 0;
 
   const WrapperComponent = layout === "container" ? Group : Stack;
 
@@ -365,6 +457,12 @@ export function PeopleClient({ initialContacts, totalCount, layout = "stack" }: 
               loading: isLoadingMore,
             }}
             hasMoreToLoad={contacts.length < totalAvailableCount}
+            totalCount={totalAvailableCount}
+            onSelectAllTotal={
+              contacts.length < totalAvailableCount ? handleSelectAllTotal : undefined
+            }
+            isAllTotalSelected={isAllTotalSelected}
+            excludedIds={excludedIds}
           />
         </Paper>
       </WrapperComponent>

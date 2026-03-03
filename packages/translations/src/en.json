@@ -476,9 +476,9 @@
     },
     "Empty": "No contacts are linked to this group yet."
   },
-  "TimelinePage": {
-    "PageTitle": "Timeline",
-    "HeaderDescription": "View a log of all past interactions with your connections.",
+  "InteractionsPage": {
+    "PageTitle": "Interactions",
+    "HeaderDescription": "View a timeline of all past interactions with your connections.",
     "WhoAreYouMeeting": "Add an interaction",
     "Title": "Title",
     "TitlePlaceholder": "Interaction title",
@@ -486,7 +486,7 @@
     "AddParticipantsPlaceholder": "Add participants...",
     "NoContactsFound": "No contacts found",
     "AlreadySelected": "already selected",
-    "TimelineView": "Timeline",
+    "TimelineView": "Interactions",
     "TableView": "Table",
     "Note": "Notes",
     "DescriptionPlaceholder": "Any relevant information about the interaction. That can be anything like what you talked about, important moments, URLs to photo albums...",

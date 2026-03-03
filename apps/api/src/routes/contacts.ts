@@ -8,22 +8,14 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { requireAuth } from "../lib/supabase.js";
 import { generateVCard } from "../lib/vcard.js";
 import {
-  attachContactChannels,
   parseEmailEntries,
   parsePhoneEntries,
   replaceContactEmails,
   replaceContactPhones,
 } from "../lib/contact-channels.js";
-import {
-  attachContactAddresses,
-  parseAddressEntries,
-  replaceContactAddresses,
-} from "../lib/contact-addresses.js";
-import {
-  attachContactSocialMedia,
-  findPersonIdBySocialMedia,
-  upsertContactSocialMedia,
-} from "../lib/social-media.js";
+import { parseAddressEntries, replaceContactAddresses } from "../lib/contact-addresses.js";
+import { findPersonIdBySocialMedia, upsertContactSocialMedia } from "../lib/social-media.js";
+import { attachAllContactExtras } from "../lib/contact-enrichment.js";
 import { GROUP_SELECT } from "./groups.js";
 import { TAG_SELECT } from "./tags.js";
 import type {
@@ -979,43 +971,16 @@ export async function contactRoutes(fastify: FastifyInstance) {
         return reply.status(500).send({ error: error.message });
       }
 
-      let contactsWithChannels = [] as Awaited<ReturnType<typeof attachContactChannels>>;
+      let enrichedContacts = [] as Awaited<ReturnType<typeof attachAllContactExtras>>;
       try {
-        contactsWithChannels = await attachContactChannels(client, user.id, contacts || []);
-      } catch (channelError) {
-        fastify.log.error({ channelError }, "Failed to attach contact channels for contact list");
-        contactsWithChannels = withEmptyChannels(contacts || []);
-      }
-
-      let contactsWithAddresses = [] as Awaited<
-        ReturnType<typeof attachContactAddresses<(typeof contactsWithChannels)[number]>>
-      >;
-      try {
-        contactsWithAddresses = await attachContactAddresses(client, user.id, contactsWithChannels);
-      } catch (addressError) {
-        fastify.log.error({ addressError }, "Failed to attach contact addresses for contact list");
-        contactsWithAddresses = contactsWithChannels.map((contact) => ({
-          ...contact,
-          addresses: [],
-        }));
-      }
-
-      let contactsWithSocialMedia = [] as Awaited<
-        ReturnType<typeof attachContactSocialMedia<(typeof contactsWithAddresses)[number]>>
-      >;
-      try {
-        contactsWithSocialMedia = await attachContactSocialMedia(
-          client,
-          user.id,
-          contactsWithAddresses,
-        );
-      } catch (socialError) {
-        fastify.log.error({ socialError }, "Failed to attach social media for contact list");
-        contactsWithSocialMedia = withEmptySocialMedia(contactsWithAddresses);
+        enrichedContacts = await attachAllContactExtras(client, user.id, contacts || []);
+      } catch (enrichError) {
+        fastify.log.error({ enrichError }, "Failed to attach contact extras for contact list");
+        enrichedContacts = withEmptySocialMedia(withEmptyChannels(contacts || []));
       }
 
       return {
-        contacts: contactsWithSocialMedia,
+        contacts: enrichedContacts,
         totalCount: typeof count === "number" ? count : contactsWithSocialMedia.length,
         stats: {
           totalContacts: totalContactsCount || 0,
@@ -1206,6 +1171,7 @@ export async function contactRoutes(fastify: FastifyInstance) {
 
   /**
    * DELETE /api/contacts - Delete multiple contacts
+   * Accepts either { ids: string[] } or { filter: ContactsFilter, excludeIds?: string[] }.
    */
   fastify.delete(
     "/",
@@ -1214,15 +1180,53 @@ export async function contactRoutes(fastify: FastifyInstance) {
       if (!auth) return;
 
       const { client, user } = auth;
-      const { ids } = request.body;
+      const body = request.body;
 
-      if (!Array.isArray(ids) || ids.length === 0) {
+      let uniqueIds: string[];
+
+      // Resolve the list of IDs to delete — either provided directly or via filter.
+      if ("ids" in body && Array.isArray(body.ids)) {
+        if (body.ids.length === 0) {
+          return reply.status(400).send({
+            error: "Invalid request body. 'ids' must be a non-empty array.",
+          });
+        }
+        uniqueIds = Array.from(new Set(body.ids.filter(Boolean)));
+      } else if ("filter" in body && body.filter) {
+        // Build the same Supabase query used by GET /contacts, but only select IDs.
+        let filterQuery = client
+          .from("people")
+          .select("id")
+          .eq("user_id", user.id)
+          .eq("myself", false);
+
+        const search = typeof body.filter.q === "string" ? body.filter.q.trim() : "";
+        if (search) {
+          const searchTokens = search.split(/\s+/).filter(Boolean);
+          for (const token of searchTokens) {
+            filterQuery = filterQuery.or(`first_name.ilike.%${token}%,last_name.ilike.%${token}%`);
+          }
+        }
+
+        const { data: rows, error: filterError } = await filterQuery;
+
+        if (filterError) {
+          return reply.status(500).send({ error: filterError.message });
+        }
+
+        const excludeSet = new Set(body.excludeIds ?? []);
+        uniqueIds = (rows || [])
+          .map((r: { id: string }) => r.id)
+          .filter((id: string) => !excludeSet.has(id));
+
+        if (uniqueIds.length === 0) {
+          return { message: "No contacts matched the filter" };
+        }
+      } else {
         return reply.status(400).send({
-          error: "Invalid request body. 'ids' must be a non-empty array.",
+          error: "Invalid request body. Provide either 'ids' or 'filter'.",
         });
       }
-
-      const uniqueIds = Array.from(new Set(ids.filter(Boolean)));
 
       try {
         await deleteOrphanedInteractionsForDeletedContacts(client, user.id, uniqueIds);
@@ -1244,7 +1248,7 @@ export async function contactRoutes(fastify: FastifyInstance) {
         return reply.status(500).send({ error: error.message });
       }
 
-      return { message: "Contacts deleted successfully" };
+      return { message: "Contacts deleted successfully", deletedCount: uniqueIds.length };
     },
   );
 
@@ -1379,39 +1383,18 @@ export async function contactRoutes(fastify: FastifyInstance) {
         return reply.status(500).send({ error: personRowsError.message });
       }
 
-      let contactsWithChannels = [] as Awaited<ReturnType<typeof attachContactChannels>>;
+      let enrichedContacts = [] as Awaited<ReturnType<typeof attachAllContactExtras>>;
       try {
-        contactsWithChannels = await attachContactChannels(client, user.id, personRows || []);
-      } catch (channelError) {
-        fastify.log.error({ channelError }, "Failed to attach channels for merge recommendations");
-        contactsWithChannels = withEmptyChannels(personRows || []);
-      }
-
-      let contactsWithAddresses = [] as Awaited<
-        ReturnType<typeof attachContactAddresses<(typeof contactsWithChannels)[number]>>
-      >;
-      try {
-        contactsWithAddresses = await attachContactAddresses(client, user.id, contactsWithChannels);
-      } catch (addressError) {
-        fastify.log.error({ addressError }, "Failed to attach addresses for merge recommendations");
-        contactsWithAddresses = contactsWithChannels.map((contact) => ({
-          ...contact,
-          addresses: [],
-        }));
-      }
-
-      let contacts = [] as Awaited<
-        ReturnType<typeof attachContactSocialMedia<(typeof contactsWithAddresses)[number]>>
-      >;
-      try {
-        contacts = await attachContactSocialMedia(client, user.id, contactsWithAddresses);
-      } catch (socialError) {
+        enrichedContacts = await attachAllContactExtras(client, user.id, personRows || []);
+      } catch (enrichError) {
         fastify.log.error(
-          { socialError },
-          "Failed to attach social media for merge recommendations",
+          { enrichError },
+          "Failed to attach contact extras for merge recommendations",
         );
-        contacts = withEmptySocialMedia(contactsWithAddresses);
+        enrichedContacts = withEmptySocialMedia(withEmptyChannels(personRows || []));
       }
+
+      const contacts = enrichedContacts;
 
       const contactsById = new Map(contacts.map((contact) => [contact.id, contact]));
 
@@ -1785,6 +1768,16 @@ export async function contactRoutes(fastify: FastifyInstance) {
           .map((row) => [row.platform, row]),
       );
 
+      // Batch social media writes: collect inserts and updates, then execute in parallel
+      const socialInserts: Array<{
+        user_id: string;
+        person_id: string;
+        platform: string;
+        handle: string;
+        connected_at: string | null;
+      }> = [];
+      const socialUpdatePromises: Array<Promise<unknown>> = [];
+
       for (const [field, platform] of Object.entries(MERGEABLE_SOCIAL_FIELDS)) {
         const leftSocial = leftSocialByPlatform.get(platform);
         const rightSocial = rightSocialByPlatform.get(platform);
@@ -1794,20 +1787,13 @@ export async function contactRoutes(fastify: FastifyInstance) {
         }
 
         if (!leftSocial) {
-          const { error: insertSocialError } = await client.from("people_social_media").insert({
+          socialInserts.push({
             user_id: user.id,
             person_id: leftPersonId,
             platform,
             handle: rightSocial.handle,
             connected_at: rightSocial.connected_at,
           });
-
-          if (insertSocialError) {
-            if (insertSocialError.code !== "23505") {
-              return reply.status(500).send({ error: insertSocialError.message });
-            }
-          }
-
           continue;
         }
 
@@ -1820,18 +1806,44 @@ export async function contactRoutes(fastify: FastifyInstance) {
           continue;
         }
 
-        const { error: updateSocialError } = await client
-          .from("people_social_media")
-          .update({
-            handle: rightSocial.handle,
-            connected_at: rightSocial.connected_at,
-            updated_at: new Date().toISOString(),
-          })
-          .eq("id", leftSocial.id)
-          .eq("user_id", user.id);
+        socialUpdatePromises.push(
+          client
+            .from("people_social_media")
+            .update({
+              handle: rightSocial.handle,
+              connected_at: rightSocial.connected_at,
+              updated_at: new Date().toISOString(),
+            })
+            .eq("id", leftSocial.id)
+            .eq("user_id", user.id),
+        );
+      }
 
-        if (updateSocialError) {
-          return reply.status(500).send({ error: updateSocialError.message });
+      // Execute all social media writes in parallel
+      const socialWriteResults = await Promise.allSettled([
+        ...(socialInserts.length > 0
+          ? [client.from("people_social_media").insert(socialInserts)]
+          : []),
+        ...socialUpdatePromises,
+      ]);
+
+      // Check for non-duplicate errors
+      for (const result of socialWriteResults) {
+        if (result.status === "rejected") {
+          return reply
+            .status(500)
+            .send({ error: result.reason?.message ?? "Social media merge failed" });
+        }
+        if (
+          result.status === "fulfilled" &&
+          result.value &&
+          typeof result.value === "object" &&
+          "error" in result.value
+        ) {
+          const err = (result.value as { error: { code?: string; message: string } | null }).error;
+          if (err && err.code !== "23505") {
+            return reply.status(500).send({ error: err.message });
+          }
         }
       }
 
@@ -1985,38 +1997,46 @@ export async function contactRoutes(fastify: FastifyInstance) {
         return reply.status(500).send({ error: relationshipsToTransferError.message });
       }
 
-      for (const relationship of relationshipsToTransfer || []) {
-        const nextSourcePersonId =
-          relationship.source_person_id === rightPersonId
-            ? leftPersonId
-            : relationship.source_person_id;
-        const nextTargetPersonId =
-          relationship.target_person_id === rightPersonId
-            ? leftPersonId
-            : relationship.target_person_id;
+      // Bulk insert relationship transfers instead of per-row inserts
+      const relationshipRows = (relationshipsToTransfer || [])
+        .map((relationship) => {
+          const nextSourcePersonId =
+            relationship.source_person_id === rightPersonId
+              ? leftPersonId
+              : relationship.source_person_id;
+          const nextTargetPersonId =
+            relationship.target_person_id === rightPersonId
+              ? leftPersonId
+              : relationship.target_person_id;
 
-        if (nextSourcePersonId === nextTargetPersonId) {
-          continue;
-        }
+          // Filter out self-referential relationships
+          if (nextSourcePersonId === nextTargetPersonId) {
+            return null;
+          }
 
-        const { error: insertRelationshipError } = await client
-          .from("people_relationships")
-          .insert({
+          return {
             user_id: user.id,
             source_person_id: nextSourcePersonId,
             target_person_id: nextTargetPersonId,
             relationship_type: relationship.relationship_type,
-          });
+          };
+        })
+        .filter((row): row is NonNullable<typeof row> => row !== null);
 
-        if (insertRelationshipError) {
-          if (
-            insertRelationshipError.code === "23505" ||
-            insertRelationshipError.code === "23514"
-          ) {
-            continue;
+      if (relationshipRows.length > 0) {
+        // Use Promise.allSettled to handle individual constraint violations gracefully
+        const results = await Promise.allSettled(
+          relationshipRows.map((row) => client.from("people_relationships").insert(row)),
+        );
+
+        for (const result of results) {
+          if (result.status === "fulfilled" && result.value.error) {
+            const err = result.value.error;
+            // 23505 = unique violation, 23514 = check constraint — both are expected and skippable
+            if (err.code !== "23505" && err.code !== "23514") {
+              return reply.status(500).send({ error: err.message });
+            }
           }
-
-          return reply.status(500).send({ error: insertRelationshipError.message });
         }
       }
 
@@ -2118,14 +2138,8 @@ export async function contactRoutes(fastify: FastifyInstance) {
       }
 
       try {
-        const [contactWithChannels] = await attachContactChannels(client, user.id, [contact]);
-        const [contactWithAddresses] = await attachContactAddresses(client, user.id, [
-          contactWithChannels,
-        ]);
-        const [contactWithSocialMedia] = await attachContactSocialMedia(client, user.id, [
-          contactWithAddresses,
-        ]);
-        return { contact: contactWithSocialMedia };
+        const [enrichedContact] = await attachAllContactExtras(client, user.id, [contact]);
+        return { contact: enrichedContact };
       } catch (channelError) {
         fastify.log.error(
           { channelError },
@@ -2938,36 +2952,45 @@ export async function contactRoutes(fastify: FastifyInstance) {
         }
 
         if (nextPhones !== undefined) {
-          await replaceContactPhones(client, user.id, id, nextPhones);
-        }
-
-        if (nextEmails !== undefined) {
-          await replaceContactEmails(client, user.id, id, nextEmails);
-        }
-
-        if (nextAddresses !== undefined) {
           request.log.info(
             {
               route: "PATCH /contacts/:id",
               personId: id,
-              addresses: nextAddresses.map((entry) => ({
+              addresses: nextAddresses?.map((entry) => ({
                 type: entry.type,
                 value: entry.value,
                 latitude: entry.latitude,
                 longitude: entry.longitude,
               })),
             },
-            "Upserting contact addresses",
+            "Upserting contact channels",
           );
-          await replaceContactAddresses(client, user.id, id, nextAddresses);
         }
 
+        // Run all replace operations in parallel — they operate on independent tables
+        const parallelOps: Promise<void>[] = [];
+
+        if (nextPhones !== undefined) {
+          parallelOps.push(replaceContactPhones(client, user.id, id, nextPhones));
+        }
+        if (nextEmails !== undefined) {
+          parallelOps.push(replaceContactEmails(client, user.id, id, nextEmails));
+        }
+        if (nextAddresses !== undefined) {
+          parallelOps.push(replaceContactAddresses(client, user.id, id, nextAddresses));
+        }
         if (socialMediaUpdates.length > 0) {
-          await Promise.all(
-            socialMediaUpdates.map((entry) =>
-              upsertContactSocialMedia(client, user.id, id, entry.platform, entry.handle),
-            ),
+          parallelOps.push(
+            Promise.all(
+              socialMediaUpdates.map((entry) =>
+                upsertContactSocialMedia(client, user.id, id, entry.platform, entry.handle),
+              ),
+            ).then(() => undefined),
           );
+        }
+
+        if (parallelOps.length > 0) {
+          await Promise.all(parallelOps);
         }
       } catch (channelError) {
         const message =
@@ -3105,6 +3128,7 @@ export async function contactRoutes(fastify: FastifyInstance) {
         .from("people")
         .select(CONTACT_SELECT)
         .eq("id", id)
+        .eq("user_id", user.id)
         .single();
 
       if (error || !contact) {
@@ -3113,14 +3137,8 @@ export async function contactRoutes(fastify: FastifyInstance) {
 
       let contactWithChannels: Contact;
       try {
-        const [mappedContact] = await attachContactChannels(client, user.id, [contact]);
-        const [mappedContactWithAddresses] = await attachContactAddresses(client, user.id, [
-          mappedContact,
-        ]);
-        const [mappedContactWithSocialMedia] = await attachContactSocialMedia(client, user.id, [
-          mappedContactWithAddresses,
-        ]);
-        contactWithChannels = mappedContactWithSocialMedia as Contact;
+        const [enrichedContact] = await attachAllContactExtras(client, user.id, [contact]);
+        contactWithChannels = enrichedContact as Contact;
       } catch (channelError) {
         fastify.log.error(
           { channelError },
@@ -3132,9 +3150,13 @@ export async function contactRoutes(fastify: FastifyInstance) {
       }
 
       // Generate vCard
-      const vcard = await generateVCard(contactWithChannels);
-
-      console.log("Generated vCard:\n", vcard);
+      let vcard: string;
+      try {
+        vcard = await generateVCard(contactWithChannels);
+      } catch (vcardError) {
+        fastify.log.error({ vcardError }, "Failed to generate vCard");
+        return reply.status(500).send({ error: "Failed to generate vCard" });
+      }
 
       // Create filename
       const firstName = contact.firstName || "contact";

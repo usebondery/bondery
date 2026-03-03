@@ -5,8 +5,7 @@
 
 import type { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
 import { requireAuth } from "../lib/supabase.js";
-import { attachContactChannels } from "../lib/contact-channels.js";
-import { attachContactSocialMedia } from "../lib/social-media.js";
+import { attachContactChannelsAndSocial } from "../lib/contact-enrichment.js";
 import type {
   Group,
   GroupWithCount,
@@ -438,29 +437,18 @@ export async function groupRoutes(fastify: FastifyInstance) {
         };
       }
 
-      let contactsWithChannels = contacts;
+      let enrichedContacts = contacts;
       try {
-        contactsWithChannels = await attachContactChannels(client, user.id, contacts || []);
-      } catch (channelError) {
-        fastify.log.error({ channelError }, "Failed to attach contact channels for group contacts");
-        contactsWithChannels = (contacts || []).map((contact) => ({
+        enrichedContacts = await attachContactChannelsAndSocial(client, user.id, contacts || []);
+      } catch (enrichError) {
+        fastify.log.error(
+          { enrichError },
+          "Failed to attach contact channels/social media for group contacts",
+        );
+        enrichedContacts = (contacts || []).map((contact) => ({
           ...contact,
           phones: [],
           emails: [],
-        }));
-      }
-
-      let contactsWithSocialMedia = contactsWithChannels;
-      try {
-        contactsWithSocialMedia = await attachContactSocialMedia(
-          client,
-          user.id,
-          contactsWithChannels,
-        );
-      } catch (socialError) {
-        fastify.log.error({ socialError }, "Failed to attach social media for group contacts");
-        contactsWithSocialMedia = contactsWithChannels.map((contact) => ({
-          ...contact,
           linkedin: null,
           instagram: null,
           whatsapp: null,
@@ -472,7 +460,7 @@ export async function groupRoutes(fastify: FastifyInstance) {
 
       return {
         group: { id: group.id, label: group.label },
-        contacts: contactsWithSocialMedia,
+        contacts: enrichedContacts,
         totalCount,
       };
     },
@@ -484,7 +472,7 @@ export async function groupRoutes(fastify: FastifyInstance) {
   fastify.post(
     "/:id/contacts",
     async (
-      request: FastifyRequest<{ Params: { id: string }; Body: GroupMembershipRequest }>,
+      request: FastifyRequest<{ Params: { id: string }; Body: { personIds: string[] } }>,
       reply: FastifyReply,
     ) => {
       const auth = await requireAuth(request, reply);
@@ -533,6 +521,7 @@ export async function groupRoutes(fastify: FastifyInstance) {
 
   /**
    * DELETE /api/groups/:id/contacts - Remove contacts from a group
+   * Accepts either { personIds: string[] } or { filter: ContactsFilter, excludePersonIds?: string[] }.
    */
   fastify.delete(
     "/:id/contacts",
@@ -545,11 +534,50 @@ export async function groupRoutes(fastify: FastifyInstance) {
 
       const { client } = auth;
       const { id: groupId } = request.params;
-      const { personIds } = request.body;
+      const body = request.body;
 
-      if (!Array.isArray(personIds) || personIds.length === 0) {
+      let personIds: string[];
+
+      if ("personIds" in body && Array.isArray(body.personIds)) {
+        if (body.personIds.length === 0) {
+          return reply.status(400).send({
+            error: "Invalid request body. 'personIds' must be a non-empty array.",
+          });
+        }
+        personIds = body.personIds;
+      } else if ("filter" in body && body.filter) {
+        // Resolve matching member IDs via the same query pattern as GET /groups/:id/contacts.
+        let filterQuery = client
+          .from("people")
+          .select("id, people_groups!inner(group_id)")
+          .eq("myself", false)
+          .eq("people_groups.group_id", groupId);
+
+        const search = typeof body.filter.q === "string" ? body.filter.q.trim() : "";
+        if (search) {
+          const searchTokens = search.split(/\s+/).filter(Boolean);
+          for (const token of searchTokens) {
+            filterQuery = filterQuery.or(`first_name.ilike.%${token}%,last_name.ilike.%${token}%`);
+          }
+        }
+
+        const { data: rows, error: filterError } = await filterQuery;
+
+        if (filterError) {
+          return reply.status(500).send({ error: filterError.message });
+        }
+
+        const excludeSet = new Set(body.excludePersonIds ?? []);
+        personIds = (rows || [])
+          .map((r: { id: string }) => r.id)
+          .filter((id: string) => !excludeSet.has(id));
+
+        if (personIds.length === 0) {
+          return { message: "No contacts matched the filter" };
+        }
+      } else {
         return reply.status(400).send({
-          error: "Invalid request body. 'personIds' must be a non-empty array.",
+          error: "Invalid request body. Provide either 'personIds' or 'filter'.",
         });
       }
 
@@ -563,7 +591,10 @@ export async function groupRoutes(fastify: FastifyInstance) {
         return reply.status(500).send({ error: error.message });
       }
 
-      return { message: "Contacts removed from group successfully" };
+      return {
+        message: "Contacts removed from group successfully",
+        removedCount: personIds.length,
+      };
     },
   );
 }

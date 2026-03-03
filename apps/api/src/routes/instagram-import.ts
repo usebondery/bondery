@@ -1,17 +1,17 @@
 import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import { requireAuth } from "../lib/supabase.js";
-import { findPersonIdBySocialMedia, upsertContactSocialMedia } from "../lib/social-media.js";
-import { parseInstagramExportUpload } from "../lib/instagram-import.js";
 import {
   assignContactsToDefaultImportGroup,
   toInstagramImportGroupKeys,
   type DefaultImportGroupKey,
 } from "../lib/default-import-groups.js";
+import { parseInstagramExportUpload } from "../lib/instagram-import.js";
 import type {
   InstagramImportCommitRequest,
   InstagramImportCommitResponse,
   InstagramImportStrategy,
   InstagramParseResponse,
+  InstagramPreparedContact,
 } from "@bondery/types";
 
 const SUPPORTED_STRATEGIES: InstagramImportStrategy[] = [
@@ -136,113 +136,172 @@ export async function instagramImportRoutes(fastify: FastifyInstance) {
       }
 
       const { client, user } = auth;
-      const contacts = Array.isArray(request.body?.contacts) ? request.body.contacts : [];
+      const rawContacts = Array.isArray(request.body?.contacts) ? request.body.contacts : [];
 
-      if (contacts.length === 0) {
+      if (rawContacts.length === 0) {
         return reply.status(400).send({ error: "No contacts provided" });
       }
 
-      let importedCount = 0;
-      let updatedCount = 0;
-      let skippedCount = 0;
-
+      // ── Pre-filter & deduplicate ────────────────────────────────────────────
       const seenHandles = new Set<string>();
-      const groupAssignments = new Map<DefaultImportGroupKey, Set<string>>();
+      const validContacts: InstagramPreparedContact[] = [];
 
-      for (const contact of contacts) {
-        if (!contact.isValid || !contact.instagramUsername) {
-          skippedCount += 1;
-          continue;
-        }
+      for (const contact of rawContacts) {
+        if (!contact.isValid || !contact.instagramUsername) continue;
 
         const handle = contact.instagramUsername.trim().toLowerCase();
-        if (!handle || seenHandles.has(handle)) {
-          skippedCount += 1;
-          continue;
-        }
+        if (!handle || seenHandles.has(handle)) continue;
 
         seenHandles.add(handle);
+        validContacts.push(contact);
+      }
 
-        try {
-          const existingPersonId = await findPersonIdBySocialMedia(
-            client,
-            user.id,
-            "instagram",
-            handle,
-          );
+      const skippedCount = rawContacts.length - validContacts.length;
 
-          let personId = existingPersonId;
+      if (validContacts.length === 0) {
+        return {
+          importedCount: 0,
+          updatedCount: 0,
+          skippedCount,
+        } satisfies InstagramImportCommitResponse;
+      }
 
-          if (!personId) {
-            const { data: createdPerson, error: createError } = await client
-              .from("people")
-              .insert({
-                user_id: user.id,
-                first_name: contact.firstName,
-                middle_name: contact.middleName,
-                last_name: contact.lastName,
-                myself: false,
-                last_interaction: new Date().toISOString(),
-              })
-              .select("id")
-              .single();
+      const now = new Date().toISOString();
 
-            if (createError || !createdPerson) {
-              skippedCount += 1;
-              continue;
-            }
+      // ── Step 1: Single bulk lookup for all existing person_ids by handle ────
+      const handles = validContacts.map((c) => c.instagramUsername.trim().toLowerCase());
 
-            personId = createdPerson.id;
-            importedCount += 1;
+      // Chunk handles to stay within Postgres IN-list limits
+      const handleToPersonId = new Map<string, string>();
 
-            const sources = Array.isArray(contact.sources) ? contact.sources : [];
-            const groupKeys = toInstagramImportGroupKeys(sources);
-            for (const groupKey of groupKeys) {
-              const groupMembers = groupAssignments.get(groupKey) ?? new Set<string>();
-              groupMembers.add(personId);
-              groupAssignments.set(groupKey, groupMembers);
-            }
-          } else {
-            const { error: updateError } = await client
-              .from("people")
-              .update({
-                first_name: contact.firstName,
-                middle_name: contact.middleName,
-                last_name: contact.lastName,
-              })
-              .eq("user_id", user.id)
-              .eq("id", personId);
+      for (let i = 0; i < handles.length; i += HANDLE_LOOKUP_CHUNK_SIZE) {
+        const chunk = handles.slice(i, i + HANDLE_LOOKUP_CHUNK_SIZE);
 
-            if (updateError) {
-              skippedCount += 1;
-              continue;
-            }
+        const { data: existingRows, error: lookupError } = await client
+          .from("people_social_media")
+          .select("handle, person_id")
+          .eq("user_id", user.id)
+          .eq("platform", "instagram")
+          .in("handle", chunk);
 
-            updatedCount += 1;
+        if (lookupError) {
+          return reply.status(500).send({ error: lookupError.message });
+        }
+
+        for (const row of existingRows ?? []) {
+          if (row.handle && row.person_id) {
+            handleToPersonId.set(row.handle.trim().toLowerCase(), row.person_id);
           }
-
-          await upsertContactSocialMedia(
-            client,
-            user.id,
-            personId,
-            "instagram",
-            handle,
-            contact.connectedAt,
-          );
-        } catch {
-          skippedCount += 1;
         }
       }
 
-      try {
-        for (const [groupKey, personIds] of groupAssignments.entries()) {
-          await assignContactsToDefaultImportGroup(
-            client,
-            user.id,
-            groupKey,
-            Array.from(personIds),
-          );
+      const toInsert = validContacts.filter(
+        (c) => !handleToPersonId.has(c.instagramUsername.trim().toLowerCase()),
+      );
+      const toUpdate = validContacts.filter((c) =>
+        handleToPersonId.has(c.instagramUsername.trim().toLowerCase()),
+      );
+
+      // ── Step 2a: Bulk insert new people ─────────────────────────────────────
+      let importedCount = 0;
+      const groupAssignments = new Map<DefaultImportGroupKey, Set<string>>();
+
+      if (toInsert.length > 0) {
+        const { data: insertedPeople, error: insertError } = await client
+          .from("people")
+          .insert(
+            toInsert.map((c) => ({
+              user_id: user.id,
+              first_name: c.firstName,
+              middle_name: c.middleName,
+              last_name: c.lastName,
+              myself: false,
+              last_interaction: now,
+            })),
+          )
+          .select("id");
+
+        if (insertError || !insertedPeople) {
+          return reply.status(500).send({ error: insertError?.message ?? "Insert failed" });
         }
+
+        // Map back: inserted rows come back in the same order as the input array
+        for (let i = 0; i < toInsert.length; i++) {
+          const inserted = insertedPeople[i];
+          if (inserted) {
+            const handle = toInsert[i].instagramUsername.trim().toLowerCase();
+            handleToPersonId.set(handle, inserted.id);
+
+            // Collect group assignments for newly imported contacts
+            const sources = Array.isArray(toInsert[i].sources) ? toInsert[i].sources : [];
+            const groupKeys = toInstagramImportGroupKeys(sources);
+            for (const groupKey of groupKeys) {
+              const members = groupAssignments.get(groupKey) ?? new Set<string>();
+              members.add(inserted.id);
+              groupAssignments.set(groupKey, members);
+            }
+          }
+        }
+
+        importedCount = insertedPeople.length;
+      }
+
+      // ── Step 2b: Concurrent update existing people ──────────────────────────
+      // Supabase doesn't support bulk UPDATE with different values per row,
+      // so we run individual updates concurrently (Promise.all) instead of sequentially.
+      let updatedCount = 0;
+
+      if (toUpdate.length > 0) {
+        const updateResults = await Promise.all(
+          toUpdate.map((c) =>
+            client
+              .from("people")
+              .update({
+                first_name: c.firstName,
+                middle_name: c.middleName,
+                last_name: c.lastName,
+              })
+              .eq("user_id", user.id)
+              .eq("id", handleToPersonId.get(c.instagramUsername.trim().toLowerCase())!),
+          ),
+        );
+
+        updatedCount = updateResults.filter((r) => !r.error).length;
+      }
+
+      // ── Step 3: Bulk upsert social media rows ──────────────────────────────
+      const socialRows = validContacts
+        .map((c) => {
+          const handle = c.instagramUsername.trim().toLowerCase();
+          const personId = handleToPersonId.get(handle);
+          if (!personId) return null;
+          return {
+            user_id: user.id,
+            person_id: personId,
+            platform: "instagram" as const,
+            handle,
+            connected_at: c.connectedAt ?? null,
+          };
+        })
+        .filter((row): row is NonNullable<typeof row> => row !== null);
+
+      if (socialRows.length > 0) {
+        const { error: socialUpsertError } = await client
+          .from("people_social_media")
+          .upsert(socialRows, { onConflict: "user_id,person_id,platform" });
+
+        if (socialUpsertError) {
+          return reply.status(500).send({ error: socialUpsertError.message });
+        }
+      }
+
+      // ── Step 4: Bulk group assignments (parallel per group key) ─────────────
+      try {
+        await Promise.all(
+          Array.from(groupAssignments.entries()).map(([groupKey, personIds]) =>
+            assignContactsToDefaultImportGroup(client, user.id, groupKey, Array.from(personIds)),
+          ),
+        );
       } catch (groupError) {
         const message =
           groupError instanceof Error ? groupError.message : "Failed to assign imported contacts";

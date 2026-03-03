@@ -17,7 +17,7 @@ import {
   ModalTitle,
   successNotificationTemplate,
 } from "@bondery/mantine-next";
-import { DatePickerWithPresets } from "../../components/timeline/DatePickerWithPresets";
+import { DatePickerWithPresets } from "../../components/interactions/DatePickerWithPresets";
 import { ACTIVITY_TYPE_OPTIONS } from "@/lib/activityTypes";
 import { getActivityTypeConfig } from "@/lib/activityTypes";
 

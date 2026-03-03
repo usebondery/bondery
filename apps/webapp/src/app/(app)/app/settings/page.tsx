@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { Stack } from "@mantine/core";
 import { getTranslations } from "next-intl/server";
 import { ProfileCard } from "./components/ProfileCard";
@@ -5,12 +6,15 @@ import { DataManagementCard } from "./components/DataManagementCard";
 import { API_URL } from "@/lib/config";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { getAuthHeaders } from "@/lib/authHeaders";
+
 import { ErrorPageHeader } from "@/app/(app)/app/components/ErrorPageHeader";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import { PageWrapper } from "../components/PageWrapper";
 import { PreferencesCard } from "./components/PreferencesCard";
 import { TagsSection } from "./components/TagsSection";
 import type { TagWithCount } from "@bondery/types";
+
+export const metadata: Metadata = { title: "Settings" };
 
 export default async function SettingsPage() {
   const headers = await getAuthHeaders();

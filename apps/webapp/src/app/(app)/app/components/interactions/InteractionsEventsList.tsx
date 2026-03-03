@@ -9,7 +9,7 @@ import { ActivityCard } from "./ActivityCard";
 
 const TIMELINE_BORDER_COLOR = "var(--mantine-color-default-border)";
 
-interface TimelineEventsListProps {
+interface InteractionsEventsListProps {
   activities: Activity[];
   resolveParticipants: (activity: Activity) => Contact[];
   editLabel: string;
@@ -25,7 +25,7 @@ interface TimelineEventsListProps {
  * Renders grouped activity cards in a Mantine Timeline.
  * Keeps home and timeline pages visually consistent.
  */
-export function TimelineEventsList({
+export function InteractionsEventsList({
   activities,
   resolveParticipants,
   editLabel,
@@ -35,7 +35,7 @@ export function TimelineEventsList({
   onEdit,
   onDuplicate,
   onDelete,
-}: TimelineEventsListProps) {
+}: InteractionsEventsListProps) {
   const groupedActivities = useMemo(() => {
     const groups: Record<string, Activity[]> = {};
 

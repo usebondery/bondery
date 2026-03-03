@@ -50,7 +50,7 @@ export const WEBAPP_ROUTES = {
   PEOPLE: "/app/people",
   FIX_CONTACTS: "/app/fix",
   GROUPS: "/app/groups",
-  TIMELINE: "/app/timeline",
+  INTERACTIONS: "/app/interactions",
   PERSON: "/app/person",
   SETTINGS: "/app/settings",
   ACCOUNT: "/app/account",

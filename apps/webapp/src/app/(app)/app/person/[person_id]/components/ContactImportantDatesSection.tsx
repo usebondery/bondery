@@ -17,7 +17,7 @@ import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import type { ImportantEvent, ImportantEventType } from "@bondery/types";
 import { errorNotificationTemplate } from "@bondery/mantine-next";
-import { DatePickerWithPresets } from "../../../components/timeline/DatePickerWithPresets";
+import { DatePickerWithPresets } from "../../../components/interactions/DatePickerWithPresets";
 import {
   IMPORTANT_EVENT_NOTIFY_OPTIONS,
   IMPORTANT_EVENT_TYPE_OPTIONS,

@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { GroupDetailClient } from "./GroupDetailClient";
 import { API_URL } from "@/lib/config";
 import type { Contact } from "@bondery/types";
@@ -7,6 +8,27 @@ import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import type { SortOrder } from "@/app/(app)/app/components/contacts/ContactsTableV2";
 
 const PAGE_SIZE = 50;
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ groupId: string }>;
+}): Promise<Metadata> {
+  try {
+    const { groupId } = await params;
+    const headers = await getAuthHeaders();
+    const res = await fetch(`${API_URL}${API_ROUTES.GROUPS}/${groupId}`, {
+      next: { tags: ["groups"] },
+      headers,
+    });
+    if (!res.ok) return { title: "Group" };
+    const data = await res.json();
+    const label = data.group?.label || "Group";
+    return { title: `${label} | Bondery` };
+  } catch {
+    return { title: "Group" };
+  }
+}
 
 interface GroupContactsResponse {
   group: { id: string; label: string; emoji?: string | null; color?: string | null };
@@ -27,10 +49,17 @@ async function getGroupContacts(
     if (query) params.set("q", query);
     if (sort) params.set("sort", sort);
 
-    const res = await fetch(
-      `${API_URL}${API_ROUTES.GROUPS}/${groupId}/contacts?${params.toString()}`,
-      { next: { tags: ["groups", "contacts"] }, headers },
-    );
+    // Fire both requests in parallel — they are independent
+    const [res, groupRes] = await Promise.all([
+      fetch(`${API_URL}${API_ROUTES.GROUPS}/${groupId}/contacts?${params.toString()}`, {
+        next: { tags: ["groups", "contacts"] },
+        headers,
+      }),
+      fetch(`${API_URL}${API_ROUTES.GROUPS}/${groupId}`, {
+        next: { tags: ["groups"] },
+        headers,
+      }),
+    ]);
 
     if (!res.ok) {
       if (res.status === 404) {
@@ -39,19 +68,14 @@ async function getGroupContacts(
       throw new Error(`Failed to fetch group contacts: ${res.status} ${res.statusText}`);
     }
 
-    const data = await res.json();
-
-    // Fetch group details (emoji, color) separately – contacts endpoint only returns id+label.
-    const groupRes = await fetch(`${API_URL}${API_ROUTES.GROUPS}/${groupId}`, {
-      next: { tags: ["groups"] },
-      headers,
-    });
-
-    const groupData = groupRes.ok
-      ? ((await groupRes.json()) as {
-          group?: { id: string; label: string; emoji?: string | null; color?: string | null };
-        })
-      : null;
+    const [data, groupData] = await Promise.all([
+      res.json(),
+      groupRes.ok
+        ? (groupRes.json() as Promise<{
+            group?: { id: string; label: string; emoji?: string | null; color?: string | null };
+          }>)
+        : Promise.resolve(null),
+    ]);
 
     const contacts = data.contacts.map((contact: Contact) => ({
       ...contact,
