@@ -9,61 +9,150 @@ import {
   MenuTarget,
   MenuDropdown,
   MenuItem,
-  Avatar,
   Stack,
 } from "@mantine/core";
-import { IconCopy, IconDotsVertical, IconEdit, IconTrash, IconUserPlus } from "@tabler/icons-react";
-import { useState, type MouseEvent } from "react";
+import {
+  IconCopy,
+  IconDotsVertical,
+  IconEdit,
+  IconPlus,
+  IconTrash,
+  IconUserPlus,
+} from "@tabler/icons-react";
+import { useState, type MouseEvent, type ReactNode } from "react";
 import type { GroupWithCount } from "@bondery/types";
 import { PersonAvatarGroup } from "@bondery/mantine-next";
 
-interface GroupCardProps {
+interface GroupCardCommonProps {
+  interactive?: boolean;
+  selected?: boolean;
+  showMenu?: boolean;
+  cursorType?: "pointer" | "default";
+  highlightColor?: "primary" | "green" | "red";
+  shadow?: string;
+}
+
+interface GroupEntityCardProps extends GroupCardCommonProps {
   group: GroupWithCount;
   onAddPeople: (group: GroupWithCount) => void;
   onEdit: (group: GroupWithCount) => void;
   onDuplicate: (group: GroupWithCount) => void;
   onDelete: (groupId: string) => void;
   onClick: (groupId: string) => void;
-  interactive?: boolean;
-  selected?: boolean;
-  showMenu?: boolean;
   variant?: "default" | "small";
-  cursorType?: "pointer" | "default";
-  highlightColor?: "primary" | "green" | "red";
-  shadow?: string;
 }
 
-export function GroupCard({
+interface GroupActionCardProps extends GroupCardCommonProps {
+  variant: "action";
+  actionLabel: string;
+  onActionClick: () => void;
+  actionIcon?: ReactNode;
+}
+
+type GroupCardProps = GroupEntityCardProps | GroupActionCardProps;
+
+export const GROUP_CARD_MAX_WIDTH_BY_VARIANT: Record<"default" | "small" | "action", string> = {
+  default: "18rem",
+  small: "14rem",
+  action: "14rem",
+};
+
+function GroupCardMenu({
   group,
+  menuOpened,
+  setMenuOpened,
   onAddPeople,
   onEdit,
   onDuplicate,
   onDelete,
-  onClick,
-  interactive = true,
-  selected = false,
-  showMenu = true,
-  variant = "default",
-  cursorType,
-  highlightColor,
-  shadow = "none",
-}: GroupCardProps) {
+  iconSize,
+}: {
+  group: GroupWithCount;
+  menuOpened: boolean;
+  setMenuOpened: (opened: boolean) => void;
+  onAddPeople: (group: GroupWithCount) => void;
+  onEdit: (group: GroupWithCount) => void;
+  onDuplicate: (group: GroupWithCount) => void;
+  onDelete: (groupId: string) => void;
+  iconSize: "sm" | "md";
+}) {
+  return (
+    <Menu shadow="md" opened={menuOpened} onChange={setMenuOpened} position="bottom-end">
+      <MenuTarget>
+        <ActionIcon
+          variant="default"
+          size={iconSize}
+          className={menuOpened ? "button-scale-effect-active" : "button-scale-effect"}
+          data-menu-trigger
+          onClick={(e) => {
+            e.stopPropagation();
+          }}
+        >
+          <IconDotsVertical size={16} color="white" style={{ opacity: 0.8 }} />
+        </ActionIcon>
+      </MenuTarget>
+      <MenuDropdown>
+        <MenuItem
+          leftSection={<IconUserPlus size={16} />}
+          onClick={(e) => {
+            e.stopPropagation();
+            setMenuOpened(false);
+            onAddPeople(group);
+          }}
+        >
+          Add people to group
+        </MenuItem>
+        <MenuItem
+          leftSection={<IconEdit size={16} />}
+          onClick={(e) => {
+            e.stopPropagation();
+            setMenuOpened(false);
+            onEdit(group);
+          }}
+        >
+          Edit
+        </MenuItem>
+        <MenuItem
+          leftSection={<IconCopy size={16} />}
+          onClick={(e) => {
+            e.stopPropagation();
+            setMenuOpened(false);
+            onDuplicate(group);
+          }}
+        >
+          Duplicate
+        </MenuItem>
+        <MenuItem
+          leftSection={<IconTrash size={16} />}
+          color="red"
+          onClick={(e) => {
+            e.stopPropagation();
+            setMenuOpened(false);
+            onDelete(group.id);
+          }}
+        >
+          Delete
+        </MenuItem>
+      </MenuDropdown>
+    </Menu>
+  );
+}
+
+export function GroupCard(props: GroupCardProps) {
   const [menuOpened, setMenuOpened] = useState(false);
+  const {
+    interactive = true,
+    selected = false,
+    showMenu = true,
+    cursorType,
+    highlightColor,
+    shadow = "none",
+  } = props;
+  const variant = props.variant || "default";
+  const isCompactVariant = variant === "small" || variant === "action";
   const isSmallVariant = variant === "small";
-  const peopleLabel = `${group.contactCount} ${group.contactCount === 1 ? "person" : "people"}`;
-  const previewContacts = group.previewContacts || [];
-
-  const handleCardClick = (e: MouseEvent) => {
-    if (!interactive) {
-      return;
-    }
-
-    // Don't trigger card click if menu is clicked
-    if ((e.target as HTMLElement).closest("[data-menu-trigger]")) {
-      return;
-    }
-    onClick(group.id);
-  };
+  const cardClassByVariant = "w-full";
+  const cardMaxWidth = GROUP_CARD_MAX_WIDTH_BY_VARIANT[variant];
 
   const resolvedHighlightColor = highlightColor || (selected ? "primary" : undefined);
   const borderColorByHighlight: Record<"primary" | "green" | "red", string> = {
@@ -77,12 +166,71 @@ export function GroupCard({
     red: "var(--mantine-color-red-light)",
   };
 
+  if (props.variant === "action") {
+    const actionIcon = props.actionIcon || <IconPlus size={isCompactVariant ? 20 : 24} />;
+
+    return (
+      <Card
+        shadow={shadow}
+        p={isCompactVariant ? "sm" : "md"}
+        style={{
+          cursor: cursorType || (interactive ? "pointer" : "default"),
+          maxWidth: cardMaxWidth,
+        }}
+        className={`${cardClassByVariant} ${interactive ? "card-scale-effect" : undefined}`}
+        onClick={() => {
+          if (!interactive) {
+            return;
+          }
+          props.onActionClick();
+        }}
+      >
+        <Card.Section bg="var(--mantine-primary-color-light)" h={isCompactVariant ? 72 : 80}>
+          <Group justify="center" h="100%" c="var(--mantine-primary-color-filled)">
+            {actionIcon}
+          </Group>
+        </Card.Section>
+
+        <Stack gap={isCompactVariant ? 8 : 10} mt={isCompactVariant ? "sm" : "md"} align="stretch">
+          <Text fw={600} size={isCompactVariant ? "sm" : "md"} ta="center" lineClamp={1}>
+            {props.actionLabel}
+          </Text>
+          <Group justify="center">
+            <Text size="sm" c="dimmed">
+              Manage memberships
+            </Text>
+          </Group>
+        </Stack>
+      </Card>
+    );
+  }
+
+  const groupProps = props;
+  const group = groupProps.group;
+  const peopleLabel = `${group.contactCount} ${group.contactCount === 1 ? "person" : "people"}`;
+  const previewContacts: NonNullable<GroupWithCount["previewContacts"]> =
+    group.previewContacts || [];
+
+  const handleCardClick = (e: MouseEvent) => {
+    if (!interactive) {
+      return;
+    }
+
+    if ((e.target as HTMLElement).closest("[data-menu-trigger]")) {
+      return;
+    }
+    groupProps.onClick(group.id);
+  };
+
   return (
     <Card
       shadow={shadow}
-      p={isSmallVariant ? "sm" : undefined}
-      style={{ cursor: cursorType || (interactive ? "pointer" : "default") }}
-      className={`${isSmallVariant ? "w-full max-w-none" : "max-w-88"} ${interactive ? "card-scale-effect" : undefined}`}
+      p={isSmallVariant ? "sm" : "md"}
+      style={{
+        cursor: cursorType || (interactive ? "pointer" : "default"),
+        maxWidth: cardMaxWidth,
+      }}
+      className={`${cardClassByVariant} ${interactive ? "card-scale-effect" : undefined}`}
       bd={
         resolvedHighlightColor
           ? `1px solid ${borderColorByHighlight[resolvedHighlightColor]}`
@@ -91,100 +239,52 @@ export function GroupCard({
       bg={resolvedHighlightColor ? backgroundColorByHighlight[resolvedHighlightColor] : undefined}
       onClick={handleCardClick}
     >
-      <Stack gap="sm">
-        <Group justify="space-between" align={isSmallVariant ? "center" : "flex-start"}>
-          <Group gap="sm" align={isSmallVariant ? "center" : "flex-start"} style={{ flex: 1 }}>
-            <Avatar
-              size={isSmallVariant ? "md" : "xl"}
-              color={group.color}
-              style={{ backgroundColor: group.color }}
-            >
-              {group.emoji}
-            </Avatar>
-            <Stack gap={6} justify="flex-start" style={{ flex: 1 }}>
-              <Text fw={600} size={isSmallVariant ? "md" : "xl"}>
-                {group.label}
-              </Text>
-              {previewContacts.length > 0 ? (
-                <PersonAvatarGroup
-                  people={previewContacts.map((contact) => ({
-                    id: contact.id,
-                    firstName: contact.firstName,
-                    lastName: contact.lastName,
-                    avatar: contact.avatar,
-                  }))}
-                  totalCount={group.contactCount}
-                  size={isSmallVariant ? "sm" : "md"}
-                />
-              ) : (
-                <Text size="sm" c="dimmed">
-                  {peopleLabel}
-                </Text>
-              )}
-            </Stack>
-          </Group>
+      <>
+        <Card.Section bg={group.color} h={isSmallVariant ? 72 : 80} pos="relative">
           {showMenu && (
-            <Menu shadow="md" opened={menuOpened} onChange={setMenuOpened} position="bottom-end">
-              <MenuTarget>
-                <ActionIcon
-                  variant="default"
-                  size="md"
-                  className={menuOpened ? "button-scale-effect-active" : "button-scale-effect"}
-                  data-menu-trigger
-                  onClick={(e) => {
-                    e.stopPropagation();
-                  }}
-                >
-                  <IconDotsVertical size={16} />
-                </ActionIcon>
-              </MenuTarget>
-              <MenuDropdown>
-                <MenuItem
-                  leftSection={<IconUserPlus size={16} />}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setMenuOpened(false);
-                    onAddPeople(group);
-                  }}
-                >
-                  Add people to group
-                </MenuItem>
-                <MenuItem
-                  leftSection={<IconEdit size={16} />}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setMenuOpened(false);
-                    onEdit(group);
-                  }}
-                >
-                  Edit
-                </MenuItem>
-                <MenuItem
-                  leftSection={<IconCopy size={16} />}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setMenuOpened(false);
-                    onDuplicate(group);
-                  }}
-                >
-                  Duplicate
-                </MenuItem>
-                <MenuItem
-                  leftSection={<IconTrash size={16} />}
-                  color="red"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setMenuOpened(false);
-                    onDelete(group.id);
-                  }}
-                >
-                  Delete
-                </MenuItem>
-              </MenuDropdown>
-            </Menu>
+            <div style={{ position: "absolute", top: 12, right: 12 }}>
+              <GroupCardMenu
+                group={group}
+                menuOpened={menuOpened}
+                setMenuOpened={setMenuOpened}
+                onAddPeople={groupProps.onAddPeople}
+                onEdit={groupProps.onEdit}
+                onDuplicate={groupProps.onDuplicate}
+                onDelete={groupProps.onDelete}
+                iconSize={isSmallVariant ? "sm" : "md"}
+              />
+            </div>
           )}
-        </Group>
-      </Stack>
+          <Group justify="center" h="100%">
+            <Text style={{ fontSize: isSmallVariant ? 34 : 40, lineHeight: 1 }}>{group.emoji}</Text>
+          </Group>
+        </Card.Section>
+
+        <Stack gap={isSmallVariant ? 8 : 10} mt={isSmallVariant ? "sm" : "md"} align="stretch">
+          <Text fw={600} size={isSmallVariant ? "sm" : "md"} ta="center" lineClamp={1}>
+            {group.label}
+          </Text>
+
+          <Group justify="center">
+            {previewContacts.length > 0 ? (
+              <PersonAvatarGroup
+                people={previewContacts.map((contact) => ({
+                  id: contact.id,
+                  firstName: contact.firstName,
+                  lastName: contact.lastName,
+                  avatar: contact.avatar,
+                }))}
+                totalCount={group.contactCount}
+                size={isSmallVariant ? "sm" : "md"}
+              />
+            ) : (
+              <Text size="sm" c="dimmed">
+                {peopleLabel}
+              </Text>
+            )}
+          </Group>
+        </Stack>
+      </>
     </Card>
   );
 }
