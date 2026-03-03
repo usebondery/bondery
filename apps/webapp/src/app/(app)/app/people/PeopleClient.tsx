@@ -68,6 +68,7 @@ export function PeopleClient({ initialContacts, totalCount, layout = "stack" }: 
       back: tMerge("Back"),
       merge: tMerge("Merge"),
       noConflicts: tMerge("NoConflicts"),
+      conflictHint: tMerge("ConflictHint"),
       processing: tMerge("Processing"),
       steps: {
         pick: tMerge("Steps.Pick"),

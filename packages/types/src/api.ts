@@ -111,6 +111,8 @@ export type InstagramImportStrategy =
   | "following_and_followers"
   | "mutual_following";
 
+export type InstagramImportSource = "following" | "followers" | "close_friends";
+
 export interface InstagramPreparedContact {
   tempId: string;
   firstName: string;
@@ -122,6 +124,7 @@ export interface InstagramPreparedContact {
   likelyPerson: boolean;
   connectedAt: string | null;
   connectedOnRaw: number | null;
+  sources: InstagramImportSource[];
   isValid: boolean;
   issues: string[];
 }

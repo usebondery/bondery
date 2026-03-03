@@ -14,6 +14,8 @@ import {
 import { useTranslations } from "next-intl";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import type {
+  Contact,
+  MergeConflictChoice,
   MergeConflictField,
   MergeRecommendation,
   MergeRecommendationsResponse,
@@ -30,6 +32,50 @@ import { MERGE_CONFLICT_FIELDS, openMergeWithModal } from "../people/components/
 
 interface FixContactsClientProps {
   initialRecommendations: MergeRecommendation[];
+}
+
+/**
+ * Returns true if the string contains diacritical marks (e.g. á, č, š, ě, ř).
+ */
+function hasDiacritics(value: string): boolean {
+  return value !== value.normalize("NFD").replace(/\p{Mn}/gu, "");
+}
+
+/**
+ * When two name values differ only by diacritics, returns the side that has
+ * the localized (diacritic-bearing) variant. Returns null when both or neither
+ * side has diacritics (no preference).
+ */
+function preferLocalizedName(
+  left: string | null | undefined,
+  right: string | null | undefined,
+): MergeConflictChoice | null {
+  const l = left?.trim() ?? "";
+  const r = right?.trim() ?? "";
+  if (!l || !r) return null;
+  const leftHas = hasDiacritics(l);
+  const rightHas = hasDiacritics(r);
+  if (leftHas && !rightHas) return "left";
+  if (!leftHas && rightHas) return "right";
+  return null;
+}
+
+const NAME_FIELDS = ["firstName", "middleName", "lastName"] as const;
+
+/**
+ * Computes initial conflict choices for name fields, pre-selecting the side
+ * that carries diacritical characters (localized name) over the plain ASCII variant.
+ */
+function computeNameConflictChoices(
+  left: Contact,
+  right: Contact,
+): Partial<Record<MergeConflictField, MergeConflictChoice>> {
+  const choices: Partial<Record<MergeConflictField, MergeConflictChoice>> = {};
+  for (const field of NAME_FIELDS) {
+    const preference = preferLocalizedName(left[field], right[field]);
+    if (preference) choices[field] = preference;
+  }
+  return choices;
 }
 
 export function FixContactsClient({ initialRecommendations }: FixContactsClientProps) {
@@ -74,6 +120,7 @@ export function FixContactsClient({ initialRecommendations }: FixContactsClientP
       back: tMerge("Back"),
       merge: tMerge("Merge"),
       noConflicts: tMerge("NoConflicts"),
+      conflictHint: tMerge("ConflictHint"),
       processing: tMerge("Processing"),
       steps: {
         pick: tMerge("Steps.Pick"),
@@ -88,6 +135,10 @@ export function FixContactsClient({ initialRecommendations }: FixContactsClientP
   );
 
   const handleAccept = (recommendation: MergeRecommendation) => {
+    const initialConflictChoices = computeNameConflictChoices(
+      recommendation.leftPerson,
+      recommendation.rightPerson,
+    );
     openMergeWithModal({
       contacts: [recommendation.leftPerson, recommendation.rightPerson],
       leftPersonId: recommendation.leftPerson.id,
@@ -97,6 +148,10 @@ export function FixContactsClient({ initialRecommendations }: FixContactsClientP
       redirectToMergedPerson: false,
       titleText: tMerge("ModalTitle"),
       texts: mergeTexts,
+      onSuccess: () => {
+        setRecommendations((prev) => prev.filter((r) => r.id !== recommendation.id));
+      },
+      initialConflictChoices,
     });
   };
 

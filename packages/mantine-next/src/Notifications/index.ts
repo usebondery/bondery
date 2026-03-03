@@ -10,3 +10,7 @@ export {
   loadingNotificationTemplate,
   type LoadingNotificationTemplateProps,
 } from "./LoadingNotificationTemplate";
+export {
+  warningNotificationTemplate,
+  type WarningNotificationTemplateProps,
+} from "./WarningNotificationTemplate";

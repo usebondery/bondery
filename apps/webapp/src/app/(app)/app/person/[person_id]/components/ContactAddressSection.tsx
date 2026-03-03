@@ -11,7 +11,7 @@ import {
   IconDotsVertical,
   IconMapPin,
   IconMapPinSearch,
-  IconMapPinPlus,
+  IconMapPinStar,
   IconPlus,
   IconRoute,
   IconStar,
@@ -557,7 +557,7 @@ export function ContactAddressSection({ contact, isSaving, onSave }: ContactAddr
                     ariaLabel={t("LookupLabel")}
                     icon={
                       entry.id === preferredAddressId ? (
-                        <IconMapPinPlus size={18} />
+                        <IconMapPinStar size={18} />
                       ) : (
                         <IconMapPin size={18} />
                       )

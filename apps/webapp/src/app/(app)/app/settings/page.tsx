@@ -9,14 +9,22 @@ import { ErrorPageHeader } from "@/app/(app)/app/components/ErrorPageHeader";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import { PageWrapper } from "../components/PageWrapper";
 import { PreferencesCard } from "./components/PreferencesCard";
+import { TagsSection } from "./components/TagsSection";
+import type { TagWithCount } from "@bondery/types";
 
 export default async function SettingsPage() {
   const headers = await getAuthHeaders();
 
-  const response = await fetch(`${API_URL}${API_ROUTES.SETTINGS}`, {
-    next: { tags: ["settings"] },
-    headers,
-  });
+  const [response, tagsResponse] = await Promise.all([
+    fetch(`${API_URL}${API_ROUTES.SETTINGS}`, {
+      next: { tags: ["settings"] },
+      headers,
+    }),
+    fetch(`${API_URL}${API_ROUTES.TAGS}?previewLimit=3`, {
+      next: { tags: ["tags"] },
+      headers,
+    }),
+  ]);
 
   if (!response.ok) {
     console.error("Failed to fetch settings:", response.statusText);
@@ -24,6 +32,9 @@ export default async function SettingsPage() {
 
   const result = await response.json();
   const settings = result?.data || {};
+
+  const tagsResult = tagsResponse.ok ? await tagsResponse.json() : { tags: [] };
+  const initialTags = (tagsResult.tags as TagWithCount[]) || [];
 
   const name = settings.name || "";
   const middlename = settings.middlename || "";
@@ -76,6 +87,8 @@ export default async function SettingsPage() {
           initialReminderSendHour={reminderSendHour}
           initialTimeFormat={timeFormat}
         />
+
+        <TagsSection initialTags={initialTags} />
 
         <DataManagementCard />
       </Stack>

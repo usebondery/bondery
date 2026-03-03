@@ -18,6 +18,7 @@ import { redirectRoutes } from "./routes/redirect.js";
 import { feedbackRoutes } from "./routes/feedback.js";
 import { reminderRoutes } from "./routes/reminders.js";
 import { groupRoutes } from "./routes/groups.js";
+import { tagRoutes } from "./routes/tags.js";
 import { interactionRoutes } from "./routes/events.js";
 import { linkedInImportRoutes } from "./routes/linkedin-import.js";
 import { instagramImportRoutes } from "./routes/instagram-import.js";
@@ -197,7 +198,7 @@ async function buildServer() {
   // Register multipart for file uploads
   await fastify.register(multipart, {
     limits: {
-      fileSize: 300 * 1024 * 1024, // 300MB max
+      fileSize: 50 * 1024 * 1024, // 50MB max
     },
   });
 
@@ -211,6 +212,7 @@ async function buildServer() {
   await fastify.register(linkedInImportRoutes, { prefix: API_ROUTES.CONTACTS_IMPORT_LINKEDIN });
   await fastify.register(instagramImportRoutes, { prefix: API_ROUTES.CONTACTS_IMPORT_INSTAGRAM });
   await fastify.register(groupRoutes, { prefix: API_ROUTES.GROUPS });
+  await fastify.register(tagRoutes, { prefix: API_ROUTES.TAGS });
   await fastify.register(accountRoutes, { prefix: API_ROUTES.ACCOUNT });
   await fastify.register(settingsRoutes, { prefix: API_ROUTES.SETTINGS });
   await fastify.register(redirectRoutes, { prefix: API_ROUTES.REDIRECT });

@@ -617,6 +617,45 @@ export type Database = {
           },
         ];
       };
+      people_tags: {
+        Row: {
+          created_at: string | null;
+          id: string;
+          person_id: string;
+          tag_id: string;
+          user_id: string;
+        };
+        Insert: {
+          created_at?: string | null;
+          id?: string;
+          person_id: string;
+          tag_id: string;
+          user_id: string;
+        };
+        Update: {
+          created_at?: string | null;
+          id?: string;
+          person_id?: string;
+          tag_id?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "people_tags_tag_id_fkey";
+            columns: ["tag_id"];
+            isOneToOne: false;
+            referencedRelation: "tags";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "people_tags_person_id_fkey";
+            columns: ["person_id"];
+            isOneToOne: false;
+            referencedRelation: "people";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       reminder_dispatch_log: {
         Row: {
           created_at: string;
@@ -637,6 +676,33 @@ export type Database = {
           id?: string;
           reminder_date?: string;
           timezone?: string;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
+      tags: {
+        Row: {
+          color: string | null;
+          created_at: string | null;
+          id: string;
+          label: string;
+          updated_at: string | null;
+          user_id: string;
+        };
+        Insert: {
+          color?: string | null;
+          created_at?: string | null;
+          id?: string;
+          label: string;
+          updated_at?: string | null;
+          user_id: string;
+        };
+        Update: {
+          color?: string | null;
+          created_at?: string | null;
+          id?: string;
+          label?: string;
+          updated_at?: string | null;
           user_id?: string;
         };
         Relationships: [];

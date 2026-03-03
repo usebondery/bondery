@@ -20,6 +20,11 @@
       "import": "./dist/check-env.js",
       "require": "./dist/check-env.js",
       "types": "./dist/check-env.d.ts"
+    },
+    "./name-utils": {
+      "import": "./dist/name-utils.js",
+      "require": "./dist/name-utils.js",
+      "types": "./dist/name-utils.d.ts"
     }
   },
   "scripts": {

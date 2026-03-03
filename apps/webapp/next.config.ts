@@ -4,7 +4,7 @@ import createNextIntlPlugin from "next-intl/plugin";
 
 const nextConfig: NextConfig = {
   experimental: {
-    proxyClientMaxBodySize: "300mb",
+    proxyClientMaxBodySize: "50mb",
   },
   async headers() {
     return [

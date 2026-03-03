@@ -23,9 +23,14 @@ When using the Anchor, Button with a Link, or Next.js Link components, import th
 
 Import the common ModalTitle from packages/mantine-next to ensure consistent styling and behavior across your application. The ModalTitle component provides a standardized way to display titles within modals, enhancing the user experience and maintaining a cohesive design throughout your application.
 
+Following best practices should be used:
+
+- If the modal requires inputs, the required inputs should have withAsterisk prop set to true.
+- If the modal has destructive actions, the destructive prop for ModalTitle should be set to true. This will change the color of the title to red, indicating that the action is destructive and requires caution from the user.
+
 ## Notifications
 
-When implementing notifications in your application, utilize the successNotificationTemplate, errorNotificationTemplate, loadingNotificationsTemplate from packages/mantine-next. These templates provide pre-configured styles and structures for success and error notifications, ensuring a consistent look and feel across your application. By using these templates, you can save time on styling and focus on delivering clear and effective notifications to your users.
+When implementing notifications in your application, utilize the successNotificationTemplate, errorNotificationTemplate, loadingNotificationsTemplate, warningNotificationTemplate from packages/mantine-next. These templates provide pre-configured styles and structures for success and error notifications, ensuring a consistent look and feel across your application. By using these templates, you can save time on styling and focus on delivering clear and effective notifications to your users.
 
 ## Dropdown menus
 

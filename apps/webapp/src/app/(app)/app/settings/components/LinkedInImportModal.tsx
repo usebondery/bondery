@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   Group,
@@ -13,8 +13,9 @@ import {
   ThemeIcon,
   Center,
   Loader,
+  Progress,
 } from "@mantine/core";
-import { Dropzone } from "@mantine/dropzone";
+import { Dropzone, MIME_TYPES } from "@mantine/dropzone";
 import {
   IconArrowLeft,
   IconArrowRight,
@@ -41,15 +42,11 @@ import { revalidateAll } from "../../actions";
 
 type Step = "intro" | "instructions" | "upload" | "processing" | "preview";
 
-const LINKEDIN_ACCEPTED_MIME_TYPES = [
-  "application/zip",
-  "application/x-zip-compressed",
-  "application/octet-stream",
-  "text/csv",
-] as const;
+const IMPORT_BATCH_SIZE = 25;
 
 interface LinkedInImportTranslations {
   ModalTitle: string;
+  InstructionsTitle: string;
   InstructionStep1Prefix: string;
   InstructionStep1LinkLabel: string;
   InstructionStep2: string;
@@ -64,9 +61,9 @@ interface LinkedInImportTranslations {
   Valid: string;
   Invalid: string;
   AlreadyExists: string;
-  InvalidRowsHint: string;
   ExistingHandleTooltip: string;
   ImportSelected: string;
+  ChooseContactsHint: string;
   ImportSuccess: string;
   NoContactsSelected: string;
   ParseError: string;
@@ -86,6 +83,8 @@ interface LinkedInImportTranslations {
   FilesAlertFileConnectionsBold: string;
   FilesAlertDescriptionSuffix: string;
   ProcessingConnections: string;
+  ImportingTitle: string;
+  ImportingProgress: string;
 }
 
 function buildImportedTitle(position: string | null, company: string | null): string | null {
@@ -151,8 +150,18 @@ function sortLinkedInContactsForPreview(
   return contacts
     .map((contact, index) => ({ contact, index }))
     .sort((left, right) => {
-      const leftRank = left.contact.alreadyExists ? 0 : left.contact.isValid ? 1 : 2;
-      const rightRank = right.contact.alreadyExists ? 0 : right.contact.isValid ? 1 : 2;
+      const leftRank =
+        left.contact.isValid && !left.contact.alreadyExists
+          ? 0
+          : left.contact.alreadyExists
+            ? 1
+            : 2;
+      const rightRank =
+        right.contact.isValid && !right.contact.alreadyExists
+          ? 0
+          : right.contact.alreadyExists
+            ? 1
+            : 2;
 
       if (leftRank !== rightRank) {
         return leftRank - rightRank;
@@ -174,11 +183,18 @@ export function LinkedInImportModal({
   const [step, setStep] = useState<Step>("intro");
   const [isParsing, setIsParsing] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
+  const [importProgress, setImportProgress] = useState<{ current: number; total: number } | null>(
+    null,
+  );
   const [parsedContacts, setParsedContacts] = useState<LinkedInPreparedContact[]>([]);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const openRef = useRef<() => void>(null);
+  const lastSelectedIndexRef = useRef<number | null>(null);
 
-  const previewContacts = useMemo(() => parsedContacts.map(toPreviewContact), [parsedContacts]);
+  const previewContacts = useMemo(
+    () => parsedContacts.filter((contact) => contact.isValid).map(toPreviewContact),
+    [parsedContacts],
+  );
 
   const validContactsCount = useMemo(
     () => parsedContacts.filter((contact) => contact.isValid).length,
@@ -225,9 +241,13 @@ export function LinkedInImportModal({
       closeOnClickOutside: !(isParsing || isImporting || step === "processing"),
       withCloseButton: !(isParsing || isImporting || step === "processing"),
       size:
-        step === "preview"
+        step === "preview" && !isImporting
           ? "80rem"
-          : step === "intro" || step === "instructions" || step === "upload"
+          : step === "intro" ||
+              step === "instructions" ||
+              step === "upload" ||
+              step === "processing" ||
+              isImporting
             ? "lg"
             : "xl",
       title: (
@@ -236,28 +256,58 @@ export function LinkedInImportModal({
     });
   }, [isImporting, isParsing, modalId, step, t]);
 
-  const handleToggleAll = () => {
-    if (allSelected) {
-      setSelectedIds(new Set());
-      return;
-    }
+  const handleToggleAll = useCallback(() => {
+    setSelectedIds((prev) => {
+      const isAllSelected = selectableIds.length > 0 && selectableIds.every((id) => prev.has(id));
+      if (isAllSelected) {
+        return new Set<string>();
+      }
+      return new Set(selectableIds);
+    });
+  }, [selectableIds]);
 
-    setSelectedIds(new Set(selectableIds));
-  };
+  const handleToggleOne = useCallback(
+    (id: string, options?: { shiftKey?: boolean; index?: number }) => {
+      if (nonSelectableIds.has(id)) {
+        return;
+      }
 
-  const handleToggleOne = (id: string) => {
-    if (nonSelectableIds.has(id)) {
-      return;
-    }
+      setSelectedIds((prev) => {
+        const next = new Set(prev);
 
-    const next = new Set(selectedIds);
-    if (next.has(id)) {
-      next.delete(id);
-    } else {
-      next.add(id);
-    }
-    setSelectedIds(next);
-  };
+        const rowIndex = options?.index;
+        const hasRangeSelection =
+          options?.shiftKey &&
+          typeof rowIndex === "number" &&
+          lastSelectedIndexRef.current !== null;
+
+        if (hasRangeSelection && typeof rowIndex === "number") {
+          const start = Math.min(lastSelectedIndexRef.current!, rowIndex);
+          const end = Math.max(lastSelectedIndexRef.current!, rowIndex);
+
+          for (let index = start; index <= end; index += 1) {
+            const row = previewContacts[index];
+            if (!row || nonSelectableIds.has(row.id)) {
+              continue;
+            }
+
+            next.add(row.id);
+          }
+        } else if (next.has(id)) {
+          next.delete(id);
+        } else {
+          next.add(id);
+        }
+
+        return next;
+      });
+
+      if (typeof options?.index === "number") {
+        lastSelectedIndexRef.current = options.index;
+      }
+    },
+    [nonSelectableIds, previewContacts],
+  );
 
   const parseUpload = async (files: File[]) => {
     if (files.length === 0) {
@@ -289,6 +339,7 @@ export function LinkedInImportModal({
       const sortedContacts = sortLinkedInContactsForPreview(contacts);
 
       setParsedContacts(sortedContacts);
+      lastSelectedIndexRef.current = null;
       setSelectedIds(
         new Set(
           sortedContacts
@@ -323,34 +374,52 @@ export function LinkedInImportModal({
     }
 
     setIsImporting(true);
+    setImportProgress({ current: 0, total: selectedContacts.length });
+
+    let totalImported = 0;
+    let totalUpdated = 0;
+    let totalSkipped = 0;
 
     try {
-      const response = await fetch(`${API_ROUTES.CONTACTS_IMPORT_LINKEDIN}/commit`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          contacts: selectedContacts,
-        }),
-      });
+      for (let i = 0; i < selectedContacts.length; i += IMPORT_BATCH_SIZE) {
+        const batch = selectedContacts.slice(i, i + IMPORT_BATCH_SIZE);
 
-      const result = await response.json();
+        const response = await fetch(`${API_ROUTES.CONTACTS_IMPORT_LINKEDIN}/commit`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ contacts: batch }),
+        });
 
-      if (!response.ok) {
-        throw new Error(result.error || t("ImportError"));
+        const result = await response.json();
+
+        if (!response.ok) {
+          throw new Error(result.error || t("ImportError"));
+        }
+
+        totalImported += result.importedCount ?? 0;
+        totalUpdated += result.updatedCount ?? 0;
+        totalSkipped += result.skippedCount ?? 0;
+
+        setImportProgress({
+          current: Math.min(i + IMPORT_BATCH_SIZE, selectedContacts.length),
+          total: selectedContacts.length,
+        });
       }
 
       notifications.show(
         successNotificationTemplate({
           title: t("SuccessTitle"),
           description: t("ImportSuccess", {
-            imported: result.importedCount ?? 0,
-            updated: result.updatedCount ?? 0,
-            skipped: result.skippedCount ?? 0,
+            imported: totalImported,
+            updated: totalUpdated,
+            skipped: totalSkipped,
           }),
         }),
       );
+
+      await fetch(`${API_ROUTES.CONTACTS}/merge-recommendations/refresh`, {
+        method: "POST",
+      }).catch(() => undefined);
 
       if (modalId) {
         modals.close(modalId);
@@ -368,6 +437,7 @@ export function LinkedInImportModal({
       );
     } finally {
       setIsImporting(false);
+      setImportProgress(null);
     }
   };
 
@@ -411,6 +481,7 @@ export function LinkedInImportModal({
             <IconBrandLinkedin size={56} />
           </ThemeIcon>
           <Stack gap="md" flex={1}>
+            <Text fw={600}>{t("InstructionsTitle")}</Text>
             <List type="ordered" listStyleType="decimal" withPadding size="sm">
               <List.Item>
                 {t("InstructionStep1Prefix")}{" "}
@@ -477,7 +548,18 @@ export function LinkedInImportModal({
           }}
           loading={isParsing}
           maxSize={30 * 1024 * 1024}
-          accept={LINKEDIN_ACCEPTED_MIME_TYPES as unknown as string[]}
+          maxFiles={1}
+          accept={{
+            [MIME_TYPES.zip]: [".zip"],
+            "application/x-zip-compressed": [".zip"],
+            "application/x-zip": [".zip"],
+            "multipart/x-zip": [".zip"],
+            "application/octet-stream": [".zip", ".csv"],
+            [MIME_TYPES.csv]: [".csv"],
+            "application/csv": [".csv"],
+            "text/plain": [".csv"],
+            "application/vnd.ms-excel": [".csv"],
+          }}
         >
           <DropzoneContent title={t("DropzoneTitle")} description={t("DropzoneDescription")} />
         </Dropzone>
@@ -509,6 +591,26 @@ export function LinkedInImportModal({
     );
   }
 
+  if (isImporting && importProgress !== null) {
+    const percentage = Math.round((importProgress.current / importProgress.total) * 100);
+    return (
+      <Stack gap="lg" py="md">
+        <Center>
+          <Stack align="center" gap="md" w="100%" maw={400}>
+            <Text fw={600}>{t("ImportingTitle")}</Text>
+            <Progress value={percentage} w="100%" size="lg" />
+            <Text size="sm" c="dimmed">
+              {t("ImportingProgress", {
+                current: importProgress.current,
+                total: importProgress.total,
+              })}
+            </Text>
+          </Stack>
+        </Center>
+      </Stack>
+    );
+  }
+
   return (
     <Stack gap="md">
       <Group justify="space-between">
@@ -532,11 +634,9 @@ export function LinkedInImportModal({
         </Group>
       </Group>
 
-      {invalidContactsCount > 0 ? (
-        <Alert color="orange" variant="light">
-          {t("InvalidRowsHint")}
-        </Alert>
-      ) : null}
+      <Text size="sm" c="dimmed">
+        {t("ChooseContactsHint")}
+      </Text>
 
       <ContactsTable
         contacts={previewContacts}
