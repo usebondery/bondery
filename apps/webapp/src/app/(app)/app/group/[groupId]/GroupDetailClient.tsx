@@ -196,7 +196,7 @@ export function GroupDetailClient({
         ...c,
         lastInteraction: c.lastInteraction ? new Date(c.lastInteraction) : null,
         createdAt: c.createdAt ? new Date(c.createdAt) : null,
-      }));
+      })) as unknown as Contact[];
 
       setContacts((prev) => [...prev, ...fetchedContacts]);
       setLoadedCount((prev) => prev + fetchedContacts.length);
