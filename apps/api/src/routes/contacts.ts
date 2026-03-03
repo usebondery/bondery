@@ -973,7 +973,9 @@ export async function contactRoutes(fastify: FastifyInstance) {
 
       let enrichedContacts: Array<{ id: string } & FullContactExtras> = [];
       try {
-        enrichedContacts = await attachContactExtras(client, user.id, contacts || [], { addresses: true });
+        enrichedContacts = await attachContactExtras(client, user.id, contacts || [], {
+          addresses: true,
+        });
       } catch (enrichError) {
         fastify.log.error({ enrichError }, "Failed to attach contact extras for contact list");
         enrichedContacts = withEmptySocialMedia(withEmptyChannels(contacts || []));
@@ -1385,7 +1387,9 @@ export async function contactRoutes(fastify: FastifyInstance) {
 
       let enrichedContacts: Array<{ id: string } & FullContactExtras> = [];
       try {
-        enrichedContacts = await attachContactExtras(client, user.id, personRows || [], { addresses: true });
+        enrichedContacts = await attachContactExtras(client, user.id, personRows || [], {
+          addresses: true,
+        });
       } catch (enrichError) {
         fastify.log.error(
           { enrichError },
@@ -2138,7 +2142,9 @@ export async function contactRoutes(fastify: FastifyInstance) {
       }
 
       try {
-        const [enrichedContact] = await attachContactExtras(client, user.id, [contact], { addresses: true });
+        const [enrichedContact] = await attachContactExtras(client, user.id, [contact], {
+          addresses: true,
+        });
         return { contact: enrichedContact };
       } catch (channelError) {
         fastify.log.error(
@@ -3137,7 +3143,9 @@ export async function contactRoutes(fastify: FastifyInstance) {
 
       let contactWithChannels: Contact;
       try {
-        const [enrichedContact] = await attachContactExtras(client, user.id, [contact], { addresses: true });
+        const [enrichedContact] = await attachContactExtras(client, user.id, [contact], {
+          addresses: true,
+        });
         contactWithChannels = enrichedContact as Contact;
       } catch (channelError) {
         fastify.log.error(
