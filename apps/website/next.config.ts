@@ -57,6 +57,12 @@ const nextConfig: NextConfig = {
         permanent: false,
       },
       {
+        source: "/oauth/consent/:path*",
+        destination: `${WEBAPP_URL}/oauth/consent/:path*`,
+        permanent: false,
+      },
+
+      {
         source: "/app/:path*",
         destination: `${WEBAPP_URL}/app/:path*`,
         permanent: false,
