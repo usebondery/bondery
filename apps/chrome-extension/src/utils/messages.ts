@@ -8,6 +8,32 @@
 
 // ─── Payloads ────────────────────────────────────────────────────────────────
 
+/** A single scraped work history entry */
+export interface ScrapedWorkEntry {
+  title?: string;
+  companyName: string;
+  /** LinkedIn company handle or numeric ID */
+  companyLinkedinId?: string;
+  companyLogoUrl?: string;
+  startDate?: string;
+  endDate?: string;
+  employmentType?: string;
+  location?: string;
+  description?: string;
+}
+
+/** A single scraped education entry */
+export interface EducationEntry {
+  schoolName: string;
+  /** LinkedIn school handle or numeric ID */
+  schoolLinkedinId?: string;
+  schoolLogoUrl?: string;
+  degree?: string;
+  description?: string;
+  startDate?: string;
+  endDate?: string;
+}
+
 /** Profile data scraped from social media by content scripts */
 export interface ScrapedProfileData {
   platform: "instagram" | "linkedin" | "facebook";
@@ -20,6 +46,12 @@ export interface ScrapedProfileData {
   headline?: string;
   place?: string;
   notes?: string;
+  /** Work history to persist when creating a new contact */
+  workHistory?: ScrapedWorkEntry[];
+  /** Education history to persist when creating a new contact */
+  educationHistory?: EducationEntry[];
+  /** LinkedIn bio / about section text */
+  linkedinBio?: string;
 }
 
 /** Person preview for the "already exists" popup */
@@ -118,6 +150,21 @@ export interface PendingPreviewResult {
   payload: PersonPreviewData | null;
 }
 
+/** Content script → Service worker: upsert scraped LinkedIn work history for a known contact */
+export interface UpsertLinkedInDataRequest {
+  type: "UPSERT_LINKEDIN_DATA";
+  payload: {
+    contactId: string;
+    workHistory: ScrapedWorkEntry[];
+  };
+}
+
+/** Service worker → Content script: result of upsert */
+export interface UpsertLinkedInDataResult {
+  type: "UPSERT_LINKEDIN_DATA_RESULT";
+  payload: { success: boolean; error?: string };
+}
+
 /** Popup → Service worker: fetch active tab social profile context */
 export interface GetActiveProfileContext {
   type: "GET_ACTIVE_PROFILE_CONTEXT";
@@ -138,6 +185,67 @@ export interface ActiveProfileContextResult {
       };
 }
 
+// ─── Enrich from LinkedIn ────────────────────────────────────────────────────
+
+/** Webapp → Extension (via webapp.content bridge): enrich an existing contact from LinkedIn */
+export interface EnrichPersonRequest {
+  type: "ENRICH_PERSON_REQUEST";
+  payload: {
+    contactId: string;
+    linkedinHandle: string;
+    /** Unique request ID for correlating the response */
+    requestId: string;
+  };
+}
+
+/** LinkedIn content script → Service worker: ask for pending enrich context */
+export interface GetEnrichContext {
+  type: "GET_ENRICH_CONTEXT";
+}
+
+/** Service worker → LinkedIn content script: context for auto-enrich (sent when tab asks) */
+export interface EnrichContextResult {
+  type: "ENRICH_CONTEXT_RESULT";
+  payload: {
+    contactId: string;
+    linkedinHandle: string;
+    requestId: string;
+  } | null;
+}
+
+/** LinkedIn content script → Service worker: scraped data for enrich */
+export interface SubmitEnrichData {
+  type: "SUBMIT_ENRICH_DATA";
+  payload: {
+    requestId: string;
+    contactId: string;
+    profile: ScrapedProfileData;
+  };
+}
+
+/** Service worker → webapp.content bridge: ack that enrich request was received */
+export interface EnrichPersonAck {
+  type: "ENRICH_PERSON_ACK";
+  payload: { requestId: string };
+}
+
+/** LinkedIn content script → Service worker: report an enrich error (profile mismatch, scrape failure, etc.) */
+export interface EnrichError {
+  type: "ENRICH_ERROR";
+  payload: {
+    requestId: string;
+    error: string;
+  };
+}
+
+/** Extension → Webapp (via webapp.content bridge): enrich result */
+export interface EnrichPersonResult {
+  type: "ENRICH_PERSON_RESULT";
+  payload: {
+    requestId: string;
+  } & ({ success: true; contactId: string } | { success: false; error: string });
+}
+
 // ─── Union Type ──────────────────────────────────────────────────────────────
 
 export type ExtensionMessage =
@@ -152,5 +260,14 @@ export type ExtensionMessage =
   | ShowPersonPreview
   | GetPendingPreview
   | PendingPreviewResult
+  | UpsertLinkedInDataRequest
+  | UpsertLinkedInDataResult
   | GetActiveProfileContext
-  | ActiveProfileContextResult;
+  | ActiveProfileContextResult
+  | EnrichPersonRequest
+  | EnrichPersonAck
+  | EnrichError
+  | GetEnrichContext
+  | EnrichContextResult
+  | SubmitEnrichData
+  | EnrichPersonResult;

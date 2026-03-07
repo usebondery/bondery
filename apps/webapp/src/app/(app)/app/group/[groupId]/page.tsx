@@ -4,7 +4,7 @@ import { API_URL } from "@/lib/config";
 import type { Contact } from "@bondery/types";
 import { getAuthHeaders } from "@/lib/authHeaders";
 import { notFound } from "next/navigation";
-import { API_ROUTES } from "@bondery/helpers/globals/paths";
+import { API_ROUTES, formatMetadataTitle } from "@bondery/helpers/globals/paths";
 import type { SortOrder } from "@/app/(app)/app/components/contacts/ContactsTableV2";
 
 const PAGE_SIZE = 50;
@@ -24,7 +24,7 @@ export async function generateMetadata({
     if (!res.ok) return { title: "Group" };
     const data = await res.json();
     const label = data.group?.label || "Group";
-    return { title: `${label} | Bondery` };
+    return { title: formatMetadataTitle(label) };
   } catch {
     return { title: "Group" };
   }
@@ -34,6 +34,8 @@ interface GroupContactsResponse {
   group: { id: string; label: string; emoji?: string | null; color?: string | null };
   contacts: Contact[];
   totalCount: number;
+  cardPreviewContacts: Contact[];
+  groupTotalCount: number;
 }
 
 async function getGroupContacts(
@@ -49,14 +51,24 @@ async function getGroupContacts(
     if (query) params.set("q", query);
     if (sort) params.set("sort", sort);
 
-    // Fire both requests in parallel — they are independent
-    const [res, groupRes] = await Promise.all([
+    // Preview contacts for the group card avatar — always unfiltered so the
+    // avatars stay stable regardless of what the user searches in the table.
+    const previewParams = new URLSearchParams();
+    previewParams.set("limit", "3");
+    previewParams.set("offset", "0");
+
+    // Fire all three requests in parallel — they are independent
+    const [res, groupRes, previewRes] = await Promise.all([
       fetch(`${API_URL}${API_ROUTES.GROUPS}/${groupId}/contacts?${params.toString()}`, {
         next: { tags: ["groups", "contacts"] },
         headers,
       }),
       fetch(`${API_URL}${API_ROUTES.GROUPS}/${groupId}`, {
         next: { tags: ["groups"] },
+        headers,
+      }),
+      fetch(`${API_URL}${API_ROUTES.GROUPS}/${groupId}/contacts?${previewParams.toString()}`, {
+        next: { tags: ["groups", "contacts"] },
         headers,
       }),
     ]);
@@ -68,13 +80,14 @@ async function getGroupContacts(
       throw new Error(`Failed to fetch group contacts: ${res.status} ${res.statusText}`);
     }
 
-    const [data, groupData] = await Promise.all([
+    const [data, groupData, previewData] = await Promise.all([
       res.json(),
       groupRes.ok
         ? (groupRes.json() as Promise<{
             group?: { id: string; label: string; emoji?: string | null; color?: string | null };
           }>)
         : Promise.resolve(null),
+      previewRes.ok ? previewRes.json() : Promise.resolve({ contacts: [] }),
     ]);
 
     const contacts = data.contacts.map((contact: Contact) => ({
@@ -82,6 +95,14 @@ async function getGroupContacts(
       lastInteraction: contact.lastInteraction ? new Date(contact.lastInteraction) : null,
       createdAt: contact.createdAt ? new Date(contact.createdAt) : null,
     }));
+
+    const cardPreviewContacts = (previewData.contacts ?? []).map(
+      (contact: Contact) => ({
+        ...contact,
+        lastInteraction: contact.lastInteraction ? new Date(contact.lastInteraction) : null,
+        createdAt: contact.createdAt ? new Date(contact.createdAt) : null,
+      }),
+    );
 
     return {
       group: {
@@ -92,6 +113,9 @@ async function getGroupContacts(
       },
       contacts,
       totalCount: data.totalCount,
+      cardPreviewContacts,
+      // Real group member count — always unfiltered, used for the group card
+      groupTotalCount: previewData.totalCount ?? data.totalCount,
     };
   } catch (error) {
     console.error("Error fetching group contacts:", error);
@@ -109,7 +133,8 @@ export default async function GroupDetailPage({
   const { groupId } = await params;
   const { q, sort } = await searchParams;
 
-  const { group, contacts, totalCount } = await getGroupContacts(groupId, q, sort);
+  const { group, contacts, totalCount, cardPreviewContacts, groupTotalCount } =
+    await getGroupContacts(groupId, q, sort);
 
   return (
     <GroupDetailClient
@@ -121,6 +146,8 @@ export default async function GroupDetailPage({
       totalCount={totalCount}
       initialSearch={q || ""}
       initialSort={(sort as SortOrder) || "nameAsc"}
+      cardPreviewContacts={cardPreviewContacts}
+      groupTotalCount={groupTotalCount}
     />
   );
 }

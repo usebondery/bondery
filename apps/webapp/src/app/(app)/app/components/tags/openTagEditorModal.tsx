@@ -13,7 +13,8 @@ import {
 } from "@mantine/core";
 import { modals } from "@mantine/modals";
 import { notifications } from "@mantine/notifications";
-import { IconTag, IconTrash } from "@tabler/icons-react";
+import { flushSync } from "react-dom";
+import { IconTag, IconTagMinus, IconTagPlus, IconTrash } from "@tabler/icons-react";
 import type { Contact, ContactPreview, TagWithCount } from "@bondery/types";
 import {
   errorNotificationTemplate,
@@ -24,7 +25,7 @@ import {
   successNotificationTemplate,
 } from "@bondery/mantine-next";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { API_URL } from "@/lib/config";
 import { openStandardConfirmModal } from "@/app/(app)/app/components/modals/openStandardConfirmModal";
 
@@ -88,6 +89,7 @@ function TagEditorModalBody({
   );
   const [isLoadingContacts, setIsLoadingContacts] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const submitLockRef = useRef(false);
 
   useEffect(() => {
     let isMounted = true;
@@ -179,9 +181,12 @@ function TagEditorModalBody({
   };
 
   const handleSave = async () => {
+    if (submitLockRef.current || isSubmitting) return;
+
     const trimmedLabel = label.trim();
     if (!trimmedLabel || !color.trim()) return;
 
+    submitLockRef.current = true;
     setIsSubmitting(true);
 
     const loadingId = notifications.show(
@@ -209,8 +214,9 @@ function TagEditorModalBody({
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ label: trimmedLabel, color }),
         });
-        if (!patchRes.ok) throw new Error("patch");
+        const isPatchSuccessful = patchRes.ok;
 
+        let areMembersSynced = true;
         if (selectedIds.length > 0) {
           const addRes = await fetch(`${API_URL}${API_ROUTES.TAGS}/${created.tag.id}/contacts`, {
             method: "POST",
@@ -218,19 +224,47 @@ function TagEditorModalBody({
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ personIds: selectedIds }),
           });
-          if (!addRes.ok) throw new Error("members");
+          areMembersSynced = addRes.ok;
         }
 
-        onCreated(
-          {
-            ...created.tag,
-            label: trimmedLabel,
-            color,
-            contactCount: selectedIds.length,
-            previewContacts: buildPreviewContacts(selectedIds),
-          },
-          selectedIds,
+        // flushSync forces React to commit the modal removal synchronously
+        // before any other state updates (setIsSubmitting, onCreated callbacks)
+        // are batched and processed. Without this, React 18's auto-batching
+        // can defer the modal store update and keep the modal visible.
+        notifications.hide(loadingId);
+        flushSync(() => modals.close(modalId));
+        notifications.show(
+          successNotificationTemplate({
+            title: t("CreateSuccessTitle"),
+            description: t("CreateSuccessDescription"),
+          }),
         );
+
+        if (!isPatchSuccessful || !areMembersSynced) {
+          notifications.show(
+            errorNotificationTemplate({
+              title: t("SaveErrorTitle"),
+              description: t("SaveErrorDescription"),
+            }),
+          );
+        }
+
+        try {
+          onCreated(
+            {
+              ...created.tag,
+              label: trimmedLabel,
+              color: isPatchSuccessful ? color : created.tag.color,
+              contactCount: areMembersSynced ? selectedIds.length : created.tag.contactCount,
+              previewContacts: areMembersSynced
+                ? buildPreviewContacts(selectedIds)
+                : created.tag.previewContacts,
+            },
+            selectedIds,
+          );
+        } catch {
+          // Keep persistence successful even if caller-side UI update throws.
+        }
       } else if (tag) {
         const updateRes = await fetch(`${API_URL}${API_ROUTES.TAGS}/${tag.id}`, {
           method: "PATCH",
@@ -242,28 +276,31 @@ function TagEditorModalBody({
 
         await syncMembers(tag.id);
 
-        onUpdated(
-          {
-            ...tag,
-            label: trimmedLabel,
-            color,
-            contactCount: selectedIds.length,
-            previewContacts: buildPreviewContacts(selectedIds),
-          },
-          selectedIds,
+        // Same reasoning: flushSync ensures the modal is gone before callbacks fire.
+        notifications.hide(loadingId);
+        flushSync(() => modals.close(modalId));
+        notifications.show(
+          successNotificationTemplate({
+            title: t("SaveSuccessTitle"),
+            description: t("SaveSuccessDescription"),
+          }),
         );
+
+        try {
+          onUpdated(
+            {
+              ...tag,
+              label: trimmedLabel,
+              color,
+              contactCount: selectedIds.length,
+              previewContacts: buildPreviewContacts(selectedIds),
+            },
+            selectedIds,
+          );
+        } catch {
+          // Keep persistence successful even if caller-side UI update throws.
+        }
       }
-
-      notifications.hide(loadingId);
-      notifications.show(
-        successNotificationTemplate({
-          title: mode === "create" ? t("CreateSuccessTitle") : t("SaveSuccessTitle"),
-          description:
-            mode === "create" ? t("CreateSuccessDescription") : t("SaveSuccessDescription"),
-        }),
-      );
-
-      modals.close(modalId);
     } catch {
       notifications.hide(loadingId);
       notifications.show(
@@ -272,8 +309,10 @@ function TagEditorModalBody({
           description: t("SaveErrorDescription"),
         }),
       );
+      // Keep modal open on error so the user can correct the issue and retry.
     } finally {
       setIsSubmitting(false);
+      submitLockRef.current = false;
     }
   };
 
@@ -309,14 +348,16 @@ function TagEditorModalBody({
             return;
           }
 
-          onDeleted(tag.id);
+          // flushSync ensures the editor modal is fully removed before the
+          // onDeleted callback triggers parent re-renders.
+          flushSync(() => modals.close(modalId));
           notifications.show(
             successNotificationTemplate({
               title: t("DeleteSuccessTitle"),
               description: t("DeleteSuccessDescription"),
             }),
           );
-          modals.close(modalId);
+          onDeleted(tag.id);
         } catch {
           notifications.show(
             errorNotificationTemplate({
@@ -380,7 +421,7 @@ function TagEditorModalBody({
           <Button
             variant="light"
             color="red"
-            leftSection={<IconTrash size={16} />}
+            leftSection={<IconTagMinus size={16} />}
             onClick={requestDelete}
             disabled={isSubmitting}
           >
@@ -395,6 +436,7 @@ function TagEditorModalBody({
           onCancel={() => modals.close(modalId)}
           cancelDisabled={isSubmitting}
           actionLabel={mode === "create" ? t("CreateButton") : t("SaveButton")}
+          actionLeftSection={mode === "create" ? <IconTagPlus size={16} /> : undefined}
           actionLoading={isSubmitting}
           actionDisabled={isSubmitting || !label.trim() || !color.trim()}
           onAction={() => {
@@ -414,7 +456,13 @@ export function openTagEditorModal(options: OpenTagEditorModalOptions) {
     title: (
       <ModalTitle
         text={options.mode === "edit" ? options.t("EditTitle") : options.t("CreateTitle")}
-        icon={<IconTag size={20} stroke={1.5} />}
+        icon={
+          options.mode === "create" ? (
+            <IconTagPlus size={20} stroke={1.5} />
+          ) : (
+            <IconTag size={20} stroke={1.5} />
+          )
+        }
       />
     ),
     size: "lg",

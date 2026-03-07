@@ -292,6 +292,8 @@ export function MapPageClient({ contacts }: MapPageClientProps) {
             selectedIds={selectedIds}
             isHeaderShown={true}
             onSearchChange={handleTableSearch}
+            noContactsFound={t("NoContactsFound")}
+            noContactsMatchSearch={t("NoContactsMatchSearch")}
             columnsForMenu={columns}
             setColumnsForMenu={setColumns}
             sortOrderForMenu={sortOrder}

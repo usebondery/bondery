@@ -82,6 +82,7 @@ export function stripNameTitles(rawName: string): string {
 
   return words
     .slice(start, end + 1)
+    .map((w) => w.replace(/,$/, "")) // strip trailing commas left by "Name, TITLE" patterns
     .join(" ")
     .trim();
 }

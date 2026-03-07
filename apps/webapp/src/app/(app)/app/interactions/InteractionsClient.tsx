@@ -339,6 +339,7 @@ export function InteractionsClient({
               labels={{
                 searchPlaceholder: t("SearchPlaceholder"),
                 noEventsFound: t("NoActivitiesFound"),
+                noEventsMatchSearch: t("NoActivitiesFiltered"),
                 sortButton: t("SortButton"),
                 visibleColumnsButton: t("VisibleColumnsButton"),
                 visibleColumnsSection: t("VisibleColumnsSection"),

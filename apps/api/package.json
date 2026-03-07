@@ -1,8 +1,9 @@
 {
   "name": "api",
-  "version": "0.1.0",
+  "version": "0.6.1",
   "private": true,
   "type": "module",
+  "description": "Bondery API",
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "build": "tsc",

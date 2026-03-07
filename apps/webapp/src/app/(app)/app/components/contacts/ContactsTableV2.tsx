@@ -18,7 +18,7 @@ import {
   IconUsersPlus,
 } from "@tabler/icons-react";
 import Image from "next/image";
-import { useMemo } from "react";
+import { useCallback, useMemo, useState } from "react";
 import type { ReactNode } from "react";
 import type { Contact } from "@bondery/types";
 import {
@@ -115,6 +115,8 @@ interface ContactsTableV2Props {
   searchDefaultValue?: string;
   searchValue?: string;
   onSearchChange?: (value: string) => void;
+  noContactsFound: string;
+  noContactsMatchSearch: string;
   columnsForMenu?: ColumnConfig[];
   setColumnsForMenu?: React.Dispatch<React.SetStateAction<ColumnConfig[]>>;
   sortOrderForMenu?: SortOrder;
@@ -302,7 +304,21 @@ export default function ContactsTableV2({
   excludedIds,
   disableNameLink,
   dateLocale,
+  noContactsFound,
+  noContactsMatchSearch,
 }: ContactsTableV2Props) {
+  const [searchIsActive, setSearchIsActive] = useState(() =>
+    Boolean(searchValue ?? searchDefaultValue),
+  );
+
+  const handleSearchChange = useCallback(
+    (value: string) => {
+      setSearchIsActive(value.length > 0);
+      onSearchChange?.(value);
+    },
+    [onSearchChange],
+  );
+
   const dateFormatter = useMemo(
     () => new Intl.DateTimeFormat(dateLocale || "en-US", { dateStyle: "short" }),
     [dateLocale],
@@ -504,7 +520,7 @@ export default function ContactsTableV2({
 
   const labels: DataTableLabels = {
     searchPlaceholder,
-    emptyStateMessage: "No contacts found",
+    emptyStateMessage: searchIsActive ? noContactsMatchSearch : noContactsFound,
     loadMoreLabel: loadMoreAction?.label,
     selectedCountTemplate: "{count} people selected",
     totalCountTemplate: "{count} total people",
@@ -539,7 +555,7 @@ export default function ContactsTableV2({
       nonSelectableIds={nonSelectableIds}
       nonSelectableTooltip={nonSelectableTooltip}
       searchValue={searchValue ?? searchDefaultValue}
-      onSearchChange={onSearchChange}
+      onSearchChange={handleSearchChange}
       sortOptions={sortOrderForMenu && setSortOrderForMenu ? sortOptions : undefined}
       currentSort={sortOrderForMenu}
       onSortChange={setSortOrderForMenu}

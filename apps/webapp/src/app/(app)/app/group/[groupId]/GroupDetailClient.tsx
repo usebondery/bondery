@@ -55,6 +55,10 @@ interface GroupDetailClientProps {
   totalCount: number;
   initialSearch: string;
   initialSort: SortOrder;
+  /** First 3 group members fetched without any search filter — stable across searches. */
+  cardPreviewContacts: Contact[];
+  /** Total group member count without any search filter — stable across searches. */
+  groupTotalCount: number;
 }
 
 export function GroupDetailClient({
@@ -66,6 +70,8 @@ export function GroupDetailClient({
   totalCount,
   initialSearch,
   initialSort,
+  cardPreviewContacts,
+  groupTotalCount,
 }: GroupDetailClientProps) {
   const t = useTranslations("GroupsPage");
   const tGroupDetail = useTranslations("GroupDetailPage");
@@ -585,15 +591,15 @@ export function GroupDetailClient({
       color: groupColor || "blue",
       createdAt: "",
       updatedAt: "",
-      contactCount: totalAvailableCount,
-      previewContacts: contacts.slice(0, 3).map((contact) => ({
+      contactCount: groupTotalCount,
+      previewContacts: cardPreviewContacts.map((contact) => ({
         id: contact.id,
         firstName: contact.firstName,
         lastName: contact.lastName,
         avatar: contact.avatar,
       })),
     }),
-    [groupColor, groupEmoji, groupId, groupLabel, contacts, totalAvailableCount],
+    [groupColor, groupEmoji, groupId, groupLabel, cardPreviewContacts, groupTotalCount],
   );
 
   const handleEditGroup = (group: GroupWithCount) => {
@@ -733,7 +739,13 @@ export function GroupDetailClient({
         <PageHeader
           icon={IconUsersGroup}
           title={"Group's details"}
-          backHref={WEBAPP_ROUTES.GROUPS}
+          backOnClick={() => {
+            if (typeof window !== "undefined" && window.history.length > 1) {
+              router.back();
+            } else {
+              router.push(WEBAPP_ROUTES.GROUPS);
+            }
+          }}
           action={
             <Button size="md" leftSection={<IconUserPlus size={16} />} onClick={handleAddContacts}>
               Add people to group
@@ -758,6 +770,8 @@ export function GroupDetailClient({
             isHeaderShown={true}
             searchDefaultValue={initialSearch}
             onSearchChange={handleSearchChange}
+            noContactsFound={tGroupDetail("NoContactsFound")}
+            noContactsMatchSearch={tGroupDetail("NoContactsMatchSearch")}
             columnsForMenu={columns}
             setColumnsForMenu={setColumns}
             sortOrderForMenu={initialSort}

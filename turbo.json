@@ -1,6 +1,6 @@
 {
   "$schema": "https://v2-8-7.turborepo.dev/schema.json",
-  "ui": "stream",
+  "ui": "tui",
   "tasks": {
     "build": {
       "env": [

@@ -3,6 +3,7 @@
 import { Button, Stack, Group, Paper } from "@mantine/core";
 import {
   IconAddressBook,
+  IconBrandLinkedin,
   IconUserPlus,
   IconUsers,
   IconUser,
@@ -31,6 +32,7 @@ import { openDeleteContactsModal } from "@/app/(app)/app/components/contacts/ope
 import { openAddPeopleToGroupSelectionModal } from "./components/AddPeopleToGroupSelectionModal";
 import { MERGE_CONFLICT_FIELDS, openMergeWithModal } from "./components/MergeWithModal";
 import { WEBSITE_URL } from "@/lib/config";
+import { useEnrichFromLinkedIn } from "@/lib/extension/useEnrichFromLinkedIn";
 
 import type { Contact, MergeConflictField } from "@bondery/types";
 import { revalidateContacts } from "../actions";
@@ -48,6 +50,8 @@ export function PeopleClient({ initialContacts, totalCount, layout = "stack" }: 
   const t = useTranslations("PeoplePage");
   const tHeader = useTranslations("PageHeader");
   const tMerge = useTranslations("MergeWithModal");
+  const tEnrich = useTranslations("EnrichFromLinkedIn");
+  const { enrichFromLinkedIn } = useEnrichFromLinkedIn({ onSuccess: revalidateContacts });
   const mergeTexts = useMemo(
     () => ({
       errorTitle: tMerge("ErrorTitle"),
@@ -432,6 +436,8 @@ export function PeopleClient({ initialContacts, totalCount, layout = "stack" }: 
             isHeaderShown={true}
             searchDefaultValue={initialSearch}
             onSearchChange={handleSearch}
+            noContactsFound={t("NoContactsFound")}
+            noContactsMatchSearch={t("NoContactsMatchSearch")}
             columnsForMenu={columns}
             setColumnsForMenu={setColumns}
             sortOrderForMenu={initialSort}
@@ -451,6 +457,17 @@ export function PeopleClient({ initialContacts, totalCount, layout = "stack" }: 
               onDeleteOne: handleDeleteContact,
               onDeleteSelected: handleDeleteSelected,
             }}
+            menuActions={[
+              {
+                key: "enrich-linkedin",
+                label: tEnrich("MenuLabel"),
+                icon: <IconBrandLinkedin size={16} />,
+                onClick: (contactId) => {
+                  const contact = contacts.find((c) => c.id === contactId);
+                  enrichFromLinkedIn(contactId, contact?.linkedin);
+                },
+              },
+            ]}
             loadMoreAction={{
               label: "Load another 50 contacts",
               onClick: handleLoadMore,

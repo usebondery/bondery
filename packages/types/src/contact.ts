@@ -254,3 +254,41 @@ export interface ContactsFilter {
 export type DeleteContactsRequest =
   | { ids: string[] }
   | { filter: ContactsFilter; excludeIds?: string[] };
+
+/**
+ * A single work history entry for a contact, typically sourced from LinkedIn.
+ */
+export interface WorkHistoryEntry {
+  id: string;
+  userId: string;
+  personId: string;
+  companyName: string;
+  companyLinkedinUrl: string | null;
+  companyLogoUrl: string | null;
+  title: string | null;
+  description: string | null;
+  startDate: string | null;
+  endDate: string | null;
+  employmentType: string | null;
+  location: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/**
+ * A single education entry for a contact, typically sourced from LinkedIn.
+ */
+export interface EducationEntry {
+  id: string;
+  userId: string;
+  personId: string;
+  schoolName: string;
+  schoolLinkedinUrl: string | null;
+  schoolLogoUrl: string | null;
+  degree: string | null;
+  description: string | null;
+  startDate: string | null;
+  endDate: string | null;
+  createdAt: string;
+  updatedAt: string;
+}

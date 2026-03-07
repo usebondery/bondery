@@ -15,7 +15,7 @@ import {
   IconCopy,
   IconDotsVertical,
   IconEdit,
-  IconPlus,
+  IconFolderCog,
   IconTrash,
   IconUserPlus,
 } from "@tabler/icons-react";
@@ -23,12 +23,35 @@ import { useState, type MouseEvent, type ReactNode } from "react";
 import type { GroupWithCount } from "@bondery/types";
 import { PersonAvatarGroup } from "@bondery/mantine-next";
 
+// ── Color maps ──────────────────────────────────────────
+
+type HighlightColor = "primary" | "green" | "red";
+
+const BORDER_COLOR: Record<HighlightColor, string> = {
+  primary: "var(--mantine-primary-color-filled)",
+  green: "var(--mantine-color-green-filled)",
+  red: "var(--mantine-color-red-filled)",
+};
+
+const BG_COLOR: Record<HighlightColor, string> = {
+  primary: "var(--mantine-primary-color-light)",
+  green: "var(--mantine-color-green-light)",
+  red: "var(--mantine-color-red-light)",
+};
+
+const FILLED_COLOR: Record<"primary" | "green", string> = {
+  primary: "var(--mantine-primary-color-filled)",
+  green: "var(--mantine-color-green-filled)",
+};
+
+// ── Prop types ──────────────────────────────────────────
+
 interface GroupCardCommonProps {
   interactive?: boolean;
   selected?: boolean;
   showMenu?: boolean;
   cursorType?: "pointer" | "default";
-  highlightColor?: "primary" | "green" | "red";
+  highlightColor?: HighlightColor;
   shadow?: string;
 }
 
@@ -47,6 +70,7 @@ interface GroupActionCardProps extends GroupCardCommonProps {
   actionLabel: string;
   onActionClick: () => void;
   actionIcon?: ReactNode;
+  actionColor?: "primary" | "green";
 }
 
 type GroupCardProps = GroupEntityCardProps | GroupActionCardProps;
@@ -56,6 +80,79 @@ export const GROUP_CARD_MAX_WIDTH_BY_VARIANT: Record<"default" | "small" | "acti
   small: "14rem",
   action: "14rem",
 };
+
+// ── Shared card shell ───────────────────────────────────
+
+/**
+ * Shared layout wrapper used by both entity and action card variants.
+ * Renders a Card with a colored top section and a body Stack underneath.
+ * Because both variants render through this same component, their DOM
+ * structure (and therefore height) is guaranteed to be identical.
+ */
+function GroupCardShell({
+  compact,
+  shadow,
+  maxWidth,
+  interactive,
+  cursorType,
+  highlightColor,
+  onClick,
+  className,
+  sectionBg,
+  sectionContent,
+  sectionOverlay,
+  label,
+  bottomRow,
+}: {
+  compact: boolean;
+  shadow: string;
+  maxWidth: string;
+  interactive: boolean;
+  cursorType?: "pointer" | "default";
+  highlightColor?: HighlightColor;
+  onClick: (e: MouseEvent) => void;
+  className: string;
+  sectionBg: string;
+  sectionContent: ReactNode;
+  sectionOverlay?: ReactNode;
+  label: string;
+  bottomRow: ReactNode;
+}) {
+  return (
+    <Card
+      shadow={shadow}
+      p={compact ? "sm" : "md"}
+      style={{
+        cursor: cursorType || (interactive ? "pointer" : "default"),
+        maxWidth,
+      }}
+      className={className}
+      bd={highlightColor ? `1px solid ${BORDER_COLOR[highlightColor]}` : undefined}
+      bg={highlightColor ? BG_COLOR[highlightColor] : undefined}
+      onClick={onClick}
+    >
+      <Card.Section bg={sectionBg} h={compact ? 72 : 80} pos="relative">
+        {sectionOverlay}
+        <Group justify="center" h="100%">
+          {sectionContent}
+        </Group>
+      </Card.Section>
+
+      <Stack gap={compact ? 8 : 10} mt={compact ? "sm" : "md"} align="stretch">
+        <Text fw={600} size={compact ? "sm" : "md"} ta="center" lineClamp={1}>
+          {label}
+        </Text>
+        {/* minH matches Mantine Avatar size so all cards share the same
+            bottom-row height regardless of content (avatars vs text). */}
+        <Group justify="center" mih={compact ? 26 : 38}>
+          {bottomRow}
+        </Group>
+      </Stack>
+    </Card>
+  );
+}
+
+// ── Context menu ────────────────────────────────────────
 
 function GroupCardMenu({
   group,
@@ -138,6 +235,8 @@ function GroupCardMenu({
   );
 }
 
+// ── Main component ──────────────────────────────────────
+
 export function GroupCard(props: GroupCardProps) {
   const [menuOpened, setMenuOpened] = useState(false);
   const {
@@ -148,143 +247,97 @@ export function GroupCard(props: GroupCardProps) {
     highlightColor,
     shadow = "none",
   } = props;
-  const variant = props.variant || "default";
-  const isCompactVariant = variant === "small" || variant === "action";
-  const isSmallVariant = variant === "small";
-  const cardClassByVariant = "w-full";
-  const cardMaxWidth = GROUP_CARD_MAX_WIDTH_BY_VARIANT[variant];
 
+  const variant = props.variant || "default";
+  const compact = variant !== "default";
+  const maxWidth = GROUP_CARD_MAX_WIDTH_BY_VARIANT[variant];
   const resolvedHighlightColor = highlightColor || (selected ? "primary" : undefined);
-  const borderColorByHighlight: Record<"primary" | "green" | "red", string> = {
-    primary: "var(--mantine-primary-color-filled)",
-    green: "var(--mantine-color-green-filled)",
-    red: "var(--mantine-color-red-filled)",
-  };
-  const backgroundColorByHighlight: Record<"primary" | "green" | "red", string> = {
-    primary: "var(--mantine-primary-color-light)",
-    green: "var(--mantine-color-green-light)",
-    red: "var(--mantine-color-red-light)",
-  };
+  const className = `w-full ${interactive ? "card-scale-effect" : ""}`.trim();
+
+  // ── Action card ─────────────────────────────────────
 
   if (props.variant === "action") {
-    const actionIcon = props.actionIcon || <IconPlus size={isCompactVariant ? 20 : 24} />;
+    const actionColor = props.actionColor ?? "primary";
+    const actionIcon = props.actionIcon || <IconFolderCog size={compact ? 20 : 24} />;
 
     return (
-      <Card
+      <GroupCardShell
+        compact={compact}
         shadow={shadow}
-        p={isCompactVariant ? "sm" : "md"}
-        style={{
-          cursor: cursorType || (interactive ? "pointer" : "default"),
-          maxWidth: cardMaxWidth,
-        }}
-        className={`${cardClassByVariant} ${interactive ? "card-scale-effect" : undefined}`}
-        onClick={() => {
-          if (!interactive) {
-            return;
-          }
-          props.onActionClick();
-        }}
-      >
-        <Card.Section bg="var(--mantine-primary-color-light)" h={isCompactVariant ? 72 : 80}>
-          <Group justify="center" h="100%" c="var(--mantine-primary-color-filled)">
-            {actionIcon}
-          </Group>
-        </Card.Section>
-
-        <Stack gap={isCompactVariant ? 8 : 10} mt={isCompactVariant ? "sm" : "md"} align="stretch">
-          <Text fw={600} size={isCompactVariant ? "sm" : "md"} ta="center" lineClamp={1}>
-            {props.actionLabel}
-          </Text>
-          <Group justify="center">
-            <Text size="sm" c="dimmed">
-              Manage memberships
-            </Text>
-          </Group>
-        </Stack>
-      </Card>
+        maxWidth={maxWidth}
+        interactive={interactive}
+        cursorType={cursorType}
+        onClick={() => interactive && props.onActionClick()}
+        className={className}
+        sectionBg={BG_COLOR[actionColor]}
+        sectionContent={<Group c={FILLED_COLOR[actionColor]}>{actionIcon}</Group>}
+        label={props.actionLabel}
+        bottomRow={null}
+      />
     );
   }
 
-  const groupProps = props;
-  const group = groupProps.group;
+  // ── Entity card ─────────────────────────────────────
+
+  const group = props.group;
+  const previewContacts = group.previewContacts || [];
   const peopleLabel = `${group.contactCount} ${group.contactCount === 1 ? "person" : "people"}`;
-  const previewContacts: NonNullable<GroupWithCount["previewContacts"]> =
-    group.previewContacts || [];
 
   const handleCardClick = (e: MouseEvent) => {
-    if (!interactive) {
-      return;
-    }
-
-    if ((e.target as HTMLElement).closest("[data-menu-trigger]")) {
-      return;
-    }
-    groupProps.onClick(group.id);
+    if (!interactive) return;
+    if ((e.target as HTMLElement).closest("[data-menu-trigger]")) return;
+    props.onClick(group.id);
   };
 
   return (
-    <Card
+    <GroupCardShell
+      compact={compact}
       shadow={shadow}
-      p={isSmallVariant ? "sm" : "md"}
-      style={{
-        cursor: cursorType || (interactive ? "pointer" : "default"),
-        maxWidth: cardMaxWidth,
-      }}
-      className={`${cardClassByVariant} ${interactive ? "card-scale-effect" : undefined}`}
-      bd={
-        resolvedHighlightColor
-          ? `1px solid ${borderColorByHighlight[resolvedHighlightColor]}`
-          : undefined
-      }
-      bg={resolvedHighlightColor ? backgroundColorByHighlight[resolvedHighlightColor] : undefined}
+      maxWidth={maxWidth}
+      interactive={interactive}
+      cursorType={cursorType}
+      highlightColor={resolvedHighlightColor}
       onClick={handleCardClick}
-    >
-      <>
-        <Card.Section bg={group.color} h={isSmallVariant ? 72 : 80} pos="relative">
-          {showMenu && (
-            <div style={{ position: "absolute", top: 12, right: 12 }}>
-              <GroupCardMenu
-                group={group}
-                menuOpened={menuOpened}
-                setMenuOpened={setMenuOpened}
-                onAddPeople={groupProps.onAddPeople}
-                onEdit={groupProps.onEdit}
-                onDuplicate={groupProps.onDuplicate}
-                onDelete={groupProps.onDelete}
-                iconSize={isSmallVariant ? "sm" : "md"}
-              />
-            </div>
-          )}
-          <Group justify="center" h="100%">
-            <Text style={{ fontSize: isSmallVariant ? 34 : 40, lineHeight: 1 }}>{group.emoji}</Text>
-          </Group>
-        </Card.Section>
-
-        <Stack gap={isSmallVariant ? 8 : 10} mt={isSmallVariant ? "sm" : "md"} align="stretch">
-          <Text fw={600} size={isSmallVariant ? "sm" : "md"} ta="center" lineClamp={1}>
-            {group.label}
+      className={className}
+      sectionBg={group.color}
+      sectionOverlay={
+        showMenu ? (
+          <div style={{ position: "absolute", top: 12, right: 12 }}>
+            <GroupCardMenu
+              group={group}
+              menuOpened={menuOpened}
+              setMenuOpened={setMenuOpened}
+              onAddPeople={props.onAddPeople}
+              onEdit={props.onEdit}
+              onDuplicate={props.onDuplicate}
+              onDelete={props.onDelete}
+              iconSize={compact ? "sm" : "md"}
+            />
+          </div>
+        ) : undefined
+      }
+      sectionContent={
+        <Text style={{ fontSize: compact ? 34 : 40, lineHeight: 1 }}>{group.emoji}</Text>
+      }
+      label={group.label}
+      bottomRow={
+        previewContacts.length > 0 ? (
+          <PersonAvatarGroup
+            people={previewContacts.map((contact) => ({
+              id: contact.id,
+              firstName: contact.firstName,
+              lastName: contact.lastName,
+              avatar: contact.avatar,
+            }))}
+            totalCount={group.contactCount}
+            size={compact ? "sm" : "md"}
+          />
+        ) : (
+          <Text size="sm" c="dimmed">
+            {peopleLabel}
           </Text>
-
-          <Group justify="center">
-            {previewContacts.length > 0 ? (
-              <PersonAvatarGroup
-                people={previewContacts.map((contact) => ({
-                  id: contact.id,
-                  firstName: contact.firstName,
-                  lastName: contact.lastName,
-                  avatar: contact.avatar,
-                }))}
-                totalCount={group.contactCount}
-                size={isSmallVariant ? "sm" : "md"}
-              />
-            ) : (
-              <Text size="sm" c="dimmed">
-                {peopleLabel}
-              </Text>
-            )}
-          </Group>
-        </Stack>
-      </>
-    </Card>
+        )
+      }
+    />
   );
 }

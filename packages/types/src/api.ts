@@ -39,6 +39,36 @@ export interface ImageValidationResult {
 }
 
 /**
+ * A single scraped work history entry from LinkedIn
+ */
+export interface ScrapedWorkHistoryEntry {
+  title?: string;
+  companyName: string;
+  /** LinkedIn company handle or numeric ID (e.g. "zs-associates" or "960796") */
+  companyLinkedinId?: string;
+  companyLogoUrl?: string;
+  startDate?: string;
+  endDate?: string;
+  employmentType?: string;
+  location?: string;
+  description?: string;
+}
+
+/**
+ * A single scraped education entry from LinkedIn
+ */
+export interface ScrapedEducationEntry {
+  schoolName: string;
+  /** LinkedIn school handle or numeric ID (e.g. "university-of-michigan" or "18915") */
+  schoolLinkedinId?: string;
+  schoolLogoUrl?: string;
+  degree?: string;
+  description?: string;
+  startDate?: string;
+  endDate?: string;
+}
+
+/**
  * Redirect endpoint request body (from browser extension)
  */
 export interface RedirectRequest {
@@ -52,6 +82,28 @@ export interface RedirectRequest {
   headline?: string;
   place?: string;
   notes?: string;
+  /** LinkedIn work history to insert when creating a new contact */
+  workHistory?: ScrapedWorkHistoryEntry[];
+  /** LinkedIn education history to insert when creating a new contact */
+  educationHistory?: ScrapedEducationEntry[];
+  /** LinkedIn bio / about section text */
+  linkedinBio?: string;
+}
+
+/**
+ * Enrich endpoint request body (from browser extension via webapp).
+ * Force-overwrites all provided fields on an existing contact.
+ */
+export interface EnrichContactRequest {
+  firstName?: string;
+  middleName?: string;
+  lastName?: string;
+  profileImageUrl?: string;
+  headline?: string;
+  place?: string;
+  linkedinBio?: string;
+  workHistory?: ScrapedWorkHistoryEntry[];
+  educationHistory?: ScrapedEducationEntry[];
 }
 
 /**
