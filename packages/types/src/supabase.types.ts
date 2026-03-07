@@ -213,6 +213,7 @@ export type Database = {
           place: string | null;
           timezone: string | null;
           headline: string | null;
+          linkedin_bio: string | null;
           updated_at: string | null;
           user_id: string;
         };
@@ -244,6 +245,7 @@ export type Database = {
           place?: string | null;
           timezone?: string | null;
           headline?: string | null;
+          linkedin_bio?: string | null;
           updated_at?: string | null;
           user_id: string;
         };
@@ -275,6 +277,7 @@ export type Database = {
           place?: string | null;
           timezone?: string | null;
           headline?: string | null;
+          linkedin_bio?: string | null;
           updated_at?: string | null;
           user_id?: string;
         };
@@ -951,6 +954,22 @@ export type Database = {
         Returns: Json;
       };
       send_hourly_reminder_digests: { Args: never; Returns: Json };
+      replace_work_history: {
+        Args: {
+          p_person_id: string;
+          p_user_id: string;
+          p_rows: Json;
+        };
+        Returns: undefined;
+      };
+      replace_education_history: {
+        Args: {
+          p_person_id: string;
+          p_user_id: string;
+          p_rows: Json;
+        };
+        Returns: undefined;
+      };
     };
     Enums: {
       color_scheme: "light" | "dark" | "auto";
