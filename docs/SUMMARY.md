@@ -4,7 +4,8 @@
 
 * [🟣 Welcome](README.md)
 * [😎 Getting started](bondery/getting-started.md)
-* [🤔 Getting help and troubleshooting](bondery/getting-help-and-troubleshooting.md)
+* [� Chrome Extension](bondery/chrome-extension.md)
+* [�🤔 Getting help and troubleshooting](bondery/getting-help-and-troubleshooting.md)
 * [‼️ Read before editing](bondery/read-before-editing.md)
 
 ## Core concepts
