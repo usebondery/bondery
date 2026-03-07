@@ -42,6 +42,16 @@ export default defineConfig({
 
   // Configure Vite
   vite: ({ mode }) => ({
+    // Enable polling-based file watching on Windows where native FS events are unreliable
+    server:
+      mode === "development"
+        ? {
+            watch: {
+              usePolling: true,
+              interval: 300,
+            },
+          }
+        : {},
     define:
       mode === "development"
         ? {
@@ -97,9 +107,9 @@ export default defineConfig({
     }
 
     return {
-      name: "Bondery Social Integration",
-      description: "Import contacts from social media directly to Bondery",
-      version: "0.6.0",
+      name: "Bondery Extension",
+      description: "Import contacts from social media directly to Bondery Webapp",
+      version: "0.6.1",
 
       permissions: [
         "storage",
@@ -134,14 +144,6 @@ export default defineConfig({
           resources: ["instagram-interceptor.js"],
           matches: ["https://www.instagram.com/*", "https://instagram.com/*"],
         },
-        {
-          resources: ["linkedin-interceptor.js"],
-          matches: [
-            "https://www.linkedin.com/*",
-            "https://linkedin.com/*",
-            "https://*.linkedin.com/*",
-          ],
-        },
       ],
     };
   },
@@ -152,7 +154,11 @@ export default defineConfig({
       console.log("[wxt] Running pre-build checks...");
 
       // Validate required environment variables
-      const requiredEnvVars = ["WXT_WEBAPP_URL", "WXT_SUPABASE_URL", "WXT_OAUTH_CLIENT_ID"];
+      const requiredEnvVars = [
+        "WXT_WEBAPP_URL",
+        "WXT_SUPABASE_URL",
+        "WXT_SUPABASE_OAUTH_CLIENT_ID",
+      ];
       const missing = requiredEnvVars.filter((key) => !process.env[key]);
 
       if (missing.length > 0 && wxt.config.mode === "production") {

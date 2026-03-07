@@ -139,6 +139,8 @@ export function PersonTagsInput({
         if (selectedPersonIds.includes(personId)) {
           updatePersonTags([...personTags, normalizedTag]);
         }
+
+        setSearch("");
       },
       onUpdated: () => {},
       onDeleted: () => {},

@@ -87,6 +87,14 @@ const envSchema = {
     PRIVATE_BONDERY_SUPABASE_HTTP_KEY: {
       type: "string",
     },
+    MAPS_URL: {
+      type: "string",
+      default: "https://api.mapy.com",
+    },
+    MAPS_KEY: {
+      type: "string",
+      default: "",
+    },
   },
 } as const;
 

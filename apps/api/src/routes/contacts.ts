@@ -40,7 +40,17 @@ import type {
   MergeRecommendationReason,
   MergeRecommendationsResponse,
   RefreshMergeRecommendationsResponse,
+  EnrichContactRequest,
+  ScrapedWorkHistoryEntry,
+  ScrapedEducationEntry,
 } from "@bondery/types";
+import { cleanPersonName } from "@bondery/helpers/name-utils";
+import { cachedGeocodeLinkedInPlace } from "../lib/mapy.js";
+import {
+  toPostgresDate,
+  updateContactPhoto,
+  uploadAllLinkedInLogos,
+} from "../lib/linkedin-helpers.js";
 
 // Contact fields selection query for Supabase
 export const CONTACT_SELECT = `
@@ -850,6 +860,84 @@ async function deleteOrphanedInteractionsForDeletedContacts(
   }
 }
 
+/**
+ * Collects all LinkedIn IDs (company and school) referenced by the work/education
+ * history of the given persons. Must be called BEFORE deleting the persons so the
+ * rows are still present.
+ *
+ * @param client Authenticated Supabase client.
+ * @param userId The user who owns the contacts.
+ * @param personIds The IDs of the contacts about to be deleted.
+ * @returns Deduplicated array of LinkedIn IDs whose logos may become orphaned.
+ */
+async function collectLinkedInLogoIds(
+  client: any,
+  userId: string,
+  personIds: string[],
+): Promise<string[]> {
+  if (personIds.length === 0) return [];
+
+  const [workResult, eduResult] = await Promise.all([
+    client
+      .from("people_work_history")
+      .select("company_linkedin_id")
+      .eq("user_id", userId)
+      .in("person_id", personIds)
+      .not("company_linkedin_id", "is", null),
+    client
+      .from("people_education_history")
+      .select("school_linkedin_id")
+      .eq("user_id", userId)
+      .in("person_id", personIds)
+      .not("school_linkedin_id", "is", null),
+  ]);
+
+  const ids = new Set<string>();
+  for (const row of workResult.data ?? []) ids.add(row.company_linkedin_id);
+  for (const row of eduResult.data ?? []) ids.add(row.school_linkedin_id);
+  return Array.from(ids);
+}
+
+/**
+ * After the persons have been deleted (and their work/education rows cascaded away),
+ * checks which of the candidate LinkedIn IDs are no longer referenced by any remaining
+ * row for this user, then removes those orphaned logo files from Supabase Storage.
+ *
+ * @param client Authenticated Supabase client.
+ * @param userId The user who owns the contacts.
+ * @param candidateIds LinkedIn IDs collected before deletion via collectLinkedInLogoIds.
+ */
+async function removeOrphanedLinkedInLogos(
+  client: any,
+  userId: string,
+  candidateIds: string[],
+): Promise<void> {
+  if (candidateIds.length === 0) return;
+
+  const [workResult, eduResult] = await Promise.all([
+    client
+      .from("people_work_history")
+      .select("company_linkedin_id")
+      .eq("user_id", userId)
+      .in("company_linkedin_id", candidateIds),
+    client
+      .from("people_education_history")
+      .select("school_linkedin_id")
+      .eq("user_id", userId)
+      .in("school_linkedin_id", candidateIds),
+  ]);
+
+  const stillReferenced = new Set<string>();
+  for (const row of workResult.data ?? []) stillReferenced.add(row.company_linkedin_id);
+  for (const row of eduResult.data ?? []) stillReferenced.add(row.school_linkedin_id);
+
+  const orphaned = candidateIds.filter((id) => !stillReferenced.has(id));
+  if (orphaned.length === 0) return;
+
+  const paths = orphaned.map((id) => `${userId}/${id}.jpg`);
+  await client.storage.from("linkedin_logos").remove(paths);
+}
+
 export async function contactRoutes(fastify: FastifyInstance) {
   /**
    * GET /api/contacts - List all contacts
@@ -1240,6 +1328,8 @@ export async function contactRoutes(fastify: FastifyInstance) {
         return reply.status(500).send({ error: message });
       }
 
+      const candidateLogoIds = await collectLinkedInLogoIds(client, user.id, uniqueIds);
+
       const { error } = await client
         .from("people")
         .delete()
@@ -1248,6 +1338,20 @@ export async function contactRoutes(fastify: FastifyInstance) {
 
       if (error) {
         return reply.status(500).send({ error: error.message });
+      }
+
+      // Clean up storage: delete avatar files for the deleted contacts
+      const avatarPaths = uniqueIds.map((id) => `${user.id}/${id}.jpg`);
+      await client.storage.from("avatars").remove(avatarPaths);
+
+      // Clean up orphaned LinkedIn logo files (best-effort, does not fail the response)
+      try {
+        await removeOrphanedLinkedInLogos(client, user.id, candidateLogoIds);
+      } catch (logoCleanupError) {
+        request.log.warn(
+          { logoCleanupError },
+          "[contacts] Failed to clean up orphaned LinkedIn logos",
+        );
       }
 
       return { message: "Contacts deleted successfully", deletedCount: uniqueIds.length };
@@ -1276,6 +1380,8 @@ export async function contactRoutes(fastify: FastifyInstance) {
         return reply.status(500).send({ error: message });
       }
 
+      const candidateLogoIds = await collectLinkedInLogoIds(client, user.id, [id]);
+
       const { data: deletedContact, error } = await client
         .from("people")
         .delete()
@@ -1286,6 +1392,19 @@ export async function contactRoutes(fastify: FastifyInstance) {
 
       if (error || !deletedContact) {
         return reply.status(404).send({ error: "Contact not found" });
+      }
+
+      // Clean up storage: delete avatar file for the deleted contact
+      await client.storage.from("avatars").remove([`${user.id}/${id}.jpg`]);
+
+      // Clean up orphaned LinkedIn logo files (best-effort, does not fail the response)
+      try {
+        await removeOrphanedLinkedInLogos(client, user.id, candidateLogoIds);
+      } catch (logoCleanupError) {
+        request.log.warn(
+          { logoCleanupError },
+          "[contacts] Failed to clean up orphaned LinkedIn logos",
+        );
       }
 
       return { message: "Contact deleted successfully" };
@@ -3176,6 +3295,355 @@ export async function contactRoutes(fastify: FastifyInstance) {
       reply.header("Content-Disposition", `attachment; filename="${filename}"`);
 
       return vcard;
+    },
+  );
+
+  /**
+   * POST /api/contacts/:id/linkedin-data - Upsert scraped LinkedIn work history
+   */
+  fastify.post(
+    "/:id/linkedin-data",
+    async (
+      request: FastifyRequest<{
+        Params: { id: string };
+        Body: {
+          workHistory: Array<{
+            title?: string;
+            companyName: string;
+            companyLinkedinId?: string;
+            startDate?: string;
+            endDate?: string;
+            employmentType?: string;
+            location?: string;
+          }>;
+        };
+      }>,
+      reply: FastifyReply,
+    ) => {
+      const auth = await requireAuth(request, reply);
+      if (!auth) return;
+
+      const { client, user } = auth;
+      const { id: personId } = request.params;
+      const { workHistory = [] } = request.body;
+
+      request.log.info(
+        { personId, userId: user.id, workHistoryCount: workHistory.length, workHistory },
+        "[linkedin-data] POST received",
+      );
+
+      // Verify the person belongs to the authenticated user
+      const { data: person, error: personError } = await client
+        .from("people")
+        .select("id")
+        .eq("id", personId)
+        .eq("user_id", user.id)
+        .single();
+
+      if (personError || !person) {
+        return reply.status(404).send({ error: "Contact not found" });
+      }
+
+      // Delete existing work history for this person, then insert the new set
+      const { error: deleteError } = await client
+        .from("people_work_history")
+        .delete()
+        .eq("person_id", personId)
+        .eq("user_id", user.id);
+
+      if (deleteError) {
+        return reply.status(500).send({ error: deleteError.message });
+      }
+
+      if (workHistory.length > 0) {
+        const rows = workHistory.map((entry) => ({
+          user_id: user.id,
+          person_id: personId,
+          company_name: entry.companyName,
+          company_linkedin_id: entry.companyLinkedinId ?? null,
+          title: entry.title ?? null,
+          start_date: entry.startDate ?? null,
+          end_date: entry.endDate ?? null,
+          employment_type: entry.employmentType ?? null,
+          location: entry.location ?? null,
+        }));
+
+        request.log.info({ rows }, "[linkedin-data] Inserting rows");
+
+        const { error: insertError } = await client.from("people_work_history").insert(rows);
+
+        if (insertError) {
+          request.log.error({ insertError }, "[linkedin-data] Insert failed");
+          return reply.status(500).send({ error: insertError.message });
+        }
+      }
+
+      request.log.info({ personId, count: workHistory.length }, "[linkedin-data] Upsert complete");
+      return reply.status(200).send({ success: true, count: workHistory.length });
+    },
+  );
+
+  /**
+   * POST /api/contacts/:id/enrich - Update a contact with scraped LinkedIn data.
+   *
+   * Work history, education, bio, and name are **overwritten** so the user can
+   * intentionally refresh stale data.  Avatar, headline, and location are only
+   * filled when the contact doesn't already have them (fill-if-missing).
+   */
+  fastify.post(
+    "/:id/enrich",
+    async (
+      request: FastifyRequest<{
+        Params: { id: string };
+        Body: EnrichContactRequest;
+      }>,
+      reply: FastifyReply,
+    ) => {
+      const auth = await requireAuth(request, reply);
+      if (!auth) return;
+
+      const { client, user } = auth;
+      const { id: personId } = request.params;
+      const {
+        firstName,
+        middleName,
+        lastName,
+        profileImageUrl,
+        headline,
+        place,
+        linkedinBio,
+        workHistory,
+        educationHistory,
+      } = request.body;
+
+      request.log.info(
+        {
+          personId,
+          userId: user.id,
+          workHistoryCount: workHistory?.length ?? 0,
+          educationCount: educationHistory?.length ?? 0,
+        },
+        "[enrich] POST received",
+      );
+
+      // Verify the person belongs to the authenticated user & fetch current values
+      // (needed for fill-if-missing logic on avatar, headline, place)
+      const { data: person, error: personError } = await client
+        .from("people")
+        .select("id, headline, place, avatar")
+        .eq("id", personId)
+        .eq("user_id", user.id)
+        .single();
+
+      if (personError || !person) {
+        return reply.status(404).send({ error: "Contact not found" });
+      }
+
+      // Upload logos in parallel (used when inserting work/edu rows)
+      const logoMap = await uploadAllLinkedInLogos(client, user.id, workHistory, educationHistory);
+
+      // Fill-if-missing: only update contact photo when there's none yet
+      if (profileImageUrl && !person.avatar) {
+        await updateContactPhoto(client, personId, user.id, profileImageUrl);
+      }
+
+      // Force-update scalar fields (name, bio always overwrite)
+      const fieldUpdates: Record<string, any> = {};
+      if (firstName !== undefined)
+        fieldUpdates.first_name = cleanPersonName(firstName) || undefined;
+      if (middleName !== undefined) fieldUpdates.middle_name = cleanPersonName(middleName) || null;
+      if (lastName !== undefined) fieldUpdates.last_name = cleanPersonName(lastName) || null;
+      if (linkedinBio !== undefined) fieldUpdates.linkedin_bio = linkedinBio || null;
+
+      // Fill-if-missing: headline
+      if (headline && !person.headline) {
+        fieldUpdates.headline = headline;
+      }
+
+      // Fill-if-missing: place / location
+      if (place && !person.place) {
+        fieldUpdates.place = place;
+        try {
+          const result = await cachedGeocodeLinkedInPlace(place);
+          if (result) {
+            const { geo, timezone: tz } = result;
+            if (geo.formattedLabel) fieldUpdates.place = geo.formattedLabel;
+            fieldUpdates.location = geo.locationEwkt;
+            if (geo.city) fieldUpdates.address_city = geo.city;
+            if (geo.state) fieldUpdates.address_state = geo.state;
+            if (geo.stateCode) fieldUpdates.address_state_code = geo.stateCode;
+            if (geo.country) fieldUpdates.address_country = geo.country;
+            if (geo.countryCode) fieldUpdates.address_country_code = geo.countryCode;
+            if (geo.formattedLabel) fieldUpdates.address_formatted = geo.formattedLabel;
+            fieldUpdates.address_granularity = "city";
+            fieldUpdates.address_geocode_source = "mapy.com";
+
+            if (tz) fieldUpdates.timezone = tz;
+          }
+        } catch (err) {
+          request.log.error({ err }, "[enrich] Geocode failed, continuing without coordinates");
+        }
+      }
+
+      if (Object.keys(fieldUpdates).length > 0) {
+        fieldUpdates.updated_at = new Date().toISOString();
+        await client.from("people").update(fieldUpdates).eq("id", personId);
+      }
+
+      // Replace work history atomically (delete + insert in one transaction)
+      if (workHistory && workHistory.length > 0) {
+        const rows = workHistory.map((entry: ScrapedWorkHistoryEntry) => ({
+          company_name: entry.companyName,
+          company_linkedin_id: entry.companyLinkedinId ?? null,
+          title: entry.title ?? null,
+          description: entry.description ?? null,
+          start_date: toPostgresDate(entry.startDate),
+          end_date: toPostgresDate(entry.endDate),
+          employment_type: entry.employmentType ?? null,
+          location: entry.location ?? null,
+        }));
+        const { error: whError } = await client.rpc("replace_work_history", {
+          p_person_id: personId,
+          p_user_id: user.id,
+          p_rows: rows,
+        });
+        if (whError) {
+          request.log.error({ whError }, "[enrich] Failed to replace work history");
+        }
+      }
+
+      // Replace education history atomically (delete + insert in one transaction)
+      if (educationHistory && educationHistory.length > 0) {
+        const rows = educationHistory.map((entry: ScrapedEducationEntry) => ({
+          school_name: entry.schoolName,
+          school_linkedin_id: entry.schoolLinkedinId ?? null,
+          degree: entry.degree ?? null,
+          description: entry.description ?? null,
+          start_date: toPostgresDate(entry.startDate),
+          end_date: toPostgresDate(entry.endDate),
+        }));
+        const { error: ehError } = await client.rpc("replace_education_history", {
+          p_person_id: personId,
+          p_user_id: user.id,
+          p_rows: rows,
+        });
+        if (ehError) {
+          request.log.error({ ehError }, "[enrich] Failed to replace education history");
+        }
+      }
+
+      request.log.info({ personId }, "[enrich] Enrichment complete");
+      return reply.status(200).send({ success: true });
+    },
+  );
+
+  /**
+   * GET /api/contacts/:id/linkedin-data - Get work history and education for a person
+   */
+  fastify.get(
+    "/:id/linkedin-data",
+    async (request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+      const auth = await requireAuth(request, reply);
+      if (!auth) return;
+
+      const { client, user } = auth;
+      const { id: personId } = request.params;
+
+      const { data: person, error: personError } = await client
+        .from("people")
+        .select("id, linkedin_bio")
+        .eq("id", personId)
+        .eq("user_id", user.id)
+        .single();
+
+      if (personError || !person) {
+        return reply.status(404).send({ error: "Contact not found" });
+      }
+
+      const [workHistoryResult, educationResult] = await Promise.all([
+        client
+          .from("people_work_history")
+          .select("*")
+          .eq("user_id", user.id)
+          .eq("person_id", personId)
+          .order("start_date", { ascending: false }),
+        client
+          .from("people_education_history")
+          .select("*")
+          .eq("user_id", user.id)
+          .eq("person_id", personId)
+          .order("start_date", { ascending: false }),
+      ]);
+
+      // Sort: active (null end_date) first, then finished — both groups ordered by
+      // start_date DESC. DB can't express (end_date IS NULL) DESC as a primary sort
+      // key via PostgREST, so we apply the two-group ordering in JS.
+      const sortByActiveFirst = <T extends { end_date: string | null; start_date: string | null }>(
+        rows: T[],
+      ): T[] =>
+        rows.sort((a, b) => {
+          const aActive = a.end_date === null;
+          const bActive = b.end_date === null;
+          if (aActive !== bActive) return aActive ? -1 : 1;
+          // Same group: most recent start_date first
+          if (!a.start_date && !b.start_date) return 0;
+          if (!a.start_date) return 1;
+          if (!b.start_date) return -1;
+          return a.start_date > b.start_date ? -1 : 1;
+        });
+
+      if (workHistoryResult.error) {
+        return reply.status(500).send({ error: workHistoryResult.error.message });
+      }
+      if (educationResult.error) {
+        return reply.status(500).send({ error: educationResult.error.message });
+      }
+
+      return {
+        linkedinBio: person.linkedin_bio ?? null,
+        workHistory: sortByActiveFirst(workHistoryResult.data || []).map((row) => ({
+          id: row.id,
+          userId: row.user_id,
+          personId: row.person_id,
+          companyName: row.company_name,
+          companyLinkedinUrl: row.company_linkedin_id
+            ? `https://www.linkedin.com/company/${row.company_linkedin_id}/`
+            : null,
+          companyLogoUrl: row.company_linkedin_id
+            ? client.storage
+                .from("linkedin_logos")
+                .getPublicUrl(`${user.id}/${row.company_linkedin_id}.jpg`).data.publicUrl
+            : null,
+          title: row.title,
+          description: row.description,
+          startDate: row.start_date,
+          endDate: row.end_date,
+          employmentType: row.employment_type,
+          location: row.location,
+          createdAt: row.created_at,
+          updatedAt: row.updated_at,
+        })),
+        education: sortByActiveFirst(educationResult.data || []).map((row) => ({
+          id: row.id,
+          userId: row.user_id,
+          personId: row.person_id,
+          schoolName: row.school_name,
+          schoolLinkedinUrl: row.school_linkedin_id
+            ? `https://www.linkedin.com/school/${row.school_linkedin_id}/`
+            : null,
+          schoolLogoUrl: row.school_linkedin_id
+            ? client.storage
+                .from("linkedin_logos")
+                .getPublicUrl(`${user.id}/${row.school_linkedin_id}.jpg`).data.publicUrl
+            : null,
+          degree: row.degree,
+          description: row.description,
+          startDate: row.start_date,
+          endDate: row.end_date,
+          createdAt: row.created_at,
+          updatedAt: row.updated_at,
+        })),
+      };
     },
   );
 }

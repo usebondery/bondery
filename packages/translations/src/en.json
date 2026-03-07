@@ -144,6 +144,22 @@
     "Title": "Contact Details",
     "Description": "View and manage details of your contact."
   },
+  "PersonTabs": {
+    "Overview": "Overview",
+    "PersonalInfo": "Personal Info",
+    "LinkedIn": "LinkedIn"
+  },
+  "LinkedInData": {
+    "About": "About",
+    "WorkHistory": "Work History",
+    "Education": "Education",
+    "Present": "Present",
+    "NoWorkHistory": "No work history available",
+    "NoEducation": "No education history available",
+    "ShowMore": "Show more",
+    "ShowLess": "Show less",
+    "LastDataUpdate": "Last data update: {date}"
+  },
   "NotFoundPage": {
     "Title": "Page Not Found",
     "Description": "The page you are looking for does not exist."
@@ -346,6 +362,8 @@
         "ExistingHandleTooltip": "Person with same username already exists",
         "ImportSelected": "Import selected ({count})",
         "ChooseContactsHint": "Choose which contacts you want to import",
+        "NoContactsFound": "No contacts to preview.",
+        "NoContactsMatchSearch": "No such contact found.",
         "ImportSuccess": "Imported: {imported}, updated: {updated}, skipped: {skipped}",
         "NoContactsSelected": "Select at least one contact to import.",
         "ParseError": "Failed to parse LinkedIn export.",
@@ -423,7 +441,9 @@
         "InstructionsTitle": "Instructions",
         "ImportingTitle": "Importing contacts...",
         "ImportingProgress": "{current} of {total} contacts processed",
-        "ChooseContactsHint": "Choose which contacts you want to import"
+        "ChooseContactsHint": "Choose which contacts you want to import",
+        "NoContactsFound": "No contacts to preview.",
+        "NoContactsMatchSearch": "No such contact found."
       }
     }
   },
@@ -474,7 +494,9 @@
       "Place": "Place",
       "LastInteraction": "Last interaction"
     },
-    "Empty": "No contacts are linked to this group yet."
+    "Empty": "No contacts are linked to this group yet.",
+    "NoContactsFound": "No contacts are linked to this group yet.",
+    "NoContactsMatchSearch": "No such contact found."
   },
   "InteractionsPage": {
     "PageTitle": "Interactions",
@@ -523,7 +545,8 @@
     "DeleteSelectedConfirmMessage": "Are you sure you want to delete {count} interactions? This action cannot be undone.",
     "DeletingSelectedTitle": "Deleting interactions",
     "DeletingSelectedDescription": "Deleting {count} selected interactions...",
-    "NoActivitiesFound": "No interactions found.",
+    "NoActivitiesFound": "You didn't create any interactions yet.",
+    "NoActivitiesFiltered": "No such interaction found.",
     "NoActivitiesWithPerson": "No interactions yet with this person.",
     "SelectedCountTemplate": "{count} selected",
     "TotalCountTemplate": "{count} total interactions",
@@ -543,8 +566,9 @@
     "AddPerson": "Add person",
     "AddEvent": "Add interaction",
     "UpcomingRemindersTitle": "Upcoming reminders",
-    "UpcomingRemindersMonthInfo": "Showing reminders with notifications due in the next month.",
-    "NoUpcomingReminders": "No upcoming reminders in the next month.",
+    "UpcomingRemindersTooltip": "These are your upcoming reminders due in the next 30 days.",
+    "UpcomingRemindersMonthInfo": "Showing reminders with notifications due in the next 30 days.",
+    "NoUpcomingReminders": "No upcoming reminders in the next 30 days.",
     "NotificationToday": "Today",
     "NotificationTomorrow": "Tomorrow",
     "NotificationInDays": "In {count} days",
@@ -554,14 +578,15 @@
     "NotificationTooltipInDays": "You will be notified in {count} days",
     "NotificationTooltipSentAt": "Notification was already sent at {sentAt}",
     "UnknownPerson": "Unknown person",
-    "TimelinePreviewTitle": "Timeline",
+    "TimelinePreviewTitle": "Interactions",
+    "TimelinePreviewTooltip": "Your 5 most recent interactions. Click to see all interactions.",
     "Stats": {
       "TotalContactsTitle": "Total Contacts",
-      "TotalContactsDescription": "People in your network",
+      "TotalContactsTooltip": "The number of people in your network on Bondery.",
       "InteractionsTitle": "This Month's Interactions",
-      "InteractionsDescription": "Contacts you've interacted with",
+      "InteractionsTooltip": "The amount of interactions you have made during the month of {month}.",
       "NewContactsTitle": "New Contacts This Year",
-      "NewContactsDescription": "Added in {year}"
+      "NewContactsTooltip": "How many people were added to your network in the current year ({year})."
     }
   },
   "FixContactsPage": {
@@ -592,7 +617,9 @@
     "Title": "People",
     "HeaderDescription": "Overview of all your contacts.",
     "ImportContacts": "Import contacts",
-    "AddPerson": "Add new person"
+    "AddPerson": "Add new person",
+    "NoContactsFound": "You haven't added any contacts yet.",
+    "NoContactsMatchSearch": "No such contact found."
   },
   "PageHeader": {
     "LearnMoreAbout": "Learn more about {concept}",
@@ -673,6 +700,8 @@
     "SearchPlaceholder": "Search address, city, region or country",
     "VisibleContactsTitle": "Contacts in current view ({count})",
     "VisibleEmpty": "No contacts in this map area.",
+    "NoContactsFound": "No contacts in this map area.",
+    "NoContactsMatchSearch": "No such contact found.",
     "VisibleColumns": {
       "Name": "Name",
       "Place": "Place",
@@ -692,8 +721,14 @@
     "ActionsLabel": "Address actions",
     "CopyAction": "Copy",
     "ShowOnMapAction": "Show on map",
+    "SetAsAction": "Set as...",
     "SetAsPreferred": "Set as preferred",
-    "OpenInMapsAction": "Open in maps",
+    "SetAsLocation": "Set as location",
+    "SetAsTimezone": "Set as timezone",
+    "SetAsTimezoneSuccess": "Timezone detected and saved",
+    "SetAsTimezoneError": "Failed to detect timezone",
+    "DetectingTimezone": "Detecting timezone…",
+    "OpenInMapsAction": "Open in maps...",
     "OpenInGoogleMaps": "Open in Google Maps",
     "OpenInMapy": "Open in Mapy.com",
     "OpenInWaze": "Open in Waze",
@@ -720,9 +755,11 @@
     "DisabledReasonAlreadyPreferred": "This address is already preferred",
     "SaveErrorTitle": "Error",
     "SaveErrorMessage": "Failed to update addresses",
-    "LocationUpdateModalTitle": "Also update the location of the contact?",
-    "LocationUpdateModalMessage": "Do you want to update the contact location from the saved address?",
-    "LocationUpdateConfirm": "Yes, update location",
+    "LocationUpdateModalTitle": "Update the location and timezone?",
+    "LocationUpdateModalMessage": "Do you want to also update the contact location and timezone of the contact from the address?",
+    "TimezoneUpdateModalTitle": "Update timezone?",
+    "TimezoneUpdateModalMessage": "Do you want to also update the contact's timezone based on the new location?",
+    "LocationUpdateConfirm": "Yes, update",
     "LocationUpdateCancel": "No",
     "LocationUpdateSuccessTitle": "Success",
     "LocationUpdateSuccessMessage": "Location updated successfully",
@@ -830,5 +867,19 @@
     "SaveErrorDescription": "Failed to save the tag.",
     "DeleteErrorTitle": "Error",
     "DeleteErrorDescription": "Failed to delete the tag."
+  },
+  "EnrichFromLinkedIn": {
+    "MenuLabel": "Enrich from LinkedIn...",
+    "ExtensionRequiredTitle": "Extension required",
+    "ExtensionRequiredMessage": "The Bondery Chrome Extension is needed to enrich contacts from LinkedIn. Install it from the Chrome Web Store to continue.",
+    "InstallExtension": "Install Extension",
+    "NoLinkedInHandle": "This contact has no LinkedIn username set. Add a LinkedIn profile first.",
+    "EnrichingTitle": "Enriching from LinkedIn",
+    "EnrichingDescription": "Scraping the latest data from LinkedIn. This may take a few moments...",
+    "SuccessTitle": "Contact enriched",
+    "SuccessDescription": "The contact was updated with the latest LinkedIn data.",
+    "ErrorTitle": "Enrichment failed",
+    "ErrorDescription": "Failed to enrich the contact from LinkedIn.",
+    "Cancel": "Cancel"
   }
 }

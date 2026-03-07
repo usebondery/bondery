@@ -41,6 +41,7 @@ export interface EventColumnConfig {
 export interface EventsTableLabels {
   searchPlaceholder: string;
   noEventsFound: string;
+  noEventsMatchSearch: string;
   // Column visibility
   visibleColumnsButton: string;
   visibleColumnsSection: string;
@@ -295,7 +296,10 @@ export function EventsTableV2({
   // --- Build labels ---
   const dataTableLabels: DataTableLabels = {
     searchPlaceholder: labels.searchPlaceholder,
-    emptyStateMessage: labels.noEventsFound,
+    emptyStateMessage:
+      searchValue.trim() && activities.length > 0
+        ? labels.noEventsMatchSearch
+        : labels.noEventsFound,
     actionsAriaLabel: labels.actionsAriaLabel,
     selectedCountTemplate: labels.selectedCountTemplate,
     totalCountTemplate: labels.totalCountTemplate,

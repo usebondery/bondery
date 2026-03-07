@@ -1,5 +1,7 @@
 ﻿"use server";
 
+import { formatPlaceLabel, formatAddressLabel } from "@bondery/helpers/address-utils";
+
 export interface MapSuggestionRegionalEntry {
   type?: string;
   name?: string;
@@ -75,37 +77,43 @@ function normalizeCoordinates(
 }
 
 /**
- * Builds a human-readable label from the raw Mapy suggest item.
- * The API's own `label` field contains the admin-type description ("Statutory city",
- * "District", etc.) which is not useful as a display string. We compose a richer
- * label from `name` + key entries from `regionalStructure`.
+ * Extracts structured address fields from a raw Mapy suggest item and
+ * produces a display label using the shared formatting helpers.
  */
-function buildDisplayLabel(raw: any): string {
+function buildLabelFromRawItem(raw: any): string {
   const name = String(raw?.name || "").trim();
   if (!name) return "";
 
   const regional: any[] = Array.isArray(raw?.regionalStructure) ? raw.regionalStructure : [];
-  const parts: string[] = [name];
 
-  // For addresses/streets include their parent municipality
-  const municipality = regional.find((e) => e.type === "regional.municipality" && e.name !== name);
-  if (municipality?.name) parts.push(municipality.name);
+  const municipality = regional.find((e: any) => e.type === "regional.municipality");
+  const city = municipality?.name ?? null;
 
-  // Add a region only when it adds clarity (avoid duplicating municipality)
-  const region = regional.find(
-    (e) =>
-      (e.type === "regional.region" || e.type === "regional.county") &&
-      e.name !== name &&
-      e.name !== municipality?.name,
-  );
-  if (region?.name) parts.push(region.name);
+  // Take the last (broadest) region entry
+  let state: string | null = null;
+  for (const entry of regional) {
+    if (entry.type === "regional.region" || entry.type === "regional.county") {
+      state = entry.name;
+    }
+  }
 
-  // Always end with country ISO code when available
-  const country = regional.find((e) => e.type === "regional.country");
-  if (country?.isoCode) parts.push(country.isoCode);
-  else if (country?.name && country.name !== name) parts.push(country.name);
+  const countryEntry = regional.find((e: any) => e.type === "regional.country");
+  const countryCode: string | null = countryEntry?.isoCode ?? null;
 
-  return parts.join(", ");
+  const isAddress = String(raw?.type || "") === "regional.address";
+  const zip: string | null = raw?.zip ? String(raw.zip) : null;
+
+  if (isAddress) {
+    return formatAddressLabel({
+      addressLine1: name,
+      city,
+      postalCode: zip,
+      state,
+      countryCode,
+    });
+  }
+
+  return formatPlaceLabel({ city: city ?? name, state, countryCode });
 }
 
 function parseItem(raw: any): MapSuggestionItem {
@@ -136,7 +144,7 @@ function parseItem(raw: any): MapSuggestionItem {
     }
   }
 
-  const displayLabel = buildDisplayLabel(raw);
+  const displayLabel = buildLabelFromRawItem(raw);
 
   return {
     label: displayLabel || String(raw?.name || ""),
@@ -213,5 +221,52 @@ export async function getMapSuggestions(query: string): Promise<MapSuggestionIte
     return parsed;
   } catch (err) {
     return [];
+  }
+}
+
+/**
+ * Fetches the IANA timezone identifier for a given coordinate pair
+ * from the Mapy.com /v1/timezone/coordinate API.
+ * Runs server-side so the private API key is never exposed to the client.
+ *
+ * @param lat - Latitude of the coordinate (-90 to 90).
+ * @param lon - Longitude of the coordinate (-180 to 180).
+ * @returns The IANA timezone name (e.g. "Europe/Prague"), or null if unavailable.
+ */
+export async function getTimezoneForCoordinates(lat: number, lon: number): Promise<string | null> {
+  if (!Number.isFinite(lat) || !Number.isFinite(lon)) {
+    return null;
+  }
+
+  const mapsUrl = process.env.NEXT_PUBLIC_MAPS_URL!;
+  const mapsKey = process.env.NEXT_PRIVATE_MAPS_KEY;
+
+  if (!mapsKey) {
+    return null;
+  }
+
+  const upstream = new URL(`${mapsUrl}/v1/timezone/coordinate`);
+  upstream.searchParams.set("apikey", mapsKey);
+  upstream.searchParams.set("lat", String(lat));
+  upstream.searchParams.set("lon", String(lon));
+  upstream.searchParams.set("lang", "en");
+
+  try {
+    const response = await fetch(upstream.toString(), {
+      method: "GET",
+      headers: { Accept: "application/json" },
+      cache: "no-store",
+    });
+
+    if (!response.ok) {
+      return null;
+    }
+
+    const payload = await response.json();
+    const timezoneName = payload?.timezone?.timezoneName;
+
+    return typeof timezoneName === "string" && timezoneName.length > 0 ? timezoneName : null;
+  } catch {
+    return null;
   }
 }

@@ -6,7 +6,11 @@
 import type { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
 import { createAuthenticatedClient } from "../lib/supabase.js";
 import { validateImageUpload, URLS } from "../lib/config.js";
-import type { RedirectRequest } from "@bondery/types";
+import type {
+  RedirectRequest,
+  ScrapedWorkHistoryEntry,
+  ScrapedEducationEntry,
+} from "@bondery/types";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@bondery/types/supabase.types";
 import { API_ROUTES, WEBAPP_ROUTES } from "@bondery/helpers";
@@ -17,6 +21,12 @@ import {
 } from "../lib/social-media.js";
 import { cleanPersonName } from "@bondery/helpers/name-utils";
 import { assignContactsToDefaultImportGroup } from "../lib/default-import-groups.js";
+import { cachedGeocodeLinkedInPlace } from "../lib/mapy.js";
+import {
+  toPostgresDate,
+  updateContactPhoto,
+  uploadAllLinkedInLogos,
+} from "../lib/linkedin-helpers.js";
 
 function resolvePrimarySocialMedia(payload: {
   instagram?: string;
@@ -74,7 +84,15 @@ export async function redirectRoutes(fastify: FastifyInstance) {
         headline,
         place,
         notes,
+        workHistory,
+        educationHistory,
+        linkedinBio,
       } = request.body;
+
+      request.log.info(
+        { handle: linkedin ?? instagram ?? facebook, workHistoryCount: workHistory?.length ?? 0 },
+        "[redirect] POST received",
+      );
 
       if (!instagram && !linkedin && !facebook) {
         return reply.status(400).send({
@@ -108,16 +126,33 @@ export async function redirectRoutes(fastify: FastifyInstance) {
         avatar: string | null;
         headline: string | null;
         place: string | null;
+        latitude: number | null;
         notes: string | null;
+        linkedin_bio: string | null;
       } | null = null;
 
       if (existingContactId) {
-        const { data: contactData, error: lookupError } = await client
+        const { data: contactData, error: lookupError } = await (client
           .from("people")
-          .select("id, first_name, last_name, avatar, headline, place, notes")
+          .select(
+            "id, first_name, last_name, avatar, headline, place, latitude, notes, linkedin_bio",
+          )
           .eq("user_id", user.id)
           .eq("id", existingContactId)
-          .single();
+          .single() as unknown as Promise<{
+          data: {
+            id: string;
+            first_name: string | null;
+            last_name: string | null;
+            avatar: string | null;
+            headline: string | null;
+            place: string | null;
+            latitude: number | null;
+            notes: string | null;
+            linkedin_bio: string | null;
+          } | null;
+          error: unknown;
+        }>);
 
         if (lookupError) {
           return reply.status(500).send({ error: "Failed to look up contact" });
@@ -125,6 +160,9 @@ export async function redirectRoutes(fastify: FastifyInstance) {
 
         existingContact = contactData;
       }
+
+      // Upload all LinkedIn logos in parallel (used by both existing and new contact paths)
+      const logoMap = await uploadAllLinkedInLogos(client, user.id, workHistory, educationHistory);
 
       // If contact exists
       if (existingContact) {
@@ -134,13 +172,98 @@ export async function redirectRoutes(fastify: FastifyInstance) {
         }
 
         // Consolidate field updates into a single query
-        const fieldUpdates: Record<string, string> = {};
+        const fieldUpdates: Record<string, any> = {};
         if (headline && !existingContact.headline) fieldUpdates.headline = headline;
         if (place && !existingContact.place) fieldUpdates.place = place;
         if (notes && !existingContact.notes) fieldUpdates.notes = notes;
+        if (linkedinBio && !existingContact.linkedin_bio) fieldUpdates.linkedin_bio = linkedinBio;
+
+        // Geocode the place if it's being set for the first time and no coordinates exist yet
+        if (place && !existingContact.place && !existingContact.latitude) {
+          try {
+            const result = await cachedGeocodeLinkedInPlace(place);
+            if (result) {
+              const { geo, timezone: tz } = result;
+              // Use the formatted mapy.com label as the canonical place value
+              if (geo.formattedLabel) fieldUpdates.place = geo.formattedLabel;
+              fieldUpdates.location = geo.locationEwkt;
+              if (geo.city) fieldUpdates.address_city = geo.city;
+              if (geo.state) fieldUpdates.address_state = geo.state;
+              if (geo.stateCode) fieldUpdates.address_state_code = geo.stateCode;
+              if (geo.country) fieldUpdates.address_country = geo.country;
+              if (geo.countryCode) fieldUpdates.address_country_code = geo.countryCode;
+              if (geo.formattedLabel) fieldUpdates.address_formatted = geo.formattedLabel;
+              fieldUpdates.address_granularity = "city";
+              fieldUpdates.address_geocode_source = "mapy.com";
+
+              if (tz) fieldUpdates.timezone = tz;
+            }
+          } catch (err) {
+            console.error(
+              "[redirect] Geocode failed for existing contact, continuing without coordinates:",
+              err,
+            );
+          }
+        }
 
         if (Object.keys(fieldUpdates).length > 0) {
           await client.from("people").update(fieldUpdates).eq("id", existingContact.id);
+        }
+
+        // Upsert work history if provided (replace existing rows)
+        if (workHistory && workHistory.length > 0) {
+          await client
+            .from("people_work_history")
+            .delete()
+            .eq("person_id", existingContact.id)
+            .eq("user_id", user.id);
+
+          const rows = workHistory.map((entry: ScrapedWorkHistoryEntry) => ({
+            user_id: user.id,
+            person_id: existingContact!.id,
+            company_name: entry.companyName,
+            company_linkedin_id: entry.companyLinkedinId ?? null,
+            title: entry.title ?? null,
+            description: entry.description ?? null,
+            start_date: toPostgresDate(entry.startDate),
+            end_date: toPostgresDate(entry.endDate),
+            employment_type: entry.employmentType ?? null,
+            location: entry.location ?? null,
+          }));
+          const { error: whError } = await client.from("people_work_history").insert(rows);
+          if (whError) {
+            console.error(
+              "[redirect] Failed to insert work history for existing contact:",
+              whError.message,
+            );
+          }
+        }
+
+        // Upsert education history if provided (replace existing rows)
+        if (educationHistory && educationHistory.length > 0) {
+          await client
+            .from("people_education_history")
+            .delete()
+            .eq("person_id", existingContact.id)
+            .eq("user_id", user.id);
+
+          const rows = educationHistory.map((entry: ScrapedEducationEntry) => ({
+            user_id: user.id,
+            person_id: existingContact!.id,
+            school_name: entry.schoolName,
+            school_linkedin_id: entry.schoolLinkedinId ?? null,
+            degree: entry.degree ?? null,
+            description: entry.description ?? null,
+            start_date: toPostgresDate(entry.startDate),
+            end_date: toPostgresDate(entry.endDate),
+          }));
+          const { error: ehError } = await client.from("people_education_history").insert(rows);
+          if (ehError) {
+            console.error(
+              "[redirect] Failed to insert education for existing contact:",
+              ehError.message,
+            );
+          }
         }
 
         return {
@@ -167,6 +290,35 @@ export async function redirectRoutes(fastify: FastifyInstance) {
       if (headline) insertData.headline = headline;
       if (place) insertData.place = place;
       if (notes) insertData.notes = notes;
+      if (linkedinBio) insertData.linkedin_bio = linkedinBio;
+
+      // Geocode the LinkedIn place string to get coordinates and structured address
+      if (place) {
+        try {
+          const result = await cachedGeocodeLinkedInPlace(place);
+          if (result) {
+            const { geo, timezone: tz } = result;
+            // Use the formatted mapy.com label as the canonical place value
+            if (geo.formattedLabel) insertData.place = geo.formattedLabel;
+            insertData.location = geo.locationEwkt;
+            if (geo.city) insertData.address_city = geo.city;
+            if (geo.state) insertData.address_state = geo.state;
+            if (geo.stateCode) insertData.address_state_code = geo.stateCode;
+            if (geo.country) insertData.address_country = geo.country;
+            if (geo.countryCode) insertData.address_country_code = geo.countryCode;
+            if (geo.formattedLabel) insertData.address_formatted = geo.formattedLabel;
+            insertData.address_granularity = "city";
+            insertData.address_geocode_source = "mapy.com";
+
+            if (tz) insertData.timezone = tz;
+          }
+        } catch (err) {
+          console.error(
+            "[redirect] Geocode failed for new contact, continuing without coordinates:",
+            err,
+          );
+        }
+      }
 
       const { data: newContact, error: createError } = await client
         .from("people")
@@ -175,6 +327,10 @@ export async function redirectRoutes(fastify: FastifyInstance) {
         .single();
 
       if (createError || !newContact) {
+        console.error(
+          "[redirect] Failed to create contact:",
+          createError?.message ?? "no data returned",
+        );
         return reply.status(500).send({ error: "Failed to create contact" });
       }
 
@@ -204,6 +360,48 @@ export async function redirectRoutes(fastify: FastifyInstance) {
       // Upload profile photo if provided
       if (profileImageUrl) {
         await updateContactPhoto(client, newContact.id, user.id, profileImageUrl);
+      }
+
+      // Insert work history if provided
+      if (workHistory && workHistory.length > 0) {
+        request.log.info(
+          { personId: newContact.id, count: workHistory.length },
+          "[redirect] Inserting work history for new contact",
+        );
+        const rows = workHistory.map((entry: ScrapedWorkHistoryEntry) => ({
+          user_id: user.id,
+          person_id: newContact.id,
+          company_name: entry.companyName,
+          company_linkedin_id: entry.companyLinkedinId ?? null,
+          title: entry.title ?? null,
+          description: entry.description ?? null,
+          start_date: toPostgresDate(entry.startDate),
+          end_date: toPostgresDate(entry.endDate),
+          employment_type: entry.employmentType ?? null,
+          location: entry.location ?? null,
+        }));
+        const { error: whError } = await client.from("people_work_history").insert(rows);
+        if (whError) {
+          console.error("[redirect] Failed to insert work history:", whError.message);
+        }
+      }
+
+      // Insert education history if provided
+      if (educationHistory && educationHistory.length > 0) {
+        const rows = educationHistory.map((entry: ScrapedEducationEntry) => ({
+          user_id: user.id,
+          person_id: newContact.id,
+          school_name: entry.schoolName,
+          school_linkedin_id: entry.schoolLinkedinId ?? null,
+          degree: entry.degree ?? null,
+          description: entry.description ?? null,
+          start_date: toPostgresDate(entry.startDate),
+          end_date: toPostgresDate(entry.endDate),
+        }));
+        const { error: ehError } = await client.from("people_education_history").insert(rows);
+        if (ehError) {
+          console.error("[redirect] Failed to insert education:", ehError.message);
+        }
       }
 
       return { contactId: newContact.id, existed: false };
@@ -268,12 +466,13 @@ export async function redirectRoutes(fastify: FastifyInstance) {
       avatar: string | null;
       headline: string | null;
       place: string | null;
+      latitude: number | null;
     } | null = null;
 
     if (existingContactId) {
       const { data: contactData, error: lookupError } = await client
         .from("people")
-        .select("id, avatar, headline, place")
+        .select("id, avatar, headline, place, latitude")
         .eq("user_id", user.id)
         .eq("id", existingContactId)
         .single();
@@ -292,9 +491,36 @@ export async function redirectRoutes(fastify: FastifyInstance) {
       }
 
       // Consolidate field updates into a single query
-      const fieldUpdates: Record<string, string> = {};
+      const fieldUpdates: Record<string, any> = {};
       if (headline && !existingContact.headline) fieldUpdates.headline = headline;
       if (place && !existingContact.place) fieldUpdates.place = place;
+
+      // Geocode the place if it's being set for the first time and no coordinates exist yet
+      if (place && !existingContact.place && !existingContact.latitude) {
+        try {
+          const result = await cachedGeocodeLinkedInPlace(place);
+          if (result) {
+            const { geo, timezone: tz } = result;
+            if (geo.formattedLabel) fieldUpdates.place = geo.formattedLabel;
+            fieldUpdates.location = geo.locationEwkt;
+            if (geo.city) fieldUpdates.address_city = geo.city;
+            if (geo.state) fieldUpdates.address_state = geo.state;
+            if (geo.stateCode) fieldUpdates.address_state_code = geo.stateCode;
+            if (geo.country) fieldUpdates.address_country = geo.country;
+            if (geo.countryCode) fieldUpdates.address_country_code = geo.countryCode;
+            if (geo.formattedLabel) fieldUpdates.address_formatted = geo.formattedLabel;
+            fieldUpdates.address_granularity = "city";
+            fieldUpdates.address_geocode_source = "mapy.com";
+
+            if (tz) fieldUpdates.timezone = tz;
+          }
+        } catch (err) {
+          console.error(
+            "[redirect] Geocode failed for existing contact (GET), continuing without coordinates:",
+            err,
+          );
+        }
+      }
 
       if (Object.keys(fieldUpdates).length > 0) {
         await client.from("people").update(fieldUpdates).eq("id", existingContact.id);
@@ -317,6 +543,33 @@ export async function redirectRoutes(fastify: FastifyInstance) {
     if (cleanedLastName) insertData.last_name = cleanedLastName;
     if (headline) insertData.headline = headline;
     if (place) insertData.place = place;
+
+    // Geocode the LinkedIn place string to get coordinates and structured address
+    if (place) {
+      try {
+        const result = await cachedGeocodeLinkedInPlace(place);
+        if (result) {
+          const { geo, timezone: tz } = result;
+          if (geo.formattedLabel) insertData.place = geo.formattedLabel;
+          insertData.location = geo.locationEwkt;
+          if (geo.city) insertData.address_city = geo.city;
+          if (geo.state) insertData.address_state = geo.state;
+          if (geo.stateCode) insertData.address_state_code = geo.stateCode;
+          if (geo.country) insertData.address_country = geo.country;
+          if (geo.countryCode) insertData.address_country_code = geo.countryCode;
+          if (geo.formattedLabel) insertData.address_formatted = geo.formattedLabel;
+          insertData.address_granularity = "city";
+          insertData.address_geocode_source = "mapy.com";
+
+          if (tz) insertData.timezone = tz;
+        }
+      } catch (err) {
+        console.error(
+          "[redirect] Geocode failed for new contact (GET), continuing without coordinates:",
+          err,
+        );
+      }
+    }
 
     const { data: newContact, error: createError } = await client
       .from("people")
@@ -355,46 +608,4 @@ export async function redirectRoutes(fastify: FastifyInstance) {
 
     return reply.redirect(`${URLS.webapp}${WEBAPP_ROUTES.PERSON}/${newContact.id}`);
   });
-}
-
-/**
- * Helper to update contact photo from URL
- */
-async function updateContactPhoto(
-  supabase: SupabaseClient<Database>,
-  contactId: string,
-  userId: string,
-  imageUrl: string,
-): Promise<void> {
-  try {
-    const response = await fetch(imageUrl);
-    if (!response.ok) return;
-
-    const blob = await response.blob();
-
-    const validation = validateImageUpload({
-      type: blob.type,
-      size: blob.size,
-    });
-    if (!validation.isValid) return;
-
-    const arrayBuffer = await blob.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
-
-    const fileName = `${userId}/${contactId}.jpg`;
-    const { error: uploadError } = await supabase.storage.from("avatars").upload(fileName, buffer, {
-      contentType: blob.type,
-      upsert: true,
-    });
-
-    if (uploadError) return;
-
-    const { data: urlData } = supabase.storage.from("avatars").getPublicUrl(fileName);
-
-    if (urlData?.publicUrl) {
-      await supabase.from("people").update({ avatar: urlData.publicUrl }).eq("id", contactId);
-    }
-  } catch (error) {
-    console.error("Error in updateContactPhoto:", error);
-  }
 }

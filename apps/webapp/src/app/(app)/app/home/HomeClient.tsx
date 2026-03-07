@@ -1,9 +1,16 @@
 "use client";
 
-import { Button, Group, Paper, SimpleGrid, Stack, Text, Title } from "@mantine/core";
-import { IconCalendarPlus, IconCopy, IconHome, IconTrash, IconUserPlus } from "@tabler/icons-react";
+import { Button, Group, Paper, SimpleGrid, Stack, Text, Title, Tooltip } from "@mantine/core";
+import {
+  IconCalendarPlus,
+  IconCopy,
+  IconHome,
+  IconInfoCircle,
+  IconTrash,
+  IconUserPlus,
+} from "@tabler/icons-react";
 import { useMemo } from "react";
-import { useTranslations } from "next-intl";
+import { useFormatter, useTranslations } from "next-intl";
 import type { Activity, Contact, UpcomingReminder } from "@bondery/types";
 import { PageWrapper } from "@/app/(app)/app/components/PageWrapper";
 import { PageHeader } from "@/app/(app)/app/components/PageHeader";
@@ -16,6 +23,7 @@ import { API_ROUTES, WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import { notifications } from "@mantine/notifications";
 import { useRouter } from "next/navigation";
 import {
+  ActionIconLink,
   errorNotificationTemplate,
   ModalTitle,
   successNotificationTemplate,
@@ -43,6 +51,9 @@ export function HomeClient({
   const router = useRouter();
   const t = useTranslations("HomePage");
   const timelineT = useTranslations("InteractionsPage");
+  const formatter = useFormatter();
+  const currentMonth = formatter.dateTime(new Date(), { month: "long" });
+  const currentYear = formatter.dateTime(new Date(), { year: "numeric" });
 
   const contactsById = useMemo(
     () => new Map(timelineContacts.map((contact) => [contact.id, contact])),
@@ -213,20 +224,32 @@ export function HomeClient({
           stats={stats}
           labels={{
             totalContactsTitle: t("Stats.TotalContactsTitle"),
-            totalContactsDescription: t("Stats.TotalContactsDescription"),
+            totalContactsTooltip: t("Stats.TotalContactsTooltip"),
             interactionsTitle: t("Stats.InteractionsTitle"),
-            interactionsDescription: t("Stats.InteractionsDescription"),
+            interactionsTooltip: t("Stats.InteractionsTooltip", {
+              month: currentMonth,
+            }),
             newContactsTitle: t("Stats.NewContactsTitle"),
-            newContactsDescription: t("Stats.NewContactsDescription", {
-              year: new Date().getFullYear(),
+            newContactsTooltip: t("Stats.NewContactsTooltip", {
+              year: currentYear,
             }),
           }}
         />
 
         <SimpleGrid cols={{ base: 1, md: 2 }} spacing="xl" verticalSpacing="xl">
           <Stack gap="md">
-            <Group gap="xs">
+            <Group gap={4} align="center">
               <Title order={2}>{t("TimelinePreviewTitle")}</Title>
+              <Tooltip label={t("TimelinePreviewTooltip")} multiline maw={240} withArrow>
+                <ActionIconLink
+                  href={WEBAPP_ROUTES.INTERACTIONS}
+                  ariaLabel={t("TimelinePreviewTooltip")}
+                  icon={<IconInfoCircle size={16} stroke={1.5} />}
+                  variant="transparent"
+                  color="gray"
+                  size="sm"
+                />
+              </Tooltip>
             </Group>
 
             {compactActivities.length === 0 ? (
@@ -251,12 +274,18 @@ export function HomeClient({
           </Stack>
 
           <Stack gap="md">
-            <Group gap="xs">
+            <Group gap={4} align="center">
               <Title order={2}>{t("UpcomingRemindersTitle")}</Title>
+              <Tooltip label={t("UpcomingRemindersTooltip")} multiline maw={240} withArrow>
+                <ActionIconLink
+                  ariaLabel={t("UpcomingRemindersTooltip")}
+                  icon={<IconInfoCircle size={16} stroke={1.5} />}
+                  variant="transparent"
+                  color="gray"
+                  size="sm"
+                />
+              </Tooltip>
             </Group>
-            <Text c="dimmed" size="sm">
-              {t("UpcomingRemindersMonthInfo")}
-            </Text>
 
             {reminders.length === 0 ? (
               <Paper withBorder radius="md" p="md">
