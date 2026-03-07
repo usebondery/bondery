@@ -8,22 +8,14 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { requireAuth } from "../lib/supabase.js";
 import { generateVCard } from "../lib/vcard.js";
 import {
-  attachContactChannels,
   parseEmailEntries,
   parsePhoneEntries,
   replaceContactEmails,
   replaceContactPhones,
 } from "../lib/contact-channels.js";
-import {
-  attachContactAddresses,
-  parseAddressEntries,
-  replaceContactAddresses,
-} from "../lib/contact-addresses.js";
-import {
-  attachContactSocialMedia,
-  findPersonIdBySocialMedia,
-  upsertContactSocialMedia,
-} from "../lib/social-media.js";
+import { parseAddressEntries, replaceContactAddresses } from "../lib/contact-addresses.js";
+import { findPersonIdBySocialMedia, upsertContactSocialMedia } from "../lib/social-media.js";
+import { attachContactExtras, type FullContactExtras } from "../lib/contact-enrichment.js";
 import { GROUP_SELECT } from "./groups.js";
 import { TAG_SELECT } from "./tags.js";
 import type {
@@ -48,7 +40,17 @@ import type {
   MergeRecommendationReason,
   MergeRecommendationsResponse,
   RefreshMergeRecommendationsResponse,
+  EnrichContactRequest,
+  ScrapedWorkHistoryEntry,
+  ScrapedEducationEntry,
 } from "@bondery/types";
+import { cleanPersonName } from "@bondery/helpers/name-utils";
+import { cachedGeocodeLinkedInPlace } from "../lib/mapy.js";
+import {
+  toPostgresDate,
+  updateContactPhoto,
+  uploadAllLinkedInLogos,
+} from "../lib/linkedin-helpers.js";
 
 // Contact fields selection query for Supabase
 export const CONTACT_SELECT = `
@@ -858,6 +860,84 @@ async function deleteOrphanedInteractionsForDeletedContacts(
   }
 }
 
+/**
+ * Collects all LinkedIn IDs (company and school) referenced by the work/education
+ * history of the given persons. Must be called BEFORE deleting the persons so the
+ * rows are still present.
+ *
+ * @param client Authenticated Supabase client.
+ * @param userId The user who owns the contacts.
+ * @param personIds The IDs of the contacts about to be deleted.
+ * @returns Deduplicated array of LinkedIn IDs whose logos may become orphaned.
+ */
+async function collectLinkedInLogoIds(
+  client: any,
+  userId: string,
+  personIds: string[],
+): Promise<string[]> {
+  if (personIds.length === 0) return [];
+
+  const [workResult, eduResult] = await Promise.all([
+    client
+      .from("people_work_history")
+      .select("company_linkedin_id")
+      .eq("user_id", userId)
+      .in("person_id", personIds)
+      .not("company_linkedin_id", "is", null),
+    client
+      .from("people_education_history")
+      .select("school_linkedin_id")
+      .eq("user_id", userId)
+      .in("person_id", personIds)
+      .not("school_linkedin_id", "is", null),
+  ]);
+
+  const ids = new Set<string>();
+  for (const row of workResult.data ?? []) ids.add(row.company_linkedin_id);
+  for (const row of eduResult.data ?? []) ids.add(row.school_linkedin_id);
+  return Array.from(ids);
+}
+
+/**
+ * After the persons have been deleted (and their work/education rows cascaded away),
+ * checks which of the candidate LinkedIn IDs are no longer referenced by any remaining
+ * row for this user, then removes those orphaned logo files from Supabase Storage.
+ *
+ * @param client Authenticated Supabase client.
+ * @param userId The user who owns the contacts.
+ * @param candidateIds LinkedIn IDs collected before deletion via collectLinkedInLogoIds.
+ */
+async function removeOrphanedLinkedInLogos(
+  client: any,
+  userId: string,
+  candidateIds: string[],
+): Promise<void> {
+  if (candidateIds.length === 0) return;
+
+  const [workResult, eduResult] = await Promise.all([
+    client
+      .from("people_work_history")
+      .select("company_linkedin_id")
+      .eq("user_id", userId)
+      .in("company_linkedin_id", candidateIds),
+    client
+      .from("people_education_history")
+      .select("school_linkedin_id")
+      .eq("user_id", userId)
+      .in("school_linkedin_id", candidateIds),
+  ]);
+
+  const stillReferenced = new Set<string>();
+  for (const row of workResult.data ?? []) stillReferenced.add(row.company_linkedin_id);
+  for (const row of eduResult.data ?? []) stillReferenced.add(row.school_linkedin_id);
+
+  const orphaned = candidateIds.filter((id) => !stillReferenced.has(id));
+  if (orphaned.length === 0) return;
+
+  const paths = orphaned.map((id) => `${userId}/${id}.jpg`);
+  await client.storage.from("linkedin_logos").remove(paths);
+}
+
 export async function contactRoutes(fastify: FastifyInstance) {
   /**
    * GET /api/contacts - List all contacts
@@ -932,7 +1012,10 @@ export async function contactRoutes(fastify: FastifyInstance) {
         .eq("myself", false);
 
       if (search) {
-        peopleQuery = peopleQuery.or(`first_name.ilike.%${search}%,last_name.ilike.%${search}%`);
+        const searchTokens = search.split(/\s+/).filter(Boolean);
+        for (const token of searchTokens) {
+          peopleQuery = peopleQuery.or(`first_name.ilike.%${token}%,last_name.ilike.%${token}%`);
+        }
       }
 
       switch (query.sort) {
@@ -976,44 +1059,19 @@ export async function contactRoutes(fastify: FastifyInstance) {
         return reply.status(500).send({ error: error.message });
       }
 
-      let contactsWithChannels = [] as Awaited<ReturnType<typeof attachContactChannels>>;
+      let enrichedContacts: Array<{ id: string } & FullContactExtras> = [];
       try {
-        contactsWithChannels = await attachContactChannels(client, user.id, contacts || []);
-      } catch (channelError) {
-        fastify.log.error({ channelError }, "Failed to attach contact channels for contact list");
-        contactsWithChannels = withEmptyChannels(contacts || []);
-      }
-
-      let contactsWithAddresses = [] as Awaited<
-        ReturnType<typeof attachContactAddresses<(typeof contactsWithChannels)[number]>>
-      >;
-      try {
-        contactsWithAddresses = await attachContactAddresses(client, user.id, contactsWithChannels);
-      } catch (addressError) {
-        fastify.log.error({ addressError }, "Failed to attach contact addresses for contact list");
-        contactsWithAddresses = contactsWithChannels.map((contact) => ({
-          ...contact,
-          addresses: [],
-        }));
-      }
-
-      let contactsWithSocialMedia = [] as Awaited<
-        ReturnType<typeof attachContactSocialMedia<(typeof contactsWithAddresses)[number]>>
-      >;
-      try {
-        contactsWithSocialMedia = await attachContactSocialMedia(
-          client,
-          user.id,
-          contactsWithAddresses,
-        );
-      } catch (socialError) {
-        fastify.log.error({ socialError }, "Failed to attach social media for contact list");
-        contactsWithSocialMedia = withEmptySocialMedia(contactsWithAddresses);
+        enrichedContacts = await attachContactExtras(client, user.id, contacts || [], {
+          addresses: true,
+        });
+      } catch (enrichError) {
+        fastify.log.error({ enrichError }, "Failed to attach contact extras for contact list");
+        enrichedContacts = withEmptySocialMedia(withEmptyChannels(contacts || []));
       }
 
       return {
-        contacts: contactsWithSocialMedia,
-        totalCount: typeof count === "number" ? count : contactsWithSocialMedia.length,
+        contacts: enrichedContacts,
+        totalCount: typeof count === "number" ? count : enrichedContacts.length,
         stats: {
           totalContacts: totalContactsCount || 0,
           thisMonthInteractions: monthInteractionsCount || 0,
@@ -1203,6 +1261,7 @@ export async function contactRoutes(fastify: FastifyInstance) {
 
   /**
    * DELETE /api/contacts - Delete multiple contacts
+   * Accepts either { ids: string[] } or { filter: ContactsFilter, excludeIds?: string[] }.
    */
   fastify.delete(
     "/",
@@ -1211,15 +1270,53 @@ export async function contactRoutes(fastify: FastifyInstance) {
       if (!auth) return;
 
       const { client, user } = auth;
-      const { ids } = request.body;
+      const body = request.body;
 
-      if (!Array.isArray(ids) || ids.length === 0) {
+      let uniqueIds: string[];
+
+      // Resolve the list of IDs to delete — either provided directly or via filter.
+      if ("ids" in body && Array.isArray(body.ids)) {
+        if (body.ids.length === 0) {
+          return reply.status(400).send({
+            error: "Invalid request body. 'ids' must be a non-empty array.",
+          });
+        }
+        uniqueIds = Array.from(new Set(body.ids.filter(Boolean)));
+      } else if ("filter" in body && body.filter) {
+        // Build the same Supabase query used by GET /contacts, but only select IDs.
+        let filterQuery = client
+          .from("people")
+          .select("id")
+          .eq("user_id", user.id)
+          .eq("myself", false);
+
+        const search = typeof body.filter.q === "string" ? body.filter.q.trim() : "";
+        if (search) {
+          const searchTokens = search.split(/\s+/).filter(Boolean);
+          for (const token of searchTokens) {
+            filterQuery = filterQuery.or(`first_name.ilike.%${token}%,last_name.ilike.%${token}%`);
+          }
+        }
+
+        const { data: rows, error: filterError } = await filterQuery;
+
+        if (filterError) {
+          return reply.status(500).send({ error: filterError.message });
+        }
+
+        const excludeSet = new Set(body.excludeIds ?? []);
+        uniqueIds = (rows || [])
+          .map((r: { id: string }) => r.id)
+          .filter((id: string) => !excludeSet.has(id));
+
+        if (uniqueIds.length === 0) {
+          return { message: "No contacts matched the filter" };
+        }
+      } else {
         return reply.status(400).send({
-          error: "Invalid request body. 'ids' must be a non-empty array.",
+          error: "Invalid request body. Provide either 'ids' or 'filter'.",
         });
       }
-
-      const uniqueIds = Array.from(new Set(ids.filter(Boolean)));
 
       try {
         await deleteOrphanedInteractionsForDeletedContacts(client, user.id, uniqueIds);
@@ -1231,6 +1328,8 @@ export async function contactRoutes(fastify: FastifyInstance) {
         return reply.status(500).send({ error: message });
       }
 
+      const candidateLogoIds = await collectLinkedInLogoIds(client, user.id, uniqueIds);
+
       const { error } = await client
         .from("people")
         .delete()
@@ -1241,7 +1340,21 @@ export async function contactRoutes(fastify: FastifyInstance) {
         return reply.status(500).send({ error: error.message });
       }
 
-      return { message: "Contacts deleted successfully" };
+      // Clean up storage: delete avatar files for the deleted contacts
+      const avatarPaths = uniqueIds.map((id) => `${user.id}/${id}.jpg`);
+      await client.storage.from("avatars").remove(avatarPaths);
+
+      // Clean up orphaned LinkedIn logo files (best-effort, does not fail the response)
+      try {
+        await removeOrphanedLinkedInLogos(client, user.id, candidateLogoIds);
+      } catch (logoCleanupError) {
+        request.log.warn(
+          { logoCleanupError },
+          "[contacts] Failed to clean up orphaned LinkedIn logos",
+        );
+      }
+
+      return { message: "Contacts deleted successfully", deletedCount: uniqueIds.length };
     },
   );
 
@@ -1267,6 +1380,8 @@ export async function contactRoutes(fastify: FastifyInstance) {
         return reply.status(500).send({ error: message });
       }
 
+      const candidateLogoIds = await collectLinkedInLogoIds(client, user.id, [id]);
+
       const { data: deletedContact, error } = await client
         .from("people")
         .delete()
@@ -1277,6 +1392,19 @@ export async function contactRoutes(fastify: FastifyInstance) {
 
       if (error || !deletedContact) {
         return reply.status(404).send({ error: "Contact not found" });
+      }
+
+      // Clean up storage: delete avatar file for the deleted contact
+      await client.storage.from("avatars").remove([`${user.id}/${id}.jpg`]);
+
+      // Clean up orphaned LinkedIn logo files (best-effort, does not fail the response)
+      try {
+        await removeOrphanedLinkedInLogos(client, user.id, candidateLogoIds);
+      } catch (logoCleanupError) {
+        request.log.warn(
+          { logoCleanupError },
+          "[contacts] Failed to clean up orphaned LinkedIn logos",
+        );
       }
 
       return { message: "Contact deleted successfully" };
@@ -1376,39 +1504,20 @@ export async function contactRoutes(fastify: FastifyInstance) {
         return reply.status(500).send({ error: personRowsError.message });
       }
 
-      let contactsWithChannels = [] as Awaited<ReturnType<typeof attachContactChannels>>;
+      let enrichedContacts: Array<{ id: string } & FullContactExtras> = [];
       try {
-        contactsWithChannels = await attachContactChannels(client, user.id, personRows || []);
-      } catch (channelError) {
-        fastify.log.error({ channelError }, "Failed to attach channels for merge recommendations");
-        contactsWithChannels = withEmptyChannels(personRows || []);
-      }
-
-      let contactsWithAddresses = [] as Awaited<
-        ReturnType<typeof attachContactAddresses<(typeof contactsWithChannels)[number]>>
-      >;
-      try {
-        contactsWithAddresses = await attachContactAddresses(client, user.id, contactsWithChannels);
-      } catch (addressError) {
-        fastify.log.error({ addressError }, "Failed to attach addresses for merge recommendations");
-        contactsWithAddresses = contactsWithChannels.map((contact) => ({
-          ...contact,
-          addresses: [],
-        }));
-      }
-
-      let contacts = [] as Awaited<
-        ReturnType<typeof attachContactSocialMedia<(typeof contactsWithAddresses)[number]>>
-      >;
-      try {
-        contacts = await attachContactSocialMedia(client, user.id, contactsWithAddresses);
-      } catch (socialError) {
+        enrichedContacts = await attachContactExtras(client, user.id, personRows || [], {
+          addresses: true,
+        });
+      } catch (enrichError) {
         fastify.log.error(
-          { socialError },
-          "Failed to attach social media for merge recommendations",
+          { enrichError },
+          "Failed to attach contact extras for merge recommendations",
         );
-        contacts = withEmptySocialMedia(contactsWithAddresses);
+        enrichedContacts = withEmptySocialMedia(withEmptyChannels(personRows || []));
       }
+
+      const contacts = enrichedContacts;
 
       const contactsById = new Map(contacts.map((contact) => [contact.id, contact]));
 
@@ -1782,6 +1891,16 @@ export async function contactRoutes(fastify: FastifyInstance) {
           .map((row) => [row.platform, row]),
       );
 
+      // Batch social media writes: collect inserts and updates, then execute in parallel
+      const socialInserts: Array<{
+        user_id: string;
+        person_id: string;
+        platform: string;
+        handle: string;
+        connected_at: string | null;
+      }> = [];
+      const socialUpdatePromises: Array<PromiseLike<unknown>> = [];
+
       for (const [field, platform] of Object.entries(MERGEABLE_SOCIAL_FIELDS)) {
         const leftSocial = leftSocialByPlatform.get(platform);
         const rightSocial = rightSocialByPlatform.get(platform);
@@ -1791,20 +1910,13 @@ export async function contactRoutes(fastify: FastifyInstance) {
         }
 
         if (!leftSocial) {
-          const { error: insertSocialError } = await client.from("people_social_media").insert({
+          socialInserts.push({
             user_id: user.id,
             person_id: leftPersonId,
             platform,
             handle: rightSocial.handle,
             connected_at: rightSocial.connected_at,
           });
-
-          if (insertSocialError) {
-            if (insertSocialError.code !== "23505") {
-              return reply.status(500).send({ error: insertSocialError.message });
-            }
-          }
-
           continue;
         }
 
@@ -1817,18 +1929,44 @@ export async function contactRoutes(fastify: FastifyInstance) {
           continue;
         }
 
-        const { error: updateSocialError } = await client
-          .from("people_social_media")
-          .update({
-            handle: rightSocial.handle,
-            connected_at: rightSocial.connected_at,
-            updated_at: new Date().toISOString(),
-          })
-          .eq("id", leftSocial.id)
-          .eq("user_id", user.id);
+        socialUpdatePromises.push(
+          client
+            .from("people_social_media")
+            .update({
+              handle: rightSocial.handle,
+              connected_at: rightSocial.connected_at,
+              updated_at: new Date().toISOString(),
+            })
+            .eq("id", leftSocial.id)
+            .eq("user_id", user.id),
+        );
+      }
 
-        if (updateSocialError) {
-          return reply.status(500).send({ error: updateSocialError.message });
+      // Execute all social media writes in parallel
+      const socialWriteResults = await Promise.allSettled([
+        ...(socialInserts.length > 0
+          ? [client.from("people_social_media").insert(socialInserts)]
+          : []),
+        ...socialUpdatePromises,
+      ]);
+
+      // Check for non-duplicate errors
+      for (const result of socialWriteResults) {
+        if (result.status === "rejected") {
+          return reply
+            .status(500)
+            .send({ error: result.reason?.message ?? "Social media merge failed" });
+        }
+        if (
+          result.status === "fulfilled" &&
+          result.value &&
+          typeof result.value === "object" &&
+          "error" in result.value
+        ) {
+          const err = (result.value as { error: { code?: string; message: string } | null }).error;
+          if (err && err.code !== "23505") {
+            return reply.status(500).send({ error: err.message });
+          }
         }
       }
 
@@ -1982,38 +2120,46 @@ export async function contactRoutes(fastify: FastifyInstance) {
         return reply.status(500).send({ error: relationshipsToTransferError.message });
       }
 
-      for (const relationship of relationshipsToTransfer || []) {
-        const nextSourcePersonId =
-          relationship.source_person_id === rightPersonId
-            ? leftPersonId
-            : relationship.source_person_id;
-        const nextTargetPersonId =
-          relationship.target_person_id === rightPersonId
-            ? leftPersonId
-            : relationship.target_person_id;
+      // Bulk insert relationship transfers instead of per-row inserts
+      const relationshipRows = (relationshipsToTransfer || [])
+        .map((relationship) => {
+          const nextSourcePersonId =
+            relationship.source_person_id === rightPersonId
+              ? leftPersonId
+              : relationship.source_person_id;
+          const nextTargetPersonId =
+            relationship.target_person_id === rightPersonId
+              ? leftPersonId
+              : relationship.target_person_id;
 
-        if (nextSourcePersonId === nextTargetPersonId) {
-          continue;
-        }
+          // Filter out self-referential relationships
+          if (nextSourcePersonId === nextTargetPersonId) {
+            return null;
+          }
 
-        const { error: insertRelationshipError } = await client
-          .from("people_relationships")
-          .insert({
+          return {
             user_id: user.id,
             source_person_id: nextSourcePersonId,
             target_person_id: nextTargetPersonId,
             relationship_type: relationship.relationship_type,
-          });
+          };
+        })
+        .filter((row): row is NonNullable<typeof row> => row !== null);
 
-        if (insertRelationshipError) {
-          if (
-            insertRelationshipError.code === "23505" ||
-            insertRelationshipError.code === "23514"
-          ) {
-            continue;
+      if (relationshipRows.length > 0) {
+        // Use Promise.allSettled to handle individual constraint violations gracefully
+        const results = await Promise.allSettled(
+          relationshipRows.map((row) => client.from("people_relationships").insert(row)),
+        );
+
+        for (const result of results) {
+          if (result.status === "fulfilled" && result.value.error) {
+            const err = result.value.error;
+            // 23505 = unique violation, 23514 = check constraint — both are expected and skippable
+            if (err.code !== "23505" && err.code !== "23514") {
+              return reply.status(500).send({ error: err.message });
+            }
           }
-
-          return reply.status(500).send({ error: insertRelationshipError.message });
         }
       }
 
@@ -2115,14 +2261,10 @@ export async function contactRoutes(fastify: FastifyInstance) {
       }
 
       try {
-        const [contactWithChannels] = await attachContactChannels(client, user.id, [contact]);
-        const [contactWithAddresses] = await attachContactAddresses(client, user.id, [
-          contactWithChannels,
-        ]);
-        const [contactWithSocialMedia] = await attachContactSocialMedia(client, user.id, [
-          contactWithAddresses,
-        ]);
-        return { contact: contactWithSocialMedia };
+        const [enrichedContact] = await attachContactExtras(client, user.id, [contact], {
+          addresses: true,
+        });
+        return { contact: enrichedContact };
       } catch (channelError) {
         fastify.log.error(
           { channelError },
@@ -2935,36 +3077,45 @@ export async function contactRoutes(fastify: FastifyInstance) {
         }
 
         if (nextPhones !== undefined) {
-          await replaceContactPhones(client, user.id, id, nextPhones);
-        }
-
-        if (nextEmails !== undefined) {
-          await replaceContactEmails(client, user.id, id, nextEmails);
-        }
-
-        if (nextAddresses !== undefined) {
           request.log.info(
             {
               route: "PATCH /contacts/:id",
               personId: id,
-              addresses: nextAddresses.map((entry) => ({
+              addresses: nextAddresses?.map((entry) => ({
                 type: entry.type,
                 value: entry.value,
                 latitude: entry.latitude,
                 longitude: entry.longitude,
               })),
             },
-            "Upserting contact addresses",
+            "Upserting contact channels",
           );
-          await replaceContactAddresses(client, user.id, id, nextAddresses);
         }
 
+        // Run all replace operations in parallel — they operate on independent tables
+        const parallelOps: Promise<void>[] = [];
+
+        if (nextPhones !== undefined) {
+          parallelOps.push(replaceContactPhones(client, user.id, id, nextPhones));
+        }
+        if (nextEmails !== undefined) {
+          parallelOps.push(replaceContactEmails(client, user.id, id, nextEmails));
+        }
+        if (nextAddresses !== undefined) {
+          parallelOps.push(replaceContactAddresses(client, user.id, id, nextAddresses));
+        }
         if (socialMediaUpdates.length > 0) {
-          await Promise.all(
-            socialMediaUpdates.map((entry) =>
-              upsertContactSocialMedia(client, user.id, id, entry.platform, entry.handle),
-            ),
+          parallelOps.push(
+            Promise.all(
+              socialMediaUpdates.map((entry) =>
+                upsertContactSocialMedia(client, user.id, id, entry.platform, entry.handle),
+              ),
+            ).then(() => undefined),
           );
+        }
+
+        if (parallelOps.length > 0) {
+          await Promise.all(parallelOps);
         }
       } catch (channelError) {
         const message =
@@ -3102,6 +3253,7 @@ export async function contactRoutes(fastify: FastifyInstance) {
         .from("people")
         .select(CONTACT_SELECT)
         .eq("id", id)
+        .eq("user_id", user.id)
         .single();
 
       if (error || !contact) {
@@ -3110,14 +3262,10 @@ export async function contactRoutes(fastify: FastifyInstance) {
 
       let contactWithChannels: Contact;
       try {
-        const [mappedContact] = await attachContactChannels(client, user.id, [contact]);
-        const [mappedContactWithAddresses] = await attachContactAddresses(client, user.id, [
-          mappedContact,
-        ]);
-        const [mappedContactWithSocialMedia] = await attachContactSocialMedia(client, user.id, [
-          mappedContactWithAddresses,
-        ]);
-        contactWithChannels = mappedContactWithSocialMedia as Contact;
+        const [enrichedContact] = await attachContactExtras(client, user.id, [contact], {
+          addresses: true,
+        });
+        contactWithChannels = enrichedContact as Contact;
       } catch (channelError) {
         fastify.log.error(
           { channelError },
@@ -3129,9 +3277,13 @@ export async function contactRoutes(fastify: FastifyInstance) {
       }
 
       // Generate vCard
-      const vcard = await generateVCard(contactWithChannels);
-
-      console.log("Generated vCard:\n", vcard);
+      let vcard: string;
+      try {
+        vcard = await generateVCard(contactWithChannels);
+      } catch (vcardError) {
+        fastify.log.error({ vcardError }, "Failed to generate vCard");
+        return reply.status(500).send({ error: "Failed to generate vCard" });
+      }
 
       // Create filename
       const firstName = contact.firstName || "contact";
@@ -3143,6 +3295,355 @@ export async function contactRoutes(fastify: FastifyInstance) {
       reply.header("Content-Disposition", `attachment; filename="${filename}"`);
 
       return vcard;
+    },
+  );
+
+  /**
+   * POST /api/contacts/:id/linkedin-data - Upsert scraped LinkedIn work history
+   */
+  fastify.post(
+    "/:id/linkedin-data",
+    async (
+      request: FastifyRequest<{
+        Params: { id: string };
+        Body: {
+          workHistory: Array<{
+            title?: string;
+            companyName: string;
+            companyLinkedinId?: string;
+            startDate?: string;
+            endDate?: string;
+            employmentType?: string;
+            location?: string;
+          }>;
+        };
+      }>,
+      reply: FastifyReply,
+    ) => {
+      const auth = await requireAuth(request, reply);
+      if (!auth) return;
+
+      const { client, user } = auth;
+      const { id: personId } = request.params;
+      const { workHistory = [] } = request.body;
+
+      request.log.info(
+        { personId, userId: user.id, workHistoryCount: workHistory.length, workHistory },
+        "[linkedin-data] POST received",
+      );
+
+      // Verify the person belongs to the authenticated user
+      const { data: person, error: personError } = await client
+        .from("people")
+        .select("id")
+        .eq("id", personId)
+        .eq("user_id", user.id)
+        .single();
+
+      if (personError || !person) {
+        return reply.status(404).send({ error: "Contact not found" });
+      }
+
+      // Delete existing work history for this person, then insert the new set
+      const { error: deleteError } = await client
+        .from("people_work_history")
+        .delete()
+        .eq("person_id", personId)
+        .eq("user_id", user.id);
+
+      if (deleteError) {
+        return reply.status(500).send({ error: deleteError.message });
+      }
+
+      if (workHistory.length > 0) {
+        const rows = workHistory.map((entry) => ({
+          user_id: user.id,
+          person_id: personId,
+          company_name: entry.companyName,
+          company_linkedin_id: entry.companyLinkedinId ?? null,
+          title: entry.title ?? null,
+          start_date: entry.startDate ?? null,
+          end_date: entry.endDate ?? null,
+          employment_type: entry.employmentType ?? null,
+          location: entry.location ?? null,
+        }));
+
+        request.log.info({ rows }, "[linkedin-data] Inserting rows");
+
+        const { error: insertError } = await client.from("people_work_history").insert(rows);
+
+        if (insertError) {
+          request.log.error({ insertError }, "[linkedin-data] Insert failed");
+          return reply.status(500).send({ error: insertError.message });
+        }
+      }
+
+      request.log.info({ personId, count: workHistory.length }, "[linkedin-data] Upsert complete");
+      return reply.status(200).send({ success: true, count: workHistory.length });
+    },
+  );
+
+  /**
+   * POST /api/contacts/:id/enrich - Update a contact with scraped LinkedIn data.
+   *
+   * Work history, education, bio, and name are **overwritten** so the user can
+   * intentionally refresh stale data.  Avatar, headline, and location are only
+   * filled when the contact doesn't already have them (fill-if-missing).
+   */
+  fastify.post(
+    "/:id/enrich",
+    async (
+      request: FastifyRequest<{
+        Params: { id: string };
+        Body: EnrichContactRequest;
+      }>,
+      reply: FastifyReply,
+    ) => {
+      const auth = await requireAuth(request, reply);
+      if (!auth) return;
+
+      const { client, user } = auth;
+      const { id: personId } = request.params;
+      const {
+        firstName,
+        middleName,
+        lastName,
+        profileImageUrl,
+        headline,
+        place,
+        linkedinBio,
+        workHistory,
+        educationHistory,
+      } = request.body;
+
+      request.log.info(
+        {
+          personId,
+          userId: user.id,
+          workHistoryCount: workHistory?.length ?? 0,
+          educationCount: educationHistory?.length ?? 0,
+        },
+        "[enrich] POST received",
+      );
+
+      // Verify the person belongs to the authenticated user & fetch current values
+      // (needed for fill-if-missing logic on avatar, headline, place)
+      const { data: person, error: personError } = await client
+        .from("people")
+        .select("id, headline, place, avatar")
+        .eq("id", personId)
+        .eq("user_id", user.id)
+        .single();
+
+      if (personError || !person) {
+        return reply.status(404).send({ error: "Contact not found" });
+      }
+
+      // Upload logos in parallel (used when inserting work/edu rows)
+      const logoMap = await uploadAllLinkedInLogos(client, user.id, workHistory, educationHistory);
+
+      // Fill-if-missing: only update contact photo when there's none yet
+      if (profileImageUrl && !person.avatar) {
+        await updateContactPhoto(client, personId, user.id, profileImageUrl);
+      }
+
+      // Force-update scalar fields (name, bio always overwrite)
+      const fieldUpdates: Record<string, any> = {};
+      if (firstName !== undefined)
+        fieldUpdates.first_name = cleanPersonName(firstName) || undefined;
+      if (middleName !== undefined) fieldUpdates.middle_name = cleanPersonName(middleName) || null;
+      if (lastName !== undefined) fieldUpdates.last_name = cleanPersonName(lastName) || null;
+      if (linkedinBio !== undefined) fieldUpdates.linkedin_bio = linkedinBio || null;
+
+      // Fill-if-missing: headline
+      if (headline && !person.headline) {
+        fieldUpdates.headline = headline;
+      }
+
+      // Fill-if-missing: place / location
+      if (place && !person.place) {
+        fieldUpdates.place = place;
+        try {
+          const result = await cachedGeocodeLinkedInPlace(place);
+          if (result) {
+            const { geo, timezone: tz } = result;
+            if (geo.formattedLabel) fieldUpdates.place = geo.formattedLabel;
+            fieldUpdates.location = geo.locationEwkt;
+            if (geo.city) fieldUpdates.address_city = geo.city;
+            if (geo.state) fieldUpdates.address_state = geo.state;
+            if (geo.stateCode) fieldUpdates.address_state_code = geo.stateCode;
+            if (geo.country) fieldUpdates.address_country = geo.country;
+            if (geo.countryCode) fieldUpdates.address_country_code = geo.countryCode;
+            if (geo.formattedLabel) fieldUpdates.address_formatted = geo.formattedLabel;
+            fieldUpdates.address_granularity = "city";
+            fieldUpdates.address_geocode_source = "mapy.com";
+
+            if (tz) fieldUpdates.timezone = tz;
+          }
+        } catch (err) {
+          request.log.error({ err }, "[enrich] Geocode failed, continuing without coordinates");
+        }
+      }
+
+      if (Object.keys(fieldUpdates).length > 0) {
+        fieldUpdates.updated_at = new Date().toISOString();
+        await client.from("people").update(fieldUpdates).eq("id", personId);
+      }
+
+      // Replace work history atomically (delete + insert in one transaction)
+      if (workHistory && workHistory.length > 0) {
+        const rows = workHistory.map((entry: ScrapedWorkHistoryEntry) => ({
+          company_name: entry.companyName,
+          company_linkedin_id: entry.companyLinkedinId ?? null,
+          title: entry.title ?? null,
+          description: entry.description ?? null,
+          start_date: toPostgresDate(entry.startDate),
+          end_date: toPostgresDate(entry.endDate),
+          employment_type: entry.employmentType ?? null,
+          location: entry.location ?? null,
+        }));
+        const { error: whError } = await client.rpc("replace_work_history", {
+          p_person_id: personId,
+          p_user_id: user.id,
+          p_rows: rows,
+        });
+        if (whError) {
+          request.log.error({ whError }, "[enrich] Failed to replace work history");
+        }
+      }
+
+      // Replace education history atomically (delete + insert in one transaction)
+      if (educationHistory && educationHistory.length > 0) {
+        const rows = educationHistory.map((entry: ScrapedEducationEntry) => ({
+          school_name: entry.schoolName,
+          school_linkedin_id: entry.schoolLinkedinId ?? null,
+          degree: entry.degree ?? null,
+          description: entry.description ?? null,
+          start_date: toPostgresDate(entry.startDate),
+          end_date: toPostgresDate(entry.endDate),
+        }));
+        const { error: ehError } = await client.rpc("replace_education_history", {
+          p_person_id: personId,
+          p_user_id: user.id,
+          p_rows: rows,
+        });
+        if (ehError) {
+          request.log.error({ ehError }, "[enrich] Failed to replace education history");
+        }
+      }
+
+      request.log.info({ personId }, "[enrich] Enrichment complete");
+      return reply.status(200).send({ success: true });
+    },
+  );
+
+  /**
+   * GET /api/contacts/:id/linkedin-data - Get work history and education for a person
+   */
+  fastify.get(
+    "/:id/linkedin-data",
+    async (request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+      const auth = await requireAuth(request, reply);
+      if (!auth) return;
+
+      const { client, user } = auth;
+      const { id: personId } = request.params;
+
+      const { data: person, error: personError } = await client
+        .from("people")
+        .select("id, linkedin_bio")
+        .eq("id", personId)
+        .eq("user_id", user.id)
+        .single();
+
+      if (personError || !person) {
+        return reply.status(404).send({ error: "Contact not found" });
+      }
+
+      const [workHistoryResult, educationResult] = await Promise.all([
+        client
+          .from("people_work_history")
+          .select("*")
+          .eq("user_id", user.id)
+          .eq("person_id", personId)
+          .order("start_date", { ascending: false }),
+        client
+          .from("people_education_history")
+          .select("*")
+          .eq("user_id", user.id)
+          .eq("person_id", personId)
+          .order("start_date", { ascending: false }),
+      ]);
+
+      // Sort: active (null end_date) first, then finished — both groups ordered by
+      // start_date DESC. DB can't express (end_date IS NULL) DESC as a primary sort
+      // key via PostgREST, so we apply the two-group ordering in JS.
+      const sortByActiveFirst = <T extends { end_date: string | null; start_date: string | null }>(
+        rows: T[],
+      ): T[] =>
+        rows.sort((a, b) => {
+          const aActive = a.end_date === null;
+          const bActive = b.end_date === null;
+          if (aActive !== bActive) return aActive ? -1 : 1;
+          // Same group: most recent start_date first
+          if (!a.start_date && !b.start_date) return 0;
+          if (!a.start_date) return 1;
+          if (!b.start_date) return -1;
+          return a.start_date > b.start_date ? -1 : 1;
+        });
+
+      if (workHistoryResult.error) {
+        return reply.status(500).send({ error: workHistoryResult.error.message });
+      }
+      if (educationResult.error) {
+        return reply.status(500).send({ error: educationResult.error.message });
+      }
+
+      return {
+        linkedinBio: person.linkedin_bio ?? null,
+        workHistory: sortByActiveFirst(workHistoryResult.data || []).map((row) => ({
+          id: row.id,
+          userId: row.user_id,
+          personId: row.person_id,
+          companyName: row.company_name,
+          companyLinkedinUrl: row.company_linkedin_id
+            ? `https://www.linkedin.com/company/${row.company_linkedin_id}/`
+            : null,
+          companyLogoUrl: row.company_linkedin_id
+            ? client.storage
+                .from("linkedin_logos")
+                .getPublicUrl(`${user.id}/${row.company_linkedin_id}.jpg`).data.publicUrl
+            : null,
+          title: row.title,
+          description: row.description,
+          startDate: row.start_date,
+          endDate: row.end_date,
+          employmentType: row.employment_type,
+          location: row.location,
+          createdAt: row.created_at,
+          updatedAt: row.updated_at,
+        })),
+        education: sortByActiveFirst(educationResult.data || []).map((row) => ({
+          id: row.id,
+          userId: row.user_id,
+          personId: row.person_id,
+          schoolName: row.school_name,
+          schoolLinkedinUrl: row.school_linkedin_id
+            ? `https://www.linkedin.com/school/${row.school_linkedin_id}/`
+            : null,
+          schoolLogoUrl: row.school_linkedin_id
+            ? client.storage
+                .from("linkedin_logos")
+                .getPublicUrl(`${user.id}/${row.school_linkedin_id}.jpg`).data.publicUrl
+            : null,
+          degree: row.degree,
+          description: row.description,
+          startDate: row.start_date,
+          endDate: row.end_date,
+          createdAt: row.created_at,
+          updatedAt: row.updated_at,
+        })),
+      };
     },
   );
 }

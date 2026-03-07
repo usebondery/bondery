@@ -24,12 +24,14 @@ import {
   addOrFindPerson,
   fetchPersonPreview,
   findPersonBySocial,
+  upsertLinkedInData,
   AuthRequiredError,
   type SocialLookupResult,
 } from "../utils/api";
 import type {
   ExtensionMessage,
   AddPersonRequest,
+  UpsertLinkedInDataRequest,
   PersonPreviewData,
   ScrapedProfileData,
 } from "../utils/messages";
@@ -343,6 +345,10 @@ async function handleMessage(
         await handleAddPerson(message, sendResponse);
         break;
 
+      case "UPSERT_LINKEDIN_DATA":
+        await handleUpsertLinkedInData(message as UpsertLinkedInDataRequest, sendResponse);
+        break;
+
       case "GET_PENDING_PREVIEW":
         sendResponse({
           type: "PENDING_PREVIEW_RESULT",
@@ -608,6 +614,9 @@ async function handleAddPerson(
       headline: payload.headline,
       place: payload.place,
       notes: payload.notes,
+      workHistory: payload.workHistory,
+      educationHistory: payload.educationHistory,
+      linkedinBio: payload.linkedinBio,
     });
 
     if (result.existed) {
@@ -719,6 +728,37 @@ async function handleAddPerson(
         },
       });
     }
+  }
+}
+
+async function handleUpsertLinkedInData(
+  message: UpsertLinkedInDataRequest,
+  sendResponse: (response: unknown) => void,
+): Promise<void> {
+  const { contactId, workHistory } = message.payload;
+
+  const authenticated = await isAuthenticated();
+  if (!authenticated) {
+    sendResponse({
+      type: "UPSERT_LINKEDIN_DATA_RESULT",
+      payload: { success: false, error: "Not authenticated" },
+    });
+    return;
+  }
+
+  try {
+    await upsertLinkedInData(contactId, workHistory);
+    console.log(`[background] Upserted ${workHistory.length} work history entries for ${contactId}`);
+    sendResponse({ type: "UPSERT_LINKEDIN_DATA_RESULT", payload: { success: true } });
+  } catch (error) {
+    console.error("[background] Upsert LinkedIn data error:", error);
+    sendResponse({
+      type: "UPSERT_LINKEDIN_DATA_RESULT",
+      payload: {
+        success: false,
+        error: error instanceof Error ? error.message : "Failed to upsert LinkedIn data",
+      },
+    });
   }
 }
 

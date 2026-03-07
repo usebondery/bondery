@@ -100,23 +100,12 @@ export function ActivityCard({
         </MenuDropdown>
       </Menu>
 
-      <Group align="stretch" wrap="nowrap" gap={0}>
+      <Group align="stretch" wrap="nowrap" gap={"md"} p="sm">
         {leftSection ? (
-          <Box
-            px="sm"
-            style={{
-              flexShrink: 0,
-              minWidth: 96,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            {leftSection}
-          </Box>
+          <Box className="flex justify-center items-center shrink-0 min-w-20">{leftSection}</Box>
         ) : null}
 
-        <Stack gap="2" p="sm" style={{ minWidth: 0, paddingRight: 28, flex: 1 }}>
+        <Stack gap="2" style={{ flex: 1 }}>
           <Group gap="xs" align="center" wrap="nowrap">
             <Text c="dimmed" size="xs">
               {date.toLocaleDateString("en-US", {

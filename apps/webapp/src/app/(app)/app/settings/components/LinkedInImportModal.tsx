@@ -85,6 +85,8 @@ interface LinkedInImportTranslations {
   ProcessingConnections: string;
   ImportingTitle: string;
   ImportingProgress: string;
+  NoContactsFound: string;
+  NoContactsMatchSearch: string;
 }
 
 function buildImportedTitle(position: string | null, company: string | null): string | null {
@@ -650,6 +652,8 @@ export function LinkedInImportModal({
         nonSelectableIds={nonSelectableIds}
         nonSelectableTooltip={t("ExistingHandleTooltip")}
         disableNameLink
+        noContactsFound={t("NoContactsFound")}
+        noContactsMatchSearch={t("NoContactsMatchSearch")}
       />
 
       <ModalFooter

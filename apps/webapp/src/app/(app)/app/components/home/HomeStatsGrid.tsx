@@ -10,11 +10,11 @@ interface HomeStatsGridProps {
   };
   labels: {
     totalContactsTitle: string;
-    totalContactsDescription: string;
+    totalContactsTooltip: string;
     interactionsTitle: string;
-    interactionsDescription: string;
+    interactionsTooltip: string;
     newContactsTitle: string;
-    newContactsDescription: string;
+    newContactsTooltip: string;
   };
 }
 
@@ -24,7 +24,7 @@ export function HomeStatsGrid({ stats, labels }: HomeStatsGridProps) {
       <StatsCard
         title={labels.totalContactsTitle}
         value={stats.totalContacts}
-        description={labels.totalContactsDescription}
+        tooltip={labels.totalContactsTooltip}
         icon={<IconUsers size={32} stroke={1.5} />}
         color="blue"
         href="/app/people"
@@ -32,15 +32,15 @@ export function HomeStatsGrid({ stats, labels }: HomeStatsGridProps) {
       <StatsCard
         title={labels.interactionsTitle}
         value={stats.thisMonthInteractions}
-        description={labels.interactionsDescription}
+        tooltip={labels.interactionsTooltip}
         icon={<IconMessageCircle size={32} stroke={1.5} />}
         color="green"
-        href="/app/timeline"
+        href="/app/interactions"
       />
       <StatsCard
         title={labels.newContactsTitle}
         value={stats.newContactsThisYear}
-        description={labels.newContactsDescription}
+        tooltip={labels.newContactsTooltip}
         icon={<IconUserPlus size={32} stroke={1.5} />}
         color="violet"
         href="/app/people"

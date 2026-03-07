@@ -1,7 +1,8 @@
 {
   "name": "website",
-  "version": "0.1.0",
+  "version": "0.6.1",
   "private": true,
+  "description": "Bondery Website",
   "scripts": {
     "check-env": "tsx scripts/check-env.ts",
     "generate-icons": "tsx scripts/generate-icons.ts",

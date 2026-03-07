@@ -3,7 +3,7 @@
 import { Group, Checkbox, TextInput, Text, Loader } from "@mantine/core";
 import { IconGift } from "@tabler/icons-react";
 import { INPUT_MAX_LENGTHS } from "@/lib/config";
-import { DatePickerWithPresets } from "../../../components/timeline/DatePickerWithPresets";
+import { DatePickerWithPresets } from "../../../components/interactions/DatePickerWithPresets";
 
 interface DateWithNotificationProps {
   title: string;

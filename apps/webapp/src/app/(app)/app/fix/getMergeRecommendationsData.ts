@@ -3,8 +3,16 @@ import { getAuthHeaders } from "@/lib/authHeaders";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import type { MergeRecommendation, MergeRecommendationsResponse } from "@bondery/types";
 
-export async function getMergeRecommendationsData(): Promise<MergeRecommendation[]> {
-  const headers = await getAuthHeaders();
+/**
+ * Fetches merge recommendations from the API.
+ *
+ * @param precomputedHeaders - Optional pre-fetched auth headers to avoid redundant getAuthHeaders() calls.
+ * @returns Array of merge recommendations.
+ */
+export async function getMergeRecommendationsData(
+  precomputedHeaders?: HeadersInit,
+): Promise<MergeRecommendation[]> {
+  const headers = precomputedHeaders ?? (await getAuthHeaders());
   const response = await fetch(`${API_URL}${API_ROUTES.CONTACTS}/merge-recommendations`, {
     next: { tags: ["merge-recommendations"] },
     headers,

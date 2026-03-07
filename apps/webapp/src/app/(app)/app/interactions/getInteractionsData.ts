@@ -3,17 +3,17 @@ import { getAuthHeaders } from "@/lib/authHeaders";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import type { Activity, Contact } from "@bondery/types";
 
-interface TimelineDataResult {
+interface InteractionsDataResult {
   contacts: Contact[];
   activities: Activity[];
 }
 
 /**
- * Fetches contacts and timeline interactions for timeline-based views.
+ * Fetches contacts and interactions for interaction-based views.
  *
- * @returns Timeline contacts and interactions with resilient empty fallback on errors.
+ * @returns contacts and interactions with resilient empty fallback on errors.
  */
-export async function getTimelineData(): Promise<TimelineDataResult> {
+export async function getInteractionsData(): Promise<InteractionsDataResult> {
   try {
     const headers = await getAuthHeaders();
 
@@ -51,7 +51,7 @@ export async function getTimelineData(): Promise<TimelineDataResult> {
       activities: (interactionsData.interactions || []) as Activity[],
     };
   } catch (error) {
-    console.error("Error fetching timeline data:", error);
+    console.error("Error fetching interactions data:", error);
     return { contacts: [], activities: [] };
   }
 }

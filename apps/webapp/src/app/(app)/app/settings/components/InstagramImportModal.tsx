@@ -114,6 +114,8 @@ interface InstagramImportTranslations {
   ImportingTitle: string;
   ImportingProgress: string;
   ChooseContactsHint: string;
+  NoContactsFound: string;
+  NoContactsMatchSearch: string;
 }
 
 async function readApiResponse(response: Response): Promise<{
@@ -856,6 +858,8 @@ export function InstagramImportModal({
         nonSelectableIds={nonSelectableIds}
         nonSelectableTooltip={t("ExistingHandleTooltip")}
         disableNameLink
+        noContactsFound={t("NoContactsFound")}
+        noContactsMatchSearch={t("NoContactsMatchSearch")}
       />
 
       <ModalFooter

@@ -37,6 +37,22 @@ export const GITHUB_REPO_URL = "https://api.github.com/repos/usebondery/bondery"
 export const STATUS_PAGE_URL = "https://bondery.openstatus.dev/";
 export const SUPPORT_EMAIL = "team@usebondery.com";
 
+/** The webapp product name used in browser tab titles and metadata. */
+export const WEBAPP_NAME = "Bondery";
+
+/** Divider character used in browser tab titles, e.g. "Person ∘ Bondery" */
+export const METADATA_TITLE_DIVIDER = "∘";
+
+/**
+ * Formats a page title for use in browser tab metadata.
+ *
+ * @param pageTitle - The page-specific title (e.g. a person's name or group label).
+ * @returns A combined title string in the format "pageTitle ∘ Bondery".
+ */
+export function formatMetadataTitle(pageTitle: string): string {
+  return `${pageTitle} ${METADATA_TITLE_DIVIDER} ${WEBAPP_NAME}`;
+}
+
 export const SOCIAL_LINKS = {
   github: "https://github.com/usebondery/bondery",
   linkedin: "https://www.linkedin.com/company/bondery",
@@ -50,7 +66,7 @@ export const WEBAPP_ROUTES = {
   PEOPLE: "/app/people",
   FIX_CONTACTS: "/app/fix",
   GROUPS: "/app/groups",
-  TIMELINE: "/app/timeline",
+  INTERACTIONS: "/app/interactions",
   PERSON: "/app/person",
   SETTINGS: "/app/settings",
   ACCOUNT: "/app/account",

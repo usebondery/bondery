@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse, ProxyConfig } from "next/server";
 
 export function proxy(request: NextRequest) {
   const nonce = Buffer.from(crypto.randomUUID()).toString("base64");
@@ -36,7 +36,7 @@ export function proxy(request: NextRequest) {
   return response;
 }
 
-export const config = {
+export const proxyConfig: ProxyConfig = {
   matcher: [
     {
       source: "/((?!api|_next/static|_next/image|favicon.ico).*)",

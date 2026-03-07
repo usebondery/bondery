@@ -17,7 +17,13 @@ import {
 } from "@mantine/core";
 import { modals } from "@mantine/modals";
 import { notifications } from "@mantine/notifications";
-import { IconMinus, IconPlus, IconSearch, IconUsersGroup } from "@tabler/icons-react";
+import {
+  IconMinus,
+  IconPlus,
+  IconSearch,
+  IconUsersGroup,
+  IconFolderPlus,
+} from "@tabler/icons-react";
 import {
   PersonChip,
   errorNotificationTemplate,
@@ -29,7 +35,8 @@ import {
 import type { Contact, ContactPreview, GroupWithCount, GroupsListResponse } from "@bondery/types";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import { revalidateGroups } from "../../actions";
-import { GroupCard } from "../../groups/components/GroupCard";
+import { GroupCard, GROUP_CARD_MAX_WIDTH_BY_VARIANT } from "../../groups/components/GroupCard";
+import { openAddGroupModal } from "../../groups/components/AddGroupModal";
 
 interface AddPeopleToGroupSelectionModalProps {
   personIds: string[];
@@ -57,6 +64,8 @@ function AddPeopleToGroupSelectionForm({
   onUpdated,
   modalId,
 }: AddPeopleToGroupSelectionFormProps) {
+  const modalGroupCardVariant = "small" as const;
+  const modalGroupCardWidth = GROUP_CARD_MAX_WIDTH_BY_VARIANT[modalGroupCardVariant];
   const router = useRouter();
   const [groups, setGroups] = useState<GroupWithCount[]>([]);
   const [isLoadingGroups, setIsLoadingGroups] = useState(true);
@@ -277,122 +286,138 @@ function AddPeopleToGroupSelectionForm({
         onChange={(event) => setSearch(event.currentTarget.value)}
       />
 
-      {groups.length === 0 ? (
-        <Text c="dimmed" ta="center" py="lg">
-          No groups found
-        </Text>
-      ) : (
-        <ScrollArea h={360} type="auto">
-          <Group gap="sm" align="flex-start" wrap="wrap">
-            {filteredGroups.length === 0 ? (
-              <Text c="dimmed" ta="center" py="lg">
+      <ScrollArea h={360} type="auto">
+        <Group gap="sm" align="flex-start" justify="flex-start" wrap="wrap" w="full">
+          {/* Create new group – always the first card in the grid */}
+          <Box
+            style={{
+              flex: `1 1 ${modalGroupCardWidth}`,
+              width: modalGroupCardWidth,
+              maxWidth: modalGroupCardWidth,
+            }}
+          >
+            <GroupCard
+              variant="action"
+              actionLabel="Create new group"
+              actionIcon={<IconFolderPlus size={20} />}
+              actionColor="green"
+              onActionClick={() => {
+                openAddGroupModal({
+                  initialSelectedIds: deduplicatedPersonIds,
+                  initialLabel: search.trim(),
+                  onCreated: (newGroup) => {
+                    // Inject the new group and immediately mark it as
+                    // "Already part of" — the people were added on creation.
+                    setGroups((prev) => [...prev, newGroup]);
+                    setInitialSelectedGroupIds((prev) => new Set([...prev, newGroup.id]));
+                    setSelectedGroupIds((prev) => new Set([...prev, newGroup.id]));
+                  },
+                });
+              }}
+            />
+          </Box>
+
+          {filteredGroups.length === 0 ? (
+            groups.length > 0 && search.trim() ? (
+              <Text c="dimmed" ta="center" py="lg" style={{ width: "100%" }}>
                 No groups match your search
               </Text>
-            ) : (
-              filteredGroups.map((group) => (
-                <UnstyledButton
-                  key={group.id}
-                  onClick={() => handleToggleGroup(group.id)}
-                  style={{
-                    textAlign: "left",
-                    flex: "1 1 18rem",
-                    minWidth: "16rem",
-                    maxWidth: "20rem",
-                  }}
-                >
-                  {(() => {
-                    const isInitiallySelected = initialSelectedGroupIds.has(group.id);
-                    const isCurrentlySelected = selectedGroupIds.has(group.id);
+            ) : null
+          ) : (
+            filteredGroups.map((group) => (
+              <UnstyledButton
+                key={group.id}
+                onClick={() => handleToggleGroup(group.id)}
+                style={{
+                  textAlign: "left",
+                  flex: `1 1 ${modalGroupCardWidth}`,
+                  width: modalGroupCardWidth,
+                  maxWidth: modalGroupCardWidth,
+                }}
+              >
+                {(() => {
+                  const isInitiallySelected = initialSelectedGroupIds.has(group.id);
+                  const isCurrentlySelected = selectedGroupIds.has(group.id);
 
-                    const selectionState = isInitiallySelected
-                      ? isCurrentlySelected
-                        ? "already"
-                        : "remove"
-                      : isCurrentlySelected
-                        ? "add"
-                        : "none";
+                  const selectionState = isInitiallySelected
+                    ? isCurrentlySelected
+                      ? "already"
+                      : "remove"
+                    : isCurrentlySelected
+                      ? "add"
+                      : "none";
 
-                    return (
-                      <Box pos="relative">
-                        {selectionState === "remove" && (
-                          <Badge
-                            size="xs"
-                            leftSection={<IconMinus size={10} />}
-                            style={{
-                              position: "absolute",
-                              top: 8,
-                              right: 8,
-                              zIndex: 2,
-                              backgroundColor: "var(--mantine-color-red-filled)",
-                              color: "var(--mantine-color-white)",
-                            }}
-                          >
-                            Remove from
-                          </Badge>
-                        )}
-                        {selectionState === "add" && (
-                          <Badge
-                            size="xs"
-                            leftSection={<IconPlus size={10} />}
-                            style={{
-                              position: "absolute",
-                              top: 8,
-                              right: 8,
-                              zIndex: 2,
-                              backgroundColor: "var(--mantine-color-green-filled)",
-                              color: "var(--mantine-color-white)",
-                            }}
-                          >
-                            Add to
-                          </Badge>
-                        )}
-                        {selectionState === "already" && (
-                          <Badge
-                            size="xs"
-                            style={{
-                              position: "absolute",
-                              top: 8,
-                              right: 8,
-                              zIndex: 2,
-                              backgroundColor: "var(--mantine-primary-color-filled)",
-                              color: "var(--mantine-color-white)",
-                            }}
-                          >
-                            Already part of
-                          </Badge>
-                        )}
+                  return (
+                    <Box pos="relative">
+                      {selectionState === "remove" && (
+                        <Badge
+                          size="xs"
+                          leftSection={<IconMinus size={10} />}
+                          className="top-2 absolute right-2 z-10"
+                          style={{
+                            backgroundColor: "var(--mantine-color-red-filled)",
+                            color: "var(--mantine-color-white)",
+                          }}
+                        >
+                          Remove from
+                        </Badge>
+                      )}
+                      {selectionState === "add" && (
+                        <Badge
+                          size="xs"
+                          leftSection={<IconPlus size={10} />}
+                          className="top-2 absolute right-2 z-10"
+                          style={{
+                            backgroundColor: "var(--mantine-color-green-filled)",
+                            color: "var(--mantine-color-white)",
+                          }}
+                        >
+                          Add to
+                        </Badge>
+                      )}
+                      {selectionState === "already" && (
+                        <Badge
+                          size="xs"
+                          className="top-2 absolute right-2 z-10"
+                          style={{
+                            backgroundColor: "var(--mantine-primary-color-filled)",
+                            color: "var(--mantine-color-white)",
+                          }}
+                        >
+                          Already part of
+                        </Badge>
+                      )}
 
-                        <GroupCard
-                          group={group}
-                          onClick={() => {}}
-                          onAddPeople={() => {}}
-                          onEdit={() => {}}
-                          onDuplicate={() => {}}
-                          onDelete={() => {}}
-                          interactive={false}
-                          cursorType="pointer"
-                          variant="small"
-                          showMenu={false}
-                          selected={isCurrentlySelected}
-                          highlightColor={
-                            selectionState === "add"
-                              ? "green"
-                              : selectionState === "remove"
-                                ? "red"
-                                : selectionState === "already"
-                                  ? "primary"
-                                  : undefined
-                          }
-                        />
-                      </Box>
-                    );
-                  })()}
-                </UnstyledButton>
-              ))
-            )}
-          </Group>
-        </ScrollArea>
-      )}
+                      <GroupCard
+                        group={group}
+                        onClick={() => {}}
+                        onAddPeople={() => {}}
+                        onEdit={() => {}}
+                        onDuplicate={() => {}}
+                        onDelete={() => {}}
+                        interactive={false}
+                        cursorType="pointer"
+                        variant={modalGroupCardVariant}
+                        showMenu={false}
+                        selected={isCurrentlySelected}
+                        highlightColor={
+                          selectionState === "add"
+                            ? "green"
+                            : selectionState === "remove"
+                              ? "red"
+                              : selectionState === "already"
+                                ? "primary"
+                                : undefined
+                        }
+                      />
+                    </Box>
+                  );
+                })()}
+              </UnstyledButton>
+            ))
+          )}
+        </Group>
+      </ScrollArea>
 
       <ModalFooter
         cancelLabel="Cancel"

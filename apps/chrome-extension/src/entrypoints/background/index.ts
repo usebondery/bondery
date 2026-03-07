@@ -32,12 +32,16 @@ import {
   addOrFindPerson,
   fetchPersonPreview,
   findPersonBySocial,
+  enrichPersonFromLinkedIn,
   AuthRequiredError,
   type SocialLookupResult,
 } from "../../utils/api";
 import type {
   ExtensionMessage,
   AddPersonRequest,
+  EnrichPersonRequest,
+  EnrichError,
+  SubmitEnrichData,
   PersonPreviewData,
   ScrapedProfileData,
 } from "../../utils/messages";
@@ -50,6 +54,15 @@ let pendingPreview: PersonPreviewData | null = null;
 
 /** Lock to prevent concurrent login flows */
 let loginInProgress = false;
+
+/** Pending enrich request (webapp → LinkedIn tab → background → API → webapp) */
+let pendingEnrich: {
+  contactId: string;
+  linkedinHandle: string;
+  requestId: string;
+  linkedinTabId: number;
+  senderTabId: number;
+} | null = null;
 
 /** Debounce timer for badge indicator updates */
 let indicatorUpdateTimer: ReturnType<typeof setTimeout> | null = null;
@@ -475,8 +488,16 @@ async function handleAddPerson(
 ): Promise<void> {
   const { payload } = message;
 
+  console.log("[background] handleAddPerson called", {
+    platform: payload.platform,
+    handle: payload.handle,
+    workHistoryCount: payload.workHistory?.length ?? 0,
+    educationHistoryCount: payload.educationHistory?.length ?? 0,
+  });
+
   const authenticated = await isAuthenticated();
   if (!authenticated) {
+    console.log("[background] handleAddPerson: not authenticated");
     sendResponse({
       type: "ADD_PERSON_RESULT",
       payload: { success: false, error: "Not authenticated", requiresAuth: true },
@@ -496,6 +517,14 @@ async function handleAddPerson(
       headline: payload.headline,
       place: payload.place,
       notes: payload.notes,
+      workHistory: payload.workHistory,
+      educationHistory: payload.educationHistory,
+      linkedinBio: payload.linkedinBio,
+    });
+
+    console.log("[background] addOrFindPerson result", {
+      contactId: result.contactId,
+      existed: result.existed,
     });
 
     if (result.existed) {
@@ -688,8 +717,227 @@ async function handleActiveProfileContext(
   }
 }
 
+// ─── Enrich Handlers ─────────────────────────────────────────────────────────
+
+const ENRICH_TIMEOUT_MINUTES = 1.5; // Chrome alarms minimum is 1 min; 1.5 min ≈ 90s
+const ENRICH_KEEPALIVE_MINUTES = 0.4; // Fires every ~24s to keep SW alive
+
+/**
+ * Clears the pending enrich state, cancels alarms, and optionally notifies
+ * the old request’s webapp tab so its notification doesn’t hang.
+ *
+ * @param reason If provided, sends a failure result to the webapp tab with this error message.
+ */
+async function clearPendingEnrich(reason?: string): Promise<void> {
+  if (!pendingEnrich) return;
+
+  const { senderTabId, linkedinTabId, requestId } = pendingEnrich;
+  pendingEnrich = null;
+
+  // Cancel alarms
+  try {
+    await browser.alarms.clear("enrich-timeout");
+  } catch {
+    /* ok */
+  }
+  try {
+    await browser.alarms.clear("enrich-keepalive");
+  } catch {
+    /* ok */
+  }
+
+  if (reason) {
+    // Close the LinkedIn tab
+    try {
+      await browser.tabs.remove(linkedinTabId);
+    } catch {
+      /* tab may already be closed */
+    }
+
+    // Notify the webapp tab so the loading notification resolves immediately
+    try {
+      await browser.tabs.sendMessage(senderTabId, {
+        type: "ENRICH_PERSON_RESULT",
+        payload: { requestId, success: false, error: reason },
+      });
+    } catch {
+      /* sender tab may be closed */
+    }
+  }
+}
+
+async function handleEnrichPersonRequest(
+  message: EnrichPersonRequest,
+  sender: { tab?: { id?: number } },
+  sendResponse: (response: unknown) => void,
+): Promise<void> {
+  const { contactId, linkedinHandle, requestId } = message.payload;
+
+  const authenticated = await isAuthenticated();
+  if (!authenticated) {
+    sendResponse({
+      type: "ENRICH_PERSON_RESULT",
+      payload: { requestId, success: false, error: "Not authenticated" },
+    });
+    return;
+  }
+
+  // Cancel any existing pending enrich, notifying the old request’s webapp tab
+  await clearPendingEnrich("Cancelled — a new enrich request was started");
+
+  const senderTabId = sender.tab?.id ?? 0;
+
+  // Open a LinkedIn tab for the target profile
+  // Decode first to normalize (handle may already be URL-encoded in the DB),
+  // then re-encode to produce a valid URL without double-encoding %xx sequences.
+  const normalizedHandle = (() => {
+    try {
+      return decodeURIComponent(linkedinHandle);
+    } catch {
+      return linkedinHandle;
+    }
+  })();
+  const linkedinUrl = `https://www.linkedin.com/in/${encodeURIComponent(normalizedHandle)}/`;
+  const tab = await browser.tabs.create({ url: linkedinUrl, active: false });
+
+  if (!tab.id) {
+    sendResponse({
+      type: "ENRICH_PERSON_RESULT",
+      payload: { requestId, success: false, error: "Failed to open LinkedIn tab" },
+    });
+    return;
+  }
+
+  // Use alarms instead of setTimeout to survive SW idle termination.
+  // The timeout alarm fires once after ~90s; the keepalive alarm pings
+  // periodically (~24s) to prevent Chrome from killing the SW mid-enrich.
+  await browser.alarms.create("enrich-timeout", { delayInMinutes: ENRICH_TIMEOUT_MINUTES });
+  await browser.alarms.create("enrich-keepalive", { periodInMinutes: ENRICH_KEEPALIVE_MINUTES });
+
+  pendingEnrich = {
+    contactId,
+    linkedinHandle,
+    requestId,
+    linkedinTabId: tab.id,
+    senderTabId,
+  };
+
+  // Respond with a typed ack so the webapp.content bridge’s
+  // runtime.sendMessage promise resolves. The real result arrives
+  // asynchronously via tabs.sendMessage → runtime.onMessage push.
+  sendResponse({
+    type: "ENRICH_PERSON_ACK",
+    payload: { requestId },
+  });
+}
+
+async function handleEnrichError(
+  message: EnrichError,
+  sender: { tab?: { id?: number } },
+  sendResponse: (response: unknown) => void,
+): Promise<void> {
+  const { requestId, error } = message.payload;
+
+  if (!pendingEnrich || pendingEnrich.requestId !== requestId) {
+    sendResponse({ type: "ENRICH_PERSON_RESULT", payload: { requestId, success: false, error } });
+    return;
+  }
+
+  // Clear state and relay the error to the webapp immediately
+  await clearPendingEnrich(error);
+  sendResponse({ type: "ENRICH_PERSON_RESULT", payload: { requestId, success: false, error } });
+}
+
+async function handleSubmitEnrichData(
+  message: SubmitEnrichData,
+  sender: { tab?: { id?: number } },
+  sendResponse: (response: unknown) => void,
+): Promise<void> {
+  const { requestId, contactId, profile } = message.payload;
+
+  if (!pendingEnrich || pendingEnrich.requestId !== requestId) {
+    sendResponse({
+      type: "ENRICH_PERSON_RESULT",
+      payload: { requestId, success: false, error: "No matching enrich request" },
+    });
+    return;
+  }
+
+  // Validate that the data is coming from the LinkedIn tab we opened
+  if (sender.tab?.id !== pendingEnrich.linkedinTabId) {
+    sendResponse({
+      type: "ENRICH_PERSON_RESULT",
+      payload: { requestId, success: false, error: "Unauthorized enrich submission" },
+    });
+    return;
+  }
+
+  const { senderTabId, linkedinTabId } = pendingEnrich;
+  await clearPendingEnrich();
+
+  try {
+    await enrichPersonFromLinkedIn(contactId, {
+      firstName: profile.firstName,
+      middleName: profile.middleName,
+      lastName: profile.lastName,
+      profileImageUrl: profile.profileImageUrl,
+      headline: profile.headline,
+      place: profile.place,
+      linkedinBio: profile.linkedinBio,
+      workHistory: profile.workHistory,
+      educationHistory: profile.educationHistory,
+    });
+
+    // Close the LinkedIn tab
+    try {
+      await browser.tabs.remove(linkedinTabId);
+    } catch {
+      /* tab may already be closed */
+    }
+
+    // Relay success to the webapp tab
+    const result = {
+      type: "ENRICH_PERSON_RESULT" as const,
+      payload: { requestId, success: true as const, contactId },
+    };
+
+    try {
+      await browser.tabs.sendMessage(senderTabId, result);
+    } catch {
+      /* sender tab may be closed */
+    }
+
+    sendResponse(result);
+  } catch (error) {
+    // Close the LinkedIn tab
+    try {
+      await browser.tabs.remove(linkedinTabId);
+    } catch {
+      /* tab may already be closed */
+    }
+
+    const result = {
+      type: "ENRICH_PERSON_RESULT" as const,
+      payload: {
+        requestId,
+        success: false as const,
+        error: error instanceof Error ? error.message : "Enrich failed",
+      },
+    };
+
+    try {
+      await browser.tabs.sendMessage(senderTabId, result);
+    } catch {
+      /* sender tab may be closed */
+    }
+
+    sendResponse(result);
+  }
+}
+
 async function handleMessage(
   message: ExtensionMessage,
+  sender: { tab?: { id?: number } },
   sendResponse: (response: unknown) => void,
 ): Promise<void> {
   try {
@@ -720,6 +968,42 @@ async function handleMessage(
 
       case "GET_ACTIVE_PROFILE_CONTEXT":
         await handleActiveProfileContext(sendResponse);
+        break;
+
+      case "ENRICH_PERSON_REQUEST":
+        await handleEnrichPersonRequest(message, sender, sendResponse);
+        break;
+
+      case "GET_ENRICH_CONTEXT":
+        // LinkedIn content script asking if it should auto-enrich
+        if (pendingEnrich && sender.tab?.id === pendingEnrich.linkedinTabId) {
+          sendResponse({
+            type: "ENRICH_CONTEXT_RESULT",
+            payload: {
+              contactId: pendingEnrich.contactId,
+              linkedinHandle: pendingEnrich.linkedinHandle,
+              requestId: pendingEnrich.requestId,
+            },
+          });
+        } else {
+          sendResponse({
+            type: "ENRICH_CONTEXT_RESULT",
+            payload: null,
+          });
+        }
+        break;
+
+      case "SUBMIT_ENRICH_DATA":
+        await handleSubmitEnrichData(message, sender, sendResponse);
+        break;
+
+      case "ENRICH_ERROR":
+        await handleEnrichError(message, sender, sendResponse);
+        break;
+
+      case "ENRICH_CONTEXT_RESULT":
+        // This message type is sent TO content scripts, not FROM them.
+        // If it arrives here unexpectedly, ignore it.
         break;
 
       default:
@@ -766,6 +1050,13 @@ const DEV_CONTENT_SCRIPTS: chrome.scripting.RegisteredContentScript[] = [
     runAt: "document_idle",
     js: ["content-scripts/facebook.js"],
     css: ["content-scripts/facebook.css"],
+    persistAcrossSessions: true,
+  },
+  {
+    id: "wxt:content-scripts/webapp.js",
+    matches: ["https://app.usebondery.com/*", "http://localhost:3000/*", "http://localhost:3002/*"],
+    runAt: "document_idle",
+    js: ["content-scripts/webapp.js"],
     persistAcrossSessions: true,
   },
 ];
@@ -842,8 +1133,8 @@ function initBackground(): void {
 
   // Message handler
   browser.runtime.onMessage.addListener(
-    (message: ExtensionMessage, _sender, sendResponse: (response: unknown) => void) => {
-      handleMessage(message, sendResponse);
+    (message: ExtensionMessage, sender, sendResponse: (response: unknown) => void) => {
+      handleMessage(message, sender, sendResponse);
       return true;
     },
   );
@@ -862,6 +1153,21 @@ function initBackground(): void {
       if (tokens.expiresAt < now + REFRESH_BUFFER) {
         console.log("[background] Proactively refreshing token...");
         await refreshAccessToken();
+      }
+    }
+
+    // Enrich timeout — fired once by the "enrich-timeout" alarm
+    if (alarm.name === "enrich-timeout" && pendingEnrich) {
+      await clearPendingEnrich("Enrich timed out");
+    }
+
+    // Enrich keepalive — periodic alarm that keeps the SW alive.
+    // No-op when there’s no pending enrich; clear it to stop pinging.
+    if (alarm.name === "enrich-keepalive" && !pendingEnrich) {
+      try {
+        await browser.alarms.clear("enrich-keepalive");
+      } catch {
+        /* ok */
       }
     }
   });

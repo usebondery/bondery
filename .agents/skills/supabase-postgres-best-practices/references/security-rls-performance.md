@@ -55,3 +55,7 @@ create index orders_user_id_idx on orders (user_id);
 ```
 
 Reference: [RLS Performance](https://supabase.com/docs/guides/database/postgres/row-level-security#rls-performance-recommendations)
+
+## Project Rule: Always Wrap auth Functions at Creation Time
+
+**Every RLS policy written in this codebase, including policies in brand-new table migrations, must wrap all `auth.*` calls (`auth.uid()`, `auth.role()`, `auth.jwt()`, etc.) in a `SELECT` subquery from the very first time they are written.** Never write `auth.uid() = user_id`; always write `(select auth.uid()) = user_id`. This applies to `USING` clauses, `WITH CHECK` clauses, and any helper function used inside a policy. Skipping this causes Postgres to evaluate the function once per row instead of once per statement, which the Supabase Performance Advisor flags as a critical issue and forces a separate follow-up migration to remediate exactly the situation to avoid.

@@ -91,49 +91,65 @@ export async function isAuthenticated(): Promise<boolean> {
 
 // ─── Token Refresh ───────────────────────────────────────────────────────────
 
+/** Singleton promise to deduplicate concurrent refresh calls */
+let refreshInFlight: Promise<StoredTokens | null> | null = null;
+
 /**
  * Refresh the access token using the stored refresh token.
- * Returns the new tokens, or null if refresh fails.
+ * Concurrent callers share the same in-flight promise to avoid
+ * rotating the refresh token twice in parallel.
+ *
+ * @returns The new tokens, or null if refresh fails.
  */
 export async function refreshAccessToken(): Promise<StoredTokens | null> {
-  const tokens = await getTokens();
-  if (!tokens?.refreshToken) return null;
+  if (refreshInFlight) return refreshInFlight;
 
-  try {
-    const response = await fetch(`${config.supabaseUrl}/auth/v1/oauth/token`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
-      body: new URLSearchParams({
-        grant_type: "refresh_token",
-        refresh_token: tokens.refreshToken,
-        client_id: config.oauthClientId,
-      }),
-    });
+  refreshInFlight = (async () => {
+    const tokens = await getTokens();
+    if (!tokens?.refreshToken) return null;
 
-    if (!response.ok) {
-      console.error("[auth] Token refresh failed:", response.status);
-      // If refresh fails with 4xx, tokens are likely revoked
-      if (response.status >= 400 && response.status < 500) {
-        await clearTokens();
+    try {
+      const response = await fetch(`${config.supabaseUrl}/auth/v1/oauth/token`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: new URLSearchParams({
+          grant_type: "refresh_token",
+          refresh_token: tokens.refreshToken,
+          client_id: config.oauthClientId,
+        }),
+      });
+
+      if (!response.ok) {
+        console.error("[auth] Token refresh failed:", response.status);
+        // If refresh fails with 4xx, tokens are likely revoked
+        if (response.status >= 400 && response.status < 500) {
+          await clearTokens();
+        }
+        return null;
       }
+
+      const data = await response.json();
+
+      const newTokens: StoredTokens = {
+        accessToken: data.access_token,
+        refreshToken: data.refresh_token ?? tokens.refreshToken,
+        expiresAt: Math.floor(Date.now() / 1000) + (data.expires_in ?? 3600),
+      };
+
+      await setTokens(newTokens);
+      return newTokens;
+    } catch (error) {
+      console.error("[auth] Token refresh error:", error);
       return null;
     }
+  })();
 
-    const data = await response.json();
-
-    const newTokens: StoredTokens = {
-      accessToken: data.access_token,
-      refreshToken: data.refresh_token ?? tokens.refreshToken,
-      expiresAt: Math.floor(Date.now() / 1000) + (data.expires_in ?? 3600),
-    };
-
-    await setTokens(newTokens);
-    return newTokens;
-  } catch (error) {
-    console.error("[auth] Token refresh error:", error);
-    return null;
+  try {
+    return await refreshInFlight;
+  } finally {
+    refreshInFlight = null;
   }
 }
 

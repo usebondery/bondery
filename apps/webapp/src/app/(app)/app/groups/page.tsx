@@ -1,8 +1,11 @@
+import type { Metadata } from "next";
 import { GroupsClient } from "./GroupsClient";
 import { API_URL } from "@/lib/config";
 import type { GroupWithCount } from "@bondery/types";
 import { getAuthHeaders } from "@/lib/authHeaders";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
+
+export const metadata: Metadata = { title: "Groups" };
 
 async function getGroups() {
   try {

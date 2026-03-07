@@ -28,7 +28,8 @@ import {
   ModalTitle,
   successNotificationTemplate,
 } from "@bondery/mantine-next";
-import type { Contact } from "@bondery/types";
+import { flushSync } from "react-dom";
+import type { Contact, GroupWithCount } from "@bondery/types";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import { revalidateGroups } from "../../actions";
 
@@ -53,7 +54,13 @@ function getRandomColor(): string {
   return COLOR_SWATCHES[Math.floor(Math.random() * COLOR_SWATCHES.length)];
 }
 
-export function openAddGroupModal() {
+interface OpenAddGroupModalOptions {
+  initialSelectedIds?: string[];
+  initialLabel?: string;
+  onCreated?: (group: GroupWithCount) => void;
+}
+
+export function openAddGroupModal(options: OpenAddGroupModalOptions = {}) {
   const modalId = `add-group-${Math.random().toString(36).slice(2)}`;
 
   modals.open({
@@ -61,16 +68,35 @@ export function openAddGroupModal() {
     title: <ModalTitle text="Add new group" icon={<IconUsersGroup size={24} />} />,
     trapFocus: true,
     size: "md",
-    children: <AddGroupForm modalId={modalId} />,
+    children: (
+      <AddGroupForm
+        modalId={modalId}
+        initialSelectedIds={options.initialSelectedIds}
+        initialLabel={options.initialLabel}
+        onCreated={options.onCreated}
+      />
+    ),
   });
 }
 
-function AddGroupForm({ modalId }: { modalId: string }) {
+interface AddGroupFormProps {
+  modalId: string;
+  initialSelectedIds?: string[];
+  initialLabel?: string;
+  onCreated?: (group: GroupWithCount) => void;
+}
+
+function AddGroupForm({
+  modalId,
+  initialSelectedIds = [],
+  initialLabel = "",
+  onCreated,
+}: AddGroupFormProps) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoadingContacts, setIsLoadingContacts] = useState(true);
   const [contacts, setContacts] = useState<Contact[]>([]);
-  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [selectedIds, setSelectedIds] = useState<string[]>(initialSelectedIds);
 
   useEffect(() => {
     modals.updateModal({
@@ -109,7 +135,7 @@ function AddGroupForm({ modalId }: { modalId: string }) {
   const form = useForm({
     mode: "controlled",
     initialValues: {
-      label: "",
+      label: initialLabel,
       emoji: getRandomEmoji(),
       color: getRandomColor(),
     },
@@ -182,9 +208,33 @@ function AddGroupForm({ modalId }: { modalId: string }) {
         }),
       );
 
-      modals.close(modalId);
-      await revalidateGroups();
-      router.refresh();
+      if (onCreated) {
+        // Build a local GroupWithCount from form values so the parent modal
+        // can immediately reflect the new group without a server round-trip.
+        const newGroup: GroupWithCount = {
+          id: createdGroupData.id!,
+          userId: "",
+          label: values.label.trim(),
+          emoji: values.emoji.trim(),
+          color: values.color.trim(),
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          contactCount: selectedIds.length,
+          previewContacts: [],
+        };
+        // Always revalidate so the page list is fresh even if the parent
+        // modal is dismissed without hitting "Edit groups".
+        void revalidateGroups();
+        router.refresh();
+        // flushSync ensures the modal is torn down before the parent callback
+        // triggers state updates, avoiding the React 18 batching race.
+        flushSync(() => modals.close(modalId));
+        onCreated(newGroup);
+      } else {
+        modals.close(modalId);
+        await revalidateGroups();
+        router.refresh();
+      }
     } catch (error) {
       notifications.hide(loadingNotification);
 

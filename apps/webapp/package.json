@@ -1,8 +1,9 @@
 {
   "name": "webapp",
-  "version": "0.1.0",
+  "version": "0.6.1",
   "private": true,
   "type": "module",
+  "description": "Bondery Webapp",
   "scripts": {
     "check-env": "tsx scripts/check-env.ts",
     "generate-icons": "tsx scripts/generate-icons.ts",
@@ -57,6 +58,7 @@
     "@tiptap/react": "^3.19.0",
     "@tiptap/starter-kit": "^3.19.0",
     "@types/d3": "^7.4.3",
+    "@vvo/tzdb": "^6.198.0",
     "d3": "^7.9.0",
     "dayjs": "^1.11.19",
     "flag-icons": "^7.5.0",
