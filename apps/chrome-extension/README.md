@@ -39,7 +39,7 @@ https://<your-extension-id>.chromiumapp.org/
 In `apps/chrome-extension/.env.development.local`:
 
 ```env
-WXT_OAUTH_CLIENT_ID="<oauth-client-id>"
+WXT_SUPABASE_OAUTH_CLIENT_ID="<oauth-client-id>"
 ```
 
 ### 4) Update Supabase OAuth client redirect URIs (local Supabase)
@@ -64,12 +64,12 @@ $headers=@{Authorization="Bearer $secret";apikey=$secret}
 Invoke-RestMethod -Method GET -Uri "$base/auth/v1/admin/oauth/clients" -Headers $headers | ConvertTo-Json -Depth 8
 ```
 
-Update redirect URIs for the client in `WXT_OAUTH_CLIENT_ID`:
+Update redirect URIs for the client in `WXT_SUPABASE_OAUTH_CLIENT_ID`:
 
 ```powershell
 $base='http://127.0.0.1:54321'
 $secret='<sb_secret_from_supabase_status>'
-$clientId='<WXT_OAUTH_CLIENT_ID>'
+$clientId='<WXT_SUPABASE_OAUTH_CLIENT_ID>'
 $body=@{
 	redirect_uris=@(
 		'https://<old-extension-id>.chromiumapp.org/',

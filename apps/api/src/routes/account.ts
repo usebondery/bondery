@@ -9,6 +9,7 @@ import { validateImageUpload } from "../lib/config.js";
 import type { UpdateAccountInput } from "@bondery/types";
 
 const AVATARS_BUCKET = "avatars";
+const LINKEDIN_LOGOS_BUCKET = "linkedin_logos";
 
 function getAccountAvatarFileName(userId: string): string {
   return `${userId}/${userId}.jpg`;
@@ -51,11 +52,16 @@ export async function accountRoutes(fastify: FastifyInstance) {
 
     try {
       // Delete user's storage files first
-      const { data: files } = await adminClient.storage.from(AVATARS_BUCKET).list(user.id);
+      const { data: avatarFiles } = await adminClient.storage.from(AVATARS_BUCKET).list(user.id);
+      if (avatarFiles && avatarFiles.length > 0) {
+        const avatarPaths = avatarFiles.map((file) => `${user.id}/${file.name}`);
+        await adminClient.storage.from(AVATARS_BUCKET).remove(avatarPaths);
+      }
 
-      if (files && files.length > 0) {
-        const filePaths = files.map((file) => `${user.id}/${file.name}`);
-        await adminClient.storage.from(AVATARS_BUCKET).remove(filePaths);
+      const { data: logoFiles } = await adminClient.storage.from(LINKEDIN_LOGOS_BUCKET).list(user.id);
+      if (logoFiles && logoFiles.length > 0) {
+        const logoPaths = logoFiles.map((file) => `${user.id}/${file.name}`);
+        await adminClient.storage.from(LINKEDIN_LOGOS_BUCKET).remove(logoPaths);
       }
 
       // Delete user using admin client

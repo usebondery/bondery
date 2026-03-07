@@ -3,7 +3,7 @@
 import { Button, TextInput, Select, Group, Stack, Textarea, Text, Avatar } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { notifications } from "@mantine/notifications";
-import { IconCalendarPlus, IconDeviceFloppy } from "@tabler/icons-react";
+import { IconCalendarPlus, IconCheck } from "@tabler/icons-react";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { modals } from "@mantine/modals";
@@ -17,7 +17,7 @@ import {
   ModalTitle,
   successNotificationTemplate,
 } from "@bondery/mantine-next";
-import { DatePickerWithPresets } from "../../components/timeline/DatePickerWithPresets";
+import { DatePickerWithPresets } from "../../components/interactions/DatePickerWithPresets";
 import { ACTIVITY_TYPE_OPTIONS } from "@/lib/activityTypes";
 import { getActivityTypeConfig } from "@/lib/activityTypes";
 
@@ -255,9 +255,7 @@ function NewActivityForm({
           actionType="submit"
           actionLoading={loading}
           actionDisabled={loading}
-          actionLeftSection={
-            isEditMode ? <IconDeviceFloppy size={16} /> : <IconCalendarPlus size={16} />
-          }
+          actionLeftSection={isEditMode ? <IconCheck size={16} /> : <IconCalendarPlus size={16} />}
         />
       </Stack>
     </form>

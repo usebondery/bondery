@@ -3,18 +3,18 @@
  *
  * Injects the "Add to Bondery" button on LinkedIn profiles.
  */
-import { defineContentScript, injectScript } from "#imports";
+import { defineContentScript } from "#imports";
 import { browser } from "wxt/browser";
 import React, { StrictMode } from "react";
 import ReactDOM from "react-dom/client";
 import { SOCIAL_PLATFORM_URL_DETAILS } from "@bondery/helpers";
 import LinkedInButton from "../../linkedin/LinkedInButton";
 import { MantineWrapper } from "../../shared/MantineWrapper";
+import { extractWorkExperience, type WorkEntry } from "../../linkedin/workExperience";
+import { extractEducation } from "../../linkedin/education";
+import { fetchFullWorkHistory, fetchFullEducation } from "../../linkedin/fetchDetails";
 // sanitizeName temporarily disabled – transliteration causes non-UTF-8 bytes in the bundle
 const sanitizeName = (s: string) => s.trim();
-
-const LINKEDIN_INTERCEPT_STATUS_TYPE = "BONDERY_LINKEDIN_INTERCEPT_STATUS";
-const LINKEDIN_INTERCEPT_PROFILE_TYPE = "BONDERY_LINKEDIN_INTERCEPT_PROFILE";
 
 export default defineContentScript({
   matches: ["https://www.linkedin.com/*", "https://linkedin.com/*", "https://*.linkedin.com/*"],
@@ -33,53 +33,25 @@ export default defineContentScript({
 
     console.log("Bondery Extension: Initializing LinkedIn integration");
 
-    try {
-      await injectScript("/linkedin-interceptor.js", {
-        keepInDom: true,
-      });
-      console.log("Bondery Extension: LinkedIn HTML interceptor injected");
-    } catch (error) {
-      console.error("Bondery Extension: Failed to inject LinkedIn interceptor:", error);
-    }
-
-    window.addEventListener("message", (event: MessageEvent) => {
-      if (event.source !== window) {
-        return;
-      }
-
-      const data = event.data as
-        | { type?: string; source?: string; status?: string; details?: unknown; payload?: unknown }
-        | undefined;
-
-      if (!data || data.source !== "bondery-linkedin-network-interceptor") {
-        return;
-      }
-
-      if (data.type === LINKEDIN_INTERCEPT_STATUS_TYPE) {
-        console.log("[linkedin][interceptor-status]", data.status, data.details || "");
-      }
-
-      if (data.type === LINKEDIN_INTERCEPT_PROFILE_TYPE) {
-        console.log("[linkedin][interceptor-profile]", data.payload);
-      }
-    });
-
     if (document.readyState === "loading") {
       await new Promise<void>((resolve) => {
         document.addEventListener("DOMContentLoaded", () => resolve());
       });
     }
 
-    // Initial injection attempt
-    injectBonderyButton();
-
-    // Setup observer for SPA navigation
-    setupObserver(ctx);
-
-    // Retry injection after delay
+    // LinkedIn renders dynamically — wait 1.5 s before first injection attempt
+    // so the profile action buttons are likely present in the DOM.
     ctx.setTimeout(() => {
       injectBonderyButton();
-    }, 2000);
+    }, 1500);
+
+    // Setup observer for SPA navigation (debounced, only fires when Message button appears)
+    setupObserver(ctx);
+
+    // Retry button injection after 3 s in case the profile rendered slowly
+    ctx.setTimeout(() => {
+      injectBonderyButton();
+    }, 3000);
 
     // Listen for URL changes (SPA navigation)
     let lastUrl = window.location.href;
@@ -98,6 +70,9 @@ export default defineContentScript({
         sendResponse(getLinkedInSnapshot());
       }
     });
+
+    // Check if this tab was opened for auto-enrich
+    checkForPendingEnrich();
   },
 });
 
@@ -175,6 +150,7 @@ function getLinkedInSnapshot() {
     profileImageUrl,
     headline,
     place,
+    workHistory: extractWorkExperience(),
   };
 }
 
@@ -183,7 +159,13 @@ function getLinkedInUsername(): string | null {
   const match = pathname.match(/^\/in\/([^\/]+)\/?$/);
 
   if (match && match[1]) {
-    return match[1];
+    // Decode percent-encoded handles (e.g. "ad%C3%A9la" → "adéla")
+    // so we always work with the human-readable form.
+    try {
+      return decodeURIComponent(match[1]);
+    } catch {
+      return match[1];
+    }
   }
 
   return null;
@@ -269,15 +251,29 @@ function injectBonderyButton() {
 }
 
 function setupObserver(ctx: { isValid: boolean }) {
+  let debounceTimer: ReturnType<typeof setTimeout> | null = null;
+
   const observer = new MutationObserver(() => {
     if (!ctx.isValid) {
       observer.disconnect();
       return;
     }
-    const username = getLinkedInUsername();
-    if (username && !document.querySelector("#bondery-li-button-root")) {
-      injectBonderyButton();
+
+    // LinkedIn's profile page is ready when the Message button is present.
+    // Skip mutation bursts that happen before the profile section is rendered.
+    if (!document.querySelector("button[aria-label^='Message']")) {
+      return;
     }
+
+    // Debounce: wait for DOM mutations to settle before trying to inject
+    if (debounceTimer !== null) clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => {
+      debounceTimer = null;
+      const username = getLinkedInUsername();
+      if (username && !document.querySelector("#bondery-li-button-root")) {
+        injectBonderyButton();
+      }
+    }, 300);
   });
 
   observer.observe(document.body, {
@@ -286,4 +282,183 @@ function setupObserver(ctx: { isValid: boolean }) {
   });
 
   return observer;
+}
+
+// ─── Auto-Enrich ─────────────────────────────────────────────────────────────
+
+/**
+ * Checks whether this LinkedIn tab was opened by the background for an enrich request.
+ * If so, waits for the page to render, performs a full scrape, and submits the data
+ * back to the background service worker.
+ */
+async function checkForPendingEnrich(): Promise<void> {
+  let requestId: string | undefined;
+
+  try {
+    const username = getLinkedInUsername();
+    if (!username) return; // Not a profile page — no enrich context to report to
+
+    // Ask the background if there's a pending enrich for this tab
+    const response = await browser.runtime.sendMessage({
+      type: "GET_ENRICH_CONTEXT",
+    });
+
+    if (!response || response.type !== "ENRICH_CONTEXT_RESULT" || !response.payload) {
+      return; // No pending enrich for this tab — nothing to do
+    }
+
+    const { contactId, linkedinHandle } = response.payload;
+    requestId = response.payload.requestId;
+
+    // Verify this is the right profile — normalize both sides to decoded form
+    const normalizedHandle = (() => {
+      try {
+        return decodeURIComponent(linkedinHandle);
+      } catch {
+        return linkedinHandle;
+      }
+    })();
+
+    if (username.toLowerCase() !== normalizedHandle.toLowerCase()) {
+      console.warn("[linkedin][enrich] Handle mismatch:", username, "!=", normalizedHandle);
+      await browser.runtime.sendMessage({
+        type: "ENRICH_ERROR",
+        payload: {
+          requestId,
+          error: `Profile mismatch: expected ${normalizedHandle}, got ${username}`,
+        },
+      });
+      return;
+    }
+
+    console.log("[linkedin][enrich] Auto-enrich triggered for", username);
+
+    // Wait for the profile to render (Message button is a good indicator)
+    await waitForProfileReady(10_000);
+
+    // Scrape DOM first for immediate data
+    const domWork = extractWorkExperience();
+    const domLogosByCompany = new Map<string, string>();
+    for (const dw of domWork) {
+      if (dw.companyLogoUrl && dw.companyName) {
+        domLogosByCompany.set(dw.companyName.toLowerCase(), dw.companyLogoUrl);
+      }
+    }
+
+    // Fetch full work/education history via Voyager API
+    const [fetchedWork, fetchedEdu] = await Promise.all([
+      fetchFullWorkHistory(username, domLogosByCompany),
+      fetchFullEducation(username),
+    ]);
+
+    const workHistory = fetchedWork.length > 0 ? fetchedWork : domWork;
+    const educationHistory = fetchedEdu.length > 0 ? fetchedEdu : extractEducation();
+
+    // Scrape remaining profile fields from DOM
+    const snapshot = getLinkedInSnapshot();
+    if (!snapshot) {
+      await browser.runtime.sendMessage({
+        type: "ENRICH_ERROR",
+        payload: { requestId, error: "Failed to scrape LinkedIn profile (DOM snapshot empty)" },
+      });
+      return;
+    }
+
+    // Extract bio text
+    const linkedinBio = extractBioText();
+
+    console.log(
+      `[linkedin][enrich] Scraped ${workHistory.length} work, ${educationHistory.length} edu for`,
+      username,
+    );
+
+    // Submit enriched data back to background
+    await browser.runtime.sendMessage({
+      type: "SUBMIT_ENRICH_DATA",
+      payload: {
+        requestId,
+        contactId,
+        profile: {
+          platform: "linkedin" as const,
+          handle: username,
+          firstName: snapshot.firstName,
+          middleName: snapshot.middleName,
+          lastName: snapshot.lastName,
+          profileImageUrl: snapshot.profileImageUrl,
+          headline: snapshot.headline,
+          place: snapshot.place,
+          workHistory,
+          educationHistory,
+          linkedinBio,
+        },
+      },
+    });
+
+    console.log("[linkedin][enrich] Enrich data submitted for", username);
+  } catch (error) {
+    console.error("[linkedin][enrich] Auto-enrich failed:", error);
+    // Report the error back to background so the webapp gets immediate feedback
+    if (requestId) {
+      try {
+        await browser.runtime.sendMessage({
+          type: "ENRICH_ERROR",
+          payload: {
+            requestId,
+            error: error instanceof Error ? error.message : "Auto-enrich failed",
+          },
+        });
+      } catch {
+        /* background may be unreachable */
+      }
+    }
+  }
+}
+
+/**
+ * Waits for the LinkedIn profile page to be ready by watching for the Message button.
+ *
+ * @param timeoutMs Maximum time to wait in milliseconds.
+ */
+function waitForProfileReady(timeoutMs: number): Promise<void> {
+  return new Promise((resolve) => {
+    if (document.querySelector("button[aria-label^='Message']")) {
+      resolve();
+      return;
+    }
+
+    const observer = new MutationObserver(() => {
+      if (document.querySelector("button[aria-label^='Message']")) {
+        observer.disconnect();
+        clearTimeout(timeoutId);
+        resolve();
+      }
+    });
+
+    const timeoutId = setTimeout(() => {
+      observer.disconnect();
+      resolve(); // Resolve anyway — scrape what we can
+    }, timeoutMs);
+
+    observer.observe(document.body, { childList: true, subtree: true });
+  });
+}
+
+/**
+ * Extracts the "About" / bio text from the LinkedIn profile page.
+ */
+function extractBioText(): string | undefined {
+  const heading = document.getElementById("about");
+  if (!heading) return undefined;
+  const section = heading.closest("section");
+  if (!section) return undefined;
+  const textSpans = Array.from(
+    section.querySelectorAll<HTMLElement>('span[aria-hidden="true"]'),
+  ).filter((el) => el.closest("a") === null && (el.textContent?.trim().length ?? 0) > 20);
+  if (textSpans.length === 0) return undefined;
+  const bioSpan = textSpans.reduce((a, b) =>
+    (a.textContent?.length ?? 0) >= (b.textContent?.length ?? 0) ? a : b,
+  );
+  const clone = bioSpan.cloneNode(true) as HTMLElement;
+  clone.querySelectorAll("br").forEach((br) => br.replaceWith("\n"));
+  return clone.textContent?.trim() || undefined;
 }

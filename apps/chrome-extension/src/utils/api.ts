@@ -7,7 +7,7 @@
 
 import { config } from "../config";
 import { getAccessToken, clearTokens } from "./auth";
-import type { RedirectRequest, RedirectResponse } from "@bondery/types";
+import type { RedirectRequest, RedirectResponse, EnrichContactRequest } from "@bondery/types";
 import { API_ROUTES } from "@bondery/helpers";
 
 export interface SocialLookupResult {
@@ -182,6 +182,91 @@ export async function fetchUserSettings(): Promise<UserSettingsProfile> {
     name: settings.name ?? null,
     avatarUrl: settings.avatar_url ?? null,
   };
+}
+
+/**
+ * Upserts scraped LinkedIn work history for an existing contact.
+ * Replaces all existing work history entries for that person.
+ *
+ * @param contactId - The contact's UUID in Bondery
+ * @param workHistory - Array of work entries scraped from LinkedIn
+ */
+export async function upsertLinkedInData(
+  contactId: string,
+  workHistory: Array<{
+    title: string;
+    companyName: string;
+    companyLinkedinId?: string;
+    startDate?: string;
+    endDate?: string;
+    employmentType?: string;
+    location?: string;
+  }>,
+): Promise<void> {
+  const token = await getAccessToken();
+
+  if (!token) {
+    throw new AuthRequiredError("Not authenticated");
+  }
+
+  const response = await fetch(
+    `${config.apiUrl}${API_ROUTES.CONTACTS}/${contactId}/linkedin-data`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ workHistory }),
+    },
+  );
+
+  if (response.status === 401) {
+    await clearTokens();
+    throw new AuthRequiredError("Session expired");
+  }
+
+  if (!response.ok) {
+    const errorBody = await response.text();
+    throw new Error(`API error ${response.status}: ${errorBody}`);
+  }
+}
+
+/**
+ * Force-updates an existing contact with freshly scraped LinkedIn data.
+ * Unlike addOrFindPerson (fill-if-missing), this overwrites every provided field.
+ *
+ * @param contactId - The contact's UUID in Bondery.
+ * @param data - Scraped profile data to overwrite on the contact.
+ */
+export async function enrichPersonFromLinkedIn(
+  contactId: string,
+  data: EnrichContactRequest,
+): Promise<void> {
+  const token = await getAccessToken();
+
+  if (!token) {
+    throw new AuthRequiredError("Not authenticated");
+  }
+
+  const response = await fetch(`${config.apiUrl}${API_ROUTES.CONTACTS}/${contactId}/enrich`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(data),
+  });
+
+  if (response.status === 401) {
+    await clearTokens();
+    throw new AuthRequiredError("Session expired");
+  }
+
+  if (!response.ok) {
+    const errorBody = await response.text();
+    throw new Error(`API error ${response.status}: ${errorBody}`);
+  }
 }
 
 /**

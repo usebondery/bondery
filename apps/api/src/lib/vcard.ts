@@ -42,7 +42,8 @@ async function fetchImageAsBase64(url: string): Promise<string | null> {
   }
 }
 
-function escapeVCardValue(value: string): string {
+function escapeVCardValue(value: string | null | undefined): string {
+  if (!value) return "";
   return value
     .replace(/\\/g, "\\\\")
     .replace(/;/g, "\\;")
@@ -87,7 +88,7 @@ export async function generateVCard(contact: Contact): Promise<string> {
   lines.push("KIND:individual");
 
   const lastName = contact.lastName ? escapeVCardValue(contact.lastName) : "";
-  const firstName = escapeVCardValue(contact.firstName);
+  const firstName = contact.firstName ? escapeVCardValue(contact.firstName) : "";
   const middleName = contact.middleName ? escapeVCardValue(contact.middleName) : "";
   lines.push(`N:${lastName};${firstName};${middleName};;`);
 

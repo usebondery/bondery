@@ -1,1 +1,2 @@
-export { EmojiPicker, ALL_EMOJIS, getRandomEmoji } from "./EmojiPicker";
+export { EmojiPicker } from "./EmojiPicker";
+export { ALL_EMOJIS, getRandomEmoji } from "./emojiData";

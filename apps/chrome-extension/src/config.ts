@@ -22,5 +22,5 @@ export const config = {
   supabaseUrl: import.meta.env.WXT_SUPABASE_URL || "http://127.0.0.1:54321",
 
   /** OAuth 2.1 client ID registered in Supabase Dashboard */
-  oauthClientId: import.meta.env.WXT_OAUTH_CLIENT_ID || "",
+  oauthClientId: import.meta.env.WXT_SUPABASE_OAUTH_CLIENT_ID || "",
 } as const;

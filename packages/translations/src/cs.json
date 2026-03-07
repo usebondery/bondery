@@ -141,6 +141,22 @@
     "Title": "Detaily kontaktu",
     "Description": "Zobrazit a spravovat detaily vašeho kontaktu."
   },
+  "PersonTabs": {
+    "Overview": "Přehled",
+    "PersonalInfo": "Osobní údaje",
+    "LinkedIn": "LinkedIn"
+  },
+  "LinkedInData": {
+    "About": "O mně",
+    "WorkHistory": "Pracovní zkušenosti",
+    "Education": "Vzdělání",
+    "Present": "Současnost",
+    "NoWorkHistory": "Žádné pracovní zkušenosti k dispozici",
+    "NoEducation": "Žádné vzdělání k dispozici",
+    "ShowMore": "Zobrazit více",
+    "ShowLess": "Zobrazit méně",
+    "LastDataUpdate": "Poslední aktualizace dat: {date}"
+  },
   "NotFoundPage": {
     "Title": "Stránka nenalezena",
     "Description": "Stránka, kterou hledáte, neexistuje."
@@ -342,6 +358,8 @@
         "ExistingHandleTooltip": "Osoba se stejným účtem už existuje",
         "ImportSelected": "Importovat vybrané ({count})",
         "ChooseContactsHint": "Vyberte, které kontakty chcete importovat",
+        "NoContactsFound": "Žádné kontakty k náhledu.",
+        "NoContactsMatchSearch": "Žádný takový kontakt nenalezen.",
         "ImportSuccess": "Importováno: {imported}, aktualizováno: {updated}, přeskočeno: {skipped}",
         "NoContactsSelected": "Vyberte alespoň jeden kontakt k importu.",
         "ParseError": "Nepodařilo se zpracovat LinkedIn export.",
@@ -421,7 +439,9 @@
         "InstructionsTitle": "Instrukce",
         "ImportingTitle": "Importuji kontakty...",
         "ImportingProgress": "{current} z {total} kontaktů zpracováno",
-        "ChooseContactsHint": "Vyberte, které kontakty chcete importovat"
+        "ChooseContactsHint": "Vyberte, kter\u00e9 kontakty chcete importovat",
+        "NoContactsFound": "\u017d\u00e1dn\u00e9 kontakty k n\u00e1hledu.",
+        "NoContactsMatchSearch": "\u017d\u00e1dn\u00fd takov\u00fd kontakt nenalezen."
       }
     }
   },
@@ -472,9 +492,11 @@
       "Place": "Místo",
       "LastInteraction": "Poslední interakce"
     },
-    "Empty": "Do této skupiny zatím nejsou přidány žádné kontakty."
+    "Empty": "Do této skupiny zatím nejsou přidány žádné kontakty.",
+    "NoContactsFound": "Do této skupiny zatím nejsou přidány žádné kontakty.",
+    "NoContactsMatchSearch": "Žádný takový kontakt nenalezen."
   },
-  "TimelinePage": {
+  "InteractionsPage": {
     "PageTitle": "Timeline",
     "HeaderDescription": "V timeline můžete zobrazit svůj přehled interakcí s vašimi kontakty.",
     "WhoAreYouMeeting": "Přidat interakci",
@@ -522,6 +544,7 @@
     "DeletingSelectedTitle": "Mazání interakcí",
     "DeletingSelectedDescription": "Mažou se {count} vybrané interakce...",
     "NoActivitiesFound": "Žádné interakce nenalezeny.",
+    "NoActivitiesFiltered": "Žádná taková interakce nenalezena.",
     "NoActivitiesWithPerson": "S touto osobou zatím nejsou žádné interakce.",
     "SelectedCountTemplate": "Vybráno: {count}",
     "TotalCountTemplate": "Celkem interakcí: {count}",
@@ -541,8 +564,9 @@
     "AddPerson": "Přidat osobu",
     "AddEvent": "Přidat interakci",
     "UpcomingRemindersTitle": "Nadcházející připomínky",
-    "UpcomingRemindersMonthInfo": "Zobrazuji připomínky, jejichž upozornění je splatné v následujícím měsíci.",
-    "NoUpcomingReminders": "Žádné připomínky v následujícím měsíci.",
+    "UpcomingRemindersTooltip": "Nadcházející připomínky splatné v příštích 30 dnech.",
+    "UpcomingRemindersMonthInfo": "Zobrazuji připomínky, jejichž upozornění je splatné v příštích 30 dnech.",
+    "NoUpcomingReminders": "Žádné připomínky v příštích 30 dnech.",
     "NotificationToday": "Dnes",
     "NotificationTomorrow": "Zítra",
     "NotificationInDays": "Za {count} dní",
@@ -552,14 +576,15 @@
     "NotificationTooltipInDays": "Upozornění přijde za {count} dní",
     "NotificationTooltipSentAt": "Upozornění už bylo odesláno {sentAt}",
     "UnknownPerson": "Neznámá osoba",
-    "TimelinePreviewTitle": "Timeline",
+    "TimelinePreviewTitle": "Interakce",
+    "TimelinePreviewTooltip": "Posledních 5 interakcí. Kliknutím zobrazíte všechny interakce.",
     "Stats": {
       "TotalContactsTitle": "Celkem kontaktů",
-      "TotalContactsDescription": "Lidé ve vaší síti",
+      "TotalContactsTooltip": "Počet lidí ve vaší síti na Bondery.",
       "InteractionsTitle": "Interakce tento měsíc",
-      "InteractionsDescription": "Kontakty, se kterými jste byli v kontaktu",
+      "InteractionsTooltip": "Počet interakcí, které jste uskutečnili v měsíci {month}.",
       "NewContactsTitle": "Nové kontakty letos",
-      "NewContactsDescription": "Přidáno v roce {year}"
+      "NewContactsTooltip": "Kolik lidí bylo přidáno do vaší sítě v aktuálním roce ({year})."
     }
   },
   "FixContactsPage": {
@@ -590,7 +615,9 @@
     "Title": "Lidé",
     "HeaderDescription": "V Lidech můžete spravovat kontakty, upravovat detaily a spouštět hromadné akce.",
     "ImportContacts": "Importovat kontakty",
-    "AddPerson": "Přidat osobu"
+    "AddPerson": "Přidat osobu",
+    "NoContactsFound": "Zatím jste nepřidali žádné kontakty.",
+    "NoContactsMatchSearch": "Žádný takový kontakt nenalezen."
   },
   "PageHeader": {
     "LearnMoreAbout": "Zjistit více o: {concept}",
@@ -676,6 +703,8 @@
     "SearchPlaceholder": "Hledejte adresu, město, region nebo zemi",
     "VisibleContactsTitle": "Kontakty v aktuálním výřezu mapy ({count})",
     "VisibleEmpty": "V této oblasti mapy nejsou žádné kontakty.",
+    "NoContactsFound": "V této oblasti mapy nejsou žádné kontakty.",
+    "NoContactsMatchSearch": "Žádný takový kontakt nenalezen.",
     "VisibleColumns": {
       "Name": "Jméno",
       "Place": "Místo",
@@ -695,8 +724,14 @@
     "ActionsLabel": "Akce adresy",
     "CopyAction": "Kopírovat",
     "ShowOnMapAction": "Zobrazit na mapě",
+    "SetAsAction": "Nastavit jako...",
     "SetAsPreferred": "Nastavit jako preferované",
-    "OpenInMapsAction": "Otevřít v mapách",
+    "SetAsLocation": "Nastavit jako polohu",
+    "SetAsTimezone": "Nastavit jako časové pásmo",
+    "SetAsTimezoneSuccess": "Časové pásmo rozpoznáno a uloženo",
+    "SetAsTimezoneError": "Nepodařilo se rozpoznat časové pásmo",
+    "DetectingTimezone": "Rozpoznávání časového pásma…",
+    "OpenInMapsAction": "Otevřít v mapách...",
     "OpenInGoogleMaps": "Otevřít v Google Maps",
     "OpenInMapy": "Otevřít v Mapy.com",
     "OpenInWaze": "Otevřít ve Waze",
@@ -724,6 +759,9 @@
     "SaveErrorTitle": "Chyba",
     "SaveErrorMessage": "Adresy se nepodařilo aktualizovat",
     "LocationUpdateModalTitle": "Chcete také aktualizovat polohu kontaktu?",
+    "LocationUpdateModalMessage": "Chcete také aktualizovat polohu kontaktu a časové pásmo z adresy?",
+    "TimezoneUpdateModalTitle": "Aktualizovat časové pásmo?",
+    "TimezoneUpdateModalMessage": "Chcete také aktualizovat časové pásmo kontaktu na základě nové polohy?",
     "LocationUpdateModalMessage": "Chcete aktualizovat polohu kontaktu podle uložené adresy?",
     "LocationUpdateConfirm": "Ano, aktualizovat polohu",
     "LocationUpdateCancel": "Ne",
@@ -781,9 +819,11 @@
     "Placeholder": "Přidat štítky...",
     "SearchPlaceholder": "Hledat nebo vytvořit štítek...",
     "NoTagsFound": "Žádné štítky nenalezeny",
-    "AddNewTagOption": "Přidat nový štítek \"{label}\"",
+    "CreateNewTagOption": "Vytvořit nový štítek \"{label}\"",
+    "CreateNewTagEmpty": "Vytvořit nový štítek",
     "AddNewTagTooltip": "Vytvořit nový štítek",
     "AddTagTooltip": "Přidat štítek",
+    "TagAlreadyAppliedTooltip": "Štítek je již přiřazen",
     "RemoveTagTooltip": "Odebrat štítek",
     "CreateTagTitle": "Vytvořit nový štítek?",
     "CreateTagMessage": "Štítek \"{name}\" ještě neexistuje. Chcete ho vytvořit a přidat ke kontaktu?",
@@ -831,5 +871,19 @@
     "SaveErrorDescription": "Nepodařilo se uložit štítek.",
     "DeleteErrorTitle": "Chyba",
     "DeleteErrorDescription": "Nepodařilo se smazat štítek."
+  },
+  "EnrichFromLinkedIn": {
+    "MenuLabel": "Obohatit z LinkedIn...",
+    "ExtensionRequiredTitle": "Vyžadováno rozšíření",
+    "ExtensionRequiredMessage": "K obohacení kontaktů z LinkedIn je potřeba rozšíření Bondery pro Chrome. Nainstalujte si ho z Chrome Web Store.",
+    "InstallExtension": "Nainstalovat rozšíření",
+    "NoLinkedInHandle": "Tento kontakt nemá nastaven LinkedIn profil. Nejprve přidejte LinkedIn profil.",
+    "EnrichingTitle": "Obohacování z LinkedIn",
+    "EnrichingDescription": "Stahujeme nejnovější data z LinkedIn. Může to chvíli trvat...",
+    "SuccessTitle": "Kontakt obohacen",
+    "SuccessDescription": "Kontakt byl aktualizován nejnovějšími daty z LinkedIn.",
+    "ErrorTitle": "Obohacení selhalo",
+    "ErrorDescription": "Nepodařilo se obohatit kontakt z LinkedIn.",
+    "Cancel": "Zrušit"
   }
 }

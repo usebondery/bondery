@@ -30,6 +30,29 @@
   filter: var(--active-filter);
 }
 
+.button-scale-effect.button-scale-effect-active:not(:disabled):not([data-disabled]):not([disabled]),
+.button-scale-effect.button-scale-effect-active:hover:not(:disabled):not([data-disabled]):not(
+    [disabled]
+  ),
+.button-scale-effect.button-scale-effect-active:focus:not(:disabled):not([data-disabled]):not(
+    [disabled]
+  ) {
+  transform: scale(var(--scale-shrink)) !important;
+  filter: var(--active-filter);
+}
+
+.emoji-picker-trigger {
+  background-color: var(--mantine-color-gray-1) !important;
+}
+
+[data-mantine-color-scheme="light"] .emoji-picker-trigger {
+  background-color: var(--mantine-color-gray-1) !important;
+}
+
+[data-mantine-color-scheme="dark"] .emoji-picker-trigger {
+  background-color: var(--mantine-color-dark-5) !important;
+}
+
 .checkbox-scale-effect:not(:disabled):not([data-disabled]):not([disabled]) {
   transition:
     transform var(--transition-time) var(--transition-ease),
@@ -121,4 +144,77 @@ ol {
 
 .mantine-Combobox-search:not(:focus-within) {
   transition: border-color var(--transition-time) var(--transition-ease);
+}
+
+/* ── DatePickerWithPresets: active preset highlight ─────────────────────── */
+/* Applied via classNames={{ presetButton: "presetsButton" }} in the component */
+
+.presetsButton[data-active] {
+  background-color: var(--mantine-primary-color-filled) !important;
+  color: var(--mantine-color-white) !important;
+}
+
+.presetsButton[data-active]:hover {
+  background-color: var(--mantine-primary-color-filled-hover) !important;
+}
+
+/* Grow-on-hover + squeeze-on-press for calendar interactive controls,
+   matching the button-scale-effect timing and scale values */
+.mantine-DatePickerInput-day:not([data-disabled]),
+.mantine-DatePicker-day:not([data-disabled]),
+.mantine-DatePickerInput-calendarHeaderControl:not([data-disabled]),
+.mantine-DatePicker-calendarHeaderControl:not([data-disabled]),
+.mantine-DatePickerInput-calendarHeaderLevel:not([data-disabled]),
+.mantine-DatePicker-calendarHeaderLevel:not([data-disabled]),
+.mantine-DatePickerInput-yearsListControl:not([data-disabled]),
+.mantine-DatePicker-yearsListControl:not([data-disabled]),
+.mantine-DatePickerInput-monthsListControl:not([data-disabled]),
+.mantine-DatePicker-monthsListControl:not([data-disabled]),
+.presetsButton {
+  transition:
+    transform var(--transition-time) var(--transition-ease),
+    filter var(--transition-time) var(--transition-ease),
+    background-color var(--transition-time) var(--transition-ease);
+}
+
+.mantine-DatePickerInput-day:hover:not([data-disabled]),
+.mantine-DatePicker-day:hover:not([data-disabled]),
+.mantine-DatePickerInput-calendarHeaderControl:hover:not([data-disabled]),
+.mantine-DatePicker-calendarHeaderControl:hover:not([data-disabled]),
+.mantine-DatePickerInput-calendarHeaderLevel:hover:not([data-disabled]),
+.mantine-DatePicker-calendarHeaderLevel:hover:not([data-disabled]),
+.mantine-DatePickerInput-yearsListControl:hover:not([data-disabled]),
+.mantine-DatePicker-yearsListControl:hover:not([data-disabled]),
+.mantine-DatePickerInput-monthsListControl:hover:not([data-disabled]),
+.mantine-DatePicker-monthsListControl:hover:not([data-disabled]),
+.presetsButton:hover {
+  transform: scale(var(--scale-grow)) !important;
+  background-color: var(--mantine-color-default-hover) !important;
+}
+
+/* Selected day: keep primary colour on hover instead of defaulting to gray */
+.mantine-DatePickerInput-day[data-selected]:hover:not([data-disabled]),
+.mantine-DatePicker-day[data-selected]:hover:not([data-disabled]),
+.mantine-DatePickerInput-day[data-in-range]:hover:not([data-disabled]),
+.mantine-DatePicker-day[data-in-range]:hover:not([data-disabled]),
+.mantine-DatePickerInput-day[data-first-in-range]:hover:not([data-disabled]),
+.mantine-DatePicker-day[data-first-in-range]:hover:not([data-disabled]),
+.mantine-DatePickerInput-day[data-last-in-range]:hover:not([data-disabled]),
+.mantine-DatePicker-day[data-last-in-range]:hover:not([data-disabled]) {
+  background-color: var(--mantine-primary-color-filled-hover) !important;
+}
+
+.mantine-DatePickerInput-day:active:not([data-disabled]),
+.mantine-DatePicker-day:active:not([data-disabled]),
+.mantine-DatePickerInput-calendarHeaderControl:active:not([data-disabled]),
+.mantine-DatePautoicker-calendarHeaderControl:active:not([data-disabled]),
+.mantine-DatePickerInput-calendarHeaderLevel:active:not([data-disabled]),
+.mantine-Dat51ePicker-calendarHeaderLevel:active:not([data-disabled]),
+.mantine-DatePickerInput-yearsListControl:active:not([data-disabled]),
+.mantine-DatePicker-yearsListControl:active:not([data-disabled]),
+.mantine-DatePickerInput-monthsListControl:active:not([data-disabled]),
+.mantine-DatePicker-monthsListControl:active:not([data-disabled]),
+.presetsButton:active {
+  transform: scale(var(--scale-shrink)) !important;
+  filter: var(--active-filter);
 }

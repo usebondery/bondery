@@ -8,6 +8,7 @@ import { createBrowswerSupabaseClient } from "@/lib/supabase/client";
 import { useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
 import { INTEGRATION_PROVIDERS, WEBSITE_URL } from "@/lib/config";
+import { setLocalePreferencesCookie } from "@/lib/auth/detectLocale";
 import { Logo } from "./components/Logo";
 import { WEBSITE_ROUTES } from "@bondery/helpers/globals/paths";
 import { AnchorLink, errorNotificationTemplate } from "@bondery/mantine-next";
@@ -39,6 +40,10 @@ export default function LoginPage() {
   const handleOAuthLogin = async (provider: "github" | "linkedin_oidc") => {
     try {
       setLoading(true);
+
+      // Store detected timezone & time format in a short-lived cookie
+      // so the auth callback can apply them to the new user's settings
+      setLocalePreferencesCookie();
 
       // Build callback URL, including the redirect param if present
       let callbackUrl = `${window.location.origin}/auth/callback`;

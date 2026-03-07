@@ -21,7 +21,14 @@ export function CallToAction() {
         className="flex justify-center items-center max-w-6xl "
         mx={"auto"}
       >
-        <Stack align="center" justify="center" h="100%" flex={1} p="xl" className="gap-y-12!">
+        <Stack
+          align="center"
+          justify="center"
+          h="100%"
+          flex={1}
+          p="xl"
+          className="gap-y-12! max-w-4/5"
+        >
           <Title order={2} ta="center" fw={"bold"} className="text-3xl! inline" c={"white"}>
             Ready to organize your network?{" "}
           </Title>

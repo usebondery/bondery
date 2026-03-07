@@ -94,6 +94,66 @@ export type Database = {
         };
         Relationships: [];
       };
+      geocode_cache: {
+        Row: {
+          city: string | null;
+          country: string | null;
+          country_code: string | null;
+          created_at: string;
+          formatted_label: string | null;
+          geocode_found: boolean;
+          id: string;
+          lat: number | null;
+          location_ewkt: string | null;
+          lon: number | null;
+          name: string | null;
+          place_key: string;
+          place_original: string;
+          state: string | null;
+          state_code: string | null;
+          timezone: string | null;
+          updated_at: string;
+        };
+        Insert: {
+          city?: string | null;
+          country?: string | null;
+          country_code?: string | null;
+          created_at?: string;
+          formatted_label?: string | null;
+          geocode_found?: boolean;
+          id?: string;
+          lat?: number | null;
+          location_ewkt?: string | null;
+          lon?: number | null;
+          name?: string | null;
+          place_key: string;
+          place_original: string;
+          state?: string | null;
+          state_code?: string | null;
+          timezone?: string | null;
+          updated_at?: string;
+        };
+        Update: {
+          city?: string | null;
+          country?: string | null;
+          country_code?: string | null;
+          created_at?: string;
+          formatted_label?: string | null;
+          geocode_found?: boolean;
+          id?: string;
+          lat?: number | null;
+          location_ewkt?: string | null;
+          lon?: number | null;
+          name?: string | null;
+          place_key?: string;
+          place_original?: string;
+          state?: string | null;
+          state_code?: string | null;
+          timezone?: string | null;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
       groups: {
         Row: {
           color: string | null;
@@ -293,6 +353,56 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "people_addresses_person_id_fkey";
+            columns: ["person_id"];
+            isOneToOne: false;
+            referencedRelation: "people";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      people_education_history: {
+        Row: {
+          created_at: string;
+          degree: string | null;
+          description: string | null;
+          end_date: string | null;
+          id: string;
+          person_id: string;
+          school_linkedin_id: string | null;
+          school_name: string;
+          start_date: string | null;
+          updated_at: string;
+          user_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          degree?: string | null;
+          description?: string | null;
+          end_date?: string | null;
+          id?: string;
+          person_id: string;
+          school_linkedin_id?: string | null;
+          school_name: string;
+          start_date?: string | null;
+          updated_at?: string;
+          user_id: string;
+        };
+        Update: {
+          created_at?: string;
+          degree?: string | null;
+          description?: string | null;
+          end_date?: string | null;
+          id?: string;
+          person_id?: string;
+          school_linkedin_id?: string | null;
+          school_name?: string;
+          start_date?: string | null;
+          updated_at?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "people_education_history_person_id_fkey";
             columns: ["person_id"];
             isOneToOne: false;
             referencedRelation: "people";
@@ -649,6 +759,62 @@ export type Database = {
           },
           {
             foreignKeyName: "people_tags_person_id_fkey";
+            columns: ["person_id"];
+            isOneToOne: false;
+            referencedRelation: "people";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      people_work_history: {
+        Row: {
+          company_linkedin_id: string | null;
+          company_name: string;
+          created_at: string;
+          description: string | null;
+          employment_type: string | null;
+          end_date: string | null;
+          id: string;
+          location: string | null;
+          person_id: string;
+          start_date: string | null;
+          title: string | null;
+          updated_at: string;
+          user_id: string;
+        };
+        Insert: {
+          company_linkedin_id?: string | null;
+          company_name: string;
+          created_at?: string;
+          description?: string | null;
+          employment_type?: string | null;
+          end_date?: string | null;
+          id?: string;
+          location?: string | null;
+          person_id: string;
+          start_date?: string | null;
+          title?: string | null;
+          updated_at?: string;
+          user_id: string;
+        };
+        Update: {
+          company_linkedin_id?: string | null;
+          company_name?: string;
+          created_at?: string;
+          description?: string | null;
+          employment_type?: string | null;
+          end_date?: string | null;
+          id?: string;
+          location?: string | null;
+          person_id?: string;
+          start_date?: string | null;
+          title?: string | null;
+          updated_at?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "people_work_history_person_id_fkey";
             columns: ["person_id"];
             isOneToOne: false;
             referencedRelation: "people";

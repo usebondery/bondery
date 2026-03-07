@@ -7,7 +7,9 @@ import { getActivityTypeConfig } from "@/lib/activityTypes";
 import { PersonAvatarGroup } from "@bondery/mantine-next";
 import { ActivityCard } from "./ActivityCard";
 
-interface TimelineEventsListProps {
+const TIMELINE_BORDER_COLOR = "var(--mantine-color-default-border)";
+
+interface InteractionsEventsListProps {
   activities: Activity[];
   resolveParticipants: (activity: Activity) => Contact[];
   editLabel: string;
@@ -23,7 +25,7 @@ interface TimelineEventsListProps {
  * Renders grouped activity cards in a Mantine Timeline.
  * Keeps home and timeline pages visually consistent.
  */
-export function TimelineEventsList({
+export function InteractionsEventsList({
   activities,
   resolveParticipants,
   editLabel,
@@ -33,7 +35,7 @@ export function TimelineEventsList({
   onEdit,
   onDuplicate,
   onDelete,
-}: TimelineEventsListProps) {
+}: InteractionsEventsListProps) {
   const groupedActivities = useMemo(() => {
     const groups: Record<string, Activity[]> = {};
 
@@ -60,7 +62,7 @@ export function TimelineEventsList({
             active={monthActivities.length}
             bulletSize={32}
             lineWidth={2}
-            color="gray.4"
+            style={{ "--tl-color": TIMELINE_BORDER_COLOR } as React.CSSProperties}
             styles={{
               itemBullet: {
                 border: "none",
@@ -85,7 +87,7 @@ export function TimelineEventsList({
                       style={{
                         borderRadius: 999,
                         backgroundColor: "var(--mantine-color-body)",
-                        border: "1px solid var(--mantine-color-default-border)",
+                        border: `1px solid ${TIMELINE_BORDER_COLOR}`,
                         boxSizing: "border-box",
                         display: "flex",
                         alignItems: "center",

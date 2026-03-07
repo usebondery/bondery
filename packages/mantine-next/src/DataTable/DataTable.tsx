@@ -11,6 +11,7 @@ import {
 } from "react";
 import {
   ActionIcon,
+  Anchor,
   Button,
   ButtonGroup,
   Checkbox,
@@ -31,7 +32,7 @@ import {
   Tooltip,
   VisuallyHidden,
 } from "@mantine/core";
-import { IconDotsVertical, IconSearch } from "@tabler/icons-react";
+import { IconChecks, IconDotsVertical, IconSearch } from "@tabler/icons-react";
 import { ColumnVisibilityMenu } from "./ColumnVisibilityMenu";
 import { SortMenu } from "./SortMenu";
 
@@ -244,6 +245,12 @@ export interface DataTableProps<TRow, TSortKey extends string = string> {
   /** Actions shown when items are selected */
   bulkActions?: BulkAction[];
 
+  // --- All-total selection ---
+  /** When true, shows IconChecks in the header checkbox to indicate all items across all pages are selected */
+  allTotalSelected?: boolean;
+  /** Set of row IDs explicitly excluded from the "all total" selection */
+  excludedIds?: Set<string>;
+
   // --- Pagination ---
   /** Whether more data can be loaded */
   hasMore?: boolean;
@@ -251,6 +258,10 @@ export interface DataTableProps<TRow, TSortKey extends string = string> {
   onLoadMore?: () => void;
   /** Whether load more is in progress */
   loadMoreLoading?: boolean;
+  /** Total number of items available (across all pages) */
+  totalCount?: number;
+  /** Callback to select all items across all pages */
+  onSelectAllTotal?: () => void;
 
   // --- Layout ---
   /** Whether to show sticky header with controls */
@@ -273,6 +284,11 @@ export interface DataTableProps<TRow, TSortKey extends string = string> {
  * Generic data table component with search, sort, column visibility,
  * selection, row actions, bulk actions, and pagination.
  */
+/** Checkbox icon that renders IconChecks (used when all items across all pages are selected) */
+function AllCheckedIcon({ className }: { indeterminate: boolean | undefined; className: string }) {
+  return <IconChecks size={18} className={className} />;
+}
+
 export function DataTable<TRow, TSortKey extends string = string>({
   data,
   columns,
@@ -298,6 +314,10 @@ export function DataTable<TRow, TSortKey extends string = string>({
   hasMore,
   onLoadMore,
   loadMoreLoading,
+  totalCount,
+  onSelectAllTotal,
+  allTotalSelected,
+  excludedIds,
   showHeader = true,
   stickyHeaderOffset = 0,
   labels,
@@ -306,6 +326,22 @@ export function DataTable<TRow, TSortKey extends string = string>({
 }: DataTableProps<TRow, TSortKey>) {
   const [openedMenuRowId, setOpenedMenuRowId] = useState<string | null>(null);
   const lastSelectedIndexRef = useRef<number | null>(null);
+
+  // Keep mutable refs so callbacks stabilised with useCallback always read the latest values.
+  // This prevents memoised DataTableRow components from holding stale closures after each
+  // selection change (bug: clicking row B would apply state from before row A was selected).
+  const onSelectOneRef = useRef(onSelectOne);
+  onSelectOneRef.current = onSelectOne;
+  const onSelectAllRef = useRef(onSelectAll);
+  onSelectAllRef.current = onSelectAll;
+  const onSelectionChangeRef = useRef(onSelectionChange);
+  onSelectionChangeRef.current = onSelectionChange;
+  const selectedIdsRef = useRef(selectedIds);
+  selectedIdsRef.current = selectedIds;
+  const nonSelectableIdsRef = useRef(nonSelectableIds);
+  nonSelectableIdsRef.current = nonSelectableIds;
+  const dataRef = useRef(data);
+  dataRef.current = data;
 
   const handleMenuOpen = useCallback((menuRowId: string) => {
     setOpenedMenuRowId(menuRowId);
@@ -330,79 +366,105 @@ export function DataTable<TRow, TSortKey extends string = string>({
   const allSelected = allSelectedOverride ?? computedAllSelected;
   const someSelected = someSelectedOverride ?? computedSomeSelected;
 
-  const handleSelectAll = () => {
-    if (onSelectAll) {
-      onSelectAll();
+  // Stable select-all handler — reads latest values through refs so it can be
+  // memoised without causing unnecessary row re-renders.
+  const selectableDataRef = useRef(selectableData);
+  selectableDataRef.current = selectableData;
+  const allSelectedRef = useRef(allSelected);
+  allSelectedRef.current = allSelected;
+
+  const handleSelectAll = useCallback(() => {
+    if (onSelectAllRef.current) {
+      onSelectAllRef.current();
       return;
     }
-
-    if (!onSelectionChange) return;
-
-    if (allSelected) {
-      // Deselect all selectable items
-      const newSelectedIds = new Set(selectedIds);
-      selectableData.forEach((row) => newSelectedIds.delete(getRowId(row)));
-      onSelectionChange(newSelectedIds);
+    if (!onSelectionChangeRef.current) return;
+    const newSelectedIds = new Set(selectedIdsRef.current);
+    if (allSelectedRef.current) {
+      selectableDataRef.current.forEach((row) => newSelectedIds.delete(getRowId(row)));
     } else {
-      // Select all selectable items
-      const newSelectedIds = new Set(selectedIds);
-      selectableData.forEach((row) => newSelectedIds.add(getRowId(row)));
-      onSelectionChange(newSelectedIds);
+      selectableDataRef.current.forEach((row) => newSelectedIds.add(getRowId(row)));
     }
-  };
+    onSelectionChangeRef.current(newSelectedIds);
+  }, [getRowId]);
 
-  const handleSelectOne = (row: TRow, rowIndex: number, options?: { shiftKey?: boolean }) => {
-    const rowId = getRowId(row);
+  // Stable per-row handler — reads latest state/callbacks through refs.
+  const handleSelectOne = useCallback(
+    (row: TRow, rowIndex: number, options?: { shiftKey?: boolean }) => {
+      const rowId = getRowId(row);
 
-    if (onSelectOne) {
-      onSelectOne(rowId, {
-        shiftKey: options?.shiftKey,
-        index: rowIndex,
-      });
-      lastSelectedIndexRef.current = rowIndex;
-      return;
-    }
+      if (onSelectOneRef.current) {
+        onSelectOneRef.current(rowId, { shiftKey: options?.shiftKey, index: rowIndex });
+        lastSelectedIndexRef.current = rowIndex;
+        return;
+      }
 
-    if (!onSelectionChange || !selectedIds) return;
-    const newSelectedIds = new Set(selectedIds);
+      if (!onSelectionChangeRef.current || !selectedIdsRef.current) return;
+      const newSelectedIds = new Set(selectedIdsRef.current);
 
-    if (options?.shiftKey && lastSelectedIndexRef.current !== null) {
-      // Range select
-      const start = Math.min(lastSelectedIndexRef.current, rowIndex);
-      const end = Math.max(lastSelectedIndexRef.current, rowIndex);
-
-      for (let i = start; i <= end; i++) {
-        const rangeRow = data[i];
-        const rangeRowId = getRowId(rangeRow);
-        if (!nonSelectableIds?.has(rangeRowId)) {
-          newSelectedIds.add(rangeRowId);
+      if (options?.shiftKey && lastSelectedIndexRef.current !== null) {
+        const start = Math.min(lastSelectedIndexRef.current, rowIndex);
+        const end = Math.max(lastSelectedIndexRef.current, rowIndex);
+        for (let i = start; i <= end; i++) {
+          const rangeRow = dataRef.current[i];
+          const rangeRowId = getRowId(rangeRow);
+          if (!nonSelectableIdsRef.current?.has(rangeRowId)) {
+            newSelectedIds.add(rangeRowId);
+          }
+        }
+      } else {
+        if (newSelectedIds.has(rowId)) {
+          newSelectedIds.delete(rowId);
+        } else {
+          newSelectedIds.add(rowId);
         }
       }
-    } else {
-      // Toggle single
-      if (newSelectedIds.has(rowId)) {
-        newSelectedIds.delete(rowId);
-      } else {
-        newSelectedIds.add(rowId);
-      }
-    }
 
-    lastSelectedIndexRef.current = rowIndex;
-    onSelectionChange(newSelectedIds);
-  };
+      lastSelectedIndexRef.current = rowIndex;
+      onSelectionChangeRef.current(newSelectedIds);
+    },
+    [getRowId],
+  );
 
   // --- Bulk actions bar ---
+  // The effective selected count accounts for filter-mode where allTotalSelected=true
+  // and excludedIds tracks deselections, so selectedIds might not hold every ID.
+  const effectiveSelectedCount = allTotalSelected
+    ? (totalCount ?? 0) - (excludedIds?.size ?? 0)
+    : (selectedIds?.size ?? 0);
+
+  const showSelectAllTotal =
+    onSelectAllTotal &&
+    totalCount !== undefined &&
+    (effectiveSelectedCount > 0 || (selectedIds !== undefined && selectedIds.size > 0)) &&
+    totalCount > data.length;
+
   const bulkActionsContent = showSelection ? (
     <Group justify="space-between" align="center" className="min-h-9">
-      <Text size="sm" c="dimmed">
-        {selectedIds && selectedIds.size > 0
-          ? (labels.selectedCountTemplate?.replace("{count}", String(selectedIds.size)) ??
-            `${selectedIds.size} selected`)
-          : (labels.totalCountTemplate?.replace("{count}", String(data.length)) ??
-            `${data.length} total items`)}
-      </Text>
+      <Stack gap={2}>
+        <Text size="sm" c="dimmed">
+          {effectiveSelectedCount > 0
+            ? (labels.selectedCountTemplate?.replace("{count}", String(effectiveSelectedCount)) ??
+              `${effectiveSelectedCount} selected`)
+            : (labels.totalCountTemplate?.replace("{count}", String(data.length)) ??
+              `${data.length} total items`)}
+        </Text>
+        {showSelectAllTotal ? (
+          allTotalSelected ? (
+            <Anchor size="sm" component="span" onClick={handleSelectAll}>
+              {labels.clearAllTotalTemplate?.replace("{count}", String(totalCount)) ??
+                `Clear selection (${totalCount})`}
+            </Anchor>
+          ) : (
+            <Anchor size="sm" component="span" onClick={onSelectAllTotal}>
+              {labels.selectAllTotalTemplate?.replace("{count}", String(totalCount)) ??
+                `Select all ${totalCount}`}
+            </Anchor>
+          )
+        ) : null}
+      </Stack>
 
-      {selectedIds && selectedIds.size > 0 && bulkActions && bulkActions.length > 0 ? (
+      {selectedIds && effectiveSelectedCount > 0 && bulkActions && bulkActions.length > 0 ? (
         <ButtonGroup>
           {bulkActions.map((action) => (
             <Tooltip
@@ -492,8 +554,9 @@ export function DataTable<TRow, TSortKey extends string = string>({
             {showSelection && showSelectAll ? (
               <TableTh style={{ width: 40 }}>
                 <Checkbox
-                  checked={allSelected}
-                  indeterminate={someSelected}
+                  icon={allTotalSelected ? AllCheckedIcon : undefined}
+                  checked={allSelected || Boolean(allTotalSelected)}
+                  indeterminate={someSelected && !allTotalSelected}
                   onChange={handleSelectAll}
                   aria-label="Select all rows"
                 />
@@ -545,7 +608,11 @@ export function DataTable<TRow, TSortKey extends string = string>({
                   row={row}
                   rowId={rowId}
                   rowIndex={rowIndex}
-                  isSelected={selectedIds?.has(rowId) ?? false}
+                  isSelected={
+                    allTotalSelected
+                      ? !(excludedIds?.has(rowId) ?? false)
+                      : (selectedIds?.has(rowId) ?? false)
+                  }
                   isMenuOpen={openedMenuRowId === rowId}
                   isNonSelectable={nonSelectableIds?.has(rowId) ?? false}
                   showSelection={showSelection}

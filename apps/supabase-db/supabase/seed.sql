@@ -777,6 +777,218 @@ BEGIN
     tag_id     = EXCLUDED.tag_id,
     user_id    = EXCLUDED.user_id,
     created_at = EXCLUDED.created_at;
+
+  -- ========================================================================
+  -- WORK HISTORY
+  -- ========================================================================
+  INSERT INTO public.people_work_history (
+    id, user_id, person_id, company_name, company_linkedin_id,
+    title, description, start_date, end_date, created_at, updated_at
+  )
+  VALUES
+    (
+      'c1c1c1c1-1111-1111-1111-111111111111',
+      seed_user_id,
+      person_ada_id,
+      'Babbage Analytical Engines',
+      'babbage-analytical',
+      'Chief Algorithm Officer',
+      'Designed the first algorithm intended for machine execution. Led the documentation of the Analytical Engine capabilities.',
+      '1842-01-01',
+      '1852-12-31',
+      '2026-02-20T10:00:00+00',
+      '2026-02-20T10:00:00+00'
+    ),
+    (
+      'c1c1c1c1-2222-2222-2222-222222222222',
+      seed_user_id,
+      person_ada_id,
+      'Royal Society Publishing',
+      'royal-society',
+      'Technical Translator & Annotator',
+      'Translated Luigi Menabrea''s memoir on the Analytical Engine, adding extensive original notes.',
+      '1840-06-01',
+      '1843-09-30',
+      '2026-02-20T10:01:00+00',
+      '2026-02-20T10:01:00+00'
+    ),
+    (
+      'c1c1c1c1-3333-3333-3333-333333333333',
+      seed_user_id,
+      person_grace_id,
+      'United States Navy',
+      'us-navy',
+      'Rear Admiral',
+      'Pioneered computer programming in the military. Led the team that developed COBOL.',
+      '1943-06-01',
+      '1986-08-14',
+      '2026-02-20T10:02:00+00',
+      '2026-02-20T10:02:00+00'
+    ),
+    (
+      'c1c1c1c1-4444-4444-4444-444444444444',
+      seed_user_id,
+      person_grace_id,
+      'Eckert–Mauchly Computer Corporation',
+      'emcc',
+      'Senior Mathematician',
+      'Developed the first compiler (A-0 System) and advanced automatic programming concepts.',
+      '1949-01-01',
+      '1959-12-31',
+      '2026-02-20T10:03:00+00',
+      '2026-02-20T10:03:00+00'
+    ),
+    (
+      'c1c1c1c1-5555-5555-5555-555555555555',
+      seed_user_id,
+      person_katherine_id,
+      'NASA Langley Research Center',
+      'nasa',
+      'Research Mathematician',
+      'Calculated orbital trajectories for Project Mercury and Apollo 11. Verified electronic computer calculations.',
+      '1953-06-01',
+      '1986-10-31',
+      '2026-02-20T10:04:00+00',
+      '2026-02-20T10:04:00+00'
+    ),
+    (
+      'c1c1c1c1-6666-6666-6666-666666666666',
+      seed_user_id,
+      person_turing_id,
+      'Government Code and Cypher School',
+      'gchq',
+      'Lead Cryptanalyst',
+      'Broke the Enigma code at Bletchley Park. Designed the Bombe machine for automated decryption.',
+      '1938-09-01',
+      '1945-06-30',
+      '2026-02-20T10:05:00+00',
+      '2026-02-20T10:05:00+00'
+    ),
+    (
+      'c1c1c1c1-7777-7777-7777-777777777777',
+      seed_user_id,
+      person_turing_id,
+      'University of Manchester',
+      'university-of-manchester',
+      'Reader in Mathematics',
+      'Developed foundational work on artificial intelligence and morphogenesis. Designed the Manchester Mark 1.',
+      '1948-10-01',
+      NULL,
+      '2026-02-20T10:06:00+00',
+      '2026-02-20T10:06:00+00'
+    )
+  ON CONFLICT (id) DO UPDATE
+  SET
+    user_id              = EXCLUDED.user_id,
+    person_id            = EXCLUDED.person_id,
+    company_name         = EXCLUDED.company_name,
+    company_linkedin_id  = EXCLUDED.company_linkedin_id,
+    title                = EXCLUDED.title,
+    description          = EXCLUDED.description,
+    start_date           = EXCLUDED.start_date,
+    end_date             = EXCLUDED.end_date,
+    created_at           = EXCLUDED.created_at,
+    updated_at           = EXCLUDED.updated_at;
+
+  -- ========================================================================
+  -- EDUCATION
+  -- ========================================================================
+  INSERT INTO public.people_education_history (
+    id, user_id, person_id, school_name, school_linkedin_id,
+    degree, description, start_date, end_date, created_at, updated_at
+  )
+  VALUES
+    (
+      'd1d1d1d1-1111-1111-1111-111111111111',
+      seed_user_id,
+      person_ada_id,
+      'Private Tutoring under Mary Somerville',
+      NULL,
+      'Mathematics & Science',
+      'Studied advanced mathematics and science under the mentorship of Mary Somerville.',
+      '1832-01-01',
+      '1835-12-31',
+      '2026-02-20T10:10:00+00',
+      '2026-02-20T10:10:00+00'
+    ),
+    (
+      'd1d1d1d1-2222-2222-2222-222222222222',
+      seed_user_id,
+      person_grace_id,
+      'Yale University',
+      'yale-university',
+      'Ph.D. Mathematics',
+      'Doctoral research in mathematics, one of the first women to earn a Ph.D. from Yale.',
+      '1930-09-01',
+      '1934-06-30',
+      '2026-02-20T10:11:00+00',
+      '2026-02-20T10:11:00+00'
+    ),
+    (
+      'd1d1d1d1-3333-3333-3333-333333333333',
+      seed_user_id,
+      person_grace_id,
+      'Vassar College',
+      'vassar-college',
+      'B.A. Mathematics & Physics',
+      'Graduated Phi Beta Kappa with a dual degree in mathematics and physics.',
+      '1924-09-01',
+      '1928-06-30',
+      '2026-02-20T10:12:00+00',
+      '2026-02-20T10:12:00+00'
+    ),
+    (
+      'd1d1d1d1-4444-4444-4444-444444444444',
+      seed_user_id,
+      person_katherine_id,
+      'West Virginia State College',
+      'west-virginia-state-university',
+      'B.S. Mathematics (summa cum laude)',
+      'Graduated at age 18, youngest student in the program. Studied under renowned mathematician W.W. Schieffelin Claytor.',
+      '1933-09-01',
+      '1937-06-30',
+      '2026-02-20T10:13:00+00',
+      '2026-02-20T10:13:00+00'
+    ),
+    (
+      'd1d1d1d1-5555-5555-5555-555555555555',
+      seed_user_id,
+      person_turing_id,
+      'Princeton University',
+      'princeton-university',
+      'Ph.D. Mathematics',
+      'Doctoral thesis on ordinal logic and the lambda calculus under Alonzo Church.',
+      '1936-09-01',
+      '1938-06-30',
+      '2026-02-20T10:14:00+00',
+      '2026-02-20T10:14:00+00'
+    ),
+    (
+      'd1d1d1d1-6666-6666-6666-666666666666',
+      seed_user_id,
+      person_turing_id,
+      'King''s College, Cambridge',
+      'kings-college-cambridge',
+      'B.A. Mathematics',
+      'Published "On Computable Numbers" introducing the concept of the Turing machine.',
+      '1931-09-01',
+      '1934-06-30',
+      '2026-02-20T10:15:00+00',
+      '2026-02-20T10:15:00+00'
+    )
+  ON CONFLICT (id) DO UPDATE
+  SET
+    user_id             = EXCLUDED.user_id,
+    person_id           = EXCLUDED.person_id,
+    school_name         = EXCLUDED.school_name,
+    school_linkedin_id  = EXCLUDED.school_linkedin_id,
+    degree              = EXCLUDED.degree,
+    description         = EXCLUDED.description,
+    start_date          = EXCLUDED.start_date,
+    end_date            = EXCLUDED.end_date,
+    created_at          = EXCLUDED.created_at,
+    updated_at          = EXCLUDED.updated_at;
+
 END;
 $$;
 
