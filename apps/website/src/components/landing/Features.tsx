@@ -103,7 +103,7 @@ export function Features() {
   return (
     <Box id="features">
       <FeatureSection
-        title="Designed for human connections, not sales leads"
+        title="Better than spreadsheets or sales CRM"
         description="Your personal connections deserve better than a sales bloated CRM. Bondery is built specifically for maintaining authentic relationships. Simple, intuitive interface with no complicated pipelines or sales jargon."
         imagePosition="right"
         imagePlaceholder={<PersonEncryptionAnimation />}
