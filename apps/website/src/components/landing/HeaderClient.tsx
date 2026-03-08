@@ -5,12 +5,13 @@ import { useDisclosure } from "@mantine/hooks";
 import { IconBrandGithub, IconTopologyStar, IconX } from "@tabler/icons-react";
 import { AnchorLink, ButtonLink } from "@bondery/mantine-next";
 import { Logo } from "@/components/Logo";
-import { SOCIAL_LINKS } from "@bondery/helpers";
+import { SOCIAL_LINKS, WEBSITE_ROUTES } from "@bondery/helpers";
 import { WEBAPP_URL } from "@/lib/config";
 
 const navLinks = [
   { label: "Features", href: "/#features" },
   { label: "Pricing", href: "/#pricing" },
+  { label: "Docs", href: WEBSITE_ROUTES.DOCS },
 ];
 
 type HeaderClientProps = {
@@ -46,7 +47,7 @@ export function HeaderClient({ initialStars }: HeaderClientProps) {
             style={{ flex: "0 0 auto" }}
           >
             {navLinks.map((link) => (
-              <AnchorLink key={link.label} href={link.href} c="var(--mantine-color-default-color)">
+              <AnchorLink key={link.label} href={link.href} target={link.target} c="var(--mantine-color-default-color)">
                 {link.label}
               </AnchorLink>
             ))}
@@ -110,6 +111,7 @@ export function HeaderClient({ initialStars }: HeaderClientProps) {
                 <AnchorLink
                   key={link.label}
                   href={link.href}
+                  target={link.target}
                   c="var(--mantine-color-default-color)"
                   size="lg"
                   onClick={closeDrawer}

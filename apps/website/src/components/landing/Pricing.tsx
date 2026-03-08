@@ -17,7 +17,7 @@ export function Pricing() {
     {
       icon: <IconUsers />,
       title: "Contact management",
-      description: "All your contacts organized in one place",
+      description: "Create unlimited amount of contacts",
     },
     {
       icon: <IconTimelineEvent />,
@@ -27,7 +27,7 @@ export function Pricing() {
     {
       icon: <IconCalendar />,
       title: "Reminders",
-      description: "Never miss birthdays and important dates",
+      description: "Never miss birthdays or important dates",
     },
   ];
 
@@ -35,17 +35,17 @@ export function Pricing() {
     {
       icon: <IconNetwork />,
       title: "Smart search",
-      description: "Find the right people instantly with contextual search",
+      description: "Find the right people with a text query",
     },
     {
       icon: <IconTopologyStar />,
       title: "Writing copilot",
-      description: "Generate tailored outreach drafts for every contact",
+      description: "Generate personalized outreach drafts",
     },
     {
       icon: <IconUsers />,
       title: "Priority support",
-      description: "We will prioritize your feature requests and questions",
+      description: "Priority of feature requests and questions",
     },
   ];
 
@@ -66,7 +66,7 @@ export function Pricing() {
             Simple, Transparent Pricing
           </Title>
           <Text c="dimmed" ta="center" size="xl" style={{ textWrap: "balance" }}>
-            Start building your network today, completely free during our beta phase.
+            Start building your network today, completely free.
           </Text>
         </Stack>
       </Container>

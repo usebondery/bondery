@@ -251,7 +251,11 @@ export function GroupsClient({ initialGroups, totalCount }: GroupsClientProps) {
           helpHref={`${WEBSITE_URL}/docs/core-concepts/groups`}
           helpLabel={tHeader("LearnMoreAbout", { concept: tHeader("Concepts.Groups") })}
           action={
-            <Button size="md" leftSection={<IconUsersPlus size={16} />} onClick={() => openAddGroupModal()}>
+            <Button
+              size="md"
+              leftSection={<IconUsersPlus size={16} />}
+              onClick={() => openAddGroupModal()}
+            >
               {t("CreateNewGroup")}
             </Button>
           }
