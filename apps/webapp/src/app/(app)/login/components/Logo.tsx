@@ -1,4 +1,4 @@
-import { BonderyLogotypeWhite } from "@bondery/branding-src";
+import { BonderyLogotypeBlack, BonderyLogotypeWhite } from "@bondery/branding-src";
 import { Flex } from "@mantine/core";
 import Link from "next/link";
 
@@ -23,7 +23,10 @@ export function Logo({ size, iconSize, href = "/" }: LogoProps) {
 
   return (
     <Link href={href} style={{ textDecoration: "none", color: "inherit" }}>
-      <Flex align="center" gap="xs">
+      <Flex align="center" gap="xs" darkHidden>
+        <BonderyLogotypeBlack width={logoSize * 3} height={logoSize} />
+      </Flex>
+      <Flex align="center" gap="xs" lightHidden>
         <BonderyLogotypeWhite width={logoSize * 3} height={logoSize} />
       </Flex>
     </Link>
