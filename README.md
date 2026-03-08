@@ -1,54 +1,34 @@
 
 ![github.png](/packages/branding/src/platforms/github_social_preview.png)
 
-# <h1 align="center">Bondery</h1>
+<h1 align="center">Bondery</h1>
+
 <p align="center">
-    Your open-source network manager
+  Your open-source personal relationship manager
 </p>
 
-## 🟣 What's Bondery?
+<p align="center">
+  <a href="https://usebondery.com">Website</a> ·
+  <a href="https://usebondery.com/docs">Documentation</a> ·
+</p>
 
-Bondery helps you manage your network of contacts effortlessly. Whether you're looking to keep in touch with friends, family, or professional connections, Bondery provides the tools you need to stay organized and connected.
+---
 
-Start building meaningful relationships today with [Bondery](https://usebondery.com)!
+## 🟣 What is Bondery?
 
-## � Quick Start
+Bondery is an open-source personal relationship manager (PRM). It helps you organize and maintain your personal and professional contacts in one place.
 
-**New to the project?** Check out [SETUP.md](./SETUP.md) for detailed setup instructions.
+Visit [usebondery.com](https://usebondery.com) to learn about the project. To learn about the core concepts, check out the [documentation](https://usebondery.com/docs).
 
-```bash
-# Install dependencies
-pnpm install
+## 🛠️ Contributing
 
-# Build shared packages
-pnpm build --filter=@bondery/types --filter=@bondery/branding
+Contributions are welcome! Before you start, please read the relevant guides in the documentation:
 
-# Run all apps in development
-pnpm dev
-```
+- [Architecture](https://usebondery.com/docs/contributing/architecture) — how the monorepo is structured and the tech decisions behind each app
+- [Local development setup](https://usebondery.com/docs/contributing/local-setup) — step-by-step instructions to run every app on your machine
 
-Apps will be available at:
-- Website: http://localhost:3000
-- Server API: http://localhost:3001
-- Webapp: http://localhost:3002
-
-## 📐 Architecture
-
-Bondery is split into multiple deployable units:
-- **apps/website** - Public landing page
-- **apps/webapp** - Authenticated application
-- **apps/api** - Fastify REST API
-- **packages/types** - Shared TypeScript types
-
-See [ARCHITECTURE.md](./ARCHITECTURE.md) for detailed architecture documentation.
-
-## �🛠️ Contributing
-You are welcome to contribute to Bondery! Please read our [Contributing Guide](CONTRIBUTING) for details on how to get started.
+To report a bug or request a feature, open an issue on the [GitHub repository](https://github.com/usebondery/bondery/issues).
 
 ## 📝 License
+
 Bondery is open-source software licensed under the [AGPL-3.0 license](LICENSE).
-
-## 📧 Get in touch with us
-If you have any questions, feedback, or need support, feel free to reach out to us at our page: [https://usebondery.com](https://usebondery.com).
-
-If you encounter any issues or have feature requests, please open an issue on our [GitHub repository](https://github.com/usebondery/bondery).

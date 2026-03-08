@@ -31,6 +31,12 @@
           spec: API
     ```
 
+## Contributing
+
+* [🛠️ Contributing](contributing/README.md)
+* [Architecture](contributing/architecture.md)
+* [Local development setup](contributing/local-setup.md)
+
 ***
 
 * [Changelog](changelog.md)

@@ -39,7 +39,7 @@ export function CallToAction() {
             variant="white"
             radius={"xl"}
           >
-            Start building your network for free
+            Start building your network
           </ButtonLink>
         </Stack>
       </Card>
