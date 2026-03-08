@@ -21,7 +21,7 @@ const faqItems = [
   {
     question: "Why is data not E2EE (yet)?",
     answer:
-      "End-to-end encryption is planned for the future, but our small team does not yet have the resources to implement robust E2EE correctly without making the too slow. Your data is still protected with our current safeguards (TLS for data in transit and AES encryption for the database at rest).",
+      "End-to-end encryption is planned for the future, but our small team does not yet have the resources to implement robust E2EE correctly without making the user experience too slow. Your data is still protected with our current safeguards (TLS for data in transit and AES encryption for the database at rest).",
   },
   {
     question: "Can I self-host Bondery?",

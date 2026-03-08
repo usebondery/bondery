@@ -96,13 +96,11 @@ async function getGroupContacts(
       createdAt: contact.createdAt ? new Date(contact.createdAt) : null,
     }));
 
-    const cardPreviewContacts = (previewData.contacts ?? []).map(
-      (contact: Contact) => ({
-        ...contact,
-        lastInteraction: contact.lastInteraction ? new Date(contact.lastInteraction) : null,
-        createdAt: contact.createdAt ? new Date(contact.createdAt) : null,
-      }),
-    );
+    const cardPreviewContacts = (previewData.contacts ?? []).map((contact: Contact) => ({
+      ...contact,
+      lastInteraction: contact.lastInteraction ? new Date(contact.lastInteraction) : null,
+      createdAt: contact.createdAt ? new Date(contact.createdAt) : null,
+    }));
 
     return {
       group: {

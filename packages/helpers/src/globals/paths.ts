@@ -6,6 +6,7 @@ export const WEBSITE_ROUTES = {
   LOGIN: "/login",
   CONTACT: "/contact",
   APP_GROUP: "/app",
+  DOCS: "/docs",
 };
 
 export const API_ROUTES = {
