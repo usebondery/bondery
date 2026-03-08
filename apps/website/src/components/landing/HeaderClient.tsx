@@ -47,7 +47,7 @@ export function HeaderClient({ initialStars }: HeaderClientProps) {
             style={{ flex: "0 0 auto" }}
           >
             {navLinks.map((link) => (
-              <AnchorLink key={link.label} href={link.href} target={link.target} c="var(--mantine-color-default-color)">
+              <AnchorLink key={link.label} href={link.href} c="var(--mantine-color-default-color)">
                 {link.label}
               </AnchorLink>
             ))}
@@ -111,7 +111,6 @@ export function HeaderClient({ initialStars }: HeaderClientProps) {
                 <AnchorLink
                   key={link.label}
                   href={link.href}
-                  target={link.target}
                   c="var(--mantine-color-default-color)"
                   size="lg"
                   onClick={closeDrawer}
