@@ -10,6 +10,7 @@
 <p align="center">
   <a href="https://usebondery.com">Website</a> ·
   <a href="https://usebondery.com/docs">Documentation</a> ·
+  <a href="https://usebondery.com/contact">Contact us</a>
 </p>
 
 ---
