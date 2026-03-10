@@ -298,11 +298,11 @@ max_frequency = "5s"
 # `twitter`, `x`, `slack`, `spotify`, `workos`, `zoom`.
 [auth.external.github]
 enabled = true
-client_id = "env(SUPABASE_AUTH_EXTERNAL_GITHUB_CLIENT_ID)"
+client_id = "env(BONDERY_SUPABASE_AUTH_EXTERNAL_GITHUB_CLIENT_ID)"
 # DO NOT commit your OAuth provider secret to git. Use environment variable substitution instead:
-secret = "env(SUPABASE_AUTH_EXTERNAL_GITHUB_SECRET)"
+secret = "env(BONDERY_SUPABASE_AUTH_EXTERNAL_GITHUB_SECRET)"
 # Overrides the default auth redirectUrl.
-redirect_uri = "env(SUPABASE_AUTH_CALLBACK_URL)"
+redirect_uri = "env(BONDERY_SUPABASE_AUTH_CALLBACK_URL)"
 # Overrides the default auth provider URL. Used to support self-hosted gitlab, single-tenant Azure,
 # or any other third-party OIDC providers.
 url = ""
@@ -313,11 +313,11 @@ email_optional = false
 
 [auth.external.linkedin_oidc]
 enabled = true
-client_id = "env(SUPABASE_AUTH_EXTERNAL_LINKEDIN_CLIENT_ID)"
+client_id = "env(BONDERY_SUPABASE_AUTH_EXTERNAL_LINKEDIN_CLIENT_ID)"
 # DO NOT commit your OAuth provider secret to git. Use environment variable substitution instead:
-secret = "env(SUPABASE_AUTH_EXTERNAL_LINKEDIN_SECRET)"
+secret = "env(BONDERY_SUPABASE_AUTH_EXTERNAL_LINKEDIN_SECRET)"
 # Overrides the default auth redirectUrl.
-redirect_uri = "env(SUPABASE_AUTH_CALLBACK_URL)"
+redirect_uri = "env(BONDERY_SUPABASE_AUTH_CALLBACK_URL)"
 # Overrides the default auth provider URL. Used to support self-hosted gitlab, single-tenant Azure,
 # or any other third-party OIDC providers.
 url = ""
