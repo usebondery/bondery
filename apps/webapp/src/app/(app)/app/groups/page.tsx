@@ -4,16 +4,20 @@ import { API_URL } from "@/lib/config";
 import type { GroupWithCount } from "@bondery/types";
 import { getAuthHeaders } from "@/lib/authHeaders";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
+import { buildAvatarQueryString } from "@/lib/avatarParams";
 
 export const metadata: Metadata = { title: "Groups" };
 
 async function getGroups() {
   try {
     const headers = await getAuthHeaders();
-    const res = await fetch(`${API_URL}${API_ROUTES.GROUPS}?previewLimit=3`, {
-      next: { tags: ["groups"] },
-      headers,
-    });
+    const res = await fetch(
+      `${API_URL}${API_ROUTES.GROUPS}?previewLimit=3&${buildAvatarQueryString("small")}`,
+      {
+        next: { tags: ["groups"] },
+        headers,
+      },
+    );
 
     if (!res.ok) {
       throw new Error(`Failed to fetch groups: ${res.status} ${res.statusText}`);

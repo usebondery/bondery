@@ -27,6 +27,7 @@ import {
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import { useEffect, useRef, useState } from "react";
 import { API_URL } from "@/lib/config";
+import { buildAvatarQueryString } from "@/lib/avatarParams";
 import { openStandardConfirmModal } from "@/app/(app)/app/components/modals/openStandardConfirmModal";
 
 const COLOR_SWATCHES = [
@@ -96,9 +97,12 @@ function TagEditorModalBody({
 
     void (async () => {
       try {
-        const contactsResponse = await fetch(`${API_URL}${API_ROUTES.CONTACTS}`, {
-          credentials: "include",
-        });
+        const contactsResponse = await fetch(
+          `${API_URL}${API_ROUTES.CONTACTS}?${buildAvatarQueryString("small")}`,
+          {
+            credentials: "include",
+          },
+        );
 
         if (!contactsResponse.ok) throw new Error("contacts");
 
@@ -107,9 +111,12 @@ function TagEditorModalBody({
         setAllContacts(contactsData.contacts || []);
 
         if (mode === "edit" && tag) {
-          const membersResponse = await fetch(`${API_URL}${API_ROUTES.TAGS}/${tag.id}/contacts`, {
-            credentials: "include",
-          });
+          const membersResponse = await fetch(
+            `${API_URL}${API_ROUTES.TAGS}/${tag.id}/contacts?${buildAvatarQueryString("small")}`,
+            {
+              credentials: "include",
+            },
+          );
 
           if (!membersResponse.ok) throw new Error("members");
 

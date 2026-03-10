@@ -45,6 +45,7 @@ import { openAddPeopleToGroupSelectionModal } from "../../people/components/AddP
 import { MERGE_CONFLICT_FIELDS, openMergeWithModal } from "../../people/components/MergeWithModal";
 import { PageHeader } from "@/app/(app)/app/components/PageHeader";
 import { PageWrapper } from "@/app/(app)/app/components/PageWrapper";
+import { appendAvatarParams } from "@/lib/avatarParams";
 
 interface GroupDetailClientProps {
   groupId: string;
@@ -197,6 +198,7 @@ export function GroupDetailClient({
       params.set("offset", String(loadedCount));
       if (initialSearch) params.set("q", initialSearch);
       if (initialSort) params.set("sort", initialSort);
+      appendAvatarParams(params, "small");
 
       const response = await fetch(`${API_ROUTES.GROUPS}/${groupId}/contacts?${params.toString()}`);
       if (!response.ok) throw new Error("Failed to load more contacts");
@@ -244,6 +246,7 @@ export function GroupDetailClient({
       params.set("offset", String(remaining.length));
       if (initialSearch) params.set("q", initialSearch);
       if (initialSort) params.set("sort", initialSort);
+      appendAvatarParams(params, "small");
 
       const res = await fetch(`${API_ROUTES.GROUPS}/${groupId}/contacts?${params.toString()}`);
       if (!res.ok) return remaining;
