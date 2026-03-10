@@ -174,7 +174,9 @@ async function buildServer() {
   const environment = process.env.NODE_ENV || "development";
   const fastify = Fastify({
     logger: getLoggerConfig(environment),
-    ignoreTrailingSlash: true,
+    routerOptions: {
+      ignoreTrailingSlash: true,
+    },
     ajv: {
       customOptions: {
         removeAdditional: true,
