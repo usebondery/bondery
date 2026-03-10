@@ -1,13 +1,22 @@
--- Test helper: force one user's reminder to be due "now" and run the hourly cron function.
+-- ╔══════════════════════════════════════════════════════════════════════╗
+-- ║  ✏️  CONFIG — optionally set a target email, then run this script   ║
+-- ╚══════════════════════════════════════════════════════════════════════╝
+
+-- ════════════════════════════════════════════════════════════════════════
+-- Test helper: force one user's reminder to be due "now" and run the
+-- hourly cron function.
 --
--- Run as postgres/service role in Supabase SQL Editor.
+-- Usage:
+-- 1) Set target_email in the DECLARE block below to the user's email.
+--    Leave it empty ('') to automatically pick the first user in auth.users.
+-- 2) Run with a privileged role (service role / postgres).
 --
 -- Notes:
--- - Prefers a non-seed user (email != seed@usebondery.local).
--- - Falls back to the only auth user when only one user exists.
--- - Requires at least one row in public.people_important_dates for the chosen user.
--- - If app.settings.next_public_api_url / app.settings.private_bondery_supabase_http_key are missing,
---   the function returns an error payload (expected) and no dispatch log row is written.
+-- - Requires at least one row in public.people_important_dates for the user.
+-- - If the vault secret next_public_api_url is missing,
+--   the function returns an error payload (expected) and no dispatch log row
+--   is written.
+-- ════════════════════════════════════════════════════════════════════════
 
 BEGIN;
 
@@ -17,41 +26,41 @@ CREATE TEMP TABLE _test_target_user (
 
 DO $$
 DECLARE
+  -- ✏️  Set your email here, or leave empty to use the first user
+  target_email  text := '';
+
   target_user_id uuid;
-  non_seed_count integer;
-  total_count integer;
+  resolved_email text;
   target_event_id uuid;
   effective_timezone text;
   local_today date;
 BEGIN
-  SELECT COUNT(*)::integer
-  INTO non_seed_count
-  FROM auth.users
-  WHERE COALESCE(email, '') <> 'seed@usebondery.local';
-
-  SELECT COUNT(*)::integer
-  INTO total_count
-  FROM auth.users;
-
-  IF non_seed_count = 1 THEN
-    SELECT id
-    INTO target_user_id
-    FROM auth.users
-    WHERE COALESCE(email, '') <> 'seed@usebondery.local'
-    ORDER BY created_at ASC, id ASC
-    LIMIT 1;
-  ELSIF non_seed_count = 0 AND total_count = 1 THEN
-    SELECT id
-    INTO target_user_id
-    FROM auth.users
-    ORDER BY created_at ASC, id ASC
-    LIMIT 1;
-  ELSE
+  IF NOT EXISTS (SELECT 1 FROM auth.users LIMIT 1) THEN
     RAISE EXCEPTION
-      'Could not determine a single test user automatically (non-seed: %, total: %).',
-      non_seed_count,
-      total_count;
+      E'No users found in auth.users.\nCreate an account first by logging in to the webapp, then re-run this script.';
   END IF;
+
+  IF target_email IS NOT NULL AND trim(target_email) <> '' THEN
+    SELECT id, email
+      INTO target_user_id, resolved_email
+    FROM auth.users
+    WHERE email = trim(target_email)
+    LIMIT 1;
+
+    IF target_user_id IS NULL THEN
+      RAISE EXCEPTION 'No auth user found with email "%". Sign up first.', trim(target_email);
+    END IF;
+  ELSE
+    SELECT id, email
+      INTO target_user_id, resolved_email
+    FROM auth.users
+    ORDER BY created_at ASC, id ASC
+    LIMIT 1;
+
+    RAISE NOTICE 'No email configured — using first user: % (%)', resolved_email, target_user_id;
+  END IF;
+
+  RAISE NOTICE 'Running cron test for user % (%)', resolved_email, target_user_id;
 
   INSERT INTO _test_target_user (user_id)
   VALUES (target_user_id);
@@ -96,7 +105,7 @@ BEGIN
   WHERE us.user_id = t.user_id;
 
   RAISE NOTICE 'Prepared user %, timezone %, local date %, event %',
-    target_user_id,
+    resolved_email,
     effective_timezone,
     local_today,
     target_event_id;
@@ -126,7 +135,7 @@ SELECT
   END AS reminder_digest_url,
   updated_at
 FROM vault.decrypted_secrets
-WHERE name IN ('next_public_api_url', 'private_bondery_supabase_http_key');
+WHERE name = 'next_public_api_url';
 
 SELECT
   e.id,
