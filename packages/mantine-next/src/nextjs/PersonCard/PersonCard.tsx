@@ -1,12 +1,14 @@
 "use client";
 
 import { Avatar, Group, Paper, Stack, Text } from "@mantine/core";
+import { IconBriefcase, IconCompass } from "@tabler/icons-react";
 import type { ContactPreview } from "@bondery/types";
 import { getAvatarColorFromName } from "../../utils/avatarColor";
 
 type PersonCardIdentity = ContactPreview & {
   middleName?: string | null;
   headline?: string | null;
+  place?: string | null;
 };
 
 export interface PersonCardProps {
@@ -27,8 +29,8 @@ export function PersonCard({ person, size = "md" }: PersonCardProps) {
       shadow="md"
       radius="md"
       p="sm"
-      bg="var(--mantine-color-white)"
-      style={{ minWidth: 260, borderColor: "var(--mantine-color-gray-3)" }}
+      bg="white"
+      style={{ minWidth: 300, borderColor: "var(--mantine-color-gray-3)" }}
     >
       <Group gap="sm" wrap="nowrap" align="center">
         <Avatar
@@ -38,14 +40,25 @@ export function PersonCard({ person, size = "md" }: PersonCardProps) {
           color={getAvatarColorFromName(person.firstName, person.lastName)}
           name={fullName}
         />
-        <Stack gap={0} style={{ minWidth: 0 }}>
+        <Stack gap={2} style={{ minWidth: 0 }}>
           <Text size="sm" fw={700} truncate c="dark.8">
             {fullName}
           </Text>
           {person.headline ? (
-            <Text size="xs" c="gray.7" truncate>
-              {person.headline}
-            </Text>
+            <Group gap={4} wrap="nowrap" style={{ minWidth: 0 }}>
+              <IconBriefcase size={12} stroke={1.5} style={{ flexShrink: 0 }} />
+              <Text size="xs" c="gray.7" truncate>
+                {person.headline}
+              </Text>
+            </Group>
+          ) : null}
+          {person.place ? (
+            <Group gap={4} wrap="nowrap" style={{ minWidth: 0 }}>
+              <IconCompass size={12} stroke={1.5} style={{ flexShrink: 0 }} />
+              <Text size="xs" c="gray.7" truncate>
+                {person.place}
+              </Text>
+            </Group>
           ) : null}
         </Stack>
       </Group>

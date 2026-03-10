@@ -15,13 +15,20 @@
     "build": "turbo build",
     "start": "turbo start",
     "lint": "turbo lint",
-    "check-types": "turbo check-types"
+    "check-types": "turbo check-types",
+    "generate-openapi": "npm run generate-openapi -w apps/api && git add apps/api/openapi.yaml"
   },
+  "pre-commit": [
+    "generate-openapi"
+  ],
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.3",
     "@eslint/js": "^8.57.1",
+    "@fastify/pre-commit": "^2.2.1",
+    "@redocly/cli": "^2.20.4",
     "ajv": "^8.17.1",
     "globals": "^17.3.0",
-    "turbo": "^2.8.12"
+    "turbo": "^2.8.12",
+    "yaml": "^2.8.2"
   }
 }

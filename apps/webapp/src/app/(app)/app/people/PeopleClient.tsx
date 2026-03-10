@@ -406,7 +406,7 @@ export function PeopleClient({ initialContacts, totalCount, layout = "stack" }: 
           icon={IconUsers}
           title={t("Title")}
           description={t("HeaderDescription")}
-          helpHref={`${WEBSITE_URL}/docs/core-concepts/people`}
+          helpHref={`${WEBSITE_URL}/docs/concepts/people`}
           helpLabel={tHeader("LearnMoreAbout", { concept: tHeader("Concepts.People") })}
           secondaryAction={
             <Button

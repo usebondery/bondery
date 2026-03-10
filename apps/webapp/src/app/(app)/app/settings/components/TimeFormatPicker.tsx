@@ -50,7 +50,7 @@ export function TimeFormatPicker({
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          time_format: nextFormat,
+          timeFormat: nextFormat,
         }),
       });
 

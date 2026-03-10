@@ -156,9 +156,9 @@ export default function PopupApp() {
     window.close();
   }
 
-  function openPersonWithAddEvent(contactId: string) {
+  function openPersonWithAddInteraction(contactId: string) {
     browser.tabs.create({
-      url: `${config.appUrl}${WEBAPP_ROUTES.PERSON}/${contactId}?addEvent=1`,
+      url: `${config.appUrl}${WEBAPP_ROUTES.PERSON}/${contactId}?addInteraction=1`,
     });
     window.close();
   }
@@ -250,7 +250,7 @@ export default function PopupApp() {
         preview={preview}
         onOpenSettings={openSettings}
         onOpenPerson={openPerson}
-        onOpenPersonWithAddEvent={openPersonWithAddEvent}
+        onOpenPersonWithAddInteraction={openPersonWithAddInteraction}
       />
     );
   }

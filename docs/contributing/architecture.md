@@ -145,16 +145,21 @@ Brand assets (logos, social previews) plus icon-generation scripts used by `apps
 ## Data flow
 
 ```
-Browser / Chrome Extension
-        │
-        ├──▶ apps/webapp (Next.js, port 3002)
-        │         │
-        │         ├──▶ Supabase (auth + realtime DB)
-        │         └──▶ apps/api (REST, port 3001)
-        │                   │
-        │                   └──▶ Supabase (server-side DB access)
-        │
-        └──▶ apps/website (Next.js, port 3000)
+Browser
+  │
+  ├──▶ apps/webapp (Next.js, port 3002)
+  │         │
+  │         ├──▶ Supabase (auth + realtime DB)
+  │         └──▶ apps/api (REST, port 3001)
+  │                   │
+  │                   └──▶ Supabase (server-side DB access)
+  │
+  └──▶ apps/website (Next.js, port 3000)
+
+Chrome Extension
+  │
+  ├──▶ Supabase (auth via chrome.identity OAuth)
+  └──▶ apps/api (contact creation / redirect endpoint)
 ```
 
 Supabase is the central data store. The webapp uses the Supabase JS client directly for most read/write operations. The API uses the Supabase service role key for privileged operations (e.g., storage, edge function triggers, bulk imports).

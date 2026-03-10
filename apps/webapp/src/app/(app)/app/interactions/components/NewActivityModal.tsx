@@ -145,7 +145,7 @@ function NewActivityForm({
 
       if (!res.ok) {
         const errorData = await res.json().catch(() => ({}));
-        throw new Error(errorData.error || errorData.message || "Failed to create event");
+        throw new Error(errorData.error || errorData.message || "Failed to create activity");
       }
 
       notifications.show(
@@ -163,7 +163,7 @@ function NewActivityForm({
         errorNotificationTemplate({
           title: "Error",
           description:
-            error instanceof Error ? error.message : "Failed to create event. Please try again.",
+            error instanceof Error ? error.message : "Failed to create activity. Please try again.",
         }),
       );
     } finally {

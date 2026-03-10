@@ -71,14 +71,13 @@ export const MERGE_CONFLICT_FIELDS: MergeConflictField[] = [
   "firstName",
   "middleName",
   "lastName",
-  "avatar",
   "headline",
   "place",
   "notes",
   "lastInteraction",
   "phones",
   "emails",
-  "importantEvents",
+  "importantDates",
   "language",
   "timezone",
   "location",
@@ -196,7 +195,7 @@ function normalizeEmailSet(value: unknown): string[] {
     .sort();
 }
 
-function normalizeImportantEventsSet(value: unknown): string[] {
+function normalizeImportantDatesSet(value: unknown): string[] {
   if (!Array.isArray(value)) {
     return [];
   }
@@ -207,19 +206,19 @@ function normalizeImportantEventsSet(value: unknown): string[] {
         return "";
       }
 
-      const row = entry as { eventType?: unknown; eventDate?: unknown; note?: unknown };
-      const eventType = String(row.eventType || "")
+      const row = entry as { type?: unknown; date?: unknown; note?: unknown };
+      const dateType = String(row.type || "")
         .trim()
         .toLowerCase();
-      const eventDate = String(row.eventDate || "")
+      const dateValue = String(row.date || "")
         .trim()
         .slice(0, 10);
       const note = String(row.note || "").trim();
-      if (!eventType || !eventDate) {
+      if (!dateType || !dateValue) {
         return "";
       }
 
-      return `${eventType}|${eventDate}|${note}`;
+      return `${dateType}|${dateValue}|${note}`;
     })
     .filter(Boolean)
     .sort();
@@ -234,10 +233,10 @@ function areValuesEquivalent(field: MergeConflictField, left: unknown, right: un
     return JSON.stringify(normalizeEmailSet(left)) === JSON.stringify(normalizeEmailSet(right));
   }
 
-  if (field === "importantEvents") {
+  if (field === "importantDates") {
     return (
-      JSON.stringify(normalizeImportantEventsSet(left)) ===
-      JSON.stringify(normalizeImportantEventsSet(right))
+      JSON.stringify(normalizeImportantDatesSet(left)) ===
+      JSON.stringify(normalizeImportantDatesSet(right))
     );
   }
 
@@ -452,8 +451,8 @@ function ConflictOptionCard({ selected, fieldLabel, onSelect, children }: Confli
 }
 
 function formatConflictDisplayValue(field: MergeConflictField, value: unknown): string {
-  if (field === "importantEvents") {
-    const count = normalizeImportantEventsSet(value).length;
+  if (field === "importantDates") {
+    const count = normalizeImportantDatesSet(value).length;
     return count > 0 ? `${count}` : "";
   }
 
@@ -544,10 +543,6 @@ function renderConflictPreview(
   value: unknown,
   contact: Contact | null,
 ): ReactNode {
-  if (field === "avatar") {
-    return <PersonChip person={toPersonPreview(contact)} size="sm" color="gray" />;
-  }
-
   if (field === "firstName" || field === "middleName" || field === "lastName") {
     const fieldValue = normalizeDisplayText(value);
 

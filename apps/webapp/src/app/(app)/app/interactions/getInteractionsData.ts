@@ -17,12 +17,12 @@ export async function getInteractionsData(): Promise<InteractionsDataResult> {
   try {
     const headers = await getAuthHeaders();
 
-    const contactsRes = await fetch(`${API_URL}${API_ROUTES.CONTACTS}`, {
+    const contactsRes = await fetch(`${API_URL}${API_ROUTES.CONTACTS}?limit=200&offset=0`, {
       next: { tags: ["contacts"] },
       headers,
     });
 
-    const interactionsRes = await fetch(`${API_URL}${API_ROUTES.INTERACTIONS}`, {
+    const interactionsRes = await fetch(`${API_URL}${API_ROUTES.INTERACTIONS}?limit=50&offset=0`, {
       next: { tags: ["interactions"] },
       headers,
     });

@@ -9,14 +9,14 @@ interface PreviewViewProps {
   preview: PersonPreviewData;
   onOpenSettings: () => void;
   onOpenPerson: (contactId: string) => void;
-  onOpenPersonWithAddEvent: (contactId: string) => void;
+  onOpenPersonWithAddInteraction: (contactId: string) => void;
 }
 
 export function PreviewView({
   preview,
   onOpenSettings,
   onOpenPerson,
-  onOpenPersonWithAddEvent,
+  onOpenPersonWithAddInteraction,
 }: PreviewViewProps) {
   return (
     <Stack p="md" gap="md" h={300}>
@@ -34,7 +34,7 @@ export function PreviewView({
         doesPersonExist
         onPersonClick={() => onOpenPerson(preview.contactId)}
         onViewOrImport={() => onOpenPerson(preview.contactId)}
-        onAddEvent={() => onOpenPersonWithAddEvent(preview.contactId)}
+        onAddInteraction={() => onOpenPersonWithAddInteraction(preview.contactId)}
       />
     </Stack>
   );

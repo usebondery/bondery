@@ -126,7 +126,6 @@ export type Database = {
       };
       people: {
         Row: {
-          avatar: string | null;
           created_at: string | null;
           first_name: string;
           id: string;
@@ -139,6 +138,7 @@ export type Database = {
           middle_name: string | null;
           myself: boolean | null;
           notes: string | null;
+          notes_updated_at: string | null;
           place: string | null;
           timezone: string | null;
           headline: string | null;
@@ -146,7 +146,6 @@ export type Database = {
           user_id: string;
         };
         Insert: {
-          avatar?: string | null;
           created_at?: string | null;
           first_name: string;
           id?: string;
@@ -159,6 +158,7 @@ export type Database = {
           middle_name?: string | null;
           myself?: boolean | null;
           notes?: string | null;
+          notes_updated_at?: string | null;
           place?: string | null;
           timezone?: string | null;
           headline?: string | null;
@@ -166,7 +166,6 @@ export type Database = {
           user_id: string;
         };
         Update: {
-          avatar?: string | null;
           created_at?: string | null;
           first_name?: string;
           id?: string;
@@ -179,6 +178,7 @@ export type Database = {
           middle_name?: string | null;
           myself?: boolean | null;
           notes?: string | null;
+          notes_updated_at?: string | null;
           place?: string | null;
           timezone?: string | null;
           headline?: string | null;
@@ -231,11 +231,11 @@ export type Database = {
           },
         ];
       };
-      people_important_events: {
+      people_important_dates: {
         Row: {
           created_at: string;
-          event_date: string;
-          event_type: string;
+          date: string;
+          type: string;
           id: string;
           note: string | null;
           notify_on: string | null;
@@ -246,8 +246,8 @@ export type Database = {
         };
         Insert: {
           created_at?: string;
-          event_date: string;
-          event_type: string;
+          date: string;
+          type: string;
           id?: string;
           note?: string | null;
           notify_on?: string | null;
@@ -258,8 +258,8 @@ export type Database = {
         };
         Update: {
           created_at?: string;
-          event_date?: string;
-          event_type?: string;
+          date?: string;
+          type?: string;
           id?: string;
           note?: string | null;
           notify_on?: string | null;
@@ -270,7 +270,7 @@ export type Database = {
         };
         Relationships: [
           {
-            foreignKeyName: "people_important_events_person_id_fkey";
+            foreignKeyName: "people_important_dates_person_id_fkey";
             columns: ["person_id"];
             isOneToOne: false;
             referencedRelation: "people";

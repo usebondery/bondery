@@ -79,13 +79,13 @@ function ActivityDetailBody({ modalId, activity, contacts }: ActivityDetailBodyP
       });
 
       if (!res.ok) {
-        throw new Error("Failed to update event");
+        throw new Error("Failed to update activity");
       }
 
       notifications.show(
         successNotificationTemplate({
           title: "Success",
-          description: "Event updated successfully",
+          description: "Activity updated successfully",
         }),
       );
 
@@ -96,7 +96,7 @@ function ActivityDetailBody({ modalId, activity, contacts }: ActivityDetailBodyP
       notifications.show(
         errorNotificationTemplate({
           title: "Error",
-          description: "Failed to update event",
+          description: "Failed to update activity",
         }),
       );
     } finally {
@@ -105,7 +105,7 @@ function ActivityDetailBody({ modalId, activity, contacts }: ActivityDetailBodyP
   };
 
   const handleDelete = async () => {
-    if (!confirm("Are you sure you want to delete this event?")) {
+    if (!confirm("Are you sure you want to delete this activity?")) {
       return;
     }
 
@@ -117,13 +117,13 @@ function ActivityDetailBody({ modalId, activity, contacts }: ActivityDetailBodyP
       });
 
       if (!res.ok) {
-        throw new Error("Failed to delete event");
+        throw new Error("Failed to delete activity");
       }
 
       notifications.show(
         successNotificationTemplate({
           title: "Success",
-          description: "Event deleted successfully",
+          description: "Activity deleted successfully",
         }),
       );
 
@@ -134,7 +134,7 @@ function ActivityDetailBody({ modalId, activity, contacts }: ActivityDetailBodyP
       notifications.show(
         errorNotificationTemplate({
           title: "Error",
-          description: "Failed to delete event",
+          description: "Failed to delete activity",
         }),
       );
     } finally {
@@ -235,7 +235,7 @@ function ActivityDetailBody({ modalId, activity, contacts }: ActivityDetailBodyP
       </Box>
 
       <ModalFooter
-        backLabel="Delete event"
+        backLabel="Delete activity"
         onBack={() => {
           void handleDelete();
         }}

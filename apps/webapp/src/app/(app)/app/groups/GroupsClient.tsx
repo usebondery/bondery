@@ -179,7 +179,10 @@ export function GroupsClient({ initialGroups, totalCount }: GroupsClientProps) {
     try {
       const duplicateLabel = `${group.label} (Copy)`;
 
-      const groupContactsRes = await fetch(`${API_ROUTES.GROUPS}/${group.id}/contacts`);
+      // Fetch up to 200 members for duplication; groups larger than 200 will be partially duplicated.
+      const groupContactsRes = await fetch(
+        `${API_ROUTES.GROUPS}/${group.id}/contacts?limit=200&offset=0`,
+      );
       if (!groupContactsRes.ok) throw new Error("Failed to fetch group members");
 
       const groupContactsPayload = (await groupContactsRes.json()) as {
@@ -248,7 +251,7 @@ export function GroupsClient({ initialGroups, totalCount }: GroupsClientProps) {
           icon={IconUsersGroup}
           title={t("Title")}
           description={t("HeaderDescription")}
-          helpHref={`${WEBSITE_URL}/docs/core-concepts/groups`}
+          helpHref={`${WEBSITE_URL}/docs/concepts/groups`}
           helpLabel={tHeader("LearnMoreAbout", { concept: tHeader("Concepts.Groups") })}
           action={
             <Button

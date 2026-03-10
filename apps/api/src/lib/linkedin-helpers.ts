@@ -7,7 +7,8 @@
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database, ScrapedWorkHistoryEntry, ScrapedEducationEntry } from "@bondery/types";
-import { validateImageUpload } from "./config.js";
+import { validateImageUpload, validateImageMagicBytes } from "./config.js";
+import logger from "./logger.js";
 
 /**
  * Converts a loose date string (YYYY, YYYY-MM, or YYYY-MM-DD) into a
@@ -57,6 +58,8 @@ export async function updateContactPhoto(
     const arrayBuffer = await blob.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
 
+    if (!validateImageMagicBytes(buffer)) return;
+
     const fileName = `${userId}/${contactId}.jpg`;
     const { error: uploadError } = await supabase.storage.from("avatars").upload(fileName, buffer, {
       contentType: blob.type,
@@ -64,14 +67,8 @@ export async function updateContactPhoto(
     });
 
     if (uploadError) return;
-
-    const { data: urlData } = supabase.storage.from("avatars").getPublicUrl(fileName);
-
-    if (urlData?.publicUrl) {
-      await supabase.from("people").update({ avatar: urlData.publicUrl }).eq("id", contactId);
-    }
   } catch (error) {
-    console.error("Error in updateContactPhoto:", error);
+    logger.error({ err: error }, "Error in updateContactPhoto");
   }
 }
 
@@ -106,6 +103,8 @@ async function uploadLinkedInLogo(
     const arrayBuffer = await blob.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
 
+    if (!validateImageMagicBytes(buffer)) return null;
+
     const fileName = `${userId}/${linkedInId}.jpg`;
     const { error: uploadError } = await supabase.storage
       .from("linkedin_logos")
@@ -115,14 +114,14 @@ async function uploadLinkedInLogo(
       });
 
     if (uploadError) {
-      console.error("[linkedin-helpers] Failed to upload linkedin logo:", uploadError.message);
+      logger.error({ err: uploadError }, "[linkedin-helpers] Failed to upload linkedin logo");
       return null;
     }
 
     const { data: urlData } = supabase.storage.from("linkedin_logos").getPublicUrl(fileName);
     return urlData?.publicUrl ?? null;
   } catch (error) {
-    console.error("[linkedin-helpers] Error in uploadLinkedInLogo:", error);
+    logger.error({ err: error }, "[linkedin-helpers] Error in uploadLinkedInLogo");
     return null;
   }
 }

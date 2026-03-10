@@ -1,0 +1,130 @@
+# /api/interactions
+root:
+  get:
+    summary: List all interactions
+    description: >
+      Retrieve all interactions (timeline events) for the authenticated user,
+      ordered by date descending. Each interaction includes its participant contacts.
+    operationId: listInteractions
+    tags:
+      - Interactions
+    security:
+      - cookieAuth: []
+    responses:
+      "200":
+        description: List of interactions
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                interactions:
+                  type: array
+                  items:
+                    $ref: "../schemas/interaction.yaml#/Interaction"
+                totalCount:
+                  type: integer
+                  description: Number of interactions in the returned array (no server-side pagination)
+      "401":
+        $ref: "../../openapi.yaml#/components/responses/UnauthorizedError"
+      "500":
+        $ref: "../../openapi.yaml#/components/responses/InternalServerError"
+
+  post:
+    summary: Create an interaction
+    description: >
+      Record a new interaction (call, meeting, message, etc.) with one or more contacts.
+      Also updates the last_interaction timestamp on all participant contacts.
+    operationId: createInteraction
+    tags:
+      - Interactions
+    security:
+      - cookieAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/interaction.yaml#/CreateInteractionInput"
+    responses:
+      "201":
+        description: Interaction created
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: string
+                  format: uuid
+      "400":
+        description: Missing type or date
+      "401":
+        $ref: "../../openapi.yaml#/components/responses/UnauthorizedError"
+      "500":
+        $ref: "../../openapi.yaml#/components/responses/InternalServerError"
+
+# /api/interactions/{id}
+byId:
+  patch:
+    summary: Update an interaction
+    description: >
+      Update an interaction's title, description, type, date, or participants.
+      If participantIds is provided, replaces all existing participants and updates
+      the last_interaction timestamp on new participants.
+    operationId: updateInteraction
+    tags:
+      - Interactions
+    security:
+      - cookieAuth: []
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/interaction.yaml#/UpdateInteractionInput"
+    responses:
+      "200":
+        description: Interaction updated
+        content:
+          application/json:
+            schema:
+              $ref: "../schemas/common.yaml#/MessageResponse"
+      "401":
+        $ref: "../../openapi.yaml#/components/responses/UnauthorizedError"
+      "500":
+        $ref: "../../openapi.yaml#/components/responses/InternalServerError"
+
+  delete:
+    summary: Delete an interaction
+    description: Delete an interaction and its participant associations
+    operationId: deleteInteraction
+    tags:
+      - Interactions
+    security:
+      - cookieAuth: []
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    responses:
+      "200":
+        description: Interaction deleted
+        content:
+          application/json:
+            schema:
+              $ref: "../schemas/common.yaml#/MessageResponse"
+      "401":
+        $ref: "../../openapi.yaml#/components/responses/UnauthorizedError"
+      "500":
+        $ref: "../../openapi.yaml#/components/responses/InternalServerError"

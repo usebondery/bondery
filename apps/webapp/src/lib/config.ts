@@ -5,10 +5,10 @@
 import type {
   ContactAddressType,
   ContactType,
-  ImportantEventType,
+  ImportantDateType,
   RelationshipType,
 } from "@bondery/types";
-import { IMPORTANT_EVENT_TYPE_META } from "@bondery/helpers";
+import { IMPORTANT_DATE_TYPE_META } from "@bondery/helpers";
 
 export const WEBAPP_URL = process.env.NEXT_PUBLIC_WEBAPP_URL!;
 export const WEBSITE_URL = process.env.NEXT_PUBLIC_WEBSITE_URL!;
@@ -43,18 +43,18 @@ export const LIMITS = {
   maxImportantDates: 5,
 } as const;
 
-export const IMPORTANT_EVENT_TYPE_OPTIONS: ReadonlyArray<{
-  value: ImportantEventType;
+export const IMPORTANT_DATE_TYPE_OPTIONS: ReadonlyArray<{
+  value: ImportantDateType;
   emoji: string;
 }> = [
-  { value: "birthday", emoji: IMPORTANT_EVENT_TYPE_META.birthday.emoji },
-  { value: "anniversary", emoji: IMPORTANT_EVENT_TYPE_META.anniversary.emoji },
-  { value: "nameday", emoji: IMPORTANT_EVENT_TYPE_META.nameday.emoji },
-  { value: "graduation", emoji: IMPORTANT_EVENT_TYPE_META.graduation.emoji },
-  { value: "other", emoji: IMPORTANT_EVENT_TYPE_META.other.emoji },
+  { value: "birthday", emoji: IMPORTANT_DATE_TYPE_META.birthday.emoji },
+  { value: "anniversary", emoji: IMPORTANT_DATE_TYPE_META.anniversary.emoji },
+  { value: "nameday", emoji: IMPORTANT_DATE_TYPE_META.nameday.emoji },
+  { value: "graduation", emoji: IMPORTANT_DATE_TYPE_META.graduation.emoji },
+  { value: "other", emoji: IMPORTANT_DATE_TYPE_META.other.emoji },
 ] as const;
 
-export const IMPORTANT_EVENT_NOTIFY_OPTIONS: ReadonlyArray<{
+export const IMPORTANT_DATE_NOTIFY_OPTIONS: ReadonlyArray<{
   value: "none" | "1" | "3" | "7";
 }> = [{ value: "none" }, { value: "1" }, { value: "3" }, { value: "7" }] as const;
 

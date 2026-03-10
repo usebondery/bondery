@@ -45,20 +45,20 @@ export default async function SettingsPage() {
   const surname = settings.surname || "";
   const timezone = settings.timezone || "UTC";
   const reminderSendHour =
-    typeof settings.reminder_send_hour === "string" &&
-    /^([01]\d|2[0-3]):[0-5]\d(:[0-5]\d)?$/.test(settings.reminder_send_hour)
-      ? settings.reminder_send_hour
+    typeof settings.reminderSendHour === "string" &&
+    /^([01]\d|2[0-3]):[0-5]\d(:[0-5]\d)?$/.test(settings.reminderSendHour)
+      ? settings.reminderSendHour
       : "08:00:00";
-  const timeFormat = settings.time_format === "12h" ? "12h" : "24h";
+  const timeFormat = settings.timeFormat === "12h" ? "12h" : "24h";
   const language = "en";
   const colorScheme =
-    settings.color_scheme === "light" ||
-    settings.color_scheme === "dark" ||
-    settings.color_scheme === "auto"
-      ? settings.color_scheme
+    settings.colorScheme === "light" ||
+    settings.colorScheme === "dark" ||
+    settings.colorScheme === "auto"
+      ? settings.colorScheme
       : "auto";
   const email = settings.email || "";
-  const avatarUrl = settings.avatar_url || null;
+  const avatarUrl = settings.avatarUrl || null;
   const providers = settings.providers || [];
 
   // Fetch user identities from Supabase

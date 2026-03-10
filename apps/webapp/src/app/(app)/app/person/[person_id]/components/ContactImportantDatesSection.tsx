@@ -15,45 +15,45 @@ import { notifications } from "@mantine/notifications";
 import { IconBell, IconCalendarEvent, IconPlus, IconTrash } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
-import type { ImportantEvent, ImportantEventType } from "@bondery/types";
+import type { ImportantDate, ImportantDateType } from "@bondery/types";
 import { errorNotificationTemplate } from "@bondery/mantine-next";
 import { DatePickerWithPresets } from "../../../components/interactions/DatePickerWithPresets";
 import {
-  IMPORTANT_EVENT_NOTIFY_OPTIONS,
-  IMPORTANT_EVENT_TYPE_OPTIONS,
+  IMPORTANT_DATE_NOTIFY_OPTIONS,
+  IMPORTANT_DATE_TYPE_OPTIONS,
   INPUT_MAX_LENGTHS,
   LIMITS,
 } from "@/lib/config";
 
-interface ImportantEventDraft {
-  eventType: ImportantEventType | null;
-  eventDate: Date | null;
+interface ImportantDateDraft {
+  type: ImportantDateType | null;
+  date: Date | null;
   note: string;
   notifyDaysBefore: 1 | 3 | 7 | null;
 }
 
 interface ContactImportantDatesSectionProps {
-  events: ImportantEvent[];
+  dates: ImportantDate[];
   personFirstName: string;
   savingField: string | null;
-  onEventsChange: (events: ImportantEvent[]) => void;
-  onSave: (events: ImportantEvent[]) => void;
+  onDatesChange: (dates: ImportantDate[]) => void;
+  onSave: (dates: ImportantDate[]) => void;
 }
 
-export type EventTypeOption = {
+export type DateTypeOption = {
   value: string;
   label: string;
   disabled?: boolean;
 };
 
-export interface ImportantEventRowCardProps {
-  eventType: ImportantEventType | null;
-  eventDate: Date | null;
+export interface ImportantDateRowCardProps {
+  type: ImportantDateType | null;
+  date: Date | null;
   note: string;
   notifyDaysBefore: 1 | 3 | 7 | null;
   disabled: boolean;
   loading: boolean;
-  typeOptions: EventTypeOption[];
+  typeOptions: DateTypeOption[];
   notifyOptions: Array<{ value: string; label: string }>;
   disabledTypeHint: string;
   disabledBirthdateTypeHint: string;
@@ -74,16 +74,16 @@ export interface ImportantEventRowCardProps {
   leftAction?: React.ReactNode;
 }
 
-function createDraftEvent(): ImportantEventDraft {
+function createDraftDate(): ImportantDateDraft {
   return {
-    eventType: null,
-    eventDate: null,
+    type: null,
+    date: null,
     note: "",
     notifyDaysBefore: null,
   };
 }
 
-function formatEventDate(date: Date | null): string | null {
+function formatDateString(date: Date | null): string | null {
   if (!date) {
     return null;
   }
@@ -94,7 +94,7 @@ function formatEventDate(date: Date | null): string | null {
   return `${year}-${month}-${day}`;
 }
 
-function parseEventDate(date: string): Date | null {
+function parseDateString(date: string): Date | null {
   if (!date) {
     return null;
   }
@@ -138,7 +138,7 @@ function parseNotifyValue(value: string | null): 1 | 3 | 7 | null {
   return null;
 }
 
-function areEventsEqual(first: ImportantEvent[], second: ImportantEvent[]): boolean {
+function areDatesEqual(first: ImportantDate[], second: ImportantDate[]): boolean {
   if (first.length !== second.length) {
     return false;
   }
@@ -151,17 +151,17 @@ function areEventsEqual(first: ImportantEvent[], second: ImportantEvent[]): bool
 
     return (
       firstEvent.id === secondEvent.id &&
-      firstEvent.eventType === secondEvent.eventType &&
-      firstEvent.eventDate === secondEvent.eventDate &&
+      firstEvent.type === secondEvent.type &&
+      firstEvent.date === secondEvent.date &&
       (firstEvent.note ?? "") === (secondEvent.note ?? "") &&
       (firstEvent.notifyDaysBefore ?? null) === (secondEvent.notifyDaysBefore ?? null)
     );
   });
 }
 
-export function ImportantEventRowCard({
-  eventType,
-  eventDate,
+export function ImportantDateRowCard({
+  type,
+  date,
   note,
   notifyDaysBefore,
   disabled,
@@ -185,7 +185,7 @@ export function ImportantEventRowCard({
   hideDeleteIcon = false,
   hideNotifySelect = false,
   leftAction,
-}: ImportantEventRowCardProps) {
+}: ImportantDateRowCardProps) {
   return (
     <Card withBorder shadow="none" p="sm" radius="md">
       <Group gap="xs" align="center" wrap="nowrap">
@@ -193,7 +193,7 @@ export function ImportantEventRowCard({
 
         <DatePickerWithPresets
           placeholder={datePlaceholder}
-          value={eventDate}
+          value={date}
           onChange={(value) => onDateChange(normalizePickerDate(value as Date | string | null))}
           valueFormat="MMMM D, YYYY"
           leftSection={<IconCalendarEvent size={16} />}
@@ -203,7 +203,7 @@ export function ImportantEventRowCard({
         />
 
         <Select
-          value={eventType}
+          value={type}
           onChange={onTypeChange}
           data={typeOptions}
           placeholder={typePlaceholder}
@@ -278,29 +278,29 @@ export function ImportantEventRowCard({
 }
 
 export function ContactImportantDatesSection({
-  events,
+  dates,
   personFirstName,
   savingField,
-  onEventsChange,
+  onDatesChange,
   onSave,
 }: ContactImportantDatesSectionProps) {
   const t = useTranslations("ContactImportantDates");
 
-  const [localEvents, setLocalEvents] = useState<ImportantEvent[]>(events);
-  const [draftEvent, setDraftEvent] = useState<ImportantEventDraft>(createDraftEvent());
+  const [localDates, setLocalDates] = useState<ImportantDate[]>(dates);
+  const [draftDate, setDraftDate] = useState<ImportantDateDraft>(createDraftDate());
 
   useEffect(() => {
-    setLocalEvents(events);
-  }, [events]);
+    setLocalDates(dates);
+  }, [dates]);
 
-  const typeOptions = IMPORTANT_EVENT_TYPE_OPTIONS.map((option) => ({
+  const typeOptions = IMPORTANT_DATE_TYPE_OPTIONS.map((option) => ({
     value: option.value,
     label: `${option.emoji} ${t(`Types.${option.value}`)}`,
   }));
 
-  const getTypeOptionsFor = (currentType: ImportantEventType | null) =>
+  const getTypeOptionsFor = (currentType: ImportantDateType | null) =>
     typeOptions.map((option) => {
-      const hasTypeAlready = localEvents.some((eventItem) => eventItem.eventType === option.value);
+      const hasTypeAlready = localDates.some((dateItem) => dateItem.type === option.value);
       const disableUniqueType =
         (option.value === "birthday" || option.value === "nameday") &&
         hasTypeAlready &&
@@ -312,7 +312,7 @@ export function ContactImportantDatesSection({
       };
     });
 
-  const notifyOptions = IMPORTANT_EVENT_NOTIFY_OPTIONS.map((option) => ({
+  const notifyOptions = IMPORTANT_DATE_NOTIFY_OPTIONS.map((option) => ({
     value: option.value,
     label:
       option.value === "none"
@@ -322,181 +322,178 @@ export function ContactImportantDatesSection({
           : t("NotifyDaysBefore", { count: Number(option.value) }),
   }));
 
-  const isLimitReached = localEvents.length >= LIMITS.maxImportantDates;
+  const isLimitReached = localDates.length >= LIMITS.maxImportantDates;
 
-  const persistEvents = (nextEvents: ImportantEvent[]) => {
-    if (areEventsEqual(nextEvents, localEvents)) {
+  const persistDates = (nextDates: ImportantDate[]) => {
+    if (areDatesEqual(nextDates, localDates)) {
       return;
     }
 
-    setLocalEvents(nextEvents);
-    onEventsChange(nextEvents);
-    onSave(nextEvents);
+    setLocalDates(nextDates);
+    onDatesChange(nextDates);
+    onSave(nextDates);
   };
 
-  const tryCreateDraftEvent = (nextDraftEvent: ImportantEventDraft) => {
+  const tryCreateDraftDate = (nextDraft: ImportantDateDraft) => {
     if (isLimitReached) {
       return;
     }
 
-    if (!nextDraftEvent.eventDate || !nextDraftEvent.eventType) {
+    if (!nextDraft.date || !nextDraft.type) {
       return;
     }
 
-    const formattedDate = formatEventDate(nextDraftEvent.eventDate);
+    const formattedDate = formatDateString(nextDraft.date);
     if (!formattedDate) {
       return;
     }
 
     if (
-      (nextDraftEvent.eventType === "birthday" || nextDraftEvent.eventType === "nameday") &&
-      localEvents.some((eventItem) => eventItem.eventType === nextDraftEvent.eventType)
+      (nextDraft.type === "birthday" || nextDraft.type === "nameday") &&
+      localDates.some((dateItem) => dateItem.type === nextDraft.type)
     ) {
       notifications.show({
         ...errorNotificationTemplate({
           title: t("ErrorTitle"),
           description: t("UniqueTypeError", {
-            type: t(`Types.${nextDraftEvent.eventType}`),
+            type: t(`Types.${nextDraft.type}`),
           }),
         }),
       });
       return;
     }
 
-    const nextEvents: ImportantEvent[] = [
-      ...localEvents,
+    const nextDates: ImportantDate[] = [
+      ...localDates,
       {
         id: crypto.randomUUID(),
         userId: "",
         personId: "",
-        eventType: nextDraftEvent.eventType,
-        eventDate: formattedDate,
-        note: nextDraftEvent.note.trim() || null,
+        type: nextDraft.type,
+        date: formattedDate,
+        note: nextDraft.note.trim() || null,
         notifyOn: null,
-        notifyDaysBefore: nextDraftEvent.notifyDaysBefore,
+        notifyDaysBefore: nextDraft.notifyDaysBefore,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       },
     ];
 
-    persistEvents(nextEvents);
-    setDraftEvent(createDraftEvent());
+    persistDates(nextDates);
+    setDraftDate(createDraftDate());
   };
 
   const handleDraftDateSelect = (value: Date | null) => {
-    const nextDraftEvent: ImportantEventDraft = {
-      ...draftEvent,
-      eventDate: value,
+    const nextDraft: ImportantDateDraft = {
+      ...draftDate,
+      date: value,
     };
-    setDraftEvent(nextDraftEvent);
-    tryCreateDraftEvent(nextDraftEvent);
+    setDraftDate(nextDraft);
+    tryCreateDraftDate(nextDraft);
   };
 
-  const handleRemoveEvent = (index: number) => {
-    const nextEvents = localEvents.filter((_, rowIndex) => rowIndex !== index);
-    persistEvents(nextEvents);
+  const handleRemoveDate = (index: number) => {
+    const nextDates = localDates.filter((_, rowIndex) => rowIndex !== index);
+    persistDates(nextDates);
   };
 
-  const handleEventDateChange = (index: number, date: Date | null) => {
-    const formattedDate = formatEventDate(date);
+  const handleDateChange = (index: number, value: Date | null) => {
+    const formattedDate = formatDateString(value);
     if (!formattedDate) {
       return;
     }
 
-    if (localEvents[index]?.eventDate === formattedDate) {
+    if (localDates[index]?.date === formattedDate) {
       return;
     }
 
-    const nextEvents = [...localEvents];
-    nextEvents[index] = {
-      ...nextEvents[index],
-      eventDate: formattedDate,
+    const nextDates = [...localDates];
+    nextDates[index] = {
+      ...nextDates[index],
+      date: formattedDate,
     };
 
-    persistEvents(nextEvents);
+    persistDates(nextDates);
   };
 
-  const handleEventTypeChange = (index: number, eventType: ImportantEventType) => {
-    if (localEvents[index]?.eventType === eventType) {
+  const handleTypeChange = (index: number, dateType: ImportantDateType) => {
+    if (localDates[index]?.type === dateType) {
       return;
     }
 
     if (
-      (eventType === "birthday" || eventType === "nameday") &&
-      localEvents.some(
-        (eventItem, rowIndex) => rowIndex !== index && eventItem.eventType === eventType,
-      )
+      (dateType === "birthday" || dateType === "nameday") &&
+      localDates.some((dateItem, rowIndex) => rowIndex !== index && dateItem.type === dateType)
     ) {
       notifications.show({
         ...errorNotificationTemplate({
           title: t("ErrorTitle"),
           description: t("UniqueTypeError", {
-            type: t(`Types.${eventType}`),
+            type: t(`Types.${dateType}`),
           }),
         }),
       });
       return;
     }
 
-    const nextEvents = [...localEvents];
-    nextEvents[index] = {
-      ...nextEvents[index],
-      eventType,
+    const nextDates = [...localDates];
+    nextDates[index] = {
+      ...nextDates[index],
+      type: dateType,
     };
 
-    persistEvents(nextEvents);
+    persistDates(nextDates);
   };
 
-  const handleEventNotifyChange = (index: number, notifyValue: string | null) => {
+  const handleNotifyChange = (index: number, notifyValue: string | null) => {
     const parsedNotifyValue = parseNotifyValue(notifyValue);
-    if ((localEvents[index]?.notifyDaysBefore ?? null) === parsedNotifyValue) {
+    if ((localDates[index]?.notifyDaysBefore ?? null) === parsedNotifyValue) {
       return;
     }
 
-    const nextEvents = [...localEvents];
-    nextEvents[index] = {
-      ...nextEvents[index],
+    const nextDates = [...localDates];
+    nextDates[index] = {
+      ...nextDates[index],
       notifyDaysBefore: parsedNotifyValue,
     };
 
-    persistEvents(nextEvents);
+    persistDates(nextDates);
   };
 
-  const handleEventNoteChange = (index: number, note: string) => {
-    if ((localEvents[index]?.note ?? "") === note) {
+  const handleNoteChange = (index: number, note: string) => {
+    if ((localDates[index]?.note ?? "") === note) {
       return;
     }
 
-    const nextEvents = [...localEvents];
-    nextEvents[index] = {
-      ...nextEvents[index],
+    const nextDates = [...localDates];
+    nextDates[index] = {
+      ...nextDates[index],
       note,
     };
 
-    setLocalEvents(nextEvents);
+    setLocalDates(nextDates);
   };
 
-  const handleSaveCurrentEvents = (index: number) => {
-    const currentEvent = localEvents[index];
-    if (!currentEvent) {
+  const handleSaveCurrentDates = (index: number) => {
+    const currentDate = localDates[index];
+    if (!currentDate) {
       return;
     }
 
-    const originalEvent =
-      events.find((eventItem) => eventItem.id === currentEvent.id) || events[index];
+    const originalDate = dates.find((dateItem) => dateItem.id === currentDate.id) || dates[index];
 
-    if (!originalEvent) {
-      onEventsChange(localEvents);
-      onSave(localEvents);
+    if (!originalDate) {
+      onDatesChange(localDates);
+      onSave(localDates);
       return;
     }
 
-    if ((currentEvent.note ?? "") === (originalEvent.note ?? "")) {
+    if ((currentDate.note ?? "") === (originalDate.note ?? "")) {
       return;
     }
 
-    onEventsChange(localEvents);
-    onSave(localEvents);
+    onDatesChange(localDates);
+    onSave(localDates);
   };
 
   return (
@@ -506,18 +503,18 @@ export function ContactImportantDatesSection({
       </Text>
 
       <Stack gap="sm">
-        {localEvents.length === 0
+        {localDates.length === 0
           ? null
-          : localEvents.map((eventItem, index) => (
-              <ImportantEventRowCard
-                key={eventItem.id || index}
-                eventType={eventItem.eventType}
-                eventDate={parseEventDate(eventItem.eventDate)}
-                note={eventItem.note || ""}
-                notifyDaysBefore={eventItem.notifyDaysBefore}
-                disabled={savingField === "importantEvents"}
-                loading={savingField === "importantEvents"}
-                typeOptions={getTypeOptionsFor(eventItem.eventType)}
+          : localDates.map((dateItem, index) => (
+              <ImportantDateRowCard
+                key={dateItem.id || index}
+                type={dateItem.type}
+                date={parseDateString(dateItem.date)}
+                note={dateItem.note || ""}
+                notifyDaysBefore={dateItem.notifyDaysBefore}
+                disabled={savingField === "importantDates"}
+                loading={savingField === "importantDates"}
+                typeOptions={getTypeOptionsFor(dateItem.type)}
                 notifyOptions={notifyOptions}
                 disabledTypeHint={t("TypeDisabledHint", { firstName: personFirstName })}
                 disabledBirthdateTypeHint={t("TypeDisabledBirthdateHint", {
@@ -531,26 +528,26 @@ export function ContactImportantDatesSection({
                 notePlaceholder={t("NotePlaceholder")}
                 typePlaceholder={t("TypePlaceholder")}
                 deleteLabel={t("DeleteAction")}
-                onDateChange={(value) => handleEventDateChange(index, value)}
+                onDateChange={(value) => handleDateChange(index, value)}
                 onTypeChange={(value) =>
-                  value ? handleEventTypeChange(index, value as ImportantEventType) : undefined
+                  value ? handleTypeChange(index, value as ImportantDateType) : undefined
                 }
-                onNoteChange={(value) => handleEventNoteChange(index, value)}
-                onNoteCommit={() => handleSaveCurrentEvents(index)}
-                onNotifyChange={(value) => handleEventNotifyChange(index, value)}
-                onDelete={() => handleRemoveEvent(index)}
+                onNoteChange={(value) => handleNoteChange(index, value)}
+                onNoteCommit={() => handleSaveCurrentDates(index)}
+                onNotifyChange={(value) => handleNotifyChange(index, value)}
+                onDelete={() => handleRemoveDate(index)}
               />
             ))}
 
         {!isLimitReached ? (
-          <ImportantEventRowCard
-            eventType={draftEvent.eventType}
-            eventDate={draftEvent.eventDate}
-            note={draftEvent.note}
-            notifyDaysBefore={draftEvent.notifyDaysBefore}
-            disabled={savingField === "importantEvents"}
+          <ImportantDateRowCard
+            type={draftDate.type}
+            date={draftDate.date}
+            note={draftDate.note}
+            notifyDaysBefore={draftDate.notifyDaysBefore}
+            disabled={savingField === "importantDates"}
             loading={false}
-            typeOptions={getTypeOptionsFor(draftEvent.eventType)}
+            typeOptions={getTypeOptionsFor(draftDate.type)}
             notifyOptions={notifyOptions}
             disabledTypeHint={t("TypeDisabledHint", { firstName: personFirstName })}
             disabledBirthdateTypeHint={t("TypeDisabledBirthdateHint", {
@@ -567,22 +564,22 @@ export function ContactImportantDatesSection({
             onDateChange={handleDraftDateSelect}
             onTypeChange={(value) =>
               (() => {
-                const nextDraftEvent: ImportantEventDraft = {
-                  ...draftEvent,
-                  eventType: (value as ImportantEventType) || null,
+                const nextDraft: ImportantDateDraft = {
+                  ...draftDate,
+                  type: (value as ImportantDateType) || null,
                 };
-                setDraftEvent(nextDraftEvent);
-                tryCreateDraftEvent(nextDraftEvent);
+                setDraftDate(nextDraft);
+                tryCreateDraftDate(nextDraft);
               })()
             }
             onNoteChange={(value) =>
-              setDraftEvent((previous) => ({
+              setDraftDate((previous) => ({
                 ...previous,
                 note: value,
               }))
             }
             onNotifyChange={(value) =>
-              setDraftEvent((previous) => ({
+              setDraftDate((previous) => ({
                 ...previous,
                 notifyDaysBefore: parseNotifyValue(value),
               }))

@@ -29,6 +29,26 @@ This installs dependencies for all apps and packages in the monorepo in a single
 
 The local Supabase instance is the foundation everything else connects to. Start it before running any other app.
 
+### Environment variables
+
+Copy the example file and fill in your GitHub and LinkedIn OAuth credentials. These are required for social login to work:
+
+**macOS / Linux:**
+```bash
+cp apps/supabase-db/.env.local.example apps/supabase-db/.env.local
+```
+
+**Windows (PowerShell):**
+```powershell
+Copy-Item apps/supabase-db/.env.local.example apps/supabase-db/.env.local
+```
+
+The example file is at [apps/supabase-db/.env.local.example](../../apps/supabase-db/.env.local.example). Fill in `SUPABASE_AUTH_EXTERNAL_GITHUB_CLIENT_ID`, `SUPABASE_AUTH_EXTERNAL_GITHUB_SECRET`, `SUPABASE_AUTH_EXTERNAL_LINKEDIN_CLIENT_ID`, and `SUPABASE_AUTH_EXTERNAL_LINKEDIN_SECRET` with credentials from your GitHub and LinkedIn OAuth apps.
+
+> **No OAuth credentials yet?** The app will still start and run — email/password login will work. Social login buttons will fail until the provider credentials are filled in.
+
+### Start
+
 ```bash
 cd apps/supabase-db
 npm run dev
@@ -67,8 +87,14 @@ npx supabase status
 
 Copy the example file and fill in your Supabase keys from step 2:
 
+**macOS / Linux:**
 ```bash
 cp apps/api/.env.development.example apps/api/.env.development.local
+```
+
+**Windows (PowerShell):**
+```powershell
+Copy-Item apps/api/.env.development.example apps/api/.env.development.local
 ```
 
 The example file is at [apps/api/.env.development.example](../../apps/api/.env.development.example). Replace the Supabase `PUBLIC_SUPABASE_URL`, `PUBLIC_SUPABASE_PUBLISHABLE_KEY`, and `PRIVATE_SUPABASE_SECRET_KEY` values with the output from `npx supabase status`.
@@ -90,8 +116,14 @@ The API server starts on **port 3001** with hot reload enabled.
 
 Copy the example file and fill in your Supabase keys from step 2:
 
+**macOS / Linux:**
 ```bash
 cp apps/webapp/.env.development.example apps/webapp/.env.development.local
+```
+
+**Windows (PowerShell):**
+```powershell
+Copy-Item apps/webapp/.env.development.example apps/webapp/.env.development.local
 ```
 
 The example file is at [apps/webapp/.env.development.example](../../apps/webapp/.env.development.example). Replace `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` with the values from `npx supabase status`.
@@ -128,20 +160,42 @@ The website starts on **port 3000**. Open [http://localhost:3000](http://localho
 
 Copy the example file:
 
+**macOS / Linux:**
 ```bash
 cp apps/chrome-extension/.env.development.example apps/chrome-extension/.env.development.local
 ```
 
+**Windows (PowerShell):**
+```powershell
+Copy-Item apps/chrome-extension/.env.development.example apps/chrome-extension/.env.development.local
+```
+
 The example file is at [apps/chrome-extension/.env.development.example](../../apps/chrome-extension/.env.development.example). You will need to fill in `WXT_SUPABASE_OAUTH_CLIENT_ID` — see below.
 
-To find your OAuth client ID, query your local Supabase instance:
+#### Getting the OAuth client ID
+
+The local Supabase instance runs an OAuth server (`[auth.oauth_server]` in `config.toml`) that the extension uses to authenticate users. An OAuth client must be registered before the extension can log in.
+
+First, check if a client already exists (e.g. created by a previous developer or via seed):
 
 ```powershell
 $base = 'http://127.0.0.1:54321'
-$secret = '<service_role key>'
+$secret = '<service_role key from npx supabase status>'
 $headers = @{ Authorization = "Bearer $secret"; apikey = $secret }
 Invoke-RestMethod -Method GET -Uri "$base/auth/v1/admin/oauth/clients" -Headers $headers | ConvertTo-Json -Depth 8
 ```
+
+If the list is empty, register a new client:
+
+```powershell
+$body = @{
+  name = 'Bondery Extension (local)'
+  redirect_uris = @('https://<your-extension-id>.chromiumapp.org/')
+} | ConvertTo-Json
+Invoke-RestMethod -Method POST -Uri "$base/auth/v1/admin/oauth/clients" -Headers ($headers + @{'Content-Type'='application/json'}) -Body $body | ConvertTo-Json -Depth 8
+```
+
+Copy the returned `client_id` into `WXT_SUPABASE_OAUTH_CLIENT_ID` in your `.env.development.local`.
 
 ### Start
 
@@ -158,6 +212,8 @@ Open `chrome://extensions` in Chrome, enable **Developer mode**, click **Load un
 ---
 
 ## Running everything at once
+
+> **Before using these commands**, make sure you have completed the environment variable setup for each app in steps 2–6 above. The apps will fail to start with cryptic errors if the `.env.development.local` files are missing.
 
 From the root of the repository you can start all apps simultaneously using Turborepo:
 

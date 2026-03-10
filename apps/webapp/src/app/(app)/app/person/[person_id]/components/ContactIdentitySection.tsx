@@ -456,6 +456,8 @@ export function ContactIdentitySection({
         avatarUrl={contact.avatar || null}
         contactName={`${contact.firstName || ""} ${contact.lastName || ""}`.trim() || "Contact"}
         contactId={personId}
+        firstName={contact.firstName}
+        lastName={contact.lastName}
       />
 
       <Stack gap="xs" style={{ flex: 1 }}>

@@ -1,6 +1,6 @@
 "use client";
 
-import { Stack, Group, Text, Button } from "@mantine/core";
+import { Stack, Text } from "@mantine/core";
 import { IconCopy, IconTrash } from "@tabler/icons-react";
 import { useState, useMemo, useEffect, useRef } from "react";
 import type { Activity, Contact } from "@bondery/types";
@@ -9,7 +9,7 @@ import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import { notifications } from "@mantine/notifications";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { InteractionsEventsList } from "../../../components/interactions/InteractionsEventsList";
+import { InteractionsList } from "../../../components/interactions/InteractionsList";
 import {
   errorNotificationTemplate,
   ModalTitle,
@@ -35,7 +35,7 @@ export function PersonInteractionsSection({
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const t = useTranslations("InteractionsPage");
-  const addEventTriggeredRef = useRef(false);
+  const addInteractionTriggeredRef = useRef(false);
 
   const contactsById = useMemo(() => {
     const allContacts = [contact, ...connectedContacts];
@@ -54,15 +54,15 @@ export function PersonInteractionsSection({
   }, [contact, selectableContacts]);
 
   useEffect(() => {
-    if (addEventTriggeredRef.current) {
+    if (addInteractionTriggeredRef.current) {
       return;
     }
 
-    if (searchParams.get("addEvent") !== "1") {
+    if (searchParams.get("addInteraction") !== "1") {
       return;
     }
 
-    addEventTriggeredRef.current = true;
+    addInteractionTriggeredRef.current = true;
 
     openNewActivityModal({
       contacts: activityModalContacts,
@@ -72,7 +72,7 @@ export function PersonInteractionsSection({
     });
 
     const params = new URLSearchParams(searchParams.toString());
-    params.delete("addEvent");
+    params.delete("addInteraction");
     const nextUrl = params.toString() ? `${pathname}?${params.toString()}` : pathname;
     router.replace(nextUrl);
   }, [searchParams, activityModalContacts, contact.id, pathname, router, t]);
@@ -194,55 +194,31 @@ export function PersonInteractionsSection({
   };
 
   return (
-    <>
-      <Stack gap="md">
-        <Group justify="space-between" align="center">
-          <Text fw={600} size="sm">
-            Interactions
-          </Text>
-          <Button
-            variant="light"
-            size="xs"
-            onClick={() => {
-              openNewActivityModal({
-                contacts: activityModalContacts,
-                initialParticipantIds: [contact.id],
-                titleText: t("WhoAreYouMeeting"),
-                t,
-              });
-            }}
-          >
-            {t("AddActivity")}
-          </Button>
-        </Group>
+    <Stack gap="xl">
+      <InteractionsList
+        activities={sortedActivities}
+        resolveParticipants={resolveParticipants}
+        editLabel={t("EditAction")}
+        duplicateLabel={t("DuplicateAction")}
+        deleteLabel={t("DeleteAction")}
+        onOpen={handleActivityClick}
+        onEdit={(activity) => {
+          openNewActivityModal({
+            contacts: activityModalContacts,
+            activity,
+            titleText: t("WhoAreYouMeeting"),
+            t,
+          });
+        }}
+        onDuplicate={handleDuplicate}
+        onDelete={handleDelete}
+      />
 
-        <Stack gap="xl">
-          <InteractionsEventsList
-            activities={sortedActivities}
-            resolveParticipants={resolveParticipants}
-            editLabel={t("EditAction")}
-            duplicateLabel={t("DuplicateAction")}
-            deleteLabel={t("DeleteAction")}
-            onOpen={handleActivityClick}
-            onEdit={(activity) => {
-              openNewActivityModal({
-                contacts: activityModalContacts,
-                activity,
-                titleText: t("WhoAreYouMeeting"),
-                t,
-              });
-            }}
-            onDuplicate={handleDuplicate}
-            onDelete={handleDelete}
-          />
-
-          {activities.length === 0 && (
-            <Text c="dimmed" size="sm" ta="center" py="xl">
-              {t("NoActivitiesWithPerson")}
-            </Text>
-          )}
-        </Stack>
-      </Stack>
-    </>
+      {activities.length === 0 && (
+        <Text c="dimmed" size="sm" ta="center" py="xl">
+          {t("NoActivitiesWithPerson")}
+        </Text>
+      )}
+    </Stack>
   );
 }

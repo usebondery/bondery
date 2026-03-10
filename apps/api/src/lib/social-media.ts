@@ -1,18 +1,17 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
-import type { Database } from "@bondery/types";
+import type { Database, SocialMediaPlatform } from "@bondery/types";
+import type { ContactWithId } from "./schemas.js";
 
-const SOCIAL_MEDIA_PLATFORMS = [
+const SOCIAL_MEDIA_PLATFORMS: SocialMediaPlatform[] = [
   "linkedin",
   "instagram",
   "whatsapp",
   "facebook",
   "website",
   "signal",
-] as const;
+];
 
-export type SocialMediaPlatform = (typeof SOCIAL_MEDIA_PLATFORMS)[number];
-
-type ContactWithId = { id: string };
+export type { SocialMediaPlatform };
 
 type SocialMediaShape = {
   linkedin: string | null;

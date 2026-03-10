@@ -7,6 +7,7 @@
 
 import { createAdminClient } from "./supabase.js";
 import { formatPlaceLabel } from "@bondery/helpers/address-utils";
+import logger from "./logger.js";
 
 const MAPS_BASE_URL = "https://api.mapy.com";
 
@@ -97,7 +98,7 @@ export async function geocodeLinkedInPlace(place: string): Promise<GeocodeResult
   const mapsUrl = getMapsUrl();
 
   if (!trimmed || !mapsKey) {
-    if (!mapsKey) console.warn("[mapy] MAPS_KEY is not configured, skipping geocode");
+    if (!mapsKey) logger.warn("[mapy] MAPS_KEY is not configured, skipping geocode");
     return null;
   }
 
@@ -121,7 +122,7 @@ export async function geocodeLinkedInPlace(place: string): Promise<GeocodeResult
     });
 
     if (!response.ok) {
-      console.error(`[mapy] Geocode failed with status ${response.status} for "${trimmed}"`);
+      logger.error({ status: response.status, place: trimmed }, "[mapy] Geocode failed");
       return null;
     }
 
@@ -178,7 +179,7 @@ export async function geocodeLinkedInPlace(place: string): Promise<GeocodeResult
       formattedLabel: formatPlaceLabel({ city, state, countryCode }),
     };
   } catch (err) {
-    console.error(`[mapy] Geocode error for "${trimmed}":`, err);
+    logger.error({ err, place: trimmed }, "[mapy] Geocode error");
     return null;
   }
 }
@@ -212,7 +213,7 @@ export async function getTimezoneForCoordinates(lat: number, lon: number): Promi
     });
 
     if (!response.ok) {
-      console.error(`[mapy] Timezone lookup failed with status ${response.status}`);
+      logger.error({ status: response.status }, "[mapy] Timezone lookup failed");
       return null;
     }
 
@@ -221,7 +222,7 @@ export async function getTimezoneForCoordinates(lat: number, lon: number): Promi
 
     return typeof timezoneName === "string" && timezoneName.length > 0 ? timezoneName : null;
   } catch (err) {
-    console.error("[mapy] Timezone lookup error:", err);
+    logger.error({ err }, "[mapy] Timezone lookup error");
     return null;
   }
 }
@@ -299,7 +300,7 @@ export async function cachedGeocodeLinkedInPlace(
     }
   } catch (err) {
     // Cache read failed — fall through to live geocode
-    console.error("[mapy] Cache read failed, falling through to live geocode:", err);
+    logger.error({ err }, "[mapy] Cache read failed, falling through to live geocode");
   }
 
   // ── 2. Live geocode + timezone ─────────────────────────────────────────
@@ -347,7 +348,7 @@ export async function cachedGeocodeLinkedInPlace(
     }
   } catch (err) {
     // Cache write failure is non-fatal — log and return the live result
-    console.error("[mapy] Cache upsert failed:", err);
+    logger.error({ err }, "[mapy] Cache upsert failed");
   }
 
   if (!geo) return null;

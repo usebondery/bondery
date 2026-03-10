@@ -4,7 +4,7 @@
 
 import { SOCIAL_PLATFORM_URL_DETAILS } from "@bondery/helpers";
 
-export interface SocialMediaPlatform {
+export interface SocialMediaPlatformConfig {
   name: string;
   baseUrl: string;
   urlPattern: RegExp;
@@ -14,7 +14,7 @@ function escapeRegexValue(value: string): string {
   return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
-export const socialMediaPlatforms: Record<string, SocialMediaPlatform> = {
+export const socialMediaPlatforms: Record<string, SocialMediaPlatformConfig> = {
   linkedin: {
     name: "LinkedIn",
     baseUrl: SOCIAL_PLATFORM_URL_DETAILS.linkedin.profileBaseUrl,

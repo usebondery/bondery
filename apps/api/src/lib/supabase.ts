@@ -5,7 +5,9 @@
 
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@bondery/types/supabase.types";
-import type { FastifyRequest, FastifyReply } from "fastify";
+import type { AvatarTransformOptions } from "@bondery/types";
+import type { FastifyRequest } from "fastify";
+import logger from "./logger.js";
 
 /**
  * Gets Supabase configuration from environment
@@ -155,9 +157,9 @@ function getAuthTokensFromCookies(request: FastifyRequest): {
           refreshToken = parsed.refresh_token;
         }
       } catch (e) {
-        console.log(
-          "[getAuthTokensFromCookies] Failed to parse as JSON:",
-          e instanceof Error ? e.message : String(e),
+        logger.debug(
+          { err: e instanceof Error ? e.message : String(e) },
+          "[getAuthTokensFromCookies] Failed to parse as JSON",
         );
         // If not JSON, might be direct token
         if (key.includes("access")) accessToken = value;
@@ -201,8 +203,10 @@ export async function createAuthenticatedClient(
   });
 
   if (error || !data.user) {
-    console.log("[createAuthenticatedClient] setSession error:", error?.message, error?.status);
-    console.log("[createAuthenticatedClient] setSession data:", data);
+    logger.warn(
+      { errorMessage: error?.message, errorStatus: error?.status },
+      "[createAuthenticatedClient] setSession error",
+    );
     return { client, user: null };
   }
 
@@ -216,26 +220,57 @@ export async function createAuthenticatedClient(
 }
 
 /**
- * Authentication middleware result
+ * Constructs the public storage URL for a contact's avatar.
+ * Avatars are stored in the `avatars` bucket under the path `{userId}/{personId}.jpg`.
+ *
+ * When `options` is provided, Supabase Storage image transformations are applied
+ * to resize and/or adjust the quality of the returned image.
+ *
+ * @param client - Authenticated Supabase client
+ * @param userId - The ID of the owning user
+ * @param personId - The ID of the contact (person)
+ * @param options - Optional avatar transform options (quality + size presets)
+ * @returns The public avatar URL, or null if unavailable
  */
-export interface AuthResult {
-  user: { id: string; email: string };
-  client: SupabaseClient<Database>;
-}
 
-/**
- * Verify authentication and return user + client, or send 401 response
- */
-export async function requireAuth(
-  request: FastifyRequest,
-  reply: FastifyReply,
-): Promise<AuthResult | null> {
-  const { client, user } = await createAuthenticatedClient(request);
+const AVATAR_SIZE_MAP = { small: 64, medium: 128, large: 256 } as const;
+const AVATAR_QUALITY_MAP = { low: 40, medium: 70, high: 90 } as const;
 
-  if (!user) {
-    reply.status(401).send({ error: "Unauthorized - Please log in" });
-    return null;
+export function buildContactAvatarUrl(
+  client: SupabaseClient<Database>,
+  userId: string,
+  personId: string,
+  options?: AvatarTransformOptions,
+  updatedAt?: string | null,
+): string | null {
+  const path = `${userId}/${personId}.jpg`;
+
+  const transform: Record<string, number> = {};
+  if (options?.size) {
+    const px = AVATAR_SIZE_MAP[options.size];
+    transform.width = px;
+    transform.height = px;
+  }
+  if (options?.quality) {
+    transform.quality = AVATAR_QUALITY_MAP[options.quality];
   }
 
-  return { user, client };
+  const hasTransform = Object.keys(transform).length > 0;
+
+  const { data } = client.storage
+    .from("avatars")
+    .getPublicUrl(path, hasTransform ? { transform } : undefined);
+
+  const baseUrl = data?.publicUrl ?? null;
+  if (!baseUrl) return null;
+
+  if (updatedAt) {
+    const ts = new Date(updatedAt).getTime();
+    if (!Number.isNaN(ts)) {
+      const sep = baseUrl.includes("?") ? "&" : "?";
+      return `${baseUrl}${sep}t=${ts}`;
+    }
+  }
+
+  return baseUrl;
 }

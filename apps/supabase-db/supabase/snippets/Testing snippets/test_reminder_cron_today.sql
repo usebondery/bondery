@@ -5,7 +5,7 @@
 -- Notes:
 -- - Prefers a non-seed user (email != seed@usebondery.local).
 -- - Falls back to the only auth user when only one user exists.
--- - Requires at least one row in public.people_important_events for the chosen user.
+-- - Requires at least one row in public.people_important_dates for the chosen user.
 -- - If app.settings.next_public_api_url / app.settings.private_bondery_supabase_http_key are missing,
 --   the function returns an error payload (expected) and no dispatch log row is written.
 
@@ -58,13 +58,13 @@ BEGIN
 
   SELECT e.id
   INTO target_event_id
-  FROM public.people_important_events e
+  FROM public.people_important_dates e
   WHERE e.user_id = target_user_id
   ORDER BY e.created_at ASC, e.id ASC
   LIMIT 1;
 
   IF target_event_id IS NULL THEN
-    RAISE EXCEPTION 'No people_important_events found for user %.', target_user_id;
+    RAISE EXCEPTION 'No people_important_dates found for user %.', target_user_id;
   END IF;
 
   SELECT COALESCE(tz.name, 'UTC')
@@ -81,7 +81,7 @@ BEGIN
 
   local_today := timezone(effective_timezone, now())::date;
 
-  UPDATE public.people_important_events
+  UPDATE public.people_important_dates
   SET
     notify_days_before = 1,
     notify_on = local_today,
@@ -132,15 +132,15 @@ SELECT
   e.id,
   e.user_id,
   e.person_id,
-  e.event_type,
-  e.event_date,
+  e.type,
+  e.date,
   e.notify_days_before,
   e.notify_on
-FROM public.people_important_events e
+FROM public.people_important_dates e
 JOIN _test_target_user t
   ON t.user_id = e.user_id
 WHERE e.notify_days_before IS NOT NULL
-ORDER BY e.notify_on ASC, e.event_date ASC;
+ORDER BY e.notify_on ASC, e.date ASC;
 
 -- Execute hourly reminder dispatcher
 SELECT public.send_hourly_reminder_digests() AS run_result;

@@ -38,6 +38,18 @@ export interface ImageValidationResult {
   error?: string;
 }
 
+/** Avatar image quality preset for Supabase Storage image transformations */
+export type AvatarQuality = "low" | "medium" | "high";
+
+/** Avatar image size preset for Supabase Storage image transformations */
+export type AvatarSize = "small" | "medium" | "large";
+
+/** Options for transforming avatar images via Supabase Storage */
+export interface AvatarTransformOptions {
+  quality?: AvatarQuality;
+  size?: AvatarSize;
+}
+
 /**
  * A single scraped work history entry from LinkedIn
  */
@@ -204,14 +216,13 @@ export type MergeConflictField =
   | "firstName"
   | "middleName"
   | "lastName"
-  | "avatar"
   | "headline"
   | "place"
   | "notes"
   | "lastInteraction"
   | "phones"
   | "emails"
-  | "importantEvents"
+  | "importantDates"
   | "language"
   | "timezone"
   | "location"

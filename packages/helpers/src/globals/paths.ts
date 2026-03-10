@@ -14,7 +14,7 @@ export const API_ROUTES = {
   CONTACTS_MERGE: "/api/contacts/merge",
   CONTACTS_MERGE_RECOMMENDATIONS: "/api/contacts/merge-recommendations",
   CONTACTS_MERGE_RECOMMENDATIONS_REFRESH: "/api/contacts/merge-recommendations/refresh",
-  CONTACTS_UPCOMING_REMINDERS: "/api/contacts/important-events/upcoming",
+  CONTACTS_UPCOMING_REMINDERS: "/api/contacts/important-dates/upcoming",
   CONTACTS_IMPORT_LINKEDIN: "/api/contacts/import/linkedin",
   CONTACTS_IMPORT_INSTAGRAM: "/api/contacts/import/instagram",
   GROUPS: "/api/groups",

@@ -16,7 +16,7 @@ const CACHE_TAGS = {
   groups: "groups",
   reminders: "reminders",
   relationships: "relationships",
-  importantEvents: "important-events",
+  importantDates: "important-dates",
   mergeRecommendations: "merge-recommendations",
 } as const;
 
@@ -50,9 +50,9 @@ export async function revalidateRelationships() {
   updateTag(CACHE_TAGS.relationships);
 }
 
-/** Invalidate important-events data. */
-export async function revalidateImportantEvents() {
-  updateTag(CACHE_TAGS.importantEvents);
+/** Invalidate important-dates data. */
+export async function revalidateImportantDates() {
+  updateTag(CACHE_TAGS.importantDates);
 }
 
 /** Invalidate merge recommendation data. */

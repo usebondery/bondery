@@ -1,14 +1,21 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
-import type { Database, EmailEntry, PhoneEntry, ContactAddressEntry } from "@bondery/types";
-import { attachContactChannels } from "./contact-channels.js";
-import { attachContactAddresses } from "./contact-addresses.js";
+import type {
+  Database,
+  EmailEntry,
+  PhoneEntry,
+  ContactAddressEntry,
+  AvatarTransformOptions,
+} from "@bondery/types";
+import { attachContactChannels } from "../routes/contacts/channels.js";
+import { attachContactAddresses } from "../routes/contacts/addresses.js";
 import { attachContactSocialMedia } from "./social-media.js";
-
-type ContactWithId = { id: string };
+import type { ContactWithId } from "./schemas.js";
+import { buildContactAvatarUrl } from "./supabase.js";
 
 type ChannelsAndSocialExtras = {
   phones: PhoneEntry[];
   emails: EmailEntry[];
+  avatar: string | null;
   linkedin: string | null;
   instagram: string | null;
   whatsapp: string | null;
@@ -47,21 +54,21 @@ export async function attachContactExtras<T extends ContactWithId>(
   client: SupabaseClient<Database>,
   userId: string,
   contacts: T[],
-  options: { addresses: true },
+  options: { addresses: true; avatarOptions?: AvatarTransformOptions },
 ): Promise<Array<T & FullContactExtras>>;
 
 export async function attachContactExtras<T extends ContactWithId>(
   client: SupabaseClient<Database>,
   userId: string,
   contacts: T[],
-  options?: { addresses?: false },
+  options?: { addresses?: false; avatarOptions?: AvatarTransformOptions },
 ): Promise<Array<T & ChannelsAndSocialExtras>>;
 
 export async function attachContactExtras<T extends ContactWithId>(
   client: SupabaseClient<Database>,
   userId: string,
   contacts: T[],
-  options?: { addresses?: boolean },
+  options?: { addresses?: boolean; avatarOptions?: AvatarTransformOptions },
 ): Promise<Array<T & ChannelsAndSocialExtras>> {
   if (!contacts.length) {
     return [];
@@ -91,6 +98,13 @@ export async function attachContactExtras<T extends ContactWithId>(
     const social = socialMap.get(contact.id);
     const base: T & ChannelsAndSocialExtras = {
       ...contact,
+      avatar: buildContactAvatarUrl(
+        client,
+        userId,
+        contact.id,
+        options?.avatarOptions,
+        contact.updatedAt,
+      ),
       linkedin: social?.linkedin ?? null,
       instagram: social?.instagram ?? null,
       whatsapp: social?.whatsapp ?? null,

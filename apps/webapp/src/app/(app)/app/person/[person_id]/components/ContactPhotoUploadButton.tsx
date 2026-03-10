@@ -10,6 +10,8 @@ interface ContactPhotoUploadButtonProps {
   avatarUrl: string | null;
   contactName: string;
   contactId: string;
+  firstName?: string | null;
+  lastName?: string | null;
 }
 
 /**
@@ -20,6 +22,8 @@ export function ContactPhotoUploadButton({
   avatarUrl,
   contactName,
   contactId,
+  firstName,
+  lastName,
 }: ContactPhotoUploadButtonProps) {
   const openUploadModal = () => {
     openPhotoUploadModal(
@@ -53,6 +57,8 @@ export function ContactPhotoUploadButton({
     <ContactAvatar
       avatarUrl={avatarUrl}
       contactName={contactName}
+      firstName={firstName}
+      lastName={lastName}
       size={128}
       className="cursor-pointer rounded-full!"
       onClick={openUploadModal}

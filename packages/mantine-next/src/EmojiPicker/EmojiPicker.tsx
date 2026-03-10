@@ -1,11 +1,8 @@
 "use client";
 
-import { useState, useMemo } from "react";
-import { Popover, Button, SimpleGrid, Text, Stack, TextInput, ScrollArea } from "@mantine/core";
-import { useDebouncedValue } from "@mantine/hooks";
-import { IconSearch } from "@tabler/icons-react";
-import { EMOJI_CATEGORIES } from "./emojiData";
-import type { EmojiData } from "./emojiData";
+import { useState } from "react";
+import { Popover, Button, Text, Stack } from "@mantine/core";
+import { EmojiPickerDropdownContent } from "./EmojiPickerDropdownContent";
 
 interface EmojiPickerProps {
   value: string;
@@ -15,34 +12,10 @@ interface EmojiPickerProps {
 
 export function EmojiPicker({ value, onChange, error }: EmojiPickerProps) {
   const [opened, setOpened] = useState(false);
-  const [search, setSearch] = useState("");
-  const [debouncedSearch] = useDebouncedValue(search, 200);
-
-  // Filter emojis based on search keywords
-  const filteredContent = useMemo(() => {
-    if (!debouncedSearch) {
-      return Object.entries(EMOJI_CATEGORIES);
-    }
-
-    const searchLower = debouncedSearch.toLowerCase();
-    const filtered: [string, EmojiData[]][] = [];
-
-    Object.entries(EMOJI_CATEGORIES).forEach(([category, emojis]) => {
-      const matchedEmojis = emojis.filter((item) =>
-        item.keywords.some((keyword) => keyword.includes(searchLower)),
-      );
-      if (matchedEmojis.length > 0) {
-        filtered.push([category, matchedEmojis]);
-      }
-    });
-
-    return filtered;
-  }, [debouncedSearch]);
 
   const handleSelect = (emoji: string) => {
     onChange(emoji);
     setOpened(false);
-    setSearch("");
   };
 
   return (
@@ -68,47 +41,7 @@ export function EmojiPicker({ value, onChange, error }: EmojiPickerProps) {
         </Popover.Target>
 
         <Popover.Dropdown>
-          <Stack gap="sm">
-            <TextInput
-              placeholder="Search by emoji name or keyword...)"
-              value={search}
-              onChange={(e) => setSearch(e.currentTarget.value)}
-              size="xs"
-              leftSection={<IconSearch size={14} />}
-            />
-
-            <ScrollArea h={250} type="auto">
-              {filteredContent.length === 0 ? (
-                <Text size="sm" c="dimmed" ta="center" py="md">
-                  No emojis found
-                </Text>
-              ) : (
-                <Stack gap="md">
-                  {filteredContent.map(([category, emojis]) => (
-                    <Stack key={category} gap={4}>
-                      <Text size="xs" fw={600} c="dimmed">
-                        {category}
-                      </Text>
-                      <SimpleGrid cols={7} spacing={4}>
-                        {emojis.map((item) => (
-                          <Button
-                            key={item.emoji}
-                            variant={value === item.emoji ? "primary" : "subtle"}
-                            color={value === item.emoji ? "" : "gray"}
-                            size="compact-md"
-                            onClick={() => handleSelect(item.emoji)}
-                            style={{ fontSize: "1.2rem", padding: 4 }}
-                          >
-                            {item.emoji}
-                          </Button>
-                        ))}
-                      </SimpleGrid>
-                    </Stack>
-                  ))}
-                </Stack>
-              )}
-            </ScrollArea>
-          </Stack>
+          <EmojiPickerDropdownContent value={value} onSelect={handleSelect} />
         </Popover.Dropdown>
       </Popover>
       {error && (
