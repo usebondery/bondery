@@ -6,6 +6,7 @@ import { getAuthHeaders } from "@/lib/authHeaders";
 import { notFound } from "next/navigation";
 import { API_ROUTES, formatMetadataTitle } from "@bondery/helpers/globals/paths";
 import type { SortOrder } from "@/app/(app)/app/components/contacts/ContactsTableV2";
+import { appendAvatarParams } from "@/lib/avatarParams";
 
 const PAGE_SIZE = 50;
 
@@ -50,12 +51,14 @@ async function getGroupContacts(
     params.set("offset", "0");
     if (query) params.set("q", query);
     if (sort) params.set("sort", sort);
+    appendAvatarParams(params, "small");
 
     // Preview contacts for the group card avatar — always unfiltered so the
     // avatars stay stable regardless of what the user searches in the table.
     const previewParams = new URLSearchParams();
     previewParams.set("limit", "3");
     previewParams.set("offset", "0");
+    appendAvatarParams(previewParams, "small");
 
     // Fire all three requests in parallel — they are independent
     const [res, groupRes, previewRes] = await Promise.all([

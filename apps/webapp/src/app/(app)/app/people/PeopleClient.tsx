@@ -36,6 +36,7 @@ import { useEnrichFromLinkedIn } from "@/lib/extension/useEnrichFromLinkedIn";
 
 import type { Contact, MergeConflictField } from "@bondery/types";
 import { revalidateContacts } from "../actions";
+import { appendAvatarParams } from "@/lib/avatarParams";
 
 interface PeopleClientProps {
   initialContacts: Contact[];
@@ -236,6 +237,7 @@ export function PeopleClient({ initialContacts, totalCount, layout = "stack" }: 
       params.set("offset", String(remaining.length));
       if (initialSearch) params.set("q", initialSearch);
       if (initialSort) params.set("sort", initialSort);
+      appendAvatarParams(params, "small");
 
       const res = await fetch(`${API_ROUTES.CONTACTS}?${params.toString()}`);
       if (!res.ok) return remaining;
@@ -324,6 +326,8 @@ export function PeopleClient({ initialContacts, totalCount, layout = "stack" }: 
       if (initialSort) {
         params.set("sort", initialSort);
       }
+
+      appendAvatarParams(params, "small");
 
       const response = await fetch(`${API_ROUTES.CONTACTS}?${params.toString()}`);
 

@@ -15,6 +15,7 @@ import { PageWrapper } from "@/app/(app)/app/components/PageWrapper";
 import { ErrorPageHeader } from "@/app/(app)/app/components/ErrorPageHeader";
 import type { Group, Tag } from "@bondery/types";
 import { API_URL } from "@/lib/config";
+import { buildAvatarQueryString } from "@/lib/avatarParams";
 
 export async function generateMetadata({
   params,
@@ -43,10 +44,13 @@ export async function generateMetadata({
 async function getPersonData(personId: string) {
   const headers = await getAuthHeaders();
 
-  const contactPromise = fetch(`${API_URL}${API_ROUTES.CONTACTS}/${personId}`, {
-    next: { tags: ["contacts"] },
-    headers,
-  });
+  const contactPromise = fetch(
+    `${API_URL}${API_ROUTES.CONTACTS}/${personId}?${buildAvatarQueryString("large")}`,
+    {
+      next: { tags: ["contacts"] },
+      headers,
+    },
+  );
 
   const groupsPromise = fetch(`${API_URL}${API_ROUTES.GROUPS}`, {
     next: { tags: ["groups"] },
@@ -58,15 +62,21 @@ async function getPersonData(personId: string) {
     headers,
   });
 
-  const interactionsPromise = fetch(`${API_URL}${API_ROUTES.INTERACTIONS}`, {
-    next: { tags: ["interactions"] },
-    headers,
-  });
+  const interactionsPromise = fetch(
+    `${API_URL}${API_ROUTES.INTERACTIONS}?${buildAvatarQueryString("medium")}`,
+    {
+      next: { tags: ["interactions"] },
+      headers,
+    },
+  );
 
-  const relationshipsPromise = fetch(`${API_URL}${API_ROUTES.CONTACTS}/${personId}/relationships`, {
-    next: { tags: ["relationships", "contacts"] },
-    headers,
-  });
+  const relationshipsPromise = fetch(
+    `${API_URL}${API_ROUTES.CONTACTS}/${personId}/relationships?${buildAvatarQueryString("small")}`,
+    {
+      next: { tags: ["relationships", "contacts"] },
+      headers,
+    },
+  );
 
   const importantDatesPromise = fetch(
     `${API_URL}${API_ROUTES.CONTACTS}/${personId}/important-dates`,
@@ -76,10 +86,13 @@ async function getPersonData(personId: string) {
     },
   );
 
-  const contactsPromise = fetch(`${API_URL}${API_ROUTES.CONTACTS}`, {
-    next: { tags: ["contacts"] },
-    headers,
-  });
+  const contactsPromise = fetch(
+    `${API_URL}${API_ROUTES.CONTACTS}?${buildAvatarQueryString("small")}`,
+    {
+      next: { tags: ["contacts"] },
+      headers,
+    },
+  );
 
   const allTagsPromise = fetch(`${API_URL}${API_ROUTES.TAGS}?previewLimit=0`, {
     next: { tags: ["tags"] },

@@ -17,6 +17,7 @@ import {
 import type { Contact } from "@bondery/types";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import { revalidateGroups } from "../../actions";
+import { buildAvatarQueryString } from "@/lib/avatarParams";
 
 export interface AddPeopleToGroupModalTexts {
   title: string;
@@ -90,8 +91,8 @@ function AddPeopleToGroupForm({ groupId, groupLabel, modalId, texts }: AddPeople
     async function fetchAvailableContacts() {
       try {
         const [allContactsRes, groupContactsRes] = await Promise.all([
-          fetch(API_ROUTES.CONTACTS),
-          fetch(`${API_ROUTES.GROUPS}/${groupId}/contacts`),
+          fetch(`${API_ROUTES.CONTACTS}?${buildAvatarQueryString("small")}`),
+          fetch(`${API_ROUTES.GROUPS}/${groupId}/contacts?${buildAvatarQueryString("small")}`),
         ]);
 
         if (!allContactsRes.ok || !groupContactsRes.ok) {
