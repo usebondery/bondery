@@ -183,9 +183,9 @@ function getAuthTokensFromCookies(request: FastifyRequest): {
 export async function createAuthenticatedClient(
   request: FastifyRequest,
 ): Promise<{ client: SupabaseClient<Database>; user: { id: string; email: string } | null }> {
-  const { PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_PUBLISHABLE_KEY } = getSupabaseConfig();
+  const { NEXT_PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_PUBLISHABLE_KEY } = getSupabaseConfig();
   const { accessToken, refreshToken } = getAuthTokensFromCookies(request);
-  const client = createClient<Database>(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_PUBLISHABLE_KEY, {
+  const client = createClient<Database>(NEXT_PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_PUBLISHABLE_KEY, {
     auth: {
       autoRefreshToken: false,
       persistSession: false,
