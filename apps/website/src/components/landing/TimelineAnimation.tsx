@@ -7,7 +7,7 @@ import { useEffect, useState } from "react";
 
 type TimelineItem = {
   id: string;
-  type: "event" | "reminder";
+  type: "activity" | "reminder";
   title: string;
   date: string;
   description?: string;
@@ -20,7 +20,7 @@ type TimelineItem = {
 const TIMELINE_ITEMS: TimelineItem[] = [
   {
     id: "1",
-    type: "event",
+    type: "activity",
     title: "Prototype hackathon",
     date: "Feb 15, 2026",
     description: "Built reminder digest prototype with the team.",
@@ -31,7 +31,7 @@ const TIMELINE_ITEMS: TimelineItem[] = [
   },
   {
     id: "2",
-    type: "event",
+    type: "activity",
     title: "Coffee with Sarah",
     date: "Feb 20, 2026",
     description: "Discussed summer trip ideas and catch up.",
@@ -164,7 +164,7 @@ function TimelineItemCard({ item, isVisible }: { item: TimelineItem; isVisible: 
           backgroundColor: "light-dark(var(--mantine-color-white), var(--mantine-color-dark-6))",
         }}
       >
-        {item.type === "event" ? (
+        {item.type === "activity" ? (
           <Group align="center" wrap="nowrap">
             {/* Emoji Circle - Colored */}
             <ThemeIcon

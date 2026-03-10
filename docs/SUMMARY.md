@@ -4,17 +4,21 @@
 
 * [🟣 Welcome](README.md)
 * [😎 Getting started](bondery/getting-started.md)
+* [📥 Import contacts](bondery/import.md)
 * [🧩 Chrome Extension](bondery/chrome-extension.md)
 * [🤔 Getting help and troubleshooting](bondery/getting-help-and-troubleshooting.md)
 * [‼️ Read before editing](bondery/read-before-editing.md)
 
 ## Core concepts
 
-* [People](core-concepts/people.md)
-* [Groups](core-concepts/groups.md)
-* [Relationships](core-concepts/relationships.md)
-* [Interactions](core-concepts/interactions.md)
-* [Reminders](core-concepts/reminders.md)
+* [People](concepts/people.md)
+* [Groups](concepts/groups.md)
+* [Relationships](concepts/relationships.md)
+* [Interactions](concepts/interactions.md)
+* [Reminders](concepts/reminders.md)
+* [Tags](concepts/tags.md)
+* [Map view](concepts/map.md)
+* [Merge contacts](concepts/merge.md)
 
 ## API
 

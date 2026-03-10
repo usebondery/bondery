@@ -46,5 +46,5 @@ ALTER TABLE public.geocode_cache ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Service role full access"
   ON public.geocode_cache
   FOR ALL
-  USING (auth.role() = 'service_role')
-  WITH CHECK (auth.role() = 'service_role');
+  USING ((select auth.role()) = 'service_role')
+  WITH CHECK ((select auth.role()) = 'service_role');

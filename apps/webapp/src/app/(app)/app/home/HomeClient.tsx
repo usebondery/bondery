@@ -17,7 +17,7 @@ import { PageHeader } from "@/app/(app)/app/components/PageHeader";
 import { HomeStatsGrid } from "@/app/(app)/app/components/home/HomeStatsGrid";
 import { UpcomingReminderCard } from "@/app/(app)/app/components/home/UpcomingReminderCard";
 import { openAddContactModal } from "@/app/(app)/app/people/components/AddContactModal";
-import { InteractionsEventsList } from "@/app/(app)/app/components/interactions/InteractionsEventsList";
+import { InteractionsList } from "@/app/(app)/app/components/interactions/InteractionsList";
 import { openNewActivityModal } from "@/app/(app)/app/interactions/components/NewActivityModal";
 import { API_ROUTES, WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import { notifications } from "@mantine/notifications";
@@ -121,7 +121,7 @@ export function HomeClient({
           });
 
           if (!response.ok) {
-            throw new Error("Failed to delete event");
+            throw new Error("Failed to delete interaction");
           }
 
           notifications.show(
@@ -164,7 +164,7 @@ export function HomeClient({
       });
 
       if (!response.ok) {
-        throw new Error("Failed to duplicate event");
+        throw new Error("Failed to duplicate interaction");
       }
 
       notifications.show(
@@ -215,7 +215,7 @@ export function HomeClient({
                 });
               }}
             >
-              {t("AddEvent")}
+              {t("AddInteraction")}
             </Button>
           }
         />
@@ -259,7 +259,7 @@ export function HomeClient({
                 </Text>
               </Paper>
             ) : (
-              <InteractionsEventsList
+              <InteractionsList
                 activities={compactActivities}
                 resolveParticipants={resolveParticipants}
                 editLabel={timelineT("EditAction")}
@@ -300,7 +300,7 @@ export function HomeClient({
 
                   return (
                     <UpcomingReminderCard
-                      key={reminder.event.id}
+                      key={reminder.importantDate.id}
                       reminder={reminder}
                       onClick={() => {
                         router.push(personHref);

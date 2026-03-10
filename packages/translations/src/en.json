@@ -142,11 +142,17 @@
   },
   "SingleContactPage": {
     "Title": "Contact Details",
-    "Description": "View and manage details of your contact."
+    "Description": "View and manage details of your contact.",
+    "NotesPlaceholder": "Write notes, use / for commands, @ to mention someone...",
+    "NotesEditedAt": "Edited {time}",
+    "NotesEditedLessThanMinute": "Edited less than a minute ago",
+    "NotesSaved": "Notes saved",
+    "NotesAlreadySaved": "Notes are up to date"
   },
   "PersonTabs": {
-    "Overview": "Overview",
-    "PersonalInfo": "Personal Info",
+    "Interactions": "Interactions",
+    "About": "About",
+    "Organize": "Organize",
     "LinkedIn": "LinkedIn"
   },
   "LinkedInData": {
@@ -564,7 +570,7 @@
     "Title": "Home",
     "HeaderDescription": "In Home you can get a quick overview of your network, reminders, and recent interactions.",
     "AddPerson": "Add person",
-    "AddEvent": "Add interaction",
+    "AddInteraction": "Add interaction",
     "UpcomingRemindersTitle": "Upcoming reminders",
     "UpcomingRemindersTooltip": "These are your upcoming reminders due in the next 30 days.",
     "UpcomingRemindersMonthInfo": "Showing reminders with notifications due in the next 30 days.",
@@ -671,7 +677,7 @@
       "connections": "Connections",
       "phones": "Phones",
       "emails": "Emails",
-      "importantEvents": "Important dates",
+      "importantDates": "Important dates",
       "position": "Position",
       "gender": "Gender",
       "language": "Language",

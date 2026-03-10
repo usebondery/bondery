@@ -11,3 +11,45 @@
 @import "@mantine/dropzone/styles.css";
 @import "flag-icons/css/flag-icons.min.css";
 @import "@bondery/mantine-next/styles";
+
+/* Editor placeholder: rendered via Tiptap Placeholder extension (text set in JS config) */
+.tiptap p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  color: var(--mantine-color-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
+}
+
+/* Editor links: pointer cursor + Mantine anchor styling */
+.tiptap a {
+  cursor: pointer;
+  color: var(--mantine-color-anchor);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* Task list: eliminate all native list markers — NodeView renders its own row layout */
+.tiptap ul[data-type="taskList"],
+.tiptap ul[data-type="taskList"] li,
+.tiptap ul[data-type="taskList"] li::marker {
+  list-style: none;
+  list-style-type: none;
+  padding-inline-start: 0;
+  margin-inline-start: 0;
+}
+
+/* Ensure Mantine Checkbox icon is properly centred inside the checkbox square */
+.tiptap ul[data-type="taskList"] .mantine-Checkbox-inner {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tiptap ul[data-type="taskList"] .mantine-Checkbox-icon {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}

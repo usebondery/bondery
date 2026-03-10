@@ -89,11 +89,10 @@ BEGIN
   INSERT INTO public.people (
     id,
     user_id,
-    title,
+    headline,
     first_name,
     middle_name,
     last_name,
-    avatar,
     last_interaction,
     myself,
     language,
@@ -112,7 +111,6 @@ BEGIN
       'Ada',
       'Byron',
       'Lovelace',
-      '/avatars/11111111-1111-1111-1111-111111111111/ada.jpg',
       '2026-02-10T09:15:00+00',
       false,
       'en',
@@ -130,7 +128,6 @@ BEGIN
       'Grace',
       'B.',
       'Hopper',
-      '/avatars/11111111-1111-1111-1111-111111111111/grace.jpg',
       '2026-02-12T14:40:00+00',
       false,
       'en',
@@ -148,7 +145,6 @@ BEGIN
       'Katherine',
       NULL,
       'Johnson',
-      '/avatars/11111111-1111-1111-1111-111111111111/katherine.jpg',
       '2026-02-14T16:20:00+00',
       false,
       'en',
@@ -166,7 +162,6 @@ BEGIN
       'Alan',
       'M.',
       'Turing',
-      '/avatars/11111111-1111-1111-1111-111111111111/alan.jpg',
       '2026-02-16T08:45:00+00',
       false,
       'en',
@@ -180,11 +175,10 @@ BEGIN
   ON CONFLICT (id) DO UPDATE
   SET
     user_id = EXCLUDED.user_id,
-    title = EXCLUDED.title,
+    headline = EXCLUDED.headline,
     first_name = EXCLUDED.first_name,
     middle_name = EXCLUDED.middle_name,
     last_name = EXCLUDED.last_name,
-    avatar = EXCLUDED.avatar,
     last_interaction = EXCLUDED.last_interaction,
     myself = EXCLUDED.myself,
     language = EXCLUDED.language,
@@ -531,12 +525,12 @@ BEGIN
     created_at = EXCLUDED.created_at,
     updated_at = EXCLUDED.updated_at;
 
-  INSERT INTO public.people_important_events (
+  INSERT INTO public.people_important_dates (
     id,
     user_id,
     person_id,
-    event_type,
-    event_date,
+    type,
+    date,
     notify_days_before,
     note,
     created_at,
@@ -591,14 +585,14 @@ BEGIN
   SET
     user_id = EXCLUDED.user_id,
     person_id = EXCLUDED.person_id,
-    event_type = EXCLUDED.event_type,
-    event_date = EXCLUDED.event_date,
+    type = EXCLUDED.type,
+    date = EXCLUDED.date,
     notify_days_before = EXCLUDED.notify_days_before,
     note = EXCLUDED.note,
     created_at = EXCLUDED.created_at,
     updated_at = EXCLUDED.updated_at;
 
-  INSERT INTO public.events (
+  INSERT INTO public.interactions (
     id,
     user_id,
     type,
@@ -669,8 +663,8 @@ BEGIN
     created_at = EXCLUDED.created_at,
     updated_at = EXCLUDED.updated_at;
 
-  INSERT INTO public.event_participants (
-    event_id,
+  INSERT INTO public.interaction_participants (
+    interaction_id,
     person_id,
     created_at
   )
@@ -710,7 +704,7 @@ BEGIN
       person_turing_id,
       '2026-02-15T18:06:00+00'
     )
-  ON CONFLICT (event_id, person_id) DO UPDATE
+  ON CONFLICT (interaction_id, person_id) DO UPDATE
   SET
     created_at = EXCLUDED.created_at;
 

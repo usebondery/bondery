@@ -21,7 +21,7 @@ BEGIN
   SELECT COUNT(*)::integer
   INTO candidate_user_count
   FROM auth.users u
-  WHERE COALESCE(u.email, '') <> 'seed@usebondery.local';
+  WHERE COALESCE(u.email, '') <> 'marek@mareksvitek.cz';
 
   IF candidate_user_count = 0 THEN
     SELECT COUNT(*)::integer

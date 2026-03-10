@@ -4,7 +4,7 @@ import type {
   Contact,
   Activity,
   ContactRelationshipWithPeople,
-  ImportantEvent,
+  ImportantDate,
   WorkHistoryEntry,
   EducationEntry,
 } from "@bondery/types";
@@ -68,10 +68,10 @@ async function getPersonData(personId: string) {
     headers,
   });
 
-  const importantEventsPromise = fetch(
-    `${API_URL}${API_ROUTES.CONTACTS}/${personId}/important-events`,
+  const importantDatesPromise = fetch(
+    `${API_URL}${API_ROUTES.CONTACTS}/${personId}/important-dates`,
     {
-      next: { tags: ["important-events", "contacts"] },
+      next: { tags: ["important-dates", "contacts"] },
       headers,
     },
   );
@@ -102,7 +102,7 @@ async function getPersonData(personId: string) {
     membershipResponse,
     interactionsResponse,
     relationshipsResponse,
-    importantEventsResponse,
+    importantDatesResponse,
     contactsResponse,
     allTagsResponse,
     personTagsResponse,
@@ -113,7 +113,7 @@ async function getPersonData(personId: string) {
     membershipPromise,
     interactionsPromise,
     relationshipsPromise,
-    importantEventsPromise,
+    importantDatesPromise,
     contactsPromise,
     allTagsPromise,
     personTagsPromise,
@@ -139,9 +139,9 @@ async function getPersonData(personId: string) {
   const relationshipsData = relationshipsResponse.ok
     ? await relationshipsResponse.json()
     : { relationships: [] };
-  const importantEventsData = importantEventsResponse.ok
-    ? await importantEventsResponse.json()
-    : { events: [] };
+  const importantDatesData = importantDatesResponse.ok
+    ? await importantDatesResponse.json()
+    : { dates: [] };
   const contactsData = contactsResponse.ok ? await contactsResponse.json() : { contacts: [] };
 
   const allTagsData = allTagsResponse.ok ? await allTagsResponse.json() : { tags: [] };
@@ -163,7 +163,7 @@ async function getPersonData(personId: string) {
         (candidate) => candidate.id !== personId,
       ) || [],
     relationships: (relationshipsData.relationships as ContactRelationshipWithPeople[]) || [],
-    importantEvents: (importantEventsData.events as ImportantEvent[]) || [],
+    importantDates: (importantDatesData.dates as ImportantDate[]) || [],
     groups: (groupsData.groups as Group[]) || [],
     personGroups: (personGroupsData.groups as Group[]) || [],
     allTags: (allTagsData.tags as Tag[]) || [],
@@ -215,7 +215,7 @@ export default async function PersonPage({
       initialConnectedContacts={data.connectedContacts}
       initialSelectableContacts={data.selectableContacts}
       initialRelationships={data.relationships}
-      initialImportantEvents={data.importantEvents}
+      initialImportantDates={data.importantDates}
       initialGroups={data.groups}
       initialPersonGroups={data.personGroups}
       initialAllTags={data.allTags}

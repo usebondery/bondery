@@ -49,35 +49,25 @@ export interface ContactAddressEntry {
   addressGeocodeSource: string | null;
 }
 
-/**
- * Important date associated with a contact
- */
+export type ImportantDateType = "birthday" | "anniversary" | "nameday" | "graduation" | "other";
+
+export type ImportantDateNotifyDaysBefore = 1 | 3 | 7 | null;
+
 export interface ImportantDate {
-  id: string;
-  name: string;
-  date: string;
-  notify: boolean;
-}
-
-export type ImportantEventType = "birthday" | "anniversary" | "nameday" | "graduation" | "other";
-
-export type ImportantEventNotifyDaysBefore = 1 | 3 | 7 | null;
-
-export interface ImportantEvent {
   id: string;
   userId: string;
   personId: string;
-  eventType: ImportantEventType;
-  eventDate: string;
+  type: ImportantDateType;
+  date: string;
   note: string | null;
   notifyOn: string | null;
-  notifyDaysBefore: ImportantEventNotifyDaysBefore;
+  notifyDaysBefore: ImportantDateNotifyDaysBefore;
   createdAt: string;
   updatedAt: string;
 }
 
 export interface UpcomingReminder {
-  event: ImportantEvent;
+  importantDate: ImportantDate;
   person: ContactPreview;
   notificationSent: boolean;
   notificationSentAt: string | null;
@@ -96,9 +86,11 @@ export interface Contact {
   headline: string | null;
   place: string | null;
   notes: string | null;
+  notesUpdatedAt?: string | null;
   avatar: string | null;
   lastInteraction: string | null;
   createdAt: string;
+  updatedAt?: string | null;
   /** Array of phone entries with type and preferred flag */
   phones: PhoneEntry[] | Json | null;
   /** Array of email entries with type and preferred flag */
@@ -111,7 +103,7 @@ export interface Contact {
   facebook: string | null;
   website: string | null;
   signal: string | null;
-  importantEvents?: ImportantEvent[] | null;
+  importantDates?: ImportantDate[] | null;
   myself: boolean | null;
   position?: Json | null;
   language: string | null;

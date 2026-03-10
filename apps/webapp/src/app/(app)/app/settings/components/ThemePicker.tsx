@@ -45,7 +45,7 @@ export function ThemePicker({ initialValue, label }: ThemePickerProps) {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          color_scheme: nextValue,
+          colorScheme: nextValue,
         }),
       });
 

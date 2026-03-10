@@ -1,12 +1,22 @@
 "use client";
 
-import { Group, Stack, Paper, Text, Button, Tabs } from "@mantine/core";
+import { Group, Stack, Paper, Text, Button, Tabs, Box } from "@mantine/core";
 import { Link } from "@mantine/tiptap";
 import { useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Highlight from "@tiptap/extension-highlight";
 import { Color } from "@tiptap/extension-color";
 import { TextStyle } from "@tiptap/extension-text-style";
+import Mention from "@tiptap/extension-mention";
+import Emoji from "@tiptap/extension-emoji";
+import TaskList from "@tiptap/extension-task-list";
+import TaskItem from "@tiptap/extension-task-item";
+import { ReactNodeViewRenderer } from "@tiptap/react";
+import Placeholder from "@tiptap/extension-placeholder";
+import { InlineDateExtension } from "./components/InlineDateExtension";
+import { MarkdownPasteExtension } from "./components/MarkdownPasteExtension";
+import { SlashCommandExtension } from "./components/SlashCommandExtension";
+import { slashCommandSuggestion } from "./components/slashCommandSuggestion";
 import { notifications } from "@mantine/notifications";
 import {
   IconCheck,
@@ -14,12 +24,13 @@ import {
   IconUser,
   IconMapPin,
   IconClock,
-  IconList,
+  IconCalendarEvent,
   IconUserCircle,
+  IconTags,
   IconBrandLinkedin,
 } from "@tabler/icons-react";
 import { useRouter, usePathname } from "next/navigation";
-import { useEffect, useMemo, useState, useCallback } from "react";
+import { useEffect, useMemo, useState, useCallback, useRef } from "react";
 import { useTranslations } from "next-intl";
 import { extractUsername } from "@/lib/socialMediaHelpers";
 import { parsePhoneNumber, combinePhoneNumber } from "@/lib/phoneHelpers";
@@ -35,7 +46,7 @@ import type {
   EmailEntry,
   Activity,
   RelationshipType,
-  ImportantEvent,
+  ImportantDate,
   MergeConflictField,
   Tag,
   WorkHistoryEntry,
@@ -49,8 +60,9 @@ import { ContactNotesSection } from "./components/ContactNotesSection";
 import { ContactAddressSection } from "./components/ContactAddressSection";
 import { ContactImportantDatesSection } from "./components/ContactImportantDatesSection";
 import { PersonInteractionsSection } from "./components/PersonInteractionsSection";
+import { openNewActivityModal } from "../../interactions/components/NewActivityModal";
 import { LinkedInTab } from "./components/LinkedInTab";
-import { PersonalInfoTab } from "./components/PersonalInfoTab";
+import { useEnrichFromLinkedIn } from "@/lib/extension/useEnrichFromLinkedIn";
 // import { ContactPGPSection } from "./components/ContactPGPSection";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
@@ -72,13 +84,18 @@ import { PersonTagsInput } from "./components/PersonTagsInput";
 import { openAddPeopleToGroupSelectionModal } from "../../people/components/AddPeopleToGroupSelectionModal";
 import { MERGE_CONFLICT_FIELDS, openMergeWithModal } from "../../people/components/MergeWithModal";
 import { WEBSITE_URL } from "@/lib/config";
+import { createMentionSuggestion } from "./components/mentionSuggestion";
+import { emojiSuggestionRender } from "./components/emojiSuggestion";
+import type { MentionSuggestionItem } from "./components/MentionList";
+import { MentionNodeView } from "./components/MentionNodeView";
+import { TaskItemNodeView } from "./components/TaskItemNodeView";
 
 interface PersonClientProps {
   initialContact: Contact;
   initialConnectedContacts: Contact[];
   initialSelectableContacts: Contact[];
   initialRelationships: ContactRelationshipWithPeople[];
-  initialImportantEvents: ImportantEvent[];
+  initialImportantDates: ImportantDate[];
   initialGroups: GroupType[];
   initialPersonGroups: GroupType[];
   initialAllTags: Tag[];
@@ -91,16 +108,16 @@ interface PersonClientProps {
   initialTab?: string;
 }
 
-const PERSON_TABS = ["overview", "personal-info", "linkedin"] as const;
+const PERSON_TABS = ["interactions", "about", "organize", "linkedin"] as const;
 type PersonTabValue = (typeof PERSON_TABS)[number];
-const DEFAULT_TAB: PersonTabValue = "overview";
+const DEFAULT_TAB: PersonTabValue = "interactions";
 
 export default function PersonClient({
   initialContact,
   initialConnectedContacts,
   initialSelectableContacts,
   initialRelationships,
-  initialImportantEvents,
+  initialImportantDates,
   initialGroups,
   initialPersonGroups,
   initialAllTags,
@@ -132,12 +149,15 @@ export default function PersonClient({
     [pathname, router],
   );
   const tRelationships = useTranslations("PersonRelationships");
+  const tEnrich = useTranslations("EnrichFromLinkedIn");
+  const { enrichFromLinkedIn } = useEnrichFromLinkedIn({ onSuccess: revalidateContacts });
   const tImportantDates = useTranslations("ContactImportantDates");
   const tPersonPage = useTranslations("SingleContactPage");
   const tMerge = useTranslations("MergeWithModal");
   const tHeader = useTranslations("PageHeader");
   const tAddress = useTranslations("ContactAddress");
   const tTabs = useTranslations("PersonTabs");
+  const tInteractions = useTranslations("InteractionsPage");
   const mergeTexts = useMemo(
     () => ({
       errorTitle: tMerge("ErrorTitle"),
@@ -182,9 +202,14 @@ export default function PersonClient({
   const [emails, setEmails] = useState<EmailEntry[]>([]);
   const [whatsappPrefix, setWhatsappPrefix] = useState("+1");
   const [signalPrefix, setSignalPrefix] = useState("+1");
-  const [importantEvents, setImportantEvents] = useState<ImportantEvent[]>(initialImportantEvents);
+  const [importantDates, setImportantDates] = useState<ImportantDate[]>(initialImportantDates);
   const [focusedField, setFocusedField] = useState<string | null>(null);
   const [groupsSaving, setGroupsSaving] = useState(false);
+
+  // Autosave debounce timer
+  const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Always-fresh save callback for Cmd+S handler
+  const noteSaveRef = useRef<() => void>(() => {});
   const [relationships, setRelationships] =
     useState<ContactRelationshipWithPeople[]>(initialRelationships);
   const [relationshipsSaving, setRelationshipsSaving] = useState(false);
@@ -215,6 +240,36 @@ export default function PersonClient({
     lastName: contact.lastName,
     avatar: contact.avatar,
   };
+
+  const mentionableContacts = useMemo<MentionSuggestionItem[]>(() => {
+    const seenIds = new Set<string>();
+
+    return [contact, ...initialSelectableContacts]
+      .filter((person) => {
+        if (!person?.id || seenIds.has(person.id)) {
+          return false;
+        }
+
+        seenIds.add(person.id);
+        return true;
+      })
+      .map((person) => {
+        const label = formatContactName(person).trim();
+
+        return {
+          id: person.id,
+          label: label.length > 0 ? label : person.id,
+          avatar: person.avatar ?? null,
+          headline: person.headline ?? null,
+          place: person.place ?? null,
+        };
+      });
+  }, [contact, initialSelectableContacts]);
+
+  const mentionSuggestion = useMemo(
+    () => createMentionSuggestion(mentionableContacts),
+    [mentionableContacts],
+  );
 
   // Initialize edited values when contact loads
   useEffect(() => {
@@ -289,10 +344,82 @@ export default function PersonClient({
 
   // Initialize rich text editor
   const editor = useEditor({
-    extensions: [StarterKit.configure({ link: false }), Link, Highlight, TextStyle, Color],
+    extensions: [
+      MarkdownPasteExtension,
+      StarterKit.configure({ link: false }),
+      Link.configure({
+        openOnClick: true,
+        HTMLAttributes: { target: "_blank", rel: "noopener noreferrer" },
+      }),
+      Highlight,
+      TextStyle,
+      Color,
+      TaskList,
+      TaskItem.extend({
+        addNodeView() {
+          return ReactNodeViewRenderer(TaskItemNodeView);
+        },
+      }).configure({ nested: true }),
+      Emoji.configure({
+        enableEmoticons: true,
+        suggestion: emojiSuggestionRender,
+      }),
+      SlashCommandExtension.configure({
+        suggestion: slashCommandSuggestion,
+      }),
+      Mention.extend({
+        addAttributes() {
+          return {
+            ...this.parent?.(),
+            avatar: {
+              default: null,
+              parseHTML: (element) => element.getAttribute("data-avatar"),
+              renderHTML: (attributes) => ({
+                "data-avatar": attributes.avatar ?? "",
+              }),
+            },
+            headline: {
+              default: null,
+              parseHTML: (element) => element.getAttribute("data-headline") || null,
+              renderHTML: (attributes) => ({
+                "data-headline": attributes.headline ?? "",
+              }),
+            },
+            place: {
+              default: null,
+              parseHTML: (element) => element.getAttribute("data-place") || null,
+              renderHTML: (attributes) => ({
+                "data-place": attributes.place ?? "",
+              }),
+            },
+          };
+        },
+        addNodeView() {
+          return ReactNodeViewRenderer(MentionNodeView);
+        },
+      }).configure({
+        suggestion: mentionSuggestion,
+      }),
+      Placeholder.configure({
+        placeholder: tPersonPage("NotesPlaceholder"),
+      }),
+      InlineDateExtension,
+    ],
     content: contact?.notes || "",
     immediatelyRender: false,
+    onUpdate: ({ editor }) => {
+      if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
+      debounceTimerRef.current = setTimeout(() => {
+        debounceTimerRef.current = null;
+        handleSocialMediaSave("notes", editor.getHTML());
+      }, 1500);
+    },
     onBlur: ({ editor }) => {
+      // Flush any pending autosave immediately
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+        debounceTimerRef.current = null;
+      }
       const activeElement = window.document.activeElement;
       if (
         activeElement instanceof HTMLElement &&
@@ -481,35 +608,35 @@ export default function PersonClient({
     await Promise.all(tasks);
   };
 
-  const handleSaveImportantEvents = async (eventsOverride?: ImportantEvent[]) => {
+  const handleSaveImportantDates = async (datesOverride?: ImportantDate[]) => {
     if (!contact || !personId) return;
 
-    const sourceEvents = eventsOverride ?? importantEvents;
-    const eventsToSave = sourceEvents
-      .filter((event) => event.eventDate)
-      .map((event) => ({
-        id: event.id,
-        eventType: event.eventType,
-        eventDate: event.eventDate,
-        note: event.note,
-        notifyDaysBefore: event.notifyDaysBefore ?? null,
+    const sourceDates = datesOverride ?? importantDates;
+    const datesToSave = sourceDates
+      .filter((entry) => entry.date)
+      .map((entry) => ({
+        id: entry.id,
+        type: entry.type,
+        date: entry.date,
+        note: entry.note,
+        notifyDaysBefore: entry.notifyDaysBefore ?? null,
       }));
 
-    setSavingField("importantEvents");
+    setSavingField("importantDates");
 
     try {
-      const res = await fetch(`${API_ROUTES.CONTACTS}/${personId}/important-events`, {
+      const res = await fetch(`${API_ROUTES.CONTACTS}/${personId}/important-dates`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ events: eventsToSave }),
+        body: JSON.stringify({ dates: datesToSave }),
       });
 
-      if (!res.ok) throw new Error("Failed to update important events");
+      if (!res.ok) throw new Error("Failed to update important dates");
 
       const data = await res.json();
-      const nextEvents = (data.events || []) as ImportantEvent[];
+      const nextDates = (data.dates || []) as ImportantDate[];
 
-      setImportantEvents(nextEvents);
+      setImportantDates(nextDates);
 
       notifications.show(
         successNotificationTemplate({
@@ -875,6 +1002,7 @@ export default function PersonClient({
       setContact({
         ...contact,
         [field]: processedValue,
+        ...(field === "notes" ? { notesUpdatedAt: new Date().toISOString() } : {}),
       });
 
       const fieldDisplayName = field.charAt(0).toUpperCase() + field.slice(1);
@@ -901,6 +1029,42 @@ export default function PersonClient({
     const value = editedValues[field] || "";
     handleSocialMediaSave(field, value);
   };
+
+  // Keep noteSaveRef fresh for Cmd+S (assigned in render body — always latest closure)
+  noteSaveRef.current = () => {
+    if (!editor) return;
+    // Flush pending debounce timer immediately
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+      debounceTimerRef.current = null;
+      handleSocialMediaSave("notes", editor.getHTML());
+      return;
+    }
+    const html = editor.getHTML();
+    if (html === (contact?.notes || "")) {
+      // Content already saved — give brief confirmation
+      notifications.show(
+        successNotificationTemplate({
+          title: tPersonPage("NotesSaved"),
+          description: tPersonPage("NotesAlreadySaved"),
+        }),
+      );
+      return;
+    }
+    handleSocialMediaSave("notes", html);
+  };
+
+  // Cmd+S / Ctrl+S — save notes immediately
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "s") {
+        e.preventDefault();
+        noteSaveRef.current();
+      }
+    };
+    document.addEventListener("keydown", handler);
+    return () => document.removeEventListener("keydown", handler);
+  }, []);
 
   const handleContactFieldBlur = (field: string, value: string) => {
     handleContactFieldSave(field, value);
@@ -1140,31 +1304,99 @@ export default function PersonClient({
               onSaveContactInfo={handleSaveContactInfo}
             />
 
-            <ContactNotesSection editor={editor} savingField={savingField} />
+            <ContactNotesSection
+              editor={editor}
+              savingField={savingField}
+              notesUpdatedAt={contact.notesUpdatedAt}
+            />
 
             {/* Tabbed sections */}
             <Tabs value={activeTab} onChange={handleTabChange} keepMounted={false}>
               <Tabs.List>
-                <Tabs.Tab value="overview" leftSection={<IconList size={16} />}>
-                  {tTabs("Overview")}
+                <Tabs.Tab value="interactions" leftSection={<IconCalendarEvent size={16} />}>
+                  {tTabs("Interactions")}
                 </Tabs.Tab>
-                <Tabs.Tab value="personal-info" leftSection={<IconUserCircle size={16} />}>
-                  {tTabs("PersonalInfo")}
+                <Tabs.Tab value="about" leftSection={<IconUserCircle size={16} />}>
+                  {tTabs("About")}
+                </Tabs.Tab>
+                <Tabs.Tab value="organize" leftSection={<IconTags size={16} />}>
+                  {tTabs("Organize")}
                 </Tabs.Tab>
                 <Tabs.Tab value="linkedin" leftSection={<IconBrandLinkedin size={16} />}>
                   {tTabs("LinkedIn")}
                 </Tabs.Tab>
               </Tabs.List>
 
-              <Tabs.Panel value="overview" pt="md">
+              <Tabs.Panel value="interactions" pt="md">
                 <Stack gap="lg">
-                  <PersonInteractionsSection
-                    activities={initialActivities}
-                    contact={contact}
-                    connectedContacts={initialConnectedContacts || []}
-                    selectableContacts={initialSelectableContacts || []}
+                  <Stack gap="xs">
+                    <Text fw={600} size="sm">
+                      Interactions
+                    </Text>
+                    <Button
+                      variant="light"
+                      size="xs"
+                      style={{ alignSelf: "flex-start" }}
+                      onClick={() => {
+                        openNewActivityModal({
+                          contacts: [contact, ...initialSelectableContacts].filter(
+                            (item, index, self) =>
+                              self.findIndex((other) => other.id === item.id) === index,
+                          ),
+                          initialParticipantIds: [contact.id],
+                          titleText: tInteractions("WhoAreYouMeeting"),
+                          t: tInteractions,
+                        });
+                      }}
+                    >
+                      {tInteractions("AddActivity")}
+                    </Button>
+                    <PersonInteractionsSection
+                      activities={initialActivities}
+                      contact={contact}
+                      connectedContacts={initialConnectedContacts || []}
+                      selectableContacts={initialSelectableContacts || []}
+                    />
+                  </Stack>
+                </Stack>
+              </Tabs.Panel>
+
+              <Tabs.Panel value="about" pt="md">
+                <Stack gap="lg">
+                  <ContactImportantDatesSection
+                    dates={importantDates}
+                    personFirstName={contact.firstName}
+                    savingField={savingField}
+                    onDatesChange={setImportantDates}
+                    onSave={handleSaveImportantDates}
                   />
 
+                  <ContactRelationshipsSection
+                    currentPerson={currentPersonPreview}
+                    selectablePeople={selectablePeople}
+                    relationships={relationships}
+                    isSubmitting={relationshipsSaving}
+                    onAddRelationship={handleAddRelationship}
+                    onUpdateRelationship={handleUpdateRelationship}
+                    onDeleteRelationship={handleDeleteRelationship}
+                  />
+
+                  <ContactPreferenceSection
+                    contact={contact}
+                    savingField={savingField}
+                    handleBlur={handleContactFieldBlur}
+                  />
+
+                  <ContactAddressSection
+                    contact={contact}
+                    isSaving={savingField === "address"}
+                    onSave={handleSaveAddress}
+                  />
+                </Stack>
+              </Tabs.Panel>
+
+              <Tabs.Panel value="organize" pt="md">
+                <Stack gap="lg">
                   <PersonTagsInput
                     personId={personId}
                     initialTags={initialPersonTags}
@@ -1209,30 +1441,13 @@ export default function PersonClient({
                 </Stack>
               </Tabs.Panel>
 
-              <Tabs.Panel value="personal-info" pt="md">
-                <PersonalInfoTab
-                  contact={contact}
-                  savingField={savingField}
-                  handleBlur={handleContactFieldBlur}
-                  importantEvents={importantEvents}
-                  onEventsChange={setImportantEvents}
-                  onSaveImportantEvents={handleSaveImportantEvents}
-                  onSaveAddress={handleSaveAddress}
-                  currentPerson={currentPersonPreview}
-                  selectablePeople={selectablePeople}
-                  relationships={relationships}
-                  isRelationshipsSubmitting={relationshipsSaving}
-                  onAddRelationship={handleAddRelationship}
-                  onUpdateRelationship={handleUpdateRelationship}
-                  onDeleteRelationship={handleDeleteRelationship}
-                />
-              </Tabs.Panel>
-
               <Tabs.Panel value="linkedin" pt="md">
                 <LinkedInTab
                   workHistory={initialWorkHistory}
                   education={initialEducation}
                   linkedinBio={initialLinkedinBio}
+                  onEnrich={() => enrichFromLinkedIn(personId, contact.linkedin)}
+                  enrichLabel={tEnrich("MenuLabel")}
                 />
               </Tabs.Panel>
             </Tabs>

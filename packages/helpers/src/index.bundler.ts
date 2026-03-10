@@ -9,7 +9,7 @@ export {
   SOCIAL_LINKS,
 } from "./globals/paths";
 export { SOCIAL_PLATFORM_URL_DETAILS } from "./globals/social-platform-urls";
-export { IMPORTANT_EVENT_TYPE_META } from "./globals/important-events";
+export { IMPORTANT_DATE_TYPE_META } from "./globals/important-dates";
 export { parseInstagramUsername } from "./instagram/parseInstagramUsername";
 export type {
   ParseInstagramUsernameInput,

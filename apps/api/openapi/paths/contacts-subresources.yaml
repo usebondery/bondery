@@ -1,0 +1,694 @@
+# Contact sub-resources: photo, tags, groups, relationships, important-events, vcard, linkedin-data, enrich
+
+# /api/contacts/{id}/photo
+photo:
+  post:
+    summary: Upload contact photo
+    description: Upload a profile photo for a contact. Replaces any existing photo.
+    operationId: uploadContactPhoto
+    tags:
+      - Contacts
+    security:
+      - cookieAuth: []
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    requestBody:
+      required: true
+      content:
+        multipart/form-data:
+          schema:
+            type: object
+            properties:
+              file:
+                type: string
+                format: binary
+    responses:
+      "200":
+        description: Photo uploaded successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                avatarUrl:
+                  type: string
+      "400":
+        description: Invalid file or no file provided
+      "401":
+        $ref: "../../openapi.yaml#/components/responses/UnauthorizedError"
+      "404":
+        description: Contact not found
+      "500":
+        $ref: "../../openapi.yaml#/components/responses/InternalServerError"
+
+  delete:
+    summary: Delete contact photo
+    description: Remove the profile photo from a contact
+    operationId: deleteContactPhoto
+    tags:
+      - Contacts
+    security:
+      - cookieAuth: []
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    responses:
+      "200":
+        description: Photo deleted successfully
+        content:
+          application/json:
+            schema:
+              $ref: "../schemas/common.yaml#/SuccessResponse"
+      "401":
+        $ref: "../../openapi.yaml#/components/responses/UnauthorizedError"
+      "404":
+        description: Contact not found
+      "500":
+        $ref: "../../openapi.yaml#/components/responses/InternalServerError"
+
+# /api/contacts/{id}/groups
+groups:
+  get:
+    summary: Get groups a contact belongs to
+    description: Returns all groups that a specific contact is a member of
+    operationId: getContactGroups
+    tags:
+      - Contacts
+    security:
+      - cookieAuth: []
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    responses:
+      "200":
+        description: List of groups
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                groups:
+                  type: array
+                  items:
+                    $ref: "../schemas/group.yaml#/Group"
+      "401":
+        $ref: "../../openapi.yaml#/components/responses/UnauthorizedError"
+      "500":
+        $ref: "../../openapi.yaml#/components/responses/InternalServerError"
+
+# /api/contacts/{id}/tags
+tags:
+  get:
+    summary: Get tags for a contact
+    description: Returns all tags assigned to a specific contact
+    operationId: getContactTags
+    tags:
+      - Contacts
+    security:
+      - cookieAuth: []
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    responses:
+      "200":
+        description: List of tags
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                tags:
+                  type: array
+                  items:
+                    $ref: "../schemas/tag.yaml#/Tag"
+      "401":
+        $ref: "../../openapi.yaml#/components/responses/UnauthorizedError"
+      "500":
+        $ref: "../../openapi.yaml#/components/responses/InternalServerError"
+
+  post:
+    summary: Add a tag to a contact
+    description: Assign an existing tag to a contact. Idempotent — adding an already-present tag is a no-op.
+    operationId: addTagToContact
+    tags:
+      - Contacts
+    security:
+      - cookieAuth: []
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - tagId
+            properties:
+              tagId:
+                type: string
+                format: uuid
+    responses:
+      "201":
+        description: Tag added to contact
+        content:
+          application/json:
+            schema:
+              $ref: "../schemas/common.yaml#/MessageResponse"
+      "400":
+        description: Missing tagId
+      "401":
+        $ref: "../../openapi.yaml#/components/responses/UnauthorizedError"
+      "500":
+        $ref: "../../openapi.yaml#/components/responses/InternalServerError"
+
+# /api/contacts/{id}/tags/{tagId}
+tagById:
+  delete:
+    summary: Remove a tag from a contact
+    description: Remove a specific tag from a contact
+    operationId: removeTagFromContact
+    tags:
+      - Contacts
+    security:
+      - cookieAuth: []
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: tagId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    responses:
+      "200":
+        description: Tag removed from contact
+        content:
+          application/json:
+            schema:
+              $ref: "../schemas/common.yaml#/MessageResponse"
+      "401":
+        $ref: "../../openapi.yaml#/components/responses/UnauthorizedError"
+      "500":
+        $ref: "../../openapi.yaml#/components/responses/InternalServerError"
+
+# /api/contacts/{id}/relationships
+relationships:
+  get:
+    summary: Get relationships for a contact
+    description: >
+      Returns all relationships where this contact is either source or target,
+      along with preview info for both related people.
+    operationId: getContactRelationships
+    tags:
+      - Contacts
+    security:
+      - cookieAuth: []
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    responses:
+      "200":
+        description: List of relationships
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                relationships:
+                  type: array
+                  items:
+                    $ref: "../schemas/contact.yaml#/Relationship"
+      "401":
+        $ref: "../../openapi.yaml#/components/responses/UnauthorizedError"
+      "404":
+        description: Contact not found
+      "500":
+        $ref: "../../openapi.yaml#/components/responses/InternalServerError"
+
+  post:
+    summary: Create a relationship
+    description: >
+      Create a directional relationship from the specified contact to another contact.
+      Returns 409 if the relationship already exists.
+    operationId: createContactRelationship
+    tags:
+      - Contacts
+    security:
+      - cookieAuth: []
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/contact.yaml#/CreateRelationshipInput"
+    responses:
+      "201":
+        description: Relationship created
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                relationship:
+                  $ref: "../schemas/contact.yaml#/Relationship"
+      "400":
+        description: Invalid input or self-referential relationship
+      "401":
+        $ref: "../../openapi.yaml#/components/responses/UnauthorizedError"
+      "404":
+        description: One or both contacts not found
+      "409":
+        description: Relationship already exists
+      "500":
+        $ref: "../../openapi.yaml#/components/responses/InternalServerError"
+
+# /api/contacts/{id}/relationships/{relationshipId}
+relationshipById:
+  patch:
+    summary: Update a relationship
+    description: Update the target person and/or relationship type for an existing relationship
+    operationId: updateContactRelationship
+    tags:
+      - Contacts
+    security:
+      - cookieAuth: []
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: relationshipId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/contact.yaml#/UpdateRelationshipInput"
+    responses:
+      "200":
+        description: Relationship updated
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                relationship:
+                  $ref: "../schemas/contact.yaml#/Relationship"
+      "400":
+        description: Invalid input or self-referential relationship
+      "401":
+        $ref: "../../openapi.yaml#/components/responses/UnauthorizedError"
+      "404":
+        description: Relationship or contact not found
+      "409":
+        description: Relationship already exists
+      "500":
+        $ref: "../../openapi.yaml#/components/responses/InternalServerError"
+
+  delete:
+    summary: Delete a relationship
+    description: Delete an existing relationship between two contacts
+    operationId: deleteContactRelationship
+    tags:
+      - Contacts
+    security:
+      - cookieAuth: []
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: relationshipId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    responses:
+      "200":
+        description: Relationship deleted
+        content:
+          application/json:
+            schema:
+              $ref: "../schemas/common.yaml#/MessageResponse"
+      "401":
+        $ref: "../../openapi.yaml#/components/responses/UnauthorizedError"
+      "404":
+        description: Relationship not found
+      "500":
+        $ref: "../../openapi.yaml#/components/responses/InternalServerError"
+
+# /api/contacts/{id}/important-events
+importantEvents:
+  get:
+    summary: Get important events for a contact
+    description: Returns all important events (birthdays, anniversaries, etc.) for a specific contact
+    operationId: getContactImportantEvents
+    tags:
+      - Contacts
+    security:
+      - cookieAuth: []
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    responses:
+      "200":
+        description: List of important events
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                events:
+                  type: array
+                  items:
+                    $ref: "../schemas/contact.yaml#/ImportantEvent"
+      "401":
+        $ref: "../../openapi.yaml#/components/responses/UnauthorizedError"
+      "404":
+        description: Contact not found
+      "500":
+        $ref: "../../openapi.yaml#/components/responses/InternalServerError"
+
+  put:
+    summary: Replace important events for a contact
+    description: >
+      Atomically replaces all important events for a contact (deletes existing, inserts new).
+      Validates event types (birthday, anniversary, nameday, graduation, other),
+      dates (YYYY-MM-DD), and notifyDaysBefore values (1, 3, 7, or null).
+    operationId: replaceContactImportantEvents
+    tags:
+      - Contacts
+    security:
+      - cookieAuth: []
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - events
+            properties:
+              events:
+                type: array
+                items:
+                  $ref: "../schemas/contact.yaml#/ImportantEventInput"
+    responses:
+      "200":
+        description: Events replaced successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                events:
+                  type: array
+                  items:
+                    $ref: "../schemas/contact.yaml#/ImportantEvent"
+      "400":
+        description: Invalid event type, date format, or notifyDaysBefore value
+      "401":
+        $ref: "../../openapi.yaml#/components/responses/UnauthorizedError"
+      "404":
+        description: Contact not found
+      "409":
+        description: Duplicate important event
+      "500":
+        $ref: "../../openapi.yaml#/components/responses/InternalServerError"
+
+# /api/contacts/{id}/vcard
+vcard:
+  get:
+    summary: Export contact as vCard
+    description: >
+      Generate and download a vCard (.vcf) file for the contact,
+      including phones, emails, addresses, and social media handles.
+    operationId: exportContactVCard
+    tags:
+      - Contacts
+    security:
+      - cookieAuth: []
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    responses:
+      "200":
+        description: vCard file
+        content:
+          text/vcard:
+            schema:
+              type: string
+        headers:
+          Content-Disposition:
+            schema:
+              type: string
+              example: 'attachment; filename="John_Doe.vcf"'
+      "401":
+        $ref: "../../openapi.yaml#/components/responses/UnauthorizedError"
+      "404":
+        description: Contact not found
+      "500":
+        $ref: "../../openapi.yaml#/components/responses/InternalServerError"
+
+# /api/contacts/{id}/linkedin-data
+linkedinData:
+  post:
+    summary: Upsert scraped LinkedIn work history
+    description: >
+      Replace all work history entries for a contact with new scraped data.
+      Deletes existing entries and inserts the provided ones.
+      Only updates work history — to update the full profile (name, bio, education, avatar),
+      use POST /{id}/enrich instead.
+    operationId: upsertLinkedInData
+    tags:
+      - Contacts
+    security:
+      - cookieAuth: []
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              workHistory:
+                type: array
+                items:
+                  type: object
+                  required:
+                    - companyName
+                  properties:
+                    title:
+                      type: string
+                    companyName:
+                      type: string
+                    companyLinkedinId:
+                      type: string
+                    startDate:
+                      type: string
+                    endDate:
+                      type: string
+                    employmentType:
+                      type: string
+                    location:
+                      type: string
+    responses:
+      "200":
+        description: Work history replaced
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                count:
+                  type: integer
+      "401":
+        $ref: "../../openapi.yaml#/components/responses/UnauthorizedError"
+      "404":
+        description: Contact not found
+      "500":
+        $ref: "../../openapi.yaml#/components/responses/InternalServerError"
+
+  get:
+    summary: Get work history and education for a contact
+    description: >
+      Returns the contact's LinkedIn bio, work history (with company logo URLs),
+      and education history (with school logo URLs). Entries are sorted with
+      active positions (no end date) first, then by start date descending.
+    operationId: getLinkedInData
+    tags:
+      - Contacts
+    security:
+      - cookieAuth: []
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    responses:
+      "200":
+        description: LinkedIn data
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                linkedinBio:
+                  type: string
+                  nullable: true
+                workHistory:
+                  type: array
+                  items:
+                    $ref: "../schemas/contact.yaml#/WorkHistoryEntry"
+                education:
+                  type: array
+                  items:
+                    $ref: "../schemas/contact.yaml#/EducationEntry"
+      "401":
+        $ref: "../../openapi.yaml#/components/responses/UnauthorizedError"
+      "404":
+        description: Contact not found
+      "500":
+        $ref: "../../openapi.yaml#/components/responses/InternalServerError"
+
+# /api/contacts/{id}/enrich
+enrich:
+  post:
+    summary: Enrich contact with full scraped LinkedIn profile
+    description: >
+      Update a contact with a full scraped LinkedIn profile. Unlike POST /{id}/linkedin-data
+      (which only replaces work history), this endpoint updates the contact's name, bio,
+      work history, and education — overwriting existing values so stale data can be refreshed.
+      Avatar, headline, and location are only filled when the contact doesn't already have them
+      (fill-if-missing strategy). LinkedIn company/school logos are uploaded in parallel.
+    operationId: enrichContact
+    tags:
+      - Contacts
+    security:
+      - cookieAuth: []
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              firstName:
+                type: string
+              middleName:
+                type: string
+              lastName:
+                type: string
+              profileImageUrl:
+                type: string
+              headline:
+                type: string
+              place:
+                type: string
+              linkedinBio:
+                type: string
+              workHistory:
+                type: array
+                items:
+                  $ref: "../schemas/redirect.yaml#/ScrapedWorkHistoryEntry"
+              educationHistory:
+                type: array
+                items:
+                  $ref: "../schemas/redirect.yaml#/ScrapedEducationEntry"
+    responses:
+      "200":
+        description: Contact enriched successfully
+        content:
+          application/json:
+            schema:
+              $ref: "../schemas/common.yaml#/SuccessResponse"
+      "401":
+        $ref: "../../openapi.yaml#/components/responses/UnauthorizedError"
+      "404":
+        description: Contact not found
+      "500":
+        $ref: "../../openapi.yaml#/components/responses/InternalServerError"

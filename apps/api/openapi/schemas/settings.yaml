@@ -1,0 +1,66 @@
+UserSettings:
+  type: object
+  properties:
+    user_id:
+      type: string
+      format: uuid
+    name:
+      type: string
+      nullable: true
+    middlename:
+      type: string
+      nullable: true
+    surname:
+      type: string
+      nullable: true
+    timezone:
+      type: string
+      example: UTC
+    reminderSendHour:
+      type: string
+      description: Time of day to send reminder emails (HH:mm:ss)
+      example: "08:00:00"
+    timeFormat:
+      type: string
+      enum: ["24h", "12h"]
+      example: "24h"
+    language:
+      type: string
+      example: en
+    colorScheme:
+      type: string
+      nullable: true
+    avatarUrl:
+      type: string
+      nullable: true
+    email:
+      type: string
+      format: email
+    providers:
+      type: array
+      items:
+        type: string
+
+UpdateUserSettingsInput:
+  type: object
+  description: All fields are optional. Only provided fields are updated.
+  properties:
+    name:
+      type: string
+    middlename:
+      type: string
+    surname:
+      type: string
+    timezone:
+      type: string
+    reminderSendHour:
+      type: string
+      description: Valid time in HH:mm or HH:mm:ss format
+    timeFormat:
+      type: string
+      enum: ["24h", "12h"]
+    language:
+      type: string
+      description: Currently only "en" is supported
+    colorScheme:
+      type: string

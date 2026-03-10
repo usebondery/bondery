@@ -22,13 +22,13 @@ import {
   successNotificationTemplate,
 } from "@bondery/mantine-next";
 import {
-  EventsTableV2,
-  createDefaultEventColumns,
-  type EventColumnConfig,
-  type EventSortOrder,
-} from "../components/interactions/EventsTableV2";
+  InteractionsTableV2,
+  createDefaultInteractionColumns,
+  type InteractionColumnConfig,
+  type InteractionSortOrder,
+} from "../components/interactions/InteractionsTableV2";
 import { openStandardConfirmModal } from "../components/modals/openStandardConfirmModal";
-import { InteractionsEventsList } from "../components/interactions/InteractionsEventsList";
+import { InteractionsList } from "../components/interactions/InteractionsList";
 
 interface InteractionsClientProps {
   initialContacts: Contact[];
@@ -45,12 +45,12 @@ export function InteractionsClient({
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [searchValue, setSearchValue] = useState("");
   // Debounced: SearchInput owns its own input state; this only fires the
-  // expensive client-side filter in EventsTableV2 after the user pauses.
+  // expensive client-side filter in InteractionsTableV2 after the user pauses.
   const handleSearchChange = useDebouncedCallback(setSearchValue, 300);
   const [viewMode, setViewMode] = useState<"interactions" | "table">("interactions");
-  const [sortOrder, setSortOrder] = useState<EventSortOrder>("dateDesc");
-  const [columns, setColumns] = useState<EventColumnConfig[]>(() =>
-    createDefaultEventColumns({
+  const [sortOrder, setSortOrder] = useState<InteractionSortOrder>("dateDesc");
+  const [columns, setColumns] = useState<InteractionColumnConfig[]>(() =>
+    createDefaultInteractionColumns({
       date: t("TableColumnDate"),
       type: t("TableColumnType"),
       title: t("TableColumnTitle"),
@@ -121,7 +121,7 @@ export function InteractionsClient({
           });
 
           if (!response.ok) {
-            throw new Error("Failed to delete event");
+            throw new Error("Failed to delete interaction");
           }
 
           notifications.show(
@@ -164,7 +164,7 @@ export function InteractionsClient({
       });
 
       if (!response.ok) {
-        throw new Error("Failed to duplicate event");
+        throw new Error("Failed to duplicate interaction");
       }
 
       notifications.show(
@@ -222,7 +222,7 @@ export function InteractionsClient({
               });
 
               if (!response.ok) {
-                throw new Error("Failed to delete event");
+                throw new Error("Failed to delete interaction");
               }
             }),
           );
@@ -266,7 +266,7 @@ export function InteractionsClient({
           title={t("PageTitle")}
           icon={IconTimelineEventText}
           description={t("HeaderDescription")}
-          helpHref={`${WEBSITE_URL}/docs/core-concepts/interactions`}
+          helpHref={`${WEBSITE_URL}/docs/concepts/interactions`}
           helpLabel={tHeader("LearnMoreAbout", { concept: tHeader("Concepts.Timeline") })}
           secondaryAction={
             <SegmentedControl
@@ -312,7 +312,7 @@ export function InteractionsClient({
         />
 
         {viewMode === "interactions" ? (
-          <InteractionsEventsList
+          <InteractionsList
             activities={sortedInteractionsActivities}
             resolveParticipants={resolveParticipants}
             editLabel={t("EditAction")}
@@ -325,7 +325,7 @@ export function InteractionsClient({
           />
         ) : (
           <Paper withBorder shadow="sm" radius="md" p="md">
-            <EventsTableV2
+            <InteractionsTableV2
               activities={initialActivities}
               resolveParticipants={resolveParticipants}
               selectedIds={selectedIds}
@@ -338,8 +338,8 @@ export function InteractionsClient({
               onSearchChange={handleSearchChange}
               labels={{
                 searchPlaceholder: t("SearchPlaceholder"),
-                noEventsFound: t("NoActivitiesFound"),
-                noEventsMatchSearch: t("NoActivitiesFiltered"),
+                noInteractionsFound: t("NoActivitiesFound"),
+                noInteractionsMatchSearch: t("NoActivitiesFiltered"),
                 sortButton: t("SortButton"),
                 visibleColumnsButton: t("VisibleColumnsButton"),
                 visibleColumnsSection: t("VisibleColumnsSection"),

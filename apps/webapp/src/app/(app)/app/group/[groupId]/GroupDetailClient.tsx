@@ -673,9 +673,10 @@ export function GroupDetailClient({
     try {
       const duplicateLabel = `${group.label} (Copy)`;
 
-      // Fetch all member IDs from the API (no limit) to ensure we capture every member,
-      // not just the currently loaded page.
-      const allMembersRes = await fetch(`${API_ROUTES.GROUPS}/${group.id}/contacts`);
+      // Fetch up to 200 member IDs for duplication; groups larger than 200 will be partially duplicated.
+      const allMembersRes = await fetch(
+        `${API_ROUTES.GROUPS}/${group.id}/contacts?limit=200&offset=0`,
+      );
       const allMembersData = allMembersRes.ok ? await allMembersRes.json() : { contacts: [] };
       const personIds = ((allMembersData.contacts || []) as { id: string }[]).map((c) => c.id);
 

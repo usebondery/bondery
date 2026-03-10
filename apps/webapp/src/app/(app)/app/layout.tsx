@@ -43,19 +43,19 @@ async function getUserSettings(precomputedHeaders?: HeadersInit) {
       const firstName = settings.name || "";
 
       const colorScheme: ColorSchemePreference =
-        settings.color_scheme === "light" ||
-        settings.color_scheme === "dark" ||
-        settings.color_scheme === "auto"
-          ? settings.color_scheme
+        settings.colorScheme === "light" ||
+        settings.colorScheme === "dark" ||
+        settings.colorScheme === "auto"
+          ? settings.colorScheme
           : "auto";
 
       return {
         userName: firstName || settings.email || "User",
         userEmail: settings.email || "",
-        avatarUrl: settings.avatar_url || null,
+        avatarUrl: settings.avatarUrl || null,
         locale: "en",
         timezone: settings.timezone || "UTC",
-        timeFormat: settings.time_format === "12h" ? "12h" : "24h",
+        timeFormat: settings.timeFormat === "12h" ? "12h" : "24h",
         colorScheme,
       } satisfies UserSettingsLayoutData;
     }

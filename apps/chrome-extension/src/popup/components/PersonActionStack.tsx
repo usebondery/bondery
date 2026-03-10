@@ -13,7 +13,7 @@ interface PersonActionStackProps {
   error?: string | null;
   onViewOrImport: () => void | Promise<void>;
   onPersonClick?: () => void;
-  onAddEvent?: () => void;
+  onAddInteraction?: () => void;
 }
 
 export function PersonActionStack({
@@ -26,7 +26,7 @@ export function PersonActionStack({
   error,
   onViewOrImport,
   onPersonClick,
-  onAddEvent,
+  onAddInteraction,
 }: PersonActionStackProps) {
   return (
     <Stack gap="md" style={{ flex: 1 }}>
@@ -55,14 +55,14 @@ export function PersonActionStack({
           {doesPersonExist ? "View in Bondery" : "Import to Bondery"}
         </Button>
 
-        {doesPersonExist && onAddEvent && (
+        {doesPersonExist && onAddInteraction && (
           <Button
             variant="default"
-            onClick={onAddEvent}
+            onClick={onAddInteraction}
             fullWidth
             leftSection={<IconCalendarPlus size={16} />}
           >
-            Add event with this person
+            Add interaction with this person
           </Button>
         )}
       </Stack>

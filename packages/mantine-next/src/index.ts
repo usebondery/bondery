@@ -9,10 +9,11 @@ export { DropzoneContent, type DropzoneContentProps } from "./Dropzone";
 export { PersonChip } from "./nextjs/PersonChip";
 export { PersonCard, type PersonCardProps } from "./nextjs/PersonCard";
 export { PersonAvatar } from "./nextjs/PersonAvatar";
+export { PersonAvatarTooltip } from "./nextjs/PersonAvatar/PersonAvatarTooltip";
 export { PersonAvatarGroup } from "./nextjs/PersonAvatarGroup";
 export { TypePicker, type TypePickerOption } from "./TypePicker";
 export { PeopleMultiPickerInput } from "./PeopleMultiPickerInput";
-export { EmojiPicker, ALL_EMOJIS, getRandomEmoji } from "./EmojiPicker";
+export { EmojiPicker, EmojiPickerDropdownContent, ALL_EMOJIS, getRandomEmoji } from "./EmojiPicker";
 export {
   successNotificationTemplate,
   type SuccessNotificationTemplateProps,

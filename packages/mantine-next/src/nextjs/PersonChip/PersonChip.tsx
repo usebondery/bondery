@@ -17,9 +17,12 @@ import type { ContactPreview } from "@bondery/types";
 import Link from "next/link";
 import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import { getAvatarColorFromName } from "../../utils/avatarColor";
+import { PersonAvatarTooltip } from "../PersonAvatar/PersonAvatarTooltip";
 
 type PersonChipIdentity = ContactPreview & {
   middleName?: string | null;
+  headline?: string | null;
+  place?: string | null;
 };
 
 function formatPersonName(candidate: PersonChipIdentity): string {
@@ -43,6 +46,8 @@ interface PersonChipProps {
   isClickable?: boolean;
   href?: string;
   badgeVariant?: BadgeProps["variant"];
+  showHoverCard?: boolean;
+  openInNewTab?: boolean;
 }
 
 export function PersonChip({
@@ -62,6 +67,8 @@ export function PersonChip({
   isClickable = false,
   href,
   badgeVariant = "light",
+  showHoverCard = false,
+  openInNewTab = false,
 }: PersonChipProps) {
   const avatarSize = size === "sm" ? 16 : 20;
   const avatarEdgeSize = size === "sm" ? 26 : 32;
@@ -181,11 +188,24 @@ export function PersonChip({
   );
 
   if (!isSelectable) {
-    if (isClickable && !disabled && resolvedHref) {
-      return <Link href={resolvedHref}>{renderBadge()}</Link>;
-    }
+    const badge = renderBadge();
+    const content =
+      isClickable && !disabled && resolvedHref ? (
+        <Link
+          href={resolvedHref}
+          target={openInNewTab ? "_blank" : undefined}
+          rel={openInNewTab ? "noopener noreferrer" : undefined}
+        >
+          {badge}
+        </Link>
+      ) : (
+        badge
+      );
 
-    return renderBadge();
+    if (showHoverCard && person) {
+      return <PersonAvatarTooltip person={person}>{content}</PersonAvatarTooltip>;
+    }
+    return content;
   }
 
   return (

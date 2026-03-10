@@ -180,7 +180,7 @@ export async function fetchUserSettings(): Promise<UserSettingsProfile> {
     id: settings.id ?? undefined,
     email: settings.email ?? null,
     name: settings.name ?? null,
-    avatarUrl: settings.avatar_url ?? null,
+    avatarUrl: settings.avatarUrl ?? null,
   };
 }
 

@@ -139,11 +139,17 @@
   },
   "SingleContactPage": {
     "Title": "Detaily kontaktu",
-    "Description": "Zobrazit a spravovat detaily vašeho kontaktu."
+    "Description": "Zobrazit a spravovat detaily vašeho kontaktu.",
+    "NotesPlaceholder": "Pište poznámky, použijte / pro příkazy, @ pro zmínění osoby...",
+    "NotesEditedAt": "Upraveno {time}",
+    "NotesEditedLessThanMinute": "Upraveno méně než minutu zpět",
+    "NotesSaved": "Poznámky uloženy",
+    "NotesAlreadySaved": "Poznámky jsou aktuální"
   },
   "PersonTabs": {
-    "Overview": "Přehled",
-    "PersonalInfo": "Osobní údaje",
+    "Interactions": "Interakce",
+    "About": "O kontaktu",
+    "Organize": "Organizace",
     "LinkedIn": "LinkedIn"
   },
   "LinkedInData": {
@@ -562,7 +568,7 @@
     "Title": "Domů",
     "HeaderDescription": "Na domovské stránce získáte rychlý přehled o síti kontaktů, připomínkách a posledních interakcích.",
     "AddPerson": "Přidat osobu",
-    "AddEvent": "Přidat interakci",
+    "AddInteraction": "Přidat interakci",
     "UpcomingRemindersTitle": "Nadcházející připomínky",
     "UpcomingRemindersTooltip": "Nadcházející připomínky splatné v příštích 30 dnech.",
     "UpcomingRemindersMonthInfo": "Zobrazuji připomínky, jejichž upozornění je splatné v příštích 30 dnech.",
@@ -674,7 +680,7 @@
       "connections": "Propojení",
       "phones": "Telefony",
       "emails": "E-maily",
-      "importantEvents": "Důležitá data",
+      "importantDates": "Důležitá data",
       "position": "Pozice",
       "gender": "Pohlaví",
       "language": "Jazyk",

@@ -221,7 +221,7 @@ function toPreviewContact(contact: InstagramPreparedContact): Contact {
     facebook: null,
     website: null,
     signal: null,
-    importantEvents: null,
+    importantDates: null,
     myself: false,
     language: null,
     timezone: null,

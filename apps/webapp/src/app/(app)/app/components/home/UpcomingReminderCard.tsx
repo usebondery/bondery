@@ -2,8 +2,8 @@
 
 import { Badge, Card, Divider, Group, Stack, Text, Tooltip } from "@mantine/core";
 import { IconBell, IconCircleCheck } from "@tabler/icons-react";
-import { IMPORTANT_EVENT_TYPE_OPTIONS } from "@/lib/config";
-import type { ImportantEventType, UpcomingReminder } from "@bondery/types";
+import { IMPORTANT_DATE_TYPE_OPTIONS } from "@/lib/config";
+import type { ImportantDateType, UpcomingReminder } from "@bondery/types";
 import { useLocale, useTranslations } from "next-intl";
 import { PersonAvatar } from "@bondery/mantine-next";
 
@@ -34,18 +34,20 @@ function getTodayUtc(): Date {
 }
 
 function getReminderNotificationDate(reminder: UpcomingReminder): Date | null {
-  const notifyOnDate = parseDateOnly(reminder.event.notifyOn);
+  const notifyOnDate = parseDateOnly(reminder.importantDate.notifyOn);
   if (notifyOnDate) {
     return notifyOnDate;
   }
 
-  const eventDate = parseDateOnly(reminder.event.eventDate);
-  if (!eventDate || reminder.event.notifyDaysBefore === null) {
+  const parsedDate = parseDateOnly(reminder.importantDate.date);
+  if (!parsedDate || reminder.importantDate.notifyDaysBefore === null) {
     return null;
   }
 
-  const notificationDate = new Date(eventDate);
-  notificationDate.setUTCDate(notificationDate.getUTCDate() - reminder.event.notifyDaysBefore);
+  const notificationDate = new Date(parsedDate);
+  notificationDate.setUTCDate(
+    notificationDate.getUTCDate() - reminder.importantDate.notifyDaysBefore,
+  );
   return notificationDate;
 }
 
@@ -82,8 +84,8 @@ function getNotificationBadgeColor(daysUntilNotification: number): string {
   return "gray";
 }
 
-function getEventEmoji(type: ImportantEventType): string {
-  return IMPORTANT_EVENT_TYPE_OPTIONS.find((option) => option.value === type)?.emoji ?? "📌";
+function getDateEmoji(type: ImportantDateType): string {
+  return IMPORTANT_DATE_TYPE_OPTIONS.find((option) => option.value === type)?.emoji ?? "📌";
 }
 
 /**
@@ -98,17 +100,17 @@ function getEventEmoji(type: ImportantEventType): string {
 export function UpcomingReminderCard({ reminder, onClick }: UpcomingReminderCardProps) {
   const locale = useLocale();
   const t = useTranslations("HomePage");
-  const eventT = useTranslations("ContactImportantDates");
+  const dateT = useTranslations("ContactImportantDates");
   const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
-  const eventDate = parseDateOnly(reminder.event.eventDate) ?? getTodayUtc();
-  const eventMonth = eventDate
+  const importantDate = parseDateOnly(reminder.importantDate.date) ?? getTodayUtc();
+  const dateMonth = importantDate
     .toLocaleDateString(locale, { month: "short" })
     .replace(".", "")
     .toUpperCase();
-  const eventDay = eventDate.toLocaleDateString(locale, { day: "2-digit" });
-  const eventTypeLabel = eventT(`Types.${reminder.event.eventType}`);
-  const eventEmoji = getEventEmoji(reminder.event.eventType);
+  const dateDay = importantDate.toLocaleDateString(locale, { day: "2-digit" });
+  const dateTypeLabel = dateT(`Types.${reminder.importantDate.type}`);
+  const dateEmoji = getDateEmoji(reminder.importantDate.type);
   const notificationInDays = getDaysUntilNotification(reminder);
   const isNotificationSent = reminder.notificationSent;
   const notificationColor = isNotificationSent
@@ -154,17 +156,17 @@ export function UpcomingReminderCard({ reminder, onClick }: UpcomingReminderCard
       component="button"
       onClick={onClick}
       style={{ cursor: "pointer", width: "100%", textAlign: "left" }}
-      aria-label={`${eventTypeLabel}, ${personName || t("UnknownPerson")}, ${notificationAriaLabel}`}
+      aria-label={`${dateTypeLabel}, ${personName || t("UnknownPerson")}, ${notificationAriaLabel}`}
     >
-      {/* Main row: date | divider | avatar | event info | notification */}
+      {/* Main row: date | divider | avatar | date info | notification */}
       <Group wrap="nowrap" gap={"0"} align="stretch">
         {/* Date rail */}
         <Stack gap={0} align="center" justify="center" px="md" py="xs" miw={60}>
           <Text fw={700} size="xs" c="var(--mantine-primary-color-filled)" lh={1.3}>
-            {eventMonth}
+            {dateMonth}
           </Text>
           <Text fw={700} fz={24} lh={1}>
-            {eventDay}
+            {dateDay}
           </Text>
         </Stack>
 
@@ -175,20 +177,20 @@ export function UpcomingReminderCard({ reminder, onClick }: UpcomingReminderCard
           <PersonAvatar person={reminder.person} size="md" />
         </Group>
 
-        {/* Event content */}
+        {/* Date content */}
         <Stack gap={2} justify="center" py="xs" style={{ flex: "1 1 0", minWidth: 0 }}>
           <Group gap="xs" wrap="nowrap" align="center">
             <Text fz={18} lh={1} aria-hidden>
-              {eventEmoji}
+              {dateEmoji}
             </Text>
             <Text fw={600} size="md" lh={1.3} truncate>
-              {eventTypeLabel}
+              {dateTypeLabel}
             </Text>
           </Group>
 
-          {reminder.event.note ? (
+          {reminder.importantDate.note ? (
             <Text size="sm" c="dimmed" lineClamp={1}>
-              {reminder.event.note}
+              {reminder.importantDate.note}
             </Text>
           ) : null}
         </Stack>

@@ -5,7 +5,7 @@ import type {
   Contact,
   ContactPreview,
   ContactRelationshipWithPeople,
-  ImportantEvent,
+  ImportantDate,
   RelationshipType,
 } from "@bondery/types";
 import { ContactPreferenceSection } from "./ContactPreferenceSection";
@@ -17,9 +17,9 @@ interface PersonalInfoTabProps {
   contact: Contact;
   savingField: string | null;
   handleBlur: (field: string, value: string) => void;
-  importantEvents: ImportantEvent[];
-  onEventsChange: (events: ImportantEvent[]) => void;
-  onSaveImportantEvents: (events?: ImportantEvent[]) => Promise<void>;
+  importantDates: ImportantDate[];
+  onDatesChange: (events: ImportantDate[]) => void;
+  onSaveImportantDates: (events?: ImportantDate[]) => Promise<void>;
   onSaveAddress: (payload: {
     addresses: Contact["addresses"];
     suggestedLocation: {
@@ -52,9 +52,9 @@ export function PersonalInfoTab({
   contact,
   savingField,
   handleBlur,
-  importantEvents,
-  onEventsChange,
-  onSaveImportantEvents,
+  importantDates,
+  onDatesChange,
+  onSaveImportantDates,
   onSaveAddress,
   currentPerson,
   selectablePeople,
@@ -67,11 +67,11 @@ export function PersonalInfoTab({
   return (
     <Stack gap="lg">
       <ContactImportantDatesSection
-        events={importantEvents}
+        dates={importantDates}
         personFirstName={contact.firstName}
         savingField={savingField}
-        onEventsChange={onEventsChange}
-        onSave={onSaveImportantEvents}
+        onDatesChange={onDatesChange}
+        onSave={onSaveImportantDates}
       />
 
       <ContactPreferenceSection
