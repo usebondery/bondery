@@ -4,6 +4,10 @@
 -- ║  SELF-HOSTING: replace the URL with your own API endpoint.          ║
 -- ╚══════════════════════════════════════════════════════════════════════╝
 
+-- ❗❗❗ SUPABASE DOES NOT SYNC THE REPOSITORY SNIPPETS FROM THE REPO FOLDER
+-- If you found this on the hosted supabase instance at supabase.com, the code may be outdated.
+-- Please check the repository for the latest version
+
 -- ════════════════════════════════════════════════════════════════════════
 -- Override the API URL vault secret for production.
 -- The default URL above points to the Bondery hosted production API.

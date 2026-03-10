@@ -2,6 +2,10 @@
 -- ║  ✏️  CONFIG — set the service role key for local development        ║
 -- ╚══════════════════════════════════════════════════════════════════════╝
 
+-- ❗❗❗ SUPABASE DOES NOT SYNC THE REPOSITORY SNIPPETS FROM THE REPO FOLDER
+-- If you found this on the hosted supabase instance at supabase.com, the code may be outdated.
+-- Please check the repository for the latest version
+
 -- ════════════════════════════════════════════════════════════════════════
 -- Set the service_role_key vault secret for local development.
 -- Run this after every `supabase db reset`.
