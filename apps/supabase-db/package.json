@@ -8,6 +8,7 @@
     "start": "npx supabase start",
     "stop": "npx supabase stop",
     "reset": "npx supabase db reset",
+    "upload:secrets": "npx supabase secrets set --env-file .env.beta --project-ref <your-project-ref>",
     "migration:new": "npx supabase migration new",
     "db:seed": "npx supabase db seed",
     "gen-types": "npx supabase gen types typescript --local > ../../packages/types/src/supabase.types.ts",
