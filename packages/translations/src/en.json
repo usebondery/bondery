@@ -262,7 +262,7 @@
       "UnlinkError": "Failed to unlink {provider}",
       "GitHub": "GitHub",
       "LinkedIn": "LinkedIn",
-      "BonderyChromeExtension": "Bondery extension",
+      "BonderyChromeExtension": "Bondery Extension",
       "Connected": "Connected",
       "NotConnected": "Not connected",
       "LinkedButCannotUnlink": "Linked, but cannot unlink as it's the only provider",

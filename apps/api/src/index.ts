@@ -10,6 +10,7 @@ import cors from "@fastify/cors";
 import cookie from "@fastify/cookie";
 import multipart from "@fastify/multipart";
 import fastifyEnv from "@fastify/env";
+import helmet from "@fastify/helmet";
 import fastifyAuth from "@fastify/auth";
 import fastifySwagger from "@fastify/swagger";
 import { createRequire } from "module";
@@ -32,7 +33,7 @@ import { instagramImportRoutes } from "./routes/instagram-import/index.js";
 const envSchema = {
   type: "object",
   required: [
-    "PUBLIC_SUPABASE_URL",
+    "NEXT_PUBLIC_SUPABASE_URL",
     "PUBLIC_SUPABASE_PUBLISHABLE_KEY",
     "PRIVATE_SUPABASE_SECRET_KEY",
     "NEXT_PUBLIC_API_URL",
@@ -48,7 +49,7 @@ const envSchema = {
       type: "string",
       default: "info",
     },
-    PUBLIC_SUPABASE_URL: {
+    NEXT_PUBLIC_SUPABASE_URL: {
       type: "string",
     },
     PUBLIC_SUPABASE_PUBLISHABLE_KEY: {
@@ -107,7 +108,7 @@ declare module "fastify" {
   interface FastifyInstance {
     config: {
       LOG_LEVEL: string;
-      PUBLIC_SUPABASE_URL: string;
+      NEXT_PUBLIC_SUPABASE_URL: string;
       PUBLIC_SUPABASE_PUBLISHABLE_KEY: string;
       PRIVATE_SUPABASE_SECRET_KEY: string;
       NEXT_PUBLIC_WEBAPP_URL: string;
@@ -211,6 +212,16 @@ async function buildServer() {
       path: `${process.cwd()}/.env.development.local`,
       debug: true,
     },
+  });
+
+  // Register security headers
+  await fastify.register(helmet, {
+    contentSecurityPolicy: false,
+    crossOriginEmbedderPolicy: false,
+    crossOriginOpenerPolicy: false,
+    crossOriginResourcePolicy: { policy: "cross-origin" },
+    strictTransportSecurity:
+      environment === "production" ? { maxAge: 31536000, includeSubDomains: true } : false,
   });
 
   // Allowed origins for CORS

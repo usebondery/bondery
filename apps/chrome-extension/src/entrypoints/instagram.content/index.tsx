@@ -4,17 +4,19 @@
  * Injects the "Add to Bondery" button on Instagram profiles.
  * Also injects the network interceptor script into the MAIN world.
  */
-import { defineContentScript, injectScript } from "#imports";
+import { defineContentScript, injectScript, type ContentScriptContext } from "#imports";
 import { browser } from "wxt/browser";
-import React, { StrictMode } from "react";
-import ReactDOM from "react-dom/client";
+import React from "react";
 import { parseInstagramUsername, SOCIAL_PLATFORM_URL_DETAILS } from "@bondery/helpers";
 import InstagramButton from "../../instagram/InstagramButton";
-import { MantineWrapper } from "../../shared/MantineWrapper";
+import { renderInShadowRoot } from "../../shared/renderInShadowRoot";
+import type { ShadowRootContentScriptUi } from "wxt/utils/content-script-ui/shadow-root";
+import type ReactDOM from "react-dom/client";
 
 export default defineContentScript({
   matches: ["https://www.instagram.com/*", "https://instagram.com/*"],
   runAt: "document_start",
+  cssInjectionMode: "ui",
 
   async main(ctx) {
     // Safety check: only run on Instagram
@@ -46,14 +48,14 @@ export default defineContentScript({
     }
 
     // Initial injection attempt
-    injectBonderyButton();
+    injectBonderyButton(ctx);
 
     // Setup observer for SPA navigation
     const observer = setupObserver(ctx);
 
     // Retry injection after delay
     ctx.setTimeout(() => {
-      injectBonderyButton();
+      injectBonderyButton(ctx);
     }, 2000);
 
     // Listen for URL changes (SPA navigation)
@@ -62,7 +64,7 @@ export default defineContentScript({
       if (window.location.href !== lastUrl) {
         lastUrl = window.location.href;
         ctx.setTimeout(() => {
-          injectBonderyButton();
+          injectBonderyButton(ctx);
         }, 1000);
       }
     }, 500);
@@ -208,7 +210,12 @@ function getInstagramUsername(): string | null {
 
 // ─── Button Injection ────────────────────────────────────────────────────────
 
-function injectBonderyButton() {
+let currentUi: ShadowRootContentScriptUi<ReactDOM.Root> | null = null;
+let isInjecting = false;
+
+async function injectBonderyButton(ctx: ContentScriptContext) {
+  if (isInjecting) return;
+
   const username = getInstagramUsername();
 
   if (!username) {
@@ -222,37 +229,40 @@ function injectBonderyButton() {
   }
 
   // Check if button already exists
-  if (document.querySelector("#bondery-ig-button-root")) {
+  if (targetSection.querySelector("bondery-instagram")) {
     return;
   }
 
-  // Create container for React component
-  const container = document.createElement("div");
-  container.id = "bondery-ig-button-root";
-  targetSection.appendChild(container);
+  // Remove previous shadow root UI if navigating between profiles
+  if (currentUi) {
+    currentUi.remove();
+    currentUi = null;
+  }
 
-  // Render React component
-  const root = ReactDOM.createRoot(container);
-  root.render(
-    <StrictMode>
-      <MantineWrapper>
-        <InstagramButton username={username} getSnapshot={getInstagramSnapshot} />
-      </MantineWrapper>
-    </StrictMode>,
-  );
-
-  console.log("Bondery Extension: Button injected successfully");
+  isInjecting = true;
+  try {
+    currentUi = await renderInShadowRoot(ctx, {
+      name: "bondery-instagram",
+      position: "inline",
+      anchor: targetSection,
+      append: "last",
+      render: () => <InstagramButton username={username} getSnapshot={getInstagramSnapshot} />,
+    });
+    console.log("Bondery Extension: Button injected successfully");
+  } finally {
+    isInjecting = false;
+  }
 }
 
-function setupObserver(ctx: { isValid: boolean }) {
+function setupObserver(ctx: ContentScriptContext) {
   const observer = new MutationObserver(() => {
     if (!ctx.isValid) {
       observer.disconnect();
       return;
     }
     const username = getInstagramUsername();
-    if (username && !document.querySelector("#bondery-ig-button-root")) {
-      injectBonderyButton();
+    if (username && !document.querySelector("bondery-instagram")) {
+      injectBonderyButton(ctx);
     }
   });
 

@@ -3,13 +3,14 @@
  *
  * Injects the "Add to Bondery" button on LinkedIn profiles.
  */
-import { defineContentScript } from "#imports";
+import { defineContentScript, type ContentScriptContext } from "#imports";
 import { browser } from "wxt/browser";
-import React, { StrictMode } from "react";
-import ReactDOM from "react-dom/client";
+import React from "react";
 import { SOCIAL_PLATFORM_URL_DETAILS } from "@bondery/helpers";
 import LinkedInButton from "../../linkedin/LinkedInButton";
-import { MantineWrapper } from "../../shared/MantineWrapper";
+import { renderInShadowRoot } from "../../shared/renderInShadowRoot";
+import type { ShadowRootContentScriptUi } from "wxt/utils/content-script-ui/shadow-root";
+import type ReactDOM from "react-dom/client";
 import { extractWorkExperience, type WorkEntry } from "../../linkedin/workExperience";
 import { extractEducation } from "../../linkedin/education";
 import { fetchFullWorkHistory, fetchFullEducation } from "../../linkedin/fetchDetails";
@@ -19,6 +20,7 @@ const sanitizeName = (s: string) => s.trim();
 export default defineContentScript({
   matches: ["https://www.linkedin.com/*", "https://linkedin.com/*", "https://*.linkedin.com/*"],
   runAt: "document_start",
+  cssInjectionMode: "ui",
 
   async main(ctx) {
     console.log("[linkedin][content] entrypoint main invoked", {
@@ -42,7 +44,7 @@ export default defineContentScript({
     // LinkedIn renders dynamically — wait 1.5 s before first injection attempt
     // so the profile action buttons are likely present in the DOM.
     ctx.setTimeout(() => {
-      injectBonderyButton();
+      injectBonderyButton(ctx);
     }, 1500);
 
     // Setup observer for SPA navigation (debounced, only fires when Message button appears)
@@ -50,7 +52,7 @@ export default defineContentScript({
 
     // Retry button injection after 3 s in case the profile rendered slowly
     ctx.setTimeout(() => {
-      injectBonderyButton();
+      injectBonderyButton(ctx);
     }, 3000);
 
     // Listen for URL changes (SPA navigation)
@@ -59,7 +61,7 @@ export default defineContentScript({
       if (window.location.href !== lastUrl) {
         lastUrl = window.location.href;
         ctx.setTimeout(() => {
-          injectBonderyButton();
+          injectBonderyButton(ctx);
         }, 1000);
       }
     }, 500);
@@ -173,7 +175,47 @@ function getLinkedInUsername(): string | null {
 
 // ─── Button Injection ────────────────────────────────────────────────────────
 
-function injectBonderyButton() {
+let currentUi: ShadowRootContentScriptUi<ReactDOM.Root> | null = null;
+let isInjecting = false;
+
+/**
+ * Finds the LinkedIn action buttons container (the div that holds "Message" and
+ * "More actions" buttons) and returns the parent element where the Bondery
+ * button should be inserted.
+ */
+function findLinkedInAnchor(): Element | null {
+  const profileSection = document.querySelector("section[data-member-id]") || document.body;
+  const messageButton = profileSection.querySelector("button[aria-label^='Message']");
+
+  if (!messageButton) {
+    return null;
+  }
+
+  let actionButtonsContainer: HTMLElement | null = messageButton.closest("div");
+
+  while (actionButtonsContainer && actionButtonsContainer !== profileSection) {
+    const hasMessage = !!actionButtonsContainer.querySelector("button[aria-label^='Message']");
+    const hasMoreActions = !!actionButtonsContainer.querySelector(
+      "button[aria-label='More actions']",
+    );
+
+    if (hasMessage && hasMoreActions) {
+      break;
+    }
+
+    actionButtonsContainer = actionButtonsContainer.parentElement;
+  }
+
+  if (!actionButtonsContainer || actionButtonsContainer === profileSection) {
+    return null;
+  }
+
+  return actionButtonsContainer;
+}
+
+async function injectBonderyButton(ctx: ContentScriptContext) {
+  if (isInjecting) return;
+
   const username = getLinkedInUsername();
 
   console.log("Bondery LinkedIn: Attempting to inject button", { username });
@@ -183,74 +225,42 @@ function injectBonderyButton() {
     return;
   }
 
-  const targetSection = (() => {
-    const profileSection = document.querySelector("section[data-member-id]") || document.body;
-    const messageButton = profileSection.querySelector("button[aria-label^='Message']");
+  const anchor = findLinkedInAnchor();
 
-    if (!messageButton) {
-      return null;
-    }
+  console.log("Bondery LinkedIn: Target section found:", !!anchor, anchor);
 
-    let actionButtonsContainer: HTMLElement | null = messageButton.closest("div");
-
-    while (actionButtonsContainer && actionButtonsContainer !== profileSection) {
-      const hasMessage = !!actionButtonsContainer.querySelector("button[aria-label^='Message']");
-      const hasMoreActions = !!actionButtonsContainer.querySelector(
-        "button[aria-label='More actions']",
-      );
-
-      if (hasMessage && hasMoreActions) {
-        break;
-      }
-
-      actionButtonsContainer = actionButtonsContainer.parentElement;
-    }
-
-    if (!actionButtonsContainer || actionButtonsContainer === profileSection) {
-      return null;
-    }
-
-    const insertParent = actionButtonsContainer.parentElement;
-
-    if (!insertParent) {
-      return null;
-    }
-
-    const existing = insertParent.querySelector("#bondery-li-button-root");
-    if (existing) {
-      return existing;
-    }
-
-    const container = document.createElement("div");
-    container.id = "bondery-li-button-root";
-    container.style.display = "flex";
-    container.style.flexDirection = "column";
-
-    insertParent.insertBefore(container, actionButtonsContainer.nextSibling);
-    return container;
-  })();
-
-  console.log("Bondery LinkedIn: Target section found:", !!targetSection, targetSection);
-
-  if (!targetSection) {
+  if (!anchor) {
     console.log("Bondery LinkedIn: Target section not found.");
     return;
   }
 
-  // Render React component
-  const root = ReactDOM.createRoot(targetSection);
-  root.render(
-    <StrictMode>
-      <MantineWrapper>
-        <LinkedInButton username={username} />
-      </MantineWrapper>
-    </StrictMode>,
-  );
+  // Check if button already exists
+  if (document.querySelector("bondery-linkedin")) {
+    return;
+  }
 
-  console.log("Bondery Extension: Button injected successfully on LinkedIn");
+  // Remove previous shadow root UI if navigating between profiles
+  if (currentUi) {
+    currentUi.remove();
+    currentUi = null;
+  }
+
+  isInjecting = true;
+  try {
+    currentUi = await renderInShadowRoot(ctx, {
+      name: "bondery-linkedin",
+      position: "inline",
+      anchor,
+      append: "after",
+      render: () => <LinkedInButton username={username} />,
+    });
+    console.log("Bondery Extension: Button injected successfully on LinkedIn");
+  } finally {
+    isInjecting = false;
+  }
 }
 
-function setupObserver(ctx: { isValid: boolean }) {
+function setupObserver(ctx: ContentScriptContext) {
   let debounceTimer: ReturnType<typeof setTimeout> | null = null;
 
   const observer = new MutationObserver(() => {
@@ -270,8 +280,8 @@ function setupObserver(ctx: { isValid: boolean }) {
     debounceTimer = setTimeout(() => {
       debounceTimer = null;
       const username = getLinkedInUsername();
-      if (username && !document.querySelector("#bondery-li-button-root")) {
-        injectBonderyButton();
+      if (username && !document.querySelector("bondery-linkedin")) {
+        injectBonderyButton(ctx);
       }
     }, 300);
   });

@@ -48,8 +48,8 @@ export default function WelcomeApp() {
                 You're all set!
               </Text>
               <Text size="md" c="dimmed" ta="center">
-                Your Bondery account is now connected. Visit any Instagram, LinkedIn, or Facebook
-                profile to start saving contacts.
+                Your Bondery account is now connected. Visit any Instagram or LinkedIn profile to
+                start saving contacts.
               </Text>
             </Stack>
             <Text size="sm" c="dimmed" ta="center">

@@ -15,6 +15,11 @@
     background-color var(--transition-time) var(--transition-ease);
 }
 
+::selection {
+  background-color: var(--mantine-primary-color-filled) !important;
+  color: white !important;
+}
+
 .button-scale-effect:hover:not(:disabled):not([data-disabled]):not([disabled]),
 .button-scale-effect:focus:not(:disabled):not([data-disabled]):not([disabled]) {
   transform: scale(var(--scale-grow)) !important;
