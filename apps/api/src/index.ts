@@ -42,7 +42,6 @@ const envSchema = {
     "PRIVATE_EMAIL_PASS",
     "PRIVATE_EMAIL_ADDRESS",
     "PRIVATE_EMAIL_PORT",
-    "PRIVATE_BONDERY_SUPABASE_HTTP_KEY",
   ],
   properties: {
     LOG_LEVEL: {
@@ -90,9 +89,6 @@ const envSchema = {
     PRIVATE_EMAIL_PORT: {
       type: "number",
     },
-    PRIVATE_BONDERY_SUPABASE_HTTP_KEY: {
-      type: "string",
-    },
     MAPS_URL: {
       type: "string",
       default: "https://api.mapy.com",
@@ -121,7 +117,6 @@ declare module "fastify" {
       PRIVATE_EMAIL_PASS: string;
       PRIVATE_EMAIL_ADDRESS: string;
       PRIVATE_EMAIL_PORT: number;
-      PRIVATE_BONDERY_SUPABASE_HTTP_KEY: string;
     };
   }
 }

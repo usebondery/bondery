@@ -12,7 +12,7 @@
  */
 
 import type { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
-import type { SupabaseClient } from "@supabase/supabase-js";
+import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@bondery/types/supabase.types";
 import { createAuthenticatedClient } from "./supabase.js";
 
@@ -29,7 +29,7 @@ declare module "fastify" {
   interface FastifyInstance {
     /** Validates Supabase session from cookies / Authorization header */
     verifySession: (request: FastifyRequest, reply: FastifyReply) => Promise<void>;
-    /** Validates x-reminder-job-secret header for server-to-server calls */
+    /** Validates service role key via Authorization: Bearer header for server-to-server calls */
     verifyServiceSecret: (request: FastifyRequest, reply: FastifyReply) => Promise<void>;
   }
 }
@@ -64,20 +64,49 @@ export function registerAuthStrategies(fastify: FastifyInstance): void {
   );
 
   // ── verifyServiceSecret ──────────────────────────────────────────────────
-  // Validates x-reminder-job-secret header for server-to-server calls
-  // (e.g. reminder cron job).
+  // Verifies the caller sent the Supabase service role key as a Bearer token
+  // by attempting an admin API call to GoTrue. If the token is a valid service
+  // role key, the call succeeds. Verified tokens are cached for the process
+  // lifetime to avoid repeated round-trips.
+  const verifiedServiceTokens = new Set<string>();
+
   fastify.decorate(
     "verifyServiceSecret",
     async (request: FastifyRequest, _reply: FastifyReply): Promise<void> => {
-      const secret = request.headers["x-reminder-job-secret"];
-      if (
-        typeof secret !== "string" ||
-        secret !== fastify.config.PRIVATE_BONDERY_SUPABASE_HTTP_KEY
-      ) {
+      const authHeader = request.headers.authorization;
+      if (typeof authHeader !== "string" || !authHeader.startsWith("Bearer ")) {
+        request.log.warn(
+          { url: request.url, reason: "missing or malformed Authorization header" },
+          "verifyServiceSecret: rejected",
+        );
         const err = new Error("Unauthorized") as Error & { statusCode: number };
         err.statusCode = 401;
         throw err;
       }
+
+      const token = authHeader.slice(7);
+      if (verifiedServiceTokens.has(token)) return;
+
+      const client = createClient(fastify.config.NEXT_PUBLIC_SUPABASE_URL, token, {
+        auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
+      });
+
+      const { error } = await client.auth.admin.listUsers({ page: 1, perPage: 1 });
+      if (error) {
+        request.log.warn(
+          {
+            url: request.url,
+            reason: "GoTrue admin call rejected token",
+            supabaseError: error.message,
+          },
+          "verifyServiceSecret: rejected",
+        );
+        const err = new Error("Unauthorized") as Error & { statusCode: number };
+        err.statusCode = 401;
+        throw err;
+      }
+
+      verifiedServiceTokens.add(token);
     },
   );
 }
