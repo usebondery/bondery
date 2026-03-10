@@ -88,6 +88,7 @@ export default defineConfig({
 
     // Environment variables (WXT_ prefix for Vite compatibility)
     const webappUrl = process.env.WXT_WEBAPP_URL || "http://localhost:3000";
+    const apiUrl = process.env.WXT_API_URL || webappUrl;
     const supabaseUrl = process.env.WXT_SUPABASE_URL || "http://127.0.0.1:54321";
 
     // Build host permissions dynamically
@@ -97,9 +98,13 @@ export default defineConfig({
       "https://www.linkedin.com/*",
       "https://linkedin.com/*",
       "https://*.linkedin.com/*",
-      "https://www.facebook.com/*",
       getOrigin(webappUrl),
     ];
+
+    // Add API URL if it is on a different origin than the webapp
+    if (getOrigin(apiUrl) !== getOrigin(webappUrl)) {
+      hostPermissions.push(getOrigin(apiUrl));
+    }
 
     // Add Supabase URL for OAuth token exchange
     if (supabaseUrl) {
@@ -111,14 +116,7 @@ export default defineConfig({
       description: "Import contacts from social media directly to Bondery Webapp",
       version: "0.6.1",
 
-      permissions: [
-        "storage",
-        "identity",
-        "alarms",
-        // scripting + tabs needed in dev builds for dynamic content script
-        // registration fallback (ensureContentScriptsRegistered in background)
-        ...(isDev ? (["scripting", "tabs"] as const) : []),
-      ],
+      permissions: ["storage", "identity", "alarms"],
       host_permissions: hostPermissions,
 
       // Icons (matched from public/ directory)
@@ -157,6 +155,7 @@ export default defineConfig({
       const requiredEnvVars = [
         "WXT_WEBAPP_URL",
         "WXT_SUPABASE_URL",
+        "WXT_API_URL",
         "WXT_SUPABASE_OAUTH_CLIENT_ID",
       ];
       const missing = requiredEnvVars.filter((key) => !process.env[key]);

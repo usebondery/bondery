@@ -2,13 +2,27 @@ import React, { createContext, useContext, useEffect, useMemo, useState } from "
 import { browser } from "wxt/browser";
 import { MantineProvider } from "@mantine/core";
 import { bonderyTheme } from "@bondery/mantine-next/theme";
-import "@mantine/core/styles.css";
-import "@mantine/dates/styles.css";
-import "flag-icons/css/flag-icons.min.css";
-import "../../../../packages/mantine-next/src/styles.css";
+
+/**
+ * CSS imports for Mantine / Bondery are NOT included here because content
+ * scripts use `cssInjectionMode: "ui"` which auto-injects CSS into the
+ * Shadow DOM. Popup / welcome pages that render outside a Shadow Root must
+ * import the styles at their own entry-point level. See:
+ *   - src/entrypoints/popup/main.tsx
+ *   - src/entrypoints/welcome/main.tsx
+ */
 
 interface MantineWrapperProps {
   children: React.ReactNode;
+  /** When rendering inside a Shadow DOM, pass the shadow host element so Mantine
+   *  sets `data-mantine-color-scheme` on it — WXT transforms `:root` → `:host`
+   *  in the bundled CSS, so the attribute must be on the shadow host for
+   *  `:host([data-mantine-color-scheme])` selectors to match. */
+  getRootElement?: () => HTMLElement;
+  /** CSS selector for Mantine's variable style block. Pass `:host` when inside
+   *  a shadow root so variables are scoped to the shadow host, consistent with
+   *  WXT's `:root` → `:host` CSS transformation. */
+  cssVariablesSelector?: string;
 }
 
 interface ExtensionThemeContextValue {
@@ -31,7 +45,7 @@ export function useExtensionTheme() {
   return context;
 }
 
-export function MantineWrapper({ children }: MantineWrapperProps) {
+export function MantineWrapper({ children, getRootElement, cssVariablesSelector }: MantineWrapperProps) {
   const [themePreference, setThemePreferenceState] = useState<"auto" | "light" | "dark">("auto");
   const [systemColorScheme, setSystemColorScheme] = useState<"light" | "dark">("light");
 
@@ -94,7 +108,12 @@ export function MantineWrapper({ children }: MantineWrapperProps) {
 
   return (
     <ExtensionThemeContext.Provider value={contextValue}>
-      <MantineProvider theme={bonderyTheme} forceColorScheme={resolvedColorScheme}>
+      <MantineProvider
+        theme={bonderyTheme}
+        forceColorScheme={resolvedColorScheme}
+        {...(getRootElement ? { getRootElement } : {})}
+        {...(cssVariablesSelector ? { cssVariablesSelector } : {})}
+      >
         {children}
       </MantineProvider>
     </ExtensionThemeContext.Provider>

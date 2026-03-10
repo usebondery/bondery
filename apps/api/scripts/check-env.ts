@@ -11,7 +11,7 @@ checkEnvVariables({
   environment,
   appPath: resolve(__dirname, ".."),
   requiredVars: [
-    "PUBLIC_SUPABASE_URL",
+    "NEXT_PUBLIC_SUPABASE_URL",
     "PUBLIC_SUPABASE_PUBLISHABLE_KEY",
     "NEXT_PUBLIC_API_URL",
     "PRIVATE_SUPABASE_SECRET_KEY",

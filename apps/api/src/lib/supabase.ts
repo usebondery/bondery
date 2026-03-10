@@ -14,14 +14,14 @@ import logger from "./logger.js";
  * These will be validated by @fastify/env at startup
  */
 function getSupabaseConfig() {
-  const PUBLIC_SUPABASE_URL = process.env.PUBLIC_SUPABASE_URL;
+  const NEXT_PUBLIC_SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const PUBLIC_SUPABASE_PUBLISHABLE_KEY = process.env.PUBLIC_SUPABASE_PUBLISHABLE_KEY;
   const PRIVATE_SUPABASE_SECRET_KEY = process.env.PRIVATE_SUPABASE_SECRET_KEY;
 
-  if (!PUBLIC_SUPABASE_URL) {
+  if (!NEXT_PUBLIC_SUPABASE_URL) {
     throw new Error(
       "Missing required Supabase environment variables. " +
-        "Ensure PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_PUBLISHABLE_KEY, and PRIVATE_SUPABASE_SECRET_KEY are set.",
+        "Ensure NEXT_PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_PUBLISHABLE_KEY, and PRIVATE_SUPABASE_SECRET_KEY are set.",
     );
   } else if (!PUBLIC_SUPABASE_PUBLISHABLE_KEY) {
     throw new Error("Missing PUBLIC_SUPABASE_PUBLISHABLE_KEY environment variable.");
@@ -29,23 +29,23 @@ function getSupabaseConfig() {
     throw new Error("Missing PRIVATE_SUPABASE_SECRET_KEY environment variable.");
   }
 
-  return { PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_PUBLISHABLE_KEY, PRIVATE_SUPABASE_SECRET_KEY };
+  return { NEXT_PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_PUBLISHABLE_KEY, PRIVATE_SUPABASE_SECRET_KEY };
 }
 
 /**
  * Creates an anonymous Supabase client (for public endpoints)
  */
 export function createAnonClient(): SupabaseClient<Database> {
-  const { PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_PUBLISHABLE_KEY } = getSupabaseConfig();
-  return createClient<Database>(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_PUBLISHABLE_KEY);
+  const { NEXT_PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_PUBLISHABLE_KEY } = getSupabaseConfig();
+  return createClient<Database>(NEXT_PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_PUBLISHABLE_KEY);
 }
 
 /**
  * Creates an admin Supabase client (for privileged operations)
  */
 export function createAdminClient(): SupabaseClient<Database> {
-  const { PUBLIC_SUPABASE_URL, PRIVATE_SUPABASE_SECRET_KEY } = getSupabaseConfig();
-  return createClient<Database>(PUBLIC_SUPABASE_URL, PRIVATE_SUPABASE_SECRET_KEY);
+  const { NEXT_PUBLIC_SUPABASE_URL, PRIVATE_SUPABASE_SECRET_KEY } = getSupabaseConfig();
+  return createClient<Database>(NEXT_PUBLIC_SUPABASE_URL, PRIVATE_SUPABASE_SECRET_KEY);
 }
 
 /**
@@ -112,8 +112,8 @@ function getAuthTokensFromCookies(request: FastifyRequest): {
   accessToken?: string;
   refreshToken?: string;
 } {
-  const { PUBLIC_SUPABASE_URL } = getSupabaseConfig();
-  const projectRef = getSupabaseProjectRef(PUBLIC_SUPABASE_URL);
+  const { NEXT_PUBLIC_SUPABASE_URL } = getSupabaseConfig();
+  const projectRef = getSupabaseProjectRef(NEXT_PUBLIC_SUPABASE_URL);
 
   // First try Fastify's parsed cookies (from browser requests)
   let cookies = request.cookies || {};

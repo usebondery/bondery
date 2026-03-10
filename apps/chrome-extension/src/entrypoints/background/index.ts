@@ -1018,77 +1018,6 @@ async function handleMessage(
   }
 }
 
-// ─── Content Script Registration ─────────────────────────────────────────────
-
-/**
- * Defines the content scripts that must be registered via chrome.scripting API.
- * In production builds, these are declared in the manifest. In dev builds,
- * WXT omits them from the manifest and relies on the dev server to register
- * them dynamically. This function ensures they are always registered regardless
- * of build mode, so the dev build works without the WXT dev server running.
- */
-const DEV_CONTENT_SCRIPTS: chrome.scripting.RegisteredContentScript[] = [
-  {
-    id: "wxt:content-scripts/linkedin.js",
-    matches: ["https://www.linkedin.com/*", "https://linkedin.com/*", "https://*.linkedin.com/*"],
-    runAt: "document_start",
-    js: ["content-scripts/linkedin.js"],
-    css: ["content-scripts/linkedin.css"],
-    persistAcrossSessions: true,
-  },
-  {
-    id: "wxt:content-scripts/instagram.js",
-    matches: ["https://www.instagram.com/*", "https://instagram.com/*"],
-    runAt: "document_start",
-    js: ["content-scripts/instagram.js"],
-    css: ["content-scripts/instagram.css"],
-    persistAcrossSessions: true,
-  },
-  {
-    id: "wxt:content-scripts/facebook.js",
-    matches: ["https://www.facebook.com/*"],
-    runAt: "document_idle",
-    js: ["content-scripts/facebook.js"],
-    css: ["content-scripts/facebook.css"],
-    persistAcrossSessions: true,
-  },
-  {
-    id: "wxt:content-scripts/webapp.js",
-    matches: ["https://app.usebondery.com/*", "http://localhost:3000/*", "http://localhost:3002/*"],
-    runAt: "document_idle",
-    js: ["content-scripts/webapp.js"],
-    persistAcrossSessions: true,
-  },
-];
-
-/**
- * Ensures all content scripts are registered via chrome.scripting API.
- * This is a no-op in production (scripts are in the manifest), but in dev
- * mode it guarantees scripts are registered even without the WXT dev server.
- */
-async function ensureContentScriptsRegistered(): Promise<void> {
-  // Only needed in dev builds — production builds use manifest content_scripts
-  if (!browser.scripting) return;
-
-  try {
-    const registered = await browser.scripting.getRegisteredContentScripts();
-    const registeredIds = new Set(registered.map((s) => s.id));
-
-    for (const script of DEV_CONTENT_SCRIPTS) {
-      if (registeredIds.has(script.id!)) {
-        // Already registered — update to pick up any file changes
-        await browser.scripting.updateContentScripts([script]);
-        console.log(`[background] Updated content script: ${script.id}`);
-      } else {
-        await browser.scripting.registerContentScripts([script]);
-        console.log(`[background] Registered content script: ${script.id}`);
-      }
-    }
-  } catch (error) {
-    console.warn("[background] Content script registration error:", error);
-  }
-}
-
 // ─── Initialization ──────────────────────────────────────────────────────────
 
 function initBackground(): void {
@@ -1108,12 +1037,10 @@ function initBackground(): void {
       }
     }
 
-    await ensureContentScriptsRegistered();
     await updateActionContextIndicator();
   });
 
   browser.runtime.onStartup.addListener(async () => {
-    await ensureContentScriptsRegistered();
     scheduleActionContextIndicatorUpdate();
   });
 

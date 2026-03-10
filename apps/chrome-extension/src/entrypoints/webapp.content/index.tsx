@@ -9,7 +9,9 @@ import { defineContentScript } from "#imports";
 import { browser } from "wxt/browser";
 
 export default defineContentScript({
-  matches: ["https://app.usebondery.com/*", "http://localhost:3000/*", "http://localhost:3002/*"],
+  // http://localhost/* covers all ports (3000, 3002, etc.) since
+  // Chrome match patterns don't support explicit port numbers.
+  matches: ["https://app.usebondery.com/*", "http://localhost/*"],
   runAt: "document_idle",
 
   main() {
