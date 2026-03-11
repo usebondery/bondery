@@ -57,9 +57,8 @@ function TeamCard({ member }: { member: TeamMember }) {
             target="_blank"
             rel="noopener noreferrer"
             ariaLabel={`${member.name} on LinkedIn`}
-          >
-            <IconBrandLinkedin />
-          </ActionIconLink>
+            icon={<IconBrandLinkedin />}
+          />
         </Stack>
       </Group>
     </Card>

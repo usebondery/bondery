@@ -11,7 +11,7 @@ export const ACTIVITY_TYPE_OPTIONS: ActivityType[] = [
   "Email",
   "Meal",
   "Meeting",
-  "Networking event",
+  "Networking interaction",
   "Note",
   "Other",
   "Party/Social",
@@ -20,7 +20,7 @@ export const ACTIVITY_TYPE_OPTIONS: ActivityType[] = [
 ];
 
 const LEGACY_ACTIVITY_TYPE_ALIASES: Record<string, ActivityType> = {
-  Networking: "Networking event",
+  Networking: "Networking interaction",
 };
 
 const ACTIVITY_TYPE_CONFIG: Record<ActivityType, ActivityTypeConfig> = {
@@ -29,7 +29,7 @@ const ACTIVITY_TYPE_CONFIG: Record<ActivityType, ActivityTypeConfig> = {
   Email: { emoji: "📧", color: "gray" },
   Meal: { emoji: "🍽️", color: "yellow" },
   Meeting: { emoji: "👔", color: "indigo" },
-  "Networking event": { emoji: "🤝", color: "teal" },
+  "Networking interaction": { emoji: "🤝", color: "teal" },
   Note: { emoji: "📝", color: "lime" },
   Other: { emoji: "⭐", color: "grape" },
   "Party/Social": { emoji: "🎉", color: "pink" },

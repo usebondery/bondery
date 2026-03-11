@@ -1,17 +1,22 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { ActionIcon, Button, Card, Group, Menu, Stack, Text, Tooltip } from "@mantine/core";
+import { ActionIcon, Card, Group, Menu, Stack, Text, Tooltip } from "@mantine/core";
 import { useTranslations } from "next-intl";
+import { formatAddressLabel } from "@bondery/helpers/address-utils";
 import {
   IconBrandGoogle,
   IconBrandWaze,
   IconChevronRight,
+  IconClock,
+  IconCompass,
+  IconAdjustments,
   IconCopy,
   IconDotsVertical,
+  IconLoader2,
   IconMapPin,
   IconMapPinSearch,
-  IconMapPinPlus,
+  IconMapPinStar,
   IconPlus,
   IconRoute,
   IconStar,
@@ -21,8 +26,14 @@ import Image from "next/image";
 import type { Contact, ContactAddressEntry, ContactAddressType } from "@bondery/types";
 import { LocationLookupInput } from "@/app/(app)/app/components/LocationLookupInput";
 import type { MapSuggestionItem } from "@/app/(app)/app/map/actions";
-import { TypePicker } from "@/app/(app)/app/components/shared/TypePicker";
-import { ActionIconLink, successNotificationTemplate } from "@bondery/mantine-next";
+import { getTimezoneForCoordinates } from "@/app/(app)/app/map/actions";
+import { resolveToCanonicalTimezone } from "@/lib/timezones";
+import {
+  ActionIconLink,
+  TypePicker,
+  successNotificationTemplate,
+  errorNotificationTemplate,
+} from "@bondery/mantine-next";
 import { ADDRESS_TYPE_OPTIONS } from "@/lib/config";
 import { PeopleMap, type PeopleMapFocus } from "@/app/(app)/app/components/map/PeopleMap";
 import { formatContactName } from "@/lib/nameHelpers";
@@ -38,6 +49,13 @@ interface ContactAddressSectionProps {
       latitude: number | null;
       longitude: number | null;
     } | null;
+    forceLocation?: boolean;
+    /** When true, skip the address save — only update the location field */
+    locationOnly?: boolean;
+    /** When true, skip address + location save — only update the timezone field */
+    timezoneOnly?: boolean;
+    /** IANA timezone string to save (used together with timezoneOnly) */
+    timezone?: string;
   }) => void;
 }
 
@@ -152,21 +170,35 @@ function toAddressFromSuggestion(
     countryEntry?.isoCode,
   );
 
+  const addressLine1 = (item.type === "regional.address" ? item.name : null) as string | null;
+  const addressCity = (municipality?.name || municipalityPart?.name || null) as string | null;
+  const addressPostalCode = item.zip || null;
+  const addressState = (region?.name || null) as string | null;
+  const addressCountryCode = (countryEntry?.isoCode || null) as string | null;
+
+  const formattedValue = formatAddressLabel({
+    addressLine1,
+    city: addressCity,
+    postalCode: addressPostalCode,
+    state: addressState,
+    countryCode: addressCountryCode,
+  });
+
   return {
     type,
-    value: item.label,
+    value: formattedValue || item.label,
     latitude: normalizedCoordinates.latitude,
     longitude: normalizedCoordinates.longitude,
-    addressLine1: item.type === "regional.address" ? item.name : null,
+    addressLine1,
     addressLine2: null,
-    addressCity: (municipality?.name || municipalityPart?.name || null) as string | null,
-    addressPostalCode: item.zip || null,
-    addressState: (region?.name || null) as string | null,
+    addressCity,
+    addressPostalCode,
+    addressState,
     addressStateCode: null,
     addressCountry: (countryEntry?.name || null) as string | null,
-    addressCountryCode: (countryEntry?.isoCode || null) as string | null,
+    addressCountryCode,
     addressGranularity: deriveGranularity(item.type),
-    addressFormatted: item.label,
+    addressFormatted: formattedValue || item.label,
     addressGeocodeSource: "mapy.com",
   };
 }
@@ -209,18 +241,45 @@ function toEditableAddresses(contact: Contact): EditableAddress[] {
     : [];
 
   if (existing.length > 0) {
-    return normalizeAddressTypes(existing).map((address, index) => ({
-      ...address,
-      ...normalizeCoordinatePair(address.latitude, address.longitude, address.addressCountryCode),
-      id: `${address.type}-${index}`,
-      value:
-        address.value || address.addressFormatted || address.addressLine1 || contact.place || "",
-      type: address.type,
-    }));
+    return normalizeAddressTypes(existing).map((address, index) => {
+      const computedValue = formatAddressLabel({
+        addressLine1: address.addressLine1,
+        addressLine2: address.addressLine2,
+        city: address.addressCity,
+        postalCode: address.addressPostalCode,
+        state: address.addressState,
+        countryCode: address.addressCountryCode,
+      });
+      return {
+        ...address,
+        ...normalizeCoordinatePair(address.latitude, address.longitude, address.addressCountryCode),
+        id: `${address.type}-${index}`,
+        value:
+          computedValue ||
+          address.value ||
+          address.addressFormatted ||
+          address.addressLine1 ||
+          contact.place ||
+          "",
+        type: address.type,
+      };
+    });
   }
 
   const fallbackValue =
-    contact.addressFormatted || contact.addressLine1 || contact.place || contact.addressCity || "";
+    formatAddressLabel({
+      addressLine1: contact.addressLine1,
+      addressLine2: contact.addressLine2,
+      city: contact.addressCity,
+      postalCode: contact.addressPostalCode,
+      state: contact.addressState,
+      countryCode: contact.addressCountryCode,
+    }) ||
+    contact.addressFormatted ||
+    contact.addressLine1 ||
+    contact.place ||
+    contact.addressCity ||
+    "";
 
   if (!fallbackValue) {
     return [];
@@ -389,6 +448,8 @@ export function ContactAddressSection({ contact, isSaving, onSave }: ContactAddr
     return [];
   }, [addresses, contact]);
 
+  const [detectingTimezoneId, setDetectingTimezoneId] = useState<string | null>(null);
+
   const mapCenter = useMemo<[number, number]>(() => {
     if (!markers.length) {
       return [0, 0];
@@ -402,126 +463,102 @@ export function ContactAddressSection({ contact, isSaving, onSave }: ContactAddr
     return [sumLat / markers.length, sumLon / markers.length];
   }, [markers]);
 
-  const addDraftAddress = () => {
-    const normalizedValue = normalizeNullableText(draft.value);
-    if (!normalizedValue || !canAddMore || usedTypes.has(draft.type)) {
-      return;
-    }
-
-    const fallbackSuggestion = getSuggestionForValue(normalizedValue);
-
-    const nextBase =
-      draft.suggestion || fallbackSuggestion
-        ? toAddressFromSuggestion(
-            (draft.suggestion || fallbackSuggestion) as MapSuggestionItem,
-            draft.type,
-          )
-        : {
-            type: draft.type,
-            value: normalizedValue,
-            latitude: null,
-            longitude: null,
-            addressLine1: null,
-            addressLine2: null,
-            addressCity: null,
-            addressPostalCode: null,
-            addressState: null,
-            addressStateCode: null,
-            addressCountry: null,
-            addressCountryCode: null,
-            addressGranularity: "address" as const,
-            addressFormatted: null,
-            addressGeocodeSource: "manual",
-          };
-
-    const nextAddresses = [
-      ...addresses,
-      enrichWithSuggestionIfAvailable({
-        ...nextBase,
-        id: `${draft.type}-${Date.now()}`,
-        value: normalizedValue,
-      }),
-    ];
-
-    setAddresses(nextAddresses);
-
-    const nextDraftType =
-      ["home", "work", "other"].find(
-        (candidate) => !nextAddresses.some((entry) => entry.type === candidate),
-      ) || draft.type;
-
-    setDraft({
-      type: nextDraftType as ContactAddressType,
-      value: "",
-      suggestion: null,
-    });
-  };
-
-  const handleSave = () => {
-    const pendingValue = normalizeNullableText(draft.value);
-    const canIncludePendingDraft =
-      Boolean(pendingValue) && addresses.length < 3 && !usedTypes.has(draft.type);
-
-    const pendingDraftAddress: EditableAddress | null = canIncludePendingDraft
-      ? {
-          ...(draft.suggestion || getSuggestionForValue(pendingValue as string)
-            ? toAddressFromSuggestion(
-                (draft.suggestion ||
-                  getSuggestionForValue(pendingValue as string)) as MapSuggestionItem,
-                draft.type,
-              )
-            : {
-                type: draft.type,
-                value: pendingValue as string,
-                latitude: null,
-                longitude: null,
-                addressLine1: null,
-                addressLine2: null,
-                addressCity: null,
-                addressPostalCode: null,
-                addressState: null,
-                addressStateCode: null,
-                addressCountry: null,
-                addressCountryCode: null,
-                addressGranularity: "address" as const,
-                addressFormatted: null,
-                addressGeocodeSource: "manual",
-              }),
-          id: `${draft.type}-${Date.now()}`,
-          value: pendingValue as string,
-        }
-      : null;
-
-    const addressesToSave = pendingDraftAddress ? [...addresses, pendingDraftAddress] : addresses;
-
-    if (pendingDraftAddress) {
-      setAddresses(addressesToSave);
-      setDraft((previous) => ({ ...previous, value: "", suggestion: null }));
-    }
-
-    const normalized = addressesToSave
-      .map((entry) => ({
-        ...entry,
-        value: entry.value.trim(),
-      }))
+  /**
+   * Normalises, enriches and persists the current address list.
+   * Only sets `suggestedLocation` when the anchor entry has valid coordinates,
+   * preventing unnecessary location-change prompts for manual (ungeocoded) entries.
+   * @param addrList - The address list to save (fresh copy, not from React state).
+   * @param locationAnchor - When provided, this entry is preferred as the
+   *   source for `suggestedLocation` coordinates instead of the first entry.
+   */
+  const saveNow = (
+    addrList: EditableAddress[],
+    locationAnchor?: EditableAddress | null,
+    forceLocation = false,
+  ) => {
+    const normalized = addrList
+      .map((entry) => ({ ...entry, value: entry.value.trim() }))
       .filter((entry) => entry.value.length > 0)
       .map((entry) => enrichWithSuggestionIfAvailable(entry))
       .map(({ id, ...rest }) => rest);
 
-    const locationSource = normalized[0] || null;
+    const anchorValue = locationAnchor?.value.trim();
+    const locationSource = anchorValue
+      ? (normalized.find((e) => e.value === anchorValue) ?? normalized[0])
+      : normalized[0];
 
-    const suggestedLocation = locationSource
-      ? {
-          place: locationSource.value,
-          latitude: locationSource.latitude,
-          longitude: locationSource.longitude,
-        }
-      : null;
+    const suggestedLocation =
+      locationSource?.latitude !== null &&
+      locationSource?.latitude !== undefined &&
+      locationSource?.longitude !== null &&
+      locationSource?.longitude !== undefined
+        ? {
+            place: locationSource.value,
+            latitude: locationSource.latitude,
+            longitude: locationSource.longitude,
+          }
+        : null;
 
-    onSave({
-      addresses: normalized,
-      suggestedLocation,
+    onSave({ addresses: normalized, suggestedLocation, forceLocation: forceLocation || undefined });
+  };
+
+  /**
+   * Commits the current draft entry (optionally overriding with a suggestion)
+   * and immediately persists all addresses via `saveNow`.
+   * @param overrideSuggestion - When the user selects from the autocomplete
+   *   dropdown this holds the selected suggestion; otherwise the existing
+   *   draft suggestion (or a cached one) is used.
+   */
+  const handleCommitDraft = (overrideSuggestion?: MapSuggestionItem) => {
+    const normalizedValue = normalizeNullableText(overrideSuggestion?.label ?? draft.value);
+    if (!normalizedValue || !canAddMore || usedTypes.has(draft.type)) return;
+
+    const suggestion =
+      overrideSuggestion ?? draft.suggestion ?? getSuggestionForValue(normalizedValue);
+
+    const nextBase = suggestion
+      ? toAddressFromSuggestion(suggestion, draft.type)
+      : {
+          type: draft.type,
+          value: normalizedValue,
+          latitude: null,
+          longitude: null,
+          addressLine1: null,
+          addressLine2: null,
+          addressCity: null,
+          addressPostalCode: null,
+          addressState: null,
+          addressStateCode: null,
+          addressCountry: null,
+          addressCountryCode: null,
+          addressGranularity: "address" as const,
+          addressFormatted: null,
+          addressGeocodeSource: "manual" as const,
+        };
+
+    const newEntry: EditableAddress = enrichWithSuggestionIfAvailable({
+      ...nextBase,
+      id: `${draft.type}-${Date.now()}`,
+      value: normalizedValue,
     });
+
+    const newAddresses = [...addresses, newEntry];
+
+    const nextDraftType =
+      (["home", "work", "other"] as ContactAddressType[]).find(
+        (type) => !newAddresses.some((a) => a.type === type),
+      ) ?? draft.type;
+
+    if (overrideSuggestion) {
+      setSuggestionsByValue((prev) => ({
+        ...prev,
+        [toSuggestionKey(overrideSuggestion.label)]: overrideSuggestion,
+      }));
+    }
+
+    setAddresses(newAddresses);
+    setDraft({ type: nextDraftType, value: "", suggestion: null });
+    saveNow(newAddresses, newEntry);
   };
 
   return (
@@ -558,7 +595,7 @@ export function ContactAddressSection({ contact, isSaving, onSave }: ContactAddr
                     ariaLabel={t("LookupLabel")}
                     icon={
                       entry.id === preferredAddressId ? (
-                        <IconMapPinPlus size={18} />
+                        <IconMapPinStar size={18} />
                       ) : (
                         <IconMapPin size={18} />
                       )
@@ -595,16 +632,12 @@ export function ContactAddressSection({ contact, isSaving, onSave }: ContactAddr
                         ...previous,
                         [toSuggestionKey(selected.label)]: selected,
                       }));
-                      setAddresses((previous) =>
-                        previous.map((address) =>
-                          address.id === entry.id
-                            ? {
-                                ...address,
-                                ...enriched,
-                              }
-                            : address,
-                        ),
+                      const newAddresses = addresses.map((address) =>
+                        address.id === entry.id ? { ...address, ...enriched } : address,
                       );
+                      setAddresses(newAddresses);
+                      const anchorEntry = newAddresses.find((a) => a.id === entry.id);
+                      saveNow(newAddresses, anchorEntry);
                     }}
                   />
 
@@ -690,6 +723,129 @@ export function ContactAddressSection({ contact, isSaving, onSave }: ContactAddr
                       </Tooltip>
                       <Menu.Sub>
                         <Menu.Sub.Target>
+                          <Menu.Sub.Item
+                            leftSection={<IconAdjustments size={14} />}
+                            rightSection={<IconChevronRight size={14} />}
+                          >
+                            {t("SetAsAction")}
+                          </Menu.Sub.Item>
+                        </Menu.Sub.Target>
+
+                        <Menu.Sub.Dropdown>
+                          <Menu.Item
+                            leftSection={<IconCompass size={14} />}
+                            disabled={!hasValidCoordinates(entry.latitude, entry.longitude)}
+                            onClick={() => {
+                              const anchorValue = entry.value.trim();
+                              const normalized = addresses
+                                .map((a) => ({ ...a, value: a.value.trim() }))
+                                .filter((a) => a.value.length > 0)
+                                .map(({ id, ...rest }) => rest);
+                              const locationSource =
+                                normalized.find((e) => e.value === anchorValue) ?? normalized[0];
+                              if (!locationSource) return;
+                              onSave({
+                                addresses: normalized,
+                                suggestedLocation: {
+                                  place: locationSource.value,
+                                  latitude: locationSource.latitude,
+                                  longitude: locationSource.longitude,
+                                },
+                                forceLocation: true,
+                                locationOnly: true,
+                              });
+                            }}
+                          >
+                            {t("SetAsLocation")}
+                          </Menu.Item>
+
+                          <Menu.Item
+                            leftSection={<IconStar size={14} />}
+                            disabled={entry.id === preferredAddressId}
+                            onClick={() => {
+                              const selected = addresses.find((address) => address.id === entry.id);
+                              if (!selected) return;
+                              const newAddresses = [
+                                selected,
+                                ...addresses.filter((address) => address.id !== entry.id),
+                              ];
+                              setAddresses(newAddresses);
+                              saveNow(newAddresses);
+                            }}
+                          >
+                            {t("SetAsPreferred")}
+                          </Menu.Item>
+
+                          <Tooltip
+                            label={t("DisabledReasonNoCoordinates")}
+                            withArrow
+                            disabled={hasValidCoordinates(entry.latitude, entry.longitude)}
+                            withinPortal
+                          >
+                            <span>
+                              <Menu.Item
+                                leftSection={
+                                  detectingTimezoneId === entry.id ? (
+                                    <IconLoader2 size={14} className="animate-spin" />
+                                  ) : (
+                                    <IconClock size={14} />
+                                  )
+                                }
+                                disabled={
+                                  !hasValidCoordinates(entry.latitude, entry.longitude) ||
+                                  detectingTimezoneId !== null
+                                }
+                                onClick={async () => {
+                                  if (
+                                    !hasValidCoordinates(entry.latitude, entry.longitude) ||
+                                    detectingTimezoneId !== null
+                                  ) {
+                                    return;
+                                  }
+                                  setDetectingTimezoneId(entry.id);
+                                  try {
+                                    const tz = await getTimezoneForCoordinates(
+                                      entry.latitude as number,
+                                      entry.longitude as number,
+                                    );
+                                    if (!tz) {
+                                      notifications.show(
+                                        errorNotificationTemplate({
+                                          title: t("SetAsTimezoneError"),
+                                          description: "",
+                                        }),
+                                      );
+                                      return;
+                                    }
+                                    const canonical = resolveToCanonicalTimezone(tz);
+                                    onSave({
+                                      addresses: [],
+                                      suggestedLocation: null,
+                                      timezoneOnly: true,
+                                      timezone: canonical,
+                                    });
+                                  } catch {
+                                    notifications.show(
+                                      errorNotificationTemplate({
+                                        title: t("SetAsTimezoneError"),
+                                        description: "",
+                                      }),
+                                    );
+                                  } finally {
+                                    setDetectingTimezoneId(null);
+                                  }
+                                }}
+                              >
+                                {detectingTimezoneId === entry.id
+                                  ? t("DetectingTimezone")
+                                  : t("SetAsTimezone")}
+                              </Menu.Item>
+                            </span>
+                          </Tooltip>
+                        </Menu.Sub.Dropdown>
+                      </Menu.Sub>
+                      <Menu.Sub>
+                        <Menu.Sub.Target>
                           <Tooltip
                             label={t("DisabledReasonEmptyAddress")}
                             withArrow
@@ -752,41 +908,16 @@ export function ContactAddressSection({ contact, isSaving, onSave }: ContactAddr
                           </Menu.Item>
                         </Menu.Sub.Dropdown>
                       </Menu.Sub>
-                      <Tooltip
-                        label={t("DisabledReasonAlreadyPreferred")}
-                        withArrow
-                        disabled={entry.id !== preferredAddressId}
-                        withinPortal
-                      >
-                        <span>
-                          <Menu.Item
-                            leftSection={<IconStar size={14} />}
-                            disabled={entry.id === preferredAddressId}
-                            onClick={() =>
-                              setAddresses((previous) => {
-                                const selected = previous.find(
-                                  (address) => address.id === entry.id,
-                                );
-                                if (!selected) return previous;
-                                return [
-                                  selected,
-                                  ...previous.filter((address) => address.id !== entry.id),
-                                ];
-                              })
-                            }
-                          >
-                            {t("SetAsPreferred")}
-                          </Menu.Item>
-                        </span>
-                      </Tooltip>
                       <Menu.Item
                         color="red"
                         leftSection={<IconTrash size={14} />}
-                        onClick={() =>
-                          setAddresses((previous) =>
-                            previous.filter((address) => address.id !== entry.id),
-                          )
-                        }
+                        onClick={() => {
+                          const newAddresses = addresses.filter(
+                            (address) => address.id !== entry.id,
+                          );
+                          setAddresses(newAddresses);
+                          saveNow(newAddresses);
+                        }}
                       >
                         {t("DeleteAction")}
                       </Menu.Item>
@@ -806,7 +937,7 @@ export function ContactAddressSection({ contact, isSaving, onSave }: ContactAddr
                       variant="light"
                       color="green"
                       aria-label={t("AddAddressAction")}
-                      onClick={addDraftAddress}
+                      onClick={() => handleCommitDraft()}
                       disabled={isSaving}
                     >
                       <IconPlus size={18} />
@@ -827,15 +958,7 @@ export function ContactAddressSection({ contact, isSaving, onSave }: ContactAddr
                       }))
                     }
                     onSuggestionSelect={(selected) => {
-                      setSuggestionsByValue((previous) => ({
-                        ...previous,
-                        [toSuggestionKey(selected.label)]: selected,
-                      }));
-                      setDraft((previous) => ({
-                        ...previous,
-                        value: selected.label,
-                        suggestion: selected,
-                      }));
+                      handleCommitDraft(selected);
                     }}
                   />
 
@@ -861,12 +984,6 @@ export function ContactAddressSection({ contact, isSaving, onSave }: ContactAddr
               {t("MaxAddressesReached")}
             </Text>
           )}
-
-          <Group justify="flex-end">
-            <Button onClick={handleSave} loading={isSaving} disabled={isSaving}>
-              {t("SaveAction")}
-            </Button>
-          </Group>
         </Stack>
 
         <Stack gap="xs" style={{ flex: "1 1 0", minWidth: 0 }}>

@@ -1,7 +1,7 @@
 "use client";
 
-import { ActionIcon, Group, Title } from "@mantine/core";
-import { IconArrowLeft } from "@tabler/icons-react";
+import { ActionIcon, Group, Stack, Text, Title, Tooltip } from "@mantine/core";
+import { IconArrowLeft, IconHelpCircle } from "@tabler/icons-react";
 import type { Icon } from "@tabler/icons-react";
 import type { ReactNode } from "react";
 import { ActionIconLink } from "@bondery/mantine-next";
@@ -9,6 +9,9 @@ import { ActionIconLink } from "@bondery/mantine-next";
 interface PageHeaderProps {
   icon: Icon;
   title: string;
+  description?: string;
+  helpHref?: string;
+  helpLabel?: string;
   action?: ReactNode;
   primaryAction?: ReactNode;
   secondaryAction?: ReactNode;
@@ -19,6 +22,9 @@ interface PageHeaderProps {
 export function PageHeader({
   icon: Icon,
   title,
+  description,
+  helpHref,
+  helpLabel,
   action,
   primaryAction,
   secondaryAction,
@@ -52,7 +58,31 @@ export function PageHeader({
           />
         )}
         <Icon size={32} stroke={1.5} />
-        <Title order={1}>{title}</Title>
+        <Stack gap={2}>
+          <Title order={1}>{title}</Title>
+          {description ? (
+            <Group gap="xs" align="center" wrap="wrap">
+              <Text size="sm" c="dimmed">
+                {description}
+              </Text>
+              {helpHref && helpLabel ? (
+                <Tooltip label={helpLabel}>
+                  <ActionIconLink
+                    href={helpHref}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    ariaLabel={helpLabel}
+                    variant="light"
+                    color="gray"
+                    radius="xl"
+                    size="sm"
+                    icon={<IconHelpCircle size={14} />}
+                  />
+                </Tooltip>
+              ) : null}
+            </Group>
+          ) : null}
+        </Stack>
       </Group>
       {resolvedAction}
     </Group>

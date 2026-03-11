@@ -10,6 +10,7 @@ export * from "./supabase.types";
 export * from "./contact";
 export * from "./activity";
 export * from "./group";
+export * from "./tag";
 export * from "./user";
 export * from "./api";
 export * from "./config";

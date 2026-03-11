@@ -15,15 +15,15 @@ import {
 import { useForm } from "@mantine/form";
 import { modals } from "@mantine/modals";
 import { notifications } from "@mantine/notifications";
-import { IconUsersGroup, IconDeviceFloppy } from "@tabler/icons-react";
+import { IconUsersGroup, IconCheck } from "@tabler/icons-react";
 import {
+  EmojiPicker,
   errorNotificationTemplate,
   loadingNotificationTemplate,
   ModalFooter,
   ModalTitle,
   successNotificationTemplate,
 } from "@bondery/mantine-next";
-import { EmojiPicker } from "@/app/(app)/app/components/EmojiPicker";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import type { GroupWithCount } from "@bondery/types";
 import { revalidateGroups } from "../../actions";
@@ -195,7 +195,7 @@ function EditGroupForm({
           actionType="submit"
           actionLoading={isSubmitting}
           actionDisabled={isSubmitting}
-          actionLeftSection={<IconDeviceFloppy size={16} />}
+          actionLeftSection={<IconCheck size={16} />}
         />
       </Stack>
     </form>

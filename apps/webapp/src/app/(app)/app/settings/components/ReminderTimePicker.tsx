@@ -175,12 +175,12 @@ export function ReminderTimePicker({
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          reminder_send_hour: apiTime,
+          reminderSendHour: apiTime,
         }),
       });
 
       if (!response.ok) {
-        throw new Error("Failed to update reminder_send_hour");
+        throw new Error("Failed to update reminderSendHour");
       }
 
       setSavedTime24h(normalizedInputTime);

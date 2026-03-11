@@ -3,21 +3,24 @@
 import { Button, Stack, Group, Paper } from "@mantine/core";
 import {
   IconAddressBook,
+  IconBrandLinkedin,
   IconUserPlus,
   IconUsers,
   IconUser,
   IconBriefcase,
   IconMapPin,
   IconClock,
-  IconBrandLinkedin,
+  IconUserCircle,
 } from "@tabler/icons-react";
 import { notifications } from "@mantine/notifications";
 import { useEffect, useState, useDeferredValue, useMemo } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
-import { useDebouncedCallback } from "@mantine/hooks";
 import { useTranslations } from "next-intl";
-import ContactsTable, { ColumnConfig } from "@/app/(app)/app/components/ContactsTable";
-import { type SortOrder } from "@/app/(app)/app/components/contacts/SortMenu";
+import { useDebouncedCallback } from "@mantine/hooks";
+import ContactsTable, {
+  ColumnConfig,
+  type SortOrder,
+} from "@/app/(app)/app/components/contacts/ContactsTableV2";
 import { API_ROUTES, WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import { openAddContactModal } from "./components/AddContactModal";
 import { PageHeader } from "@/app/(app)/app/components/PageHeader";
@@ -28,9 +31,12 @@ import { openDeleteContactModal } from "@/app/(app)/app/components/contacts/open
 import { openDeleteContactsModal } from "@/app/(app)/app/components/contacts/openDeleteContactsModal";
 import { openAddPeopleToGroupSelectionModal } from "./components/AddPeopleToGroupSelectionModal";
 import { MERGE_CONFLICT_FIELDS, openMergeWithModal } from "./components/MergeWithModal";
+import { WEBSITE_URL } from "@/lib/config";
+import { useEnrichFromLinkedIn } from "@/lib/extension/useEnrichFromLinkedIn";
 
 import type { Contact, MergeConflictField } from "@bondery/types";
 import { revalidateContacts } from "../actions";
+import { appendAvatarParams } from "@/lib/avatarParams";
 
 interface PeopleClientProps {
   initialContacts: Contact[];
@@ -42,7 +48,11 @@ export function PeopleClient({ initialContacts, totalCount, layout = "stack" }: 
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const t = useTranslations("PeoplePage");
+  const tHeader = useTranslations("PageHeader");
   const tMerge = useTranslations("MergeWithModal");
+  const tEnrich = useTranslations("EnrichFromLinkedIn");
+  const { enrichFromLinkedIn } = useEnrichFromLinkedIn({ onSuccess: revalidateContacts });
   const mergeTexts = useMemo(
     () => ({
       errorTitle: tMerge("ErrorTitle"),
@@ -63,6 +73,7 @@ export function PeopleClient({ initialContacts, totalCount, layout = "stack" }: 
       back: tMerge("Back"),
       merge: tMerge("Merge"),
       noConflicts: tMerge("NoConflicts"),
+      conflictHint: tMerge("ConflictHint"),
       processing: tMerge("Processing"),
       steps: {
         pick: tMerge("Steps.Pick"),
@@ -81,6 +92,8 @@ export function PeopleClient({ initialContacts, totalCount, layout = "stack" }: 
   const initialSort = (searchParams.get("sort") as SortOrder) || "nameAsc";
 
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [isAllTotalSelected, setIsAllTotalSelected] = useState(false);
+  const [excludedIds, setExcludedIds] = useState<Set<string>>(new Set());
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [contacts, setContacts] = useState<Contact[]>(initialContacts);
   const [loadedCount, setLoadedCount] = useState(initialContacts.length);
@@ -95,8 +108,8 @@ export function PeopleClient({ initialContacts, totalCount, layout = "stack" }: 
       fixed: true,
     },
     {
-      key: "title",
-      label: "Title",
+      key: "headline",
+      label: "Headline",
       visible: true,
       icon: <IconBriefcase size={16} />,
     },
@@ -116,7 +129,7 @@ export function PeopleClient({ initialContacts, totalCount, layout = "stack" }: 
       key: "social",
       label: "Social Media",
       visible: true,
-      icon: <IconBrandLinkedin size={16} />,
+      icon: <IconUserCircle size={16} />,
     },
   ]);
 
@@ -129,10 +142,13 @@ export function PeopleClient({ initialContacts, totalCount, layout = "stack" }: 
     setLoadedCount(initialContacts.length);
     setTotalAvailableCount(totalCount);
     setSelectedIds(new Set());
+    setIsAllTotalSelected(false);
+    setExcludedIds(new Set());
     setLastSelectedIndex(null);
   }, [initialContacts, totalCount]);
 
-  // Handle search with debounce
+  // Handle search: debounce the URL update so the server is only re-fetched
+  // after the user pauses, while DataTable keeps the input responsive locally.
   const handleSearch = useDebouncedCallback((query: string) => {
     const params = new URLSearchParams(searchParams);
     if (query) {
@@ -141,7 +157,7 @@ export function PeopleClient({ initialContacts, totalCount, layout = "stack" }: 
       params.delete("q");
     }
     router.replace(`${pathname}?${params.toString()}`);
-  }, 300);
+  }, 500);
 
   // Handle sort
   const handleSort = (order: SortOrder) => {
@@ -159,9 +175,12 @@ export function PeopleClient({ initialContacts, totalCount, layout = "stack" }: 
       contactName,
       onDeleted: async () => {
         setSelectedIds(new Set());
-        setContacts((prev) => prev.filter((contact) => contact.id !== contactId));
-        setLoadedCount((prev) => Math.max(0, prev - 1));
-        setTotalAvailableCount((prev) => Math.max(0, prev - 1));
+        const remaining = contacts.filter((contact) => contact.id !== contactId);
+        const newTotal = Math.max(0, totalAvailableCount - 1);
+        const refilled = await refillToPageSize(remaining, newTotal);
+        setContacts(refilled);
+        setLoadedCount(refilled.length);
+        setTotalAvailableCount(newTotal);
         await revalidateContacts();
         router.refresh();
       },
@@ -189,6 +208,13 @@ export function PeopleClient({ initialContacts, totalCount, layout = "stack" }: 
   };
 
   const handleSelectAll = () => {
+    if (isAllTotalSelected) {
+      // In filter-mode: clear everything
+      setIsAllTotalSelected(false);
+      setExcludedIds(new Set());
+      setSelectedIds(new Set());
+      return;
+    }
     if (selectedIds.size === contacts.length) {
       setSelectedIds(new Set());
     } else {
@@ -196,8 +222,58 @@ export function PeopleClient({ initialContacts, totalCount, layout = "stack" }: 
     }
   };
 
+  /**
+   * After deleting contacts, if the loaded list drops below PAGE_SIZE and more
+   * contacts remain in the system, automatically fetch enough to fill back up.
+   */
+  const refillToPageSize = async (remaining: Contact[], newTotal: number): Promise<Contact[]> => {
+    const PAGE_SIZE = 50;
+    const needed = Math.min(PAGE_SIZE - remaining.length, newTotal - remaining.length);
+    if (needed <= 0) return remaining;
+
+    try {
+      const params = new URLSearchParams();
+      params.set("limit", String(needed));
+      params.set("offset", String(remaining.length));
+      if (initialSearch) params.set("q", initialSearch);
+      if (initialSort) params.set("sort", initialSort);
+      appendAvatarParams(params, "small");
+
+      const res = await fetch(`${API_ROUTES.CONTACTS}?${params.toString()}`);
+      if (!res.ok) return remaining;
+
+      const data = await res.json();
+      const extra = (data.contacts || []) as Contact[];
+      const existingIds = new Set(remaining.map((c) => c.id));
+      const uniqueExtra = extra.filter((c) => !existingIds.has(c.id));
+      return [...remaining, ...uniqueExtra];
+    } catch {
+      return remaining;
+    }
+  };
+
   const handleSelectOne = (id: string, options?: { shiftKey?: boolean; index?: number }) => {
     const currentIndex = options?.index ?? contacts.findIndex((contact) => contact.id === id);
+
+    // In filter-mode, toggle via excludedIds instead of selectedIds.
+    if (isAllTotalSelected) {
+      const newExcluded = new Set(excludedIds);
+      if (newExcluded.has(id)) {
+        newExcluded.delete(id);
+      } else {
+        newExcluded.add(id);
+      }
+      // If every single item was excluded, auto-clear filter mode.
+      if (newExcluded.size >= totalAvailableCount) {
+        setIsAllTotalSelected(false);
+        setExcludedIds(new Set());
+        setSelectedIds(new Set());
+      } else {
+        setExcludedIds(newExcluded);
+      }
+      if (currentIndex >= 0) setLastSelectedIndex(currentIndex);
+      return;
+    }
 
     if (options?.shiftKey && lastSelectedIndex !== null && currentIndex >= 0) {
       const shouldSelect = !selectedIds.has(id);
@@ -251,6 +327,8 @@ export function PeopleClient({ initialContacts, totalCount, layout = "stack" }: 
         params.set("sort", initialSort);
       }
 
+      appendAvatarParams(params, "small");
+
       const response = await fetch(`${API_ROUTES.CONTACTS}?${params.toString()}`);
 
       if (!response.ok) {
@@ -260,7 +338,11 @@ export function PeopleClient({ initialContacts, totalCount, layout = "stack" }: 
       const data = await response.json();
       const fetchedContacts = (data.contacts || []) as Contact[];
 
-      setContacts((prev) => [...prev, ...fetchedContacts]);
+      setContacts((prev) => {
+        const existingIds = new Set(prev.map((c) => c.id));
+        const uniqueNew = fetchedContacts.filter((c) => !existingIds.has(c.id));
+        return [...prev, ...uniqueNew];
+      });
       setLoadedCount((prev) => prev + fetchedContacts.length);
       if (Number.isFinite(data.totalCount)) {
         setTotalAvailableCount(data.totalCount);
@@ -279,20 +361,45 @@ export function PeopleClient({ initialContacts, totalCount, layout = "stack" }: 
 
   const handleDeleteSelected = (ids: string[]) => {
     openDeleteContactsModal({
-      contactIds: ids,
-      onDeleted: async () => {
+      contactIds: isAllTotalSelected ? [] : ids,
+      filterPayload: isAllTotalSelected
+        ? {
+            filter: { q: initialSearch || undefined, sort: initialSort || undefined },
+            excludeIds: Array.from(excludedIds),
+          }
+        : undefined,
+      onDeleted: async (deletedCount?: number) => {
+        const removedCount = deletedCount ?? ids.length;
+        setIsAllTotalSelected(false);
+        setExcludedIds(new Set());
         setSelectedIds(new Set());
-        setContacts((prev) => prev.filter((contact) => !ids.includes(contact.id)));
-        setLoadedCount((prev) => Math.max(0, prev - ids.length));
-        setTotalAvailableCount((prev) => Math.max(0, prev - ids.length));
+        const remaining = isAllTotalSelected
+          ? contacts.filter((c) => excludedIds.has(c.id))
+          : contacts.filter((contact) => !ids.includes(contact.id));
+        const newTotal = Math.max(0, totalAvailableCount - removedCount);
+        const refilled = await refillToPageSize(remaining, newTotal);
+        setContacts(refilled);
+        setLoadedCount(refilled.length);
+        setTotalAvailableCount(newTotal);
         await revalidateContacts();
         router.refresh();
       },
     });
   };
 
-  const allSelected = contacts.length > 0 && selectedIds.size === contacts.length;
-  const someSelected = selectedIds.size > 0 && selectedIds.size < contacts.length;
+  /** Instant: flip the sentinel flag — no network call. */
+  const handleSelectAllTotal = () => {
+    setIsAllTotalSelected(true);
+    setExcludedIds(new Set());
+    // Keep selectedIds as-is; DataTable will use allTotalSelected for rendering.
+  };
+
+  const allSelected = isAllTotalSelected
+    ? contacts.length > 0 && contacts.every((c) => !excludedIds.has(c.id))
+    : contacts.length > 0 && contacts.every((c) => selectedIds.has(c.id));
+  const someSelected = isAllTotalSelected
+    ? !allSelected && excludedIds.size < totalAvailableCount
+    : !allSelected && selectedIds.size > 0;
 
   const WrapperComponent = layout === "container" ? Group : Stack;
 
@@ -301,7 +408,10 @@ export function PeopleClient({ initialContacts, totalCount, layout = "stack" }: 
       <WrapperComponent gap="xl" {...(layout === "container" ? { justify: "space-between" } : {})}>
         <PageHeader
           icon={IconUsers}
-          title="People"
+          title={t("Title")}
+          description={t("HeaderDescription")}
+          helpHref={`${WEBSITE_URL}/docs/concepts/people`}
+          helpLabel={tHeader("LearnMoreAbout", { concept: tHeader("Concepts.People") })}
           secondaryAction={
             <Button
               variant="outline"
@@ -309,7 +419,7 @@ export function PeopleClient({ initialContacts, totalCount, layout = "stack" }: 
               leftSection={<IconAddressBook size={16} />}
               onClick={() => router.push(`${WEBAPP_ROUTES.SETTINGS}#data-management`)}
             >
-              Import contacts
+              {t("ImportContacts")}
             </Button>
           }
           primaryAction={
@@ -318,7 +428,7 @@ export function PeopleClient({ initialContacts, totalCount, layout = "stack" }: 
               leftSection={<IconUserPlus size={16} />}
               onClick={openAddContactModal}
             >
-              Add new person
+              {t("AddPerson")}
             </Button>
           }
         />
@@ -330,6 +440,8 @@ export function PeopleClient({ initialContacts, totalCount, layout = "stack" }: 
             isHeaderShown={true}
             searchDefaultValue={initialSearch}
             onSearchChange={handleSearch}
+            noContactsFound={t("NoContactsFound")}
+            noContactsMatchSearch={t("NoContactsMatchSearch")}
             columnsForMenu={columns}
             setColumnsForMenu={setColumns}
             sortOrderForMenu={initialSort}
@@ -349,12 +461,29 @@ export function PeopleClient({ initialContacts, totalCount, layout = "stack" }: 
               onDeleteOne: handleDeleteContact,
               onDeleteSelected: handleDeleteSelected,
             }}
+            menuActions={[
+              {
+                key: "enrich-linkedin",
+                label: tEnrich("MenuLabel"),
+                icon: <IconBrandLinkedin size={16} />,
+                onClick: (contactId) => {
+                  const contact = contacts.find((c) => c.id === contactId);
+                  enrichFromLinkedIn(contactId, contact?.linkedin);
+                },
+              },
+            ]}
             loadMoreAction={{
               label: "Load another 50 contacts",
               onClick: handleLoadMore,
               loading: isLoadingMore,
             }}
             hasMoreToLoad={contacts.length < totalAvailableCount}
+            totalCount={totalAvailableCount}
+            onSelectAllTotal={
+              contacts.length < totalAvailableCount ? handleSelectAllTotal : undefined
+            }
+            isAllTotalSelected={isAllTotalSelected}
+            excludedIds={excludedIds}
           />
         </Paper>
       </WrapperComponent>

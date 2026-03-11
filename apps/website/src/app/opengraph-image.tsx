@@ -1,5 +1,5 @@
 import { ImageResponse } from "next/og";
-import { BonderyLogotypeBlack } from "@bondery/branding";
+import { BonderyLogotypeBlack } from "@bondery/branding-src";
 
 export const runtime = "edge";
 

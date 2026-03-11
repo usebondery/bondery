@@ -8,6 +8,8 @@ import {
   Button,
   Group,
   Text,
+  Center,
+  Loader,
   ColorInput,
   DEFAULT_THEME,
   Box,
@@ -17,13 +19,17 @@ import { modals } from "@mantine/modals";
 import { notifications } from "@mantine/notifications";
 import { IconUsersGroup } from "@tabler/icons-react";
 import {
+  PeopleMultiPickerInput,
+  EmojiPicker,
   errorNotificationTemplate,
+  getRandomEmoji,
   loadingNotificationTemplate,
   ModalFooter,
   ModalTitle,
   successNotificationTemplate,
 } from "@bondery/mantine-next";
-import { EmojiPicker, getRandomEmoji } from "@/app/(app)/app/components/EmojiPicker";
+import { flushSync } from "react-dom";
+import type { Contact, GroupWithCount } from "@bondery/types";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import { revalidateGroups } from "../../actions";
 
@@ -48,7 +54,13 @@ function getRandomColor(): string {
   return COLOR_SWATCHES[Math.floor(Math.random() * COLOR_SWATCHES.length)];
 }
 
-export function openAddGroupModal() {
+interface OpenAddGroupModalOptions {
+  initialSelectedIds?: string[];
+  initialLabel?: string;
+  onCreated?: (group: GroupWithCount) => void;
+}
+
+export function openAddGroupModal(options: OpenAddGroupModalOptions = {}) {
   const modalId = `add-group-${Math.random().toString(36).slice(2)}`;
 
   modals.open({
@@ -56,13 +68,35 @@ export function openAddGroupModal() {
     title: <ModalTitle text="Add new group" icon={<IconUsersGroup size={24} />} />,
     trapFocus: true,
     size: "md",
-    children: <AddGroupForm modalId={modalId} />,
+    children: (
+      <AddGroupForm
+        modalId={modalId}
+        initialSelectedIds={options.initialSelectedIds}
+        initialLabel={options.initialLabel}
+        onCreated={options.onCreated}
+      />
+    ),
   });
 }
 
-function AddGroupForm({ modalId }: { modalId: string }) {
+interface AddGroupFormProps {
+  modalId: string;
+  initialSelectedIds?: string[];
+  initialLabel?: string;
+  onCreated?: (group: GroupWithCount) => void;
+}
+
+function AddGroupForm({
+  modalId,
+  initialSelectedIds = [],
+  initialLabel = "",
+  onCreated,
+}: AddGroupFormProps) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoadingContacts, setIsLoadingContacts] = useState(true);
+  const [contacts, setContacts] = useState<Contact[]>([]);
+  const [selectedIds, setSelectedIds] = useState<string[]>(initialSelectedIds);
 
   useEffect(() => {
     modals.updateModal({
@@ -73,10 +107,35 @@ function AddGroupForm({ modalId }: { modalId: string }) {
     });
   }, [isSubmitting, modalId]);
 
+  useEffect(() => {
+    async function fetchContacts() {
+      try {
+        const response = await fetch(API_ROUTES.CONTACTS);
+        if (!response.ok) {
+          throw new Error("Failed to fetch contacts");
+        }
+
+        const data = (await response.json()) as { contacts?: Contact[] };
+        setContacts(data.contacts || []);
+      } catch {
+        notifications.show(
+          errorNotificationTemplate({
+            title: "Error",
+            description: "Failed to load contacts",
+          }),
+        );
+      } finally {
+        setIsLoadingContacts(false);
+      }
+    }
+
+    void fetchContacts();
+  }, []);
+
   const form = useForm({
     mode: "controlled",
     initialValues: {
-      label: "",
+      label: initialLabel,
       emoji: getRandomEmoji(),
       color: getRandomColor(),
     },
@@ -118,6 +177,28 @@ function AddGroupForm({ modalId }: { modalId: string }) {
         throw new Error(errorData.error || "Failed to create group");
       }
 
+      const createdGroupData = (await res.json()) as { id?: string };
+
+      if (!createdGroupData.id) {
+        throw new Error("Failed to parse new group id");
+      }
+
+      if (selectedIds.length > 0) {
+        const addPeopleResponse = await fetch(
+          `${API_ROUTES.GROUPS}/${createdGroupData.id}/contacts`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ personIds: selectedIds }),
+          },
+        );
+
+        if (!addPeopleResponse.ok) {
+          const addPeopleError = await addPeopleResponse.json();
+          throw new Error(addPeopleError.error || "Failed to add contacts to group");
+        }
+      }
+
       notifications.hide(loadingNotification);
 
       notifications.show(
@@ -127,9 +208,33 @@ function AddGroupForm({ modalId }: { modalId: string }) {
         }),
       );
 
-      modals.close(modalId);
-      await revalidateGroups();
-      router.refresh();
+      if (onCreated) {
+        // Build a local GroupWithCount from form values so the parent modal
+        // can immediately reflect the new group without a server round-trip.
+        const newGroup: GroupWithCount = {
+          id: createdGroupData.id!,
+          userId: "",
+          label: values.label.trim(),
+          emoji: values.emoji.trim(),
+          color: values.color.trim(),
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          contactCount: selectedIds.length,
+          previewContacts: [],
+        };
+        // Always revalidate so the page list is fresh even if the parent
+        // modal is dismissed without hitting "Edit groups".
+        void revalidateGroups();
+        router.refresh();
+        // flushSync ensures the modal is torn down before the parent callback
+        // triggers state updates, avoiding the React 18 batching race.
+        flushSync(() => modals.close(modalId));
+        onCreated(newGroup);
+      } else {
+        modals.close(modalId);
+        await revalidateGroups();
+        router.refresh();
+      }
     } catch (error) {
       notifications.hide(loadingNotification);
 
@@ -177,6 +282,31 @@ function AddGroupForm({ modalId }: { modalId: string }) {
           closeOnColorSwatchClick
           {...form.getInputProps("color")}
         />
+
+        <Stack gap="xs">
+          <Text size="sm" fw={500}>
+            Add people
+          </Text>
+
+          {isLoadingContacts ? (
+            <Center py="xs">
+              <Loader size="sm" />
+            </Center>
+          ) : contacts.length === 0 ? (
+            <Text c="dimmed" size="sm">
+              No contacts found
+            </Text>
+          ) : (
+            <PeopleMultiPickerInput
+              contacts={contacts}
+              selectedIds={selectedIds}
+              onChange={setSelectedIds}
+              placeholder="Add contacts..."
+              noResultsLabel="No contacts found"
+              disabled={isSubmitting}
+            />
+          )}
+        </Stack>
 
         <ModalFooter
           cancelLabel="Cancel"

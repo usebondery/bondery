@@ -1,0 +1,1 @@
+export { PersonAvatarGroup } from "./PersonAvatarGroup";

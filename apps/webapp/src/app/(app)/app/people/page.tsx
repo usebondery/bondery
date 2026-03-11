@@ -1,5 +1,8 @@
+import type { Metadata } from "next";
 import { PeopleClient } from "./PeopleClient";
 import { getContactsData, type SortOrder } from "./getContactsData";
+
+export const metadata: Metadata = { title: "People" };
 
 export default async function PeoplePage({
   searchParams,

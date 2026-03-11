@@ -1,25 +1,56 @@
+import type { Metadata } from "next";
 import { Stack, Text } from "@mantine/core";
 import type {
   Contact,
   Activity,
   ContactRelationshipWithPeople,
-  ImportantEvent,
+  ImportantDate,
+  WorkHistoryEntry,
+  EducationEntry,
 } from "@bondery/types";
 import PersonClient from "./PersonClient";
 import { getAuthHeaders } from "@/lib/authHeaders";
-import { API_ROUTES } from "@bondery/helpers/globals/paths";
+import { API_ROUTES, formatMetadataTitle } from "@bondery/helpers/globals/paths";
 import { PageWrapper } from "@/app/(app)/app/components/PageWrapper";
 import { ErrorPageHeader } from "@/app/(app)/app/components/ErrorPageHeader";
-import type { Group } from "@bondery/types";
+import type { Group, Tag } from "@bondery/types";
 import { API_URL } from "@/lib/config";
+import { buildAvatarQueryString } from "@/lib/avatarParams";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ person_id: string }>;
+}): Promise<Metadata> {
+  try {
+    const { person_id: personId } = await params;
+    const headers = await getAuthHeaders();
+    const res = await fetch(`${API_URL}${API_ROUTES.CONTACTS}/${personId}`, {
+      next: { tags: ["contacts"] },
+      headers,
+    });
+    if (!res.ok) return { title: "Person" };
+    const data = await res.json();
+    const contact = data.contact;
+    const fullName = [contact.firstName, contact.middleName, contact.lastName]
+      .filter(Boolean)
+      .join(" ");
+    return { title: formatMetadataTitle(fullName) };
+  } catch {
+    return { title: "Person" };
+  }
+}
 
 async function getPersonData(personId: string) {
   const headers = await getAuthHeaders();
 
-  const contactPromise = fetch(`${API_URL}${API_ROUTES.CONTACTS}/${personId}`, {
-    next: { tags: ["contacts"] },
-    headers,
-  });
+  const contactPromise = fetch(
+    `${API_URL}${API_ROUTES.CONTACTS}/${personId}?${buildAvatarQueryString("large")}`,
+    {
+      next: { tags: ["contacts"] },
+      headers,
+    },
+  );
 
   const groupsPromise = fetch(`${API_URL}${API_ROUTES.GROUPS}`, {
     next: { tags: ["groups"] },
@@ -31,25 +62,49 @@ async function getPersonData(personId: string) {
     headers,
   });
 
-  const eventsPromise = fetch(`${API_URL}${API_ROUTES.EVENTS}`, {
-    next: { tags: ["events"] },
-    headers,
-  });
-
-  const relationshipsPromise = fetch(`${API_URL}${API_ROUTES.CONTACTS}/${personId}/relationships`, {
-    next: { tags: ["relationships", "contacts"] },
-    headers,
-  });
-
-  const importantEventsPromise = fetch(
-    `${API_URL}${API_ROUTES.CONTACTS}/${personId}/important-events`,
+  const interactionsPromise = fetch(
+    `${API_URL}${API_ROUTES.INTERACTIONS}?${buildAvatarQueryString("medium")}`,
     {
-      next: { tags: ["important-events", "contacts"] },
+      next: { tags: ["interactions"] },
       headers,
     },
   );
 
-  const contactsPromise = fetch(`${API_URL}${API_ROUTES.CONTACTS}`, {
+  const relationshipsPromise = fetch(
+    `${API_URL}${API_ROUTES.CONTACTS}/${personId}/relationships?${buildAvatarQueryString("small")}`,
+    {
+      next: { tags: ["relationships", "contacts"] },
+      headers,
+    },
+  );
+
+  const importantDatesPromise = fetch(
+    `${API_URL}${API_ROUTES.CONTACTS}/${personId}/important-dates`,
+    {
+      next: { tags: ["important-dates", "contacts"] },
+      headers,
+    },
+  );
+
+  const contactsPromise = fetch(
+    `${API_URL}${API_ROUTES.CONTACTS}?${buildAvatarQueryString("small")}`,
+    {
+      next: { tags: ["contacts"] },
+      headers,
+    },
+  );
+
+  const allTagsPromise = fetch(`${API_URL}${API_ROUTES.TAGS}?previewLimit=0`, {
+    next: { tags: ["tags"] },
+    headers,
+  });
+
+  const personTagsPromise = fetch(`${API_URL}${API_ROUTES.CONTACTS}/${personId}/tags`, {
+    next: { tags: ["tags", "contacts"] },
+    headers,
+  });
+
+  const linkedInDataPromise = fetch(`${API_URL}${API_ROUTES.CONTACTS}/${personId}/linkedin-data`, {
     next: { tags: ["contacts"] },
     headers,
   });
@@ -58,18 +113,24 @@ async function getPersonData(personId: string) {
     contactResponse,
     groupsResponse,
     membershipResponse,
-    eventsResponse,
+    interactionsResponse,
     relationshipsResponse,
-    importantEventsResponse,
+    importantDatesResponse,
     contactsResponse,
+    allTagsResponse,
+    personTagsResponse,
+    linkedInDataResponse,
   ] = await Promise.all([
     contactPromise,
     groupsPromise,
     membershipPromise,
-    eventsPromise,
+    interactionsPromise,
     relationshipsPromise,
-    importantEventsPromise,
+    importantDatesPromise,
     contactsPromise,
+    allTagsPromise,
+    personTagsPromise,
+    linkedInDataPromise,
   ]);
 
   if (!contactResponse.ok) {
@@ -85,18 +146,27 @@ async function getPersonData(personId: string) {
 
   const groupsData = groupsResponse.ok ? await groupsResponse.json() : { groups: [] };
   const personGroupsData = membershipResponse.ok ? await membershipResponse.json() : { groups: [] };
-  const eventsData = eventsResponse.ok ? await eventsResponse.json() : { events: [] };
+  const interactionsData = interactionsResponse.ok
+    ? await interactionsResponse.json()
+    : { interactions: [] };
   const relationshipsData = relationshipsResponse.ok
     ? await relationshipsResponse.json()
     : { relationships: [] };
-  const importantEventsData = importantEventsResponse.ok
-    ? await importantEventsResponse.json()
-    : { events: [] };
+  const importantDatesData = importantDatesResponse.ok
+    ? await importantDatesResponse.json()
+    : { dates: [] };
   const contactsData = contactsResponse.ok ? await contactsResponse.json() : { contacts: [] };
 
+  const allTagsData = allTagsResponse.ok ? await allTagsResponse.json() : { tags: [] };
+  const personTagsData = personTagsResponse.ok ? await personTagsResponse.json() : { tags: [] };
+  const linkedInData = linkedInDataResponse.ok
+    ? await linkedInDataResponse.json()
+    : { workHistory: [], education: [], linkedinBio: null };
+
   const personActivities =
-    eventsData.events?.filter((a: any) => a.participants?.some((p: any) => p.id === personId)) ||
-    [];
+    interactionsData.interactions?.filter((a: any) =>
+      a.participants?.some((p: any) => p.id === personId),
+    ) || [];
 
   return {
     contact,
@@ -106,15 +176,27 @@ async function getPersonData(personId: string) {
         (candidate) => candidate.id !== personId,
       ) || [],
     relationships: (relationshipsData.relationships as ContactRelationshipWithPeople[]) || [],
-    importantEvents: (importantEventsData.events as ImportantEvent[]) || [],
+    importantDates: (importantDatesData.dates as ImportantDate[]) || [],
     groups: (groupsData.groups as Group[]) || [],
     personGroups: (personGroupsData.groups as Group[]) || [],
+    allTags: (allTagsData.tags as Tag[]) || [],
+    personTags: (personTagsData.tags as Tag[]) || [],
     activities: (personActivities as Activity[]) || [],
+    workHistory: (linkedInData.workHistory as WorkHistoryEntry[]) || [],
+    education: (linkedInData.education as EducationEntry[]) || [],
+    linkedinBio: (linkedInData.linkedinBio as string | null) ?? null,
   };
 }
 
-export default async function PersonPage({ params }: { params: Promise<{ person_id: string }> }) {
+export default async function PersonPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ person_id: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
   const { person_id: personId } = await params;
+  const { tab } = await searchParams;
 
   if (!personId) {
     return (
@@ -146,11 +228,17 @@ export default async function PersonPage({ params }: { params: Promise<{ person_
       initialConnectedContacts={data.connectedContacts}
       initialSelectableContacts={data.selectableContacts}
       initialRelationships={data.relationships}
-      initialImportantEvents={data.importantEvents}
+      initialImportantDates={data.importantDates}
       initialGroups={data.groups}
       initialPersonGroups={data.personGroups}
+      initialAllTags={data.allTags}
+      initialPersonTags={data.personTags}
       initialActivities={data.activities}
+      initialWorkHistory={data.workHistory}
+      initialEducation={data.education}
+      initialLinkedinBio={data.linkedinBio}
       personId={personId}
+      initialTab={typeof tab === "string" ? tab : undefined}
     />
   );
 }

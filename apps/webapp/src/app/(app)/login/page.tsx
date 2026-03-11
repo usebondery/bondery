@@ -8,6 +8,7 @@ import { createBrowswerSupabaseClient } from "@/lib/supabase/client";
 import { useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
 import { INTEGRATION_PROVIDERS, WEBSITE_URL } from "@/lib/config";
+import { setLocalePreferencesCookie } from "@/lib/auth/detectLocale";
 import { Logo } from "./components/Logo";
 import { WEBSITE_ROUTES } from "@bondery/helpers/globals/paths";
 import { AnchorLink, errorNotificationTemplate } from "@bondery/mantine-next";
@@ -20,6 +21,7 @@ export default function LoginPage() {
 
   // Preserve redirect parameter for post-login navigation (e.g., OAuth consent flow)
   const redirectParam = searchParams.get("redirect") ?? searchParams.get("returnUrl");
+  const shouldForceDesktopLoginLayout = redirectParam?.startsWith("/oauth/consent") ?? false;
 
   const getProviderIcon = (iconName: string) => {
     const icons: Record<string, React.ComponentType<{ size?: number }>> = {
@@ -29,11 +31,19 @@ export default function LoginPage() {
     return icons[iconName] || IconBrandGithubFilled;
   };
 
-  const activeProviders = INTEGRATION_PROVIDERS.filter((p) => p.active);
+  const activeProviders = INTEGRATION_PROVIDERS.filter((p) => p.active).sort((a, b) => {
+    if (a.providerKey === "linkedin_oidc" && b.providerKey !== "linkedin_oidc") return -1;
+    if (b.providerKey === "linkedin_oidc" && a.providerKey !== "linkedin_oidc") return 1;
+    return 0;
+  });
 
   const handleOAuthLogin = async (provider: "github" | "linkedin_oidc") => {
     try {
       setLoading(true);
+
+      // Store detected timezone & time format in a short-lived cookie
+      // so the auth callback can apply them to the new user's settings
+      setLocalePreferencesCookie();
 
       // Build callback URL, including the redirect param if present
       let callbackUrl = `${window.location.origin}/auth/callback`;
@@ -71,18 +81,24 @@ export default function LoginPage() {
   return (
     <div className="flex min-h-screen items-center justify-center ">
       <Card p="xl" className="max-w-md">
-        <Stack gap="lg" align="center" hiddenFrom="md">
-          <Logo size={60} href={WEBSITE_URL} />
-          <Stack gap="0" align="center">
-            <Text size="lg" fw={600} ta="center">
-              {t("MobileNotAvailable")}
-            </Text>
-            <Text size="md" c="dimmed" ta="center">
-              {t("MobileNotAvailableMessage")}
-            </Text>
+        {!shouldForceDesktopLoginLayout && (
+          <Stack gap="lg" align="center" hiddenFrom="sm">
+            <Logo size={60} href={WEBSITE_URL} />
+            <Stack gap="0" align="center">
+              <Text size="lg" fw={600} ta="center">
+                {t("MobileNotAvailable")}
+              </Text>
+              <Text size="md" c="dimmed" ta="center">
+                {t("MobileNotAvailableMessage")}
+              </Text>
+            </Stack>
           </Stack>
-        </Stack>
-        <Stack gap="md" align="center" visibleFrom="md">
+        )}
+        <Stack
+          gap="md"
+          align="center"
+          {...(!shouldForceDesktopLoginLayout ? { visibleFrom: "sm" } : {})}
+        >
           <Logo size={60} href={WEBSITE_URL} />
           <Text size="md" ta="center">
             {t("Description")}

@@ -9,10 +9,12 @@ import "leaflet/dist/leaflet.css";
 import { API_ROUTES, WEBSITE_ROUTES } from "@bondery/helpers/globals/paths";
 import { API_URL } from "@/lib/config";
 import { ColorSchemeSync } from "./components/ColorSchemeSync";
-import type { ColorSchemePreference } from "@bondery/types";
+import type { ColorSchemePreference, MergeRecommendation } from "@bondery/types";
+import { getMergeRecommendationsData } from "./fix/getMergeRecommendationsData";
 
 interface UserSettingsLayoutData {
   userName: string;
+  userEmail: string;
   avatarUrl: string | null;
   locale: string;
   timezone: string;
@@ -22,10 +24,12 @@ interface UserSettingsLayoutData {
 
 /**
  * Fetches user settings and data from the internal API.
+ *
+ * @param precomputedHeaders - Optional pre-fetched auth headers to avoid redundant getAuthHeaders() calls.
  */
-async function getUserSettings() {
+async function getUserSettings(precomputedHeaders?: HeadersInit) {
   try {
-    const headers = await getAuthHeaders();
+    const headers = precomputedHeaders ?? (await getAuthHeaders());
 
     const response = await fetch(`${API_URL}${API_ROUTES.SETTINGS}`, {
       next: { tags: ["settings"] },
@@ -39,18 +43,19 @@ async function getUserSettings() {
       const firstName = settings.name || "";
 
       const colorScheme: ColorSchemePreference =
-        settings.color_scheme === "light" ||
-        settings.color_scheme === "dark" ||
-        settings.color_scheme === "auto"
-          ? settings.color_scheme
+        settings.colorScheme === "light" ||
+        settings.colorScheme === "dark" ||
+        settings.colorScheme === "auto"
+          ? settings.colorScheme
           : "auto";
 
       return {
         userName: firstName || settings.email || "User",
-        avatarUrl: settings.avatar_url || null,
+        userEmail: settings.email || "",
+        avatarUrl: settings.avatarUrl || null,
         locale: "en",
         timezone: settings.timezone || "UTC",
-        timeFormat: settings.time_format === "12h" ? "12h" : "24h",
+        timeFormat: settings.timeFormat === "12h" ? "12h" : "24h",
         colorScheme,
       } satisfies UserSettingsLayoutData;
     }
@@ -58,6 +63,7 @@ async function getUserSettings() {
 
   return {
     userName: "User",
+    userEmail: "",
     avatarUrl: null,
     locale: "en",
     timezone: "UTC",
@@ -76,8 +82,16 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     redirect(WEBSITE_ROUTES.LOGIN);
   }
 
-  const { userName, avatarUrl, locale, timezone, timeFormat, colorScheme } =
-    await getUserSettings();
+  // Fetch auth headers once, then parallelise both independent API calls
+  const headers = await getAuthHeaders();
+
+  const [settings, recommendations] = await Promise.all([
+    getUserSettings(headers),
+    getMergeRecommendationsData(headers).catch(() => [] as MergeRecommendation[]),
+  ]);
+
+  const { userName, userEmail, avatarUrl, locale, timezone, timeFormat, colorScheme } = settings;
+  const hasActiveMergeRecommendations = recommendations.length > 0;
 
   const messages = translations[locale as keyof typeof translations] || translations.en;
 
@@ -92,7 +106,12 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         }}
       >
         <AppShellNavbar p="md">
-          <NavigationSidebarContent userName={userName} avatarUrl={avatarUrl} />
+          <NavigationSidebarContent
+            userName={userName}
+            userEmail={userEmail}
+            avatarUrl={avatarUrl}
+            hasActiveMergeRecommendations={hasActiveMergeRecommendations}
+          />
         </AppShellNavbar>
         <AppShellMain>{children}</AppShellMain>
       </AppShell>

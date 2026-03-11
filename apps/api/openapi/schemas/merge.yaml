@@ -1,0 +1,83 @@
+MergeContactsRequest:
+  type: object
+  required:
+    - leftPersonId
+    - rightPersonId
+  properties:
+    leftPersonId:
+      type: string
+      format: uuid
+      description: The contact that survives the merge
+    rightPersonId:
+      type: string
+      format: uuid
+      description: The contact that gets merged into the left and deleted
+    conflictResolutions:
+      type: object
+      description: >
+        Per-field conflict resolution choices. Values are "left" (keep the surviving contact's value)
+        or "right" (take the merged contact's value).
+        Supported scalar keys: firstName, middleName, lastName, avatar, headline, place, notes,
+        lastInteraction, language, timezone, location, latitude, longitude.
+        Supported set keys (merged by union): phones, emails, importantEvents.
+        Supported social keys: linkedin, instagram, whatsapp, facebook, website, signal.
+      additionalProperties:
+        type: string
+        enum: [left, right]
+
+MergeContactsResponse:
+  type: object
+  properties:
+    personId:
+      type: string
+      format: uuid
+    userId:
+      type: string
+      format: uuid
+    mergedIntoPersonId:
+      type: string
+      format: uuid
+    mergedFromPersonId:
+      type: string
+      format: uuid
+
+MergeRecommendationReason:
+  type: string
+  enum:
+    - fullName
+    - email
+    - phone
+
+MergeRecommendation:
+  type: object
+  properties:
+    id:
+      type: string
+      format: uuid
+    leftPerson:
+      $ref: "../schemas/contact.yaml#/Contact"
+    rightPerson:
+      $ref: "../schemas/contact.yaml#/Contact"
+    score:
+      type: number
+      description: Similarity score between 0 and 1
+    reasons:
+      type: array
+      items:
+        $ref: "#/MergeRecommendationReason"
+
+MergeRecommendationsResponse:
+  type: object
+  properties:
+    recommendations:
+      type: array
+      items:
+        $ref: "#/MergeRecommendation"
+
+RefreshMergeRecommendationsResponse:
+  type: object
+  properties:
+    success:
+      type: boolean
+    recommendationsCount:
+      type: integer

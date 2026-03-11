@@ -5,10 +5,10 @@
 import type {
   ContactAddressType,
   ContactType,
-  ImportantEventType,
+  ImportantDateType,
   RelationshipType,
 } from "@bondery/types";
-import { IMPORTANT_EVENT_TYPE_META } from "@bondery/helpers";
+import { IMPORTANT_DATE_TYPE_META } from "@bondery/helpers";
 
 export const WEBAPP_URL = process.env.NEXT_PUBLIC_WEBAPP_URL!;
 export const WEBSITE_URL = process.env.NEXT_PUBLIC_WEBSITE_URL!;
@@ -29,7 +29,7 @@ export const INPUT_MAX_LENGTHS = {
   firstName: 50,
   middleName: 50,
   lastName: 50,
-  title: 100,
+  headline: 100,
   place: 100,
   description: 500,
   dateName: 50,
@@ -43,18 +43,18 @@ export const LIMITS = {
   maxImportantDates: 5,
 } as const;
 
-export const IMPORTANT_EVENT_TYPE_OPTIONS: ReadonlyArray<{
-  value: ImportantEventType;
+export const IMPORTANT_DATE_TYPE_OPTIONS: ReadonlyArray<{
+  value: ImportantDateType;
   emoji: string;
 }> = [
-  { value: "birthday", emoji: IMPORTANT_EVENT_TYPE_META.birthday.emoji },
-  { value: "anniversary", emoji: IMPORTANT_EVENT_TYPE_META.anniversary.emoji },
-  { value: "nameday", emoji: IMPORTANT_EVENT_TYPE_META.nameday.emoji },
-  { value: "graduation", emoji: IMPORTANT_EVENT_TYPE_META.graduation.emoji },
-  { value: "other", emoji: IMPORTANT_EVENT_TYPE_META.other.emoji },
+  { value: "birthday", emoji: IMPORTANT_DATE_TYPE_META.birthday.emoji },
+  { value: "anniversary", emoji: IMPORTANT_DATE_TYPE_META.anniversary.emoji },
+  { value: "nameday", emoji: IMPORTANT_DATE_TYPE_META.nameday.emoji },
+  { value: "graduation", emoji: IMPORTANT_DATE_TYPE_META.graduation.emoji },
+  { value: "other", emoji: IMPORTANT_DATE_TYPE_META.other.emoji },
 ] as const;
 
-export const IMPORTANT_EVENT_NOTIFY_OPTIONS: ReadonlyArray<{
+export const IMPORTANT_DATE_NOTIFY_OPTIONS: ReadonlyArray<{
   value: "none" | "1" | "3" | "7";
 }> = [{ value: "none" }, { value: "1" }, { value: "3" }, { value: "7" }] as const;
 
@@ -129,21 +129,21 @@ export const MAX_DOHERTY_THRESHOLD = 0.7;
  */
 export const INTEGRATION_PROVIDERS = [
   {
-    provider: "github",
-    providerKey: "github",
-    displayName: "GitHub",
-    iconColor: "dark",
-    backgroundColor: "black",
-    icon: "github",
-    active: true,
-  },
-  {
     provider: "linkedin",
     providerKey: "linkedin_oidc",
     displayName: "LinkedIn",
     iconColor: "#0A66C2",
     backgroundColor: "#0A66C2",
     icon: "linkedin",
+    active: true,
+  },
+  {
+    provider: "github",
+    providerKey: "github",
+    displayName: "GitHub",
+    iconColor: "dark",
+    backgroundColor: "black",
+    icon: "github",
     active: true,
   },
 ] as const;

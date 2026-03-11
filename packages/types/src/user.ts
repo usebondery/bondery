@@ -16,11 +16,11 @@ export interface UserSettings {
   middlename: string | null;
   surname: string | null;
   timezone: string | null;
-  reminder_send_hour: string;
-  time_format: TimeFormatPreference;
+  reminderSendHour: string;
+  timeFormat: TimeFormatPreference;
   language: string | null;
-  color_scheme: ColorSchemePreference;
-  avatar_url: string | null;
+  colorScheme: ColorSchemePreference;
+  avatarUrl: string | null;
   created_at?: string | null;
   updated_at?: string | null;
 }
@@ -44,10 +44,10 @@ export interface UpdateUserSettingsInput {
   middlename?: string;
   surname?: string;
   timezone?: string;
-  reminder_send_hour?: string;
-  time_format?: TimeFormatPreference;
+  reminderSendHour?: string;
+  timeFormat?: TimeFormatPreference;
   language?: string;
-  color_scheme?: ColorSchemePreference;
+  colorScheme?: ColorSchemePreference;
 }
 
 /**

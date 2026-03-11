@@ -10,15 +10,15 @@ import {
   Text,
 } from "@react-email/components";
 import { EmailWrapper } from "../shared/EmailWrapper.js";
-import { IMPORTANT_EVENT_TYPE_META } from "@bondery/helpers";
+import { IMPORTANT_DATE_TYPE_META } from "@bondery/helpers";
 import * as React from "react";
 
 export interface ReminderDigestEmailItem {
   personId: string;
   personName: string;
   personAvatar: string | null;
-  eventType: "birthday" | "anniversary" | "nameday" | "graduation" | "other";
-  eventDate: string;
+  type: "birthday" | "anniversary" | "nameday" | "graduation" | "other";
+  date: string;
   notifyOn: string;
   notifyDaysBefore: 1 | 3 | 7;
   note: string | null;
@@ -40,7 +40,7 @@ function getInitials(name: string) {
     .join("");
 }
 
-function formatEventDate(dateValue: string) {
+function formatDateLabel(dateValue: string) {
   const parsedDate = new Date(`${dateValue}T00:00:00Z`);
   if (Number.isNaN(parsedDate.getTime())) {
     return dateValue;
@@ -67,9 +67,9 @@ function formatTargetDate(dateValue: string) {
   });
 }
 
-function getDaysRemaining(targetDate: string, eventDate: string) {
+function getDaysRemaining(targetDate: string, date: string) {
   const target = new Date(`${targetDate}T00:00:00Z`);
-  const event = new Date(`${eventDate}T00:00:00Z`);
+  const event = new Date(`${date}T00:00:00Z`);
 
   if (Number.isNaN(target.getTime()) || Number.isNaN(event.getTime())) {
     return null;
@@ -96,18 +96,18 @@ export default function ReminderDigestEmail({ targetDate, reminders }: ReminderD
 
           {reminders.map((reminder) => {
             const personUrl = `https://app.usebondery.com/app/person/${encodeURIComponent(reminder.personId)}`;
-            const eventMeta = IMPORTANT_EVENT_TYPE_META[reminder.eventType];
-            const daysRemaining = getDaysRemaining(targetDate, reminder.eventDate);
+            const dateMeta = IMPORTANT_DATE_TYPE_META[reminder.type];
+            const daysRemaining = getDaysRemaining(targetDate, reminder.date);
             const remainingLabel =
               daysRemaining === null
                 ? `${reminder.notifyDaysBefore} day${reminder.notifyDaysBefore === 1 ? "" : "s"}`
                 : `${daysRemaining} day${daysRemaining === 1 ? "" : "s"}`;
             const personInitials = getInitials(reminder.personName) || "?";
-            const eventDateLabel = formatEventDate(reminder.eventDate);
+            const dateLabel = formatDateLabel(reminder.date);
 
             return (
               <Section
-                key={`${reminder.personId}-${reminder.eventType}-${reminder.eventDate}`}
+                key={`${reminder.personId}-${reminder.type}-${reminder.date}`}
                 className="mb-3 border border-gray-200 bg-white"
                 style={{ borderRadius: "12px", overflow: "hidden" }}
               >
@@ -150,8 +150,8 @@ export default function ReminderDigestEmail({ targetDate, reminders }: ReminderD
                       {reminder.personName}
                     </Link>
                     <Text className="m-0 text-sm text-gray-700">
-                      {eventMeta.emoji} <strong>{eventMeta.label}</strong> is coming up in{" "}
-                      <strong>{remainingLabel}</strong> on {eventDateLabel}.
+                      {dateMeta.emoji} <strong>{dateMeta.label}</strong> is coming up in{" "}
+                      <strong>{remainingLabel}</strong> on {dateLabel}.
                     </Text>
                     {reminder.note ? (
                       <Text className="mt-1 mb-0 text-xs text-gray-600">{reminder.note}</Text>

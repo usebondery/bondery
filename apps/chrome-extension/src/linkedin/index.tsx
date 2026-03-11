@@ -1,7 +1,45 @@
 import React, { StrictMode } from "react";
 import ReactDOM from "react-dom/client";
+import { SOCIAL_PLATFORM_URL_DETAILS } from "@bondery/helpers";
 import LinkedInButton from "./LinkedInButton";
 import { MantineWrapper } from "../shared/MantineWrapper";
+
+function getLinkedInSnapshot() {
+  const username = getLinkedInUsername();
+  if (!username) return null;
+
+  const topCard = document.querySelector("section[data-member-id]") || document;
+  const nameElement = topCard.querySelector("a[aria-label] > h1") || topCard.querySelector("h1");
+  const fullName = nameElement?.textContent?.trim() || username;
+  const nameParts = fullName.split(/\s+/).filter(Boolean);
+
+  const firstName = nameParts[0] ?? username;
+  const lastName = nameParts.length > 1 ? nameParts[nameParts.length - 1] : undefined;
+  const middleName =
+    nameParts.length > 2 ? nameParts.slice(1, nameParts.length - 1).join(" ") : undefined;
+
+  const titleElement = topCard.querySelector("div[data-generated-suggestion-target]");
+  const headline = titleElement?.textContent?.trim() || undefined;
+
+  const contactInfoLink = topCard.querySelector("#top-card-text-details-contact-info");
+  const placeElement = contactInfoLink?.parentElement?.previousElementSibling || null;
+  const place = placeElement?.textContent?.trim() || undefined;
+
+  const profilePhotoImg = topCard.querySelector(
+    "button[aria-label*='profile picture'] img",
+  ) as HTMLImageElement | null;
+
+  return {
+    platform: "linkedin" as const,
+    handle: username,
+    firstName,
+    middleName,
+    lastName,
+    profileImageUrl: profilePhotoImg?.src || undefined,
+    headline,
+    place,
+  };
+}
 
 // Extract LinkedIn username from URL
 function getLinkedInUsername(): string | null {
@@ -34,7 +72,7 @@ function injectBonderyButton() {
       return null;
     }
 
-    let actionButtonsContainer = messageButton.closest("div");
+    let actionButtonsContainer: HTMLElement | null = messageButton.closest("div");
 
     while (actionButtonsContainer && actionButtonsContainer !== profileSection) {
       const hasMessage = !!actionButtonsContainer.querySelector("button[aria-label^='Message']");
@@ -113,7 +151,7 @@ function setupObserver() {
 // Initialize
 function init() {
   // Safety check: only run on LinkedIn
-  if (!window.location.hostname.includes("linkedin.com")) {
+  if (!window.location.hostname.includes(SOCIAL_PLATFORM_URL_DETAILS.linkedin.domain)) {
     return;
   }
 
@@ -137,6 +175,12 @@ function init() {
     }
   }, 500);
 }
+
+chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
+  if (message?.type === "GET_SCRAPED_PROFILE") {
+    sendResponse(getLinkedInSnapshot());
+  }
+});
 
 if (document.readyState === "loading") {
   document.addEventListener("DOMContentLoaded", init);

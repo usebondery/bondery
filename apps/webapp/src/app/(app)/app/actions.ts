@@ -12,11 +12,11 @@ import { updateTag } from "next/cache";
 const CACHE_TAGS = {
   settings: "settings",
   contacts: "contacts",
-  events: "events",
+  interactions: "interactions",
   groups: "groups",
   reminders: "reminders",
   relationships: "relationships",
-  importantEvents: "important-events",
+  importantDates: "important-dates",
   mergeRecommendations: "merge-recommendations",
 } as const;
 
@@ -30,9 +30,9 @@ export async function revalidateContacts() {
   updateTag(CACHE_TAGS.contacts);
 }
 
-/** Invalidate events / activities. */
-export async function revalidateEvents() {
-  updateTag(CACHE_TAGS.events);
+/** Invalidate interactions / activities. */
+export async function revalidateInteractions() {
+  updateTag(CACHE_TAGS.interactions);
 }
 
 /** Invalidate groups list and group membership data. */
@@ -50,9 +50,9 @@ export async function revalidateRelationships() {
   updateTag(CACHE_TAGS.relationships);
 }
 
-/** Invalidate important-events data. */
-export async function revalidateImportantEvents() {
-  updateTag(CACHE_TAGS.importantEvents);
+/** Invalidate important-dates data. */
+export async function revalidateImportantDates() {
+  updateTag(CACHE_TAGS.importantDates);
 }
 
 /** Invalidate merge recommendation data. */

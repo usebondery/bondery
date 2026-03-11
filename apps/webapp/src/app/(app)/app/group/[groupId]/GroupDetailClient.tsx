@@ -16,17 +16,15 @@ import ContactsTable, {
   BulkSelectionAction,
   ColumnConfig,
   MenuAction,
-} from "@/app/(app)/app/components/ContactsTable";
-import { type SortOrder } from "@/app/(app)/app/components/contacts/SortMenu";
-import { PageHeader } from "@/app/(app)/app/components/PageHeader";
-import { PageWrapper } from "@/app/(app)/app/components/PageWrapper";
-import type { Contact } from "@bondery/types";
-import { useDeferredValue, useMemo, useState } from "react";
+  type SortOrder,
+} from "@/app/(app)/app/components/contacts/ContactsTableV2";
+import { useEffect, useDeferredValue, useMemo, useState } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { useDebouncedCallback } from "@mantine/hooks";
 import { useTranslations } from "next-intl";
 import { openAddPeopleToGroupModal } from "../../groups/components/AddPeopleToGroupModal";
 import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
+import { WEBSITE_URL } from "@/lib/config";
 import { formatContactName } from "@/lib/nameHelpers";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import { notifications } from "@mantine/notifications";
@@ -42,25 +40,44 @@ import { openDeleteContactModal } from "@/app/(app)/app/components/contacts/open
 import { openDeleteContactsModal } from "@/app/(app)/app/components/contacts/openDeleteContactsModal";
 import { GroupCard } from "../../groups/components/GroupCard";
 import { openEditGroupModal } from "../../groups/components/EditGroupModal";
-import type { GroupWithCount, MergeConflictField } from "@bondery/types";
+import type { Contact, GroupWithCount, MergeConflictField } from "@bondery/types";
 import { openAddPeopleToGroupSelectionModal } from "../../people/components/AddPeopleToGroupSelectionModal";
 import { MERGE_CONFLICT_FIELDS, openMergeWithModal } from "../../people/components/MergeWithModal";
+import { PageHeader } from "@/app/(app)/app/components/PageHeader";
+import { PageWrapper } from "@/app/(app)/app/components/PageWrapper";
+import { appendAvatarParams } from "@/lib/avatarParams";
 
 interface GroupDetailClientProps {
   groupId: string;
   groupLabel: string;
+  groupEmoji: string;
+  groupColor: string;
   initialContacts: Contact[];
   totalCount: number;
+  initialSearch: string;
+  initialSort: SortOrder;
+  /** First 3 group members fetched without any search filter — stable across searches. */
+  cardPreviewContacts: Contact[];
+  /** Total group member count without any search filter — stable across searches. */
+  groupTotalCount: number;
 }
 
 export function GroupDetailClient({
   groupId,
   groupLabel,
+  groupEmoji,
+  groupColor,
   initialContacts,
   totalCount,
+  initialSearch,
+  initialSort,
+  cardPreviewContacts,
+  groupTotalCount,
 }: GroupDetailClientProps) {
   const t = useTranslations("GroupsPage");
+  const tGroupDetail = useTranslations("GroupDetailPage");
   const tMerge = useTranslations("MergeWithModal");
+  const tHeader = useTranslations("PageHeader");
   const mergeTexts = useMemo(
     () => ({
       errorTitle: tMerge("ErrorTitle"),
@@ -81,6 +98,7 @@ export function GroupDetailClient({
       back: tMerge("Back"),
       merge: tMerge("Merge"),
       noConflicts: tMerge("NoConflicts"),
+      conflictHint: tMerge("ConflictHint"),
       processing: tMerge("Processing"),
       steps: {
         pick: tMerge("Steps.Pick"),
@@ -96,20 +114,25 @@ export function GroupDetailClient({
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const initialSearch = searchParams.get("q") || "";
-  const sortParam = searchParams.get("sort") as SortOrder | null;
-  const sortOrder: SortOrder =
-    sortParam === "nameAsc" ||
-    sortParam === "nameDesc" ||
-    sortParam === "surnameAsc" ||
-    sortParam === "surnameDesc" ||
-    sortParam === "interactionAsc" ||
-    sortParam === "interactionDesc"
-      ? sortParam
-      : "nameAsc";
-  const [searchValue, setSearchValue] = useState(initialSearch);
+
+  const [contacts, setContacts] = useState<Contact[]>(initialContacts);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [loadedCount, setLoadedCount] = useState(initialContacts.length);
+  const [totalAvailableCount, setTotalAvailableCount] = useState(totalCount);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [isAllTotalSelected, setIsAllTotalSelected] = useState(false);
+  const [excludedIds, setExcludedIds] = useState<Set<string>>(new Set());
   const [lastSelectedIndex, setLastSelectedIndex] = useState<number | null>(null);
+
+  useEffect(() => {
+    setContacts(initialContacts);
+    setLoadedCount(initialContacts.length);
+    setTotalAvailableCount(totalCount);
+    setSelectedIds(new Set());
+    setIsAllTotalSelected(false);
+    setExcludedIds(new Set());
+    setLastSelectedIndex(null);
+  }, [initialContacts, totalCount]);
 
   const [columns, setColumns] = useState<ColumnConfig[]>([
     {
@@ -120,8 +143,8 @@ export function GroupDetailClient({
       fixed: true,
     },
     {
-      key: "title",
-      label: "Title",
+      key: "headline",
+      label: "Headline",
       visible: true,
       icon: <IconBriefcase size={16} />,
     },
@@ -155,7 +178,8 @@ export function GroupDetailClient({
     router.replace(`${pathname}?${params.toString()}`);
   };
 
-  const handleSearch = useDebouncedCallback((query: string) => {
+  // Debounced: updates the URL so the server component re-fetches with the new query.
+  const handleSearchChange = useDebouncedCallback((query: string) => {
     const params = new URLSearchParams(searchParams);
     if (query) {
       params.set("q", query);
@@ -165,73 +189,123 @@ export function GroupDetailClient({
     router.replace(`${pathname}?${params.toString()}`);
   }, 300);
 
-  const filteredAndSortedContacts = useMemo(() => {
-    const normalizedQuery = searchValue.trim().toLowerCase();
-    const filtered = normalizedQuery
-      ? initialContacts.filter((contact) =>
-          formatContactName(contact).toLowerCase().includes(normalizedQuery),
-        )
-      : initialContacts;
+  const handleLoadMore = async () => {
+    if (isLoadingMore) return;
+    setIsLoadingMore(true);
+    try {
+      const params = new URLSearchParams();
+      params.set("limit", "50");
+      params.set("offset", String(loadedCount));
+      if (initialSearch) params.set("q", initialSearch);
+      if (initialSort) params.set("sort", initialSort);
+      appendAvatarParams(params, "small");
 
-    const nameValue = (contact: Contact) => formatContactName(contact).toLowerCase();
-    const surnameValue = (contact: Contact) => contact.lastName?.toLowerCase() || "";
-    const interactionValue = (contact: Contact): number | null => {
-      if (!contact.lastInteraction) return null;
-      return typeof contact.lastInteraction === "string"
-        ? new Date(contact.lastInteraction).getTime()
-        : new Date(contact.lastInteraction).getTime();
-    };
+      const response = await fetch(`${API_ROUTES.GROUPS}/${groupId}/contacts?${params.toString()}`);
+      if (!response.ok) throw new Error("Failed to load more contacts");
 
-    const sorted = [...filtered].sort((a, b) => {
-      switch (sortOrder) {
-        case "nameDesc":
-          return nameValue(b).localeCompare(nameValue(a));
-        case "surnameAsc":
-          return (
-            surnameValue(a).localeCompare(surnameValue(b)) ||
-            nameValue(a).localeCompare(nameValue(b))
-          );
-        case "surnameDesc":
-          return (
-            surnameValue(b).localeCompare(surnameValue(a)) ||
-            nameValue(b).localeCompare(nameValue(a))
-          );
-        case "interactionAsc": {
-          const aVal = interactionValue(a) ?? Infinity;
-          const bVal = interactionValue(b) ?? Infinity;
-          return aVal - bVal;
-        }
-        case "interactionDesc": {
-          const aVal = interactionValue(a) ?? -Infinity;
-          const bVal = interactionValue(b) ?? -Infinity;
-          return bVal - aVal;
-        }
-        case "nameAsc":
-        default:
-          return nameValue(a).localeCompare(nameValue(b));
+      const data = await response.json();
+      const fetchedContacts = ((data.contacts || []) as Contact[]).map((c) => ({
+        ...c,
+        lastInteraction: c.lastInteraction ? new Date(c.lastInteraction) : null,
+        createdAt: c.createdAt ? new Date(c.createdAt) : null,
+      })) as unknown as Contact[];
+
+      setContacts((prev) => {
+        const existingIds = new Set(prev.map((c) => c.id));
+        const uniqueNew = fetchedContacts.filter((c) => !existingIds.has(c.id));
+        return [...prev, ...uniqueNew];
+      });
+      setLoadedCount((prev) => prev + fetchedContacts.length);
+      if (Number.isFinite(data.totalCount)) {
+        setTotalAvailableCount(data.totalCount);
       }
-    });
+    } catch {
+      notifications.show(
+        errorNotificationTemplate({
+          title: "Error",
+          description: "Failed to load more contacts. Please try again.",
+        }),
+      );
+    } finally {
+      setIsLoadingMore(false);
+    }
+  };
 
-    return sorted;
-  }, [initialContacts, searchValue, sortOrder]);
+  /**
+   * After removing/deleting contacts, if the loaded list drops below PAGE_SIZE
+   * and more members remain, automatically fetch enough to fill back up to PAGE_SIZE.
+   */
+  const refillToPageSize = async (remaining: Contact[], newTotal: number): Promise<Contact[]> => {
+    const PAGE_SIZE = 50;
+    const needed = Math.min(PAGE_SIZE - remaining.length, newTotal - remaining.length);
+    if (needed <= 0) return remaining;
+
+    try {
+      const params = new URLSearchParams();
+      params.set("limit", String(needed));
+      params.set("offset", String(remaining.length));
+      if (initialSearch) params.set("q", initialSearch);
+      if (initialSort) params.set("sort", initialSort);
+      appendAvatarParams(params, "small");
+
+      const res = await fetch(`${API_ROUTES.GROUPS}/${groupId}/contacts?${params.toString()}`);
+      if (!res.ok) return remaining;
+
+      const data = await res.json();
+      const extra = ((data.contacts || []) as Contact[]).map((c) => ({
+        ...c,
+        lastInteraction: c.lastInteraction ? new Date(c.lastInteraction) : null,
+        createdAt: c.createdAt ? new Date(c.createdAt) : null,
+      })) as unknown as Contact[];
+
+      const existingIds = new Set(remaining.map((c) => c.id));
+      const uniqueExtra = extra.filter((c) => !existingIds.has(c.id));
+      return [...remaining, ...uniqueExtra];
+    } catch {
+      return remaining;
+    }
+  };
 
   const handleSelectAll = () => {
-    if (selectedIds.size === filteredAndSortedContacts.length) {
+    if (isAllTotalSelected) {
+      setIsAllTotalSelected(false);
+      setExcludedIds(new Set());
+      setSelectedIds(new Set());
+      return;
+    }
+    if (selectedIds.size === contacts.length) {
       setSelectedIds(new Set());
     } else {
-      setSelectedIds(new Set(filteredAndSortedContacts.map((c) => c.id)));
+      setSelectedIds(new Set(contacts.map((c) => c.id)));
     }
   };
 
   const handleSelectOne = (id: string, options?: { shiftKey?: boolean; index?: number }) => {
-    const currentIndex =
-      options?.index ?? filteredAndSortedContacts.findIndex((contact) => contact.id === id);
+    const currentIndex = options?.index ?? contacts.findIndex((contact) => contact.id === id);
+
+    if (isAllTotalSelected) {
+      const newExcluded = new Set(excludedIds);
+      if (newExcluded.has(id)) {
+        newExcluded.delete(id);
+      } else {
+        newExcluded.add(id);
+      }
+      if (newExcluded.size >= totalAvailableCount) {
+        setIsAllTotalSelected(false);
+        setExcludedIds(new Set());
+        setSelectedIds(new Set());
+      } else {
+        setExcludedIds(newExcluded);
+      }
+      if (currentIndex >= 0) setLastSelectedIndex(currentIndex);
+      return;
+    }
 
     if (options?.shiftKey && lastSelectedIndex !== null && currentIndex >= 0) {
       const shouldSelect = !selectedIds.has(id);
       const start = Math.min(lastSelectedIndex, currentIndex);
       const end = Math.max(lastSelectedIndex, currentIndex);
-      const rangeIds = filteredAndSortedContacts.slice(start, end + 1).map((contact) => contact.id);
+      const rangeIds = contacts.slice(start, end + 1).map((contact) => contact.id);
 
       const newSelected = new Set(selectedIds);
 
@@ -260,8 +334,8 @@ export function GroupDetailClient({
   };
 
   const handleBulkRemoveFromGroup = async () => {
-    const ids = Array.from(selectedIds);
-    if (ids.length === 0) return;
+    const ids = isAllTotalSelected ? [] : Array.from(selectedIds);
+    if (!isAllTotalSelected && ids.length === 0) return;
 
     const loadingId = notifications.show({
       ...loadingNotificationTemplate({
@@ -271,25 +345,45 @@ export function GroupDetailClient({
     });
 
     try {
+      const body = isAllTotalSelected
+        ? {
+            filter: { q: initialSearch || undefined, sort: initialSort || undefined },
+            excludePersonIds: Array.from(excludedIds),
+          }
+        : { personIds: ids };
+
       const res = await fetch(`${API_ROUTES.GROUPS}/${groupId}/contacts`, {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ personIds: ids }),
+        body: JSON.stringify(body),
       });
 
       if (!res.ok) {
         throw new Error("Failed to remove contacts from group");
       }
 
+      const result = (await res.json().catch(() => ({}))) as { removedCount?: number };
+      const removedCount = result.removedCount ?? ids.length;
+
       notifications.update({
         ...successNotificationTemplate({
           title: "Success",
-          description: `${ids.length} contact(s) removed from group successfully`,
+          description: `${removedCount} contact(s) removed from group successfully`,
         }),
         id: loadingId,
       });
 
+      setIsAllTotalSelected(false);
+      setExcludedIds(new Set());
       setSelectedIds(new Set());
+      const remaining = isAllTotalSelected
+        ? contacts.filter((c) => excludedIds.has(c.id))
+        : contacts.filter((c) => !ids.includes(c.id));
+      const newTotal = Math.max(0, totalAvailableCount - removedCount);
+      const refilled = await refillToPageSize(remaining, newTotal);
+      setContacts(refilled);
+      setLoadedCount(refilled.length);
+      setTotalAvailableCount(newTotal);
       await revalidateGroups();
       router.refresh();
     } catch (error) {
@@ -305,12 +399,29 @@ export function GroupDetailClient({
   };
 
   const handleBulkDelete = (ids: string[]) => {
-    if (ids.length === 0) return;
+    if (!isAllTotalSelected && ids.length === 0) return;
 
     openDeleteContactsModal({
-      contactIds: ids,
-      onDeleted: async () => {
+      contactIds: isAllTotalSelected ? [] : ids,
+      filterPayload: isAllTotalSelected
+        ? {
+            filter: { q: initialSearch || undefined, sort: initialSort || undefined },
+            excludeIds: Array.from(excludedIds),
+          }
+        : undefined,
+      onDeleted: async (deletedCount?: number) => {
+        const removedCount = deletedCount ?? ids.length;
+        setIsAllTotalSelected(false);
+        setExcludedIds(new Set());
         setSelectedIds(new Set());
+        const remaining = isAllTotalSelected
+          ? contacts.filter((c) => excludedIds.has(c.id))
+          : contacts.filter((c) => !ids.includes(c.id));
+        const newTotal = Math.max(0, totalAvailableCount - removedCount);
+        const refilled = await refillToPageSize(remaining, newTotal);
+        setContacts(refilled);
+        setLoadedCount(refilled.length);
+        setTotalAvailableCount(newTotal);
         await revalidateContacts();
         await revalidateGroups();
         router.refresh();
@@ -345,6 +456,12 @@ export function GroupDetailClient({
         id: loadingId,
       });
 
+      const remaining = contacts.filter((c) => c.id !== contactId);
+      const newTotal = Math.max(0, totalAvailableCount - 1);
+      const refilled = await refillToPageSize(remaining, newTotal);
+      setContacts(refilled);
+      setLoadedCount(refilled.length);
+      setTotalAvailableCount(newTotal);
       await revalidateGroups();
       router.refresh();
     } catch (error) {
@@ -360,13 +477,19 @@ export function GroupDetailClient({
   };
 
   const deleteContact = (contactId: string) => {
-    const targetContact = initialContacts.find((contact) => contact.id === contactId);
+    const targetContact = contacts.find((contact) => contact.id === contactId);
     const contactName = targetContact ? formatContactName(targetContact) : "this contact";
 
     openDeleteContactModal({
       contactId,
       contactName,
       onDeleted: async () => {
+        const remaining = contacts.filter((c) => c.id !== contactId);
+        const newTotal = Math.max(0, totalAvailableCount - 1);
+        const refilled = await refillToPageSize(remaining, newTotal);
+        setContacts(refilled);
+        setLoadedCount(refilled.length);
+        setTotalAvailableCount(newTotal);
         await revalidateContacts();
         await revalidateGroups();
         router.refresh();
@@ -384,7 +507,7 @@ export function GroupDetailClient({
 
   const openMergeModal = (leftPersonId: string, rightPersonId?: string, lockBoth?: boolean) => {
     openMergeWithModal({
-      contacts: initialContacts,
+      contacts,
       leftPersonId,
       rightPersonId,
       disableLeftPicker: true,
@@ -394,10 +517,19 @@ export function GroupDetailClient({
     });
   };
 
+  /** Instant: flip the sentinel flag — no network call. */
+  const handleSelectAllTotal = () => {
+    setIsAllTotalSelected(true);
+    setExcludedIds(new Set());
+  };
+
   // Computed selection values
-  const allSelected =
-    filteredAndSortedContacts.length > 0 && selectedIds.size === filteredAndSortedContacts.length;
-  const someSelected = selectedIds.size > 0 && selectedIds.size < filteredAndSortedContacts.length;
+  const allSelected = isAllTotalSelected
+    ? contacts.length > 0 && contacts.every((c) => !excludedIds.has(c.id))
+    : contacts.length > 0 && contacts.every((c) => selectedIds.has(c.id));
+  const someSelected = isAllTotalSelected
+    ? !allSelected && excludedIds.size < totalAvailableCount
+    : !allSelected && selectedIds.size > 0;
 
   const bulkSelectionActions: BulkSelectionAction[] = [
     {
@@ -458,19 +590,19 @@ export function GroupDetailClient({
       id: groupId,
       userId: "",
       label: groupLabel,
-      emoji: "👥",
-      color: "",
+      emoji: groupEmoji || "👥",
+      color: groupColor || "blue",
       createdAt: "",
       updatedAt: "",
-      contactCount: totalCount,
-      previewContacts: initialContacts.slice(0, 3).map((contact) => ({
+      contactCount: groupTotalCount,
+      previewContacts: cardPreviewContacts.map((contact) => ({
         id: contact.id,
         firstName: contact.firstName,
         lastName: contact.lastName,
         avatar: contact.avatar,
       })),
     }),
-    [groupId, groupLabel, initialContacts, totalCount],
+    [groupColor, groupEmoji, groupId, groupLabel, cardPreviewContacts, groupTotalCount],
   );
 
   const handleEditGroup = (group: GroupWithCount) => {
@@ -543,7 +675,13 @@ export function GroupDetailClient({
 
     try {
       const duplicateLabel = `${group.label} (Copy)`;
-      const personIds = initialContacts.map((contact) => contact.id);
+
+      // Fetch up to 200 member IDs for duplication; groups larger than 200 will be partially duplicated.
+      const allMembersRes = await fetch(
+        `${API_ROUTES.GROUPS}/${group.id}/contacts?limit=200&offset=0`,
+      );
+      const allMembersData = allMembersRes.ok ? await allMembersRes.json() : { contacts: [] };
+      const personIds = ((allMembersData.contacts || []) as { id: string }[]).map((c) => c.id);
 
       const res = await fetch(API_ROUTES.GROUPS, {
         method: "POST",
@@ -604,8 +742,14 @@ export function GroupDetailClient({
       <Stack gap="xl">
         <PageHeader
           icon={IconUsersGroup}
-          title="Group"
-          backHref={WEBAPP_ROUTES.GROUPS}
+          title={"Group's details"}
+          backOnClick={() => {
+            if (typeof window !== "undefined" && window.history.length > 1) {
+              router.back();
+            } else {
+              router.push(WEBAPP_ROUTES.GROUPS);
+            }
+          }}
           action={
             <Button size="md" leftSection={<IconUserPlus size={16} />} onClick={handleAddContacts}>
               Add people to group
@@ -625,17 +769,16 @@ export function GroupDetailClient({
 
         <Paper withBorder shadow="sm" radius="md" p="md">
           <ContactsTable
-            contacts={filteredAndSortedContacts}
+            contacts={contacts}
             selectedIds={selectedIds}
             isHeaderShown={true}
-            searchValue={searchValue}
-            onSearchChange={(value) => {
-              setSearchValue(value);
-              handleSearch(value);
-            }}
+            searchDefaultValue={initialSearch}
+            onSearchChange={handleSearchChange}
+            noContactsFound={tGroupDetail("NoContactsFound")}
+            noContactsMatchSearch={tGroupDetail("NoContactsMatchSearch")}
             columnsForMenu={columns}
             setColumnsForMenu={setColumns}
-            sortOrderForMenu={sortOrder}
+            sortOrderForMenu={initialSort}
             setSortOrderForMenu={handleSortChange}
             visibleColumns={visibleColumns}
             onSelectAll={handleSelectAll}
@@ -654,6 +797,18 @@ export function GroupDetailClient({
             }}
             menuActions={menuActions}
             bulkSelectionActions={bulkSelectionActions}
+            loadMoreAction={{
+              label: "Load another 50 contacts",
+              onClick: handleLoadMore,
+              loading: isLoadingMore,
+            }}
+            hasMoreToLoad={contacts.length < totalAvailableCount}
+            totalCount={totalAvailableCount}
+            onSelectAllTotal={
+              contacts.length < totalAvailableCount ? handleSelectAllTotal : undefined
+            }
+            isAllTotalSelected={isAllTotalSelected}
+            excludedIds={excludedIds}
           />
         </Paper>
       </Stack>

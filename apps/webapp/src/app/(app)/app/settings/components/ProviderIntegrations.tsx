@@ -30,11 +30,19 @@ interface UserIdentity {
 interface ProviderIntegrationsProps {
   providers: string[];
   userIdentities: UserIdentity[];
+  showOAuthProviders?: boolean;
+  showExtensionProvider?: boolean;
+  title?: string;
+  description?: string;
 }
 
 export function ProviderIntegrations({
   providers: initialProviders,
   userIdentities,
+  showOAuthProviders = true,
+  showExtensionProvider = true,
+  title,
+  description,
 }: ProviderIntegrationsProps) {
   const [providers, setProviders] = useState<string[]>(initialProviders);
   const [isExtensionInstalled, setIsExtensionInstalled] = useState(false);
@@ -164,64 +172,70 @@ export function ProviderIntegrations({
     <Stack gap="md">
       <div>
         <Text size="sm" fw={500} mb={4}>
-          {t("ConnectedAccounts")}
+          {title || t("ConnectedAccounts")}
         </Text>
         <Text size="xs" c="dimmed">
-          {t("ConnectedAccountsDescription")}
+          {description || t("ConnectedAccountsDescription")}
         </Text>
       </div>
       <Group gap="md">
-        {INTEGRATION_PROVIDERS.map(({ provider, providerKey, iconColor }) => {
-          const icon = provider === "github" ? IconBrandGithub : IconBrandLinkedin;
-          const isConnected = providers.includes(providerKey);
-          const isDisabled = providers.length === 1 && isConnected;
+        {showOAuthProviders
+          ? INTEGRATION_PROVIDERS.map(({ provider, providerKey, iconColor }) => {
+              const icon = provider === "github" ? IconBrandGithub : IconBrandLinkedin;
+              const isConnected = providers.includes(providerKey);
+              const isDisabled = providers.length === 1 && isConnected;
 
-          return (
-            <IntegrationCard
-              key={provider}
-              provider={provider}
-              displayName={
-                provider === "github" ? tIntegration("GitHub") : tIntegration("LinkedIn")
+              return (
+                <IntegrationCard
+                  key={provider}
+                  provider={provider}
+                  displayName={
+                    provider === "github" ? tIntegration("GitHub") : tIntegration("LinkedIn")
+                  }
+                  icon={icon}
+                  iconColor={iconColor}
+                  isConnected={isConnected}
+                  isDisabled={isDisabled}
+                  connectedDescription={tIntegration("ClickToUnlink", {
+                    provider:
+                      provider === "github" ? tIntegration("GitHub") : tIntegration("LinkedIn"),
+                  })}
+                  unconnectedDescription={tIntegration("ClickToLink", {
+                    provider:
+                      provider === "github" ? tIntegration("GitHub") : tIntegration("LinkedIn"),
+                  })}
+                  disabledDescription={tIntegration("LinkedButCannotUnlink")}
+                  onClick={() => {
+                    if (isDisabled) return;
+                    if (isConnected) {
+                      handleUnlinkClick(provider as "github" | "linkedin");
+                    } else {
+                      linkProvider(provider as "github" | "linkedin");
+                    }
+                  }}
+                />
+              );
+            })
+          : null}
+        {showExtensionProvider ? (
+          <IntegrationCard
+            provider="bondery_chrome_extension"
+            displayName={tIntegration("BonderyChromeExtension")}
+            iconNode={<BonderyIcon width={28} height={28} />}
+            iconColor="grape"
+            isConnected={isExtensionInstalled}
+            isDisabled={isExtensionInstalled}
+            connectedDescription={tIntegration("ExtensionLinkedDescription")}
+            unconnectedDescription={tIntegration("ExtensionInstallDescription")}
+            onClick={() => {
+              if (isExtensionInstalled) {
+                return;
               }
-              icon={icon}
-              iconColor={iconColor}
-              isConnected={isConnected}
-              isDisabled={isDisabled}
-              connectedDescription={tIntegration("ClickToUnlink", {
-                provider: provider === "github" ? tIntegration("GitHub") : tIntegration("LinkedIn"),
-              })}
-              unconnectedDescription={tIntegration("ClickToLink", {
-                provider: provider === "github" ? tIntegration("GitHub") : tIntegration("LinkedIn"),
-              })}
-              disabledDescription={tIntegration("LinkedButCannotUnlink")}
-              onClick={() => {
-                if (isDisabled) return;
-                if (isConnected) {
-                  handleUnlinkClick(provider as "github" | "linkedin");
-                } else {
-                  linkProvider(provider as "github" | "linkedin");
-                }
-              }}
-            />
-          );
-        })}
-        <IntegrationCard
-          provider="bondery_chrome_extension"
-          displayName={tIntegration("BonderyChromeExtension")}
-          iconNode={<BonderyIcon width={28} height={28} />}
-          iconColor="grape"
-          isConnected={isExtensionInstalled}
-          isDisabled={isExtensionInstalled}
-          connectedDescription={tIntegration("ExtensionLinkedDescription")}
-          unconnectedDescription={tIntegration("ExtensionInstallDescription")}
-          onClick={() => {
-            if (isExtensionInstalled) {
-              return;
-            }
 
-            window.open(CHROME_EXTENSION_URL, "_blank", "noopener,noreferrer");
-          }}
-        />
+              window.open(CHROME_EXTENSION_URL, "_blank", "noopener,noreferrer");
+            }}
+          />
+        ) : null}
       </Group>
     </Stack>
   );

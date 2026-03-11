@@ -14,18 +14,10 @@ To create a new release of the Bondery Chrome Extension (only if there are updat
 
 ### 1. Update Version Numbers
 
-Update the version in **both** of these files:
+Update the version in the following files:
 1. `apps/chrome-extension/package.json` → `"version": "X.Y.Z"`
-2. `apps/chrome-extension/scripts/generate-manifest.ts` → `version: "X.Y.Z"`
 
-### 2. Regenerate Manifest
-
-```bash
-cd apps/chrome-extension
-npm run generate-manifest
-```
-
-### 3. Commit Changes
+### 2. Commit Changes
 
 ```bash
 git add .
@@ -33,7 +25,7 @@ git commit -m "chore(extension): Bump version to X.Y.Z"
 git push
 ```
 
-### 4. Create and Push Tag
+### 3. Create and Push Tag
 
 ```bash
 # Replace X.Y.Z with your version number (e.g., 0.4.0)
@@ -47,7 +39,7 @@ git tag ext-v0.4.0
 git push origin ext-v0.4.0
 ```
 
-### 5. GitHub Actions Will Automatically
+### 4. GitHub Actions Will Automatically
 
 - Build the extension in production mode (extension only, not the web app)
    - Create a GitHub release

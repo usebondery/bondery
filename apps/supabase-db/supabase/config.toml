@@ -15,7 +15,7 @@ schemas = ["public", "graphql_public"]
 extra_search_path = ["public", "extensions"]
 # The maximum number of rows returns from a view, table, or stored procedure. Limits payload size
 # for accidental or malicious requests.
-max_rows = 1000
+max_rows = 1500
 
 [api.tls]
 # Enable HTTPS endpoints locally using a self-signed certificate.
@@ -29,8 +29,6 @@ enabled = false
 port = 54322
 # Port used by db diff command to initialize the shadow database.
 shadow_port = 54320
-# Maximum amount of time to wait for health check when starting the local database.
-health_timeout = "2m"
 # The database major version to use. This has to be the same as your remote database's. Run `SHOW
 # server_version;` on the remote database to check.
 major_version = 17
@@ -58,11 +56,10 @@ enabled = true
 schema_paths = []
 
 [db.seed]
-# If enabled, seeds the database after migrations during a db reset.
-enabled = true
-# Specifies an ordered list of seed files to load during db reset.
-# Supports glob patterns relative to supabase directory: "./seeds/*.sql"
-sql_paths = ["./seed.sql"]
+# Seeding is intentionally disabled. Use the Testing snippet
+# supabase/snippets/Testing/populate_sample_data.sql to load sample data on demand.
+enabled = false
+sql_paths = []
 
 [db.network_restrictions]
 # Enable management of network restrictions.
@@ -119,8 +116,8 @@ file_size_limit = "50MiB"
 enabled = true
 
 # Image transformation API is available to Supabase Pro plan.
-# [storage.image_transformation]
-# enabled = true
+[storage.image_transformation]
+enabled = true
 
 # Store analytical data in S3 for running ETL jobs over Iceberg Catalog
 # This feature is only available on the hosted platform.
@@ -147,9 +144,9 @@ max_indexes = 5
 enabled = true
 # The base URL of your website. Used as an allow-list for redirects and for constructing URLs used
 # in emails.
-site_url = "env(NEXT_PUBLIC_WEBAPP_URL)"
+site_url = "env(BONDERY_SUPABASE_WEBAPP_URL)"
 # A list of *exact* URLs that auth providers are permitted to redirect to post authentication.
-additional_redirect_urls = ["env(NEXT_PUBLIC_WEBAPP_URL)", "env(NEXT_PUBLIC_WEBAPP_URL)/auth/callback"]
+additional_redirect_urls = ["env(BONDERY_SUPABASE_WEBAPP_URL)", "env(BONDERY_SUPABASE_WEBAPP_CALLBACK_URL)"]
 # How long tokens are valid for, in seconds. Defaults to 3600 (1 hour), maximum 604,800 (1 week).
 jwt_expiry = 3600
 # JWT issuer URL. If not set, defaults to the local API URL (http://127.0.0.1:<port>/auth/v1).
@@ -166,9 +163,9 @@ enable_signup = true
 # Allow/disallow anonymous sign-ins to your project.
 enable_anonymous_sign_ins = false
 # Allow/disallow testing manual linking of accounts
-enable_manual_linking = false
+enable_manual_linking = true
 # Passwords shorter than this value will be rejected as weak. Minimum 6, recommended 8 or more.
-minimum_password_length = 6
+minimum_password_length = 10
 # Passwords that do not meet the following requirements will be rejected as weak. Supported values
 # are: `letters_digits`, `lower_upper_letters_digits`, `lower_upper_letters_digits_symbols`
 password_requirements = ""
@@ -300,11 +297,11 @@ max_frequency = "5s"
 # `twitter`, `x`, `slack`, `spotify`, `workos`, `zoom`.
 [auth.external.github]
 enabled = true
-client_id = "env(SUPABASE_AUTH_EXTERNAL_GITHUB_CLIENT_ID)"
+client_id = "env(BONDERY_SUPABASE_AUTH_EXTERNAL_GITHUB_CLIENT_ID)"
 # DO NOT commit your OAuth provider secret to git. Use environment variable substitution instead:
-secret = "env(SUPABASE_AUTH_EXTERNAL_GITHUB_SECRET)"
+secret = "env(BONDERY_SUPABASE_AUTH_EXTERNAL_GITHUB_SECRET)"
 # Overrides the default auth redirectUrl.
-redirect_uri = "env(SUPABASE_AUTH_CALLBACK_URL)"
+redirect_uri = "env(BONDERY_SUPABASE_AUTH_CALLBACK_URL)"
 # Overrides the default auth provider URL. Used to support self-hosted gitlab, single-tenant Azure,
 # or any other third-party OIDC providers.
 url = ""
@@ -315,11 +312,11 @@ email_optional = false
 
 [auth.external.linkedin_oidc]
 enabled = true
-client_id = "env(SUPABASE_AUTH_EXTERNAL_LINKEDIN_CLIENT_ID)"
+client_id = "env(BONDERY_SUPABASE_AUTH_EXTERNAL_LINKEDIN_CLIENT_ID)"
 # DO NOT commit your OAuth provider secret to git. Use environment variable substitution instead:
-secret = "env(SUPABASE_AUTH_EXTERNAL_LINKEDIN_SECRET)"
+secret = "env(BONDERY_SUPABASE_AUTH_EXTERNAL_LINKEDIN_SECRET)"
 # Overrides the default auth redirectUrl.
-redirect_uri = "env(SUPABASE_AUTH_CALLBACK_URL)"
+redirect_uri = "env(BONDERY_SUPABASE_AUTH_CALLBACK_URL)"
 # Overrides the default auth provider URL. Used to support self-hosted gitlab, single-tenant Azure,
 # or any other third-party OIDC providers.
 url = ""
@@ -359,11 +356,11 @@ enabled = false
 # OAuth server configuration
 [auth.oauth_server]
 # Enable OAuth server functionality
-enabled = false
+enabled = true
 # Path for OAuth consent flow UI
 authorization_url_path = "/oauth/consent"
 # Allow dynamic client registration
-allow_dynamic_registration = false
+allow_dynamic_registration = true
 
 [edge_runtime]
 enabled = true

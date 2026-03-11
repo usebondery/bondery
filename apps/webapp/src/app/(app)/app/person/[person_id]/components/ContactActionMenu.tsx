@@ -1,11 +1,19 @@
 import { Button, Menu, MenuItem } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
-import { IconArrowMerge, IconDotsVertical, IconId, IconTrash } from "@tabler/icons-react";
+import {
+  IconArrowMerge,
+  IconBrandLinkedin,
+  IconDotsVertical,
+  IconId,
+  IconTrash,
+} from "@tabler/icons-react";
 import type { Contact } from "@bondery/types";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import { useState } from "react";
 import { errorNotificationTemplate, successNotificationTemplate } from "@bondery/mantine-next";
 import { useTranslations } from "next-intl";
+import { useEnrichFromLinkedIn } from "@/lib/extension/useEnrichFromLinkedIn";
+import { revalidateContacts } from "../../../actions";
 
 interface ContactActionMenuProps {
   contact: Contact;
@@ -21,6 +29,8 @@ export function ContactActionMenu({
   onMergeWith,
 }: ContactActionMenuProps) {
   const tMerge = useTranslations("MergeWithModal");
+  const tEnrich = useTranslations("EnrichFromLinkedIn");
+  const { enrichFromLinkedIn } = useEnrichFromLinkedIn({ onSuccess: revalidateContacts });
 
   const handleExport = async () => {
     try {
@@ -80,6 +90,12 @@ export function ContactActionMenu({
         </MenuItem>
         <MenuItem leftSection={<IconId size={16} />} onClick={handleExport}>
           Download vCard
+        </MenuItem>
+        <MenuItem
+          leftSection={<IconBrandLinkedin size={16} />}
+          onClick={() => enrichFromLinkedIn(personId, contact.linkedin)}
+        >
+          {tEnrich("MenuLabel")}
         </MenuItem>
         <MenuItem color="red" leftSection={<IconTrash size={16} />} onClick={onDelete}>
           Delete Contact

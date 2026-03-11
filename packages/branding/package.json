@@ -1,6 +1,6 @@
 {
   "name": "@bondery/branding",
-  "version": "0.1.0",
+  "version": "0.6.1",
   "type": "module",
   "description": "Bondery branding assets and icons",
   "main": "./dist/index.js",
@@ -43,23 +43,14 @@
     "src/assets"
   ],
   "scripts": {
-    "build": "tsc",
-    "generate-react-icons": "tsx scripts/generate-react-icons.ts"
+    "build": "tsc && node scripts/fix-esm-imports.mjs"
   },
   "dependencies": {
     "sharp": "^0.34.5"
   },
   "devDependencies": {
-    "@svgr/core": "^8.1.0",
-    "@svgr/plugin-jsx": "^8.1.0",
-    "@svgr/plugin-prettier": "^8.1.0",
     "@types/node": "^25",
     "tsx": "^4.21.0",
     "typescript": "^5"
-  },
-  "keywords": [
-    "branding",
-    "icons",
-    "assets"
-  ]
+  }
 }

@@ -28,32 +28,32 @@ export type Database = {
   };
   public: {
     Tables: {
-      event_participants: {
+      interaction_participants: {
         Row: {
           created_at: string;
-          event_id: string;
+          interaction_id: string;
           person_id: string;
         };
         Insert: {
           created_at?: string;
-          event_id: string;
+          interaction_id: string;
           person_id: string;
         };
         Update: {
           created_at?: string;
-          event_id?: string;
+          interaction_id?: string;
           person_id?: string;
         };
         Relationships: [
           {
-            foreignKeyName: "event_participants_event_id_fkey";
-            columns: ["event_id"];
+            foreignKeyName: "interaction_participants_interaction_id_fkey";
+            columns: ["interaction_id"];
             isOneToOne: false;
-            referencedRelation: "events";
+            referencedRelation: "interactions";
             referencedColumns: ["id"];
           },
           {
-            foreignKeyName: "event_participants_person_id_fkey";
+            foreignKeyName: "interaction_participants_person_id_fkey";
             columns: ["person_id"];
             isOneToOne: false;
             referencedRelation: "people";
@@ -61,7 +61,7 @@ export type Database = {
           },
         ];
       };
-      events: {
+      interactions: {
         Row: {
           created_at: string;
           date: string;
@@ -91,6 +91,66 @@ export type Database = {
           type?: string;
           updated_at?: string;
           user_id?: string;
+        };
+        Relationships: [];
+      };
+      geocode_cache: {
+        Row: {
+          city: string | null;
+          country: string | null;
+          country_code: string | null;
+          created_at: string;
+          formatted_label: string | null;
+          geocode_found: boolean;
+          id: string;
+          lat: number | null;
+          location_ewkt: string | null;
+          lon: number | null;
+          name: string | null;
+          place_key: string;
+          place_original: string;
+          state: string | null;
+          state_code: string | null;
+          timezone: string | null;
+          updated_at: string;
+        };
+        Insert: {
+          city?: string | null;
+          country?: string | null;
+          country_code?: string | null;
+          created_at?: string;
+          formatted_label?: string | null;
+          geocode_found?: boolean;
+          id?: string;
+          lat?: number | null;
+          location_ewkt?: string | null;
+          lon?: number | null;
+          name?: string | null;
+          place_key: string;
+          place_original: string;
+          state?: string | null;
+          state_code?: string | null;
+          timezone?: string | null;
+          updated_at?: string;
+        };
+        Update: {
+          city?: string | null;
+          country?: string | null;
+          country_code?: string | null;
+          created_at?: string;
+          formatted_label?: string | null;
+          geocode_found?: boolean;
+          id?: string;
+          lat?: number | null;
+          location_ewkt?: string | null;
+          lon?: number | null;
+          name?: string | null;
+          place_key?: string;
+          place_original?: string;
+          state?: string | null;
+          state_code?: string | null;
+          timezone?: string | null;
+          updated_at?: string;
         };
         Relationships: [];
       };
@@ -137,7 +197,6 @@ export type Database = {
           address_postal_code: string | null;
           address_state: string | null;
           address_state_code: string | null;
-          avatar: string | null;
           created_at: string | null;
           first_name: string;
           id: string;
@@ -150,9 +209,11 @@ export type Database = {
           middle_name: string | null;
           myself: boolean | null;
           notes: string | null;
+          notes_updated_at: string | null;
           place: string | null;
           timezone: string | null;
-          title: string | null;
+          headline: string | null;
+          linkedin_bio: string | null;
           updated_at: string | null;
           user_id: string;
         };
@@ -168,7 +229,6 @@ export type Database = {
           address_postal_code?: string | null;
           address_state?: string | null;
           address_state_code?: string | null;
-          avatar?: string | null;
           created_at?: string | null;
           first_name: string;
           id?: string;
@@ -181,9 +241,11 @@ export type Database = {
           middle_name?: string | null;
           myself?: boolean | null;
           notes?: string | null;
+          notes_updated_at?: string | null;
           place?: string | null;
           timezone?: string | null;
-          title?: string | null;
+          headline?: string | null;
+          linkedin_bio?: string | null;
           updated_at?: string | null;
           user_id: string;
         };
@@ -199,7 +261,6 @@ export type Database = {
           address_postal_code?: string | null;
           address_state?: string | null;
           address_state_code?: string | null;
-          avatar?: string | null;
           created_at?: string | null;
           first_name?: string;
           id?: string;
@@ -212,9 +273,11 @@ export type Database = {
           middle_name?: string | null;
           myself?: boolean | null;
           notes?: string | null;
+          notes_updated_at?: string | null;
           place?: string | null;
           timezone?: string | null;
-          title?: string | null;
+          headline?: string | null;
+          linkedin_bio?: string | null;
           updated_at?: string | null;
           user_id?: string;
         };
@@ -293,6 +356,56 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "people_addresses_person_id_fkey";
+            columns: ["person_id"];
+            isOneToOne: false;
+            referencedRelation: "people";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      people_education_history: {
+        Row: {
+          created_at: string;
+          degree: string | null;
+          description: string | null;
+          end_date: string | null;
+          id: string;
+          person_id: string;
+          school_linkedin_id: string | null;
+          school_name: string;
+          start_date: string | null;
+          updated_at: string;
+          user_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          degree?: string | null;
+          description?: string | null;
+          end_date?: string | null;
+          id?: string;
+          person_id: string;
+          school_linkedin_id?: string | null;
+          school_name: string;
+          start_date?: string | null;
+          updated_at?: string;
+          user_id: string;
+        };
+        Update: {
+          created_at?: string;
+          degree?: string | null;
+          description?: string | null;
+          end_date?: string | null;
+          id?: string;
+          person_id?: string;
+          school_linkedin_id?: string | null;
+          school_name?: string;
+          start_date?: string | null;
+          updated_at?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "people_education_history_person_id_fkey";
             columns: ["person_id"];
             isOneToOne: false;
             referencedRelation: "people";
@@ -383,11 +496,11 @@ export type Database = {
           },
         ];
       };
-      people_important_events: {
+      people_important_dates: {
         Row: {
           created_at: string;
-          event_date: string;
-          event_type: string;
+          date: string;
+          type: string;
           id: string;
           note: string | null;
           notify_days_before: number | null;
@@ -398,8 +511,8 @@ export type Database = {
         };
         Insert: {
           created_at?: string;
-          event_date: string;
-          event_type: string;
+          date: string;
+          type: string;
           id?: string;
           note?: string | null;
           notify_days_before?: number | null;
@@ -410,8 +523,8 @@ export type Database = {
         };
         Update: {
           created_at?: string;
-          event_date?: string;
-          event_type?: string;
+          date?: string;
+          type?: string;
           id?: string;
           note?: string | null;
           notify_days_before?: number | null;
@@ -422,7 +535,7 @@ export type Database = {
         };
         Relationships: [
           {
-            foreignKeyName: "people_important_events_person_id_fkey";
+            foreignKeyName: "people_important_dates_person_id_fkey";
             columns: ["person_id"];
             isOneToOne: false;
             referencedRelation: "people";
@@ -617,6 +730,101 @@ export type Database = {
           },
         ];
       };
+      people_tags: {
+        Row: {
+          created_at: string | null;
+          id: string;
+          person_id: string;
+          tag_id: string;
+          user_id: string;
+        };
+        Insert: {
+          created_at?: string | null;
+          id?: string;
+          person_id: string;
+          tag_id: string;
+          user_id: string;
+        };
+        Update: {
+          created_at?: string | null;
+          id?: string;
+          person_id?: string;
+          tag_id?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "people_tags_tag_id_fkey";
+            columns: ["tag_id"];
+            isOneToOne: false;
+            referencedRelation: "tags";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "people_tags_person_id_fkey";
+            columns: ["person_id"];
+            isOneToOne: false;
+            referencedRelation: "people";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      people_work_history: {
+        Row: {
+          company_linkedin_id: string | null;
+          company_name: string;
+          created_at: string;
+          description: string | null;
+          employment_type: string | null;
+          end_date: string | null;
+          id: string;
+          location: string | null;
+          person_id: string;
+          start_date: string | null;
+          title: string | null;
+          updated_at: string;
+          user_id: string;
+        };
+        Insert: {
+          company_linkedin_id?: string | null;
+          company_name: string;
+          created_at?: string;
+          description?: string | null;
+          employment_type?: string | null;
+          end_date?: string | null;
+          id?: string;
+          location?: string | null;
+          person_id: string;
+          start_date?: string | null;
+          title?: string | null;
+          updated_at?: string;
+          user_id: string;
+        };
+        Update: {
+          company_linkedin_id?: string | null;
+          company_name?: string;
+          created_at?: string;
+          description?: string | null;
+          employment_type?: string | null;
+          end_date?: string | null;
+          id?: string;
+          location?: string | null;
+          person_id?: string;
+          start_date?: string | null;
+          title?: string | null;
+          updated_at?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "people_work_history_person_id_fkey";
+            columns: ["person_id"];
+            isOneToOne: false;
+            referencedRelation: "people";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       reminder_dispatch_log: {
         Row: {
           created_at: string;
@@ -637,6 +845,33 @@ export type Database = {
           id?: string;
           reminder_date?: string;
           timezone?: string;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
+      tags: {
+        Row: {
+          color: string | null;
+          created_at: string | null;
+          id: string;
+          label: string;
+          updated_at: string | null;
+          user_id: string;
+        };
+        Insert: {
+          color?: string | null;
+          created_at?: string | null;
+          id?: string;
+          label: string;
+          updated_at?: string | null;
+          user_id: string;
+        };
+        Update: {
+          color?: string | null;
+          created_at?: string | null;
+          id?: string;
+          label?: string;
+          updated_at?: string | null;
           user_id?: string;
         };
         Relationships: [];
@@ -719,6 +954,22 @@ export type Database = {
         Returns: Json;
       };
       send_hourly_reminder_digests: { Args: never; Returns: Json };
+      replace_work_history: {
+        Args: {
+          p_person_id: string;
+          p_user_id: string;
+          p_rows: Json;
+        };
+        Returns: undefined;
+      };
+      replace_education_history: {
+        Args: {
+          p_person_id: string;
+          p_user_id: string;
+          p_rows: Json;
+        };
+        Returns: undefined;
+      };
     };
     Enums: {
       color_scheme: "light" | "dark" | "auto";
