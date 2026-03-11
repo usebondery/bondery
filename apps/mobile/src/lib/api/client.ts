@@ -1,7 +1,9 @@
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import type {
+  Contact,
   ContactsListResponse,
   DeleteContactsRequest,
+  GroupsListResponse,
   UserSettingsResponse,
 } from "@bondery/types";
 import { API_URL } from "../config";
@@ -94,6 +96,37 @@ export async function deleteContacts(ids: string[]): Promise<void> {
     method: "DELETE",
     body: JSON.stringify(body),
   });
+}
+
+/**
+ * Fetches the list of groups with contact counts.
+ */
+export async function fetchGroups(): Promise<GroupsListResponse> {
+  return apiRequest<GroupsListResponse>(API_ROUTES.GROUPS);
+}
+
+/**
+ * Fetches the contacts belonging to a specific group.
+ */
+export async function fetchGroupContacts(
+  groupId: string,
+  params?: { query?: string; limit?: number; offset?: number },
+): Promise<ContactsListResponse> {
+  const sp = new URLSearchParams();
+  sp.set("sort", "nameAsc");
+  if (params?.limit) sp.set("limit", String(params.limit));
+  if (params?.offset) sp.set("offset", String(params.offset));
+  if (params?.query?.trim()) sp.set("q", params.query.trim());
+  return apiRequest<ContactsListResponse>(
+    `${API_ROUTES.GROUPS}/${groupId}/contacts?${sp.toString()}`,
+  );
+}
+
+/**
+ * Fetches a single contact by ID.
+ */
+export async function fetchContact(id: string): Promise<{ contact: Contact }> {
+  return apiRequest<{ contact: Contact }>(`${API_ROUTES.CONTACTS}/${id}`);
 }
 
 /**

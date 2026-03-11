@@ -97,6 +97,10 @@ const envSchema = {
       type: "string",
       default: "",
     },
+    EXTRA_ALLOWED_ORIGINS: {
+      type: "string",
+      default: "",
+    },
   },
 } as const;
 
@@ -117,6 +121,7 @@ declare module "fastify" {
       PRIVATE_EMAIL_PASS: string;
       PRIVATE_EMAIL_ADDRESS: string;
       PRIVATE_EMAIL_PORT: number;
+      EXTRA_ALLOWED_ORIGINS: string;
     };
   }
 }
@@ -222,9 +227,15 @@ async function buildServer() {
   });
 
   // Allowed origins for CORS
+  const extraOrigins = fastify.config.EXTRA_ALLOWED_ORIGINS
+    ? fastify.config.EXTRA_ALLOWED_ORIGINS.split(",")
+        .map((o) => o.trim())
+        .filter(Boolean)
+    : [];
   const ALLOWED_ORIGINS = [
     fastify.config.NEXT_PUBLIC_WEBAPP_URL,
     fastify.config.NEXT_PUBLIC_WEBSITE_URL,
+    ...extraOrigins,
   ].filter(Boolean);
 
   // Register CORS

@@ -8,6 +8,10 @@ export const supabase = HAS_MOBILE_CONFIG
       auth: {
         autoRefreshToken: true,
         persistSession: true,
+        // PKCE: Supabase redirects with ?code= query param instead of hash
+        // tokens, so the code can be exchanged manually in the callback screen.
+        flowType: "pkce",
+        // Do not auto-detect session from URL — the callback screen handles it.
         detectSessionInUrl: false,
         storage: supabaseSecureStorage,
       },

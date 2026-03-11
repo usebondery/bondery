@@ -183,9 +183,11 @@ function getAuthTokensFromCookies(request: FastifyRequest): {
 export async function createAuthenticatedClient(
   request: FastifyRequest,
 ): Promise<{ client: SupabaseClient<Database>; user: { id: string; email: string } | null }> {
-  const { NEXT_PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_PUBLISHABLE_KEY } = getSupabaseConfig();
+  const { NEXT_PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_PUBLISHABLE_KEY, PRIVATE_SUPABASE_SECRET_KEY } = getSupabaseConfig();
   const { accessToken, refreshToken } = getAuthTokensFromCookies(request);
-  const client = createClient<Database>(NEXT_PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_PUBLISHABLE_KEY, {
+
+  // Create an anon client solely for token validation
+  const anonClient = createClient<Database>(NEXT_PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_PUBLISHABLE_KEY, {
     auth: {
       autoRefreshToken: false,
       persistSession: false,
@@ -193,22 +195,33 @@ export async function createAuthenticatedClient(
   });
 
   if (!accessToken) {
-    return { client, user: null };
+    return { client: anonClient, user: null };
   }
 
-  // Set the session with the tokens
-  const { data, error } = await client.auth.setSession({
-    access_token: accessToken,
-    refresh_token: refreshToken || "",
-  });
+  // Validate the access token — recommended server-side pattern.
+  const { data, error } = await anonClient.auth.getUser(accessToken);
 
   if (error || !data.user) {
     logger.warn(
       { errorMessage: error?.message, errorStatus: error?.status },
-      "[createAuthenticatedClient] setSession error",
+      "[createAuthenticatedClient] getUser error",
     );
-    return { client, user: null };
+    return { client: anonClient, user: null };
   }
+
+  // Create a service-role client that passes the user's JWT in the Authorization header.
+  // This satisfies RLS policies (auth.uid() = user.id) while running server-side.
+  const client = createClient<Database>(NEXT_PUBLIC_SUPABASE_URL, PRIVATE_SUPABASE_SECRET_KEY, {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false,
+    },
+    global: {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    },
+  });
 
   return {
     client,
