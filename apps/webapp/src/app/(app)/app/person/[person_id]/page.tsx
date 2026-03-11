@@ -5,9 +5,11 @@ import type {
   Activity,
   ContactRelationshipWithPeople,
   ImportantDate,
+  MergeRecommendation,
   WorkHistoryEntry,
   EducationEntry,
 } from "@bondery/types";
+import { getMergeRecommendationsData } from "@/app/(app)/app/fix/getMergeRecommendationsData";
 import PersonClient from "./PersonClient";
 import { getAuthHeaders } from "@/lib/authHeaders";
 import { API_ROUTES, formatMetadataTitle } from "@bondery/helpers/globals/paths";
@@ -109,6 +111,10 @@ async function getPersonData(personId: string) {
     headers,
   });
 
+  const mergeRecommendationsPromise = getMergeRecommendationsData(headers).catch(
+    () => [] as MergeRecommendation[],
+  );
+
   const [
     contactResponse,
     groupsResponse,
@@ -120,6 +126,7 @@ async function getPersonData(personId: string) {
     allTagsResponse,
     personTagsResponse,
     linkedInDataResponse,
+    allMergeRecommendations,
   ] = await Promise.all([
     contactPromise,
     groupsPromise,
@@ -131,6 +138,7 @@ async function getPersonData(personId: string) {
     allTagsPromise,
     personTagsPromise,
     linkedInDataPromise,
+    mergeRecommendationsPromise,
   ]);
 
   if (!contactResponse.ok) {
@@ -185,6 +193,10 @@ async function getPersonData(personId: string) {
     workHistory: (linkedInData.workHistory as WorkHistoryEntry[]) || [],
     education: (linkedInData.education as EducationEntry[]) || [],
     linkedinBio: (linkedInData.linkedinBio as string | null) ?? null,
+    mergeRecommendation:
+      (allMergeRecommendations as MergeRecommendation[]).find(
+        (r) => r.leftPerson.id === personId || r.rightPerson.id === personId,
+      ) ?? null,
   };
 }
 
@@ -237,6 +249,7 @@ export default async function PersonPage({
       initialWorkHistory={data.workHistory}
       initialEducation={data.education}
       initialLinkedinBio={data.linkedinBio}
+      initialMergeRecommendation={data.mergeRecommendation}
       personId={personId}
       initialTab={typeof tab === "string" ? tab : undefined}
     />

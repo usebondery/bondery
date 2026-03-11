@@ -17,6 +17,8 @@ export interface DataColumnConfig<TRow> {
   fixed?: boolean;
   /** Min-width CSS class (e.g., "min-w-40") */
   minWidthClass?: string;
+  /** If true, the column header label and icon are not rendered */
+  hideHeader?: boolean;
   /** Custom render function for cell content */
   render: (row: TRow, rowIndex: number) => ReactNode;
 }
