@@ -1,6 +1,8 @@
 # Supabase
 .supabase/
 .env.local
+.env.beta
+.env.production
 
 # Dependencies
 node_modules/

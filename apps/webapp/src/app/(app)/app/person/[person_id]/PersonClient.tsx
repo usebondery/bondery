@@ -1,16 +1,36 @@
 "use client";
 
-import { Group, Stack, Paper, Text, Card, Avatar, Button } from "@mantine/core";
+import { Group, Stack, Paper, Text, Button, Tabs, Box } from "@mantine/core";
 import { Link } from "@mantine/tiptap";
 import { useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Highlight from "@tiptap/extension-highlight";
 import { Color } from "@tiptap/extension-color";
 import { TextStyle } from "@tiptap/extension-text-style";
+import Mention from "@tiptap/extension-mention";
+import Emoji from "@tiptap/extension-emoji";
+import TaskList from "@tiptap/extension-task-list";
+import TaskItem from "@tiptap/extension-task-item";
+import { ReactNodeViewRenderer } from "@tiptap/react";
+import Placeholder from "@tiptap/extension-placeholder";
+import { InlineDateExtension } from "./components/InlineDateExtension";
+import { MarkdownPasteExtension } from "./components/MarkdownPasteExtension";
+import { SlashCommandExtension } from "./components/SlashCommandExtension";
+import { slashCommandSuggestion } from "./components/slashCommandSuggestion";
 import { notifications } from "@mantine/notifications";
-import { IconCheck, IconX, IconUser, IconPlus, IconMapPin } from "@tabler/icons-react";
-import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import {
+  IconCheck,
+  IconX,
+  IconUser,
+  IconMapPin,
+  IconClock,
+  IconCalendarEvent,
+  IconUserCircle,
+  IconTags,
+  IconBrandLinkedin,
+} from "@tabler/icons-react";
+import { useRouter, usePathname } from "next/navigation";
+import { useEffect, useMemo, useState, useCallback, useRef } from "react";
 import { useTranslations } from "next-intl";
 import { extractUsername } from "@/lib/socialMediaHelpers";
 import { parsePhoneNumber, combinePhoneNumber } from "@/lib/phoneHelpers";
@@ -26,8 +46,11 @@ import type {
   EmailEntry,
   Activity,
   RelationshipType,
-  ImportantEvent,
+  ImportantDate,
   MergeConflictField,
+  Tag,
+  WorkHistoryEntry,
+  EducationEntry,
 } from "@bondery/types";
 import { ContactActionMenu } from "./components/ContactActionMenu";
 import { ContactIdentitySection } from "./components/ContactIdentitySection";
@@ -36,10 +59,14 @@ import { ContactRelationshipsSection } from "./components/ContactRelationshipsSe
 import { ContactNotesSection } from "./components/ContactNotesSection";
 import { ContactAddressSection } from "./components/ContactAddressSection";
 import { ContactImportantDatesSection } from "./components/ContactImportantDatesSection";
-import { PersonTimelineSection } from "./components/PersonTimelineSection";
+import { PersonInteractionsSection } from "./components/PersonInteractionsSection";
+import { openNewActivityModal } from "../../interactions/components/NewActivityModal";
+import { LinkedInTab } from "./components/LinkedInTab";
+import { useEnrichFromLinkedIn } from "@/lib/extension/useEnrichFromLinkedIn";
 // import { ContactPGPSection } from "./components/ContactPGPSection";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
+import { HELP_DOCS_URL } from "@bondery/helpers";
 import {
   errorNotificationTemplate,
   ModalTitle,
@@ -48,40 +75,89 @@ import {
 import { PageWrapper } from "@/app/(app)/app/components/PageWrapper";
 import { PageHeader } from "@/app/(app)/app/components/PageHeader";
 import { revalidateContacts, revalidateRelationships } from "../../actions";
+import { getTimezoneForCoordinates } from "@/app/(app)/app/map/actions";
+import { resolveToCanonicalTimezone } from "@/lib/timezones";
 import { openDeleteContactModal } from "@/app/(app)/app/components/contacts/openDeleteContactModal";
 import { openStandardConfirmModal } from "@/app/(app)/app/components/modals/openStandardConfirmModal";
 import { GroupCard } from "../../groups/components/GroupCard";
+import { PersonTagsInput } from "./components/PersonTagsInput";
 import { openAddPeopleToGroupSelectionModal } from "../../people/components/AddPeopleToGroupSelectionModal";
 import { MERGE_CONFLICT_FIELDS, openMergeWithModal } from "../../people/components/MergeWithModal";
+import { WEBSITE_URL } from "@/lib/config";
+import { createMentionSuggestion } from "./components/mentionSuggestion";
+import { emojiSuggestionRender } from "./components/emojiSuggestion";
+import type { MentionSuggestionItem } from "./components/MentionList";
+import { MentionNodeView } from "./components/MentionNodeView";
+import { TaskItemNodeView } from "./components/TaskItemNodeView";
 
 interface PersonClientProps {
   initialContact: Contact;
   initialConnectedContacts: Contact[];
   initialSelectableContacts: Contact[];
   initialRelationships: ContactRelationshipWithPeople[];
-  initialImportantEvents: ImportantEvent[];
+  initialImportantDates: ImportantDate[];
   initialGroups: GroupType[];
   initialPersonGroups: GroupType[];
+  initialAllTags: Tag[];
+  initialPersonTags: Tag[];
   initialActivities: Activity[];
+  initialWorkHistory: WorkHistoryEntry[];
+  initialEducation: EducationEntry[];
+  initialLinkedinBio?: string | null;
   personId: string;
+  initialTab?: string;
 }
+
+const PERSON_TABS = ["interactions", "about", "organize", "linkedin"] as const;
+type PersonTabValue = (typeof PERSON_TABS)[number];
+const DEFAULT_TAB: PersonTabValue = "interactions";
 
 export default function PersonClient({
   initialContact,
   initialConnectedContacts,
   initialSelectableContacts,
   initialRelationships,
-  initialImportantEvents,
+  initialImportantDates,
   initialGroups,
   initialPersonGroups,
+  initialAllTags,
+  initialPersonTags,
   initialActivities = [],
+  initialWorkHistory = [],
+  initialEducation = [],
+  initialLinkedinBio = null,
   personId,
+  initialTab,
 }: PersonClientProps) {
   const router = useRouter();
+  const pathname = usePathname();
+
+  const resolvedInitialTab: PersonTabValue = PERSON_TABS.includes(initialTab as PersonTabValue)
+    ? (initialTab as PersonTabValue)
+    : DEFAULT_TAB;
+  const [activeTab, setActiveTab] = useState<PersonTabValue>(resolvedInitialTab);
+
+  const handleTabChange = useCallback(
+    (value: string | null) => {
+      const tab = PERSON_TABS.includes(value as PersonTabValue)
+        ? (value as PersonTabValue)
+        : DEFAULT_TAB;
+      setActiveTab(tab);
+      const query = tab === DEFAULT_TAB ? "" : `?tab=${tab}`;
+      router.replace(`${pathname}${query}`, { scroll: false });
+    },
+    [pathname, router],
+  );
   const tRelationships = useTranslations("PersonRelationships");
+  const tEnrich = useTranslations("EnrichFromLinkedIn");
+  const { enrichFromLinkedIn } = useEnrichFromLinkedIn({ onSuccess: revalidateContacts });
   const tImportantDates = useTranslations("ContactImportantDates");
+  const tPersonPage = useTranslations("SingleContactPage");
   const tMerge = useTranslations("MergeWithModal");
+  const tHeader = useTranslations("PageHeader");
   const tAddress = useTranslations("ContactAddress");
+  const tTabs = useTranslations("PersonTabs");
+  const tInteractions = useTranslations("InteractionsPage");
   const mergeTexts = useMemo(
     () => ({
       errorTitle: tMerge("ErrorTitle"),
@@ -102,6 +178,7 @@ export default function PersonClient({
       back: tMerge("Back"),
       merge: tMerge("Merge"),
       noConflicts: tMerge("NoConflicts"),
+      conflictHint: tMerge("ConflictHint"),
       processing: tMerge("Processing"),
       steps: {
         pick: tMerge("Steps.Pick"),
@@ -125,12 +202,22 @@ export default function PersonClient({
   const [emails, setEmails] = useState<EmailEntry[]>([]);
   const [whatsappPrefix, setWhatsappPrefix] = useState("+1");
   const [signalPrefix, setSignalPrefix] = useState("+1");
-  const [importantEvents, setImportantEvents] = useState<ImportantEvent[]>(initialImportantEvents);
+  const [importantDates, setImportantDates] = useState<ImportantDate[]>(initialImportantDates);
   const [focusedField, setFocusedField] = useState<string | null>(null);
   const [groupsSaving, setGroupsSaving] = useState(false);
+
+  // Autosave debounce timer
+  const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Always-fresh save callback for Cmd+S handler
+  const noteSaveRef = useRef<() => void>(() => {});
   const [relationships, setRelationships] =
     useState<ContactRelationshipWithPeople[]>(initialRelationships);
   const [relationshipsSaving, setRelationshipsSaving] = useState(false);
+
+  // Sync contact state when server data changes (after router.refresh())
+  useEffect(() => {
+    setContact(initialContact);
+  }, [initialContact]);
 
   // Sync relationships state when server data changes (after router.refresh())
   useEffect(() => {
@@ -153,6 +240,36 @@ export default function PersonClient({
     lastName: contact.lastName,
     avatar: contact.avatar,
   };
+
+  const mentionableContacts = useMemo<MentionSuggestionItem[]>(() => {
+    const seenIds = new Set<string>();
+
+    return [contact, ...initialSelectableContacts]
+      .filter((person) => {
+        if (!person?.id || seenIds.has(person.id)) {
+          return false;
+        }
+
+        seenIds.add(person.id);
+        return true;
+      })
+      .map((person) => {
+        const label = formatContactName(person).trim();
+
+        return {
+          id: person.id,
+          label: label.length > 0 ? label : person.id,
+          avatar: person.avatar ?? null,
+          headline: person.headline ?? null,
+          place: person.place ?? null,
+        };
+      });
+  }, [contact, initialSelectableContacts]);
+
+  const mentionSuggestion = useMemo(
+    () => createMentionSuggestion(mentionableContacts),
+    [mentionableContacts],
+  );
 
   // Initialize edited values when contact loads
   useEffect(() => {
@@ -196,7 +313,7 @@ export default function PersonClient({
         firstName: contact.firstName || "",
         middleName: contact.middleName || "",
         lastName: contact.lastName || "",
-        title: contact.title || "",
+        headline: contact.headline || "",
         place: contact.place || "",
         notes: contact.notes || "",
         linkedin: contact.linkedin || "",
@@ -216,7 +333,7 @@ export default function PersonClient({
     contact?.firstName,
     contact?.middleName,
     contact?.lastName,
-    contact?.title,
+    contact?.headline,
     contact?.place,
     contact?.notes,
     contact?.linkedin,
@@ -227,10 +344,82 @@ export default function PersonClient({
 
   // Initialize rich text editor
   const editor = useEditor({
-    extensions: [StarterKit.configure({ link: false }), Link, Highlight, TextStyle, Color],
+    extensions: [
+      MarkdownPasteExtension,
+      StarterKit.configure({ link: false }),
+      Link.configure({
+        openOnClick: true,
+        HTMLAttributes: { target: "_blank", rel: "noopener noreferrer" },
+      }),
+      Highlight,
+      TextStyle,
+      Color,
+      TaskList,
+      TaskItem.extend({
+        addNodeView() {
+          return ReactNodeViewRenderer(TaskItemNodeView);
+        },
+      }).configure({ nested: true }),
+      Emoji.configure({
+        enableEmoticons: true,
+        suggestion: emojiSuggestionRender,
+      }),
+      SlashCommandExtension.configure({
+        suggestion: slashCommandSuggestion,
+      }),
+      Mention.extend({
+        addAttributes() {
+          return {
+            ...this.parent?.(),
+            avatar: {
+              default: null,
+              parseHTML: (element) => element.getAttribute("data-avatar"),
+              renderHTML: (attributes) => ({
+                "data-avatar": attributes.avatar ?? "",
+              }),
+            },
+            headline: {
+              default: null,
+              parseHTML: (element) => element.getAttribute("data-headline") || null,
+              renderHTML: (attributes) => ({
+                "data-headline": attributes.headline ?? "",
+              }),
+            },
+            place: {
+              default: null,
+              parseHTML: (element) => element.getAttribute("data-place") || null,
+              renderHTML: (attributes) => ({
+                "data-place": attributes.place ?? "",
+              }),
+            },
+          };
+        },
+        addNodeView() {
+          return ReactNodeViewRenderer(MentionNodeView);
+        },
+      }).configure({
+        suggestion: mentionSuggestion,
+      }),
+      Placeholder.configure({
+        placeholder: tPersonPage("NotesPlaceholder"),
+      }),
+      InlineDateExtension,
+    ],
     content: contact?.notes || "",
     immediatelyRender: false,
+    onUpdate: ({ editor }) => {
+      if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
+      debounceTimerRef.current = setTimeout(() => {
+        debounceTimerRef.current = null;
+        handleSocialMediaSave("notes", editor.getHTML());
+      }, 1500);
+    },
     onBlur: ({ editor }) => {
+      // Flush any pending autosave immediately
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+        debounceTimerRef.current = null;
+      }
       const activeElement = window.document.activeElement;
       if (
         activeElement instanceof HTMLElement &&
@@ -277,15 +466,13 @@ export default function PersonClient({
 
       if (!res.ok) throw new Error("Failed to update");
 
-      if (field !== "language" && field !== "timezone") {
-        setContact(
-          (previous) =>
-            ({
-              ...previous,
-              [field]: value,
-            }) as Contact,
-        );
-      }
+      setContact(
+        (previous) =>
+          ({
+            ...previous,
+            [field]: value,
+          }) as Contact,
+      );
 
       notifications.show(
         successNotificationTemplate({
@@ -421,35 +608,35 @@ export default function PersonClient({
     await Promise.all(tasks);
   };
 
-  const handleSaveImportantEvents = async (eventsOverride?: ImportantEvent[]) => {
+  const handleSaveImportantDates = async (datesOverride?: ImportantDate[]) => {
     if (!contact || !personId) return;
 
-    const sourceEvents = eventsOverride ?? importantEvents;
-    const eventsToSave = sourceEvents
-      .filter((event) => event.eventDate)
-      .map((event) => ({
-        id: event.id,
-        eventType: event.eventType,
-        eventDate: event.eventDate,
-        note: event.note,
-        notifyDaysBefore: event.notifyDaysBefore ?? null,
+    const sourceDates = datesOverride ?? importantDates;
+    const datesToSave = sourceDates
+      .filter((entry) => entry.date)
+      .map((entry) => ({
+        id: entry.id,
+        type: entry.type,
+        date: entry.date,
+        note: entry.note,
+        notifyDaysBefore: entry.notifyDaysBefore ?? null,
       }));
 
-    setSavingField("importantEvents");
+    setSavingField("importantDates");
 
     try {
-      const res = await fetch(`${API_ROUTES.CONTACTS}/${personId}/important-events`, {
+      const res = await fetch(`${API_ROUTES.CONTACTS}/${personId}/important-dates`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ events: eventsToSave }),
+        body: JSON.stringify({ dates: datesToSave }),
       });
 
-      if (!res.ok) throw new Error("Failed to update important events");
+      if (!res.ok) throw new Error("Failed to update important dates");
 
       const data = await res.json();
-      const nextEvents = (data.events || []) as ImportantEvent[];
+      const nextDates = (data.dates || []) as ImportantDate[];
 
-      setImportantEvents(nextEvents);
+      setImportantDates(nextDates);
 
       notifications.show(
         successNotificationTemplate({
@@ -476,10 +663,143 @@ export default function PersonClient({
       latitude: number | null;
       longitude: number | null;
     } | null;
+    /** When true, apply the location update immediately without confirmation modal */
+    forceLocation?: boolean;
+    /** When true, skip the address save — only update the location field */
+    locationOnly?: boolean;
+    /** When true, skip address + location save — only update the timezone field */
+    timezoneOnly?: boolean;
+    /** IANA timezone string to save (used together with timezoneOnly) */
+    timezone?: string;
   }) => {
     if (!contact || !personId) return;
 
+    // Timezone-only path: delegate to the generic field save helper and return early.
+    if (payload.timezoneOnly && payload.timezone) {
+      await handleContactFieldSave("timezone", payload.timezone);
+      return;
+    }
+
     setSavingField("address");
+
+    // Location-only path: skip address PATCH and the "Addresses updated" notification,
+    // resolve the matching address entry for field population, then go straight to
+    // the location update (always forced — no confirmation modal).
+    if (payload.locationOnly && payload.suggestedLocation) {
+      const addressEntries = Array.isArray(payload.addresses)
+        ? payload.addresses.filter(
+            (entry): entry is ContactAddressEntry =>
+              typeof entry === "object" && entry !== null && !Array.isArray(entry),
+          )
+        : [];
+      const preferredAddress =
+        addressEntries.length > 0
+          ? addressEntries.find((entry) => entry.type === "home") || addressEntries[0]
+          : null;
+      const locationAddress =
+        addressEntries.find((entry) => entry.value === payload.suggestedLocation?.place) ??
+        preferredAddress;
+      try {
+        const locationResponse = await fetch(`${API_ROUTES.CONTACTS}/${personId}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            place: payload.suggestedLocation.place,
+            latitude: payload.suggestedLocation.latitude,
+            longitude: payload.suggestedLocation.longitude,
+          }),
+        });
+        if (!locationResponse.ok) throw new Error("Failed to update location");
+        setContact((previous) => ({
+          ...previous,
+          place: payload.suggestedLocation?.place ?? null,
+          latitude: payload.suggestedLocation?.latitude ?? null,
+          longitude: payload.suggestedLocation?.longitude ?? null,
+          addressLine1: locationAddress?.addressLine1 ?? null,
+          addressLine2: locationAddress?.addressLine2 ?? null,
+          addressCity: locationAddress?.addressCity ?? null,
+          addressPostalCode: locationAddress?.addressPostalCode ?? null,
+          addressState: locationAddress?.addressState ?? null,
+          addressStateCode: locationAddress?.addressStateCode ?? null,
+          addressCountry: locationAddress?.addressCountry ?? null,
+          addressCountryCode: locationAddress?.addressCountryCode ?? null,
+          addressGranularity: locationAddress?.addressGranularity ?? "address",
+          addressFormatted: locationAddress?.addressFormatted ?? null,
+          addressGeocodeSource: locationAddress?.addressGeocodeSource ?? null,
+        }));
+        notifications.show(
+          successNotificationTemplate({
+            title: tAddress("LocationUpdateSuccessTitle"),
+            description: tAddress("LocationUpdateSuccessMessage"),
+          }),
+        );
+
+        // After the location saved, offer to also update the timezone
+        const lat = payload.suggestedLocation?.latitude;
+        const lon = payload.suggestedLocation?.longitude;
+        if (lat != null && lon != null) {
+          openStandardConfirmModal({
+            title: (
+              <ModalTitle
+                text={tAddress("TimezoneUpdateModalTitle")}
+                icon={<IconClock size={18} />}
+              />
+            ),
+            message: <Text size="sm">{tAddress("TimezoneUpdateModalMessage")}</Text>,
+            confirmLabel: tAddress("LocationUpdateConfirm"),
+            cancelLabel: tAddress("LocationUpdateCancel"),
+            onConfirm: async () => {
+              setSavingField("address");
+              try {
+                const rawTz = await getTimezoneForCoordinates(lat, lon).catch(() => null);
+                const canonical = rawTz ? resolveToCanonicalTimezone(rawTz) : null;
+                if (!canonical) {
+                  notifications.show(
+                    errorNotificationTemplate({
+                      title: tAddress("SetAsTimezoneError"),
+                      description: "",
+                    }),
+                  );
+                  return;
+                }
+                const tzRes = await fetch(`${API_ROUTES.CONTACTS}/${personId}`, {
+                  method: "PATCH",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ timezone: canonical }),
+                });
+                if (!tzRes.ok) throw new Error("Failed to update timezone");
+                setContact((previous) => ({ ...previous, timezone: canonical }));
+                notifications.show(
+                  successNotificationTemplate({
+                    title: tAddress("SetAsTimezoneSuccess"),
+                    description: "",
+                  }),
+                );
+              } catch {
+                notifications.show(
+                  errorNotificationTemplate({
+                    title: tAddress("SetAsTimezoneError"),
+                    description: "",
+                  }),
+                );
+              } finally {
+                setSavingField(null);
+              }
+            },
+          });
+        }
+      } catch {
+        notifications.show(
+          errorNotificationTemplate({
+            title: tAddress("LocationUpdateErrorTitle"),
+            description: tAddress("LocationUpdateErrorMessage"),
+          }),
+        );
+      } finally {
+        setSavingField(null);
+      }
+      return;
+    }
 
     try {
       const res = await fetch(`${API_ROUTES.CONTACTS}/${personId}`, {
@@ -510,23 +830,18 @@ export default function PersonClient({
           ? addressEntries.find((entry) => entry.type === "home") || addressEntries[0]
           : null;
 
+      // Find the address entry that matches the suggested location (the one that was created/updated)
+      const locationAddress = payload.suggestedLocation
+        ? (addressEntries.find((entry) => entry.value === payload.suggestedLocation?.place) ??
+          preferredAddress)
+        : preferredAddress;
+
+      // Only update the addresses list in state here — all location-related
+      // fields (place, addressLine1, lat/lng, etc.) are written only after
+      // the user confirms the location update modal below.
       setContact((previous) => ({
         ...previous,
         addresses: payload.addresses,
-        place: preferredAddress?.value ?? null,
-        latitude: preferredAddress?.latitude ?? null,
-        longitude: preferredAddress?.longitude ?? null,
-        addressLine1: preferredAddress?.addressLine1 ?? null,
-        addressLine2: preferredAddress?.addressLine2 ?? null,
-        addressCity: preferredAddress?.addressCity ?? null,
-        addressPostalCode: preferredAddress?.addressPostalCode ?? null,
-        addressState: preferredAddress?.addressState ?? null,
-        addressStateCode: preferredAddress?.addressStateCode ?? null,
-        addressCountry: preferredAddress?.addressCountry ?? null,
-        addressCountryCode: preferredAddress?.addressCountryCode ?? null,
-        addressGranularity: preferredAddress?.addressGranularity ?? "address",
-        addressFormatted: preferredAddress?.addressFormatted ?? null,
-        addressGeocodeSource: preferredAddress?.addressGeocodeSource ?? null,
       }));
 
       notifications.show(
@@ -537,59 +852,88 @@ export default function PersonClient({
       );
 
       if (payload.suggestedLocation) {
-        openStandardConfirmModal({
-          title: (
-            <ModalTitle
-              text={tAddress("LocationUpdateModalTitle")}
-              icon={<IconMapPin size={18} />}
-            />
-          ),
-          message: <Text size="sm">{tAddress("LocationUpdateModalMessage")}</Text>,
-          confirmLabel: tAddress("LocationUpdateConfirm"),
-          cancelLabel: tAddress("LocationUpdateCancel"),
-          onConfirm: async () => {
-            setSavingField("address");
+        const applyLocationUpdate = async () => {
+          setSavingField("address");
+          try {
+            const lat = payload.suggestedLocation?.latitude;
+            const lon = payload.suggestedLocation?.longitude;
 
-            try {
-              const locationResponse = await fetch(`${API_ROUTES.CONTACTS}/${personId}`, {
-                method: "PATCH",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                  place: payload.suggestedLocation?.place,
-                  latitude: payload.suggestedLocation?.latitude,
-                  longitude: payload.suggestedLocation?.longitude,
-                }),
-              });
-
-              if (!locationResponse.ok) {
-                throw new Error("Failed to update location");
-              }
-
-              setContact((previous) => ({
-                ...previous,
-                place: payload.suggestedLocation?.place || previous.place,
-                latitude: payload.suggestedLocation?.latitude ?? previous.latitude,
-                longitude: payload.suggestedLocation?.longitude ?? previous.longitude,
-              }));
-
-              notifications.show(
-                successNotificationTemplate({
-                  title: tAddress("LocationUpdateSuccessTitle"),
-                  description: tAddress("LocationUpdateSuccessMessage"),
-                }),
-              );
-            } catch {
-              notifications.show(
-                errorNotificationTemplate({
-                  title: tAddress("LocationUpdateErrorTitle"),
-                  description: tAddress("LocationUpdateErrorMessage"),
-                }),
-              );
-            } finally {
-              setSavingField(null);
+            // Detect timezone from coordinates in parallel, non-blocking
+            let canonicalTimezone: string | null = null;
+            if (lat != null && lon != null) {
+              const rawTz = await getTimezoneForCoordinates(lat, lon).catch(() => null);
+              if (rawTz) canonicalTimezone = resolveToCanonicalTimezone(rawTz);
             }
-          },
-        });
+
+            const locationPatch: Record<string, unknown> = {
+              place: payload.suggestedLocation?.place,
+              latitude: lat,
+              longitude: lon,
+            };
+            if (canonicalTimezone) {
+              locationPatch.timezone = canonicalTimezone;
+            }
+
+            const locationResponse = await fetch(`${API_ROUTES.CONTACTS}/${personId}`, {
+              method: "PATCH",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(locationPatch),
+            });
+            if (!locationResponse.ok) {
+              throw new Error("Failed to update location");
+            }
+            setContact((previous) => ({
+              ...previous,
+              place: payload.suggestedLocation?.place ?? null,
+              latitude: payload.suggestedLocation?.latitude ?? null,
+              longitude: payload.suggestedLocation?.longitude ?? null,
+              addressLine1: locationAddress?.addressLine1 ?? null,
+              addressLine2: locationAddress?.addressLine2 ?? null,
+              addressCity: locationAddress?.addressCity ?? null,
+              addressPostalCode: locationAddress?.addressPostalCode ?? null,
+              addressState: locationAddress?.addressState ?? null,
+              addressStateCode: locationAddress?.addressStateCode ?? null,
+              addressCountry: locationAddress?.addressCountry ?? null,
+              addressCountryCode: locationAddress?.addressCountryCode ?? null,
+              addressGranularity: locationAddress?.addressGranularity ?? "address",
+              addressFormatted: locationAddress?.addressFormatted ?? null,
+              addressGeocodeSource: locationAddress?.addressGeocodeSource ?? null,
+              ...(canonicalTimezone ? { timezone: canonicalTimezone } : {}),
+            }));
+            notifications.show(
+              successNotificationTemplate({
+                title: tAddress("LocationUpdateSuccessTitle"),
+                description: tAddress("LocationUpdateSuccessMessage"),
+              }),
+            );
+          } catch {
+            notifications.show(
+              errorNotificationTemplate({
+                title: tAddress("LocationUpdateErrorTitle"),
+                description: tAddress("LocationUpdateErrorMessage"),
+              }),
+            );
+          } finally {
+            setSavingField(null);
+          }
+        };
+
+        if (payload.forceLocation) {
+          void applyLocationUpdate();
+        } else {
+          openStandardConfirmModal({
+            title: (
+              <ModalTitle
+                text={tAddress("LocationUpdateModalTitle")}
+                icon={<IconMapPin size={18} />}
+              />
+            ),
+            message: <Text size="sm">{tAddress("LocationUpdateModalMessage")}</Text>,
+            confirmLabel: tAddress("LocationUpdateConfirm"),
+            cancelLabel: tAddress("LocationUpdateCancel"),
+            onConfirm: applyLocationUpdate,
+          });
+        }
       }
     } catch (error) {
       const message = error instanceof Error ? error.message : tAddress("SaveErrorMessage");
@@ -658,6 +1002,7 @@ export default function PersonClient({
       setContact({
         ...contact,
         [field]: processedValue,
+        ...(field === "notes" ? { notesUpdatedAt: new Date().toISOString() } : {}),
       });
 
       const fieldDisplayName = field.charAt(0).toUpperCase() + field.slice(1);
@@ -684,6 +1029,42 @@ export default function PersonClient({
     const value = editedValues[field] || "";
     handleSocialMediaSave(field, value);
   };
+
+  // Keep noteSaveRef fresh for Cmd+S (assigned in render body — always latest closure)
+  noteSaveRef.current = () => {
+    if (!editor) return;
+    // Flush pending debounce timer immediately
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+      debounceTimerRef.current = null;
+      handleSocialMediaSave("notes", editor.getHTML());
+      return;
+    }
+    const html = editor.getHTML();
+    if (html === (contact?.notes || "")) {
+      // Content already saved — give brief confirmation
+      notifications.show(
+        successNotificationTemplate({
+          title: tPersonPage("NotesSaved"),
+          description: tPersonPage("NotesAlreadySaved"),
+        }),
+      );
+      return;
+    }
+    handleSocialMediaSave("notes", html);
+  };
+
+  // Cmd+S / Ctrl+S — save notes immediately
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "s") {
+        e.preventDefault();
+        noteSaveRef.current();
+      }
+    };
+    document.addEventListener("keydown", handler);
+    return () => document.removeEventListener("keydown", handler);
+  }, []);
 
   const handleContactFieldBlur = (field: string, value: string) => {
     handleContactFieldSave(field, value);
@@ -891,7 +1272,7 @@ export default function PersonClient({
       <Stack gap="xl">
         <PageHeader
           icon={IconUser}
-          title="Person's details"
+          title={"Person's details"}
           backOnClick={() => {
             if (typeof window !== "undefined" && window.history.length > 1) {
               router.back();
@@ -911,6 +1292,7 @@ export default function PersonClient({
 
         <Paper withBorder shadow="sm" radius="md" p="xl">
           <Stack gap="lg">
+            {/* Always-visible: identity + notes */}
             <ContactIdentitySection
               contact={contact}
               personId={personId}
@@ -922,121 +1304,153 @@ export default function PersonClient({
               onSaveContactInfo={handleSaveContactInfo}
             />
 
-            <ContactNotesSection editor={editor} savingField={savingField} />
-
-            <PersonTimelineSection
-              activities={initialActivities}
-              contact={contact}
-              connectedContacts={initialConnectedContacts || []}
-              selectableContacts={initialSelectableContacts || []}
+            <ContactNotesSection
+              editor={editor}
+              savingField={savingField}
+              notesUpdatedAt={contact.notesUpdatedAt}
             />
 
-            <Stack gap="xs">
-              <Text size="sm" fw={500}>
-                Groups
-              </Text>
-              <Group gap="sm" align="flex-start" wrap="wrap">
-                {personGroups.map((group) => (
-                  <div
-                    key={group.id}
-                    style={{
-                      flex: "1 1 18rem",
-                      minWidth: "16rem",
-                      maxWidth: "20rem",
-                    }}
-                  >
-                    <GroupCard
-                      group={{
-                        ...(group as GroupWithCount),
-                        contactCount: 1,
-                        previewContacts: [currentPersonPreview],
+            {/* Tabbed sections */}
+            <Tabs value={activeTab} onChange={handleTabChange} keepMounted={false}>
+              <Tabs.List>
+                <Tabs.Tab value="interactions" leftSection={<IconCalendarEvent size={16} />}>
+                  {tTabs("Interactions")}
+                </Tabs.Tab>
+                <Tabs.Tab value="about" leftSection={<IconUserCircle size={16} />}>
+                  {tTabs("About")}
+                </Tabs.Tab>
+                <Tabs.Tab value="organize" leftSection={<IconTags size={16} />}>
+                  {tTabs("Organize")}
+                </Tabs.Tab>
+                <Tabs.Tab value="linkedin" leftSection={<IconBrandLinkedin size={16} />}>
+                  {tTabs("LinkedIn")}
+                </Tabs.Tab>
+              </Tabs.List>
+
+              <Tabs.Panel value="interactions" pt="md">
+                <Stack gap="lg">
+                  <Stack gap="xs">
+                    <Text fw={600} size="sm">
+                      Interactions
+                    </Text>
+                    <Button
+                      variant="light"
+                      size="xs"
+                      style={{ alignSelf: "flex-start" }}
+                      onClick={() => {
+                        openNewActivityModal({
+                          contacts: [contact, ...initialSelectableContacts].filter(
+                            (item, index, self) =>
+                              self.findIndex((other) => other.id === item.id) === index,
+                          ),
+                          initialParticipantIds: [contact.id],
+                          titleText: tInteractions("WhoAreYouMeeting"),
+                          t: tInteractions,
+                        });
                       }}
-                      onClick={(groupId) => router.push(`/app/group/${groupId}`)}
-                      onAddPeople={() => {}}
-                      onEdit={() => {}}
-                      onDuplicate={() => {}}
-                      onDelete={() => {}}
-                      interactive={true}
-                      variant="small"
-                      showMenu={false}
-                      shadow="none"
+                    >
+                      {tInteractions("AddActivity")}
+                    </Button>
+                    <PersonInteractionsSection
+                      activities={initialActivities}
+                      contact={contact}
+                      connectedContacts={initialConnectedContacts || []}
+                      selectableContacts={initialSelectableContacts || []}
                     />
-                  </div>
-                ))}
+                  </Stack>
+                </Stack>
+              </Tabs.Panel>
 
-                <div
-                  style={{
-                    flex: "1 1 18rem",
-                    minWidth: "16rem",
-                    maxWidth: "20rem",
-                  }}
-                >
-                  <Card
-                    withBorder
-                    shadow="none"
-                    p="sm"
-                    className={`h-full min-h-full ${groupsSaving ? undefined : "card-scale-effect"}`}
-                    style={{
-                      cursor: groupsSaving ? "not-allowed" : "pointer",
-                    }}
-                    onClick={() => {
-                      if (!groupsSaving) {
-                        openAddToGroupsModal();
-                      }
-                    }}
-                  >
-                    <Group gap="sm" align="center" wrap="nowrap">
-                      <Avatar size="md" radius="xl">
-                        <IconPlus size={16} />
-                      </Avatar>
-                      <Text size="md" fw={600}>
-                        Edit groups
-                      </Text>
+              <Tabs.Panel value="about" pt="md">
+                <Stack gap="lg">
+                  <ContactImportantDatesSection
+                    dates={importantDates}
+                    personFirstName={contact.firstName}
+                    savingField={savingField}
+                    onDatesChange={setImportantDates}
+                    onSave={handleSaveImportantDates}
+                  />
+
+                  <ContactRelationshipsSection
+                    currentPerson={currentPersonPreview}
+                    selectablePeople={selectablePeople}
+                    relationships={relationships}
+                    isSubmitting={relationshipsSaving}
+                    onAddRelationship={handleAddRelationship}
+                    onUpdateRelationship={handleUpdateRelationship}
+                    onDeleteRelationship={handleDeleteRelationship}
+                  />
+
+                  <ContactPreferenceSection
+                    contact={contact}
+                    savingField={savingField}
+                    handleBlur={handleContactFieldBlur}
+                  />
+
+                  <ContactAddressSection
+                    contact={contact}
+                    isSaving={savingField === "address"}
+                    onSave={handleSaveAddress}
+                  />
+                </Stack>
+              </Tabs.Panel>
+
+              <Tabs.Panel value="organize" pt="md">
+                <Stack gap="lg">
+                  <PersonTagsInput
+                    personId={personId}
+                    initialTags={initialPersonTags}
+                    allTags={initialAllTags}
+                  />
+
+                  <Stack gap="xs">
+                    <Text size="sm" fw={500}>
+                      Groups
+                    </Text>
+                    <Group gap="sm" align="flex-start" wrap="wrap">
+                      {personGroups.map((group) => (
+                        <GroupCard
+                          key={group.id}
+                          group={{
+                            ...(group as GroupWithCount),
+                            contactCount: 1,
+                            previewContacts: [currentPersonPreview],
+                          }}
+                          onClick={(groupId) => router.push(`/app/group/${groupId}`)}
+                          onAddPeople={() => {}}
+                          onEdit={() => {}}
+                          onDuplicate={() => {}}
+                          onDelete={() => {}}
+                          interactive={true}
+                          variant="small"
+                          showMenu={false}
+                          shadow="none"
+                        />
+                      ))}
+
+                      <GroupCard
+                        variant="action"
+                        actionLabel="Edit groups"
+                        shadow="none"
+                        interactive={!groupsSaving}
+                        cursorType={groupsSaving ? "default" : "pointer"}
+                        onActionClick={openAddToGroupsModal}
+                      />
                     </Group>
-                  </Card>
-                </div>
-              </Group>
-            </Stack>
+                  </Stack>
+                </Stack>
+              </Tabs.Panel>
 
-            <ContactPreferenceSection
-              contact={contact}
-              savingField={savingField}
-              handleBlur={handleContactFieldBlur}
-            />
-
-            <ContactAddressSection
-              contact={contact}
-              isSaving={savingField === "address"}
-              onSave={handleSaveAddress}
-            />
-
-            <ContactImportantDatesSection
-              events={importantEvents}
-              personFirstName={contact.firstName}
-              savingField={savingField}
-              onEventsChange={setImportantEvents}
-              onSave={handleSaveImportantEvents}
-            />
-
-            {/* TODO: PGP keys */}
-            {/* <ContactPGPSection
-              contact={contact}
-              savingField={savingField}
-              handleChange={handleChange}
-              handleBlur={handleBlur}
-            />
-
-            <Divider /> */}
-
-            <ContactRelationshipsSection
-              currentPerson={currentPersonPreview}
-              selectablePeople={selectablePeople}
-              relationships={relationships}
-              isSubmitting={relationshipsSaving}
-              onAddRelationship={handleAddRelationship}
-              onUpdateRelationship={handleUpdateRelationship}
-              onDeleteRelationship={handleDeleteRelationship}
-            />
+              <Tabs.Panel value="linkedin" pt="md">
+                <LinkedInTab
+                  workHistory={initialWorkHistory}
+                  education={initialEducation}
+                  linkedinBio={initialLinkedinBio}
+                  onEnrich={() => enrichFromLinkedIn(personId, contact.linkedin)}
+                  enrichLabel={tEnrich("MenuLabel")}
+                />
+              </Tabs.Panel>
+            </Tabs>
           </Stack>
         </Paper>
       </Stack>

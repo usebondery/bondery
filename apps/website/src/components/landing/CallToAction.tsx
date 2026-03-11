@@ -18,32 +18,28 @@ export function CallToAction() {
         mih={400}
         p="xl"
         bg="var(--mantine-primary-color-filled)"
-        className="flex justify-center items-center max-w-6xl"
+        className="flex justify-center items-center max-w-6xl "
         mx={"auto"}
       >
-        <Stack align="center" justify="center" h="100%" flex={1} p="xl" className="gap-y-12!">
-          <Title
-            order={2}
-            ta="center"
-            fw={"bold"}
-            className="text-3xl! inline"
-            c={"white"}
-            maw="80%"
-          >
+        <Stack
+          align="center"
+          justify="center"
+          h="100%"
+          flex={1}
+          p="xl"
+          className="gap-y-12! max-w-4/5"
+        >
+          <Title order={2} ta="center" fw={"bold"} className="text-3xl! inline" c={"white"}>
             Ready to organize your network?{" "}
-            <Container hiddenFrom="md" component={"span"}>
-              <br />
-              <br />
-            </Container>
-            Start building meaningful connections today.
           </Title>
           <ButtonLink
             href={`${WEBAPP_URL}/login`}
             size="lg"
             rightSection={<IconArrowUpRight />}
             variant="white"
+            radius={"xl"}
           >
-            Start for free
+            Start building your network
           </ButtonLink>
         </Stack>
       </Card>

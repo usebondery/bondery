@@ -7,10 +7,9 @@ import { DivIcon } from "leaflet";
 import { useRouter } from "next/navigation";
 import { renderToStaticMarkup } from "react-dom/server";
 import MarkerClusterGroup from "react-leaflet-cluster";
-import { bonderyTheme } from "@bondery/mantine-next";
+import { PersonChip, bonderyTheme } from "@bondery/mantine-next";
 import "maplibre-gl/dist/maplibre-gl.css";
 import "leaflet.markercluster/dist/MarkerCluster.css";
-import { PersonChip } from "@/app/(app)/app/components/shared/PersonChip";
 import type { PeopleMapFocus, PeopleMapMarker } from "./PeopleMap";
 
 interface PeopleMapClientProps {
@@ -91,6 +90,7 @@ export function PeopleMapClient({
         style={{ height: "100%", width: "100%" }}
       >
         <MapFocusController focus={focus} defaultZoom={zoom} />
+        <FitMarkersController markers={markers} defaultZoom={zoom} />
         <VisibleMarkersController
           markers={markers}
           onVisibleMarkerIdsChange={onVisibleMarkerIdsChange}
@@ -163,6 +163,43 @@ function MapFocusController({ focus, defaultZoom }: MapFocusControllerProps) {
 
     map.flyTo([focus.latitude, focus.longitude], focus.zoom ?? defaultZoom, { animate: true });
   }, [defaultZoom, focus, map]);
+
+  return null;
+}
+
+interface FitMarkersControllerProps {
+  markers: PeopleMapMarker[];
+  defaultZoom: number;
+}
+
+/**
+ * Re-centers the map whenever the set of markers changes (e.g. after an address
+ * is added or updated). Skips the very first render so MapContainer's initial
+ * `center` prop handles the page-load position.
+ */
+function FitMarkersController({ markers, defaultZoom }: FitMarkersControllerProps) {
+  const map = useMap();
+  const prevKeyRef = useRef("");
+
+  useEffect(() => {
+    const key = markers.map((m) => `${m.latitude}:${m.longitude}`).join("|");
+
+    if (prevKeyRef.current === key) return;
+
+    const isFirstLoad = prevKeyRef.current === "";
+    prevKeyRef.current = key;
+
+    if (isFirstLoad || markers.length === 0) return;
+
+    if (markers.length === 1) {
+      map.flyTo([markers[0].latitude, markers[0].longitude], defaultZoom, { animate: true });
+    } else {
+      map.fitBounds(
+        markers.map((m) => [m.latitude, m.longitude] as [number, number]),
+        { padding: [40, 40], animate: true },
+      );
+    }
+  }, [defaultZoom, map, markers]);
 
   return null;
 }

@@ -350,9 +350,9 @@ export function SocialMediaSection({
       }
 
       if (field === "whatsapp") {
-        processedValue = combinePhoneNumber(whatsappPrefix, inputValue);
+        processedValue = inputValue.trim() ? combinePhoneNumber(whatsappPrefix, inputValue) : "";
       } else if (field === "signal") {
-        processedValue = combinePhoneNumber(signalPrefix, inputValue);
+        processedValue = inputValue.trim() ? combinePhoneNumber(signalPrefix, inputValue) : "";
       } else if (field === "website") {
         const normalizedWebsite = normalizeWebsiteUrl(inputValue);
 

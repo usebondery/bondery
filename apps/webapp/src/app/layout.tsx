@@ -6,9 +6,10 @@ import { ModalsProvider } from "@mantine/modals";
 import { Lexend } from "next/font/google";
 import { ColorSchemeScript, MantineProvider, mantineHtmlProps } from "@mantine/core";
 import { headers } from "next/headers";
+import { WEBAPP_NAME } from "@bondery/helpers";
 
 export const metadata: Metadata = {
-  title: "Bondery",
+  title: WEBAPP_NAME,
   description: "Build bonds that last forever.",
 };
 

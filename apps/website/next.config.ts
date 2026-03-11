@@ -42,6 +42,11 @@ const nextConfig: NextConfig = {
         permanent: true,
       },
       {
+        source: "/docs/:path*",
+        destination: `${HELP_DOCS_URL}/:path*`,
+        permanent: true,
+      },
+      {
         source: "/login",
         destination: `${WEBAPP_URL}/login`,
         permanent: true,
@@ -51,6 +56,12 @@ const nextConfig: NextConfig = {
         destination: `${WEBAPP_URL}/auth/callback/:path*`,
         permanent: false,
       },
+      {
+        source: "/oauth/consent/:path*",
+        destination: `${WEBAPP_URL}/oauth/consent/:path*`,
+        permanent: false,
+      },
+
       {
         source: "/app/:path*",
         destination: `${WEBAPP_URL}/app/:path*`,

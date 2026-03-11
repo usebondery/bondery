@@ -1,0 +1,315 @@
+# /api/contacts - Core CRUD operations
+root:
+  get:
+    summary: List all contacts
+    description: >
+      Retrieve paginated contacts for the authenticated user (excludes the user's own profile).
+      Returns enriched contacts with phones, emails, addresses, and social media handles.
+      Also returns aggregate stats (total contacts, interactions this month, new contacts this year).
+    operationId: listContacts
+    tags:
+      - Contacts
+    security:
+      - cookieAuth: []
+    parameters:
+      - name: limit
+        in: query
+        schema:
+          type: integer
+          minimum: 1
+        description: Maximum number of contacts to return. When omitted, all contacts are returned.
+      - name: offset
+        in: query
+        schema:
+          type: integer
+          minimum: 0
+          default: 0
+        description: Number of contacts to skip (used with limit for pagination)
+      - name: q
+        in: query
+        schema:
+          type: string
+        description: Search query to filter contacts by first or last name
+      - name: sort
+        in: query
+        schema:
+          type: string
+          enum: [nameAsc, nameDesc, surnameAsc, surnameDesc, interactionAsc, interactionDesc]
+          default: nameAsc
+        description: Sort order for contacts
+    responses:
+      "200":
+        description: List of contacts
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                contacts:
+                  type: array
+                  items:
+                    $ref: "../schemas/contact.yaml#/Contact"
+                totalCount:
+                  type: integer
+                  description: >
+                    Total number of contacts matching the query (may be larger than the
+                    returned array when using limit/offset pagination)
+                stats:
+                  type: object
+                  properties:
+                    totalContacts:
+                      type: integer
+                    thisMonthInteractions:
+                      type: integer
+                    newContactsThisYear:
+                      type: integer
+      "401":
+        $ref: "../../openapi.yaml#/components/responses/UnauthorizedError"
+      "500":
+        $ref: "../../openapi.yaml#/components/responses/InternalServerError"
+
+  post:
+    summary: Create a new contact
+    description: >
+      Create a new contact for the authenticated user.
+      Requires first name and last name. Optionally attaches a LinkedIn handle.
+    operationId: createContact
+    tags:
+      - Contacts
+    security:
+      - cookieAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/contact.yaml#/CreateContactInput"
+    responses:
+      "201":
+        description: Contact created successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: string
+                  format: uuid
+      "400":
+        description: Missing first name or last name
+      "401":
+        $ref: "../../openapi.yaml#/components/responses/UnauthorizedError"
+      "500":
+        $ref: "../../openapi.yaml#/components/responses/InternalServerError"
+
+  delete:
+    summary: Delete multiple contacts
+    description: >
+      Delete multiple contacts by their IDs, or by a search filter with optional exclusions.
+      Also cleans up orphaned interactions, avatar files, and LinkedIn logo files.
+    operationId: deleteContacts
+    tags:
+      - Contacts
+    security:
+      - cookieAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/contact.yaml#/DeleteContactsRequest"
+    responses:
+      "200":
+        description: Contacts deleted successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                deletedCount:
+                  type: integer
+      "400":
+        description: Invalid request body
+      "401":
+        $ref: "../../openapi.yaml#/components/responses/UnauthorizedError"
+      "500":
+        $ref: "../../openapi.yaml#/components/responses/InternalServerError"
+
+# /api/contacts/{id}
+byId:
+  get:
+    summary: Get a single contact
+    description: Retrieve a contact's full details including phones, emails, addresses, and social media
+    operationId: getContact
+    tags:
+      - Contacts
+    security:
+      - cookieAuth: []
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    responses:
+      "200":
+        description: Contact details
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                contact:
+                  $ref: "../schemas/contact.yaml#/Contact"
+      "401":
+        $ref: "../../openapi.yaml#/components/responses/UnauthorizedError"
+      "404":
+        description: Contact not found
+      "500":
+        $ref: "../../openapi.yaml#/components/responses/InternalServerError"
+
+  patch:
+    summary: Update a contact
+    description: >
+      Update an existing contact's information. All fields are optional.
+      Handles scalar fields, phones, emails, addresses, social media, and coordinates.
+      Latitude and longitude must be provided together or both set to null.
+    operationId: updateContact
+    tags:
+      - Contacts
+    security:
+      - cookieAuth: []
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/contact.yaml#/UpdateContactInput"
+    responses:
+      "200":
+        description: Contact updated successfully
+        content:
+          application/json:
+            schema:
+              $ref: "../schemas/common.yaml#/MessageResponse"
+      "400":
+        description: Invalid input (e.g. missing first name, mismatched lat/lng)
+      "401":
+        $ref: "../../openapi.yaml#/components/responses/UnauthorizedError"
+      "404":
+        description: Contact not found
+      "500":
+        $ref: "../../openapi.yaml#/components/responses/InternalServerError"
+
+  delete:
+    summary: Delete a single contact
+    description: >
+      Delete a single contact by ID. Also cleans up orphaned interactions,
+      avatar files, and LinkedIn logo files.
+    operationId: deleteContact
+    tags:
+      - Contacts
+    security:
+      - cookieAuth: []
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    responses:
+      "200":
+        description: Contact deleted successfully
+        content:
+          application/json:
+            schema:
+              $ref: "../schemas/common.yaml#/MessageResponse"
+      "401":
+        $ref: "../../openapi.yaml#/components/responses/UnauthorizedError"
+      "404":
+        description: Contact not found
+      "500":
+        $ref: "../../openapi.yaml#/components/responses/InternalServerError"
+
+# /api/contacts/by-social
+bySocial:
+  get:
+    summary: Find contact by social media handle
+    description: >
+      Look up a contact by platform (instagram, linkedin, facebook) and handle.
+      Returns whether the contact exists and minimal preview info.
+    operationId: getContactBySocial
+    tags:
+      - Contacts
+    security:
+      - cookieAuth: []
+    parameters:
+      - name: platform
+        in: query
+        required: true
+        schema:
+          type: string
+          enum: [instagram, linkedin, facebook]
+      - name: handle
+        in: query
+        required: true
+        schema:
+          type: string
+    responses:
+      "200":
+        description: Lookup result
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                exists:
+                  type: boolean
+                contact:
+                  $ref: "../schemas/common.yaml#/ContactPreview"
+      "400":
+        description: Invalid platform or handle
+      "401":
+        $ref: "../../openapi.yaml#/components/responses/UnauthorizedError"
+      "500":
+        $ref: "../../openapi.yaml#/components/responses/InternalServerError"
+
+# /api/contacts/important-events/upcoming
+upcomingEvents:
+  get:
+    summary: List upcoming reminders
+    description: >
+      Returns important events with notification configured that fall within
+      the next month. Includes whether a reminder email has already been sent.
+    operationId: listUpcomingReminders
+    tags:
+      - Contacts
+    security:
+      - cookieAuth: []
+    responses:
+      "200":
+        description: Upcoming reminders
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reminders:
+                  type: array
+                  items:
+                    $ref: "../schemas/contact.yaml#/UpcomingReminder"
+      "401":
+        $ref: "../../openapi.yaml#/components/responses/UnauthorizedError"
+      "500":
+        $ref: "../../openapi.yaml#/components/responses/InternalServerError"

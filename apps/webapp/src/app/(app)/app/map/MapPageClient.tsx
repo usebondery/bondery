@@ -15,9 +15,11 @@ import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import type { Contact, MergeConflictField } from "@bondery/types";
-import ContactsTable, { type ColumnConfig } from "@/app/(app)/app/components/ContactsTable";
+import ContactsTable, {
+  type ColumnConfig,
+  type SortOrder,
+} from "@/app/(app)/app/components/contacts/ContactsTableV2";
 import { LocationLookupInput } from "@/app/(app)/app/components/LocationLookupInput";
-import { type SortOrder } from "@/app/(app)/app/components/contacts/SortMenu";
 import { openDeleteContactModal } from "@/app/(app)/app/components/contacts/openDeleteContactModal";
 import { openDeleteContactsModal } from "@/app/(app)/app/components/contacts/openDeleteContactsModal";
 import { openAddPeopleToGroupSelectionModal } from "@/app/(app)/app/people/components/AddPeopleToGroupSelectionModal";
@@ -81,6 +83,7 @@ export function MapPageClient({ contacts }: MapPageClientProps) {
       back: tMerge("Back"),
       merge: tMerge("Merge"),
       noConflicts: tMerge("NoConflicts"),
+      conflictHint: tMerge("ConflictHint"),
       processing: tMerge("Processing"),
       steps: {
         pick: tMerge("Steps.Pick"),
@@ -156,7 +159,7 @@ export function MapPageClient({ contacts }: MapPageClientProps) {
 
   const [columns, setColumns] = useState<ColumnConfig[]>([
     { key: "name", label: "Name", visible: true, icon: <IconUser size={16} />, fixed: true },
-    { key: "title", label: "Title", visible: true, icon: <IconBriefcase size={16} /> },
+    { key: "headline", label: "Headline", visible: true, icon: <IconBriefcase size={16} /> },
     { key: "place", label: "Location", visible: true, icon: <IconMapPin size={16} /> },
     {
       key: "lastInteraction",
@@ -257,7 +260,7 @@ export function MapPageClient({ contacts }: MapPageClientProps) {
   return (
     <PageWrapper>
       <Stack gap="xl">
-        <PageHeader icon={IconMap2} title={t("Title")} />
+        <PageHeader icon={IconMap2} title={t("Title")} description={t("Subtitle")} />
 
         {/* Map location autocomplete */}
         <LocationLookupInput
@@ -289,6 +292,8 @@ export function MapPageClient({ contacts }: MapPageClientProps) {
             selectedIds={selectedIds}
             isHeaderShown={true}
             onSearchChange={handleTableSearch}
+            noContactsFound={t("NoContactsFound")}
+            noContactsMatchSearch={t("NoContactsMatchSearch")}
             columnsForMenu={columns}
             setColumnsForMenu={setColumns}
             sortOrderForMenu={sortOrder}

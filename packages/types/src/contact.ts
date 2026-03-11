@@ -49,35 +49,25 @@ export interface ContactAddressEntry {
   addressGeocodeSource: string | null;
 }
 
-/**
- * Important date associated with a contact
- */
+export type ImportantDateType = "birthday" | "anniversary" | "nameday" | "graduation" | "other";
+
+export type ImportantDateNotifyDaysBefore = 1 | 3 | 7 | null;
+
 export interface ImportantDate {
-  id: string;
-  name: string;
-  date: string;
-  notify: boolean;
-}
-
-export type ImportantEventType = "birthday" | "anniversary" | "nameday" | "graduation" | "other";
-
-export type ImportantEventNotifyDaysBefore = 1 | 3 | 7 | null;
-
-export interface ImportantEvent {
   id: string;
   userId: string;
   personId: string;
-  eventType: ImportantEventType;
-  eventDate: string;
+  type: ImportantDateType;
+  date: string;
   note: string | null;
   notifyOn: string | null;
-  notifyDaysBefore: ImportantEventNotifyDaysBefore;
+  notifyDaysBefore: ImportantDateNotifyDaysBefore;
   createdAt: string;
   updatedAt: string;
 }
 
 export interface UpcomingReminder {
-  event: ImportantEvent;
+  importantDate: ImportantDate;
   person: ContactPreview;
   notificationSent: boolean;
   notificationSentAt: string | null;
@@ -93,12 +83,14 @@ export interface Contact {
   firstName: string;
   middleName: string | null;
   lastName: string | null;
-  title: string | null;
+  headline: string | null;
   place: string | null;
   notes: string | null;
+  notesUpdatedAt?: string | null;
   avatar: string | null;
   lastInteraction: string | null;
   createdAt: string;
+  updatedAt?: string | null;
   /** Array of phone entries with type and preferred flag */
   phones: PhoneEntry[] | Json | null;
   /** Array of email entries with type and preferred flag */
@@ -111,7 +103,7 @@ export interface Contact {
   facebook: string | null;
   website: string | null;
   signal: string | null;
-  importantEvents?: ImportantEvent[] | null;
+  importantDates?: ImportantDate[] | null;
   myself: boolean | null;
   position?: Json | null;
   language: string | null;
@@ -184,7 +176,8 @@ export interface ContactRelationshipWithPeople extends ContactRelationship {
  */
 export interface CreateContactInput {
   firstName: string;
-  lastName: string;
+  middleName?: string;
+  lastName?: string;
   linkedin?: string;
 }
 
@@ -232,8 +225,62 @@ export interface ContactRelationshipsResponse {
 }
 
 /**
- * Request body for deleting multiple contacts
+ * Filter parameters for selecting contacts without enumerating IDs.
+ * Mirrors the query string accepted by GET /api/contacts.
  */
-export interface DeleteContactsRequest {
-  ids: string[];
+export interface ContactsFilter {
+  q?: string;
+  sort?:
+    | "nameAsc"
+    | "nameDesc"
+    | "surnameAsc"
+    | "surnameDesc"
+    | "interactionAsc"
+    | "interactionDesc";
+}
+
+/**
+ * Request body for deleting multiple contacts.
+ * Supports either an explicit list of IDs or a filter that matches all contacts to delete.
+ */
+export type DeleteContactsRequest =
+  | { ids: string[] }
+  | { filter: ContactsFilter; excludeIds?: string[] };
+
+/**
+ * A single work history entry for a contact, typically sourced from LinkedIn.
+ */
+export interface WorkHistoryEntry {
+  id: string;
+  userId: string;
+  personId: string;
+  companyName: string;
+  companyLinkedinUrl: string | null;
+  companyLogoUrl: string | null;
+  title: string | null;
+  description: string | null;
+  startDate: string | null;
+  endDate: string | null;
+  employmentType: string | null;
+  location: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/**
+ * A single education entry for a contact, typically sourced from LinkedIn.
+ */
+export interface EducationEntry {
+  id: string;
+  userId: string;
+  personId: string;
+  schoolName: string;
+  schoolLinkedinUrl: string | null;
+  schoolLogoUrl: string | null;
+  degree: string | null;
+  description: string | null;
+  startDate: string | null;
+  endDate: string | null;
+  createdAt: string;
+  updatedAt: string;
 }

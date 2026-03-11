@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Button, Group, Paper, Stack, Text } from "@mantine/core";
+import { Button, Group, Paper, SegmentedControl, Stack, Text } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import {
   IconArrowMerge,
@@ -14,19 +14,68 @@ import {
 import { useTranslations } from "next-intl";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import type {
+  Contact,
+  MergeConflictChoice,
   MergeConflictField,
   MergeRecommendation,
   MergeRecommendationsResponse,
   RefreshMergeRecommendationsResponse,
 } from "@bondery/types";
-import { errorNotificationTemplate, successNotificationTemplate } from "@bondery/mantine-next";
+import {
+  PersonChip,
+  errorNotificationTemplate,
+  successNotificationTemplate,
+} from "@bondery/mantine-next";
 import { PageWrapper } from "@/app/(app)/app/components/PageWrapper";
 import { PageHeader } from "@/app/(app)/app/components/PageHeader";
-import { PersonChip } from "@/app/(app)/app/components/shared/PersonChip";
 import { MERGE_CONFLICT_FIELDS, openMergeWithModal } from "../people/components/MergeWithModal";
 
 interface FixContactsClientProps {
   initialRecommendations: MergeRecommendation[];
+}
+
+/**
+ * Returns true if the string contains diacritical marks (e.g. á, č, š, ě, ř).
+ */
+function hasDiacritics(value: string): boolean {
+  return value !== value.normalize("NFD").replace(/\p{Mn}/gu, "");
+}
+
+/**
+ * When two name values differ only by diacritics, returns the side that has
+ * the localized (diacritic-bearing) variant. Returns null when both or neither
+ * side has diacritics (no preference).
+ */
+function preferLocalizedName(
+  left: string | null | undefined,
+  right: string | null | undefined,
+): MergeConflictChoice | null {
+  const l = left?.trim() ?? "";
+  const r = right?.trim() ?? "";
+  if (!l || !r) return null;
+  const leftHas = hasDiacritics(l);
+  const rightHas = hasDiacritics(r);
+  if (leftHas && !rightHas) return "left";
+  if (!leftHas && rightHas) return "right";
+  return null;
+}
+
+const NAME_FIELDS = ["firstName", "middleName", "lastName"] as const;
+
+/**
+ * Computes initial conflict choices for name fields, pre-selecting the side
+ * that carries diacritical characters (localized name) over the plain ASCII variant.
+ */
+function computeNameConflictChoices(
+  left: Contact,
+  right: Contact,
+): Partial<Record<MergeConflictField, MergeConflictChoice>> {
+  const choices: Partial<Record<MergeConflictField, MergeConflictChoice>> = {};
+  for (const field of NAME_FIELDS) {
+    const preference = preferLocalizedName(left[field], right[field]);
+    if (preference) choices[field] = preference;
+  }
+  return choices;
 }
 
 export function FixContactsClient({ initialRecommendations }: FixContactsClientProps) {
@@ -71,6 +120,7 @@ export function FixContactsClient({ initialRecommendations }: FixContactsClientP
       back: tMerge("Back"),
       merge: tMerge("Merge"),
       noConflicts: tMerge("NoConflicts"),
+      conflictHint: tMerge("ConflictHint"),
       processing: tMerge("Processing"),
       steps: {
         pick: tMerge("Steps.Pick"),
@@ -85,6 +135,10 @@ export function FixContactsClient({ initialRecommendations }: FixContactsClientP
   );
 
   const handleAccept = (recommendation: MergeRecommendation) => {
+    const initialConflictChoices = computeNameConflictChoices(
+      recommendation.leftPerson,
+      recommendation.rightPerson,
+    );
     openMergeWithModal({
       contacts: [recommendation.leftPerson, recommendation.rightPerson],
       leftPersonId: recommendation.leftPerson.id,
@@ -94,6 +148,10 @@ export function FixContactsClient({ initialRecommendations }: FixContactsClientP
       redirectToMergedPerson: false,
       titleText: tMerge("ModalTitle"),
       texts: mergeTexts,
+      onSuccess: () => {
+        setRecommendations((prev) => prev.filter((r) => r.id !== recommendation.id));
+      },
+      initialConflictChoices,
     });
   };
 
@@ -174,8 +232,13 @@ export function FixContactsClient({ initialRecommendations }: FixContactsClientP
     }
   };
 
-  const handleToggleDeclined = async () => {
-    const nextShowDeclined = !showDeclined;
+  const handleRecommendationViewChange = async (nextView: "active" | "hidden") => {
+    const nextShowDeclined = nextView === "hidden";
+
+    if (showDeclined === nextShowDeclined) {
+      return;
+    }
+
     setIsRefreshing(true);
 
     try {
@@ -238,15 +301,31 @@ export function FixContactsClient({ initialRecommendations }: FixContactsClientP
           icon={IconArrowMerge}
           title={t("Title")}
           secondaryAction={
-            <Button
-              variant="outline"
-              size="md"
-              leftSection={showDeclined ? <IconEye size={16} /> : <IconEyeOff size={16} />}
-              onClick={handleToggleDeclined}
-              loading={isRefreshing}
-            >
-              {showDeclined ? t("ShowActiveSuggestions") : t("ShowDeclinedSuggestions")}
-            </Button>
+            <SegmentedControl
+              value={showDeclined ? "hidden" : "active"}
+              onChange={(value) => handleRecommendationViewChange(value as "active" | "hidden")}
+              disabled={isRefreshing}
+              data={[
+                {
+                  value: "active",
+                  label: (
+                    <Group gap={6} wrap="nowrap">
+                      <IconEye size={14} />
+                      <span>{t("ActiveRecommendations")}</span>
+                    </Group>
+                  ),
+                },
+                {
+                  value: "hidden",
+                  label: (
+                    <Group gap={6} wrap="nowrap">
+                      <IconEyeOff size={14} />
+                      <span>{t("HiddenRecommendations")}</span>
+                    </Group>
+                  ),
+                },
+              ]}
+            />
           }
           primaryAction={
             <Button
@@ -258,6 +337,7 @@ export function FixContactsClient({ initialRecommendations }: FixContactsClientP
               {t("RefreshSuggestions")}
             </Button>
           }
+          description={t("Description")}
         />
 
         {recommendations.length === 0 ? (

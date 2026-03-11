@@ -1,4 +1,4 @@
-import type { ContactPreview } from "./contact";
+import type { ContactPreview, ContactsFilter } from "./contact";
 
 /**
  * Group Domain Types
@@ -68,11 +68,12 @@ export interface GroupResponse {
 }
 
 /**
- * Request body for adding/removing people from a group
+ * Request body for adding/removing people from a group.
+ * Supports either an explicit list of person IDs or a filter that matches all group members.
  */
-export interface GroupMembershipRequest {
-  personIds: string[];
-}
+export type GroupMembershipRequest =
+  | { personIds: string[] }
+  | { filter: ContactsFilter; excludePersonIds?: string[] };
 
 /**
  * Request body for deleting multiple groups

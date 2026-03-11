@@ -5,13 +5,13 @@ import { useDisclosure } from "@mantine/hooks";
 import { IconBrandGithub, IconTopologyStar, IconX } from "@tabler/icons-react";
 import { AnchorLink, ButtonLink } from "@bondery/mantine-next";
 import { Logo } from "@/components/Logo";
-import { SOCIAL_LINKS } from "@bondery/helpers";
+import { SOCIAL_LINKS, WEBSITE_ROUTES } from "@bondery/helpers";
 import { WEBAPP_URL } from "@/lib/config";
-
 
 const navLinks = [
   { label: "Features", href: "/#features" },
   { label: "Pricing", href: "/#pricing" },
+  { label: "Docs", href: WEBSITE_ROUTES.DOCS },
 ];
 
 type HeaderClientProps = {
@@ -23,7 +23,18 @@ export function HeaderClient({ initialStars }: HeaderClientProps) {
 
   return (
     <Box component="header" className="sticky top-6 z-50 ">
-      <Paper maw={1440} mx={{ base: "xs", md: "xl" }} shadow="md" py={"md"} px={"xs"}>
+      <Paper
+        maw={1440}
+        mx="auto"
+        w={{
+          base: "calc(100% - var(--mantine-spacing-xs) * 2)",
+          md: "calc(100% - var(--mantine-spacing-xl) * 2)",
+        }}
+        shadow="md"
+        py={"md"}
+        px={"xs"}
+        className="rounded-full!"
+      >
         <Flex align="center" px="md" visibleFrom="sm">
           <Box style={{ flex: 1 }}>
             <Logo size={32} />
@@ -55,9 +66,10 @@ export function HeaderClient({ initialStars }: HeaderClientProps) {
             <ButtonLink
               href={`${WEBAPP_URL}/login`}
               size="md"
+              radius={"xl"}
               leftSection={<IconTopologyStar size={20} />}
             >
-              Go to app
+              Login or Sign up
             </ButtonLink>
           </Flex>
         </Flex>
@@ -124,7 +136,7 @@ export function HeaderClient({ initialStars }: HeaderClientProps) {
                   leftSection={<IconTopologyStar size={20} />}
                   fullWidth
                 >
-                  Go to app
+                  Login or Sign up
                 </ButtonLink>
               </Stack>
             </Flex>

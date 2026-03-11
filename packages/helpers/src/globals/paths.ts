@@ -6,6 +6,7 @@ export const WEBSITE_ROUTES = {
   LOGIN: "/login",
   CONTACT: "/contact",
   APP_GROUP: "/app",
+  DOCS: "/docs",
 };
 
 export const API_ROUTES = {
@@ -13,11 +14,12 @@ export const API_ROUTES = {
   CONTACTS_MERGE: "/api/contacts/merge",
   CONTACTS_MERGE_RECOMMENDATIONS: "/api/contacts/merge-recommendations",
   CONTACTS_MERGE_RECOMMENDATIONS_REFRESH: "/api/contacts/merge-recommendations/refresh",
-  CONTACTS_UPCOMING_REMINDERS: "/api/contacts/important-events/upcoming",
+  CONTACTS_UPCOMING_REMINDERS: "/api/contacts/important-dates/upcoming",
   CONTACTS_IMPORT_LINKEDIN: "/api/contacts/import/linkedin",
   CONTACTS_IMPORT_INSTAGRAM: "/api/contacts/import/instagram",
   GROUPS: "/api/groups",
-  EVENTS: "/api/events",
+  TAGS: "/api/tags",
+  INTERACTIONS: "/api/interactions",
   SETTINGS: "/api/settings",
   ACCOUNT: "/api/account",
   ACCOUNT_PERSON: "/api/account/person",
@@ -36,6 +38,22 @@ export const GITHUB_REPO_URL = "https://api.github.com/repos/usebondery/bondery"
 export const STATUS_PAGE_URL = "https://bondery.openstatus.dev/";
 export const SUPPORT_EMAIL = "team@usebondery.com";
 
+/** The webapp product name used in browser tab titles and metadata. */
+export const WEBAPP_NAME = "Bondery";
+
+/** Divider character used in browser tab titles, e.g. "Person ∘ Bondery" */
+export const METADATA_TITLE_DIVIDER = "∘";
+
+/**
+ * Formats a page title for use in browser tab metadata.
+ *
+ * @param pageTitle - The page-specific title (e.g. a person's name or group label).
+ * @returns A combined title string in the format "pageTitle ∘ Bondery".
+ */
+export function formatMetadataTitle(pageTitle: string): string {
+  return `${pageTitle} ${METADATA_TITLE_DIVIDER} ${WEBAPP_NAME}`;
+}
+
 export const SOCIAL_LINKS = {
   github: "https://github.com/usebondery/bondery",
   linkedin: "https://www.linkedin.com/company/bondery",
@@ -49,7 +67,7 @@ export const WEBAPP_ROUTES = {
   PEOPLE: "/app/people",
   FIX_CONTACTS: "/app/fix",
   GROUPS: "/app/groups",
-  TIMELINE: "/app/timeline",
+  INTERACTIONS: "/app/interactions",
   PERSON: "/app/person",
   SETTINGS: "/app/settings",
   ACCOUNT: "/app/account",

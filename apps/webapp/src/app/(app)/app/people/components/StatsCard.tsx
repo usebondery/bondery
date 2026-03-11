@@ -1,23 +1,17 @@
-import { Paper, Group, Text, ThemeIcon } from "@mantine/core";
+import { ActionIcon, Group, Paper, Text, ThemeIcon, Tooltip } from "@mantine/core";
+import { IconInfoCircle } from "@tabler/icons-react";
 import type { ReactNode } from "react";
 
 interface StatsCardProps {
   title: string;
   value: string | number;
-  description: string;
+  tooltip: string;
   icon: ReactNode;
   color?: string;
   href?: string;
 }
 
-export function StatsCard({
-  title,
-  value,
-  description,
-  icon,
-  color = "blue",
-  href,
-}: StatsCardProps) {
+export function StatsCard({ title, value, tooltip, icon, color = "blue", href }: StatsCardProps) {
   return (
     <Paper
       component={href ? "a" : "div"}
@@ -29,14 +23,18 @@ export function StatsCard({
     >
       <Group justify="space-between">
         <div>
-          <Text c="dimmed" size="xs" tt="uppercase" fw={700}>
-            {title}
-          </Text>
+          <Group gap={4} align="center" wrap="nowrap">
+            <Text c="dimmed" size="xs" tt="uppercase" fw={700}>
+              {title}
+            </Text>
+            <Tooltip label={tooltip} multiline maw={220} withArrow>
+              <ActionIcon variant="transparent" color="gray" size="xs" aria-label="Info">
+                <IconInfoCircle size={13} stroke={1.5} />
+              </ActionIcon>
+            </Tooltip>
+          </Group>
           <Text fw={700} size="xl" mt="xs">
             {value}
-          </Text>
-          <Text c="dimmed" size="xs" mt="xs">
-            {description}
           </Text>
         </div>
         <ThemeIcon color={color} variant="light" size={60} radius="md">

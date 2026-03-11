@@ -10,6 +10,7 @@ import { PageHeader } from "@/app/(app)/app/components/PageHeader";
 import { PageWrapper } from "@/app/(app)/app/components/PageWrapper";
 import type { GroupWithCount } from "@bondery/types";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
+import { WEBSITE_URL } from "@/lib/config";
 import { openAddGroupModal } from "./components/AddGroupModal";
 import { openEditGroupModal } from "./components/EditGroupModal";
 import { openAddPeopleToGroupModal } from "./components/AddPeopleToGroupModal";
@@ -31,6 +32,7 @@ interface GroupsClientProps {
 
 export function GroupsClient({ initialGroups, totalCount }: GroupsClientProps) {
   const t = useTranslations("GroupsPage");
+  const tHeader = useTranslations("PageHeader");
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -177,7 +179,10 @@ export function GroupsClient({ initialGroups, totalCount }: GroupsClientProps) {
     try {
       const duplicateLabel = `${group.label} (Copy)`;
 
-      const groupContactsRes = await fetch(`${API_ROUTES.GROUPS}/${group.id}/contacts`);
+      // Fetch up to 200 members for duplication; groups larger than 200 will be partially duplicated.
+      const groupContactsRes = await fetch(
+        `${API_ROUTES.GROUPS}/${group.id}/contacts?limit=200&offset=0`,
+      );
       if (!groupContactsRes.ok) throw new Error("Failed to fetch group members");
 
       const groupContactsPayload = (await groupContactsRes.json()) as {
@@ -244,10 +249,17 @@ export function GroupsClient({ initialGroups, totalCount }: GroupsClientProps) {
       <Stack gap="xl">
         <PageHeader
           icon={IconUsersGroup}
-          title="Groups"
+          title={t("Title")}
+          description={t("HeaderDescription")}
+          helpHref={`${WEBSITE_URL}/docs/concepts/groups`}
+          helpLabel={tHeader("LearnMoreAbout", { concept: tHeader("Concepts.Groups") })}
           action={
-            <Button size="md" leftSection={<IconUsersPlus size={16} />} onClick={openAddGroupModal}>
-              Create new group
+            <Button
+              size="md"
+              leftSection={<IconUsersPlus size={16} />}
+              onClick={() => openAddGroupModal()}
+            >
+              {t("CreateNewGroup")}
             </Button>
           }
         />
@@ -264,7 +276,7 @@ export function GroupsClient({ initialGroups, totalCount }: GroupsClientProps) {
             </Group>
 
             {sortedGroups.length > 0 ? (
-              <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="md" mt="md">
+              <SimpleGrid cols={{ base: 1, sm: 2, lg: 3, xl: 4 }} spacing="md" mt="md">
                 {sortedGroups.map((group) => (
                   <GroupCard
                     key={group.id}

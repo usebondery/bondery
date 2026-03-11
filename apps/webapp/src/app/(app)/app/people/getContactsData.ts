@@ -2,6 +2,7 @@ import { API_URL } from "@/lib/config";
 import { getAuthHeaders } from "@/lib/authHeaders";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import type { Contact } from "@bondery/types";
+import { appendAvatarParams, type AvatarPreset } from "@/lib/avatarParams";
 
 export type SortOrder =
   | "nameAsc"
@@ -30,6 +31,7 @@ export interface ContactsDataResult {
  * @param sort - Optional contacts sorting mode.
  * @param limit - Page size for contacts fetch.
  * @param offset - Starting offset for contacts fetch.
+ * @param avatarPreset - Avatar transform preset (small, medium, large).
  * @returns Contacts list, total count, and stats for dashboard usage.
  */
 export async function getContactsData(
@@ -37,6 +39,7 @@ export async function getContactsData(
   sort?: SortOrder,
   limit = 50,
   offset = 0,
+  avatarPreset: AvatarPreset = "small",
 ): Promise<ContactsDataResult> {
   const headers = await getAuthHeaders();
   const params = new URLSearchParams();
@@ -50,6 +53,8 @@ export async function getContactsData(
   if (sort) {
     params.set("sort", sort);
   }
+
+  appendAvatarParams(params, avatarPreset);
 
   const response = await fetch(`${API_URL}${API_ROUTES.CONTACTS}?${params.toString()}`, {
     next: { tags: ["contacts"] },

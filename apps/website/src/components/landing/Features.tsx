@@ -4,6 +4,7 @@ import { PrivacyCodeAnimation } from "./PrivacyCodeAnimation";
 import { PersonEncryptionAnimation } from "./PersonEncryptionAnimation";
 import { SyncedConnectionsAnimation } from "./SyncedConnectionsAnimation";
 import { TimelineAnimation } from "./TimelineAnimation";
+import { AnimatedPeople } from "./AnimatedPeople";
 
 type FeatureSectionProps = {
   title: string;
@@ -103,29 +104,29 @@ export function Features() {
   return (
     <Box id="features">
       <FeatureSection
-        title="Designed for human connections, not sales leads"
-        description="Your personal connections deserve better than a sales bloated CRM. Bondery is built specifically for maintaining authentic relationships. Simple, intuitive interface with no complicated pipelines or sales jargon."
+        title="Your network is one of your most valuable assets."
+        description="Bondery helps you build and maintain it: keeping track of the people you know and nudging you when too much time has passed. The best relationships are built on remembering the details. "
         imagePosition="right"
-        imagePlaceholder={<PersonEncryptionAnimation />}
+        imagePlaceholder={<AnimatedPeople />}
       />
 
       <FeatureSection
         title="The contact hub that updates itself"
-        description="Stop juggling notes, apps, and memory. Bondery is the one place to store and manage your contacts across your entire workflow. It automatically fetches updates from LinkedIn and other sources, so you can stop maintaining data by hand. Open it on web, use it on mobile, or plug it into your custom app via API."
+        description="Stop juggling notes, calendars and memory. Bondery is the one place for all your contacts, which automatically pulls in updates from LinkedIn so your data stays fresh without the manual work. Available on web, mobile, and via API."
         imagePosition="left"
         imagePlaceholder={<SyncedConnectionsAnimation />}
       />
 
       <FeatureSection
         title="Never forget what matters"
-        description="When was the last time you forgot something important about a person? With Bondery, keep all the details in one place and get reminded when it matters. From birthdays and gift ideas to how you met and family info. Your memory, on steroids."
+        description="When was the last time you forgot something important about a person? With Bondery, keep all the details in one place and get reminded about them. From birthdays to follow-ups after conversations."
         imagePosition="right"
         imagePlaceholder={<TimelineAnimation />}
       />
 
       <FeatureSection
         title="Open-source and privacy-first"
-        description="Your contacts are precious and should not be shared for profit. Bondery is fully open-source and hosted on EU servers, with data that stays in Europe. Self-hosting option coming soon. You own your data, always."
+        description="Your contacts are precious and should not be shared for profit. Bondery is fully open-source and hosted on EU servers, with data that stays in Europe. With self-hosting option coming soon."
         imagePosition="left"
         imagePlaceholder={<PrivacyCodeAnimation />}
       />

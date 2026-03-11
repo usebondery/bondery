@@ -28,7 +28,7 @@ export type Database = {
   };
   public: {
     Tables: {
-      events: {
+      interactions: {
         Row: {
           created_at: string;
           date: string;
@@ -61,32 +61,32 @@ export type Database = {
         };
         Relationships: [];
       };
-      event_participants: {
+      interaction_participants: {
         Row: {
-          event_id: string;
+          interaction_id: string;
           created_at: string;
           person_id: string;
         };
         Insert: {
-          event_id: string;
+          interaction_id: string;
           created_at?: string;
           person_id: string;
         };
         Update: {
-          event_id?: string;
+          interaction_id?: string;
           created_at?: string;
           person_id?: string;
         };
         Relationships: [
           {
-            foreignKeyName: "event_participants_event_id_fkey";
-            columns: ["event_id"];
+            foreignKeyName: "interaction_participants_interaction_id_fkey";
+            columns: ["interaction_id"];
             isOneToOne: false;
-            referencedRelation: "events";
+            referencedRelation: "interactions";
             referencedColumns: ["id"];
           },
           {
-            foreignKeyName: "event_participants_person_id_fkey";
+            foreignKeyName: "interaction_participants_person_id_fkey";
             columns: ["person_id"];
             isOneToOne: false;
             referencedRelation: "people";
@@ -126,7 +126,6 @@ export type Database = {
       };
       people: {
         Row: {
-          avatar: string | null;
           created_at: string | null;
           first_name: string;
           id: string;
@@ -139,14 +138,14 @@ export type Database = {
           middle_name: string | null;
           myself: boolean | null;
           notes: string | null;
+          notes_updated_at: string | null;
           place: string | null;
           timezone: string | null;
-          title: string | null;
+          headline: string | null;
           updated_at: string | null;
           user_id: string;
         };
         Insert: {
-          avatar?: string | null;
           created_at?: string | null;
           first_name: string;
           id?: string;
@@ -159,14 +158,14 @@ export type Database = {
           middle_name?: string | null;
           myself?: boolean | null;
           notes?: string | null;
+          notes_updated_at?: string | null;
           place?: string | null;
           timezone?: string | null;
-          title?: string | null;
+          headline?: string | null;
           updated_at?: string | null;
           user_id: string;
         };
         Update: {
-          avatar?: string | null;
           created_at?: string | null;
           first_name?: string;
           id?: string;
@@ -179,9 +178,10 @@ export type Database = {
           middle_name?: string | null;
           myself?: boolean | null;
           notes?: string | null;
+          notes_updated_at?: string | null;
           place?: string | null;
           timezone?: string | null;
-          title?: string | null;
+          headline?: string | null;
           updated_at?: string | null;
           user_id?: string;
         };
@@ -231,11 +231,11 @@ export type Database = {
           },
         ];
       };
-      people_important_events: {
+      people_important_dates: {
         Row: {
           created_at: string;
-          event_date: string;
-          event_type: string;
+          date: string;
+          type: string;
           id: string;
           note: string | null;
           notify_on: string | null;
@@ -246,8 +246,8 @@ export type Database = {
         };
         Insert: {
           created_at?: string;
-          event_date: string;
-          event_type: string;
+          date: string;
+          type: string;
           id?: string;
           note?: string | null;
           notify_on?: string | null;
@@ -258,8 +258,8 @@ export type Database = {
         };
         Update: {
           created_at?: string;
-          event_date?: string;
-          event_type?: string;
+          date?: string;
+          type?: string;
           id?: string;
           note?: string | null;
           notify_on?: string | null;
@@ -270,7 +270,7 @@ export type Database = {
         };
         Relationships: [
           {
-            foreignKeyName: "people_important_events_person_id_fkey";
+            foreignKeyName: "people_important_dates_person_id_fkey";
             columns: ["person_id"];
             isOneToOne: false;
             referencedRelation: "people";
