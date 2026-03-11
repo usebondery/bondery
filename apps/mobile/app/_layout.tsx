@@ -3,8 +3,10 @@ import React from "react";
 import { Stack, useRouter, useSegments } from "expo-router";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
+import { TamaguiProvider } from "@tamagui/core";
 import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
 import { useAuthSession } from "../src/lib/auth/useAuthSession";
+import tamaguiConfig from "../src/theme/tamagui.config";
 
 type RootErrorBoundaryState = {
   hasError: boolean;
@@ -66,15 +68,17 @@ export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
-        <RootErrorBoundary>
-          {isLoadingSession ? (
-            <View style={styles.loadingScreen}>
-              <ActivityIndicator size="large" color="#111827" />
-            </View>
-          ) : (
-            <Stack screenOptions={{ headerShown: false }} />
-          )}
-        </RootErrorBoundary>
+        <TamaguiProvider config={tamaguiConfig}>
+          <RootErrorBoundary>
+            {isLoadingSession ? (
+              <View style={styles.loadingScreen}>
+                <ActivityIndicator size="large" color="#111827" />
+              </View>
+            ) : (
+              <Stack screenOptions={{ headerShown: false }} />
+            )}
+          </RootErrorBoundary>
+        </TamaguiProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>
   );

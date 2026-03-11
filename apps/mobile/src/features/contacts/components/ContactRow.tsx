@@ -4,7 +4,7 @@ import { Swipeable } from "react-native-gesture-handler";
 import { IconCheck, IconDotsVertical } from "@tabler/icons-react-native";
 import type { Contact } from "@bondery/types";
 import type { SwipeAction } from "../../../lib/preferences/useMobilePreferences";
-import { formatContactName, getContactInitial } from "../contactUtils";
+import { formatContactName, getAvatarColorHex, getContactInitials } from "../contactUtils";
 
 interface ContactRowProps {
   contact: Contact;
@@ -22,6 +22,7 @@ interface ContactRowProps {
   };
   onToggleSelect: (contactId: string) => void;
   onExecuteAction: (contact: Contact, action: SwipeAction) => void;
+  onPress?: (contactId: string) => void;
 }
 
 export function ContactRow({
@@ -33,8 +34,10 @@ export function ContactRow({
   texts,
   onToggleSelect,
   onExecuteAction,
+  onPress,
 }: ContactRowProps) {
   const name = useMemo(() => formatContactName(contact), [contact]);
+  const avatarColor = getAvatarColorHex(contact);
 
   const openOptions = () => {
     Alert.alert(name, texts.quickActionsTitle, [
@@ -86,16 +89,23 @@ export function ContactRow({
         onPress={() => {
           if (selectionMode) {
             onToggleSelect(contact.id);
+          } else {
+            onPress?.(contact.id);
           }
         }}
         style={[styles.container, selected && styles.containerSelected]}
       >
         <View style={styles.leftSide}>
-          <View style={[styles.avatar, selected && styles.avatarSelected]}>
+          <View
+            style={[
+              styles.avatar,
+              selected ? styles.avatarSelected : { backgroundColor: avatarColor },
+            ]}
+          >
             {selected ? (
               <IconCheck size={16} stroke="#111827" />
             ) : (
-              <Text style={styles.avatarText}>{getContactInitial(contact)}</Text>
+              <Text style={styles.avatarText}>{getContactInitials(contact)}</Text>
             )}
           </View>
           <Text numberOfLines={1} style={styles.nameText}>
@@ -144,9 +154,9 @@ const styles = StyleSheet.create({
     backgroundColor: "#c7d2fe",
   },
   avatarText: {
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: "700",
-    color: "#374151",
+    color: "#ffffff",
   },
   nameText: {
     fontSize: 16,

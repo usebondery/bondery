@@ -2,17 +2,20 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
+  Image,
   Linking,
   Pressable,
+  ScrollView,
   SectionList,
   StyleSheet,
   Text,
   TextInput,
   View,
 } from "react-native";
-import type { Contact } from "@bondery/types";
-import type { ContactSortOrder } from "../../lib/api/client";
-import { deleteContacts, fetchContacts } from "../../lib/api/client";
+import { useRouter } from "expo-router";
+import { IconSearch } from "@tabler/icons-react-native";
+import type { Contact, GroupWithCount, UserSettings } from "@bondery/types";
+import { deleteContacts, fetchContacts, fetchGroups, fetchSettings } from "../../lib/api/client";
 import {
   MobilePreferencesState,
   useMobilePreferences,
@@ -32,22 +35,19 @@ type ContactSection = {
   data: Contact[];
 };
 
-const SORT_OPTIONS: Array<{ value: ContactSortOrder; key: string }> = [
-  { value: "nameAsc", key: "MobileApp.Contacts.SortNameAsc" },
-  { value: "nameDesc", key: "MobileApp.Contacts.SortNameDesc" },
-  { value: "surnameAsc", key: "MobileApp.Contacts.SortSurnameAsc" },
-  { value: "surnameDesc", key: "MobileApp.Contacts.SortSurnameDesc" },
-];
-
 export function ContactsScreen() {
   const t = useMobileTranslations();
+  const router = useRouter();
   const sectionListRef = useRef<SectionList<Contact, ContactSection>>(null);
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [query, setQuery] = useState("");
-  const [sort, setSort] = useState<ContactSortOrder>("nameAsc");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [groups, setGroups] = useState<GroupWithCount[]>([]);
+  const [userSettings, setUserSettings] = useState<(UserSettings & { email?: string }) | null>(
+    null,
+  );
   const leftSwipeAction = useMobilePreferences(
     (state: MobilePreferencesState) => state.leftSwipeAction,
   );
@@ -62,8 +62,8 @@ export function ContactsScreen() {
     try {
       const response = await fetchContacts({
         query,
-        sort,
-        limit: 500,
+        sort: "nameAsc",
+        limit: 200,
         offset: 0,
       });
       setContacts(response.contacts || []);
@@ -78,7 +78,13 @@ export function ContactsScreen() {
 
   useEffect(() => {
     loadContacts();
-  }, [sort]);
+    Promise.all([fetchGroups(), fetchSettings()])
+      .then(([groupsRes, settingsRes]) => {
+        setGroups(groupsRes.groups || []);
+        setUserSettings(settingsRes.data || null);
+      })
+      .catch(() => {});
+  }, []);
 
   const filteredContacts = useMemo(
     () => contacts.filter((contact) => contactMatchesQuery(contact, query)),
@@ -168,32 +174,17 @@ export function ContactsScreen() {
       <View style={styles.header}>
         <Text style={styles.title}>{t("MobileApp.Contacts.Title")}</Text>
 
-        <TextInput
-          value={query}
-          onChangeText={setQuery}
-          placeholder={t("MobileApp.Contacts.SearchPlaceholder")}
-          placeholderTextColor="#9ca3af"
-          style={styles.searchInput}
-          autoCapitalize="none"
-          autoCorrect={false}
-        />
-
-        <View style={styles.sortRow}>
-          {SORT_OPTIONS.map((option) => {
-            const active = option.value === sort;
-
-            return (
-              <Pressable
-                key={option.value}
-                onPress={() => setSort(option.value)}
-                style={[styles.sortButton, active && styles.sortButtonActive]}
-              >
-                <Text style={[styles.sortButtonText, active && styles.sortButtonTextActive]}>
-                  {t(option.key)}
-                </Text>
-              </Pressable>
-            );
-          })}
+        <View style={styles.searchContainer}>
+          <IconSearch size={16} stroke="#9ca3af" />
+          <TextInput
+            value={query}
+            onChangeText={setQuery}
+            placeholder={t("MobileApp.Contacts.SearchPlaceholder")}
+            placeholderTextColor="#9ca3af"
+            style={styles.searchInput}
+            autoCapitalize="none"
+            autoCorrect={false}
+          />
         </View>
 
         {selectionMode ? (
@@ -231,6 +222,72 @@ export function ContactsScreen() {
             keyExtractor={(item: Contact) => item.id}
             stickySectionHeadersEnabled
             showsVerticalScrollIndicator={false}
+            ListHeaderComponent={
+              userSettings || groups.length > 0 ? (
+                <View>
+                  {userSettings ? (
+                    <View style={styles.profileCard}>
+                      <View style={styles.profileAvatar}>
+                        {userSettings.avatarUrl ? (
+                          <Image
+                            source={{ uri: userSettings.avatarUrl }}
+                            style={styles.profileAvatarImage}
+                            resizeMode="cover"
+                          />
+                        ) : (
+                          <Text style={styles.profileAvatarInitial}>
+                            {(
+                              (userSettings.name || userSettings.email || "?")[0] || "?"
+                            ).toUpperCase()}
+                          </Text>
+                        )}
+                      </View>
+                      <Text style={styles.profileName}>
+                        {[userSettings.name, userSettings.surname].filter(Boolean).join(" ") ||
+                          userSettings.email ||
+                          ""}
+                      </Text>
+                    </View>
+                  ) : null}
+
+                  {groups.length > 0 ? (
+                    <View style={styles.groupsSection}>
+                      <Text style={styles.groupsSectionTitle}>Groups</Text>
+                      <ScrollView
+                        horizontal
+                        showsHorizontalScrollIndicator={false}
+                        contentContainerStyle={styles.groupsScroll}
+                      >
+                        {groups.map((group) => (
+                          <Pressable
+                            key={group.id}
+                            style={styles.groupChip}
+                            onPress={() =>
+                              router.push({
+                                pathname: "/group/[id]",
+                                params: {
+                                  id: group.id,
+                                  label: group.label,
+                                  emoji: group.emoji || "",
+                                },
+                              })
+                            }
+                          >
+                            {group.emoji ? (
+                              <Text style={styles.groupEmoji}>{group.emoji}</Text>
+                            ) : null}
+                            <Text style={styles.groupLabel}>{group.label}</Text>
+                            <View style={styles.groupCountBadge}>
+                              <Text style={styles.groupCount}>{group.contactCount}</Text>
+                            </View>
+                          </Pressable>
+                        ))}
+                      </ScrollView>
+                    </View>
+                  ) : null}
+                </View>
+              ) : null
+            }
             renderSectionHeader={({ section }: { section: ContactSection }) => (
               <View style={styles.sectionHeader}>
                 <Text style={styles.sectionHeaderText}>{section.title}</Text>
@@ -253,6 +310,7 @@ export function ContactsScreen() {
                 }}
                 onToggleSelect={toggleContactSelection}
                 onExecuteAction={executeAction}
+                onPress={(id) => router.push({ pathname: "/contact/[id]", params: { id } })}
               />
             )}
             ListEmptyComponent={
@@ -299,39 +357,22 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     color: "#111827",
   },
-  searchInput: {
+  searchContainer: {
     marginTop: 12,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    paddingHorizontal: 12,
     borderWidth: 1,
     borderColor: "#e5e7eb",
     borderRadius: 10,
-    paddingHorizontal: 12,
+    backgroundColor: "#f9fafb",
+  },
+  searchInput: {
+    flex: 1,
     paddingVertical: 10,
     fontSize: 15,
     color: "#111827",
-    backgroundColor: "#f9fafb",
-  },
-  sortRow: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 8,
-    marginTop: 12,
-  },
-  sortButton: {
-    paddingHorizontal: 10,
-    paddingVertical: 8,
-    borderRadius: 999,
-    backgroundColor: "#f3f4f6",
-  },
-  sortButtonActive: {
-    backgroundColor: "#111827",
-  },
-  sortButtonText: {
-    fontSize: 12,
-    fontWeight: "600",
-    color: "#374151",
-  },
-  sortButtonTextActive: {
-    color: "#ffffff",
   },
   selectionActions: {
     marginTop: 10,
@@ -392,6 +433,85 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   emptyText: {
+    color: "#6b7280",
+  },
+  profileCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: "#f3f4f6",
+  },
+  profileAvatar: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: "#f3f4f6",
+    alignItems: "center",
+    justifyContent: "center",
+    overflow: "hidden",
+  },
+  profileAvatarImage: {
+    width: 44,
+    height: 44,
+  },
+  profileAvatarInitial: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#374151",
+  },
+  profileName: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#111827",
+  },
+  groupsSection: {
+    paddingTop: 16,
+    paddingBottom: 12,
+  },
+  groupsSectionTitle: {
+    paddingHorizontal: 16,
+    fontSize: 11,
+    fontWeight: "700",
+    color: "#6b7280",
+    textTransform: "uppercase",
+    letterSpacing: 0.8,
+    marginBottom: 10,
+  },
+  groupsScroll: {
+    paddingHorizontal: 16,
+    gap: 8,
+  },
+  groupChip: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 20,
+    backgroundColor: "#f9fafb",
+    borderWidth: 1,
+    borderColor: "#e5e7eb",
+  },
+  groupEmoji: {
+    fontSize: 16,
+  },
+  groupLabel: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#111827",
+  },
+  groupCountBadge: {
+    backgroundColor: "#e5e7eb",
+    borderRadius: 10,
+    paddingHorizontal: 6,
+    paddingVertical: 1,
+  },
+  groupCount: {
+    fontSize: 11,
+    fontWeight: "700",
     color: "#6b7280",
   },
 });
