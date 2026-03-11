@@ -62,6 +62,7 @@ export interface ColumnConfig {
   visible: boolean;
   icon?: ReactNode;
   fixed?: boolean;
+  hideHeader?: boolean;
 }
 
 export interface MenuAction {
@@ -414,6 +415,7 @@ export default function ContactsTableV2({
               icon: COLUMN_DEFINITIONS[key].icon,
               visible: true,
               fixed: key === "name",
+              hideHeader: key === "name",
             }))
           : (visibleColumnsProp as ColumnConfig[])
         : [],
@@ -436,6 +438,7 @@ export default function ContactsTableV2({
         visible: column.visible,
         fixed: column.fixed,
         minWidthClass: column.key === "name" ? "min-w-60" : "min-w-24",
+        hideHeader: column.hideHeader ?? column.key === "name",
         render: (contact: Contact) => {
           switch (column.key) {
             case "name":

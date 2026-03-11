@@ -1,5 +1,5 @@
 import { SimpleGrid } from "@mantine/core";
-import { IconMessageCircle, IconUserPlus, IconUsers } from "@tabler/icons-react";
+import { IconMessageCircle, IconUserPlus, IconUser } from "@tabler/icons-react";
 import { StatsCard } from "@/app/(app)/app/people/components/StatsCard";
 
 interface HomeStatsGridProps {
@@ -25,7 +25,7 @@ export function HomeStatsGrid({ stats, labels }: HomeStatsGridProps) {
         title={labels.totalContactsTitle}
         value={stats.totalContacts}
         tooltip={labels.totalContactsTooltip}
-        icon={<IconUsers size={32} stroke={1.5} />}
+        icon={<IconUser size={32} stroke={1.5} />}
         color="blue"
         href="/app/people"
       />

@@ -615,7 +615,9 @@
     "NoNewSuggestionsFound": "Nebyly nalezeny žádné nové návrhy",
     "NewSuggestionsFound": "Nalezeno nových návrhů: {count}",
     "RefreshSuccess": "Návrhy sloučení byly obnoveny",
-    "RefreshError": "Návrhy sloučení se nepodařilo obnovit"
+    "RefreshError": "Návrhy sloučení se nepodařilo obnovit",
+    "PossibleDuplicateBadge": "Duplikát",
+    "PossibleDuplicateTooltip": "Tento kontakt může být duplikátem jiného kontaktu. Pokud se jedná o stejnou osobu, sloučte je."
   },
   "PeoplePage": {
     "Title": "Lidé",

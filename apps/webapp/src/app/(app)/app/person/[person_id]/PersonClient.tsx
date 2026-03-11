@@ -48,6 +48,7 @@ import type {
   RelationshipType,
   ImportantDate,
   MergeConflictField,
+  MergeRecommendation,
   Tag,
   WorkHistoryEntry,
   EducationEntry,
@@ -89,6 +90,7 @@ import { emojiSuggestionRender } from "./components/emojiSuggestion";
 import type { MentionSuggestionItem } from "./components/MentionList";
 import { MentionNodeView } from "./components/MentionNodeView";
 import { TaskItemNodeView } from "./components/TaskItemNodeView";
+import { MergeRecommendationCard } from "@/app/(app)/app/components/contacts/MergeRecommendationCard";
 
 interface PersonClientProps {
   initialContact: Contact;
@@ -104,6 +106,7 @@ interface PersonClientProps {
   initialWorkHistory: WorkHistoryEntry[];
   initialEducation: EducationEntry[];
   initialLinkedinBio?: string | null;
+  initialMergeRecommendation?: MergeRecommendation | null;
   personId: string;
   initialTab?: string;
 }
@@ -126,6 +129,7 @@ export default function PersonClient({
   initialWorkHistory = [],
   initialEducation = [],
   initialLinkedinBio = null,
+  initialMergeRecommendation = null,
   personId,
   initialTab,
 }: PersonClientProps) {
@@ -193,6 +197,9 @@ export default function PersonClient({
   );
 
   const [contact, setContact] = useState<Contact>(initialContact);
+  const [mergeRecommendation, setMergeRecommendation] = useState<MergeRecommendation | null>(
+    initialMergeRecommendation,
+  );
   const [personGroups, setPersonGroups] = useState<GroupType[]>(initialPersonGroups);
   const [savingField, setSavingField] = useState<string | null>(null);
   const [editedValues, setEditedValues] = useState<{
@@ -1289,6 +1296,17 @@ export default function PersonClient({
             />
           }
         />
+
+        {mergeRecommendation && (
+          <MergeRecommendationCard
+            recommendation={mergeRecommendation}
+            contacts={[mergeRecommendation.leftPerson, mergeRecommendation.rightPerson]}
+            mergeTexts={mergeTexts}
+            onAccepted={() => setMergeRecommendation(null)}
+            onDeclined={() => setMergeRecommendation(null)}
+            redirectAfterMerge
+          />
+        )}
 
         <Paper withBorder shadow="sm" radius="md" p="xl">
           <Stack gap="lg">

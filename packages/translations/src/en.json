@@ -617,7 +617,9 @@
     "NoNewSuggestionsFound": "No new suggestions found",
     "NewSuggestionsFound": "{count} new suggestions found",
     "RefreshSuccess": "Merge suggestions refreshed",
-    "RefreshError": "Failed to refresh merge suggestions"
+    "RefreshError": "Failed to refresh merge suggestions",
+    "PossibleDuplicateBadge": "Duplicate",
+    "PossibleDuplicateTooltip": "This contact may be a possible duplicate of another contact. If they are the same person, merge them."
   },
   "PeoplePage": {
     "Title": "People",

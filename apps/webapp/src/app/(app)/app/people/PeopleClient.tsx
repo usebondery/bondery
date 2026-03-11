@@ -407,7 +407,7 @@ export function PeopleClient({ initialContacts, totalCount, layout = "stack" }: 
     <PageWrapper>
       <WrapperComponent gap="xl" {...(layout === "container" ? { justify: "space-between" } : {})}>
         <PageHeader
-          icon={IconUsers}
+          icon={IconUser}
           title={t("Title")}
           description={t("HeaderDescription")}
           helpHref={`${WEBSITE_URL}/docs/concepts/people`}

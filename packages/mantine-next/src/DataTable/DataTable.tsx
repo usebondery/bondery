@@ -567,7 +567,7 @@ export function DataTable<TRow, TSortKey extends string = string>({
 
             {visibleColumns.map((col) => (
               <TableTh key={col.key} className={col.minWidthClass}>
-                {col.icon ? (
+                {!col.hideHeader && (col.icon ? (
                   <Group gap="xs" wrap="nowrap" style={{ width: "fit-content" }}>
                     {col.icon}
                     <Text size="sm" fw={500}>
@@ -578,7 +578,7 @@ export function DataTable<TRow, TSortKey extends string = string>({
                   <Text size="sm" fw={500}>
                     {col.label}
                   </Text>
-                )}
+                ))}
               </TableTh>
             ))}
 

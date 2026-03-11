@@ -3,19 +3,10 @@
 import { useMemo, useState } from "react";
 import { Button, Group, Paper, SegmentedControl, Stack, Text } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
-import {
-  IconArrowMerge,
-  IconCheck,
-  IconEye,
-  IconEyeOff,
-  IconRefresh,
-  IconX,
-} from "@tabler/icons-react";
+import { IconArrowMerge, IconEye, IconEyeOff, IconRefresh } from "@tabler/icons-react";
 import { useTranslations } from "next-intl";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import type {
-  Contact,
-  MergeConflictChoice,
   MergeConflictField,
   MergeRecommendation,
   MergeRecommendationsResponse,
@@ -28,61 +19,17 @@ import {
 } from "@bondery/mantine-next";
 import { PageWrapper } from "@/app/(app)/app/components/PageWrapper";
 import { PageHeader } from "@/app/(app)/app/components/PageHeader";
-import { MERGE_CONFLICT_FIELDS, openMergeWithModal } from "../people/components/MergeWithModal";
+import { MERGE_CONFLICT_FIELDS } from "../people/components/MergeWithModal";
+import { MergeRecommendationCard } from "../components/contacts/MergeRecommendationCard";
 
 interface FixContactsClientProps {
   initialRecommendations: MergeRecommendation[];
-}
-
-/**
- * Returns true if the string contains diacritical marks (e.g. á, č, š, ě, ř).
- */
-function hasDiacritics(value: string): boolean {
-  return value !== value.normalize("NFD").replace(/\p{Mn}/gu, "");
-}
-
-/**
- * When two name values differ only by diacritics, returns the side that has
- * the localized (diacritic-bearing) variant. Returns null when both or neither
- * side has diacritics (no preference).
- */
-function preferLocalizedName(
-  left: string | null | undefined,
-  right: string | null | undefined,
-): MergeConflictChoice | null {
-  const l = left?.trim() ?? "";
-  const r = right?.trim() ?? "";
-  if (!l || !r) return null;
-  const leftHas = hasDiacritics(l);
-  const rightHas = hasDiacritics(r);
-  if (leftHas && !rightHas) return "left";
-  if (!leftHas && rightHas) return "right";
-  return null;
-}
-
-const NAME_FIELDS = ["firstName", "middleName", "lastName"] as const;
-
-/**
- * Computes initial conflict choices for name fields, pre-selecting the side
- * that carries diacritical characters (localized name) over the plain ASCII variant.
- */
-function computeNameConflictChoices(
-  left: Contact,
-  right: Contact,
-): Partial<Record<MergeConflictField, MergeConflictChoice>> {
-  const choices: Partial<Record<MergeConflictField, MergeConflictChoice>> = {};
-  for (const field of NAME_FIELDS) {
-    const preference = preferLocalizedName(left[field], right[field]);
-    if (preference) choices[field] = preference;
-  }
-  return choices;
 }
 
 export function FixContactsClient({ initialRecommendations }: FixContactsClientProps) {
   const t = useTranslations("FixContactsPage");
   const tMerge = useTranslations("MergeWithModal");
   const [recommendations, setRecommendations] = useState(initialRecommendations);
-  const [decliningIds, setDecliningIds] = useState<Set<string>>(new Set());
   const [restoringIds, setRestoringIds] = useState<Set<string>>(new Set());
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [showDeclined, setShowDeclined] = useState(false);
@@ -133,65 +80,6 @@ export function FixContactsClient({ initialRecommendations }: FixContactsClientP
     }),
     [tMerge],
   );
-
-  const handleAccept = (recommendation: MergeRecommendation) => {
-    const initialConflictChoices = computeNameConflictChoices(
-      recommendation.leftPerson,
-      recommendation.rightPerson,
-    );
-    openMergeWithModal({
-      contacts: [recommendation.leftPerson, recommendation.rightPerson],
-      leftPersonId: recommendation.leftPerson.id,
-      rightPersonId: recommendation.rightPerson.id,
-      disableLeftPicker: true,
-      disableRightPicker: true,
-      redirectToMergedPerson: false,
-      titleText: tMerge("ModalTitle"),
-      texts: mergeTexts,
-      onSuccess: () => {
-        setRecommendations((prev) => prev.filter((r) => r.id !== recommendation.id));
-      },
-      initialConflictChoices,
-    });
-  };
-
-  const handleDecline = async (recommendationId: string) => {
-    setDecliningIds((prev) => new Set(prev).add(recommendationId));
-
-    try {
-      const response = await fetch(
-        `${API_ROUTES.CONTACTS}/merge-recommendations/${recommendationId}/decline`,
-        {
-          method: "PATCH",
-        },
-      );
-
-      if (!response.ok) {
-        throw new Error(t("DeclineError"));
-      }
-
-      setRecommendations((prev) => prev.filter((item) => item.id !== recommendationId));
-      notifications.show(
-        successNotificationTemplate({
-          title: t("SuccessTitle"),
-          description: t("DeclineSuccess"),
-        }),
-      );
-    } catch (error) {
-      notifications.show(
-        errorNotificationTemplate({
-          title: t("ErrorTitle"),
-          description: error instanceof Error ? error.message : t("DeclineError"),
-        }),
-      );
-    } finally {
-      setDecliningIds((prev) => {
-        const next = new Set(prev);
-        next.delete(recommendationId);
-        return next;
-      });
-    }
-  };
 
   const handleRefreshSuggestions = async () => {
     setIsRefreshing(true);
@@ -348,49 +236,42 @@ export function FixContactsClient({ initialRecommendations }: FixContactsClientP
           </Paper>
         ) : (
           <Stack gap="sm">
-            {recommendations.map((recommendation) => (
-              <Paper key={recommendation.id} withBorder radius="md" p="md">
-                <Group justify="space-between" align="center" wrap="nowrap">
-                  <Group align="center" wrap="nowrap">
-                    <PersonChip person={recommendation.leftPerson} isClickable />
-                    <Text c="dimmed" size="sm" fw={500}>
-                      {tMerge("MergeWithLabel")}
-                    </Text>
-                    <PersonChip person={recommendation.rightPerson} isClickable />
+            {recommendations.map((recommendation) =>
+              showDeclined ? (
+                <Paper key={recommendation.id} withBorder radius="md" p="md">
+                  <Group justify="space-between" align="center" wrap="nowrap">
+                    <Group align="center" wrap="nowrap">
+                      <PersonChip person={recommendation.leftPerson} isClickable />
+                      <Text c="dimmed" size="sm" fw={500}>
+                        {tMerge("MergeWithLabel")}
+                      </Text>
+                      <PersonChip person={recommendation.rightPerson} isClickable />
+                    </Group>
+                    <Button
+                      variant="default"
+                      leftSection={<IconRefresh size={16} />}
+                      onClick={() => handleRestore(recommendation.id)}
+                      loading={restoringIds.has(recommendation.id)}
+                    >
+                      {t("RestoreSuggestion")}
+                    </Button>
                   </Group>
-
-                  <Group>
-                    {showDeclined ? (
-                      <Button
-                        variant="default"
-                        leftSection={<IconRefresh size={16} />}
-                        onClick={() => handleRestore(recommendation.id)}
-                        loading={restoringIds.has(recommendation.id)}
-                      >
-                        {t("RestoreSuggestion")}
-                      </Button>
-                    ) : (
-                      <>
-                        <Button
-                          variant="default"
-                          leftSection={<IconX size={16} />}
-                          onClick={() => handleDecline(recommendation.id)}
-                          loading={decliningIds.has(recommendation.id)}
-                        >
-                          {t("DeclineMerge")}
-                        </Button>
-                        <Button
-                          leftSection={<IconCheck size={16} />}
-                          onClick={() => handleAccept(recommendation)}
-                        >
-                          {t("AcceptMerge")}
-                        </Button>
-                      </>
-                    )}
-                  </Group>
-                </Group>
-              </Paper>
-            ))}
+                </Paper>
+              ) : (
+                <MergeRecommendationCard
+                  key={recommendation.id}
+                  recommendation={recommendation}
+                  contacts={[recommendation.leftPerson, recommendation.rightPerson]}
+                  mergeTexts={mergeTexts}
+                  onAccepted={() =>
+                    setRecommendations((prev) => prev.filter((r) => r.id !== recommendation.id))
+                  }
+                  onDeclined={() =>
+                    setRecommendations((prev) => prev.filter((r) => r.id !== recommendation.id))
+                  }
+                />
+              ),
+            )}
           </Stack>
         )}
       </Stack>
