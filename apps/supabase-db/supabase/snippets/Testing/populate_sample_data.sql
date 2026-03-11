@@ -47,6 +47,23 @@ DECLARE
   resolved_email    text;
   relation          record;
   table_row_count   bigint;
+  sample_person_index integer;
+  sample_first_names text[] := ARRAY[
+    'Amelia', 'Benjamin', 'Charlotte', 'Daniel', 'Elena',
+    'Felix', 'Gabriela', 'Henry', 'Isabella', 'Jakub',
+    'Klara', 'Lukas', 'Marta', 'Nikolai', 'Olivia',
+    'Pavel', 'Quinn', 'Rafael', 'Sofia', 'Tomas',
+    'Ursula', 'Viktor', 'Wendy', 'Xavier', 'Yasmin',
+    'Zuzana', 'Arthur', 'Bianca', 'Cedric', 'Diana'
+  ];
+  sample_last_names text[] := ARRAY[
+    'Novak', 'Svoboda', 'Kral', 'Horak', 'Pokorny',
+    'Marek', 'Dvorak', 'Urban', 'Kolar', 'Jelinek',
+    'Toman', 'Sykora', 'Bartos', 'Fiala', 'Benes',
+    'Navratil', 'Sedlak', 'Cerny', 'Polak', 'Kucera',
+    'Blazek', 'Kadlec', 'Prochazka', 'Kopecky', 'Richter',
+    'Havel', 'Zeman', 'Klein', 'Vesely', 'Hruska'
+  ];
 BEGIN
 
   -- ── Resolve target user ──────────────────────────────────────────────────
@@ -110,6 +127,31 @@ BEGIN
     location = EXCLUDED.location, place = EXCLUDED.place, notes = EXCLUDED.notes,
     created_at = EXCLUDED.created_at, updated_at = EXCLUDED.updated_at;
 
+  -- ── Sample auto-generated people ────────────────────────────────────────
+  FOR sample_person_index IN 1..30 LOOP
+    INSERT INTO public.people (
+      id, user_id, headline, first_name, middle_name, last_name,
+      last_interaction, myself, language, timezone, location, place, notes, created_at, updated_at
+    ) VALUES (
+      (format('44444444-4444-4444-4444-%s', lpad(sample_person_index::text, 12, '0')))::uuid,
+      target_user_id, NULL,
+      sample_first_names[sample_person_index], NULL,
+      sample_last_names[sample_person_index],
+      ('2026-02-01T09:00:00+00'::timestamptz + (sample_person_index || ' days')::interval),
+      false, 'en', 'Europe/Prague', NULL, 'Prague',
+      format('Auto-generated sample contact: %s %s', sample_first_names[sample_person_index], sample_last_names[sample_person_index]),
+      ('2026-01-01T10:00:00+00'::timestamptz + (sample_person_index || ' days')::interval),
+      ('2026-01-01T10:00:00+00'::timestamptz + (sample_person_index || ' days')::interval)
+    )
+    ON CONFLICT (id) DO UPDATE SET
+      user_id = EXCLUDED.user_id, headline = EXCLUDED.headline,
+      first_name = EXCLUDED.first_name, middle_name = EXCLUDED.middle_name,
+      last_name = EXCLUDED.last_name, last_interaction = EXCLUDED.last_interaction,
+      myself = EXCLUDED.myself, language = EXCLUDED.language, timezone = EXCLUDED.timezone,
+      location = EXCLUDED.location, place = EXCLUDED.place, notes = EXCLUDED.notes,
+      created_at = EXCLUDED.created_at, updated_at = EXCLUDED.updated_at;
+  END LOOP;
+
   -- ── Groups ───────────────────────────────────────────────────────────────
   INSERT INTO public.groups (id, user_id, label, emoji, color, created_at, updated_at) VALUES
     (group_family_id,  target_user_id, 'Family',  '👨‍👩‍👧‍👦', '#F97316', '2026-01-15T11:05:00+00', '2026-02-01T10:00:00+00'),
@@ -128,6 +170,23 @@ BEGIN
     person_id = EXCLUDED.person_id, group_id = EXCLUDED.group_id,
     user_id = EXCLUDED.user_id, created_at = EXCLUDED.created_at;
 
+  FOR sample_person_index IN 1..30 LOOP
+    INSERT INTO public.people_groups (id, person_id, group_id, user_id, created_at) VALUES (
+      (format('aa000000-0000-0000-0000-%s', lpad(sample_person_index::text, 12, '0')))::uuid,
+      (format('44444444-4444-4444-4444-%s', lpad(sample_person_index::text, 12, '0')))::uuid,
+      CASE sample_person_index % 3
+        WHEN 1 THEN group_family_id
+        WHEN 2 THEN group_work_id
+        ELSE group_friends_id
+      END,
+      target_user_id,
+      ('2026-01-10T08:00:00+00'::timestamptz + (sample_person_index || ' days')::interval)
+    )
+    ON CONFLICT (id) DO UPDATE SET
+      person_id = EXCLUDED.person_id, group_id = EXCLUDED.group_id,
+      user_id = EXCLUDED.user_id, created_at = EXCLUDED.created_at;
+  END LOOP;
+
   -- ── Phones ───────────────────────────────────────────────────────────────
   INSERT INTO public.people_phones (id, user_id, person_id, prefix, value, type, preferred, sort_order, created_at, updated_at) VALUES
     ('cccccccc-3333-3333-3333-333333333333', target_user_id, person_ada_id,       '+44', '7700900123', 'home', true,  0, '2026-01-15T11:10:00+00', '2026-02-01T11:00:00+00'),
@@ -138,6 +197,27 @@ BEGIN
     user_id = EXCLUDED.user_id, person_id = EXCLUDED.person_id, prefix = EXCLUDED.prefix,
     value = EXCLUDED.value, type = EXCLUDED.type, preferred = EXCLUDED.preferred,
     sort_order = EXCLUDED.sort_order, created_at = EXCLUDED.created_at, updated_at = EXCLUDED.updated_at;
+
+  FOR sample_person_index IN 1..30 LOOP
+    INSERT INTO public.people_phones (
+      id, user_id, person_id, prefix, value, type, preferred, sort_order, created_at, updated_at
+    ) VALUES (
+      (format('bb000000-0000-0000-0000-%s', lpad(sample_person_index::text, 12, '0')))::uuid,
+      target_user_id,
+      (format('44444444-4444-4444-4444-%s', lpad(sample_person_index::text, 12, '0')))::uuid,
+      '+420',
+      format('601%s', lpad(sample_person_index::text, 7, '0')),
+      'home',
+      true,
+      0,
+      ('2026-01-12T11:00:00+00'::timestamptz + (sample_person_index || ' days')::interval),
+      ('2026-01-12T11:00:00+00'::timestamptz + (sample_person_index || ' days')::interval)
+    )
+    ON CONFLICT (id) DO UPDATE SET
+      user_id = EXCLUDED.user_id, person_id = EXCLUDED.person_id, prefix = EXCLUDED.prefix,
+      value = EXCLUDED.value, type = EXCLUDED.type, preferred = EXCLUDED.preferred,
+      sort_order = EXCLUDED.sort_order, created_at = EXCLUDED.created_at, updated_at = EXCLUDED.updated_at;
+  END LOOP;
 
   -- ── Emails ───────────────────────────────────────────────────────────────
   INSERT INTO public.people_emails (id, user_id, person_id, value, type, preferred, sort_order, created_at, updated_at) VALUES
@@ -150,6 +230,26 @@ BEGIN
     type = EXCLUDED.type, preferred = EXCLUDED.preferred, sort_order = EXCLUDED.sort_order,
     created_at = EXCLUDED.created_at, updated_at = EXCLUDED.updated_at;
 
+  FOR sample_person_index IN 1..30 LOOP
+    INSERT INTO public.people_emails (
+      id, user_id, person_id, value, type, preferred, sort_order, created_at, updated_at
+    ) VALUES (
+      (format('cc000000-0000-0000-0000-%s', lpad(sample_person_index::text, 12, '0')))::uuid,
+      target_user_id,
+      (format('44444444-4444-4444-4444-%s', lpad(sample_person_index::text, 12, '0')))::uuid,
+      lower(format('%s.%s%s@sample.example', sample_first_names[sample_person_index], sample_last_names[sample_person_index], lpad(sample_person_index::text, 2, '0'))),
+      'work',
+      true,
+      0,
+      ('2026-01-13T11:00:00+00'::timestamptz + (sample_person_index || ' days')::interval),
+      ('2026-01-13T11:00:00+00'::timestamptz + (sample_person_index || ' days')::interval)
+    )
+    ON CONFLICT (id) DO UPDATE SET
+      user_id = EXCLUDED.user_id, person_id = EXCLUDED.person_id, value = EXCLUDED.value,
+      type = EXCLUDED.type, preferred = EXCLUDED.preferred, sort_order = EXCLUDED.sort_order,
+      created_at = EXCLUDED.created_at, updated_at = EXCLUDED.updated_at;
+  END LOOP;
+
   -- ── Social media ─────────────────────────────────────────────────────────
   INSERT INTO public.people_social_media (id, user_id, person_id, platform, handle, connected_at, created_at, updated_at) VALUES
     ('10101010-7777-7777-7777-777777777777', target_user_id, person_ada_id,       'linkedin', 'ada-lovelace',                '2026-01-10T09:00:00+00', '2026-01-15T11:14:00+00', '2026-02-01T11:04:00+00'),
@@ -161,6 +261,28 @@ BEGIN
     handle = EXCLUDED.handle, connected_at = EXCLUDED.connected_at,
     created_at = EXCLUDED.created_at, updated_at = EXCLUDED.updated_at;
 
+  FOR sample_person_index IN 1..30 LOOP
+    INSERT INTO public.people_social_media (
+      id, user_id, person_id, platform, handle, connected_at, created_at, updated_at
+    ) VALUES (
+      (format('dd000000-0000-0000-0000-%s', lpad(sample_person_index::text, 12, '0')))::uuid,
+      target_user_id,
+      (format('44444444-4444-4444-4444-%s', lpad(sample_person_index::text, 12, '0')))::uuid,
+      CASE WHEN sample_person_index % 2 = 0 THEN 'linkedin' ELSE 'website' END,
+      CASE
+        WHEN sample_person_index % 2 = 0 THEN lower(format('%s-%s', sample_first_names[sample_person_index], sample_last_names[sample_person_index]))
+        ELSE lower(format('https://%s-%s.example', sample_first_names[sample_person_index], sample_last_names[sample_person_index]))
+      END,
+      ('2026-01-14T09:00:00+00'::timestamptz + (sample_person_index || ' days')::interval),
+      ('2026-01-14T11:00:00+00'::timestamptz + (sample_person_index || ' days')::interval),
+      ('2026-01-14T11:00:00+00'::timestamptz + (sample_person_index || ' days')::interval)
+    )
+    ON CONFLICT (id) DO UPDATE SET
+      user_id = EXCLUDED.user_id, person_id = EXCLUDED.person_id, platform = EXCLUDED.platform,
+      handle = EXCLUDED.handle, connected_at = EXCLUDED.connected_at,
+      created_at = EXCLUDED.created_at, updated_at = EXCLUDED.updated_at;
+  END LOOP;
+
   -- ── Relationships ────────────────────────────────────────────────────────
   INSERT INTO public.people_relationships (id, user_id, source_person_id, target_person_id, relationship_type, created_at, updated_at) VALUES
     ('30303030-9999-9999-9999-999999999999', target_user_id, person_ada_id,       person_grace_id, 'colleague', '2026-01-17T12:00:00+00', '2026-02-01T11:06:00+00'),
@@ -170,6 +292,29 @@ BEGIN
     user_id = EXCLUDED.user_id, source_person_id = EXCLUDED.source_person_id,
     target_person_id = EXCLUDED.target_person_id, relationship_type = EXCLUDED.relationship_type,
     created_at = EXCLUDED.created_at, updated_at = EXCLUDED.updated_at;
+
+  FOR sample_person_index IN 1..30 LOOP
+    INSERT INTO public.people_relationships (
+      id, user_id, source_person_id, target_person_id, relationship_type, created_at, updated_at
+    ) VALUES (
+      (format('ee000000-0000-0000-0000-%s', lpad(sample_person_index::text, 12, '0')))::uuid,
+      target_user_id,
+      (format('44444444-4444-4444-4444-%s', lpad(sample_person_index::text, 12, '0')))::uuid,
+      CASE sample_person_index % 4
+        WHEN 1 THEN person_ada_id
+        WHEN 2 THEN person_grace_id
+        WHEN 3 THEN person_katherine_id
+        ELSE person_turing_id
+      END,
+      'friend',
+      ('2026-01-17T12:00:00+00'::timestamptz + (sample_person_index || ' days')::interval),
+      ('2026-01-17T12:00:00+00'::timestamptz + (sample_person_index || ' days')::interval)
+    )
+    ON CONFLICT (id) DO UPDATE SET
+      user_id = EXCLUDED.user_id, source_person_id = EXCLUDED.source_person_id,
+      target_person_id = EXCLUDED.target_person_id, relationship_type = EXCLUDED.relationship_type,
+      created_at = EXCLUDED.created_at, updated_at = EXCLUDED.updated_at;
+  END LOOP;
 
   -- ── Important dates ──────────────────────────────────────────────────────
   INSERT INTO public.people_important_dates (id, user_id, person_id, type, date, notify_days_before, note, created_at, updated_at) VALUES
@@ -181,6 +326,26 @@ BEGIN
     user_id = EXCLUDED.user_id, person_id = EXCLUDED.person_id, type = EXCLUDED.type,
     date = EXCLUDED.date, notify_days_before = EXCLUDED.notify_days_before, note = EXCLUDED.note,
     created_at = EXCLUDED.created_at, updated_at = EXCLUDED.updated_at;
+
+  FOR sample_person_index IN 1..30 LOOP
+    INSERT INTO public.people_important_dates (
+      id, user_id, person_id, type, date, notify_days_before, note, created_at, updated_at
+    ) VALUES (
+      (format('ff000000-0000-0000-0000-%s', lpad(sample_person_index::text, 12, '0')))::uuid,
+      target_user_id,
+      (format('44444444-4444-4444-4444-%s', lpad(sample_person_index::text, 12, '0')))::uuid,
+      'birthday',
+      (DATE '1985-01-01' + (sample_person_index * 30)),
+      5,
+      format('Generated birthday reminder for %s %s', sample_first_names[sample_person_index], sample_last_names[sample_person_index]),
+      ('2026-01-18T08:00:00+00'::timestamptz + (sample_person_index || ' days')::interval),
+      ('2026-01-18T08:00:00+00'::timestamptz + (sample_person_index || ' days')::interval)
+    )
+    ON CONFLICT (id) DO UPDATE SET
+      user_id = EXCLUDED.user_id, person_id = EXCLUDED.person_id, type = EXCLUDED.type,
+      date = EXCLUDED.date, notify_days_before = EXCLUDED.notify_days_before, note = EXCLUDED.note,
+      created_at = EXCLUDED.created_at, updated_at = EXCLUDED.updated_at;
+  END LOOP;
 
   -- ── Interactions ─────────────────────────────────────────────────────────
   INSERT INTO public.interactions (id, user_id, type, title, description, date, created_at, updated_at) VALUES
@@ -233,6 +398,25 @@ BEGIN
     person_id = EXCLUDED.person_id, tag_id = EXCLUDED.tag_id,
     user_id = EXCLUDED.user_id, created_at = EXCLUDED.created_at;
 
+  FOR sample_person_index IN 1..30 LOOP
+    INSERT INTO public.people_tags (id, person_id, tag_id, user_id, created_at) VALUES (
+      (format('ad000000-0000-0000-0000-%s', lpad(sample_person_index::text, 12, '0')))::uuid,
+      (format('44444444-4444-4444-4444-%s', lpad(sample_person_index::text, 12, '0')))::uuid,
+      CASE sample_person_index % 5
+        WHEN 1 THEN tag_programmer_id
+        WHEN 2 THEN tag_founder_id
+        WHEN 3 THEN tag_czech_id
+        WHEN 4 THEN tag_ecommerce_id
+        ELSE tag_investor_id
+      END,
+      target_user_id,
+      ('2026-01-16T08:10:00+00'::timestamptz + (sample_person_index || ' days')::interval)
+    )
+    ON CONFLICT (id) DO UPDATE SET
+      person_id = EXCLUDED.person_id, tag_id = EXCLUDED.tag_id,
+      user_id = EXCLUDED.user_id, created_at = EXCLUDED.created_at;
+  END LOOP;
+
   -- ── Work history ─────────────────────────────────────────────────────────
   INSERT INTO public.people_work_history (
     id, user_id, person_id, company_name, company_linkedin_id,
@@ -251,6 +435,30 @@ BEGIN
     start_date = EXCLUDED.start_date, end_date = EXCLUDED.end_date,
     created_at = EXCLUDED.created_at, updated_at = EXCLUDED.updated_at;
 
+  FOR sample_person_index IN 1..30 LOOP
+    INSERT INTO public.people_work_history (
+      id, user_id, person_id, company_name, company_linkedin_id,
+      title, description, start_date, end_date, created_at, updated_at
+    ) VALUES (
+      (format('ab000000-0000-0000-0000-%s', lpad(sample_person_index::text, 12, '0')))::uuid,
+      target_user_id,
+      (format('44444444-4444-4444-4444-%s', lpad(sample_person_index::text, 12, '0')))::uuid,
+      format('Sample Company %s', sample_person_index),
+      lower(format('sample-company-%s', sample_person_index::text)),
+      'Account Manager',
+      format('Generated work history entry for %s %s.', sample_first_names[sample_person_index], sample_last_names[sample_person_index]),
+      (DATE '2010-01-01' + (sample_person_index * 20)),
+      NULL,
+      ('2026-02-21T10:00:00+00'::timestamptz + (sample_person_index || ' hours')::interval),
+      ('2026-02-21T10:00:00+00'::timestamptz + (sample_person_index || ' hours')::interval)
+    )
+    ON CONFLICT (id) DO UPDATE SET
+      user_id = EXCLUDED.user_id, person_id = EXCLUDED.person_id, company_name = EXCLUDED.company_name,
+      company_linkedin_id = EXCLUDED.company_linkedin_id, title = EXCLUDED.title, description = EXCLUDED.description,
+      start_date = EXCLUDED.start_date, end_date = EXCLUDED.end_date,
+      created_at = EXCLUDED.created_at, updated_at = EXCLUDED.updated_at;
+  END LOOP;
+
   -- ── Education ────────────────────────────────────────────────────────────
   INSERT INTO public.people_education_history (
     id, user_id, person_id, school_name, school_linkedin_id,
@@ -267,6 +475,30 @@ BEGIN
     school_linkedin_id = EXCLUDED.school_linkedin_id, degree = EXCLUDED.degree, description = EXCLUDED.description,
     start_date = EXCLUDED.start_date, end_date = EXCLUDED.end_date,
     created_at = EXCLUDED.created_at, updated_at = EXCLUDED.updated_at;
+
+  FOR sample_person_index IN 1..30 LOOP
+    INSERT INTO public.people_education_history (
+      id, user_id, person_id, school_name, school_linkedin_id,
+      degree, description, start_date, end_date, created_at, updated_at
+    ) VALUES (
+      (format('ac000000-0000-0000-0000-%s', lpad(sample_person_index::text, 12, '0')))::uuid,
+      target_user_id,
+      (format('44444444-4444-4444-4444-%s', lpad(sample_person_index::text, 12, '0')))::uuid,
+      format('Sample University %s', sample_person_index),
+      lower(format('sample-university-%s', sample_person_index::text)),
+      'B.Sc. Business Informatics',
+      format('Generated education history entry for %s %s.', sample_first_names[sample_person_index], sample_last_names[sample_person_index]),
+      (DATE '2005-09-01' + (sample_person_index * 15)),
+      (DATE '2009-06-30' + (sample_person_index * 15)),
+      ('2026-02-22T10:00:00+00'::timestamptz + (sample_person_index || ' hours')::interval),
+      ('2026-02-22T10:00:00+00'::timestamptz + (sample_person_index || ' hours')::interval)
+    )
+    ON CONFLICT (id) DO UPDATE SET
+      user_id = EXCLUDED.user_id, person_id = EXCLUDED.person_id, school_name = EXCLUDED.school_name,
+      school_linkedin_id = EXCLUDED.school_linkedin_id, degree = EXCLUDED.degree, description = EXCLUDED.description,
+      start_date = EXCLUDED.start_date, end_date = EXCLUDED.end_date,
+      created_at = EXCLUDED.created_at, updated_at = EXCLUDED.updated_at;
+  END LOOP;
 
   -- ── Reassign all public user_id columns to target user ───────────────────
   -- This ensures any pre-existing data (e.g. from other dev sessions) is
