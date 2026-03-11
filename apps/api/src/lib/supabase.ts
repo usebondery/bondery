@@ -183,16 +183,21 @@ function getAuthTokensFromCookies(request: FastifyRequest): {
 export async function createAuthenticatedClient(
   request: FastifyRequest,
 ): Promise<{ client: SupabaseClient<Database>; user: { id: string; email: string } | null }> {
-  const { NEXT_PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_PUBLISHABLE_KEY, PRIVATE_SUPABASE_SECRET_KEY } = getSupabaseConfig();
+  const { NEXT_PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_PUBLISHABLE_KEY, PRIVATE_SUPABASE_SECRET_KEY } =
+    getSupabaseConfig();
   const { accessToken, refreshToken } = getAuthTokensFromCookies(request);
 
   // Create an anon client solely for token validation
-  const anonClient = createClient<Database>(NEXT_PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_PUBLISHABLE_KEY, {
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false,
+  const anonClient = createClient<Database>(
+    NEXT_PUBLIC_SUPABASE_URL,
+    PUBLIC_SUPABASE_PUBLISHABLE_KEY,
+    {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false,
+      },
     },
-  });
+  );
 
   if (!accessToken) {
     return { client: anonClient, user: null };
