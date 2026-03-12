@@ -21,12 +21,19 @@ import { PageWrapper } from "@/app/(app)/app/components/PageWrapper";
 import { PageHeader } from "@/app/(app)/app/components/PageHeader";
 import { MERGE_CONFLICT_FIELDS } from "../people/components/MergeWithModal";
 import { MergeRecommendationCard } from "../components/contacts/MergeRecommendationCard";
+import { EnrichRecommendationCard } from "./components/EnrichRecommendationCard";
 
 interface FixContactsClientProps {
   initialRecommendations: MergeRecommendation[];
+  eligibleCount: number;
+  queueStatus: { pending: number; completed: number; failed: number } | null;
 }
 
-export function FixContactsClient({ initialRecommendations }: FixContactsClientProps) {
+export function FixContactsClient({
+  initialRecommendations,
+  eligibleCount,
+  queueStatus,
+}: FixContactsClientProps) {
   const t = useTranslations("FixContactsPage");
   const tMerge = useTranslations("MergeWithModal");
   const [recommendations, setRecommendations] = useState(initialRecommendations);
@@ -227,6 +234,10 @@ export function FixContactsClient({ initialRecommendations }: FixContactsClientP
           }
           description={t("Description")}
         />
+
+        {!showDeclined && (
+          <EnrichRecommendationCard eligibleCount={eligibleCount} queueStatus={queueStatus} />
+        )}
 
         {recommendations.length === 0 ? (
           <Paper withBorder radius="md" p="md">

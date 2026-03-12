@@ -7,7 +7,7 @@ import { modals } from "@mantine/modals";
 import { Stack, Text } from "@mantine/core";
 import { IconBrandLinkedin, IconDownload } from "@tabler/icons-react";
 import { useTranslations } from "next-intl";
-import { detectBonderyChromeExtension } from "@/lib/extension/detectBonderyChromeExtension";
+import { checkExtensionAuth } from "@/lib/extension/checkExtensionAuth";
 import { CHROME_EXTENSION_URL } from "@bondery/helpers/globals/paths";
 import {
   errorNotificationTemplate,
@@ -55,9 +55,9 @@ export function useEnrichFromLinkedIn(options?: { onSuccess?: () => void | Promi
         return;
       }
 
-      // Check if extension is installed
-      const extensionState = await detectBonderyChromeExtension();
-      if (extensionState === "not_installed") {
+      // Check if extension is installed and authenticated
+      const authState = await checkExtensionAuth();
+      if (authState === "not_installed") {
         const modalId = `enrich-ext-required-${Math.random().toString(36).slice(2)}`;
         modals.open({
           modalId,
@@ -88,6 +88,16 @@ export function useEnrichFromLinkedIn(options?: { onSuccess?: () => void | Promi
         return;
       }
 
+      if (authState === "not_authenticated") {
+        notifications.show(
+          errorNotificationTemplate({
+            title: t("NotAuthenticatedTitle"),
+            description: t("NotAuthenticatedMessage"),
+          }),
+        );
+        return;
+      }
+
       // Generate a unique request ID
       const requestId = crypto.randomUUID();
       pendingRequestId.current = requestId;
@@ -107,8 +117,8 @@ export function useEnrichFromLinkedIn(options?: { onSuccess?: () => void | Promi
       const resultPromise = new Promise<{ success: boolean; error?: string }>((resolve) => {
         const timeout = setTimeout(() => {
           cleanup();
-          resolve({ success: false, error: "Enrich timed out" });
-        }, 100_000); // 100s timeout
+          resolve({ success: false, error: "timeout" });
+        }, 20_000); // 20s timeout
 
         const onMessage = (event: MessageEvent) => {
           if (event.source !== window) return;
@@ -140,7 +150,7 @@ export function useEnrichFromLinkedIn(options?: { onSuccess?: () => void | Promi
             requestId,
           },
         },
-        "*",
+        window.location.origin,
       );
 
       // Wait for the result
@@ -163,11 +173,14 @@ export function useEnrichFromLinkedIn(options?: { onSuccess?: () => void | Promi
         await onSuccessRef.current?.();
         router.refresh();
       } else {
+        const isTimeout = result.error === "timeout";
         notifications.update({
           id: notificationId,
           ...errorNotificationTemplate({
-            title: t("ErrorTitle"),
-            description: result.error || t("ErrorDescription"),
+            title: isTimeout ? t("ExtensionNotRespondingTitle") : t("ErrorTitle"),
+            description: isTimeout
+              ? t("ExtensionNotRespondingDescription")
+              : result.error || t("ErrorDescription"),
           }),
           loading: false,
           autoClose: 6000,

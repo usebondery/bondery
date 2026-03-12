@@ -169,7 +169,7 @@ async function getPersonData(personId: string) {
   const personTagsData = personTagsResponse.ok ? await personTagsResponse.json() : { tags: [] };
   const linkedInData = linkedInDataResponse.ok
     ? await linkedInDataResponse.json()
-    : { workHistory: [], education: [], linkedinBio: null };
+    : { workHistory: [], education: [], linkedinBio: null, syncedAt: null };
 
   const personActivities =
     interactionsData.interactions?.filter((a: any) =>
@@ -193,6 +193,7 @@ async function getPersonData(personId: string) {
     workHistory: (linkedInData.workHistory as WorkHistoryEntry[]) || [],
     education: (linkedInData.education as EducationEntry[]) || [],
     linkedinBio: (linkedInData.linkedinBio as string | null) ?? null,
+    syncedAt: (linkedInData.syncedAt as string | null) ?? null,
     mergeRecommendation:
       (allMergeRecommendations as MergeRecommendation[]).find(
         (r) => r.leftPerson.id === personId || r.rightPerson.id === personId,
@@ -249,6 +250,7 @@ export default async function PersonPage({
       initialWorkHistory={data.workHistory}
       initialEducation={data.education}
       initialLinkedinBio={data.linkedinBio}
+      initialSyncedAt={data.syncedAt}
       initialMergeRecommendation={data.mergeRecommendation}
       personId={personId}
       initialTab={typeof tab === "string" ? tab : undefined}

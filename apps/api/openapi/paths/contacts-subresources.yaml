@@ -613,6 +613,10 @@ linkedinData:
                 linkedinBio:
                   type: string
                   nullable: true
+                syncedAt:
+                  type: string
+                  format: date-time
+                  nullable: true
                 workHistory:
                   type: array
                   items:
@@ -692,3 +696,176 @@ enrich:
         description: Contact not found
       "500":
         $ref: "../../openapi.yaml#/components/responses/InternalServerError"
+
+# /api/contacts/enrich-queue/eligible-count
+enrichQueueEligibleCount:
+  get:
+    summary: Count contacts eligible for LinkedIn enrichment
+    description: >
+      Returns the number of contacts that have a LinkedIn handle
+      but have never been synced (no people_linkedin record).
+    operationId: getEnrichQueueEligibleCount
+    tags:
+      - Contacts
+    security:
+      - cookieAuth: []
+    responses:
+      "200":
+        description: Eligible count
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                count:
+                  type: integer
+      "401":
+        $ref: "../../openapi.yaml#/components/responses/UnauthorizedError"
+
+# /api/contacts/enrich-queue
+enrichQueue:
+  get:
+    summary: List enrich queue items
+    description: Returns pending and processing queue items for the current user.
+    operationId: getEnrichQueue
+    tags:
+      - Contacts
+    security:
+      - cookieAuth: []
+    responses:
+      "200":
+        description: Queue items
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                items:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        format: uuid
+                      userId:
+                        type: string
+                        format: uuid
+                      personId:
+                        type: string
+                        format: uuid
+                      status:
+                        type: string
+                        enum: [pending, processing, completed, failed]
+                      errorMessage:
+                        type: string
+                        nullable: true
+                      createdAt:
+                        type: string
+                        format: date-time
+                      updatedAt:
+                        type: string
+                        format: date-time
+                      linkedinHandle:
+                        type: string
+                        nullable: true
+      "401":
+        $ref: "../../openapi.yaml#/components/responses/UnauthorizedError"
+
+  delete:
+    summary: Clear completed/failed queue items
+    description: Removes all completed and failed items from the enrich queue.
+    operationId: deleteEnrichQueue
+    tags:
+      - Contacts
+    security:
+      - cookieAuth: []
+    responses:
+      "200":
+        description: Queue cleared
+        content:
+          application/json:
+            schema:
+              $ref: "../schemas/common.yaml#/SuccessResponse"
+      "401":
+        $ref: "../../openapi.yaml#/components/responses/UnauthorizedError"
+
+# /api/contacts/enrich-queue/batch
+enrichQueueBatch:
+  post:
+    summary: Create batch enrich queue entries
+    description: >
+      Creates enrich queue entries for all eligible contacts (or a specific list
+      of person IDs). Eligible contacts are those with a LinkedIn handle but
+      no people_linkedin record.
+    operationId: createEnrichQueueBatch
+    tags:
+      - Contacts
+    security:
+      - cookieAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              personIds:
+                type: array
+                items:
+                  type: string
+                  format: uuid
+    responses:
+      "200":
+        description: Batch created
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                created:
+                  type: integer
+      "401":
+        $ref: "../../openapi.yaml#/components/responses/UnauthorizedError"
+
+# /api/contacts/enrich-queue/{id}
+enrichQueueItem:
+  patch:
+    summary: Update enrich queue item status
+    description: Update the status of a queue item (processing, completed, or failed).
+    operationId: updateEnrichQueueItem
+    tags:
+      - Contacts
+    security:
+      - cookieAuth: []
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - status
+            properties:
+              status:
+                type: string
+                enum: [processing, completed, failed]
+              errorMessage:
+                type: string
+                nullable: true
+    responses:
+      "200":
+        description: Queue item updated
+        content:
+          application/json:
+            schema:
+              $ref: "../schemas/common.yaml#/SuccessResponse"
+      "401":
+        $ref: "../../openapi.yaml#/components/responses/UnauthorizedError"

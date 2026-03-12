@@ -94,6 +94,44 @@ export type Database = {
         };
         Relationships: [];
       };
+      linkedin_enrich_queue: {
+        Row: {
+          created_at: string;
+          error_message: string | null;
+          id: string;
+          person_id: string;
+          status: string;
+          updated_at: string;
+          user_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          error_message?: string | null;
+          id?: string;
+          person_id: string;
+          status?: string;
+          updated_at?: string;
+          user_id: string;
+        };
+        Update: {
+          created_at?: string;
+          error_message?: string | null;
+          id?: string;
+          person_id?: string;
+          status?: string;
+          updated_at?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "linkedin_enrich_queue_person_id_fkey";
+            columns: ["person_id"];
+            isOneToOne: false;
+            referencedRelation: "people";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       geocode_cache: {
         Row: {
           city: string | null;
@@ -213,7 +251,6 @@ export type Database = {
           place: string | null;
           timezone: string | null;
           headline: string | null;
-          linkedin_bio: string | null;
           updated_at: string | null;
           user_id: string;
         };
@@ -245,7 +282,6 @@ export type Database = {
           place?: string | null;
           timezone?: string | null;
           headline?: string | null;
-          linkedin_bio?: string | null;
           updated_at?: string | null;
           user_id: string;
         };
@@ -277,7 +313,6 @@ export type Database = {
           place?: string | null;
           timezone?: string | null;
           headline?: string | null;
-          linkedin_bio?: string | null;
           updated_at?: string | null;
           user_id?: string;
         };
@@ -370,7 +405,7 @@ export type Database = {
           description: string | null;
           end_date: string | null;
           id: string;
-          person_id: string;
+          people_linkedin_id: string;
           school_linkedin_id: string | null;
           school_name: string;
           start_date: string | null;
@@ -383,7 +418,7 @@ export type Database = {
           description?: string | null;
           end_date?: string | null;
           id?: string;
-          person_id: string;
+          people_linkedin_id: string;
           school_linkedin_id?: string | null;
           school_name: string;
           start_date?: string | null;
@@ -396,7 +431,7 @@ export type Database = {
           description?: string | null;
           end_date?: string | null;
           id?: string;
-          person_id?: string;
+          people_linkedin_id?: string;
           school_linkedin_id?: string | null;
           school_name?: string;
           start_date?: string | null;
@@ -405,9 +440,44 @@ export type Database = {
         };
         Relationships: [
           {
-            foreignKeyName: "people_education_history_person_id_fkey";
-            columns: ["person_id"];
+            foreignKeyName: "people_education_history_people_linkedin_id_fkey";
+            columns: ["people_linkedin_id"];
             isOneToOne: false;
+            referencedRelation: "people_linkedin";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      people_linkedin: {
+        Row: {
+          bio: string | null;
+          created_at: string;
+          id: string;
+          person_id: string;
+          updated_at: string;
+          user_id: string;
+        };
+        Insert: {
+          bio?: string | null;
+          created_at?: string;
+          id?: string;
+          person_id: string;
+          updated_at?: string;
+          user_id: string;
+        };
+        Update: {
+          bio?: string | null;
+          created_at?: string;
+          id?: string;
+          person_id?: string;
+          updated_at?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "people_linkedin_person_id_fkey";
+            columns: ["person_id"];
+            isOneToOne: true;
             referencedRelation: "people";
             referencedColumns: ["id"];
           },
@@ -779,7 +849,7 @@ export type Database = {
           end_date: string | null;
           id: string;
           location: string | null;
-          person_id: string;
+          people_linkedin_id: string;
           start_date: string | null;
           title: string | null;
           updated_at: string;
@@ -794,7 +864,7 @@ export type Database = {
           end_date?: string | null;
           id?: string;
           location?: string | null;
-          person_id: string;
+          people_linkedin_id: string;
           start_date?: string | null;
           title?: string | null;
           updated_at?: string;
@@ -809,7 +879,7 @@ export type Database = {
           end_date?: string | null;
           id?: string;
           location?: string | null;
-          person_id?: string;
+          people_linkedin_id?: string;
           start_date?: string | null;
           title?: string | null;
           updated_at?: string;
@@ -817,10 +887,10 @@ export type Database = {
         };
         Relationships: [
           {
-            foreignKeyName: "people_work_history_person_id_fkey";
-            columns: ["person_id"];
+            foreignKeyName: "people_work_history_people_linkedin_id_fkey";
+            columns: ["people_linkedin_id"];
             isOneToOne: false;
-            referencedRelation: "people";
+            referencedRelation: "people_linkedin";
             referencedColumns: ["id"];
           },
         ];
@@ -956,7 +1026,7 @@ export type Database = {
       send_hourly_reminder_digests: { Args: never; Returns: Json };
       replace_work_history: {
         Args: {
-          p_person_id: string;
+          p_people_linkedin_id: string;
           p_user_id: string;
           p_rows: Json;
         };
@@ -964,11 +1034,23 @@ export type Database = {
       };
       replace_education_history: {
         Args: {
-          p_person_id: string;
+          p_people_linkedin_id: string;
           p_user_id: string;
           p_rows: Json;
         };
         Returns: undefined;
+      };
+      get_linkedin_enrich_eligible: {
+        Args: {
+          p_user_id: string;
+          p_limit?: number;
+        };
+        Returns: {
+          person_id: string;
+          handle: string;
+          first_name: string | null;
+          last_name: string | null;
+        }[];
       };
     };
     Enums: {

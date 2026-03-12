@@ -2,8 +2,9 @@
  * Webapp Bridge Content Script Entry Point (WXT)
  *
  * Allows the webapp to detect if the extension is installed
- * by responding to ping messages, and bridges enrich requests
- * from the webapp to the extension background service worker.
+ * by responding to ping messages, bridges auth status checks,
+ * and bridges enrich requests from the webapp to the extension
+ * background service worker.
  */
 import { defineContentScript } from "#imports";
 import { browser } from "wxt/browser";
@@ -17,6 +18,8 @@ export default defineContentScript({
   main() {
     const EXTENSION_PING_TYPE = "BONDERY_EXTENSION_PING";
     const EXTENSION_PONG_TYPE = "BONDERY_EXTENSION_PONG";
+    const AUTH_STATUS_REQUEST_TYPE = "BONDERY_AUTH_STATUS_REQUEST";
+    const AUTH_STATUS_RESPONSE_TYPE = "BONDERY_AUTH_STATUS_RESPONSE";
     const ENRICH_REQUEST_TYPE = "BONDERY_ENRICH_REQUEST";
     const ENRICH_RESULT_TYPE = "BONDERY_ENRICH_RESULT";
 
@@ -39,6 +42,33 @@ export default defineContentScript({
           },
           targetOrigin,
         );
+        return;
+      }
+
+      // Auth status check: forward to background and relay response
+      if (event.data?.type === AUTH_STATUS_REQUEST_TYPE) {
+        try {
+          const response = await browser.runtime.sendMessage({
+            type: "AUTH_STATUS_REQUEST",
+          });
+          window.postMessage(
+            {
+              type: AUTH_STATUS_RESPONSE_TYPE,
+              requestId: event.data.requestId,
+              payload: response?.payload ?? { isAuthenticated: false },
+            },
+            targetOrigin,
+          );
+        } catch {
+          window.postMessage(
+            {
+              type: AUTH_STATUS_RESPONSE_TYPE,
+              requestId: event.data.requestId,
+              payload: { isAuthenticated: false },
+            },
+            targetOrigin,
+          );
+        }
         return;
       }
 

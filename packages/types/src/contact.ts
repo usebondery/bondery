@@ -253,7 +253,7 @@ export type DeleteContactsRequest =
 export interface WorkHistoryEntry {
   id: string;
   userId: string;
-  personId: string;
+  peopleLinkedinId: string;
   companyName: string;
   companyLinkedinUrl: string | null;
   companyLogoUrl: string | null;
@@ -273,7 +273,7 @@ export interface WorkHistoryEntry {
 export interface EducationEntry {
   id: string;
   userId: string;
-  personId: string;
+  peopleLinkedinId: string;
   schoolName: string;
   schoolLinkedinUrl: string | null;
   schoolLogoUrl: string | null;
@@ -283,4 +283,41 @@ export interface EducationEntry {
   endDate: string | null;
   createdAt: string;
   updatedAt: string;
+}
+
+/**
+ * Response from GET /contacts/:id/linkedin-data
+ */
+export interface LinkedInDataResponse {
+  linkedinBio: string | null;
+  syncedAt: string | null;
+  workHistory: WorkHistoryEntry[];
+  education: EducationEntry[];
+}
+
+/**
+ * Enrich queue item status values.
+ */
+export type EnrichQueueStatus = "pending" | "processing" | "completed" | "failed";
+
+/**
+ * A single entry in the LinkedIn enrich queue.
+ */
+export interface EnrichQueueItem {
+  id: string;
+  userId: string;
+  personId: string;
+  status: EnrichQueueStatus;
+  errorMessage: string | null;
+  createdAt: string;
+  updatedAt: string;
+  /** Included when returning queue items with contact details */
+  linkedinHandle?: string;
+}
+
+/**
+ * Response from GET /contacts/enrich-queue/eligible-count
+ */
+export interface EnrichEligibleCountResponse {
+  count: number;
 }

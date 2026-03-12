@@ -11,6 +11,8 @@ import { API_URL } from "@/lib/config";
 import { ColorSchemeSync } from "./components/ColorSchemeSync";
 import type { ColorSchemePreference, MergeRecommendation } from "@bondery/types";
 import { getMergeRecommendationsData } from "./fix/getMergeRecommendationsData";
+import { EnrichStatusNotificationManager } from "@/lib/extension/EnrichStatusNotificationManager";
+import { EnrichResumeDetector } from "@/lib/extension/EnrichResumeDetector";
 
 interface UserSettingsLayoutData {
   userName: string;
@@ -98,6 +100,8 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   return (
     <LocaleProvider locale={locale} timezone={timezone} timeFormat={timeFormat} messages={messages}>
       <ColorSchemeSync colorScheme={colorScheme} />
+      <EnrichStatusNotificationManager />
+      <EnrichResumeDetector />
       <AppShell
         padding="md"
         navbar={{

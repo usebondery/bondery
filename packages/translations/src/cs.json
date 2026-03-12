@@ -619,6 +619,24 @@
     "PossibleDuplicateBadge": "Duplikát",
     "PossibleDuplicateTooltip": "Tento kontakt může být duplikátem jiného kontaktu. Pokud se jedná o stejnou osobu, sloučte je."
   },
+  "EnrichRecommendationCard": {
+    "Badge": "LinkedIn",
+    "Tooltip": "Tyto kontakty mají LinkedIn profil, ale zatím nebyly obohaceny. Obohaťte je a stáhněte jejich pracovní zkušenosti, vzdělání a bio.",
+    "EligibleLabel": "{count, plural, one {# osoba} few {# osoby} other {# osob}} může být obohacena",
+    "ProgressLabel": "Obohacování: {completed} z {totalEligible} hotovo",
+    "ProgressLabelWithFailed": "Obohacování: {completed} z {totalEligible} hotovo ({failed} selhalo)",
+    "ProcessingPerson": "Obohacování {name}...",
+    "AllEnrichedTitle": "Všechny kontakty obohaceny",
+    "AllEnrichedDescription": "Všechny kontakty s LinkedIn profilem již byly obohaceny.",
+    "EnrichAll": "Obohatit vše",
+    "Enrich": "Obohatit",
+    "PersonEligibleLabel": "Tento kontakt může být obohacen z LinkedIn",
+    "CurrentlyEnriching": "Právě obohacuji:",
+    "Pause": "Pozastavit",
+    "ResumeLabel": "Obohacování přerušeno: {completed} hotovo, {pending} zbývá",
+    "Resume": "Pokračovat",
+    "SkipRemaining": "Přeskočit zbytek"
+  },
   "PeoplePage": {
     "Title": "Lidé",
     "HeaderDescription": "V Lidech můžete spravovat kontakty, upravovat detaily a spouštět hromadné akce.",
@@ -892,6 +910,22 @@
     "SuccessDescription": "Kontakt byl aktualizován nejnovějšími daty z LinkedIn.",
     "ErrorTitle": "Obohacení selhalo",
     "ErrorDescription": "Nepodařilo se obohatit kontakt z LinkedIn.",
-    "Cancel": "Zrušit"
+    "NotAuthenticatedTitle": "Vyžadováno přihlášení v rozšíření",
+    "NotAuthenticatedMessage": "Otevřete rozšíření Bondery pro Chrome a přihlaste se, poté zkuste znovu.",
+    "AllEnrichedTitle": "Všechny kontakty obohaceny",
+    "AllEnrichedDescription": "Všechny kontakty s LinkedIn profilem již byly obohaceny.",
+    "BatchCompletedTitle": "Dávka obohacena",
+    "BatchCompletedDescription": "{completed, plural, one {# kontakt} other {# kontaktů}} úspěšně obohaceno.",
+    "AllDoneTitle": "Obohacení dokončeno",
+    "AllDoneDescription": "Celkem {count, plural, one {# kontakt} other {# kontaktů}} úspěšně obohaceno.",
+    "CurrentlyEnriching": "Právě obohacuji:",
+    "ProgressCount": "{completed} / {totalEligible}",
+    "ExtensionNotRespondingTitle": "Rozšíření neodpovídá",
+    "ExtensionNotRespondingDescription": "Rozšíření Bondery neodpovědělo včas. Zkontrolujte, zda je povoleno, a zkuste to znovu.",
+    "Cancel": "Zrušit",
+    "ResumeNotificationTitle": "Obohacování přerušeno",
+    "ResumeCount": "{completed} hotovo, {pending} zbývá",
+    "Resume": "Pokračovat",
+    "SkipRemaining": "Přeskočit zbytek"
   }
 }

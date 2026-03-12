@@ -621,6 +621,24 @@
     "PossibleDuplicateBadge": "Duplicate",
     "PossibleDuplicateTooltip": "This contact may be a possible duplicate of another contact. If they are the same person, merge them."
   },
+  "EnrichRecommendationCard": {
+    "Badge": "LinkedIn",
+    "Tooltip": "These contacts have a LinkedIn profile but haven't been enriched yet. Enrich them to pull their latest work history, education and bio.",
+    "EligibleLabel": "{count, plural, one {# person} other {# people}} could be enriched",
+    "ProgressLabel": "Enriching: {completed} of {totalEligible} completed",
+    "ProgressLabelWithFailed": "Enriching: {completed} of {totalEligible} completed ({failed} failed)",
+    "ProcessingPerson": "Enriching {name}...",
+    "AllEnrichedTitle": "All contacts enriched",
+    "AllEnrichedDescription": "All contacts with a LinkedIn profile have already been enriched.",
+    "EnrichAll": "Enrich all",
+    "Enrich": "Enrich",
+    "PersonEligibleLabel": "This contact could be enriched from LinkedIn",
+    "CurrentlyEnriching": "Currently enriching:",
+    "Pause": "Pause",
+    "ResumeLabel": "Enrichment interrupted: {completed} done, {pending} remaining",
+    "Resume": "Resume",
+    "SkipRemaining": "Skip remaining"
+  },
   "PeoplePage": {
     "Title": "People",
     "HeaderDescription": "Overview of all your contacts.",
@@ -888,6 +906,22 @@
     "SuccessDescription": "The contact was updated with the latest LinkedIn data.",
     "ErrorTitle": "Enrichment failed",
     "ErrorDescription": "Failed to enrich the contact from LinkedIn.",
-    "Cancel": "Cancel"
+    "NotAuthenticatedTitle": "Extension sign-in required",
+    "NotAuthenticatedMessage": "Please open the Bondery Chrome Extension and sign in first, then try again.",
+    "AllEnrichedTitle": "All contacts enriched",
+    "AllEnrichedDescription": "All contacts with a LinkedIn profile have already been enriched.",
+    "BatchCompletedTitle": "Batch enriched",
+    "BatchCompletedDescription": "{completed, plural, one {# contact} other {# contacts}} enriched successfully.",
+    "AllDoneTitle": "Enrichment complete",
+    "AllDoneDescription": "All {count, plural, one {# contact} other {# contacts}} enriched successfully.",
+    "CurrentlyEnriching": "Currently enriching:",
+    "ProgressCount": "{completed} / {totalEligible}",
+    "ExtensionNotRespondingTitle": "Extension not responding",
+    "ExtensionNotRespondingDescription": "The Bondery extension did not respond in time. Make sure it is enabled and try again.",
+    "Cancel": "Cancel",
+    "ResumeNotificationTitle": "Enrichment interrupted",
+    "ResumeCount": "{completed} done, {pending} remaining",
+    "Resume": "Resume",
+    "SkipRemaining": "Skip remaining"
   }
 }
