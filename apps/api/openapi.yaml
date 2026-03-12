@@ -1172,6 +1172,76 @@ paths:
       responses:
         "200":
           description: Default Response
+  /api/contacts/enrich-queue/eligible-count:
+    get:
+      tags:
+        - Contacts
+      responses:
+        "200":
+          description: Default Response
+  /api/contacts/enrich-queue/status:
+    get:
+      tags:
+        - Contacts
+      responses:
+        "200":
+          description: Default Response
+  /api/contacts/enrich-queue/init:
+    post:
+      tags:
+        - Contacts
+      responses:
+        "200":
+          description: Default Response
+  /api/contacts/enrich-queue/next-batch:
+    get:
+      tags:
+        - Contacts
+      responses:
+        "200":
+          description: Default Response
+  /api/contacts/enrich-queue/{id}:
+    patch:
+      tags:
+        - Contacts
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - status
+              properties:
+                status:
+                  anyOf:
+                    - type: string
+                      enum:
+                        - completed
+                    - type: string
+                      enum:
+                        - failed
+                errorMessage:
+                  anyOf:
+                    - type: string
+                    - type: "null"
+      parameters:
+        - schema:
+            format: uuid
+            type: string
+          in: path
+          name: id
+          required: true
+      responses:
+        "200":
+          description: Default Response
+  /api/contacts/enrich-queue:
+    delete:
+      tags:
+        - Contacts
+      responses:
+        "200":
+          description: Default Response
   /api/contacts/import/linkedin/parse:
     post:
       tags:

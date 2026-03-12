@@ -14,3 +14,7 @@ export {
   warningNotificationTemplate,
   type WarningNotificationTemplateProps,
 } from "./WarningNotificationTemplate";
+export {
+  statusNotificationTemplate,
+  type StatusNotificationTemplateProps,
+} from "./StatusNotificationTemplate";

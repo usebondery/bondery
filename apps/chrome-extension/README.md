@@ -66,6 +66,8 @@ Invoke-RestMethod -Method GET -Uri "$base/auth/v1/admin/oauth/clients" -Headers 
 
 Update redirect URIs for the client in `WXT_SUPABASE_OAUTH_CLIENT_ID`:
 
+If a client needs to be created, create a public client, not confiendential, and use the generated client ID in `WXT_SUPABASE_OAUTH_CLIENT_ID`.
+
 ```powershell
 $base='http://127.0.0.1:54321'
 $secret='<sb_secret_from_supabase_status>'

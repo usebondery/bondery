@@ -159,13 +159,12 @@ export async function redirectRoutes(fastify: FastifyInstance) {
         place: string | null;
         latitude: number | null;
         notes: string | null;
-        linkedin_bio: string | null;
       } | null = null;
 
       if (existingContactId) {
         const { data: contactData, error: lookupError } = await (client
           .from("people")
-          .select("id, first_name, last_name, headline, place, latitude, notes, linkedin_bio")
+          .select("id, first_name, last_name, headline, place, latitude, notes")
           .eq("user_id", user.id)
           .eq("id", existingContactId)
           .single() as unknown as Promise<{
@@ -177,7 +176,6 @@ export async function redirectRoutes(fastify: FastifyInstance) {
             place: string | null;
             latitude: number | null;
             notes: string | null;
-            linkedin_bio: string | null;
           } | null;
           error: unknown;
         }>);
@@ -212,7 +210,6 @@ export async function redirectRoutes(fastify: FastifyInstance) {
         if (headline && !existingContact.headline) fieldUpdates.headline = headline;
         if (place && !existingContact.place) fieldUpdates.place = place;
         if (notes && !existingContact.notes) fieldUpdates.notes = notes;
-        if (linkedinBio && !existingContact.linkedin_bio) fieldUpdates.linkedin_bio = linkedinBio;
 
         // Geocode the place if it's being set for the first time and no coordinates exist yet
         if (place && !existingContact.place && !existingContact.latitude) {
@@ -246,59 +243,87 @@ export async function redirectRoutes(fastify: FastifyInstance) {
           await client.from("people").update(fieldUpdates).eq("id", existingContact.id);
         }
 
-        // Upsert work history if provided (replace existing rows)
-        if (workHistory && workHistory.length > 0) {
-          await client
-            .from("people_work_history")
-            .delete()
-            .eq("person_id", existingContact.id)
-            .eq("user_id", user.id);
+        // Upsert people_linkedin + replace work/education history if provided
+        if (
+          (workHistory && workHistory.length > 0) ||
+          (educationHistory && educationHistory.length > 0) ||
+          linkedinBio
+        ) {
+          const { data: linkedinRow, error: linkedinUpsertError } = await client
+            .from("people_linkedin")
+            .upsert(
+              {
+                user_id: user.id,
+                person_id: existingContact.id,
+                ...(linkedinBio ? { bio: linkedinBio } : {}),
+                updated_at: new Date().toISOString(),
+              },
+              { onConflict: "user_id,person_id" },
+            )
+            .select("id")
+            .single();
 
-          const rows = workHistory.map((entry: ScrapedWorkHistoryEntry) => ({
-            user_id: user.id,
-            person_id: existingContact!.id,
-            company_name: entry.companyName,
-            company_linkedin_id: entry.companyLinkedinId ?? null,
-            title: entry.title ?? null,
-            description: entry.description ?? null,
-            start_date: toPostgresDate(entry.startDate),
-            end_date: toPostgresDate(entry.endDate),
-            employment_type: entry.employmentType ?? null,
-            location: entry.location ?? null,
-          }));
-          const { error: whError } = await client.from("people_work_history").insert(rows);
-          if (whError) {
+          if (linkedinUpsertError || !linkedinRow) {
             request.log.error(
-              { err: whError },
-              "[redirect] Failed to insert work history for existing contact",
+              { err: linkedinUpsertError },
+              "[redirect] Failed to upsert people_linkedin for existing contact",
             );
-          }
-        }
+          } else {
+            // Upsert work history if provided (replace existing rows)
+            if (workHistory && workHistory.length > 0) {
+              await client
+                .from("people_work_history")
+                .delete()
+                .eq("people_linkedin_id", linkedinRow.id)
+                .eq("user_id", user.id);
 
-        // Upsert education history if provided (replace existing rows)
-        if (educationHistory && educationHistory.length > 0) {
-          await client
-            .from("people_education_history")
-            .delete()
-            .eq("person_id", existingContact.id)
-            .eq("user_id", user.id);
+              const rows = workHistory.map((entry: ScrapedWorkHistoryEntry) => ({
+                user_id: user.id,
+                people_linkedin_id: linkedinRow.id,
+                company_name: entry.companyName,
+                company_linkedin_id: entry.companyLinkedinId ?? null,
+                title: entry.title ?? null,
+                description: entry.description ?? null,
+                start_date: toPostgresDate(entry.startDate),
+                end_date: toPostgresDate(entry.endDate),
+                employment_type: entry.employmentType ?? null,
+                location: entry.location ?? null,
+              }));
+              const { error: whError } = await client.from("people_work_history").insert(rows);
+              if (whError) {
+                request.log.error(
+                  { err: whError },
+                  "[redirect] Failed to insert work history for existing contact",
+                );
+              }
+            }
 
-          const rows = educationHistory.map((entry: ScrapedEducationEntry) => ({
-            user_id: user.id,
-            person_id: existingContact!.id,
-            school_name: entry.schoolName,
-            school_linkedin_id: entry.schoolLinkedinId ?? null,
-            degree: entry.degree ?? null,
-            description: entry.description ?? null,
-            start_date: toPostgresDate(entry.startDate),
-            end_date: toPostgresDate(entry.endDate),
-          }));
-          const { error: ehError } = await client.from("people_education_history").insert(rows);
-          if (ehError) {
-            request.log.error(
-              { err: ehError },
-              "[redirect] Failed to insert education for existing contact",
-            );
+            // Upsert education history if provided (replace existing rows)
+            if (educationHistory && educationHistory.length > 0) {
+              await client
+                .from("people_education_history")
+                .delete()
+                .eq("people_linkedin_id", linkedinRow.id)
+                .eq("user_id", user.id);
+
+              const rows = educationHistory.map((entry: ScrapedEducationEntry) => ({
+                user_id: user.id,
+                people_linkedin_id: linkedinRow.id,
+                school_name: entry.schoolName,
+                school_linkedin_id: entry.schoolLinkedinId ?? null,
+                degree: entry.degree ?? null,
+                description: entry.description ?? null,
+                start_date: toPostgresDate(entry.startDate),
+                end_date: toPostgresDate(entry.endDate),
+              }));
+              const { error: ehError } = await client.from("people_education_history").insert(rows);
+              if (ehError) {
+                request.log.error(
+                  { err: ehError },
+                  "[redirect] Failed to insert education for existing contact",
+                );
+              }
+            }
           }
         }
 
@@ -326,7 +351,6 @@ export async function redirectRoutes(fastify: FastifyInstance) {
       if (headline) insertData.headline = headline;
       if (place) insertData.place = place;
       if (notes) insertData.notes = notes;
-      if (linkedinBio) insertData.linkedin_bio = linkedinBio;
 
       // Geocode the LinkedIn place string to get coordinates and structured address
       if (place) {
@@ -395,45 +419,69 @@ export async function redirectRoutes(fastify: FastifyInstance) {
         await updateContactPhoto(client, newContact.id, user.id, profileImageUrl);
       }
 
-      // Insert work history if provided
-      if (workHistory && workHistory.length > 0) {
-        request.log.info(
-          { personId: newContact.id, count: workHistory.length },
-          "[redirect] Inserting work history for new contact",
-        );
-        const rows = workHistory.map((entry: ScrapedWorkHistoryEntry) => ({
-          user_id: user.id,
-          person_id: newContact.id,
-          company_name: entry.companyName,
-          company_linkedin_id: entry.companyLinkedinId ?? null,
-          title: entry.title ?? null,
-          description: entry.description ?? null,
-          start_date: toPostgresDate(entry.startDate),
-          end_date: toPostgresDate(entry.endDate),
-          employment_type: entry.employmentType ?? null,
-          location: entry.location ?? null,
-        }));
-        const { error: whError } = await client.from("people_work_history").insert(rows);
-        if (whError) {
-          request.log.error({ err: whError }, "[redirect] Failed to insert work history");
-        }
-      }
+      // Insert LinkedIn data (bio + work/education) via people_linkedin
+      if (
+        (workHistory && workHistory.length > 0) ||
+        (educationHistory && educationHistory.length > 0) ||
+        linkedinBio
+      ) {
+        const { data: linkedinRow, error: linkedinInsertError } = await client
+          .from("people_linkedin")
+          .insert({
+            user_id: user.id,
+            person_id: newContact.id,
+            bio: linkedinBio ?? null,
+          })
+          .select("id")
+          .single();
 
-      // Insert education history if provided
-      if (educationHistory && educationHistory.length > 0) {
-        const rows = educationHistory.map((entry: ScrapedEducationEntry) => ({
-          user_id: user.id,
-          person_id: newContact.id,
-          school_name: entry.schoolName,
-          school_linkedin_id: entry.schoolLinkedinId ?? null,
-          degree: entry.degree ?? null,
-          description: entry.description ?? null,
-          start_date: toPostgresDate(entry.startDate),
-          end_date: toPostgresDate(entry.endDate),
-        }));
-        const { error: ehError } = await client.from("people_education_history").insert(rows);
-        if (ehError) {
-          request.log.error({ err: ehError }, "[redirect] Failed to insert education");
+        if (linkedinInsertError || !linkedinRow) {
+          request.log.error(
+            { err: linkedinInsertError },
+            "[redirect] Failed to insert people_linkedin for new contact",
+          );
+        } else {
+          // Insert work history if provided
+          if (workHistory && workHistory.length > 0) {
+            request.log.info(
+              { personId: newContact.id, count: workHistory.length },
+              "[redirect] Inserting work history for new contact",
+            );
+            const rows = workHistory.map((entry: ScrapedWorkHistoryEntry) => ({
+              user_id: user.id,
+              people_linkedin_id: linkedinRow.id,
+              company_name: entry.companyName,
+              company_linkedin_id: entry.companyLinkedinId ?? null,
+              title: entry.title ?? null,
+              description: entry.description ?? null,
+              start_date: toPostgresDate(entry.startDate),
+              end_date: toPostgresDate(entry.endDate),
+              employment_type: entry.employmentType ?? null,
+              location: entry.location ?? null,
+            }));
+            const { error: whError } = await client.from("people_work_history").insert(rows);
+            if (whError) {
+              request.log.error({ err: whError }, "[redirect] Failed to insert work history");
+            }
+          }
+
+          // Insert education history if provided
+          if (educationHistory && educationHistory.length > 0) {
+            const rows = educationHistory.map((entry: ScrapedEducationEntry) => ({
+              user_id: user.id,
+              people_linkedin_id: linkedinRow.id,
+              school_name: entry.schoolName,
+              school_linkedin_id: entry.schoolLinkedinId ?? null,
+              degree: entry.degree ?? null,
+              description: entry.description ?? null,
+              start_date: toPostgresDate(entry.startDate),
+              end_date: toPostgresDate(entry.endDate),
+            }));
+            const { error: ehError } = await client.from("people_education_history").insert(rows);
+            if (ehError) {
+              request.log.error({ err: ehError }, "[redirect] Failed to insert education");
+            }
+          }
         }
       }
 

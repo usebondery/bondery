@@ -23,6 +23,8 @@ export {
   type LoadingNotificationTemplateProps,
   warningNotificationTemplate,
   type WarningNotificationTemplateProps,
+  statusNotificationTemplate,
+  type StatusNotificationTemplateProps,
 } from "./Notifications";
 export { bonderyTheme, primaryColor } from "./theme";
 

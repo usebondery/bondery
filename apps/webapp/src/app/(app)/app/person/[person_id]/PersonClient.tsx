@@ -90,7 +90,7 @@ import { emojiSuggestionRender } from "./components/emojiSuggestion";
 import type { MentionSuggestionItem } from "./components/MentionList";
 import { MentionNodeView } from "./components/MentionNodeView";
 import { TaskItemNodeView } from "./components/TaskItemNodeView";
-import { MergeRecommendationCard } from "@/app/(app)/app/components/contacts/MergeRecommendationCard";
+import { RecommendationsSection } from "./components/RecommendationsSection";
 
 interface PersonClientProps {
   initialContact: Contact;
@@ -106,6 +106,7 @@ interface PersonClientProps {
   initialWorkHistory: WorkHistoryEntry[];
   initialEducation: EducationEntry[];
   initialLinkedinBio?: string | null;
+  initialSyncedAt?: string | null;
   initialMergeRecommendation?: MergeRecommendation | null;
   personId: string;
   initialTab?: string;
@@ -129,6 +130,7 @@ export default function PersonClient({
   initialWorkHistory = [],
   initialEducation = [],
   initialLinkedinBio = null,
+  initialSyncedAt = null,
   initialMergeRecommendation = null,
   personId,
   initialTab,
@@ -1297,16 +1299,14 @@ export default function PersonClient({
           }
         />
 
-        {mergeRecommendation && (
-          <MergeRecommendationCard
-            recommendation={mergeRecommendation}
-            contacts={[mergeRecommendation.leftPerson, mergeRecommendation.rightPerson]}
-            mergeTexts={mergeTexts}
-            onAccepted={() => setMergeRecommendation(null)}
-            onDeclined={() => setMergeRecommendation(null)}
-            redirectAfterMerge
-          />
-        )}
+        <RecommendationsSection
+          mergeRecommendation={mergeRecommendation}
+          mergeTexts={mergeTexts}
+          onMergeAccepted={() => setMergeRecommendation(null)}
+          onMergeDeclined={() => setMergeRecommendation(null)}
+          showEnrichCard={!!contact.linkedin && !initialSyncedAt}
+          onEnrich={() => enrichFromLinkedIn(personId, contact.linkedin)}
+        />
 
         <Paper withBorder shadow="sm" radius="md" p="xl">
           <Stack gap="lg">
@@ -1464,6 +1464,7 @@ export default function PersonClient({
                   workHistory={initialWorkHistory}
                   education={initialEducation}
                   linkedinBio={initialLinkedinBio}
+                  syncedAt={initialSyncedAt}
                   onEnrich={() => enrichFromLinkedIn(personId, contact.linkedin)}
                   enrichLabel={tEnrich("MenuLabel")}
                 />
