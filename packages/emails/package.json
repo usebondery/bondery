@@ -1,6 +1,6 @@
 {
   "name": "@bondery/emails",
-  "version": "0.6.2",
+  "version": "0.6.3",
   "description": "Bondery email templates using React Email",
   "type": "module",
   "main": "./dist/index.js",
