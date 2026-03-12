@@ -16,6 +16,7 @@
     "@bondery/emails": "*",
     "@bondery/helpers": "*",
     "@bondery/types": "*",
+    "@bondery/vcard": "*",
     "@fastify/auth": "^5.0.4",
     "@fastify/cookie": "^11.0.2",
     "@fastify/cors": "^11.2.0",
