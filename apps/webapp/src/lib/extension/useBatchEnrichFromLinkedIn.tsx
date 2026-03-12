@@ -6,7 +6,7 @@ import { notifications } from "@mantine/notifications";
 import { useTranslations } from "next-intl";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import { checkExtensionAuth } from "@/lib/extension/checkExtensionAuth";
-import { errorNotificationTemplate, successNotificationTemplate } from "@bondery/mantine-next";
+import { errorNotificationTemplate, informationNotificationTemplate, successNotificationTemplate } from "@bondery/mantine-next";
 import {
   defaultState,
   getState,
@@ -400,7 +400,14 @@ export function useBatchEnrichFromLinkedIn() {
    */
   const pause = useCallback(() => {
     setCancelled(true);
-  }, []);
+    notifications.show({
+      ...informationNotificationTemplate({
+        title: t("PausingTitle"),
+        description: t("PausingDescription"),
+      }),
+      autoClose: 4000,
+    });
+  }, [t]);
 
   /**
    * Discard an interrupted enrichment run by deleting remaining pending rows.

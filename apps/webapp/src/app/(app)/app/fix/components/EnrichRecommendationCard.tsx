@@ -2,7 +2,13 @@
 
 import { Button, Group, Loader, Paper, Progress, Stack, Text, Tooltip } from "@mantine/core";
 import { PersonChip } from "@bondery/mantine-next";
-import { IconBrandLinkedin, IconPlayerPause, IconPlayerPlay, IconTrash } from "@tabler/icons-react";
+import {
+  IconBrandLinkedin,
+  IconPlayerPause,
+  IconPlayerPlay,
+  IconPlayerPlayFilled,
+  IconTrash,
+} from "@tabler/icons-react";
 import { useTranslations } from "next-intl";
 import { useBatchEnrichFromLinkedIn } from "@/lib/extension/useBatchEnrichFromLinkedIn";
 import { useRouter } from "next/navigation";
@@ -116,7 +122,7 @@ export function EnrichRecommendationCard({
               </Button>
               <Button
                 color="blue"
-                leftSection={<IconPlayerPlay size={16} />}
+                leftSection={<IconPlayerPlayFilled size={16} />}
                 onClick={handleResume}
               >
                 {t("Resume")}

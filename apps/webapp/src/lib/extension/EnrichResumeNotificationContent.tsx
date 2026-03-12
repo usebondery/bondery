@@ -3,7 +3,7 @@
 import { useSyncExternalStore } from "react";
 import { useTranslations } from "next-intl";
 import { Button, Group, Text } from "@mantine/core";
-import { IconPlayerPlay, IconTrash } from "@tabler/icons-react";
+import { IconPlayerPlay, IconPlayerPlayFilled, IconTrash } from "@tabler/icons-react";
 import { useRouter } from "next/navigation";
 import { defaultState, getState, subscribe } from "./enrichBatchStore";
 import { useBatchEnrichFromLinkedIn } from "./useBatchEnrichFromLinkedIn";
@@ -55,7 +55,7 @@ export function EnrichResumeNotificationContent() {
         <Button
           size="xs"
           color="blue"
-          leftSection={<IconPlayerPlay size={12} />}
+          leftSection={<IconPlayerPlayFilled size={12} />}
           onClick={handleResume}
         >
           {t("Resume")}
