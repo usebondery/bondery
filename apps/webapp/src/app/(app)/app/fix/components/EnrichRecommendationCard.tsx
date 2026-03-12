@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, Group, Loader, Paper, Progress, Stack, Text, Tooltip } from "@mantine/core";
+import { Box, Button, Group, Loader, Paper, Progress, Stack, Text, Tooltip } from "@mantine/core";
 import { PersonChip } from "@bondery/mantine-next";
 import {
   IconBrandLinkedin,
@@ -38,6 +38,7 @@ export function EnrichRecommendationCard({
     discard,
     isLoading,
     isRunning,
+    isPausing,
     totalEligible,
     completed,
     failed,
@@ -108,9 +109,18 @@ export function EnrichRecommendationCard({
           )}
 
           {isRunning ? (
-            <Button variant="default" leftSection={<IconPlayerPause size={16} />} onClick={pause}>
-              {t("Pause")}
-            </Button>
+            <Tooltip label={t("PausingTooltip")} withArrow disabled={!isPausing}>
+              <Box component="span" display="inline-block">
+                <Button
+                  variant="default"
+                  leftSection={<IconPlayerPause size={16} />}
+                  onClick={pause}
+                  disabled={isPausing}
+                >
+                  {t("Pause")}
+                </Button>
+              </Box>
+            </Tooltip>
           ) : hasInterruptedRun ? (
             <Group gap="xs" wrap="nowrap">
               <Button

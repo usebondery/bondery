@@ -633,6 +633,7 @@
     "PersonEligibleLabel": "Tento kontakt může být obohacen z LinkedIn",
     "CurrentlyEnriching": "Právě obohacuji:",
     "Pause": "Pozastavit",
+    "PausingTooltip": "Dokončuji aktuální kontakt, pak se zastavím...",
     "ResumeLabel": "Obohacování přerušeno: {completed} hotovo, {pending} zbývá",
     "Resume": "Pokračovat",
     "SkipRemaining": "Přeskočit zbytek"

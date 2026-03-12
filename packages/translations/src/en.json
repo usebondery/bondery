@@ -635,6 +635,7 @@
     "PersonEligibleLabel": "This contact could be enriched from LinkedIn",
     "CurrentlyEnriching": "Currently enriching:",
     "Pause": "Pause",
+    "PausingTooltip": "Finishing current contact, then pausing...",
     "ResumeLabel": "Enrichment interrupted: {completed} done, {pending} remaining",
     "Resume": "Resume",
     "SkipRemaining": "Skip remaining"
