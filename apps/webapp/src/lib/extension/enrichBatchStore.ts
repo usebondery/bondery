@@ -32,6 +32,8 @@ export interface EnrichBatchState {
    * Drives the global resume notification. Cleared when a resume or discard occurs.
    */
   pendingQueueStatus: { pending: number; completed: number; failed: number } | null;
+  /** True from the moment Pause is clicked until the current contact finishes and the loop stops. */
+  isPausing: boolean;
 }
 
 export const defaultState: EnrichBatchState = {
@@ -42,6 +44,7 @@ export const defaultState: EnrichBatchState = {
   failed: 0,
   currentPerson: null,
   pendingQueueStatus: null,
+  isPausing: false,
 };
 
 // ─── Internal store ───────────────────────────────────────────────────────────

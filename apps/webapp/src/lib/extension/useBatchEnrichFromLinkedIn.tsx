@@ -267,6 +267,7 @@ export function useBatchEnrichFromLinkedIn() {
     setState({
       isLoading: false,
       isRunning: true,
+      isPausing: false,
       completed: 0,
       failed: 0,
       totalEligible,
@@ -275,7 +276,7 @@ export function useBatchEnrichFromLinkedIn() {
 
     const { completedCount, abortReason } = await runEnrichLoop(0, 0);
 
-    setState({ isRunning: false, isLoading: false, currentPerson: null });
+    setState({ isRunning: false, isLoading: false, isPausing: false, currentPerson: null });
 
     // On pause: leave all rows intact so the run can be resumed.
     // On natural completion: delete all rows (completed contacts have people_linkedin,
@@ -351,6 +352,7 @@ export function useBatchEnrichFromLinkedIn() {
       setState({
         isLoading: false,
         isRunning: true,
+        isPausing: false,
         completed: queueStatus.completed,
         failed: queueStatus.failed,
         totalEligible,
@@ -362,7 +364,7 @@ export function useBatchEnrichFromLinkedIn() {
         queueStatus.failed,
       );
 
-      setState({ isRunning: false, isLoading: false, currentPerson: null });
+      setState({ isRunning: false, isLoading: false, isPausing: false, currentPerson: null });
 
       if (isCancelled()) {
         const s = getState();
@@ -404,6 +406,7 @@ export function useBatchEnrichFromLinkedIn() {
    */
   const pause = useCallback(() => {
     setCancelled(true);
+    setState({ isPausing: true });
     notifications.show({
       ...informationNotificationTemplate({
         title: t("PausingTitle"),
@@ -428,6 +431,7 @@ export function useBatchEnrichFromLinkedIn() {
     discard,
     isLoading: storeState.isLoading,
     isRunning: storeState.isRunning,
+    isPausing: storeState.isPausing,
     totalEligible: storeState.totalEligible,
     completed: storeState.completed,
     failed: storeState.failed,
