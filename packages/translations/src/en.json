@@ -919,6 +919,8 @@
     "ExtensionNotRespondingTitle": "Extension not responding",
     "ExtensionNotRespondingDescription": "The Bondery extension did not respond in time. Make sure it is enabled and try again.",
     "Cancel": "Cancel",
+    "PausingTitle": "Pausing after current contact",
+    "PausingDescription": "Enrichment will stop once the current contact finishes.",
     "ResumeNotificationTitle": "Enrichment interrupted",
     "ResumeCount": "{completed} done, {pending} remaining",
     "Resume": "Resume",

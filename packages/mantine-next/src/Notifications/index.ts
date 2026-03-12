@@ -18,3 +18,7 @@ export {
   statusNotificationTemplate,
   type StatusNotificationTemplateProps,
 } from "./StatusNotificationTemplate";
+export {
+  informationNotificationTemplate,
+  type InformationNotificationTemplateProps,
+} from "./InformationNotificationTemplate";

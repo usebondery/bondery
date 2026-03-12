@@ -923,6 +923,8 @@
     "ExtensionNotRespondingTitle": "Rozšíření neodpovídá",
     "ExtensionNotRespondingDescription": "Rozšíření Bondery neodpovědělo včas. Zkontrolujte, zda je povoleno, a zkuste to znovu.",
     "Cancel": "Zrušit",
+    "PausingTitle": "Pozastavení po aktuálním kontaktu",
+    "PausingDescription": "Obohacování se zastaví po dokončení aktuálního kontaktu.",
     "ResumeNotificationTitle": "Obohacování přerušeno",
     "ResumeCount": "{completed} hotovo, {pending} zbývá",
     "Resume": "Pokračovat",
