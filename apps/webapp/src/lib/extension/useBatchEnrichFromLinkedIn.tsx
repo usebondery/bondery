@@ -6,7 +6,11 @@ import { notifications } from "@mantine/notifications";
 import { useTranslations } from "next-intl";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import { checkExtensionAuth } from "@/lib/extension/checkExtensionAuth";
-import { errorNotificationTemplate, informationNotificationTemplate, successNotificationTemplate } from "@bondery/mantine-next";
+import {
+  errorNotificationTemplate,
+  informationNotificationTemplate,
+  successNotificationTemplate,
+} from "@bondery/mantine-next";
 import {
   defaultState,
   getState,
