@@ -91,6 +91,10 @@
       "outputs": ["dist/**"],
       "env": []
     },
+    "@bondery/vcard#build": {
+      "outputs": ["dist/**"],
+      "env": []
+    },
     "@bondery/types#build": {
       "outputs": ["dist/**"],
       "env": []
