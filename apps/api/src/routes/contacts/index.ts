@@ -3398,10 +3398,67 @@ export async function contactRoutes(fastify: FastifyInstance) {
         )[0] as unknown as Contact;
       }
 
+      let exportImportantDates: Array<{
+        type: "birthday" | "anniversary" | "nameday" | "graduation" | "other";
+        date: string;
+      }> = [];
+      let exportCategories: string[] = [];
+
+      try {
+        const [{ data: importantDates }, { data: peopleTags }] = await Promise.all([
+          client
+            .from("people_important_dates")
+            .select("type, date")
+            .eq("person_id", id)
+            .eq("user_id", user.id),
+          client.from("people_tags").select("tag_id").eq("person_id", id).eq("user_id", user.id),
+        ]);
+
+        exportImportantDates = (importantDates ?? [])
+          .map((entry) => ({
+            type: entry.type,
+            date: entry.date,
+          }))
+          .filter(
+            (
+              entry,
+            ): entry is {
+              type: "birthday" | "anniversary" | "nameday" | "graduation" | "other";
+              date: string;
+            } =>
+              IMPORTANT_DATE_TYPES.includes(entry.type as ImportantDateType) &&
+              typeof entry.date === "string" &&
+              entry.date.trim().length > 0,
+          );
+
+        const tagIds = Array.from(
+          new Set((peopleTags ?? []).map((entry) => entry.tag_id).filter(Boolean)),
+        );
+
+        if (tagIds.length > 0) {
+          const { data: tags } = await client
+            .from("tags")
+            .select("label")
+            .eq("user_id", user.id)
+            .in("id", tagIds);
+
+          exportCategories = Array.from(
+            new Set(
+              (tags ?? []).map((entry) => entry.label).filter((label): label is string => !!label),
+            ),
+          );
+        }
+      } catch (extrasError) {
+        fastify.log.warn({ extrasError }, "Failed to fetch important dates/tags for vCard export");
+      }
+
       // Generate vCard
       let vcard: string;
       try {
-        vcard = await generateVCard(contactWithChannels);
+        vcard = await generateVCard(contactWithChannels, {
+          importantDates: exportImportantDates,
+          categories: exportCategories,
+        });
       } catch (vcardError) {
         fastify.log.error({ vcardError }, "Failed to generate vCard");
         return reply.status(500).send({ error: "Failed to generate vCard" });

@@ -7,6 +7,41 @@ import type { Contact } from "@bondery/types";
 import { attachMedia, contactToVCard, serializeVCard } from "@bondery/vcard";
 import logger from "../../lib/logger.js";
 
+type VCardExportImportantDate = {
+  type: "birthday" | "anniversary" | "nameday" | "graduation" | "other";
+  date: string;
+};
+
+type VCardExportExtras = {
+  importantDates?: VCardExportImportantDate[];
+  categories?: string[];
+};
+
+function formatVCardDate(dateString: string | null | undefined): string | null {
+  if (!dateString) return null;
+
+  const normalized = dateString.trim();
+  const dashDateMatch = normalized.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (dashDateMatch) {
+    return `${dashDateMatch[1]}${dashDateMatch[2]}${dashDateMatch[3]}`;
+  }
+
+  const compactDateMatch = normalized.match(/^\d{8}$/);
+  if (compactDateMatch) {
+    return normalized;
+  }
+
+  const parsed = new Date(normalized);
+  if (Number.isNaN(parsed.getTime())) {
+    return null;
+  }
+
+  const year = parsed.getUTCFullYear();
+  const month = String(parsed.getUTCMonth() + 1).padStart(2, "0");
+  const day = String(parsed.getUTCDate()).padStart(2, "0");
+  return `${year}${month}${day}`;
+}
+
 function formatVCardTimestamp(dateString: string | null): string | null {
   if (!dateString) return null;
   try {
@@ -23,8 +58,27 @@ function formatVCardTimestamp(dateString: string | null): string | null {
   }
 }
 
-export async function generateVCard(contact: Contact): Promise<string> {
+export async function generateVCard(contact: Contact, extras?: VCardExportExtras): Promise<string> {
   let card = contactToVCard(contact);
+
+  const birthdayDate = extras?.importantDates?.find((entry) => entry.type === "birthday")?.date;
+  const anniversaryDate = extras?.importantDates?.find(
+    (entry) => entry.type === "anniversary",
+  )?.date;
+
+  const bday = formatVCardDate(birthdayDate);
+  const anniversary = formatVCardDate(anniversaryDate);
+
+  const categories = Array.from(
+    new Set((extras?.categories ?? []).map((value) => value.trim()).filter(Boolean)),
+  );
+
+  card = {
+    ...card,
+    birthday: bday ? { value: bday, valueType: "date-and-or-time" } : undefined,
+    anniversary: anniversary ? { value: anniversary, valueType: "date-and-or-time" } : undefined,
+    categories,
+  };
 
   if (contact.avatar) {
     try {
