@@ -9,7 +9,7 @@ export type InteractionType =
   | "Email"
   | "Meal"
   | "Meeting"
-  | "Networking interaction"
+  | "Networking event"
   | "Note"
   | "Other"
   | "Party/Social"
