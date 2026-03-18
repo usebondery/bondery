@@ -12,7 +12,7 @@ import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import { useState } from "react";
 import { errorNotificationTemplate, successNotificationTemplate } from "@bondery/mantine-next";
 import { useTranslations } from "next-intl";
-import { useEnrichFromLinkedIn } from "@/lib/extension/useEnrichFromLinkedIn";
+import { useBatchEnrichFromLinkedIn } from "@/lib/extension/useBatchEnrichFromLinkedIn";
 import { revalidateContacts } from "../../../actions";
 
 interface ContactActionMenuProps {
@@ -30,7 +30,7 @@ export function ContactActionMenu({
 }: ContactActionMenuProps) {
   const tMerge = useTranslations("MergeWithModal");
   const tEnrich = useTranslations("EnrichFromLinkedIn");
-  const { enrichFromLinkedIn } = useEnrichFromLinkedIn({ onSuccess: revalidateContacts });
+  const { startForPerson } = useBatchEnrichFromLinkedIn();
 
   const handleExport = async () => {
     try {
@@ -93,7 +93,7 @@ export function ContactActionMenu({
         </MenuItem>
         <MenuItem
           leftSection={<IconBrandLinkedin size={16} />}
-          onClick={() => enrichFromLinkedIn(personId, contact.linkedin)}
+          onClick={() => startForPerson(personId, contact.linkedin)}
         >
           {tEnrich("MenuLabel")}
         </MenuItem>

@@ -1190,6 +1190,15 @@ paths:
     post:
       tags:
         - Contacts
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                personId:
+                  type: string
       responses:
         "200":
           description: Default Response

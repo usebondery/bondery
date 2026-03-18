@@ -3915,50 +3915,103 @@ export async function contactRoutes(fastify: FastifyInstance) {
    * POST /api/contacts/enrich-queue/init
    * Initialize a new enrichment run.
    *
+   * When `personId` is provided in the body, queues only that single contact.
+   * Otherwise queues all eligible contacts (those with a LinkedIn handle but
+   * no people_linkedin record yet).
+   *
    * 1. Deletes all existing queue rows for the user (clears previous run).
-   * 2. Finds all eligible contacts via the RPC join.
+   * 2. Finds eligible contacts (all or just one).
    * 3. Bulk-inserts them as status='pending'.
    * 4. Returns totalEligible.
    *
    * Idempotent — safe to call multiple times.
    */
-  fastify.post("/enrich-queue/init", async (request: FastifyRequest, reply: FastifyReply) => {
-    const { client, user } = getAuth(request);
+  fastify.post(
+    "/enrich-queue/init",
+    {
+      schema: {
+        body: Type.Optional(
+          Type.Object({
+            personId: Type.Optional(Type.String()),
+          }),
+        ),
+      },
+    },
+    async (
+      request: FastifyRequest<{ Body?: { personId?: string } }>,
+      reply: FastifyReply,
+    ) => {
+      const { client, user } = getAuth(request);
+      const personId = (request.body as { personId?: string } | undefined)?.personId;
 
-    // Clear any leftover rows from a previous run.
-    await client.from("linkedin_enrich_queue").delete().eq("user_id", user.id);
+      // Clear any leftover rows from a previous run.
+      await client.from("linkedin_enrich_queue").delete().eq("user_id", user.id);
 
-    // Find all eligible contacts via the efficient RPC join.
-    const { data: eligible, error: rpcError } = await client.rpc("get_linkedin_enrich_eligible", {
-      p_user_id: user.id,
-    });
+      if (personId) {
+        // Single-person mode: verify the contact belongs to this user, then queue just them.
+        const { data: person, error: personError } = await client
+          .from("people")
+          .select("id")
+          .eq("id", personId)
+          .eq("user_id", user.id)
+          .maybeSingle();
 
-    if (rpcError) {
-      return reply.status(500).send({ error: rpcError.message });
-    }
+        if (personError) {
+          return reply.status(500).send({ error: personError.message });
+        }
 
-    const rows = eligible || [];
-    const totalEligible = rows.length;
+        if (!person) {
+          return reply.status(404).send({ error: "Contact not found" });
+        }
 
-    if (totalEligible === 0) {
-      return { totalEligible: 0 };
-    }
+        const { error: insertError } = await client.from("linkedin_enrich_queue").insert({
+          user_id: user.id,
+          person_id: personId,
+          status: "pending" as const,
+        });
 
-    // Bulk-insert all eligible contacts as pending queue items.
-    const queueRows = rows.map((r: { person_id: string }) => ({
-      user_id: user.id,
-      person_id: r.person_id,
-      status: "pending" as const,
-    }));
+        if (insertError) {
+          return reply.status(500).send({ error: insertError.message });
+        }
 
-    const { error: insertError } = await client.from("linkedin_enrich_queue").insert(queueRows);
+        return { totalEligible: 1 };
+      }
 
-    if (insertError) {
-      return reply.status(500).send({ error: insertError.message });
-    }
+      // Batch mode: find all eligible contacts via the efficient RPC join.
+      const { data: eligible, error: rpcError } = await client.rpc(
+        "get_linkedin_enrich_eligible",
+        {
+          p_user_id: user.id,
+        },
+      );
 
-    return { totalEligible };
-  });
+      if (rpcError) {
+        return reply.status(500).send({ error: rpcError.message });
+      }
+
+      const rows = eligible || [];
+      const totalEligible = rows.length;
+
+      if (totalEligible === 0) {
+        return { totalEligible: 0 };
+      }
+
+      // Bulk-insert all eligible contacts as pending queue items.
+      const queueRows = rows.map((r: { person_id: string }) => ({
+        user_id: user.id,
+        person_id: r.person_id,
+        status: "pending" as const,
+      }));
+
+      const { error: insertError } = await client.from("linkedin_enrich_queue").insert(queueRows);
+
+      if (insertError) {
+        return reply.status(500).send({ error: insertError.message });
+      }
+
+      return { totalEligible };
+    },
+  );
 
   /**
    * GET /api/contacts/enrich-queue/next-batch

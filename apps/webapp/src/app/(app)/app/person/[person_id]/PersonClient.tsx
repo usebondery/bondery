@@ -63,7 +63,7 @@ import { ContactImportantDatesSection } from "./components/ContactImportantDates
 import { PersonInteractionsSection } from "./components/PersonInteractionsSection";
 import { openNewActivityModal } from "../../interactions/components/NewActivityModal";
 import { LinkedInTab } from "./components/LinkedInTab";
-import { useEnrichFromLinkedIn } from "@/lib/extension/useEnrichFromLinkedIn";
+import { useBatchEnrichFromLinkedIn } from "@/lib/extension/useBatchEnrichFromLinkedIn";
 // import { ContactPGPSection } from "./components/ContactPGPSection";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
@@ -156,7 +156,7 @@ export default function PersonClient({
   );
   const tRelationships = useTranslations("PersonRelationships");
   const tEnrich = useTranslations("EnrichFromLinkedIn");
-  const { enrichFromLinkedIn } = useEnrichFromLinkedIn({ onSuccess: revalidateContacts });
+  const { startForPerson } = useBatchEnrichFromLinkedIn();
   const tImportantDates = useTranslations("ContactImportantDates");
   const tPersonPage = useTranslations("SingleContactPage");
   const tMerge = useTranslations("MergeWithModal");
@@ -1305,7 +1305,8 @@ export default function PersonClient({
           onMergeAccepted={() => setMergeRecommendation(null)}
           onMergeDeclined={() => setMergeRecommendation(null)}
           showEnrichCard={!!contact.linkedin && !initialSyncedAt}
-          onEnrich={() => enrichFromLinkedIn(personId, contact.linkedin)}
+          personId={personId}
+          linkedinHandle={contact.linkedin ?? null}
         />
 
         <Paper withBorder shadow="sm" radius="md" p="xl">
@@ -1465,7 +1466,7 @@ export default function PersonClient({
                   education={initialEducation}
                   linkedinBio={initialLinkedinBio}
                   syncedAt={initialSyncedAt}
-                  onEnrich={() => enrichFromLinkedIn(personId, contact.linkedin)}
+                  onEnrich={() => startForPerson(personId, contact.linkedin)}
                   enrichLabel={tEnrich("MenuLabel")}
                 />
               </Tabs.Panel>

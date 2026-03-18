@@ -314,6 +314,119 @@ export function useBatchEnrichFromLinkedIn() {
   }, [t, router, runEnrichLoop]);
 
   /**
+   * Queue and enrich a single contact by person ID.
+   * Shares the same queue / notification / store infrastructure as the batch flow,
+   * so the persistent EnrichStatusNotificationManager reflects the progress.
+   *
+   * @param contactId UUID of the person to enrich.
+   * @param linkedinHandle LinkedIn handle of the person (used for validation only — the
+   *   queue item itself resolves the handle via next-batch).
+   */
+  const startForPerson = useCallback(
+    async (contactId: string, linkedinHandle: string | null | undefined) => {
+      if (!linkedinHandle) {
+        notifications.show(
+          errorNotificationTemplate({
+            title: t("ErrorTitle"),
+            description: t("NoLinkedInHandle"),
+          }),
+        );
+        return;
+      }
+
+      setState({ isLoading: true });
+
+      const authState = await checkExtensionAuth();
+
+      if (authState === "not_installed") {
+        setState({ isLoading: false });
+        notifications.show(
+          errorNotificationTemplate({
+            title: t("ErrorTitle"),
+            description: t("ExtensionRequiredMessage"),
+          }),
+        );
+        return;
+      }
+
+      if (authState === "not_authenticated") {
+        setState({ isLoading: false });
+        notifications.show(
+          errorNotificationTemplate({
+            title: t("NotAuthenticatedTitle"),
+            description: t("NotAuthenticatedMessage"),
+          }),
+        );
+        return;
+      }
+
+      const initRes = await fetch(`${API_ROUTES.CONTACTS}/enrich-queue/init`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ personId: contactId }),
+      });
+
+      if (!initRes.ok) {
+        setState({ isLoading: false });
+        notifications.show(
+          errorNotificationTemplate({
+            title: t("ErrorTitle"),
+            description: t("ErrorDescription"),
+          }),
+        );
+        return;
+      }
+
+      setCancelled(false);
+      setState({
+        isLoading: false,
+        isRunning: true,
+        isPausing: false,
+        completed: 0,
+        failed: 0,
+        totalEligible: 1,
+        currentPerson: null,
+      });
+
+      const { completedCount, abortReason } = await runEnrichLoop(0, 0);
+
+      setState({ isRunning: false, isLoading: false, isPausing: false, currentPerson: null });
+
+      if (isCancelled()) {
+        const s = getState();
+        setPendingQueueStatus({
+          pending: s.totalEligible - s.completed - s.failed,
+          completed: s.completed,
+          failed: s.failed,
+        });
+      } else if (!abortReason) {
+        await fetch(`${API_ROUTES.CONTACTS}/enrich-queue`, { method: "DELETE" });
+      }
+
+      if (abortReason === "circuit_breaker") {
+        notifications.show(
+          errorNotificationTemplate({
+            title: t("ExtensionNotRespondingTitle"),
+            description: t("ExtensionNotRespondingDescription"),
+          }),
+        );
+      } else if (!isCancelled() && completedCount > 0) {
+        notifications.show(
+          successNotificationTemplate({
+            title: t("AllDoneTitle"),
+            description: t("AllDoneDescription", { count: 1 }),
+          }),
+        );
+      }
+
+      if (completedCount > 0) {
+        router.refresh();
+      }
+    },
+    [t, router, runEnrichLoop],
+  );
+
+  /**
    * Resume an interrupted enrichment run.
    * Called when the page detects pending queue items from a previous session.
    */
@@ -426,6 +539,7 @@ export function useBatchEnrichFromLinkedIn() {
 
   return {
     start,
+    startForPerson,
     resume,
     pause,
     discard,

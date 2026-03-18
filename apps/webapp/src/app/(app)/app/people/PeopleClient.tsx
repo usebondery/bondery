@@ -32,7 +32,7 @@ import { openDeleteContactsModal } from "@/app/(app)/app/components/contacts/ope
 import { openAddPeopleToGroupSelectionModal } from "./components/AddPeopleToGroupSelectionModal";
 import { MERGE_CONFLICT_FIELDS, openMergeWithModal } from "./components/MergeWithModal";
 import { WEBSITE_URL } from "@/lib/config";
-import { useEnrichFromLinkedIn } from "@/lib/extension/useEnrichFromLinkedIn";
+import { useBatchEnrichFromLinkedIn } from "@/lib/extension/useBatchEnrichFromLinkedIn";
 
 import type { Contact, MergeConflictField } from "@bondery/types";
 import { revalidateContacts } from "../actions";
@@ -52,7 +52,7 @@ export function PeopleClient({ initialContacts, totalCount, layout = "stack" }: 
   const tHeader = useTranslations("PageHeader");
   const tMerge = useTranslations("MergeWithModal");
   const tEnrich = useTranslations("EnrichFromLinkedIn");
-  const { enrichFromLinkedIn } = useEnrichFromLinkedIn({ onSuccess: revalidateContacts });
+  const { startForPerson } = useBatchEnrichFromLinkedIn();
   const mergeTexts = useMemo(
     () => ({
       errorTitle: tMerge("ErrorTitle"),
@@ -468,7 +468,7 @@ export function PeopleClient({ initialContacts, totalCount, layout = "stack" }: 
                 icon: <IconBrandLinkedin size={16} />,
                 onClick: (contactId) => {
                   const contact = contacts.find((c) => c.id === contactId);
-                  enrichFromLinkedIn(contactId, contact?.linkedin);
+                  startForPerson(contactId, contact?.linkedin);
                 },
               },
             ]}

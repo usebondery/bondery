@@ -12,7 +12,8 @@ interface RecommendationsSectionProps {
   onMergeAccepted: () => void;
   onMergeDeclined: () => void;
   showEnrichCard: boolean;
-  onEnrich: () => void;
+  personId: string;
+  linkedinHandle: string | null;
 }
 
 /**
@@ -25,7 +26,8 @@ export function RecommendationsSection({
   onMergeAccepted,
   onMergeDeclined,
   showEnrichCard,
-  onEnrich,
+  personId,
+  linkedinHandle,
 }: RecommendationsSectionProps) {
   if (!mergeRecommendation && !showEnrichCard) {
     return null;
@@ -44,7 +46,9 @@ export function RecommendationsSection({
         />
       )}
 
-      {showEnrichCard && <EnrichRecommendationCard onEnrich={onEnrich} />}
+      {showEnrichCard && (
+        <EnrichRecommendationCard personId={personId} linkedinHandle={linkedinHandle} />
+      )}
     </Stack>
   );
 }
