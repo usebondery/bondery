@@ -1,6 +1,6 @@
 {
   "name": "@bondery/mantine-next",
-  "version": "0.6.3",
+  "version": "1.3.0",
   "private": true,
   "type": "module",
   "main": "./src/index.ts",

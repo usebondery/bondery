@@ -114,7 +114,7 @@ export default defineConfig({
     return {
       name: "Bondery Extension",
       description: "Import contacts from social media directly to Bondery Webapp",
-      version: "0.6.3",
+      version: "1.3.0",
 
       permissions: ["storage", "identity", "alarms"],
       host_permissions: hostPermissions,
