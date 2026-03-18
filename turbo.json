@@ -4,6 +4,7 @@
   "tasks": {
     "build": {
       "env": [
+        "NODE_ENV",
         "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY",
         "NEXT_PUBLIC_SUPABASE_URL",
         "PUBLIC_SUPABASE_URL",
