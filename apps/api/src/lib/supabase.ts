@@ -184,11 +184,21 @@ export async function createAuthenticatedClient(
   request: FastifyRequest,
 ): Promise<{ client: SupabaseClient<Database>; user: { id: string; email: string } | null }> {
   const { NEXT_PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_PUBLISHABLE_KEY } = getSupabaseConfig();
-  const { accessToken, refreshToken } = getAuthTokensFromCookies(request);
+  const { accessToken } = getAuthTokensFromCookies(request);
+
+  // Build a client that forwards the Bearer token on every request (for RLS).
+  // Using getUser() to validate because the token may be either a Supabase session
+  // JWT (cookie-based webapp flow) or a Supabase OAuth 2.1 access token (extension
+  // PKCE flow). Both are valid Supabase JWTs but the OAuth refresh token is NOT
+  // interchangeable with Supabase's internal session refresh token, so setSession()
+  // would fail for the extension flow.
   const client = createClient<Database>(NEXT_PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_PUBLISHABLE_KEY, {
     auth: {
       autoRefreshToken: false,
       persistSession: false,
+    },
+    global: {
+      headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
     },
   });
 
@@ -196,16 +206,12 @@ export async function createAuthenticatedClient(
     return { client, user: null };
   }
 
-  // Set the session with the tokens
-  const { data, error } = await client.auth.setSession({
-    access_token: accessToken,
-    refresh_token: refreshToken || "",
-  });
+  const { data, error } = await client.auth.getUser(accessToken);
 
   if (error || !data.user) {
     logger.warn(
       { errorMessage: error?.message, errorStatus: error?.status },
-      "[createAuthenticatedClient] setSession error",
+      "[createAuthenticatedClient] getUser error",
     );
     return { client, user: null };
   }
