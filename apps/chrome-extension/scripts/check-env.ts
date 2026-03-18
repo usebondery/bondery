@@ -9,9 +9,10 @@ const environment = (process.env.NODE_ENV || "development") as "production" | "d
 const isCi = process.env.GITHUB_ACTIONS === "true" || process.env.CI === "true";
 
 const requiredVars = [
-  "NEXT_PUBLIC_WEBAPP_URL",
-  "PUBLIC_SUPABASE_URL",
-  "PRIVATE_SUPABASE_OAUTH_CLIENT_ID",
+  "WXT_WEBAPP_URL",
+  "WXT_API_URL",
+  "WXT_SUPABASE_URL",
+  "WXT_SUPABASE_OAUTH_CLIENT_ID",
 ];
 
 if (environment === "production" && isCi) {

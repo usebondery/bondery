@@ -19,6 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       NEXT_PUBLIC_WEBAPP_URL: ${{ vars.NEXT_PUBLIC_WEBAPP_URL }}
+      PUBLIC_API_URL: ${{ vars.PUBLIC_API_URL }}
       PUBLIC_SUPABASE_URL: ${{ vars.PUBLIC_SUPABASE_URL }}
       PRIVATE_SUPABASE_OAUTH_CLIENT_ID: ${{ secrets.PRIVATE_SUPABASE_OAUTH_CLIENT_ID }}
       PRIVATE_CHROME_EXTENSION_ID: ${{ secrets.PRIVATE_CHROME_EXTENSION_ID }}
@@ -75,9 +76,10 @@ jobs:
 
       - name: Create production environment file
         run: |
-          echo "NEXT_PUBLIC_WEBAPP_URL=$NEXT_PUBLIC_WEBAPP_URL" > apps/chrome-extension/.env.production.local
-          echo "PUBLIC_SUPABASE_URL=$PUBLIC_SUPABASE_URL" >> apps/chrome-extension/.env.production.local
-          echo "PRIVATE_SUPABASE_OAUTH_CLIENT_ID=$PRIVATE_SUPABASE_OAUTH_CLIENT_ID" >> apps/chrome-extension/.env.production.local
+          echo "WXT_WEBAPP_URL=$NEXT_PUBLIC_WEBAPP_URL" > apps/chrome-extension/.env.production.local
+          echo "WXT_API_URL=$PUBLIC_API_URL" >> apps/chrome-extension/.env.production.local
+          echo "WXT_SUPABASE_URL=$PUBLIC_SUPABASE_URL" >> apps/chrome-extension/.env.production.local
+          echo "WXT_SUPABASE_OAUTH_CLIENT_ID=$PRIVATE_SUPABASE_OAUTH_CLIENT_ID" >> apps/chrome-extension/.env.production.local
 
       - name: Build Chrome Extension
         env:
