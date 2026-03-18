@@ -56,16 +56,20 @@ You can also trigger a release manually from the GitHub Actions tab:
 
 ## Environment Variables
 
-The workflow uses these repository variables:
-- `NEXT_PUBLIC_WEBAPP_URL`: Production app URL (configured in GitHub Settings → Secrets and variables → Actions → Variables)
-- `PRIVATE_CHROME_PUBLISHER_ID`: Chrome Web Store publisher ID used for V2 API upload/publish endpoints
+All variables are stored as **repository secrets** (GitHub Settings → Secrets and variables → Actions → Secrets):
 
-The workflow also requires these repository secrets for Chrome Web Store upload/publish:
-- `PRIVATE_CHROME_EXTENSION_ID`
-- `PRIVATE_CHROME_PUBLISHER_ID`
-- `PRIVATE_CHROME_SERVICE_ACCOUNT_KEY_JSON` (entire service account JSON from Google Cloud)
-- `PRIVATE_CHROME_PRIVATE_SIGNING_KEY` (PEM private key used to sign CRX packages)
-- `PRIVATE_CHROME_PUBLIC_SIGNING_KEY` (PEM public key used to verify CRX signing key pair and extension ID)
+### WXT build variables
+- `WXT_WEBAPP_URL`: Production webapp URL (e.g. `https://app.usebondery.com`)
+- `WXT_API_URL`: Production API URL (e.g. `https://api.usebondery.com`)
+- `WXT_SUPABASE_URL`: Supabase project URL
+- `WXT_SUPABASE_OAUTH_CLIENT_ID`: OAuth client ID from Supabase Dashboard → Authentication → OAuth Apps
+
+### Chrome Web Store
+- `PRIVATE_CHROME_EXTENSION_ID`: Extension ID in CWS
+- `PRIVATE_CHROME_PUBLISHER_ID`: Publisher ID used for CWS V2 API endpoints
+- `PRIVATE_CHROME_SERVICE_ACCOUNT_KEY_JSON`: Entire service account JSON from Google Cloud
+- `PRIVATE_CHROME_PRIVATE_SIGNING_KEY`: PEM private key used to sign CRX packages
+- `PRIVATE_CHROME_PUBLIC_SIGNING_KEY`: PEM public key used to verify CRX signing key pair and extension ID
 
 ## Installation for End Users
 
