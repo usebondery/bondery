@@ -21,7 +21,7 @@ jobs:
       NEXT_PUBLIC_WEBAPP_URL: ${{ vars.NEXT_PUBLIC_WEBAPP_URL }}
       PUBLIC_API_URL: ${{ vars.PUBLIC_API_URL }}
       PUBLIC_SUPABASE_URL: ${{ vars.PUBLIC_SUPABASE_URL }}
-      PRIVATE_SUPABASE_OAUTH_CLIENT_ID: ${{ secrets.PRIVATE_SUPABASE_OAUTH_CLIENT_ID }}
+      WXT_SUPABASE_OAUTH_CLIENT_ID: ${{ secrets.WXT_SUPABASE_OAUTH_CLIENT_ID }}
       PRIVATE_CHROME_EXTENSION_ID: ${{ secrets.PRIVATE_CHROME_EXTENSION_ID }}
       PRIVATE_CHROME_PUBLISHER_ID: ${{ secrets.PRIVATE_CHROME_PUBLISHER_ID }}
       PRIVATE_CHROME_SERVICE_ACCOUNT_KEY_JSON: ${{ secrets.PRIVATE_CHROME_SERVICE_ACCOUNT_KEY_JSON }}
@@ -79,7 +79,7 @@ jobs:
           echo "WXT_WEBAPP_URL=$NEXT_PUBLIC_WEBAPP_URL" > apps/chrome-extension/.env.production.local
           echo "WXT_API_URL=$PUBLIC_API_URL" >> apps/chrome-extension/.env.production.local
           echo "WXT_SUPABASE_URL=$PUBLIC_SUPABASE_URL" >> apps/chrome-extension/.env.production.local
-          echo "WXT_SUPABASE_OAUTH_CLIENT_ID=$PRIVATE_SUPABASE_OAUTH_CLIENT_ID" >> apps/chrome-extension/.env.production.local
+          echo "WXT_SUPABASE_OAUTH_CLIENT_ID=$WXT_SUPABASE_OAUTH_CLIENT_ID" >> apps/chrome-extension/.env.production.local
 
       - name: Build Chrome Extension
         env:
