@@ -3937,10 +3937,7 @@ export async function contactRoutes(fastify: FastifyInstance) {
         ),
       },
     },
-    async (
-      request: FastifyRequest<{ Body?: { personId?: string } }>,
-      reply: FastifyReply,
-    ) => {
+    async (request: FastifyRequest<{ Body?: { personId?: string } }>, reply: FastifyReply) => {
       const { client, user } = getAuth(request);
       const personId = (request.body as { personId?: string } | undefined)?.personId;
 
@@ -3978,12 +3975,9 @@ export async function contactRoutes(fastify: FastifyInstance) {
       }
 
       // Batch mode: find all eligible contacts via the efficient RPC join.
-      const { data: eligible, error: rpcError } = await client.rpc(
-        "get_linkedin_enrich_eligible",
-        {
-          p_user_id: user.id,
-        },
-      );
+      const { data: eligible, error: rpcError } = await client.rpc("get_linkedin_enrich_eligible", {
+        p_user_id: user.id,
+      });
 
       if (rpcError) {
         return reply.status(500).send({ error: rpcError.message });
