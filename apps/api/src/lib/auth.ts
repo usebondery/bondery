@@ -136,7 +136,9 @@ export function registerAuthStrategies(fastify: FastifyInstance): void {
         .single();
 
       if (error || !data?.is_admin) {
-        const err = new Error("Forbidden - Admin access required") as Error & { statusCode: number };
+        const err = new Error("Forbidden - Admin access required") as Error & {
+          statusCode: number;
+        };
         err.statusCode = 403;
         throw err;
       }

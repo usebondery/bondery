@@ -95,11 +95,7 @@ export async function statsRoutes(fastify: FastifyInstance) {
       }
 
       const days = request.query.days ?? 90;
-      const timeline = await getActiveUsersTimeline(
-        POSTHOG_API_SECRET,
-        POSTHOG_PROJECT_ID,
-        days,
-      );
+      const timeline = await getActiveUsersTimeline(POSTHOG_API_SECRET, POSTHOG_PROJECT_ID, days);
       return { timeline };
     },
   );
@@ -212,7 +208,7 @@ export async function statsRoutes(fastify: FastifyInstance) {
         return reply.status(502).send({ error: "Failed to fetch GitHub repo data" });
       }
 
-      const payload = await res.json() as { stargazers_count?: number };
+      const payload = (await res.json()) as { stargazers_count?: number };
       return {
         stars: payload.stargazers_count ?? 0,
         repo: GITHUB_REPO_URL.replace("https://api.github.com/repos/", ""),

@@ -84,9 +84,30 @@ export function ActiveUsersChart({ data }: ActiveUsersChartProps) {
                 value === "mau" ? t("MAU") : value === "wau" ? t("WAU") : t("DAU")
               }
             />
-            <Line type="monotone" dataKey="mau" stroke="var(--mantine-color-grape-5)" strokeWidth={2} dot={false} activeDot={{ r: 4 }} />
-            <Line type="monotone" dataKey="wau" stroke="var(--mantine-color-teal-5)" strokeWidth={2} dot={false} activeDot={{ r: 4 }} />
-            <Line type="monotone" dataKey="dau" stroke="var(--mantine-color-blue-5)" strokeWidth={2} dot={false} activeDot={{ r: 4 }} />
+            <Line
+              type="monotone"
+              dataKey="mau"
+              stroke="var(--mantine-color-grape-5)"
+              strokeWidth={2}
+              dot={false}
+              activeDot={{ r: 4 }}
+            />
+            <Line
+              type="monotone"
+              dataKey="wau"
+              stroke="var(--mantine-color-teal-5)"
+              strokeWidth={2}
+              dot={false}
+              activeDot={{ r: 4 }}
+            />
+            <Line
+              type="monotone"
+              dataKey="dau"
+              stroke="var(--mantine-color-blue-5)"
+              strokeWidth={2}
+              dot={false}
+              activeDot={{ r: 4 }}
+            />
           </LineChart>
         </ResponsiveContainer>
       </div>

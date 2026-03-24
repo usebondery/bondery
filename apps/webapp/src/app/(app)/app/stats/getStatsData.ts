@@ -75,20 +75,20 @@ export async function getStatsData(headers: HeadersInit) {
     }).catch(() => null),
   ]);
 
-  const activeUsers: ActiveUsersData | null =
-    activeUsersRes?.ok ? await activeUsersRes.json() : null;
+  const activeUsers: ActiveUsersData | null = activeUsersRes?.ok
+    ? await activeUsersRes.json()
+    : null;
 
   const funnelResult = funnelRes?.ok ? await funnelRes.json() : null;
   const funnel: FunnelPeriod[] | null = funnelResult?.periods ?? null;
 
-  const nps: NpsData | null =
-    npsRes?.ok ? await npsRes.json() : null;
+  const nps: NpsData | null = npsRes?.ok ? await npsRes.json() : null;
 
-  const totalUsers: TotalUsersData | null =
-    totalUsersRes?.ok ? await totalUsersRes.json() : null;
+  const totalUsers: TotalUsersData | null = totalUsersRes?.ok ? await totalUsersRes.json() : null;
 
-  const githubStars: GithubStarsData | null =
-    githubStarsRes?.ok ? await githubStarsRes.json() : null;
+  const githubStars: GithubStarsData | null = githubStarsRes?.ok
+    ? await githubStarsRes.json()
+    : null;
 
   return { activeUsers, funnel, nps, totalUsers, githubStars };
 }

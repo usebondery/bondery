@@ -69,7 +69,9 @@ export function FunnelChart({ data }: FunnelChartProps) {
 
   return (
     <Card withBorder padding="lg">
-      <Text fw={500} mb="xs">{t("Funnel")}</Text>
+      <Text fw={500} mb="xs">
+        {t("Funnel")}
+      </Text>
       <Text size="xs" c="dimmed" mb="xl">
         {t("FunnelDescription")}
       </Text>
