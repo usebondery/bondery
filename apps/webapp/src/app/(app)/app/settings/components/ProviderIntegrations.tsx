@@ -1,13 +1,12 @@
 "use client";
 
 import { Group, Stack, Text } from "@mantine/core";
-import { IconUnlink } from "@tabler/icons-react";
+import { IconUnlink, IconPuzzle } from "@tabler/icons-react";
 import { IconBrandGithub, IconBrandLinkedin } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
 import { notifications } from "@mantine/notifications";
 import { useTranslations } from "next-intl";
 import { BonderyIcon } from "@bondery/branding/react";
-import { CHROME_EXTENSION_URL } from "@bondery/helpers";
 import { INTEGRATION_PROVIDERS } from "@/lib/config";
 import { detectBonderyChromeExtension } from "@/lib/extension/detectBonderyChromeExtension";
 import { IntegrationCard } from "./IntegrationCard";
@@ -19,6 +18,8 @@ import {
   successNotificationTemplate,
 } from "@bondery/mantine-next";
 import { openStandardConfirmModal } from "../../components/modals/openStandardConfirmModal";
+import { modals } from "@mantine/modals";
+import { ChromeExtensionModal } from "./ChromeExtensionModal";
 
 interface UserIdentity {
   id: string;
@@ -232,7 +233,23 @@ export function ProviderIntegrations({
                 return;
               }
 
-              window.open(CHROME_EXTENSION_URL, "_blank", "noopener,noreferrer");
+              const modalId = "chrome-extension-modal";
+              modals.open({
+                modalId,
+                title: (
+                  <ModalTitle
+                    text={tIntegration("ExtensionModalTitle")}
+                    icon={<IconPuzzle size={20} stroke={1.5} />}
+                  />
+                ),
+                size: "md",
+                children: (
+                  <ChromeExtensionModal
+                    modalId={modalId}
+                    t={(key) => tIntegration(`ChromeExtensionModal.${key}` as never)}
+                  />
+                ),
+              });
             }}
           />
         ) : null}

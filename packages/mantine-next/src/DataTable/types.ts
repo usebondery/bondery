@@ -112,6 +112,8 @@ export interface DataTableLabels {
   loadMoreLabel?: string;
   /** Template for selected count (e.g., "{count} selected") */
   selectedCountTemplate?: string;
+  /** Template for selected count when exactly 1 item is selected (e.g., "1 person selected") */
+  selectedSingularCountTemplate?: string;
   /** Template for total count (e.g., "{count} total items") */
   totalCountTemplate?: string;
   /** Template for "select all" link (e.g., "Select all {count} people") */

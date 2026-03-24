@@ -1,6 +1,7 @@
 export const WEBSITE_ROUTES = {
   HOME: "/",
   ABOUT: "/about",
+  BLOG: "/blog",
   PRIVACY: "/privacy",
   TERMS: "/terms",
   LOGIN: "/login",
@@ -17,6 +18,7 @@ export const API_ROUTES = {
   CONTACTS_UPCOMING_REMINDERS: "/api/contacts/important-dates/upcoming",
   CONTACTS_IMPORT_LINKEDIN: "/api/contacts/import/linkedin",
   CONTACTS_IMPORT_INSTAGRAM: "/api/contacts/import/instagram",
+  CONTACTS_IMPORT_VCARD: "/api/contacts/import/vcard",
   GROUPS: "/api/groups",
   TAGS: "/api/tags",
   INTERACTIONS: "/api/interactions",
@@ -27,6 +29,8 @@ export const API_ROUTES = {
   FEEDBACK: "/api/feedback",
   REMINDERS: "/api/reminders",
   REDIRECT: "/api/redirect",
+  CONTACTS_SHARE: "/api/contacts/share",
+  STATS: "/api/stats",
 } as const;
 
 export const CHROME_EXTENSION_URL =
@@ -41,8 +45,8 @@ export const SUPPORT_EMAIL = "team@usebondery.com";
 /** The webapp product name used in browser tab titles and metadata. */
 export const WEBAPP_NAME = "Bondery";
 
-/** Divider character used in browser tab titles, e.g. "Person ∘ Bondery" */
-export const METADATA_TITLE_DIVIDER = "∘";
+/** Divider character used in browser tab titles, e.g. "Person • Bondery" */
+export const METADATA_TITLE_DIVIDER = "•";
 
 /**
  * Formats a page title for use in browser tab metadata.
@@ -59,6 +63,7 @@ export const SOCIAL_LINKS = {
   linkedin: "https://www.linkedin.com/company/bondery",
   reddit: "https://www.reddit.com/r/bondery",
   x: "https://x.com/usebondery",
+  discord: "https://discord.gg/vsTAMBMwxx",
 } as const;
 
 export const WEBAPP_ROUTES = {
@@ -72,6 +77,7 @@ export const WEBAPP_ROUTES = {
   SETTINGS: "/app/settings",
   ACCOUNT: "/app/account",
   FEEDBACK: "/app/feedback",
+  STATS: "/app/stats",
   LOGIN: "/login",
   APP_GROUP: "/app",
   DEFAULT_PAGE_AFTER_LOGIN: "/app/home",

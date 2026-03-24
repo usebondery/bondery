@@ -4,6 +4,8 @@ import { Button, Stack, Group, Paper } from "@mantine/core";
 import {
   IconAddressBook,
   IconBrandLinkedin,
+  IconId,
+  IconShare,
   IconUserPlus,
   IconUsers,
   IconUser,
@@ -25,16 +27,17 @@ import { API_ROUTES, WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import { openAddContactModal } from "./components/AddContactModal";
 import { PageHeader } from "@/app/(app)/app/components/PageHeader";
 import { PageWrapper } from "@/app/(app)/app/components/PageWrapper";
-import { errorNotificationTemplate } from "@bondery/mantine-next";
+import { errorNotificationTemplate, successNotificationTemplate } from "@bondery/mantine-next";
 import { formatContactName } from "@/lib/nameHelpers";
 import { openDeleteContactModal } from "@/app/(app)/app/components/contacts/openDeleteContactModal";
 import { openDeleteContactsModal } from "@/app/(app)/app/components/contacts/openDeleteContactsModal";
 import { openAddPeopleToGroupSelectionModal } from "./components/AddPeopleToGroupSelectionModal";
 import { MERGE_CONFLICT_FIELDS, openMergeWithModal } from "./components/MergeWithModal";
+import { openShareContactModal } from "./components/ShareContactModal";
 import { WEBSITE_URL } from "@/lib/config";
 import { useBatchEnrichFromLinkedIn } from "@/lib/extension/useBatchEnrichFromLinkedIn";
 
-import type { Contact, MergeConflictField } from "@bondery/types";
+import type { Contact, MergeConflictField, ShareableField } from "@bondery/types";
 import { revalidateContacts } from "../actions";
 import { appendAvatarParams } from "@/lib/avatarParams";
 
@@ -51,7 +54,9 @@ export function PeopleClient({ initialContacts, totalCount, layout = "stack" }: 
   const t = useTranslations("PeoplePage");
   const tHeader = useTranslations("PageHeader");
   const tMerge = useTranslations("MergeWithModal");
+  const tShare = useTranslations("ShareContactModal");
   const tEnrich = useTranslations("EnrichFromLinkedIn");
+  const tActions = useTranslations("ContactActionMenu");
   const { startForPerson } = useBatchEnrichFromLinkedIn();
   const mergeTexts = useMemo(
     () => ({
@@ -87,6 +92,53 @@ export function PeopleClient({ initialContacts, totalCount, layout = "stack" }: 
     [tMerge],
   );
 
+  const shareTexts = useMemo(
+    () => ({
+      modalTitle: tShare("ModalTitle"),
+      recipientEmailLabel: tShare("RecipientEmailLabel"),
+      recipientEmailPlaceholder: tShare("RecipientEmailPlaceholder"),
+      recipientsLabel: tShare("RecipientsLabel"),
+      recipientsPlaceholder: tShare("RecipientsPlaceholder"),
+      messageLabel: tShare("MessageLabel"),
+      messagePlaceholder: tShare("MessagePlaceholder"),
+      sendCopyCheckbox: tShare("SendCopyCheckbox"),
+      selectFieldsLabel: tShare("SelectFieldsLabel"),
+      submitButton: (count: number) => count > 0 ? tShare("SubmitButtonWithCount", { count }) : tShare("SubmitButton"),
+      cancelButton: tShare("CancelButton"),
+      sendingButton: tShare("SendingButton"),
+      successTitle: tShare("SuccessTitle"),
+      successDescription: tShare("SuccessDescription"),
+      errorTitle: tShare("ErrorTitle"),
+      errorDescription: tShare("ErrorDescription"),
+      noFieldsSelectedError: tShare("NoFieldsSelectedError"),
+      invalidEmailError: tShare("InvalidEmailError"),
+      invalidEmailsError: tShare("InvalidEmailsError"),
+      maxRecipientsError: tShare("MaxRecipientsError"),
+      noRecipientsError: tShare("NoRecipientsError"),
+      requiredFieldTooltip: tShare("RequiredFieldTooltip"),
+      avatarRequiredTooltip: tShare("AvatarRequiredTooltip"),
+      avatarDescription: (name: string) => tShare("AvatarDescription", { name }),
+      fieldLabels: {
+        name: tShare("Fields.name"),
+        avatar: tShare("Fields.avatar"),
+        headline: tShare("Fields.headline"),
+        phones: tShare("Fields.phones"),
+        emails: tShare("Fields.emails"),
+        location: tShare("Fields.location"),
+        linkedin: tShare("Fields.linkedin"),
+        instagram: tShare("Fields.instagram"),
+        facebook: tShare("Fields.facebook"),
+        website: tShare("Fields.website"),
+        whatsapp: tShare("Fields.whatsapp"),
+        signal: tShare("Fields.signal"),
+        addresses: tShare("Fields.addresses"),
+        notes: tShare("Fields.notes"),
+        importantDates: tShare("Fields.importantDates"),
+      },
+    }),
+    [tShare],
+  );
+
   // Get initial state from URL params
   const initialSearch = searchParams.get("q") || "";
   const initialSort = (searchParams.get("sort") as SortOrder) || "nameAsc";
@@ -114,7 +166,7 @@ export function PeopleClient({ initialContacts, totalCount, layout = "stack" }: 
       icon: <IconBriefcase size={16} />,
     },
     {
-      key: "place",
+      key: "location",
       label: "Location",
       visible: true,
       icon: <IconMapPin size={16} />,
@@ -127,7 +179,7 @@ export function PeopleClient({ initialContacts, totalCount, layout = "stack" }: 
     },
     {
       key: "social",
-      label: "Social Media",
+      label: "Socials",
       visible: true,
       icon: <IconUserCircle size={16} />,
     },
@@ -462,6 +514,53 @@ export function PeopleClient({ initialContacts, totalCount, layout = "stack" }: 
               onDeleteSelected: handleDeleteSelected,
             }}
             menuActions={[
+              {
+                key: "share",
+                label: tShare("ActionLabelMenu"),
+                icon: <IconShare size={16} />,
+                onClick: (contactId) => {
+                  const contact = contacts.find((c) => c.id === contactId);
+                  if (contact) {
+                    openShareContactModal({ contact, texts: shareTexts });
+                  }
+                },
+              },
+              {
+                key: "download-vcard",
+                label: tActions("DownloadVCard"),
+                icon: <IconId size={16} />,
+                onClick: async (contactId) => {
+                  try {
+                    const response = await fetch(`${API_ROUTES.CONTACTS}/${contactId}/vcard`);
+                    if (!response.ok) throw new Error("Failed to export vCard");
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement("a");
+                    a.href = url;
+                    const contact = contacts.find((c) => c.id === contactId);
+                    const firstName = contact?.firstName || "contact";
+                    const lastName = contact?.lastName || "";
+                    a.download = lastName ? `${firstName}_${lastName}.vcf` : `${firstName}.vcf`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    window.URL.revokeObjectURL(url);
+                    notifications.show(
+                      successNotificationTemplate({
+                        title: tActions("ExportSuccess"),
+                        description: tActions("ExportSuccessDescription"),
+                      }),
+                    );
+                  } catch {
+                    notifications.show(
+                      errorNotificationTemplate({
+                        title: tActions("ExportError"),
+                        description: tActions("ExportErrorDescription"),
+                      }),
+                    );
+                  }
+                },
+              },
               {
                 key: "enrich-linkedin",
                 label: tEnrich("MenuLabel"),

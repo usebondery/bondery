@@ -12,6 +12,7 @@ import {
   successNotificationTemplate,
 } from "@bondery/mantine-next";
 import { openStandardConfirmModal } from "../modals/openStandardConfirmModal";
+import { captureEvent } from "@/lib/analytics/client";
 
 export interface OpenDeleteContactsModalParams {
   /** Explicit IDs when not using filter mode. */
@@ -79,6 +80,8 @@ export function openDeleteContactsModal({
 
         const result = (await response.json().catch(() => ({}))) as { deletedCount?: number };
         const deletedCount = result.deletedCount ?? contactIds.length;
+
+        captureEvent("contacts_bulk_deleted", { count: deletedCount });
 
         notifications.hide(loadingNotification);
         notifications.show(

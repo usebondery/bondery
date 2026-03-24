@@ -1,36 +1,11 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import {
-  Center,
-  Divider,
-  Group,
-  Input,
-  Loader,
-  Paper,
-  SimpleGrid,
-  Stack,
-  Text,
-  Title,
-  UnstyledButton,
-} from "@mantine/core";
+import { Center, Group, Loader, Paper, SimpleGrid, Stack, Text } from "@mantine/core";
 import { modals } from "@mantine/modals";
 import { notifications } from "@mantine/notifications";
-import {
-  IconArrowLeft,
-  IconArrowMerge,
-  IconArrowRight,
-  IconBrandFacebook,
-  IconBrandInstagram,
-  IconBrandLinkedin,
-  IconBrandWhatsapp,
-  IconCheck,
-  IconMail,
-  IconMessageCircle,
-  IconPhone,
-  IconWorld,
-} from "@tabler/icons-react";
+import { IconArrowLeft, IconArrowMerge, IconArrowRight } from "@tabler/icons-react";
 import {
   ModalFooter,
   PersonChip,
@@ -42,15 +17,12 @@ import {
 import { API_ROUTES, WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import type {
   Contact,
-  EmailEntry,
   MergeConflictChoice,
   MergeConflictField,
   MergeContactsResponse,
-  PhoneEntry,
 } from "@bondery/types";
-import { IMaskInput } from "react-imask";
-import { getTelephoneReactMaskExpression } from "@/lib/phoneHelpers";
 import { revalidateAll } from "../../actions";
+import { SelectableCard } from "@/app/(app)/app/components/SelectableCard";
 
 interface OpenMergeWithModalParams {
   contacts: Contact[];
@@ -72,7 +44,7 @@ export const MERGE_CONFLICT_FIELDS: MergeConflictField[] = [
   "middleName",
   "lastName",
   "headline",
-  "place",
+  "location",
   "notes",
   "lastInteraction",
   "phones",
@@ -80,7 +52,7 @@ export const MERGE_CONFLICT_FIELDS: MergeConflictField[] = [
   "importantDates",
   "language",
   "timezone",
-  "location",
+  "gisPoint",
   "latitude",
   "longitude",
   "linkedin",
@@ -247,44 +219,6 @@ function areValuesEquivalent(field: MergeConflictField, left: unknown, right: un
   return JSON.stringify(left) === JSON.stringify(right);
 }
 
-type SocialConflictField = Extract<
-  MergeConflictField,
-  "linkedin" | "instagram" | "facebook" | "website" | "whatsapp" | "signal"
->;
-
-const SOCIAL_FIELD_CONFIG: Record<
-  SocialConflictField,
-  {
-    label: string;
-    icon: React.ReactNode;
-  }
-> = {
-  linkedin: {
-    label: "LinkedIn",
-    icon: <IconBrandLinkedin size={14} />,
-  },
-  instagram: {
-    label: "Instagram",
-    icon: <IconBrandInstagram size={14} />,
-  },
-  facebook: {
-    label: "Facebook",
-    icon: <IconBrandFacebook size={14} />,
-  },
-  website: {
-    label: "Website",
-    icon: <IconWorld size={14} />,
-  },
-  whatsapp: {
-    label: "WhatsApp",
-    icon: <IconBrandWhatsapp size={14} />,
-  },
-  signal: {
-    label: "Signal",
-    icon: <IconMessageCircle size={14} />,
-  },
-};
-
 function normalizeDisplayText(value: unknown): string {
   if (value === null || value === undefined) {
     return "";
@@ -345,60 +279,6 @@ function getAutoLastInteractionChoice(
   return leftTimestamp > rightTimestamp ? "left" : "right";
 }
 
-function getPhoneEntries(value: unknown): PhoneEntry[] {
-  if (!Array.isArray(value)) {
-    return [];
-  }
-
-  return value
-    .map((entry) => {
-      if (!entry || typeof entry !== "object") {
-        return null;
-      }
-
-      const row = entry as Partial<PhoneEntry>;
-      const prefix = String(row.prefix || "").trim();
-      const number = String(row.value || "").trim();
-      if (!number) {
-        return null;
-      }
-
-      return {
-        prefix,
-        value: number,
-        type: row.type === "work" ? "work" : "home",
-        preferred: Boolean(row.preferred),
-      } satisfies PhoneEntry;
-    })
-    .filter((entry): entry is PhoneEntry => Boolean(entry));
-}
-
-function getEmailEntries(value: unknown): EmailEntry[] {
-  if (!Array.isArray(value)) {
-    return [];
-  }
-
-  return value
-    .map((entry) => {
-      if (!entry || typeof entry !== "object") {
-        return null;
-      }
-
-      const row = entry as Partial<EmailEntry>;
-      const email = String(row.value || "").trim();
-      if (!email) {
-        return null;
-      }
-
-      return {
-        value: email,
-        type: row.type === "work" ? "work" : "home",
-        preferred: Boolean(row.preferred),
-      } satisfies EmailEntry;
-    })
-    .filter((entry): entry is EmailEntry => Boolean(entry));
-}
-
 function toPersonPreview(contact: Contact | null) {
   if (!contact) {
     return null;
@@ -411,43 +291,6 @@ function toPersonPreview(contact: Contact | null) {
     lastName: contact.lastName,
     avatar: contact.avatar,
   };
-}
-
-interface ConflictOptionCardProps {
-  selected: boolean;
-  fieldLabel: string;
-  onSelect: () => void;
-  children: ReactNode;
-}
-
-function ConflictOptionCard({ selected, fieldLabel, onSelect, children }: ConflictOptionCardProps) {
-  return (
-    <Paper
-      withBorder
-      radius="md"
-      p="sm"
-      className="input-scale-effect"
-      style={{
-        borderColor: selected ? "var(--mantine-primary-color-filled)" : undefined,
-        backgroundColor: selected ? "var(--mantine-primary-color-light-hover)" : undefined,
-      }}
-    >
-      <UnstyledButton
-        w="100%"
-        onClick={onSelect}
-        style={{ textAlign: "left" }}
-        aria-pressed={selected}
-      >
-        <Stack gap="xs">
-          <Group justify="space-between" wrap="nowrap">
-            <Text fw={"bold"}>{fieldLabel}</Text>
-            {selected ? <IconCheck size={14} /> : null}
-          </Group>
-          <div style={{ pointerEvents: "none" }}>{children}</div>
-        </Stack>
-      </UnstyledButton>
-    </Paper>
-  );
 }
 
 function formatConflictDisplayValue(field: MergeConflictField, value: unknown): string {
@@ -465,164 +308,6 @@ function formatConflictDisplayValue(field: MergeConflictField, value: unknown): 
   }
 
   return normalizeDisplayText(value);
-}
-
-function renderPhonesPreview(value: unknown): ReactNode {
-  const entries = getPhoneEntries(value);
-
-  if (entries.length === 0) {
-    return <Input value="" type="tel" disabled readOnly leftSection={<IconPhone size={14} />} />;
-  }
-
-  return (
-    <Stack gap="xs">
-      {entries.map((entry, index) => (
-        <Group key={`${entry.prefix}-${entry.value}-${entry.type}-${index}`} gap="xs" wrap="nowrap">
-          <Input
-            component={IMaskInput}
-            mask={getTelephoneReactMaskExpression(entry.prefix || "+1")}
-            unmask
-            value={entry.value}
-            disabled
-            readOnly
-            leftSection={<IconPhone size={14} />}
-            rightSection={
-              <Text size="xs" c="dimmed">
-                {entry.prefix}
-              </Text>
-            }
-            style={{ flex: 1 }}
-          />
-        </Group>
-      ))}
-    </Stack>
-  );
-}
-
-function renderEmailsPreview(value: unknown): ReactNode {
-  const entries = getEmailEntries(value);
-
-  if (entries.length === 0) {
-    return <Input value="" disabled readOnly leftSection={<IconMail size={14} />} />;
-  }
-
-  return (
-    <Stack gap="xs">
-      {entries.map((entry, index) => (
-        <Group key={`${entry.value}-${entry.type}-${index}`} gap="xs" wrap="nowrap">
-          <Input
-            type="text"
-            value={entry.value}
-            disabled
-            readOnly
-            leftSection={<IconMail size={14} />}
-            style={{ flex: 1 }}
-          />
-        </Group>
-      ))}
-    </Stack>
-  );
-}
-
-function renderSocialPreview(field: SocialConflictField, value: unknown): ReactNode {
-  const config = SOCIAL_FIELD_CONFIG[field];
-
-  return (
-    <Input
-      value={normalizeDisplayText(value)}
-      disabled
-      readOnly
-      leftSection={config.icon}
-      style={{ flex: 1 }}
-    />
-  );
-}
-
-function renderConflictPreview(
-  field: MergeConflictField,
-  value: unknown,
-  contact: Contact | null,
-): ReactNode {
-  if (field === "firstName" || field === "middleName" || field === "lastName") {
-    const fieldValue = normalizeDisplayText(value);
-
-    return (
-      <PersonChip
-        person={{
-          id: contact?.id || `${field}-${fieldValue || "value"}`,
-          firstName: field === "firstName" ? fieldValue : "",
-          middleName: field === "middleName" ? fieldValue : "",
-          lastName: field === "lastName" ? fieldValue : "",
-          avatar: null,
-        }}
-        size="sm"
-        color="gray"
-      />
-    );
-  }
-
-  if (field === "phones") {
-    return renderPhonesPreview(value);
-  }
-
-  if (field === "emails") {
-    return renderEmailsPreview(value);
-  }
-
-  if (
-    field === "linkedin" ||
-    field === "instagram" ||
-    field === "facebook" ||
-    field === "website" ||
-    field === "whatsapp" ||
-    field === "signal"
-  ) {
-    return renderSocialPreview(field, value);
-  }
-
-  if (field === "language") {
-    return (
-      <Input
-        value={normalizeDisplayText(value)}
-        disabled
-        readOnly
-        leftSection={<IconMessageCircle size={14} />}
-      />
-    );
-  }
-
-  if (field === "timezone") {
-    return (
-      <Input
-        value={normalizeDisplayText(value)}
-        disabled
-        readOnly
-        leftSection={<IconWorld size={14} />}
-      />
-    );
-  }
-
-  if (field === "latitude" || field === "longitude") {
-    return (
-      <Input
-        type="number"
-        value={normalizeDisplayText(value)}
-        disabled
-        readOnly
-        leftSection={<IconWorld size={14} />}
-      />
-    );
-  }
-
-  return (
-    <Input
-      type="text"
-      value={formatConflictDisplayValue(field, value)}
-      disabled
-      readOnly
-      leftSection={<IconMessageCircle size={14} />}
-    />
-  );
 }
 
 export function openMergeWithModal({
@@ -945,40 +630,59 @@ function MergeWithModal({
                   <PersonChip person={toPersonPreview(rightContact)} isClickable />
                 </Center>
               </SimpleGrid>
-              {conflicts.map((conflict) => {
-                const selectedChoice = conflictChoices[conflict.field] || "left";
+              {(() => {
+                const hasLatLngPair =
+                  conflicts.some((c) => c.field === "latitude") &&
+                  conflicts.some((c) => c.field === "longitude");
+                const lngConflict = conflicts.find((c) => c.field === "longitude");
 
-                return (
-                  <Stack key={conflict.field} gap="sm">
-                    <SimpleGrid cols={2} spacing="sm">
-                      <ConflictOptionCard
-                        selected={selectedChoice === "left"}
-                        fieldLabel={texts.fields[conflict.field]}
-                        onSelect={() =>
-                          setConflictChoices((prev) => ({
-                            ...prev,
-                            [conflict.field]: "left",
-                          }))
-                        }
-                      >
-                        {renderConflictPreview(conflict.field, conflict.leftValue, leftContact)}
-                      </ConflictOptionCard>
-                      <ConflictOptionCard
-                        selected={selectedChoice === "right"}
-                        fieldLabel={texts.fields[conflict.field]}
-                        onSelect={() =>
-                          setConflictChoices((prev) => ({
-                            ...prev,
-                            [conflict.field]: "right",
-                          }))
-                        }
-                      >
-                        {renderConflictPreview(conflict.field, conflict.rightValue, rightContact)}
-                      </ConflictOptionCard>
-                    </SimpleGrid>
-                  </Stack>
-                );
-              })}
+                return conflicts
+                  .filter((c) => !(c.field === "longitude" && hasLatLngPair))
+                  .map((conflict) => {
+                    const isLatLng = conflict.field === "latitude" && hasLatLngPair;
+                    const selectedChoice = conflictChoices[conflict.field] || "left";
+
+                    const label = isLatLng
+                      ? `${texts.fields.latitude} / ${texts.fields.longitude}`
+                      : texts.fields[conflict.field];
+
+                    const leftDesc = isLatLng
+                      ? `${normalizeDisplayText(conflict.leftValue)}, ${normalizeDisplayText(lngConflict?.leftValue)}`
+                      : formatConflictDisplayValue(conflict.field, conflict.leftValue) || undefined;
+
+                    const rightDesc = isLatLng
+                      ? `${normalizeDisplayText(conflict.rightValue)}, ${normalizeDisplayText(lngConflict?.rightValue)}`
+                      : formatConflictDisplayValue(conflict.field, conflict.rightValue) ||
+                        undefined;
+
+                    const handleSelect = (side: MergeConflictChoice) => {
+                      setConflictChoices((prev) => {
+                        const next = { ...prev, [conflict.field]: side };
+                        if (isLatLng) next.longitude = side;
+                        return next;
+                      });
+                    };
+
+                    return (
+                      <Stack key={conflict.field} gap="sm">
+                        <SimpleGrid cols={2} spacing="sm">
+                          <SelectableCard
+                            selected={selectedChoice === "left"}
+                            label={label}
+                            description={leftDesc || undefined}
+                            onClick={() => handleSelect("left")}
+                          />
+                          <SelectableCard
+                            selected={selectedChoice === "right"}
+                            label={label}
+                            description={rightDesc || undefined}
+                            onClick={() => handleSelect("right")}
+                          />
+                        </SimpleGrid>
+                      </Stack>
+                    );
+                  });
+              })()}
             </Stack>
           )}
 

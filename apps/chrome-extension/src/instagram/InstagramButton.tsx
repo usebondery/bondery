@@ -19,7 +19,7 @@ interface InstagramProfileSnapshot {
   lastName?: string;
   profileImageUrl?: string;
   headline?: string;
-  place?: string;
+  location?: string;
   notes?: string;
 }
 
@@ -118,7 +118,7 @@ const InstagramButton: React.FC<InstagramButtonProps> = ({ username, getSnapshot
           lastName: profileName?.lastName,
           profileImageUrl: profilePhotoUrl ?? undefined,
           headline: snapshot?.headline,
-          place: snapshot?.place,
+          location: snapshot?.location,
           notes,
         },
       });

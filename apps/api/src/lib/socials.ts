@@ -1,8 +1,8 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
-import type { Database, SocialMediaPlatform } from "@bondery/types";
+import type { Database, SocialPlatform } from "@bondery/types";
 import type { ContactWithId } from "./schemas.js";
 
-const SOCIAL_MEDIA_PLATFORMS: SocialMediaPlatform[] = [
+const SOCIAL_PLATFORMS: SocialPlatform[] = [
   "linkedin",
   "instagram",
   "whatsapp",
@@ -11,9 +11,9 @@ const SOCIAL_MEDIA_PLATFORMS: SocialMediaPlatform[] = [
   "signal",
 ];
 
-export type { SocialMediaPlatform };
+export type { SocialPlatform };
 
-type SocialMediaShape = {
+type SocialsShape = {
   linkedin: string | null;
   instagram: string | null;
   whatsapp: string | null;
@@ -29,7 +29,7 @@ type SocialRow = {
   connected_at: string | null;
 };
 
-function emptySocialShape(): SocialMediaShape {
+function emptySocialShape(): SocialsShape {
   return {
     linkedin: null,
     instagram: null,
@@ -40,27 +40,27 @@ function emptySocialShape(): SocialMediaShape {
   };
 }
 
-function asSocialMediaPlatform(value: string): SocialMediaPlatform | null {
-  if ((SOCIAL_MEDIA_PLATFORMS as readonly string[]).includes(value)) {
-    return value as SocialMediaPlatform;
+function asSocialPlatform(value: string): SocialPlatform | null {
+  if ((SOCIAL_PLATFORMS as readonly string[]).includes(value)) {
+    return value as SocialPlatform;
   }
 
   return null;
 }
 
 /**
- * Loads normalized social media rows and merges them into contact-shaped objects.
+ * Loads normalized socials rows and merges them into contact-shaped objects.
  *
  * @param client Authenticated Supabase client.
  * @param userId Authenticated user id.
  * @param contacts Contacts loaded from people table.
- * @returns Contacts with top-level social media fields attached.
+ * @returns Contacts with top-level socials fields attached.
  */
-export async function attachContactSocialMedia<T extends ContactWithId>(
+export async function attachContactSocials<T extends ContactWithId>(
   client: SupabaseClient<Database>,
   userId: string,
   contacts: T[],
-): Promise<Array<T & SocialMediaShape>> {
+): Promise<Array<T & SocialsShape>> {
   if (!contacts.length) {
     return [];
   }
@@ -68,7 +68,7 @@ export async function attachContactSocialMedia<T extends ContactWithId>(
   const personIds = contacts.map((contact) => contact.id);
 
   const { data: socialRows, error } = await client
-    .from("people_social_media")
+    .from("people_socials")
     .select("person_id, platform, handle, connected_at")
     .eq("user_id", userId)
     .in("person_id", personIds);
@@ -77,13 +77,13 @@ export async function attachContactSocialMedia<T extends ContactWithId>(
     throw new Error(error.message);
   }
 
-  const map = new Map<string, SocialMediaShape>();
+  const map = new Map<string, SocialsShape>();
   for (const contact of contacts) {
     map.set(contact.id, emptySocialShape());
   }
 
   for (const row of (socialRows || []) as SocialRow[]) {
-    const platform = asSocialMediaPlatform(row.platform);
+    const platform = asSocialPlatform(row.platform);
     if (!platform) {
       continue;
     }
@@ -103,19 +103,19 @@ export async function attachContactSocialMedia<T extends ContactWithId>(
 }
 
 /**
- * Upserts or deletes a social media handle for a specific person and platform.
+ * Upserts or deletes a socials handle for a specific person and platform.
  *
  * @param client Authenticated Supabase client.
  * @param userId Authenticated user id.
  * @param personId Person id.
- * @param platform Social media platform.
+ * @param platform Social platform.
  * @param handle Handle/URL value. Empty/null removes the row.
  */
-export async function upsertContactSocialMedia(
+export async function upsertContactSocials(
   client: SupabaseClient<Database>,
   userId: string,
   personId: string,
-  platform: SocialMediaPlatform,
+  platform: SocialPlatform,
   handle: string | null | undefined,
   connectedAt?: string | null,
 ): Promise<void> {
@@ -123,7 +123,7 @@ export async function upsertContactSocialMedia(
 
   if (normalizedHandle.length === 0) {
     const { error: deleteError } = await client
-      .from("people_social_media")
+      .from("people_socials")
       .delete()
       .eq("user_id", userId)
       .eq("person_id", personId)
@@ -136,7 +136,7 @@ export async function upsertContactSocialMedia(
     return;
   }
 
-  const { error: upsertError } = await client.from("people_social_media").upsert(
+  const { error: upsertError } = await client.from("people_socials").upsert(
     {
       user_id: userId,
       person_id: personId,
@@ -155,18 +155,18 @@ export async function upsertContactSocialMedia(
 }
 
 /**
- * Finds person id by user and one social media platform/handle pair.
+ * Finds person id by user and one social platform/handle pair.
  *
  * @param client Authenticated Supabase client.
  * @param userId Authenticated user id.
- * @param platform Social media platform.
+ * @param platform Social platform.
  * @param handle Handle/URL to match.
  * @returns Matching person id or null.
  */
-export async function findPersonIdBySocialMedia(
+export async function findPersonIdBySocial(
   client: SupabaseClient<Database>,
   userId: string,
-  platform: SocialMediaPlatform,
+  platform: SocialPlatform,
   handle: string,
 ): Promise<string | null> {
   const normalizedHandle = handle.trim();
@@ -175,7 +175,7 @@ export async function findPersonIdBySocialMedia(
   }
 
   const { data, error } = await client
-    .from("people_social_media")
+    .from("people_socials")
     .select("person_id")
     .eq("user_id", userId)
     .eq("platform", platform)

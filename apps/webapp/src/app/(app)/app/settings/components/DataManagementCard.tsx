@@ -5,6 +5,7 @@ import { LogoutSection } from "./LogoutSection";
 import { DeleteAccountSection } from "./DeleteAccountSection";
 import { LinkedInImportSection } from "./LinkedInImportSection";
 import { InstagramImportSection } from "./InstagramImportSection";
+import { VCardImportSection } from "./VCardImportSection";
 
 export function DataManagementCard() {
   const t = useTranslations("SettingsPage.DataManagement");
@@ -36,6 +37,7 @@ export function DataManagementCard() {
         <Group align="flex-start" gap="md" wrap="wrap">
           <LinkedInImportSection />
           <InstagramImportSection />
+          <VCardImportSection />
         </Group>
       </CardSection>
 

@@ -28,6 +28,9 @@ import { tagRoutes } from "./routes/tags/index.js";
 import { interactionRoutes } from "./routes/interactions/index.js";
 import { linkedInImportRoutes } from "./routes/linkedin-import/index.js";
 import { instagramImportRoutes } from "./routes/instagram-import/index.js";
+import { vcardImportRoutes } from "./routes/vcard-import/index.js";
+import { shareRoutes } from "./routes/share/index.js";
+import { statsRoutes } from "./routes/stats/index.js";
 
 // Environment variable schema
 const envSchema = {
@@ -97,6 +100,14 @@ const envSchema = {
       type: "string",
       default: "",
     },
+    POSTHOG_API_SECRET: {
+      type: "string",
+      default: "",
+    },
+    POSTHOG_PROJECT_ID: {
+      type: "string",
+      default: "",
+    },
   },
 } as const;
 
@@ -117,6 +128,8 @@ declare module "fastify" {
       PRIVATE_EMAIL_PASS: string;
       PRIVATE_EMAIL_ADDRESS: string;
       PRIVATE_EMAIL_PORT: number;
+      POSTHOG_API_SECRET: string;
+      POSTHOG_PROJECT_ID: string;
     };
   }
 }
@@ -280,6 +293,8 @@ async function buildServer() {
         { name: "Redirect", description: "Browser extension integration endpoints" },
         { name: "Feedback", description: "User feedback" },
         { name: "Reminders", description: "Scheduled reminder operations" },
+        { name: "Share", description: "Share contacts via email" },
+        { name: "Stats", description: "Admin KPI dashboard metrics" },
       ],
     },
   });
@@ -293,6 +308,7 @@ async function buildServer() {
   await fastify.register(contactRoutes, { prefix: API_ROUTES.CONTACTS });
   await fastify.register(linkedInImportRoutes, { prefix: API_ROUTES.CONTACTS_IMPORT_LINKEDIN });
   await fastify.register(instagramImportRoutes, { prefix: API_ROUTES.CONTACTS_IMPORT_INSTAGRAM });
+  await fastify.register(vcardImportRoutes, { prefix: API_ROUTES.CONTACTS_IMPORT_VCARD });
   await fastify.register(groupRoutes, { prefix: API_ROUTES.GROUPS });
   await fastify.register(tagRoutes, { prefix: API_ROUTES.TAGS });
   await fastify.register(accountRoutes, { prefix: API_ROUTES.ACCOUNT });
@@ -301,6 +317,8 @@ async function buildServer() {
   await fastify.register(feedbackRoutes, { prefix: API_ROUTES.FEEDBACK });
   await fastify.register(reminderRoutes, { prefix: API_ROUTES.REMINDERS });
   await fastify.register(interactionRoutes, { prefix: API_ROUTES.INTERACTIONS });
+  await fastify.register(shareRoutes, { prefix: API_ROUTES.CONTACTS_SHARE });
+  await fastify.register(statsRoutes, { prefix: API_ROUTES.STATS });
 
   return fastify;
 }

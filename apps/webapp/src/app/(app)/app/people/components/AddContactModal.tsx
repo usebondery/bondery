@@ -18,6 +18,7 @@ import { INPUT_MAX_LENGTHS } from "@/lib/config";
 import { getRandomExampleName } from "@/lib/randomNameHelpers";
 import { API_ROUTES, WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import { revalidateContacts } from "../../actions";
+import { captureEvent } from "@/lib/analytics/client";
 
 export function openAddContactModal() {
   const modalId = `add-contact-${Math.random().toString(36).slice(2)}`;
@@ -113,6 +114,8 @@ function AddContactForm({ modalId }: { modalId: string }) {
           description: "Contact created successfully",
         }),
       );
+
+      captureEvent("contact_created");
 
       // Close modal
       modals.close(modalId);

@@ -8,7 +8,7 @@ import { PersonCard } from "../PersonCard";
 type PersonAvatarTooltipIdentity = ContactPreview & {
   middleName?: string | null;
   headline?: string | null;
-  place?: string | null;
+  location?: string | null;
 };
 
 interface PersonAvatarTooltipProps {

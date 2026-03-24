@@ -20,7 +20,7 @@ interface CachedProfile {
   lastName?: string;
   profilePhotoUrl?: string;
   headline?: string;
-  place?: string;
+  location?: string;
   workHistory: WorkEntry[];
   educationHistory: EducationEntry[];
   linkedinBio?: string;
@@ -46,72 +46,72 @@ async function getOrScrapeProfile(
   }
 
   const promise = (async () => {
-  const profileName = extractFns.extractProfileName();
-  const profilePhotoUrl = extractFns.extractProfilePhotoUrl() ?? undefined;
-  const headline = extractFns.extractHeadline() ?? undefined;
-  const place = extractFns.extractPlace() ?? undefined;
+    const profileName = extractFns.extractProfileName();
+    const profilePhotoUrl = extractFns.extractProfilePhotoUrl() ?? undefined;
+    const headline = extractFns.extractHeadline() ?? undefined;
+    const location = extractFns.extractPlace() ?? undefined;
 
-  // Scrape the live DOM first (synchronous, free) to pre-seed logo URLs.
-  // Passing these into fetchFullWorkHistory lets enrichEntriesWithLogos skip
-  // Voyager API calls for any company whose logo is already visible in the DOM.
-  const domWork = extractWorkExperience();
-  const domLogosByCompany = new Map<string, string>();
-  for (const dw of domWork) {
-    if (dw.companyLogoUrl && dw.companyName) {
-      domLogosByCompany.set(dw.companyName.toLowerCase(), dw.companyLogoUrl);
+    // Scrape the live DOM first (synchronous, free) to pre-seed logo URLs.
+    // Passing these into fetchFullWorkHistory lets enrichEntriesWithLogos skip
+    // Voyager API calls for any company whose logo is already visible in the DOM.
+    const domWork = extractWorkExperience();
+    const domLogosByCompany = new Map<string, string>();
+    for (const dw of domWork) {
+      if (dw.companyLogoUrl && dw.companyName) {
+        domLogosByCompany.set(dw.companyName.toLowerCase(), dw.companyLogoUrl);
+      }
     }
-  }
 
-  // Attempt to fetch the full details pages for complete work/education history.
-  // Falls back to scraping the (truncated) live DOM if the fetch fails.
-  const [fetchedWork, fetchedEdu] = await Promise.all([
-    fetchFullWorkHistory(username, domLogosByCompany),
-    fetchFullEducation(username),
-  ]);
-  console.log(
-    `[linkedin][button] Fetch results: ${fetchedWork.length} work, ${fetchedEdu.length} edu` +
-    ` — using ${fetchedWork.length > 0 ? "fetched" : "live DOM"} work,` +
-    ` ${fetchedEdu.length > 0 ? "fetched" : "live DOM"} edu`,
-  );
-
-  const workHistory = fetchedWork.length > 0 ? fetchedWork : domWork;
-
-  const educationHistory = fetchedEdu.length > 0 ? fetchedEdu : extractEducation();
-
-  const linkedinBio = (() => {
-    const heading = document.getElementById("about");
-    if (!heading) return undefined;
-    const section = heading.closest("section");
-    if (!section) return undefined;
-    // LinkedIn renders the bio text inside a visually-hidden span inside the about section.
-    // The class name is obfuscated and may change; fall back to a broader selector.
-    const textSpans = Array.from(
-      section.querySelectorAll<HTMLElement>('span[aria-hidden="true"]'),
-    ).filter((el) => el.closest("a") === null && (el.textContent?.trim().length ?? 0) > 20);
-    if (textSpans.length === 0) return undefined;
-    // Use the span with the most text content as the bio.
-    const bioSpan = textSpans.reduce((a, b) =>
-      (a.textContent?.length ?? 0) >= (b.textContent?.length ?? 0) ? a : b,
+    // Attempt to fetch the full details pages for complete work/education history.
+    // Falls back to scraping the (truncated) live DOM if the fetch fails.
+    const [fetchedWork, fetchedEdu] = await Promise.all([
+      fetchFullWorkHistory(username, domLogosByCompany),
+      fetchFullEducation(username),
+    ]);
+    console.log(
+      `[linkedin][button] Fetch results: ${fetchedWork.length} work, ${fetchedEdu.length} edu` +
+        ` — using ${fetchedWork.length > 0 ? "fetched" : "live DOM"} work,` +
+        ` ${fetchedEdu.length > 0 ? "fetched" : "live DOM"} edu`,
     );
-    const clone = bioSpan.cloneNode(true) as HTMLElement;
-    clone.querySelectorAll("br").forEach((br) => br.replaceWith("\n"));
-    return clone.textContent?.trim() || undefined;
-  })();
 
-  const cached: CachedProfile = {
-    firstName: profileName?.firstName,
-    middleName: profileName?.middleName,
-    lastName: profileName?.lastName,
-    profilePhotoUrl,
-    headline,
-    place,
-    workHistory,
-    educationHistory,
-    linkedinBio,
-  };
-  profileCache.set(username, cached);
-  console.log("[linkedin][button] Profile scraped and cached for", username, cached);
-  return cached;
+    const workHistory = fetchedWork.length > 0 ? fetchedWork : domWork;
+
+    const educationHistory = fetchedEdu.length > 0 ? fetchedEdu : extractEducation();
+
+    const linkedinBio = (() => {
+      const heading = document.getElementById("about");
+      if (!heading) return undefined;
+      const section = heading.closest("section");
+      if (!section) return undefined;
+      // LinkedIn renders the bio text inside a visually-hidden span inside the about section.
+      // The class name is obfuscated and may change; fall back to a broader selector.
+      const textSpans = Array.from(
+        section.querySelectorAll<HTMLElement>('span[aria-hidden="true"]'),
+      ).filter((el) => el.closest("a") === null && (el.textContent?.trim().length ?? 0) > 20);
+      if (textSpans.length === 0) return undefined;
+      // Use the span with the most text content as the bio.
+      const bioSpan = textSpans.reduce((a, b) =>
+        (a.textContent?.length ?? 0) >= (b.textContent?.length ?? 0) ? a : b,
+      );
+      const clone = bioSpan.cloneNode(true) as HTMLElement;
+      clone.querySelectorAll("br").forEach((br) => br.replaceWith("\n"));
+      return clone.textContent?.trim() || undefined;
+    })();
+
+    const cached: CachedProfile = {
+      firstName: profileName?.firstName,
+      middleName: profileName?.middleName,
+      lastName: profileName?.lastName,
+      profilePhotoUrl,
+      headline,
+      location,
+      workHistory,
+      educationHistory,
+      linkedinBio,
+    };
+    profileCache.set(username, cached);
+    console.log("[linkedin][button] Profile scraped and cached for", username, cached);
+    return cached;
   })();
 
   inflightScrapes.set(username, promise);
@@ -344,7 +344,7 @@ const LinkedInButton: React.FC<LinkedInButtonProps> = ({ username }) => {
           lastName: profile.lastName,
           profileImageUrl: profile.profilePhotoUrl,
           headline: profile.headline,
-          place: profile.place,
+          location: profile.location,
           workHistory,
           educationHistory,
           linkedinBio: profile.linkedinBio,

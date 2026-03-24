@@ -31,6 +31,8 @@ declare module "fastify" {
     verifySession: (request: FastifyRequest, reply: FastifyReply) => Promise<void>;
     /** Validates service role key via Authorization: Bearer header for server-to-server calls */
     verifyServiceSecret: (request: FastifyRequest, reply: FastifyReply) => Promise<void>;
+    /** Validates session + checks is_admin flag on user_settings */
+    verifyAdmin: (request: FastifyRequest, reply: FastifyReply) => Promise<void>;
   }
 }
 
@@ -107,6 +109,37 @@ export function registerAuthStrategies(fastify: FastifyInstance): void {
       }
 
       verifiedServiceTokens.add(token);
+    },
+  );
+
+  // ── verifyAdmin ────────────────────────────────────────────────────────────
+  // Verifies the user has an active session AND the is_admin flag is set
+  // on their user_settings row. Rejects with 403 if not an admin.
+  fastify.decorate(
+    "verifyAdmin",
+    async (request: FastifyRequest, reply: FastifyReply): Promise<void> => {
+      // First verify the session (populates authUser + authClient)
+      const { client, user } = await createAuthenticatedClient(request);
+      if (!user) {
+        const err = new Error("Unauthorized - Please log in") as Error & { statusCode: number };
+        err.statusCode = 401;
+        throw err;
+      }
+      request.authUser = user;
+      request.authClient = client;
+
+      // Check admin flag
+      const { data, error } = await client
+        .from("user_settings")
+        .select("is_admin")
+        .eq("user_id", user.id)
+        .single();
+
+      if (error || !data?.is_admin) {
+        const err = new Error("Forbidden - Admin access required") as Error & { statusCode: number };
+        err.statusCode = 403;
+        throw err;
+      }
     },
   );
 }

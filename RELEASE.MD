@@ -21,3 +21,6 @@ Then to push migrations to the production database run:
 cd apps/supabase-db
 npx supabase db push
 ```
+
+## API
+Generate the API openapi spec by running:

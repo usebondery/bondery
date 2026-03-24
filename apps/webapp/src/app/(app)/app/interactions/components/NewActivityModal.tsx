@@ -20,6 +20,7 @@ import {
 import { DatePickerWithPresets } from "../../components/interactions/DatePickerWithPresets";
 import { ACTIVITY_TYPE_OPTIONS } from "@/lib/activityTypes";
 import { getActivityTypeConfig } from "@/lib/activityTypes";
+import { captureEvent } from "@/lib/analytics/client";
 
 interface OpenNewActivityModalParams {
   contacts: Contact[];
@@ -147,6 +148,11 @@ function NewActivityForm({
         const errorData = await res.json().catch(() => ({}));
         throw new Error(errorData.error || errorData.message || "Failed to create activity");
       }
+
+      captureEvent(activity ? "interaction_updated" : "interaction_created", {
+        activity_type: values.type,
+        participant_count: values.participantIds.length,
+      });
 
       notifications.show(
         successNotificationTemplate({

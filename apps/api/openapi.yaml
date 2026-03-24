@@ -281,7 +281,7 @@ paths:
                   anyOf:
                     - type: string
                     - type: "null"
-                place:
+                location:
                   anyOf:
                     - type: string
                     - type: "null"
@@ -297,7 +297,7 @@ paths:
                   anyOf:
                     - type: string
                     - type: "null"
-                location:
+                gisPoint:
                   anyOf:
                     - type: string
                     - type: "null"
@@ -308,50 +308,6 @@ paths:
                 longitude:
                   anyOf:
                     - type: number
-                    - type: "null"
-                addressLine1:
-                  anyOf:
-                    - type: string
-                    - type: "null"
-                addressLine2:
-                  anyOf:
-                    - type: string
-                    - type: "null"
-                addressCity:
-                  anyOf:
-                    - type: string
-                    - type: "null"
-                addressPostalCode:
-                  anyOf:
-                    - type: string
-                    - type: "null"
-                addressState:
-                  anyOf:
-                    - type: string
-                    - type: "null"
-                addressStateCode:
-                  anyOf:
-                    - type: string
-                    - type: "null"
-                addressCountry:
-                  anyOf:
-                    - type: string
-                    - type: "null"
-                addressCountryCode:
-                  anyOf:
-                    - type: string
-                    - type: "null"
-                addressGranularity:
-                  anyOf:
-                    - type: string
-                    - type: "null"
-                addressFormatted:
-                  anyOf:
-                    - type: string
-                    - type: "null"
-                addressGeocodeSource:
-                  anyOf:
-                    - type: string
                     - type: "null"
                 lastInteraction:
                   anyOf:
@@ -1112,7 +1068,7 @@ paths:
                   anyOf:
                     - type: string
                     - type: "null"
-                place:
+                location:
                   anyOf:
                     - type: string
                     - type: "null"
@@ -1367,6 +1323,279 @@ paths:
                         type: array
                         items:
                           type: string
+      responses:
+        "200":
+          description: Default Response
+  /api/contacts/import/vcard/parse:
+    post:
+      tags:
+        - Import
+      responses:
+        "200":
+          description: Default Response
+  /api/contacts/import/vcard/commit:
+    post:
+      tags:
+        - Import
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - contacts
+              properties:
+                contacts:
+                  minItems: 1
+                  type: array
+                  items:
+                    type: object
+                    required:
+                      - tempId
+                      - firstName
+                      - middleName
+                      - lastName
+                      - headline
+                      - phones
+                      - emails
+                      - addresses
+                      - linkedin
+                      - instagram
+                      - whatsapp
+                      - facebook
+                      - signal
+                      - website
+                      - avatarUri
+                      - importantDates
+                      - isValid
+                    properties:
+                      tempId:
+                        type: string
+                      firstName:
+                        type: string
+                      middleName:
+                        anyOf:
+                          - type: string
+                          - type: "null"
+                      lastName:
+                        type: string
+                      headline:
+                        anyOf:
+                          - type: string
+                          - type: "null"
+                      phones:
+                        type: array
+                        items:
+                          type: object
+                          required:
+                            - prefix
+                            - value
+                            - type
+                            - preferred
+                          properties:
+                            prefix:
+                              type: string
+                            value:
+                              type: string
+                            type:
+                              anyOf:
+                                - type: string
+                                  enum:
+                                    - home
+                                - type: string
+                                  enum:
+                                    - work
+                            preferred:
+                              type: boolean
+                      emails:
+                        type: array
+                        items:
+                          type: object
+                          required:
+                            - value
+                            - type
+                            - preferred
+                          properties:
+                            value:
+                              type: string
+                            type:
+                              anyOf:
+                                - type: string
+                                  enum:
+                                    - home
+                                - type: string
+                                  enum:
+                                    - work
+                            preferred:
+                              type: boolean
+                      addresses:
+                        type: array
+                        items:
+                          type: object
+                          required:
+                            - value
+                            - type
+                            - preferred
+                            - addressLine1
+                            - addressLine2
+                            - addressCity
+                            - addressPostalCode
+                            - addressState
+                            - addressStateCode
+                            - addressCountry
+                            - addressCountryCode
+                            - addressFormatted
+                            - latitude
+                            - longitude
+                            - geocodeSource
+                            - validity
+                            - timezone
+                          properties:
+                            value:
+                              type: string
+                            type:
+                              anyOf:
+                                - type: string
+                                  enum:
+                                    - home
+                                - type: string
+                                  enum:
+                                    - work
+                                - type: string
+                                  enum:
+                                    - other
+                            preferred:
+                              type: boolean
+                            addressLine1:
+                              anyOf:
+                                - type: string
+                                - type: "null"
+                            addressLine2:
+                              anyOf:
+                                - type: string
+                                - type: "null"
+                            addressCity:
+                              anyOf:
+                                - type: string
+                                - type: "null"
+                            addressPostalCode:
+                              anyOf:
+                                - type: string
+                                - type: "null"
+                            addressState:
+                              anyOf:
+                                - type: string
+                                - type: "null"
+                            addressStateCode:
+                              anyOf:
+                                - type: string
+                                - type: "null"
+                            addressCountry:
+                              anyOf:
+                                - type: string
+                                - type: "null"
+                            addressCountryCode:
+                              anyOf:
+                                - type: string
+                                - type: "null"
+                            addressFormatted:
+                              anyOf:
+                                - type: string
+                                - type: "null"
+                            latitude:
+                              anyOf:
+                                - type: number
+                                - type: "null"
+                            longitude:
+                              anyOf:
+                                - type: number
+                                - type: "null"
+                            geocodeSource:
+                              anyOf:
+                                - type: string
+                                  enum:
+                                    - mapy.com
+                                - type: "null"
+                            validity:
+                              anyOf:
+                                - type: string
+                                  enum:
+                                    - valid
+                                - type: string
+                                  enum:
+                                    - unverifiable
+                                - type: string
+                                  enum:
+                                    - invalid
+                            timezone:
+                              anyOf:
+                                - type: string
+                                - type: "null"
+                      linkedin:
+                        anyOf:
+                          - type: string
+                          - type: "null"
+                      instagram:
+                        anyOf:
+                          - type: string
+                          - type: "null"
+                      whatsapp:
+                        anyOf:
+                          - type: string
+                          - type: "null"
+                      facebook:
+                        anyOf:
+                          - type: string
+                          - type: "null"
+                      signal:
+                        anyOf:
+                          - type: string
+                          - type: "null"
+                      website:
+                        anyOf:
+                          - type: string
+                          - type: "null"
+                      avatarUri:
+                        anyOf:
+                          - type: string
+                          - type: "null"
+                      importantDates:
+                        anyOf:
+                          - type: array
+                            items:
+                              type: object
+                              required:
+                                - type
+                                - date
+                                - note
+                              properties:
+                                type:
+                                  anyOf:
+                                    - type: string
+                                      enum:
+                                        - birthday
+                                    - type: string
+                                      enum:
+                                        - anniversary
+                                    - type: string
+                                      enum:
+                                        - nameday
+                                    - type: string
+                                      enum:
+                                        - graduation
+                                    - type: string
+                                      enum:
+                                        - other
+                                date:
+                                  type: string
+                                note:
+                                  anyOf:
+                                    - type: string
+                                    - type: "null"
+                          - type: "null"
+                      isValid:
+                        type: boolean
       responses:
         "200":
           description: Default Response
@@ -2002,7 +2231,7 @@ paths:
                   anyOf:
                     - type: string
                     - type: "null"
-                place:
+                location:
                   anyOf:
                     - type: string
                     - type: "null"
@@ -2106,7 +2335,7 @@ paths:
         - schema:
             type: string
           in: query
-          name: place
+          name: location
           required: false
       responses:
         "200":
@@ -2356,6 +2585,247 @@ paths:
       responses:
         "200":
           description: Default Response
+  /api/contacts/share:
+    post:
+      tags:
+        - Share
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - personId
+                - recipientEmails
+                - sendCopy
+                - selectedFields
+              properties:
+                personId:
+                  minLength: 1
+                  type: string
+                recipientEmails:
+                  minItems: 1
+                  maxItems: 10
+                  type: array
+                  items:
+                    format: email
+                    type: string
+                message:
+                  maxLength: 2000
+                  type: string
+                sendCopy:
+                  type: boolean
+                selectedFields:
+                  minItems: 1
+                  type: array
+                  items:
+                    anyOf:
+                      - type: string
+                        enum:
+                          - name
+                      - type: string
+                        enum:
+                          - avatar
+                      - type: string
+                        enum:
+                          - headline
+                      - type: string
+                        enum:
+                          - phones
+                      - type: string
+                        enum:
+                          - emails
+                      - type: string
+                        enum:
+                          - location
+                      - type: string
+                        enum:
+                          - linkedin
+                      - type: string
+                        enum:
+                          - instagram
+                      - type: string
+                        enum:
+                          - facebook
+                      - type: string
+                        enum:
+                          - website
+                      - type: string
+                        enum:
+                          - whatsapp
+                      - type: string
+                        enum:
+                          - signal
+                      - type: string
+                        enum:
+                          - addresses
+                      - type: string
+                        enum:
+                          - notes
+                      - type: string
+                        enum:
+                          - importantDates
+      responses:
+        "200":
+          description: Default Response
+  /api/stats/active-users:
+    get:
+      tags:
+        - Stats
+      parameters:
+        - schema:
+            minimum: 30
+            maximum: 180
+            default: 90
+            type: number
+          in: query
+          name: days
+          required: false
+      responses:
+        "200":
+          description: Default Response
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - timeline
+                properties:
+                  timeline:
+                    type: array
+                    items:
+                      type: object
+                      required:
+                        - date
+                        - dau
+                        - wau
+                        - mau
+                      properties:
+                        date:
+                          type: string
+                        dau:
+                          type: number
+                        wau:
+                          type: number
+                        mau:
+                          type: number
+  /api/stats/funnel:
+    get:
+      tags:
+        - Stats
+      responses:
+        "200":
+          description: Default Response
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - periods
+                properties:
+                  periods:
+                    type: array
+                    items:
+                      type: object
+                      required:
+                        - periodKey
+                        - periodLabel
+                        - signups
+                        - contacts
+                        - interactions
+                        - signupsToContactsPct
+                        - contactsToInteractionsPct
+                      properties:
+                        periodKey:
+                          type: string
+                        periodLabel:
+                          type: string
+                        signups:
+                          type: number
+                        contacts:
+                          type: number
+                        interactions:
+                          type: number
+                        signupsToContactsPct:
+                          type: number
+                        contactsToInteractionsPct:
+                          type: number
+  /api/stats/nps:
+    get:
+      tags:
+        - Stats
+      responses:
+        "200":
+          description: Default Response
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - score
+                  - responses
+                  - promoters
+                  - passives
+                  - detractors
+                properties:
+                  score:
+                    anyOf:
+                      - type: number
+                      - type: "null"
+                  responses:
+                    type: number
+                  promoters:
+                    type: number
+                  passives:
+                    type: number
+                  detractors:
+                    type: number
+  /api/stats/total-users:
+    get:
+      tags:
+        - Stats
+      responses:
+        "200":
+          description: Default Response
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - timeline
+                properties:
+                  timeline:
+                    type: array
+                    items:
+                      type: object
+                      required:
+                        - date
+                        - total
+                      properties:
+                        date:
+                          type: string
+                        total:
+                          type: number
+  /api/stats/github-stars:
+    get:
+      tags:
+        - Stats
+      responses:
+        "200":
+          description: Default Response
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - stars
+                  - repo
+                properties:
+                  stars:
+                    type: number
+                  repo:
+                    type: string
 servers:
   - url: http://localhost:3001
     description: Local development server
@@ -2384,3 +2854,7 @@ tags:
     description: User feedback
   - name: Reminders
     description: Scheduled reminder operations
+  - name: Share
+    description: Share contacts via email
+  - name: Stats
+    description: Admin KPI dashboard metrics

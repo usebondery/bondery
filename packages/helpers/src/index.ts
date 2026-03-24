@@ -21,6 +21,7 @@ export type {
 } from "./instagram/parseInstagramUsername.js";
 export { stripEmojis, stripNameTitles, extractNameParts, cleanPersonName } from "./name-utils.js";
 export { formatDateRange, formatDuration } from "./date-utils.js";
+export { getReadingTime } from "./reading-time.js";
 export { linkedinCompanyUrl, linkedinSchoolUrl, extractLinkedinId } from "./linkedin-utils.js";
 export { formatPlaceLabel, formatAddressLabel } from "./address-utils.js";
 export type { PlaceLabelFields, AddressLabelFields } from "./address-utils.js";

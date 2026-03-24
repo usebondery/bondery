@@ -1,0 +1,21 @@
+{
+	"servers": {
+		"plane": {
+			"command": "npx",
+			"args": [
+				"mcp-remote@latest",
+				"https://mcp.plane.so/http/mcp"
+			],
+			"type": "stdio"
+		},
+		"github": {
+			"type": "http",
+			"url": "https://api.githubcopilot.com/mcp/"
+		},
+		"Vercel": {
+			"url": "https://mcp.vercel.com",
+			"type": "http"
+		}
+	},
+	"inputs": []
+}

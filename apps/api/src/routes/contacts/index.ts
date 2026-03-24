@@ -16,7 +16,7 @@ import {
   replaceContactPhones,
 } from "./channels.js";
 import { parseAddressEntries, replaceContactAddresses } from "./addresses.js";
-import { findPersonIdBySocialMedia, upsertContactSocialMedia } from "../../lib/social-media.js";
+import { findPersonIdBySocial, upsertContactSocials } from "../../lib/socials.js";
 import { attachContactExtras, type FullContactExtras } from "../../lib/contact-enrichment.js";
 import type {
   Contact,
@@ -27,7 +27,7 @@ import type {
   ImportantDateType,
   UpcomingReminder,
   Database,
-  SocialMediaPlatform,
+  SocialPlatform,
   MergeContactsResponse,
   MergeConflictField,
   MergeConflictChoice,
@@ -38,7 +38,7 @@ import type {
   ScrapedEducationEntry,
 } from "@bondery/types";
 import { cleanPersonName } from "@bondery/helpers/name-utils";
-import { cachedGeocodeLinkedInPlace } from "../../lib/mapy.js";
+import { cachedGeocodeLinkedInLocation } from "../../lib/mapy.js";
 import {
   toPostgresDate,
   updateContactPhoto,
@@ -111,7 +111,7 @@ const IMPORTANT_DATE_TYPES = [
 
 const IMPORTANT_DATE_NOTIFY_VALUES = [1, 3, 7] as const;
 
-const LOOKUP_SOCIAL_PLATFORMS: SocialMediaPlatform[] = ["instagram", "linkedin", "facebook"];
+const LOOKUP_SOCIAL_PLATFORMS: SocialPlatform[] = ["instagram", "linkedin", "facebook"];
 
 // ── TypeBox Schemas ──────────────────────────────────────────────
 
@@ -164,24 +164,13 @@ const UpdateContactBody = Type.Object({
   middleName: Type.Optional(NullableString),
   lastName: Type.Optional(NullableString),
   headline: Type.Optional(NullableString),
-  place: Type.Optional(NullableString),
+  location: Type.Optional(NullableString),
   notes: Type.Optional(NullableString),
   language: Type.Optional(NullableString),
   timezone: Type.Optional(NullableString),
-  location: Type.Optional(NullableString),
+  gisPoint: Type.Optional(NullableString),
   latitude: Type.Optional(NullableNumber),
   longitude: Type.Optional(NullableNumber),
-  addressLine1: Type.Optional(NullableString),
-  addressLine2: Type.Optional(NullableString),
-  addressCity: Type.Optional(NullableString),
-  addressPostalCode: Type.Optional(NullableString),
-  addressState: Type.Optional(NullableString),
-  addressStateCode: Type.Optional(NullableString),
-  addressCountry: Type.Optional(NullableString),
-  addressCountryCode: Type.Optional(NullableString),
-  addressGranularity: Type.Optional(NullableString),
-  addressFormatted: Type.Optional(NullableString),
-  addressGeocodeSource: Type.Optional(NullableString),
   lastInteraction: Type.Optional(NullableString),
   phones: Type.Optional(Type.Array(PhoneEntrySchema)),
   emails: Type.Optional(Type.Array(EmailEntrySchema)),
@@ -275,7 +264,7 @@ const EnrichContactBody = Type.Object({
   lastName: Type.Optional(NullableString),
   profileImageUrl: Type.Optional(NullableString),
   headline: Type.Optional(NullableString),
-  place: Type.Optional(NullableString),
+  location: Type.Optional(NullableString),
   linkedinBio: Type.Optional(NullableString),
   workHistory: Type.Optional(Type.Array(ScrapedWorkHistoryEntrySchema)),
   educationHistory: Type.Optional(Type.Array(ScrapedEducationEntrySchema)),
@@ -286,12 +275,12 @@ const MERGEABLE_SCALAR_FIELDS = {
   middleName: "middle_name",
   lastName: "last_name",
   headline: "headline",
-  place: "place",
+  location: "location",
   notes: "notes",
   lastInteraction: "last_interaction",
   language: "language",
   timezone: "timezone",
-  location: "location",
+  gisPoint: "gis_point",
   latitude: "latitude",
   longitude: "longitude",
 } as const;
@@ -305,7 +294,7 @@ const MERGEABLE_SOCIAL_FIELDS: Record<
     MergeConflictField,
     "linkedin" | "instagram" | "whatsapp" | "facebook" | "website" | "signal"
   >,
-  SocialMediaPlatform
+  SocialPlatform
 > = {
   linkedin: "linkedin",
   instagram: "instagram",
@@ -448,7 +437,7 @@ async function recomputeMergeRecommendations(
     client.from("people_emails").select("person_id, value").eq("user_id", userId),
     client.from("people_phones").select("person_id, prefix, value").eq("user_id", userId),
     client
-      .from("people_social_media")
+      .from("people_socials")
       .select("person_id, platform, handle")
       .eq("user_id", userId)
       .in("platform", ["linkedin", "facebook"]),
@@ -877,7 +866,7 @@ function withEmptyChannels<T extends { id: string }>(
   }));
 }
 
-function withEmptySocialMedia<
+function withEmptySocials<
   T extends {
     id: string;
   },
@@ -1207,7 +1196,7 @@ export async function contactRoutes(fastify: FastifyInstance) {
         });
       } catch (enrichError) {
         fastify.log.error({ enrichError }, "Failed to attach contact extras for contact list");
-        enrichedContacts = withEmptySocialMedia(withEmptyChannels(contacts || []));
+        enrichedContacts = withEmptySocials(withEmptyChannels(contacts || []));
       }
 
       return {
@@ -1396,7 +1385,7 @@ export async function contactRoutes(fastify: FastifyInstance) {
 
       if (body.linkedin && body.linkedin.trim().length > 0) {
         try {
-          await upsertContactSocialMedia(client, user.id, newContact.id, "linkedin", body.linkedin);
+          await upsertContactSocials(client, user.id, newContact.id, "linkedin", body.linkedin);
         } catch (socialError) {
           const message =
             socialError instanceof Error ? socialError.message : "Social upsert failed";
@@ -1662,7 +1651,7 @@ export async function contactRoutes(fastify: FastifyInstance) {
           { enrichError },
           "Failed to attach contact extras for merge recommendations",
         );
-        enrichedContacts = withEmptySocialMedia(withEmptyChannels(personRows || []));
+        enrichedContacts = withEmptySocials(withEmptyChannels(personRows || []));
       }
 
       const contacts = enrichedContacts;
@@ -2008,7 +1997,7 @@ export async function contactRoutes(fastify: FastifyInstance) {
       }
 
       const { data: socialRows, error: socialRowsError } = await client
-        .from("people_social_media")
+        .from("people_socials")
         .select("id, person_id, platform, handle, connected_at")
         .eq("user_id", user.id)
         .in("person_id", [leftPersonId, rightPersonId]);
@@ -2069,7 +2058,7 @@ export async function contactRoutes(fastify: FastifyInstance) {
 
         socialUpdatePromises.push(
           client
-            .from("people_social_media")
+            .from("people_socials")
             .update({
               handle: rightSocial.handle,
               connected_at: rightSocial.connected_at,
@@ -2083,7 +2072,7 @@ export async function contactRoutes(fastify: FastifyInstance) {
       // Execute all social media writes in parallel
       const socialWriteResults = await Promise.allSettled([
         ...(socialInserts.length > 0
-          ? [client.from("people_social_media").insert(socialInserts)]
+          ? [client.from("people_socials").insert(socialInserts)]
           : []),
         ...socialUpdatePromises,
       ]);
@@ -2343,7 +2332,7 @@ export async function contactRoutes(fastify: FastifyInstance) {
         return reply.status(400).send({ error: "Invalid platform or handle" });
       }
 
-      const personId = await findPersonIdBySocialMedia(client, user.id, platform, handle);
+      const personId = await findPersonIdBySocial(client, user.id, platform, handle);
 
       if (!personId) {
         return { exists: false };
@@ -2416,7 +2405,7 @@ export async function contactRoutes(fastify: FastifyInstance) {
           { channelError },
           "Failed to attach contact channels/social media for single contact",
         );
-        return { contact: withEmptySocialMedia(withEmptyChannels([contact]))[0] };
+        return { contact: withEmptySocials(withEmptyChannels([contact]))[0] };
       }
     },
   );
@@ -3024,26 +3013,11 @@ export async function contactRoutes(fastify: FastifyInstance) {
       if (body.middleName !== undefined) updates.middle_name = body.middleName;
       if (body.lastName !== undefined) updates.last_name = body.lastName;
       if (body.headline !== undefined) updates.headline = body.headline;
-      if (body.place !== undefined) updates.place = body.place;
+      if (body.location !== undefined) updates.location = body.location;
       if (body.notes !== undefined) updates.notes = body.notes;
       if (body.language !== undefined) updates.language = body.language;
       if (body.timezone !== undefined) updates.timezone = body.timezone;
-      if (body.location !== undefined) updates.location = body.location;
-      if (body.addressLine1 !== undefined) updates.address_line1 = body.addressLine1;
-      if (body.addressLine2 !== undefined) updates.address_line2 = body.addressLine2;
-      if (body.addressCity !== undefined) updates.address_city = body.addressCity;
-      if (body.addressPostalCode !== undefined)
-        updates.address_postal_code = body.addressPostalCode;
-      if (body.addressState !== undefined) updates.address_state = body.addressState;
-      if (body.addressStateCode !== undefined) updates.address_state_code = body.addressStateCode;
-      if (body.addressCountry !== undefined) updates.address_country = body.addressCountry;
-      if (body.addressCountryCode !== undefined)
-        updates.address_country_code = body.addressCountryCode;
-      if (body.addressGranularity !== undefined)
-        updates.address_granularity = body.addressGranularity;
-      if (body.addressFormatted !== undefined) updates.address_formatted = body.addressFormatted;
-      if (body.addressGeocodeSource !== undefined)
-        updates.address_geocode_source = body.addressGeocodeSource;
+      if (body.gisPoint !== undefined) updates.gis_point = body.gisPoint;
       if (body.lastInteraction !== undefined) updates.last_interaction = body.lastInteraction;
 
       const hasLatitudeField = Object.prototype.hasOwnProperty.call(body, "latitude");
@@ -3119,45 +3093,33 @@ export async function contactRoutes(fastify: FastifyInstance) {
           return reply.status(400).send({ error: message });
         }
 
-        const preferredAddress =
-          nextAddresses.find((entry) => entry.type === "home") || nextAddresses[0] || null;
-
-        updates.place = preferredAddress?.value ?? null;
-        updates.address_line1 = preferredAddress?.addressLine1 ?? null;
-        updates.address_line2 = preferredAddress?.addressLine2 ?? null;
-        updates.address_city = preferredAddress?.addressCity ?? null;
-        updates.address_postal_code = preferredAddress?.addressPostalCode ?? null;
-        updates.address_state = preferredAddress?.addressState ?? null;
-        updates.address_state_code = preferredAddress?.addressStateCode ?? null;
-        updates.address_country = preferredAddress?.addressCountry ?? null;
-        updates.address_country_code = preferredAddress?.addressCountryCode ?? null;
-        updates.address_granularity = preferredAddress?.addressGranularity ?? "address";
-        updates.address_formatted = preferredAddress?.addressFormatted ?? null;
-        updates.address_geocode_source = preferredAddress?.addressGeocodeSource ?? null;
+        // sort_order = 0 is the preferred address — sync its display label to people.location.
+        const preferredAddress = nextAddresses[0] ?? null;
+        updates.location = preferredAddress?.value ?? null;
       }
 
-      const socialMediaUpdates: Array<{
-        platform: Parameters<typeof upsertContactSocialMedia>[3];
+      const socialsUpdates: Array<{
+        platform: Parameters<typeof upsertContactSocials>[3];
         handle: string | null | undefined;
       }> = [];
 
       if (body.linkedin !== undefined) {
-        socialMediaUpdates.push({ platform: "linkedin", handle: body.linkedin });
+        socialsUpdates.push({ platform: "linkedin", handle: body.linkedin });
       }
       if (body.instagram !== undefined) {
-        socialMediaUpdates.push({ platform: "instagram", handle: body.instagram });
+        socialsUpdates.push({ platform: "instagram", handle: body.instagram });
       }
       if (body.whatsapp !== undefined) {
-        socialMediaUpdates.push({ platform: "whatsapp", handle: body.whatsapp });
+        socialsUpdates.push({ platform: "whatsapp", handle: body.whatsapp });
       }
       if (body.facebook !== undefined) {
-        socialMediaUpdates.push({ platform: "facebook", handle: body.facebook });
+        socialsUpdates.push({ platform: "facebook", handle: body.facebook });
       }
       if (body.website !== undefined) {
-        socialMediaUpdates.push({ platform: "website", handle: body.website });
+        socialsUpdates.push({ platform: "website", handle: body.website });
       }
       if (body.signal !== undefined) {
-        socialMediaUpdates.push({ platform: "signal", handle: body.signal });
+        socialsUpdates.push({ platform: "signal", handle: body.signal });
       }
 
       updates.updated_at = new Date().toISOString();
@@ -3220,11 +3182,11 @@ export async function contactRoutes(fastify: FastifyInstance) {
         if (nextAddresses !== undefined) {
           parallelOps.push(replaceContactAddresses(client, user.id, id, nextAddresses));
         }
-        if (socialMediaUpdates.length > 0) {
+        if (socialsUpdates.length > 0) {
           parallelOps.push(
             Promise.all(
-              socialMediaUpdates.map((entry) =>
-                upsertContactSocialMedia(client, user.id, id, entry.platform, entry.handle),
+              socialsUpdates.map((entry) =>
+                upsertContactSocials(client, user.id, id, entry.platform, entry.handle),
               ),
             ).then(() => undefined),
           );
@@ -3393,7 +3355,7 @@ export async function contactRoutes(fastify: FastifyInstance) {
           { channelError },
           "Failed to attach contact channels/social media for vCard export",
         );
-        contactWithChannels = withEmptySocialMedia(
+        contactWithChannels = withEmptySocials(
           withEmptyChannels([contact]),
         )[0] as unknown as Contact;
       }
@@ -3589,7 +3551,7 @@ export async function contactRoutes(fastify: FastifyInstance) {
         lastName,
         profileImageUrl,
         headline,
-        place,
+        location,
         linkedinBio,
         workHistory,
         educationHistory,
@@ -3606,10 +3568,10 @@ export async function contactRoutes(fastify: FastifyInstance) {
       );
 
       // Verify the person belongs to the authenticated user & fetch current values
-      // (needed for fill-if-missing logic on headline, place)
+      // (needed for fill-if-missing logic on headline, location)
       const { data: person, error: personError } = await client
         .from("people")
-        .select("id, headline, place")
+        .select("id, headline, location")
         .eq("id", personId)
         .eq("user_id", user.id)
         .single();
@@ -3644,24 +3606,15 @@ export async function contactRoutes(fastify: FastifyInstance) {
         fieldUpdates.headline = headline;
       }
 
-      // Fill-if-missing: place / location
-      if (place && !person.place) {
-        fieldUpdates.place = place;
+      // Fill-if-missing: location / gisPoint
+      if (location && !person.location) {
+        fieldUpdates.location = location;
         try {
-          const result = await cachedGeocodeLinkedInPlace(place);
+          const result = await cachedGeocodeLinkedInLocation(location);
           if (result) {
             const { geo, timezone: tz } = result;
-            if (geo.formattedLabel) fieldUpdates.place = geo.formattedLabel;
-            fieldUpdates.location = geo.locationEwkt;
-            if (geo.city) fieldUpdates.address_city = geo.city;
-            if (geo.state) fieldUpdates.address_state = geo.state;
-            if (geo.stateCode) fieldUpdates.address_state_code = geo.stateCode;
-            if (geo.country) fieldUpdates.address_country = geo.country;
-            if (geo.countryCode) fieldUpdates.address_country_code = geo.countryCode;
-            if (geo.formattedLabel) fieldUpdates.address_formatted = geo.formattedLabel;
-            fieldUpdates.address_granularity = "city";
-            fieldUpdates.address_geocode_source = "mapy.com";
-
+            if (geo.formattedLabel) fieldUpdates.location = geo.formattedLabel;
+            fieldUpdates.gis_point = geo.locationEwkt;
             if (tz) fieldUpdates.timezone = tz;
           }
         } catch (err) {
@@ -4012,7 +3965,7 @@ export async function contactRoutes(fastify: FastifyInstance) {
    * Returns the next batch of pending queue items (up to 50).
    *
    * No request body — the queue status IS the exclude list.
-   * Joins with people_social_media (for handle) and people (for names).
+   * Joins with people_socials (for handle) and people (for names).
    */
   fastify.get("/enrich-queue/next-batch", async (request: FastifyRequest, reply: FastifyReply) => {
     const BATCH_LIMIT = 50;
@@ -4039,9 +3992,9 @@ export async function contactRoutes(fastify: FastifyInstance) {
     const personIds = items.map((i) => i.person_id);
 
     // Fetch handles and names in parallel.
-    const [socialMediaRes, namesRes] = await Promise.all([
+    const [socialsRes, namesRes] = await Promise.all([
       client
-        .from("people_social_media")
+        .from("people_socials")
         .select("person_id, handle")
         .eq("user_id", user.id)
         .eq("platform", "linkedin")
@@ -4054,7 +4007,7 @@ export async function contactRoutes(fastify: FastifyInstance) {
     ]);
 
     const handleMap = new Map(
-      (socialMediaRes.data || []).map((sm) => [sm.person_id, sm.handle as string]),
+      (socialsRes.data || []).map((sm) => [sm.person_id, sm.handle as string]),
     );
     const nameMap = new Map(
       (namesRes.data || []).map((p) => [

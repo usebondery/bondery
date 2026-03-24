@@ -1,30 +1,31 @@
 import { Container, Stack, Text, Title, Paper, Group, ThemeIcon } from "@mantine/core";
-import { IconMail, IconBrandLinkedin, IconBrandGithub } from "@tabler/icons-react";
+import { IconMail, IconBrandDiscord, IconBrandReddit } from "@tabler/icons-react";
 import { AnchorLink } from "@bondery/mantine-next";
+import { SOCIAL_LINKS, SUPPORT_EMAIL } from "@bondery/helpers";
 
 const CONTACT_METHODS = [
   {
-    text: "team@usebondery.com",
-    href: "mailto:team@usebondery.com",
+    text: SUPPORT_EMAIL,
+    href: `mailto:${SUPPORT_EMAIL}`,
     icon: IconMail,
     color: "violet",
-    target: undefined,
+    target: undefined as string | undefined,
   },
   {
-    text: "Follow us on LinkedIn",
-    href: "https://www.linkedin.com/company/bondery",
-    icon: IconBrandLinkedin,
-    color: "blue",
+    text: "Chat with us on Discord",
+    href: SOCIAL_LINKS.discord,
+    icon: IconBrandDiscord,
+    color: "indigo",
     target: "_blank" as const,
   },
   {
-    text: "Star us on GitHub",
-    href: "https://github.com/usebondery/bondery",
-    icon: IconBrandGithub,
-    color: "dark",
+    text: "Post on our Reddit",
+    href: SOCIAL_LINKS.reddit,
+    icon: IconBrandReddit,
+    color: "orange",
     target: "_blank" as const,
   },
-] as const;
+];
 
 export function Contact() {
   return (
@@ -35,7 +36,7 @@ export function Contact() {
             Contact us
           </Title>
           <Text ta="center" size="lg" c="dimmed" maw={600}>
-            Have questions or feedback? Reach out and we'll get back to you.
+            Have questions or feedback? We're here to help or just chat!
           </Text>
         </Stack>
 

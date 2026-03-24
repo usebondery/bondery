@@ -7,11 +7,11 @@ import {
   IconWorld,
 } from "@tabler/icons-react";
 import { SOCIAL_PLATFORM_URL_DETAILS } from "@bondery/helpers";
-import { extractUsername, createSocialMediaUrl } from "@/lib/socialMediaHelpers";
+import { extractUsername, createSocialUrl } from "@/lib/socialsHelpers";
 
 type SocialPlatform = "linkedin" | "instagram" | "facebook" | "website";
 
-interface SocialMediaInputProps {
+interface SocialsInputProps {
   platform: SocialPlatform;
   value: string;
   onChange: (value: string) => void;
@@ -24,7 +24,7 @@ interface SocialMediaInputProps {
   displayLabel?: boolean;
 }
 
-export function validateSocialMediaInput(value: string, platform: SocialPlatform): string | null {
+export function validateSocialsInput(value: string, platform: SocialPlatform): string | null {
   if (!value || value.trim().length === 0) {
     return null; // Empty is valid (optional field)
   }
@@ -103,7 +103,7 @@ const platformConfig: Record<
   },
 };
 
-export function SocialMediaInput({
+export function SocialsInput({
   platform,
   value,
   onChange,
@@ -114,7 +114,7 @@ export function SocialMediaInput({
   autoExtractUsername = true,
   error,
   displayLabel = false,
-}: SocialMediaInputProps) {
+}: SocialsInputProps) {
   const config = platformConfig[platform];
 
   const handleChange = (newValue: string) => {
@@ -134,7 +134,7 @@ export function SocialMediaInput({
 
   // Create href for the action icon
   const href =
-    value && platform !== "website" ? createSocialMediaUrl(platform, value) : value || undefined;
+    value && platform !== "website" ? createSocialUrl(platform, value) : value || undefined;
 
   const platformName = platform.charAt(0).toUpperCase() + platform.slice(1);
 

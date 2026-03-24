@@ -29,6 +29,7 @@ import { useEffect, useRef, useState } from "react";
 import { API_URL } from "@/lib/config";
 import { buildAvatarQueryString } from "@/lib/avatarParams";
 import { openStandardConfirmModal } from "@/app/(app)/app/components/modals/openStandardConfirmModal";
+import { captureEvent } from "@/lib/analytics/client";
 
 const COLOR_SWATCHES = [
   ...DEFAULT_THEME.colors.red.slice(5, 8),
@@ -239,6 +240,8 @@ function TagEditorModalBody({
         // are batched and processed. Without this, React 18's auto-batching
         // can defer the modal store update and keep the modal visible.
         notifications.hide(loadingId);
+        captureEvent("tag_created");
+
         flushSync(() => modals.close(modalId));
         notifications.show(
           successNotificationTemplate({
@@ -282,6 +285,8 @@ function TagEditorModalBody({
         if (!updateRes.ok) throw new Error("update");
 
         await syncMembers(tag.id);
+
+        captureEvent("tag_updated");
 
         // Same reasoning: flushSync ensures the modal is gone before callbacks fire.
         notifications.hide(loadingId);
@@ -354,6 +359,8 @@ function TagEditorModalBody({
             );
             return;
           }
+
+          captureEvent("tag_deleted");
 
           // flushSync ensures the editor modal is fully removed before the
           // onDeleted callback triggers parent re-renders.

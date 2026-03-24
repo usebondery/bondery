@@ -24,14 +24,14 @@ export interface AddressLabelFields {
 }
 
 /**
- * Formats a location into a compact place label such as
+ * Formats a location into a compact location label such as
  * `"Brno, South Moravian Region, CZ"`.
  *
  * Missing parts are silently skipped — e.g. if only `city` and `countryCode`
  * are set the result is `"Brno, CZ"`.  Returns an empty string when every
  * field is null/undefined/empty.
  *
- * @param fields - Structured place fields (all optional).
+ * @param fields - Structured location fields (all optional).
  * @returns Comma-separated label, or `""`.
  */
 export function formatPlaceLabel(fields: PlaceLabelFields): string {

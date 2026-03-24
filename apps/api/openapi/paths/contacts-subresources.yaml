@@ -671,7 +671,7 @@ enrich:
                 type: string
               headline:
                 type: string
-              place:
+              location:
                 type: string
               linkedinBio:
                 type: string

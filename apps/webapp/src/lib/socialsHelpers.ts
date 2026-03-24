@@ -4,7 +4,7 @@
 
 import { SOCIAL_PLATFORM_URL_DETAILS } from "@bondery/helpers";
 
-export interface SocialMediaPlatformConfig {
+export interface SocialPlatformConfig {
   name: string;
   baseUrl: string;
   urlPattern: RegExp;
@@ -14,7 +14,7 @@ function escapeRegexValue(value: string): string {
   return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
-export const socialMediaPlatforms: Record<string, SocialMediaPlatformConfig> = {
+export const socialPlatforms: Record<string, SocialPlatformConfig> = {
   linkedin: {
     name: "LinkedIn",
     baseUrl: SOCIAL_PLATFORM_URL_DETAILS.linkedin.profileBaseUrl,
@@ -52,7 +52,7 @@ export const socialMediaPlatforms: Record<string, SocialMediaPlatformConfig> = {
 export function extractUsername(platform: string, input: string): string {
   if (!input) return "";
 
-  const platformConfig = socialMediaPlatforms[platform];
+  const platformConfig = socialPlatforms[platform];
   if (!platformConfig) return input;
 
   // If it looks like a URL, extract the username
@@ -71,10 +71,10 @@ export function extractUsername(platform: string, input: string): string {
  * @param username - The username
  * @returns The full URL or empty string if no username
  */
-export function createSocialMediaUrl(platform: string, username: string): string {
+export function createSocialUrl(platform: string, username: string): string {
   if (!username) return "";
 
-  const platformConfig = socialMediaPlatforms[platform];
+  const platformConfig = socialPlatforms[platform];
   if (!platformConfig) return username;
 
   // If it's already a full URL, return as is

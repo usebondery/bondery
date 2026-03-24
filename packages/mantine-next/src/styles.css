@@ -6,6 +6,7 @@
   --scale-grow: 1.02;
   --scale-shrink: 0.98;
   --active-filter: brightness(0.9);
+  --mantine-spacing-xxs: 0.375rem;
 }
 
 .button-scale-effect:not(:disabled):not([data-disabled]):not([disabled]) {
@@ -115,6 +116,12 @@ ol {
 
 .card-scale-effect:hover {
   transform: scale(var(--scale-grow));
+}
+
+.selectable-card {
+  transition:
+    background-color var(--transition-time) var(--transition-ease),
+    border-color var(--transition-time) var(--transition-ease);
 }
 
 .mantine-Combobox-option[data-combobox-selected="true"] .mantine-Text-root {

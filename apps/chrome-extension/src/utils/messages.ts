@@ -44,7 +44,7 @@ export interface ScrapedProfileData {
   lastName?: string;
   profileImageUrl?: string;
   headline?: string;
-  place?: string;
+  location?: string;
   notes?: string;
   /** Work history to persist when creating a new contact */
   workHistory?: ScrapedWorkEntry[];

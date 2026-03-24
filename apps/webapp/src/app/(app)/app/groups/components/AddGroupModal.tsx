@@ -32,6 +32,7 @@ import { flushSync } from "react-dom";
 import type { Contact, GroupWithCount } from "@bondery/types";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import { revalidateGroups } from "../../actions";
+import { captureEvent } from "@/lib/analytics/client";
 
 // Predefined color swatches
 const COLOR_SWATCHES = [
@@ -198,6 +199,8 @@ function AddGroupForm({
           throw new Error(addPeopleError.error || "Failed to add contacts to group");
         }
       }
+
+      captureEvent("group_created");
 
       notifications.hide(loadingNotification);
 

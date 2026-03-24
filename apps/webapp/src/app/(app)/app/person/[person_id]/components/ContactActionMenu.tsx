@@ -5,6 +5,7 @@ import {
   IconBrandLinkedin,
   IconDotsVertical,
   IconId,
+  IconShare,
   IconTrash,
 } from "@tabler/icons-react";
 import type { Contact } from "@bondery/types";
@@ -20,6 +21,7 @@ interface ContactActionMenuProps {
   personId: string;
   onDelete: () => void;
   onMergeWith: () => void;
+  onShare: () => void;
 }
 
 export function ContactActionMenu({
@@ -27,9 +29,12 @@ export function ContactActionMenu({
   personId,
   onDelete,
   onMergeWith,
+  onShare,
 }: ContactActionMenuProps) {
   const tMerge = useTranslations("MergeWithModal");
+  const tShare = useTranslations("ShareContactModal");
   const tEnrich = useTranslations("EnrichFromLinkedIn");
+  const tActions = useTranslations("ContactActionMenu");
   const { startForPerson } = useBatchEnrichFromLinkedIn();
 
   const handleExport = async () => {
@@ -51,16 +56,16 @@ export function ContactActionMenu({
 
       notifications.show(
         successNotificationTemplate({
-          title: "Success",
-          description: "Contact exported as vCard",
+          title: tActions("ExportSuccess"),
+          description: tActions("ExportSuccessDescription"),
         }),
       );
     } catch (error) {
       console.error("Failed to export vCard:", error);
       notifications.show(
         errorNotificationTemplate({
-          title: "Error",
-          description: "Failed to export contact. Please try again.",
+          title: tActions("ExportError"),
+          description: tActions("ExportErrorDescription"),
         }),
       );
     }
@@ -80,16 +85,16 @@ export function ContactActionMenu({
           className={`button-scale-effect ${opened ? "button-scale-effect-active" : ""}`}
           leftSection={<IconDotsVertical size={18} />}
         >
-          Actions
+          {tActions("ActionsButton")}
         </Button>
       </Menu.Target>
 
       <Menu.Dropdown>
-        <MenuItem leftSection={<IconArrowMerge size={16} />} onClick={onMergeWith}>
-          {tMerge("ActionLabelMenu")}
+        <MenuItem leftSection={<IconShare size={16} />} onClick={onShare}>
+          {tShare("ActionLabelMenu")}
         </MenuItem>
         <MenuItem leftSection={<IconId size={16} />} onClick={handleExport}>
-          Download vCard
+          {tActions("DownloadVCard")}
         </MenuItem>
         <MenuItem
           leftSection={<IconBrandLinkedin size={16} />}
@@ -97,8 +102,11 @@ export function ContactActionMenu({
         >
           {tEnrich("MenuLabel")}
         </MenuItem>
+        <MenuItem leftSection={<IconArrowMerge size={16} />} onClick={onMergeWith}>
+          {tMerge("ActionLabelMenu")}
+        </MenuItem>
         <MenuItem color="red" leftSection={<IconTrash size={16} />} onClick={onDelete}>
-          Delete Contact
+          {tActions("DeleteContact")}
         </MenuItem>
       </Menu.Dropdown>
     </Menu>

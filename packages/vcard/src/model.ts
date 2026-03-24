@@ -170,6 +170,7 @@ export interface VCardContactDraft {
   addresses: Array<{
     value: string;
     type: "home" | "work" | "other";
+    preferred: boolean;
     addressLine1: string | null;
     addressLine2: string | null;
     addressCity: string | null;
@@ -185,5 +186,10 @@ export interface VCardContactDraft {
   facebook: string | null;
   signal: string | null;
   avatarUri: string | null;
+  importantDates: Array<{
+    type: "birthday" | "anniversary" | "nameday" | "graduation" | "other";
+    date: string;
+    note: string | null;
+  }> | null;
   raw: VCardRaw;
 }

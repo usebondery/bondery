@@ -160,14 +160,14 @@ export function MapPageClient({ contacts }: MapPageClientProps) {
   const [columns, setColumns] = useState<ColumnConfig[]>([
     { key: "name", label: "Name", visible: true, icon: <IconUser size={16} />, fixed: true },
     { key: "headline", label: "Headline", visible: true, icon: <IconBriefcase size={16} /> },
-    { key: "place", label: "Location", visible: true, icon: <IconMapPin size={16} /> },
+    { key: "location", label: "Location", visible: true, icon: <IconMapPin size={16} /> },
     {
       key: "lastInteraction",
       label: "Last Interaction",
       visible: true,
       icon: <IconClock size={16} />,
     },
-    { key: "social", label: "Social Media", visible: true, icon: <IconBrandLinkedin size={16} /> },
+    { key: "social", label: "Socials", visible: true, icon: <IconBrandLinkedin size={16} /> },
   ]);
 
   const deferredColumns = useDeferredValue(columns);

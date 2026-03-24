@@ -23,7 +23,7 @@ import {
   parsePhoneNumber,
   TELEPHONE_PREFIX_OPTIONS,
 } from "@/lib/phoneHelpers";
-import { createSocialMediaUrl, extractUsername } from "@/lib/socialMediaHelpers";
+import { createSocialUrl, extractUsername } from "@/lib/socialsHelpers";
 import {
   ActionIconLink,
   errorNotificationTemplate,
@@ -35,7 +35,7 @@ import { ContactInfoSection, type ContactInfoLabels } from "./ContactInfoSection
 import { InlineEditableInput } from "./InlineEditableInput";
 import { getSocialActionTooltip } from "@/lib/socialActionTooltips";
 
-interface SocialMediaSectionProps {
+interface SocialsSectionProps {
   contact: Contact;
   personId: string;
   phones: PhoneEntry[];
@@ -213,7 +213,7 @@ function SocialPopoverButton({
   );
 }
 
-export function SocialMediaSection({
+export function SocialsSection({
   contact,
   personId,
   phones,
@@ -222,8 +222,8 @@ export function SocialMediaSection({
   onPhonesChange,
   onEmailsChange,
   onSaveContactInfo,
-}: SocialMediaSectionProps) {
-  const t = useTranslations("SocialMedia");
+}: SocialsSectionProps) {
+  const t = useTranslations("Socials");
   const tContactInfo = useTranslations("ContactInfo");
   const [values, setValues] = useState<SocialFieldValues>(() => getInitialValues(contact));
   const [persistedValues, setPersistedValues] = useState<SocialFieldValues>(() =>
@@ -577,7 +577,7 @@ export function SocialMediaSection({
           tooltipLabel={getSocialActionTooltip("linkedin", contact.firstName)}
           href={
             persistedValues.linkedin
-              ? createSocialMediaUrl("linkedin", persistedValues.linkedin)
+              ? createSocialUrl("linkedin", persistedValues.linkedin)
               : undefined
           }
           disabled={!persistedValues.linkedin}
@@ -606,7 +606,7 @@ export function SocialMediaSection({
           tooltipLabel={getSocialActionTooltip("instagram", contact.firstName)}
           href={
             persistedValues.instagram
-              ? createSocialMediaUrl("instagram", persistedValues.instagram)
+              ? createSocialUrl("instagram", persistedValues.instagram)
               : undefined
           }
           disabled={!persistedValues.instagram}
@@ -635,7 +635,7 @@ export function SocialMediaSection({
           tooltipLabel={getSocialActionTooltip("facebook", contact.firstName)}
           href={
             persistedValues.facebook
-              ? createSocialMediaUrl("facebook", persistedValues.facebook)
+              ? createSocialUrl("facebook", persistedValues.facebook)
               : undefined
           }
           disabled={!persistedValues.facebook}
@@ -664,7 +664,7 @@ export function SocialMediaSection({
           tooltipLabel={getSocialActionTooltip("whatsapp", contact.firstName)}
           href={
             hasWhatsAppValue
-              ? createSocialMediaUrl("whatsapp", persistedValues.whatsapp)
+              ? createSocialUrl("whatsapp", persistedValues.whatsapp)
               : undefined
           }
           disabled={!hasWhatsAppValue}
