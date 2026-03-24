@@ -1434,7 +1434,7 @@ export async function contactRoutes(fastify: FastifyInstance) {
 
         if (uniqueIds.length === 0) {
           return reply.status(400).send({
-            error: "Invalid request body. 'ids' must be a non-empty array.",
+            error: "No deletable contacts found. Your own contact card cannot be deleted.",
           });
         }
       } else if ("filter" in body && body.filter) {
@@ -1536,7 +1536,7 @@ export async function contactRoutes(fastify: FastifyInstance) {
       }
 
       if (contactCheck.myself) {
-        return reply.status(403).send({ error: "Cannot delete yourself contact" });
+        return reply.status(403).send({ error: "Cannot delete your own contact card" });
       }
 
       try {
