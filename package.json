@@ -2,7 +2,7 @@
   "name": "bondery-monorepo",
   "version": "1.3.0",
   "private": true,
-  "packageManager": "npm@11.10.0",
+  "packageManager": "npm@11.12.0",
   "workspaces": [
     "apps/*",
     "packages/*"
@@ -12,6 +12,7 @@
     "dev:core": "turbo dev --filter=webapp --filter=api --filter=@bondery/emails",
     "dev:extension": "turbo dev --filter=webapp --filter=api --filter=chrome-extension --filter=website",
     "dev:supabase": "turbo dev --filter=supabase-db",
+    "dev:website": "turbo dev --filter=website",
     "build": "turbo build",
     "start": "turbo start",
     "lint": "turbo lint",
@@ -22,13 +23,16 @@
     "generate-openapi"
   ],
   "devDependencies": {
-    "@eslint/eslintrc": "^3.3.3",
-    "@eslint/js": "^8.57.1",
+    "@eslint/eslintrc": "^3.3.5",
+    "@eslint/js": "^9.0.0",
     "@fastify/pre-commit": "^2.2.1",
-    "@redocly/cli": "^2.20.4",
-    "ajv": "^8.17.1",
-    "globals": "^17.3.0",
-    "turbo": "^2.8.16",
-    "yaml": "^2.8.2"
+    "@redocly/cli": "^2.24.1",
+    "ajv": "^8.18.0",
+    "globals": "^17.4.0",
+    "turbo": "^2.8.20",
+    "yaml": "^2.8.3"
+  },
+  "dependencies": {
+    "mcp-remote": "^0.1.38"
   }
 }

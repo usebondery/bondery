@@ -13,13 +13,13 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@bondery/types/supabase.types";
 import { API_ROUTES, WEBAPP_ROUTES } from "@bondery/helpers";
 import {
-  findPersonIdBySocialMedia,
-  type SocialMediaPlatform,
-  upsertContactSocialMedia,
-} from "../../lib/social-media.js";
+  findPersonIdBySocial,
+  type SocialPlatform,
+  upsertContactSocials,
+} from "../../lib/socials.js";
 import { cleanPersonName } from "@bondery/helpers/name-utils";
 import { assignContactsToDefaultImportGroup } from "../../lib/default-import-groups.js";
-import { cachedGeocodeLinkedInPlace } from "../../lib/mapy.js";
+import { cachedGeocodeLinkedInLocation } from "../../lib/mapy.js";
 import {
   toPostgresDate,
   updateContactPhoto,
@@ -40,7 +40,7 @@ const RedirectBody = Type.Object({
   lastName: Type.Optional(NullableString),
   profileImageUrl: Type.Optional(NullableString),
   headline: Type.Optional(NullableString),
-  place: Type.Optional(NullableString),
+  location: Type.Optional(NullableString),
   notes: Type.Optional(NullableString),
   linkedinBio: Type.Optional(NullableString),
   workHistory: Type.Optional(Type.Array(ScrapedWorkHistoryEntrySchema)),
@@ -56,14 +56,14 @@ const RedirectQuery = Type.Object({
   lastName: Type.Optional(Type.String()),
   profileImageUrl: Type.Optional(Type.String()),
   headline: Type.Optional(Type.String()),
-  place: Type.Optional(Type.String()),
+  location: Type.Optional(Type.String()),
 });
 
-function resolvePrimarySocialMedia(payload: {
+function resolvePrimarySocial(payload: {
   instagram?: string;
   linkedin?: string;
   facebook?: string;
-}): { platform: SocialMediaPlatform; handle: string } | null {
+}): { platform: SocialPlatform; handle: string } | null {
   if (payload.instagram?.trim()) {
     return { platform: "instagram", handle: payload.instagram.trim() };
   }
@@ -79,7 +79,7 @@ function resolvePrimarySocialMedia(payload: {
   return null;
 }
 
-function resolveExtensionDefaultGroup(platform: SocialMediaPlatform) {
+function resolveExtensionDefaultGroup(platform: SocialPlatform) {
   if (platform === "linkedin") {
     return "extension_linkedin" as const;
   }
@@ -114,7 +114,7 @@ export async function redirectRoutes(fastify: FastifyInstance) {
         lastName,
         profileImageUrl,
         headline,
-        place,
+        location,
         notes,
         workHistory,
         educationHistory,
@@ -132,8 +132,8 @@ export async function redirectRoutes(fastify: FastifyInstance) {
         });
       }
 
-      const primarySocialMedia = resolvePrimarySocialMedia({ instagram, linkedin, facebook });
-      if (!primarySocialMedia) {
+      const primarySocial = resolvePrimarySocial({ instagram, linkedin, facebook });
+      if (!primarySocial) {
         return reply.status(400).send({
           error: "Instagram, LinkedIn, or Facebook username is required",
         });
@@ -141,11 +141,11 @@ export async function redirectRoutes(fastify: FastifyInstance) {
 
       let existingContactId: string | null = null;
       try {
-        existingContactId = await findPersonIdBySocialMedia(
+        existingContactId = await findPersonIdBySocial(
           client,
           user.id,
-          primarySocialMedia.platform,
-          primarySocialMedia.handle,
+          primarySocial.platform,
+          primarySocial.handle,
         );
       } catch {
         return reply.status(500).send({ error: "Failed to look up contact" });
@@ -156,7 +156,7 @@ export async function redirectRoutes(fastify: FastifyInstance) {
         first_name: string | null;
         last_name: string | null;
         headline: string | null;
-        place: string | null;
+        location: string | null;
         latitude: number | null;
         notes: string | null;
       } | null = null;
@@ -164,7 +164,7 @@ export async function redirectRoutes(fastify: FastifyInstance) {
       if (existingContactId) {
         const { data: contactData, error: lookupError } = await (client
           .from("people")
-          .select("id, first_name, last_name, headline, place, latitude, notes")
+          .select("id, first_name, last_name, headline, location, latitude, notes")
           .eq("user_id", user.id)
           .eq("id", existingContactId)
           .single() as unknown as Promise<{
@@ -173,7 +173,7 @@ export async function redirectRoutes(fastify: FastifyInstance) {
             first_name: string | null;
             last_name: string | null;
             headline: string | null;
-            place: string | null;
+            location: string | null;
             latitude: number | null;
             notes: string | null;
           } | null;
@@ -208,26 +208,18 @@ export async function redirectRoutes(fastify: FastifyInstance) {
         // Consolidate field updates into a single query
         const fieldUpdates: Record<string, any> = {};
         if (headline && !existingContact.headline) fieldUpdates.headline = headline;
-        if (place && !existingContact.place) fieldUpdates.place = place;
+        if (location && !existingContact.location) fieldUpdates.location = location;
         if (notes && !existingContact.notes) fieldUpdates.notes = notes;
 
-        // Geocode the place if it's being set for the first time and no coordinates exist yet
-        if (place && !existingContact.place && !existingContact.latitude) {
+        // Geocode the location if it's being set for the first time and no coordinates exist yet
+        if (location && !existingContact.location && !existingContact.latitude) {
           try {
-            const result = await cachedGeocodeLinkedInPlace(place);
+            const result = await cachedGeocodeLinkedInLocation(location);
             if (result) {
               const { geo, timezone: tz } = result;
-              // Use the formatted mapy.com label as the canonical place value
-              if (geo.formattedLabel) fieldUpdates.place = geo.formattedLabel;
-              fieldUpdates.location = geo.locationEwkt;
-              if (geo.city) fieldUpdates.address_city = geo.city;
-              if (geo.state) fieldUpdates.address_state = geo.state;
-              if (geo.stateCode) fieldUpdates.address_state_code = geo.stateCode;
-              if (geo.country) fieldUpdates.address_country = geo.country;
-              if (geo.countryCode) fieldUpdates.address_country_code = geo.countryCode;
-              if (geo.formattedLabel) fieldUpdates.address_formatted = geo.formattedLabel;
-              fieldUpdates.address_granularity = "city";
-              fieldUpdates.address_geocode_source = "mapy.com";
+              // Use the formatted mapy.com label as the canonical location value
+              if (geo.formattedLabel) fieldUpdates.location = geo.formattedLabel;
+              fieldUpdates.gis_point = geo.locationEwkt;
 
               if (tz) fieldUpdates.timezone = tz;
             }
@@ -339,7 +331,7 @@ export async function redirectRoutes(fastify: FastifyInstance) {
       // Create new contact
       const insertData: any = {
         user_id: user.id,
-        first_name: cleanPersonName(firstName) || primarySocialMedia.handle || "Unknown",
+        first_name: cleanPersonName(firstName) || primarySocial.handle || "Unknown",
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       };
@@ -349,26 +341,18 @@ export async function redirectRoutes(fastify: FastifyInstance) {
       if (cleanedMiddleName) insertData.middle_name = cleanedMiddleName;
       if (cleanedLastName) insertData.last_name = cleanedLastName;
       if (headline) insertData.headline = headline;
-      if (place) insertData.place = place;
+      if (location) insertData.location = location;
       if (notes) insertData.notes = notes;
 
-      // Geocode the LinkedIn place string to get coordinates and structured address
-      if (place) {
+      // Geocode the LinkedIn location string to get coordinates and structured address
+      if (location) {
         try {
-          const result = await cachedGeocodeLinkedInPlace(place);
+          const result = await cachedGeocodeLinkedInLocation(location);
           if (result) {
             const { geo, timezone: tz } = result;
-            // Use the formatted mapy.com label as the canonical place value
-            if (geo.formattedLabel) insertData.place = geo.formattedLabel;
-            insertData.location = geo.locationEwkt;
-            if (geo.city) insertData.address_city = geo.city;
-            if (geo.state) insertData.address_state = geo.state;
-            if (geo.stateCode) insertData.address_state_code = geo.stateCode;
-            if (geo.country) insertData.address_country = geo.country;
-            if (geo.countryCode) insertData.address_country_code = geo.countryCode;
-            if (geo.formattedLabel) insertData.address_formatted = geo.formattedLabel;
-            insertData.address_granularity = "city";
-            insertData.address_geocode_source = "mapy.com";
+            // Use the formatted mapy.com label as the canonical location value
+            if (geo.formattedLabel) insertData.location = geo.formattedLabel;
+            insertData.gis_point = geo.locationEwkt;
 
             if (tz) insertData.timezone = tz;
           }
@@ -392,18 +376,18 @@ export async function redirectRoutes(fastify: FastifyInstance) {
       }
 
       try {
-        await upsertContactSocialMedia(
+        await upsertContactSocials(
           client,
           user.id,
           newContact.id,
-          primarySocialMedia.platform,
-          primarySocialMedia.handle,
+          primarySocial.platform,
+          primarySocial.handle,
         );
       } catch {
-        return reply.status(500).send({ error: "Failed to save social media" });
+        return reply.status(500).send({ error: "Failed to save socials" });
       }
 
-      const extensionGroup = resolveExtensionDefaultGroup(primarySocialMedia.platform);
+      const extensionGroup = resolveExtensionDefaultGroup(primarySocial.platform);
       if (extensionGroup) {
         try {
           await assignContactsToDefaultImportGroup(client, user.id, extensionGroup, [
@@ -509,7 +493,7 @@ export async function redirectRoutes(fastify: FastifyInstance) {
         lastName,
         profileImageUrl,
         headline,
-        place,
+        location,
       } = query;
 
       if (!instagram && !linkedin && !facebook) {
@@ -518,8 +502,8 @@ export async function redirectRoutes(fastify: FastifyInstance) {
         });
       }
 
-      const primarySocialMedia = resolvePrimarySocialMedia({ instagram, linkedin, facebook });
-      if (!primarySocialMedia) {
+      const primarySocial = resolvePrimarySocial({ instagram, linkedin, facebook });
+      if (!primarySocial) {
         return reply.status(400).send({
           error: "Instagram, LinkedIn, or Facebook username is required",
         });
@@ -538,11 +522,11 @@ export async function redirectRoutes(fastify: FastifyInstance) {
 
       let existingContactId: string | null = null;
       try {
-        existingContactId = await findPersonIdBySocialMedia(
+        existingContactId = await findPersonIdBySocial(
           client,
           user.id,
-          primarySocialMedia.platform,
-          primarySocialMedia.handle,
+          primarySocial.platform,
+          primarySocial.handle,
         );
       } catch {
         return reply.status(500).send({ error: "Failed to look up contact" });
@@ -551,14 +535,14 @@ export async function redirectRoutes(fastify: FastifyInstance) {
       let existingContact: {
         id: string;
         headline: string | null;
-        place: string | null;
+        location: string | null;
         latitude: number | null;
       } | null = null;
 
       if (existingContactId) {
         const { data: contactData, error: lookupError } = await client
           .from("people")
-          .select("id, headline, place, latitude")
+          .select("id, headline, location, latitude")
           .eq("user_id", user.id)
           .eq("id", existingContactId)
           .single();
@@ -587,24 +571,16 @@ export async function redirectRoutes(fastify: FastifyInstance) {
         // Consolidate field updates into a single query
         const fieldUpdates: Record<string, any> = {};
         if (headline && !existingContact.headline) fieldUpdates.headline = headline;
-        if (place && !existingContact.place) fieldUpdates.place = place;
+        if (location && !existingContact.location) fieldUpdates.location = location;
 
-        // Geocode the place if it's being set for the first time and no coordinates exist yet
-        if (place && !existingContact.place && !existingContact.latitude) {
+        // Geocode the location if it's being set for the first time and no coordinates exist yet
+        if (location && !existingContact.location && !existingContact.latitude) {
           try {
-            const result = await cachedGeocodeLinkedInPlace(place);
+            const result = await cachedGeocodeLinkedInLocation(location);
             if (result) {
               const { geo, timezone: tz } = result;
-              if (geo.formattedLabel) fieldUpdates.place = geo.formattedLabel;
-              fieldUpdates.location = geo.locationEwkt;
-              if (geo.city) fieldUpdates.address_city = geo.city;
-              if (geo.state) fieldUpdates.address_state = geo.state;
-              if (geo.stateCode) fieldUpdates.address_state_code = geo.stateCode;
-              if (geo.country) fieldUpdates.address_country = geo.country;
-              if (geo.countryCode) fieldUpdates.address_country_code = geo.countryCode;
-              if (geo.formattedLabel) fieldUpdates.address_formatted = geo.formattedLabel;
-              fieldUpdates.address_granularity = "city";
-              fieldUpdates.address_geocode_source = "mapy.com";
+              if (geo.formattedLabel) fieldUpdates.location = geo.formattedLabel;
+              fieldUpdates.gis_point = geo.locationEwkt;
 
               if (tz) fieldUpdates.timezone = tz;
             }
@@ -626,7 +602,7 @@ export async function redirectRoutes(fastify: FastifyInstance) {
       // Create new contact
       const insertData: any = {
         user_id: user.id,
-        first_name: cleanPersonName(firstName) || primarySocialMedia.handle || "Unknown",
+        first_name: cleanPersonName(firstName) || primarySocial.handle || "Unknown",
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       };
@@ -636,24 +612,16 @@ export async function redirectRoutes(fastify: FastifyInstance) {
       if (cleanedMiddleName) insertData.middle_name = cleanedMiddleName;
       if (cleanedLastName) insertData.last_name = cleanedLastName;
       if (headline) insertData.headline = headline;
-      if (place) insertData.place = place;
+      if (location) insertData.location = location;
 
-      // Geocode the LinkedIn place string to get coordinates and structured address
-      if (place) {
+      // Geocode the LinkedIn location string to get coordinates and structured address
+      if (location) {
         try {
-          const result = await cachedGeocodeLinkedInPlace(place);
+          const result = await cachedGeocodeLinkedInLocation(location);
           if (result) {
             const { geo, timezone: tz } = result;
-            if (geo.formattedLabel) insertData.place = geo.formattedLabel;
-            insertData.location = geo.locationEwkt;
-            if (geo.city) insertData.address_city = geo.city;
-            if (geo.state) insertData.address_state = geo.state;
-            if (geo.stateCode) insertData.address_state_code = geo.stateCode;
-            if (geo.country) insertData.address_country = geo.country;
-            if (geo.countryCode) insertData.address_country_code = geo.countryCode;
-            if (geo.formattedLabel) insertData.address_formatted = geo.formattedLabel;
-            insertData.address_granularity = "city";
-            insertData.address_geocode_source = "mapy.com";
+            if (geo.formattedLabel) insertData.location = geo.formattedLabel;
+            insertData.gis_point = geo.locationEwkt;
 
             if (tz) insertData.timezone = tz;
           }
@@ -676,18 +644,18 @@ export async function redirectRoutes(fastify: FastifyInstance) {
       }
 
       try {
-        await upsertContactSocialMedia(
+        await upsertContactSocials(
           client,
           user.id,
           newContact.id,
-          primarySocialMedia.platform,
-          primarySocialMedia.handle,
+          primarySocial.platform,
+          primarySocial.handle,
         );
       } catch {
-        return reply.status(500).send({ error: "Failed to save social media" });
+        return reply.status(500).send({ error: "Failed to save socials" });
       }
 
-      const extensionGroup = resolveExtensionDefaultGroup(primarySocialMedia.platform);
+      const extensionGroup = resolveExtensionDefaultGroup(primarySocial.platform);
       if (extensionGroup) {
         try {
           await assignContactsToDefaultImportGroup(client, user.id, extensionGroup, [

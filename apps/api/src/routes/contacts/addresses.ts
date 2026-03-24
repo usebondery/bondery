@@ -9,6 +9,7 @@ type ContactWithAddresses = {
 type AddressRow = {
   person_id: string;
   type: string;
+  label: string | null;
   value: string;
   latitude: number | null;
   longitude: number | null;
@@ -23,6 +24,8 @@ type AddressRow = {
   address_granularity: string;
   address_formatted: string | null;
   address_geocode_source: string | null;
+  geocode_confidence: string | null;
+  timezone: string | null;
 };
 
 function normalizeAddressType(value: unknown): ContactAddressType {
@@ -125,8 +128,8 @@ export function parseAddressEntries(input: unknown): ContactAddressEntry[] {
     throw new Error("addresses must be an array");
   }
 
-  if (input.length > 3) {
-    throw new Error("addresses can contain at most 3 entries");
+  if (input.length > 5) {
+    throw new Error("addresses can contain at most 5 entries");
   }
 
   const parsed = input.map((item, index) => {
@@ -157,6 +160,7 @@ export function parseAddressEntries(input: unknown): ContactAddressEntry[] {
     return {
       value: maybeValue.trim(),
       type: normalizeAddressType((item as Record<string, unknown>).type),
+      label: normalizeNullableText((item as Record<string, unknown>).label),
       latitude: normalizedCoordinates.latitude,
       longitude: normalizedCoordinates.longitude,
       addressLine1: normalizeNullableText((item as Record<string, unknown>).addressLine1),
@@ -173,14 +177,11 @@ export function parseAddressEntries(input: unknown): ContactAddressEntry[] {
       addressFormatted: normalizeNullableText((item as Record<string, unknown>).addressFormatted),
       addressGeocodeSource: normalizeNullableText(
         (item as Record<string, unknown>).addressGeocodeSource,
-      ),
+      ) as ContactAddressEntry["addressGeocodeSource"],
+      geocodeConfidence: null,
+      timezone: normalizeNullableText((item as Record<string, unknown>).timezone),
     } as ContactAddressEntry;
   });
-
-  const uniqueTypes = new Set(parsed.map((entry) => entry.type));
-  if (uniqueTypes.size !== parsed.length) {
-    throw new Error("addresses cannot contain duplicate types");
-  }
 
   return parsed;
 }
@@ -207,7 +208,7 @@ export async function attachContactAddresses<T extends ContactWithId>(
   const { data: addressRows, error: addressError } = await client
     .from("people_addresses")
     .select(
-      "person_id, type, value, latitude, longitude, address_line1, address_line2, address_city, address_postal_code, address_state, address_state_code, address_country, address_country_code, address_granularity, address_formatted, address_geocode_source",
+      "person_id, type, label, value, latitude, longitude, address_line1, address_line2, address_city, address_postal_code, address_state, address_state_code, address_country, address_country_code, address_granularity, address_formatted, address_geocode_source, geocode_confidence, timezone",
     )
     .eq("user_id", userId)
     .in("person_id", personIds)
@@ -236,6 +237,7 @@ export async function attachContactAddresses<T extends ContactWithId>(
     bucket.push({
       value: row.value,
       type: normalizeAddressType(row.type),
+      label: row.label,
       latitude: normalizedCoordinates.latitude,
       longitude: normalizedCoordinates.longitude,
       addressLine1: row.address_line1,
@@ -248,7 +250,11 @@ export async function attachContactAddresses<T extends ContactWithId>(
       addressCountryCode: row.address_country_code,
       addressGranularity: normalizeAddressGranularity(row.address_granularity),
       addressFormatted: row.address_formatted,
-      addressGeocodeSource: row.address_geocode_source,
+      addressGeocodeSource: (row.address_geocode_source ??
+        null) as ContactAddressEntry["addressGeocodeSource"],
+      geocodeConfidence: (row.geocode_confidence ??
+        null) as ContactAddressEntry["geocodeConfidence"],
+      timezone: row.timezone,
     });
   }
 
@@ -290,6 +296,7 @@ export async function replaceContactAddresses(
     user_id: userId,
     person_id: personId,
     type: address.type,
+    label: address.label,
     value: address.value,
     latitude: address.latitude,
     longitude: address.longitude,
@@ -304,6 +311,8 @@ export async function replaceContactAddresses(
     address_granularity: address.addressGranularity,
     address_formatted: address.addressFormatted,
     address_geocode_source: address.addressGeocodeSource,
+    geocode_confidence: address.geocodeConfidence,
+    timezone: address.timezone,
     sort_order: index,
   }));
 

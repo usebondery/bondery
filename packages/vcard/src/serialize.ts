@@ -106,8 +106,27 @@ function pushTextValues(lines: string[], name: string, values: VCardTextValue[])
 
 function pushMediaValues(lines: string[], name: string, values: VCardMedia[]): void {
   for (const item of values) {
+    if (item.source === "data-uri") {
+      // Use ENCODING=b format for broad client compatibility (Google Contacts, etc.)
+      const dataUriMatch = item.uri.match(/^data:([^;]+);base64,(.+)$/s);
+      if (dataUriMatch) {
+        const mimeType = dataUriMatch[1];
+        const base64Data = dataUriMatch[2];
+        const typeSubtype = (mimeType.split("/")[1] ?? "jpeg").toUpperCase();
+        const parameters: VCardParameter[] = [
+          { name: "ENCODING", values: ["b"] },
+          { name: "TYPE", values: [typeSubtype] },
+        ];
+        if (item.pref !== undefined) {
+          parameters.push({ name: "PREF", values: [String(item.pref)] });
+        }
+        appendLine(lines, { name, parameters, value: base64Data });
+        continue;
+      }
+    }
+
     const parameters: VCardParameter[] = [{ name: "VALUE", values: ["uri"] }];
-    if (item.mediaType && !item.uri.startsWith("data:")) {
+    if (item.mediaType) {
       parameters.push({ name: "MEDIATYPE", values: [item.mediaType] });
     }
     if (item.types.length > 0) {
@@ -136,9 +155,6 @@ function pushAddress(lines: string[], address: VCardAddress): void {
   }
   if (address.label) {
     parameters.push({ name: "LABEL", values: [escapeText(address.label)] });
-  }
-  if (address.geo) {
-    parameters.push({ name: "GEO", values: [address.geo] });
   }
   if (address.tz) {
     parameters.push({ name: "TZ", values: [address.tz] });

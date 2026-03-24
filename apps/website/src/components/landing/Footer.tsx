@@ -1,5 +1,6 @@
 import { Box, Divider, Flex, Paper, Text, Title } from "@mantine/core";
 import {
+  IconBrandDiscordFilled,
   IconBrandGithubFilled,
   IconBrandLinkedinFilled,
   IconBrandReddit,
@@ -80,6 +81,7 @@ export function Footer() {
             <LinkGroup
               title="Company"
               links={[
+                { key: "blog", title: "Blog", href: WEBSITE_ROUTES.BLOG },
                 { key: "contact", title: "Contact us", href: WEBSITE_ROUTES.CONTACT },
                 { key: "status", title: "Status", href: "/status", target: "_blank" },
               ]}
@@ -99,25 +101,16 @@ export function Footer() {
               title="Connect with us"
               links={[
                 {
-                  key: "github",
+                  key: "discord",
                   title: (
                     <Flex align="center" gap={4}>
-                      <IconBrandGithubFilled size={16} /> GitHub
+                      <IconBrandDiscordFilled size={16} /> Discord
                     </Flex>
                   ),
-                  href: SOCIAL_LINKS.github,
+                  href: SOCIAL_LINKS.discord,
                   target: "_blank",
                 },
-                {
-                  key: "linkedin",
-                  title: (
-                    <Flex align="center" gap={4}>
-                      <IconBrandLinkedinFilled size={16} /> LinkedIn
-                    </Flex>
-                  ),
-                  href: SOCIAL_LINKS.linkedin,
-                  target: "_blank",
-                },
+
                 {
                   key: "reddit",
                   title: (
@@ -136,6 +129,26 @@ export function Footer() {
                     </Flex>
                   ),
                   href: SOCIAL_LINKS.x,
+                  target: "_blank",
+                },
+                {
+                  key: "linkedin",
+                  title: (
+                    <Flex align="center" gap={4}>
+                      <IconBrandLinkedinFilled size={16} /> LinkedIn
+                    </Flex>
+                  ),
+                  href: SOCIAL_LINKS.linkedin,
+                  target: "_blank",
+                },
+                {
+                  key: "github",
+                  title: (
+                    <Flex align="center" gap={4}>
+                      <IconBrandGithubFilled size={16} /> GitHub
+                    </Flex>
+                  ),
+                  href: SOCIAL_LINKS.github,
                   target: "_blank",
                 },
               ]}

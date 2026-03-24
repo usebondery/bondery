@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { formatMetadataTitle } from "@bondery/helpers";
 import { Privacy } from "@/components/legal";
 
 export const metadata: Metadata = {
@@ -8,13 +9,13 @@ export const metadata: Metadata = {
     canonical: "/privacy",
   },
   openGraph: {
-    title: "Privacy Policy | Bondery",
+    title: formatMetadataTitle("Privacy Policy"),
     description: "Learn how Bondery collects, uses, and protects your data.",
     url: "/privacy",
     type: "website",
   },
   twitter: {
-    title: "Privacy Policy | Bondery",
+    title: formatMetadataTitle("Privacy Policy"),
     description: "Learn how Bondery collects, uses, and protects your data.",
   },
 };

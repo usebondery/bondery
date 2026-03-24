@@ -7,7 +7,8 @@ export type DefaultImportGroupKey =
   | "instagram_following"
   | "instagram_close_friends"
   | "extension_linkedin"
-  | "extension_instagram";
+  | "extension_instagram"
+  | "vcard_import";
 
 const DEFAULT_IMPORT_GROUPS: Record<
   DefaultImportGroupKey,
@@ -46,6 +47,11 @@ const DEFAULT_IMPORT_GROUPS: Record<
     label: "Instagram: Extension Import",
     color: "#E4405F",
     emoji: "📷",
+  },
+  vcard_import: {
+    label: "Mobile Contacts",
+    color: "#4CAF50",
+    emoji: "📱",
   },
 };
 

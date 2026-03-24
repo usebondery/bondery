@@ -188,7 +188,7 @@ function getInstagramSnapshot() {
     lastName: parsedName.lastName || undefined,
     profileImageUrl: interceptedMeta?.photoUrl || img?.src || undefined,
     headline: interceptedMeta?.category || undefined,
-    place: getAddressPlace(interceptedMeta),
+    location: getAddressPlace(interceptedMeta),
     notes: interceptedMeta?.description || undefined,
   };
 }

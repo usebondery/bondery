@@ -3,9 +3,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
+  Divider,
   Group,
+  Paper,
   Stack,
   Text,
+  Title,
   Alert,
   Badge,
   List,
@@ -112,7 +115,7 @@ function toPreviewContact(contact: LinkedInPreparedContact): Contact {
     middleName: contact.middleName,
     lastName: contact.lastName,
     headline: buildImportedTitle(contact.position, contact.company),
-    place: null,
+    location: null,
     notes: null,
     avatar: null,
     lastInteraction: null,
@@ -132,17 +135,6 @@ function toPreviewContact(contact: LinkedInPreparedContact): Contact {
     location: null,
     latitude: null,
     longitude: null,
-    addressLine1: null,
-    addressLine2: null,
-    addressCity: null,
-    addressPostalCode: null,
-    addressState: null,
-    addressStateCode: null,
-    addressCountry: null,
-    addressCountryCode: null,
-    addressGranularity: "address",
-    addressFormatted: null,
-    addressGeocodeSource: null,
   };
 }
 
@@ -445,24 +437,41 @@ export function LinkedInImportModal({
 
   if (step === "intro") {
     return (
-      <Stack gap="md">
-        <Group align="flex-start" wrap="nowrap" gap="lg">
-          <ThemeIcon size={92} radius="xl" variant="light" color="blue">
-            <IconBrandLinkedin size={56} />
+      <Stack gap="xl">
+        <Stack align="center" gap="md" pt="sm">
+          <ThemeIcon size={110} radius="xl" variant="light" color="blue">
+            <IconBrandLinkedin size={64} />
           </ThemeIcon>
-          <Stack gap="md">
-            <Text fw={600}>{t("IntroTitle")}</Text>
-            <Text size="sm" c="dimmed">
-              {t("IntroDescription1")}
-            </Text>
-            <Text size="sm" c="dimmed">
-              {t("IntroDescription2")}
-            </Text>
-            <Text size="sm" c="dimmed">
-              {t("IntroDescription3")}
-            </Text>
+          <Title order={4} ta="center">
+            {t("IntroTitle")}
+          </Title>
+        </Stack>
+
+        <Paper withBorder p="md" radius="md">
+          <Stack gap="sm">
+            <Group gap="sm" wrap="nowrap" align="flex-start">
+              <IconCircleCheck
+                size={18}
+                style={{ flexShrink: 0, marginTop: 1, color: "var(--mantine-color-blue-6)" }}
+              />
+              <Text size="sm">{t("IntroDescription1")}</Text>
+            </Group>
+            <Group gap="sm" wrap="nowrap" align="flex-start">
+              <IconCircleCheck
+                size={18}
+                style={{ flexShrink: 0, marginTop: 1, color: "var(--mantine-color-blue-6)" }}
+              />
+              <Text size="sm">{t("IntroDescription2")}</Text>
+            </Group>
+            <Group gap="sm" wrap="nowrap" align="flex-start">
+              <IconCircleCheck
+                size={18}
+                style={{ flexShrink: 0, marginTop: 1, color: "var(--mantine-color-blue-6)" }}
+              />
+              <Text size="sm">{t("IntroDescription3")}</Text>
+            </Group>
           </Stack>
-        </Group>
+        </Paper>
 
         <ModalFooter
           cancelLabel={t("Cancel")}
@@ -478,14 +487,25 @@ export function LinkedInImportModal({
   if (step === "instructions") {
     return (
       <Stack gap="md">
-        <Group align="center" wrap="nowrap" gap="xl">
-          <ThemeIcon size={92} radius="xl" variant="light" color="blue">
-            <IconBrandLinkedin size={56} />
-          </ThemeIcon>
-          <Stack gap="md" flex={1}>
-            <Text fw={600}>{t("InstructionsTitle")}</Text>
-            <List type="ordered" listStyleType="decimal" withPadding size="sm">
-              <List.Item>
+        <Paper withBorder p="md" radius="md">
+          <Stack gap="sm">
+            <Text fw={600} size="sm" ta="center">
+              {t("InstructionsTitle")}
+            </Text>
+            <Divider />
+            <Group gap="sm" wrap="nowrap" align="center">
+              <ThemeIcon
+                size={22}
+                radius="xl"
+                variant="filled"
+                color="blue"
+                style={{ flexShrink: 0 }}
+              >
+                <Text component="span" size="xs" fw={700} lh={1}>
+                  1
+                </Text>
+              </ThemeIcon>
+              <Text size="sm">
                 {t("InstructionStep1Prefix")}{" "}
                 <Anchor
                   href="https://www.linkedin.com/mypreferences/d/download-my-data"
@@ -494,29 +514,36 @@ export function LinkedInImportModal({
                 >
                   {t("InstructionStep1LinkLabel")}
                 </Anchor>
-              </List.Item>
-
-              <List.Item>{t("InstructionStep2")}</List.Item>
-              <List.Item>{t("InstructionStep3")}</List.Item>
-              <List.Item>{t("InstructionStep4")}</List.Item>
-            </List>
-
-            <Alert color="blue" variant="light">
-              <Stack gap={4}>
-                <Text size="sm" fw={600}>
-                  {t("FilesAlertTitle")}
-                </Text>
-                <Text size="sm">
-                  {t("FilesAlertDescriptionPrefix")}{" "}
-                  <Text component="span" fw={700}>
-                    {t("FilesAlertFileConnectionsBold")}
+              </Text>
+            </Group>
+            {[t("InstructionStep2"), t("InstructionStep3"), t("InstructionStep4")].map((s, i) => (
+              <Group key={i} gap="sm" wrap="nowrap" align="center">
+                <ThemeIcon
+                  size={22}
+                  radius="xl"
+                  variant="filled"
+                  color="blue"
+                  style={{ flexShrink: 0 }}
+                >
+                  <Text component="span" size="xs" fw={700} lh={1}>
+                    {i + 2}
                   </Text>
-                  . {t("FilesAlertDescriptionSuffix")}
-                </Text>
-              </Stack>
-            </Alert>
+                </ThemeIcon>
+                <Text size="sm">{s}</Text>
+              </Group>
+            ))}
           </Stack>
-        </Group>
+        </Paper>
+
+        <Alert color="blue" variant="light" title={t("FilesAlertTitle")}>
+          <Text size="sm">
+            {t("FilesAlertDescriptionPrefix")}{" "}
+            <Text component="span" fw={700}>
+              {t("FilesAlertFileConnectionsBold")}
+            </Text>
+            . {t("FilesAlertDescriptionSuffix")}
+          </Text>
+        </Alert>
 
         <ModalFooter
           backLabel={t("Back")}

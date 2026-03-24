@@ -4,14 +4,6 @@
 @source "@bondery/branding/**/*.{ts,tsx}";
 @source "@bondery/mantine-next/**/*.{ts,tsx}";
 
-@import "@mantine/core/styles.css";
-@import "@mantine/notifications/styles.css";
-@import "@mantine/dates/styles.css";
-@import "@mantine/tiptap/styles.css";
-@import "@mantine/dropzone/styles.css";
-@import "flag-icons/css/flag-icons.min.css";
-@import "@bondery/mantine-next/styles";
-
 /* Editor placeholder: rendered via Tiptap Placeholder extension (text set in JS config) */
 .tiptap p.is-editor-empty:first-child::before {
   content: attr(data-placeholder);

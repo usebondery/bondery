@@ -20,6 +20,7 @@ import {
   setCancelled,
   setPendingQueueStatus,
 } from "@/lib/extension/enrichBatchStore";
+import { captureEvent } from "@/lib/analytics/client";
 
 /** Number of consecutive timeouts before the circuit breaker aborts the loop. */
 const MAX_CONSECUTIVE_TIMEOUTS = 5;
@@ -263,6 +264,8 @@ export function useBatchEnrichFromLinkedIn() {
       return;
     }
 
+    captureEvent("batch_enrich_started", { eligible_count: totalEligible });
+
     setCancelled(false);
     setState({
       isLoading: false,
@@ -300,6 +303,7 @@ export function useBatchEnrichFromLinkedIn() {
         }),
       );
     } else if (!isCancelled() && completedCount > 0) {
+      captureEvent("batch_enrich_completed", { total_enriched: completedCount });
       notifications.show(
         successNotificationTemplate({
           title: t("AllDoneTitle"),
@@ -411,6 +415,7 @@ export function useBatchEnrichFromLinkedIn() {
           }),
         );
       } else if (!isCancelled() && completedCount > 0) {
+        captureEvent("contact_enriched_linkedin");
         notifications.show(
           successNotificationTemplate({
             title: t("AllDoneTitle"),
@@ -525,7 +530,7 @@ export function useBatchEnrichFromLinkedIn() {
         title: t("PausingTitle"),
         description: t("PausingDescription"),
       }),
-      autoClose: 4000,
+      autoClose: 6000,
     });
   }, [t]);
 

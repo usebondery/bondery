@@ -22,7 +22,7 @@ import { PersonAvatarTooltip } from "../PersonAvatar/PersonAvatarTooltip";
 type PersonChipIdentity = ContactPreview & {
   middleName?: string | null;
   headline?: string | null;
-  place?: string | null;
+  location?: string | null;
 };
 
 function formatPersonName(candidate: PersonChipIdentity): string {
@@ -134,6 +134,9 @@ export function PersonChip({
     </span>
   ) : null;
 
+  const shouldShowChevron =
+    isSelectable && !disabled && ((person && !onClear) || (!person && showChevronWhenEmpty));
+
   const renderBadge = () => (
     <Badge
       variant={badgeVariant}
@@ -161,7 +164,7 @@ export function PersonChip({
           >
             <IconX size={clearSize} />
           </span>
-        ) : isSelectable && (person || showChevronWhenEmpty) ? (
+        ) : shouldShowChevron ? (
           <span style={{ display: "inline-flex", alignItems: "center", marginInlineEnd: -2 }}>
             <IconChevronDown size={chevronSize} />
           </span>
@@ -233,7 +236,7 @@ export function PersonChip({
         </UnstyledButton>
       </Combobox.Target>
 
-      <Combobox.Dropdown className="min-w-64">
+      <Combobox.Dropdown className="min-w-80">
         <Combobox.Search
           ref={searchInputRef}
           value={search}

@@ -34,6 +34,7 @@ export type ContactAddressType = "home" | "work" | "other";
 export interface ContactAddressEntry {
   value: string;
   type: ContactAddressType;
+  label: string | null;
   latitude: number | null;
   longitude: number | null;
   addressLine1: string | null;
@@ -46,7 +47,9 @@ export interface ContactAddressEntry {
   addressCountryCode: string | null;
   addressGranularity: "address" | "city" | "state" | "country";
   addressFormatted: string | null;
-  addressGeocodeSource: string | null;
+  addressGeocodeSource: "mapy.com" | "manual" | null;
+  geocodeConfidence: "verified" | "unverifiable" | null;
+  timezone: string | null;
 }
 
 export type ImportantDateType = "birthday" | "anniversary" | "nameday" | "graduation" | "other";
@@ -84,7 +87,7 @@ export interface Contact {
   middleName: string | null;
   lastName: string | null;
   headline: string | null;
-  place: string | null;
+  location: string | null;
   notes: string | null;
   notesUpdatedAt?: string | null;
   avatar: string | null;
@@ -108,20 +111,9 @@ export interface Contact {
   position?: Json | null;
   language: string | null;
   timezone: string | null;
-  location: string | null;
+  gisPoint: string | null;
   latitude: number | null;
   longitude: number | null;
-  addressLine1: string | null;
-  addressLine2: string | null;
-  addressCity: string | null;
-  addressPostalCode: string | null;
-  addressState: string | null;
-  addressStateCode: string | null;
-  addressCountry: string | null;
-  addressCountryCode: string | null;
-  addressGranularity: "address" | "city" | "state" | "country";
-  addressFormatted: string | null;
-  addressGeocodeSource: string | null;
 }
 
 /**

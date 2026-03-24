@@ -224,93 +224,60 @@ export type Database = {
       };
       people: {
         Row: {
-          address_city: string | null;
-          address_country: string | null;
-          address_country_code: string | null;
-          address_formatted: string | null;
-          address_geocode_source: string | null;
-          address_granularity: string;
-          address_line1: string | null;
-          address_line2: string | null;
-          address_postal_code: string | null;
-          address_state: string | null;
-          address_state_code: string | null;
           created_at: string | null;
           first_name: string;
+          gis_point: unknown;
           id: string;
           language: string | null;
           last_interaction: string | null;
           last_name: string | null;
           latitude: number | null;
-          location: unknown;
+          location: string | null;
           longitude: number | null;
           middle_name: string | null;
           myself: boolean | null;
           notes: string | null;
           notes_updated_at: string | null;
-          place: string | null;
           timezone: string | null;
           headline: string | null;
           updated_at: string | null;
           user_id: string;
         };
         Insert: {
-          address_city?: string | null;
-          address_country?: string | null;
-          address_country_code?: string | null;
-          address_formatted?: string | null;
-          address_geocode_source?: string | null;
-          address_granularity?: string;
-          address_line1?: string | null;
-          address_line2?: string | null;
-          address_postal_code?: string | null;
-          address_state?: string | null;
-          address_state_code?: string | null;
           created_at?: string | null;
           first_name: string;
+          gis_point?: unknown;
           id?: string;
           language?: string | null;
           last_interaction?: string | null;
           last_name?: string | null;
           latitude?: number | null;
-          location?: unknown;
+          location?: string | null;
           longitude?: number | null;
           middle_name?: string | null;
           myself?: boolean | null;
           notes?: string | null;
           notes_updated_at?: string | null;
-          place?: string | null;
           timezone?: string | null;
           headline?: string | null;
           updated_at?: string | null;
           user_id: string;
         };
         Update: {
-          address_city?: string | null;
-          address_country?: string | null;
-          address_country_code?: string | null;
-          address_formatted?: string | null;
-          address_geocode_source?: string | null;
-          address_granularity?: string;
-          address_line1?: string | null;
-          address_line2?: string | null;
-          address_postal_code?: string | null;
-          address_state?: string | null;
-          address_state_code?: string | null;
           created_at?: string | null;
           first_name?: string;
+          gis_point?: unknown;
           id?: string;
           language?: string | null;
           last_interaction?: string | null;
           last_name?: string | null;
           latitude?: number | null;
-          location?: unknown;
+          location?: string | null;
           longitude?: number | null;
           middle_name?: string | null;
           myself?: boolean | null;
           notes?: string | null;
           notes_updated_at?: string | null;
-          place?: string | null;
           timezone?: string | null;
           headline?: string | null;
           updated_at?: string | null;
@@ -332,11 +299,15 @@ export type Database = {
           address_state: string | null;
           address_state_code: string | null;
           created_at: string;
+          geocode_confidence: string | null;
           id: string;
+          label: string | null;
           latitude: number | null;
+          gis_point: unknown;
           longitude: number | null;
           person_id: string;
           sort_order: number;
+          timezone: string | null;
           type: string;
           updated_at: string;
           user_id: string;
@@ -355,11 +326,14 @@ export type Database = {
           address_state?: string | null;
           address_state_code?: string | null;
           created_at?: string;
+          geocode_confidence?: string | null;
           id?: string;
+          label?: string | null;
           latitude?: number | null;
           longitude?: number | null;
           person_id: string;
           sort_order?: number;
+          timezone?: string | null;
           type?: string;
           updated_at?: string;
           user_id: string;
@@ -378,11 +352,14 @@ export type Database = {
           address_state?: string | null;
           address_state_code?: string | null;
           created_at?: string;
+          geocode_confidence?: string | null;
           id?: string;
+          label?: string | null;
           latitude?: number | null;
           longitude?: number | null;
           person_id?: string;
           sort_order?: number;
+          timezone?: string | null;
           type?: string;
           updated_at?: string;
           user_id?: string;
@@ -759,7 +736,7 @@ export type Database = {
           },
         ];
       };
-      people_social_media: {
+      people_socials: {
         Row: {
           connected_at: string | null;
           created_at: string;
@@ -792,7 +769,7 @@ export type Database = {
         };
         Relationships: [
           {
-            foreignKeyName: "people_social_media_person_id_fkey";
+            foreignKeyName: "people_socials_person_id_fkey";
             columns: ["person_id"];
             isOneToOne: false;
             referencedRelation: "people";
@@ -952,6 +929,7 @@ export type Database = {
           color_scheme: Database["public"]["Enums"]["color_scheme"];
           created_at: string | null;
           id: string;
+          is_admin: boolean;
           language: string | null;
           middlename: string | null;
           name: string | null;
@@ -968,6 +946,7 @@ export type Database = {
           color_scheme?: Database["public"]["Enums"]["color_scheme"];
           created_at?: string | null;
           id?: string;
+          is_admin?: boolean;
           language?: string | null;
           middlename?: string | null;
           name?: string | null;
@@ -984,6 +963,7 @@ export type Database = {
           color_scheme?: Database["public"]["Enums"]["color_scheme"];
           created_at?: string | null;
           id?: string;
+          is_admin?: boolean;
           language?: string | null;
           middlename?: string | null;
           name?: string | null;
@@ -1039,6 +1019,36 @@ export type Database = {
           p_rows: Json;
         };
         Returns: undefined;
+      };
+      get_funnel_stats: {
+        Args: {
+          p_weeks?: number;
+        };
+        Returns: {
+          week: string;
+          signups: number;
+          contacts: number;
+          interactions: number;
+        }[];
+      };
+      get_funnel_periods: {
+        Args: never;
+        Returns: {
+          period_key: string;
+          period_label: string;
+          signups: number;
+          contacts: number;
+          interactions: number;
+          signups_to_contacts_pct: number;
+          contacts_to_interactions_pct: number;
+        }[];
+      };
+      get_total_users_growth: {
+        Args: never;
+        Returns: {
+          date: string;
+          total: number;
+        }[];
       };
       get_linkedin_enrich_eligible: {
         Args: {

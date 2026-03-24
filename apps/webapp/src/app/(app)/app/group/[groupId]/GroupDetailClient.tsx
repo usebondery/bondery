@@ -149,7 +149,7 @@ export function GroupDetailClient({
       icon: <IconBriefcase size={16} />,
     },
     {
-      key: "place",
+      key: "location",
       label: "Location",
       visible: true,
       icon: <IconMapPin size={16} />,
@@ -162,7 +162,7 @@ export function GroupDetailClient({
     },
     {
       key: "social",
-      label: "Social Media",
+      label: "Socials",
       visible: true,
       icon: <IconBrandLinkedin size={16} />,
     },

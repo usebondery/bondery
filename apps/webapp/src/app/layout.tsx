@@ -1,5 +1,12 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import "@mantine/core/styles.css";
+import "@mantine/notifications/styles.css";
+import "@mantine/dates/styles.css";
+import "@mantine/tiptap/styles.css";
+import "@mantine/dropzone/styles.css";
+import "flag-icons/css/flag-icons.min.css";
+import "@bondery/mantine-next/styles";
 import { bonderyTheme } from "@bondery/mantine-next";
 import { Notifications } from "@mantine/notifications";
 import { ModalsProvider } from "@mantine/modals";
@@ -33,7 +40,7 @@ export default async function RootLayout({
       <body>
         <MantineProvider defaultColorScheme="auto" theme={bonderyTheme}>
           <ModalsProvider modalProps={{ centered: true }}>
-            <Notifications autoClose={5000} position="top-center" />
+            <Notifications autoClose={6000} position="top-center" />
             {children}
           </ModalsProvider>
         </MantineProvider>

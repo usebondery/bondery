@@ -113,7 +113,7 @@ function getLinkedInSnapshot() {
 
   const contactInfoLink = topCard.querySelector("#top-card-text-details-contact-info");
   const placeElement = contactInfoLink?.parentElement?.previousElementSibling || null;
-  const place = placeElement?.textContent?.trim() || undefined;
+  const location = placeElement?.textContent?.trim() || undefined;
 
   const profilePhotoImg = topCard.querySelector(
     "button[aria-label*='profile picture'] img",
@@ -151,7 +151,7 @@ function getLinkedInSnapshot() {
     lastName,
     profileImageUrl,
     headline,
-    place,
+    location,
     workHistory: extractWorkExperience(),
   };
 }
@@ -396,7 +396,7 @@ async function checkForPendingEnrich(): Promise<void> {
           lastName: snapshot.lastName,
           profileImageUrl: snapshot.profileImageUrl,
           headline: snapshot.headline,
-          place: snapshot.place,
+          location: snapshot.location,
           workHistory,
           educationHistory,
           linkedinBio,

@@ -30,7 +30,7 @@ export const INPUT_MAX_LENGTHS = {
   middleName: 50,
   lastName: 50,
   headline: 100,
-  place: 100,
+  location: 100,
   description: 500,
   dateName: 50,
 } as const;
@@ -41,6 +41,7 @@ export const FEATURES = {
 
 export const LIMITS = {
   maxImportantDates: 5,
+  maxAddresses: 5,
 } as const;
 
 export const IMPORTANT_DATE_TYPE_OPTIONS: ReadonlyArray<{

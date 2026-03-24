@@ -444,8 +444,10 @@ export function DataTable<TRow, TSortKey extends string = string>({
       <Stack gap={2}>
         <Text size="sm" c="dimmed">
           {effectiveSelectedCount > 0
-            ? (labels.selectedCountTemplate?.replace("{count}", String(effectiveSelectedCount)) ??
-              `${effectiveSelectedCount} selected`)
+            ? effectiveSelectedCount === 1 && labels.selectedSingularCountTemplate
+              ? labels.selectedSingularCountTemplate
+              : (labels.selectedCountTemplate?.replace("{count}", String(effectiveSelectedCount)) ??
+                `${effectiveSelectedCount} selected`)
             : (labels.totalCountTemplate?.replace("{count}", String(data.length)) ??
               `${data.length} total items`)}
         </Text>
@@ -567,18 +569,19 @@ export function DataTable<TRow, TSortKey extends string = string>({
 
             {visibleColumns.map((col) => (
               <TableTh key={col.key} className={col.minWidthClass}>
-                {!col.hideHeader && (col.icon ? (
-                  <Group gap="xs" wrap="nowrap" style={{ width: "fit-content" }}>
-                    {col.icon}
+                {!col.hideHeader &&
+                  (col.icon ? (
+                    <Group gap="xxs" wrap="nowrap" style={{ width: "fit-content" }}>
+                      {col.icon}
+                      <Text size="sm" fw={500}>
+                        {col.label}
+                      </Text>
+                    </Group>
+                  ) : (
                     <Text size="sm" fw={500}>
                       {col.label}
                     </Text>
-                  </Group>
-                ) : (
-                  <Text size="sm" fw={500}>
-                    {col.label}
-                  </Text>
-                ))}
+                  ))}
               </TableTh>
             ))}
 

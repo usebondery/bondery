@@ -1,6 +1,6 @@
 "use client";
 
-import { Group, Space, Text, Tooltip } from "@mantine/core";
+import { Avatar, Group, Space, Stack, Text, Tooltip } from "@mantine/core";
 import {
   IconArrowMerge,
   IconBrandFacebook,
@@ -32,14 +32,23 @@ import {
   type SortOption,
 } from "@bondery/mantine-next";
 import { formatContactName } from "@/lib/nameHelpers";
-import { createSocialMediaUrl } from "@/lib/socialMediaHelpers";
+import { createSocialUrl } from "@/lib/socialsHelpers";
 import {
   getSocialActionTooltip,
   SOCIAL_ACTION_ORDER,
   type SocialActionKey,
 } from "@/lib/socialActionTooltips";
+import { getTelephoneReactMaskExpression, countryCodes } from "@/lib/phoneHelpers";
 
-export type ColumnKey = "name" | "headline" | "place" | "lastInteraction" | "social";
+export type ColumnKey =
+  | "name"
+  | "headline"
+  | "location"
+  | "lastInteraction"
+  | "social"
+  | "phone"
+  | "email"
+  | "avatar";
 export type SortOrder =
   | "nameAsc"
   | "nameDesc"
@@ -48,12 +57,47 @@ export type SortOrder =
   | "interactionAsc"
   | "interactionDesc";
 
+/**
+ * Formats a phone number for display using the appropriate country mask.
+ * @param prefix Country code prefix (e.g., "+420", "+1")
+ * @param value Phone number digits
+ * @returns Formatted phone string
+ */
+function formatPhoneForDisplay(prefix: string, value: string): string {
+  if (!value) return prefix || "";
+
+  const mask = getTelephoneReactMaskExpression(prefix);
+  const digits = value.replace(/\D/g, "");
+
+  let formatted = "";
+  let digitIndex = 0;
+
+  for (const char of mask) {
+    if (char === "0" && digitIndex < digits.length) {
+      formatted += digits[digitIndex];
+      digitIndex++;
+    } else if (char !== "0") {
+      formatted += char;
+    }
+  }
+
+  // Append any remaining digits that didn't fit the mask
+  if (digitIndex < digits.length) {
+    formatted += digits.slice(digitIndex);
+  }
+
+  return [prefix, formatted.trim()].filter(Boolean).join(" ");
+}
+
 const COLUMN_DEFINITIONS: Record<ColumnKey, { label: string; icon: ReactNode }> = {
   name: { label: "Name", icon: <IconUser size={16} /> },
   headline: { label: "Headline", icon: <IconBriefcase size={16} /> },
-  place: { label: "Location", icon: <IconMapPin size={16} /> },
+  location: { label: "Location", icon: <IconMapPin size={16} /> },
   lastInteraction: { label: "Last Interaction", icon: <IconClock size={16} /> },
-  social: { label: "Social Media", icon: <IconUserCircle size={16} /> },
+  social: { label: "Socials", icon: <IconUserCircle size={16} /> },
+  phone: { label: "Phone", icon: <IconPhone size={16} /> },
+  email: { label: "Email", icon: <IconMail size={16} /> },
+  avatar: { label: "", icon: null },
 };
 
 export interface ColumnConfig {
@@ -195,7 +239,7 @@ function ContactSocialIcons({ contact }: { contact: Contact }) {
     linkedin: {
       key: "linkedin",
       icon: <IconBrandLinkedin size={18} />,
-      href: contact.linkedin ? createSocialMediaUrl("linkedin", contact.linkedin) : undefined,
+      href: contact.linkedin ? createSocialUrl("linkedin", contact.linkedin) : undefined,
       color: "blue",
       label: "LinkedIn",
       disabled: !contact.linkedin,
@@ -203,7 +247,7 @@ function ContactSocialIcons({ contact }: { contact: Contact }) {
     instagram: {
       key: "instagram",
       icon: <IconBrandInstagram size={18} />,
-      href: contact.instagram ? createSocialMediaUrl("instagram", contact.instagram) : undefined,
+      href: contact.instagram ? createSocialUrl("instagram", contact.instagram) : undefined,
       color: "pink",
       label: "Instagram",
       disabled: !contact.instagram,
@@ -211,7 +255,7 @@ function ContactSocialIcons({ contact }: { contact: Contact }) {
     whatsapp: {
       key: "whatsapp",
       icon: <IconBrandWhatsapp size={18} />,
-      href: contact.whatsapp ? createSocialMediaUrl("whatsapp", contact.whatsapp) : undefined,
+      href: contact.whatsapp ? createSocialUrl("whatsapp", contact.whatsapp) : undefined,
       color: "green",
       label: "WhatsApp",
       disabled: !contact.whatsapp,
@@ -219,7 +263,7 @@ function ContactSocialIcons({ contact }: { contact: Contact }) {
     facebook: {
       key: "facebook",
       icon: <IconBrandFacebook size={18} />,
-      href: contact.facebook ? createSocialMediaUrl("facebook", contact.facebook) : undefined,
+      href: contact.facebook ? createSocialUrl("facebook", contact.facebook) : undefined,
       color: "blue",
       label: "Facebook",
       disabled: !contact.facebook,
@@ -395,8 +439,8 @@ export default function ContactsTableV2({
     : null;
 
   const effectiveMenuActions: MenuAction[] = [
-    ...standardMenuActions,
     ...(menuActions || []),
+    ...standardMenuActions,
     ...(standardDeleteMenuAction ? [standardDeleteMenuAction] : []),
   ];
   const effectiveBulkSelectionActions: BulkSelectionAction[] = [
@@ -466,12 +510,12 @@ export default function ContactsTableV2({
                 </Tooltip>
               );
             }
-            case "place": {
-              const placeValue = contact.place || "-";
+            case "location": {
+              const locationValue = contact.location || "-";
               return (
-                <Tooltip label={placeValue} withArrow>
+                <Tooltip label={locationValue} withArrow>
                   <Text size="sm" lineClamp={1}>
-                    {placeValue}
+                    {locationValue}
                   </Text>
                 </Tooltip>
               );
@@ -482,6 +526,68 @@ export default function ContactsTableV2({
                 : "-";
             case "social":
               return <ContactSocialIcons contact={contact} />;
+            case "phone": {
+              const phones = Array.isArray(contact.phones) ? contact.phones : [];
+              const preferred = phones.find((p: any) => p?.preferred) || phones[0];
+              if (!preferred || typeof preferred !== "object" || !("value" in preferred))
+                return "-";
+              const phone = preferred as { prefix?: string; value: string };
+              const phoneDisplay = formatPhoneForDisplay(phone.prefix || "", phone.value);
+              const otherPhoneCount = phones.length - 1;
+              return (
+                <Tooltip label={phoneDisplay} withArrow>
+                  <Stack gap={0}>
+                    <Text size="sm" lineClamp={1}>
+                      {phoneDisplay || "-"}
+                    </Text>
+                    {otherPhoneCount > 0 && (
+                      <Text size="xs" c="dimmed">
+                        +{otherPhoneCount} other {otherPhoneCount === 1 ? "phone" : "phones"}
+                      </Text>
+                    )}
+                  </Stack>
+                </Tooltip>
+              );
+            }
+            case "email": {
+              const emails = Array.isArray(contact.emails) ? contact.emails : [];
+              const preferred = emails.find((e: any) => e?.preferred) || emails[0];
+              if (!preferred || typeof preferred !== "object" || !("value" in preferred))
+                return "-";
+              const email = preferred as { value: string };
+              const otherEmailCount = emails.length - 1;
+              return (
+                <Tooltip label={email.value} withArrow>
+                  <Stack gap={0}>
+                    <Text size="sm" lineClamp={1}>
+                      {email.value || "-"}
+                    </Text>
+                    {otherEmailCount > 0 && (
+                      <Text size="xs" c="dimmed">
+                        +{otherEmailCount} other {otherEmailCount === 1 ? "email" : "emails"}
+                      </Text>
+                    )}
+                  </Stack>
+                </Tooltip>
+              );
+            }
+            case "avatar": {
+              const avatarSrc =
+                "avatarUri" in contact && contact.avatarUri && typeof contact.avatarUri === "string"
+                  ? contact.avatarUri
+                  : contact.avatar;
+              if (avatarSrc) {
+                return (
+                  <Avatar
+                    src={avatarSrc}
+                    alt={`${contact.firstName || ""} ${contact.lastName || ""}`.trim()}
+                    size={32}
+                    radius="xl"
+                  />
+                );
+              }
+              return null;
+            }
             default:
               return null;
           }
@@ -526,6 +632,7 @@ export default function ContactsTableV2({
     emptyStateMessage: searchIsActive ? noContactsMatchSearch : noContactsFound,
     loadMoreLabel: loadMoreAction?.label,
     selectedCountTemplate: "{count} people selected",
+    selectedSingularCountTemplate: "1 person selected",
     totalCountTemplate: "{count} total people",
     actionsAriaLabel: "Contact actions",
     columnVisibility: {

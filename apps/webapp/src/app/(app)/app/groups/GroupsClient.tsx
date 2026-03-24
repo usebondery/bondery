@@ -24,6 +24,7 @@ import {
 } from "@bondery/mantine-next";
 import { revalidateGroups } from "../actions";
 import { openStandardConfirmModal } from "../components/modals/openStandardConfirmModal";
+import { captureEvent } from "@/lib/analytics/client";
 
 interface GroupsClientProps {
   initialGroups: GroupWithCount[];
@@ -142,6 +143,8 @@ export function GroupsClient({ initialGroups, totalCount }: GroupsClientProps) {
           });
 
           if (!res.ok) throw new Error("Failed to delete group");
+
+          captureEvent("group_deleted");
 
           notifications.update({
             ...successNotificationTemplate({

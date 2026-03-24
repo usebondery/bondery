@@ -34,7 +34,7 @@ import {
   successNotificationTemplate,
   errorNotificationTemplate,
 } from "@bondery/mantine-next";
-import { ADDRESS_TYPE_OPTIONS } from "@/lib/config";
+import { ADDRESS_TYPE_OPTIONS, LIMITS } from "@/lib/config";
 import { PeopleMap, type PeopleMapFocus } from "@/app/(app)/app/components/map/PeopleMap";
 import { formatContactName } from "@/lib/nameHelpers";
 import { notifications } from "@mantine/notifications";
@@ -45,7 +45,7 @@ interface ContactAddressSectionProps {
   onSave: (payload: {
     addresses: ContactAddressEntry[];
     suggestedLocation: {
-      place: string;
+      location: string;
       latitude: number | null;
       longitude: number | null;
     } | null;
@@ -200,6 +200,9 @@ function toAddressFromSuggestion(
     addressGranularity: deriveGranularity(item.type),
     addressFormatted: formattedValue || item.label,
     addressGeocodeSource: "mapy.com",
+    label: null,
+    geocodeConfidence: null,
+    timezone: null,
   };
 }
 
@@ -210,29 +213,7 @@ function toDefaultAddressType(index: number): ContactAddressType {
 }
 
 function normalizeAddressTypes(entries: ContactAddressEntry[]): ContactAddressEntry[] {
-  const availableTypes: ContactAddressType[] = ["home", "work", "other"];
-  const usedTypes = new Set<ContactAddressType>();
-
-  return entries.slice(0, 3).map((entry, index) => {
-    const preferredType = (entry.type || toDefaultAddressType(index)) as ContactAddressType;
-
-    if (!usedTypes.has(preferredType)) {
-      usedTypes.add(preferredType);
-      return {
-        ...entry,
-        type: preferredType,
-      };
-    }
-
-    const fallbackType = availableTypes.find((candidate) => !usedTypes.has(candidate));
-    const resolvedType = fallbackType || preferredType;
-    usedTypes.add(resolvedType);
-
-    return {
-      ...entry,
-      type: resolvedType,
-    };
-  });
+  return entries;
 }
 
 function toEditableAddresses(contact: Contact): EditableAddress[] {
@@ -259,58 +240,15 @@ function toEditableAddresses(contact: Contact): EditableAddress[] {
           address.value ||
           address.addressFormatted ||
           address.addressLine1 ||
-          contact.place ||
+          contact.location ||
           "",
         type: address.type,
       };
     });
   }
 
-  const fallbackValue =
-    formatAddressLabel({
-      addressLine1: contact.addressLine1,
-      addressLine2: contact.addressLine2,
-      city: contact.addressCity,
-      postalCode: contact.addressPostalCode,
-      state: contact.addressState,
-      countryCode: contact.addressCountryCode,
-    }) ||
-    contact.addressFormatted ||
-    contact.addressLine1 ||
-    contact.place ||
-    contact.addressCity ||
-    "";
-
-  if (!fallbackValue) {
-    return [];
-  }
-
-  const normalizedFallbackCoordinates = normalizeCoordinatePair(
-    contact.latitude,
-    contact.longitude,
-    contact.addressCountryCode,
-  );
-
-  return [
-    {
-      id: "home-0",
-      type: "home",
-      value: fallbackValue,
-      latitude: normalizedFallbackCoordinates.latitude,
-      longitude: normalizedFallbackCoordinates.longitude,
-      addressLine1: contact.addressLine1,
-      addressLine2: contact.addressLine2,
-      addressCity: contact.addressCity,
-      addressPostalCode: contact.addressPostalCode,
-      addressState: contact.addressState,
-      addressStateCode: contact.addressStateCode,
-      addressCountry: contact.addressCountry,
-      addressCountryCode: contact.addressCountryCode,
-      addressGranularity: contact.addressGranularity,
-      addressFormatted: contact.addressFormatted,
-      addressGeocodeSource: contact.addressGeocodeSource,
-    },
-  ];
+  // No addresses in people_addresses yet — show nothing.
+  return [];
 }
 
 export function ContactAddressSection({ contact, isSaving, onSave }: ContactAddressSectionProps) {
@@ -389,33 +327,15 @@ export function ContactAddressSection({ contact, isSaving, onSave }: ContactAddr
       value: "",
       suggestion: null,
     });
-  }, [
-    contact.addresses,
-    contact.place,
-    contact.addressLine1,
-    contact.addressLine2,
-    contact.addressCity,
-    contact.addressPostalCode,
-    contact.addressState,
-    contact.addressStateCode,
-    contact.addressCountry,
-    contact.addressCountryCode,
-    contact.addressGranularity,
-    contact.addressFormatted,
-    contact.addressGeocodeSource,
-    contact.latitude,
-    contact.longitude,
-  ]);
-
-  const usedTypes = new Set(addresses.map((entry) => entry.type));
+  }, [contact.addresses, contact.location, contact.latitude, contact.longitude]);
 
   const getTypeData = (currentType?: ContactAddressType) =>
     typeOptions.map((option) => ({
       ...option,
-      disabled: usedTypes.has(option.value as ContactAddressType) && option.value !== currentType,
+      disabled: false,
     }));
 
-  const canAddMore = addresses.length < 3;
+  const canAddMore = addresses.length < LIMITS.maxAddresses;
 
   const preferredAddressId = addresses[0]?.id;
 
@@ -493,7 +413,7 @@ export function ContactAddressSection({ contact, isSaving, onSave }: ContactAddr
       locationSource?.longitude !== null &&
       locationSource?.longitude !== undefined
         ? {
-            place: locationSource.value,
+            location: locationSource.value,
             latitude: locationSource.latitude,
             longitude: locationSource.longitude,
           }
@@ -511,7 +431,7 @@ export function ContactAddressSection({ contact, isSaving, onSave }: ContactAddr
    */
   const handleCommitDraft = (overrideSuggestion?: MapSuggestionItem) => {
     const normalizedValue = normalizeNullableText(overrideSuggestion?.label ?? draft.value);
-    if (!normalizedValue || !canAddMore || usedTypes.has(draft.type)) return;
+    if (!normalizedValue || !canAddMore) return;
 
     const suggestion =
       overrideSuggestion ?? draft.suggestion ?? getSuggestionForValue(normalizedValue);
@@ -534,6 +454,9 @@ export function ContactAddressSection({ contact, isSaving, onSave }: ContactAddr
           addressGranularity: "address" as const,
           addressFormatted: null,
           addressGeocodeSource: "manual" as const,
+          label: null,
+          geocodeConfidence: null,
+          timezone: null,
         };
 
     const newEntry: EditableAddress = enrichWithSuggestionIfAvailable({
@@ -544,11 +467,6 @@ export function ContactAddressSection({ contact, isSaving, onSave }: ContactAddr
 
     const newAddresses = [...addresses, newEntry];
 
-    const nextDraftType =
-      (["home", "work", "other"] as ContactAddressType[]).find(
-        (type) => !newAddresses.some((a) => a.type === type),
-      ) ?? draft.type;
-
     if (overrideSuggestion) {
       setSuggestionsByValue((prev) => ({
         ...prev,
@@ -557,7 +475,7 @@ export function ContactAddressSection({ contact, isSaving, onSave }: ContactAddr
     }
 
     setAddresses(newAddresses);
-    setDraft({ type: nextDraftType, value: "", suggestion: null });
+    setDraft({ type: draft.type, value: "", suggestion: null });
     saveNow(newAddresses, newEntry);
   };
 
@@ -747,7 +665,7 @@ export function ContactAddressSection({ contact, isSaving, onSave }: ContactAddr
                               onSave({
                                 addresses: normalized,
                                 suggestedLocation: {
-                                  place: locationSource.value,
+                                  location: locationSource.value,
                                   latitude: locationSource.latitude,
                                   longitude: locationSource.longitude,
                                 },

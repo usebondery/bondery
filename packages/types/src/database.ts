@@ -133,13 +133,13 @@ export type Database = {
           last_interaction: string | null;
           last_name: string | null;
           latitude: number | null;
-          location: unknown;
+          gis_point: unknown;
           longitude: number | null;
           middle_name: string | null;
           myself: boolean | null;
           notes: string | null;
           notes_updated_at: string | null;
-          place: string | null;
+          location: string | null;
           timezone: string | null;
           headline: string | null;
           updated_at: string | null;
@@ -153,13 +153,13 @@ export type Database = {
           last_interaction?: string | null;
           last_name?: string | null;
           latitude?: number | null;
-          location?: unknown;
+          gis_point?: unknown;
           longitude?: number | null;
           middle_name?: string | null;
           myself?: boolean | null;
           notes?: string | null;
           notes_updated_at?: string | null;
-          place?: string | null;
+          location?: string | null;
           timezone?: string | null;
           headline?: string | null;
           updated_at?: string | null;
@@ -173,13 +173,13 @@ export type Database = {
           last_interaction?: string | null;
           last_name?: string | null;
           latitude?: number | null;
-          location?: unknown;
+          gis_point?: unknown;
           longitude?: number | null;
           middle_name?: string | null;
           myself?: boolean | null;
           notes?: string | null;
           notes_updated_at?: string | null;
-          place?: string | null;
+          location?: string | null;
           timezone?: string | null;
           headline?: string | null;
           updated_at?: string | null;
@@ -364,7 +364,7 @@ export type Database = {
           },
         ];
       };
-      people_social_media: {
+      people_socials: {
         Row: {
           connected_at: string | null;
           created_at: string;
@@ -397,7 +397,7 @@ export type Database = {
         };
         Relationships: [
           {
-            foreignKeyName: "people_social_media_person_id_fkey";
+            foreignKeyName: "people_socials_person_id_fkey";
             columns: ["person_id"];
             isOneToOne: false;
             referencedRelation: "people";

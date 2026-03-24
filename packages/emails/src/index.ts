@@ -5,3 +5,5 @@ export type {
   ReminderDigestEmailProps,
   ReminderDigestEmailItem,
 } from "./templates/ReminderDigestEmail.js";
+export { default as ShareContactEmail } from "./templates/ShareContactEmail.js";
+export type { ShareContactEmailProps } from "./templates/ShareContactEmail.js";

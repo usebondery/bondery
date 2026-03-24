@@ -23,7 +23,7 @@ function getLinkedInSnapshot() {
 
   const contactInfoLink = topCard.querySelector("#top-card-text-details-contact-info");
   const placeElement = contactInfoLink?.parentElement?.previousElementSibling || null;
-  const place = placeElement?.textContent?.trim() || undefined;
+  const location = placeElement?.textContent?.trim() || undefined;
 
   const profilePhotoImg = topCard.querySelector(
     "button[aria-label*='profile picture'] img",
@@ -37,7 +37,7 @@ function getLinkedInSnapshot() {
     lastName,
     profileImageUrl: profilePhotoImg?.src || undefined,
     headline,
-    place,
+    location,
   };
 }
 

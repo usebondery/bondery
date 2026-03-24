@@ -24,8 +24,21 @@ function unfoldLines(input: string): string[] {
   const logicalLines: string[] = [];
 
   for (const line of physicalLines) {
+    // RFC 6350 folding: continuation line starts with space or tab
     if ((line.startsWith(" ") || line.startsWith("\t")) && logicalLines.length > 0) {
       logicalLines[logicalLines.length - 1] += line.slice(1);
+      continue;
+    }
+
+    // vCard 2.1 quoted-printable soft line break: previous line ends with '='
+    if (
+      logicalLines.length > 0 &&
+      logicalLines[logicalLines.length - 1].endsWith("=") &&
+      isQuotedPrintableLine(logicalLines[logicalLines.length - 1])
+    ) {
+      // Remove trailing '=' and append current line
+      logicalLines[logicalLines.length - 1] =
+        logicalLines[logicalLines.length - 1].slice(0, -1) + line;
       continue;
     }
 
@@ -35,6 +48,37 @@ function unfoldLines(input: string): string[] {
   }
 
   return logicalLines;
+}
+
+/** Checks whether a content line has ENCODING=QUOTED-PRINTABLE in the property parameters. */
+function isQuotedPrintableLine(line: string): boolean {
+  const colonIndex = line.indexOf(":");
+  if (colonIndex === -1) return false;
+  const left = line.slice(0, colonIndex).toUpperCase();
+  return left.includes("ENCODING=QUOTED-PRINTABLE");
+}
+
+/**
+ * Decodes a quoted-printable encoded string to a UTF-8 string.
+ * Handles multi-byte UTF-8 sequences (e.g. =C4=8D → č).
+ */
+function decodeQuotedPrintable(value: string): string {
+  const bytes: number[] = [];
+  let i = 0;
+  while (i < value.length) {
+    if (value[i] === "=" && i + 2 < value.length) {
+      const hex = value.slice(i + 1, i + 3);
+      if (/^[0-9A-Fa-f]{2}$/.test(hex)) {
+        bytes.push(parseInt(hex, 16));
+        i += 3;
+        continue;
+      }
+    }
+    // Plain ASCII character
+    bytes.push(value.charCodeAt(i));
+    i += 1;
+  }
+  return new TextDecoder("utf-8").decode(new Uint8Array(bytes));
 }
 
 function findContentDelimiter(line: string): number {
@@ -144,11 +188,17 @@ function parseContentLine(line: string): VCardProperty {
     .trim()
     .toUpperCase();
 
+  const parameters = parseParameters(parameterTokens);
+
+  // Decode quoted-printable value when the encoding parameter is present (vCard 2.1/3.0)
+  const encoding = parameters.find((p) => p.name === "ENCODING")?.values[0]?.toLowerCase();
+  const decodedValue = encoding === "quoted-printable" ? decodeQuotedPrintable(value) : value;
+
   return {
     group,
     name,
-    parameters: parseParameters(parameterTokens),
-    value,
+    parameters,
+    value: decodedValue,
   };
 }
 

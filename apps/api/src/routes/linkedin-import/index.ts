@@ -86,7 +86,7 @@ export async function linkedInImportRoutes(fastify: FastifyInstance) {
           const handleChunk = normalizedHandles.slice(index, index + HANDLE_LOOKUP_CHUNK_SIZE);
 
           const { data: existingRows, error: existingError } = await client
-            .from("people_social_media")
+            .from("people_socials")
             .select("handle")
             .eq("user_id", user.id)
             .eq("platform", "linkedin")
@@ -167,7 +167,7 @@ export async function linkedInImportRoutes(fastify: FastifyInstance) {
       const handles = contacts.map((c) => c.linkedinUsername.trim());
 
       const { data: existingSocialRows, error: socialLookupError } = await client
-        .from("people_social_media")
+        .from("people_socials")
         .select("handle, person_id")
         .eq("user_id", user.id)
         .eq("platform", "linkedin")
@@ -264,7 +264,7 @@ export async function linkedInImportRoutes(fastify: FastifyInstance) {
 
       if (socialRows.length > 0) {
         const { error: socialUpsertError } = await client
-          .from("people_social_media")
+          .from("people_socials")
           .upsert(socialRows, { onConflict: "user_id,person_id,platform" });
 
         if (socialUpsertError) {

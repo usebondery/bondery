@@ -23,7 +23,7 @@ function getMapsUrl(): string {
   return process.env.MAPS_URL || MAPS_BASE_URL;
 }
 
-/** Structured result from geocoding a LinkedIn place string. */
+/** Structured result from geocoding a LinkedIn location string. */
 export interface GeocodeResult {
   /** PostGIS EWKT string for direct insert/update of the `location` geography column. */
   locationEwkt: string;
@@ -37,6 +37,7 @@ export interface GeocodeResult {
   stateCode: string | null;
   country: string | null;
   countryCode: string | null;
+  postalCode: string | null;
   formattedLabel: string | null;
 }
 
@@ -53,11 +54,11 @@ export interface GeocodeResult {
  * For 3-part strings the middle segment (region) is intentionally dropped from the
  * query so the API resolves the *city*, not the region.
  *
- * @param place - Raw location string from LinkedIn.
+ * @param location - Raw location string from LinkedIn.
  * @returns An object with `query` and optional `locality`.
  */
-function parseLinkedInPlace(place: string): { query: string; locality?: string } {
-  const trimmed = place.trim();
+function parseLinkedInLocation(location: string): { query: string; locality?: string } {
+  const trimmed = location.trim();
   const parts = trimmed
     .split(", ")
     .map((s) => s.trim())
@@ -80,20 +81,20 @@ function parseLinkedInPlace(place: string): { query: string; locality?: string }
 /**
  * Geocodes a LinkedIn-scraped location string using the Mapy.com /v1/geocode API.
  *
- * Splits the place into city + country, sends a regional geocode request with
+ * Splits the location into city + country, sends a regional geocode request with
  * limit=1, and parses the first result's position and regional structure into
  * a structured GeocodeResult.
  *
  * Returns null when:
- *  - `place` is empty
+ *  - `location` is empty
  *  - `MAPS_KEY` is not configured
  *  - the API returns no results or an error
  *
- * @param place - Raw location string from LinkedIn (e.g. "Brno, Czechia" or "Czechia").
+ * @param location - Raw location string from LinkedIn (e.g. "Brno, Czechia" or "Czechia").
  * @returns Structured geocode result, or null on failure.
  */
-export async function geocodeLinkedInPlace(place: string): Promise<GeocodeResult | null> {
-  const trimmed = place.trim();
+export async function geocodeLinkedInLocation(location: string): Promise<GeocodeResult | null> {
+  const trimmed = location.trim();
   const mapsKey = getMapsKey();
   const mapsUrl = getMapsUrl();
 
@@ -102,7 +103,7 @@ export async function geocodeLinkedInPlace(place: string): Promise<GeocodeResult
     return null;
   }
 
-  const { query, locality } = parseLinkedInPlace(trimmed);
+  const { query, locality } = parseLinkedInLocation(trimmed);
 
   const upstream = new URL(`${mapsUrl}/v1/geocode`);
   upstream.searchParams.set("apikey", mapsKey);
@@ -122,7 +123,7 @@ export async function geocodeLinkedInPlace(place: string): Promise<GeocodeResult
     });
 
     if (!response.ok) {
-      logger.error({ status: response.status, place: trimmed }, "[mapy] Geocode failed");
+      logger.error({ status: response.status, location: trimmed }, "[mapy] Geocode failed");
       return null;
     }
 
@@ -176,10 +177,11 @@ export async function geocodeLinkedInPlace(place: string): Promise<GeocodeResult
       stateCode,
       country,
       countryCode,
+      postalCode: typeof item.zip === "string" && item.zip.length > 0 ? item.zip : null,
       formattedLabel: formatPlaceLabel({ city, state, countryCode }),
     };
   } catch (err) {
-    logger.error({ err, place: trimmed }, "[mapy] Geocode error");
+    logger.error({ err, location: trimmed }, "[mapy] Geocode error");
     return null;
   }
 }
@@ -227,6 +229,135 @@ export async function getTimezoneForCoordinates(lat: number, lon: number): Promi
   }
 }
 
+/**
+ * Validates a street-level address by geocoding without the `type: "regional"` filter.
+ *
+ * Unlike `geocodeLinkedInPlace` (which only matches cities/regions), this function
+ * searches across all result types (streets, addresses, POIs, regions). If the API
+ * returns only a regional/city-level match for a query that includes a street name,
+ * the street is considered non-existent.
+ *
+ * @param query - Full address string (e.g. "Panská 11, Mostkovice, Czechia").
+ * @param expectedCity - The city to validate the result against (case-insensitive).
+ * @returns The geocode result if the address is valid at street level, or `null` if
+ *          the street/address was not found.
+ */
+export async function validateStreetAddress(
+  query: string,
+  expectedCity: string,
+): Promise<GeocodeResult | null> {
+  const trimmed = query.trim();
+  const mapsKey = getMapsKey();
+  const mapsUrl = getMapsUrl();
+
+  if (!trimmed || !mapsKey) return null;
+
+  const upstream = new URL(`${mapsUrl}/v1/geocode`);
+  upstream.searchParams.set("apikey", mapsKey);
+  upstream.searchParams.set("query", trimmed);
+  upstream.searchParams.set("lang", "en");
+  upstream.searchParams.set("limit", "1");
+  // No type filter — search all result types (address, street, regional, etc.)
+
+  try {
+    const response = await fetch(upstream.toString(), {
+      method: "GET",
+      headers: { Accept: "application/json" },
+    });
+
+    if (!response.ok) {
+      logger.error(
+        { status: response.status, address: trimmed },
+        "[mapy] Address validation geocode failed",
+      );
+      return null;
+    }
+
+    const payload = await response.json();
+    const items = Array.isArray(payload?.items) ? payload.items : [];
+
+    if (items.length === 0) return null;
+
+    const item = items[0];
+    const position = item.position;
+
+    if (!position || typeof position.lat !== "number" || typeof position.lon !== "number") {
+      return null;
+    }
+
+    // Check result type: if only an administrative region level, the street wasn't found.
+    // Mapy.com result types: "regional.municipality", "regional.region",
+    // "regional.country", "regional.address", "street", "address", "poi", etc.
+    // Note: "regional.address" IS a valid street-level result — only reject pure admin types.
+    const resultType: string = item.type ?? "";
+    const ADMIN_REGION_TYPES = new Set([
+      "regional.municipality",
+      "regional.municipality_part",
+      "regional.quarter",
+      "regional.region",
+      "regional.country",
+    ]);
+    if (ADMIN_REGION_TYPES.has(resultType)) {
+      // The API only found a city/region, not a specific address → not a street result
+      return null;
+    }
+
+    // Verify the result is in the expected city (prevent matching a same-name
+    // street in a different city).
+    const regional: Array<{ name: string; type: string; isoCode?: string }> = Array.isArray(
+      item.regionalStructure,
+    )
+      ? item.regionalStructure
+      : [];
+
+    let city: string | null = null;
+    let state: string | null = null;
+    let stateCode: string | null = null;
+    let country: string | null = null;
+    let countryCode: string | null = null;
+
+    for (const entry of regional) {
+      if (entry.type === "regional.municipality" || entry.type === "regional.municipality_part") {
+        if (!city) city = entry.name;
+      } else if (entry.type === "regional.region") {
+        state = entry.name;
+      } else if (entry.type === "regional.country") {
+        country = entry.name;
+        countryCode = entry.isoCode ?? null;
+      }
+    }
+
+    // If we have an expected city and it doesn't match, result is for a different city
+    if (expectedCity && city) {
+      const normalizedExpected = expectedCity.trim().toLowerCase();
+      const normalizedCity = city.trim().toLowerCase();
+      if (
+        !normalizedCity.includes(normalizedExpected) &&
+        !normalizedExpected.includes(normalizedCity)
+      ) {
+        return null;
+      }
+    }
+
+    return {
+      locationEwkt: `SRID=4326;POINT(${position.lon} ${position.lat})`,
+      lat: position.lat,
+      lon: position.lon,
+      name: item.name ?? trimmed,
+      city,
+      state,
+      stateCode,
+      country,
+      countryCode,
+      postalCode: typeof item.zip === "string" && item.zip.length > 0 ? item.zip : null,
+      formattedLabel: formatPlaceLabel({ city, state, countryCode }),
+    };
+  } catch (err) {
+    logger.error({ err, address: trimmed }, "[mapy] Address validation error");
+    return null;
+  }
+}
+
 /** Combined geocode + timezone result returned by the cached helper. */
 export interface CachedGeocodeResult {
   geo: GeocodeResult;
@@ -234,27 +365,27 @@ export interface CachedGeocodeResult {
 }
 
 /**
- * Geocodes a LinkedIn place string with a shared database cache.
+ * Geocodes a LinkedIn location string with a shared database cache.
  *
  * Lookup flow:
- *  1. Normalise `place` → `place_key` (lowercased, trimmed).
+ *  1. Normalise `location` → `location_key` (lowercased, trimmed).
  *  2. Check `geocode_cache` for a non-stale row (updated within the last
  *     {@link GEOCODE_CACHE_TTL_DAYS} days).
  *  3. On cache **hit** with `geocode_found = true` → return cached geo + timezone.
  *  4. On cache **hit** with `geocode_found = false` → return `null` (negative cache).
- *  5. On cache **miss** or stale → call `geocodeLinkedInPlace()` + optionally
+ *  5. On cache **miss** or stale → call `geocodeLinkedInLocation()` + optionally
  *     `getTimezoneForCoordinates()`, upsert the result, and return it.
  *
  * Uses an admin Supabase client internally so the public `geocode_cache` table
  * (service-role only RLS) is accessible regardless of the calling user's session.
  *
- * @param place - Raw location string from LinkedIn (e.g. "Brno, Czechia").
+ * @param location - Raw location string from LinkedIn (e.g. "Brno, Czechia").
  * @returns Combined geocode result with timezone, or `null` when geocoding yields no result.
  */
-export async function cachedGeocodeLinkedInPlace(
-  place: string,
+export async function cachedGeocodeLinkedInLocation(
+  location: string,
 ): Promise<CachedGeocodeResult | null> {
-  const placeKey = place.trim().toLowerCase();
+  const placeKey = location.trim().toLowerCase();
   if (!placeKey) return null;
 
   const admin = createAdminClient();
@@ -273,7 +404,7 @@ export async function cachedGeocodeLinkedInPlace(
 
     if (cached) {
       if (!cached.geocode_found) {
-        // Negative cache — the place was previously looked up with no result
+        // Negative cache — the location was previously looked up with no result
         return null;
       }
 
@@ -288,6 +419,7 @@ export async function cachedGeocodeLinkedInPlace(
           stateCode: cached.state_code ?? null,
           country: cached.country ?? null,
           countryCode: cached.country_code ?? null,
+          postalCode: null,
           formattedLabel:
             formatPlaceLabel({
               city: cached.city,
@@ -304,7 +436,7 @@ export async function cachedGeocodeLinkedInPlace(
   }
 
   // ── 2. Live geocode + timezone ─────────────────────────────────────────
-  const geo = await geocodeLinkedInPlace(place);
+  const geo = await geocodeLinkedInLocation(location);
   let timezone: string | null = null;
 
   if (geo) {
@@ -317,7 +449,7 @@ export async function cachedGeocodeLinkedInPlace(
       await admin.from("geocode_cache").upsert(
         {
           place_key: placeKey,
-          place_original: place.trim(),
+          place_original: location.trim(),
           geocode_found: true,
           lat: geo.lat,
           lon: geo.lon,
@@ -335,11 +467,11 @@ export async function cachedGeocodeLinkedInPlace(
         { onConflict: "place_key" },
       );
     } else {
-      // Negative cache — remember that this place yields no result
+      // Negative cache — remember that this location yields no result
       await admin.from("geocode_cache").upsert(
         {
           place_key: placeKey,
-          place_original: place.trim(),
+          place_original: location.trim(),
           geocode_found: false,
           updated_at: new Date().toISOString(),
         },

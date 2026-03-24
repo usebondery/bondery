@@ -7,12 +7,12 @@ import { errorNotificationTemplate, successNotificationTemplate } from "@bondery
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import { ContactPhotoUploadButton } from "./ContactPhotoUploadButton";
 import { InlineEditableInput } from "./InlineEditableInput";
-import { SocialMediaSection } from "./SocialMediaSection";
+import { SocialsSection } from "./SocialsSection";
 import { INPUT_MAX_LENGTHS } from "@/lib/config";
 import { LocationLookupInput } from "@/app/(app)/app/components/LocationLookupInput";
 
 type NameField = "firstName" | "middleName" | "lastName";
-type ProfileField = "headline" | "place";
+type ProfileField = "headline" | "location";
 
 interface ContactIdentitySectionProps {
   contact: Contact;
@@ -77,9 +77,9 @@ const PROFILE_FIELD_CONFIGS: ProfileFieldConfig[] = [
     successLabel: "Headline",
   },
   {
-    field: "place",
+    field: "location",
     placeholder: "Location",
-    maxLength: INPUT_MAX_LENGTHS.place,
+    maxLength: INPUT_MAX_LENGTHS.location,
     successLabel: "Location",
   },
 ];
@@ -201,7 +201,7 @@ function usePersonProfileFields(
   const [focusedField, setFocusedField] = useState<ProfileField | null>(null);
   const [savingByField, setSavingByField] = useState<Record<ProfileField, boolean>>({
     headline: false,
-    place: false,
+    location: false,
   });
   const [values, setValues] = useState<Record<ProfileField, string>>(initialValues);
 
@@ -212,7 +212,7 @@ function usePersonProfileFields(
     setValues(initialValues);
     persistedValuesRef.current = initialValues;
     placeCoordinatesRef.current = null;
-  }, [initialValues.place, initialValues.headline, personId]);
+  }, [initialValues.location, initialValues.headline, personId]);
 
   const updateField = useCallback((field: ProfileField, value: string) => {
     setValues((previous) => ({
@@ -220,7 +220,7 @@ function usePersonProfileFields(
       [field]: value,
     }));
 
-    if (field === "place") {
+    if (field === "location") {
       placeCoordinatesRef.current = null;
     }
   }, []);
@@ -229,7 +229,7 @@ function usePersonProfileFields(
     async (value: string, latitude: number | null, longitude: number | null) => {
       setValues((previous) => ({
         ...previous,
-        place: value,
+        location: value,
       }));
 
       if (latitude === null || longitude === null) {
@@ -241,7 +241,7 @@ function usePersonProfileFields(
 
       setSavingByField((previous) => ({
         ...previous,
-        place: true,
+        location: true,
       }));
 
       try {
@@ -249,7 +249,7 @@ function usePersonProfileFields(
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            place: value,
+            location: value,
             latitude,
             longitude,
           }),
@@ -259,7 +259,7 @@ function usePersonProfileFields(
           throw new Error("Failed to update");
         }
 
-        persistedValuesRef.current.place = value;
+        persistedValuesRef.current.location = value;
 
         notifications.show(
           successNotificationTemplate({
@@ -277,7 +277,7 @@ function usePersonProfileFields(
       } finally {
         setSavingByField((previous) => ({
           ...previous,
-          place: false,
+          location: false,
         }));
       }
     },
@@ -300,14 +300,14 @@ function usePersonProfileFields(
       }));
 
       try {
-        const placeCoordinates = field === "place" ? placeCoordinatesRef.current : null;
+        const locationCoordinates = field === "location" ? placeCoordinatesRef.current : null;
         const payload: Record<string, string | number | null> = {
           [field]: value,
         };
 
-        if (field === "place" && placeCoordinates) {
-          payload.latitude = placeCoordinates.latitude;
-          payload.longitude = placeCoordinates.longitude;
+        if (field === "location" && locationCoordinates) {
+          payload.latitude = locationCoordinates.latitude;
+          payload.longitude = locationCoordinates.longitude;
         }
 
         const response = await fetch(`${API_ROUTES.CONTACTS}/${personId}`, {
@@ -332,7 +332,7 @@ function usePersonProfileFields(
         notifications.show(
           errorNotificationTemplate({
             title: "Error",
-            description: `Failed to update ${field === "place" ? "location" : field}`,
+            description: `Failed to update ${field === "location" ? "location" : field}`,
           }),
         );
       } finally {
@@ -445,7 +445,7 @@ export function ContactIdentitySection({
     personId,
     {
       headline: contact.headline || "",
-      place: contact.place || "",
+      location: contact.location || "",
     },
     PROFILE_FIELD_CONFIGS,
   );
@@ -496,9 +496,9 @@ export function ContactIdentitySection({
             <LocationLookupInput
               ariaLabel="Location"
               placeholder="Location"
-              value={profileValues.place}
-              disabled={savingProfileByField.place}
-              onChange={(value) => updateProfileField("place", value)}
+              value={profileValues.location}
+              disabled={savingProfileByField.location}
+              onChange={(value) => updateProfileField("location", value)}
               onSuggestionSelect={(selected) => {
                 void savePlaceFromSuggestion(
                   selected.label,
@@ -506,12 +506,12 @@ export function ContactIdentitySection({
                   selected.position.lon,
                 );
               }}
-              onBlur={() => handleProfileBlur("place")}
+              onBlur={() => handleProfileBlur("location")}
             />
           </div>
         </Group>
 
-        <SocialMediaSection
+        <SocialsSection
           contact={contact}
           personId={personId}
           phones={phones}

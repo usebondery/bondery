@@ -1,14 +1,4 @@
-import {
-  Body,
-  Column,
-  Container,
-  Heading,
-  Img,
-  Link,
-  Row,
-  Section,
-  Text,
-} from "@react-email/components";
+import { Column, Container, Heading, Img, Link, Row, Section, Text } from "@react-email/components";
 import { EmailWrapper } from "../shared/EmailWrapper.js";
 import { IMPORTANT_DATE_TYPE_META } from "@bondery/helpers";
 import * as React from "react";
@@ -85,84 +75,82 @@ export default function ReminderDigestEmail({ targetDate, reminders }: ReminderD
 
   return (
     <EmailWrapper preview={previewText}>
-      <Body className="bg-gray-50">
-        <Container className="mx-auto mt-4 rounded-lg bg-white p-6 shadow-sm">
-          <Heading className="mb-1 text-md font-bold text-gray-900">
-            Bondery reminders for {headingDate}
-          </Heading>
-          <Text className="mb-4 text-sm text-gray-700">
-            You have {reminders.length} reminder{reminders.length === 1 ? "" : "s"}:
-          </Text>
+      <Container className="mx-auto mb-4 rounded-lg bg-white p-6 shadow-sm">
+        <Heading className="mb-1 text-md font-bold text-gray-900">
+          Bondery reminders for {headingDate}
+        </Heading>
+        <Text className="mb-4 text-sm text-gray-700">
+          You have {reminders.length} reminder{reminders.length === 1 ? "" : "s"}:
+        </Text>
 
-          {reminders.map((reminder) => {
-            const personUrl = `https://app.usebondery.com/app/person/${encodeURIComponent(reminder.personId)}`;
-            const dateMeta = IMPORTANT_DATE_TYPE_META[reminder.type];
-            const daysRemaining = getDaysRemaining(targetDate, reminder.date);
-            const remainingLabel =
-              daysRemaining === null
-                ? `${reminder.notifyDaysBefore} day${reminder.notifyDaysBefore === 1 ? "" : "s"}`
-                : `${daysRemaining} day${daysRemaining === 1 ? "" : "s"}`;
-            const personInitials = getInitials(reminder.personName) || "?";
-            const dateLabel = formatDateLabel(reminder.date);
+        {reminders.map((reminder) => {
+          const personUrl = `https://app.usebondery.com/app/person/${encodeURIComponent(reminder.personId)}`;
+          const dateMeta = IMPORTANT_DATE_TYPE_META[reminder.type];
+          const daysRemaining = getDaysRemaining(targetDate, reminder.date);
+          const remainingLabel =
+            daysRemaining === null
+              ? `${reminder.notifyDaysBefore} day${reminder.notifyDaysBefore === 1 ? "" : "s"}`
+              : `${daysRemaining} day${daysRemaining === 1 ? "" : "s"}`;
+          const personInitials = getInitials(reminder.personName) || "?";
+          const dateLabel = formatDateLabel(reminder.date);
 
-            return (
-              <Section
-                key={`${reminder.personId}-${reminder.type}-${reminder.date}`}
-                className="mb-3 border border-gray-200 bg-white"
-                style={{ borderRadius: "12px", overflow: "hidden" }}
-              >
-                <Row>
-                  <Column align="center" width="72" className="bg-brand py-3">
-                    {reminder.personAvatar ? (
-                      <Img
-                        src={reminder.personAvatar}
-                        alt={`${reminder.personName} avatar`}
-                        width="40"
-                        height="40"
-                        className="border border-white"
-                        style={{
-                          borderRadius: "9999px",
-                          width: "40px",
-                          height: "40px",
-                          objectFit: "cover",
-                        }}
-                      />
-                    ) : (
-                      <Text
-                        className="m-0 border border-white bg-white text-xs font-bold text-brand"
-                        style={{
-                          borderRadius: "9999px",
-                          width: "40px",
-                          height: "40px",
-                          lineHeight: "40px",
-                          textAlign: "center",
-                        }}
-                      >
-                        {personInitials}
-                      </Text>
-                    )}
-                  </Column>
-                  <Column className="px-3 py-2">
-                    <Link
-                      href={personUrl}
-                      className="mt-0 mb-1 text-sm font-bold text-gray-900 underline"
+          return (
+            <Section
+              key={`${reminder.personId}-${reminder.type}-${reminder.date}`}
+              className="mb-3 border border-gray-200 bg-white"
+              style={{ borderRadius: "12px", overflow: "hidden" }}
+            >
+              <Row>
+                <Column align="center" width="72" className="bg-brand py-3">
+                  {reminder.personAvatar ? (
+                    <Img
+                      src={reminder.personAvatar}
+                      alt={`${reminder.personName} avatar`}
+                      width="40"
+                      height="40"
+                      className="border border-white"
+                      style={{
+                        borderRadius: "9999px",
+                        width: "40px",
+                        height: "40px",
+                        objectFit: "cover",
+                      }}
+                    />
+                  ) : (
+                    <Text
+                      className="m-0 border border-white bg-white text-xs font-bold text-brand"
+                      style={{
+                        borderRadius: "9999px",
+                        width: "40px",
+                        height: "40px",
+                        lineHeight: "40px",
+                        textAlign: "center",
+                      }}
                     >
-                      {reminder.personName}
-                    </Link>
-                    <Text className="m-0 text-sm text-gray-700">
-                      {dateMeta.emoji} <strong>{dateMeta.label}</strong> is coming up in{" "}
-                      <strong>{remainingLabel}</strong> on {dateLabel}.
+                      {personInitials}
                     </Text>
-                    {reminder.note ? (
-                      <Text className="mt-1 mb-0 text-xs text-gray-600">{reminder.note}</Text>
-                    ) : null}
-                  </Column>
-                </Row>
-              </Section>
-            );
-          })}
-        </Container>
-      </Body>
+                  )}
+                </Column>
+                <Column className="px-3 py-2">
+                  <Link
+                    href={personUrl}
+                    className="mt-0 mb-1 text-sm font-bold text-gray-900 underline"
+                  >
+                    {reminder.personName}
+                  </Link>
+                  <Text className="m-0 text-sm text-gray-700">
+                    {dateMeta.emoji} <strong>{dateMeta.label}</strong> is coming up in{" "}
+                    <strong>{remainingLabel}</strong> on {dateLabel}.
+                  </Text>
+                  {reminder.note ? (
+                    <Text className="mt-1 mb-0 text-xs text-gray-600">{reminder.note}</Text>
+                  ) : null}
+                </Column>
+              </Row>
+            </Section>
+          );
+        })}
+      </Container>
     </EmailWrapper>
   );
 }

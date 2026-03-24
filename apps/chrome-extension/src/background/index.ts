@@ -612,7 +612,7 @@ async function handleAddPerson(
       lastName: payload.lastName,
       profileImageUrl: payload.profileImageUrl,
       headline: payload.headline,
-      place: payload.place,
+      location: payload.location,
       notes: payload.notes,
       workHistory: payload.workHistory,
       educationHistory: payload.educationHistory,
@@ -748,7 +748,9 @@ async function handleUpsertLinkedInData(
 
   try {
     await upsertLinkedInData(contactId, workHistory);
-    console.log(`[background] Upserted ${workHistory.length} work history entries for ${contactId}`);
+    console.log(
+      `[background] Upserted ${workHistory.length} work history entries for ${contactId}`,
+    );
     sendResponse({ type: "UPSERT_LINKEDIN_DATA_RESULT", payload: { success: true } });
   } catch (error) {
     console.error("[background] Upsert LinkedIn data error:", error);

@@ -81,12 +81,20 @@ export async function generateVCard(contact: Contact, extras?: VCardExportExtras
   };
 
   if (contact.avatar) {
-    try {
-      if (contact.avatar.trim()) {
-        card = attachMedia(card, "PHOTO", { uri: contact.avatar.trim() });
+    const avatarUrl = contact.avatar.trim();
+    if (avatarUrl) {
+      try {
+        const response = await fetch(avatarUrl);
+        if (response.ok) {
+          const buffer = await response.arrayBuffer();
+          const mediaType = response.headers.get("content-type") ?? "image/jpeg";
+          card = attachMedia(card, "PHOTO", { data: buffer, mediaType });
+        } else {
+          logger.warn({ status: response.status, url: avatarUrl }, "Failed to fetch avatar for vCard embedding");
+        }
+      } catch (error) {
+        logger.error({ err: error }, "Failed to fetch and embed avatar for vCard");
       }
-    } catch (error) {
-      logger.error({ err: error }, "Failed to attach avatar URI for vCard");
     }
   }
 

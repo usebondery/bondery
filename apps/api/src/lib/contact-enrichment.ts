@@ -8,7 +8,7 @@ import type {
 } from "@bondery/types";
 import { attachContactChannels } from "../routes/contacts/channels.js";
 import { attachContactAddresses } from "../routes/contacts/addresses.js";
-import { attachContactSocialMedia } from "./social-media.js";
+import { attachContactSocials } from "./socials.js";
 import type { ContactWithId } from "./schemas.js";
 import { buildContactAvatarUrl } from "./supabase.js";
 
@@ -30,7 +30,7 @@ export type FullContactExtras = ChannelsAndSocialExtras & {
 
 /**
  * Enriches a list of contacts with channels (phones + emails), optional addresses,
- * and social media — all fetched in parallel.
+ * and socials — all fetched in parallel.
  *
  * The overload accepting `{ addresses: true }` widens the return type to include
  * the `addresses` field, while the default (no option / `{ addresses: false }`)
@@ -79,7 +79,7 @@ export async function attachContactExtras<T extends ContactWithId>(
   const [channelsResult, maybeAddresses, socialResult] = await Promise.all([
     attachContactChannels(client, userId, contacts),
     includeAddresses ? attachContactAddresses(client, userId, contacts) : Promise.resolve(null),
-    attachContactSocialMedia(client, userId, contacts),
+    attachContactSocials(client, userId, contacts),
   ]);
 
   const socialMap = new Map<string, (typeof socialResult)[number]>();

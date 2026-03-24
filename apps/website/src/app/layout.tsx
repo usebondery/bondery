@@ -7,7 +7,7 @@ import { ColorSchemeScript, MantineProvider, mantineHtmlProps } from "@mantine/c
 import { Footer, Header } from "@/components/landing";
 import Script from "next/script";
 import { WEBSITE_URL } from "@/lib/config";
-import { SOCIAL_LINKS, SUPPORT_EMAIL } from "@bondery/helpers";
+import { METADATA_TITLE_DIVIDER, SOCIAL_LINKS, SUPPORT_EMAIL, WEBAPP_NAME } from "@bondery/helpers";
 import { headers } from "next/headers";
 
 const ogTitle = "Bondery: Build bonds that last forever";
@@ -18,7 +18,7 @@ export const metadata: Metadata = {
   metadataBase: new URL(WEBSITE_URL),
   title: {
     default: ogTitle,
-    template: "%s | Bondery",
+    template: `%s ${METADATA_TITLE_DIVIDER} ${WEBAPP_NAME}`,
   },
   description: ogDescription,
   alternates: {
@@ -139,7 +139,7 @@ export default async function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareApplicationSchema) }}
         />
         <MantineProvider defaultColorScheme="dark" theme={bonderyTheme}>
-          <Notifications autoClose={5000} position="top-center" />
+          <Notifications autoClose={6000} position="top-center" />
           <Header />
           <main>{children}</main>
           <Footer />

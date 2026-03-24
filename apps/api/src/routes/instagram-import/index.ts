@@ -95,7 +95,7 @@ export async function instagramImportRoutes(fastify: FastifyInstance) {
           const handleChunk = normalizedHandles.slice(index, index + HANDLE_LOOKUP_CHUNK_SIZE);
 
           const { data: existingRows, error: existingError } = await client
-            .from("people_social_media")
+            .from("people_socials")
             .select("handle")
             .eq("user_id", user.id)
             .eq("platform", "instagram")
@@ -186,7 +186,7 @@ export async function instagramImportRoutes(fastify: FastifyInstance) {
         const chunk = handles.slice(i, i + HANDLE_LOOKUP_CHUNK_SIZE);
 
         const { data: existingRows, error: lookupError } = await client
-          .from("people_social_media")
+          .from("people_socials")
           .select("handle, person_id")
           .eq("user_id", user.id)
           .eq("platform", "instagram")
@@ -295,7 +295,7 @@ export async function instagramImportRoutes(fastify: FastifyInstance) {
 
       if (socialRows.length > 0) {
         const { error: socialUpsertError } = await client
-          .from("people_social_media")
+          .from("people_socials")
           .upsert(socialRows, { onConflict: "user_id,person_id,platform" });
 
         if (socialUpsertError) {

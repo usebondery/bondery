@@ -12,3 +12,15 @@ The strategy for handling contact avatars involves removing the stored avatar co
 # Fastify server
 
 Use Fastify built in console logging functions of `request.log` and `reply.log` instead of `console.log` for better performance, structured logging, and integration with Fastify's logging ecosystem.
+
+# Code review
+
+When reviewing code, focus on the following aspects:
+
+1. **Code Quality**: Ensure the code is clean, well-structured, and follows best practices. Look for readability, maintainability, and adherence to coding standards.
+2. **Functionality**: Verify that the code works as intended and meets the requirements.
+3. **Performance**: Assess the efficiency of the code, looking for potential bottlenecks or areas where performance can be improved.
+4. **Security**: Check for any security vulnerabilities or potential risks in the code.
+5. **Edge Cases**: Consider how the code handles edge cases and unexpected inputs.
+6. **Documentation**: Verify that the code is well-documented, with clear comments and explanations where necessary.
+7. **UX** Consider the user experience implications of the code, ensuring it provides a smooth and intuitive experience for users.
