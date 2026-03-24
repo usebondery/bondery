@@ -228,9 +228,9 @@ function toPreviewContact(contact: InstagramPreparedContact): Contact {
     myself: false,
     language: null,
     timezone: null,
-    location: null,
     latitude: null,
     longitude: null,
+    gisPoint: null,
   };
 }
 

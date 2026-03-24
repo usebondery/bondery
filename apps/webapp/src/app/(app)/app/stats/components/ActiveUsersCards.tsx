@@ -47,9 +47,9 @@ export function ActiveUsersChart({ data }: ActiveUsersChartProps) {
               tickLine={false}
               axisLine={false}
               minTickGap={24}
-              tick={({ x, y, payload, index }) => {
+              tick={({ x, y, payload, index }: any) => {
                 const point = chartData[index ?? 0];
-                if (!point?.showTick) return null;
+                if (!point?.showTick) return <g />;
                 return (
                   <text x={x} y={y + 12} textAnchor="middle" fill="var(--mantine-color-gray-5)">
                     {payload.value}

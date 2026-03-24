@@ -25,8 +25,7 @@ export function CategorySwitcher({ activeCategory }: CategorySwitcherProps) {
             <Tooltip key={cat} label={CATEGORY_TOOLTIPS[cat]} withArrow>
               <Tabs.Tab
                 value={cat}
-                component={Link as any}
-                href={`/blog/${cat}`}
+                renderRoot={(props) => <Link href={`/blog/${cat}`} {...props} />}
                 leftSection={Icon ? <Icon size={16} /> : undefined}
               >
                 {cat.charAt(0).toUpperCase() + cat.slice(1)}

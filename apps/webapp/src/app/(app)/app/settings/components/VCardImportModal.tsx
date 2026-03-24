@@ -107,9 +107,9 @@ function toPreviewContact(contact: VCardPreparedContact): Contact {
     myself: false,
     language: null,
     timezone: null,
-    location: null,
     latitude: null,
     longitude: null,
+    gisPoint: null,
   };
 }
 

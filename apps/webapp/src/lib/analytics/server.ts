@@ -32,6 +32,6 @@ export function captureServerEvent(
   posthogClient.capture({ distinctId, event, properties });
 
   after(async () => {
-    await posthogClient.flushAsync();
+    await posthogClient.flush();
   });
 }
