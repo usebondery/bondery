@@ -1368,6 +1368,7 @@ export default function PersonClient({
           onMergeAccepted={() => setMergeRecommendation(null)}
           onMergeDeclined={() => setMergeRecommendation(null)}
           showEnrichCard={!!contact.linkedin && !initialSyncedAt}
+          showMyselfCard={!!contact.myself}
           personId={personId}
           linkedinHandle={contact.linkedin ?? null}
         />

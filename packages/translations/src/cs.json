@@ -1033,7 +1033,14 @@
     "ExportSuccessDescription": "Kontakt byl exportován jako vCard",
     "ExportError": "Chyba",
     "ExportErrorDescription": "Nepodařilo se exportovat kontakt. Zkuste to prosím znovu.",
-    "DeleteContact": "Smazat kontakt"
+    "DeleteContact": "Smazat kontakt",
+    "CannotDeleteMyself": "Nemůžete smazat svou vlastní vizitku"
+  },
+  "MyselfRecommendationCard": {
+    "Badge": "Vaše vizitka",
+    "BadgeTooltip": "Tento kontakt reprezentuje vás a udržuje váš profil synchronizovaný v celé aplikaci.",
+    "Description": "Toto je vaše osobní vizitka. Nelze ji smazat a zůstává synchronizovaná s nastavením vašeho profilu.",
+    "GoToSettings": "Upravit v nastavení"
   },
   "StatsPage": {
     "Title": "KPI Dashboard",

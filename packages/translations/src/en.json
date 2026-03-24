@@ -1029,7 +1029,14 @@
     "ExportSuccessDescription": "Contact exported as vCard",
     "ExportError": "Error",
     "ExportErrorDescription": "Failed to export contact. Please try again.",
-    "DeleteContact": "Delete Contact"
+    "DeleteContact": "Delete Contact",
+    "CannotDeleteMyself": "You cannot delete your own contact card"
+  },
+  "MyselfRecommendationCard": {
+    "Badge": "Your contact card",
+    "BadgeTooltip": "This contact represents you and keeps your profile synced across the app.",
+    "Description": "This is your personal contact card. It cannot be deleted and stays in sync with your profile settings.",
+    "GoToSettings": "Edit in Settings"
   },
   "StatsPage": {
     "Title": "KPIs Dashboard",

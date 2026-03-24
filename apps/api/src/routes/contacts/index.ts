@@ -1421,6 +1421,22 @@ export async function contactRoutes(fastify: FastifyInstance) {
             error: "Invalid request body. 'ids' must be a non-empty array.",
           });
         }
+
+        // Filter out myself contacts — they cannot be deleted
+        const { data: myselfRows } = await client
+          .from("people")
+          .select("id")
+          .eq("user_id", user.id)
+          .eq("myself", true)
+          .in("id", uniqueIds);
+        const myselfIds = new Set((myselfRows ?? []).map((r: { id: string }) => r.id));
+        uniqueIds = uniqueIds.filter((id) => !myselfIds.has(id));
+
+        if (uniqueIds.length === 0) {
+          return reply.status(400).send({
+            error: "Invalid request body. 'ids' must be a non-empty array.",
+          });
+        }
       } else if ("filter" in body && body.filter) {
         // Build the same Supabase query used by GET /contacts, but only select IDs.
         let filterQuery = client
@@ -1506,6 +1522,22 @@ export async function contactRoutes(fastify: FastifyInstance) {
     async (request: FastifyRequest<{ Params: typeof UuidParam.static }>, reply: FastifyReply) => {
       const { client, user } = getAuth(request);
       const { id } = request.params;
+
+      // Check if this is the myself contact before doing anything destructive
+      const { data: contactCheck } = await client
+        .from("people")
+        .select("id, myself")
+        .eq("id", id)
+        .eq("user_id", user.id)
+        .single();
+
+      if (!contactCheck) {
+        return reply.status(404).send({ error: "Contact not found" });
+      }
+
+      if (contactCheck.myself) {
+        return reply.status(403).send({ error: "Cannot delete yourself contact" });
+      }
 
       try {
         await deleteOrphanedInteractionsForDeletedContacts(client, user.id, [id]);

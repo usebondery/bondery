@@ -220,6 +220,10 @@ export function PeopleClient({ initialContacts, totalCount, layout = "stack" }: 
 
   const handleDeleteContact = (contactId: string) => {
     const targetContact = contacts.find((contact) => contact.id === contactId);
+
+    // Myself contacts cannot be deleted
+    if (targetContact?.myself) return;
+
     const contactName = targetContact ? formatContactName(targetContact) : "this contact";
 
     openDeleteContactModal({
@@ -504,6 +508,8 @@ export function PeopleClient({ initialContacts, totalCount, layout = "stack" }: 
             allSelected={allSelected}
             someSelected={someSelected}
             showSelection={true}
+            nonSelectableIds={new Set(contacts.filter((c) => c.myself).map((c) => c.id))}
+            nonSelectableTooltip={tActions("CannotDeleteMyself")}
             standardActions={{
               onMergeOne: (contactId) => openMergeModal(contactId),
               onMergeSelected: (leftContactId, rightContactId) =>

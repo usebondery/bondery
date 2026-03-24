@@ -1,4 +1,4 @@
-import { Button, Menu, MenuItem } from "@mantine/core";
+import { Button, Menu, MenuItem, Tooltip } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import {
   IconArrowMerge,
@@ -105,9 +105,24 @@ export function ContactActionMenu({
         <MenuItem leftSection={<IconArrowMerge size={16} />} onClick={onMergeWith}>
           {tMerge("ActionLabelMenu")}
         </MenuItem>
-        <MenuItem color="red" leftSection={<IconTrash size={16} />} onClick={onDelete}>
-          {tActions("DeleteContact")}
-        </MenuItem>
+        <Tooltip
+          label={tActions("CannotDeleteMyself")}
+          disabled={!contact.myself}
+          withArrow
+          multiline
+          maw={220}
+        >
+          <div>
+            <MenuItem
+              color="red"
+              leftSection={<IconTrash size={16} />}
+              onClick={onDelete}
+              disabled={!!contact.myself}
+            >
+              {tActions("DeleteContact")}
+            </MenuItem>
+          </div>
+        </Tooltip>
       </Menu.Dropdown>
     </Menu>
   );
