@@ -144,7 +144,9 @@
     "NotesEditedAt": "Upraveno {time}",
     "NotesEditedLessThanMinute": "Upraveno méně než minutu zpět",
     "NotesSaved": "Poznámky uloženy",
-    "NotesAlreadySaved": "Poznámky jsou aktuální"
+    "NotesAlreadySaved": "Poznámky jsou aktuální",
+    "MyselfPageTitle": "Já",
+    "MyselfPageDescription": "Vaše profilová vizitka. Tyto informace jsou sdíleny při odesílání nebo sdílení vašeho kontaktu."
   },
   "PersonTabs": {
     "Interactions": "Interakce",
@@ -204,6 +206,8 @@
     "Title": "Nastavení",
     "Profile": {
       "Title": "Profil",
+      "YourProfileCard": "Vaše profilová vizitka",
+      "YourProfileCardDescription": "Zobrazuje se při sdílení kontaktů. Můžete také sdílet nebo exportovat vlastní vCard.",
       "FirstName": "Jméno",
       "MiddleNames": "Prostřední jména",
       "Surname": "Příjmení",
@@ -265,6 +269,7 @@
       "ClickToLink": "Klikněte pro propojení vašeho účtu {provider}",
       "ClickToUnlink": "Klikněte pro odpojení vašeho účtu {provider}",
       "ExtensionLinkedDescription": "Propojeno",
+      "ExtensionLinkedDescriptionWithVersion": "Nainstalovaná verze {version}",
       "ExtensionInstallDescription": "Klikněte pro instalaci z Chrome Web Store",
       "ExtensionModalTitle": "Bondery Browser rozšíření",
       "ChromeExtensionModal": {
@@ -698,6 +703,7 @@
   },
   "PageHeader": {
     "LearnMoreAbout": "Zjistit více o: {concept}",
+    "HelpLabel": "Zjistit více",
     "Concepts": {
       "Home": "domovské stránce",
       "Timeline": "událostech",
@@ -1033,7 +1039,9 @@
     "ExportSuccessDescription": "Kontakt byl exportován jako vCard",
     "ExportError": "Chyba",
     "ExportErrorDescription": "Nepodařilo se exportovat kontakt. Zkuste to prosím znovu.",
-    "DeleteContact": "Smazat kontakt"
+    "DeleteContact": "Smazat kontakt",
+    "CannotDeleteMyself": "Nemůžete smazat svou vlastní vizitku",
+    "CannotMergeMyself": "Nemůžete sloučit svou vlastní vizitku s ostatními"
   },
   "StatsPage": {
     "Title": "KPI Dashboard",
@@ -1068,5 +1076,14 @@
     "NoData": "Žádná data k dispozici",
     "Forbidden": "Nemáte přístup k této stránce.",
     "PostHogNotConfigured": "PostHog není nakonfigurován."
+  },
+  "ExtensionVersionCheck": {
+    "UpdateRequiredTitle": "Vyžadována aktualizace",
+    "UpdateRequiredDescription": "Vaše rozšíření Bondery je zastaralé a nemusí správně fungovat. Pro pokračování prosím aktualizujte.",
+    "UpdateButton": "Aktualizovat",
+    "WebappNotificationTitle": "Dostupná aktualizace rozšíření",
+    "WebappNotificationDescription": "Vaše rozšíření Bondery Chrome potřebuje aktualizaci, aby správně fungovalo.",
+    "ApiRejectedTitle": "Verze je příliš stará",
+    "ApiRejectedDescription": "Server odmítl požadavek, protože vaše rozšíření je zastaralé. Prosím aktualizujte."
   }
 }

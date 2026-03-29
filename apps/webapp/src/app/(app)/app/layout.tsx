@@ -13,6 +13,7 @@ import type { ColorSchemePreference, MergeRecommendation } from "@bondery/types"
 import { getMergeRecommendationsData } from "./fix/getMergeRecommendationsData";
 import { EnrichStatusNotificationManager } from "@/lib/extension/EnrichStatusNotificationManager";
 import { EnrichResumeDetector } from "@/lib/extension/EnrichResumeDetector";
+import { ExtensionUpdateNotificationManager } from "@/lib/extension/ExtensionUpdateNotificationManager";
 
 interface UserSettingsLayoutData {
   userName: string;
@@ -102,6 +103,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       <ColorSchemeSync colorScheme={colorScheme} />
       <EnrichStatusNotificationManager />
       <EnrichResumeDetector />
+      <ExtensionUpdateNotificationManager />
       <AppShell
         padding="md"
         navbar={{

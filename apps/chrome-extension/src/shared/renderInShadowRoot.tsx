@@ -21,7 +21,6 @@ import { MantineWrapper } from "./MantineWrapper";
 // CSS imports — WXT's `cssInjectionMode: "ui"` will bundle these and
 // automatically inject them into the Shadow Root instead of the host page.
 import "@mantine/core/styles.css";
-import "@mantine/dates/styles.css";
 import "flag-icons/css/flag-icons.min.css";
 import "../../../../packages/mantine-next/src/styles.css";
 
@@ -52,10 +51,7 @@ export async function renderInShadowRoot(
       const root = ReactDOM.createRoot(uiContainer);
       root.render(
         <StrictMode>
-          <MantineWrapper
-            getRootElement={() => shadowHost}
-            cssVariablesSelector=":host"
-          >
+          <MantineWrapper getRootElement={() => shadowHost} cssVariablesSelector=":host">
             {options.render(uiContainer)}
           </MantineWrapper>
         </StrictMode>,

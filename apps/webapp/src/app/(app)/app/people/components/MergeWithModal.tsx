@@ -2,10 +2,20 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Center, Group, Loader, Paper, SimpleGrid, Stack, Text } from "@mantine/core";
+import {
+  Center,
+  Group,
+  Loader,
+  Paper,
+  SimpleGrid,
+  Stack,
+  Text,
+  Avatar,
+  UnstyledButton,
+} from "@mantine/core";
 import { modals } from "@mantine/modals";
 import { notifications } from "@mantine/notifications";
-import { IconArrowLeft, IconArrowMerge, IconArrowRight } from "@tabler/icons-react";
+import { IconArrowLeft, IconArrowMerge, IconArrowRight, IconCheck } from "@tabler/icons-react";
 import {
   ModalFooter,
   PersonChip,
@@ -23,6 +33,7 @@ import type {
 } from "@bondery/types";
 import { revalidateAll } from "../../actions";
 import { SelectableCard } from "@/app/(app)/app/components/SelectableCard";
+import { getAvatarColorFromName } from "@/lib/avatarColor";
 
 interface OpenMergeWithModalParams {
   contacts: Contact[];
@@ -40,6 +51,7 @@ interface OpenMergeWithModalParams {
 type Step = "pick" | "resolve" | "processing";
 
 export const MERGE_CONFLICT_FIELDS: MergeConflictField[] = [
+  "avatar",
   "firstName",
   "middleName",
   "lastName",
@@ -310,6 +322,79 @@ function formatConflictDisplayValue(field: MergeConflictField, value: unknown): 
   return normalizeDisplayText(value);
 }
 
+interface AvatarConflictPickerProps {
+  leftContact: Contact;
+  rightContact: Contact;
+  choice: MergeConflictChoice;
+  label: string;
+  onChange: (side: MergeConflictChoice) => void;
+}
+
+function AvatarConflictPicker({
+  leftContact,
+  rightContact,
+  choice,
+  label,
+  onChange,
+}: AvatarConflictPickerProps) {
+  const sides: Array<{ side: MergeConflictChoice; contact: Contact }> = [
+    { side: "left", contact: leftContact },
+    { side: "right", contact: rightContact },
+  ];
+
+  return (
+    <Stack gap="sm">
+      <SimpleGrid cols={2} spacing="sm">
+        {sides.map(({ side, contact }) => {
+          const selected = choice === side;
+          const avatarColor = getAvatarColorFromName(contact.firstName, contact.lastName);
+          const fullName = `${contact.firstName} ${contact.lastName ?? ""}`.trim();
+          return (
+            <UnstyledButton
+              key={side}
+              onClick={() => onChange(side)}
+              w="100%"
+              h="100%"
+              style={{ textAlign: "left" }}
+              aria-pressed={selected}
+            >
+              <Paper
+                p="xs"
+                radius="md"
+                withBorder
+                h="100%"
+                style={{
+                  borderColor: selected ? "var(--mantine-primary-color-filled)" : undefined,
+                  backgroundColor: selected
+                    ? "var(--mantine-primary-color-light-hover)"
+                    : undefined,
+                  cursor: "pointer",
+                }}
+              >
+                <Stack gap={6} align="center">
+                  <Group justify="space-between" wrap="nowrap" w="100%">
+                    <Text size="sm" fw={500}>
+                      {label}
+                    </Text>
+                    {selected && <IconCheck size={14} />}
+                  </Group>
+                  <Avatar
+                    src={contact.avatar ?? undefined}
+                    size={48}
+                    radius="xl"
+                    color={avatarColor}
+                    name={fullName}
+                  />
+                </Stack>
+              </Paper>
+            </UnstyledButton>
+          );
+        })}
+      </SimpleGrid>
+    </Stack>
+  );
+}
+
 export function openMergeWithModal({
   contacts,
   leftPersonId,
@@ -396,12 +481,14 @@ function MergeWithModal({
 
   const peopleOptions = useMemo(
     () =>
-      contacts.map((contact) => ({
-        id: contact.id,
-        firstName: contact.firstName,
-        lastName: contact.lastName,
-        avatar: contact.avatar,
-      })),
+      contacts
+        .filter((contact) => !contact.myself)
+        .map((contact) => ({
+          id: contact.id,
+          firstName: contact.firstName,
+          lastName: contact.lastName,
+          avatar: contact.avatar,
+        })),
     [contacts],
   );
 
@@ -439,6 +526,7 @@ function MergeWithModal({
         hasMeaningfulValue(entry.leftValue) &&
         hasMeaningfulValue(entry.rightValue) &&
         entry.field !== "lastInteraction" &&
+        entry.field !== "avatar" &&
         !areValuesEquivalent(entry.field, entry.leftValue, entry.rightValue),
     );
   }, [leftContact, rightContact]);
@@ -611,80 +699,114 @@ function MergeWithModal({
 
       {step === "resolve" ? (
         <Stack gap="sm">
-          {conflicts.length === 0 ? (
-            <Paper withBorder radius="md" p="md">
-              <Text size="sm" c="dimmed">
-                {texts.noConflicts}
-              </Text>
-            </Paper>
-          ) : (
-            <Stack gap="sm">
-              <Text size="sm" c="dimmed">
-                {texts.conflictHint}
-              </Text>
-              <SimpleGrid cols={2} spacing="sm" mt={"md"} mb="xs">
-                <Center>
-                  <PersonChip person={toPersonPreview(leftContact)} isClickable />
-                </Center>
-                <Center>
-                  <PersonChip person={toPersonPreview(rightContact)} isClickable />
-                </Center>
-              </SimpleGrid>
-              {(() => {
-                const hasLatLngPair =
-                  conflicts.some((c) => c.field === "latitude") &&
-                  conflicts.some((c) => c.field === "longitude");
-                const lngConflict = conflicts.find((c) => c.field === "longitude");
+          {(() => {
+            // Show avatar picker when the user is explicitly in the resolve step
+            // (not the auto-merge fast path where shouldSkipPickStep && no field conflicts)
+            const showAvatarPicker =
+              Boolean(leftContact && rightContact) && (!shouldSkipPickStep || conflicts.length > 0);
 
-                return conflicts
-                  .filter((c) => !(c.field === "longitude" && hasLatLngPair))
-                  .map((conflict) => {
-                    const isLatLng = conflict.field === "latitude" && hasLatLngPair;
-                    const selectedChoice = conflictChoices[conflict.field] || "left";
+            if (conflicts.length === 0) {
+              return (
+                <>
+                  {showAvatarPicker && leftContact && rightContact ? (
+                    <AvatarConflictPicker
+                      leftContact={leftContact}
+                      rightContact={rightContact}
+                      choice={conflictChoices.avatar ?? "left"}
+                      label={texts.fields.avatar}
+                      onChange={(side) => setConflictChoices((prev) => ({ ...prev, avatar: side }))}
+                    />
+                  ) : (
+                    <Paper withBorder radius="md" p="md">
+                      <Text size="sm" c="dimmed">
+                        {texts.noConflicts}
+                      </Text>
+                    </Paper>
+                  )}
+                </>
+              );
+            }
 
-                    const label = isLatLng
-                      ? `${texts.fields.latitude} / ${texts.fields.longitude}`
-                      : texts.fields[conflict.field];
+            return (
+              <Stack gap="sm">
+                <Text size="sm" c="dimmed">
+                  {texts.conflictHint}
+                </Text>
+                <SimpleGrid cols={2} spacing="sm" mt={"md"} mb="xs">
+                  <Center>
+                    <PersonChip person={toPersonPreview(leftContact)} isClickable />
+                  </Center>
+                  <Center>
+                    <PersonChip person={toPersonPreview(rightContact)} isClickable />
+                  </Center>
+                </SimpleGrid>
+                {/* Avatar conflict picker alongside field conflicts */}
+                {leftContact && rightContact ? (
+                  <AvatarConflictPicker
+                    leftContact={leftContact}
+                    rightContact={rightContact}
+                    choice={conflictChoices.avatar ?? "left"}
+                    label={texts.fields.avatar}
+                    onChange={(side) => setConflictChoices((prev) => ({ ...prev, avatar: side }))}
+                  />
+                ) : null}
+                {(() => {
+                  const hasLatLngPair =
+                    conflicts.some((c) => c.field === "latitude") &&
+                    conflicts.some((c) => c.field === "longitude");
+                  const lngConflict = conflicts.find((c) => c.field === "longitude");
 
-                    const leftDesc = isLatLng
-                      ? `${normalizeDisplayText(conflict.leftValue)}, ${normalizeDisplayText(lngConflict?.leftValue)}`
-                      : formatConflictDisplayValue(conflict.field, conflict.leftValue) || undefined;
+                  return conflicts
+                    .filter((c) => !(c.field === "longitude" && hasLatLngPair))
+                    .map((conflict) => {
+                      const isLatLng = conflict.field === "latitude" && hasLatLngPair;
+                      const selectedChoice = conflictChoices[conflict.field] || "left";
 
-                    const rightDesc = isLatLng
-                      ? `${normalizeDisplayText(conflict.rightValue)}, ${normalizeDisplayText(lngConflict?.rightValue)}`
-                      : formatConflictDisplayValue(conflict.field, conflict.rightValue) ||
-                        undefined;
+                      const label = isLatLng
+                        ? `${texts.fields.latitude} / ${texts.fields.longitude}`
+                        : texts.fields[conflict.field];
 
-                    const handleSelect = (side: MergeConflictChoice) => {
-                      setConflictChoices((prev) => {
-                        const next = { ...prev, [conflict.field]: side };
-                        if (isLatLng) next.longitude = side;
-                        return next;
-                      });
-                    };
+                      const leftDesc = isLatLng
+                        ? `${normalizeDisplayText(conflict.leftValue)}, ${normalizeDisplayText(lngConflict?.leftValue)}`
+                        : formatConflictDisplayValue(conflict.field, conflict.leftValue) ||
+                          undefined;
 
-                    return (
-                      <Stack key={conflict.field} gap="sm">
-                        <SimpleGrid cols={2} spacing="sm">
-                          <SelectableCard
-                            selected={selectedChoice === "left"}
-                            label={label}
-                            description={leftDesc || undefined}
-                            onClick={() => handleSelect("left")}
-                          />
-                          <SelectableCard
-                            selected={selectedChoice === "right"}
-                            label={label}
-                            description={rightDesc || undefined}
-                            onClick={() => handleSelect("right")}
-                          />
-                        </SimpleGrid>
-                      </Stack>
-                    );
-                  });
-              })()}
-            </Stack>
-          )}
+                      const rightDesc = isLatLng
+                        ? `${normalizeDisplayText(conflict.rightValue)}, ${normalizeDisplayText(lngConflict?.rightValue)}`
+                        : formatConflictDisplayValue(conflict.field, conflict.rightValue) ||
+                          undefined;
+
+                      const handleSelect = (side: MergeConflictChoice) => {
+                        setConflictChoices((prev) => {
+                          const next = { ...prev, [conflict.field]: side };
+                          if (isLatLng) next.longitude = side;
+                          return next;
+                        });
+                      };
+
+                      return (
+                        <Stack key={conflict.field} gap="sm">
+                          <SimpleGrid cols={2} spacing="sm">
+                            <SelectableCard
+                              selected={selectedChoice === "left"}
+                              label={label}
+                              description={leftDesc || undefined}
+                              onClick={() => handleSelect("left")}
+                            />
+                            <SelectableCard
+                              selected={selectedChoice === "right"}
+                              label={label}
+                              description={rightDesc || undefined}
+                              onClick={() => handleSelect("right")}
+                            />
+                          </SimpleGrid>
+                        </Stack>
+                      );
+                    });
+                })()}
+              </Stack>
+            );
+          })()}
 
           <ModalFooter
             {...(shouldSkipPickStep

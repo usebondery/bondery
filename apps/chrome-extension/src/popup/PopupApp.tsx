@@ -21,6 +21,8 @@ import { SettingsView } from "./views/SettingsView";
 import { PreviewView } from "./views/PreviewView";
 import { ImportView } from "./views/ImportView";
 import { LoggedInView } from "./views/LoggedInView";
+import { UpdateRequiredView } from "./views/UpdateRequiredView";
+import type { VersionCheckResponse } from "../utils/messages";
 
 export default function PopupApp() {
   const { themePreference, setThemePreference } = useExtensionTheme();
@@ -39,6 +41,15 @@ export default function PopupApp() {
 
   async function checkAuthAndPreview() {
     try {
+      // Check if an update is required before proceeding
+      const versionResponse: VersionCheckResponse = await browser.runtime.sendMessage({
+        type: "VERSION_CHECK_REQUEST",
+      });
+      if (versionResponse.payload.updateRequired) {
+        setState("update-required");
+        return;
+      }
+
       const authResponse: AuthStatusResponse = await browser.runtime.sendMessage({
         type: "AUTH_STATUS_REQUEST",
       });
@@ -226,6 +237,10 @@ export default function PopupApp() {
 
   if (state === "loading") {
     return <LoadingView />;
+  }
+
+  if (state === "update-required") {
+    return <UpdateRequiredView />;
   }
 
   if (state === "logged-out") {

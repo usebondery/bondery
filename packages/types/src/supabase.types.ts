@@ -931,11 +931,8 @@ export type Database = {
           id: string;
           is_admin: boolean;
           language: string | null;
-          middlename: string | null;
-          name: string | null;
           next_reminder_at_utc: string;
           reminder_send_hour: string;
-          surname: string | null;
           time_format: string;
           timezone: string | null;
           updated_at: string | null;
@@ -948,11 +945,8 @@ export type Database = {
           id?: string;
           is_admin?: boolean;
           language?: string | null;
-          middlename?: string | null;
-          name?: string | null;
           next_reminder_at_utc: string;
           reminder_send_hour?: string;
-          surname?: string | null;
           time_format?: string;
           timezone?: string | null;
           updated_at?: string | null;
@@ -965,11 +959,8 @@ export type Database = {
           id?: string;
           is_admin?: boolean;
           language?: string | null;
-          middlename?: string | null;
-          name?: string | null;
           next_reminder_at_utc?: string;
           reminder_send_hour?: string;
-          surname?: string | null;
           time_format?: string;
           timezone?: string | null;
           updated_at?: string | null;

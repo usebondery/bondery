@@ -47,6 +47,7 @@ export function ProviderIntegrations({
 }: ProviderIntegrationsProps) {
   const [providers, setProviders] = useState<string[]>(initialProviders);
   const [isExtensionInstalled, setIsExtensionInstalled] = useState(false);
+  const [extensionVersion, setExtensionVersion] = useState<string | null>(null);
 
   const t = useTranslations("SettingsPage.Profile");
   const tIntegration = useTranslations("SettingsPage.Integration");
@@ -54,12 +55,13 @@ export function ProviderIntegrations({
   useEffect(() => {
     let isMounted = true;
 
-    void detectBonderyChromeExtension().then((state) => {
+    void detectBonderyChromeExtension().then((result) => {
       if (!isMounted) {
         return;
       }
 
-      setIsExtensionInstalled(state === "installed");
+      setIsExtensionInstalled(result.state === "installed");
+      setExtensionVersion(result.version);
     });
 
     return () => {
@@ -226,7 +228,13 @@ export function ProviderIntegrations({
             iconColor="grape"
             isConnected={isExtensionInstalled}
             isDisabled={isExtensionInstalled}
-            connectedDescription={tIntegration("ExtensionLinkedDescription")}
+            connectedDescription={
+              extensionVersion
+                ? tIntegration("ExtensionLinkedDescriptionWithVersion", {
+                    version: extensionVersion,
+                  })
+                : tIntegration("ExtensionLinkedDescription")
+            }
             unconnectedDescription={tIntegration("ExtensionInstallDescription")}
             onClick={() => {
               if (isExtensionInstalled) {

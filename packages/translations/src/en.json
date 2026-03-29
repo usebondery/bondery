@@ -147,7 +147,9 @@
     "NotesEditedAt": "Edited {time}",
     "NotesEditedLessThanMinute": "Edited less than a minute ago",
     "NotesSaved": "Notes saved",
-    "NotesAlreadySaved": "Notes are up to date"
+    "NotesAlreadySaved": "Notes are up to date",
+    "MyselfPageTitle": "Myself",
+    "MyselfPageDescription": "Your profile card. This information is shared when you send or share your contact."
   },
   "PersonTabs": {
     "Interactions": "Interactions",
@@ -207,6 +209,8 @@
     "Title": "Settings",
     "Profile": {
       "Title": "Profile",
+      "YourProfileCard": "Your profile card",
+      "YourProfileCardDescription": "Shown when sharing contacts externally. You can also share or export your own vCard.",
       "FirstName": "First name",
       "MiddleNames": "Middle names",
       "Surname": "Surname",
@@ -269,6 +273,7 @@
       "ClickToLink": "Click to link your {provider} account",
       "ClickToUnlink": "Click to unlink your {provider} account",
       "ExtensionLinkedDescription": "Installed",
+      "ExtensionLinkedDescriptionWithVersion": "Installed version {version}",
       "ExtensionInstallDescription": "Click to install from Chrome Web Store",
       "ExtensionModalTitle": "Bondery Extension",
       "ChromeExtensionModal": {
@@ -700,6 +705,7 @@
   },
   "PageHeader": {
     "LearnMoreAbout": "Learn more about {concept}",
+    "HelpLabel": "Learn more",
     "Concepts": {
       "Timeline": "Interactions",
       "People": "People",
@@ -1029,7 +1035,9 @@
     "ExportSuccessDescription": "Contact exported as vCard",
     "ExportError": "Error",
     "ExportErrorDescription": "Failed to export contact. Please try again.",
-    "DeleteContact": "Delete Contact"
+    "DeleteContact": "Delete Contact",
+    "CannotDeleteMyself": "You cannot delete your own contact card",
+    "CannotMergeMyself": "You cannot merge your own contact card with others"
   },
   "StatsPage": {
     "Title": "KPIs Dashboard",
@@ -1064,5 +1072,14 @@
     "NoData": "No data available",
     "Forbidden": "You do not have access to this page.",
     "PostHogNotConfigured": "PostHog is not configured."
+  },
+  "ExtensionVersionCheck": {
+    "UpdateRequiredTitle": "Update Required",
+    "UpdateRequiredDescription": "Your Bondery extension is outdated and may not work correctly. Please update to continue.",
+    "UpdateButton": "Update",
+    "WebappNotificationTitle": "Extension Update Available",
+    "WebappNotificationDescription": "Your Bondery Chrome Extension needs an update to keep working properly.",
+    "ApiRejectedTitle": "Version Too Old",
+    "ApiRejectedDescription": "The server rejected the request because your extension is outdated. Please update."
   }
 }

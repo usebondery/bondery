@@ -14,8 +14,9 @@ import helmet from "@fastify/helmet";
 import fastifyAuth from "@fastify/auth";
 import fastifySwagger from "@fastify/swagger";
 import { createRequire } from "module";
-import { API_ROUTES } from "@bondery/helpers";
+import { API_ROUTES, CHROME_EXTENSION_URL, MIN_EXTENSION_VERSION } from "@bondery/helpers";
 import { registerAuthStrategies } from "./lib/auth.js";
+import { registerExtensionVersionCheck } from "./lib/extensionVersionCheck.js";
 
 import { contactRoutes } from "./routes/contacts/index.js";
 import { accountRoutes } from "./routes/account/index.js";
@@ -245,7 +246,7 @@ async function buildServer() {
     origin: ALLOWED_ORIGINS,
     credentials: true,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
-    allowedHeaders: ["Content-Type", "Authorization"],
+    allowedHeaders: ["Content-Type", "Authorization", "X-Bondery-Extension-Version"],
   });
 
   // Register cookie parser
@@ -261,6 +262,9 @@ async function buildServer() {
   // Register auth plugin and strategies
   await fastify.register(fastifyAuth);
   registerAuthStrategies(fastify);
+
+  // Register extension version enforcement (426 Upgrade Required for outdated extensions)
+  registerExtensionVersionCheck(fastify);
 
   // Register OpenAPI spec generator
   await fastify.register(fastifySwagger, {
@@ -301,7 +305,14 @@ async function buildServer() {
 
   // Health check endpoint
   fastify.get("/status", { schema: { tags: ["Health"] } }, async () => {
-    return { status: "ok", timestamp: new Date().toISOString() };
+    return {
+      status: "ok",
+      timestamp: new Date().toISOString(),
+      extension: {
+        minVersion: MIN_EXTENSION_VERSION,
+        storeUrl: CHROME_EXTENSION_URL,
+      },
+    };
   });
 
   // Register route modules

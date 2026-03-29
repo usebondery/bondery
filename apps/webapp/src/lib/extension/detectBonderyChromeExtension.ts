@@ -1,5 +1,10 @@
 export type ExtensionInstallState = "installed" | "not_installed";
 
+export interface ExtensionDetectionResult {
+  state: ExtensionInstallState;
+  version: string | null;
+}
+
 const EXTENSION_PING_TYPE = "BONDERY_EXTENSION_PING";
 const EXTENSION_PONG_TYPE = "BONDERY_EXTENSION_PONG";
 
@@ -8,11 +13,11 @@ const EXTENSION_PONG_TYPE = "BONDERY_EXTENSION_PONG";
  * for the current page by performing a postMessage ping/pong handshake.
  *
  * @param timeoutMs Maximum time to wait for the extension response in milliseconds.
- * @returns A promise resolving to "installed" when the extension responds, otherwise "not_installed".
+ * @returns A promise resolving to the detection result with install state and version.
  */
-export function detectBonderyChromeExtension(timeoutMs = 1200): Promise<ExtensionInstallState> {
+export function detectBonderyChromeExtension(timeoutMs = 1200): Promise<ExtensionDetectionResult> {
   if (typeof window === "undefined") {
-    return Promise.resolve("not_installed");
+    return Promise.resolve({ state: "not_installed", version: null });
   }
 
   return new Promise((resolve) => {
@@ -37,12 +42,15 @@ export function detectBonderyChromeExtension(timeoutMs = 1200): Promise<Extensio
       }
 
       cleanup();
-      resolve("installed");
+      resolve({
+        state: "installed",
+        version: typeof event.data.version === "string" ? event.data.version : null,
+      });
     };
 
     const timeoutId = window.setTimeout(() => {
       cleanup();
-      resolve("not_installed");
+      resolve({ state: "not_installed", version: null });
     }, timeoutMs);
 
     window.addEventListener("message", onMessage);

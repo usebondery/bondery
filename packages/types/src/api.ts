@@ -276,6 +276,7 @@ export type MergeConflictField =
   | "firstName"
   | "middleName"
   | "lastName"
+  | "avatar"
   | "headline"
   | "location"
   | "notes"

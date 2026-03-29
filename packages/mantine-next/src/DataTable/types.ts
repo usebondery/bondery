@@ -48,6 +48,10 @@ export interface RowAction<TRow> {
   color?: string;
   /** Callback when action is triggered */
   onClick: (row: TRow) => void;
+  /** When true, the action is rendered as disabled */
+  disabled?: (row: TRow) => boolean;
+  /** Tooltip shown when hovering over a disabled action */
+  disabledTooltip?: string;
 }
 
 /**

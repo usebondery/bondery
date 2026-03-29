@@ -70,7 +70,7 @@ export function EnrichStatusNotificationManager() {
     <Notifications
       store={statusNotificationsStore}
       position="bottom-right"
-      limit={1}
+      limit={2}
       autoClose={false}
     />
   );

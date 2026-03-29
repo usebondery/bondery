@@ -34,6 +34,7 @@ import {
   findPersonBySocial,
   enrichPersonFromLinkedIn,
   AuthRequiredError,
+  ExtensionOutdatedError,
   type SocialLookupResult,
 } from "../../utils/api";
 import type {
@@ -44,8 +45,9 @@ import type {
   SubmitEnrichData,
   PersonPreviewData,
   ScrapedProfileData,
+  VersionCheckResponse,
 } from "../../utils/messages";
-import { WEBAPP_ROUTES } from "@bondery/helpers";
+import { WEBAPP_ROUTES, isVersionBelow } from "@bondery/helpers";
 
 // ─── State ───────────────────────────────────────────────────────────────────
 
@@ -78,6 +80,8 @@ const BADGE_COLOR_PERSON_EXISTS = "var(--mantine-color-green-filled)";
 const BADGE_COLOR_OFF_BONDERY = "var(--mantine-color-yellow-filled)";
 const BADGE_COLOR_UNAUTHENTICATED = "var(--mantine-color-orange-filled)";
 
+const BADGE_COLOR_UPDATE_REQUIRED = "var(--mantine-color-red-filled)";
+const BADGE_COLOR_UPDATE_REQUIRED_FALLBACK = "red";
 const BADGE_COLOR_ON_BONDERY_FALLBACK = "purple";
 const BADGE_COLOR_PERSON_EXISTS_FALLBACK = "green";
 const BADGE_COLOR_OFF_BONDERY_FALLBACK = "yellow";
@@ -238,6 +242,12 @@ async function resolvePersonExists(profile: ScrapedProfileData): Promise<boolean
 
 async function updateActionContextIndicator(): Promise<void> {
   try {
+    const { updateRequired = false } = await browser.storage.local.get("updateRequired");
+    if (updateRequired) {
+      await setDeterminedBadge(BADGE_COLOR_UPDATE_REQUIRED, BADGE_COLOR_UPDATE_REQUIRED_FALLBACK);
+      return;
+    }
+
     const [activeTab] = await browser.tabs.query({ active: true, currentWindow: true });
     const tabUrl = activeTab?.url || "";
     const onBondery = tabUrl.startsWith(config.appUrl);
@@ -970,6 +980,20 @@ async function handleMessage(
         await handleActiveProfileContext(sendResponse);
         break;
 
+      case "OPEN_EXTENSIONS_PAGE":
+        await browser.tabs.create({ url: `chrome://extensions/?id=${browser.runtime.id}` });
+        sendResponse({ type: "OK" });
+        break;
+
+      case "VERSION_CHECK_REQUEST": {
+        const { updateRequired = false } = await browser.storage.local.get("updateRequired");
+        sendResponse({
+          type: "VERSION_CHECK_RESPONSE",
+          payload: { updateRequired },
+        } satisfies VersionCheckResponse);
+        break;
+      }
+
       case "ENRICH_PERSON_REQUEST":
         await handleEnrichPersonRequest(message, sender, sendResponse);
         break;
@@ -1010,11 +1034,46 @@ async function handleMessage(
         sendResponse({ type: "ERROR", payload: { error: "Unknown message type" } });
     }
   } catch (error) {
+    if (error instanceof ExtensionOutdatedError) {
+      await browser.storage.local.set({ updateRequired: true });
+      await updateActionContextIndicator();
+      sendResponse({
+        type: "ERROR",
+        payload: { error: "Extension update required", extensionOutdated: true },
+      });
+      return;
+    }
+
     console.error("[background] Message handler error:", error);
     sendResponse({
       type: "ERROR",
       payload: { error: error instanceof Error ? error.message : "Unknown error" },
     });
+  }
+}
+
+// ─── Version Compatibility Check ─────────────────────────────────────────────
+
+/**
+ * Fetches the minimum required extension version from the API /status endpoint
+ * and stores whether an update is required in browser.storage.local.
+ */
+async function checkVersionCompatibility(): Promise<void> {
+  try {
+    const response = await fetch(`${config.apiUrl}/status`);
+    if (!response.ok) return;
+
+    const data = await response.json();
+    const minVersion = data?.extension?.minVersion;
+    if (!minVersion) return;
+
+    const currentVersion = browser.runtime.getManifest().version;
+    const updateRequired = isVersionBelow(currentVersion, minVersion);
+
+    await browser.storage.local.set({ updateRequired });
+    await updateActionContextIndicator();
+  } catch {
+    // Network errors are non-fatal; keep the previous stored value.
   }
 }
 
@@ -1027,6 +1086,10 @@ function initBackground(): void {
       const welcomeUrl = browser.runtime.getURL("welcome.html");
       await browser.tabs.create({ url: welcomeUrl });
     } else if (details.reason === "update") {
+      // Clear any stale updateRequired flag so the badge doesn't briefly show
+      // red after an update. checkVersionCompatibility() re-evaluates immediately.
+      await browser.storage.local.remove("updateRequired");
+
       const authenticated = await isAuthenticated();
       if (!authenticated) {
         await browser.action.setBadgeText({ text: BADGE_TEXT_INDICATOR });
@@ -1069,7 +1132,17 @@ function initBackground(): void {
   // Periodic token refresh alarm
   browser.alarms.create("token-refresh", { periodInMinutes: 15 });
 
+  // Check extension version compatibility every 60 minutes
+  browser.alarms.create("version-check", { periodInMinutes: 60 });
+
+  // Run an immediate version check on startup
+  void checkVersionCompatibility();
+
   browser.alarms.onAlarm.addListener(async (alarm) => {
+    if (alarm.name === "version-check") {
+      await checkVersionCompatibility();
+    }
+
     if (alarm.name === "token-refresh") {
       const tokens = await getTokens();
       if (!tokens) return;

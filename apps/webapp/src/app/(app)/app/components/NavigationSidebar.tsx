@@ -1,6 +1,7 @@
 "use client";
 
 import { Group, Stack, Box } from "@mantine/core";
+import { useHover } from "@mantine/hooks";
 import {
   IconHome,
   IconSettings,
@@ -46,6 +47,8 @@ export function NavigationSidebarContent({
   hasActiveMergeRecommendations,
 }: NavigationSidebarContentProps) {
   const pathname = usePathname();
+  const { hovered: myselfHovered, ref: myselfRef } = useHover();
+  const isMyselfActive = pathname === WEBAPP_ROUTES.MYSELF;
 
   return (
     <Box style={{ display: "flex", flexDirection: "column", height: "100%" }}>
@@ -66,7 +69,7 @@ export function NavigationSidebarContent({
         ))}
       </Stack>
 
-      <Stack gap="xs" mt="auto">
+      <Stack gap="xs" mt="auto" mb="xs">
         {secondaryLinks.map((link, index) => (
           <NavLinkItem
             key={`${link.href}-${index}`}
@@ -77,11 +80,25 @@ export function NavigationSidebarContent({
         ))}
       </Stack>
 
-      <Box mt="md">
+      <Box>
         <Box
+          ref={myselfRef}
           component={Link}
-          href={WEBAPP_ROUTES.SETTINGS}
-          style={{ color: "inherit", textDecoration: "none", display: "block" }}
+          href={WEBAPP_ROUTES.MYSELF}
+          py="xs"
+          px="sm"
+          style={{
+            display: "block",
+            textDecoration: "none",
+            color: isMyselfActive ? "white" : "inherit",
+            borderRadius: "var(--mantine-radius-sm)",
+            transition: "background-color var(--transition-time) var(--transition-ease)",
+            backgroundColor: isMyselfActive
+              ? "var(--mantine-primary-color-filled)"
+              : myselfHovered
+                ? "var(--mantine-primary-color-light-hover)"
+                : "transparent",
+          }}
         >
           <UserCard name={userName} subtitle={userEmail} avatarUrl={avatarUrl} />
         </Box>

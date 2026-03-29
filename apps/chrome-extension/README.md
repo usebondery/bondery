@@ -64,9 +64,27 @@ $headers=@{Authorization="Bearer $secret";apikey=$secret}
 Invoke-RestMethod -Method GET -Uri "$base/auth/v1/admin/oauth/clients" -Headers $headers | ConvertTo-Json -Depth 8
 ```
 
-Update redirect URIs for the client in `WXT_SUPABASE_OAUTH_CLIENT_ID`:
+**If no client exists yet**, create a public client (PKCE, no secret). The `token_endpoint_auth_method='none'` flag is required — omitting it creates a confidential client that will reject PKCE token exchanges with `invalid_credentials`:
 
-If a client needs to be created, create a public client, not confiendential, and use the generated client ID in `WXT_SUPABASE_OAUTH_CLIENT_ID`.
+```powershell
+$base='http://127.0.0.1:54321'
+$secret='<sb_secret_from_supabase_status>'
+$headers=@{Authorization="Bearer $secret";apikey=$secret;'Content-Type'='application/json'}
+$body=@{
+	redirect_uris=@('https://<extension-id>.chromiumapp.org/')
+	token_endpoint_auth_method='none'
+} | ConvertTo-Json -Depth 5
+Invoke-RestMethod -Method POST -Uri "$base/auth/v1/admin/oauth/clients" -Headers $headers -Body $body | ConvertTo-Json -Depth 8
+```
+
+Copy the returned `client_id` into `WXT_SUPABASE_OAUTH_CLIENT_ID` in `.env.development.local`.
+
+> **Note:** A confidential client (`client_type: "confidential"`) cannot be converted to public via `PUT`. If you accidentally created one, delete it and recreate:
+> ```powershell
+> Invoke-RestMethod -Method DELETE -Uri "$base/auth/v1/admin/oauth/clients/<client-id>" -Headers $headers
+> ```
+
+**If a client already exists** (check `client_type: "public"`), just update its redirect URIs to add your new extension ID alongside the existing ones:
 
 ```powershell
 $base='http://127.0.0.1:54321'
@@ -89,4 +107,21 @@ After updating redirect URIs, reload the unpacked extension and retry login.
 ## Hosted Supabase projects
 
 If you are using a hosted Supabase project (not local Docker), perform the same redirect URI update in that environment's Auth OAuth clients as well.
+
+## Testing the "extension update required" flow locally
+
+Because the local extension is always the current version, the update gate (`MIN_EXTENSION_VERSION`) never triggers. To simulate it:
+
+1. In `packages/helpers/src/globals/paths.ts`, temporarily bump `MIN_EXTENSION_VERSION` above the installed version:
+
+```ts
+// Current extension version is 1.3.0 — set min higher to simulate outdated client
+export const MIN_EXTENSION_VERSION = "99.0.0";
+```
+
+2. Restart the API server (or let it hot-reload). The API will now reject all extension requests with `426 Upgrade Required`.
+
+3. The extension background worker detects the 426, sets `updateRequired: true` in storage, and the popup shows the update-required screen.
+
+4. Revert `MIN_EXTENSION_VERSION` back to `"0.0.0"` when done testing.
 

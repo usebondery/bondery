@@ -26,6 +26,7 @@ import {
   findPersonBySocial,
   upsertLinkedInData,
   AuthRequiredError,
+  ExtensionOutdatedError,
   type SocialLookupResult,
 } from "../utils/api";
 import type {
@@ -34,8 +35,10 @@ import type {
   UpsertLinkedInDataRequest,
   PersonPreviewData,
   ScrapedProfileData,
+  VersionCheckResponse,
 } from "../utils/messages";
 import { WEBAPP_ROUTES } from "@bondery/helpers";
+import { isVersionBelow } from "@bondery/helpers";
 
 // ─── State ───────────────────────────────────────────────────────────────────
 
@@ -276,6 +279,9 @@ function scheduleActionContextIndicatorUpdate(delayMs = 200): void {
 // ─── Install Handler ─────────────────────────────────────────────────────────
 
 chrome.runtime.onInstalled.addListener(async (details) => {
+  // Always check version compatibility on install/update
+  await checkVersionCompatibility();
+
   if (details.reason === "install") {
     // First-time installation: open welcome page for login
     const welcomeUrl = chrome.runtime.getURL("welcome/index.html");
@@ -296,6 +302,7 @@ chrome.runtime.onInstalled.addListener(async (details) => {
 });
 
 chrome.runtime.onStartup.addListener(() => {
+  checkVersionCompatibility();
   scheduleActionContextIndicatorUpdate();
 });
 
@@ -362,10 +369,28 @@ async function handleMessage(
         await handleActiveProfileContext(sendResponse);
         break;
 
+      case "VERSION_CHECK_REQUEST": {
+        const { updateRequired = false } = await chrome.storage.local.get("updateRequired");
+        sendResponse({
+          type: "VERSION_CHECK_RESPONSE",
+          payload: { updateRequired },
+        } satisfies VersionCheckResponse);
+        break;
+      }
+
       default:
         sendResponse({ type: "ERROR", payload: { error: "Unknown message type" } });
     }
   } catch (error) {
+    if (error instanceof ExtensionOutdatedError) {
+      await chrome.storage.local.set({ updateRequired: true });
+      sendResponse({
+        type: "ERROR",
+        payload: { error: "Extension update required", extensionOutdated: true },
+      });
+      return;
+    }
+
     console.error("[background] Message handler error:", error);
     sendResponse({
       type: "ERROR",
@@ -855,6 +880,9 @@ async function handleActiveProfileContext(
 // Check token health every 15 minutes (service worker alarm)
 chrome.alarms.create("token-refresh", { periodInMinutes: 15 });
 
+// Check extension version compatibility every 60 minutes
+chrome.alarms.create("version-check", { periodInMinutes: 60 });
+
 chrome.alarms.onAlarm.addListener(async (alarm) => {
   if (alarm.name === "token-refresh") {
     const tokens = await getTokens();
@@ -868,4 +896,32 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
       await refreshAccessToken();
     }
   }
+
+  if (alarm.name === "version-check") {
+    await checkVersionCompatibility();
+  }
 });
+
+// ─── Version Compatibility Check ─────────────────────────────────────────────
+
+/**
+ * Fetches the minimum required extension version from the API /status endpoint
+ * and stores whether an update is required in chrome.storage.local.
+ */
+async function checkVersionCompatibility(): Promise<void> {
+  try {
+    const response = await fetch(`${config.apiUrl}/status`);
+    if (!response.ok) return;
+
+    const data = await response.json();
+    const minVersion = data?.extension?.minVersion;
+    if (!minVersion) return;
+
+    const currentVersion = chrome.runtime.getManifest().version;
+    const updateRequired = isVersionBelow(currentVersion, minVersion);
+
+    await chrome.storage.local.set({ updateRequired });
+  } catch {
+    // Network errors are non-fatal; keep the previous stored value.
+  }
+}

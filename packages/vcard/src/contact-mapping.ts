@@ -183,7 +183,9 @@ export function contactToVCard(contact: Contact): VCard {
       properties: [],
       warnings: [],
     },
-    customProperties: [],
+    customProperties: contact.myself
+      ? [{ name: "X-MYSELF", parameters: [], value: "TRUE" }]
+      : [],
   };
 }
 

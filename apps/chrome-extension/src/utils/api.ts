@@ -27,6 +27,78 @@ export interface UserSettingsProfile {
   avatarUrl: string | null;
 }
 
+// ─── Error Classes ───────────────────────────────────────────────────────────
+
+/**
+ * Custom error class for authentication-required scenarios.
+ * The service worker uses this to distinguish auth errors from other failures.
+ */
+export class AuthRequiredError extends Error {
+  readonly requiresAuth = true;
+
+  constructor(message: string) {
+    super(message);
+    this.name = "AuthRequiredError";
+  }
+}
+
+/**
+ * Thrown when the API rejects a request with 426 Upgrade Required,
+ * meaning the extension version is too old.
+ */
+export class ExtensionOutdatedError extends Error {
+  readonly extensionOutdated = true;
+
+  constructor(message: string) {
+    super(message);
+    this.name = "ExtensionOutdatedError";
+  }
+}
+
+// ─── Authenticated Fetch Wrapper ─────────────────────────────────────────────
+
+/**
+ * Centralised fetch wrapper that attaches OAuth token and extension version header,
+ * and handles 401 (auth expired) and 426 (extension outdated) responses.
+ *
+ * @param url - The full URL to fetch
+ * @param options - Standard RequestInit options (method, body, extra headers, etc.)
+ * @returns The raw Response for the caller to parse
+ * @throws AuthRequiredError on missing token or 401
+ * @throws ExtensionOutdatedError on 426
+ */
+async function authenticatedFetch(url: string, options: RequestInit = {}): Promise<Response> {
+  const token = await getAccessToken();
+
+  if (!token) {
+    throw new AuthRequiredError("Not authenticated");
+  }
+
+  const extensionVersion = chrome.runtime.getManifest().version;
+
+  const headers: Record<string, string> = {
+    ...(options.headers as Record<string, string>),
+    Authorization: `Bearer ${token}`,
+    "X-Bondery-Extension-Version": extensionVersion,
+  };
+
+  const response = await fetch(url, { ...options, headers });
+
+  if (response.status === 401) {
+    await clearTokens();
+    throw new AuthRequiredError("Session expired");
+  }
+
+  if (response.status === 426) {
+    await chrome.storage.local.set({ updateRequired: true });
+    throw new ExtensionOutdatedError("Extension update required");
+  }
+
+  return response;
+}
+
+// ─── API Functions ───────────────────────────────────────────────────────────
+
 /**
  * Create or find a contact via the redirect API endpoint.
  * This is the same endpoint the extension previously used via browser redirect,
@@ -40,26 +112,11 @@ export interface UserSettingsProfile {
  * @throws Error if not authenticated or request fails
  */
 export async function addOrFindPerson(data: RedirectRequest): Promise<RedirectResponse> {
-  const token = await getAccessToken();
-
-  if (!token) {
-    throw new AuthRequiredError("Not authenticated");
-  }
-
-  const response = await fetch(`${config.apiUrl}${API_ROUTES.REDIRECT}`, {
+  const response = await authenticatedFetch(`${config.apiUrl}${API_ROUTES.REDIRECT}`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
   });
-
-  if (response.status === 401) {
-    // Token was rejected — clear stored tokens
-    await clearTokens();
-    throw new AuthRequiredError("Session expired");
-  }
 
   if (!response.ok) {
     const errorBody = await response.text();
@@ -76,27 +133,13 @@ export async function findPersonBySocial(
   platform: "instagram" | "linkedin" | "facebook",
   handle: string,
 ): Promise<SocialLookupResult> {
-  const token = await getAccessToken();
-
-  if (!token) {
-    throw new AuthRequiredError("Not authenticated");
-  }
-
   const url = new URL(`${config.apiUrl}${API_ROUTES.CONTACTS}/by-social`);
   url.searchParams.set("platform", platform);
   url.searchParams.set("handle", handle);
 
-  const response = await fetch(url.toString(), {
+  const response = await authenticatedFetch(url.toString(), {
     method: "GET",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
   });
-
-  if (response.status === 401) {
-    await clearTokens();
-    throw new AuthRequiredError("Session expired");
-  }
 
   if (!response.ok) {
     const errorBody = await response.text();
@@ -115,23 +158,9 @@ export async function findPersonBySocial(
 export async function fetchPersonPreview(
   contactId: string,
 ): Promise<{ firstName: string; lastName: string | null; avatar: string | null }> {
-  const token = await getAccessToken();
-
-  if (!token) {
-    throw new AuthRequiredError("Not authenticated");
-  }
-
-  const response = await fetch(`${config.apiUrl}${API_ROUTES.CONTACTS}/${contactId}`, {
+  const response = await authenticatedFetch(`${config.apiUrl}${API_ROUTES.CONTACTS}/${contactId}`, {
     method: "GET",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
   });
-
-  if (response.status === 401) {
-    await clearTokens();
-    throw new AuthRequiredError("Session expired");
-  }
 
   if (!response.ok) {
     throw new Error(`API error ${response.status}`);
@@ -151,23 +180,9 @@ export async function fetchPersonPreview(
  * Fetch authenticated user's settings/profile data.
  */
 export async function fetchUserSettings(): Promise<UserSettingsProfile> {
-  const token = await getAccessToken();
-
-  if (!token) {
-    throw new AuthRequiredError("Not authenticated");
-  }
-
-  const response = await fetch(`${config.apiUrl}${API_ROUTES.SETTINGS}`, {
+  const response = await authenticatedFetch(`${config.apiUrl}${API_ROUTES.SETTINGS}`, {
     method: "GET",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
   });
-
-  if (response.status === 401) {
-    await clearTokens();
-    throw new AuthRequiredError("Session expired");
-  }
 
   if (!response.ok) {
     throw new Error(`API error ${response.status}`);
@@ -203,28 +218,14 @@ export async function upsertLinkedInData(
     location?: string;
   }>,
 ): Promise<void> {
-  const token = await getAccessToken();
-
-  if (!token) {
-    throw new AuthRequiredError("Not authenticated");
-  }
-
-  const response = await fetch(
+  const response = await authenticatedFetch(
     `${config.apiUrl}${API_ROUTES.CONTACTS}/${contactId}/linkedin-data`,
     {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ workHistory }),
     },
   );
-
-  if (response.status === 401) {
-    await clearTokens();
-    throw new AuthRequiredError("Session expired");
-  }
 
   if (!response.ok) {
     const errorBody = await response.text();
@@ -243,41 +244,17 @@ export async function enrichPersonFromLinkedIn(
   contactId: string,
   data: EnrichContactRequest,
 ): Promise<void> {
-  const token = await getAccessToken();
-
-  if (!token) {
-    throw new AuthRequiredError("Not authenticated");
-  }
-
-  const response = await fetch(`${config.apiUrl}${API_ROUTES.CONTACTS}/${contactId}/enrich`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
+  const response = await authenticatedFetch(
+    `${config.apiUrl}${API_ROUTES.CONTACTS}/${contactId}/enrich`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
     },
-    body: JSON.stringify(data),
-  });
-
-  if (response.status === 401) {
-    await clearTokens();
-    throw new AuthRequiredError("Session expired");
-  }
+  );
 
   if (!response.ok) {
     const errorBody = await response.text();
     throw new Error(`API error ${response.status}: ${errorBody}`);
-  }
-}
-
-/**
- * Custom error class for authentication-required scenarios.
- * The service worker uses this to distinguish auth errors from other failures.
- */
-export class AuthRequiredError extends Error {
-  readonly requiresAuth = true;
-
-  constructor(message: string) {
-    super(message);
-    this.name = "AuthRequiredError";
   }
 }

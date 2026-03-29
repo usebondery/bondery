@@ -58,7 +58,9 @@ export function PeopleMultiPickerInput({
   const filteredContacts = useMemo(() => {
     const query = search.trim().toLowerCase();
 
-    const availableContacts = contacts.filter((contact) => !selectedIds.includes(contact.id));
+    const availableContacts = contacts.filter(
+      (contact) => !selectedIds.includes(contact.id) && !contact.myself,
+    );
 
     if (!query) {
       return availableContacts;

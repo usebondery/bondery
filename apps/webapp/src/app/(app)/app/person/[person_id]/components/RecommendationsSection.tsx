@@ -1,7 +1,7 @@
 "use client";
 
 import { Stack } from "@mantine/core";
-import type { Contact, MergeRecommendation } from "@bondery/types";
+import type { MergeRecommendation } from "@bondery/types";
 import { MergeRecommendationCard } from "@/app/(app)/app/components/contacts/MergeRecommendationCard";
 import type { MergeWithModalTexts } from "../../../people/components/MergeWithModal";
 import { EnrichRecommendationCard } from "./EnrichRecommendationCard";

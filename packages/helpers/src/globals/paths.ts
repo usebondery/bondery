@@ -36,6 +36,13 @@ export const API_ROUTES = {
 export const CHROME_EXTENSION_URL =
   "https://chromewebstore.google.com/detail/lpcmokfekjjejnpobhbkgmjkodfhpmha";
 
+/**
+ * Minimum Chrome extension version required by the API.
+ * Requests from extensions below this version receive HTTP 426 Upgrade Required.
+ * Set to "0.0.0" to disable enforcement.
+ */
+export const MIN_EXTENSION_VERSION: string = "1.3.0";
+
 export const HELP_DOCS_URL = "https://bondery.gitbook.io";
 
 export const GITHUB_REPO_URL = "https://api.github.com/repos/usebondery/bondery";
@@ -74,6 +81,7 @@ export const WEBAPP_ROUTES = {
   GROUPS: "/app/groups",
   INTERACTIONS: "/app/interactions",
   PERSON: "/app/person",
+  MYSELF: "/app/myself",
   SETTINGS: "/app/settings",
   ACCOUNT: "/app/account",
   FEEDBACK: "/app/feedback",

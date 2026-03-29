@@ -2142,6 +2142,42 @@ paths:
       responses:
         "200":
           description: Default Response
+  /api/account/person:
+    get:
+      tags:
+        - Account
+      parameters:
+        - schema:
+            anyOf:
+              - type: string
+                enum:
+                  - low
+              - type: string
+                enum:
+                  - medium
+              - type: string
+                enum:
+                  - high
+          in: query
+          name: avatarQuality
+          required: false
+        - schema:
+            anyOf:
+              - type: string
+                enum:
+                  - small
+              - type: string
+                enum:
+                  - medium
+              - type: string
+                enum:
+                  - large
+          in: query
+          name: avatarSize
+          required: false
+      responses:
+        "200":
+          description: Default Response
   /api/settings:
     get:
       tags:
@@ -2159,12 +2195,6 @@ paths:
             schema:
               type: object
               properties:
-                name:
-                  type: string
-                middlename:
-                  type: string
-                surname:
-                  type: string
                 timezone:
                   type: string
                 reminderSendHour:

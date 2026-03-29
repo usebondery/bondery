@@ -183,6 +183,8 @@ function NewActivityForm({
         <TextInput
           label={t("Title")}
           placeholder={t("TitlePlaceholder")}
+          autoFocus
+          data-autofocus
           {...form.getInputProps("title")}
         />
 
@@ -208,8 +210,6 @@ function NewActivityForm({
           <Textarea
             placeholder={t("DescriptionPlaceholder")}
             minRows={6}
-            autoFocus
-            data-autofocus
             {...form.getInputProps("description")}
             styles={{
               input: {

@@ -103,7 +103,8 @@ export function PeopleClient({ initialContacts, totalCount, layout = "stack" }: 
       messagePlaceholder: tShare("MessagePlaceholder"),
       sendCopyCheckbox: tShare("SendCopyCheckbox"),
       selectFieldsLabel: tShare("SelectFieldsLabel"),
-      submitButton: (count: number) => count > 0 ? tShare("SubmitButtonWithCount", { count }) : tShare("SubmitButton"),
+      submitButton: (count: number) =>
+        count > 0 ? tShare("SubmitButtonWithCount", { count }) : tShare("SubmitButton"),
       cancelButton: tShare("CancelButton"),
       sendingButton: tShare("SendingButton"),
       successTitle: tShare("SuccessTitle"),
@@ -220,6 +221,7 @@ export function PeopleClient({ initialContacts, totalCount, layout = "stack" }: 
 
   const handleDeleteContact = (contactId: string) => {
     const targetContact = contacts.find((contact) => contact.id === contactId);
+
     const contactName = targetContact ? formatContactName(targetContact) : "this contact";
 
     openDeleteContactModal({
@@ -508,6 +510,7 @@ export function PeopleClient({ initialContacts, totalCount, layout = "stack" }: 
               onMergeOne: (contactId) => openMergeModal(contactId),
               onMergeSelected: (leftContactId, rightContactId) =>
                 openMergeModal(leftContactId, rightContactId, true),
+              mergeDisabledTooltip: tActions("CannotMergeMyself"),
               onAddToGroupsOne: (contactId) => handleAddToGroup([contactId]),
               onAddToGroupsSelected: (contactIds) => handleAddToGroup(contactIds),
               onDeleteOne: handleDeleteContact,

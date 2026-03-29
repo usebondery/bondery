@@ -7,7 +7,7 @@ import type { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { Type } from "@sinclair/typebox";
 import { getAuth } from "../../lib/auth.js";
-import { buildContactAvatarUrl } from "../../lib/supabase.js";
+import { buildContactAvatarUrl, createAdminClient } from "../../lib/supabase.js";
 import { generateVCard } from "./vcard.js";
 import {
   parseEmailEntries,
@@ -308,6 +308,7 @@ const MERGEABLE_FIELDS = new Set<MergeConflictField>([
   ...Object.keys(MERGEABLE_SCALAR_FIELDS),
   ...Object.keys(MERGEABLE_SOCIAL_FIELDS),
   ...MERGEABLE_SET_FIELDS,
+  "avatar",
 ] as MergeConflictField[]);
 
 const MERGE_RECOMMENDATION_ALGORITHM_VERSION = "v1";
@@ -1421,6 +1422,22 @@ export async function contactRoutes(fastify: FastifyInstance) {
             error: "Invalid request body. 'ids' must be a non-empty array.",
           });
         }
+
+        // Filter out myself contacts — they cannot be deleted
+        const { data: myselfRows } = await client
+          .from("people")
+          .select("id")
+          .eq("user_id", user.id)
+          .eq("myself", true)
+          .in("id", uniqueIds);
+        const myselfIds = new Set((myselfRows ?? []).map((r: { id: string }) => r.id));
+        uniqueIds = uniqueIds.filter((id) => !myselfIds.has(id));
+
+        if (uniqueIds.length === 0) {
+          return reply.status(400).send({
+            error: "No deletable contacts found. Your own contact card cannot be deleted.",
+          });
+        }
       } else if ("filter" in body && body.filter) {
         // Build the same Supabase query used by GET /contacts, but only select IDs.
         let filterQuery = client
@@ -1506,6 +1523,22 @@ export async function contactRoutes(fastify: FastifyInstance) {
     async (request: FastifyRequest<{ Params: typeof UuidParam.static }>, reply: FastifyReply) => {
       const { client, user } = getAuth(request);
       const { id } = request.params;
+
+      // Check if this is the myself contact before doing anything destructive
+      const { data: contactCheck } = await client
+        .from("people")
+        .select("id, myself")
+        .eq("id", id)
+        .eq("user_id", user.id)
+        .single();
+
+      if (!contactCheck) {
+        return reply.status(404).send({ error: "Contact not found" });
+      }
+
+      if (contactCheck.myself) {
+        return reply.status(403).send({ error: "Cannot delete your own contact card" });
+      }
 
       try {
         await deleteOrphanedInteractionsForDeletedContacts(client, user.id, [id]);
@@ -2071,9 +2104,7 @@ export async function contactRoutes(fastify: FastifyInstance) {
 
       // Execute all social media writes in parallel
       const socialWriteResults = await Promise.allSettled([
-        ...(socialInserts.length > 0
-          ? [client.from("people_socials").insert(socialInserts)]
-          : []),
+        ...(socialInserts.length > 0 ? [client.from("people_socials").insert(socialInserts)] : []),
         ...socialUpdatePromises,
       ]);
 
@@ -2299,6 +2330,18 @@ export async function contactRoutes(fastify: FastifyInstance) {
       if (deleteMergedPersonError) {
         return reply.status(500).send({ error: deleteMergedPersonError.message });
       }
+
+      // Handle avatar conflict: copy the chosen avatar file, then clean up the right person's file
+      const rightAvatarPath = `${user.id}/${rightPersonId}.jpg`;
+      const leftAvatarPath = `${user.id}/${leftPersonId}.jpg`;
+
+      if (resolveConflictChoice(conflictResolutions, "avatar") === "right") {
+        // Copy right person's avatar to left person's storage path (best-effort, tolerates missing files)
+        await client.storage.from("avatars").copy(rightAvatarPath, leftAvatarPath);
+      }
+
+      // Remove the right person's avatar file regardless of choice (cleanup orphaned file)
+      await client.storage.from("avatars").remove([rightAvatarPath]);
 
       const response: MergeContactsResponse = {
         personId: leftPersonId,
@@ -3129,7 +3172,7 @@ export async function contactRoutes(fastify: FastifyInstance) {
         .update(updates)
         .eq("id", id)
         .eq("user_id", user.id)
-        .select("id")
+        .select("id, myself")
         .single();
 
       if (error) {
@@ -3231,7 +3274,7 @@ export async function contactRoutes(fastify: FastifyInstance) {
       // Verify contact belongs to user
       const { data: contact, error: contactError } = await client
         .from("people")
-        .select("id")
+        .select("id, myself")
         .eq("id", contactId)
         .eq("user_id", user.id)
         .single();
@@ -3248,12 +3291,20 @@ export async function contactRoutes(fastify: FastifyInstance) {
           .status(400)
           .send({ error: "File content does not match a valid image format" });
       }
+      // After migration 20260326100000, myself contacts have people.id = user_id,
+      // so the file path avatars/{userId}/{contactId}.jpg is already the settings avatar path.
       const fileName = `${user.id}/${contactId}.jpg`;
+      const adminClient = createAdminClient();
 
-      const { error: uploadError } = await client.storage.from("avatars").upload(fileName, buffer, {
-        contentType: data.mimetype,
-        upsert: true,
-      });
+      // Delete existing file first to ensure the new one is always stored
+      await adminClient.storage.from("avatars").remove([fileName]);
+
+      const { error: uploadError } = await adminClient.storage
+        .from("avatars")
+        .upload(fileName, buffer, {
+          contentType: data.mimetype,
+          upsert: true,
+        });
 
       if (uploadError) {
         return reply.status(500).send({ error: "Failed to upload photo" });
@@ -3288,7 +3339,7 @@ export async function contactRoutes(fastify: FastifyInstance) {
       // Verify contact belongs to user
       const { data: contact, error: contactError } = await client
         .from("people")
-        .select("id")
+        .select("id, myself")
         .eq("id", contactId)
         .eq("user_id", user.id)
         .single();
@@ -3297,9 +3348,10 @@ export async function contactRoutes(fastify: FastifyInstance) {
         return reply.status(404).send({ error: "Contact not found" });
       }
 
-      // Delete from storage
+      // After migration 20260326100000, myself contacts have people.id = user_id,
+      // so avatars/{userId}/{contactId}.jpg is already the settings avatar path.
       const fileName = `${user.id}/${contactId}.jpg`;
-      await client.storage.from("avatars").remove([fileName]);
+      await createAdminClient().storage.from("avatars").remove([fileName]);
 
       // Touch updated_at so the avatar URL cache is invalidated on next fetch
       await client

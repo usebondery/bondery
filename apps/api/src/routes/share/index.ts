@@ -2,6 +2,7 @@ import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import { Type } from "@sinclair/typebox";
 import { getAuth } from "../../lib/auth.js";
 import { CONTACT_SELECT } from "../../lib/schemas.js";
+import { buildContactAvatarUrl } from "../../lib/supabase.js";
 import { attachContactExtras } from "../../lib/contact-enrichment.js";
 import nodemailer from "nodemailer";
 import { render } from "@react-email/components";
@@ -59,14 +60,15 @@ export async function shareRoutes(fastify: FastifyInstance) {
       const { user, client } = getAuth(request);
       const { personId, recipientEmails, message, sendCopy, selectedFields } = request.body;
 
-      // Fetch sender's display name from user_settings
-      const { data: userSettings } = await client
-        .from("user_settings")
-        .select("name, middlename, surname, avatar_url")
+      // Fetch sender's display name from myself contact
+      const { data: myselfContact } = await client
+        .from("people")
+        .select("first_name, middle_name, last_name")
         .eq("user_id", user.id)
+        .eq("myself", true)
         .single();
       const senderName =
-        [userSettings?.name, userSettings?.middlename, userSettings?.surname]
+        [myselfContact?.first_name, myselfContact?.middle_name, myselfContact?.last_name]
           .filter(Boolean)
           .join(" ") || user.email;
 
@@ -131,7 +133,7 @@ export async function shareRoutes(fastify: FastifyInstance) {
         senderName,
         senderEmail: user.email,
         recipientEmail: recipientEmails[0],
-        senderAvatarUrl: userSettings?.avatar_url ?? undefined,
+        senderAvatarUrl: buildContactAvatarUrl(client, user.id, user.id) ?? undefined,
         message: message || undefined,
         contactName,
         contactAvatarUrl: enriched.avatar ?? undefined,

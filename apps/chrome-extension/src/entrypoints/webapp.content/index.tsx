@@ -22,6 +22,7 @@ export default defineContentScript({
     const AUTH_STATUS_RESPONSE_TYPE = "BONDERY_AUTH_STATUS_RESPONSE";
     const ENRICH_REQUEST_TYPE = "BONDERY_ENRICH_REQUEST";
     const ENRICH_RESULT_TYPE = "BONDERY_ENRICH_RESULT";
+    const OPEN_EXTENSIONS_PAGE_TYPE = "BONDERY_OPEN_EXTENSIONS_PAGE";
 
     // Use the page’s own origin as the target for postMessage
     // instead of "*" to prevent cross-origin iframes from intercepting.
@@ -39,6 +40,7 @@ export default defineContentScript({
             type: EXTENSION_PONG_TYPE,
             requestId: event.data.requestId,
             source: "bondery-extension",
+            version: browser.runtime.getManifest().version,
           },
           targetOrigin,
         );
@@ -68,6 +70,23 @@ export default defineContentScript({
             },
             targetOrigin,
           );
+        }
+        return;
+      }
+
+      // Open extensions page: forward to background so it can open chrome://extensions.
+      // Send an ack back to the webapp so it knows the extension handled the request
+      // and skips the Chrome Web Store fallback.
+      if (event.data?.type === OPEN_EXTENSIONS_PAGE_TYPE) {
+        const requestId: string | undefined = event.data?.requestId;
+        try {
+          await browser.runtime.sendMessage({ type: "OPEN_EXTENSIONS_PAGE" });
+          window.postMessage(
+            { type: "BONDERY_OPEN_EXTENSIONS_PAGE_ACK", requestId },
+            targetOrigin,
+          );
+        } catch {
+          // Extension may not be reachable; webapp will fall back to Chrome Web Store
         }
         return;
       }

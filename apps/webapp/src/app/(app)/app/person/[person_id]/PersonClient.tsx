@@ -113,6 +113,8 @@ interface PersonClientProps {
   initialMergeRecommendation?: MergeRecommendation | null;
   personId: string;
   initialTab?: string;
+  /** When true, renders the page as the "Myself" profile view: no back button, custom header, hides delete/merge actions. */
+  myselfMode?: boolean;
 }
 
 const PERSON_TABS = ["interactions", "about", "organize", "linkedin"] as const;
@@ -137,6 +139,7 @@ export default function PersonClient({
   initialMergeRecommendation = null,
   personId,
   initialTab,
+  myselfMode = false,
 }: PersonClientProps) {
   const router = useRouter();
   const pathname = usePathname();
@@ -242,12 +245,14 @@ export default function PersonClient({
     setPersonGroups(initialPersonGroups);
   }, [initialPersonGroups]);
 
-  const selectablePeople: ContactPreview[] = initialSelectableContacts.map((person) => ({
-    id: person.id,
-    firstName: person.firstName,
-    lastName: person.lastName,
-    avatar: person.avatar,
-  }));
+  const selectablePeople: ContactPreview[] = initialSelectableContacts
+    .filter((person) => !person.myself)
+    .map((person) => ({
+      id: person.id,
+      firstName: person.firstName,
+      lastName: person.lastName,
+      avatar: person.avatar,
+    }));
   const currentPersonPreview: ContactPreview = {
     id: contact.id,
     firstName: contact.firstName,
@@ -1342,15 +1347,22 @@ export default function PersonClient({
     <PageWrapper>
       <Stack gap="xl">
         <PageHeader
-          icon={IconUser}
-          title={"Person's details"}
-          backOnClick={() => {
-            if (typeof window !== "undefined" && window.history.length > 1) {
-              router.back();
-              return;
-            }
-            router.push(WEBAPP_ROUTES.PEOPLE);
-          }}
+          icon={myselfMode ? IconUserCircle : IconUser}
+          title={myselfMode ? tPersonPage("MyselfPageTitle") : "Person's details"}
+          description={myselfMode ? tPersonPage("MyselfPageDescription") : undefined}
+          helpHref={myselfMode ? `${HELP_DOCS_URL}/bondery/myself` : undefined}
+          helpLabel={myselfMode ? tHeader("HelpLabel") : undefined}
+          backOnClick={
+            myselfMode
+              ? undefined
+              : () => {
+                  if (typeof window !== "undefined" && window.history.length > 1) {
+                    router.back();
+                    return;
+                  }
+                  router.push(WEBAPP_ROUTES.PEOPLE);
+                }
+          }
           action={
             <ContactActionMenu
               contact={contact}
@@ -1358,6 +1370,7 @@ export default function PersonClient({
               onDelete={openDeleteModal}
               onMergeWith={openMergeWithModalForCurrentPerson}
               onShare={openShareModal}
+              myselfMode={myselfMode}
             />
           }
         />

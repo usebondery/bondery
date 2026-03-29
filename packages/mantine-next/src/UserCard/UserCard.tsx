@@ -21,7 +21,7 @@ export function UserCard({ name, subtitle, avatarUrl, rightSection }: UserCardPr
             {name}
           </Text>
           {subtitle ? (
-            <Text size="xs" c="dimmed" truncate>
+            <Text size="xs" style={{ color: "inherit" }} truncate>
               {subtitle}
             </Text>
           ) : null}

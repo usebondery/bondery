@@ -1,4 +1,4 @@
-import { Badge, Group, Stack } from "@mantine/core";
+import { Group, Stack } from "@mantine/core";
 import { IconBriefcase } from "@tabler/icons-react";
 import type { Contact, EmailEntry, PhoneEntry } from "@bondery/types";
 import React, { useCallback, useEffect, useRef, useState } from "react";
@@ -10,6 +10,7 @@ import { InlineEditableInput } from "./InlineEditableInput";
 import { SocialsSection } from "./SocialsSection";
 import { INPUT_MAX_LENGTHS } from "@/lib/config";
 import { LocationLookupInput } from "@/app/(app)/app/components/LocationLookupInput";
+import { revalidateSettings } from "@/app/(app)/app/actions";
 
 type NameField = "firstName" | "middleName" | "lastName";
 type ProfileField = "headline" | "location";
@@ -30,6 +31,7 @@ interface NameFieldsProps {
   initialFirstName: string;
   initialMiddleName: string;
   initialLastName: string;
+  isMyselfContact: boolean;
 }
 
 interface NameFieldConfig {
@@ -92,6 +94,7 @@ function usePersonNameFields(
   personId: string,
   initialValues: Record<NameField, string>,
   fieldConfigs: NameFieldConfig[],
+  isMyselfContact: boolean,
 ) {
   const [focusedField, setFocusedField] = useState<NameField | null>(null);
   const [savingByField, setSavingByField] = useState<Record<NameField, boolean>>({
@@ -147,6 +150,10 @@ function usePersonNameFields(
         }
 
         persistedValuesRef.current[field] = value;
+
+        if (isMyselfContact && field === "firstName") {
+          await revalidateSettings();
+        }
 
         notifications.show(
           successNotificationTemplate({
@@ -379,6 +386,7 @@ const NameFields = React.memo(
     initialFirstName,
     initialMiddleName,
     initialLastName,
+    isMyselfContact,
   }: NameFieldsProps) {
     const { values, focusedField, savingByField, setFocusedField, updateField, handleBlur } =
       usePersonNameFields(
@@ -389,6 +397,7 @@ const NameFields = React.memo(
           lastName: initialLastName,
         },
         NAME_FIELD_CONFIGS,
+        isMyselfContact,
       );
     const [hoveredField, setHoveredField] = useState<NameField | null>(null);
 
@@ -420,7 +429,7 @@ const NameFields = React.memo(
       </Group>
     );
   },
-  (prev, next) => prev.personId === next.personId,
+  (prev, next) => prev.personId === next.personId && prev.isMyselfContact === next.isMyselfContact,
 );
 
 export function ContactIdentitySection({
@@ -458,6 +467,7 @@ export function ContactIdentitySection({
         contactId={personId}
         firstName={contact.firstName}
         lastName={contact.lastName}
+        isMyselfContact={contact.myself === true}
       />
 
       <Stack gap="xs" style={{ flex: 1 }}>
@@ -468,13 +478,9 @@ export function ContactIdentitySection({
               initialFirstName={contact.firstName || ""}
               initialMiddleName={contact.middleName || ""}
               initialLastName={contact.lastName || ""}
+              isMyselfContact={contact.myself === true}
             />
           </Stack>
-          {contact.myself && (
-            <Badge color="violet" variant="light">
-              You
-            </Badge>
-          )}
         </Group>
 
         <Group gap="xs" grow>

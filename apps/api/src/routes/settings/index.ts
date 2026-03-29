@@ -13,9 +13,6 @@ import logger from "../../lib/logger.js";
 // ── TypeBox Schemas ──────────────────────────────────────────────────────────
 
 const UpdateSettingsBody = Type.Object({
-  name: Type.Optional(Type.String()),
-  middlename: Type.Optional(Type.String()),
-  surname: Type.Optional(Type.String()),
   timezone: Type.Optional(Type.String()),
   reminderSendHour: Type.Optional(
     Type.String({ pattern: "^([01]\\d|2[0-3]):[0-5]\\d(:[0-5]\\d)?$" }),
@@ -71,39 +68,6 @@ function getEffectiveUserMetadata(user: SupabaseUserWithMetadata | undefined): U
   return {
     ...identityMetadata,
     ...baseMetadata,
-  };
-}
-
-/**
- * Normalizes auth provider metadata into first name and surname values used by user settings.
- */
-function getMetadataNameParts(userMetadata: UserMetadata | undefined): {
-  name: string;
-  surname: string;
-} {
-  const givenName = userMetadata?.given_name?.trim() || "";
-  const familyName = userMetadata?.family_name?.trim() || "";
-
-  if (givenName || familyName) {
-    return {
-      name: givenName,
-      surname: familyName,
-    };
-  }
-
-  const fullName = (userMetadata?.name || userMetadata?.full_name || "").trim();
-  if (!fullName) {
-    return { name: "", surname: "" };
-  }
-
-  const parts = fullName.split(/\s+/).filter(Boolean);
-  if (parts.length === 1) {
-    return { name: parts[0], surname: "" };
-  }
-
-  return {
-    name: parts[0],
-    surname: parts.slice(1).join(" "),
   };
 }
 
@@ -206,11 +170,11 @@ export async function settingsRoutes(fastify: FastifyInstance) {
    */
   fastify.get("/", async (request: FastifyRequest, reply: FastifyReply) => {
     const { client, user } = getAuth(request);
+    const adminClient = createAdminClient();
 
     // Get user info for email/providers
     const { data: userData } = await client.auth.getUser();
     const userMetadata = getEffectiveUserMetadata(userData?.user as SupabaseUserWithMetadata);
-    const metadataName = getMetadataNameParts(userMetadata);
     const metadataAvatarUrl = getMetadataAvatarUrl(userMetadata);
 
     // Get settings from database
@@ -232,9 +196,6 @@ export async function settingsRoutes(fastify: FastifyInstance) {
         .from("user_settings")
         .insert({
           user_id: user.id,
-          name: metadataName.name,
-          middlename: "",
-          surname: metadataName.surname,
           timezone: "UTC",
           reminder_send_hour: DEFAULT_REMINDER_SEND_HOUR,
           time_format: DEFAULT_TIME_FORMAT,
@@ -252,53 +213,51 @@ export async function settingsRoutes(fastify: FastifyInstance) {
       resolvedSettings = newSettings;
     }
 
-    const hydrationUpdates: Record<string, string | null> = {};
+    // Derive avatar URL deterministically from storage path.
+    // If no file exists yet and the provider has an avatar, import it on first load.
+    const avatarFileName = getAccountAvatarFileName(user.id);
+    const { data: existingFiles } = await adminClient.storage
+      .from(AVATARS_BUCKET)
+      .list(user.id, { search: `${user.id}.jpg`, limit: 1 });
+    const hasStoredAvatar = (existingFiles ?? []).some((f) => f.name === `${user.id}.jpg`);
 
-    if (!resolvedSettings.name?.trim() && metadataName.name) {
-      hydrationUpdates.name = metadataName.name;
+    if (!hasStoredAvatar && metadataAvatarUrl) {
+      await importMetadataAvatarToStorage(user.id, metadataAvatarUrl);
     }
 
-    if (!resolvedSettings.surname?.trim() && metadataName.surname) {
-      hydrationUpdates.surname = metadataName.surname;
-    }
+    // Build the public URL deterministically; browser 404s gracefully if no file
+    const { data: publicUrlData } = adminClient.storage
+      .from(AVATARS_BUCKET)
+      .getPublicUrl(avatarFileName);
+    const avatarUrl = publicUrlData?.publicUrl || null;
 
-    const currentAvatarUrl = resolvedSettings.avatar_url?.trim() || "";
-    const hasManagedAvatar = currentAvatarUrl.includes("/avatars/");
+    // Fetch name from the myself contact (source of truth)
+    const { data: myselfContact } = await client
+      .from("people")
+      .select("first_name, updated_at")
+      .eq("user_id", user.id)
+      .eq("myself", true)
+      .single();
 
-    if (!hasManagedAvatar) {
-      if (metadataAvatarUrl) {
-        const storedAvatarUrl = await importMetadataAvatarToStorage(user.id, metadataAvatarUrl);
-        hydrationUpdates.avatar_url = storedAvatarUrl;
-      } else if (currentAvatarUrl) {
-        hydrationUpdates.avatar_url = null;
-      }
-    }
-
-    if (Object.keys(hydrationUpdates).length > 0) {
-      const { data: hydratedSettings, error: hydrateError } = await client
-        .from("user_settings")
-        .update(hydrationUpdates)
-        .eq("user_id", user.id)
-        .select()
-        .single();
-
-      if (!hydrateError && hydratedSettings) {
-        resolvedSettings = hydratedSettings;
+    // Append updated_at as a cache-buster so browsers fetch the new image after upload
+    let resolvedAvatarUrl = avatarUrl;
+    if (resolvedAvatarUrl && myselfContact?.updated_at) {
+      const ts = new Date(myselfContact.updated_at).getTime();
+      if (!Number.isNaN(ts)) {
+        resolvedAvatarUrl = `${resolvedAvatarUrl}${resolvedAvatarUrl.includes("?") ? "&" : "?"}t=${ts}`;
       }
     }
 
     return {
       success: true,
       data: {
-        name: resolvedSettings.name,
-        middlename: resolvedSettings.middlename,
-        surname: resolvedSettings.surname,
+        name: myselfContact?.first_name || null,
         timezone: resolvedSettings.timezone,
         reminderSendHour: resolvedSettings.reminder_send_hour ?? DEFAULT_REMINDER_SEND_HOUR,
         timeFormat: resolvedSettings.time_format ?? DEFAULT_TIME_FORMAT,
         language: "en",
         colorScheme: resolvedSettings.color_scheme,
-        avatarUrl: resolvedSettings.avatar_url || null,
+        avatarUrl: resolvedAvatarUrl,
         email: userData?.user?.email,
         providers: userData?.user?.app_metadata?.providers || [],
       },
@@ -314,9 +273,6 @@ export async function settingsRoutes(fastify: FastifyInstance) {
     async (
       request: FastifyRequest<{
         Body: {
-          name?: string;
-          middlename?: string;
-          surname?: string;
           timezone?: string;
           reminderSendHour?: string;
           timeFormat?: "24h" | "12h";
@@ -327,15 +283,11 @@ export async function settingsRoutes(fastify: FastifyInstance) {
       reply: FastifyReply,
     ) => {
       const { client, user } = getAuth(request);
-      const { name, middlename, surname, timezone, reminderSendHour, language, colorScheme } =
-        request.body || {};
+      const { timezone, reminderSendHour, language, colorScheme } = request.body || {};
       const { timeFormat } = request.body || {};
 
       const updatePayload: Record<string, unknown> = {};
 
-      if (name !== undefined) updatePayload.name = name;
-      if (middlename !== undefined) updatePayload.middlename = middlename;
-      if (surname !== undefined) updatePayload.surname = surname;
       if (timezone !== undefined) updatePayload.timezone = timezone;
       if (reminderSendHour !== undefined) {
         updatePayload.reminder_send_hour = normalizeReminderSendHour(reminderSendHour);
@@ -392,28 +344,14 @@ export async function settingsRoutes(fastify: FastifyInstance) {
         result = data;
       }
 
-      // Sync display_name in auth.users
-      const displayName = [result.name, result.middlename, result.surname]
-        .filter(Boolean)
-        .join(" ")
-        .trim();
-
-      if (displayName) {
-        await client.auth.updateUser({ data: { name: displayName } });
-      }
-
       return {
         success: true,
         data: {
-          name: result.name,
-          middlename: result.middlename,
-          surname: result.surname,
           timezone: result.timezone,
           reminderSendHour: result.reminder_send_hour,
           timeFormat: result.time_format,
           language: result.language,
           colorScheme: result.color_scheme,
-          avatarUrl: result.avatar_url || null,
         },
       };
     },
