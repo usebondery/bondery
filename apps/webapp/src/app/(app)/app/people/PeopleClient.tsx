@@ -480,7 +480,7 @@ export function PeopleClient({ initialContacts, totalCount, layout = "stack" }: 
             <Button
               size="md"
               leftSection={<IconUserPlus size={16} />}
-              onClick={openAddContactModal}
+              onClick={() => openAddContactModal()}
             >
               {t("AddPerson")}
             </Button>

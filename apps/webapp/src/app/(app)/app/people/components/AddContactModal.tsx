@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+
 import { useRouter } from "next/navigation";
 import { Stack, TextInput, Text } from "@mantine/core";
 import { useForm } from "@mantine/form";
@@ -17,42 +18,69 @@ import {
 import { INPUT_MAX_LENGTHS } from "@/lib/config";
 import { getRandomExampleName } from "@/lib/randomNameHelpers";
 import { API_ROUTES, WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
+import type { Contact } from "@bondery/types";
 import { revalidateContacts } from "../../actions";
 import { captureEvent } from "@/lib/analytics/client";
 
-export function openAddContactModal() {
+interface OpenAddContactModalOptions {
+  onCreated?: (contact: Contact) => void;
+  initialFirstName?: string;
+  initialMiddleName?: string;
+  initialLastName?: string;
+}
+
+interface AddContactFormProps extends OpenAddContactModalOptions {
+  modalId?: string;
+  /** When provided, used instead of the modals manager to close the modal (embedded mode). */
+  onClose?: () => void;
+}
+
+export function openAddContactModal(options: OpenAddContactModalOptions = {}) {
   const modalId = `add-contact-${Math.random().toString(36).slice(2)}`;
 
   modals.open({
     modalId,
-    title: <ModalTitle text="Add new person" icon={<IconUserPlus size={24} />} />,
+    title: <ModalTitle text="Create person" icon={<IconUserPlus size={24} />} />,
     trapFocus: true,
-    children: <AddContactForm modalId={modalId} />,
+    children: (
+      <AddContactForm modalId={modalId} onClose={() => modals.close(modalId)} {...options} />
+    ),
   });
 }
 
-function AddContactForm({ modalId }: { modalId: string }) {
+export function AddContactForm({
+  modalId,
+  onClose,
+  onCreated,
+  initialFirstName = "",
+  initialMiddleName = "",
+  initialLastName = "",
+}: AddContactFormProps) {
   const router = useRouter();
+  const safeModalId = modalId ?? "";
   const [focusedField, setFocusedField] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
+    // In embedded mode (onClose prop provided), the parent <Modal> controls
+    // these behaviours directly — no need to go through the modals manager.
+    if (onClose) return;
     modals.updateModal({
-      modalId,
+      modalId: safeModalId,
       closeOnEscape: !isSubmitting,
       closeOnClickOutside: !isSubmitting,
       withCloseButton: !isSubmitting,
     });
-  }, [isSubmitting, modalId]);
+  }, [isSubmitting, safeModalId, onClose]);
 
   const exampleName = useMemo(() => getRandomExampleName(), []);
 
   const form = useForm({
     mode: "controlled",
     initialValues: {
-      firstName: "",
-      middleName: "",
-      lastName: "",
+      firstName: initialFirstName,
+      middleName: initialMiddleName,
+      lastName: initialLastName,
     },
     validate: {
       firstName: (value) =>
@@ -101,8 +129,26 @@ function AddContactForm({ modalId }: { modalId: string }) {
         throw new Error(errorData.error || "Failed to create contact");
       }
 
-      const data = await res.json();
+      const data = (await res.json()) as { id?: string };
       const newContactId = data.id;
+
+      if (!newContactId) {
+        throw new Error("Contact was created but response did not include contact id");
+      }
+
+      let createdContactForCallback: Contact | null = null;
+
+      if (onCreated) {
+        const createdContactRes = await fetch(`${API_ROUTES.CONTACTS}/${newContactId}`);
+
+        if (!createdContactRes.ok) {
+          const createdContactError = await createdContactRes.json().catch(() => ({}));
+          throw new Error(createdContactError.error || "Failed to load created contact");
+        }
+
+        const createdContactData = (await createdContactRes.json()) as { contact: Contact };
+        createdContactForCallback = createdContactData.contact;
+      }
 
       // Hide loading notification
       notifications.hide(loadingNotification);
@@ -117,12 +163,29 @@ function AddContactForm({ modalId }: { modalId: string }) {
 
       captureEvent("contact_created");
 
-      // Close modal
-      modals.close(modalId);
-
-      // Redirect to person page
       await revalidateContacts();
-      router.push(`${WEBAPP_ROUTES.PERSON}/${newContactId}`);
+
+      if (onCreated) {
+        if (!createdContactForCallback) {
+          throw new Error("Failed to load created contact");
+        }
+
+        if (onClose) {
+          onClose();
+        } else {
+          modals.close(safeModalId);
+        }
+        onCreated(createdContactForCallback);
+        return;
+      }
+
+      if (onClose) {
+        onClose();
+      } else {
+        // Close modal and redirect to person page
+        modals.close(safeModalId);
+        router.push(`${WEBAPP_ROUTES.PERSON}/${newContactId}`);
+      }
     } catch (error) {
       // Hide loading notification
       notifications.hide(loadingNotification);
@@ -203,7 +266,7 @@ function AddContactForm({ modalId }: { modalId: string }) {
 
         <ModalFooter
           cancelLabel="Cancel"
-          onCancel={() => modals.close(modalId)}
+          onCancel={() => (onClose ? onClose() : modals.close(safeModalId))}
           cancelDisabled={isSubmitting}
           actionLabel={`Add ${form.getValues().firstName} to Bondery`}
           actionType="submit"

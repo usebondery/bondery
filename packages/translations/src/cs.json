@@ -563,6 +563,7 @@
     "TitleRequired": "Název je povinný",
     "AddParticipantsPlaceholder": "Přidat účastníky...",
     "NoContactsFound": "Žádné kontakty nenalezeny",
+    "CreateNewPersonFallback": "Nemůžete někoho najít? Vytvořte novou osobu",
     "AlreadySelected": "již vybráno",
     "TimelineView": "Timeline",
     "TableView": "Tabulka",

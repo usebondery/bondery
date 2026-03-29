@@ -17,6 +17,7 @@ interface PeopleMultiPickerInputProps {
   noResultsLabel?: string;
   error?: React.ReactNode;
   disabled?: boolean;
+  inputRef?: React.Ref<HTMLInputElement>;
 }
 
 /**
@@ -32,6 +33,7 @@ export function PeopleMultiPickerInput({
   noResultsLabel,
   error,
   disabled,
+  inputRef,
 }: PeopleMultiPickerInputProps) {
   const [search, setSearch] = useState("");
 
@@ -116,6 +118,7 @@ export function PeopleMultiPickerInput({
 
             <Combobox.EventsTarget>
               <PillsInput.Field
+                ref={inputRef}
                 value={search}
                 placeholder={selectedContacts.length === 0 ? placeholder : undefined}
                 onFocus={() => contactsCombobox.openDropdown()}

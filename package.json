@@ -29,7 +29,7 @@
     "@redocly/cli": "^2.24.1",
     "ajv": "^8.18.0",
     "globals": "^17.4.0",
-    "turbo": "^2.8.20",
+    "turbo": "^2.8.21",
     "yaml": "^2.8.3"
   },
   "dependencies": {

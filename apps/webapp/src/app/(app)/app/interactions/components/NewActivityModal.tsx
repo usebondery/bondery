@@ -1,15 +1,27 @@
 "use client";
 
-import { Button, TextInput, Select, Group, Stack, Textarea, Text, Avatar } from "@mantine/core";
+import {
+  Button,
+  TextInput,
+  Select,
+  Group,
+  Stack,
+  Textarea,
+  Text,
+  Avatar,
+  Modal,
+  getDefaultZIndex,
+} from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { notifications } from "@mantine/notifications";
-import { IconCalendarPlus, IconCheck } from "@tabler/icons-react";
-import { useEffect, useMemo, useState } from "react";
+import { IconCalendarPlus, IconCheck, IconUserPlus } from "@tabler/icons-react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { modals } from "@mantine/modals";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import type { Contact, Activity } from "@bondery/types";
 import { revalidateInteractions } from "../../actions";
+import { AddContactForm } from "../../people/components/AddContactModal";
 import {
   ModalFooter,
   PeopleMultiPickerInput,
@@ -22,12 +34,14 @@ import { ACTIVITY_TYPE_OPTIONS } from "@/lib/activityTypes";
 import { getActivityTypeConfig } from "@/lib/activityTypes";
 import { captureEvent } from "@/lib/analytics/client";
 
+type ModalTranslationsFn = (key: string, values?: Record<string, string | number>) => string;
+
 interface OpenNewActivityModalParams {
   contacts: Contact[];
   activity?: Activity | null;
   initialParticipantIds?: string[];
   titleText?: string;
-  t: (key: string) => string;
+  t: ModalTranslationsFn;
 }
 
 interface NewActivityFormProps {
@@ -35,7 +49,7 @@ interface NewActivityFormProps {
   contacts: Contact[];
   activity: Activity | null;
   initialParticipantIds?: string[];
-  t: (key: string) => string;
+  t: ModalTranslationsFn;
 }
 
 function toLocalDateInputValue(value: Date): string {
@@ -80,7 +94,14 @@ function NewActivityForm({
 }: NewActivityFormProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [availableContacts, setAvailableContacts] = useState<Contact[]>(contacts);
+  const [createPersonOpened, setCreatePersonOpened] = useState(false);
+  const participantsInputRef = useRef<HTMLInputElement>(null);
   const isEditMode = Boolean(activity?.id);
+
+  useEffect(() => {
+    setAvailableContacts(contacts);
+  }, [contacts]);
 
   useEffect(() => {
     modals.updateModal({
@@ -121,6 +142,27 @@ function NewActivityForm({
   );
 
   const selectedTypeConfig = getActivityTypeConfig(form.values.type);
+
+  const handleContactCreated = (createdContact: Contact) => {
+    setAvailableContacts((currentContacts) => {
+      if (currentContacts.some((contact) => contact.id === createdContact.id)) {
+        return currentContacts;
+      }
+
+      return [...currentContacts, createdContact];
+    });
+
+    const nextParticipantIds = Array.from(
+      new Set([...form.getValues().participantIds, createdContact.id]),
+    );
+
+    form.setFieldValue("participantIds", nextParticipantIds);
+    form.validateField("participantIds");
+
+    setTimeout(() => {
+      participantsInputRef.current?.focus();
+    }, 0);
+  };
 
   const handleSubmit = async (values: typeof form.values) => {
     setLoading(true);
@@ -178,93 +220,130 @@ function NewActivityForm({
   };
 
   return (
-    <form onSubmit={form.onSubmit(handleSubmit)}>
-      <Stack gap="md">
-        <TextInput
-          label={t("Title")}
-          placeholder={t("TitlePlaceholder")}
-          autoFocus
-          data-autofocus
-          {...form.getInputProps("title")}
-        />
-
-        <PeopleMultiPickerInput
-          contacts={contacts}
-          selectedIds={form.values.participantIds}
-          onChange={(ids) => {
-            form.setFieldValue("participantIds", ids);
-            form.validateField("participantIds");
-          }}
-          placeholder={t("AddParticipantsPlaceholder")}
-          noResultsLabel={t("NoContactsFound")}
-          error={form.errors.participantIds}
-          disabled={loading}
-        />
-
-        <Stack gap="xs">
-          <Group justify="space-between" align="center">
-            <Text size="sm" fw={500}>
-              {t("Note")}
-            </Text>
-          </Group>
-          <Textarea
-            placeholder={t("DescriptionPlaceholder")}
-            minRows={6}
-            {...form.getInputProps("description")}
-            styles={{
-              input: {
-                resize: "vertical",
-              },
-            }}
+    <>
+      <form onSubmit={form.onSubmit(handleSubmit)}>
+        <Stack gap="md">
+          <TextInput
+            label={t("Title")}
+            placeholder={t("TitlePlaceholder")}
+            autoFocus
+            data-autofocus
+            {...form.getInputProps("title")}
           />
-        </Stack>
 
-        <Group mt="md">
-          <Group grow w="100%">
-            <DatePickerWithPresets
-              placeholder={t("PickDate")}
-              {...form.getInputProps("date")}
-              w="100%"
+          <Stack gap={4}>
+            <PeopleMultiPickerInput
+              contacts={availableContacts}
+              selectedIds={form.values.participantIds}
+              onChange={(ids) => {
+                form.setFieldValue("participantIds", ids);
+                form.validateField("participantIds");
+              }}
+              placeholder={t("AddParticipantsPlaceholder")}
+              noResultsLabel={t("NoContactsFound")}
+              inputRef={participantsInputRef}
+              error={form.errors.participantIds}
+              disabled={loading}
             />
-            <Select
-              data={activityTypeSelectOptions}
-              placeholder={t("Type")}
-              {...form.getInputProps("type")}
-              w="100%"
-              allowDeselect={false}
-              searchable
-              leftSection={
-                <Avatar color={selectedTypeConfig.color} size={20} radius="xl">
-                  {selectedTypeConfig.emoji}
-                </Avatar>
-              }
-              renderOption={({ option }) => {
-                const typeConfig = getActivityTypeConfig(option.value);
-                return (
-                  <Group gap="sm" wrap="nowrap">
-                    <Avatar color={typeConfig.color} size={20} radius="xl">
-                      {typeConfig.emoji}
-                    </Avatar>
-                    <Text size="sm">{option.label}</Text>
-                  </Group>
-                );
+
+            <Button
+              variant="subtle"
+              size="xs"
+              onClick={() => {
+                setCreatePersonOpened(true);
+              }}
+              disabled={loading}
+              style={{ alignSelf: "flex-start", paddingLeft: 0 }}
+            >
+              {t("CreateNewPersonFallback")}
+            </Button>
+          </Stack>
+
+          <Stack gap="xs">
+            <Group justify="space-between" align="center">
+              <Text size="sm" fw={500}>
+                {t("Note")}
+              </Text>
+            </Group>
+            <Textarea
+              placeholder={t("DescriptionPlaceholder")}
+              minRows={6}
+              {...form.getInputProps("description")}
+              styles={{
+                input: {
+                  resize: "vertical",
+                },
               }}
             />
-          </Group>
-        </Group>
+          </Stack>
 
-        <ModalFooter
-          cancelLabel={t("Cancel")}
-          onCancel={() => modals.close(modalId)}
-          cancelDisabled={loading}
-          actionLabel={isEditMode ? t("SaveChanges") : t("AddActivity")}
-          actionType="submit"
-          actionLoading={loading}
-          actionDisabled={loading}
-          actionLeftSection={isEditMode ? <IconCheck size={16} /> : <IconCalendarPlus size={16} />}
+          <Group mt="md">
+            <Group grow w="100%">
+              <DatePickerWithPresets
+                placeholder={t("PickDate")}
+                {...form.getInputProps("date")}
+                w="100%"
+              />
+              <Select
+                data={activityTypeSelectOptions}
+                placeholder={t("Type")}
+                {...form.getInputProps("type")}
+                w="100%"
+                allowDeselect={false}
+                searchable
+                leftSection={
+                  <Avatar color={selectedTypeConfig.color} size={20} radius="xl">
+                    {selectedTypeConfig.emoji}
+                  </Avatar>
+                }
+                renderOption={({ option }) => {
+                  const typeConfig = getActivityTypeConfig(option.value);
+                  return (
+                    <Group gap="sm" wrap="nowrap">
+                      <Avatar color={typeConfig.color} size={20} radius="xl">
+                        {typeConfig.emoji}
+                      </Avatar>
+                      <Text size="sm">{option.label}</Text>
+                    </Group>
+                  );
+                }}
+              />
+            </Group>
+          </Group>
+
+          <ModalFooter
+            cancelLabel={t("Cancel")}
+            onCancel={() => modals.close(modalId)}
+            cancelDisabled={loading}
+            actionLabel={isEditMode ? t("SaveChanges") : t("AddActivity")}
+            actionType="submit"
+            actionLoading={loading}
+            actionDisabled={loading}
+            actionLeftSection={
+              isEditMode ? <IconCheck size={16} /> : <IconCalendarPlus size={16} />
+            }
+          />
+        </Stack>
+      </form>
+
+      <Modal
+        opened={createPersonOpened}
+        onClose={() => setCreatePersonOpened(false)}
+        title={<ModalTitle text="Create person" icon={<IconUserPlus size={24} />} />}
+        trapFocus
+        closeOnEscape
+        closeOnClickOutside
+        zIndex={getDefaultZIndex("modal") + 2}
+      >
+        <AddContactForm
+          onClose={() => setCreatePersonOpened(false)}
+          onCreated={(contact) => {
+            setCreatePersonOpened(false);
+            handleContactCreated(contact);
+          }}
         />
-      </Stack>
-    </form>
+      </Modal>
+    </>
   );
 }
 
