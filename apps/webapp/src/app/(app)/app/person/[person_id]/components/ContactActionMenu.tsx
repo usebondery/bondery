@@ -22,6 +22,8 @@ interface ContactActionMenuProps {
   onDelete: () => void;
   onMergeWith: () => void;
   onShare: () => void;
+  /** When true, hides delete and merge options (used on the Myself profile page). */
+  myselfMode?: boolean;
 }
 
 export function ContactActionMenu({
@@ -30,6 +32,7 @@ export function ContactActionMenu({
   onDelete,
   onMergeWith,
   onShare,
+  myselfMode = false,
 }: ContactActionMenuProps) {
   const tMerge = useTranslations("MergeWithModal");
   const tShare = useTranslations("ShareContactModal");
@@ -102,27 +105,45 @@ export function ContactActionMenu({
         >
           {tEnrich("MenuLabel")}
         </MenuItem>
-        <MenuItem leftSection={<IconArrowMerge size={16} />} onClick={onMergeWith}>
-          {tMerge("ActionLabelMenu")}
-        </MenuItem>
-        <Tooltip
-          label={tActions("CannotDeleteMyself")}
-          disabled={!contact.myself}
-          withArrow
-          multiline
-          maw={220}
-        >
-          <div>
-            <MenuItem
-              color="red"
-              leftSection={<IconTrash size={16} />}
-              onClick={onDelete}
-              disabled={!!contact.myself}
-            >
-              {tActions("DeleteContact")}
-            </MenuItem>
-          </div>
-        </Tooltip>
+        {!myselfMode && (
+          <Tooltip
+            label={tActions("CannotMergeMyself")}
+            disabled={!contact.myself}
+            withArrow
+            multiline
+            maw={220}
+          >
+            <div>
+              <MenuItem
+                leftSection={<IconArrowMerge size={16} />}
+                onClick={onMergeWith}
+                disabled={!!contact.myself}
+              >
+                {tMerge("ActionLabelMenu")}
+              </MenuItem>
+            </div>
+          </Tooltip>
+        )}
+        {!myselfMode && (
+          <Tooltip
+            label={tActions("CannotDeleteMyself")}
+            disabled={!contact.myself}
+            withArrow
+            multiline
+            maw={220}
+          >
+            <div>
+              <MenuItem
+                color="red"
+                leftSection={<IconTrash size={16} />}
+                onClick={onDelete}
+                disabled={!!contact.myself}
+              >
+                {tActions("DeleteContact")}
+              </MenuItem>
+            </div>
+          </Tooltip>
+        )}
       </Menu.Dropdown>
     </Menu>
   );

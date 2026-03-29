@@ -1,3 +1,5 @@
+"use client";
+
 import {
   ActionIcon,
   Text,
@@ -8,22 +10,14 @@ import {
   CardSection,
   Tooltip,
 } from "@mantine/core";
-import { IconHelpCircle, IconMail, IconUserCircle } from "@tabler/icons-react";
+import { IconHelpCircle, IconMail, IconUserCircle, IconChevronRight } from "@tabler/icons-react";
 import { useTranslations } from "next-intl";
-import { PhotoUploadButton } from "./PhotoUploadButton";
-import { NameFields } from "./NameFields";
-import { LanguagePicker } from "@/components/shared/LanguagePicker";
-import { TimezonePicker } from "@/components/shared/TimezonePicker";
+import { PersonChip } from "@bondery/mantine-next";
+import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import { ProviderIntegrations } from "./ProviderIntegrations";
 
 interface ProfileCardProps {
-  initialName?: string;
-  initialMiddlename?: string;
-  initialSurname?: string;
-  initialTimezone?: string;
-  initialLanguage?: string;
   email: string;
-  avatarUrl: string | null;
   providers: string[];
   userIdentities: Array<{
     id: string;
@@ -31,22 +25,17 @@ interface ProfileCardProps {
     identity_id: string;
     provider: string;
   }>;
+  myselfPerson: {
+    id: string;
+    firstName: string;
+    middleName?: string | null;
+    lastName: string | null;
+    avatar: string | null;
+  } | null;
 }
 
-export function ProfileCard({
-  initialName = "",
-  initialMiddlename = "",
-  initialSurname = "",
-  initialTimezone = "UTC",
-  initialLanguage = "en",
-  email,
-  avatarUrl,
-  providers,
-  userIdentities,
-}: ProfileCardProps) {
+export function ProfileCard({ email, providers, userIdentities, myselfPerson }: ProfileCardProps) {
   const t = useTranslations("SettingsPage.Profile");
-
-  const userName = [initialName, initialMiddlename, initialSurname].filter(Boolean).join(" ");
 
   return (
     <Card withBorder shadow="sm">
@@ -60,14 +49,21 @@ export function ProfileCard({
       </CardSection>
 
       <CardSection inheritPadding py="md">
-        <Group align="flex-start">
-          <PhotoUploadButton avatarUrl={avatarUrl} userName={userName} />
-          <NameFields
-            initialName={initialName}
-            initialMiddlename={initialMiddlename}
-            initialSurname={initialSurname}
-          />
-        </Group>
+        <div>
+          <Text size="sm" fw={500} mb={4}>
+            {t("YourProfileCard")}
+          </Text>
+          <Text size="xs" c="dimmed" mb="xs">
+            {t("YourProfileCardDescription")}
+          </Text>
+        </div>
+        <PersonChip
+          person={myselfPerson}
+          isClickable
+          href={WEBAPP_ROUTES.MYSELF}
+          rightSection={<IconChevronRight size={14} />}
+          size="md"
+        />
       </CardSection>
 
       <Divider />
@@ -93,9 +89,6 @@ export function ProfileCard({
           disabled
           readOnly
         />
-        {/* TODO: language and timezone support */}
-        {/* <LanguagePicker initialValue={initialLanguage} /> */}
-        {/* <TimezonePicker initialValue={initialTimezone} /> */}
       </CardSection>
 
       <Divider />

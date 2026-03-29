@@ -452,46 +452,34 @@ export type Database = {
       };
       user_settings: {
         Row: {
-          avatar_url: string | null;
           color_scheme: "light" | "dark" | "auto";
           created_at: string | null;
           id: string;
           language: string | null;
-          middlename: string | null;
-          name: string | null;
           next_reminder_at_utc: string;
           reminder_send_hour: string;
-          surname: string | null;
           timezone: string | null;
           updated_at: string | null;
           user_id: string;
         };
         Insert: {
-          avatar_url?: string | null;
           color_scheme?: "light" | "dark" | "auto";
           created_at?: string | null;
           id?: string;
           language?: string | null;
-          middlename?: string | null;
-          name?: string | null;
           next_reminder_at_utc?: string;
           reminder_send_hour?: string;
-          surname?: string | null;
           timezone?: string | null;
           updated_at?: string | null;
           user_id: string;
         };
         Update: {
-          avatar_url?: string | null;
           color_scheme?: "light" | "dark" | "auto";
           created_at?: string | null;
           id?: string;
           language?: string | null;
-          middlename?: string | null;
-          name?: string | null;
           next_reminder_at_utc?: string;
           reminder_send_hour?: string;
-          surname?: string | null;
           timezone?: string | null;
           updated_at?: string | null;
           user_id?: string;

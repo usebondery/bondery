@@ -103,7 +103,8 @@ export function PeopleClient({ initialContacts, totalCount, layout = "stack" }: 
       messagePlaceholder: tShare("MessagePlaceholder"),
       sendCopyCheckbox: tShare("SendCopyCheckbox"),
       selectFieldsLabel: tShare("SelectFieldsLabel"),
-      submitButton: (count: number) => count > 0 ? tShare("SubmitButtonWithCount", { count }) : tShare("SubmitButton"),
+      submitButton: (count: number) =>
+        count > 0 ? tShare("SubmitButtonWithCount", { count }) : tShare("SubmitButton"),
       cancelButton: tShare("CancelButton"),
       sendingButton: tShare("SendingButton"),
       successTitle: tShare("SuccessTitle"),
@@ -220,9 +221,6 @@ export function PeopleClient({ initialContacts, totalCount, layout = "stack" }: 
 
   const handleDeleteContact = (contactId: string) => {
     const targetContact = contacts.find((contact) => contact.id === contactId);
-
-    // Myself contacts cannot be deleted
-    if (targetContact?.myself) return;
 
     const contactName = targetContact ? formatContactName(targetContact) : "this contact";
 
@@ -508,12 +506,11 @@ export function PeopleClient({ initialContacts, totalCount, layout = "stack" }: 
             allSelected={allSelected}
             someSelected={someSelected}
             showSelection={true}
-            nonSelectableIds={new Set(contacts.filter((c) => c.myself).map((c) => c.id))}
-            nonSelectableTooltip={tActions("CannotDeleteMyself")}
             standardActions={{
               onMergeOne: (contactId) => openMergeModal(contactId),
               onMergeSelected: (leftContactId, rightContactId) =>
                 openMergeModal(leftContactId, rightContactId, true),
+              mergeDisabledTooltip: tActions("CannotMergeMyself"),
               onAddToGroupsOne: (contactId) => handleAddToGroup([contactId]),
               onAddToGroupsSelected: (contactIds) => handleAddToGroup(contactIds),
               onDeleteOne: handleDeleteContact,

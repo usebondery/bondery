@@ -13,19 +13,24 @@ import { PageWrapper } from "../components/PageWrapper";
 import { PreferencesCard } from "./components/PreferencesCard";
 import { TagsSection } from "./components/TagsSection";
 import type { TagWithCount } from "@bondery/types";
+import { buildAvatarQueryString } from "@/lib/avatarParams";
 
 export const metadata: Metadata = { title: "Settings" };
 
 export default async function SettingsPage() {
   const headers = await getAuthHeaders();
 
-  const [response, tagsResponse] = await Promise.all([
+  const [response, tagsResponse, personResponse] = await Promise.all([
     fetch(`${API_URL}${API_ROUTES.SETTINGS}`, {
       next: { tags: ["settings"] },
       headers,
     }),
     fetch(`${API_URL}${API_ROUTES.TAGS}?previewLimit=3`, {
       next: { tags: ["tags"] },
+      headers,
+    }),
+    fetch(`${API_URL}${API_ROUTES.ACCOUNT_PERSON}?${buildAvatarQueryString("small")}`, {
+      next: { tags: ["contacts"] },
       headers,
     }),
   ]);
@@ -40,9 +45,9 @@ export default async function SettingsPage() {
   const tagsResult = tagsResponse.ok ? await tagsResponse.json() : { tags: [] };
   const initialTags = (tagsResult.tags as TagWithCount[]) || [];
 
-  const name = settings.name || "";
-  const middlename = settings.middlename || "";
-  const surname = settings.surname || "";
+  const personResult = personResponse.ok ? await personResponse.json() : null;
+  const myselfPerson = personResult?.contact ?? null;
+
   const timezone = settings.timezone || "UTC";
   const reminderSendHour =
     typeof settings.reminderSendHour === "string" &&
@@ -73,15 +78,10 @@ export default async function SettingsPage() {
       <ErrorPageHeader iconType="settings" title={t("Title")} />
       <Stack gap="xl">
         <ProfileCard
-          initialName={name}
-          initialMiddlename={middlename}
-          initialSurname={surname}
-          initialTimezone={timezone}
-          initialLanguage={language}
           email={email}
-          avatarUrl={avatarUrl}
           providers={providers}
           userIdentities={userIdentities}
+          myselfPerson={myselfPerson}
         />
 
         <PreferencesCard

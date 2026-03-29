@@ -4,6 +4,7 @@ export {
   WEBAPP_ROUTES,
   GITHUB_REPO_URL,
   CHROME_EXTENSION_URL,
+  MIN_EXTENSION_VERSION,
   HELP_DOCS_URL,
   SUPPORT_EMAIL,
   STATUS_PAGE_URL,
@@ -25,3 +26,4 @@ export { getReadingTime } from "./reading-time.js";
 export { linkedinCompanyUrl, linkedinSchoolUrl, extractLinkedinId } from "./linkedin-utils.js";
 export { formatPlaceLabel, formatAddressLabel } from "./address-utils.js";
 export type { PlaceLabelFields, AddressLabelFields } from "./address-utils.js";
+export { compareVersions, isVersionBelow } from "./version-utils.js";

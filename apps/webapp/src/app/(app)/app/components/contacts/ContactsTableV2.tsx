@@ -115,6 +115,8 @@ export interface MenuAction {
   icon: ReactNode;
   color?: string;
   onClick: (contactId: string) => void;
+  disabled?: (contact: Contact) => boolean;
+  disabledTooltip?: string;
 }
 
 export interface BulkSelectionAction {
@@ -137,10 +139,12 @@ interface StandardContactActions {
   onDeleteOne?: (contactId: string) => void;
   onDeleteSelected?: (contactIds: string[]) => void;
   mergeMenuLabel?: string;
+  mergeDisabledTooltip?: string;
   mergeBulkLabel?: string;
   addToGroupsMenuLabel?: string;
   addToGroupsBulkLabel?: string;
   deleteMenuLabel?: string;
+  deleteDisabledTooltip?: string;
   deleteBulkLabel?: string;
   isDeleteSelectedLoading?: boolean;
 }
@@ -495,7 +499,6 @@ export default function ContactsTableV2({
                     lastName: contact.lastName,
                     avatar: contact.avatar,
                   }}
-                  color={nonSelectableIds?.has(contact.id) ? "gray" : undefined}
                   isClickable={!disableNameLink}
                   size="md"
                 />
@@ -604,6 +607,8 @@ export default function ContactsTableV2({
     icon: action.icon,
     color: action.color,
     onClick: (contact) => action.onClick(contact.id),
+    disabled: action.disabled,
+    disabledTooltip: action.disabledTooltip,
   }));
 
   const bulkActions: BulkAction[] = effectiveBulkSelectionActions.map((action) => ({

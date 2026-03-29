@@ -8,6 +8,13 @@ import { Type } from "@sinclair/typebox";
 import { createAdminClient } from "../../lib/supabase.js";
 import { getAuth } from "../../lib/auth.js";
 import { validateImageUpload, validateImageMagicBytes } from "../../lib/config.js";
+import {
+  CONTACT_SELECT,
+  AvatarQualityEnum,
+  AvatarSizeEnum,
+  extractAvatarOptions,
+} from "../../lib/schemas.js";
+import { attachContactExtras } from "../../lib/contact-enrichment.js";
 
 const UpdateAccountBody = Type.Object({
   name: Type.Optional(Type.String()),
@@ -137,27 +144,19 @@ export async function accountRoutes(fastify: FastifyInstance) {
     // Get public URL
     const { data: publicUrlData } = adminClient.storage.from(AVATARS_BUCKET).getPublicUrl(fileName);
 
-    const avatarUrl = publicUrlData?.publicUrl
-      ? `${publicUrlData.publicUrl}?t=${Date.now()}`
-      : null;
+    const avatarUrl = publicUrlData?.publicUrl || null;
 
     if (!avatarUrl) {
       return reply.status(500).send({ error: "Failed to generate avatar URL" });
     }
 
-    // Store in user_settings
-    const { error: updateError } = await client.from("user_settings").upsert(
-      {
-        user_id: user.id,
-        avatar_url: avatarUrl,
-        next_reminder_at_utc: new Date().toISOString(),
-      },
-      { onConflict: "user_id" },
-    );
-
-    if (updateError) {
-      return reply.status(500).send({ error: "Failed to update user profile" });
-    }
+    // Touch the myself contact's updated_at so the contacts list picks up the
+    // new avatar URL (which is cache-busted by the updated_at timestamp).
+    await client
+      .from("people")
+      .update({ updated_at: new Date().toISOString() })
+      .eq("user_id", user.id)
+      .eq("myself", true);
 
     return { success: true, data: { avatarUrl } };
   });
@@ -174,9 +173,59 @@ export async function accountRoutes(fastify: FastifyInstance) {
     // Delete account photo
     await adminClient.storage.from(AVATARS_BUCKET).remove([fileName]);
 
-    // Update user_settings
-    await client.from("user_settings").update({ avatar_url: null }).eq("user_id", user.id);
+    // Touch the myself contact so the contacts list invalidates its avatar cache
+    await client
+      .from("people")
+      .update({ updated_at: new Date().toISOString() })
+      .eq("user_id", user.id)
+      .eq("myself", true);
 
     return { success: true };
   });
+
+  /**
+   * GET /api/account/person - Fetch the authenticated user's "myself" contact
+   */
+  fastify.get(
+    "/person",
+    {
+      schema: {
+        querystring: Type.Object({
+          avatarQuality: Type.Optional(AvatarQualityEnum),
+          avatarSize: Type.Optional(AvatarSizeEnum),
+        }),
+      },
+    },
+    async (
+      request: FastifyRequest<{
+        Querystring: { avatarQuality?: string; avatarSize?: string };
+      }>,
+      reply: FastifyReply,
+    ) => {
+      const { client, user } = getAuth(request);
+      const avatarOpts = extractAvatarOptions(request.query as any);
+
+      const { data: contact, error } = await client
+        .from("people")
+        .select(CONTACT_SELECT)
+        .eq("user_id", user.id)
+        .eq("myself", true)
+        .single();
+
+      if (error || !contact) {
+        return reply.status(404).send({ error: "Myself contact not found" });
+      }
+
+      try {
+        const [enrichedContact] = await attachContactExtras(client, user.id, [contact], {
+          addresses: true,
+          avatarOptions: avatarOpts,
+        });
+        return { contact: enrichedContact };
+      } catch (enrichError) {
+        request.log.error({ enrichError }, "Failed to enrich myself contact");
+        return reply.status(500).send({ error: "Failed to load profile contact" });
+      }
+    },
+  );
 }

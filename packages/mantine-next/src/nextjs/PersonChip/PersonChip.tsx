@@ -12,7 +12,7 @@ import {
   type MantineColor,
 } from "@mantine/core";
 import { IconChevronDown, IconX } from "@tabler/icons-react";
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState, type ReactNode } from "react";
 import type { ContactPreview } from "@bondery/types";
 import Link from "next/link";
 import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
@@ -48,6 +48,8 @@ interface PersonChipProps {
   badgeVariant?: BadgeProps["variant"];
   showHoverCard?: boolean;
   openInNewTab?: boolean;
+  /** Custom right section override — rendered instead of the default chevron/clear icon. */
+  rightSection?: ReactNode;
 }
 
 export function PersonChip({
@@ -69,6 +71,7 @@ export function PersonChip({
   badgeVariant = "light",
   showHoverCard = false,
   openInNewTab = false,
+  rightSection,
 }: PersonChipProps) {
   const avatarSize = size === "sm" ? 16 : 20;
   const avatarEdgeSize = size === "sm" ? 26 : 32;
@@ -144,7 +147,11 @@ export function PersonChip({
       size={badgeSize}
       leftSection={leftAvatar}
       rightSection={
-        onClear && person ? (
+        rightSection !== undefined ? (
+          <span style={{ display: "inline-flex", alignItems: "center", marginInlineEnd: -2 }}>
+            {rightSection}
+          </span>
+        ) : onClear && person ? (
           <span
             onMouseDown={(event) => {
               event.preventDefault();
@@ -176,7 +183,11 @@ export function PersonChip({
           opacity: disabled ? 0.6 : 1,
           paddingInlineStart: person && avatarEdge ? 0 : undefined,
           paddingInlineEnd:
-            person && (onClear || isSelectable) ? (size === "sm" ? 8 : 10) : undefined,
+            person && (onClear || isSelectable || rightSection !== undefined)
+              ? size === "sm"
+                ? 8
+                : 10
+              : undefined,
           overflow: person && avatarEdge ? "hidden" : undefined,
         },
         label: {

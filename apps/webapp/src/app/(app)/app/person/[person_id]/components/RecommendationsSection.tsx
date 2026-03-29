@@ -3,7 +3,6 @@
 import { Stack } from "@mantine/core";
 import type { MergeRecommendation } from "@bondery/types";
 import { MergeRecommendationCard } from "@/app/(app)/app/components/contacts/MergeRecommendationCard";
-import { MyselfRecommendationCard } from "@/app/(app)/app/components/contacts/MyselfRecommendationCard";
 import type { MergeWithModalTexts } from "../../../people/components/MergeWithModal";
 import { EnrichRecommendationCard } from "./EnrichRecommendationCard";
 
@@ -13,13 +12,12 @@ interface RecommendationsSectionProps {
   onMergeAccepted: () => void;
   onMergeDeclined: () => void;
   showEnrichCard: boolean;
-  showMyselfCard: boolean;
   personId: string;
   linkedinHandle: string | null;
 }
 
 /**
- * Displays recommendation cards (merge duplicates, LinkedIn enrichment, myself)
+ * Displays recommendation cards (merge duplicates, LinkedIn enrichment)
  * above the main person detail content.
  */
 export function RecommendationsSection({
@@ -28,18 +26,15 @@ export function RecommendationsSection({
   onMergeAccepted,
   onMergeDeclined,
   showEnrichCard,
-  showMyselfCard,
   personId,
   linkedinHandle,
 }: RecommendationsSectionProps) {
-  if (!mergeRecommendation && !showEnrichCard && !showMyselfCard) {
+  if (!mergeRecommendation && !showEnrichCard) {
     return null;
   }
 
   return (
     <Stack gap="sm">
-      {showMyselfCard && <MyselfRecommendationCard />}
-
       {mergeRecommendation && (
         <MergeRecommendationCard
           recommendation={mergeRecommendation}
@@ -57,4 +52,3 @@ export function RecommendationsSection({
     </Stack>
   );
 }
-

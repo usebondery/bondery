@@ -246,6 +246,17 @@ export interface EnrichPersonResult {
   } & ({ success: true; contactId: string } | { success: false; error: string });
 }
 
+/** Popup → Background: ask if an extension update is required */
+export interface VersionCheckRequest {
+  type: "VERSION_CHECK_REQUEST";
+}
+
+/** Background → Popup: whether extension update is required */
+export interface VersionCheckResponse {
+  type: "VERSION_CHECK_RESPONSE";
+  payload: { updateRequired: boolean };
+}
+
 // ─── Union Type ──────────────────────────────────────────────────────────────
 
 export type ExtensionMessage =
@@ -270,4 +281,6 @@ export type ExtensionMessage =
   | GetEnrichContext
   | EnrichContextResult
   | SubmitEnrichData
-  | EnrichPersonResult;
+  | EnrichPersonResult
+  | VersionCheckRequest
+  | VersionCheckResponse;

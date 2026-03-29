@@ -6,6 +6,8 @@ import { PhotoConfirmModal } from "./PhotoConfirmModal";
 import { UserAvatar } from "@/app/(app)/app/components/UserAvatar";
 import { openPhotoUploadModal } from "@/lib/photoUpload";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
+import { revalidateSettings } from "@/app/(app)/app/actions";
+import { useRouter } from "next/navigation";
 
 interface PhotoUploadButtonProps {
   avatarUrl: string | null;
@@ -14,6 +16,7 @@ interface PhotoUploadButtonProps {
 
 export function PhotoUploadButton({ avatarUrl, userName }: PhotoUploadButtonProps) {
   const t = useTranslations("SettingsPage.Profile");
+  const router = useRouter();
 
   const openUploadModal = () => {
     openPhotoUploadModal(
@@ -21,6 +24,10 @@ export function PhotoUploadButton({ avatarUrl, userName }: PhotoUploadButtonProp
         uploadEndpoint: API_ROUTES.ACCOUNT_PHOTO,
         avatarUrl,
         displayName: userName,
+        onSuccess: async () => {
+          await revalidateSettings();
+          router.refresh();
+        },
       },
       {
         TitleModal: t("TitleModal"),

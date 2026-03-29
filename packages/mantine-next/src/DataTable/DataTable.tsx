@@ -159,16 +159,34 @@ function DataTableRowComponent<TRow>({
               </ActionIcon>
             </MenuTarget>
             <MenuDropdown>
-              {rowActions!.map((action) => (
-                <MenuItem
-                  key={action.key}
-                  leftSection={action.icon}
-                  color={action.color}
-                  onClick={() => action.onClick(row)}
-                >
-                  {action.label}
-                </MenuItem>
-              ))}
+              {rowActions!.map((action) => {
+                const isDisabled = action.disabled?.(row) ?? false;
+                const item = (
+                  <MenuItem
+                    key={action.key}
+                    leftSection={action.icon}
+                    color={action.color}
+                    onClick={() => action.onClick(row)}
+                    disabled={isDisabled}
+                  >
+                    {action.label}
+                  </MenuItem>
+                );
+                if (isDisabled && action.disabledTooltip) {
+                  return (
+                    <Tooltip
+                      key={action.key}
+                      label={action.disabledTooltip}
+                      withArrow
+                      multiline
+                      maw={220}
+                    >
+                      <div>{item}</div>
+                    </Tooltip>
+                  );
+                }
+                return item;
+              })}
             </MenuDropdown>
           </Menu>
         </TableTd>
