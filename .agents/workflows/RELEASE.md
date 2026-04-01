@@ -50,7 +50,7 @@ Complete all of the following **before** pushing anything to the `release` branc
    packages/types/package.json
    packages/vcard/package.json
    ```
-2. **Update the minimum Extension version** in the API and webapp.
+2. **Update the minimum Extension version** in the packages/helpers package. The const to update is `MIN_EXTENSION_VERSION` in `packages/helpers/src/constants.ts`. This ensures users are prompted to update if they have an incompatible extension version.
 3. **Update CHANGELOG.md** — add a new version section following the [changelog format](../../.github/instructions/changelog.instructions.md).
 4. **Generate the OpenAPI spec** and commit the output. This keeps API docs and client SDKs in sync.
 5. **Build all packages and apps** (`turbo build`) and verify there are no errors.
