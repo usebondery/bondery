@@ -71,8 +71,19 @@ paths:
               - type: string
                 enum:
                   - interactionDesc
+              - type: string
+                enum:
+                  - createdAtAsc
+              - type: string
+                enum:
+                  - createdAtDesc
           in: query
           name: sort
+          required: false
+        - schema:
+            type: boolean
+          in: query
+          name: keepInTouch
           required: false
         - schema:
             anyOf:
@@ -310,6 +321,15 @@ paths:
                     - type: number
                     - type: "null"
                 lastInteraction:
+                  anyOf:
+                    - type: string
+                    - type: "null"
+                keepFrequencyDays:
+                  anyOf:
+                    - minimum: 1
+                      type: integer
+                    - type: "null"
+                snoozedUntil:
                   anyOf:
                     - type: string
                     - type: "null"
@@ -1781,6 +1801,12 @@ paths:
               - type: string
                 enum:
                   - interactionDesc
+              - type: string
+                enum:
+                  - createdAtAsc
+              - type: string
+                enum:
+                  - createdAtDesc
           in: query
           name: sort
           required: false
