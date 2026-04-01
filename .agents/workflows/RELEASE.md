@@ -1,0 +1,117 @@
+
+
+---
+name: Release Workflow
+description: Technical release process — versioning, prerequisites, and deployment.
+triggers:
+  - new monthly release
+  - patch / hotfix
+related:
+  - blog/BLOG-POST.md
+---
+
+# Release Workflow
+
+## Versioning
+
+Format: `X.Y.Z`
+
+| Segment | Meaning | Example |
+|---------|---------|---------|
+| **X** | Year offset from 2025 (2026 = 1, 2027 = 2, …) | `1` |
+| **Y** | Month (1 = January, 2 = February, …) | `3` |
+| **Z** | Patch within that month (starts at 0) | `0` |
+
+Examples: first release in Jan 2026 → `1.1.0`, second → `1.1.1`, first in Feb 2026 → `1.2.0`.
+
+## Commit Messages
+
+Follow the [commit message guidelines](../../.github/instructions/changelog.instructions.md) so the changelog can be generated correctly.
+
+---
+
+## Prerequisites (on `main`)
+
+Complete all of the following **before** pushing anything to the `release` branch:
+
+1. **Bump version numbers** in every `package.json` across the monorepo.
+   ```
+   root package.json
+   apps/api/package.json
+   apps/chrome-extension/package.json
+   apps/supabase-db/package.json
+   apps/webapp/package.json
+   apps/website/package.json
+   packages/branding/package.json
+   packages/emails/package.json
+   packages/helpers/package.json
+   packages/mantine-next/package.json
+   packages/translations/package.json
+   packages/types/package.json
+   packages/vcard/package.json
+   ```
+2. **Update the minimum Extension version** in the API and webapp.
+3. **Update CHANGELOG.md** — add a new version section following the [changelog format](../../.github/instructions/changelog.instructions.md).
+4. **Generate the OpenAPI spec** and commit the output. This keeps API docs and client SDKs in sync.
+5. **Build all packages and apps** (`turbo build`) and verify there are no errors.
+6. **Commit** everything to `main`.
+
+---
+
+## Release Steps
+
+### 1. Chrome Extension (if changed)
+
+The Chrome extension must be released **before** the web app because Google requires a manual review.
+
+1. Create and push the extension git tag:
+   ```bash
+   git tag ext-vX.Y.Z
+   git push origin ext-vX.Y.Z
+   ```
+   This triggers the `release-extension` GitHub Actions workflow automatically. You can also trigger it manually — see [apps/chrome-extension/RELEASE.md](../../apps/chrome-extension/RELEASE.md) for details.
+2. **Wait** for Google's review to complete and the extension to be published.
+3. Once approved, proceed to step 2.
+
+> **If the review is rejected:** fix the issues on `main`, create a new patch tag (`ext-vX.Y.Z+1`), and re-submit. Do **not** proceed with the web app release until the extension is live.
+
+### 2. Web App & Other Apps
+
+1. Verify all [prerequisites](#prerequisites-on-main) are complete.
+2. Push `main` to the `release` branch:
+   ```bash
+   git push origin main:release
+   ```
+   The deployment workflow triggers automatically.
+
+---
+
+## Patch / Hotfix Release
+
+For urgent fixes between monthly releases:
+
+1. Fix the issue on `main`.
+2. Bump only the **Z** segment (e.g. `1.3.0` → `1.3.1`).
+3. Follow the same [prerequisites](#prerequisites-on-main) and [release steps](#release-steps) above.
+
+> **Tip:** Keep hotfixes small. Avoid bundling listing or permission changes with code fixes (especially for the Chrome extension — see tips in [apps/chrome-extension/RELEASE.md](../../apps/chrome-extension/RELEASE.md)).
+
+---
+
+## Post-Release: Announce to Users
+
+Once the technical deploy is confirmed working:
+
+1. Write and publish a blog post about the release — follow the [Blog Post Workflow](blog/BLOG-POST.md).
+2. Announce on Discord and Reddit using the announce CLI.
+3. (Future) Trigger the in-app notification for the new version.
+
+---
+
+## Rollback
+
+If a release introduces a critical issue:
+
+1. Revert the faulty commits on `main`.
+2. Create a new patch release following the hotfix flow above.
+3. For the Chrome extension, submit a new version — you cannot unpublish a Chrome Web Store update.
