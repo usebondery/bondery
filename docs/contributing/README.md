@@ -18,4 +18,5 @@ Before you get started, please read through the guides in this section:
 3. Make your changes, following the code quality guidelines in the codebase
 4. Open a pull request against `main` with a clear description of what was changed and why
 
+## Bugs and Feature Requests
 For bugs or feature requests, please [open an issue](https://github.com/usebondery/bondery/issues) first so we can discuss the approach before implementation.
