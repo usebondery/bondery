@@ -1,5 +1,9 @@
 import { defineConfig } from "wxt";
 import { resolve } from "path";
+import { createRequire } from "module";
+
+const require = createRequire(import.meta.url);
+const { version } = require("./package.json") as { version: string };
 
 // Helper to extract origin from URL for host permissions
 const getOrigin = (url: string) => {
@@ -114,7 +118,7 @@ export default defineConfig({
     return {
       name: "Bondery Extension",
       description: "Import contacts from social media directly to Bondery Webapp",
-      version: "1.3.0",
+      version,
 
       permissions: ["storage", "identity", "alarms"],
       host_permissions: hostPermissions,
