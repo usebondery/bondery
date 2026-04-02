@@ -1,9 +1,7 @@
 import type { PostMeta } from "@/app/blog/_lib/types";
 import type { ComponentType } from "react";
 
-import April2026Release, {
-  postMeta as april2026Release,
-} from "./product/april-2026-release.mdx";
+import April2026Release, { postMeta as april2026Release } from "./product/april-2026-release.mdx";
 import IntroducingBondery, {
   postMeta as introducingBondery,
 } from "./product/introducing-bondery.mdx";
