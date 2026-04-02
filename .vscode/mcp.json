@@ -41,7 +41,15 @@
 		"supabase": {
 			"url": "http://localhost:54321/mcp",
 			"type": "http"
-		}
+		},
+		    "mantine": {
+      "command": "npx",
+      "args": ["-y", "@mantine/mcp-server"],
+      "env": {
+        "MANTINE_MCP_DATA_URL": "https://mantine.dev/mcp"
+      }
+    }
+
 	},
 	"inputs": []
 }
