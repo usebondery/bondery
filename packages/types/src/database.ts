@@ -131,6 +131,7 @@ export type Database = {
           id: string;
           language: string | null;
           last_interaction: string | null;
+          last_interaction_activity_id: string | null;
           last_name: string | null;
           latitude: number | null;
           gis_point: unknown;
@@ -151,6 +152,7 @@ export type Database = {
           id?: string;
           language?: string | null;
           last_interaction?: string | null;
+          last_interaction_activity_id?: string | null;
           last_name?: string | null;
           latitude?: number | null;
           gis_point?: unknown;
@@ -171,6 +173,7 @@ export type Database = {
           id?: string;
           language?: string | null;
           last_interaction?: string | null;
+          last_interaction_activity_id?: string | null;
           last_name?: string | null;
           latitude?: number | null;
           gis_point?: unknown;

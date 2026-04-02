@@ -119,6 +119,8 @@ function toPreviewContact(contact: LinkedInPreparedContact): Contact {
     notes: null,
     avatar: null,
     lastInteraction: null,
+    lastInteractionActivityId: null,
+    keepFrequencyDays: null,
     createdAt: new Date().toISOString(),
     phones: [],
     emails: [],

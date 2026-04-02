@@ -94,6 +94,8 @@ function toPreviewContact(contact: VCardPreparedContact): Contact {
     notes: null,
     avatar: contact.avatarUri,
     lastInteraction: null,
+    lastInteractionActivityId: null,
+    keepFrequencyDays: null,
     createdAt: new Date().toISOString(),
     phones: contact.phones,
     emails: contact.emails,

@@ -1,0 +1,61 @@
+import { SOCIAL_LINKS } from "@bondery/helpers";
+
+export { postMeta } from "./april-2026-release.meta";
+
+## What's new in v1.4.0
+
+April brings the biggest feature drop since launch — keep-in-touch reminders, two new import sources, a dedicated "Myself" contact, and a full preferences overhaul. Here's everything that shipped.
+
+## Keep in touch, on your terms
+
+The most-requested feature is here. You can now set a follow-up frequency for any contact — weekly, biweekly, monthly, quarterly, biannually, or yearly. Bondery tracks when you last interacted and surfaces who's overdue so you never let a connection go cold.
+
+- Pick a frequency on any person's page.
+- The Keep-in-Touch page shows upcoming and overdue contacts at a glance.
+- Log an interaction or mark complete directly from the list.
+- Filter by look-ahead window (7, 30, or 90 days) to plan your week.
+
+## Instagram import
+
+Already had your contacts on Instagram? Now you can bring them into Bondery. Export your data from Instagram as a ZIP, upload it, and Bondery handles the rest — followers, following, and close friends are parsed automatically. A built-in brand detector keeps business accounts separate so your contact list stays clean.
+
+## vCard import
+
+For contacts stored in standard `.vcf` files — whether exported from Apple Contacts, Google, or Outlook — the new vCard importer does the heavy lifting. It supports geocoding, timezone enrichment, address validation, embedded photos, and important dates. Just drag and drop.
+
+## Meet "Myself"
+
+Every new account now starts with a special Myself contact — a non-deletable card that represents you. Use it to store your own details, track your social links, and share a clean contact card with others.
+
+## User preferences
+
+Settings got a major upgrade. You can now configure:
+
+- **Timezone** — used for reminder scheduling and date display.
+- **Reminder send hour** — choose when daily digests arrive.
+- **Time format** — 12-hour or 24-hour.
+- **Language** — English or Czech.
+- **Color scheme** — light, dark, or system.
+- **Profile photo** — upload directly from account settings.
+
+## Feedback & NPS
+
+We added a built-in feedback page so you can share what's working and what isn't — right inside the app. NPS scores help us track satisfaction over time.
+
+## Extension version gating
+
+The API now enforces a minimum Chrome extension version. If your extension is outdated, you'll see a clear upgrade prompt instead of mysterious errors.
+
+## What's next
+
+We're heads-down on the mobile app, voice notes input, and deeper calendar integrations. Follow along on <a href={SOCIAL_LINKS.discord} target="_blank" rel="noopener noreferrer">Discord</a> or <a href={SOCIAL_LINKS.reddit} target="_blank" rel="noopener noreferrer">Reddit</a>, or check the <a href={SOCIAL_LINKS.github} target="_blank" rel="noopener noreferrer">GitHub repo</a> to see what's shipping next.
+
+{/* 
+## Images to generate
+
+1. Hero: Mascot checking a calendar with reminder bells floating around — used below the title
+2. Keep-in-touch section: Mascot reaching out to shake hands with another mascot across a bridge — used in "Keep in touch"
+3. Import section: Mascot juggling Instagram, vCard, and LinkedIn logos — used between the two import sections
+4. Myself section: Mascot looking at its own reflection holding a contact card — used in "Meet Myself"
+5. CTA: Mascot waving from a phone screen — used in "What's next"
+*/}

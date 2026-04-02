@@ -47,7 +47,6 @@ import { revalidateAll } from "../../actions";
 
 type Step = "intro" | "instructions" | "upload" | "strategy" | "processing" | "preview";
 
-const INSTAGRAM_IMPORT_ROUTE = "/api/contacts/import/instagram";
 const IMPORT_BATCH_SIZE = 25;
 const INSTAGRAM_MAX_FILE_SIZE_BYTES = 100 * 1024 * 1024;
 
@@ -215,6 +214,8 @@ function toPreviewContact(contact: InstagramPreparedContact): Contact {
     notes: null,
     avatar: null,
     lastInteraction: null,
+    lastInteractionActivityId: null,
+    keepFrequencyDays: null,
     createdAt: new Date().toISOString(),
     phones: [],
     emails: [],
@@ -462,7 +463,7 @@ export function InstagramImportModal({
     formData.append("strategy", strategy);
 
     try {
-      const response = await fetch(`${INSTAGRAM_IMPORT_ROUTE}/parse`, {
+      const response = await fetch(`${API_ROUTES.CONTACTS_IMPORT_INSTAGRAM}/parse`, {
         method: "POST",
         body: formData,
       });
@@ -528,7 +529,7 @@ export function InstagramImportModal({
       for (let i = 0; i < selectedContacts.length; i += IMPORT_BATCH_SIZE) {
         const batch = selectedContacts.slice(i, i + IMPORT_BATCH_SIZE);
 
-        const response = await fetch(`${INSTAGRAM_IMPORT_ROUTE}/commit`, {
+        const response = await fetch(`${API_ROUTES.CONTACTS_IMPORT_INSTAGRAM}/commit`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ contacts: batch }),

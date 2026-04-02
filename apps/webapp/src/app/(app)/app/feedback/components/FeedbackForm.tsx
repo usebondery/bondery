@@ -49,7 +49,7 @@ export function FeedbackForm() {
     });
 
     try {
-      const response = await fetch(API_ROUTES.FEEDBACK, {
+      const response = await fetch(API_ROUTES.ME_FEEDBACK, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

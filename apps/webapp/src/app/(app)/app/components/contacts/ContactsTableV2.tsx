@@ -55,7 +55,9 @@ export type SortOrder =
   | "surnameAsc"
   | "surnameDesc"
   | "interactionAsc"
-  | "interactionDesc";
+  | "interactionDesc"
+  | "createdAtAsc"
+  | "createdAtDesc";
 
 /**
  * Formats a phone number for display using the appropriate country mask.
@@ -630,6 +632,8 @@ export default function ContactsTableV2({
     { key: "surnameDesc", label: "Surname Z→A" },
     { key: "interactionDesc", label: "Newest interaction" },
     { key: "interactionAsc", label: "Oldest interaction" },
+    { key: "createdAtDesc", label: "Newest added" },
+    { key: "createdAtAsc", label: "Oldest added" },
   ];
 
   const labels: DataTableLabels = {

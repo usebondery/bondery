@@ -27,7 +27,7 @@ async function getMyselfData() {
   const headers = await getAuthHeaders();
 
   const contactPromise = fetch(
-    `${API_URL}${API_ROUTES.ACCOUNT_PERSON}?${buildAvatarQueryString("large")}`,
+    `${API_URL}${API_ROUTES.ME_PERSON}?${buildAvatarQueryString("large")}`,
     {
       next: { tags: ["contacts"] },
       headers,

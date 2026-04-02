@@ -8,9 +8,9 @@ import {
   IconUser,
   IconUsersGroup,
   IconMap2,
-  IconMessageCircle,
   IconTimelineEventText,
   IconArrowMerge,
+  IconHeartHandshake,
 } from "@tabler/icons-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -24,18 +24,19 @@ interface NavigationSidebarContentProps {
   userEmail: string;
   avatarUrl: string | null;
   hasActiveMergeRecommendations: boolean;
+  hasOverdueKeepInTouch: boolean;
 }
 
 const primaryLinks = [
   { href: WEBAPP_ROUTES.HOME, label: "Home", icon: IconHome },
   { href: WEBAPP_ROUTES.INTERACTIONS, label: "Interactions", icon: IconTimelineEventText },
   { href: WEBAPP_ROUTES.PEOPLE, label: "People", icon: IconUser },
+  { href: WEBAPP_ROUTES.KEEP_IN_TOUCH, label: "Keep in touch", icon: IconHeartHandshake },
   { href: WEBAPP_ROUTES.GROUPS, label: "Groups", icon: IconUsersGroup },
   { href: WEBAPP_ROUTES.MAP, label: "Map", icon: IconMap2 },
 ];
 
 const secondaryLinks = [
-  { href: WEBAPP_ROUTES.FEEDBACK, label: "Feedback", icon: IconMessageCircle },
   { href: "/app/fix", label: "Fix & merge", icon: IconArrowMerge },
   { href: WEBAPP_ROUTES.SETTINGS, label: "Settings", icon: IconSettings },
 ];
@@ -45,6 +46,7 @@ export function NavigationSidebarContent({
   userEmail,
   avatarUrl,
   hasActiveMergeRecommendations,
+  hasOverdueKeepInTouch,
 }: NavigationSidebarContentProps) {
   const pathname = usePathname();
   const { hovered: myselfHovered, ref: myselfRef } = useHover();
@@ -65,7 +67,12 @@ export function NavigationSidebarContent({
 
       <Stack gap="xs">
         {primaryLinks.map((link, index) => (
-          <NavLinkItem key={`${link.href}-${index}`} {...link} active={pathname === link.href} />
+          <NavLinkItem
+            key={`${link.href}-${index}`}
+            {...link}
+            active={pathname === link.href}
+            showIndicator={link.href === WEBAPP_ROUTES.KEEP_IN_TOUCH && hasOverdueKeepInTouch}
+          />
         ))}
       </Stack>
 

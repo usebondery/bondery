@@ -501,6 +501,15 @@
         "NoContactsFound": "\u017d\u00e1dn\u00e9 kontakty k n\u00e1hledu.",
         "NoContactsMatchSearch": "\u017d\u00e1dn\u00fd takov\u00fd kontakt nenalezen."
       }
+    },
+    "Support": {
+      "Title": "Podpora",
+      "DocumentationTitle": "Dokumentace",
+      "DocumentationDescription": "Prohl\u00e9dn\u011bte si pr\u016fvodce, tutori\u00e1ly a reference pro lep\u0161\u00ed vyu\u017eit\u00ed Bondery.",
+      "ContactTitle": "Kontaktujte n\u00e1s",
+      "ContactDescription": "M\u00e1te ot\u00e1zku nebo pot\u0159ebujete pomoc? Napi\u0161te n\u00e1m.",
+      "FeedbackTitle": "Odeslat zp\u011btnou vazbu",
+      "FeedbackDescription": "Pomozte n\u00e1m vylep\u0161it Bondery sd\u00edlen\u00edm va\u0161ich n\u00e1zor\u016f."
     }
   },
   "GroupsPage": {
@@ -618,7 +627,21 @@
     "DuplicateFailed": "Interakci se nepodařilo duplikovat",
     "LastInteractionInput": "Poslední interakce",
     "LastInteractionUpdated": "Poslední interakce aktualizována",
-    "LastInteractionUpdateFailed": "Nepodařilo se aktualizovat poslední interakci"
+    "LastInteractionUpdateFailed": "Nepodařilo se aktualizovat poslední interakci",
+    "LastInteractionViaActivity": "Z {type}",
+    "LastInteractionManual": "Nastaveno ručně",
+    "KeepInTouchFrequency": "Zůstat v kontaktu",
+    "KeepInTouchNone": "Žádná",
+    "FrequencyWeekly": "Týdně",
+    "FrequencyBiweekly": "Každé dva týdny",
+    "FrequencyQuarterly": "Čtvrtletně",
+    "FrequencyBiannually": "Každé půl roku",
+    "FrequencyYearly": "Ročně",
+    "FrequencyNone": "Neudržovat kontakt",
+    "NextDue": "Příští kontakt",
+    "KeepInTouchUpdated": "Zůstat v kontaktu aktualizováno",
+    "KeepInTouchUpdatedDescription": "Frekvence byla úspěšně aktualizována",
+    "KeepInTouchUpdateFailed": "Nepodařilo se aktualizovat frekvenci"
   },
   "HomePage": {
     "Title": "Domů",
@@ -647,7 +670,13 @@
       "InteractionsTooltip": "Počet interakcí, které jste uskutečnili v měsíci {month}.",
       "NewContactsTitle": "Nové kontakty letos",
       "NewContactsTooltip": "Kolik lidí bylo přidáno do vaší sítě v aktuálním roce ({year})."
-    }
+    },
+    "RecentlyAddedTitle": "Nedávno přidaní",
+    "RecentlyAddedTooltip": "5 naposledy přidaných lidí ve vaší síti.",
+    "NoRecentlyAdded": "Zatím nebyli přidáni žádní lidé.",
+    "RecentlyInteractedTitle": "Nedávno v kontaktu",
+    "RecentlyInteractedTooltip": "5 lidí, se kterými jste naposledy komunikovali.",
+    "NoRecentlyInteracted": "Zatím žádné nedávné interakce."
   },
   "FixContactsPage": {
     "Title": "Opravit a sloučit",
@@ -713,7 +742,8 @@
       "GroupDetail": "této skupině",
       "Map": "mapě",
       "FixAndMerge": "opravě a slučování",
-      "PersonDetails": "detailu osoby"
+      "PersonDetails": "detailu osoby",
+      "KeepInTouch": "udržování kontaktu"
     }
   },
   "MergeWithModal": {
@@ -1086,5 +1116,40 @@
     "WebappNotificationDescription": "Vaše rozšíření Bondery Chrome potřebuje aktualizaci, aby správně fungovalo.",
     "ApiRejectedTitle": "Verze je příliš stará",
     "ApiRejectedDescription": "Server odmítl požadavek, protože vaše rozšíření je zastaralé. Prosím aktualizujte."
+  },
+  "KeepInTouch": {
+    "Title": "Zůstat v kontaktu",
+    "Description": "Lidé, se kterými chcete být v pravidelném kontaktu. Nejdéle nekontaktovaní se zobrazí jako první.",
+    "EmptyTitle": "Žádné kontakty k oslovení",
+    "EmptyDescription": "Nastavte frekvenci na jakémkoliv kontaktu a uvidíte je zde, až bude čas se ozvat.",
+    "GoToPeople": "Přejít na Lidi",
+    "DueToday": "Dnes",
+    "OverdueBy": "{days, plural, one {# den po termínu} few {# dny po termínu} other {# dní po termínu}}",
+    "DueIn": "{days, plural, one {Za # den} few {Za # dny} other {Za # dní}}",
+    "FrequencyWeekly": "Týdně",
+    "FrequencyBiweekly": "Každé dva týdny",
+    "FrequencyQuarterly": "Čtvrtletně",
+    "FrequencyBiannually": "Každé půl roku",
+    "FrequencyYearly": "Ročně",
+    "FrequencyNone": "Neudržovat kontakt",
+    "MarkComplete": "Hotovo",
+    "MarkCompleteSuccess": "Označeno jako hotové — poslední interakce nastavena na dnešek",
+    "MarkCompleteFailed": "Nepodařilo se označit jako hotové",
+    "FrequencyUpdated": "Frekvence aktualizována",
+    "FrequencyUpdateFailed": "Nepodařilo se aktualizovat frekvenci",
+    "DateTooltipFuture": "Pro udržení kontaktu {frequency}, oslovte je do {date}",
+    "SelectFrequencyAriaLabel": "Změnit frekvenci kontaktu pro {name}",
+    "MarkAsDone": "Označit jako hotové",
+    "LogInteraction": "Zaznamenat interakci...",
+    "LastMetRelative": "Naposledy viděni {time}",
+    "LastMetToday": "Naposledy viděni dnes",
+    "LastMetNever": "Ještě nesetkáni",
+    "Label": "Zůstat v kontaktu",
+    "NextDue": "Příští kontakt",
+    "DueDateLabel": "Termín: {date}",
+    "WindowNext7": "Příštích 7 dní",
+    "WindowNext30": "Příštích 30 dní",
+    "WindowNext90": "Příštích 90 dní",
+    "WindowLabel": "Zobrazit"
   }
 }

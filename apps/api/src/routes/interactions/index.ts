@@ -173,7 +173,7 @@ export async function interactionRoutes(fastify: FastifyInstance) {
 
         await client
           .from("people")
-          .update({ last_interaction: body.date })
+          .update({ last_interaction: body.date, last_interaction_activity_id: interaction.id })
           .in("id", body.participantIds);
       }
 
@@ -263,7 +263,7 @@ export async function interactionRoutes(fastify: FastifyInstance) {
           if (body.date) {
             await client
               .from("people")
-              .update({ last_interaction: body.date })
+              .update({ last_interaction: body.date, last_interaction_activity_id: id })
               .in("id", body.participantIds);
           }
         }

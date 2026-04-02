@@ -64,6 +64,8 @@ import { ContactImportantDatesSection } from "./components/ContactImportantDates
 import { PersonInteractionsSection } from "./components/PersonInteractionsSection";
 import { openNewActivityModal } from "../../interactions/components/NewActivityModal";
 import { DatePickerWithPresets } from "@/app/(app)/app/components/interactions/DatePickerWithPresets";
+import { computeNextDueDate } from "@/app/(app)/app/keep-in-touch/keepInTouchConfig";
+import { KeepInTouchSelect } from "@/app/(app)/app/keep-in-touch/KeepInTouchSelect";
 import { LinkedInTab } from "./components/LinkedInTab";
 import { useBatchEnrichFromLinkedIn } from "@/lib/extension/useBatchEnrichFromLinkedIn";
 // import { ContactPGPSection } from "./components/ContactPGPSection";
@@ -289,6 +291,18 @@ export default function PersonClient({
     () => createMentionSuggestion(mentionableContacts),
     [mentionableContacts],
   );
+
+  /** Infer whether the last interaction was set via a logged activity or manually. */
+  const lastInteractionSource = useMemo<
+    { type: "activity"; activityType: string } | { type: "manual" } | null
+  >(() => {
+    if (!contact.lastInteraction) return null;
+    if (contact.lastInteractionActivityId) {
+      const linked = initialActivities.find((a) => a.id === contact.lastInteractionActivityId);
+      if (linked) return { type: "activity", activityType: linked.type };
+    }
+    return { type: "manual" };
+  }, [contact.lastInteraction, contact.lastInteractionActivityId, initialActivities]);
 
   // Initialize edited values when contact loads
   useEffect(() => {
@@ -539,6 +553,34 @@ export default function PersonClient({
       );
     } finally {
       setSavingLastInteraction(false);
+    }
+  };
+
+  const handleSaveKeepFrequency = async (value: string | null) => {
+    if (!contact || !personId) return;
+    const keepFrequencyDays = value && value !== "none" ? parseInt(value, 10) : null;
+    try {
+      const res = await fetch(`${API_ROUTES.CONTACTS}/${personId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ keepFrequencyDays }),
+      });
+      if (!res.ok) throw new Error("Failed to update");
+      setContact((prev) => ({ ...prev, keepFrequencyDays }) as Contact);
+      notifications.show(
+        successNotificationTemplate({
+          title: tInteractions("KeepInTouchUpdated"),
+          description: tInteractions("KeepInTouchUpdatedDescription"),
+        }),
+      );
+      revalidateContacts();
+    } catch {
+      notifications.show(
+        errorNotificationTemplate({
+          title: "Error",
+          description: tInteractions("KeepInTouchUpdateFailed"),
+        }),
+      );
     }
   };
 
@@ -1424,21 +1466,41 @@ export default function PersonClient({
 
               <Tabs.Panel value="interactions" pt="md">
                 <Stack gap="lg">
-                  <DatePickerWithPresets
-                    label={tInteractions("LastInteractionInput")}
-                    value={contact.lastInteraction ?? null}
-                    disabled={savingLastInteraction}
-                    className="max-w-60"
-                    onChange={(val) => {
-                      const date = val as Date | string | null;
-                      const dateStr = !date
-                        ? null
-                        : date instanceof Date
-                          ? `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`
-                          : (String(date).split("T")[0] ?? null);
-                      handleSaveLastInteraction(dateStr);
-                    }}
-                  />
+                  <Group gap="md" align="flex-start" grow>
+                    <Stack gap={4}>
+                      <DatePickerWithPresets
+                        label={tInteractions("LastInteractionInput")}
+                        value={contact.lastInteraction ?? null}
+                        disabled={savingLastInteraction}
+                        onChange={(val) => {
+                          const date = val as Date | string | null;
+                          const dateStr = !date
+                            ? null
+                            : date instanceof Date
+                              ? `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`
+                              : (String(date).split("T")[0] ?? null);
+                          handleSaveLastInteraction(dateStr);
+                        }}
+                      />
+                      {lastInteractionSource ? (
+                        <Text size="xs" c="dimmed">
+                          {lastInteractionSource.type === "activity"
+                            ? tInteractions("LastInteractionViaActivity", {
+                                type: lastInteractionSource.activityType,
+                              })
+                            : tInteractions("LastInteractionManual")}
+                        </Text>
+                      ) : null}
+                    </Stack>
+                    <KeepInTouchSelect
+                      value={contact.keepFrequencyDays?.toString() ?? "none"}
+                      onChange={(val) => handleSaveKeepFrequency(val === "none" ? null : val)}
+                      nextDueDate={computeNextDueDate(
+                        contact.lastInteraction,
+                        contact.keepFrequencyDays,
+                      )}
+                    />
+                  </Group>
                   <Stack gap="xs">
                     <Text fw={600} size="sm">
                       Interactions

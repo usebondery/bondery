@@ -228,8 +228,10 @@ export type Database = {
           first_name: string;
           gis_point: unknown;
           id: string;
+          keep_frequency_days: number | null;
           language: string | null;
           last_interaction: string | null;
+          last_interaction_activity_id: string | null;
           last_name: string | null;
           latitude: number | null;
           location: string | null;
@@ -248,8 +250,10 @@ export type Database = {
           first_name: string;
           gis_point?: unknown;
           id?: string;
+          keep_frequency_days?: number | null;
           language?: string | null;
           last_interaction?: string | null;
+          last_interaction_activity_id?: string | null;
           last_name?: string | null;
           latitude?: number | null;
           location?: string | null;
@@ -268,8 +272,10 @@ export type Database = {
           first_name?: string;
           gis_point?: unknown;
           id?: string;
+          keep_frequency_days?: number | null;
           language?: string | null;
           last_interaction?: string | null;
+          last_interaction_activity_id?: string | null;
           last_name?: string | null;
           latitude?: number | null;
           location?: string | null;

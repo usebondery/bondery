@@ -112,7 +112,7 @@ async function authenticatedFetch(url: string, options: RequestInit = {}): Promi
  * @throws Error if not authenticated or request fails
  */
 export async function addOrFindPerson(data: RedirectRequest): Promise<RedirectResponse> {
-  const response = await authenticatedFetch(`${config.apiUrl}${API_ROUTES.REDIRECT}`, {
+  const response = await authenticatedFetch(`${config.apiUrl}${API_ROUTES.EXTENSION}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
@@ -180,7 +180,7 @@ export async function fetchPersonPreview(
  * Fetch authenticated user's settings/profile data.
  */
 export async function fetchUserSettings(): Promise<UserSettingsProfile> {
-  const response = await authenticatedFetch(`${config.apiUrl}${API_ROUTES.SETTINGS}`, {
+  const response = await authenticatedFetch(`${config.apiUrl}${API_ROUTES.ME_SETTINGS}`, {
     method: "GET",
   });
 

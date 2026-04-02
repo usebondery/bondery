@@ -9,8 +9,9 @@ import "leaflet/dist/leaflet.css";
 import { API_ROUTES, WEBSITE_ROUTES } from "@bondery/helpers/globals/paths";
 import { API_URL } from "@/lib/config";
 import { ColorSchemeSync } from "./components/ColorSchemeSync";
-import type { ColorSchemePreference, MergeRecommendation } from "@bondery/types";
+import type { ColorSchemePreference, Contact, MergeRecommendation } from "@bondery/types";
 import { getMergeRecommendationsData } from "./fix/getMergeRecommendationsData";
+import { getKeepInTouchData } from "./keep-in-touch/getKeepInTouchData";
 import { EnrichStatusNotificationManager } from "@/lib/extension/EnrichStatusNotificationManager";
 import { EnrichResumeDetector } from "@/lib/extension/EnrichResumeDetector";
 import { ExtensionUpdateNotificationManager } from "@/lib/extension/ExtensionUpdateNotificationManager";
@@ -34,7 +35,7 @@ async function getUserSettings(precomputedHeaders?: HeadersInit) {
   try {
     const headers = precomputedHeaders ?? (await getAuthHeaders());
 
-    const response = await fetch(`${API_URL}${API_ROUTES.SETTINGS}`, {
+    const response = await fetch(`${API_URL}${API_ROUTES.ME_SETTINGS}`, {
       next: { tags: ["settings"] },
       headers,
     });
@@ -88,13 +89,20 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   // Fetch auth headers once, then parallelise both independent API calls
   const headers = await getAuthHeaders();
 
-  const [settings, recommendations] = await Promise.all([
+  const [settings, recommendations, keepInTouchData] = await Promise.all([
     getUserSettings(headers),
     getMergeRecommendationsData(headers).catch(() => [] as MergeRecommendation[]),
+    getKeepInTouchData(headers).catch(() => ({ contacts: [] as Contact[] })),
   ]);
 
   const { userName, userEmail, avatarUrl, locale, timezone, timeFormat, colorScheme } = settings;
   const hasActiveMergeRecommendations = recommendations.length > 0;
+  const hasOverdueKeepInTouch = keepInTouchData.contacts.some((c) => {
+    if (!c.keepFrequencyDays || !c.lastInteraction) return true;
+    const nextDue = new Date(c.lastInteraction);
+    nextDue.setDate(nextDue.getDate() + c.keepFrequencyDays);
+    return nextDue <= new Date();
+  });
 
   const messages = translations[locale as keyof typeof translations] || translations.en;
 
@@ -117,6 +125,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
             userEmail={userEmail}
             avatarUrl={avatarUrl}
             hasActiveMergeRecommendations={hasActiveMergeRecommendations}
+            hasOverdueKeepInTouch={hasOverdueKeepInTouch}
           />
         </AppShellNavbar>
         <AppShellMain>{children}</AppShellMain>

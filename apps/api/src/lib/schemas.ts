@@ -38,6 +38,8 @@ export const CONTACT_SELECT = `
   notes,
   notesUpdatedAt:notes_updated_at,
   lastInteraction:last_interaction,
+  lastInteractionActivityId:last_interaction_activity_id,
+  keepFrequencyDays:keep_frequency_days,
   createdAt:created_at,
   myself,
   language,
@@ -141,6 +143,8 @@ export const ContactSortEnum = Type.Union([
   Type.Literal("surnameDesc"),
   Type.Literal("interactionAsc"),
   Type.Literal("interactionDesc"),
+  Type.Literal("createdAtAsc"),
+  Type.Literal("createdAtDesc"),
 ]);
 
 /** Standard error response shape */

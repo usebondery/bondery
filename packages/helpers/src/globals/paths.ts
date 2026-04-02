@@ -22,15 +22,15 @@ export const API_ROUTES = {
   GROUPS: "/api/groups",
   TAGS: "/api/tags",
   INTERACTIONS: "/api/interactions",
-  SETTINGS: "/api/settings",
-  ACCOUNT: "/api/account",
-  ACCOUNT_PERSON: "/api/account/person",
-  ACCOUNT_PHOTO: "/api/account/photo",
-  FEEDBACK: "/api/feedback",
-  REMINDERS: "/api/reminders",
-  REDIRECT: "/api/redirect",
+  ME: "/api/me",
+  ME_PERSON: "/api/me/person",
+  ME_PHOTO: "/api/me/photo",
+  ME_SETTINGS: "/api/me/settings",
+  ME_FEEDBACK: "/api/me/feedback",
+  INTERNAL_REMINDER_DIGEST: "/api/internal/reminder-digest",
+  EXTENSION: "/api/extension",
   CONTACTS_SHARE: "/api/contacts/share",
-  STATS: "/api/stats",
+  ADMIN_STATS: "/api/admin/stats",
 } as const;
 
 export const CHROME_EXTENSION_URL =
@@ -41,7 +41,7 @@ export const CHROME_EXTENSION_URL =
  * Requests from extensions below this version receive HTTP 426 Upgrade Required.
  * Set to "0.0.0" to disable enforcement.
  */
-export const MIN_EXTENSION_VERSION: string = "1.3.0";
+export const MIN_EXTENSION_VERSION: string = "1.4.0";
 
 export const HELP_DOCS_URL = "https://bondery.gitbook.io";
 
@@ -77,6 +77,7 @@ export const WEBAPP_ROUTES = {
   HOME: "/app/home",
   MAP: "/app/map",
   PEOPLE: "/app/people",
+  KEEP_IN_TOUCH: "/app/keep-in-touch",
   FIX_CONTACTS: "/app/fix",
   GROUPS: "/app/groups",
   INTERACTIONS: "/app/interactions",
@@ -84,8 +85,7 @@ export const WEBAPP_ROUTES = {
   MYSELF: "/app/myself",
   SETTINGS: "/app/settings",
   ACCOUNT: "/app/account",
-  FEEDBACK: "/app/feedback",
-  STATS: "/app/stats",
+  STATS: "/app/admin/stats",
   LOGIN: "/login",
   APP_GROUP: "/app",
   DEFAULT_PAGE_AFTER_LOGIN: "/app/home",

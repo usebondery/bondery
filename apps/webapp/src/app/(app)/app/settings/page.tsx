@@ -12,6 +12,7 @@ import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import { PageWrapper } from "../components/PageWrapper";
 import { PreferencesCard } from "./components/PreferencesCard";
 import { TagsSection } from "./components/TagsSection";
+import { SupportCard } from "./components/SupportCard";
 import type { TagWithCount } from "@bondery/types";
 import { buildAvatarQueryString } from "@/lib/avatarParams";
 
@@ -21,7 +22,7 @@ export default async function SettingsPage() {
   const headers = await getAuthHeaders();
 
   const [response, tagsResponse, personResponse] = await Promise.all([
-    fetch(`${API_URL}${API_ROUTES.SETTINGS}`, {
+    fetch(`${API_URL}${API_ROUTES.ME_SETTINGS}`, {
       next: { tags: ["settings"] },
       headers,
     }),
@@ -29,7 +30,7 @@ export default async function SettingsPage() {
       next: { tags: ["tags"] },
       headers,
     }),
-    fetch(`${API_URL}${API_ROUTES.ACCOUNT_PERSON}?${buildAvatarQueryString("small")}`, {
+    fetch(`${API_URL}${API_ROUTES.ME_PERSON}?${buildAvatarQueryString("small")}`, {
       next: { tags: ["contacts"] },
       headers,
     }),
@@ -77,6 +78,8 @@ export default async function SettingsPage() {
     <PageWrapper>
       <ErrorPageHeader iconType="settings" title={t("Title")} />
       <Stack gap="xl">
+        <SupportCard />
+
         <ProfileCard
           email={email}
           providers={providers}

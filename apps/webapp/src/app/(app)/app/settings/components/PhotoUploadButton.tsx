@@ -21,7 +21,7 @@ export function PhotoUploadButton({ avatarUrl, userName }: PhotoUploadButtonProp
   const openUploadModal = () => {
     openPhotoUploadModal(
       {
-        uploadEndpoint: API_ROUTES.ACCOUNT_PHOTO,
+        uploadEndpoint: API_ROUTES.ME_PHOTO,
         avatarUrl,
         displayName: userName,
         onSuccess: async () => {

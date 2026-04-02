@@ -1,0 +1,91 @@
+# /api/extension
+root:
+  post:
+    summary: Find or create contact (programmatic)
+    description: >
+      Programmatic endpoint for the browser extension. Finds an existing contact by social
+      media handle, or creates a new one. If the contact already exists, updates missing
+      fields (photo, headline, location) and returns the existing contact info as JSON.
+      Also stores work history, education history, and LinkedIn bio if provided.
+      Returns a JSON response — for browser-based redirects, use GET /api/extension instead.
+    operationId: findOrCreateContact
+    tags:
+      - Extension
+    security:
+      - cookieAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/redirect.yaml#/RedirectRequest"
+    responses:
+      "200":
+        description: Contact created or found
+        content:
+          application/json:
+            schema:
+              $ref: "../schemas/redirect.yaml#/RedirectPostResponse"
+      "400":
+        description: Missing required social media handle (instagram, linkedin, or facebook)
+      "401":
+        $ref: "../../openapi.yaml#/components/responses/UnauthorizedError"
+      "500":
+        $ref: "../../openapi.yaml#/components/responses/InternalServerError"
+
+  get:
+    summary: Browser redirect to contact page
+    description: >
+      Browser-facing endpoint used by the extension to open a contact in the webapp.
+      Finds or creates a contact from query parameters, then issues a 302 redirect
+      to the contact's page. If the user is not authenticated, redirects to the
+      login page with a return URL. Updates missing photo, headline, and location on
+      existing contacts. For programmatic (JSON) access, use POST /api/extension instead.
+    operationId: browserRedirectToContact
+    tags:
+      - Extension
+    security: []
+    parameters:
+      - name: instagram
+        in: query
+        schema:
+          type: string
+      - name: linkedin
+        in: query
+        schema:
+          type: string
+      - name: facebook
+        in: query
+        schema:
+          type: string
+      - name: firstName
+        in: query
+        schema:
+          type: string
+      - name: middleName
+        in: query
+        schema:
+          type: string
+      - name: lastName
+        in: query
+        schema:
+          type: string
+      - name: profileImageUrl
+        in: query
+        schema:
+          type: string
+      - name: headline
+        in: query
+        schema:
+          type: string
+      - name: location
+        in: query
+        schema:
+          type: string
+    responses:
+      "302":
+        description: Redirect to contact page in the webapp, or to login if unauthenticated
+      "400":
+        description: Missing required social media handle (instagram, linkedin, or facebook)
+      "500":
+        $ref: "../../openapi.yaml#/components/responses/InternalServerError"

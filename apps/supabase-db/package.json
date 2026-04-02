@@ -1,6 +1,6 @@
 {
   "name": "supabase-db",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "private": true,
   "description": "Supabase database setup, migrations, and edge functions",
   "scripts": {

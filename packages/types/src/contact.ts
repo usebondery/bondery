@@ -92,6 +92,8 @@ export interface Contact {
   notesUpdatedAt?: string | null;
   avatar: string | null;
   lastInteraction: string | null;
+  lastInteractionActivityId: string | null;
+  keepFrequencyDays: number | null;
   createdAt: string;
   updatedAt?: string | null;
   /** Array of phone entries with type and preferred flag */
@@ -228,7 +230,9 @@ export interface ContactsFilter {
     | "surnameAsc"
     | "surnameDesc"
     | "interactionAsc"
-    | "interactionDesc";
+    | "interactionDesc"
+    | "createdAtAsc"
+    | "createdAtDesc";
 }
 
 /**

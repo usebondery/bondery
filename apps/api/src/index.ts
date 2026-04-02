@@ -19,19 +19,19 @@ import { registerAuthStrategies } from "./lib/auth.js";
 import { registerExtensionVersionCheck } from "./lib/extensionVersionCheck.js";
 
 import { contactRoutes } from "./routes/contacts/index.js";
-import { accountRoutes } from "./routes/account/index.js";
-import { settingsRoutes } from "./routes/settings/index.js";
-import { redirectRoutes } from "./routes/redirect/index.js";
-import { feedbackRoutes } from "./routes/feedback/index.js";
-import { reminderRoutes } from "./routes/reminders/index.js";
+import { meRoutes } from "./routes/me/index.js";
+import { meSettingsRoutes } from "./routes/me/settings/index.js";
+import { extensionRoutes } from "./routes/extension/index.js";
+import { meFeedbackRoutes } from "./routes/me/feedback/index.js";
+import { reminderDigestRoutes } from "./routes/internal/reminder-digest.js";
 import { groupRoutes } from "./routes/groups/index.js";
 import { tagRoutes } from "./routes/tags/index.js";
 import { interactionRoutes } from "./routes/interactions/index.js";
-import { linkedInImportRoutes } from "./routes/linkedin-import/index.js";
-import { instagramImportRoutes } from "./routes/instagram-import/index.js";
-import { vcardImportRoutes } from "./routes/vcard-import/index.js";
-import { shareRoutes } from "./routes/share/index.js";
-import { statsRoutes } from "./routes/stats/index.js";
+import { linkedInImportRoutes } from "./routes/import/linkedin/index.js";
+import { instagramImportRoutes } from "./routes/import/instagram/index.js";
+import { vcardImportRoutes } from "./routes/import/vcard/index.js";
+import { shareRoutes } from "./routes/contacts/share/index.js";
+import { statsRoutes } from "./routes/admin/stats/index.js";
 
 // Environment variable schema
 const envSchema = {
@@ -275,7 +275,7 @@ async function buildServer() {
         description:
           "REST API for the Bondery application — a contact and relationship management platform.\n\n" +
           "## Authentication\n\n" +
-          "All endpoints (except `/status` and `GET /api/redirect`) require authentication " +
+          "All endpoints (except `/status` and `GET /api/extension`) require authentication " +
           "via a Supabase session cookie or a Bearer token in the Authorization header.",
         version: "1.0.0",
         contact: { name: "Bondery Support", url: "https://usebondery.com" },
@@ -292,11 +292,9 @@ async function buildServer() {
         { name: "Tags", description: "Tag management operations" },
         { name: "Interactions", description: "Interaction timeline events" },
         { name: "Import", description: "Contact import from social platforms" },
-        { name: "Account", description: "User account operations" },
-        { name: "Settings", description: "User settings and preferences" },
-        { name: "Redirect", description: "Browser extension integration endpoints" },
-        { name: "Feedback", description: "User feedback" },
-        { name: "Reminders", description: "Scheduled reminder operations" },
+        { name: "Me", description: "Authenticated user profile, settings, and feedback" },
+        { name: "Extension", description: "Browser extension integration endpoints" },
+        { name: "Internal", description: "Service-to-service endpoints (not user-facing)" },
         { name: "Share", description: "Share contacts via email" },
         { name: "Stats", description: "Admin KPI dashboard metrics" },
       ],
@@ -322,14 +320,14 @@ async function buildServer() {
   await fastify.register(vcardImportRoutes, { prefix: API_ROUTES.CONTACTS_IMPORT_VCARD });
   await fastify.register(groupRoutes, { prefix: API_ROUTES.GROUPS });
   await fastify.register(tagRoutes, { prefix: API_ROUTES.TAGS });
-  await fastify.register(accountRoutes, { prefix: API_ROUTES.ACCOUNT });
-  await fastify.register(settingsRoutes, { prefix: API_ROUTES.SETTINGS });
-  await fastify.register(redirectRoutes, { prefix: API_ROUTES.REDIRECT });
-  await fastify.register(feedbackRoutes, { prefix: API_ROUTES.FEEDBACK });
-  await fastify.register(reminderRoutes, { prefix: API_ROUTES.REMINDERS });
+  await fastify.register(meRoutes, { prefix: API_ROUTES.ME });
+  await fastify.register(meSettingsRoutes, { prefix: API_ROUTES.ME_SETTINGS });
+  await fastify.register(extensionRoutes, { prefix: API_ROUTES.EXTENSION });
+  await fastify.register(meFeedbackRoutes, { prefix: API_ROUTES.ME_FEEDBACK });
+  await fastify.register(reminderDigestRoutes, { prefix: API_ROUTES.INTERNAL_REMINDER_DIGEST });
   await fastify.register(interactionRoutes, { prefix: API_ROUTES.INTERACTIONS });
   await fastify.register(shareRoutes, { prefix: API_ROUTES.CONTACTS_SHARE });
-  await fastify.register(statsRoutes, { prefix: API_ROUTES.STATS });
+  await fastify.register(statsRoutes, { prefix: API_ROUTES.ADMIN_STATS });
 
   return fastify;
 }

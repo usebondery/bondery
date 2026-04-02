@@ -503,6 +503,15 @@
         "NoContactsFound": "No contacts to preview.",
         "NoContactsMatchSearch": "No such contact found."
       }
+    },
+    "Support": {
+      "Title": "Support",
+      "DocumentationTitle": "Documentation",
+      "DocumentationDescription": "Browse guides, tutorials, and references to get the most out of Bondery.",
+      "ContactTitle": "Contact us",
+      "ContactDescription": "Have a question or need help? Reach out to us directly.",
+      "FeedbackTitle": "Send feedback",
+      "FeedbackDescription": "Help us improve Bondery by sharing your thoughts."
     }
   },
   "GroupsPage": {
@@ -574,7 +583,7 @@
     "PickDate": "Pick date",
     "Type": "Type",
     "Cancel": "Cancel",
-    "AddActivity": "Log new interaction",
+    "AddActivity": "Log interaction",
     "SaveChanges": "Save changes",
     "SearchPlaceholder": "Search...",
     "SortButton": "Sort",
@@ -620,7 +629,21 @@
     "DuplicateFailed": "Failed to duplicate interaction",
     "LastInteractionInput": "Last interaction",
     "LastInteractionUpdated": "Last interaction updated",
-    "LastInteractionUpdateFailed": "Failed to update last interaction"
+    "LastInteractionUpdateFailed": "Failed to update last interaction",
+    "LastInteractionViaActivity": "From a {type}",
+    "LastInteractionManual": "Manually set",
+    "KeepInTouchFrequency": "Keep in touch",
+    "KeepInTouchNone": "None",
+    "FrequencyWeekly": "Weekly",
+    "FrequencyBiweekly": "Biweekly",
+    "FrequencyQuarterly": "Quarterly",
+    "FrequencyBiannually": "Biannually",
+    "FrequencyYearly": "Yearly",
+    "FrequencyNone": "Don't keep in touch",
+    "NextDue": "Next due",
+    "KeepInTouchUpdated": "Keep in touch updated",
+    "KeepInTouchUpdatedDescription": "Frequency updated successfully",
+    "KeepInTouchUpdateFailed": "Failed to update keep in touch frequency"
   },
   "HomePage": {
     "Title": "Home",
@@ -649,7 +672,13 @@
       "InteractionsTooltip": "The amount of interactions you have made during the month of {month}.",
       "NewContactsTitle": "New Contacts This Year",
       "NewContactsTooltip": "How many people were added to your network in the current year ({year})."
-    }
+    },
+    "RecentlyAddedTitle": "Recently added",
+    "RecentlyAddedTooltip": "The 5 most recently added people in your network.",
+    "NoRecentlyAdded": "No people added yet.",
+    "RecentlyInteractedTitle": "Recently interacted",
+    "RecentlyInteractedTooltip": "The 5 people you most recently interacted with.",
+    "NoRecentlyInteracted": "No recent interactions yet."
   },
   "FixContactsPage": {
     "Title": "Fix & merge",
@@ -710,7 +739,8 @@
     "Concepts": {
       "Timeline": "Interactions",
       "People": "People",
-      "Groups": "Groups"
+      "Groups": "Groups",
+      "KeepInTouch": "Keep in touch"
     }
   },
   "MergeWithModal": {
@@ -1082,5 +1112,40 @@
     "WebappNotificationDescription": "Your Bondery Chrome Extension needs an update to keep working properly.",
     "ApiRejectedTitle": "Version Too Old",
     "ApiRejectedDescription": "The server rejected the request because your extension is outdated. Please update."
+  },
+  "KeepInTouch": {
+    "Title": "Keep in touch",
+    "Description": "People you want to stay in regular contact with. The most overdue contacts appear first.",
+    "EmptyTitle": "No contacts to follow up with",
+    "EmptyDescription": "Set a keep-in-touch frequency on any contact to see them here when it's time to reach out.",
+    "GoToPeople": "Go to People",
+    "DueToday": "Due today",
+    "OverdueBy": "{days, plural, one {# day overdue} other {# days overdue}}",
+    "DueIn": "{days, plural, one {Due in # day} other {Due in # days}}",
+    "FrequencyWeekly": "Weekly",
+    "FrequencyBiweekly": "Biweekly",
+    "FrequencyQuarterly": "Quarterly",
+    "FrequencyBiannually": "Biannually",
+    "FrequencyYearly": "Yearly",
+    "FrequencyNone": "Don't keep in touch",
+    "MarkComplete": "Done",
+    "MarkCompleteSuccess": "Marked as done — last interaction set to today",
+    "MarkCompleteFailed": "Failed to mark as done",
+    "FrequencyUpdated": "Frequency updated",
+    "FrequencyUpdateFailed": "Failed to update frequency",
+    "DateTooltipFuture": "To keep in touch {frequency}, interact by {date}",
+    "SelectFrequencyAriaLabel": "Change keep-in-touch frequency for {name}",
+    "MarkAsDone": "Mark as done",
+    "LogInteraction": "Log interaction...",
+    "LastMetRelative": "Last met {time}",
+    "LastMetToday": "Last met today",
+    "LastMetNever": "Never met",
+    "Label": "Keep in touch",
+    "NextDue": "Next due",
+    "DueDateLabel": "Due: {date}",
+    "WindowNext7": "Next 7 days",
+    "WindowNext30": "Next 30 days",
+    "WindowNext90": "Next 90 days",
+    "WindowLabel": "Show"
   }
 }

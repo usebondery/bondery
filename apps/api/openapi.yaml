@@ -8,7 +8,7 @@ info:
     ## Authentication
 
 
-    All endpoints (except `/status` and `GET /api/redirect`) require authentication via a Supabase session cookie or a
+    All endpoints (except `/status` and `GET /api/extension`) require authentication via a Supabase session cookie or a
     Bearer token in the Authorization header.
   version: 1.0.0
   contact:
@@ -23,436 +23,6 @@ paths:
     get:
       tags:
         - Health
-      responses:
-        "200":
-          description: Default Response
-  /api/contacts:
-    get:
-      tags:
-        - Contacts
-      parameters:
-        - schema:
-            minimum: 1
-            maximum: 200
-            default: 50
-            type: integer
-          in: query
-          name: limit
-          required: false
-        - schema:
-            minimum: 0
-            default: 0
-            type: integer
-          in: query
-          name: offset
-          required: false
-        - schema:
-            type: string
-          in: query
-          name: q
-          required: false
-        - schema:
-            anyOf:
-              - type: string
-                enum:
-                  - nameAsc
-              - type: string
-                enum:
-                  - nameDesc
-              - type: string
-                enum:
-                  - surnameAsc
-              - type: string
-                enum:
-                  - surnameDesc
-              - type: string
-                enum:
-                  - interactionAsc
-              - type: string
-                enum:
-                  - interactionDesc
-              - type: string
-                enum:
-                  - createdAtAsc
-              - type: string
-                enum:
-                  - createdAtDesc
-          in: query
-          name: sort
-          required: false
-        - schema:
-            type: boolean
-          in: query
-          name: keepInTouch
-          required: false
-        - schema:
-            anyOf:
-              - type: string
-                enum:
-                  - low
-              - type: string
-                enum:
-                  - medium
-              - type: string
-                enum:
-                  - high
-          in: query
-          name: avatarQuality
-          required: false
-        - schema:
-            anyOf:
-              - type: string
-                enum:
-                  - small
-              - type: string
-                enum:
-                  - medium
-              - type: string
-                enum:
-                  - large
-          in: query
-          name: avatarSize
-          required: false
-      responses:
-        "200":
-          description: Default Response
-    post:
-      tags:
-        - Contacts
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required:
-                - firstName
-                - lastName
-              properties:
-                firstName:
-                  minLength: 1
-                  type: string
-                lastName:
-                  minLength: 1
-                  type: string
-                middleName:
-                  type: string
-                linkedin:
-                  type: string
-      responses:
-        "200":
-          description: Default Response
-    delete:
-      tags:
-        - Contacts
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              anyOf:
-                - type: object
-                  required:
-                    - ids
-                  properties:
-                    ids:
-                      minItems: 1
-                      type: array
-                      items:
-                        type: string
-                - type: object
-                  required:
-                    - filter
-                  properties:
-                    filter:
-                      type: object
-                      properties:
-                        q:
-                          type: string
-                    excludeIds:
-                      type: array
-                      items:
-                        type: string
-      responses:
-        "200":
-          description: Default Response
-  /api/contacts/important-dates/upcoming:
-    get:
-      tags:
-        - Contacts
-      parameters:
-        - schema:
-            anyOf:
-              - type: string
-                enum:
-                  - low
-              - type: string
-                enum:
-                  - medium
-              - type: string
-                enum:
-                  - high
-          in: query
-          name: avatarQuality
-          required: false
-        - schema:
-            anyOf:
-              - type: string
-                enum:
-                  - small
-              - type: string
-                enum:
-                  - medium
-              - type: string
-                enum:
-                  - large
-          in: query
-          name: avatarSize
-          required: false
-      responses:
-        "200":
-          description: Default Response
-  /api/contacts/{id}:
-    delete:
-      tags:
-        - Contacts
-      parameters:
-        - schema:
-            format: uuid
-            type: string
-          in: path
-          name: id
-          required: true
-      responses:
-        "200":
-          description: Default Response
-    get:
-      tags:
-        - Contacts
-      parameters:
-        - schema:
-            anyOf:
-              - type: string
-                enum:
-                  - low
-              - type: string
-                enum:
-                  - medium
-              - type: string
-                enum:
-                  - high
-          in: query
-          name: avatarQuality
-          required: false
-        - schema:
-            anyOf:
-              - type: string
-                enum:
-                  - small
-              - type: string
-                enum:
-                  - medium
-              - type: string
-                enum:
-                  - large
-          in: query
-          name: avatarSize
-          required: false
-        - schema:
-            format: uuid
-            type: string
-          in: path
-          name: id
-          required: true
-      responses:
-        "200":
-          description: Default Response
-    patch:
-      tags:
-        - Contacts
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                firstName:
-                  minLength: 1
-                  type: string
-                middleName:
-                  anyOf:
-                    - type: string
-                    - type: "null"
-                lastName:
-                  anyOf:
-                    - type: string
-                    - type: "null"
-                headline:
-                  anyOf:
-                    - type: string
-                    - type: "null"
-                location:
-                  anyOf:
-                    - type: string
-                    - type: "null"
-                notes:
-                  anyOf:
-                    - type: string
-                    - type: "null"
-                language:
-                  anyOf:
-                    - type: string
-                    - type: "null"
-                timezone:
-                  anyOf:
-                    - type: string
-                    - type: "null"
-                gisPoint:
-                  anyOf:
-                    - type: string
-                    - type: "null"
-                latitude:
-                  anyOf:
-                    - type: number
-                    - type: "null"
-                longitude:
-                  anyOf:
-                    - type: number
-                    - type: "null"
-                lastInteraction:
-                  anyOf:
-                    - type: string
-                    - type: "null"
-                keepFrequencyDays:
-                  anyOf:
-                    - minimum: 1
-                      type: integer
-                    - type: "null"
-                snoozedUntil:
-                  anyOf:
-                    - type: string
-                    - type: "null"
-                phones:
-                  type: array
-                  items:
-                    type: object
-                    required:
-                      - value
-                    properties:
-                      prefix:
-                        type: string
-                      value:
-                        type: string
-                      type:
-                        type: string
-                      preferred:
-                        type: boolean
-                emails:
-                  type: array
-                  items:
-                    type: object
-                    required:
-                      - value
-                    properties:
-                      value:
-                        type: string
-                      type:
-                        type: string
-                      preferred:
-                        type: boolean
-                addresses:
-                  type: array
-                  items:
-                    type: object
-                    properties:
-                      type:
-                        type: string
-                      value:
-                        type: string
-                      addressLine1:
-                        anyOf:
-                          - type: string
-                          - type: "null"
-                      addressLine2:
-                        anyOf:
-                          - type: string
-                          - type: "null"
-                      addressCity:
-                        anyOf:
-                          - type: string
-                          - type: "null"
-                      addressPostalCode:
-                        anyOf:
-                          - type: string
-                          - type: "null"
-                      addressState:
-                        anyOf:
-                          - type: string
-                          - type: "null"
-                      addressStateCode:
-                        anyOf:
-                          - type: string
-                          - type: "null"
-                      addressCountry:
-                        anyOf:
-                          - type: string
-                          - type: "null"
-                      addressCountryCode:
-                        anyOf:
-                          - type: string
-                          - type: "null"
-                      addressGranularity:
-                        anyOf:
-                          - type: string
-                          - type: "null"
-                      addressFormatted:
-                        anyOf:
-                          - type: string
-                          - type: "null"
-                      addressGeocodeSource:
-                        anyOf:
-                          - type: string
-                          - type: "null"
-                      latitude:
-                        anyOf:
-                          - type: number
-                          - type: "null"
-                      longitude:
-                        anyOf:
-                          - type: number
-                          - type: "null"
-                linkedin:
-                  anyOf:
-                    - type: string
-                    - type: "null"
-                instagram:
-                  anyOf:
-                    - type: string
-                    - type: "null"
-                whatsapp:
-                  anyOf:
-                    - type: string
-                    - type: "null"
-                facebook:
-                  anyOf:
-                    - type: string
-                    - type: "null"
-                website:
-                  anyOf:
-                    - type: string
-                    - type: "null"
-                signal:
-                  anyOf:
-                    - type: string
-                    - type: "null"
-      parameters:
-        - schema:
-            format: uuid
-            type: string
-          in: path
-          name: id
-          required: true
       responses:
         "200":
           description: Default Response
@@ -562,445 +132,6 @@ paths:
                       - type: string
                         enum:
                           - right
-      responses:
-        "200":
-          description: Default Response
-  /api/contacts/by-social:
-    get:
-      tags:
-        - Contacts
-      parameters:
-        - schema:
-            type: string
-          in: query
-          name: platform
-          required: false
-        - schema:
-            type: string
-          in: query
-          name: handle
-          required: false
-        - schema:
-            anyOf:
-              - type: string
-                enum:
-                  - low
-              - type: string
-                enum:
-                  - medium
-              - type: string
-                enum:
-                  - high
-          in: query
-          name: avatarQuality
-          required: false
-        - schema:
-            anyOf:
-              - type: string
-                enum:
-                  - small
-              - type: string
-                enum:
-                  - medium
-              - type: string
-                enum:
-                  - large
-          in: query
-          name: avatarSize
-          required: false
-      responses:
-        "200":
-          description: Default Response
-  /api/contacts/{id}/groups:
-    get:
-      tags:
-        - Contacts
-      parameters:
-        - schema:
-            format: uuid
-            type: string
-          in: path
-          name: id
-          required: true
-      responses:
-        "200":
-          description: Default Response
-  /api/contacts/{id}/tags:
-    get:
-      tags:
-        - Contacts
-      parameters:
-        - schema:
-            format: uuid
-            type: string
-          in: path
-          name: id
-          required: true
-      responses:
-        "200":
-          description: Default Response
-    post:
-      tags:
-        - Contacts
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required:
-                - tagId
-              properties:
-                tagId:
-                  minLength: 1
-                  type: string
-      parameters:
-        - schema:
-            format: uuid
-            type: string
-          in: path
-          name: id
-          required: true
-      responses:
-        "200":
-          description: Default Response
-  /api/contacts/{id}/tags/{tagId}:
-    delete:
-      tags:
-        - Contacts
-      parameters:
-        - schema:
-            type: string
-          in: path
-          name: id
-          required: true
-        - schema:
-            type: string
-          in: path
-          name: tagId
-          required: true
-      responses:
-        "200":
-          description: Default Response
-  /api/contacts/{id}/relationships:
-    get:
-      tags:
-        - Contacts
-      parameters:
-        - schema:
-            anyOf:
-              - type: string
-                enum:
-                  - low
-              - type: string
-                enum:
-                  - medium
-              - type: string
-                enum:
-                  - high
-          in: query
-          name: avatarQuality
-          required: false
-        - schema:
-            anyOf:
-              - type: string
-                enum:
-                  - small
-              - type: string
-                enum:
-                  - medium
-              - type: string
-                enum:
-                  - large
-          in: query
-          name: avatarSize
-          required: false
-        - schema:
-            format: uuid
-            type: string
-          in: path
-          name: id
-          required: true
-      responses:
-        "200":
-          description: Default Response
-    post:
-      tags:
-        - Contacts
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required:
-                - relatedPersonId
-                - relationshipType
-              properties:
-                relatedPersonId:
-                  minLength: 1
-                  type: string
-                relationshipType:
-                  anyOf:
-                    - type: string
-                      enum:
-                        - parent
-                    - type: string
-                      enum:
-                        - child
-                    - type: string
-                      enum:
-                        - spouse
-                    - type: string
-                      enum:
-                        - partner
-                    - type: string
-                      enum:
-                        - sibling
-                    - type: string
-                      enum:
-                        - friend
-                    - type: string
-                      enum:
-                        - colleague
-                    - type: string
-                      enum:
-                        - neighbor
-                    - type: string
-                      enum:
-                        - guardian
-                    - type: string
-                      enum:
-                        - dependent
-                    - type: string
-                      enum:
-                        - other
-      parameters:
-        - schema:
-            format: uuid
-            type: string
-          in: path
-          name: id
-          required: true
-      responses:
-        "200":
-          description: Default Response
-  /api/contacts/{id}/relationships/{relationshipId}:
-    patch:
-      tags:
-        - Contacts
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required:
-                - relatedPersonId
-                - relationshipType
-              properties:
-                relatedPersonId:
-                  minLength: 1
-                  type: string
-                relationshipType:
-                  anyOf:
-                    - type: string
-                      enum:
-                        - parent
-                    - type: string
-                      enum:
-                        - child
-                    - type: string
-                      enum:
-                        - spouse
-                    - type: string
-                      enum:
-                        - partner
-                    - type: string
-                      enum:
-                        - sibling
-                    - type: string
-                      enum:
-                        - friend
-                    - type: string
-                      enum:
-                        - colleague
-                    - type: string
-                      enum:
-                        - neighbor
-                    - type: string
-                      enum:
-                        - guardian
-                    - type: string
-                      enum:
-                        - dependent
-                    - type: string
-                      enum:
-                        - other
-      parameters:
-        - schema:
-            type: string
-          in: path
-          name: id
-          required: true
-        - schema:
-            type: string
-          in: path
-          name: relationshipId
-          required: true
-      responses:
-        "200":
-          description: Default Response
-    delete:
-      tags:
-        - Contacts
-      parameters:
-        - schema:
-            type: string
-          in: path
-          name: id
-          required: true
-        - schema:
-            type: string
-          in: path
-          name: relationshipId
-          required: true
-      responses:
-        "200":
-          description: Default Response
-  /api/contacts/{id}/important-dates:
-    get:
-      tags:
-        - Contacts
-      parameters:
-        - schema:
-            format: uuid
-            type: string
-          in: path
-          name: id
-          required: true
-      responses:
-        "200":
-          description: Default Response
-    put:
-      tags:
-        - Contacts
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required:
-                - dates
-              properties:
-                dates:
-                  type: array
-                  items:
-                    type: object
-                    required:
-                      - type
-                      - date
-                    properties:
-                      id:
-                        type: string
-                      type:
-                        type: string
-                      date:
-                        pattern: ^\d{4}-\d{2}-\d{2}$
-                        type: string
-                      note:
-                        anyOf:
-                          - type: string
-                          - type: "null"
-                      notifyDaysBefore:
-                        anyOf:
-                          - type: number
-                            enum:
-                              - 1
-                          - type: number
-                            enum:
-                              - 3
-                          - type: number
-                            enum:
-                              - 7
-                          - type: "null"
-      parameters:
-        - schema:
-            format: uuid
-            type: string
-          in: path
-          name: id
-          required: true
-      responses:
-        "200":
-          description: Default Response
-  /api/contacts/{id}/photo:
-    post:
-      tags:
-        - Contacts
-      parameters:
-        - schema:
-            format: uuid
-            type: string
-          in: path
-          name: id
-          required: true
-      responses:
-        "200":
-          description: Default Response
-    delete:
-      tags:
-        - Contacts
-      parameters:
-        - schema:
-            format: uuid
-            type: string
-          in: path
-          name: id
-          required: true
-      responses:
-        "200":
-          description: Default Response
-  /api/contacts/{id}/vcard:
-    get:
-      tags:
-        - Contacts
-      parameters:
-        - schema:
-            anyOf:
-              - type: string
-                enum:
-                  - low
-              - type: string
-                enum:
-                  - medium
-              - type: string
-                enum:
-                  - high
-          in: query
-          name: avatarQuality
-          required: false
-        - schema:
-            anyOf:
-              - type: string
-                enum:
-                  - small
-              - type: string
-                enum:
-                  - medium
-              - type: string
-                enum:
-                  - large
-          in: query
-          name: avatarSize
-          required: false
-        - schema:
-            format: uuid
-            type: string
-          in: path
-          name: id
-          required: true
       responses:
         "200":
           description: Default Response
@@ -1224,6 +355,871 @@ paths:
     delete:
       tags:
         - Contacts
+      responses:
+        "200":
+          description: Default Response
+  /api/contacts/{id}/relationships:
+    get:
+      tags:
+        - Contacts
+      parameters:
+        - schema:
+            anyOf:
+              - type: string
+                enum:
+                  - low
+              - type: string
+                enum:
+                  - medium
+              - type: string
+                enum:
+                  - high
+          in: query
+          name: avatarQuality
+          required: false
+        - schema:
+            anyOf:
+              - type: string
+                enum:
+                  - small
+              - type: string
+                enum:
+                  - medium
+              - type: string
+                enum:
+                  - large
+          in: query
+          name: avatarSize
+          required: false
+        - schema:
+            format: uuid
+            type: string
+          in: path
+          name: id
+          required: true
+      responses:
+        "200":
+          description: Default Response
+    post:
+      tags:
+        - Contacts
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - relatedPersonId
+                - relationshipType
+              properties:
+                relatedPersonId:
+                  minLength: 1
+                  type: string
+                relationshipType:
+                  anyOf:
+                    - type: string
+                      enum:
+                        - parent
+                    - type: string
+                      enum:
+                        - child
+                    - type: string
+                      enum:
+                        - spouse
+                    - type: string
+                      enum:
+                        - partner
+                    - type: string
+                      enum:
+                        - sibling
+                    - type: string
+                      enum:
+                        - friend
+                    - type: string
+                      enum:
+                        - colleague
+                    - type: string
+                      enum:
+                        - neighbor
+                    - type: string
+                      enum:
+                        - guardian
+                    - type: string
+                      enum:
+                        - dependent
+                    - type: string
+                      enum:
+                        - other
+      parameters:
+        - schema:
+            format: uuid
+            type: string
+          in: path
+          name: id
+          required: true
+      responses:
+        "200":
+          description: Default Response
+  /api/contacts/{id}/relationships/{relationshipId}:
+    patch:
+      tags:
+        - Contacts
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - relatedPersonId
+                - relationshipType
+              properties:
+                relatedPersonId:
+                  minLength: 1
+                  type: string
+                relationshipType:
+                  anyOf:
+                    - type: string
+                      enum:
+                        - parent
+                    - type: string
+                      enum:
+                        - child
+                    - type: string
+                      enum:
+                        - spouse
+                    - type: string
+                      enum:
+                        - partner
+                    - type: string
+                      enum:
+                        - sibling
+                    - type: string
+                      enum:
+                        - friend
+                    - type: string
+                      enum:
+                        - colleague
+                    - type: string
+                      enum:
+                        - neighbor
+                    - type: string
+                      enum:
+                        - guardian
+                    - type: string
+                      enum:
+                        - dependent
+                    - type: string
+                      enum:
+                        - other
+      parameters:
+        - schema:
+            type: string
+          in: path
+          name: id
+          required: true
+        - schema:
+            type: string
+          in: path
+          name: relationshipId
+          required: true
+      responses:
+        "200":
+          description: Default Response
+    delete:
+      tags:
+        - Contacts
+      parameters:
+        - schema:
+            type: string
+          in: path
+          name: id
+          required: true
+        - schema:
+            type: string
+          in: path
+          name: relationshipId
+          required: true
+      responses:
+        "200":
+          description: Default Response
+  /api/contacts/important-dates/upcoming:
+    get:
+      tags:
+        - Contacts
+      parameters:
+        - schema:
+            anyOf:
+              - type: string
+                enum:
+                  - low
+              - type: string
+                enum:
+                  - medium
+              - type: string
+                enum:
+                  - high
+          in: query
+          name: avatarQuality
+          required: false
+        - schema:
+            anyOf:
+              - type: string
+                enum:
+                  - small
+              - type: string
+                enum:
+                  - medium
+              - type: string
+                enum:
+                  - large
+          in: query
+          name: avatarSize
+          required: false
+      responses:
+        "200":
+          description: Default Response
+  /api/contacts/{id}/important-dates:
+    get:
+      tags:
+        - Contacts
+      parameters:
+        - schema:
+            format: uuid
+            type: string
+          in: path
+          name: id
+          required: true
+      responses:
+        "200":
+          description: Default Response
+    put:
+      tags:
+        - Contacts
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - dates
+              properties:
+                dates:
+                  type: array
+                  items:
+                    type: object
+                    required:
+                      - type
+                      - date
+                    properties:
+                      id:
+                        type: string
+                      type:
+                        type: string
+                      date:
+                        pattern: ^\d{4}-\d{2}-\d{2}$
+                        type: string
+                      note:
+                        anyOf:
+                          - type: string
+                          - type: "null"
+                      notifyDaysBefore:
+                        anyOf:
+                          - type: number
+                            enum:
+                              - 1
+                          - type: number
+                            enum:
+                              - 3
+                          - type: number
+                            enum:
+                              - 7
+                          - type: "null"
+      parameters:
+        - schema:
+            format: uuid
+            type: string
+          in: path
+          name: id
+          required: true
+      responses:
+        "200":
+          description: Default Response
+  /api/contacts:
+    get:
+      tags:
+        - Contacts
+      parameters:
+        - schema:
+            minimum: 1
+            maximum: 200
+            default: 50
+            type: integer
+          in: query
+          name: limit
+          required: false
+        - schema:
+            minimum: 0
+            default: 0
+            type: integer
+          in: query
+          name: offset
+          required: false
+        - schema:
+            type: string
+          in: query
+          name: q
+          required: false
+        - schema:
+            anyOf:
+              - type: string
+                enum:
+                  - nameAsc
+              - type: string
+                enum:
+                  - nameDesc
+              - type: string
+                enum:
+                  - surnameAsc
+              - type: string
+                enum:
+                  - surnameDesc
+              - type: string
+                enum:
+                  - interactionAsc
+              - type: string
+                enum:
+                  - interactionDesc
+              - type: string
+                enum:
+                  - createdAtAsc
+              - type: string
+                enum:
+                  - createdAtDesc
+          in: query
+          name: sort
+          required: false
+        - schema:
+            type: boolean
+          in: query
+          name: keepInTouch
+          required: false
+        - schema:
+            anyOf:
+              - type: string
+                enum:
+                  - low
+              - type: string
+                enum:
+                  - medium
+              - type: string
+                enum:
+                  - high
+          in: query
+          name: avatarQuality
+          required: false
+        - schema:
+            anyOf:
+              - type: string
+                enum:
+                  - small
+              - type: string
+                enum:
+                  - medium
+              - type: string
+                enum:
+                  - large
+          in: query
+          name: avatarSize
+          required: false
+      responses:
+        "200":
+          description: Default Response
+    post:
+      tags:
+        - Contacts
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - firstName
+                - lastName
+              properties:
+                firstName:
+                  minLength: 1
+                  type: string
+                lastName:
+                  minLength: 1
+                  type: string
+                middleName:
+                  type: string
+                linkedin:
+                  type: string
+      responses:
+        "200":
+          description: Default Response
+    delete:
+      tags:
+        - Contacts
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              anyOf:
+                - type: object
+                  required:
+                    - ids
+                  properties:
+                    ids:
+                      minItems: 1
+                      type: array
+                      items:
+                        type: string
+                - type: object
+                  required:
+                    - filter
+                  properties:
+                    filter:
+                      type: object
+                      properties:
+                        q:
+                          type: string
+                    excludeIds:
+                      type: array
+                      items:
+                        type: string
+      responses:
+        "200":
+          description: Default Response
+  /api/contacts/{id}:
+    delete:
+      tags:
+        - Contacts
+      parameters:
+        - schema:
+            format: uuid
+            type: string
+          in: path
+          name: id
+          required: true
+      responses:
+        "200":
+          description: Default Response
+    get:
+      tags:
+        - Contacts
+      parameters:
+        - schema:
+            anyOf:
+              - type: string
+                enum:
+                  - low
+              - type: string
+                enum:
+                  - medium
+              - type: string
+                enum:
+                  - high
+          in: query
+          name: avatarQuality
+          required: false
+        - schema:
+            anyOf:
+              - type: string
+                enum:
+                  - small
+              - type: string
+                enum:
+                  - medium
+              - type: string
+                enum:
+                  - large
+          in: query
+          name: avatarSize
+          required: false
+        - schema:
+            format: uuid
+            type: string
+          in: path
+          name: id
+          required: true
+      responses:
+        "200":
+          description: Default Response
+    patch:
+      tags:
+        - Contacts
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                firstName:
+                  minLength: 1
+                  type: string
+                middleName:
+                  anyOf:
+                    - type: string
+                    - type: "null"
+                lastName:
+                  anyOf:
+                    - type: string
+                    - type: "null"
+                headline:
+                  anyOf:
+                    - type: string
+                    - type: "null"
+                location:
+                  anyOf:
+                    - type: string
+                    - type: "null"
+                notes:
+                  anyOf:
+                    - type: string
+                    - type: "null"
+                language:
+                  anyOf:
+                    - type: string
+                    - type: "null"
+                timezone:
+                  anyOf:
+                    - type: string
+                    - type: "null"
+                gisPoint:
+                  anyOf:
+                    - type: string
+                    - type: "null"
+                latitude:
+                  anyOf:
+                    - type: number
+                    - type: "null"
+                longitude:
+                  anyOf:
+                    - type: number
+                    - type: "null"
+                lastInteraction:
+                  anyOf:
+                    - type: string
+                    - type: "null"
+                keepFrequencyDays:
+                  anyOf:
+                    - minimum: 1
+                      type: integer
+                    - type: "null"
+                phones:
+                  type: array
+                  items:
+                    type: object
+                    required:
+                      - value
+                    properties:
+                      prefix:
+                        type: string
+                      value:
+                        type: string
+                      type:
+                        type: string
+                      preferred:
+                        type: boolean
+                emails:
+                  type: array
+                  items:
+                    type: object
+                    required:
+                      - value
+                    properties:
+                      value:
+                        type: string
+                      type:
+                        type: string
+                      preferred:
+                        type: boolean
+                addresses:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      type:
+                        type: string
+                      value:
+                        type: string
+                      addressLine1:
+                        anyOf:
+                          - type: string
+                          - type: "null"
+                      addressLine2:
+                        anyOf:
+                          - type: string
+                          - type: "null"
+                      addressCity:
+                        anyOf:
+                          - type: string
+                          - type: "null"
+                      addressPostalCode:
+                        anyOf:
+                          - type: string
+                          - type: "null"
+                      addressState:
+                        anyOf:
+                          - type: string
+                          - type: "null"
+                      addressStateCode:
+                        anyOf:
+                          - type: string
+                          - type: "null"
+                      addressCountry:
+                        anyOf:
+                          - type: string
+                          - type: "null"
+                      addressCountryCode:
+                        anyOf:
+                          - type: string
+                          - type: "null"
+                      addressGranularity:
+                        anyOf:
+                          - type: string
+                          - type: "null"
+                      addressFormatted:
+                        anyOf:
+                          - type: string
+                          - type: "null"
+                      addressGeocodeSource:
+                        anyOf:
+                          - type: string
+                          - type: "null"
+                      latitude:
+                        anyOf:
+                          - type: number
+                          - type: "null"
+                      longitude:
+                        anyOf:
+                          - type: number
+                          - type: "null"
+                linkedin:
+                  anyOf:
+                    - type: string
+                    - type: "null"
+                instagram:
+                  anyOf:
+                    - type: string
+                    - type: "null"
+                whatsapp:
+                  anyOf:
+                    - type: string
+                    - type: "null"
+                facebook:
+                  anyOf:
+                    - type: string
+                    - type: "null"
+                website:
+                  anyOf:
+                    - type: string
+                    - type: "null"
+                signal:
+                  anyOf:
+                    - type: string
+                    - type: "null"
+      parameters:
+        - schema:
+            format: uuid
+            type: string
+          in: path
+          name: id
+          required: true
+      responses:
+        "200":
+          description: Default Response
+  /api/contacts/by-social:
+    get:
+      tags:
+        - Contacts
+      parameters:
+        - schema:
+            type: string
+          in: query
+          name: platform
+          required: false
+        - schema:
+            type: string
+          in: query
+          name: handle
+          required: false
+        - schema:
+            anyOf:
+              - type: string
+                enum:
+                  - low
+              - type: string
+                enum:
+                  - medium
+              - type: string
+                enum:
+                  - high
+          in: query
+          name: avatarQuality
+          required: false
+        - schema:
+            anyOf:
+              - type: string
+                enum:
+                  - small
+              - type: string
+                enum:
+                  - medium
+              - type: string
+                enum:
+                  - large
+          in: query
+          name: avatarSize
+          required: false
+      responses:
+        "200":
+          description: Default Response
+  /api/contacts/{id}/groups:
+    get:
+      tags:
+        - Contacts
+      parameters:
+        - schema:
+            format: uuid
+            type: string
+          in: path
+          name: id
+          required: true
+      responses:
+        "200":
+          description: Default Response
+  /api/contacts/{id}/tags:
+    get:
+      tags:
+        - Contacts
+      parameters:
+        - schema:
+            format: uuid
+            type: string
+          in: path
+          name: id
+          required: true
+      responses:
+        "200":
+          description: Default Response
+    post:
+      tags:
+        - Contacts
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - tagId
+              properties:
+                tagId:
+                  minLength: 1
+                  type: string
+      parameters:
+        - schema:
+            format: uuid
+            type: string
+          in: path
+          name: id
+          required: true
+      responses:
+        "200":
+          description: Default Response
+  /api/contacts/{id}/tags/{tagId}:
+    delete:
+      tags:
+        - Contacts
+      parameters:
+        - schema:
+            type: string
+          in: path
+          name: id
+          required: true
+        - schema:
+            type: string
+          in: path
+          name: tagId
+          required: true
+      responses:
+        "200":
+          description: Default Response
+  /api/contacts/{id}/photo:
+    post:
+      tags:
+        - Contacts
+      parameters:
+        - schema:
+            format: uuid
+            type: string
+          in: path
+          name: id
+          required: true
+      responses:
+        "200":
+          description: Default Response
+    delete:
+      tags:
+        - Contacts
+      parameters:
+        - schema:
+            format: uuid
+            type: string
+          in: path
+          name: id
+          required: true
+      responses:
+        "200":
+          description: Default Response
+  /api/contacts/{id}/vcard:
+    get:
+      tags:
+        - Contacts
+      parameters:
+        - schema:
+            anyOf:
+              - type: string
+                enum:
+                  - low
+              - type: string
+                enum:
+                  - medium
+              - type: string
+                enum:
+                  - high
+          in: query
+          name: avatarQuality
+          required: false
+        - schema:
+            anyOf:
+              - type: string
+                enum:
+                  - small
+              - type: string
+                enum:
+                  - medium
+              - type: string
+                enum:
+                  - large
+          in: query
+          name: avatarSize
+          required: false
+        - schema:
+            format: uuid
+            type: string
+          in: path
+          name: id
+          required: true
       responses:
         "200":
           description: Default Response
@@ -2129,10 +2125,10 @@ paths:
       responses:
         "200":
           description: Default Response
-  /api/account:
+  /api/me:
     patch:
       tags:
-        - Account
+        - Me
       requestBody:
         required: true
         content:
@@ -2151,27 +2147,27 @@ paths:
           description: Default Response
     delete:
       tags:
-        - Account
+        - Me
       responses:
         "200":
           description: Default Response
-  /api/account/photo:
+  /api/me/photo:
     post:
       tags:
-        - Account
+        - Me
       responses:
         "200":
           description: Default Response
     delete:
       tags:
-        - Account
+        - Me
       responses:
         "200":
           description: Default Response
-  /api/account/person:
+  /api/me/person:
     get:
       tags:
-        - Account
+        - Me
       parameters:
         - schema:
             anyOf:
@@ -2204,16 +2200,16 @@ paths:
       responses:
         "200":
           description: Default Response
-  /api/settings:
+  /api/me/settings:
     get:
       tags:
-        - Settings
+        - Me
       responses:
         "200":
           description: Default Response
     patch:
       tags:
-        - Settings
+        - Me
       requestBody:
         required: true
         content:
@@ -2252,10 +2248,10 @@ paths:
       responses:
         "200":
           description: Default Response
-  /api/redirect:
+  /api/extension:
     post:
       tags:
-        - Redirect
+        - Extension
       requestBody:
         required: true
         content:
@@ -2346,7 +2342,7 @@ paths:
           description: Default Response
     get:
       tags:
-        - Redirect
+        - Extension
       parameters:
         - schema:
             type: string
@@ -2396,10 +2392,10 @@ paths:
       responses:
         "200":
           description: Default Response
-  /api/feedback:
+  /api/me/feedback:
     post:
       tags:
-        - Feedback
+        - Me
       requestBody:
         required: true
         content:
@@ -2422,10 +2418,10 @@ paths:
       responses:
         "200":
           description: Default Response
-  /api/reminders/daily-digest:
+  /api/internal/reminder-digest:
     post:
       tags:
-        - Reminders
+        - Internal
       requestBody:
         required: true
         content:
@@ -2725,7 +2721,7 @@ paths:
       responses:
         "200":
           description: Default Response
-  /api/stats/active-users:
+  /api/admin/stats/active-users:
     get:
       tags:
         - Stats
@@ -2766,7 +2762,7 @@ paths:
                           type: number
                         mau:
                           type: number
-  /api/stats/funnel:
+  /api/admin/stats/funnel:
     get:
       tags:
         - Stats
@@ -2807,7 +2803,7 @@ paths:
                           type: number
                         contactsToInteractionsPct:
                           type: number
-  /api/stats/nps:
+  /api/admin/stats/nps:
     get:
       tags:
         - Stats
@@ -2837,7 +2833,7 @@ paths:
                     type: number
                   detractors:
                     type: number
-  /api/stats/total-users:
+  /api/admin/stats/total-users:
     get:
       tags:
         - Stats
@@ -2863,7 +2859,7 @@ paths:
                           type: string
                         total:
                           type: number
-  /api/stats/github-stars:
+  /api/admin/stats/github-stars:
     get:
       tags:
         - Stats
@@ -2900,16 +2896,12 @@ tags:
     description: Interaction timeline events
   - name: Import
     description: Contact import from social platforms
-  - name: Account
-    description: User account operations
-  - name: Settings
-    description: User settings and preferences
-  - name: Redirect
+  - name: Me
+    description: Authenticated user profile, settings, and feedback
+  - name: Extension
     description: Browser extension integration endpoints
-  - name: Feedback
-    description: User feedback
-  - name: Reminders
-    description: Scheduled reminder operations
+  - name: Internal
+    description: Service-to-service endpoints (not user-facing)
   - name: Share
     description: Share contacts via email
   - name: Stats
