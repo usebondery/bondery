@@ -89,14 +89,23 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   // Fetch auth headers once, then parallelise both independent API calls
   const headers = await getAuthHeaders();
 
-  const [settings, recommendations, keepInTouchData] = await Promise.all([
+  const [settings, recommendations, keepInTouchData, enrichEligibleRes] = await Promise.all([
     getUserSettings(headers),
     getMergeRecommendationsData(headers).catch(() => [] as MergeRecommendation[]),
     getKeepInTouchData(headers).catch(() => ({ contacts: [] as Contact[] })),
+    fetch(`${API_URL}${API_ROUTES.CONTACTS}/enrich-queue/eligible-count`, { headers }).catch(
+      () => null,
+    ),
   ]);
 
+  let enrichEligibleCount = 0;
+  if (enrichEligibleRes?.ok) {
+    const data = await enrichEligibleRes.json();
+    enrichEligibleCount = data.count ?? 0;
+  }
+
   const { userName, userEmail, avatarUrl, locale, timezone, timeFormat, colorScheme } = settings;
-  const hasActiveMergeRecommendations = recommendations.length > 0;
+  const hasActiveMergeRecommendations = recommendations.length > 0 || enrichEligibleCount > 0;
   const hasOverdueKeepInTouch = keepInTouchData.contacts.some((c) => {
     if (!c.keepFrequencyDays || !c.lastInteraction) return true;
     const nextDue = new Date(c.lastInteraction);
