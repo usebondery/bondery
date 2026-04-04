@@ -17,7 +17,8 @@
     "start": "turbo start",
     "lint": "turbo lint",
     "check-types": "turbo check-types",
-    "generate-openapi": "npm run generate-openapi -w apps/api && git add apps/api/openapi.yaml"
+    "generate-openapi": "npm run generate-openapi -w apps/api && git add apps/api/openapi.yaml",
+    "generate-types": "npm run gen-types -w apps/supabase-db && git add packages/types/src/supabase.types.ts"
   },
   "pre-commit": [
     "generate-openapi"

@@ -51,8 +51,16 @@ Complete all of the following **before** pushing anything to the `release` branc
 2. **Update the minimum Extension version** in the packages/helpers package. The const to update is `MIN_EXTENSION_VERSION` in `packages/helpers/src/constants.ts`. This ensures users are prompted to update if they have an incompatible extension version.
 3. **Update CHANGELOG.md** — add a new version section following the [changelog format](../../.github/instructions/changelog.instructions.md).
 4. **Generate the OpenAPI spec** and commit the output. This keeps API docs and client SDKs in sync.
-5. **Build all packages and apps** (`turbo build`) and verify there are no errors.
-6. **Commit** everything to `main`.
+   ```bash
+   npm run generate-openapi
+   ```
+5. **Generate Supabase TypeScript types** from the local database and commit the output. This ensures `supabase.types.ts` reflects the current schema and all RPC signatures.
+   ```bash
+   npm run generate-types
+   ```
+   > Requires the local Supabase instance to be running (`npm run dev:supabase`).
+6. **Build all packages and apps** (`turbo build`) and verify there are no errors.
+7. **Commit** everything to `main`.
 
 ---
 
