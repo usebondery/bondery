@@ -1059,6 +1059,50 @@ export type Database = {
           last_name: string | null;
         }[];
       };
+      get_map_pins_in_bbox: {
+        Args: {
+          p_user_id: string;
+          p_min_lat: number;
+          p_max_lat: number;
+          p_min_lon: number;
+          p_max_lon: number;
+          p_limit?: number;
+        };
+        Returns: {
+          id: string;
+          first_name: string;
+          last_name: string | null;
+          headline: string | null;
+          location: string | null;
+          last_interaction: string | null;
+          latitude: number;
+          longitude: number;
+          updated_at: string;
+        }[];
+      };
+      get_map_address_pins_in_bbox: {
+        Args: {
+          p_user_id: string;
+          p_min_lat: number;
+          p_max_lat: number;
+          p_min_lon: number;
+          p_max_lon: number;
+          p_limit?: number;
+        };
+        Returns: {
+          address_id: string;
+          person_id: string;
+          first_name: string;
+          last_name: string | null;
+          address_type: string;
+          address_formatted: string | null;
+          address_city: string | null;
+          address_country: string | null;
+          latitude: number;
+          longitude: number;
+          updated_at: string;
+        }[];
+      };
     };
     Enums: {
       color_scheme: "light" | "dark" | "auto";

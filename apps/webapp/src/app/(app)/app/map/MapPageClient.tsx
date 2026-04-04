@@ -207,7 +207,7 @@ export function MapPageClient({ view }: MapPageClientProps) {
     }
     return locationPins.map((p) => ({
       id: p.id,
-      name: formatContactName(p),
+      name: [p.firstName, p.lastName].filter(Boolean).join(" "),
       firstName: p.firstName,
       lastName: p.lastName,
       latitude: p.latitude,
@@ -290,7 +290,7 @@ export function MapPageClient({ view }: MapPageClientProps) {
   const filteredPins = useMemo(() => {
     const query = tableSearch.trim().toLowerCase();
     const base = query
-      ? visibleLocationPins.filter((p) => formatContactName(p).toLowerCase().includes(query))
+      ? visibleLocationPins.filter((p) => [p.firstName, p.lastName].filter(Boolean).join(" ").toLowerCase().includes(query))
       : visibleLocationPins;
     return sortPins(base, sortOrder);
   }, [visibleLocationPins, tableSearch, sortOrder]);
@@ -301,7 +301,7 @@ export function MapPageClient({ view }: MapPageClientProps) {
       ? addressContactRows.filter((r) => formatContactName(r as any).toLowerCase().includes(query))
       : addressContactRows;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return sortPins(base as any, sortOrder) as typeof addressContactRows;
+    return sortPins(base as any, sortOrder) as unknown as typeof addressContactRows;
   }, [addressContactRows, tableSearch, sortOrder]);
 
   const allSelected = filteredPins.length > 0 && selectedIds.size === filteredPins.length;
@@ -340,7 +340,7 @@ export function MapPageClient({ view }: MapPageClientProps) {
     const target = locationPins.find((p) => p.id === contactId);
     openDeleteContactModal({
       contactId,
-      contactName: target ? formatContactName(target) : "this contact",
+      contactName: target ? [target.firstName, target.lastName].filter(Boolean).join(" ") : "this contact",
       onDeleted: async () => {
         setSelectedIds(new Set());
         await revalidateContacts();
