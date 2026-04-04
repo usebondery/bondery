@@ -31,6 +31,9 @@ import {
 import { flushSync } from "react-dom";
 import type { Contact, GroupWithCount } from "@bondery/types";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
+import { buildAvatarQueryString } from "@/lib/avatarParams";
+import { DEBOUNCE_MS } from "@/lib/config";
+import { searchContacts } from "@/lib/searchContacts";
 import { revalidateGroups } from "../../actions";
 import { captureEvent } from "@/lib/analytics/client";
 
@@ -111,7 +114,9 @@ function AddGroupForm({
   useEffect(() => {
     async function fetchContacts() {
       try {
-        const response = await fetch(API_ROUTES.CONTACTS);
+        const response = await fetch(
+          `${API_ROUTES.CONTACTS}?limit=200&${buildAvatarQueryString("small")}`,
+        );
         if (!response.ok) {
           throw new Error("Failed to fetch contacts");
         }
@@ -306,6 +311,8 @@ function AddGroupForm({
               onChange={setSelectedIds}
               placeholder="Add contacts..."
               noResultsLabel="No contacts found"
+              onSearch={searchContacts}
+              searchDebounceMs={DEBOUNCE_MS.contactPicker}
               disabled={isSubmitting}
             />
           )}

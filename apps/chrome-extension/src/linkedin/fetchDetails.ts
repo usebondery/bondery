@@ -233,32 +233,48 @@ function extractProfileUrn(entities: Record<string, unknown>[], username: string
     }
   }
 
-  // 2. Fall back: search the full page HTML for a fsd_profile URN near the username
-  //    LinkedIn often has "publicIdentifier":"username"...entityUrn":"urn:li:fsd_profile:XYZ"
+  // 2. Sliding-window search of the raw page HTML.
+  //    The old regex used [^}]* which silently fails when nested JSON objects
+  //    appear between publicIdentifier and entityUrn. Instead, we locate every
+  //    occurrence of the username string and scan a ±1500-char window for an
+  //    fsd_profile URN — nested braces are no longer an obstacle.
   const pageHtml = document.documentElement.innerHTML;
-
-  //    Try to find the URN that appears in the same JSON block as the username
-  const urnPattern = new RegExp(
-    `"publicIdentifier"\\s*:\\s*"${username}"[^}]*?"entityUrn"\\s*:\\s*"(urn:li:fsd_profile:[A-Za-z0-9_-]+)"`,
-  );
-  const urnMatch = pageHtml.match(urnPattern);
-  if (urnMatch?.[1]) {
-    console.log(
-      `[linkedin][fetchDetails] Found profileUrn in page HTML (near username): ${urnMatch[1]}`,
-    );
-    return urnMatch[1];
+  const usernameToken = `"${username}"`;
+  let idx = pageHtml.indexOf(usernameToken);
+  while (idx !== -1) {
+    const windowStart = Math.max(0, idx - 1000);
+    const windowEnd = Math.min(pageHtml.length, idx + usernameToken.length + 1000);
+    const slice = pageHtml.slice(windowStart, windowEnd);
+    const urnMatch = slice.match(/urn:li:fsd_profile:[A-Za-z0-9_-]+/);
+    if (urnMatch) {
+      console.log(
+        `[linkedin][fetchDetails] Found profileUrn via sliding-window HTML search: ${urnMatch[0]}`,
+      );
+      return urnMatch[0];
+    }
+    idx = pageHtml.indexOf(usernameToken, idx + 1);
   }
 
-  //    Also try reversed field order
-  const urnPatternRev = new RegExp(
-    `"entityUrn"\\s*:\\s*"(urn:li:fsd_profile:[A-Za-z0-9_-]+)"[^}]*?"publicIdentifier"\\s*:\\s*"${username}"`,
-  );
-  const urnMatchRev = pageHtml.match(urnPatternRev);
-  if (urnMatchRev?.[1]) {
-    console.log(
-      `[linkedin][fetchDetails] Found profileUrn in page HTML (reversed): ${urnMatchRev[1]}`,
-    );
-    return urnMatchRev[1];
+  // 3. DOM fallback: section[data-member-id] gives the numeric member ID.
+  //    Search for any co-located fsd_profile URN in a window around it.
+  const memberSection = document.querySelector("section[data-member-id]");
+  const memberId = memberSection?.getAttribute("data-member-id");
+  if (memberId) {
+    const memberToken = `"${memberId}"`;
+    let mIdx = pageHtml.indexOf(memberToken);
+    while (mIdx !== -1) {
+      const windowStart = Math.max(0, mIdx - 500);
+      const windowEnd = Math.min(pageHtml.length, mIdx + memberToken.length + 500);
+      const slice = pageHtml.slice(windowStart, windowEnd);
+      const urnMatch = slice.match(/urn:li:fsd_profile:[A-Za-z0-9_-]+/);
+      if (urnMatch) {
+        console.log(
+          `[linkedin][fetchDetails] Found profileUrn via memberId sliding-window: ${urnMatch[0]}`,
+        );
+        return urnMatch[0];
+      }
+      mIdx = pageHtml.indexOf(memberToken, mIdx + 1);
+    }
   }
 
   console.warn(`[linkedin][fetchDetails] Could not find profileUrn for ${username}`);
@@ -465,7 +481,9 @@ async function fetchCompanyLogo(
   // Strategy 3: Direct company ID lookup via classic organization API (single-entity response)
   // Extract numeric ID from URN (e.g. "urn:li:fsd_company:960796" → "960796")
   // or from a purely numeric universalName.
-  const numericId = companyUrn?.split(":").pop() ?? (universalName && /^\d+$/.test(universalName) ? universalName : undefined);
+  const numericId =
+    companyUrn?.split(":").pop() ??
+    (universalName && /^\d+$/.test(universalName) ? universalName : undefined);
   if (numericId && /^\d+$/.test(numericId)) {
     const data = await voyagerFetch(`/voyager/api/organization/companies/${numericId}`);
     if (data) {
@@ -570,7 +588,9 @@ async function enrichEntriesWithLogos(
       try {
         const logoUrl = await fetchCompanyLogo(urn, linkedInId);
         if (logoUrl) keyToLogo.set(key, logoUrl);
-      } catch { /* ignore individual logo fetch failures */ }
+      } catch {
+        /* ignore individual logo fetch failures */
+      }
     }),
   );
 
@@ -702,21 +722,87 @@ async function mapEducationEntityAsync(
   if (schoolUniversalName) {
     schoolLinkedinId = schoolUniversalName;
   } else {
-    // Fall back to schoolUrn or companyUrn → extract numeric ID
-    const schoolUrn = (edu.schoolUrn ?? edu.companyUrn) as string | undefined;
-    if (schoolUrn) {
-      schoolLinkedinId = schoolUrn.split(":").pop();
+    // Prefer companyUrn / miniSchool.entityUrn over schoolUrn.
+    // LinkedIn schools are also company entities; the fsd_company URN ID maps to
+    // a /company/ URL that is reliably accessible, whereas urn:li:school IDs may
+    // point to a different (sometimes inaccessible) /school/ namespace.
+    const companyUrn = (edu.companyUrn ?? miniSchool?.entityUrn) as string | undefined;
+    const schoolUrn = edu.schoolUrn as string | undefined;
+    const urn = companyUrn ?? schoolUrn;
+    if (urn) {
+      schoolLinkedinId = urn.split(":").pop();
     }
+  }
+
+  // Try to extract school logo directly from the entity's embedded school/miniSchool objects.
+  // LinkedIn API responses often include logo data in these sub-objects (same Voyager image structure
+  // as company logos). This avoids extra network requests when the logo is already in the payload.
+  let schoolLogoUrl: string | undefined;
+  for (const obj of [miniSchool, school, edu].filter(Boolean) as Record<string, unknown>[]) {
+    for (const key of ["logo", "companyLogo", "logoV2", "logoResolutionResult"]) {
+      const logoData = obj[key] as Record<string, unknown> | undefined;
+      if (logoData) {
+        const url = extractLogoUrlFromVoyagerImage(logoData);
+        if (url) {
+          schoolLogoUrl = url;
+          break;
+        }
+      }
+    }
+    if (schoolLogoUrl) break;
   }
 
   return {
     schoolName,
     schoolLinkedinId,
+    ...(schoolLogoUrl ? { schoolLogoUrl } : {}),
     degree,
     description: description || undefined,
     startDate,
     endDate,
   };
+}
+
+/**
+ * Enriches education entries with school logo URLs.
+ *
+ * Batch-fetches logos via the Voyager companies API for entries whose logo
+ * was not embedded in the API response (i.e. `schoolLogoUrl` is still undefined).
+ * Uses the same `fetchCompanyLogo` helper as work-entry enrichment so the
+ * lookup strategy (universalName slug → entityUrn → numeric ID) is consistent.
+ */
+async function enrichEducationWithLogos(entries: EducationEntry[]): Promise<EducationEntry[]> {
+  // Collect distinct IDs that still need logos (deduplicated)
+  const seenIds = new Set<string>();
+  const tasks: string[] = [];
+  for (const entry of entries) {
+    if (entry.schoolLogoUrl || !entry.schoolLinkedinId) continue;
+    if (seenIds.has(entry.schoolLinkedinId)) continue;
+    seenIds.add(entry.schoolLinkedinId);
+    tasks.push(entry.schoolLinkedinId);
+  }
+
+  if (tasks.length === 0) return entries;
+
+  console.log(`[linkedin][fetchDetails] Fetching logos for ${tasks.length} school(s):`, tasks);
+
+  const idToLogo = new Map<string, string>();
+  await Promise.all(
+    tasks.map(async (schoolId) => {
+      try {
+        const logoUrl = await fetchCompanyLogo(undefined, schoolId);
+        if (logoUrl) idToLogo.set(schoolId, logoUrl);
+      } catch {
+        /* ignore individual logo fetch failures */
+      }
+    }),
+  );
+
+  return entries.map((entry) => {
+    if (entry.schoolLogoUrl || !entry.schoolLinkedinId) return entry;
+    const url = idToLogo.get(entry.schoolLinkedinId);
+    return url ? { ...entry, schoolLogoUrl: url } : entry;
+  });
 }
 
 // ─── PositionGroup → flat positions extractor ──────────────────────────────
@@ -926,6 +1012,33 @@ function extractNestedPositions(
 
 // ─── Endpoint discovery: try multiple dash API paths ────────────────────────
 
+/**
+ * Fetches the fsd_profile URN for a LinkedIn profile by calling the classic
+ * Voyager profiles endpoint. Only used when the URN cannot be found in the
+ * embedded page JSON (e.g. server-side-rendered pages with no <code> blocks).
+ */
+async function fetchProfileUrnByApi(username: string): Promise<string | null> {
+  const data = await voyagerFetch(`/voyager/api/identity/profiles/${encodeURIComponent(username)}`);
+  if (!data) return null;
+
+  // The profile entity is either in included[], data.data, or data itself
+  const candidates: Record<string, unknown>[] = [
+    ...collectIncludedEntities([data]),
+    ...(data.data && typeof data.data === "object" ? [data.data as Record<string, unknown>] : []),
+    data,
+  ];
+
+  for (const e of candidates) {
+    const urn = (e.dashEntityUrn ?? e.entityUrn ?? e.objectUrn) as string | undefined;
+    if (urn?.startsWith("urn:li:fsd_profile:")) {
+      console.log(`[linkedin][fetchDetails] Resolved profileUrn via API profile fetch: ${urn}`);
+      return urn;
+    }
+  }
+
+  return null;
+}
+
 /** Endpoints to try for work history (in priority order). */
 const WORK_ENDPOINTS = (urn: string) => [
   // Individual positions endpoint (has title, companyName, etc.)
@@ -972,7 +1085,12 @@ export async function fetchFullWorkHistory(
   const entities = collectIncludedEntities(blocks);
   logEntityTypes(entities, "live page");
 
-  const profileUrn = extractProfileUrn(entities, username);
+  let profileUrn = extractProfileUrn(entities, username);
+
+  // If the URN wasn't embedded in the page, try fetching it from the API directly.
+  if (!profileUrn) {
+    profileUrn = await fetchProfileUrnByApi(username);
+  }
 
   // ── Step 2: Try dash API endpoints (authoritative — requests up to 100 entries) ──
   if (profileUrn) {
@@ -1081,7 +1199,12 @@ export async function fetchFullEducation(username: string): Promise<EducationEnt
   const blocks = extractLivePageJsonBlocks();
   const entities = collectIncludedEntities(blocks);
 
-  const profileUrn = extractProfileUrn(entities, username);
+  let profileUrn = extractProfileUrn(entities, username);
+
+  // If the URN wasn't embedded in the page, try the API profile endpoint.
+  if (!profileUrn) {
+    profileUrn = await fetchProfileUrnByApi(username);
+  }
 
   // ── Step 2: Try dash API (authoritative — requests up to 100 entries) ──
   if (profileUrn) {
@@ -1118,7 +1241,7 @@ export async function fetchFullEducation(username: string): Promise<EducationEnt
           `[linkedin][fetchDetails] Parsed ${entries.length} education entries from API`,
           entries.map((e) => `${e.schoolName} — ${e.degree ?? "(no degree)"}`),
         );
-        return entries;
+        return enrichEducationWithLogos(entries);
       }
     } else {
       console.warn(`[linkedin][fetchDetails] All education API endpoints failed for ${username}`);
@@ -1157,7 +1280,7 @@ export async function fetchFullEducation(username: string): Promise<EducationEnt
         `[linkedin][fetchDetails] Parsed ${entries.length} education entries from live page (fallback)`,
         entries.map((e) => `${e.schoolName} — ${e.degree ?? "(no degree)"}`),
       );
-      return entries;
+      return enrichEducationWithLogos(entries);
     }
   }
 

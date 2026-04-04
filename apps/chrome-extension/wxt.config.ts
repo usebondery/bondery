@@ -56,12 +56,11 @@ export default defineConfig({
             },
           }
         : {},
-    define:
-      mode === "development"
-        ? {
-            "process.env.NODE_ENV": JSON.stringify("production"),
-          }
-        : {},
+    // Note: do NOT override process.env.NODE_ENV in development mode builds.
+    // Forcing "production" here causes a mismatch: Vite's React plugin still
+    // emits jsxDEV() calls (dev JSX transform), but React's production bundle
+    // doesn't export jsxDEV — resulting in a runtime crash in the popup.
+    define: {},
     build:
       mode === "development"
         ? {

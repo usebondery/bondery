@@ -1,15 +1,6 @@
 "use client";
 
-import {
-  Text,
-  Group,
-  Card,
-  CardSection,
-  Paper,
-  Stack,
-  ThemeIcon,
-  UnstyledButton,
-} from "@mantine/core";
+import { Text, Group, CardSection, Paper, Stack, ThemeIcon, UnstyledButton } from "@mantine/core";
 import {
   IconLifebuoy,
   IconBook,
@@ -23,6 +14,7 @@ import { ModalTitle } from "@bondery/mantine-next";
 import { WEBSITE_ROUTES } from "@bondery/helpers/globals/paths";
 import { WEBSITE_URL } from "@/lib/config";
 import { FeedbackModal } from "./FeedbackModal";
+import { SettingsSection } from "./SettingsSection";
 import type { ComponentType } from "react";
 
 interface SupportItemCardProps {
@@ -104,16 +96,7 @@ export function SupportCard() {
   };
 
   return (
-    <Card id="support" withBorder shadow="sm">
-      <CardSection withBorder inheritPadding py="md">
-        <Group gap="xs">
-          <IconLifebuoy size={20} stroke={1.5} />
-          <Text size="lg" fw={600}>
-            {t("Title")}
-          </Text>
-        </Group>
-      </CardSection>
-
+    <SettingsSection id="support" icon={<IconLifebuoy size={20} stroke={1.5} />} title={t("Title")}>
       <CardSection inheritPadding py="md">
         <Group grow align="stretch" gap="md">
           <SupportItemCard
@@ -136,6 +119,6 @@ export function SupportCard() {
           />
         </Group>
       </CardSection>
-    </Card>
+    </SettingsSection>
   );
 }

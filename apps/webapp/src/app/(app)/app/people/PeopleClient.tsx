@@ -15,10 +15,11 @@ import {
   IconUserCircle,
 } from "@tabler/icons-react";
 import { notifications } from "@mantine/notifications";
-import { useEffect, useState, useDeferredValue, useMemo } from "react";
+import { useEffect, useState, useDeferredValue, useMemo, useTransition } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useDebouncedCallback } from "@mantine/hooks";
+import { DEBOUNCE_MS } from "@/lib/config";
 import ContactsTable, {
   ColumnConfig,
   type SortOrder,
@@ -40,6 +41,7 @@ import { useBatchEnrichFromLinkedIn } from "@/lib/extension/useBatchEnrichFromLi
 import type { Contact, MergeConflictField, ShareableField } from "@bondery/types";
 import { revalidateContacts } from "../actions";
 import { appendAvatarParams } from "@/lib/avatarParams";
+import { searchContacts } from "@/lib/searchContacts";
 
 interface PeopleClientProps {
   initialContacts: Contact[];
@@ -202,6 +204,7 @@ export function PeopleClient({ initialContacts, totalCount, layout = "stack" }: 
 
   // Handle search: debounce the URL update so the server is only re-fetched
   // after the user pauses, while DataTable keeps the input responsive locally.
+  const [isSearchPending, startSearchTransition] = useTransition();
   const handleSearch = useDebouncedCallback((query: string) => {
     const params = new URLSearchParams(searchParams);
     if (query) {
@@ -209,8 +212,10 @@ export function PeopleClient({ initialContacts, totalCount, layout = "stack" }: 
     } else {
       params.delete("q");
     }
-    router.replace(`${pathname}?${params.toString()}`);
-  }, 500);
+    startSearchTransition(() => {
+      router.replace(`${pathname}?${params.toString()}`);
+    });
+  }, DEBOUNCE_MS.search);
 
   // Handle sort
   const handleSort = (order: SortOrder) => {
@@ -258,6 +263,7 @@ export function PeopleClient({ initialContacts, totalCount, layout = "stack" }: 
       disableRightPicker: Boolean(lockBoth),
       titleText: tMerge("ModalTitle"),
       texts: mergeTexts,
+      onSearch: searchContacts,
     });
   };
 
@@ -494,6 +500,7 @@ export function PeopleClient({ initialContacts, totalCount, layout = "stack" }: 
             isHeaderShown={true}
             searchDefaultValue={initialSearch}
             onSearchChange={handleSearch}
+            searchLoading={isSearchPending}
             noContactsFound={t("NoContactsFound")}
             noContactsMatchSearch={t("NoContactsMatchSearch")}
             columnsForMenu={columns}

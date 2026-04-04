@@ -26,6 +26,8 @@ export function ButtonLink({
   className,
   ...buttonProps
 }: ButtonLinkProps) {
+  const mergedClassName = ["button-scale-effect", className].filter(Boolean).join(" ");
+
   return (
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     <Button
@@ -33,7 +35,7 @@ export function ButtonLink({
       href={href}
       target={target}
       rel={rel}
-      className={className}
+      className={mergedClassName}
       {...buttonProps}
     >
       {children}

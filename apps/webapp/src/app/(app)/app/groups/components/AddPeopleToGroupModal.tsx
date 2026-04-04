@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Stack, Text, Loader, Center } from "@mantine/core";
 import { modals } from "@mantine/modals";
@@ -18,6 +18,8 @@ import type { Contact } from "@bondery/types";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import { revalidateGroups } from "../../actions";
 import { buildAvatarQueryString } from "@/lib/avatarParams";
+import { DEBOUNCE_MS } from "@/lib/config";
+import { searchContacts } from "@/lib/searchContacts";
 
 export interface AddPeopleToGroupModalTexts {
   title: string;
@@ -77,6 +79,7 @@ function AddPeopleToGroupForm({ groupId, groupLabel, modalId, texts }: AddPeople
   const [isLoading, setIsLoading] = useState(true);
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const existingMemberIdsRef = useRef<Set<string>>(new Set());
 
   useEffect(() => {
     modals.updateModal({
@@ -91,7 +94,7 @@ function AddPeopleToGroupForm({ groupId, groupLabel, modalId, texts }: AddPeople
     async function fetchAvailableContacts() {
       try {
         const [allContactsRes, groupContactsRes] = await Promise.all([
-          fetch(`${API_ROUTES.CONTACTS}?${buildAvatarQueryString("small")}`),
+          fetch(`${API_ROUTES.CONTACTS}?limit=200&${buildAvatarQueryString("small")}`),
           fetch(`${API_ROUTES.GROUPS}/${groupId}/contacts?${buildAvatarQueryString("small")}`),
         ]);
 
@@ -103,6 +106,7 @@ function AddPeopleToGroupForm({ groupId, groupLabel, modalId, texts }: AddPeople
         const groupContactsData = (await groupContactsRes.json()) as { contacts: Contact[] };
 
         const existingIds = new Set(groupContactsData.contacts.map((contact) => contact.id));
+        existingMemberIdsRef.current = existingIds;
         setContacts(allContactsData.contacts.filter((contact) => !existingIds.has(contact.id)));
       } catch (error) {
         notifications.show(
@@ -118,6 +122,11 @@ function AddPeopleToGroupForm({ groupId, groupLabel, modalId, texts }: AddPeople
 
     fetchAvailableContacts();
   }, [groupId, texts.errorTitle, texts.loadError]);
+
+  const handleSearch = useCallback(async (query: string): Promise<Contact[]> => {
+    const results = await searchContacts(query);
+    return results.filter((c) => !existingMemberIdsRef.current.has(c.id));
+  }, []);
 
   const handleSubmit = async () => {
     if (selectedIds.length === 0) {
@@ -207,6 +216,8 @@ function AddPeopleToGroupForm({ groupId, groupLabel, modalId, texts }: AddPeople
         onChange={setSelectedIds}
         placeholder={texts.addContactsPlaceholder}
         noResultsLabel={texts.noContactsFound}
+        onSearch={handleSearch}
+        searchDebounceMs={DEBOUNCE_MS.contactPicker}
         disabled={isSubmitting}
       />
 

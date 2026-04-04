@@ -205,7 +205,9 @@ export function registerLinkedInDataRoutes(fastify: FastifyInstance): void {
           peopleLinkedinId: row.people_linkedin_id,
           schoolName: row.school_name,
           schoolLinkedinUrl: row.school_linkedin_id
-            ? `https://www.linkedin.com/school/${row.school_linkedin_id}/`
+            ? /^\d+$/.test(row.school_linkedin_id)
+              ? `https://www.linkedin.com/company/${row.school_linkedin_id}/`
+              : `https://www.linkedin.com/school/${row.school_linkedin_id}/`
             : null,
           schoolLogoUrl: row.school_linkedin_id
             ? client.storage

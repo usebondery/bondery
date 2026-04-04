@@ -194,6 +194,7 @@ async function buildServer() {
     ajv: {
       customOptions: {
         removeAdditional: true,
+        coerceTypes: true,
       },
     },
   }).withTypeProvider<TypeBoxTypeProvider>();
@@ -221,7 +222,6 @@ async function buildServer() {
     schema: envSchema,
     dotenv: {
       path: `${process.cwd()}/.env.development.local`,
-      debug: true,
     },
   });
 

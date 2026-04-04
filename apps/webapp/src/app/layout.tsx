@@ -11,7 +11,12 @@ import { bonderyTheme } from "@bondery/mantine-next";
 import { Notifications } from "@mantine/notifications";
 import { ModalsProvider } from "@mantine/modals";
 import { Lexend } from "next/font/google";
-import { ColorSchemeScript, MantineProvider, mantineHtmlProps } from "@mantine/core";
+import {
+  ColorSchemeScript,
+  MantineProvider,
+  mantineHtmlProps,
+  v8CssVariablesResolver,
+} from "@mantine/core";
 import { headers } from "next/headers";
 import { WEBAPP_NAME } from "@bondery/helpers";
 
@@ -38,7 +43,11 @@ export default async function RootLayout({
         <ColorSchemeScript nonce={nonce} defaultColorScheme="auto" />
       </head>
       <body>
-        <MantineProvider defaultColorScheme="auto" theme={bonderyTheme}>
+        <MantineProvider
+          defaultColorScheme="auto"
+          theme={bonderyTheme}
+          cssVariablesResolver={v8CssVariablesResolver}
+        >
           <ModalsProvider modalProps={{ centered: true }}>
             <Notifications autoClose={6000} position="top-center" />
             {children}

@@ -1,6 +1,6 @@
 "use client";
 
-import { ActionIcon, Card, CardSection, Group, Text, Tooltip } from "@mantine/core";
+import { ActionIcon, CardSection, Group, Text, Tooltip } from "@mantine/core";
 import { IconAdjustmentsHorizontal, IconHelpCircle } from "@tabler/icons-react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
@@ -14,6 +14,7 @@ import {
   successNotificationTemplate,
 } from "@bondery/mantine-next";
 import { ThemePicker } from "./ThemePicker";
+import { SettingsSection } from "./SettingsSection";
 import { ReminderTimePicker } from "./ReminderTimePicker";
 import { TimeFormatPicker } from "./TimeFormatPicker";
 import { LanguagePicker } from "@/components/shared/LanguagePicker";
@@ -155,16 +156,7 @@ export function PreferencesCard({
   };
 
   return (
-    <Card withBorder shadow="sm">
-      <CardSection withBorder inheritPadding py="md">
-        <Group gap="xs">
-          <IconAdjustmentsHorizontal size={20} stroke={1.5} />
-          <Text size="lg" fw={600}>
-            {t("Title")}
-          </Text>
-        </Group>
-      </CardSection>
-
+    <SettingsSection icon={<IconAdjustmentsHorizontal size={20} stroke={1.5} />} title={t("Title")}>
       <CardSection inheritPadding py="md">
         <ThemePicker
           initialValue={initialColorScheme}
@@ -222,6 +214,6 @@ export function PreferencesCard({
           </div>
         </Group>
       </CardSection>
-    </Card>
+    </SettingsSection>
   );
 }

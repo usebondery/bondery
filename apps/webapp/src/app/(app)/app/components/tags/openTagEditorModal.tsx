@@ -25,8 +25,8 @@ import {
   successNotificationTemplate,
 } from "@bondery/mantine-next";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
-import { useEffect, useRef, useState } from "react";
-import { API_URL } from "@/lib/config";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { API_URL, DEBOUNCE_MS } from "@/lib/config";
 import { buildAvatarQueryString } from "@/lib/avatarParams";
 import { openStandardConfirmModal } from "@/app/(app)/app/components/modals/openStandardConfirmModal";
 import { captureEvent } from "@/lib/analytics/client";
@@ -99,7 +99,7 @@ function TagEditorModalBody({
     void (async () => {
       try {
         const contactsResponse = await fetch(
-          `${API_URL}${API_ROUTES.CONTACTS}?${buildAvatarQueryString("small")}`,
+          `${API_URL}${API_ROUTES.CONTACTS}?limit=200&${buildAvatarQueryString("small")}`,
           {
             credentials: "include",
           },
@@ -145,6 +145,20 @@ function TagEditorModalBody({
       isMounted = false;
     };
   }, [mode, tag, t]);
+
+  const handleSearch = useCallback(async (query: string): Promise<Contact[]> => {
+    try {
+      const res = await fetch(
+        `${API_URL}${API_ROUTES.CONTACTS}?q=${encodeURIComponent(query)}&limit=10&${buildAvatarQueryString("small")}`,
+        { credentials: "include" },
+      );
+      if (!res.ok) return [];
+      const data = (await res.json()) as { contacts?: Contact[] };
+      return data.contacts ?? [];
+    } catch {
+      return [];
+    }
+  }, []);
 
   const buildPreviewContacts = (ids: string[]): ContactPreview[] => {
     const map = new Map(allContacts.map((contact) => [contact.id, contact]));
@@ -425,6 +439,8 @@ function TagEditorModalBody({
             onChange={setSelectedIds}
             placeholder={t("AddFirstPersonPlaceholder")}
             noResultsLabel={t("NoPeopleFound")}
+            onSearch={handleSearch}
+            searchDebounceMs={DEBOUNCE_MS.contactPicker}
             disabled={isSubmitting}
           />
         )}

@@ -9,7 +9,7 @@ import { PageWrapper } from "@/app/(app)/app/components/PageWrapper";
 import { openNewActivityModal } from "./components/NewActivityModal";
 import type { Contact, Activity } from "@bondery/types";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
-import { WEBSITE_URL } from "@/lib/config";
+import { WEBSITE_URL, DEBOUNCE_MS } from "@/lib/config";
 import { PageHeader } from "../components/PageHeader";
 import { useTranslations } from "next-intl";
 import { notifications } from "@mantine/notifications";
@@ -44,9 +44,20 @@ export function InteractionsClient({
   const tHeader = useTranslations("PageHeader");
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [searchValue, setSearchValue] = useState("");
+  const [isSearchLoading, setIsSearchLoading] = useState(false);
   // Debounced: SearchInput owns its own input state; this only fires the
   // expensive client-side filter in InteractionsTableV2 after the user pauses.
-  const handleSearchChange = useDebouncedCallback(setSearchValue, 300);
+  const debouncedSetSearchValue = useDebouncedCallback((value: string) => {
+    setSearchValue(value);
+    setIsSearchLoading(false);
+  }, DEBOUNCE_MS.search);
+  const handleSearchChange = useCallback(
+    (value: string) => {
+      setIsSearchLoading(true);
+      debouncedSetSearchValue(value);
+    },
+    [debouncedSetSearchValue],
+  );
   const [viewMode, setViewMode] = useState<"interactions" | "table">("interactions");
   const [sortOrder, setSortOrder] = useState<InteractionSortOrder>("dateDesc");
   const [columns, setColumns] = useState<InteractionColumnConfig[]>(() =>
@@ -336,6 +347,7 @@ export function InteractionsClient({
               onSortChange={setSortOrder}
               searchValue={searchValue}
               onSearchChange={handleSearchChange}
+              searchLoading={isSearchLoading}
               labels={{
                 searchPlaceholder: t("SearchPlaceholder"),
                 noInteractionsFound: t("NoActivitiesFound"),

@@ -87,6 +87,7 @@ export interface InteractionsTableV2Props {
   // External state for search
   searchValue: string;
   onSearchChange: (value: string) => void;
+  searchLoading?: boolean;
   // Callbacks
   onEdit: (activity: Activity) => void;
   onDuplicate: (activity: Activity) => void;
@@ -118,6 +119,7 @@ export function InteractionsTableV2({
   onSortChange,
   searchValue,
   onSearchChange,
+  searchLoading,
   onEdit,
   onDuplicate,
   onDelete,
@@ -348,6 +350,7 @@ export function InteractionsTableV2({
       onSelectionChange={onSelectionChange}
       searchValue={searchValue}
       onSearchChange={onSearchChange}
+      searchLoading={searchLoading}
       sortOptions={sortOptions}
       currentSort={sortOrder}
       onSortChange={onSortChange}

@@ -65,7 +65,7 @@ const FeatureSection = ({
       }}
     >
       <Container size="xl" py={{ base: "xl", md: "calc(var(--mantine-spacing-xl) * 2)" }}>
-        <Grid gutter={{ base: "xl", md: "calc(var(--mantine-spacing-xl) * 3)" }} align="center">
+        <Grid gap={{ base: "xl", md: "calc(var(--mantine-spacing-xl) * 3)" }} align="center">
           {imagePosition === "left" ? (
             <>
               <GridCol span={{ base: 12, md: 6 }} order={{ base: 2, md: 1 }}>

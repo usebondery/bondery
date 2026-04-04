@@ -504,6 +504,7 @@ export function ContactIdentitySection({
               placeholder="Location"
               value={profileValues.location}
               disabled={savingProfileByField.location}
+              mode="place"
               onChange={(value) => updateProfileField("location", value)}
               onSuggestionSelect={(selected) => {
                 void savePlaceFromSuggestion(

@@ -1,6 +1,6 @@
 {
   "name": "@bondery/mantine-next",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "private": true,
   "type": "module",
   "main": "./src/index.ts",
@@ -22,6 +22,7 @@
       "types": "./src/theme.ts"
     },
     "./styles": {
+      "types": "./src/styles.d.ts",
       "style": "./src/styles.css",
       "import": "./src/styles.css",
       "require": "./src/styles.css"
@@ -36,9 +37,9 @@
     "@dnd-kit/utilities": "^3.2.2"
   },
   "peerDependencies": {
-    "@mantine/core": "^8.3.11",
-    "@mantine/dropzone": "^8.3.11",
-    "@mantine/hooks": "^8.3.11",
+    "@mantine/core": "^9.0.0",
+    "@mantine/dropzone": "^9.0.0",
+    "@mantine/hooks": "^9.0.0",
     "@tabler/icons-react": "^3.34.1",
     "next": "^16.0.0",
     "react": "^19.0.0",

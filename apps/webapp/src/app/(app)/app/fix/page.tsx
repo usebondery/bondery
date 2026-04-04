@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import type { MergeRecommendation } from "@bondery/types";
 import { FixContactsClient } from "./FixContactsClient";
 import { getMergeRecommendationsData } from "./getMergeRecommendationsData";
 import { getAuthHeaders } from "@/lib/authHeaders";
@@ -11,7 +12,7 @@ export default async function FixPage() {
   const headers = await getAuthHeaders();
 
   const [recommendations, eligibleCountRes, queueStatusRes] = await Promise.all([
-    getMergeRecommendationsData(),
+    getMergeRecommendationsData(headers).catch(() => [] as MergeRecommendation[]),
     fetch(`${API_URL}${API_ROUTES.CONTACTS}/enrich-queue/eligible-count`, { headers }).catch(
       () => null,
     ),

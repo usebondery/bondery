@@ -116,6 +116,26 @@ const BySocialQuery = Type.Object({
   avatarSize: Type.Optional(AvatarSizeEnum),
 });
 
+const MapPinsQuery = Type.Object({
+  minLat: Type.Number({ minimum: -90, maximum: 90 }),
+  maxLat: Type.Number({ minimum: -90, maximum: 90 }),
+  minLon: Type.Number({ minimum: -180, maximum: 180 }),
+  maxLon: Type.Number({ minimum: -180, maximum: 180 }),
+  limit: Type.Optional(Type.Integer({ minimum: 1, maximum: 1000, default: 500 })),
+  avatarQuality: Type.Optional(AvatarQualityEnum),
+  avatarSize: Type.Optional(AvatarSizeEnum),
+});
+
+const MapAddressPinsQuery = Type.Object({
+  minLat: Type.Number({ minimum: -90, maximum: 90 }),
+  maxLat: Type.Number({ minimum: -90, maximum: 90 }),
+  minLon: Type.Number({ minimum: -180, maximum: 180 }),
+  maxLon: Type.Number({ minimum: -180, maximum: 180 }),
+  limit: Type.Optional(Type.Integer({ minimum: 1, maximum: 1000, default: 500 })),
+  avatarQuality: Type.Optional(AvatarQualityEnum),
+  avatarSize: Type.Optional(AvatarSizeEnum),
+});
+
 function isLookupPlatform(value: string): value is (typeof LOOKUP_SOCIAL_PLATFORMS)[number] {
   return LOOKUP_SOCIAL_PLATFORMS.includes(value as (typeof LOOKUP_SOCIAL_PLATFORMS)[number]);
 }
@@ -369,6 +389,123 @@ export async function contactRoutes(fastify: FastifyInstance) {
   registerEnrichmentRoutes(fastify);
   registerRelationshipRoutes(fastify);
   registerImportantDateRoutes(fastify);
+
+  /**
+   * GET /api/contacts/map-pins - Fetch lightweight pin data for contacts within a bounding box
+   */
+  fastify.get(
+    "/map-pins",
+    { schema: { querystring: MapPinsQuery } },
+    async (
+      request: FastifyRequest<{ Querystring: typeof MapPinsQuery.static }>,
+      reply: FastifyReply,
+    ) => {
+      const { client, user } = getAuth(request);
+      const { minLat, maxLat, minLon, maxLon, limit = 500 } = request.query;
+      const avatarOptions = extractAvatarOptions(request.query);
+
+      const { data, error } = await client.rpc("get_map_pins_in_bbox", {
+        p_user_id: user.id,
+        p_min_lat: minLat,
+        p_max_lat: maxLat,
+        p_min_lon: minLon,
+        p_max_lon: maxLon,
+        p_limit: Math.min(limit, 1000),
+      });
+
+      if (error) {
+        request.log.error({ err: error }, "Error fetching map pins");
+        return reply.status(500).send({ error: error.message });
+      }
+
+      const pins = (data || []).map(
+        (row: {
+          id: string;
+          first_name: string;
+          last_name: string | null;
+          headline: string | null;
+          location: string | null;
+          last_interaction: string | null;
+          latitude: number;
+          longitude: number;
+          updated_at: string;
+        }) => ({
+          id: row.id,
+          firstName: row.first_name,
+          lastName: row.last_name,
+          headline: row.headline,
+          location: row.location,
+          lastInteraction: row.last_interaction,
+          latitude: row.latitude,
+          longitude: row.longitude,
+          avatar: buildContactAvatarUrl(client, user.id, row.id, avatarOptions),
+        }),
+      );
+
+      return { pins };
+    },
+  );
+
+  /**
+   * GET /api/contacts/map-address-pins - Fetch address pin data within a bounding box.
+   * Returns one row per people_addresses record (not deduplicated by person).
+   */
+  fastify.get(
+    "/map-address-pins",
+    { schema: { querystring: MapAddressPinsQuery } },
+    async (
+      request: FastifyRequest<{ Querystring: typeof MapAddressPinsQuery.static }>,
+      reply: FastifyReply,
+    ) => {
+      const { client, user } = getAuth(request);
+      const { minLat, maxLat, minLon, maxLon, limit = 500 } = request.query;
+      const avatarOptions = extractAvatarOptions(request.query);
+
+      const { data, error } = await client.rpc("get_map_address_pins_in_bbox", {
+        p_user_id: user.id,
+        p_min_lat: minLat,
+        p_max_lat: maxLat,
+        p_min_lon: minLon,
+        p_max_lon: maxLon,
+        p_limit: Math.min(limit, 1000),
+      });
+
+      if (error) {
+        request.log.error({ err: error }, "Error fetching map address pins");
+        return reply.status(500).send({ error: error.message });
+      }
+
+      const pins = (data || []).map(
+        (row: {
+          address_id: string;
+          person_id: string;
+          first_name: string;
+          last_name: string | null;
+          address_type: string;
+          address_formatted: string | null;
+          address_city: string | null;
+          address_country: string | null;
+          latitude: number;
+          longitude: number;
+          updated_at: string;
+        }) => ({
+          addressId: row.address_id,
+          personId: row.person_id,
+          firstName: row.first_name,
+          lastName: row.last_name,
+          addressType: row.address_type,
+          addressFormatted: row.address_formatted,
+          addressCity: row.address_city,
+          addressCountry: row.address_country,
+          latitude: row.latitude,
+          longitude: row.longitude,
+          avatar: buildContactAvatarUrl(client, user.id, row.person_id, avatarOptions),
+        }),
+      );
+
+      return { pins };
+    },
+  );
 
   /**
    * GET /api/contacts - List all contacts
@@ -1002,9 +1139,10 @@ export async function contactRoutes(fastify: FastifyInstance) {
           return reply.status(400).send({ error: message });
         }
 
-        // sort_order = 0 is the preferred address — sync its display label to people.location.
-        const preferredAddress = nextAddresses[0] ?? null;
-        updates.location = preferredAddress?.value ?? null;
+        // NOTE: people.location is NOT auto-synced from the preferred address here.
+        // The client sends a separate PATCH with { location, latitude, longitude }
+        // only when the user explicitly confirms the location update prompt.
+        // Auto-syncing here would overwrite a manually set location when the user declines.
       }
 
       const socialsUpdates: Array<{

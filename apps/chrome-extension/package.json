@@ -1,6 +1,6 @@
 {
   "name": "chrome-extension",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "private": true,
   "type": "module",
   "description": "Bondery Extension",
@@ -37,7 +37,7 @@
     "prettier": "^3.8.1",
     "sharp": "^0.34.5",
     "tsx": "^4.21.0",
-    "typescript": "^5",
+    "typescript": "^6",
     "wxt": "^0.20.20"
   },
   "dependencies": {
@@ -45,8 +45,8 @@
     "@bondery/helpers": "*",
     "@bondery/mantine-next": "*",
     "@bondery/types": "*",
-    "@mantine/core": "^8.3.18",
-    "@mantine/hooks": "^8.3.18",
+    "@mantine/core": "^9.0.0",
+    "@mantine/hooks": "^9.0.0",
     "@tabler/icons-react": "^3.40.0",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",

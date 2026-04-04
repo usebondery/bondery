@@ -88,6 +88,7 @@ import { GroupCard } from "../../groups/components/GroupCard";
 import { PersonTagsInput } from "./components/PersonTagsInput";
 import { openAddPeopleToGroupSelectionModal } from "../../people/components/AddPeopleToGroupSelectionModal";
 import { MERGE_CONFLICT_FIELDS, openMergeWithModal } from "../../people/components/MergeWithModal";
+import { searchContacts } from "@/lib/searchContacts";
 import { openShareContactModal } from "../../people/components/ShareContactModal";
 import { WEBSITE_URL } from "@/lib/config";
 import { createMentionSuggestion } from "./components/mentionSuggestion";
@@ -1332,6 +1333,7 @@ export default function PersonClient({
       disableLeftPicker: true,
       titleText: tMerge("ModalTitle"),
       texts: mergeTexts,
+      onSearch: searchContacts,
     });
   };
 

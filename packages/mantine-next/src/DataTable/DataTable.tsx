@@ -45,10 +45,12 @@ function SearchInput({
   initialValue,
   placeholder,
   onChange,
+  loading,
 }: {
   initialValue: string;
   placeholder?: string;
   onChange: (value: string) => void;
+  loading?: boolean;
 }) {
   const [value, setValue] = useState(initialValue);
   return (
@@ -62,6 +64,7 @@ function SearchInput({
         onChange(e.currentTarget.value);
       }}
       style={{ flex: 1 }}
+      loading={loading}
     />
   );
 }
@@ -242,6 +245,8 @@ export interface DataTableProps<TRow, TSortKey extends string = string> {
   searchValue?: string;
   /** Callback when search value changes */
   onSearchChange?: (value: string) => void;
+  /** Show loading indicator on search input */
+  searchLoading?: boolean;
 
   // --- Sort ---
   /** Available sort options */
@@ -323,6 +328,7 @@ export function DataTable<TRow, TSortKey extends string = string>({
   getRowSelectionAriaLabel,
   searchValue,
   onSearchChange,
+  searchLoading,
   sortOptions,
   currentSort,
   onSortChange,
@@ -524,6 +530,7 @@ export function DataTable<TRow, TSortKey extends string = string>({
           initialValue={searchValue ?? ""}
           placeholder={labels.searchPlaceholder}
           onChange={onSearchChange}
+          loading={searchLoading}
         />
       ) : null}
       {onColumnsChange !== undefined ? (

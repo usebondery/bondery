@@ -59,7 +59,7 @@ export function ActiveUsersChart({ data }: ActiveUsersChartProps) {
             />
             <YAxis tickLine={false} axisLine={false} width={34} allowDecimals={false} />
             <Tooltip
-              formatter={(value: number, name: string) => [
+              formatter={(value, name) => [
                 Number(value).toLocaleString(),
                 name === "mau" ? t("MAU") : name === "wau" ? t("WAU") : t("DAU"),
               ]}

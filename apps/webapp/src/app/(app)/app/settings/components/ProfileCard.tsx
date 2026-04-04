@@ -1,20 +1,12 @@
 "use client";
 
-import {
-  ActionIcon,
-  Text,
-  TextInput,
-  Group,
-  Divider,
-  Card,
-  CardSection,
-  Tooltip,
-} from "@mantine/core";
+import { ActionIcon, Text, TextInput, Group, Divider, CardSection, Tooltip } from "@mantine/core";
 import { IconHelpCircle, IconMail, IconUserCircle, IconChevronRight } from "@tabler/icons-react";
 import { useTranslations } from "next-intl";
 import { PersonChip } from "@bondery/mantine-next";
 import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import { ProviderIntegrations } from "./ProviderIntegrations";
+import { SettingsSection } from "./SettingsSection";
 
 interface ProfileCardProps {
   email: string;
@@ -38,16 +30,7 @@ export function ProfileCard({ email, providers, userIdentities, myselfPerson }: 
   const t = useTranslations("SettingsPage.Profile");
 
   return (
-    <Card withBorder shadow="sm">
-      <CardSection withBorder inheritPadding py="md">
-        <Group gap="xs">
-          <IconUserCircle size={20} stroke={1.5} />
-          <Text size="lg" fw={600}>
-            {t("Title")}
-          </Text>
-        </Group>
-      </CardSection>
-
+    <SettingsSection icon={<IconUserCircle size={20} stroke={1.5} />} title={t("Title")}>
       <CardSection inheritPadding py="md">
         <div>
           <Text size="sm" fw={500} mb={4}>
@@ -98,6 +81,7 @@ export function ProfileCard({ email, providers, userIdentities, myselfPerson }: 
           providers={providers}
           userIdentities={userIdentities}
           showExtensionProvider={false}
+          showPWAProvider={false}
         />
       </CardSection>
 
@@ -112,6 +96,6 @@ export function ProfileCard({ email, providers, userIdentities, myselfPerson }: 
           description={t("BonderyApplicationsDescription")}
         />
       </CardSection>
-    </Card>
+    </SettingsSection>
   );
 }

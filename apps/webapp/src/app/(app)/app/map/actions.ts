@@ -101,6 +101,7 @@ function buildLabelFromRawItem(raw: any): string {
   const countryCode: string | null = countryEntry?.isoCode ?? null;
 
   const isAddress = String(raw?.type || "") === "regional.address";
+  const isStreet = String(raw?.type || "") === "regional.street";
   const zip: string | null = raw?.zip ? String(raw.zip) : null;
 
   if (isAddress) {
@@ -111,6 +112,10 @@ function buildLabelFromRawItem(raw: any): string {
       state,
       countryCode,
     });
+  }
+
+  if (isStreet) {
+    return formatAddressLabel({ addressLine1: name, city, countryCode });
   }
 
   return formatPlaceLabel({ city: city ?? name, state, countryCode });
@@ -170,9 +175,13 @@ function parseItem(raw: any): MapSuggestionItem {
  * Runs server-side so the private API key is never exposed to the client.
  *
  * @param query - The search string typed by the user (min 2 chars to trigger).
+ * @param mode - "place" returns only city/region results; "address" (default) also includes streets and addresses.
  * @returns Array of parsed suggestion items including label, position, and regional structure.
  */
-export async function getMapSuggestions(query: string): Promise<MapSuggestionItem[]> {
+export async function getMapSuggestions(
+  query: string,
+  mode: "place" | "address" = "address",
+): Promise<MapSuggestionItem[]> {
   const text = query.trim();
   if (text.length < 2) {
     return [];
@@ -194,7 +203,9 @@ export async function getMapSuggestions(query: string): Promise<MapSuggestionIte
   upstream.searchParams.set("limit", "8");
   upstream.searchParams.set(
     "type",
-    "regional.address,regional.municipality,regional.region,regional.country",
+    mode === "place"
+      ? "regional.municipality"
+      : "regional.address,regional.street,regional.municipality",
   );
 
   try {

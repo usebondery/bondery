@@ -647,6 +647,150 @@ paths:
       responses:
         "200":
           description: Default Response
+  /api/contacts/map-pins:
+    get:
+      tags:
+        - Contacts
+      parameters:
+        - schema:
+            minimum: -90
+            maximum: 90
+            type: number
+          in: query
+          name: minLat
+          required: true
+        - schema:
+            minimum: -90
+            maximum: 90
+            type: number
+          in: query
+          name: maxLat
+          required: true
+        - schema:
+            minimum: -180
+            maximum: 180
+            type: number
+          in: query
+          name: minLon
+          required: true
+        - schema:
+            minimum: -180
+            maximum: 180
+            type: number
+          in: query
+          name: maxLon
+          required: true
+        - schema:
+            minimum: 1
+            maximum: 1000
+            default: 500
+            type: integer
+          in: query
+          name: limit
+          required: false
+        - schema:
+            anyOf:
+              - type: string
+                enum:
+                  - low
+              - type: string
+                enum:
+                  - medium
+              - type: string
+                enum:
+                  - high
+          in: query
+          name: avatarQuality
+          required: false
+        - schema:
+            anyOf:
+              - type: string
+                enum:
+                  - small
+              - type: string
+                enum:
+                  - medium
+              - type: string
+                enum:
+                  - large
+          in: query
+          name: avatarSize
+          required: false
+      responses:
+        "200":
+          description: Default Response
+  /api/contacts/map-address-pins:
+    get:
+      tags:
+        - Contacts
+      parameters:
+        - schema:
+            minimum: -90
+            maximum: 90
+            type: number
+          in: query
+          name: minLat
+          required: true
+        - schema:
+            minimum: -90
+            maximum: 90
+            type: number
+          in: query
+          name: maxLat
+          required: true
+        - schema:
+            minimum: -180
+            maximum: 180
+            type: number
+          in: query
+          name: minLon
+          required: true
+        - schema:
+            minimum: -180
+            maximum: 180
+            type: number
+          in: query
+          name: maxLon
+          required: true
+        - schema:
+            minimum: 1
+            maximum: 1000
+            default: 500
+            type: integer
+          in: query
+          name: limit
+          required: false
+        - schema:
+            anyOf:
+              - type: string
+                enum:
+                  - low
+              - type: string
+                enum:
+                  - medium
+              - type: string
+                enum:
+                  - high
+          in: query
+          name: avatarQuality
+          required: false
+        - schema:
+            anyOf:
+              - type: string
+                enum:
+                  - small
+              - type: string
+                enum:
+                  - medium
+              - type: string
+                enum:
+                  - large
+          in: query
+          name: avatarSize
+          required: false
+      responses:
+        "200":
+          description: Default Response
   /api/contacts:
     get:
       tags:

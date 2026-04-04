@@ -166,6 +166,7 @@ interface ContactsTableV2Props {
   searchDefaultValue?: string;
   searchValue?: string;
   onSearchChange?: (value: string) => void;
+  searchLoading?: boolean;
   noContactsFound: string;
   noContactsMatchSearch: string;
   columnsForMenu?: ColumnConfig[];
@@ -193,6 +194,8 @@ interface ContactsTableV2Props {
   excludedIds?: Set<string>;
   disableNameLink?: boolean;
   dateLocale?: string;
+  /** Optional custom renderer for the location cell. Receives the row (typed as Contact but may be any shape) and should return a ReactNode. */
+  renderLocationCell?: (contact: Contact) => ReactNode;
 }
 
 interface SocialLink {
@@ -332,6 +335,7 @@ export default function ContactsTableV2({
   searchDefaultValue,
   searchValue,
   onSearchChange,
+  searchLoading,
   columnsForMenu,
   setColumnsForMenu,
   sortOrderForMenu,
@@ -357,6 +361,7 @@ export default function ContactsTableV2({
   dateLocale,
   noContactsFound,
   noContactsMatchSearch,
+  renderLocationCell,
 }: ContactsTableV2Props) {
   const [searchIsActive, setSearchIsActive] = useState(() =>
     Boolean(searchValue ?? searchDefaultValue),
@@ -516,6 +521,7 @@ export default function ContactsTableV2({
               );
             }
             case "location": {
+              if (renderLocationCell) return renderLocationCell(contact);
               const locationValue = contact.location || "-";
               return (
                 <Tooltip label={locationValue} withArrow>
@@ -665,7 +671,7 @@ export default function ContactsTableV2({
     <DataTable<Contact, SortOrder>
       data={contacts}
       columns={tableColumns}
-      getRowId={(contact) => contact.id}
+      getRowId={(contact) => (contact as any)._rowKey ?? contact.id}
       selectedIds={selectedIds}
       onSelectAll={showSelection ? onSelectAll : undefined}
       onSelectOne={showSelection ? onSelectOne : undefined}
@@ -675,6 +681,7 @@ export default function ContactsTableV2({
       nonSelectableTooltip={nonSelectableTooltip}
       searchValue={searchValue ?? searchDefaultValue}
       onSearchChange={handleSearchChange}
+      searchLoading={searchLoading}
       sortOptions={sortOrderForMenu && setSortOrderForMenu ? sortOptions : undefined}
       currentSort={sortOrderForMenu}
       onSortChange={setSortOrderForMenu}

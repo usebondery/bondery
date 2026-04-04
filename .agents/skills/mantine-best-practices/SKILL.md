@@ -49,3 +49,7 @@ When creating a dropdown menu, use following rules:
 ## Not using server component
 
 Mantine UI compoennts support Next.js server components. However, they need to be referenced as named exports. For example the List.Item must be imported as ListItem to be used in a server component.
+
+## Inputs
+
+When using text or other inputs with an async searching or loading state, use the loading prop.

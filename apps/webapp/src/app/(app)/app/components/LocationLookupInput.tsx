@@ -4,6 +4,7 @@ import { Autocomplete, Group } from "@mantine/core";
 import { useEffect, useRef, useState } from "react";
 import { getMapSuggestions, type MapSuggestionItem } from "@/app/(app)/app/map/actions";
 import { IconCompass } from "@tabler/icons-react";
+import { DEBOUNCE_MS } from "@/lib/config";
 
 interface LocationLookupInputProps {
   label?: string;
@@ -12,6 +13,9 @@ interface LocationLookupInputProps {
   disabled?: boolean;
   ariaLabel?: string;
   style?: React.CSSProperties;
+  /** "place" shows only city/region/country suggestions (e.g. for a person's LinkedIn-style location field).
+   *  "address" (default) also includes streets and full addresses. */
+  mode?: "place" | "address";
   onChange: (value: string) => void;
   onSuggestionSelect: (item: MapSuggestionItem) => void;
   onBlur?: () => void;
@@ -30,11 +34,14 @@ export function LocationLookupInput({
   disabled,
   ariaLabel,
   style,
+  mode = "address",
   onChange,
   onSuggestionSelect,
   onBlur,
 }: LocationLookupInputProps) {
   const [options, setOptions] = useState<string[]>([]);
+  const [selectedFlag, setSelectedFlag] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
   const suggestionsByLabel = useRef<Record<string, MapSuggestionItem>>({});
   const optionFlagByLabel = useRef<Record<string, string>>({});
 
@@ -48,7 +55,8 @@ export function LocationLookupInput({
         return;
       }
 
-      const items = await getMapSuggestions(text);
+      setLoading(true);
+      const items = await getMapSuggestions(text, mode);
       const dictionary: Record<string, MapSuggestionItem> = {};
       for (const item of items) {
         dictionary[item.label] = item;
@@ -59,10 +67,11 @@ export function LocationLookupInput({
         Object.entries(dictionary).map(([label, item]) => [label, getSuggestionCountryFlag(item)]),
       );
       setOptions(Object.keys(dictionary));
-    }, 300);
+      setLoading(false);
+    }, DEBOUNCE_MS.locationSuggest);
 
     return () => clearTimeout(timeoutId);
-  }, [value]);
+  }, [value, mode]);
 
   return (
     <Autocomplete
@@ -71,15 +80,27 @@ export function LocationLookupInput({
       value={value}
       disabled={disabled}
       style={style}
+      className="max-w-120"
       aria-label={ariaLabel}
       leftSection={<IconCompass size={16} />}
-      onChange={onChange}
+      rightSection={
+          selectedFlag ? (
+            <span className={`fi fi-${selectedFlag}`} style={{ width: 18 }} />
+          ) : undefined
+        }
+      rightSectionPointerEvents="none"
+      loading={loading}
+      onChange={(v) => {
+          onChange(v);
+          setSelectedFlag(optionFlagByLabel.current[v] ?? null);
+        }}
       data={options}
       onOptionSubmit={(selectedLabel) => {
         const selected = suggestionsByLabel.current[selectedLabel];
         if (!selected) return;
 
         onChange(selectedLabel);
+        setSelectedFlag(optionFlagByLabel.current[selectedLabel] ?? null);
         onSuggestionSelect(selected);
       }}
       onBlur={onBlur}

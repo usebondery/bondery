@@ -20,11 +20,18 @@ export function linkedinCompanyUrl(id: string | null | undefined): string | null
 /**
  * Builds the canonical LinkedIn school URL from a stored identifier.
  *
- * @param id The school handle or numeric ID (e.g. "university-of-michigan" or "18915").
- * @returns Full URL (e.g. "https://www.linkedin.com/school/university-of-michigan/"), or null.
+ * LinkedIn schools are also company entities. Numeric IDs come from `fsd_company`
+ * URNs and resolve under the `/company/` path. Named slugs (universalName) use the
+ * `/school/` path.
+ *
+ * @param id The school handle or numeric ID (e.g. "university-of-michigan" or "15092563").
+ * @returns Full URL (e.g. "https://www.linkedin.com/company/15092563/"), or null.
  */
 export function linkedinSchoolUrl(id: string | null | undefined): string | null {
   if (!id) return null;
+  // Numeric IDs originate from company URNs (urn:li:fsd_company:N) → /company/ URL
+  // Named slugs originate from miniSchool.universalName → /school/ URL
+  if (/^\d+$/.test(id)) return `https://www.linkedin.com/company/${id}/`;
   return `https://www.linkedin.com/school/${id}/`;
 }
 

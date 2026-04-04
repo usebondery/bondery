@@ -12,6 +12,8 @@ export const WEBSITE_ROUTES = {
 
 export const API_ROUTES = {
   CONTACTS: "/api/contacts",
+  CONTACTS_MAP_PINS: "/api/contacts/map-pins",
+  CONTACTS_MAP_ADDRESS_PINS: "/api/contacts/map-address-pins",
   CONTACTS_MERGE: "/api/contacts/merge",
   CONTACTS_MERGE_RECOMMENDATIONS: "/api/contacts/merge-recommendations",
   CONTACTS_MERGE_RECOMMENDATIONS_REFRESH: "/api/contacts/merge-recommendations/refresh",
@@ -41,7 +43,7 @@ export const CHROME_EXTENSION_URL =
  * Requests from extensions below this version receive HTTP 426 Upgrade Required.
  * Set to "0.0.0" to disable enforcement.
  */
-export const MIN_EXTENSION_VERSION: string = "1.4.0";
+export const MIN_EXTENSION_VERSION: string = "1.4.1";
 
 export const HELP_DOCS_URL = "https://bondery.gitbook.io";
 

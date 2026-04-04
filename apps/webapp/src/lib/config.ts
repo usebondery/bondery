@@ -44,6 +44,23 @@ export const LIMITS = {
   maxAddresses: 5,
 } as const;
 
+/**
+ * UI debounce delay constants (milliseconds).
+ * Import these instead of hardcoding magic numbers.
+ */
+export const DEBOUNCE_MS = {
+  /** Delay for text search inputs before triggering a server/router fetch. */
+  search: 500,
+  /** Delay after the user stops panning/zooming the map before fetching new pins. */
+  mapViewport: 600,
+  /** Debounce for the contact picker's server-side search (PeopleMultiPickerInput). */
+  contactPicker: 300,
+  /** Debounce for local client-side table search filtering (no server call). */
+  tableSearch: 200,
+  /** Debounce inside LocationLookupInput before calling the map suggestion API. */
+  locationSuggest: 300,
+} as const;
+
 export const IMPORTANT_DATE_TYPE_OPTIONS: ReadonlyArray<{
   value: ImportantDateType;
   emoji: string;

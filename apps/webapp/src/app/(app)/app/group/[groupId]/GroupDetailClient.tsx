@@ -18,13 +18,13 @@ import ContactsTable, {
   MenuAction,
   type SortOrder,
 } from "@/app/(app)/app/components/contacts/ContactsTableV2";
-import { useEffect, useDeferredValue, useMemo, useState } from "react";
+import { useEffect, useDeferredValue, useMemo, useState, useTransition } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { useDebouncedCallback } from "@mantine/hooks";
 import { useTranslations } from "next-intl";
 import { openAddPeopleToGroupModal } from "../../groups/components/AddPeopleToGroupModal";
 import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
-import { WEBSITE_URL } from "@/lib/config";
+import { WEBSITE_URL, DEBOUNCE_MS } from "@/lib/config";
 import { formatContactName } from "@/lib/nameHelpers";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import { notifications } from "@mantine/notifications";
@@ -43,6 +43,7 @@ import { openEditGroupModal } from "../../groups/components/EditGroupModal";
 import type { Contact, GroupWithCount, MergeConflictField } from "@bondery/types";
 import { openAddPeopleToGroupSelectionModal } from "../../people/components/AddPeopleToGroupSelectionModal";
 import { MERGE_CONFLICT_FIELDS, openMergeWithModal } from "../../people/components/MergeWithModal";
+import { searchContacts } from "@/lib/searchContacts";
 import { PageHeader } from "@/app/(app)/app/components/PageHeader";
 import { PageWrapper } from "@/app/(app)/app/components/PageWrapper";
 import { appendAvatarParams } from "@/lib/avatarParams";
@@ -179,6 +180,7 @@ export function GroupDetailClient({
   };
 
   // Debounced: updates the URL so the server component re-fetches with the new query.
+  const [isSearchPending, startSearchTransition] = useTransition();
   const handleSearchChange = useDebouncedCallback((query: string) => {
     const params = new URLSearchParams(searchParams);
     if (query) {
@@ -186,8 +188,10 @@ export function GroupDetailClient({
     } else {
       params.delete("q");
     }
-    router.replace(`${pathname}?${params.toString()}`);
-  }, 300);
+    startSearchTransition(() => {
+      router.replace(`${pathname}?${params.toString()}`);
+    });
+  }, DEBOUNCE_MS.search);
 
   const handleLoadMore = async () => {
     if (isLoadingMore) return;
@@ -514,6 +518,7 @@ export function GroupDetailClient({
       disableRightPicker: Boolean(lockBoth),
       titleText: tMerge("ModalTitle"),
       texts: mergeTexts,
+      onSearch: searchContacts,
     });
   };
 
@@ -774,6 +779,7 @@ export function GroupDetailClient({
             isHeaderShown={true}
             searchDefaultValue={initialSearch}
             onSearchChange={handleSearchChange}
+            searchLoading={isSearchPending}
             noContactsFound={tGroupDetail("NoContactsFound")}
             noContactsMatchSearch={tGroupDetail("NoContactsMatchSearch")}
             columnsForMenu={columns}

@@ -15,6 +15,7 @@ import { getKeepInTouchData } from "./keep-in-touch/getKeepInTouchData";
 import { EnrichStatusNotificationManager } from "@/lib/extension/EnrichStatusNotificationManager";
 import { EnrichResumeDetector } from "@/lib/extension/EnrichResumeDetector";
 import { ExtensionUpdateNotificationManager } from "@/lib/extension/ExtensionUpdateNotificationManager";
+import { ServiceWorkerRegistration } from "./components/ServiceWorkerRegistration";
 
 interface UserSettingsLayoutData {
   userName: string;
@@ -117,6 +118,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   return (
     <LocaleProvider locale={locale} timezone={timezone} timeFormat={timeFormat} messages={messages}>
+      <ServiceWorkerRegistration />
       <ColorSchemeSync colorScheme={colorScheme} />
       <EnrichStatusNotificationManager />
       <EnrichResumeDetector />

@@ -10,6 +10,18 @@
 // Must be set before the dynamic import so the guard sees it.
 process.env.GENERATE_OPENAPI = "true";
 
+// Provide dummy values for required env vars so @fastify/env validation passes
+// without needing a local .env file. None of these are used during spec generation.
+process.env.NEXT_PUBLIC_SUPABASE_URL ??= "http://localhost:54321";
+process.env.PUBLIC_SUPABASE_PUBLISHABLE_KEY ??= "dummy";
+process.env.PRIVATE_SUPABASE_SECRET_KEY ??= "dummy";
+process.env.NEXT_PUBLIC_API_URL ??= "http://localhost:3001";
+process.env.PRIVATE_EMAIL_HOST ??= "localhost";
+process.env.PRIVATE_EMAIL_USER ??= "dummy";
+process.env.PRIVATE_EMAIL_PASS ??= "dummy";
+process.env.PRIVATE_EMAIL_ADDRESS ??= "dummy@localhost";
+process.env.PRIVATE_EMAIL_PORT ??= "587";
+
 import { writeFileSync } from "fs";
 import { resolve, dirname } from "path";
 import { fileURLToPath } from "url";

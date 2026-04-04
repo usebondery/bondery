@@ -20,6 +20,8 @@ import {
 import { openStandardConfirmModal } from "../../components/modals/openStandardConfirmModal";
 import { modals } from "@mantine/modals";
 import { ChromeExtensionModal } from "./ChromeExtensionModal";
+import { usePWAInstall } from "@/hooks/usePWAInstall";
+import { IconDeviceDesktop } from "@tabler/icons-react";
 
 interface UserIdentity {
   id: string;
@@ -33,6 +35,7 @@ interface ProviderIntegrationsProps {
   userIdentities: UserIdentity[];
   showOAuthProviders?: boolean;
   showExtensionProvider?: boolean;
+  showPWAProvider?: boolean;
   title?: string;
   description?: string;
 }
@@ -42,12 +45,16 @@ export function ProviderIntegrations({
   userIdentities,
   showOAuthProviders = true,
   showExtensionProvider = true,
+  showPWAProvider = true,
   title,
   description,
 }: ProviderIntegrationsProps) {
   const [providers, setProviders] = useState<string[]>(initialProviders);
   const [isExtensionInstalled, setIsExtensionInstalled] = useState(false);
   const [extensionVersion, setExtensionVersion] = useState<string | null>(null);
+
+  const { canInstall, isChromiumDesktop, isPWAInstalled, isInstalledFromBrowser, install } =
+    usePWAInstall();
 
   const t = useTranslations("SettingsPage.Profile");
   const tIntegration = useTranslations("SettingsPage.Integration");
@@ -261,6 +268,36 @@ export function ProviderIntegrations({
             }}
           />
         ) : null}
+        {showPWAProvider
+          ? (() => {
+              const isInstalled = isPWAInstalled || isInstalledFromBrowser;
+              const isUnsupported = !canInstall && !isInstalled && !isChromiumDesktop;
+              const isMenuInstall = !canInstall && !isInstalled && isChromiumDesktop;
+              const isDisabled = isInstalled || isUnsupported || isMenuInstall;
+              const disabledDescription = isUnsupported
+                ? tIntegration("DesktopAppNotSupportedDescription")
+                : isMenuInstall
+                  ? tIntegration("DesktopAppMenuInstallDescription")
+                  : undefined;
+
+              return (
+                <IntegrationCard
+                  provider="pwa"
+                  displayName={tIntegration("DesktopApp")}
+                  icon={IconDeviceDesktop}
+                  iconColor="grape"
+                  isConnected={isInstalled}
+                  isDisabled={isDisabled}
+                  connectedDescription={tIntegration("DesktopAppInstalledDescription")}
+                  unconnectedDescription={tIntegration("DesktopAppInstallDescription")}
+                  disabledDescription={disabledDescription}
+                  onClick={() => {
+                    if (canInstall) void install();
+                  }}
+                />
+              );
+            })()
+          : null}
       </Group>
     </Stack>
   );

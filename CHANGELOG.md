@@ -1,6 +1,29 @@
 # Changelog
 All notable changes to this project will be documented in this file. On more information about the format, see [Instructions for changelog](.github/instructions/changelog.instructions.md).
 
+## [1.4.1] - 04.04.2026
+
+### ✨ Added
+
+- Map: address pins view with segmented control to switch between people and address pins, including filterable `AddressPinsTable` with address type badges.
+- PWA: install Bondery as a desktop app directly from Settings — shows contextual install instructions for Chromium-based browsers.
+- New GIS database functions: `get_map_pins_in_bbox` and `get_map_address_pins_in_bbox` RPCs for viewport-bounded map queries, with a partial GIS index for performance.
+
+### 🐛 Fixed
+
+- Chrome extension: fixed LinkedIn profile URN extraction failing on profiles where nested JSON objects appeared between `publicIdentifier` and `entityUrn` fields; replaced fragile regex with a sliding-window HTML search and DOM member-ID fallback.
+- Chrome extension: fixed language-agnostic profile photo extraction using button iteration instead of localised aria-label matching.
+- Fix & Merge page: prevented server component crash when the merge recommendations API is unreachable.
+- Fixed `get_linkedin_enrich_eligible` RPC referencing the old `people_social_media` table name after the rename to `people_socials`.
+
+### 🔄 Changed
+
+- Map page now fetches pins lazily within the current viewport bounds instead of loading all contacts upfront.
+
+### 📦 Dependencies
+
+- Bumped minimum Chrome extension version to 1.4.1.
+
 ## [1.4.0] - 01.04.2026
 
 ### ✨ Added

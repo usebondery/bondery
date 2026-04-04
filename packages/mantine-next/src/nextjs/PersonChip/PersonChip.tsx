@@ -4,15 +4,18 @@ import {
   Avatar,
   Badge,
   type BadgeProps,
+  Center,
   Combobox,
   Group,
+  Loader,
   Text,
   UnstyledButton,
   useCombobox,
   type MantineColor,
 } from "@mantine/core";
+import { useDebouncedCallback } from "@mantine/hooks";
 import { IconChevronDown, IconX } from "@tabler/icons-react";
-import { useMemo, useRef, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import type { ContactPreview } from "@bondery/types";
 import Link from "next/link";
 import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
@@ -50,6 +53,10 @@ interface PersonChipProps {
   openInNewTab?: boolean;
   /** Custom right section override — rendered instead of the default chevron/clear icon. */
   rightSection?: ReactNode;
+  /** Async server-side search handler. When provided, triggers after the user stops typing. */
+  onSearch?: (query: string) => Promise<ContactPreview[]>;
+  /** Debounce delay for `onSearch` in milliseconds. Defaults to 300. */
+  searchDebounceMs?: number;
 }
 
 export function PersonChip({
@@ -72,6 +79,8 @@ export function PersonChip({
   showHoverCard = false,
   openInNewTab = false,
   rightSection,
+  onSearch,
+  searchDebounceMs = 300,
 }: PersonChipProps) {
   const avatarSize = size === "sm" ? 16 : 20;
   const avatarEdgeSize = size === "sm" ? 26 : 32;
@@ -98,19 +107,39 @@ export function PersonChip({
     onDropdownClose: () => {
       combobox.resetSelectedOption();
       setSearch("");
+      searchGenRef.current += 1;
+      setAsyncResults([]);
+      setIsSearching(false);
     },
   });
   const [search, setSearch] = useState("");
+  const [asyncResults, setAsyncResults] = useState<ContactPreview[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const searchGenRef = useRef<number>(0);
+  const knownPeopleRef = useRef<Map<string, ContactPreview>>(new Map());
+
+  useEffect(() => {
+    people.forEach((p) => knownPeopleRef.current.set(p.id, p));
+  }, [people]);
+
+  const triggerSearch = useDebouncedCallback(async (query: string) => {
+    if (!onSearch) return;
+    const gen = ++searchGenRef.current;
+    const results = await onSearch(query);
+    if (gen !== searchGenRef.current) return;
+    results.forEach((r) => knownPeopleRef.current.set(r.id, r));
+    setAsyncResults(results);
+    setIsSearching(false);
+  }, searchDebounceMs);
 
   const filteredPeople = useMemo(() => {
-    const query = search.trim().toLowerCase();
-
-    if (!query) {
-      return people;
+    if (onSearch && search.trim()) {
+      return asyncResults;
     }
-
+    const query = search.trim().toLowerCase();
+    if (!query) return people;
     return people.filter((candidate) => getDisplayName(candidate).toLowerCase().includes(query));
-  }, [people, search]);
+  }, [people, search, onSearch, asyncResults]);
 
   const fullName = getDisplayName(person);
   const resolvedHref = href || (person ? `${WEBAPP_ROUTES.PERSON}/${person.id}` : undefined);
@@ -251,12 +280,33 @@ export function PersonChip({
         <Combobox.Search
           ref={searchInputRef}
           value={search}
-          onChange={(event) => setSearch(event.currentTarget.value)}
+          onChange={(event) => {
+            const value = event.currentTarget.value;
+            setSearch(value);
+            if (onSearch) {
+              const query = value.trim();
+              if (!query) {
+                searchGenRef.current += 1;
+                setAsyncResults([]);
+                setIsSearching(false);
+              } else {
+                setIsSearching(true);
+                triggerSearch(query);
+              }
+            }
+          }}
           placeholder={searchPlaceholder}
+          loading={isSearching}
           autoFocus
         />
         <Combobox.Options style={{ overflowY: "auto" }} className="max-h-60">
-          {filteredPeople.length > 0 ? (
+          {isSearching ? (
+            <Combobox.Empty>
+              <Center>
+                <Loader size="xs" />
+              </Center>
+            </Combobox.Empty>
+          ) : filteredPeople.length > 0 ? (
             filteredPeople.map((candidate) => {
               const candidateName = formatPersonName(candidate);
 

@@ -33,6 +33,8 @@ import { DatePickerWithPresets } from "../../components/interactions/DatePickerW
 import { ACTIVITY_TYPE_OPTIONS } from "@/lib/activityTypes";
 import { getActivityTypeConfig } from "@/lib/activityTypes";
 import { captureEvent } from "@/lib/analytics/client";
+import { DEBOUNCE_MS } from "@/lib/config";
+import { searchContacts } from "@/lib/searchContacts";
 
 type ModalTranslationsFn = (key: string, values?: Record<string, string | number>) => string;
 
@@ -239,8 +241,11 @@ function NewActivityForm({
                 form.setFieldValue("participantIds", ids);
                 form.validateField("participantIds");
               }}
+              onSearch={searchContacts}
+              searchDebounceMs={DEBOUNCE_MS.contactPicker}
               placeholder={t("AddParticipantsPlaceholder")}
               noResultsLabel={t("NoContactsFound")}
+              searchingLabel="Searching…"
               inputRef={participantsInputRef}
               error={form.errors.participantIds}
               disabled={loading}

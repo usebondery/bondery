@@ -1,4 +1,6 @@
-import { Text, Group, Divider, Card, CardSection } from "@mantine/core";
+"use client";
+
+import { Text, Group, Divider, CardSection } from "@mantine/core";
 import { IconDatabase } from "@tabler/icons-react";
 import { useTranslations } from "next-intl";
 import { LogoutSection } from "./LogoutSection";
@@ -6,21 +8,17 @@ import { DeleteAccountSection } from "./DeleteAccountSection";
 import { LinkedInImportSection } from "./LinkedInImportSection";
 import { InstagramImportSection } from "./InstagramImportSection";
 import { VCardImportSection } from "./VCardImportSection";
+import { SettingsSection } from "./SettingsSection";
 
 export function DataManagementCard() {
   const t = useTranslations("SettingsPage.DataManagement");
 
   return (
-    <Card id="data-management" withBorder shadow="sm">
-      <CardSection withBorder inheritPadding py="md">
-        <Group gap="xs">
-          <IconDatabase size={20} stroke={1.5} />
-          <Text size="lg" fw={600}>
-            {t("Title")}
-          </Text>
-        </Group>
-      </CardSection>
-
+    <SettingsSection
+      id="data-management"
+      icon={<IconDatabase size={20} stroke={1.5} />}
+      title={t("Title")}
+    >
       <CardSection inheritPadding py="md">
         <LogoutSection />
       </CardSection>
@@ -46,6 +44,6 @@ export function DataManagementCard() {
       <CardSection inheritPadding py="md">
         <DeleteAccountSection />
       </CardSection>
-    </Card>
+    </SettingsSection>
   );
 }

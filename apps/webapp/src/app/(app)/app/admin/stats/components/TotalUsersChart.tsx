@@ -52,7 +52,7 @@ export function TotalUsersChart({ data }: TotalUsersChartProps) {
               tickLine={false}
               axisLine={false}
               minTickGap={24}
-              tick={({ x, y, payload, index }) => {
+              tick={({ x, y, payload, index }: any) => {
                 const point = chartData[index ?? 0];
                 if (!point?.showTick) return <g />;
                 return (
@@ -64,7 +64,7 @@ export function TotalUsersChart({ data }: TotalUsersChartProps) {
             />
             <YAxis tickLine={false} axisLine={false} width={40} allowDecimals={false} />
             <Tooltip
-              formatter={(value: number) => [Number(value).toLocaleString(), t("TotalUsers")]}
+              formatter={(value) => [Number(value).toLocaleString(), t("TotalUsers")]}
               labelFormatter={(_label, payload) => {
                 const rawDate = payload?.[0]?.payload?.date;
                 return rawDate ? new Date(rawDate).toLocaleDateString() : "";

@@ -25,7 +25,7 @@ interface CachedProfile {
   educationHistory: EducationEntry[];
   linkedinBio?: string;
 }
-const profileCache = new Map<string, CachedProfile>();
+export const profileCache = new Map<string, CachedProfile>();
 const inflightScrapes = new Map<string, Promise<CachedProfile>>();
 
 async function getOrScrapeProfile(
@@ -122,22 +122,78 @@ async function getOrScrapeProfile(
   }
 }
 
+// ─── Standalone DOM extract helpers (module-level, shared with content script) ─
+
+/**
+ * Extracts the profile photo URL from the LinkedIn top-card section.
+ * Language-agnostic: iterates buttons (photo is always in a button) rather than
+ * relying on localised aria-labels like "profile picture".
+ */
+export function extractProfilePhotoUrl(): string | null {
+  const topCard = document.querySelector("section[data-member-id]") || document.body;
+
+  // Strategy 1: any button inside the top-card containing an <img> with a real src.
+  const buttons = topCard.querySelectorAll<HTMLButtonElement>("button");
+  for (const btn of buttons) {
+    const img = btn.querySelector("img") as HTMLImageElement | null;
+    if (img?.src && !img.src.includes("data:image")) {
+      return img.src;
+    }
+  }
+
+  // Strategy 2: data-view-name container
+  const memberPhotoContainer = document.querySelector(
+    '[data-view-name="profile-top-card-member-photo"]',
+  );
+  if (memberPhotoContainer) {
+    const img =
+      (memberPhotoContainer.querySelector('img[data-loaded="true"]') as HTMLImageElement | null) ??
+      (memberPhotoContainer.querySelector("img") as HTMLImageElement | null);
+    if (img?.src && !img.src.includes("data:image")) {
+      return img.src;
+    }
+  }
+
+  // Strategy 3: stable class-based selectors (may drift over time)
+  const fallbacks = [
+    ".pv-top-card-profile-picture__image",
+    "[data-anonymize='headshot-photo']",
+    "img.profile-photo-edit__preview",
+  ];
+  for (const selector of fallbacks) {
+    const img = document.querySelector(selector) as HTMLImageElement | null;
+    if (img?.src && !img.src.includes("data:image")) {
+      return img.src;
+    }
+  }
+
+  return null;
+}
+
 interface LinkedInButtonProps {
   username: string;
 }
 
 const LinkedInButton: React.FC<LinkedInButtonProps> = ({ username }) => {
   const [isLoading, setIsLoading] = useState(false);
+  // True while the background cache-warmup scrape is in flight so the button
+  // shows as loading from the moment it mounts until the data is ready.
+  const [isPreloading, setIsPreloading] = useState(!profileCache.has(username));
 
   useEffect(() => {
     // Warm the cache on mount so data is ready before the button is clicked.
     // Subsequent mounts for the same username return the cached value immediately.
-    void getOrScrapeProfile(username, {
+    if (profileCache.has(username)) {
+      setIsPreloading(false);
+      return;
+    }
+    setIsPreloading(true);
+    getOrScrapeProfile(username, {
       extractProfileName,
       extractProfilePhotoUrl,
       extractHeadline,
       extractPlace,
-    });
+    }).finally(() => setIsPreloading(false));
   }, [username]);
 
   const extractProfileName = (): {
@@ -258,54 +314,6 @@ const LinkedInButton: React.FC<LinkedInButtonProps> = ({ username }) => {
     return null;
   };
 
-  const extractProfilePhotoUrl = (): string | null => {
-    const topCard = document.querySelector("section[data-member-id]") || document;
-    const profilePhotoImg = topCard.querySelector(
-      "button[aria-label*='profile picture'] img",
-    ) as HTMLImageElement | null;
-
-    if (profilePhotoImg?.src && !profilePhotoImg.src.includes("data:image")) {
-      return profilePhotoImg.src;
-    }
-    // Find image inside element with data-view-name="profile-top-card-member-photo"
-    const memberPhotoContainer = document.querySelector(
-      '[data-view-name="profile-top-card-member-photo"]',
-    );
-
-    if (memberPhotoContainer) {
-      const img = memberPhotoContainer.querySelector('img[data-loaded="true"]') as HTMLImageElement;
-
-      if (img?.src && !img.src.includes("data:image")) {
-        return img.src;
-      }
-    }
-
-    // Fallback to original selector
-    const img = document.querySelector(
-      "img._021a4e24.a4f8c248.ad272af2._8d269092._00859a34",
-    ) as HTMLImageElement;
-
-    if (img && img.src && !img.src.includes("data:image")) {
-      return img.src;
-    }
-
-    // Try alternative selectors
-    const alternatives = [
-      ".pv-top-card-profile-picture__image",
-      "[data-anonymize='headshot-photo']",
-      "img.profile-photo-edit__preview",
-    ];
-
-    for (const selector of alternatives) {
-      const altImg = document.querySelector(selector) as HTMLImageElement;
-      if (altImg?.src && !altImg.src.includes("data:image")) {
-        return altImg.src;
-      }
-    }
-
-    return null;
-  };
-
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
 
   const handleClick = async (e: React.MouseEvent) => {
@@ -379,16 +387,23 @@ const LinkedInButton: React.FC<LinkedInButtonProps> = ({ username }) => {
 
   return (
     <>
-      <Button
-        onClick={handleClick}
-        loading={isLoading}
-        fullWidth
-        radius="xl"
-        size="xl"
-        leftSection={<BonderyIconWhite width={16} height={16} />}
-      >
-        Open in Bondery
-      </Button>
+      {/*
+       * overflow:clip (not hidden) clips the button-scale-effect hover
+       * transform at the wrapper boundary without creating a scroll
+       * container or affecting the host page layout, so LinkedIn's
+       * action bar doesn't get a permanent horizontal scrollbar.
+       */}
+      <div style={{ overflow: "clip", borderRadius: "var(--mantine-radius-xl)" }}>
+        <Button
+          onClick={handleClick}
+          loading={isLoading || isPreloading}
+          radius="xl"
+          size="lg"
+          leftSection={<BonderyIconWhite width={14} height={14} />}
+        >
+          Open in Bondery
+        </Button>
+      </div>
       {statusMessage && (
         <Text size="xs" c="dimmed" ta="center" mt={4}>
           {statusMessage}

@@ -3,7 +3,12 @@ import "./globals.css";
 import { bonderyTheme } from "@bondery/mantine-next";
 import { Notifications } from "@mantine/notifications";
 import { Lexend } from "next/font/google";
-import { ColorSchemeScript, MantineProvider, mantineHtmlProps } from "@mantine/core";
+import {
+  ColorSchemeScript,
+  MantineProvider,
+  mantineHtmlProps,
+  v8CssVariablesResolver,
+} from "@mantine/core";
 import { Footer, Header } from "@/components/landing";
 import Script from "next/script";
 import { WEBSITE_URL } from "@/lib/config";
@@ -138,7 +143,11 @@ export default async function RootLayout({
           nonce={nonce}
           dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareApplicationSchema) }}
         />
-        <MantineProvider defaultColorScheme="dark" theme={bonderyTheme}>
+        <MantineProvider
+          defaultColorScheme="dark"
+          theme={bonderyTheme}
+          cssVariablesResolver={v8CssVariablesResolver}
+        >
           <Notifications autoClose={6000} position="top-center" />
           <Header />
           <main>{children}</main>

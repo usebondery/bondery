@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   Center,
@@ -27,6 +27,7 @@ import {
 import { API_ROUTES, WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import type {
   Contact,
+  ContactPreview,
   MergeConflictChoice,
   MergeConflictField,
   MergeContactsResponse,
@@ -34,6 +35,7 @@ import type {
 import { revalidateAll } from "../../actions";
 import { SelectableCard } from "@/app/(app)/app/components/SelectableCard";
 import { getAvatarColorFromName } from "@/lib/avatarColor";
+import { DEBOUNCE_MS } from "@/lib/config";
 
 interface OpenMergeWithModalParams {
   contacts: Contact[];
@@ -44,6 +46,7 @@ interface OpenMergeWithModalParams {
   redirectToMergedPerson?: boolean;
   titleText: string;
   texts: MergeWithModalTexts;
+  onSearch?: (query: string) => Promise<Contact[]>;
   onSuccess?: () => void;
   initialConflictChoices?: Partial<Record<MergeConflictField, MergeConflictChoice>>;
 }
@@ -404,6 +407,7 @@ export function openMergeWithModal({
   redirectToMergedPerson = true,
   titleText,
   texts,
+  onSearch,
   onSuccess,
   initialConflictChoices,
 }: OpenMergeWithModalParams) {
@@ -425,6 +429,7 @@ export function openMergeWithModal({
         redirectToMergedPerson={redirectToMergedPerson}
         modalId={modalId}
         texts={texts}
+        onSearch={onSearch}
         onSuccess={onSuccess}
         initialConflictChoices={initialConflictChoices}
       />
@@ -441,6 +446,7 @@ interface MergeWithModalProps {
   redirectToMergedPerson: boolean;
   modalId: string;
   texts: MergeWithModalTexts;
+  onSearch?: (query: string) => Promise<Contact[]>;
   onSuccess?: () => void;
   initialConflictChoices?: Partial<Record<MergeConflictField, MergeConflictChoice>>;
 }
@@ -454,6 +460,7 @@ function MergeWithModal({
   redirectToMergedPerson,
   modalId,
   texts,
+  onSearch,
   onSuccess,
   initialConflictChoices,
 }: MergeWithModalProps) {
@@ -466,6 +473,7 @@ function MergeWithModal({
   const [rightPersonId, setRightPersonId] = useState(initialRightPersonId || "");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const autoMergeRef = useRef(false);
+  const knownContactsRef = useRef<Map<string, Contact>>(new Map());
   const [conflictChoices, setConflictChoices] = useState<
     Partial<Record<MergeConflictField, MergeConflictChoice>>
   >(initialConflictChoices ?? {});
@@ -478,6 +486,28 @@ function MergeWithModal({
       withCloseButton: !isSubmitting,
     });
   }, [isSubmitting, modalId]);
+
+  useEffect(() => {
+    contacts.forEach((c) => knownContactsRef.current.set(c.id, c));
+  }, [contacts]);
+
+  // Left picker: onSearch not wired — disabled in all current callers (disableLeftPicker: true).
+  const handleRightSearch = useCallback(
+    async (query: string): Promise<ContactPreview[]> => {
+      if (!onSearch) return [];
+      const results = await onSearch(query);
+      results.forEach((c) => knownContactsRef.current.set(c.id, c));
+      return results
+        .filter((c) => !c.myself && c.id !== leftPersonId)
+        .map((c) => ({
+          id: c.id,
+          firstName: c.firstName,
+          lastName: c.lastName,
+          avatar: c.avatar,
+        }));
+    },
+    [onSearch, leftPersonId],
+  );
 
   const peopleOptions = useMemo(
     () =>
@@ -498,7 +528,9 @@ function MergeWithModal({
   );
 
   const rightContact = useMemo(
-    () => contacts.find((candidate) => candidate.id === rightPersonId) || null,
+    () =>
+      contacts.find((candidate) => candidate.id === rightPersonId) ??
+      (rightPersonId ? (knownContactsRef.current.get(rightPersonId) ?? null) : null),
     [contacts, rightPersonId],
   );
 
@@ -682,6 +714,8 @@ function MergeWithModal({
               placeholder={texts.selectRightPerson}
               searchPlaceholder={texts.searchPeople}
               noResultsLabel={texts.noPeopleFound}
+              onSearch={onSearch ? handleRightSearch : undefined}
+              searchDebounceMs={DEBOUNCE_MS.contactPicker}
             />
           </Group>
 
