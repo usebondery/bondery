@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, Stack, Group, Paper } from "@mantine/core";
+import { Button, Stack, Group, Paper, Tooltip, Kbd, Text } from "@mantine/core";
 import {
   IconAddressBook,
   IconBrandLinkedin,
@@ -18,8 +18,9 @@ import { notifications } from "@mantine/notifications";
 import { useEffect, useState, useDeferredValue, useMemo, useTransition } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { useDebouncedCallback } from "@mantine/hooks";
-import { DEBOUNCE_MS } from "@/lib/config";
+import { useDebouncedCallback, useHotkeys } from "@mantine/hooks";
+import { DEBOUNCE_MS, HOTKEYS } from "@/lib/config";
+import { peopleSearchActions } from "../components/PeopleSearchSpotlight";
 import ContactsTable, {
   ColumnConfig,
   type SortOrder,
@@ -216,6 +217,11 @@ export function PeopleClient({ initialContacts, totalCount, layout = "stack" }: 
       router.replace(`${pathname}?${params.toString()}`);
     });
   }, DEBOUNCE_MS.search);
+
+  useHotkeys([
+    [HOTKEYS.ADD_PERSON, () => openAddContactModal()],
+    [HOTKEYS.FIND_PERSON, () => peopleSearchActions.open()],
+  ]);
 
   // Handle sort
   const handleSort = (order: SortOrder) => {
@@ -483,13 +489,25 @@ export function PeopleClient({ initialContacts, totalCount, layout = "stack" }: 
             </Button>
           }
           primaryAction={
-            <Button
-              size="md"
-              leftSection={<IconUserPlus size={16} />}
-              onClick={() => openAddContactModal()}
+            <Tooltip
+              label={
+                <Group gap="xs" wrap="nowrap">
+                  <Text size="xs" inherit>
+                    {t("AddPerson")}
+                  </Text>
+                  <Kbd size="xs">{HOTKEYS.ADD_PERSON.toUpperCase()}</Kbd>
+                </Group>
+              }
+              withArrow
             >
-              {t("AddPerson")}
-            </Button>
+              <Button
+                size="md"
+                leftSection={<IconUserPlus size={16} />}
+                onClick={() => openAddContactModal()}
+              >
+                {t("AddPerson")}
+              </Button>
+            </Tooltip>
           }
         />
 

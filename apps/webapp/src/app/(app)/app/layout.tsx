@@ -1,5 +1,4 @@
-import { AppShell, AppShellMain, AppShellNavbar } from "@mantine/core";
-import { NavigationSidebarContent } from "./components/NavigationSidebar";
+import { AppShellWrapper } from "./components/AppShellWrapper";
 import { LocaleProvider } from "@/app/(app)/app/components/UserLocaleProvider";
 import { getAuthHeaders } from "@/lib/authHeaders";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
@@ -16,6 +15,8 @@ import { EnrichStatusNotificationManager } from "@/lib/extension/EnrichStatusNot
 import { EnrichResumeDetector } from "@/lib/extension/EnrichResumeDetector";
 import { ExtensionUpdateNotificationManager } from "@/lib/extension/ExtensionUpdateNotificationManager";
 import { ServiceWorkerRegistration } from "./components/ServiceWorkerRegistration";
+import { Suspense } from "react";
+import { cookies } from "next/headers";
 
 interface UserSettingsLayoutData {
   userName: string;
@@ -64,7 +65,9 @@ async function getUserSettings(precomputedHeaders?: HeadersInit) {
         colorScheme,
       } satisfies UserSettingsLayoutData;
     }
-  } catch (error) {}
+  } catch (error) {
+    console.error("[AppLayout] Failed to fetch user settings:", error);
+  }
 
   return {
     userName: "User",
@@ -87,11 +90,69 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     redirect(WEBSITE_ROUTES.LOGIN);
   }
 
-  // Fetch auth headers once, then parallelise both independent API calls
+  // Fetch auth headers + read cookie in parallel (both fast)
+  const headers = await getAuthHeaders();
+  const [settings, cookieStore] = await Promise.all([getUserSettings(headers), cookies()]);
+
+  const initialCollapsed = cookieStore.get("bondery-sidebar-collapsed")?.value === "true";
+  const { userName, avatarUrl, locale, timezone, timeFormat, colorScheme } = settings;
+  const messages = translations[locale as keyof typeof translations] || translations.en;
+
+  return (
+    <LocaleProvider locale={locale} timezone={timezone} timeFormat={timeFormat} messages={messages}>
+      <ServiceWorkerRegistration />
+      <ColorSchemeSync colorScheme={colorScheme} />
+      <EnrichStatusNotificationManager />
+      <EnrichResumeDetector />
+      <ExtensionUpdateNotificationManager />
+      {/*
+       * Suspense boundary: show the shell with default (no-badge) state immediately,
+       * then replace with actual badge data once the slower parallel fetches resolve.
+       */}
+      <Suspense
+        fallback={
+          <AppShellWrapper
+            userName={userName}
+            avatarUrl={avatarUrl}
+            initialCollapsed={initialCollapsed}
+            hasActiveMergeRecommendations={false}
+            hasOverdueKeepInTouch={false}
+          >
+            {children}
+          </AppShellWrapper>
+        }
+      >
+        <AppShellWithBadges
+          userName={userName}
+          avatarUrl={avatarUrl}
+          initialCollapsed={initialCollapsed}
+        >
+          {children}
+        </AppShellWithBadges>
+      </Suspense>
+    </LocaleProvider>
+  );
+}
+
+/**
+ * Async server component that fetches sidebar badge indicator data in parallel
+ * and renders the full app shell. Consumed inside a Suspense boundary so that
+ * the shell structure is visible while these slower fetches are in-flight.
+ */
+async function AppShellWithBadges({
+  userName,
+  avatarUrl,
+  initialCollapsed,
+  children,
+}: {
+  userName: string;
+  avatarUrl: string | null;
+  initialCollapsed: boolean;
+  children: React.ReactNode;
+}) {
   const headers = await getAuthHeaders();
 
-  const [settings, recommendations, keepInTouchData, enrichEligibleRes] = await Promise.all([
-    getUserSettings(headers),
+  const [recommendations, keepInTouchData, enrichEligibleRes] = await Promise.all([
     getMergeRecommendationsData(headers).catch(() => [] as MergeRecommendation[]),
     getKeepInTouchData(headers).catch(() => ({ contacts: [] as Contact[] })),
     fetch(`${API_URL}${API_ROUTES.CONTACTS}/enrich-queue/eligible-count`, { headers }).catch(
@@ -105,7 +166,6 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     enrichEligibleCount = data.count ?? 0;
   }
 
-  const { userName, userEmail, avatarUrl, locale, timezone, timeFormat, colorScheme } = settings;
   const hasActiveMergeRecommendations = recommendations.length > 0 || enrichEligibleCount > 0;
   const hasOverdueKeepInTouch = keepInTouchData.contacts.some((c) => {
     if (!c.keepFrequencyDays || !c.lastInteraction) return true;
@@ -114,33 +174,15 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     return nextDue <= new Date();
   });
 
-  const messages = translations[locale as keyof typeof translations] || translations.en;
-
   return (
-    <LocaleProvider locale={locale} timezone={timezone} timeFormat={timeFormat} messages={messages}>
-      <ServiceWorkerRegistration />
-      <ColorSchemeSync colorScheme={colorScheme} />
-      <EnrichStatusNotificationManager />
-      <EnrichResumeDetector />
-      <ExtensionUpdateNotificationManager />
-      <AppShell
-        padding="md"
-        navbar={{
-          width: 280,
-          breakpoint: "sm",
-        }}
-      >
-        <AppShellNavbar p="md">
-          <NavigationSidebarContent
-            userName={userName}
-            userEmail={userEmail}
-            avatarUrl={avatarUrl}
-            hasActiveMergeRecommendations={hasActiveMergeRecommendations}
-            hasOverdueKeepInTouch={hasOverdueKeepInTouch}
-          />
-        </AppShellNavbar>
-        <AppShellMain>{children}</AppShellMain>
-      </AppShell>
-    </LocaleProvider>
+    <AppShellWrapper
+      userName={userName}
+      avatarUrl={avatarUrl}
+      initialCollapsed={initialCollapsed}
+      hasActiveMergeRecommendations={hasActiveMergeRecommendations}
+      hasOverdueKeepInTouch={hasOverdueKeepInTouch}
+    >
+      {children}
+    </AppShellWrapper>
   );
 }

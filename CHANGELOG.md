@@ -1,6 +1,37 @@
 # Changelog
 All notable changes to this project will be documented in this file. On more information about the format, see [Instructions for changelog](.github/instructions/changelog.instructions.md).
 
+## [1.4.2] - 04.04.2026
+
+### ✨ Added
+
+- Webapp: command palette (Ctrl+K / ⌘+K) for quick keyboard-driven navigation, contact search, and common actions.
+- Webapp: collapsible navigation sidebar with Ctrl+B / ⌘+B toggle.
+- Webapp: people search spotlight for fast contact lookup (F).
+- Webapp: global hotkey system (`HOTKEYS` config) for consistent keyboard shortcut management.
+
+### 🐛 Fixed
+
+- LinkedIn import: parenthetical maiden/married names (e.g. `Andělová (Hudská)`) are now unwrapped — both parts are preserved and correctly split into first/middle/last name fields.
+- LinkedIn import: emojis (e.g. `👋🏼`) are now stripped before name splitting so they no longer appear as a spurious last name token.
+- LinkedIn import: academic titles with trailing periods (e.g. `MSc.`, `PhD.`, `MBA.`) are now correctly stripped from names.
+- LinkedIn import: ALL-CAPS name tokens (e.g. `ALEXANDRO`) are now normalised to title case after parsing.
+- LinkedIn import: contacts that already exist in Bondery are now correctly detected as duplicates when their LinkedIn handle contains percent-encoded characters (e.g. `albert-jel%C3%ADnek-69649944`); handles are decoded before comparison.
+- Chrome extension: eliminated redundant Voyager API calls during enrichment by extracting DOM-based profile fields (name, photo, headline, location) inline instead of calling `getLinkedInSnapshot()`, reducing rate-limit risk.
+
+### 🔄 Changed
+
+- Chrome extension: location extraction during enrichment now tries multiple DOM selectors in order of specificity for robustness across LinkedIn's varying page layouts.
+
+### 📝 Documentation
+
+- Added Chrome Extension OAuth Setup workflow covering the redirect URI mismatch error and resolution steps.
+- Fixed incomplete OAuth client create command in local development setup guide (added required `token_endpoint_auth_method='none'`).
+
+### 📦 Dependencies
+
+- Bumped minimum Chrome extension version to 1.4.2.
+
 ## [1.4.1] - 04.04.2026
 
 ### ✨ Added

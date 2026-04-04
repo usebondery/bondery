@@ -27,6 +27,16 @@ function getSuggestionCountryFlag(item: MapSuggestionItem): string {
   return iso && iso.length === 2 ? iso : "aq";
 }
 
+/**
+ * Extracts a 2-letter ISO country code from a formatted location label
+ * produced by {@link formatPlaceLabel} (e.g. "Ann Arbor, Michigan, US" → "us").
+ * Returns `null` when the last segment isn't a valid-looking country code.
+ */
+function extractCountryCodeFromLabel(label: string): string | null {
+  const lastSegment = label.split(",").pop()?.trim().toLowerCase();
+  return lastSegment && /^[a-z]{2}$/.test(lastSegment) ? lastSegment : null;
+}
+
 export function LocationLookupInput({
   label,
   placeholder,
@@ -40,12 +50,27 @@ export function LocationLookupInput({
   onBlur,
 }: LocationLookupInputProps) {
   const [options, setOptions] = useState<string[]>([]);
-  const [selectedFlag, setSelectedFlag] = useState<string | null>(null);
+  const [selectedFlag, setSelectedFlag] = useState<string | null>(() =>
+    extractCountryCodeFromLabel(value),
+  );
   const [loading, setLoading] = useState(false);
   const suggestionsByLabel = useRef<Record<string, MapSuggestionItem>>({});
   const optionFlagByLabel = useRef<Record<string, string>>({});
+  /** Tracks whether the user has actively changed the input value. */
+  const userHasTyped = useRef(false);
+
+  // Sync the flag when value changes externally (e.g. after enrichment / router.refresh())
+  useEffect(() => {
+    if (!userHasTyped.current) {
+      setSelectedFlag(extractCountryCodeFromLabel(value));
+    }
+  }, [value]);
 
   useEffect(() => {
+    // Skip the initial API call when the component mounts with a pre-populated value.
+    // Only start fetching suggestions after the user types.
+    if (!userHasTyped.current) return;
+
     const timeoutId = setTimeout(async () => {
       const text = value.trim();
       if (text.length < 2) {
@@ -80,20 +105,20 @@ export function LocationLookupInput({
       value={value}
       disabled={disabled}
       style={style}
-      className="max-w-120"
       aria-label={ariaLabel}
       leftSection={<IconCompass size={16} />}
       rightSection={
-          selectedFlag ? (
-            <span className={`fi fi-${selectedFlag}`} style={{ width: 18 }} />
-          ) : undefined
-        }
+        selectedFlag ? (
+          <span className={`fi fi-${selectedFlag}`} style={{ width: 18 }} />
+        ) : undefined
+      }
       rightSectionPointerEvents="none"
       loading={loading}
       onChange={(v) => {
-          onChange(v);
-          setSelectedFlag(optionFlagByLabel.current[v] ?? null);
-        }}
+        userHasTyped.current = true;
+        onChange(v);
+        setSelectedFlag(optionFlagByLabel.current[v] ?? null);
+      }}
       data={options}
       onOptionSubmit={(selectedLabel) => {
         const selected = suggestionsByLabel.current[selectedLabel];

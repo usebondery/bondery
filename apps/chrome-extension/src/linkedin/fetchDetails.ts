@@ -208,10 +208,14 @@ function extractProfileUrn(entities: Record<string, unknown>[], username: string
     `[linkedin][fetchDetails] Looking for profileUrn for "${username}" among ${entities.length} entities`,
   );
 
+  // Normalise to NFC so diacritical-mark profiles (e.g. "antonín-müller-…")
+  // match even when the URL was decoded to NFD combining characters.
+  const normalizedUsername = username.normalize("NFC");
+
   // 1. Find the Profile / MiniProfile entity whose publicIdentifier matches the viewed user
   for (const e of entities) {
     const pubId = (e.publicIdentifier ?? e.vanityName) as string | undefined;
-    if (pubId === username) {
+    if (pubId?.normalize("NFC") === normalizedUsername) {
       const urn = (e.entityUrn ?? e.objectUrn ?? e.dashEntityUrn ?? e["*profile"]) as
         | string
         | undefined;

@@ -39,6 +39,24 @@ export const FEATURES = {
   birthdayNotifications: true,
 } as const;
 
+/**
+ * Global keyboard shortcuts used across the webapp.
+ * Use `mod` for Ctrl on Windows/Linux and ⌘ on Mac.
+ * Bare single-key shortcuts (e.g. "n") fire only when focus is outside inputs.
+ */
+export const HOTKEYS = {
+  /** Toggle the navigation sidebar (Ctrl+B / ⌘+B) */
+  SIDEBAR_TOGGLE: "mod+b",
+  /** Open the command palette (Ctrl+K / ⌘+K) */
+  COMMAND_PALETTE: "mod+k",
+  /** Open the "Log interaction" modal */
+  LOG_INTERACTION: "n",
+  /** Open the "Add person" modal */
+  ADD_PERSON: "c",
+  /** Open the "Find person" spotlight */
+  FIND_PERSON: "f",
+} as const;
+
 export const LIMITS = {
   maxImportantDates: 5,
   maxAddresses: 5,

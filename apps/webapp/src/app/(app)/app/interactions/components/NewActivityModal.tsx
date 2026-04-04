@@ -43,6 +43,7 @@ interface OpenNewActivityModalParams {
   activity?: Activity | null;
   initialParticipantIds?: string[];
   titleText?: string;
+  onCreated?: (activityId: string) => void;
   t: ModalTranslationsFn;
 }
 
@@ -51,6 +52,7 @@ interface NewActivityFormProps {
   contacts: Contact[];
   activity: Activity | null;
   initialParticipantIds?: string[];
+  onCreated?: (activityId: string) => void;
   t: ModalTranslationsFn;
 }
 
@@ -92,6 +94,7 @@ function NewActivityForm({
   contacts,
   activity,
   initialParticipantIds,
+  onCreated,
   t,
 }: NewActivityFormProps) {
   const router = useRouter();
@@ -193,6 +196,8 @@ function NewActivityForm({
         throw new Error(errorData.error || errorData.message || "Failed to create activity");
       }
 
+      const data = (await res.json()) as { id: string };
+
       captureEvent(activity ? "interaction_updated" : "interaction_created", {
         activity_type: values.type,
         participant_count: values.participantIds.length,
@@ -207,7 +212,11 @@ function NewActivityForm({
 
       modals.close(modalId);
       await revalidateInteractions();
-      router.refresh();
+      if (onCreated && !isEditMode) {
+        onCreated(data.id);
+      } else {
+        router.refresh();
+      }
     } catch (error) {
       notifications.show(
         errorNotificationTemplate({
@@ -357,6 +366,7 @@ export function openNewActivityModal({
   activity = null,
   initialParticipantIds,
   titleText,
+  onCreated,
   t,
 }: OpenNewActivityModalParams): void {
   const modalId = `activity-${Math.random().toString(36).slice(2)}`;
@@ -372,6 +382,7 @@ export function openNewActivityModal({
         contacts={contacts}
         activity={activity}
         initialParticipantIds={initialParticipantIds}
+        onCreated={onCreated}
         t={t}
       />
     ),

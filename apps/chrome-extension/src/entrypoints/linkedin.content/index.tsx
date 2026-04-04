@@ -463,15 +463,45 @@ async function checkForPendingEnrich(): Promise<void> {
     const workHistory = fetchedWork.length > 0 ? fetchedWork : domWork;
     const educationHistory = fetchedEdu.length > 0 ? fetchedEdu : extractEducation();
 
-    // Scrape remaining profile fields from DOM
-    const snapshot = getLinkedInSnapshot();
-    if (!snapshot) {
-      await browser.runtime.sendMessage({
-        type: "ENRICH_ERROR",
-        payload: { requestId, error: "Failed to scrape LinkedIn profile (DOM snapshot empty)" },
-      });
-      return;
-    }
+    // Scrape profile identity fields directly from DOM.
+    // We intentionally do NOT call getLinkedInSnapshot() here because that
+    // function would trigger a second redundant round of Voyager API calls
+    // (fetchFullWorkHistory + fetchFullEducation were already awaited above).
+    // Duplicate requests risk rate-limiting and delay, so we extract only the
+    // DOM-based fields we need: name, photo, headline, and location.
+    const topCard = document.querySelector("section[data-member-id]") || document;
+    const nameEl =
+      topCard.querySelector<HTMLElement>("a[aria-label] > h1") ||
+      topCard.querySelector<HTMLElement>("h1");
+    const altNameSelectors = [
+      "h1.text-heading-xlarge",
+      ".pv-text-details__left-panel h1",
+      "[data-anonymize='person-name']",
+    ];
+    const altNameEl = altNameSelectors
+      .map((s) => document.querySelector<HTMLElement>(s))
+      .find((el) => !!el?.textContent?.trim());
+    const fullName = (nameEl?.textContent?.trim() || altNameEl?.textContent?.trim() || "").trim();
+    const nameParts = fullName.split(/\s+/).filter(Boolean);
+    const firstName = nameParts[0] ?? username;
+    const lastName = nameParts.length > 1 ? nameParts[nameParts.length - 1] : undefined;
+    const middleName = nameParts.length > 2 ? nameParts.slice(1, -1).join(" ") : undefined;
+
+    const titleEl = topCard.querySelector<HTMLElement>("div[data-generated-suggestion-target]");
+    const headline = titleEl?.textContent?.trim() || undefined;
+
+    // Location: try multiple selectors in order of specificity for robustness
+    // across LinkedIn's DOM variations and background-tab rendering states.
+    const contactInfoLink = topCard.querySelector("#top-card-text-details-contact-info");
+    const locationFromContactInfo =
+      contactInfoLink?.parentElement?.previousElementSibling?.textContent?.trim() || undefined;
+    const locationFromSpan =
+      topCard
+        .querySelector<HTMLElement>(".text-body-small.inline.t-black--light")
+        ?.textContent?.trim() || undefined;
+    const location = locationFromContactInfo || locationFromSpan;
+
+    const profileImageUrl = extractProfilePhotoUrl() ?? undefined;
 
     // Extract bio text
     const linkedinBio = extractBioText();
@@ -490,12 +520,12 @@ async function checkForPendingEnrich(): Promise<void> {
         profile: {
           platform: "linkedin" as const,
           handle: username,
-          firstName: snapshot.firstName,
-          middleName: snapshot.middleName,
-          lastName: snapshot.lastName,
-          profileImageUrl: snapshot.profileImageUrl,
-          headline: snapshot.headline,
-          location: snapshot.location,
+          firstName,
+          middleName,
+          lastName,
+          profileImageUrl,
+          headline,
+          location,
           workHistory,
           educationHistory,
           linkedinBio,

@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, Group, Paper, SimpleGrid, Stack, Text, Title, Tooltip } from "@mantine/core";
+import { Button, Group, Kbd, Paper, SimpleGrid, Stack, Text, Title, Tooltip } from "@mantine/core";
 import {
   IconCalendarPlus,
   IconCopy,
@@ -10,6 +10,7 @@ import {
   IconUserPlus,
 } from "@tabler/icons-react";
 import { useMemo } from "react";
+import { useHotkeys } from "@mantine/hooks";
 import { useFormatter, useTranslations } from "next-intl";
 import type { Activity, Contact, UpcomingReminder } from "@bondery/types";
 import { PageWrapper } from "@/app/(app)/app/components/PageWrapper";
@@ -32,6 +33,8 @@ import {
 } from "@bondery/mantine-next";
 import { revalidateInteractions } from "../actions";
 import { openStandardConfirmModal } from "../components/modals/openStandardConfirmModal";
+import { HOTKEYS } from "@/lib/config";
+import { peopleSearchActions } from "../components/PeopleSearchSpotlight";
 
 interface HomeClientProps {
   stats: {
@@ -65,6 +68,24 @@ export function HomeClient({
     () => new Map(timelineContacts.map((contact) => [contact.id, contact])),
     [timelineContacts],
   );
+
+  function handleLogInteraction() {
+    openNewActivityModal({
+      contacts: timelineContacts,
+      titleText: timelineT("WhoAreYouMeeting"),
+      t: timelineT,
+    });
+  }
+
+  function handleAddPerson() {
+    openAddContactModal();
+  }
+
+  useHotkeys([
+    [HOTKEYS.LOG_INTERACTION, handleLogInteraction],
+    [HOTKEYS.ADD_PERSON, handleAddPerson],
+    [HOTKEYS.FIND_PERSON, () => peopleSearchActions.open()],
+  ]);
 
   const compactActivities = useMemo(
     () =>
@@ -200,29 +221,47 @@ export function HomeClient({
           title={t("Title")}
           icon={IconHome}
           secondaryAction={
-            <Button
-              variant="outline"
-              size="md"
-              leftSection={<IconUserPlus size={16} />}
-              onClick={() => openAddContactModal()}
+            <Tooltip
+              label={
+                <Group gap="xs" wrap="nowrap">
+                  <Text size="xs" inherit>
+                    {t("AddPerson")}
+                  </Text>
+                  <Kbd size="xs">{HOTKEYS.ADD_PERSON.toUpperCase()}</Kbd>
+                </Group>
+              }
+              withArrow
             >
-              {t("AddPerson")}
-            </Button>
+              <Button
+                variant="outline"
+                size="md"
+                leftSection={<IconUserPlus size={16} />}
+                onClick={handleAddPerson}
+              >
+                {t("AddPerson")}
+              </Button>
+            </Tooltip>
           }
           primaryAction={
-            <Button
-              size="md"
-              leftSection={<IconCalendarPlus size={16} />}
-              onClick={() => {
-                openNewActivityModal({
-                  contacts: timelineContacts,
-                  titleText: timelineT("WhoAreYouMeeting"),
-                  t: timelineT,
-                });
-              }}
+            <Tooltip
+              label={
+                <Group gap="xs" wrap="nowrap">
+                  <Text size="xs" inherit>
+                    {t("AddInteraction")}
+                  </Text>
+                  <Kbd size="xs">{HOTKEYS.LOG_INTERACTION.toUpperCase()}</Kbd>
+                </Group>
+              }
+              withArrow
             >
-              {t("AddInteraction")}
-            </Button>
+              <Button
+                size="md"
+                leftSection={<IconCalendarPlus size={16} />}
+                onClick={handleLogInteraction}
+              >
+                {t("AddInteraction")}
+              </Button>
+            </Tooltip>
           }
         />
 

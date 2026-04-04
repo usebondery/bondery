@@ -20,6 +20,7 @@ const NAME_TITLE_TOKENS = new Set([
   "phdr",
   "phdr.",
   "phd",
+  "phd.",
   "ph.d",
   "ph.d.",
   "dphil",
@@ -28,16 +29,40 @@ const NAME_TITLE_TOKENS = new Set([
   "prof",
   "prof.",
   "mba",
+  "mba.",
   "ma",
+  "ma.",
   "msc",
+  "msc.",
   "bsc",
+  "bsc.",
   "cpa",
+  "cpa.",
   "esq",
   "esq.",
   "jd",
+  "jd.",
   "md",
+  "md.",
   "dds",
+  "dds.",
 ]);
+
+/**
+ * Unwraps parenthetical segments from a name string by removing the brackets
+ * but keeping the content inside them.
+ * e.g. "Middlename (Lastname)" → "Middlename Lastname"
+ * Collapses resulting extra whitespace.
+ *
+ * @param value Name string potentially containing parenthetical parts.
+ * @returns Name string with parentheses removed but their content preserved.
+ */
+export function stripNameParentheticals(value: string): string {
+  return value
+    .replace(/\(([^)]*)\)/g, "$1")
+    .replace(/\s{2,}/g, " ")
+    .trim();
+}
 
 /**
  * Removes emoji characters from a string, including:
@@ -113,6 +138,29 @@ export function extractNameParts(lastNameInput: string): {
     middleName: words[words.length - 2],
     lastName: words[words.length - 1],
   };
+}
+
+/**
+ * Normalizes the casing of a name string.
+ * Tokens that are entirely uppercase and longer than one character are converted
+ * to title case (e.g. "ALEXANDRO" → "Alexandro").
+ * Tokens that are already mixed-case (e.g. "McDonald", "O'Brien") are left untouched
+ * to avoid mangling legitimate casing.
+ * Single-character tokens (initials) are also left unchanged.
+ *
+ * @param name Cleaned name string (after emoji/title stripping).
+ * @returns Name string with all-caps tokens converted to title case.
+ */
+export function normalizeNameCase(name: string): string {
+  return name
+    .split(/\s+/)
+    .map((token) => {
+      if (token.length > 1 && token === token.toUpperCase()) {
+        return token.charAt(0).toUpperCase() + token.slice(1).toLowerCase();
+      }
+      return token;
+    })
+    .join(" ");
 }
 
 /**

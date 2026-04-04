@@ -101,7 +101,16 @@ export async function linkedInImportRoutes(fastify: FastifyInstance) {
               continue;
             }
 
-            const normalizedHandle = row.handle.trim().toLowerCase();
+            // Decode percent-encoded handles (e.g. from old imports) so they
+            // match the decoded form produced by the current parser.
+            let decodedHandle: string;
+            try {
+              decodedHandle = decodeURIComponent(row.handle.trim());
+            } catch {
+              decodedHandle = row.handle.trim();
+            }
+
+            const normalizedHandle = decodedHandle.toLowerCase();
             if (normalizedHandle.length > 0) {
               existingHandleSet.add(normalizedHandle);
             }
@@ -180,7 +189,15 @@ export async function linkedInImportRoutes(fastify: FastifyInstance) {
       const handleToPersonId = new Map<string, string>();
       for (const row of existingSocialRows ?? []) {
         if (row.handle && row.person_id) {
-          handleToPersonId.set(row.handle.trim(), row.person_id);
+          // Decode percent-encoded handles (e.g. from old imports) so they
+          // match the decoded form produced by the current parser.
+          let decodedHandle: string;
+          try {
+            decodedHandle = decodeURIComponent(row.handle.trim());
+          } catch {
+            decodedHandle = row.handle.trim();
+          }
+          handleToPersonId.set(decodedHandle, row.person_id);
         }
       }
 

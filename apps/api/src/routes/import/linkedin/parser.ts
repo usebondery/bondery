@@ -2,7 +2,7 @@ import AdmZip from "adm-zip";
 import { parse as parseCsv } from "csv-parse/sync";
 import type { LinkedInPreparedContact } from "@bondery/types";
 import { SOCIAL_PLATFORM_URL_DETAILS } from "@bondery/helpers";
-import { stripEmojis, stripNameTitles, extractNameParts } from "@bondery/helpers/name-utils";
+import { stripEmojis, stripNameParentheticals, stripNameTitles, extractNameParts, normalizeNameCase } from "@bondery/helpers/name-utils";
 import type { UploadFile } from "../../../lib/schemas.js";
 
 const LINKEDIN_REQUIRED_HEADERS = [
@@ -61,11 +61,19 @@ function parseLinkedInUsername(rawUrl: string): { username: string | null; norma
       username = segments[segments.length - 1];
     }
 
-    const cleaned =
-      normalizeNullableString(username?.replace(/\?.*$/, "").replace(/#.*$/, "")) || null;
+    const raw = normalizeNullableString(username?.replace(/\?.*$/, "").replace(/#.*$/, "")) || null;
 
-    if (!cleaned) {
+    if (!raw) {
       return { username: null, normalizedUrl: fallback };
+    }
+
+    // Decode percent-encoding so handles are stored consistently with the
+    // chrome extension, which also calls decodeURIComponent on extracted handles.
+    let cleaned: string;
+    try {
+      cleaned = decodeURIComponent(raw);
+    } catch {
+      cleaned = raw;
     }
 
     return {
@@ -200,12 +208,17 @@ export function parseLinkedInCsvUpload(files: UploadFile[]): LinkedInPreparedCon
   }
 
   return parsedRows.map((row, index) => {
-    const firstName = stripEmojis(
-      stripNameTitles(normalizeNullableString(row["First Name"]) || ""),
+    const firstName = normalizeNameCase(
+      stripNameTitles(
+        stripNameParentheticals(stripEmojis(normalizeNullableString(row["First Name"]) || "")),
+      ),
     );
-    const nameParts = extractNameParts(stripNameTitles(row["Last Name"] || ""));
-    const cleanedMiddleName = nameParts.middleName ? stripEmojis(nameParts.middleName) : null;
-    const cleanedLastName = stripEmojis(nameParts.lastName);
+    const rawLastName = stripNameTitles(
+      stripNameParentheticals(stripEmojis(row["Last Name"] || "")),
+    );
+    const nameParts = extractNameParts(rawLastName);
+    const cleanedMiddleName = nameParts.middleName ? normalizeNameCase(nameParts.middleName) : null;
+    const cleanedLastName = normalizeNameCase(nameParts.lastName);
     const { username: linkedinUsername, normalizedUrl } = parseLinkedInUsername(row.URL || "");
     const email = normalizeNullableString(row["Email Address"]);
     const company = normalizeNullableString(row.Company);

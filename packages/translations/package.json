@@ -1,6 +1,6 @@
 {
   "name": "@bondery/translations",
-  "version": "1.4.1",
+  "version": "1.4.2",
   "description": "Bondery internationalization translations",
   "main": "src/index.ts",
   "types": "src/index.ts",

@@ -285,12 +285,17 @@ export function MapPageClient({ view }: MapPageClientProps) {
     setLastSelectedIndex(null);
   }, [visibleMarkerIds]);
 
-  const handleTableSearch = useDebouncedCallback((q: string) => setTableSearch(q), DEBOUNCE_MS.tableSearch);
+  const handleTableSearch = useDebouncedCallback(
+    (q: string) => setTableSearch(q),
+    DEBOUNCE_MS.tableSearch,
+  );
 
   const filteredPins = useMemo(() => {
     const query = tableSearch.trim().toLowerCase();
     const base = query
-      ? visibleLocationPins.filter((p) => [p.firstName, p.lastName].filter(Boolean).join(" ").toLowerCase().includes(query))
+      ? visibleLocationPins.filter((p) =>
+          [p.firstName, p.lastName].filter(Boolean).join(" ").toLowerCase().includes(query),
+        )
       : visibleLocationPins;
     return sortPins(base, sortOrder);
   }, [visibleLocationPins, tableSearch, sortOrder]);
@@ -298,7 +303,11 @@ export function MapPageClient({ view }: MapPageClientProps) {
   const filteredAddressRows = useMemo(() => {
     const query = tableSearch.trim().toLowerCase();
     const base = query
-      ? addressContactRows.filter((r) => formatContactName(r as any).toLowerCase().includes(query))
+      ? addressContactRows.filter((r) =>
+          formatContactName(r as any)
+            .toLowerCase()
+            .includes(query),
+        )
       : addressContactRows;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return sortPins(base as any, sortOrder) as unknown as typeof addressContactRows;
@@ -340,7 +349,9 @@ export function MapPageClient({ view }: MapPageClientProps) {
     const target = locationPins.find((p) => p.id === contactId);
     openDeleteContactModal({
       contactId,
-      contactName: target ? [target.firstName, target.lastName].filter(Boolean).join(" ") : "this contact",
+      contactName: target
+        ? [target.firstName, target.lastName].filter(Boolean).join(" ")
+        : "this contact",
       onDeleted: async () => {
         setSelectedIds(new Set());
         await revalidateContacts();
@@ -468,11 +479,18 @@ export function MapPageClient({ view }: MapPageClientProps) {
                 const addr = contact.location || "—";
                 return (
                   <Group gap={6} wrap="nowrap" style={{ minWidth: 0 }}>
-                    <Badge size="xs" variant="light" color={ADDRESS_TYPE_COLOR[type] ?? "gray"} style={{ flexShrink: 0 }}>
+                    <Badge
+                      size="xs"
+                      variant="light"
+                      color={ADDRESS_TYPE_COLOR[type] ?? "gray"}
+                      style={{ flexShrink: 0 }}
+                    >
                       {type}
                     </Badge>
                     <Tooltip label={addr} withArrow>
-                      <Text size="sm" lineClamp={1}>{addr}</Text>
+                      <Text size="sm" lineClamp={1}>
+                        {addr}
+                      </Text>
                     </Tooltip>
                   </Group>
                 );

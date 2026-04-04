@@ -21,6 +21,7 @@ import {
   setPendingQueueStatus,
 } from "@/lib/extension/enrichBatchStore";
 import { captureEvent } from "@/lib/analytics/client";
+import { revalidateContacts } from "@/app/(app)/app/actions";
 
 /** Number of consecutive timeouts before the circuit breaker aborts the loop. */
 const MAX_CONSECUTIVE_TIMEOUTS = 5;
@@ -313,6 +314,7 @@ export function useBatchEnrichFromLinkedIn() {
     }
 
     if (completedCount > 0) {
+      await revalidateContacts();
       router.refresh();
     }
   }, [t, router, runEnrichLoop]);
@@ -425,6 +427,7 @@ export function useBatchEnrichFromLinkedIn() {
       }
 
       if (completedCount > 0) {
+        await revalidateContacts();
         router.refresh();
       }
     },

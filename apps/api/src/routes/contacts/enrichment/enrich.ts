@@ -37,9 +37,9 @@ export function registerEnrichRoutes(fastify: FastifyInstance): void {
   /**
    * POST /api/contacts/:id/enrich - Update a contact with scraped LinkedIn data.
    *
-   * Work history, education, bio, and name are **overwritten** so the user can
-   * intentionally refresh stale data.  Avatar, headline, and location are only
-   * filled when the contact doesn't already have them (fill-if-missing).
+   * Work history, education, bio, name, avatar, and location are **overwritten**
+   * so the user can intentionally refresh stale data.  Headline is only filled
+   * when the contact doesn't already have it (fill-if-missing).
    */
   fastify.post(
     "/:id/enrich",
@@ -91,19 +91,20 @@ export function registerEnrichRoutes(fastify: FastifyInstance): void {
       // Upload logos in parallel (used when inserting work/edu rows)
       await uploadAllLinkedInLogos(client, user.id, workHistory, educationHistory);
 
-      // Fill-if-missing: only upload contact photo when avatar storage object is absent
+      // Always (re-)upload the contact photo so enrichment refreshes stale avatars.
       if (profileImageUrl) {
-        const { data: existingFiles } = await client.storage
-          .from("avatars")
-          .list(user.id, { search: `${personId}.jpg`, limit: 1 });
-        const hasAvatar = (existingFiles ?? []).some((f) => f.name === `${personId}.jpg`);
-        if (!hasAvatar) {
-          await updateContactPhoto(client, personId, user.id, profileImageUrl);
-        }
+        await updateContactPhoto(client, personId, user.id, profileImageUrl);
       }
 
       // Force-update scalar fields (name always overwrites)
       const fieldUpdates: Record<string, any> = {};
+
+      // Bump updated_at when a new photo is uploaded so the avatar URL
+      // cache-buster (appended ?t= timestamp) changes and browsers/CDN
+      // serve the fresh image even when no scalar fields changed.
+      if (profileImageUrl) {
+        fieldUpdates.updated_at = new Date().toISOString();
+      }
       if (firstName !== undefined)
         fieldUpdates.first_name = cleanPersonName(firstName) || undefined;
       if (middleName !== undefined) fieldUpdates.middle_name = cleanPersonName(middleName) || null;
@@ -114,8 +115,8 @@ export function registerEnrichRoutes(fastify: FastifyInstance): void {
         fieldUpdates.headline = headline;
       }
 
-      // Fill-if-missing: location / gisPoint
-      if (location && !person.location) {
+      // Always geocode & overwrite location so the user gets fresh coordinates on re-enrich
+      if (location) {
         fieldUpdates.location = location;
         try {
           const result = await cachedGeocodeLinkedInLocation(location);

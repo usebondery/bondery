@@ -1,15 +1,16 @@
 "use client";
 
-import { Button, Group, Paper, SegmentedControl, Stack, Text } from "@mantine/core";
+import { Button, Group, Paper, SegmentedControl, Stack, Text, Tooltip, Kbd } from "@mantine/core";
 import { IconCalendarPlus, IconCopy, IconTable, IconTimelineEventText } from "@tabler/icons-react";
 import { useCallback, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useDebouncedCallback } from "@mantine/hooks";
+import { useDebouncedCallback, useHotkeys } from "@mantine/hooks";
 import { PageWrapper } from "@/app/(app)/app/components/PageWrapper";
 import { openNewActivityModal } from "./components/NewActivityModal";
 import type { Contact, Activity } from "@bondery/types";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
-import { WEBSITE_URL, DEBOUNCE_MS } from "@/lib/config";
+import { WEBSITE_URL, DEBOUNCE_MS, HOTKEYS } from "@/lib/config";
+import { peopleSearchActions } from "../components/PeopleSearchSpotlight";
 import { PageHeader } from "../components/PageHeader";
 import { useTranslations } from "next-intl";
 import { notifications } from "@mantine/notifications";
@@ -51,6 +52,16 @@ export function InteractionsClient({
     setSearchValue(value);
     setIsSearchLoading(false);
   }, DEBOUNCE_MS.search);
+
+  useHotkeys([
+    [
+      HOTKEYS.LOG_INTERACTION,
+      () =>
+        openNewActivityModal({ contacts: initialContacts, titleText: t("WhoAreYouMeeting"), t }),
+    ],
+    [HOTKEYS.FIND_PERSON, () => peopleSearchActions.open()],
+  ]);
+
   const handleSearchChange = useCallback(
     (value: string) => {
       setIsSearchLoading(true);
@@ -306,19 +317,31 @@ export function InteractionsClient({
             />
           }
           primaryAction={
-            <Button
-              size="md"
-              leftSection={<IconCalendarPlus size={16} />}
-              onClick={() => {
-                openNewActivityModal({
-                  contacts: initialContacts,
-                  titleText: t("WhoAreYouMeeting"),
-                  t,
-                });
-              }}
+            <Tooltip
+              label={
+                <Group gap="xs" wrap="nowrap">
+                  <Text size="xs" inherit>
+                    {t("AddActivity")}
+                  </Text>
+                  <Kbd size="xs">{HOTKEYS.LOG_INTERACTION.toUpperCase()}</Kbd>
+                </Group>
+              }
+              withArrow
             >
-              {t("AddActivity")}
-            </Button>
+              <Button
+                size="md"
+                leftSection={<IconCalendarPlus size={16} />}
+                onClick={() => {
+                  openNewActivityModal({
+                    contacts: initialContacts,
+                    titleText: t("WhoAreYouMeeting"),
+                    t,
+                  });
+                }}
+              >
+                {t("AddActivity")}
+              </Button>
+            </Tooltip>
           }
         />
 

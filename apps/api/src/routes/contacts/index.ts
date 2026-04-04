@@ -1192,8 +1192,10 @@ export async function contactRoutes(fastify: FastifyInstance) {
           const { error: locationError } = await client.rpc("set_person_location", {
             p_person_id: id,
             p_user_id: user.id,
-            p_latitude: nextLatitude ?? null,
-            p_longitude: nextLongitude ?? null,
+            // The SQL function handles null to clear coordinates; cast needed because
+            // generated types reflect the non-nullable Postgres signature.
+            p_latitude: (nextLatitude ?? null) as number,
+            p_longitude: (nextLongitude ?? null) as number,
           });
 
           if (locationError) {
