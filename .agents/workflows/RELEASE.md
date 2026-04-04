@@ -58,6 +58,9 @@ Complete all of the following **before** pushing anything to the `release` branc
 
 ## Release Steps
 
+> **CRITICAL ORDERING RULE FOR AI AGENTS AND HUMANS ALIKE:**
+> Steps 1 and 2 are SEQUENTIAL and BLOCKING. You MUST NOT push to the `release` branch until you have received explicit confirmation from the user that the Chrome extension has been approved and published by Google. Doing so deploys the web app to production before users have the updated extension, which breaks API version gating.
+
 ### 1. Chrome Extension (if changed)
 
 The Chrome extension must be released **before** the web app because Google requires a manual review.
@@ -68,12 +71,14 @@ The Chrome extension must be released **before** the web app because Google requ
    git push origin ext-vX.Y.Z
    ```
    This triggers the `release-extension` GitHub Actions workflow automatically. You can also trigger it manually — see [apps/chrome-extension/RELEASE.md](../../apps/chrome-extension/RELEASE.md) for details.
-2. **Wait** for Google's review to complete and the extension to be published.
-3. Once approved, proceed to step 2.
+2. **STOP. Do not continue to Step 2.** Wait for the user to confirm that Google's review is complete and the extension is live in the Chrome Web Store.
+3. Once the user confirms the extension is published, proceed to Step 2.
 
 > **If the review is rejected:** fix the issues on `main`, create a new patch tag (`ext-vX.Y.Z+1`), and re-submit. Do **not** proceed with the web app release until the extension is live.
 
 ### 2. Web App & Other Apps
+
+> **GATE: Only execute this step after the user has explicitly confirmed the Chrome extension is live.**
 
 1. Verify all [prerequisites](#prerequisites-on-main) are complete.
 2. Push `main` to the `release` branch:
