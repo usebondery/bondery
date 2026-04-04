@@ -93,6 +93,7 @@
       "env": []
     },
     "@bondery/vcard#build": {
+      "dependsOn": ["@bondery/helpers#build", "@bondery/types#build"],
       "outputs": ["dist/**"],
       "env": []
     },
