@@ -51,7 +51,7 @@ export function InteractionsClient({
   const debouncedSetSearchValue = useDebouncedCallback((value: string) => {
     setSearchValue(value);
     setIsSearchLoading(false);
-  }, DEBOUNCE_MS.search);
+  }, DEBOUNCE_MS.localFilter);
 
   useHotkeys([
     [

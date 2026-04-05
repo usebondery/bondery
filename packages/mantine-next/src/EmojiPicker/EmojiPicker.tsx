@@ -8,9 +8,11 @@ interface EmojiPickerProps {
   value: string;
   onChange: (emoji: string) => void;
   error?: string;
+  /** Debounce delay in ms for the emoji search input. Defaults to 200 (local filter). */
+  searchDebounceMs?: number;
 }
 
-export function EmojiPicker({ value, onChange, error }: EmojiPickerProps) {
+export function EmojiPicker({ value, onChange, error, searchDebounceMs }: EmojiPickerProps) {
   const [opened, setOpened] = useState(false);
 
   const handleSelect = (emoji: string) => {
@@ -41,7 +43,11 @@ export function EmojiPicker({ value, onChange, error }: EmojiPickerProps) {
         </Popover.Target>
 
         <Popover.Dropdown>
-          <EmojiPickerDropdownContent value={value} onSelect={handleSelect} />
+          <EmojiPickerDropdownContent
+            value={value}
+            onSelect={handleSelect}
+            searchDebounceMs={searchDebounceMs}
+          />
         </Popover.Dropdown>
       </Popover>
       {error && (

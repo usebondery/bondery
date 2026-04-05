@@ -16,6 +16,7 @@ import {
 } from "./channels.js";
 import { parseAddressEntries, replaceContactAddresses } from "./addresses.js";
 import { findPersonIdBySocial, upsertContactSocials } from "../../lib/socials.js";
+import { cachedGeocodeLinkedInLocation } from "../../lib/mapy.js";
 import { attachContactExtras, type FullContactExtras } from "../../lib/contact-enrichment.js";
 import type {
   Contact,
@@ -559,69 +560,118 @@ export async function contactRoutes(fastify: FastifyInstance) {
           .lt("created_at", nextYearStart.toISOString()),
       ]);
 
-      let peopleQuery = client
-        .from("people")
-        .select(CONTACT_SELECT, { count: "exact" })
-        .eq("user_id", user.id)
-        .eq("myself", false);
-
-      // Keep-in-touch filter: only contacts with a frequency set
-      if (query.keepInTouch) {
-        peopleQuery = peopleQuery.not("keep_frequency_days", "is", null);
-      }
+      // ── Fuzzy search path ────────────────────────────────────────────────
+      // When a search query is active, use the search_people_ids RPC which
+      // leverages pg_trgm word_similarity for typo-tolerant, accent-insensitive
+      // matching. The RPC returns ranked (id, rank) pairs; we then fetch full
+      // contact rows via .in() to preserve the CONTACT_SELECT camelCase aliases.
+      let contacts: any[] | null = null;
+      let count: number | null = null;
+      let error: any = null;
 
       if (search) {
-        const searchTokens = search.split(/\s+/).filter(Boolean);
-        for (const token of searchTokens) {
-          peopleQuery = peopleQuery.or(`first_name.ilike.%${token}%,last_name.ilike.%${token}%`);
+        const { data: ranked, error: rpcError } = await client.rpc("search_people_ids", {
+          p_user_id: user.id,
+          p_query: search,
+          p_limit: limit,
+          p_offset: offset,
+        });
+
+        if (rpcError) {
+          request.log.error({ err: rpcError }, "Error in fuzzy search RPC");
+          return reply.status(500).send({ error: rpcError.message });
         }
+
+        if (!ranked || ranked.length === 0) {
+          contacts = [];
+          count = 0;
+        } else {
+          const rankedIds = ranked.map((r: { id: string }) => r.id);
+
+          let fetchQuery = client.from("people").select(CONTACT_SELECT).in("id", rankedIds);
+
+          // Preserve keepInTouch filter even during search
+          if (query.keepInTouch) {
+            fetchQuery = fetchQuery.not("keep_frequency_days", "is", null);
+          }
+
+          const { data: fetchedContacts, error: fetchError } = await fetchQuery;
+
+          if (fetchError) {
+            request.log.error({ err: fetchError }, "Error fetching fuzzy search results");
+            return reply.status(500).send({ error: fetchError.message });
+          }
+
+          // Restore the relevance ordering from the RPC
+          const orderMap = new Map(rankedIds.map((id: string, i: number) => [id, i]));
+          contacts = (fetchedContacts || []).sort(
+            (a: { id: string }, b: { id: string }) =>
+              (orderMap.get(a.id) ?? 999) - (orderMap.get(b.id) ?? 999),
+          );
+          count = contacts.length;
+        }
+      } else {
+        // ── Standard list path (no search) ──────────────────────────────────
+        let peopleQuery = client
+          .from("people")
+          .select(CONTACT_SELECT, { count: "exact" })
+          .eq("user_id", user.id)
+          .eq("myself", false);
+
+        // Keep-in-touch filter: only contacts with a frequency set
+        if (query.keepInTouch) {
+          peopleQuery = peopleQuery.not("keep_frequency_days", "is", null);
+        }
+
+        switch (query.sort) {
+          case "nameAsc":
+            peopleQuery = peopleQuery.order("first_name", { ascending: true });
+            break;
+          case "nameDesc":
+            peopleQuery = peopleQuery.order("first_name", { ascending: false });
+            break;
+          case "surnameAsc":
+            peopleQuery = peopleQuery.order("last_name", { ascending: true, nullsFirst: true });
+            break;
+          case "surnameDesc":
+            peopleQuery = peopleQuery.order("last_name", { ascending: false, nullsFirst: false });
+            break;
+          case "interactionAsc":
+            peopleQuery = peopleQuery.order("last_interaction", {
+              ascending: true,
+              nullsFirst: true,
+            });
+            break;
+          case "interactionDesc":
+            peopleQuery = peopleQuery.order("last_interaction", {
+              ascending: false,
+              nullsFirst: false,
+            });
+            break;
+          case "createdAtAsc":
+            peopleQuery = peopleQuery.order("created_at", {
+              ascending: true,
+              nullsFirst: true,
+            });
+            break;
+          case "createdAtDesc":
+            peopleQuery = peopleQuery.order("created_at", {
+              ascending: false,
+              nullsFirst: false,
+            });
+            break;
+          default:
+            peopleQuery = peopleQuery.order("first_name", { ascending: true });
+            break;
+        }
+
+        peopleQuery = peopleQuery.range(offset, offset + limit - 1);
+
+        const result = await peopleQuery;
+        contacts = result.data;
+        count = result.count;
+        error = result.error;
       }
-
-      switch (query.sort) {
-        case "nameAsc":
-          peopleQuery = peopleQuery.order("first_name", { ascending: true });
-          break;
-        case "nameDesc":
-          peopleQuery = peopleQuery.order("first_name", { ascending: false });
-          break;
-        case "surnameAsc":
-          peopleQuery = peopleQuery.order("last_name", { ascending: true, nullsFirst: true });
-          break;
-        case "surnameDesc":
-          peopleQuery = peopleQuery.order("last_name", { ascending: false, nullsFirst: false });
-          break;
-        case "interactionAsc":
-          peopleQuery = peopleQuery.order("last_interaction", {
-            ascending: true,
-            nullsFirst: true,
-          });
-          break;
-        case "interactionDesc":
-          peopleQuery = peopleQuery.order("last_interaction", {
-            ascending: false,
-            nullsFirst: false,
-          });
-          break;
-        case "createdAtAsc":
-          peopleQuery = peopleQuery.order("created_at", {
-            ascending: true,
-            nullsFirst: true,
-          });
-          break;
-        case "createdAtDesc":
-          peopleQuery = peopleQuery.order("created_at", {
-            ascending: false,
-            nullsFirst: false,
-          });
-          break;
-        default:
-          peopleQuery = peopleQuery.order("first_name", { ascending: true });
-          break;
-      }
-
-      peopleQuery = peopleQuery.range(offset, offset + limit - 1);
-
-      const { data: contacts, error, count } = await peopleQuery;
 
       if (error) {
         request.log.error({ err: error }, "Error fetching contacts");
@@ -745,31 +795,43 @@ export async function contactRoutes(fastify: FastifyInstance) {
           });
         }
       } else if ("filter" in body && body.filter) {
-        // Build the same Supabase query used by GET /contacts, but only select IDs.
-        let filterQuery = client
-          .from("people")
-          .select("id")
-          .eq("user_id", user.id)
-          .eq("myself", false);
-
+        // Resolve matching IDs via fuzzy search RPC when a search query is present,
+        // otherwise fetch all non-myself contacts.
         const search = typeof body.filter.q === "string" ? body.filter.q.trim() : "";
         if (search) {
-          const searchTokens = search.split(/\s+/).filter(Boolean);
-          for (const token of searchTokens) {
-            filterQuery = filterQuery.or(`first_name.ilike.%${token}%,last_name.ilike.%${token}%`);
+          const { data: ranked, error: rpcError } = await client.rpc("search_people_ids", {
+            p_user_id: user.id,
+            p_query: search,
+            p_limit: 10000,
+            p_offset: 0,
+          });
+
+          if (rpcError) {
+            return reply.status(500).send({ error: rpcError.message });
           }
+
+          const excludeSet = new Set(body.excludeIds ?? []);
+          uniqueIds = (ranked || [])
+            .map((r: { id: string }) => r.id)
+            .filter((id: string) => !excludeSet.has(id));
+        } else {
+          let filterQuery = client
+            .from("people")
+            .select("id")
+            .eq("user_id", user.id)
+            .eq("myself", false);
+
+          const { data: rows, error: filterError } = await filterQuery;
+
+          if (filterError) {
+            return reply.status(500).send({ error: filterError.message });
+          }
+
+          const excludeSet = new Set(body.excludeIds ?? []);
+          uniqueIds = (rows || [])
+            .map((r: { id: string }) => r.id)
+            .filter((id: string) => !excludeSet.has(id));
         }
-
-        const { data: rows, error: filterError } = await filterQuery;
-
-        if (filterError) {
-          return reply.status(500).send({ error: filterError.message });
-        }
-
-        const excludeSet = new Set(body.excludeIds ?? []);
-        uniqueIds = (rows || [])
-          .map((r: { id: string }) => r.id)
-          .filter((id: string) => !excludeSet.has(id));
 
         if (uniqueIds.length === 0) {
           return { message: "No contacts matched the filter" };
@@ -1058,6 +1120,33 @@ export async function contactRoutes(fastify: FastifyInstance) {
       if (body.language !== undefined) updates.language = body.language;
       if (body.timezone !== undefined) updates.timezone = body.timezone;
       if (body.gisPoint !== undefined) updates.gis_point = body.gisPoint;
+
+      // Geocode location server-side when the client doesn't supply coordinates.
+      // If the client sends latitude/longitude or gisPoint explicitly, those take
+      // precedence and we skip geocoding to avoid overwriting client-provided data.
+      const clientProvidesCoords =
+        Object.prototype.hasOwnProperty.call(body, "latitude") ||
+        Object.prototype.hasOwnProperty.call(body, "longitude") ||
+        Object.prototype.hasOwnProperty.call(body, "gisPoint");
+
+      let geocodedLocation: { lat: number; lon: number } | null = null;
+
+      if (body.location && !clientProvidesCoords) {
+        try {
+          const geocoded = await cachedGeocodeLinkedInLocation(body.location);
+          if (geocoded) {
+            const { geo, timezone: tz } = geocoded;
+            if (geo.formattedLabel) updates.location = geo.formattedLabel;
+            geocodedLocation = { lat: geo.lat, lon: geo.lon };
+            if (tz && body.timezone === undefined) updates.timezone = tz;
+          }
+        } catch (err) {
+          request.log.warn(
+            { err },
+            "[PATCH contact] Geocode failed, continuing without coordinates",
+          );
+        }
+      }
       if (body.lastInteraction !== undefined) {
         updates.last_interaction = body.lastInteraction;
         // Manual update clears the activity link — NULL signals "set manually"
@@ -1200,6 +1289,23 @@ export async function contactRoutes(fastify: FastifyInstance) {
 
           if (locationError) {
             return reply.status(500).send({ error: locationError.message });
+          }
+        } else if (geocodedLocation) {
+          // Server-side geocoding resolved coordinates — update gis_point via the
+          // same RPC used for explicit lat/lon so generated latitude/longitude columns
+          // are updated correctly.
+          const { error: geoRpcError } = await client.rpc("set_person_location", {
+            p_person_id: id,
+            p_user_id: user.id,
+            p_latitude: geocodedLocation.lat as number,
+            p_longitude: geocodedLocation.lon as number,
+          });
+          if (geoRpcError) {
+            // Non-fatal: text fields (location, timezone) were already persisted above.
+            request.log.warn(
+              { err: geoRpcError },
+              "[PATCH contact] Failed to set geocoded coordinates",
+            );
           }
         }
 

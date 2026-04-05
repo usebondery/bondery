@@ -32,6 +32,7 @@ import { instagramImportRoutes } from "./routes/import/instagram/index.js";
 import { vcardImportRoutes } from "./routes/import/vcard/index.js";
 import { shareRoutes } from "./routes/contacts/share/index.js";
 import { statsRoutes } from "./routes/admin/stats/index.js";
+import { meOnboardingRoutes } from "./routes/me/onboarding/index.js";
 
 // Environment variable schema
 const envSchema = {
@@ -328,6 +329,7 @@ async function buildServer() {
   await fastify.register(interactionRoutes, { prefix: API_ROUTES.INTERACTIONS });
   await fastify.register(shareRoutes, { prefix: API_ROUTES.CONTACTS_SHARE });
   await fastify.register(statsRoutes, { prefix: API_ROUTES.ADMIN_STATS });
+  await fastify.register(meOnboardingRoutes, { prefix: API_ROUTES.ME_ONBOARDING_COMPLETE });
 
   return fastify;
 }

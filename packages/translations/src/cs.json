@@ -681,7 +681,21 @@
     "NoRecentlyAdded": "Zatím nebyli přidáni žádní lidé.",
     "RecentlyInteractedTitle": "Nedávno v kontaktu",
     "RecentlyInteractedTooltip": "5 lidí, se kterými jste naposledy komunikovali.",
-    "NoRecentlyInteracted": "Zatím žádné nedávné interakce."
+    "NoRecentlyInteracted": "Zatím žádné nedávné interakce.",
+    "ProgressRail": {
+      "Title": "Začínáme",
+      "Progress": "{completed} z {total} dokončeno",
+      "Tasks": {
+        "AddContacts": "Přidejte první kontakty",
+        "LogInteraction": "Zaznamenejte první interakci",
+        "SetReminder": "Nastavte připomínku"
+      }
+    },
+    "ExtensionNudge": {
+      "Title": "Vylepšete Bondery naším Chrome rozšířením",
+      "Description": "Importujte kontakty přímo z profilů LinkedIn a Instagramu a udržujte svou síť aktuální bez námahy.",
+      "InstallButton": "Nainstalovat rozšíření"
+    }
   },
   "FixContactsPage": {
     "Title": "Opravit a sloučit",
@@ -1161,5 +1175,36 @@
     "WindowNext30": "Příštích 30 dní",
     "WindowNext90": "Příštích 90 dní",
     "WindowLabel": "Zobrazit"
+  },
+  "Onboarding": {
+    "Loading": {
+      "Message": "Připravujeme vše pro vás…"
+    },
+    "Welcome": {
+      "TitleWithName": "Vítejte, {name}! 😊",
+      "TitleGeneric": "Vítejte v Bondery! 😊",
+      "Subtitle": "Těší nás. Pojďme nastavit váš osobní CRM.",
+      "LetsGo": "Pojďme na to"
+    },
+    "Intent": {
+      "Title": "Jak budete Bondery používat?",
+      "Description": "Pomůže nám to přizpůsobit nastavení.",
+      "personal": "Přátelé a rodina",
+      "professional": "Profesní",
+      "both": "Oboje"
+    },
+    "Import": {
+      "Title": "Importujte kontakty",
+      "Description": "Přeneste svou síť do Bondery z LinkedIn, Instagramu, nebo je přidejte ručně.",
+      "LinkedIn": "Import z LinkedIn",
+      "Instagram": "Import z Instagramu",
+      "LinkedInDescription": "Nahrajte exportovaný soubor vašich LinkedIn kontaktů.",
+      "InstagramDescription": "Nahrajte export vašich Instagram sledujících/sledovaných.",
+      "ManualAdd": "Vytvořit ručně",
+      "SkipForNow": "Přeskočit",
+      "SuccessTitle": "Import dokončen!",
+      "SuccessDescription": "{imported} importováno, {updated} aktualizováno, {skipped} přeskočeno.",
+      "Finish": "Začít používat"
+    }
   }
 }

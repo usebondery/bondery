@@ -1811,6 +1811,7 @@ paths:
               type: object
               required:
                 - label
+                - color
               properties:
                 label:
                   minLength: 1
@@ -1818,6 +1819,7 @@ paths:
                 emoji:
                   type: string
                 color:
+                  minLength: 1
                   type: string
       responses:
         "200":
@@ -3022,6 +3024,13 @@ paths:
                     type: number
                   repo:
                     type: string
+  /api/me/onboarding/complete:
+    patch:
+      tags:
+        - Me
+      responses:
+        "200":
+          description: Default Response
 servers:
   - url: http://localhost:3001
     description: Local development server

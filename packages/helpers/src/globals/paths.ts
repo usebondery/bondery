@@ -33,6 +33,7 @@ export const API_ROUTES = {
   EXTENSION: "/api/extension",
   CONTACTS_SHARE: "/api/contacts/share",
   ADMIN_STATS: "/api/admin/stats",
+  ME_ONBOARDING_COMPLETE: "/api/me/onboarding/complete",
 } as const;
 
 export const CHROME_EXTENSION_URL =
@@ -91,4 +92,5 @@ export const WEBAPP_ROUTES = {
   LOGIN: "/login",
   APP_GROUP: "/app",
   DEFAULT_PAGE_AFTER_LOGIN: "/app/home",
+  ONBOARDING: "/app/onboarding",
 };

@@ -26,6 +26,7 @@ import {
 } from "@bondery/mantine-next";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import type { GroupWithCount } from "@bondery/types";
+import { DEBOUNCE_MS } from "@/lib/config";
 import { revalidateGroups } from "../../actions";
 
 // Predefined color swatches
@@ -162,6 +163,7 @@ function EditGroupForm({
               value={form.values.emoji}
               onChange={(emoji) => form.setFieldValue("emoji", emoji)}
               error={form.errors.emoji as string | undefined}
+              searchDebounceMs={DEBOUNCE_MS.localFilter}
             />
           </Box>
           <Box style={{ flex: 1 }}>

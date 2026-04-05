@@ -171,9 +171,11 @@ function sortLinkedInContactsForPreview(
 export function LinkedInImportModal({
   t,
   modalId,
+  onSuccess,
 }: {
   t: (key: keyof LinkedInImportTranslations, values?: Record<string, string | number>) => string;
   modalId?: string;
+  onSuccess?: (stats: { imported: number; updated: number; skipped: number }) => void;
 }) {
   const router = useRouter();
   const [step, setStep] = useState<Step>("intro");
@@ -423,7 +425,12 @@ export function LinkedInImportModal({
         modals.closeAll();
       }
       await revalidateAll();
-      router.push(WEBAPP_ROUTES.PEOPLE);
+
+      if (onSuccess) {
+        onSuccess({ imported: totalImported, updated: totalUpdated, skipped: totalSkipped });
+      } else {
+        router.push(WEBAPP_ROUTES.PEOPLE);
+      }
     } catch (error) {
       notifications.show(
         errorNotificationTemplate({

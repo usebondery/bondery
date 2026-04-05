@@ -5,7 +5,7 @@ import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import * as translations from "@bondery/translations";
 import "leaflet/dist/leaflet.css";
-import { API_ROUTES, WEBSITE_ROUTES } from "@bondery/helpers/globals/paths";
+import { API_ROUTES, WEBAPP_ROUTES, WEBSITE_ROUTES } from "@bondery/helpers/globals/paths";
 import { API_URL } from "@/lib/config";
 import { ColorSchemeSync } from "./components/ColorSchemeSync";
 import type { ColorSchemePreference, Contact, MergeRecommendation } from "@bondery/types";
@@ -16,7 +16,7 @@ import { EnrichResumeDetector } from "@/lib/extension/EnrichResumeDetector";
 import { ExtensionUpdateNotificationManager } from "@/lib/extension/ExtensionUpdateNotificationManager";
 import { ServiceWorkerRegistration } from "./components/ServiceWorkerRegistration";
 import { Suspense } from "react";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 
 interface UserSettingsLayoutData {
   userName: string;
@@ -26,6 +26,7 @@ interface UserSettingsLayoutData {
   timezone: string;
   timeFormat: "24h" | "12h";
   colorScheme: ColorSchemePreference;
+  onboardingCompletedAt: string | null;
 }
 
 /**
@@ -63,6 +64,7 @@ async function getUserSettings(precomputedHeaders?: HeadersInit) {
         timezone: settings.timezone || "UTC",
         timeFormat: settings.timeFormat === "12h" ? "12h" : "24h",
         colorScheme,
+        onboardingCompletedAt: settings.onboardingCompletedAt ?? null,
       } satisfies UserSettingsLayoutData;
     }
   } catch (error) {
@@ -77,6 +79,7 @@ async function getUserSettings(precomputedHeaders?: HeadersInit) {
     timezone: "UTC",
     timeFormat: "24h",
     colorScheme: "auto",
+    onboardingCompletedAt: null,
   } satisfies UserSettingsLayoutData;
 }
 
@@ -91,8 +94,20 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   }
 
   // Fetch auth headers + read cookie in parallel (both fast)
-  const headers = await getAuthHeaders();
-  const [settings, cookieStore] = await Promise.all([getUserSettings(headers), cookies()]);
+  const authHeaders = await getAuthHeaders();
+  const [settings, cookieStore, headersList] = await Promise.all([
+    getUserSettings(authHeaders),
+    cookies(),
+    headers(),
+  ]);
+
+  // Route guard: redirect to onboarding if not yet completed.
+  // Runs BEFORE the Suspense boundary so AppShellWithBadges (3 heavy fetches)
+  // never mounts for onboarding users.
+  const pathname = headersList.get("x-pathname") ?? "";
+  if (!settings.onboardingCompletedAt && !pathname.startsWith(WEBAPP_ROUTES.ONBOARDING)) {
+    redirect(WEBAPP_ROUTES.ONBOARDING);
+  }
 
   const initialCollapsed = cookieStore.get("bondery-sidebar-collapsed")?.value === "true";
   const { userName, avatarUrl, locale, timezone, timeFormat, colorScheme } = settings;

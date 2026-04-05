@@ -68,15 +68,17 @@ export const LIMITS = {
  */
 export const DEBOUNCE_MS = {
   /** Delay for text search inputs before triggering a server/router fetch. */
-  search: 500,
+  search: 600,
   /** Delay after the user stops panning/zooming the map before fetching new pins. */
   mapViewport: 600,
   /** Debounce for the contact picker's server-side search (PeopleMultiPickerInput). */
-  contactPicker: 300,
-  /** Debounce for local client-side table search filtering (no server call). */
+  contactPicker: 600,
+  /** Debounce for local client-side filtering (no server call, e.g. emojis, table search). */
+  localFilter: 200,
+  /** @deprecated Use localFilter for client-side filtering. */
   tableSearch: 200,
   /** Debounce inside LocationLookupInput before calling the map suggestion API. */
-  locationSuggest: 300,
+  locationSuggest: 600,
 } as const;
 
 export const IMPORTANT_DATE_TYPE_OPTIONS: ReadonlyArray<{

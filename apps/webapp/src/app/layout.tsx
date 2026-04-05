@@ -6,6 +6,7 @@ import "@mantine/dates/styles.css";
 import "@mantine/tiptap/styles.css";
 import "@mantine/dropzone/styles.css";
 import "@mantine/spotlight/styles.css";
+import "@mantine/nprogress/styles.css";
 import "flag-icons/css/flag-icons.min.css";
 import "@bondery/mantine-next/styles";
 import { bonderyTheme } from "@bondery/mantine-next";

@@ -299,7 +299,7 @@ export function GroupCard(props: GroupCardProps) {
       highlightColor={resolvedHighlightColor}
       onClick={handleCardClick}
       className={className}
-      sectionBg={group.color}
+      sectionBg={group.color ?? undefined}
       sectionOverlay={
         showMenu ? (
           <div style={{ position: "absolute", top: 12, right: 12 }}>

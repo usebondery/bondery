@@ -47,6 +47,7 @@
     "@mantine/hooks": "^9.0.0",
     "@mantine/modals": "^9.0.0",
     "@mantine/notifications": "^9.0.0",
+    "@mantine/nprogress": "^9.0.0",
     "@mantine/spotlight": "^9.0.0",
     "@mantine/tiptap": "^9.0.0",
     "@maplibre/maplibre-gl-leaflet": "^0.1.3",

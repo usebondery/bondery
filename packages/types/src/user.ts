@@ -19,6 +19,7 @@ export interface UserSettings {
   language: string | null;
   colorScheme: ColorSchemePreference;
   avatarUrl: string | null;
+  onboardingCompletedAt: string | null;
   created_at?: string | null;
   updated_at?: string | null;
 }

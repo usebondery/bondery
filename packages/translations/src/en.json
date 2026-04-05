@@ -683,7 +683,21 @@
     "NoRecentlyAdded": "No people added yet.",
     "RecentlyInteractedTitle": "Recently interacted",
     "RecentlyInteractedTooltip": "The 5 people you most recently interacted with.",
-    "NoRecentlyInteracted": "No recent interactions yet."
+    "NoRecentlyInteracted": "No recent interactions yet.",
+    "ProgressRail": {
+      "Title": "Getting started",
+      "Progress": "{completed} of {total} completed",
+      "Tasks": {
+        "AddContacts": "Add your first contacts",
+        "LogInteraction": "Log your first interaction",
+        "SetReminder": "Set up a reminder"
+      }
+    },
+    "ExtensionNudge": {
+      "Title": "Supercharge Bondery with our Chrome extension",
+      "Description": "Import contacts directly from LinkedIn & Instagram profiles and keep your network up-to-date effortlessly.",
+      "InstallButton": "Install extension"
+    }
   },
   "FixContactsPage": {
     "Title": "Fix & merge",
@@ -1157,5 +1171,36 @@
     "WindowNext30": "Next 30 days",
     "WindowNext90": "Next 90 days",
     "WindowLabel": "Show"
+  },
+  "Onboarding": {
+    "Loading": {
+      "Message": "Setting things up for you…"
+    },
+    "Welcome": {
+      "TitleWithName": "Welcome, {name}! 😊",
+      "TitleGeneric": "Welcome to Bondery! 😊",
+      "Subtitle": "Pleasure to meet you. Let's set up your personal CRM.",
+      "LetsGo": "Let's go"
+    },
+    "Intent": {
+      "Title": "How will you use Bondery?",
+      "Description": "This helps us tailor your setup experience.",
+      "personal": "Friends & Family",
+      "professional": "Professional",
+      "both": "Both"
+    },
+    "Import": {
+      "Title": "Import your contacts",
+      "Description": "Bring your existing network into Bondery from LinkedIn, Instagram, or add them manually.",
+      "LinkedIn": "Import from LinkedIn",
+      "Instagram": "Import from Instagram",
+      "LinkedInDescription": "Upload your LinkedIn connections export file.",
+      "InstagramDescription": "Upload your Instagram followers/following data.",
+      "ManualAdd": "Create manually",
+      "SkipForNow": "Skip for now",
+      "SuccessTitle": "Import complete!",
+      "SuccessDescription": "{imported} imported, {updated} updated, {skipped} skipped.",
+      "Finish": "Get started"
+    }
   }
 }

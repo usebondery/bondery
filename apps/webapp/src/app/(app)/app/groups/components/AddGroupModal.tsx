@@ -266,6 +266,7 @@ function AddGroupForm({
               value={form.values.emoji}
               onChange={(emoji) => form.setFieldValue("emoji", emoji)}
               error={form.errors.emoji as string | undefined}
+              searchDebounceMs={DEBOUNCE_MS.localFilter}
             />
           </Box>
           <Box style={{ flex: 1 }}>

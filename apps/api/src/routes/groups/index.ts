@@ -30,7 +30,7 @@ const GroupsQuery = Type.Object({
 const CreateGroupBody = Type.Object({
   label: Type.String({ minLength: 1 }),
   emoji: Type.Optional(Type.String()),
-  color: Type.Optional(Type.String()),
+  color: Type.String({ minLength: 1 }),
 });
 
 const UpdateGroupBody = Type.Object({
@@ -163,7 +163,7 @@ export async function groupRoutes(fastify: FastifyInstance) {
     "/",
     { schema: { body: CreateGroupBody } },
     async (
-      request: FastifyRequest<{ Body: { label: string; emoji?: string; color?: string } }>,
+      request: FastifyRequest<{ Body: { label: string; emoji?: string; color: string } }>,
       reply: FastifyReply,
     ) => {
       const { client, user } = getAuth(request);

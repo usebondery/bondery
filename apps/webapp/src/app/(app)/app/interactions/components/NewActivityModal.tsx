@@ -68,6 +68,49 @@ function parseLocalDateInputValue(value: string): Date {
   return new Date(year, month - 1, day);
 }
 
+/**
+ * Build a minimal Contact stub from a raw participant object returned by the
+ * GET /interactions API. The API embeds participant data (snake_case) directly
+ * on each activity so that chips can resolve to a name even when the participant
+ * is not present in the caller's `contacts` prop (e.g. contacts are paginated,
+ * or the modal was opened from a narrow contacts subset like PersonInteractionsSection).
+ */
+function buildParticipantSeed(p: unknown): Contact | null {
+  if (!p || typeof p === "string") return null;
+  const raw = p as Record<string, unknown>;
+  const id = typeof raw.id === "string" ? raw.id : null;
+  if (!id) return null;
+  return {
+    id,
+    userId: "",
+    firstName: (raw.firstName ?? raw.first_name ?? "") as string,
+    middleName: (raw.middleName ?? raw.middle_name ?? null) as string | null,
+    lastName: (raw.lastName ?? raw.last_name ?? null) as string | null,
+    headline: null,
+    location: null,
+    notes: null,
+    avatar: (raw.avatar ?? null) as string | null,
+    lastInteraction: null,
+    lastInteractionActivityId: null,
+    keepFrequencyDays: null,
+    createdAt: (raw.updated_at ?? raw.updatedAt ?? "") as string,
+    phones: null,
+    emails: null,
+    linkedin: null,
+    instagram: null,
+    whatsapp: null,
+    facebook: null,
+    website: null,
+    signal: null,
+    myself: null,
+    language: null,
+    timezone: null,
+    gisPoint: null,
+    latitude: null,
+    longitude: null,
+  };
+}
+
 function withFallbackTime(date: Date, fallback: Date): Date {
   const hasTime =
     date.getHours() !== 0 ||
@@ -99,13 +142,30 @@ function NewActivityForm({
 }: NewActivityFormProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
-  const [availableContacts, setAvailableContacts] = useState<Contact[]>(contacts);
+  const [availableContacts, setAvailableContacts] = useState<Contact[]>(() => {
+    if (!activity?.participants?.length) return contacts;
+    // Seed the pool with participant data embedded in the activity so that chips
+    // for already-selected contacts always resolve to a name, even when those
+    // contacts aren't in the caller's `contacts` prop.
+    const pool = new Map(contacts.map((c) => [c.id, c]));
+    for (const p of activity.participants as unknown[]) {
+      const seed = buildParticipantSeed(p);
+      if (seed && !pool.has(seed.id)) pool.set(seed.id, seed);
+    }
+    return Array.from(pool.values());
+  });
   const [createPersonOpened, setCreatePersonOpened] = useState(false);
   const participantsInputRef = useRef<HTMLInputElement>(null);
   const isEditMode = Boolean(activity?.id);
 
   useEffect(() => {
-    setAvailableContacts(contacts);
+    // Merge incoming contacts into the pool rather than replacing it, so that
+    // participant seeds added during initialization are not lost.
+    setAvailableContacts((prev) => {
+      const pool = new Map(prev.map((c) => [c.id, c]));
+      for (const c of contacts) pool.set(c.id, c);
+      return Array.from(pool.values());
+    });
   }, [contacts]);
 
   useEffect(() => {

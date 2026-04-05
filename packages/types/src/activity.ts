@@ -17,6 +17,18 @@ export type InteractionType =
   | "Competition/Hackathon"
   | "Custom";
 
+/**
+ * Lightweight participant shape embedded in Interaction objects returned by the API.
+ * The API joins people data directly onto each interaction (snake_case from the DB).
+ */
+export interface InteractionParticipant {
+  id: string;
+  first_name: string;
+  last_name: string | null;
+  avatar: string | null;
+  updated_at?: string;
+}
+
 export interface Interaction {
   id: string;
   userId: string;
@@ -26,8 +38,11 @@ export interface Interaction {
   date: string; // ISO string
   createdAt: string;
   updatedAt: string;
-  /** Array of participant IDs (fetched separately or joined) */
-  participants?: string[];
+  /**
+   * Participants embedded by the API as lightweight objects (snake_case).
+   * May also be a plain string ID array when used programmatically.
+   */
+  participants?: InteractionParticipant[] | string[];
 }
 
 export interface CreateInteractionInput {

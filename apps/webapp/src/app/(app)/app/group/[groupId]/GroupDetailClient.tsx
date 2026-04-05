@@ -696,7 +696,7 @@ export function GroupDetailClient({
         body: JSON.stringify({
           label: duplicateLabel,
           emoji: group.emoji || "",
-          color: group.color || "",
+          color: group.color || "#1971C2",
         }),
       });
 

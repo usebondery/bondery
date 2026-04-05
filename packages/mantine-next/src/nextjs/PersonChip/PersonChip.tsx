@@ -217,11 +217,11 @@ export function PersonChip({
                 ? 8
                 : 10
               : undefined,
-          overflow: person && avatarEdge ? "hidden" : undefined,
         },
         label: {
           textTransform: "none",
           fontWeight: 400,
+          overflow: "visible",
           color: person ? undefined : "var(--mantine-color-dimmed)",
         },
       }}

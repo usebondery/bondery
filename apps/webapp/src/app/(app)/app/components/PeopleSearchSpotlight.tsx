@@ -10,7 +10,7 @@ import type { Contact } from "@bondery/types";
 import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import { getAvatarColorFromName } from "@/lib/avatarColor";
 import { searchContacts } from "@/lib/searchContacts";
-import { HOTKEYS } from "@/lib/config";
+import { DEBOUNCE_MS, HOTKEYS } from "@/lib/config";
 
 const [peopleStore, peopleSearchActions] = createSpotlight();
 export { peopleSearchActions };
@@ -34,12 +34,15 @@ export function PeopleSearchSpotlight() {
       setResults(contacts);
       setIsLoading(false);
     }
-  }, 300);
+  }, DEBOUNCE_MS.search);
 
   const handleQueryChange = useCallback(
     (q: string) => {
       setQuery(q);
       if (q.trim().length >= MIN_QUERY_LENGTH) {
+        // Show the loader immediately so the user sees intent before the
+        // debounce fires and the actual fetch begins.
+        setIsLoading(true);
         debouncedSearch(q.trim());
       } else {
         setResults([]);

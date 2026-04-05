@@ -237,6 +237,7 @@ export async function meSettingsRoutes(fastify: FastifyInstance) {
         language: "en",
         colorScheme: resolvedSettings.color_scheme,
         avatarUrl: resolvedAvatarUrl,
+        onboardingCompletedAt: resolvedSettings.onboarding_completed_at ?? null,
         email: userData?.user?.email,
         providers: userData?.user?.app_metadata?.providers || [],
       },
