@@ -93,11 +93,11 @@ const envSchema = {
     PRIVATE_EMAIL_PORT: {
       type: "number",
     },
-    MAPS_URL: {
+    NEXT_PUBLIC_MAPS_URL: {
       type: "string",
       default: "https://api.mapy.com",
     },
-    MAPS_KEY: {
+    NEXT_PRIVATE_MAPS_KEY: {
       type: "string",
       default: "",
     },

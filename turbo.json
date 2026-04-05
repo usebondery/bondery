@@ -5,6 +5,8 @@
     "build": {
       "env": [
         "NODE_ENV",
+        "NEXT_PRIVATE_MAPS_KEY",
+        "NEXT_PUBLIC_MAPS_URL",
         "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY",
         "NEXT_PUBLIC_SUPABASE_URL",
         "PUBLIC_SUPABASE_URL",
@@ -52,6 +54,8 @@
       "cache": true,
       "env": [
         "NEXT_PUBLIC_WEBAPP_URL",
+        "NEXT_PRIVATE_MAPS_KEY",
+        "NEXT_PUBLIC_MAPS_URL",
         "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY",
         "NEXT_PUBLIC_SUPABASE_URL",
         "PUBLIC_SUPABASE_URL",
@@ -107,6 +111,8 @@
     }
   },
   "globalPassThroughEnv": [
+    "NEXT_PRIVATE_MAPS_KEY",
+    "NEXT_PUBLIC_MAPS_URL",
     "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY",
     "NEXT_PUBLIC_SUPABASE_URL",
     "PUBLIC_SUPABASE_URL",
