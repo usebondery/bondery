@@ -134,7 +134,7 @@ export function NavigationSidebarContent({
 
       {/* User card */}
       <Box mb="xs">
-        <Tooltip label={userName} position="right" withArrow disabled={!collapsed}>
+        <Tooltip label={`Ahoy, ${userName}! 😎`} position="right" withArrow disabled={!collapsed}>
           <Group
             ref={userCardRef}
             component={Link as any}
