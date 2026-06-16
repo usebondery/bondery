@@ -13,6 +13,7 @@ import type {
   MergeContactsResponse,
   MergeConflictField,
   MergeConflictChoice,
+  TablesUpdate,
 } from "@bondery/types";
 import {
   MERGEABLE_FIELDS,
@@ -82,7 +83,7 @@ export function registerMergeExecuteRoute(fastify: FastifyInstance): void {
         return reply.status(404).send({ error: "One or both contacts were not found" });
       }
 
-      const scalarUpdates: Record<string, unknown> = {};
+      const scalarUpdates: TablesUpdate<"people"> = {};
 
       for (const [field, dbColumn] of Object.entries(MERGEABLE_SCALAR_FIELDS)) {
         const mergeField = field as MergeConflictField;
@@ -94,7 +95,7 @@ export function registerMergeExecuteRoute(fastify: FastifyInstance): void {
         }
 
         if (!hasMeaningfulValue(leftValue)) {
-          scalarUpdates[dbColumn] = rightValue;
+          (scalarUpdates as Record<string, unknown>)[dbColumn] = rightValue;
           continue;
         }
 
@@ -108,7 +109,7 @@ export function registerMergeExecuteRoute(fastify: FastifyInstance): void {
             mergeField,
           ) === "right"
         ) {
-          scalarUpdates[dbColumn] = rightValue;
+          (scalarUpdates as Record<string, unknown>)[dbColumn] = rightValue;
         }
       }
 

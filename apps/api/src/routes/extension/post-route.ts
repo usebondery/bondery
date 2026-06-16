@@ -5,7 +5,7 @@
 import type { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
 import { buildContactAvatarUrl } from "../../lib/supabase.js";
 import { getAuth } from "../../lib/auth.js";
-import type { ScrapedWorkHistoryEntry, ScrapedEducationEntry } from "@bondery/types";
+import type { ScrapedWorkHistoryEntry, ScrapedEducationEntry, TablesUpdate } from "@bondery/types";
 import { findPersonIdBySocial, upsertContactSocials } from "../../lib/socials.js";
 import { cleanPersonName } from "@bondery/helpers/name";
 import { assignContactsToDefaultImportGroup } from "../../lib/default-import-groups.js";
@@ -128,7 +128,7 @@ export function registerPostRoute(fastify: FastifyInstance): void {
         }
 
         // Consolidate field updates into a single query
-        const fieldUpdates: Record<string, any> = {};
+        const fieldUpdates: TablesUpdate<"people"> = {};
         if (headline && !existingContact.headline) fieldUpdates.headline = headline;
         if (location && !existingContact.location) fieldUpdates.location = location;
         if (notes && !existingContact.notes) fieldUpdates.notes = notes;

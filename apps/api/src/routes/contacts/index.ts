@@ -26,6 +26,7 @@ import type {
   ImportantDateType,
   PhoneEntry,
   SocialPlatform,
+  TablesUpdate,
 } from "@bondery/types";
 import {
   UuidParam,
@@ -1100,7 +1101,7 @@ export async function contactRoutes(fastify: FastifyInstance) {
       const body = request.body;
 
       // Map camelCase to snake_case
-      const updates: Record<string, unknown> = {};
+      const updates: TablesUpdate<"people"> = {};
 
       if (body.firstName !== undefined) {
         updates.first_name = body.firstName;

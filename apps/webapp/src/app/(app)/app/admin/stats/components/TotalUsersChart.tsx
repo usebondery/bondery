@@ -81,7 +81,8 @@ export function TotalUsersChart({ data }: TotalUsersChartProps) {
               tickLine={false}
               axisLine={false}
               minTickGap={24}
-              tick={({ x = 0, y = 0, payload, index }: AxisTickProps) => {
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              tick={(({ x = 0, y = 0, payload, index }: AxisTickProps) => {
                 const point = chartData[index ?? 0];
                 if (!point?.showTick) return <g />;
                 return (
@@ -94,7 +95,7 @@ export function TotalUsersChart({ data }: TotalUsersChartProps) {
                     {payload?.value}
                   </text>
                 );
-              }}
+              }) as any}
             />
             <YAxis
               tickLine={false}

@@ -15,7 +15,7 @@ import {
   AvatarSizeEnum,
   extractAvatarOptions,
 } from "../../lib/schemas.js";
-import type { Tag, TagWithCount, ContactPreview } from "@bondery/types";
+import type { Tag, TagWithCount, ContactPreview, TablesUpdate } from "@bondery/types";
 
 // ── TypeBox Schemas ──────────────────────────────────────────────────────────
 
@@ -244,7 +244,7 @@ export async function tagRoutes(fastify: FastifyInstance) {
       const { id } = request.params;
       const body = request.body;
 
-      const updates: Record<string, unknown> = {};
+      const updates: TablesUpdate<"tags"> = {};
 
       if (body.label !== undefined) {
         updates.label = body.label.trim();

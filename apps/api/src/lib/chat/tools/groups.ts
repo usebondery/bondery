@@ -1,7 +1,7 @@
 import { tool } from "ai";
 import { z } from "zod";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import type { Database } from "@bondery/types/supabase.types";
+import type { Database, TablesUpdate } from "@bondery/types/supabase.types";
 
 /**
  * Creates group-related tools for the AI chat agent.
@@ -104,7 +104,7 @@ export function createGroupTools(supabase: SupabaseClient<Database>, userId: str
         color: z.string().optional().describe("New color"),
       }),
       execute: async ({ groupId, label, emoji, color }) => {
-        const updates: Record<string, string> = {};
+        const updates: TablesUpdate<"groups"> = {};
         if (label !== undefined) updates.label = label.trim();
         if (emoji !== undefined) updates.emoji = emoji.trim();
         if (color !== undefined) updates.color = color.trim();

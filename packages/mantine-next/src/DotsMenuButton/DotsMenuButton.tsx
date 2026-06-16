@@ -1,7 +1,10 @@
+import type { MouseEventHandler } from "react";
 import { ActionIcon, type ActionIconProps } from "@mantine/core";
 import { IconDotsVertical } from "@tabler/icons-react";
 
 export interface DotsMenuButtonProps extends Omit<ActionIconProps, "children"> {
+  onClick?: MouseEventHandler<HTMLButtonElement>;
+  "aria-label"?: string;
   /** Size passed to the icon. Defaults to 16. */
   iconSize?: number;
   /** Whether the associated menu is currently open. Controls the squeeze animation. */

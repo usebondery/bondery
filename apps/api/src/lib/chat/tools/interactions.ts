@@ -1,7 +1,7 @@
 import { tool } from "ai";
 import { z } from "zod";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import type { Database } from "@bondery/types/supabase.types";
+import type { Database, TablesUpdate } from "@bondery/types/supabase.types";
 import { INTERACTION_TYPES } from "@bondery/helpers";
 
 /**
@@ -259,7 +259,7 @@ export function createInteractionTools(supabase: SupabaseClient<Database>, userI
         description: z.string().max(1000).optional().describe("New description or notes"),
       }),
       execute: async ({ interactionId, title, type, date, description }) => {
-        const updates: Record<string, string> = {};
+        const updates: TablesUpdate<"interactions"> = {};
         if (title !== undefined) updates.title = title;
         if (type !== undefined) updates.type = type;
         if (date !== undefined) updates.date = date;

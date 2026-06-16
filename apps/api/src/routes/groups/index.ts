@@ -15,7 +15,7 @@ import {
   extractAvatarOptions,
 } from "../../lib/schemas.js";
 import { buildContactAvatarUrl } from "../../lib/supabase.js";
-import type { Group, GroupWithCount, ContactPreview } from "@bondery/types";
+import type { Group, GroupWithCount, ContactPreview, TablesUpdate } from "@bondery/types";
 
 import { registerGroupContactRoutes } from "./contacts.js";
 
@@ -235,7 +235,7 @@ export async function groupRoutes(fastify: FastifyInstance) {
       const body = request.body;
 
       // Map camelCase to snake_case
-      const updates: Record<string, unknown> = {};
+      const updates: TablesUpdate<"groups"> = {};
 
       if (body.label !== undefined) {
         updates.label = body.label;

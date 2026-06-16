@@ -12,6 +12,7 @@ import {
   validateImageMagicBytes,
 } from "../../../lib/config.js";
 import logger from "../../../lib/logger.js";
+import type { TablesUpdate } from "@bondery/types";
 import { getMyselfProfile } from "../../../lib/myself.js";
 
 // ── TypeBox Schemas ──────────────────────────────────────────────────────────
@@ -302,7 +303,7 @@ export async function meSettingsRoutes(fastify: FastifyInstance) {
         request.body || {};
       const { timeFormat } = request.body || {};
 
-      const updatePayload: Record<string, unknown> = {};
+      const updatePayload: TablesUpdate<"user_settings"> = {};
 
       if (timezone !== undefined) updatePayload.timezone = timezone;
       if (reminderSendHour !== undefined) {

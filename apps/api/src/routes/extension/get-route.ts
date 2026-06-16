@@ -12,6 +12,7 @@ import { cachedGeocodeLinkedInLocation } from "../../lib/mapy.js";
 import { updateContactPhoto } from "../../lib/linkedin-helpers.js";
 import { URLS } from "../../lib/config.js";
 import { RedirectQuery, resolvePrimarySocial, resolveExtensionDefaultGroup } from "./helpers.js";
+import type { TablesUpdate } from "@bondery/types";
 
 export function registerGetRoute(fastify: FastifyInstance): void {
   /**
@@ -110,7 +111,7 @@ export function registerGetRoute(fastify: FastifyInstance): void {
         }
 
         // Consolidate field updates into a single query
-        const fieldUpdates: Record<string, any> = {};
+        const fieldUpdates: TablesUpdate<"people"> = {};
         if (headline && !existingContact.headline) fieldUpdates.headline = headline;
         if (location && !existingContact.location) fieldUpdates.location = location;
 

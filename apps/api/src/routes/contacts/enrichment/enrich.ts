@@ -12,6 +12,7 @@ import {
   uploadAllLinkedInLogos,
 } from "../../../lib/linkedin-helpers.js";
 import { cleanPersonName } from "@bondery/helpers/name";
+import type { TablesUpdate } from "@bondery/types";
 import { cachedGeocodeLinkedInLocation } from "../../../lib/mapy.js";
 import type { ScrapedWorkHistoryEntry, ScrapedEducationEntry } from "@bondery/types";
 import {
@@ -97,7 +98,7 @@ export function registerEnrichRoutes(fastify: FastifyInstance): void {
       }
 
       // Force-update scalar fields (name always overwrites)
-      const fieldUpdates: Record<string, any> = {};
+      const fieldUpdates: TablesUpdate<"people"> = {};
 
       // Bump updated_at when a new photo is uploaded so the avatar URL
       // cache-buster (appended ?t= timestamp) changes and browsers/CDN

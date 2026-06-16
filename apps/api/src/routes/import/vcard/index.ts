@@ -4,7 +4,7 @@ import { getAuth } from "../../../lib/auth.js";
 import { parseVCardUpload } from "./parser.js";
 import { assignContactsToDefaultImportGroup } from "../../../lib/default-import-groups.js";
 import { validateImageUpload, validateImageMagicBytes } from "../../../lib/config.js";
-import type { VCardImportCommitResponse, VCardParseResponse } from "@bondery/types";
+import type { VCardImportCommitResponse, VCardParseResponse, TablesUpdate } from "@bondery/types";
 import logger from "../../../lib/logger.js";
 import { formatPlaceLabel } from "@bondery/helpers";
 
@@ -305,7 +305,7 @@ export async function vcardImportRoutes(fastify: FastifyInstance) {
               picked.addressCity ||
               picked.value;
 
-            const fieldUpdates: Record<string, unknown> = {
+            const fieldUpdates: TablesUpdate<"people"> = {
               location: locationLabel,
               gis_point: `SRID=4326;POINT(${picked.longitude} ${picked.latitude})`,
               updated_at: new Date().toISOString(),

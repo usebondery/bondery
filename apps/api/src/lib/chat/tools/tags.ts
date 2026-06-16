@@ -1,7 +1,7 @@
 import { tool } from "ai";
 import { z } from "zod";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import type { Database } from "@bondery/types/supabase.types";
+import type { Database, TablesUpdate } from "@bondery/types/supabase.types";
 
 // Fixed color palette for auto-assigning tag colors (matches API route)
 const TAG_COLORS = [
@@ -128,7 +128,7 @@ export function createTagTools(supabase: SupabaseClient<Database>, userId: strin
         color: z.string().optional().describe("New hex color"),
       }),
       execute: async ({ tagId, label, color }) => {
-        const updates: Record<string, string> = {};
+        const updates: TablesUpdate<"tags"> = {};
         if (label !== undefined) updates.label = label.trim();
         if (color !== undefined) updates.color = color.trim();
 
