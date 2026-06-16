@@ -29,8 +29,9 @@ export const INPUT_MAX_LENGTHS = {
   firstName: 50,
   middleName: 50,
   lastName: 50,
+  fullName: 150,
   headline: 100,
-  place: 100,
+  location: 100,
   description: 500,
   dateName: 50,
 } as const;
@@ -39,8 +40,46 @@ export const FEATURES = {
   birthdayNotifications: true,
 } as const;
 
+/**
+ * Global keyboard shortcuts used across the webapp.
+ * Use `mod` for Ctrl on Windows/Linux and ⌘ on Mac.
+ * Bare single-key shortcuts (e.g. "n") fire only when focus is outside inputs.
+ */
+export const HOTKEYS = {
+  /** Toggle the navigation sidebar (Ctrl+B / ⌘+B) */
+  SIDEBAR_TOGGLE: "mod+b",
+  /** Open the command palette (Ctrl+K / ⌘+K) */
+  COMMAND_PALETTE: "mod+k",
+  /** Open the "Log interaction" modal */
+  LOG_INTERACTION: "n",
+  /** Open the "Add person" modal */
+  ADD_PERSON: "c",
+  /** Open the "Find person" spotlight */
+  FIND_PERSON: "f",
+} as const;
+
 export const LIMITS = {
   maxImportantDates: 5,
+  maxAddresses: 5,
+} as const;
+
+/**
+ * UI debounce delay constants (milliseconds).
+ * Import these instead of hardcoding magic numbers.
+ */
+export const DEBOUNCE_MS = {
+  /** Delay for text search inputs before triggering a server/router fetch. */
+  search: 600,
+  /** Delay after the user stops panning/zooming the map before fetching new pins. */
+  mapViewport: 600,
+  /** Debounce for the contact picker's server-side search (PeopleMultiPickerInput). */
+  contactPicker: 600,
+  /** Debounce for local client-side filtering (no server call, e.g. emojis, table search). */
+  localFilter: 200,
+  /** @deprecated Use localFilter for client-side filtering. */
+  tableSearch: 200,
+  /** Debounce inside LocationLookupInput before calling the map suggestion API. */
+  locationSuggest: 600,
 } as const;
 
 export const IMPORTANT_DATE_TYPE_OPTIONS: ReadonlyArray<{

@@ -8,7 +8,7 @@ info:
     ## Authentication
 
 
-    All endpoints (except `/status` and `GET /api/redirect`) require authentication via a Supabase session cookie or a
+    All endpoints (except `/status` and `GET /api/extension`) require authentication via a Supabase session cookie or a
     Bearer token in the Authorization header.
   version: 1.0.0
   contact:
@@ -23,6 +23,771 @@ paths:
     get:
       tags:
         - Health
+      responses:
+        "200":
+          description: Default Response
+  /api/contacts/merge-recommendations:
+    get:
+      tags:
+        - Contacts
+      parameters:
+        - schema:
+            type: string
+          in: query
+          name: declined
+          required: false
+        - schema:
+            anyOf:
+              - type: string
+                enum:
+                  - low
+              - type: string
+                enum:
+                  - medium
+              - type: string
+                enum:
+                  - high
+          in: query
+          name: avatarQuality
+          required: false
+        - schema:
+            anyOf:
+              - type: string
+                enum:
+                  - small
+              - type: string
+                enum:
+                  - medium
+              - type: string
+                enum:
+                  - large
+          in: query
+          name: avatarSize
+          required: false
+      responses:
+        "200":
+          description: Default Response
+  /api/contacts/merge-recommendations/refresh:
+    post:
+      tags:
+        - Contacts
+      responses:
+        "200":
+          description: Default Response
+  /api/contacts/merge-recommendations/{id}/decline:
+    patch:
+      tags:
+        - Contacts
+      parameters:
+        - schema:
+            format: uuid
+            type: string
+          in: path
+          name: id
+          required: true
+      responses:
+        "200":
+          description: Default Response
+  /api/contacts/merge-recommendations/{id}/restore:
+    patch:
+      tags:
+        - Contacts
+      parameters:
+        - schema:
+            format: uuid
+            type: string
+          in: path
+          name: id
+          required: true
+      responses:
+        "200":
+          description: Default Response
+  /api/contacts/merge:
+    post:
+      tags:
+        - Contacts
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - leftPersonId
+                - rightPersonId
+              properties:
+                leftPersonId:
+                  minLength: 1
+                  type: string
+                rightPersonId:
+                  minLength: 1
+                  type: string
+                conflictResolutions:
+                  type: object
+                  additionalProperties:
+                    anyOf:
+                      - type: string
+                        enum:
+                          - left
+                      - type: string
+                        enum:
+                          - right
+      responses:
+        "200":
+          description: Default Response
+  /api/contacts/{id}/linkedin-data:
+    post:
+      tags:
+        - Contacts
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                workHistory:
+                  type: array
+                  items:
+                    type: object
+                    required:
+                      - companyName
+                    properties:
+                      title:
+                        type: string
+                      companyName:
+                        type: string
+                      companyLinkedinId:
+                        type: string
+                      startDate:
+                        type: string
+                      endDate:
+                        type: string
+                      employmentType:
+                        type: string
+                      location:
+                        type: string
+      parameters:
+        - schema:
+            format: uuid
+            type: string
+          in: path
+          name: id
+          required: true
+      responses:
+        "200":
+          description: Default Response
+    get:
+      tags:
+        - Contacts
+      parameters:
+        - schema:
+            format: uuid
+            type: string
+          in: path
+          name: id
+          required: true
+      responses:
+        "200":
+          description: Default Response
+  /api/contacts/{id}/enrich:
+    post:
+      tags:
+        - Contacts
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                firstName:
+                  type: string
+                middleName:
+                  anyOf:
+                    - type: string
+                    - type: "null"
+                lastName:
+                  anyOf:
+                    - type: string
+                    - type: "null"
+                profileImageUrl:
+                  anyOf:
+                    - type: string
+                    - type: "null"
+                headline:
+                  anyOf:
+                    - type: string
+                    - type: "null"
+                location:
+                  anyOf:
+                    - type: string
+                    - type: "null"
+                linkedinBio:
+                  anyOf:
+                    - type: string
+                    - type: "null"
+                workHistory:
+                  type: array
+                  items:
+                    type: object
+                    required:
+                      - companyName
+                    properties:
+                      companyName:
+                        type: string
+                      companyLinkedinId:
+                        type: string
+                      title:
+                        type: string
+                      description:
+                        type: string
+                      startDate:
+                        type: string
+                      endDate:
+                        type: string
+                      employmentType:
+                        type: string
+                      location:
+                        type: string
+                educationHistory:
+                  type: array
+                  items:
+                    type: object
+                    required:
+                      - schoolName
+                    properties:
+                      schoolName:
+                        type: string
+                      schoolLinkedinId:
+                        type: string
+                      degree:
+                        type: string
+                      description:
+                        type: string
+                      startDate:
+                        type: string
+                      endDate:
+                        type: string
+      parameters:
+        - schema:
+            format: uuid
+            type: string
+          in: path
+          name: id
+          required: true
+      responses:
+        "200":
+          description: Default Response
+  /api/contacts/enrich-queue/eligible-count:
+    get:
+      tags:
+        - Contacts
+      responses:
+        "200":
+          description: Default Response
+  /api/contacts/enrich-queue/status:
+    get:
+      tags:
+        - Contacts
+      responses:
+        "200":
+          description: Default Response
+  /api/contacts/enrich-queue/init:
+    post:
+      tags:
+        - Contacts
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                personId:
+                  type: string
+      responses:
+        "200":
+          description: Default Response
+  /api/contacts/enrich-queue/next-batch:
+    get:
+      tags:
+        - Contacts
+      responses:
+        "200":
+          description: Default Response
+  /api/contacts/enrich-queue/{id}:
+    patch:
+      tags:
+        - Contacts
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - status
+              properties:
+                status:
+                  anyOf:
+                    - type: string
+                      enum:
+                        - completed
+                    - type: string
+                      enum:
+                        - failed
+                errorMessage:
+                  anyOf:
+                    - type: string
+                    - type: "null"
+      parameters:
+        - schema:
+            format: uuid
+            type: string
+          in: path
+          name: id
+          required: true
+      responses:
+        "200":
+          description: Default Response
+  /api/contacts/enrich-queue:
+    delete:
+      tags:
+        - Contacts
+      responses:
+        "200":
+          description: Default Response
+  /api/contacts/{id}/relationships:
+    get:
+      tags:
+        - Contacts
+      parameters:
+        - schema:
+            anyOf:
+              - type: string
+                enum:
+                  - low
+              - type: string
+                enum:
+                  - medium
+              - type: string
+                enum:
+                  - high
+          in: query
+          name: avatarQuality
+          required: false
+        - schema:
+            anyOf:
+              - type: string
+                enum:
+                  - small
+              - type: string
+                enum:
+                  - medium
+              - type: string
+                enum:
+                  - large
+          in: query
+          name: avatarSize
+          required: false
+        - schema:
+            format: uuid
+            type: string
+          in: path
+          name: id
+          required: true
+      responses:
+        "200":
+          description: Default Response
+    post:
+      tags:
+        - Contacts
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - relatedPersonId
+                - relationshipType
+              properties:
+                relatedPersonId:
+                  minLength: 1
+                  type: string
+                relationshipType:
+                  anyOf:
+                    - type: string
+                      enum:
+                        - parent
+                    - type: string
+                      enum:
+                        - child
+                    - type: string
+                      enum:
+                        - spouse
+                    - type: string
+                      enum:
+                        - partner
+                    - type: string
+                      enum:
+                        - sibling
+                    - type: string
+                      enum:
+                        - friend
+                    - type: string
+                      enum:
+                        - colleague
+                    - type: string
+                      enum:
+                        - neighbor
+                    - type: string
+                      enum:
+                        - guardian
+                    - type: string
+                      enum:
+                        - dependent
+                    - type: string
+                      enum:
+                        - other
+      parameters:
+        - schema:
+            format: uuid
+            type: string
+          in: path
+          name: id
+          required: true
+      responses:
+        "200":
+          description: Default Response
+  /api/contacts/{id}/relationships/{relationshipId}:
+    patch:
+      tags:
+        - Contacts
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - relatedPersonId
+                - relationshipType
+              properties:
+                relatedPersonId:
+                  minLength: 1
+                  type: string
+                relationshipType:
+                  anyOf:
+                    - type: string
+                      enum:
+                        - parent
+                    - type: string
+                      enum:
+                        - child
+                    - type: string
+                      enum:
+                        - spouse
+                    - type: string
+                      enum:
+                        - partner
+                    - type: string
+                      enum:
+                        - sibling
+                    - type: string
+                      enum:
+                        - friend
+                    - type: string
+                      enum:
+                        - colleague
+                    - type: string
+                      enum:
+                        - neighbor
+                    - type: string
+                      enum:
+                        - guardian
+                    - type: string
+                      enum:
+                        - dependent
+                    - type: string
+                      enum:
+                        - other
+      parameters:
+        - schema:
+            type: string
+          in: path
+          name: id
+          required: true
+        - schema:
+            type: string
+          in: path
+          name: relationshipId
+          required: true
+      responses:
+        "200":
+          description: Default Response
+    delete:
+      tags:
+        - Contacts
+      parameters:
+        - schema:
+            type: string
+          in: path
+          name: id
+          required: true
+        - schema:
+            type: string
+          in: path
+          name: relationshipId
+          required: true
+      responses:
+        "200":
+          description: Default Response
+  /api/contacts/important-dates/upcoming:
+    get:
+      tags:
+        - Contacts
+      parameters:
+        - schema:
+            anyOf:
+              - type: string
+                enum:
+                  - low
+              - type: string
+                enum:
+                  - medium
+              - type: string
+                enum:
+                  - high
+          in: query
+          name: avatarQuality
+          required: false
+        - schema:
+            anyOf:
+              - type: string
+                enum:
+                  - small
+              - type: string
+                enum:
+                  - medium
+              - type: string
+                enum:
+                  - large
+          in: query
+          name: avatarSize
+          required: false
+      responses:
+        "200":
+          description: Default Response
+  /api/contacts/{id}/important-dates:
+    get:
+      tags:
+        - Contacts
+      parameters:
+        - schema:
+            format: uuid
+            type: string
+          in: path
+          name: id
+          required: true
+      responses:
+        "200":
+          description: Default Response
+    put:
+      tags:
+        - Contacts
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - dates
+              properties:
+                dates:
+                  type: array
+                  items:
+                    type: object
+                    required:
+                      - type
+                      - date
+                    properties:
+                      id:
+                        type: string
+                      type:
+                        type: string
+                      date:
+                        pattern: ^\d{4}-\d{2}-\d{2}$
+                        type: string
+                      note:
+                        anyOf:
+                          - type: string
+                          - type: "null"
+                      notifyDaysBefore:
+                        anyOf:
+                          - type: number
+                            enum:
+                              - 1
+                          - type: number
+                            enum:
+                              - 3
+                          - type: number
+                            enum:
+                              - 7
+                          - type: "null"
+      parameters:
+        - schema:
+            format: uuid
+            type: string
+          in: path
+          name: id
+          required: true
+      responses:
+        "200":
+          description: Default Response
+  /api/contacts/map-pins:
+    get:
+      tags:
+        - Contacts
+      parameters:
+        - schema:
+            minimum: -90
+            maximum: 90
+            type: number
+          in: query
+          name: minLat
+          required: true
+        - schema:
+            minimum: -90
+            maximum: 90
+            type: number
+          in: query
+          name: maxLat
+          required: true
+        - schema:
+            minimum: -180
+            maximum: 180
+            type: number
+          in: query
+          name: minLon
+          required: true
+        - schema:
+            minimum: -180
+            maximum: 180
+            type: number
+          in: query
+          name: maxLon
+          required: true
+        - schema:
+            minimum: 1
+            maximum: 1000
+            default: 500
+            type: integer
+          in: query
+          name: limit
+          required: false
+        - schema:
+            anyOf:
+              - type: string
+                enum:
+                  - low
+              - type: string
+                enum:
+                  - medium
+              - type: string
+                enum:
+                  - high
+          in: query
+          name: avatarQuality
+          required: false
+        - schema:
+            anyOf:
+              - type: string
+                enum:
+                  - small
+              - type: string
+                enum:
+                  - medium
+              - type: string
+                enum:
+                  - large
+          in: query
+          name: avatarSize
+          required: false
+      responses:
+        "200":
+          description: Default Response
+  /api/contacts/map-address-pins:
+    get:
+      tags:
+        - Contacts
+      parameters:
+        - schema:
+            minimum: -90
+            maximum: 90
+            type: number
+          in: query
+          name: minLat
+          required: true
+        - schema:
+            minimum: -90
+            maximum: 90
+            type: number
+          in: query
+          name: maxLat
+          required: true
+        - schema:
+            minimum: -180
+            maximum: 180
+            type: number
+          in: query
+          name: minLon
+          required: true
+        - schema:
+            minimum: -180
+            maximum: 180
+            type: number
+          in: query
+          name: maxLon
+          required: true
+        - schema:
+            minimum: 1
+            maximum: 1000
+            default: 500
+            type: integer
+          in: query
+          name: limit
+          required: false
+        - schema:
+            anyOf:
+              - type: string
+                enum:
+                  - low
+              - type: string
+                enum:
+                  - medium
+              - type: string
+                enum:
+                  - high
+          in: query
+          name: avatarQuality
+          required: false
+        - schema:
+            anyOf:
+              - type: string
+                enum:
+                  - small
+              - type: string
+                enum:
+                  - medium
+              - type: string
+                enum:
+                  - large
+          in: query
+          name: avatarSize
+          required: false
       responses:
         "200":
           description: Default Response
@@ -71,8 +836,19 @@ paths:
               - type: string
                 enum:
                   - interactionDesc
+              - type: string
+                enum:
+                  - createdAtAsc
+              - type: string
+                enum:
+                  - createdAtDesc
           in: query
           name: sort
+          required: false
+        - schema:
+            type: boolean
+          in: query
+          name: keepInTouch
           required: false
         - schema:
             anyOf:
@@ -114,20 +890,18 @@ paths:
           application/json:
             schema:
               type: object
+              required:
+                - firstName
               properties:
                 firstName:
                   minLength: 1
                   type: string
                 lastName:
-                  minLength: 1
                   type: string
                 middleName:
                   type: string
                 linkedin:
                   type: string
-              required:
-                - firstName
-                - lastName
       responses:
         "200":
           description: Default Response
@@ -141,15 +915,17 @@ paths:
             schema:
               anyOf:
                 - type: object
+                  required:
+                    - ids
                   properties:
                     ids:
                       minItems: 1
                       type: array
                       items:
                         type: string
-                  required:
-                    - ids
                 - type: object
+                  required:
+                    - filter
                   properties:
                     filter:
                       type: object
@@ -160,44 +936,6 @@ paths:
                       type: array
                       items:
                         type: string
-                  required:
-                    - filter
-      responses:
-        "200":
-          description: Default Response
-  /api/contacts/important-dates/upcoming:
-    get:
-      tags:
-        - Contacts
-      parameters:
-        - schema:
-            anyOf:
-              - type: string
-                enum:
-                  - low
-              - type: string
-                enum:
-                  - medium
-              - type: string
-                enum:
-                  - high
-          in: query
-          name: avatarQuality
-          required: false
-        - schema:
-            anyOf:
-              - type: string
-                enum:
-                  - small
-              - type: string
-                enum:
-                  - medium
-              - type: string
-                enum:
-                  - large
-          in: query
-          name: avatarSize
-          required: false
       responses:
         "200":
           description: Default Response
@@ -281,7 +1019,7 @@ paths:
                   anyOf:
                     - type: string
                     - type: "null"
-                place:
+                location:
                   anyOf:
                     - type: string
                     - type: "null"
@@ -297,7 +1035,7 @@ paths:
                   anyOf:
                     - type: string
                     - type: "null"
-                location:
+                gisPoint:
                   anyOf:
                     - type: string
                     - type: "null"
@@ -309,58 +1047,21 @@ paths:
                   anyOf:
                     - type: number
                     - type: "null"
-                addressLine1:
-                  anyOf:
-                    - type: string
-                    - type: "null"
-                addressLine2:
-                  anyOf:
-                    - type: string
-                    - type: "null"
-                addressCity:
-                  anyOf:
-                    - type: string
-                    - type: "null"
-                addressPostalCode:
-                  anyOf:
-                    - type: string
-                    - type: "null"
-                addressState:
-                  anyOf:
-                    - type: string
-                    - type: "null"
-                addressStateCode:
-                  anyOf:
-                    - type: string
-                    - type: "null"
-                addressCountry:
-                  anyOf:
-                    - type: string
-                    - type: "null"
-                addressCountryCode:
-                  anyOf:
-                    - type: string
-                    - type: "null"
-                addressGranularity:
-                  anyOf:
-                    - type: string
-                    - type: "null"
-                addressFormatted:
-                  anyOf:
-                    - type: string
-                    - type: "null"
-                addressGeocodeSource:
-                  anyOf:
-                    - type: string
-                    - type: "null"
                 lastInteraction:
                   anyOf:
                     - type: string
+                    - type: "null"
+                keepFrequencyDays:
+                  anyOf:
+                    - minimum: 1
+                      type: integer
                     - type: "null"
                 phones:
                   type: array
                   items:
                     type: object
+                    required:
+                      - value
                     properties:
                       prefix:
                         type: string
@@ -370,12 +1071,12 @@ paths:
                         type: string
                       preferred:
                         type: boolean
-                    required:
-                      - value
                 emails:
                   type: array
                   items:
                     type: object
+                    required:
+                      - value
                     properties:
                       value:
                         type: string
@@ -383,8 +1084,6 @@ paths:
                         type: string
                       preferred:
                         type: boolean
-                    required:
-                      - value
                 addresses:
                   type: array
                   items:
@@ -480,115 +1179,6 @@ paths:
       responses:
         "200":
           description: Default Response
-  /api/contacts/merge-recommendations:
-    get:
-      tags:
-        - Contacts
-      parameters:
-        - schema:
-            type: string
-          in: query
-          name: declined
-          required: false
-        - schema:
-            anyOf:
-              - type: string
-                enum:
-                  - low
-              - type: string
-                enum:
-                  - medium
-              - type: string
-                enum:
-                  - high
-          in: query
-          name: avatarQuality
-          required: false
-        - schema:
-            anyOf:
-              - type: string
-                enum:
-                  - small
-              - type: string
-                enum:
-                  - medium
-              - type: string
-                enum:
-                  - large
-          in: query
-          name: avatarSize
-          required: false
-      responses:
-        "200":
-          description: Default Response
-  /api/contacts/merge-recommendations/refresh:
-    post:
-      tags:
-        - Contacts
-      responses:
-        "200":
-          description: Default Response
-  /api/contacts/merge-recommendations/{id}/decline:
-    patch:
-      tags:
-        - Contacts
-      parameters:
-        - schema:
-            format: uuid
-            type: string
-          in: path
-          name: id
-          required: true
-      responses:
-        "200":
-          description: Default Response
-  /api/contacts/merge-recommendations/{id}/restore:
-    patch:
-      tags:
-        - Contacts
-      parameters:
-        - schema:
-            format: uuid
-            type: string
-          in: path
-          name: id
-          required: true
-      responses:
-        "200":
-          description: Default Response
-  /api/contacts/merge:
-    post:
-      tags:
-        - Contacts
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                leftPersonId:
-                  minLength: 1
-                  type: string
-                rightPersonId:
-                  minLength: 1
-                  type: string
-                conflictResolutions:
-                  type: object
-                  additionalProperties:
-                    anyOf:
-                      - type: string
-                        enum:
-                          - left
-                      - type: string
-                        enum:
-                          - right
-              required:
-                - leftPersonId
-                - rightPersonId
-      responses:
-        "200":
-          description: Default Response
   /api/contacts/by-social:
     get:
       tags:
@@ -672,12 +1262,12 @@ paths:
           application/json:
             schema:
               type: object
+              required:
+                - tagId
               properties:
                 tagId:
                   minLength: 1
                   type: string
-              required:
-                - tagId
       parameters:
         - schema:
             format: uuid
@@ -702,259 +1292,6 @@ paths:
             type: string
           in: path
           name: tagId
-          required: true
-      responses:
-        "200":
-          description: Default Response
-  /api/contacts/{id}/relationships:
-    get:
-      tags:
-        - Contacts
-      parameters:
-        - schema:
-            anyOf:
-              - type: string
-                enum:
-                  - low
-              - type: string
-                enum:
-                  - medium
-              - type: string
-                enum:
-                  - high
-          in: query
-          name: avatarQuality
-          required: false
-        - schema:
-            anyOf:
-              - type: string
-                enum:
-                  - small
-              - type: string
-                enum:
-                  - medium
-              - type: string
-                enum:
-                  - large
-          in: query
-          name: avatarSize
-          required: false
-        - schema:
-            format: uuid
-            type: string
-          in: path
-          name: id
-          required: true
-      responses:
-        "200":
-          description: Default Response
-    post:
-      tags:
-        - Contacts
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                relatedPersonId:
-                  minLength: 1
-                  type: string
-                relationshipType:
-                  anyOf:
-                    - type: string
-                      enum:
-                        - parent
-                    - type: string
-                      enum:
-                        - child
-                    - type: string
-                      enum:
-                        - spouse
-                    - type: string
-                      enum:
-                        - partner
-                    - type: string
-                      enum:
-                        - sibling
-                    - type: string
-                      enum:
-                        - friend
-                    - type: string
-                      enum:
-                        - colleague
-                    - type: string
-                      enum:
-                        - neighbor
-                    - type: string
-                      enum:
-                        - guardian
-                    - type: string
-                      enum:
-                        - dependent
-                    - type: string
-                      enum:
-                        - other
-              required:
-                - relatedPersonId
-                - relationshipType
-      parameters:
-        - schema:
-            format: uuid
-            type: string
-          in: path
-          name: id
-          required: true
-      responses:
-        "200":
-          description: Default Response
-  /api/contacts/{id}/relationships/{relationshipId}:
-    patch:
-      tags:
-        - Contacts
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                relatedPersonId:
-                  minLength: 1
-                  type: string
-                relationshipType:
-                  anyOf:
-                    - type: string
-                      enum:
-                        - parent
-                    - type: string
-                      enum:
-                        - child
-                    - type: string
-                      enum:
-                        - spouse
-                    - type: string
-                      enum:
-                        - partner
-                    - type: string
-                      enum:
-                        - sibling
-                    - type: string
-                      enum:
-                        - friend
-                    - type: string
-                      enum:
-                        - colleague
-                    - type: string
-                      enum:
-                        - neighbor
-                    - type: string
-                      enum:
-                        - guardian
-                    - type: string
-                      enum:
-                        - dependent
-                    - type: string
-                      enum:
-                        - other
-              required:
-                - relatedPersonId
-                - relationshipType
-      parameters:
-        - schema:
-            type: string
-          in: path
-          name: id
-          required: true
-        - schema:
-            type: string
-          in: path
-          name: relationshipId
-          required: true
-      responses:
-        "200":
-          description: Default Response
-    delete:
-      tags:
-        - Contacts
-      parameters:
-        - schema:
-            type: string
-          in: path
-          name: id
-          required: true
-        - schema:
-            type: string
-          in: path
-          name: relationshipId
-          required: true
-      responses:
-        "200":
-          description: Default Response
-  /api/contacts/{id}/important-dates:
-    get:
-      tags:
-        - Contacts
-      parameters:
-        - schema:
-            format: uuid
-            type: string
-          in: path
-          name: id
-          required: true
-      responses:
-        "200":
-          description: Default Response
-    put:
-      tags:
-        - Contacts
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                dates:
-                  type: array
-                  items:
-                    type: object
-                    properties:
-                      id:
-                        type: string
-                      type:
-                        type: string
-                      date:
-                        pattern: ^\d{4}-\d{2}-\d{2}$
-                        type: string
-                      note:
-                        anyOf:
-                          - type: string
-                          - type: "null"
-                      notifyDaysBefore:
-                        anyOf:
-                          - type: number
-                            enum:
-                              - 1
-                          - type: number
-                            enum:
-                              - 3
-                          - type: number
-                            enum:
-                              - 7
-                          - type: "null"
-                    required:
-                      - type
-                      - date
-              required:
-                - dates
-      parameters:
-        - schema:
-            format: uuid
-            type: string
-          in: path
-          name: id
           required: true
       responses:
         "200":
@@ -1028,150 +1365,6 @@ paths:
       responses:
         "200":
           description: Default Response
-  /api/contacts/{id}/linkedin-data:
-    post:
-      tags:
-        - Contacts
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                workHistory:
-                  type: array
-                  items:
-                    type: object
-                    properties:
-                      title:
-                        type: string
-                      companyName:
-                        type: string
-                      companyLinkedinId:
-                        type: string
-                      startDate:
-                        type: string
-                      endDate:
-                        type: string
-                      employmentType:
-                        type: string
-                      location:
-                        type: string
-                    required:
-                      - companyName
-      parameters:
-        - schema:
-            format: uuid
-            type: string
-          in: path
-          name: id
-          required: true
-      responses:
-        "200":
-          description: Default Response
-    get:
-      tags:
-        - Contacts
-      parameters:
-        - schema:
-            format: uuid
-            type: string
-          in: path
-          name: id
-          required: true
-      responses:
-        "200":
-          description: Default Response
-  /api/contacts/{id}/enrich:
-    post:
-      tags:
-        - Contacts
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                firstName:
-                  type: string
-                middleName:
-                  anyOf:
-                    - type: string
-                    - type: "null"
-                lastName:
-                  anyOf:
-                    - type: string
-                    - type: "null"
-                profileImageUrl:
-                  anyOf:
-                    - type: string
-                    - type: "null"
-                headline:
-                  anyOf:
-                    - type: string
-                    - type: "null"
-                place:
-                  anyOf:
-                    - type: string
-                    - type: "null"
-                linkedinBio:
-                  anyOf:
-                    - type: string
-                    - type: "null"
-                workHistory:
-                  type: array
-                  items:
-                    type: object
-                    properties:
-                      companyName:
-                        type: string
-                      companyLinkedinId:
-                        type: string
-                      title:
-                        type: string
-                      description:
-                        type: string
-                      startDate:
-                        type: string
-                      endDate:
-                        type: string
-                      employmentType:
-                        type: string
-                      location:
-                        type: string
-                    required:
-                      - companyName
-                educationHistory:
-                  type: array
-                  items:
-                    type: object
-                    properties:
-                      schoolName:
-                        type: string
-                      schoolLinkedinId:
-                        type: string
-                      degree:
-                        type: string
-                      description:
-                        type: string
-                      startDate:
-                        type: string
-                      endDate:
-                        type: string
-                    required:
-                      - schoolName
-      parameters:
-        - schema:
-            format: uuid
-            type: string
-          in: path
-          name: id
-          required: true
-      responses:
-        "200":
-          description: Default Response
   /api/contacts/import/linkedin/parse:
     post:
       tags:
@@ -1189,12 +1382,19 @@ paths:
           application/json:
             schema:
               type: object
+              required:
+                - contacts
               properties:
                 contacts:
                   minItems: 1
                   type: array
                   items:
                     type: object
+                    required:
+                      - firstName
+                      - lastName
+                      - linkedinUsername
+                      - isValid
                     properties:
                       firstName:
                         type: string
@@ -1226,13 +1426,6 @@ paths:
                           - type: "null"
                       isValid:
                         type: boolean
-                    required:
-                      - firstName
-                      - lastName
-                      - linkedinUsername
-                      - isValid
-              required:
-                - contacts
       responses:
         "200":
           description: Default Response
@@ -1253,12 +1446,18 @@ paths:
           application/json:
             schema:
               type: object
+              required:
+                - contacts
               properties:
                 contacts:
                   minItems: 1
                   type: array
                   items:
                     type: object
+                    required:
+                      - firstName
+                      - instagramUsername
+                      - isValid
                     properties:
                       firstName:
                         type: string
@@ -1282,12 +1481,279 @@ paths:
                         type: array
                         items:
                           type: string
-                    required:
-                      - firstName
-                      - instagramUsername
-                      - isValid
+      responses:
+        "200":
+          description: Default Response
+  /api/contacts/import/vcard/parse:
+    post:
+      tags:
+        - Import
+      responses:
+        "200":
+          description: Default Response
+  /api/contacts/import/vcard/commit:
+    post:
+      tags:
+        - Import
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
               required:
                 - contacts
+              properties:
+                contacts:
+                  minItems: 1
+                  type: array
+                  items:
+                    type: object
+                    required:
+                      - tempId
+                      - firstName
+                      - middleName
+                      - lastName
+                      - headline
+                      - phones
+                      - emails
+                      - addresses
+                      - linkedin
+                      - instagram
+                      - whatsapp
+                      - facebook
+                      - signal
+                      - website
+                      - avatarUri
+                      - importantDates
+                      - isValid
+                    properties:
+                      tempId:
+                        type: string
+                      firstName:
+                        type: string
+                      middleName:
+                        anyOf:
+                          - type: string
+                          - type: "null"
+                      lastName:
+                        type: string
+                      headline:
+                        anyOf:
+                          - type: string
+                          - type: "null"
+                      phones:
+                        type: array
+                        items:
+                          type: object
+                          required:
+                            - prefix
+                            - value
+                            - type
+                            - preferred
+                          properties:
+                            prefix:
+                              type: string
+                            value:
+                              type: string
+                            type:
+                              anyOf:
+                                - type: string
+                                  enum:
+                                    - home
+                                - type: string
+                                  enum:
+                                    - work
+                            preferred:
+                              type: boolean
+                      emails:
+                        type: array
+                        items:
+                          type: object
+                          required:
+                            - value
+                            - type
+                            - preferred
+                          properties:
+                            value:
+                              type: string
+                            type:
+                              anyOf:
+                                - type: string
+                                  enum:
+                                    - home
+                                - type: string
+                                  enum:
+                                    - work
+                            preferred:
+                              type: boolean
+                      addresses:
+                        type: array
+                        items:
+                          type: object
+                          required:
+                            - value
+                            - type
+                            - preferred
+                            - addressLine1
+                            - addressLine2
+                            - addressCity
+                            - addressPostalCode
+                            - addressState
+                            - addressStateCode
+                            - addressCountry
+                            - addressCountryCode
+                            - addressFormatted
+                            - latitude
+                            - longitude
+                            - geocodeSource
+                            - validity
+                            - timezone
+                          properties:
+                            value:
+                              type: string
+                            type:
+                              anyOf:
+                                - type: string
+                                  enum:
+                                    - home
+                                - type: string
+                                  enum:
+                                    - work
+                                - type: string
+                                  enum:
+                                    - other
+                            preferred:
+                              type: boolean
+                            addressLine1:
+                              anyOf:
+                                - type: string
+                                - type: "null"
+                            addressLine2:
+                              anyOf:
+                                - type: string
+                                - type: "null"
+                            addressCity:
+                              anyOf:
+                                - type: string
+                                - type: "null"
+                            addressPostalCode:
+                              anyOf:
+                                - type: string
+                                - type: "null"
+                            addressState:
+                              anyOf:
+                                - type: string
+                                - type: "null"
+                            addressStateCode:
+                              anyOf:
+                                - type: string
+                                - type: "null"
+                            addressCountry:
+                              anyOf:
+                                - type: string
+                                - type: "null"
+                            addressCountryCode:
+                              anyOf:
+                                - type: string
+                                - type: "null"
+                            addressFormatted:
+                              anyOf:
+                                - type: string
+                                - type: "null"
+                            latitude:
+                              anyOf:
+                                - type: number
+                                - type: "null"
+                            longitude:
+                              anyOf:
+                                - type: number
+                                - type: "null"
+                            geocodeSource:
+                              anyOf:
+                                - type: string
+                                  enum:
+                                    - mapy.com
+                                - type: "null"
+                            validity:
+                              anyOf:
+                                - type: string
+                                  enum:
+                                    - valid
+                                - type: string
+                                  enum:
+                                    - unverifiable
+                                - type: string
+                                  enum:
+                                    - invalid
+                            timezone:
+                              anyOf:
+                                - type: string
+                                - type: "null"
+                      linkedin:
+                        anyOf:
+                          - type: string
+                          - type: "null"
+                      instagram:
+                        anyOf:
+                          - type: string
+                          - type: "null"
+                      whatsapp:
+                        anyOf:
+                          - type: string
+                          - type: "null"
+                      facebook:
+                        anyOf:
+                          - type: string
+                          - type: "null"
+                      signal:
+                        anyOf:
+                          - type: string
+                          - type: "null"
+                      website:
+                        anyOf:
+                          - type: string
+                          - type: "null"
+                      avatarUri:
+                        anyOf:
+                          - type: string
+                          - type: "null"
+                      importantDates:
+                        anyOf:
+                          - type: array
+                            items:
+                              type: object
+                              required:
+                                - type
+                                - date
+                                - note
+                              properties:
+                                type:
+                                  anyOf:
+                                    - type: string
+                                      enum:
+                                        - birthday
+                                    - type: string
+                                      enum:
+                                        - anniversary
+                                    - type: string
+                                      enum:
+                                        - nameday
+                                    - type: string
+                                      enum:
+                                        - graduation
+                                    - type: string
+                                      enum:
+                                        - other
+                                date:
+                                  type: string
+                                note:
+                                  anyOf:
+                                    - type: string
+                                    - type: "null"
+                          - type: "null"
+                      isValid:
+                        type: boolean
       responses:
         "200":
           description: Default Response
@@ -1341,6 +1807,9 @@ paths:
           application/json:
             schema:
               type: object
+              required:
+                - label
+                - color
               properties:
                 label:
                   minLength: 1
@@ -1348,9 +1817,8 @@ paths:
                 emoji:
                   type: string
                 color:
+                  minLength: 1
                   type: string
-              required:
-                - label
       responses:
         "200":
           description: Default Response
@@ -1363,14 +1831,14 @@ paths:
           application/json:
             schema:
               type: object
+              required:
+                - ids
               properties:
                 ids:
                   minItems: 1
                   type: array
                   items:
                     type: string
-              required:
-                - ids
       responses:
         "200":
           description: Default Response
@@ -1473,6 +1941,12 @@ paths:
               - type: string
                 enum:
                   - interactionDesc
+              - type: string
+                enum:
+                  - createdAtAsc
+              - type: string
+                enum:
+                  - createdAtDesc
           in: query
           name: sort
           required: false
@@ -1522,14 +1996,14 @@ paths:
           application/json:
             schema:
               type: object
+              required:
+                - personIds
               properties:
                 personIds:
                   minItems: 1
                   type: array
                   items:
                     type: string
-              required:
-                - personIds
       parameters:
         - schema:
             format: uuid
@@ -1550,15 +2024,17 @@ paths:
             schema:
               anyOf:
                 - type: object
+                  required:
+                    - personIds
                   properties:
                     personIds:
                       minItems: 1
                       type: array
                       items:
                         type: string
-                  required:
-                    - personIds
                 - type: object
+                  required:
+                    - filter
                   properties:
                     filter:
                       type: object
@@ -1569,8 +2045,6 @@ paths:
                       type: array
                       items:
                         type: string
-                  required:
-                    - filter
       parameters:
         - schema:
             format: uuid
@@ -1631,12 +2105,12 @@ paths:
           application/json:
             schema:
               type: object
+              required:
+                - label
               properties:
                 label:
                   minLength: 1
                   type: string
-              required:
-                - label
       responses:
         "200":
           description: Default Response
@@ -1649,18 +2123,31 @@ paths:
           application/json:
             schema:
               type: object
+              required:
+                - ids
               properties:
                 ids:
                   minItems: 1
                   type: array
                   items:
                     type: string
-              required:
-                - ids
       responses:
         "200":
           description: Default Response
   /api/tags/{id}:
+    get:
+      tags:
+        - Tags
+      parameters:
+        - schema:
+            format: uuid
+            type: string
+          in: path
+          name: id
+          required: true
+      responses:
+        "200":
+          description: Default Response
     patch:
       tags:
         - Tags
@@ -1750,14 +2237,14 @@ paths:
           application/json:
             schema:
               type: object
+              required:
+                - personIds
               properties:
                 personIds:
                   minItems: 1
                   type: array
                   items:
                     type: string
-              required:
-                - personIds
       parameters:
         - schema:
             format: uuid
@@ -1777,14 +2264,14 @@ paths:
           application/json:
             schema:
               type: object
+              required:
+                - personIds
               properties:
                 personIds:
                   minItems: 1
                   type: array
                   items:
                     type: string
-              required:
-                - personIds
       parameters:
         - schema:
             format: uuid
@@ -1795,10 +2282,10 @@ paths:
       responses:
         "200":
           description: Default Response
-  /api/account:
+  /api/me:
     patch:
       tags:
-        - Account
+        - Me
       requestBody:
         required: true
         content:
@@ -1817,33 +2304,69 @@ paths:
           description: Default Response
     delete:
       tags:
-        - Account
+        - Me
       responses:
         "200":
           description: Default Response
-  /api/account/photo:
+  /api/me/photo:
     post:
       tags:
-        - Account
+        - Me
       responses:
         "200":
           description: Default Response
     delete:
       tags:
-        - Account
+        - Me
       responses:
         "200":
           description: Default Response
-  /api/settings:
+  /api/me/person:
     get:
       tags:
-        - Settings
+        - Me
+      parameters:
+        - schema:
+            anyOf:
+              - type: string
+                enum:
+                  - low
+              - type: string
+                enum:
+                  - medium
+              - type: string
+                enum:
+                  - high
+          in: query
+          name: avatarQuality
+          required: false
+        - schema:
+            anyOf:
+              - type: string
+                enum:
+                  - small
+              - type: string
+                enum:
+                  - medium
+              - type: string
+                enum:
+                  - large
+          in: query
+          name: avatarSize
+          required: false
+      responses:
+        "200":
+          description: Default Response
+  /api/me/settings:
+    get:
+      tags:
+        - Me
       responses:
         "200":
           description: Default Response
     patch:
       tags:
-        - Settings
+        - Me
       requestBody:
         required: true
         content:
@@ -1851,12 +2374,6 @@ paths:
             schema:
               type: object
               properties:
-                name:
-                  type: string
-                middlename:
-                  type: string
-                surname:
-                  type: string
                 timezone:
                   type: string
                 reminderSendHour:
@@ -1888,10 +2405,10 @@ paths:
       responses:
         "200":
           description: Default Response
-  /api/redirect:
+  /api/extension:
     post:
       tags:
-        - Redirect
+        - Extension
       requestBody:
         required: true
         content:
@@ -1923,7 +2440,7 @@ paths:
                   anyOf:
                     - type: string
                     - type: "null"
-                place:
+                location:
                   anyOf:
                     - type: string
                     - type: "null"
@@ -1939,6 +2456,8 @@ paths:
                   type: array
                   items:
                     type: object
+                    required:
+                      - companyName
                     properties:
                       companyName:
                         type: string
@@ -1956,12 +2475,12 @@ paths:
                         type: string
                       location:
                         type: string
-                    required:
-                      - companyName
                 educationHistory:
                   type: array
                   items:
                     type: object
+                    required:
+                      - schoolName
                     properties:
                       schoolName:
                         type: string
@@ -1975,14 +2494,12 @@ paths:
                         type: string
                       endDate:
                         type: string
-                    required:
-                      - schoolName
       responses:
         "200":
           description: Default Response
     get:
       tags:
-        - Redirect
+        - Extension
       parameters:
         - schema:
             type: string
@@ -2027,21 +2544,25 @@ paths:
         - schema:
             type: string
           in: query
-          name: place
+          name: location
           required: false
       responses:
         "200":
           description: Default Response
-  /api/feedback:
+  /api/me/feedback:
     post:
       tags:
-        - Feedback
+        - Me
       requestBody:
         required: true
         content:
           application/json:
             schema:
               type: object
+              required:
+                - npsScore
+                - npsReason
+                - generalFeedback
               properties:
                 npsScore:
                   minimum: 0
@@ -2051,23 +2572,22 @@ paths:
                   type: string
                 generalFeedback:
                   type: string
-              required:
-                - npsScore
-                - npsReason
-                - generalFeedback
       responses:
         "200":
           description: Default Response
-  /api/reminders/daily-digest:
+  /api/internal/reminder-digest:
     post:
       tags:
-        - Reminders
+        - Internal
       requestBody:
         required: true
         content:
           application/json:
             schema:
               type: object
+              required:
+                - targetDate
+                - users
               properties:
                 targetDate:
                   type: string
@@ -2075,6 +2595,10 @@ paths:
                   type: array
                   items:
                     type: object
+                    required:
+                      - userId
+                      - email
+                      - reminders
                     properties:
                       userId:
                         type: string
@@ -2088,6 +2612,13 @@ paths:
                         type: array
                         items:
                           type: object
+                          required:
+                            - personId
+                            - personName
+                            - type
+                            - date
+                            - notifyOn
+                            - notifyDaysBefore
                           properties:
                             personId:
                               type: string
@@ -2133,20 +2664,6 @@ paths:
                               anyOf:
                                 - type: string
                                 - type: "null"
-                          required:
-                            - personId
-                            - personName
-                            - type
-                            - date
-                            - notifyOn
-                            - notifyDaysBefore
-                    required:
-                      - userId
-                      - email
-                      - reminders
-              required:
-                - targetDate
-                - users
       responses:
         "200":
           description: Default Response
@@ -2210,6 +2727,9 @@ paths:
           application/json:
             schema:
               type: object
+              required:
+                - type
+                - date
               properties:
                 type:
                   minLength: 1
@@ -2225,13 +2745,66 @@ paths:
                   type: array
                   items:
                     type: string
-              required:
-                - type
-                - date
       responses:
         "200":
           description: Default Response
   /api/interactions/{id}:
+    get:
+      tags:
+        - Interactions
+      parameters:
+        - schema:
+            minimum: 1
+            maximum: 200
+            default: 50
+            type: integer
+          in: query
+          name: limit
+          required: false
+        - schema:
+            minimum: 0
+            default: 0
+            type: integer
+          in: query
+          name: offset
+          required: false
+        - schema:
+            anyOf:
+              - type: string
+                enum:
+                  - low
+              - type: string
+                enum:
+                  - medium
+              - type: string
+                enum:
+                  - high
+          in: query
+          name: avatarQuality
+          required: false
+        - schema:
+            anyOf:
+              - type: string
+                enum:
+                  - small
+              - type: string
+                enum:
+                  - medium
+              - type: string
+                enum:
+                  - large
+          in: query
+          name: avatarSize
+          required: false
+        - schema:
+            format: uuid
+            type: string
+          in: path
+          name: id
+          required: true
+      responses:
+        "200":
+          description: Default Response
     delete:
       tags:
         - Interactions
@@ -2277,6 +2850,330 @@ paths:
       responses:
         "200":
           description: Default Response
+  /api/contacts/share:
+    post:
+      tags:
+        - Share
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - personId
+                - recipientEmails
+                - selectedFields
+              properties:
+                personId:
+                  minLength: 1
+                  type: string
+                recipientEmails:
+                  minItems: 1
+                  maxItems: 10
+                  type: array
+                  items:
+                    format: email
+                    type: string
+                message:
+                  maxLength: 2000
+                  type: string
+                selectedFields:
+                  minItems: 1
+                  type: array
+                  items:
+                    anyOf:
+                      - type: string
+                        enum:
+                          - name
+                      - type: string
+                        enum:
+                          - avatar
+                      - type: string
+                        enum:
+                          - headline
+                      - type: string
+                        enum:
+                          - phones
+                      - type: string
+                        enum:
+                          - emails
+                      - type: string
+                        enum:
+                          - location
+                      - type: string
+                        enum:
+                          - linkedin
+                      - type: string
+                        enum:
+                          - instagram
+                      - type: string
+                        enum:
+                          - facebook
+                      - type: string
+                        enum:
+                          - website
+                      - type: string
+                        enum:
+                          - whatsapp
+                      - type: string
+                        enum:
+                          - signal
+                      - type: string
+                        enum:
+                          - addresses
+                      - type: string
+                        enum:
+                          - notes
+                      - type: string
+                        enum:
+                          - importantDates
+      responses:
+        "200":
+          description: Default Response
+  /api/admin/stats/active-users:
+    get:
+      tags:
+        - Stats
+      parameters:
+        - schema:
+            minimum: 30
+            maximum: 180
+            default: 90
+            type: number
+          in: query
+          name: days
+          required: false
+      responses:
+        "200":
+          description: Default Response
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - timeline
+                properties:
+                  timeline:
+                    type: array
+                    items:
+                      type: object
+                      required:
+                        - date
+                        - dau
+                        - wau
+                        - mau
+                      properties:
+                        date:
+                          type: string
+                        dau:
+                          type: number
+                        wau:
+                          type: number
+                        mau:
+                          type: number
+  /api/admin/stats/funnel:
+    get:
+      tags:
+        - Stats
+      responses:
+        "200":
+          description: Default Response
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - periods
+                properties:
+                  periods:
+                    type: array
+                    items:
+                      type: object
+                      required:
+                        - periodKey
+                        - periodLabel
+                        - signups
+                        - contacts
+                        - interactions
+                        - signupsToContactsPct
+                        - contactsToInteractionsPct
+                      properties:
+                        periodKey:
+                          type: string
+                        periodLabel:
+                          type: string
+                        signups:
+                          type: number
+                        contacts:
+                          type: number
+                        interactions:
+                          type: number
+                        signupsToContactsPct:
+                          type: number
+                        contactsToInteractionsPct:
+                          type: number
+  /api/admin/stats/nps:
+    get:
+      tags:
+        - Stats
+      responses:
+        "200":
+          description: Default Response
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - score
+                  - responses
+                  - promoters
+                  - passives
+                  - detractors
+                properties:
+                  score:
+                    anyOf:
+                      - type: number
+                      - type: "null"
+                  responses:
+                    type: number
+                  promoters:
+                    type: number
+                  passives:
+                    type: number
+                  detractors:
+                    type: number
+  /api/admin/stats/total-users:
+    get:
+      tags:
+        - Stats
+      responses:
+        "200":
+          description: Default Response
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - timeline
+                properties:
+                  timeline:
+                    type: array
+                    items:
+                      type: object
+                      required:
+                        - date
+                        - total
+                      properties:
+                        date:
+                          type: string
+                        total:
+                          type: number
+  /api/admin/stats/github-stars:
+    get:
+      tags:
+        - Stats
+      responses:
+        "200":
+          description: Default Response
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - stars
+                  - repo
+                properties:
+                  stars:
+                    type: number
+                  repo:
+                    type: string
+  /api/me/onboarding/complete:
+    patch:
+      tags:
+        - Me
+      responses:
+        "200":
+          description: Default Response
+  /api/chat:
+    post:
+      tags:
+        - Chat
+      responses:
+        "200":
+          description: Default Response
+  /api/chat/sessions:
+    get:
+      tags:
+        - Chat
+      responses:
+        "200":
+          description: Default Response
+    post:
+      tags:
+        - Chat
+      responses:
+        "200":
+          description: Default Response
+  /api/chat/sessions/{sessionId}:
+    patch:
+      tags:
+        - Chat
+      parameters:
+        - schema:
+            type: string
+          in: path
+          name: sessionId
+          required: true
+      responses:
+        "200":
+          description: Default Response
+    delete:
+      tags:
+        - Chat
+      parameters:
+        - schema:
+            type: string
+          in: path
+          name: sessionId
+          required: true
+      responses:
+        "200":
+          description: Default Response
+  /api/chat/sessions/{sessionId}/messages:
+    get:
+      tags:
+        - Chat
+      parameters:
+        - schema:
+            type: string
+          in: path
+          name: sessionId
+          required: true
+      responses:
+        "200":
+          description: Default Response
+  /api/subscriptions:
+    get:
+      tags:
+        - Subscriptions
+      responses:
+        "200":
+          description: Default Response
+  /api/subscriptions/sync:
+    post:
+      tags:
+        - Subscriptions
+      responses:
+        "200":
+          description: Default Response
+  /api/webhooks/polar:
+    post:
+      tags:
+        - Webhooks
+      responses:
+        "200":
+          description: Default Response
 servers:
   - url: http://localhost:3001
     description: Local development server
@@ -2295,13 +3192,19 @@ tags:
     description: Interaction timeline events
   - name: Import
     description: Contact import from social platforms
-  - name: Account
-    description: User account operations
-  - name: Settings
-    description: User settings and preferences
-  - name: Redirect
+  - name: Me
+    description: Authenticated user profile, settings, and feedback
+  - name: Extension
     description: Browser extension integration endpoints
-  - name: Feedback
-    description: User feedback
-  - name: Reminders
-    description: Scheduled reminder operations
+  - name: Internal
+    description: Service-to-service endpoints (not user-facing)
+  - name: Share
+    description: Share contacts via email
+  - name: Stats
+    description: Admin KPI dashboard metrics
+  - name: Chat
+    description: AI chat assistant
+  - name: Subscriptions
+    description: Subscription and billing management
+  - name: Webhooks
+    description: Inbound webhooks from third-party services

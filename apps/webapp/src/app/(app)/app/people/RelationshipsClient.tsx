@@ -8,8 +8,11 @@ interface RelationshipsClientProps {
   totalCount: number;
 }
 
-export function RelationshipsClient({ initialContacts, totalCount }: RelationshipsClientProps) {
+export function RelationshipsClient({
+  initialContacts,
+  totalCount,
+}: RelationshipsClientProps) {
   return (
-    <PeopleClient initialContacts={initialContacts} totalCount={totalCount} layout="container" />
+    <PeopleClient initialContacts={initialContacts} totalCount={totalCount} />
   );
 }

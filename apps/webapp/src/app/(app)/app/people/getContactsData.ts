@@ -10,7 +10,9 @@ export type SortOrder =
   | "surnameAsc"
   | "surnameDesc"
   | "interactionAsc"
-  | "interactionDesc";
+  | "interactionDesc"
+  | "createdAtAsc"
+  | "createdAtDesc";
 
 export interface ContactsStats {
   totalContacts: number;

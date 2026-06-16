@@ -23,8 +23,14 @@ export {
   type LoadingNotificationTemplateProps,
   warningNotificationTemplate,
   type WarningNotificationTemplateProps,
+  statusNotificationTemplate,
+  type StatusNotificationTemplateProps,
+  informationNotificationTemplate,
+  type InformationNotificationTemplateProps,
 } from "./Notifications";
 export { bonderyTheme, primaryColor } from "./theme";
+export { DotsMenuButton, type DotsMenuButtonProps } from "./DotsMenuButton";
+export { CopyButton, type CopyButtonProps } from "./CopyButton";
 
 // DataTable
 export {

@@ -1,10 +1,23 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import "@mantine/core/styles.css";
+import "@mantine/notifications/styles.css";
+import "@mantine/dates/styles.css";
+import "@mantine/tiptap/styles.css";
+import "@mantine/dropzone/styles.css";
+import "@mantine/spotlight/styles.css";
+import "@mantine/nprogress/styles.css";
+import "flag-icons/css/flag-icons.min.css";
+import "@bondery/mantine-next/styles";
 import { bonderyTheme } from "@bondery/mantine-next";
 import { Notifications } from "@mantine/notifications";
-import { ModalsProvider } from "@mantine/modals";
 import { Lexend } from "next/font/google";
-import { ColorSchemeScript, MantineProvider, mantineHtmlProps } from "@mantine/core";
+import {
+  ColorSchemeScript,
+  MantineProvider,
+  mantineHtmlProps,
+  v8CssVariablesResolver,
+} from "@mantine/core";
 import { headers } from "next/headers";
 import { WEBAPP_NAME } from "@bondery/helpers";
 
@@ -31,11 +44,13 @@ export default async function RootLayout({
         <ColorSchemeScript nonce={nonce} defaultColorScheme="auto" />
       </head>
       <body>
-        <MantineProvider defaultColorScheme="auto" theme={bonderyTheme}>
-          <ModalsProvider modalProps={{ centered: true }}>
-            <Notifications autoClose={5000} position="top-center" />
-            {children}
-          </ModalsProvider>
+        <MantineProvider
+          defaultColorScheme="auto"
+          theme={bonderyTheme}
+          cssVariablesResolver={v8CssVariablesResolver}
+        >
+          <Notifications autoClose={6000} position="top-center" />
+          {children}
         </MantineProvider>
       </body>
     </html>

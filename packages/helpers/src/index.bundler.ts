@@ -7,11 +7,8 @@ export {
   STATUS_PAGE_URL,
   SUPPORT_EMAIL,
   SOCIAL_LINKS,
-} from "./globals/paths";
-export { SOCIAL_PLATFORM_URL_DETAILS } from "./globals/social-platform-urls";
-export { IMPORTANT_DATE_TYPE_META } from "./globals/important-dates";
-export { parseInstagramUsername } from "./instagram/parseInstagramUsername";
-export type {
-  ParseInstagramUsernameInput,
-  ParsedInstagramName,
-} from "./instagram/parseInstagramUsername";
+  SOCIAL_PLATFORM_URL_DETAILS,
+  IMPORTANT_DATE_TYPE_META,
+} from "./globals";
+export { parseInstagramUsername } from "./platform";
+export type { ParseInstagramUsernameInput, ParsedInstagramName } from "./platform";

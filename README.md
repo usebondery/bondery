@@ -23,10 +23,7 @@ Visit [usebondery.com](https://usebondery.com) to learn about the project. To le
 
 ## 🛠️ Contributing
 
-Contributions are welcome! Before you start, please read the relevant guides in the documentation:
-
-- [Architecture](https://usebondery.com/docs/contributing/architecture) — how the monorepo is structured and the tech decisions behind each app
-- [Local development setup](https://usebondery.com/docs/contributing/local-setup) — step-by-step instructions to run every app on your machine
+Contributions are welcome! Before you start, please read the [contribution guide](https://usebondery.com/docs/contributing).
 
 To report a bug or request a feature, open an issue on the [GitHub repository](https://github.com/usebondery/bondery/issues).
 

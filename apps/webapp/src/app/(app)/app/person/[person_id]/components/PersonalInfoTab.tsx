@@ -23,7 +23,7 @@ interface PersonalInfoTabProps {
   onSaveAddress: (payload: {
     addresses: Contact["addresses"];
     suggestedLocation: {
-      place: string;
+      location: string;
       latitude: number | null;
       longitude: number | null;
     } | null;

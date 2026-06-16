@@ -9,6 +9,16 @@ const nextConfig: NextConfig = {
   async headers() {
     return [
       {
+        // Prevent browsers from caching a stale service worker script
+        source: "/sw.js",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "no-cache, no-store, must-revalidate",
+          },
+        ],
+      },
+      {
         source: "/:path*",
         headers: [
           {
@@ -39,4 +49,6 @@ const nextConfig: NextConfig = {
 };
 
 const withNextIntl = createNextIntlPlugin("./src/lib/i18n/request.ts");
-export default withNextIntl(nextConfig);
+// Type cast needed: root node_modules/next (from @react-email) and webapp's local next
+// resolve to different versions, causing a false type conflict at build time.
+export default withNextIntl(nextConfig as Parameters<typeof withNextIntl>[0]);

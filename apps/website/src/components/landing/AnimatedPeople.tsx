@@ -55,7 +55,7 @@ export function AnimatedPeople() {
   useEffect(() => {
     const interval = setInterval(handleNext, 4000);
     return () => clearInterval(interval);
-  }, []);
+  }, [handleNext]);
 
   const getRotation = (index: number, isActive: boolean) => {
     if (isActive) return 0;

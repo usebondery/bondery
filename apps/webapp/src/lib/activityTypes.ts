@@ -1,26 +1,18 @@
 import type { ActivityType } from "@bondery/types";
+import { INTERACTION_TYPES } from "@bondery/helpers";
 
 export type ActivityTypeConfig = {
   emoji: string;
   color: string;
 };
 
-export const ACTIVITY_TYPE_OPTIONS: ActivityType[] = [
-  "Call",
-  "Coffee",
-  "Email",
-  "Meal",
-  "Meeting",
-  "Networking interaction",
-  "Note",
-  "Other",
-  "Party/Social",
-  "Text/Messaging",
-  "Competition/Hackathon",
-];
+export const ACTIVITY_TYPE_OPTIONS: ActivityType[] = INTERACTION_TYPES.filter(
+  (t) => t !== "Custom",
+);
 
 const LEGACY_ACTIVITY_TYPE_ALIASES: Record<string, ActivityType> = {
-  Networking: "Networking interaction",
+  Networking: "Networking event",
+  "Networking interaction": "Networking event",
 };
 
 const ACTIVITY_TYPE_CONFIG: Record<ActivityType, ActivityTypeConfig> = {
@@ -29,7 +21,7 @@ const ACTIVITY_TYPE_CONFIG: Record<ActivityType, ActivityTypeConfig> = {
   Email: { emoji: "📧", color: "gray" },
   Meal: { emoji: "🍽️", color: "yellow" },
   Meeting: { emoji: "👔", color: "indigo" },
-  "Networking interaction": { emoji: "🤝", color: "teal" },
+  "Networking event": { emoji: "🤝", color: "teal" },
   Note: { emoji: "📝", color: "lime" },
   Other: { emoji: "⭐", color: "grape" },
   "Party/Social": { emoji: "🎉", color: "pink" },

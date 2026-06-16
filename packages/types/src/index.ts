@@ -11,6 +11,8 @@ export * from "./contact";
 export * from "./activity";
 export * from "./group";
 export * from "./tag";
+export * from "./chat";
+export * from "./subscription";
 export * from "./user";
 export * from "./api";
 export * from "./config";

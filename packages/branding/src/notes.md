@@ -5,7 +5,7 @@ Here is **only the list**, in your requested structure, with **simple bullets an
 
 ---
 
-# Social media
+# Socials
 
 ## LinkedIn
 

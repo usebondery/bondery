@@ -2,7 +2,7 @@
 
 import { ActionIcon, Card, Group, Select, Stack, Text, Tooltip } from "@mantine/core";
 import { IconPlus, IconTrash } from "@tabler/icons-react";
-import { useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import type {
   ContactPreview,
@@ -10,7 +10,8 @@ import type {
   RelationshipType,
 } from "@bondery/types";
 import { PersonChip } from "@bondery/mantine-next";
-import { RELATIONSHIP_TYPE_OPTIONS } from "@/lib/config";
+import { DEBOUNCE_MS, RELATIONSHIP_TYPE_OPTIONS } from "@/lib/config";
+import { searchContacts } from "@/lib/searchContacts";
 
 interface ContactRelationshipsSectionProps {
   currentPerson: ContactPreview;
@@ -58,6 +59,14 @@ export function ContactRelationshipsSection({
     label: `${typeOption.emoji} ${t(`Types.${typeOption.value}`)}`,
   }));
 
+  const handleSearch = useCallback(
+    async (query: string): Promise<ContactPreview[]> => {
+      const results = await searchContacts(query);
+      return results.filter((c) => c.id !== currentPerson.id);
+    },
+    [currentPerson.id],
+  );
+
   return (
     <Stack gap="sm">
       <Text size="sm" fw={600}>
@@ -98,6 +107,8 @@ export function ContactRelationshipsSection({
                 }
                 onDelete={() => onDeleteRelationship(relationship.id)}
                 removeActionLabel={t("RemoveAction")}
+                onSearch={handleSearch}
+                searchDebounceMs={DEBOUNCE_MS.contactPicker}
               />
             );
           })}
@@ -118,6 +129,8 @@ export function ContactRelationshipsSection({
         ofLabel={t("OfLabel")}
         addActionLabel={t("AddHint")}
         onCreate={onAddRelationship}
+        onSearch={handleSearch}
+        searchDebounceMs={DEBOUNCE_MS.contactPicker}
       />
     </Stack>
   );
@@ -145,6 +158,8 @@ interface RelationshipCardRowProps {
   onCreate?: (relationshipType: RelationshipType, relatedPersonId: string) => Promise<void>;
   onUpdate?: (relationshipType: RelationshipType, relatedPersonId: string) => Promise<void>;
   onDelete?: () => void;
+  onSearch?: (query: string) => Promise<ContactPreview[]>;
+  searchDebounceMs?: number;
 }
 
 function RelationshipCardRow({
@@ -167,6 +182,8 @@ function RelationshipCardRow({
   onCreate,
   onUpdate,
   onDelete,
+  onSearch,
+  searchDebounceMs,
 }: RelationshipCardRowProps) {
   const [relationshipType, setRelationshipType] = useState<RelationshipType | null>(
     initialRelationshipType || null,
@@ -175,13 +192,36 @@ function RelationshipCardRow({
     initialRelatedPerson?.id || null,
   );
   const [isAutoCreating, setIsAutoCreating] = useState(false);
+  const knownRelatedPeopleRef = useRef<Map<string, ContactPreview>>(new Map());
 
   const selectableRelatedPeople = selectablePeople.filter(
     (candidate) => candidate.id !== currentPerson.id,
   );
 
+  useEffect(() => {
+    selectableRelatedPeople.forEach((p) => knownRelatedPeopleRef.current.set(p.id, p));
+  }, [selectableRelatedPeople]);
+
+  useEffect(() => {
+    if (initialRelatedPerson) {
+      knownRelatedPeopleRef.current.set(initialRelatedPerson.id, initialRelatedPerson);
+    }
+  }, [initialRelatedPerson]);
+
+  const localHandleSearch = useCallback(
+    async (query: string): Promise<ContactPreview[]> => {
+      if (!onSearch) return [];
+      const results = await onSearch(query);
+      results.forEach((r) => knownRelatedPeopleRef.current.set(r.id, r));
+      return results;
+    },
+    [onSearch],
+  );
+
   const relatedPerson = relatedPersonId
-    ? selectableRelatedPeople.find((candidate) => candidate.id === relatedPersonId) || null
+    ? (selectableRelatedPeople.find((candidate) => candidate.id === relatedPersonId) ??
+      knownRelatedPeopleRef.current.get(relatedPersonId) ??
+      null)
     : null;
 
   const maybeCreate = async (nextType: RelationshipType | null, nextPersonId: string | null) => {
@@ -255,6 +295,8 @@ function RelationshipCardRow({
           noResultsLabel={noPeopleFound}
           people={selectableRelatedPeople}
           showChevronWhenEmpty
+          onSearch={onSearch ? localHandleSearch : undefined}
+          searchDebounceMs={searchDebounceMs}
           onSelectPerson={(nextPersonId) => {
             if (!nextPersonId) {
               return;

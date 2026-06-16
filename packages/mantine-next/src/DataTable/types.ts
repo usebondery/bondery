@@ -17,6 +17,8 @@ export interface DataColumnConfig<TRow> {
   fixed?: boolean;
   /** Min-width CSS class (e.g., "min-w-40") */
   minWidthClass?: string;
+  /** If true, the column header label and icon are not rendered */
+  hideHeader?: boolean;
   /** Custom render function for cell content */
   render: (row: TRow, rowIndex: number) => ReactNode;
 }
@@ -46,6 +48,10 @@ export interface RowAction<TRow> {
   color?: string;
   /** Callback when action is triggered */
   onClick: (row: TRow) => void;
+  /** When true, the action is rendered as disabled */
+  disabled?: (row: TRow) => boolean;
+  /** Tooltip shown when hovering over a disabled action */
+  disabledTooltip?: string;
 }
 
 /**
@@ -110,6 +116,8 @@ export interface DataTableLabels {
   loadMoreLabel?: string;
   /** Template for selected count (e.g., "{count} selected") */
   selectedCountTemplate?: string;
+  /** Template for selected count when exactly 1 item is selected (e.g., "1 person selected") */
+  selectedSingularCountTemplate?: string;
   /** Template for total count (e.g., "{count} total items") */
   totalCountTemplate?: string;
   /** Template for "select all" link (e.g., "Select all {count} people") */

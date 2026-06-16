@@ -1,7 +1,7 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { browser } from "wxt/browser";
-import { Button, Stack, Text, Center, Card, ThemeIcon, Group } from "@mantine/core";
-import { IconCheck, IconBrandChrome } from "@tabler/icons-react";
+import { Button, Stack, Text, Center, Card, ThemeIcon, } from "@mantine/core";
+import { IconCheck, } from "@tabler/icons-react";
 import { BonderyIcon } from "@bondery/branding";
 import type { LoginResult } from "../utils/messages";
 

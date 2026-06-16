@@ -1,0 +1,37 @@
+"use client";
+
+import { IconAddressBook, IconDownload } from "@tabler/icons-react";
+import { useTranslations } from "next-intl";
+import { modals } from "@mantine/modals";
+import { ModalTitle } from "@bondery/mantine-next";
+import { IntegrationCard } from "@/components/shared/IntegrationCard";
+import { VCardImportModal } from "./VCardImportModal";
+
+export function VCardImportSection() {
+  const t = useTranslations("SettingsPage.DataManagement.VCardImport");
+
+  const openImporter = () => {
+    const modalId = "vcard-import-modal";
+    modals.open({
+      modalId,
+      title: <ModalTitle text={t("ModalTitle")} icon={<IconDownload size={20} stroke={1.5} />} />,
+      size: "lg",
+      children: <VCardImportModal t={t} modalId={modalId} />,
+    });
+  };
+
+  return (
+    <IntegrationCard
+      provider="vcard_import"
+      displayName={t("MobileContacts")}
+      icon={IconAddressBook}
+      iconColor="green"
+      isConnected={false}
+      isDisabled={false}
+      isLinkable={false}
+      connectedDescription={t("CardDescription")}
+      unconnectedDescription={t("CardDescription")}
+      onClick={openImporter}
+    />
+  );
+}

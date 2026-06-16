@@ -20,7 +20,7 @@ export function About() {
         </Box>
 
         <Box>
-          <Grid gutter="xl" align="center">
+          <Grid gap="xl" align="center">
             <GridCol span={{ base: 12, md: 6 }}>
               <Image
                 src="/images/team/medtech-hackathon.jpg"

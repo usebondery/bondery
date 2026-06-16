@@ -34,28 +34,19 @@ export const CONTACT_SELECT = `
   middleName:middle_name,
   lastName:last_name,
   headline,
-  place,
+  location,
   notes,
   notesUpdatedAt:notes_updated_at,
   lastInteraction:last_interaction,
+  lastInteractionActivityId:last_interaction_activity_id,
+  keepFrequencyDays:keep_frequency_days,
   createdAt:created_at,
   myself,
   language,
   timezone,
-  location,
+  gisPoint:gis_point,
   latitude,
   longitude,
-  addressLine1:address_line1,
-  addressLine2:address_line2,
-  addressCity:address_city,
-  addressPostalCode:address_postal_code,
-  addressState:address_state,
-  addressStateCode:address_state_code,
-  addressCountry:address_country,
-  addressCountryCode:address_country_code,
-  addressGranularity:address_granularity,
-  addressFormatted:address_formatted,
-  addressGeocodeSource:address_geocode_source,
   updatedAt:updated_at
 `;
 
@@ -152,6 +143,8 @@ export const ContactSortEnum = Type.Union([
   Type.Literal("surnameDesc"),
   Type.Literal("interactionAsc"),
   Type.Literal("interactionDesc"),
+  Type.Literal("createdAtAsc"),
+  Type.Literal("createdAtDesc"),
 ]);
 
 /** Standard error response shape */

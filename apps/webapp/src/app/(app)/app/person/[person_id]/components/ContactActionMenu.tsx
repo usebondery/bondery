@@ -1,10 +1,11 @@
-import { Button, Menu, MenuItem } from "@mantine/core";
+import { Button, Menu, MenuItem, Tooltip } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import {
   IconArrowMerge,
   IconBrandLinkedin,
   IconDotsVertical,
   IconId,
+  IconShare,
   IconTrash,
 } from "@tabler/icons-react";
 import type { Contact } from "@bondery/types";
@@ -12,7 +13,7 @@ import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import { useState } from "react";
 import { errorNotificationTemplate, successNotificationTemplate } from "@bondery/mantine-next";
 import { useTranslations } from "next-intl";
-import { useEnrichFromLinkedIn } from "@/lib/extension/useEnrichFromLinkedIn";
+import { useBatchEnrichFromLinkedIn } from "@/lib/extension/useBatchEnrichFromLinkedIn";
 import { revalidateContacts } from "../../../actions";
 
 interface ContactActionMenuProps {
@@ -20,6 +21,9 @@ interface ContactActionMenuProps {
   personId: string;
   onDelete: () => void;
   onMergeWith: () => void;
+  onShare: () => void;
+  /** When true, hides delete and merge options (used on the Myself profile page). */
+  myselfMode?: boolean;
 }
 
 export function ContactActionMenu({
@@ -27,10 +31,14 @@ export function ContactActionMenu({
   personId,
   onDelete,
   onMergeWith,
+  onShare,
+  myselfMode = false,
 }: ContactActionMenuProps) {
   const tMerge = useTranslations("MergeWithModal");
+  const tShare = useTranslations("ShareContactModal");
   const tEnrich = useTranslations("EnrichFromLinkedIn");
-  const { enrichFromLinkedIn } = useEnrichFromLinkedIn({ onSuccess: revalidateContacts });
+  const tActions = useTranslations("ContactActionMenu");
+  const { startForPerson } = useBatchEnrichFromLinkedIn();
 
   const handleExport = async () => {
     try {
@@ -51,16 +59,16 @@ export function ContactActionMenu({
 
       notifications.show(
         successNotificationTemplate({
-          title: "Success",
-          description: "Contact exported as vCard",
+          title: tActions("ExportSuccess"),
+          description: tActions("ExportSuccessDescription"),
         }),
       );
     } catch (error) {
       console.error("Failed to export vCard:", error);
       notifications.show(
         errorNotificationTemplate({
-          title: "Error",
-          description: "Failed to export contact. Please try again.",
+          title: tActions("ExportError"),
+          description: tActions("ExportErrorDescription"),
         }),
       );
     }
@@ -80,26 +88,62 @@ export function ContactActionMenu({
           className={`button-scale-effect ${opened ? "button-scale-effect-active" : ""}`}
           leftSection={<IconDotsVertical size={18} />}
         >
-          Actions
+          {tActions("ActionsButton")}
         </Button>
       </Menu.Target>
 
       <Menu.Dropdown>
-        <MenuItem leftSection={<IconArrowMerge size={16} />} onClick={onMergeWith}>
-          {tMerge("ActionLabelMenu")}
+        <MenuItem leftSection={<IconShare size={16} />} onClick={onShare}>
+          {tShare("ActionLabelMenu")}
         </MenuItem>
         <MenuItem leftSection={<IconId size={16} />} onClick={handleExport}>
-          Download vCard
+          {tActions("DownloadVCard")}
         </MenuItem>
         <MenuItem
           leftSection={<IconBrandLinkedin size={16} />}
-          onClick={() => enrichFromLinkedIn(personId, contact.linkedin)}
+          onClick={() => startForPerson(personId, contact.linkedin)}
         >
           {tEnrich("MenuLabel")}
         </MenuItem>
-        <MenuItem color="red" leftSection={<IconTrash size={16} />} onClick={onDelete}>
-          Delete Contact
-        </MenuItem>
+        {!myselfMode && (
+          <Tooltip
+            label={tActions("CannotMergeMyself")}
+            disabled={!contact.myself}
+            withArrow
+            multiline
+            maw={220}
+          >
+            <div>
+              <MenuItem
+                leftSection={<IconArrowMerge size={16} />}
+                onClick={onMergeWith}
+                disabled={!!contact.myself}
+              >
+                {tMerge("ActionLabelMenu")}
+              </MenuItem>
+            </div>
+          </Tooltip>
+        )}
+        {!myselfMode && (
+          <Tooltip
+            label={tActions("CannotDeleteMyself")}
+            disabled={!contact.myself}
+            withArrow
+            multiline
+            maw={220}
+          >
+            <div>
+              <MenuItem
+                color="red"
+                leftSection={<IconTrash size={16} />}
+                onClick={onDelete}
+                disabled={!!contact.myself}
+              >
+                {tActions("DeleteContact")}
+              </MenuItem>
+            </div>
+          </Tooltip>
+        )}
       </Menu.Dropdown>
     </Menu>
   );

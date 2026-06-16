@@ -47,7 +47,7 @@ export function DeleteAccountSection() {
             id: "delete-account",
           });
 
-          const response = await fetch(API_ROUTES.ACCOUNT, {
+          const response = await fetch(API_ROUTES.ME, {
             method: "DELETE",
           });
 

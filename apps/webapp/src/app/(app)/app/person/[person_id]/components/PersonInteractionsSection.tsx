@@ -67,8 +67,6 @@ export function PersonInteractionsSection({
     openNewActivityModal({
       contacts: activityModalContacts,
       initialParticipantIds: [contact.id],
-      titleText: t("WhoAreYouMeeting"),
-      t,
     });
 
     const params = new URLSearchParams(searchParams.toString());
@@ -81,8 +79,6 @@ export function PersonInteractionsSection({
     openNewActivityModal({
       contacts: activityModalContacts,
       activity,
-      titleText: t("WhoAreYouMeeting"),
-      t,
     });
   };
 
@@ -206,8 +202,6 @@ export function PersonInteractionsSection({
           openNewActivityModal({
             contacts: activityModalContacts,
             activity,
-            titleText: t("WhoAreYouMeeting"),
-            t,
           });
         }}
         onDuplicate={handleDuplicate}

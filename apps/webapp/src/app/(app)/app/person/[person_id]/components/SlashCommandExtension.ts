@@ -10,7 +10,7 @@ import type { SlashCommandItem } from "./SlashCommandList";
 export const SlashCommandExtension = Extension.create({
   name: "slashCommand",
 
-  addOptions() {
+  addOptions(): { suggestion: Record<string, unknown> } {
     return {
       suggestion: {
         char: "/",

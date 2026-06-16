@@ -34,6 +34,7 @@ export type ContactAddressType = "home" | "work" | "other";
 export interface ContactAddressEntry {
   value: string;
   type: ContactAddressType;
+  label: string | null;
   latitude: number | null;
   longitude: number | null;
   addressLine1: string | null;
@@ -46,7 +47,9 @@ export interface ContactAddressEntry {
   addressCountryCode: string | null;
   addressGranularity: "address" | "city" | "state" | "country";
   addressFormatted: string | null;
-  addressGeocodeSource: string | null;
+  addressGeocodeSource: "mapy.com" | "manual" | null;
+  geocodeConfidence: "verified" | "unverifiable" | null;
+  timezone: string | null;
 }
 
 export type ImportantDateType = "birthday" | "anniversary" | "nameday" | "graduation" | "other";
@@ -84,11 +87,13 @@ export interface Contact {
   middleName: string | null;
   lastName: string | null;
   headline: string | null;
-  place: string | null;
+  location: string | null;
   notes: string | null;
   notesUpdatedAt?: string | null;
   avatar: string | null;
   lastInteraction: string | null;
+  lastInteractionActivityId: string | null;
+  keepFrequencyDays: number | null;
   createdAt: string;
   updatedAt?: string | null;
   /** Array of phone entries with type and preferred flag */
@@ -108,20 +113,9 @@ export interface Contact {
   position?: Json | null;
   language: string | null;
   timezone: string | null;
-  location: string | null;
+  gisPoint: string | null;
   latitude: number | null;
   longitude: number | null;
-  addressLine1: string | null;
-  addressLine2: string | null;
-  addressCity: string | null;
-  addressPostalCode: string | null;
-  addressState: string | null;
-  addressStateCode: string | null;
-  addressCountry: string | null;
-  addressCountryCode: string | null;
-  addressGranularity: "address" | "city" | "state" | "country";
-  addressFormatted: string | null;
-  addressGeocodeSource: string | null;
 }
 
 /**
@@ -236,7 +230,9 @@ export interface ContactsFilter {
     | "surnameAsc"
     | "surnameDesc"
     | "interactionAsc"
-    | "interactionDesc";
+    | "interactionDesc"
+    | "createdAtAsc"
+    | "createdAtDesc";
 }
 
 /**
@@ -253,7 +249,7 @@ export type DeleteContactsRequest =
 export interface WorkHistoryEntry {
   id: string;
   userId: string;
-  personId: string;
+  peopleLinkedinId: string;
   companyName: string;
   companyLinkedinUrl: string | null;
   companyLogoUrl: string | null;
@@ -273,7 +269,7 @@ export interface WorkHistoryEntry {
 export interface EducationEntry {
   id: string;
   userId: string;
-  personId: string;
+  peopleLinkedinId: string;
   schoolName: string;
   schoolLinkedinUrl: string | null;
   schoolLogoUrl: string | null;
@@ -283,4 +279,41 @@ export interface EducationEntry {
   endDate: string | null;
   createdAt: string;
   updatedAt: string;
+}
+
+/**
+ * Response from GET /contacts/:id/linkedin-data
+ */
+export interface LinkedInDataResponse {
+  linkedinBio: string | null;
+  syncedAt: string | null;
+  workHistory: WorkHistoryEntry[];
+  education: EducationEntry[];
+}
+
+/**
+ * Enrich queue item status values.
+ */
+export type EnrichQueueStatus = "pending" | "processing" | "completed" | "failed";
+
+/**
+ * A single entry in the LinkedIn enrich queue.
+ */
+export interface EnrichQueueItem {
+  id: string;
+  userId: string;
+  personId: string;
+  status: EnrichQueueStatus;
+  errorMessage: string | null;
+  createdAt: string;
+  updatedAt: string;
+  /** Included when returning queue items with contact details */
+  linkedinHandle?: string;
+}
+
+/**
+ * Response from GET /contacts/enrich-queue/eligible-count
+ */
+export interface EnrichEligibleCountResponse {
+  count: number;
 }

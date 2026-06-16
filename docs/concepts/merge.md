@@ -42,7 +42,7 @@ The wizard has three steps:
 
    - Scalar fields: first name, last name, middle name, headline, location, birthday, notes, about
    - Set fields: phones, emails, important events (all entries from both contacts are merged, duplicates removed)
-   - Social media: LinkedIn, Instagram, WhatsApp, Facebook, website, Signal
+   - Socials: LinkedIn, Instagram, WhatsApp, Facebook, website, Signal
 
    If there are no conflicts, this step is skipped.
 

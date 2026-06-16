@@ -20,6 +20,13 @@ export interface PeopleMapFocus {
   token: string;
 }
 
+export interface MapBounds {
+  minLat: number;
+  maxLat: number;
+  minLon: number;
+  maxLon: number;
+}
+
 interface PeopleMapProps {
   markers: PeopleMapMarker[];
   center?: [number, number];
@@ -28,6 +35,8 @@ interface PeopleMapProps {
   scrollWheelZoom?: boolean;
   focus?: PeopleMapFocus | null;
   onVisibleMarkerIdsChange?: (markerIds: string[]) => void;
+  onBoundsChange?: (bounds: MapBounds) => void;
+  disableAutoFit?: boolean;
   disableChipNavigation?: boolean;
 }
 
@@ -44,6 +53,8 @@ export function PeopleMap({
   scrollWheelZoom = true,
   focus,
   onVisibleMarkerIdsChange,
+  onBoundsChange,
+  disableAutoFit = false,
   disableChipNavigation = false,
 }: PeopleMapProps) {
   return (
@@ -55,6 +66,8 @@ export function PeopleMap({
       scrollWheelZoom={scrollWheelZoom}
       focus={focus}
       onVisibleMarkerIdsChange={onVisibleMarkerIdsChange}
+      onBoundsChange={onBoundsChange}
+      disableAutoFit={disableAutoFit}
       disableChipNavigation={disableChipNavigation}
     />
   );

@@ -1,9 +1,12 @@
 {
-  "$schema": "https://v2-8-7.turborepo.dev/schema.json",
+  "$schema": "https://v2-9-5.turborepo.dev/schema.json",
   "ui": "tui",
   "tasks": {
     "build": {
       "env": [
+        "NODE_ENV",
+        "NEXT_PRIVATE_MAPS_KEY",
+        "NEXT_PUBLIC_MAPS_URL",
         "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY",
         "NEXT_PUBLIC_SUPABASE_URL",
         "PUBLIC_SUPABASE_URL",
@@ -43,7 +46,21 @@
       "dependsOn": ["^check-types"]
     },
     "lint": {
-      "dependsOn": ["^lint"]
+      "dependsOn": ["^lint"],
+      "passThroughEnv": [
+        "SYSTEMROOT",
+        "WINDIR",
+        "COMSPEC",
+        "PATHEXT",
+        "PATH",
+        "TEMP",
+        "TMP",
+        "APPDATA",
+        "LOCALAPPDATA",
+        "USERPROFILE",
+        "HOMEDRIVE",
+        "HOMEPATH"
+      ]
     },
     "dev": {
       "dependsOn": ["^build"],
@@ -51,6 +68,8 @@
       "cache": true,
       "env": [
         "NEXT_PUBLIC_WEBAPP_URL",
+        "NEXT_PRIVATE_MAPS_KEY",
+        "NEXT_PUBLIC_MAPS_URL",
         "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY",
         "NEXT_PUBLIC_SUPABASE_URL",
         "PUBLIC_SUPABASE_URL",
@@ -91,6 +110,11 @@
       "outputs": ["dist/**"],
       "env": []
     },
+    "@bondery/vcard#build": {
+      "dependsOn": ["@bondery/helpers#build", "@bondery/types#build"],
+      "outputs": ["dist/**"],
+      "env": []
+    },
     "@bondery/types#build": {
       "outputs": ["dist/**"],
       "env": []
@@ -101,6 +125,23 @@
     }
   },
   "globalPassThroughEnv": [
+    "PATH",
+    "PATHEXT",
+    "SYSTEMROOT",
+    "WINDIR",
+    "COMSPEC",
+    "TEMP",
+    "TMP",
+    "APPDATA",
+    "LOCALAPPDATA",
+    "USERPROFILE",
+    "HOMEDRIVE",
+    "HOMEPATH",
+    "ProgramFiles",
+    "ProgramFiles(x86)",
+    "ProgramW6432",
+    "NEXT_PRIVATE_MAPS_KEY",
+    "NEXT_PUBLIC_MAPS_URL",
     "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY",
     "NEXT_PUBLIC_SUPABASE_URL",
     "PUBLIC_SUPABASE_URL",

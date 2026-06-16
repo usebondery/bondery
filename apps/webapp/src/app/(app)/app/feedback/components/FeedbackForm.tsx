@@ -11,6 +11,7 @@ import {
   loadingNotificationTemplate,
   successNotificationTemplate,
 } from "@bondery/mantine-next";
+import { captureEvent } from "@/lib/analytics/client";
 
 interface FeedbackFormValues {
   npsScore: number;
@@ -48,7 +49,7 @@ export function FeedbackForm() {
     });
 
     try {
-      const response = await fetch(API_ROUTES.FEEDBACK, {
+      const response = await fetch(API_ROUTES.ME_FEEDBACK, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -67,6 +68,12 @@ export function FeedbackForm() {
           description: t("SuccessMessage"),
         }),
       );
+
+      captureEvent("nps_submitted", {
+        score: values.npsScore,
+        has_reason: values.npsReason.trim().length > 0,
+        has_general_feedback: values.generalFeedback.trim().length > 0,
+      });
 
       // Reset form after successful submission
       form.reset();

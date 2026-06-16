@@ -53,7 +53,7 @@ const TIMELINE_ITEMS: TimelineItem[] = [
 ];
 
 export function TimelineAnimation() {
-  const theme = useMantineTheme();
+  const _theme = useMantineTheme();
 
   // State to control staggered animation appearance
   const [visibleCount, setVisibleCount] = useState(0);

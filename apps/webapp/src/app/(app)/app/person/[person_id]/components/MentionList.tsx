@@ -8,7 +8,7 @@ export interface MentionSuggestionItem {
   label: string;
   avatar?: string | null;
   headline?: string | null;
-  place?: string | null;
+  location?: string | null;
 }
 
 interface MentionListProps {

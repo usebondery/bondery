@@ -185,12 +185,12 @@ $headers = @{ Authorization = "Bearer $secret"; apikey = $secret }
 Invoke-RestMethod -Method GET -Uri "$base/auth/v1/admin/oauth/clients" -Headers $headers | ConvertTo-Json -Depth 8
 ```
 
-If the list is empty, register a new client:
+If the list is empty, register a new public client. The `token_endpoint_auth_method='none'` flag is required — omitting it creates a confidential client that rejects PKCE token exchanges with `invalid_credentials`:
 
 ```powershell
 $body = @{
-  name = 'Bondery Extension (local)'
-  redirect_uris = @('https://<your-extension-id>.chromiumapp.org/')
+  redirect_uris              = @('https://<your-extension-id>.chromiumapp.org/')
+  token_endpoint_auth_method = 'none'
 } | ConvertTo-Json
 Invoke-RestMethod -Method POST -Uri "$base/auth/v1/admin/oauth/clients" -Headers ($headers + @{'Content-Type'='application/json'}) -Body $body | ConvertTo-Json -Depth 8
 ```

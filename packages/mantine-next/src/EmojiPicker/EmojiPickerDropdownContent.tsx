@@ -12,6 +12,8 @@ interface EmojiPickerDropdownContentProps {
   value?: string;
   /** Called when the user clicks an emoji. */
   onSelect: (emoji: string) => void;
+  /** Debounce delay in ms for the search input. Local filter only — no API call. */
+  searchDebounceMs?: number;
 }
 
 /**
@@ -19,9 +21,13 @@ interface EmojiPickerDropdownContentProps {
  * Extracted so it can be reused inside different containers (Popover, Menu, etc.)
  * without duplicating the filtering logic.
  */
-export function EmojiPickerDropdownContent({ value, onSelect }: EmojiPickerDropdownContentProps) {
+export function EmojiPickerDropdownContent({
+  value,
+  onSelect,
+  searchDebounceMs = 200,
+}: EmojiPickerDropdownContentProps) {
   const [search, setSearch] = useState("");
-  const [debouncedSearch] = useDebouncedValue(search, 200);
+  const [debouncedSearch] = useDebouncedValue(search, searchDebounceMs);
 
   const filteredContent = useMemo<[string, EmojiData[]][]>(() => {
     if (!debouncedSearch) {

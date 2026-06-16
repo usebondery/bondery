@@ -53,3 +53,4 @@ next-env.d.ts
 
 # dist
 **/dist/**
+.env.local

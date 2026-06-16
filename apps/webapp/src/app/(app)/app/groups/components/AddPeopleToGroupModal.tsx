@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Stack, Text, Loader, Center } from "@mantine/core";
 import { modals } from "@mantine/modals";
 import { notifications } from "@mantine/notifications";
 import { IconUserPlus } from "@tabler/icons-react";
+import { useTranslations } from "next-intl";
 import {
   PeopleMultiPickerInput,
   errorNotificationTemplate,
@@ -18,42 +19,26 @@ import type { Contact } from "@bondery/types";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import { revalidateGroups } from "../../actions";
 import { buildAvatarQueryString } from "@/lib/avatarParams";
-
-export interface AddPeopleToGroupModalTexts {
-  title: string;
-  errorTitle: string;
-  successTitle: string;
-  loadError: string;
-  noSelectionTitle: string;
-  noSelectionDescription: string;
-  addingTitle: string;
-  addingDescription: string;
-  addError: string;
-  emptyState: string;
-  close: string;
-  cancel: string;
-  addContactsPlaceholder: string;
-  noContactsFound: string;
-  formatActionLabel(count: number): string;
-  formatSuccessMessage(count: number, groupLabel: string): string;
-}
+import { DEBOUNCE_MS } from "@/lib/config";
+import { searchContacts } from "@/lib/searchContacts";
 
 interface AddPeopleToGroupModalProps {
   groupId: string;
   groupLabel: string;
-  texts: AddPeopleToGroupModalTexts;
 }
 
 interface AddPeopleToGroupFormProps extends AddPeopleToGroupModalProps {
   modalId: string;
 }
 
-interface AddPeopleToGroupModalTitleProps {
-  title: string;
-}
-
-function AddPeopleToGroupModalTitle({ title }: AddPeopleToGroupModalTitleProps) {
-  return <ModalTitle text={title} icon={<IconUserPlus size={24} />} />;
+function AddPeopleToGroupModalTitle({ groupLabel }: { groupLabel: string }) {
+  const t = useTranslations("GroupsPage");
+  return (
+    <ModalTitle
+      text={t("AddPeopleModal.Title", { groupLabel })}
+      icon={<IconUserPlus size={24} />}
+    />
+  );
 }
 
 /**
@@ -64,19 +49,21 @@ export function openAddPeopleToGroupModal(props: AddPeopleToGroupModalProps) {
 
   modals.open({
     modalId,
-    title: <AddPeopleToGroupModalTitle title={props.texts.title} />,
+    title: <AddPeopleToGroupModalTitle groupLabel={props.groupLabel} />,
     trapFocus: true,
     size: "md",
     children: <AddPeopleToGroupForm {...props} modalId={modalId} />,
   });
 }
 
-function AddPeopleToGroupForm({ groupId, groupLabel, modalId, texts }: AddPeopleToGroupFormProps) {
+function AddPeopleToGroupForm({ groupId, groupLabel, modalId }: AddPeopleToGroupFormProps) {
   const router = useRouter();
+  const t = useTranslations("GroupsPage");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const existingMemberIdsRef = useRef<Set<string>>(new Set());
 
   useEffect(() => {
     modals.updateModal({
@@ -91,7 +78,7 @@ function AddPeopleToGroupForm({ groupId, groupLabel, modalId, texts }: AddPeople
     async function fetchAvailableContacts() {
       try {
         const [allContactsRes, groupContactsRes] = await Promise.all([
-          fetch(`${API_ROUTES.CONTACTS}?${buildAvatarQueryString("small")}`),
+          fetch(`${API_ROUTES.CONTACTS}?limit=200&${buildAvatarQueryString("small")}`),
           fetch(`${API_ROUTES.GROUPS}/${groupId}/contacts?${buildAvatarQueryString("small")}`),
         ]);
 
@@ -103,12 +90,13 @@ function AddPeopleToGroupForm({ groupId, groupLabel, modalId, texts }: AddPeople
         const groupContactsData = (await groupContactsRes.json()) as { contacts: Contact[] };
 
         const existingIds = new Set(groupContactsData.contacts.map((contact) => contact.id));
+        existingMemberIdsRef.current = existingIds;
         setContacts(allContactsData.contacts.filter((contact) => !existingIds.has(contact.id)));
       } catch (error) {
         notifications.show(
           errorNotificationTemplate({
-            title: texts.errorTitle,
-            description: texts.loadError,
+            title: t("AddPeopleModal.ErrorTitle"),
+            description: t("AddPeopleModal.LoadError"),
           }),
         );
       } finally {
@@ -117,13 +105,18 @@ function AddPeopleToGroupForm({ groupId, groupLabel, modalId, texts }: AddPeople
     }
 
     fetchAvailableContacts();
-  }, [groupId, texts.errorTitle, texts.loadError]);
+  }, [groupId]);
+
+  const handleSearch = useCallback(async (query: string): Promise<Contact[]> => {
+    const results = await searchContacts(query);
+    return results.filter((c) => !existingMemberIdsRef.current.has(c.id));
+  }, []);
 
   const handleSubmit = async () => {
     if (selectedIds.length === 0) {
       notifications.show({
-        title: texts.noSelectionTitle,
-        message: texts.noSelectionDescription,
+        title: t("AddPeopleModal.NoSelectionTitle"),
+        message: t("AddPeopleModal.NoSelectionDescription"),
         color: "yellow",
       });
       return;
@@ -133,8 +126,8 @@ function AddPeopleToGroupForm({ groupId, groupLabel, modalId, texts }: AddPeople
 
     const loadingNotification = notifications.show({
       ...loadingNotificationTemplate({
-        title: texts.addingTitle,
-        description: texts.addingDescription,
+        title: t("AddPeopleModal.AddingTitle"),
+        description: t("AddPeopleModal.AddingDescription"),
       }),
     });
 
@@ -149,15 +142,18 @@ function AddPeopleToGroupForm({ groupId, groupLabel, modalId, texts }: AddPeople
 
       if (!res.ok) {
         const errorData = await res.json();
-        throw new Error(errorData.error || texts.addError);
+        throw new Error(errorData.error || t("AddPeopleModal.AddError"));
       }
 
       notifications.hide(loadingNotification);
 
       notifications.show(
         successNotificationTemplate({
-          title: texts.successTitle,
-          description: texts.formatSuccessMessage(selectedIds.length, groupLabel),
+          title: t("AddPeopleModal.SuccessTitle"),
+          description:
+            selectedIds.length === 1
+              ? t("AddPeopleModal.SuccessMessageSingular", { groupLabel })
+              : t("AddPeopleModal.SuccessMessagePlural", { count: selectedIds.length, groupLabel }),
         }),
       );
 
@@ -169,8 +165,8 @@ function AddPeopleToGroupForm({ groupId, groupLabel, modalId, texts }: AddPeople
 
       notifications.show(
         errorNotificationTemplate({
-          title: texts.errorTitle,
-          description: error instanceof Error ? error.message : texts.addError,
+          title: t("AddPeopleModal.ErrorTitle"),
+          description: error instanceof Error ? error.message : t("AddPeopleModal.AddError"),
         }),
       );
     } finally {
@@ -190,14 +186,22 @@ function AddPeopleToGroupForm({ groupId, groupLabel, modalId, texts }: AddPeople
     return (
       <Stack gap="md">
         <Text c="dimmed" ta="center">
-          {texts.emptyState}
+          {t("AddPeopleModal.EmptyState")}
         </Text>
-        <ModalFooter cancelLabel={texts.close} onCancel={() => modals.close(modalId)} />
+        <ModalFooter
+          cancelLabel={t("AddPeopleModal.Close")}
+          onCancel={() => modals.close(modalId)}
+        />
       </Stack>
     );
   }
 
-  const actionLabel = texts.formatActionLabel(selectedIds.length);
+  const actionLabel =
+    selectedIds.length === 0
+      ? t("AddPeopleModal.ActionDefault")
+      : selectedIds.length === 1
+        ? t("AddPeopleModal.ActionSingular")
+        : t("AddPeopleModal.ActionPlural", { count: selectedIds.length });
 
   return (
     <Stack gap="md">
@@ -205,13 +209,15 @@ function AddPeopleToGroupForm({ groupId, groupLabel, modalId, texts }: AddPeople
         contacts={contacts}
         selectedIds={selectedIds}
         onChange={setSelectedIds}
-        placeholder={texts.addContactsPlaceholder}
-        noResultsLabel={texts.noContactsFound}
+        placeholder={t("AddPeopleModal.AddContactsPlaceholder")}
+        noResultsLabel={t("AddPeopleModal.NoContactsFound")}
+        onSearch={handleSearch}
+        searchDebounceMs={DEBOUNCE_MS.contactPicker}
         disabled={isSubmitting}
       />
 
       <ModalFooter
-        cancelLabel={texts.cancel}
+        cancelLabel={t("AddPeopleModal.Cancel")}
         onCancel={() => modals.close(modalId)}
         cancelDisabled={isSubmitting}
         actionLabel={actionLabel}

@@ -7,7 +7,6 @@ import type { ReactNode } from "react";
 interface ErrorPageHeaderProps {
   iconType: "user" | "message-circle" | "settings";
   title: string;
-  description?: string;
   action?: ReactNode;
   backHref?: string;
 }
@@ -18,21 +17,7 @@ const iconMap = {
   settings: IconSettings,
 } as const;
 
-export function ErrorPageHeader({
-  iconType,
-  title,
-  description,
-  action,
-  backHref,
-}: ErrorPageHeaderProps) {
+export function ErrorPageHeader({ iconType, title, action, backHref }: ErrorPageHeaderProps) {
   const Icon = iconMap[iconType];
-  return (
-    <PageHeader
-      icon={Icon}
-      title={title}
-      description={description}
-      action={action}
-      backHref={backHref}
-    />
-  );
+  return <PageHeader icon={Icon} title={title} action={action} backHref={backHref} />;
 }

@@ -13,4 +13,16 @@ export const SOCIAL_PLATFORM_URL_DETAILS = {
     profileBaseUrlWithWww: "https://www.linkedin.com/in/",
     hostMatchPattern: "https://www.linkedin.com/*",
   },
+  facebook: {
+    domain: "facebook.com",
+    wwwDomain: "www.facebook.com",
+    profileBaseUrl: "https://facebook.com/",
+    profileBaseUrlWithWww: "https://www.facebook.com/",
+    hostMatchPattern: "https://www.facebook.com/*",
+    messengerBaseUrl: "https://m.me/",
+  },
+  whatsapp: {
+    domain: "wa.me",
+    deepLinkBaseUrl: "https://wa.me/",
+  },
 } as const;

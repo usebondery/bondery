@@ -11,7 +11,7 @@ export interface InputMaxLengths {
   middleName: number;
   lastName: number;
   headline: number;
-  place: number;
+  location: number;
   description: number;
   dateName: number;
 }
@@ -39,9 +39,9 @@ export interface IntegrationProvider {
 }
 
 /**
- * Social media platform type
+ * Social platform type
  */
-export type SocialMediaPlatform =
+export type SocialPlatform =
   | "linkedin"
   | "instagram"
   | "facebook"

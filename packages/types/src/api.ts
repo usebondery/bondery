@@ -92,7 +92,7 @@ export interface RedirectRequest {
   lastName?: string;
   profileImageUrl?: string;
   headline?: string;
-  place?: string;
+  location?: string;
   notes?: string;
   /** LinkedIn work history to insert when creating a new contact */
   workHistory?: ScrapedWorkHistoryEntry[];
@@ -112,7 +112,7 @@ export interface EnrichContactRequest {
   lastName?: string;
   profileImageUrl?: string;
   headline?: string;
-  place?: string;
+  location?: string;
   linkedinBio?: string;
   workHistory?: ScrapedWorkHistoryEntry[];
   educationHistory?: ScrapedEducationEntry[];
@@ -210,14 +210,75 @@ export interface InstagramImportCommitResponse {
   skippedCount: number;
 }
 
+export interface VCardPreparedContact {
+  tempId: string;
+  firstName: string;
+  middleName: string | null;
+  lastName: string;
+  headline: string | null;
+  phones: Array<{ prefix: string; value: string; type: "home" | "work"; preferred: boolean }>;
+  emails: Array<{ value: string; type: "home" | "work"; preferred: boolean }>;
+  addresses: Array<{
+    value: string;
+    type: "home" | "work" | "other";
+    preferred: boolean;
+    addressLine1: string | null;
+    addressLine2: string | null;
+    addressCity: string | null;
+    addressPostalCode: string | null;
+    addressState: string | null;
+    addressStateCode: string | null;
+    addressCountry: string | null;
+    addressCountryCode: string | null;
+    addressFormatted: string | null;
+    latitude: number | null;
+    longitude: number | null;
+    geocodeSource: "mapy.com" | null;
+    /** Street validated as existing (valid), city-only or unchecked (unverifiable), or street not found (invalid). */
+    validity: "valid" | "unverifiable" | "invalid";
+    timezone: string | null;
+  }>;
+  linkedin: string | null;
+  instagram: string | null;
+  whatsapp: string | null;
+  facebook: string | null;
+  signal: string | null;
+  website: string | null;
+  avatarUri: string | null;
+  importantDates: Array<{
+    type: "birthday" | "anniversary" | "nameday" | "graduation" | "other";
+    date: string;
+    note: string | null;
+  }> | null;
+  isValid: boolean;
+  issues: string[];
+}
+
+export interface VCardParseResponse {
+  contacts: VCardPreparedContact[];
+  totalCount: number;
+  validCount: number;
+  invalidCount: number;
+}
+
+export interface VCardImportCommitRequest {
+  contacts: VCardPreparedContact[];
+}
+
+export interface VCardImportCommitResponse {
+  importedCount: number;
+  skippedCount: number;
+}
+
 export type MergeConflictChoice = "left" | "right";
 
 export type MergeConflictField =
   | "firstName"
   | "middleName"
   | "lastName"
+  | "avatar"
   | "headline"
-  | "place"
+  | "location"
   | "notes"
   | "lastInteraction"
   | "phones"
@@ -225,7 +286,7 @@ export type MergeConflictField =
   | "importantDates"
   | "language"
   | "timezone"
-  | "location"
+  | "gisPoint"
   | "latitude"
   | "longitude"
   | "linkedin"
@@ -246,6 +307,31 @@ export interface MergeContactsResponse {
   userId: string;
   mergedIntoPersonId: string;
   mergedFromPersonId: string;
+}
+
+export type ShareableField =
+  | "name"
+  | "avatar"
+  | "headline"
+  | "phones"
+  | "emails"
+  | "location"
+  | "linkedin"
+  | "instagram"
+  | "facebook"
+  | "website"
+  | "whatsapp"
+  | "signal"
+  | "addresses"
+  | "notes"
+  | "importantDates";
+
+export interface ShareContactRequest {
+  personId: string;
+  recipientEmails: string[];
+  message?: string;
+  sendCopy: boolean;
+  selectedFields: ShareableField[];
 }
 
 export type MergeRecommendationReason = "fullName" | "email" | "phone";

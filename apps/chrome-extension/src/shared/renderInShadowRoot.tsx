@@ -13,7 +13,8 @@
  * @returns The ShadowRootContentScriptUi instance (call `.mount()` to insert into DOM).
  */
 import { createShadowRootUi, type ContentScriptContext } from "#imports";
-import React, { StrictMode } from "react";
+import type React from "react";
+import { StrictMode } from "react";
 import ReactDOM from "react-dom/client";
 import type { ContentScriptAppendMode } from "wxt/utils/content-script-ui/types";
 import { MantineWrapper } from "./MantineWrapper";
@@ -21,7 +22,6 @@ import { MantineWrapper } from "./MantineWrapper";
 // CSS imports — WXT's `cssInjectionMode: "ui"` will bundle these and
 // automatically inject them into the Shadow Root instead of the host page.
 import "@mantine/core/styles.css";
-import "@mantine/dates/styles.css";
 import "flag-icons/css/flag-icons.min.css";
 import "../../../../packages/mantine-next/src/styles.css";
 
@@ -52,10 +52,7 @@ export async function renderInShadowRoot(
       const root = ReactDOM.createRoot(uiContainer);
       root.render(
         <StrictMode>
-          <MantineWrapper
-            getRootElement={() => shadowHost}
-            cssVariablesSelector=":host"
-          >
+          <MantineWrapper getRootElement={() => shadowHost} cssVariablesSelector=":host">
             {options.render(uiContainer)}
           </MantineWrapper>
         </StrictMode>,

@@ -108,6 +108,21 @@ function parseDateString(date: string): Date | null {
   return new Date(year, month - 1, day);
 }
 
+/**
+ * Checks if a date is a recurring date (year 1904 sentinel).
+ */
+function isRecurringDate(date: Date | null): boolean {
+  return date?.getFullYear() === 1904;
+}
+
+/**
+ * Returns the appropriate date format based on whether it's a recurring date.
+ * Recurring dates (year 1904) show without year.
+ */
+function getDateFormat(date: Date | null): string {
+  return isRecurringDate(date) ? "MMMM D" : "MMMM D, YYYY";
+}
+
 function normalizePickerDate(value: Date | string | null): Date | null {
   if (!value) {
     return null;
@@ -186,6 +201,8 @@ export function ImportantDateRowCard({
   hideNotifySelect = false,
   leftAction,
 }: ImportantDateRowCardProps) {
+  const dateFormat = getDateFormat(date);
+
   return (
     <Card withBorder shadow="none" p="sm" radius="md">
       <Group gap="xs" align="center" wrap="nowrap">
@@ -195,7 +212,7 @@ export function ImportantDateRowCard({
           placeholder={datePlaceholder}
           value={date}
           onChange={(value) => onDateChange(normalizePickerDate(value as Date | string | null))}
-          valueFormat="MMMM D, YYYY"
+          valueFormat={dateFormat}
           leftSection={<IconCalendarEvent size={16} />}
           className="min-w-44"
           size="sm"

@@ -15,7 +15,12 @@ import {
   AvatarSizeEnum,
   extractAvatarOptions,
 } from "../../lib/schemas.js";
-import type { Tag, TagWithCount, ContactPreview } from "@bondery/types";
+import type {
+  Tag,
+  TagWithCount,
+  ContactPreview,
+  TablesUpdate,
+} from "@bondery/types";
 
 // ── TypeBox Schemas ──────────────────────────────────────────────────────────
 
@@ -125,12 +130,16 @@ export async function tagRoutes(fastify: FastifyInstance) {
       let previewContactsById = new Map<string, ContactPreview>();
 
       if (includePreview) {
-        const previewIds = Array.from(new Set(Array.from(previewMap.values()).flat()));
+        const previewIds = Array.from(
+          new Set(Array.from(previewMap.values()).flat()),
+        );
 
         if (previewIds.length > 0) {
           const { data: previewContacts, error: previewError } = await client
             .from("people")
-            .select(`id, firstName:first_name, lastName:last_name, updatedAt:updated_at`)
+            .select(
+              `id, firstName:first_name, lastName:last_name, updatedAt:updated_at`,
+            )
             .in("id", previewIds)
             .eq("myself", false);
 
@@ -185,7 +194,10 @@ export async function tagRoutes(fastify: FastifyInstance) {
   fastify.post(
     "/",
     { schema: { body: CreateTagBody } },
-    async (request: FastifyRequest<{ Body: { label: string } }>, reply: FastifyReply) => {
+    async (
+      request: FastifyRequest<{ Body: { label: string } }>,
+      reply: FastifyReply,
+    ) => {
       const { client, user } = getAuth(request);
       const body = request.body;
 
@@ -206,20 +218,51 @@ export async function tagRoutes(fastify: FastifyInstance) {
   );
 
   /**
+   * GET /api/tags/:id - Get a single tag
+   */
+  fastify.get(
+    "/:id",
+    { schema: { params: UuidParam } },
+    async (
+      request: FastifyRequest<{ Params: { id: string } }>,
+      reply: FastifyReply,
+    ) => {
+      const { client, user } = getAuth(request);
+      const { id } = request.params;
+
+      const { data: tag, error } = await client
+        .from("tags")
+        .select(TAG_SELECT)
+        .eq("id", id)
+        .eq("user_id", user.id)
+        .single();
+
+      if (error) {
+        return reply.status(404).send({ error: "Tag not found" });
+      }
+
+      return { tag };
+    },
+  );
+
+  /**
    * PATCH /api/tags/:id - Update a tag label
    */
   fastify.patch(
     "/:id",
     { schema: { params: UuidParam, body: UpdateTagBody } },
     async (
-      request: FastifyRequest<{ Params: { id: string }; Body: { label?: string; color?: string } }>,
+      request: FastifyRequest<{
+        Params: { id: string };
+        Body: { label?: string; color?: string };
+      }>,
       reply: FastifyReply,
     ) => {
       const { client, user } = getAuth(request);
       const { id } = request.params;
       const body = request.body;
 
-      const updates: Record<string, unknown> = {};
+      const updates: TablesUpdate<"tags"> = {};
 
       if (body.label !== undefined) {
         updates.label = body.label.trim();
@@ -248,11 +291,18 @@ export async function tagRoutes(fastify: FastifyInstance) {
   fastify.delete(
     "/:id",
     { schema: { params: UuidParam } },
-    async (request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+    async (
+      request: FastifyRequest<{ Params: { id: string } }>,
+      reply: FastifyReply,
+    ) => {
       const { client, user } = getAuth(request);
       const { id } = request.params;
 
-      const { error } = await client.from("tags").delete().eq("id", id).eq("user_id", user.id);
+      const { error } = await client
+        .from("tags")
+        .delete()
+        .eq("id", id)
+        .eq("user_id", user.id);
 
       if (error) {
         return reply.status(500).send({ error: error.message });
@@ -268,11 +318,18 @@ export async function tagRoutes(fastify: FastifyInstance) {
   fastify.delete(
     "/",
     { schema: { body: IdsBody } },
-    async (request: FastifyRequest<{ Body: { ids: string[] } }>, reply: FastifyReply) => {
+    async (
+      request: FastifyRequest<{ Body: { ids: string[] } }>,
+      reply: FastifyReply,
+    ) => {
       const { client, user } = getAuth(request);
       const { ids } = request.body;
 
-      const { error } = await client.from("tags").delete().eq("user_id", user.id).in("id", ids);
+      const { error } = await client
+        .from("tags")
+        .delete()
+        .eq("user_id", user.id)
+        .in("id", ids);
 
       if (error) {
         return reply.status(500).send({ error: error.message });
@@ -316,7 +373,9 @@ export async function tagRoutes(fastify: FastifyInstance) {
         return reply.status(500).send({ error: membershipsError.message });
       }
 
-      const personIds = (memberships || []).map((m: { person_id: string }) => m.person_id);
+      const personIds = (memberships || []).map(
+        (m: { person_id: string }) => m.person_id,
+      );
 
       if (personIds.length === 0) {
         return { contacts: [], totalCount: 0 };
@@ -324,7 +383,9 @@ export async function tagRoutes(fastify: FastifyInstance) {
 
       const { data: contacts, error: contactsError } = await client
         .from("people")
-        .select("id, firstName:first_name, lastName:last_name, updatedAt:updated_at")
+        .select(
+          "id, firstName:first_name, lastName:last_name, updatedAt:updated_at",
+        )
         .in("id", personIds)
         .eq("myself", false);
 
@@ -335,7 +396,13 @@ export async function tagRoutes(fastify: FastifyInstance) {
       return {
         contacts: (contacts || []).map((c) => ({
           ...c,
-          avatar: buildContactAvatarUrl(client, user.id, c.id, avatarOptions, c.updatedAt),
+          avatar: buildContactAvatarUrl(
+            client,
+            user.id,
+            c.id,
+            avatarOptions,
+            c.updatedAt,
+          ),
         })),
         totalCount: (contacts || []).length,
       };
@@ -349,7 +416,10 @@ export async function tagRoutes(fastify: FastifyInstance) {
     "/:id/contacts",
     { schema: { params: UuidParam, body: TagMembershipBody } },
     async (
-      request: FastifyRequest<{ Params: { id: string }; Body: { personIds: string[] } }>,
+      request: FastifyRequest<{
+        Params: { id: string };
+        Body: { personIds: string[] };
+      }>,
       reply: FastifyReply,
     ) => {
       const { client, user } = getAuth(request);
@@ -394,7 +464,10 @@ export async function tagRoutes(fastify: FastifyInstance) {
     "/:id/contacts",
     { schema: { params: UuidParam, body: TagMembershipBody } },
     async (
-      request: FastifyRequest<{ Params: { id: string }; Body: { personIds: string[] } }>,
+      request: FastifyRequest<{
+        Params: { id: string };
+        Body: { personIds: string[] };
+      }>,
       reply: FastifyReply,
     ) => {
       const { client, user } = getAuth(request);

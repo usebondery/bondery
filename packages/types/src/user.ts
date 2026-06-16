@@ -12,15 +12,14 @@ export type TimeFormatPreference = "24h" | "12h";
 export interface UserSettings {
   id?: string;
   user_id: string;
-  name: string | null;
-  middlename: string | null;
-  surname: string | null;
+  name?: string | null;
   timezone: string | null;
   reminderSendHour: string;
   timeFormat: TimeFormatPreference;
   language: string | null;
   colorScheme: ColorSchemePreference;
   avatarUrl: string | null;
+  onboardingCompletedAt: string | null;
   created_at?: string | null;
   updated_at?: string | null;
 }
@@ -40,9 +39,6 @@ export interface UserSettingsResponse {
  * Input for updating user settings
  */
 export interface UpdateUserSettingsInput {
-  name?: string;
-  middlename?: string;
-  surname?: string;
   timezone?: string;
   reminderSendHour?: string;
   timeFormat?: TimeFormatPreference;

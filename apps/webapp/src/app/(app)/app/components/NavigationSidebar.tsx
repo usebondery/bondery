@@ -1,90 +1,238 @@
 "use client";
 
-import { Group, Stack, Box } from "@mantine/core";
+import { Avatar, Box, Group, Kbd, Stack, Text, Tooltip } from "@mantine/core";
+import { useHover } from "@mantine/hooks";
 import {
+  IconSearch,
   IconHome,
   IconSettings,
-  IconUsers,
+  IconUser,
   IconUsersGroup,
   IconMap2,
-  IconMessageCircle,
   IconTimelineEventText,
   IconArrowMerge,
+  IconHeartHandshake,
+  IconMessageChatbot,
 } from "@tabler/icons-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { NavLinkItem } from "./NavLinkItem";
-import { AnchorLink, UserCard } from "@bondery/mantine-next";
+import { spotlight } from "./CommandPalette";
+import { AnchorLink } from "@bondery/mantine-next";
 import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
-import { BonderyLogotypeBlack, BonderyLogotypeWhite } from "@bondery/branding-src";
+import {
+  BonderyLogotypeBlack,
+  BonderyLogotypeWhite,
+  BonderyIcon,
+  BonderyIconWhite,
+} from "@bondery/branding-src";
 
 interface NavigationSidebarContentProps {
   userName: string;
-  userEmail: string;
   avatarUrl: string | null;
   hasActiveMergeRecommendations: boolean;
+  hasOverdueKeepInTouch: boolean;
+  collapsed: boolean;
 }
 
-const primaryLinks = [
+export const primaryLinks = [
   { href: WEBAPP_ROUTES.HOME, label: "Home", icon: IconHome },
-  { href: WEBAPP_ROUTES.INTERACTIONS, label: "Interactions", icon: IconTimelineEventText },
-  { href: WEBAPP_ROUTES.PEOPLE, label: "People", icon: IconUsers },
+  {
+    href: WEBAPP_ROUTES.INTERACTIONS,
+    label: "Interactions",
+    icon: IconTimelineEventText,
+  },
+  { href: WEBAPP_ROUTES.PEOPLE, label: "People", icon: IconUser },
+  {
+    href: WEBAPP_ROUTES.KEEP_IN_TOUCH,
+    label: "Keep in touch",
+    icon: IconHeartHandshake,
+  },
   { href: WEBAPP_ROUTES.GROUPS, label: "Groups", icon: IconUsersGroup },
   { href: WEBAPP_ROUTES.MAP, label: "Map", icon: IconMap2 },
+  { href: WEBAPP_ROUTES.CHAT, label: "AI Assistant", icon: IconMessageChatbot },
 ];
 
-const secondaryLinks = [
-  { href: WEBAPP_ROUTES.FEEDBACK, label: "Feedback", icon: IconMessageCircle },
-  { href: "/app/fix", label: "Fix & merge", icon: IconArrowMerge },
+export const secondaryLinks = [
+  {
+    href: WEBAPP_ROUTES.FIX_CONTACTS,
+    label: "Fix & merge",
+    icon: IconArrowMerge,
+  },
   { href: WEBAPP_ROUTES.SETTINGS, label: "Settings", icon: IconSettings },
 ];
 
 export function NavigationSidebarContent({
   userName,
-  userEmail,
   avatarUrl,
   hasActiveMergeRecommendations,
+  hasOverdueKeepInTouch,
+  collapsed,
 }: NavigationSidebarContentProps) {
   const pathname = usePathname();
+  const isMyselfActive = pathname === WEBAPP_ROUTES.MYSELF;
+  const { hovered: userCardHovered, ref: userCardRef } =
+    useHover<HTMLAnchorElement>();
 
   return (
     <Box style={{ display: "flex", flexDirection: "column", height: "100%" }}>
-      <Group mb="md">
-        <AnchorLink href={WEBAPP_ROUTES.DEFAULT_PAGE_AFTER_LOGIN} underline="never">
-          <Box darkHidden>
-            <BonderyLogotypeBlack width={140} height={36} />
-          </Box>
-          <Box lightHidden>
-            <BonderyLogotypeWhite width={140} height={36} />
-          </Box>
+      {/* Logo */}
+      <Group mb="md" justify={collapsed ? "center" : "flex-start"}>
+        <AnchorLink
+          href={WEBAPP_ROUTES.DEFAULT_PAGE_AFTER_LOGIN}
+          underline="never"
+        >
+          {collapsed ? (
+            <>
+              <Box darkHidden>
+                <BonderyIcon width={36} height={36} />
+              </Box>
+              <Box lightHidden>
+                <BonderyIconWhite width={36} height={36} />
+              </Box>
+            </>
+          ) : (
+            <>
+              <Box darkHidden>
+                <BonderyLogotypeBlack width={140} height={36} />
+              </Box>
+              <Box lightHidden>
+                <BonderyLogotypeWhite width={140} height={36} />
+              </Box>
+            </>
+          )}
         </AnchorLink>
       </Group>
 
-      <Stack gap="xs">
-        {primaryLinks.map((link, index) => (
-          <NavLinkItem key={`${link.href}-${index}`} {...link} active={pathname === link.href} />
-        ))}
-      </Stack>
+      {/* Search / command palette trigger */}
+      <Box mb="xs">
+        <NavLinkItem
+          label="Search..."
+          icon={IconSearch}
+          onClick={() => spotlight.open()}
+          bordered
+          dimLabel
+          collapsed={collapsed}
+          rightSection={
+            <Group gap={4} wrap="nowrap">
+              <Kbd size="xs">Ctrl</Kbd>
+              <Kbd size="xs">K</Kbd>
+            </Group>
+          }
+        />
+      </Box>
 
-      <Stack gap="xs" mt="auto">
-        {secondaryLinks.map((link, index) => (
+      {/* Primary navigation links */}
+      <Stack gap="xs">
+        {primaryLinks.map((link) => (
           <NavLinkItem
-            key={`${link.href}-${index}`}
+            key={link.href}
             {...link}
             active={pathname === link.href}
-            showIndicator={link.href === "/app/fix" && hasActiveMergeRecommendations}
+            showIndicator={
+              link.href === WEBAPP_ROUTES.KEEP_IN_TOUCH && hasOverdueKeepInTouch
+            }
+            collapsed={collapsed}
           />
         ))}
       </Stack>
 
-      <Box mt="md">
-        <Box
-          component={Link}
-          href={WEBAPP_ROUTES.SETTINGS}
-          style={{ color: "inherit", textDecoration: "none", display: "block" }}
+      {/* Secondary navigation links */}
+      <Stack gap="xs" mt="auto" mb="xs">
+        {secondaryLinks.map((link) => (
+          <NavLinkItem
+            key={link.href}
+            {...link}
+            active={pathname === link.href}
+            showIndicator={
+              link.href === WEBAPP_ROUTES.FIX_CONTACTS &&
+              hasActiveMergeRecommendations
+            }
+            collapsed={collapsed}
+          />
+        ))}
+      </Stack>
+
+      {/* User card — mirrors NavLinkItem structure exactly: same ITEM_PADDING,
+          same justify=flex-start, Avatar replaces the icon. */}
+      <Box mb="xs">
+        <Tooltip
+          label={`Ahoy, ${userName}! 😎`}
+          position="right"
+          withArrow
+          disabled={!collapsed}
         >
-          <UserCard name={userName} subtitle={userEmail} avatarUrl={avatarUrl} />
-        </Box>
+          <Group
+            ref={userCardRef}
+            component={Link as any}
+            {...({ href: WEBAPP_ROUTES.MYSELF } as any)}
+            // Same reasoning as NavLinkItem: active state = background color only.
+            // button-scale-effect-active would apply brightness(0.9) permanently.
+            className="button-scale-effect"
+            wrap="nowrap"
+            gap="sm"
+            justify="flex-start"
+            aria-current={isMyselfActive ? "page" : undefined}
+            style={{
+              width: "100%",
+              borderRadius: "var(--mantine-radius-sm)",
+              // No inline transition — the button-scale-effect CSS class already
+              // defines transition for transform, filter, AND background-color.
+              // An inline override here would cause transform/filter to snap
+              // instantly (no animation) because inline styles beat CSS classes.
+              backgroundColor: isMyselfActive
+                ? "var(--mantine-primary-color-filled)"
+                : userCardHovered
+                  ? "var(--mantine-primary-color-light-hover)"
+                  : "transparent",
+              color: isMyselfActive ? "white" : "inherit",
+              textDecoration: "none",
+              paddingLeft: "var(--sidebar-icon-pl)",
+              paddingRight: "var(--sidebar-icon-pl)",
+              paddingTop: "var(--mantine-spacing-xs)",
+              paddingBottom: "var(--mantine-spacing-xs)",
+            }}
+          >
+            {/* Icon-slot wrapper: same 20px width as every NavLinkItem icon so the
+                avatar is visually centred in collapsed state and column-aligned
+                in expanded state. The avatar (sm = 26px) visually overflows
+                by 3px per side, which is fine for a round avatar. */}
+            <Box
+              style={{
+                width: "var(--sidebar-nav-icon-size)",
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                flexShrink: 0,
+                overflow: "visible",
+              }}
+            >
+              <Avatar
+                src={avatarUrl ?? undefined}
+                radius="xl"
+                size="sm"
+                name={userName}
+              />
+            </Box>
+            {!collapsed && (
+              <Text
+                size="sm"
+                fw={500}
+                c={isMyselfActive ? "white" : undefined}
+                style={{
+                  flex: 1,
+                  minWidth: 0,
+                  lineHeight: 1.2,
+                  overflow: "hidden",
+                  whiteSpace: "nowrap",
+                  textOverflow: "ellipsis",
+                }}
+              >
+                {userName}
+              </Text>
+            )}
+          </Group>
+        </Tooltip>
       </Box>
     </Box>
   );

@@ -28,11 +28,12 @@ import {
   IconUserCircle,
   IconTags,
   IconBrandLinkedin,
+  IconPlus,
 } from "@tabler/icons-react";
 import { useRouter, usePathname } from "next/navigation";
 import { useEffect, useMemo, useState, useCallback, useRef } from "react";
 import { useTranslations } from "next-intl";
-import { extractUsername } from "@/lib/socialMediaHelpers";
+import { extractUsername } from "@/lib/socialsHelpers";
 import { parsePhoneNumber, combinePhoneNumber } from "@/lib/phoneHelpers";
 import { formatContactName } from "@/lib/nameHelpers";
 import type {
@@ -47,7 +48,7 @@ import type {
   Activity,
   RelationshipType,
   ImportantDate,
-  MergeConflictField,
+  MergeRecommendation,
   Tag,
   WorkHistoryEntry,
   EducationEntry,
@@ -61,8 +62,11 @@ import { ContactAddressSection } from "./components/ContactAddressSection";
 import { ContactImportantDatesSection } from "./components/ContactImportantDatesSection";
 import { PersonInteractionsSection } from "./components/PersonInteractionsSection";
 import { openNewActivityModal } from "../../interactions/components/NewActivityModal";
+import { DatePickerWithPresets } from "@/app/(app)/app/components/interactions/DatePickerWithPresets";
+import { computeNextDueDate } from "@/app/(app)/app/keep-in-touch/keepInTouchConfig";
+import { KeepInTouchSelect } from "@/app/(app)/app/keep-in-touch/KeepInTouchSelect";
 import { LinkedInTab } from "./components/LinkedInTab";
-import { useEnrichFromLinkedIn } from "@/lib/extension/useEnrichFromLinkedIn";
+import { useBatchEnrichFromLinkedIn } from "@/lib/extension/useBatchEnrichFromLinkedIn";
 // import { ContactPGPSection } from "./components/ContactPGPSection";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
@@ -82,13 +86,16 @@ import { openStandardConfirmModal } from "@/app/(app)/app/components/modals/open
 import { GroupCard } from "../../groups/components/GroupCard";
 import { PersonTagsInput } from "./components/PersonTagsInput";
 import { openAddPeopleToGroupSelectionModal } from "../../people/components/AddPeopleToGroupSelectionModal";
-import { MERGE_CONFLICT_FIELDS, openMergeWithModal } from "../../people/components/MergeWithModal";
+import { openMergeWithModal } from "../../people/components/MergeWithModal";
+import { searchContacts } from "@/lib/searchContacts";
+import { openShareContactModal } from "../../people/components/ShareContactModal";
 import { WEBSITE_URL } from "@/lib/config";
 import { createMentionSuggestion } from "./components/mentionSuggestion";
 import { emojiSuggestionRender } from "./components/emojiSuggestion";
 import type { MentionSuggestionItem } from "./components/MentionList";
 import { MentionNodeView } from "./components/MentionNodeView";
 import { TaskItemNodeView } from "./components/TaskItemNodeView";
+import { RecommendationsSection } from "./components/RecommendationsSection";
 
 interface PersonClientProps {
   initialContact: Contact;
@@ -104,8 +111,12 @@ interface PersonClientProps {
   initialWorkHistory: WorkHistoryEntry[];
   initialEducation: EducationEntry[];
   initialLinkedinBio?: string | null;
+  initialSyncedAt?: string | null;
+  initialMergeRecommendation?: MergeRecommendation | null;
   personId: string;
   initialTab?: string;
+  /** When true, renders the page as the "Myself" profile view: no back button, custom header, hides delete/merge actions. */
+  myselfMode?: boolean;
 }
 
 const PERSON_TABS = ["interactions", "about", "organize", "linkedin"] as const;
@@ -126,8 +137,11 @@ export default function PersonClient({
   initialWorkHistory = [],
   initialEducation = [],
   initialLinkedinBio = null,
+  initialSyncedAt = null,
+  initialMergeRecommendation = null,
   personId,
   initialTab,
+  myselfMode = false,
 }: PersonClientProps) {
   const router = useRouter();
   const pathname = usePathname();
@@ -150,49 +164,17 @@ export default function PersonClient({
   );
   const tRelationships = useTranslations("PersonRelationships");
   const tEnrich = useTranslations("EnrichFromLinkedIn");
-  const { enrichFromLinkedIn } = useEnrichFromLinkedIn({ onSuccess: revalidateContacts });
+  const { startForPerson } = useBatchEnrichFromLinkedIn();
   const tImportantDates = useTranslations("ContactImportantDates");
   const tPersonPage = useTranslations("SingleContactPage");
-  const tMerge = useTranslations("MergeWithModal");
   const tHeader = useTranslations("PageHeader");
   const tAddress = useTranslations("ContactAddress");
   const tTabs = useTranslations("PersonTabs");
   const tInteractions = useTranslations("InteractionsPage");
-  const mergeTexts = useMemo(
-    () => ({
-      errorTitle: tMerge("ErrorTitle"),
-      successTitle: tMerge("SuccessTitle"),
-      selectBothPeopleError: tMerge("SelectBothPeopleError"),
-      differentPeopleError: tMerge("DifferentPeopleError"),
-      mergingTitle: tMerge("MergingTitle"),
-      mergingDescription: tMerge("MergingDescription"),
-      mergeSuccess: tMerge("MergeSuccess"),
-      mergeFailed: tMerge("MergeFailed"),
-      mergeWithLabel: tMerge("MergeWithLabel"),
-      selectLeftPerson: tMerge("SelectLeftPerson"),
-      selectRightPerson: tMerge("SelectRightPerson"),
-      searchPeople: tMerge("SearchPeople"),
-      noPeopleFound: tMerge("NoPeopleFound"),
-      cancel: tMerge("Cancel"),
-      continue: tMerge("Continue"),
-      back: tMerge("Back"),
-      merge: tMerge("Merge"),
-      noConflicts: tMerge("NoConflicts"),
-      conflictHint: tMerge("ConflictHint"),
-      processing: tMerge("Processing"),
-      steps: {
-        pick: tMerge("Steps.Pick"),
-        resolve: tMerge("Steps.Resolve"),
-        process: tMerge("Steps.Process"),
-      },
-      fields: Object.fromEntries(
-        MERGE_CONFLICT_FIELDS.map((field) => [field, tMerge(`Fields.${field}`)]),
-      ) as Record<MergeConflictField, string>,
-    }),
-    [tMerge],
-  );
-
   const [contact, setContact] = useState<Contact>(initialContact);
+  const [mergeRecommendation, setMergeRecommendation] = useState<MergeRecommendation | null>(
+    initialMergeRecommendation,
+  );
   const [personGroups, setPersonGroups] = useState<GroupType[]>(initialPersonGroups);
   const [savingField, setSavingField] = useState<string | null>(null);
   const [editedValues, setEditedValues] = useState<{
@@ -205,6 +187,7 @@ export default function PersonClient({
   const [importantDates, setImportantDates] = useState<ImportantDate[]>(initialImportantDates);
   const [focusedField, setFocusedField] = useState<string | null>(null);
   const [groupsSaving, setGroupsSaving] = useState(false);
+  const [savingLastInteraction, setSavingLastInteraction] = useState(false);
 
   // Autosave debounce timer
   const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -228,12 +211,14 @@ export default function PersonClient({
     setPersonGroups(initialPersonGroups);
   }, [initialPersonGroups]);
 
-  const selectablePeople: ContactPreview[] = initialSelectableContacts.map((person) => ({
-    id: person.id,
-    firstName: person.firstName,
-    lastName: person.lastName,
-    avatar: person.avatar,
-  }));
+  const selectablePeople: ContactPreview[] = initialSelectableContacts
+    .filter((person) => !person.myself)
+    .map((person) => ({
+      id: person.id,
+      firstName: person.firstName,
+      lastName: person.lastName,
+      avatar: person.avatar,
+    }));
   const currentPersonPreview: ContactPreview = {
     id: contact.id,
     firstName: contact.firstName,
@@ -261,7 +246,7 @@ export default function PersonClient({
           label: label.length > 0 ? label : person.id,
           avatar: person.avatar ?? null,
           headline: person.headline ?? null,
-          place: person.place ?? null,
+          location: person.location ?? null,
         };
       });
   }, [contact, initialSelectableContacts]);
@@ -270,6 +255,18 @@ export default function PersonClient({
     () => createMentionSuggestion(mentionableContacts),
     [mentionableContacts],
   );
+
+  /** Infer whether the last interaction was set via a logged activity or manually. */
+  const lastInteractionSource = useMemo<
+    { type: "activity"; activityType: string } | { type: "manual" } | null
+  >(() => {
+    if (!contact.lastInteraction) return null;
+    if (contact.lastInteractionActivityId) {
+      const linked = initialActivities.find((a) => a.id === contact.lastInteractionActivityId);
+      if (linked) return { type: "activity", activityType: linked.type };
+    }
+    return { type: "manual" };
+  }, [contact.lastInteraction, contact.lastInteractionActivityId, initialActivities]);
 
   // Initialize edited values when contact loads
   useEffect(() => {
@@ -314,7 +311,7 @@ export default function PersonClient({
         middleName: contact.middleName || "",
         lastName: contact.lastName || "",
         headline: contact.headline || "",
-        place: contact.place || "",
+        location: contact.location || "",
         notes: contact.notes || "",
         linkedin: contact.linkedin || "",
         instagram: contact.instagram || "",
@@ -334,7 +331,7 @@ export default function PersonClient({
     contact?.middleName,
     contact?.lastName,
     contact?.headline,
-    contact?.place,
+    contact?.location,
     contact?.notes,
     contact?.linkedin,
     contact?.instagram,
@@ -385,11 +382,11 @@ export default function PersonClient({
                 "data-headline": attributes.headline ?? "",
               }),
             },
-            place: {
+            location: {
               default: null,
-              parseHTML: (element) => element.getAttribute("data-place") || null,
+              parseHTML: (element) => element.getAttribute("data-location") || null,
               renderHTML: (attributes) => ({
-                "data-place": attributes.place ?? "",
+                "data-location": attributes.location ?? "",
               }),
             },
           };
@@ -411,7 +408,7 @@ export default function PersonClient({
       if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
       debounceTimerRef.current = setTimeout(() => {
         debounceTimerRef.current = null;
-        handleSocialMediaSave("notes", editor.getHTML());
+        handleSocialSave("notes", editor.getHTML());
       }, 1500);
     },
     onBlur: ({ editor }) => {
@@ -430,7 +427,7 @@ export default function PersonClient({
 
       const html = editor.getHTML();
       if (html !== contact?.notes) {
-        handleSocialMediaSave("notes", html);
+        handleSocialSave("notes", html);
       }
     },
   });
@@ -491,6 +488,63 @@ export default function PersonClient({
       if (shouldTrackGlobalLoading) {
         setSavingField(null);
       }
+    }
+  };
+
+  const handleSaveLastInteraction = async (date: string | null) => {
+    if (!contact || !personId) return;
+    setSavingLastInteraction(true);
+    try {
+      const res = await fetch(`${API_ROUTES.CONTACTS}/${personId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ lastInteraction: date }),
+      });
+      if (!res.ok) throw new Error("Failed to update");
+      setContact((prev) => ({ ...prev, lastInteraction: date }) as Contact);
+      notifications.show(
+        successNotificationTemplate({
+          title: "Success",
+          description: tInteractions("LastInteractionUpdated"),
+        }),
+      );
+    } catch {
+      notifications.show(
+        errorNotificationTemplate({
+          title: "Error",
+          description: tInteractions("LastInteractionUpdateFailed"),
+        }),
+      );
+    } finally {
+      setSavingLastInteraction(false);
+    }
+  };
+
+  const handleSaveKeepFrequency = async (value: string | null) => {
+    if (!contact || !personId) return;
+    const keepFrequencyDays = value && value !== "none" ? parseInt(value, 10) : null;
+    try {
+      const res = await fetch(`${API_ROUTES.CONTACTS}/${personId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ keepFrequencyDays }),
+      });
+      if (!res.ok) throw new Error("Failed to update");
+      setContact((prev) => ({ ...prev, keepFrequencyDays }) as Contact);
+      notifications.show(
+        successNotificationTemplate({
+          title: tInteractions("KeepInTouchUpdated"),
+          description: tInteractions("KeepInTouchUpdatedDescription"),
+        }),
+      );
+      revalidateContacts();
+    } catch {
+      notifications.show(
+        errorNotificationTemplate({
+          title: "Error",
+          description: tInteractions("KeepInTouchUpdateFailed"),
+        }),
+      );
     }
   };
 
@@ -659,7 +713,7 @@ export default function PersonClient({
   const handleSaveAddress = async (payload: {
     addresses: Contact["addresses"];
     suggestedLocation: {
-      place: string;
+      location: string;
       latitude: number | null;
       longitude: number | null;
     } | null;
@@ -697,14 +751,14 @@ export default function PersonClient({
           ? addressEntries.find((entry) => entry.type === "home") || addressEntries[0]
           : null;
       const locationAddress =
-        addressEntries.find((entry) => entry.value === payload.suggestedLocation?.place) ??
+        addressEntries.find((entry) => entry.value === payload.suggestedLocation?.location) ??
         preferredAddress;
       try {
         const locationResponse = await fetch(`${API_ROUTES.CONTACTS}/${personId}`, {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            place: payload.suggestedLocation.place,
+            location: payload.suggestedLocation.location,
             latitude: payload.suggestedLocation.latitude,
             longitude: payload.suggestedLocation.longitude,
           }),
@@ -712,20 +766,9 @@ export default function PersonClient({
         if (!locationResponse.ok) throw new Error("Failed to update location");
         setContact((previous) => ({
           ...previous,
-          place: payload.suggestedLocation?.place ?? null,
+          location: payload.suggestedLocation?.location ?? null,
           latitude: payload.suggestedLocation?.latitude ?? null,
           longitude: payload.suggestedLocation?.longitude ?? null,
-          addressLine1: locationAddress?.addressLine1 ?? null,
-          addressLine2: locationAddress?.addressLine2 ?? null,
-          addressCity: locationAddress?.addressCity ?? null,
-          addressPostalCode: locationAddress?.addressPostalCode ?? null,
-          addressState: locationAddress?.addressState ?? null,
-          addressStateCode: locationAddress?.addressStateCode ?? null,
-          addressCountry: locationAddress?.addressCountry ?? null,
-          addressCountryCode: locationAddress?.addressCountryCode ?? null,
-          addressGranularity: locationAddress?.addressGranularity ?? "address",
-          addressFormatted: locationAddress?.addressFormatted ?? null,
-          addressGeocodeSource: locationAddress?.addressGeocodeSource ?? null,
         }));
         notifications.show(
           successNotificationTemplate({
@@ -832,12 +875,12 @@ export default function PersonClient({
 
       // Find the address entry that matches the suggested location (the one that was created/updated)
       const locationAddress = payload.suggestedLocation
-        ? (addressEntries.find((entry) => entry.value === payload.suggestedLocation?.place) ??
+        ? (addressEntries.find((entry) => entry.value === payload.suggestedLocation?.location) ??
           preferredAddress)
         : preferredAddress;
 
       // Only update the addresses list in state here — all location-related
-      // fields (place, addressLine1, lat/lng, etc.) are written only after
+      // fields (location, addressLine1, lat/lng, etc.) are written only after
       // the user confirms the location update modal below.
       setContact((previous) => ({
         ...previous,
@@ -866,7 +909,7 @@ export default function PersonClient({
             }
 
             const locationPatch: Record<string, unknown> = {
-              place: payload.suggestedLocation?.place,
+              location: payload.suggestedLocation?.location,
               latitude: lat,
               longitude: lon,
             };
@@ -884,20 +927,9 @@ export default function PersonClient({
             }
             setContact((previous) => ({
               ...previous,
-              place: payload.suggestedLocation?.place ?? null,
+              location: payload.suggestedLocation?.location ?? null,
               latitude: payload.suggestedLocation?.latitude ?? null,
               longitude: payload.suggestedLocation?.longitude ?? null,
-              addressLine1: locationAddress?.addressLine1 ?? null,
-              addressLine2: locationAddress?.addressLine2 ?? null,
-              addressCity: locationAddress?.addressCity ?? null,
-              addressPostalCode: locationAddress?.addressPostalCode ?? null,
-              addressState: locationAddress?.addressState ?? null,
-              addressStateCode: locationAddress?.addressStateCode ?? null,
-              addressCountry: locationAddress?.addressCountry ?? null,
-              addressCountryCode: locationAddress?.addressCountryCode ?? null,
-              addressGranularity: locationAddress?.addressGranularity ?? "address",
-              addressFormatted: locationAddress?.addressFormatted ?? null,
-              addressGeocodeSource: locationAddress?.addressGeocodeSource ?? null,
               ...(canonicalTimezone ? { timezone: canonicalTimezone } : {}),
             }));
             notifications.show(
@@ -948,7 +980,7 @@ export default function PersonClient({
     }
   };
 
-  const handleSocialMediaSave = async (field: string, value: string) => {
+  const handleSocialSave = async (field: string, value: string) => {
     if (!contact || !personId) return;
 
     // Extract username from URL if applicable
@@ -1027,7 +1059,7 @@ export default function PersonClient({
 
   const handleBlur = (field: string) => {
     const value = editedValues[field] || "";
-    handleSocialMediaSave(field, value);
+    handleSocialSave(field, value);
   };
 
   // Keep noteSaveRef fresh for Cmd+S (assigned in render body — always latest closure)
@@ -1037,7 +1069,7 @@ export default function PersonClient({
     if (debounceTimerRef.current) {
       clearTimeout(debounceTimerRef.current);
       debounceTimerRef.current = null;
-      handleSocialMediaSave("notes", editor.getHTML());
+      handleSocialSave("notes", editor.getHTML());
       return;
     }
     const html = editor.getHTML();
@@ -1051,7 +1083,7 @@ export default function PersonClient({
       );
       return;
     }
-    handleSocialMediaSave("notes", html);
+    handleSocialSave("notes", html);
   };
 
   // Cmd+S / Ctrl+S — save notes immediately
@@ -1262,32 +1294,52 @@ export default function PersonClient({
       contacts: mergeContacts,
       leftPersonId: contact.id,
       disableLeftPicker: true,
-      titleText: tMerge("ModalTitle"),
-      texts: mergeTexts,
+      onSearch: searchContacts,
     });
+  };
+
+  const openShareModal = () => {
+    openShareContactModal({ contact });
   };
 
   return (
     <PageWrapper>
       <Stack gap="xl">
         <PageHeader
-          icon={IconUser}
-          title={"Person's details"}
-          backOnClick={() => {
-            if (typeof window !== "undefined" && window.history.length > 1) {
-              router.back();
-              return;
-            }
-            router.push(WEBAPP_ROUTES.PEOPLE);
-          }}
+          icon={myselfMode ? IconUserCircle : IconUser}
+          title={myselfMode ? tPersonPage("MyselfPageTitle") : "Person's details"}
+          helpHref={myselfMode ? `${HELP_DOCS_URL}/bondery/myself` : undefined}
+          helpLabel={myselfMode ? tPersonPage("MyselfPageDescription") : undefined}
+          backOnClick={
+            myselfMode
+              ? undefined
+              : () => {
+                  if (typeof window !== "undefined" && window.history.length > 1) {
+                    router.back();
+                    return;
+                  }
+                  router.push(WEBAPP_ROUTES.PEOPLE);
+                }
+          }
           action={
             <ContactActionMenu
               contact={contact}
               personId={personId}
               onDelete={openDeleteModal}
               onMergeWith={openMergeWithModalForCurrentPerson}
+              onShare={openShareModal}
+              myselfMode={myselfMode}
             />
           }
+        />
+
+        <RecommendationsSection
+          mergeRecommendation={mergeRecommendation}
+          onMergeAccepted={() => setMergeRecommendation(null)}
+          onMergeDeclined={() => setMergeRecommendation(null)}
+          showEnrichCard={!!contact.linkedin && !initialSyncedAt}
+          personId={personId}
+          linkedinHandle={contact.linkedin ?? null}
         />
 
         <Paper withBorder shadow="sm" radius="md" p="xl">
@@ -1329,6 +1381,41 @@ export default function PersonClient({
 
               <Tabs.Panel value="interactions" pt="md">
                 <Stack gap="lg">
+                  <Group gap="md" align="flex-start" grow>
+                    <Stack gap={4}>
+                      <DatePickerWithPresets
+                        label={tInteractions("LastInteractionInput")}
+                        value={contact.lastInteraction ?? null}
+                        disabled={savingLastInteraction}
+                        onChange={(val) => {
+                          const date = val as Date | string | null;
+                          const dateStr = !date
+                            ? null
+                            : date instanceof Date
+                              ? `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`
+                              : (String(date).split("T")[0] ?? null);
+                          handleSaveLastInteraction(dateStr);
+                        }}
+                      />
+                      {lastInteractionSource ? (
+                        <Text size="xs" c="dimmed">
+                          {lastInteractionSource.type === "activity"
+                            ? tInteractions("LastInteractionViaActivity", {
+                                type: lastInteractionSource.activityType,
+                              })
+                            : tInteractions("LastInteractionManual")}
+                        </Text>
+                      ) : null}
+                    </Stack>
+                    <KeepInTouchSelect
+                      value={contact.keepFrequencyDays?.toString() ?? "none"}
+                      onChange={(val) => handleSaveKeepFrequency(val === "none" ? null : val)}
+                      nextDueDate={computeNextDueDate(
+                        contact.lastInteraction,
+                        contact.keepFrequencyDays,
+                      )}
+                    />
+                  </Group>
                   <Stack gap="xs">
                     <Text fw={600} size="sm">
                       Interactions
@@ -1337,6 +1424,7 @@ export default function PersonClient({
                       variant="light"
                       size="xs"
                       style={{ alignSelf: "flex-start" }}
+                      leftSection={<IconPlus size={16} />}
                       onClick={() => {
                         openNewActivityModal({
                           contacts: [contact, ...initialSelectableContacts].filter(
@@ -1344,8 +1432,6 @@ export default function PersonClient({
                               self.findIndex((other) => other.id === item.id) === index,
                           ),
                           initialParticipantIds: [contact.id],
-                          titleText: tInteractions("WhoAreYouMeeting"),
-                          t: tInteractions,
                         });
                       }}
                     >
@@ -1446,7 +1532,8 @@ export default function PersonClient({
                   workHistory={initialWorkHistory}
                   education={initialEducation}
                   linkedinBio={initialLinkedinBio}
-                  onEnrich={() => enrichFromLinkedIn(personId, contact.linkedin)}
+                  syncedAt={initialSyncedAt}
+                  onEnrich={() => startForPerson(personId, contact.linkedin)}
                   enrichLabel={tEnrich("MenuLabel")}
                 />
               </Tabs.Panel>

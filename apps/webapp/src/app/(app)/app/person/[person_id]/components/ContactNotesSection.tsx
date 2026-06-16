@@ -10,6 +10,7 @@ import { InsertLinkControl } from "./InsertLinkControl";
 import { htmlToMarkdown } from "./htmlToMarkdown";
 import { markdownToHtml } from "./markdownToHtml";
 import { useTranslations, useFormatter } from "next-intl";
+import { formatRelativeTime } from "@/lib/formatRelativeTime";
 
 interface ContactNotesSectionProps {
   editor: Editor | null;
@@ -71,12 +72,7 @@ export function ContactNotesSection({
     if (nextMode === "source") {
       setEditableText(editor.getHTML());
     } else if (nextMode === "markdown") {
-      setEditableText(
-        htmlToMarkdown(editor.getHTML(), {
-          formatDate: (d) =>
-            formatter.dateTime(d, { year: "numeric", month: "2-digit", day: "2-digit" }),
-        }),
-      );
+      setEditableText(htmlToMarkdown(editor.getHTML()));
     } else {
       // Returning to rich editor — restore focus so blur-save works normally
       setTimeout(() => editor.commands.focus(), 0);
@@ -133,11 +129,9 @@ export function ContactNotesSection({
         {savingField === "notes" && <Loader size="xs" />}
         {notesUpdatedAt && savingField !== "notes" && (
           <Text size="xs" c="dimmed">
-            {Date.now() - new Date(notesUpdatedAt).getTime() < 60_000
-              ? t("NotesEditedLessThanMinute")
-              : t("NotesEditedAt", {
-                  time: formatter.relativeTime(new Date(notesUpdatedAt), { now: new Date() }),
-                })}
+            {t("NotesEditedAt", {
+              time: formatRelativeTime(new Date(notesUpdatedAt), formatter, t("lessThanMinuteAgo")),
+            })}
           </Text>
         )}
       </Group>

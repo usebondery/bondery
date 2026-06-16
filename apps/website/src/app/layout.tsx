@@ -3,11 +3,16 @@ import "./globals.css";
 import { bonderyTheme } from "@bondery/mantine-next";
 import { Notifications } from "@mantine/notifications";
 import { Lexend } from "next/font/google";
-import { ColorSchemeScript, MantineProvider, mantineHtmlProps } from "@mantine/core";
+import {
+  ColorSchemeScript,
+  MantineProvider,
+  mantineHtmlProps,
+  v8CssVariablesResolver,
+} from "@mantine/core";
 import { Footer, Header } from "@/components/landing";
 import Script from "next/script";
 import { WEBSITE_URL } from "@/lib/config";
-import { SOCIAL_LINKS, SUPPORT_EMAIL } from "@bondery/helpers";
+import { METADATA_TITLE_DIVIDER, SOCIAL_LINKS, SUPPORT_EMAIL, WEBAPP_NAME } from "@bondery/helpers";
 import { headers } from "next/headers";
 
 const ogTitle = "Bondery: Build bonds that last forever";
@@ -18,7 +23,7 @@ export const metadata: Metadata = {
   metadataBase: new URL(WEBSITE_URL),
   title: {
     default: ogTitle,
-    template: "%s | Bondery",
+    template: `%s ${METADATA_TITLE_DIVIDER} ${WEBAPP_NAME}`,
   },
   description: ogDescription,
   alternates: {
@@ -138,8 +143,12 @@ export default async function RootLayout({
           nonce={nonce}
           dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareApplicationSchema) }}
         />
-        <MantineProvider defaultColorScheme="dark" theme={bonderyTheme}>
-          <Notifications autoClose={5000} position="top-center" />
+        <MantineProvider
+          defaultColorScheme="dark"
+          theme={bonderyTheme}
+          cssVariablesResolver={v8CssVariablesResolver}
+        >
+          <Notifications autoClose={6000} position="top-center" />
           <Header />
           <main>{children}</main>
           <Footer />

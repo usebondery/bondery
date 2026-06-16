@@ -15,7 +15,8 @@ import logger from "./logger.js";
  */
 function getSupabaseConfig() {
   const NEXT_PUBLIC_SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const PUBLIC_SUPABASE_PUBLISHABLE_KEY = process.env.PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+  const PUBLIC_SUPABASE_PUBLISHABLE_KEY =
+    process.env.PUBLIC_SUPABASE_PUBLISHABLE_KEY;
   const PRIVATE_SUPABASE_SECRET_KEY = process.env.PRIVATE_SUPABASE_SECRET_KEY;
 
   if (!NEXT_PUBLIC_SUPABASE_URL) {
@@ -24,28 +25,44 @@ function getSupabaseConfig() {
         "Ensure NEXT_PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_PUBLISHABLE_KEY, and PRIVATE_SUPABASE_SECRET_KEY are set.",
     );
   } else if (!PUBLIC_SUPABASE_PUBLISHABLE_KEY) {
-    throw new Error("Missing PUBLIC_SUPABASE_PUBLISHABLE_KEY environment variable.");
+    throw new Error(
+      "Missing PUBLIC_SUPABASE_PUBLISHABLE_KEY environment variable.",
+    );
   } else if (!PRIVATE_SUPABASE_SECRET_KEY) {
-    throw new Error("Missing PRIVATE_SUPABASE_SECRET_KEY environment variable.");
+    throw new Error(
+      "Missing PRIVATE_SUPABASE_SECRET_KEY environment variable.",
+    );
   }
 
-  return { NEXT_PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_PUBLISHABLE_KEY, PRIVATE_SUPABASE_SECRET_KEY };
+  return {
+    NEXT_PUBLIC_SUPABASE_URL,
+    PUBLIC_SUPABASE_PUBLISHABLE_KEY,
+    PRIVATE_SUPABASE_SECRET_KEY,
+  };
 }
 
 /**
  * Creates an anonymous Supabase client (for public endpoints)
  */
 export function createAnonClient(): SupabaseClient<Database> {
-  const { NEXT_PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_PUBLISHABLE_KEY } = getSupabaseConfig();
-  return createClient<Database>(NEXT_PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_PUBLISHABLE_KEY);
+  const { NEXT_PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_PUBLISHABLE_KEY } =
+    getSupabaseConfig();
+  return createClient<Database>(
+    NEXT_PUBLIC_SUPABASE_URL,
+    PUBLIC_SUPABASE_PUBLISHABLE_KEY,
+  );
 }
 
 /**
  * Creates an admin Supabase client (for privileged operations)
  */
 export function createAdminClient(): SupabaseClient<Database> {
-  const { NEXT_PUBLIC_SUPABASE_URL, PRIVATE_SUPABASE_SECRET_KEY } = getSupabaseConfig();
-  return createClient<Database>(NEXT_PUBLIC_SUPABASE_URL, PRIVATE_SUPABASE_SECRET_KEY);
+  const { NEXT_PUBLIC_SUPABASE_URL, PRIVATE_SUPABASE_SECRET_KEY } =
+    getSupabaseConfig();
+  return createClient<Database>(
+    NEXT_PUBLIC_SUPABASE_URL,
+    PRIVATE_SUPABASE_SECRET_KEY,
+  );
 }
 
 /**
@@ -70,7 +87,9 @@ function parseCookieHeader(cookieHeader: string): Record<string, string> {
 /**
  * Combine chunked cookies (e.g., cookie.0, cookie.1)
  */
-function combineChunkedCookies(cookies: Record<string, string>): Record<string, string> {
+function combineChunkedCookies(
+  cookies: Record<string, string>,
+): Record<string, string> {
   const combined: Record<string, string> = {};
   const chunks: Record<string, string[]> = {};
 
@@ -182,19 +201,30 @@ function getAuthTokensFromCookies(request: FastifyRequest): {
  */
 export async function createAuthenticatedClient(
   request: FastifyRequest,
-): Promise<{ client: SupabaseClient<Database>; user: { id: string; email: string } | null }> {
-  const { NEXT_PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_PUBLISHABLE_KEY, PRIVATE_SUPABASE_SECRET_KEY } =
+): Promise<{
+  client: SupabaseClient<Database>;
+  user: { id: string; email: string } | null;
+}> {
+  const { NEXT_PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_PUBLISHABLE_KEY } =
     getSupabaseConfig();
-  const { accessToken, refreshToken } = getAuthTokensFromCookies(request);
+  const { accessToken } = getAuthTokensFromCookies(request);
 
-  // Create an anon client solely for token validation
-  const anonClient = createClient<Database>(
+  // Build a client that forwards the Bearer token on every request (for RLS).
+  // Using getUser() to validate because the token may be either a Supabase session
+  // JWT (cookie-based webapp flow) or a Supabase OAuth 2.1 access token (extension
+  // PKCE flow). Both are valid Supabase JWTs but the OAuth refresh token is NOT
+  // interchangeable with Supabase's internal session refresh token, so setSession()
+  // would fail for the extension flow.
+  const client = createClient<Database>(
     NEXT_PUBLIC_SUPABASE_URL,
     PUBLIC_SUPABASE_PUBLISHABLE_KEY,
     {
       auth: {
         autoRefreshToken: false,
         persistSession: false,
+      },
+      global: {
+        headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
       },
     },
   );
@@ -203,8 +233,7 @@ export async function createAuthenticatedClient(
     return { client: anonClient, user: null };
   }
 
-  // Validate the access token — recommended server-side pattern.
-  const { data, error } = await anonClient.auth.getUser(accessToken);
+  const { data, error } = await client.auth.getUser(accessToken);
 
   if (error || !data.user) {
     logger.warn(
@@ -216,20 +245,24 @@ export async function createAuthenticatedClient(
 
   // Create a service-role client that passes the user's JWT in the Authorization header.
   // This satisfies RLS policies (auth.uid() = user.id) while running server-side.
-  const client = createClient<Database>(NEXT_PUBLIC_SUPABASE_URL, PRIVATE_SUPABASE_SECRET_KEY, {
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false,
-    },
-    global: {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
+  const authedClient = createClient<Database>(
+    NEXT_PUBLIC_SUPABASE_URL,
+    PRIVATE_SUPABASE_SECRET_KEY,
+    {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false,
+      },
+      global: {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
       },
     },
-  });
+  );
 
   return {
-    client,
+    client: authedClient,
     user: {
       id: data.user.id,
       email: data.user.email || "",

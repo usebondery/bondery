@@ -17,8 +17,8 @@ MergeContactsRequest:
       description: >
         Per-field conflict resolution choices. Values are "left" (keep the surviving contact's value)
         or "right" (take the merged contact's value).
-        Supported scalar keys: firstName, middleName, lastName, avatar, headline, place, notes,
-        lastInteraction, language, timezone, location, latitude, longitude.
+        Supported scalar keys: firstName, middleName, lastName, avatar, headline, location, notes,
+        lastInteraction, language, timezone, gisPoint, latitude, longitude.
         Supported set keys (merged by union): phones, emails, importantEvents.
         Supported social keys: linkedin, instagram, whatsapp, facebook, website, signal.
       additionalProperties:

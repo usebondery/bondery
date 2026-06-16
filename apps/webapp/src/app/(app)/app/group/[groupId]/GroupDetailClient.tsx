@@ -18,13 +18,13 @@ import ContactsTable, {
   MenuAction,
   type SortOrder,
 } from "@/app/(app)/app/components/contacts/ContactsTableV2";
-import { useEffect, useDeferredValue, useMemo, useState } from "react";
+import { useEffect, useDeferredValue, useMemo, useState, useTransition } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { useDebouncedCallback } from "@mantine/hooks";
 import { useTranslations } from "next-intl";
 import { openAddPeopleToGroupModal } from "../../groups/components/AddPeopleToGroupModal";
 import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
-import { WEBSITE_URL } from "@/lib/config";
+import { WEBSITE_URL, DEBOUNCE_MS } from "@/lib/config";
 import { formatContactName } from "@/lib/nameHelpers";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import { notifications } from "@mantine/notifications";
@@ -40,9 +40,10 @@ import { openDeleteContactModal } from "@/app/(app)/app/components/contacts/open
 import { openDeleteContactsModal } from "@/app/(app)/app/components/contacts/openDeleteContactsModal";
 import { GroupCard } from "../../groups/components/GroupCard";
 import { openEditGroupModal } from "../../groups/components/EditGroupModal";
-import type { Contact, GroupWithCount, MergeConflictField } from "@bondery/types";
+import type { Contact, GroupWithCount } from "@bondery/types";
 import { openAddPeopleToGroupSelectionModal } from "../../people/components/AddPeopleToGroupSelectionModal";
-import { MERGE_CONFLICT_FIELDS, openMergeWithModal } from "../../people/components/MergeWithModal";
+import { openMergeWithModal } from "../../people/components/MergeWithModal";
+import { searchContacts } from "@/lib/searchContacts";
 import { PageHeader } from "@/app/(app)/app/components/PageHeader";
 import { PageWrapper } from "@/app/(app)/app/components/PageWrapper";
 import { appendAvatarParams } from "@/lib/avatarParams";
@@ -76,41 +77,7 @@ export function GroupDetailClient({
 }: GroupDetailClientProps) {
   const t = useTranslations("GroupsPage");
   const tGroupDetail = useTranslations("GroupDetailPage");
-  const tMerge = useTranslations("MergeWithModal");
   const tHeader = useTranslations("PageHeader");
-  const mergeTexts = useMemo(
-    () => ({
-      errorTitle: tMerge("ErrorTitle"),
-      successTitle: tMerge("SuccessTitle"),
-      selectBothPeopleError: tMerge("SelectBothPeopleError"),
-      differentPeopleError: tMerge("DifferentPeopleError"),
-      mergingTitle: tMerge("MergingTitle"),
-      mergingDescription: tMerge("MergingDescription"),
-      mergeSuccess: tMerge("MergeSuccess"),
-      mergeFailed: tMerge("MergeFailed"),
-      mergeWithLabel: tMerge("MergeWithLabel"),
-      selectLeftPerson: tMerge("SelectLeftPerson"),
-      selectRightPerson: tMerge("SelectRightPerson"),
-      searchPeople: tMerge("SearchPeople"),
-      noPeopleFound: tMerge("NoPeopleFound"),
-      cancel: tMerge("Cancel"),
-      continue: tMerge("Continue"),
-      back: tMerge("Back"),
-      merge: tMerge("Merge"),
-      noConflicts: tMerge("NoConflicts"),
-      conflictHint: tMerge("ConflictHint"),
-      processing: tMerge("Processing"),
-      steps: {
-        pick: tMerge("Steps.Pick"),
-        resolve: tMerge("Steps.Resolve"),
-        process: tMerge("Steps.Process"),
-      },
-      fields: Object.fromEntries(
-        MERGE_CONFLICT_FIELDS.map((field) => [field, tMerge(`Fields.${field}`)]),
-      ) as Record<MergeConflictField, string>,
-    }),
-    [tMerge],
-  );
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -149,7 +116,7 @@ export function GroupDetailClient({
       icon: <IconBriefcase size={16} />,
     },
     {
-      key: "place",
+      key: "location",
       label: "Location",
       visible: true,
       icon: <IconMapPin size={16} />,
@@ -162,7 +129,7 @@ export function GroupDetailClient({
     },
     {
       key: "social",
-      label: "Social Media",
+      label: "Socials",
       visible: true,
       icon: <IconBrandLinkedin size={16} />,
     },
@@ -179,6 +146,7 @@ export function GroupDetailClient({
   };
 
   // Debounced: updates the URL so the server component re-fetches with the new query.
+  const [isSearchPending, startSearchTransition] = useTransition();
   const handleSearchChange = useDebouncedCallback((query: string) => {
     const params = new URLSearchParams(searchParams);
     if (query) {
@@ -186,8 +154,10 @@ export function GroupDetailClient({
     } else {
       params.delete("q");
     }
-    router.replace(`${pathname}?${params.toString()}`);
-  }, 300);
+    startSearchTransition(() => {
+      router.replace(`${pathname}?${params.toString()}`);
+    });
+  }, DEBOUNCE_MS.search);
 
   const handleLoadMore = async () => {
     if (isLoadingMore) return;
@@ -512,8 +482,7 @@ export function GroupDetailClient({
       rightPersonId,
       disableLeftPicker: true,
       disableRightPicker: Boolean(lockBoth),
-      titleText: tMerge("ModalTitle"),
-      texts: mergeTexts,
+      onSearch: searchContacts,
     });
   };
 
@@ -553,35 +522,6 @@ export function GroupDetailClient({
     openAddPeopleToGroupModal({
       groupId,
       groupLabel,
-      texts: {
-        title: t("AddPeopleModal.Title", { groupLabel }),
-        errorTitle: t("AddPeopleModal.ErrorTitle"),
-        successTitle: t("AddPeopleModal.SuccessTitle"),
-        loadError: t("AddPeopleModal.LoadError"),
-        noSelectionTitle: t("AddPeopleModal.NoSelectionTitle"),
-        noSelectionDescription: t("AddPeopleModal.NoSelectionDescription"),
-        addingTitle: t("AddPeopleModal.AddingTitle"),
-        addingDescription: t("AddPeopleModal.AddingDescription"),
-        addError: t("AddPeopleModal.AddError"),
-        emptyState: t("AddPeopleModal.EmptyState"),
-        close: t("AddPeopleModal.Close"),
-        cancel: t("AddPeopleModal.Cancel"),
-        addContactsPlaceholder: t("AddPeopleModal.AddContactsPlaceholder"),
-        noContactsFound: t("AddPeopleModal.NoContactsFound"),
-        formatActionLabel: (count: number) =>
-          count === 0
-            ? t("AddPeopleModal.ActionDefault")
-            : count === 1
-              ? t("AddPeopleModal.ActionSingular")
-              : t("AddPeopleModal.ActionPlural", { count }),
-        formatSuccessMessage: (count: number, targetGroupLabel: string) =>
-          count === 1
-            ? t("AddPeopleModal.SuccessMessageSingular", { groupLabel: targetGroupLabel })
-            : t("AddPeopleModal.SuccessMessagePlural", {
-                count,
-                groupLabel: targetGroupLabel,
-              }),
-      },
     });
   };
 
@@ -691,7 +631,7 @@ export function GroupDetailClient({
         body: JSON.stringify({
           label: duplicateLabel,
           emoji: group.emoji || "",
-          color: group.color || "",
+          color: group.color || "#1971C2",
         }),
       });
 
@@ -774,6 +714,7 @@ export function GroupDetailClient({
             isHeaderShown={true}
             searchDefaultValue={initialSearch}
             onSearchChange={handleSearchChange}
+            searchLoading={isSearchPending}
             noContactsFound={tGroupDetail("NoContactsFound")}
             noContactsMatchSearch={tGroupDetail("NoContactsMatchSearch")}
             columnsForMenu={columns}

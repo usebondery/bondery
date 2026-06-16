@@ -1,6 +1,7 @@
-import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
+import type React from "react";
+import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { browser } from "wxt/browser";
-import { MantineProvider } from "@mantine/core";
+import { MantineProvider, v8CssVariablesResolver } from "@mantine/core";
 import { bonderyTheme } from "@bondery/mantine-next/theme";
 
 /**
@@ -45,7 +46,11 @@ export function useExtensionTheme() {
   return context;
 }
 
-export function MantineWrapper({ children, getRootElement, cssVariablesSelector }: MantineWrapperProps) {
+export function MantineWrapper({
+  children,
+  getRootElement,
+  cssVariablesSelector,
+}: MantineWrapperProps) {
   const [themePreference, setThemePreferenceState] = useState<"auto" | "light" | "dark">("auto");
   const [systemColorScheme, setSystemColorScheme] = useState<"light" | "dark">("light");
 
@@ -101,7 +106,7 @@ export function MantineWrapper({ children, getRootElement, cssVariablesSelector 
       themePreference,
       setThemePreference,
     }),
-    [themePreference],
+    [themePreference, setThemePreference],
   );
 
   const resolvedColorScheme = themePreference === "auto" ? systemColorScheme : themePreference;
@@ -111,6 +116,7 @@ export function MantineWrapper({ children, getRootElement, cssVariablesSelector 
       <MantineProvider
         theme={bonderyTheme}
         forceColorScheme={resolvedColorScheme}
+        cssVariablesResolver={v8CssVariablesResolver}
         {...(getRootElement ? { getRootElement } : {})}
         {...(cssVariablesSelector ? { cssVariablesSelector } : {})}
       >

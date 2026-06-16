@@ -34,10 +34,18 @@ async function getUpcomingReminders(): Promise<UpcomingReminder[]> {
 }
 
 export default async function HomePage() {
-  const [{ stats }, { contacts, activities }, reminders] = await Promise.all([
+  const [
+    { stats },
+    { contacts, activities },
+    reminders,
+    { contacts: recentlyAdded },
+    { contacts: recentlyInteracted },
+  ] = await Promise.all([
     getContactsData(undefined, undefined, 1, 0),
     getInteractionsData(),
     getUpcomingReminders(),
+    getContactsData(undefined, "createdAtDesc", 5, 0, "small"),
+    getContactsData(undefined, "interactionDesc", 5, 0, "small"),
   ]);
 
   return (
@@ -46,6 +54,8 @@ export default async function HomePage() {
       reminders={reminders}
       timelineContacts={contacts}
       timelineActivities={activities}
+      recentlyAdded={recentlyAdded}
+      recentlyInteracted={recentlyInteracted}
     />
   );
 }

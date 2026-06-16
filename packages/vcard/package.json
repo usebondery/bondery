@@ -1,0 +1,27 @@
+{
+  "name": "@bondery/vcard",
+  "version": "1.4.2",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "check-types": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@bondery/helpers": "*",
+    "@bondery/types": "*"
+  },
+  "devDependencies": {
+    "@types/node": "^25",
+    "typescript": "^6"
+  }
+}

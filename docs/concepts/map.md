@@ -18,7 +18,7 @@ Below the map there is a contact table that lists only the contacts currently vi
 
 - **Search** within visible contacts using the table's search box
 - **Sort** by first name, last name, or last interaction date (ascending or descending)
-- **Show/hide columns** — Name, Headline, Location, Last Interaction, Social Media
+- **Show/hide columns** — Name, Headline, Location, Last Interaction, Socials
 - **Select** one or multiple contacts using the checkboxes (shift-click to select a range)
 
 ## Markers

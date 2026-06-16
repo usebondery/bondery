@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, Group, Paper, SimpleGrid, Stack, Text, Title, Tooltip } from "@mantine/core";
+import { Button, Group, Kbd, Paper, SimpleGrid, Stack, Text, Title, Tooltip } from "@mantine/core";
 import {
   IconCalendarPlus,
   IconCopy,
@@ -10,6 +10,7 @@ import {
   IconUserPlus,
 } from "@tabler/icons-react";
 import { useMemo } from "react";
+import { useHotkeys } from "@mantine/hooks";
 import { useFormatter, useTranslations } from "next-intl";
 import type { Activity, Contact, UpcomingReminder } from "@bondery/types";
 import { PageWrapper } from "@/app/(app)/app/components/PageWrapper";
@@ -19,6 +20,7 @@ import { UpcomingReminderCard } from "@/app/(app)/app/components/home/UpcomingRe
 import { openAddContactModal } from "@/app/(app)/app/people/components/AddContactModal";
 import { InteractionsList } from "@/app/(app)/app/components/interactions/InteractionsList";
 import { openNewActivityModal } from "@/app/(app)/app/interactions/components/NewActivityModal";
+import Link from "next/link";
 import { API_ROUTES, WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import { notifications } from "@mantine/notifications";
 import { useRouter } from "next/navigation";
@@ -26,10 +28,13 @@ import {
   ActionIconLink,
   errorNotificationTemplate,
   ModalTitle,
+  PersonChip,
   successNotificationTemplate,
 } from "@bondery/mantine-next";
 import { revalidateInteractions } from "../actions";
 import { openStandardConfirmModal } from "../components/modals/openStandardConfirmModal";
+import { HOTKEYS } from "@/lib/config";
+import { peopleSearchActions } from "../components/PeopleSearchSpotlight";
 
 interface HomeClientProps {
   stats: {
@@ -40,6 +45,8 @@ interface HomeClientProps {
   reminders: UpcomingReminder[];
   timelineContacts: Contact[];
   timelineActivities: Activity[];
+  recentlyAdded: Contact[];
+  recentlyInteracted: Contact[];
 }
 
 export function HomeClient({
@@ -47,6 +54,8 @@ export function HomeClient({
   reminders,
   timelineContacts,
   timelineActivities,
+  recentlyAdded,
+  recentlyInteracted,
 }: HomeClientProps) {
   const router = useRouter();
   const t = useTranslations("HomePage");
@@ -59,6 +68,22 @@ export function HomeClient({
     () => new Map(timelineContacts.map((contact) => [contact.id, contact])),
     [timelineContacts],
   );
+
+  function handleLogInteraction() {
+    openNewActivityModal({
+      contacts: timelineContacts,
+    });
+  }
+
+  function handleAddPerson() {
+    openAddContactModal();
+  }
+
+  useHotkeys([
+    [HOTKEYS.LOG_INTERACTION, handleLogInteraction],
+    [HOTKEYS.ADD_PERSON, handleAddPerson],
+    [HOTKEYS.FIND_PERSON, () => peopleSearchActions.open()],
+  ]);
 
   const compactActivities = useMemo(
     () =>
@@ -96,8 +121,6 @@ export function HomeClient({
     openNewActivityModal({
       contacts: timelineContacts,
       activity,
-      titleText: timelineT("WhoAreYouMeeting"),
-      t: timelineT,
     });
   };
 
@@ -194,29 +217,47 @@ export function HomeClient({
           title={t("Title")}
           icon={IconHome}
           secondaryAction={
-            <Button
-              variant="outline"
-              size="md"
-              leftSection={<IconUserPlus size={16} />}
-              onClick={openAddContactModal}
+            <Tooltip
+              label={
+                <Group gap="xs" wrap="nowrap">
+                  <Text size="xs" inherit>
+                    {t("AddPerson")}
+                  </Text>
+                  <Kbd size="xs">{HOTKEYS.ADD_PERSON.toUpperCase()}</Kbd>
+                </Group>
+              }
+              withArrow
             >
-              {t("AddPerson")}
-            </Button>
+              <Button
+                variant="outline"
+                size="md"
+                leftSection={<IconUserPlus size={16} />}
+                onClick={handleAddPerson}
+              >
+                {t("AddPerson")}
+              </Button>
+            </Tooltip>
           }
           primaryAction={
-            <Button
-              size="md"
-              leftSection={<IconCalendarPlus size={16} />}
-              onClick={() => {
-                openNewActivityModal({
-                  contacts: timelineContacts,
-                  titleText: timelineT("WhoAreYouMeeting"),
-                  t: timelineT,
-                });
-              }}
+            <Tooltip
+              label={
+                <Group gap="xs" wrap="nowrap">
+                  <Text size="xs" inherit>
+                    {t("AddInteraction")}
+                  </Text>
+                  <Kbd size="xs">{HOTKEYS.LOG_INTERACTION.toUpperCase()}</Kbd>
+                </Group>
+              }
+              withArrow
             >
-              {t("AddInteraction")}
-            </Button>
+              <Button
+                size="md"
+                leftSection={<IconCalendarPlus size={16} />}
+                onClick={handleLogInteraction}
+              >
+                {t("AddInteraction")}
+              </Button>
+            </Tooltip>
           }
         />
 
@@ -239,7 +280,9 @@ export function HomeClient({
         <SimpleGrid cols={{ base: 1, md: 2 }} spacing="xl" verticalSpacing="xl">
           <Stack gap="md">
             <Group gap={4} align="center">
-              <Title order={2}>{t("TimelinePreviewTitle")}</Title>
+              <Link href={WEBAPP_ROUTES.INTERACTIONS} style={{ textDecoration: "none" }}>
+                <Title order={2}>{t("TimelinePreviewTitle")}</Title>
+              </Link>
               <Tooltip label={t("TimelinePreviewTooltip")} multiline maw={240} withArrow>
                 <ActionIconLink
                   href={WEBAPP_ROUTES.INTERACTIONS}
@@ -273,43 +316,129 @@ export function HomeClient({
             )}
           </Stack>
 
-          <Stack gap="md">
-            <Group gap={4} align="center">
-              <Title order={2}>{t("UpcomingRemindersTitle")}</Title>
-              <Tooltip label={t("UpcomingRemindersTooltip")} multiline maw={240} withArrow>
-                <ActionIconLink
-                  ariaLabel={t("UpcomingRemindersTooltip")}
-                  icon={<IconInfoCircle size={16} stroke={1.5} />}
-                  variant="transparent"
-                  color="gray"
-                  size="sm"
-                />
-              </Tooltip>
-            </Group>
+          <Stack gap="xl">
+            <Stack gap="md">
+              <Group gap={4} align="center">
+                <Title order={2}>{t("UpcomingRemindersTitle")}</Title>
+                <Tooltip label={t("UpcomingRemindersTooltip")} multiline maw={240} withArrow>
+                  <ActionIconLink
+                    ariaLabel={t("UpcomingRemindersTooltip")}
+                    icon={<IconInfoCircle size={16} stroke={1.5} />}
+                    variant="transparent"
+                    color="gray"
+                    size="sm"
+                  />
+                </Tooltip>
+              </Group>
 
-            {reminders.length === 0 ? (
-              <Paper withBorder radius="md" p="md">
-                <Text c="dimmed" size="sm">
-                  {t("NoUpcomingReminders")}
-                </Text>
-              </Paper>
-            ) : (
-              <Stack gap="sm">
-                {reminders.map((reminder) => {
-                  const personHref = `${WEBAPP_ROUTES.PERSON}/${reminder.person.id}`;
+              {reminders.length === 0 ? (
+                <Paper withBorder radius="md" p="md">
+                  <Text c="dimmed" size="sm">
+                    {t("NoUpcomingReminders")}
+                  </Text>
+                </Paper>
+              ) : (
+                <Stack gap="sm">
+                  {reminders.map((reminder) => {
+                    const personHref = `${WEBAPP_ROUTES.PERSON}/${reminder.person.id}`;
 
-                  return (
-                    <UpcomingReminderCard
-                      key={reminder.importantDate.id}
-                      reminder={reminder}
-                      onClick={() => {
-                        router.push(personHref);
-                      }}
+                    return (
+                      <UpcomingReminderCard
+                        key={reminder.importantDate.id}
+                        reminder={reminder}
+                        onClick={() => {
+                          router.push(personHref);
+                        }}
+                      />
+                    );
+                  })}
+                </Stack>
+              )}
+            </Stack>
+
+            <Stack gap="md">
+              <Group gap={4} align="center">
+                <Link
+                  href={`${WEBAPP_ROUTES.PEOPLE}?sort=createdAtDesc`}
+                  style={{ textDecoration: "none" }}
+                >
+                  <Title order={2}>{t("RecentlyAddedTitle")}</Title>
+                </Link>
+                <Tooltip label={t("RecentlyAddedTooltip")} multiline maw={240} withArrow>
+                  <ActionIconLink
+                    href={`${WEBAPP_ROUTES.PEOPLE}?sort=createdAtDesc`}
+                    ariaLabel={t("RecentlyAddedTooltip")}
+                    icon={<IconInfoCircle size={16} stroke={1.5} />}
+                    variant="transparent"
+                    color="gray"
+                    size="sm"
+                  />
+                </Tooltip>
+              </Group>
+
+              {recentlyAdded.length === 0 ? (
+                <Paper withBorder radius="md" p="md">
+                  <Text c="dimmed" size="sm">
+                    {t("NoRecentlyAdded")}
+                  </Text>
+                </Paper>
+              ) : (
+                <Group gap="sm" wrap="wrap">
+                  {recentlyAdded.map((person) => (
+                    <PersonChip
+                      key={person.id}
+                      person={person}
+                      size="md"
+                      isClickable
+                      showHoverCard
+                      href={`${WEBAPP_ROUTES.PERSON}/${person.id}`}
                     />
-                  );
-                })}
-              </Stack>
-            )}
+                  ))}
+                </Group>
+              )}
+            </Stack>
+
+            <Stack gap="md">
+              <Group gap={4} align="center">
+                <Link
+                  href={`${WEBAPP_ROUTES.PEOPLE}?sort=interactionDesc`}
+                  style={{ textDecoration: "none" }}
+                >
+                  <Title order={2}>{t("RecentlyInteractedTitle")}</Title>
+                </Link>
+                <Tooltip label={t("RecentlyInteractedTooltip")} multiline maw={240} withArrow>
+                  <ActionIconLink
+                    href={`${WEBAPP_ROUTES.PEOPLE}?sort=interactionDesc`}
+                    ariaLabel={t("RecentlyInteractedTooltip")}
+                    icon={<IconInfoCircle size={16} stroke={1.5} />}
+                    variant="transparent"
+                    color="gray"
+                    size="sm"
+                  />
+                </Tooltip>
+              </Group>
+
+              {recentlyInteracted.length === 0 ? (
+                <Paper withBorder radius="md" p="md">
+                  <Text c="dimmed" size="sm">
+                    {t("NoRecentlyInteracted")}
+                  </Text>
+                </Paper>
+              ) : (
+                <Group gap="sm" wrap="wrap">
+                  {recentlyInteracted.map((person) => (
+                    <PersonChip
+                      key={person.id}
+                      person={person}
+                      size="md"
+                      isClickable
+                      showHoverCard
+                      href={`${WEBAPP_ROUTES.PERSON}/${person.id}`}
+                    />
+                  ))}
+                </Group>
+              )}
+            </Stack>
           </Stack>
         </SimpleGrid>
       </Stack>

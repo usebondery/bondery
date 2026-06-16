@@ -1,6 +1,6 @@
 "use client";
 
-import { Group, Space, Text, Tooltip } from "@mantine/core";
+import { Avatar, Group, Space, Stack, Text, Tooltip } from "@mantine/core";
 import {
   IconArrowMerge,
   IconBrandFacebook,
@@ -32,28 +32,81 @@ import {
   type SortOption,
 } from "@bondery/mantine-next";
 import { formatContactName } from "@/lib/nameHelpers";
-import { createSocialMediaUrl } from "@/lib/socialMediaHelpers";
+import { createSocialUrl } from "@/lib/socialsHelpers";
 import {
   getSocialActionTooltip,
   SOCIAL_ACTION_ORDER,
   type SocialActionKey,
 } from "@/lib/socialActionTooltips";
+import {
+  getTelephoneReactMaskExpression,
+  countryCodes,
+} from "@/lib/phoneHelpers";
+import { abbreviateLocationCountry } from "@bondery/helpers";
 
-export type ColumnKey = "name" | "headline" | "place" | "lastInteraction" | "social";
+export type ColumnKey =
+  | "name"
+  | "headline"
+  | "location"
+  | "lastInteraction"
+  | "social"
+  | "phone"
+  | "email"
+  | "avatar";
 export type SortOrder =
   | "nameAsc"
   | "nameDesc"
   | "surnameAsc"
   | "surnameDesc"
   | "interactionAsc"
-  | "interactionDesc";
+  | "interactionDesc"
+  | "createdAtAsc"
+  | "createdAtDesc";
 
-const COLUMN_DEFINITIONS: Record<ColumnKey, { label: string; icon: ReactNode }> = {
+/**
+ * Formats a phone number for display using the appropriate country mask.
+ * @param prefix Country code prefix (e.g., "+420", "+1")
+ * @param value Phone number digits
+ * @returns Formatted phone string
+ */
+function formatPhoneForDisplay(prefix: string, value: string): string {
+  if (!value) return prefix || "";
+
+  const mask = getTelephoneReactMaskExpression(prefix);
+  const digits = value.replace(/\D/g, "");
+
+  let formatted = "";
+  let digitIndex = 0;
+
+  for (const char of mask) {
+    if (char === "0" && digitIndex < digits.length) {
+      formatted += digits[digitIndex];
+      digitIndex++;
+    } else if (char !== "0") {
+      formatted += char;
+    }
+  }
+
+  // Append any remaining digits that didn't fit the mask
+  if (digitIndex < digits.length) {
+    formatted += digits.slice(digitIndex);
+  }
+
+  return [prefix, formatted.trim()].filter(Boolean).join(" ");
+}
+
+const COLUMN_DEFINITIONS: Record<
+  ColumnKey,
+  { label: string; icon: ReactNode }
+> = {
   name: { label: "Name", icon: <IconUser size={16} /> },
   headline: { label: "Headline", icon: <IconBriefcase size={16} /> },
-  place: { label: "Location", icon: <IconMapPin size={16} /> },
+  location: { label: "Location", icon: <IconMapPin size={16} /> },
   lastInteraction: { label: "Last Interaction", icon: <IconClock size={16} /> },
-  social: { label: "Social Media", icon: <IconUserCircle size={16} /> },
+  social: { label: "Socials", icon: <IconUserCircle size={16} /> },
+  phone: { label: "Phone", icon: <IconPhone size={16} /> },
+  email: { label: "Email", icon: <IconMail size={16} /> },
+  avatar: { label: "", icon: null },
 };
 
 export interface ColumnConfig {
@@ -62,6 +115,7 @@ export interface ColumnConfig {
   visible: boolean;
   icon?: ReactNode;
   fixed?: boolean;
+  hideHeader?: boolean;
 }
 
 export interface MenuAction {
@@ -70,6 +124,8 @@ export interface MenuAction {
   icon: ReactNode;
   color?: string;
   onClick: (contactId: string) => void;
+  disabled?: (contact: Contact) => boolean;
+  disabledTooltip?: string;
 }
 
 export interface BulkSelectionAction {
@@ -92,10 +148,12 @@ interface StandardContactActions {
   onDeleteOne?: (contactId: string) => void;
   onDeleteSelected?: (contactIds: string[]) => void;
   mergeMenuLabel?: string;
+  mergeDisabledTooltip?: string;
   mergeBulkLabel?: string;
   addToGroupsMenuLabel?: string;
   addToGroupsBulkLabel?: string;
   deleteMenuLabel?: string;
+  deleteDisabledTooltip?: string;
   deleteBulkLabel?: string;
   isDeleteSelectedLoading?: boolean;
 }
@@ -115,6 +173,7 @@ interface ContactsTableV2Props {
   searchDefaultValue?: string;
   searchValue?: string;
   onSearchChange?: (value: string) => void;
+  searchLoading?: boolean;
   noContactsFound: string;
   noContactsMatchSearch: string;
   columnsForMenu?: ColumnConfig[];
@@ -123,7 +182,10 @@ interface ContactsTableV2Props {
   setSortOrderForMenu?: (order: SortOrder) => void;
   visibleColumns: ColumnKey[] | ColumnConfig[];
   onSelectAll?: () => void;
-  onSelectOne?: (id: string, options?: { shiftKey?: boolean; index?: number }) => void;
+  onSelectOne?: (
+    id: string,
+    options?: { shiftKey?: boolean; index?: number },
+  ) => void;
   allSelected?: boolean;
   someSelected?: boolean;
   showSelection?: boolean;
@@ -142,6 +204,8 @@ interface ContactsTableV2Props {
   excludedIds?: Set<string>;
   disableNameLink?: boolean;
   dateLocale?: string;
+  /** Optional custom renderer for the location cell. Receives the row (typed as Contact but may be any shape) and should return a ReactNode. */
+  renderLocationCell?: (contact: Contact) => ReactNode;
 }
 
 interface SocialLink {
@@ -160,8 +224,13 @@ function ContactSocialIcons({ contact }: { contact: Contact }) {
       icon: <IconPhone size={18} />,
       href: (() => {
         const phones = Array.isArray(contact.phones) ? contact.phones : [];
-        const preferredPhone = phones.find((p: any) => p?.preferred) || phones[0];
-        if (preferredPhone && typeof preferredPhone === "object" && "value" in preferredPhone) {
+        const preferredPhone =
+          phones.find((p: any) => p?.preferred) || phones[0];
+        if (
+          preferredPhone &&
+          typeof preferredPhone === "object" &&
+          "value" in preferredPhone
+        ) {
           const phone = preferredPhone as any;
           return `tel:${phone.prefix || ""}${phone.value}`;
         }
@@ -178,8 +247,13 @@ function ContactSocialIcons({ contact }: { contact: Contact }) {
       icon: <IconMail size={18} />,
       href: (() => {
         const emails = Array.isArray(contact.emails) ? contact.emails : [];
-        const preferredEmail = emails.find((e: any) => e?.preferred) || emails[0];
-        if (preferredEmail && typeof preferredEmail === "object" && "value" in preferredEmail) {
+        const preferredEmail =
+          emails.find((e: any) => e?.preferred) || emails[0];
+        if (
+          preferredEmail &&
+          typeof preferredEmail === "object" &&
+          "value" in preferredEmail
+        ) {
           const email = preferredEmail as any;
           return `mailto:${email.value}`;
         }
@@ -194,7 +268,9 @@ function ContactSocialIcons({ contact }: { contact: Contact }) {
     linkedin: {
       key: "linkedin",
       icon: <IconBrandLinkedin size={18} />,
-      href: contact.linkedin ? createSocialMediaUrl("linkedin", contact.linkedin) : undefined,
+      href: contact.linkedin
+        ? createSocialUrl("linkedin", contact.linkedin)
+        : undefined,
       color: "blue",
       label: "LinkedIn",
       disabled: !contact.linkedin,
@@ -202,7 +278,9 @@ function ContactSocialIcons({ contact }: { contact: Contact }) {
     instagram: {
       key: "instagram",
       icon: <IconBrandInstagram size={18} />,
-      href: contact.instagram ? createSocialMediaUrl("instagram", contact.instagram) : undefined,
+      href: contact.instagram
+        ? createSocialUrl("instagram", contact.instagram)
+        : undefined,
       color: "pink",
       label: "Instagram",
       disabled: !contact.instagram,
@@ -210,7 +288,9 @@ function ContactSocialIcons({ contact }: { contact: Contact }) {
     whatsapp: {
       key: "whatsapp",
       icon: <IconBrandWhatsapp size={18} />,
-      href: contact.whatsapp ? createSocialMediaUrl("whatsapp", contact.whatsapp) : undefined,
+      href: contact.whatsapp
+        ? createSocialUrl("whatsapp", contact.whatsapp)
+        : undefined,
       color: "green",
       label: "WhatsApp",
       disabled: !contact.whatsapp,
@@ -218,14 +298,18 @@ function ContactSocialIcons({ contact }: { contact: Contact }) {
     facebook: {
       key: "facebook",
       icon: <IconBrandFacebook size={18} />,
-      href: contact.facebook ? createSocialMediaUrl("facebook", contact.facebook) : undefined,
+      href: contact.facebook
+        ? createSocialUrl("facebook", contact.facebook)
+        : undefined,
       color: "blue",
       label: "Facebook",
       disabled: !contact.facebook,
     },
     signal: {
       key: "signal",
-      icon: <Image src="/icons/signal.svg" alt="Signal" width={18} height={18} />,
+      icon: (
+        <Image src="/icons/signal.svg" alt="Signal" width={18} height={18} />
+      ),
       href: contact.signal || undefined,
       color: "indigo",
       label: "Signal",
@@ -233,7 +317,9 @@ function ContactSocialIcons({ contact }: { contact: Contact }) {
     },
   };
 
-  const socials: SocialLink[] = SOCIAL_ACTION_ORDER.map((key) => socialByKey[key]);
+  const socials: SocialLink[] = SOCIAL_ACTION_ORDER.map(
+    (key) => socialByKey[key],
+  );
 
   return (
     <Group wrap="nowrap" className="gap-1!">
@@ -260,7 +346,11 @@ function ContactSocialIcons({ contact }: { contact: Contact }) {
                 color={social.color}
                 href={social.href}
                 size="md"
-                target={social.href && social.href.startsWith("http") ? "_blank" : undefined}
+                target={
+                  social.href && social.href.startsWith("http")
+                    ? "_blank"
+                    : undefined
+                }
                 ariaLabel={social.label}
                 icon={social.icon}
               />
@@ -281,6 +371,7 @@ export default function ContactsTableV2({
   searchDefaultValue,
   searchValue,
   onSearchChange,
+  searchLoading,
   columnsForMenu,
   setColumnsForMenu,
   sortOrderForMenu,
@@ -306,6 +397,7 @@ export default function ContactsTableV2({
   dateLocale,
   noContactsFound,
   noContactsMatchSearch,
+  renderLocationCell,
 }: ContactsTableV2Props) {
   const [searchIsActive, setSearchIsActive] = useState(() =>
     Boolean(searchValue ?? searchDefaultValue),
@@ -320,11 +412,14 @@ export default function ContactsTableV2({
   );
 
   const dateFormatter = useMemo(
-    () => new Intl.DateTimeFormat(dateLocale || "en-US", { dateStyle: "short" }),
+    () =>
+      new Intl.DateTimeFormat(dateLocale || "en-US", { dateStyle: "short" }),
     [dateLocale],
   );
 
-  const selectedContacts = contacts.filter((contact) => selectedIds?.has(contact.id));
+  const selectedContacts = contacts.filter((contact) =>
+    selectedIds?.has(contact.id),
+  );
 
   const standardMenuActions: MenuAction[] = [];
   if (standardActions?.onMergeOne) {
@@ -343,15 +438,16 @@ export default function ContactsTableV2({
       onClick: (contactId) => standardActions.onAddToGroupsOne?.(contactId),
     });
   }
-  const standardDeleteMenuAction: MenuAction | null = standardActions?.onDeleteOne
-    ? {
-        key: "deleteContact",
-        label: standardActions.deleteMenuLabel || "Delete",
-        icon: <IconTrash size={14} />,
-        color: "red",
-        onClick: (contactId) => standardActions.onDeleteOne?.(contactId),
-      }
-    : null;
+  const standardDeleteMenuAction: MenuAction | null =
+    standardActions?.onDeleteOne
+      ? {
+          key: "deleteContact",
+          label: standardActions.deleteMenuLabel || "Delete",
+          icon: <IconTrash size={14} />,
+          color: "red",
+          onClick: (contactId) => standardActions.onDeleteOne?.(contactId),
+        }
+      : null;
 
   const standardBulkSelectionActions: BulkSelectionAction[] = [];
   if (standardActions?.onMergeSelected) {
@@ -361,7 +457,10 @@ export default function ContactsTableV2({
       icon: <IconArrowMerge size={16} />,
       onClick: () => {
         if (selectedContacts.length === 2) {
-          standardActions.onMergeSelected?.(selectedContacts[0].id, selectedContacts[1].id);
+          standardActions.onMergeSelected?.(
+            selectedContacts[0].id,
+            selectedContacts[1].id,
+          );
         }
       },
       disabled: selectedContacts.length !== 2,
@@ -379,23 +478,24 @@ export default function ContactsTableV2({
       },
     });
   }
-  const standardDeleteBulkAction: BulkSelectionAction | null = standardActions?.onDeleteSelected
-    ? {
-        key: "deleteSelected",
-        label: standardActions.deleteBulkLabel || "Delete",
-        icon: <IconTrash size={16} />,
-        color: "red",
-        onClick: () => {
-          const ids = selectedContacts.map((contact) => contact.id);
-          standardActions.onDeleteSelected?.(ids);
-        },
-        loading: standardActions.isDeleteSelectedLoading,
-      }
-    : null;
+  const standardDeleteBulkAction: BulkSelectionAction | null =
+    standardActions?.onDeleteSelected
+      ? {
+          key: "deleteSelected",
+          label: standardActions.deleteBulkLabel || "Delete",
+          icon: <IconTrash size={16} />,
+          color: "red",
+          onClick: () => {
+            const ids = selectedContacts.map((contact) => contact.id);
+            standardActions.onDeleteSelected?.(ids);
+          },
+          loading: standardActions.isDeleteSelectedLoading,
+        }
+      : null;
 
   const effectiveMenuActions: MenuAction[] = [
-    ...standardMenuActions,
     ...(menuActions || []),
+    ...standardMenuActions,
     ...(standardDeleteMenuAction ? [standardDeleteMenuAction] : []),
   ];
   const effectiveBulkSelectionActions: BulkSelectionAction[] = [
@@ -414,13 +514,17 @@ export default function ContactsTableV2({
               icon: COLUMN_DEFINITIONS[key].icon,
               visible: true,
               fixed: key === "name",
+              hideHeader: key === "name",
             }))
           : (visibleColumnsProp as ColumnConfig[])
         : [],
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       visibleColumnsProp
-        ?.map((c) => (typeof c === "string" ? c : `${c.key}:${Number(c.visible)}:${c.fixed ?? 0}`))
+        ?.map((c) =>
+          typeof c === "string"
+            ? c
+            : `${c.key}:${Number(c.visible)}:${c.fixed ?? 0}`,
+        )
         .join(","),
     ],
   );
@@ -436,6 +540,7 @@ export default function ContactsTableV2({
         visible: column.visible,
         fixed: column.fixed,
         minWidthClass: column.key === "name" ? "min-w-60" : "min-w-24",
+        hideHeader: column.hideHeader ?? column.key === "name",
         render: (contact: Contact) => {
           switch (column.key) {
             case "name":
@@ -448,7 +553,6 @@ export default function ContactsTableV2({
                     lastName: contact.lastName,
                     avatar: contact.avatar,
                   }}
-                  color={nonSelectableIds?.has(contact.id) ? "gray" : undefined}
                   isClickable={!disableNameLink}
                   size="md"
                 />
@@ -463,12 +567,16 @@ export default function ContactsTableV2({
                 </Tooltip>
               );
             }
-            case "place": {
-              const placeValue = contact.place || "-";
+            case "location": {
+              if (renderLocationCell) return renderLocationCell(contact);
+              const locationValue = contact.location || "-";
+              const shortLocation = contact.location
+                ? abbreviateLocationCountry(contact.location)
+                : "-";
               return (
-                <Tooltip label={placeValue} withArrow>
+                <Tooltip label={locationValue} withArrow>
                   <Text size="sm" lineClamp={1}>
-                    {placeValue}
+                    {shortLocation}
                   </Text>
                 </Tooltip>
               );
@@ -479,35 +587,123 @@ export default function ContactsTableV2({
                 : "-";
             case "social":
               return <ContactSocialIcons contact={contact} />;
+            case "phone": {
+              const phones = Array.isArray(contact.phones)
+                ? contact.phones
+                : [];
+              const preferred =
+                phones.find((p: any) => p?.preferred) || phones[0];
+              if (
+                !preferred ||
+                typeof preferred !== "object" ||
+                !("value" in preferred)
+              )
+                return "-";
+              const phone = preferred as { prefix?: string; value: string };
+              const phoneDisplay = formatPhoneForDisplay(
+                phone.prefix || "",
+                phone.value,
+              );
+              const otherPhoneCount = phones.length - 1;
+              return (
+                <Tooltip label={phoneDisplay} withArrow>
+                  <Stack gap={0}>
+                    <Text size="sm" lineClamp={1}>
+                      {phoneDisplay || "-"}
+                    </Text>
+                    {otherPhoneCount > 0 && (
+                      <Text size="xs" c="dimmed">
+                        +{otherPhoneCount} other{" "}
+                        {otherPhoneCount === 1 ? "phone" : "phones"}
+                      </Text>
+                    )}
+                  </Stack>
+                </Tooltip>
+              );
+            }
+            case "email": {
+              const emails = Array.isArray(contact.emails)
+                ? contact.emails
+                : [];
+              const preferred =
+                emails.find((e: any) => e?.preferred) || emails[0];
+              if (
+                !preferred ||
+                typeof preferred !== "object" ||
+                !("value" in preferred)
+              )
+                return "-";
+              const email = preferred as { value: string };
+              const otherEmailCount = emails.length - 1;
+              return (
+                <Tooltip label={email.value} withArrow>
+                  <Stack gap={0}>
+                    <Text size="sm" lineClamp={1}>
+                      {email.value || "-"}
+                    </Text>
+                    {otherEmailCount > 0 && (
+                      <Text size="xs" c="dimmed">
+                        +{otherEmailCount} other{" "}
+                        {otherEmailCount === 1 ? "email" : "emails"}
+                      </Text>
+                    )}
+                  </Stack>
+                </Tooltip>
+              );
+            }
+            case "avatar": {
+              const avatarSrc =
+                "avatarUri" in contact &&
+                contact.avatarUri &&
+                typeof contact.avatarUri === "string"
+                  ? contact.avatarUri
+                  : contact.avatar;
+              if (avatarSrc) {
+                return (
+                  <Avatar
+                    src={avatarSrc}
+                    alt={`${contact.firstName || ""} ${contact.lastName || ""}`.trim()}
+                    size={32}
+                    radius="xl"
+                  />
+                );
+              }
+              return null;
+            }
             default:
               return null;
           }
         },
       })),
     // nonSelectableIds and disableNameLink are included because they affect the name column render.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [sourceColumns, nonSelectableIds, disableNameLink, dateFormatter],
   );
 
-  const rowActions: RowAction<Contact>[] = effectiveMenuActions.map((action) => ({
-    key: action.key,
-    label: action.label,
-    icon: action.icon,
-    color: action.color,
-    onClick: (contact) => action.onClick(contact.id),
-  }));
+  const rowActions: RowAction<Contact>[] = effectiveMenuActions.map(
+    (action) => ({
+      key: action.key,
+      label: action.label,
+      icon: action.icon,
+      color: action.color,
+      onClick: (contact) => action.onClick(contact.id),
+      disabled: action.disabled,
+      disabledTooltip: action.disabledTooltip,
+    }),
+  );
 
-  const bulkActions: BulkAction[] = effectiveBulkSelectionActions.map((action) => ({
-    key: action.key,
-    label: action.label,
-    icon: action.icon,
-    color: action.color,
-    variant: action.variant,
-    onClick: action.onClick,
-    disabled: action.disabled,
-    disabledTooltip: action.disabledTooltip,
-    loading: action.loading,
-  }));
+  const bulkActions: BulkAction[] = effectiveBulkSelectionActions.map(
+    (action) => ({
+      key: action.key,
+      label: action.label,
+      icon: action.icon,
+      color: action.color,
+      variant: action.variant,
+      onClick: action.onClick,
+      disabled: action.disabled,
+      disabledTooltip: action.disabledTooltip,
+      loading: action.loading,
+    }),
+  );
 
   const sortOptions: SortOption<SortOrder>[] = [
     { key: "nameAsc", label: "Name A→Z" },
@@ -516,6 +712,8 @@ export default function ContactsTableV2({
     { key: "surnameDesc", label: "Surname Z→A" },
     { key: "interactionDesc", label: "Newest interaction" },
     { key: "interactionAsc", label: "Oldest interaction" },
+    { key: "createdAtDesc", label: "Newest added" },
+    { key: "createdAtAsc", label: "Oldest added" },
   ];
 
   const labels: DataTableLabels = {
@@ -523,6 +721,7 @@ export default function ContactsTableV2({
     emptyStateMessage: searchIsActive ? noContactsMatchSearch : noContactsFound,
     loadMoreLabel: loadMoreAction?.label,
     selectedCountTemplate: "{count} people selected",
+    selectedSingularCountTemplate: "1 person selected",
     totalCountTemplate: "{count} total people",
     actionsAriaLabel: "Contact actions",
     columnVisibility: {
@@ -546,7 +745,7 @@ export default function ContactsTableV2({
     <DataTable<Contact, SortOrder>
       data={contacts}
       columns={tableColumns}
-      getRowId={(contact) => contact.id}
+      getRowId={(contact) => (contact as any)._rowKey ?? contact.id}
       selectedIds={selectedIds}
       onSelectAll={showSelection ? onSelectAll : undefined}
       onSelectOne={showSelection ? onSelectOne : undefined}
@@ -556,7 +755,10 @@ export default function ContactsTableV2({
       nonSelectableTooltip={nonSelectableTooltip}
       searchValue={searchValue ?? searchDefaultValue}
       onSearchChange={handleSearchChange}
-      sortOptions={sortOrderForMenu && setSortOrderForMenu ? sortOptions : undefined}
+      searchLoading={searchLoading}
+      sortOptions={
+        sortOrderForMenu && setSortOrderForMenu ? sortOptions : undefined
+      }
       currentSort={sortOrderForMenu}
       onSortChange={setSortOrderForMenu}
       onColumnsChange={
@@ -588,7 +790,9 @@ export default function ContactsTableV2({
       labels={labels}
       headerContent={null}
       showSelectAll={showSelection}
-      getRowSelectionAriaLabel={(contact) => `Select ${formatContactName(contact)}`}
+      getRowSelectionAriaLabel={(contact) =>
+        `Select ${formatContactName(contact)}`
+      }
     />
   );
 }

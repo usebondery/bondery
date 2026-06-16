@@ -27,7 +27,7 @@ export function SortMenu({ sortBy, setSortBy }: SortMenuProps) {
           size="md"
           variant="light"
           leftSection={<IconArrowsSort size={16} />}
-          className={opened ? "button-scale-effect-active" : "button-scale-effect"}
+          className={opened ? "button-scale-effect-active" : undefined}
         >
           Sort
         </Button>

@@ -1,4 +1,4 @@
-import React, { StrictMode } from "react";
+import { StrictMode } from "react";
 import ReactDOM from "react-dom/client";
 import { SOCIAL_PLATFORM_URL_DETAILS } from "@bondery/helpers";
 import LinkedInButton from "./LinkedInButton";
@@ -23,7 +23,7 @@ function getLinkedInSnapshot() {
 
   const contactInfoLink = topCard.querySelector("#top-card-text-details-contact-info");
   const placeElement = contactInfoLink?.parentElement?.previousElementSibling || null;
-  const place = placeElement?.textContent?.trim() || undefined;
+  const location = placeElement?.textContent?.trim() || undefined;
 
   const profilePhotoImg = topCard.querySelector(
     "button[aria-label*='profile picture'] img",
@@ -37,16 +37,16 @@ function getLinkedInSnapshot() {
     lastName,
     profileImageUrl: profilePhotoImg?.src || undefined,
     headline,
-    place,
+    location,
   };
 }
 
 // Extract LinkedIn username from URL
 function getLinkedInUsername(): string | null {
   const pathname = window.location.pathname;
-  const match = pathname.match(/^\/in\/([^\/]+)\/?$/);
+  const match = pathname.match(/^\/in\/([^/]+)\/?$/);
 
-  if (match && match[1]) {
+  if (match?.[1]) {
     return match[1];
   }
 

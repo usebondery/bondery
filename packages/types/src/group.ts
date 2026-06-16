@@ -44,7 +44,7 @@ export interface PeopleGroup {
 export interface CreateGroupInput {
   label: string;
   emoji?: string;
-  color?: string;
+  color: string;
 }
 
 /**

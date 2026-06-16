@@ -1,4 +1,4 @@
-import React from "react";
+import type React from "react";
 import { ActionIcon, Box, Divider, Group } from "@mantine/core";
 import { BonderyLogotypeBlack, BonderyLogotypeWhite } from "@bondery/branding-src";
 

@@ -1,4 +1,4 @@
-import React from "react";
+
 import { Button, Stack, Text } from "@mantine/core";
 import { IconCalendarPlus, IconExternalLink, IconUserPlus } from "@tabler/icons-react";
 import { PersonChip } from "./PersonChip";

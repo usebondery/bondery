@@ -8,7 +8,7 @@ import { getAvatarColorFromName } from "../../utils/avatarColor";
 type PersonCardIdentity = ContactPreview & {
   middleName?: string | null;
   headline?: string | null;
-  place?: string | null;
+  location?: string | null;
 };
 
 export interface PersonCardProps {
@@ -52,11 +52,11 @@ export function PersonCard({ person, size = "md" }: PersonCardProps) {
               </Text>
             </Group>
           ) : null}
-          {person.place ? (
+          {person.location ? (
             <Group gap={4} wrap="nowrap" style={{ minWidth: 0 }}>
               <IconCompass size={12} stroke={1.5} style={{ flexShrink: 0 }} />
               <Text size="xs" c="gray.7" truncate>
-                {person.place}
+                {person.location}
               </Text>
             </Group>
           ) : null}

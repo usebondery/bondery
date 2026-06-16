@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { formatMetadataTitle } from "@bondery/helpers";
 import { Contact, Team } from "@/components/landing";
 
 export const metadata: Metadata = {
@@ -8,13 +9,13 @@ export const metadata: Metadata = {
     canonical: "/contact",
   },
   openGraph: {
-    title: "Contact | Bondery",
+    title: formatMetadataTitle("Contact"),
     description: "Contact the Bondery team for support, feedback, and partnership inquiries.",
     url: "/contact",
     type: "website",
   },
   twitter: {
-    title: "Contact | Bondery",
+    title: formatMetadataTitle("Contact"),
     description: "Contact the Bondery team for support, feedback, and partnership inquiries.",
   },
 };

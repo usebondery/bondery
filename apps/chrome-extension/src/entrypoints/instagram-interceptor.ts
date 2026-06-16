@@ -61,7 +61,7 @@ export default defineUnlistedScript(() => {
     );
   }
 
-  function getHeaderValue(headers: HeaderLike, headerName: string): string {
+  function _getHeaderValue(headers: HeaderLike, headerName: string): string {
     if (!headers) {
       return "";
     }
@@ -227,14 +227,14 @@ export default defineUnlistedScript(() => {
     xhr.__bonderyRequestHeaders = {};
 
     const originalOpen = xhr.open.bind(xhr);
-    xhr.open = function (method: string, url: string | URL, ...args: unknown[]) {
+    xhr.open = (method: string, url: string | URL, ...args: unknown[]) => {
       xhr.__bonderyRequestMethod = method.toUpperCase();
       xhr.__bonderyRequestUrl = typeof url === "string" ? url : url.toString();
       return originalOpen(method, url, ...(args as [boolean?, string?, string?]));
     };
 
     const originalSetRequestHeader = xhr.setRequestHeader.bind(xhr);
-    xhr.setRequestHeader = function (name: string, value: string) {
+    xhr.setRequestHeader = (name: string, value: string) => {
       if (xhr.__bonderyRequestHeaders) {
         xhr.__bonderyRequestHeaders[name.toLowerCase()] = value;
       }
@@ -288,7 +288,7 @@ export default defineUnlistedScript(() => {
 
   const originalFetch = window.fetch.bind(window);
 
-  window.fetch = async function (input: RequestInfo | URL, init?: RequestInit): Promise<Response> {
+  window.fetch = async (input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
     const method = getRequestMethod(input, init);
     const url = getRequestUrl(input);
     const headers: Record<string, string> = {};

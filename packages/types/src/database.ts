@@ -131,15 +131,16 @@ export type Database = {
           id: string;
           language: string | null;
           last_interaction: string | null;
+          last_interaction_activity_id: string | null;
           last_name: string | null;
           latitude: number | null;
-          location: unknown;
+          gis_point: unknown;
           longitude: number | null;
           middle_name: string | null;
           myself: boolean | null;
           notes: string | null;
           notes_updated_at: string | null;
-          place: string | null;
+          location: string | null;
           timezone: string | null;
           headline: string | null;
           updated_at: string | null;
@@ -151,15 +152,16 @@ export type Database = {
           id?: string;
           language?: string | null;
           last_interaction?: string | null;
+          last_interaction_activity_id?: string | null;
           last_name?: string | null;
           latitude?: number | null;
-          location?: unknown;
+          gis_point?: unknown;
           longitude?: number | null;
           middle_name?: string | null;
           myself?: boolean | null;
           notes?: string | null;
           notes_updated_at?: string | null;
-          place?: string | null;
+          location?: string | null;
           timezone?: string | null;
           headline?: string | null;
           updated_at?: string | null;
@@ -171,15 +173,16 @@ export type Database = {
           id?: string;
           language?: string | null;
           last_interaction?: string | null;
+          last_interaction_activity_id?: string | null;
           last_name?: string | null;
           latitude?: number | null;
-          location?: unknown;
+          gis_point?: unknown;
           longitude?: number | null;
           middle_name?: string | null;
           myself?: boolean | null;
           notes?: string | null;
           notes_updated_at?: string | null;
-          place?: string | null;
+          location?: string | null;
           timezone?: string | null;
           headline?: string | null;
           updated_at?: string | null;
@@ -364,7 +367,7 @@ export type Database = {
           },
         ];
       };
-      people_social_media: {
+      people_socials: {
         Row: {
           connected_at: string | null;
           created_at: string;
@@ -397,7 +400,7 @@ export type Database = {
         };
         Relationships: [
           {
-            foreignKeyName: "people_social_media_person_id_fkey";
+            foreignKeyName: "people_socials_person_id_fkey";
             columns: ["person_id"];
             isOneToOne: false;
             referencedRelation: "people";
@@ -452,46 +455,34 @@ export type Database = {
       };
       user_settings: {
         Row: {
-          avatar_url: string | null;
           color_scheme: "light" | "dark" | "auto";
           created_at: string | null;
           id: string;
           language: string | null;
-          middlename: string | null;
-          name: string | null;
           next_reminder_at_utc: string;
           reminder_send_hour: string;
-          surname: string | null;
           timezone: string | null;
           updated_at: string | null;
           user_id: string;
         };
         Insert: {
-          avatar_url?: string | null;
           color_scheme?: "light" | "dark" | "auto";
           created_at?: string | null;
           id?: string;
           language?: string | null;
-          middlename?: string | null;
-          name?: string | null;
           next_reminder_at_utc?: string;
           reminder_send_hour?: string;
-          surname?: string | null;
           timezone?: string | null;
           updated_at?: string | null;
           user_id: string;
         };
         Update: {
-          avatar_url?: string | null;
           color_scheme?: "light" | "dark" | "auto";
           created_at?: string | null;
           id?: string;
           language?: string | null;
-          middlename?: string | null;
-          name?: string | null;
           next_reminder_at_utc?: string;
           reminder_send_hour?: string;
-          surname?: string | null;
           timezone?: string | null;
           updated_at?: string | null;
           user_id?: string;

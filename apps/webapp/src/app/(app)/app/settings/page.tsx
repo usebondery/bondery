@@ -12,23 +12,39 @@ import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import { PageWrapper } from "../components/PageWrapper";
 import { PreferencesCard } from "./components/PreferencesCard";
 import { TagsSection } from "./components/TagsSection";
+import { SupportCard } from "./components/SupportCard";
+import { SubscriptionCard } from "./components/SubscriptionCard";
 import type { TagWithCount } from "@bondery/types";
+import type { SubscriptionStatus } from "@bondery/types";
+import { buildAvatarQueryString } from "@/lib/avatarParams";
 
 export const metadata: Metadata = { title: "Settings" };
 
 export default async function SettingsPage() {
   const headers = await getAuthHeaders();
 
-  const [response, tagsResponse] = await Promise.all([
-    fetch(`${API_URL}${API_ROUTES.SETTINGS}`, {
-      next: { tags: ["settings"] },
-      headers,
-    }),
-    fetch(`${API_URL}${API_ROUTES.TAGS}?previewLimit=3`, {
-      next: { tags: ["tags"] },
-      headers,
-    }),
-  ]);
+  const [response, tagsResponse, personResponse, subscriptionResponse] =
+    await Promise.all([
+      fetch(`${API_URL}${API_ROUTES.ME_SETTINGS}`, {
+        next: { tags: ["settings"] },
+        headers,
+      }),
+      fetch(`${API_URL}${API_ROUTES.TAGS}?previewLimit=3`, {
+        next: { tags: ["tags"] },
+        headers,
+      }),
+      fetch(
+        `${API_URL}${API_ROUTES.ME_PERSON}?${buildAvatarQueryString("small")}`,
+        {
+          next: { tags: ["contacts"] },
+          headers,
+        },
+      ),
+      fetch(`${API_URL}${API_ROUTES.SUBSCRIPTIONS}`, {
+        cache: "no-store",
+        headers,
+      }),
+    ]);
 
   if (!response.ok) {
     console.error("Failed to fetch settings:", response.statusText);
@@ -40,9 +56,23 @@ export default async function SettingsPage() {
   const tagsResult = tagsResponse.ok ? await tagsResponse.json() : { tags: [] };
   const initialTags = (tagsResult.tags as TagWithCount[]) || [];
 
-  const name = settings.name || "";
-  const middlename = settings.middlename || "";
-  const surname = settings.surname || "";
+  const personResult = personResponse.ok ? await personResponse.json() : null;
+  const myselfPerson = personResult?.contact ?? null;
+
+  const subscriptionResult = subscriptionResponse.ok
+    ? await subscriptionResponse.json()
+    : null;
+  const subscriptionStatus: SubscriptionStatus | null =
+    subscriptionResult?.data ?? null;
+
+  // Fire-and-forget sync: bootstraps subscription for pre-existing Polar customers
+  if (subscriptionStatus?.plan !== "premium") {
+    fetch(`${API_URL}${API_ROUTES.SUBSCRIPTIONS_SYNC}`, {
+      method: "POST",
+      headers,
+    }).catch(() => {});
+  }
+
   const timezone = settings.timezone || "UTC";
   const reminderSendHour =
     typeof settings.reminderSendHour === "string" &&
@@ -72,17 +102,18 @@ export default async function SettingsPage() {
     <PageWrapper>
       <ErrorPageHeader iconType="settings" title={t("Title")} />
       <Stack gap="xl">
+        <SupportCard />
+
         <ProfileCard
-          initialName={name}
-          initialMiddlename={middlename}
-          initialSurname={surname}
-          initialTimezone={timezone}
-          initialLanguage={language}
           email={email}
-          avatarUrl={avatarUrl}
           providers={providers}
           userIdentities={userIdentities}
+          myselfPerson={myselfPerson}
         />
+
+        {subscriptionStatus && (
+          <SubscriptionCard subscriptionStatus={subscriptionStatus} />
+        )}
 
         <PreferencesCard
           initialColorScheme={colorScheme}

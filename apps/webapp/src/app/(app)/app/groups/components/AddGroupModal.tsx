@@ -18,6 +18,7 @@ import { useForm } from "@mantine/form";
 import { modals } from "@mantine/modals";
 import { notifications } from "@mantine/notifications";
 import { IconUsersGroup } from "@tabler/icons-react";
+import { useTranslations } from "next-intl";
 import {
   PeopleMultiPickerInput,
   EmojiPicker,
@@ -31,7 +32,11 @@ import {
 import { flushSync } from "react-dom";
 import type { Contact, GroupWithCount } from "@bondery/types";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
+import { buildAvatarQueryString } from "@/lib/avatarParams";
+import { DEBOUNCE_MS } from "@/lib/config";
+import { searchContacts } from "@/lib/searchContacts";
 import { revalidateGroups } from "../../actions";
+import { captureEvent } from "@/lib/analytics/client";
 
 // Predefined color swatches
 const COLOR_SWATCHES = [
@@ -60,12 +65,17 @@ interface OpenAddGroupModalOptions {
   onCreated?: (group: GroupWithCount) => void;
 }
 
+function AddGroupModalTitle() {
+  const t = useTranslations("GroupsPage");
+  return <ModalTitle text={t("AddGroupModal.Title")} icon={<IconUsersGroup size={24} />} />;
+}
+
 export function openAddGroupModal(options: OpenAddGroupModalOptions = {}) {
   const modalId = `add-group-${Math.random().toString(36).slice(2)}`;
 
   modals.open({
     modalId,
-    title: <ModalTitle text="Add new group" icon={<IconUsersGroup size={24} />} />,
+    title: <AddGroupModalTitle />,
     trapFocus: true,
     size: "md",
     children: (
@@ -93,6 +103,7 @@ function AddGroupForm({
   onCreated,
 }: AddGroupFormProps) {
   const router = useRouter();
+  const t = useTranslations("GroupsPage");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoadingContacts, setIsLoadingContacts] = useState(true);
   const [contacts, setContacts] = useState<Contact[]>([]);
@@ -110,7 +121,9 @@ function AddGroupForm({
   useEffect(() => {
     async function fetchContacts() {
       try {
-        const response = await fetch(API_ROUTES.CONTACTS);
+        const response = await fetch(
+          `${API_ROUTES.CONTACTS}?limit=200&${buildAvatarQueryString("small")}`,
+        );
         if (!response.ok) {
           throw new Error("Failed to fetch contacts");
         }
@@ -120,8 +133,8 @@ function AddGroupForm({
       } catch {
         notifications.show(
           errorNotificationTemplate({
-            title: "Error",
-            description: "Failed to load contacts",
+            title: t("AddGroupModal.ErrorTitle"),
+            description: t("AddGroupModal.LoadContactsError"),
           }),
         );
       } finally {
@@ -142,12 +155,12 @@ function AddGroupForm({
     validate: {
       label: (value) =>
         value.trim().length === 0
-          ? "Please add a label"
+          ? t("AddGroupModal.LabelRequired")
           : value.length > 100
-            ? "Label must be 100 characters or less"
+            ? t("AddGroupModal.LabelTooLong", { max: 100 })
             : null,
-      emoji: (value) => (value.trim().length === 0 ? "Please select an emoji" : null),
-      color: (value) => (value.trim().length === 0 ? "Please select a color" : null),
+      emoji: (value) => (value.trim().length === 0 ? t("AddGroupModal.EmojiRequired") : null),
+      color: (value) => (value.trim().length === 0 ? t("AddGroupModal.ColorRequired") : null),
     },
   });
 
@@ -156,8 +169,8 @@ function AddGroupForm({
 
     const loadingNotification = notifications.show({
       ...loadingNotificationTemplate({
-        title: "Creating group...",
-        description: "Please wait while we create the new group",
+        title: t("AddGroupModal.LoadingTitle"),
+        description: t("AddGroupModal.LoadingDescription"),
       }),
     });
 
@@ -199,12 +212,14 @@ function AddGroupForm({
         }
       }
 
+      captureEvent("group_created");
+
       notifications.hide(loadingNotification);
 
       notifications.show(
         successNotificationTemplate({
-          title: "Success",
-          description: "Group created successfully",
+          title: t("AddGroupModal.SuccessTitle"),
+          description: t("AddGroupModal.SuccessDescription"),
         }),
       );
 
@@ -240,8 +255,8 @@ function AddGroupForm({
 
       notifications.show(
         errorNotificationTemplate({
-          title: "Error",
-          description: error instanceof Error ? error.message : "Failed to create group",
+          title: t("AddGroupModal.ErrorTitle"),
+          description: error instanceof Error ? error.message : t("AddGroupModal.CreateFailed"),
         }),
       );
     } finally {
@@ -258,12 +273,13 @@ function AddGroupForm({
               value={form.values.emoji}
               onChange={(emoji) => form.setFieldValue("emoji", emoji)}
               error={form.errors.emoji as string | undefined}
+              searchDebounceMs={DEBOUNCE_MS.localFilter}
             />
           </Box>
           <Box style={{ flex: 1 }}>
             <TextInput
-              label="Label"
-              placeholder="e.g., Family, Work, Friends"
+              label={t("AddGroupModal.LabelInput")}
+              placeholder={t("AddGroupModal.LabelPlaceholder")}
               withAsterisk
               required
               data-autofocus
@@ -273,8 +289,8 @@ function AddGroupForm({
         </Group>
 
         <ColorInput
-          label="Color"
-          placeholder="Pick a color"
+          label={t("AddGroupModal.ColorInput")}
+          placeholder={t("AddGroupModal.ColorPlaceholder")}
           withAsterisk
           format="hex"
           swatches={COLOR_SWATCHES}
@@ -285,7 +301,7 @@ function AddGroupForm({
 
         <Stack gap="xs">
           <Text size="sm" fw={500}>
-            Add people
+            {t("AddGroupModal.AddPeople")}
           </Text>
 
           {isLoadingContacts ? (
@@ -294,7 +310,7 @@ function AddGroupForm({
             </Center>
           ) : contacts.length === 0 ? (
             <Text c="dimmed" size="sm">
-              No contacts found
+              {t("AddGroupModal.NoContactsFound")}
             </Text>
           ) : (
             <PeopleMultiPickerInput
@@ -303,16 +319,18 @@ function AddGroupForm({
               onChange={setSelectedIds}
               placeholder="Add contacts..."
               noResultsLabel="No contacts found"
+              onSearch={searchContacts}
+              searchDebounceMs={DEBOUNCE_MS.contactPicker}
               disabled={isSubmitting}
             />
           )}
         </Stack>
 
         <ModalFooter
-          cancelLabel="Cancel"
+          cancelLabel={t("AddGroupModal.Cancel")}
           onCancel={() => modals.close(modalId)}
           cancelDisabled={isSubmitting}
-          actionLabel="Create group"
+          actionLabel={t("AddGroupModal.CreateGroup")}
           actionType="submit"
           actionLoading={isSubmitting}
           actionDisabled={isSubmitting}

@@ -1,6 +1,6 @@
 {
   "name": "@bondery/helpers",
-  "version": "0.6.1",
+  "version": "1.4.2",
   "private": true,
   "type": "module",
   "main": "./dist/index.js",
@@ -11,25 +11,55 @@
       "require": "./dist/index.js",
       "types": "./dist/index.d.ts"
     },
+    "./globals": {
+      "import": "./dist/globals/index.js",
+      "require": "./dist/globals/index.js",
+      "types": "./dist/globals/index.d.ts"
+    },
     "./globals/paths": {
       "import": "./dist/globals/paths.js",
       "require": "./dist/globals/paths.js",
       "types": "./dist/globals/paths.d.ts"
     },
-    "./check-env": {
-      "import": "./dist/check-env.js",
-      "require": "./dist/check-env.js",
-      "types": "./dist/check-env.d.ts"
+    "./platform": {
+      "import": "./dist/platform/index.js",
+      "require": "./dist/platform/index.js",
+      "types": "./dist/platform/index.d.ts"
     },
-    "./name-utils": {
-      "import": "./dist/name-utils.js",
-      "require": "./dist/name-utils.js",
-      "types": "./dist/name-utils.d.ts"
+    "./name": {
+      "import": "./dist/name/index.js",
+      "require": "./dist/name/index.js",
+      "types": "./dist/name/index.d.ts"
     },
-    "./address-utils": {
-      "import": "./dist/address-utils.js",
-      "require": "./dist/address-utils.js",
-      "types": "./dist/address-utils.d.ts"
+    "./address": {
+      "import": "./dist/address/index.js",
+      "require": "./dist/address/index.js",
+      "types": "./dist/address/index.d.ts"
+    },
+    "./date": {
+      "import": "./dist/date/index.js",
+      "require": "./dist/date/index.js",
+      "types": "./dist/date/index.d.ts"
+    },
+    "./text": {
+      "import": "./dist/text/index.js",
+      "require": "./dist/text/index.js",
+      "types": "./dist/text/index.d.ts"
+    },
+    "./version": {
+      "import": "./dist/version/index.js",
+      "require": "./dist/version/index.js",
+      "types": "./dist/version/index.d.ts"
+    },
+    "./interactions": {
+      "import": "./dist/interactions/index.js",
+      "require": "./dist/interactions/index.js",
+      "types": "./dist/interactions/index.d.ts"
+    },
+    "./env": {
+      "import": "./dist/env/index.js",
+      "require": "./dist/env/index.js",
+      "types": "./dist/env/index.d.ts"
     }
   },
   "scripts": {

@@ -1,6 +1,5 @@
 "use client";
 
-import { useMemo } from "react";
 import { Button, Divider, Stack, Text } from "@mantine/core";
 import { IconBrandLinkedin } from "@tabler/icons-react";
 import { useTranslations, useFormatter } from "next-intl";
@@ -13,6 +12,7 @@ interface LinkedInTabProps {
   workHistory: WorkHistoryEntry[];
   education: EducationEntry[];
   linkedinBio?: string | null;
+  syncedAt?: string | null;
   onEnrich: () => void;
   enrichLabel: string;
 }
@@ -32,6 +32,7 @@ export function LinkedInTab({
   workHistory,
   education,
   linkedinBio,
+  syncedAt,
   onEnrich,
   enrichLabel,
 }: LinkedInTabProps) {
@@ -40,11 +41,7 @@ export function LinkedInTab({
 
   const isEmpty = workHistory.length === 0 && education.length === 0 && !linkedinBio;
 
-  const lastUpdated = useMemo(() => {
-    const allDates = [...workHistory, ...education].map((e) => e.updatedAt).filter(Boolean);
-    if (allDates.length === 0) return null;
-    return new Date(Math.max(...allDates.map((d) => new Date(d).getTime())));
-  }, [workHistory, education]);
+  const lastSynced = syncedAt ? new Date(syncedAt) : null;
 
   if (isEmpty) {
     return (
@@ -58,11 +55,11 @@ export function LinkedInTab({
 
   return (
     <Stack gap="lg">
-      {/* Last data update timestamp */}
-      {lastUpdated && (
+      {/* Last synced timestamp */}
+      {lastSynced && (
         <Text size="xs" c="dimmed">
           {t("LastDataUpdate", {
-            date: format.dateTime(lastUpdated, { dateStyle: "medium" }),
+            date: format.dateTime(lastSynced, { dateStyle: "medium" }),
           })}
         </Text>
       )}

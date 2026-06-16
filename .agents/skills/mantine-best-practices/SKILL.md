@@ -40,8 +40,16 @@ When creating a dropdown menu, use following rules:
 - If the modal only has a confirmation step, the action button should not have "..." at the end. If it has more steps, it should have "..." at the end.
 - When an option is disabled put a Tooltip with the reason on hover. This helps users understand why an option is not available and can improve the overall user experience.
 
+## Buttons
+
+- When a button is disabled, render a Mantine Tooltip on hover to explain why the button is disabled.
+
 # Common mistakes to avoid
 
 ## Not using server component
 
 Mantine UI compoennts support Next.js server components. However, they need to be referenced as named exports. For example the List.Item must be imported as ListItem to be used in a server component.
+
+## Inputs
+
+When using text or other inputs with an async searching or loading state, use the loading prop.

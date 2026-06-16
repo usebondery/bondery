@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { formatMetadataTitle } from "@bondery/helpers";
 import { Terms } from "@/components/legal";
 
 export const metadata: Metadata = {
@@ -8,13 +9,13 @@ export const metadata: Metadata = {
     canonical: "/terms",
   },
   openGraph: {
-    title: "Terms of Service | Bondery",
+    title: formatMetadataTitle("Terms of Service"),
     description: "Bondery Terms of Service page. This legal text is currently in progress.",
     url: "/terms",
     type: "article",
   },
   twitter: {
-    title: "Terms of Service | Bondery",
+    title: formatMetadataTitle("Terms of Service"),
     description: "Bondery Terms of Service page. This legal text is currently in progress.",
   },
 };

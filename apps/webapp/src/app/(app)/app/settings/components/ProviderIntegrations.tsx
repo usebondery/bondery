@@ -1,13 +1,11 @@
 "use client";
 
 import { Group, Stack, Text } from "@mantine/core";
-import { IconUnlink } from "@tabler/icons-react";
-import { IconBrandGithub, IconBrandLinkedin } from "@tabler/icons-react";
+import { IconUnlink, IconPuzzle } from "@tabler/icons-react";
+import { IconBrandGithub, IconBrandLinkedin, IconBrowser } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
 import { notifications } from "@mantine/notifications";
 import { useTranslations } from "next-intl";
-import { BonderyIcon } from "@bondery/branding/react";
-import { CHROME_EXTENSION_URL } from "@bondery/helpers";
 import { INTEGRATION_PROVIDERS } from "@/lib/config";
 import { detectBonderyChromeExtension } from "@/lib/extension/detectBonderyChromeExtension";
 import { IntegrationCard } from "./IntegrationCard";
@@ -19,6 +17,10 @@ import {
   successNotificationTemplate,
 } from "@bondery/mantine-next";
 import { openStandardConfirmModal } from "../../components/modals/openStandardConfirmModal";
+import { modals } from "@mantine/modals";
+import { ChromeExtensionModal } from "./ChromeExtensionModal";
+import { usePWAInstall } from "@/hooks/usePWAInstall";
+import { IconDeviceDesktop } from "@tabler/icons-react";
 
 interface UserIdentity {
   id: string;
@@ -32,6 +34,7 @@ interface ProviderIntegrationsProps {
   userIdentities: UserIdentity[];
   showOAuthProviders?: boolean;
   showExtensionProvider?: boolean;
+  showPWAProvider?: boolean;
   title?: string;
   description?: string;
 }
@@ -41,11 +44,16 @@ export function ProviderIntegrations({
   userIdentities,
   showOAuthProviders = true,
   showExtensionProvider = true,
+  showPWAProvider = true,
   title,
   description,
 }: ProviderIntegrationsProps) {
   const [providers, setProviders] = useState<string[]>(initialProviders);
   const [isExtensionInstalled, setIsExtensionInstalled] = useState(false);
+  const [extensionVersion, setExtensionVersion] = useState<string | null>(null);
+
+  const { canInstall, isChromiumDesktop, isPWAInstalled, isInstalledFromBrowser, install } =
+    usePWAInstall();
 
   const t = useTranslations("SettingsPage.Profile");
   const tIntegration = useTranslations("SettingsPage.Integration");
@@ -53,12 +61,13 @@ export function ProviderIntegrations({
   useEffect(() => {
     let isMounted = true;
 
-    void detectBonderyChromeExtension().then((state) => {
+    void detectBonderyChromeExtension().then((result) => {
       if (!isMounted) {
         return;
       }
 
-      setIsExtensionInstalled(state === "installed");
+      setIsExtensionInstalled(result.state === "installed");
+      setExtensionVersion(result.version);
     });
 
     return () => {
@@ -221,21 +230,73 @@ export function ProviderIntegrations({
           <IntegrationCard
             provider="bondery_chrome_extension"
             displayName={tIntegration("BonderyChromeExtension")}
-            iconNode={<BonderyIcon width={28} height={28} />}
+            icon={IconBrowser}
             iconColor="grape"
             isConnected={isExtensionInstalled}
             isDisabled={isExtensionInstalled}
-            connectedDescription={tIntegration("ExtensionLinkedDescription")}
+            connectedDescription={
+              extensionVersion
+                ? tIntegration("ExtensionLinkedDescriptionWithVersion", {
+                    version: extensionVersion,
+                  })
+                : tIntegration("ExtensionLinkedDescription")
+            }
             unconnectedDescription={tIntegration("ExtensionInstallDescription")}
             onClick={() => {
               if (isExtensionInstalled) {
                 return;
               }
 
-              window.open(CHROME_EXTENSION_URL, "_blank", "noopener,noreferrer");
+              const modalId = "chrome-extension-modal";
+              modals.open({
+                modalId,
+                title: (
+                  <ModalTitle
+                    text={tIntegration("ExtensionModalTitle")}
+                    icon={<IconPuzzle size={20} stroke={1.5} />}
+                  />
+                ),
+                size: "md",
+                children: (
+                  <ChromeExtensionModal
+                    modalId={modalId}
+                    t={(key) => tIntegration(`ChromeExtensionModal.${key}` as never)}
+                  />
+                ),
+              });
             }}
           />
         ) : null}
+        {showPWAProvider
+          ? (() => {
+              const isInstalled = isPWAInstalled || isInstalledFromBrowser;
+              const isUnsupported = !canInstall && !isInstalled && !isChromiumDesktop;
+              const isMenuInstall = !canInstall && !isInstalled && isChromiumDesktop;
+              const isDisabled = isInstalled || isUnsupported || isMenuInstall;
+              const disabledDescription = isUnsupported
+                ? tIntegration("DesktopAppNotSupportedDescription")
+                : isMenuInstall
+                  ? tIntegration("DesktopAppMenuInstallDescription")
+                  : undefined;
+
+              return (
+                <IntegrationCard
+                  provider="pwa"
+                  displayName={tIntegration("DesktopApp")}
+                  icon={IconDeviceDesktop}
+                  iconColor="grape"
+                  isConnected={isInstalled}
+                  isDisabled={isDisabled}
+                  connectedDescription={tIntegration("DesktopAppInstalledDescription")}
+                  unconnectedDescription={tIntegration("DesktopAppInstallDescription")}
+                  disabledDescription={disabledDescription}
+                  onClick={() => {
+                    if (canInstall) void install();
+                  }}
+                />
+              );
+            })()
+          : null}
       </Group>
     </Stack>
   );

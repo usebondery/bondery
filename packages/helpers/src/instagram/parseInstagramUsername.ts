@@ -1,3 +1,5 @@
+import { COMMON_PERSON_NAME_TOKEN_SET } from "../name/common-person-name-tokens.js";
+
 export interface ParsedInstagramName {
   firstName: string;
   middleName: string | null;
@@ -38,42 +40,7 @@ const SMALL_CAPS_MAP: Record<string, string> = {
   ᴢ: "z",
 };
 
-const COMMON_NAME_TOKENS = new Set<string>([
-  "adam",
-  "adela",
-  "alex",
-  "anna",
-  "andrej",
-  "andrea",
-  "daniel",
-  "david",
-  "eva",
-  "jakub",
-  "jana",
-  "jan",
-  "jiri",
-  "joao",
-  "jose",
-  "katerina",
-  "lucie",
-  "maria",
-  "martin",
-  "matyas",
-  "michael",
-  "michel",
-  "nikola",
-  "ondrej",
-  "pavel",
-  "petra",
-  "petr",
-  "silva",
-  "svoboda",
-  "tomas",
-  "vaclav",
-  "janku",
-  "novak",
-  "novakova",
-]);
+const COMMON_NAME_TOKENS = COMMON_PERSON_NAME_TOKEN_SET;
 
 function toTitleCase(token: string): string {
   return token.charAt(0).toUpperCase() + token.slice(1).toLowerCase();

@@ -11,6 +11,7 @@ import {
   successNotificationTemplate,
 } from "@bondery/mantine-next";
 import { openStandardConfirmModal } from "../modals/openStandardConfirmModal";
+import { captureEvent } from "@/lib/analytics/client";
 
 interface OpenDeleteContactModalParams {
   contactId: string;
@@ -65,6 +66,8 @@ export function openDeleteContactModal({
         if (!response.ok) {
           throw new Error("Failed to delete contact");
         }
+
+        captureEvent("contact_deleted");
 
         notifications.hide(loadingNotification);
         notifications.show(

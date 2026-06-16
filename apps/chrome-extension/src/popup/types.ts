@@ -1,6 +1,11 @@
 export type MainAuthedState = "logged-in" | "preview" | "import";
 
-export type PopupState = "loading" | "logged-out" | MainAuthedState | "settings";
+export type PopupState =
+  | "loading"
+  | "logged-out"
+  | "update-required"
+  | MainAuthedState
+  | "settings";
 
 export interface UserInfo {
   id: string;

@@ -8,12 +8,12 @@ import { NodeViewWrapper, type NodeViewProps } from "@tiptap/react";
  * Renders the mentioned person as a PersonChip Badge directly in the editor.
  */
 export function MentionNodeView({ node }: NodeViewProps) {
-  const { id, label, avatar, headline, place } = node.attrs as {
+  const { id, label, avatar, headline, location } = node.attrs as {
     id: string;
     label: string;
     avatar: string | null;
     headline: string | null;
-    place: string | null;
+    location: string | null;
   };
 
   return (
@@ -29,7 +29,7 @@ export function MentionNodeView({ node }: NodeViewProps) {
           lastName: null,
           avatar: avatar || null,
           headline: headline || null,
-          place: place || null,
+          location: location || null,
         }}
         size="sm"
         isClickable={true}

@@ -1,0 +1,75 @@
+import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { getAuthHeaders } from "@/lib/authHeaders";
+import { API_ROUTES } from "@bondery/helpers/globals/paths";
+import { API_URL } from "@/lib/config";
+import { NextRequest } from "next/server";
+
+/**
+ * Proxy handler that forwards chat session API requests to the Fastify backend.
+ */
+async function proxyRequest(request: NextRequest, subPath: string) {
+  const supabase = await createServerSupabaseClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return new Response("Unauthorized", { status: 401 });
+  }
+
+  const headers = await getAuthHeaders();
+  const url = `${API_URL}${API_ROUTES.CHAT_SESSIONS}${subPath}`;
+
+  const fetchOptions: RequestInit = {
+    method: request.method,
+    headers: { ...headers, "Content-Type": "application/json" },
+  };
+
+  if (request.method !== "GET" && request.method !== "HEAD") {
+    try {
+      fetchOptions.body = JSON.stringify(await request.json());
+    } catch {
+      // No body — that's fine for DELETE
+    }
+  }
+
+  const apiResponse = await fetch(url, fetchOptions);
+  const responseBody = await apiResponse.text();
+
+  return new Response(responseBody, {
+    status: apiResponse.status,
+    headers: { "Content-Type": apiResponse.headers.get("Content-Type") ?? "application/json" },
+  });
+}
+
+function getSubPath(params: { path?: string[] }): string {
+  return params.path ? `/${params.path.join("/")}` : "";
+}
+
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ path?: string[] }> },
+) {
+  return proxyRequest(request, getSubPath(await params));
+}
+
+export async function POST(
+  request: NextRequest,
+  { params }: { params: Promise<{ path?: string[] }> },
+) {
+  return proxyRequest(request, getSubPath(await params));
+}
+
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: Promise<{ path?: string[] }> },
+) {
+  return proxyRequest(request, getSubPath(await params));
+}
+
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Promise<{ path?: string[] }> },
+) {
+  return proxyRequest(request, getSubPath(await params));
+}

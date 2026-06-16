@@ -14,20 +14,34 @@ import helmet from "@fastify/helmet";
 import fastifyAuth from "@fastify/auth";
 import fastifySwagger from "@fastify/swagger";
 import { createRequire } from "module";
-import { API_ROUTES } from "@bondery/helpers";
+import {
+  API_ROUTES,
+  CHROME_EXTENSION_URL,
+  MIN_EXTENSION_VERSION,
+} from "@bondery/helpers";
 import { registerAuthStrategies } from "./lib/auth.js";
+import { registerExtensionVersionCheck } from "./lib/extensionVersionCheck.js";
 
 import { contactRoutes } from "./routes/contacts/index.js";
-import { accountRoutes } from "./routes/account/index.js";
-import { settingsRoutes } from "./routes/settings/index.js";
-import { redirectRoutes } from "./routes/redirect/index.js";
-import { feedbackRoutes } from "./routes/feedback/index.js";
-import { reminderRoutes } from "./routes/reminders/index.js";
+import { meRoutes } from "./routes/me/index.js";
+import { meSettingsRoutes } from "./routes/me/settings/index.js";
+import { extensionRoutes } from "./routes/extension/index.js";
+import { meFeedbackRoutes } from "./routes/me/feedback/index.js";
+import { reminderDigestRoutes } from "./routes/internal/reminder-digest.js";
 import { groupRoutes } from "./routes/groups/index.js";
 import { tagRoutes } from "./routes/tags/index.js";
 import { interactionRoutes } from "./routes/interactions/index.js";
-import { linkedInImportRoutes } from "./routes/linkedin-import/index.js";
-import { instagramImportRoutes } from "./routes/instagram-import/index.js";
+import { linkedInImportRoutes } from "./routes/import/linkedin/index.js";
+import { instagramImportRoutes } from "./routes/import/instagram/index.js";
+import { vcardImportRoutes } from "./routes/import/vcard/index.js";
+import { shareRoutes } from "./routes/contacts/share/index.js";
+import { statsRoutes } from "./routes/admin/stats/index.js";
+import { meOnboardingRoutes } from "./routes/me/onboarding/index.js";
+import { chatRoutes } from "./routes/chat/index.js";
+import { chatSessionRoutes } from "./routes/chat/sessions.js";
+import { subscriptionRoutes } from "./routes/subscriptions/index.js";
+import { subscriptionSyncRoutes } from "./routes/subscriptions/sync.js";
+import { polarWebhookRoutes } from "./routes/webhooks/polar.js";
 
 // Environment variable schema
 const envSchema = {
@@ -89,17 +103,37 @@ const envSchema = {
     PRIVATE_EMAIL_PORT: {
       type: "number",
     },
-    MAPS_URL: {
+    NEXT_PUBLIC_MAPS_URL: {
       type: "string",
       default: "https://api.mapy.com",
     },
-    MAPS_KEY: {
+    NEXT_PRIVATE_MAPS_KEY: {
       type: "string",
       default: "",
     },
-    EXTRA_ALLOWED_ORIGINS: {
+    POSTHOG_API_SECRET: {
       type: "string",
       default: "",
+    },
+    POSTHOG_PROJECT_ID: {
+      type: "string",
+      default: "",
+    },
+    ANTHROPIC_API_KEY: {
+      type: "string",
+      default: "",
+    },
+    POLAR_WEBHOOK_SECRET: {
+      type: "string",
+      default: "",
+    },
+    POLAR_ACCESS_TOKEN: {
+      type: "string",
+      default: "",
+    },
+    POLAR_ENVIRONMENT: {
+      type: "string",
+      default: "production",
     },
   },
 } as const;
@@ -121,7 +155,12 @@ declare module "fastify" {
       PRIVATE_EMAIL_PASS: string;
       PRIVATE_EMAIL_ADDRESS: string;
       PRIVATE_EMAIL_PORT: number;
-      EXTRA_ALLOWED_ORIGINS: string;
+      POSTHOG_API_SECRET: string;
+      POSTHOG_PROJECT_ID: string;
+      ANTHROPIC_API_KEY: string;
+      POLAR_WEBHOOK_SECRET: string;
+      POLAR_ACCESS_TOKEN: string;
+      POLAR_ENVIRONMENT: string;
     };
   }
 }
@@ -131,7 +170,8 @@ function resolveListenAddress(config: {
   API_PORT: number;
   API_HOST: string;
 }) {
-  const fallbackPort = Number(process.env.PORT) || Number(config.API_PORT) || 3000;
+  const fallbackPort =
+    Number(process.env.PORT) || Number(config.API_PORT) || 3000;
   const fallbackHost = config.API_HOST || "0.0.0.0";
 
   try {
@@ -168,7 +208,10 @@ function getLoggerConfig(env: string) {
         },
       };
     } catch (error) {
-      console.warn("pino-pretty not available, falling back to default logger", error);
+      console.warn(
+        "pino-pretty not available, falling back to default logger",
+        error,
+      );
     }
   }
 
@@ -185,6 +228,7 @@ async function buildServer() {
     ajv: {
       customOptions: {
         removeAdditional: true,
+        coerceTypes: true,
       },
     },
   }).withTypeProvider<TypeBoxTypeProvider>();
@@ -212,7 +256,6 @@ async function buildServer() {
     schema: envSchema,
     dotenv: {
       path: `${process.cwd()}/.env.development.local`,
-      debug: true,
     },
   });
 
@@ -223,7 +266,9 @@ async function buildServer() {
     crossOriginOpenerPolicy: false,
     crossOriginResourcePolicy: { policy: "cross-origin" },
     strictTransportSecurity:
-      environment === "production" ? { maxAge: 31536000, includeSubDomains: true } : false,
+      environment === "production"
+        ? { maxAge: 31536000, includeSubDomains: true }
+        : false,
   });
 
   // Allowed origins for CORS
@@ -243,7 +288,11 @@ async function buildServer() {
     origin: ALLOWED_ORIGINS,
     credentials: true,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
-    allowedHeaders: ["Content-Type", "Authorization"],
+    allowedHeaders: [
+      "Content-Type",
+      "Authorization",
+      "X-Bondery-Extension-Version",
+    ],
   });
 
   // Register cookie parser
@@ -260,6 +309,9 @@ async function buildServer() {
   await fastify.register(fastifyAuth);
   registerAuthStrategies(fastify);
 
+  // Register extension version enforcement (426 Upgrade Required for outdated extensions)
+  registerExtensionVersionCheck(fastify);
+
   // Register OpenAPI spec generator
   await fastify.register(fastifySwagger, {
     openapi: {
@@ -269,14 +321,17 @@ async function buildServer() {
         description:
           "REST API for the Bondery application — a contact and relationship management platform.\n\n" +
           "## Authentication\n\n" +
-          "All endpoints (except `/status` and `GET /api/redirect`) require authentication " +
+          "All endpoints (except `/status` and `GET /api/extension`) require authentication " +
           "via a Supabase session cookie or a Bearer token in the Authorization header.",
         version: "1.0.0",
         contact: { name: "Bondery Support", url: "https://usebondery.com" },
         license: { name: "Proprietary" },
       },
       servers: [
-        { url: "http://localhost:3001", description: "Local development server" },
+        {
+          url: "http://localhost:3001",
+          description: "Local development server",
+        },
         { url: "https://api.usebondery.com", description: "Production server" },
       ],
       tags: [
@@ -286,32 +341,86 @@ async function buildServer() {
         { name: "Tags", description: "Tag management operations" },
         { name: "Interactions", description: "Interaction timeline events" },
         { name: "Import", description: "Contact import from social platforms" },
-        { name: "Account", description: "User account operations" },
-        { name: "Settings", description: "User settings and preferences" },
-        { name: "Redirect", description: "Browser extension integration endpoints" },
-        { name: "Feedback", description: "User feedback" },
-        { name: "Reminders", description: "Scheduled reminder operations" },
+        {
+          name: "Me",
+          description: "Authenticated user profile, settings, and feedback",
+        },
+        {
+          name: "Extension",
+          description: "Browser extension integration endpoints",
+        },
+        {
+          name: "Internal",
+          description: "Service-to-service endpoints (not user-facing)",
+        },
+        { name: "Share", description: "Share contacts via email" },
+        { name: "Stats", description: "Admin KPI dashboard metrics" },
+        { name: "Chat", description: "AI chat assistant" },
+        {
+          name: "Subscriptions",
+          description: "Subscription and billing management",
+        },
+        {
+          name: "Webhooks",
+          description: "Inbound webhooks from third-party services",
+        },
       ],
     },
   });
 
   // Health check endpoint
   fastify.get("/status", { schema: { tags: ["Health"] } }, async () => {
-    return { status: "ok", timestamp: new Date().toISOString() };
+    return {
+      status: "ok",
+      timestamp: new Date().toISOString(),
+      extension: {
+        minVersion: MIN_EXTENSION_VERSION,
+        storeUrl: CHROME_EXTENSION_URL,
+      },
+    };
   });
 
   // Register route modules
   await fastify.register(contactRoutes, { prefix: API_ROUTES.CONTACTS });
-  await fastify.register(linkedInImportRoutes, { prefix: API_ROUTES.CONTACTS_IMPORT_LINKEDIN });
-  await fastify.register(instagramImportRoutes, { prefix: API_ROUTES.CONTACTS_IMPORT_INSTAGRAM });
+  await fastify.register(linkedInImportRoutes, {
+    prefix: API_ROUTES.CONTACTS_IMPORT_LINKEDIN,
+  });
+  await fastify.register(instagramImportRoutes, {
+    prefix: API_ROUTES.CONTACTS_IMPORT_INSTAGRAM,
+  });
+  await fastify.register(vcardImportRoutes, {
+    prefix: API_ROUTES.CONTACTS_IMPORT_VCARD,
+  });
   await fastify.register(groupRoutes, { prefix: API_ROUTES.GROUPS });
   await fastify.register(tagRoutes, { prefix: API_ROUTES.TAGS });
-  await fastify.register(accountRoutes, { prefix: API_ROUTES.ACCOUNT });
-  await fastify.register(settingsRoutes, { prefix: API_ROUTES.SETTINGS });
-  await fastify.register(redirectRoutes, { prefix: API_ROUTES.REDIRECT });
-  await fastify.register(feedbackRoutes, { prefix: API_ROUTES.FEEDBACK });
-  await fastify.register(reminderRoutes, { prefix: API_ROUTES.REMINDERS });
-  await fastify.register(interactionRoutes, { prefix: API_ROUTES.INTERACTIONS });
+  await fastify.register(meRoutes, { prefix: API_ROUTES.ME });
+  await fastify.register(meSettingsRoutes, { prefix: API_ROUTES.ME_SETTINGS });
+  await fastify.register(extensionRoutes, { prefix: API_ROUTES.EXTENSION });
+  await fastify.register(meFeedbackRoutes, { prefix: API_ROUTES.ME_FEEDBACK });
+  await fastify.register(reminderDigestRoutes, {
+    prefix: API_ROUTES.INTERNAL_REMINDER_DIGEST,
+  });
+  await fastify.register(interactionRoutes, {
+    prefix: API_ROUTES.INTERACTIONS,
+  });
+  await fastify.register(shareRoutes, { prefix: API_ROUTES.CONTACTS_SHARE });
+  await fastify.register(statsRoutes, { prefix: API_ROUTES.ADMIN_STATS });
+  await fastify.register(meOnboardingRoutes, {
+    prefix: API_ROUTES.ME_ONBOARDING_COMPLETE,
+  });
+  await fastify.register(chatRoutes, { prefix: API_ROUTES.CHAT });
+  await fastify.register(chatSessionRoutes, {
+    prefix: API_ROUTES.CHAT_SESSIONS,
+  });
+  await fastify.register(subscriptionRoutes, {
+    prefix: API_ROUTES.SUBSCRIPTIONS,
+  });
+  await fastify.register(subscriptionSyncRoutes, {
+    prefix: API_ROUTES.SUBSCRIPTIONS_SYNC,
+  });
+  await fastify.register(polarWebhookRoutes, {
+    prefix: API_ROUTES.WEBHOOKS_POLAR,
+  });
 
   return fastify;
 }

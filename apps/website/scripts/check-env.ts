@@ -1,6 +1,6 @@
-import { checkEnvVariables } from "@bondery/helpers/check-env";
-import { resolve, dirname } from "path";
-import { fileURLToPath } from "url";
+import { checkEnvVariables } from "@bondery/helpers/env";
+import { resolve, dirname } from "node:path";
+import { fileURLToPath } from "node:url";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);

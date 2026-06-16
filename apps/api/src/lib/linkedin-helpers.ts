@@ -61,6 +61,8 @@ export async function updateContactPhoto(
     if (!validateImageMagicBytes(buffer)) return;
 
     const fileName = `${userId}/${contactId}.jpg`;
+    // Remove first to invalidate Supabase's render cache (upsert alone does not invalidate it)
+    await supabase.storage.from("avatars").remove([fileName]);
     const { error: uploadError } = await supabase.storage.from("avatars").upload(fileName, buffer, {
       contentType: blob.type,
       upsert: true,

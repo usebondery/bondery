@@ -10,7 +10,10 @@ import {
   type ReactNode,
 } from "react";
 
-export type ActionIconLinkProps = Omit<ActionIconProps, "component" | "href" | "children"> & {
+export type ActionIconLinkProps = Omit<
+  ActionIconProps,
+  "component" | "href" | "children"
+> & {
   href?: string;
   ariaLabel: string;
   icon: ReactNode;
@@ -73,7 +76,6 @@ export function ActionIconLink({
 
   return (
     <ActionIcon
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       component={Link as any}
       href={href}
       target={target}

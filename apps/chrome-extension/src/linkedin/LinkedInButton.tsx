@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from "react";
+import type React from "react";
+import { useState, useEffect } from "react";
 import { browser } from "wxt/browser";
 import { Button, Text } from "@mantine/core";
 import { BonderyIconWhite } from "@bondery/branding";
 import { WEBAPP_ROUTES } from "@bondery/helpers";
-import { cleanPersonName } from "@bondery/helpers/name-utils";
+import { cleanPersonName } from "@bondery/helpers/name";
 import { config } from "../config";
 import { extractWorkExperience, type WorkEntry } from "./workExperience";
 import { extractEducation, type EducationEntry } from "./education";
@@ -20,12 +21,12 @@ interface CachedProfile {
   lastName?: string;
   profilePhotoUrl?: string;
   headline?: string;
-  place?: string;
+  location?: string;
   workHistory: WorkEntry[];
   educationHistory: EducationEntry[];
   linkedinBio?: string;
 }
-const profileCache = new Map<string, CachedProfile>();
+export const profileCache = new Map<string, CachedProfile>();
 const inflightScrapes = new Map<string, Promise<CachedProfile>>();
 
 async function getOrScrapeProfile(
@@ -46,72 +47,72 @@ async function getOrScrapeProfile(
   }
 
   const promise = (async () => {
-  const profileName = extractFns.extractProfileName();
-  const profilePhotoUrl = extractFns.extractProfilePhotoUrl() ?? undefined;
-  const headline = extractFns.extractHeadline() ?? undefined;
-  const place = extractFns.extractPlace() ?? undefined;
+    const profileName = extractFns.extractProfileName();
+    const profilePhotoUrl = extractFns.extractProfilePhotoUrl() ?? undefined;
+    const headline = extractFns.extractHeadline() ?? undefined;
+    const location = extractFns.extractPlace() ?? undefined;
 
-  // Scrape the live DOM first (synchronous, free) to pre-seed logo URLs.
-  // Passing these into fetchFullWorkHistory lets enrichEntriesWithLogos skip
-  // Voyager API calls for any company whose logo is already visible in the DOM.
-  const domWork = extractWorkExperience();
-  const domLogosByCompany = new Map<string, string>();
-  for (const dw of domWork) {
-    if (dw.companyLogoUrl && dw.companyName) {
-      domLogosByCompany.set(dw.companyName.toLowerCase(), dw.companyLogoUrl);
+    // Scrape the live DOM first (synchronous, free) to pre-seed logo URLs.
+    // Passing these into fetchFullWorkHistory lets enrichEntriesWithLogos skip
+    // Voyager API calls for any company whose logo is already visible in the DOM.
+    const domWork = extractWorkExperience();
+    const domLogosByCompany = new Map<string, string>();
+    for (const dw of domWork) {
+      if (dw.companyLogoUrl && dw.companyName) {
+        domLogosByCompany.set(dw.companyName.toLowerCase(), dw.companyLogoUrl);
+      }
     }
-  }
 
-  // Attempt to fetch the full details pages for complete work/education history.
-  // Falls back to scraping the (truncated) live DOM if the fetch fails.
-  const [fetchedWork, fetchedEdu] = await Promise.all([
-    fetchFullWorkHistory(username, domLogosByCompany),
-    fetchFullEducation(username),
-  ]);
-  console.log(
-    `[linkedin][button] Fetch results: ${fetchedWork.length} work, ${fetchedEdu.length} edu` +
-    ` — using ${fetchedWork.length > 0 ? "fetched" : "live DOM"} work,` +
-    ` ${fetchedEdu.length > 0 ? "fetched" : "live DOM"} edu`,
-  );
-
-  const workHistory = fetchedWork.length > 0 ? fetchedWork : domWork;
-
-  const educationHistory = fetchedEdu.length > 0 ? fetchedEdu : extractEducation();
-
-  const linkedinBio = (() => {
-    const heading = document.getElementById("about");
-    if (!heading) return undefined;
-    const section = heading.closest("section");
-    if (!section) return undefined;
-    // LinkedIn renders the bio text inside a visually-hidden span inside the about section.
-    // The class name is obfuscated and may change; fall back to a broader selector.
-    const textSpans = Array.from(
-      section.querySelectorAll<HTMLElement>('span[aria-hidden="true"]'),
-    ).filter((el) => el.closest("a") === null && (el.textContent?.trim().length ?? 0) > 20);
-    if (textSpans.length === 0) return undefined;
-    // Use the span with the most text content as the bio.
-    const bioSpan = textSpans.reduce((a, b) =>
-      (a.textContent?.length ?? 0) >= (b.textContent?.length ?? 0) ? a : b,
+    // Attempt to fetch the full details pages for complete work/education history.
+    // Falls back to scraping the (truncated) live DOM if the fetch fails.
+    const [fetchedWork, fetchedEdu] = await Promise.all([
+      fetchFullWorkHistory(username, domLogosByCompany),
+      fetchFullEducation(username),
+    ]);
+    console.log(
+      `[linkedin][button] Fetch results: ${fetchedWork.length} work, ${fetchedEdu.length} edu` +
+        ` — using ${fetchedWork.length > 0 ? "fetched" : "live DOM"} work,` +
+        ` ${fetchedEdu.length > 0 ? "fetched" : "live DOM"} edu`,
     );
-    const clone = bioSpan.cloneNode(true) as HTMLElement;
-    clone.querySelectorAll("br").forEach((br) => br.replaceWith("\n"));
-    return clone.textContent?.trim() || undefined;
-  })();
 
-  const cached: CachedProfile = {
-    firstName: profileName?.firstName,
-    middleName: profileName?.middleName,
-    lastName: profileName?.lastName,
-    profilePhotoUrl,
-    headline,
-    place,
-    workHistory,
-    educationHistory,
-    linkedinBio,
-  };
-  profileCache.set(username, cached);
-  console.log("[linkedin][button] Profile scraped and cached for", username, cached);
-  return cached;
+    const workHistory = fetchedWork.length > 0 ? fetchedWork : domWork;
+
+    const educationHistory = fetchedEdu.length > 0 ? fetchedEdu : extractEducation();
+
+    const linkedinBio = (() => {
+      const heading = document.getElementById("about");
+      if (!heading) return undefined;
+      const section = heading.closest("section");
+      if (!section) return undefined;
+      // LinkedIn renders the bio text inside a visually-hidden span inside the about section.
+      // The class name is obfuscated and may change; fall back to a broader selector.
+      const textSpans = Array.from(
+        section.querySelectorAll<HTMLElement>('span[aria-hidden="true"]'),
+      ).filter((el) => el.closest("a") === null && (el.textContent?.trim().length ?? 0) > 20);
+      if (textSpans.length === 0) return undefined;
+      // Use the span with the most text content as the bio.
+      const bioSpan = textSpans.reduce((a, b) =>
+        (a.textContent?.length ?? 0) >= (b.textContent?.length ?? 0) ? a : b,
+      );
+      const clone = bioSpan.cloneNode(true) as HTMLElement;
+      clone.querySelectorAll("br").forEach((br) => br.replaceWith("\n"));
+      return clone.textContent?.trim() || undefined;
+    })();
+
+    const cached: CachedProfile = {
+      firstName: profileName?.firstName,
+      middleName: profileName?.middleName,
+      lastName: profileName?.lastName,
+      profilePhotoUrl,
+      headline,
+      location,
+      workHistory,
+      educationHistory,
+      linkedinBio,
+    };
+    profileCache.set(username, cached);
+    console.log("[linkedin][button] Profile scraped and cached for", username, cached);
+    return cached;
   })();
 
   inflightScrapes.set(username, promise);
@@ -122,23 +123,79 @@ async function getOrScrapeProfile(
   }
 }
 
+// ─── Standalone DOM extract helpers (module-level, shared with content script) ─
+
+/**
+ * Extracts the profile photo URL from the LinkedIn top-card section.
+ * Language-agnostic: iterates buttons (photo is always in a button) rather than
+ * relying on localised aria-labels like "profile picture".
+ */
+export function extractProfilePhotoUrl(): string | null {
+  const topCard = document.querySelector("section[data-member-id]") || document.body;
+
+  // Strategy 1: any button inside the top-card containing an <img> with a real src.
+  const buttons = topCard.querySelectorAll<HTMLButtonElement>("button");
+  for (const btn of buttons) {
+    const img = btn.querySelector("img") as HTMLImageElement | null;
+    if (img?.src && !img.src.includes("data:image")) {
+      return img.src;
+    }
+  }
+
+  // Strategy 2: data-view-name container
+  const memberPhotoContainer = document.querySelector(
+    '[data-view-name="profile-top-card-member-photo"]',
+  );
+  if (memberPhotoContainer) {
+    const img =
+      (memberPhotoContainer.querySelector('img[data-loaded="true"]') as HTMLImageElement | null) ??
+      (memberPhotoContainer.querySelector("img") as HTMLImageElement | null);
+    if (img?.src && !img.src.includes("data:image")) {
+      return img.src;
+    }
+  }
+
+  // Strategy 3: stable class-based selectors (may drift over time)
+  const fallbacks = [
+    ".pv-top-card-profile-picture__image",
+    "[data-anonymize='headshot-photo']",
+    "img.profile-photo-edit__preview",
+  ];
+  for (const selector of fallbacks) {
+    const img = document.querySelector(selector) as HTMLImageElement | null;
+    if (img?.src && !img.src.includes("data:image")) {
+      return img.src;
+    }
+  }
+
+  return null;
+}
+
 interface LinkedInButtonProps {
   username: string;
 }
 
 const LinkedInButton: React.FC<LinkedInButtonProps> = ({ username }) => {
   const [isLoading, setIsLoading] = useState(false);
+  // True while the background cache-warmup scrape is in flight so the button
+  // shows as loading from the moment it mounts until the data is ready.
+  const [isPreloading, setIsPreloading] = useState(!profileCache.has(username));
 
   useEffect(() => {
     // Warm the cache on mount so data is ready before the button is clicked.
     // Subsequent mounts for the same username return the cached value immediately.
-    void getOrScrapeProfile(username, {
+    if (profileCache.has(username)) {
+      setIsPreloading(false);
+      return;
+    }
+    setIsPreloading(true);
+    getOrScrapeProfile(username, {
       extractProfileName,
       extractProfilePhotoUrl,
       extractHeadline,
       extractPlace,
-    });
-  }, [username]);
+    }).finally(() => setIsPreloading(false));
+  }, [username, extractProfileName, extractPlace, extractHeadline]);
 
   const extractProfileName = (): {
     firstName: string;
@@ -150,7 +207,7 @@ const LinkedInButton: React.FC<LinkedInButtonProps> = ({ username }) => {
 
     console.log("LinkedIn: Name element found:", !!nameElement, nameElement?.textContent);
 
-    if (!nameElement || !nameElement.textContent) {
+    if (!nameElement?.textContent) {
       // Try alternative selectors
       const alternatives = [
         "h1.text-heading-xlarge",
@@ -211,7 +268,7 @@ const LinkedInButton: React.FC<LinkedInButtonProps> = ({ username }) => {
     const topCard = document.querySelector("section[data-member-id]") || document;
     const titleElement = topCard.querySelector("div[data-generated-suggestion-target]");
 
-    if (titleElement && titleElement.textContent) {
+    if (titleElement?.textContent) {
       return titleElement.textContent.trim();
     }
 
@@ -237,7 +294,7 @@ const LinkedInButton: React.FC<LinkedInButtonProps> = ({ username }) => {
     const contactInfoLink = topCard.querySelector("#top-card-text-details-contact-info");
     const placeElement = contactInfoLink?.parentElement?.previousElementSibling || null;
 
-    if (placeElement && placeElement.textContent) {
+    if (placeElement?.textContent) {
       return placeElement.textContent.trim();
     }
 
@@ -252,54 +309,6 @@ const LinkedInButton: React.FC<LinkedInButtonProps> = ({ username }) => {
       const altElement = document.querySelector(selector);
       if (altElement?.textContent) {
         return altElement.textContent.trim();
-      }
-    }
-
-    return null;
-  };
-
-  const extractProfilePhotoUrl = (): string | null => {
-    const topCard = document.querySelector("section[data-member-id]") || document;
-    const profilePhotoImg = topCard.querySelector(
-      "button[aria-label*='profile picture'] img",
-    ) as HTMLImageElement | null;
-
-    if (profilePhotoImg?.src && !profilePhotoImg.src.includes("data:image")) {
-      return profilePhotoImg.src;
-    }
-    // Find image inside element with data-view-name="profile-top-card-member-photo"
-    const memberPhotoContainer = document.querySelector(
-      '[data-view-name="profile-top-card-member-photo"]',
-    );
-
-    if (memberPhotoContainer) {
-      const img = memberPhotoContainer.querySelector('img[data-loaded="true"]') as HTMLImageElement;
-
-      if (img?.src && !img.src.includes("data:image")) {
-        return img.src;
-      }
-    }
-
-    // Fallback to original selector
-    const img = document.querySelector(
-      "img._021a4e24.a4f8c248.ad272af2._8d269092._00859a34",
-    ) as HTMLImageElement;
-
-    if (img && img.src && !img.src.includes("data:image")) {
-      return img.src;
-    }
-
-    // Try alternative selectors
-    const alternatives = [
-      ".pv-top-card-profile-picture__image",
-      "[data-anonymize='headshot-photo']",
-      "img.profile-photo-edit__preview",
-    ];
-
-    for (const selector of alternatives) {
-      const altImg = document.querySelector(selector) as HTMLImageElement;
-      if (altImg?.src && !altImg.src.includes("data:image")) {
-        return altImg.src;
       }
     }
 
@@ -344,7 +353,7 @@ const LinkedInButton: React.FC<LinkedInButtonProps> = ({ username }) => {
           lastName: profile.lastName,
           profileImageUrl: profile.profilePhotoUrl,
           headline: profile.headline,
-          place: profile.place,
+          location: profile.location,
           workHistory,
           educationHistory,
           linkedinBio: profile.linkedinBio,
@@ -379,16 +388,23 @@ const LinkedInButton: React.FC<LinkedInButtonProps> = ({ username }) => {
 
   return (
     <>
-      <Button
-        onClick={handleClick}
-        loading={isLoading}
-        fullWidth
-        radius="xl"
-        size="xl"
-        leftSection={<BonderyIconWhite width={16} height={16} />}
-      >
-        Open in Bondery
-      </Button>
+      {/*
+       * overflow:clip (not hidden) clips the button-scale-effect hover
+       * transform at the wrapper boundary without creating a scroll
+       * container or affecting the host page layout, so LinkedIn's
+       * action bar doesn't get a permanent horizontal scrollbar.
+       */}
+      <div style={{ overflow: "clip", borderRadius: "var(--mantine-radius-xl)" }}>
+        <Button
+          onClick={handleClick}
+          loading={isLoading || isPreloading}
+          radius="xl"
+          size="lg"
+          leftSection={<BonderyIconWhite width={14} height={14} />}
+        >
+          Open in Bondery
+        </Button>
+      </div>
       {statusMessage && (
         <Text size="xs" c="dimmed" ta="center" mt={4}>
           {statusMessage}

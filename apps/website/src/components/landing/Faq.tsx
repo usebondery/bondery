@@ -5,7 +5,6 @@ import {
   AccordionPanel,
   Container,
   Stack,
-  Text,
   Title,
 } from "@mantine/core";
 

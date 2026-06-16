@@ -2,7 +2,7 @@
 
 import { Box, Container, Grid, Paper, TableOfContents, Text, Title } from "@mantine/core";
 import Link from "next/link";
-import { type ReactNode } from "react";
+import type { ReactNode } from "react";
 
 interface LegalDocumentLayoutProps {
   title: string;
@@ -13,7 +13,7 @@ interface LegalDocumentLayoutProps {
 export function LegalDocumentLayout({ title, lastUpdated, children }: LegalDocumentLayoutProps) {
   return (
     <Container size="xl" py="xl">
-      <Grid gutter="xl">
+      <Grid gap="xl">
         <Grid.Col span={{ base: 12, md: 3 }} visibleFrom="md">
           <Box
             mx="auto"

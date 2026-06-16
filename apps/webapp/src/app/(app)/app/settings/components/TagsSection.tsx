@@ -1,6 +1,6 @@
 "use client";
 
-import { Card, CardSection, Group, Text } from "@mantine/core";
+import { CardSection, Group } from "@mantine/core";
 import { IconTag } from "@tabler/icons-react";
 import { useState } from "react";
 import { useTranslations } from "next-intl";
@@ -8,6 +8,7 @@ import type { TagWithCount } from "@bondery/types";
 import { TagPill } from "@/app/(app)/app/components/tags/TagPill";
 import { openTagEditorModal } from "@/app/(app)/app/components/tags/openTagEditorModal";
 import { AddNewTagButton } from "@/app/(app)/app/components/tags/AddNewTagButton";
+import { SettingsSection } from "./SettingsSection";
 
 interface TagsSectionProps {
   initialTags: TagWithCount[];
@@ -18,16 +19,7 @@ export function TagsSection({ initialTags }: TagsSectionProps) {
   const [tags, setTags] = useState<TagWithCount[]>(initialTags);
 
   return (
-    <Card id="tags" withBorder shadow="sm">
-      <CardSection withBorder inheritPadding py="md">
-        <Group gap="xs">
-          <IconTag size={20} stroke={1.5} />
-          <Text size="lg" fw={600}>
-            {t("Title")}
-          </Text>
-        </Group>
-      </CardSection>
-
+    <SettingsSection id="tags" icon={<IconTag size={20} stroke={1.5} />} title={t("Title")}>
       <CardSection inheritPadding py="md">
         <Group gap="sm" align="center">
           {tags.map((tag) => (
@@ -74,6 +66,6 @@ export function TagsSection({ initialTags }: TagsSectionProps) {
           />
         </Group>
       </CardSection>
-    </Card>
+    </SettingsSection>
   );
 }

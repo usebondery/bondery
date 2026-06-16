@@ -15,6 +15,7 @@ window.addEventListener("message", (event: MessageEvent) => {
       type: EXTENSION_PONG_TYPE,
       requestId: event.data.requestId,
       source: "bondery-extension",
+      version: chrome.runtime.getManifest().version,
     },
     "*",
   );

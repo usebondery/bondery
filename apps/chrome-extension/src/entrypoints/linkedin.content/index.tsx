@@ -5,13 +5,15 @@
  */
 import { defineContentScript, type ContentScriptContext } from "#imports";
 import { browser } from "wxt/browser";
-import React from "react";
 import { SOCIAL_PLATFORM_URL_DETAILS } from "@bondery/helpers";
-import LinkedInButton from "../../linkedin/LinkedInButton";
+import LinkedInButton, {
+  profileCache,
+  extractProfilePhotoUrl,
+} from "../../linkedin/LinkedInButton";
 import { renderInShadowRoot } from "../../shared/renderInShadowRoot";
 import type { ShadowRootContentScriptUi } from "wxt/utils/content-script-ui/shadow-root";
 import type ReactDOM from "react-dom/client";
-import { extractWorkExperience, type WorkEntry } from "../../linkedin/workExperience";
+import { extractWorkExperience, } from "../../linkedin/workExperience";
 import { extractEducation } from "../../linkedin/education";
 import { fetchFullWorkHistory, fetchFullEducation } from "../../linkedin/fetchDetails";
 // sanitizeName temporarily disabled – transliteration causes non-UTF-8 bytes in the bundle
@@ -60,6 +62,16 @@ export default defineContentScript({
     ctx.setInterval(() => {
       if (window.location.href !== lastUrl) {
         lastUrl = window.location.href;
+
+        // Immediately remove the stale button so it never flashes on the new
+        // profile while we wait for the new profile's action buttons to render.
+        const newUsername = getLinkedInUsername();
+        if (currentUi && currentInjectedUsername !== newUsername) {
+          currentUi.remove();
+          currentUi = null;
+          currentInjectedUsername = null;
+        }
+
         ctx.setTimeout(() => {
           injectBonderyButton(ctx);
         }, 1000);
@@ -69,7 +81,8 @@ export default defineContentScript({
     // Listen for profile scrape requests from background
     browser.runtime.onMessage.addListener((message, _sender, sendResponse) => {
       if (message?.type === "GET_SCRAPED_PROFILE") {
-        sendResponse(getLinkedInSnapshot());
+        getLinkedInSnapshot().then(sendResponse);
+        return true; // keep the message channel open for the async response
       }
     });
 
@@ -80,10 +93,32 @@ export default defineContentScript({
 
 // ─── Profile Scraping ────────────────────────────────────────────────────────
 
-function getLinkedInSnapshot() {
+async function getLinkedInSnapshot() {
   const username = getLinkedInUsername();
   if (!username) return null;
 
+  // ── Use the button's warm cache whenever possible ─────────────────────────
+  // LinkedInButton warms `profileCache` on mount using the same DOM + Voyager
+  // pipeline the button click uses. If the cache is already warm, return the
+  // rich data (Voyager work/edu, correct photo) directly rather than re-scraping.
+  const cached = profileCache.get(username);
+  if (cached) {
+    return {
+      platform: "linkedin" as const,
+      handle: username,
+      firstName: cached.firstName,
+      middleName: cached.middleName,
+      lastName: cached.lastName,
+      profileImageUrl: cached.profilePhotoUrl,
+      headline: cached.headline,
+      location: cached.location,
+      workHistory: cached.workHistory,
+      educationHistory: cached.educationHistory,
+      linkedinBio: cached.linkedinBio,
+    };
+  }
+
+  // ── Fallback: basic DOM scrape (cache not warm yet) ───────────────────────
   const topCard = document.querySelector("section[data-member-id]") || document;
   const nameElement = topCard.querySelector("a[aria-label] > h1") || topCard.querySelector("h1");
 
@@ -113,35 +148,17 @@ function getLinkedInSnapshot() {
 
   const contactInfoLink = topCard.querySelector("#top-card-text-details-contact-info");
   const placeElement = contactInfoLink?.parentElement?.previousElementSibling || null;
-  const place = placeElement?.textContent?.trim() || undefined;
+  const location = placeElement?.textContent?.trim() || undefined;
 
-  const profilePhotoImg = topCard.querySelector(
-    "button[aria-label*='profile picture'] img",
-  ) as HTMLImageElement | null;
+  // Language-agnostic photo extraction (shared module-level function)
+  const profileImageUrl = extractProfilePhotoUrl() ?? undefined;
 
-  const memberPhotoContainer = document.querySelector(
-    '[data-view-name="profile-top-card-member-photo"]',
-  );
-  const memberPhotoImg = memberPhotoContainer?.querySelector(
-    'img[data-loaded="true"]',
-  ) as HTMLImageElement | null;
-
-  const fallbackPhotoSelectors = [
-    ".pv-top-card-profile-picture__image",
-    "[data-anonymize='headshot-photo']",
-    "img.profile-photo-edit__preview",
-    "img._021a4e24.a4f8c248.ad272af2._8d269092._00859a34",
-  ];
-
-  const fallbackPhotoImg = fallbackPhotoSelectors
-    .map((selector) => document.querySelector(selector) as HTMLImageElement | null)
-    .find((image) => Boolean(image?.src && !image.src.includes("data:image")));
-
-  const profileImageUrl =
-    (profilePhotoImg?.src && !profilePhotoImg.src.includes("data:image") && profilePhotoImg.src) ||
-    (memberPhotoImg?.src && !memberPhotoImg.src.includes("data:image") && memberPhotoImg.src) ||
-    fallbackPhotoImg?.src ||
-    undefined;
+  // Fetch complete history via Voyager API (same pipeline the button uses).
+  // Falls back to DOM scrape when API returns nothing (e.g. rate-limited or URN not found).
+  const [fetchedWork, fetchedEdu] = await Promise.all([
+    fetchFullWorkHistory(username),
+    fetchFullEducation(username),
+  ]);
 
   return {
     platform: "linkedin" as const,
@@ -151,16 +168,17 @@ function getLinkedInSnapshot() {
     lastName,
     profileImageUrl,
     headline,
-    place,
-    workHistory: extractWorkExperience(),
+    location,
+    workHistory: fetchedWork.length > 0 ? fetchedWork : extractWorkExperience(),
+    educationHistory: fetchedEdu.length > 0 ? fetchedEdu : extractEducation(),
   };
 }
 
 function getLinkedInUsername(): string | null {
   const pathname = window.location.pathname;
-  const match = pathname.match(/^\/in\/([^\/]+)\/?$/);
+  const match = pathname.match(/^\/in\/([^/]+)\/?$/);
 
-  if (match && match[1]) {
+  if (match?.[1]) {
     // Decode percent-encoded handles (e.g. "ad%C3%A9la" → "adéla")
     // so we always work with the human-readable form.
     try {
@@ -176,33 +194,100 @@ function getLinkedInUsername(): string | null {
 // ─── Button Injection ────────────────────────────────────────────────────────
 
 let currentUi: ShadowRootContentScriptUi<ReactDOM.Root> | null = null;
+let currentInjectedUsername: string | null = null;
 let isInjecting = false;
 
 /**
- * Finds the LinkedIn action buttons container (the div that holds "Message" and
- * "More actions" buttons) and returns the parent element where the Bondery
- * button should be inserted.
+ * Returns a reference button from the LinkedIn profile action bar, using a
+ * cascade of selectors from most-specific to most-generic to remain language-agnostic.
+ *
+ * LinkedIn's aria-labels are localised. Relying solely on `aria-label^='Message'`
+ * breaks for non-English browser locales (e.g. macOS Chrome picks up the system
+ * language). We therefore try several strategies in order:
+ *   1. Data-control-name attribute (stable across locales)
+ *   2. English aria-label (most users)
+ *   3. artdeco-button class: LinkedIn's CTA action buttons (Follow, Message, Connect,
+ *      More…) always carry the `artdeco-button` CSS class, while the inline company /
+ *      school shortcut buttons in the top card do NOT. Filtering on this class ensures
+ *      we skip those shortcut buttons and land on the real action row.
+ */
+function findProfileActionButton(): HTMLButtonElement | null {
+  const profileSection = document.querySelector("section[data-member-id]") || document.body;
+
+  // 1. data-control-name is NOT localised
+  const byControlName = profileSection.querySelector<HTMLButtonElement>(
+    'button[data-control-name="message"]',
+  );
+  if (byControlName) return byControlName;
+
+  // 2. English aria-label (common case)
+  const byEnglishLabel = profileSection.querySelector<HTMLButtonElement>(
+    "button[aria-label^='Message']",
+  );
+  if (byEnglishLabel) return byEnglishLabel;
+
+  // 3. Language-agnostic: find the first artdeco-button with visible text inside
+  //    the top-card section. artdeco-button is LinkedIn's design-system class used
+  //    exclusively on action CTAs — the quick-jump company/school buttons use a
+  //    different class and are reliably excluded this way.
+  //    Also exclude notification-edge-setting toggle buttons (class contains "nt-edge")
+  //    which appear on connected profiles and also carry artdeco-button but live in
+  //    a separate DOM branch from the real action row.
+  const artdecoButtons = Array.from(
+    profileSection.querySelectorAll<HTMLButtonElement>("button.artdeco-button"),
+  ).filter((btn) => {
+    // Stay inside the top-card — exclude buttons inside sub-sections (experience, etc.)
+    const section = btn.closest("section");
+    if (section && section !== profileSection) return false;
+    // Exclude notification-edge-setting toggle buttons
+    if (btn.closest("[class*='nt-edge']")) return false;
+    return true;
+  });
+
+  const firstArtdeco = artdecoButtons.find((btn) => !!btn.textContent?.trim());
+  if (firstArtdeco) return firstArtdeco;
+
+  // 4. Ultimate fallback — any button with text in the profile section.
+  //    Reached only if LinkedIn ever drops the artdeco-button class.
+  const allButtons = Array.from(
+    profileSection.querySelectorAll<HTMLButtonElement>("button"),
+  ).filter((btn) => {
+    const section = btn.closest("section");
+    if (section && section !== profileSection) return false;
+    if (btn.closest("[class*='nt-edge']")) return false;
+    return true;
+  });
+
+  return allButtons.find((btn) => !!btn.textContent?.trim()) ?? null;
+}
+
+/**
+ * Finds the LinkedIn action buttons container and returns it so the Bondery
+ * button can be inserted immediately after it.
  */
 function findLinkedInAnchor(): Element | null {
   const profileSection = document.querySelector("section[data-member-id]") || document.body;
-  const messageButton = profileSection.querySelector("button[aria-label^='Message']");
+  const referenceButton = findProfileActionButton();
 
-  if (!messageButton) {
+  if (!referenceButton) {
     return null;
   }
 
-  let actionButtonsContainer: HTMLElement | null = messageButton.closest("div");
+  // Walk up from the reference button to find the shallowest div that contains
+  // at least 2 artdeco-buttons (the action buttons row), stopping before the
+  // profile section. Using artdeco-button ensures we don't accidentally match
+  // container divs that hold the company/school shortcut buttons.
+  // nt-edge notification-toggle buttons are excluded from the count so they
+  // don't inflate the tally and cause us to stop at the wrong ancestor.
+  let actionButtonsContainer: HTMLElement | null = referenceButton.closest("div");
 
   while (actionButtonsContainer && actionButtonsContainer !== profileSection) {
-    const hasMessage = !!actionButtonsContainer.querySelector("button[aria-label^='Message']");
-    const hasMoreActions = !!actionButtonsContainer.querySelector(
-      "button[aria-label='More actions']",
-    );
-
-    if (hasMessage && hasMoreActions) {
+    const buttonCount = Array.from(
+      actionButtonsContainer.querySelectorAll<HTMLButtonElement>("button.artdeco-button"),
+    ).filter((b) => !b.closest("[class*='nt-edge']")).length;
+    if (buttonCount >= 2) {
       break;
     }
-
     actionButtonsContainer = actionButtonsContainer.parentElement;
   }
 
@@ -234,15 +319,25 @@ async function injectBonderyButton(ctx: ContentScriptContext) {
     return;
   }
 
-  // Check if button already exists
+  // If button already exists for this exact username, nothing to do.
+  // If it exists for a different username (SPA navigation), remove and re-inject.
   if (document.querySelector("bondery-linkedin")) {
-    return;
+    if (currentInjectedUsername === username) {
+      return;
+    }
+    // Different profile — tear down the stale button before re-injecting.
+    if (currentUi) {
+      currentUi.remove();
+      currentUi = null;
+      currentInjectedUsername = null;
+    }
   }
 
   // Remove previous shadow root UI if navigating between profiles
   if (currentUi) {
     currentUi.remove();
     currentUi = null;
+    currentInjectedUsername = null;
   }
 
   isInjecting = true;
@@ -254,6 +349,7 @@ async function injectBonderyButton(ctx: ContentScriptContext) {
       append: "after",
       render: () => <LinkedInButton username={username} />,
     });
+    currentInjectedUsername = username;
     console.log("Bondery Extension: Button injected successfully on LinkedIn");
   } finally {
     isInjecting = false;
@@ -269,9 +365,11 @@ function setupObserver(ctx: ContentScriptContext) {
       return;
     }
 
-    // LinkedIn's profile page is ready when the Message button is present.
-    // Skip mutation bursts that happen before the profile section is rendered.
-    if (!document.querySelector("button[aria-label^='Message']")) {
+    // LinkedIn's profile page is ready when the profile section has at least one
+    // artdeco-button (the primary CTA). Using the artdeco-button class avoids a
+    // false-positive on the company/school shortcut buttons that appear earlier
+    // in the DOM and don't use that class.
+    if (!document.querySelector("section[data-member-id] button.artdeco-button")) {
       return;
     }
 
@@ -313,7 +411,7 @@ async function checkForPendingEnrich(): Promise<void> {
       type: "GET_ENRICH_CONTEXT",
     });
 
-    if (!response || response.type !== "ENRICH_CONTEXT_RESULT" || !response.payload) {
+    if (response?.type !== "ENRICH_CONTEXT_RESULT" || !response.payload) {
       return; // No pending enrich for this tab — nothing to do
     }
 
@@ -364,15 +462,45 @@ async function checkForPendingEnrich(): Promise<void> {
     const workHistory = fetchedWork.length > 0 ? fetchedWork : domWork;
     const educationHistory = fetchedEdu.length > 0 ? fetchedEdu : extractEducation();
 
-    // Scrape remaining profile fields from DOM
-    const snapshot = getLinkedInSnapshot();
-    if (!snapshot) {
-      await browser.runtime.sendMessage({
-        type: "ENRICH_ERROR",
-        payload: { requestId, error: "Failed to scrape LinkedIn profile (DOM snapshot empty)" },
-      });
-      return;
-    }
+    // Scrape profile identity fields directly from DOM.
+    // We intentionally do NOT call getLinkedInSnapshot() here because that
+    // function would trigger a second redundant round of Voyager API calls
+    // (fetchFullWorkHistory + fetchFullEducation were already awaited above).
+    // Duplicate requests risk rate-limiting and delay, so we extract only the
+    // DOM-based fields we need: name, photo, headline, and location.
+    const topCard = document.querySelector("section[data-member-id]") || document;
+    const nameEl =
+      topCard.querySelector<HTMLElement>("a[aria-label] > h1") ||
+      topCard.querySelector<HTMLElement>("h1");
+    const altNameSelectors = [
+      "h1.text-heading-xlarge",
+      ".pv-text-details__left-panel h1",
+      "[data-anonymize='person-name']",
+    ];
+    const altNameEl = altNameSelectors
+      .map((s) => document.querySelector<HTMLElement>(s))
+      .find((el) => !!el?.textContent?.trim());
+    const fullName = (nameEl?.textContent?.trim() || altNameEl?.textContent?.trim() || "").trim();
+    const nameParts = fullName.split(/\s+/).filter(Boolean);
+    const firstName = nameParts[0] ?? username;
+    const lastName = nameParts.length > 1 ? nameParts[nameParts.length - 1] : undefined;
+    const middleName = nameParts.length > 2 ? nameParts.slice(1, -1).join(" ") : undefined;
+
+    const titleEl = topCard.querySelector<HTMLElement>("div[data-generated-suggestion-target]");
+    const headline = titleEl?.textContent?.trim() || undefined;
+
+    // Location: try multiple selectors in order of specificity for robustness
+    // across LinkedIn's DOM variations and background-tab rendering states.
+    const contactInfoLink = topCard.querySelector("#top-card-text-details-contact-info");
+    const locationFromContactInfo =
+      contactInfoLink?.parentElement?.previousElementSibling?.textContent?.trim() || undefined;
+    const locationFromSpan =
+      topCard
+        .querySelector<HTMLElement>(".text-body-small.inline.t-black--light")
+        ?.textContent?.trim() || undefined;
+    const location = locationFromContactInfo || locationFromSpan;
+
+    const profileImageUrl = extractProfilePhotoUrl() ?? undefined;
 
     // Extract bio text
     const linkedinBio = extractBioText();
@@ -391,12 +519,12 @@ async function checkForPendingEnrich(): Promise<void> {
         profile: {
           platform: "linkedin" as const,
           handle: username,
-          firstName: snapshot.firstName,
-          middleName: snapshot.middleName,
-          lastName: snapshot.lastName,
-          profileImageUrl: snapshot.profileImageUrl,
-          headline: snapshot.headline,
-          place: snapshot.place,
+          firstName,
+          middleName,
+          lastName,
+          profileImageUrl,
+          headline,
+          location,
           workHistory,
           educationHistory,
           linkedinBio,

@@ -4,7 +4,8 @@
 
 * [🟣 Welcome](README.md)
 * [😎 Getting started](bondery/getting-started.md)
-* [📥 Import contacts](bondery/import.md)
+* [� Myself — your profile card](bondery/myself.md)
+* [�📥 Import contacts](bondery/import.md)
 * [🧩 Chrome Extension](bondery/chrome-extension.md)
 * [🤔 Getting help and troubleshooting](bondery/getting-help-and-troubleshooting.md)
 * [‼️ Read before editing](bondery/read-before-editing.md)
@@ -19,6 +20,7 @@
 * [Tags](concepts/tags.md)
 * [Map view](concepts/map.md)
 * [Merge contacts](concepts/merge.md)
+* [AI Assistant](concepts/chat.md)
 
 ## API
 

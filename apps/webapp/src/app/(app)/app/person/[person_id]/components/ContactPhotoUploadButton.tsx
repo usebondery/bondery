@@ -1,10 +1,12 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { ContactAvatar } from "./ContactAvatar";
 import { openPhotoUploadModal } from "@/lib/photoUpload";
 import { PhotoUploadModal } from "@/app/(app)/app/settings/components/PhotoUploadModal";
 import { PhotoConfirmModal } from "@/app/(app)/app/settings/components/PhotoConfirmModal";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
+import { revalidateSettings } from "@/app/(app)/app/actions";
 
 interface ContactPhotoUploadButtonProps {
   avatarUrl: string | null;
@@ -12,6 +14,7 @@ interface ContactPhotoUploadButtonProps {
   contactId: string;
   firstName?: string | null;
   lastName?: string | null;
+  isMyselfContact?: boolean;
 }
 
 /**
@@ -24,14 +27,22 @@ export function ContactPhotoUploadButton({
   contactId,
   firstName,
   lastName,
+  isMyselfContact,
 }: ContactPhotoUploadButtonProps) {
+  const router = useRouter();
+
   const openUploadModal = () => {
     openPhotoUploadModal(
       {
         uploadEndpoint: `${API_ROUTES.CONTACTS}/${contactId}/photo`,
         avatarUrl,
         displayName: contactName,
-        // Reload page after successful upload
+        onSuccess: isMyselfContact
+          ? async () => {
+              await revalidateSettings();
+              router.refresh();
+            }
+          : undefined,
       },
       {
         TitleModal: "Upload Contact Photo",

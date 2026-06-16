@@ -11,6 +11,7 @@ import { WEBAPP_URL } from "@/lib/config";
 const navLinks = [
   { label: "Features", href: "/#features" },
   { label: "Pricing", href: "/#pricing" },
+  { label: "Blog", href: WEBSITE_ROUTES.BLOG },
   { label: "Docs", href: WEBSITE_ROUTES.DOCS },
 ];
 

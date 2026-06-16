@@ -4,8 +4,8 @@ import { IconPencil, IconPlus, IconX } from "@tabler/icons-react";
 interface TagPillProps {
   label: string;
   color?: string | null;
-  onClick: () => void;
-  tooltipLabel: string;
+  onClick?: () => void;
+  tooltipLabel?: string;
   showEditIcon?: boolean;
   showAddIcon?: boolean;
   preventInputBlur?: boolean;
@@ -55,16 +55,34 @@ export function TagPill({
         backgroundColor,
       }}
     >
-      <Tooltip label={tooltipLabel} withArrow>
-        <UnstyledButton
-          onMouseDown={(event) => {
-            if (preventInputBlur) {
-              event.preventDefault();
-            }
-          }}
-          onClick={onClick}
+      {onClick ? (
+        <Tooltip label={tooltipLabel} withArrow>
+          <UnstyledButton
+            onMouseDown={(event) => {
+              if (preventInputBlur) {
+                event.preventDefault();
+              }
+            }}
+            onClick={onClick}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 6,
+              padding: `${resolved.py}px ${resolved.px}px`,
+              color: color || undefined,
+            }}
+          >
+            <Text size={resolved.font} fw={500} c="inherit">
+              {label}
+            </Text>
+            {showEditIcon ? <IconPencil size={14} /> : null}
+            {showAddIcon ? <IconPlus size={14} /> : null}
+          </UnstyledButton>
+        </Tooltip>
+      ) : (
+        <span
           style={{
-            display: "flex",
+            display: "inline-flex",
             alignItems: "center",
             gap: 6,
             padding: `${resolved.py}px ${resolved.px}px`,
@@ -74,10 +92,8 @@ export function TagPill({
           <Text size={resolved.font} fw={500} c="inherit">
             {label}
           </Text>
-          {showEditIcon ? <IconPencil size={14} /> : null}
-          {showAddIcon ? <IconPlus size={14} /> : null}
-        </UnstyledButton>
-      </Tooltip>
+        </span>
+      )}
 
       {clearable && onRemove ? (
         <Tooltip label={removeTooltipLabel} withArrow>

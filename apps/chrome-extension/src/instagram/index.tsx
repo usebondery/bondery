@@ -1,4 +1,4 @@
-import React, { StrictMode } from "react";
+import { StrictMode } from "react";
 import ReactDOM from "react-dom/client";
 import { parseInstagramUsername, SOCIAL_PLATFORM_URL_DETAILS } from "@bondery/helpers";
 import InstagramButton from "./InstagramButton";
@@ -110,7 +110,7 @@ function getInstagramSnapshot() {
     lastName: parsedName.lastName || undefined,
     profileImageUrl: interceptedMeta?.photoUrl || img?.src || undefined,
     headline: interceptedMeta?.category || undefined,
-    place: getAddressPlace(interceptedMeta),
+    location: getAddressPlace(interceptedMeta),
     notes: interceptedMeta?.description || undefined,
   };
 }
@@ -118,11 +118,10 @@ function getInstagramSnapshot() {
 // Extract Instagram username from URL
 function getInstagramUsername(): string | null {
   const pathname = window.location.pathname;
-  const match = pathname.match(/^\/([^\/]+)\/?$/);
+  const match = pathname.match(/^\/([^/]+)\/?$/);
 
   if (
-    match &&
-    match[1] &&
+    match?.[1] &&
     !["explore", "reels", "stories", "direct", "accounts", "settings"].includes(match[1])
   ) {
     return match[1];

@@ -60,7 +60,7 @@ export function NameFields({ initialName, initialMiddlename, initialSurname }: N
     }
 
     try {
-      const response = await fetch(API_ROUTES.SETTINGS, {
+      const response = await fetch(API_ROUTES.ME_SETTINGS, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
