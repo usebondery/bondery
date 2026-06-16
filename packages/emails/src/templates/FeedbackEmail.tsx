@@ -1,4 +1,4 @@
-import { Container, Heading, Hr, Section, Text } from "@react-email/components";
+import { Container, Heading, Hr, Section, Text } from "react-email";
 import { EmailWrapper } from "../shared/EmailWrapper.js";
 import * as React from "react";
 
@@ -24,15 +24,21 @@ export default function FeedbackEmail({
   return (
     <EmailWrapper preview={previewText}>
       <Container className="mx-auto mb-4 rounded-lg bg-white p-6 shadow-sm">
-        <Heading className="mb-8 text-md font-bold text-gray-900">New Feedback Received</Heading>
+        <Heading className="mb-8 text-md font-bold text-gray-900">
+          New Feedback Received
+        </Heading>
 
         <Section className="mb-4 rounded-lg bg-gray-50 p-4">
-          <Text className="mb-1 text-sm font-semibold text-gray-700">User Email:</Text>
+          <Text className="mb-1 text-sm font-semibold text-gray-700">
+            User Email:
+          </Text>
           <Text className="text-sm text-gray-900">{userEmail}</Text>
         </Section>
 
         <Section className="mb-4 rounded-lg bg-gray-50 p-4">
-          <Text className="mb-1 text-sm font-semibold text-gray-700">User ID:</Text>
+          <Text className="mb-1 text-sm font-semibold text-gray-700">
+            User ID:
+          </Text>
           <Text className="text-sm font-mono text-gray-600">{userId}</Text>
         </Section>
 
@@ -50,7 +56,9 @@ export default function FeedbackEmail({
         </Section>
 
         <Section className="mb-4">
-          <Text className="mb-2 text-sm font-semibold text-gray-900">General Feedback:</Text>
+          <Text className="mb-2 text-sm font-semibold text-gray-900">
+            General Feedback:
+          </Text>
           <Text className="rounded-lg bg-gray-50 p-4 text-sm leading-6 text-gray-700">
             {generalFeedback || "(Not provided)"}
           </Text>

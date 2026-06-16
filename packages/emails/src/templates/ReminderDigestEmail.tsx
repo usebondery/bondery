@@ -1,4 +1,13 @@
-import { Column, Container, Heading, Img, Link, Row, Section, Text } from "@react-email/components";
+import {
+  Column,
+  Container,
+  Heading,
+  Img,
+  Link,
+  Row,
+  Section,
+  Text,
+} from "react-email";
 import { EmailWrapper } from "../shared/EmailWrapper.js";
 import { IMPORTANT_DATE_TYPE_META } from "@bondery/helpers";
 import * as React from "react";
@@ -66,10 +75,16 @@ function getDaysRemaining(targetDate: string, date: string) {
   }
 
   const millisecondsInDay = 24 * 60 * 60 * 1000;
-  return Math.max(0, Math.round((event.getTime() - target.getTime()) / millisecondsInDay));
+  return Math.max(
+    0,
+    Math.round((event.getTime() - target.getTime()) / millisecondsInDay),
+  );
 }
 
-export default function ReminderDigestEmail({ targetDate, reminders }: ReminderDigestEmailProps) {
+export default function ReminderDigestEmail({
+  targetDate,
+  reminders,
+}: ReminderDigestEmailProps) {
   const previewText = `You have ${reminders.length} reminder${reminders.length === 1 ? "" : "s"} for ${targetDate}`;
   const headingDate = formatTargetDate(targetDate);
 
@@ -80,7 +95,8 @@ export default function ReminderDigestEmail({ targetDate, reminders }: ReminderD
           Bondery reminders for {headingDate}
         </Heading>
         <Text className="mb-4 text-sm text-gray-700">
-          You have {reminders.length} reminder{reminders.length === 1 ? "" : "s"}:
+          You have {reminders.length} reminder
+          {reminders.length === 1 ? "" : "s"}:
         </Text>
 
         {reminders.map((reminder) => {
@@ -139,11 +155,13 @@ export default function ReminderDigestEmail({ targetDate, reminders }: ReminderD
                     {reminder.personName}
                   </Link>
                   <Text className="m-0 text-sm text-gray-700">
-                    {dateMeta.emoji} <strong>{dateMeta.label}</strong> is coming up in{" "}
-                    <strong>{remainingLabel}</strong> on {dateLabel}.
+                    {dateMeta.emoji} <strong>{dateMeta.label}</strong> is coming
+                    up in <strong>{remainingLabel}</strong> on {dateLabel}.
                   </Text>
                   {reminder.note ? (
-                    <Text className="mt-1 mb-0 text-xs text-gray-600">{reminder.note}</Text>
+                    <Text className="mt-1 mb-0 text-xs text-gray-600">
+                      {reminder.note}
+                    </Text>
                   ) : null}
                 </Column>
               </Row>

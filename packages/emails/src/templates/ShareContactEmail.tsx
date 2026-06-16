@@ -8,7 +8,7 @@ import {
   Row,
   Section,
   Text,
-} from "@react-email/components";
+} from "react-email";
 import { EmailWrapper } from "../shared/EmailWrapper.js";
 import * as React from "react";
 
@@ -56,7 +56,13 @@ export interface ShareContactEmailProps {
   importantDates?: ShareContactEmailDate[];
 }
 
-function InfoRow({ label, children }: { label: string; children: React.ReactNode }) {
+function InfoRow({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) {
   return (
     <Section className="mb-3">
       <Text className="mb-0 text-xs font-semibold uppercase tracking-wide text-gray-500">
@@ -77,7 +83,13 @@ function getInitials(name: string): string {
     .join("");
 }
 
-function AvatarDisplay({ avatarUrl, name }: { avatarUrl?: string; name: string }) {
+function AvatarDisplay({
+  avatarUrl,
+  name,
+}: {
+  avatarUrl?: string;
+  name: string;
+}) {
   if (avatarUrl) {
     return (
       <Img
@@ -95,7 +107,9 @@ function AvatarDisplay({ avatarUrl, name }: { avatarUrl?: string; name: string }
       className="h-14 w-14 rounded-full bg-brand/10 text-center"
       style={{ lineHeight: "56px" }}
     >
-      <Text className="m-0 text-sm font-semibold text-brand">{getInitials(name) || "?"}</Text>
+      <Text className="m-0 text-sm font-semibold text-brand">
+        {getInitials(name) || "?"}
+      </Text>
     </Section>
   );
 }
@@ -121,13 +135,16 @@ export default function ShareContactEmail({
   importantDates,
 }: ShareContactEmailProps) {
   const previewText = `${senderName} shared a contact with you • ${contactName}`;
-  const senderMessage = message?.trim() || "Shared this contact with you via Bondery.";
+  const senderMessage =
+    message?.trim() || "Shared this contact with you via Bondery.";
   const resolvedHeadline = headline?.trim() || "No headline";
 
   return (
     <EmailWrapper preview={previewText}>
       <Container className="mx-auto mb-4 rounded-lg bg-white p-6 shadow-sm">
-        <Heading className="mb-4 text-lg font-bold text-gray-900">Contact shared with you</Heading>
+        <Heading className="mb-4 text-lg font-bold text-gray-900">
+          Contact shared with you
+        </Heading>
 
         <Section className="mb-3 rounded-lg border border-gray-200 bg-gray-50 p-4">
           <Row>
@@ -135,7 +152,9 @@ export default function ShareContactEmail({
               <AvatarDisplay avatarUrl={senderAvatarUrl} name={senderName} />
             </Column>
             <Column>
-              <Text className="mt-0 mb-1 text-sm font-semibold text-gray-900">{senderName}</Text>
+              <Text className="mt-0 mb-1 text-sm font-semibold text-gray-900">
+                {senderName}
+              </Text>
               <Text className="m-0 text-sm italic text-gray-600">
                 &ldquo;{senderMessage}&rdquo;
               </Text>
@@ -149,8 +168,12 @@ export default function ShareContactEmail({
               <AvatarDisplay avatarUrl={contactAvatarUrl} name={contactName} />
             </Column>
             <Column>
-              <Text className="mt-0 mb-1 text-sm font-semibold text-gray-900">{contactName}</Text>
-              <Text className="m-0 text-sm text-gray-700">💼 {resolvedHeadline}</Text>
+              <Text className="mt-0 mb-1 text-sm font-semibold text-gray-900">
+                {contactName}
+              </Text>
+              <Text className="m-0 text-sm text-gray-700">
+                💼 {resolvedHeadline}
+              </Text>
             </Column>
           </Row>
         </Section>
@@ -172,7 +195,11 @@ export default function ShareContactEmail({
         {emails && emails.length > 0 && (
           <InfoRow label="Email">
             {emails.map((email, i) => (
-              <Link key={i} href={`mailto:${email.value}`} className="block text-sm text-brand">
+              <Link
+                key={i}
+                href={`mailto:${email.value}`}
+                className="block text-sm text-brand"
+              >
                 {email.value}
                 {email.type ? ` (${email.type})` : ""}
               </Link>
@@ -200,7 +227,10 @@ export default function ShareContactEmail({
 
         {linkedin && (
           <InfoRow label="LinkedIn">
-            <Link href={`https://linkedin.com/in/${linkedin}`} className="text-sm text-brand">
+            <Link
+              href={`https://linkedin.com/in/${linkedin}`}
+              className="text-sm text-brand"
+            >
               {linkedin}
             </Link>
           </InfoRow>
@@ -208,7 +238,10 @@ export default function ShareContactEmail({
 
         {instagram && (
           <InfoRow label="Instagram">
-            <Link href={`https://instagram.com/${instagram}`} className="text-sm text-brand">
+            <Link
+              href={`https://instagram.com/${instagram}`}
+              className="text-sm text-brand"
+            >
               @{instagram}
             </Link>
           </InfoRow>
@@ -216,7 +249,10 @@ export default function ShareContactEmail({
 
         {facebook && (
           <InfoRow label="Facebook">
-            <Link href={`https://facebook.com/${facebook}`} className="text-sm text-brand">
+            <Link
+              href={`https://facebook.com/${facebook}`}
+              className="text-sm text-brand"
+            >
               {facebook}
             </Link>
           </InfoRow>

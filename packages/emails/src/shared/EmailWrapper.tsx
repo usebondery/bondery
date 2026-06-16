@@ -6,7 +6,7 @@ import {
   Preview,
   Container,
   Font,
-} from "@react-email/components";
+} from "react-email";
 import { BRAND_PRIMARY_COLOR } from "@bondery/branding/src";
 import * as React from "react";
 import { BonderyLogotypeBlack } from "@bondery/branding/react/src";
