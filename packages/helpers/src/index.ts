@@ -12,18 +12,39 @@ export {
   METADATA_TITLE_DIVIDER,
   WEBAPP_NAME,
   formatMetadataTitle,
-} from "./globals/paths.js";
-export { SOCIAL_PLATFORM_URL_DETAILS } from "./globals/social-platform-urls.js";
-export { IMPORTANT_DATE_TYPE_META } from "./globals/important-dates.js";
-export { parseInstagramUsername } from "./instagram/parseInstagramUsername.js";
-export type {
-  ParseInstagramUsernameInput,
-  ParsedInstagramName,
-} from "./instagram/parseInstagramUsername.js";
-export { stripEmojis, stripNameTitles, extractNameParts, cleanPersonName } from "./name-utils.js";
-export { formatDateRange, formatDuration } from "./date-utils.js";
-export { getReadingTime } from "./reading-time.js";
-export { linkedinCompanyUrl, linkedinSchoolUrl, extractLinkedinId } from "./linkedin-utils.js";
-export { formatPlaceLabel, formatAddressLabel } from "./address-utils.js";
-export type { PlaceLabelFields, AddressLabelFields } from "./address-utils.js";
-export { compareVersions, isVersionBelow } from "./version-utils.js";
+  SOCIAL_PLATFORM_URL_DETAILS,
+  IMPORTANT_DATE_TYPE_META,
+} from "./globals/index.js";
+
+export { parseInstagramUsername, linkedinCompanyUrl, extractLinkedinId } from "./platform/index.js";
+export type { ParseInstagramUsernameInput, ParsedInstagramName } from "./platform/index.js";
+
+export {
+  stripEmojis,
+  stripNameTitles,
+  extractNameParts,
+  cleanPersonName,
+  parseFullName,
+} from "./name/index.js";
+
+export { formatDateRange, formatDuration } from "./date/index.js";
+
+export {
+  getReadingTime,
+  parseInlineTokens,
+  tokenToString,
+  tokensToString,
+  BP_TOKEN_RE,
+} from "./text/index.js";
+export type { InlineToken, InlineTokenType } from "./text/index.js";
+
+export {
+  formatPlaceLabel,
+  formatAddressLabel,
+  abbreviateLocationCountry,
+} from "./address/index.js";
+export type { PlaceLabelFields, AddressLabelFields } from "./address/index.js";
+
+export { compareVersions, isVersionBelow } from "./version/index.js";
+
+export { INTERACTION_TYPES } from "./interactions/index.js";

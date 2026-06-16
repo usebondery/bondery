@@ -16,7 +16,8 @@ export const API_ROUTES = {
   CONTACTS_MAP_ADDRESS_PINS: "/api/contacts/map-address-pins",
   CONTACTS_MERGE: "/api/contacts/merge",
   CONTACTS_MERGE_RECOMMENDATIONS: "/api/contacts/merge-recommendations",
-  CONTACTS_MERGE_RECOMMENDATIONS_REFRESH: "/api/contacts/merge-recommendations/refresh",
+  CONTACTS_MERGE_RECOMMENDATIONS_REFRESH:
+    "/api/contacts/merge-recommendations/refresh",
   CONTACTS_UPCOMING_REMINDERS: "/api/contacts/important-dates/upcoming",
   CONTACTS_IMPORT_LINKEDIN: "/api/contacts/import/linkedin",
   CONTACTS_IMPORT_INSTAGRAM: "/api/contacts/import/instagram",
@@ -34,6 +35,11 @@ export const API_ROUTES = {
   CONTACTS_SHARE: "/api/contacts/share",
   ADMIN_STATS: "/api/admin/stats",
   ME_ONBOARDING_COMPLETE: "/api/me/onboarding/complete",
+  CHAT: "/api/chat",
+  CHAT_SESSIONS: "/api/chat/sessions",
+  SUBSCRIPTIONS: "/api/subscriptions",
+  SUBSCRIPTIONS_SYNC: "/api/subscriptions/sync",
+  WEBHOOKS_POLAR: "/api/webhooks/polar",
 } as const;
 
 export const CHROME_EXTENSION_URL =
@@ -48,7 +54,8 @@ export const MIN_EXTENSION_VERSION: string = "1.4.2";
 
 export const HELP_DOCS_URL = "https://bondery.gitbook.io";
 
-export const GITHUB_REPO_URL = "https://api.github.com/repos/usebondery/bondery";
+export const GITHUB_REPO_URL =
+  "https://api.github.com/repos/usebondery/bondery";
 export const STATUS_PAGE_URL = "https://bondery.openstatus.dev/";
 export const SUPPORT_EMAIL = "team@usebondery.com";
 
@@ -89,6 +96,7 @@ export const WEBAPP_ROUTES = {
   SETTINGS: "/app/settings",
   ACCOUNT: "/app/account",
   STATS: "/app/admin/stats",
+  CHAT: "/app/chat",
   LOGIN: "/login",
   APP_GROUP: "/app",
   DEFAULT_PAGE_AFTER_LOGIN: "/app/home",

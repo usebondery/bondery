@@ -173,3 +173,39 @@ export function cleanPersonName(rawName: string | null | undefined): string {
   if (!rawName || typeof rawName !== "string") return "";
   return stripNameTitles(stripEmojis(rawName.trim()));
 }
+
+/**
+ * Parses a full name string into first, middle, and last name parts.
+ * Strips emojis and title prefixes/suffixes before splitting on whitespace.
+ * Mirrors the LinkedIn name parsing pattern used across import flows.
+ *
+ * @param fullName The raw full name string to parse.
+ * @returns Object with `firstName` (always present after cleaning), `middleName` (if 3+ tokens),
+ *          and `lastName` (if 2+ tokens). All values are properly cased.
+ */
+export function parseFullName(fullName: string): {
+  firstName: string;
+  middleName: string | null;
+  lastName: string | null;
+} {
+  const cleaned = cleanPersonName(fullName);
+  const tokens = cleaned.split(/\s+/).filter(Boolean);
+
+  if (tokens.length === 0) {
+    return { firstName: "", middleName: null, lastName: null };
+  }
+
+  if (tokens.length === 1) {
+    return { firstName: tokens[0], middleName: null, lastName: null };
+  }
+
+  if (tokens.length === 2) {
+    return { firstName: tokens[0], middleName: null, lastName: tokens[1] };
+  }
+
+  return {
+    firstName: tokens[0],
+    middleName: tokens.slice(1, -1).join(" "),
+    lastName: tokens[tokens.length - 1],
+  };
+}
