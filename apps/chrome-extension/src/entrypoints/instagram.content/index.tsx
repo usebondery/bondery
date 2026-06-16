@@ -6,7 +6,6 @@
  */
 import { defineContentScript, injectScript, type ContentScriptContext } from "#imports";
 import { browser } from "wxt/browser";
-import React from "react";
 import { parseInstagramUsername, SOCIAL_PLATFORM_URL_DETAILS } from "@bondery/helpers";
 import InstagramButton from "../../instagram/InstagramButton";
 import { renderInShadowRoot } from "../../shared/renderInShadowRoot";
@@ -51,7 +50,7 @@ export default defineContentScript({
     injectBonderyButton(ctx);
 
     // Setup observer for SPA navigation
-    const observer = setupObserver(ctx);
+    const _observer = setupObserver(ctx);
 
     // Retry injection after delay
     ctx.setTimeout(() => {
@@ -60,7 +59,7 @@ export default defineContentScript({
 
     // Listen for URL changes (SPA navigation)
     let lastUrl = window.location.href;
-    const urlCheckInterval = ctx.setInterval(() => {
+    const _urlCheckInterval = ctx.setInterval(() => {
       if (window.location.href !== lastUrl) {
         lastUrl = window.location.href;
         ctx.setTimeout(() => {
@@ -195,11 +194,10 @@ function getInstagramSnapshot() {
 
 function getInstagramUsername(): string | null {
   const pathname = window.location.pathname;
-  const match = pathname.match(/^\/([^\/]+)\/?$/);
+  const match = pathname.match(/^\/([^/]+)\/?$/);
 
   if (
-    match &&
-    match[1] &&
+    match?.[1] &&
     !["explore", "reels", "stories", "direct", "accounts", "settings"].includes(match[1])
   ) {
     return match[1];

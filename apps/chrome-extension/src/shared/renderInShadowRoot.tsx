@@ -13,7 +13,8 @@
  * @returns The ShadowRootContentScriptUi instance (call `.mount()` to insert into DOM).
  */
 import { createShadowRootUi, type ContentScriptContext } from "#imports";
-import React, { StrictMode } from "react";
+import type React from "react";
+import { StrictMode } from "react";
 import ReactDOM from "react-dom/client";
 import type { ContentScriptAppendMode } from "wxt/utils/content-script-ui/types";
 import { MantineWrapper } from "./MantineWrapper";

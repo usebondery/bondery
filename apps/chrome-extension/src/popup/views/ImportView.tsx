@@ -1,4 +1,4 @@
-import React from "react";
+
 import { Stack } from "@mantine/core";
 import { IconSettings } from "@tabler/icons-react";
 import { PersonActionStack } from "../components/PersonActionStack";

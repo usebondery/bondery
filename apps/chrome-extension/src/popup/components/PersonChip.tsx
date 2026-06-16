@@ -1,4 +1,4 @@
-import React from "react";
+
 import { Avatar, Badge } from "@mantine/core";
 
 interface PersonChipProps {

@@ -1,4 +1,4 @@
-import React from "react";
+
 import { Button, Stack, Text } from "@mantine/core";
 import { IconPuzzle } from "@tabler/icons-react";
 import { BonderyIcon } from "@bondery/branding";

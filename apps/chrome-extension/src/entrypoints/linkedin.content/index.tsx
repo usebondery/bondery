@@ -5,7 +5,6 @@
  */
 import { defineContentScript, type ContentScriptContext } from "#imports";
 import { browser } from "wxt/browser";
-import React from "react";
 import { SOCIAL_PLATFORM_URL_DETAILS } from "@bondery/helpers";
 import LinkedInButton, {
   profileCache,
@@ -14,7 +13,7 @@ import LinkedInButton, {
 import { renderInShadowRoot } from "../../shared/renderInShadowRoot";
 import type { ShadowRootContentScriptUi } from "wxt/utils/content-script-ui/shadow-root";
 import type ReactDOM from "react-dom/client";
-import { extractWorkExperience, type WorkEntry } from "../../linkedin/workExperience";
+import { extractWorkExperience, } from "../../linkedin/workExperience";
 import { extractEducation } from "../../linkedin/education";
 import { fetchFullWorkHistory, fetchFullEducation } from "../../linkedin/fetchDetails";
 // sanitizeName temporarily disabled – transliteration causes non-UTF-8 bytes in the bundle
@@ -177,9 +176,9 @@ async function getLinkedInSnapshot() {
 
 function getLinkedInUsername(): string | null {
   const pathname = window.location.pathname;
-  const match = pathname.match(/^\/in\/([^\/]+)\/?$/);
+  const match = pathname.match(/^\/in\/([^/]+)\/?$/);
 
-  if (match && match[1]) {
+  if (match?.[1]) {
     // Decode percent-encoded handles (e.g. "ad%C3%A9la" → "adéla")
     // so we always work with the human-readable form.
     try {
@@ -412,7 +411,7 @@ async function checkForPendingEnrich(): Promise<void> {
       type: "GET_ENRICH_CONTEXT",
     });
 
-    if (!response || response.type !== "ENRICH_CONTEXT_RESULT" || !response.payload) {
+    if (response?.type !== "ENRICH_CONTEXT_RESULT" || !response.payload) {
       return; // No pending enrich for this tab — nothing to do
     }
 

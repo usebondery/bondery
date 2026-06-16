@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from "react";
+import type React from "react";
+import { useState, useEffect } from "react";
 import { browser } from "wxt/browser";
 import { Button, Text } from "@mantine/core";
 import { BonderyIconWhite } from "@bondery/branding";
 import { WEBAPP_ROUTES } from "@bondery/helpers";
-import { cleanPersonName } from "@bondery/helpers/name-utils";
+import { cleanPersonName } from "@bondery/helpers/name";
 import { config } from "../config";
 import { extractWorkExperience, type WorkEntry } from "./workExperience";
 import { extractEducation, type EducationEntry } from "./education";
@@ -194,7 +195,7 @@ const LinkedInButton: React.FC<LinkedInButtonProps> = ({ username }) => {
       extractHeadline,
       extractPlace,
     }).finally(() => setIsPreloading(false));
-  }, [username]);
+  }, [username, extractProfileName, extractPlace, extractHeadline]);
 
   const extractProfileName = (): {
     firstName: string;
@@ -206,7 +207,7 @@ const LinkedInButton: React.FC<LinkedInButtonProps> = ({ username }) => {
 
     console.log("LinkedIn: Name element found:", !!nameElement, nameElement?.textContent);
 
-    if (!nameElement || !nameElement.textContent) {
+    if (!nameElement?.textContent) {
       // Try alternative selectors
       const alternatives = [
         "h1.text-heading-xlarge",
@@ -267,7 +268,7 @@ const LinkedInButton: React.FC<LinkedInButtonProps> = ({ username }) => {
     const topCard = document.querySelector("section[data-member-id]") || document;
     const titleElement = topCard.querySelector("div[data-generated-suggestion-target]");
 
-    if (titleElement && titleElement.textContent) {
+    if (titleElement?.textContent) {
       return titleElement.textContent.trim();
     }
 
@@ -293,7 +294,7 @@ const LinkedInButton: React.FC<LinkedInButtonProps> = ({ username }) => {
     const contactInfoLink = topCard.querySelector("#top-card-text-details-contact-info");
     const placeElement = contactInfoLink?.parentElement?.previousElementSibling || null;
 
-    if (placeElement && placeElement.textContent) {
+    if (placeElement?.textContent) {
       return placeElement.textContent.trim();
     }
 

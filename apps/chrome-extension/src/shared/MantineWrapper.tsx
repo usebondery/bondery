@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
+import type React from "react";
+import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { browser } from "wxt/browser";
 import { MantineProvider, v8CssVariablesResolver } from "@mantine/core";
 import { bonderyTheme } from "@bondery/mantine-next/theme";
@@ -105,7 +106,7 @@ export function MantineWrapper({
       themePreference,
       setThemePreference,
     }),
-    [themePreference],
+    [themePreference, setThemePreference],
   );
 
   const resolvedColorScheme = themePreference === "auto" ? systemColorScheme : themePreference;

@@ -1,4 +1,5 @@
-import React, { useRef, useState } from "react";
+import type React from "react";
+import { useRef, useState } from "react";
 import { browser } from "wxt/browser";
 import { Button, Text } from "@mantine/core";
 import { BonderyIconWhite } from "@bondery/branding";
@@ -52,7 +53,7 @@ const InstagramButton: React.FC<InstagramButtonProps> = ({ username, getSnapshot
     const img = document.querySelector(
       `img[alt="${username}'s profile picture"]`,
     ) as HTMLImageElement;
-    if (img && img.src) {
+    if (img?.src) {
       return img.src;
     }
     return null;

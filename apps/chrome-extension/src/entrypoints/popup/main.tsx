@@ -1,5 +1,5 @@
 import "@vitejs/plugin-react/preamble";
-import React, { StrictMode } from "react";
+import { StrictMode } from "react";
 import ReactDOM from "react-dom/client";
 import "@mantine/core/styles.css";
 import "flag-icons/css/flag-icons.min.css";

@@ -156,7 +156,7 @@ function collectIncludedEntities(blocks: unknown[]): Record<string, unknown>[] {
 function logEntityTypes(entities: Record<string, unknown>[], label: string): void {
   const types = new Set<string>();
   for (const e of entities) {
-    const t = e["$type"] as string | undefined;
+    const t = e.$type as string | undefined;
     if (t) types.add(t);
   }
   console.log(
@@ -384,7 +384,7 @@ function extractLogoUrlFromVoyagerImage(
 
   // Direct url field
   const url = img.url as string | undefined;
-  if (url && url.startsWith("http")) return url;
+  if (url?.startsWith("http")) return url;
 
   // Recurse into nested objects (handles image, vectorImage,
   // com.linkedin.common.VectorImage, logoResolutionResult, etc.)
@@ -838,7 +838,7 @@ function extractPositionsFromApiResponse(
 
   // First: check if there are flat Position entities directly
   const flatPositions = apiEntities.filter((e) => {
-    const t = e["$type"] as string | undefined;
+    const t = e.$type as string | undefined;
     return t != null && /position/i.test(t) && !/group/i.test(t) && !/collection/i.test(t);
   });
 
@@ -855,7 +855,7 @@ function extractPositionsFromApiResponse(
 
   // Second: handle PositionGroup entities
   const positionGroups = apiEntities.filter((e) => {
-    const t = e["$type"] as string | undefined;
+    const t = e.$type as string | undefined;
     return t != null && /positiongroup/i.test(t);
   });
 
@@ -877,7 +877,7 @@ function extractPositionsFromApiResponse(
 
   // Also index by $id if present (some Voyager responses use $id references)
   for (const e of apiEntities) {
-    const id = e["$id"] as string | undefined;
+    const id = e.$id as string | undefined;
     if (id) entityByUrn.set(id, e);
   }
 
@@ -921,7 +921,7 @@ function extractPositionsFromApiResponse(
         `[linkedin][fetchDetails] data.element keys:`,
         Object.keys(el),
         `$type:`,
-        el["$type"],
+        el.$type,
       );
     }
   }
@@ -975,7 +975,6 @@ function extractNestedPositions(
         const profilePos = obj.profilePosition as Record<string, unknown> | undefined;
         if (profilePos) {
           positions.push(profilePos);
-          continue;
         }
       }
     }
@@ -1147,7 +1146,7 @@ export async function fetchFullWorkHistory(
 
   // ── Step 3: Fall back to live page position entities ──
   const positionEntities = entities.filter((e) => {
-    const t = e["$type"] as string | undefined;
+    const t = e.$type as string | undefined;
     return (
       t != null &&
       (/position/i.test(t) || /experience/i.test(t)) &&
@@ -1219,7 +1218,7 @@ export async function fetchFullEducation(username: string): Promise<EducationEnt
       logEntityTypes(apiEntities, "education API");
 
       const apiEducation = apiEntities.filter((e) => {
-        const t = e["$type"] as string | undefined;
+        const t = e.$type as string | undefined;
         return (
           t != null &&
           (/education/i.test(t) || /school/i.test(t)) &&
@@ -1256,7 +1255,7 @@ export async function fetchFullEducation(username: string): Promise<EducationEnt
 
   // ── Step 3: Fall back to live page education entities ──
   const educationEntities = entities.filter((e) => {
-    const t = e["$type"] as string | undefined;
+    const t = e.$type as string | undefined;
     return (
       t != null &&
       (/education/i.test(t) || /school/i.test(t)) &&

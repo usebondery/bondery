@@ -104,7 +104,7 @@ function parseProfileFromUrl(rawUrl?: string): ScrapedProfileData | null {
   const pathname = parsedUrl.pathname;
 
   if (hostname.includes("linkedin.com")) {
-    const linkedInMatch = pathname.match(/^\/in\/([^\/?#]+)\/?$/);
+    const linkedInMatch = pathname.match(/^\/in\/([^/?#]+)\/?$/);
     if (linkedInMatch?.[1]) {
       return {
         platform: "linkedin",
@@ -114,7 +114,7 @@ function parseProfileFromUrl(rawUrl?: string): ScrapedProfileData | null {
   }
 
   if (hostname.includes("instagram.com")) {
-    const instagramMatch = pathname.match(/^\/([^\/?#]+)\/?$/);
+    const instagramMatch = pathname.match(/^\/([^/?#]+)\/?$/);
     const reservedPaths = new Set([
       "explore",
       "reels",

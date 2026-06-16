@@ -1,4 +1,4 @@
-import React from "react";
+
 import { Button, Stack } from "@mantine/core";
 import { IconArrowLeft, IconLogout } from "@tabler/icons-react";
 import { ThemePicker } from "../components/ThemePicker";

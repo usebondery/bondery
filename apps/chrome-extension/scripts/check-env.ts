@@ -1,4 +1,4 @@
-import { checkEnvVariables } from "@bondery/helpers/check-env";
+import { checkEnvVariables } from "@bondery/helpers/env";
 import { resolve, dirname } from "path";
 import { fileURLToPath } from "url";
 

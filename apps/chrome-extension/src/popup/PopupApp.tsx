@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { browser } from "wxt/browser";
 import { config } from "../config";
 import { WEBAPP_ROUTES } from "@bondery/helpers";
@@ -37,7 +37,7 @@ export default function PopupApp() {
 
   useEffect(() => {
     checkAuthAndPreview();
-  }, []);
+  }, [checkAuthAndPreview]);
 
   async function checkAuthAndPreview() {
     try {
