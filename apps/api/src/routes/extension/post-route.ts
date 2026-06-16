@@ -5,8 +5,15 @@
 import type { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
 import { buildContactAvatarUrl } from "../../lib/supabase.js";
 import { getAuth } from "../../lib/auth.js";
-import type { ScrapedWorkHistoryEntry, ScrapedEducationEntry, TablesUpdate } from "@bondery/types";
-import { findPersonIdBySocial, upsertContactSocials } from "../../lib/socials.js";
+import type {
+  ScrapedWorkHistoryEntry,
+  ScrapedEducationEntry,
+  TablesUpdate,
+} from "@bondery/types";
+import {
+  findPersonIdBySocial,
+  upsertContactSocials,
+} from "../../lib/socials.js";
 import { cleanPersonName } from "@bondery/helpers/name";
 import { assignContactsToDefaultImportGroup } from "../../lib/default-import-groups.js";
 import { cachedGeocodeLinkedInLocation } from "../../lib/mapy.js";
@@ -15,7 +22,11 @@ import {
   updateContactPhoto,
   uploadAllLinkedInLogos,
 } from "../../lib/linkedin-helpers.js";
-import { RedirectBody, resolvePrimarySocial, resolveExtensionDefaultGroup } from "./helpers.js";
+import {
+  RedirectBody,
+  resolvePrimarySocial,
+  resolveExtensionDefaultGroup,
+} from "./helpers.js";
 
 export function registerPostRoute(fastify: FastifyInstance): void {
   /**
@@ -23,8 +34,14 @@ export function registerPostRoute(fastify: FastifyInstance): void {
    */
   fastify.post(
     "/",
-    { schema: { body: RedirectBody }, onRequest: fastify.auth([fastify.verifySession]) },
-    async (request: FastifyRequest<{ Body: typeof RedirectBody.static }>, reply: FastifyReply) => {
+    {
+      schema: { body: RedirectBody },
+      onRequest: fastify.auth([fastify.verifySession]),
+    },
+    async (
+      request: FastifyRequest<{ Body: typeof RedirectBody.static }>,
+      reply: FastifyReply,
+    ) => {
       const { client, user } = getAuth(request);
 
       const {
@@ -44,7 +61,10 @@ export function registerPostRoute(fastify: FastifyInstance): void {
       } = request.body;
 
       request.log.info(
-        { handle: linkedin ?? instagram ?? facebook, workHistoryCount: workHistory?.length ?? 0 },
+        {
+          handle: linkedin ?? instagram ?? facebook,
+          workHistoryCount: workHistory?.length ?? 0,
+        },
         "[extension] POST received",
       );
 
@@ -54,7 +74,11 @@ export function registerPostRoute(fastify: FastifyInstance): void {
         });
       }
 
-      const primarySocial = resolvePrimarySocial({ instagram, linkedin, facebook });
+      const primarySocial = resolvePrimarySocial({
+        instagram,
+        linkedin,
+        facebook,
+      });
       if (!primarySocial) {
         return reply.status(400).send({
           error: "Instagram, LinkedIn, or Facebook username is required",
@@ -86,7 +110,9 @@ export function registerPostRoute(fastify: FastifyInstance): void {
       if (existingContactId) {
         const { data: contactData, error: lookupError } = await (client
           .from("people")
-          .select("id, first_name, last_name, headline, location, latitude, notes")
+          .select(
+            "id, first_name, last_name, headline, location, latitude, notes",
+          )
           .eq("user_id", user.id)
           .eq("id", existingContactId)
           .single() as unknown as Promise<{
@@ -110,7 +136,12 @@ export function registerPostRoute(fastify: FastifyInstance): void {
       }
 
       // Upload all LinkedIn logos in parallel (used by both existing and new contact paths)
-      const logoMap = await uploadAllLinkedInLogos(client, user.id, workHistory, educationHistory);
+      const logoMap = await uploadAllLinkedInLogos(
+        client,
+        user.id,
+        workHistory,
+        educationHistory,
+      );
 
       // If contact exists
       if (existingContact) {
@@ -123,24 +154,36 @@ export function registerPostRoute(fastify: FastifyInstance): void {
             (f) => f.name === `${existingContact!.id}.jpg`,
           );
           if (!hasAvatar) {
-            await updateContactPhoto(client, existingContact.id, user.id, profileImageUrl);
+            await updateContactPhoto(
+              client,
+              existingContact.id,
+              user.id,
+              profileImageUrl,
+            );
           }
         }
 
         // Consolidate field updates into a single query
         const fieldUpdates: TablesUpdate<"people"> = {};
-        if (headline && !existingContact.headline) fieldUpdates.headline = headline;
-        if (location && !existingContact.location) fieldUpdates.location = location;
+        if (headline && !existingContact.headline)
+          fieldUpdates.headline = headline;
+        if (location && !existingContact.location)
+          fieldUpdates.location = location;
         if (notes && !existingContact.notes) fieldUpdates.notes = notes;
 
         // Geocode the location if it's being set for the first time and no coordinates exist yet
-        if (location && !existingContact.location && !existingContact.latitude) {
+        if (
+          location &&
+          !existingContact.location &&
+          !existingContact.latitude
+        ) {
           try {
             const result = await cachedGeocodeLinkedInLocation(location);
             if (result) {
               const { geo, timezone: tz } = result;
               // Use the formatted mapy.com label as the canonical location value
-              if (geo.formattedLabel) fieldUpdates.location = geo.formattedLabel;
+              if (geo.formattedLabel)
+                fieldUpdates.location = geo.formattedLabel;
               fieldUpdates.gis_point = geo.locationEwkt;
 
               if (tz) fieldUpdates.timezone = tz;
@@ -154,7 +197,10 @@ export function registerPostRoute(fastify: FastifyInstance): void {
         }
 
         if (Object.keys(fieldUpdates).length > 0) {
-          await client.from("people").update(fieldUpdates).eq("id", existingContact.id);
+          await client
+            .from("people")
+            .update(fieldUpdates)
+            .eq("id", existingContact.id);
         }
 
         // Upsert people_linkedin + replace work/education history if provided
@@ -191,19 +237,23 @@ export function registerPostRoute(fastify: FastifyInstance): void {
                 .eq("people_linkedin_id", linkedinRow.id)
                 .eq("user_id", user.id);
 
-              const rows = workHistory.map((entry: ScrapedWorkHistoryEntry) => ({
-                user_id: user.id,
-                people_linkedin_id: linkedinRow.id,
-                company_name: entry.companyName,
-                company_linkedin_id: entry.companyLinkedinId ?? null,
-                title: entry.title ?? null,
-                description: entry.description ?? null,
-                start_date: toPostgresDate(entry.startDate),
-                end_date: toPostgresDate(entry.endDate),
-                employment_type: entry.employmentType ?? null,
-                location: entry.location ?? null,
-              }));
-              const { error: whError } = await client.from("people_work_history").insert(rows);
+              const rows = workHistory.map(
+                (entry: ScrapedWorkHistoryEntry) => ({
+                  user_id: user.id,
+                  people_linkedin_id: linkedinRow.id,
+                  company_name: entry.companyName,
+                  company_linkedin_id: entry.companyLinkedinId ?? null,
+                  title: entry.title ?? null,
+                  description: entry.description ?? null,
+                  start_date: toPostgresDate(entry.startDate),
+                  end_date: toPostgresDate(entry.endDate),
+                  employment_type: entry.employmentType ?? null,
+                  location: entry.location ?? null,
+                }),
+              );
+              const { error: whError } = await client
+                .from("people_work_history")
+                .insert(rows);
               if (whError) {
                 request.log.error(
                   { err: whError },
@@ -220,17 +270,21 @@ export function registerPostRoute(fastify: FastifyInstance): void {
                 .eq("people_linkedin_id", linkedinRow.id)
                 .eq("user_id", user.id);
 
-              const rows = educationHistory.map((entry: ScrapedEducationEntry) => ({
-                user_id: user.id,
-                people_linkedin_id: linkedinRow.id,
-                school_name: entry.schoolName,
-                school_linkedin_id: entry.schoolLinkedinId ?? null,
-                degree: entry.degree ?? null,
-                description: entry.description ?? null,
-                start_date: toPostgresDate(entry.startDate),
-                end_date: toPostgresDate(entry.endDate),
-              }));
-              const { error: ehError } = await client.from("people_education_history").insert(rows);
+              const rows = educationHistory.map(
+                (entry: ScrapedEducationEntry) => ({
+                  user_id: user.id,
+                  people_linkedin_id: linkedinRow.id,
+                  school_name: entry.schoolName,
+                  school_linkedin_id: entry.schoolLinkedinId ?? null,
+                  degree: entry.degree ?? null,
+                  description: entry.description ?? null,
+                  start_date: toPostgresDate(entry.startDate),
+                  end_date: toPostgresDate(entry.endDate),
+                }),
+              );
+              const { error: ehError } = await client
+                .from("people_education_history")
+                .insert(rows);
               if (ehError) {
                 request.log.error(
                   { err: ehError },
@@ -253,7 +307,8 @@ export function registerPostRoute(fastify: FastifyInstance): void {
       // Create new contact
       const insertData: any = {
         user_id: user.id,
-        first_name: cleanPersonName(firstName) || primarySocial.handle || "Unknown",
+        first_name:
+          cleanPersonName(firstName) || primarySocial.handle || "Unknown",
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       };
@@ -293,7 +348,10 @@ export function registerPostRoute(fastify: FastifyInstance): void {
         .single();
 
       if (createError || !newContact) {
-        request.log.error({ err: createError }, "[extension] Failed to create contact");
+        request.log.error(
+          { err: createError },
+          "[extension] Failed to create contact",
+        );
         return reply.status(500).send({ error: "Failed to create contact" });
       }
 
@@ -309,20 +367,32 @@ export function registerPostRoute(fastify: FastifyInstance): void {
         return reply.status(500).send({ error: "Failed to save socials" });
       }
 
-      const extensionGroup = resolveExtensionDefaultGroup(primarySocial.platform);
+      const extensionGroup = resolveExtensionDefaultGroup(
+        primarySocial.platform,
+      );
       if (extensionGroup) {
         try {
-          await assignContactsToDefaultImportGroup(client, user.id, extensionGroup, [
-            newContact.id,
-          ]);
+          await assignContactsToDefaultImportGroup(
+            client,
+            user.id,
+            extensionGroup,
+            [newContact.id],
+          );
         } catch {
-          return reply.status(500).send({ error: "Failed to assign default group" });
+          return reply
+            .status(500)
+            .send({ error: "Failed to assign default group" });
         }
       }
 
       // Upload profile photo if provided
       if (profileImageUrl) {
-        await updateContactPhoto(client, newContact.id, user.id, profileImageUrl);
+        await updateContactPhoto(
+          client,
+          newContact.id,
+          user.id,
+          profileImageUrl,
+        );
       }
 
       // Insert LinkedIn data (bio + work/education) via people_linkedin
@@ -365,27 +435,39 @@ export function registerPostRoute(fastify: FastifyInstance): void {
               employment_type: entry.employmentType ?? null,
               location: entry.location ?? null,
             }));
-            const { error: whError } = await client.from("people_work_history").insert(rows);
+            const { error: whError } = await client
+              .from("people_work_history")
+              .insert(rows);
             if (whError) {
-              request.log.error({ err: whError }, "[extension] Failed to insert work history");
+              request.log.error(
+                { err: whError },
+                "[extension] Failed to insert work history",
+              );
             }
           }
 
           // Insert education history if provided
           if (educationHistory && educationHistory.length > 0) {
-            const rows = educationHistory.map((entry: ScrapedEducationEntry) => ({
-              user_id: user.id,
-              people_linkedin_id: linkedinRow.id,
-              school_name: entry.schoolName,
-              school_linkedin_id: entry.schoolLinkedinId ?? null,
-              degree: entry.degree ?? null,
-              description: entry.description ?? null,
-              start_date: toPostgresDate(entry.startDate),
-              end_date: toPostgresDate(entry.endDate),
-            }));
-            const { error: ehError } = await client.from("people_education_history").insert(rows);
+            const rows = educationHistory.map(
+              (entry: ScrapedEducationEntry) => ({
+                user_id: user.id,
+                people_linkedin_id: linkedinRow.id,
+                school_name: entry.schoolName,
+                school_linkedin_id: entry.schoolLinkedinId ?? null,
+                degree: entry.degree ?? null,
+                description: entry.description ?? null,
+                start_date: toPostgresDate(entry.startDate),
+                end_date: toPostgresDate(entry.endDate),
+              }),
+            );
+            const { error: ehError } = await client
+              .from("people_education_history")
+              .insert(rows);
             if (ehError) {
-              request.log.error({ err: ehError }, "[extension] Failed to insert education");
+              request.log.error(
+                { err: ehError },
+                "[extension] Failed to insert education",
+              );
             }
           }
         }

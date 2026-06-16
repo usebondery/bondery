@@ -21,7 +21,10 @@ const TAG_COLORS = [
  * Picks the next tag color by cycling through the palette based on the
  * current count of tags the user already has.
  */
-async function pickNextColor(supabase: SupabaseClient<Database>, userId: string): Promise<string> {
+async function pickNextColor(
+  supabase: SupabaseClient<Database>,
+  userId: string,
+): Promise<string> {
   const { count } = await supabase
     .from("tags")
     .select("id", { count: "exact", head: true })
@@ -38,13 +41,25 @@ async function pickNextColor(supabase: SupabaseClient<Database>, userId: string)
  * @param userId - The authenticated user's ID.
  * @returns An object of AI SDK tools for tag operations.
  */
-export function createTagTools(supabase: SupabaseClient<Database>, userId: string) {
+export function createTagTools(
+  supabase: SupabaseClient<Database>,
+  userId: string,
+) {
   return {
     search_tags: tool({
-      description: "Search tags by label. Returns all tags if no query is provided.",
+      description:
+        "Search tags by label. Returns all tags if no query is provided.",
       inputSchema: z.object({
-        query: z.string().optional().describe("Free-text search across tag labels"),
-        limit: z.number().min(1).max(25).default(10).describe("Max results to return"),
+        query: z
+          .string()
+          .optional()
+          .describe("Free-text search across tag labels"),
+        limit: z
+          .number()
+          .min(1)
+          .max(25)
+          .default(10)
+          .describe("Max results to return"),
       }),
       execute: async ({ query, limit }) => {
         let dbQuery = supabase
@@ -92,10 +107,14 @@ export function createTagTools(supabase: SupabaseClient<Database>, userId: strin
         "Create a new tag. A color is automatically assigned from a rotating palette unless provided.",
       inputSchema: z.object({
         label: z.string().min(1).max(100).describe("Tag label"),
-        color: z.string().optional().describe("Optional hex color override (e.g. '#3B82F6')"),
+        color: z
+          .string()
+          .optional()
+          .describe("Optional hex color override (e.g. '#3B82F6')"),
       }),
       execute: async ({ label, color }) => {
-        const tagColor = color?.trim() || (await pickNextColor(supabase, userId));
+        const tagColor =
+          color?.trim() || (await pickNextColor(supabase, userId));
 
         const { data: tag, error } = await supabase
           .from("tags")
@@ -138,7 +157,10 @@ export function createTagTools(supabase: SupabaseClient<Database>, userId: strin
 
         updates.updated_at = new Date().toISOString();
 
-        const { error } = await supabase.from("tags").update(updates).eq("id", tagId);
+        const { error } = await supabase
+          .from("tags")
+          .update(updates)
+          .eq("id", tagId);
 
         if (error) {
           return { error: `Failed to update tag: ${error.message}` };
@@ -155,7 +177,11 @@ export function createTagTools(supabase: SupabaseClient<Database>, userId: strin
         tagId: z.string().uuid().describe("The UUID of the tag to delete"),
       }),
       execute: async ({ tagId }) => {
-        const { data: tag } = await supabase.from("tags").select("label").eq("id", tagId).single();
+        const { data: tag } = await supabase
+          .from("tags")
+          .select("label")
+          .eq("id", tagId)
+          .single();
 
         const { error } = await supabase.from("tags").delete().eq("id", tagId);
 
@@ -168,10 +194,14 @@ export function createTagTools(supabase: SupabaseClient<Database>, userId: strin
     }),
 
     add_tag_to_contacts: tool({
-      description: "Apply a tag to one or more contacts. Skips contacts that already have the tag.",
+      description:
+        "Apply a tag to one or more contacts. Skips contacts that already have the tag.",
       inputSchema: z.object({
         tagId: z.string().uuid().describe("The UUID of the tag"),
-        personIds: z.array(z.string().uuid()).min(1).describe("UUIDs of the contacts to tag"),
+        personIds: z
+          .array(z.string().uuid())
+          .min(1)
+          .describe("UUIDs of the contacts to tag"),
       }),
       execute: async ({ tagId, personIds }) => {
         const memberships = personIds.map((personId) => ({
@@ -180,10 +210,12 @@ export function createTagTools(supabase: SupabaseClient<Database>, userId: strin
           user_id: userId,
         }));
 
-        const { error } = await supabase.from("people_tags").upsert(memberships, {
-          onConflict: "person_id,tag_id",
-          ignoreDuplicates: true,
-        });
+        const { error } = await supabase
+          .from("people_tags")
+          .upsert(memberships, {
+            onConflict: "person_id,tag_id",
+            ignoreDuplicates: true,
+          });
 
         if (error) {
           return { error: `Failed to tag contacts: ${error.message}` };
@@ -195,18 +227,23 @@ export function createTagTools(supabase: SupabaseClient<Database>, userId: strin
           .in("id", personIds);
 
         const names =
-          people?.map((p) => [p.first_name, p.last_name].filter(Boolean).join(" ")).join(", ") ??
-          "unknown";
+          people
+            ?.map((p) => [p.first_name, p.last_name].filter(Boolean).join(" "))
+            .join(", ") ?? "unknown";
 
         return { message: `Tagged ${names}.`, tagId };
       },
     }),
 
     remove_tag_from_contacts: tool({
-      description: "Remove a tag from one or more contacts. Does not delete the tag itself.",
+      description:
+        "Remove a tag from one or more contacts. Does not delete the tag itself.",
       inputSchema: z.object({
         tagId: z.string().uuid().describe("The UUID of the tag"),
-        personIds: z.array(z.string().uuid()).min(1).describe("UUIDs of the contacts to untag"),
+        personIds: z
+          .array(z.string().uuid())
+          .min(1)
+          .describe("UUIDs of the contacts to untag"),
       }),
       execute: async ({ tagId, personIds }) => {
         const { error } = await supabase
@@ -216,7 +253,9 @@ export function createTagTools(supabase: SupabaseClient<Database>, userId: strin
           .in("person_id", personIds);
 
         if (error) {
-          return { error: `Failed to remove tag from contacts: ${error.message}` };
+          return {
+            error: `Failed to remove tag from contacts: ${error.message}`,
+          };
         }
 
         const { data: people } = await supabase
@@ -225,8 +264,9 @@ export function createTagTools(supabase: SupabaseClient<Database>, userId: strin
           .in("id", personIds);
 
         const names =
-          people?.map((p) => [p.first_name, p.last_name].filter(Boolean).join(" ")).join(", ") ??
-          "unknown";
+          people
+            ?.map((p) => [p.first_name, p.last_name].filter(Boolean).join(" "))
+            .join(", ") ?? "unknown";
 
         return { message: `Removed tag from ${names}.`, tagId };
       },

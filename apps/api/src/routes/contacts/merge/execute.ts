@@ -49,16 +49,22 @@ export function registerMergeExecuteRoute(fastify: FastifyInstance): void {
       const conflictResolutions = request.body.conflictResolutions || {};
 
       if (leftPersonId === rightPersonId) {
-        return reply.status(400).send({ error: "Cannot merge the same contact" });
+        return reply
+          .status(400)
+          .send({ error: "Cannot merge the same contact" });
       }
 
       for (const [field, choice] of Object.entries(conflictResolutions)) {
         if (!MERGEABLE_FIELDS.has(field as MergeConflictField)) {
-          return reply.status(400).send({ error: `Unsupported conflict field: ${field}` });
+          return reply
+            .status(400)
+            .send({ error: `Unsupported conflict field: ${field}` });
         }
 
         if (choice !== "left" && choice !== "right") {
-          return reply.status(400).send({ error: `Invalid conflict choice for field: ${field}` });
+          return reply
+            .status(400)
+            .send({ error: `Invalid conflict choice for field: ${field}` });
         }
       }
 
@@ -73,14 +79,22 @@ export function registerMergeExecuteRoute(fastify: FastifyInstance): void {
       }
 
       if (!peopleRows || peopleRows.length !== 2) {
-        return reply.status(404).send({ error: "One or both contacts were not found" });
+        return reply
+          .status(404)
+          .send({ error: "One or both contacts were not found" });
       }
 
-      const leftPerson = peopleRows.find((person) => person.id === leftPersonId);
-      const rightPerson = peopleRows.find((person) => person.id === rightPersonId);
+      const leftPerson = peopleRows.find(
+        (person) => person.id === leftPersonId,
+      );
+      const rightPerson = peopleRows.find(
+        (person) => person.id === rightPersonId,
+      );
 
       if (!leftPerson || !rightPerson) {
-        return reply.status(404).send({ error: "One or both contacts were not found" });
+        return reply
+          .status(404)
+          .send({ error: "One or both contacts were not found" });
       }
 
       const scalarUpdates: TablesUpdate<"people"> = {};
@@ -105,7 +119,9 @@ export function registerMergeExecuteRoute(fastify: FastifyInstance): void {
 
         if (
           resolveConflictChoice(
-            conflictResolutions as Partial<Record<MergeConflictField, MergeConflictChoice>>,
+            conflictResolutions as Partial<
+              Record<MergeConflictField, MergeConflictChoice>
+            >,
             mergeField,
           ) === "right"
         ) {
@@ -146,7 +162,9 @@ export function registerMergeExecuteRoute(fastify: FastifyInstance): void {
       if (leftPhonesError || rightPhonesError) {
         return reply
           .status(500)
-          .send({ error: leftPhonesError?.message || rightPhonesError?.message });
+          .send({
+            error: leftPhonesError?.message || rightPhonesError?.message,
+          });
       }
 
       const normalizedLeftPhones = (leftPhones || [])
@@ -174,18 +192,33 @@ export function registerMergeExecuteRoute(fastify: FastifyInstance): void {
       let mergedPhones = normalizedLeftPhones;
       if (!normalizedLeftPhones.length && normalizedRightPhones.length) {
         mergedPhones = normalizedRightPhones;
-      } else if (normalizedLeftPhones.length && normalizedRightPhones.length && !phonesEqual) {
+      } else if (
+        normalizedLeftPhones.length &&
+        normalizedRightPhones.length &&
+        !phonesEqual
+      ) {
         const choice = resolveConflictChoice(
-          conflictResolutions as Partial<Record<MergeConflictField, MergeConflictChoice>>,
+          conflictResolutions as Partial<
+            Record<MergeConflictField, MergeConflictChoice>
+          >,
           "phones",
         );
-        mergedPhones = choice === "right" ? normalizedRightPhones : normalizedLeftPhones;
+        mergedPhones =
+          choice === "right" ? normalizedRightPhones : normalizedLeftPhones;
       }
 
       try {
-        await replaceContactPhones(client, user.id, leftPersonId, mergedPhones as PhoneEntry[]);
+        await replaceContactPhones(
+          client,
+          user.id,
+          leftPersonId,
+          mergedPhones as PhoneEntry[],
+        );
       } catch (phoneError) {
-        const message = phoneError instanceof Error ? phoneError.message : "Failed to merge phones";
+        const message =
+          phoneError instanceof Error
+            ? phoneError.message
+            : "Failed to merge phones";
         return reply.status(500).send({ error: message });
       }
 
@@ -210,7 +243,9 @@ export function registerMergeExecuteRoute(fastify: FastifyInstance): void {
       if (leftEmailsError || rightEmailsError) {
         return reply
           .status(500)
-          .send({ error: leftEmailsError?.message || rightEmailsError?.message });
+          .send({
+            error: leftEmailsError?.message || rightEmailsError?.message,
+          });
       }
 
       const normalizedLeftEmails = (leftEmails || [])
@@ -236,18 +271,33 @@ export function registerMergeExecuteRoute(fastify: FastifyInstance): void {
       let mergedEmails = normalizedLeftEmails;
       if (!normalizedLeftEmails.length && normalizedRightEmails.length) {
         mergedEmails = normalizedRightEmails;
-      } else if (normalizedLeftEmails.length && normalizedRightEmails.length && !emailsEqual) {
+      } else if (
+        normalizedLeftEmails.length &&
+        normalizedRightEmails.length &&
+        !emailsEqual
+      ) {
         const choice = resolveConflictChoice(
-          conflictResolutions as Partial<Record<MergeConflictField, MergeConflictChoice>>,
+          conflictResolutions as Partial<
+            Record<MergeConflictField, MergeConflictChoice>
+          >,
           "emails",
         );
-        mergedEmails = choice === "right" ? normalizedRightEmails : normalizedLeftEmails;
+        mergedEmails =
+          choice === "right" ? normalizedRightEmails : normalizedLeftEmails;
       }
 
       try {
-        await replaceContactEmails(client, user.id, leftPersonId, mergedEmails as EmailEntry[]);
+        await replaceContactEmails(
+          client,
+          user.id,
+          leftPersonId,
+          mergedEmails as EmailEntry[],
+        );
       } catch (emailError) {
-        const message = emailError instanceof Error ? emailError.message : "Failed to merge emails";
+        const message =
+          emailError instanceof Error
+            ? emailError.message
+            : "Failed to merge emails";
         return reply.status(500).send({ error: message });
       }
 
@@ -307,7 +357,9 @@ export function registerMergeExecuteRoute(fastify: FastifyInstance): void {
         }
 
         const choice = resolveConflictChoice(
-          conflictResolutions as Partial<Record<MergeConflictField, MergeConflictChoice>>,
+          conflictResolutions as Partial<
+            Record<MergeConflictField, MergeConflictChoice>
+          >,
           field as MergeConflictField,
         );
         if (choice !== "right") {
@@ -329,7 +381,9 @@ export function registerMergeExecuteRoute(fastify: FastifyInstance): void {
 
       // Execute all social media writes in parallel
       const socialWriteResults = await Promise.allSettled([
-        ...(socialInserts.length > 0 ? [client.from("people_socials").insert(socialInserts)] : []),
+        ...(socialInserts.length > 0
+          ? [client.from("people_socials").insert(socialInserts)]
+          : []),
         ...socialUpdatePromises,
       ]);
 
@@ -338,7 +392,9 @@ export function registerMergeExecuteRoute(fastify: FastifyInstance): void {
         if (result.status === "rejected") {
           return reply
             .status(500)
-            .send({ error: result.reason?.message ?? "Social media merge failed" });
+            .send({
+              error: result.reason?.message ?? "Social media merge failed",
+            });
         }
         if (
           result.status === "fulfilled" &&
@@ -346,48 +402,58 @@ export function registerMergeExecuteRoute(fastify: FastifyInstance): void {
           typeof result.value === "object" &&
           "error" in result.value
         ) {
-          const err = (result.value as { error: { code?: string; message: string } | null }).error;
+          const err = (
+            result.value as { error: { code?: string; message: string } | null }
+          ).error;
           if (err && err.code !== "23505") {
             return reply.status(500).send({ error: err.message });
           }
         }
       }
 
-      const { data: rightGroupMemberships, error: rightGroupMembershipsError } = await client
-        .from("people_groups")
-        .select("group_id")
-        .eq("user_id", user.id)
-        .eq("person_id", rightPersonId);
+      const { data: rightGroupMemberships, error: rightGroupMembershipsError } =
+        await client
+          .from("people_groups")
+          .select("group_id")
+          .eq("user_id", user.id)
+          .eq("person_id", rightPersonId);
 
       if (rightGroupMembershipsError) {
-        return reply.status(500).send({ error: rightGroupMembershipsError.message });
+        return reply
+          .status(500)
+          .send({ error: rightGroupMembershipsError.message });
       }
 
       if ((rightGroupMemberships || []).length > 0) {
-        const { error: groupMergeError } = await client.from("people_groups").upsert(
-          (rightGroupMemberships || []).map((membership) => ({
-            user_id: user.id,
-            person_id: leftPersonId,
-            group_id: membership.group_id,
-          })),
-          {
-            onConflict: "person_id,group_id",
-            ignoreDuplicates: true,
-          },
-        );
+        const { error: groupMergeError } = await client
+          .from("people_groups")
+          .upsert(
+            (rightGroupMemberships || []).map((membership) => ({
+              user_id: user.id,
+              person_id: leftPersonId,
+              group_id: membership.group_id,
+            })),
+            {
+              onConflict: "person_id,group_id",
+              ignoreDuplicates: true,
+            },
+          );
 
         if (groupMergeError) {
           return reply.status(500).send({ error: groupMergeError.message });
         }
       }
 
-      const { data: rightParticipants, error: rightParticipantsError } = await client
-        .from("interaction_participants")
-        .select("interaction_id")
-        .eq("person_id", rightPersonId);
+      const { data: rightParticipants, error: rightParticipantsError } =
+        await client
+          .from("interaction_participants")
+          .select("interaction_id")
+          .eq("person_id", rightPersonId);
 
       if (rightParticipantsError) {
-        return reply.status(500).send({ error: rightParticipantsError.message });
+        return reply
+          .status(500)
+          .send({ error: rightParticipantsError.message });
       }
 
       if ((rightParticipants || []).length > 0) {
@@ -405,7 +471,9 @@ export function registerMergeExecuteRoute(fastify: FastifyInstance): void {
           );
 
         if (participantsMergeError) {
-          return reply.status(500).send({ error: participantsMergeError.message });
+          return reply
+            .status(500)
+            .send({ error: participantsMergeError.message });
         }
       }
 
@@ -430,29 +498,44 @@ export function registerMergeExecuteRoute(fastify: FastifyInstance): void {
       if (leftImportantDatesError || rightImportantDatesError) {
         return reply
           .status(500)
-          .send({ error: leftImportantDatesError?.message || rightImportantDatesError?.message });
+          .send({
+            error:
+              leftImportantDatesError?.message ||
+              rightImportantDatesError?.message,
+          });
       }
 
-      const normalizedLeftImportantDates = (leftImportantDates || []).map((event) => ({
-        type: event.type,
-        date: event.date,
-        note: event.note,
-        notify_days_before: event.notify_days_before,
-      }));
+      const normalizedLeftImportantDates = (leftImportantDates || []).map(
+        (event) => ({
+          type: event.type,
+          date: event.date,
+          note: event.note,
+          notify_days_before: event.notify_days_before,
+        }),
+      );
 
-      const normalizedRightImportantDates = (rightImportantDates || []).map((event) => ({
-        type: event.type,
-        date: event.date,
-        note: event.note,
-        notify_days_before: event.notify_days_before,
-      }));
+      const normalizedRightImportantDates = (rightImportantDates || []).map(
+        (event) => ({
+          type: event.type,
+          date: event.date,
+          note: event.note,
+          notify_days_before: event.notify_days_before,
+        }),
+      );
 
       const importantDatesEqual =
-        JSON.stringify(normalizeImportantDateSet(normalizedLeftImportantDates)) ===
-        JSON.stringify(normalizeImportantDateSet(normalizedRightImportantDates));
+        JSON.stringify(
+          normalizeImportantDateSet(normalizedLeftImportantDates),
+        ) ===
+        JSON.stringify(
+          normalizeImportantDateSet(normalizedRightImportantDates),
+        );
 
       let mergedImportantDates = normalizedLeftImportantDates;
-      if (!normalizedLeftImportantDates.length && normalizedRightImportantDates.length) {
+      if (
+        !normalizedLeftImportantDates.length &&
+        normalizedRightImportantDates.length
+      ) {
         mergedImportantDates = normalizedRightImportantDates;
       } else if (
         normalizedLeftImportantDates.length &&
@@ -460,11 +543,15 @@ export function registerMergeExecuteRoute(fastify: FastifyInstance): void {
         !importantDatesEqual
       ) {
         const choice = resolveConflictChoice(
-          conflictResolutions as Partial<Record<MergeConflictField, MergeConflictChoice>>,
+          conflictResolutions as Partial<
+            Record<MergeConflictField, MergeConflictChoice>
+          >,
           "importantDates",
         );
         mergedImportantDates =
-          choice === "right" ? normalizedRightImportantDates : normalizedLeftImportantDates;
+          choice === "right"
+            ? normalizedRightImportantDates
+            : normalizedLeftImportantDates;
       }
 
       const { error: deleteLeftImportantDatesError } = await client
@@ -474,7 +561,9 @@ export function registerMergeExecuteRoute(fastify: FastifyInstance): void {
         .eq("person_id", leftPersonId);
 
       if (deleteLeftImportantDatesError) {
-        return reply.status(500).send({ error: deleteLeftImportantDatesError.message });
+        return reply
+          .status(500)
+          .send({ error: deleteLeftImportantDatesError.message });
       }
 
       if (mergedImportantDates.length > 0) {
@@ -492,18 +581,27 @@ export function registerMergeExecuteRoute(fastify: FastifyInstance): void {
           );
 
         if (insertImportantDatesError) {
-          return reply.status(500).send({ error: insertImportantDatesError.message });
+          return reply
+            .status(500)
+            .send({ error: insertImportantDatesError.message });
         }
       }
 
-      const { data: relationshipsToTransfer, error: relationshipsToTransferError } = await client
+      const {
+        data: relationshipsToTransfer,
+        error: relationshipsToTransferError,
+      } = await client
         .from("people_relationships")
         .select("relationship_type, source_person_id, target_person_id")
         .eq("user_id", user.id)
-        .or(`source_person_id.eq.${rightPersonId},target_person_id.eq.${rightPersonId}`);
+        .or(
+          `source_person_id.eq.${rightPersonId},target_person_id.eq.${rightPersonId}`,
+        );
 
       if (relationshipsToTransferError) {
-        return reply.status(500).send({ error: relationshipsToTransferError.message });
+        return reply
+          .status(500)
+          .send({ error: relationshipsToTransferError.message });
       }
 
       // Bulk insert relationship transfers instead of per-row inserts
@@ -535,7 +633,9 @@ export function registerMergeExecuteRoute(fastify: FastifyInstance): void {
       if (relationshipRows.length > 0) {
         // Use Promise.allSettled to handle individual constraint violations gracefully
         const results = await Promise.allSettled(
-          relationshipRows.map((row) => client.from("people_relationships").insert(row)),
+          relationshipRows.map((row) =>
+            client.from("people_relationships").insert(row),
+          ),
         );
 
         for (const result of results) {
@@ -556,7 +656,9 @@ export function registerMergeExecuteRoute(fastify: FastifyInstance): void {
         .eq("user_id", user.id);
 
       if (deleteMergedPersonError) {
-        return reply.status(500).send({ error: deleteMergedPersonError.message });
+        return reply
+          .status(500)
+          .send({ error: deleteMergedPersonError.message });
       }
 
       // Handle avatar conflict: copy the chosen avatar file, then clean up the right person's file
@@ -565,12 +667,16 @@ export function registerMergeExecuteRoute(fastify: FastifyInstance): void {
 
       if (
         resolveConflictChoice(
-          conflictResolutions as Partial<Record<MergeConflictField, MergeConflictChoice>>,
+          conflictResolutions as Partial<
+            Record<MergeConflictField, MergeConflictChoice>
+          >,
           "avatar",
         ) === "right"
       ) {
         // Copy right person's avatar to left person's storage path (best-effort, tolerates missing files)
-        await client.storage.from("avatars").copy(rightAvatarPath, leftAvatarPath);
+        await client.storage
+          .from("avatars")
+          .copy(rightAvatarPath, leftAvatarPath);
       }
 
       // Remove the right person's avatar file regardless of choice (cleanup orphaned file)

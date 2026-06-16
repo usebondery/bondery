@@ -11,13 +11,25 @@ import type { Database, TablesUpdate } from "@bondery/types/supabase.types";
  * @param userId - The authenticated user's ID.
  * @returns An object of AI SDK tools for group operations.
  */
-export function createGroupTools(supabase: SupabaseClient<Database>, userId: string) {
+export function createGroupTools(
+  supabase: SupabaseClient<Database>,
+  userId: string,
+) {
   return {
     search_groups: tool({
-      description: "Search groups by name. Returns all groups if no query is provided.",
+      description:
+        "Search groups by name. Returns all groups if no query is provided.",
       inputSchema: z.object({
-        query: z.string().optional().describe("Free-text search across group names"),
-        limit: z.number().min(1).max(25).default(10).describe("Max results to return"),
+        query: z
+          .string()
+          .optional()
+          .describe("Free-text search across group names"),
+        limit: z
+          .number()
+          .min(1)
+          .max(25)
+          .default(10)
+          .describe("Max results to return"),
       }),
       execute: async ({ query, limit }) => {
         let dbQuery = supabase
@@ -66,8 +78,14 @@ export function createGroupTools(supabase: SupabaseClient<Database>, userId: str
         "Create a new group for organizing contacts. Returns the created group's details.",
       inputSchema: z.object({
         label: z.string().min(1).max(100).describe("Group name"),
-        emoji: z.string().optional().describe("Emoji icon for the group (e.g. 🏋️, 🎵)"),
-        color: z.string().min(1).describe("Color for the group (e.g. 'blue', 'red', '#3B82F6')"),
+        emoji: z
+          .string()
+          .optional()
+          .describe("Emoji icon for the group (e.g. 🏋️, 🎵)"),
+        color: z
+          .string()
+          .min(1)
+          .describe("Color for the group (e.g. 'blue', 'red', '#3B82F6')"),
       }),
       execute: async ({ label, emoji, color }) => {
         const { data: group, error } = await supabase
@@ -115,7 +133,10 @@ export function createGroupTools(supabase: SupabaseClient<Database>, userId: str
 
         updates.updated_at = new Date().toISOString();
 
-        const { error } = await supabase.from("groups").update(updates).eq("id", groupId);
+        const { error } = await supabase
+          .from("groups")
+          .update(updates)
+          .eq("id", groupId);
 
         if (error) {
           return { error: `Failed to update group: ${error.message}` };
@@ -138,7 +159,10 @@ export function createGroupTools(supabase: SupabaseClient<Database>, userId: str
           .eq("id", groupId)
           .single();
 
-        const { error } = await supabase.from("groups").delete().eq("id", groupId);
+        const { error } = await supabase
+          .from("groups")
+          .delete()
+          .eq("id", groupId);
 
         if (error) {
           return { error: `Failed to delete group: ${error.message}` };
@@ -149,10 +173,14 @@ export function createGroupTools(supabase: SupabaseClient<Database>, userId: str
     }),
 
     add_contacts_to_group: tool({
-      description: "Add one or more contacts to a group. Skips contacts that are already members.",
+      description:
+        "Add one or more contacts to a group. Skips contacts that are already members.",
       inputSchema: z.object({
         groupId: z.string().uuid().describe("The UUID of the group"),
-        personIds: z.array(z.string().uuid()).min(1).describe("UUIDs of the contacts to add"),
+        personIds: z
+          .array(z.string().uuid())
+          .min(1)
+          .describe("UUIDs of the contacts to add"),
       }),
       execute: async ({ groupId, personIds }) => {
         const memberships = personIds.map((personId) => ({
@@ -161,10 +189,12 @@ export function createGroupTools(supabase: SupabaseClient<Database>, userId: str
           user_id: userId,
         }));
 
-        const { error } = await supabase.from("people_groups").upsert(memberships, {
-          onConflict: "person_id,group_id",
-          ignoreDuplicates: true,
-        });
+        const { error } = await supabase
+          .from("people_groups")
+          .upsert(memberships, {
+            onConflict: "person_id,group_id",
+            ignoreDuplicates: true,
+          });
 
         if (error) {
           return { error: `Failed to add contacts to group: ${error.message}` };
@@ -176,8 +206,9 @@ export function createGroupTools(supabase: SupabaseClient<Database>, userId: str
           .in("id", personIds);
 
         const names =
-          people?.map((p) => [p.first_name, p.last_name].filter(Boolean).join(" ")).join(", ") ??
-          "unknown";
+          people
+            ?.map((p) => [p.first_name, p.last_name].filter(Boolean).join(" "))
+            .join(", ") ?? "unknown";
 
         return { message: `Added ${names} to the group.`, groupId };
       },
@@ -188,7 +219,10 @@ export function createGroupTools(supabase: SupabaseClient<Database>, userId: str
         "Remove one or more contacts from a group. Does not delete the contacts themselves.",
       inputSchema: z.object({
         groupId: z.string().uuid().describe("The UUID of the group"),
-        personIds: z.array(z.string().uuid()).min(1).describe("UUIDs of the contacts to remove"),
+        personIds: z
+          .array(z.string().uuid())
+          .min(1)
+          .describe("UUIDs of the contacts to remove"),
       }),
       execute: async ({ groupId, personIds }) => {
         const { error } = await supabase
@@ -198,7 +232,9 @@ export function createGroupTools(supabase: SupabaseClient<Database>, userId: str
           .in("person_id", personIds);
 
         if (error) {
-          return { error: `Failed to remove contacts from group: ${error.message}` };
+          return {
+            error: `Failed to remove contacts from group: ${error.message}`,
+          };
         }
 
         const { data: people } = await supabase
@@ -207,8 +243,9 @@ export function createGroupTools(supabase: SupabaseClient<Database>, userId: str
           .in("id", personIds);
 
         const names =
-          people?.map((p) => [p.first_name, p.last_name].filter(Boolean).join(" ")).join(", ") ??
-          "unknown";
+          people
+            ?.map((p) => [p.first_name, p.last_name].filter(Boolean).join(" "))
+            .join(", ") ?? "unknown";
 
         return { message: `Removed ${names} from the group.`, groupId };
       },

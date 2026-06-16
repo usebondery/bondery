@@ -14,7 +14,10 @@ import {
 import { cleanPersonName } from "@bondery/helpers/name";
 import type { TablesUpdate } from "@bondery/types";
 import { cachedGeocodeLinkedInLocation } from "../../../lib/mapy.js";
-import type { ScrapedWorkHistoryEntry, ScrapedEducationEntry } from "@bondery/types";
+import type {
+  ScrapedWorkHistoryEntry,
+  ScrapedEducationEntry,
+} from "@bondery/types";
 import {
   UuidParam,
   NullableString,
@@ -90,7 +93,12 @@ export function registerEnrichRoutes(fastify: FastifyInstance): void {
       }
 
       // Upload logos in parallel (used when inserting work/edu rows)
-      await uploadAllLinkedInLogos(client, user.id, workHistory, educationHistory);
+      await uploadAllLinkedInLogos(
+        client,
+        user.id,
+        workHistory,
+        educationHistory,
+      );
 
       // Always (re-)upload the contact photo so enrichment refreshes stale avatars.
       if (profileImageUrl) {
@@ -108,8 +116,10 @@ export function registerEnrichRoutes(fastify: FastifyInstance): void {
       }
       if (firstName !== undefined)
         fieldUpdates.first_name = cleanPersonName(firstName) || undefined;
-      if (middleName !== undefined) fieldUpdates.middle_name = cleanPersonName(middleName) || null;
-      if (lastName !== undefined) fieldUpdates.last_name = cleanPersonName(lastName) || null;
+      if (middleName !== undefined)
+        fieldUpdates.middle_name = cleanPersonName(middleName) || null;
+      if (lastName !== undefined)
+        fieldUpdates.last_name = cleanPersonName(lastName) || null;
 
       // Fill-if-missing: headline
       if (headline && !person.headline) {
@@ -128,7 +138,10 @@ export function registerEnrichRoutes(fastify: FastifyInstance): void {
             if (tz) fieldUpdates.timezone = tz;
           }
         } catch (err) {
-          request.log.error({ err }, "[enrich] Geocode failed, continuing without coordinates");
+          request.log.error(
+            { err },
+            "[enrich] Geocode failed, continuing without coordinates",
+          );
         }
       }
 
@@ -153,8 +166,13 @@ export function registerEnrichRoutes(fastify: FastifyInstance): void {
         .single();
 
       if (linkedinUpsertError || !linkedinRow) {
-        request.log.error({ linkedinUpsertError }, "[enrich] Failed to upsert people_linkedin");
-        return reply.status(500).send({ error: "Failed to save LinkedIn profile data" });
+        request.log.error(
+          { linkedinUpsertError },
+          "[enrich] Failed to upsert people_linkedin",
+        );
+        return reply
+          .status(500)
+          .send({ error: "Failed to save LinkedIn profile data" });
       }
 
       const peopleLinkedinId = linkedinRow.id;
@@ -177,7 +195,10 @@ export function registerEnrichRoutes(fastify: FastifyInstance): void {
           p_rows: rows,
         });
         if (whError) {
-          request.log.error({ whError }, "[enrich] Failed to replace work history");
+          request.log.error(
+            { whError },
+            "[enrich] Failed to replace work history",
+          );
         }
       }
 
@@ -191,13 +212,19 @@ export function registerEnrichRoutes(fastify: FastifyInstance): void {
           start_date: toPostgresDate(entry.startDate),
           end_date: toPostgresDate(entry.endDate),
         }));
-        const { error: ehError } = await client.rpc("replace_education_history", {
-          p_people_linkedin_id: peopleLinkedinId,
-          p_user_id: user.id,
-          p_rows: rows,
-        });
+        const { error: ehError } = await client.rpc(
+          "replace_education_history",
+          {
+            p_people_linkedin_id: peopleLinkedinId,
+            p_user_id: user.id,
+            p_rows: rows,
+          },
+        );
         if (ehError) {
-          request.log.error({ ehError }, "[enrich] Failed to replace education history");
+          request.log.error(
+            { ehError },
+            "[enrich] Failed to replace education history",
+          );
         }
       }
 

@@ -3,8 +3,15 @@ import { Type } from "@sinclair/typebox";
 import { getAuth } from "../../../lib/auth.js";
 import { parseVCardUpload } from "./parser.js";
 import { assignContactsToDefaultImportGroup } from "../../../lib/default-import-groups.js";
-import { validateImageUpload, validateImageMagicBytes } from "../../../lib/config.js";
-import type { VCardImportCommitResponse, VCardParseResponse, TablesUpdate } from "@bondery/types";
+import {
+  validateImageUpload,
+  validateImageMagicBytes,
+} from "../../../lib/config.js";
+import type {
+  VCardImportCommitResponse,
+  VCardParseResponse,
+  TablesUpdate,
+} from "@bondery/types";
 import logger from "../../../lib/logger.js";
 import { formatPlaceLabel } from "@bondery/helpers";
 
@@ -23,7 +30,11 @@ const VCardCommitEmailSchema = Type.Object({
 
 const VCardCommitAddressSchema = Type.Object({
   value: Type.String(),
-  type: Type.Union([Type.Literal("home"), Type.Literal("work"), Type.Literal("other")]),
+  type: Type.Union([
+    Type.Literal("home"),
+    Type.Literal("work"),
+    Type.Literal("other"),
+  ]),
   preferred: Type.Boolean(),
   addressLine1: Type.Union([Type.String(), Type.Null()]),
   addressLine2: Type.Union([Type.String(), Type.Null()]),
@@ -73,7 +84,10 @@ const VCardCommitContactSchema = Type.Object({
   signal: Type.Union([Type.String(), Type.Null()]),
   website: Type.Union([Type.String(), Type.Null()]),
   avatarUri: Type.Union([Type.String(), Type.Null()]),
-  importantDates: Type.Union([Type.Array(VCardCommitImportantDateSchema), Type.Null()]),
+  importantDates: Type.Union([
+    Type.Array(VCardCommitImportantDateSchema),
+    Type.Null(),
+  ]),
   isValid: Type.Boolean(),
 });
 
@@ -88,7 +102,9 @@ const AVATARS_BUCKET = "avatars";
  *
  * @returns Buffer + contentType, or null if the URI is not a valid data URI.
  */
-function decodeDataUri(uri: string): { buffer: Buffer; contentType: string } | null {
+function decodeDataUri(
+  uri: string,
+): { buffer: Buffer; contentType: string } | null {
   const match = uri.match(/^data:([^;]+);base64,(.+)$/);
   if (!match) return null;
 
@@ -109,41 +125,45 @@ export async function vcardImportRoutes(fastify: FastifyInstance) {
   });
   fastify.addHook("onRequest", fastify.auth([fastify.verifySession]));
 
-  fastify.post("/parse", async (request: FastifyRequest, reply: FastifyReply) => {
-    try {
-      const files: Array<{ fileName: string; content: Buffer }> = [];
+  fastify.post(
+    "/parse",
+    async (request: FastifyRequest, reply: FastifyReply) => {
+      try {
+        const files: Array<{ fileName: string; content: Buffer }> = [];
 
-      for await (const part of request.parts()) {
-        if (part.type !== "file") {
-          continue;
+        for await (const part of request.parts()) {
+          if (part.type !== "file") {
+            continue;
+          }
+
+          const content = await part.toBuffer();
+          if (!content || !part.filename) {
+            continue;
+          }
+
+          files.push({
+            fileName: part.filename,
+            content,
+          });
         }
 
-        const content = await part.toBuffer();
-        if (!content || !part.filename) {
-          continue;
-        }
+        const contacts = await parseVCardUpload(files);
 
-        files.push({
-          fileName: part.filename,
-          content,
-        });
+        const response: VCardParseResponse = {
+          contacts,
+          totalCount: contacts.length,
+          validCount: contacts.filter((item) => item.isValid).length,
+          invalidCount: contacts.filter((item) => !item.isValid).length,
+        };
+
+        return response;
+      } catch (error) {
+        const message =
+          error instanceof Error ? error.message : "Failed to parse vCard file";
+        return reply.status(400).send({ error: message });
       }
-
-      const contacts = await parseVCardUpload(files);
-
-      const response: VCardParseResponse = {
-        contacts,
-        totalCount: contacts.length,
-        validCount: contacts.filter((item) => item.isValid).length,
-        invalidCount: contacts.filter((item) => !item.isValid).length,
-      };
-
-      return response;
-    } catch (error) {
-      const message = error instanceof Error ? error.message : "Failed to parse vCard file";
-      return reply.status(400).send({ error: message });
-    }
-  });
+    },
+  );
 
   fastify.post(
     "/commit",
@@ -160,7 +180,10 @@ export async function vcardImportRoutes(fastify: FastifyInstance) {
       const skippedCount = rawContacts.length - contacts.length;
 
       if (contacts.length === 0) {
-        return { importedCount: 0, skippedCount } satisfies VCardImportCommitResponse;
+        return {
+          importedCount: 0,
+          skippedCount,
+        } satisfies VCardImportCommitResponse;
       }
 
       const now = new Date().toISOString();
@@ -182,7 +205,9 @@ export async function vcardImportRoutes(fastify: FastifyInstance) {
         .select("id");
 
       if (insertError || !insertedPeople) {
-        return reply.status(500).send({ error: insertError?.message ?? "Insert failed" });
+        return reply
+          .status(500)
+          .send({ error: insertError?.message ?? "Insert failed" });
       }
 
       const importedCount = insertedPeople.length;
@@ -208,9 +233,14 @@ export async function vcardImportRoutes(fastify: FastifyInstance) {
       );
 
       if (phoneRows.length > 0) {
-        const { error: phoneError } = await client.from("people_phones").insert(phoneRows);
+        const { error: phoneError } = await client
+          .from("people_phones")
+          .insert(phoneRows);
         if (phoneError) {
-          logger.error({ err: phoneError }, "Failed to insert phones during vCard import");
+          logger.error(
+            { err: phoneError },
+            "Failed to insert phones during vCard import",
+          );
         }
       }
 
@@ -227,9 +257,14 @@ export async function vcardImportRoutes(fastify: FastifyInstance) {
       );
 
       if (emailRows.length > 0) {
-        const { error: emailError } = await client.from("people_emails").insert(emailRows);
+        const { error: emailError } = await client
+          .from("people_emails")
+          .insert(emailRows);
         if (emailError) {
-          logger.error({ err: emailError }, "Failed to insert emails during vCard import");
+          logger.error(
+            { err: emailError },
+            "Failed to insert emails during vCard import",
+          );
         }
       }
 
@@ -240,41 +275,54 @@ export async function vcardImportRoutes(fastify: FastifyInstance) {
       // All enriched fields (state code, country code, formatted, timezone) are
       // already resolved — no geocoding needed here.
       // The preferred address (vCard pref flag) is placed first (sort_order = 0).
-      const addressRows = contactPersonPairs.flatMap(({ contact, personId }) => {
-        const valid = contact.addresses.filter((addr) => addr.validity === "valid");
-        // Sort preferred first so sort_order = 0 is the preferred address.
-        const sorted = [...valid.filter((a) => a.preferred), ...valid.filter((a) => !a.preferred)];
-        return sorted.map((address, sortOrder) => ({
-          user_id: user.id,
-          person_id: personId,
-          type: address.type,
-          label: null,
-          value: address.value,
-          latitude: address.latitude,
-          longitude: address.longitude,
-          address_line1: address.addressLine1,
-          address_line2: address.addressLine2,
-          address_city: address.addressCity,
-          address_postal_code: address.addressPostalCode,
-          address_state: address.addressState,
-          address_state_code: address.addressStateCode,
-          address_country: address.addressCountry,
-          address_country_code: address.addressCountryCode,
-          address_formatted: address.addressFormatted,
-          // "address" when we have a street (full address data), "city" when city-level only.
-          // Geocode precision is captured separately in geocode_confidence.
-          address_granularity: address.addressLine1 ? "address" : "city",
-          address_geocode_source: address.geocodeSource,
-          geocode_confidence: address.validity === "valid" ? "verified" : "unverifiable",
-          timezone: address.timezone,
-          sort_order: sortOrder,
-        }));
-      });
+      const addressRows = contactPersonPairs.flatMap(
+        ({ contact, personId }) => {
+          const valid = contact.addresses.filter(
+            (addr) => addr.validity === "valid",
+          );
+          // Sort preferred first so sort_order = 0 is the preferred address.
+          const sorted = [
+            ...valid.filter((a) => a.preferred),
+            ...valid.filter((a) => !a.preferred),
+          ];
+          return sorted.map((address, sortOrder) => ({
+            user_id: user.id,
+            person_id: personId,
+            type: address.type,
+            label: null,
+            value: address.value,
+            latitude: address.latitude,
+            longitude: address.longitude,
+            address_line1: address.addressLine1,
+            address_line2: address.addressLine2,
+            address_city: address.addressCity,
+            address_postal_code: address.addressPostalCode,
+            address_state: address.addressState,
+            address_state_code: address.addressStateCode,
+            address_country: address.addressCountry,
+            address_country_code: address.addressCountryCode,
+            address_formatted: address.addressFormatted,
+            // "address" when we have a street (full address data), "city" when city-level only.
+            // Geocode precision is captured separately in geocode_confidence.
+            address_granularity: address.addressLine1 ? "address" : "city",
+            address_geocode_source: address.geocodeSource,
+            geocode_confidence:
+              address.validity === "valid" ? "verified" : "unverifiable",
+            timezone: address.timezone,
+            sort_order: sortOrder,
+          }));
+        },
+      );
 
       if (addressRows.length > 0) {
-        const { error: addressError } = await client.from("people_addresses").insert(addressRows);
+        const { error: addressError } = await client
+          .from("people_addresses")
+          .insert(addressRows);
         if (addressError) {
-          logger.error({ err: addressError }, "Failed to insert addresses during vCard import");
+          logger.error(
+            { err: addressError },
+            "Failed to insert addresses during vCard import",
+          );
         }
       }
 
@@ -387,7 +435,10 @@ export async function vcardImportRoutes(fastify: FastifyInstance) {
           .upsert(socialRows, { onConflict: "user_id,person_id,platform" });
 
         if (socialError) {
-          logger.error({ err: socialError }, "Failed to upsert social media during vCard import");
+          logger.error(
+            { err: socialError },
+            "Failed to upsert social media during vCard import",
+          );
         }
       }
 
@@ -415,7 +466,10 @@ export async function vcardImportRoutes(fastify: FastifyInstance) {
               return;
             }
 
-            const validation = validateImageUpload({ type: contentType, size: buffer.length });
+            const validation = validateImageUpload({
+              type: contentType,
+              size: buffer.length,
+            });
             if (!validation.isValid) return;
 
             if (!validateImageMagicBytes(buffer)) return;
@@ -426,7 +480,10 @@ export async function vcardImportRoutes(fastify: FastifyInstance) {
               upsert: true,
             });
           } catch (error) {
-            logger.error({ err: error, personId }, "Failed to upload vCard avatar");
+            logger.error(
+              { err: error, personId },
+              "Failed to upload vCard avatar",
+            );
           }
         });
 
@@ -446,19 +503,31 @@ export async function vcardImportRoutes(fastify: FastifyInstance) {
       );
 
       if (dateRows.length > 0) {
-        const { error: datesError } = await client.from("people_important_dates").insert(dateRows);
+        const { error: datesError } = await client
+          .from("people_important_dates")
+          .insert(dateRows);
 
         if (datesError) {
-          logger.error({ err: datesError }, "Failed to insert dates during vCard import");
+          logger.error(
+            { err: datesError },
+            "Failed to insert dates during vCard import",
+          );
         }
       }
 
       // ── Step 8: Assign to default import group ──────────────────────────────
       try {
-        await assignContactsToDefaultImportGroup(client, user.id, "vcard_import", personIds);
+        await assignContactsToDefaultImportGroup(
+          client,
+          user.id,
+          "vcard_import",
+          personIds,
+        );
       } catch (groupError) {
         const message =
-          groupError instanceof Error ? groupError.message : "Failed to assign imported contacts";
+          groupError instanceof Error
+            ? groupError.message
+            : "Failed to assign imported contacts";
         return reply.status(500).send({ error: message });
       }
 

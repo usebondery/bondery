@@ -12,13 +12,20 @@ import { INTERACTION_TYPES } from "@bondery/helpers";
  * @param userId - The authenticated user's ID.
  * @returns An object of AI SDK tools for interaction operations.
  */
-export function createInteractionTools(supabase: SupabaseClient<Database>, userId: string) {
+export function createInteractionTools(
+  supabase: SupabaseClient<Database>,
+  userId: string,
+) {
   return {
     log_interaction: tool({
       description:
         "Log a new interaction with one or more contacts. Automatically updates last_interaction on each participant.",
       inputSchema: z.object({
-        title: z.string().max(200).optional().describe("Short title or summary of the interaction"),
+        title: z
+          .string()
+          .max(200)
+          .optional()
+          .describe("Short title or summary of the interaction"),
         type: z.enum(INTERACTION_TYPES).describe("Type of interaction"),
         description: z
           .string()
@@ -110,10 +117,21 @@ export function createInteractionTools(supabase: SupabaseClient<Database>, userI
           .uuid()
           .optional()
           .describe("Filter to interactions involving this contact"),
-        type: z.enum(INTERACTION_TYPES).optional().describe("Filter by interaction type"),
-        dateFrom: z.string().optional().describe("Start date filter (YYYY-MM-DD)"),
+        type: z
+          .enum(INTERACTION_TYPES)
+          .optional()
+          .describe("Filter by interaction type"),
+        dateFrom: z
+          .string()
+          .optional()
+          .describe("Start date filter (YYYY-MM-DD)"),
         dateTo: z.string().optional().describe("End date filter (YYYY-MM-DD)"),
-        limit: z.number().min(1).max(25).default(10).describe("Max results to return"),
+        limit: z
+          .number()
+          .min(1)
+          .max(25)
+          .default(10)
+          .describe("Max results to return"),
       }),
       execute: async ({ contactId, type, dateFrom, dateTo, limit }) => {
         let query = supabase
@@ -149,7 +167,9 @@ export function createInteractionTools(supabase: SupabaseClient<Database>, userI
 
         if (contactId) {
           results = results.filter((i: any) =>
-            i.interaction_participants?.some((p: any) => p.person_id === contactId),
+            i.interaction_participants?.some(
+              (p: any) => p.person_id === contactId,
+            ),
           );
         }
 
@@ -163,7 +183,9 @@ export function createInteractionTools(supabase: SupabaseClient<Database>, userI
             participants:
               i.interaction_participants
                 ?.map((p: any) =>
-                  [p.people?.first_name, p.people?.last_name].filter(Boolean).join(" "),
+                  [p.people?.first_name, p.people?.last_name]
+                    .filter(Boolean)
+                    .join(" "),
                 )
                 .filter(Boolean) ?? [],
           })),
@@ -179,8 +201,13 @@ export function createInteractionTools(supabase: SupabaseClient<Database>, userI
         interactionId: z
           .string()
           .uuid()
-          .describe("The UUID of the existing interaction to add participants to"),
-        participantIds: z.array(z.string().uuid()).min(1).describe("UUIDs of the contacts to add"),
+          .describe(
+            "The UUID of the existing interaction to add participants to",
+          ),
+        participantIds: z
+          .array(z.string().uuid())
+          .min(1)
+          .describe("UUIDs of the contacts to add"),
       }),
       execute: async ({ interactionId, participantIds }) => {
         // Fetch interaction to get date for updating last_interaction
@@ -200,21 +227,31 @@ export function createInteractionTools(supabase: SupabaseClient<Database>, userI
           .select("person_id")
           .eq("interaction_id", interactionId);
 
-        const existingIds = new Set(existing?.map((p: any) => p.person_id) ?? []);
+        const existingIds = new Set(
+          existing?.map((p: any) => p.person_id) ?? [],
+        );
         const newIds = participantIds.filter((id) => !existingIds.has(id));
 
         if (newIds.length === 0) {
-          return { message: "All specified contacts are already part of this interaction." };
+          return {
+            message:
+              "All specified contacts are already part of this interaction.",
+          };
         }
 
         const { error: insertError } = await supabase
           .from("interaction_participants")
           .insert(
-            newIds.map((personId) => ({ interaction_id: interactionId, person_id: personId })),
+            newIds.map((personId) => ({
+              interaction_id: interactionId,
+              person_id: personId,
+            })),
           );
 
         if (insertError) {
-          return { error: `Failed to add participants: ${insertError.message}` };
+          return {
+            error: `Failed to add participants: ${insertError.message}`,
+          };
         }
 
         // Update last_interaction on newly added people
@@ -252,11 +289,24 @@ export function createInteractionTools(supabase: SupabaseClient<Database>, userI
       description:
         "Update an existing interaction's details such as title, type, date, or description. Use this when the user wants to edit or change information about a previously logged interaction.",
       inputSchema: z.object({
-        interactionId: z.string().uuid().describe("The UUID of the interaction to update"),
+        interactionId: z
+          .string()
+          .uuid()
+          .describe("The UUID of the interaction to update"),
         title: z.string().max(200).optional().describe("New title or summary"),
-        type: z.enum(INTERACTION_TYPES).optional().describe("New interaction type"),
-        date: z.string().optional().describe("New date in ISO format (YYYY-MM-DD)"),
-        description: z.string().max(1000).optional().describe("New description or notes"),
+        type: z
+          .enum(INTERACTION_TYPES)
+          .optional()
+          .describe("New interaction type"),
+        date: z
+          .string()
+          .optional()
+          .describe("New date in ISO format (YYYY-MM-DD)"),
+        description: z
+          .string()
+          .max(1000)
+          .optional()
+          .describe("New description or notes"),
       }),
       execute: async ({ interactionId, title, type, date, description }) => {
         const updates: TablesUpdate<"interactions"> = {};
@@ -277,7 +327,9 @@ export function createInteractionTools(supabase: SupabaseClient<Database>, userI
           .single();
 
         if (error || !interaction) {
-          return { error: `Failed to update interaction: ${error?.message ?? "not found"}` };
+          return {
+            error: `Failed to update interaction: ${error?.message ?? "not found"}`,
+          };
         }
 
         // If the date changed, update last_interaction on all participants
@@ -346,7 +398,9 @@ export function createInteractionTools(supabase: SupabaseClient<Database>, userI
           .in("person_id", participantIds);
 
         if (deleteError) {
-          return { error: `Failed to remove participants: ${deleteError.message}` };
+          return {
+            error: `Failed to remove participants: ${deleteError.message}`,
+          };
         }
 
         const { data: people } = await supabase
@@ -355,8 +409,9 @@ export function createInteractionTools(supabase: SupabaseClient<Database>, userI
           .in("id", participantIds);
 
         const names =
-          people?.map((p) => [p.first_name, p.last_name].filter(Boolean).join(" ")).join(", ") ??
-          "unknown";
+          people
+            ?.map((p) => [p.first_name, p.last_name].filter(Boolean).join(" "))
+            .join(", ") ?? "unknown";
 
         return {
           message: `Removed ${names} from the interaction.`,
@@ -370,7 +425,10 @@ export function createInteractionTools(supabase: SupabaseClient<Database>, userI
       description:
         "Delete an interaction entirely. Use this when the user wants to remove a logged interaction. This will also remove all participant links. Ask for confirmation before deleting.",
       inputSchema: z.object({
-        interactionId: z.string().uuid().describe("The UUID of the interaction to delete"),
+        interactionId: z
+          .string()
+          .uuid()
+          .describe("The UUID of the interaction to delete"),
       }),
       execute: async ({ interactionId }) => {
         // Fetch the interaction first so we can report what was deleted
@@ -397,7 +455,9 @@ export function createInteractionTools(supabase: SupabaseClient<Database>, userI
           .eq("id", interactionId);
 
         if (deleteError) {
-          return { error: `Failed to delete interaction: ${deleteError.message}` };
+          return {
+            error: `Failed to delete interaction: ${deleteError.message}`,
+          };
         }
 
         return {

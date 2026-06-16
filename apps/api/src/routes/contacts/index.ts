@@ -16,9 +16,15 @@ import {
   replaceContactPhones,
 } from "./channels.js";
 import { parseAddressEntries, replaceContactAddresses } from "./addresses.js";
-import { findPersonIdBySocial, upsertContactSocials } from "../../lib/socials.js";
+import {
+  findPersonIdBySocial,
+  upsertContactSocials,
+} from "../../lib/socials.js";
 import { cachedGeocodeLinkedInLocation } from "../../lib/mapy.js";
-import { attachContactExtras, type FullContactExtras } from "../../lib/contact-enrichment.js";
+import {
+  attachContactExtras,
+  type FullContactExtras,
+} from "../../lib/contact-enrichment.js";
 import type {
   Contact,
   ContactAddressEntry,
@@ -46,11 +52,18 @@ import {
 import { registerMergeRoutes } from "./merge/index.js";
 import { registerEnrichmentRoutes } from "./enrichment/index.js";
 import { registerRelationshipRoutes } from "./relationships/index.js";
-import { registerImportantDateRoutes, IMPORTANT_DATE_TYPES } from "./important-dates/index.js";
+import {
+  registerImportantDateRoutes,
+  IMPORTANT_DATE_TYPES,
+} from "./important-dates/index.js";
 import { registerPhotoRoutes } from "./photo/index.js";
 import { registerTagRoutes } from "./tags/index.js";
 
-const LOOKUP_SOCIAL_PLATFORMS: SocialPlatform[] = ["instagram", "linkedin", "facebook"];
+const LOOKUP_SOCIAL_PLATFORMS: SocialPlatform[] = [
+  "instagram",
+  "linkedin",
+  "facebook",
+];
 
 // ── TypeBox Schemas ──────────────────────────────────────────────
 
@@ -90,7 +103,9 @@ const UpdateContactBody = Type.Object({
   latitude: Type.Optional(NullableNumber),
   longitude: Type.Optional(NullableNumber),
   lastInteraction: Type.Optional(NullableString),
-  keepFrequencyDays: Type.Optional(Type.Union([Type.Integer({ minimum: 1 }), Type.Null()])),
+  keepFrequencyDays: Type.Optional(
+    Type.Union([Type.Integer({ minimum: 1 }), Type.Null()]),
+  ),
   phones: Type.Optional(Type.Array(PhoneEntrySchema)),
   emails: Type.Optional(Type.Array(EmailEntrySchema)),
   addresses: Type.Optional(Type.Array(ContactAddressEntrySchema)),
@@ -124,7 +139,9 @@ const MapPinsQuery = Type.Object({
   maxLat: Type.Number({ minimum: -90, maximum: 90 }),
   minLon: Type.Number({ minimum: -180, maximum: 180 }),
   maxLon: Type.Number({ minimum: -180, maximum: 180 }),
-  limit: Type.Optional(Type.Integer({ minimum: 1, maximum: 1000, default: 500 })),
+  limit: Type.Optional(
+    Type.Integer({ minimum: 1, maximum: 1000, default: 500 }),
+  ),
   avatarQuality: Type.Optional(AvatarQualityEnum),
   avatarSize: Type.Optional(AvatarSizeEnum),
 });
@@ -134,13 +151,19 @@ const MapAddressPinsQuery = Type.Object({
   maxLat: Type.Number({ minimum: -90, maximum: 90 }),
   minLon: Type.Number({ minimum: -180, maximum: 180 }),
   maxLon: Type.Number({ minimum: -180, maximum: 180 }),
-  limit: Type.Optional(Type.Integer({ minimum: 1, maximum: 1000, default: 500 })),
+  limit: Type.Optional(
+    Type.Integer({ minimum: 1, maximum: 1000, default: 500 }),
+  ),
   avatarQuality: Type.Optional(AvatarQualityEnum),
   avatarSize: Type.Optional(AvatarSizeEnum),
 });
 
-function isLookupPlatform(value: string): value is (typeof LOOKUP_SOCIAL_PLATFORMS)[number] {
-  return LOOKUP_SOCIAL_PLATFORMS.includes(value as (typeof LOOKUP_SOCIAL_PLATFORMS)[number]);
+function isLookupPlatform(
+  value: string,
+): value is (typeof LOOKUP_SOCIAL_PLATFORMS)[number] {
+  return LOOKUP_SOCIAL_PLATFORMS.includes(
+    value as (typeof LOOKUP_SOCIAL_PLATFORMS)[number],
+  );
 }
 
 function toContactPreview(
@@ -219,10 +242,11 @@ async function deleteOrphanedInteractionsForDeletedContacts(
     return;
   }
 
-  const { data: impactedMemberships, error: impactedMembershipsError } = await client
-    .from("interaction_participants")
-    .select("interaction_id, person_id")
-    .in("person_id", uniqueContactIds);
+  const { data: impactedMemberships, error: impactedMembershipsError } =
+    await client
+      .from("interaction_participants")
+      .select("interaction_id, person_id")
+      .in("person_id", uniqueContactIds);
 
   if (impactedMembershipsError) {
     throw new Error(impactedMembershipsError.message);
@@ -240,11 +264,12 @@ async function deleteOrphanedInteractionsForDeletedContacts(
     return;
   }
 
-  const { data: ownedInteractions, error: ownedInteractionsError } = await client
-    .from("interactions")
-    .select("id")
-    .eq("user_id", userId)
-    .in("id", impactedInteractionIds);
+  const { data: ownedInteractions, error: ownedInteractionsError } =
+    await client
+      .from("interactions")
+      .select("id")
+      .eq("user_id", userId)
+      .in("id", impactedInteractionIds);
 
   if (ownedInteractionsError) {
     throw new Error(ownedInteractionsError.message);
@@ -279,8 +304,9 @@ async function deleteOrphanedInteractionsForDeletedContacts(
       continue;
     }
 
-    const allParticipantsDeleted = participants.every((membership: { person_id: string }) =>
-      uniqueContactIds.includes(membership.person_id),
+    const allParticipantsDeleted = participants.every(
+      (membership: { person_id: string }) =>
+        uniqueContactIds.includes(membership.person_id),
     );
 
     if (allParticipantsDeleted) {
@@ -372,8 +398,10 @@ async function removeOrphanedLinkedInLogos(
   ]);
 
   const stillReferenced = new Set<string>();
-  for (const row of workResult.data ?? []) stillReferenced.add(row.company_linkedin_id);
-  for (const row of eduResult.data ?? []) stillReferenced.add(row.school_linkedin_id);
+  for (const row of workResult.data ?? [])
+    stillReferenced.add(row.company_linkedin_id);
+  for (const row of eduResult.data ?? [])
+    stillReferenced.add(row.school_linkedin_id);
 
   const orphaned = candidateIds.filter((id) => !stillReferenced.has(id));
   if (orphaned.length === 0) return;
@@ -457,7 +485,9 @@ export async function contactRoutes(fastify: FastifyInstance) {
     "/map-address-pins",
     { schema: { querystring: MapAddressPinsQuery } },
     async (
-      request: FastifyRequest<{ Querystring: typeof MapAddressPinsQuery.static }>,
+      request: FastifyRequest<{
+        Querystring: typeof MapAddressPinsQuery.static;
+      }>,
       reply: FastifyReply,
     ) => {
       const { client, user } = getAuth(request);
@@ -502,7 +532,12 @@ export async function contactRoutes(fastify: FastifyInstance) {
           addressCountry: row.address_country,
           latitude: row.latitude,
           longitude: row.longitude,
-          avatar: buildContactAvatarUrl(client, user.id, row.person_id, avatarOptions),
+          avatar: buildContactAvatarUrl(
+            client,
+            user.id,
+            row.person_id,
+            avatarOptions,
+          ),
         }),
       );
 
@@ -531,8 +566,12 @@ export async function contactRoutes(fastify: FastifyInstance) {
       const search = typeof query.q === "string" ? query.q.trim() : "";
 
       const now = new Date();
-      const monthStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
-      const nextMonthStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 1));
+      const monthStart = new Date(
+        Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1),
+      );
+      const nextMonthStart = new Date(
+        Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 1),
+      );
       const yearStart = new Date(Date.UTC(now.getUTCFullYear(), 0, 1));
       const nextYearStart = new Date(Date.UTC(now.getUTCFullYear() + 1, 0, 1));
 
@@ -591,7 +630,10 @@ export async function contactRoutes(fastify: FastifyInstance) {
         } else {
           const rankedIds = ranked.map((r) => r.id);
 
-          let fetchQuery = client.from("people").select(CONTACT_SELECT).in("id", rankedIds);
+          let fetchQuery = client
+            .from("people")
+            .select(CONTACT_SELECT)
+            .in("id", rankedIds);
 
           // Preserve keepInTouch filter even during search
           if (query.keepInTouch) {
@@ -601,7 +643,10 @@ export async function contactRoutes(fastify: FastifyInstance) {
           const { data: fetchedContacts, error: fetchError } = await fetchQuery;
 
           if (fetchError) {
-            request.log.error({ err: fetchError }, "Error fetching fuzzy search results");
+            request.log.error(
+              { err: fetchError },
+              "Error fetching fuzzy search results",
+            );
             return reply.status(500).send({ error: fetchError.message });
           }
 
@@ -629,10 +674,16 @@ export async function contactRoutes(fastify: FastifyInstance) {
             peopleQuery = peopleQuery.order("first_name", { ascending: false });
             break;
           case "surnameAsc":
-            peopleQuery = peopleQuery.order("last_name", { ascending: true, nullsFirst: true });
+            peopleQuery = peopleQuery.order("last_name", {
+              ascending: true,
+              nullsFirst: true,
+            });
             break;
           case "surnameDesc":
-            peopleQuery = peopleQuery.order("last_name", { ascending: false, nullsFirst: false });
+            peopleQuery = peopleQuery.order("last_name", {
+              ascending: false,
+              nullsFirst: false,
+            });
             break;
           case "interactionAsc":
             peopleQuery = peopleQuery.order("last_interaction", {
@@ -678,12 +729,20 @@ export async function contactRoutes(fastify: FastifyInstance) {
 
       let enrichedContacts: Array<{ id: string } & FullContactExtras> = [];
       try {
-        enrichedContacts = await attachContactExtras(client, user.id, contacts || [], {
-          addresses: true,
-          avatarOptions,
-        });
+        enrichedContacts = await attachContactExtras(
+          client,
+          user.id,
+          contacts || [],
+          {
+            addresses: true,
+            avatarOptions,
+          },
+        );
       } catch (enrichError) {
-        fastify.log.error({ enrichError }, "Failed to attach contact extras for contact list");
+        fastify.log.error(
+          { enrichError },
+          "Failed to attach contact extras for contact list",
+        );
         enrichedContacts = withEmptySocials(withEmptyChannels(contacts || []));
       }
 
@@ -743,10 +802,18 @@ export async function contactRoutes(fastify: FastifyInstance) {
 
       if (body.linkedin && body.linkedin.trim().length > 0) {
         try {
-          await upsertContactSocials(client, user.id, newContact.id, "linkedin", body.linkedin);
+          await upsertContactSocials(
+            client,
+            user.id,
+            newContact.id,
+            "linkedin",
+            body.linkedin,
+          );
         } catch (socialError) {
           const message =
-            socialError instanceof Error ? socialError.message : "Social upsert failed";
+            socialError instanceof Error
+              ? socialError.message
+              : "Social upsert failed";
           return reply.status(500).send({ error: message });
         }
       }
@@ -787,27 +854,38 @@ export async function contactRoutes(fastify: FastifyInstance) {
           .eq("user_id", user.id)
           .eq("myself", true)
           .in("id", uniqueIds);
-        const myselfIds = new Set((myselfRows ?? []).map((r: { id: string }) => r.id));
+        const myselfIds = new Set(
+          (myselfRows ?? []).map((r: { id: string }) => r.id),
+        );
         uniqueIds = uniqueIds.filter((id) => !myselfIds.has(id));
 
         if (uniqueIds.length === 0) {
           return reply.status(400).send({
-            error: "No deletable contacts found. Your own contact card cannot be deleted.",
+            error:
+              "No deletable contacts found. Your own contact card cannot be deleted.",
           });
         }
       } else if ("filter" in body && body.filter) {
         // Resolve matching IDs via fuzzy search RPC when a search query is present,
         // otherwise fetch all non-myself contacts.
-        const search = typeof body.filter.q === "string" ? body.filter.q.trim() : "";
+        const search =
+          typeof body.filter.q === "string" ? body.filter.q.trim() : "";
         if (search) {
-          const { ranked, error: rpcError } = await searchPeopleIds(client, user.id, search, 10000);
+          const { ranked, error: rpcError } = await searchPeopleIds(
+            client,
+            user.id,
+            search,
+            10000,
+          );
 
           if (rpcError) {
             return reply.status(500).send({ error: rpcError });
           }
 
           const excludeSet = new Set(body.excludeIds ?? []);
-          uniqueIds = (ranked || []).map((r) => r.id).filter((id) => !excludeSet.has(id));
+          uniqueIds = (ranked || [])
+            .map((r) => r.id)
+            .filter((id) => !excludeSet.has(id));
         } else {
           let filterQuery = client
             .from("people")
@@ -837,7 +915,11 @@ export async function contactRoutes(fastify: FastifyInstance) {
       }
 
       try {
-        await deleteOrphanedInteractionsForDeletedContacts(client, user.id, uniqueIds);
+        await deleteOrphanedInteractionsForDeletedContacts(
+          client,
+          user.id,
+          uniqueIds,
+        );
       } catch (cleanupError) {
         const message =
           cleanupError instanceof Error
@@ -846,7 +928,11 @@ export async function contactRoutes(fastify: FastifyInstance) {
         return reply.status(500).send({ error: message });
       }
 
-      const candidateLogoIds = await collectLinkedInLogoIds(client, user.id, uniqueIds);
+      const candidateLogoIds = await collectLinkedInLogoIds(
+        client,
+        user.id,
+        uniqueIds,
+      );
 
       const { error } = await client
         .from("people")
@@ -872,7 +958,10 @@ export async function contactRoutes(fastify: FastifyInstance) {
         );
       }
 
-      return { message: "Contacts deleted successfully", deletedCount: uniqueIds.length };
+      return {
+        message: "Contacts deleted successfully",
+        deletedCount: uniqueIds.length,
+      };
     },
   );
 
@@ -882,7 +971,10 @@ export async function contactRoutes(fastify: FastifyInstance) {
   fastify.delete(
     "/:id",
     { schema: { params: UuidParam } },
-    async (request: FastifyRequest<{ Params: typeof UuidParam.static }>, reply: FastifyReply) => {
+    async (
+      request: FastifyRequest<{ Params: typeof UuidParam.static }>,
+      reply: FastifyReply,
+    ) => {
       const { client, user } = getAuth(request);
       const { id } = request.params;
 
@@ -899,11 +991,15 @@ export async function contactRoutes(fastify: FastifyInstance) {
       }
 
       if (contactCheck.myself) {
-        return reply.status(403).send({ error: "Cannot delete your own contact card" });
+        return reply
+          .status(403)
+          .send({ error: "Cannot delete your own contact card" });
       }
 
       try {
-        await deleteOrphanedInteractionsForDeletedContacts(client, user.id, [id]);
+        await deleteOrphanedInteractionsForDeletedContacts(client, user.id, [
+          id,
+        ]);
       } catch (cleanupError) {
         const message =
           cleanupError instanceof Error
@@ -912,7 +1008,9 @@ export async function contactRoutes(fastify: FastifyInstance) {
         return reply.status(500).send({ error: message });
       }
 
-      const candidateLogoIds = await collectLinkedInLogoIds(client, user.id, [id]);
+      const candidateLogoIds = await collectLinkedInLogoIds(client, user.id, [
+        id,
+      ]);
 
       const { data: deletedContact, error } = await client
         .from("people")
@@ -964,7 +1062,12 @@ export async function contactRoutes(fastify: FastifyInstance) {
         return reply.status(400).send({ error: "Invalid platform or handle" });
       }
 
-      const personId = await findPersonIdBySocial(client, user.id, platform, handle);
+      const personId = await findPersonIdBySocial(
+        client,
+        user.id,
+        platform,
+        handle,
+      );
 
       if (!personId) {
         return { exists: false };
@@ -978,14 +1081,22 @@ export async function contactRoutes(fastify: FastifyInstance) {
         .single();
 
       if (error || !person) {
-        return reply.status(500).send({ error: error?.message ?? "Failed to find contact" });
+        return reply
+          .status(500)
+          .send({ error: error?.message ?? "Failed to find contact" });
       }
 
       return {
         exists: true,
         contact: toContactPreview(
           person,
-          buildContactAvatarUrl(client, user.id, person.id, avatarOpts, person.updated_at),
+          buildContactAvatarUrl(
+            client,
+            user.id,
+            person.id,
+            avatarOpts,
+            person.updated_at,
+          ),
         ),
       };
     },
@@ -1027,10 +1138,15 @@ export async function contactRoutes(fastify: FastifyInstance) {
       }
 
       try {
-        const [enrichedContact] = await attachContactExtras(client, user.id, [contact], {
-          addresses: true,
-          avatarOptions: avatarOpts,
-        });
+        const [enrichedContact] = await attachContactExtras(
+          client,
+          user.id,
+          [contact],
+          {
+            addresses: true,
+            avatarOptions: avatarOpts,
+          },
+        );
         return { contact: enrichedContact };
       } catch (channelError) {
         fastify.log.error(
@@ -1048,7 +1164,10 @@ export async function contactRoutes(fastify: FastifyInstance) {
   fastify.get(
     "/:id/groups",
     { schema: { params: UuidParam } },
-    async (request: FastifyRequest<{ Params: typeof UuidParam.static }>, reply: FastifyReply) => {
+    async (
+      request: FastifyRequest<{ Params: typeof UuidParam.static }>,
+      reply: FastifyReply,
+    ) => {
       const { client } = getAuth(request);
       const { id: personId } = request.params;
 
@@ -1149,8 +1268,14 @@ export async function contactRoutes(fastify: FastifyInstance) {
       if (body.keepFrequencyDays !== undefined)
         updates.keep_frequency_days = body.keepFrequencyDays;
 
-      const hasLatitudeField = Object.prototype.hasOwnProperty.call(body, "latitude");
-      const hasLongitudeField = Object.prototype.hasOwnProperty.call(body, "longitude");
+      const hasLatitudeField = Object.prototype.hasOwnProperty.call(
+        body,
+        "latitude",
+      );
+      const hasLongitudeField = Object.prototype.hasOwnProperty.call(
+        body,
+        "longitude",
+      );
 
       let nextLatitude: number | null | undefined;
       let nextLongitude: number | null | undefined;
@@ -1162,7 +1287,9 @@ export async function contactRoutes(fastify: FastifyInstance) {
         if ((nextLatitude === null) !== (nextLongitude === null)) {
           return reply
             .status(400)
-            .send({ error: "Both latitude and longitude must be provided together" });
+            .send({
+              error: "Both latitude and longitude must be provided together",
+            });
         }
 
         if (
@@ -1170,7 +1297,9 @@ export async function contactRoutes(fastify: FastifyInstance) {
           nextLongitude !== null &&
           (!Number.isFinite(nextLatitude) || !Number.isFinite(nextLongitude))
         ) {
-          return reply.status(400).send({ error: "Invalid latitude/longitude values" });
+          return reply
+            .status(400)
+            .send({ error: "Invalid latitude/longitude values" });
         }
       }
 
@@ -1180,7 +1309,9 @@ export async function contactRoutes(fastify: FastifyInstance) {
           nextPhones = parsePhoneEntries(body.phones);
         } catch (parseError) {
           const message =
-            parseError instanceof Error ? parseError.message : "Invalid phones payload";
+            parseError instanceof Error
+              ? parseError.message
+              : "Invalid phones payload";
           return reply.status(400).send({ error: message });
         }
       }
@@ -1191,7 +1322,9 @@ export async function contactRoutes(fastify: FastifyInstance) {
           nextEmails = parseEmailEntries(body.emails);
         } catch (parseError) {
           const message =
-            parseError instanceof Error ? parseError.message : "Invalid emails payload";
+            parseError instanceof Error
+              ? parseError.message
+              : "Invalid emails payload";
           return reply.status(400).send({ error: message });
         }
       }
@@ -1218,7 +1351,9 @@ export async function contactRoutes(fastify: FastifyInstance) {
           );
         } catch (parseError) {
           const message =
-            parseError instanceof Error ? parseError.message : "Invalid addresses payload";
+            parseError instanceof Error
+              ? parseError.message
+              : "Invalid addresses payload";
           return reply.status(400).send({ error: message });
         }
 
@@ -1272,14 +1407,17 @@ export async function contactRoutes(fastify: FastifyInstance) {
 
       try {
         if (hasLatitudeField || hasLongitudeField) {
-          const { error: locationError } = await client.rpc("set_person_location", {
-            p_person_id: id,
-            p_user_id: user.id,
-            // The SQL function handles null to clear coordinates; cast needed because
-            // generated types reflect the non-nullable Postgres signature.
-            p_latitude: (nextLatitude ?? null) as number,
-            p_longitude: (nextLongitude ?? null) as number,
-          });
+          const { error: locationError } = await client.rpc(
+            "set_person_location",
+            {
+              p_person_id: id,
+              p_user_id: user.id,
+              // The SQL function handles null to clear coordinates; cast needed because
+              // generated types reflect the non-nullable Postgres signature.
+              p_latitude: (nextLatitude ?? null) as number,
+              p_longitude: (nextLongitude ?? null) as number,
+            },
+          );
 
           if (locationError) {
             return reply.status(500).send({ error: locationError.message });
@@ -1288,12 +1426,15 @@ export async function contactRoutes(fastify: FastifyInstance) {
           // Server-side geocoding resolved coordinates — update gis_point via the
           // same RPC used for explicit lat/lon so generated latitude/longitude columns
           // are updated correctly.
-          const { error: geoRpcError } = await client.rpc("set_person_location", {
-            p_person_id: id,
-            p_user_id: user.id,
-            p_latitude: geocodedLocation.lat as number,
-            p_longitude: geocodedLocation.lon as number,
-          });
+          const { error: geoRpcError } = await client.rpc(
+            "set_person_location",
+            {
+              p_person_id: id,
+              p_user_id: user.id,
+              p_latitude: geocodedLocation.lat as number,
+              p_longitude: geocodedLocation.lon as number,
+            },
+          );
           if (geoRpcError) {
             // Non-fatal: text fields (location, timezone) were already persisted above.
             request.log.warn(
@@ -1323,19 +1464,31 @@ export async function contactRoutes(fastify: FastifyInstance) {
         const parallelOps: Promise<void>[] = [];
 
         if (nextPhones !== undefined) {
-          parallelOps.push(replaceContactPhones(client, user.id, id, nextPhones));
+          parallelOps.push(
+            replaceContactPhones(client, user.id, id, nextPhones),
+          );
         }
         if (nextEmails !== undefined) {
-          parallelOps.push(replaceContactEmails(client, user.id, id, nextEmails));
+          parallelOps.push(
+            replaceContactEmails(client, user.id, id, nextEmails),
+          );
         }
         if (nextAddresses !== undefined) {
-          parallelOps.push(replaceContactAddresses(client, user.id, id, nextAddresses));
+          parallelOps.push(
+            replaceContactAddresses(client, user.id, id, nextAddresses),
+          );
         }
         if (socialsUpdates.length > 0) {
           parallelOps.push(
             Promise.all(
               socialsUpdates.map((entry) =>
-                upsertContactSocials(client, user.id, id, entry.platform, entry.handle),
+                upsertContactSocials(
+                  client,
+                  user.id,
+                  id,
+                  entry.platform,
+                  entry.handle,
+                ),
               ),
             ).then(() => undefined),
           );
@@ -1346,7 +1499,9 @@ export async function contactRoutes(fastify: FastifyInstance) {
         }
       } catch (channelError) {
         const message =
-          channelError instanceof Error ? channelError.message : "Unknown channel error";
+          channelError instanceof Error
+            ? channelError.message
+            : "Unknown channel error";
         return reply.status(500).send({ error: message });
       }
 
@@ -1370,7 +1525,10 @@ export async function contactRoutes(fastify: FastifyInstance) {
         }),
       },
     },
-    async (request: FastifyRequest<{ Params: typeof UuidParam.static }>, reply: FastifyReply) => {
+    async (
+      request: FastifyRequest<{ Params: typeof UuidParam.static }>,
+      reply: FastifyReply,
+    ) => {
       const { client, user } = getAuth(request);
       const avatarOpts = extractAvatarOptions(request.query as any);
       const { id } = request.params;
@@ -1389,10 +1547,15 @@ export async function contactRoutes(fastify: FastifyInstance) {
 
       let contactWithChannels: Contact;
       try {
-        const [enrichedContact] = await attachContactExtras(client, user.id, [contact], {
-          addresses: true,
-          avatarOptions: avatarOpts,
-        });
+        const [enrichedContact] = await attachContactExtras(
+          client,
+          user.id,
+          [contact],
+          {
+            addresses: true,
+            avatarOptions: avatarOpts,
+          },
+        );
         contactWithChannels = enrichedContact as Contact;
       } catch (channelError) {
         fastify.log.error(
@@ -1411,14 +1574,19 @@ export async function contactRoutes(fastify: FastifyInstance) {
       let exportCategories: string[] = [];
 
       try {
-        const [{ data: importantDates }, { data: peopleTags }] = await Promise.all([
-          client
-            .from("people_important_dates")
-            .select("type, date")
-            .eq("person_id", id)
-            .eq("user_id", user.id),
-          client.from("people_tags").select("tag_id").eq("person_id", id).eq("user_id", user.id),
-        ]);
+        const [{ data: importantDates }, { data: peopleTags }] =
+          await Promise.all([
+            client
+              .from("people_important_dates")
+              .select("type, date")
+              .eq("person_id", id)
+              .eq("user_id", user.id),
+            client
+              .from("people_tags")
+              .select("tag_id")
+              .eq("person_id", id)
+              .eq("user_id", user.id),
+          ]);
 
         exportImportantDates = (importantDates ?? [])
           .map((entry) => ({
@@ -1429,7 +1597,12 @@ export async function contactRoutes(fastify: FastifyInstance) {
             (
               entry,
             ): entry is {
-              type: "birthday" | "anniversary" | "nameday" | "graduation" | "other";
+              type:
+                | "birthday"
+                | "anniversary"
+                | "nameday"
+                | "graduation"
+                | "other";
               date: string;
             } =>
               IMPORTANT_DATE_TYPES.includes(entry.type as ImportantDateType) &&
@@ -1438,7 +1611,9 @@ export async function contactRoutes(fastify: FastifyInstance) {
           );
 
         const tagIds = Array.from(
-          new Set((peopleTags ?? []).map((entry) => entry.tag_id).filter(Boolean)),
+          new Set(
+            (peopleTags ?? []).map((entry) => entry.tag_id).filter(Boolean),
+          ),
         );
 
         if (tagIds.length > 0) {
@@ -1450,12 +1625,17 @@ export async function contactRoutes(fastify: FastifyInstance) {
 
           exportCategories = Array.from(
             new Set(
-              (tags ?? []).map((entry) => entry.label).filter((label): label is string => !!label),
+              (tags ?? [])
+                .map((entry) => entry.label)
+                .filter((label): label is string => !!label),
             ),
           );
         }
       } catch (extrasError) {
-        fastify.log.warn({ extrasError }, "Failed to fetch important dates/tags for vCard export");
+        fastify.log.warn(
+          { extrasError },
+          "Failed to fetch important dates/tags for vCard export",
+        );
       }
 
       // Generate vCard
@@ -1473,7 +1653,9 @@ export async function contactRoutes(fastify: FastifyInstance) {
       // Create filename
       const firstName = contact.firstName || "contact";
       const lastName = contact.lastName || "";
-      const filename = lastName ? `${firstName}_${lastName}.vcf` : `${firstName}.vcf`;
+      const filename = lastName
+        ? `${firstName}_${lastName}.vcf`
+        : `${firstName}.vcf`;
 
       // Set response headers for file download
       reply.header("Content-Type", "text/vcard; charset=utf-8");

@@ -15,7 +15,12 @@ import {
   extractAvatarOptions,
 } from "../../lib/schemas.js";
 import { buildContactAvatarUrl } from "../../lib/supabase.js";
-import type { Group, GroupWithCount, ContactPreview, TablesUpdate } from "@bondery/types";
+import type {
+  Group,
+  GroupWithCount,
+  ContactPreview,
+  TablesUpdate,
+} from "@bondery/types";
 
 import { registerGroupContactRoutes } from "./contacts.js";
 
@@ -58,8 +63,11 @@ export async function groupRoutes(fastify: FastifyInstance) {
       const { client, user } = getAuth(request);
 
       const previewLimitRaw = request.query?.previewLimit;
-      const previewLimit = previewLimitRaw ? Number(previewLimitRaw) : undefined;
-      const includePreview = Number.isFinite(previewLimit) && (previewLimit as number) > 0;
+      const previewLimit = previewLimitRaw
+        ? Number(previewLimitRaw)
+        : undefined;
+      const includePreview =
+        Number.isFinite(previewLimit) && (previewLimit as number) > 0;
       const avatarOptions = extractAvatarOptions(request.query);
 
       // Get all groups
@@ -101,12 +109,16 @@ export async function groupRoutes(fastify: FastifyInstance) {
       let previewContactsById = new Map<string, ContactPreview>();
 
       if (includePreview) {
-        const previewIds = Array.from(new Set(Array.from(previewMap.values()).flat()));
+        const previewIds = Array.from(
+          new Set(Array.from(previewMap.values()).flat()),
+        );
 
         if (previewIds.length > 0) {
           const { data: previewContacts, error: previewError } = await client
             .from("people")
-            .select(`id, firstName:first_name, lastName:last_name, updatedAt:updated_at`)
+            .select(
+              `id, firstName:first_name, lastName:last_name, updatedAt:updated_at`,
+            )
             .in("id", previewIds)
             .eq("myself", false);
 
@@ -163,7 +175,9 @@ export async function groupRoutes(fastify: FastifyInstance) {
     "/",
     { schema: { body: CreateGroupBody } },
     async (
-      request: FastifyRequest<{ Body: { label: string; emoji?: string; color: string } }>,
+      request: FastifyRequest<{
+        Body: { label: string; emoji?: string; color: string };
+      }>,
       reply: FastifyReply,
     ) => {
       const { client, user } = getAuth(request);
@@ -198,7 +212,10 @@ export async function groupRoutes(fastify: FastifyInstance) {
   fastify.get(
     "/:id",
     { schema: { params: UuidParam } },
-    async (request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+    async (
+      request: FastifyRequest<{ Params: { id: string } }>,
+      reply: FastifyReply,
+    ) => {
       const { client, user } = getAuth(request);
       const { id } = request.params;
 
@@ -265,11 +282,18 @@ export async function groupRoutes(fastify: FastifyInstance) {
   fastify.delete(
     "/",
     { schema: { body: IdsBody } },
-    async (request: FastifyRequest<{ Body: { ids: string[] } }>, reply: FastifyReply) => {
+    async (
+      request: FastifyRequest<{ Body: { ids: string[] } }>,
+      reply: FastifyReply,
+    ) => {
       const { client, user } = getAuth(request);
       const { ids } = request.body;
 
-      const { error } = await client.from("groups").delete().eq("user_id", user.id).in("id", ids);
+      const { error } = await client
+        .from("groups")
+        .delete()
+        .eq("user_id", user.id)
+        .in("id", ids);
 
       if (error) {
         return reply.status(500).send({ error: error.message });
@@ -285,11 +309,18 @@ export async function groupRoutes(fastify: FastifyInstance) {
   fastify.delete(
     "/:id",
     { schema: { params: UuidParam } },
-    async (request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+    async (
+      request: FastifyRequest<{ Params: { id: string } }>,
+      reply: FastifyReply,
+    ) => {
       const { client, user } = getAuth(request);
       const { id } = request.params;
 
-      const { error } = await client.from("groups").delete().eq("id", id).eq("user_id", user.id);
+      const { error } = await client
+        .from("groups")
+        .delete()
+        .eq("id", id)
+        .eq("user_id", user.id);
 
       if (error) {
         return reply.status(500).send({ error: error.message });

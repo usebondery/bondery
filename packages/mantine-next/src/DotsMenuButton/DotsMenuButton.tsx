@@ -18,7 +18,11 @@ export interface DotsMenuButtonProps extends Omit<ActionIconProps, "children"> {
  *
  * Wrap with `<Menu.Target>` to use as a menu trigger.
  */
-export function DotsMenuButton({ iconSize = 16, opened = false, ...props }: DotsMenuButtonProps) {
+export function DotsMenuButton({
+  iconSize = 16,
+  opened = false,
+  ...props
+}: DotsMenuButtonProps) {
   return (
     <ActionIcon
       variant="default"

@@ -82,20 +82,22 @@ export function TotalUsersChart({ data }: TotalUsersChartProps) {
               axisLine={false}
               minTickGap={24}
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              tick={(({ x = 0, y = 0, payload, index }: AxisTickProps) => {
-                const point = chartData[index ?? 0];
-                if (!point?.showTick) return <g />;
-                return (
-                  <text
-                    x={x}
-                    y={y + 12}
-                    textAnchor="middle"
-                    fill="var(--mantine-color-gray-5)"
-                  >
-                    {payload?.value}
-                  </text>
-                );
-              }) as any}
+              tick={
+                (({ x = 0, y = 0, payload, index }: AxisTickProps) => {
+                  const point = chartData[index ?? 0];
+                  if (!point?.showTick) return <g />;
+                  return (
+                    <text
+                      x={x}
+                      y={y + 12}
+                      textAnchor="middle"
+                      fill="var(--mantine-color-gray-5)"
+                    >
+                      {payload?.value}
+                    </text>
+                  );
+                }) as any
+              }
             />
             <YAxis
               tickLine={false}

@@ -5,13 +5,20 @@
 import type { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
 import { createAuthenticatedClient } from "../../lib/supabase.js";
 import { API_ROUTES, WEBAPP_ROUTES } from "@bondery/helpers";
-import { findPersonIdBySocial, upsertContactSocials } from "../../lib/socials.js";
+import {
+  findPersonIdBySocial,
+  upsertContactSocials,
+} from "../../lib/socials.js";
 import { cleanPersonName } from "@bondery/helpers/name";
 import { assignContactsToDefaultImportGroup } from "../../lib/default-import-groups.js";
 import { cachedGeocodeLinkedInLocation } from "../../lib/mapy.js";
 import { updateContactPhoto } from "../../lib/linkedin-helpers.js";
 import { URLS } from "../../lib/config.js";
-import { RedirectQuery, resolvePrimarySocial, resolveExtensionDefaultGroup } from "./helpers.js";
+import {
+  RedirectQuery,
+  resolvePrimarySocial,
+  resolveExtensionDefaultGroup,
+} from "./helpers.js";
 import type { TablesUpdate } from "@bondery/types";
 
 export function registerGetRoute(fastify: FastifyInstance): void {
@@ -44,7 +51,11 @@ export function registerGetRoute(fastify: FastifyInstance): void {
         });
       }
 
-      const primarySocial = resolvePrimarySocial({ instagram, linkedin, facebook });
+      const primarySocial = resolvePrimarySocial({
+        instagram,
+        linkedin,
+        facebook,
+      });
       if (!primarySocial) {
         return reply.status(400).send({
           error: "Instagram, LinkedIn, or Facebook username is required",
@@ -55,7 +66,9 @@ export function registerGetRoute(fastify: FastifyInstance): void {
 
       if (!user) {
         // Redirect to login with return URL
-        const searchParams = new URLSearchParams(query as Record<string, string>);
+        const searchParams = new URLSearchParams(
+          query as Record<string, string>,
+        );
         const returnUrl = `${API_ROUTES.EXTENSION}?${searchParams.toString()}`;
         return reply.redirect(
           `${URLS.webapp}${URLS.login}?returnUrl=${encodeURIComponent(returnUrl)}`,
@@ -106,22 +119,34 @@ export function registerGetRoute(fastify: FastifyInstance): void {
             (f) => f.name === `${existingContact!.id}.jpg`,
           );
           if (!hasAvatar) {
-            await updateContactPhoto(client, existingContact.id, user.id, profileImageUrl);
+            await updateContactPhoto(
+              client,
+              existingContact.id,
+              user.id,
+              profileImageUrl,
+            );
           }
         }
 
         // Consolidate field updates into a single query
         const fieldUpdates: TablesUpdate<"people"> = {};
-        if (headline && !existingContact.headline) fieldUpdates.headline = headline;
-        if (location && !existingContact.location) fieldUpdates.location = location;
+        if (headline && !existingContact.headline)
+          fieldUpdates.headline = headline;
+        if (location && !existingContact.location)
+          fieldUpdates.location = location;
 
         // Geocode the location if it's being set for the first time and no coordinates exist yet
-        if (location && !existingContact.location && !existingContact.latitude) {
+        if (
+          location &&
+          !existingContact.location &&
+          !existingContact.latitude
+        ) {
           try {
             const result = await cachedGeocodeLinkedInLocation(location);
             if (result) {
               const { geo, timezone: tz } = result;
-              if (geo.formattedLabel) fieldUpdates.location = geo.formattedLabel;
+              if (geo.formattedLabel)
+                fieldUpdates.location = geo.formattedLabel;
               fieldUpdates.gis_point = geo.locationEwkt;
 
               if (tz) fieldUpdates.timezone = tz;
@@ -135,16 +160,22 @@ export function registerGetRoute(fastify: FastifyInstance): void {
         }
 
         if (Object.keys(fieldUpdates).length > 0) {
-          await client.from("people").update(fieldUpdates).eq("id", existingContact.id);
+          await client
+            .from("people")
+            .update(fieldUpdates)
+            .eq("id", existingContact.id);
         }
 
-        return reply.redirect(`${URLS.webapp}${WEBAPP_ROUTES.PERSON}/${existingContact.id}`);
+        return reply.redirect(
+          `${URLS.webapp}${WEBAPP_ROUTES.PERSON}/${existingContact.id}`,
+        );
       }
 
       // Create new contact
       const insertData: any = {
         user_id: user.id,
-        first_name: cleanPersonName(firstName) || primarySocial.handle || "Unknown",
+        first_name:
+          cleanPersonName(firstName) || primarySocial.handle || "Unknown",
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       };
@@ -197,22 +228,36 @@ export function registerGetRoute(fastify: FastifyInstance): void {
         return reply.status(500).send({ error: "Failed to save socials" });
       }
 
-      const extensionGroup = resolveExtensionDefaultGroup(primarySocial.platform);
+      const extensionGroup = resolveExtensionDefaultGroup(
+        primarySocial.platform,
+      );
       if (extensionGroup) {
         try {
-          await assignContactsToDefaultImportGroup(client, user.id, extensionGroup, [
-            newContact.id,
-          ]);
+          await assignContactsToDefaultImportGroup(
+            client,
+            user.id,
+            extensionGroup,
+            [newContact.id],
+          );
         } catch {
-          return reply.status(500).send({ error: "Failed to assign default group" });
+          return reply
+            .status(500)
+            .send({ error: "Failed to assign default group" });
         }
       }
 
       if (profileImageUrl) {
-        await updateContactPhoto(client, newContact.id, user.id, profileImageUrl);
+        await updateContactPhoto(
+          client,
+          newContact.id,
+          user.id,
+          profileImageUrl,
+        );
       }
 
-      return reply.redirect(`${URLS.webapp}${WEBAPP_ROUTES.PERSON}/${newContact.id}`);
+      return reply.redirect(
+        `${URLS.webapp}${WEBAPP_ROUTES.PERSON}/${newContact.id}`,
+      );
     },
   );
 }
