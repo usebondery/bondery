@@ -59,6 +59,7 @@ export function AppShellWrapper({
         navbar={{
           width: collapsed ? SIDEBAR_COLLAPSED_WIDTH : SIDEBAR_EXPANDED_WIDTH,
           breakpoint: "sm",
+          collapsed: { mobile: true },
         }}
         transitionDuration={250}
         transitionTimingFunction="ease"
@@ -71,7 +72,7 @@ export function AppShellWrapper({
             hasOverdueKeepInTouch={hasOverdueKeepInTouch}
             collapsed={collapsed}
           />
-        </AppShellNavbar>
+        </AppShellNavbar>{" "}
         <AppShellMain>{children}</AppShellMain>
       </AppShell>
 
@@ -97,9 +98,11 @@ export function AppShellWrapper({
           aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
           style={{
             position: "fixed",
-            left: collapsed ? SIDEBAR_COLLAPSED_WIDTH : SIDEBAR_EXPANDED_WIDTH,
+            left: collapsed
+              ? "var(--sidebar-collapsed-width)"
+              : "var(--sidebar-expanded-width)",
             top: "calc(var(--mantine-spacing-md) + 18px)",
-            transform: "translate(-50%, -50%)",
+            translate: "-50% -50%",
             zIndex: 150,
           }}
         >

@@ -17,16 +17,11 @@ import {
   errorNotificationTemplate,
   successNotificationTemplate,
 } from "@bondery/mantine-next";
-import {
-  MERGE_CONFLICT_FIELDS,
-  openMergeWithModal,
-  type MergeWithModalTexts,
-} from "../../people/components/MergeWithModal";
+import { MERGE_CONFLICT_FIELDS, openMergeWithModal } from "../../people/components/MergeWithModal";
 
 interface MergeRecommendationCardProps {
   recommendation: MergeRecommendation;
   contacts: Contact[];
-  mergeTexts: MergeWithModalTexts;
   onAccepted: () => void;
   onDeclined: () => void;
   redirectAfterMerge?: boolean;
@@ -83,7 +78,6 @@ function computeNameConflictChoices(
 export function MergeRecommendationCard({
   recommendation,
   contacts,
-  mergeTexts,
   onAccepted,
   onDeclined,
   redirectAfterMerge = false,
@@ -104,8 +98,6 @@ export function MergeRecommendationCard({
       disableLeftPicker: true,
       disableRightPicker: true,
       redirectToMergedPerson: redirectAfterMerge,
-      titleText: tMerge("ModalTitle"),
-      texts: mergeTexts,
       onSuccess: onAccepted,
       initialConflictChoices,
     });

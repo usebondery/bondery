@@ -18,6 +18,15 @@ interface ActiveUsersChartProps {
   data: ActiveUsersData;
 }
 
+interface AxisTickProps {
+  x?: number;
+  y?: number;
+  payload?: {
+    value?: string | number;
+  };
+  index?: number;
+}
+
 export function ActiveUsersChart({ data }: ActiveUsersChartProps) {
   const t = useTranslations("StatsPage");
 
@@ -40,28 +49,48 @@ export function ActiveUsersChart({ data }: ActiveUsersChartProps) {
       </Text>
       <div style={{ width: "100%", height: 320 }}>
         <ResponsiveContainer>
-          <LineChart data={chartData} margin={{ top: 8, right: 20, left: 0, bottom: 8 }}>
-            <CartesianGrid strokeDasharray="4 4" stroke="var(--mantine-color-dark-4)" />
+          <LineChart
+            data={chartData}
+            margin={{ top: 8, right: 20, left: 0, bottom: 8 }}
+          >
+            <CartesianGrid
+              strokeDasharray="4 4"
+              stroke="var(--mantine-color-dark-4)"
+            />
             <XAxis
               dataKey="dateLabel"
               tickLine={false}
               axisLine={false}
               minTickGap={24}
-              tick={({ x, y, payload, index }: any) => {
+              tick={({ x = 0, y = 0, payload, index }: AxisTickProps) => {
                 const point = chartData[index ?? 0];
                 if (!point?.showTick) return <g />;
                 return (
-                  <text x={x} y={y + 12} textAnchor="middle" fill="var(--mantine-color-gray-5)">
-                    {payload.value}
+                  <text
+                    x={x}
+                    y={y + 12}
+                    textAnchor="middle"
+                    fill="var(--mantine-color-gray-5)"
+                  >
+                    {payload?.value}
                   </text>
                 );
               }}
             />
-            <YAxis tickLine={false} axisLine={false} width={34} allowDecimals={false} />
+            <YAxis
+              tickLine={false}
+              axisLine={false}
+              width={34}
+              allowDecimals={false}
+            />
             <Tooltip
               formatter={(value, name) => [
                 Number(value).toLocaleString(),
-                name === "mau" ? t("MAU") : name === "wau" ? t("WAU") : t("DAU"),
+                name === "mau"
+                  ? t("MAU")
+                  : name === "wau"
+                    ? t("WAU")
+                    : t("DAU"),
               ]}
               labelFormatter={(_label, payload) => {
                 const rawDate = payload?.[0]?.payload?.date;
@@ -81,7 +110,11 @@ export function ActiveUsersChart({ data }: ActiveUsersChartProps) {
               iconType="circle"
               wrapperStyle={{ paddingBottom: 16 }}
               formatter={(value) =>
-                value === "mau" ? t("MAU") : value === "wau" ? t("WAU") : t("DAU")
+                value === "mau"
+                  ? t("MAU")
+                  : value === "wau"
+                    ? t("WAU")
+                    : t("DAU")
               }
             />
             <Line

@@ -16,6 +16,7 @@ import { useForm } from "@mantine/form";
 import { notifications } from "@mantine/notifications";
 import { IconCalendarPlus, IconCheck, IconUserPlus } from "@tabler/icons-react";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { modals } from "@mantine/modals";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
@@ -36,15 +37,11 @@ import { captureEvent } from "@/lib/analytics/client";
 import { DEBOUNCE_MS } from "@/lib/config";
 import { searchContacts } from "@/lib/searchContacts";
 
-type ModalTranslationsFn = (key: string, values?: Record<string, string | number>) => string;
-
 interface OpenNewActivityModalParams {
   contacts: Contact[];
   activity?: Activity | null;
   initialParticipantIds?: string[];
-  titleText?: string;
   onCreated?: (activityId: string) => void;
-  t: ModalTranslationsFn;
 }
 
 interface NewActivityFormProps {
@@ -53,7 +50,6 @@ interface NewActivityFormProps {
   activity: Activity | null;
   initialParticipantIds?: string[];
   onCreated?: (activityId: string) => void;
-  t: ModalTranslationsFn;
 }
 
 function toLocalDateInputValue(value: Date): string {
@@ -132,15 +128,20 @@ function withFallbackTime(date: Date, fallback: Date): Date {
   return normalizedDate;
 }
 
+function NewActivityModalTitle() {
+  const t = useTranslations("InteractionsPage");
+  return <ModalTitle text={t("WhoAreYouMeeting")} icon={<IconCalendarPlus size={24} />} />;
+}
+
 function NewActivityForm({
   modalId,
   contacts,
   activity,
   initialParticipantIds,
   onCreated,
-  t,
 }: NewActivityFormProps) {
   const router = useRouter();
+  const t = useTranslations("InteractionsPage");
   const [loading, setLoading] = useState(false);
   const [availableContacts, setAvailableContacts] = useState<Contact[]>(() => {
     if (!activity?.participants?.length) return contacts;
@@ -425,16 +426,13 @@ export function openNewActivityModal({
   contacts,
   activity = null,
   initialParticipantIds,
-  titleText,
   onCreated,
-  t,
 }: OpenNewActivityModalParams): void {
   const modalId = `activity-${Math.random().toString(36).slice(2)}`;
-  const modalTitle = titleText || t("WhoAreYouMeeting");
 
   modals.open({
     modalId,
-    title: <ModalTitle text={modalTitle} icon={<IconCalendarPlus size={24} />} />,
+    title: <NewActivityModalTitle />,
     size: "lg",
     children: (
       <NewActivityForm
@@ -443,7 +441,6 @@ export function openNewActivityModal({
         activity={activity}
         initialParticipantIds={initialParticipantIds}
         onCreated={onCreated}
-        t={t}
       />
     ),
   });

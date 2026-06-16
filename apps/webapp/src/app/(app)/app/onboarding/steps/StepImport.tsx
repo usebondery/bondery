@@ -38,8 +38,12 @@ interface ImportStats {
 
 export function StepImport({ onNext, onSkip }: StepProps) {
   const t = useTranslations("Onboarding.Import");
-  const linkedInT = useTranslations("SettingsPage.DataManagement.LinkedInImport");
-  const instagramT = useTranslations("SettingsPage.DataManagement.InstagramImport");
+  const linkedInT = useTranslations(
+    "SettingsPage.DataManagement.LinkedInImport",
+  );
+  const instagramT = useTranslations(
+    "SettingsPage.DataManagement.InstagramImport",
+  );
   const [importResult, setImportResult] = useState<ImportStats | null>(null);
 
   const handleImportSuccess = (stats: ImportStats) => {
@@ -51,11 +55,19 @@ export function StepImport({ onNext, onSkip }: StepProps) {
     modals.open({
       modalId,
       title: (
-        <ModalTitle text={linkedInT("ModalTitle")} icon={<IconDownload size={20} stroke={1.5} />} />
+        <ModalTitle
+          text={linkedInT("ModalTitle")}
+          icon={<IconDownload size={20} stroke={1.5} />}
+        />
       ),
       size: "lg",
       children: (
-        <LinkedInImportModal t={linkedInT} modalId={modalId} onSuccess={handleImportSuccess} />
+        <LinkedInImportModal
+          t={linkedInT}
+          modalId={modalId}
+          onSuccess={handleImportSuccess}
+          showNavigationProgress={false}
+        />
       ),
     });
   };
@@ -72,7 +84,12 @@ export function StepImport({ onNext, onSkip }: StepProps) {
       ),
       size: "lg",
       children: (
-        <InstagramImportModal t={instagramT} modalId={modalId} onSuccess={handleImportSuccess} />
+        <InstagramImportModal
+          t={instagramT}
+          modalId={modalId}
+          onSuccess={handleImportSuccess}
+          showNavigationProgress={false}
+        />
       ),
     });
   };
@@ -126,7 +143,11 @@ export function StepImport({ onNext, onSkip }: StepProps) {
           className="button-scale-effect"
         >
           <Stack align="center" gap="sm">
-            <IconBrandLinkedin size={36} stroke={1.5} color="var(--mantine-color-blue-6)" />
+            <IconBrandLinkedin
+              size={36}
+              stroke={1.5}
+              color="var(--mantine-color-blue-6)"
+            />
             <Text fw={600} size="sm" ta="center">
               {t("LinkedIn")}
             </Text>
@@ -145,7 +166,11 @@ export function StepImport({ onNext, onSkip }: StepProps) {
           className="button-scale-effect"
         >
           <Stack align="center" gap="sm">
-            <IconBrandInstagram size={36} stroke={1.5} color="var(--mantine-color-pink-6)" />
+            <IconBrandInstagram
+              size={36}
+              stroke={1.5}
+              color="var(--mantine-color-pink-6)"
+            />
             <Text fw={600} size="sm" ta="center">
               {t("Instagram")}
             </Text>

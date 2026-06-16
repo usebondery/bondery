@@ -3,7 +3,15 @@
 import { useChat } from "@ai-sdk/react";
 import type { UIMessage } from "ai";
 import { DefaultChatTransport } from "ai";
-import { ActionIcon, Box, Button, Group, Stack, Text, TextInput } from "@mantine/core";
+import {
+  ActionIcon,
+  Box,
+  Button,
+  Group,
+  Stack,
+  Text,
+  TextInput,
+} from "@mantine/core";
 import { IconMessageChatbot, IconSend } from "@tabler/icons-react";
 import { useRef, useEffect, useState, useMemo, useCallback } from "react";
 import { useRouter } from "next/navigation";
@@ -58,13 +66,13 @@ export function ChatView({
     sessionIdRef.current = sessionId;
   }, [sessionId]);
 
-
   const { messages, sendMessage, status, error, setMessages } = useChat({
     transport: useMemo(
       () =>
         new DefaultChatTransport({
           api: "/api/chat",
-          body: () => (sessionIdRef.current ? { sessionId: sessionIdRef.current } : {}),
+          body: () =>
+            sessionIdRef.current ? { sessionId: sessionIdRef.current } : {},
         }),
       [],
     ),
@@ -76,7 +84,9 @@ export function ChatView({
         try {
           const body = JSON.parse(error.message.replace(/^.*?({.*}).*$/, "$1"));
           if (body?.resetAt) setServerResetAt(body.resetAt);
-        } catch { /* ignore parse errors */ }
+        } catch {
+          /* ignore parse errors */
+        }
       }
     },
   });
@@ -93,7 +103,9 @@ export function ChatView({
       setInputValue("");
       setMessagesSent(0);
       setServerResetAt(null);
-      setQuotaExceeded(subscriptionStatus ? !subscriptionStatus.canUseChat : false);
+      setQuotaExceeded(
+        subscriptionStatus ? !subscriptionStatus.canUseChat : false,
+      );
       messageDatesRef.current.clear();
       sessionIdRef.current = undefined;
       // Refresh server data so the optimistic counter restarts from the true baseline.
@@ -119,7 +131,9 @@ export function ChatView({
           if (session?.title) {
             updateSession(sid, { title: session.title });
           }
-        } catch { /* ignore */ }
+        } catch {
+          /* ignore */
+        }
       }, 3000);
       return () => clearTimeout(timer);
     }
@@ -181,7 +195,8 @@ export function ChatView({
 
   // Compute adjusted subscription status with client-side message count
   const adjustedSubscriptionStatus = useMemo(() => {
-    if (!subscriptionStatus || messagesSent === 0) return subscriptionStatus ?? null;
+    if (!subscriptionStatus || messagesSent === 0)
+      return subscriptionStatus ?? null;
     const updatedUsed = subscriptionStatus.aiMessagesUsed + messagesSent;
     return {
       ...subscriptionStatus,
@@ -200,7 +215,9 @@ export function ChatView({
   }, [adjustedSubscriptionStatus]);
 
   return (
-    <Box style={{ display: "flex", flexDirection: "column", minHeight: "100%" }}>
+    <Box
+      style={{ display: "flex", flexDirection: "column", minHeight: "100%" }}
+    >
       {/* Header + messages in natural flow */}
       <Box p="xl" pb="md" style={{ flex: 1 }}>
         <Stack gap="xl">
@@ -270,14 +287,21 @@ export function ChatView({
           {quotaExceeded ? (
             <ChatQuotaAlert
               onSuccess={handleUpgradeSuccess}
-              variant={subscriptionStatus?.plan === "premium" ? "premium" : "free"}
+              variant={
+                subscriptionStatus?.plan === "premium" ? "premium" : "free"
+              }
               resetAt={serverResetAt ?? subscriptionStatus?.aiMonthlyResetAt}
             />
           ) : (
             <>
               {adjustedSubscriptionStatus && (
-                <Box mb="xs" style={{ display: "flex", justifyContent: "center" }}>
-                  <ChatQuotaBadge subscriptionStatus={adjustedSubscriptionStatus} />
+                <Box
+                  mb="xs"
+                  style={{ display: "flex", justifyContent: "center" }}
+                >
+                  <ChatQuotaBadge
+                    subscriptionStatus={adjustedSubscriptionStatus}
+                  />
                 </Box>
               )}
               <form onSubmit={handleSubmit}>

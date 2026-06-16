@@ -18,17 +18,23 @@ export function ChatQuotaBadge({
 
   if (subscriptionStatus.plan === "premium") {
     const { aiMessagesUsed, aiMessageLimit } = subscriptionStatus;
-    if (aiMessageLimit <= 0 || aiMessagesUsed / aiMessageLimit < 0.8) return null;
+    if (aiMessageLimit <= 0 || aiMessagesUsed / aiMessageLimit < 0.8)
+      return null;
 
     const remaining = Math.max(0, aiMessageLimit - aiMessagesUsed);
     return (
-      <Tooltip label={t("premiumQuotaTooltip", { remaining, limit: aiMessageLimit })}>
+      <Tooltip
+        label={t("premiumQuotaTooltip", { remaining, limit: aiMessageLimit })}
+      >
         <Badge
           variant="light"
           color={remaining === 0 ? "red" : "orange"}
           size="sm"
         >
-          {t("premiumQuotaBadge", { used: aiMessagesUsed, limit: aiMessageLimit })}
+          {t("premiumQuotaBadge", {
+            used: aiMessagesUsed,
+            limit: aiMessageLimit,
+          })}
         </Badge>
       </Tooltip>
     );
@@ -36,16 +42,25 @@ export function ChatQuotaBadge({
 
   if (subscriptionStatus.aiMessagesUsed === 0) return null;
 
-  const remaining = subscriptionStatus.aiMessageLimit - subscriptionStatus.aiMessagesUsed;
+  const remaining =
+    subscriptionStatus.aiMessageLimit - subscriptionStatus.aiMessagesUsed;
 
   return (
-    <Tooltip label={t("quotaTooltip", { remaining, limit: subscriptionStatus.aiMessageLimit })}>
+    <Tooltip
+      label={t("quotaTooltip", {
+        remaining,
+        limit: subscriptionStatus.aiMessageLimit,
+      })}
+    >
       <Badge
         variant="light"
         color={remaining <= 1 ? "red" : remaining <= 2 ? "orange" : "blue"}
         size="sm"
       >
-        {t("quotaBadge", { remaining, limit: subscriptionStatus.aiMessageLimit })}
+        {t("quotaBadge", {
+          remaining,
+          limit: subscriptionStatus.aiMessageLimit,
+        })}
       </Badge>
     </Tooltip>
   );

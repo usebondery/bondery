@@ -1,6 +1,6 @@
 ﻿"use server";
 
-import { formatPlaceLabel, formatAddressLabel } from "@bondery/helpers/address-utils";
+import { formatPlaceLabel, formatAddressLabel } from "@bondery/helpers/address";
 
 export interface MapSuggestionRegionalEntry {
   type?: string;

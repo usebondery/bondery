@@ -1,7 +1,6 @@
 import { headers } from "next/headers";
 import * as translations from "@bondery/translations";
-
-type SupportedLocale = keyof typeof translations;
+import type { SupportedLocale } from "@bondery/translations";
 
 /**
  * Get locale from browser's Accept-Language header

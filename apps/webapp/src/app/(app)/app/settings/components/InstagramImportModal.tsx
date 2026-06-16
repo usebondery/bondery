@@ -33,7 +33,11 @@ import {
 } from "@tabler/icons-react";
 import { notifications } from "@mantine/notifications";
 import { modals } from "@mantine/modals";
-import type { Contact, InstagramImportStrategy, InstagramPreparedContact } from "@bondery/types";
+import type {
+  Contact,
+  InstagramImportStrategy,
+  InstagramPreparedContact,
+} from "@bondery/types";
 import {
   DropzoneContent,
   ModalFooter,
@@ -41,14 +45,31 @@ import {
   ModalTitle,
   successNotificationTemplate,
 } from "@bondery/mantine-next";
+import { NavigationProgress } from "@mantine/nprogress";
 import { API_ROUTES, WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import ContactsTable from "@/app/(app)/app/components/contacts/ContactsTableV2";
 import { revalidateAll } from "../../actions";
+import { useImporterNavigationProgress } from "./useImporterNavigationProgress";
 
-type Step = "intro" | "instructions" | "upload" | "strategy" | "processing" | "preview";
+type Step =
+  | "intro"
+  | "instructions"
+  | "upload"
+  | "strategy"
+  | "processing"
+  | "preview";
 
 const IMPORT_BATCH_SIZE = 25;
 const INSTAGRAM_MAX_FILE_SIZE_BYTES = 100 * 1024 * 1024;
+
+const STEP_PROGRESS: Record<Step, number> = {
+  intro: 10,
+  instructions: 24,
+  upload: 40,
+  strategy: 56,
+  processing: 70,
+  preview: 84,
+};
 
 interface InstagramImportTranslations {
   SectionTitle: string;
@@ -143,12 +164,19 @@ async function readApiResponse(response: Response): Promise<{
   }
 }
 
-function readNumberField(data: Record<string, unknown> | null, key: string): number {
+function readNumberField(
+  data: Record<string, unknown> | null,
+  key: string,
+): number {
   const value = data?.[key];
   return typeof value === "number" && Number.isFinite(value) ? value : 0;
 }
 
-type ZipValidationError = "no-file" | "file-too-large" | "invalid-extension" | "invalid-mime";
+type ZipValidationError =
+  | "no-file"
+  | "file-too-large"
+  | "invalid-extension"
+  | "invalid-mime";
 
 const ACCEPTED_ZIP_MIME_TYPES = new Set([
   "application/zip",
@@ -186,7 +214,10 @@ function validateInstagramZipFile(
 
 function getZipValidationMessage(
   code: ZipValidationError,
-  t: (key: keyof InstagramImportTranslations, values?: Record<string, string | number>) => string,
+  t: (
+    key: keyof InstagramImportTranslations,
+    values?: Record<string, string | number>,
+  ) => string,
 ): string {
   switch (code) {
     case "no-file":
@@ -236,13 +267,19 @@ function toPreviewContact(contact: InstagramPreparedContact): Contact {
 }
 
 function strategyOptions(
-  t: (key: keyof InstagramImportTranslations, values?: Record<string, string | number>) => string,
+  t: (
+    key: keyof InstagramImportTranslations,
+    values?: Record<string, string | number>,
+  ) => string,
 ): Array<{ value: InstagramImportStrategy; label: string }> {
   return [
     { value: "close_friends", label: t("StrategyCloseFriends") },
     { value: "following", label: t("StrategyFollowing") },
     { value: "followers", label: t("StrategyFollowers") },
-    { value: "following_and_followers", label: t("StrategyFollowingAndFollowers") },
+    {
+      value: "following_and_followers",
+      label: t("StrategyFollowingAndFollowers"),
+    },
     { value: "mutual_following", label: t("StrategyMutualFollowing") },
   ];
 }
@@ -254,17 +291,25 @@ function sortInstagramContactsForPreview(
     .map((contact, index) => ({ contact, index }))
     .sort((left, right) => {
       const leftRank =
-        left.contact.isValid && left.contact.likelyPerson && !left.contact.alreadyExists
+        left.contact.isValid &&
+        left.contact.likelyPerson &&
+        !left.contact.alreadyExists
           ? 0
-          : left.contact.isValid && !left.contact.likelyPerson && !left.contact.alreadyExists
+          : left.contact.isValid &&
+              !left.contact.likelyPerson &&
+              !left.contact.alreadyExists
             ? 1
             : left.contact.alreadyExists
               ? 2
               : 3;
       const rightRank =
-        right.contact.isValid && right.contact.likelyPerson && !right.contact.alreadyExists
+        right.contact.isValid &&
+        right.contact.likelyPerson &&
+        !right.contact.alreadyExists
           ? 0
-          : right.contact.isValid && !right.contact.likelyPerson && !right.contact.alreadyExists
+          : right.contact.isValid &&
+              !right.contact.likelyPerson &&
+              !right.contact.alreadyExists
             ? 1
             : right.contact.alreadyExists
               ? 2
@@ -283,27 +328,42 @@ export function InstagramImportModal({
   t,
   modalId,
   onSuccess,
+  showNavigationProgress = true,
 }: {
-  t: (key: keyof InstagramImportTranslations, values?: Record<string, string | number>) => string;
+  t: (
+    key: keyof InstagramImportTranslations,
+    values?: Record<string, string | number>,
+  ) => string;
   modalId?: string;
-  onSuccess?: (stats: { imported: number; updated: number; skipped: number }) => void;
+  onSuccess?: (stats: {
+    imported: number;
+    updated: number;
+    skipped: number;
+  }) => void;
+  showNavigationProgress?: boolean;
 }) {
   const router = useRouter();
   const [step, setStep] = useState<Step>("intro");
   const [isParsing, setIsParsing] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
-  const [importProgress, setImportProgress] = useState<{ current: number; total: number } | null>(
-    null,
-  );
+  const [importProgress, setImportProgress] = useState<{
+    current: number;
+    total: number;
+  } | null>(null);
   const [uploadedZip, setUploadedZip] = useState<File | null>(null);
-  const [strategy, setStrategy] = useState<InstagramImportStrategy>("following_and_followers");
-  const [parsedContacts, setParsedContacts] = useState<InstagramPreparedContact[]>([]);
+  const [strategy, setStrategy] = useState<InstagramImportStrategy>(
+    "following_and_followers",
+  );
+  const [parsedContacts, setParsedContacts] = useState<
+    InstagramPreparedContact[]
+  >([]);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const openRef = useRef<() => void>(null);
   const lastSelectedIndexRef = useRef<number | null>(null);
 
   const previewContacts = useMemo(
-    () => parsedContacts.filter((contact) => contact.isValid).map(toPreviewContact),
+    () =>
+      parsedContacts.filter((contact) => contact.isValid).map(toPreviewContact),
     [parsedContacts],
   );
 
@@ -324,17 +384,37 @@ export function InstagramImportModal({
   const nonSelectableIds = useMemo(
     () =>
       new Set(
-        parsedContacts.filter((contact) => contact.alreadyExists).map((contact) => contact.tempId),
+        parsedContacts
+          .filter((contact) => contact.alreadyExists)
+          .map((contact) => contact.tempId),
       ),
     [parsedContacts],
   );
   const selectableIds = useMemo(
-    () => previewContacts.map((contact) => contact.id).filter((id) => !nonSelectableIds.has(id)),
+    () =>
+      previewContacts
+        .map((contact) => contact.id)
+        .filter((id) => !nonSelectableIds.has(id)),
     [previewContacts, nonSelectableIds],
   );
 
-  const allSelected = selectableIds.length > 0 && selectableIds.every((id) => selectedIds.has(id));
+  const allSelected =
+    selectableIds.length > 0 &&
+    selectableIds.every((id) => selectedIds.has(id));
   const someSelected = selectedIds.size > 0 && !allSelected;
+
+  useImporterNavigationProgress({
+    step,
+    stepProgress: STEP_PROGRESS,
+    importProgress,
+  });
+
+  const renderWithNavigationProgress = (content: JSX.Element) => (
+    <>
+      {showNavigationProgress ? <NavigationProgress /> : null}
+      {content}
+    </>
+  );
 
   const closeModal = () => {
     if (modalId) {
@@ -357,7 +437,10 @@ export function InstagramImportModal({
       withCloseButton: !(isParsing || isImporting || step === "processing"),
       size: "lg",
       title: (
-        <ModalTitle text={t("ModalTitle")} icon={<IconBrandInstagram size={20} stroke={1.5} />} />
+        <ModalTitle
+          text={t("ModalTitle")}
+          icon={<IconBrandInstagram size={20} stroke={1.5} />}
+        />
       ),
     });
   }, [isImporting, isParsing, modalId, step, t]);
@@ -465,15 +548,19 @@ export function InstagramImportModal({
     formData.append("strategy", strategy);
 
     try {
-      const response = await fetch(`${API_ROUTES.CONTACTS_IMPORT_INSTAGRAM}/parse`, {
-        method: "POST",
-        body: formData,
-      });
+      const response = await fetch(
+        `${API_ROUTES.CONTACTS_IMPORT_INSTAGRAM}/parse`,
+        {
+          method: "POST",
+          body: formData,
+        },
+      );
 
       const { data, text } = await readApiResponse(response);
 
       if (!response.ok) {
-        const apiError = data && typeof data.error === "string" ? data.error : null;
+        const apiError =
+          data && typeof data.error === "string" ? data.error : null;
         const fallback =
           response.status === 413
             ? "Uploaded ZIP is too large. Please export only contacts data."
@@ -490,7 +577,10 @@ export function InstagramImportModal({
       setSelectedIds(
         new Set(
           sortedContacts
-            .filter((item) => item.isValid && item.likelyPerson && !item.alreadyExists)
+            .filter(
+              (item) =>
+                item.isValid && item.likelyPerson && !item.alreadyExists,
+            )
             .map((item) => item.tempId),
         ),
       );
@@ -509,7 +599,9 @@ export function InstagramImportModal({
   };
 
   const handleImport = async () => {
-    const selectedContacts = parsedContacts.filter((contact) => selectedIds.has(contact.tempId));
+    const selectedContacts = parsedContacts.filter((contact) =>
+      selectedIds.has(contact.tempId),
+    );
 
     if (selectedContacts.length === 0) {
       notifications.show({
@@ -531,17 +623,23 @@ export function InstagramImportModal({
       for (let i = 0; i < selectedContacts.length; i += IMPORT_BATCH_SIZE) {
         const batch = selectedContacts.slice(i, i + IMPORT_BATCH_SIZE);
 
-        const response = await fetch(`${API_ROUTES.CONTACTS_IMPORT_INSTAGRAM}/commit`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ contacts: batch }),
-        });
+        const response = await fetch(
+          `${API_ROUTES.CONTACTS_IMPORT_INSTAGRAM}/commit`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ contacts: batch }),
+          },
+        );
 
         const { data, text } = await readApiResponse(response);
 
         if (!response.ok) {
-          const apiError = data && typeof data.error === "string" ? data.error : null;
-          throw new Error(apiError || text || `${t("ImportError")} (HTTP ${response.status})`);
+          const apiError =
+            data && typeof data.error === "string" ? data.error : null;
+          throw new Error(
+            apiError || text || `${t("ImportError")} (HTTP ${response.status})`,
+          );
         }
 
         totalImported += readNumberField(data, "importedCount");
@@ -573,7 +671,11 @@ export function InstagramImportModal({
       await revalidateAll();
 
       if (onSuccess) {
-        onSuccess({ imported: totalImported, updated: totalUpdated, skipped: totalSkipped });
+        onSuccess({
+          imported: totalImported,
+          updated: totalUpdated,
+          skipped: totalSkipped,
+        });
       } else {
         router.push(WEBAPP_ROUTES.PEOPLE);
       }
@@ -581,7 +683,8 @@ export function InstagramImportModal({
       notifications.show(
         errorNotificationTemplate({
           title: t("ErrorTitle"),
-          description: error instanceof Error ? error.message : t("ImportError"),
+          description:
+            error instanceof Error ? error.message : t("ImportError"),
         }),
       );
     } finally {
@@ -591,7 +694,7 @@ export function InstagramImportModal({
   };
 
   if (step === "intro") {
-    return (
+    return renderWithNavigationProgress(
       <Stack gap="xl">
         <Stack align="center" gap="md" pt="sm">
           <ThemeIcon size={110} radius="xl" variant="light" color="pink">
@@ -607,21 +710,33 @@ export function InstagramImportModal({
             <Group gap="sm" wrap="nowrap" align="flex-start">
               <IconCircleCheck
                 size={18}
-                style={{ flexShrink: 0, marginTop: 1, color: "var(--mantine-color-pink-6)" }}
+                style={{
+                  flexShrink: 0,
+                  marginTop: 1,
+                  color: "var(--mantine-color-pink-6)",
+                }}
               />
               <Text size="sm">{t("IntroDescription1")}</Text>
             </Group>
             <Group gap="sm" wrap="nowrap" align="flex-start">
               <IconCircleCheck
                 size={18}
-                style={{ flexShrink: 0, marginTop: 1, color: "var(--mantine-color-pink-6)" }}
+                style={{
+                  flexShrink: 0,
+                  marginTop: 1,
+                  color: "var(--mantine-color-pink-6)",
+                }}
               />
               <Text size="sm">{t("IntroDescription2")}</Text>
             </Group>
             <Group gap="sm" wrap="nowrap" align="flex-start">
               <IconCircleCheck
                 size={18}
-                style={{ flexShrink: 0, marginTop: 1, color: "var(--mantine-color-pink-6)" }}
+                style={{
+                  flexShrink: 0,
+                  marginTop: 1,
+                  color: "var(--mantine-color-pink-6)",
+                }}
               />
               <Text size="sm">{t("IntroDescription3")}</Text>
             </Group>
@@ -635,12 +750,12 @@ export function InstagramImportModal({
           onAction={() => setStep("instructions")}
           actionRightSection={<IconArrowRight size={16} />}
         />
-      </Stack>
+      </Stack>,
     );
   }
 
   if (step === "instructions") {
-    return (
+    return renderWithNavigationProgress(
       <Stack gap="md">
         <Paper withBorder p="md" radius="md">
           <Stack gap="sm">
@@ -711,7 +826,11 @@ export function InstagramImportModal({
                 </Stack>
               </Stack>
             </Group>
-            {[t("InstructionStep8"), t("InstructionStep10"), t("InstructionStep11")].map((s, i) => (
+            {[
+              t("InstructionStep8"),
+              t("InstructionStep10"),
+              t("InstructionStep11"),
+            ].map((s, i) => (
               <Group key={i} gap="sm" wrap="nowrap" align="center">
                 <ThemeIcon
                   size={22}
@@ -750,12 +869,12 @@ export function InstagramImportModal({
           onAction={() => setStep("upload")}
           actionRightSection={<IconArrowRight size={16} />}
         />
-      </Stack>
+      </Stack>,
     );
   }
 
   if (step === "upload") {
-    return (
+    return renderWithNavigationProgress(
       <Stack gap="md">
         <Dropzone
           openRef={openRef}
@@ -788,7 +907,10 @@ export function InstagramImportModal({
             "application/octet-stream": [".zip"],
           }}
         >
-          <DropzoneContent title={t("DropzoneTitle")} description={t("DropzoneDescription")} />
+          <DropzoneContent
+            title={t("DropzoneTitle")}
+            description={t("DropzoneDescription")}
+          />
         </Dropzone>
 
         <ModalFooter
@@ -801,12 +923,12 @@ export function InstagramImportModal({
           onAction={() => openRef.current?.()}
           actionLeftSection={<IconFileZip size={16} />}
         />
-      </Stack>
+      </Stack>,
     );
   }
 
   if (step === "strategy") {
-    return (
+    return renderWithNavigationProgress(
       <Stack gap="md">
         <Alert
           color="blue"
@@ -824,7 +946,9 @@ export function InstagramImportModal({
           data={strategyOptions(t)}
           value={strategy}
           onChange={(value) =>
-            setStrategy((value as InstagramImportStrategy) || "following_and_followers")
+            setStrategy(
+              (value as InstagramImportStrategy) || "following_and_followers",
+            )
           }
           allowDeselect={false}
         />
@@ -842,14 +966,16 @@ export function InstagramImportModal({
           }}
           actionLoading={isParsing}
           actionDisabled={isParsing}
-          actionRightSection={!isParsing ? <IconArrowRight size={16} /> : undefined}
+          actionRightSection={
+            !isParsing ? <IconArrowRight size={16} /> : undefined
+          }
         />
-      </Stack>
+      </Stack>,
     );
   }
 
   if (step === "processing") {
-    return (
+    return renderWithNavigationProgress(
       <Stack gap="lg" py="md">
         <Center>
           <Stack align="center" gap="sm">
@@ -857,13 +983,15 @@ export function InstagramImportModal({
             <Text>{t("ProcessingConnections")}</Text>
           </Stack>
         </Center>
-      </Stack>
+      </Stack>,
     );
   }
 
   if (isImporting && importProgress !== null) {
-    const percentage = Math.round((importProgress.current / importProgress.total) * 100);
-    return (
+    const percentage = Math.round(
+      (importProgress.current / importProgress.total) * 100,
+    );
+    return renderWithNavigationProgress(
       <Stack gap="lg" py="md">
         <Center>
           <Stack align="center" gap="md" w="100%" maw={400}>
@@ -877,22 +1005,30 @@ export function InstagramImportModal({
             </Text>
           </Stack>
         </Center>
-      </Stack>
+      </Stack>,
     );
   }
 
-  return (
+  return renderWithNavigationProgress(
     <Stack gap="md">
       <Group justify="space-between">
         <Group gap="xs">
           <Badge color="blue" variant="light">
             {t("Total", { count: parsedContacts.length })}
           </Badge>
-          <Badge color="green" variant="light" leftSection={<IconCircleCheck size={12} />}>
+          <Badge
+            color="green"
+            variant="light"
+            leftSection={<IconCircleCheck size={12} />}
+          >
             {t("Valid", { count: validContactsCount })}
           </Badge>
           {invalidContactsCount > 0 ? (
-            <Badge color="orange" variant="light" leftSection={<IconAlertTriangle size={12} />}>
+            <Badge
+              color="orange"
+              variant="light"
+              leftSection={<IconAlertTriangle size={12} />}
+            >
               {t("Invalid", { count: invalidContactsCount })}
             </Badge>
           ) : null}
@@ -903,7 +1039,9 @@ export function InstagramImportModal({
           ) : null}
           {likelyInfluencersCount > 0 ? (
             <Badge color="violet" variant="light">
-              {t("LikelyBusinessAndInfluencers", { count: likelyInfluencersCount })}
+              {t("LikelyBusinessAndInfluencers", {
+                count: likelyInfluencersCount,
+              })}
             </Badge>
           ) : null}
         </Group>
@@ -941,10 +1079,12 @@ export function InstagramImportModal({
         onAction={() => {
           void handleImport();
         }}
-        actionLeftSection={!isImporting ? <IconBrandInstagram size={16} /> : undefined}
+        actionLeftSection={
+          !isImporting ? <IconBrandInstagram size={16} /> : undefined
+        }
         actionLoading={isImporting}
         actionDisabled={isImporting}
       />
-    </Stack>
+    </Stack>,
   );
 }

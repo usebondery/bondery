@@ -1,14 +1,13 @@
 import { AppShellWrapper } from "./components/AppShellWrapper";
-import { LocaleProvider } from "@/app/(app)/app/components/UserLocaleProvider";
 import { getAuthHeaders } from "@/lib/authHeaders";
+import { getUserSettings } from "@/lib/user/getUserSettings";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
-import * as translations from "@bondery/translations";
 import "leaflet/dist/leaflet.css";
 import { API_ROUTES, WEBAPP_ROUTES, WEBSITE_ROUTES } from "@bondery/helpers/globals/paths";
 import { API_URL } from "@/lib/config";
 import { ColorSchemeSync } from "./components/ColorSchemeSync";
-import type { ColorSchemePreference, Contact, MergeRecommendation } from "@bondery/types";
+import type { Contact, MergeRecommendation } from "@bondery/types";
 import { getMergeRecommendationsData } from "./fix/getMergeRecommendationsData";
 import { getKeepInTouchData } from "./keep-in-touch/getKeepInTouchData";
 import { EnrichStatusNotificationManager } from "@/lib/extension/EnrichStatusNotificationManager";
@@ -17,71 +16,6 @@ import { ExtensionUpdateNotificationManager } from "@/lib/extension/ExtensionUpd
 import { ServiceWorkerRegistration } from "./components/ServiceWorkerRegistration";
 import { Suspense } from "react";
 import { cookies, headers } from "next/headers";
-
-interface UserSettingsLayoutData {
-  userName: string;
-  userEmail: string;
-  avatarUrl: string | null;
-  locale: string;
-  timezone: string;
-  timeFormat: "24h" | "12h";
-  colorScheme: ColorSchemePreference;
-  onboardingCompletedAt: string | null;
-}
-
-/**
- * Fetches user settings and data from the internal API.
- *
- * @param precomputedHeaders - Optional pre-fetched auth headers to avoid redundant getAuthHeaders() calls.
- */
-async function getUserSettings(precomputedHeaders?: HeadersInit) {
-  try {
-    const headers = precomputedHeaders ?? (await getAuthHeaders());
-
-    const response = await fetch(`${API_URL}${API_ROUTES.ME_SETTINGS}`, {
-      next: { tags: ["settings"] },
-      headers,
-    });
-
-    if (response.ok) {
-      const result = await response.json();
-      const settings = result?.data || {};
-
-      const firstName = settings.name || "";
-
-      const colorScheme: ColorSchemePreference =
-        settings.colorScheme === "light" ||
-        settings.colorScheme === "dark" ||
-        settings.colorScheme === "auto"
-          ? settings.colorScheme
-          : "auto";
-
-      return {
-        userName: firstName || settings.email || "User",
-        userEmail: settings.email || "",
-        avatarUrl: settings.avatarUrl || null,
-        locale: "en",
-        timezone: settings.timezone || "UTC",
-        timeFormat: settings.timeFormat === "12h" ? "12h" : "24h",
-        colorScheme,
-        onboardingCompletedAt: settings.onboardingCompletedAt ?? null,
-      } satisfies UserSettingsLayoutData;
-    }
-  } catch (error) {
-    console.error("[AppLayout] Failed to fetch user settings:", error);
-  }
-
-  return {
-    userName: "User",
-    userEmail: "",
-    avatarUrl: null,
-    locale: "en",
-    timezone: "UTC",
-    timeFormat: "24h",
-    colorScheme: "auto",
-    onboardingCompletedAt: null,
-  } satisfies UserSettingsLayoutData;
-}
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createServerSupabaseClient();
@@ -93,10 +27,10 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     redirect(WEBSITE_ROUTES.LOGIN);
   }
 
-  // Fetch auth headers + read cookie in parallel (both fast)
-  const authHeaders = await getAuthHeaders();
+  // getUserSettings() is cache()-wrapped: the fetch runs once and is shared with
+  // resolveLocaleSettings() in the group layout — no duplicate API calls.
   const [settings, cookieStore, headersList] = await Promise.all([
-    getUserSettings(authHeaders),
+    getUserSettings(),
     cookies(),
     headers(),
   ]);
@@ -110,11 +44,10 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   }
 
   const initialCollapsed = cookieStore.get("bondery-sidebar-collapsed")?.value === "true";
-  const { userName, avatarUrl, locale, timezone, timeFormat, colorScheme } = settings;
-  const messages = translations[locale as keyof typeof translations] || translations.en;
+  const { userName, avatarUrl, colorScheme } = settings;
 
   return (
-    <LocaleProvider locale={locale} timezone={timezone} timeFormat={timeFormat} messages={messages}>
+    <>
       <ServiceWorkerRegistration />
       <ColorSchemeSync colorScheme={colorScheme} />
       <EnrichStatusNotificationManager />
@@ -145,7 +78,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           {children}
         </AppShellWithBadges>
       </Suspense>
-    </LocaleProvider>
+    </>
   );
 }
 

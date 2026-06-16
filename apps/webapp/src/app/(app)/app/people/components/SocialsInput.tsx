@@ -1,5 +1,6 @@
 import { Group, TextInput, ActionIcon, Loader } from "@mantine/core";
-import { type ReactNode } from "react";
+import { useId } from "react";
+import type { ReactNode } from "react";
 import {
   IconBrandLinkedin,
   IconBrandInstagram,
@@ -24,7 +25,10 @@ interface SocialsInputProps {
   displayLabel?: boolean;
 }
 
-export function validateSocialsInput(value: string, platform: SocialPlatform): string | null {
+export function validateSocialsInput(
+  value: string,
+  platform: SocialPlatform,
+): string | null {
   if (!value || value.trim().length === 0) {
     return null; // Empty is valid (optional field)
   }
@@ -58,11 +62,13 @@ export function validateSocialsInput(value: string, platform: SocialPlatform): s
 
       const allowedDomains = validDomains[platform];
       const isValidDomain = allowedDomains.some(
-        (allowedDomain) => domain === allowedDomain || domain.endsWith("." + allowedDomain),
+        (allowedDomain) =>
+          domain === allowedDomain || domain.endsWith("." + allowedDomain),
       );
 
       if (!isValidDomain) {
-        const platformName = platform.charAt(0).toUpperCase() + platform.slice(1);
+        const platformName =
+          platform.charAt(0).toUpperCase() + platform.slice(1);
         return `Please enter a valid ${platformName} URL or username`;
       }
     } else {
@@ -79,7 +85,7 @@ export function validateSocialsInput(value: string, platform: SocialPlatform): s
 
 const platformConfig: Record<
   SocialPlatform,
-  { icon: React.ReactNode; color: string; placeholder: string }
+  { icon: ReactNode; color: string; placeholder: string }
 > = {
   linkedin: {
     icon: <IconBrandLinkedin size={18} />,
@@ -116,6 +122,7 @@ export function SocialsInput({
   displayLabel = false,
 }: SocialsInputProps) {
   const config = platformConfig[platform];
+  const inputId = useId();
 
   const handleChange = (newValue: string) => {
     onChange(newValue);
@@ -134,7 +141,9 @@ export function SocialsInput({
 
   // Create href for the action icon
   const href =
-    value && platform !== "website" ? createSocialUrl(platform, value) : value || undefined;
+    value && platform !== "website"
+      ? createSocialUrl(platform, value)
+      : value || undefined;
 
   const platformName = platform.charAt(0).toUpperCase() + platform.slice(1);
 
@@ -142,6 +151,7 @@ export function SocialsInput({
     <div>
       {displayLabel && (
         <label
+          htmlFor={inputId}
           style={{
             fontSize: "0.875rem",
             fontWeight: 500,
@@ -164,6 +174,7 @@ export function SocialsInput({
           {config.icon}
         </ActionIcon>
         <TextInput
+          id={inputId}
           placeholder={placeholder || config.placeholder}
           value={value}
           onChange={(e) => handleChange(e.target.value)}

@@ -7,7 +7,8 @@ import { Stack, TextInput, Text } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { modals } from "@mantine/modals";
 import { notifications } from "@mantine/notifications";
-import { IconUserPlus } from "@tabler/icons-react";
+import { IconBrandLinkedin, IconUserPlus } from "@tabler/icons-react";
+import { useTranslations } from "next-intl";
 import {
   errorNotificationTemplate,
   loadingNotificationTemplate,
@@ -21,12 +22,13 @@ import { API_ROUTES, WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import type { Contact } from "@bondery/types";
 import { revalidateContacts } from "../../actions";
 import { captureEvent } from "@/lib/analytics/client";
+import { parseFullName } from "@bondery/helpers";
+import { extractUsername } from "@/lib/socialsHelpers";
 
 interface OpenAddContactModalOptions {
   onCreated?: (contact: Contact) => void;
-  initialFirstName?: string;
-  initialMiddleName?: string;
-  initialLastName?: string;
+  initialFullName?: string;
+  initialLinkedin?: string;
 }
 
 interface AddContactFormProps extends OpenAddContactModalOptions {
@@ -35,12 +37,17 @@ interface AddContactFormProps extends OpenAddContactModalOptions {
   onClose?: () => void;
 }
 
+function AddContactModalTitle() {
+  const t = useTranslations("PeoplePage");
+  return <ModalTitle text={t("AddContactModal.Title")} icon={<IconUserPlus size={24} />} />;
+}
+
 export function openAddContactModal(options: OpenAddContactModalOptions = {}) {
   const modalId = `add-contact-${Math.random().toString(36).slice(2)}`;
 
   modals.open({
     modalId,
-    title: <ModalTitle text="Create person" icon={<IconUserPlus size={24} />} />,
+    title: <AddContactModalTitle />,
     trapFocus: true,
     children: (
       <AddContactForm modalId={modalId} onClose={() => modals.close(modalId)} {...options} />
@@ -52,11 +59,11 @@ export function AddContactForm({
   modalId,
   onClose,
   onCreated,
-  initialFirstName = "",
-  initialMiddleName = "",
-  initialLastName = "",
+  initialFullName = "",
+  initialLinkedin = "",
 }: AddContactFormProps) {
   const router = useRouter();
+  const t = useTranslations("PeoplePage");
   const safeModalId = modalId ?? "";
   const [focusedField, setFocusedField] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -78,27 +85,19 @@ export function AddContactForm({
   const form = useForm({
     mode: "controlled",
     initialValues: {
-      firstName: initialFirstName,
-      middleName: initialMiddleName,
-      lastName: initialLastName,
+      fullName: initialFullName,
+      linkedin: initialLinkedin,
     },
     validate: {
-      firstName: (value) =>
-        value.trim().length === 0
-          ? "Please add a first name"
-          : value.length > INPUT_MAX_LENGTHS.firstName
-            ? `First name must be ${INPUT_MAX_LENGTHS.firstName} characters or less`
-            : null,
-      middleName: (value) =>
-        value.length > INPUT_MAX_LENGTHS.middleName
-          ? `Middle name must be ${INPUT_MAX_LENGTHS.middleName} characters or less`
-          : null,
-      lastName: (value) =>
-        value.trim().length === 0
-          ? "Please add a last name"
-          : value.length > INPUT_MAX_LENGTHS.lastName
-            ? `Last name must be ${INPUT_MAX_LENGTHS.lastName} characters or less`
-            : null,
+      fullName: (value) => {
+        const trimmed = value.trim();
+        if (trimmed.length === 0) return t("AddContactModal.NameRequired");
+        if (trimmed.length > INPUT_MAX_LENGTHS.fullName)
+          return t("AddContactModal.NameTooLong", { max: INPUT_MAX_LENGTHS.fullName });
+        const parsed = parseFullName(trimmed);
+        if (!parsed.firstName) return t("AddContactModal.InvalidName");
+        return null;
+      },
     },
   });
 
@@ -108,19 +107,24 @@ export function AddContactForm({
     // Show loading notification
     const loadingNotification = notifications.show({
       ...loadingNotificationTemplate({
-        title: "Creating contact...",
-        description: "Please wait while we create the new contact",
+        title: t("AddContactModal.LoadingTitle"),
+        description: t("AddContactModal.LoadingDescription"),
       }),
     });
 
     try {
+      const { firstName, middleName, lastName } = parseFullName(values.fullName.trim());
+      const linkedinRaw = values.linkedin.trim();
+      const linkedinHandle = linkedinRaw ? extractUsername("linkedin", linkedinRaw) : undefined;
+
       const res = await fetch(API_ROUTES.CONTACTS, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          firstName: values.firstName.trim(),
-          middleName: values.middleName.trim() || undefined,
-          lastName: values.lastName.trim(),
+          firstName,
+          ...(middleName ? { middleName } : {}),
+          ...(lastName ? { lastName } : {}),
+          ...(linkedinHandle ? { linkedin: linkedinHandle } : {}),
         }),
       });
 
@@ -156,8 +160,8 @@ export function AddContactForm({
       // Show success notification
       notifications.show(
         successNotificationTemplate({
-          title: "Success",
-          description: "Contact created successfully",
+          title: t("AddContactModal.SuccessTitle"),
+          description: t("AddContactModal.SuccessDescription"),
         }),
       );
 
@@ -193,9 +197,8 @@ export function AddContactForm({
       // Show error notification
       notifications.show(
         errorNotificationTemplate({
-          title: "Error",
-          description:
-            error instanceof Error ? error.message : "Failed to create contact. Please try again.",
+          title: t("AddContactModal.ErrorTitle"),
+          description: error instanceof Error ? error.message : t("AddContactModal.CreateFailed"),
         }),
       );
 
@@ -207,68 +210,51 @@ export function AddContactForm({
     <form onSubmit={form.onSubmit(handleSubmit)}>
       <Stack>
         <TextInput
-          label="First name"
-          placeholder={exampleName.firstName}
+          label={t("AddContactModal.FullNameInput")}
+          placeholder={`${exampleName.firstName} ${exampleName.lastName}`}
           withAsterisk
-          maxLength={INPUT_MAX_LENGTHS.firstName}
-          key={form.key("firstName")}
-          {...form.getInputProps("firstName")}
+          maxLength={INPUT_MAX_LENGTHS.fullName}
+          key={form.key("fullName")}
+          {...form.getInputProps("fullName")}
           disabled={isSubmitting}
           data-autofocus
           autoFocus
-          onFocus={() => setFocusedField("firstName")}
+          onFocus={() => setFocusedField("fullName")}
           onBlur={() => setFocusedField(null)}
           rightSection={
-            focusedField === "firstName" ? (
+            focusedField === "fullName" ? (
               <Text size="10px" c="dimmed">
-                {form.values.firstName.length}/{INPUT_MAX_LENGTHS.firstName}
+                {form.values.fullName.length}/{INPUT_MAX_LENGTHS.fullName}
               </Text>
             ) : null
           }
         />
 
         <TextInput
-          label="Middle names"
-          placeholder={exampleName.middleName}
-          maxLength={INPUT_MAX_LENGTHS.middleName}
-          key={form.key("middleName")}
-          {...form.getInputProps("middleName")}
-          onFocus={() => setFocusedField("middleName")}
-          onBlur={() => setFocusedField(null)}
+          label={t("AddContactModal.LinkedInInput")}
+          placeholder={t("AddContactModal.LinkedInPlaceholder")}
+          maxLength={200}
+          leftSection={<IconBrandLinkedin size={16} />}
+          key={form.key("linkedin")}
+          {...form.getInputProps("linkedin")}
+          onFocus={() => setFocusedField("linkedin")}
+          onBlur={(e) => {
+            setFocusedField(null);
+            // Extract handle from any URL format on blur
+            const raw = e.currentTarget.value.trim();
+            if (raw) {
+              const extracted = extractUsername("linkedin", raw);
+              form.setFieldValue("linkedin", extracted);
+            }
+          }}
           disabled={isSubmitting}
-          rightSection={
-            focusedField === "middleName" ? (
-              <Text size="10px" c="dimmed">
-                {form.values.middleName.length}/{INPUT_MAX_LENGTHS.middleName}
-              </Text>
-            ) : null
-          }
-        />
-
-        <TextInput
-          label="Last name"
-          placeholder={exampleName.lastName}
-          withAsterisk
-          maxLength={INPUT_MAX_LENGTHS.lastName}
-          key={form.key("lastName")}
-          {...form.getInputProps("lastName")}
-          onFocus={() => setFocusedField("lastName")}
-          onBlur={() => setFocusedField(null)}
-          disabled={isSubmitting}
-          rightSection={
-            focusedField === "lastName" ? (
-              <Text size="10px" c="dimmed">
-                {form.values.lastName.length}/{INPUT_MAX_LENGTHS.lastName}
-              </Text>
-            ) : null
-          }
         />
 
         <ModalFooter
-          cancelLabel="Cancel"
+          cancelLabel={t("AddContactModal.Cancel")}
           onCancel={() => (onClose ? onClose() : modals.close(safeModalId))}
           cancelDisabled={isSubmitting}
-          actionLabel={`Add ${form.getValues().firstName} to Bondery`}
+          actionLabel={t("AddContactModal.AddToBondery")}
           actionType="submit"
           actionLoading={isSubmitting}
           actionDisabled={isSubmitting}

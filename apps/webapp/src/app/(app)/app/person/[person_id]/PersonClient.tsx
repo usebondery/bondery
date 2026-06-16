@@ -48,7 +48,6 @@ import type {
   Activity,
   RelationshipType,
   ImportantDate,
-  MergeConflictField,
   MergeRecommendation,
   Tag,
   WorkHistoryEntry,
@@ -87,7 +86,7 @@ import { openStandardConfirmModal } from "@/app/(app)/app/components/modals/open
 import { GroupCard } from "../../groups/components/GroupCard";
 import { PersonTagsInput } from "./components/PersonTagsInput";
 import { openAddPeopleToGroupSelectionModal } from "../../people/components/AddPeopleToGroupSelectionModal";
-import { MERGE_CONFLICT_FIELDS, openMergeWithModal } from "../../people/components/MergeWithModal";
+import { openMergeWithModal } from "../../people/components/MergeWithModal";
 import { searchContacts } from "@/lib/searchContacts";
 import { openShareContactModal } from "../../people/components/ShareContactModal";
 import { WEBSITE_URL } from "@/lib/config";
@@ -168,46 +167,10 @@ export default function PersonClient({
   const { startForPerson } = useBatchEnrichFromLinkedIn();
   const tImportantDates = useTranslations("ContactImportantDates");
   const tPersonPage = useTranslations("SingleContactPage");
-  const tMerge = useTranslations("MergeWithModal");
-  const tShare = useTranslations("ShareContactModal");
   const tHeader = useTranslations("PageHeader");
   const tAddress = useTranslations("ContactAddress");
   const tTabs = useTranslations("PersonTabs");
   const tInteractions = useTranslations("InteractionsPage");
-  const mergeTexts = useMemo(
-    () => ({
-      errorTitle: tMerge("ErrorTitle"),
-      successTitle: tMerge("SuccessTitle"),
-      selectBothPeopleError: tMerge("SelectBothPeopleError"),
-      differentPeopleError: tMerge("DifferentPeopleError"),
-      mergingTitle: tMerge("MergingTitle"),
-      mergingDescription: tMerge("MergingDescription"),
-      mergeSuccess: tMerge("MergeSuccess"),
-      mergeFailed: tMerge("MergeFailed"),
-      mergeWithLabel: tMerge("MergeWithLabel"),
-      selectLeftPerson: tMerge("SelectLeftPerson"),
-      selectRightPerson: tMerge("SelectRightPerson"),
-      searchPeople: tMerge("SearchPeople"),
-      noPeopleFound: tMerge("NoPeopleFound"),
-      cancel: tMerge("Cancel"),
-      continue: tMerge("Continue"),
-      back: tMerge("Back"),
-      merge: tMerge("Merge"),
-      noConflicts: tMerge("NoConflicts"),
-      conflictHint: tMerge("ConflictHint"),
-      processing: tMerge("Processing"),
-      steps: {
-        pick: tMerge("Steps.Pick"),
-        resolve: tMerge("Steps.Resolve"),
-        process: tMerge("Steps.Process"),
-      },
-      fields: Object.fromEntries(
-        MERGE_CONFLICT_FIELDS.map((field) => [field, tMerge(`Fields.${field}`)]),
-      ) as Record<MergeConflictField, string>,
-    }),
-    [tMerge],
-  );
-
   const [contact, setContact] = useState<Contact>(initialContact);
   const [mergeRecommendation, setMergeRecommendation] = useState<MergeRecommendation | null>(
     initialMergeRecommendation,
@@ -1331,60 +1294,12 @@ export default function PersonClient({
       contacts: mergeContacts,
       leftPersonId: contact.id,
       disableLeftPicker: true,
-      titleText: tMerge("ModalTitle"),
-      texts: mergeTexts,
       onSearch: searchContacts,
     });
   };
 
   const openShareModal = () => {
-    openShareContactModal({
-      contact,
-      texts: {
-        modalTitle: tShare("ModalTitle"),
-        recipientEmailLabel: tShare("RecipientEmailLabel"),
-        recipientEmailPlaceholder: tShare("RecipientEmailPlaceholder"),
-        recipientsLabel: tShare("RecipientsLabel"),
-        recipientsPlaceholder: tShare("RecipientsPlaceholder"),
-        messageLabel: tShare("MessageLabel"),
-        messagePlaceholder: tShare("MessagePlaceholder"),
-        sendCopyCheckbox: tShare("SendCopyCheckbox"),
-        selectFieldsLabel: tShare("SelectFieldsLabel"),
-        submitButton: (count: number) =>
-          count > 0 ? tShare("SubmitButtonWithCount", { count }) : tShare("SubmitButton"),
-        cancelButton: tShare("CancelButton"),
-        sendingButton: tShare("SendingButton"),
-        successTitle: tShare("SuccessTitle"),
-        successDescription: tShare("SuccessDescription"),
-        errorTitle: tShare("ErrorTitle"),
-        errorDescription: tShare("ErrorDescription"),
-        noFieldsSelectedError: tShare("NoFieldsSelectedError"),
-        invalidEmailError: tShare("InvalidEmailError"),
-        invalidEmailsError: tShare("InvalidEmailsError"),
-        maxRecipientsError: tShare("MaxRecipientsError"),
-        noRecipientsError: tShare("NoRecipientsError"),
-        requiredFieldTooltip: tShare("RequiredFieldTooltip"),
-        avatarRequiredTooltip: tShare("AvatarRequiredTooltip"),
-        avatarDescription: (name: string) => tShare("AvatarDescription", { name }),
-        fieldLabels: {
-          name: tShare("Fields.name"),
-          avatar: tShare("Fields.avatar"),
-          headline: tShare("Fields.headline"),
-          phones: tShare("Fields.phones"),
-          emails: tShare("Fields.emails"),
-          location: tShare("Fields.location"),
-          linkedin: tShare("Fields.linkedin"),
-          instagram: tShare("Fields.instagram"),
-          facebook: tShare("Fields.facebook"),
-          website: tShare("Fields.website"),
-          whatsapp: tShare("Fields.whatsapp"),
-          signal: tShare("Fields.signal"),
-          addresses: tShare("Fields.addresses"),
-          notes: tShare("Fields.notes"),
-          importantDates: tShare("Fields.importantDates"),
-        },
-      },
-    });
+    openShareContactModal({ contact });
   };
 
   return (
@@ -1393,9 +1308,8 @@ export default function PersonClient({
         <PageHeader
           icon={myselfMode ? IconUserCircle : IconUser}
           title={myselfMode ? tPersonPage("MyselfPageTitle") : "Person's details"}
-          description={myselfMode ? tPersonPage("MyselfPageDescription") : undefined}
           helpHref={myselfMode ? `${HELP_DOCS_URL}/bondery/myself` : undefined}
-          helpLabel={myselfMode ? tHeader("HelpLabel") : undefined}
+          helpLabel={myselfMode ? tPersonPage("MyselfPageDescription") : undefined}
           backOnClick={
             myselfMode
               ? undefined
@@ -1421,7 +1335,6 @@ export default function PersonClient({
 
         <RecommendationsSection
           mergeRecommendation={mergeRecommendation}
-          mergeTexts={mergeTexts}
           onMergeAccepted={() => setMergeRecommendation(null)}
           onMergeDeclined={() => setMergeRecommendation(null)}
           showEnrichCard={!!contact.linkedin && !initialSyncedAt}
@@ -1519,8 +1432,6 @@ export default function PersonClient({
                               self.findIndex((other) => other.id === item.id) === index,
                           ),
                           initialParticipantIds: [contact.id],
-                          titleText: tInteractions("WhoAreYouMeeting"),
-                          t: tInteractions,
                         });
                       }}
                     >

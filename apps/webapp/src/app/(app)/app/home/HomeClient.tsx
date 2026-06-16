@@ -72,8 +72,6 @@ export function HomeClient({
   function handleLogInteraction() {
     openNewActivityModal({
       contacts: timelineContacts,
-      titleText: timelineT("WhoAreYouMeeting"),
-      t: timelineT,
     });
   }
 
@@ -123,8 +121,6 @@ export function HomeClient({
     openNewActivityModal({
       contacts: timelineContacts,
       activity,
-      titleText: timelineT("WhoAreYouMeeting"),
-      t: timelineT,
     });
   };
 

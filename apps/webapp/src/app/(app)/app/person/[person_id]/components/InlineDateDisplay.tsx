@@ -7,16 +7,48 @@ import { IconCalendar } from "@tabler/icons-react";
 import { NodeViewWrapper, type NodeViewProps } from "@tiptap/react";
 import { useFormatter } from "next-intl";
 
+type InlineDateDisplayProps =
+  | (NodeViewProps & { isDisplayOnly?: never })
+  | { isDisplayOnly: true; timestamp: string };
+
 /**
- * Inline NodeView for the InlineDateExtension.
- * Renders the stored timestamp as a localised date badge directly in the editor.
- * Clicking the badge opens a DatePicker popover to change the date.
+ * Renders a localised date badge.
+ *
+ * Two modes:
+ * - **Editor mode** (default): used as a Tiptap NodeView. Clicking the badge
+ *   opens a DatePicker popover so the user can change the date.
+ * - **Display-only mode** (`isDisplayOnly={true}`): used outside the editor
+ *   (e.g. in the AI chat). Renders a non-interactive badge from a plain
+ *   `timestamp` prop. No Tiptap wrapper, no popover.
  */
-export function InlineDateDisplay({ node, updateAttributes }: NodeViewProps) {
-  const { timestamp } = node.attrs as { timestamp: string };
+export function InlineDateDisplay(props: InlineDateDisplayProps) {
   const formatter = useFormatter();
   const [opened, setOpened] = useState(false);
 
+  if (props.isDisplayOnly) {
+    const date = new Date(props.timestamp);
+    const display = formatter.dateTime(date, {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    });
+    return (
+      <span style={{ display: "inline-block", verticalAlign: "middle" }}>
+        <Badge
+          variant="outline"
+          size="sm"
+          leftSection={<IconCalendar size={12} stroke={1.5} />}
+          styles={{ label: { textTransform: "none", fontWeight: 400 } }}
+        >
+          {display}
+        </Badge>
+      </span>
+    );
+  }
+
+  // Editor mode — Tiptap NodeView
+  const { node, updateAttributes } = props;
+  const { timestamp } = node.attrs as { timestamp: string };
   const date = new Date(timestamp);
   const display = formatter.dateTime(date, {
     year: "numeric",

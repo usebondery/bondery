@@ -21,7 +21,10 @@ import {
   setPendingQueueStatus,
 } from "@/lib/extension/enrichBatchStore";
 import { captureEvent } from "@/lib/analytics/client";
-import { revalidateContacts, revalidateSettings } from "@/app/(app)/app/actions";
+import {
+  revalidateContacts,
+  revalidateSettings,
+} from "@/app/(app)/app/actions";
 
 /** Number of consecutive timeouts before the circuit breaker aborts the loop. */
 const MAX_CONSECUTIVE_TIMEOUTS = 5;
@@ -39,6 +42,33 @@ interface QueueItem {
 
 interface NextBatchResponse {
   items: QueueItem[];
+}
+
+async function getResponseErrorDescription(
+  response: Response,
+  fallbackDescription: string,
+): Promise<string> {
+  try {
+    const data = (await response.json()) as {
+      error?: string;
+      message?: string;
+    };
+    const detail = data?.error ?? data?.message;
+    if (detail && detail.trim().length > 0) {
+      return `${fallbackDescription} (${detail})`;
+    }
+  } catch {
+    try {
+      const text = await response.text();
+      if (text.trim().length > 0) {
+        return `${fallbackDescription} (${text.trim()})`;
+      }
+    } catch {
+      // Ignore parse errors and return fallback below.
+    }
+  }
+
+  return fallbackDescription;
 }
 
 /**
@@ -62,10 +92,17 @@ export function useBatchEnrichFromLinkedIn() {
   const t = useTranslations("EnrichFromLinkedIn");
   const router = useRouter();
 
-  const storeState = useSyncExternalStore(subscribe, getState, () => defaultState);
+  const storeState = useSyncExternalStore(
+    subscribe,
+    getState,
+    () => defaultState,
+  );
 
   const enrichSinglePerson = useCallback(
-    (contactId: string, linkedinHandle: string): Promise<{ success: boolean; error?: string }> => {
+    (
+      contactId: string,
+      linkedinHandle: string,
+    ): Promise<{ success: boolean; error?: string }> => {
       return new Promise((resolve) => {
         const requestId = crypto.randomUUID();
 
@@ -106,7 +143,11 @@ export function useBatchEnrichFromLinkedIn() {
   );
 
   const patchQueueItem = useCallback(
-    async (queueItemId: string, status: "completed" | "failed", errorMessage?: string) => {
+    async (
+      queueItemId: string,
+      status: "completed" | "failed",
+      errorMessage?: string,
+    ) => {
       await fetch(`${API_ROUTES.CONTACTS}/enrich-queue/${queueItemId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
@@ -133,13 +174,19 @@ export function useBatchEnrichFromLinkedIn() {
       while (true) {
         if (isCancelled()) break;
 
-        const batchRes = await fetch(`${API_ROUTES.CONTACTS}/enrich-queue/next-batch`);
+        const batchRes = await fetch(
+          `${API_ROUTES.CONTACTS}/enrich-queue/next-batch`,
+        );
 
         if (!batchRes.ok) {
+          const description = await getResponseErrorDescription(
+            batchRes,
+            t("ErrorDescription"),
+          );
           notifications.show(
             errorNotificationTemplate({
               title: t("ErrorTitle"),
-              description: t("ErrorDescription"),
+              description,
             }),
           );
           break;
@@ -165,14 +212,21 @@ export function useBatchEnrichFromLinkedIn() {
           });
 
           if (!item.linkedinHandle) {
-            await patchQueueItem(item.queueItemId, "failed", "Missing LinkedIn handle");
+            await patchQueueItem(
+              item.queueItemId,
+              "failed",
+              "Missing LinkedIn handle",
+            );
             failedCount++;
             consecutiveTimeouts = 0;
             setState({ failed: failedCount, currentPerson: null });
             continue;
           }
 
-          const result = await enrichSinglePerson(item.personId, item.linkedinHandle);
+          const result = await enrichSinglePerson(
+            item.personId,
+            item.linkedinHandle,
+          );
 
           if (result.success) {
             await patchQueueItem(item.queueItemId, "completed");
@@ -239,20 +293,28 @@ export function useBatchEnrichFromLinkedIn() {
     // Initialize the queue — clears old rows, populates fresh pending items.
     const initRes = await fetch(`${API_ROUTES.CONTACTS}/enrich-queue/init`, {
       method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({}),
     });
 
     if (!initRes.ok) {
+      const description = await getResponseErrorDescription(
+        initRes,
+        t("ErrorDescription"),
+      );
       setState({ isLoading: false });
       notifications.show(
         errorNotificationTemplate({
           title: t("ErrorTitle"),
-          description: t("ErrorDescription"),
+          description,
         }),
       );
       return;
     }
 
-    const { totalEligible } = (await initRes.json()) as { totalEligible: number };
+    const { totalEligible } = (await initRes.json()) as {
+      totalEligible: number;
+    };
 
     if (totalEligible === 0) {
       setState({ isLoading: false });
@@ -280,7 +342,12 @@ export function useBatchEnrichFromLinkedIn() {
 
     const { completedCount, abortReason } = await runEnrichLoop(0, 0);
 
-    setState({ isRunning: false, isLoading: false, isPausing: false, currentPerson: null });
+    setState({
+      isRunning: false,
+      isLoading: false,
+      isPausing: false,
+      currentPerson: null,
+    });
 
     // On pause: leave all rows intact so the run can be resumed.
     // On natural completion: delete all rows (completed contacts have people_linkedin,
@@ -304,7 +371,9 @@ export function useBatchEnrichFromLinkedIn() {
         }),
       );
     } else if (!isCancelled() && completedCount > 0) {
-      captureEvent("batch_enrich_completed", { total_enriched: completedCount });
+      captureEvent("batch_enrich_completed", {
+        total_enriched: completedCount,
+      });
       notifications.show(
         successNotificationTemplate({
           title: t("AllDoneTitle"),
@@ -374,11 +443,15 @@ export function useBatchEnrichFromLinkedIn() {
       });
 
       if (!initRes.ok) {
+        const description = await getResponseErrorDescription(
+          initRes,
+          t("ErrorDescription"),
+        );
         setState({ isLoading: false });
         notifications.show(
           errorNotificationTemplate({
             title: t("ErrorTitle"),
-            description: t("ErrorDescription"),
+            description,
           }),
         );
         return;
@@ -397,7 +470,12 @@ export function useBatchEnrichFromLinkedIn() {
 
       const { completedCount, abortReason } = await runEnrichLoop(0, 0);
 
-      setState({ isRunning: false, isLoading: false, isPausing: false, currentPerson: null });
+      setState({
+        isRunning: false,
+        isLoading: false,
+        isPausing: false,
+        currentPerson: null,
+      });
 
       if (isCancelled()) {
         const s = getState();
@@ -407,7 +485,9 @@ export function useBatchEnrichFromLinkedIn() {
           failed: s.failed,
         });
       } else if (!abortReason) {
-        await fetch(`${API_ROUTES.CONTACTS}/enrich-queue`, { method: "DELETE" });
+        await fetch(`${API_ROUTES.CONTACTS}/enrich-queue`, {
+          method: "DELETE",
+        });
       }
 
       if (abortReason === "circuit_breaker") {
@@ -441,7 +521,11 @@ export function useBatchEnrichFromLinkedIn() {
    * Called when the page detects pending queue items from a previous session.
    */
   const resume = useCallback(
-    async (queueStatus: { pending: number; completed: number; failed: number }) => {
+    async (queueStatus: {
+      pending: number;
+      completed: number;
+      failed: number;
+    }) => {
       setState({ isLoading: true });
 
       const authState = await checkExtensionAuth();
@@ -468,7 +552,8 @@ export function useBatchEnrichFromLinkedIn() {
         return;
       }
 
-      const totalEligible = queueStatus.pending + queueStatus.completed + queueStatus.failed;
+      const totalEligible =
+        queueStatus.pending + queueStatus.completed + queueStatus.failed;
 
       setPendingQueueStatus(null);
       setCancelled(false);
@@ -487,7 +572,12 @@ export function useBatchEnrichFromLinkedIn() {
         queueStatus.failed,
       );
 
-      setState({ isRunning: false, isLoading: false, isPausing: false, currentPerson: null });
+      setState({
+        isRunning: false,
+        isLoading: false,
+        isPausing: false,
+        currentPerson: null,
+      });
 
       if (isCancelled()) {
         const s = getState();
@@ -497,7 +587,9 @@ export function useBatchEnrichFromLinkedIn() {
           failed: s.failed,
         });
       } else if (!abortReason) {
-        await fetch(`${API_ROUTES.CONTACTS}/enrich-queue`, { method: "DELETE" });
+        await fetch(`${API_ROUTES.CONTACTS}/enrich-queue`, {
+          method: "DELETE",
+        });
       }
 
       if (abortReason === "circuit_breaker") {

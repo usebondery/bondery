@@ -8,26 +8,24 @@
  *
  * Runs client-side only (uses DOMParser). Returns an empty string on the server.
  *
+ * Entity references use the unified `[[bp:type:id]]` wire format.
+ *
  * @param html - Raw HTML string from editor.getHTML()
- * @param options.formatDate - Optional locale-aware date formatter for inline-date nodes
  * @returns Markdown string representation
  */
-export function htmlToMarkdown(
-  html: string,
-  options?: { formatDate?: (date: Date) => string },
-): string {
+export function htmlToMarkdown(html: string): string {
   if (typeof window === "undefined") return "";
   if (!html || html === "<p></p>") return "";
 
   const parser = new DOMParser();
   const doc = parser.parseFromString(html, "text/html");
 
-  return nodeToMarkdown(doc.body, options?.formatDate)
+  return nodeToMarkdown(doc.body)
     .replace(/\n{3,}/g, "\n\n")
     .trim();
 }
 
-function nodeToMarkdown(node: Node, formatDate?: (d: Date) => string): string {
+function nodeToMarkdown(node: Node): string {
   if (node.nodeType === Node.TEXT_NODE) {
     return node.textContent ?? "";
   }
@@ -38,25 +36,20 @@ function nodeToMarkdown(node: Node, formatDate?: (d: Date) => string): string {
   const tag = el.tagName.toLowerCase();
   const children = () =>
     Array.from(el.childNodes)
-      .map((n) => nodeToMarkdown(n, formatDate))
+      .map((n) => nodeToMarkdown(n))
       .join("");
 
-  // @mention span — serialised by Tiptap with data-type="mention" and data-label
+  // @mention span — serialised by Tiptap with data-type="mention" and data-id
   if (tag === "span" && el.getAttribute("data-type") === "mention") {
-    const label = el.getAttribute("data-label") ?? el.textContent ?? "";
     const id = el.getAttribute("data-id") ?? "";
-    return `[@${label}](${id})`;
+    return `[[bp:person:${id}]]`;
   }
 
-  // Inline date node — serialised as a locale-aware date string
+  // Inline date node — serialised as [[bp:date:ISO]]
   if (tag === "span" && el.getAttribute("data-type") === "inline-date") {
     const ts = el.getAttribute("data-timestamp") ?? "";
     if (ts) {
-      const d = new Date(ts);
-      if (formatDate) return formatDate(d);
-      const mm = String(d.getMonth() + 1).padStart(2, "0");
-      const dd = String(d.getDate()).padStart(2, "0");
-      return `${mm}/${dd}/${d.getFullYear()}`;
+      return `[[bp:date:${ts}]]`;
     }
     return el.textContent ?? "";
   }
@@ -99,7 +92,7 @@ function nodeToMarkdown(node: Node, formatDate?: (d: Date) => string): string {
       const rows = Array.from(el.children)
         .map((li) => {
           const liContent = Array.from(li.childNodes)
-            .map((n) => nodeToMarkdown(n, formatDate))
+            .map((n) => nodeToMarkdown(n))
             .join("")
             .trim();
           if (isTaskList) {
@@ -117,7 +110,7 @@ function nodeToMarkdown(node: Node, formatDate?: (d: Date) => string): string {
       const rows = Array.from(el.children)
         .map((li, i) => {
           const liContent = Array.from(li.childNodes)
-            .map((n) => nodeToMarkdown(n, formatDate))
+            .map((n) => nodeToMarkdown(n))
             .join("")
             .trim();
           return `${i + 1}. ${liContent}`;

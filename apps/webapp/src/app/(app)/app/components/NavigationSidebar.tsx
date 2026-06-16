@@ -12,6 +12,7 @@ import {
   IconTimelineEventText,
   IconArrowMerge,
   IconHeartHandshake,
+  IconMessageChatbot,
 } from "@tabler/icons-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -36,15 +37,28 @@ interface NavigationSidebarContentProps {
 
 export const primaryLinks = [
   { href: WEBAPP_ROUTES.HOME, label: "Home", icon: IconHome },
-  { href: WEBAPP_ROUTES.INTERACTIONS, label: "Interactions", icon: IconTimelineEventText },
+  {
+    href: WEBAPP_ROUTES.INTERACTIONS,
+    label: "Interactions",
+    icon: IconTimelineEventText,
+  },
   { href: WEBAPP_ROUTES.PEOPLE, label: "People", icon: IconUser },
-  { href: WEBAPP_ROUTES.KEEP_IN_TOUCH, label: "Keep in touch", icon: IconHeartHandshake },
+  {
+    href: WEBAPP_ROUTES.KEEP_IN_TOUCH,
+    label: "Keep in touch",
+    icon: IconHeartHandshake,
+  },
   { href: WEBAPP_ROUTES.GROUPS, label: "Groups", icon: IconUsersGroup },
   { href: WEBAPP_ROUTES.MAP, label: "Map", icon: IconMap2 },
+  { href: WEBAPP_ROUTES.CHAT, label: "AI Assistant", icon: IconMessageChatbot },
 ];
 
 export const secondaryLinks = [
-  { href: WEBAPP_ROUTES.FIX_CONTACTS, label: "Fix & merge", icon: IconArrowMerge },
+  {
+    href: WEBAPP_ROUTES.FIX_CONTACTS,
+    label: "Fix & merge",
+    icon: IconArrowMerge,
+  },
   { href: WEBAPP_ROUTES.SETTINGS, label: "Settings", icon: IconSettings },
 ];
 
@@ -57,13 +71,17 @@ export function NavigationSidebarContent({
 }: NavigationSidebarContentProps) {
   const pathname = usePathname();
   const isMyselfActive = pathname === WEBAPP_ROUTES.MYSELF;
-  const { hovered: userCardHovered, ref: userCardRef } = useHover<HTMLAnchorElement>();
+  const { hovered: userCardHovered, ref: userCardRef } =
+    useHover<HTMLAnchorElement>();
 
   return (
     <Box style={{ display: "flex", flexDirection: "column", height: "100%" }}>
       {/* Logo */}
       <Group mb="md" justify={collapsed ? "center" : "flex-start"}>
-        <AnchorLink href={WEBAPP_ROUTES.DEFAULT_PAGE_AFTER_LOGIN} underline="never">
+        <AnchorLink
+          href={WEBAPP_ROUTES.DEFAULT_PAGE_AFTER_LOGIN}
+          underline="never"
+        >
           {collapsed ? (
             <>
               <Box darkHidden>
@@ -111,7 +129,9 @@ export function NavigationSidebarContent({
             key={link.href}
             {...link}
             active={pathname === link.href}
-            showIndicator={link.href === WEBAPP_ROUTES.KEEP_IN_TOUCH && hasOverdueKeepInTouch}
+            showIndicator={
+              link.href === WEBAPP_ROUTES.KEEP_IN_TOUCH && hasOverdueKeepInTouch
+            }
             collapsed={collapsed}
           />
         ))}
@@ -125,29 +145,41 @@ export function NavigationSidebarContent({
             {...link}
             active={pathname === link.href}
             showIndicator={
-              link.href === WEBAPP_ROUTES.FIX_CONTACTS && hasActiveMergeRecommendations
+              link.href === WEBAPP_ROUTES.FIX_CONTACTS &&
+              hasActiveMergeRecommendations
             }
             collapsed={collapsed}
           />
         ))}
       </Stack>
 
-      {/* User card */}
+      {/* User card — mirrors NavLinkItem structure exactly: same ITEM_PADDING,
+          same justify=flex-start, Avatar replaces the icon. */}
       <Box mb="xs">
-        <Tooltip label={`Ahoy, ${userName}! 😎`} position="right" withArrow disabled={!collapsed}>
+        <Tooltip
+          label={`Ahoy, ${userName}! 😎`}
+          position="right"
+          withArrow
+          disabled={!collapsed}
+        >
           <Group
             ref={userCardRef}
             component={Link as any}
             {...({ href: WEBAPP_ROUTES.MYSELF } as any)}
+            // Same reasoning as NavLinkItem: active state = background color only.
+            // button-scale-effect-active would apply brightness(0.9) permanently.
+            className="button-scale-effect"
             wrap="nowrap"
             gap="sm"
-            justify={collapsed ? "center" : "flex-start"}
-            p="xs"
+            justify="flex-start"
             aria-current={isMyselfActive ? "page" : undefined}
             style={{
               width: "100%",
               borderRadius: "var(--mantine-radius-sm)",
-              transition: "background-color var(--transition-time) var(--transition-ease)",
+              // No inline transition — the button-scale-effect CSS class already
+              // defines transition for transform, filter, AND background-color.
+              // An inline override here would cause transform/filter to snap
+              // instantly (no animation) because inline styles beat CSS classes.
               backgroundColor: isMyselfActive
                 ? "var(--mantine-primary-color-filled)"
                 : userCardHovered
@@ -155,14 +187,41 @@ export function NavigationSidebarContent({
                   : "transparent",
               color: isMyselfActive ? "white" : "inherit",
               textDecoration: "none",
+              paddingLeft: "var(--sidebar-icon-pl)",
+              paddingRight: "var(--sidebar-icon-pl)",
+              paddingTop: "var(--mantine-spacing-xs)",
+              paddingBottom: "var(--mantine-spacing-xs)",
             }}
           >
-            <Avatar src={avatarUrl ?? undefined} radius="xl" size="sm" name={userName} />
+            {/* Icon-slot wrapper: same 20px width as every NavLinkItem icon so the
+                avatar is visually centred in collapsed state and column-aligned
+                in expanded state. The avatar (sm = 26px) visually overflows
+                by 3px per side, which is fine for a round avatar. */}
+            <Box
+              style={{
+                width: "var(--sidebar-nav-icon-size)",
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                flexShrink: 0,
+                overflow: "visible",
+              }}
+            >
+              <Avatar
+                src={avatarUrl ?? undefined}
+                radius="xl"
+                size="sm"
+                name={userName}
+              />
+            </Box>
             {!collapsed && (
               <Text
                 size="sm"
                 fw={500}
+                c={isMyselfActive ? "white" : undefined}
                 style={{
+                  flex: 1,
+                  minWidth: 0,
                   lineHeight: 1.2,
                   overflow: "hidden",
                   whiteSpace: "nowrap",

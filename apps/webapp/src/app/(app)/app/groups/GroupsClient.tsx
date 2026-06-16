@@ -85,32 +85,6 @@ export function GroupsClient({ initialGroups, totalCount }: GroupsClientProps) {
     openAddPeopleToGroupModal({
       groupId: group.id,
       groupLabel: group.label,
-      texts: {
-        title: t("AddPeopleModal.Title", { groupLabel: group.label }),
-        errorTitle: t("AddPeopleModal.ErrorTitle"),
-        successTitle: t("AddPeopleModal.SuccessTitle"),
-        loadError: t("AddPeopleModal.LoadError"),
-        noSelectionTitle: t("AddPeopleModal.NoSelectionTitle"),
-        noSelectionDescription: t("AddPeopleModal.NoSelectionDescription"),
-        addingTitle: t("AddPeopleModal.AddingTitle"),
-        addingDescription: t("AddPeopleModal.AddingDescription"),
-        addError: t("AddPeopleModal.AddError"),
-        emptyState: t("AddPeopleModal.EmptyState"),
-        close: t("AddPeopleModal.Close"),
-        cancel: t("AddPeopleModal.Cancel"),
-        addContactsPlaceholder: t("AddPeopleModal.AddContactsPlaceholder"),
-        noContactsFound: t("AddPeopleModal.NoContactsFound"),
-        formatActionLabel: (count: number) =>
-          count === 0
-            ? t("AddPeopleModal.ActionDefault")
-            : count === 1
-              ? t("AddPeopleModal.ActionSingular")
-              : t("AddPeopleModal.ActionPlural", { count }),
-        formatSuccessMessage: (count: number, groupLabel: string) =>
-          count === 1
-            ? t("AddPeopleModal.SuccessMessageSingular", { groupLabel })
-            : t("AddPeopleModal.SuccessMessagePlural", { count, groupLabel }),
-      },
     });
   };
 
@@ -253,9 +227,8 @@ export function GroupsClient({ initialGroups, totalCount }: GroupsClientProps) {
         <PageHeader
           icon={IconUsersGroup}
           title={t("Title")}
-          description={t("HeaderDescription")}
           helpHref={`${WEBSITE_URL}/docs/concepts/groups`}
-          helpLabel={tHeader("LearnMoreAbout", { concept: tHeader("Concepts.Groups") })}
+          helpLabel={t("HeaderDescription")}
           action={
             <Button
               size="md"

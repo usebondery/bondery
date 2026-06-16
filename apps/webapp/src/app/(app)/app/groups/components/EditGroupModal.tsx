@@ -16,6 +16,7 @@ import { useForm } from "@mantine/form";
 import { modals } from "@mantine/modals";
 import { notifications } from "@mantine/notifications";
 import { IconUsersGroup, IconCheck } from "@tabler/icons-react";
+import { useTranslations } from "next-intl";
 import {
   EmojiPicker,
   errorNotificationTemplate,
@@ -52,12 +53,17 @@ interface EditGroupModalProps {
   initialColor: string;
 }
 
+function EditGroupModalTitle() {
+  const t = useTranslations("GroupsPage");
+  return <ModalTitle text={t("EditGroupModal.Title")} icon={<IconUsersGroup size={24} />} />;
+}
+
 export function openEditGroupModal(props: EditGroupModalProps) {
   const modalId = `edit-group-${Math.random().toString(36).slice(2)}`;
 
   modals.open({
     modalId,
-    title: <ModalTitle text="Edit group" icon={<IconUsersGroup size={24} />} />,
+    title: <EditGroupModalTitle />,
     trapFocus: true,
     size: "md",
     children: <EditGroupForm {...props} modalId={modalId} />,
@@ -72,6 +78,7 @@ function EditGroupForm({
   modalId,
 }: EditGroupModalProps & { modalId: string }) {
   const router = useRouter();
+  const t = useTranslations("GroupsPage");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
@@ -93,12 +100,12 @@ function EditGroupForm({
     validate: {
       label: (value) =>
         value.trim().length === 0
-          ? "Please add a label"
+          ? t("EditGroupModal.LabelRequired")
           : value.length > 100
-            ? "Label must be 100 characters or less"
+            ? t("EditGroupModal.LabelTooLong", { max: 100 })
             : null,
-      emoji: (value) => (value.trim().length === 0 ? "Please select an emoji" : null),
-      color: (value) => (value.trim().length === 0 ? "Please select a color" : null),
+      emoji: (value) => (value.trim().length === 0 ? t("EditGroupModal.EmojiRequired") : null),
+      color: (value) => (value.trim().length === 0 ? t("EditGroupModal.ColorRequired") : null),
     },
   });
 
@@ -107,8 +114,8 @@ function EditGroupForm({
 
     const loadingNotification = notifications.show({
       ...loadingNotificationTemplate({
-        title: "Saving...",
-        description: "Please wait while we save the changes",
+        title: t("EditGroupModal.LoadingTitle"),
+        description: t("EditGroupModal.LoadingDescription"),
       }),
     });
 
@@ -132,8 +139,8 @@ function EditGroupForm({
 
       notifications.show(
         successNotificationTemplate({
-          title: "Success",
-          description: "Group updated successfully",
+          title: t("EditGroupModal.SuccessTitle"),
+          description: t("EditGroupModal.SuccessDescription"),
         }),
       );
 
@@ -145,8 +152,8 @@ function EditGroupForm({
 
       notifications.show(
         errorNotificationTemplate({
-          title: "Error",
-          description: error instanceof Error ? error.message : "Failed to update group",
+          title: t("EditGroupModal.ErrorTitle"),
+          description: error instanceof Error ? error.message : t("EditGroupModal.UpdateFailed"),
         }),
       );
     } finally {
@@ -168,8 +175,8 @@ function EditGroupForm({
           </Box>
           <Box style={{ flex: 1 }}>
             <TextInput
-              label="Label"
-              placeholder="e.g., Family, Work, Friends"
+              label={t("EditGroupModal.LabelInput")}
+              placeholder={t("EditGroupModal.LabelPlaceholder")}
               withAsterisk
               required
               data-autofocus
@@ -179,8 +186,8 @@ function EditGroupForm({
         </Group>
 
         <ColorInput
-          label="Color"
-          placeholder="Pick a color"
+          label={t("EditGroupModal.ColorInput")}
+          placeholder={t("EditGroupModal.ColorPlaceholder")}
           withAsterisk
           format="hex"
           swatches={COLOR_SWATCHES}
@@ -190,10 +197,10 @@ function EditGroupForm({
         />
 
         <ModalFooter
-          cancelLabel="Cancel"
+          cancelLabel={t("EditGroupModal.Cancel")}
           onCancel={() => modals.close(modalId)}
           cancelDisabled={isSubmitting}
-          actionLabel="Save changes"
+          actionLabel={t("EditGroupModal.SaveChanges")}
           actionType="submit"
           actionLoading={isSubmitting}
           actionDisabled={isSubmitting}

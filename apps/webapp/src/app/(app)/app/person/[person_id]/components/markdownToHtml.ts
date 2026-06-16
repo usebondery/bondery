@@ -47,11 +47,14 @@ export function markdownToHtml(markdown: string): string {
       .replace(/==(.+?)==/g, (_, a) => `<mark>${a}</mark>`)
       // inline code: `…`
       .replace(/`([^`]+)`/g, (_, a) => `<code>${a}</code>`)
-      // mention: [@Person Name](uuid) — must come before the generic link rule
+      // bp tokens: [[bp:person:UUID]], [[bp:date:ISO]], etc.
       .replace(
-        /\[@([^\]]+)\]\(([^)]+)\)/g,
-        (_, label, id) =>
-          `<span data-type="mention" data-id="${id}" data-label="${label}">@${label}</span>`,
+        /\[\[bp:person:([^\]]+)\]\]/g,
+        (_, id) => `<span data-type="mention" data-id="${id}" data-label="">@</span>`,
+      )
+      .replace(
+        /\[\[bp:date:([^\]]+)\]\]/g,
+        (_, ts) => `<span data-type="inline-date" data-timestamp="${ts}"></span>`,
       )
       // link: [text](url)
       .replace(

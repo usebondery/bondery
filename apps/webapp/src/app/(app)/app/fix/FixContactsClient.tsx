@@ -1,13 +1,12 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { Button, Group, Paper, SegmentedControl, Stack, Text } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { IconArrowMerge, IconEye, IconEyeOff, IconRefresh } from "@tabler/icons-react";
 import { useTranslations } from "next-intl";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import type {
-  MergeConflictField,
   MergeRecommendation,
   MergeRecommendationsResponse,
   RefreshMergeRecommendationsResponse,
@@ -19,7 +18,6 @@ import {
 } from "@bondery/mantine-next";
 import { PageWrapper } from "@/app/(app)/app/components/PageWrapper";
 import { PageHeader } from "@/app/(app)/app/components/PageHeader";
-import { MERGE_CONFLICT_FIELDS } from "../people/components/MergeWithModal";
 import { MergeRecommendationCard } from "../components/contacts/MergeRecommendationCard";
 import { EnrichRecommendationCard } from "./components/EnrichRecommendationCard";
 
@@ -53,40 +51,6 @@ export function FixContactsClient({
     const payload = (await listResponse.json()) as MergeRecommendationsResponse;
     setRecommendations(payload.recommendations || []);
   };
-
-  const mergeTexts = useMemo(
-    () => ({
-      errorTitle: tMerge("ErrorTitle"),
-      successTitle: tMerge("SuccessTitle"),
-      selectBothPeopleError: tMerge("SelectBothPeopleError"),
-      differentPeopleError: tMerge("DifferentPeopleError"),
-      mergingTitle: tMerge("MergingTitle"),
-      mergingDescription: tMerge("MergingDescription"),
-      mergeSuccess: tMerge("MergeSuccess"),
-      mergeFailed: tMerge("MergeFailed"),
-      mergeWithLabel: tMerge("MergeWithLabel"),
-      selectLeftPerson: tMerge("SelectLeftPerson"),
-      selectRightPerson: tMerge("SelectRightPerson"),
-      searchPeople: tMerge("SearchPeople"),
-      noPeopleFound: tMerge("NoPeopleFound"),
-      cancel: tMerge("Cancel"),
-      continue: tMerge("Continue"),
-      back: tMerge("Back"),
-      merge: tMerge("Merge"),
-      noConflicts: tMerge("NoConflicts"),
-      conflictHint: tMerge("ConflictHint"),
-      processing: tMerge("Processing"),
-      steps: {
-        pick: tMerge("Steps.Pick"),
-        resolve: tMerge("Steps.Resolve"),
-        process: tMerge("Steps.Process"),
-      },
-      fields: Object.fromEntries(
-        MERGE_CONFLICT_FIELDS.map((field) => [field, tMerge(`Fields.${field}`)]),
-      ) as Record<MergeConflictField, string>,
-    }),
-    [tMerge],
-  );
 
   const handleRefreshSuggestions = async () => {
     setIsRefreshing(true);
@@ -232,7 +196,7 @@ export function FixContactsClient({
               {t("RefreshSuggestions")}
             </Button>
           }
-          description={t("Description")}
+          helpLabel={t("Description")}
         />
 
         {!showDeclined && (
@@ -273,7 +237,6 @@ export function FixContactsClient({
                   key={recommendation.id}
                   recommendation={recommendation}
                   contacts={[recommendation.leftPerson, recommendation.rightPerson]}
-                  mergeTexts={mergeTexts}
                   onAccepted={() =>
                     setRecommendations((prev) => prev.filter((r) => r.id !== recommendation.id))
                   }

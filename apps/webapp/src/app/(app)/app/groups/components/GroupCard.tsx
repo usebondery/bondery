@@ -1,27 +1,10 @@
 "use client";
 
-import {
-  Card,
-  Group,
-  Text,
-  Menu,
-  ActionIcon,
-  MenuTarget,
-  MenuDropdown,
-  MenuItem,
-  Stack,
-} from "@mantine/core";
-import {
-  IconCopy,
-  IconDotsVertical,
-  IconEdit,
-  IconFolderCog,
-  IconTrash,
-  IconUserPlus,
-} from "@tabler/icons-react";
+import { Card, Group, Text, Menu, MenuTarget, MenuDropdown, MenuItem, Stack } from "@mantine/core";
+import { IconCopy, IconEdit, IconFolderCog, IconTrash, IconUserPlus } from "@tabler/icons-react";
 import { useState, type MouseEvent, type ReactNode } from "react";
 import type { GroupWithCount } from "@bondery/types";
-import { PersonAvatarGroup } from "@bondery/mantine-next";
+import { PersonAvatarGroup, DotsMenuButton } from "@bondery/mantine-next";
 
 // ── Color maps ──────────────────────────────────────────
 
@@ -176,17 +159,14 @@ function GroupCardMenu({
   return (
     <Menu shadow="md" opened={menuOpened} onChange={setMenuOpened} position="bottom-end">
       <MenuTarget>
-        <ActionIcon
-          variant="default"
+        <DotsMenuButton
           size={iconSize}
-          className={menuOpened ? "button-scale-effect-active" : "button-scale-effect"}
+          opened={menuOpened}
           data-menu-trigger
           onClick={(e) => {
             e.stopPropagation();
           }}
-        >
-          <IconDotsVertical size={16} />
-        </ActionIcon>
+        />
       </MenuTarget>
       <MenuDropdown>
         <MenuItem

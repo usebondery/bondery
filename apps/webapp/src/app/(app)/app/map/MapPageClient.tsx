@@ -1,6 +1,14 @@
 "use client";
 
-import { Badge, Group, Paper, SegmentedControl, Stack, Text, Tooltip } from "@mantine/core";
+import {
+  Badge,
+  Group,
+  Paper,
+  SegmentedControl,
+  Stack,
+  Text,
+  Tooltip,
+} from "@mantine/core";
 import { useDebouncedCallback } from "@mantine/hooks";
 import {
   IconBrandLinkedin,
@@ -11,12 +19,18 @@ import {
   IconMapPin,
   IconUser,
 } from "@tabler/icons-react";
-import { useCallback, useEffect, useMemo, useRef, useState, useDeferredValue } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useDeferredValue,
+} from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { API_ROUTES, WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import { DEBOUNCE_MS } from "@/lib/config";
-import type { MergeConflictField } from "@bondery/types";
 import ContactsTable, {
   type ColumnConfig,
   type SortOrder,
@@ -25,10 +39,7 @@ import { LocationLookupInput } from "@/app/(app)/app/components/LocationLookupIn
 import { openDeleteContactModal } from "@/app/(app)/app/components/contacts/openDeleteContactModal";
 import { openDeleteContactsModal } from "@/app/(app)/app/components/contacts/openDeleteContactsModal";
 import { openAddPeopleToGroupSelectionModal } from "@/app/(app)/app/people/components/AddPeopleToGroupSelectionModal";
-import {
-  MERGE_CONFLICT_FIELDS,
-  openMergeWithModal,
-} from "@/app/(app)/app/people/components/MergeWithModal";
+import { openMergeWithModal } from "@/app/(app)/app/people/components/MergeWithModal";
 import { formatContactName } from "@/lib/nameHelpers";
 import { PageHeader } from "@/app/(app)/app/components/PageHeader";
 import { PageWrapper } from "@/app/(app)/app/components/PageWrapper";
@@ -68,51 +79,21 @@ function sortPins(list: MapPin[], order: SortOrder): MapPin[] {
 
 export function MapPageClient({ view }: MapPageClientProps) {
   const t = useTranslations("MapPage");
-  const tMerge = useTranslations("MergeWithModal");
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-
-  const mergeTexts = useMemo(
-    () => ({
-      errorTitle: tMerge("ErrorTitle"),
-      successTitle: tMerge("SuccessTitle"),
-      selectBothPeopleError: tMerge("SelectBothPeopleError"),
-      differentPeopleError: tMerge("DifferentPeopleError"),
-      mergingTitle: tMerge("MergingTitle"),
-      mergingDescription: tMerge("MergingDescription"),
-      mergeSuccess: tMerge("MergeSuccess"),
-      mergeFailed: tMerge("MergeFailed"),
-      mergeWithLabel: tMerge("MergeWithLabel"),
-      selectLeftPerson: tMerge("SelectLeftPerson"),
-      selectRightPerson: tMerge("SelectRightPerson"),
-      searchPeople: tMerge("SearchPeople"),
-      noPeopleFound: tMerge("NoPeopleFound"),
-      cancel: tMerge("Cancel"),
-      continue: tMerge("Continue"),
-      back: tMerge("Back"),
-      merge: tMerge("Merge"),
-      noConflicts: tMerge("NoConflicts"),
-      conflictHint: tMerge("ConflictHint"),
-      processing: tMerge("Processing"),
-      steps: {
-        pick: tMerge("Steps.Pick"),
-        resolve: tMerge("Steps.Resolve"),
-        process: tMerge("Steps.Process"),
-      },
-      fields: Object.fromEntries(
-        MERGE_CONFLICT_FIELDS.map((field) => [field, tMerge(`Fields.${field}`)]),
-      ) as Record<MergeConflictField, string>,
-    }),
-    [tMerge],
-  );
 
   // Map location search
   const [locationQuery, setLocationQuery] = useState("");
   const [mapFocus, setMapFocus] = useState<PeopleMapFocus | null>(null);
 
   const handleLocationSelect = (selected: MapSuggestionItem) => {
-    if (!selected || selected.position.lat === null || selected.position.lon === null) return;
+    if (
+      !selected ||
+      selected.position.lat === null ||
+      selected.position.lon === null
+    )
+      return;
     setLocationQuery(selected.label);
     setMapFocus({
       latitude: selected.position.lat,
@@ -155,7 +136,9 @@ export function MapPageClient({ view }: MapPageClientProps) {
 
     const mode = viewRef.current;
     const endpoint =
-      mode === "addresses" ? API_ROUTES.CONTACTS_MAP_ADDRESS_PINS : API_ROUTES.CONTACTS_MAP_PINS;
+      mode === "addresses"
+        ? API_ROUTES.CONTACTS_MAP_ADDRESS_PINS
+        : API_ROUTES.CONTACTS_MAP_PINS;
 
     try {
       const res = await fetch(`${endpoint}?${params}`);
@@ -231,7 +214,11 @@ export function MapPageClient({ view }: MapPageClientProps) {
   // Map address pins to a contact-shaped object so we can reuse ContactsTable.
   // id = personId so the PersonChip name link points to the correct person.
   // _addressType is a custom extra field read by renderAddressLocationCell via `as any`.
-  const ADDRESS_TYPE_COLOR: Record<string, string> = { home: "blue", work: "grape", other: "gray" };
+  const ADDRESS_TYPE_COLOR: Record<string, string> = {
+    home: "blue",
+    work: "grape",
+    other: "gray",
+  };
 
   const addressContactRows = useMemo(
     () =>
@@ -256,12 +243,30 @@ export function MapPageClient({ view }: MapPageClientProps) {
   const [tableSearch, setTableSearch] = useState("");
   const [sortOrder, setSortOrder] = useState<SortOrder>("nameAsc");
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
-  const [lastSelectedIndex, setLastSelectedIndex] = useState<number | null>(null);
+  const [lastSelectedIndex, setLastSelectedIndex] = useState<number | null>(
+    null,
+  );
 
   const [columns, setColumns] = useState<ColumnConfig[]>([
-    { key: "name", label: "Name", visible: true, icon: <IconUser size={16} />, fixed: true },
-    { key: "headline", label: "Headline", visible: true, icon: <IconBriefcase size={16} /> },
-    { key: "location", label: "Location", visible: true, icon: <IconMapPin size={16} /> },
+    {
+      key: "name",
+      label: "Name",
+      visible: true,
+      icon: <IconUser size={16} />,
+      fixed: true,
+    },
+    {
+      key: "headline",
+      label: "Headline",
+      visible: true,
+      icon: <IconBriefcase size={16} />,
+    },
+    {
+      key: "location",
+      label: "Location",
+      visible: true,
+      icon: <IconMapPin size={16} />,
+    },
     {
       key: "lastInteraction",
       label: "Last Interaction",
@@ -294,7 +299,11 @@ export function MapPageClient({ view }: MapPageClientProps) {
     const query = tableSearch.trim().toLowerCase();
     const base = query
       ? visibleLocationPins.filter((p) =>
-          [p.firstName, p.lastName].filter(Boolean).join(" ").toLowerCase().includes(query),
+          [p.firstName, p.lastName]
+            .filter(Boolean)
+            .join(" ")
+            .toLowerCase()
+            .includes(query),
         )
       : visibleLocationPins;
     return sortPins(base, sortOrder);
@@ -309,12 +318,16 @@ export function MapPageClient({ view }: MapPageClientProps) {
             .includes(query),
         )
       : addressContactRows;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return sortPins(base as any, sortOrder) as unknown as typeof addressContactRows;
+    return sortPins(
+      base as any,
+      sortOrder,
+    ) as unknown as typeof addressContactRows;
   }, [addressContactRows, tableSearch, sortOrder]);
 
-  const allSelected = filteredPins.length > 0 && selectedIds.size === filteredPins.length;
-  const someSelected = selectedIds.size > 0 && selectedIds.size < filteredPins.length;
+  const allSelected =
+    filteredPins.length > 0 && selectedIds.size === filteredPins.length;
+  const someSelected =
+    selectedIds.size > 0 && selectedIds.size < filteredPins.length;
 
   const handleSelectAll = () => {
     if (selectedIds.size === filteredPins.length) {
@@ -324,8 +337,12 @@ export function MapPageClient({ view }: MapPageClientProps) {
     }
   };
 
-  const handleSelectOne = (id: string, options?: { shiftKey?: boolean; index?: number }) => {
-    const currentIndex = options?.index ?? filteredPins.findIndex((p) => p.id === id);
+  const handleSelectOne = (
+    id: string,
+    options?: { shiftKey?: boolean; index?: number },
+  ) => {
+    const currentIndex =
+      options?.index ?? filteredPins.findIndex((p) => p.id === id);
 
     if (options?.shiftKey && lastSelectedIndex !== null && currentIndex >= 0) {
       const shouldSelect = !selectedIds.has(id);
@@ -333,7 +350,9 @@ export function MapPageClient({ view }: MapPageClientProps) {
       const end = Math.max(lastSelectedIndex, currentIndex);
       const rangeIds = filteredPins.slice(start, end + 1).map((p) => p.id);
       const next = new Set(selectedIds);
-      rangeIds.forEach((rid) => (shouldSelect ? next.add(rid) : next.delete(rid)));
+      rangeIds.forEach((rid) =>
+        shouldSelect ? next.add(rid) : next.delete(rid),
+      );
       setSelectedIds(next);
       setLastSelectedIndex(currentIndex);
       return;
@@ -371,16 +390,17 @@ export function MapPageClient({ view }: MapPageClientProps) {
     });
   };
 
-  const openMergeModal = (leftPersonId: string, rightPersonId?: string, lockBoth?: boolean) => {
+  const openMergeModal = (
+    leftPersonId: string,
+    rightPersonId?: string,
+    lockBoth?: boolean,
+  ) => {
     openMergeWithModal({
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       contacts: visibleLocationPins as any,
       leftPersonId,
       rightPersonId,
       disableLeftPicker: true,
       disableRightPicker: Boolean(lockBoth),
-      titleText: tMerge("ModalTitle"),
-      texts: mergeTexts,
     });
   };
 
@@ -390,7 +410,7 @@ export function MapPageClient({ view }: MapPageClientProps) {
         <PageHeader
           icon={IconMap2}
           title={t("Title")}
-          description={t("Subtitle")}
+          helpLabel={t("Subtitle")}
           secondaryAction={
             <SegmentedControl
               value={view}
@@ -445,7 +465,6 @@ export function MapPageClient({ view }: MapPageClientProps) {
         {view === "addresses" ? (
           <Paper withBorder shadow="sm" radius="md" p="md">
             <ContactsTable
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               contacts={filteredAddressRows as any}
               selectedIds={selectedIds}
               isHeaderShown={true}
@@ -467,14 +486,15 @@ export function MapPageClient({ view }: MapPageClientProps) {
                 onMergeSelected: (leftContactId, rightContactId) =>
                   openMergeModal(leftContactId, rightContactId, true),
                 onAddToGroupsOne: (contactId) =>
-                  openAddPeopleToGroupSelectionModal({ personIds: [contactId] }),
+                  openAddPeopleToGroupSelectionModal({
+                    personIds: [contactId],
+                  }),
                 onAddToGroupsSelected: (contactIds) =>
                   openAddPeopleToGroupSelectionModal({ personIds: contactIds }),
                 onDeleteOne: handleDeleteContact,
                 onDeleteSelected: handleBulkDelete,
               }}
               renderLocationCell={(contact) => {
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 const type = (contact as any)._addressType as string;
                 const addr = contact.location || "—";
                 return (
@@ -500,7 +520,6 @@ export function MapPageClient({ view }: MapPageClientProps) {
         ) : (
           <Paper withBorder shadow="sm" radius="md" p="md">
             <ContactsTable
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               contacts={filteredPins as any}
               selectedIds={selectedIds}
               isHeaderShown={true}
@@ -522,7 +541,9 @@ export function MapPageClient({ view }: MapPageClientProps) {
                 onMergeSelected: (leftContactId, rightContactId) =>
                   openMergeModal(leftContactId, rightContactId, true),
                 onAddToGroupsOne: (contactId) =>
-                  openAddPeopleToGroupSelectionModal({ personIds: [contactId] }),
+                  openAddPeopleToGroupSelectionModal({
+                    personIds: [contactId],
+                  }),
                 onAddToGroupsSelected: (contactIds) =>
                   openAddPeopleToGroupSelectionModal({ personIds: contactIds }),
                 onDeleteOne: handleDeleteContact,

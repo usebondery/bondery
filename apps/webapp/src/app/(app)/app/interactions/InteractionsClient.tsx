@@ -54,11 +54,7 @@ export function InteractionsClient({
   }, DEBOUNCE_MS.localFilter);
 
   useHotkeys([
-    [
-      HOTKEYS.LOG_INTERACTION,
-      () =>
-        openNewActivityModal({ contacts: initialContacts, titleText: t("WhoAreYouMeeting"), t }),
-    ],
+    [HOTKEYS.LOG_INTERACTION, () => openNewActivityModal({ contacts: initialContacts })],
     [HOTKEYS.FIND_PERSON, () => peopleSearchActions.open()],
   ]);
 
@@ -118,8 +114,6 @@ export function InteractionsClient({
     openNewActivityModal({
       contacts: initialContacts,
       activity,
-      titleText: t("WhoAreYouMeeting"),
-      t,
     });
   };
 
@@ -287,9 +281,8 @@ export function InteractionsClient({
         <PageHeader
           title={t("PageTitle")}
           icon={IconTimelineEventText}
-          description={t("HeaderDescription")}
           helpHref={`${WEBSITE_URL}/docs/concepts/interactions`}
-          helpLabel={tHeader("LearnMoreAbout", { concept: tHeader("Concepts.Timeline") })}
+          helpLabel={t("HeaderDescription")}
           secondaryAction={
             <SegmentedControl
               value={viewMode}
@@ -334,8 +327,6 @@ export function InteractionsClient({
                 onClick={() => {
                   openNewActivityModal({
                     contacts: initialContacts,
-                    titleText: t("WhoAreYouMeeting"),
-                    t,
                   });
                 }}
               >

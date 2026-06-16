@@ -1,13 +1,10 @@
 "use client";
 
-import { Button, Stack, Group, Paper, Tooltip, Kbd, Text } from "@mantine/core";
+import { Paper } from "@mantine/core";
 import {
-  IconAddressBook,
   IconBrandLinkedin,
   IconId,
   IconShare,
-  IconUserPlus,
-  IconUsers,
   IconUser,
   IconBriefcase,
   IconMapPin,
@@ -15,134 +12,93 @@ import {
   IconUserCircle,
 } from "@tabler/icons-react";
 import { notifications } from "@mantine/notifications";
-import { useEffect, useState, useDeferredValue, useMemo, useTransition } from "react";
+import { useEffect, useState, useRef, useTransition } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { useDebouncedCallback, useHotkeys } from "@mantine/hooks";
-import { DEBOUNCE_MS, HOTKEYS } from "@/lib/config";
-import { peopleSearchActions } from "../components/PeopleSearchSpotlight";
+import { useDebouncedCallback } from "@mantine/hooks";
+import { DEBOUNCE_MS } from "@/lib/config";
 import ContactsTable, {
   ColumnConfig,
   type SortOrder,
 } from "@/app/(app)/app/components/contacts/ContactsTableV2";
-import { API_ROUTES, WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
+import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import { openAddContactModal } from "./components/AddContactModal";
-import { PageHeader } from "@/app/(app)/app/components/PageHeader";
-import { PageWrapper } from "@/app/(app)/app/components/PageWrapper";
 import { errorNotificationTemplate, successNotificationTemplate } from "@bondery/mantine-next";
 import { formatContactName } from "@/lib/nameHelpers";
 import { openDeleteContactModal } from "@/app/(app)/app/components/contacts/openDeleteContactModal";
 import { openDeleteContactsModal } from "@/app/(app)/app/components/contacts/openDeleteContactsModal";
 import { openAddPeopleToGroupSelectionModal } from "./components/AddPeopleToGroupSelectionModal";
-import { MERGE_CONFLICT_FIELDS, openMergeWithModal } from "./components/MergeWithModal";
+import { openMergeWithModal } from "./components/MergeWithModal";
 import { openShareContactModal } from "./components/ShareContactModal";
-import { WEBSITE_URL } from "@/lib/config";
 import { useBatchEnrichFromLinkedIn } from "@/lib/extension/useBatchEnrichFromLinkedIn";
 
-import type { Contact, MergeConflictField, ShareableField } from "@bondery/types";
+import type { Contact } from "@bondery/types";
 import { revalidateContacts } from "../actions";
 import { appendAvatarParams } from "@/lib/avatarParams";
 import { searchContacts } from "@/lib/searchContacts";
+import { useResponsiveColumns } from "@/hooks/useResponsiveColumns";
+
+const COLUMN_VISIBILITY_COOKIE = "bondery_contacts_columns";
+
+/** Default column definitions. Icons are stable JSX — defined once outside the component. */
+const DEFAULT_COLUMNS: Omit<ColumnConfig, "icon">[] = [
+  { key: "name", label: "Name", visible: true, fixed: true },
+  { key: "headline", label: "Headline", visible: true },
+  { key: "location", label: "Location", visible: true },
+  { key: "lastInteraction", label: "Last Interaction", visible: true },
+  { key: "social", label: "Socials", visible: true },
+];
+
+/**
+ * Merges saved visibility preferences into the default column list.
+ * Columns not present in saved data use their code defaults, so new columns
+ * added in a future deploy always appear correctly.
+ */
+function applyColumnVisibility(
+  saved: { key: string; visible: boolean }[] | undefined,
+): Omit<ColumnConfig, "icon">[] {
+  if (!saved) return DEFAULT_COLUMNS;
+  const savedMap = new Map(saved.map((e) => [e.key, e.visible]));
+  return DEFAULT_COLUMNS.map((col) =>
+    savedMap.has(col.key) ? { ...col, visible: savedMap.get(col.key)! } : col,
+  );
+}
+
+/**
+ * Writes column visibility to a cookie so it can be read server-side on the
+ * next request, preventing a layout shift from client-only state rehydration.
+ */
+function saveColumnsToCookie(columns: ColumnConfig[]): void {
+  try {
+    const value = encodeURIComponent(
+      JSON.stringify(columns.map(({ key, visible }) => ({ key, visible }))),
+    );
+    document.cookie = `${COLUMN_VISIBILITY_COOKIE}=${value}; path=/; max-age=31536000; SameSite=Lax`;
+  } catch {
+    // Cookie writes can fail in restrictive environments — fail silently
+  }
+}
 
 interface PeopleClientProps {
   initialContacts: Contact[];
   totalCount: number;
-  layout?: "stack" | "container";
+  /** Column visibility preferences resolved server-side from the cookie. */
+  savedColumnVisibility?: { key: string; visible: boolean }[];
 }
 
-export function PeopleClient({ initialContacts, totalCount, layout = "stack" }: PeopleClientProps) {
+export function PeopleClient({
+  initialContacts,
+  totalCount,
+  savedColumnVisibility,
+}: PeopleClientProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const t = useTranslations("PeoplePage");
-  const tHeader = useTranslations("PageHeader");
-  const tMerge = useTranslations("MergeWithModal");
   const tShare = useTranslations("ShareContactModal");
   const tEnrich = useTranslations("EnrichFromLinkedIn");
   const tActions = useTranslations("ContactActionMenu");
   const { startForPerson } = useBatchEnrichFromLinkedIn();
-  const mergeTexts = useMemo(
-    () => ({
-      errorTitle: tMerge("ErrorTitle"),
-      successTitle: tMerge("SuccessTitle"),
-      selectBothPeopleError: tMerge("SelectBothPeopleError"),
-      differentPeopleError: tMerge("DifferentPeopleError"),
-      mergingTitle: tMerge("MergingTitle"),
-      mergingDescription: tMerge("MergingDescription"),
-      mergeSuccess: tMerge("MergeSuccess"),
-      mergeFailed: tMerge("MergeFailed"),
-      mergeWithLabel: tMerge("MergeWithLabel"),
-      selectLeftPerson: tMerge("SelectLeftPerson"),
-      selectRightPerson: tMerge("SelectRightPerson"),
-      searchPeople: tMerge("SearchPeople"),
-      noPeopleFound: tMerge("NoPeopleFound"),
-      cancel: tMerge("Cancel"),
-      continue: tMerge("Continue"),
-      back: tMerge("Back"),
-      merge: tMerge("Merge"),
-      noConflicts: tMerge("NoConflicts"),
-      conflictHint: tMerge("ConflictHint"),
-      processing: tMerge("Processing"),
-      steps: {
-        pick: tMerge("Steps.Pick"),
-        resolve: tMerge("Steps.Resolve"),
-        process: tMerge("Steps.Process"),
-      },
-      fields: Object.fromEntries(
-        MERGE_CONFLICT_FIELDS.map((field) => [field, tMerge(`Fields.${field}`)]),
-      ) as Record<MergeConflictField, string>,
-    }),
-    [tMerge],
-  );
-
-  const shareTexts = useMemo(
-    () => ({
-      modalTitle: tShare("ModalTitle"),
-      recipientEmailLabel: tShare("RecipientEmailLabel"),
-      recipientEmailPlaceholder: tShare("RecipientEmailPlaceholder"),
-      recipientsLabel: tShare("RecipientsLabel"),
-      recipientsPlaceholder: tShare("RecipientsPlaceholder"),
-      messageLabel: tShare("MessageLabel"),
-      messagePlaceholder: tShare("MessagePlaceholder"),
-      sendCopyCheckbox: tShare("SendCopyCheckbox"),
-      selectFieldsLabel: tShare("SelectFieldsLabel"),
-      submitButton: (count: number) =>
-        count > 0 ? tShare("SubmitButtonWithCount", { count }) : tShare("SubmitButton"),
-      cancelButton: tShare("CancelButton"),
-      sendingButton: tShare("SendingButton"),
-      successTitle: tShare("SuccessTitle"),
-      successDescription: tShare("SuccessDescription"),
-      errorTitle: tShare("ErrorTitle"),
-      errorDescription: tShare("ErrorDescription"),
-      noFieldsSelectedError: tShare("NoFieldsSelectedError"),
-      invalidEmailError: tShare("InvalidEmailError"),
-      invalidEmailsError: tShare("InvalidEmailsError"),
-      maxRecipientsError: tShare("MaxRecipientsError"),
-      noRecipientsError: tShare("NoRecipientsError"),
-      requiredFieldTooltip: tShare("RequiredFieldTooltip"),
-      avatarRequiredTooltip: tShare("AvatarRequiredTooltip"),
-      avatarDescription: (name: string) => tShare("AvatarDescription", { name }),
-      fieldLabels: {
-        name: tShare("Fields.name"),
-        avatar: tShare("Fields.avatar"),
-        headline: tShare("Fields.headline"),
-        phones: tShare("Fields.phones"),
-        emails: tShare("Fields.emails"),
-        location: tShare("Fields.location"),
-        linkedin: tShare("Fields.linkedin"),
-        instagram: tShare("Fields.instagram"),
-        facebook: tShare("Fields.facebook"),
-        website: tShare("Fields.website"),
-        whatsapp: tShare("Fields.whatsapp"),
-        signal: tShare("Fields.signal"),
-        addresses: tShare("Fields.addresses"),
-        notes: tShare("Fields.notes"),
-        importantDates: tShare("Fields.importantDates"),
-      },
-    }),
-    [tShare],
-  );
-
   // Get initial state from URL params
   const initialSearch = searchParams.get("q") || "";
   const initialSort = (searchParams.get("sort") as SortOrder) || "nameAsc";
@@ -155,43 +111,44 @@ export function PeopleClient({ initialContacts, totalCount, layout = "stack" }: 
   const [loadedCount, setLoadedCount] = useState(initialContacts.length);
   const [totalAvailableCount, setTotalAvailableCount] = useState(totalCount);
   const [lastSelectedIndex, setLastSelectedIndex] = useState<number | null>(null);
-  const [columns, setColumns] = useState<ColumnConfig[]>([
-    {
-      key: "name",
-      label: "Name",
-      visible: true,
-      icon: <IconUser size={16} />,
-      fixed: true,
-    },
-    {
-      key: "headline",
-      label: "Headline",
-      visible: true,
-      icon: <IconBriefcase size={16} />,
-    },
-    {
-      key: "location",
-      label: "Location",
-      visible: true,
-      icon: <IconMapPin size={16} />,
-    },
-    {
-      key: "lastInteraction",
-      label: "Last Interaction",
-      visible: true,
-      icon: <IconClock size={16} />,
-    },
-    {
-      key: "social",
-      label: "Socials",
-      visible: true,
-      icon: <IconUserCircle size={16} />,
-    },
-  ]);
+  const paperRef = useRef<HTMLDivElement>(null);
+
+  // Icons are stable references — defined inline so they can be merged with
+  // server-resolved prefs (the cookie carries only key + visible, not JSX).
+  const columnIcons: Record<string, React.ReactNode> = {
+    name: <IconUser size={16} />,
+    headline: <IconBriefcase size={16} />,
+    location: <IconMapPin size={16} />,
+    lastInteraction: <IconClock size={16} />,
+    social: <IconUserCircle size={16} />,
+  };
+
+  // Initial state is derived from the server-resolved cookie prop so the server
+  // HTML already has the correct columns — no mount-time localStorage read,
+  // no layout shift.
+  const [columns, setColumns] = useState<ColumnConfig[]>(() =>
+    applyColumnVisibility(savedColumnVisibility).map((col) => ({
+      ...col,
+      icon: columnIcons[col.key],
+    })),
+  );
 
   // Defer the columns update to prevent UI freezing when toggling visibility
-  const deferredColumns = useDeferredValue(columns);
-  const visibleColumns = deferredColumns.filter((c) => c.visible);
+  const { effectiveColumns, onColumnsChange } = useResponsiveColumns(paperRef, columns);
+
+  // Wrapper passed to ContactsTable so both user-state and pinned-keys stay in sync
+  const handleColumnsMenuChange: React.Dispatch<React.SetStateAction<ColumnConfig[]>> = (
+    action,
+  ) => {
+    setColumns((prev) => {
+      const nextColumns = typeof action === "function" ? action(prev) : action;
+      onColumnsChange(nextColumns);
+      // Write to cookie so the server can render the correct columns on the next
+      // request, eliminating layout shift from client-only rehydration.
+      saveColumnsToCookie(nextColumns);
+      return nextColumns;
+    });
+  };
 
   useEffect(() => {
     setContacts(initialContacts);
@@ -217,11 +174,6 @@ export function PeopleClient({ initialContacts, totalCount, layout = "stack" }: 
       router.replace(`${pathname}?${params.toString()}`);
     });
   }, DEBOUNCE_MS.search);
-
-  useHotkeys([
-    [HOTKEYS.ADD_PERSON, () => openAddContactModal()],
-    [HOTKEYS.FIND_PERSON, () => peopleSearchActions.open()],
-  ]);
 
   // Handle sort
   const handleSort = (order: SortOrder) => {
@@ -267,8 +219,6 @@ export function PeopleClient({ initialContacts, totalCount, layout = "stack" }: 
       rightPersonId,
       disableLeftPicker: true,
       disableRightPicker: Boolean(lockBoth),
-      titleText: tMerge("ModalTitle"),
-      texts: mergeTexts,
       onSearch: searchContacts,
     });
   };
@@ -467,153 +417,106 @@ export function PeopleClient({ initialContacts, totalCount, layout = "stack" }: 
     ? !allSelected && excludedIds.size < totalAvailableCount
     : !allSelected && selectedIds.size > 0;
 
-  const WrapperComponent = layout === "container" ? Group : Stack;
-
   return (
-    <PageWrapper>
-      <WrapperComponent gap="xl" {...(layout === "container" ? { justify: "space-between" } : {})}>
-        <PageHeader
-          icon={IconUser}
-          title={t("Title")}
-          description={t("HeaderDescription")}
-          helpHref={`${WEBSITE_URL}/docs/concepts/people`}
-          helpLabel={tHeader("LearnMoreAbout", { concept: tHeader("Concepts.People") })}
-          secondaryAction={
-            <Button
-              variant="outline"
-              size="md"
-              leftSection={<IconAddressBook size={16} />}
-              onClick={() => router.push(`${WEBAPP_ROUTES.SETTINGS}#data-management`)}
-            >
-              {t("ImportContacts")}
-            </Button>
-          }
-          primaryAction={
-            <Tooltip
-              label={
-                <Group gap="xs" wrap="nowrap">
-                  <Text size="xs" inherit>
-                    {t("AddPerson")}
-                  </Text>
-                  <Kbd size="xs">{HOTKEYS.ADD_PERSON.toUpperCase()}</Kbd>
-                </Group>
+    <Paper ref={paperRef} withBorder shadow="sm" radius="md" p="md">
+      <ContactsTable
+        contacts={contacts}
+        selectedIds={selectedIds}
+        isHeaderShown={true}
+        searchDefaultValue={initialSearch}
+        onSearchChange={handleSearch}
+        searchLoading={isSearchPending}
+        noContactsFound={t("NoContactsFound")}
+        noContactsMatchSearch={t("NoContactsMatchSearch")}
+        columnsForMenu={effectiveColumns}
+        setColumnsForMenu={handleColumnsMenuChange}
+        sortOrderForMenu={initialSort}
+        setSortOrderForMenu={handleSort}
+        visibleColumns={effectiveColumns}
+        onSelectAll={handleSelectAll}
+        onSelectOne={handleSelectOne}
+        allSelected={allSelected}
+        someSelected={someSelected}
+        showSelection={true}
+        standardActions={{
+          onMergeOne: (contactId) => openMergeModal(contactId),
+          onMergeSelected: (leftContactId, rightContactId) =>
+            openMergeModal(leftContactId, rightContactId, true),
+          mergeDisabledTooltip: tActions("CannotMergeMyself"),
+          onAddToGroupsOne: (contactId) => handleAddToGroup([contactId]),
+          onAddToGroupsSelected: (contactIds) => handleAddToGroup(contactIds),
+          onDeleteOne: handleDeleteContact,
+          onDeleteSelected: handleDeleteSelected,
+        }}
+        menuActions={[
+          {
+            key: "share",
+            label: tShare("ActionLabelMenu"),
+            icon: <IconShare size={16} />,
+            onClick: (contactId) => {
+              const contact = contacts.find((c) => c.id === contactId);
+              if (contact) {
+                openShareContactModal({ contact });
               }
-              withArrow
-            >
-              <Button
-                size="md"
-                leftSection={<IconUserPlus size={16} />}
-                onClick={() => openAddContactModal()}
-              >
-                {t("AddPerson")}
-              </Button>
-            </Tooltip>
-          }
-        />
-
-        <Paper withBorder shadow="sm" radius="md" p="md">
-          <ContactsTable
-            contacts={contacts}
-            selectedIds={selectedIds}
-            isHeaderShown={true}
-            searchDefaultValue={initialSearch}
-            onSearchChange={handleSearch}
-            searchLoading={isSearchPending}
-            noContactsFound={t("NoContactsFound")}
-            noContactsMatchSearch={t("NoContactsMatchSearch")}
-            columnsForMenu={columns}
-            setColumnsForMenu={setColumns}
-            sortOrderForMenu={initialSort}
-            setSortOrderForMenu={handleSort}
-            visibleColumns={visibleColumns}
-            onSelectAll={handleSelectAll}
-            onSelectOne={handleSelectOne}
-            allSelected={allSelected}
-            someSelected={someSelected}
-            showSelection={true}
-            standardActions={{
-              onMergeOne: (contactId) => openMergeModal(contactId),
-              onMergeSelected: (leftContactId, rightContactId) =>
-                openMergeModal(leftContactId, rightContactId, true),
-              mergeDisabledTooltip: tActions("CannotMergeMyself"),
-              onAddToGroupsOne: (contactId) => handleAddToGroup([contactId]),
-              onAddToGroupsSelected: (contactIds) => handleAddToGroup(contactIds),
-              onDeleteOne: handleDeleteContact,
-              onDeleteSelected: handleDeleteSelected,
-            }}
-            menuActions={[
-              {
-                key: "share",
-                label: tShare("ActionLabelMenu"),
-                icon: <IconShare size={16} />,
-                onClick: (contactId) => {
-                  const contact = contacts.find((c) => c.id === contactId);
-                  if (contact) {
-                    openShareContactModal({ contact, texts: shareTexts });
-                  }
-                },
-              },
-              {
-                key: "download-vcard",
-                label: tActions("DownloadVCard"),
-                icon: <IconId size={16} />,
-                onClick: async (contactId) => {
-                  try {
-                    const response = await fetch(`${API_ROUTES.CONTACTS}/${contactId}/vcard`);
-                    if (!response.ok) throw new Error("Failed to export vCard");
-                    const blob = await response.blob();
-                    const url = window.URL.createObjectURL(blob);
-                    const a = document.createElement("a");
-                    a.href = url;
-                    const contact = contacts.find((c) => c.id === contactId);
-                    const firstName = contact?.firstName || "contact";
-                    const lastName = contact?.lastName || "";
-                    a.download = lastName ? `${firstName}_${lastName}.vcf` : `${firstName}.vcf`;
-                    document.body.appendChild(a);
-                    a.click();
-                    document.body.removeChild(a);
-                    window.URL.revokeObjectURL(url);
-                    notifications.show(
-                      successNotificationTemplate({
-                        title: tActions("ExportSuccess"),
-                        description: tActions("ExportSuccessDescription"),
-                      }),
-                    );
-                  } catch {
-                    notifications.show(
-                      errorNotificationTemplate({
-                        title: tActions("ExportError"),
-                        description: tActions("ExportErrorDescription"),
-                      }),
-                    );
-                  }
-                },
-              },
-              {
-                key: "enrich-linkedin",
-                label: tEnrich("MenuLabel"),
-                icon: <IconBrandLinkedin size={16} />,
-                onClick: (contactId) => {
-                  const contact = contacts.find((c) => c.id === contactId);
-                  startForPerson(contactId, contact?.linkedin);
-                },
-              },
-            ]}
-            loadMoreAction={{
-              label: "Load another 50 contacts",
-              onClick: handleLoadMore,
-              loading: isLoadingMore,
-            }}
-            hasMoreToLoad={contacts.length < totalAvailableCount}
-            totalCount={totalAvailableCount}
-            onSelectAllTotal={
-              contacts.length < totalAvailableCount ? handleSelectAllTotal : undefined
-            }
-            isAllTotalSelected={isAllTotalSelected}
-            excludedIds={excludedIds}
-          />
-        </Paper>
-      </WrapperComponent>
-    </PageWrapper>
+            },
+          },
+          {
+            key: "download-vcard",
+            label: tActions("DownloadVCard"),
+            icon: <IconId size={16} />,
+            onClick: async (contactId) => {
+              try {
+                const response = await fetch(`${API_ROUTES.CONTACTS}/${contactId}/vcard`);
+                if (!response.ok) throw new Error("Failed to export vCard");
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url;
+                const contact = contacts.find((c) => c.id === contactId);
+                const firstName = contact?.firstName || "contact";
+                const lastName = contact?.lastName || "";
+                a.download = lastName ? `${firstName}_${lastName}.vcf` : `${firstName}.vcf`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+                notifications.show(
+                  successNotificationTemplate({
+                    title: tActions("ExportSuccess"),
+                    description: tActions("ExportSuccessDescription"),
+                  }),
+                );
+              } catch {
+                notifications.show(
+                  errorNotificationTemplate({
+                    title: tActions("ExportError"),
+                    description: tActions("ExportErrorDescription"),
+                  }),
+                );
+              }
+            },
+          },
+          {
+            key: "enrich-linkedin",
+            label: tEnrich("MenuLabel"),
+            icon: <IconBrandLinkedin size={16} />,
+            onClick: (contactId) => {
+              const contact = contacts.find((c) => c.id === contactId);
+              startForPerson(contactId, contact?.linkedin);
+            },
+          },
+        ]}
+        loadMoreAction={{
+          label: "Load another 50 contacts",
+          onClick: handleLoadMore,
+          loading: isLoadingMore,
+        }}
+        hasMoreToLoad={contacts.length < totalAvailableCount}
+        totalCount={totalAvailableCount}
+        onSelectAllTotal={contacts.length < totalAvailableCount ? handleSelectAllTotal : undefined}
+        isAllTotalSelected={isAllTotalSelected}
+        excludedIds={excludedIds}
+      />
+    </Paper>
   );
 }

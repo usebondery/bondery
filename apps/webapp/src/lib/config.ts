@@ -29,6 +29,7 @@ export const INPUT_MAX_LENGTHS = {
   firstName: 50,
   middleName: 50,
   lastName: 50,
+  fullName: 150,
   headline: 100,
   location: 100,
   description: 500,

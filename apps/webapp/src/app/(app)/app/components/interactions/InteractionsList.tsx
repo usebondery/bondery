@@ -1,6 +1,6 @@
 "use client";
 
-import { Box, Group, Stack, Text, ThemeIcon, Timeline } from "@mantine/core";
+import { Group, Stack, Text, ThemeIcon, Timeline } from "@mantine/core";
 import type { Activity, Contact } from "@bondery/types";
 import { useMemo } from "react";
 import { getActivityTypeConfig } from "@/lib/activityTypes";
@@ -81,23 +81,9 @@ export function InteractionsList({
                   key={activity.id}
                   mt="sm"
                   bullet={
-                    <Box
-                      w={32}
-                      h={32}
-                      style={{
-                        borderRadius: 999,
-                        backgroundColor: "var(--mantine-color-body)",
-                        border: `1px solid ${TIMELINE_BORDER_COLOR}`,
-                        boxSizing: "border-box",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                      }}
-                    >
-                      <ThemeIcon size={"30"} radius="xl" variant="light" color={typeConfig.color}>
-                        {typeConfig.emoji}
-                      </ThemeIcon>
-                    </Box>
+                    <ThemeIcon size={32} radius="xl" variant="white" color={typeConfig.color}>
+                      {typeConfig.emoji}
+                    </ThemeIcon>
                   }
                 >
                   <ActivityCard

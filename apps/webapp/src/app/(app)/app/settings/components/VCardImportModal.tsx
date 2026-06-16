@@ -37,13 +37,23 @@ import {
   successNotificationTemplate,
   warningNotificationTemplate,
 } from "@bondery/mantine-next";
+import { NavigationProgress } from "@mantine/nprogress";
 import { API_ROUTES, WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import ContactsTable from "@/app/(app)/app/components/contacts/ContactsTableV2";
 import { revalidateAll } from "../../actions";
+import { useImporterNavigationProgress } from "./useImporterNavigationProgress";
 
 type Step = "intro" | "instructions" | "upload" | "processing" | "preview";
 
 const IMPORT_BATCH_SIZE = 25;
+
+const STEP_PROGRESS: Record<Step, number> = {
+  intro: 12,
+  instructions: 30,
+  upload: 50,
+  processing: 68,
+  preview: 84,
+};
 
 interface VCardImportTranslations {
   ModalTitle: string;
@@ -115,7 +125,9 @@ function toPreviewContact(contact: VCardPreparedContact): Contact {
   };
 }
 
-function sortVCardContactsForPreview(contacts: VCardPreparedContact[]): VCardPreparedContact[] {
+function sortVCardContactsForPreview(
+  contacts: VCardPreparedContact[],
+): VCardPreparedContact[] {
   return contacts
     .map((contact, index) => ({ contact, index }))
     .sort((left, right) => {
@@ -130,24 +142,33 @@ function sortVCardContactsForPreview(contacts: VCardPreparedContact[]): VCardPre
 export function VCardImportModal({
   t,
   modalId,
+  showNavigationProgress = true,
 }: {
-  t: (key: keyof VCardImportTranslations, values?: Record<string, string | number>) => string;
+  t: (
+    key: keyof VCardImportTranslations,
+    values?: Record<string, string | number>,
+  ) => string;
   modalId?: string;
+  showNavigationProgress?: boolean;
 }) {
   const router = useRouter();
   const [step, setStep] = useState<Step>("intro");
   const [isParsing, setIsParsing] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
-  const [importProgress, setImportProgress] = useState<{ current: number; total: number } | null>(
-    null,
+  const [importProgress, setImportProgress] = useState<{
+    current: number;
+    total: number;
+  } | null>(null);
+  const [parsedContacts, setParsedContacts] = useState<VCardPreparedContact[]>(
+    [],
   );
-  const [parsedContacts, setParsedContacts] = useState<VCardPreparedContact[]>([]);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const openRef = useRef<() => void>(null);
   const lastSelectedIndexRef = useRef<number | null>(null);
 
   const previewContacts = useMemo(
-    () => parsedContacts.filter((contact) => contact.isValid).map(toPreviewContact),
+    () =>
+      parsedContacts.filter((contact) => contact.isValid).map(toPreviewContact),
     [parsedContacts],
   );
 
@@ -163,8 +184,23 @@ export function VCardImportModal({
     [previewContacts],
   );
 
-  const allSelected = selectableIds.length > 0 && selectableIds.every((id) => selectedIds.has(id));
+  const allSelected =
+    selectableIds.length > 0 &&
+    selectableIds.every((id) => selectedIds.has(id));
   const someSelected = selectedIds.size > 0 && !allSelected;
+
+  useImporterNavigationProgress({
+    step,
+    stepProgress: STEP_PROGRESS,
+    importProgress,
+  });
+
+  const renderWithNavigationProgress = (content: JSX.Element) => (
+    <>
+      {showNavigationProgress ? <NavigationProgress /> : null}
+      {content}
+    </>
+  );
 
   const closeModal = () => {
     if (modalId) {
@@ -193,14 +229,18 @@ export function VCardImportModal({
             ? "lg"
             : "xl",
       title: (
-        <ModalTitle text={t("ModalTitle")} icon={<IconAddressBook size={20} stroke={1.5} />} />
+        <ModalTitle
+          text={t("ModalTitle")}
+          icon={<IconAddressBook size={20} stroke={1.5} />}
+        />
       ),
     });
   }, [isImporting, isParsing, modalId, step, t]);
 
   const handleToggleAll = useCallback(() => {
     setSelectedIds((prev) => {
-      const isAllSelected = selectableIds.length > 0 && selectableIds.every((id) => prev.has(id));
+      const isAllSelected =
+        selectableIds.length > 0 && selectableIds.every((id) => prev.has(id));
       if (isAllSelected) return new Set<string>();
       return new Set(selectableIds);
     });
@@ -252,10 +292,13 @@ export function VCardImportModal({
     });
 
     try {
-      const response = await fetch(`${API_ROUTES.CONTACTS_IMPORT_VCARD}/parse`, {
-        method: "POST",
-        body: formData,
-      });
+      const response = await fetch(
+        `${API_ROUTES.CONTACTS_IMPORT_VCARD}/parse`,
+        {
+          method: "POST",
+          body: formData,
+        },
+      );
 
       const result = await response.json();
 
@@ -269,7 +312,11 @@ export function VCardImportModal({
       setParsedContacts(sortedContacts);
       lastSelectedIndexRef.current = null;
       setSelectedIds(
-        new Set(sortedContacts.filter((item) => item.isValid).map((item) => item.tempId)),
+        new Set(
+          sortedContacts
+            .filter((item) => item.isValid)
+            .map((item) => item.tempId),
+        ),
       );
       setStep("preview");
     } catch (error) {
@@ -286,7 +333,9 @@ export function VCardImportModal({
   };
 
   const handleImport = async () => {
-    const selectedContacts = parsedContacts.filter((contact) => selectedIds.has(contact.tempId));
+    const selectedContacts = parsedContacts.filter((contact) =>
+      selectedIds.has(contact.tempId),
+    );
 
     if (selectedContacts.length === 0) {
       notifications.show(
@@ -308,11 +357,14 @@ export function VCardImportModal({
       for (let i = 0; i < selectedContacts.length; i += IMPORT_BATCH_SIZE) {
         const batch = selectedContacts.slice(i, i + IMPORT_BATCH_SIZE);
 
-        const response = await fetch(`${API_ROUTES.CONTACTS_IMPORT_VCARD}/commit`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ contacts: batch }),
-        });
+        const response = await fetch(
+          `${API_ROUTES.CONTACTS_IMPORT_VCARD}/commit`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ contacts: batch }),
+          },
+        );
 
         const result = await response.json();
 
@@ -354,7 +406,8 @@ export function VCardImportModal({
       notifications.show(
         errorNotificationTemplate({
           title: t("ErrorTitle"),
-          description: error instanceof Error ? error.message : t("ImportError"),
+          description:
+            error instanceof Error ? error.message : t("ImportError"),
         }),
       );
     } finally {
@@ -364,7 +417,7 @@ export function VCardImportModal({
   };
 
   if (step === "intro") {
-    return (
+    return renderWithNavigationProgress(
       <Stack gap="xl">
         <Stack align="center" gap="md" pt="sm">
           <ThemeIcon size={110} radius="xl" variant="light" color="green">
@@ -380,21 +433,33 @@ export function VCardImportModal({
             <Group gap="sm" wrap="nowrap" align="flex-start">
               <IconCircleCheck
                 size={18}
-                style={{ flexShrink: 0, marginTop: 1, color: "var(--mantine-color-green-6)" }}
+                style={{
+                  flexShrink: 0,
+                  marginTop: 1,
+                  color: "var(--mantine-color-green-6)",
+                }}
               />
               <Text size="sm">{t("IntroDescription1")}</Text>
             </Group>
             <Group gap="sm" wrap="nowrap" align="flex-start">
               <IconCircleCheck
                 size={18}
-                style={{ flexShrink: 0, marginTop: 1, color: "var(--mantine-color-green-6)" }}
+                style={{
+                  flexShrink: 0,
+                  marginTop: 1,
+                  color: "var(--mantine-color-green-6)",
+                }}
               />
               <Text size="sm">{t("IntroDescription2")}</Text>
             </Group>
             <Group gap="sm" wrap="nowrap" align="flex-start">
               <IconCircleCheck
                 size={18}
-                style={{ flexShrink: 0, marginTop: 1, color: "var(--mantine-color-green-6)" }}
+                style={{
+                  flexShrink: 0,
+                  marginTop: 1,
+                  color: "var(--mantine-color-green-6)",
+                }}
               />
               <Text size="sm">{t("IntroDescription3")}</Text>
             </Group>
@@ -408,12 +473,12 @@ export function VCardImportModal({
           onAction={() => setStep("instructions")}
           actionRightSection={<IconArrowRight size={16} />}
         />
-      </Stack>
+      </Stack>,
     );
   }
 
   if (step === "instructions") {
-    return (
+    return renderWithNavigationProgress(
       <Stack gap="md">
         <Paper withBorder p="md" radius="md">
           <Stack gap="sm">
@@ -455,12 +520,12 @@ export function VCardImportModal({
           onAction={() => setStep("upload")}
           actionRightSection={<IconArrowRight size={16} />}
         />
-      </Stack>
+      </Stack>,
     );
   }
 
   if (step === "upload") {
-    return (
+    return renderWithNavigationProgress(
       <Stack gap="md">
         <Dropzone
           openRef={openRef}
@@ -485,7 +550,10 @@ export function VCardImportModal({
             "application/octet-stream": [".vcf"],
           }}
         >
-          <DropzoneContent title={t("DropzoneTitle")} description={t("DropzoneDescription")} />
+          <DropzoneContent
+            title={t("DropzoneTitle")}
+            description={t("DropzoneDescription")}
+          />
         </Dropzone>
 
         <ModalFooter
@@ -498,12 +566,12 @@ export function VCardImportModal({
           onAction={() => openRef.current?.()}
           actionLeftSection={<IconAddressBook size={16} />}
         />
-      </Stack>
+      </Stack>,
     );
   }
 
   if (step === "processing") {
-    return (
+    return renderWithNavigationProgress(
       <Stack gap="lg" py="md">
         <Center>
           <Stack align="center" gap="sm">
@@ -511,13 +579,15 @@ export function VCardImportModal({
             <Text>{t("ProcessingContacts")}</Text>
           </Stack>
         </Center>
-      </Stack>
+      </Stack>,
     );
   }
 
   if (isImporting && importProgress !== null) {
-    const percentage = Math.round((importProgress.current / importProgress.total) * 100);
-    return (
+    const percentage = Math.round(
+      (importProgress.current / importProgress.total) * 100,
+    );
+    return renderWithNavigationProgress(
       <Stack gap="lg" py="md">
         <Center>
           <Stack align="center" gap="md" w="100%" maw={400}>
@@ -531,22 +601,30 @@ export function VCardImportModal({
             </Text>
           </Stack>
         </Center>
-      </Stack>
+      </Stack>,
     );
   }
 
-  return (
+  return renderWithNavigationProgress(
     <Stack gap="md">
       <Group justify="space-between">
         <Group gap="xs">
           <Badge color="blue" variant="light">
             {t("Total", { count: parsedContacts.length })}
           </Badge>
-          <Badge color="green" variant="light" leftSection={<IconCircleCheck size={12} />}>
+          <Badge
+            color="green"
+            variant="light"
+            leftSection={<IconCircleCheck size={12} />}
+          >
             {t("Valid", { count: validContactsCount })}
           </Badge>
           {invalidContactsCount > 0 ? (
-            <Badge color="orange" variant="light" leftSection={<IconAlertTriangle size={12} />}>
+            <Badge
+              color="orange"
+              variant="light"
+              leftSection={<IconAlertTriangle size={12} />}
+            >
               {t("Invalid", { count: invalidContactsCount })}
             </Badge>
           ) : null}
@@ -583,10 +661,12 @@ export function VCardImportModal({
         onAction={() => {
           void handleImport();
         }}
-        actionLeftSection={!isImporting ? <IconAddressBook size={16} /> : undefined}
+        actionLeftSection={
+          !isImporting ? <IconAddressBook size={16} /> : undefined
+        }
         actionLoading={isImporting}
         actionDisabled={isImporting}
       />
-    </Stack>
+    </Stack>,
   );
 }

@@ -33,12 +33,15 @@ export const socialPlatforms: Record<string, SocialPlatformConfig> = {
   },
   facebook: {
     name: "Facebook",
-    baseUrl: "https://facebook.com/",
-    urlPattern: /(?:https?:\/\/)?(?:www\.)?facebook\.com\/([^\/\?]+)/i,
+    baseUrl: SOCIAL_PLATFORM_URL_DETAILS.facebook.profileBaseUrl,
+    urlPattern: new RegExp(
+      `(?:https?:\\/\\/)?(?:www\\.)?${escapeRegexValue(SOCIAL_PLATFORM_URL_DETAILS.facebook.domain)}\\/([^\\/\\?]+)`,
+      "i",
+    ),
   },
   whatsapp: {
     name: "WhatsApp",
-    baseUrl: "https://wa.me/",
+    baseUrl: SOCIAL_PLATFORM_URL_DETAILS.whatsapp.deepLinkBaseUrl,
     urlPattern: /(?:https?:\/\/)?(?:wa\.me|api\.whatsapp\.com\/send\?phone=)\/?([\d]+)/i,
   },
 };

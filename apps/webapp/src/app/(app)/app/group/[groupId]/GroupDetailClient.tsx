@@ -40,9 +40,9 @@ import { openDeleteContactModal } from "@/app/(app)/app/components/contacts/open
 import { openDeleteContactsModal } from "@/app/(app)/app/components/contacts/openDeleteContactsModal";
 import { GroupCard } from "../../groups/components/GroupCard";
 import { openEditGroupModal } from "../../groups/components/EditGroupModal";
-import type { Contact, GroupWithCount, MergeConflictField } from "@bondery/types";
+import type { Contact, GroupWithCount } from "@bondery/types";
 import { openAddPeopleToGroupSelectionModal } from "../../people/components/AddPeopleToGroupSelectionModal";
-import { MERGE_CONFLICT_FIELDS, openMergeWithModal } from "../../people/components/MergeWithModal";
+import { openMergeWithModal } from "../../people/components/MergeWithModal";
 import { searchContacts } from "@/lib/searchContacts";
 import { PageHeader } from "@/app/(app)/app/components/PageHeader";
 import { PageWrapper } from "@/app/(app)/app/components/PageWrapper";
@@ -77,41 +77,7 @@ export function GroupDetailClient({
 }: GroupDetailClientProps) {
   const t = useTranslations("GroupsPage");
   const tGroupDetail = useTranslations("GroupDetailPage");
-  const tMerge = useTranslations("MergeWithModal");
   const tHeader = useTranslations("PageHeader");
-  const mergeTexts = useMemo(
-    () => ({
-      errorTitle: tMerge("ErrorTitle"),
-      successTitle: tMerge("SuccessTitle"),
-      selectBothPeopleError: tMerge("SelectBothPeopleError"),
-      differentPeopleError: tMerge("DifferentPeopleError"),
-      mergingTitle: tMerge("MergingTitle"),
-      mergingDescription: tMerge("MergingDescription"),
-      mergeSuccess: tMerge("MergeSuccess"),
-      mergeFailed: tMerge("MergeFailed"),
-      mergeWithLabel: tMerge("MergeWithLabel"),
-      selectLeftPerson: tMerge("SelectLeftPerson"),
-      selectRightPerson: tMerge("SelectRightPerson"),
-      searchPeople: tMerge("SearchPeople"),
-      noPeopleFound: tMerge("NoPeopleFound"),
-      cancel: tMerge("Cancel"),
-      continue: tMerge("Continue"),
-      back: tMerge("Back"),
-      merge: tMerge("Merge"),
-      noConflicts: tMerge("NoConflicts"),
-      conflictHint: tMerge("ConflictHint"),
-      processing: tMerge("Processing"),
-      steps: {
-        pick: tMerge("Steps.Pick"),
-        resolve: tMerge("Steps.Resolve"),
-        process: tMerge("Steps.Process"),
-      },
-      fields: Object.fromEntries(
-        MERGE_CONFLICT_FIELDS.map((field) => [field, tMerge(`Fields.${field}`)]),
-      ) as Record<MergeConflictField, string>,
-    }),
-    [tMerge],
-  );
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -516,8 +482,6 @@ export function GroupDetailClient({
       rightPersonId,
       disableLeftPicker: true,
       disableRightPicker: Boolean(lockBoth),
-      titleText: tMerge("ModalTitle"),
-      texts: mergeTexts,
       onSearch: searchContacts,
     });
   };
@@ -558,35 +522,6 @@ export function GroupDetailClient({
     openAddPeopleToGroupModal({
       groupId,
       groupLabel,
-      texts: {
-        title: t("AddPeopleModal.Title", { groupLabel }),
-        errorTitle: t("AddPeopleModal.ErrorTitle"),
-        successTitle: t("AddPeopleModal.SuccessTitle"),
-        loadError: t("AddPeopleModal.LoadError"),
-        noSelectionTitle: t("AddPeopleModal.NoSelectionTitle"),
-        noSelectionDescription: t("AddPeopleModal.NoSelectionDescription"),
-        addingTitle: t("AddPeopleModal.AddingTitle"),
-        addingDescription: t("AddPeopleModal.AddingDescription"),
-        addError: t("AddPeopleModal.AddError"),
-        emptyState: t("AddPeopleModal.EmptyState"),
-        close: t("AddPeopleModal.Close"),
-        cancel: t("AddPeopleModal.Cancel"),
-        addContactsPlaceholder: t("AddPeopleModal.AddContactsPlaceholder"),
-        noContactsFound: t("AddPeopleModal.NoContactsFound"),
-        formatActionLabel: (count: number) =>
-          count === 0
-            ? t("AddPeopleModal.ActionDefault")
-            : count === 1
-              ? t("AddPeopleModal.ActionSingular")
-              : t("AddPeopleModal.ActionPlural", { count }),
-        formatSuccessMessage: (count: number, targetGroupLabel: string) =>
-          count === 1
-            ? t("AddPeopleModal.SuccessMessageSingular", { groupLabel: targetGroupLabel })
-            : t("AddPeopleModal.SuccessMessagePlural", {
-                count,
-                groupLabel: targetGroupLabel,
-              }),
-      },
     });
   };
 

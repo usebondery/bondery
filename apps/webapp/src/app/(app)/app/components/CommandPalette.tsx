@@ -66,7 +66,6 @@ export function CommandPalette() {
                 openNewActivityModal({
                   contacts: [],
                   onCreated: () => router.push(WEBAPP_ROUTES.INTERACTIONS),
-                  t: (key, values) => t(key as any, values as any),
                 }),
             },
             {

@@ -243,9 +243,8 @@ export function KeepInTouchClient({ initialContacts, endDate }: KeepInTouchClien
         <PageHeader
           icon={IconHeartHandshake}
           title={t("Title")}
-          description={t("Description")}
           helpHref={`${WEBSITE_URL}/docs/concepts/reminders`}
-          helpLabel={tHeader("LearnMoreAbout", { concept: tHeader("Concepts.KeepInTouch") })}
+          helpLabel={t("Description")}
           secondaryAction={windowPicker}
         />
         <Stack align="center" gap="md" py="xl">
@@ -267,9 +266,8 @@ export function KeepInTouchClient({ initialContacts, endDate }: KeepInTouchClien
       <PageHeader
         icon={IconHeartHandshake}
         title={t("Title")}
-        description={t("Description")}
         helpHref={`${WEBSITE_URL}/docs/concepts/reminders`}
-        helpLabel={tHeader("LearnMoreAbout", { concept: tHeader("Concepts.KeepInTouch") })}
+        helpLabel={t("Description")}
         secondaryAction={windowPicker}
       />
 
@@ -367,8 +365,6 @@ export function KeepInTouchClient({ initialContacts, endDate }: KeepInTouchClien
                           openNewActivityModal({
                             contacts: initialContacts,
                             initialParticipantIds: [contact.id],
-                            titleText: tInteractions("WhoAreYouMeeting"),
-                            t: tInteractions,
                           })
                         }
                       >

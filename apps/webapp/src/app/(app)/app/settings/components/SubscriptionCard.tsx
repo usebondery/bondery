@@ -34,16 +34,20 @@ export function SubscriptionCard({
     return format.dateTime(new Date(value), { dateStyle: "medium" });
   };
 
-  const formatAmount = (amountMinor: number | null, currency: string | null): string | null => {
+  const formatAmount = (
+    amountMinor: number | null,
+    currency: string | null,
+  ): string | null => {
     if (amountMinor == null || !currency) return null;
     const upperCurrency = currency.toUpperCase();
 
     let fractionDigits = 2;
     try {
-      fractionDigits = new Intl.NumberFormat(undefined, {
-        style: "currency",
-        currency: upperCurrency,
-      }).resolvedOptions().maximumFractionDigits ?? 2;
+      fractionDigits =
+        new Intl.NumberFormat(undefined, {
+          style: "currency",
+          currency: upperCurrency,
+        }).resolvedOptions().maximumFractionDigits ?? 2;
     } catch {
       fractionDigits = 2;
     }
@@ -62,20 +66,30 @@ export function SubscriptionCard({
 
   const trialEndsAt = formatDate(subscriptionStatus.trialEndsAt);
   const periodEndsAt = formatDate(subscriptionStatus.currentPeriodEnd);
-  const renewalAmount = formatAmount(subscriptionStatus.amount, subscriptionStatus.currency);
+  const renewalAmount = formatAmount(
+    subscriptionStatus.amount,
+    subscriptionStatus.currency,
+  );
   const monthlyResetAt = formatDate(subscriptionStatus.aiMonthlyResetAt);
 
   const getSubscriptionDescription = (): { text: string; color: string } => {
     const polarStatus = subscriptionStatus.polarStatus;
 
     if (!isPremium) {
-      if (polarStatus === "past_due" || polarStatus === "unpaid" || polarStatus === "incomplete") {
+      if (
+        polarStatus === "past_due" ||
+        polarStatus === "unpaid" ||
+        polarStatus === "incomplete"
+      ) {
         return { text: t("PaymentIssue"), color: "red" };
       }
 
       if (polarStatus === "canceled" || polarStatus === "incomplete_expired") {
         if (periodEndsAt) {
-          return { text: t("SubscriptionExpiredDate", { date: periodEndsAt }), color: "orange" };
+          return {
+            text: t("SubscriptionExpiredDate", { date: periodEndsAt }),
+            color: "orange",
+          };
         }
         return { text: t("SubscriptionExpired"), color: "orange" };
       }
@@ -102,7 +116,10 @@ export function SubscriptionCard({
 
       if (trialEndsAt && renewalAmount) {
         return {
-          text: t("TrialRenewsWithCharge", { date: trialEndsAt, amount: renewalAmount }),
+          text: t("TrialRenewsWithCharge", {
+            date: trialEndsAt,
+            amount: renewalAmount,
+          }),
           color: "teal",
         };
       }
@@ -117,7 +134,10 @@ export function SubscriptionCard({
     if (polarStatus === "active") {
       if (subscriptionStatus.cancelAtPeriodEnd) {
         if (periodEndsAt) {
-          return { text: t("SubscriptionExpiresNoRenewDate", { date: periodEndsAt }), color: "orange" };
+          return {
+            text: t("SubscriptionExpiresNoRenewDate", { date: periodEndsAt }),
+            color: "orange",
+          };
         }
         return { text: t("SubscriptionExpiresNoRenew"), color: "orange" };
       }
@@ -129,20 +149,30 @@ export function SubscriptionCard({
       return { text: t("ActivePlan"), color: "dimmed" };
     }
 
-    if (polarStatus === "past_due" || polarStatus === "unpaid" || polarStatus === "incomplete") {
+    if (
+      polarStatus === "past_due" ||
+      polarStatus === "unpaid" ||
+      polarStatus === "incomplete"
+    ) {
       return { text: t("PaymentIssue"), color: "red" };
     }
 
     if (polarStatus === "canceled" || polarStatus === "incomplete_expired") {
       if (periodEndsAt) {
-        return { text: t("SubscriptionExpiredDate", { date: periodEndsAt }), color: "orange" };
+        return {
+          text: t("SubscriptionExpiredDate", { date: periodEndsAt }),
+          color: "orange",
+        };
       }
       return { text: t("SubscriptionExpired"), color: "orange" };
     }
 
     if (subscriptionStatus.cancelAtPeriodEnd) {
       if (periodEndsAt) {
-        return { text: t("SubscriptionExpiresNoRenewDate", { date: periodEndsAt }), color: "orange" };
+        return {
+          text: t("SubscriptionExpiresNoRenewDate", { date: periodEndsAt }),
+          color: "orange",
+        };
       }
       return { text: t("SubscriptionExpiresNoRenew"), color: "orange" };
     }
@@ -160,20 +190,14 @@ export function SubscriptionCard({
     : t("FreePlan");
 
   return (
-    <SettingsSection
-      icon={<IconCreditCard size={20} />}
-      title={t("Title")}
-    >
+    <SettingsSection icon={<IconCreditCard size={20} />} title={t("Title")}>
       <CardSection inheritPadding py="md">
         <Stack gap="md">
           <Group justify="space-between" align="flex-start">
             <div>
               <Group gap="xs">
                 <Text fw={500}>{t("CurrentPlan")}</Text>
-                <Badge
-                  variant="light"
-                  color={isPremium ? "violet" : "gray"}
-                >
+                <Badge variant="light" color={isPremium ? "violet" : "gray"}>
                   {planLabel}
                 </Badge>
               </Group>
@@ -210,13 +234,20 @@ export function SubscriptionCard({
                 )}
               </Group>
               <Progress
-                value={(subscriptionStatus.aiMessagesUsed / subscriptionStatus.aiMessageLimit) * 100}
+                value={
+                  (subscriptionStatus.aiMessagesUsed /
+                    subscriptionStatus.aiMessageLimit) *
+                  100
+                }
                 color={
-                  subscriptionStatus.aiMessagesUsed >= subscriptionStatus.aiMessageLimit
+                  subscriptionStatus.aiMessagesUsed >=
+                  subscriptionStatus.aiMessageLimit
                     ? "red"
-                    : subscriptionStatus.aiMessagesUsed / subscriptionStatus.aiMessageLimit >= 0.8
-                    ? "orange"
-                    : "violet"
+                    : subscriptionStatus.aiMessagesUsed /
+                          subscriptionStatus.aiMessageLimit >=
+                        0.8
+                      ? "orange"
+                      : "violet"
                 }
                 size="sm"
                 radius="xl"

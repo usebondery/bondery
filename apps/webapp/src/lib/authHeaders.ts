@@ -1,10 +1,13 @@
+import { cache } from "react";
 import { cookies } from "next/headers";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
 /**
  * Creates headers object with authentication cookies for internal API calls.
+ * Wrapped in React cache() so it runs at most once per server render,
+ * even when called from multiple layouts or utilities in the same request.
  */
-export async function getAuthHeaders(): Promise<HeadersInit> {
+export const getAuthHeaders = cache(async (): Promise<HeadersInit> => {
   const cookieStore = await cookies();
 
   const cookieHeader = cookieStore
@@ -27,4 +30,4 @@ export async function getAuthHeaders(): Promise<HeadersInit> {
   }
 
   return headers;
-}
+});

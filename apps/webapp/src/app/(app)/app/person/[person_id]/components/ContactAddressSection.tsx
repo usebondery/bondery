@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { ActionIcon, Card, Group, Menu, Stack, Text, Tooltip } from "@mantine/core";
 import { useTranslations } from "next-intl";
-import { formatAddressLabel } from "@bondery/helpers/address-utils";
+import { formatAddressLabel } from "@bondery/helpers/address";
 import {
   IconBrandGoogle,
   IconBrandWaze,

@@ -3,12 +3,10 @@
 import { Stack } from "@mantine/core";
 import type { MergeRecommendation } from "@bondery/types";
 import { MergeRecommendationCard } from "@/app/(app)/app/components/contacts/MergeRecommendationCard";
-import type { MergeWithModalTexts } from "../../../people/components/MergeWithModal";
 import { EnrichRecommendationCard } from "./EnrichRecommendationCard";
 
 interface RecommendationsSectionProps {
   mergeRecommendation: MergeRecommendation | null;
-  mergeTexts: MergeWithModalTexts;
   onMergeAccepted: () => void;
   onMergeDeclined: () => void;
   showEnrichCard: boolean;
@@ -22,7 +20,6 @@ interface RecommendationsSectionProps {
  */
 export function RecommendationsSection({
   mergeRecommendation,
-  mergeTexts,
   onMergeAccepted,
   onMergeDeclined,
   showEnrichCard,
@@ -39,7 +36,6 @@ export function RecommendationsSection({
         <MergeRecommendationCard
           recommendation={mergeRecommendation}
           contacts={[mergeRecommendation.leftPerson, mergeRecommendation.rightPerson]}
-          mergeTexts={mergeTexts}
           onAccepted={onMergeAccepted}
           onDeclined={onMergeDeclined}
           redirectAfterMerge

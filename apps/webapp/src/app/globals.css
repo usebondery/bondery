@@ -1,5 +1,46 @@
 @import "tailwindcss";
 
+/* ── Sidebar layout tokens ──────────────────────────────────────────────────
+   Single source of truth for sidebar dimensions.
+   The AppShell `navbar.width` prop still receives the raw numbers from
+   AppShellWrapper (Mantine requires JS values there), but every CSS property
+   that references sidebar widths or icon positioning must use these variables.
+
+   --sidebar-icon-pl formula:
+     (collapsed-width - 2 × navbar-padding - icon-size) / 2
+     = (80px - 2×16px - 20px) / 2 = 14px
+   This keeps every nav item icon pinned at the same horizontal centre
+   in both the collapsed and expanded states.
+
+   --sidebar-avatar-pl formula:
+     (collapsed-width - 2 × navbar-padding - avatar-size) / 2
+     = (80px - 2×16px - 26px) / 2 = 11px
+   Mantine Avatar size="sm" is 26px. Using symmetric padding means the avatar
+   is perfectly centred when collapsed (11+26+11=48) and left-aligned when
+   expanded, without any JS-driven padding change between states — eliminating
+   the positional jump during the sidebar width CSS transition.
+   ────────────────────────────────────────────────────────────────────────── */
+:root {
+  --sidebar-collapsed-width: 80px;
+  --sidebar-expanded-width: 280px;
+  --sidebar-nav-icon-size: 20px;
+  --sidebar-avatar-size: 26px; /* Mantine Avatar size="sm" */
+  --sidebar-icon-pl: calc(
+    (
+        var(--sidebar-collapsed-width) - 2 * var(--mantine-spacing-md) -
+          var(--sidebar-nav-icon-size)
+      ) /
+      2
+  );
+  --sidebar-avatar-pl: calc(
+    (
+        var(--sidebar-collapsed-width) - 2 * var(--mantine-spacing-md) -
+          var(--sidebar-avatar-size)
+      ) /
+      2
+  );
+}
+
 /* Scan branding package for Tailwind classes */
 @source "@bondery/branding/**/*.{ts,tsx}";
 @source "@bondery/mantine-next/**/*.{ts,tsx}";

@@ -11,7 +11,6 @@ import "flag-icons/css/flag-icons.min.css";
 import "@bondery/mantine-next/styles";
 import { bonderyTheme } from "@bondery/mantine-next";
 import { Notifications } from "@mantine/notifications";
-import { ModalsProvider } from "@mantine/modals";
 import { Lexend } from "next/font/google";
 import {
   ColorSchemeScript,
@@ -50,10 +49,8 @@ export default async function RootLayout({
           theme={bonderyTheme}
           cssVariablesResolver={v8CssVariablesResolver}
         >
-          <ModalsProvider modalProps={{ centered: true }}>
-            <Notifications autoClose={6000} position="top-center" />
-            {children}
-          </ModalsProvider>
+          <Notifications autoClose={6000} position="top-center" />
+          {children}
         </MantineProvider>
       </body>
     </html>

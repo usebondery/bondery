@@ -1,18 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import {
-  Checkbox,
-  SimpleGrid,
-  Stack,
-  TagsInput,
-  Text,
-  Textarea,
-  Tooltip,
-} from "@mantine/core";
+import { Checkbox, SimpleGrid, Stack, TagsInput, Text, Textarea, Tooltip } from "@mantine/core";
 import { modals } from "@mantine/modals";
 import { notifications } from "@mantine/notifications";
 import { IconSend2, IconShare } from "@tabler/icons-react";
+import { useTranslations } from "next-intl";
 import { SelectableCard } from "@/app/(app)/app/components/SelectableCard";
 import {
   ModalFooter,
@@ -49,48 +42,25 @@ const ALL_FIELDS: ShareableField[] = [
 
 const REQUIRED_FIELDS: ShareableField[] = ["avatar", "headline"];
 
-export interface ShareContactTexts {
-  modalTitle: string;
-  recipientEmailLabel: string;
-  recipientEmailPlaceholder: string;
-  recipientsLabel: string;
-  recipientsPlaceholder: string;
-  messageLabel: string;
-  messagePlaceholder: string;
-  sendCopyCheckbox: string;
-  selectFieldsLabel: string;
-  submitButton: (count: number) => string;
-  cancelButton: string;
-  sendingButton: string;
-  successTitle: string;
-  successDescription: string;
-  errorTitle: string;
-  errorDescription: string;
-  noFieldsSelectedError: string;
-  noRecipientsError: string;
-  invalidEmailError: string;
-  invalidEmailsError: string;
-  maxRecipientsError: string;
-  requiredFieldTooltip: string;
-  avatarRequiredTooltip: string;
-  avatarDescription: (name: string) => string;
-  fieldLabels: Record<ShareableField, string>;
-}
-
 interface OpenShareContactModalParams {
   contact: Contact;
-  texts: ShareContactTexts;
 }
 
-export function openShareContactModal({ contact, texts }: OpenShareContactModalParams) {
+function ShareContactModalTitle() {
+  const tShare = useTranslations("ShareContactModal");
+
+  return <ModalTitle text={tShare("ModalTitle")} icon={<IconShare size={22} />} />;
+}
+
+export function openShareContactModal({ contact }: OpenShareContactModalParams) {
   const modalId = `share-contact-${Math.random().toString(36).slice(2)}`;
 
   modals.open({
     modalId,
     trapFocus: true,
     size: "lg",
-    title: <ModalTitle text={texts.modalTitle} icon={<IconShare size={22} />} />,
-    children: <ShareContactModalContent contact={contact} texts={texts} modalId={modalId} />,
+    title: <ShareContactModalTitle />,
+    children: <ShareContactModalContent contact={contact} modalId={modalId} />,
   });
 }
 
@@ -185,18 +155,43 @@ function getFieldPreview(contact: Contact, field: ShareableField): string {
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const MAX_RECIPIENTS = 10;
 
-function ShareContactModalContent({
-  contact,
-  texts,
-  modalId,
-}: {
+export interface ShareContactTexts {
+  modalTitle: string;
+  recipientEmailLabel: string;
+  recipientEmailPlaceholder: string;
+  recipientsLabel: string;
+  recipientsPlaceholder: string;
+  messageLabel: string;
+  messagePlaceholder: string;
+  sendCopyCheckbox: string;
+  sendCopyTooltip: string;
+  selectFieldsLabel: string;
+  submitButton: (count: number) => string;
+  cancelButton: string;
+  sendingButton: string;
+  successTitle: string;
+  successDescription: string;
+  errorTitle: string;
+  errorDescription: string;
+  noFieldsSelectedError: string;
+  noRecipientsError: string;
+  invalidEmailError: string;
+  invalidEmailsError: string;
+  maxRecipientsError: string;
+  requiredFieldTooltip: string;
+  avatarRequiredTooltip: string;
+  avatarDescription: (name: string) => string;
+  fieldLabels: Record<ShareableField, string>;
+}
+
+interface OpenShareContactModalParams {
   contact: Contact;
-  texts: ShareContactTexts;
-  modalId: string;
-}) {
+}
+
+function ShareContactModalContent({ contact, modalId }: { contact: Contact; modalId: string }) {
+  const tShare = useTranslations("ShareContactModal");
   const [recipientEmails, setRecipientEmails] = useState<string[]>([]);
   const [message, setMessage] = useState("");
-  const [sendCopy, setSendCopy] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [emailError, setEmailError] = useState<string | null>(null);
 
@@ -229,16 +224,16 @@ function ShareContactModalContent({
 
   const validate = (): boolean => {
     if (recipientEmails.length === 0) {
-      setEmailError(texts.noRecipientsError);
+      setEmailError(tShare("NoRecipientsError"));
       return false;
     }
     if (recipientEmails.length > MAX_RECIPIENTS) {
-      setEmailError(texts.maxRecipientsError);
+      setEmailError(tShare("MaxRecipientsError"));
       return false;
     }
     const allValid = recipientEmails.every((e) => EMAIL_REGEX.test(e));
     if (!allValid) {
-      setEmailError(texts.invalidEmailsError);
+      setEmailError(tShare("InvalidEmailsError"));
       return false;
     }
     setEmailError(null);
@@ -257,7 +252,6 @@ function ShareContactModalContent({
           personId: contact.id,
           recipientEmails,
           message: message || undefined,
-          sendCopy,
           selectedFields: Array.from(new Set([...selectedFields, ...REQUIRED_FIELDS])),
         }),
       });
@@ -268,16 +262,16 @@ function ShareContactModalContent({
 
       notifications.show(
         successNotificationTemplate({
-          title: texts.successTitle,
-          description: texts.successDescription,
+          title: tShare("SuccessTitle"),
+          description: tShare("SuccessDescription"),
         }),
       );
       modals.close(modalId);
     } catch {
       notifications.show(
         errorNotificationTemplate({
-          title: texts.errorTitle,
-          description: texts.errorDescription,
+          title: tShare("ErrorTitle"),
+          description: tShare("ErrorDescription"),
         }),
       );
     } finally {
@@ -290,8 +284,8 @@ function ShareContactModalContent({
   return (
     <Stack gap="md">
       <TagsInput
-        label={texts.recipientsLabel}
-        placeholder={recipientEmails.length > 0 ? "" : texts.recipientsPlaceholder}
+        label={tShare("RecipientsLabel")}
+        placeholder={recipientEmails.length > 0 ? "" : tShare("RecipientsPlaceholder")}
         value={recipientEmails}
         onChange={(values) => {
           setRecipientEmails(values);
@@ -305,21 +299,19 @@ function ShareContactModalContent({
       />
 
       <Textarea
-        label={texts.messageLabel}
-        placeholder={texts.messagePlaceholder}
+        label={tShare("MessageLabel")}
+        placeholder={tShare("MessagePlaceholder")}
         value={message}
         onChange={(e) => setMessage(e.currentTarget.value)}
         rows={3}
       />
 
-      <Checkbox
-        label={texts.sendCopyCheckbox}
-        checked={sendCopy}
-        onChange={(e) => setSendCopy(e.currentTarget.checked)}
-      />
+      <Tooltip label={tShare("SendCopyTooltip")} withArrow>
+        <Checkbox label={tShare("SendCopyCheckbox")} checked disabled onChange={() => {}} />
+      </Tooltip>
 
       <Text fw={500} size="sm">
-        {texts.selectFieldsLabel}
+        {tShare("SelectFieldsLabel")}
       </Text>
 
       <SimpleGrid cols={{ base: 2, sm: 3 }} spacing="xs">
@@ -329,14 +321,22 @@ function ShareContactModalContent({
           return (
             <Tooltip
               key={field}
-              label={field === "avatar" ? texts.avatarRequiredTooltip : texts.requiredFieldTooltip}
+              label={
+                field === "avatar"
+                  ? tShare("AvatarRequiredTooltip")
+                  : tShare("RequiredFieldTooltip")
+              }
               disabled={!isRequiredField}
               withArrow
             >
               <div>
                 <SelectableCard
-                  label={texts.fieldLabels[field]}
-                  description={field === "avatar" ? texts.avatarDescription(contactName) : getFieldPreview(contact, field) || undefined}
+                  label={tShare(`Fields.${field}`)}
+                  description={
+                    field === "avatar"
+                      ? tShare("AvatarDescription", { name: contactName })
+                      : getFieldPreview(contact, field) || undefined
+                  }
                   selected={selectedFields.has(field)}
                   disabled={isRequiredField}
                   onClick={() => toggleField(field)}
@@ -348,10 +348,16 @@ function ShareContactModalContent({
       </SimpleGrid>
 
       <ModalFooter
-        cancelLabel={texts.cancelButton}
+        cancelLabel={tShare("CancelButton")}
         onCancel={() => modals.close(modalId)}
         cancelDisabled={isSubmitting}
-        actionLabel={isSubmitting ? texts.sendingButton : texts.submitButton(recipientEmails.length)}
+        actionLabel={
+          isSubmitting
+            ? tShare("SendingButton")
+            : recipientEmails.length > 0
+              ? tShare("SubmitButtonWithCount", { count: recipientEmails.length })
+              : tShare("SubmitButton")
+        }
         onAction={handleSubmit}
         actionLoading={isSubmitting}
         actionDisabled={isSubmitting}

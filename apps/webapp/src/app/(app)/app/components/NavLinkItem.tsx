@@ -1,6 +1,7 @@
 "use client";
 
 import { Group, Indicator, Text, Tooltip, UnstyledButton } from "@mantine/core";
+import { useHover } from "@mantine/hooks";
 import Link from "next/link";
 import { ComponentType, ReactNode } from "react";
 
@@ -22,6 +23,19 @@ export interface NavLinkItemProps {
   dimLabel?: boolean;
 }
 
+/**
+ * Padding keeps the icon horizontally centred inside the collapsed sidebar
+ * (matching --sidebar-icon-pl in globals.css) so it never shifts on expand/collapse.
+ * Both paddingLeft and paddingRight use the same value so the icon is
+ * visually symmetric at all sidebar states.
+ */
+const ITEM_PADDING = {
+  paddingLeft: "var(--sidebar-icon-pl)",
+  paddingRight: "var(--sidebar-icon-pl)",
+  paddingTop: "var(--mantine-spacing-xs)",
+  paddingBottom: "var(--mantine-spacing-xs)",
+} as const;
+
 export function NavLinkItem({
   href,
   onClick,
@@ -34,23 +48,32 @@ export function NavLinkItem({
   rightSection,
   dimLabel,
 }: NavLinkItemProps) {
-  // Active and hover colours are handled via Tailwind class selectors — no JS
-  // hover tracking needed. When active, the filled background wins and the hover
-  // class is not applied so active items don't flash on mouse-over.
-  const stateClassName = active
-    ? "bg-[var(--mantine-primary-color-filled)] text-white"
-    : "bg-transparent hover:bg-[var(--mantine-primary-color-light-hover)]!";
+  // Active state is indicated solely by background color (primary fill).
+  // button-scale-effect-active is intentionally NOT applied here — it permanently
+  // applies filter:brightness(0.9) which tints white text gray and adds scale(0.98).
+  // That class is reserved for mouse-press feedback, not current-page indication.
+  const stateClassName = "button-scale-effect";
+  const { hovered, ref } = useHover<HTMLElement>();
 
   const sharedStyle = {
     width: "100%",
     borderRadius: "var(--mantine-radius-sm)",
-    transition: "background-color var(--transition-time) var(--transition-ease)",
-    ...(bordered && { border: "1px solid var(--mantine-color-default-border)" }),
+    // outline sits outside the box model so it doesn't shrink the padding area.
+    ...(bordered && {
+      outline: "1px solid var(--mantine-color-default-border)",
+    }),
   } as const;
 
   const innerContent = (
     <>
-      <Indicator inline disabled={!showIndicator} color="yellow" position="top-end" withBorder>
+      <Indicator
+        inline
+        disabled={!showIndicator}
+        color="yellow"
+        position="top-end"
+        withBorder
+        style={{ color: active ? "white" : undefined }}
+      >
         <Icon size={20} stroke={1.5} />
       </Indicator>
       {!collapsed && (
@@ -58,7 +81,7 @@ export function NavLinkItem({
           <Text
             size="sm"
             fw={dimLabel ? undefined : 500}
-            c={dimLabel ? "dimmed" : undefined}
+            c={active ? "white" : dimLabel ? "dimmed" : undefined}
             style={{ flex: 1, minWidth: 0, lineHeight: 1.2 }}
           >
             {label}
@@ -69,19 +92,26 @@ export function NavLinkItem({
     </>
   );
 
-  // Button mode — UnstyledButton applies proper UA resets and h={40} prevents
-  // rightSection content (e.g. Kbd) from inflating the row beyond the icon height.
+  // Button mode — UnstyledButton applies proper UA resets.
+  // h={40} prevents rightSection content (e.g. Kbd) from inflating the row.
   const item = onClick ? (
     <UnstyledButton
+      ref={ref as any}
       onClick={onClick}
       h={40}
-      px="xs"
       className={stateClassName}
       style={{
         display: "flex",
         alignItems: "center",
-        justifyContent: collapsed ? "center" : "flex-start",
+        justifyContent: "flex-start",
         gap: "var(--mantine-spacing-sm)",
+        backgroundColor: active
+          ? "var(--mantine-primary-color-filled)"
+          : hovered
+            ? "var(--mantine-primary-color-light-hover)"
+            : "transparent",
+        color: active ? "white" : "inherit",
+        ...ITEM_PADDING,
         ...sharedStyle,
       }}
     >
@@ -89,16 +119,23 @@ export function NavLinkItem({
     </UnstyledButton>
   ) : (
     <Group
+      ref={ref as any}
       component={Link as any}
       {...({ href } as any)}
       wrap="nowrap"
       gap="sm"
-      justify={collapsed ? "center" : "flex-start"}
-      p="xs"
+      justify="flex-start"
       aria-current={active ? "page" : undefined}
       className={stateClassName}
       style={{
+        backgroundColor: active
+          ? "var(--mantine-primary-color-filled)"
+          : hovered
+            ? "var(--mantine-primary-color-light-hover)"
+            : "transparent",
+        color: active ? "white" : "inherit",
         textDecoration: "none",
+        ...ITEM_PADDING,
         ...sharedStyle,
       }}
     >

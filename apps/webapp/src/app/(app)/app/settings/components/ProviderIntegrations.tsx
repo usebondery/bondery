@@ -2,11 +2,10 @@
 
 import { Group, Stack, Text } from "@mantine/core";
 import { IconUnlink, IconPuzzle } from "@tabler/icons-react";
-import { IconBrandGithub, IconBrandLinkedin } from "@tabler/icons-react";
+import { IconBrandGithub, IconBrandLinkedin, IconBrowser } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
 import { notifications } from "@mantine/notifications";
 import { useTranslations } from "next-intl";
-import { BonderyIcon } from "@bondery/branding/react";
 import { INTEGRATION_PROVIDERS } from "@/lib/config";
 import { detectBonderyChromeExtension } from "@/lib/extension/detectBonderyChromeExtension";
 import { IntegrationCard } from "./IntegrationCard";
@@ -231,7 +230,7 @@ export function ProviderIntegrations({
           <IntegrationCard
             provider="bondery_chrome_extension"
             displayName={tIntegration("BonderyChromeExtension")}
-            iconNode={<BonderyIcon width={28} height={28} />}
+            icon={IconBrowser}
             iconColor="grape"
             isConnected={isExtensionInstalled}
             isDisabled={isExtensionInstalled}

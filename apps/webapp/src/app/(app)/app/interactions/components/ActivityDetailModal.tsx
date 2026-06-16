@@ -9,6 +9,7 @@ import { notifications } from "@mantine/notifications";
 import { API_ROUTES, WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import { useRouter } from "next/navigation";
 import { modals } from "@mantine/modals";
+import { useTranslations } from "next-intl";
 import {
   ActionIconLink,
   ModalFooter,
@@ -18,6 +19,7 @@ import {
 } from "@bondery/mantine-next";
 import { getAvatarColorFromName } from "@/lib/avatarColor";
 import { revalidateInteractions } from "../../actions";
+import { openStandardConfirmModal } from "@/app/(app)/app/components/modals/openStandardConfirmModal";
 
 interface OpenActivityDetailModalParams {
   activity: Activity;
@@ -49,6 +51,7 @@ function ActivityDetailBody({ modalId, activity, contacts }: ActivityDetailBodyP
   const [note, setNote] = useState(activity.description || "");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const t = useTranslations("InteractionsPage");
 
   useEffect(() => {
     modals.updateModal({
@@ -84,8 +87,8 @@ function ActivityDetailBody({ modalId, activity, contacts }: ActivityDetailBodyP
 
       notifications.show(
         successNotificationTemplate({
-          title: "Success",
-          description: "Activity updated successfully",
+          title: t("SuccessTitle"),
+          description: t("ActivityUpdated"),
         }),
       );
 
@@ -95,8 +98,8 @@ function ActivityDetailBody({ modalId, activity, contacts }: ActivityDetailBodyP
     } catch {
       notifications.show(
         errorNotificationTemplate({
-          title: "Error",
-          description: "Failed to update activity",
+          title: t("ErrorTitle"),
+          description: t("ActivityUpdateFailed"),
         }),
       );
     } finally {
@@ -104,42 +107,46 @@ function ActivityDetailBody({ modalId, activity, contacts }: ActivityDetailBodyP
     }
   };
 
-  const handleDelete = async () => {
-    if (!confirm("Are you sure you want to delete this activity?")) {
-      return;
-    }
+  const handleDelete = () => {
+    openStandardConfirmModal({
+      title: t("DeleteActivity"),
+      message: t("DeleteActivityConfirmMessage"),
+      confirmLabel: t("DeleteActivity"),
+      cancelLabel: t("Cancel"),
+      confirmColor: "red",
+      onConfirm: async () => {
+        setLoading(true);
+        try {
+          const res = await fetch(`${API_ROUTES.INTERACTIONS}/${activity.id}`, {
+            method: "DELETE",
+          });
 
-    setLoading(true);
+          if (!res.ok) {
+            throw new Error("Failed to delete activity");
+          }
 
-    try {
-      const res = await fetch(`${API_ROUTES.INTERACTIONS}/${activity.id}`, {
-        method: "DELETE",
-      });
+          notifications.show(
+            successNotificationTemplate({
+              title: t("SuccessTitle"),
+              description: t("ActivityDeleted"),
+            }),
+          );
 
-      if (!res.ok) {
-        throw new Error("Failed to delete activity");
-      }
-
-      notifications.show(
-        successNotificationTemplate({
-          title: "Success",
-          description: "Activity deleted successfully",
-        }),
-      );
-
-      await revalidateInteractions();
-      router.refresh();
-      modals.close(modalId);
-    } catch {
-      notifications.show(
-        errorNotificationTemplate({
-          title: "Error",
-          description: "Failed to delete activity",
-        }),
-      );
-    } finally {
-      setLoading(false);
-    }
+          await revalidateInteractions();
+          router.refresh();
+          modals.close(modalId);
+        } catch {
+          notifications.show(
+            errorNotificationTemplate({
+              title: t("ErrorTitle"),
+              description: t("DeleteFailed"),
+            }),
+          );
+        } finally {
+          setLoading(false);
+        }
+      },
+    });
   };
 
   return (
@@ -147,7 +154,7 @@ function ActivityDetailBody({ modalId, activity, contacts }: ActivityDetailBodyP
       <Box>
         <Group justify="space-between" mb="sm">
           <Text fw={600} size="sm" c="dimmed" tt="uppercase">
-            Attendees
+            {t("Attendees")}
           </Text>
         </Group>
 
@@ -211,7 +218,7 @@ function ActivityDetailBody({ modalId, activity, contacts }: ActivityDetailBodyP
             ))
           ) : (
             <Text c="dimmed" size="sm">
-              No attendees
+              {t("NoAttendees")}
             </Text>
           )}
         </Stack>
@@ -219,7 +226,7 @@ function ActivityDetailBody({ modalId, activity, contacts }: ActivityDetailBodyP
 
       <Box>
         <Textarea
-          placeholder="Add a note for this meeting. Press (r) to focus."
+          placeholder={t("ActivityDetailNotePlaceholder")}
           minRows={6}
           value={note}
           onChange={(event) => setNote(event.currentTarget.value)}
@@ -235,15 +242,15 @@ function ActivityDetailBody({ modalId, activity, contacts }: ActivityDetailBodyP
       </Box>
 
       <ModalFooter
-        backLabel="Delete activity"
+        backLabel={t("DeleteActivity")}
         onBack={() => {
-          void handleDelete();
+          handleDelete();
         }}
         backDisabled={loading}
-        cancelLabel="Cancel"
+        cancelLabel={t("Cancel")}
         onCancel={() => modals.close(modalId)}
         cancelDisabled={loading}
-        actionLabel="Save changes"
+        actionLabel={t("SaveChanges")}
         onAction={() => {
           void handleSave();
         }}
