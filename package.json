@@ -13,9 +13,11 @@
     "dev:extension": "turbo dev --filter=webapp --filter=api --filter=chrome-extension --filter=website",
     "dev:supabase": "turbo dev --filter=supabase-db",
     "dev:website": "turbo dev --filter=website",
+    "dev:polar-webhook": "npx localtunnel --port 3001",
     "build": "turbo build",
     "start": "turbo start",
     "lint": "turbo lint",
+    "format": "biome format --write .",
     "check-types": "turbo check-types",
     "generate-openapi": "npm run generate-openapi -w apps/api && git add apps/api/openapi.yaml",
     "generate-types": "npm run gen-types -w apps/supabase-db && git add packages/types/src/supabase.types.ts"
@@ -24,12 +26,10 @@
     "generate-openapi"
   ],
   "devDependencies": {
-    "@eslint/eslintrc": "^3.3.5",
-    "@eslint/js": "^9.0.0",
+    "@biomejs/biome": "^2.5.0",
     "@fastify/pre-commit": "^2.2.1",
     "@redocly/cli": "^2.24.1",
     "ajv": "^8.18.0",
-    "globals": "^17.4.0",
     "turbo": "^2.9.5",
     "yaml": "^2.8.3"
   },

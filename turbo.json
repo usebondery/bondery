@@ -46,7 +46,21 @@
       "dependsOn": ["^check-types"]
     },
     "lint": {
-      "dependsOn": ["^lint"]
+      "dependsOn": ["^lint"],
+      "passThroughEnv": [
+        "SYSTEMROOT",
+        "WINDIR",
+        "COMSPEC",
+        "PATHEXT",
+        "PATH",
+        "TEMP",
+        "TMP",
+        "APPDATA",
+        "LOCALAPPDATA",
+        "USERPROFILE",
+        "HOMEDRIVE",
+        "HOMEPATH"
+      ]
     },
     "dev": {
       "dependsOn": ["^build"],
@@ -111,6 +125,21 @@
     }
   },
   "globalPassThroughEnv": [
+    "PATH",
+    "PATHEXT",
+    "SYSTEMROOT",
+    "WINDIR",
+    "COMSPEC",
+    "TEMP",
+    "TMP",
+    "APPDATA",
+    "LOCALAPPDATA",
+    "USERPROFILE",
+    "HOMEDRIVE",
+    "HOMEPATH",
+    "ProgramFiles",
+    "ProgramFiles(x86)",
+    "ProgramW6432",
     "NEXT_PRIVATE_MAPS_KEY",
     "NEXT_PUBLIC_MAPS_URL",
     "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY",

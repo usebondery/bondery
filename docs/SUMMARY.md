@@ -20,6 +20,7 @@
 * [Tags](concepts/tags.md)
 * [Map view](concepts/map.md)
 * [Merge contacts](concepts/merge.md)
+* [AI Assistant](concepts/chat.md)
 
 ## API
 
