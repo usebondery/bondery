@@ -1,7 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import { Box, Button, Divider, Menu, MenuDropdown, MenuTarget, Text } from "@mantine/core";
+import {
+  Box,
+  Button,
+  Divider,
+  Menu,
+  MenuDropdown,
+  MenuTarget,
+  Text,
+} from "@mantine/core";
 import { IconEye } from "@tabler/icons-react";
 import {
   DndContext,
@@ -18,10 +26,15 @@ import {
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
-import { SortableColumnItem, type SortableColumnItemColumn } from "./SortableColumnItem";
+import {
+  SortableColumnItem,
+  type SortableColumnItemColumn,
+} from "./SortableColumnItem";
 import type { ColumnVisibilityLabels } from "./types";
 
-export interface ColumnVisibilityMenuProps<TColumn extends SortableColumnItemColumn> {
+export interface ColumnVisibilityMenuProps<
+  TColumn extends SortableColumnItemColumn,
+> {
   /** Array of column configurations */
   columns: TColumn[];
   /** Callback when columns change (visibility or order) */
@@ -91,12 +104,14 @@ export function ColumnVisibilityMenu<TColumn extends SortableColumnItemColumn>({
     onColumnsChange(newColumns as TColumn[]);
   };
 
-  const buttonClassName = opened ? "button-scale-effect-active" : "button-scale-effect";
-
   return (
     <Menu width={width} opened={opened} onChange={setOpened}>
       <MenuTarget>
-        <Button variant="light" leftSection={<IconEye size={16} />} className={buttonClassName}>
+        <Button
+          variant="light"
+          leftSection={<IconEye size={16} />}
+          className={opened ? "button-scale-effect-active" : undefined}
+        >
           {labels.buttonLabel}
         </Button>
       </MenuTarget>

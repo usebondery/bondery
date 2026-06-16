@@ -31,15 +31,13 @@ export function SortMenu<TSortKey extends string>({
 }: SortMenuProps<TSortKey>) {
   const [opened, setOpened] = useState(false);
 
-  const buttonClassName = opened ? "button-scale-effect-active" : "button-scale-effect";
-
   return (
     <Menu shadow="md" width={width} opened={opened} onChange={setOpened}>
       <MenuTarget>
         <Button
           variant="light"
           leftSection={<IconArrowsSort size={16} />}
-          className={buttonClassName}
+          className={opened ? "button-scale-effect-active" : undefined}
         >
           {labels.buttonLabel}
         </Button>

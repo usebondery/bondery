@@ -47,6 +47,16 @@
   filter: var(--active-filter);
 }
 
+/* Removes scale/filter from elements that should not have the scale effect (e.g. nav cards).
+   Specificity matches .button-scale-effect:hover:not(:disabled):not([...]) = (0,5,0)
+   so that cascade order (this comes last) is the tiebreaker. */
+.no-scale:hover:not(:disabled):not([data-disabled]):not([disabled]),
+.no-scale:focus:not(:disabled):not([data-disabled]):not([disabled]),
+.no-scale:active:not(:disabled):not([data-disabled]):not([disabled]) {
+  transform: none !important;
+  filter: none !important;
+}
+
 .emoji-picker-trigger {
   background-color: var(--mantine-color-gray-1) !important;
 }

@@ -39,9 +39,7 @@ export const bonderyTheme = createTheme({
       },
     },
     Button: {
-      defaultProps: {
-        className: "button-scale-effect",
-      },
+      classNames: { root: "button-scale-effect" },
     },
     Select: {
       defaultProps: {
@@ -60,16 +58,7 @@ export const bonderyTheme = createTheme({
       },
     },
     CloseButton: {
-      defaultProps: {
-        className: "button-scale-effect",
-      },
-    },
-    Modal: {
-      defaultProps: {
-        closeButtonProps: {
-          className: "button-scale-effect ",
-        },
-      },
+      classNames: { root: "button-scale-effect" },
     },
     List: {
       defaultProps: {
@@ -118,9 +107,7 @@ export const bonderyTheme = createTheme({
       },
     },
     ActionIcon: {
-      defaultProps: {
-        className: "button-scale-effect",
-      },
+      classNames: { root: "button-scale-effect" },
     },
     Title: {
       defaultProps: {
@@ -133,9 +120,7 @@ export const bonderyTheme = createTheme({
       },
     },
     NavLink: {
-      defaultProps: {
-        className: "button-scale-effect",
-      },
+      classNames: { root: "button-scale-effect" },
       styles: {
         root: {
           borderRadius: "var(--mantine-radius-xs)",
