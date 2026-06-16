@@ -892,13 +892,11 @@ paths:
               type: object
               required:
                 - firstName
-                - lastName
               properties:
                 firstName:
                   minLength: 1
                   type: string
                 lastName:
-                  minLength: 1
                   type: string
                 middleName:
                   type: string
@@ -2137,6 +2135,19 @@ paths:
         "200":
           description: Default Response
   /api/tags/{id}:
+    get:
+      tags:
+        - Tags
+      parameters:
+        - schema:
+            format: uuid
+            type: string
+          in: path
+          name: id
+          required: true
+      responses:
+        "200":
+          description: Default Response
     patch:
       tags:
         - Tags
@@ -2738,6 +2749,62 @@ paths:
         "200":
           description: Default Response
   /api/interactions/{id}:
+    get:
+      tags:
+        - Interactions
+      parameters:
+        - schema:
+            minimum: 1
+            maximum: 200
+            default: 50
+            type: integer
+          in: query
+          name: limit
+          required: false
+        - schema:
+            minimum: 0
+            default: 0
+            type: integer
+          in: query
+          name: offset
+          required: false
+        - schema:
+            anyOf:
+              - type: string
+                enum:
+                  - low
+              - type: string
+                enum:
+                  - medium
+              - type: string
+                enum:
+                  - high
+          in: query
+          name: avatarQuality
+          required: false
+        - schema:
+            anyOf:
+              - type: string
+                enum:
+                  - small
+              - type: string
+                enum:
+                  - medium
+              - type: string
+                enum:
+                  - large
+          in: query
+          name: avatarSize
+          required: false
+        - schema:
+            format: uuid
+            type: string
+          in: path
+          name: id
+          required: true
+      responses:
+        "200":
+          description: Default Response
     delete:
       tags:
         - Interactions
@@ -2796,7 +2863,6 @@ paths:
               required:
                 - personId
                 - recipientEmails
-                - sendCopy
                 - selectedFields
               properties:
                 personId:
@@ -2812,8 +2878,6 @@ paths:
                 message:
                   maxLength: 2000
                   type: string
-                sendCopy:
-                  type: boolean
                 selectedFields:
                   minItems: 1
                   type: array
@@ -3031,6 +3095,85 @@ paths:
       responses:
         "200":
           description: Default Response
+  /api/chat:
+    post:
+      tags:
+        - Chat
+      responses:
+        "200":
+          description: Default Response
+  /api/chat/sessions:
+    get:
+      tags:
+        - Chat
+      responses:
+        "200":
+          description: Default Response
+    post:
+      tags:
+        - Chat
+      responses:
+        "200":
+          description: Default Response
+  /api/chat/sessions/{sessionId}:
+    patch:
+      tags:
+        - Chat
+      parameters:
+        - schema:
+            type: string
+          in: path
+          name: sessionId
+          required: true
+      responses:
+        "200":
+          description: Default Response
+    delete:
+      tags:
+        - Chat
+      parameters:
+        - schema:
+            type: string
+          in: path
+          name: sessionId
+          required: true
+      responses:
+        "200":
+          description: Default Response
+  /api/chat/sessions/{sessionId}/messages:
+    get:
+      tags:
+        - Chat
+      parameters:
+        - schema:
+            type: string
+          in: path
+          name: sessionId
+          required: true
+      responses:
+        "200":
+          description: Default Response
+  /api/subscriptions:
+    get:
+      tags:
+        - Subscriptions
+      responses:
+        "200":
+          description: Default Response
+  /api/subscriptions/sync:
+    post:
+      tags:
+        - Subscriptions
+      responses:
+        "200":
+          description: Default Response
+  /api/webhooks/polar:
+    post:
+      tags:
+        - Webhooks
+      responses:
+        "200":
+          description: Default Response
 servers:
   - url: http://localhost:3001
     description: Local development server
@@ -3059,3 +3202,9 @@ tags:
     description: Share contacts via email
   - name: Stats
     description: Admin KPI dashboard metrics
+  - name: Chat
+    description: AI chat assistant
+  - name: Subscriptions
+    description: Subscription and billing management
+  - name: Webhooks
+    description: Inbound webhooks from third-party services
