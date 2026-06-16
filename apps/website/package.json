@@ -12,7 +12,7 @@
     "dev": "next dev --port 3000",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint",
+    "lint": "biome lint .",
     "check-types": "tsc --noEmit"
   },
   "browserslist": {
@@ -45,8 +45,8 @@
     "motion": "^12.38.0",
     "next": "^16.2.1",
     "next-intl": "^4.8.3",
-    "react": "19.2.4",
-    "react-dom": "19.2.4"
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
@@ -54,8 +54,6 @@
     "@types/node": "^25",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "eslint": "^9.0.0",
-    "eslint-config-next": "16.2.1",
     "postcss": "^8.5.8",
     "postcss-preset-mantine": "^1.18.0",
     "postcss-simple-vars": "^7.0.1",

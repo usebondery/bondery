@@ -2,7 +2,7 @@
 
 import { Box, Divider, List, Table, Text, Title } from "@mantine/core";
 import { AnchorLink } from "@bondery/mantine-next";
-import { type ReactNode } from "react";
+import type { ReactNode } from "react";
 import { LegalDocumentLayout } from "./shared/LegalDocumentLayout";
 
 // Types for data-driven sections
@@ -48,7 +48,7 @@ const subprocessors = [
 ];
 
 // Reusable components
-function Section({ id, number, title, children }: SectionProps) {
+function _Section({ id, number, title, children }: SectionProps) {
   return (
     <>
       <Title order={2} mb="md" id={id}>
@@ -60,7 +60,7 @@ function Section({ id, number, title, children }: SectionProps) {
   );
 }
 
-function SubSection({ title, children }: { title: string; children: ReactNode }) {
+function _SubSection({ title, children }: { title: string; children: ReactNode }) {
   return (
     <>
       <Title order={3} mt="lg" mb="sm">
@@ -71,7 +71,7 @@ function SubSection({ title, children }: { title: string; children: ReactNode })
   );
 }
 
-function BulletList({ items }: { items: ReactNode[] }) {
+function _BulletList({ items }: { items: ReactNode[] }) {
   return (
     <List mb="lg" withPadding listStyleType="disc">
       {items.map((item, index) => (

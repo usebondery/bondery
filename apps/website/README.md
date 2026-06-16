@@ -17,7 +17,7 @@ The dev server starts at `http://localhost:3000`.
 | `npm run dev -w apps/website` | Start local dev server |
 | `npm run build -w apps/website` | Production build |
 | `npm run check-types -w apps/website` | TypeScript type check |
-| `npm run lint -w apps/website` | ESLint |
+| `npm run lint -w apps/website` | Biome lint |
 | `npm run announce -w apps/website -- --slug <slug>` | Announce a blog post |
 
 ## Blog

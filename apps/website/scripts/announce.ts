@@ -26,8 +26,8 @@
  *   REDDIT_PASSWORD               Reddit account password [not needed with --discord-only]
  */
 
-import fs from "fs";
-import path from "path";
+import fs from "node:fs";
+import path from "node:path";
 import { allPostMeta } from "../content/blog/metadata";
 import { getReadingTime } from "@bondery/helpers";
 import { postDiscordAnnouncement } from "./lib/discord";
@@ -83,7 +83,7 @@ if (missingEnv.length > 0) {
   process.exit(1);
 }
 
-const websiteUrl = process.env.NEXT_PUBLIC_WEBSITE_URL!.replace(/\/$/, "");
+const websiteUrl = process.env.NEXT_PUBLIC_WEBSITE_URL?.replace(/\/$/, "");
 const discordWebhookUrl = process.env.PRIVATE_DISCORD_WEBHOOK_URL ?? "";
 const redditConfig: RedditConfig = {
   clientId: process.env.REDDIT_CLIENT_ID ?? "",

@@ -5,9 +5,8 @@ import {
   IconCalendar,
   IconUsers,
   IconTopologyStar,
-  IconHourglass,
-  IconTimeline,
   IconTimelineEvent,
+  IconMessageChatbot,
 } from "@tabler/icons-react";
 import { WEBAPP_URL } from "@/lib/config";
 import { PricingCard } from "./PricingCard";
@@ -32,6 +31,11 @@ export function Pricing() {
   ];
 
   const premiumFeatures = [
+    {
+      icon: <IconMessageChatbot />,
+      title: "AI Assistant",
+      description: "Unlimited AI chat to search, write, and manage contacts",
+    },
     {
       icon: <IconNetwork />,
       title: "Smart search",
@@ -65,7 +69,12 @@ export function Pricing() {
           <Title order={2} ta="center" className="text-5xl!" fw={"bold"}>
             Simple, Transparent Pricing
           </Title>
-          <Text c="dimmed" ta="center" size="xl" style={{ textWrap: "balance" }}>
+          <Text
+            c="dimmed"
+            ta="center"
+            size="xl"
+            style={{ textWrap: "balance" }}
+          >
             Start building your network today, completely free.
           </Text>
         </Stack>
@@ -105,13 +114,12 @@ export function Pricing() {
           action={
             <ButtonLink
               href={`${WEBAPP_URL}/login`}
-              disabled
               size="lg"
               fullWidth
-              variant="outline"
-              leftSection={<IconHourglass size={18} />}
+              variant="primary"
+              leftSection={<IconTopologyStar size={18} />}
             >
-              Coming soon
+              Get started
             </ButtonLink>
           }
         />

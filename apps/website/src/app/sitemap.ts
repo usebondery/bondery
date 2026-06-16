@@ -1,7 +1,7 @@
 import { WEBSITE_URL } from "@/lib/config";
 import { WEBSITE_ROUTES } from "@bondery/helpers";
 import { getAllPosts, BLOG_CATEGORIES } from "@/app/blog/_lib";
-import { MetadataRoute } from "next";
+import type { MetadataRoute } from "next";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date();

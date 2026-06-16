@@ -1,6 +1,6 @@
 "use client";
 
-import { Box, Card, Text, useMantineTheme } from "@mantine/core";
+import { Card, useMantineTheme } from "@mantine/core";
 import { useHover, useMediaQuery } from "@mantine/hooks";
 import { motion, AnimatePresence } from "motion/react";
 import { useEffect, useState } from "react";

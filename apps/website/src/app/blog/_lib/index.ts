@@ -1,4 +1,4 @@
-export { type PostMeta, type PostCategory } from "./types";
+export type { PostMeta, PostCategory } from "./types";
 export {
   type BlogCategoryConfig,
   BLOG_CATEGORY_CONFIGS,

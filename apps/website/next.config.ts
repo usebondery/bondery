@@ -74,6 +74,7 @@ const nextConfig: NextConfig = {
 };
 
 const withMDX = createMDX();
+type WithMDXConfig = Parameters<typeof withMDX>[0];
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- withMDX resolves NextConfig from root node_modules; cast avoids monorepo type mismatch
-export default withMDX(nextConfig as any);
+// withMDX resolves NextConfig from root node_modules; cast avoids monorepo type mismatch
+export default withMDX(nextConfig as WithMDXConfig);

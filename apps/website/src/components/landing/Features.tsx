@@ -1,7 +1,5 @@
-import { Box, Container, Grid, GridCol, Image, Stack, Text, Title } from "@mantine/core";
-import NextImage from "next/image";
+import { Box, Container, Grid, GridCol, Stack, Text, Title } from "@mantine/core";
 import { PrivacyCodeAnimation } from "./PrivacyCodeAnimation";
-import { PersonEncryptionAnimation } from "./PersonEncryptionAnimation";
 import { SyncedConnectionsAnimation } from "./SyncedConnectionsAnimation";
 import { TimelineAnimation } from "./TimelineAnimation";
 import { AnimatedPeople } from "./AnimatedPeople";
@@ -87,7 +85,7 @@ const FeatureSection = ({
   );
 };
 
-const ImagePlaceholder = ({ color = "blue" }: { color?: string }) => (
+const _ImagePlaceholder = ({ color = "blue" }: { color?: string }) => (
   <Box
     style={{
       width: "100%",

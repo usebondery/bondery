@@ -2,7 +2,7 @@
 
 import { Box, Container, Grid, Paper, TableOfContents, Text, Title } from "@mantine/core";
 import Link from "next/link";
-import { type ReactNode } from "react";
+import type { ReactNode } from "react";
 
 interface LegalDocumentLayoutProps {
   title: string;
