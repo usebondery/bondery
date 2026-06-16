@@ -52,8 +52,7 @@ export async function checkAndIncrementQuota(
     .single();
 
   const isPremium =
-    subscription?.status === "active" ||
-    subscription?.status === "canceling";
+    subscription?.status === "active" || subscription?.status === "canceling";
 
   const limit = isPremium ? PREMIUM_MESSAGE_LIMIT : FREE_MESSAGE_LIMIT;
 
@@ -67,11 +66,21 @@ export async function checkAndIncrementQuota(
   );
 
   if (error) {
-    throw new Error(`check_and_increment_ai_messages RPC failed: ${error.message}`);
+    throw new Error(
+      `check_and_increment_ai_messages RPC failed: ${error.message}`,
+    );
   }
 
   // RPC returns a single-row result set
-  const row = Array.isArray(data) ? (data as Array<{ allowed: boolean; messages_used: number; reset_at: string | null }>)[0] : null;
+  const row = Array.isArray(data)
+    ? (
+        data as Array<{
+          allowed: boolean;
+          messages_used: number;
+          reset_at: string | null;
+        }>
+      )[0]
+    : null;
 
   return {
     allowed: row?.allowed ?? false,
@@ -100,8 +109,7 @@ export async function checkChatQuota(
     .single();
 
   const isPremium =
-    subscription?.status === "active" ||
-    subscription?.status === "canceling";
+    subscription?.status === "active" || subscription?.status === "canceling";
 
   if (isPremium) {
     const { data: settings } = await client
@@ -120,9 +128,12 @@ export async function checkChatQuota(
 
     const messagesUsed = periodExpired ? 0 : rawUsed;
     // Return period END (start + 30 days) so the UI shows when usage resets.
-    const resetAt = periodExpired || !rawResetAt
-      ? null
-      : new Date(new Date(rawResetAt).getTime() + 30 * 24 * 60 * 60 * 1000).toISOString();
+    const resetAt =
+      periodExpired || !rawResetAt
+        ? null
+        : new Date(
+            new Date(rawResetAt).getTime() + 30 * 24 * 60 * 60 * 1000,
+          ).toISOString();
 
     return {
       allowed: messagesUsed < PREMIUM_MESSAGE_LIMIT,

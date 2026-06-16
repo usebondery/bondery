@@ -5,7 +5,11 @@
 
 import type { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
 import { getAuth } from "../../lib/auth.js";
-import { checkChatQuota, FREE_MESSAGE_LIMIT, PREMIUM_MESSAGE_LIMIT } from "../../lib/chat/quota.js";
+import {
+  checkChatQuota,
+  FREE_MESSAGE_LIMIT,
+  PREMIUM_MESSAGE_LIMIT,
+} from "../../lib/chat/quota.js";
 import type { SubscriptionStatus } from "@bondery/types";
 import { getPolarClient } from "../../lib/polar.js";
 
@@ -19,17 +23,14 @@ const POLAR_STATUSES: SubscriptionStatus["polarStatus"][] = [
   "unpaid",
 ];
 
-const POLAR_INTERVALS: NonNullable<SubscriptionStatus["recurringInterval"]>[] = [
-  "day",
-  "week",
-  "month",
-  "year",
-];
+const POLAR_INTERVALS: NonNullable<SubscriptionStatus["recurringInterval"]>[] =
+  ["day", "week", "month", "year"];
 
 function toPolarStatus(
   value: string | null | undefined,
 ): SubscriptionStatus["polarStatus"] {
-  return value && POLAR_STATUSES.includes(value as SubscriptionStatus["polarStatus"])
+  return value &&
+    POLAR_STATUSES.includes(value as SubscriptionStatus["polarStatus"])
     ? (value as SubscriptionStatus["polarStatus"])
     : null;
 }
@@ -37,7 +38,10 @@ function toPolarStatus(
 function toPolarInterval(
   value: string | null | undefined,
 ): SubscriptionStatus["recurringInterval"] {
-  return value && POLAR_INTERVALS.includes(value as NonNullable<SubscriptionStatus["recurringInterval"]>)
+  return value &&
+    POLAR_INTERVALS.includes(
+      value as NonNullable<SubscriptionStatus["recurringInterval"]>,
+    )
     ? (value as SubscriptionStatus["recurringInterval"])
     : null;
 }
@@ -79,11 +83,15 @@ export async function subscriptionRoutes(fastify: FastifyInstance) {
         });
 
         polarStatus = toPolarStatus(polarSubscription.status);
-        trialEndsAt = polarSubscription.trialEnd ? polarSubscription.trialEnd.toISOString() : null;
+        trialEndsAt = polarSubscription.trialEnd
+          ? polarSubscription.trialEnd.toISOString()
+          : null;
         amount = polarSubscription.amount ?? null;
         currency = polarSubscription.currency ?? null;
         productName = polarSubscription.product?.name ?? null;
-        recurringInterval = toPolarInterval(polarSubscription.recurringInterval);
+        recurringInterval = toPolarInterval(
+          polarSubscription.recurringInterval,
+        );
         currentPeriodEnd = polarSubscription.currentPeriodEnd
           ? polarSubscription.currentPeriodEnd.toISOString()
           : currentPeriodEnd;
@@ -98,7 +106,8 @@ export async function subscriptionRoutes(fastify: FastifyInstance) {
     const status: SubscriptionStatus = {
       plan: quota.plan,
       aiMessagesUsed: quota.messagesUsed,
-      aiMessageLimit: quota.plan === "premium" ? PREMIUM_MESSAGE_LIMIT : FREE_MESSAGE_LIMIT,
+      aiMessageLimit:
+        quota.plan === "premium" ? PREMIUM_MESSAGE_LIMIT : FREE_MESSAGE_LIMIT,
       aiMonthlyResetAt: quota.resetAt,
       canUseChat: quota.allowed,
       currentPeriodEnd,

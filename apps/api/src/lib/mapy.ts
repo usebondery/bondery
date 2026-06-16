@@ -6,7 +6,7 @@
  */
 
 import { createAdminClient } from "./supabase.js";
-import { formatPlaceLabel } from "@bondery/helpers/address-utils";
+import { formatPlaceLabel } from "@bondery/helpers/address";
 import logger from "./logger.js";
 
 const MAPS_BASE_URL = "https://api.mapy.com";

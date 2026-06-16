@@ -13,7 +13,10 @@
  */
 
 import type { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
-import { validateEvent, WebhookVerificationError } from "@polar-sh/sdk/webhooks";
+import {
+  validateEvent,
+  WebhookVerificationError,
+} from "@polar-sh/sdk/webhooks";
 import { createAdminClient } from "../../lib/supabase.js";
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -24,9 +27,12 @@ import { createAdminClient } from "../../lib/supabase.js";
  */
 async function findUserIdByEmail(email: string): Promise<string | null> {
   const admin = createAdminClient();
-  const { data, error } = await admin.rpc("get_user_id_by_email" as never, {
-    p_email: email,
-  } as never);
+  const { data, error } = await admin.rpc(
+    "get_user_id_by_email" as never,
+    {
+      p_email: email,
+    } as never,
+  );
 
   if (error) {
     throw new Error(`get_user_id_by_email RPC failed: ${error.message}`);
@@ -55,8 +61,12 @@ export async function upsertSubscription(
       polar_customer_id: polarCustomerId,
       polar_subscription_id: polarSubscriptionId,
       status,
-      current_period_start: currentPeriodStart ? currentPeriodStart.toISOString() : null,
-      current_period_end: currentPeriodEnd ? currentPeriodEnd.toISOString() : null,
+      current_period_start: currentPeriodStart
+        ? currentPeriodStart.toISOString()
+        : null,
+      current_period_end: currentPeriodEnd
+        ? currentPeriodEnd.toISOString()
+        : null,
       cancel_at_period_end: cancelAtPeriodEnd,
     },
     { onConflict: "user_id" },
@@ -88,7 +98,9 @@ async function storePendingSubscription(
       polar_customer_id: polarCustomerId,
       polar_subscription_id: polarSubscriptionId,
       status,
-      current_period_end: currentPeriodEnd ? currentPeriodEnd.toISOString() : null,
+      current_period_end: currentPeriodEnd
+        ? currentPeriodEnd.toISOString()
+        : null,
       cancel_at_period_end: cancelAtPeriodEnd,
     } as never,
     { onConflict: "email" },
@@ -106,7 +118,10 @@ async function storePendingSubscription(
  * "canceling" means: active subscription the user has requested to cancel —
  * still has full access until current_period_end.
  */
-export function mapStatus(polarStatus: string, cancelAtPeriodEnd: boolean): string {
+export function mapStatus(
+  polarStatus: string,
+  cancelAtPeriodEnd: boolean,
+): string {
   switch (polarStatus) {
     case "active":
       return cancelAtPeriodEnd ? "canceling" : "active";
@@ -136,7 +151,9 @@ export function mapStatus(polarStatus: string, cancelAtPeriodEnd: boolean): stri
  * Registered without the `verifySession` hook — Polar events are anonymous
  * HTTP POST requests authenticated solely by HMAC signature.
  */
-export async function polarWebhookRoutes(fastify: FastifyInstance): Promise<void> {
+export async function polarWebhookRoutes(
+  fastify: FastifyInstance,
+): Promise<void> {
   fastify.addHook("onRoute", (routeOptions) => {
     routeOptions.schema = { ...routeOptions.schema, tags: ["Webhooks"] };
   });
@@ -145,9 +162,13 @@ export async function polarWebhookRoutes(fastify: FastifyInstance): Promise<void
   // verify the HMAC against the exact bytes Polar sent. Without this,
   // Fastify would JSON-parse the body first, losing whitespace and key-order
   // information that is part of the signed payload.
-  fastify.addContentTypeParser("application/json", { parseAs: "buffer" }, (_req, body, done) => {
-    done(null, body);
-  });
+  fastify.addContentTypeParser(
+    "application/json",
+    { parseAs: "buffer" },
+    (_req, body, done) => {
+      done(null, body);
+    },
+  );
 
   /**
    * POST / — receive and process a Polar webhook event
@@ -156,7 +177,9 @@ export async function polarWebhookRoutes(fastify: FastifyInstance): Promise<void
     const secret = fastify.config.POLAR_WEBHOOK_SECRET;
 
     if (!secret) {
-      request.log.warn("POLAR_WEBHOOK_SECRET is not configured — rejecting webhook");
+      request.log.warn(
+        "POLAR_WEBHOOK_SECRET is not configured — rejecting webhook",
+      );
       return reply.status(500).send({ error: "Webhook not configured" });
     }
 
@@ -174,7 +197,10 @@ export async function polarWebhookRoutes(fastify: FastifyInstance): Promise<void
       event = validateEvent(rawBody, headers, secret);
     } catch (err) {
       if (err instanceof WebhookVerificationError) {
-        request.log.warn({ reason: err.message }, "polar-webhook: invalid signature");
+        request.log.warn(
+          { reason: err.message },
+          "polar-webhook: invalid signature",
+        );
         return reply.status(400).send({ error: "Invalid webhook signature" });
       }
       throw err;
@@ -199,29 +225,38 @@ export async function polarWebhookRoutes(fastify: FastifyInstance): Promise<void
     const email = sub.customer.email;
 
     if (!email) {
-      request.log.warn({ type: event.type }, "polar-webhook: no customer email in payload — skipping");
+      request.log.warn(
+        { type: event.type },
+        "polar-webhook: no customer email in payload — skipping",
+      );
       return reply.status(200).send({ received: true });
     }
 
-    const status = event.type === "subscription.revoked"
-      ? "revoked"
-      : mapStatus(sub.status, sub.cancelAtPeriodEnd);
+    const status =
+      event.type === "subscription.revoked"
+        ? "revoked"
+        : mapStatus(sub.status, sub.cancelAtPeriodEnd);
 
-    const currentPeriodStart = event.type === "subscription.revoked"
-      ? null
-      : ((sub as { currentPeriodStart?: Date | null }).currentPeriodStart ?? null);
+    const currentPeriodStart =
+      event.type === "subscription.revoked"
+        ? null
+        : ((sub as { currentPeriodStart?: Date | null }).currentPeriodStart ??
+          null);
 
-    const currentPeriodEnd = event.type === "subscription.revoked"
-      ? null
-      : (sub.currentPeriodEnd ?? null);
+    const currentPeriodEnd =
+      event.type === "subscription.revoked"
+        ? null
+        : (sub.currentPeriodEnd ?? null);
 
     // ── Identity resolution ───────────────────────────────────────────────
     // Use externalCustomerId (our user UUID) first — set at checkout creation.
     // Fall back to email lookup for subscriptions created outside the app
     // (e.g., directly in the Polar dashboard).
 
-    const externalId = (sub as { externalCustomerId?: string | null }).externalCustomerId;
-    const isValidUuid = externalId != null && /^[0-9a-f-]{36}$/i.test(externalId);
+    const externalId = (sub as { externalCustomerId?: string | null })
+      .externalCustomerId;
+    const isValidUuid =
+      externalId != null && /^[0-9a-f-]{36}$/i.test(externalId);
 
     let userId: string | null = isValidUuid ? externalId : null;
 
@@ -250,8 +285,13 @@ export async function polarWebhookRoutes(fastify: FastifyInstance): Promise<void
           "polar-webhook: no Bondery user found — stored in pending_subscriptions",
         );
       } catch (err) {
-        request.log.error({ err, email }, "polar-webhook: failed to store pending subscription");
-        return reply.status(500).send({ error: "Failed to store pending subscription" });
+        request.log.error(
+          { err, email },
+          "polar-webhook: failed to store pending subscription",
+        );
+        return reply
+          .status(500)
+          .send({ error: "Failed to store pending subscription" });
       }
       return reply.status(200).send({ received: true });
     }
@@ -267,12 +307,17 @@ export async function polarWebhookRoutes(fastify: FastifyInstance): Promise<void
         sub.cancelAtPeriodEnd,
       );
     } catch (err) {
-      request.log.error({ err, userId, type: event.type }, "polar-webhook: upsert failed");
+      request.log.error(
+        { err, userId, type: event.type },
+        "polar-webhook: upsert failed",
+      );
       return reply.status(500).send({ error: "Failed to process webhook" });
     }
 
-    request.log.info({ userId, status, type: event.type }, "polar-webhook: subscription updated");
+    request.log.info(
+      { userId, status, type: event.type },
+      "polar-webhook: subscription updated",
+    );
     return reply.status(200).send({ received: true });
   });
 }
-

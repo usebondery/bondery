@@ -21,7 +21,9 @@ import { createAdminClient } from "../../lib/supabase.js";
 import { getPolarClient } from "../../lib/polar.js";
 import { upsertSubscription, mapStatus } from "../webhooks/polar.js";
 
-export async function subscriptionSyncRoutes(fastify: FastifyInstance): Promise<void> {
+export async function subscriptionSyncRoutes(
+  fastify: FastifyInstance,
+): Promise<void> {
   fastify.addHook("onRoute", (routeOptions) => {
     routeOptions.schema = { ...routeOptions.schema, tags: ["Subscriptions"] };
   });
@@ -41,8 +43,13 @@ export async function subscriptionSyncRoutes(fastify: FastifyInstance): Promise<
       .single();
 
     if (existing?.status === "active" || existing?.status === "canceling") {
-      request.log.info({ userId: user.id }, "subscription-sync: already active, skipping");
-      return reply.status(200).send({ synced: false, reason: "already_active" });
+      request.log.info(
+        { userId: user.id },
+        "subscription-sync: already active, skipping",
+      );
+      return reply
+        .status(200)
+        .send({ synced: false, reason: "already_active" });
     }
 
     const admin = createAdminClient();
@@ -50,17 +57,19 @@ export async function subscriptionSyncRoutes(fastify: FastifyInstance): Promise<
 
     // ── Case 1: Check pending_subscriptions (bought before signing up) ──
     if (email) {
-    const { data: pending } = await admin
-      .from("pending_subscriptions" as never)
-      .select("*")
-      .eq("email", email)
-      .single() as unknown as { data: {
-        polar_customer_id: string;
-        polar_subscription_id: string;
-        status: string;
-        current_period_end: string | null;
-        cancel_at_period_end: boolean;
-      } | null };
+      const { data: pending } = (await admin
+        .from("pending_subscriptions" as never)
+        .select("*")
+        .eq("email", email)
+        .single()) as unknown as {
+        data: {
+          polar_customer_id: string;
+          polar_subscription_id: string;
+          status: string;
+          current_period_end: string | null;
+          cancel_at_period_end: boolean;
+        } | null;
+      };
 
       if (pending) {
         try {
@@ -70,12 +79,17 @@ export async function subscriptionSyncRoutes(fastify: FastifyInstance): Promise<
             pending.polar_subscription_id,
             pending.status,
             null,
-            pending.current_period_end ? new Date(pending.current_period_end) : null,
+            pending.current_period_end
+              ? new Date(pending.current_period_end)
+              : null,
             pending.cancel_at_period_end,
           );
 
           // Remove the claimed pending row
-          await admin.from("pending_subscriptions" as never).delete().eq("email", email as never);
+          await admin
+            .from("pending_subscriptions" as never)
+            .delete()
+            .eq("email", email as never);
 
           request.log.info(
             { userId: user.id, email },
@@ -83,8 +97,13 @@ export async function subscriptionSyncRoutes(fastify: FastifyInstance): Promise<
           );
           return reply.status(200).send({ synced: true, source: "pending" });
         } catch (err) {
-          request.log.error({ err, userId: user.id }, "subscription-sync: failed to claim pending");
-          return reply.status(503).send({ error: "Failed to sync subscription" });
+          request.log.error(
+            { err, userId: user.id },
+            "subscription-sync: failed to claim pending",
+          );
+          return reply
+            .status(503)
+            .send({ error: "Failed to sync subscription" });
         }
       }
     }
@@ -94,18 +113,30 @@ export async function subscriptionSyncRoutes(fastify: FastifyInstance): Promise<
     try {
       polar = getPolarClient();
     } catch {
-      request.log.warn({ userId: user.id }, "subscription-sync: Polar not configured");
-      return reply.status(200).send({ synced: false, reason: "polar_not_configured" });
+      request.log.warn(
+        { userId: user.id },
+        "subscription-sync: Polar not configured",
+      );
+      return reply
+        .status(200)
+        .send({ synced: false, reason: "polar_not_configured" });
     }
 
     try {
       let polarCustomer;
       try {
-        polarCustomer = await polar.customers.getExternal({ externalId: user.id });
+        polarCustomer = await polar.customers.getExternal({
+          externalId: user.id,
+        });
       } catch {
         // Customer doesn't exist in Polar — free tier user
-        request.log.info({ userId: user.id }, "subscription-sync: no Polar customer found");
-        return reply.status(200).send({ synced: false, reason: "no_polar_customer" });
+        request.log.info(
+          { userId: user.id },
+          "subscription-sync: no Polar customer found",
+        );
+        return reply
+          .status(200)
+          .send({ synced: false, reason: "no_polar_customer" });
       }
 
       // Find the most recent active or canceling subscription for this customer
@@ -114,20 +145,27 @@ export async function subscriptionSyncRoutes(fastify: FastifyInstance): Promise<
       });
 
       // Find the most recent subscription that is active or would still provide access
-      const activeSub = subscriptions.result.items.find(
-        (s) => s.status === "active" || (s.status === "canceled" && s.cancelAtPeriodEnd),
-      ) ?? subscriptions.result.items[0];
+      const activeSub =
+        subscriptions.result.items.find(
+          (s) =>
+            s.status === "active" ||
+            (s.status === "canceled" && s.cancelAtPeriodEnd),
+        ) ?? subscriptions.result.items[0];
 
       if (!activeSub) {
         request.log.info(
           { userId: user.id, polarCustomerId: polarCustomer.id },
           "subscription-sync: no active Polar subscription found",
         );
-        return reply.status(200).send({ synced: false, reason: "no_active_subscription" });
+        return reply
+          .status(200)
+          .send({ synced: false, reason: "no_active_subscription" });
       }
 
       const status = mapStatus(activeSub.status, activeSub.cancelAtPeriodEnd);
-      const currentPeriodStart = (activeSub as { currentPeriodStart?: Date | null }).currentPeriodStart ?? null;
+      const currentPeriodStart =
+        (activeSub as { currentPeriodStart?: Date | null })
+          .currentPeriodStart ?? null;
       const currentPeriodEnd = activeSub.currentPeriodEnd ?? null;
 
       await upsertSubscription(
@@ -146,8 +184,13 @@ export async function subscriptionSyncRoutes(fastify: FastifyInstance): Promise<
       );
       return reply.status(200).send({ synced: true, source: "polar_api" });
     } catch (err) {
-      request.log.error({ err, userId: user.id }, "subscription-sync: Polar API error");
-      return reply.status(503).send({ error: "Failed to sync subscription from Polar" });
+      request.log.error(
+        { err, userId: user.id },
+        "subscription-sync: Polar API error",
+      );
+      return reply
+        .status(503)
+        .send({ error: "Failed to sync subscription from Polar" });
     }
   });
 }

@@ -21,6 +21,7 @@ process.env.PRIVATE_EMAIL_USER ??= "dummy";
 process.env.PRIVATE_EMAIL_PASS ??= "dummy";
 process.env.PRIVATE_EMAIL_ADDRESS ??= "dummy@localhost";
 process.env.PRIVATE_EMAIL_PORT ??= "587";
+process.env.POLAR_WEBHOOK_SECRET ??= "dummy";
 
 import { writeFileSync } from "fs";
 import { resolve, dirname } from "path";

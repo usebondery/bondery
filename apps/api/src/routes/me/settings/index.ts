@@ -7,7 +7,10 @@ import type { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
 import { Type } from "@sinclair/typebox";
 import { createAdminClient } from "../../../lib/supabase.js";
 import { getAuth } from "../../../lib/auth.js";
-import { validateImageUpload, validateImageMagicBytes } from "../../../lib/config.js";
+import {
+  validateImageUpload,
+  validateImageMagicBytes,
+} from "../../../lib/config.js";
 import logger from "../../../lib/logger.js";
 import { getMyselfProfile } from "../../../lib/myself.js";
 
@@ -18,10 +21,16 @@ const UpdateSettingsBody = Type.Object({
   reminderSendHour: Type.Optional(
     Type.String({ pattern: "^([01]\\d|2[0-3]):[0-5]\\d(:[0-5]\\d)?$" }),
   ),
-  timeFormat: Type.Optional(Type.Union([Type.Literal("24h"), Type.Literal("12h")])),
+  timeFormat: Type.Optional(
+    Type.Union([Type.Literal("24h"), Type.Literal("12h")]),
+  ),
   language: Type.Optional(Type.Literal("en")),
   colorScheme: Type.Optional(
-    Type.Union([Type.Literal("light"), Type.Literal("dark"), Type.Literal("auto")]),
+    Type.Union([
+      Type.Literal("light"),
+      Type.Literal("dark"),
+      Type.Literal("auto"),
+    ]),
   ),
 });
 
@@ -59,7 +68,9 @@ type SupabaseUserWithMetadata = {
   }>;
 };
 
-function getEffectiveUserMetadata(user: SupabaseUserWithMetadata | undefined): UserMetadata {
+function getEffectiveUserMetadata(
+  user: SupabaseUserWithMetadata | undefined,
+): UserMetadata {
   const baseMetadata = user?.user_metadata || {};
   const linkedInIdentity = (user?.identities || []).find(
     (identity) => identity.provider === "linkedin_oidc",
@@ -75,7 +86,9 @@ function getEffectiveUserMetadata(user: SupabaseUserWithMetadata | undefined): U
 /**
  * Returns avatar URL from auth metadata, including provider-specific keys.
  */
-function getMetadataAvatarUrl(userMetadata: UserMetadata | undefined): string | null {
+function getMetadataAvatarUrl(
+  userMetadata: UserMetadata | undefined,
+): string | null {
   return userMetadata?.avatar_url || userMetadata?.picture || null;
 }
 
@@ -99,13 +112,16 @@ async function importMetadataAvatarToStorage(
       return null;
     }
 
-    const contentType = response.headers.get("content-type")?.split(";")[0]?.trim() || "";
+    const contentType =
+      response.headers.get("content-type")?.split(";")[0]?.trim() || "";
     const arrayBuffer = await response.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
 
     const normalizedType = contentType.toLowerCase();
     const validationType =
-      normalizedType.startsWith("image/") || normalizedType === "" ? "image/jpeg" : contentType;
+      normalizedType.startsWith("image/") || normalizedType === ""
+        ? "image/jpeg"
+        : contentType;
 
     const validation = validateImageUpload({
       type: validationType,
@@ -148,12 +164,20 @@ async function importMetadataAvatarToStorage(
       return null;
     }
 
-    const { data: publicUrlData } = adminClient.storage.from(AVATARS_BUCKET).getPublicUrl(fileName);
+    const { data: publicUrlData } = adminClient.storage
+      .from(AVATARS_BUCKET)
+      .getPublicUrl(fileName);
 
-    return publicUrlData?.publicUrl ? `${publicUrlData.publicUrl}?t=${Date.now()}` : null;
+    return publicUrlData?.publicUrl
+      ? `${publicUrlData.publicUrl}?t=${Date.now()}`
+      : null;
   } catch (error) {
     logger.warn(
-      { userId, avatarUrl, message: error instanceof Error ? error.message : String(error) },
+      {
+        userId,
+        avatarUrl,
+        message: error instanceof Error ? error.message : String(error),
+      },
       "[settings] Provider avatar import crashed",
     );
     return null;
@@ -175,7 +199,9 @@ export async function meSettingsRoutes(fastify: FastifyInstance) {
 
     // Get user info for email/providers
     const { data: userData } = await client.auth.getUser();
-    const userMetadata = getEffectiveUserMetadata(userData?.user as SupabaseUserWithMetadata);
+    const userMetadata = getEffectiveUserMetadata(
+      userData?.user as SupabaseUserWithMetadata,
+    );
     const metadataAvatarUrl = getMetadataAvatarUrl(userMetadata);
 
     // Get settings from database
@@ -208,7 +234,9 @@ export async function meSettingsRoutes(fastify: FastifyInstance) {
         .single();
 
       if (insertError) {
-        return reply.status(500).send({ error: "Failed to create default settings" });
+        return reply
+          .status(500)
+          .send({ error: "Failed to create default settings" });
       }
 
       resolvedSettings = newSettings;
@@ -219,25 +247,32 @@ export async function meSettingsRoutes(fastify: FastifyInstance) {
     const { data: existingFiles } = await adminClient.storage
       .from(AVATARS_BUCKET)
       .list(user.id, { search: `${user.id}.jpg`, limit: 1 });
-    const hasStoredAvatar = (existingFiles ?? []).some((f) => f.name === `${user.id}.jpg`);
+    const hasStoredAvatar = (existingFiles ?? []).some(
+      (f) => f.name === `${user.id}.jpg`,
+    );
 
     if (!hasStoredAvatar && metadataAvatarUrl) {
       await importMetadataAvatarToStorage(user.id, metadataAvatarUrl);
     }
 
-    const { firstName, avatarUrl: resolvedAvatarUrl } = await getMyselfProfile(client, user.id);
+    const { firstName, avatarUrl: resolvedAvatarUrl } = await getMyselfProfile(
+      client,
+      user.id,
+    );
 
     return {
       success: true,
       data: {
         name: firstName,
         timezone: resolvedSettings.timezone,
-        reminderSendHour: resolvedSettings.reminder_send_hour ?? DEFAULT_REMINDER_SEND_HOUR,
+        reminderSendHour:
+          resolvedSettings.reminder_send_hour ?? DEFAULT_REMINDER_SEND_HOUR,
         timeFormat: resolvedSettings.time_format ?? DEFAULT_TIME_FORMAT,
-        language: "en",
+        language: resolvedSettings.language ?? "en",
         colorScheme: resolvedSettings.color_scheme,
         avatarUrl: resolvedAvatarUrl,
         onboardingCompletedAt: resolvedSettings.onboarding_completed_at ?? null,
+        aiMessagesUsed: resolvedSettings.ai_messages_used ?? 0,
         email: userData?.user?.email,
         providers: userData?.user?.app_metadata?.providers || [],
       },
@@ -263,14 +298,16 @@ export async function meSettingsRoutes(fastify: FastifyInstance) {
       reply: FastifyReply,
     ) => {
       const { client, user } = getAuth(request);
-      const { timezone, reminderSendHour, language, colorScheme } = request.body || {};
+      const { timezone, reminderSendHour, language, colorScheme } =
+        request.body || {};
       const { timeFormat } = request.body || {};
 
       const updatePayload: Record<string, unknown> = {};
 
       if (timezone !== undefined) updatePayload.timezone = timezone;
       if (reminderSendHour !== undefined) {
-        updatePayload.reminder_send_hour = normalizeReminderSendHour(reminderSendHour);
+        updatePayload.reminder_send_hour =
+          normalizeReminderSendHour(reminderSendHour);
       }
       if (language !== undefined) {
         updatePayload.language = language;

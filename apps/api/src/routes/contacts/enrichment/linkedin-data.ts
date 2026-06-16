@@ -7,6 +7,7 @@ import type { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
 import { Type } from "@sinclair/typebox";
 import { getAuth } from "../../../lib/auth.js";
 import { UuidParam } from "../../../lib/schemas.js";
+import { linkedinCompanyUrl } from "@bondery/helpers";
 
 const LinkedInDataBody = Type.Object({
   workHistory: Type.Optional(
@@ -182,9 +183,7 @@ export function registerLinkedInDataRoutes(fastify: FastifyInstance): void {
           userId: row.user_id,
           peopleLinkedinId: row.people_linkedin_id,
           companyName: row.company_name,
-          companyLinkedinUrl: row.company_linkedin_id
-            ? `https://www.linkedin.com/company/${row.company_linkedin_id}/`
-            : null,
+          companyLinkedinUrl: linkedinCompanyUrl(row.company_linkedin_id),
           companyLogoUrl: row.company_linkedin_id
             ? client.storage
                 .from("linkedin_logos")
@@ -204,11 +203,7 @@ export function registerLinkedInDataRoutes(fastify: FastifyInstance): void {
           userId: row.user_id,
           peopleLinkedinId: row.people_linkedin_id,
           schoolName: row.school_name,
-          schoolLinkedinUrl: row.school_linkedin_id
-            ? /^\d+$/.test(row.school_linkedin_id)
-              ? `https://www.linkedin.com/company/${row.school_linkedin_id}/`
-              : `https://www.linkedin.com/school/${row.school_linkedin_id}/`
-            : null,
+          schoolLinkedinUrl: linkedinCompanyUrl(row.school_linkedin_id),
           schoolLogoUrl: row.school_linkedin_id
             ? client.storage
                 .from("linkedin_logos")

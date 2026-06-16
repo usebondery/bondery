@@ -182,6 +182,71 @@ export async function interactionRoutes(fastify: FastifyInstance) {
   );
 
   /**
+   * GET /api/interactions/:id - Get a single interaction
+   */
+  fastify.get(
+    "/:id",
+    { schema: { params: UuidParam, querystring: InteractionsQuery } },
+    async (
+      request: FastifyRequest<{
+        Params: { id: string };
+        Querystring: typeof InteractionsQuery.static;
+      }>,
+      reply: FastifyReply,
+    ) => {
+      const { client, user } = getAuth(request);
+      const { id } = request.params;
+
+      const { data: interaction, error } = await client
+        .from("interactions")
+        .select(
+          `
+          *,
+          participants:interaction_participants(
+            person:people(
+              id,
+              first_name,
+              last_name,
+              updated_at
+            )
+          )
+        `,
+        )
+        .eq("id", id)
+        .eq("user_id", user.id)
+        .single();
+
+      if (error) {
+        return reply.status(404).send({ error: "Interaction not found" });
+      }
+
+      const avatarOptions = extractAvatarOptions(request.query);
+
+      return {
+        interaction: {
+          id: interaction.id,
+          title: interaction.title,
+          type: interaction.type,
+          description: interaction.description,
+          date: interaction.date,
+          createdAt: interaction.created_at,
+          updatedAt: interaction.updated_at,
+          participants: interaction.participants.map((participant: any) => ({
+            ...participant.person,
+            avatar: buildContactAvatarUrl(
+              client,
+              user.id,
+              participant.person.id,
+              avatarOptions,
+              participant.person.updated_at,
+            ),
+          })),
+        },
+      };
+    },
+  );
+
+  /**
    * DELETE /api/interactions/:id - Delete an interaction
    */
   fastify.delete(

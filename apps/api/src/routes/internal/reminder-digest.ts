@@ -1,7 +1,7 @@
 import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import { Type } from "@sinclair/typebox";
 import nodemailer from "nodemailer";
-import { render } from "@react-email/components";
+import { render } from "@react-email/render";
 import { ReminderDigestEmail } from "@bondery/emails";
 
 const ReminderDigestItemSchema = Type.Object({
@@ -17,7 +17,11 @@ const ReminderDigestItemSchema = Type.Object({
   ]),
   date: Type.String(),
   notifyOn: Type.String(),
-  notifyDaysBefore: Type.Union([Type.Literal(1), Type.Literal(3), Type.Literal(7)]),
+  notifyDaysBefore: Type.Union([
+    Type.Literal(1),
+    Type.Literal(3),
+    Type.Literal(7),
+  ]),
   note: Type.Optional(Type.Union([Type.String(), Type.Null()])),
 });
 
@@ -51,7 +55,10 @@ export async function reminderDigestRoutes(fastify: FastifyInstance) {
     ) => {
       const { targetDate, users } = request.body;
 
-      request.log.info({ targetDate, userCount: users.length }, "Received reminder digest request");
+      request.log.info(
+        { targetDate, userCount: users.length },
+        "Received reminder digest request",
+      );
 
       if (users.length === 0) {
         return reply.send({
@@ -75,7 +82,8 @@ export async function reminderDigestRoutes(fastify: FastifyInstance) {
         },
       });
 
-      const failures: Array<{ userId: string; email: string; error: string }> = [];
+      const failures: Array<{ userId: string; email: string; error: string }> =
+        [];
       let sentUsers = 0;
 
       for (const user of users) {

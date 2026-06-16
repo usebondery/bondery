@@ -4,7 +4,12 @@
  */
 
 /** Possible subscription statuses synced from Polar.sh webhooks. */
-export type SubscriptionStatusValue = "active" | "canceling" | "canceled" | "revoked" | "past_due";
+export type SubscriptionStatusValue =
+  | "active"
+  | "canceling"
+  | "canceled"
+  | "revoked"
+  | "past_due";
 
 /**
  * A subscription row stored in the database, mapped from Polar.sh webhook events.

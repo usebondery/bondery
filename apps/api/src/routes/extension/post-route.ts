@@ -7,7 +7,7 @@ import { buildContactAvatarUrl } from "../../lib/supabase.js";
 import { getAuth } from "../../lib/auth.js";
 import type { ScrapedWorkHistoryEntry, ScrapedEducationEntry } from "@bondery/types";
 import { findPersonIdBySocial, upsertContactSocials } from "../../lib/socials.js";
-import { cleanPersonName } from "@bondery/helpers/name-utils";
+import { cleanPersonName } from "@bondery/helpers/name";
 import { assignContactsToDefaultImportGroup } from "../../lib/default-import-groups.js";
 import { cachedGeocodeLinkedInLocation } from "../../lib/mapy.js";
 import {

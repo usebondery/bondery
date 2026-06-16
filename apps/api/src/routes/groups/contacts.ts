@@ -6,6 +6,7 @@
 import type { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
 import { Type } from "@sinclair/typebox";
 import { getAuth } from "../../lib/auth.js";
+import { searchPeopleIds, restoreRankedOrder } from "../../lib/search.js";
 import { attachContactExtras } from "../../lib/contact-enrichment.js";
 import {
   UuidParam,
@@ -82,24 +83,28 @@ export function registerGroupContactRoutes(fastify: FastifyInstance): void {
       let totalCount: number;
 
       if (search) {
-        const { data: ranked, error: rpcError } = await client.rpc("search_people_ids", {
-          p_user_id: user.id,
-          p_query: search,
-          p_limit: limit,
-          p_offset: offset,
-          p_group_id: groupId,
-        });
+        const { ranked, error: rpcError } = await searchPeopleIds(
+          client,
+          user.id,
+          search,
+          limit,
+          offset,
+          groupId,
+        );
 
         if (rpcError) {
-          fastify.log.error({ rpcError }, "Error in fuzzy search RPC for group contacts");
-          return reply.status(500).send({ error: rpcError.message });
+          fastify.log.error(
+            { rpcError },
+            "Error in fuzzy search RPC for group contacts",
+          );
+          return reply.status(500).send({ error: rpcError });
         }
 
         if (!ranked || ranked.length === 0) {
           contacts = [];
           totalCount = 0;
         } else {
-          const rankedIds = ranked.map((r: { id: string }) => r.id);
+          const rankedIds = ranked.map((r) => r.id);
 
           const { data: fetchedContacts, error: fetchError } = await client
             .from("people")
@@ -107,16 +112,14 @@ export function registerGroupContactRoutes(fastify: FastifyInstance): void {
             .in("id", rankedIds);
 
           if (fetchError) {
-            fastify.log.error({ fetchError }, "Error fetching fuzzy group search results");
+            fastify.log.error(
+              { fetchError },
+              "Error fetching fuzzy group search results",
+            );
             return reply.status(500).send({ error: fetchError.message });
           }
 
-          // Restore the relevance ordering from the RPC
-          const orderMap = new Map(rankedIds.map((id: string, i: number) => [id, i]));
-          contacts = (fetchedContacts || []).sort(
-            (a: { id: string }, b: { id: string }) =>
-              (orderMap.get(a.id) ?? 999) - (orderMap.get(b.id) ?? 999),
-          );
+          contacts = restoreRankedOrder(fetchedContacts || [], rankedIds);
           totalCount = contacts.length;
         }
       } else {
@@ -125,16 +128,23 @@ export function registerGroupContactRoutes(fastify: FastifyInstance): void {
         // when passing large lists of person IDs via .in() for groups with many members.
         let contactsQuery = client
           .from("people")
-          .select(`${CONTACT_SELECT}, people_groups!inner(group_id)`, { count: "exact" })
+          .select(`${CONTACT_SELECT}, people_groups!inner(group_id)`, {
+            count: "exact",
+          })
           .eq("myself", false)
           .eq("people_groups.group_id", groupId);
 
         switch (query.sort) {
           case "nameDesc":
-            contactsQuery = contactsQuery.order("first_name", { ascending: false });
+            contactsQuery = contactsQuery.order("first_name", {
+              ascending: false,
+            });
             break;
           case "surnameAsc":
-            contactsQuery = contactsQuery.order("last_name", { ascending: true, nullsFirst: true });
+            contactsQuery = contactsQuery.order("last_name", {
+              ascending: true,
+              nullsFirst: true,
+            });
             break;
           case "surnameDesc":
             contactsQuery = contactsQuery.order("last_name", {
@@ -156,21 +166,29 @@ export function registerGroupContactRoutes(fastify: FastifyInstance): void {
             break;
           case "nameAsc":
           default:
-            contactsQuery = contactsQuery.order("first_name", { ascending: true });
+            contactsQuery = contactsQuery.order("first_name", {
+              ascending: true,
+            });
             break;
         }
 
         contactsQuery = contactsQuery.range(offset, offset + limit - 1);
 
-        const { data: contactRows, error: contactsError, count } = await contactsQuery;
+        const {
+          data: contactRows,
+          error: contactsError,
+          count,
+        } = await contactsQuery;
 
         if (contactsError) {
-          fastify.log.error({ contactsError }, "Failed to fetch contacts for group");
+          fastify.log.error(
+            { contactsError },
+            "Failed to fetch contacts for group",
+          );
           return reply.status(500).send({ error: contactsError.message });
         }
 
         // Strip the join helper field before passing contacts down the pipeline
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         contacts = (contactRows || []).map((row: any) => {
           const { people_groups: _pg, ...contact } = row;
           return contact;
@@ -189,9 +207,14 @@ export function registerGroupContactRoutes(fastify: FastifyInstance): void {
 
       let enrichedContacts = contacts;
       try {
-        enrichedContacts = await attachContactExtras(client, user.id, contacts || [], {
-          avatarOptions,
-        });
+        enrichedContacts = await attachContactExtras(
+          client,
+          user.id,
+          contacts || [],
+          {
+            avatarOptions,
+          },
+        );
       } catch (enrichError) {
         fastify.log.error(
           { enrichError },
@@ -227,7 +250,10 @@ export function registerGroupContactRoutes(fastify: FastifyInstance): void {
     "/:id/contacts",
     { schema: { params: UuidParam, body: GroupAddContactsBody } },
     async (
-      request: FastifyRequest<{ Params: { id: string }; Body: { personIds: string[] } }>,
+      request: FastifyRequest<{
+        Params: { id: string };
+        Body: { personIds: string[] };
+      }>,
       reply: FastifyReply,
     ) => {
       const { client, user } = getAuth(request);
@@ -273,7 +299,10 @@ export function registerGroupContactRoutes(fastify: FastifyInstance): void {
     "/:id/contacts",
     { schema: { params: UuidParam, body: GroupRemoveContactsBody } },
     async (
-      request: FastifyRequest<{ Params: { id: string }; Body: Record<string, unknown> }>,
+      request: FastifyRequest<{
+        Params: { id: string };
+        Body: Record<string, unknown>;
+      }>,
       reply: FastifyReply,
     ) => {
       const { client, user } = getAuth(request);
@@ -285,23 +314,33 @@ export function registerGroupContactRoutes(fastify: FastifyInstance): void {
       if ("personIds" in body && Array.isArray(body.personIds)) {
         if (body.personIds.length === 0) {
           return reply.status(400).send({
-            error: "Invalid request body. 'personIds' must be a non-empty array.",
+            error:
+              "Invalid request body. 'personIds' must be a non-empty array.",
           });
         }
         personIds = body.personIds;
       } else if ("filter" in body && body.filter) {
-        const filterBody = body as { filter: { q?: string }; excludePersonIds?: string[] };
+        const filterBody = body as {
+          filter: { q?: string };
+          excludePersonIds?: string[];
+        };
         // Resolve matching member IDs via fuzzy search RPC when a search query is present,
         // otherwise fetch all group members.
-        const search = typeof filterBody.filter.q === "string" ? filterBody.filter.q.trim() : "";
+        const search =
+          typeof filterBody.filter.q === "string"
+            ? filterBody.filter.q.trim()
+            : "";
         if (search) {
-          const { data: ranked, error: rpcError } = await client.rpc("search_people_ids", {
-            p_user_id: user.id,
-            p_query: search,
-            p_limit: 10000,
-            p_offset: 0,
-            p_group_id: groupId,
-          });
+          const { data: ranked, error: rpcError } = await client.rpc(
+            "search_people_ids",
+            {
+              p_user_id: user.id,
+              p_query: search,
+              p_limit: 10000,
+              p_offset: 0,
+              p_group_id: groupId,
+            },
+          );
 
           if (rpcError) {
             return reply.status(500).send({ error: rpcError.message });
@@ -335,7 +374,8 @@ export function registerGroupContactRoutes(fastify: FastifyInstance): void {
         }
       } else {
         return reply.status(400).send({
-          error: "Invalid request body. Provide either 'personIds' or 'filter'.",
+          error:
+            "Invalid request body. Provide either 'personIds' or 'filter'.",
         });
       }
 

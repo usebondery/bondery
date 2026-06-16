@@ -11,7 +11,7 @@ import {
   updateContactPhoto,
   uploadAllLinkedInLogos,
 } from "../../../lib/linkedin-helpers.js";
-import { cleanPersonName } from "@bondery/helpers/name-utils";
+import { cleanPersonName } from "@bondery/helpers/name";
 import { cachedGeocodeLinkedInLocation } from "../../../lib/mapy.js";
 import type { ScrapedWorkHistoryEntry, ScrapedEducationEntry } from "@bondery/types";
 import {

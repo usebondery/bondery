@@ -36,31 +36,34 @@ export function registerEnrichQueueRoutes(fastify: FastifyInstance): void {
    * Returns counts of queue items grouped by status.
    * Used for resume detection on page load.
    */
-  fastify.get("/enrich-queue/status", async (request: FastifyRequest, reply: FastifyReply) => {
-    const { client, user } = getAuth(request);
+  fastify.get(
+    "/enrich-queue/status",
+    async (request: FastifyRequest, reply: FastifyReply) => {
+      const { client, user } = getAuth(request);
 
-    const { data, error } = await client
-      .from("linkedin_enrich_queue")
-      .select("status")
-      .eq("user_id", user.id);
+      const { data, error } = await client
+        .from("linkedin_enrich_queue")
+        .select("status")
+        .eq("user_id", user.id);
 
-    if (error) {
-      return reply.status(500).send({ error: error.message });
-    }
-
-    const counts = { pending: 0, completed: 0, failed: 0 };
-    for (const row of data || []) {
-      if (row.status === "pending" || row.status === "processing") {
-        counts.pending++;
-      } else if (row.status === "completed") {
-        counts.completed++;
-      } else if (row.status === "failed") {
-        counts.failed++;
+      if (error) {
+        return reply.status(500).send({ error: error.message });
       }
-    }
 
-    return counts;
-  });
+      const counts = { pending: 0, completed: 0, failed: 0 };
+      for (const row of data || []) {
+        if (row.status === "pending" || row.status === "processing") {
+          counts.pending++;
+        } else if (row.status === "completed") {
+          counts.completed++;
+        } else if (row.status === "failed") {
+          counts.failed++;
+        }
+      }
+
+      return counts;
+    },
+  );
 
   /**
    * POST /api/contacts/enrich-queue/init
@@ -88,12 +91,19 @@ export function registerEnrichQueueRoutes(fastify: FastifyInstance): void {
         ),
       },
     },
-    async (request: FastifyRequest<{ Body?: { personId?: string } }>, reply: FastifyReply) => {
+    async (
+      request: FastifyRequest<{ Body?: { personId?: string } }>,
+      reply: FastifyReply,
+    ) => {
       const { client, user } = getAuth(request);
-      const personId = (request.body as { personId?: string } | undefined)?.personId;
+      const personId = (request.body as { personId?: string } | undefined)
+        ?.personId;
 
       // Clear any leftover rows from a previous run.
-      await client.from("linkedin_enrich_queue").delete().eq("user_id", user.id);
+      await client
+        .from("linkedin_enrich_queue")
+        .delete()
+        .eq("user_id", user.id);
 
       if (personId) {
         // Single-person mode: verify the contact belongs to this user, then queue just them.
@@ -112,11 +122,13 @@ export function registerEnrichQueueRoutes(fastify: FastifyInstance): void {
           return reply.status(404).send({ error: "Contact not found" });
         }
 
-        const { error: insertError } = await client.from("linkedin_enrich_queue").insert({
-          user_id: user.id,
-          person_id: personId,
-          status: "pending" as const,
-        });
+        const { error: insertError } = await client
+          .from("linkedin_enrich_queue")
+          .insert({
+            user_id: user.id,
+            person_id: personId,
+            status: "pending" as const,
+          });
 
         if (insertError) {
           return reply.status(500).send({ error: insertError.message });
@@ -126,9 +138,12 @@ export function registerEnrichQueueRoutes(fastify: FastifyInstance): void {
       }
 
       // Batch mode: find all eligible contacts via the efficient RPC join.
-      const { data: eligible, error: rpcError } = await client.rpc("get_linkedin_enrich_eligible", {
-        p_user_id: user.id,
-      });
+      const { data: eligible, error: rpcError } = await client.rpc(
+        "get_linkedin_enrich_eligible",
+        {
+          p_user_id: user.id,
+        },
+      );
 
       if (rpcError) {
         return reply.status(500).send({ error: rpcError.message });
@@ -148,7 +163,9 @@ export function registerEnrichQueueRoutes(fastify: FastifyInstance): void {
         status: "pending" as const,
       }));
 
-      const { error: insertError } = await client.from("linkedin_enrich_queue").insert(queueRows);
+      const { error: insertError } = await client
+        .from("linkedin_enrich_queue")
+        .insert(queueRows);
 
       if (insertError) {
         return reply.status(500).send({ error: insertError.message });
@@ -165,65 +182,71 @@ export function registerEnrichQueueRoutes(fastify: FastifyInstance): void {
    * No request body — the queue status IS the exclude list.
    * Joins with people_socials (for handle) and people (for names).
    */
-  fastify.get("/enrich-queue/next-batch", async (request: FastifyRequest, reply: FastifyReply) => {
-    const BATCH_LIMIT = 50;
-    const { client, user } = getAuth(request);
+  fastify.get(
+    "/enrich-queue/next-batch",
+    async (request: FastifyRequest, reply: FastifyReply) => {
+      const BATCH_LIMIT = 50;
+      const { client, user } = getAuth(request);
 
-    // Fetch next pending queue items.
-    const { data: queueItems, error: queueError } = await client
-      .from("linkedin_enrich_queue")
-      .select("id, person_id")
-      .eq("user_id", user.id)
-      .eq("status", "pending")
-      .order("created_at", { ascending: true })
-      .limit(BATCH_LIMIT);
-
-    if (queueError) {
-      return reply.status(500).send({ error: queueError.message });
-    }
-
-    const items = queueItems || [];
-    if (items.length === 0) {
-      return { items: [] };
-    }
-
-    const personIds = items.map((i) => i.person_id);
-
-    // Fetch handles and names in parallel.
-    const [socialsRes, namesRes] = await Promise.all([
-      client
-        .from("people_socials")
-        .select("person_id, handle")
+      // Fetch next pending queue items.
+      const { data: queueItems, error: queueError } = await client
+        .from("linkedin_enrich_queue")
+        .select("id, person_id")
         .eq("user_id", user.id)
-        .eq("platform", "linkedin")
-        .in("person_id", personIds),
-      client
-        .from("people")
-        .select("id, first_name, last_name")
-        .eq("user_id", user.id)
-        .in("id", personIds),
-    ]);
+        .eq("status", "pending")
+        .order("created_at", { ascending: true })
+        .limit(BATCH_LIMIT);
 
-    const handleMap = new Map(
-      (socialsRes.data || []).map((sm) => [sm.person_id, sm.handle as string]),
-    );
-    const nameMap = new Map(
-      (namesRes.data || []).map((p) => [
-        p.id,
-        { firstName: p.first_name ?? null, lastName: p.last_name ?? null },
-      ]),
-    );
+      if (queueError) {
+        return reply.status(500).send({ error: queueError.message });
+      }
 
-    return {
-      items: items.map((item) => ({
-        queueItemId: item.id,
-        personId: item.person_id,
-        linkedinHandle: handleMap.get(item.person_id) ?? null,
-        firstName: nameMap.get(item.person_id)?.firstName ?? null,
-        lastName: nameMap.get(item.person_id)?.lastName ?? null,
-      })),
-    };
-  });
+      const items = queueItems || [];
+      if (items.length === 0) {
+        return { items: [] };
+      }
+
+      const personIds = items.map((i) => i.person_id);
+
+      // Fetch handles and names in parallel.
+      const [socialsRes, namesRes] = await Promise.all([
+        client
+          .from("people_socials")
+          .select("person_id, handle")
+          .eq("user_id", user.id)
+          .eq("platform", "linkedin")
+          .in("person_id", personIds),
+        client
+          .from("people")
+          .select("id, first_name, last_name")
+          .eq("user_id", user.id)
+          .in("id", personIds),
+      ]);
+
+      const handleMap = new Map(
+        (socialsRes.data || []).map((sm) => [
+          sm.person_id,
+          sm.handle as string,
+        ]),
+      );
+      const nameMap = new Map(
+        (namesRes.data || []).map((p) => [
+          p.id,
+          { firstName: p.first_name ?? null, lastName: p.last_name ?? null },
+        ]),
+      );
+
+      return {
+        items: items.map((item) => ({
+          queueItemId: item.id,
+          personId: item.person_id,
+          linkedinHandle: handleMap.get(item.person_id) ?? null,
+          firstName: nameMap.get(item.person_id)?.firstName ?? null,
+          lastName: nameMap.get(item.person_id)?.lastName ?? null,
+        })),
+      };
+    },
+  );
 
   /**
    * PATCH /api/contacts/enrich-queue/:id
@@ -235,7 +258,10 @@ export function registerEnrichQueueRoutes(fastify: FastifyInstance): void {
       schema: {
         params: UuidParam,
         body: Type.Object({
-          status: Type.Union([Type.Literal("completed"), Type.Literal("failed")]),
+          status: Type.Union([
+            Type.Literal("completed"),
+            Type.Literal("failed"),
+          ]),
           errorMessage: Type.Optional(NullableString),
         }),
       },
@@ -273,15 +299,21 @@ export function registerEnrichQueueRoutes(fastify: FastifyInstance): void {
    * Delete remaining pending queue items (cancel path).
    * Completed/failed rows are preserved and cleaned up by the next init call.
    */
-  fastify.delete("/enrich-queue", async (request: FastifyRequest, reply: FastifyReply) => {
-    const { client, user } = getAuth(request);
+  fastify.delete(
+    "/enrich-queue",
+    async (request: FastifyRequest, reply: FastifyReply) => {
+      const { client, user } = getAuth(request);
 
-    const { error } = await client.from("linkedin_enrich_queue").delete().eq("user_id", user.id);
+      const { error } = await client
+        .from("linkedin_enrich_queue")
+        .delete()
+        .eq("user_id", user.id);
 
-    if (error) {
-      return reply.status(500).send({ error: error.message });
-    }
+      if (error) {
+        return reply.status(500).send({ error: error.message });
+      }
 
-    return { success: true };
-  });
+      return { success: true };
+    },
+  );
 }

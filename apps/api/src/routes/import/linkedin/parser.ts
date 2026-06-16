@@ -2,7 +2,13 @@ import AdmZip from "adm-zip";
 import { parse as parseCsv } from "csv-parse/sync";
 import type { LinkedInPreparedContact } from "@bondery/types";
 import { SOCIAL_PLATFORM_URL_DETAILS } from "@bondery/helpers";
-import { stripEmojis, stripNameParentheticals, stripNameTitles, extractNameParts, normalizeNameCase } from "@bondery/helpers/name-utils";
+import {
+  stripEmojis,
+  stripNameParentheticals,
+  stripNameTitles,
+  extractNameParts,
+  normalizeNameCase,
+} from "@bondery/helpers/name";
 import type { UploadFile } from "../../../lib/schemas.js";
 
 const LINKEDIN_REQUIRED_HEADERS = [

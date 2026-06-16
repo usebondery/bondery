@@ -206,6 +206,31 @@ export async function tagRoutes(fastify: FastifyInstance) {
   );
 
   /**
+   * GET /api/tags/:id - Get a single tag
+   */
+  fastify.get(
+    "/:id",
+    { schema: { params: UuidParam } },
+    async (request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+      const { client, user } = getAuth(request);
+      const { id } = request.params;
+
+      const { data: tag, error } = await client
+        .from("tags")
+        .select(TAG_SELECT)
+        .eq("id", id)
+        .eq("user_id", user.id)
+        .single();
+
+      if (error) {
+        return reply.status(404).send({ error: "Tag not found" });
+      }
+
+      return { tag };
+    },
+  );
+
+  /**
    * PATCH /api/tags/:id - Update a tag label
    */
   fastify.patch(

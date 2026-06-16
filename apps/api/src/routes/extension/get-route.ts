@@ -6,7 +6,7 @@ import type { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
 import { createAuthenticatedClient } from "../../lib/supabase.js";
 import { API_ROUTES, WEBAPP_ROUTES } from "@bondery/helpers";
 import { findPersonIdBySocial, upsertContactSocials } from "../../lib/socials.js";
-import { cleanPersonName } from "@bondery/helpers/name-utils";
+import { cleanPersonName } from "@bondery/helpers/name";
 import { assignContactsToDefaultImportGroup } from "../../lib/default-import-groups.js";
 import { cachedGeocodeLinkedInLocation } from "../../lib/mapy.js";
 import { updateContactPhoto } from "../../lib/linkedin-helpers.js";

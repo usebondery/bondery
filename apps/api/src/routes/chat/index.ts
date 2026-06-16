@@ -67,8 +67,20 @@ export async function chatRoutes(fastify: FastifyInstance) {
 
       Promise.resolve(result.text)
         .then(async (fullText) => {
-          await persistMessages(client, sessionId, lastUserMessage, fullText, request);
-          await generateTitleIfNeeded(client, sessionId, lastUserMessage, fullText, request);
+          await persistMessages(
+            client,
+            sessionId,
+            lastUserMessage,
+            fullText,
+            request,
+          );
+          await generateTitleIfNeeded(
+            client,
+            sessionId,
+            lastUserMessage,
+            fullText,
+            request,
+          );
         })
         .catch((err: unknown) => {
           request.log.error(err, "Failed to persist chat messages");

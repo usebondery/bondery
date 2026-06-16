@@ -7,7 +7,7 @@ import type { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
 import { Type } from "@sinclair/typebox";
 import { getAuth } from "../../../lib/auth.js";
 import nodemailer from "nodemailer";
-import { render } from "@react-email/components";
+import { render } from "@react-email/render";
 import { FeedbackEmail } from "@bondery/emails";
 
 // ── TypeBox Schemas ──────────────────────────────────────────────────────────
@@ -82,7 +82,10 @@ export async function meFeedbackRoutes(fastify: FastifyInstance) {
         request.log.error({ err: emailError }, "Error sending feedback email");
         return reply.status(500).send({
           error: "Failed to render or send feedback email",
-          details: emailError instanceof Error ? emailError.message : String(emailError),
+          details:
+            emailError instanceof Error
+              ? emailError.message
+              : String(emailError),
         });
       }
 

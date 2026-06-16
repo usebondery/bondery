@@ -10,7 +10,11 @@
  */
 
 import type { FastifyInstance } from "fastify";
-import { isVersionBelow, CHROME_EXTENSION_URL, MIN_EXTENSION_VERSION } from "@bondery/helpers";
+import {
+  isVersionBelow,
+  CHROME_EXTENSION_URL,
+  MIN_EXTENSION_VERSION,
+} from "@bondery/helpers";
 
 /**
  * Registers a global `onRequest` hook that rejects outdated or header-less
@@ -30,12 +34,21 @@ export function registerExtensionVersionCheck(fastify: FastifyInstance): void {
       return;
     }
 
+    // Inbound webhooks from third-party services (e.g. Polar) have no Cookie
+    // header and no extension version header. They authenticate via HMAC
+    // signatures verified inside their own route handlers.
+    if (request.url.startsWith("/api/webhooks/")) {
+      return;
+    }
+
     // Webapp requests always include a Cookie header — let them through
     if (request.headers.cookie) {
       return;
     }
 
-    const extensionVersion = request.headers["x-bondery-extension-version"] as string | undefined;
+    const extensionVersion = request.headers["x-bondery-extension-version"] as
+      | string
+      | undefined;
 
     // Missing header + no cookie = old extension without header support → reject
     if (!extensionVersion) {

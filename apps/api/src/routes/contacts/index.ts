@@ -7,6 +7,7 @@ import type { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
 import { Type } from "@sinclair/typebox";
 import { getAuth } from "../../lib/auth.js";
 import { buildContactAvatarUrl } from "../../lib/supabase.js";
+import { searchPeopleIds, restoreRankedOrder } from "../../lib/search.js";
 import { generateVCard } from "./vcard.js";
 import {
   parseEmailEntries,
@@ -70,7 +71,7 @@ const ContactListQuery = Type.Object({
 
 const CreateContactBody = Type.Object({
   firstName: Type.String({ minLength: 1 }),
-  lastName: Type.String({ minLength: 1 }),
+  lastName: Type.Optional(Type.String()),
   middleName: Type.Optional(Type.String()),
   linkedin: Type.Optional(Type.String()),
 });
@@ -570,23 +571,24 @@ export async function contactRoutes(fastify: FastifyInstance) {
       let error: any = null;
 
       if (search) {
-        const { data: ranked, error: rpcError } = await client.rpc("search_people_ids", {
-          p_user_id: user.id,
-          p_query: search,
-          p_limit: limit,
-          p_offset: offset,
-        });
+        const { ranked, error: rpcError } = await searchPeopleIds(
+          client,
+          user.id,
+          search,
+          limit,
+          offset,
+        );
 
         if (rpcError) {
           request.log.error({ err: rpcError }, "Error in fuzzy search RPC");
-          return reply.status(500).send({ error: rpcError.message });
+          return reply.status(500).send({ error: rpcError });
         }
 
         if (!ranked || ranked.length === 0) {
           contacts = [];
           count = 0;
         } else {
-          const rankedIds = ranked.map((r: { id: string }) => r.id);
+          const rankedIds = ranked.map((r) => r.id);
 
           let fetchQuery = client.from("people").select(CONTACT_SELECT).in("id", rankedIds);
 
@@ -602,12 +604,7 @@ export async function contactRoutes(fastify: FastifyInstance) {
             return reply.status(500).send({ error: fetchError.message });
           }
 
-          // Restore the relevance ordering from the RPC
-          const orderMap = new Map(rankedIds.map((id: string, i: number) => [id, i]));
-          contacts = (fetchedContacts || []).sort(
-            (a: { id: string }, b: { id: string }) =>
-              (orderMap.get(a.id) ?? 999) - (orderMap.get(b.id) ?? 999),
-          );
+          contacts = restoreRankedOrder(fetchedContacts || [], rankedIds);
           count = contacts.length;
         }
       } else {
@@ -720,10 +717,13 @@ export async function contactRoutes(fastify: FastifyInstance) {
       const insertData: any = {
         user_id: user.id,
         first_name: body.firstName.trim(),
-        last_name: body.lastName.trim(),
         last_interaction: new Date().toISOString(),
         myself: false,
       };
+
+      if (body.lastName && body.lastName.trim().length > 0) {
+        insertData.last_name = body.lastName.trim();
+      }
 
       if (body.middleName && body.middleName.trim().length > 0) {
         insertData.middle_name = body.middleName.trim();
@@ -799,21 +799,14 @@ export async function contactRoutes(fastify: FastifyInstance) {
         // otherwise fetch all non-myself contacts.
         const search = typeof body.filter.q === "string" ? body.filter.q.trim() : "";
         if (search) {
-          const { data: ranked, error: rpcError } = await client.rpc("search_people_ids", {
-            p_user_id: user.id,
-            p_query: search,
-            p_limit: 10000,
-            p_offset: 0,
-          });
+          const { ranked, error: rpcError } = await searchPeopleIds(client, user.id, search, 10000);
 
           if (rpcError) {
-            return reply.status(500).send({ error: rpcError.message });
+            return reply.status(500).send({ error: rpcError });
           }
 
           const excludeSet = new Set(body.excludeIds ?? []);
-          uniqueIds = (ranked || [])
-            .map((r: { id: string }) => r.id)
-            .filter((id: string) => !excludeSet.has(id));
+          uniqueIds = (ranked || []).map((r) => r.id).filter((id) => !excludeSet.has(id));
         } else {
           let filterQuery = client
             .from("people")
