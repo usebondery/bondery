@@ -1,11 +1,11 @@
 "use client";
 
 import { Group } from "@mantine/core";
-import type { Contact } from "@bondery/types";
+import type { Contact } from "@bondery/schemas";
 import { useEffect, useState } from "react";
 import { TimezonePicker } from "@/components/shared/TimezonePicker";
 import { LanguagePicker } from "@/components/shared/LanguagePicker";
-import { WORLD_LANGUAGES_DATA } from "@/lib/languages";
+import { WORLD_LANGUAGES_DATA } from "@bondery/helpers/locale";
 
 interface ContactPreferenceSectionProps {
   contact: Contact;

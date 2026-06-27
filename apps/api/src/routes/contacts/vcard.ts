@@ -1,9 +1,9 @@
-﻿/**
+/**
  * vCard Generation Utility
  * Generates vCard 4.0 formatted files from contact data
  */
 
-import type { Contact } from "@bondery/types";
+import type { Contact } from "@bondery/schemas";
 import { attachMedia, contactToVCard, serializeVCard } from "@bondery/vcard";
 import logger from "../../lib/logger.js";
 

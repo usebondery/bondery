@@ -105,7 +105,15 @@ groups:
                 groups:
                   type: array
                   items:
-                    $ref: "../schemas/group.yaml#/Group"
+                    allOf:
+                      - $ref: "../schemas/group.yaml#/Group"
+                      - type: object
+                        required:
+                          - contactCount
+                        properties:
+                          contactCount:
+                            type: integer
+                            minimum: 0
       "401":
         $ref: "../../openapi.yaml#/components/responses/UnauthorizedError"
       "500":
@@ -139,7 +147,15 @@ tags:
                 tags:
                   type: array
                   items:
-                    $ref: "../schemas/tag.yaml#/Tag"
+                    allOf:
+                      - $ref: "../schemas/tag.yaml#/Tag"
+                      - type: object
+                        required:
+                          - contactCount
+                        properties:
+                          contactCount:
+                            type: integer
+                            minimum: 0
       "401":
         $ref: "../../openapi.yaml#/components/responses/UnauthorizedError"
       "500":
@@ -178,7 +194,10 @@ tags:
         content:
           application/json:
             schema:
-              $ref: "../schemas/common.yaml#/MessageResponse"
+              type: object
+              properties:
+                tag:
+                  $ref: "../schemas/tag.yaml#/Tag"
       "400":
         description: Missing tagId
       "401":

@@ -1,35 +1,10 @@
 import { tool } from "ai";
 import { z } from "zod";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import type { Database } from "@bondery/types/supabase.types";
+import type { Database } from "@bondery/schemas/supabase.types";
+import { createSocialUrl } from "@bondery/helpers";
 import { buildContactAvatarUrl } from "../../supabase.js";
 import { searchPeopleIds } from "../../search.js";
-import { SOCIAL_PLATFORM_URL_DETAILS } from "@bondery/helpers";
-
-/** Maps a stored platform+handle to a full profile URL, or null for unknown platforms. */
-function buildSocialProfileUrl(platform: string, handle: string): string | null {
-  if (!handle) return null;
-  switch (platform) {
-    case "linkedin":
-      return `${SOCIAL_PLATFORM_URL_DETAILS.linkedin.profileBaseUrl}${handle}`;
-    case "instagram":
-      return `${SOCIAL_PLATFORM_URL_DETAILS.instagram.profileBaseUrl}${handle}`;
-    case "facebook":
-      return `https://facebook.com/${handle}`;
-    case "twitter":
-      return `https://x.com/${handle}`;
-    case "github":
-      return `https://github.com/${handle}`;
-    case "youtube":
-      return `https://youtube.com/@${handle}`;
-    case "tiktok":
-      return `https://tiktok.com/@${handle}`;
-    case "website":
-      return handle.startsWith("http") ? handle : `https://${handle}`;
-    default:
-      return null;
-  }
-}
 
 /**
  * Fetches full details for a single contact by ID.
@@ -118,7 +93,7 @@ async function fetchContactDetails(
       socials?.map((s: any) => ({
         platform: s.platform,
         handle: s.handle,
-        url: buildSocialProfileUrl(s.platform, s.handle),
+        url: createSocialUrl(s.platform, s.handle) || null,
       })) ?? [],
     importantDates: dates ?? [],
     linkedin: linkedin

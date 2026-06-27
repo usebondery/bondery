@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { useMantineColorScheme } from "@mantine/core";
-import type { ColorSchemePreference } from "@bondery/types";
+import type { ColorSchemePreference } from "@bondery/schemas";
 
 interface ColorSchemeSyncProps {
   colorScheme: ColorSchemePreference;

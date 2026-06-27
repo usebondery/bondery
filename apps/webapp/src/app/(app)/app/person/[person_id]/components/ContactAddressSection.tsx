@@ -3,7 +3,16 @@
 import { useEffect, useMemo, useState } from "react";
 import { ActionIcon, Card, Group, Menu, Stack, Text, Tooltip } from "@mantine/core";
 import { useTranslations } from "next-intl";
-import { formatAddressLabel } from "@bondery/helpers/address";
+import { formatAddressLabel, buildManualContactAddress } from "@bondery/helpers/address";
+import { geocodeSuggestionDisplayLabel } from "@bondery/helpers/geocode";
+import {
+  CONTACT_LIMITS,
+  firstZodErrorMessage,
+  replaceAddressesSchema,
+  type Contact,
+  type ContactAddressEntry,
+  type ContactAddressType,
+} from "@bondery/schemas";
 import {
   IconBrandGoogle,
   IconBrandWaze,
@@ -23,18 +32,16 @@ import {
   IconTrash,
 } from "@tabler/icons-react";
 import Image from "next/image";
-import type { Contact, ContactAddressEntry, ContactAddressType } from "@bondery/types";
 import { LocationLookupInput } from "@/app/(app)/app/components/LocationLookupInput";
-import type { MapSuggestionItem } from "@/app/(app)/app/map/actions";
-import { getTimezoneForCoordinates } from "@/app/(app)/app/map/actions";
-import { resolveToCanonicalTimezone } from "@/lib/timezones";
+import { fetchTimezoneForCoordinates } from "@/lib/geocode";
+import { resolveToCanonicalTimezone } from "@bondery/helpers/locale";
 import {
   ActionIconLink,
   TypePicker,
   successNotificationTemplate,
   errorNotificationTemplate,
 } from "@bondery/mantine-next";
-import { ADDRESS_TYPE_OPTIONS, LIMITS } from "@/lib/config";
+import { ADDRESS_TYPE_OPTIONS } from "@/lib/config";
 import { PeopleMap, type PeopleMapFocus } from "@/app/(app)/app/components/map/PeopleMap";
 import { formatContactName } from "@/lib/nameHelpers";
 import { notifications } from "@mantine/notifications";
@@ -66,33 +73,7 @@ interface EditableAddress extends ContactAddressEntry {
 interface DraftAddress {
   type: ContactAddressType;
   value: string;
-  suggestion: MapSuggestionItem | null;
-}
-
-function deriveGranularity(
-  type: string | null | undefined,
-): "address" | "city" | "state" | "country" {
-  if (type === "regional.country") return "country";
-  if (type === "regional.region") return "state";
-  if (type === "regional.municipality" || type === "regional.municipality_part") return "city";
-  return "address";
-}
-
-function pickByType(
-  entries: Array<{ type?: string; name?: string; isoCode?: string }>,
-  wantedType: string,
-): { type?: string; name?: string; isoCode?: string } | null {
-  const match = entries.find((entry) => entry.type === wantedType);
-  return match || null;
-}
-
-function pickLastByType(
-  entries: Array<{ type?: string; name?: string; isoCode?: string }>,
-  wantedType: string,
-): { type?: string; name?: string; isoCode?: string } | null {
-  const matches = entries.filter((entry) => entry.type === wantedType);
-  if (matches.length === 0) return null;
-  return matches[matches.length - 1] || null;
+  suggestion: ContactAddressEntry | null;
 }
 
 function normalizeNullableText(value: string): string | null {
@@ -100,116 +81,11 @@ function normalizeNullableText(value: string): string | null {
   return trimmed.length > 0 ? trimmed : null;
 }
 
-function isValidCoordinatePair(latitude: number, longitude: number): boolean {
-  return (
-    Number.isFinite(latitude) &&
-    Number.isFinite(longitude) &&
-    latitude >= -90 &&
-    latitude <= 90 &&
-    longitude >= -180 &&
-    longitude <= 180
-  );
-}
-
-function isWithinCzechiaBounds(latitude: number, longitude: number): boolean {
-  return latitude >= 48.4 && latitude <= 51.2 && longitude >= 12.0 && longitude <= 19.0;
-}
-
-function normalizeCoordinatePair(
-  latitude: number | null,
-  longitude: number | null,
-  countryCode?: string | null,
-): { latitude: number | null; longitude: number | null } {
-  if (latitude === null || longitude === null) {
-    return { latitude: null, longitude: null };
-  }
-
-  const directValid = isValidCoordinatePair(latitude, longitude);
-  const swappedValid = isValidCoordinatePair(longitude, latitude);
-
-  if (!directValid && !swappedValid) {
-    return { latitude: null, longitude: null };
-  }
-
-  const normalizedCountryCode = String(countryCode || "").toUpperCase();
-  if (normalizedCountryCode === "CZ" && directValid && swappedValid) {
-    const directInside = isWithinCzechiaBounds(latitude, longitude);
-    const swappedInside = isWithinCzechiaBounds(longitude, latitude);
-
-    if (!directInside && swappedInside) {
-      return { latitude: longitude, longitude: latitude };
-    }
-
-    if (directInside && !swappedInside) {
-      return { latitude, longitude };
-    }
-  }
-
-  if (directValid) {
-    return { latitude, longitude };
-  }
-
-  if (swappedValid) {
-    return { latitude: longitude, longitude: latitude };
-  }
-
-  return { latitude: null, longitude: null };
-}
-
-function toAddressFromSuggestion(
-  item: MapSuggestionItem,
+function applyGeocodedSuggestion(
+  suggestion: ContactAddressEntry,
   type: ContactAddressType,
 ): Omit<EditableAddress, "id"> {
-  const municipality = pickByType(item.regionalStructure, "regional.municipality");
-  const municipalityPart = pickByType(item.regionalStructure, "regional.municipality_part");
-  const region = pickLastByType(item.regionalStructure, "regional.region");
-  const countryEntry = pickByType(item.regionalStructure, "regional.country");
-  const normalizedCoordinates = normalizeCoordinatePair(
-    item.position.lat,
-    item.position.lon,
-    countryEntry?.isoCode,
-  );
-
-  const addressLine1 = (item.type === "regional.address" ? item.name : null) as string | null;
-  const addressCity = (municipality?.name || municipalityPart?.name || null) as string | null;
-  const addressPostalCode = item.zip || null;
-  const addressState = (region?.name || null) as string | null;
-  const addressCountryCode = (countryEntry?.isoCode || null) as string | null;
-
-  const formattedValue = formatAddressLabel({
-    addressLine1,
-    city: addressCity,
-    postalCode: addressPostalCode,
-    state: addressState,
-    countryCode: addressCountryCode,
-  });
-
-  return {
-    type,
-    value: formattedValue || item.label,
-    latitude: normalizedCoordinates.latitude,
-    longitude: normalizedCoordinates.longitude,
-    addressLine1,
-    addressLine2: null,
-    addressCity,
-    addressPostalCode,
-    addressState,
-    addressStateCode: null,
-    addressCountry: (countryEntry?.name || null) as string | null,
-    addressCountryCode,
-    addressGranularity: deriveGranularity(item.type),
-    addressFormatted: formattedValue || item.label,
-    addressGeocodeSource: "mapy.com",
-    label: null,
-    geocodeConfidence: null,
-    timezone: null,
-  };
-}
-
-function toDefaultAddressType(index: number): ContactAddressType {
-  if (index === 0) return "home";
-  if (index === 1) return "work";
-  return "other";
+  return { ...suggestion, type };
 }
 
 function normalizeAddressTypes(entries: ContactAddressEntry[]): ContactAddressEntry[] {
@@ -233,7 +109,6 @@ function toEditableAddresses(contact: Contact): EditableAddress[] {
       });
       return {
         ...address,
-        ...normalizeCoordinatePair(address.latitude, address.longitude, address.addressCountryCode),
         id: `${address.type}-${index}`,
         value:
           computedValue ||
@@ -271,13 +146,13 @@ export function ContactAddressSection({ contact, isSaving, onSave }: ContactAddr
   const [addresses, setAddresses] = useState<EditableAddress[]>(() => toEditableAddresses(contact));
   const [draft, setDraft] = useState<DraftAddress>({ type: "home", value: "", suggestion: null });
   const [mapFocus, setMapFocus] = useState<PeopleMapFocus | null>(null);
-  const [suggestionsByValue, setSuggestionsByValue] = useState<Record<string, MapSuggestionItem>>(
+  const [suggestionsByValue, setSuggestionsByValue] = useState<Record<string, ContactAddressEntry>>(
     {},
   );
 
   const toSuggestionKey = (value: string) => value.trim().toLowerCase();
 
-  const getSuggestionForValue = (value: string): MapSuggestionItem | null => {
+  const getSuggestionForValue = (value: string): ContactAddressEntry | null => {
     if (!value) {
       return null;
     }
@@ -303,7 +178,7 @@ export function ContactAddressSection({ contact, isSaving, onSave }: ContactAddr
       return entry;
     }
 
-    const enriched = toAddressFromSuggestion(suggestion, entry.type);
+    const enriched = applyGeocodedSuggestion(suggestion, entry.type);
     return {
       ...entry,
       ...enriched,
@@ -335,7 +210,7 @@ export function ContactAddressSection({ contact, isSaving, onSave }: ContactAddr
       disabled: false,
     }));
 
-  const canAddMore = addresses.length < LIMITS.maxAddresses;
+  const canAddMore = addresses.length < CONTACT_LIMITS.maxAddresses;
 
   const preferredAddressId = addresses[0]?.id;
 
@@ -402,10 +277,21 @@ export function ContactAddressSection({ contact, isSaving, onSave }: ContactAddr
       .map((entry) => enrichWithSuggestionIfAvailable(entry))
       .map(({ id, ...rest }) => rest);
 
+    const parsedAddresses = replaceAddressesSchema.safeParse(normalized);
+    if (!parsedAddresses.success) {
+      notifications.show(
+        errorNotificationTemplate({
+          title: t("DeleteErrorTitle"),
+          description: firstZodErrorMessage(parsedAddresses.error),
+        }),
+      );
+      return;
+    }
+
     const anchorValue = locationAnchor?.value.trim();
     const locationSource = anchorValue
-      ? (normalized.find((e) => e.value === anchorValue) ?? normalized[0])
-      : normalized[0];
+      ? (parsedAddresses.data.find((e) => e.value === anchorValue) ?? parsedAddresses.data[0])
+      : parsedAddresses.data[0];
 
     const suggestedLocation =
       locationSource?.latitude !== null &&
@@ -419,7 +305,11 @@ export function ContactAddressSection({ contact, isSaving, onSave }: ContactAddr
           }
         : null;
 
-    onSave({ addresses: normalized, suggestedLocation, forceLocation: forceLocation || undefined });
+    onSave({
+      addresses: parsedAddresses.data,
+      suggestedLocation,
+      forceLocation: forceLocation || undefined,
+    });
   };
 
   /**
@@ -429,35 +319,23 @@ export function ContactAddressSection({ contact, isSaving, onSave }: ContactAddr
    *   dropdown this holds the selected suggestion; otherwise the existing
    *   draft suggestion (or a cached one) is used.
    */
-  const handleCommitDraft = (overrideSuggestion?: MapSuggestionItem) => {
-    const normalizedValue = normalizeNullableText(overrideSuggestion?.label ?? draft.value);
+  const handleCommitDraft = (overrideSuggestion?: ContactAddressEntry) => {
+    const normalizedValue = normalizeNullableText(
+      overrideSuggestion ? geocodeSuggestionDisplayLabel(overrideSuggestion) : draft.value,
+    );
     if (!normalizedValue || !canAddMore) return;
 
     const suggestion =
       overrideSuggestion ?? draft.suggestion ?? getSuggestionForValue(normalizedValue);
 
     const nextBase = suggestion
-      ? toAddressFromSuggestion(suggestion, draft.type)
-      : {
-          type: draft.type,
+      ? applyGeocodedSuggestion(suggestion, draft.type)
+      : buildManualContactAddress({
           value: normalizedValue,
-          latitude: null,
-          longitude: null,
-          addressLine1: null,
-          addressLine2: null,
-          addressCity: null,
-          addressPostalCode: null,
-          addressState: null,
-          addressStateCode: null,
-          addressCountry: null,
-          addressCountryCode: null,
-          addressGranularity: "address" as const,
-          addressFormatted: null,
-          addressGeocodeSource: "manual" as const,
+          type: draft.type,
           label: null,
-          geocodeConfidence: null,
           timezone: null,
-        };
+        });
 
     const newEntry: EditableAddress = enrichWithSuggestionIfAvailable({
       ...nextBase,
@@ -470,7 +348,7 @@ export function ContactAddressSection({ contact, isSaving, onSave }: ContactAddr
     if (overrideSuggestion) {
       setSuggestionsByValue((prev) => ({
         ...prev,
-        [toSuggestionKey(overrideSuggestion.label)]: overrideSuggestion,
+        [toSuggestionKey(geocodeSuggestionDisplayLabel(overrideSuggestion))]: overrideSuggestion,
       }));
     }
 
@@ -545,10 +423,10 @@ export function ContactAddressSection({ contact, isSaving, onSave }: ContactAddr
                       )
                     }
                     onSuggestionSelect={(selected) => {
-                      const enriched = toAddressFromSuggestion(selected, entry.type);
+                      const enriched = applyGeocodedSuggestion(selected, entry.type);
                       setSuggestionsByValue((previous) => ({
                         ...previous,
-                        [toSuggestionKey(selected.label)]: selected,
+                        [toSuggestionKey(geocodeSuggestionDisplayLabel(selected))]: selected,
                       }));
                       const newAddresses = addresses.map((address) =>
                         address.id === entry.id ? { ...address, ...enriched } : address,
@@ -722,7 +600,7 @@ export function ContactAddressSection({ contact, isSaving, onSave }: ContactAddr
                                   }
                                   setDetectingTimezoneId(entry.id);
                                   try {
-                                    const tz = await getTimezoneForCoordinates(
+                                    const tz = await fetchTimezoneForCoordinates(
                                       entry.latitude as number,
                                       entry.longitude as number,
                                     );

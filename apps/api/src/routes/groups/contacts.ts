@@ -9,6 +9,14 @@ import { getAuth } from "../../lib/auth.js";
 import { searchPeopleIds, restoreRankedOrder } from "../../lib/search.js";
 import { attachContactExtras } from "../../lib/contact-enrichment.js";
 import {
+  resolveContactPersonIds,
+  ResolveContactPersonIdsError,
+} from "../../lib/resolve-contact-person-ids.js";
+import {
+  resolveGroupMemberPersonIds,
+  ResolveGroupMemberPersonIdsError,
+} from "../../lib/resolve-group-member-person-ids.js";
+import {
   UuidParam,
   ContactsFilterSchema,
   ContactSortEnum,
@@ -27,19 +35,54 @@ const GroupContactsQuery = Type.Object({
   avatarSize: Type.Optional(AvatarSizeEnum),
 });
 
-const GroupAddContactsBody = Type.Object({
-  personIds: Type.Array(Type.String(), { minItems: 1 }),
-});
+const GroupAddContactsBody = Type.Union([
+  Type.Object({
+    personIds: Type.Array(Type.String(), { minItems: 1 }),
+  }),
+  Type.Object({
+    contactFilter: ContactsFilterSchema,
+    excludePersonIds: Type.Optional(Type.Array(Type.String())),
+  }),
+]);
 
 const GroupRemoveContactsBody = Type.Union([
   Type.Object({
     personIds: Type.Array(Type.String(), { minItems: 1 }),
   }),
   Type.Object({
-    filter: ContactsFilterSchema,
+    memberFilter: ContactsFilterSchema,
     excludePersonIds: Type.Optional(Type.Array(Type.String())),
   }),
 ]);
+
+const EXISTING_MEMBERSHIP_LOOKUP_CHUNK_SIZE = 500;
+
+async function findExistingGroupMemberIds(
+  client: ReturnType<typeof getAuth>["client"],
+  groupId: string,
+  personIds: string[],
+): Promise<Set<string>> {
+  const existingIds = new Set<string>();
+
+  for (let offset = 0; offset < personIds.length; offset += EXISTING_MEMBERSHIP_LOOKUP_CHUNK_SIZE) {
+    const chunk = personIds.slice(offset, offset + EXISTING_MEMBERSHIP_LOOKUP_CHUNK_SIZE);
+    const { data, error } = await client
+      .from("people_groups")
+      .select("person_id")
+      .eq("group_id", groupId)
+      .in("person_id", chunk);
+
+    if (error) {
+      throw error;
+    }
+
+    for (const row of data ?? []) {
+      existingIds.add(row.person_id);
+    }
+  }
+
+  return existingIds;
+}
 
 export function registerGroupContactRoutes(fastify: FastifyInstance): void {
   /**
@@ -252,15 +295,14 @@ export function registerGroupContactRoutes(fastify: FastifyInstance): void {
     async (
       request: FastifyRequest<{
         Params: { id: string };
-        Body: { personIds: string[] };
+        Body: Record<string, unknown>;
       }>,
       reply: FastifyReply,
     ) => {
       const { client, user } = getAuth(request);
       const { id: groupId } = request.params;
-      const { personIds } = request.body;
+      const body = request.body;
 
-      // Verify group exists
       const { data: group, error: groupError } = await client
         .from("groups")
         .select("id")
@@ -271,8 +313,71 @@ export function registerGroupContactRoutes(fastify: FastifyInstance): void {
         return reply.status(404).send({ error: "Group not found" });
       }
 
+      let personIds: string[];
+
+      try {
+        if ("personIds" in body && Array.isArray(body.personIds)) {
+          personIds = await resolveContactPersonIds(
+            client,
+            user.id,
+            { personIds: body.personIds },
+            { rejectEmptyExplicit: true },
+          );
+        } else if ("contactFilter" in body && body.contactFilter) {
+          personIds = await resolveContactPersonIds(client, user.id, {
+            contactFilter: body.contactFilter as { q?: string },
+            excludePersonIds: Array.isArray(body.excludePersonIds)
+              ? body.excludePersonIds
+              : undefined,
+          });
+        } else {
+          return reply.status(400).send({
+            error:
+              "Invalid request body. Provide either 'personIds' or 'contactFilter'.",
+          });
+        }
+      } catch (error) {
+        if (error instanceof ResolveContactPersonIdsError) {
+          return reply.status(error.statusCode).send({ error: error.message });
+        }
+
+        throw error;
+      }
+
+      if (personIds.length === 0) {
+        return {
+          message: "No contacts matched the contact filter",
+          addedCount: 0,
+          skippedCount: 0,
+        };
+      }
+
+      let existingMemberIds: Set<string>;
+
+      try {
+        existingMemberIds = await findExistingGroupMemberIds(client, groupId, personIds);
+      } catch (lookupError) {
+        const message =
+          lookupError instanceof Error
+            ? lookupError.message
+            : "Failed to check existing group memberships";
+        return reply.status(500).send({ error: message });
+      }
+
+      const skippedCount = existingMemberIds.size;
+      const newPersonIds = personIds.filter((personId) => !existingMemberIds.has(personId));
+      const addedCount = newPersonIds.length;
+
+      if (newPersonIds.length === 0) {
+        return {
+          message: "All contacts were already in the group",
+          addedCount: 0,
+          skippedCount,
+        };
+      }
+
       // Insert memberships (upsert to avoid duplicates)
-      const memberships = personIds.map((personId) => ({
+      const memberships = newPersonIds.map((personId) => ({
         person_id: personId,
         group_id: groupId,
         user_id: user.id,
@@ -287,13 +392,17 @@ export function registerGroupContactRoutes(fastify: FastifyInstance): void {
         return reply.status(500).send({ error: error.message });
       }
 
-      return { message: "Contacts added to group successfully" };
+      return {
+        message: "Contacts added to group successfully",
+        addedCount,
+        skippedCount,
+      };
     },
   );
 
   /**
    * DELETE /api/groups/:id/contacts - Remove contacts from a group
-   * Accepts either { personIds: string[] } or { filter: ContactsFilter, excludePersonIds?: string[] }.
+   * Accepts either { personIds: string[] } or { memberFilter: ContactsFilter, excludePersonIds?: string[] }.
    */
   fastify.delete(
     "/:id/contacts",
@@ -311,72 +420,42 @@ export function registerGroupContactRoutes(fastify: FastifyInstance): void {
 
       let personIds: string[];
 
-      if ("personIds" in body && Array.isArray(body.personIds)) {
-        if (body.personIds.length === 0) {
-          return reply.status(400).send({
-            error:
-              "Invalid request body. 'personIds' must be a non-empty array.",
-          });
-        }
-        personIds = body.personIds;
-      } else if ("filter" in body && body.filter) {
-        const filterBody = body as {
-          filter: { q?: string };
-          excludePersonIds?: string[];
-        };
-        // Resolve matching member IDs via fuzzy search RPC when a search query is present,
-        // otherwise fetch all group members.
-        const search =
-          typeof filterBody.filter.q === "string"
-            ? filterBody.filter.q.trim()
-            : "";
-        if (search) {
-          const { data: ranked, error: rpcError } = await client.rpc(
-            "search_people_ids",
+      try {
+        if ("personIds" in body && Array.isArray(body.personIds)) {
+          personIds = await resolveGroupMemberPersonIds(
+            client,
+            user.id,
+            groupId,
+            { personIds: body.personIds },
             {
-              p_user_id: user.id,
-              p_query: search,
-              p_limit: 10000,
-              p_offset: 0,
-              p_group_id: groupId,
+              rejectEmptyExplicit: true,
+              emptyExplicitError:
+                "Invalid request body. 'personIds' must be a non-empty array.",
             },
           );
-
-          if (rpcError) {
-            return reply.status(500).send({ error: rpcError.message });
-          }
-
-          const excludeSet = new Set(filterBody.excludePersonIds ?? []);
-          personIds = (ranked || [])
-            .map((r: { id: string }) => r.id)
-            .filter((id: string) => !excludeSet.has(id));
+        } else if ("memberFilter" in body && body.memberFilter) {
+          personIds = await resolveGroupMemberPersonIds(client, user.id, groupId, {
+            memberFilter: body.memberFilter as { q?: string },
+            excludePersonIds: Array.isArray(body.excludePersonIds)
+              ? body.excludePersonIds
+              : undefined,
+          });
         } else {
-          let filterQuery = client
-            .from("people")
-            .select("id, people_groups!inner(group_id)")
-            .eq("myself", false)
-            .eq("people_groups.group_id", groupId);
-
-          const { data: rows, error: filterError } = await filterQuery;
-
-          if (filterError) {
-            return reply.status(500).send({ error: filterError.message });
-          }
-
-          const excludeSet = new Set(filterBody.excludePersonIds ?? []);
-          personIds = (rows || [])
-            .map((r: { id: string }) => r.id)
-            .filter((id: string) => !excludeSet.has(id));
+          return reply.status(400).send({
+            error:
+              "Invalid request body. Provide either 'personIds' or 'memberFilter'.",
+          });
+        }
+      } catch (error) {
+        if (error instanceof ResolveGroupMemberPersonIdsError) {
+          return reply.status(error.statusCode).send({ error: error.message });
         }
 
-        if (personIds.length === 0) {
-          return { message: "No contacts matched the filter" };
-        }
-      } else {
-        return reply.status(400).send({
-          error:
-            "Invalid request body. Provide either 'personIds' or 'filter'.",
-        });
+        throw error;
+      }
+
+      if (personIds.length === 0) {
+        return { message: "No group members matched the member filter" };
       }
 
       const { error } = await client

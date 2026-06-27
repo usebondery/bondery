@@ -1,7 +1,7 @@
 import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import { Type } from "@sinclair/typebox";
 import { getAuth } from "../../../lib/auth.js";
-import type { ShareableField } from "@bondery/types";
+import type { ShareableField } from "@bondery/schemas";
 import { shareContact } from "./lib.js";
 
 const ShareContactBody = Type.Object({

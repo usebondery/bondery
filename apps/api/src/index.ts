@@ -14,13 +14,14 @@ import helmet from "@fastify/helmet";
 import fastifyAuth from "@fastify/auth";
 import fastifySwagger from "@fastify/swagger";
 import { createRequire } from "module";
-import {
-  API_ROUTES,
-  CHROME_EXTENSION_URL,
-  MIN_EXTENSION_VERSION,
-} from "@bondery/helpers";
+import { API_ROUTES } from "@bondery/helpers";
 import { registerAuthStrategies } from "./lib/auth.js";
 import { registerExtensionVersionCheck } from "./lib/extensionVersionCheck.js";
+import { registerHealthRoutes } from "./lib/health/routes.js";
+import {
+  registerNotFoundRateLimit,
+  registerRateLimit,
+} from "./lib/rate-limit.js";
 
 import { contactRoutes } from "./routes/contacts/index.js";
 import { meRoutes } from "./routes/me/index.js";
@@ -40,8 +41,11 @@ import { meOnboardingRoutes } from "./routes/me/onboarding/index.js";
 import { chatRoutes } from "./routes/chat/index.js";
 import { chatSessionRoutes } from "./routes/chat/sessions.js";
 import { subscriptionRoutes } from "./routes/subscriptions/index.js";
+import { subscriptionCheckoutRoutes } from "./routes/subscriptions/checkout.js";
+import { subscriptionPortalRoutes } from "./routes/subscriptions/portal.js";
 import { subscriptionSyncRoutes } from "./routes/subscriptions/sync.js";
 import { polarWebhookRoutes } from "./routes/webhooks/polar.js";
+import { geocodeRoutes } from "./routes/geocode/index.js";
 
 // Environment variable schema
 const envSchema = {
@@ -79,6 +83,10 @@ const envSchema = {
     },
     NEXT_PUBLIC_API_URL: {
       type: "string",
+    },
+    EXTRA_ALLOWED_ORIGINS: {
+      type: "string",
+      default: "",
     },
     API_PORT: {
       type: "number",
@@ -135,6 +143,14 @@ const envSchema = {
       type: "string",
       default: "production",
     },
+    POLAR_PRODUCT_ID: {
+      type: "string",
+      default: "",
+    },
+    PRIVATE_REDIS_URL: {
+      type: "string",
+      default: "",
+    },
   },
 } as const;
 
@@ -148,6 +164,7 @@ declare module "fastify" {
       NEXT_PUBLIC_WEBAPP_URL: string;
       NEXT_PUBLIC_WEBSITE_URL: string;
       NEXT_PUBLIC_API_URL: string;
+      EXTRA_ALLOWED_ORIGINS: string;
       API_PORT: number;
       API_HOST: string;
       PRIVATE_EMAIL_HOST: string;
@@ -161,6 +178,10 @@ declare module "fastify" {
       POLAR_WEBHOOK_SECRET: string;
       POLAR_ACCESS_TOKEN: string;
       POLAR_ENVIRONMENT: string;
+      POLAR_PRODUCT_ID: string;
+      NEXT_PUBLIC_MAPS_URL: string;
+      NEXT_PRIVATE_MAPS_KEY: string;
+      PRIVATE_REDIS_URL: string;
     };
   }
 }
@@ -222,6 +243,7 @@ async function buildServer() {
   const environment = process.env.NODE_ENV || "development";
   const fastify = Fastify({
     logger: getLoggerConfig(environment),
+    trustProxy: true,
     routerOptions: {
       ignoreTrailingSlash: true,
     },
@@ -244,12 +266,18 @@ async function buildServer() {
   });
 
   // Custom error handler for validation errors
-  fastify.setErrorHandler((error: FastifyError, _request, reply) => {
-    if (error.validation) {
-      return reply.status(400).send({ error: error.message });
-    }
-    reply.status(error.statusCode ?? 500).send({ error: error.message });
-  });
+  fastify.setErrorHandler(
+    (error: FastifyError & { retryAfter?: number }, _request, reply) => {
+      if (error.validation) {
+        return reply.status(400).send({ error: error.message });
+      }
+      const body: Record<string, unknown> = { error: error.message };
+      if (error.retryAfter !== undefined) {
+        body.retryAfter = error.retryAfter;
+      }
+      reply.status(error.statusCode ?? 500).send(body);
+    },
+  );
 
   // Register environment variable validation
   await fastify.register(fastifyEnv, {
@@ -274,7 +302,7 @@ async function buildServer() {
   // Allowed origins for CORS
   const extraOrigins = fastify.config.EXTRA_ALLOWED_ORIGINS
     ? fastify.config.EXTRA_ALLOWED_ORIGINS.split(",")
-        .map((o) => o.trim())
+        .map((o: string) => o.trim())
         .filter(Boolean)
     : [];
   const ALLOWED_ORIGINS = [
@@ -308,6 +336,8 @@ async function buildServer() {
   // Register auth plugin and strategies
   await fastify.register(fastifyAuth);
   registerAuthStrategies(fastify);
+  await registerRateLimit(fastify);
+  registerNotFoundRateLimit(fastify);
 
   // Register extension version enforcement (426 Upgrade Required for outdated extensions)
   registerExtensionVersionCheck(fastify);
@@ -320,8 +350,15 @@ async function buildServer() {
         title: "Bondery API",
         description:
           "REST API for the Bondery application — a contact and relationship management platform.\n\n" +
+          "## Health checks\n\n" +
+          "- `GET /status` — **Liveness**. Returns 200 when the API process is running. " +
+          "Does not probe external dependencies.\n" +
+          "- `GET /health` — **Readiness**. Probes Supabase (auth, database, storage), Redis, " +
+          "and reports configuration status for other integrations. Cached for one minute; " +
+          "rate limited to one request per minute per client. Returns 503 when critical " +
+          "dependencies are unavailable.\n\n" +
           "## Authentication\n\n" +
-          "All endpoints (except `/status` and `GET /api/extension`) require authentication " +
+          "All endpoints (except `/status` and `/health`) require authentication " +
           "via a Supabase session cookie or a Bearer token in the Authorization header.",
         version: "1.0.0",
         contact: { name: "Bondery Support", url: "https://usebondery.com" },
@@ -335,7 +372,11 @@ async function buildServer() {
         { url: "https://api.usebondery.com", description: "Production server" },
       ],
       tags: [
-        { name: "Health", description: "Server health check endpoints" },
+        {
+          name: "Health",
+          description:
+            "Liveness (`GET /status`) and readiness (`GET /health`) probes",
+        },
         { name: "Contacts", description: "Contact management operations" },
         { name: "Groups", description: "Group management operations" },
         { name: "Tags", description: "Tag management operations" },
@@ -364,21 +405,15 @@ async function buildServer() {
           name: "Webhooks",
           description: "Inbound webhooks from third-party services",
         },
+        {
+          name: "Geocode",
+          description: "Address autocomplete and geocoding proxy",
+        },
       ],
     },
   });
 
-  // Health check endpoint
-  fastify.get("/status", { schema: { tags: ["Health"] } }, async () => {
-    return {
-      status: "ok",
-      timestamp: new Date().toISOString(),
-      extension: {
-        minVersion: MIN_EXTENSION_VERSION,
-        storeUrl: CHROME_EXTENSION_URL,
-      },
-    };
-  });
+  registerHealthRoutes(fastify);
 
   // Register route modules
   await fastify.register(contactRoutes, { prefix: API_ROUTES.CONTACTS });
@@ -415,12 +450,19 @@ async function buildServer() {
   await fastify.register(subscriptionRoutes, {
     prefix: API_ROUTES.SUBSCRIPTIONS,
   });
+  await fastify.register(subscriptionCheckoutRoutes, {
+    prefix: API_ROUTES.SUBSCRIPTIONS_CHECKOUT,
+  });
+  await fastify.register(subscriptionPortalRoutes, {
+    prefix: API_ROUTES.SUBSCRIPTIONS_PORTAL,
+  });
   await fastify.register(subscriptionSyncRoutes, {
     prefix: API_ROUTES.SUBSCRIPTIONS_SYNC,
   });
   await fastify.register(polarWebhookRoutes, {
     prefix: API_ROUTES.WEBHOOKS_POLAR,
   });
+  await fastify.register(geocodeRoutes, { prefix: "/api/geocode" });
 
   return fastify;
 }

@@ -11,11 +11,12 @@ import {
   TextInput,
   Button,
 } from "@mantine/core";
+import { schemaResolver, useForm } from "@mantine/form";
 import { modals } from "@mantine/modals";
 import { notifications } from "@mantine/notifications";
 import { flushSync } from "react-dom";
 import { IconTag, IconTagMinus, IconTagPlus, IconTrash } from "@tabler/icons-react";
-import type { Contact, ContactPreview, TagWithCount } from "@bondery/types";
+import { createTagSchema, type Contact, type ContactPreview, type TagWithCount } from "@bondery/schemas";
 import {
   errorNotificationTemplate,
   loadingNotificationTemplate,
@@ -80,8 +81,14 @@ function TagEditorModalBody({
   onUpdated,
   onDeleted,
 }: TagEditorModalBodyProps) {
-  const [label, setLabel] = useState(initialLabel ?? tag?.label ?? "");
-  const [color, setColor] = useState(tag?.color ?? randomHexColor());
+  const form = useForm<{ label: string; color: string }>({
+    mode: "controlled",
+    initialValues: {
+      label: initialLabel ?? tag?.label ?? "",
+      color: tag?.color ?? randomHexColor(),
+    },
+    validate: schemaResolver(createTagSchema, { sync: true }),
+  });
   const [allContacts, setAllContacts] = useState<Contact[]>([]);
   const [selectedIds, setSelectedIds] = useState<string[]>(
     mode === "create" ? initialSelectedPersonIds : [],
@@ -202,11 +209,12 @@ function TagEditorModalBody({
     }
   };
 
-  const handleSave = async () => {
+  const handleSave = async (values: typeof form.values) => {
     if (submitLockRef.current || isSubmitting) return;
 
-    const trimmedLabel = label.trim();
-    if (!trimmedLabel || !color.trim()) return;
+    const trimmedLabel = values.label.trim();
+    const color = values.color.trim();
+    if (!trimmedLabel || !color) return;
 
     submitLockRef.current = true;
     setIsSubmitting(true);
@@ -399,82 +407,80 @@ function TagEditorModalBody({
   };
 
   return (
-    <Stack gap="md">
-      <Group gap="md" grow align="flex-start">
-        <ColorInput
-          label={t("ColorLabel")}
-          withAsterisk
-          required
-          value={color}
-          onChange={setColor}
-          swatches={COLOR_SWATCHES}
-          swatchesPerRow={9}
-          format="hex"
-          placeholder="#A1B2C3"
-        />
-
-        <TextInput
-          label={t("LabelLabel")}
-          withAsterisk
-          required
-          value={label}
-          onChange={(event) => setLabel(event.currentTarget.value)}
-          placeholder={t("LabelPlaceholder")}
-          data-autofocus
-        />
-      </Group>
-
-      <Stack gap="xs">
-        <Text size="sm" fw={500}>
-          {t("PeopleWithTagLabel")}
-        </Text>
-        {isLoadingContacts ? (
-          <Center py="xs">
-            <Loader size="sm" />
-          </Center>
-        ) : (
-          <PeopleMultiPickerInput
-            contacts={allContacts}
-            selectedIds={selectedIds}
-            onChange={setSelectedIds}
-            placeholder={t("AddFirstPersonPlaceholder")}
-            noResultsLabel={t("NoPeopleFound")}
-            onSearch={handleSearch}
-            searchDebounceMs={DEBOUNCE_MS.contactPicker}
-            disabled={isSubmitting}
+    <form onSubmit={form.onSubmit(handleSave)}>
+      <Stack gap="md">
+        <Group gap="md" grow align="flex-start">
+          <ColorInput
+            label={t("ColorLabel")}
+            withAsterisk
+            required
+            swatches={COLOR_SWATCHES}
+            swatchesPerRow={9}
+            format="hex"
+            placeholder="#A1B2C3"
+            {...form.getInputProps("color")}
           />
-        )}
+
+          <TextInput
+            label={t("LabelLabel")}
+            withAsterisk
+            required
+            placeholder={t("LabelPlaceholder")}
+            data-autofocus
+            {...form.getInputProps("label")}
+          />
+        </Group>
+
+        <Stack gap="xs">
+          <Text size="sm" fw={500}>
+            {t("PeopleWithTagLabel")}
+          </Text>
+          {isLoadingContacts ? (
+            <Center py="xs">
+              <Loader size="sm" />
+            </Center>
+          ) : (
+            <PeopleMultiPickerInput
+              contacts={allContacts}
+              selectedIds={selectedIds}
+              onChange={setSelectedIds}
+              placeholder={t("AddFirstPersonPlaceholder")}
+              noResultsLabel={t("NoPeopleFound")}
+              onSearch={handleSearch}
+              searchDebounceMs={DEBOUNCE_MS.contactPicker}
+              disabled={isSubmitting}
+            />
+          )}
+        </Stack>
+
+        <Group justify="space-between" mt="md">
+          {mode === "edit" ? (
+            <Button
+              variant="light"
+              color="red"
+              leftSection={<IconTagMinus size={16} />}
+              onClick={requestDelete}
+              disabled={isSubmitting}
+            >
+              {t("DeleteButton")}
+            </Button>
+          ) : (
+            <span />
+          )}
+
+          <ModalFooter
+            cancelLabel={t("CancelButton")}
+            onCancel={() => modals.close(modalId)}
+            cancelDisabled={isSubmitting}
+            actionLabel={mode === "create" ? t("CreateButton") : t("SaveButton")}
+            actionLeftSection={mode === "create" ? <IconTagPlus size={16} /> : undefined}
+            actionLoading={isSubmitting}
+            actionDisabled={isSubmitting || !form.values.label.trim() || !form.values.color.trim()}
+            actionType="submit"
+          />
+        </Group>
       </Stack>
-
-      <Group justify="space-between" mt="md">
-        {mode === "edit" ? (
-          <Button
-            variant="light"
-            color="red"
-            leftSection={<IconTagMinus size={16} />}
-            onClick={requestDelete}
-            disabled={isSubmitting}
-          >
-            {t("DeleteButton")}
-          </Button>
-        ) : (
-          <span />
-        )}
-
-        <ModalFooter
-          cancelLabel={t("CancelButton")}
-          onCancel={() => modals.close(modalId)}
-          cancelDisabled={isSubmitting}
-          actionLabel={mode === "create" ? t("CreateButton") : t("SaveButton")}
-          actionLeftSection={mode === "create" ? <IconTagPlus size={16} /> : undefined}
-          actionLoading={isSubmitting}
-          actionDisabled={isSubmitting || !label.trim() || !color.trim()}
-          onAction={() => {
-            void handleSave();
-          }}
-        />
-      </Group>
-    </Stack>
+    </form>
   );
 }
 

@@ -1,4 +1,4 @@
-ï»¿"use client";
+"use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { JSX } from "react";
@@ -38,7 +38,7 @@ import type {
   Contact,
   InstagramImportStrategy,
   InstagramPreparedContact,
-} from "@bondery/types";
+} from "@bondery/schemas";
 import {
   DropzoneContent,
   ModalFooter,
@@ -819,10 +819,10 @@ export function InstagramImportModal({
                 <Text size="sm">{t("InstructionStep4")}</Text>
                 <Stack gap={2} pl="xs">
                   <Text size="sm" c="dimmed">
-                    â€“ {t("InstructionStep5")}
+                    – {t("InstructionStep5")}
                   </Text>
                   <Text size="sm" c="dimmed">
-                    â€“ {t("InstructionStep6")}
+                    – {t("InstructionStep6")}
                   </Text>
                 </Stack>
               </Stack>

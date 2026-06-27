@@ -8,6 +8,7 @@ import { Type } from "@sinclair/typebox";
 import { getAuth } from "../../../lib/auth.js";
 import { UuidParam } from "../../../lib/schemas.js";
 import { linkedinCompanyUrl } from "@bondery/helpers";
+import { ENRICH_TIER } from "../../../lib/rate-limit.js";
 
 const LinkedInDataBody = Type.Object({
   workHistory: Type.Optional(
@@ -31,7 +32,10 @@ export function registerLinkedInDataRoutes(fastify: FastifyInstance): void {
    */
   fastify.post(
     "/:id/linkedin-data",
-    { schema: { params: UuidParam, body: LinkedInDataBody } },
+    {
+      schema: { params: UuidParam, body: LinkedInDataBody },
+      config: { rateLimit: ENRICH_TIER },
+    },
     async (
       request: FastifyRequest<{
         Params: typeof UuidParam.static;

@@ -7,7 +7,7 @@ import { usePathname } from "next/navigation";
 import { useFormatter, useTranslations } from "next-intl";
 import { useState } from "react";
 import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
-import type { ChatSession } from "@bondery/types";
+import type { ChatSession } from "@bondery/schemas";
 import {
   DotsMenuButton,
   ModalTitle,

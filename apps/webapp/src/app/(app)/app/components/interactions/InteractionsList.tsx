@@ -1,7 +1,7 @@
 "use client";
 
 import { Group, Stack, Text, ThemeIcon, Timeline } from "@mantine/core";
-import type { Activity, Contact } from "@bondery/types";
+import type { Activity, Contact } from "@bondery/schemas";
 import { useMemo } from "react";
 import { getActivityTypeConfig } from "@/lib/activityTypes";
 import { PersonAvatarGroup } from "@bondery/mantine-next";

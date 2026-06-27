@@ -1,5 +1,5 @@
 import { cleanPersonName, extractNameParts, SOCIAL_PLATFORM_URL_DETAILS } from "@bondery/helpers";
-import type { Contact, ContactAddressEntry, EmailEntry, PhoneEntry } from "@bondery/types";
+import type { Contact, ContactAddressEntry, EmailEntry, PhoneEntry } from "@bondery/schemas";
 import type {
   VCard,
   VCardContactDraft,

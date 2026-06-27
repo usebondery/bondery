@@ -3,7 +3,7 @@
 import { Avatar, Group, Spoiler, Stack, Text } from "@mantine/core";
 import { IconBriefcase } from "@tabler/icons-react";
 import { useTranslations } from "next-intl";
-import type { WorkHistoryEntry } from "@bondery/types";
+import type { WorkHistoryEntry } from "@bondery/schemas";
 import { formatDateRange, formatDuration } from "@bondery/helpers";
 import { AnchorLink } from "@bondery/mantine-next";
 

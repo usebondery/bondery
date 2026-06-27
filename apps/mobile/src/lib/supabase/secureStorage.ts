@@ -1,6 +1,10 @@
 import { Platform } from "react-native";
 import * as SecureStore from "expo-secure-store";
 
+const SECURE_STORE_OPTIONS: SecureStore.SecureStoreOptions = {
+  keychainAccessible: SecureStore.WHEN_UNLOCKED_THIS_DEVICE_ONLY,
+};
+
 /**
  * Supabase auth storage adapter.
  * Uses SecureStore on native platforms and localStorage on web.
@@ -13,7 +17,7 @@ export const supabaseSecureStorage = {
       return localStorage.getItem(key);
     }
 
-    return SecureStore.getItemAsync(key);
+    return SecureStore.getItemAsync(key, SECURE_STORE_OPTIONS);
   },
   setItem: async (key: string, value: string): Promise<void> => {
     if (Platform.OS === "web") {
@@ -21,7 +25,7 @@ export const supabaseSecureStorage = {
       return;
     }
 
-    await SecureStore.setItemAsync(key, value);
+    await SecureStore.setItemAsync(key, value, SECURE_STORE_OPTIONS);
   },
   removeItem: async (key: string): Promise<void> => {
     if (Platform.OS === "web") {
@@ -29,6 +33,6 @@ export const supabaseSecureStorage = {
       return;
     }
 
-    await SecureStore.deleteItemAsync(key);
+    await SecureStore.deleteItemAsync(key, SECURE_STORE_OPTIONS);
   },
 };

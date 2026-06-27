@@ -13,7 +13,7 @@
 
 import type { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
-import type { Database } from "@bondery/types/supabase.types";
+import type { Database } from "@bondery/schemas/supabase.types";
 import { createAuthenticatedClient } from "./supabase.js";
 
 // ── Type augmentation ────────────────────────────────────────────────────────

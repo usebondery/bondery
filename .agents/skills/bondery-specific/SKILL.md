@@ -1,9 +1,19 @@
 ---
 name: bondery-specific
-description: A documentation containing the specifid architectural decisions and their rationale.
+description: Bondery-specific architectural decisions, product UX patterns, and their rationale.
 metadata:
-  version: 0.0.1
+  version: 0.1.0
 ---
+
+## References
+
+Consult these resources as needed:
+
+```
+references/
+  ux-patterns.md    Feedback, progressive disclosure, destructive actions, autofocus, mobile settings previews & async states, mobile sheets & forms
+  mobile-forms.md   React Hook Form patterns for ActionSheetPopup forms (typed useSheetForm, Sheet*Field wrappers, schema output, audit guardrails)
+```
 
 # Using avatars and logos
 
@@ -23,7 +33,7 @@ When reviewing code, focus on the following aspects:
 4. **Security**: Check for any security vulnerabilities or potential risks in the code.
 5. **Edge Cases**: Consider how the code handles edge cases and unexpected inputs.
 6. **Documentation**: Verify that the code is well-documented, with clear comments and explanations where necessary.
-7. **UX** Consider the user experience implications of the code, ensuring it provides a smooth and intuitive experience for users.
+7. **UX** Consider the user experience implications of the code, ensuring it provides a smooth and intuitive experience for users. Read `references/ux-patterns.md` for Bondery-specific patterns covering feedback, progressive disclosure, destructive actions, and autofocus.
 
 # Supabase extensions schema
 

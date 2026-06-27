@@ -1,7 +1,7 @@
 import { tool } from "ai";
 import { z } from "zod";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import type { Database, TablesUpdate } from "@bondery/types/supabase.types";
+import type { Database, TablesUpdate } from "@bondery/schemas/supabase.types";
 import { INTERACTION_TYPES } from "@bondery/helpers";
 
 /**

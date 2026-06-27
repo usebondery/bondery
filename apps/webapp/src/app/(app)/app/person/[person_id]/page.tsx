@@ -8,14 +8,14 @@ import type {
   MergeRecommendation,
   WorkHistoryEntry,
   EducationEntry,
-} from "@bondery/types";
+} from "@bondery/schemas";
 import { getMergeRecommendationsData } from "@/app/(app)/app/fix/getMergeRecommendationsData";
 import PersonClient from "./PersonClient";
 import { getAuthHeaders } from "@/lib/authHeaders";
 import { API_ROUTES, formatMetadataTitle } from "@bondery/helpers/globals/paths";
 import { PageWrapper } from "@/app/(app)/app/components/PageWrapper";
 import { ErrorPageHeader } from "@/app/(app)/app/components/ErrorPageHeader";
-import type { Group, Tag } from "@bondery/types";
+import type { Group, Tag } from "@bondery/schemas";
 import { API_URL } from "@/lib/config";
 import { buildAvatarQueryString } from "@/lib/avatarParams";
 

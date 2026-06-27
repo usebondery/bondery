@@ -9,7 +9,7 @@ import type {
   MergeConflictField,
   MergeConflictChoice,
   MergeRecommendationReason,
-} from "@bondery/types";
+} from "@bondery/schemas";
 import { AvatarQualityEnum, AvatarSizeEnum } from "../../../lib/schemas.js";
 
 // ── Constants ────────────────────────────────────────────────────

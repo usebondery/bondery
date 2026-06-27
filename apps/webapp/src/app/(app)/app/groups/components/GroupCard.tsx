@@ -3,7 +3,7 @@
 import { Card, Group, Text, Menu, MenuTarget, MenuDropdown, MenuItem, Stack } from "@mantine/core";
 import { IconCopy, IconEdit, IconFolderCog, IconTrash, IconUserPlus } from "@tabler/icons-react";
 import { useState, type MouseEvent, type ReactNode } from "react";
-import type { GroupWithCount } from "@bondery/types";
+import type { GroupWithCount } from "@bondery/schemas";
 import { PersonAvatarGroup, DotsMenuButton } from "@bondery/mantine-next";
 
 // ── Color maps ──────────────────────────────────────────

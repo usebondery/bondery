@@ -33,8 +33,8 @@ import {
 import { useRouter, usePathname } from "next/navigation";
 import { useEffect, useMemo, useState, useCallback, useRef } from "react";
 import { useTranslations } from "next-intl";
-import { extractUsername } from "@/lib/socialsHelpers";
-import { parsePhoneNumber, combinePhoneNumber } from "@/lib/phoneHelpers";
+import { extractUsername } from "@bondery/helpers";
+import { parsePhoneNumber, combinePhoneNumber } from "@bondery/helpers/phone";
 import { formatContactName } from "@/lib/nameHelpers";
 import type {
   Contact,
@@ -52,7 +52,7 @@ import type {
   Tag,
   WorkHistoryEntry,
   EducationEntry,
-} from "@bondery/types";
+} from "@bondery/schemas";
 import { ContactActionMenu } from "./components/ContactActionMenu";
 import { ContactIdentitySection } from "./components/ContactIdentitySection";
 import { ContactPreferenceSection } from "./components/ContactPreferenceSection";
@@ -79,8 +79,8 @@ import {
 import { PageWrapper } from "@/app/(app)/app/components/PageWrapper";
 import { PageHeader } from "@/app/(app)/app/components/PageHeader";
 import { revalidateContacts, revalidateRelationships } from "../../actions";
-import { getTimezoneForCoordinates } from "@/app/(app)/app/map/actions";
-import { resolveToCanonicalTimezone } from "@/lib/timezones";
+import { fetchTimezoneForCoordinates } from "@/lib/geocode";
+import { resolveToCanonicalTimezone } from "@bondery/helpers/locale";
 import { openDeleteContactModal } from "@/app/(app)/app/components/contacts/openDeleteContactModal";
 import { openStandardConfirmModal } from "@/app/(app)/app/components/modals/openStandardConfirmModal";
 import { GroupCard } from "../../groups/components/GroupCard";
@@ -794,7 +794,7 @@ export default function PersonClient({
             onConfirm: async () => {
               setSavingField("address");
               try {
-                const rawTz = await getTimezoneForCoordinates(lat, lon).catch(() => null);
+                const rawTz = await fetchTimezoneForCoordinates(lat, lon).catch(() => null);
                 const canonical = rawTz ? resolveToCanonicalTimezone(rawTz) : null;
                 if (!canonical) {
                   notifications.show(
@@ -904,7 +904,7 @@ export default function PersonClient({
             // Detect timezone from coordinates in parallel, non-blocking
             let canonicalTimezone: string | null = null;
             if (lat != null && lon != null) {
-              const rawTz = await getTimezoneForCoordinates(lat, lon).catch(() => null);
+              const rawTz = await fetchTimezoneForCoordinates(lat, lon).catch(() => null);
               if (rawTz) canonicalTimezone = resolveToCanonicalTimezone(rawTz);
             }
 

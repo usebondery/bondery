@@ -5,7 +5,7 @@ import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import { redirect } from "next/navigation";
 import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import type { UIMessage } from "ai";
-import type { SubscriptionStatus } from "@bondery/types";
+import type { SubscriptionStatus } from "@bondery/schemas";
 
 interface ChatMessageRow {
   id: string;

@@ -8,7 +8,7 @@ import {
   IconShare,
   IconTrash,
 } from "@tabler/icons-react";
-import type { Contact } from "@bondery/types";
+import type { Contact } from "@bondery/schemas";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import { useState } from "react";
 import { errorNotificationTemplate, successNotificationTemplate } from "@bondery/mantine-next";

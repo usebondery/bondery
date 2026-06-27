@@ -12,7 +12,7 @@ import {
 import { useMemo } from "react";
 import { useHotkeys } from "@mantine/hooks";
 import { useFormatter, useTranslations } from "next-intl";
-import type { Activity, Contact, UpcomingReminder } from "@bondery/types";
+import type { Activity, Contact, UpcomingReminder } from "@bondery/schemas";
 import { PageWrapper } from "@/app/(app)/app/components/PageWrapper";
 import { PageHeader } from "@/app/(app)/app/components/PageHeader";
 import { HomeStatsGrid } from "@/app/(app)/app/components/home/HomeStatsGrid";

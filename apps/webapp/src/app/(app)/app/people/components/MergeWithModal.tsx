@@ -32,7 +32,7 @@ import type {
   MergeConflictChoice,
   MergeConflictField,
   MergeContactsResponse,
-} from "@bondery/types";
+} from "@bondery/schemas";
 import { revalidateAll } from "../../actions";
 import { SelectableCard } from "@/app/(app)/app/components/SelectableCard";
 import { getAvatarColorFromName } from "@/lib/avatarColor";

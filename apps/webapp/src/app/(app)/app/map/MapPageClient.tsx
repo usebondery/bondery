@@ -49,7 +49,8 @@ import {
   type PeopleMapFocus,
 } from "@/app/(app)/app/components/map/PeopleMap";
 import type { MapView, MapPin, AddressPin } from "./types";
-import type { MapSuggestionItem } from "./actions";
+import type { ContactAddressEntry } from "@bondery/schemas";
+import { geocodeSuggestionDisplayLabel } from "@bondery/helpers/geocode";
 import { revalidateContacts } from "../actions";
 
 interface MapPageClientProps {
@@ -87,19 +88,15 @@ export function MapPageClient({ view }: MapPageClientProps) {
   const [locationQuery, setLocationQuery] = useState("");
   const [mapFocus, setMapFocus] = useState<PeopleMapFocus | null>(null);
 
-  const handleLocationSelect = (selected: MapSuggestionItem) => {
-    if (
-      !selected ||
-      selected.position.lat === null ||
-      selected.position.lon === null
-    )
-      return;
-    setLocationQuery(selected.label);
+  const handleLocationSelect = (selected: ContactAddressEntry) => {
+    if (selected.latitude === null || selected.longitude === null) return;
+    const label = geocodeSuggestionDisplayLabel(selected);
+    setLocationQuery(label);
     setMapFocus({
-      latitude: selected.position.lat,
-      longitude: selected.position.lon,
+      latitude: selected.latitude,
+      longitude: selected.longitude,
       zoom: 13,
-      token: `${selected.label}-${Date.now()}`,
+      token: `${label}-${Date.now()}`,
     });
   };
 

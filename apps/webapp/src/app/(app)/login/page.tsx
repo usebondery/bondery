@@ -2,7 +2,11 @@
 
 import { useState } from "react";
 import { Text, Button, Stack, Card } from "@mantine/core";
-import { IconBrandGithubFilled, IconBrandLinkedin, IconX } from "@tabler/icons-react";
+import {
+  IconBrandGithubFilled,
+  IconBrandLinkedin,
+  IconX,
+} from "@tabler/icons-react";
 import { notifications } from "@mantine/notifications";
 import { createBrowswerSupabaseClient } from "@/lib/supabase/client";
 import { useTranslations } from "next-intl";
@@ -20,8 +24,10 @@ export default function LoginPage() {
   const searchParams = useSearchParams();
 
   // Preserve redirect parameter for post-login navigation (e.g., OAuth consent flow)
-  const redirectParam = searchParams.get("redirect") ?? searchParams.get("returnUrl");
-  const shouldForceDesktopLoginLayout = redirectParam?.startsWith("/oauth/consent") ?? false;
+  const redirectParam =
+    searchParams.get("redirect") ?? searchParams.get("returnUrl");
+  const shouldForceDesktopLoginLayout =
+    redirectParam?.startsWith("/oauth/consent") ?? false;
 
   const getProviderIcon = (iconName: string) => {
     const icons: Record<string, React.ComponentType<{ size?: number }>> = {
@@ -31,11 +37,21 @@ export default function LoginPage() {
     return icons[iconName] || IconBrandGithubFilled;
   };
 
-  const activeProviders = INTEGRATION_PROVIDERS.filter((p) => p.active).sort((a, b) => {
-    if (a.providerKey === "linkedin_oidc" && b.providerKey !== "linkedin_oidc") return -1;
-    if (b.providerKey === "linkedin_oidc" && a.providerKey !== "linkedin_oidc") return 1;
-    return 0;
-  });
+  const activeProviders = INTEGRATION_PROVIDERS.filter((p) => p.active).sort(
+    (a, b) => {
+      if (
+        a.providerKey === "linkedin_oidc" &&
+        b.providerKey !== "linkedin_oidc"
+      )
+        return -1;
+      if (
+        b.providerKey === "linkedin_oidc" &&
+        a.providerKey !== "linkedin_oidc"
+      )
+        return 1;
+      return 0;
+    },
+  );
 
   const handleOAuthLogin = async (provider: "github" | "linkedin_oidc") => {
     try {
@@ -70,7 +86,8 @@ export default function LoginPage() {
       notifications.show(
         errorNotificationTemplate({
           title: t("UnexpectedError"),
-          description: err instanceof Error ? err.message : t("UnexpectedErrorMessage"),
+          description:
+            err instanceof Error ? err.message : t("UnexpectedErrorMessage"),
         }),
       );
     } finally {
@@ -113,7 +130,9 @@ export default function LoginPage() {
                   size="lg"
                   leftSection={<IconComponent size={20} />}
                   onClick={() =>
-                    handleOAuthLogin(provider.providerKey as "github" | "linkedin_oidc")
+                    handleOAuthLogin(
+                      provider.providerKey as "github" | "linkedin_oidc",
+                    )
                   }
                   loading={loading}
                   fullWidth
@@ -126,11 +145,17 @@ export default function LoginPage() {
           </Stack>
           <Text size="xs" c="dimmed" ta="center">
             {t("TermsAgreement")}{" "}
-            <AnchorLink href={`${WEBSITE_URL}${WEBSITE_ROUTES.TERMS}`} size="xs">
+            <AnchorLink
+              href={`${WEBSITE_URL}${WEBSITE_ROUTES.TERMS}`}
+              size="xs"
+            >
               {t("TermsOfService")}
             </AnchorLink>{" "}
             {t("And")}{" "}
-            <AnchorLink href={`${WEBSITE_URL}${WEBSITE_ROUTES.PRIVACY}`} size="xs">
+            <AnchorLink
+              href={`${WEBSITE_URL}${WEBSITE_ROUTES.PRIVACY}`}
+              size="xs"
+            >
               {t("PrivacyPolicy")}
             </AnchorLink>
           </Text>

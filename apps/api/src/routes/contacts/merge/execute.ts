@@ -5,6 +5,7 @@
 
 import type { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
 import { getAuth } from "../../../lib/auth.js";
+import { loadEnrichedContact } from "../../../lib/contact-enrichment.js";
 import { replaceContactPhones, replaceContactEmails } from "../channels.js";
 import { upsertContactSocials } from "../../../lib/socials.js";
 import type {
@@ -14,7 +15,7 @@ import type {
   MergeConflictField,
   MergeConflictChoice,
   TablesUpdate,
-} from "@bondery/types";
+} from "@bondery/schemas";
 import {
   MERGEABLE_FIELDS,
   MERGEABLE_SCALAR_FIELDS,
@@ -689,7 +690,18 @@ export function registerMergeExecuteRoute(fastify: FastifyInstance): void {
         mergedFromPersonId: rightPersonId,
       };
 
-      return response;
+      const contact = await loadEnrichedContact(
+        client,
+        user.id,
+        leftPersonId,
+        undefined,
+        request.log,
+      );
+
+      return {
+        ...response,
+        contact,
+      };
     },
   );
 }

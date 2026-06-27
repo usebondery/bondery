@@ -1,6 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
-import type { Database } from "@bondery/types/supabase.types";
-import type { ShareableField } from "@bondery/types";
+import type { Database } from "@bondery/schemas/supabase.types";
+import type { ShareableField } from "@bondery/schemas";
 import { CONTACT_SELECT } from "../../../lib/schemas.js";
 import { buildContactAvatarUrl } from "../../../lib/supabase.js";
 import {

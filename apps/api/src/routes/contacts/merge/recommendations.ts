@@ -15,7 +15,7 @@ import type {
   MergeRecommendationReason,
   MergeRecommendationsResponse,
   RefreshMergeRecommendationsResponse,
-} from "@bondery/types";
+} from "@bondery/schemas";
 import { UuidParam, CONTACT_SELECT, extractAvatarOptions } from "../../../lib/schemas.js";
 import {
   MERGE_RECOMMENDATION_ALGORITHM_VERSION,

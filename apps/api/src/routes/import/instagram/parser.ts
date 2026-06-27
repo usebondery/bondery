@@ -3,7 +3,7 @@ import type {
   InstagramImportSource,
   InstagramImportStrategy,
   InstagramPreparedContact,
-} from "@bondery/types";
+} from "@bondery/schemas";
 import { parseInstagramUsername, SOCIAL_PLATFORM_URL_DETAILS } from "@bondery/helpers";
 import {
   COMMON_BRAND_NAME_TOKEN_SET as COMMON_BRANDS_NAME_TOKENS,

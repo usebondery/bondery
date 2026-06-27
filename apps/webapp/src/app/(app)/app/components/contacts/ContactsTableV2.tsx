@@ -20,7 +20,7 @@ import {
 import Image from "next/image";
 import { useCallback, useMemo, useState } from "react";
 import type { ReactNode } from "react";
-import type { Contact } from "@bondery/types";
+import type { Contact } from "@bondery/schemas";
 import {
   ActionIconLink,
   DataTable,
@@ -32,16 +32,13 @@ import {
   type SortOption,
 } from "@bondery/mantine-next";
 import { formatContactName } from "@/lib/nameHelpers";
-import { createSocialUrl } from "@/lib/socialsHelpers";
+import { createSocialUrl } from "@bondery/helpers";
 import {
   getSocialActionTooltip,
   SOCIAL_ACTION_ORDER,
   type SocialActionKey,
 } from "@/lib/socialActionTooltips";
-import {
-  getTelephoneReactMaskExpression,
-  countryCodes,
-} from "@/lib/phoneHelpers";
+import { getTelephoneReactMaskExpression, countryCodes } from "@bondery/helpers/phone";
 import { abbreviateLocationCountry } from "@bondery/helpers";
 
 export type ColumnKey =

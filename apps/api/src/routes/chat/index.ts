@@ -6,11 +6,12 @@
 import type { FastifyInstance, FastifyRequest } from "fastify";
 import type { UIMessage } from "ai";
 import { convertToModelMessages } from "ai";
-import type { Json } from "@bondery/types/supabase.types";
+import type { Json } from "@bondery/schemas/supabase.types";
 import { getAuth } from "../../lib/auth.js";
 import { runChatAgent } from "../../lib/chat/agent.js";
 import { generateSessionTitle } from "../../lib/chat/title.js";
 import { checkAndIncrementQuota } from "../../lib/chat/quota.js";
+import { AI_TIER } from "../../lib/rate-limit.js";
 
 export async function chatRoutes(fastify: FastifyInstance) {
   fastify.addHook("onRoute", (routeOptions) => {
@@ -23,6 +24,7 @@ export async function chatRoutes(fastify: FastifyInstance) {
    */
   fastify.post(
     "/",
+    { config: { rateLimit: AI_TIER } },
     async (
       request: FastifyRequest<{
         Body: { messages: UIMessage[]; sessionId: string };

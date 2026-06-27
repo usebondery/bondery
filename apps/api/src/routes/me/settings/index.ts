@@ -12,7 +12,7 @@ import {
   validateImageMagicBytes,
 } from "../../../lib/config.js";
 import logger from "../../../lib/logger.js";
-import type { TablesUpdate } from "@bondery/types";
+import type { TablesUpdate } from "@bondery/schemas";
 import { getMyselfProfile } from "../../../lib/myself.js";
 
 // ── TypeBox Schemas ──────────────────────────────────────────────────────────
@@ -25,7 +25,9 @@ const UpdateSettingsBody = Type.Object({
   timeFormat: Type.Optional(
     Type.Union([Type.Literal("24h"), Type.Literal("12h")]),
   ),
-  language: Type.Optional(Type.Literal("en")),
+  language: Type.Optional(
+    Type.Union([Type.Literal("en"), Type.Literal("cs")]),
+  ),
   colorScheme: Type.Optional(
     Type.Union([
       Type.Literal("light"),
@@ -33,11 +35,113 @@ const UpdateSettingsBody = Type.Object({
       Type.Literal("auto"),
     ]),
   ),
+  leftSwipeAction: Type.Optional(
+    Type.Union([
+      Type.Literal("call"),
+      Type.Literal("message"),
+      Type.Literal("email"),
+    ]),
+  ),
+  rightSwipeAction: Type.Optional(
+    Type.Union([
+      Type.Literal("call"),
+      Type.Literal("message"),
+      Type.Literal("email"),
+    ]),
+  ),
+  groupSortOrder: Type.Optional(
+    Type.Union([
+      Type.Literal("recent-opened"),
+      Type.Literal("count-desc"),
+      Type.Literal("count-asc"),
+      Type.Literal("alpha-asc"),
+      Type.Literal("alpha-desc"),
+    ]),
+  ),
+  tagSortOrder: Type.Optional(
+    Type.Union([
+      Type.Literal("count-desc"),
+      Type.Literal("count-asc"),
+      Type.Literal("alpha-asc"),
+      Type.Literal("alpha-desc"),
+    ]),
+  ),
+  /** When true, apply updates only for accounts created within the last 30 seconds. */
+  onlyIfNewSignup: Type.Optional(Type.Boolean()),
 });
 
 const AVATARS_BUCKET = "avatars";
 const DEFAULT_REMINDER_SEND_HOUR = "08:00:00";
 const DEFAULT_TIME_FORMAT = "24h" as const;
+const DEFAULT_LEFT_SWIPE_ACTION = "message" as const;
+const DEFAULT_RIGHT_SWIPE_ACTION = "call" as const;
+const DEFAULT_GROUP_SORT_ORDER = "count-desc" as const;
+const DEFAULT_TAG_SORT_ORDER = "count-desc" as const;
+const NEW_SIGNUP_WINDOW_MS = 30_000;
+
+function formatSettingsPatchData(result: {
+  timezone?: string | null;
+  reminder_send_hour?: string | null;
+  time_format?: string | null;
+  language?: string | null;
+  color_scheme?: string | null;
+  left_swipe_action?: string | null;
+  right_swipe_action?: string | null;
+  group_sort_order?: string | null;
+  tag_sort_order?: string | null;
+}) {
+  return {
+    timezone: result.timezone,
+    reminderSendHour: result.reminder_send_hour,
+    timeFormat: result.time_format,
+    language: result.language,
+    colorScheme: result.color_scheme,
+    leftSwipeAction: result.left_swipe_action,
+    rightSwipeAction: result.right_swipe_action,
+    groupSortOrder: result.group_sort_order,
+    tagSortOrder: result.tag_sort_order,
+  };
+}
+
+type UserIdentityRow = {
+  id: string;
+  user_id: string;
+  identity_id: string;
+  provider: string;
+};
+
+function mapUserIdentities(
+  identities: Array<{
+    id?: string;
+    user_id?: string;
+    identity_id?: string;
+    provider?: string;
+  }> | null | undefined,
+): UserIdentityRow[] {
+  if (!identities?.length) {
+    return [];
+  }
+
+  return identities
+    .filter(
+      (identity): identity is {
+        id: string;
+        user_id: string;
+        identity_id: string;
+        provider: string;
+      } =>
+        typeof identity.id === "string" &&
+        typeof identity.user_id === "string" &&
+        typeof identity.identity_id === "string" &&
+        typeof identity.provider === "string",
+    )
+    .map((identity) => ({
+      id: identity.id,
+      user_id: identity.user_id,
+      identity_id: identity.identity_id,
+      provider: identity.provider,
+    }));
+}
 
 function normalizeReminderSendHour(value: string): string {
   const [hourPart, minutePart, secondPart] = value.trim().split(":");
@@ -261,6 +365,9 @@ export async function meSettingsRoutes(fastify: FastifyInstance) {
       user.id,
     );
 
+    const { data: identitiesData } = await client.auth.getUserIdentities();
+    const identities = mapUserIdentities(identitiesData?.identities);
+
     return {
       success: true,
       data: {
@@ -271,11 +378,19 @@ export async function meSettingsRoutes(fastify: FastifyInstance) {
         timeFormat: resolvedSettings.time_format ?? DEFAULT_TIME_FORMAT,
         language: resolvedSettings.language ?? "en",
         colorScheme: resolvedSettings.color_scheme,
+        leftSwipeAction:
+          resolvedSettings.left_swipe_action ?? DEFAULT_LEFT_SWIPE_ACTION,
+        rightSwipeAction:
+          resolvedSettings.right_swipe_action ?? DEFAULT_RIGHT_SWIPE_ACTION,
+        groupSortOrder:
+          resolvedSettings.group_sort_order ?? DEFAULT_GROUP_SORT_ORDER,
+        tagSortOrder: resolvedSettings.tag_sort_order ?? DEFAULT_TAG_SORT_ORDER,
         avatarUrl: resolvedAvatarUrl,
         onboardingCompletedAt: resolvedSettings.onboarding_completed_at ?? null,
         aiMessagesUsed: resolvedSettings.ai_messages_used ?? 0,
         email: userData?.user?.email,
         providers: userData?.user?.app_metadata?.providers || [],
+        identities,
       },
     };
   });
@@ -292,16 +407,35 @@ export async function meSettingsRoutes(fastify: FastifyInstance) {
           timezone?: string;
           reminderSendHour?: string;
           timeFormat?: "24h" | "12h";
-          language?: "en";
+          language?: "en" | "cs";
           colorScheme?: "light" | "dark" | "auto";
+          leftSwipeAction?: "call" | "message" | "email";
+          rightSwipeAction?: "call" | "message" | "email";
+          groupSortOrder?:
+            | "recent-opened"
+            | "count-desc"
+            | "count-asc"
+            | "alpha-asc"
+            | "alpha-desc";
+          tagSortOrder?: "count-desc" | "count-asc" | "alpha-asc" | "alpha-desc";
+          onlyIfNewSignup?: boolean;
         };
       }>,
       reply: FastifyReply,
     ) => {
       const { client, user } = getAuth(request);
-      const { timezone, reminderSendHour, language, colorScheme } =
-        request.body || {};
-      const { timeFormat } = request.body || {};
+      const {
+        timezone,
+        reminderSendHour,
+        language,
+        colorScheme,
+        leftSwipeAction,
+        rightSwipeAction,
+        groupSortOrder,
+        tagSortOrder,
+        timeFormat,
+        onlyIfNewSignup,
+      } = request.body || {};
 
       const updatePayload: TablesUpdate<"user_settings"> = {};
 
@@ -317,12 +451,48 @@ export async function meSettingsRoutes(fastify: FastifyInstance) {
       if (timeFormat !== undefined) {
         updatePayload.time_format = timeFormat;
       }
+      if (leftSwipeAction !== undefined) {
+        updatePayload.left_swipe_action = leftSwipeAction;
+      }
+      if (rightSwipeAction !== undefined) {
+        updatePayload.right_swipe_action = rightSwipeAction;
+      }
+      if (groupSortOrder !== undefined) {
+        updatePayload.group_sort_order = groupSortOrder;
+      }
+      if (tagSortOrder !== undefined) {
+        updatePayload.tag_sort_order = tagSortOrder;
+      }
 
       if (Object.keys(updatePayload).length === 0) {
         return reply.status(400).send({ error: "No settings fields provided" });
       }
 
-      // Check if settings exist
+      if (onlyIfNewSignup) {
+        const { data: signupSettings } = await client
+          .from("user_settings")
+          .select(
+            "created_at, timezone, reminder_send_hour, time_format, language, color_scheme",
+          )
+          .eq("user_id", user.id)
+          .single();
+
+        const isNewSignup =
+          signupSettings?.created_at &&
+          Date.now() - new Date(signupSettings.created_at).getTime() <
+            NEW_SIGNUP_WINDOW_MS;
+
+        if (!isNewSignup) {
+          return {
+            success: true,
+            skipped: true,
+            data: signupSettings
+              ? formatSettingsPatchData(signupSettings)
+              : null,
+          };
+        }
+      }
+
       const { data: existingSettings } = await client
         .from("user_settings")
         .select("id")
@@ -332,7 +502,6 @@ export async function meSettingsRoutes(fastify: FastifyInstance) {
       let result;
 
       if (existingSettings) {
-        // Update existing
         const { data, error } = await client
           .from("user_settings")
           .update(updatePayload)
@@ -345,7 +514,6 @@ export async function meSettingsRoutes(fastify: FastifyInstance) {
         }
         result = data;
       } else {
-        // Insert new
         const { data, error } = await client
           .from("user_settings")
           .insert({
@@ -364,13 +532,7 @@ export async function meSettingsRoutes(fastify: FastifyInstance) {
 
       return {
         success: true,
-        data: {
-          timezone: result.timezone,
-          reminderSendHour: result.reminder_send_hour,
-          timeFormat: result.time_format,
-          language: result.language,
-          colorScheme: result.color_scheme,
-        },
+        data: formatSettingsPatchData(result),
       };
     },
   );

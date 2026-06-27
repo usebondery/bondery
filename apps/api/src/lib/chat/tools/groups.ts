@@ -1,7 +1,8 @@
 import { tool } from "ai";
 import { z } from "zod";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import type { Database, TablesUpdate } from "@bondery/types/supabase.types";
+import type { Database, TablesUpdate } from "@bondery/schemas/supabase.types";
+import { createGroupSchema, updateGroupSchema } from "@bondery/schemas";
 
 /**
  * Creates group-related tools for the AI chat agent.
@@ -76,24 +77,14 @@ export function createGroupTools(
     create_group: tool({
       description:
         "Create a new group for organizing contacts. Returns the created group's details.",
-      inputSchema: z.object({
-        label: z.string().min(1).max(100).describe("Group name"),
-        emoji: z
-          .string()
-          .optional()
-          .describe("Emoji icon for the group (e.g. 🏋️, 🎵)"),
-        color: z
-          .string()
-          .min(1)
-          .describe("Color for the group (e.g. 'blue', 'red', '#3B82F6')"),
-      }),
+      inputSchema: createGroupSchema,
       execute: async ({ label, emoji, color }) => {
         const { data: group, error } = await supabase
           .from("groups")
           .insert({
             user_id: userId,
             label: label.trim(),
-            emoji: emoji?.trim() || null,
+            emoji: emoji.trim() || null,
             color: color.trim(),
           })
           .select("id, label, emoji, color")
@@ -115,11 +106,8 @@ export function createGroupTools(
 
     update_group: tool({
       description: "Update an existing group's name, emoji, or color.",
-      inputSchema: z.object({
+      inputSchema: updateGroupSchema.extend({
         groupId: z.string().uuid().describe("The UUID of the group to update"),
-        label: z.string().min(1).max(100).optional().describe("New group name"),
-        emoji: z.string().optional().describe("New emoji icon"),
-        color: z.string().optional().describe("New color"),
       }),
       execute: async ({ groupId, label, emoji, color }) => {
         const updates: TablesUpdate<"groups"> = {};

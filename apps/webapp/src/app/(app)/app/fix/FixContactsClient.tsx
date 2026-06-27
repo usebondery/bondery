@@ -10,7 +10,7 @@ import type {
   MergeRecommendation,
   MergeRecommendationsResponse,
   RefreshMergeRecommendationsResponse,
-} from "@bondery/types";
+} from "@bondery/schemas";
 import {
   PersonChip,
   errorNotificationTemplate,

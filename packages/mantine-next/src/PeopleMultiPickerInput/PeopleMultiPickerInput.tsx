@@ -12,7 +12,7 @@ import {
 } from "@mantine/core";
 import { useDebouncedCallback } from "@mantine/hooks";
 import { useEffect, useMemo, useState } from "react";
-import type { Contact } from "@bondery/types";
+import type { Contact } from "@bondery/schemas";
 import { PersonChip } from "../nextjs/PersonChip";
 import { getAvatarColorFromName } from "../utils/avatarColor";
 import { formatContactName } from "../utils/nameHelpers";

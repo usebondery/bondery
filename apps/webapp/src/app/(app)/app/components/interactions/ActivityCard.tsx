@@ -14,7 +14,7 @@ import {
   Text,
 } from "@mantine/core";
 import { IconCopy, IconDotsVertical, IconEdit, IconTrash } from "@tabler/icons-react";
-import type { Activity } from "@bondery/types";
+import type { Activity } from "@bondery/schemas";
 import type { ReactNode } from "react";
 import { getActivityTypeConfig, type ActivityTypeConfig } from "@/lib/activityTypes";
 

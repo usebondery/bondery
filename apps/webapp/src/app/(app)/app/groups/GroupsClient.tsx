@@ -8,7 +8,7 @@ import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { PageHeader } from "@/app/(app)/app/components/PageHeader";
 import { PageWrapper } from "@/app/(app)/app/components/PageWrapper";
-import type { GroupWithCount } from "@bondery/types";
+import type { GroupWithCount } from "@bondery/schemas";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import { WEBSITE_URL } from "@/lib/config";
 import { openAddGroupModal } from "./components/AddGroupModal";

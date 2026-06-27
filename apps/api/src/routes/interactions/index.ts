@@ -8,6 +8,7 @@ import { Type } from "@sinclair/typebox";
 import { getAuth } from "../../lib/auth.js";
 import {
   UuidParam,
+  INTERACTION_SELECT,
   AvatarQualityEnum,
   AvatarSizeEnum,
   extractAvatarOptions,
@@ -39,6 +40,44 @@ const UpdateInteractionBody = Type.Object({
   participantIds: Type.Optional(Type.Array(Type.String())),
 });
 
+async function loadInteraction(
+  client: ReturnType<typeof getAuth>["client"],
+  userId: string,
+  interactionId: string,
+  avatarOptions?: ReturnType<typeof extractAvatarOptions>,
+) {
+  const { data: interaction, error } = await client
+    .from("interactions")
+    .select(INTERACTION_SELECT)
+    .eq("id", interactionId)
+    .eq("user_id", userId)
+    .single();
+
+  if (error || !interaction) {
+    return null;
+  }
+
+  return {
+    id: interaction.id,
+    title: interaction.title,
+    type: interaction.type,
+    description: interaction.description,
+    date: interaction.date,
+    createdAt: interaction.created_at,
+    updatedAt: interaction.updated_at,
+    participants: interaction.participants.map((participant: any) => ({
+      ...participant.person,
+      avatar: buildContactAvatarUrl(
+        client,
+        userId,
+        participant.person.id,
+        avatarOptions,
+        participant.person.updated_at,
+      ),
+    })),
+  };
+}
+
 export async function interactionRoutes(fastify: FastifyInstance) {
   fastify.addHook("onRoute", (routeOptions) => {
     routeOptions.schema = { ...routeOptions.schema, tags: ["Interactions"] };
@@ -67,20 +106,7 @@ export async function interactionRoutes(fastify: FastifyInstance) {
         count,
       } = await client
         .from("interactions")
-        .select(
-          `
-        *,
-        participants:interaction_participants(
-          person:people(
-            id,
-            first_name,
-            last_name,
-            updated_at
-          )
-        )
-      `,
-          { count: "exact" },
-        )
+        .select(INTERACTION_SELECT, { count: "exact" })
         .order("date", { ascending: false })
         .range(offset, offset + limit - 1);
 
@@ -177,7 +203,19 @@ export async function interactionRoutes(fastify: FastifyInstance) {
           .in("id", body.participantIds);
       }
 
-      return reply.status(201).send({ id: interaction.id });
+      const fullInteraction = await loadInteraction(
+        client,
+        user.id,
+        interaction.id,
+      );
+
+      if (!fullInteraction) {
+        return reply
+          .status(500)
+          .send({ error: "Interaction was created but could not be reloaded" });
+      }
+
+      return reply.status(201).send({ interaction: fullInteraction });
     },
   );
 
@@ -197,52 +235,14 @@ export async function interactionRoutes(fastify: FastifyInstance) {
       const { client, user } = getAuth(request);
       const { id } = request.params;
 
-      const { data: interaction, error } = await client
-        .from("interactions")
-        .select(
-          `
-          *,
-          participants:interaction_participants(
-            person:people(
-              id,
-              first_name,
-              last_name,
-              updated_at
-            )
-          )
-        `,
-        )
-        .eq("id", id)
-        .eq("user_id", user.id)
-        .single();
+      const avatarOptions = extractAvatarOptions(request.query);
+      const interaction = await loadInteraction(client, user.id, id, avatarOptions);
 
-      if (error) {
+      if (!interaction) {
         return reply.status(404).send({ error: "Interaction not found" });
       }
 
-      const avatarOptions = extractAvatarOptions(request.query);
-
-      return {
-        interaction: {
-          id: interaction.id,
-          title: interaction.title,
-          type: interaction.type,
-          description: interaction.description,
-          date: interaction.date,
-          createdAt: interaction.created_at,
-          updatedAt: interaction.updated_at,
-          participants: interaction.participants.map((participant: any) => ({
-            ...participant.person,
-            avatar: buildContactAvatarUrl(
-              client,
-              user.id,
-              participant.person.id,
-              avatarOptions,
-              participant.person.updated_at,
-            ),
-          })),
-        },
-      };
+      return { interaction };
     },
   );
 
@@ -253,7 +253,7 @@ export async function interactionRoutes(fastify: FastifyInstance) {
     "/:id",
     { schema: { params: UuidParam } },
     async (request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
-      const { client } = getAuth(request);
+      const { client, user } = getAuth(request);
       const { id } = request.params;
 
       const { error } = await client.from("interactions").delete().eq("id", id);
@@ -334,7 +334,12 @@ export async function interactionRoutes(fastify: FastifyInstance) {
         }
       }
 
-      return { message: "Interaction updated successfully" };
+      const interaction = await loadInteraction(client, user.id, id);
+      if (!interaction) {
+        return reply.status(404).send({ error: "Interaction not found" });
+      }
+
+      return { interaction };
     },
   );
 }

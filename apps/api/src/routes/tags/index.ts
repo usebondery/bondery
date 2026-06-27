@@ -20,7 +20,7 @@ import type {
   TagWithCount,
   ContactPreview,
   TablesUpdate,
-} from "@bondery/types";
+} from "@bondery/schemas";
 
 // ── TypeBox Schemas ──────────────────────────────────────────────────────────
 
@@ -271,17 +271,23 @@ export async function tagRoutes(fastify: FastifyInstance) {
 
       updates.updated_at = new Date().toISOString();
 
-      const { error } = await client
+      const { data: updatedTag, error } = await client
         .from("tags")
         .update(updates)
         .eq("id", id)
-        .eq("user_id", user.id);
+        .eq("user_id", user.id)
+        .select(TAG_SELECT)
+        .single();
 
       if (error) {
         return reply.status(500).send({ error: error.message });
       }
 
-      return { message: "Tag updated successfully" };
+      if (!updatedTag) {
+        return reply.status(404).send({ error: "Tag not found" });
+      }
+
+      return { message: "Tag updated successfully", tag: updatedTag };
     },
   );
 

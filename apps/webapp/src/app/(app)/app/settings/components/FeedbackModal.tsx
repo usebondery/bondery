@@ -1,7 +1,7 @@
 "use client";
 
 import { Button, Slider, Stack, Text, Textarea } from "@mantine/core";
-import { useForm } from "@mantine/form";
+import { schemaResolver, useForm } from "@mantine/form";
 import { modals } from "@mantine/modals";
 import { notifications } from "@mantine/notifications";
 import { useState } from "react";
@@ -11,14 +11,9 @@ import {
   loadingNotificationTemplate,
   successNotificationTemplate,
 } from "@bondery/mantine-next";
+import { feedbackFormSchema, type FeedbackFormInput } from "@bondery/schemas";
 import { captureEvent } from "@/lib/analytics/client";
 import type { useTranslations } from "next-intl";
-
-interface FeedbackFormValues {
-  npsScore: number;
-  npsReason: string;
-  generalFeedback: string;
-}
 
 const SLIDER_MARKS = [
   { value: 0, label: "0" },
@@ -34,16 +29,17 @@ interface FeedbackModalProps {
 export function FeedbackModal({ modalId, t }: FeedbackModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const form = useForm<FeedbackFormValues>({
+  const form = useForm<FeedbackFormInput>({
     mode: "controlled",
     initialValues: {
       npsScore: 5,
       npsReason: "",
       generalFeedback: "",
     },
+    validate: schemaResolver(feedbackFormSchema, { sync: true }),
   });
 
-  const handleSubmit = async (values: FeedbackFormValues) => {
+  const handleSubmit = async (values: FeedbackFormInput) => {
     setIsSubmitting(true);
 
     const loadingNotification = notifications.show({
@@ -81,7 +77,7 @@ export function FeedbackModal({ modalId, t }: FeedbackModalProps) {
       });
 
       modals.close(modalId);
-    } catch (error) {
+    } catch {
       notifications.hide(loadingNotification);
       notifications.show(
         errorNotificationTemplate({

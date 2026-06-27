@@ -45,7 +45,7 @@ Complete all of the following **before** pushing anything to the `release` branc
    packages/helpers/package.json
    packages/mantine-next/package.json
    packages/translations/package.json
-   packages/types/package.json
+   packages/schemas/package.json
    packages/vcard/package.json
    ```
 2. **Update the minimum Extension version** in the packages/helpers package. The const to update is `MIN_EXTENSION_VERSION` in `packages/helpers/src/constants.ts`. This ensures users are prompted to update if they have an incompatible extension version.

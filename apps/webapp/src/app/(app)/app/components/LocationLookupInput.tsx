@@ -2,9 +2,15 @@
 
 import { Autocomplete, Group } from "@mantine/core";
 import { useEffect, useRef, useState } from "react";
-import { getMapSuggestions, type MapSuggestionItem } from "@/app/(app)/app/map/actions";
 import { IconCompass } from "@tabler/icons-react";
+import { GEOCODE_SUGGEST_MIN_QUERY_LENGTH } from "@bondery/helpers/address";
+import {
+  geocodeSuggestionDisplayKey,
+  geocodeSuggestionDisplayLabel,
+} from "@bondery/helpers/geocode";
+import type { ContactAddressEntry } from "@bondery/schemas";
 import { DEBOUNCE_MS } from "@/lib/config";
+import { fetchGeocodeSuggestions } from "@/lib/geocode";
 
 interface LocationLookupInputProps {
   label?: string;
@@ -17,13 +23,12 @@ interface LocationLookupInputProps {
    *  "address" (default) also includes streets and full addresses. */
   mode?: "place" | "address";
   onChange: (value: string) => void;
-  onSuggestionSelect: (item: MapSuggestionItem) => void;
+  onSuggestionSelect: (item: ContactAddressEntry) => void;
   onBlur?: () => void;
 }
 
-function getSuggestionCountryFlag(item: MapSuggestionItem): string {
-  const countryEntry = item.regionalStructure.find((entry) => entry.type === "regional.country");
-  const iso = countryEntry?.isoCode?.toLowerCase();
+function getSuggestionCountryFlag(entry: ContactAddressEntry): string {
+  const iso = entry.addressCountryCode?.toLowerCase();
   return iso && iso.length === 2 ? iso : "aq";
 }
 
@@ -54,10 +59,12 @@ export function LocationLookupInput({
     extractCountryCodeFromLabel(value),
   );
   const [loading, setLoading] = useState(false);
-  const suggestionsByLabel = useRef<Record<string, MapSuggestionItem>>({});
+  const suggestionsByLabel = useRef<Record<string, ContactAddressEntry>>({});
   const optionFlagByLabel = useRef<Record<string, string>>({});
   /** Tracks whether the user has actively changed the input value. */
   const userHasTyped = useRef(false);
+  const activeQueryRef = useRef<string | null>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   // Sync the flag when value changes externally (e.g. after enrichment / router.refresh())
   useEffect(() => {
@@ -71,31 +78,66 @@ export function LocationLookupInput({
     // Only start fetching suggestions after the user types.
     if (!userHasTyped.current) return;
 
-    const timeoutId = setTimeout(async () => {
+    const timeoutId = setTimeout(() => {
       const text = value.trim();
-      if (text.length < 2) {
+      if (text.length < GEOCODE_SUGGEST_MIN_QUERY_LENGTH) {
         setOptions([]);
         suggestionsByLabel.current = {};
         optionFlagByLabel.current = {};
         return;
       }
 
-      setLoading(true);
-      const items = await getMapSuggestions(text, mode);
-      const dictionary: Record<string, MapSuggestionItem> = {};
-      for (const item of items) {
-        dictionary[item.label] = item;
-      }
+      abortControllerRef.current?.abort();
+      const controller = new AbortController();
+      abortControllerRef.current = controller;
+      activeQueryRef.current = text;
 
-      suggestionsByLabel.current = dictionary;
-      optionFlagByLabel.current = Object.fromEntries(
-        Object.entries(dictionary).map(([label, item]) => [label, getSuggestionCountryFlag(item)]),
-      );
-      setOptions(Object.keys(dictionary));
-      setLoading(false);
+      void (async () => {
+        setLoading(true);
+        try {
+          const items = await fetchGeocodeSuggestions(text, mode, controller.signal);
+          if (activeQueryRef.current !== text) {
+            return;
+          }
+
+          const dictionary: Record<string, ContactAddressEntry> = {};
+          const flags: Record<string, string> = {};
+          const labels: string[] = [];
+
+          for (const item of items) {
+            const displayLabel = geocodeSuggestionDisplayLabel(item);
+            dictionary[displayLabel] = item;
+            flags[displayLabel] = getSuggestionCountryFlag(item);
+            labels.push(displayLabel);
+          }
+
+          suggestionsByLabel.current = dictionary;
+          optionFlagByLabel.current = flags;
+          setOptions(labels);
+        } catch (error) {
+          if (error instanceof Error && error.name === "AbortError") {
+            return;
+          }
+          if (activeQueryRef.current === text) {
+            setOptions([]);
+            suggestionsByLabel.current = {};
+            optionFlagByLabel.current = {};
+          }
+        } finally {
+          if (activeQueryRef.current === text) {
+            setLoading(false);
+          }
+          if (abortControllerRef.current === controller) {
+            abortControllerRef.current = null;
+          }
+        }
+      })();
     }, DEBOUNCE_MS.locationSuggest);
 
-    return () => clearTimeout(timeoutId);
+    return () => {
+      clearTimeout(timeoutId);
+      abortControllerRef.current?.abort();
+    };
   }, [value, mode]);
 
   return (
@@ -142,3 +184,6 @@ export function LocationLookupInput({
     />
   );
 }
+
+// Re-export for consumers that need stable suggestion keys
+export { geocodeSuggestionDisplayKey, geocodeSuggestionDisplayLabel };

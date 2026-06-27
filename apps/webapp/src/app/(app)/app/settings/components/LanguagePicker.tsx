@@ -3,7 +3,7 @@
 import { notifications } from "@mantine/notifications";
 import { useTranslations } from "next-intl";
 import { LanguagePicker as SharedLanguagePicker } from "@/components/shared/LanguagePicker";
-import { APP_LANGUAGES_DATA } from "@/lib/languages";
+import { APP_LANGUAGES_DATA } from "@bondery/helpers/locale";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import {
   errorNotificationTemplate,
@@ -17,6 +17,7 @@ interface LanguagePickerProps {
 
 export function LanguagePicker({ initialValue }: LanguagePickerProps) {
   const t = useTranslations("SettingsPage.Profile");
+  const tLanguages = useTranslations("Languages");
 
   const handleChange = async (val: string) => {
     const loadingNotification = notifications.show({
@@ -70,6 +71,7 @@ export function LanguagePicker({ initialValue }: LanguagePickerProps) {
       label={t("Language")}
       placeholder={t("LanguageSearch")}
       languages={APP_LANGUAGES_DATA}
+      getLocalizedLabel={(language) => tLanguages(language.value)}
     />
   );
 }

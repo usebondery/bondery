@@ -1,7 +1,7 @@
 import { streamText, stepCountIs, type ModelMessage } from "ai";
 import type { ServerResponse } from "http";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import type { Database } from "@bondery/types/supabase.types";
+import type { Database } from "@bondery/schemas/supabase.types";
 import { getChatModel } from "./provider.js";
 import { SYSTEM_PROMPT } from "./system-prompt.js";
 import { createContactTools } from "./tools/contacts.js";

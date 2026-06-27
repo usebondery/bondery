@@ -92,9 +92,8 @@ root:
             schema:
               type: object
               properties:
-                id:
-                  type: string
-                  format: uuid
+                contact:
+                  $ref: "../schemas/contact.yaml#/Contact"
       "400":
         description: Missing first name or last name
       "401":
@@ -201,7 +200,10 @@ byId:
         content:
           application/json:
             schema:
-              $ref: "../schemas/common.yaml#/MessageResponse"
+              type: object
+              properties:
+                contact:
+                  $ref: "../schemas/contact.yaml#/Contact"
       "400":
         description: Invalid input (e.g. missing first name, mismatched lat/lng)
       "401":

@@ -11,8 +11,9 @@ import {
 } from "@mantine/core";
 import { IconCreditCard, IconExternalLink } from "@tabler/icons-react";
 import { useFormatter, useTranslations } from "next-intl";
+import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import { SettingsSection } from "./SettingsSection";
-import type { SubscriptionStatus } from "@bondery/types";
+import type { SubscriptionStatus } from "@bondery/schemas";
 import { UpgradeButton } from "@/components/shared";
 
 /**
@@ -27,7 +28,7 @@ export function SubscriptionCard({
   const t = useTranslations("SettingsPage.Subscription");
   const format = useFormatter();
   const isPremium = subscriptionStatus.plan === "premium";
-  const portalUrl = `/api/portal`;
+  const portalUrl = API_ROUTES.SUBSCRIPTIONS_PORTAL;
 
   const formatDate = (value: string | null): string | null => {
     if (!value) return null;

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Checkbox, SimpleGrid, Stack, TagsInput, Text, Textarea, Tooltip } from "@mantine/core";
+import { schemaResolver, useForm } from "@mantine/form";
 import { modals } from "@mantine/modals";
 import { notifications } from "@mantine/notifications";
 import { IconSend2, IconShare } from "@tabler/icons-react";
@@ -14,14 +15,16 @@ import {
   successNotificationTemplate,
 } from "@bondery/mantine-next";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
-import type {
-  Contact,
-  ContactAddressEntry,
-  EmailEntry,
-  ImportantDate,
-  PhoneEntry,
-  ShareableField,
-} from "@bondery/types";
+import {
+  shareContactEmailSchema,
+  type Contact,
+  type ContactAddressEntry,
+  type EmailEntry,
+  type ImportantDate,
+  type PhoneEntry,
+  type ShareableField,
+} from "@bondery/schemas";
+import { z } from "zod";
 
 const ALL_FIELDS: ShareableField[] = [
   "avatar",
@@ -41,6 +44,10 @@ const ALL_FIELDS: ShareableField[] = [
 ];
 
 const REQUIRED_FIELDS: ShareableField[] = ["avatar", "headline"];
+const shareContactFormSchema = z.object({
+  recipientEmails: shareContactEmailSchema.shape.recipients,
+  message: shareContactEmailSchema.shape.message,
+});
 
 interface OpenShareContactModalParams {
   contact: Contact;
@@ -152,9 +159,6 @@ function getFieldPreview(contact: Contact, field: ShareableField): string {
   }
 }
 
-const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const MAX_RECIPIENTS = 10;
-
 export interface ShareContactTexts {
   modalTitle: string;
   recipientEmailLabel: string;
@@ -190,10 +194,15 @@ interface OpenShareContactModalParams {
 
 function ShareContactModalContent({ contact, modalId }: { contact: Contact; modalId: string }) {
   const tShare = useTranslations("ShareContactModal");
-  const [recipientEmails, setRecipientEmails] = useState<string[]>([]);
-  const [message, setMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [emailError, setEmailError] = useState<string | null>(null);
+  const form = useForm({
+    mode: "controlled",
+    initialValues: {
+      recipientEmails: [] as string[],
+      message: "",
+    },
+    validate: schemaResolver(shareContactFormSchema, { sync: true }),
+  });
 
   const availableFields = ALL_FIELDS.filter(
     (field) => REQUIRED_FIELDS.includes(field) || hasFieldData(contact, field),
@@ -222,26 +231,7 @@ function ShareContactModalContent({ contact, modalId }: { contact: Contact; moda
     });
   };
 
-  const validate = (): boolean => {
-    if (recipientEmails.length === 0) {
-      setEmailError(tShare("NoRecipientsError"));
-      return false;
-    }
-    if (recipientEmails.length > MAX_RECIPIENTS) {
-      setEmailError(tShare("MaxRecipientsError"));
-      return false;
-    }
-    const allValid = recipientEmails.every((e) => EMAIL_REGEX.test(e));
-    if (!allValid) {
-      setEmailError(tShare("InvalidEmailsError"));
-      return false;
-    }
-    setEmailError(null);
-    return true;
-  };
-
-  const handleSubmit = async () => {
-    if (!validate()) return;
+  const handleSubmit = async (values: typeof form.values) => {
     setIsSubmitting(true);
 
     try {
@@ -250,8 +240,8 @@ function ShareContactModalContent({ contact, modalId }: { contact: Contact; moda
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           personId: contact.id,
-          recipientEmails,
-          message: message || undefined,
+          recipientEmails: values.recipientEmails,
+          message: values.message || undefined,
           selectedFields: Array.from(new Set([...selectedFields, ...REQUIRED_FIELDS])),
         }),
       });
@@ -282,87 +272,86 @@ function ShareContactModalContent({ contact, modalId }: { contact: Contact; moda
   const contactName = [contact.firstName, contact.lastName].filter(Boolean).join(" ");
 
   return (
-    <Stack gap="md">
-      <TagsInput
-        label={tShare("RecipientsLabel")}
-        placeholder={recipientEmails.length > 0 ? "" : tShare("RecipientsPlaceholder")}
-        value={recipientEmails}
-        onChange={(values) => {
-          setRecipientEmails(values);
-          setEmailError(null);
-        }}
-        error={emailError}
-        required
-        data-autofocus
-        splitChars={[",", " "]}
-        clearable
-      />
+    <form onSubmit={form.onSubmit(handleSubmit)}>
+      <Stack gap="md">
+        <TagsInput
+          label={tShare("RecipientsLabel")}
+          placeholder={form.values.recipientEmails.length > 0 ? "" : tShare("RecipientsPlaceholder")}
+          value={form.values.recipientEmails}
+          onChange={(values) => form.setFieldValue("recipientEmails", values)}
+          error={form.errors.recipientEmails}
+          required
+          data-autofocus
+          splitChars={[",", " "]}
+          clearable
+        />
 
-      <Textarea
-        label={tShare("MessageLabel")}
-        placeholder={tShare("MessagePlaceholder")}
-        value={message}
-        onChange={(e) => setMessage(e.currentTarget.value)}
-        rows={3}
-      />
+        <Textarea
+          label={tShare("MessageLabel")}
+          placeholder={tShare("MessagePlaceholder")}
+          value={form.values.message}
+          onChange={(e) => form.setFieldValue("message", e.currentTarget.value)}
+          rows={3}
+        />
 
-      <Tooltip label={tShare("SendCopyTooltip")} withArrow>
-        <Checkbox label={tShare("SendCopyCheckbox")} checked disabled onChange={() => {}} />
-      </Tooltip>
+        <Tooltip label={tShare("SendCopyTooltip")} withArrow>
+          <Checkbox label={tShare("SendCopyCheckbox")} checked disabled onChange={() => {}} />
+        </Tooltip>
 
-      <Text fw={500} size="sm">
-        {tShare("SelectFieldsLabel")}
-      </Text>
+        <Text fw={500} size="sm">
+          {tShare("SelectFieldsLabel")}
+        </Text>
 
-      <SimpleGrid cols={{ base: 2, sm: 3 }} spacing="xs">
-        {availableFields.map((field) => {
-          const isRequiredField = REQUIRED_FIELDS.includes(field);
+        <SimpleGrid cols={{ base: 2, sm: 3 }} spacing="xs">
+          {availableFields.map((field) => {
+            const isRequiredField = REQUIRED_FIELDS.includes(field);
 
-          return (
-            <Tooltip
-              key={field}
-              label={
-                field === "avatar"
-                  ? tShare("AvatarRequiredTooltip")
-                  : tShare("RequiredFieldTooltip")
-              }
-              disabled={!isRequiredField}
-              withArrow
-            >
-              <div>
-                <SelectableCard
-                  label={tShare(`Fields.${field}`)}
-                  description={
-                    field === "avatar"
-                      ? tShare("AvatarDescription", { name: contactName })
-                      : getFieldPreview(contact, field) || undefined
-                  }
-                  selected={selectedFields.has(field)}
-                  disabled={isRequiredField}
-                  onClick={() => toggleField(field)}
-                />
-              </div>
-            </Tooltip>
-          );
-        })}
-      </SimpleGrid>
+            return (
+              <Tooltip
+                key={field}
+                label={
+                  field === "avatar"
+                    ? tShare("AvatarRequiredTooltip")
+                    : tShare("RequiredFieldTooltip")
+                }
+                disabled={!isRequiredField}
+                withArrow
+              >
+                <div>
+                  <SelectableCard
+                    label={tShare(`Fields.${field}`)}
+                    description={
+                      field === "avatar"
+                        ? tShare("AvatarDescription", { name: contactName })
+                        : getFieldPreview(contact, field) || undefined
+                    }
+                    selected={selectedFields.has(field)}
+                    disabled={isRequiredField}
+                    onClick={() => toggleField(field)}
+                  />
+                </div>
+              </Tooltip>
+            );
+          })}
+        </SimpleGrid>
 
-      <ModalFooter
-        cancelLabel={tShare("CancelButton")}
-        onCancel={() => modals.close(modalId)}
-        cancelDisabled={isSubmitting}
-        actionLabel={
-          isSubmitting
-            ? tShare("SendingButton")
-            : recipientEmails.length > 0
-              ? tShare("SubmitButtonWithCount", { count: recipientEmails.length })
-              : tShare("SubmitButton")
-        }
-        onAction={handleSubmit}
-        actionLoading={isSubmitting}
-        actionDisabled={isSubmitting}
-        actionLeftSection={<IconSend2 size={16} />}
-      />
-    </Stack>
+        <ModalFooter
+          cancelLabel={tShare("CancelButton")}
+          onCancel={() => modals.close(modalId)}
+          cancelDisabled={isSubmitting}
+          actionLabel={
+            isSubmitting
+              ? tShare("SendingButton")
+              : form.values.recipientEmails.length > 0
+                ? tShare("SubmitButtonWithCount", { count: form.values.recipientEmails.length })
+                : tShare("SubmitButton")
+          }
+          actionType="submit"
+          actionLoading={isSubmitting}
+          actionDisabled={isSubmitting}
+          actionLeftSection={<IconSend2 size={16} />}
+        />
+      </Stack>
+    </form>
   );
 }

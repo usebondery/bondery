@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useCallback, useContext, useState } from "react";
-import type { ChatSession } from "@bondery/types";
+import type { ChatSession } from "@bondery/schemas";
 
 interface ChatSessionsContextValue {
   sessions: ChatSession[];

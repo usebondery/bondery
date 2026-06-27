@@ -10,7 +10,7 @@ import {
   FREE_MESSAGE_LIMIT,
   PREMIUM_MESSAGE_LIMIT,
 } from "../../lib/chat/quota.js";
-import type { SubscriptionStatus } from "@bondery/types";
+import type { SubscriptionStatus } from "@bondery/schemas";
 import { getPolarClient } from "../../lib/polar.js";
 
 const POLAR_STATUSES: SubscriptionStatus["polarStatus"][] = [

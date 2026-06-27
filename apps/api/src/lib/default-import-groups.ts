@@ -1,4 +1,4 @@
-import type { Database, InstagramImportSource } from "@bondery/types";
+import type { Database, InstagramImportSource } from "@bondery/schemas";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 export type DefaultImportGroupKey =

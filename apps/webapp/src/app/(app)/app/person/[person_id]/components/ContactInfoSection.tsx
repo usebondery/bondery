@@ -28,12 +28,20 @@ import {
 } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
 import { IMaskInput } from "react-imask";
-import type { PhoneEntry, EmailEntry, ContactType } from "@bondery/types";
+import {
+  CONTACT_LIMITS,
+  firstZodErrorMessage,
+  replaceEmailsSchema,
+  replacePhonesSchema,
+  type PhoneEntry,
+  type EmailEntry,
+  type ContactType,
+} from "@bondery/schemas";
 import {
   TELEPHONE_PREFIX_OPTIONS,
   getTelephoneReactMaskExpression,
   parsePhoneNumber,
-} from "@/lib/phoneHelpers";
+} from "@bondery/helpers/phone";
 import { EMAIL_TYPE_OPTIONS, PHONE_TYPE_OPTIONS } from "@/lib/config";
 import {
   ActionIconLink,
@@ -43,8 +51,8 @@ import {
 } from "@bondery/mantine-next";
 import { notifications } from "@mantine/notifications";
 
-const MAX_ENTRIES = 5;
-const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const MAX_PHONE_ENTRIES = CONTACT_LIMITS.maxPhones;
+const MAX_EMAIL_ENTRIES = CONTACT_LIMITS.maxEmails;
 
 interface ContactInfoSectionProps {
   phones: PhoneEntry[];
@@ -201,11 +209,14 @@ export function ContactInfoSection({
     );
   };
 
-  const hasInvalidEmail = (entries: EmailEntry[]) =>
-    entries.some((email) => {
-      const normalized = email.value.trim();
-      return Boolean(normalized) && !EMAIL_REGEX.test(normalized);
-    });
+  const showSchemaNotification = (message?: string) => {
+    notifications.show(
+      errorNotificationTemplate({
+        title: text.invalidEmailTitle,
+        description: message || text.invalidEmailMessage,
+      }),
+    );
+  };
 
   useEffect(() => {
     setLocalPhones(phones);
@@ -215,41 +226,53 @@ export function ContactInfoSection({
     setLocalEmails(emails);
   }, [emails]);
 
-  const isPhoneLimitReached = localPhones.length >= MAX_ENTRIES;
-  const isEmailLimitReached = localEmails.length >= MAX_ENTRIES;
+  const isPhoneLimitReached = localPhones.length >= MAX_PHONE_ENTRIES;
+  const isEmailLimitReached = localEmails.length >= MAX_EMAIL_ENTRIES;
   const showPhones = mode !== "emails";
   const showEmails = mode !== "phones";
 
   const persistPhones = (nextPhones: PhoneEntry[]) => {
-    setLocalPhones(nextPhones);
-    onPhonesChange(nextPhones);
-    onSave({ phones: nextPhones });
+    const parsed = replacePhonesSchema.safeParse(nextPhones);
+    if (!parsed.success) {
+      showSchemaNotification(firstZodErrorMessage(parsed.error));
+      return;
+    }
+    setLocalPhones(parsed.data);
+    onPhonesChange(parsed.data);
+    onSave({ phones: parsed.data });
   };
 
   const persistEmails = (nextEmails: EmailEntry[]) => {
-    if (hasInvalidEmail(nextEmails)) {
-      showInvalidEmailNotification();
+    const parsed = replaceEmailsSchema.safeParse(nextEmails);
+    if (!parsed.success) {
+      showSchemaNotification(firstZodErrorMessage(parsed.error));
       return;
     }
 
-    setLocalEmails(nextEmails);
-    onEmailsChange(nextEmails);
-    onSave({ emails: nextEmails });
+    setLocalEmails(parsed.data);
+    onEmailsChange(parsed.data);
+    onSave({ emails: parsed.data });
   };
 
   const saveCurrentPhones = () => {
-    onPhonesChange(localPhones);
-    onSave({ phones: localPhones });
+    const parsed = replacePhonesSchema.safeParse(localPhones);
+    if (!parsed.success) {
+      showSchemaNotification(firstZodErrorMessage(parsed.error));
+      return;
+    }
+    onPhonesChange(parsed.data);
+    onSave({ phones: parsed.data });
   };
 
   const saveCurrentEmails = () => {
-    if (hasInvalidEmail(localEmails)) {
-      showInvalidEmailNotification();
+    const parsed = replaceEmailsSchema.safeParse(localEmails);
+    if (!parsed.success) {
+      showSchemaNotification(firstZodErrorMessage(parsed.error));
       return;
     }
 
-    onEmailsChange(localEmails);
-    onSave({ emails: localEmails });
+    onEmailsChange(parsed.data);
+    onSave({ emails: parsed.data });
   };
 
   const handleCommitDraftPhone = () => {
@@ -338,7 +361,12 @@ export function ContactInfoSection({
       return;
     }
 
-    if (!EMAIL_REGEX.test(nextValue)) {
+    if (
+      !replaceEmailsSchema.safeParse([
+        ...localEmails,
+        { ...draftEmail, value: nextValue, preferred: localEmails.length === 0 },
+      ]).success
+    ) {
       showInvalidEmailNotification();
       return;
     }

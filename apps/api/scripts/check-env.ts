@@ -20,5 +20,6 @@ checkEnvVariables({
     "PRIVATE_EMAIL_USER",
     "PRIVATE_EMAIL_PASS",
     "PRIVATE_EMAIL_ADDRESS",
+    ...(environment === "production" ? ["PRIVATE_REDIS_URL"] : []),
   ],
 });

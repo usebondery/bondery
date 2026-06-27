@@ -54,9 +54,8 @@ root:
             schema:
               type: object
               properties:
-                id:
-                  type: string
-                  format: uuid
+                interaction:
+                  $ref: "../schemas/interaction.yaml#/Interaction"
       "400":
         description: Missing type or date
       "401":
@@ -96,7 +95,10 @@ byId:
         content:
           application/json:
             schema:
-              $ref: "../schemas/common.yaml#/MessageResponse"
+              type: object
+              properties:
+                interaction:
+                  $ref: "../schemas/interaction.yaml#/Interaction"
       "401":
         $ref: "../../openapi.yaml#/components/responses/UnauthorizedError"
       "500":

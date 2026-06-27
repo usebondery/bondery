@@ -173,8 +173,11 @@ export async function polarWebhookRoutes(
   /**
    * POST / — receive and process a Polar webhook event
    */
-  fastify.post("/", async (request: FastifyRequest, reply: FastifyReply) => {
-    const secret = fastify.config.POLAR_WEBHOOK_SECRET;
+  fastify.post(
+    "/",
+    { config: { rateLimit: false } },
+    async (request: FastifyRequest, reply: FastifyReply) => {
+      const secret = fastify.config.POLAR_WEBHOOK_SECRET;
 
     if (!secret) {
       request.log.warn(
@@ -314,10 +317,11 @@ export async function polarWebhookRoutes(
       return reply.status(500).send({ error: "Failed to process webhook" });
     }
 
-    request.log.info(
-      { userId, status, type: event.type },
-      "polar-webhook: subscription updated",
-    );
-    return reply.status(200).send({ received: true });
-  });
+      request.log.info(
+        { userId, status, type: event.type },
+        "polar-webhook: subscription updated",
+      );
+      return reply.status(200).send({ received: true });
+    },
+  );
 }

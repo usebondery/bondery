@@ -38,8 +38,12 @@ export const API_ROUTES = {
   CHAT: "/api/chat",
   CHAT_SESSIONS: "/api/chat/sessions",
   SUBSCRIPTIONS: "/api/subscriptions",
+  SUBSCRIPTIONS_CHECKOUT: "/api/subscriptions/checkout",
+  SUBSCRIPTIONS_PORTAL: "/api/subscriptions/portal",
   SUBSCRIPTIONS_SYNC: "/api/subscriptions/sync",
   WEBHOOKS_POLAR: "/api/webhooks/polar",
+  GEOCODE_SUGGEST: "/api/geocode/suggest",
+  GEOCODE_TIMEZONE: "/api/geocode/timezone",
 } as const;
 
 export const CHROME_EXTENSION_URL =

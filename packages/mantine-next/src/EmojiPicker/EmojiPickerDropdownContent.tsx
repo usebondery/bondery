@@ -4,8 +4,7 @@ import { useMemo, useState } from "react";
 import { Button, ScrollArea, SimpleGrid, Stack, Text, TextInput } from "@mantine/core";
 import { useDebouncedValue } from "@mantine/hooks";
 import { IconSearch } from "@tabler/icons-react";
-import { EMOJI_CATEGORIES } from "./emojiData";
-import type { EmojiData } from "./emojiData";
+import { filterEmojiCategories } from "@bondery/helpers/emoji";
 
 interface EmojiPickerDropdownContentProps {
   /** Currently selected emoji (highlighted in the grid). */
@@ -29,26 +28,10 @@ export function EmojiPickerDropdownContent({
   const [search, setSearch] = useState("");
   const [debouncedSearch] = useDebouncedValue(search, searchDebounceMs);
 
-  const filteredContent = useMemo<[string, EmojiData[]][]>(() => {
-    if (!debouncedSearch) {
-      return Object.entries(EMOJI_CATEGORIES);
-    }
-
-    const searchLower = debouncedSearch.toLowerCase();
-    const filtered: [string, EmojiData[]][] = [];
-
-    Object.entries(EMOJI_CATEGORIES).forEach(([category, emojis]) => {
-      const matchedEmojis = emojis.filter((item) =>
-        item.keywords.some((keyword) => keyword.includes(searchLower)),
-      );
-
-      if (matchedEmojis.length > 0) {
-        filtered.push([category, matchedEmojis]);
-      }
-    });
-
-    return filtered;
-  }, [debouncedSearch]);
+  const filteredContent = useMemo(
+    () => filterEmojiCategories(debouncedSearch),
+    [debouncedSearch],
+  );
 
   return (
     <Stack gap="sm">

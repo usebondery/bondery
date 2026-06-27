@@ -33,7 +33,7 @@
     "@bondery/branding": "*",
     "@bondery/helpers": "*",
     "@bondery/mantine-next": "*",
-    "@bondery/types": "*",
+    "@bondery/schemas": "*",
     "@mantine/core": "^9.0.0",
     "@mantine/hooks": "^9.0.0",
     "@tabler/icons-react": "^3.40.0",

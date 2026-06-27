@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import { useDebouncedCallback, useHotkeys } from "@mantine/hooks";
 import { PageWrapper } from "@/app/(app)/app/components/PageWrapper";
 import { openNewActivityModal } from "./components/NewActivityModal";
-import type { Contact, Activity } from "@bondery/types";
+import type { Contact, Activity } from "@bondery/schemas";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import { WEBSITE_URL, DEBOUNCE_MS, HOTKEYS } from "@/lib/config";
 import { peopleSearchActions } from "../components/PeopleSearchSpotlight";

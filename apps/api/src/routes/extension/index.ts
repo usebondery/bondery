@@ -5,7 +5,6 @@
 
 import type { FastifyInstance } from "fastify";
 import { registerPostRoute } from "./post-route.js";
-import { registerGetRoute } from "./get-route.js";
 
 export async function extensionRoutes(fastify: FastifyInstance) {
   fastify.addHook("onRoute", (routeOptions) => {
@@ -13,5 +12,4 @@ export async function extensionRoutes(fastify: FastifyInstance) {
   });
 
   registerPostRoute(fastify);
-  registerGetRoute(fastify);
 }

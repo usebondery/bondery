@@ -67,6 +67,7 @@ const GithubStarsResponse = Type.Object({
 export async function statsRoutes(fastify: FastifyInstance) {
   // Tag all routes in this plugin for OpenAPI docs
   fastify.addHook("onRoute", (routeOptions) => {
+    routeOptions.config = { ...routeOptions.config, rateLimit: false };
     routeOptions.schema = { ...routeOptions.schema, tags: ["Stats"] };
   });
 

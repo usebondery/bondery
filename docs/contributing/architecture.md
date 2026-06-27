@@ -105,18 +105,19 @@ Manages the PostgreSQL schema, Row Level Security policies, seed data, and Supab
 | Edge functions | Deno (TypeScript) |
 | Migrations | Supabase CLI |
 
-All database types are generated from the live schema into `packages/types/src/supabase.types.ts` and shared across all apps.
+All database types are generated from the live schema into `packages/schemas/src/supabase.types.ts` and shared across all apps.
 
 ---
 
 ## Shared packages
 
-### `packages/types`
+### `packages/schemas`
 
-Single source of truth for TypeScript types across the monorepo. Contains:
+Single source of truth for Zod schemas, inferred TypeScript types, and Supabase database types across the monorepo. Contains:
 
 - Auto-generated Supabase database types (`supabase.types.ts`)
-- Domain-level types shared between apps
+- Entity schemas and inferred domain types shared between apps
+- Shared validation constants and form schemas
 
 Run `npm run gen-types` inside `apps/supabase-db` to regenerate after a schema change.
 

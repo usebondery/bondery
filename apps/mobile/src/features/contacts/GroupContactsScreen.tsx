@@ -1,33 +1,79 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
-  Alert,
-  Linking,
   Pressable,
-  SectionList,
   StyleSheet,
   Text,
-  TextInput,
   View,
 } from "react-native";
+import { FlashList, type FlashListRef } from "@shopify/flash-list";
 import { useRouter } from "expo-router";
+import { GestureDetector } from "react-native-gesture-handler";
+import {
+  IconCopy,
+  IconSearch,
+  IconUsersMinus,
+} from "@tabler/icons-react-native";
+import type { Contact, Group } from "@bondery/schemas";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { IconArrowLeft, IconSearch } from "@tabler/icons-react-native";
-import type { Contact } from "@bondery/types";
-import { fetchGroupContacts } from "../../lib/api/client";
+import { ContactsSelectionActionBar } from "../../components/ContactsSelectionActionBar";
+import { ActionSheetPopup } from "../../components/ActionSheetPopup";
+import { MobileTextInput } from "../../components/MobileTextInput";
+import {
+  LoadErrorCard,
+  loadErrorTabRootInset,
+} from "../../components/load-state";
+import { GroupContactsScreenHeader } from "./components/GroupContactsScreenHeader";
+import { GroupEditSheet } from "./components/GroupEditSheet";
+import { GroupDeleteDialog } from "./components/GroupDeleteDialog";
+import {
+  addContactsToGroup,
+  createGroup,
+  fetchGroup,
+  fetchGroupContacts,
+  fetchGroups,
+} from "../../lib/api/client";
+import {
+  DEBOUNCE_MS,
+  GROUP_CONTACTS_FETCH_LIMIT,
+  LIST_SCROLL,
+  UI_TIMING_MS,
+} from "../../lib/config";
+import { useDebouncedValue } from "../../lib/hooks/useDebouncedValue";
+import { useContactsStore, useGroupsStore } from "../../lib/store";
 import {
   MobilePreferencesState,
+  SwipeAction,
   useMobilePreferences,
 } from "../../lib/preferences/useMobilePreferences";
 import { useMobileTranslations } from "../../lib/i18n/useMobileTranslations";
+import { useAppToast } from "../../lib/toast/useAppToast";
+import { floatingBarStyles } from "../../theme/floatingBarStyles";
+import { MOBILE_LAYOUT, MOBILE_TYPOGRAPHY } from "../../theme/tokens";
+import { useMobileThemeColors } from "../../theme/useMobileThemeColors";
 import { AlphabetScroller } from "./components/AlphabetScroller";
-import { ContactRow } from "./components/ContactRow";
+import { ContactListItem } from "./components/ContactListItem";
+import { ContactsAddToGroupsSheet } from "./components/ContactsAddToGroupsSheet";
+import { ContactsSectionHeader } from "./components/ContactsSectionHeader";
+import { ContactsSelectionBackHandler } from "./components/ContactsSelectionBackHandler";
+import { ContactsSelectionDialogs } from "./components/ContactsSelectionDialogs";
+import { GroupContactsRemoveFromGroupDialog } from "./components/GroupContactsRemoveFromGroupDialog";
 import {
-  contactMatchesQuery,
-  formatContactName,
-  getContactInitial,
-  getPrimaryPhone,
-} from "./contactUtils";
+  useContactsEffectiveSelectedCount,
+  useContactsSelection,
+  useContactsSelectionMode,
+} from "./contactsSelectionStore";
+import { formatContactName, getContactInitial } from "./contactUtils";
+import { executeContactSwipeAction } from "./contactSwipeActions";
+import {
+  buildContactsFlatRows,
+  type ContactSection,
+  type ContactsFlatRow,
+} from "./contactsFlatList";
+import { sortGroups } from "./groupSort";
+import { useContactsDragSelection } from "./hooks/useContactsDragSelection";
+import { useContactsSelectionListSync } from "./hooks/useContactsSelectionListSync";
+import type { FloatingActionBarAction } from "../../components/FloatingActionBar";
 
 interface GroupContactsScreenProps {
   groupId: string;
@@ -35,51 +81,213 @@ interface GroupContactsScreenProps {
   emoji: string;
 }
 
-type ContactSection = {
-  title: string;
-  data: Contact[];
-};
-
-export function GroupContactsScreen({ groupId, label, emoji }: GroupContactsScreenProps) {
+export function GroupContactsScreen({
+  groupId,
+  label,
+  emoji,
+}: GroupContactsScreenProps) {
   const t = useMobileTranslations();
+  const { showToast } = useAppToast();
   const router = useRouter();
+  const colors = useMobileThemeColors();
   const insets = useSafeAreaInsets();
-  const sectionListRef = useRef<SectionList<Contact, ContactSection>>(null);
-  const [contacts, setContacts] = useState<Contact[]>([]);
-  const [query, setQuery] = useState("");
+  const flashListRef = useRef<FlashListRef<ContactsFlatRow>>(null);
+  const pendingScrollIndexRef = useRef<number | null>(null);
+  const scrollRetryCountRef = useRef(0);
+  const latestRequestRef = useRef(0);
+  const [listContactIds, setListContactIds] = useState<string[]>([]);
+  const [totalCount, setTotalCount] = useState(0);
+  const [searchInput, setSearchInput] = useState("");
+  const debouncedQuery = useDebouncedValue(
+    searchInput.trim(),
+    DEBOUNCE_MS.search,
+  );
   const [loading, setLoading] = useState(true);
+  const [isSearching, setIsSearching] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const contactsById = useContactsStore((state) => state.byId);
+  const upsertContacts = useContactsStore((state) => state.upsertContacts);
+  const groupsById = useGroupsStore((state) => state.byId);
+  const upsertGroup = useGroupsStore((state) => state.upsertGroup);
+  const upsertGroups = useGroupsStore((state) => state.upsertGroups);
+  const [listViewportHeight, setListViewportHeight] = useState(0);
+
+  // Local label/emoji updated after a successful edit so the header reflects changes without navigation.
+  const [localLabel, setLocalLabel] = useState(label);
+  const [localEmoji, setLocalEmoji] = useState(emoji);
+
+  // Lazy-loaded full group details (includes color). Fetched once on first edit/duplicate trigger.
+  const [groupDetails, setGroupDetails] = useState<Group | null>(null);
+  const [isEditSheetOpen, setIsEditSheetOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isDuplicateDialogOpen, setIsDuplicateDialogOpen] = useState(false);
+  const [isDuplicating, setIsDuplicating] = useState(false);
+  const selectionMode = useContactsSelectionMode();
+  const effectiveSelectedCount = useContactsEffectiveSelectedCount();
+  const setRemoveFromGroupConfirmOpen = useContactsSelection(
+    (state) => state.setRemoveFromGroupConfirmOpen,
+  );
+  const isRemovingFromGroup = useContactsSelection(
+    (state) => state.isRemovingFromGroup,
+  );
+  const isDeleting = useContactsSelection((state) => state.isDeleting);
+  const isAddingToGroups = useContactsSelection(
+    (state) => state.isAddingToGroups,
+  );
   const leftSwipeAction = useMobilePreferences(
     (state: MobilePreferencesState) => state.leftSwipeAction,
   );
   const rightSwipeAction = useMobilePreferences(
     (state: MobilePreferencesState) => state.rightSwipeAction,
   );
+  const groupSortOrder = useMobilePreferences(
+    (state: MobilePreferencesState) => state.groupSortOrder,
+  );
+  const groupLastOpenedAt = useMobilePreferences(
+    (state: MobilePreferencesState) => state.groupLastOpenedAt,
+  );
+  const recordGroupOpened = useMobilePreferences(
+    (state: MobilePreferencesState) => state.recordGroupOpened,
+  );
 
-  const loadContacts = () => {
-    setLoading(true);
-    setError(null);
-    fetchGroupContacts(groupId, { limit: 200, offset: 0 })
-      .then((res) => setContacts(res.contacts || []))
-      .catch((err) =>
-        setError(err instanceof Error ? err.message : t("MobileApp.Common.ErrorTitle")),
-      )
-      .finally(() => setLoading(false));
-  };
+  const groups = useMemo(() => Object.values(groupsById), [groupsById]);
+  const sortedGroups = useMemo(
+    () => sortGroups(groups, groupSortOrder, groupLastOpenedAt),
+    [groups, groupSortOrder, groupLastOpenedAt],
+  );
+  const contacts = useMemo(
+    () =>
+      listContactIds
+        .map((contactId) => contactsById[contactId])
+        .filter((contact): contact is Contact => Boolean(contact)),
+    [contactsById, listContactIds],
+  );
+
+  const rowTexts = useMemo(
+    () => ({
+      call: t("MobileApp.Common.Call"),
+      message: t("MobileApp.Common.Message"),
+      email: t("MobileApp.Common.Email"),
+    }),
+    [t],
+  );
+
+  const isSearchActive = debouncedQuery.length > 0;
 
   useEffect(() => {
-    loadContacts();
-  }, [groupId]);
+    recordGroupOpened(groupId);
+  }, [groupId, recordGroupOpened]);
 
-  const filteredContacts = useMemo(
-    () => contacts.filter((c) => contactMatchesQuery(c, query)),
-    [contacts, query],
+  const fetchGroupContactsPage = useCallback(
+    async ({
+      query,
+      showInitialLoader = false,
+    }: {
+      query: string;
+      showInitialLoader?: boolean;
+    }) => {
+      const requestId = ++latestRequestRef.current;
+
+      if (showInitialLoader) {
+        setLoading(true);
+      } else {
+        setIsSearching(true);
+      }
+
+      setError(null);
+
+      try {
+        const response = await fetchGroupContacts(groupId, {
+          query,
+          limit: GROUP_CONTACTS_FETCH_LIMIT,
+          offset: 0,
+        });
+
+        if (requestId !== latestRequestRef.current) {
+          return;
+        }
+
+        const fetchedContacts = response.contacts || [];
+        upsertContacts(fetchedContacts);
+        setListContactIds(fetchedContacts.map((contact) => contact.id));
+        setTotalCount(
+          Number.isFinite(response.totalCount)
+            ? response.totalCount
+            : fetchedContacts.length,
+        );
+      } catch (loadError) {
+        if (requestId !== latestRequestRef.current) {
+          return;
+        }
+
+        setError(
+          loadError instanceof Error
+            ? loadError.message
+            : t("MobileApp.Common.ErrorTitle"),
+        );
+      } finally {
+        if (requestId === latestRequestRef.current) {
+          setLoading(false);
+          setIsSearching(false);
+        }
+      }
+    },
+    [groupId, t, upsertContacts],
+  );
+
+  const reloadGroups = useCallback(async () => {
+    try {
+      const groupsRes = await fetchGroups();
+      upsertGroups(groupsRes.groups || []);
+    } catch {
+      // Keep existing groups on refresh failure.
+    }
+  }, [upsertGroups]);
+
+  const reloadMembers = useCallback(async () => {
+    await fetchGroupContactsPage({ query: debouncedQuery });
+  }, [debouncedQuery, fetchGroupContactsPage]);
+
+  useEffect(() => {
+    void fetchGroupContactsPage({
+      query: debouncedQuery,
+      showInitialLoader: true,
+    });
+  }, [debouncedQuery, fetchGroupContactsPage]);
+
+  useEffect(() => {
+    void reloadGroups();
+  }, [reloadGroups]);
+
+  useContactsSelectionListSync({
+    contacts,
+    totalCount,
+  });
+
+  const handleSearchChange = useCallback(
+    (value: string) => {
+      setSearchInput(value);
+      if (value.trim() !== debouncedQuery) {
+        setIsSearching(true);
+      }
+    },
+    [debouncedQuery],
   );
 
   const sections = useMemo<ContactSection[]>(() => {
+    if (isSearchActive) {
+      return [
+        {
+          title: "",
+          kind: "search",
+          data: contacts,
+        },
+      ];
+    }
+
     const grouped = new Map<string, Contact[]>();
 
-    filteredContacts.forEach((contact) => {
+    contacts.forEach((contact) => {
       const initial = getContactInitial(contact);
       const letter = /^[A-Z]$/.test(initial) ? initial : "#";
       const bucket = grouped.get(letter) || [];
@@ -91,130 +299,445 @@ export function GroupContactsScreen({ groupId, label, emoji }: GroupContactsScre
       .sort(([left], [right]) => left.localeCompare(right))
       .map(([title, data]) => ({
         title,
-        data: data.sort((left, right) =>
+        kind: "alphabet" as const,
+        data: [...data].sort((left, right) =>
           formatContactName(left).localeCompare(formatContactName(right)),
         ),
       }));
-  }, [filteredContacts]);
+  }, [contacts, isSearchActive]);
 
-  const sectionLetters = useMemo(() => sections.map((section) => section.title), [sections]);
+  const sectionLetters = useMemo(
+    () =>
+      sections
+        .filter((section) => section.kind === "alphabet")
+        .map((section) => section.title),
+    [sections],
+  );
 
-  const executeAction = (contact: Contact, action: "call" | "message") => {
-    const primaryPhone = getPrimaryPhone(contact);
+  const {
+    rows: flatRows,
+    stickyHeaderIndices,
+    letterToIndex,
+  } = useMemo(() => buildContactsFlatRows(sections), [sections]);
 
-    if (!primaryPhone) {
-      Alert.alert(t("MobileApp.Common.ErrorTitle"), t("MobileApp.Contacts.MissingPhone"));
+  const {
+    gesture: dragSelectionGesture,
+    isDragging,
+    onScroll,
+  } = useContactsDragSelection({
+    enabled: selectionMode && !isSearchActive,
+    flatRows,
+    myselfContactId: undefined,
+    listHeaderHeight: 0,
+    listViewportHeight,
+    flashListRef,
+  });
+
+  const executeAction = useCallback(
+    (contact: Contact, action: SwipeAction) => {
+      executeContactSwipeAction(contact, action, showToast, {
+        missingPhone: t("MobileApp.Contacts.MissingPhone"),
+        missingEmail: t("MobileApp.Contacts.MissingEmail"),
+        errorTitle: t("MobileApp.Common.ErrorTitle"),
+      });
+    },
+    [showToast, t],
+  );
+
+  const handleOpenContact = useCallback(
+    (contactId: string) => {
+      router.push({ pathname: "/contact/[id]", params: { id: contactId } });
+    },
+    [router],
+  );
+
+  const handleBack = useCallback(() => {
+    router.back();
+  }, [router]);
+
+  const navigateToGroup = useCallback(
+    (group: Group) => {
+      router.navigate({
+        pathname: "/group/[id]",
+        params: {
+          id: group.id,
+          label: group.label,
+          emoji: group.emoji || "",
+        },
+      });
+    },
+    [router],
+  );
+
+  /**
+   * Lazily fetches full group details (includes color) the first time an action that
+   * needs them is triggered. Returns the cached value if already loaded.
+   */
+  const ensureGroupDetails = useCallback(async (): Promise<Group> => {
+    if (groupDetails) return groupDetails;
+
+    const response = await fetchGroup(groupId);
+    setGroupDetails(response.group);
+    return response.group;
+  }, [groupDetails, groupId]);
+
+  const handleOpenEditGroup = useCallback(async () => {
+    try {
+      await ensureGroupDetails();
+    } catch {
+      showToast({
+        type: "error",
+        headline: t("MobileApp.Common.ErrorTitle"),
+        description: t("MobileApp.Common.UnknownError"),
+      });
       return;
     }
+    setIsEditSheetOpen(true);
+  }, [ensureGroupDetails, showToast, t]);
 
-    const scheme = action === "call" ? "tel" : "sms";
-    Linking.openURL(`${scheme}:${primaryPhone}`).catch(() => {
-      Alert.alert(t("MobileApp.Common.ErrorTitle"), t("MobileApp.Contacts.ActionFailed"));
-    });
-  };
+  const handleGroupSaved = useCallback((group: Group) => {
+    setLocalLabel(group.label);
+    setLocalEmoji(group.emoji ?? "");
+    setGroupDetails(group);
+    upsertGroup(group);
+  }, [upsertGroup]);
 
-  const navBarStyle = { paddingTop: insets.top + 8, paddingBottom: 8 };
-  const headerTitle = emoji ? `${emoji} ${label}` : label;
+  const handleConfirmDuplicateGroup = useCallback(async () => {
+    if (isDuplicating) return;
+
+    setIsDuplicating(true);
+
+    try {
+      const details = await ensureGroupDetails();
+      const { group: newGroup } = await createGroup({
+        label: `${details.label} (copy)`,
+        emoji: details.emoji?.trim() || "📁",
+        color: details.color,
+      });
+
+      if (contacts.length > 0) {
+        await addContactsToGroup(newGroup.id, {
+          personIds: contacts.map((c) => c.id),
+        });
+      }
+
+      setIsDuplicateDialogOpen(false);
+      navigateToGroup(newGroup);
+    } catch {
+      showToast({
+        type: "error",
+        headline: t("MobileApp.Common.ErrorTitle"),
+        description: t("MobileApp.Groups.DuplicateFailed"),
+      });
+    } finally {
+      setIsDuplicating(false);
+    }
+  }, [
+    contacts,
+    ensureGroupDetails,
+    isDuplicating,
+    navigateToGroup,
+    showToast,
+    t,
+  ]);
+
+  const duplicateDialogTitle = t(
+    "MobileApp.Groups.DuplicateDialogTitle",
+  ).replace("{title}", localEmoji ? `${localEmoji} ${localLabel}` : localLabel);
+
+  const scrollToFlatIndex = useCallback((index: number) => {
+    pendingScrollIndexRef.current = index;
+    scrollRetryCountRef.current = 0;
+
+    const attemptScroll = () => {
+      void flashListRef.current
+        ?.scrollToIndex({
+          index,
+          animated: false,
+          viewOffset: 0,
+        })
+        .catch(() => {
+          if (
+            pendingScrollIndexRef.current !== index ||
+            scrollRetryCountRef.current >= LIST_SCROLL.maxRetries
+          ) {
+            return;
+          }
+
+          scrollRetryCountRef.current += 1;
+          setTimeout(attemptScroll, UI_TIMING_MS.scrollRetryDelay);
+        });
+    };
+
+    attemptScroll();
+  }, []);
+
+  const renderFlatItem = useCallback(
+    ({ item }: { item: ContactsFlatRow }) => {
+      if (item.type === "section-header") {
+        return <ContactsSectionHeader title={item.title} />;
+      }
+
+      return (
+        <ContactListItem
+          contact={item.contact}
+          isMyselfRow={false}
+          isSwipeEnabled={!selectionMode && item.sectionKind !== "search"}
+          leftSwipeAction={leftSwipeAction}
+          rightSwipeAction={rightSwipeAction}
+          texts={rowTexts}
+          onExecuteAction={executeAction}
+          onOpenContact={handleOpenContact}
+          onOpenMyself={() => {}}
+        />
+      );
+    },
+    [
+      executeAction,
+      handleOpenContact,
+      leftSwipeAction,
+      rightSwipeAction,
+      rowTexts,
+      selectionMode,
+    ],
+  );
+
+  const listEmpty = useMemo(
+    () => (
+      <View style={styles.centeredState}>
+        <Text style={[styles.emptyText, { color: colors.textMuted }]}>
+          {debouncedQuery
+            ? t("MobileApp.Contacts.NoMatchSearch")
+            : t("MobileApp.Contacts.Empty")}
+        </Text>
+      </View>
+    ),
+    [colors.textMuted, debouncedQuery, t],
+  );
+
+  const listExtraData = useMemo(
+    () => ({
+      leftSwipeAction,
+      rightSwipeAction,
+      selectionMode,
+    }),
+    [leftSwipeAction, rightSwipeAction, selectionMode],
+  );
+
+  const handleLetterChange = useCallback(
+    (letter: string) => {
+      const targetIndex = letterToIndex.get(letter);
+
+      if (targetIndex !== undefined) {
+        scrollToFlatIndex(targetIndex);
+      }
+    },
+    [letterToIndex, scrollToFlatIndex],
+  );
+
+  const isSelectionBusy = isDeleting || isAddingToGroups || isRemovingFromGroup;
+
+  const removeFromGroupAction = useMemo<FloatingActionBarAction>(
+    () => ({
+      id: "remove-from-group",
+      icon: <IconUsersMinus size={20} stroke={colors.iconSecondary} />,
+      accessibilityLabel: t("MobileApp.Contacts.RemoveFromGroup"),
+      onPress: () => setRemoveFromGroupConfirmOpen(true),
+      disabled: effectiveSelectedCount === 0 || isSelectionBusy,
+      loading: isRemovingFromGroup,
+    }),
+    [
+      colors.iconSecondary,
+      effectiveSelectedCount,
+      isRemovingFromGroup,
+      isSelectionBusy,
+      setRemoveFromGroupConfirmOpen,
+      t,
+    ],
+  );
+
+  const showFullScreenLoader = loading && contacts.length === 0;
+  const listBottomInset = selectionMode
+    ? MOBILE_LAYOUT.floatingTabBar.selectionBarInset +
+      Math.max(insets.bottom, 8)
+    : 24;
 
   return (
-    <View style={styles.screen}>
-      <View style={[styles.navBar, navBarStyle]}>
-        <Pressable onPress={() => router.back()} hitSlop={12} style={styles.backButton}>
-          <IconArrowLeft size={22} stroke="#111827" />
-        </Pressable>
-        <Text style={styles.navTitle} numberOfLines={1}>
-          {headerTitle}
-        </Text>
-        <View style={styles.navRight} />
-      </View>
+    <View style={[styles.screen, { backgroundColor: colors.appBackground }]}>
+      <ContactsSelectionBackHandler />
+      <GroupContactsScreenHeader
+        label={localLabel}
+        emoji={localEmoji}
+        onBack={handleBack}
+        onEditGroup={() => {
+          void handleOpenEditGroup();
+        }}
+        onDuplicateGroup={() => setIsDuplicateDialogOpen(true)}
+        onDeleteGroup={() => setIsDeleteDialogOpen(true)}
+        isDuplicating={isDuplicating}
+      />
 
       <View style={styles.searchRow}>
-        <View style={styles.searchContainer}>
-          <IconSearch size={16} stroke="#9ca3af" />
-          <TextInput
-            value={query}
-            onChangeText={setQuery}
-            placeholder={t("MobileApp.Contacts.SearchPlaceholder")}
-            placeholderTextColor="#9ca3af"
-            style={styles.searchInput}
-            autoCapitalize="none"
-            autoCorrect={false}
-          />
-        </View>
+        <MobileTextInput
+          value={searchInput}
+          onChangeText={handleSearchChange}
+          placeholder={t("MobileApp.Contacts.SearchPlaceholder")}
+          autoCapitalize="none"
+          autoCorrect={false}
+          unfocusedBorderColor={colors.borderStrong}
+          backgroundColor={colors.surfaceMuted}
+          leadingIcon={<IconSearch size={16} stroke={colors.iconSecondary} />}
+          style={styles.searchInput}
+          trailingAccessory={
+            isSearching ? (
+              <View style={styles.searchSpinner}>
+                <ActivityIndicator size="small" color={colors.textMuted} />
+              </View>
+            ) : (
+              <View style={styles.searchSpinner} />
+            )
+          }
+        />
       </View>
 
-      {loading ? (
+      {showFullScreenLoader ? (
         <View style={styles.centeredState}>
-          <ActivityIndicator size="large" color="#111827" />
+          <ActivityIndicator size="large" color={colors.textPrimary} />
         </View>
       ) : null}
 
-      {!loading && error ? (
-        <View style={styles.centeredState}>
-          <Text style={styles.errorText}>{error}</Text>
-          <Pressable style={styles.retryButton} onPress={loadContacts}>
-            <Text style={styles.retryText}>{t("MobileApp.Common.Retry")}</Text>
-          </Pressable>
-        </View>
-      ) : null}
-
-      {!loading && !error ? (
-        <View style={styles.listContainer}>
-          <SectionList
-            ref={sectionListRef}
-            sections={sections}
-            keyExtractor={(item: Contact) => item.id}
-            stickySectionHeadersEnabled
-            showsVerticalScrollIndicator={false}
-            renderSectionHeader={({ section }: { section: ContactSection }) => (
-              <View style={styles.sectionHeader}>
-                <Text style={styles.sectionHeaderText}>{section.title}</Text>
-              </View>
-            )}
-            renderItem={({ item }: { item: Contact }) => (
-              <ContactRow
-                contact={item}
-                selected={false}
-                selectionMode={false}
-                leftSwipeAction={leftSwipeAction}
-                rightSwipeAction={rightSwipeAction}
-                texts={{
-                  call: t("MobileApp.Common.Call"),
-                  message: t("MobileApp.Common.Message"),
-                  quickActionsTitle: t("MobileApp.Contacts.QuickActions"),
-                  select: t("MobileApp.Common.Select"),
-                  deselect: t("MobileApp.Common.Deselect"),
-                  cancel: t("MobileApp.Common.Cancel"),
-                }}
-                onToggleSelect={() => {}}
-                onExecuteAction={executeAction}
-                onPress={(id) => router.push({ pathname: "/contact/[id]", params: { id } })}
-              />
-            )}
-            ListEmptyComponent={
-              <View style={styles.centeredState}>
-                <Text style={styles.emptyText}>{t("MobileApp.Contacts.Empty")}</Text>
-              </View>
-            }
-          />
-
-          <AlphabetScroller
-            letters={sectionLetters}
-            onLetterChange={(letter) => {
-              const targetIndex = sections.findIndex((section) => section.title === letter);
-
-              if (targetIndex >= 0) {
-                sectionListRef.current?.scrollToLocation({
-                  sectionIndex: targetIndex,
-                  itemIndex: 0,
-                  animated: false,
-                  viewOffset: 0,
-                });
-              }
+      {!showFullScreenLoader && error ? (
+        <View style={loadErrorTabRootInset}>
+          <LoadErrorCard
+            title={t("MobileApp.Settings.LoadErrorTitle")}
+            description={error}
+            onRetry={() => {
+              void reloadMembers();
             }}
           />
         </View>
       ) : null}
+
+      {!showFullScreenLoader && !error ? (
+        <View style={styles.listContainer}>
+          <GestureDetector gesture={dragSelectionGesture}>
+            <View
+              style={styles.listGestureTarget}
+              onLayout={(event) => {
+                setListViewportHeight(event.nativeEvent.layout.height);
+              }}
+            >
+              <FlashList
+                key={isSearchActive ? `search-${debouncedQuery}` : "browse"}
+                ref={flashListRef}
+                data={flatRows}
+                extraData={listExtraData}
+                keyExtractor={(item) => item.key}
+                getItemType={(item) => item.type}
+                renderItem={renderFlatItem}
+                onScroll={onScroll}
+                scrollEventThrottle={16}
+                scrollEnabled={!isDragging}
+                stickyHeaderIndices={
+                  isSearchActive ? undefined : stickyHeaderIndices
+                }
+                showsVerticalScrollIndicator={false}
+                ListEmptyComponent={listEmpty}
+                contentContainerStyle={{ paddingBottom: listBottomInset }}
+              />
+            </View>
+          </GestureDetector>
+
+          {!isSearchActive ? (
+            <AlphabetScroller
+              letters={sectionLetters}
+              onLetterChange={handleLetterChange}
+            />
+          ) : null}
+        </View>
+      ) : null}
+
+      {selectionMode ? (
+        <View pointerEvents="box-none" style={floatingBarStyles.host}>
+          <ContactsSelectionActionBar extraActions={[removeFromGroupAction]} />
+        </View>
+      ) : null}
+
+      <ContactsSelectionDialogs
+        debouncedQuery={debouncedQuery}
+        onContactsReloaded={reloadMembers}
+        loadedGroupMembers={contacts}
+      />
+      <ContactsAddToGroupsSheet
+        groups={sortedGroups}
+        debouncedQuery={debouncedQuery}
+        onGroupsReloaded={reloadGroups}
+        loadedGroupMembers={contacts}
+      />
+      <GroupContactsRemoveFromGroupDialog
+        groupId={groupId}
+        debouncedQuery={debouncedQuery}
+        onMembersReloaded={reloadMembers}
+      />
+
+      <GroupEditSheet
+        mode="edit"
+        open={isEditSheetOpen}
+        groupId={groupId}
+        initialLabel={groupDetails?.label ?? localLabel}
+        initialEmoji={groupDetails?.emoji ?? localEmoji}
+        initialColor={groupDetails?.color ?? ""}
+        onOpenChange={setIsEditSheetOpen}
+        onSaved={handleGroupSaved}
+        onDeleted={handleBack}
+      />
+
+      <GroupDeleteDialog
+        open={isDeleteDialogOpen}
+        groupId={groupId}
+        groupTitle={localEmoji ? `${localEmoji} ${localLabel}` : localLabel}
+        onOpenChange={setIsDeleteDialogOpen}
+        onDeleted={handleBack}
+      />
+
+      <ActionSheetPopup
+        open={isDuplicateDialogOpen}
+        title={duplicateDialogTitle}
+        isBusy={isDuplicating}
+        onOpenChange={(nextOpen) => {
+          if (!nextOpen && isDuplicating) return;
+          setIsDuplicateDialogOpen(nextOpen);
+        }}
+        onClose={() => {
+          if (isDuplicating) return;
+          setIsDuplicateDialogOpen(false);
+        }}
+        actions={[
+          {
+            label: t("MobileApp.Common.Cancel"),
+            onPress: () => setIsDuplicateDialogOpen(false),
+            disabled: isDuplicating,
+            tone: "neutral",
+            variant: "outline",
+          },
+          {
+            label: t("MobileApp.Groups.DuplicateConfirm"),
+            icon: <IconCopy size={16} stroke={colors.textOnPrimary} />,
+            onPress: () => {
+              void handleConfirmDuplicateGroup();
+            },
+            loading: isDuplicating,
+            tone: "primary",
+            variant: "filled",
+          },
+        ]}
+      >
+        <Text
+          style={[styles.duplicateDialogBody, { color: colors.textSecondary }]}
+        >
+          {t("MobileApp.Groups.DuplicateDialogBody")}
+        </Text>
+      </ActionSheetPopup>
     </View>
   );
 }
@@ -222,88 +745,37 @@ export function GroupContactsScreen({ groupId, label, emoji }: GroupContactsScre
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: "#ffffff",
-  },
-  navBar: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 16,
-    backgroundColor: "#ffffff",
-  },
-  backButton: {
-    padding: 4,
-  },
-  navTitle: {
-    flex: 1,
-    textAlign: "center",
-    fontSize: 17,
-    fontWeight: "600",
-    color: "#111827",
-    marginHorizontal: 8,
-  },
-  navRight: {
-    width: 30,
   },
   searchRow: {
     paddingHorizontal: 16,
+    paddingTop: 12,
     paddingBottom: 8,
   },
-  searchContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    paddingHorizontal: 12,
-    borderWidth: 1,
-    borderColor: "#e5e7eb",
-    borderRadius: 10,
-    backgroundColor: "#f9fafb",
-  },
   searchInput: {
-    flex: 1,
     paddingVertical: 10,
-    fontSize: 15,
-    color: "#111827",
+  },
+  searchSpinner: {
+    width: 20,
+    alignItems: "center",
+    justifyContent: "center",
   },
   listContainer: {
     flex: 1,
   },
-  centeredState: {
+  listGestureTarget: {
     flex: 1,
+  },
+  centeredState: {
     alignItems: "center",
     justifyContent: "center",
-    padding: 24,
-  },
-  sectionHeader: {
-    backgroundColor: "#f9fafb",
-    paddingHorizontal: 16,
-    paddingVertical: 4,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: "#e5e7eb",
-  },
-  sectionHeaderText: {
-    fontSize: 13,
-    fontWeight: "700",
-    color: "#6b7280",
-  },
-  errorText: {
-    color: "#ef4444",
-    fontSize: 15,
-    textAlign: "center",
-    marginBottom: 16,
-  },
-  retryButton: {
+    paddingTop: MOBILE_LAYOUT.floatingTabBar.screenHeaderInset,
     paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 8,
-    backgroundColor: "#111827",
   },
-  retryText: {
-    color: "#ffffff",
-    fontSize: 15,
-    fontWeight: "600",
+  duplicateDialogBody: {
+    fontSize: MOBILE_TYPOGRAPHY.fontSize.body,
+    lineHeight: 20,
   },
   emptyText: {
-    color: "#6b7280",
-    fontSize: 15,
+    fontSize: MOBILE_TYPOGRAPHY.fontSize.bodyLarge,
   },
 });

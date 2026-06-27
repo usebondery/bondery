@@ -3,7 +3,8 @@ import { Type } from "@sinclair/typebox";
 import { getAuth } from "../../../lib/auth.js";
 import { parseLinkedInCsvUpload } from "./parser.js";
 import { assignContactsToDefaultImportGroup } from "../../../lib/default-import-groups.js";
-import type { LinkedInImportCommitResponse, LinkedInParseResponse } from "@bondery/types";
+import type { LinkedInImportCommitResponse, LinkedInParseResponse } from "@bondery/schemas";
+import { IMPORT_TIER } from "../../../lib/rate-limit.js";
 
 const LinkedInCommitContactSchema = Type.Object({
   firstName: Type.String(),
@@ -142,7 +143,7 @@ export async function linkedInImportRoutes(fastify: FastifyInstance) {
 
   fastify.post(
     "/commit",
-    { schema: { body: LinkedInCommitBody } },
+    { schema: { body: LinkedInCommitBody }, config: { rateLimit: IMPORT_TIER } },
     async (
       request: FastifyRequest<{ Body: typeof LinkedInCommitBody.static }>,
       reply: FastifyReply,

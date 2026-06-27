@@ -1,6 +1,6 @@
 import AdmZip from "adm-zip";
 import { parse as parseCsv } from "csv-parse/sync";
-import type { LinkedInPreparedContact } from "@bondery/types";
+import type { LinkedInPreparedContact } from "@bondery/schemas";
 import { SOCIAL_PLATFORM_URL_DETAILS } from "@bondery/helpers";
 import {
   stripEmojis,

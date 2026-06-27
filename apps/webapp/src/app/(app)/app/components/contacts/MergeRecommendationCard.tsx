@@ -11,7 +11,7 @@ import type {
   MergeConflictChoice,
   MergeConflictField,
   MergeRecommendation,
-} from "@bondery/types";
+} from "@bondery/schemas";
 import {
   PersonChip,
   errorNotificationTemplate,

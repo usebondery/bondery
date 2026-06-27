@@ -1,7 +1,7 @@
 import { API_URL } from "@/lib/config";
 import { getAuthHeaders } from "@/lib/authHeaders";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
-import type { Contact } from "@bondery/types";
+import type { Contact } from "@bondery/schemas";
 import { appendAvatarParams, type AvatarPreset } from "@/lib/avatarParams";
 
 export type SortOrder =

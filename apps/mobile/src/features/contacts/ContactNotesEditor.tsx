@@ -1,0 +1,408 @@
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  KeyboardAvoidingView,
+  Platform,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
+import { useFocusEffect, useRouter } from "expo-router";
+import type {
+  EnrichedMarkdownTextInputInstance,
+  StyleState,
+} from "react-native-enriched-markdown";
+import { EnrichedMarkdownTextInput } from "react-native-enriched-markdown";
+import type { Contact } from "@bondery/schemas";
+import { contactNotesUpdateSchema } from "@bondery/schemas";
+import {
+  collapsePersonMentionsFromEditor,
+  expandPersonMentionsForEditor,
+  formatPersonMentionLink,
+  htmlToMarkdown,
+  markdownToHtml,
+} from "@bondery/helpers/notes";
+import {
+  fetchContact,
+  fetchMyselfContact,
+  updateContact,
+} from "../../lib/api/client";
+import { StackNavBar } from "../../components/chrome";
+import { MOBILE_TYPOGRAPHY } from "../../theme/tokens";
+import { useMobileThemeColors } from "../../theme/useMobileThemeColors";
+import { useAppToast } from "../../lib/toast/useAppToast";
+import { formatContactName, formatRelativeEditedAt } from "./contactUtils";
+import { NotesFormattingToolbar } from "./components/NotesFormattingToolbar";
+import {
+  EditorCommandPalette,
+  type EditorPaletteMode,
+} from "./components/EditorCommandPalette";
+import { useMentionableContacts } from "./hooks/useMentionableContacts";
+import {
+  removeSlashTokenFromMarkdown,
+  useSlashCommandDetection,
+} from "./hooks/useSlashCommandDetection";
+import type { SlashCommandDefinition } from "./slashCommands";
+
+interface ContactNotesEditorProps {
+  id?: string;
+  isMyselfMode?: boolean;
+}
+
+type SaveStatus = "idle" | "saving" | "saved" | "error";
+
+const AUTOSAVE_DELAY_MS = 1500;
+
+export function ContactNotesEditor({
+  id,
+  isMyselfMode = false,
+}: ContactNotesEditorProps) {
+  const router = useRouter();
+  const colors = useMobileThemeColors();
+  const { showToast } = useAppToast();
+
+  const [contactId, setContactId] = useState<string | null>(id ?? null);
+  const [contactName, setContactName] = useState<string>("");
+  const [notesUpdatedAt, setNotesUpdatedAt] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [saveStatus, setSaveStatus] = useState<SaveStatus>("idle");
+  const [styleState, setStyleState] = useState<StyleState | null>(null);
+  const [rawMarkdown, setRawMarkdown] = useState<string | null>(null);
+  const [mentionActive, setMentionActive] = useState(false);
+  const [mentionQuery, setMentionQuery] = useState("");
+  const [loadedContact, setLoadedContact] = useState<Contact | null>(null);
+
+  const editorRef = useRef<EnrichedMarkdownTextInputInstance>(null);
+  const pendingMarkdown = useRef<string | null>(null);
+  const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const isSavingRef = useRef(false);
+  const isTransitioningToMentionRef = useRef(false);
+
+  const {
+    loading: mentionContactsLoading,
+    getContactName,
+    filterContacts,
+  } = useMentionableContacts({
+    contactId: loadedContact?.id ?? null,
+    isMyselfMode,
+    subjectContact: loadedContact,
+  });
+
+  const { slashState, handleChangeText, handleChangeSelection, clearSlash } =
+    useSlashCommandDetection();
+
+  const paletteMode: EditorPaletteMode = mentionActive
+    ? "mention"
+    : slashState?.isActive
+      ? "slash"
+      : "closed";
+
+  const mentionResults = useMemo(
+    () => filterContacts(mentionQuery),
+    [filterContacts, mentionQuery],
+  );
+
+  const getContactNameForEditor = useCallback(
+    (personId: string) => {
+      if (loadedContact && personId === loadedContact.id) {
+        return formatContactName(loadedContact);
+      }
+      return getContactName(personId);
+    },
+    [getContactName, loadedContact],
+  );
+
+  const editorDefaultValue = useMemo(() => {
+    if (rawMarkdown === null) {
+      return "";
+    }
+
+    return expandPersonMentionsForEditor(rawMarkdown, getContactNameForEditor);
+  }, [rawMarkdown, getContactNameForEditor]);
+
+  useEffect(() => {
+    const request = isMyselfMode
+      ? fetchMyselfContact()
+      : fetchContact(id as string);
+    request
+      .then(({ contact }) => {
+        setContactId(contact.id);
+        setContactName(formatContactName(contact));
+        setLoadedContact(contact);
+        setNotesUpdatedAt(contact.notesUpdatedAt ?? null);
+        setRawMarkdown(htmlToMarkdown(contact.notes ?? ""));
+      })
+      .catch(() => {
+        showToast({ type: "error", headline: "Failed to load notes" });
+      })
+      .finally(() => setLoading(false));
+  }, [id, isMyselfMode, showToast]);
+
+  const saveNotes = useCallback(
+    async (markdown: string) => {
+      if (!contactId || isSavingRef.current) return;
+      isSavingRef.current = true;
+      setSaveStatus("saving");
+      try {
+        const collapsed = collapsePersonMentionsFromEditor(markdown);
+        const html = markdownToHtml(collapsed) || null;
+        const payload = contactNotesUpdateSchema.parse({ notes: html });
+        const { contact: updated } = await updateContact(contactId, payload);
+        setNotesUpdatedAt(updated.notesUpdatedAt ?? null);
+        setSaveStatus("saved");
+      } catch {
+        setSaveStatus("error");
+        showToast({ type: "error", headline: "Failed to save notes" });
+      } finally {
+        isSavingRef.current = false;
+      }
+    },
+    [contactId, showToast],
+  );
+
+  const scheduleAutosave = useCallback(
+    (markdown: string) => {
+      pendingMarkdown.current = markdown;
+      if (saveTimer.current) clearTimeout(saveTimer.current);
+      setSaveStatus("idle");
+      saveTimer.current = setTimeout(() => {
+        if (pendingMarkdown.current !== null) {
+          void saveNotes(pendingMarkdown.current);
+          pendingMarkdown.current = null;
+        }
+      }, AUTOSAVE_DELAY_MS);
+    },
+    [saveNotes],
+  );
+
+  useFocusEffect(
+    useCallback(() => {
+      return () => {
+        if (saveTimer.current) {
+          clearTimeout(saveTimer.current);
+          saveTimer.current = null;
+        }
+        if (pendingMarkdown.current !== null) {
+          void saveNotes(pendingMarkdown.current);
+          pendingMarkdown.current = null;
+        }
+      };
+    }, [saveNotes]),
+  );
+
+  const dismissPalette = useCallback(() => {
+    clearSlash();
+    setMentionActive(false);
+    setMentionQuery("");
+  }, [clearSlash]);
+
+  const removeActiveSlashToken = useCallback(async () => {
+    const editor = editorRef.current;
+    if (!editor || !slashState) {
+      return;
+    }
+
+    const markdown = await editor.getMarkdown();
+    const withoutSlash = removeSlashTokenFromMarkdown(
+      markdown,
+      slashState.query,
+    );
+    if (withoutSlash !== markdown) {
+      editor.setValue(withoutSlash);
+    }
+  }, [slashState]);
+
+  const handleSlashCommandSelect = useCallback(
+    async (command: SlashCommandDefinition) => {
+      const editor = editorRef.current;
+      if (!editor || !slashState) {
+        return;
+      }
+
+      await removeActiveSlashToken();
+
+      if (command.id === "mention") {
+        isTransitioningToMentionRef.current = true;
+        clearSlash();
+        editor.startMention("@");
+        setMentionActive(true);
+        setMentionQuery("");
+        return;
+      }
+
+      clearSlash();
+      command.run(editor);
+    },
+    [clearSlash, removeActiveSlashToken, slashState],
+  );
+
+  const handleMentionSelect = useCallback((contact: Contact) => {
+    const editor = editorRef.current;
+    if (!editor) {
+      return;
+    }
+
+    const { displayText, url } = formatPersonMentionLink(
+      formatContactName(contact),
+      contact.id,
+    );
+    editor.insertMention(displayText, url);
+  }, []);
+
+  const handleStartMention = useCallback(() => {
+    clearSlash();
+    setMentionActive(true);
+    setMentionQuery("");
+  }, [clearSlash]);
+
+  const handleChangeMention = useCallback(({ text }: { text: string }) => {
+    setMentionQuery(text);
+  }, []);
+
+  const handleEndMention = useCallback(() => {
+    if (isTransitioningToMentionRef.current) {
+      isTransitioningToMentionRef.current = false;
+      return;
+    }
+
+    setMentionActive(false);
+    setMentionQuery("");
+  }, []);
+
+  const navSubtitle = useMemo(() => {
+    if (saveStatus === "saving") return "Saving…";
+    if (saveStatus === "error") return "Save failed";
+    if (notesUpdatedAt) return formatRelativeEditedAt(notesUpdatedAt);
+    return undefined;
+  }, [saveStatus, notesUpdatedAt]);
+
+  const markdownStyle = useMemo(
+    () => ({
+      paragraph: { color: colors.textPrimary, fontSize: 16, lineHeight: 24 },
+      strong: { color: colors.textPrimary },
+      em: { color: colors.textPrimary },
+      link: { color: colors.primary },
+      code: { backgroundColor: colors.surfacePressed },
+      list: { color: colors.textPrimary, fontSize: 16 },
+      linkVariants: {
+        "^bp://person/": {
+          color: colors.primary,
+          backgroundColor: colors.primary + "18",
+          underline: false,
+        },
+      },
+    }),
+    [colors],
+  );
+
+  const showEditor = !loading && rawMarkdown !== null;
+
+  const titleRow = (
+    <View style={styles.titleCol}>
+      <Text
+        style={[styles.navTitle, { color: colors.textPrimary }]}
+        numberOfLines={1}
+      >
+        {contactName || "Notes"}
+      </Text>
+      {navSubtitle ? (
+        <Text
+          style={[
+            styles.navSubtitle,
+            {
+              color:
+                saveStatus === "error" ? colors.dangerText : colors.textMuted,
+            },
+          ]}
+          numberOfLines={1}
+        >
+          {navSubtitle}
+        </Text>
+      ) : null}
+    </View>
+  );
+
+  return (
+    <View style={[styles.screen, { backgroundColor: colors.appBackground }]}>
+      <StackNavBar onBack={() => router.back()} titleRow={titleRow} />
+
+      {showEditor ? (
+        <KeyboardAvoidingView
+          style={styles.flex}
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+        >
+          <EnrichedMarkdownTextInput
+            ref={editorRef}
+            style={[styles.editor, { color: colors.textPrimary }]}
+            defaultValue={editorDefaultValue}
+            placeholder="Write notes…"
+            placeholderTextColor={colors.textMuted}
+            autoFocus
+            multiline
+            scrollEnabled
+            cursorColor={colors.primary}
+            selectionColor={colors.primary + "44"}
+            markdownStyle={markdownStyle}
+            mentionIndicators={["@"]}
+            onChangeMarkdown={scheduleAutosave}
+            onChangeText={handleChangeText}
+            onChangeSelection={handleChangeSelection}
+            onChangeState={setStyleState}
+            onStartMention={handleStartMention}
+            onChangeMention={handleChangeMention}
+            onEndMention={handleEndMention}
+          />
+          {paletteMode !== "closed" ? (
+            <EditorCommandPalette
+              mode={paletteMode}
+              slashQuery={slashState?.query ?? ""}
+              mentionContacts={mentionResults}
+              mentionLoading={mentionContactsLoading}
+              onDismiss={dismissPalette}
+              onSlashCommandSelect={(command) => {
+                void handleSlashCommandSelect(command);
+              }}
+              onMentionSelect={handleMentionSelect}
+            />
+          ) : (
+            <NotesFormattingToolbar
+              editorRef={editorRef}
+              styleState={styleState}
+            />
+          )}
+        </KeyboardAvoidingView>
+      ) : null}
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  screen: {
+    flex: 1,
+  },
+  flex: {
+    flex: 1,
+  },
+  titleCol: {
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 1,
+  },
+  navTitle: {
+    fontSize: MOBILE_TYPOGRAPHY.fontSize.body,
+    fontWeight: MOBILE_TYPOGRAPHY.fontWeight.semibold,
+    textAlign: "center",
+  },
+  navSubtitle: {
+    fontSize: MOBILE_TYPOGRAPHY.fontSize.caption,
+    textAlign: "center",
+  },
+  editor: {
+    flex: 1,
+    fontSize: 16,
+    lineHeight: 24,
+    paddingHorizontal: 16,
+    paddingTop: 12,
+    paddingBottom: 8,
+    textAlignVertical: "top",
+  },
+});

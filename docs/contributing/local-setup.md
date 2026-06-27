@@ -77,7 +77,7 @@ npx supabase status
 |---|---|
 | `npm run reset` | Reset database and re-run all migrations and seed |
 | `npm run migration:new -- <name>` | Create a new migration file |
-| `npm run gen-types` | Regenerate `packages/types/src/supabase.types.ts` from the local schema |
+| `npm run gen-types` | Regenerate `packages/schemas/src/supabase.types.ts` from the local schema |
 
 ---
 

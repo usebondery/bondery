@@ -3,7 +3,7 @@
 import { Stack, Text } from "@mantine/core";
 import { IconCopy, IconTrash } from "@tabler/icons-react";
 import { useState, useMemo, useEffect, useRef } from "react";
-import type { Activity, Contact } from "@bondery/types";
+import type { Activity, Contact } from "@bondery/schemas";
 import { openNewActivityModal } from "../../../interactions/components/NewActivityModal";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import { notifications } from "@mantine/notifications";

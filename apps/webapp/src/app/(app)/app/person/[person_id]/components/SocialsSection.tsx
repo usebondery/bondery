@@ -14,7 +14,13 @@ import Image from "next/image";
 import { modals } from "@mantine/modals";
 import { notifications } from "@mantine/notifications";
 import { memo, useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import type { Contact, EmailEntry, PhoneEntry } from "@bondery/types";
+import {
+  firstZodErrorMessage,
+  socialHandleSchema,
+  type Contact,
+  type EmailEntry,
+  type PhoneEntry,
+} from "@bondery/schemas";
 import { IMaskInput } from "react-imask";
 import { useTranslations } from "next-intl";
 import {
@@ -22,8 +28,8 @@ import {
   getTelephoneReactMaskExpression,
   parsePhoneNumber,
   TELEPHONE_PREFIX_OPTIONS,
-} from "@/lib/phoneHelpers";
-import { createSocialUrl, extractUsername } from "@/lib/socialsHelpers";
+} from "@bondery/helpers/phone";
+import { createSocialUrl, normalizeWebsiteUrl } from "@bondery/helpers";
 import {
   ActionIconLink,
   errorNotificationTemplate,
@@ -49,29 +55,6 @@ interface SocialsSectionProps {
 type SocialFieldKey = "linkedin" | "instagram" | "facebook" | "website" | "whatsapp" | "signal";
 
 type SocialFieldValues = Record<SocialFieldKey, string>;
-
-function normalizeWebsiteUrl(value: string): string | null {
-  const trimmedValue = value.trim();
-
-  if (!trimmedValue) {
-    return "";
-  }
-
-  const candidate = /^https?:\/\//i.test(trimmedValue) ? trimmedValue : `https://${trimmedValue}`;
-
-  try {
-    const parsedUrl = new URL(candidate);
-    const isHttpProtocol = parsedUrl.protocol === "http:" || parsedUrl.protocol === "https:";
-
-    if (!isHttpProtocol || !parsedUrl.hostname.includes(".")) {
-      return null;
-    }
-
-    return parsedUrl.toString();
-  } catch {
-    return null;
-  }
-}
 
 function getInitialValues(contact: Contact): SocialFieldValues {
   const whatsappParsed = parsePhoneNumber(contact.whatsapp || "");
@@ -345,28 +328,30 @@ export function SocialsSection({
       const inputValue = valuesRef.current[field] || "";
       let processedValue = inputValue;
 
-      if (["linkedin", "instagram", "facebook", "whatsapp"].includes(field)) {
-        processedValue = extractUsername(field, inputValue);
-      }
-
       if (field === "whatsapp") {
         processedValue = inputValue.trim() ? combinePhoneNumber(whatsappPrefix, inputValue) : "";
       } else if (field === "signal") {
         processedValue = inputValue.trim() ? combinePhoneNumber(signalPrefix, inputValue) : "";
-      } else if (field === "website") {
-        const normalizedWebsite = normalizeWebsiteUrl(inputValue);
-
-        if (normalizedWebsite === null) {
+      } else if (
+        field === "linkedin" ||
+        field === "instagram" ||
+        field === "facebook" ||
+        field === "website"
+      ) {
+        const parsedSocialHandle = socialHandleSchema.safeParse({
+          platform: field,
+          value: inputValue,
+        });
+        if (!parsedSocialHandle.success) {
           notifications.show(
             errorNotificationTemplate({
-              title: "Invalid URL",
-              description: "Please enter a valid website URL",
+              title: "Validation Error",
+              description: firstZodErrorMessage(parsedSocialHandle.error),
             }),
           );
           return;
         }
-
-        processedValue = normalizedWebsite;
+        processedValue = parsedSocialHandle.data.value;
       }
 
       if (processedValue === persistedValuesRef.current[field]) {

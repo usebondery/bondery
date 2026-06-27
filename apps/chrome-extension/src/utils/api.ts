@@ -7,7 +7,7 @@
 
 import { config } from "../config";
 import { getAccessToken, clearTokens } from "./auth";
-import type { RedirectRequest, RedirectResponse, EnrichContactRequest } from "@bondery/types";
+import type { RedirectRequest, RedirectResponse, EnrichContactRequest } from "@bondery/schemas";
 import { API_ROUTES } from "@bondery/helpers";
 
 export interface SocialLookupResult {

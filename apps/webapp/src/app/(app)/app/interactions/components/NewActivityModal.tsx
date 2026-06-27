@@ -12,7 +12,7 @@ import {
   Modal,
   getDefaultZIndex,
 } from "@mantine/core";
-import { useForm } from "@mantine/form";
+import { schemaResolver, useForm } from "@mantine/form";
 import { notifications } from "@mantine/notifications";
 import { IconCalendarPlus, IconCheck, IconUserPlus } from "@tabler/icons-react";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -20,7 +20,7 @@ import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { modals } from "@mantine/modals";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
-import type { Contact, Activity } from "@bondery/types";
+import { interactionFormSchema, type Contact, type Activity } from "@bondery/schemas";
 import { revalidateInteractions } from "../../actions";
 import { AddContactForm } from "../../people/components/AddContactModal";
 import {
@@ -194,12 +194,7 @@ function NewActivityForm({
       type: activity?.type || "Call",
       description: activity?.description || "",
     },
-    validate: {
-      title: (value) => (value.trim().length > 0 ? null : t("TitleRequired")),
-      participantIds: (value) => (value.length > 0 ? null : "Please select at least one contact"),
-      date: (value) => (value ? null : "Please select a date"),
-      type: (value) => (value ? null : "Please select a type"),
-    },
+    validate: schemaResolver(interactionFormSchema, { sync: true }),
   });
 
   const activityTypeSelectOptions = useMemo(

@@ -2,7 +2,7 @@ import { getAuthHeaders } from "@/lib/authHeaders";
 import { API_URL } from "@/lib/config";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import { ChatView } from "./ChatView";
-import type { SubscriptionStatus } from "@bondery/types";
+import type { SubscriptionStatus } from "@bondery/schemas";
 
 /**
  * Chat index page — shows an empty chat interface.

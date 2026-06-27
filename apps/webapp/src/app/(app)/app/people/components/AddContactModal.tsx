@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 
 import { useRouter } from "next/navigation";
 import { Stack, TextInput, Text } from "@mantine/core";
-import { useForm } from "@mantine/form";
+import { schemaResolver, useForm } from "@mantine/form";
 import { modals } from "@mantine/modals";
 import { notifications } from "@mantine/notifications";
 import { IconBrandLinkedin, IconUserPlus } from "@tabler/icons-react";
@@ -16,14 +16,29 @@ import {
   ModalTitle,
   successNotificationTemplate,
 } from "@bondery/mantine-next";
-import { INPUT_MAX_LENGTHS } from "@/lib/config";
-import { getRandomExampleName } from "@/lib/randomNameHelpers";
+import { z } from "zod";
 import { API_ROUTES, WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
-import type { Contact } from "@bondery/types";
+import { getRandomExampleName } from "@bondery/helpers/name";
+import {
+  CONTACT_FIELD_MAX_LENGTHS,
+  createContactInputSchema,
+  firstZodErrorMessage,
+  type Contact,
+} from "@bondery/schemas";
 import { revalidateContacts } from "../../actions";
 import { captureEvent } from "@/lib/analytics/client";
-import { parseFullName } from "@bondery/helpers";
-import { extractUsername } from "@/lib/socialsHelpers";
+import { extractUsername, parseFullName } from "@bondery/helpers";
+
+const addContactFormSchema = createContactInputSchema.superRefine((value, context) => {
+  const parsed = parseFullName(value.fullName.trim());
+  if (!parsed.firstName) {
+    context.addIssue({
+      code: "custom",
+      path: ["fullName"],
+      message: "Name is required",
+    });
+  }
+});
 
 interface OpenAddContactModalOptions {
   onCreated?: (contact: Contact) => void;
@@ -88,17 +103,7 @@ export function AddContactForm({
       fullName: initialFullName,
       linkedin: initialLinkedin,
     },
-    validate: {
-      fullName: (value) => {
-        const trimmed = value.trim();
-        if (trimmed.length === 0) return t("AddContactModal.NameRequired");
-        if (trimmed.length > INPUT_MAX_LENGTHS.fullName)
-          return t("AddContactModal.NameTooLong", { max: INPUT_MAX_LENGTHS.fullName });
-        const parsed = parseFullName(trimmed);
-        if (!parsed.firstName) return t("AddContactModal.InvalidName");
-        return null;
-      },
-    },
+    validate: schemaResolver(addContactFormSchema, { sync: true }),
   });
 
   const handleSubmit = async (values: typeof form.values) => {
@@ -195,10 +200,16 @@ export function AddContactForm({
       notifications.hide(loadingNotification);
 
       // Show error notification
+      const fallbackMessage =
+        error instanceof z.ZodError
+          ? firstZodErrorMessage(error)
+          : error instanceof Error
+            ? error.message
+            : t("AddContactModal.CreateFailed");
       notifications.show(
         errorNotificationTemplate({
           title: t("AddContactModal.ErrorTitle"),
-          description: error instanceof Error ? error.message : t("AddContactModal.CreateFailed"),
+          description: fallbackMessage,
         }),
       );
 
@@ -213,7 +224,7 @@ export function AddContactForm({
           label={t("AddContactModal.FullNameInput")}
           placeholder={`${exampleName.firstName} ${exampleName.lastName}`}
           withAsterisk
-          maxLength={INPUT_MAX_LENGTHS.fullName}
+          maxLength={CONTACT_FIELD_MAX_LENGTHS.fullName}
           key={form.key("fullName")}
           {...form.getInputProps("fullName")}
           disabled={isSubmitting}
@@ -224,7 +235,7 @@ export function AddContactForm({
           rightSection={
             focusedField === "fullName" ? (
               <Text size="10px" c="dimmed">
-                {form.values.fullName.length}/{INPUT_MAX_LENGTHS.fullName}
+                {form.values.fullName.length}/{CONTACT_FIELD_MAX_LENGTHS.fullName}
               </Text>
             ) : null
           }

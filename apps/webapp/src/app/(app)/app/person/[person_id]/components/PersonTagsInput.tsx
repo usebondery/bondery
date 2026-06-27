@@ -14,7 +14,7 @@ import { IconTag } from "@tabler/icons-react";
 import { notifications } from "@mantine/notifications";
 import { useState, useCallback } from "react";
 import { useTranslations } from "next-intl";
-import type { Tag, TagWithCount } from "@bondery/types";
+import type { Tag, TagWithCount } from "@bondery/schemas";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import { errorNotificationTemplate, warningNotificationTemplate } from "@bondery/mantine-next";
 import { API_URL } from "@/lib/config";

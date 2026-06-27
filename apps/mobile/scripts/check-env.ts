@@ -1,4 +1,4 @@
-import { checkEnvVariables } from "@bondery/helpers/check-env";
+import { checkEnvVariables } from "@bondery/helpers/env";
 import { existsSync, readFileSync } from "fs";
 import { resolve, dirname } from "path";
 import { fileURLToPath } from "url";

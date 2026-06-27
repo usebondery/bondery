@@ -16,7 +16,7 @@ import {
   getCurrentTimeInTimezone,
   formatOffset,
   TIMEZONES_DATA,
-} from "@/lib/timezones";
+} from "@bondery/helpers/locale";
 
 const TimezoneItem = forwardRef<
   HTMLDivElement,

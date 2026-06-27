@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import type { MergeRecommendation } from "@bondery/types";
+import type { MergeRecommendation } from "@bondery/schemas";
 import { FixContactsClient } from "./FixContactsClient";
 import { getMergeRecommendationsData } from "./getMergeRecommendationsData";
 import { getAuthHeaders } from "@/lib/authHeaders";

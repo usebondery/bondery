@@ -40,7 +40,7 @@ import { openDeleteContactModal } from "@/app/(app)/app/components/contacts/open
 import { openDeleteContactsModal } from "@/app/(app)/app/components/contacts/openDeleteContactsModal";
 import { GroupCard } from "../../groups/components/GroupCard";
 import { openEditGroupModal } from "../../groups/components/EditGroupModal";
-import type { Contact, GroupWithCount } from "@bondery/types";
+import type { Contact, GroupWithCount } from "@bondery/schemas";
 import { openAddPeopleToGroupSelectionModal } from "../../people/components/AddPeopleToGroupSelectionModal";
 import { openMergeWithModal } from "../../people/components/MergeWithModal";
 import { searchContacts } from "@/lib/searchContacts";
@@ -317,7 +317,7 @@ export function GroupDetailClient({
     try {
       const body = isAllTotalSelected
         ? {
-            filter: { q: initialSearch || undefined, sort: initialSort || undefined },
+            memberFilter: { q: initialSearch || undefined, sort: initialSort || undefined },
             excludePersonIds: Array.from(excludedIds),
           }
         : { personIds: ids };

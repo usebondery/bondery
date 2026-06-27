@@ -6,7 +6,7 @@ import { Avatar, Group, Loader, Stack, Text } from "@mantine/core";
 import { useDebouncedCallback } from "@mantine/hooks";
 import { createSpotlight, Spotlight } from "@mantine/spotlight";
 import { IconBriefcase, IconCompass, IconSearch, IconUsers } from "@tabler/icons-react";
-import type { Contact } from "@bondery/types";
+import type { Contact } from "@bondery/schemas";
 import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import { getAvatarColorFromName } from "@/lib/avatarColor";
 import { searchContacts } from "@/lib/searchContacts";

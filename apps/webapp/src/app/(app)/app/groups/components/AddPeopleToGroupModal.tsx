@@ -15,7 +15,7 @@ import {
   ModalTitle,
   successNotificationTemplate,
 } from "@bondery/mantine-next";
-import type { Contact } from "@bondery/types";
+import type { Contact } from "@bondery/schemas";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import { revalidateGroups } from "../../actions";
 import { buildAvatarQueryString } from "@/lib/avatarParams";
@@ -145,15 +145,34 @@ function AddPeopleToGroupForm({ groupId, groupLabel, modalId }: AddPeopleToGroup
         throw new Error(errorData.error || t("AddPeopleModal.AddError"));
       }
 
+      const result = (await res.json().catch(() => ({}))) as {
+        addedCount?: number;
+        skippedCount?: number;
+      };
+      const addedCount = result.addedCount ?? selectedIds.length;
+      const skippedCount = result.skippedCount ?? 0;
+
       notifications.hide(loadingNotification);
+
+      const skippedSuffix =
+        skippedCount > 0 && addedCount > 0
+          ? ` ${
+              skippedCount === 1
+                ? t("AddPeopleModal.SkippedAlreadyInGroupSingular", { count: skippedCount })
+                : t("AddPeopleModal.SkippedAlreadyInGroupPlural", { count: skippedCount })
+            }`
+          : "";
 
       notifications.show(
         successNotificationTemplate({
           title: t("AddPeopleModal.SuccessTitle"),
           description:
-            selectedIds.length === 1
-              ? t("AddPeopleModal.SuccessMessageSingular", { groupLabel })
-              : t("AddPeopleModal.SuccessMessagePlural", { count: selectedIds.length, groupLabel }),
+            addedCount === 0
+              ? t("AddPeopleModal.AllAlreadyInGroup", { groupLabel })
+              : addedCount === 1
+                ? t("AddPeopleModal.SuccessMessageSingular", { groupLabel }) + skippedSuffix
+                : t("AddPeopleModal.SuccessMessagePlural", { count: addedCount, groupLabel }) +
+                  skippedSuffix,
         }),
       );
 

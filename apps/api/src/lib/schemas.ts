@@ -3,7 +3,7 @@
  */
 
 import { Type, type Static } from "@sinclair/typebox";
-import type { AvatarTransformOptions } from "@bondery/types";
+import type { AvatarTransformOptions } from "@bondery/schemas";
 
 // ── Reusable TypeBox helpers ─────────────────────────────────────────────────
 
@@ -69,6 +69,19 @@ export const TAG_SELECT = `
   color,
   createdAt:created_at,
   updatedAt:updated_at
+`;
+
+/** Interaction fields selection query for Supabase */
+export const INTERACTION_SELECT = `
+  *,
+  participants:interaction_participants(
+    person:people(
+      id,
+      first_name,
+      last_name,
+      updated_at
+    )
+  )
 `;
 
 // ── Schema fragments ─────────────────────────────────────────────────────────
@@ -184,6 +197,60 @@ export const ContactAddressEntrySchema = Type.Object({
   addressGeocodeSource: Type.Optional(Type.Union([Type.String(), Type.Null()])),
   latitude: Type.Optional(Type.Union([Type.Number(), Type.Null()])),
   longitude: Type.Optional(Type.Union([Type.Number(), Type.Null()])),
+});
+
+export const ContactAddressTypeEnum = Type.Union([
+  Type.Literal("home"),
+  Type.Literal("work"),
+  Type.Literal("other"),
+]);
+
+export const ContactAddressGranularityEnum = Type.Union([
+  Type.Literal("address"),
+  Type.Literal("city"),
+  Type.Literal("state"),
+  Type.Literal("country"),
+]);
+
+export const ContactAddressGeocodeSourceEnum = Type.Union([
+  Type.Literal("mapy.com"),
+  Type.Literal("manual"),
+]);
+
+export const ContactAddressConfidenceEnum = Type.Union([
+  Type.Literal("verified"),
+  Type.Literal("unverifiable"),
+]);
+
+/** Strict mapped geocode suggestion payload used by GET /api/geocode/suggest. */
+export const GeocodeSuggestedAddressSchema = Type.Object({
+  value: Type.String(),
+  type: ContactAddressTypeEnum,
+  label: NullableString,
+  latitude: NullableNumber,
+  longitude: NullableNumber,
+  addressLine1: NullableString,
+  addressLine2: NullableString,
+  addressCity: NullableString,
+  addressPostalCode: NullableString,
+  addressState: NullableString,
+  addressStateCode: NullableString,
+  addressCountry: NullableString,
+  addressCountryCode: NullableString,
+  addressGranularity: ContactAddressGranularityEnum,
+  addressFormatted: NullableString,
+  addressGeocodeSource: Type.Union([ContactAddressGeocodeSourceEnum, Type.Null()]),
+  geocodeConfidence: Type.Union([ContactAddressConfidenceEnum, Type.Null()]),
+  timezone: NullableString,
+});
+
+export const GeocodeSuggestResponseSchema = Type.Object({
+  addresses: Type.Array(GeocodeSuggestedAddressSchema),
+});
+
+/** Response payload for GET /api/geocode/timezone. */
+export const GeocodeTimezoneResponseSchema = Type.Object({
+  timezone: NullableString,
 });
 
 /** Sub-schema: scraped work history entry */

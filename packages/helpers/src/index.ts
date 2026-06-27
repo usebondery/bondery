@@ -45,6 +45,50 @@ export {
 } from "./address/index.js";
 export type { PlaceLabelFields, AddressLabelFields } from "./address/index.js";
 
+export {
+  CONTACT_ADDRESS_TYPE_OPTIONS,
+  CONTACT_CHANNEL_TYPE_OPTIONS,
+  getContactAddressTypeEmoji,
+  getContactChannelTypeEmoji,
+} from "./contact/index.js";
+export type { ContactAddressTypeOption, ContactChannelTypeOption } from "./contact/index.js";
+
 export { compareVersions, isVersionBelow } from "./version/index.js";
 
+export {
+  CONTACT_SOCIAL_BRAND_COLORS,
+  CONTACT_SOCIAL_FIELD_KEYS,
+  createSocialUrl,
+  extractUsername,
+  formatWhatsAppNumber,
+  normalizePhoneSocialValue,
+  normalizeWebsiteUrl,
+  processContactSocialFieldValue,
+  socialPlatforms,
+} from "./socials/index.js";
+export type {
+  ContactSocialFieldKey,
+  ContactSocialPlatform,
+  ProcessContactSocialFieldResult,
+  SocialPlatformConfig,
+} from "./socials/index.js";
+
 export { INTERACTION_TYPES } from "./interactions/index.js";
+
+export {
+  buildGeocodeSuggestQuery,
+  buildGeocodeTimezoneQuery,
+  geocodeSuggestionDisplayKey,
+  geocodeSuggestionDisplayLabel,
+} from "./geocode/index.js";
+
+export {
+  combinePhoneNumber,
+  countryCodes,
+  DEFAULT_PHONE_REACT_MASK_EXPRESSION,
+  formatPhoneNumber,
+  getTelephoneReactMaskExpression,
+  parsePhoneNumber,
+  TELEPHONE_PREFIX_OPTIONS,
+} from "./phone/index.js";
+export type { CountryCode, TelephonePrefixOption } from "./phone/index.js";

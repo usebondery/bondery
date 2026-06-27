@@ -4,7 +4,6 @@ import { getTranslations } from "next-intl/server";
 import { ProfileCard } from "./components/ProfileCard";
 import { DataManagementCard } from "./components/DataManagementCard";
 import { API_URL } from "@/lib/config";
-import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { getAuthHeaders } from "@/lib/authHeaders";
 
 import { ErrorPageHeader } from "@/app/(app)/app/components/ErrorPageHeader";
@@ -14,8 +13,8 @@ import { PreferencesCard } from "./components/PreferencesCard";
 import { TagsSection } from "./components/TagsSection";
 import { SupportCard } from "./components/SupportCard";
 import { SubscriptionCard } from "./components/SubscriptionCard";
-import type { TagWithCount } from "@bondery/types";
-import type { SubscriptionStatus } from "@bondery/types";
+import type { TagWithCount } from "@bondery/schemas";
+import type { SubscriptionStatus } from "@bondery/schemas";
 import { buildAvatarQueryString } from "@/lib/avatarParams";
 
 export const metadata: Metadata = { title: "Settings" };
@@ -88,13 +87,8 @@ export default async function SettingsPage() {
       ? settings.colorScheme
       : "auto";
   const email = settings.email || "";
-  const avatarUrl = settings.avatarUrl || null;
   const providers = settings.providers || [];
-
-  // Fetch user identities from Supabase
-  const supabase = await createServerSupabaseClient();
-  const { data: identitiesData } = await supabase.auth.getUserIdentities();
-  const userIdentities = identitiesData?.identities || [];
+  const userIdentities = settings.identities ?? [];
 
   const t = await getTranslations("SettingsPage");
 

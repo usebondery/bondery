@@ -1,4 +1,4 @@
-import type { Contact } from "@bondery/types";
+import type { Contact } from "@bondery/schemas";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import { appendAvatarParams } from "./avatarParams";
 

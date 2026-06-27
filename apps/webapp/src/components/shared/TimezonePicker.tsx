@@ -5,7 +5,7 @@ import { IconWorld } from "@tabler/icons-react";
 import { useState, useEffect, forwardRef } from "react";
 import type { ReactNode } from "react";
 import { useFormatter, useTranslations } from "next-intl";
-import { getGroupedTimezones, formatOffset, TIMEZONES_DATA } from "@/lib/timezones";
+import { getGroupedTimezones, formatOffset, TIMEZONES_DATA } from "@bondery/helpers/locale";
 
 const TimezoneItem = forwardRef<
   HTMLDivElement,

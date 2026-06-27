@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { GroupDetailClient } from "./GroupDetailClient";
 import { API_URL } from "@/lib/config";
-import type { Contact } from "@bondery/types";
+import type { Contact } from "@bondery/schemas";
 import { getAuthHeaders } from "@/lib/authHeaders";
 import { notFound } from "next/navigation";
 import { API_ROUTES, formatMetadataTitle } from "@bondery/helpers/globals/paths";

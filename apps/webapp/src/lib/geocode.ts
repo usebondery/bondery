@@ -1,0 +1,74 @@
+import { API_ROUTES } from "@bondery/helpers/globals/paths";
+import { GEOCODE_SUGGEST_MIN_QUERY_LENGTH } from "@bondery/helpers/address";
+import { buildGeocodeSuggestQuery, buildGeocodeTimezoneQuery } from "@bondery/helpers/geocode";
+import {
+  parseGeocodeSuggestResponse,
+  parseGeocodeTimezoneResponse,
+  type ContactAddressEntry,
+} from "@bondery/schemas";
+
+/**
+ * Fetches address/place autocomplete suggestions from the Bondery geocode proxy.
+ * Uses same-origin `/api` rewrite so session cookies are sent automatically.
+ */
+export async function fetchGeocodeSuggestions(
+  query: string,
+  mode: "address" | "place" = "address",
+  signal?: AbortSignal,
+): Promise<ContactAddressEntry[]> {
+  const trimmed = query.trim();
+  if (trimmed.length < GEOCODE_SUGGEST_MIN_QUERY_LENGTH) {
+    return [];
+  }
+
+  try {
+    const response = await fetch(
+      `${API_ROUTES.GEOCODE_SUGGEST}?${buildGeocodeSuggestQuery(trimmed, mode)}`,
+      { signal },
+    );
+
+    if (!response.ok) {
+      return [];
+    }
+
+    const json: unknown = await response.json();
+    return parseGeocodeSuggestResponse(json);
+  } catch (error) {
+    if (error instanceof Error && error.name === "AbortError") {
+      throw error;
+    }
+    return [];
+  }
+}
+
+/**
+ * Fetches the IANA timezone identifier for a coordinate pair via the Bondery geocode proxy.
+ */
+export async function fetchTimezoneForCoordinates(
+  lat: number,
+  lon: number,
+  signal?: AbortSignal,
+): Promise<string | null> {
+  if (!Number.isFinite(lat) || !Number.isFinite(lon)) {
+    return null;
+  }
+
+  try {
+    const response = await fetch(
+      `${API_ROUTES.GEOCODE_TIMEZONE}?${buildGeocodeTimezoneQuery(lat, lon)}`,
+      { signal },
+    );
+
+    if (!response.ok) {
+      return null;
+    }
+
+    const json: unknown = await response.json();
+    return parseGeocodeTimezoneResponse(json);
+  } catch (error) {
+    if (error instanceof Error && error.name === "AbortError") {
+      throw error;
+    }
+    return null;
+  }
+}

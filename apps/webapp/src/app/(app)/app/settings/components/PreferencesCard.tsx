@@ -4,7 +4,7 @@ import { ActionIcon, CardSection, Group, Text, Tooltip } from "@mantine/core";
 import { IconAdjustmentsHorizontal, IconHelpCircle } from "@tabler/icons-react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import type { ColorSchemePreference } from "@bondery/types";
+import type { ColorSchemePreference } from "@bondery/schemas";
 import { notifications } from "@mantine/notifications";
 import { useState } from "react";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
@@ -19,7 +19,7 @@ import { ReminderTimePicker } from "./ReminderTimePicker";
 import { TimeFormatPicker } from "./TimeFormatPicker";
 import { LanguagePicker } from "@/components/shared/LanguagePicker";
 import { TimezonePicker } from "@/components/shared/TimezonePicker";
-import { APP_LANGUAGES_DATA } from "@/lib/languages";
+import { APP_LANGUAGES_DATA } from "@bondery/helpers/locale";
 
 interface PreferencesCardProps {
   initialColorScheme: ColorSchemePreference;
@@ -37,6 +37,7 @@ export function PreferencesCard({
   initialTimeFormat,
 }: PreferencesCardProps) {
   const t = useTranslations("SettingsPage.Preferences");
+  const tLanguages = useTranslations("Languages");
   const router = useRouter();
   const [language, setLanguage] = useState(initialLanguage);
   const [savedLanguage, setSavedLanguage] = useState(initialLanguage);
@@ -177,6 +178,7 @@ export function PreferencesCard({
               label={renderFieldLabel(t("Language"), t("LanguageTooltip"))}
               placeholder={t("LanguageSearch")}
               languages={APP_LANGUAGES_DATA}
+              getLocalizedLabel={(appLanguage) => tLanguages(appLanguage.value)}
             />
           </div>
 

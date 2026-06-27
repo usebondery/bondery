@@ -1,4 +1,4 @@
-import { TIMEZONES_DATA } from "@/lib/timezones";
+import { TIMEZONES_DATA } from "@bondery/helpers/locale";
 
 /**
  * ISO 3166-1 alpha-2 country codes (lowercase) that conventionally use

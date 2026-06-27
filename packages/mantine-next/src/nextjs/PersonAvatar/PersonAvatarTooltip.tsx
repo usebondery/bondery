@@ -2,7 +2,7 @@
 
 import { Tooltip } from "@mantine/core";
 import type { ReactNode } from "react";
-import type { ContactPreview } from "@bondery/types";
+import type { ContactPreview } from "@bondery/schemas";
 import { PersonCard } from "../PersonCard";
 
 type PersonAvatarTooltipIdentity = ContactPreview & {

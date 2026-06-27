@@ -30,7 +30,7 @@ export function registerExtensionVersionCheck(fastify: FastifyInstance): void {
     }
 
     // Skip unauthenticated health-check routes
-    if (request.url === "/status") {
+    if (request.url === "/status" || request.url === "/health") {
       return;
     }
 
@@ -38,6 +38,14 @@ export function registerExtensionVersionCheck(fastify: FastifyInstance): void {
     // header and no extension version header. They authenticate via HMAC
     // signatures verified inside their own route handlers.
     if (request.url.startsWith("/api/webhooks/")) {
+      return;
+    }
+
+    // Mobile and other headless clients authenticate with a Bearer token and
+    // do not send browser cookies. They are not extension traffic and should
+    // bypass extension version enforcement.
+    const authorization = request.headers.authorization;
+    if (typeof authorization === "string" && authorization.startsWith("Bearer ")) {
       return;
     }
 

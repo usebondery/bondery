@@ -8,7 +8,7 @@ import type {
   ContactPreview,
   ContactRelationshipWithPeople,
   RelationshipType,
-} from "@bondery/types";
+} from "@bondery/schemas";
 import { PersonChip } from "@bondery/mantine-next";
 import { DEBOUNCE_MS, RELATIONSHIP_TYPE_OPTIONS } from "@/lib/config";
 import { searchContacts } from "@/lib/searchContacts";

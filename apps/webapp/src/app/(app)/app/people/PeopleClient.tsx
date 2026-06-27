@@ -32,7 +32,7 @@ import { openMergeWithModal } from "./components/MergeWithModal";
 import { openShareContactModal } from "./components/ShareContactModal";
 import { useBatchEnrichFromLinkedIn } from "@/lib/extension/useBatchEnrichFromLinkedIn";
 
-import type { Contact } from "@bondery/types";
+import type { Contact } from "@bondery/schemas";
 import { revalidateContacts } from "../actions";
 import { appendAvatarParams } from "@/lib/avatarParams";
 import { searchContacts } from "@/lib/searchContacts";

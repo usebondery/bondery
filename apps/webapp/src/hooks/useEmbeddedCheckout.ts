@@ -11,6 +11,7 @@ import {
 } from "@bondery/mantine-next";
 import { useTranslations } from "next-intl";
 import type { PolarEmbedCheckout } from "@polar-sh/checkout/embed";
+import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import { createBrowswerSupabaseClient } from "@/lib/supabase/client";
 
 /** Maximum ms to wait for the Polar iframe onLoaded event before resetting loading state. */
@@ -35,7 +36,7 @@ interface UseEmbeddedCheckoutResult {
  * Hook that creates a Polar checkout session and opens it as an in-app iframe overlay.
  *
  * Flow:
- *  1. POST /api/checkout/session → get session URL (409 = already subscribed)
+ *  1. POST /api/subscriptions/checkout → get session URL (409 = already subscribed)
  *  2. PolarEmbedCheckout.create(url) → iframe overlay appears
  *  3. `success` event → subscribe to Supabase Realtime on `subscriptions` table
  *  4. When DB row changes to active/canceling → show success notification, call onSuccess, router.refresh()
@@ -70,7 +71,7 @@ export function useEmbeddedCheckout({
 
     let url: string;
     try {
-      const res = await fetch("/api/checkout/session", { method: "POST" });
+      const res = await fetch(API_ROUTES.SUBSCRIPTIONS_CHECKOUT, { method: "POST" });
 
       if (res.status === 401) {
         notifications.show(

@@ -1,29 +1,65 @@
 {
   "expo": {
-    "name": "Bondery Mobile",
-    "slug": "bondery-mobile",
-    "version": "0.1.0",
+    "name": "Bondery",
+    "slug": "bondery",
+    "version": "1.6.0",
     "orientation": "portrait",
     "scheme": "bondery",
+    "icon": "./assets/images/icon_1024.png",
     "userInterfaceStyle": "automatic",
+    "buildCacheProvider": "eas",
     "assetBundlePatterns": [
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "icon": "./assets/images/icon_1024.png",
+      "infoPlist": {
+        "NSCameraUsageDescription": "Bondery needs camera access to set contact profile photos.",
+        "NSPhotoLibraryUsageDescription": "Bondery needs photo library access to set contact profile photos."
+      }
     },
     "android": {
       "adaptiveIcon": {
+        "foregroundImage": "./assets/images/icon_512.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.bondery.mobile",
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.READ_MEDIA_IMAGES"
+      ]
     },
     "plugins": [
       "expo-router",
       "expo-secure-store",
-      "expo-web-browser"
+      "expo-web-browser",
+      "expo-sharing",
+      "expo-splash-screen",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Bondery needs photo library access to set contact profile photos.",
+          "cameraPermission": "Bondery needs camera access to set contact profile photos."
+        }
+      ],
+      [
+        "expo-navigation-bar",
+        {
+          "enforceContrast": false
+        }
+      ],
+      "react-native-enriched-markdown"
     ],
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "d07d8729-e178-4d86-ba54-0a6a3be84f85"
+      }
+    },
+    "owner": "bondery"
   }
 }

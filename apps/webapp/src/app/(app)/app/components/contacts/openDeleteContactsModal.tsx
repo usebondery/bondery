@@ -4,7 +4,7 @@ import { Text } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { IconAlertCircle, IconTrash } from "@tabler/icons-react";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
-import type { ContactsFilter } from "@bondery/types";
+import type { ContactsFilter } from "@bondery/schemas";
 import {
   errorNotificationTemplate,
   loadingNotificationTemplate,

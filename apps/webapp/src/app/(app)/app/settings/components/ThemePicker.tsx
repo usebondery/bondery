@@ -1,6 +1,6 @@
 import { useMantineColorScheme } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
-import type { ColorSchemePreference } from "@bondery/types";
+import type { ColorSchemePreference } from "@bondery/schemas";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import { useState } from "react";
 import type { ReactNode } from "react";

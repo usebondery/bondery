@@ -1,7 +1,7 @@
 "use client";
 
 import { Avatar } from "@mantine/core";
-import type { ContactPreview } from "@bondery/types";
+import type { ContactPreview } from "@bondery/schemas";
 import Link from "next/link";
 import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import { getAvatarColorFromName } from "../../utils/avatarColor";

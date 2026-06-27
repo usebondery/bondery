@@ -1,196 +1,212 @@
-import { useEffect, useState } from "react";
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
-import type { UserSettingsResponse } from "@bondery/types";
-import { fetchSettings } from "../../lib/api/client";
+import { Linking, ScrollView, StyleSheet, View } from "react-native";
+import { useRouter } from "expo-router";
+import * as WebBrowser from "expo-web-browser";
 import {
-  MobilePreferencesState,
-  MobileLocale,
-  SwipeAction,
-  useMobilePreferences,
-} from "../../lib/preferences/useMobilePreferences";
+  IconBook,
+  IconBrandDiscord,
+  IconBrandGithub,
+  IconBrandLinkedin,
+  IconBrandReddit,
+  IconBrandX,
+  IconMessage,
+  IconSettings,
+  IconSun,
+  IconTag,
+  IconUsers,
+  IconWorld,
+} from "@tabler/icons-react-native";
+import { HELP_DOCS_URL, SOCIAL_LINKS } from "@bondery/helpers/globals/paths";
+import { TabRootLargeTitle, TabRootScreenHeader } from "../../components/chrome";
 import { useMobileTranslations } from "../../lib/i18n/useMobileTranslations";
+import { useAppToast } from "../../lib/toast/useAppToast";
+import { useFabSpeedDialScrollDismiss } from "../navigation/useFabSpeedDialScrollDismiss";
+import { SOCIAL_BRAND_COLORS } from "../../theme/colors";
+import { MOBILE_LAYOUT } from "../../theme/tokens";
+import { useMobileThemeColors } from "../../theme/useMobileThemeColors";
+import { ContactSocialButton } from "../contacts/components/ContactSocialButton";
+import { SettingsNavigationRow } from "./components/SettingsNavigationRow";
+import { SettingsSectionCard } from "./components/SettingsSectionCard";
 
-function ChoiceGroup<T extends string>({
-  options,
-  selected,
-  onChange,
-}: {
-  options: Array<{ value: T; label: string }>;
-  selected: T;
-  onChange: (value: T) => void;
-}) {
-  return (
-    <View style={styles.choiceGroup}>
-      {options.map((option) => {
-        const active = option.value === selected;
-
-        return (
-          <Pressable
-            key={option.value}
-            onPress={() => onChange(option.value)}
-            style={[styles.choiceChip, active && styles.choiceChipActive]}
-          >
-            <Text style={[styles.choiceChipText, active && styles.choiceChipTextActive]}>
-              {option.label}
-            </Text>
-          </Pressable>
-        );
-      })}
-    </View>
-  );
-}
+const SOCIAL_BUTTONS = [
+  {
+    id: "github",
+    labelKey: "MobileApp.Settings.OpenGitHub",
+    url: SOCIAL_LINKS.github,
+    color: SOCIAL_BRAND_COLORS.github,
+    icon: IconBrandGithub,
+  },
+  {
+    id: "linkedin",
+    labelKey: "MobileApp.Settings.OpenLinkedIn",
+    url: SOCIAL_LINKS.linkedin,
+    color: SOCIAL_BRAND_COLORS.linkedin,
+    icon: IconBrandLinkedin,
+  },
+  {
+    id: "reddit",
+    labelKey: "MobileApp.Settings.OpenReddit",
+    url: SOCIAL_LINKS.reddit,
+    color: SOCIAL_BRAND_COLORS.reddit,
+    icon: IconBrandReddit,
+  },
+  {
+    id: "x",
+    labelKey: "MobileApp.Settings.OpenX",
+    url: SOCIAL_LINKS.x,
+    color: SOCIAL_BRAND_COLORS.x,
+    icon: IconBrandX,
+  },
+  {
+    id: "discord",
+    labelKey: "MobileApp.Settings.OpenDiscord",
+    url: SOCIAL_LINKS.discord,
+    color: SOCIAL_BRAND_COLORS.discord,
+    icon: IconBrandDiscord,
+  },
+] as const;
 
 export function SettingsScreen() {
   const t = useMobileTranslations();
-  const locale = useMobilePreferences((state: MobilePreferencesState) => state.locale);
-  const leftSwipeAction = useMobilePreferences(
-    (state: MobilePreferencesState) => state.leftSwipeAction,
-  );
-  const rightSwipeAction = useMobilePreferences(
-    (state: MobilePreferencesState) => state.rightSwipeAction,
-  );
-  const setLocale = useMobilePreferences((state: MobilePreferencesState) => state.setLocale);
-  const setLeftSwipeAction = useMobilePreferences(
-    (state: MobilePreferencesState) => state.setLeftSwipeAction,
-  );
-  const setRightSwipeAction = useMobilePreferences(
-    (state: MobilePreferencesState) => state.setRightSwipeAction,
-  );
+  const router = useRouter();
+  const { showToast } = useAppToast();
+  const colors = useMobileThemeColors();
+  const { onScroll: fabScrollDismiss } = useFabSpeedDialScrollDismiss();
 
-  const [loadingSettings, setLoadingSettings] = useState(true);
-  const [settingsResponse, setSettingsResponse] = useState<UserSettingsResponse | null>(null);
+  const openDocs = async () => {
+    try {
+      await WebBrowser.openBrowserAsync(HELP_DOCS_URL);
+      return;
+    } catch {
+      // Fall back to platform URL open when in-app browser cannot be presented.
+    }
 
-  useEffect(() => {
-    const loadSettings = async () => {
-      try {
-        const response = await fetchSettings();
-        setSettingsResponse(response);
-      } finally {
-        setLoadingSettings(false);
-      }
-    };
+    try {
+      await Linking.openURL(HELP_DOCS_URL);
+    } catch {
+      showToast({
+        type: "error",
+        headline: t("MobileApp.Settings.OpenDocsErrorHeadline"),
+        description: t("MobileApp.Settings.OpenDocsErrorDescription"),
+      });
+    }
+  };
 
-    loadSettings();
-  }, []);
-
-  const swipeOptions: Array<{ value: SwipeAction; label: string }> = [
-    { value: "call", label: t("MobileApp.Common.Call") },
-    { value: "message", label: t("MobileApp.Common.Message") },
-  ];
-
-  const localeOptions: Array<{ value: MobileLocale; label: string }> = [
-    { value: "en", label: t("MobileApp.Settings.English") },
-    { value: "cs", label: t("MobileApp.Settings.Czech") },
-  ];
+  const openExternalUrl = async (url: string) => {
+    try {
+      await Linking.openURL(url);
+    } catch {
+      // No toast needed here; this is a non-critical optional action.
+    }
+  };
 
   return (
-    <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
-      <Text style={styles.title}>{t("MobileApp.Settings.Title")}</Text>
+    <View style={[styles.screen, { backgroundColor: colors.appBackground }]}>
+      <TabRootScreenHeader
+        titleRow={<TabRootLargeTitle>{t("MobileApp.Settings.Title")}</TabRootLargeTitle>}
+      />
 
-      <View style={styles.card}>
-        <Text style={styles.cardTitle}>{t("MobileApp.Settings.Account")}</Text>
-        {loadingSettings ? (
-          <ActivityIndicator size="small" color="#111827" />
-        ) : (
-          <>
-            <Text style={styles.accountText}>
-              {settingsResponse?.data?.email || t("MobileApp.Settings.NoEmail")}
-            </Text>
-            <Text style={styles.accountSubText}>{settingsResponse?.data?.timezone || "UTC"}</Text>
-          </>
-        )}
-      </View>
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={styles.content}
+        onScroll={fabScrollDismiss}
+        scrollEventThrottle={16}
+      >
+      <SettingsSectionCard title={t("MobileApp.Settings.Account")}>
+        <SettingsNavigationRow
+          icon={<IconSettings size={18} stroke={colors.iconPrimary} />}
+          label={t("MobileApp.Settings.Account")}
+          onPress={() => router.push("/settings/account")}
+        />
+      </SettingsSectionCard>
 
-      <View style={styles.card}>
-        <Text style={styles.cardTitle}>{t("MobileApp.Settings.SwipeActions")}</Text>
-
-        <Text style={styles.label}>{t("MobileApp.Settings.LeftSwipe")}</Text>
-        <ChoiceGroup
-          options={swipeOptions}
-          selected={leftSwipeAction}
-          onChange={setLeftSwipeAction}
+      <SettingsSectionCard title={t("MobileApp.Settings.Preferences")}>
+        <SettingsNavigationRow
+          icon={<IconMessage size={18} stroke={colors.iconPrimary} />}
+          label={t("MobileApp.Settings.SwipeActions")}
+          onPress={() => router.push("/settings/swipe-actions")}
         />
 
-        <Text style={styles.label}>{t("MobileApp.Settings.RightSwipe")}</Text>
-        <ChoiceGroup
-          options={swipeOptions}
-          selected={rightSwipeAction}
-          onChange={setRightSwipeAction}
+        <SettingsNavigationRow
+          icon={<IconUsers size={18} stroke={colors.iconPrimary} />}
+          label={t("MobileApp.Settings.GroupSort")}
+          onPress={() => router.push("/settings/group-sort")}
         />
-      </View>
 
-      <View style={styles.card}>
-        <Text style={styles.cardTitle}>{t("MobileApp.Settings.Language")}</Text>
-        <ChoiceGroup options={localeOptions} selected={locale} onChange={setLocale} />
-      </View>
-    </ScrollView>
+        <SettingsNavigationRow
+          icon={<IconTag size={18} stroke={colors.iconPrimary} />}
+          label={t("MobileApp.TagsSettings.Title")}
+          onPress={() => router.push("/settings/tags")}
+        />
+
+        <SettingsNavigationRow
+          icon={<IconWorld size={18} stroke={colors.iconPrimary} />}
+          label={t("MobileApp.Settings.LanguageAndTime")}
+          onPress={() => router.push("/settings/language")}
+        />
+
+        <SettingsNavigationRow
+          icon={<IconSun size={18} stroke={colors.iconPrimary} />}
+          label={t("MobileApp.Settings.Theme")}
+          showDivider={false}
+          onPress={() => router.push("/settings/theme")}
+        />
+      </SettingsSectionCard>
+
+      <SettingsSectionCard title={t("MobileApp.Settings.Guides")}>
+        <SettingsNavigationRow
+          icon={<IconBook size={18} stroke={colors.iconPrimary} />}
+          label={t("MobileApp.Settings.Docs")}
+          destination="external"
+          externalLabel={t("MobileApp.Settings.External")}
+          showDivider={false}
+          onPress={() => {
+            void openDocs();
+          }}
+        />
+      </SettingsSectionCard>
+
+      <SettingsSectionCard title={t("MobileApp.Settings.FollowUs")}>
+        <View style={styles.socialsRow}>
+          {SOCIAL_BUTTONS.map((social) => {
+            const Icon = social.icon;
+
+            return (
+              <ContactSocialButton
+                key={social.id}
+                color={social.color}
+                icon={<Icon size={20} stroke={social.color} />}
+                accessibilityLabel={t(social.labelKey)}
+                onPress={() => {
+                  void openExternalUrl(social.url);
+                }}
+              />
+            );
+          })}
+        </View>
+      </SettingsSectionCard>
+      </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: "#f9fafb",
+  },
+  scroll: {
+    flex: 1,
   },
   content: {
-    paddingTop: 54,
-    paddingHorizontal: 16,
-    paddingBottom: 32,
-    gap: 14,
+    paddingHorizontal: MOBILE_LAYOUT.spacing.horizontal,
+    paddingBottom: MOBILE_LAYOUT.spacing.contentBottom,
+    gap: 16,
   },
-  title: {
-    fontSize: 28,
-    fontWeight: "700",
-    color: "#111827",
-  },
-  card: {
-    borderRadius: 14,
-    backgroundColor: "#ffffff",
-    borderWidth: 1,
-    borderColor: "#e5e7eb",
-    padding: 14,
-    gap: 10,
-  },
-  cardTitle: {
-    fontSize: 16,
-    fontWeight: "700",
-    color: "#111827",
-  },
-  accountText: {
-    fontSize: 14,
-    color: "#111827",
-    fontWeight: "500",
-  },
-  accountSubText: {
-    fontSize: 13,
-    color: "#6b7280",
-  },
-  label: {
-    marginTop: 2,
-    fontSize: 13,
-    color: "#4b5563",
-    fontWeight: "600",
-  },
-  choiceGroup: {
+  socialsRow: {
     flexDirection: "row",
-    gap: 8,
-    flexWrap: "wrap",
-  },
-  choiceChip: {
-    borderRadius: 999,
-    backgroundColor: "#f3f4f6",
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-  },
-  choiceChipActive: {
-    backgroundColor: "#111827",
-  },
-  choiceChipText: {
-    fontSize: 13,
-    color: "#374151",
-    fontWeight: "600",
-  },
-  choiceChipTextActive: {
-    color: "#ffffff",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 14,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
   },
 });

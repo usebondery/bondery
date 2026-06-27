@@ -4,7 +4,7 @@ import { CardSection, Group } from "@mantine/core";
 import { IconTag } from "@tabler/icons-react";
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import type { TagWithCount } from "@bondery/types";
+import type { TagWithCount } from "@bondery/schemas";
 import { TagPill } from "@/app/(app)/app/components/tags/TagPill";
 import { openTagEditorModal } from "@/app/(app)/app/components/tags/openTagEditorModal";
 import { AddNewTagButton } from "@/app/(app)/app/components/tags/AddNewTagButton";

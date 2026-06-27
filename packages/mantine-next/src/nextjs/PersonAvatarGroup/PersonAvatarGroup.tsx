@@ -1,7 +1,7 @@
 "use client";
 
 import { Avatar, AvatarGroup, Stack, Tooltip } from "@mantine/core";
-import type { ContactPreview } from "@bondery/types";
+import type { ContactPreview } from "@bondery/schemas";
 import { PersonAvatar } from "../PersonAvatar";
 
 type PersonAvatarGroupIdentity = ContactPreview & {

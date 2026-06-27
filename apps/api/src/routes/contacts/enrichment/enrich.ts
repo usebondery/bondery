@@ -12,18 +12,19 @@ import {
   uploadAllLinkedInLogos,
 } from "../../../lib/linkedin-helpers.js";
 import { cleanPersonName } from "@bondery/helpers/name";
-import type { TablesUpdate } from "@bondery/types";
+import type { TablesUpdate } from "@bondery/schemas";
 import { cachedGeocodeLinkedInLocation } from "../../../lib/mapy.js";
 import type {
   ScrapedWorkHistoryEntry,
   ScrapedEducationEntry,
-} from "@bondery/types";
+} from "@bondery/schemas";
 import {
   UuidParam,
   NullableString,
   ScrapedWorkHistoryEntrySchema,
   ScrapedEducationEntrySchema,
 } from "../../../lib/schemas.js";
+import { ENRICH_TIER } from "../../../lib/rate-limit.js";
 
 const EnrichContactBody = Type.Object({
   firstName: Type.Optional(Type.String()),
@@ -47,7 +48,10 @@ export function registerEnrichRoutes(fastify: FastifyInstance): void {
    */
   fastify.post(
     "/:id/enrich",
-    { schema: { params: UuidParam, body: EnrichContactBody } },
+    {
+      schema: { params: UuidParam, body: EnrichContactBody },
+      config: { rateLimit: ENRICH_TIER },
+    },
     async (
       request: FastifyRequest<{
         Params: typeof UuidParam.static;

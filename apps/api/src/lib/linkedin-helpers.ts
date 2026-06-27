@@ -6,7 +6,7 @@
  */
 
 import type { SupabaseClient } from "@supabase/supabase-js";
-import type { Database, ScrapedWorkHistoryEntry, ScrapedEducationEntry } from "@bondery/types";
+import type { Database, ScrapedWorkHistoryEntry, ScrapedEducationEntry } from "@bondery/schemas";
 import { validateImageUpload, validateImageMagicBytes } from "./config.js";
 import logger from "./logger.js";
 

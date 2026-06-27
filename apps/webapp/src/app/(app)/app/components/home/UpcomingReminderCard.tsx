@@ -3,7 +3,7 @@
 import { Badge, Card, Divider, Group, Stack, Text, Tooltip } from "@mantine/core";
 import { IconBell, IconCircleCheck } from "@tabler/icons-react";
 import { IMPORTANT_DATE_TYPE_OPTIONS } from "@/lib/config";
-import type { ImportantDateType, UpcomingReminder } from "@bondery/types";
+import type { ImportantDateType, UpcomingReminder } from "@bondery/schemas";
 import { useLocale, useTranslations } from "next-intl";
 import { PersonAvatar } from "@bondery/mantine-next";
 

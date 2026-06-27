@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Groups API Routes
  * Handles CRUD operations for groups and group memberships
  */
@@ -20,7 +20,8 @@ import type {
   GroupWithCount,
   ContactPreview,
   TablesUpdate,
-} from "@bondery/types";
+} from "@bondery/schemas";
+import { GROUP_LABEL_MAX_LENGTH } from "@bondery/schemas/constants";
 
 import { registerGroupContactRoutes } from "./contacts.js";
 
@@ -33,15 +34,15 @@ const GroupsQuery = Type.Object({
 });
 
 const CreateGroupBody = Type.Object({
-  label: Type.String({ minLength: 1 }),
-  emoji: Type.Optional(Type.String()),
+  label: Type.String({ minLength: 1, maxLength: GROUP_LABEL_MAX_LENGTH }),
+  emoji: Type.String({ minLength: 1 }),
   color: Type.String({ minLength: 1 }),
 });
 
 const UpdateGroupBody = Type.Object({
-  label: Type.Optional(Type.String({ minLength: 1 })),
-  emoji: Type.Optional(Type.String()),
-  color: Type.Optional(Type.String()),
+  label: Type.Optional(Type.String({ minLength: 1, maxLength: GROUP_LABEL_MAX_LENGTH })),
+  emoji: Type.Optional(Type.String({ minLength: 1 })),
+  color: Type.Optional(Type.String({ minLength: 1 })),
 });
 
 export async function groupRoutes(fastify: FastifyInstance) {
@@ -176,33 +177,32 @@ export async function groupRoutes(fastify: FastifyInstance) {
     { schema: { body: CreateGroupBody } },
     async (
       request: FastifyRequest<{
-        Body: { label: string; emoji?: string; color: string };
+        Body: { label: string; emoji: string; color: string };
       }>,
       reply: FastifyReply,
     ) => {
       const { client, user } = getAuth(request);
       const body = request.body;
 
-      // Prepare insert data
       const insertData: any = {
         user_id: user.id,
         label: body.label.trim(),
-        emoji: body.emoji?.trim() || null,
-        color: body.color?.trim() || null,
+        emoji: body.emoji.trim() || null,
+        color: body.color.trim() || null,
       };
 
       // Insert group
       const { data: newGroup, error } = await client
         .from("groups")
         .insert(insertData)
-        .select("id")
+        .select(GROUP_SELECT)
         .single();
 
       if (error) {
         return reply.status(500).send({ error: error.message });
       }
 
-      return reply.status(201).send({ id: newGroup.id });
+      return reply.status(201).send({ group: newGroup });
     },
   );
 
@@ -251,28 +251,31 @@ export async function groupRoutes(fastify: FastifyInstance) {
       const { id } = request.params;
       const body = request.body;
 
-      // Map camelCase to snake_case
       const updates: TablesUpdate<"groups"> = {};
 
-      if (body.label !== undefined) {
-        updates.label = body.label;
-      }
-      if (body.emoji !== undefined) updates.emoji = body.emoji;
-      if (body.color !== undefined) updates.color = body.color;
+      if (body.label !== undefined) updates.label = body.label.trim();
+      if (body.emoji !== undefined) updates.emoji = body.emoji.trim();
+      if (body.color !== undefined) updates.color = body.color.trim();
 
       updates.updated_at = new Date().toISOString();
 
-      const { error } = await client
+      const { data: group, error } = await client
         .from("groups")
         .update(updates)
         .eq("id", id)
-        .eq("user_id", user.id);
+        .eq("user_id", user.id)
+        .select(GROUP_SELECT)
+        .single();
 
       if (error) {
         return reply.status(500).send({ error: error.message });
       }
 
-      return { message: "Group updated successfully" };
+      if (!group) {
+        return reply.status(404).send({ error: "Group not found" });
+      }
+
+      return { group };
     },
   );
 

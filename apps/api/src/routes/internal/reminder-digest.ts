@@ -48,6 +48,7 @@ export async function reminderDigestRoutes(fastify: FastifyInstance) {
     {
       schema: { body: ReminderDigestBody },
       onRequest: fastify.auth([fastify.verifyServiceSecret]),
+      config: { rateLimit: false },
     },
     async (
       request: FastifyRequest<{ Body: typeof ReminderDigestBody.static }>,

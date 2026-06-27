@@ -1,7 +1,7 @@
 import { API_URL } from "@/lib/config";
 import { getAuthHeaders } from "@/lib/authHeaders";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
-import type { Activity, Contact } from "@bondery/types";
+import type { Activity, Contact } from "@bondery/schemas";
 import { buildAvatarQueryString } from "@/lib/avatarParams";
 
 interface InteractionsDataResult {

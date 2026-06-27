@@ -13,6 +13,7 @@ import {
   loadingNotificationTemplate,
   successNotificationTemplate,
 } from "@bondery/mantine-next";
+import { firstZodErrorMessage, reminderSendHourSchema } from "@bondery/schemas";
 
 interface ReminderTimePickerProps {
   initialTime: string;
@@ -157,6 +158,18 @@ export function ReminderTimePicker({
       return;
     }
 
+    const parsedReminderTime = reminderSendHourSchema.safeParse(apiTime);
+    if (!parsedReminderTime.success) {
+      notifications.show(
+        errorNotificationTemplate({
+          title: t("UpdateError"),
+          description: firstZodErrorMessage(parsedReminderTime.error),
+        }),
+      );
+      setValue24h(savedTime24h);
+      return;
+    }
+
     if (normalizedInputTime === savedTime24h) {
       return;
     }
@@ -175,7 +188,7 @@ export function ReminderTimePicker({
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          reminderSendHour: apiTime,
+          reminderSendHour: parsedReminderTime.data,
         }),
       });
 

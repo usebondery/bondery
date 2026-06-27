@@ -5,7 +5,7 @@ import { IconLanguage } from "@tabler/icons-react";
 import { useState, useEffect } from "react";
 import type { ReactNode } from "react";
 import { useTranslations } from "next-intl";
-import { APP_LANGUAGES_DATA, WORLD_LANGUAGES_DATA, LanguageData } from "@/lib/languages";
+import { APP_LANGUAGES_DATA, WORLD_LANGUAGES_DATA, formatLanguageDisplayLabel, type LanguageData } from "@bondery/helpers/locale";
 
 interface LanguagePickerProps {
   value?: string;
@@ -16,6 +16,7 @@ interface LanguagePickerProps {
   description?: ReactNode;
   placeholder?: string;
   languages?: LanguageData[];
+  getLocalizedLabel?: (language: LanguageData) => string;
   loading?: boolean;
   disabled?: boolean;
 }
@@ -29,6 +30,7 @@ export function LanguagePicker({
   description,
   placeholder,
   languages = APP_LANGUAGES_DATA,
+  getLocalizedLabel,
   loading = false,
   disabled = false,
 }: LanguagePickerProps) {
@@ -67,6 +69,11 @@ export function LanguagePicker({
   };
 
   const selectedLanguage = languages.find((lang) => lang.value === language);
+
+  const getExonym = (lang: LanguageData) => getLocalizedLabel?.(lang) ?? lang.label;
+
+  const getDisplayLabel = (lang: LanguageData) =>
+    formatLanguageDisplayLabel(getExonym(lang), lang.nativeName);
 
   return (
     <Stack gap={4}>
@@ -109,7 +116,7 @@ export function LanguagePicker({
               <Group gap="xs" wrap="nowrap">
                 <span className={`fi fi-${selectedLanguage.flag}`} style={{ flexShrink: 0 }} />
                 <Text size="sm" fw={400}>
-                  {selectedLanguage.label} ({selectedLanguage.nativeName})
+                  {getDisplayLabel(selectedLanguage)}
                 </Text>
               </Group>
             ) : (
@@ -128,11 +135,16 @@ export function LanguagePicker({
           <Combobox.Options>
             <ScrollArea.Autosize mah={200}>
               {languages
-                .filter(
-                  (lang) =>
-                    lang.label.toLowerCase().includes(searchValue.toLowerCase()) ||
-                    lang.nativeName.toLowerCase().includes(searchValue.toLowerCase()),
-                )
+                .filter((lang) => {
+                  const query = searchValue.toLowerCase();
+                  const exonym = getExonym(lang).toLowerCase();
+
+                  return (
+                    exonym.includes(query) ||
+                    lang.label.toLowerCase().includes(query) ||
+                    lang.nativeName.toLowerCase().includes(query)
+                  );
+                })
                 .map((lang) => {
                   const isSelected = lang.value === language;
                   return (
@@ -163,7 +175,7 @@ export function LanguagePicker({
                             </Text>
                           )}
                           <Text component="span" size="sm" fw={400}>
-                            {lang.label} ({lang.nativeName})
+                            {getDisplayLabel(lang)}
                           </Text>
                         </div>
                       </Group>

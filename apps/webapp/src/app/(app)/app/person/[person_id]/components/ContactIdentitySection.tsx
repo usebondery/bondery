@@ -1,6 +1,12 @@
 import { Group, Stack } from "@mantine/core";
 import { IconBriefcase } from "@tabler/icons-react";
-import type { Contact, EmailEntry, PhoneEntry } from "@bondery/types";
+import {
+  CONTACT_FIELD_MAX_LENGTHS,
+  firstZodErrorMessage,
+  type Contact,
+  type EmailEntry,
+  type PhoneEntry,
+} from "@bondery/schemas";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { notifications } from "@mantine/notifications";
 import { errorNotificationTemplate, successNotificationTemplate } from "@bondery/mantine-next";
@@ -8,9 +14,10 @@ import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import { ContactPhotoUploadButton } from "./ContactPhotoUploadButton";
 import { InlineEditableInput } from "./InlineEditableInput";
 import { SocialsSection } from "./SocialsSection";
-import { INPUT_MAX_LENGTHS } from "@/lib/config";
 import { LocationLookupInput } from "@/app/(app)/app/components/LocationLookupInput";
+import { geocodeSuggestionDisplayLabel } from "@bondery/helpers/geocode";
 import { revalidateSettings } from "@/app/(app)/app/actions";
+import { z } from "zod";
 
 type NameField = "firstName" | "middleName" | "lastName";
 type ProfileField = "headline" | "location";
@@ -53,20 +60,20 @@ const NAME_FIELD_CONFIGS: NameFieldConfig[] = [
   {
     field: "firstName",
     placeholder: "First name",
-    maxLength: INPUT_MAX_LENGTHS.firstName,
+    maxLength: CONTACT_FIELD_MAX_LENGTHS.firstName,
     required: true,
     successLabel: "First",
   },
   {
     field: "middleName",
     placeholder: "Middle name",
-    maxLength: INPUT_MAX_LENGTHS.middleName,
+    maxLength: CONTACT_FIELD_MAX_LENGTHS.middleName,
     successLabel: "Middle",
   },
   {
     field: "lastName",
     placeholder: "Last name",
-    maxLength: INPUT_MAX_LENGTHS.lastName,
+    maxLength: CONTACT_FIELD_MAX_LENGTHS.lastName,
     successLabel: "Last",
   },
 ];
@@ -75,16 +82,41 @@ const PROFILE_FIELD_CONFIGS: ProfileFieldConfig[] = [
   {
     field: "headline",
     placeholder: "Headline",
-    maxLength: INPUT_MAX_LENGTHS.headline,
+    maxLength: CONTACT_FIELD_MAX_LENGTHS.headline,
     successLabel: "Headline",
   },
   {
     field: "location",
     placeholder: "Location",
-    maxLength: INPUT_MAX_LENGTHS.location,
+    maxLength: CONTACT_FIELD_MAX_LENGTHS.location,
     successLabel: "Location",
   },
 ];
+
+const nameFieldValidationSchemas: Record<NameField, z.ZodType<string>> = {
+  firstName: z
+    .string()
+    .trim()
+    .min(1, { error: "First name is required" })
+    .max(CONTACT_FIELD_MAX_LENGTHS.firstName, {
+      error: `First name must be at most ${CONTACT_FIELD_MAX_LENGTHS.firstName} characters`,
+    }),
+  middleName: z.string().trim().max(CONTACT_FIELD_MAX_LENGTHS.middleName, {
+    error: `Middle name must be at most ${CONTACT_FIELD_MAX_LENGTHS.middleName} characters`,
+  }),
+  lastName: z.string().trim().max(CONTACT_FIELD_MAX_LENGTHS.lastName, {
+    error: `Last name must be at most ${CONTACT_FIELD_MAX_LENGTHS.lastName} characters`,
+  }),
+};
+
+const profileFieldValidationSchemas: Record<ProfileField, z.ZodType<string>> = {
+  headline: z.string().trim().max(CONTACT_FIELD_MAX_LENGTHS.headline, {
+    error: `Headline must be at most ${CONTACT_FIELD_MAX_LENGTHS.headline} characters`,
+  }),
+  location: z.string().trim().max(CONTACT_FIELD_MAX_LENGTHS.location, {
+    error: `Location must be at most ${CONTACT_FIELD_MAX_LENGTHS.location} characters`,
+  }),
+};
 
 /**
  * Manages inline editable name fields with isolated per-field save lifecycle.
@@ -123,11 +155,12 @@ function usePersonNameFields(
 
       if (value === persistedValue) return;
 
-      if (config.required && !value.trim()) {
+      const validation = nameFieldValidationSchemas[field].safeParse(value);
+      if (!validation.success) {
         notifications.show(
           errorNotificationTemplate({
             title: "Validation Error",
-            description: "First name is required",
+            description: firstZodErrorMessage(validation.error),
           }),
         );
         return;
@@ -300,6 +333,17 @@ function usePersonProfileFields(
       const persistedValue = persistedValuesRef.current[field];
 
       if (value === persistedValue) return;
+
+      const validation = profileFieldValidationSchemas[field].safeParse(value);
+      if (!validation.success) {
+        notifications.show(
+          errorNotificationTemplate({
+            title: "Validation Error",
+            description: firstZodErrorMessage(validation.error),
+          }),
+        );
+        return;
+      }
 
       setSavingByField((previous) => ({
         ...previous,
@@ -494,7 +538,7 @@ export function ContactIdentitySection({
             isSaving={savingProfileByField.headline}
             isFocused={focusedProfileField === "headline"}
             showCounter
-            maxLength={INPUT_MAX_LENGTHS.headline}
+            maxLength={CONTACT_FIELD_MAX_LENGTHS.headline}
             leftSection={<IconBriefcase size={18} />}
           />
 
@@ -508,9 +552,9 @@ export function ContactIdentitySection({
               onChange={(value) => updateProfileField("location", value)}
               onSuggestionSelect={(selected) => {
                 void savePlaceFromSuggestion(
-                  selected.label,
-                  selected.position.lat,
-                  selected.position.lon,
+                  geocodeSuggestionDisplayLabel(selected),
+                  selected.latitude,
+                  selected.longitude,
                 );
               }}
               onBlur={() => handleProfileBlur("location")}

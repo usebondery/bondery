@@ -7,7 +7,11 @@ import { notifications } from "@mantine/notifications";
 import { useTranslations } from "next-intl";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import { useRouter } from "next/navigation";
-import { INPUT_MAX_LENGTHS } from "@/lib/config";
+import {
+  CONTACT_FIELD_MAX_LENGTHS,
+  firstZodErrorMessage,
+  updateAccountInputSchema,
+} from "@bondery/schemas";
 import { revalidateSettings } from "../../actions";
 import { errorNotificationTemplate, successNotificationTemplate } from "@bondery/mantine-next";
 
@@ -33,16 +37,6 @@ export function NameFields({ initialName, initialMiddlename, initialSurname }: N
   const router = useRouter();
 
   const updateName = async (field: "name" | "middlename" | "surname", value: string) => {
-    if (field === "name" && value.trim().length === 0) {
-      setNameError("First name is required");
-      setName(originalName);
-      return;
-    }
-
-    if (field === "name") {
-      setNameError("");
-    }
-
     const currentValues = {
       name,
       middlename,
@@ -59,6 +53,31 @@ export function NameFields({ initialName, initialMiddlename, initialSurname }: N
       return;
     }
 
+    const nextValues = {
+      ...currentValues,
+      [field]: value,
+    };
+
+    const validationResult = updateAccountInputSchema.safeParse(nextValues);
+    if (!validationResult.success) {
+      const message = firstZodErrorMessage(validationResult.error);
+      if (field === "name") {
+        setNameError(message);
+        setName(originalName);
+      }
+      notifications.show(
+        errorNotificationTemplate({
+          title: t("UpdateError"),
+          description: message,
+        }),
+      );
+      return;
+    }
+
+    if (field === "name") {
+      setNameError("");
+    }
+
     try {
       const response = await fetch(API_ROUTES.ME_SETTINGS, {
         method: "PATCH",
@@ -66,8 +85,7 @@ export function NameFields({ initialName, initialMiddlename, initialSurname }: N
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          ...currentValues,
-          [field]: value,
+          ...validationResult.data,
         }),
       });
 
@@ -115,7 +133,7 @@ export function NameFields({ initialName, initialMiddlename, initialSurname }: N
         rightSection={
           nameFocused ? (
             <Text size="xs" c="dimmed" pr={"xs"}>
-              {name.length}/{INPUT_MAX_LENGTHS.firstName}
+              {name.length}/{CONTACT_FIELD_MAX_LENGTHS.firstName}
             </Text>
           ) : undefined
         }
@@ -135,7 +153,7 @@ export function NameFields({ initialName, initialMiddlename, initialSurname }: N
         rightSection={
           middlenameFocused ? (
             <Text size="xs" c="dimmed" pr={"xs"}>
-              {middlename.length}/{INPUT_MAX_LENGTHS.middleName}
+              {middlename.length}/{CONTACT_FIELD_MAX_LENGTHS.middleName}
             </Text>
           ) : undefined
         }
@@ -153,7 +171,7 @@ export function NameFields({ initialName, initialMiddlename, initialSurname }: N
         rightSection={
           surnameFocused ? (
             <Text size="xs" c="dimmed" pr={"xs"}>
-              {surname.length}/{INPUT_MAX_LENGTHS.lastName}
+              {surname.length}/{CONTACT_FIELD_MAX_LENGTHS.lastName}
             </Text>
           ) : undefined
         }

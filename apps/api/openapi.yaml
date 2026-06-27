@@ -5,11 +5,21 @@ info:
     REST API for the Bondery application — a contact and relationship management platform.
 
 
+    ## Health checks
+
+
+    - `GET /status` — **Liveness**. Returns 200 when the API process is running. Does not probe external dependencies.
+
+    - `GET /health` — **Readiness**. Probes Supabase (auth, database, storage), Redis, and reports configuration status
+    for other integrations. Cached for one minute; rate limited to one request per minute per client. Returns 503 when
+    critical dependencies are unavailable.
+
+
     ## Authentication
 
 
-    All endpoints (except `/status` and `GET /api/extension`) require authentication via a Supabase session cookie or a
-    Bearer token in the Authorization header.
+    All endpoints (except `/status` and `/health`) require authentication via a Supabase session cookie or a Bearer
+    token in the Authorization header.
   version: 1.0.0
   contact:
     name: Bondery Support
@@ -23,9 +33,385 @@ paths:
     get:
       tags:
         - Health
+      description: Liveness probe. Returns 200 when the API process is running. Does not check external dependencies. Use `GET
+        /health` for a readiness probe that checks Supabase, Redis, and other configured integrations.
       responses:
         "200":
           description: Default Response
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - timestamp
+                  - extension
+                properties:
+                  status:
+                    type: string
+                    enum:
+                      - ok
+                  timestamp:
+                    format: date-time
+                    type: string
+                  extension:
+                    type: object
+                    required:
+                      - minVersion
+                      - storeUrl
+                    properties:
+                      minVersion:
+                        type: string
+                      storeUrl:
+                        type: string
+  /health:
+    get:
+      tags:
+        - Health
+      description: "Readiness probe. Checks configured dependencies and returns per-service status. Results are cached in
+        memory for one minute. Rate limited to one request per minute per client. Returns HTTP 503 when critical
+        dependencies are unavailable (`status: unhealthy`). Returns HTTP 200 when all critical dependencies are healthy
+        (`status: ok` or `status: degraded`). Supabase auth is checked via `GET /auth/v1/health`; Supabase database
+        (PostgREST) via `GET /rest-admin/v1/live`; Supabase storage via `GET /storage/v1/health`."
+      responses:
+        "200":
+          description: Default Response
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - timestamp
+                  - cached
+                  - cacheExpiresAt
+                  - services
+                properties:
+                  status:
+                    anyOf:
+                      - type: string
+                        enum:
+                          - ok
+                      - type: string
+                        enum:
+                          - degraded
+                      - type: string
+                        enum:
+                          - unhealthy
+                  timestamp:
+                    format: date-time
+                    type: string
+                  cached:
+                    description: True when this response was served from the in-process cache (refreshed at most once per minute).
+                    type: boolean
+                  cacheExpiresAt:
+                    format: date-time
+                    description: When the cached readiness snapshot expires and the next request will re-probe dependencies.
+                    type: string
+                  services:
+                    type: object
+                    required:
+                      - supabase
+                      - redis
+                      - smtp
+                      - anthropic
+                      - polar
+                      - mapy
+                      - posthog
+                    properties:
+                      supabase:
+                        type: object
+                        required:
+                          - auth
+                          - database
+                          - storage
+                        properties:
+                          auth:
+                            type: object
+                            required:
+                              - ok
+                            properties:
+                              ok:
+                                type: boolean
+                              latencyMs:
+                                type: number
+                              error:
+                                type: string
+                              configured:
+                                type: boolean
+                          database:
+                            type: object
+                            required:
+                              - ok
+                            properties:
+                              ok:
+                                type: boolean
+                              latencyMs:
+                                type: number
+                              error:
+                                type: string
+                              configured:
+                                type: boolean
+                          storage:
+                            type: object
+                            required:
+                              - ok
+                            properties:
+                              ok:
+                                type: boolean
+                              latencyMs:
+                                type: number
+                              error:
+                                type: string
+                              configured:
+                                type: boolean
+                      redis:
+                        type: object
+                        required:
+                          - ok
+                        properties:
+                          ok:
+                            type: boolean
+                          latencyMs:
+                            type: number
+                          error:
+                            type: string
+                          configured:
+                            type: boolean
+                      smtp:
+                        type: object
+                        required:
+                          - ok
+                        properties:
+                          ok:
+                            type: boolean
+                          latencyMs:
+                            type: number
+                          error:
+                            type: string
+                          configured:
+                            type: boolean
+                      anthropic:
+                        type: object
+                        required:
+                          - ok
+                        properties:
+                          ok:
+                            type: boolean
+                          latencyMs:
+                            type: number
+                          error:
+                            type: string
+                          configured:
+                            type: boolean
+                      polar:
+                        type: object
+                        required:
+                          - ok
+                        properties:
+                          ok:
+                            type: boolean
+                          latencyMs:
+                            type: number
+                          error:
+                            type: string
+                          configured:
+                            type: boolean
+                      mapy:
+                        type: object
+                        required:
+                          - ok
+                        properties:
+                          ok:
+                            type: boolean
+                          latencyMs:
+                            type: number
+                          error:
+                            type: string
+                          configured:
+                            type: boolean
+                      posthog:
+                        type: object
+                        required:
+                          - ok
+                        properties:
+                          ok:
+                            type: boolean
+                          latencyMs:
+                            type: number
+                          error:
+                            type: string
+                          configured:
+                            type: boolean
+        "503":
+          description: Default Response
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - timestamp
+                  - cached
+                  - cacheExpiresAt
+                  - services
+                properties:
+                  status:
+                    anyOf:
+                      - type: string
+                        enum:
+                          - ok
+                      - type: string
+                        enum:
+                          - degraded
+                      - type: string
+                        enum:
+                          - unhealthy
+                  timestamp:
+                    format: date-time
+                    type: string
+                  cached:
+                    description: True when this response was served from the in-process cache (refreshed at most once per minute).
+                    type: boolean
+                  cacheExpiresAt:
+                    format: date-time
+                    description: When the cached readiness snapshot expires and the next request will re-probe dependencies.
+                    type: string
+                  services:
+                    type: object
+                    required:
+                      - supabase
+                      - redis
+                      - smtp
+                      - anthropic
+                      - polar
+                      - mapy
+                      - posthog
+                    properties:
+                      supabase:
+                        type: object
+                        required:
+                          - auth
+                          - database
+                          - storage
+                        properties:
+                          auth:
+                            type: object
+                            required:
+                              - ok
+                            properties:
+                              ok:
+                                type: boolean
+                              latencyMs:
+                                type: number
+                              error:
+                                type: string
+                              configured:
+                                type: boolean
+                          database:
+                            type: object
+                            required:
+                              - ok
+                            properties:
+                              ok:
+                                type: boolean
+                              latencyMs:
+                                type: number
+                              error:
+                                type: string
+                              configured:
+                                type: boolean
+                          storage:
+                            type: object
+                            required:
+                              - ok
+                            properties:
+                              ok:
+                                type: boolean
+                              latencyMs:
+                                type: number
+                              error:
+                                type: string
+                              configured:
+                                type: boolean
+                      redis:
+                        type: object
+                        required:
+                          - ok
+                        properties:
+                          ok:
+                            type: boolean
+                          latencyMs:
+                            type: number
+                          error:
+                            type: string
+                          configured:
+                            type: boolean
+                      smtp:
+                        type: object
+                        required:
+                          - ok
+                        properties:
+                          ok:
+                            type: boolean
+                          latencyMs:
+                            type: number
+                          error:
+                            type: string
+                          configured:
+                            type: boolean
+                      anthropic:
+                        type: object
+                        required:
+                          - ok
+                        properties:
+                          ok:
+                            type: boolean
+                          latencyMs:
+                            type: number
+                          error:
+                            type: string
+                          configured:
+                            type: boolean
+                      polar:
+                        type: object
+                        required:
+                          - ok
+                        properties:
+                          ok:
+                            type: boolean
+                          latencyMs:
+                            type: number
+                          error:
+                            type: string
+                          configured:
+                            type: boolean
+                      mapy:
+                        type: object
+                        required:
+                          - ok
+                        properties:
+                          ok:
+                            type: boolean
+                          latencyMs:
+                            type: number
+                          error:
+                            type: string
+                          configured:
+                            type: boolean
+                      posthog:
+                        type: object
+                        required:
+                          - ok
+                        properties:
+                          ok:
+                            type: boolean
+                          latencyMs:
+                            type: number
+                          error:
+                            type: string
+                          configured:
+                            type: boolean
   /api/contacts/merge-recommendations:
     get:
       tags:
@@ -1809,12 +2195,15 @@ paths:
               type: object
               required:
                 - label
+                - emoji
                 - color
               properties:
                 label:
                   minLength: 1
+                  maxLength: 100
                   type: string
                 emoji:
+                  minLength: 1
                   type: string
                 color:
                   minLength: 1
@@ -1868,10 +2257,13 @@ paths:
               properties:
                 label:
                   minLength: 1
+                  maxLength: 100
                   type: string
                 emoji:
+                  minLength: 1
                   type: string
                 color:
+                  minLength: 1
                   type: string
       parameters:
         - schema:
@@ -1995,15 +2387,29 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              required:
-                - personIds
-              properties:
-                personIds:
-                  minItems: 1
-                  type: array
-                  items:
-                    type: string
+              anyOf:
+                - type: object
+                  required:
+                    - personIds
+                  properties:
+                    personIds:
+                      minItems: 1
+                      type: array
+                      items:
+                        type: string
+                - type: object
+                  required:
+                    - contactFilter
+                  properties:
+                    contactFilter:
+                      type: object
+                      properties:
+                        q:
+                          type: string
+                    excludePersonIds:
+                      type: array
+                      items:
+                        type: string
       parameters:
         - schema:
             format: uuid
@@ -2034,9 +2440,9 @@ paths:
                         type: string
                 - type: object
                   required:
-                    - filter
+                    - memberFilter
                   properties:
-                    filter:
+                    memberFilter:
                       type: object
                       properties:
                         q:
@@ -2388,9 +2794,13 @@ paths:
                       enum:
                         - 12h
                 language:
-                  type: string
-                  enum:
-                    - en
+                  anyOf:
+                    - type: string
+                      enum:
+                        - en
+                    - type: string
+                      enum:
+                        - cs
                 colorScheme:
                   anyOf:
                     - type: string
@@ -2402,6 +2812,61 @@ paths:
                     - type: string
                       enum:
                         - auto
+                leftSwipeAction:
+                  anyOf:
+                    - type: string
+                      enum:
+                        - call
+                    - type: string
+                      enum:
+                        - message
+                    - type: string
+                      enum:
+                        - email
+                rightSwipeAction:
+                  anyOf:
+                    - type: string
+                      enum:
+                        - call
+                    - type: string
+                      enum:
+                        - message
+                    - type: string
+                      enum:
+                        - email
+                groupSortOrder:
+                  anyOf:
+                    - type: string
+                      enum:
+                        - recent-opened
+                    - type: string
+                      enum:
+                        - count-desc
+                    - type: string
+                      enum:
+                        - count-asc
+                    - type: string
+                      enum:
+                        - alpha-asc
+                    - type: string
+                      enum:
+                        - alpha-desc
+                tagSortOrder:
+                  anyOf:
+                    - type: string
+                      enum:
+                        - count-desc
+                    - type: string
+                      enum:
+                        - count-asc
+                    - type: string
+                      enum:
+                        - alpha-asc
+                    - type: string
+                      enum:
+                        - alpha-desc
+                onlyIfNewSignup:
+                  type: boolean
       responses:
         "200":
           description: Default Response
@@ -2494,58 +2959,6 @@ paths:
                         type: string
                       endDate:
                         type: string
-      responses:
-        "200":
-          description: Default Response
-    get:
-      tags:
-        - Extension
-      parameters:
-        - schema:
-            type: string
-          in: query
-          name: instagram
-          required: false
-        - schema:
-            type: string
-          in: query
-          name: linkedin
-          required: false
-        - schema:
-            type: string
-          in: query
-          name: facebook
-          required: false
-        - schema:
-            type: string
-          in: query
-          name: firstName
-          required: false
-        - schema:
-            type: string
-          in: query
-          name: middleName
-          required: false
-        - schema:
-            type: string
-          in: query
-          name: lastName
-          required: false
-        - schema:
-            type: string
-          in: query
-          name: profileImageUrl
-          required: false
-        - schema:
-            type: string
-          in: query
-          name: headline
-          required: false
-        - schema:
-            type: string
-          in: query
-          name: location
-          required: false
       responses:
         "200":
           description: Default Response
@@ -3160,6 +3573,20 @@ paths:
       responses:
         "200":
           description: Default Response
+  /api/subscriptions/checkout:
+    post:
+      tags:
+        - Subscriptions
+      responses:
+        "200":
+          description: Default Response
+  /api/subscriptions/portal:
+    get:
+      tags:
+        - Subscriptions
+      responses:
+        "200":
+          description: Default Response
   /api/subscriptions/sync:
     post:
       tags:
@@ -3174,6 +3601,198 @@ paths:
       responses:
         "200":
           description: Default Response
+  /api/geocode/suggest:
+    get:
+      tags:
+        - Geocode
+      description: Returns mapped address/place autocomplete entries from Mapy.com
+      parameters:
+        - schema:
+            minLength: 3
+            maxLength: 200
+            type: string
+          in: query
+          name: q
+          required: true
+        - schema:
+            default: address
+            anyOf:
+              - type: string
+                enum:
+                  - address
+              - type: string
+                enum:
+                  - place
+          in: query
+          name: mode
+          required: false
+      responses:
+        "200":
+          description: Default Response
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - addresses
+                properties:
+                  addresses:
+                    type: array
+                    items:
+                      type: object
+                      required:
+                        - value
+                        - type
+                        - label
+                        - latitude
+                        - longitude
+                        - addressLine1
+                        - addressLine2
+                        - addressCity
+                        - addressPostalCode
+                        - addressState
+                        - addressStateCode
+                        - addressCountry
+                        - addressCountryCode
+                        - addressGranularity
+                        - addressFormatted
+                        - addressGeocodeSource
+                        - geocodeConfidence
+                        - timezone
+                      properties:
+                        value:
+                          type: string
+                        type:
+                          anyOf:
+                            - type: string
+                              enum:
+                                - home
+                            - type: string
+                              enum:
+                                - work
+                            - type: string
+                              enum:
+                                - other
+                        label:
+                          anyOf:
+                            - type: string
+                            - type: "null"
+                        latitude:
+                          anyOf:
+                            - type: number
+                            - type: "null"
+                        longitude:
+                          anyOf:
+                            - type: number
+                            - type: "null"
+                        addressLine1:
+                          anyOf:
+                            - type: string
+                            - type: "null"
+                        addressLine2:
+                          anyOf:
+                            - type: string
+                            - type: "null"
+                        addressCity:
+                          anyOf:
+                            - type: string
+                            - type: "null"
+                        addressPostalCode:
+                          anyOf:
+                            - type: string
+                            - type: "null"
+                        addressState:
+                          anyOf:
+                            - type: string
+                            - type: "null"
+                        addressStateCode:
+                          anyOf:
+                            - type: string
+                            - type: "null"
+                        addressCountry:
+                          anyOf:
+                            - type: string
+                            - type: "null"
+                        addressCountryCode:
+                          anyOf:
+                            - type: string
+                            - type: "null"
+                        addressGranularity:
+                          anyOf:
+                            - type: string
+                              enum:
+                                - address
+                            - type: string
+                              enum:
+                                - city
+                            - type: string
+                              enum:
+                                - state
+                            - type: string
+                              enum:
+                                - country
+                        addressFormatted:
+                          anyOf:
+                            - type: string
+                            - type: "null"
+                        addressGeocodeSource:
+                          anyOf:
+                            - anyOf:
+                                - type: string
+                                  enum:
+                                    - mapy.com
+                                - type: string
+                                  enum:
+                                    - manual
+                            - type: "null"
+                        geocodeConfidence:
+                          anyOf:
+                            - anyOf:
+                                - type: string
+                                  enum:
+                                    - verified
+                                - type: string
+                                  enum:
+                                    - unverifiable
+                            - type: "null"
+                        timezone:
+                          anyOf:
+                            - type: string
+                            - type: "null"
+  /api/geocode/timezone:
+    get:
+      tags:
+        - Geocode
+      description: Returns the IANA timezone for a latitude/longitude pair from Mapy.com
+      parameters:
+        - schema:
+            minimum: -90
+            maximum: 90
+            type: number
+          in: query
+          name: lat
+          required: true
+        - schema:
+            minimum: -180
+            maximum: 180
+            type: number
+          in: query
+          name: lon
+          required: true
+      responses:
+        "200":
+          description: Default Response
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - timezone
+                properties:
+                  timezone:
+                    anyOf:
+                      - type: string
+                      - type: "null"
 servers:
   - url: http://localhost:3001
     description: Local development server
@@ -3181,7 +3800,7 @@ servers:
     description: Production server
 tags:
   - name: Health
-    description: Server health check endpoints
+    description: Liveness (`GET /status`) and readiness (`GET /health`) probes
   - name: Contacts
     description: Contact management operations
   - name: Groups
@@ -3208,3 +3827,5 @@ tags:
     description: Subscription and billing management
   - name: Webhooks
     description: Inbound webhooks from third-party services
+  - name: Geocode
+    description: Address autocomplete and geocoding proxy

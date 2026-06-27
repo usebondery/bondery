@@ -9,7 +9,7 @@
  */
 
 import type { SupabaseClient } from "@supabase/supabase-js";
-import type { Database } from "@bondery/types/supabase.types";
+import type { Database } from "@bondery/schemas/supabase.types";
 
 /** Number of free AI messages available to unsubscribed users (lifetime). */
 export const FREE_MESSAGE_LIMIT = 5;

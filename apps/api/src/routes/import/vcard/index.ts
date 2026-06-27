@@ -11,9 +11,10 @@ import type {
   VCardImportCommitResponse,
   VCardParseResponse,
   TablesUpdate,
-} from "@bondery/types";
+} from "@bondery/schemas";
 import logger from "../../../lib/logger.js";
 import { formatPlaceLabel } from "@bondery/helpers";
+import { IMPORT_TIER } from "../../../lib/rate-limit.js";
 
 const VCardCommitPhoneSchema = Type.Object({
   prefix: Type.String(),
@@ -167,7 +168,7 @@ export async function vcardImportRoutes(fastify: FastifyInstance) {
 
   fastify.post(
     "/commit",
-    { schema: { body: VCardCommitBody } },
+    { schema: { body: VCardCommitBody }, config: { rateLimit: IMPORT_TIER } },
     async (
       request: FastifyRequest<{ Body: typeof VCardCommitBody.static }>,
       reply: FastifyReply,

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { GroupsClient } from "./GroupsClient";
 import { API_URL } from "@/lib/config";
-import type { GroupWithCount } from "@bondery/types";
+import type { GroupWithCount } from "@bondery/schemas";
 import { getAuthHeaders } from "@/lib/authHeaders";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import { buildAvatarQueryString } from "@/lib/avatarParams";

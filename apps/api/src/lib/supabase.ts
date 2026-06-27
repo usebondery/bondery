@@ -4,8 +4,8 @@
  */
 
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
-import type { Database } from "@bondery/types/supabase.types";
-import type { AvatarTransformOptions } from "@bondery/types";
+import type { Database } from "@bondery/schemas/supabase.types";
+import type { AvatarTransformOptions } from "@bondery/schemas";
 import type { FastifyRequest } from "fastify";
 import logger from "./logger.js";
 
@@ -230,7 +230,7 @@ export async function createAuthenticatedClient(
   );
 
   if (!accessToken) {
-    return { client: anonClient, user: null };
+    return { client, user: null };
   }
 
   const { data, error } = await client.auth.getUser(accessToken);
@@ -240,29 +240,11 @@ export async function createAuthenticatedClient(
       { errorMessage: error?.message, errorStatus: error?.status },
       "[createAuthenticatedClient] getUser error",
     );
-    return { client: anonClient, user: null };
+    return { client, user: null };
   }
 
-  // Create a service-role client that passes the user's JWT in the Authorization header.
-  // This satisfies RLS policies (auth.uid() = user.id) while running server-side.
-  const authedClient = createClient<Database>(
-    NEXT_PUBLIC_SUPABASE_URL,
-    PRIVATE_SUPABASE_SECRET_KEY,
-    {
-      auth: {
-        autoRefreshToken: false,
-        persistSession: false,
-      },
-      global: {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      },
-    },
-  );
-
   return {
-    client: authedClient,
+    client,
     user: {
       id: data.user.id,
       email: data.user.email || "",

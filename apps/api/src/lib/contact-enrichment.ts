@@ -1,15 +1,16 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type {
   Database,
+  Contact,
   EmailEntry,
   PhoneEntry,
   ContactAddressEntry,
   AvatarTransformOptions,
-} from "@bondery/types";
+} from "@bondery/schemas";
 import { attachContactChannels } from "../routes/contacts/channels.js";
 import { attachContactAddresses } from "../routes/contacts/addresses.js";
 import { attachContactSocials } from "./socials.js";
-import type { ContactWithId } from "./schemas.js";
+import { CONTACT_SELECT, type ContactWithId } from "./schemas.js";
 import { buildContactAvatarUrl } from "./supabase.js";
 
 type ChannelsAndSocialExtras = {
@@ -27,6 +28,46 @@ type ChannelsAndSocialExtras = {
 export type FullContactExtras = ChannelsAndSocialExtras & {
   addresses: ContactAddressEntry[];
 };
+
+function withEmptyChannels<T extends { id: string }>(
+  rows: T[],
+): Array<T & { phones: []; emails: []; addresses: [] }> {
+  return rows.map((row) => ({
+    ...row,
+    phones: [],
+    emails: [],
+    addresses: [],
+  }));
+}
+
+function withEmptySocials<
+  T extends {
+    id: string;
+  },
+>(
+  rows: T[],
+): Array<
+  T & {
+    avatar: null;
+    linkedin: null;
+    instagram: null;
+    whatsapp: null;
+    facebook: null;
+    website: null;
+    signal: null;
+  }
+> {
+  return rows.map((row) => ({
+    ...row,
+    avatar: null,
+    linkedin: null,
+    instagram: null,
+    whatsapp: null,
+    facebook: null,
+    website: null,
+    signal: null,
+  }));
+}
 
 /**
  * Enriches a list of contacts with channels (phones + emails), optional addresses,
@@ -120,4 +161,33 @@ export async function attachContactExtras<T extends ContactWithId>(
       addresses: addressMap.get(contact.id) ?? [],
     };
   });
+}
+
+export async function loadEnrichedContact(
+  client: SupabaseClient<Database>,
+  userId: string,
+  contactId: string,
+  options?: { avatarOptions?: AvatarTransformOptions },
+  log?: { error: (obj: unknown, msg: string) => void },
+): Promise<Contact | null> {
+  const { data: contact, error } = await client
+    .from("people")
+    .select(CONTACT_SELECT)
+    .eq("id", contactId)
+    .single();
+
+  if (error || !contact) {
+    return null;
+  }
+
+  try {
+    const [enrichedContact] = await attachContactExtras(client, userId, [contact], {
+      addresses: true,
+      avatarOptions: options?.avatarOptions,
+    });
+    return enrichedContact as Contact;
+  } catch (channelError) {
+    log?.error({ channelError }, "Failed to attach contact extras");
+    return withEmptySocials(withEmptyChannels([contact]))[0] as Contact;
+  }
 }

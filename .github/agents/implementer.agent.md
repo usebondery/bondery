@@ -43,7 +43,7 @@ Before implementing, always determine:
 
 - Which workspace(s) does this task touch?
 - Is any logic general enough to live in `packages/` instead of being duplicated across apps?
-- Does this task require changes to shared types in `packages/types`? If so, run type generation after changes.
+- Does this task require changes to shared schemas in `packages/schemas`? If so, run type generation after database changes.
 - Does this touch the API? If so, run OpenAPI generation after changes.
 
 ## Step 2: Fetch Your Task from Plane
@@ -108,7 +108,7 @@ Once the implementation is complete:
    - Are all configurable values in config/env files?
    - Are errors handled explicitly and usefully?
    - Is there any hardcoded value, unused import, or dead code?
-   - If types were changed in `packages/types`, was type generation run?
+   - If schemas were changed in `packages/schemas`, was type generation run after database changes?
    - If the API was changed, was OpenAPI generation run?
    - Is the code readable by someone who didn't write it?
 

@@ -2,7 +2,7 @@ import { cache } from "react";
 import { getAuthHeaders } from "@/lib/authHeaders";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import { API_URL } from "@/lib/config";
-import type { ColorSchemePreference } from "@bondery/types";
+import type { ColorSchemePreference } from "@bondery/schemas";
 import { SUPPORTED_LOCALES } from "@bondery/translations";
 import type { SupportedLocale } from "@bondery/translations";
 

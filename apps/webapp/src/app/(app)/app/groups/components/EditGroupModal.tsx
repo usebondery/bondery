@@ -12,7 +12,8 @@ import {
   DEFAULT_THEME,
   Box,
 } from "@mantine/core";
-import { useForm } from "@mantine/form";
+import { useForm, schemaResolver } from "@mantine/form";
+import { updateGroupSchema } from "@bondery/schemas";
 import { modals } from "@mantine/modals";
 import { notifications } from "@mantine/notifications";
 import { IconUsersGroup, IconCheck } from "@tabler/icons-react";
@@ -26,7 +27,7 @@ import {
   successNotificationTemplate,
 } from "@bondery/mantine-next";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
-import type { GroupWithCount } from "@bondery/types";
+import type { GroupWithCount } from "@bondery/schemas";
 import { DEBOUNCE_MS } from "@/lib/config";
 import { revalidateGroups } from "../../actions";
 
@@ -97,16 +98,7 @@ function EditGroupForm({
       emoji: initialEmoji,
       color: initialColor,
     },
-    validate: {
-      label: (value) =>
-        value.trim().length === 0
-          ? t("EditGroupModal.LabelRequired")
-          : value.length > 100
-            ? t("EditGroupModal.LabelTooLong", { max: 100 })
-            : null,
-      emoji: (value) => (value.trim().length === 0 ? t("EditGroupModal.EmojiRequired") : null),
-      color: (value) => (value.trim().length === 0 ? t("EditGroupModal.ColorRequired") : null),
-    },
+    validate: schemaResolver(updateGroupSchema, { sync: true }),
   });
 
   const handleSubmit = async (values: typeof form.values) => {

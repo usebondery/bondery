@@ -1,5 +1,5 @@
 import { Text } from "@mantine/core";
-import type { Contact } from "@bondery/types";
+import type { Contact } from "@bondery/schemas";
 
 interface LastInteractionSectionProps {
   contact: Contact;

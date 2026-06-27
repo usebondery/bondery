@@ -6,7 +6,7 @@ import { IconShare } from "@tabler/icons-react";
 import { useTranslations } from "next-intl";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import { buildAvatarQueryString } from "@/lib/avatarParams";
-import type { Contact } from "@bondery/types";
+import type { Contact } from "@bondery/schemas";
 import { openShareContactModal } from "../people/components/ShareContactModal";
 
 /** Module-level cache so repeated mentions of the same contact cost zero extra fetches. */

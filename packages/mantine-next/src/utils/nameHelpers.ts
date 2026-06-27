@@ -1,4 +1,4 @@
-import type { Contact } from "@bondery/types";
+import type { Contact } from "@bondery/schemas";
 
 /**
  * Formats a contact's full name with proper spacing.

@@ -32,7 +32,7 @@ import {
 } from "@tabler/icons-react";
 import { notifications } from "@mantine/notifications";
 import { modals } from "@mantine/modals";
-import type { Contact, LinkedInPreparedContact } from "@bondery/types";
+import type { Contact, LinkedInPreparedContact } from "@bondery/schemas";
 import {
   DropzoneContent,
   ModalFooter,

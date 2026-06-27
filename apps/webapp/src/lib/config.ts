@@ -7,8 +7,14 @@ import type {
   ContactType,
   ImportantDateType,
   RelationshipType,
-} from "@bondery/types";
-import { IMPORTANT_DATE_TYPE_META } from "@bondery/helpers";
+} from "@bondery/schemas";
+import {
+  AVATAR_UPLOAD as SCHEMA_AVATAR_UPLOAD,
+  CONTACT_FIELD_MAX_LENGTHS,
+  CONTACT_LIMITS,
+} from "@bondery/schemas";
+import { IMPORTANT_DATE_TYPE_META, CONTACT_ADDRESS_TYPE_OPTIONS, CONTACT_CHANNEL_TYPE_OPTIONS } from "@bondery/helpers";
+import { GEOCODE_SUGGEST_DEBOUNCE_MS } from "@bondery/helpers/address";
 
 export const WEBAPP_URL = process.env.NEXT_PUBLIC_WEBAPP_URL!;
 export const WEBSITE_URL = process.env.NEXT_PUBLIC_WEBSITE_URL!;
@@ -23,18 +29,8 @@ function normalizeApiBaseUrl(rawUrl: string): string {
 }
 
 export const API_URL = normalizeApiBaseUrl(process.env.NEXT_PUBLIC_API_URL!);
-export const MAPS_URL = process.env.NEXT_PUBLIC_MAPS_URL || "https://api.mapy.com";
 
-export const INPUT_MAX_LENGTHS = {
-  firstName: 50,
-  middleName: 50,
-  lastName: 50,
-  fullName: 150,
-  headline: 100,
-  location: 100,
-  description: 500,
-  dateName: 50,
-} as const;
+export const INPUT_MAX_LENGTHS = CONTACT_FIELD_MAX_LENGTHS;
 
 export const FEATURES = {
   birthdayNotifications: true,
@@ -59,8 +55,8 @@ export const HOTKEYS = {
 } as const;
 
 export const LIMITS = {
-  maxImportantDates: 5,
-  maxAddresses: 5,
+  maxImportantDates: CONTACT_LIMITS.maxImportantDates,
+  maxAddresses: CONTACT_LIMITS.maxAddresses,
 } as const;
 
 /**
@@ -79,7 +75,7 @@ export const DEBOUNCE_MS = {
   /** @deprecated Use localFilter for client-side filtering. */
   tableSearch: 200,
   /** Debounce inside LocationLookupInput before calling the map suggestion API. */
-  locationSuggest: 600,
+  locationSuggest: GEOCODE_SUGGEST_DEBOUNCE_MS,
 } as const;
 
 export const IMPORTANT_DATE_TYPE_OPTIONS: ReadonlyArray<{
@@ -118,46 +114,39 @@ export const CONTACT_METHOD_TYPE_OPTIONS: ReadonlyArray<{
   value: ContactType;
   emoji: string;
   label: string;
-}> = [
-  { value: "home", emoji: "🏠", label: "Home" },
-  { value: "work", emoji: "💼", label: "Work" },
-] as const;
+}> = CONTACT_CHANNEL_TYPE_OPTIONS.map((option) => ({
+  ...option,
+  label: option.value === "work" ? "Work" : "Home",
+}));
 
 export const PHONE_TYPE_OPTIONS: ReadonlyArray<{
   value: ContactType;
   emoji: string;
   label: string;
-}> = [
-  { value: "home", emoji: "🏠", label: "Home" },
-  { value: "work", emoji: "💼", label: "Work" },
-] as const;
+}> = CONTACT_METHOD_TYPE_OPTIONS;
 
 export const EMAIL_TYPE_OPTIONS: ReadonlyArray<{
   value: ContactType;
   emoji: string;
   label: string;
-}> = [
-  { value: "home", emoji: "🏠", label: "Home" },
-  { value: "work", emoji: "💼", label: "Work" },
-] as const;
+}> = CONTACT_METHOD_TYPE_OPTIONS;
 
 export const ADDRESS_TYPE_OPTIONS: ReadonlyArray<{
   value: ContactAddressType;
   emoji: string;
   label: string;
-}> = [
-  { value: "home", emoji: "🏠", label: "Home" },
-  { value: "work", emoji: "💼", label: "Work" },
-  { value: "other", emoji: "📍", label: "Other" },
-] as const;
+}> = CONTACT_ADDRESS_TYPE_OPTIONS.map((option) => ({
+  ...option,
+  label: option.value === "work" ? "Work" : option.value === "other" ? "Other" : "Home",
+}));
 
 /**
  * Avatar upload configuration
  */
 export const AVATAR_UPLOAD = {
-  allowedMimeTypes: ["image/jpeg", "image/jpg", "image/png", "image/gif", "image/webp"] as const,
-  maxFileSize: 5 * 1024 * 1024,
-  maxFileSizeMB: 5,
+  allowedMimeTypes: SCHEMA_AVATAR_UPLOAD.allowedMimeTypes,
+  maxFileSize: SCHEMA_AVATAR_UPLOAD.maxFileSizeBytes,
+  maxFileSizeMB: SCHEMA_AVATAR_UPLOAD.maxFileSizeMB,
 } as const;
 
 // Doherty threshold, used for max function reply time

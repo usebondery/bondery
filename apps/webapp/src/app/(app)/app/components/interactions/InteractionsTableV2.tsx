@@ -12,7 +12,7 @@ import {
   IconUsers,
 } from "@tabler/icons-react";
 import { useLocale } from "next-intl";
-import type { Activity, Contact } from "@bondery/types";
+import type { Activity, Contact } from "@bondery/schemas";
 import {
   DataTable,
   PersonAvatarGroup,

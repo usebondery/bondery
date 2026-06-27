@@ -1,4 +1,4 @@
-import type { ActivityType } from "@bondery/types";
+import type { ActivityType } from "@bondery/schemas";
 import { INTERACTION_TYPES } from "@bondery/helpers";
 
 export type ActivityTypeConfig = {

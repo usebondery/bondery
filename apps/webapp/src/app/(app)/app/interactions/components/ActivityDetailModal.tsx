@@ -3,7 +3,7 @@
 import { Text, Group, Stack, Avatar, Button, Textarea, Box } from "@mantine/core";
 import { IconCalendar, IconMail, IconBrandLinkedin } from "@tabler/icons-react";
 import { BonderyIcon } from "@bondery/branding/react";
-import type { Activity, Contact } from "@bondery/types";
+import type { Activity, Contact } from "@bondery/schemas";
 import { useEffect, useState } from "react";
 import { notifications } from "@mantine/notifications";
 import { API_ROUTES, WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";

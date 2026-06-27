@@ -1,7 +1,7 @@
 import { API_URL } from "@/lib/config";
 import { getAuthHeaders } from "@/lib/authHeaders";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
-import type { MergeRecommendation, MergeRecommendationsResponse } from "@bondery/types";
+import type { MergeRecommendation, MergeRecommendationsResponse } from "@bondery/schemas";
 
 /**
  * Fetches merge recommendations from the API.

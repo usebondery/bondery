@@ -7,7 +7,7 @@ import "leaflet/dist/leaflet.css";
 import { API_ROUTES, WEBAPP_ROUTES, WEBSITE_ROUTES } from "@bondery/helpers/globals/paths";
 import { API_URL } from "@/lib/config";
 import { ColorSchemeSync } from "./components/ColorSchemeSync";
-import type { Contact, MergeRecommendation } from "@bondery/types";
+import type { Contact, MergeRecommendation } from "@bondery/schemas";
 import { getMergeRecommendationsData } from "./fix/getMergeRecommendationsData";
 import { getKeepInTouchData } from "./keep-in-touch/getKeepInTouchData";
 import { EnrichStatusNotificationManager } from "@/lib/extension/EnrichStatusNotificationManager";

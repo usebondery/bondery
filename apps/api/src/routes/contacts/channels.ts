@@ -1,5 +1,5 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
-import type { Database, EmailEntry, PhoneEntry } from "@bondery/types";
+import type { Database, EmailEntry, PhoneEntry } from "@bondery/schemas";
 import type { ContactWithId } from "../../lib/schemas.js";
 
 type PersonChannelRows = {

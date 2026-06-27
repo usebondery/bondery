@@ -110,12 +110,13 @@
       "outputs": ["dist/**"],
       "env": []
     },
-    "@bondery/vcard#build": {
-      "dependsOn": ["@bondery/helpers#build", "@bondery/types#build"],
+    "@bondery/schemas#build": {
+      "dependsOn": ["@bondery/helpers#build"],
       "outputs": ["dist/**"],
       "env": []
     },
-    "@bondery/types#build": {
+    "@bondery/vcard#build": {
+      "dependsOn": ["@bondery/helpers#build", "@bondery/schemas#build"],
       "outputs": ["dist/**"],
       "env": []
     },

@@ -8,6 +8,10 @@ import { Type } from "@sinclair/typebox";
 import { getAuth } from "../../lib/auth.js";
 import { buildContactAvatarUrl } from "../../lib/supabase.js";
 import { searchPeopleIds, restoreRankedOrder } from "../../lib/search.js";
+import {
+  resolveContactPersonIds,
+  ResolveContactPersonIdsError,
+} from "../../lib/resolve-contact-person-ids.js";
 import { generateVCard } from "./vcard.js";
 import {
   parseEmailEntries,
@@ -23,6 +27,7 @@ import {
 import { cachedGeocodeLinkedInLocation } from "../../lib/mapy.js";
 import {
   attachContactExtras,
+  loadEnrichedContact,
   type FullContactExtras,
 } from "../../lib/contact-enrichment.js";
 import type {
@@ -33,7 +38,7 @@ import type {
   PhoneEntry,
   SocialPlatform,
   TablesUpdate,
-} from "@bondery/types";
+} from "@bondery/schemas";
 import {
   UuidParam,
   ContactsFilterSchema,
@@ -818,7 +823,21 @@ export async function contactRoutes(fastify: FastifyInstance) {
         }
       }
 
-      return reply.status(201).send({ id: newContact.id });
+      const contact = await loadEnrichedContact(
+        client,
+        user.id,
+        newContact.id,
+        undefined,
+        request.log,
+      );
+
+      if (!contact) {
+        return reply
+          .status(500)
+          .send({ error: "Contact was created but could not be reloaded" });
+      }
+
+      return reply.status(201).send({ contact });
     },
   );
 
@@ -838,80 +857,40 @@ export async function contactRoutes(fastify: FastifyInstance) {
 
       let uniqueIds: string[];
 
-      // Resolve the list of IDs to delete — either provided directly or via filter.
-      if ("ids" in body && Array.isArray(body.ids)) {
-        uniqueIds = Array.from(new Set(body.ids.filter(Boolean)));
-        if (uniqueIds.length === 0) {
-          return reply.status(400).send({
-            error: "Invalid request body. 'ids' must be a non-empty array.",
-          });
-        }
-
-        // Filter out myself contacts — they cannot be deleted
-        const { data: myselfRows } = await client
-          .from("people")
-          .select("id")
-          .eq("user_id", user.id)
-          .eq("myself", true)
-          .in("id", uniqueIds);
-        const myselfIds = new Set(
-          (myselfRows ?? []).map((r: { id: string }) => r.id),
-        );
-        uniqueIds = uniqueIds.filter((id) => !myselfIds.has(id));
-
-        if (uniqueIds.length === 0) {
-          return reply.status(400).send({
-            error:
-              "No deletable contacts found. Your own contact card cannot be deleted.",
-          });
-        }
-      } else if ("filter" in body && body.filter) {
-        // Resolve matching IDs via fuzzy search RPC when a search query is present,
-        // otherwise fetch all non-myself contacts.
-        const search =
-          typeof body.filter.q === "string" ? body.filter.q.trim() : "";
-        if (search) {
-          const { ranked, error: rpcError } = await searchPeopleIds(
+      try {
+        if ("ids" in body && Array.isArray(body.ids)) {
+          uniqueIds = await resolveContactPersonIds(
             client,
             user.id,
-            search,
-            10000,
+            { personIds: body.ids },
+            {
+              rejectEmptyExplicit: true,
+              emptyExplicitError:
+                "Invalid request body. 'ids' must be a non-empty array.",
+              onlyMyselfError:
+                "No deletable contacts found. Your own contact card cannot be deleted.",
+            },
           );
+        } else if ("filter" in body && body.filter) {
+          uniqueIds = await resolveContactPersonIds(client, user.id, {
+            contactFilter: body.filter,
+            excludePersonIds: body.excludeIds,
+          });
 
-          if (rpcError) {
-            return reply.status(500).send({ error: rpcError });
+          if (uniqueIds.length === 0) {
+            return { message: "No contacts matched the filter" };
           }
-
-          const excludeSet = new Set(body.excludeIds ?? []);
-          uniqueIds = (ranked || [])
-            .map((r) => r.id)
-            .filter((id) => !excludeSet.has(id));
         } else {
-          let filterQuery = client
-            .from("people")
-            .select("id")
-            .eq("user_id", user.id)
-            .eq("myself", false);
-
-          const { data: rows, error: filterError } = await filterQuery;
-
-          if (filterError) {
-            return reply.status(500).send({ error: filterError.message });
-          }
-
-          const excludeSet = new Set(body.excludeIds ?? []);
-          uniqueIds = (rows || [])
-            .map((r: { id: string }) => r.id)
-            .filter((id: string) => !excludeSet.has(id));
+          return reply.status(400).send({
+            error: "Invalid request body. Provide either 'ids' or 'filter'.",
+          });
+        }
+      } catch (error) {
+        if (error instanceof ResolveContactPersonIdsError) {
+          return reply.status(error.statusCode).send({ error: error.message });
         }
 
-        if (uniqueIds.length === 0) {
-          return { message: "No contacts matched the filter" };
-        }
-      } else {
-        return reply.status(400).send({
-          error: "Invalid request body. Provide either 'ids' or 'filter'.",
-        });
+        throw error;
       }
 
       try {
@@ -1127,34 +1106,19 @@ export async function contactRoutes(fastify: FastifyInstance) {
       const { id } = request.params;
       const avatarOpts = extractAvatarOptions(request.query as any);
 
-      const { data: contact, error } = await client
-        .from("people")
-        .select(CONTACT_SELECT)
-        .eq("id", id)
-        .single();
+      const enrichedContact = await loadEnrichedContact(
+        client,
+        user.id,
+        id,
+        { avatarOptions: avatarOpts },
+        request.log,
+      );
 
-      if (error) {
-        return reply.status(404).send({ error: error.message });
+      if (!enrichedContact) {
+        return reply.status(404).send({ error: "Contact not found" });
       }
 
-      try {
-        const [enrichedContact] = await attachContactExtras(
-          client,
-          user.id,
-          [contact],
-          {
-            addresses: true,
-            avatarOptions: avatarOpts,
-          },
-        );
-        return { contact: enrichedContact };
-      } catch (channelError) {
-        fastify.log.error(
-          { channelError },
-          "Failed to attach contact channels/social media for single contact",
-        );
-        return { contact: withEmptySocials(withEmptyChannels([contact]))[0] };
-      }
+      return { contact: enrichedContact };
     },
   );
 
@@ -1196,7 +1160,27 @@ export async function contactRoutes(fastify: FastifyInstance) {
         return reply.status(500).send({ error: groupsError.message });
       }
 
-      return { groups };
+      const { data: groupMemberships, error: countsError } = await client
+        .from("people_groups")
+        .select("group_id")
+        .in("group_id", groupIds);
+
+      if (countsError) {
+        return reply.status(500).send({ error: countsError.message });
+      }
+
+      const countMap = new Map<string, number>();
+      groupMemberships?.forEach((item) => {
+        const current = countMap.get(item.group_id) || 0;
+        countMap.set(item.group_id, current + 1);
+      });
+
+      const groupsWithCounts = (groups || []).map((group) => ({
+        ...group,
+        contactCount: countMap.get(group.id) || 0,
+      }));
+
+      return { groups: groupsWithCounts };
     },
   );
 
@@ -1505,7 +1489,19 @@ export async function contactRoutes(fastify: FastifyInstance) {
         return reply.status(500).send({ error: message });
       }
 
-      return { message: "Contact updated successfully" };
+      const enrichedContact = await loadEnrichedContact(
+        client,
+        user.id,
+        id,
+        undefined,
+        request.log,
+      );
+
+      if (!enrichedContact) {
+        return reply.status(404).send({ error: "Contact not found" });
+      }
+
+      return { contact: enrichedContact };
     },
   );
 

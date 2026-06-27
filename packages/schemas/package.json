@@ -1,0 +1,42 @@
+{
+  "name": "@bondery/schemas",
+  "version": "1.4.2",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.js"
+    },
+    "./constants": {
+      "types": "./dist/constants/index.d.ts",
+      "import": "./dist/constants/index.js",
+      "require": "./dist/constants/index.js"
+    },
+    "./supabase.types": {
+      "types": "./dist/supabase.types.d.ts",
+      "import": "./dist/supabase.types.js",
+      "require": "./dist/supabase.types.js"
+    },
+    "./database": {
+      "types": "./dist/supabase.types.d.ts",
+      "import": "./dist/supabase.types.js",
+      "require": "./dist/supabase.types.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "check-types": "tsc --noEmit",
+    "test:contracts": "npx tsx ./src/contracts.assertions.ts"
+  },
+  "dependencies": {
+    "@bondery/helpers": "*",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "typescript": "^6"
+  }
+}

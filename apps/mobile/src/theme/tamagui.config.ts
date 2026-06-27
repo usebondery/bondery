@@ -1,32 +1,60 @@
 import { createTamagui } from "@tamagui/core";
-import { createAnimations } from "@tamagui/animations-react-native";
+import { createAnimations } from "@tamagui/animations-reanimated";
 import { defaultConfig } from "@tamagui/config/v4";
-
-/**
- * Global press shrink scale.
- * Change this single value to adjust the press-depth effect on all ScalePressable buttons.
- */
-export const PRESS_SCALE = 0.96;
+import { UI_TIMING_MS } from "../lib/config";
+import {
+  PRIMARY_BUTTON_BACKGROUND,
+  PRIMARY_BUTTON_BACKGROUND_HOVER,
+  PRIMARY_BUTTON_BACKGROUND_PRESS,
+  PRIMARY_BUTTON_TEXT,
+} from "./colors";
 
 const animations = createAnimations({
-  /** Fast spring used for press/release scale transitions */
+  /** Fast spring — press/release, popovers, opacity feedback */
   quick: {
     type: "spring",
     damping: 20,
     mass: 1.2,
     stiffness: 250,
   },
+  /** Softer spring — larger enter/exit motion */
   medium: {
     type: "spring",
     damping: 10,
     mass: 0.9,
     stiffness: 100,
   },
+  /** Fixed duration — input-adjacent timing, subtle fades */
+  timing200: {
+    type: "timing",
+    duration: UI_TIMING_MS.inputFocusTransition,
+  },
 });
+
+const lightTheme = {
+  ...defaultConfig.themes.light,
+  primaryButtonBackground: PRIMARY_BUTTON_BACKGROUND,
+  primaryButtonBackgroundHover: PRIMARY_BUTTON_BACKGROUND_HOVER,
+  primaryButtonBackgroundPress: PRIMARY_BUTTON_BACKGROUND_PRESS,
+  primaryButtonText: PRIMARY_BUTTON_TEXT,
+};
+
+const darkTheme = {
+  ...defaultConfig.themes.dark,
+  primaryButtonBackground: PRIMARY_BUTTON_BACKGROUND,
+  primaryButtonBackgroundHover: PRIMARY_BUTTON_BACKGROUND_HOVER,
+  primaryButtonBackgroundPress: PRIMARY_BUTTON_BACKGROUND_PRESS,
+  primaryButtonText: PRIMARY_BUTTON_TEXT,
+};
 
 const tamaguiConfig = createTamagui({
   ...defaultConfig,
   animations,
+  themes: {
+    ...defaultConfig.themes,
+    light: lightTheme,
+    dark: darkTheme,
+  },
 });
 
 export type AppTamaguiConfig = typeof tamaguiConfig;

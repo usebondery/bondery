@@ -24,7 +24,7 @@ import {
   errorNotificationTemplate,
 } from "@bondery/mantine-next";
 import { API_ROUTES, WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
-import type { Contact } from "@bondery/types";
+import type { Contact } from "@bondery/schemas";
 import { revalidateContacts } from "../actions";
 import { AnchorLink } from "@bondery/mantine-next";
 import { computeNextDueDate } from "./keepInTouchConfig";

@@ -14,7 +14,8 @@ import {
   DEFAULT_THEME,
   Box,
 } from "@mantine/core";
-import { useForm } from "@mantine/form";
+import { useForm, schemaResolver } from "@mantine/form";
+import { createGroupSchema } from "@bondery/schemas";
 import { modals } from "@mantine/modals";
 import { notifications } from "@mantine/notifications";
 import { IconUsersGroup } from "@tabler/icons-react";
@@ -30,7 +31,7 @@ import {
   successNotificationTemplate,
 } from "@bondery/mantine-next";
 import { flushSync } from "react-dom";
-import type { Contact, GroupWithCount } from "@bondery/types";
+import type { Contact, GroupWithCount } from "@bondery/schemas";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import { buildAvatarQueryString } from "@/lib/avatarParams";
 import { DEBOUNCE_MS } from "@/lib/config";
@@ -152,16 +153,7 @@ function AddGroupForm({
       emoji: getRandomEmoji(),
       color: getRandomColor(),
     },
-    validate: {
-      label: (value) =>
-        value.trim().length === 0
-          ? t("AddGroupModal.LabelRequired")
-          : value.length > 100
-            ? t("AddGroupModal.LabelTooLong", { max: 100 })
-            : null,
-      emoji: (value) => (value.trim().length === 0 ? t("AddGroupModal.EmojiRequired") : null),
-      color: (value) => (value.trim().length === 0 ? t("AddGroupModal.ColorRequired") : null),
-    },
+    validate: schemaResolver(createGroupSchema, { sync: true }),
   });
 
   const handleSubmit = async (values: typeof form.values) => {

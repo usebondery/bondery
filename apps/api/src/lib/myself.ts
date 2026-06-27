@@ -1,5 +1,5 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
-import type { Database, AvatarTransformOptions } from "@bondery/types";
+import type { Database, AvatarTransformOptions } from "@bondery/schemas";
 import { buildContactAvatarUrl } from "./supabase.js";
 
 export type MyselfProfile = {

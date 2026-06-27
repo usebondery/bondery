@@ -22,7 +22,7 @@ import { useTranslations } from "next-intl";
 import { PageHeader } from "@/app/(app)/app/components/PageHeader";
 import { WEBSITE_URL } from "@/lib/config";
 import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
-import type { SubscriptionStatus } from "@bondery/types";
+import type { SubscriptionStatus } from "@bondery/schemas";
 import { useChatSessions } from "./ChatSessionsContext";
 
 const SUGGESTED_PROMPTS = [

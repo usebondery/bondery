@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { PersonChip } from "@bondery/mantine-next";
-import type { ContactPreview } from "@bondery/types";
+import type { ContactPreview } from "@bondery/schemas";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import { buildAvatarQueryString } from "@/lib/avatarParams";
 

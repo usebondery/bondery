@@ -1,7 +1,7 @@
 "use client";
 
 import { Button, Card, Slider, Stack, Text, Textarea } from "@mantine/core";
-import { useForm } from "@mantine/form";
+import { schemaResolver, useForm } from "@mantine/form";
 import { notifications } from "@mantine/notifications";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
@@ -11,13 +11,8 @@ import {
   loadingNotificationTemplate,
   successNotificationTemplate,
 } from "@bondery/mantine-next";
+import { feedbackFormSchema, type FeedbackFormInput } from "@bondery/schemas";
 import { captureEvent } from "@/lib/analytics/client";
-
-interface FeedbackFormValues {
-  npsScore: number;
-  npsReason: string;
-  generalFeedback: string;
-}
 
 const SLIDER_MARKS = [
   { value: 0, label: "0" },
@@ -29,16 +24,17 @@ export function FeedbackForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const t = useTranslations("FeedbackPage");
 
-  const form = useForm<FeedbackFormValues>({
+  const form = useForm<FeedbackFormInput>({
     mode: "controlled",
     initialValues: {
       npsScore: 5,
       npsReason: "",
       generalFeedback: "",
     },
+    validate: schemaResolver(feedbackFormSchema, { sync: true }),
   });
 
-  const handleSubmit = async (values: FeedbackFormValues) => {
+  const handleSubmit = async (values: FeedbackFormInput) => {
     setIsSubmitting(true);
 
     const loadingNotification = notifications.show({
@@ -75,9 +71,8 @@ export function FeedbackForm() {
         has_general_feedback: values.generalFeedback.trim().length > 0,
       });
 
-      // Reset form after successful submission
       form.reset();
-    } catch (error) {
+    } catch {
       notifications.hide(loadingNotification);
       notifications.show(
         errorNotificationTemplate({
@@ -94,7 +89,6 @@ export function FeedbackForm() {
     <Card p="xl" className="max-w-xl" ta="left">
       <form onSubmit={form.onSubmit(handleSubmit)}>
         <Stack gap="xl">
-          {/* NPS Score Slider */}
           <Stack gap="md">
             <Text fw={500}>{t("NpsLabel")}</Text>
             <Slider
@@ -109,7 +103,6 @@ export function FeedbackForm() {
             />
           </Stack>
 
-          {/* NPS Reason Textarea */}
           <Textarea
             label={t("NpsReasonLabel", { score: form.values.npsScore })}
             placeholder={t("NpsReasonPlaceholder")}
@@ -118,7 +111,6 @@ export function FeedbackForm() {
             {...form.getInputProps("npsReason")}
           />
 
-          {/* General Feedback Textarea */}
           <Textarea
             label={t("GeneralFeedbackLabel")}
             placeholder={t("GeneralFeedbackPlaceholder")}
@@ -127,7 +119,6 @@ export function FeedbackForm() {
             {...form.getInputProps("generalFeedback")}
           />
 
-          {/* Submit Button */}
           <Button type="submit" loading={isSubmitting} fullWidth size="md">
             {t("SubmitButton")}
           </Button>

@@ -1,19 +1,10 @@
-import { Stack, styled } from "@tamagui/core";
-import { PRESS_SCALE } from "./tamagui.config";
+import type { ComponentProps } from "react";
+import { Tappable } from "./Tappable";
 
 /**
- * Drop-in pressable that scales down on press using the globally configured
- * PRESS_SCALE value from tamagui.config.ts.
- *
- * @example
- * <ScalePressable onPress={handlePress}>
- *   <View style={styles.actionIcon}>
- *     <IconPhone size={20} />
- *   </View>
- * </ScalePressable>
+ * Backward-compatible alias to {@link Tappable} with `variant="default"`.
+ * @deprecated Import `Tappable` in new code.
  */
-export const ScalePressable = styled(Stack, {
-  animation: "quick",
-  pressStyle: { scale: PRESS_SCALE },
-  cursor: "pointer",
-});
+export function ScalePressable(props: ComponentProps<typeof Tappable>) {
+  return <Tappable variant="default" {...props} />;
+}

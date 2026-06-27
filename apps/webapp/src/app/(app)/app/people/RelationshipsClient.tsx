@@ -1,6 +1,6 @@
 "use client";
 
-import type { Contact } from "@bondery/types";
+import type { Contact } from "@bondery/schemas";
 import { PeopleClient } from "./PeopleClient";
 
 interface RelationshipsClientProps {

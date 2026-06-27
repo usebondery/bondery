@@ -3,7 +3,7 @@ import { API_URL } from "@/lib/config";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import { ChatSessionSidebar } from "./ChatSessionSidebar";
 import { ChatSessionsProvider } from "./ChatSessionsContext";
-import type { ChatSession } from "@bondery/types";
+import type { ChatSession } from "@bondery/schemas";
 import { Box } from "@mantine/core";
 
 /**

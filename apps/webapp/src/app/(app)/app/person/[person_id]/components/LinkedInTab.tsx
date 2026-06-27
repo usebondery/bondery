@@ -3,7 +3,7 @@
 import { Button, Divider, Stack, Text } from "@mantine/core";
 import { IconBrandLinkedin } from "@tabler/icons-react";
 import { useTranslations, useFormatter } from "next-intl";
-import type { WorkHistoryEntry, EducationEntry } from "@bondery/types";
+import type { WorkHistoryEntry, EducationEntry } from "@bondery/schemas";
 import { WorkHistoryCard } from "./WorkHistoryCard";
 import { EducationCard } from "./EducationCard";
 import { LinkedInBioSection } from "./LinkedInBioSection";

@@ -52,7 +52,27 @@ export function registerTagRoutes(fastify: FastifyInstance): void {
         return reply.status(500).send({ error: tagsError.message });
       }
 
-      return { tags };
+      const { data: tagMemberships, error: countsError } = await client
+        .from("people_tags")
+        .select("tag_id")
+        .in("tag_id", tagIds);
+
+      if (countsError) {
+        return reply.status(500).send({ error: countsError.message });
+      }
+
+      const countMap = new Map<string, number>();
+      tagMemberships?.forEach((item: { tag_id: string }) => {
+        const current = countMap.get(item.tag_id) || 0;
+        countMap.set(item.tag_id, current + 1);
+      });
+
+      const tagsWithCounts = (tags || []).map((tag) => ({
+        ...tag,
+        contactCount: countMap.get(tag.id) || 0,
+      }));
+
+      return { tags: tagsWithCounts };
     },
   );
 
@@ -84,7 +104,18 @@ export function registerTagRoutes(fastify: FastifyInstance): void {
         return reply.status(500).send({ error: error.message });
       }
 
-      return reply.status(201).send({ message: "Tag added to contact successfully" });
+      const { data: tag, error: tagError } = await client
+        .from("tags")
+        .select(TAG_SELECT)
+        .eq("id", tagId)
+        .eq("user_id", user.id)
+        .single();
+
+      if (tagError || !tag) {
+        return reply.status(404).send({ error: "Tag not found" });
+      }
+
+      return reply.status(201).send({ tag });
     },
   );
 

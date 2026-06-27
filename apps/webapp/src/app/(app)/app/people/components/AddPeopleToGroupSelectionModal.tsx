@@ -32,7 +32,7 @@ import {
   ModalTitle,
   successNotificationTemplate,
 } from "@bondery/mantine-next";
-import type { Contact, ContactPreview, GroupWithCount, GroupsListResponse } from "@bondery/types";
+import type { Contact, ContactPreview, GroupWithCount, GroupsListResponse } from "@bondery/schemas";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import { revalidateGroups } from "../../actions";
 import { GroupCard, GROUP_CARD_MAX_WIDTH_BY_VARIANT } from "../../groups/components/GroupCard";
@@ -230,12 +230,38 @@ function AddPeopleToGroupSelectionForm({
         }
       }
 
+      const addResults = await Promise.all(
+        addResponses.map((response) =>
+          response.json().catch(() => ({})),
+        ),
+      ) as Array<{ addedCount?: number; skippedCount?: number }>;
+      const totalAdded = addResults.reduce(
+        (sum, result) => sum + (result.addedCount ?? 0),
+        0,
+      );
+      const totalSkipped = addResults.reduce(
+        (sum, result) => sum + (result.skippedCount ?? 0),
+        0,
+      );
+
       notifications.hide(loadingNotification);
+
+      const membershipSummary =
+        totalAdded === 0 && totalSkipped > 0
+          ? `All selected people were already in the chosen group(s).`
+          : `${totalAdded} ${totalAdded === 1 ? "person" : "people"} added${
+              totalSkipped > 0
+                ? ` (${totalSkipped} already in group${totalSkipped === 1 ? "" : "s"})`
+                : ""
+            } across ${targetGroupIds.length} ${targetGroupIds.length === 1 ? "group" : "groups"}`;
 
       notifications.show(
         successNotificationTemplate({
           title: "Success",
-          description: `${deduplicatedPersonIds.length} ${deduplicatedPersonIds.length === 1 ? "person" : "people"} membership updated in ${selectedGroupIds.size} ${selectedGroupIds.size === 1 ? "group" : "groups"}`,
+          description:
+            removedGroupIds.length > 0
+              ? `${deduplicatedPersonIds.length} ${deduplicatedPersonIds.length === 1 ? "person" : "people"} membership updated in ${selectedGroupIds.size} ${selectedGroupIds.size === 1 ? "group" : "groups"}`
+              : membershipSummary,
         }),
       );
 

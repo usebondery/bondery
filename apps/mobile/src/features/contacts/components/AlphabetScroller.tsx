@@ -3,11 +3,12 @@ import {
   GestureResponderEvent,
   LayoutChangeEvent,
   PanResponder,
-  PanResponderGestureState,
   StyleSheet,
   Text,
   View,
 } from "react-native";
+import { MOBILE_LAYOUT, MOBILE_TYPOGRAPHY } from "../../../theme/tokens";
+import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
 
 interface AlphabetScrollerProps {
   letters: string[];
@@ -15,23 +16,30 @@ interface AlphabetScrollerProps {
 }
 
 export function AlphabetScroller({ letters, onLetterChange }: AlphabetScrollerProps) {
+  const colors = useMobileThemeColors();
   const [containerHeight, setContainerHeight] = useState(0);
   const [activeLetter, setActiveLetter] = useState<string | null>(null);
 
   const maxIndex = Math.max(letters.length - 1, 0);
 
-  const updateLetterByPosition = (gestureState: PanResponderGestureState) => {
+  const updateLetterByPosition = (locationY: number) => {
     if (!containerHeight || letters.length === 0) {
       return;
     }
 
     const rowHeight = containerHeight / letters.length;
-    const rawIndex = Math.floor(gestureState.y0 / rowHeight + gestureState.dy / rowHeight);
+    const rawIndex = Math.floor(locationY / rowHeight);
     const boundedIndex = Math.min(Math.max(rawIndex, 0), maxIndex);
     const selectedLetter = letters[boundedIndex];
 
-    setActiveLetter(selectedLetter);
-    onLetterChange(selectedLetter);
+    setActiveLetter((currentLetter) => {
+      if (currentLetter === selectedLetter) {
+        return currentLetter;
+      }
+
+      onLetterChange(selectedLetter);
+      return selectedLetter;
+    });
   };
 
   const panResponder = useMemo(
@@ -39,14 +47,10 @@ export function AlphabetScroller({ letters, onLetterChange }: AlphabetScrollerPr
       PanResponder.create({
         onStartShouldSetPanResponder: () => true,
         onMoveShouldSetPanResponder: () => true,
-        onPanResponderGrant: (
-          _event: GestureResponderEvent,
-          gestureState: PanResponderGestureState,
-        ) => updateLetterByPosition(gestureState),
-        onPanResponderMove: (
-          _event: GestureResponderEvent,
-          gestureState: PanResponderGestureState,
-        ) => updateLetterByPosition(gestureState),
+        onPanResponderGrant: (event: GestureResponderEvent) =>
+          updateLetterByPosition(event.nativeEvent.locationY),
+        onPanResponderMove: (event: GestureResponderEvent) =>
+          updateLetterByPosition(event.nativeEvent.locationY),
         onPanResponderRelease: () => setActiveLetter(null),
         onPanResponderTerminate: () => setActiveLetter(null),
       }),
@@ -64,19 +68,23 @@ export function AlphabetScroller({ letters, onLetterChange }: AlphabetScrollerPr
   return (
     <View style={styles.wrapper}>
       {activeLetter ? (
-        <View style={styles.bubble}>
-          <Text style={styles.bubbleText}>{activeLetter}</Text>
+        <View style={[styles.bubble, { backgroundColor: colors.textPrimary }]}> 
+          <Text style={[styles.bubbleText, { color: colors.textOnPrimary }]}>{activeLetter}</Text>
         </View>
       ) : null}
       <View
         onLayout={handleContainerLayout}
-        style={styles.lettersContainer}
+        style={[styles.lettersContainer, { backgroundColor: colors.overlay }]}
         {...panResponder.panHandlers}
       >
         {letters.map((letter) => (
           <Text
             key={letter}
-            style={[styles.letter, activeLetter === letter && styles.letterActive]}
+            style={[
+              styles.letter,
+              { color: colors.textMuted },
+              activeLetter === letter && [styles.letterActive, { color: colors.textPrimary }],
+            ]}
           >
             {letter}
           </Text>
@@ -97,7 +105,6 @@ const styles = StyleSheet.create({
     zIndex: 20,
   },
   lettersContainer: {
-    backgroundColor: "rgba(255,255,255,0.9)",
     borderRadius: 12,
     paddingHorizontal: 4,
     paddingVertical: 8,
@@ -105,27 +112,22 @@ const styles = StyleSheet.create({
   },
   letter: {
     fontSize: 10,
-    fontWeight: "600",
-    color: "#6b7280",
+    fontWeight: MOBILE_TYPOGRAPHY.fontWeight.semibold,
     textAlign: "center",
     width: 14,
   },
-  letterActive: {
-    color: "#111827",
-  },
+  letterActive: {},
   bubble: {
     position: "absolute",
     right: 34,
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: "#111827",
+    width: MOBILE_LAYOUT.alphabetScroller.bubble,
+    height: MOBILE_LAYOUT.alphabetScroller.bubble,
+    borderRadius: MOBILE_LAYOUT.alphabetScroller.bubble / 2,
     justifyContent: "center",
     alignItems: "center",
   },
   bubbleText: {
-    color: "#ffffff",
     fontSize: 20,
-    fontWeight: "700",
+    fontWeight: MOBILE_TYPOGRAPHY.fontWeight.bold,
   },
 });

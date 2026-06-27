@@ -15,15 +15,17 @@ import { notifications } from "@mantine/notifications";
 import { IconBell, IconCalendarEvent, IconPlus, IconTrash } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
-import type { ImportantDate, ImportantDateType } from "@bondery/types";
+import {
+  CONTACT_FIELD_MAX_LENGTHS,
+  CONTACT_LIMITS,
+  firstZodErrorMessage,
+  replaceImportantDatesSchema,
+  type ImportantDate,
+  type ImportantDateType,
+} from "@bondery/schemas";
 import { errorNotificationTemplate } from "@bondery/mantine-next";
 import { DatePickerWithPresets } from "../../../components/interactions/DatePickerWithPresets";
-import {
-  IMPORTANT_DATE_NOTIFY_OPTIONS,
-  IMPORTANT_DATE_TYPE_OPTIONS,
-  INPUT_MAX_LENGTHS,
-  LIMITS,
-} from "@/lib/config";
+import { IMPORTANT_DATE_NOTIFY_OPTIONS, IMPORTANT_DATE_TYPE_OPTIONS } from "@/lib/config";
 
 interface ImportantDateDraft {
   type: ImportantDateType | null;
@@ -339,10 +341,29 @@ export function ContactImportantDatesSection({
           : t("NotifyDaysBefore", { count: Number(option.value) }),
   }));
 
-  const isLimitReached = localDates.length >= LIMITS.maxImportantDates;
+  const isLimitReached = localDates.length >= CONTACT_LIMITS.maxImportantDates;
+
+  const isValidDatesPayload = (nextDates: ImportantDate[]) => {
+    const parsed = replaceImportantDatesSchema.safeParse(nextDates);
+    if (!parsed.success) {
+      notifications.show(
+        errorNotificationTemplate({
+          title: t("ErrorTitle"),
+          description: firstZodErrorMessage(parsed.error),
+        }),
+      );
+      return false;
+    }
+
+    return true;
+  };
 
   const persistDates = (nextDates: ImportantDate[]) => {
     if (areDatesEqual(nextDates, localDates)) {
+      return;
+    }
+
+    if (!isValidDatesPayload(nextDates)) {
       return;
     }
 
@@ -500,12 +521,19 @@ export function ContactImportantDatesSection({
     const originalDate = dates.find((dateItem) => dateItem.id === currentDate.id) || dates[index];
 
     if (!originalDate) {
+      if (!isValidDatesPayload(localDates)) {
+        return;
+      }
       onDatesChange(localDates);
       onSave(localDates);
       return;
     }
 
     if ((currentDate.note ?? "") === (originalDate.note ?? "")) {
+      return;
+    }
+
+    if (!isValidDatesPayload(localDates)) {
       return;
     }
 
@@ -540,7 +568,7 @@ export function ContactImportantDatesSection({
                 disabledNamedateTypeHint={t("TypeDisabledNamedateHint", {
                   firstName: personFirstName,
                 })}
-                noteMaxLength={INPUT_MAX_LENGTHS.dateName}
+                noteMaxLength={CONTACT_FIELD_MAX_LENGTHS.dateName}
                 datePlaceholder={t("DatePlaceholder")}
                 notePlaceholder={t("NotePlaceholder")}
                 typePlaceholder={t("TypePlaceholder")}
@@ -573,7 +601,7 @@ export function ContactImportantDatesSection({
             disabledNamedateTypeHint={t("TypeDisabledNamedateHint", {
               firstName: personFirstName,
             })}
-            noteMaxLength={INPUT_MAX_LENGTHS.dateName}
+            noteMaxLength={CONTACT_FIELD_MAX_LENGTHS.dateName}
             datePlaceholder={t("DatePlaceholder")}
             notePlaceholder={t("NotePlaceholder")}
             typePlaceholder={t("TypePlaceholder")}

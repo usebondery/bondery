@@ -60,12 +60,50 @@
       "import": "./dist/env/index.js",
       "require": "./dist/env/index.js",
       "types": "./dist/env/index.d.ts"
+    },
+    "./locale": {
+      "import": "./dist/locale/index.js",
+      "require": "./dist/locale/index.js",
+      "types": "./dist/locale/index.d.ts"
+    },
+    "./socials": {
+      "import": "./dist/socials/index.js",
+      "require": "./dist/socials/index.js",
+      "types": "./dist/socials/index.d.ts"
+    },
+    "./phone": {
+      "import": "./dist/phone/index.js",
+      "require": "./dist/phone/index.js",
+      "types": "./dist/phone/index.d.ts"
+    },
+    "./contact": {
+      "import": "./dist/contact/index.js",
+      "require": "./dist/contact/index.js",
+      "types": "./dist/contact/index.d.ts"
+    },
+    "./geocode": {
+      "import": "./dist/geocode/index.js",
+      "require": "./dist/geocode/index.js",
+      "types": "./dist/geocode/index.d.ts"
+    },
+    "./emoji": {
+      "import": "./dist/emoji/index.js",
+      "require": "./dist/emoji/index.js",
+      "types": "./dist/emoji/index.d.ts"
+    },
+    "./notes": {
+      "import": "./dist/notes/index.js",
+      "require": "./dist/notes/index.js",
+      "types": "./dist/notes/index.d.ts"
     }
   },
   "scripts": {
     "build": "tsc"
   },
   "dependencies": {
+    "@bondery/schemas": "*",
+    "@bondery/translations": "*",
+    "@vvo/tzdb": "^6.198.0",
     "transliteration": "^2.6.1"
   },
   "devDependencies": {

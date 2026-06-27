@@ -7,7 +7,7 @@ import type { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
 import { Type } from "@sinclair/typebox";
 import { getAuth } from "../../../lib/auth.js";
 import { buildContactAvatarUrl } from "../../../lib/supabase.js";
-import type { ImportantDateType, UpcomingReminder, Database } from "@bondery/types";
+import type { ImportantDateType, UpcomingReminder, Database } from "@bondery/schemas";
 import {
   UuidParam,
   ImportantDateInputSchema,

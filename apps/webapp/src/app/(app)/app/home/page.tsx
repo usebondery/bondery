@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { API_URL } from "@/lib/config";
 import { getAuthHeaders } from "@/lib/authHeaders";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
-import type { UpcomingReminder } from "@bondery/types";
+import type { UpcomingReminder } from "@bondery/schemas";
 import { buildAvatarQueryString } from "@/lib/avatarParams";
 import { getContactsData } from "../people/getContactsData";
 import { getInteractionsData } from "../interactions/getInteractionsData";

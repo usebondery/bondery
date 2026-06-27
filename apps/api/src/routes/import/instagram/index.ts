@@ -12,7 +12,8 @@ import type {
   InstagramImportSource,
   InstagramImportStrategy,
   InstagramParseResponse,
-} from "@bondery/types";
+} from "@bondery/schemas";
+import { IMPORT_TIER } from "../../../lib/rate-limit.js";
 
 const InstagramCommitContactSchema = Type.Object({
   firstName: Type.String(),
@@ -142,7 +143,7 @@ export async function instagramImportRoutes(fastify: FastifyInstance) {
 
   fastify.post(
     "/commit",
-    { schema: { body: InstagramCommitBody } },
+    { schema: { body: InstagramCommitBody }, config: { rateLimit: IMPORT_TIER } },
     async (
       request: FastifyRequest<{ Body: typeof InstagramCommitBody.static }>,
       reply: FastifyReply,

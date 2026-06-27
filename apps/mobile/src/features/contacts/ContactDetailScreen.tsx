@@ -1,14 +1,10 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
-  ActionSheetIOS,
   ActivityIndicator,
-  Alert,
   Image,
   Linking,
-  Platform,
   Pressable,
   ScrollView,
-  Share,
   StyleSheet,
   Text,
   View,
@@ -16,489 +12,785 @@ import {
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
-  IconArrowLeft,
-  IconBrandFacebook,
-  IconBrandInstagram,
-  IconBrandLinkedin,
-  IconBrandWhatsapp,
-  IconCalendar,
   IconChevronDown,
   IconChevronUp,
   IconClock,
-  IconDotsVertical,
   IconMail,
-  IconMapPin,
   IconMessage,
+  IconPencil,
   IconPhone,
-  IconWorld,
+  IconTrash,
 } from "@tabler/icons-react-native";
-import type { Contact, EmailEntry, ImportantDate, PhoneEntry } from "@bondery/types";
-import { fetchContact } from "../../lib/api/client";
+import { EnrichedMarkdownText } from "react-native-enriched-markdown";
+import { expandPersonMentionsForEditor, htmlToMarkdown, parsePersonMentionUrl } from "@bondery/helpers/notes";
+import type {
+  Contact,
+  ContactAddressEntry,
+  EmailEntry,
+  Group,
+  GroupWithCount,
+  ImportantDate,
+  PhoneEntry,
+  Tag,
+  TagWithCount,
+} from "@bondery/schemas";
+import type { ContactSocialFieldKey } from "@bondery/helpers";
+import { firstZodErrorMessage, replaceImportantDatesSchema } from "@bondery/schemas";
+import {
+  deleteContacts,
+  fetchContact,
+  fetchContactGroups,
+  fetchContactImportantDates,
+  fetchContactTags,
+  fetchMyselfContact,
+  replaceImportantDates,
+  updateContact,
+  type ImportantDateInput,
+} from "../../lib/api/client";
+import { ActionSheetPopup } from "../../components/ActionSheetPopup";
+import { LoadErrorCard, loadErrorStackInset } from "../../components/load-state";
+import { StackNavBar } from "../../components/chrome";
+import {
+  NOTES_COLLAPSE_CHAR_THRESHOLD,
+  normalizeMobileUrlForDevice,
+} from "../../lib/config";
+import { useMobileTranslations } from "../../lib/i18n/useMobileTranslations";
+import { useContactsStore } from "../../lib/store";
+import {
+  ShareUnavailableError,
+  shareContactVCard,
+} from "../../lib/share/shareContactVCard";
+import { useAppToast } from "../../lib/toast/useAppToast";
 import { ScalePressable } from "../../theme/ScalePressable";
-import { formatContactName, getAvatarColorHex, getContactInitials } from "./contactUtils";
+import {
+  MOBILE_LAYOUT,
+  MOBILE_TYPOGRAPHY,
+} from "../../theme/tokens";
+import { useMobileThemeColors } from "../../theme/useMobileThemeColors";
+import { ContactAddressesSection } from "./components/ContactAddressesSection";
+import { ContactDetailOverflowMenu } from "./components/ContactDetailOverflowMenu";
+import { ShareContactEmailSheet } from "./ShareContactEmailSheet";
+import { ContactEmailsSection } from "./components/ContactEmailsSection";
+import { ContactGroupsSection } from "./components/ContactGroupsSection";
+import { ContactTagsSection } from "./components/ContactTagsSection";
+import { ContactPhonesSection } from "./components/ContactPhonesSection";
+import { ContactSocialSection } from "./components/ContactSocialSection";
+import { ContactImportantDatesSection } from "./components/ContactImportantDatesSection";
+import { EditIdentitySheet } from "./components/EditIdentitySheet";
+import { ContactDetailSectionHeader } from "./components/ContactDetailSectionHeader";
+import { contactDetailStyles } from "./components/contactDetailStyles";
+import {
+  normalizeEmailsForSave,
+  normalizePhonesForSave,
+} from "./contactChannelConstants";
+import {
+  formatAbsoluteDate,
+  formatContactLocation,
+  formatContactName,
+  formatRelativeDate,
+  getAvatarColorHex,
+  getContactAddresses,
+  getContactInitials,
+  parseContactEmails,
+  parseContactPhones,
+} from "./contactUtils";
+import { useMentionableContacts } from "./hooks/useMentionableContacts";
 
 interface ContactDetailScreenProps {
-  id: string;
+  id?: string;
+  isMyselfMode?: boolean;
 }
 
-// ── Helpers ──────────────────────────────────────────────────────────────────
-
-function formatRelativeDate(dateStr: string): string {
-  const diffDays = Math.floor((Date.now() - new Date(dateStr).getTime()) / 86_400_000);
-  if (diffDays === 0) return "Today";
-  if (diffDays === 1) return "Yesterday";
-  if (diffDays < 7) return `${diffDays} days ago`;
-  const weeks = Math.floor(diffDays / 7);
-  if (diffDays < 30) return `${weeks} week${weeks > 1 ? "s" : ""} ago`;
-  const months = Math.floor(diffDays / 30);
-  if (diffDays < 365) return `${months} month${months > 1 ? "s" : ""} ago`;
-  const years = Math.floor(diffDays / 365);
-  return `${years} year${years > 1 ? "s" : ""} ago`;
-}
-
-function formatAbsoluteDate(dateStr: string): string {
-  return new Date(dateStr).toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  });
-}
-
-const DATE_LABELS: Record<string, string> = {
-  birthday: "Birthday",
-  anniversary: "Anniversary",
-  nameday: "Name Day",
-  graduation: "Graduation",
-  other: "Important Date",
-};
-
-const SOCIAL_LABELS: Record<string, string> = {
-  linkedin: "LinkedIn",
-  instagram: "Instagram",
-  facebook: "Facebook",
-  whatsapp: "WhatsApp",
-  signal: "Signal",
-  website: "Website",
-};
-
-function buildVCard(
-  contact: Contact,
-  phones: PhoneEntry[],
-  emails: EmailEntry[],
-  name: string,
-): string {
-  const lines: string[] = [
-    "BEGIN:VCARD",
-    "VERSION:3.0",
-    `FN:${name}`,
-    `N:${contact.lastName ?? ""};${contact.firstName ?? ""};${contact.middleName ?? ""};;`,
-  ];
-
-  phones.forEach((p) => {
-    const type = p.type === "work" ? "WORK" : "HOME";
-    lines.push(`TEL;TYPE=${type}:${p.prefix ?? ""}${p.value}`);
-  });
-
-  emails.forEach((e) => {
-    const type = e.type === "work" ? "WORK" : "HOME";
-    lines.push(`EMAIL;TYPE=${type}:${e.value}`);
-  });
-
-  if (contact.notes) {
-    lines.push(`NOTE:${contact.notes.replace(/\n/g, "\\n")}`);
-  }
-
-  lines.push("END:VCARD");
-  return lines.join("\n");
-}
-
-function buildSocialUrl(platform: string, handle: string): string {
-  if (handle.startsWith("http")) return handle;
-  switch (platform) {
-    case "linkedin":
-      return `https://linkedin.com/in/${handle}`;
-    case "instagram":
-      return `https://instagram.com/${handle}`;
-    case "facebook":
-      return `https://facebook.com/${handle}`;
-    case "whatsapp":
-      return `https://wa.me/${handle.replace(/\D/g, "")}`;
-    case "signal":
-      return `https://signal.me/#p/${handle}`;
-    case "website":
-      return `https://${handle}`;
-    default:
-      return handle;
-  }
-}
-
-// ── Sub-components ────────────────────────────────────────────────────────────
-
-function SectionTitle({ title }: { title: string }) {
-  return <Text style={styles.sectionTitle}>{title}</Text>;
-}
-
-function SocialCard({
-  platform,
-  handle,
-  onPress,
-}: {
-  platform: string;
-  handle: string;
-  onPress: () => void;
-}) {
-  const iconProps = { size: 18, stroke: "#6b7280" } as const;
-  const icons: Record<string, React.ReactNode> = {
-    linkedin: <IconBrandLinkedin {...iconProps} />,
-    instagram: <IconBrandInstagram {...iconProps} />,
-    facebook: <IconBrandFacebook {...iconProps} />,
-    whatsapp: <IconBrandWhatsapp {...iconProps} />,
-    signal: <IconMessage {...iconProps} />,
-    website: <IconWorld {...iconProps} />,
-  };
-
-  return (
-    <Pressable style={styles.card} onPress={onPress}>
-      <View style={styles.cardRow}>
-        <View style={styles.cardLeft}>
-          <Text style={styles.cardPrimary}>{SOCIAL_LABELS[platform] ?? platform}</Text>
-          <Text style={styles.cardSecondary} numberOfLines={1}>
-            {handle}
-          </Text>
-        </View>
-        {icons[platform] ?? null}
-      </View>
-    </Pressable>
-  );
-}
-
-// ── Main Screen ───────────────────────────────────────────────────────────────
-
-export function ContactDetailScreen({ id }: ContactDetailScreenProps) {
+export function ContactDetailScreen({
+  id,
+  isMyselfMode = false,
+}: ContactDetailScreenProps) {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const [contact, setContact] = useState<Contact | null>(null);
+  const colors = useMobileThemeColors();
+  const t = useMobileTranslations();
+  const { showToast } = useAppToast();
+  const upsertContact = useContactsStore((state) => state.upsertContact);
+  const removeContact = useContactsStore((state) => state.removeContact);
+  const contact = useContactsStore((state) => {
+    if (isMyselfMode) {
+      return state.myselfContactId ? state.byId[state.myselfContactId] ?? null : null;
+    }
+
+    if (!id) {
+      return null;
+    }
+
+    return state.byId[id] ?? null;
+  });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [notesExpanded, setNotesExpanded] = useState(false);
+  const [avatarImageFailed, setAvatarImageFailed] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [isSharing, setIsSharing] = useState(false);
+  const [isDeleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [isShareEmailSheetOpen, setShareEmailSheetOpen] = useState(false);
+  const [isIdentitySheetOpen, setIdentitySheetOpen] = useState(false);
+  const [importantDates, setImportantDates] = useState<ImportantDate[]>([]);
+  const [memberGroups, setMemberGroups] = useState<GroupWithCount[]>([]);
+  const [groupsLoading, setGroupsLoading] = useState(true);
+  const [groupsError, setGroupsError] = useState<string | null>(null);
+  const [memberTags, setMemberTags] = useState<TagWithCount[]>([]);
+  const [tagsLoading, setTagsLoading] = useState(true);
+  const [tagsError, setTagsError] = useState<string | null>(null);
+
+  const {
+    contacts: mentionableContacts,
+    myselfContactId,
+    getContactName,
+  } = useMentionableContacts({
+    contactId: contact?.id ?? id ?? null,
+    isMyselfMode,
+  });
+
+  const loadContactImportantDates = useCallback(async (contactId: string) => {
+    try {
+      const { dates } = await fetchContactImportantDates(contactId);
+      setImportantDates(dates);
+    } catch {
+      setImportantDates([]);
+    }
+  }, []);
+
+  const loadContactTags = useCallback(async (contactId: string) => {
+    setTagsLoading(true);
+    setTagsError(null);
+
+    try {
+      const { tags } = await fetchContactTags(contactId);
+      setMemberTags(tags);
+    } catch (err) {
+      setTagsError(
+        err instanceof Error ? err.message : t("MobileApp.ContactDetail.TagsLoadError"),
+      );
+    } finally {
+      setTagsLoading(false);
+    }
+  }, [t]);
+
+  const loadContactGroups = useCallback(async (contactId: string) => {
+    setGroupsLoading(true);
+    setGroupsError(null);
+
+    try {
+      const { groups } = await fetchContactGroups(contactId);
+      setMemberGroups(groups);
+    } catch (err) {
+      setGroupsError(
+        err instanceof Error ? err.message : t("MobileApp.ContactDetail.GroupsLoadError"),
+      );
+    } finally {
+      setGroupsLoading(false);
+    }
+  }, [t]);
+
+  const loadContact = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+
+    if (!isMyselfMode && !id) {
+      setError("Contact not found");
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const { contact: loadedContact } = await (isMyselfMode
+        ? fetchMyselfContact()
+        : fetchContact(id as string));
+      upsertContact(loadedContact);
+      void loadContactImportantDates(loadedContact.id);
+      void loadContactTags(loadedContact.id);
+      if (!isMyselfMode) {
+        void loadContactGroups(loadedContact.id);
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to load contact");
+    } finally {
+      setLoading(false);
+    }
+  }, [
+    id,
+    isMyselfMode,
+    loadContactGroups,
+    loadContactImportantDates,
+    loadContactTags,
+    upsertContact,
+  ]);
 
   useEffect(() => {
-    fetchContact(id)
-      .then(({ contact: c }) => setContact(c))
-      .catch((err) => setError(err instanceof Error ? err.message : "Failed to load contact"))
-      .finally(() => setLoading(false));
-  }, [id]);
+    void loadContact();
+  }, [loadContact]);
 
-  const navBarStyle = { paddingTop: insets.top + 8, paddingBottom: 8 };
+  useEffect(() => {
+    setAvatarImageFailed(false);
+  }, [contact?.avatar]);
 
-  function shareContact() {
-    if (!contact) return;
-    const vCard = buildVCard(contact, phones, emails, name);
-    Share.share({ title: name, message: vCard }).catch(() => {});
-  }
-
-  function showMenu() {
-    if (Platform.OS === "ios") {
-      ActionSheetIOS.showActionSheetWithOptions(
-        { options: ["Cancel", "Share contact"], cancelButtonIndex: 0 },
-        (index) => {
-          if (index === 1) shareContact();
-        },
-      );
-    } else {
-      Alert.alert(name, undefined, [
-        { text: "Share contact", onPress: shareContact },
-        { text: "Cancel", style: "cancel" },
-      ]);
+  const notesMarkdown = useMemo(() => {
+    const raw = htmlToMarkdown(contact?.notes ?? "");
+    if (!contact) {
+      return raw;
     }
-  }
+    return expandPersonMentionsForEditor(raw, getContactName);
+  }, [contact, getContactName]);
+
+  const handleMentionLinkPress = useCallback(
+    ({ url }: { url: string }) => {
+      const personId = parsePersonMentionUrl(url);
+      if (!personId) {
+        return;
+      }
+
+      const isKnownContact = mentionableContacts.some((item) => item.id === personId);
+      if (!isKnownContact) {
+        showToast({ type: "error", headline: "Contact no longer available" });
+        return;
+      }
+
+      if (myselfContactId && personId === myselfContactId) {
+        router.push("/myself");
+        return;
+      }
+
+      router.push(`/contact/${personId}`);
+    },
+    [mentionableContacts, myselfContactId, router, showToast],
+  );
 
   if (loading || error || !contact) {
     return (
-      <View style={styles.screen}>
-        <View style={[styles.navBar, navBarStyle]}>
-          <Pressable onPress={() => router.back()} hitSlop={12} style={styles.backButton}>
-            <IconArrowLeft size={22} stroke="#111827" />
-          </Pressable>
-        </View>
-        <View style={styles.centered}>
-          {loading ? (
-            <ActivityIndicator size="large" color="#111827" />
-          ) : (
-            <Text style={styles.errorText}>{error ?? "Contact not found"}</Text>
-          )}
-        </View>
+      <View style={[styles.screen, { backgroundColor: colors.appBackground }]}>
+        <StackNavBar onBack={() => router.back()} />
+        {loading ? (
+          <View style={styles.centered}>
+            <ActivityIndicator size="large" color={colors.textPrimary} />
+          </View>
+        ) : (
+          <View style={loadErrorStackInset}>
+            <LoadErrorCard
+              title={t("MobileApp.Settings.LoadErrorTitle")}
+              description={error ?? t("MobileApp.Common.UnknownError")}
+              onRetry={() => {
+                void loadContact();
+              }}
+            />
+          </View>
+        )}
       </View>
     );
   }
 
-  const phones = (contact.phones as PhoneEntry[] | null) ?? [];
-  const emails = (contact.emails as EmailEntry[] | null) ?? [];
-  const importantDates = (contact.importantDates as ImportantDate[] | null) ?? [];
-  const initials = getContactInitials(contact);
-  const avatarColor = getAvatarColorHex(contact);
-  const name = formatContactName(contact);
+  const activeContact = contact;
+  const phones = parseContactPhones(activeContact);
+  const emails = parseContactEmails(activeContact);
+  const addresses = getContactAddresses(activeContact);
+  const initials = getContactInitials(activeContact);
+  const avatarColor = getAvatarColorHex(activeContact);
+  const avatarUri = activeContact.avatar
+    ? normalizeMobileUrlForDevice(activeContact.avatar)
+    : null;
+  const shouldShowAvatarImage = Boolean(avatarUri) && !avatarImageFailed;
+  const name = formatContactName(activeContact);
+  const locationLabel = formatContactLocation(activeContact);
 
-  const primaryPhone = phones.find((p) => p.preferred) ?? phones[0];
-  const primaryEmail = emails.find((e) => e.preferred) ?? emails[0];
+  const primaryPhone = phones.find((phone) => phone.preferred) ?? phones[0];
+  const primaryEmail = emails.find((email) => email.preferred) ?? emails[0];
 
-  const socialPlatforms = (
-    ["linkedin", "instagram", "facebook", "whatsapp", "signal", "website"] as const
-  ).filter((p) => Boolean(contact[p]));
+  function shareContact() {
+    void (async () => {
+      setIsSharing(true);
+
+      try {
+        await shareContactVCard({
+          contactId: activeContact.id,
+          contact: activeContact,
+          dialogTitle: name,
+        });
+      } catch (err) {
+        if (err instanceof ShareUnavailableError) {
+          showToast({
+            type: "error",
+            headline: t("MobileApp.ContactDetail.ShareUnavailable"),
+          });
+          return;
+        }
+
+        showToast({
+          type: "error",
+          headline: t("MobileApp.ContactDetail.ShareFailed"),
+          description: t("MobileApp.ContactDetail.ShareFailedDescription"),
+        });
+      } finally {
+        setIsSharing(false);
+      }
+    })();
+  }
+
+  function handleDeleteContact() {
+    void (async () => {
+      setIsDeleting(true);
+
+      try {
+        await deleteContacts([activeContact.id]);
+        removeContact(activeContact.id);
+        setDeleteConfirmOpen(false);
+        router.back();
+      } catch {
+        showToast({
+          type: "error",
+          headline: t("MobileApp.Common.ErrorTitle"),
+          description: t("MobileApp.ContactDetail.DeleteFailed"),
+        });
+      } finally {
+        setIsDeleting(false);
+      }
+    })();
+  }
+
+  async function handleUpdateSocial(
+    platform: ContactSocialFieldKey,
+    value: string,
+  ) {
+    const { contact: updated } = await updateContact(activeContact.id, {
+      [platform]: value,
+    });
+    upsertContact(updated);
+  }
+
+  async function handleSavePhones(nextPhones: PhoneEntry[]) {
+    const { contact: updated } = await updateContact(activeContact.id, {
+      phones: normalizePhonesForSave(nextPhones),
+    });
+    upsertContact(updated);
+  }
+
+  async function handleSaveEmails(nextEmails: EmailEntry[]) {
+    const { contact: updated } = await updateContact(activeContact.id, {
+      emails: normalizeEmailsForSave(nextEmails),
+    });
+    upsertContact(updated);
+  }
+
+  async function handleSaveAddresses(nextAddresses: ContactAddressEntry[]) {
+    const { contact: updated } = await updateContact(activeContact.id, {
+      addresses: nextAddresses,
+    });
+    upsertContact(updated);
+  }
 
   function openPhone(phone: PhoneEntry) {
-    Linking.openURL(`tel:${phone.prefix}${phone.value}`).catch(() =>
-      Alert.alert("Error", "Could not open phone dialer"),
-    );
+    Linking.openURL(`tel:${phone.prefix}${phone.value}`).catch(() => {
+      showToast({
+        type: "error",
+        headline: t("MobileApp.Common.ErrorTitle"),
+        description: "Could not open phone dialer",
+      });
+    });
   }
 
   function openSms(phone: PhoneEntry) {
-    Linking.openURL(`sms:${phone.prefix}${phone.value}`).catch(() =>
-      Alert.alert("Error", "Could not open messages"),
-    );
+    Linking.openURL(`sms:${phone.prefix}${phone.value}`).catch(() => {
+      showToast({
+        type: "error",
+        headline: t("MobileApp.Common.ErrorTitle"),
+        description: "Could not open messages",
+      });
+    });
   }
 
   function openEmail(email: EmailEntry) {
-    Linking.openURL(`mailto:${email.value}`).catch(() =>
-      Alert.alert("Error", "Could not open email app"),
-    );
+    Linking.openURL(`mailto:${email.value}`).catch(() => {
+      showToast({
+        type: "error",
+        headline: t("MobileApp.Common.ErrorTitle"),
+        description: "Could not open email app",
+      });
+    });
   }
 
-  function openSocial(platform: string, handle: string) {
-    Linking.openURL(buildSocialUrl(platform, handle)).catch(() =>
-      Alert.alert("Error", "Could not open link"),
-    );
+  async function handleSaveImportantDates(nextDates: ImportantDate[]) {
+    const payload: ImportantDateInput[] = nextDates
+      .filter((entry) => entry.date)
+      .map((entry) => ({
+        id: entry.id || undefined,
+        type: entry.type,
+        date: entry.date,
+        note: entry.note,
+        notifyDaysBefore: entry.notifyDaysBefore ?? null,
+      }));
+
+    const parsed = replaceImportantDatesSchema.safeParse(payload);
+    if (!parsed.success) {
+      throw new Error(firstZodErrorMessage(parsed.error));
+    }
+
+    const { dates } = await replaceImportantDates(activeContact.id, parsed.data);
+    setImportantDates(dates);
+    upsertContact({ ...activeContact, importantDates: dates });
   }
 
-  function openAddress() {
-    if (!contact) return;
-    const addr = contact.addressFormatted ?? contact.place;
-    if (!addr) return;
-    const query = encodeURIComponent(addr);
-    const url = Platform.OS === "ios" ? `maps:?q=${query}` : `geo:0,0?q=${query}`;
-    Linking.openURL(url).catch(() => Linking.openURL(`https://maps.google.com?q=${query}`));
-  }
+  const hasInfo = Boolean(contact.lastInteraction);
+  const longNotes = notesMarkdown.length > NOTES_COLLAPSE_CHAR_THRESHOLD;
 
-  const hasAddress = Boolean(contact.addressFormatted ?? contact.place);
-  const hasInfo = Boolean(contact.lastInteraction) || importantDates.length > 0 || hasAddress;
-  const hasSocial = socialPlatforms.length > 0;
-  const longNotes = (contact.notes?.length ?? 0) > 200;
+  function openNotesEditor() {
+    if (isMyselfMode) {
+      router.push("/myself/notes");
+    } else {
+      router.push(`/contact/${activeContact.id}/notes`);
+    }
+  }
 
   return (
-    <View style={styles.screen}>
-      {/* ── Nav bar ── */}
-      <View style={[styles.navBar, navBarStyle]}>
-        <Pressable onPress={() => router.back()} hitSlop={12} style={styles.backButton}>
-          <IconArrowLeft size={22} stroke="#111827" />
-        </Pressable>
-        <Pressable onPress={showMenu} hitSlop={12} style={styles.menuButton}>
-          <IconDotsVertical size={22} stroke="#111827" />
-        </Pressable>
-      </View>
+    <View style={[styles.screen, { backgroundColor: colors.appBackground }]}>
+      <StackNavBar
+        onBack={() => router.back()}
+        right={
+          <ContactDetailOverflowMenu
+            isMyselfMode={isMyselfMode}
+            isBusy={isDeleting || isSharing}
+            onShare={shareContact}
+            onShareViaEmail={() => setShareEmailSheetOpen(true)}
+            onDelete={() => setDeleteConfirmOpen(true)}
+          />
+        }
+      />
+
+      <ActionSheetPopup
+        open={isDeleteConfirmOpen}
+        title={t("MobileApp.ContactDetail.DeleteContactConfirmTitle").replace(
+          "{name}",
+          name,
+        )}
+        isBusy={isDeleting}
+        onOpenChange={setDeleteConfirmOpen}
+        onClose={() => setDeleteConfirmOpen(false)}
+        actions={[
+          {
+            label: t("MobileApp.Common.Cancel"),
+            onPress: () => setDeleteConfirmOpen(false),
+            disabled: isDeleting,
+            tone: "neutral",
+            variant: "outline",
+          },
+          {
+            label: t("MobileApp.Common.Delete"),
+            icon: <IconTrash size={16} color={colors.textOnPrimary} />,
+            onPress: handleDeleteContact,
+            loading: isDeleting,
+            disabled: isDeleting,
+            tone: "danger",
+            variant: "filled",
+          },
+        ]}
+      />
+
+      <ShareContactEmailSheet
+        open={isShareEmailSheetOpen}
+        contactId={activeContact.id}
+        contactName={name}
+        onOpenChange={setShareEmailSheetOpen}
+        onClose={() => setShareEmailSheetOpen(false)}
+      />
+
+      <EditIdentitySheet
+        open={isIdentitySheetOpen}
+        contact={activeContact}
+        isMyselfMode={isMyselfMode}
+        onOpenChange={setIdentitySheetOpen}
+        onClose={() => setIdentitySheetOpen(false)}
+        onContactUpdated={upsertContact}
+      />
 
       <ScrollView
         style={styles.scroll}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {/* ── Hero ── */}
-        <View style={styles.hero}>
-          <View style={[styles.avatarCircle, !contact.avatar && { backgroundColor: avatarColor }]}>
-            {contact.avatar ? (
-              <Image
-                source={{ uri: contact.avatar }}
-                style={styles.avatarImage}
-                resizeMode="cover"
-              />
-            ) : (
-              <Text style={styles.avatarInitial}>{initials}</Text>
-            )}
+        <View style={styles.heroSection}>
+          <View style={contactDetailStyles.sectionHeaderRow}>
+            <View style={styles.heroHeaderSpacer} />
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t("MobileApp.ContactIdentity.EditProfile")}
+              onPress={() => setIdentitySheetOpen(true)}
+              style={contactDetailStyles.sectionHeaderAction}
+            >
+              <IconPencil size={16} stroke={colors.primary} />
+              <Text
+                style={[
+                  contactDetailStyles.sectionHeaderActionText,
+                  { color: colors.primary },
+                ]}
+              >
+                {t("ContactInfo.EditAction")}
+              </Text>
+            </Pressable>
           </View>
-          <Text style={styles.heroName}>{name}</Text>
-          {contact.headline ? <Text style={styles.heroHeadline}>{contact.headline}</Text> : null}
-          {contact.place ? <Text style={styles.heroPlace}>{contact.place}</Text> : null}
+
+          <View style={styles.hero}>
+            <View
+              style={[
+                styles.avatarCircle,
+                { backgroundColor: colors.surfacePressed },
+                !shouldShowAvatarImage && { backgroundColor: avatarColor },
+              ]}
+            >
+              {shouldShowAvatarImage ? (
+                <Image
+                  source={{ uri: avatarUri || undefined }}
+                  style={styles.avatarImage}
+                  resizeMode="cover"
+                  onError={() => setAvatarImageFailed(true)}
+                />
+              ) : (
+                <Text
+                  style={[styles.avatarInitial, { color: colors.textOnPrimary }]}
+                >
+                  {initials}
+                </Text>
+              )}
+            </View>
+            <Text style={[styles.heroName, { color: colors.textPrimary }]}>
+              {name}
+            </Text>
+            {contact.headline ? (
+              <Text
+                style={[styles.heroHeadline, { color: colors.textSecondary }]}
+              >
+                {contact.headline}
+              </Text>
+            ) : null}
+            {locationLabel ? (
+              <Text style={[styles.heroPlace, { color: colors.textMuted }]}>
+                {locationLabel}
+              </Text>
+            ) : null}
+          </View>
         </View>
 
-        {/* ── Quick Actions ── */}
-        {phones.length > 0 || emails.length > 0 || contact.whatsapp ? (
-          <View style={styles.quickActions}>
+        {phones.length > 0 || emails.length > 0 ? (
+          <View
+            style={[styles.quickActions, { borderBottomColor: colors.border }]}
+          >
             {phones.length > 0 ? (
-              <ScalePressable style={styles.actionButton} onPress={() => openPhone(primaryPhone!)}>
-                <View style={styles.actionIcon}>
-                  <IconPhone size={20} stroke="#111827" />
+              <ScalePressable
+                style={styles.actionButton}
+                accessibilityLabel={t("MobileApp.Common.Call")}
+                onPress={() => openPhone(primaryPhone!)}
+              >
+                <View
+                  style={[
+                    styles.actionIcon,
+                    { backgroundColor: colors.surfacePressed },
+                  ]}
+                >
+                  <IconPhone size={20} stroke={colors.iconPrimary} />
                 </View>
               </ScalePressable>
             ) : null}
             {phones.length > 0 ? (
-              <ScalePressable style={styles.actionButton} onPress={() => openSms(primaryPhone!)}>
-                <View style={styles.actionIcon}>
-                  <IconMessage size={20} stroke="#111827" />
+              <ScalePressable
+                style={styles.actionButton}
+                accessibilityLabel={t("MobileApp.Common.Message")}
+                onPress={() => openSms(primaryPhone!)}
+              >
+                <View
+                  style={[
+                    styles.actionIcon,
+                    { backgroundColor: colors.surfacePressed },
+                  ]}
+                >
+                  <IconMessage size={20} stroke={colors.iconPrimary} />
                 </View>
               </ScalePressable>
             ) : null}
             {emails.length > 0 ? (
-              <ScalePressable style={styles.actionButton} onPress={() => openEmail(primaryEmail!)}>
-                <View style={styles.actionIcon}>
-                  <IconMail size={20} stroke="#111827" />
-                </View>
-              </ScalePressable>
-            ) : null}
-            {contact.whatsapp ? (
               <ScalePressable
                 style={styles.actionButton}
-                onPress={() => openSocial("whatsapp", contact.whatsapp!)}
+                accessibilityLabel={t("ContactInfo.SendEmailAction")}
+                onPress={() => openEmail(primaryEmail!)}
               >
-                <View style={styles.actionIcon}>
-                  <IconBrandWhatsapp size={20} stroke="#111827" />
+                <View
+                  style={[
+                    styles.actionIcon,
+                    { backgroundColor: colors.surfacePressed },
+                  ]}
+                >
+                  <IconMail size={20} stroke={colors.iconPrimary} />
                 </View>
               </ScalePressable>
             ) : null}
           </View>
         ) : null}
 
-        {/* ── Phones ── */}
-        {phones.length > 0 ? (
-          <View style={styles.section}>
-            <SectionTitle title="Phone" />
-            {phones.map((phone, i) => (
-              <Pressable key={i} style={styles.card} onPress={() => openPhone(phone)}>
-                <View style={styles.cardRow}>
-                  <View style={styles.cardLeft}>
-                    <Text style={styles.cardPrimary}>
-                      {phone.prefix} {phone.value}
+        <ContactPhonesSection phones={phones} onSavePhones={handleSavePhones} />
+        <ContactEmailsSection emails={emails} onSaveEmails={handleSaveEmails} />
+
+        <ContactSocialSection
+          contact={contact}
+          contactFirstName={contact.firstName}
+          onUpdateSocial={handleUpdateSocial}
+        />
+
+        <ContactTagsSection
+          contactId={contact.id}
+          contactName={formatContactName(contact)}
+          tags={memberTags}
+          loading={tagsLoading}
+          error={tagsError}
+          onRetry={() => void loadContactTags(contact.id)}
+          onTagAdded={(tag) =>
+            setMemberTags((prev) =>
+              prev.some((existing) => existing.id === tag.id)
+                ? prev
+                : [...prev, { ...tag, contactCount: 0 }],
+            )
+          }
+          onTagsReplaced={(tags) => setMemberTags(tags as TagWithCount[])}
+        />
+
+        {!isMyselfMode ? (
+          <ContactGroupsSection
+            contactId={contact.id}
+            contactName={formatContactName(contact)}
+            groups={memberGroups}
+            loading={groupsLoading}
+            error={groupsError}
+            onRetry={() => void loadContactGroups(contact.id)}
+            onGroupAdded={(group) =>
+              setMemberGroups((prev) =>
+                prev.some((existing) => existing.id === group.id)
+                  ? prev
+                  : [...prev, { ...group, contactCount: 0 }],
+              )
+            }
+            onGroupsReplaced={(groups) => setMemberGroups(groups as GroupWithCount[])}
+          />
+        ) : null}
+
+        <ContactAddressesSection
+          addresses={addresses}
+          onSaveAddresses={handleSaveAddresses}
+        />
+
+        <ContactImportantDatesSection
+          dates={importantDates}
+          contactFirstName={contact.firstName}
+          onSaveDates={handleSaveImportantDates}
+        />
+
+        <View style={contactDetailStyles.section}>
+          <ContactDetailSectionHeader title="Notes" />
+          <Pressable
+            style={[
+              contactDetailStyles.card,
+              {
+                backgroundColor: colors.surfaceMuted,
+                borderColor: colors.border,
+              },
+            ]}
+            onPress={openNotesEditor}
+            accessibilityRole="button"
+            accessibilityLabel={notesMarkdown ? "Edit notes" : "Add notes"}
+          >
+            {notesMarkdown ? (
+              <>
+                <View style={notesExpanded ? undefined : styles.notesCollapsed}>
+                  <EnrichedMarkdownText
+                    markdown={notesMarkdown}
+                    flavor="github"
+                    onLinkPress={handleMentionLinkPress}
+                    markdownStyle={{
+                      paragraph: { color: colors.textSecondary, fontSize: 15, lineHeight: 22, marginBottom: 4 },
+                      h1: { color: colors.textPrimary },
+                      h2: { color: colors.textPrimary },
+                      h3: { color: colors.textPrimary },
+                      list: { color: colors.textSecondary, fontSize: 15 },
+                      link: { color: colors.primary },
+                      code: { backgroundColor: colors.surfacePressed },
+                      blockquote: { borderColor: colors.border },
+                      linkVariants: {
+                        "^bp://person/": {
+                          color: colors.primary,
+                          backgroundColor: colors.primary + "18",
+                          underline: false,
+                        },
+                      },
+                    }}
+                  />
+                </View>
+                {longNotes ? (
+                  <Pressable
+                    style={styles.showMoreButton}
+                    onPress={(e) => {
+                      e.stopPropagation?.();
+                      setNotesExpanded((v) => !v);
+                    }}
+                    accessibilityRole="button"
+                    accessibilityLabel={notesExpanded ? "Show less notes" : "Show more notes"}
+                  >
+                    {notesExpanded ? (
+                      <IconChevronUp size={14} stroke={colors.iconSecondary} />
+                    ) : (
+                      <IconChevronDown size={14} stroke={colors.iconSecondary} />
+                    )}
+                    <Text style={[styles.showMoreText, { color: colors.textMuted }]}>
+                      {notesExpanded ? "Show less" : "Show more"}
                     </Text>
-                    <View style={styles.badgeRow}>
-                      <View style={styles.badge}>
-                        <Text style={styles.badgeText}>{phone.type}</Text>
-                      </View>
-                      {phone.preferred ? (
-                        <View style={[styles.badge, styles.badgeDefault]}>
-                          <Text style={[styles.badgeText, styles.badgeDefaultText]}>default</Text>
-                        </View>
-                      ) : null}
-                    </View>
-                  </View>
-                  <IconPhone size={16} stroke="#9ca3af" />
-                </View>
-              </Pressable>
-            ))}
-          </View>
-        ) : null}
-
-        {/* ── Emails ── */}
-        {emails.length > 0 ? (
-          <View style={styles.section}>
-            <SectionTitle title="Email" />
-            {emails.map((email, i) => (
-              <Pressable key={i} style={styles.card} onPress={() => openEmail(email)}>
-                <View style={styles.cardRow}>
-                  <View style={styles.cardLeft}>
-                    <Text style={styles.cardPrimary}>{email.value}</Text>
-                    <View style={styles.badgeRow}>
-                      <View style={styles.badge}>
-                        <Text style={styles.badgeText}>{email.type}</Text>
-                      </View>
-                      {email.preferred ? (
-                        <View style={[styles.badge, styles.badgeDefault]}>
-                          <Text style={[styles.badgeText, styles.badgeDefaultText]}>default</Text>
-                        </View>
-                      ) : null}
-                    </View>
-                  </View>
-                  <IconMail size={16} stroke="#9ca3af" />
-                </View>
-              </Pressable>
-            ))}
-          </View>
-        ) : null}
-
-        {/* ── Social Media ── */}
-        {hasSocial ? (
-          <View style={styles.section}>
-            <SectionTitle title="Social media" />
-            {socialPlatforms.map((platform) => (
-              <SocialCard
-                key={platform}
-                platform={platform}
-                handle={contact[platform]!}
-                onPress={() => openSocial(platform, contact[platform]!)}
-              />
-            ))}
-          </View>
-        ) : null}
-
-        {/* ── Notes ── */}
-        {contact.notes ? (
-          <View style={styles.section}>
-            <SectionTitle title="Notes" />
-            <View style={styles.card}>
-              <Text style={styles.notesText} numberOfLines={notesExpanded ? undefined : 4}>
-                {contact.notes}
+                  </Pressable>
+                ) : null}
+              </>
+            ) : (
+              <Text style={[styles.notesPlaceholder, { color: colors.textMuted }]}>
+                Add notes…
               </Text>
-              {longNotes ? (
-                <Pressable
-                  style={styles.showMoreButton}
-                  onPress={() => setNotesExpanded((v) => !v)}
-                >
-                  {notesExpanded ? (
-                    <IconChevronUp size={14} stroke="#6b7280" />
-                  ) : (
-                    <IconChevronDown size={14} stroke="#6b7280" />
-                  )}
-                  <Text style={styles.showMoreText}>
-                    {notesExpanded ? "Show less" : "Show more"}
-                  </Text>
-                </Pressable>
-              ) : null}
-            </View>
-          </View>
-        ) : null}
+            )}
+          </Pressable>
+        </View>
 
-        {/* ── Info ── */}
         {hasInfo ? (
-          <View style={styles.section}>
-            <SectionTitle title="Info" />
+          <View style={contactDetailStyles.section}>
+            <ContactDetailSectionHeader title="Info" />
 
             {contact.lastInteraction ? (
-              <View style={styles.card}>
-                <View style={styles.infoRow}>
-                  <IconClock size={16} stroke="#6b7280" />
-                  <View style={styles.infoTexts}>
-                    <Text style={styles.infoLabel}>Last interaction</Text>
-                    <Text style={styles.infoValue}>
+              <View
+                style={[
+                  contactDetailStyles.card,
+                  {
+                    backgroundColor: colors.surfaceMuted,
+                    borderColor: colors.border,
+                  },
+                ]}
+              >
+                <View style={contactDetailStyles.infoRow}>
+                  <IconClock size={16} stroke={colors.iconSecondary} />
+                  <View style={contactDetailStyles.infoTexts}>
+                    <Text
+                      style={[
+                        contactDetailStyles.sectionLabel,
+                        { color: colors.textMuted },
+                      ]}
+                    >
+                      Last interaction
+                    </Text>
+                    <Text
+                      style={[
+                        contactDetailStyles.infoValue,
+                        { color: colors.textPrimary },
+                      ]}
+                    >
                       {formatRelativeDate(contact.lastInteraction)} ·{" "}
                       {formatAbsoluteDate(contact.lastInteraction)}
                     </Text>
                   </View>
                 </View>
               </View>
-            ) : null}
-
-            {importantDates.map((d, i) => (
-              <View key={i} style={styles.card}>
-                <View style={styles.infoRow}>
-                  <IconCalendar size={16} stroke="#6b7280" />
-                  <View style={styles.infoTexts}>
-                    <Text style={styles.infoLabel}>{DATE_LABELS[d.type] ?? d.type}</Text>
-                    <Text style={styles.infoValue}>{formatAbsoluteDate(d.date)}</Text>
-                    {d.note ? <Text style={styles.infoNote}>{d.note}</Text> : null}
-                  </View>
-                </View>
-              </View>
-            ))}
-
-            {hasAddress ? (
-              <Pressable style={styles.card} onPress={openAddress}>
-                <View style={styles.infoRow}>
-                  <IconMapPin size={16} stroke="#6b7280" />
-                  <View style={styles.infoTexts}>
-                    <Text style={styles.infoLabel}>Address</Text>
-                    <Text style={styles.infoValue}>
-                      {contact.addressFormatted ?? contact.place}
-                    </Text>
-                  </View>
-                </View>
-              </Pressable>
             ) : null}
           </View>
         ) : null}
@@ -512,30 +804,11 @@ export function ContactDetailScreen({ id }: ContactDetailScreenProps) {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: "#ffffff",
-  },
-  navBar: {
-    paddingHorizontal: 16,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
-  backButton: {
-    padding: 4,
-  },
-  menuButton: {
-    padding: 4,
   },
   centered: {
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
-  },
-  errorText: {
-    fontSize: 14,
-    color: "#ef4444",
-    textAlign: "center",
-    paddingHorizontal: 32,
   },
   scroll: {
     flex: 1,
@@ -543,58 +816,54 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: 16,
   },
-
-  // Hero
+  heroSection: {
+    marginBottom: 4,
+  },
+  heroHeaderSpacer: {
+    flex: 1,
+  },
   hero: {
     alignItems: "center",
     paddingVertical: 24,
     gap: 6,
   },
   avatarCircle: {
-    width: 88,
-    height: 88,
-    borderRadius: 44,
-    backgroundColor: "#f3f4f6",
+    width: MOBILE_LAYOUT.avatar.hero,
+    height: MOBILE_LAYOUT.avatar.hero,
+    borderRadius: MOBILE_LAYOUT.avatar.heroRadius,
     alignItems: "center",
     justifyContent: "center",
     marginBottom: 8,
     overflow: "hidden",
   },
   avatarImage: {
-    width: 88,
-    height: 88,
+    width: MOBILE_LAYOUT.avatar.hero,
+    height: MOBILE_LAYOUT.avatar.hero,
   },
   avatarInitial: {
     fontSize: 30,
-    fontWeight: "700",
-    color: "#ffffff",
+    fontWeight: MOBILE_TYPOGRAPHY.fontWeight.bold,
     letterSpacing: 1,
   },
   heroName: {
     fontSize: 24,
-    fontWeight: "700",
-    color: "#111827",
+    fontWeight: MOBILE_TYPOGRAPHY.fontWeight.bold,
     textAlign: "center",
   },
   heroHeadline: {
-    fontSize: 14,
-    color: "#374151",
+    fontSize: MOBILE_TYPOGRAPHY.fontSize.body,
     textAlign: "center",
   },
   heroPlace: {
-    fontSize: 13,
-    color: "#6b7280",
+    fontSize: MOBILE_TYPOGRAPHY.fontSize.caption,
     textAlign: "center",
   },
-
-  // Quick actions
   quickActions: {
     flexDirection: "row",
     justifyContent: "center",
     gap: 16,
     paddingBottom: 24,
     borderBottomWidth: 1,
-    borderBottomColor: "#f3f4f6",
     marginBottom: 24,
   },
   actionButton: {
@@ -602,88 +871,20 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   actionIcon: {
-    width: 52,
-    height: 52,
-    borderRadius: 26,
-    backgroundColor: "#f3f4f6",
+    width: MOBILE_LAYOUT.touchTargetLarge,
+    height: MOBILE_LAYOUT.touchTargetLarge,
+    borderRadius: MOBILE_LAYOUT.touchTargetLarge / 2,
     alignItems: "center",
     justifyContent: "center",
   },
-  actionLabel: {
-    fontSize: 12,
-    color: "#374151",
-    fontWeight: "500",
+  notesCollapsed: {
+    maxHeight: 88,
+    overflow: "hidden",
   },
-
-  // Sections
-  section: {
-    marginBottom: 24,
-    gap: 8,
-  },
-  sectionTitle: {
-    fontSize: 11,
-    fontWeight: "700",
-    color: "#6b7280",
-    textTransform: "uppercase",
-    letterSpacing: 0.8,
-    marginBottom: 2,
-  },
-
-  // Cards
-  card: {
-    backgroundColor: "#f9fafb",
-    borderRadius: 12,
-    padding: 14,
-    borderWidth: 1,
-    borderColor: "#f3f4f6",
-  },
-  cardRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    gap: 12,
-  },
-  cardLeft: {
-    flex: 1,
-    gap: 4,
-  },
-  cardPrimary: {
-    fontSize: 15,
-    fontWeight: "600",
-    color: "#111827",
-  },
-  cardSecondary: {
-    fontSize: 13,
-    color: "#6b7280",
-  },
-  badgeRow: {
-    flexDirection: "row",
-    gap: 6,
-  },
-  badge: {
-    paddingHorizontal: 7,
-    paddingVertical: 2,
-    borderRadius: 999,
-    backgroundColor: "#e5e7eb",
-  },
-  badgeText: {
-    fontSize: 11,
-    fontWeight: "600",
-    color: "#374151",
-    textTransform: "capitalize",
-  },
-  badgeDefault: {
-    backgroundColor: "#dbeafe",
-  },
-  badgeDefaultText: {
-    color: "#1d4ed8",
-  },
-
-  // Notes
-  notesText: {
-    fontSize: 14,
-    color: "#374151",
+  notesPlaceholder: {
+    fontSize: MOBILE_TYPOGRAPHY.fontSize.body,
     lineHeight: 20,
+    fontStyle: "italic",
   },
   showMoreButton: {
     flexDirection: "row",
@@ -693,35 +894,10 @@ const styles = StyleSheet.create({
   },
   showMoreText: {
     fontSize: 12,
-    color: "#6b7280",
-    fontWeight: "600",
-  },
-
-  // Info rows
-  infoRow: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    gap: 12,
-  },
-  infoTexts: {
-    flex: 1,
-    gap: 2,
-  },
-  infoLabel: {
-    fontSize: 11,
-    fontWeight: "600",
-    color: "#6b7280",
-    textTransform: "uppercase",
-    letterSpacing: 0.5,
-  },
-  infoValue: {
-    fontSize: 14,
-    color: "#111827",
-    fontWeight: "500",
+    fontWeight: MOBILE_TYPOGRAPHY.fontWeight.semibold,
   },
   infoNote: {
-    fontSize: 13,
-    color: "#6b7280",
+    fontSize: MOBILE_TYPOGRAPHY.fontSize.caption,
     marginTop: 2,
   },
 });

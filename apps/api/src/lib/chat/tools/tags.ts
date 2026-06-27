@@ -1,7 +1,7 @@
 import { tool } from "ai";
 import { z } from "zod";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import type { Database, TablesUpdate } from "@bondery/types/supabase.types";
+import type { Database, TablesUpdate } from "@bondery/schemas/supabase.types";
 
 // Fixed color palette for auto-assigning tag colors (matches API route)
 const TAG_COLORS = [

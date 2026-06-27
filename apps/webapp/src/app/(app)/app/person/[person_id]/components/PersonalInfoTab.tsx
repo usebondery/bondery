@@ -7,7 +7,7 @@ import type {
   ContactRelationshipWithPeople,
   ImportantDate,
   RelationshipType,
-} from "@bondery/types";
+} from "@bondery/schemas";
 import { ContactPreferenceSection } from "./ContactPreferenceSection";
 import { ContactAddressSection } from "./ContactAddressSection";
 import { ContactImportantDatesSection } from "./ContactImportantDatesSection";

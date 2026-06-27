@@ -2,7 +2,7 @@
 
 import { Badge, Tooltip } from "@mantine/core";
 import { useTranslations } from "next-intl";
-import type { SubscriptionStatus } from "@bondery/types";
+import type { SubscriptionStatus } from "@bondery/schemas";
 
 /**
  * Small badge showing remaining messages.

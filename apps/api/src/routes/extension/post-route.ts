@@ -9,7 +9,7 @@ import type {
   ScrapedWorkHistoryEntry,
   ScrapedEducationEntry,
   TablesUpdate,
-} from "@bondery/types";
+} from "@bondery/schemas";
 import {
   findPersonIdBySocial,
   upsertContactSocials,
