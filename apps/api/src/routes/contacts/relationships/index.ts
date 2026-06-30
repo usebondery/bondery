@@ -154,7 +154,7 @@ export function registerRelationshipRoutes(fastify: AppFastifyInstance): void {
             userId: relationship.user_id,
             sourcePersonId: relationship.source_person_id,
             targetPersonId: relationship.target_person_id,
-            relationshipType: relationship.relationship_type,
+            relationshipType: relationship.relationship_type as RelationshipType,
             createdAt: relationship.created_at,
             updatedAt: relationship.updated_at,
             sourcePerson: toContactPreview(
@@ -185,7 +185,9 @@ export function registerRelationshipRoutes(fastify: AppFastifyInstance): void {
             ),
           };
         })
-        .filter((relationship) => Boolean(relationship));
+        .filter((relationship): relationship is NonNullable<typeof relationship> =>
+          relationship != null,
+        );
 
       return { relationships: formattedRelationships };
     },
@@ -257,7 +259,7 @@ export function registerRelationshipRoutes(fastify: AppFastifyInstance): void {
           userId: insertedRelationship.user_id,
           sourcePersonId: insertedRelationship.source_person_id,
           targetPersonId: insertedRelationship.target_person_id,
-          relationshipType: insertedRelationship.relationship_type,
+          relationshipType: insertedRelationship.relationship_type as RelationshipType,
           createdAt: insertedRelationship.created_at,
           updatedAt: insertedRelationship.updated_at,
         },
@@ -351,7 +353,7 @@ export function registerRelationshipRoutes(fastify: AppFastifyInstance): void {
           userId: updatedRelationship.user_id,
           sourcePersonId: updatedRelationship.source_person_id,
           targetPersonId: updatedRelationship.target_person_id,
-          relationshipType: updatedRelationship.relationship_type,
+          relationshipType: updatedRelationship.relationship_type as RelationshipType,
           createdAt: updatedRelationship.created_at,
           updatedAt: updatedRelationship.updated_at,
         },

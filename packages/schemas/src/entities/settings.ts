@@ -23,7 +23,7 @@ export const tagSortOrderPreferenceSchema = z.enum([
   "alpha-desc",
 ]);
 
-const mutableUserSettingsSchema = z.object({
+const mutableUserSettingsInputSchema = z.object({
   timezone: z.string().nullable(),
   reminderSendHour: reminderSendHourSchema,
   timeFormat: timeFormatPreferenceSchema,
@@ -35,6 +35,19 @@ const mutableUserSettingsSchema = z.object({
   tagSortOrder: tagSortOrderPreferenceSchema,
 });
 
+/** Wire shape for GET /api/me/settings — DB columns may be plain strings before narrowing. */
+const mutableUserSettingsSchema = z.object({
+  timezone: z.string().nullable(),
+  reminderSendHour: reminderSendHourSchema,
+  timeFormat: z.string(),
+  language: z.string().nullable(),
+  colorScheme: colorSchemePreferenceSchema,
+  leftSwipeAction: z.string(),
+  rightSwipeAction: z.string(),
+  groupSortOrder: z.string(),
+  tagSortOrder: z.string(),
+});
+
 /** Wire/API user settings (GET /api/me/settings). */
 export const userSettingsSchema = z.object({
   name: z.string().nullable().optional(),
@@ -44,7 +57,7 @@ export const userSettingsSchema = z.object({
   aiMessagesUsed: z.number().optional(),
 });
 
-export const updateUserSettingsInputSchema = mutableUserSettingsSchema
+export const updateUserSettingsInputSchema = mutableUserSettingsInputSchema
   .omit({ timezone: true, language: true })
   .extend({
     timezone: z.string().optional(),
@@ -81,13 +94,15 @@ export const userAccountResponseSchema = z.object({
   success: z.boolean(),
   data: z.object({
     id: z.string(),
-    email: z.string(),
-    user_metadata: z.object({
-      name: z.string(),
-      middlename: z.string(),
-      surname: z.string(),
-      avatar_url: z.string().nullable(),
-    }),
+    email: z.string().optional(),
+    user_metadata: z
+      .object({
+        name: z.string().optional(),
+        middlename: z.string().optional(),
+        surname: z.string().optional(),
+        avatar_url: z.string().nullable().optional(),
+      })
+      .passthrough(),
   }),
 });
 

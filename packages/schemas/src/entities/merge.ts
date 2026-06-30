@@ -59,11 +59,11 @@ export const mergeRecommendationsResponseSchema = makePaginatedListResponseSchem
 );
 
 export const declineMergeRecommendationResponseSchema = z.object({
-  success: z.literal(true),
+  success: z.boolean(),
 });
 
 export const refreshMergeRecommendationsResponseSchema = z.object({
-  success: z.literal(true),
+  success: z.boolean(),
   recommendationsCount: z.number(),
   recommendations: z.array(mergeRecommendationSchema),
 });

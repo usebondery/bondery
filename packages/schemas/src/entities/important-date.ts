@@ -5,7 +5,11 @@ import {
   IMPORTANT_DATE_NOTIFY_DAYS,
   IMPORTANT_DATE_TYPES,
 } from "../constants/index.js";
-import { entityAuditSchema, entityIdentitySchema, makeCollectionResponseSchema } from "./_shared.js";
+import {
+  entityIdentitySchema,
+  entityNullableAuditSchema,
+  makeCollectionResponseSchema,
+} from "./_shared.js";
 
 const isoDateSchema = z
   .string()
@@ -30,14 +34,14 @@ const importantDateNoteSchema = z.string().nullable();
 
 const importantDateBaseFieldsSchema = importantDateCoreSchema.extend({
   note: importantDateNoteSchema,
-  notifyDaysBefore: importantDateNotifyDaysSchema,
+  notifyDaysBefore: z.number().nullable(),
 });
 
 export const importantDateSchema = entityIdentitySchema.extend({
   personId: z.string(),
   ...importantDateBaseFieldsSchema.shape,
   notifyOn: z.string().nullable(),
-}).extend(entityAuditSchema.shape);
+}).extend(entityNullableAuditSchema.shape);
 
 const importantDateNotifyDaysInputSchema = z.preprocess((value) => {
   if (value === "none" || value === "") {

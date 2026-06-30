@@ -171,7 +171,10 @@ export function registerMergeExecuteRoute(fastify: AppFastifyInstance): void {
         return reply
           .status(500)
           .send({
-            error: leftPhonesError?.message || rightPhonesError?.message,
+            error:
+              leftPhonesError?.message ||
+              rightPhonesError?.message ||
+              "Failed to load phone numbers",
           });
       }
 
@@ -252,7 +255,10 @@ export function registerMergeExecuteRoute(fastify: AppFastifyInstance): void {
         return reply
           .status(500)
           .send({
-            error: leftEmailsError?.message || rightEmailsError?.message,
+            error:
+              leftEmailsError?.message ||
+              rightEmailsError?.message ||
+              "Failed to load email addresses",
           });
       }
 
@@ -509,7 +515,8 @@ export function registerMergeExecuteRoute(fastify: AppFastifyInstance): void {
           .send({
             error:
               leftImportantDatesError?.message ||
-              rightImportantDatesError?.message,
+              rightImportantDatesError?.message ||
+              "Failed to load important dates",
           });
       }
 

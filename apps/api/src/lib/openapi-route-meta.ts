@@ -1,9 +1,13 @@
+import type { FastifySchema } from "fastify";
 import type { RouteOptions } from "fastify";
 
 export type OpenApiRouteArea = "integration" | "session" | "internal";
 
-const INTEGRATION_SECURITY = [{ bearerAuth: [] as string[] }, { apiKeyAuth: [] as string[] }];
-const SESSION_SECURITY = [{ bearerAuth: [] as string[] }];
+const INTEGRATION_SECURITY: NonNullable<FastifySchema["security"]> = [
+  { bearerAuth: [] },
+  { apiKeyAuth: [] },
+];
+const SESSION_SECURITY: NonNullable<FastifySchema["security"]> = [{ bearerAuth: [] }];
 
 /**
  * Applies OpenAPI security and visibility metadata to a route during registration.
@@ -24,6 +28,6 @@ export function applyOpenApiRouteMeta(
     return;
   }
 
-  routeOptions.schema.security =
+  (routeOptions.schema as FastifySchema).security =
     options.area === "integration" ? INTEGRATION_SECURITY : SESSION_SECURITY;
 }

@@ -45,6 +45,7 @@ import type {
   TablesUpdate,
 } from "@bondery/schemas";
 import {
+  bySocialLookupResponseSchema,
   contactsFilterSchema,
   contactGroupsResponseSchema,
   contactResponseSchema,
@@ -689,7 +690,11 @@ export const contactRoutes: AppRoutePlugin = async (fastify) => {
       });
 
       return {
-        ...buildPaginatedResponse("contacts", enrichedContacts, pagination),
+        ...buildPaginatedResponse(
+          "contacts",
+          enrichedContacts as Contact[],
+          pagination,
+        ),
         stats: {
           totalContacts: totalContactsCount || 0,
           thisMonthInteractions: monthInteractionsCount || 0,
@@ -887,7 +892,7 @@ export const contactRoutes: AppRoutePlugin = async (fastify) => {
       schema: {
         description: "Find a contact by social platform and handle.",
         querystring: bySocialQuerySchema,
-        response: withOkResponse(contactResponseSchema, "Matching contact"),
+        response: withOkResponse(bySocialLookupResponseSchema, "Matching contact"),
       } satisfies FastifyZodOpenApiSchema,
     },
     async (request, reply) => {

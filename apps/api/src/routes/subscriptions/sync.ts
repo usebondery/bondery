@@ -22,7 +22,6 @@ import { getAuth } from "../../lib/auth.js";
 import { createAdminClient } from "../../lib/supabase.js";
 import { applyOpenApiRouteMeta } from "../../lib/openapi-route-meta.js";
 import { withOkResponse } from "../../lib/openapi-route-responses.js";
-import { createAdminClient } from "../../lib/supabase.js";
 import { getPolarClient } from "../../lib/polar.js";
 import { upsertSubscription, mapStatus } from "../webhooks/polar.js";
 

@@ -44,7 +44,7 @@ export function registerPhotoRoutes(fastify: AppFastifyInstance): void {
         await import("../../../lib/config.js");
       const validation = validateImageUpload({ type: data.mimetype, size: 0 });
       if (!validation.isValid) {
-        return reply.status(400).send({ error: validation.error });
+        return reply.status(400).send({ error: validation.error ?? "Invalid upload" });
       }
 
       const { data: contact, error: contactError } = await client

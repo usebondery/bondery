@@ -140,7 +140,7 @@ export const meRoutes: AppRoutePlugin = async (fastify) => {
     const buffer = await data.toBuffer();
     const validation = validateImageUpload({ type: data.mimetype, size: buffer.length });
     if (!validation.isValid) {
-      return reply.status(400).send({ error: validation.error });
+      return reply.status(400).send({ error: validation.error ?? "Invalid upload" });
     }
 
     if (!validateImageMagicBytes(buffer)) {

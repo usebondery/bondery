@@ -64,6 +64,8 @@ components:
           type: string
         description:
           type: string
+        details:
+          type: string
       required:
         - error
       additionalProperties: false
@@ -110,6 +112,7 @@ components:
           nullable: true
           type: number
         createdAt:
+          nullable: true
           type: string
         updatedAt:
           nullable: true
@@ -297,26 +300,16 @@ components:
                 nullable: true
                 type: string
               notifyDaysBefore:
-                anyOf:
-                  - type: number
-                    enum:
-                      - 1
-                  - type: number
-                    enum:
-                      - 3
-                  - type: number
-                    enum:
-                      - 7
-                  - type: string
-                    nullable: true
-                    enum:
-                      - null
+                nullable: true
+                type: number
               notifyOn:
                 nullable: true
                 type: string
               createdAt:
+                nullable: true
                 type: string
               updatedAt:
+                nullable: true
                 type: string
             required:
               - id
@@ -343,7 +336,6 @@ components:
           type: string
         gisPoint:
           nullable: true
-          type: string
         latitude:
           nullable: true
           type: number
@@ -433,7 +425,6 @@ components:
           maximum: 9007199254740991
       required:
         - message
-        - deletedCount
       additionalProperties: false
       description: Bulk contact delete result
     Tag:
@@ -449,8 +440,10 @@ components:
           nullable: true
           type: string
         createdAt:
+          nullable: true
           type: string
         updatedAt:
+          nullable: true
           type: string
       required:
         - id
@@ -471,12 +464,16 @@ components:
         label:
           type: string
         emoji:
+          nullable: true
           type: string
         color:
+          nullable: true
           type: string
         createdAt:
+          nullable: true
           type: string
         updatedAt:
+          nullable: true
           type: string
       required:
         - id
@@ -1170,8 +1167,6 @@ paths:
                 properties:
                   success:
                     type: boolean
-                    enum:
-                      - true
                   recommendationsCount:
                     type: number
                   recommendations:
@@ -1260,8 +1255,6 @@ paths:
                 properties:
                   success:
                     type: boolean
-                    enum:
-                      - true
                 required:
                   - success
                 additionalProperties: false
@@ -1318,8 +1311,6 @@ paths:
                 properties:
                   success:
                     type: boolean
-                    enum:
-                      - true
                 required:
                   - success
                 additionalProperties: false
@@ -1492,8 +1483,6 @@ paths:
                 properties:
                   success:
                     type: boolean
-                    enum:
-                      - true
                   count:
                     type: number
                 required:
@@ -1794,8 +1783,6 @@ paths:
                 properties:
                   success:
                     type: boolean
-                    enum:
-                      - true
                   message:
                     type: string
                 required:
@@ -2106,8 +2093,6 @@ paths:
                 properties:
                   success:
                     type: boolean
-                    enum:
-                      - true
                   message:
                     type: string
                 required:
@@ -2159,8 +2144,6 @@ paths:
                 properties:
                   success:
                     type: boolean
-                    enum:
-                      - true
                   message:
                     type: string
                 required:
@@ -2261,8 +2244,10 @@ paths:
                             - dependent
                             - other
                         createdAt:
+                          nullable: true
                           type: string
                         updatedAt:
+                          nullable: true
                           type: string
                         sourcePerson:
                           type: object
@@ -2418,8 +2403,10 @@ paths:
                           - dependent
                           - other
                       createdAt:
+                        nullable: true
                         type: string
                       updatedAt:
+                        nullable: true
                         type: string
                     required:
                       - id
@@ -2542,8 +2529,10 @@ paths:
                           - dependent
                           - other
                       createdAt:
+                        nullable: true
                         type: string
                       updatedAt:
+                        nullable: true
                         type: string
                     required:
                       - id
@@ -2702,26 +2691,16 @@ paths:
                               nullable: true
                               type: string
                             notifyDaysBefore:
-                              anyOf:
-                                - type: number
-                                  enum:
-                                    - 1
-                                - type: number
-                                  enum:
-                                    - 3
-                                - type: number
-                                  enum:
-                                    - 7
-                                - type: string
-                                  nullable: true
-                                  enum:
-                                    - null
+                              nullable: true
+                              type: number
                             notifyOn:
                               nullable: true
                               type: string
                             createdAt:
+                              nullable: true
                               type: string
                             updatedAt:
+                              nullable: true
                               type: string
                           required:
                             - id
@@ -2845,26 +2824,16 @@ paths:
                           nullable: true
                           type: string
                         notifyDaysBefore:
-                          anyOf:
-                            - type: number
-                              enum:
-                                - 1
-                            - type: number
-                              enum:
-                                - 3
-                            - type: number
-                              enum:
-                                - 7
-                            - type: string
-                              nullable: true
-                              enum:
-                                - null
+                          nullable: true
+                          type: number
                         notifyOn:
                           nullable: true
                           type: string
                         createdAt:
+                          nullable: true
                           type: string
                         updatedAt:
+                          nullable: true
                           type: string
                       required:
                         - id
@@ -3007,26 +2976,16 @@ paths:
                           nullable: true
                           type: string
                         notifyDaysBefore:
-                          anyOf:
-                            - type: number
-                              enum:
-                                - 1
-                            - type: number
-                              enum:
-                                - 3
-                            - type: number
-                              enum:
-                                - 7
-                            - type: string
-                              nullable: true
-                              enum:
-                                - null
+                          nullable: true
+                          type: number
                         notifyOn:
                           nullable: true
                           type: string
                         createdAt:
+                          nullable: true
                           type: string
                         updatedAt:
+                          nullable: true
                           type: string
                       required:
                         - id
@@ -4160,10 +4119,29 @@ paths:
               schema:
                 type: object
                 properties:
+                  exists:
+                    type: boolean
                   contact:
-                    $ref: "#/components/schemas/Contact"
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      firstName:
+                        type: string
+                      lastName:
+                        nullable: true
+                        type: string
+                      avatar:
+                        nullable: true
+                        type: string
+                    required:
+                      - id
+                      - firstName
+                      - lastName
+                      - avatar
+                    additionalProperties: false
                 required:
-                  - contact
+                  - exists
                 additionalProperties: false
         "400":
           description: Invalid request
@@ -4228,12 +4206,16 @@ paths:
                         label:
                           type: string
                         emoji:
+                          nullable: true
                           type: string
                         color:
+                          nullable: true
                           type: string
                         createdAt:
+                          nullable: true
                           type: string
                         updatedAt:
+                          nullable: true
                           type: string
                         contactCount:
                           type: number
@@ -4498,6 +4480,7 @@ paths:
                   success:
                     type: boolean
                   avatarUrl:
+                    nullable: true
                     type: string
                   error:
                     type: string
@@ -4556,8 +4539,6 @@ paths:
                 properties:
                   success:
                     type: boolean
-                    enum:
-                      - true
                   message:
                     type: string
                 required:
@@ -5705,12 +5686,16 @@ paths:
                         label:
                           type: string
                         emoji:
+                          nullable: true
                           type: string
                         color:
+                          nullable: true
                           type: string
                         createdAt:
+                          nullable: true
                           type: string
                         updatedAt:
+                          nullable: true
                           type: string
                         contactCount:
                           type: number
@@ -6453,8 +6438,10 @@ paths:
                           nullable: true
                           type: string
                         createdAt:
+                          nullable: true
                           type: string
                         updatedAt:
+                          nullable: true
                           type: string
                         contactCount:
                           type: number
@@ -7123,15 +7110,9 @@ paths:
                           avatar_url:
                             nullable: true
                             type: string
-                        required:
-                          - name
-                          - middlename
-                          - surname
-                          - avatar_url
-                        additionalProperties: false
+                        additionalProperties: {}
                     required:
                       - id
-                      - email
                       - user_metadata
                     additionalProperties: false
                 required:
@@ -7183,8 +7164,6 @@ paths:
                 properties:
                   success:
                     type: boolean
-                    enum:
-                      - true
                   message:
                     type: string
                 required:
@@ -7293,8 +7272,6 @@ paths:
                 properties:
                   success:
                     type: boolean
-                    enum:
-                      - true
                   message:
                     type: string
                 required:
@@ -7426,9 +7403,6 @@ paths:
                         pattern: ^([01]\d|2[0-3]):[0-5]\d(:[0-5]\d)?$
                       timeFormat:
                         type: string
-                        enum:
-                          - 24h
-                          - 12h
                       language:
                         nullable: true
                         type: string
@@ -7440,31 +7414,12 @@ paths:
                           - auto
                       leftSwipeAction:
                         type: string
-                        enum:
-                          - call
-                          - message
-                          - email
                       rightSwipeAction:
                         type: string
-                        enum:
-                          - call
-                          - message
-                          - email
                       groupSortOrder:
                         type: string
-                        enum:
-                          - recent-opened
-                          - count-desc
-                          - count-asc
-                          - alpha-asc
-                          - alpha-desc
                       tagSortOrder:
                         type: string
-                        enum:
-                          - count-desc
-                          - count-asc
-                          - alpha-asc
-                          - alpha-desc
                       avatarUrl:
                         nullable: true
                         type: string
@@ -8156,8 +8111,6 @@ paths:
                 properties:
                   success:
                     type: boolean
-                    enum:
-                      - true
                   message:
                     type: string
                 required:
@@ -8706,8 +8659,6 @@ paths:
                 properties:
                   success:
                     type: boolean
-                    enum:
-                      - true
                   message:
                     type: string
                 required:
@@ -9082,8 +9033,6 @@ paths:
                 properties:
                   success:
                     type: boolean
-                    enum:
-                      - true
                   message:
                     type: string
                 required:
@@ -9475,13 +9424,9 @@ paths:
                           type: string
                         role:
                           type: string
-                          enum:
-                            - user
-                            - assistant
-                        content:
-                          type: object
-                          additionalProperties: {}
+                        content: {}
                         created_at:
+                          nullable: true
                           type: string
                       required:
                         - id
@@ -10323,26 +10268,16 @@ paths:
                                       nullable: true
                                       type: string
                                     notifyDaysBefore:
-                                      anyOf:
-                                        - type: number
-                                          enum:
-                                            - 1
-                                        - type: number
-                                          enum:
-                                            - 3
-                                        - type: number
-                                          enum:
-                                            - 7
-                                        - type: string
-                                          nullable: true
-                                          enum:
-                                            - null
+                                      nullable: true
+                                      type: number
                                     notifyOn:
                                       nullable: true
                                       type: string
                                     createdAt:
+                                      nullable: true
                                       type: string
                                     updatedAt:
+                                      nullable: true
                                       type: string
                                   required:
                                     - id
@@ -10368,7 +10303,6 @@ paths:
                                 type: string
                               gisPoint:
                                 nullable: true
-                                type: string
                               latitude:
                                 nullable: true
                                 type: number

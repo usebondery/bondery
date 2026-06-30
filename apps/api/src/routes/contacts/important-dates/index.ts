@@ -81,14 +81,14 @@ export function toImportantDate(event: {
   note: string | null;
   notify_on: string | null;
   notify_days_before: number | null;
-  created_at: string;
-  updated_at: string;
+  created_at: string | null;
+  updated_at: string | null;
 }) {
   return {
     id: event.id,
     userId: event.user_id,
     personId: event.person_id,
-    type: event.type,
+    type: event.type as ImportantDateType,
     date: event.date,
     note: event.note,
     notifyOn: event.notify_on,
@@ -255,7 +255,7 @@ export function registerImportantDateRoutes(fastify: AppFastifyInstance): void {
             notificationSentAt,
           };
         })
-        .filter((value): value is UpcomingReminder => Boolean(value))
+        .filter((value): value is NonNullable<typeof value> => value != null)
         .sort((a, b) => {
           const aReminderDate = deriveReminderDateKey({
             date: a.importantDate.date,

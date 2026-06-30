@@ -7,16 +7,17 @@ import { shareContactEmailSchema } from "./channels.js";
 export const apiErrorResponseSchema = z.object({
   error: z.string(),
   description: z.string().optional(),
+  details: z.string().optional(),
 });
 
 export const apiSuccessResponseSchema = z.object({
-  success: z.literal(true),
+  success: z.boolean(),
   message: z.string().optional(),
 });
 
 export const photoUploadResponseSchema = z.object({
   success: z.boolean(),
-  avatarUrl: z.string().optional(),
+  avatarUrl: z.string().nullable().optional(),
   error: z.string().optional(),
 });
 

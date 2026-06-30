@@ -3,8 +3,8 @@ import { GROUP_LABEL_MAX_LENGTH } from "../constants/index.js";
 import { hexColorSchema } from "../primitives/index.js";
 import { contactPreviewSchema, contactSchema, contactsFilterSchema } from "./contact.js";
 import {
-  entityAuditSchema,
   entityIdentitySchema,
+  entityNullableAuditSchema,
   excludePersonIdsSchema,
   idsRequestSchema,
   labelFieldSchema,
@@ -23,9 +23,9 @@ const groupEditableFieldsSchema = z.object({
 
 export const groupSchema = entityIdentitySchema.extend({
   label: z.string(),
-  emoji: z.string(),
-  color: z.string(),
-}).extend(entityAuditSchema.shape);
+  emoji: z.string().nullable(),
+  color: z.string().nullable(),
+}).extend(entityNullableAuditSchema.shape);
 
 export const groupWithCountSchema = groupSchema.extend({
   contactCount: z.number(),

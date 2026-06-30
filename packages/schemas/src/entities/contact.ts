@@ -6,8 +6,8 @@ import { importantDateSchema } from "./important-date.js";
 import { contactIdSchema } from "../contact-id.js";
 import {
   createdAtSchema,
-  entityAuditSchema,
   entityIdentitySchema,
+  entityNullableAuditSchema,
   idsRequestSchema,
   makeCollectionResponseSchema,
   makePaginatedListResponseSchema,
@@ -47,7 +47,7 @@ export const contactSchema = entityIdentitySchema.extend({
   lastInteraction: z.string().nullable(),
   lastInteractionActivityId: z.string().nullable(),
   keepFrequencyDays: z.number().nullable(),
-  createdAt: createdAtSchema,
+  createdAt: createdAtSchema.nullable(),
   updatedAt: updatedAtSchema.nullable().optional(),
   phones: z.array(phoneEntryEntitySchema).nullable(),
   emails: z.array(emailEntryEntitySchema).nullable(),
@@ -63,7 +63,7 @@ export const contactSchema = entityIdentitySchema.extend({
   position: z.unknown().nullable().optional(),
   language: z.string().nullable(),
   timezone: z.string().nullable(),
-  gisPoint: z.string().nullable(),
+  gisPoint: z.unknown().nullable(),
   latitude: z.number().nullable(),
   longitude: z.number().nullable(),
 });
@@ -79,7 +79,7 @@ export const contactRelationshipSchema = entityIdentitySchema.extend({
   sourcePersonId: z.string(),
   targetPersonId: z.string(),
   relationshipType: relationshipTypeSchema,
-}).extend(entityAuditSchema.shape);
+}).extend(entityNullableAuditSchema.shape);
 
 export const contactRelationshipWithPeopleSchema = contactRelationshipSchema.extend({
   sourcePerson: contactPreviewSchema,
@@ -224,7 +224,12 @@ export const deleteContactsRequestSchema = z.union([
 ]);
 
 export const deleteContactsResponseSchema = messageResponseSchema.extend({
-  deletedCount: z.number().int(),
+  deletedCount: z.number().int().optional(),
+});
+
+export const bySocialLookupResponseSchema = z.object({
+  exists: z.boolean(),
+  contact: contactPreviewSchema.optional(),
 });
 
 export const deleteContactResponseSchema = messageResponseSchema;
@@ -277,8 +282,8 @@ export const enrichQueueItemSchema = entityIdentitySchema.extend({
   personId: z.string(),
   status: enrichQueueStatusSchema,
   errorMessage: z.string().nullable(),
-  createdAt: createdAtSchema,
-  updatedAt: updatedAtSchema,
+  createdAt: createdAtSchema.nullable(),
+  updatedAt: updatedAtSchema.nullable(),
   linkedinHandle: z.string().optional(),
 });
 
@@ -309,7 +314,7 @@ export const enrichQueueNextBatchResponseSchema = z.object({
 });
 
 export const linkedInDataUpsertResponseSchema = z.object({
-  success: z.literal(true),
+  success: z.boolean(),
   count: z.number(),
 });
 
