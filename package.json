@@ -17,6 +17,8 @@
     "dev:website": "turbo dev --filter=website",
     "dev:polar-webhook": "npx localtunnel --port 3001",
     "build": "turbo build",
+    "build:api": "turbo build --filter=api",
+    "turbo:clean": "turbo daemon clean",
     "start": "turbo start",
     "lint": "turbo lint",
     "format": "biome format --write .",

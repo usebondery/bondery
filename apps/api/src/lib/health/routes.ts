@@ -72,10 +72,10 @@ export function registerHealthRoutes(fastify: AppFastifyInstance): void {
         smtpAddress: fastify.config.PRIVATE_EMAIL_ADDRESS,
         smtpPort: fastify.config.PRIVATE_EMAIL_PORT,
         anthropicApiKey: fastify.config.PRIVATE_ANTHROPIC_API_KEY,
-        polarAccessToken: fastify.config.POLAR_ACCESS_TOKEN,
+        polarAccessToken: fastify.config.PRIVATE_POLAR_ACCESS_TOKEN,
         polarProductId: fastify.config.POLAR_PRODUCT_ID,
-        polarWebhookSecret: fastify.config.POLAR_WEBHOOK_SECRET,
-        mapsApiKey: fastify.config.NEXT_PRIVATE_MAPS_KEY,
+        polarWebhookSecret: fastify.config.PRIVATE_POLAR_WEBHOOK_SECRET,
+        mapsApiKey: fastify.config.PRIVATE_MAPS_KEY,
         posthogApiSecret: fastify.config.POSTHOG_API_SECRET,
         posthogProjectId: fastify.config.POSTHOG_PROJECT_ID,
       });

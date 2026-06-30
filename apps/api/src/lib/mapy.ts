@@ -16,11 +16,11 @@ const GEOCODE_CACHE_TTL_DAYS = 180;
 
 /** Read at call time — env is populated by @fastify/env after module load. */
 function getMapsKey(): string {
-  return process.env.NEXT_PRIVATE_MAPS_KEY || "";
+  return process.env.PRIVATE_MAPS_KEY || "";
 }
 
 function getMapsUrl(): string {
-  return process.env.NEXT_PUBLIC_MAPS_URL || MAPS_BASE_URL;
+  return process.env.PUBLIC_MAPS_URL || MAPS_BASE_URL;
 }
 
 /** Structured result from geocoding a LinkedIn location string. */
@@ -87,7 +87,7 @@ function parseLinkedInLocation(location: string): { query: string; locality?: st
  *
  * Returns null when:
  *  - `location` is empty
- *  - `NEXT_PRIVATE_MAPS_KEY` is not configured
+ *  - `PRIVATE_MAPS_KEY` is not configured
  *  - the API returns no results or an error
  *
  * @param location - Raw location string from LinkedIn (e.g. "Brno, Czechia" or "Czechia").
@@ -99,7 +99,7 @@ export async function geocodeLinkedInLocation(location: string): Promise<Geocode
   const mapsUrl = getMapsUrl();
 
   if (!trimmed || !mapsKey) {
-    if (!mapsKey) logger.warn("[mapy] NEXT_PRIVATE_MAPS_KEY is not configured, skipping geocode");
+    if (!mapsKey) logger.warn("[mapy] PRIVATE_MAPS_KEY is not configured, skipping geocode");
     return null;
   }
 
@@ -471,7 +471,7 @@ export async function cachedGeocodeLinkedInLocation(
       );
     } else if (mapsKeyConfigured) {
       // Negative cache — the API was called and returned no result.
-      // Skipped when NEXT_PRIVATE_MAPS_KEY is not configured so that transient
+      // Skipped when PRIVATE_MAPS_KEY is not configured so that transient
       // misconfigurations don't poison the cache for 180 days.
       await admin.from("geocode_cache").upsert(
         {

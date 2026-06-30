@@ -88,9 +88,9 @@ export const geocodeRoutes: AppRoutePlugin = async (fastify) => {
 
 
 
-      const mapsKey = fastify.config.NEXT_PRIVATE_MAPS_KEY;
+      const mapsKey = fastify.config.PRIVATE_MAPS_KEY;
 
-      const mapsUrl = fastify.config.NEXT_PUBLIC_MAPS_URL;
+      const mapsUrl = fastify.config.PUBLIC_MAPS_URL;
 
 
 

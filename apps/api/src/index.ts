@@ -124,11 +124,11 @@ const envSchema = {
     PRIVATE_EMAIL_PORT: {
       type: "number",
     },
-    NEXT_PUBLIC_MAPS_URL: {
+    PUBLIC_MAPS_URL: {
       type: "string",
       default: "https://api.mapy.com",
     },
-    NEXT_PRIVATE_MAPS_KEY: {
+    PRIVATE_MAPS_KEY: {
       type: "string",
       default: "",
     },
@@ -144,15 +144,15 @@ const envSchema = {
       type: "string",
       default: "",
     },
-    POLAR_WEBHOOK_SECRET: {
+    PRIVATE_POLAR_WEBHOOK_SECRET: {
       type: "string",
       default: "",
     },
-    POLAR_ACCESS_TOKEN: {
+    PRIVATE_POLAR_ACCESS_TOKEN: {
       type: "string",
       default: "",
     },
-    POLAR_ENVIRONMENT: {
+    PUBLIC_POLAR_ENVIRONMENT: {
       type: "string",
       default: "production",
     },
@@ -194,12 +194,12 @@ declare module "fastify" {
       POSTHOG_API_SECRET: string;
       POSTHOG_PROJECT_ID: string;
       PRIVATE_ANTHROPIC_API_KEY: string;
-      POLAR_WEBHOOK_SECRET: string;
-      POLAR_ACCESS_TOKEN: string;
-      POLAR_ENVIRONMENT: string;
+      PRIVATE_POLAR_WEBHOOK_SECRET: string;
+      PRIVATE_POLAR_ACCESS_TOKEN: string;
+      PUBLIC_POLAR_ENVIRONMENT: string;
       POLAR_PRODUCT_ID: string;
-      NEXT_PUBLIC_MAPS_URL: string;
-      NEXT_PRIVATE_MAPS_KEY: string;
+      PUBLIC_MAPS_URL: string;
+      PRIVATE_MAPS_KEY: string;
       PRIVATE_REDIS_URL: string;
       PRIVATE_API_KEY_PEPPER: string;
       PRIVATE_SUPABASE_JWT_SIGNING_JWK: string;

@@ -179,11 +179,11 @@ export async function polarWebhookRoutes(
     "/",
     { config: { rateLimit: false } },
     async (request: FastifyRequest, reply: FastifyReply) => {
-      const secret = fastify.config.POLAR_WEBHOOK_SECRET;
+      const secret = fastify.config.PRIVATE_POLAR_WEBHOOK_SECRET;
 
     if (!secret) {
       request.log.warn(
-        "POLAR_WEBHOOK_SECRET is not configured — rejecting webhook",
+        "PRIVATE_POLAR_WEBHOOK_SECRET is not configured — rejecting webhook",
       );
       return reply.status(500).send({ error: "Webhook not configured" });
     }

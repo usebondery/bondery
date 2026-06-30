@@ -1,12 +1,26 @@
 {
   "$schema": "https://v2-10-1.turborepo.dev/schema.json",
-  "ui": "tui",
+  "ui": "stream",
   "tasks": {
     "build": {
+      "passThroughEnv": [
+        "SYSTEMROOT",
+        "WINDIR",
+        "COMSPEC",
+        "PATHEXT",
+        "PATH",
+        "TEMP",
+        "TMP",
+        "APPDATA",
+        "LOCALAPPDATA",
+        "USERPROFILE",
+        "HOMEDRIVE",
+        "HOMEPATH"
+      ],
       "env": [
         "NODE_ENV",
-        "NEXT_PRIVATE_MAPS_KEY",
-        "NEXT_PUBLIC_MAPS_URL",
+        "PRIVATE_MAPS_KEY",
+        "PUBLIC_MAPS_URL",
         "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY",
         "NEXT_PUBLIC_SUPABASE_URL",
         "PUBLIC_SUPABASE_URL",
@@ -68,8 +82,8 @@
       "cache": true,
       "env": [
         "NEXT_PUBLIC_WEBAPP_URL",
-        "NEXT_PRIVATE_MAPS_KEY",
-        "NEXT_PUBLIC_MAPS_URL",
+        "PRIVATE_MAPS_KEY",
+        "PUBLIC_MAPS_URL",
         "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY",
         "NEXT_PUBLIC_SUPABASE_URL",
         "PUBLIC_SUPABASE_URL",
@@ -141,8 +155,8 @@
     "ProgramFiles",
     "ProgramFiles(x86)",
     "ProgramW6432",
-    "NEXT_PRIVATE_MAPS_KEY",
-    "NEXT_PUBLIC_MAPS_URL",
+    "PRIVATE_MAPS_KEY",
+    "PUBLIC_MAPS_URL",
     "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY",
     "NEXT_PUBLIC_SUPABASE_URL",
     "PUBLIC_SUPABASE_URL",

@@ -23,8 +23,8 @@ checkEnvVariables({
     ...(environment === "production"
       ? [
           "PRIVATE_REDIS_URL",
-          "POLAR_ACCESS_TOKEN",
-          "POLAR_WEBHOOK_SECRET",
+          "PRIVATE_POLAR_ACCESS_TOKEN",
+          "PRIVATE_POLAR_WEBHOOK_SECRET",
           "POLAR_PRODUCT_ID",
         ]
       : []),
