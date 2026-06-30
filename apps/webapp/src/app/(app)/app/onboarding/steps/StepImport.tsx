@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useTranslations } from "next-intl";
+import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
 import {
   Button,
   Card,

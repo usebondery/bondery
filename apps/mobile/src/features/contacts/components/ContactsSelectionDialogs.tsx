@@ -1,11 +1,10 @@
 import { IconTrash } from "@tabler/icons-react-native";
 import { ActionSheetPopup } from "../../../components/ActionSheetPopup";
-import { deleteContacts } from "../../../lib/api/client";
+import { contactsDomain } from "../../../lib/domains/contacts";
 import { useMobileTranslations } from "../../../lib/i18n/useMobileTranslations";
 import { useAppToast } from "../../../lib/toast/useAppToast";
 import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
-import { buildContactsSelectionGroupPayload } from "../buildContactsSelectionGroupPayload";
-import { buildGroupSelectionMemberPersonIds } from "../buildGroupSelectionMemberPersonIds";
+import { resolveContactsSelectionPersonIds } from "../resolveContactsSelectionPersonIds";
 import {
   useContactsEffectiveSelectedCount,
   useContactsSelection,
@@ -36,22 +35,16 @@ export function ContactsSelectionDialogs({
   const handleConfirmDeleteSelected = () => {
     void (async () => {
       const selectionState = useContactsSelection.getState();
-      const selectedContactIds = selectionState.getSelectedContactIds();
 
       setIsDeleting(true);
 
       try {
-        if (loadedGroupMembers) {
-          const personIds = buildGroupSelectionMemberPersonIds(selectionState, loadedGroupMembers);
-          await deleteContacts({ ids: personIds });
-        } else if (selectionState.isAllTotalSelected) {
-          await deleteContacts({
-            filter: { q: debouncedQuery || undefined, sort: "nameAsc" },
-            excludeIds: selectionState.getExcludedIds(),
-          });
-        } else {
-          await deleteContacts({ ids: selectedContactIds });
-        }
+        const personIds = resolveContactsSelectionPersonIds(
+          selectionState,
+          debouncedQuery,
+          loadedGroupMembers ? { loadedGroupMembers } : undefined,
+        );
+        contactsDomain.deleteMany(personIds);
 
         exitSelectionMode();
         setDeleteConfirmOpen(false);

@@ -10,7 +10,8 @@ import {
   Text,
 } from "@mantine/core";
 import { IconCreditCard, IconExternalLink } from "@tabler/icons-react";
-import { useFormatter, useTranslations } from "next-intl";
+import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
+import { useDateFormatter as useFormatter } from "@/lib/i18n/useDateFormatter";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import { SettingsSection } from "./SettingsSection";
 import type { SubscriptionStatus } from "@bondery/schemas";

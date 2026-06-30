@@ -3,12 +3,15 @@
  * Handles marking onboarding as complete
  */
 
-import type { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
+import type { FastifyReply } from "fastify";
+import type { AppRoutePlugin } from "../../../lib/fastify-types.js";
 import { getAuth } from "../../../lib/auth.js";
 
-export async function meOnboardingRoutes(fastify: FastifyInstance) {
+export const meOnboardingRoutes: AppRoutePlugin = async (fastify) => {
   fastify.addHook("onRoute", (routeOptions) => {
-    routeOptions.schema = { ...routeOptions.schema, tags: ["Me"] };
+    if (routeOptions.schema) {
+      routeOptions.schema.tags = ["Me"];
+    }
   });
   fastify.addHook("onRequest", fastify.auth([fastify.verifySession]));
 
@@ -17,7 +20,7 @@ export async function meOnboardingRoutes(fastify: FastifyInstance) {
    *
    * Idempotent: only sets onboarding_completed_at if currently NULL.
    */
-  fastify.patch("/", async (request: FastifyRequest, reply: FastifyReply) => {
+  fastify.patch("/", async (request, reply) => {
     const { client, user } = getAuth(request);
 
     const { error } = await client

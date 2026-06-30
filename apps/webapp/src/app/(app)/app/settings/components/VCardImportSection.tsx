@@ -1,7 +1,7 @@
 "use client";
 
 import { IconAddressBook, IconDownload } from "@tabler/icons-react";
-import { useTranslations } from "next-intl";
+import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
 import { modals } from "@mantine/modals";
 import { ModalTitle } from "@bondery/mantine-next";
 import { IntegrationCard } from "@/components/shared/IntegrationCard";

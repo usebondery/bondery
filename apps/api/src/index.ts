@@ -4,8 +4,16 @@
  */
 
 import Fastify from "fastify";
+import type { AppFastifyInstance } from "./lib/fastify-types.js";
 import type { FastifyError } from "fastify";
-import { TypeBoxTypeProvider } from "@fastify/type-provider-typebox";
+import {
+  fastifyZodOpenApiPlugin,
+  fastifyZodOpenApiTransformers,
+  RequestValidationError,
+  serializerCompiler,
+  validatorCompiler,
+  type FastifyZodOpenApiTypeProvider,
+} from "fastify-zod-openapi";
 import cors from "@fastify/cors";
 import cookie from "@fastify/cookie";
 import multipart from "@fastify/multipart";
@@ -15,6 +23,7 @@ import fastifyAuth from "@fastify/auth";
 import fastifySwagger from "@fastify/swagger";
 import { createRequire } from "module";
 import { API_ROUTES } from "@bondery/helpers";
+import { registerOpenApiComponentSchemas } from "@bondery/schemas";
 import { registerAuthStrategies } from "./lib/auth.js";
 import { registerExtensionVersionCheck } from "./lib/extensionVersionCheck.js";
 import { registerHealthRoutes } from "./lib/health/routes.js";
@@ -26,6 +35,7 @@ import {
 import { contactRoutes } from "./routes/contacts/index.js";
 import { meRoutes } from "./routes/me/index.js";
 import { meSettingsRoutes } from "./routes/me/settings/index.js";
+import { meApiKeysRoutes } from "./routes/me/api-keys/index.js";
 import { extensionRoutes } from "./routes/extension/index.js";
 import { meFeedbackRoutes } from "./routes/me/feedback/index.js";
 import { reminderDigestRoutes } from "./routes/internal/reminder-digest.js";
@@ -46,6 +56,7 @@ import { subscriptionPortalRoutes } from "./routes/subscriptions/portal.js";
 import { subscriptionSyncRoutes } from "./routes/subscriptions/sync.js";
 import { polarWebhookRoutes } from "./routes/webhooks/polar.js";
 import { geocodeRoutes } from "./routes/geocode/index.js";
+import { syncRoutes } from "./routes/sync/index.js";
 
 // Environment variable schema
 const envSchema = {
@@ -55,6 +66,8 @@ const envSchema = {
     "PUBLIC_SUPABASE_PUBLISHABLE_KEY",
     "PRIVATE_SUPABASE_SECRET_KEY",
     "NEXT_PUBLIC_API_URL",
+    "PRIVATE_API_KEY_PEPPER",
+    "PRIVATE_SUPABASE_JWT_SIGNING_JWK",
     "PRIVATE_EMAIL_HOST",
     "PRIVATE_EMAIL_USER",
     "PRIVATE_EMAIL_PASS",
@@ -127,7 +140,7 @@ const envSchema = {
       type: "string",
       default: "",
     },
-    ANTHROPIC_API_KEY: {
+    PRIVATE_ANTHROPIC_API_KEY: {
       type: "string",
       default: "",
     },
@@ -150,6 +163,12 @@ const envSchema = {
     PRIVATE_REDIS_URL: {
       type: "string",
       default: "",
+    },
+    PRIVATE_API_KEY_PEPPER: {
+      type: "string",
+    },
+    PRIVATE_SUPABASE_JWT_SIGNING_JWK: {
+      type: "string",
     },
   },
 } as const;
@@ -174,7 +193,7 @@ declare module "fastify" {
       PRIVATE_EMAIL_PORT: number;
       POSTHOG_API_SECRET: string;
       POSTHOG_PROJECT_ID: string;
-      ANTHROPIC_API_KEY: string;
+      PRIVATE_ANTHROPIC_API_KEY: string;
       POLAR_WEBHOOK_SECRET: string;
       POLAR_ACCESS_TOKEN: string;
       POLAR_ENVIRONMENT: string;
@@ -182,6 +201,8 @@ declare module "fastify" {
       NEXT_PUBLIC_MAPS_URL: string;
       NEXT_PRIVATE_MAPS_KEY: string;
       PRIVATE_REDIS_URL: string;
+      PRIVATE_API_KEY_PEPPER: string;
+      PRIVATE_SUPABASE_JWT_SIGNING_JWK: string;
     };
   }
 }
@@ -240,6 +261,7 @@ function getLoggerConfig(env: string) {
 }
 
 async function buildServer() {
+  registerOpenApiComponentSchemas();
   const environment = process.env.NODE_ENV || "development";
   const fastify = Fastify({
     logger: getLoggerConfig(environment),
@@ -247,13 +269,11 @@ async function buildServer() {
     routerOptions: {
       ignoreTrailingSlash: true,
     },
-    ajv: {
-      customOptions: {
-        removeAdditional: true,
-        coerceTypes: true,
-      },
-    },
-  }).withTypeProvider<TypeBoxTypeProvider>();
+  }).withTypeProvider<FastifyZodOpenApiTypeProvider>();
+
+  await fastify.register(fastifyZodOpenApiPlugin);
+  fastify.setValidatorCompiler(validatorCompiler);
+  fastify.setSerializerCompiler(serializerCompiler);
 
   // Custom schema error formatter to match existing { error: "..." } response format
   fastify.setSchemaErrorFormatter((errors, dataVar) => {
@@ -268,7 +288,7 @@ async function buildServer() {
   // Custom error handler for validation errors
   fastify.setErrorHandler(
     (error: FastifyError & { retryAfter?: number }, _request, reply) => {
-      if (error.validation) {
+      if (error instanceof RequestValidationError || error.validation) {
         return reply.status(400).send({ error: error.message });
       }
       const body: Record<string, unknown> = { error: error.message };
@@ -342,7 +362,6 @@ async function buildServer() {
   // Register extension version enforcement (426 Upgrade Required for outdated extensions)
   registerExtensionVersionCheck(fastify);
 
-  // Register OpenAPI spec generator
   await fastify.register(fastifySwagger, {
     openapi: {
       openapi: "3.0.3",
@@ -358,8 +377,16 @@ async function buildServer() {
           "rate limited to one request per minute per client. Returns 503 when critical " +
           "dependencies are unavailable.\n\n" +
           "## Authentication\n\n" +
-          "All endpoints (except `/status` and `/health`) require authentication " +
-          "via a Supabase session cookie or a Bearer token in the Authorization header.",
+          "Most endpoints require authentication via a Supabase session cookie or a " +
+          "Bearer token (session JWT or long-lived API key).\n\n" +
+          "**Session auth:** Sign in via the webapp; the browser sends session cookies " +
+          "or a Supabase access token.\n\n" +
+          "**API keys:** Create keys in Settings → API keys. Send " +
+          "`Authorization: Bearer bondery_key_…` on allowed integration routes " +
+          "(contacts, groups, tags, interactions, imports, share, geocode). " +
+          "Keys support `read` (GET/HEAD) or `full` access. See the authentication guide.\n\n" +
+          "Endpoints under `/api/me/api-keys`, `/api/sync`, `/api/chat`, `/api/admin`, " +
+          "`/api/subscriptions`, and `/api/extension` do not accept API keys.",
         version: "1.0.0",
         contact: { name: "Bondery Support", url: "https://usebondery.com" },
         license: { name: "Proprietary" },
@@ -410,7 +437,30 @@ async function buildServer() {
           description: "Address autocomplete and geocoding proxy",
         },
       ],
+      components: {
+        securitySchemes: {
+          bearerAuth: {
+            type: "http",
+            scheme: "bearer",
+            bearerFormat: "JWT",
+            description:
+              "Supabase session access token from the webapp or mobile app. " +
+              "Send as `Authorization: Bearer <access_token>`.",
+          },
+          apiKeyAuth: {
+            type: "http",
+            scheme: "bearer",
+            bearerFormat: "API Key",
+            description:
+              "Long-lived API key created in Settings → API keys. " +
+              "Format: `bondery_key_<keyId>_<secret>`. " +
+              "Only works on integration routes (contacts, groups, tags, interactions, " +
+              "imports, share, geocode). Supports `read` (GET/HEAD) or `full` access.",
+          },
+        },
+      },
     },
+    ...fastifyZodOpenApiTransformers,
   });
 
   registerHealthRoutes(fastify);
@@ -430,6 +480,7 @@ async function buildServer() {
   await fastify.register(tagRoutes, { prefix: API_ROUTES.TAGS });
   await fastify.register(meRoutes, { prefix: API_ROUTES.ME });
   await fastify.register(meSettingsRoutes, { prefix: API_ROUTES.ME_SETTINGS });
+  await fastify.register(meApiKeysRoutes, { prefix: API_ROUTES.ME_API_KEYS });
   await fastify.register(extensionRoutes, { prefix: API_ROUTES.EXTENSION });
   await fastify.register(meFeedbackRoutes, { prefix: API_ROUTES.ME_FEEDBACK });
   await fastify.register(reminderDigestRoutes, {
@@ -463,6 +514,7 @@ async function buildServer() {
     prefix: API_ROUTES.WEBHOOKS_POLAR,
   });
   await fastify.register(geocodeRoutes, { prefix: "/api/geocode" });
+  await fastify.register(syncRoutes, { prefix: "/api/sync" });
 
   return fastify;
 }

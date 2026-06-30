@@ -3,7 +3,7 @@ import { useFocusEffect } from "expo-router";
 import { useContactsSelection } from "../contactsSelectionStore";
 
 interface UseContactsSelectionListSyncOptions {
-  contacts: { id: string }[];
+  contactIds: string[];
   totalCount: number;
   myselfContactId?: string;
 }
@@ -13,7 +13,7 @@ interface UseContactsSelectionListSyncOptions {
  * selection when the screen loses focus.
  */
 export function useContactsSelectionListSync({
-  contacts,
+  contactIds,
   totalCount,
   myselfContactId,
 }: UseContactsSelectionListSyncOptions) {
@@ -36,18 +36,18 @@ export function useContactsSelectionListSync({
   }, [setSelectionTotalCount, totalCount]);
 
   useEffect(() => {
-    setLoadedContactCount(contacts.length);
-  }, [contacts.length, setLoadedContactCount]);
+    setLoadedContactCount(contactIds.length);
+  }, [contactIds.length, setLoadedContactCount]);
 
   useEffect(() => {
-    const knownContactIds = new Set(contacts.map((contact) => contact.id));
+    const knownContactIds = new Set(contactIds);
 
     if (myselfContactId) {
       knownContactIds.add(myselfContactId);
     }
 
     pruneSelectionToKnownContactIds(knownContactIds);
-  }, [contacts, myselfContactId, pruneSelectionToKnownContactIds]);
+  }, [contactIds, myselfContactId, pruneSelectionToKnownContactIds]);
 
   useFocusEffect(
     useCallback(() => {

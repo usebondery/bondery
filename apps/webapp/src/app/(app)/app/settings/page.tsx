@@ -1,10 +1,9 @@
 import type { Metadata } from "next";
 import { Stack } from "@mantine/core";
-import { getTranslations } from "next-intl/server";
+import { getWebTranslations as getTranslations } from "@/lib/i18n/getWebTranslations";
 import { ProfileCard } from "./components/ProfileCard";
 import { DataManagementCard } from "./components/DataManagementCard";
-import { API_URL } from "@/lib/config";
-import { getAuthHeaders } from "@/lib/authHeaders";
+import { serverApiFetch } from "@/lib/api/server";
 
 import { ErrorPageHeader } from "@/app/(app)/app/components/ErrorPageHeader";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
@@ -13,37 +12,26 @@ import { PreferencesCard } from "./components/PreferencesCard";
 import { TagsSection } from "./components/TagsSection";
 import { SupportCard } from "./components/SupportCard";
 import { SubscriptionCard } from "./components/SubscriptionCard";
-import type { TagWithCount } from "@bondery/schemas";
-import type { SubscriptionStatus } from "@bondery/schemas";
+import { ApiKeysSection } from "./components/ApiKeysSection";
+import type { ApiKeyListItem, TagWithCount, SubscriptionStatus } from "@bondery/schemas";
+import { SUPPORTED_LOCALES } from "@bondery/translations";
+import type { SupportedLocale } from "@bondery/translations";
 import { buildAvatarQueryString } from "@/lib/avatarParams";
+import { API_URL } from "@/lib/config";
 
 export const metadata: Metadata = { title: "Settings" };
 
 export default async function SettingsPage() {
-  const headers = await getAuthHeaders();
-
-  const [response, tagsResponse, personResponse, subscriptionResponse] =
+  const [response, tagsResponse, personResponse, subscriptionResponse, apiKeysResponse] =
     await Promise.all([
-      fetch(`${API_URL}${API_ROUTES.ME_SETTINGS}`, {
-        next: { tags: ["settings"] },
-        headers,
-      }),
-      fetch(`${API_URL}${API_ROUTES.TAGS}?previewLimit=3`, {
-        next: { tags: ["tags"] },
-        headers,
-      }),
-      fetch(
-        `${API_URL}${API_ROUTES.ME_PERSON}?${buildAvatarQueryString("small")}`,
-        {
-          next: { tags: ["contacts"] },
-          headers,
-        },
-      ),
-      fetch(`${API_URL}${API_ROUTES.SUBSCRIPTIONS}`, {
-        cache: "no-store",
-        headers,
-      }),
-    ]);
+    serverApiFetch(API_ROUTES.ME_SETTINGS, undefined, { cache: "no-store" }),
+    serverApiFetch(`${API_ROUTES.TAGS}?previewLimit=3`, undefined, { next: { tags: ["tags"] } }),
+    serverApiFetch(`${API_ROUTES.ME_PERSON}?${buildAvatarQueryString("small")}`, undefined, {
+      next: { tags: ["contacts"] },
+    }),
+    serverApiFetch(API_ROUTES.SUBSCRIPTIONS, undefined, { cache: "no-store" }),
+    serverApiFetch(API_ROUTES.ME_API_KEYS, undefined, { cache: "no-store" }),
+  ]);
 
   if (!response.ok) {
     console.error("Failed to fetch settings:", response.statusText);
@@ -58,18 +46,15 @@ export default async function SettingsPage() {
   const personResult = personResponse.ok ? await personResponse.json() : null;
   const myselfPerson = personResult?.contact ?? null;
 
-  const subscriptionResult = subscriptionResponse.ok
-    ? await subscriptionResponse.json()
-    : null;
-  const subscriptionStatus: SubscriptionStatus | null =
-    subscriptionResult?.data ?? null;
+  const subscriptionResult = subscriptionResponse.ok ? await subscriptionResponse.json() : null;
+  const subscriptionStatus: SubscriptionStatus | null = subscriptionResult?.data ?? null;
+
+  const apiKeysResult = apiKeysResponse.ok ? await apiKeysResponse.json() : { apiKeys: [] };
+  const initialApiKeys = (apiKeysResult.apiKeys as ApiKeyListItem[]) ?? [];
 
   // Fire-and-forget sync: bootstraps subscription for pre-existing Polar customers
   if (subscriptionStatus?.plan !== "premium") {
-    fetch(`${API_URL}${API_ROUTES.SUBSCRIPTIONS_SYNC}`, {
-      method: "POST",
-      headers,
-    }).catch(() => {});
+    serverApiFetch(API_ROUTES.SUBSCRIPTIONS_SYNC, { method: "POST" }).catch(() => {});
   }
 
   const timezone = settings.timezone || "UTC";
@@ -79,7 +64,10 @@ export default async function SettingsPage() {
       ? settings.reminderSendHour
       : "08:00:00";
   const timeFormat = settings.timeFormat === "12h" ? "12h" : "24h";
-  const language = "en";
+  const rawLanguage: string = settings.language ?? "en";
+  const language: SupportedLocale = (SUPPORTED_LOCALES as readonly string[]).includes(rawLanguage)
+    ? (rawLanguage as SupportedLocale)
+    : "en";
   const colorScheme =
     settings.colorScheme === "light" ||
     settings.colorScheme === "dark" ||
@@ -104,6 +92,8 @@ export default async function SettingsPage() {
           userIdentities={userIdentities}
           myselfPerson={myselfPerson}
         />
+
+        <ApiKeysSection initialApiKeys={initialApiKeys} apiBaseUrl={API_URL} />
 
         {subscriptionStatus && (
           <SubscriptionCard subscriptionStatus={subscriptionStatus} />

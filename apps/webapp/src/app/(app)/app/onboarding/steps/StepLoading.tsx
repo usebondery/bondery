@@ -2,8 +2,7 @@
 
 import { useEffect } from "react";
 import { Center, Loader, Stack, Text } from "@mantine/core";
-import { useTranslations } from "next-intl";
-
+import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
 interface StepProps {
   onNext: () => void;
 }

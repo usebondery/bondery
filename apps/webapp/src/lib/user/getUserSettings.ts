@@ -1,7 +1,6 @@
 import { cache } from "react";
-import { getAuthHeaders } from "@/lib/authHeaders";
+import { serverApiFetch } from "@/lib/api/server";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
-import { API_URL } from "@/lib/config";
 import type { ColorSchemePreference } from "@bondery/schemas";
 import { SUPPORTED_LOCALES } from "@bondery/translations";
 import type { SupportedLocale } from "@bondery/translations";
@@ -40,11 +39,14 @@ const DEFAULT_SETTINGS: UserSettingsData = {
  */
 export const getUserSettings = cache(async (): Promise<UserSettingsData> => {
   try {
-    const headers = await getAuthHeaders();
-    const response = await fetch(`${API_URL}${API_ROUTES.ME_SETTINGS}`, {
-      next: { tags: ["settings"] },
-      headers,
+    const response = await serverApiFetch(API_ROUTES.ME_SETTINGS, undefined, {
+      cache: "no-store",
     });
+
+    if (response.status === 401) {
+      console.error("[getUserSettings] Unauthorized (401) — returning default settings");
+      return DEFAULT_SETTINGS;
+    }
 
     if (response.ok) {
       const result = await response.json();

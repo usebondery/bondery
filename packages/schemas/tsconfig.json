@@ -4,6 +4,12 @@
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
     "lib": ["ES2020"],
+    "baseUrl": ".",
+    "paths": {
+      "@bondery/schemas": ["./src/index.ts"],
+      "@bondery/schemas/*": ["./src/*"]
+    },
+    "ignoreDeprecations": "6.0",
     "outDir": "./dist",
     "rootDir": "./src",
     "strict": true,

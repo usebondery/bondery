@@ -9,6 +9,45 @@
 export type Database = {
   public: {
     Tables: {
+      api_keys: {
+        Row: {
+          created_at: string | null
+          id: string
+          key_hash: string
+          key_id: string
+          key_prefix: string
+          label: string
+          last_used_at: string | null
+          permission: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          key_hash: string
+          key_id: string
+          key_prefix: string
+          label: string
+          last_used_at?: string | null
+          permission: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          key_hash?: string
+          key_id?: string
+          key_prefix?: string
+          label?: string
+          last_used_at?: string | null
+          permission?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       chat_messages: {
         Row: {
           content: Json
@@ -297,6 +336,7 @@ export type Database = {
           created_at: string | null
           first_name: string
           gis_point: unknown
+          has_avatar: boolean
           headline: string | null
           id: string
           keep_frequency_days: number | null
@@ -319,6 +359,7 @@ export type Database = {
           created_at?: string | null
           first_name: string
           gis_point?: unknown
+          has_avatar?: boolean
           headline?: string | null
           id?: string
           keep_frequency_days?: number | null
@@ -341,6 +382,7 @@ export type Database = {
           created_at?: string | null
           first_name?: string
           gis_point?: unknown
+          has_avatar?: boolean
           headline?: string | null
           id?: string
           keep_frequency_days?: number | null
@@ -1048,6 +1090,84 @@ export type Database = {
         }
         Relationships: []
       }
+      sync_change_log: {
+        Row: {
+          change_index: number
+          created_at: string
+          entity_id: string
+          operation: string
+          row_data: Json | null
+          server_sequence: number
+          table_name: string
+          user_id: string
+        }
+        Insert: {
+          change_index?: number
+          created_at?: string
+          entity_id: string
+          operation: string
+          row_data?: Json | null
+          server_sequence: number
+          table_name: string
+          user_id: string
+        }
+        Update: {
+          change_index?: number
+          created_at?: string
+          entity_id?: string
+          operation?: string
+          row_data?: Json | null
+          server_sequence?: number
+          table_name?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      sync_mutation_receipts: {
+        Row: {
+          client_mutation_id: string
+          created_at: string
+          mutation_type: string
+          payload_hash: string
+          result: Json
+          server_sequence: number
+          user_id: string
+        }
+        Insert: {
+          client_mutation_id: string
+          created_at?: string
+          mutation_type: string
+          payload_hash: string
+          result: Json
+          server_sequence: number
+          user_id: string
+        }
+        Update: {
+          client_mutation_id?: string
+          created_at?: string
+          mutation_type?: string
+          payload_hash?: string
+          result?: Json
+          server_sequence?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
+      sync_user_sequence: {
+        Row: {
+          last_sequence: number
+          user_id: string
+        }
+        Insert: {
+          last_sequence?: number
+          user_id: string
+        }
+        Update: {
+          last_sequence?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_settings: {
         Row: {
           ai_messages_month_reset_at: string
@@ -1055,12 +1175,16 @@ export type Database = {
           ai_messages_used: number
           color_scheme: Database["public"]["Enums"]["color_scheme"]
           created_at: string | null
+          group_sort_order: string
           id: string
           is_admin: boolean
           language: string | null
+          left_swipe_action: string
           next_reminder_at_utc: string
           onboarding_completed_at: string | null
           reminder_send_hour: string
+          right_swipe_action: string
+          tag_sort_order: string
           time_format: string
           timezone: string | null
           updated_at: string | null
@@ -1072,12 +1196,16 @@ export type Database = {
           ai_messages_used?: number
           color_scheme?: Database["public"]["Enums"]["color_scheme"]
           created_at?: string | null
+          group_sort_order?: string
           id?: string
           is_admin?: boolean
           language?: string | null
+          left_swipe_action?: string
           next_reminder_at_utc: string
           onboarding_completed_at?: string | null
           reminder_send_hour?: string
+          right_swipe_action?: string
+          tag_sort_order?: string
           time_format?: string
           timezone?: string | null
           updated_at?: string | null
@@ -1089,12 +1217,16 @@ export type Database = {
           ai_messages_used?: number
           color_scheme?: Database["public"]["Enums"]["color_scheme"]
           created_at?: string | null
+          group_sort_order?: string
           id?: string
           is_admin?: boolean
           language?: string | null
+          left_swipe_action?: string
           next_reminder_at_utc?: string
           onboarding_completed_at?: string | null
           reminder_send_hour?: string
+          right_swipe_action?: string
+          tag_sort_order?: string
           time_format?: string
           timezone?: string | null
           updated_at?: string | null
@@ -1107,6 +1239,15 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      authenticate_api_key: {
+        Args: { p_key_id: string; p_provided_hash: string }
+        Returns: {
+          id: string
+          label: string
+          permission: string
+          user_id: string
+        }[]
+      }
       check_and_increment_ai_messages: {
         Args: { p_is_premium: boolean; p_limit: number; p_user_id: string }
         Returns: {
@@ -1170,6 +1311,7 @@ export type Database = {
           address_id: string
           address_type: string
           first_name: string
+          has_avatar: boolean
           last_name: string
           latitude: number
           longitude: number
@@ -1188,6 +1330,7 @@ export type Database = {
         }
         Returns: {
           first_name: string
+          has_avatar: boolean
           headline: string
           id: string
           last_interaction: string
@@ -1204,6 +1347,10 @@ export type Database = {
           date: string
           total: number
         }[]
+      }
+      allocate_sync_server_sequence: {
+        Args: { p_count?: number; p_user_id: string }
+        Returns: number
       }
       get_user_id_by_email: { Args: { p_email: string }; Returns: string }
       get_user_settings_is_admin: {
@@ -1226,9 +1373,11 @@ export type Database = {
       search_people_ids: {
         Args: {
           p_group_id?: string
+          p_keep_in_touch?: boolean
           p_limit?: number
           p_offset?: number
           p_query: string
+          p_tag_id?: string
           p_threshold?: number
           p_user_id: string
         }
@@ -1236,6 +1385,17 @@ export type Database = {
           id: string
           rank: number
         }[]
+      }
+      count_search_people_ids: {
+        Args: {
+          p_group_id?: string
+          p_keep_in_touch?: boolean
+          p_query: string
+          p_tag_id?: string
+          p_threshold?: number
+          p_user_id: string
+        }
+        Returns: number
       }
       send_daily_reminder_digests: {
         Args: { target_date?: string }

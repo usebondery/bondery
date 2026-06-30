@@ -11,11 +11,11 @@ import {
   IconUserPlus,
   IconUserSearch,
 } from "@tabler/icons-react";
-import { useTranslations } from "next-intl";
+import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
 import { useRouter } from "next/navigation";
 import { openAddContactModal } from "@/app/(app)/app/people/components/AddContactModal";
 import { openNewActivityModal } from "@/app/(app)/app/interactions/components/NewActivityModal";
-import { primaryLinks, secondaryLinks } from "./NavigationSidebar";
+import { useAppNavigationLinks } from "./NavigationSidebar";
 import { HOTKEYS, WEBSITE_URL } from "@/lib/config";
 import { WEBAPP_ROUTES, WEBSITE_ROUTES } from "@bondery/helpers/globals/paths";
 import { peopleSearchActions } from "./PeopleSearchSpotlight";
@@ -23,17 +23,19 @@ import { peopleSearchActions } from "./PeopleSearchSpotlight";
 export { spotlight };
 
 export function CommandPalette() {
-  const t = useTranslations("InteractionsPage");
+  const t = useTranslations("CommandPalette");
+  const tNav = useTranslations("AppNavigation");
   const router = useRouter();
+  const { primaryLinks, secondaryLinks } = useAppNavigationLinks();
 
   const navActions = [
     ...primaryLinks,
     ...secondaryLinks,
-    { href: WEBAPP_ROUTES.MYSELF, label: "Myself", icon: IconUserCircle },
+    { href: WEBAPP_ROUTES.MYSELF, label: tNav("Myself"), icon: IconUserCircle },
   ].map((link) => ({
     id: `goto-${link.href}`,
     label: link.label,
-    description: `Go to ${link.label}`,
+    description: t("GoToDescription", { label: link.label }),
     leftSection: <link.icon size={20} stroke={1.5} />,
     keywords: ["go", "navigate", "open", link.label.toLowerCase()],
     onClick: () => router.push(link.href),
@@ -45,20 +47,20 @@ export function CommandPalette() {
       clearQueryOnClose
       highlightQuery
       limit={12}
-      nothingFound="No actions found"
+      nothingFound={t("NothingFound")}
       scrollAreaProps={{ h: 320 }}
       searchProps={{
         leftSection: <IconSearch size={18} stroke={1.5} />,
-        placeholder: "Search actions or navigate…",
+        placeholder: t("SearchPlaceholder"),
       }}
       actions={[
         {
-          group: "Actions",
+          group: t("ActionsGroup"),
           actions: [
             {
               id: "log-interaction",
-              label: "Log interaction",
-              description: "Record a new meeting, call, or message",
+              label: t("LogInteraction"),
+              description: t("LogInteractionDescription"),
               leftSection: <IconCalendarPlus size={20} stroke={1.5} />,
               rightSection: <Kbd size="xs">N</Kbd>,
               keywords: ["interaction", "log", "meeting", "call", "activity", "new"],
@@ -70,8 +72,8 @@ export function CommandPalette() {
             },
             {
               id: "add-person",
-              label: "Add person",
-              description: "Create a new contact in your network",
+              label: t("AddPerson"),
+              description: t("AddPersonDescription"),
               leftSection: <IconUserPlus size={20} stroke={1.5} />,
               rightSection: <Kbd size="xs">C</Kbd>,
               keywords: ["person", "contact", "add", "create", "new"],
@@ -82,8 +84,8 @@ export function CommandPalette() {
             },
             {
               id: "find-person",
-              label: "Find person",
-              description: "Search your network by name",
+              label: t("FindPerson"),
+              description: t("FindPersonDescription"),
               leftSection: <IconUserSearch size={20} stroke={1.5} />,
               rightSection: <Kbd size="xs">F</Kbd>,
               keywords: ["find", "search", "person", "contact", "lookup"],
@@ -92,24 +94,24 @@ export function CommandPalette() {
           ],
         },
         {
-          group: "Navigate",
+          group: t("NavigateGroup"),
           actions: navActions,
         },
         {
-          group: "Help",
+          group: t("HelpGroup"),
           actions: [
             {
               id: "docs",
-              label: "Documentation",
-              description: "Read the Bondery docs",
+              label: t("Documentation"),
+              description: t("DocumentationDescription"),
               leftSection: <IconBook2 size={20} stroke={1.5} />,
               keywords: ["docs", "help", "documentation", "guide", "learn"],
               onClick: () => window.open(`${WEBSITE_URL}${WEBSITE_ROUTES.DOCS}`, "_blank"),
             },
             {
               id: "contact",
-              label: "Contact us",
-              description: "Get in touch with the Bondery team",
+              label: t("ContactUs"),
+              description: t("ContactUsDescription"),
               leftSection: <IconMail size={20} stroke={1.5} />,
               keywords: ["contact", "support", "help", "feedback", "email"],
               onClick: () => window.open(`${WEBSITE_URL}${WEBSITE_ROUTES.CONTACT}`, "_blank"),

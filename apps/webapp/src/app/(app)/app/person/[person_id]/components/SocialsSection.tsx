@@ -16,13 +16,13 @@ import { notifications } from "@mantine/notifications";
 import { memo, useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import {
   firstZodErrorMessage,
-  socialHandleSchema,
   type Contact,
   type EmailEntry,
   type PhoneEntry,
 } from "@bondery/schemas";
+import { normalizedSocialHandleSchema } from "@bondery/helpers/forms";
 import { IMaskInput } from "react-imask";
-import { useTranslations } from "next-intl";
+import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
 import {
   combinePhoneNumber,
   getTelephoneReactMaskExpression,
@@ -36,8 +36,9 @@ import {
   ModalTitle,
   successNotificationTemplate,
 } from "@bondery/mantine-next";
-import { API_ROUTES } from "@bondery/helpers/globals/paths";
-import { ContactInfoSection, type ContactInfoLabels } from "./ContactInfoSection";
+import { useUpdateContactMutation } from "@/lib/query/hooks/useContacts";
+import { ContactInfoSection } from "./ContactInfoSection";
+import { useContactInfoLabels } from "@/lib/i18n/useContactInfoLabels";
 import { InlineEditableInput } from "./InlineEditableInput";
 import { getSocialActionTooltip } from "@/lib/socialActionTooltips";
 
@@ -208,6 +209,19 @@ export function SocialsSection({
 }: SocialsSectionProps) {
   const t = useTranslations("Socials");
   const tContactInfo = useTranslations("ContactInfo");
+  const tCommon = useTranslations("WebAppCommon");
+  const fieldLabels = useMemo(
+    () => ({
+      linkedin: t("FieldLinkedin"),
+      instagram: t("FieldInstagram"),
+      facebook: t("FieldFacebook"),
+      whatsapp: t("FieldWhatsapp"),
+      signal: t("FieldSignal"),
+      website: t("FieldWebsite"),
+    }),
+    [t],
+  );
+  const updateContactMutation = useUpdateContactMutation(personId);
   const [values, setValues] = useState<SocialFieldValues>(() => getInitialValues(contact));
   const [persistedValues, setPersistedValues] = useState<SocialFieldValues>(() =>
     getPersistedValues(contact),
@@ -242,32 +256,7 @@ export function SocialsSection({
     ? `tel:${preferredPhone.prefix}${preferredPhone.value}`
     : undefined;
   const preferredEmailHref = preferredEmail ? `mailto:${preferredEmail.value}` : undefined;
-  const contactInfoLabels = useMemo<ContactInfoLabels>(
-    () => ({
-      title: tContactInfo("Title"),
-      typeHome: tContactInfo("TypeHome"),
-      typeWork: tContactInfo("TypeWork"),
-      phoneNumbers: tContactInfo("PhoneNumbers"),
-      phonePlaceholder: tContactInfo("PhonePlaceholder"),
-      typeLabel: tContactInfo("TypeLabel"),
-      callAction: tContactInfo("CallAction"),
-      sendSmsAction: tContactInfo("SendSmsAction"),
-      copyAction: tContactInfo("CopyAction"),
-      copySuccessTitle: tContactInfo("CopySuccessTitle"),
-      phoneCopiedMessage: tContactInfo("PhoneCopiedMessage"),
-      emailCopiedMessage: tContactInfo("EmailCopiedMessage"),
-      invalidEmailTitle: tContactInfo("InvalidEmailTitle"),
-      invalidEmailMessage: tContactInfo("InvalidEmailMessage"),
-      setAsPreferred: tContactInfo("SetAsPreferred"),
-      deleteAction: tContactInfo("DeleteAction"),
-      addPhone: tContactInfo("AddPhone"),
-      emailAddresses: tContactInfo("EmailAddresses"),
-      emailPlaceholder: tContactInfo("EmailPlaceholder"),
-      sendEmailAction: tContactInfo("SendEmailAction"),
-      addEmail: tContactInfo("AddEmail"),
-    }),
-    [tContactInfo],
-  );
+  const contactInfoLabels = useContactInfoLabels();
 
   const clearCloseTimeout = useCallback(() => {
     if (closeTimeoutRef.current !== null) {
@@ -338,14 +327,14 @@ export function SocialsSection({
         field === "facebook" ||
         field === "website"
       ) {
-        const parsedSocialHandle = socialHandleSchema.safeParse({
+        const parsedSocialHandle = normalizedSocialHandleSchema.safeParse({
           platform: field,
           value: inputValue,
         });
         if (!parsedSocialHandle.success) {
           notifications.show(
             errorNotificationTemplate({
-              title: "Validation Error",
+              title: t("ValidationErrorTitle"),
               description: firstZodErrorMessage(parsedSocialHandle.error),
             }),
           );
@@ -364,15 +353,7 @@ export function SocialsSection({
       }));
 
       try {
-        const response = await fetch(`${API_ROUTES.CONTACTS}/${personId}`, {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ [field]: processedValue }),
-        });
-
-        if (!response.ok) {
-          throw new Error("Failed to update");
-        }
+        await updateContactMutation.mutateAsync({ [field]: processedValue });
 
         persistedValuesRef.current[field] = processedValue;
         setPersistedValues((previous) => ({
@@ -406,15 +387,15 @@ export function SocialsSection({
 
         notifications.show(
           successNotificationTemplate({
-            title: "Success",
-            description: `${field.charAt(0).toUpperCase() + field.slice(1)} updated successfully`,
+            title: tCommon("SuccessTitle"),
+            description: t("UpdateSuccess", { field: fieldLabels[field] }),
           }),
         );
       } catch {
         notifications.show(
           errorNotificationTemplate({
-            title: "Error",
-            description: `Failed to update ${field}`,
+            title: tCommon("ErrorTitle"),
+            description: t("UpdateError", { field: fieldLabels[field] }),
           }),
         );
       } finally {
@@ -424,7 +405,7 @@ export function SocialsSection({
         }));
       }
     },
-    [personId, signalPrefix, whatsappPrefix],
+    [personId, signalPrefix, whatsappPrefix, updateContactMutation, fieldLabels, t, tCommon],
   );
 
   const getWebsiteUrl = (website: string | null): string | undefined => {
@@ -524,7 +505,7 @@ export function SocialsSection({
           field="phone"
           isOpen={openField === "phone"}
           color="blue"
-          ariaLabel="Phone"
+          ariaLabel={t("AriaPhone")}
           tooltipLabel={getSocialActionTooltip("phone", contact.firstName)}
           href={preferredPhoneHref}
           disabled={!preferredPhoneHref}
@@ -541,7 +522,7 @@ export function SocialsSection({
           field="email"
           isOpen={openField === "email"}
           color="red"
-          ariaLabel="Email"
+          ariaLabel={t("AriaEmail")}
           tooltipLabel={getSocialActionTooltip("email", contact.firstName)}
           href={preferredEmailHref}
           disabled={!preferredEmailHref}
@@ -558,7 +539,7 @@ export function SocialsSection({
           field="linkedin"
           isOpen={openField === "linkedin"}
           color="blue"
-          ariaLabel="LinkedIn"
+          ariaLabel={t("FieldLinkedin")}
           tooltipLabel={getSocialActionTooltip("linkedin", contact.firstName)}
           href={
             persistedValues.linkedin
@@ -572,7 +553,7 @@ export function SocialsSection({
           icon={<IconBrandLinkedin size={18} />}
         >
           <InlineEditableInput
-            aria-label="LinkedIn"
+            aria-label={t("FieldLinkedin")}
             placeholder={t("LinkedInPlaceholder")}
             value={values.linkedin}
             onChange={(value) => handleValueChange("linkedin", value)}
@@ -587,7 +568,7 @@ export function SocialsSection({
           field="instagram"
           isOpen={openField === "instagram"}
           color="pink"
-          ariaLabel="Instagram"
+          ariaLabel={t("FieldInstagram")}
           tooltipLabel={getSocialActionTooltip("instagram", contact.firstName)}
           href={
             persistedValues.instagram
@@ -601,7 +582,7 @@ export function SocialsSection({
           icon={<IconBrandInstagram size={18} />}
         >
           <InlineEditableInput
-            aria-label="Instagram"
+            aria-label={t("FieldInstagram")}
             placeholder={t("InstagramPlaceholder")}
             value={values.instagram}
             onChange={(value) => handleValueChange("instagram", value)}
@@ -616,7 +597,7 @@ export function SocialsSection({
           field="facebook"
           isOpen={openField === "facebook"}
           color="blue"
-          ariaLabel="Facebook"
+          ariaLabel={t("FieldFacebook")}
           tooltipLabel={getSocialActionTooltip("facebook", contact.firstName)}
           href={
             persistedValues.facebook
@@ -630,7 +611,7 @@ export function SocialsSection({
           icon={<IconBrandFacebook size={18} />}
         >
           <InlineEditableInput
-            aria-label="Facebook"
+            aria-label={t("FieldFacebook")}
             placeholder={t("FacebookPlaceholder")}
             value={values.facebook}
             onChange={(value) => handleValueChange("facebook", value)}
@@ -645,7 +626,7 @@ export function SocialsSection({
           field="whatsapp"
           isOpen={openField === "whatsapp"}
           color="green"
-          ariaLabel="WhatsApp"
+          ariaLabel={t("FieldWhatsapp")}
           tooltipLabel={getSocialActionTooltip("whatsapp", contact.firstName)}
           href={
             hasWhatsAppValue
@@ -664,7 +645,7 @@ export function SocialsSection({
               component={IMaskInput}
               mask={getTelephoneReactMaskExpression(whatsappPrefix)}
               unmask
-              aria-label="WhatsApp"
+              aria-label={t("FieldWhatsapp")}
               placeholder={t("WhatsAppPlaceholder")}
               value={values.whatsapp}
               onAccept={(value: string) =>
@@ -690,7 +671,7 @@ export function SocialsSection({
           field="signal"
           isOpen={openField === "signal"}
           color="cyan"
-          ariaLabel="Signal"
+          ariaLabel={t("FieldSignal")}
           tooltipLabel={getSocialActionTooltip("signal", contact.firstName)}
           href={
             hasSignalValue
@@ -700,7 +681,7 @@ export function SocialsSection({
           disabled={!hasSignalValue}
           onOpen={openPopover}
           onScheduleClose={scheduleClosePopover}
-          icon={<Image src="/icons/signal.svg" alt="Signal" width={18} height={18} />}
+          icon={<Image src="/icons/brands/signal.svg" alt="Signal" width={18} height={18} />}
         >
           <Group gap="xs" wrap="nowrap" align="center" style={{ width: 390 }}>
             <PrefixSelect value={signalPrefix} onChange={setSignalPrefix} />
@@ -708,7 +689,7 @@ export function SocialsSection({
               component={IMaskInput}
               mask={getTelephoneReactMaskExpression(signalPrefix)}
               unmask
-              aria-label="Signal"
+              aria-label={t("FieldSignal")}
               placeholder={t("SignalPlaceholder")}
               value={values.signal}
               onAccept={(value: string) =>
@@ -734,7 +715,7 @@ export function SocialsSection({
           field="website"
           isOpen={openField === "website"}
           color="indigo"
-          ariaLabel="Website"
+          ariaLabel={t("FieldWebsite")}
           tooltipLabel={t("OpenWebsite")}
           href={getWebsiteUrl(persistedValues.website)}
           disabled={!persistedValues.website}
@@ -744,7 +725,7 @@ export function SocialsSection({
           icon={<IconWorld size={18} />}
         >
           <InlineEditableInput
-            aria-label="Website"
+            aria-label={t("FieldWebsite")}
             placeholder={t("WebsitePlaceholder")}
             value={values.website}
             onChange={(value) => handleValueChange("website", value)}

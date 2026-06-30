@@ -13,6 +13,7 @@ import {
 import { useHotkeys } from "@mantine/hooks";
 import { useState } from "react";
 import { IconChevronsLeft, IconChevronsRight } from "@tabler/icons-react";
+import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
 import { NavigationSidebarContent } from "./NavigationSidebar";
 import { HOTKEYS } from "@/lib/config";
 import { CommandPalette } from "./CommandPalette";
@@ -41,6 +42,7 @@ export function AppShellWrapper({
   initialCollapsed,
 }: AppShellWrapperProps) {
   const [collapsed, setCollapsed] = useState(initialCollapsed);
+  const t = useTranslations("AppNavigation");
 
   function handleToggle() {
     setCollapsed((prev) => {
@@ -81,7 +83,7 @@ export function AppShellWrapper({
         label={
           <Group gap="xs" wrap="nowrap">
             <Text size="xs" inherit>
-              {collapsed ? "Expand sidebar" : "Collapse sidebar"}
+              {collapsed ? t("ExpandSidebar") : t("CollapseSidebar")}
             </Text>
             <Kbd size="xs">Ctrl+B</Kbd>
           </Group>
@@ -95,7 +97,7 @@ export function AppShellWrapper({
           size={"lg"}
           variant="default"
           onClick={handleToggle}
-          aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+          aria-label={collapsed ? t("ExpandSidebar") : t("CollapseSidebar")}
           style={{
             position: "fixed",
             left: collapsed

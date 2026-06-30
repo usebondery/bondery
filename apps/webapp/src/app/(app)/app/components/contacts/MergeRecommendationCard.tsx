@@ -4,8 +4,8 @@ import { useState } from "react";
 import { Button, Group, Paper, Text, Tooltip } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { IconCheck, IconCopy, IconUser, IconUsers, IconX } from "@tabler/icons-react";
-import { useTranslations } from "next-intl";
-import { API_ROUTES } from "@bondery/helpers/globals/paths";
+import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
+import { useDeclineMergeRecommendationMutation } from "@/lib/query/hooks/useMergeRecommendations";
 import type {
   Contact,
   MergeConflictChoice,
@@ -85,6 +85,7 @@ export function MergeRecommendationCard({
   const t = useTranslations("FixContactsPage");
   const tMerge = useTranslations("MergeWithModal");
   const [isDeclining, setIsDeclining] = useState(false);
+  const declineMutation = useDeclineMergeRecommendationMutation();
 
   const handleAccept = () => {
     const initialConflictChoices = computeNameConflictChoices(
@@ -106,13 +107,7 @@ export function MergeRecommendationCard({
   const handleDecline = async () => {
     setIsDeclining(true);
     try {
-      const response = await fetch(
-        `${API_ROUTES.CONTACTS}/merge-recommendations/${recommendation.id}/decline`,
-        { method: "PATCH" },
-      );
-      if (!response.ok) {
-        throw new Error(t("DeclineError"));
-      }
+      await declineMutation.mutateAsync(recommendation.id);
       notifications.show(
         successNotificationTemplate({
           title: t("SuccessTitle"),

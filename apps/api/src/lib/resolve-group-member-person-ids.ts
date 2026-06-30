@@ -7,7 +7,7 @@ export type ResolveGroupMemberPersonIdsExplicitBody = {
 };
 
 export type ResolveGroupMemberPersonIdsFilterBody = {
-  memberFilter: { q?: string };
+  memberFilter: { search?: string; sort?: string };
   excludePersonIds?: string[];
 };
 
@@ -59,7 +59,9 @@ export async function resolveGroupMemberPersonIds(
 
   if ("memberFilter" in body && body.memberFilter) {
     const search =
-      typeof body.memberFilter.q === "string" ? body.memberFilter.q.trim() : "";
+      typeof body.memberFilter.search === "string"
+        ? body.memberFilter.search.trim()
+        : "";
 
     if (search) {
       const { ranked, error: rpcError } = await searchPeopleIds(
@@ -68,7 +70,7 @@ export async function resolveGroupMemberPersonIds(
         search,
         10000,
         0,
-        groupId,
+        { groupId },
       );
 
       if (rpcError) {

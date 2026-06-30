@@ -15,22 +15,25 @@ import {
 import { IconCalendarPlus, IconCheck, IconClock, IconHeartHandshake } from "@tabler/icons-react";
 import { openNewActivityModal } from "@/app/(app)/app/interactions/components/NewActivityModal";
 import { notifications } from "@mantine/notifications";
-import { useCallback, useEffect, useState } from "react";
-import { useTranslations, useLocale, useFormatter } from "next-intl";
+import { useCallback, useMemo, useState } from "react";
+import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
+import { useDateFormatter as useFormatter } from "@/lib/i18n/useDateFormatter";
+import { useCurrentLocale as useLocale } from "@/app/(app)/app/components/UserLocaleProvider";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import {
   PersonChip,
   successNotificationTemplate,
   errorNotificationTemplate,
 } from "@bondery/mantine-next";
-import { API_ROUTES, WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import type { Contact } from "@bondery/schemas";
-import { revalidateContacts } from "../actions";
 import { AnchorLink } from "@bondery/mantine-next";
+import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import { computeNextDueDate } from "./keepInTouchConfig";
 import { KeepInTouchSelect } from "./KeepInTouchSelect";
 import { PageHeader } from "@/app/(app)/app/components/PageHeader";
 import { WEBSITE_URL } from "@/lib/config";
+import { useKeepInTouchQuery } from "@/lib/query/hooks/useKeepInTouch";
+import { usePatchContactMutation } from "@/lib/query/hooks/useContacts";
 
 interface KeepInTouchContact extends Contact {
   /** Computed: days until next follow-up. Negative = overdue. */
@@ -54,7 +57,6 @@ function computeDaysUntilDue(contact: Contact): number {
 }
 
 interface KeepInTouchClientProps {
-  initialContacts: Contact[];
   endDate: string;
 }
 
@@ -79,15 +81,14 @@ function endDateToWindowValue(endDate: string): string {
   return "90";
 }
 
-export function KeepInTouchClient({ initialContacts, endDate }: KeepInTouchClientProps) {
+export function KeepInTouchClient({ endDate }: KeepInTouchClientProps) {
   const t = useTranslations("KeepInTouch");
-  const tHeader = useTranslations("PageHeader");
-  const tInteractions = useTranslations("InteractionsPage");
   const locale = useLocale();
   const formatter = useFormatter();
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const patchContact = usePatchContactMutation();
   const formatDate = (date: Date) =>
     new Intl.DateTimeFormat(locale || "en-US", { dateStyle: "short" }).format(date);
 
@@ -102,21 +103,22 @@ export function KeepInTouchClient({ initialContacts, endDate }: KeepInTouchClien
     [searchParams, pathname, router],
   );
 
-  const [contacts, setContacts] = useState<KeepInTouchContact[]>(() =>
-    initialContacts
-      .map((c) => ({ ...c, daysUntilDue: computeDaysUntilDue(c) }))
-      .sort((a, b) => a.daysUntilDue - b.daysUntilDue),
-  );
-  const [loadingIds, setLoadingIds] = useState<Set<string>>(new Set());
+  const { data: keepInTouchData } = useKeepInTouchQuery();
 
-  // Re-sync when server re-fetches (e.g. after logging an interaction via the modal)
-  useEffect(() => {
-    setContacts(
-      initialContacts
-        .map((c) => ({ ...c, daysUntilDue: computeDaysUntilDue(c) }))
-        .sort((a, b) => a.daysUntilDue - b.daysUntilDue),
-    );
-  }, [initialContacts]);
+  const contacts = useMemo(() => {
+    const all = keepInTouchData?.contacts ?? [];
+    return all
+      .filter((c) => {
+        const nextDue = computeNextDueDate(c.lastInteraction, c.keepFrequencyDays);
+        if (!nextDue) return true;
+        if (nextDue <= new Date()) return true;
+        return nextDue <= new Date(endDate + "T23:59:59");
+      })
+      .map((c) => ({ ...c, daysUntilDue: computeDaysUntilDue(c) }))
+      .sort((a, b) => a.daysUntilDue - b.daysUntilDue);
+  }, [keepInTouchData?.contacts, endDate]);
+
+  const [loadingIds, setLoadingIds] = useState<Set<string>>(new Set());
 
   const markLoading = useCallback((id: string, loading: boolean) => {
     setLoadingIds((prev) => {
@@ -134,26 +136,7 @@ export function KeepInTouchClient({ initialContacts, endDate }: KeepInTouchClien
 
       try {
         const today = new Date().toISOString().split("T")[0];
-        const res = await fetch(`${API_ROUTES.CONTACTS}/${contactId}`, {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ lastInteraction: today }),
-        });
-        if (!res.ok) throw new Error("Failed to update");
-
-        setContacts((prev) =>
-          prev
-            .map((c) =>
-              c.id === contactId
-                ? {
-                    ...c,
-                    lastInteraction: today,
-                    daysUntilDue: computeDaysUntilDue({ ...c, lastInteraction: today }),
-                  }
-                : c,
-            )
-            .sort((a, b) => a.daysUntilDue - b.daysUntilDue),
-        );
+        await patchContact.mutateAsync({ id: contactId, patch: { lastInteraction: today } });
 
         notifications.show(
           successNotificationTemplate({
@@ -161,7 +144,6 @@ export function KeepInTouchClient({ initialContacts, endDate }: KeepInTouchClien
             description: t("MarkCompleteSuccess"),
           }),
         );
-        revalidateContacts();
       } catch {
         notifications.show(
           errorNotificationTemplate({
@@ -173,7 +155,7 @@ export function KeepInTouchClient({ initialContacts, endDate }: KeepInTouchClien
         markLoading(contactId, false);
       }
     },
-    [loadingIds, markLoading, t],
+    [loadingIds, markLoading, t, patchContact],
   );
 
   const handleSaveKeepFrequency = useCallback(
@@ -183,28 +165,7 @@ export function KeepInTouchClient({ initialContacts, endDate }: KeepInTouchClien
       const keepFrequencyDays = value && value !== "none" ? parseInt(value, 10) : null;
 
       try {
-        const res = await fetch(`${API_ROUTES.CONTACTS}/${contactId}`, {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ keepFrequencyDays }),
-        });
-        if (!res.ok) throw new Error("Failed to update");
-
-        setContacts((prev) =>
-          keepFrequencyDays === null
-            ? prev.filter((c) => c.id !== contactId)
-            : prev
-                .map((c) =>
-                  c.id === contactId
-                    ? {
-                        ...c,
-                        keepFrequencyDays,
-                        daysUntilDue: computeDaysUntilDue({ ...c, keepFrequencyDays }),
-                      }
-                    : c,
-                )
-                .sort((a, b) => a.daysUntilDue - b.daysUntilDue),
-        );
+        await patchContact.mutateAsync({ id: contactId, patch: { keepFrequencyDays } });
 
         notifications.show(
           successNotificationTemplate({
@@ -212,7 +173,6 @@ export function KeepInTouchClient({ initialContacts, endDate }: KeepInTouchClien
             description: "",
           }),
         );
-        revalidateContacts();
       } catch {
         notifications.show(
           errorNotificationTemplate({
@@ -224,7 +184,7 @@ export function KeepInTouchClient({ initialContacts, endDate }: KeepInTouchClien
         markLoading(contactId, false);
       }
     },
-    [loadingIds, markLoading, t],
+    [loadingIds, markLoading, t, patchContact],
   );
 
   const windowPicker = (
@@ -298,7 +258,7 @@ export function KeepInTouchClient({ initialContacts, endDate }: KeepInTouchClien
               d.getFullYear() === today.getFullYear() &&
               d.getMonth() === today.getMonth() &&
               d.getDate() === today.getDate();
-            return isToday ? "today" : formatter.relativeTime(d, { now: today });
+            return isToday ? "today" : formatter.relativeTime(d, today);
           })();
 
           return (
@@ -363,7 +323,7 @@ export function KeepInTouchClient({ initialContacts, endDate }: KeepInTouchClien
                         leftSection={<IconCalendarPlus size={14} />}
                         onClick={() =>
                           openNewActivityModal({
-                            contacts: initialContacts,
+                            contacts: keepInTouchData?.contacts ?? [],
                             initialParticipantIds: [contact.id],
                           })
                         }

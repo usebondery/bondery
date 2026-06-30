@@ -3,10 +3,11 @@
  * Handles adding, removing, and listing contacts within a group.
  */
 
-import type { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
-import { Type } from "@sinclair/typebox";
+import type { FastifyReply } from "fastify";
+import type { AppFastifyInstance } from "../../lib/fastify-types.js";
+import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
 import { getAuth } from "../../lib/auth.js";
-import { searchPeopleIds, restoreRankedOrder } from "../../lib/search.js";
+import { searchPeopleIds, restoreRankedOrder, countSearchPeopleIds } from "../../lib/search.js";
 import { attachContactExtras } from "../../lib/contact-enrichment.js";
 import {
   resolveContactPersonIds,
@@ -16,44 +17,19 @@ import {
   resolveGroupMemberPersonIds,
   ResolveGroupMemberPersonIdsError,
 } from "../../lib/resolve-group-member-person-ids.js";
+import { CONTACT_SELECT, extractAvatarOptions } from "../../lib/queries.js";
+import { peopleListQuerySchema, uuidParamSchema } from "@bondery/schemas/http";
 import {
-  UuidParam,
-  ContactsFilterSchema,
-  ContactSortEnum,
-  CONTACT_SELECT,
-  AvatarQualityEnum,
-  AvatarSizeEnum,
-  extractAvatarOptions,
-} from "../../lib/schemas.js";
-
-const GroupContactsQuery = Type.Object({
-  limit: Type.Optional(Type.Integer({ minimum: 1, maximum: 200, default: 50 })),
-  offset: Type.Optional(Type.Integer({ minimum: 0, default: 0 })),
-  q: Type.Optional(Type.String()),
-  sort: Type.Optional(ContactSortEnum),
-  avatarQuality: Type.Optional(AvatarQualityEnum),
-  avatarSize: Type.Optional(AvatarSizeEnum),
-});
-
-const GroupAddContactsBody = Type.Union([
-  Type.Object({
-    personIds: Type.Array(Type.String(), { minItems: 1 }),
-  }),
-  Type.Object({
-    contactFilter: ContactsFilterSchema,
-    excludePersonIds: Type.Optional(Type.Array(Type.String())),
-  }),
-]);
-
-const GroupRemoveContactsBody = Type.Union([
-  Type.Object({
-    personIds: Type.Array(Type.String(), { minItems: 1 }),
-  }),
-  Type.Object({
-    memberFilter: ContactsFilterSchema,
-    excludePersonIds: Type.Optional(Type.Array(Type.String())),
-  }),
-]);
+  addContactsToGroupRequestSchema,
+  removeGroupMembersRequestSchema,
+} from "@bondery/schemas";
+import {
+  buildPaginatedResponse,
+  buildPaginationMeta,
+  normalizeSearch,
+  parsePagination,
+  resolveSort,
+} from "../../lib/pagination.js";
 
 const EXISTING_MEMBERSHIP_LOOKUP_CHUNK_SIZE = 500;
 
@@ -84,27 +60,26 @@ async function findExistingGroupMemberIds(
   return existingIds;
 }
 
-export function registerGroupContactRoutes(fastify: FastifyInstance): void {
+export function registerGroupContactRoutes(fastify: AppFastifyInstance): void {
   /**
    * GET /api/groups/:id/contacts - Get paginated contacts in a group
    */
   fastify.get(
     "/:id/contacts",
-    { schema: { params: UuidParam, querystring: GroupContactsQuery } },
-    async (
-      request: FastifyRequest<{
-        Params: { id: string };
-        Querystring: typeof GroupContactsQuery.static;
-      }>,
-      reply: FastifyReply,
-    ) => {
+    {
+      schema: {
+        params: uuidParamSchema,
+        querystring: peopleListQuerySchema,
+      } satisfies FastifyZodOpenApiSchema,
+    },
+    async (request, reply) => {
       const { client, user } = getAuth(request);
       const { id: groupId } = request.params;
-      const query = request.query || {};
+      const query = request.query;
 
-      const limit = Math.min(query.limit ?? 50, 200);
-      const offset = query.offset ?? 0;
-      const search = typeof query.q === "string" ? query.q.trim() : "";
+      const { limit, offset } = parsePagination(query);
+      const search = normalizeSearch(query.search);
+      const effectiveSort = resolveSort(query.sort, "nameAsc");
       const avatarOptions = extractAvatarOptions(query);
 
       // First verify the group exists
@@ -126,28 +101,33 @@ export function registerGroupContactRoutes(fastify: FastifyInstance): void {
       let totalCount: number;
 
       if (search) {
-        const { ranked, error: rpcError } = await searchPeopleIds(
-          client,
-          user.id,
-          search,
-          limit,
-          offset,
-          groupId,
-        );
+        const [searchResult, countResult] = await Promise.all([
+          searchPeopleIds(client, user.id, search, limit, offset, { groupId }),
+          countSearchPeopleIds(client, user.id, search, { groupId }),
+        ]);
 
-        if (rpcError) {
+        if (searchResult.error) {
           fastify.log.error(
-            { rpcError },
+            { rpcError: searchResult.error },
             "Error in fuzzy search RPC for group contacts",
           );
-          return reply.status(500).send({ error: rpcError });
+          return reply.status(500).send({ error: searchResult.error });
         }
 
-        if (!ranked || ranked.length === 0) {
+        if (countResult.error) {
+          fastify.log.error(
+            { rpcError: countResult.error },
+            "Error in fuzzy search count RPC for group contacts",
+          );
+          return reply.status(500).send({ error: countResult.error });
+        }
+
+        totalCount = countResult.count ?? 0;
+
+        if (!searchResult.ranked || searchResult.ranked.length === 0) {
           contacts = [];
-          totalCount = 0;
         } else {
-          const rankedIds = ranked.map((r) => r.id);
+          const rankedIds = searchResult.ranked.map((r) => r.id);
 
           const { data: fetchedContacts, error: fetchError } = await client
             .from("people")
@@ -163,7 +143,6 @@ export function registerGroupContactRoutes(fastify: FastifyInstance): void {
           }
 
           contacts = restoreRankedOrder(fetchedContacts || [], rankedIds);
-          totalCount = contacts.length;
         }
       } else {
         // ── Standard list path (no search) ────────────────────────────────
@@ -240,14 +219,6 @@ export function registerGroupContactRoutes(fastify: FastifyInstance): void {
         totalCount = typeof count === "number" ? count : contacts.length;
       }
 
-      if (contacts.length === 0) {
-        return {
-          group: { id: group.id, label: group.label },
-          contacts: [],
-          totalCount,
-        };
-      }
-
       let enrichedContacts = contacts;
       try {
         enrichedContacts = await attachContactExtras(
@@ -276,12 +247,18 @@ export function registerGroupContactRoutes(fastify: FastifyInstance): void {
         }));
       }
 
-      return {
-        group: { id: group.id, label: group.label },
-        contacts: enrichedContacts,
-        totalCount,
+      const pagination = buildPaginationMeta({
         limit,
         offset,
+        totalCount,
+        itemCount: enrichedContacts.length,
+        sort: effectiveSort,
+        search,
+      });
+
+      return {
+        group: { id: group.id, label: group.label },
+        ...buildPaginatedResponse("contacts", enrichedContacts, pagination),
       };
     },
   );
@@ -291,14 +268,13 @@ export function registerGroupContactRoutes(fastify: FastifyInstance): void {
    */
   fastify.post(
     "/:id/contacts",
-    { schema: { params: UuidParam, body: GroupAddContactsBody } },
-    async (
-      request: FastifyRequest<{
-        Params: { id: string };
-        Body: Record<string, unknown>;
-      }>,
-      reply: FastifyReply,
-    ) => {
+    {
+      schema: {
+        params: uuidParamSchema,
+        body: addContactsToGroupRequestSchema,
+      } satisfies FastifyZodOpenApiSchema,
+    },
+    async (request, reply) => {
       const { client, user } = getAuth(request);
       const { id: groupId } = request.params;
       const body = request.body;
@@ -325,7 +301,7 @@ export function registerGroupContactRoutes(fastify: FastifyInstance): void {
           );
         } else if ("contactFilter" in body && body.contactFilter) {
           personIds = await resolveContactPersonIds(client, user.id, {
-            contactFilter: body.contactFilter as { q?: string },
+            contactFilter: body.contactFilter as { search?: string; sort?: string },
             excludePersonIds: Array.isArray(body.excludePersonIds)
               ? body.excludePersonIds
               : undefined,
@@ -406,14 +382,13 @@ export function registerGroupContactRoutes(fastify: FastifyInstance): void {
    */
   fastify.delete(
     "/:id/contacts",
-    { schema: { params: UuidParam, body: GroupRemoveContactsBody } },
-    async (
-      request: FastifyRequest<{
-        Params: { id: string };
-        Body: Record<string, unknown>;
-      }>,
-      reply: FastifyReply,
-    ) => {
+    {
+      schema: {
+        params: uuidParamSchema,
+        body: removeGroupMembersRequestSchema,
+      } satisfies FastifyZodOpenApiSchema,
+    },
+    async (request, reply) => {
       const { client, user } = getAuth(request);
       const { id: groupId } = request.params;
       const body = request.body;
@@ -435,7 +410,7 @@ export function registerGroupContactRoutes(fastify: FastifyInstance): void {
           );
         } else if ("memberFilter" in body && body.memberFilter) {
           personIds = await resolveGroupMemberPersonIds(client, user.id, groupId, {
-            memberFilter: body.memberFilter as { q?: string },
+            memberFilter: body.memberFilter as { search?: string; sort?: string },
             excludePersonIds: Array.isArray(body.excludePersonIds)
               ? body.excludePersonIds
               : undefined,

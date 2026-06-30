@@ -3,8 +3,9 @@
  * Updates a contact with scraped LinkedIn data (name, bio, work history, education, avatar).
  */
 
-import type { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
-import { Type } from "@sinclair/typebox";
+import type { FastifyReply } from "fastify";
+import type { AppFastifyInstance } from "../../../lib/fastify-types.js";
+import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
 import { getAuth } from "../../../lib/auth.js";
 import {
   toPostgresDate,
@@ -18,27 +19,11 @@ import type {
   ScrapedWorkHistoryEntry,
   ScrapedEducationEntry,
 } from "@bondery/schemas";
-import {
-  UuidParam,
-  NullableString,
-  ScrapedWorkHistoryEntrySchema,
-  ScrapedEducationEntrySchema,
-} from "../../../lib/schemas.js";
+import { enrichContactRequestSchema } from "@bondery/schemas";
+import { uuidParamSchema } from "@bondery/schemas/http";
 import { ENRICH_TIER } from "../../../lib/rate-limit.js";
 
-const EnrichContactBody = Type.Object({
-  firstName: Type.Optional(Type.String()),
-  middleName: Type.Optional(NullableString),
-  lastName: Type.Optional(NullableString),
-  profileImageUrl: Type.Optional(NullableString),
-  headline: Type.Optional(NullableString),
-  location: Type.Optional(NullableString),
-  linkedinBio: Type.Optional(NullableString),
-  workHistory: Type.Optional(Type.Array(ScrapedWorkHistoryEntrySchema)),
-  educationHistory: Type.Optional(Type.Array(ScrapedEducationEntrySchema)),
-});
-
-export function registerEnrichRoutes(fastify: FastifyInstance): void {
+export function registerEnrichRoutes(fastify: AppFastifyInstance): void {
   /**
    * POST /api/contacts/:id/enrich - Update a contact with scraped LinkedIn data.
    *
@@ -49,16 +34,13 @@ export function registerEnrichRoutes(fastify: FastifyInstance): void {
   fastify.post(
     "/:id/enrich",
     {
-      schema: { params: UuidParam, body: EnrichContactBody },
+      schema: {
+        params: uuidParamSchema,
+        body: enrichContactRequestSchema,
+      } satisfies FastifyZodOpenApiSchema,
       config: { rateLimit: ENRICH_TIER },
     },
-    async (
-      request: FastifyRequest<{
-        Params: typeof UuidParam.static;
-        Body: typeof EnrichContactBody.static;
-      }>,
-      reply: FastifyReply,
-    ) => {
+    async (request, reply) => {
       const { client, user } = getAuth(request);
       const { id: personId } = request.params;
       const {

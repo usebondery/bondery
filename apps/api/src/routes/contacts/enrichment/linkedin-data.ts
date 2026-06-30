@@ -3,46 +3,29 @@
  * Upsert and retrieve scraped LinkedIn work/education history.
  */
 
-import type { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
-import { Type } from "@sinclair/typebox";
+import type { FastifyReply } from "fastify";
+import type { AppFastifyInstance } from "../../../lib/fastify-types.js";
+import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
 import { getAuth } from "../../../lib/auth.js";
-import { UuidParam } from "../../../lib/schemas.js";
+import { uuidParamSchema } from "@bondery/schemas/http";
+import { linkedInDataRequestSchema } from "@bondery/schemas";
 import { linkedinCompanyUrl } from "@bondery/helpers";
 import { ENRICH_TIER } from "../../../lib/rate-limit.js";
 
-const LinkedInDataBody = Type.Object({
-  workHistory: Type.Optional(
-    Type.Array(
-      Type.Object({
-        title: Type.Optional(Type.String()),
-        companyName: Type.String(),
-        companyLinkedinId: Type.Optional(Type.String()),
-        startDate: Type.Optional(Type.String()),
-        endDate: Type.Optional(Type.String()),
-        employmentType: Type.Optional(Type.String()),
-        location: Type.Optional(Type.String()),
-      }),
-    ),
-  ),
-});
-
-export function registerLinkedInDataRoutes(fastify: FastifyInstance): void {
+export function registerLinkedInDataRoutes(fastify: AppFastifyInstance): void {
   /**
    * POST /api/contacts/:id/linkedin-data - Upsert scraped LinkedIn work history
    */
   fastify.post(
     "/:id/linkedin-data",
     {
-      schema: { params: UuidParam, body: LinkedInDataBody },
+      schema: {
+        params: uuidParamSchema,
+        body: linkedInDataRequestSchema,
+      } satisfies FastifyZodOpenApiSchema,
       config: { rateLimit: ENRICH_TIER },
     },
-    async (
-      request: FastifyRequest<{
-        Params: typeof UuidParam.static;
-        Body: typeof LinkedInDataBody.static;
-      }>,
-      reply: FastifyReply,
-    ) => {
+    async (request, reply) => {
       const { client, user } = getAuth(request);
       const { id: personId } = request.params;
       const { workHistory = [] } = request.body;
@@ -122,8 +105,12 @@ export function registerLinkedInDataRoutes(fastify: FastifyInstance): void {
    */
   fastify.get(
     "/:id/linkedin-data",
-    { schema: { params: UuidParam } },
-    async (request: FastifyRequest<{ Params: typeof UuidParam.static }>, reply: FastifyReply) => {
+    {
+      schema: {
+        params: uuidParamSchema,
+      } satisfies FastifyZodOpenApiSchema,
+    },
+    async (request, reply) => {
       const { client, user } = getAuth(request);
       const { id: personId } = request.params;
 

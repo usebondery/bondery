@@ -1,3 +1,7 @@
+---
+icon: code-merge
+---
+
 # Merge contacts
 
 Over time it is easy to end up with duplicate contacts — one created manually and one imported from LinkedIn or Instagram, for example. The merge feature lets you consolidate them into a single record without losing any data.

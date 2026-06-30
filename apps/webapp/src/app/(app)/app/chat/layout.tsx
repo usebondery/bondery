@@ -1,45 +1,41 @@
-import { getAuthHeaders } from "@/lib/authHeaders";
-import { API_URL } from "@/lib/config";
-import { API_ROUTES } from "@bondery/helpers/globals/paths";
+import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { ChatSessionSidebar } from "./ChatSessionSidebar";
 import { ChatSessionsProvider } from "./ChatSessionsContext";
-import type { ChatSession } from "@bondery/schemas";
 import { Box } from "@mantine/core";
+import { createChatSessionsQueryFn } from "@/lib/query/fetchers/serverQueryFns";
+import { chatKeys } from "@/lib/query/keys";
+import { getQueryClient } from "@/lib/query/client";
 
 /**
- * Chat layout — fetches sessions once on the server, then hands them to the
- * client-side ChatSessionsProvider so mutations (add/remove) are instant.
+ * Chat layout — prefetches sessions into TanStack Query, then renders the sidebar.
  */
 export default async function ChatLayout({ children }: { children: React.ReactNode }) {
-  let sessions: ChatSession[] = [];
+  const queryClient = getQueryClient();
 
   try {
-    const headers = await getAuthHeaders();
-    const response = await fetch(`${API_URL}${API_ROUTES.CHAT_SESSIONS}`, {
-      headers,
-      cache: "no-store",
+    await queryClient.prefetchQuery({
+      queryKey: chatKeys.sessions(),
+      queryFn: createChatSessionsQueryFn(),
     });
-    if (response.ok) {
-      const result = await response.json();
-      sessions = result?.data ?? [];
-    }
   } catch {}
 
   return (
-    <ChatSessionsProvider initialSessions={sessions}>
-      <Box
-        style={{
-          display: "flex",
-          height: "100dvh",
-          marginTop: "calc(-1 * var(--mantine-spacing-md))",
-          marginBottom: "calc(-1 * var(--mantine-spacing-md))",
-          marginLeft: "calc(-1 * var(--mantine-spacing-md))",
-          overflow: "hidden",
-        }}
-      >
-        <ChatSessionSidebar />
-        <Box style={{ flex: 1, minWidth: 0, overflowY: "auto" }}>{children}</Box>
-      </Box>
-    </ChatSessionsProvider>
+    <HydrationBoundary state={dehydrate(queryClient)}>
+      <ChatSessionsProvider>
+        <Box
+          style={{
+            display: "flex",
+            height: "100dvh",
+            marginTop: "calc(-1 * var(--mantine-spacing-md))",
+            marginBottom: "calc(-1 * var(--mantine-spacing-md))",
+            marginLeft: "calc(-1 * var(--mantine-spacing-md))",
+            overflow: "hidden",
+          }}
+        >
+          <ChatSessionSidebar />
+          <Box style={{ flex: 1, minWidth: 0, overflowY: "auto" }}>{children}</Box>
+        </Box>
+      </ChatSessionsProvider>
+    </HydrationBoundary>
   );
 }

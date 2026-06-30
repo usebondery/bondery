@@ -1,14 +1,14 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { Pressable, ScrollView, StyleSheet } from "react-native";
 import { useRouter } from "expo-router";
 import { IconPlus } from "@tabler/icons-react-native";
-import type { Group, GroupWithCount } from "@bondery/schemas";
-import { fetchGroups, updateSettings } from "../../lib/api/client";
+import type { GroupWithCount } from "@bondery/schemas";
+import { updateSettings } from "../../lib/api/client";
+import { useGroups } from "../../lib/sync/hooks/useSyncQuery";
 import type {
   GroupSortOrder,
   MobilePreferencesState,
 } from "../../lib/preferences/useMobilePreferences";
-import { useGroupsStore } from "../../lib/store";
 import { useMobilePreferences } from "../../lib/preferences/useMobilePreferences";
 import { StackNavBar } from "../../components/chrome";
 import { ContactsGroupsHeader } from "../contacts/components/ContactsGroupsHeader";
@@ -26,11 +26,7 @@ export function SettingsGroupSortScreen() {
   const router = useRouter();
   const t = useMobileTranslations();
   const colors = useMobileThemeColors();
-  const groupsById = useGroupsStore((state) => state.byId);
-  const upsertGroup = useGroupsStore((state) => state.upsertGroup);
-  const upsertGroups = useGroupsStore((state) => state.upsertGroups);
-  const removeGroup = useGroupsStore((state) => state.removeGroup);
-  const [isLoading, setIsLoading] = useState(true);
+  const { data: syncedGroups, isInitialSync, refresh: refreshGroups } = useGroups();
   const [loadError, setLoadError] = useState<string | null>(null);
   const [isCreateOpen, setCreateOpen] = useState(false);
   const [editingGroup, setEditingGroup] = useState<GroupWithCount | null>(null);
@@ -45,37 +41,20 @@ export function SettingsGroupSortScreen() {
     (state: MobilePreferencesState) => state.setGroupSortOrder,
   );
 
-  const reloadGroups = useCallback(async () => {
-    setIsLoading(true);
-    setLoadError(null);
+  const isLoading = isInitialSync && syncedGroups.length === 0;
 
-    try {
-      const response = await fetchGroups();
-      upsertGroups(response.groups || []);
-    } catch (err) {
-      setLoadError(
-        err instanceof Error
-          ? err.message
-          : t("MobileApp.Settings.GroupsLoadErrorDescription"),
-      );
-    } finally {
-      setIsLoading(false);
-    }
-  }, [t, upsertGroups]);
+  const reloadGroups = useCallback(() => {
+    refreshGroups();
+  }, [refreshGroups]);
 
-  useEffect(() => {
-    void reloadGroups();
-  }, [reloadGroups]);
-
-  const groups = useMemo(() => Object.values(groupsById), [groupsById]);
   const previewGroups = useMemo(
-    () => sortGroups(groups, groupSortOrder, groupLastOpenedAt),
-    [groupLastOpenedAt, groupSortOrder, groups],
+    () => sortGroups(syncedGroups, groupSortOrder, groupLastOpenedAt),
+    [groupLastOpenedAt, groupSortOrder, syncedGroups],
   );
 
   const manageGroups = useMemo(
-    () => sortGroups(groups, "alpha-asc", groupLastOpenedAt),
-    [groupLastOpenedAt, groups],
+    () => sortGroups(syncedGroups, "alpha-asc", groupLastOpenedAt),
+    [groupLastOpenedAt, syncedGroups],
   );
 
   const sortOptions: Array<{ value: GroupSortOrder; label: string }> = [
@@ -98,37 +77,22 @@ export function SettingsGroupSortScreen() {
     void updateSettings({ groupSortOrder: nextOrder });
   };
 
-  const handleGroupCreated = useCallback((group: Group) => {
-    if (!group?.id || !group.label) {
-      return;
-    }
+  const handleGroupCreated = useCallback(() => {
+    refreshGroups();
+  }, [refreshGroups]);
 
-    upsertGroup(group);
-  }, [upsertGroup]);
-
-  const handleGroupSaved = useCallback(
-    (group: Group) => {
-      if (!editingGroup) {
-        return;
-      }
-
-      upsertGroup({ ...group, id: editingGroup.id });
-      setEditingGroup(null);
-    },
-    [editingGroup, upsertGroup],
-  );
+  const handleGroupSaved = useCallback(() => {
+    setEditingGroup(null);
+    refreshGroups();
+  }, [refreshGroups]);
 
   const handleGroupDeleted = useCallback(() => {
-    if (!editingGroup) {
-      return;
-    }
-
-    removeGroup(editingGroup.id);
     setEditingGroup(null);
-  }, [editingGroup, removeGroup]);
+    refreshGroups();
+  }, [refreshGroups]);
 
   const previewCaption =
-    groups.length === 0 && !isLoading && !loadError
+    syncedGroups.length === 0 && !isLoading && !loadError
       ? t("MobileApp.Settings.PreviewHintGroupsEmpty")
       : t("MobileApp.Settings.PreviewHintGroups");
 

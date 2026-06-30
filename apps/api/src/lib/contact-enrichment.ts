@@ -10,8 +10,8 @@ import type {
 import { attachContactChannels } from "../routes/contacts/channels.js";
 import { attachContactAddresses } from "../routes/contacts/addresses.js";
 import { attachContactSocials } from "./socials.js";
-import { CONTACT_SELECT, type ContactWithId } from "./schemas.js";
-import { buildContactAvatarUrl } from "./supabase.js";
+import { CONTACT_SELECT, type ContactWithId } from "./queries.js";
+import { resolveContactAvatarUrl } from "./supabase.js";
 
 type ChannelsAndSocialExtras = {
   phones: PhoneEntry[];
@@ -139,12 +139,15 @@ export async function attachContactExtras<T extends ContactWithId>(
     const social = socialMap.get(contact.id);
     const base: T & ChannelsAndSocialExtras = {
       ...contact,
-      avatar: buildContactAvatarUrl(
+      avatar: resolveContactAvatarUrl(
         client,
         userId,
-        contact.id,
+        {
+          id: contact.id,
+          hasAvatar: contact.hasAvatar,
+          updatedAt: contact.updatedAt,
+        },
         options?.avatarOptions,
-        contact.updatedAt,
       ),
       linkedin: social?.linkedin ?? null,
       instagram: social?.instagram ?? null,

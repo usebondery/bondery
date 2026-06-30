@@ -3,7 +3,8 @@
 import { Avatar, Box, List, ListItem, Paper, Text } from "@mantine/core";
 import { IconMessageChatbot } from "@tabler/icons-react";
 import { type UIMessage } from "ai";
-import { useFormatter, useTranslations } from "next-intl";
+import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
+import { useDateFormatter as useFormatter } from "@/lib/i18n/useDateFormatter";
 import { type ReactNode } from "react";
 import { AnchorLink, CopyButton } from "@bondery/mantine-next";
 import { parseInlineTokens, type InlineToken } from "@bondery/helpers";

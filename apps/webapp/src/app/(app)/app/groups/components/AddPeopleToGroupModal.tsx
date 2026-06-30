@@ -1,12 +1,11 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { Stack, Text, Loader, Center } from "@mantine/core";
 import { modals } from "@mantine/modals";
 import { notifications } from "@mantine/notifications";
 import { IconUserPlus } from "@tabler/icons-react";
-import { useTranslations } from "next-intl";
+import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
 import {
   PeopleMultiPickerInput,
   errorNotificationTemplate,
@@ -16,11 +15,13 @@ import {
   successNotificationTemplate,
 } from "@bondery/mantine-next";
 import type { Contact } from "@bondery/schemas";
-import { API_ROUTES } from "@bondery/helpers/globals/paths";
-import { revalidateGroups } from "../../actions";
-import { buildAvatarQueryString } from "@/lib/avatarParams";
 import { DEBOUNCE_MS } from "@/lib/config";
 import { searchContacts } from "@/lib/searchContacts";
+import { useContactsListQuery } from "@/lib/query/hooks/useContacts";
+import {
+  useAddContactsToGroupMutation,
+  useGroupMembersQuery,
+} from "@/lib/query/hooks/useGroups";
 
 interface AddPeopleToGroupModalProps {
   groupId: string;
@@ -57,13 +58,37 @@ export function openAddPeopleToGroupModal(props: AddPeopleToGroupModalProps) {
 }
 
 function AddPeopleToGroupForm({ groupId, groupLabel, modalId }: AddPeopleToGroupFormProps) {
-  const router = useRouter();
   const t = useTranslations("GroupsPage");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const [contacts, setContacts] = useState<Contact[]>([]);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const existingMemberIdsRef = useRef<Set<string>>(new Set());
+  const { data: allContactsData, isLoading: isLoadingAll, isError: isAllContactsError } =
+    useContactsListQuery({ limit: 200 });
+  const { data: groupMembersData, isLoading: isLoadingMembers, isError: isMembersError } =
+    useGroupMembersQuery(groupId, { limit: 200, offset: 0 });
+  const addContactsMutation = useAddContactsToGroupMutation(groupId);
+
+  const contacts = useMemo(() => {
+    if (!allContactsData?.contacts || !groupMembersData?.contacts) {
+      return [];
+    }
+    const existingIds = new Set(groupMembersData.contacts.map((contact) => contact.id));
+    existingMemberIdsRef.current = existingIds;
+    return allContactsData.contacts.filter((contact) => !existingIds.has(contact.id));
+  }, [allContactsData?.contacts, groupMembersData?.contacts]);
+
+  const isLoading = isLoadingAll || isLoadingMembers;
+
+  useEffect(() => {
+    if (isAllContactsError || isMembersError) {
+      notifications.show(
+        errorNotificationTemplate({
+          title: t("AddPeopleModal.ErrorTitle"),
+          description: t("AddPeopleModal.LoadError"),
+        }),
+      );
+    }
+  }, [isAllContactsError, isMembersError, t]);
 
   useEffect(() => {
     modals.updateModal({
@@ -73,39 +98,6 @@ function AddPeopleToGroupForm({ groupId, groupLabel, modalId }: AddPeopleToGroup
       withCloseButton: !isSubmitting,
     });
   }, [isSubmitting, modalId]);
-
-  useEffect(() => {
-    async function fetchAvailableContacts() {
-      try {
-        const [allContactsRes, groupContactsRes] = await Promise.all([
-          fetch(`${API_ROUTES.CONTACTS}?limit=200&${buildAvatarQueryString("small")}`),
-          fetch(`${API_ROUTES.GROUPS}/${groupId}/contacts?${buildAvatarQueryString("small")}`),
-        ]);
-
-        if (!allContactsRes.ok || !groupContactsRes.ok) {
-          throw new Error("Failed to fetch contacts");
-        }
-
-        const allContactsData = (await allContactsRes.json()) as { contacts: Contact[] };
-        const groupContactsData = (await groupContactsRes.json()) as { contacts: Contact[] };
-
-        const existingIds = new Set(groupContactsData.contacts.map((contact) => contact.id));
-        existingMemberIdsRef.current = existingIds;
-        setContacts(allContactsData.contacts.filter((contact) => !existingIds.has(contact.id)));
-      } catch (error) {
-        notifications.show(
-          errorNotificationTemplate({
-            title: t("AddPeopleModal.ErrorTitle"),
-            description: t("AddPeopleModal.LoadError"),
-          }),
-        );
-      } finally {
-        setIsLoading(false);
-      }
-    }
-
-    fetchAvailableContacts();
-  }, [groupId]);
 
   const handleSearch = useCallback(async (query: string): Promise<Contact[]> => {
     const results = await searchContacts(query);
@@ -132,23 +124,7 @@ function AddPeopleToGroupForm({ groupId, groupLabel, modalId }: AddPeopleToGroup
     });
 
     try {
-      const res = await fetch(`${API_ROUTES.GROUPS}/${groupId}/contacts`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          personIds: selectedIds,
-        }),
-      });
-
-      if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.error || t("AddPeopleModal.AddError"));
-      }
-
-      const result = (await res.json().catch(() => ({}))) as {
-        addedCount?: number;
-        skippedCount?: number;
-      };
+      const result = await addContactsMutation.mutateAsync(selectedIds);
       const addedCount = result.addedCount ?? selectedIds.length;
       const skippedCount = result.skippedCount ?? 0;
 
@@ -177,8 +153,6 @@ function AddPeopleToGroupForm({ groupId, groupLabel, modalId }: AddPeopleToGroup
       );
 
       modals.close(modalId);
-      await revalidateGroups();
-      router.refresh();
     } catch (error) {
       notifications.hide(loadingNotification);
 
@@ -225,7 +199,7 @@ function AddPeopleToGroupForm({ groupId, groupLabel, modalId }: AddPeopleToGroup
   return (
     <Stack gap="md">
       <PeopleMultiPickerInput
-        contacts={contacts}
+        contacts={contacts as Contact[]}
         selectedIds={selectedIds}
         onChange={setSelectedIds}
         placeholder={t("AddPeopleModal.AddContactsPlaceholder")}

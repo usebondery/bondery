@@ -1,8 +1,7 @@
 "use client";
 
 import { Spoiler, Stack, Text } from "@mantine/core";
-import { useTranslations } from "next-intl";
-
+import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
 interface LinkedInBioSectionProps {
   bio: string;
 }

@@ -5,8 +5,7 @@ import { Badge, Popover } from "@mantine/core";
 import { DatePicker } from "@mantine/dates";
 import { IconCalendar } from "@tabler/icons-react";
 import { NodeViewWrapper, type NodeViewProps } from "@tiptap/react";
-import { useFormatter } from "next-intl";
-
+import { useDateFormatter as useFormatter } from "@/lib/i18n/useDateFormatter";
 type InlineDateDisplayProps =
   | (NodeViewProps & { isDisplayOnly?: never })
   | { isDisplayOnly: true; timestamp: string };

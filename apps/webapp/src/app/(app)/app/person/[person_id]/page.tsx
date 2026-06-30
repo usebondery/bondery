@@ -10,13 +10,12 @@ import type {
   EducationEntry,
 } from "@bondery/schemas";
 import { getMergeRecommendationsData } from "@/app/(app)/app/fix/getMergeRecommendationsData";
-import PersonClient from "./PersonClient";
-import { getAuthHeaders } from "@/lib/authHeaders";
+import { PersonLoader } from "./PersonLoader";
+import { serverApiFetch } from "@/lib/api/server";
 import { API_ROUTES, formatMetadataTitle } from "@bondery/helpers/globals/paths";
 import { PageWrapper } from "@/app/(app)/app/components/PageWrapper";
 import { ErrorPageHeader } from "@/app/(app)/app/components/ErrorPageHeader";
 import type { Group, Tag } from "@bondery/schemas";
-import { API_URL } from "@/lib/config";
 import { buildAvatarQueryString } from "@/lib/avatarParams";
 
 export async function generateMetadata({
@@ -26,10 +25,8 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   try {
     const { person_id: personId } = await params;
-    const headers = await getAuthHeaders();
-    const res = await fetch(`${API_URL}${API_ROUTES.CONTACTS}/${personId}`, {
+    const res = await serverApiFetch(`${API_ROUTES.CONTACTS}/${personId}`, undefined, {
       next: { tags: ["contacts"] },
-      headers,
     });
     if (!res.ok) return { title: "Person" };
     const data = await res.json();
@@ -44,74 +41,59 @@ export async function generateMetadata({
 }
 
 async function getPersonData(personId: string) {
-  const headers = await getAuthHeaders();
-
-  const contactPromise = fetch(
-    `${API_URL}${API_ROUTES.CONTACTS}/${personId}?${buildAvatarQueryString("large")}`,
-    {
-      next: { tags: ["contacts"] },
-      headers,
-    },
+  const contactPromise = serverApiFetch(
+    `${API_ROUTES.CONTACTS}/${personId}?${buildAvatarQueryString("large")}`,
+    undefined,
+    { next: { tags: ["contacts"] } },
   );
 
-  const groupsPromise = fetch(`${API_URL}${API_ROUTES.GROUPS}`, {
+  const groupsPromise = serverApiFetch(API_ROUTES.GROUPS, undefined, {
     next: { tags: ["groups"] },
-    headers,
   });
 
-  const membershipPromise = fetch(`${API_URL}${API_ROUTES.CONTACTS}/${personId}/groups`, {
+  const membershipPromise = serverApiFetch(`${API_ROUTES.CONTACTS}/${personId}/groups`, undefined, {
     next: { tags: ["groups", "contacts"] },
-    headers,
   });
 
-  const interactionsPromise = fetch(
-    `${API_URL}${API_ROUTES.INTERACTIONS}?${buildAvatarQueryString("medium")}`,
-    {
-      next: { tags: ["interactions"] },
-      headers,
-    },
+  const interactionsPromise = serverApiFetch(
+    `${API_ROUTES.INTERACTIONS}?${buildAvatarQueryString("medium")}`,
+    undefined,
+    { next: { tags: ["interactions"] } },
   );
 
-  const relationshipsPromise = fetch(
-    `${API_URL}${API_ROUTES.CONTACTS}/${personId}/relationships?${buildAvatarQueryString("small")}`,
-    {
-      next: { tags: ["relationships", "contacts"] },
-      headers,
-    },
+  const relationshipsPromise = serverApiFetch(
+    `${API_ROUTES.CONTACTS}/${personId}/relationships?${buildAvatarQueryString("small")}`,
+    undefined,
+    { next: { tags: ["relationships", "contacts"] } },
   );
 
-  const importantDatesPromise = fetch(
-    `${API_URL}${API_ROUTES.CONTACTS}/${personId}/important-dates`,
-    {
-      next: { tags: ["important-dates", "contacts"] },
-      headers,
-    },
+  const importantDatesPromise = serverApiFetch(
+    `${API_ROUTES.CONTACTS}/${personId}/important-dates`,
+    undefined,
+    { next: { tags: ["important-dates", "contacts"] } },
   );
 
-  const contactsPromise = fetch(
-    `${API_URL}${API_ROUTES.CONTACTS}?${buildAvatarQueryString("small")}`,
-    {
-      next: { tags: ["contacts"] },
-      headers,
-    },
+  const contactsPromise = serverApiFetch(
+    `${API_ROUTES.CONTACTS}?${buildAvatarQueryString("small")}`,
+    undefined,
+    { next: { tags: ["contacts"] } },
   );
 
-  const allTagsPromise = fetch(`${API_URL}${API_ROUTES.TAGS}?previewLimit=0`, {
+  const allTagsPromise = serverApiFetch(`${API_ROUTES.TAGS}?previewLimit=0`, undefined, {
     next: { tags: ["tags"] },
-    headers,
   });
 
-  const personTagsPromise = fetch(`${API_URL}${API_ROUTES.CONTACTS}/${personId}/tags`, {
+  const personTagsPromise = serverApiFetch(`${API_ROUTES.CONTACTS}/${personId}/tags`, undefined, {
     next: { tags: ["tags", "contacts"] },
-    headers,
   });
 
-  const linkedInDataPromise = fetch(`${API_URL}${API_ROUTES.CONTACTS}/${personId}/linkedin-data`, {
-    next: { tags: ["contacts"] },
-    headers,
-  });
+  const linkedInDataPromise = serverApiFetch(
+    `${API_ROUTES.CONTACTS}/${personId}/linkedin-data`,
+    undefined,
+    { next: { tags: ["contacts"] } },
+  );
 
-  const mergeRecommendationsPromise = getMergeRecommendationsData(headers).catch(
+  const mergeRecommendationsPromise = getMergeRecommendationsData().catch(
     () => [] as MergeRecommendation[],
   );
 
@@ -236,7 +218,7 @@ export default async function PersonPage({
   }
 
   return (
-    <PersonClient
+    <PersonLoader
       initialContact={data.contact}
       initialConnectedContacts={data.connectedContacts}
       initialSelectableContacts={data.selectableContacts}

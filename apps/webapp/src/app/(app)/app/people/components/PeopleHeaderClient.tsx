@@ -3,7 +3,7 @@
 import { Button, Group, Kbd, Text, Tooltip } from "@mantine/core";
 import { IconAddressBook, IconUser, IconUserPlus } from "@tabler/icons-react";
 import { useHotkeys } from "@mantine/hooks";
-import { useTranslations } from "next-intl";
+import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
 import { useRouter } from "next/navigation";
 import { PageHeader } from "@/app/(app)/app/components/PageHeader";
 import { openAddContactModal } from "./AddContactModal";

@@ -6,8 +6,8 @@ import { notifications } from "@mantine/notifications";
 import { IconBell } from "@tabler/icons-react";
 import { useState } from "react";
 import type { ReactNode } from "react";
-import { useTranslations } from "next-intl";
-import { API_ROUTES } from "@bondery/helpers/globals/paths";
+import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
+import { useUpdateSettingsMutation } from "@/lib/query/hooks/useSettings";
 import {
   errorNotificationTemplate,
   loadingNotificationTemplate,
@@ -122,6 +122,7 @@ export function ReminderTimePicker({
   description,
 }: ReminderTimePickerProps) {
   const t = useTranslations("SettingsPage.Preferences");
+  const updateSettingsMutation = useUpdateSettingsMutation();
   const initialHourValue = roundToHourValue(toInputTime(initialTime));
   const [value24h, setValue24h] = useState(initialHourValue);
   const [savedTime24h, setSavedTime24h] = useState(initialHourValue);
@@ -182,19 +183,9 @@ export function ReminderTimePicker({
     });
 
     try {
-      const response = await fetch(API_ROUTES.ME_SETTINGS, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          reminderSendHour: parsedReminderTime.data,
-        }),
+      await updateSettingsMutation.mutateAsync({
+        reminderSendHour: parsedReminderTime.data,
       });
-
-      if (!response.ok) {
-        throw new Error("Failed to update reminderSendHour");
-      }
 
       setSavedTime24h(normalizedInputTime);
       setValue24h(normalizedInputTime);

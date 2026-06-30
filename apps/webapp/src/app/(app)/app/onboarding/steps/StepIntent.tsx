@@ -1,12 +1,10 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
 import { SimpleGrid, Stack, Text, Title, UnstyledButton } from "@mantine/core";
 import { IconFriends, IconBriefcase, IconWorld } from "@tabler/icons-react";
 import { useOnboardingContext } from "../OnboardingContext";
 import type { OnboardingIntent } from "../OnboardingContext";
-import { seedSampleData } from "@/lib/onboarding/seedSampleData";
-import { API_URL } from "@/lib/config";
 
 interface StepProps {
   onNext: () => void;
@@ -24,12 +22,10 @@ const INTENT_OPTIONS: {
 
 export function StepIntent({ onNext }: StepProps) {
   const t = useTranslations("Onboarding.Intent");
-  const { setIntent, setSeedPromise } = useOnboardingContext();
+  const { setIntent } = useOnboardingContext();
 
   const handleSelect = (value: NonNullable<OnboardingIntent>) => {
     setIntent(value);
-    // Kick off seeding immediately; store the promise so completeOnboarding can await it.
-    setSeedPromise(seedSampleData(value, API_URL));
     onNext();
   };
 

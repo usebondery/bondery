@@ -3,72 +3,80 @@
  * Provides KPI data for the internal dashboard.
  */
 
-import type { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
-import { Type } from "@sinclair/typebox";
+import type { FastifyReply } from "fastify";
+import type { AppFastifyInstance, AppRoutePlugin } from "../../../lib/fastify-types.js";
+import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
+import { z } from "zod";
 import { GITHUB_REPO_URL } from "@bondery/helpers/globals/paths";
 import { createAdminClient } from "../../../lib/supabase.js";
 import { getActiveUsersTimeline, getNpsResults } from "../../../lib/posthog.js";
 
 // ── Response schemas ─────────────────────────────────────────────────────────
 
-const ActiveUsersTimelinePoint = Type.Object({
-  date: Type.String(),
-  dau: Type.Number(),
-  wau: Type.Number(),
-  mau: Type.Number(),
+const activeUsersTimelinePointSchema = z.object({
+  date: z.string(),
+  dau: z.number(),
+  wau: z.number(),
+  mau: z.number(),
 });
 
-const ActiveUsersResponse = Type.Object({
-  timeline: Type.Array(ActiveUsersTimelinePoint),
+const activeUsersResponseSchema = z.object({
+  timeline: z.array(activeUsersTimelinePointSchema),
 });
 
-const ActiveUsersQuery = Type.Object({
-  days: Type.Optional(Type.Number({ minimum: 30, maximum: 180, default: 90 })),
+const activeUsersQuerySchema = z.object({
+  days: z.coerce.number().int().min(30).max(180).optional().default(90),
 });
 
-const FunnelPeriod = Type.Object({
-  periodKey: Type.String(),
-  periodLabel: Type.String(),
-  signups: Type.Number(),
-  contacts: Type.Number(),
-  interactions: Type.Number(),
-  signupsToContactsPct: Type.Number(),
-  contactsToInteractionsPct: Type.Number(),
+const funnelPeriodSchema = z.object({
+  periodKey: z.string(),
+  periodLabel: z.string(),
+  signups: z.number(),
+  contacts: z.number(),
+  interactions: z.number(),
+  signupsToContactsPct: z.number(),
+  contactsToInteractionsPct: z.number(),
 });
 
-const FunnelResponse = Type.Object({
-  periods: Type.Array(FunnelPeriod),
+const funnelResponseSchema = z.object({
+  periods: z.array(funnelPeriodSchema),
 });
 
-const NpsResponse = Type.Object({
-  score: Type.Union([Type.Number(), Type.Null()]),
-  responses: Type.Number(),
-  promoters: Type.Number(),
-  passives: Type.Number(),
-  detractors: Type.Number(),
+const npsResponseSchema = z.object({
+  score: z.number().nullable(),
+  responses: z.number(),
+  promoters: z.number(),
+  passives: z.number(),
+  detractors: z.number(),
 });
 
-const TotalUsersPoint = Type.Object({
-  date: Type.String(),
-  total: Type.Number(),
+const totalUsersPointSchema = z.object({
+  date: z.string(),
+  total: z.number(),
 });
 
-const TotalUsersResponse = Type.Object({
-  timeline: Type.Array(TotalUsersPoint),
+const totalUsersResponseSchema = z.object({
+  timeline: z.array(totalUsersPointSchema),
 });
 
-const GithubStarsResponse = Type.Object({
-  stars: Type.Number(),
-  repo: Type.String(),
+const githubStarsResponseSchema = z.object({
+  stars: z.number(),
+  repo: z.string(),
+});
+
+const errorResponseSchema = z.object({
+  error: z.string(),
 });
 
 // ── Route plugin ─────────────────────────────────────────────────────────────
 
-export async function statsRoutes(fastify: FastifyInstance) {
+export const statsRoutes: AppRoutePlugin = async (fastify) => {
   // Tag all routes in this plugin for OpenAPI docs
   fastify.addHook("onRoute", (routeOptions) => {
     routeOptions.config = { ...routeOptions.config, rateLimit: false };
-    routeOptions.schema = { ...routeOptions.schema, tags: ["Stats"] };
+    if (routeOptions.schema) {
+      routeOptions.schema.tags = ["Stats"];
+    }
   });
 
   // All stats routes require admin access
@@ -82,14 +90,14 @@ export async function statsRoutes(fastify: FastifyInstance) {
     "/active-users",
     {
       schema: {
-        querystring: ActiveUsersQuery,
-        response: { 200: ActiveUsersResponse },
-      },
+        querystring: activeUsersQuerySchema,
+        response: {
+          200: activeUsersResponseSchema,
+          503: errorResponseSchema,
+        },
+      } satisfies FastifyZodOpenApiSchema,
     },
-    async (
-      request: FastifyRequest<{ Querystring: typeof ActiveUsersQuery.static }>,
-      reply: FastifyReply,
-    ) => {
+    async (request, reply) => {
       const { POSTHOG_API_SECRET, POSTHOG_PROJECT_ID } = fastify.config;
       if (!POSTHOG_API_SECRET || !POSTHOG_PROJECT_ID) {
         return reply.status(503).send({ error: "PostHog not configured" });
@@ -110,10 +118,13 @@ export async function statsRoutes(fastify: FastifyInstance) {
     "/funnel",
     {
       schema: {
-        response: { 200: FunnelResponse },
-      },
+        response: {
+          200: funnelResponseSchema,
+          500: errorResponseSchema,
+        },
+      } satisfies FastifyZodOpenApiSchema,
     },
-    async (request: FastifyRequest, reply: FastifyReply) => {
+    async (request, reply) => {
       const adminClient = createAdminClient();
 
       const { data, error } = await adminClient.rpc("get_funnel_periods");
@@ -145,10 +156,13 @@ export async function statsRoutes(fastify: FastifyInstance) {
     "/nps",
     {
       schema: {
-        response: { 200: NpsResponse },
-      },
+        response: {
+          200: npsResponseSchema,
+          503: errorResponseSchema,
+        },
+      } satisfies FastifyZodOpenApiSchema,
     },
-    async (_request: FastifyRequest, reply: FastifyReply) => {
+    async (_request, reply) => {
       const { POSTHOG_API_SECRET, POSTHOG_PROJECT_ID } = fastify.config;
       if (!POSTHOG_API_SECRET || !POSTHOG_PROJECT_ID) {
         return reply.status(503).send({ error: "PostHog not configured" });
@@ -167,10 +181,13 @@ export async function statsRoutes(fastify: FastifyInstance) {
     "/total-users",
     {
       schema: {
-        response: { 200: TotalUsersResponse },
-      },
+        response: {
+          200: totalUsersResponseSchema,
+          500: errorResponseSchema,
+        },
+      } satisfies FastifyZodOpenApiSchema,
     },
-    async (request: FastifyRequest, reply: FastifyReply) => {
+    async (request, reply) => {
       const adminClient = createAdminClient();
 
       const { data, error } = await adminClient.rpc("get_total_users_growth");
@@ -197,10 +214,13 @@ export async function statsRoutes(fastify: FastifyInstance) {
     "/github-stars",
     {
       schema: {
-        response: { 200: GithubStarsResponse },
-      },
+        response: {
+          200: githubStarsResponseSchema,
+          502: errorResponseSchema,
+        },
+      } satisfies FastifyZodOpenApiSchema,
     },
-    async (_request: FastifyRequest, reply: FastifyReply) => {
+    async (_request, reply) => {
       const res = await fetch(GITHUB_REPO_URL, {
         headers: { "User-Agent": "bondery-stats-api" },
       });
@@ -216,4 +236,4 @@ export async function statsRoutes(fastify: FastifyInstance) {
       };
     },
   );
-}
+};

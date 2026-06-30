@@ -1,3 +1,7 @@
+---
+icon: map-location-dot
+---
+
 # Map view
 
 The map view plots every contact that has a location on an interactive world map. It is a good way to see where your network is concentrated, plan visits, or find contacts in a specific city before you travel.
@@ -24,3 +28,9 @@ Below the map there is a contact table that lists only the contacts currently vi
 ## Markers
 
 Each contact with valid coordinates is shown as a marker on the map. Clicking a marker opens a small popover with the contact's name and a link to their full profile page.
+
+## Related concepts
+
+* [People](people.md) — location field and geocoding prerequisites
+* [Tags](tags.md) — filter and segment contacts (web contacts list)
+* [Groups](groups.md) — organize contacts by shared context

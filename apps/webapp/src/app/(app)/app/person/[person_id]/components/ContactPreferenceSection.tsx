@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { TimezonePicker } from "@/components/shared/TimezonePicker";
 import { LanguagePicker } from "@/components/shared/LanguagePicker";
 import { WORLD_LANGUAGES_DATA } from "@bondery/helpers/locale";
+import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
 
 interface ContactPreferenceSectionProps {
   contact: Contact;
@@ -18,6 +19,7 @@ export function ContactPreferenceSection({
   savingField,
   handleBlur,
 }: ContactPreferenceSectionProps) {
+  const t = useTranslations("ContactPreferenceSection");
   const [language, setLanguage] = useState(contact.language || "en");
   const [timezone, setTimezone] = useState(contact.timezone || "UTC");
 
@@ -33,8 +35,8 @@ export function ContactPreferenceSection({
           value={language}
           onChange={(value) => setLanguage(value)}
           onBlur={(value) => handleBlur("language", value)}
-          label="Preferred Language"
-          placeholder="Select language..."
+          label={t("LanguageLabel")}
+          placeholder={t("LanguagePlaceholder")}
           languages={WORLD_LANGUAGES_DATA}
           loading={savingField === "language"}
         />
@@ -45,8 +47,8 @@ export function ContactPreferenceSection({
           value={timezone}
           onChange={(value) => setTimezone(value)}
           onBlur={(value) => handleBlur("timezone", value)}
-          label="Timezone"
-          placeholder="Select timezone..."
+          label={t("TimezoneLabel")}
+          placeholder={t("TimezonePlaceholder")}
           loading={savingField === "timezone"}
         />
       </div>

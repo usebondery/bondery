@@ -4,7 +4,7 @@ import { Text, Button, Group } from "@mantine/core";
 import { IconLogout } from "@tabler/icons-react";
 import { useRouter } from "next/navigation";
 import { notifications } from "@mantine/notifications";
-import { useTranslations } from "next-intl";
+import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
 import { createBrowswerSupabaseClient } from "@/lib/supabase/client";
 import { WEBSITE_ROUTES } from "@bondery/helpers/globals/paths";
 import { errorNotificationTemplate, loadingNotificationTemplate } from "@bondery/mantine-next";

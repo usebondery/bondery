@@ -1,5 +1,5 @@
 /**
- * Generates openapi.yaml from the running Fastify server's TypeBox schemas.
+ * Generates openapi.yaml from the running Fastify server's Zod schemas.
  *
  * Usage: npx tsx scripts/generate-openapi.ts
  *
@@ -22,6 +22,9 @@ process.env.PRIVATE_EMAIL_PASS ??= "dummy";
 process.env.PRIVATE_EMAIL_ADDRESS ??= "dummy@localhost";
 process.env.PRIVATE_EMAIL_PORT ??= "587";
 process.env.POLAR_WEBHOOK_SECRET ??= "dummy";
+process.env.PRIVATE_API_KEY_PEPPER ??= "dummy-pepper-for-openapi-generation";
+process.env.PRIVATE_SUPABASE_JWT_SIGNING_JWK ??=
+  '{"kty":"EC","x":"-ztnrq2xtqWzVslfvYg9Ehds97TWbhD6pFWcYJJKFLA","y":"foLtmAT7OJud7d9ltwZuF9podzkTEhyD56tiDRZFSZQ","crv":"P-256","d":"_bKhwEFYFXeOH3IOBLtT0PS7NSDkWP6xbrqWtj37u2A","alg":"ES256","kid":"openapi-dummy","use":"sig"}';
 
 import { writeFileSync } from "fs";
 import { resolve, dirname } from "path";

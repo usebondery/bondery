@@ -1,11 +1,9 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
 import {
   Badge,
   Box,
-  Button,
   Center,
   Group,
   Loader,
@@ -32,15 +30,27 @@ import {
   ModalTitle,
   successNotificationTemplate,
 } from "@bondery/mantine-next";
-import type { Contact, ContactPreview, GroupWithCount, GroupsListResponse } from "@bondery/schemas";
-import { API_ROUTES } from "@bondery/helpers/globals/paths";
-import { revalidateGroups } from "../../actions";
+import type { ContactPreview, GroupWithCount } from "@bondery/schemas";
 import { GroupCard, GROUP_CARD_MAX_WIDTH_BY_VARIANT } from "../../groups/components/GroupCard";
 import { openAddGroupModal } from "../../groups/components/AddGroupModal";
+import {
+  useContactGroupsQueries,
+  useContactsListQuery,
+} from "@/lib/query/hooks/useContacts";
+import {
+  useGroupsListQuery,
+  useSyncContactGroupMembershipsMutation,
+} from "@/lib/query/hooks/useGroups";
+import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
+
+export interface GroupMembershipUpdate {
+  groups: GroupWithCount[];
+  selectedGroupIds: string[];
+}
 
 interface AddPeopleToGroupSelectionModalProps {
   personIds: string[];
-  onUpdated?: () => Promise<void> | void;
+  onUpdated?: (update: GroupMembershipUpdate) => Promise<void> | void;
 }
 
 interface AddPeopleToGroupSelectionFormProps extends AddPeopleToGroupSelectionModalProps {
@@ -64,18 +74,36 @@ function AddPeopleToGroupSelectionForm({
   onUpdated,
   modalId,
 }: AddPeopleToGroupSelectionFormProps) {
+  const t = useTranslations("AddPeopleToGroupSelectionModal");
+  const tCommon = useTranslations("WebAppCommon");
   const modalGroupCardVariant = "small" as const;
   const modalGroupCardWidth = GROUP_CARD_MAX_WIDTH_BY_VARIANT[modalGroupCardVariant];
-  const router = useRouter();
   const [groups, setGroups] = useState<GroupWithCount[]>([]);
-  const [isLoadingGroups, setIsLoadingGroups] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [search, setSearch] = useState("");
   const [selectedGroupIds, setSelectedGroupIds] = useState<Set<string>>(new Set());
   const [initialSelectedGroupIds, setInitialSelectedGroupIds] = useState<Set<string>>(new Set());
   const [selectedPeople, setSelectedPeople] = useState<ContactPreview[]>([]);
+  const [hasInitialized, setHasInitialized] = useState(false);
 
   const deduplicatedPersonIds = useMemo(() => Array.from(new Set(personIds)), [personIds]);
+  const { data: groupsData, isLoading: isLoadingGroups, isError: isGroupsError } =
+    useGroupsListQuery({ previewLimit: 3 });
+  const membershipQueries = useContactGroupsQueries(deduplicatedPersonIds);
+  const { data: contactsData, isLoading: isLoadingContacts, isError: isContactsError } =
+    useContactsListQuery({ limit: 200, enabled: deduplicatedPersonIds.length > 0 });
+  const syncMembershipsMutation = useSyncContactGroupMembershipsMutation();
+
+  const isLoadingMemberships = membershipQueries.some((query) => query.isLoading);
+  const isLoadingGroupsData =
+    isLoadingGroups || isLoadingMemberships || isLoadingContacts || !hasInitialized;
+
+  useEffect(() => {
+    modals.updateModal({
+      modalId,
+      title: <ModalTitle text={t("Title")} icon={<IconUsersGroup size={24} />} />,
+    });
+  }, [modalId, t]);
 
   useEffect(() => {
     modals.updateModal({
@@ -87,73 +115,64 @@ function AddPeopleToGroupSelectionForm({
   }, [isSubmitting, modalId]);
 
   useEffect(() => {
-    async function fetchGroupsAndMemberships() {
-      try {
-        const [groupsResponse, membershipResponses, contactsResponse] = await Promise.all([
-          fetch(`${API_ROUTES.GROUPS}?previewLimit=3`),
-          Promise.all(
-            deduplicatedPersonIds.map((personId) =>
-              fetch(`${API_ROUTES.CONTACTS}/${personId}/groups`),
-            ),
-          ),
-          fetch(API_ROUTES.CONTACTS),
-        ]);
+    if (isGroupsError || isContactsError || membershipQueries.some((query) => query.isError)) {
+      notifications.show(
+        errorNotificationTemplate({
+          title: tCommon("ErrorTitle"),
+          description: t("LoadError"),
+        }),
+      );
+    }
+  }, [isGroupsError, isContactsError, membershipQueries, t, tCommon]);
 
-        if (
-          !groupsResponse.ok ||
-          membershipResponses.some((response) => !response.ok) ||
-          !contactsResponse.ok
-        ) {
-          throw new Error("Failed to load groups");
-        }
-
-        const data = (await groupsResponse.json()) as GroupsListResponse;
-        setGroups(data.groups || []);
-
-        const memberships = await Promise.all(
-          membershipResponses.map(async (response) => {
-            const membershipData = (await response.json()) as { groups?: Array<{ id: string }> };
-            return new Set((membershipData.groups || []).map((group) => group.id));
-          }),
-        );
-
-        const intersection = memberships.reduce<Set<string>>(
-          (sharedGroupIds, membershipSet) => {
-            return new Set(
-              Array.from(sharedGroupIds).filter((groupId) => membershipSet.has(groupId)),
-            );
-          },
-          memberships[0] ? new Set(memberships[0]) : new Set(),
-        );
-
-        const contactsData = (await contactsResponse.json()) as { contacts?: Contact[] };
-        const selectedPersonIdsSet = new Set(deduplicatedPersonIds);
-        const personChips = (contactsData.contacts || [])
-          .filter((person) => selectedPersonIdsSet.has(person.id))
-          .map((person) => ({
-            id: person.id,
-            firstName: person.firstName,
-            lastName: person.lastName,
-            avatar: person.avatar,
-          }));
-
-        setInitialSelectedGroupIds(intersection);
-        setSelectedGroupIds(new Set(intersection));
-        setSelectedPeople(personChips);
-      } catch {
-        notifications.show(
-          errorNotificationTemplate({
-            title: "Error",
-            description: "Failed to load groups and memberships",
-          }),
-        );
-      } finally {
-        setIsLoadingGroups(false);
-      }
+  useEffect(() => {
+    if (
+      isLoadingGroups ||
+      isLoadingContacts ||
+      isLoadingMemberships ||
+      !groupsData ||
+      !contactsData
+    ) {
+      return;
     }
 
-    fetchGroupsAndMemberships();
-  }, [deduplicatedPersonIds]);
+    const memberships = membershipQueries.map(
+      (query) => new Set((query.data || []).map((group) => group.id)),
+    );
+
+    const intersection = memberships.reduce<Set<string>>(
+      (sharedGroupIds, membershipSet) => {
+        return new Set(
+          Array.from(sharedGroupIds).filter((groupId) => membershipSet.has(groupId)),
+        );
+      },
+      memberships[0] ? new Set(memberships[0]) : new Set(),
+    );
+
+    const selectedPersonIdsSet = new Set(deduplicatedPersonIds);
+    const personChips = (contactsData.contacts || [])
+      .filter((person) => selectedPersonIdsSet.has(person.id))
+      .map((person) => ({
+        id: person.id,
+        firstName: person.firstName,
+        lastName: person.lastName,
+        avatar: person.avatar,
+      }));
+
+    setGroups(groupsData.groups || []);
+    setInitialSelectedGroupIds(intersection);
+    setSelectedGroupIds(new Set(intersection));
+    setSelectedPeople(personChips);
+    setHasInitialized(true);
+  }, [
+    contactsData,
+    deduplicatedPersonIds,
+    groupsData,
+    isLoadingContacts,
+    isLoadingGroups,
+    isLoadingMemberships,
+    membershipQueries,
+  ]);
 
   const filteredGroups = useMemo(() => {
     const trimmedSearch = search.trim().toLowerCase();
@@ -195,46 +214,18 @@ function AddPeopleToGroupSelectionForm({
 
     const loadingNotification = notifications.show({
       ...loadingNotificationTemplate({
-        title: "Adding people...",
-        description: "Please wait while we add selected people to the group",
+        title: t("AddingTitle"),
+        description: t("AddingDescription"),
       }),
     });
 
     try {
-      const addResponses = await Promise.all(
-        targetGroupIds.map((groupId) =>
-          fetch(`${API_ROUTES.GROUPS}/${groupId}/contacts`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ personIds: deduplicatedPersonIds }),
-          }),
-        ),
-      );
+      const addResults = await syncMembershipsMutation.mutateAsync({
+        personIds: deduplicatedPersonIds,
+        addToGroupIds: targetGroupIds,
+        removeFromGroupIds: removedGroupIds,
+      });
 
-      const removeResponses = await Promise.all(
-        removedGroupIds.map((groupId) =>
-          fetch(`${API_ROUTES.GROUPS}/${groupId}/contacts`, {
-            method: "DELETE",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ personIds: deduplicatedPersonIds }),
-          }),
-        ),
-      );
-
-      const responses = [...addResponses, ...removeResponses];
-
-      for (const response of responses) {
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.error || "Failed to add people to groups");
-        }
-      }
-
-      const addResults = await Promise.all(
-        addResponses.map((response) =>
-          response.json().catch(() => ({})),
-        ),
-      ) as Array<{ addedCount?: number; skippedCount?: number }>;
       const totalAdded = addResults.reduce(
         (sum, result) => sum + (result.addedCount ?? 0),
         0,
@@ -246,39 +237,60 @@ function AddPeopleToGroupSelectionForm({
 
       notifications.hide(loadingNotification);
 
+      const peopleLabel = totalAdded === 1 ? t("PersonSingular") : t("PeoplePlural");
+      const groupsLabel =
+        targetGroupIds.length === 1 ? t("GroupSingular") : t("GroupsPlural");
+      const skippedSuffix =
+        totalSkipped > 0
+          ? totalSkipped === 1
+            ? t("SkippedSuffixSingular", { count: totalSkipped })
+            : t("SkippedSuffixPlural", { count: totalSkipped })
+          : "";
+
       const membershipSummary =
         totalAdded === 0 && totalSkipped > 0
-          ? `All selected people were already in the chosen group(s).`
-          : `${totalAdded} ${totalAdded === 1 ? "person" : "people"} added${
-              totalSkipped > 0
-                ? ` (${totalSkipped} already in group${totalSkipped === 1 ? "" : "s"})`
-                : ""
-            } across ${targetGroupIds.length} ${targetGroupIds.length === 1 ? "group" : "groups"}`;
+          ? t("AllAlreadyInGroups")
+          : t("AddedSummary", {
+              count: totalAdded,
+              peopleLabel,
+              skippedSuffix,
+              groupCount: targetGroupIds.length,
+              groupsLabel,
+            });
 
       notifications.show(
         successNotificationTemplate({
-          title: "Success",
+          title: tCommon("SuccessTitle"),
           description:
             removedGroupIds.length > 0
-              ? `${deduplicatedPersonIds.length} ${deduplicatedPersonIds.length === 1 ? "person" : "people"} membership updated in ${selectedGroupIds.size} ${selectedGroupIds.size === 1 ? "group" : "groups"}`
+              ? t("MembershipUpdated", {
+                  count: deduplicatedPersonIds.length,
+                  peopleLabel:
+                    deduplicatedPersonIds.length === 1
+                      ? t("PersonSingular")
+                      : t("PeoplePlural"),
+                  groupCount: selectedGroupIds.size,
+                  groupsLabel:
+                    selectedGroupIds.size === 1 ? t("GroupSingular") : t("GroupsPlural"),
+                })
               : membershipSummary,
         }),
       );
 
       modals.close(modalId);
       if (onUpdated) {
-        await onUpdated();
-      } else {
-        await revalidateGroups();
-        router.refresh();
+        await onUpdated({
+          groups,
+          selectedGroupIds: Array.from(selectedGroupIds),
+        });
       }
     } catch (error) {
       notifications.hide(loadingNotification);
 
       notifications.show(
         errorNotificationTemplate({
-          title: "Error",
-          description: error instanceof Error ? error.message : "Failed to add people to group",
+          title: tCommon("ErrorTitle"),
+          description: error instanceof Error ? error.message : t("SubmitError"),
         }),
       );
     } finally {
@@ -286,7 +298,7 @@ function AddPeopleToGroupSelectionForm({
     }
   };
 
-  if (isLoadingGroups) {
+  if (isLoadingGroupsData) {
     return (
       <Center py="xl">
         <Loader />
@@ -305,8 +317,8 @@ function AddPeopleToGroupSelectionForm({
       )}
 
       <TextInput
-        label="Search groups"
-        placeholder="Search by group name..."
+        label={t("SearchLabel")}
+        placeholder={t("SearchPlaceholder")}
         leftSection={<IconSearch size={16} />}
         value={search}
         onChange={(event) => setSearch(event.currentTarget.value)}
@@ -314,7 +326,6 @@ function AddPeopleToGroupSelectionForm({
 
       <ScrollArea h={360} type="auto">
         <Group gap="sm" align="flex-start" justify="flex-start" wrap="wrap" w="full">
-          {/* Create new group – always the first card in the grid */}
           <Box
             style={{
               flex: `1 1 ${modalGroupCardWidth}`,
@@ -324,7 +335,7 @@ function AddPeopleToGroupSelectionForm({
           >
             <GroupCard
               variant="action"
-              actionLabel="Create new group"
+              actionLabel={t("CreateNewGroup")}
               actionIcon={<IconFolderPlus size={20} />}
               actionColor="green"
               onActionClick={() => {
@@ -332,8 +343,6 @@ function AddPeopleToGroupSelectionForm({
                   initialSelectedIds: deduplicatedPersonIds,
                   initialLabel: search.trim(),
                   onCreated: (newGroup) => {
-                    // Inject the new group and immediately mark it as
-                    // "Already part of" — the people were added on creation.
                     setGroups((prev) => [...prev, newGroup]);
                     setInitialSelectedGroupIds((prev) => new Set([...prev, newGroup.id]));
                     setSelectedGroupIds((prev) => new Set([...prev, newGroup.id]));
@@ -346,7 +355,7 @@ function AddPeopleToGroupSelectionForm({
           {filteredGroups.length === 0 ? (
             groups.length > 0 && search.trim() ? (
               <Text c="dimmed" ta="center" py="lg" style={{ width: "100%" }}>
-                No groups match your search
+                {t("NoGroupsMatch")}
               </Text>
             ) : null
           ) : (
@@ -385,7 +394,7 @@ function AddPeopleToGroupSelectionForm({
                             color: "var(--mantine-color-white)",
                           }}
                         >
-                          Remove from
+                          {t("BadgeRemoveFrom")}
                         </Badge>
                       )}
                       {selectionState === "add" && (
@@ -398,7 +407,7 @@ function AddPeopleToGroupSelectionForm({
                             color: "var(--mantine-color-white)",
                           }}
                         >
-                          Add to
+                          {t("BadgeAddTo")}
                         </Badge>
                       )}
                       {selectionState === "already" && (
@@ -410,7 +419,7 @@ function AddPeopleToGroupSelectionForm({
                             color: "var(--mantine-color-white)",
                           }}
                         >
-                          Already part of
+                          {t("BadgeAlreadyPartOf")}
                         </Badge>
                       )}
 
@@ -446,10 +455,10 @@ function AddPeopleToGroupSelectionForm({
       </ScrollArea>
 
       <ModalFooter
-        cancelLabel="Cancel"
+        cancelLabel={t("Cancel")}
         onCancel={() => modals.close(modalId)}
         cancelDisabled={isSubmitting}
-        actionLabel="Edit groups"
+        actionLabel={t("Submit")}
         onAction={() => {
           void handleSubmit();
         }}

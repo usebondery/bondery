@@ -5,7 +5,7 @@ import { schemaResolver, useForm } from "@mantine/form";
 import { modals } from "@mantine/modals";
 import { notifications } from "@mantine/notifications";
 import { useState } from "react";
-import { API_ROUTES } from "@bondery/helpers/globals/paths";
+import { submitFeedback } from "@/lib/api/domains/settings";
 import {
   errorNotificationTemplate,
   loadingNotificationTemplate,
@@ -13,8 +13,7 @@ import {
 } from "@bondery/mantine-next";
 import { feedbackFormSchema, type FeedbackFormInput } from "@bondery/schemas";
 import { captureEvent } from "@/lib/analytics/client";
-import type { useTranslations } from "next-intl";
-
+import type { TFunction } from "i18next";
 const SLIDER_MARKS = [
   { value: 0, label: "0" },
   { value: 5, label: "5" },
@@ -23,7 +22,7 @@ const SLIDER_MARKS = [
 
 interface FeedbackModalProps {
   modalId: string;
-  t: ReturnType<typeof useTranslations<"FeedbackPage">>;
+  t: TFunction;
 }
 
 export function FeedbackModal({ modalId, t }: FeedbackModalProps) {
@@ -50,17 +49,7 @@ export function FeedbackModal({ modalId, t }: FeedbackModalProps) {
     });
 
     try {
-      const response = await fetch(API_ROUTES.ME_FEEDBACK, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(values),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to submit feedback");
-      }
+      await submitFeedback(values);
 
       notifications.hide(loadingNotification);
       notifications.show(

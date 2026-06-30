@@ -16,7 +16,8 @@ import Placeholder from "@tiptap/extension-placeholder";
 import { InlineDateExtension } from "./components/InlineDateExtension";
 import { MarkdownPasteExtension } from "./components/MarkdownPasteExtension";
 import { SlashCommandExtension } from "./components/SlashCommandExtension";
-import { slashCommandSuggestion } from "./components/slashCommandSuggestion";
+import { createSlashCommandSuggestion } from "./components/slashCommandSuggestion";
+import { useSlashCommands } from "@/lib/i18n/useSlashCommands";
 import { notifications } from "@mantine/notifications";
 import {
   IconCheck,
@@ -32,7 +33,8 @@ import {
 } from "@tabler/icons-react";
 import { useRouter, usePathname } from "next/navigation";
 import { useEffect, useMemo, useState, useCallback, useRef } from "react";
-import { useTranslations } from "next-intl";
+import { useQuery } from "@tanstack/react-query";
+import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
 import { extractUsername } from "@bondery/helpers";
 import { parsePhoneNumber, combinePhoneNumber } from "@bondery/helpers/phone";
 import { formatContactName } from "@/lib/nameHelpers";
@@ -68,9 +70,21 @@ import { KeepInTouchSelect } from "@/app/(app)/app/keep-in-touch/KeepInTouchSele
 import { LinkedInTab } from "./components/LinkedInTab";
 import { useBatchEnrichFromLinkedIn } from "@/lib/extension/useBatchEnrichFromLinkedIn";
 // import { ContactPGPSection } from "./components/ContactPGPSection";
-import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import { HELP_DOCS_URL } from "@bondery/helpers";
+import {
+  createContactImportantDatesQueryFn,
+  createContactRelationshipsQueryFn,
+} from "@/lib/query/fetchers/contacts";
+import { contactKeys } from "@/lib/query/keys";
+import {
+  useContactQuery,
+  useCreateContactRelationshipMutation,
+  useDeleteContactRelationshipMutation,
+  usePutContactImportantDatesMutation,
+  useUpdateContactMutation,
+  useUpdateContactRelationshipMutation,
+} from "@/lib/query/hooks/useContacts";
 import {
   errorNotificationTemplate,
   ModalTitle,
@@ -78,10 +92,9 @@ import {
 } from "@bondery/mantine-next";
 import { PageWrapper } from "@/app/(app)/app/components/PageWrapper";
 import { PageHeader } from "@/app/(app)/app/components/PageHeader";
-import { revalidateContacts, revalidateRelationships } from "../../actions";
 import { fetchTimezoneForCoordinates } from "@/lib/geocode";
 import { resolveToCanonicalTimezone } from "@bondery/helpers/locale";
-import { openDeleteContactModal } from "@/app/(app)/app/components/contacts/openDeleteContactModal";
+import { useOpenDeleteContactModal } from "@/app/(app)/app/components/contacts/openDeleteContactModal";
 import { openStandardConfirmModal } from "@/app/(app)/app/components/modals/openStandardConfirmModal";
 import { GroupCard } from "../../groups/components/GroupCard";
 import { PersonTagsInput } from "./components/PersonTagsInput";
@@ -145,6 +158,22 @@ export default function PersonClient({
 }: PersonClientProps) {
   const router = useRouter();
   const pathname = usePathname();
+  const updateContactMutation = useUpdateContactMutation(personId);
+  const createRelationshipMutation = useCreateContactRelationshipMutation(personId);
+  const updateRelationshipMutation = useUpdateContactRelationshipMutation(personId);
+  const deleteRelationshipMutation = useDeleteContactRelationshipMutation(personId);
+  const putImportantDatesMutation = usePutContactImportantDatesMutation(personId);
+  const { data: fetchedContact } = useContactQuery(personId);
+  const { data: relationships = initialRelationships } = useQuery({
+    queryKey: contactKeys.relationships(personId),
+    queryFn: createContactRelationshipsQueryFn(personId),
+    initialData: initialRelationships,
+  });
+  const { data: fetchedImportantDates } = useQuery({
+    queryKey: contactKeys.importantDates(personId),
+    queryFn: createContactImportantDatesQueryFn(personId),
+    initialData: initialImportantDates,
+  });
 
   const resolvedInitialTab: PersonTabValue = PERSON_TABS.includes(initialTab as PersonTabValue)
     ? (initialTab as PersonTabValue)
@@ -171,6 +200,13 @@ export default function PersonClient({
   const tAddress = useTranslations("ContactAddress");
   const tTabs = useTranslations("PersonTabs");
   const tInteractions = useTranslations("InteractionsPage");
+  const tContactInfo = useTranslations("ContactInfo");
+  const openDeleteContactModal = useOpenDeleteContactModal();
+  const slashCommands = useSlashCommands();
+  const slashCommandSuggestion = useMemo(
+    () => createSlashCommandSuggestion(slashCommands),
+    [slashCommands],
+  );
   const [contact, setContact] = useState<Contact>(initialContact);
   const [mergeRecommendation, setMergeRecommendation] = useState<MergeRecommendation | null>(
     initialMergeRecommendation,
@@ -193,23 +229,24 @@ export default function PersonClient({
   const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   // Always-fresh save callback for Cmd+S handler
   const noteSaveRef = useRef<() => void>(() => {});
-  const [relationships, setRelationships] =
-    useState<ContactRelationshipWithPeople[]>(initialRelationships);
   const [relationshipsSaving, setRelationshipsSaving] = useState(false);
 
-  // Sync contact state when server data changes (after router.refresh())
+  // Sync contact state when query data updates (after invalidation refetch)
   useEffect(() => {
-    setContact(initialContact);
-  }, [initialContact]);
-
-  // Sync relationships state when server data changes (after router.refresh())
-  useEffect(() => {
-    setRelationships(initialRelationships);
-  }, [initialRelationships]);
+    if (fetchedContact) {
+      setContact(fetchedContact);
+    }
+  }, [fetchedContact]);
 
   useEffect(() => {
     setPersonGroups(initialPersonGroups);
   }, [initialPersonGroups]);
+
+  useEffect(() => {
+    if (fetchedImportantDates) {
+      setImportantDates(fetchedImportantDates);
+    }
+  }, [fetchedImportantDates]);
 
   const selectablePeople: ContactPreview[] = initialSelectableContacts
     .filter((person) => !person.myself)
@@ -455,13 +492,7 @@ export default function PersonClient({
     }
 
     try {
-      const res = await fetch(`${API_ROUTES.CONTACTS}/${personId}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ [field]: value }),
-      });
-
-      if (!res.ok) throw new Error("Failed to update");
+      await updateContactMutation.mutateAsync({ [field]: value });
 
       setContact(
         (previous) =>
@@ -473,14 +504,15 @@ export default function PersonClient({
 
       notifications.show(
         successNotificationTemplate({
-          title: "Success",
-          description: `${field === "timezone" ? "Timezone" : "Language"} updated successfully`,
+          title: tInteractions("SuccessTitle"),
+          description:
+            field === "timezone" ? tPersonPage("TimezoneUpdated") : tPersonPage("LanguageUpdated"),
         }),
       );
     } catch (error) {
       notifications.show(
         errorNotificationTemplate({
-          title: "Error",
+          title: tInteractions("ErrorTitle"),
           description: `Failed to update ${field === "timezone" ? "timezone" : "language"}`,
         }),
       );
@@ -495,23 +527,18 @@ export default function PersonClient({
     if (!contact || !personId) return;
     setSavingLastInteraction(true);
     try {
-      const res = await fetch(`${API_ROUTES.CONTACTS}/${personId}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ lastInteraction: date }),
-      });
-      if (!res.ok) throw new Error("Failed to update");
+      await updateContactMutation.mutateAsync({ lastInteraction: date });
       setContact((prev) => ({ ...prev, lastInteraction: date }) as Contact);
       notifications.show(
         successNotificationTemplate({
-          title: "Success",
+          title: tInteractions("SuccessTitle"),
           description: tInteractions("LastInteractionUpdated"),
         }),
       );
     } catch {
       notifications.show(
         errorNotificationTemplate({
-          title: "Error",
+          title: tInteractions("ErrorTitle"),
           description: tInteractions("LastInteractionUpdateFailed"),
         }),
       );
@@ -524,12 +551,7 @@ export default function PersonClient({
     if (!contact || !personId) return;
     const keepFrequencyDays = value && value !== "none" ? parseInt(value, 10) : null;
     try {
-      const res = await fetch(`${API_ROUTES.CONTACTS}/${personId}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ keepFrequencyDays }),
-      });
-      if (!res.ok) throw new Error("Failed to update");
+      await updateContactMutation.mutateAsync({ keepFrequencyDays });
       setContact((prev) => ({ ...prev, keepFrequencyDays }) as Contact);
       notifications.show(
         successNotificationTemplate({
@@ -537,11 +559,10 @@ export default function PersonClient({
           description: tInteractions("KeepInTouchUpdatedDescription"),
         }),
       );
-      revalidateContacts();
     } catch {
       notifications.show(
         errorNotificationTemplate({
-          title: "Error",
+          title: tInteractions("ErrorTitle"),
           description: tInteractions("KeepInTouchUpdateFailed"),
         }),
       );
@@ -568,13 +589,7 @@ export default function PersonClient({
     }
 
     try {
-      const res = await fetch(`${API_ROUTES.CONTACTS}/${personId}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ phones: phonesToSave }),
-      });
-
-      if (!res.ok) throw new Error("Failed to update");
+      await updateContactMutation.mutateAsync({ phones: phonesToSave });
 
       setContact({
         ...contact,
@@ -583,15 +598,15 @@ export default function PersonClient({
 
       notifications.show(
         successNotificationTemplate({
-          title: "Success",
-          description: "Phone numbers updated successfully",
+          title: tInteractions("SuccessTitle"),
+          description: tContactInfo("PhonesUpdated"),
         }),
       );
     } catch {
       notifications.show(
         errorNotificationTemplate({
-          title: "Error",
-          description: "Failed to update phone numbers",
+          title: tInteractions("ErrorTitle"),
+          description: tContactInfo("PhonesUpdateError"),
         }),
       );
     }
@@ -611,13 +626,7 @@ export default function PersonClient({
     }
 
     try {
-      const res = await fetch(`${API_ROUTES.CONTACTS}/${personId}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ emails: emailsToSave }),
-      });
-
-      if (!res.ok) throw new Error("Failed to update");
+      await updateContactMutation.mutateAsync({ emails: emailsToSave });
 
       setContact({
         ...contact,
@@ -626,15 +635,15 @@ export default function PersonClient({
 
       notifications.show(
         successNotificationTemplate({
-          title: "Success",
-          description: "Email addresses updated successfully",
+          title: tInteractions("SuccessTitle"),
+          description: tContactInfo("EmailsUpdated"),
         }),
       );
     } catch {
       notifications.show(
         errorNotificationTemplate({
-          title: "Error",
-          description: "Failed to update email addresses",
+          title: tInteractions("ErrorTitle"),
+          description: tContactInfo("EmailsUpdateError"),
         }),
       );
     }
@@ -679,18 +688,7 @@ export default function PersonClient({
     setSavingField("importantDates");
 
     try {
-      const res = await fetch(`${API_ROUTES.CONTACTS}/${personId}/important-dates`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ dates: datesToSave }),
-      });
-
-      if (!res.ok) throw new Error("Failed to update important dates");
-
-      const data = await res.json();
-      const nextDates = (data.dates || []) as ImportantDate[];
-
-      setImportantDates(nextDates);
+      await putImportantDatesMutation.mutateAsync(datesToSave);
 
       notifications.show(
         successNotificationTemplate({
@@ -754,16 +752,11 @@ export default function PersonClient({
         addressEntries.find((entry) => entry.value === payload.suggestedLocation?.location) ??
         preferredAddress;
       try {
-        const locationResponse = await fetch(`${API_ROUTES.CONTACTS}/${personId}`, {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            location: payload.suggestedLocation.location,
-            latitude: payload.suggestedLocation.latitude,
-            longitude: payload.suggestedLocation.longitude,
-          }),
+        await updateContactMutation.mutateAsync({
+          location: payload.suggestedLocation.location,
+          latitude: payload.suggestedLocation.latitude,
+          longitude: payload.suggestedLocation.longitude,
         });
-        if (!locationResponse.ok) throw new Error("Failed to update location");
         setContact((previous) => ({
           ...previous,
           location: payload.suggestedLocation?.location ?? null,
@@ -805,12 +798,7 @@ export default function PersonClient({
                   );
                   return;
                 }
-                const tzRes = await fetch(`${API_ROUTES.CONTACTS}/${personId}`, {
-                  method: "PATCH",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({ timezone: canonical }),
-                });
-                if (!tzRes.ok) throw new Error("Failed to update timezone");
+                await updateContactMutation.mutateAsync({ timezone: canonical });
                 setContact((previous) => ({ ...previous, timezone: canonical }));
                 notifications.show(
                   successNotificationTemplate({
@@ -845,21 +833,7 @@ export default function PersonClient({
     }
 
     try {
-      const res = await fetch(`${API_ROUTES.CONTACTS}/${personId}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ addresses: payload.addresses }),
-      });
-
-      if (!res.ok) {
-        const errorPayload = await res.json().catch(() => null);
-        const serverMessage =
-          errorPayload && typeof errorPayload === "object"
-            ? ((errorPayload as Record<string, unknown>).error as string) ||
-              ((errorPayload as Record<string, unknown>).message as string)
-            : null;
-        throw new Error(serverMessage || "Failed to update address");
-      }
+      await updateContactMutation.mutateAsync({ addresses: payload.addresses });
 
       const addressEntries = Array.isArray(payload.addresses)
         ? payload.addresses.filter(
@@ -917,14 +891,7 @@ export default function PersonClient({
               locationPatch.timezone = canonicalTimezone;
             }
 
-            const locationResponse = await fetch(`${API_ROUTES.CONTACTS}/${personId}`, {
-              method: "PATCH",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify(locationPatch),
-            });
-            if (!locationResponse.ok) {
-              throw new Error("Failed to update location");
-            }
+            await updateContactMutation.mutateAsync(locationPatch);
             setContact((previous) => ({
               ...previous,
               location: payload.suggestedLocation?.location ?? null,
@@ -1006,8 +973,8 @@ export default function PersonClient({
     if (field === "firstName" && (!processedValue || processedValue.trim() === "")) {
       notifications.show(
         errorNotificationTemplate({
-          title: "Validation Error",
-          description: "First name is required",
+          title: tPersonPage("ValidationErrorTitle"),
+          description: tPersonPage("FirstNameRequired"),
         }),
       );
       // Revert to original value
@@ -1021,14 +988,7 @@ export default function PersonClient({
     setSavingField(field);
 
     try {
-      // In a real app, you'd call your API here:
-      const res = await fetch(`${API_ROUTES.CONTACTS}/${personId}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ [field]: processedValue }),
-      });
-
-      if (!res.ok) throw new Error("Failed to update");
+      await updateContactMutation.mutateAsync({ [field]: processedValue });
 
       // Update local state with username
       setContact({
@@ -1041,15 +1001,18 @@ export default function PersonClient({
 
       notifications.show(
         successNotificationTemplate({
-          title: "Success",
+          title: tInteractions("SuccessTitle"),
           description: `${fieldDisplayName} updated successfully`,
         }),
       );
     } catch {
       notifications.show(
         errorNotificationTemplate({
-          title: "Error",
-          description: `Failed to update ${field}`,
+          title: tInteractions("ErrorTitle"),
+          description:
+            field === "timezone"
+              ? tPersonPage("TimezoneUpdateFailed")
+              : tPersonPage("LanguageUpdateFailed"),
         }),
       );
     } finally {
@@ -1105,18 +1068,9 @@ export default function PersonClient({
   const openAddToGroupsModal = () => {
     openAddPeopleToGroupSelectionModal({
       personIds: [personId],
-      onUpdated: async () => {
-        try {
-          const response = await fetch(`${API_ROUTES.CONTACTS}/${personId}/groups`);
-          if (!response.ok) {
-            return;
-          }
-
-          const payload = (await response.json()) as { groups?: GroupType[] };
-          setPersonGroups(payload.groups || []);
-        } catch {
-          // Keep existing state if groups refresh fails
-        }
+      onUpdated: ({ groups, selectedGroupIds }) => {
+        const selected = new Set(selectedGroupIds);
+        setPersonGroups(groups.filter((group) => selected.has(group.id)));
       },
     });
   };
@@ -1128,19 +1082,7 @@ export default function PersonClient({
     setRelationshipsSaving(true);
 
     try {
-      const response = await fetch(`${API_ROUTES.CONTACTS}/${personId}/relationships`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ relationshipType, relatedPersonId }),
-      });
-
-      if (!response.ok) {
-        const payload = await response.json().catch(() => ({}));
-        throw new Error(payload.error || tRelationships("CreateError"));
-      }
-
-      await revalidateRelationships();
-      router.refresh();
+      await createRelationshipMutation.mutateAsync({ relationshipType, relatedPersonId });
 
       notifications.show(
         successNotificationTemplate({
@@ -1164,23 +1106,7 @@ export default function PersonClient({
     setRelationshipsSaving(true);
 
     try {
-      const response = await fetch(
-        `${API_ROUTES.CONTACTS}/${personId}/relationships/${relationshipId}`,
-        {
-          method: "DELETE",
-        },
-      );
-
-      if (!response.ok) {
-        const payload = await response.json().catch(() => ({}));
-        throw new Error(payload.error || tRelationships("DeleteError"));
-      }
-
-      setRelationships((previous) =>
-        previous.filter((relationship) => relationship.id !== relationshipId),
-      );
-
-      await revalidateRelationships();
+      await deleteRelationshipMutation.mutateAsync(relationshipId);
 
       notifications.show(
         successNotificationTemplate({
@@ -1208,22 +1134,13 @@ export default function PersonClient({
     setRelationshipsSaving(true);
 
     try {
-      const response = await fetch(
-        `${API_ROUTES.CONTACTS}/${personId}/relationships/${relationshipId}`,
-        {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ relationshipType, relatedPersonId }),
+      await updateRelationshipMutation.mutateAsync({
+        relationshipId,
+        input: {
+          relationshipType,
+          relatedPersonId,
         },
-      );
-
-      if (!response.ok) {
-        const payload = await response.json().catch(() => ({}));
-        throw new Error(payload.error || tRelationships("UpdateError"));
-      }
-
-      await revalidateRelationships();
-      router.refresh();
+      });
 
       notifications.show(
         successNotificationTemplate({
@@ -1277,7 +1194,6 @@ export default function PersonClient({
       contactId: personId,
       contactName: formatContactName(contact),
       onDeleted: async () => {
-        await revalidateContacts();
         router.push(WEBAPP_ROUTES.PEOPLE);
       },
     });
@@ -1308,7 +1224,7 @@ export default function PersonClient({
         <PageHeader
           icon={myselfMode ? IconUserCircle : IconUser}
           title={myselfMode ? tPersonPage("MyselfPageTitle") : "Person's details"}
-          helpHref={myselfMode ? `${HELP_DOCS_URL}/bondery/myself` : undefined}
+          helpHref={myselfMode ? `${HELP_DOCS_URL}/concepts/myself` : undefined}
           helpLabel={myselfMode ? tPersonPage("MyselfPageDescription") : undefined}
           backOnClick={
             myselfMode

@@ -9,9 +9,10 @@ import {
   IconPlayerPlayFilled,
   IconTrash,
 } from "@tabler/icons-react";
-import { useTranslations } from "next-intl";
+import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
 import { useBatchEnrichFromLinkedIn } from "@/lib/extension/useBatchEnrichFromLinkedIn";
-import { useRouter } from "next/navigation";
+import { getQueryClient } from "@/lib/query/client";
+import { invalidateAfterEnrichBatch } from "@/lib/query/invalidation";
 
 interface EnrichRecommendationCardProps {
   eligibleCount: number;
@@ -30,7 +31,6 @@ export function EnrichRecommendationCard({
   queueStatus,
 }: EnrichRecommendationCardProps) {
   const t = useTranslations("EnrichRecommendationCard");
-  const router = useRouter();
   const {
     start,
     resume,
@@ -64,7 +64,7 @@ export function EnrichRecommendationCard({
 
   const handleDiscard = async () => {
     await discard();
-    router.refresh();
+    await invalidateAfterEnrichBatch(getQueryClient());
   };
 
   return (

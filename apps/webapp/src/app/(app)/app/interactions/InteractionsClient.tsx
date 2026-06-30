@@ -3,20 +3,17 @@
 import { Button, Group, Paper, SegmentedControl, Stack, Text, Tooltip, Kbd } from "@mantine/core";
 import { IconCalendarPlus, IconCopy, IconTable, IconTimelineEventText } from "@tabler/icons-react";
 import { useCallback, useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
 import { useDebouncedCallback, useHotkeys } from "@mantine/hooks";
 import { PageWrapper } from "@/app/(app)/app/components/PageWrapper";
 import { openNewActivityModal } from "./components/NewActivityModal";
 import type { Contact, Activity } from "@bondery/schemas";
-import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import { WEBSITE_URL, DEBOUNCE_MS, HOTKEYS } from "@/lib/config";
 import { peopleSearchActions } from "../components/PeopleSearchSpotlight";
 import { PageHeader } from "../components/PageHeader";
-import { useTranslations } from "next-intl";
+import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
 import { notifications } from "@mantine/notifications";
 import { IconTrash } from "@tabler/icons-react";
 import { ModalTitle } from "@bondery/mantine-next";
-import { revalidateInteractions } from "../actions";
 import {
   errorNotificationTemplate,
   loadingNotificationTemplate,
@@ -30,6 +27,10 @@ import {
 } from "../components/interactions/InteractionsTableV2";
 import { openStandardConfirmModal } from "../components/modals/openStandardConfirmModal";
 import { InteractionsList } from "../components/interactions/InteractionsList";
+import {
+  useCreateInteractionMutation,
+  useDeleteInteractionMutation,
+} from "@/lib/query/hooks/useInteractions";
 
 interface InteractionsClientProps {
   initialContacts: Contact[];
@@ -40,9 +41,10 @@ export function InteractionsClient({
   initialContacts,
   initialActivities,
 }: InteractionsClientProps) {
-  const router = useRouter();
   const t = useTranslations("InteractionsPage");
   const tHeader = useTranslations("PageHeader");
+  const deleteInteractionMutation = useDeleteInteractionMutation();
+  const createInteractionMutation = useCreateInteractionMutation();
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [searchValue, setSearchValue] = useState("");
   const [isSearchLoading, setIsSearchLoading] = useState(false);
@@ -132,27 +134,18 @@ export function InteractionsClient({
       confirmColor: "red",
       onConfirm: async () => {
         try {
-          const response = await fetch(`${API_ROUTES.INTERACTIONS}/${activity.id}`, {
-            method: "DELETE",
-          });
-
-          if (!response.ok) {
-            throw new Error("Failed to delete interaction");
-          }
+          await deleteInteractionMutation.mutateAsync(activity.id);
 
           notifications.show(
             successNotificationTemplate({
-              title: "Success",
+              title: t("SuccessTitle"),
               description: t("ActivityDeleted"),
             }),
           );
-
-          await revalidateInteractions();
-          router.refresh();
         } catch {
           notifications.show(
             errorNotificationTemplate({
-              title: "Error",
+              title: t("ErrorTitle"),
               description: t("DeleteFailed"),
             }),
           );
@@ -167,36 +160,25 @@ export function InteractionsClient({
       .filter((id): id is string => Boolean(id));
 
     try {
-      const response = await fetch(API_ROUTES.INTERACTIONS, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          title: activity.title || "",
-          type: activity.type,
-          description: activity.description || "",
-          date: activity.date,
-          participantIds,
-        }),
+      await createInteractionMutation.mutateAsync({
+        title: activity.title || "",
+        type: activity.type,
+        description: activity.description || "",
+        date: activity.date,
+        participantIds,
       });
-
-      if (!response.ok) {
-        throw new Error("Failed to duplicate interaction");
-      }
 
       notifications.show(
         successNotificationTemplate({
-          title: "Success",
+          title: t("SuccessTitle"),
           description: t("ActivityDuplicated"),
           icon: <IconCopy size={18} />,
         }),
       );
-
-      await revalidateInteractions();
-      router.refresh();
     } catch {
       notifications.show(
         errorNotificationTemplate({
-          title: "Error",
+          title: t("ErrorTitle"),
           description: t("DuplicateFailed"),
         }),
       );
@@ -232,15 +214,7 @@ export function InteractionsClient({
 
         try {
           await Promise.all(
-            activities.map(async (activity) => {
-              const response = await fetch(`${API_ROUTES.INTERACTIONS}/${activity.id}`, {
-                method: "DELETE",
-              });
-
-              if (!response.ok) {
-                throw new Error("Failed to delete interaction");
-              }
-            }),
+            activities.map((item) => deleteInteractionMutation.mutateAsync(item.id)),
           );
 
           notifications.update({
@@ -252,8 +226,6 @@ export function InteractionsClient({
           });
 
           setSelectedIds(new Set());
-          await revalidateInteractions();
-          router.refresh();
         } catch {
           notifications.update({
             ...errorNotificationTemplate({
@@ -381,8 +353,8 @@ export function InteractionsClient({
                 deleteLabel: t("DeleteAction"),
                 deleteSelectedAction: t("DeleteSelectedAction"),
                 actionsAriaLabel: t("TableColumnActions"),
-                selectedCountTemplate: t.raw("SelectedCountTemplate") as string,
-                totalCountTemplate: t.raw("TotalCountTemplate") as string,
+                selectedCountTemplate: t("SelectedCountTemplate"),
+                totalCountTemplate: t("TotalCountTemplate"),
                 columns: {
                   date: t("TableColumnDate"),
                   title: t("TableColumnTitle"),

@@ -1,16 +1,11 @@
 "use client";
 
 import { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { Button, Group, Paper, SegmentedControl, Stack, Text } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { IconArrowMerge, IconEye, IconEyeOff, IconRefresh } from "@tabler/icons-react";
-import { useTranslations } from "next-intl";
-import { API_ROUTES } from "@bondery/helpers/globals/paths";
-import type {
-  MergeRecommendation,
-  MergeRecommendationsResponse,
-  RefreshMergeRecommendationsResponse,
-} from "@bondery/schemas";
+import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
 import {
   PersonChip,
   errorNotificationTemplate,
@@ -20,54 +15,38 @@ import { PageWrapper } from "@/app/(app)/app/components/PageWrapper";
 import { PageHeader } from "@/app/(app)/app/components/PageHeader";
 import { MergeRecommendationCard } from "../components/contacts/MergeRecommendationCard";
 import { EnrichRecommendationCard } from "./components/EnrichRecommendationCard";
+import {
+  useEnrichEligibleCountQuery,
+  useEnrichQueueStatusQuery,
+  useMergeRecommendationsQuery,
+  useRefreshMergeRecommendationsMutation,
+  useRestoreMergeRecommendationMutation,
+} from "@/lib/query/hooks/useMergeRecommendations";
+import { invalidateMergeRecommendationDomain } from "@/lib/query/invalidation";
 
-interface FixContactsClientProps {
-  initialRecommendations: MergeRecommendation[];
-  eligibleCount: number;
-  queueStatus: { pending: number; completed: number; failed: number } | null;
-}
-
-export function FixContactsClient({
-  initialRecommendations,
-  eligibleCount,
-  queueStatus,
-}: FixContactsClientProps) {
+export function FixContactsClient() {
   const t = useTranslations("FixContactsPage");
   const tMerge = useTranslations("MergeWithModal");
-  const [recommendations, setRecommendations] = useState(initialRecommendations);
-  const [restoringIds, setRestoringIds] = useState<Set<string>>(new Set());
-  const [isRefreshing, setIsRefreshing] = useState(false);
+  const queryClient = useQueryClient();
   const [showDeclined, setShowDeclined] = useState(false);
+  const [restoringIds, setRestoringIds] = useState<Set<string>>(new Set());
 
-  const fetchRecommendations = async (includeDeclined: boolean) => {
-    const listResponse = await fetch(
-      `${API_ROUTES.CONTACTS}/merge-recommendations${includeDeclined ? "?declined=true" : ""}`,
-    );
+  const { data: recommendations = [], isFetching: isListFetching } =
+    useMergeRecommendationsQuery(showDeclined);
+  const { data: eligibleCount = 0 } = useEnrichEligibleCountQuery();
+  const { data: queueStatus = null } = useEnrichQueueStatusQuery();
+  const refreshMutation = useRefreshMergeRecommendationsMutation();
+  const restoreMutation = useRestoreMergeRecommendationMutation();
 
-    if (!listResponse.ok) {
-      throw new Error(t("RefreshError"));
-    }
-
-    const payload = (await listResponse.json()) as MergeRecommendationsResponse;
-    setRecommendations(payload.recommendations || []);
-  };
+  const invalidateRecommendations = () => invalidateMergeRecommendationDomain(queryClient);
 
   const handleRefreshSuggestions = async () => {
-    setIsRefreshing(true);
-
     try {
-      const refreshResponse = await fetch(`${API_ROUTES.CONTACTS}/merge-recommendations/refresh`, {
-        method: "POST",
-      });
-
-      if (!refreshResponse.ok) {
-        throw new Error(t("RefreshError"));
-      }
-
-      const refreshPayload = (await refreshResponse.json()) as RefreshMergeRecommendationsResponse;
-      const recommendationsCount = Math.max(0, Number(refreshPayload.recommendationsCount) || 0);
-
-      await fetchRecommendations(false);
+      const refreshPayload = await refreshMutation.mutateAsync();
+      const recommendationsCount = Math.max(
+        0,
+        Number(refreshPayload.recommendationsCount) || 0,
+      );
       setShowDeclined(false);
 
       notifications.show(
@@ -86,51 +65,18 @@ export function FixContactsClient({
           description: error instanceof Error ? error.message : t("RefreshError"),
         }),
       );
-    } finally {
-      setIsRefreshing(false);
     }
   };
 
-  const handleRecommendationViewChange = async (nextView: "active" | "hidden") => {
-    const nextShowDeclined = nextView === "hidden";
-
-    if (showDeclined === nextShowDeclined) {
-      return;
-    }
-
-    setIsRefreshing(true);
-
-    try {
-      await fetchRecommendations(nextShowDeclined);
-      setShowDeclined(nextShowDeclined);
-    } catch (error) {
-      notifications.show(
-        errorNotificationTemplate({
-          title: t("ErrorTitle"),
-          description: error instanceof Error ? error.message : t("RefreshError"),
-        }),
-      );
-    } finally {
-      setIsRefreshing(false);
-    }
+  const handleRecommendationViewChange = (nextView: "active" | "hidden") => {
+    setShowDeclined(nextView === "hidden");
   };
 
   const handleRestore = async (recommendationId: string) => {
     setRestoringIds((prev) => new Set(prev).add(recommendationId));
 
     try {
-      const response = await fetch(
-        `${API_ROUTES.CONTACTS}/merge-recommendations/${recommendationId}/restore`,
-        {
-          method: "PATCH",
-        },
-      );
-
-      if (!response.ok) {
-        throw new Error(t("RestoreError"));
-      }
-
-      setRecommendations((prev) => prev.filter((item) => item.id !== recommendationId));
+      await restoreMutation.mutateAsync(recommendationId);
       notifications.show(
         successNotificationTemplate({
           title: t("SuccessTitle"),
@@ -152,6 +98,8 @@ export function FixContactsClient({
       });
     }
   };
+
+  const isRefreshing = isListFetching || refreshMutation.isPending;
 
   return (
     <PageWrapper>
@@ -190,8 +138,8 @@ export function FixContactsClient({
             <Button
               size="md"
               leftSection={<IconRefresh size={16} />}
-              onClick={handleRefreshSuggestions}
-              loading={isRefreshing}
+              onClick={() => void handleRefreshSuggestions()}
+              loading={refreshMutation.isPending}
             >
               {t("RefreshSuggestions")}
             </Button>
@@ -225,7 +173,7 @@ export function FixContactsClient({
                     <Button
                       variant="default"
                       leftSection={<IconRefresh size={16} />}
-                      onClick={() => handleRestore(recommendation.id)}
+                      onClick={() => void handleRestore(recommendation.id)}
                       loading={restoringIds.has(recommendation.id)}
                     >
                       {t("RestoreSuggestion")}
@@ -237,12 +185,8 @@ export function FixContactsClient({
                   key={recommendation.id}
                   recommendation={recommendation}
                   contacts={[recommendation.leftPerson, recommendation.rightPerson]}
-                  onAccepted={() =>
-                    setRecommendations((prev) => prev.filter((r) => r.id !== recommendation.id))
-                  }
-                  onDeclined={() =>
-                    setRecommendations((prev) => prev.filter((r) => r.id !== recommendation.id))
-                  }
+                  onAccepted={() => void invalidateRecommendations()}
+                  onDeclined={() => void invalidateRecommendations()}
                 />
               ),
             )}

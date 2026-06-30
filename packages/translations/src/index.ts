@@ -12,3 +12,5 @@ import enTranslations from "./en.json";
 import csTranslations from "./cs.json";
 
 export { enTranslations as en, csTranslations as cs };
+
+export { i18nConfig, loadTranslation, resourceLoader } from "./i18n";

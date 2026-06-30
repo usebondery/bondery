@@ -11,7 +11,7 @@ Bondery is an open-source personal relationship manager (PRM). It helps you stay
 * **Manage contacts** — Keep a rich database of the people in your network, with notes, social links, phone numbers, and more
 * **Log interactions** — Record calls, meetings, coffees, and messages so you have a timeline of every relationship
 * **Set reminders** — Add birthdays, anniversaries, and other important dates and get email notifications before they arrive
-* **Import from LinkedIn & Instagram** — Use the browser extension to save contacts straight from social networks
+* **Import from LinkedIn & Instagram** — Use the [browser extension](bondery/chrome-extension.md) or [bulk import](bondery/import.md); see also the [mobile app](bondery/mobile-app.md)
 
 ### For developers
 

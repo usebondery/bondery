@@ -1,5 +1,4 @@
 import { z } from "zod";
-import { parseFullName } from "@bondery/helpers";
 import { CONTACT_FIELD_MAX_LENGTHS } from "../constants/index.js";
 import { contactAddressEntrySchema } from "./address.js";
 import { emailEntryEntitySchema, phoneEntryEntitySchema } from "./channels.js";
@@ -10,7 +9,7 @@ import {
   entityIdentitySchema,
   idsRequestSchema,
   makeCollectionResponseSchema,
-  makeListResponseSchema,
+  makePaginatedListResponseSchema,
   updatedAtSchema,
 } from "./_shared.js";
 
@@ -126,24 +125,6 @@ export const createContactInputSchema = z.object({
     }),
 });
 
-export const createContactSchema = createContactInputSchema.transform((value, context) => {
-  const parsed = parseFullName(value.fullName);
-  if (!parsed.firstName) {
-    context.addIssue({
-      code: "custom",
-      message: "Name is required",
-      path: ["fullName"],
-    });
-    return z.NEVER;
-  }
-
-  return {
-    firstName: parsed.firstName,
-    middleName: parsed.middleName ?? null,
-    lastName: parsed.lastName ?? null,
-  };
-});
-
 export const updateContactInputSchema = contactSchema.partial().omit({
   id: true,
   createdAt: true,
@@ -153,7 +134,18 @@ export const contactResponseSchema = z.object({
   contact: contactSchema,
 });
 
-export const contactsListResponseSchema = makeListResponseSchema("contacts", contactSchema);
+export const contactsListStatsSchema = z.object({
+  totalContacts: z.number(),
+  thisMonthInteractions: z.number(),
+  newContactsThisYear: z.number(),
+});
+
+export const contactsListResponseSchema = makePaginatedListResponseSchema(
+  "contacts",
+  contactSchema,
+).extend({
+  stats: contactsListStatsSchema,
+});
 
 export const createContactRelationshipInputSchema = z.object({
   relatedPersonId: z.string(),
@@ -179,7 +171,7 @@ export const contactSortOrderSchema = z.enum([
 ]);
 
 export const contactsFilterSchema = z.object({
-  q: z.string().optional(),
+  search: z.string().optional(),
   sort: contactSortOrderSchema.optional(),
 });
 
@@ -248,6 +240,19 @@ export const enrichEligibleCountResponseSchema = z.object({
   count: z.number(),
 });
 
+/** POST /api/contacts/enrich-queue/init optional body. */
+export const enrichQueueInitBodySchema = z
+  .object({
+    personId: z.string().optional(),
+  })
+  .optional();
+
+/** PATCH /api/contacts/enrich-queue/:id body. */
+export const enrichQueuePatchBodySchema = z.object({
+  status: z.enum(["completed", "failed"]),
+  errorMessage: z.string().nullable().optional(),
+});
+
 export const shareableFieldSchema = z.enum([
   "name",
   "avatar",
@@ -286,7 +291,7 @@ export type LinkedInDataResponse = z.infer<typeof linkedInDataResponseSchema>;
 export type EnrichQueueStatus = z.infer<typeof enrichQueueStatusSchema>;
 export type EnrichQueueItem = z.infer<typeof enrichQueueItemSchema>;
 export type EnrichEligibleCountResponse = z.infer<typeof enrichEligibleCountResponseSchema>;
+export type EnrichQueueInitBody = z.infer<typeof enrichQueueInitBodySchema>;
+export type EnrichQueuePatchBody = z.infer<typeof enrichQueuePatchBodySchema>;
 export type ShareableField = z.infer<typeof shareableFieldSchema>;
-export type CreateContactNameInput = z.input<typeof createContactSchema>;
-export type CreateContactPayload = z.output<typeof createContactSchema>;
 export type UpdateContactIdentityInput = z.infer<typeof updateContactIdentitySchema>;

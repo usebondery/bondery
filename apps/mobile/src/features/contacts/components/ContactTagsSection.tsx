@@ -3,7 +3,7 @@ import { useCallback, useMemo, useState } from "react";
 import { ScrollView, StyleSheet, View } from "react-native";
 import type { Tag, TagWithCount } from "@bondery/schemas";
 import { LoadErrorCard } from "../../../components/load-state";
-import { addTagToContact } from "../../../lib/api/client";
+import { contactsDomain } from "../../../lib/domains/contacts";
 import { useMobileTranslations } from "../../../lib/i18n/useMobileTranslations";
 import { useMobilePreferences } from "../../../lib/preferences/useMobilePreferences";
 import { useAppToast } from "../../../lib/toast/useAppToast";
@@ -78,10 +78,10 @@ export function ContactTagsSection({
   ).replace("{name}", contactName);
 
   const handleTagCreated = useCallback(
-    async (tag: Tag) => {
+    (tag: Tag) => {
       try {
-        const { tag: addedTag } = await addTagToContact(contactId, tag.id);
-        onTagAdded(addedTag);
+        contactsDomain.addTag(contactId, tag.id);
+        onTagAdded(tag);
       } catch {
         showToast({
           type: "error",

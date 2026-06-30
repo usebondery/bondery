@@ -13,6 +13,7 @@ import {
   IconArrowMerge,
   IconHeartHandshake,
   IconMessageChatbot,
+  type Icon,
 } from "@tabler/icons-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -26,6 +27,60 @@ import {
   BonderyIcon,
   BonderyIconWhite,
 } from "@bondery/branding-src";
+import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
+
+type NavigationLinkDef = {
+  href: string;
+  labelKey: string;
+  icon: Icon;
+};
+
+export const primaryLinkDefs: NavigationLinkDef[] = [
+  { href: WEBAPP_ROUTES.HOME, labelKey: "Home", icon: IconHome },
+  {
+    href: WEBAPP_ROUTES.INTERACTIONS,
+    labelKey: "Interactions",
+    icon: IconTimelineEventText,
+  },
+  { href: WEBAPP_ROUTES.PEOPLE, labelKey: "People", icon: IconUser },
+  {
+    href: WEBAPP_ROUTES.KEEP_IN_TOUCH,
+    labelKey: "KeepInTouch",
+    icon: IconHeartHandshake,
+  },
+  { href: WEBAPP_ROUTES.GROUPS, labelKey: "Groups", icon: IconUsersGroup },
+  { href: WEBAPP_ROUTES.MAP, labelKey: "Map", icon: IconMap2 },
+  { href: WEBAPP_ROUTES.CHAT, labelKey: "Chat", icon: IconMessageChatbot },
+];
+
+export const secondaryLinkDefs: NavigationLinkDef[] = [
+  {
+    href: WEBAPP_ROUTES.FIX_CONTACTS,
+    labelKey: "FixAndMerge",
+    icon: IconArrowMerge,
+  },
+  { href: WEBAPP_ROUTES.SETTINGS, labelKey: "Settings", icon: IconSettings },
+];
+
+export type ResolvedNavigationLink = NavigationLinkDef & { label: string };
+
+export function useAppNavigationLinks(): {
+  primaryLinks: ResolvedNavigationLink[];
+  secondaryLinks: ResolvedNavigationLink[];
+} {
+  const t = useTranslations("AppNavigation");
+
+  const resolve = (defs: NavigationLinkDef[]): ResolvedNavigationLink[] =>
+    defs.map((link) => ({
+      ...link,
+      label: t(link.labelKey),
+    }));
+
+  return {
+    primaryLinks: resolve(primaryLinkDefs),
+    secondaryLinks: resolve(secondaryLinkDefs),
+  };
+}
 
 interface NavigationSidebarContentProps {
   userName: string;
@@ -35,33 +90,6 @@ interface NavigationSidebarContentProps {
   collapsed: boolean;
 }
 
-export const primaryLinks = [
-  { href: WEBAPP_ROUTES.HOME, label: "Home", icon: IconHome },
-  {
-    href: WEBAPP_ROUTES.INTERACTIONS,
-    label: "Interactions",
-    icon: IconTimelineEventText,
-  },
-  { href: WEBAPP_ROUTES.PEOPLE, label: "People", icon: IconUser },
-  {
-    href: WEBAPP_ROUTES.KEEP_IN_TOUCH,
-    label: "Keep in touch",
-    icon: IconHeartHandshake,
-  },
-  { href: WEBAPP_ROUTES.GROUPS, label: "Groups", icon: IconUsersGroup },
-  { href: WEBAPP_ROUTES.MAP, label: "Map", icon: IconMap2 },
-  { href: WEBAPP_ROUTES.CHAT, label: "AI Assistant", icon: IconMessageChatbot },
-];
-
-export const secondaryLinks = [
-  {
-    href: WEBAPP_ROUTES.FIX_CONTACTS,
-    label: "Fix & merge",
-    icon: IconArrowMerge,
-  },
-  { href: WEBAPP_ROUTES.SETTINGS, label: "Settings", icon: IconSettings },
-];
-
 export function NavigationSidebarContent({
   userName,
   avatarUrl,
@@ -70,6 +98,8 @@ export function NavigationSidebarContent({
   collapsed,
 }: NavigationSidebarContentProps) {
   const pathname = usePathname();
+  const t = useTranslations("AppNavigation");
+  const { primaryLinks, secondaryLinks } = useAppNavigationLinks();
   const isMyselfActive = pathname === WEBAPP_ROUTES.MYSELF;
   const { hovered: userCardHovered, ref: userCardRef } =
     useHover<HTMLAnchorElement>();
@@ -107,7 +137,7 @@ export function NavigationSidebarContent({
       {/* Search / command palette trigger */}
       <Box mb="xs">
         <NavLinkItem
-          label="Search..."
+          label={t("Search")}
           icon={IconSearch}
           onClick={() => spotlight.open()}
           bordered
@@ -157,7 +187,7 @@ export function NavigationSidebarContent({
           same justify=flex-start, Avatar replaces the icon. */}
       <Box mb="xs">
         <Tooltip
-          label={`Ahoy, ${userName}! 😎`}
+          label={t("MyselfGreeting", { name: userName })}
           position="right"
           withArrow
           disabled={!collapsed}

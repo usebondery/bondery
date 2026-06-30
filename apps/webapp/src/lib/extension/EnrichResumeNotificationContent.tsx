@@ -1,25 +1,19 @@
 "use client";
 
 import { useSyncExternalStore } from "react";
-import { useTranslations } from "next-intl";
+import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
 import { Button, Group, Text } from "@mantine/core";
-import { IconPlayerPlay, IconPlayerPlayFilled, IconTrash } from "@tabler/icons-react";
-import { useRouter } from "next/navigation";
+import { IconPlayerPlayFilled, IconTrash } from "@tabler/icons-react";
+import { getQueryClient } from "@/lib/query/client";
+import { invalidateAfterEnrichBatch } from "@/lib/query/invalidation";
 import { defaultState, getState, subscribe } from "./enrichBatchStore";
 import { useBatchEnrichFromLinkedIn } from "./useBatchEnrichFromLinkedIn";
 
 /**
  * Live notification body for the interrupted-enrichment resume prompt.
- *
- * Rendered as the `message` of the persistent `"enrich-resume"` notification.
- * Subscribes directly to `enrichBatchStore` so it re-renders on state changes
- * without needing `notifications.update()`.
- *
- * Shows the interrupted count, and Resume / Discard action buttons.
  */
 export function EnrichResumeNotificationContent() {
   const t = useTranslations("EnrichFromLinkedIn");
-  const router = useRouter();
   const { resume, discard } = useBatchEnrichFromLinkedIn();
 
   const { pendingQueueStatus } = useSyncExternalStore(subscribe, getState, () => defaultState);
@@ -32,7 +26,7 @@ export function EnrichResumeNotificationContent() {
 
   const handleDiscard = async () => {
     await discard();
-    router.refresh();
+    await invalidateAfterEnrichBatch(getQueryClient());
   };
 
   return (

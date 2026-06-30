@@ -2,12 +2,12 @@
 
 import { useState, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
 import { Modal } from "@mantine/core";
 import { nprogress, NavigationProgress } from "@mantine/nprogress";
-import { API_ROUTES, WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
-import { API_URL } from "@/lib/config";
-import { OnboardingProvider, useOnboardingContext } from "./OnboardingContext";
+import { completeOnboarding as completeOnboardingRequest } from "@/lib/api/domains/settings";
+import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
+import { OnboardingProvider } from "./OnboardingContext";
 import { StepLoading } from "./steps/StepLoading";
 import { StepWelcome } from "./steps/StepWelcome";
 import { StepIntent } from "./steps/StepIntent";
@@ -24,7 +24,6 @@ const STEP_PROGRESS: Record<number, number> = {
 function OnboardingFlowContent() {
   const router = useRouter();
   const t = useTranslations("Onboarding");
-  const { seedPromise } = useOnboardingContext();
   const [step, setStep] = useState(0);
   const [isCompleting, setIsCompleting] = useState(false);
 
@@ -41,21 +40,12 @@ function OnboardingFlowContent() {
     setIsCompleting(true);
     nprogress.set(100);
     try {
-      // Wait for seeding to finish so the home page renders with data.
-      // Cap at 15 s to avoid blocking indefinitely on network failures.
-      if (seedPromise) {
-        const timeout = new Promise<void>((resolve) => setTimeout(resolve, 15_000));
-        await Promise.race([seedPromise, timeout]);
-      }
-      await fetch(`${API_URL}${API_ROUTES.ME_ONBOARDING_COMPLETE}`, {
-        method: "PATCH",
-        credentials: "include",
-      });
+      await completeOnboardingRequest();
       router.push(WEBAPP_ROUTES.HOME);
     } catch {
       setIsCompleting(false);
     }
-  }, [router, isCompleting, seedPromise]);
+  }, [router, isCompleting]);
 
   const renderStep = () => {
     switch (step) {

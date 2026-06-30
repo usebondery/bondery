@@ -2,12 +2,12 @@
 
 import { ActionIcon, CardSection, Group, Text, Tooltip } from "@mantine/core";
 import { IconAdjustmentsHorizontal, IconHelpCircle } from "@tabler/icons-react";
-import { useRouter } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { getQueryClient } from "@/lib/query/client";
+import { invalidateSettings } from "@/lib/query/invalidation";
+import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
 import type { ColorSchemePreference } from "@bondery/schemas";
 import { notifications } from "@mantine/notifications";
 import { useState } from "react";
-import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import {
   errorNotificationTemplate,
   loadingNotificationTemplate,
@@ -20,6 +20,9 @@ import { TimeFormatPicker } from "./TimeFormatPicker";
 import { LanguagePicker } from "@/components/shared/LanguagePicker";
 import { TimezonePicker } from "@/components/shared/TimezonePicker";
 import { APP_LANGUAGES_DATA } from "@bondery/helpers/locale";
+import { useUpdateSettingsMutation } from "@/lib/query/hooks/useSettings";
+import { useApplyUserLanguage } from "@/lib/i18n/useApplyUserLanguage";
+import type { SupportedLocale } from "@bondery/translations";
 
 interface PreferencesCardProps {
   initialColorScheme: ColorSchemePreference;
@@ -38,7 +41,8 @@ export function PreferencesCard({
 }: PreferencesCardProps) {
   const t = useTranslations("SettingsPage.Preferences");
   const tLanguages = useTranslations("Languages");
-  const router = useRouter();
+  const updateSettings = useUpdateSettingsMutation();
+  const applyUserLanguage = useApplyUserLanguage();
   const [language, setLanguage] = useState(initialLanguage);
   const [savedLanguage, setSavedLanguage] = useState(initialLanguage);
   const [timezone, setTimezone] = useState(initialTimezone);
@@ -71,19 +75,7 @@ export function PreferencesCard({
     });
 
     try {
-      const response = await fetch(API_ROUTES.ME_SETTINGS, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          timezone: nextTimezone,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to update timezone");
-      }
+      await updateSettings.mutateAsync({ timezone: nextTimezone });
 
       setSavedTimezone(nextTimezone);
 
@@ -120,21 +112,10 @@ export function PreferencesCard({
     });
 
     try {
-      const response = await fetch(API_ROUTES.ME_SETTINGS, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          language: nextLanguage,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to update language");
-      }
+      await updateSettings.mutateAsync({ language: nextLanguage });
 
       setSavedLanguage(nextLanguage);
+      await applyUserLanguage(nextLanguage as SupportedLocale);
 
       notifications.hide(loadingNotification);
       notifications.show(
@@ -210,7 +191,7 @@ export function PreferencesCard({
             <TimeFormatPicker
               initialTimeFormat={initialTimeFormat}
               onTimeFormatChange={setTimeFormat}
-              onTimeFormatSaved={() => router.refresh()}
+              onTimeFormatSaved={() => void invalidateSettings(getQueryClient())}
               label={renderFieldLabel(t("TimeFormat"), t("TimeFormatTooltip"))}
             />
           </div>

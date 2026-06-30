@@ -4,16 +4,14 @@ import { TextInput, Group, Text } from "@mantine/core";
 import { IconUser } from "@tabler/icons-react";
 import { useState } from "react";
 import { notifications } from "@mantine/notifications";
-import { useTranslations } from "next-intl";
-import { API_ROUTES } from "@bondery/helpers/globals/paths";
-import { useRouter } from "next/navigation";
+import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
 import {
   CONTACT_FIELD_MAX_LENGTHS,
   firstZodErrorMessage,
   updateAccountInputSchema,
 } from "@bondery/schemas";
-import { revalidateSettings } from "../../actions";
 import { errorNotificationTemplate, successNotificationTemplate } from "@bondery/mantine-next";
+import { useUpdateSettingsMutation } from "@/lib/query/hooks/useSettings";
 
 interface NameFieldsProps {
   initialName: string;
@@ -34,7 +32,7 @@ export function NameFields({ initialName, initialMiddlename, initialSurname }: N
   const [surnameFocused, setSurnameFocused] = useState(false);
 
   const t = useTranslations("SettingsPage.Profile");
-  const router = useRouter();
+  const updateSettings = useUpdateSettingsMutation();
 
   const updateName = async (field: "name" | "middlename" | "surname", value: string) => {
     const currentValues = {
@@ -79,19 +77,7 @@ export function NameFields({ initialName, initialMiddlename, initialSurname }: N
     }
 
     try {
-      const response = await fetch(API_ROUTES.ME_SETTINGS, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          ...validationResult.data,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to update name");
-      }
+      await updateSettings.mutateAsync(validationResult.data);
 
       if (field === "name") setOriginalName(value);
       if (field === "middlename") setOriginalMiddlename(value);
@@ -103,11 +89,6 @@ export function NameFields({ initialName, initialMiddlename, initialSurname }: N
           description: t("NameUpdateSuccess"),
         }),
       );
-
-      setTimeout(async () => {
-        await revalidateSettings();
-        router.refresh();
-      }, 500);
     } catch {
       notifications.show(
         errorNotificationTemplate({

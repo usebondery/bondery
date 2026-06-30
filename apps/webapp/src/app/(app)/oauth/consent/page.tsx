@@ -18,7 +18,7 @@ import { IconShield, IconX, IconCheck } from "@tabler/icons-react";
 import { notifications } from "@mantine/notifications";
 import { createBrowswerSupabaseClient } from "@/lib/supabase/client";
 import { useSearchParams, useRouter } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
 import { errorNotificationTemplate } from "@bondery/mantine-next";
 
 /**

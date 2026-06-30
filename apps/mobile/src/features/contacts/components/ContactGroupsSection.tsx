@@ -3,7 +3,7 @@ import { useCallback, useMemo, useState } from "react";
 import { ScrollView, StyleSheet, View } from "react-native";
 import type { Group, GroupWithCount } from "@bondery/schemas";
 import { LoadErrorCard } from "../../../components/load-state";
-import { addContactsToGroup } from "../../../lib/api/client";
+import { groupsDomain } from "../../../lib/domains/groups";
 import { useMobileTranslations } from "../../../lib/i18n/useMobileTranslations";
 import { useMobilePreferences } from "../../../lib/preferences/useMobilePreferences";
 import { useAppToast } from "../../../lib/toast/useAppToast";
@@ -78,9 +78,9 @@ export function ContactGroupsSection({
   );
 
   const handleGroupCreated = useCallback(
-    async (group: Group) => {
+    (group: Group) => {
       try {
-        await addContactsToGroup(group.id, { personIds: [contactId] });
+        groupsDomain.addMembers(group.id, [contactId]);
         onGroupAdded(group);
       } catch {
         showToast({

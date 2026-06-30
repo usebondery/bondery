@@ -2,7 +2,7 @@
 
 import { Card, Text, Group, SimpleGrid, RingProgress, Stack, ThemeIcon } from "@mantine/core";
 import { IconMoodSmile, IconMoodNeutral, IconMoodSad } from "@tabler/icons-react";
-import { useTranslations } from "next-intl";
+import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
 import type { NpsData } from "../getStatsData";
 
 interface NpsCardProps {

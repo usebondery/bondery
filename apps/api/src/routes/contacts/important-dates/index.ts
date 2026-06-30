@@ -3,18 +3,18 @@
  * Handles important dates (birthdays, anniversaries, etc.) and upcoming reminders.
  */
 
-import type { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
-import { Type } from "@sinclair/typebox";
+import type { FastifyReply } from "fastify";
+import type { AppFastifyInstance } from "../../../lib/fastify-types.js";
+import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
 import { getAuth } from "../../../lib/auth.js";
-import { buildContactAvatarUrl } from "../../../lib/supabase.js";
+import { resolveContactAvatarUrl } from "../../../lib/supabase.js";
 import type { ImportantDateType, UpcomingReminder, Database } from "@bondery/schemas";
+import { extractAvatarOptions } from "../../../lib/queries.js";
 import {
-  UuidParam,
-  ImportantDateInputSchema,
-  AvatarQualityEnum,
-  AvatarSizeEnum,
-  extractAvatarOptions,
-} from "../../../lib/schemas.js";
+  avatarTransformQuerySchema,
+  importantDatesReplaceBodySchema,
+  uuidParamSchema,
+} from "@bondery/schemas/http";
 
 // ── Constants ────────────────────────────────────────────────────
 
@@ -40,20 +40,6 @@ export const IMPORTANT_DATE_TYPES = [
 ] satisfies ImportantDateType[];
 
 export const IMPORTANT_DATE_NOTIFY_VALUES = [1, 3, 7] as const;
-
-// ── TypeBox Schemas ──────────────────────────────────────────────
-
-const ImportantDateTypeEnum = Type.Union([
-  Type.Literal("birthday"),
-  Type.Literal("anniversary"),
-  Type.Literal("nameday"),
-  Type.Literal("graduation"),
-  Type.Literal("other"),
-]);
-
-const ImportantDatesBody = Type.Object({
-  dates: Type.Array(ImportantDateInputSchema),
-});
 
 // ── Helpers ──────────────────────────────────────────────────────
 
@@ -149,7 +135,7 @@ export function deriveReminderDateKey(entry: {
 
 // ── Route Registration ───────────────────────────────────────────
 
-export function registerImportantDateRoutes(fastify: FastifyInstance): void {
+export function registerImportantDateRoutes(fastify: AppFastifyInstance): void {
   /**
    * GET /api/contacts/important-dates/upcoming - List upcoming reminders with notification configured
    */
@@ -157,18 +143,12 @@ export function registerImportantDateRoutes(fastify: FastifyInstance): void {
     "/important-dates/upcoming",
     {
       schema: {
-        querystring: Type.Object({
-          avatarQuality: Type.Optional(AvatarQualityEnum),
-          avatarSize: Type.Optional(AvatarSizeEnum),
-        }),
-      },
+        querystring: avatarTransformQuerySchema,
+      } satisfies FastifyZodOpenApiSchema,
     },
-    async (
-      request: FastifyRequest<{ Querystring: { avatarQuality?: string; avatarSize?: string } }>,
-      reply: FastifyReply,
-    ) => {
+    async (request, reply) => {
       const { client, user } = getAuth(request);
-      const avatarOptions = extractAvatarOptions(request.query as any);
+      const avatarOptions = extractAvatarOptions(request.query);
 
       const today = new Date();
       const startDate = new Date(
@@ -183,7 +163,7 @@ export function registerImportantDateRoutes(fastify: FastifyInstance): void {
       const { data: rows, error } = await client
         .from("people_important_dates")
         .select(
-          `${IMPORTANT_DATE_SELECT}, person:people!inner(id, first_name, last_name, updated_at)`,
+          `${IMPORTANT_DATE_SELECT}, person:people!inner(id, first_name, last_name, updated_at, has_avatar)`,
         )
         .eq("user_id", user.id)
         .or("notify_days_before.not.is.null,notify_on.not.is.null")
@@ -253,7 +233,16 @@ export function registerImportantDateRoutes(fastify: FastifyInstance): void {
             importantDate: toImportantDate(row),
             person: toContactPreview(
               person,
-              buildContactAvatarUrl(client, user.id, person.id, avatarOptions, person.updated_at),
+              resolveContactAvatarUrl(
+                client,
+                user.id,
+                {
+                  id: person.id,
+                  hasAvatar: person.has_avatar,
+                  updatedAt: person.updated_at,
+                },
+                avatarOptions,
+              ),
             ),
             notificationSent: Boolean(notificationSentAt),
             notificationSentAt,
@@ -288,8 +277,12 @@ export function registerImportantDateRoutes(fastify: FastifyInstance): void {
    */
   fastify.get(
     "/:id/important-dates",
-    { schema: { params: UuidParam } },
-    async (request: FastifyRequest<{ Params: typeof UuidParam.static }>, reply: FastifyReply) => {
+    {
+      schema: {
+        params: uuidParamSchema,
+      } satisfies FastifyZodOpenApiSchema,
+    },
+    async (request, reply) => {
       const { client, user } = getAuth(request);
       const { id: personId } = request.params;
 
@@ -326,14 +319,13 @@ export function registerImportantDateRoutes(fastify: FastifyInstance): void {
    */
   fastify.put(
     "/:id/important-dates",
-    { schema: { params: UuidParam, body: ImportantDatesBody } },
-    async (
-      request: FastifyRequest<{
-        Params: typeof UuidParam.static;
-        Body: typeof ImportantDatesBody.static;
-      }>,
-      reply: FastifyReply,
-    ) => {
+    {
+      schema: {
+        params: uuidParamSchema,
+        body: importantDatesReplaceBodySchema,
+      } satisfies FastifyZodOpenApiSchema,
+    },
+    async (request, reply) => {
       const { client, user } = getAuth(request);
       const { id: personId } = request.params;
       const dates = request.body.dates;

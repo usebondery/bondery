@@ -3,7 +3,7 @@ import { z } from "zod";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@bondery/schemas/supabase.types";
 import { createSocialUrl } from "@bondery/helpers";
-import { buildContactAvatarUrl } from "../../supabase.js";
+import { resolveContactAvatarUrl } from "../../supabase.js";
 import { searchPeopleIds } from "../../search.js";
 
 /**
@@ -61,7 +61,11 @@ async function fetchContactDetails(
     firstName: person.first_name,
     middleName: person.middle_name,
     lastName: person.last_name,
-    avatar: buildContactAvatarUrl(supabase, userId, person.id),
+    avatar: resolveContactAvatarUrl(supabase, userId, {
+      id: person.id,
+      hasAvatar: person.has_avatar,
+      updatedAt: person.updated_at,
+    }),
     fullName: [person.first_name, person.middle_name, person.last_name].filter(Boolean).join(" "),
     headline: person.headline,
     location: person.location,
@@ -184,7 +188,7 @@ export function createContactTools(supabase: SupabaseClient<Database>, userId: s
           .select(
             `
             id, first_name, middle_name, last_name, headline, location, language,
-            last_interaction, keep_frequency_days, created_at,
+            last_interaction, keep_frequency_days, created_at, has_avatar, updated_at,
             people_tags ( tags ( label, color ) )
           `,
           )
@@ -227,7 +231,11 @@ export function createContactTools(supabase: SupabaseClient<Database>, userId: s
             firstName: c.first_name,
             middleName: c.middle_name,
             lastName: c.last_name,
-            avatar: buildContactAvatarUrl(supabase, userId, c.id),
+            avatar: resolveContactAvatarUrl(supabase, userId, {
+              id: c.id,
+              hasAvatar: c.has_avatar,
+              updatedAt: c.updated_at,
+            }),
             fullName: [c.first_name, c.middle_name, c.last_name].filter(Boolean).join(" "),
             headline: c.headline,
             location: c.location,

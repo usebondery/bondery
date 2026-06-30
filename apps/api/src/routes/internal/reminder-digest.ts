@@ -1,59 +1,29 @@
-import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
-import { Type } from "@sinclair/typebox";
+import type { FastifyInstance, FastifyReply } from "fastify";
+import type { AppFastifyInstance, AppRoutePlugin } from "../../lib/fastify-types.js";
+import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
+import { z } from "zod";
 import nodemailer from "nodemailer";
 import { render } from "@react-email/render";
 import { ReminderDigestEmail } from "@bondery/emails";
+import { reminderDigestRequestSchema } from "@bondery/schemas";
 
-const ReminderDigestItemSchema = Type.Object({
-  personId: Type.String(),
-  personName: Type.String(),
-  personAvatar: Type.Optional(Type.Union([Type.String(), Type.Null()])),
-  type: Type.Union([
-    Type.Literal("birthday"),
-    Type.Literal("anniversary"),
-    Type.Literal("nameday"),
-    Type.Literal("graduation"),
-    Type.Literal("other"),
-  ]),
-  date: Type.String(),
-  notifyOn: Type.String(),
-  notifyDaysBefore: Type.Union([
-    Type.Literal(1),
-    Type.Literal(3),
-    Type.Literal(7),
-  ]),
-  note: Type.Optional(Type.Union([Type.String(), Type.Null()])),
-});
-
-const ReminderDigestUserSchema = Type.Object({
-  userId: Type.String(),
-  email: Type.String(),
-  timezone: Type.Optional(Type.String()),
-  targetDate: Type.Optional(Type.String()),
-  reminders: Type.Array(ReminderDigestItemSchema),
-});
-
-const ReminderDigestBody = Type.Object({
-  targetDate: Type.String(),
-  users: Type.Array(ReminderDigestUserSchema),
-});
-
-export async function reminderDigestRoutes(fastify: FastifyInstance) {
+export const reminderDigestRoutes: AppRoutePlugin = async (fastify) => {
   fastify.addHook("onRoute", (routeOptions) => {
-    routeOptions.schema = { ...routeOptions.schema, tags: ["Internal"] };
+    if (routeOptions.schema) {
+      routeOptions.schema.tags = ["Internal"];
+    }
   });
 
   fastify.post(
     "/",
     {
-      schema: { body: ReminderDigestBody },
+      schema: {
+        body: reminderDigestRequestSchema,
+      } satisfies FastifyZodOpenApiSchema,
       onRequest: fastify.auth([fastify.verifyServiceSecret]),
       config: { rateLimit: false },
     },
-    async (
-      request: FastifyRequest<{ Body: typeof ReminderDigestBody.static }>,
-      reply: FastifyReply,
-    ) => {
+    async (request, reply) => {
       const { targetDate, users } = request.body;
 
       request.log.info(

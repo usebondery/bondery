@@ -20,6 +20,15 @@ checkEnvVariables({
     "PRIVATE_EMAIL_USER",
     "PRIVATE_EMAIL_PASS",
     "PRIVATE_EMAIL_ADDRESS",
-    ...(environment === "production" ? ["PRIVATE_REDIS_URL"] : []),
+    ...(environment === "production"
+      ? [
+          "PRIVATE_REDIS_URL",
+          "POLAR_ACCESS_TOKEN",
+          "POLAR_WEBHOOK_SECRET",
+          "POLAR_PRODUCT_ID",
+        ]
+      : []),
+    "PRIVATE_API_KEY_PEPPER",
+    "PRIVATE_SUPABASE_JWT_SIGNING_JWK",
   ],
 });

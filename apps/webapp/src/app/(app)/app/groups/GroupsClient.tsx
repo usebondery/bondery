@@ -3,13 +3,12 @@
 import { useMemo } from "react";
 import { Text, Button, Stack, Group, Paper, SimpleGrid } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
-import { IconCopy, IconTrash, IconUsersGroup, IconUsersPlus } from "@tabler/icons-react";
+import { IconTrash, IconUsersGroup, IconUsersPlus } from "@tabler/icons-react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
 import { PageHeader } from "@/app/(app)/app/components/PageHeader";
 import { PageWrapper } from "@/app/(app)/app/components/PageWrapper";
 import type { GroupWithCount } from "@bondery/schemas";
-import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import { WEBSITE_URL } from "@/lib/config";
 import { openAddGroupModal } from "./components/AddGroupModal";
 import { openEditGroupModal } from "./components/EditGroupModal";
@@ -22,21 +21,28 @@ import {
   ModalTitle,
   successNotificationTemplate,
 } from "@bondery/mantine-next";
-import { revalidateGroups } from "../actions";
 import { openStandardConfirmModal } from "../components/modals/openStandardConfirmModal";
 import { captureEvent } from "@/lib/analytics/client";
+import {
+  useDeleteGroupMutation,
+  useDuplicateGroupMutation,
+  useGroupsListQuery,
+} from "@/lib/query/hooks/useGroups";
 
-interface GroupsClientProps {
-  initialGroups: GroupWithCount[];
-  totalCount: number;
-}
+const LIST_PARAMS = { previewLimit: 3 };
 
-export function GroupsClient({ initialGroups, totalCount }: GroupsClientProps) {
+export function GroupsClient() {
   const t = useTranslations("GroupsPage");
-  const tHeader = useTranslations("PageHeader");
+  const tCommon = useTranslations("WebAppCommon");
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const { data } = useGroupsListQuery(LIST_PARAMS);
+  const deleteGroupMutation = useDeleteGroupMutation();
+  const duplicateGroupMutation = useDuplicateGroupMutation();
+  const initialGroups = data?.groups ?? [];
+  const totalCount = data?.totalCount ?? 0;
+
   const sortParam = searchParams.get("sort");
   const sortBy: SortOption =
     sortParam === "count-asc" ||
@@ -52,7 +58,6 @@ export function GroupsClient({ initialGroups, totalCount }: GroupsClientProps) {
     router.replace(`${pathname}?${params.toString()}`);
   };
 
-  // Sort groups based on selected option
   const sortedGroups = useMemo(() => {
     const groups = [...initialGroups];
     switch (sortBy) {
@@ -93,50 +98,45 @@ export function GroupsClient({ initialGroups, totalCount }: GroupsClientProps) {
     if (!group) return;
 
     openStandardConfirmModal({
-      title: <ModalTitle text="Delete group?" icon={<IconTrash size={20} />} isDangerous={true} />,
-      message: (
-        <Text size="sm">
-          Are you sure you want to delete "{group.label}"? This action cannot be undone. The
-          contacts in this group will not be deleted.
-        </Text>
+      title: (
+        <ModalTitle
+          text={t("DeleteGroup.Title")}
+          icon={<IconTrash size={20} />}
+          isDangerous={true}
+        />
       ),
-      confirmLabel: "Delete",
-      cancelLabel: "Cancel",
+      message: (
+        <Text size="sm">{t("DeleteGroup.Message", { label: group.label })}</Text>
+      ),
+      confirmLabel: tCommon("Delete"),
+      cancelLabel: tCommon("Cancel"),
       confirmColor: "red",
       onConfirm: async () => {
         const loadingNotification = notifications.show({
           ...loadingNotificationTemplate({
-            title: "Deleting...",
-            description: `Deleting group "${group.label}"`,
+            title: tCommon("Deleting"),
+            description: t("DeleteGroup.LoadingDescription", { label: group.label }),
           }),
         });
 
         try {
-          const res = await fetch(`${API_ROUTES.GROUPS}/${groupId}`, {
-            method: "DELETE",
-          });
-
-          if (!res.ok) throw new Error("Failed to delete group");
+          await deleteGroupMutation.mutateAsync(groupId);
 
           captureEvent("group_deleted");
 
           notifications.update({
             ...successNotificationTemplate({
-              title: "Success",
-              description: "Group deleted successfully",
+              title: tCommon("SuccessTitle"),
+              description: t("DeleteGroup.SuccessDescription"),
             }),
             id: loadingNotification,
           });
-
-          // Refresh the page to update the groups list
-          await revalidateGroups();
-          router.refresh();
         } catch (error) {
           console.error("Error deleting group:", error);
           notifications.update({
             ...errorNotificationTemplate({
-              title: "Error",
-              description: "Failed to delete group. Please try again.",
+              title: tCommon("ErrorTitle"),
+              description: t("DeleteGroup.ErrorDescription"),
             }),
             id: loadingNotification,
           });
@@ -148,73 +148,34 @@ export function GroupsClient({ initialGroups, totalCount }: GroupsClientProps) {
   const handleDuplicateGroup = async (group: GroupWithCount) => {
     const loadingNotification = notifications.show({
       ...loadingNotificationTemplate({
-        title: "Duplicating...",
-        description: `Duplicating group "${group.label}"`,
+        title: tCommon("Duplicating"),
+        description: t("DuplicateGroup.LoadingDescription", { label: group.label }),
       }),
     });
 
     try {
-      const duplicateLabel = `${group.label} (Copy)`;
-
-      // Fetch up to 200 members for duplication; groups larger than 200 will be partially duplicated.
-      const groupContactsRes = await fetch(
-        `${API_ROUTES.GROUPS}/${group.id}/contacts?limit=200&offset=0`,
-      );
-      if (!groupContactsRes.ok) throw new Error("Failed to fetch group members");
-
-      const groupContactsPayload = (await groupContactsRes.json()) as {
-        contacts?: Array<{ id: string }>;
-      };
-      const personIds = (groupContactsPayload.contacts || []).map((contact) => contact.id);
-
-      const res = await fetch(API_ROUTES.GROUPS, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          label: duplicateLabel,
+      await duplicateGroupMutation.mutateAsync({
+        sourceGroupId: group.id,
+        input: {
+          label: `${group.label}${t("DuplicateGroup.CopySuffix")}`,
           emoji: group.emoji || "",
           color: group.color || "#1971C2",
-        }),
+        },
       });
-
-      if (!res.ok) throw new Error("Failed to duplicate group");
-
-      const createdGroupPayload = (await res.json()) as { id?: string };
-      if (!createdGroupPayload.id) throw new Error("Failed to parse duplicated group id");
-
-      if (personIds.length > 0) {
-        const membershipRes = await fetch(
-          `${API_ROUTES.GROUPS}/${createdGroupPayload.id}/contacts`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ personIds }),
-          },
-        );
-
-        if (!membershipRes.ok) throw new Error("Failed to duplicate group members");
-      }
 
       notifications.update({
         ...successNotificationTemplate({
-          title: "Success",
-          description: "Group duplicated successfully",
+          title: tCommon("SuccessTitle"),
+          description: t("DuplicateGroup.SuccessDescription"),
         }),
         id: loadingNotification,
       });
-
-      await revalidateGroups();
-      router.refresh();
     } catch (error) {
       console.error("Error duplicating group:", error);
       notifications.update({
         ...errorNotificationTemplate({
-          title: "Error",
-          description: "Failed to duplicate group. Please try again.",
+          title: tCommon("ErrorTitle"),
+          description: t("DuplicateGroup.ErrorDescription"),
         }),
         id: loadingNotification,
       });

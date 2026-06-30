@@ -1,0 +1,92 @@
+import { z } from "zod";
+import { CONTACT_LIMITS } from "../constants/index.js";
+import { channelTypeSchema } from "../primitives/index.js";
+const SHARE_CONTACT_EMAIL_MAX_RECIPIENTS = 10;
+const SHARE_CONTACT_EMAIL_MAX_MESSAGE_LENGTH = 2000;
+function refinePhoneEntryDigits(data, context) {
+    if (data.value.replace(/\D/g, "").length === 0) {
+        context.addIssue({
+            code: "custom",
+            message: "Phone number is required",
+            path: ["value"],
+        });
+    }
+}
+export const phoneEntryEntitySchema = z.object({
+    prefix: z.string().trim().min(1, { error: "Country code is required" }),
+    value: z.string().trim().min(1, { error: "Phone number is required" }),
+    type: channelTypeSchema,
+    preferred: z.boolean(),
+});
+const phoneEntryBaseSchema = phoneEntryEntitySchema.omit({ preferred: true });
+const phoneEntryOptionalPreferredSchema = phoneEntryBaseSchema.extend({
+    preferred: z.boolean().optional(),
+});
+export const emailEntryEntitySchema = z.object({
+    value: z.string().trim().min(1, { error: "Email is required" }),
+    type: channelTypeSchema,
+    preferred: z.boolean(),
+});
+const emailEntryBaseSchema = emailEntryEntitySchema.omit({ preferred: true });
+const emailEntryOptionalPreferredSchema = emailEntryBaseSchema.extend({
+    preferred: z.boolean().optional(),
+});
+/** Mobile phone sheet — subset of phone fields; pick must run before refinements. */
+export const phoneEntrySheetSchema = phoneEntryOptionalPreferredSchema
+    .pick({ prefix: true, value: true, type: true })
+    .superRefine(refinePhoneEntryDigits);
+/** Single phone row before PATCH /api/contacts/:id phones array. */
+export const phoneEntryInputSchema = phoneEntryOptionalPreferredSchema.superRefine(refinePhoneEntryDigits);
+export const phoneEntrySchema = phoneEntryInputSchema.transform((value) => ({
+    ...value,
+    preferred: value.preferred ?? false,
+    prefix: value.prefix || "+1",
+    value: value.value.replace(/\D/g, ""),
+}));
+/** Single email row before PATCH /api/contacts/:id emails array. */
+export const emailEntryInputSchema = z.object({
+    ...emailEntryOptionalPreferredSchema.shape,
+    value: emailEntryOptionalPreferredSchema.shape.value.email({
+        error: "Enter a valid email address",
+    }),
+});
+export const emailEntrySchema = emailEntryInputSchema.transform((value) => ({
+    ...value,
+    preferred: value.preferred ?? false,
+    value: value.value.toLowerCase(),
+}));
+export const replacePhonesSchema = z.array(phoneEntrySchema).max(CONTACT_LIMITS.maxPhones, {
+    error: `Maximum of ${CONTACT_LIMITS.maxPhones} phone numbers allowed`,
+});
+export const replaceEmailsSchema = z.array(emailEntrySchema).max(CONTACT_LIMITS.maxEmails, {
+    error: `Maximum of ${CONTACT_LIMITS.maxEmails} email addresses allowed`,
+});
+export const shareContactEmailSchema = z.object({
+    recipients: z
+        .array(z
+        .string()
+        .trim()
+        .email({ error: "Enter a valid email address" })
+        .transform((value) => value.toLowerCase()))
+        .min(1, { error: "At least one recipient is required" })
+        .max(SHARE_CONTACT_EMAIL_MAX_RECIPIENTS, {
+        error: `Maximum of ${SHARE_CONTACT_EMAIL_MAX_RECIPIENTS} recipients allowed`,
+    })
+        .superRefine((recipients, context) => {
+        const unique = new Set(recipients);
+        if (unique.size !== recipients.length) {
+            context.addIssue({
+                code: "custom",
+                message: "Duplicate recipient emails are not allowed",
+            });
+        }
+    }),
+    message: z
+        .string()
+        .trim()
+        .max(SHARE_CONTACT_EMAIL_MAX_MESSAGE_LENGTH, {
+        error: `Message must be at most ${SHARE_CONTACT_EMAIL_MAX_MESSAGE_LENGTH} characters`,
+    })
+        .transform((value) => value || undefined)
+        .optional(),
+});

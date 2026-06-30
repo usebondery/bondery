@@ -3,35 +3,28 @@
  * Handles authenticated user profile operations
  */
 
-import type { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
-import { Type } from "@sinclair/typebox";
-import { createAdminClient } from "../../lib/supabase.js";
+import type { FastifyReply } from "fastify";
+import type { AppFastifyInstance, AppRoutePlugin } from "../../lib/fastify-types.js";
+import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
+import { createAdminClient, resolveContactAvatarUrl } from "../../lib/supabase.js";
+import {
+  uploadContactAvatarAndSetFlag,
+  deleteContactAvatarAndClearFlag,
+} from "../../lib/avatar-storage.js";
 import { getAuth } from "../../lib/auth.js";
 import { validateImageUpload, validateImageMagicBytes } from "../../lib/config.js";
-import {
-  CONTACT_SELECT,
-  AvatarQualityEnum,
-  AvatarSizeEnum,
-  extractAvatarOptions,
-} from "../../lib/schemas.js";
+import { CONTACT_SELECT, extractAvatarOptions } from "../../lib/queries.js";
+import { avatarTransformQuerySchema } from "@bondery/schemas/http";
+import { updateAccountInputSchema } from "@bondery/schemas";
 import { attachContactExtras } from "../../lib/contact-enrichment.js";
 
-const UpdateAccountBody = Type.Object({
-  name: Type.Optional(Type.String()),
-  middlename: Type.Optional(Type.String()),
-  surname: Type.Optional(Type.String()),
-});
-
-const AVATARS_BUCKET = "avatars";
 const LINKEDIN_LOGOS_BUCKET = "linkedin_logos";
 
-function getAccountAvatarFileName(userId: string): string {
-  return `${userId}/${userId}.jpg`;
-}
-
-export async function meRoutes(fastify: FastifyInstance) {
+export const meRoutes: AppRoutePlugin = async (fastify) => {
   fastify.addHook("onRoute", (routeOptions) => {
-    routeOptions.schema = { ...routeOptions.schema, tags: ["Me"] };
+    if (routeOptions.schema) {
+      routeOptions.schema.tags = ["Me"];
+    }
   });
   fastify.addHook("onRequest", fastify.auth([fastify.verifySession]));
 
@@ -40,11 +33,12 @@ export async function meRoutes(fastify: FastifyInstance) {
    */
   fastify.patch(
     "/",
-    { schema: { body: UpdateAccountBody } },
-    async (
-      request: FastifyRequest<{ Body: typeof UpdateAccountBody.static }>,
-      reply: FastifyReply,
-    ) => {
+    {
+      schema: {
+        body: updateAccountInputSchema,
+      } satisfies FastifyZodOpenApiSchema,
+    },
+    async (request, reply) => {
       const { client } = getAuth(request);
       const { name, middlename, surname } = request.body;
 
@@ -63,16 +57,16 @@ export async function meRoutes(fastify: FastifyInstance) {
   /**
    * DELETE /api/me - Delete user account
    */
-  fastify.delete("/", async (request: FastifyRequest, reply: FastifyReply) => {
+  fastify.delete("/", async (request, reply) => {
     const { client, user } = getAuth(request);
     const adminClient = createAdminClient();
 
     try {
       // Delete user's storage files first
-      const { data: avatarFiles } = await adminClient.storage.from(AVATARS_BUCKET).list(user.id);
+      const { data: avatarFiles } = await adminClient.storage.from("avatars").list(user.id);
       if (avatarFiles && avatarFiles.length > 0) {
         const avatarPaths = avatarFiles.map((file) => `${user.id}/${file.name}`);
-        await adminClient.storage.from(AVATARS_BUCKET).remove(avatarPaths);
+        await adminClient.storage.from("avatars").remove(avatarPaths);
       }
 
       const { data: logoFiles } = await adminClient.storage
@@ -102,7 +96,7 @@ export async function meRoutes(fastify: FastifyInstance) {
   /**
    * POST /api/me/photo - Upload profile photo
    */
-  fastify.post("/photo", async (request: FastifyRequest, reply: FastifyReply) => {
+  fastify.post("/photo", async (request, reply) => {
     const { client, user } = getAuth(request);
     const adminClient = createAdminClient();
 
@@ -121,42 +115,31 @@ export async function meRoutes(fastify: FastifyInstance) {
       return reply.status(400).send({ error: "File content does not match a valid image format" });
     }
 
-    const fileName = getAccountAvatarFileName(user.id);
-
-    // Delete existing account photo
-    await adminClient.storage.from(AVATARS_BUCKET).remove([fileName]);
-
-    // Upload new file
-    const { error: uploadError } = await adminClient.storage
-      .from(AVATARS_BUCKET)
-      .upload(fileName, buffer, {
-        contentType: data.mimetype,
-        upsert: true,
-      });
-
-    if (uploadError) {
+    try {
+      await uploadContactAvatarAndSetFlag(
+        client,
+        adminClient,
+        user.id,
+        user.id,
+        buffer,
+        data.mimetype,
+      );
+    } catch (uploadError) {
       return reply.status(500).send({
         error: "Failed to upload profile photo",
-        description: uploadError.message,
+        description: uploadError instanceof Error ? uploadError.message : String(uploadError),
       });
     }
 
-    // Get public URL
-    const { data: publicUrlData } = adminClient.storage.from(AVATARS_BUCKET).getPublicUrl(fileName);
-
-    const avatarUrl = publicUrlData?.publicUrl || null;
+    const avatarUrl = resolveContactAvatarUrl(client, user.id, {
+      id: user.id,
+      hasAvatar: true,
+      updatedAt: new Date().toISOString(),
+    });
 
     if (!avatarUrl) {
       return reply.status(500).send({ error: "Failed to generate avatar URL" });
     }
-
-    // Touch the myself contact's updated_at so the contacts list picks up the
-    // new avatar URL (which is cache-busted by the updated_at timestamp).
-    await client
-      .from("people")
-      .update({ updated_at: new Date().toISOString() })
-      .eq("user_id", user.id)
-      .eq("myself", true);
 
     return { success: true, data: { avatarUrl } };
   });
@@ -164,21 +147,11 @@ export async function meRoutes(fastify: FastifyInstance) {
   /**
    * DELETE /api/me/photo - Delete profile photo
    */
-  fastify.delete("/photo", async (request: FastifyRequest, reply: FastifyReply) => {
+  fastify.delete("/photo", async (request, reply) => {
     const { client, user } = getAuth(request);
     const adminClient = createAdminClient();
 
-    const fileName = getAccountAvatarFileName(user.id);
-
-    // Delete account photo
-    await adminClient.storage.from(AVATARS_BUCKET).remove([fileName]);
-
-    // Touch the myself contact so the contacts list invalidates its avatar cache
-    await client
-      .from("people")
-      .update({ updated_at: new Date().toISOString() })
-      .eq("user_id", user.id)
-      .eq("myself", true);
+    await deleteContactAvatarAndClearFlag(client, adminClient, user.id, user.id);
 
     return { success: true };
   });
@@ -190,20 +163,12 @@ export async function meRoutes(fastify: FastifyInstance) {
     "/person",
     {
       schema: {
-        querystring: Type.Object({
-          avatarQuality: Type.Optional(AvatarQualityEnum),
-          avatarSize: Type.Optional(AvatarSizeEnum),
-        }),
-      },
+        querystring: avatarTransformQuerySchema,
+      } satisfies FastifyZodOpenApiSchema,
     },
-    async (
-      request: FastifyRequest<{
-        Querystring: { avatarQuality?: string; avatarSize?: string };
-      }>,
-      reply: FastifyReply,
-    ) => {
+    async (request, reply) => {
       const { client, user } = getAuth(request);
-      const avatarOpts = extractAvatarOptions(request.query as any);
+      const avatarOpts = extractAvatarOptions(request.query);
 
       const { data: contact, error } = await client
         .from("people")

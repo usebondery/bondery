@@ -11,12 +11,8 @@ import {
   View,
   type ListRenderItemInfo,
 } from "react-native";
-import {
-  addContactsToGroup,
-  fetchContactGroups,
-  fetchGroups,
-  removeGroupMembers,
-} from "../../../lib/api/client";
+import { contactsDomain } from "../../../lib/domains/contacts";
+import { groupsDomain } from "../../../lib/domains/groups";
 import { MOBILE_OPACITY } from "../../../lib/config";
 import { useMobileTranslations } from "../../../lib/i18n/useMobileTranslations";
 import { useAppToast } from "../../../lib/toast/useAppToast";
@@ -95,14 +91,17 @@ export function ContactEditGroupsSheet({
     let cancelled = false;
     setIsLoadingGroups(true);
 
-    void Promise.all([fetchGroups(), fetchContactGroups(contactId)])
-      .then(([groupsResponse, membershipResponse]) => {
+    void Promise.resolve()
+      .then(() => {
         if (cancelled) {
           return;
         }
 
-        setAllGroups(groupsResponse.groups);
-        const memberIds = new Set(membershipResponse.groups.map((group) => group.id));
+        const allGroups = groupsDomain.list();
+        setAllGroups(allGroups);
+        const memberIds = new Set(
+          contactsDomain.listGroups(contactId).map((group) => group.id),
+        );
         setInitialSelectedIds(memberIds);
         setSelectedGroupIds(new Set(memberIds));
       })
@@ -174,14 +173,12 @@ export function ContactEditGroupsSheet({
       setIsSaving(true);
 
       try {
-        await Promise.all([
-          ...added.map((groupId) =>
-            addContactsToGroup(groupId, { personIds: [contactId] }),
-          ),
-          ...removed.map((groupId) =>
-            removeGroupMembers(groupId, { personIds: [contactId] }),
-          ),
-        ]);
+        for (const groupId of added) {
+          groupsDomain.addMembers(groupId, [contactId]);
+        }
+        for (const groupId of removed) {
+          groupsDomain.removeMembers(groupId, [contactId]);
+        }
 
         const newGroups = allGroups.filter((group) => selectedGroupIds.has(group.id));
         onOpenChange(false);

@@ -1,5 +1,4 @@
 import type { Contact } from "@bondery/schemas";
-import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
@@ -39,13 +38,8 @@ function MentionContactRow({
   const colors = useMobileThemeColors();
   const name = formatContactName(contact);
   const avatarColor = getAvatarColorHex(contact);
-  const [avatarImageFailed, setAvatarImageFailed] = useState(false);
   const avatarUri = contact.avatar ? normalizeMobileUrlForDevice(contact.avatar) : undefined;
-  const showAvatarImage = !!avatarUri && !avatarImageFailed;
-
-  useEffect(() => {
-    setAvatarImageFailed(false);
-  }, [contact.avatar]);
+  const showAvatarImage = !!avatarUri;
 
   return (
     <Pressable
@@ -68,7 +62,6 @@ function MentionContactRow({
           <Image
             source={{ uri: avatarUri }}
             style={styles.avatarImage}
-            onError={() => setAvatarImageFailed(true)}
           />
         ) : (
           <Text style={[styles.avatarInitials, { color: colors.textOnPrimary }]}>

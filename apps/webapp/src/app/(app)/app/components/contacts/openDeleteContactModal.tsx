@@ -1,9 +1,9 @@
 "use client";
 
+import { useCallback } from "react";
 import { Text } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { IconAlertCircle, IconTrash } from "@tabler/icons-react";
-import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import {
   errorNotificationTemplate,
   loadingNotificationTemplate,
@@ -12,6 +12,8 @@ import {
 } from "@bondery/mantine-next";
 import { openStandardConfirmModal } from "../modals/openStandardConfirmModal";
 import { captureEvent } from "@/lib/analytics/client";
+import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
+import { useDeleteContactsMutation } from "@/lib/query/hooks/useContacts";
 
 interface OpenDeleteContactModalParams {
   contactId: string;
@@ -21,72 +23,61 @@ interface OpenDeleteContactModalParams {
 
 /**
  * Opens a standardized confirmation modal and deletes a single contact.
- *
- * This keeps delete UX and behavior consistent between ContactsTable-based views
- * and the single-person detail view.
  */
-export function openDeleteContactModal({
-  contactId,
-  contactName,
-  onDeleted,
-}: OpenDeleteContactModalParams): void {
-  openStandardConfirmModal({
-    title: (
-      <ModalTitle
-        text={`Delete ${contactName}?`}
-        icon={<IconAlertCircle size={24} />}
-        isDangerous={true}
-      />
-    ),
-    message: (
-      <Text size="sm">
-        Are you sure you want to delete <strong>{contactName}</strong>? This person&apos;s data,
-        mentions, and related information will be deleted. And this action cannot be restored.
-      </Text>
-    ),
-    confirmLabel: "Yes, delete",
-    cancelLabel: "No, cancel",
-    confirmColor: "red",
-    confirmLeftSection: <IconTrash size={16} />,
-    onConfirm: async () => {
-      const loadingNotification = notifications.show({
-        ...loadingNotificationTemplate({
-          title: "Deleting contact...",
-          description: "Please wait while we delete this contact",
-        }),
+export function useOpenDeleteContactModal() {
+  const t = useTranslations("PeoplePage.DeleteContact");
+  const tCommon = useTranslations("WebAppCommon");
+  const deleteContactsMutation = useDeleteContactsMutation();
+
+  return useCallback(
+    ({ contactId, contactName, onDeleted }: OpenDeleteContactModalParams) => {
+      openStandardConfirmModal({
+        title: (
+          <ModalTitle
+            text={t("Title", { name: contactName })}
+            icon={<IconAlertCircle size={24} />}
+            isDangerous={true}
+          />
+        ),
+        message: <Text size="sm">{t("Message", { name: contactName })}</Text>,
+        confirmLabel: tCommon("YesDelete"),
+        cancelLabel: tCommon("NoCancel"),
+        confirmColor: "red",
+        confirmLeftSection: <IconTrash size={16} />,
+        onConfirm: async () => {
+          const loadingNotification = notifications.show({
+            ...loadingNotificationTemplate({
+              title: t("LoadingTitle"),
+              description: t("LoadingDescription"),
+            }),
+          });
+
+          try {
+            await deleteContactsMutation.mutateAsync([contactId]);
+
+            captureEvent("contact_deleted");
+
+            notifications.hide(loadingNotification);
+            notifications.show(
+              successNotificationTemplate({
+                title: tCommon("SuccessTitle"),
+                description: t("SuccessDescription"),
+              }),
+            );
+
+            await onDeleted?.();
+          } catch {
+            notifications.hide(loadingNotification);
+            notifications.show(
+              errorNotificationTemplate({
+                title: tCommon("ErrorTitle"),
+                description: t("ErrorDescription"),
+              }),
+            );
+          }
+        },
       });
-
-      try {
-        const response = await fetch(API_ROUTES.CONTACTS, {
-          method: "DELETE",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ ids: [contactId] }),
-        });
-
-        if (!response.ok) {
-          throw new Error("Failed to delete contact");
-        }
-
-        captureEvent("contact_deleted");
-
-        notifications.hide(loadingNotification);
-        notifications.show(
-          successNotificationTemplate({
-            title: "Success",
-            description: "Contact deleted successfully",
-          }),
-        );
-
-        await onDeleted?.();
-      } catch {
-        notifications.hide(loadingNotification);
-        notifications.show(
-          errorNotificationTemplate({
-            title: "Error",
-            description: "Failed to delete contact. Please try again.",
-          }),
-        );
-      }
     },
-  });
+    [deleteContactsMutation, t, tCommon],
+  );
 }

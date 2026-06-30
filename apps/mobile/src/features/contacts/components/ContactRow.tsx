@@ -1,4 +1,4 @@
-import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useRef } from "react";
 import { Image, StyleSheet, Text, View } from "react-native";
 import Swipeable, {
   SwipeDirection,
@@ -57,15 +57,10 @@ export const ContactRow = memo(function ContactRow({
   const swipeableRef = useRef<SwipeableMethods>(null);
   const name = useMemo(() => formatContactName(contact), [contact]);
   const avatarColor = getAvatarColorHex(contact);
-  const [avatarImageFailed, setAvatarImageFailed] = useState(false);
   const avatarUri = contact.avatar ? normalizeMobileUrlForDevice(contact.avatar) : undefined;
   const swipeGesturesEnabled = isSwipeEnabled && !selectionMode;
   const showDisabledStyle = isDisabled && selectionMode;
   const isRowSelected = selected && !showDisabledStyle;
-
-  useEffect(() => {
-    setAvatarImageFailed(false);
-  }, [contact.avatar]);
 
   useEffect(() => {
     if (selectionMode) {
@@ -73,7 +68,7 @@ export const ContactRow = memo(function ContactRow({
     }
   }, [selectionMode]);
 
-  const shouldShowAvatarImage = !!avatarUri && !avatarImageFailed && !isRowSelected;
+  const shouldShowAvatarImage = !!avatarUri && !isRowSelected;
 
   const handleLongPress = useCallback(() => {
     if (previewMode || selectionMode || isDisabled) {
@@ -179,7 +174,6 @@ export const ContactRow = memo(function ContactRow({
               source={{ uri: avatarUri }}
               style={styles.avatarImage}
               resizeMode="cover"
-              onError={() => setAvatarImageFailed(true)}
             />
           ) : (
             <Text style={[styles.avatarText, { color: colors.textOnPrimary }]}>

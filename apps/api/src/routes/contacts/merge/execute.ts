@@ -3,7 +3,9 @@
  * POST /merge: merges two duplicate contacts, left person absorbs right.
  */
 
-import type { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
+import type { FastifyInstance, FastifyReply } from "fastify";
+import type { AppFastifyInstance } from "../../../lib/fastify-types.js";
+import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
 import { getAuth } from "../../../lib/auth.js";
 import { loadEnrichedContact } from "../../../lib/contact-enrichment.js";
 import { replaceContactPhones, replaceContactEmails } from "../channels.js";
@@ -20,7 +22,7 @@ import {
   MERGEABLE_FIELDS,
   MERGEABLE_SCALAR_FIELDS,
   MERGEABLE_SOCIAL_FIELDS,
-  MergeContactsBody,
+  mergeContactsBodySchema,
   normalizePhoneSet,
   normalizeEmailSet,
   normalizeImportantDateSet,
@@ -32,18 +34,19 @@ import {
 // Suppress unused import warning — upsertContactSocials kept for future social upsert path
 void upsertContactSocials;
 
-export function registerMergeExecuteRoute(fastify: FastifyInstance): void {
+export function registerMergeExecuteRoute(fastify: AppFastifyInstance): void {
   /**
    * POST /api/contacts/merge - Merge duplicate contacts
    * Left person survives and absorbs data from right person.
    */
   fastify.post(
     "/merge",
-    { schema: { body: MergeContactsBody } },
-    async (
-      request: FastifyRequest<{ Body: typeof MergeContactsBody.static }>,
-      reply: FastifyReply,
-    ) => {
+    {
+      schema: {
+        body: mergeContactsBodySchema,
+      } satisfies FastifyZodOpenApiSchema,
+    },
+    async (request, reply) => {
       const { client, user } = getAuth(request);
       const leftPersonId = request.body.leftPersonId.trim();
       const rightPersonId = request.body.rightPersonId.trim();
@@ -683,12 +686,20 @@ export function registerMergeExecuteRoute(fastify: FastifyInstance): void {
       // Remove the right person's avatar file regardless of choice (cleanup orphaned file)
       await client.storage.from("avatars").remove([rightAvatarPath]);
 
-      const response: MergeContactsResponse = {
-        personId: leftPersonId,
-        userId: user.id,
-        mergedIntoPersonId: leftPersonId,
-        mergedFromPersonId: rightPersonId,
-      };
+      const avatarChoice = resolveConflictChoice(
+        conflictResolutions as Partial<
+          Record<MergeConflictField, MergeConflictChoice>
+        >,
+        "avatar",
+      );
+      const survivorHasAvatar =
+        avatarChoice === "right" ? rightPerson.has_avatar : leftPerson.has_avatar;
+
+      await client
+        .from("people")
+        .update({ has_avatar: survivorHasAvatar })
+        .eq("id", leftPersonId)
+        .eq("user_id", user.id);
 
       const contact = await loadEnrichedContact(
         client,
@@ -698,10 +709,15 @@ export function registerMergeExecuteRoute(fastify: FastifyInstance): void {
         request.log,
       );
 
-      return {
-        ...response,
+      const response: MergeContactsResponse = {
+        personId: leftPersonId,
+        userId: user.id,
+        mergedIntoPersonId: leftPersonId,
+        mergedFromPersonId: rightPersonId,
         contact,
       };
+
+      return response;
     },
   );
 }

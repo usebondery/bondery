@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
+import { clientApiJsonOrNull } from "@/lib/api/client";
 import { getState, setPendingQueueStatus } from "./enrichBatchStore";
 
 /**
@@ -23,16 +24,13 @@ export function EnrichResumeDetector() {
 
     void (async () => {
       try {
-        const res = await fetch(`${API_ROUTES.CONTACTS}/enrich-queue/status`);
-        if (!res.ok) return;
-
-        const data = (await res.json()) as {
+        const data = await clientApiJsonOrNull<{
           pending: number;
           completed: number;
           failed: number;
-        };
+        }>(`${API_ROUTES.CONTACTS}/enrich-queue/status`);
 
-        if (data.pending > 0) {
+        if (data && data.pending > 0) {
           setPendingQueueStatus(data);
         }
       } catch {

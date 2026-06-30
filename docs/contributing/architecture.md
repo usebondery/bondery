@@ -1,6 +1,18 @@
 # Architecture
 
-Bondery is a monorepo managed with [Turborepo](https://turbo.build/repo) and npm workspaces. All apps and shared packages live in the same repository, sharing a single `node_modules` resolution and a common build/lint/type-check pipeline.
+Bondery is a monorepo managed with [Turborepo](https://turbo.build/repo) and npm workspaces. Apps and shared packages share tooling, types, and translations; Turborepo orchestrates dev, build, lint, and type-check across the tree.
+
+## Mental model
+
+| Layer | Role |
+|---|---|
+| **Postgres (Supabase)** | Source of truth for all user data |
+| **Fastify API** | Auth validation, business logic, list/search endpoints, imports, mobile sync (push/pull/bootstrap) |
+| **Clients** | Webapp, mobile, and Chrome extension — auth via Supabase; app data via the API |
+
+Supabase Auth issues JWTs. Clients attach those tokens to API requests. The API uses Supabase (service role or user-scoped client) to read and write Postgres, with Row Level Security on direct database access paths.
+
+Domain mutations (create/update/delete contacts, groups, tags, etc.) live in `apps/api/src/domains/`. REST routes and `POST /api/sync/push` call the same functions so web, mobile, and future clients stay consistent.
 
 ## Repository structure
 
@@ -8,104 +20,124 @@ Bondery is a monorepo managed with [Turborepo](https://turbo.build/repo) and npm
 bondery/
 ├── apps/
 │   ├── webapp/           # Main web application (Next.js)
+│   ├── mobile/           # iOS & Android app (Expo)
 │   ├── api/              # REST API server (Fastify)
 │   ├── website/          # Public marketing site (Next.js)
 │   ├── chrome-extension/ # Browser extension (WXT + React)
-│   └── supabase-db/      # Database, migrations & edge functions
+│   └── supabase-db/      # Database migrations and seeds
 ├── packages/
-│   ├── types/            # Shared TypeScript types & Supabase schema
-│   ├── translations/     # Localization strings (EN, CZ)
-│   ├── helpers/          # Shared utility functions
-│   ├── emails/           # Transactional email templates
-│   ├── mantine-next/     # Mantine provider wrappers for Next.js
-│   └── branding/         # Brand assets, logos and icon generators
+│   ├── schemas/          # Zod schemas, domain types, Supabase generated types, sync protocol
+│   ├── translations/     # Localization strings (EN, CS)
+│   ├── helpers/          # Shared utilities, route constants, dev ports
+│   ├── emails/           # Transactional email templates (React Email)
+│   ├── mantine-next/     # Shared Mantine components for Next.js apps
+│   ├── branding/         # Logos, icons, brand assets
+│   └── vcard/            # vCard serialization
 └── docs/                 # GitBook documentation
 ```
 
 ## Apps
 
-### `apps/webapp` — Web Application
+### `apps/webapp` — Web application
 
-The primary user-facing product.
+The primary user-facing product at [app.usebondery.com](https://app.usebondery.com).
 
 | Concern | Technology |
 |---|---|
-| Framework | [Next.js](https://nextjs.org/) (App Router, React Server Components) |
+| Framework | [Next.js](https://nextjs.org/) 16 (App Router, React Server Components) |
 | Language | TypeScript |
-| UI library | [Mantine v8](https://mantine.dev/) |
+| UI | [Mantine v9](https://mantine.dev/) via `@bondery/mantine-next` |
 | Supplemental styles | [Tailwind CSS](https://tailwindcss.com/) |
-| Authentication & database | [Supabase](https://supabase.com/) (`@supabase/ssr`) |
-| Rich text editor | [Tiptap](https://tiptap.dev/) |
-| Drag and drop | [dnd-kit](https://dndkit.com/) |
-| Localization | [next-intl](https://next-intl.dev/) |
+| Data fetching | [TanStack Query](https://tanstack.com/query) + `lib/query/` fetchers and hooks |
+| API transport | `clientApi*` / `serverApi*` wrappers in `lib/api/client.ts` |
+| Authentication | [Supabase Auth](https://supabase.com/) (`@supabase/ssr`) — sessions only; no direct DB reads for app data |
+| Rich text | [Tiptap](https://tiptap.dev/) |
+| Localization | `@bondery/translations` via `useWebTranslations` |
 | Icons | [Tabler Icons](https://tabler.io/icons) |
 
-The webapp communicates directly with Supabase for real-time data and auth, and calls `apps/api` for heavier operations (import/export, account management, etc.).
+Server components and client hooks call the Fastify API with the user's Supabase JWT. A small set of Next.js route handlers (e.g. streaming chat) proxy to the API after verifying the session locally.
 
 **Dev port:** `3002`
 
 ---
 
-### `apps/api` — REST API Server
+### `apps/api` — REST API server
 
-A lightweight backend for operations that can't or shouldn't happen in the browser.
+Central backend for all product data and privileged operations.
 
 | Concern | Technology |
 |---|---|
 | Framework | [Fastify v5](https://fastify.dev/) |
 | Language | TypeScript |
-| Database | [Supabase](https://supabase.com/) (`@supabase/supabase-js`) |
-| Email delivery | [Nodemailer](https://nodemailer.com/) with [React Email](https://react.email/) templates |
+| Database | [Supabase](https://supabase.com/) / Postgres (`@supabase/supabase-js`) |
+| Domain layer | `src/domains/*` — shared by REST routes and sync push |
+| Sync | Changelog pull/bootstrap (`GET /api/sync/pull`, `GET /api/sync/bootstrap`), mutation push (`POST /api/sync/push`) |
+| Email | [Nodemailer](https://nodemailer.com/) + [React Email](https://react.email/) templates |
+| API contract | OpenAPI spec in `openapi.yaml`, generated from route modules |
 
-The API validates a Supabase JWT on every request to identify the acting user. It exposes endpoints for contacts, account management, settings, imports, exports, and the browser extension redirect.
+Every authenticated request validates the Supabase JWT. List endpoints follow a shared [pagination contract](../../.agents/skills/bondery-specific/references/api-design.md) (`limit`, `offset`, `search`, `sort`, nested `pagination` object).
 
 **Dev port:** `3001` | **Production:** `api.usebondery.com`
 
 ---
 
-### `apps/website` — Marketing Site
+### `apps/mobile` — Mobile application
 
-The public landing page at [usebondery.com](https://usebondery.com).
+Native iOS and Android client built with Expo. Offline-capable via local SQLite and server-authoritative pull sync.
+
+| Concern | Technology |
+|---|---|
+| Framework | [Expo](https://expo.dev/) + [Expo Router](https://docs.expo.dev/router/introduction/) |
+| Language | TypeScript |
+| UI | [Tamagui](https://tamagui.dev/) |
+| Local database | [expo-sqlite](https://docs.expo.dev/versions/latest/sdk/sqlite/) |
+| Read sync | `GET /api/sync/bootstrap` + `GET /api/sync/pull` (batched `sync_change_log`) |
+| Write sync | REST when online; `pending_mutations` outbox → `POST /api/sync/push` when offline |
+| Authentication | Supabase Auth |
+
+See [Local development setup](local-setup.md#7-mobile-application-appsmobile) for running the sync stack locally.
+
+---
+
+### `apps/website` — Marketing site
+
+Public landing page at [usebondery.com](https://usebondery.com).
 
 | Concern | Technology |
 |---|---|
 | Framework | [Next.js](https://nextjs.org/) (App Router) |
-| Language | TypeScript |
-| UI library | [Mantine v8](https://mantine.dev/) |
-| Localization | [next-intl](https://next-intl.dev/) |
+| UI | [Mantine v9](https://mantine.dev/) |
+| Localization | `@bondery/translations` |
 
-**Dev port:** `3000` | **Production:** `usebondery.com`
+**Dev port:** `3000`
 
 ---
 
-### `apps/chrome-extension` — Browser Extension
+### `apps/chrome-extension` — Browser extension
 
-A Chrome (and Firefox) extension that lets users save contacts from social networks.
+Saves contacts from social networks while browsing.
 
 | Concern | Technology |
 |---|---|
 | Extension framework | [WXT](https://wxt.dev/) |
-| UI | React + [Mantine v8](https://mantine.dev/) |
-| Language | TypeScript |
+| UI | React + [Mantine v9](https://mantine.dev/) |
 | Authentication | Supabase OAuth via `chrome.identity` |
+| Data | Fastify API (contact create/update, redirect endpoint) |
 | Supported sites | LinkedIn, Facebook, Instagram |
-
-The extension injects content scripts into supported social network pages, extracts contact data from the DOM, and sends it to the Bondery webapp/API.
 
 ---
 
 ### `apps/supabase-db` — Database
 
-Manages the PostgreSQL schema, Row Level Security policies, seed data, and Supabase Edge Functions.
+PostgreSQL schema, Row Level Security, seeds, and local dev tooling.
 
 | Concern | Technology |
 |---|---|
-| Database | [PostgreSQL](https://www.postgresql.org/) (via Supabase) |
-| Auth | Supabase Auth |
-| Edge functions | Deno (TypeScript) |
+| Database | [PostgreSQL](https://www.postgresql.org/) via Supabase |
+| Auth | Supabase Auth (GitHub, LinkedIn OAuth) |
 | Migrations | Supabase CLI |
 
-All database types are generated from the live schema into `packages/schemas/src/supabase.types.ts` and shared across all apps.
+Run `npm run gen-types` after schema changes to refresh `packages/schemas/src/supabase.types.ts`.
 
 ---
 
@@ -113,54 +145,73 @@ All database types are generated from the live schema into `packages/schemas/src
 
 ### `packages/schemas`
 
-Single source of truth for Zod schemas, inferred TypeScript types, and Supabase database types across the monorepo. Contains:
-
-- Auto-generated Supabase database types (`supabase.types.ts`)
-- Entity schemas and inferred domain types shared between apps
-- Shared validation constants and form schemas
-
-Run `npm run gen-types` inside `apps/supabase-db` to regenerate after a schema change.
+Single source of truth for Zod schemas, inferred TypeScript types, Supabase database types, and the mobile sync protocol (`src/sync/`). Import domain types from here — do not redefine them in apps.
 
 ### `packages/translations`
 
-All user-facing strings for the webapp and website. Supports **English (EN)** and **Czech (CZ)**. Components import from this package rather than hardcoding strings.
+User-facing strings for webapp, website, and mobile. English and Czech. Add keys to both locale files.
 
 ### `packages/helpers`
 
-Shared pure utility functions (formatting, validation, etc.) used across multiple apps.
+Shared pure utilities, `API_ROUTES`, dev port constants, and platform helpers used across apps.
 
 ### `packages/emails`
 
-Transactional email templates built with [React Email](https://react.email/). Rendered and sent by `apps/api` via Nodemailer.
+React Email templates rendered and sent by the API.
 
 ### `packages/mantine-next`
 
-Thin wrappers that configure Mantine's `ColorSchemeScript` and `MantineProvider` for use inside Next.js App Router layouts.
+Reusable Mantine-based components (avatars, data tables, modals) shared by webapp and website.
 
 ### `packages/branding`
 
-Brand assets (logos, social previews) plus icon-generation scripts used by `apps/webapp`, `apps/website`, and `apps/chrome-extension`.
+Logos, icon assets, and React icon components.
+
+### `packages/vcard`
+
+vCard generation used by API export and share flows.
 
 ---
 
 ## Data flow
 
 ```
-Browser
-  │
-  ├──▶ apps/webapp (Next.js, port 3002)
-  │         │
-  │         ├──▶ Supabase (auth + realtime DB)
-  │         └──▶ apps/api (REST, port 3001)
-  │                   │
-  │                   └──▶ Supabase (server-side DB access)
-  │
-  └──▶ apps/website (Next.js, port 3000)
-
-Chrome Extension
-  │
-  ├──▶ Supabase (auth via chrome.identity OAuth)
-  └──▶ apps/api (contact creation / redirect endpoint)
+┌─────────────┐     JWT      ┌─────────────┐     SQL/RLS    ┌──────────────┐
+│   Clients   │ ──────────▶  │  apps/api   │ ────────────▶  │   Postgres   │
+│ web / mobile│ ◀──────────  │  (Fastify)  │ ◀────────────  │  (Supabase)  │
+│  extension  │   JSON       └──────┬──────┘                └──────┬───────┘
+└──────┬──────┘                     │                               │
+       │                            │ pull / bootstrap              │ changelog
+       │ Supabase Auth              │                               │
+       │ (login only)               ▼                               ▼
+       └──────────────────▶  mobile SQLite ◀── sync_change_log ──┘
 ```
 
-Supabase is the central data store. The webapp uses the Supabase JS client directly for most read/write operations. The API uses the Supabase service role key for privileged operations (e.g., storage, edge function triggers, bulk imports).
+**Webapp and extension:** Supabase for auth; all contact, group, tag, interaction, and settings data through the API.
+
+**Mobile:** Supabase for auth; bootstrap + pull for reads; mutation outbox → sync push for tier-1 writes. Server state wins on pull; optimistic `is_pending` is UI-only until push completes.
+
+**API internals:** Route handlers are thin. `domains/*` functions accept a `DomainContext` (user, Supabase client) and return `{ data, txid }` where sync confirmation is required.
+
+---
+
+## Sync (mobile)
+
+The API validates the session and serves per-user changelog batches from `sync_change_log`.
+
+| Path | Purpose |
+|---|---|
+| `GET /api/sync/bootstrap` | Initial SQLite snapshot |
+| `GET /api/sync/pull` | Incremental batched changes |
+| `POST /api/sync/push` | Apply offline mutation outbox |
+
+Protocol version headers (`X-Bondery-Sync-Protocol`, `X-Bondery-SQLite-Schema`) gate compatibility. Full design: [Sync architecture (mobile)](sync-architecture.md).
+
+---
+
+## Related docs
+
+* [Local development setup](local-setup.md)
+* [Sync architecture (mobile)](sync-architecture.md)
+* [API design reference](../../.agents/skills/bondery-specific/references/api-design.md)
+* [API usage reference](../../.agents/skills/bondery-specific/references/api-usage.md)

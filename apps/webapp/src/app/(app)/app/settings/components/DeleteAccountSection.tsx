@@ -3,8 +3,10 @@
 import { Text, Button, Group } from "@mantine/core";
 import { IconTrash, IconAlertCircle } from "@tabler/icons-react";
 import { notifications } from "@mantine/notifications";
-import { useTranslations } from "next-intl";
-import { API_ROUTES, WEBSITE_ROUTES } from "@bondery/helpers/globals/paths";
+import { Trans } from "next-i18next/client";
+import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
+import { WEBSITE_ROUTES } from "@bondery/helpers/globals/paths";
+import { useDeleteAccountMutation } from "@/lib/query/hooks/useSettings";
 import {
   errorNotificationTemplate,
   loadingNotificationTemplate,
@@ -16,6 +18,7 @@ import { openStandardConfirmModal } from "../../components/modals/openStandardCo
 
 export function DeleteAccountSection() {
   const t = useTranslations("SettingsPage.DataManagement");
+  const deleteAccountMutation = useDeleteAccountMutation();
 
   const handleDeleteAccount = () => {
     openStandardConfirmModal({
@@ -28,9 +31,7 @@ export function DeleteAccountSection() {
       ),
       message: (
         <Text size="sm">
-          {t.rich("DeleteConfirmMessage", {
-            b: (chunks) => <b>{chunks}</b>,
-          })}
+          <Trans t={t} i18nKey="DeleteConfirmMessage" components={{ b: <b /> }} />
         </Text>
       ),
       confirmLabel: t("DeleteConfirmButton"),
@@ -47,14 +48,7 @@ export function DeleteAccountSection() {
             id: "delete-account",
           });
 
-          const response = await fetch(API_ROUTES.ME, {
-            method: "DELETE",
-          });
-
-          if (!response.ok) {
-            const data = await response.json();
-            throw new Error(data.error || "Failed to delete account");
-          }
+          await deleteAccountMutation.mutateAsync();
 
           notifications.hide("delete-account");
           notifications.show(

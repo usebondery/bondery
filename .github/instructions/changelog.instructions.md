@@ -1,12 +1,12 @@
 ---
 name: Changelog Instructions
 description: Guidelines for writing and maintaining the changelog.
-applyTo: **/CHANGELOG.md
+applyTo: docs/changelog.md
 ---
 
 # Changelog instructions
 
-The changelog can be found at the root of the project, [CHANGELOG.md](../../CHANGELOG.md).
+The changelog lives at [docs/changelog.md](../../docs/changelog.md).
 
 ## Guiding Principles
 

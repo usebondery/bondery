@@ -11,9 +11,9 @@ import { IconLogout, IconTrash } from "@tabler/icons-react-native";
 import type { Contact } from "@bondery/schemas";
 import { ActionSheetPopup } from "../../components/ActionSheetPopup";
 import { StackNavBar } from "../../components/chrome";
-import { deleteMyAccount, fetchMyselfContact, fetchSettings } from "../../lib/api/client";
+import { deleteMyAccount, fetchSettings } from "../../lib/api/client";
+import { useMyselfContact } from "../../lib/sync/hooks/useSyncQuery";
 import { useMobileTranslations } from "../../lib/i18n/useMobileTranslations";
-import { clearAllEntityStores } from "../../lib/store";
 import { supabase } from "../../lib/supabase/client";
 import { useMobileThemeColors } from "../../theme/useMobileThemeColors";
 import { MOBILE_LAYOUT, MOBILE_TYPOGRAPHY } from "../../theme/tokens";
@@ -31,6 +31,7 @@ export function SettingsAccountScreen() {
   const [fallbackName, setFallbackName] = useState<string | null>(null);
   const [fallbackAvatarUrl, setFallbackAvatarUrl] = useState<string | null>(null);
   const [myselfContact, setMyselfContact] = useState<Contact | null>(null);
+  const { data: syncedMyself } = useMyselfContact();
   const [pendingAction, setPendingAction] = useState<
     "logout" | "delete" | null
   >(null);
@@ -46,13 +47,6 @@ export function SettingsAccountScreen() {
       setEmail(settingsResponse.data?.email ?? null);
       setFallbackName(settingsResponse.data?.name ?? null);
       setFallbackAvatarUrl(settingsResponse.data?.avatarUrl ?? null);
-
-      try {
-        const myselfResponse = await fetchMyselfContact();
-        setMyselfContact(myselfResponse.contact);
-      } catch {
-        setMyselfContact(null);
-      }
     } catch (err) {
       setLoadError(
         err instanceof Error
@@ -63,6 +57,10 @@ export function SettingsAccountScreen() {
       setIsLoading(false);
     }
   }, [t]);
+
+  useEffect(() => {
+    setMyselfContact(syncedMyself);
+  }, [syncedMyself]);
 
   useEffect(() => {
     void loadAccount();
@@ -91,7 +89,6 @@ export function SettingsAccountScreen() {
 
     try {
       await signOut();
-      clearAllEntityStores();
     } catch (logoutError) {
       setActionError(
         logoutError instanceof Error
@@ -117,7 +114,6 @@ export function SettingsAccountScreen() {
       if (supabase) {
         await supabase.auth.signOut({ scope: "local" });
       }
-      clearAllEntityStores();
 
       setDeleteConfirmOpen(false);
       Alert.alert(

@@ -1,27 +1,26 @@
 import type { Contact } from "@bondery/schemas";
-import { API_ROUTES } from "@bondery/helpers/globals/paths";
-import { appendAvatarParams } from "./avatarParams";
+import { getQueryClient } from "@/lib/query/client";
+import { contactKeys } from "@/lib/query/keys";
+import { createClientFetcher } from "@/lib/query/fetchers/createClientFetcher";
+import { buildContactsListPath } from "@/lib/query/fetchers/contacts";
 
 /**
- * Searches contacts by name on the server.
- * Intended as the `onSearch` prop of `PeopleMultiPickerInput` in contexts
- * that use same-origin requests (no credentials header needed).
- *
- * @param query - The search string to match against contact names.
- * @returns Up to 10 contacts matching the query, with small avatars. Returns
- *   an empty array on network or API error so the picker degrades gracefully.
+ * Searches contacts by name for client-side pickers.
+ * Uses TanStack Query cache when called from React; falls back to direct fetch.
  */
 export async function searchContacts(query: string): Promise<Contact[]> {
-  try {
-    const params = new URLSearchParams();
-    params.set("q", query);
-    params.set("limit", "10");
-    appendAvatarParams(params, "small");
-    const res = await fetch(`${API_ROUTES.CONTACTS}?${params.toString()}`);
-    if (!res.ok) return [];
-    const data = (await res.json()) as { contacts?: Contact[] };
-    return data.contacts ?? [];
-  } catch {
-    return [];
-  }
+  const trimmed = query.trim();
+  if (trimmed.length === 0) return [];
+
+  const queryClient = getQueryClient();
+  return queryClient.fetchQuery({
+    queryKey: contactKeys.search(trimmed),
+    queryFn: async () => {
+      const fetch = createClientFetcher();
+      const data = await fetch<{ contacts?: Contact[] }>(
+        buildContactsListPath({ search: trimmed, limit: 10 }),
+      );
+      return data.contacts ?? [];
+    },
+  });
 }

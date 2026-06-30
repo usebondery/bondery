@@ -1,7 +1,7 @@
 "use client";
 
 import { useSyncExternalStore } from "react";
-import { useTranslations } from "next-intl";
+import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
 import { Group, Progress, Stack, Text } from "@mantine/core";
 import { PersonChip } from "@bondery/mantine-next";
 import { defaultState, getState, subscribe } from "./enrichBatchStore";

@@ -1,0 +1,57 @@
+{
+  "name": "bondery-monorepo",
+  "version": "1.4.2",
+  "private": true,
+  "packageManager": "npm@11.12.0",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "turbo dev",
+    "dev:core": "turbo dev --filter=webapp --filter=api --filter=@bondery/emails",
+    "mobile": "turbo dev --filter=api --filter=mobile",
+    "dev:extension": "turbo dev --filter=webapp --filter=api --filter=chrome-extension --filter=website",
+    "dev:supabase": "turbo dev --filter=supabase-db",
+    "dev:sync": "turbo dev --filter=api --filter=mobile",
+    "dev:website": "turbo dev --filter=website",
+    "dev:polar-webhook": "npx localtunnel --port 3001",
+    "build": "turbo build",
+    "start": "turbo start",
+    "lint": "turbo lint",
+    "format": "biome format --write .",
+    "check-types": "turbo check-types",
+    "generate-openapi": "npm run generate-openapi -w apps/api && git add apps/api/openapi.yaml",
+    "generate-types": "npm run gen-types -w apps/supabase-db && git add packages/schemas/src/supabase.types.ts"
+  },
+  "pre-commit": [
+    "generate-openapi"
+  ],
+  "devDependencies": {
+    "@biomejs/biome": "^2.5.0",
+    "@fastify/pre-commit": "^2.2.1",
+    "@redocly/cli": "^2.33.0",
+    "ajv": "^8.18.0",
+    "expo-mcp": "~0.2.1",
+    "turbo": "^2.10.0",
+    "yaml": "^2.8.3"
+  },
+  "dependencies": {
+    "freeport-async": "^2.0.0",
+    "mcp-remote": "^0.1.38"
+  },
+  "allowScripts": {
+    "core-js@3.49.0": true,
+    "core-js-pure@3.49.0": true,
+    "esbuild@0.28.1": true,
+    "esbuild@0.27.7": true,
+    "esbuild@0.27.4": true,
+    "esbuild@0.28.0": true,
+    "protobufjs@7.6.4": true,
+    "sharp@0.34.5": true,
+    "spawn-sync@1.0.15": true,
+    "@fastify/pre-commit@2.2.1": true,
+    "@parcel/watcher@2.5.6": true,
+    "@swc/core@1.15.41": true
+  }
+}

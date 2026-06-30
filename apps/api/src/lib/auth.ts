@@ -12,23 +12,44 @@
  */
 
 import type { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
+import type { AppFastifyInstance } from "./fastify-types.js";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@bondery/schemas/supabase.types";
-import { createAuthenticatedClient } from "./supabase.js";
+import type { ApiKeyPermission } from "@bondery/schemas";
+import { createAuthenticatedClient, createAdminClient } from "./supabase.js";
+import {
+  isApiKeyBearerToken,
+  loadJwtSigningMaterial,
+  mintSupabaseUserAccessToken,
+  supabaseAuthIssuerUrl,
+  validateApiKey,
+  verifyJwtSigningJwkAgainstJwks,
+} from "./api-keys.js";
+import { assertApiKeyAccess } from "./api-key-access.js";
 
 // ── Type augmentation ────────────────────────────────────────────────────────
 
 declare module "fastify" {
   interface FastifyRequest {
-    /** Authenticated user — set by verifySession strategy */
+    /** Authenticated user — set by verifySession / verifyAuth strategies */
     authUser: { id: string; email: string } | null;
-    /** RLS-scoped Supabase client — set by verifySession strategy */
+    /** RLS-scoped Supabase client — set by verifySession / verifyAuth strategies */
     authClient: SupabaseClient<Database> | null;
+    /** Set when the request was authenticated via a long-lived API key */
+    authApiKey: {
+      id: string;
+      permission: ApiKeyPermission;
+      label: string;
+    } | null;
   }
 
   interface FastifyInstance {
     /** Validates Supabase session from cookies / Authorization header */
     verifySession: (request: FastifyRequest, reply: FastifyReply) => Promise<void>;
+    /** Validates session or long-lived API key */
+    verifyAuth: (request: FastifyRequest, reply: FastifyReply) => Promise<void>;
+    /** Enforces API key route allowlist and permission for key-authenticated requests */
+    assertApiKeyAccess: (request: FastifyRequest, reply: FastifyReply) => Promise<void>;
     /** Validates service role key via Authorization: Bearer header for server-to-server calls */
     verifyServiceSecret: (request: FastifyRequest, reply: FastifyReply) => Promise<void>;
     /** Validates session + checks is_admin flag on user_settings */
@@ -42,10 +63,44 @@ declare module "fastify" {
  * Registers auth strategy decorators on the Fastify instance.
  * Must be called after @fastify/env (needs config) and before route registration.
  */
-export function registerAuthStrategies(fastify: FastifyInstance): void {
+export function registerAuthStrategies(fastify: AppFastifyInstance): void {
   // Decorate requests with auth slots (null = not yet authenticated)
   fastify.decorateRequest("authUser", null);
   fastify.decorateRequest("authClient", null);
+  fastify.decorateRequest("authApiKey", null);
+
+  const pepper = fastify.config.PRIVATE_API_KEY_PEPPER.trim();
+  const jwtSigningJwk = fastify.config.PRIVATE_SUPABASE_JWT_SIGNING_JWK.trim();
+  const jwtIssuerUrl = supabaseAuthIssuerUrl(fastify.config.NEXT_PUBLIC_SUPABASE_URL);
+
+  fastify.addHook("onReady", async () => {
+    await loadJwtSigningMaterial(jwtSigningJwk);
+    if (process.env.GENERATE_OPENAPI === "true") {
+      return;
+    }
+    const jwksCheck = await verifyJwtSigningJwkAgainstJwks(
+      jwtSigningJwk,
+      jwtIssuerUrl,
+    );
+    if (!jwksCheck.ok) {
+      fastify.log.error(
+        {
+          envKid: jwksCheck.envKid,
+          jwksKids: jwksCheck.jwksKids,
+          jwksFetchError: jwksCheck.jwksFetchError,
+        },
+        jwksCheck.message ?? "JWT signing JWK does not match Supabase JWKS",
+      );
+      throw new Error(
+        jwksCheck.message ??
+          "PRIVATE_SUPABASE_JWT_SIGNING_JWK does not match Supabase JWKS",
+      );
+    }
+    fastify.log.info(
+      { envKid: jwksCheck.envKid, jwksKids: jwksCheck.jwksKids },
+      "JWT signing JWK matches Supabase JWKS",
+    );
+  });
 
   // ── verifySession ────────────────────────────────────────────────────────
   // Extracts Supabase session from cookies / Bearer token.
@@ -62,6 +117,101 @@ export function registerAuthStrategies(fastify: FastifyInstance): void {
       }
       request.authUser = user;
       request.authClient = client;
+      request.authApiKey = null;
+    },
+  );
+
+  // ── verifyAuth ─────────────────────────────────────────────────────────────
+  fastify.decorate(
+    "verifyAuth",
+    async (request: FastifyRequest, _reply: FastifyReply): Promise<void> => {
+      const authHeader = request.headers.authorization;
+      const bearerToken =
+        typeof authHeader === "string" && authHeader.startsWith("Bearer ")
+          ? authHeader.slice(7)
+          : undefined;
+
+      if (bearerToken && isApiKeyBearerToken(bearerToken)) {
+        const admin = createAdminClient();
+        const validated = await validateApiKey(admin, bearerToken.trim(), pepper);
+        if (!validated) {
+          const err = new Error("Invalid API key") as Error & { statusCode: number };
+          err.statusCode = 401;
+          throw err;
+        }
+
+        let accessToken: string;
+        try {
+          accessToken = await mintSupabaseUserAccessToken(
+            validated.userId,
+            jwtSigningJwk,
+            jwtIssuerUrl,
+          );
+        } catch (error) {
+          request.log.error({ err: error }, "API key JWT mint failed");
+          const err = new Error(
+            "API key is valid but the server could not mint a session. Check PRIVATE_SUPABASE_JWT_SIGNING_JWK.",
+          ) as Error & { statusCode: number };
+          err.statusCode = 500;
+          throw err;
+        }
+
+        const { client, user, authError } = await createAuthenticatedClient(
+          request,
+          accessToken,
+        );
+        if (!user) {
+          const jwksCheck = await verifyJwtSigningJwkAgainstJwks(
+            jwtSigningJwk,
+            jwtIssuerUrl,
+          );
+          request.log.warn(
+            {
+              authError,
+              jwtIssuerUrl,
+              envKid: jwksCheck.envKid,
+              jwksKids: jwksCheck.jwksKids,
+              jwkKidInJwks: jwksCheck.ok,
+            },
+            "API key hash valid but minted JWT was rejected by Supabase Auth",
+          );
+          const err = new Error(
+            jwksCheck.ok
+              ? `API key is valid but Supabase rejected the minted session (${authError ?? "unknown error"}).`
+              : (jwksCheck.message ??
+                  "API key is valid but JWT signing is misconfigured."),
+          ) as Error & { statusCode: number };
+          err.statusCode = jwksCheck.ok ? 503 : 500;
+          throw err;
+        }
+
+        request.authUser = user;
+        request.authClient = client;
+
+        request.authApiKey = {
+          id: validated.id,
+          permission: validated.permission,
+          label: validated.label,
+        };
+        return;
+      }
+
+      const { client, user } = await createAuthenticatedClient(request);
+      if (!user) {
+        const err = new Error("Unauthorized - Please log in") as Error & { statusCode: number };
+        err.statusCode = 401;
+        throw err;
+      }
+      request.authUser = user;
+      request.authClient = client;
+      request.authApiKey = null;
+    },
+  );
+
+  fastify.decorate(
+    "assertApiKeyAccess",
+    async (request: FastifyRequest, reply: FastifyReply): Promise<void> => {
+      assertApiKeyAccess(request, reply);
     },
   );
 
@@ -87,6 +237,15 @@ export function registerAuthStrategies(fastify: FastifyInstance): void {
       }
 
       const token = authHeader.slice(7);
+      if (isApiKeyBearerToken(token)) {
+        request.log.warn(
+          { url: request.url, reason: "API key sent to service-secret route" },
+          "verifyServiceSecret: rejected",
+        );
+        const err = new Error("Unauthorized") as Error & { statusCode: number };
+        err.statusCode = 401;
+        throw err;
+      }
       if (verifiedServiceTokens.has(token)) return;
 
       const client = createClient(fastify.config.NEXT_PUBLIC_SUPABASE_URL, token, {
@@ -127,6 +286,7 @@ export function registerAuthStrategies(fastify: FastifyInstance): void {
       }
       request.authUser = user;
       request.authClient = client;
+      request.authApiKey = null;
 
       // Check admin flag
       const { data, error } = await client

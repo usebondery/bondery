@@ -3,46 +3,40 @@
  * Handles user feedback submission and sends email notification
  */
 
-import type { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
-import { Type } from "@sinclair/typebox";
+import type { FastifyInstance, FastifyReply } from "fastify";
+import type { AppFastifyInstance, AppRoutePlugin } from "../../../lib/fastify-types.js";
+import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
+import { feedbackFormSchema } from "@bondery/schemas";
 import { getAuth } from "../../../lib/auth.js";
 import nodemailer from "nodemailer";
 import { render } from "@react-email/render";
 import { FeedbackEmail } from "@bondery/emails";
 
-// ── TypeBox Schemas ──────────────────────────────────────────────────────────
-
-const FeedbackBody = Type.Object({
-  npsScore: Type.Integer({ minimum: 0, maximum: 10 }),
-  npsReason: Type.String(),
-  generalFeedback: Type.String(),
-});
-
 /**
  * POST /api/me/feedback - Submit feedback
  */
-export async function meFeedbackRoutes(fastify: FastifyInstance) {
+export const meFeedbackRoutes: AppRoutePlugin = async (fastify) => {
   fastify.addHook("onRoute", (routeOptions) => {
-    routeOptions.schema = { ...routeOptions.schema, tags: ["Me"] };
+    if (routeOptions.schema) {
+      routeOptions.schema.tags = ["Me"];
+    }
   });
   fastify.addHook("onRequest", fastify.auth([fastify.verifySession]));
 
   fastify.post(
     "/",
-    { schema: { body: FeedbackBody } },
-    async (
-      request: FastifyRequest<{
-        Body: { npsScore: number; npsReason: string; generalFeedback: string };
-      }>,
-      reply: FastifyReply,
-    ) => {
+    {
+      schema: {
+        body: feedbackFormSchema,
+      } satisfies FastifyZodOpenApiSchema,
+    },
+    async (request, reply) => {
       const { user } = getAuth(request);
       const { npsScore, npsReason, generalFeedback } = request.body;
 
       const userEmail = user.email || "unknown";
       const timestamp = new Date().toISOString();
 
-      // Create nodemailer transporter
       const transporter = nodemailer.createTransport({
         host: fastify.config.PRIVATE_EMAIL_HOST,
         port: Number(fastify.config.PRIVATE_EMAIL_PORT),
@@ -56,7 +50,6 @@ export async function meFeedbackRoutes(fastify: FastifyInstance) {
         },
       });
 
-      // Render email template using React Email
       try {
         const emailHtml = await render(
           FeedbackEmail({
@@ -69,7 +62,6 @@ export async function meFeedbackRoutes(fastify: FastifyInstance) {
           }),
         );
 
-        // Send email
         await transporter.sendMail({
           from: `Robot from Bondery <${fastify.config.PRIVATE_EMAIL_ADDRESS}>`,
           to: `Robot from Bondery <${fastify.config.PRIVATE_EMAIL_ADDRESS}>`,

@@ -39,9 +39,12 @@ import {
   warningNotificationTemplate,
 } from "@bondery/mantine-next";
 import { NavigationProgress } from "@mantine/nprogress";
-import { API_ROUTES, WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
+import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import ContactsTable from "@/app/(app)/app/components/contacts/ContactsTableV2";
-import { revalidateAll } from "../../actions";
+import {
+  useCommitVCardImportMutation,
+  useParseVCardImportMutation,
+} from "@/lib/query/hooks/useImports";
 import { useImporterNavigationProgress } from "./useImporterNavigationProgress";
 
 type Step = "intro" | "instructions" | "upload" | "processing" | "preview";
@@ -153,6 +156,8 @@ export function VCardImportModal({
   showNavigationProgress?: boolean;
 }) {
   const router = useRouter();
+  const parseImport = useParseVCardImportMutation();
+  const commitImport = useCommitVCardImportMutation();
   const [step, setStep] = useState<Step>("intro");
   const [isParsing, setIsParsing] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
@@ -293,19 +298,7 @@ export function VCardImportModal({
     });
 
     try {
-      const response = await fetch(
-        `${API_ROUTES.CONTACTS_IMPORT_VCARD}/parse`,
-        {
-          method: "POST",
-          body: formData,
-        },
-      );
-
-      const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(result.error || t("ParseError"));
-      }
+      const result = await parseImport.mutateAsync(formData);
 
       const contacts = (result.contacts || []) as VCardPreparedContact[];
       const sortedContacts = sortVCardContactsForPreview(contacts);
@@ -357,21 +350,12 @@ export function VCardImportModal({
     try {
       for (let i = 0; i < selectedContacts.length; i += IMPORT_BATCH_SIZE) {
         const batch = selectedContacts.slice(i, i + IMPORT_BATCH_SIZE);
+        const isLastBatch = i + IMPORT_BATCH_SIZE >= selectedContacts.length;
 
-        const response = await fetch(
-          `${API_ROUTES.CONTACTS_IMPORT_VCARD}/commit`,
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ contacts: batch }),
-          },
-        );
-
-        const result = await response.json();
-
-        if (!response.ok) {
-          throw new Error(result.error || t("ImportError"));
-        }
+        const result = await commitImport.mutateAsync({
+          body: { contacts: batch },
+          finalize: isLastBatch,
+        });
 
         totalImported += result.importedCount ?? 0;
         totalSkipped += result.skippedCount ?? 0;
@@ -392,16 +376,11 @@ export function VCardImportModal({
         }),
       );
 
-      await fetch(`${API_ROUTES.CONTACTS}/merge-recommendations/refresh`, {
-        method: "POST",
-      }).catch(() => undefined);
-
       if (modalId) {
         modals.close(modalId);
       } else {
         modals.closeAll();
       }
-      await revalidateAll();
       router.push(WEBAPP_ROUTES.PEOPLE);
     } catch (error) {
       notifications.show(

@@ -47,9 +47,12 @@ import {
   successNotificationTemplate,
 } from "@bondery/mantine-next";
 import { NavigationProgress } from "@mantine/nprogress";
-import { API_ROUTES, WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
+import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import ContactsTable from "@/app/(app)/app/components/contacts/ContactsTableV2";
-import { revalidateAll } from "../../actions";
+import {
+  useCommitInstagramImportMutation,
+  useParseInstagramImportMutation,
+} from "@/lib/query/hooks/useImports";
 import { useImporterNavigationProgress } from "./useImporterNavigationProgress";
 
 type Step =
@@ -140,29 +143,6 @@ interface InstagramImportTranslations {
   ChooseContactsHint: string;
   NoContactsFound: string;
   NoContactsMatchSearch: string;
-}
-
-async function readApiResponse(response: Response): Promise<{
-  data: Record<string, unknown> | null;
-  text: string | null;
-}> {
-  const raw = await response.text();
-
-  if (!raw) {
-    return { data: null, text: null };
-  }
-
-  try {
-    return {
-      data: JSON.parse(raw) as Record<string, unknown>,
-      text: null,
-    };
-  } catch {
-    return {
-      data: null,
-      text: raw,
-    };
-  }
 }
 
 function readNumberField(
@@ -344,6 +324,8 @@ export function InstagramImportModal({
   showNavigationProgress?: boolean;
 }) {
   const router = useRouter();
+  const parseImport = useParseInstagramImportMutation();
+  const commitImport = useCommitInstagramImportMutation();
   const [step, setStep] = useState<Step>("intro");
   const [isParsing, setIsParsing] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
@@ -549,26 +531,7 @@ export function InstagramImportModal({
     formData.append("strategy", strategy);
 
     try {
-      const response = await fetch(
-        `${API_ROUTES.CONTACTS_IMPORT_INSTAGRAM}/parse`,
-        {
-          method: "POST",
-          body: formData,
-        },
-      );
-
-      const { data, text } = await readApiResponse(response);
-
-      if (!response.ok) {
-        const apiError =
-          data && typeof data.error === "string" ? data.error : null;
-        const fallback =
-          response.status === 413
-            ? "Uploaded ZIP is too large. Please export only contacts data."
-            : `${t("ParseError")} (HTTP ${response.status})`;
-
-        throw new Error(apiError || text || fallback);
-      }
+      const data = await parseImport.mutateAsync(formData);
 
       const contacts = (data?.contacts || []) as InstagramPreparedContact[];
       const sortedContacts = sortInstagramContactsForPreview(contacts);
@@ -623,25 +586,12 @@ export function InstagramImportModal({
     try {
       for (let i = 0; i < selectedContacts.length; i += IMPORT_BATCH_SIZE) {
         const batch = selectedContacts.slice(i, i + IMPORT_BATCH_SIZE);
+        const isLastBatch = i + IMPORT_BATCH_SIZE >= selectedContacts.length;
 
-        const response = await fetch(
-          `${API_ROUTES.CONTACTS_IMPORT_INSTAGRAM}/commit`,
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ contacts: batch }),
-          },
-        );
-
-        const { data, text } = await readApiResponse(response);
-
-        if (!response.ok) {
-          const apiError =
-            data && typeof data.error === "string" ? data.error : null;
-          throw new Error(
-            apiError || text || `${t("ImportError")} (HTTP ${response.status})`,
-          );
-        }
+        const data = await commitImport.mutateAsync({
+          body: { contacts: batch },
+          finalize: isLastBatch,
+        });
 
         totalImported += readNumberField(data, "importedCount");
         totalUpdated += readNumberField(data, "updatedCount");
@@ -664,12 +614,7 @@ export function InstagramImportModal({
         }),
       );
 
-      await fetch(`${API_ROUTES.CONTACTS}/merge-recommendations/refresh`, {
-        method: "POST",
-      }).catch(() => undefined);
-
       modals.closeAll();
-      await revalidateAll();
 
       if (onSuccess) {
         onSuccess({
@@ -819,10 +764,10 @@ export function InstagramImportModal({
                 <Text size="sm">{t("InstructionStep4")}</Text>
                 <Stack gap={2} pl="xs">
                   <Text size="sm" c="dimmed">
-                    – {t("InstructionStep5")}
+                    ? {t("InstructionStep5")}
                   </Text>
                   <Text size="sm" c="dimmed">
-                    – {t("InstructionStep6")}
+                    ? {t("InstructionStep6")}
                   </Text>
                 </Stack>
               </Stack>

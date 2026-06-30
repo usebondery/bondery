@@ -1,11 +1,8 @@
 import type { Contact } from "@bondery/schemas";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import {
-  fetchContact,
-  fetchContacts,
-  fetchMyselfContact,
-} from "../../../lib/api/client";
+import { contactsDomain } from "../../../lib/domains/contacts";
 import { CONTACTS_PAGE_SIZE } from "../../../lib/config";
+import { useSync } from "../../../lib/sync/SyncProvider";
 import { formatContactName } from "../contactUtils";
 
 export const MAX_MENTION_RESULTS = 8;
@@ -38,15 +35,14 @@ function mergeContacts(primary: Contact | null, others: Contact[]): Contact[] {
   return Array.from(byId.values());
 }
 
-async function fetchContactsPage(offset: number): Promise<Contact[]> {
-  const response = await fetchContacts({
+function fetchContactsPage(offset: number): Contact[] {
+  const response = contactsDomain.list({
     query: "",
-    sort: "nameAsc",
     limit: CONTACTS_PAGE_SIZE,
     offset,
   });
 
-  return response.contacts ?? [];
+  return response.contacts;
 }
 
 interface UseMentionableContactsOptions {
@@ -65,16 +61,17 @@ export function useMentionableContacts({
   const [loading, setLoading] = useState(true);
   const [myselfContactId, setMyselfContactId] = useState<string | null>(null);
   const backgroundLoadStartedRef = useRef(false);
+  const { revision } = useSync();
 
   useEffect(() => {
     let cancelled = false;
     backgroundLoadStartedRef.current = false;
 
-    async function loadRemainingPages(startOffset: number) {
+    function loadRemainingPages(startOffset: number) {
       let offset = startOffset;
 
       while (!cancelled) {
-        const page = await fetchContactsPage(offset);
+        const page = fetchContactsPage(offset);
         if (page.length === 0) {
           break;
         }
@@ -89,42 +86,34 @@ export function useMentionableContacts({
       }
     }
 
-    async function load() {
+    function load() {
       setLoading(true);
 
       try {
-        const needsSubjectFetch = !subjectContact && Boolean(contactId) && !isMyselfMode;
-        const needsMyselfFetch = !isMyselfMode;
-
-        const [firstPage, fetchedSubject, fetchedMyself] = await Promise.all([
-          fetchContactsPage(0),
-          needsSubjectFetch
-            ? fetchContact(contactId as string).catch(() => null)
-            : Promise.resolve(null),
-          needsMyselfFetch
-            ? fetchMyselfContact().catch(() => null)
-            : isMyselfMode
-              ? fetchMyselfContact().catch(() => null)
-              : Promise.resolve(null),
-        ]);
+        const fetchedSubject =
+          !subjectContact && Boolean(contactId) && !isMyselfMode
+            ? contactsDomain.get(contactId as string)
+            : null;
+        const fetchedMyself = contactsDomain.getMyself();
+        const firstPage = fetchContactsPage(0);
 
         if (cancelled) {
           return;
         }
 
         const resolvedSubject = isMyselfMode
-          ? fetchedMyself?.contact ?? subjectContact
-          : subjectContact ?? fetchedSubject?.contact ?? null;
+          ? fetchedMyself ?? subjectContact
+          : subjectContact ?? fetchedSubject ?? null;
 
         const myselfContact =
-          !isMyselfMode && fetchedMyself?.contact?.id !== resolvedSubject?.id
-            ? fetchedMyself?.contact ?? null
+          !isMyselfMode && fetchedMyself?.id !== resolvedSubject?.id
+            ? fetchedMyself ?? null
             : null;
 
         setMyselfContactId(
           isMyselfMode
             ? resolvedSubject?.id ?? null
-            : fetchedMyself?.contact?.id ?? null,
+            : fetchedMyself?.id ?? null,
         );
 
         const merged = mergeContacts(resolvedSubject, [
@@ -137,7 +126,7 @@ export function useMentionableContacts({
 
         if (!backgroundLoadStartedRef.current && firstPage.length === CONTACTS_PAGE_SIZE) {
           backgroundLoadStartedRef.current = true;
-          void loadRemainingPages(CONTACTS_PAGE_SIZE);
+          loadRemainingPages(CONTACTS_PAGE_SIZE);
         }
       } finally {
         if (!cancelled) {
@@ -146,12 +135,12 @@ export function useMentionableContacts({
       }
     }
 
-    void load();
+    load();
 
     return () => {
       cancelled = true;
     };
-  }, [contactId, isMyselfMode, subjectContact]);
+  }, [contactId, isMyselfMode, revision, subjectContact]);
 
   const contactNameById = useMemo(() => {
     const map = new Map<string, string>();

@@ -1,22 +1,24 @@
-import { Linking, ScrollView, StyleSheet, View } from "react-native";
+import { ScrollView, StyleSheet, View } from "react-native";
 import { useRouter } from "expo-router";
-import * as WebBrowser from "expo-web-browser";
 import {
-  IconBook,
   IconBrandDiscord,
   IconBrandGithub,
   IconBrandLinkedin,
   IconBrandReddit,
   IconBrandX,
+  IconBook,
+  IconInfoCircle,
   IconMessage,
+  IconServer,
   IconSettings,
+  IconShield,
   IconSun,
   IconTag,
   IconUsers,
   IconWorld,
 } from "@tabler/icons-react-native";
 import { HELP_DOCS_URL, SOCIAL_LINKS } from "@bondery/helpers/globals/paths";
-import { TabRootLargeTitle, TabRootScreenHeader } from "../../components/chrome";
+import { TabRootLargeTitle, TabRootScreenHeader, useScrollBottomInset } from "../../components/chrome";
 import { useMobileTranslations } from "../../lib/i18n/useMobileTranslations";
 import { useAppToast } from "../../lib/toast/useAppToast";
 import { useFabSpeedDialScrollDismiss } from "../navigation/useFabSpeedDialScrollDismiss";
@@ -24,6 +26,7 @@ import { SOCIAL_BRAND_COLORS } from "../../theme/colors";
 import { MOBILE_LAYOUT } from "../../theme/tokens";
 import { useMobileThemeColors } from "../../theme/useMobileThemeColors";
 import { ContactSocialButton } from "../contacts/components/ContactSocialButton";
+import { openExternalUrl } from "./openExternalUrl";
 import { SettingsNavigationRow } from "./components/SettingsNavigationRow";
 import { SettingsSectionCard } from "./components/SettingsSectionCard";
 
@@ -70,33 +73,17 @@ export function SettingsScreen() {
   const router = useRouter();
   const { showToast } = useAppToast();
   const colors = useMobileThemeColors();
+  const scrollBottomInset = useScrollBottomInset("tabRoot");
   const { onScroll: fabScrollDismiss } = useFabSpeedDialScrollDismiss();
 
-  const openDocs = async () => {
-    try {
-      await WebBrowser.openBrowserAsync(HELP_DOCS_URL);
-      return;
-    } catch {
-      // Fall back to platform URL open when in-app browser cannot be presented.
-    }
-
-    try {
-      await Linking.openURL(HELP_DOCS_URL);
-    } catch {
+  const openDocs = () => {
+    void openExternalUrl(HELP_DOCS_URL, () => {
       showToast({
         type: "error",
         headline: t("MobileApp.Settings.OpenDocsErrorHeadline"),
         description: t("MobileApp.Settings.OpenDocsErrorDescription"),
       });
-    }
-  };
-
-  const openExternalUrl = async (url: string) => {
-    try {
-      await Linking.openURL(url);
-    } catch {
-      // No toast needed here; this is a non-critical optional action.
-    }
+    });
   };
 
   return (
@@ -107,7 +94,10 @@ export function SettingsScreen() {
 
       <ScrollView
         style={styles.scroll}
-        contentContainerStyle={styles.content}
+        contentContainerStyle={[
+          styles.content,
+          { paddingBottom: scrollBottomInset },
+        ]}
         onScroll={fabScrollDismiss}
         scrollEventThrottle={16}
       >
@@ -152,16 +142,26 @@ export function SettingsScreen() {
         />
       </SettingsSectionCard>
 
-      <SettingsSectionCard title={t("MobileApp.Settings.Guides")}>
+      <SettingsSectionCard title={t("MobileApp.Settings.Links")}>
         <SettingsNavigationRow
           icon={<IconBook size={18} stroke={colors.iconPrimary} />}
-          label={t("MobileApp.Settings.Docs")}
+          label={t("MobileApp.Settings.Guides")}
           destination="external"
           externalLabel={t("MobileApp.Settings.External")}
+          onPress={openDocs}
+        />
+
+        <SettingsNavigationRow
+          icon={<IconInfoCircle size={18} stroke={colors.iconPrimary} />}
+          label={t("MobileApp.Settings.AboutUs")}
+          onPress={() => router.push("/settings/about")}
+        />
+
+        <SettingsNavigationRow
+          icon={<IconShield size={18} stroke={colors.iconPrimary} />}
+          label={t("MobileApp.Settings.Legal")}
           showDivider={false}
-          onPress={() => {
-            void openDocs();
-          }}
+          onPress={() => router.push("/settings/legal")}
         />
       </SettingsSectionCard>
 
@@ -184,6 +184,15 @@ export function SettingsScreen() {
           })}
         </View>
       </SettingsSectionCard>
+
+      <SettingsSectionCard title={t("MobileApp.Settings.Technical")}>
+        <SettingsNavigationRow
+          icon={<IconServer size={18} stroke={colors.iconPrimary} />}
+          label={t("MobileApp.Settings.Technical")}
+          showDivider={false}
+          onPress={() => router.push("/settings/technical")}
+        />
+      </SettingsSectionCard>
       </ScrollView>
     </View>
   );
@@ -198,7 +207,6 @@ const styles = StyleSheet.create({
   },
   content: {
     paddingHorizontal: MOBILE_LAYOUT.spacing.horizontal,
-    paddingBottom: MOBILE_LAYOUT.spacing.contentBottom,
     gap: 16,
   },
   socialsRow: {

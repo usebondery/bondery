@@ -1,6 +1,6 @@
 import { Card, Text, Group, ThemeIcon } from "@mantine/core";
 import { IconStar } from "@tabler/icons-react";
-import { getTranslations } from "next-intl/server";
+import { getWebTranslations as getTranslations } from "@/lib/i18n/getWebTranslations";
 import type { GithubStarsData } from "../getStatsData";
 
 interface GithubStarsCardProps {

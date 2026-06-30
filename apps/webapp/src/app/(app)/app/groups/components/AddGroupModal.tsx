@@ -1,11 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import {
   Stack,
   TextInput,
-  Button,
   Group,
   Text,
   Center,
@@ -19,7 +17,7 @@ import { createGroupSchema } from "@bondery/schemas";
 import { modals } from "@mantine/modals";
 import { notifications } from "@mantine/notifications";
 import { IconUsersGroup } from "@tabler/icons-react";
-import { useTranslations } from "next-intl";
+import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
 import {
   PeopleMultiPickerInput,
   EmojiPicker,
@@ -32,12 +30,14 @@ import {
 } from "@bondery/mantine-next";
 import { flushSync } from "react-dom";
 import type { Contact, GroupWithCount } from "@bondery/schemas";
-import { API_ROUTES } from "@bondery/helpers/globals/paths";
-import { buildAvatarQueryString } from "@/lib/avatarParams";
 import { DEBOUNCE_MS } from "@/lib/config";
 import { searchContacts } from "@/lib/searchContacts";
-import { revalidateGroups } from "../../actions";
 import { captureEvent } from "@/lib/analytics/client";
+import { useContactsListQuery } from "@/lib/query/hooks/useContacts";
+import {
+  useAddContactsToGroupByIdMutation,
+  useCreateGroupMutation,
+} from "@/lib/query/hooks/useGroups";
 
 // Predefined color swatches
 const COLOR_SWATCHES = [
@@ -103,12 +103,25 @@ function AddGroupForm({
   initialLabel = "",
   onCreated,
 }: AddGroupFormProps) {
-  const router = useRouter();
   const t = useTranslations("GroupsPage");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isLoadingContacts, setIsLoadingContacts] = useState(true);
-  const [contacts, setContacts] = useState<Contact[]>([]);
   const [selectedIds, setSelectedIds] = useState<string[]>(initialSelectedIds);
+  const { data: contactsData, isLoading: isLoadingContacts, isError: isContactsError } =
+    useContactsListQuery({ limit: 200 });
+  const createGroupMutation = useCreateGroupMutation();
+  const addContactsMutation = useAddContactsToGroupByIdMutation();
+  const contacts = contactsData?.contacts ?? [];
+
+  useEffect(() => {
+    if (isContactsError) {
+      notifications.show(
+        errorNotificationTemplate({
+          title: t("AddGroupModal.ErrorTitle"),
+          description: t("AddGroupModal.LoadContactsError"),
+        }),
+      );
+    }
+  }, [isContactsError, t]);
 
   useEffect(() => {
     modals.updateModal({
@@ -118,33 +131,6 @@ function AddGroupForm({
       withCloseButton: !isSubmitting,
     });
   }, [isSubmitting, modalId]);
-
-  useEffect(() => {
-    async function fetchContacts() {
-      try {
-        const response = await fetch(
-          `${API_ROUTES.CONTACTS}?limit=200&${buildAvatarQueryString("small")}`,
-        );
-        if (!response.ok) {
-          throw new Error("Failed to fetch contacts");
-        }
-
-        const data = (await response.json()) as { contacts?: Contact[] };
-        setContacts(data.contacts || []);
-      } catch {
-        notifications.show(
-          errorNotificationTemplate({
-            title: t("AddGroupModal.ErrorTitle"),
-            description: t("AddGroupModal.LoadContactsError"),
-          }),
-        );
-      } finally {
-        setIsLoadingContacts(false);
-      }
-    }
-
-    void fetchContacts();
-  }, []);
 
   const form = useForm({
     mode: "controlled",
@@ -167,41 +153,19 @@ function AddGroupForm({
     });
 
     try {
-      const res = await fetch(API_ROUTES.GROUPS, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          label: values.label.trim(),
-          emoji: values.emoji.trim(),
-          color: values.color.trim(),
-        }),
+      const createdGroupData = await createGroupMutation.mutateAsync({
+        label: values.label.trim(),
+        emoji: values.emoji.trim(),
+        color: values.color.trim(),
       });
 
-      if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.error || "Failed to create group");
-      }
-
-      const createdGroupData = (await res.json()) as { id?: string };
-
-      if (!createdGroupData.id) {
+      const groupId = createdGroupData.group?.id;
+      if (!groupId) {
         throw new Error("Failed to parse new group id");
       }
 
       if (selectedIds.length > 0) {
-        const addPeopleResponse = await fetch(
-          `${API_ROUTES.GROUPS}/${createdGroupData.id}/contacts`,
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ personIds: selectedIds }),
-          },
-        );
-
-        if (!addPeopleResponse.ok) {
-          const addPeopleError = await addPeopleResponse.json();
-          throw new Error(addPeopleError.error || "Failed to add contacts to group");
-        }
+        await addContactsMutation.mutateAsync({ groupId, contactIds: selectedIds });
       }
 
       captureEvent("group_created");
@@ -216,10 +180,8 @@ function AddGroupForm({
       );
 
       if (onCreated) {
-        // Build a local GroupWithCount from form values so the parent modal
-        // can immediately reflect the new group without a server round-trip.
         const newGroup: GroupWithCount = {
-          id: createdGroupData.id!,
+          id: groupId,
           userId: "",
           label: values.label.trim(),
           emoji: values.emoji.trim(),
@@ -229,18 +191,10 @@ function AddGroupForm({
           contactCount: selectedIds.length,
           previewContacts: [],
         };
-        // Always revalidate so the page list is fresh even if the parent
-        // modal is dismissed without hitting "Edit groups".
-        void revalidateGroups();
-        router.refresh();
-        // flushSync ensures the modal is torn down before the parent callback
-        // triggers state updates, avoiding the React 18 batching race.
         flushSync(() => modals.close(modalId));
         onCreated(newGroup);
       } else {
         modals.close(modalId);
-        await revalidateGroups();
-        router.refresh();
       }
     } catch (error) {
       notifications.hide(loadingNotification);
@@ -306,11 +260,11 @@ function AddGroupForm({
             </Text>
           ) : (
             <PeopleMultiPickerInput
-              contacts={contacts}
+              contacts={contacts as Contact[]}
               selectedIds={selectedIds}
               onChange={setSelectedIds}
-              placeholder="Add contacts..."
-              noResultsLabel="No contacts found"
+              placeholder={t("AddGroupModal.AddContactsPlaceholder")}
+              noResultsLabel={t("AddGroupModal.NoContactsFound")}
               onSearch={searchContacts}
               searchDebounceMs={DEBOUNCE_MS.contactPicker}
               disabled={isSubmitting}

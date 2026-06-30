@@ -14,7 +14,7 @@ import {
 import { notifications } from "@mantine/notifications";
 import { IconBell, IconCalendarEvent, IconPlus, IconTrash } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
-import { useTranslations } from "next-intl";
+import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
 import {
   CONTACT_FIELD_MAX_LENGTHS,
   CONTACT_LIMITS,

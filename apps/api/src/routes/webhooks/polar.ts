@@ -155,7 +155,9 @@ export async function polarWebhookRoutes(
   fastify: FastifyInstance,
 ): Promise<void> {
   fastify.addHook("onRoute", (routeOptions) => {
-    routeOptions.schema = { ...routeOptions.schema, tags: ["Webhooks"] };
+    if (routeOptions.schema) {
+      routeOptions.schema.tags = ["Webhooks"];
+    }
   });
 
   // Capture the raw request body as a Buffer so that `validateEvent` can

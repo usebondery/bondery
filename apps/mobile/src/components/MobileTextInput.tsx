@@ -79,6 +79,7 @@ function splitContainerStyle(containerStyle: StyleProp<ViewStyle>) {
 export type MobileTextInputProps = TextInputProps & {
   error?: boolean;
   errorMessage?: string;
+  description?: string;
   leadingIcon?: ReactNode;
   trailingAccessory?: ReactNode;
   /** When true (default), shows `current/max` in the trailing section while focused if `maxLength` is set. */
@@ -94,6 +95,7 @@ export const MobileTextInput = memo(
     {
       error = false,
       errorMessage,
+      description,
       leadingIcon,
       trailingAccessory,
       showMaxLengthCounter = true,
@@ -232,6 +234,10 @@ export const MobileTextInput = memo(
           <Text style={[styles.errorMessage, { color: colors.dangerText }]}>
             {errorMessage}
           </Text>
+        ) : description ? (
+          <Text style={[styles.description, { color: colors.textMuted }]}>
+            {description}
+          </Text>
         ) : null}
       </View>
     );
@@ -278,6 +284,9 @@ const styles = StyleSheet.create({
     fontVariant: ["tabular-nums"],
   },
   errorMessage: {
+    fontSize: MOBILE_TYPOGRAPHY.fontSize.caption,
+  },
+  description: {
     fontSize: MOBILE_TYPOGRAPHY.fontSize.caption,
   },
   input: {

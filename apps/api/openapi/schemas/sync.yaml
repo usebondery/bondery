@@ -1,0 +1,186 @@
+SyncPushRequest:
+  type: object
+  required: [deviceId, mutations]
+  properties:
+    deviceId:
+      type: string
+      format: uuid
+    mutations:
+      type: array
+      minItems: 1
+      maxItems: 50
+      items:
+        $ref: "#/SyncMutation"
+
+SyncMutation:
+  type: object
+  required: [id, clientSequence, type]
+  properties:
+    id:
+      type: string
+      format: uuid
+    clientSequence:
+      type: integer
+      minimum: 1
+    type:
+      type: string
+    entityId:
+      type: string
+      format: uuid
+    baseUpdatedAt:
+      type: string
+      format: date-time
+    payload:
+      type: object
+
+SyncPushResponse:
+  type: object
+  required: [results, serverTime, nextServerSequence]
+  properties:
+    results:
+      type: array
+      items:
+        $ref: "#/SyncPushResult"
+    serverTime:
+      type: string
+      format: date-time
+    nextServerSequence:
+      type: integer
+      minimum: 0
+
+SyncPushResult:
+  oneOf:
+    - $ref: "#/SyncPushAppliedResult"
+    - $ref: "#/SyncPushDuplicateResult"
+    - $ref: "#/SyncPushConflictResult"
+    - $ref: "#/SyncPushRejectedResult"
+
+SyncPushAppliedResult:
+  type: object
+  required: [id, status, serverSequence, txid, data]
+  properties:
+    id:
+      type: string
+      format: uuid
+    status:
+      type: string
+      enum: [applied]
+    serverSequence:
+      type: integer
+    txid:
+      type: string
+    data:
+      type: object
+
+SyncPushDuplicateResult:
+  type: object
+  required: [id, status, serverSequence]
+  properties:
+    id:
+      type: string
+      format: uuid
+    status:
+      type: string
+      enum: [duplicate]
+    serverSequence:
+      type: integer
+    txid:
+      type: string
+    data:
+      type: object
+
+SyncPushConflictResult:
+  type: object
+  required: [id, status, server]
+  properties:
+    id:
+      type: string
+      format: uuid
+    status:
+      type: string
+      enum: [conflict]
+    txid:
+      type: string
+    server:
+      type: object
+    error:
+      type: string
+
+SyncPushRejectedResult:
+  type: object
+  required: [id, status, error]
+  properties:
+    id:
+      type: string
+      format: uuid
+    status:
+      type: string
+      enum: [rejected]
+    error:
+      type: string
+
+SyncVersionMismatch:
+  type: object
+  properties:
+    error:
+      type: string
+    requiredVersion:
+      type: integer
+    clientVersion:
+      type: integer
+      nullable: true
+
+SyncChange:
+  type: object
+  required: [table, operation, entityId, value]
+  properties:
+    table:
+      type: string
+    operation:
+      type: string
+      enum: [insert, update, delete]
+    entityId:
+      type: string
+      format: uuid
+    value:
+      type: object
+      nullable: true
+
+SyncBatch:
+  type: object
+  required: [serverSequence, changes]
+  properties:
+    serverSequence:
+      type: integer
+    changes:
+      type: array
+      items:
+        $ref: "#/SyncChange"
+
+SyncPullResponse:
+  type: object
+  required: [batches, nextServerSequence]
+  properties:
+    batches:
+      type: array
+      items:
+        $ref: "#/SyncBatch"
+    nextServerSequence:
+      type: integer
+      minimum: 0
+    requiresBootstrap:
+      type: boolean
+
+SyncBootstrapResponse:
+  type: object
+  required: [tables, nextServerSequence]
+  properties:
+    tables:
+      type: object
+      additionalProperties:
+        type: array
+        items:
+          type: object
+    nextServerSequence:
+      type: integer
+      minimum: 0

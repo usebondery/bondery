@@ -5,7 +5,7 @@ import { ActionSheetPopup } from "../../../components/ActionSheetPopup";
 import { useMobileTranslations } from "../../../lib/i18n/useMobileTranslations";
 import { useAppToast } from "../../../lib/toast/useAppToast";
 import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
-import { deleteTag } from "../../../lib/api/client";
+import { tagsDomain } from "../../../lib/domains/tags";
 
 interface TagDeleteDialogProps {
   open: boolean;
@@ -33,7 +33,7 @@ export function TagDeleteDialog({
     setIsDeleting(true);
 
     try {
-      await deleteTag(tagId);
+      tagsDomain.delete(tagId);
       onOpenChange(false);
       onDeleted();
     } catch {

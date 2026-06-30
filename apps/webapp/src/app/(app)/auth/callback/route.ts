@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { API_ROUTES, WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import { LOCALE_PREFS_COOKIE } from "@/lib/auth/detectLocale";
-import { API_URL } from "@/lib/config";
+import { serverApiFetch } from "@/lib/api/server";
 
 /**
  * Parses the locale preferences cookie set during OAuth login.
@@ -25,35 +25,14 @@ function parseLocalePrefs(
   }
 }
 
-async function applyLocalePrefsViaApi(
-  cookieStore: Awaited<ReturnType<typeof cookies>>,
-  supabase: ReturnType<typeof createServerClient>,
-  localePrefs: { timezone: string; timeFormat: "12h" | "24h" },
-): Promise<void> {
-  const { data: sessionData } = await supabase.auth.getSession();
-  const accessToken = sessionData.session?.access_token;
-
-  const cookieHeader = cookieStore
-    .getAll()
-    .map((cookie) => `${cookie.name}=${cookie.value}`)
-    .join("; ");
-
-  const headers: HeadersInit = {
-    "Content-Type": "application/json",
-  };
-
-  if (cookieHeader) {
-    headers.Cookie = cookieHeader;
-  }
-
-  if (accessToken) {
-    headers.Authorization = `Bearer ${accessToken}`;
-  }
-
+async function applyLocalePrefsViaApi(localePrefs: {
+  timezone: string;
+  timeFormat: "12h" | "24h";
+}): Promise<void> {
   try {
-    await fetch(`${API_URL}${API_ROUTES.ME_SETTINGS}`, {
+    await serverApiFetch(API_ROUTES.ME_SETTINGS, {
       method: "PATCH",
-      headers,
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         timezone: localePrefs.timezone,
         timeFormat: localePrefs.timeFormat,
@@ -103,7 +82,7 @@ export async function GET(request: Request) {
       const localePrefs = parseLocalePrefs(localePrefsRaw);
 
       if (localePrefs) {
-        await applyLocalePrefsViaApi(cookieStore, supabase, localePrefs);
+        await applyLocalePrefsViaApi(localePrefs);
         response.cookies.set(LOCALE_PREFS_COOKIE, "", { path: "/", maxAge: 0 });
       }
 

@@ -9,9 +9,10 @@ import {
   errorNotificationTemplate,
   warningNotificationTemplate,
 } from "@bondery/mantine-next";
-import { useTranslations } from "next-intl";
+import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
 import type { PolarEmbedCheckout } from "@polar-sh/checkout/embed";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
+import { clientApiFetch } from "@/lib/api/client";
 import { createBrowswerSupabaseClient } from "@/lib/supabase/client";
 
 /** Maximum ms to wait for the Polar iframe onLoaded event before resetting loading state. */
@@ -71,7 +72,7 @@ export function useEmbeddedCheckout({
 
     let url: string;
     try {
-      const res = await fetch(API_ROUTES.SUBSCRIPTIONS_CHECKOUT, { method: "POST" });
+      const res = await clientApiFetch(API_ROUTES.SUBSCRIPTIONS_CHECKOUT, { method: "POST" });
 
       if (res.status === 401) {
         notifications.show(

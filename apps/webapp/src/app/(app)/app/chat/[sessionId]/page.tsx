@@ -1,6 +1,5 @@
 import { ChatView } from "../ChatView";
-import { getAuthHeaders } from "@/lib/authHeaders";
-import { API_URL } from "@/lib/config";
+import { serverApiFetch } from "@/lib/api/server";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import { redirect } from "next/navigation";
 import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
@@ -23,7 +22,6 @@ export default async function ChatSessionPage({
   params: Promise<{ sessionId: string }>;
 }) {
   const { sessionId } = await params;
-  const headers = await getAuthHeaders();
 
   // Fetch user settings for avatar
   let avatarUrl: string | null = null;
@@ -32,14 +30,8 @@ export default async function ChatSessionPage({
 
   try {
     const [settingsRes, subscriptionRes] = await Promise.all([
-      fetch(`${API_URL}${API_ROUTES.ME_SETTINGS}`, {
-        next: { tags: ["settings"] },
-        headers,
-      }),
-      fetch(`${API_URL}${API_ROUTES.SUBSCRIPTIONS}`, {
-        cache: "no-store",
-        headers,
-      }),
+      serverApiFetch(API_ROUTES.ME_SETTINGS, undefined, { next: { tags: ["settings"] } }),
+      serverApiFetch(API_ROUTES.SUBSCRIPTIONS, undefined, { cache: "no-store" }),
     ]);
 
     if (settingsRes.ok) {
@@ -55,10 +47,7 @@ export default async function ChatSessionPage({
 
     // Fire-and-forget sync: bootstraps subscription for pre-existing Polar customers
     if (subscriptionStatus?.plan !== "premium") {
-      fetch(`${API_URL}${API_ROUTES.SUBSCRIPTIONS_SYNC}`, {
-        method: "POST",
-        headers,
-      }).catch(() => {});
+      serverApiFetch(API_ROUTES.SUBSCRIPTIONS_SYNC, { method: "POST" }).catch(() => {});
     }
   } catch {}
 
@@ -66,12 +55,10 @@ export default async function ChatSessionPage({
   let initialMessages: UIMessage[] = [];
 
   try {
-    const messagesRes = await fetch(
-      `${API_URL}${API_ROUTES.CHAT_SESSIONS}/${sessionId}/messages`,
-      {
-        headers,
-        cache: "no-store",
-      },
+    const messagesRes = await serverApiFetch(
+      `${API_ROUTES.CHAT_SESSIONS}/${sessionId}/messages`,
+      undefined,
+      { cache: "no-store" },
     );
 
     if (messagesRes.status === 404) {
@@ -79,8 +66,8 @@ export default async function ChatSessionPage({
     }
 
     if (messagesRes.ok) {
-      const { data } = (await messagesRes.json()) as { data: ChatMessageRow[] };
-      initialMessages = data.map((msg) => ({
+      const { messages } = (await messagesRes.json()) as { messages: ChatMessageRow[] };
+      initialMessages = messages.map((msg) => ({
         id: msg.id,
         role: msg.role,
         content: msg.content?.text ?? "",

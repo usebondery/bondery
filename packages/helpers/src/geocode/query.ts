@@ -3,10 +3,10 @@
  */
 
 export function buildGeocodeSuggestQuery(
-  q: string,
+  search: string,
   mode: "address" | "place" = "address",
 ): string {
-  const params = new URLSearchParams({ q: q.trim(), mode });
+  const params = new URLSearchParams({ search: search.trim(), mode });
   return params.toString();
 }
 

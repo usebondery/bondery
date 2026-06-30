@@ -1,7 +1,7 @@
 "use client";
 
 import { Card, Text } from "@mantine/core";
-import { useTranslations } from "next-intl";
+import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
 import {
   CartesianGrid,
   Legend,

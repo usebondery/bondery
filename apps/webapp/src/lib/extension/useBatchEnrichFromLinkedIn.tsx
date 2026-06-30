@@ -1,10 +1,10 @@
 "use client";
 
 import { useCallback, useSyncExternalStore } from "react";
-import { useRouter } from "next/navigation";
 import { notifications } from "@mantine/notifications";
-import { useTranslations } from "next-intl";
+import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
+import { clientApiFetch } from "@/lib/api/client";
 import { checkExtensionAuth } from "@/lib/extension/checkExtensionAuth";
 import {
   errorNotificationTemplate,
@@ -21,10 +21,6 @@ import {
   setPendingQueueStatus,
 } from "@/lib/extension/enrichBatchStore";
 import { captureEvent } from "@/lib/analytics/client";
-import {
-  revalidateContacts,
-  revalidateSettings,
-} from "@/app/(app)/app/actions";
 
 /** Number of consecutive timeouts before the circuit breaker aborts the loop. */
 const MAX_CONSECUTIVE_TIMEOUTS = 5;
@@ -90,7 +86,6 @@ async function getResponseErrorDescription(
  */
 export function useBatchEnrichFromLinkedIn() {
   const t = useTranslations("EnrichFromLinkedIn");
-  const router = useRouter();
 
   const storeState = useSyncExternalStore(
     subscribe,
@@ -148,7 +143,7 @@ export function useBatchEnrichFromLinkedIn() {
       status: "completed" | "failed",
       errorMessage?: string,
     ) => {
-      await fetch(`${API_ROUTES.CONTACTS}/enrich-queue/${queueItemId}`, {
+      await clientApiFetch(`${API_ROUTES.CONTACTS}/enrich-queue/${queueItemId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status, errorMessage: errorMessage ?? null }),
@@ -174,7 +169,7 @@ export function useBatchEnrichFromLinkedIn() {
       while (true) {
         if (isCancelled()) break;
 
-        const batchRes = await fetch(
+        const batchRes = await clientApiFetch(
           `${API_ROUTES.CONTACTS}/enrich-queue/next-batch`,
         );
 
@@ -291,7 +286,7 @@ export function useBatchEnrichFromLinkedIn() {
     }
 
     // Initialize the queue — clears old rows, populates fresh pending items.
-    const initRes = await fetch(`${API_ROUTES.CONTACTS}/enrich-queue/init`, {
+    const initRes = await clientApiFetch(`${API_ROUTES.CONTACTS}/enrich-queue/init`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({}),
@@ -360,7 +355,7 @@ export function useBatchEnrichFromLinkedIn() {
         failed: s.failed,
       });
     } else if (!abortReason) {
-      await fetch(`${API_ROUTES.CONTACTS}/enrich-queue`, { method: "DELETE" });
+      await clientApiFetch(`${API_ROUTES.CONTACTS}/enrich-queue`, { method: "DELETE" });
     }
 
     if (abortReason === "circuit_breaker") {
@@ -381,13 +376,7 @@ export function useBatchEnrichFromLinkedIn() {
         }),
       );
     }
-
-    if (completedCount > 0) {
-      await revalidateContacts();
-      await revalidateSettings();
-      router.refresh();
-    }
-  }, [t, router, runEnrichLoop]);
+  }, [t, runEnrichLoop]);
 
   /**
    * Queue and enrich a single contact by person ID.
@@ -436,7 +425,7 @@ export function useBatchEnrichFromLinkedIn() {
         return;
       }
 
-      const initRes = await fetch(`${API_ROUTES.CONTACTS}/enrich-queue/init`, {
+      const initRes = await clientApiFetch(`${API_ROUTES.CONTACTS}/enrich-queue/init`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ personId: contactId }),
@@ -485,7 +474,7 @@ export function useBatchEnrichFromLinkedIn() {
           failed: s.failed,
         });
       } else if (!abortReason) {
-        await fetch(`${API_ROUTES.CONTACTS}/enrich-queue`, {
+        await clientApiFetch(`${API_ROUTES.CONTACTS}/enrich-queue`, {
           method: "DELETE",
         });
       }
@@ -506,14 +495,8 @@ export function useBatchEnrichFromLinkedIn() {
           }),
         );
       }
-
-      if (completedCount > 0) {
-        await revalidateContacts();
-        await revalidateSettings();
-        router.refresh();
-      }
     },
-    [t, router, runEnrichLoop],
+    [t, runEnrichLoop],
   );
 
   /**
@@ -587,7 +570,7 @@ export function useBatchEnrichFromLinkedIn() {
           failed: s.failed,
         });
       } else if (!abortReason) {
-        await fetch(`${API_ROUTES.CONTACTS}/enrich-queue`, {
+        await clientApiFetch(`${API_ROUTES.CONTACTS}/enrich-queue`, {
           method: "DELETE",
         });
       }
@@ -607,14 +590,8 @@ export function useBatchEnrichFromLinkedIn() {
           }),
         );
       }
-
-      if (completedCount > 0) {
-        await revalidateContacts();
-        await revalidateSettings();
-        router.refresh();
-      }
     },
-    [t, router, runEnrichLoop],
+    [t, runEnrichLoop],
   );
 
   /**
@@ -637,7 +614,7 @@ export function useBatchEnrichFromLinkedIn() {
    * Discard an interrupted enrichment run by deleting remaining pending rows.
    */
   const discard = useCallback(async () => {
-    await fetch(`${API_ROUTES.CONTACTS}/enrich-queue`, { method: "DELETE" });
+    await clientApiFetch(`${API_ROUTES.CONTACTS}/enrich-queue`, { method: "DELETE" });
     setPendingQueueStatus(null);
   }, []);
 

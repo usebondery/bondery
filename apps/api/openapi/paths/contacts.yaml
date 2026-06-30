@@ -17,7 +17,9 @@ root:
         schema:
           type: integer
           minimum: 1
-        description: Maximum number of contacts to return. When omitted, all contacts are returned.
+          maximum: 200
+          default: 50
+        description: Maximum number of contacts to return per page (default 50, max 200)
       - name: offset
         in: query
         schema:
@@ -25,16 +27,16 @@ root:
           minimum: 0
           default: 0
         description: Number of contacts to skip (used with limit for pagination)
-      - name: q
+      - name: search
         in: query
         schema:
           type: string
-        description: Search query to filter contacts by first or last name
+        description: Search query to filter contacts by name (fuzzy match)
       - name: sort
         in: query
         schema:
           type: string
-          enum: [nameAsc, nameDesc, surnameAsc, surnameDesc, interactionAsc, interactionDesc]
+          enum: [nameAsc, nameDesc, surnameAsc, surnameDesc, interactionAsc, interactionDesc, createdAtAsc, createdAtDesc]
           default: nameAsc
         description: Sort order for contacts
     responses:
@@ -49,11 +51,8 @@ root:
                   type: array
                   items:
                     $ref: "../schemas/contact.yaml#/Contact"
-                totalCount:
-                  type: integer
-                  description: >
-                    Total number of contacts matching the query (may be larger than the
-                    returned array when using limit/offset pagination)
+                pagination:
+                  $ref: "../schemas/pagination.yaml#/PaginationMeta"
                 stats:
                   type: object
                   properties:

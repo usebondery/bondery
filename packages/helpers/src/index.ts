@@ -6,6 +6,7 @@ export {
   CHROME_EXTENSION_URL,
   MIN_EXTENSION_VERSION,
   HELP_DOCS_URL,
+  CHANGELOG_URL,
   SUPPORT_EMAIL,
   STATUS_PAGE_URL,
   SOCIAL_LINKS,
@@ -74,6 +75,16 @@ export type {
 } from "./socials/index.js";
 
 export { INTERACTION_TYPES } from "./interactions/index.js";
+
+export {
+  createContactFromFullNameSchema,
+  normalizedSocialHandleSchema,
+} from "./forms/index.js";
+export type {
+  CreateContactFromFullNameInput,
+  CreateContactFromFullNameOutput,
+  NormalizedSocialHandle,
+} from "./forms/index.js";
 
 export {
   buildGeocodeSuggestQuery,

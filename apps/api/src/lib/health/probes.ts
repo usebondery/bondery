@@ -81,7 +81,7 @@ export async function probeSupabaseDatabase(
   publishableKey: string,
 ): Promise<ServiceProbeResult> {
   const baseUrl = normalizeSupabaseBaseUrl(supabaseUrl);
-  return probeHttp(`${baseUrl}/rest-admin/v1/live`, {
+  return probeHttp(`${baseUrl}/rest-admin/v1/ready`, {
     method: "GET",
     headers: supabaseRequestHeaders(publishableKey),
   });

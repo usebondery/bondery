@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { ActionIcon, Card, Group, Menu, Stack, Text, Tooltip } from "@mantine/core";
-import { useTranslations } from "next-intl";
+import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
 import { formatAddressLabel, buildManualContactAddress } from "@bondery/helpers/address";
 import { geocodeSuggestionDisplayLabel } from "@bondery/helpers/geocode";
 import {
@@ -676,7 +676,7 @@ export function ContactAddressSection({ contact, isSaving, onSave }: ContactAddr
                           </Menu.Item>
                           <Menu.Item
                             leftSection={
-                              <Image src="/icons/mapy.svg" alt="Mapy.com" width={14} height={14} />
+                              <Image src="/icons/brands/mapy.svg" alt="Mapy.com" width={14} height={14} />
                             }
                             onClick={() => {
                               const query = encodeURIComponent(entry.value);

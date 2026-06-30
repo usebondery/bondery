@@ -1,6 +1,9 @@
-import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
-import { Type } from "@sinclair/typebox";
+import type { FastifyReply } from "fastify";
+import type { AppFastifyInstance, AppRoutePlugin } from "../../../lib/fastify-types.js";
+import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
+import { vcardImportCommitRequestSchema } from "@bondery/schemas";
 import { getAuth } from "../../../lib/auth.js";
+import { registerApiKeyProtectedHooks } from "../../../lib/api-key-access.js";
 import { parseVCardUpload } from "./parser.js";
 import { assignContactsToDefaultImportGroup } from "../../../lib/default-import-groups.js";
 import {
@@ -13,88 +16,10 @@ import type {
   TablesUpdate,
 } from "@bondery/schemas";
 import logger from "../../../lib/logger.js";
+import { createAdminClient } from "../../../lib/supabase.js";
+import { uploadContactAvatarAndSetFlag } from "../../../lib/avatar-storage.js";
 import { formatPlaceLabel } from "@bondery/helpers";
 import { IMPORT_TIER } from "../../../lib/rate-limit.js";
-
-const VCardCommitPhoneSchema = Type.Object({
-  prefix: Type.String(),
-  value: Type.String(),
-  type: Type.Union([Type.Literal("home"), Type.Literal("work")]),
-  preferred: Type.Boolean(),
-});
-
-const VCardCommitEmailSchema = Type.Object({
-  value: Type.String(),
-  type: Type.Union([Type.Literal("home"), Type.Literal("work")]),
-  preferred: Type.Boolean(),
-});
-
-const VCardCommitAddressSchema = Type.Object({
-  value: Type.String(),
-  type: Type.Union([
-    Type.Literal("home"),
-    Type.Literal("work"),
-    Type.Literal("other"),
-  ]),
-  preferred: Type.Boolean(),
-  addressLine1: Type.Union([Type.String(), Type.Null()]),
-  addressLine2: Type.Union([Type.String(), Type.Null()]),
-  addressCity: Type.Union([Type.String(), Type.Null()]),
-  addressPostalCode: Type.Union([Type.String(), Type.Null()]),
-  addressState: Type.Union([Type.String(), Type.Null()]),
-  addressStateCode: Type.Union([Type.String(), Type.Null()]),
-  addressCountry: Type.Union([Type.String(), Type.Null()]),
-  addressCountryCode: Type.Union([Type.String(), Type.Null()]),
-  addressFormatted: Type.Union([Type.String(), Type.Null()]),
-  latitude: Type.Union([Type.Number(), Type.Null()]),
-  longitude: Type.Union([Type.Number(), Type.Null()]),
-  geocodeSource: Type.Union([Type.Literal("mapy.com"), Type.Null()]),
-  validity: Type.Union([
-    Type.Literal("valid"),
-    Type.Literal("unverifiable"),
-    Type.Literal("invalid"),
-  ]),
-  timezone: Type.Union([Type.String(), Type.Null()]),
-});
-
-const VCardCommitImportantDateSchema = Type.Object({
-  type: Type.Union([
-    Type.Literal("birthday"),
-    Type.Literal("anniversary"),
-    Type.Literal("nameday"),
-    Type.Literal("graduation"),
-    Type.Literal("other"),
-  ]),
-  date: Type.String(),
-  note: Type.Union([Type.String(), Type.Null()]),
-});
-
-const VCardCommitContactSchema = Type.Object({
-  tempId: Type.String(),
-  firstName: Type.String(),
-  middleName: Type.Union([Type.String(), Type.Null()]),
-  lastName: Type.String(),
-  headline: Type.Union([Type.String(), Type.Null()]),
-  phones: Type.Array(VCardCommitPhoneSchema),
-  emails: Type.Array(VCardCommitEmailSchema),
-  addresses: Type.Array(VCardCommitAddressSchema),
-  linkedin: Type.Union([Type.String(), Type.Null()]),
-  instagram: Type.Union([Type.String(), Type.Null()]),
-  whatsapp: Type.Union([Type.String(), Type.Null()]),
-  facebook: Type.Union([Type.String(), Type.Null()]),
-  signal: Type.Union([Type.String(), Type.Null()]),
-  website: Type.Union([Type.String(), Type.Null()]),
-  avatarUri: Type.Union([Type.String(), Type.Null()]),
-  importantDates: Type.Union([
-    Type.Array(VCardCommitImportantDateSchema),
-    Type.Null(),
-  ]),
-  isValid: Type.Boolean(),
-});
-
-const VCardCommitBody = Type.Object({
-  contacts: Type.Array(VCardCommitContactSchema, { minItems: 1 }),
-});
 
 const AVATARS_BUCKET = "avatars";
 
@@ -120,15 +45,17 @@ function decodeDataUri(
   }
 }
 
-export async function vcardImportRoutes(fastify: FastifyInstance) {
+export const vcardImportRoutes: AppRoutePlugin = async (fastify) => {
   fastify.addHook("onRoute", (routeOptions) => {
-    routeOptions.schema = { ...routeOptions.schema, tags: ["Import"] };
+    if (routeOptions.schema) {
+      routeOptions.schema.tags = ["Import"];
+    }
   });
-  fastify.addHook("onRequest", fastify.auth([fastify.verifySession]));
+  registerApiKeyProtectedHooks(fastify);
 
   fastify.post(
     "/parse",
-    async (request: FastifyRequest, reply: FastifyReply) => {
+    async (request, reply) => {
       try {
         const files: Array<{ fileName: string; content: Buffer }> = [];
 
@@ -168,11 +95,13 @@ export async function vcardImportRoutes(fastify: FastifyInstance) {
 
   fastify.post(
     "/commit",
-    { schema: { body: VCardCommitBody }, config: { rateLimit: IMPORT_TIER } },
-    async (
-      request: FastifyRequest<{ Body: typeof VCardCommitBody.static }>,
-      reply: FastifyReply,
-    ) => {
+    {
+      schema: {
+        body: vcardImportCommitRequestSchema,
+      } satisfies FastifyZodOpenApiSchema,
+      config: { rateLimit: IMPORT_TIER },
+    },
+    async (request, reply) => {
       const { client, user } = getAuth(request);
       const rawContacts = request.body.contacts;
 
@@ -475,11 +404,15 @@ export async function vcardImportRoutes(fastify: FastifyInstance) {
 
             if (!validateImageMagicBytes(buffer)) return;
 
-            const fileName = `${user.id}/${personId}.jpg`;
-            await client.storage.from(AVATARS_BUCKET).upload(fileName, buffer, {
+            const adminClient = createAdminClient();
+            await uploadContactAvatarAndSetFlag(
+              client,
+              adminClient,
+              user.id,
+              personId,
+              buffer,
               contentType,
-              upsert: true,
-            });
+            );
           } catch (error) {
             logger.error(
               { err: error, personId },

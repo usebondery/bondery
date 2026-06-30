@@ -1,15 +1,17 @@
 "use client";
 
 import { notifications } from "@mantine/notifications";
-import { useTranslations } from "next-intl";
+import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
+import { useApplyUserLanguage } from "@/lib/i18n/useApplyUserLanguage";
+import type { SupportedLocale } from "@bondery/translations";
 import { LanguagePicker as SharedLanguagePicker } from "@/components/shared/LanguagePicker";
 import { APP_LANGUAGES_DATA } from "@bondery/helpers/locale";
-import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import {
   errorNotificationTemplate,
   loadingNotificationTemplate,
   successNotificationTemplate,
 } from "@bondery/mantine-next";
+import { useUpdateSettingsMutation } from "@/lib/query/hooks/useSettings";
 
 interface LanguagePickerProps {
   initialValue: string;
@@ -18,6 +20,8 @@ interface LanguagePickerProps {
 export function LanguagePicker({ initialValue }: LanguagePickerProps) {
   const t = useTranslations("SettingsPage.Profile");
   const tLanguages = useTranslations("Languages");
+  const updateSettings = useUpdateSettingsMutation();
+  const applyUserLanguage = useApplyUserLanguage();
 
   const handleChange = async (val: string) => {
     const loadingNotification = notifications.show({
@@ -28,19 +32,8 @@ export function LanguagePicker({ initialValue }: LanguagePickerProps) {
     });
 
     try {
-      const response = await fetch(API_ROUTES.ME_SETTINGS, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          language: val,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to update language");
-      }
+      await updateSettings.mutateAsync({ language: val });
+      await applyUserLanguage(val as SupportedLocale);
 
       notifications.hide(loadingNotification);
       notifications.show(
@@ -50,9 +43,6 @@ export function LanguagePicker({ initialValue }: LanguagePickerProps) {
         }),
       );
 
-      setTimeout(() => {
-        window.location.reload();
-      }, 500);
     } catch {
       notifications.hide(loadingNotification);
       notifications.show(

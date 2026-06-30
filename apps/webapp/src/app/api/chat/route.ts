@@ -1,7 +1,6 @@
 import { createServerSupabaseClient } from "@/lib/supabase/server";
-import { getAuthHeaders } from "@/lib/authHeaders";
+import { serverApiFetch } from "@/lib/api/server";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
-import { API_URL } from "@/lib/config";
 
 export async function POST(request: Request) {
   const supabase = await createServerSupabaseClient();
@@ -15,11 +14,10 @@ export async function POST(request: Request) {
   }
 
   const body = await request.json();
-  const headers = await getAuthHeaders();
 
-  const apiResponse = await fetch(`${API_URL}${API_ROUTES.CHAT}`, {
+  const apiResponse = await serverApiFetch(API_ROUTES.CHAT, {
     method: "POST",
-    headers: { ...headers, "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
   });
 

@@ -13,14 +13,16 @@ import {
 import { IconTag } from "@tabler/icons-react";
 import { notifications } from "@mantine/notifications";
 import { useState, useCallback } from "react";
-import { useTranslations } from "next-intl";
+import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
 import type { Tag, TagWithCount } from "@bondery/schemas";
-import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import { errorNotificationTemplate, warningNotificationTemplate } from "@bondery/mantine-next";
-import { API_URL } from "@/lib/config";
 import { TagPill } from "@/app/(app)/app/components/tags/TagPill";
 import { openTagEditorModal } from "@/app/(app)/app/components/tags/openTagEditorModal";
 import { AddNewTagButton } from "@/app/(app)/app/components/tags/AddNewTagButton";
+import {
+  useAddTagToContactMutation,
+  useRemoveTagFromContactMutation,
+} from "@/lib/query/hooks/useTags";
 
 interface PersonTagsInputProps {
   personId: string;
@@ -48,6 +50,8 @@ export function PersonTagsInput({
 }: PersonTagsInputProps) {
   const t = useTranslations("TagsInput");
   const tSettings = useTranslations("TagsSettings");
+  const addTagMutation = useAddTagToContactMutation(personId);
+  const removeTagMutation = useRemoveTagFromContactMutation(personId);
   const [personTags, setPersonTags] = useState<Tag[]>(initialTags);
   const [workspaceTags, setWorkspaceTags] = useState<Tag[]>(allTags);
   const [search, setSearch] = useState("");
@@ -78,23 +82,11 @@ export function PersonTagsInput({
   );
 
   const addTagToPerson = async (tagId: string) => {
-    const res = await fetch(`${API_URL}${API_ROUTES.CONTACTS}/${personId}/tags`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify({ tagId }),
-    });
-
-    if (!res.ok) throw new Error("Failed to add tag to person");
+    await addTagMutation.mutateAsync(tagId);
   };
 
   const removeTagFromPerson = async (tagId: string) => {
-    const res = await fetch(`${API_URL}${API_ROUTES.CONTACTS}/${personId}/tags/${tagId}`, {
-      method: "DELETE",
-      credentials: "include",
-    });
-
-    if (!res.ok) throw new Error("Failed to remove tag from person");
+    await removeTagMutation.mutateAsync(tagId);
   };
 
   const handleAddExistingTag = async (tag: Tag) => {

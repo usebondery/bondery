@@ -1,14 +1,16 @@
-﻿/**
+/**
  * Extension API Routes
  * Handles browser extension integration for creating/updating contacts
  */
 
-import type { FastifyInstance } from "fastify";
+import type { AppRoutePlugin } from "../../lib/fastify-types.js";
 import { registerPostRoute } from "./post-route.js";
 
-export async function extensionRoutes(fastify: FastifyInstance) {
+export const extensionRoutes: AppRoutePlugin = async (fastify) => {
   fastify.addHook("onRoute", (routeOptions) => {
-    routeOptions.schema = { ...routeOptions.schema, tags: ["Extension"] };
+    if (routeOptions.schema) {
+      routeOptions.schema.tags = ["Extension"];
+    }
   });
 
   registerPostRoute(fastify);

@@ -1,3 +1,4 @@
+import "react-native-get-random-values";
 import "react-native-gesture-handler";
 import "@tamagui/native/setup-teleport";
 import React, { useEffect } from "react";
@@ -11,6 +12,7 @@ import { StyleSheet, Text, View } from "react-native";
 import { I18nextProvider } from "react-i18next";
 import { AuthProvider } from "../src/lib/auth/AuthProvider";
 import { useAuth } from "../src/lib/auth/useAuth";
+import { SyncProvider } from "../src/lib/sync/SyncProvider";
 import { useAndroidKeyboardResizeMode } from "../src/lib/hooks/useAndroidKeyboardResizeMode";
 import { AppToastProvider } from "../src/lib/toast/useAppToast";
 import type { MobileThemeColors } from "../src/theme/colors";
@@ -27,9 +29,14 @@ type RootErrorBoundaryState = {
   message: string;
 };
 
-type RootErrorBoundaryProps = React.PropsWithChildren<{ colors: MobileThemeColors }>;
+type RootErrorBoundaryProps = React.PropsWithChildren<{
+  colors: MobileThemeColors;
+}>;
 
-class RootErrorBoundary extends React.Component<RootErrorBoundaryProps, RootErrorBoundaryState> {
+class RootErrorBoundary extends React.Component<
+  RootErrorBoundaryProps,
+  RootErrorBoundaryState
+> {
   constructor(props: RootErrorBoundaryProps) {
     super(props);
     this.state = { hasError: false, message: "" };
@@ -47,7 +54,12 @@ class RootErrorBoundary extends React.Component<RootErrorBoundaryProps, RootErro
 
     if (this.state.hasError) {
       return (
-        <View style={[styles.errorScreen, { backgroundColor: colors.appBackground }]}>
+        <View
+          style={[
+            styles.errorScreen,
+            { backgroundColor: colors.appBackground },
+          ]}
+        >
           <Text style={[styles.errorTitle, { color: colors.textPrimary }]}>
             Mobile app runtime error
           </Text>
@@ -100,16 +112,21 @@ export default function RootLayout() {
         <LocaleSync />
         <SafeAreaProvider>
           <KeyboardProvider preload={false}>
-            <TamaguiProvider config={tamaguiConfig} defaultTheme={resolvedTheme}>
+            <TamaguiProvider
+              config={tamaguiConfig}
+              defaultTheme={resolvedTheme}
+            >
               <Theme name={resolvedTheme}>
                 <AppStatusBar />
                 <AppNavigationBar />
                 <AppToastProvider>
                   <PortalProvider>
                     <AuthProvider>
-                      <RootErrorBoundary colors={colors}>
-                        <RootNavigator />
-                      </RootErrorBoundary>
+                      <SyncProvider>
+                        <RootErrorBoundary colors={colors}>
+                          <RootNavigator />
+                        </RootErrorBoundary>
+                      </SyncProvider>
                     </AuthProvider>
                   </PortalProvider>
                 </AppToastProvider>

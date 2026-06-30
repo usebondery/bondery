@@ -1,0 +1,19 @@
+{
+  "mcpServers": {
+    "plane": {
+      "command": "npx",
+      "args": [
+        "mcp-remote@latest",
+        "https://mcp.plane.so/http/mcp"
+      ],
+      "type": "stdio"
+    },
+    "chrome-devtools": {
+      "command": "npx -y chrome-devtools-mcp@latest"
+    },
+    "expo": {
+      "type": "http",
+      "url": "https://mcp.expo.dev/mcp"
+    }
+  }
+}

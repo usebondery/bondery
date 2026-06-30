@@ -4,8 +4,8 @@ import { Text, Stack, Combobox, useCombobox, Input, ScrollArea, Group } from "@m
 import { IconWorld } from "@tabler/icons-react";
 import { useState, useEffect, forwardRef } from "react";
 import { notifications } from "@mantine/notifications";
-import { useTranslations } from "next-intl";
-import { API_ROUTES } from "@bondery/helpers/globals/paths";
+import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
+import { useUpdateSettingsMutation } from "@/lib/query/hooks/useSettings";
 import {
   errorNotificationTemplate,
   loadingNotificationTemplate,
@@ -85,6 +85,7 @@ export function TimezonePicker({ initialValue }: TimezonePickerProps) {
   const [timezone, setTimezone] = useState(initialValue);
   const [timezoneSearch, setTimezoneSearch] = useState("");
   const t = useTranslations("SettingsPage.Profile");
+  const updateSettingsMutation = useUpdateSettingsMutation();
   const [currentTimezoneTime, setCurrentTimezoneTime] = useState(() => {
     const tzData = TIMEZONES_DATA.find((tz) => tz.value === initialValue);
     return tzData ? getCurrentTimeInTimezone(tzData.offset) : "";
@@ -123,19 +124,9 @@ export function TimezonePicker({ initialValue }: TimezonePickerProps) {
     });
 
     try {
-      const response = await fetch(API_ROUTES.ME_SETTINGS, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          timezone: val,
-        }),
+      await updateSettingsMutation.mutateAsync({
+        timezone: val,
       });
-
-      if (!response.ok) {
-        throw new Error("Failed to update timezone");
-      }
 
       setTimezone(val);
       combobox.closeDropdown();

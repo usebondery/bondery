@@ -4,7 +4,8 @@ import { Text, Stack, Combobox, useCombobox, Input, ScrollArea, Group } from "@m
 import { IconWorld } from "@tabler/icons-react";
 import { useState, useEffect, forwardRef } from "react";
 import type { ReactNode } from "react";
-import { useFormatter, useTranslations } from "next-intl";
+import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
+import { useDateFormatter as useFormatter } from "@/lib/i18n/useDateFormatter";
 import { getGroupedTimezones, formatOffset, TIMEZONES_DATA } from "@bondery/helpers/locale";
 
 const TimezoneItem = forwardRef<

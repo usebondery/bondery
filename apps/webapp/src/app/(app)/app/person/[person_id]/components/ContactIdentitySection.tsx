@@ -1,3 +1,5 @@
+"use client";
+
 import { Group, Stack } from "@mantine/core";
 import { IconBriefcase } from "@tabler/icons-react";
 import {
@@ -10,17 +12,21 @@ import {
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { notifications } from "@mantine/notifications";
 import { errorNotificationTemplate, successNotificationTemplate } from "@bondery/mantine-next";
-import { API_ROUTES } from "@bondery/helpers/globals/paths";
+import { useQueryClient } from "@tanstack/react-query";
+import { useUpdateContactMutation } from "@/lib/query/hooks/useContacts";
+import { invalidateSettings } from "@/lib/query/invalidation";
 import { ContactPhotoUploadButton } from "./ContactPhotoUploadButton";
 import { InlineEditableInput } from "./InlineEditableInput";
 import { SocialsSection } from "./SocialsSection";
 import { LocationLookupInput } from "@/app/(app)/app/components/LocationLookupInput";
 import { geocodeSuggestionDisplayLabel } from "@bondery/helpers/geocode";
-import { revalidateSettings } from "@/app/(app)/app/actions";
-import { z } from "zod";
-
-type NameField = "firstName" | "middleName" | "lastName";
-type ProfileField = "headline" | "location";
+import {
+  useContactIdentityFieldConfigs,
+  type NameField,
+  type NameFieldConfig,
+  type ProfileField,
+  type ProfileFieldConfig,
+} from "@/lib/i18n/useContactIdentityFieldConfigs";
 
 interface ContactIdentitySectionProps {
   contact: Contact;
@@ -41,83 +47,6 @@ interface NameFieldsProps {
   isMyselfContact: boolean;
 }
 
-interface NameFieldConfig {
-  field: NameField;
-  placeholder: string;
-  maxLength: number;
-  required?: boolean;
-  successLabel: string;
-}
-
-interface ProfileFieldConfig {
-  field: ProfileField;
-  placeholder: string;
-  maxLength: number;
-  successLabel: string;
-}
-
-const NAME_FIELD_CONFIGS: NameFieldConfig[] = [
-  {
-    field: "firstName",
-    placeholder: "First name",
-    maxLength: CONTACT_FIELD_MAX_LENGTHS.firstName,
-    required: true,
-    successLabel: "First",
-  },
-  {
-    field: "middleName",
-    placeholder: "Middle name",
-    maxLength: CONTACT_FIELD_MAX_LENGTHS.middleName,
-    successLabel: "Middle",
-  },
-  {
-    field: "lastName",
-    placeholder: "Last name",
-    maxLength: CONTACT_FIELD_MAX_LENGTHS.lastName,
-    successLabel: "Last",
-  },
-];
-
-const PROFILE_FIELD_CONFIGS: ProfileFieldConfig[] = [
-  {
-    field: "headline",
-    placeholder: "Headline",
-    maxLength: CONTACT_FIELD_MAX_LENGTHS.headline,
-    successLabel: "Headline",
-  },
-  {
-    field: "location",
-    placeholder: "Location",
-    maxLength: CONTACT_FIELD_MAX_LENGTHS.location,
-    successLabel: "Location",
-  },
-];
-
-const nameFieldValidationSchemas: Record<NameField, z.ZodType<string>> = {
-  firstName: z
-    .string()
-    .trim()
-    .min(1, { error: "First name is required" })
-    .max(CONTACT_FIELD_MAX_LENGTHS.firstName, {
-      error: `First name must be at most ${CONTACT_FIELD_MAX_LENGTHS.firstName} characters`,
-    }),
-  middleName: z.string().trim().max(CONTACT_FIELD_MAX_LENGTHS.middleName, {
-    error: `Middle name must be at most ${CONTACT_FIELD_MAX_LENGTHS.middleName} characters`,
-  }),
-  lastName: z.string().trim().max(CONTACT_FIELD_MAX_LENGTHS.lastName, {
-    error: `Last name must be at most ${CONTACT_FIELD_MAX_LENGTHS.lastName} characters`,
-  }),
-};
-
-const profileFieldValidationSchemas: Record<ProfileField, z.ZodType<string>> = {
-  headline: z.string().trim().max(CONTACT_FIELD_MAX_LENGTHS.headline, {
-    error: `Headline must be at most ${CONTACT_FIELD_MAX_LENGTHS.headline} characters`,
-  }),
-  location: z.string().trim().max(CONTACT_FIELD_MAX_LENGTHS.location, {
-    error: `Location must be at most ${CONTACT_FIELD_MAX_LENGTHS.location} characters`,
-  }),
-};
-
 /**
  * Manages inline editable name fields with isolated per-field save lifecycle.
  * Typing is local-only and each field saves independently on blur.
@@ -127,7 +56,13 @@ function usePersonNameFields(
   initialValues: Record<NameField, string>,
   fieldConfigs: NameFieldConfig[],
   isMyselfContact: boolean,
+  nameFieldValidationSchemas: ReturnType<
+    typeof useContactIdentityFieldConfigs
+  >["nameFieldValidationSchemas"],
+  copy: ReturnType<typeof useContactIdentityFieldConfigs>["copy"],
 ) {
+  const queryClient = useQueryClient();
+  const updateContactMutation = useUpdateContactMutation(personId);
   const [focusedField, setFocusedField] = useState<NameField | null>(null);
   const [savingByField, setSavingByField] = useState<Record<NameField, boolean>>({
     firstName: false,
@@ -159,7 +94,7 @@ function usePersonNameFields(
       if (!validation.success) {
         notifications.show(
           errorNotificationTemplate({
-            title: "Validation Error",
+            title: copy.validationErrorTitle,
             description: firstZodErrorMessage(validation.error),
           }),
         );
@@ -172,33 +107,25 @@ function usePersonNameFields(
       }));
 
       try {
-        const response = await fetch(`${API_ROUTES.CONTACTS}/${personId}`, {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ [field]: value }),
-        });
-
-        if (!response.ok) {
-          throw new Error("Failed to update");
-        }
+        await updateContactMutation.mutateAsync({ [field]: value });
 
         persistedValuesRef.current[field] = value;
 
         if (isMyselfContact && field === "firstName") {
-          await revalidateSettings();
+          await invalidateSettings(queryClient);
         }
 
         notifications.show(
           successNotificationTemplate({
-            title: "Saved",
-            description: `${config.successLabel} name updated`,
+            title: copy.savedTitle,
+            description: copy.nameFieldUpdated(config.successLabel),
           }),
         );
       } catch {
         notifications.show(
           errorNotificationTemplate({
-            title: "Error",
-            description: `Failed to update ${field}`,
+            title: copy.errorTitle,
+            description: copy.updateFieldFailed(field),
           }),
         );
       } finally {
@@ -208,7 +135,15 @@ function usePersonNameFields(
         }));
       }
     },
-    [fieldConfigs, personId, values],
+    [
+      copy,
+      fieldConfigs,
+      isMyselfContact,
+      nameFieldValidationSchemas,
+      queryClient,
+      updateContactMutation,
+      values,
+    ],
   );
 
   const handleBlur = useCallback(
@@ -237,7 +172,12 @@ function usePersonProfileFields(
   personId: string,
   initialValues: Record<ProfileField, string>,
   fieldConfigs: ProfileFieldConfig[],
+  profileFieldValidationSchemas: ReturnType<
+    typeof useContactIdentityFieldConfigs
+  >["profileFieldValidationSchemas"],
+  copy: ReturnType<typeof useContactIdentityFieldConfigs>["copy"],
 ) {
+  const updateContactMutation = useUpdateContactMutation(personId);
   const [focusedField, setFocusedField] = useState<ProfileField | null>(null);
   const [savingByField, setSavingByField] = useState<Record<ProfileField, boolean>>({
     headline: false,
@@ -285,33 +225,25 @@ function usePersonProfileFields(
       }));
 
       try {
-        const response = await fetch(`${API_ROUTES.CONTACTS}/${personId}`, {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            location: value,
-            latitude,
-            longitude,
-          }),
+        await updateContactMutation.mutateAsync({
+          location: value,
+          latitude,
+          longitude,
         });
-
-        if (!response.ok) {
-          throw new Error("Failed to update");
-        }
 
         persistedValuesRef.current.location = value;
 
         notifications.show(
           successNotificationTemplate({
-            title: "Saved",
-            description: "Location updated",
+            title: copy.savedTitle,
+            description: copy.locationUpdated,
           }),
         );
       } catch {
         notifications.show(
           errorNotificationTemplate({
-            title: "Error",
-            description: "Failed to update location",
+            title: copy.errorTitle,
+            description: copy.updateFieldFailed("location"),
           }),
         );
       } finally {
@@ -321,7 +253,7 @@ function usePersonProfileFields(
         }));
       }
     },
-    [personId],
+    [copy, updateContactMutation],
   );
 
   const saveField = useCallback(
@@ -338,7 +270,7 @@ function usePersonProfileFields(
       if (!validation.success) {
         notifications.show(
           errorNotificationTemplate({
-            title: "Validation Error",
+            title: copy.validationErrorTitle,
             description: firstZodErrorMessage(validation.error),
           }),
         );
@@ -361,29 +293,21 @@ function usePersonProfileFields(
           payload.longitude = locationCoordinates.longitude;
         }
 
-        const response = await fetch(`${API_ROUTES.CONTACTS}/${personId}`, {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        });
-
-        if (!response.ok) {
-          throw new Error("Failed to update");
-        }
+        await updateContactMutation.mutateAsync(payload);
 
         persistedValuesRef.current[field] = value;
 
         notifications.show(
           successNotificationTemplate({
-            title: "Saved",
-            description: `${config.successLabel} updated`,
+            title: copy.savedTitle,
+            description: copy.fieldUpdated(config.successLabel),
           }),
         );
       } catch {
         notifications.show(
           errorNotificationTemplate({
-            title: "Error",
-            description: `Failed to update ${field === "location" ? "location" : field}`,
+            title: copy.errorTitle,
+            description: copy.updateFieldFailed(field),
           }),
         );
       } finally {
@@ -393,7 +317,7 @@ function usePersonProfileFields(
         }));
       }
     },
-    [fieldConfigs, personId, values],
+    [copy, fieldConfigs, profileFieldValidationSchemas, updateContactMutation, values],
   );
 
   const handleBlur = useCallback(
@@ -432,6 +356,8 @@ const NameFields = React.memo(
     initialLastName,
     isMyselfContact,
   }: NameFieldsProps) {
+    const { nameFieldConfigs, nameFieldValidationSchemas, copy } =
+      useContactIdentityFieldConfigs();
     const { values, focusedField, savingByField, setFocusedField, updateField, handleBlur } =
       usePersonNameFields(
         personId,
@@ -440,14 +366,16 @@ const NameFields = React.memo(
           middleName: initialMiddleName,
           lastName: initialLastName,
         },
-        NAME_FIELD_CONFIGS,
+        nameFieldConfigs,
         isMyselfContact,
+        nameFieldValidationSchemas,
+        copy,
       );
     const [hoveredField, setHoveredField] = useState<NameField | null>(null);
 
     return (
       <Group grow gap={"xs"} wrap="nowrap">
-        {NAME_FIELD_CONFIGS.map((config) => (
+        {nameFieldConfigs.map((config) => (
           <InlineEditableInput
             key={config.field}
             aria-label={config.placeholder}
@@ -486,6 +414,10 @@ export function ContactIdentitySection({
   onEmailsChange,
   onSaveContactInfo,
 }: ContactIdentitySectionProps) {
+  const { profileFieldConfigs, profileFieldValidationSchemas, copy } =
+    useContactIdentityFieldConfigs();
+  const headlineConfig = profileFieldConfigs.find((config) => config.field === "headline");
+  const locationConfig = profileFieldConfigs.find((config) => config.field === "location");
   const {
     values: profileValues,
     focusedField: focusedProfileField,
@@ -500,14 +432,18 @@ export function ContactIdentitySection({
       headline: contact.headline || "",
       location: contact.location || "",
     },
-    PROFILE_FIELD_CONFIGS,
+    profileFieldConfigs,
+    profileFieldValidationSchemas,
+    copy,
   );
 
   return (
     <Group align="center">
       <ContactPhotoUploadButton
         avatarUrl={contact.avatar || null}
-        contactName={`${contact.firstName || ""} ${contact.lastName || ""}`.trim() || "Contact"}
+        contactName={
+          `${contact.firstName || ""} ${contact.lastName || ""}`.trim() || copy.contactNameFallback
+        }
         contactId={personId}
         firstName={contact.firstName}
         lastName={contact.lastName}
@@ -529,8 +465,8 @@ export function ContactIdentitySection({
 
         <Group gap="xs" grow>
           <InlineEditableInput
-            aria-label="Headline"
-            placeholder="Headline"
+            aria-label={headlineConfig?.placeholder ?? ""}
+            placeholder={headlineConfig?.placeholder ?? ""}
             value={profileValues.headline}
             onChange={(value) => updateProfileField("headline", value)}
             onFocus={() => setFocusedProfileField("headline")}
@@ -544,8 +480,8 @@ export function ContactIdentitySection({
 
           <div style={{ flex: 1 }}>
             <LocationLookupInput
-              ariaLabel="Location"
-              placeholder="Location"
+              ariaLabel={locationConfig?.placeholder ?? ""}
+              placeholder={locationConfig?.placeholder ?? ""}
               value={profileValues.location}
               disabled={savingProfileByField.location}
               mode="place"

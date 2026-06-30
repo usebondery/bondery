@@ -2,7 +2,8 @@
 
 import { Select, Stack, Text } from "@mantine/core";
 import { IconHeartHandshake } from "@tabler/icons-react";
-import { useTranslations, useLocale } from "next-intl";
+import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
+import { useCurrentLocale as useLocale } from "@/app/(app)/app/components/UserLocaleProvider";
 import { KEEP_IN_TOUCH_PRESETS } from "./keepInTouchConfig";
 
 interface KeepInTouchSelectProps {

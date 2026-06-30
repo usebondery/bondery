@@ -8,3 +8,4 @@ export {
   useScreenChromeInsets,
   type ScreenChromeInsetVariant,
 } from "./useScreenChromeInsets";
+export { useScrollBottomInset, type ScrollChromeVariant } from "./useScrollBottomInset";

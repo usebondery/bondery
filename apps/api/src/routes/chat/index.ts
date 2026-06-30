@@ -3,7 +3,8 @@
  * Handles AI chat assistant streaming responses
  */
 
-import type { FastifyInstance, FastifyRequest } from "fastify";
+import type { FastifyRequest } from "fastify";
+import type { AppRoutePlugin } from "../../lib/fastify-types.js";
 import type { UIMessage } from "ai";
 import { convertToModelMessages } from "ai";
 import type { Json } from "@bondery/schemas/supabase.types";
@@ -13,9 +14,11 @@ import { generateSessionTitle } from "../../lib/chat/title.js";
 import { checkAndIncrementQuota } from "../../lib/chat/quota.js";
 import { AI_TIER } from "../../lib/rate-limit.js";
 
-export async function chatRoutes(fastify: FastifyInstance) {
+export const chatRoutes: AppRoutePlugin = async (fastify) => {
   fastify.addHook("onRoute", (routeOptions) => {
-    routeOptions.schema = { ...routeOptions.schema, tags: ["Chat"] };
+    if (routeOptions.schema) {
+      routeOptions.schema.tags = ["Chat"];
+    }
   });
   fastify.addHook("onRequest", fastify.auth([fastify.verifySession]));
 

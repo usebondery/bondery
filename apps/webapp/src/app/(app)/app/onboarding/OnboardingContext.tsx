@@ -8,24 +8,18 @@ export type OnboardingIntent = "personal" | "professional" | "both" | null;
 interface OnboardingContextValue {
   intent: OnboardingIntent;
   setIntent: (intent: OnboardingIntent) => void;
-  seedPromise: Promise<void> | null;
-  setSeedPromise: (p: Promise<void>) => void;
 }
 
 const OnboardingCtx = createContext<OnboardingContextValue | null>(null);
 
 export function OnboardingProvider({ children }: { children: ReactNode }) {
   const [intent, setIntentState] = useState<OnboardingIntent>(null);
-  const [seedPromise, setSeedPromise] = useState<Promise<void> | null>(null);
 
   const setIntent = useCallback((value: OnboardingIntent) => {
     setIntentState(value);
   }, []);
 
-  const value = useMemo(
-    () => ({ intent, setIntent, seedPromise, setSeedPromise }),
-    [intent, setIntent, seedPromise],
-  );
+  const value = useMemo(() => ({ intent, setIntent }), [intent, setIntent]);
 
   return <OnboardingCtx.Provider value={value}>{children}</OnboardingCtx.Provider>;
 }

@@ -9,7 +9,8 @@ import { useState, useEffect, useRef } from "react";
 import { InsertLinkControl } from "./InsertLinkControl";
 import { htmlToMarkdown } from "./htmlToMarkdown";
 import { markdownToHtml } from "./markdownToHtml";
-import { useTranslations, useFormatter } from "next-intl";
+import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
+import { useDateFormatter as useFormatter } from "@/lib/i18n/useDateFormatter";
 import { formatRelativeTime } from "@/lib/formatRelativeTime";
 
 interface ContactNotesSectionProps {
@@ -51,6 +52,7 @@ export function ContactNotesSection({
   notesUpdatedAt,
 }: ContactNotesSectionProps) {
   const t = useTranslations("SingleContactPage");
+  const tNotes = useTranslations("NotesEditor");
   const formatter = useFormatter();
   const [mode, setMode] = useState<"editor" | "source" | "markdown">("editor");
   const [editableText, setEditableText] = useState("");
@@ -124,7 +126,7 @@ export function ContactNotesSection({
     <div>
       <Group gap="xs" mb="xs" align="center">
         <Text size="sm" fw={600}>
-          Notes
+          {tNotes("NotesTitle")}
         </Text>
         {savingField === "notes" && <Loader size="xs" />}
         {notesUpdatedAt && savingField !== "notes" && (
@@ -147,25 +149,25 @@ export function ContactNotesSection({
               {mode === "editor" && (
                 <>
                   <RichTextEditor.ControlsGroup>
-                    <T label="Bold" hint="Ctrl+B · type **...**">
+                    <T label={tNotes("Bold")} hint={tNotes("BoldHint")}>
                       <RichTextEditor.Bold />
                     </T>
-                    <T label="Italic" hint="Ctrl+I · type _..._">
+                    <T label={tNotes("Italic")} hint={tNotes("ItalicHint")}>
                       <RichTextEditor.Italic />
                     </T>
-                    <T label="Underline" hint="Ctrl+U">
+                    <T label={tNotes("Underline")} hint={tNotes("UnderlineHint")}>
                       <RichTextEditor.Underline />
                     </T>
-                    <T label="Strikethrough" hint="Ctrl+Shift+S · type ~~...~~">
+                    <T label={tNotes("Strikethrough")} hint={tNotes("StrikethroughHint")}>
                       <RichTextEditor.Strikethrough />
                     </T>
-                    <T label="Clear formatting">
+                    <T label={tNotes("ClearFormatting")}>
                       <RichTextEditor.ClearFormatting />
                     </T>
                   </RichTextEditor.ControlsGroup>
 
                   <RichTextEditor.ControlsGroup>
-                    <T label="Text color">
+                    <T label={tNotes("TextColor")}>
                       <RichTextEditor.ColorPicker
                         colors={[
                           "#25262b",
@@ -185,42 +187,42 @@ export function ContactNotesSection({
                         ]}
                       />
                     </T>
-                    <T label="Unset color">
+                    <T label={tNotes("UnsetColor")}>
                       <RichTextEditor.UnsetColor />
                     </T>
-                    <T label="Highlight" hint="Ctrl+Shift+H · type ==...==">
+                    <T label={tNotes("Highlight")} hint={tNotes("HighlightHint")}>
                       <RichTextEditor.Highlight />
                     </T>
                   </RichTextEditor.ControlsGroup>
 
                   <RichTextEditor.ControlsGroup>
-                    <T label="Heading 1" hint="type # + Space">
+                    <T label={tNotes("Heading1")} hint={tNotes("Heading1Hint")}>
                       <RichTextEditor.H1 />
                     </T>
-                    <T label="Heading 2" hint="type ## + Space">
+                    <T label={tNotes("Heading2")} hint={tNotes("Heading2Hint")}>
                       <RichTextEditor.H2 />
                     </T>
-                    <T label="Heading 3" hint="type ### + Space">
+                    <T label={tNotes("Heading3")} hint={tNotes("Heading3Hint")}>
                       <RichTextEditor.H3 />
                     </T>
                   </RichTextEditor.ControlsGroup>
 
                   <RichTextEditor.ControlsGroup>
-                    <T label="Blockquote" hint="type > + Space">
+                    <T label={tNotes("Blockquote")} hint={tNotes("BlockquoteHint")}>
                       <RichTextEditor.Blockquote />
                     </T>
-                    <T label="Divider" hint="type ---">
+                    <T label={tNotes("Divider")} hint={tNotes("DividerHint")}>
                       <RichTextEditor.Hr />
                     </T>
-                    <T label="Bullet list" hint="type - + Space">
+                    <T label={tNotes("BulletList")} hint={tNotes("BulletListHint")}>
                       <RichTextEditor.BulletList />
                     </T>
-                    <T label="Ordered list" hint="type 1. + Space">
+                    <T label={tNotes("OrderedList")} hint={tNotes("OrderedListHint")}>
                       <RichTextEditor.OrderedList />
                     </T>
-                    <T label="Todo list" hint="type [ ] + Space">
+                    <T label={tNotes("TodoList")} hint={tNotes("TodoListHint")}>
                       <RichTextEditor.Control
-                        aria-label="Toggle todo list"
+                        aria-label={tNotes("ToggleTodoList")}
                         onClick={handleToggleTaskList}
                         active={editor?.isActive("taskList")}
                       >
@@ -231,7 +233,7 @@ export function ContactNotesSection({
 
                   <RichTextEditor.ControlsGroup>
                     <InsertLinkControl />
-                    <T label="Remove link" hint="Ctrl+Shift+K">
+                    <T label={tNotes("RemoveLink")} hint={tNotes("RemoveLinkHint")}>
                       <RichTextEditor.Unlink />
                     </T>
                   </RichTextEditor.ControlsGroup>
@@ -240,24 +242,24 @@ export function ContactNotesSection({
             </Group>
 
             <RichTextEditor.ControlsGroup>
-              <T label="Undo" hint="Ctrl+Z">
+              <T label={tNotes("Undo")} hint={tNotes("UndoHint")}>
                 <RichTextEditor.Undo />
               </T>
-              <T label="Redo" hint="Ctrl+Shift+Z">
+              <T label={tNotes("Redo")} hint={tNotes("RedoHint")}>
                 <RichTextEditor.Redo />
               </T>
-              <T label="Source code">
+              <T label={tNotes("SourceCode")}>
                 <RichTextEditor.Control
-                  aria-label="Toggle source code"
+                  aria-label={tNotes("ToggleSourceCode")}
                   onClick={() => handleModeToggle("source")}
                   active={mode === "source"}
                 >
                   <IconCode size={16} stroke={1.5} />
                 </RichTextEditor.Control>
               </T>
-              <T label="Markdown">
+              <T label={tNotes("Markdown")}>
                 <RichTextEditor.Control
-                  aria-label="Toggle markdown editor"
+                  aria-label={tNotes("ToggleMarkdown")}
                   onClick={() => handleModeToggle("markdown")}
                   active={mode === "markdown"}
                 >
@@ -276,7 +278,7 @@ export function ContactNotesSection({
           <>
             <Group justify="flex-end" px="md" pt="xs">
               <Tooltip
-                label={mode === "markdown" ? "Copy markdown" : "Copy HTML"}
+                label={mode === "markdown" ? tNotes("CopyMarkdown") : tNotes("CopyHtml")}
                 openDelay={400}
                 withinPortal
               >
@@ -288,12 +290,15 @@ export function ContactNotesSection({
                     clipboard.copy(editableText);
                     notifications.show(
                       successNotificationTemplate({
-                        title: "Copied",
-                        description: `${mode === "markdown" ? "Markdown" : "HTML"} copied to clipboard`,
+                        title: tNotes("CopiedTitle"),
+                        description:
+                          mode === "markdown"
+                            ? tNotes("CopiedMarkdown")
+                            : tNotes("CopiedHtml"),
                       }),
                     );
                   }}
-                  aria-label="Copy"
+                  aria-label={tNotes("CopyAction")}
                 >
                   <IconCopy size={14} />
                 </ActionIcon>

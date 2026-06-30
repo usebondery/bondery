@@ -25,12 +25,21 @@ import {
   PeopleMultiPickerInput,
   successNotificationTemplate,
 } from "@bondery/mantine-next";
-import { API_ROUTES } from "@bondery/helpers/globals/paths";
+import { useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { API_URL, DEBOUNCE_MS } from "@/lib/config";
-import { buildAvatarQueryString } from "@/lib/avatarParams";
+import { DEBOUNCE_MS } from "@/lib/config";
 import { openStandardConfirmModal } from "@/app/(app)/app/components/modals/openStandardConfirmModal";
 import { captureEvent } from "@/lib/analytics/client";
+import { useContactsListQuery } from "@/lib/query/hooks/useContacts";
+import {
+  useCreateTagMutation,
+  useDeleteTagMutation,
+  useSyncTagContactsByIdMutation,
+  useTagMembersQuery,
+  useUpdateTagByIdMutation,
+} from "@/lib/query/hooks/useTags";
+import { createContactsListQueryFn } from "@/lib/query/fetchers/contacts";
+import { contactKeys } from "@/lib/query/keys";
 
 const COLOR_SWATCHES = [
   ...DEFAULT_THEME.colors.red.slice(5, 8),
@@ -81,6 +90,21 @@ function TagEditorModalBody({
   onUpdated,
   onDeleted,
 }: TagEditorModalBodyProps) {
+  const queryClient = useQueryClient();
+  const createTagMutation = useCreateTagMutation();
+  const updateTagByIdMutation = useUpdateTagByIdMutation();
+  const syncTagContactsMutation = useSyncTagContactsByIdMutation();
+  const deleteTagMutation = useDeleteTagMutation();
+
+  const { data: contactsData, isLoading: isLoadingContactsList } = useContactsListQuery({
+    limit: 200,
+  });
+  const { data: tagMembers, isLoading: isLoadingMembers } = useTagMembersQuery(
+    tag?.id ?? "",
+    undefined,
+    mode === "edit" && !!tag,
+  );
+
   const form = useForm<{ label: string; color: string }>({
     mode: "controlled",
     initialValues: {
@@ -89,83 +113,42 @@ function TagEditorModalBody({
     },
     validate: schemaResolver(createTagSchema, { sync: true }),
   });
-  const [allContacts, setAllContacts] = useState<Contact[]>([]);
+
+  const allContacts = contactsData?.contacts ?? [];
   const [selectedIds, setSelectedIds] = useState<string[]>(
     mode === "create" ? initialSelectedPersonIds : [],
   );
   const [initialSelectedIds, setInitialSelectedIds] = useState<string[]>(
     mode === "create" ? initialSelectedPersonIds : [],
   );
-  const [isLoadingContacts, setIsLoadingContacts] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const submitLockRef = useRef(false);
 
   useEffect(() => {
-    let isMounted = true;
+    if (mode !== "edit" || !tagMembers) return;
+    const ids = tagMembers.contacts.map((person) => person.id);
+    setSelectedIds(ids);
+    setInitialSelectedIds(ids);
+  }, [mode, tagMembers]);
 
-    void (async () => {
+  const isLoadingContacts =
+    isLoadingContactsList || (mode === "edit" && !!tag && isLoadingMembers);
+
+  const handleSearch = useCallback(
+    async (query: string): Promise<Contact[]> => {
       try {
-        const contactsResponse = await fetch(
-          `${API_URL}${API_ROUTES.CONTACTS}?limit=200&${buildAvatarQueryString("small")}`,
-          {
-            credentials: "include",
-          },
-        );
-
-        if (!contactsResponse.ok) throw new Error("contacts");
-
-        const contactsData = (await contactsResponse.json()) as { contacts?: Contact[] };
-        if (!isMounted) return;
-        setAllContacts(contactsData.contacts || []);
-
-        if (mode === "edit" && tag) {
-          const membersResponse = await fetch(
-            `${API_URL}${API_ROUTES.TAGS}/${tag.id}/contacts?${buildAvatarQueryString("small")}`,
-            {
-              credentials: "include",
-            },
-          );
-
-          if (!membersResponse.ok) throw new Error("members");
-
-          const membersData = (await membersResponse.json()) as { contacts?: ContactPreview[] };
-          const ids = (membersData.contacts || []).map((person) => person.id);
-          if (!isMounted) return;
-          setSelectedIds(ids);
-          setInitialSelectedIds(ids);
-        }
+        const params = { search: query, limit: 10 };
+        const data = await queryClient.fetchQuery({
+          queryKey: contactKeys.list(params),
+          queryFn: createContactsListQueryFn(params),
+        });
+        return data.contacts ?? [];
       } catch {
-        if (!isMounted) return;
-        notifications.show(
-          errorNotificationTemplate({
-            title: t("LoadContactsErrorTitle"),
-            description: t("LoadContactsErrorDescription"),
-          }),
-        );
-      } finally {
-        if (!isMounted) return;
-        setIsLoadingContacts(false);
+        return [];
       }
-    })();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [mode, tag, t]);
-
-  const handleSearch = useCallback(async (query: string): Promise<Contact[]> => {
-    try {
-      const res = await fetch(
-        `${API_URL}${API_ROUTES.CONTACTS}?q=${encodeURIComponent(query)}&limit=10&${buildAvatarQueryString("small")}`,
-        { credentials: "include" },
-      );
-      if (!res.ok) return [];
-      const data = (await res.json()) as { contacts?: Contact[] };
-      return data.contacts ?? [];
-    } catch {
-      return [];
-    }
-  }, []);
+    },
+    [queryClient],
+  );
 
   const buildPreviewContacts = (ids: string[]): ContactPreview[] => {
     const map = new Map(allContacts.map((contact) => [contact.id, contact]));
@@ -188,25 +171,9 @@ function TagEditorModalBody({
     const toAdd = selectedIds.filter((id) => !initial.has(id));
     const toRemove = initialSelectedIds.filter((id) => !current.has(id));
 
-    if (toAdd.length > 0) {
-      const addRes = await fetch(`${API_URL}${API_ROUTES.TAGS}/${tagId}/contacts`, {
-        method: "POST",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ personIds: toAdd }),
-      });
-      if (!addRes.ok) throw new Error("add");
-    }
+    if (toAdd.length === 0 && toRemove.length === 0) return;
 
-    if (toRemove.length > 0) {
-      const removeRes = await fetch(`${API_URL}${API_ROUTES.TAGS}/${tagId}/contacts`, {
-        method: "DELETE",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ personIds: toRemove }),
-      });
-      if (!removeRes.ok) throw new Error("remove");
-    }
+    await syncTagContactsMutation.mutateAsync({ tagId, toAdd, toRemove });
   };
 
   const handleSave = async (values: typeof form.values) => {
@@ -228,39 +195,31 @@ function TagEditorModalBody({
 
     try {
       if (mode === "create") {
-        const createRes = await fetch(`${API_URL}${API_ROUTES.TAGS}`, {
-          method: "POST",
-          credentials: "include",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ label: trimmedLabel }),
-        });
-        if (!createRes.ok) throw new Error("create");
+        const created = await createTagMutation.mutateAsync({ label: trimmedLabel });
 
-        const created = (await createRes.json()) as { tag: TagWithCount };
-
-        const patchRes = await fetch(`${API_URL}${API_ROUTES.TAGS}/${created.tag.id}`, {
-          method: "PATCH",
-          credentials: "include",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ label: trimmedLabel, color }),
-        });
-        const isPatchSuccessful = patchRes.ok;
+        let isPatchSuccessful = true;
+        try {
+          await updateTagByIdMutation.mutateAsync({
+            tagId: created.tag.id,
+            patch: { label: trimmedLabel, color },
+          });
+        } catch {
+          isPatchSuccessful = false;
+        }
 
         let areMembersSynced = true;
         if (selectedIds.length > 0) {
-          const addRes = await fetch(`${API_URL}${API_ROUTES.TAGS}/${created.tag.id}/contacts`, {
-            method: "POST",
-            credentials: "include",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ personIds: selectedIds }),
-          });
-          areMembersSynced = addRes.ok;
+          try {
+            await syncTagContactsMutation.mutateAsync({
+              tagId: created.tag.id,
+              toAdd: selectedIds,
+              toRemove: [],
+            });
+          } catch {
+            areMembersSynced = false;
+          }
         }
 
-        // flushSync forces React to commit the modal removal synchronously
-        // before any other state updates (setIsSubmitting, onCreated callbacks)
-        // are batched and processed. Without this, React 18's auto-batching
-        // can defer the modal store update and keep the modal visible.
         notifications.hide(loadingId);
         captureEvent("tag_created");
 
@@ -298,19 +257,15 @@ function TagEditorModalBody({
           // Keep persistence successful even if caller-side UI update throws.
         }
       } else if (tag) {
-        const updateRes = await fetch(`${API_URL}${API_ROUTES.TAGS}/${tag.id}`, {
-          method: "PATCH",
-          credentials: "include",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ label: trimmedLabel, color }),
+        await updateTagByIdMutation.mutateAsync({
+          tagId: tag.id,
+          patch: { label: trimmedLabel, color },
         });
-        if (!updateRes.ok) throw new Error("update");
 
         await syncMembers(tag.id);
 
         captureEvent("tag_updated");
 
-        // Same reasoning: flushSync ensures the modal is gone before callbacks fire.
         notifications.hide(loadingId);
         flushSync(() => modals.close(modalId));
         notifications.show(
@@ -343,7 +298,6 @@ function TagEditorModalBody({
           description: t("SaveErrorDescription"),
         }),
       );
-      // Keep modal open on error so the user can correct the issue and retry.
     } finally {
       setIsSubmitting(false);
       submitLockRef.current = false;
@@ -367,25 +321,10 @@ function TagEditorModalBody({
       confirmColor: "red",
       onConfirm: async () => {
         try {
-          const response = await fetch(`${API_URL}${API_ROUTES.TAGS}/${tag.id}`, {
-            method: "DELETE",
-            credentials: "include",
-          });
-
-          if (!response.ok) {
-            notifications.show(
-              errorNotificationTemplate({
-                title: t("DeleteErrorTitle"),
-                description: t("DeleteErrorDescription"),
-              }),
-            );
-            return;
-          }
+          await deleteTagMutation.mutateAsync(tag.id);
 
           captureEvent("tag_deleted");
 
-          // flushSync ensures the editor modal is fully removed before the
-          // onDeleted callback triggers parent re-renders.
           flushSync(() => modals.close(modalId));
           notifications.show(
             successNotificationTemplate({

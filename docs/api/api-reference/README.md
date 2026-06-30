@@ -22,6 +22,10 @@ https://api.usebondery.com/
 
 If you're selfhosting, change the path to your own API server URL.
 
+## Authentication
+
+See [authentication.md](../authentication.md) for session tokens vs long-lived API keys, how to create keys in Settings, permission levels, and which routes accept API keys.
+
 ## Issues and contributing
 
 If you run into any issues, please contact us or open an issue on GitHub. Read more here: [getting-help-and-troubleshooting.md](../../bondery/getting-help-and-troubleshooting.md "mention").

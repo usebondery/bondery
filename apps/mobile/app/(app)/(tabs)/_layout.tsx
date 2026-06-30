@@ -5,6 +5,7 @@ import { CreateContactSheetProvider } from "../../../src/features/contacts/creat
 import { FabSpeedDialShell } from "../../../src/features/navigation/FabSpeedDialShell";
 import { FloatingTabsChrome } from "../../../src/features/navigation/FloatingTabsChrome";
 import { FloatingChromeProvider } from "../../../src/features/navigation/floatingChromeContext";
+import { FloatingChromeInsetsProvider } from "../../../src/features/navigation/floatingChromeInsetsContext";
 import {
   TabBarPropsProvider,
   TabBarPropsSync,
@@ -12,39 +13,41 @@ import {
 
 function TabsLayoutContent() {
   return (
-    <TabBarPropsProvider>
-      <View style={{ flex: 1 }}>
-        <Tabs
-          initialRouteName="contacts"
-          tabBar={(props) => <TabBarPropsSync {...props} />}
-          screenOptions={{
-            headerShown: false,
-            tabBarShowLabel: false,
-            tabBarStyle: {
-              display: "none",
-            },
-          }}
-        >
-          <Tabs.Screen
-            name="contacts"
-            options={{
-              tabBarIcon: ({ color, size }) => (
-                <IconUser stroke={color} size={size} />
-              ),
+    <FloatingChromeInsetsProvider>
+      <TabBarPropsProvider>
+        <View style={{ flex: 1 }}>
+          <Tabs
+            initialRouteName="contacts"
+            tabBar={(props) => <TabBarPropsSync {...props} />}
+            screenOptions={{
+              headerShown: false,
+              tabBarShowLabel: false,
+              tabBarStyle: {
+                display: "none",
+              },
             }}
-          />
-          <Tabs.Screen
-            name="settings"
-            options={{
-              tabBarIcon: ({ color, size }) => (
-                <IconSettings stroke={color} size={size} />
-              ),
-            }}
-          />
-        </Tabs>
-        <FloatingTabsChrome />
-      </View>
-    </TabBarPropsProvider>
+          >
+            <Tabs.Screen
+              name="contacts"
+              options={{
+                tabBarIcon: ({ color, size }) => (
+                  <IconUser stroke={color} size={size} />
+                ),
+              }}
+            />
+            <Tabs.Screen
+              name="settings"
+              options={{
+                tabBarIcon: ({ color, size }) => (
+                  <IconSettings stroke={color} size={size} />
+                ),
+              }}
+            />
+          </Tabs>
+          <FloatingTabsChrome />
+        </View>
+      </TabBarPropsProvider>
+    </FloatingChromeInsetsProvider>
   );
 }
 

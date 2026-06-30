@@ -9,6 +9,7 @@ import {
   labelFieldSchema,
   makeCollectionResponseSchema,
   makeListResponseSchema,
+  makePaginatedListResponseSchema,
   personIdsSelectionSchema,
 } from "./_shared.js";
 
@@ -46,6 +47,11 @@ export const updateTagSchema = createTagSchema.partial();
 
 export const tagsListResponseSchema = makeListResponseSchema("tags", tagWithCountSchema);
 
+export const tagMembersListResponseSchema = makePaginatedListResponseSchema(
+  "contacts",
+  contactPreviewSchema,
+);
+
 export const contactTagsResponseSchema = makeCollectionResponseSchema("tags", tagWithCountSchema);
 
 export const tagMembershipRequestSchema = personIdsSelectionSchema;
@@ -58,6 +64,7 @@ export type PeopleTag = z.infer<typeof peopleTagSchema>;
 export type CreateTagInput = z.infer<typeof createTagInputSchema>;
 export type UpdateTagInput = z.infer<typeof updateTagSchema>;
 export type TagsListResponse = z.infer<typeof tagsListResponseSchema>;
+export type TagMembersListResponse = z.infer<typeof tagMembersListResponseSchema>;
 export type ContactTagsResponse = z.infer<typeof contactTagsResponseSchema>;
 export type TagMembershipRequest = z.infer<typeof tagMembershipRequestSchema>;
 export type DeleteTagsRequest = z.infer<typeof deleteTagsRequestSchema>;

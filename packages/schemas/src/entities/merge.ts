@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { contactSchema } from "./contact.js";
+import { makePaginatedListResponseSchema } from "./_shared.js";
 
 export const mergeConflictChoiceSchema = z.enum(["left", "right"]);
 
@@ -52,9 +53,10 @@ export const mergeContactsResponseSchema = z.object({
   contact: contactSchema.nullable(),
 });
 
-export const mergeRecommendationsResponseSchema = z.object({
-  recommendations: z.array(mergeRecommendationSchema),
-});
+export const mergeRecommendationsResponseSchema = makePaginatedListResponseSchema(
+  "recommendations",
+  mergeRecommendationSchema,
+);
 
 export const declineMergeRecommendationResponseSchema = z.object({
   success: z.literal(true),
@@ -63,6 +65,7 @@ export const declineMergeRecommendationResponseSchema = z.object({
 export const refreshMergeRecommendationsResponseSchema = z.object({
   success: z.literal(true),
   recommendationsCount: z.number(),
+  recommendations: z.array(mergeRecommendationSchema),
 });
 
 export type MergeConflictChoice = z.infer<typeof mergeConflictChoiceSchema>;

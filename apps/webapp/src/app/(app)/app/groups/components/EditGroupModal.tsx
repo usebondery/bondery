@@ -1,13 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import {
   Stack,
   TextInput,
-  Button,
   Group,
-  Text,
   ColorInput,
   DEFAULT_THEME,
   Box,
@@ -17,7 +14,7 @@ import { updateGroupSchema } from "@bondery/schemas";
 import { modals } from "@mantine/modals";
 import { notifications } from "@mantine/notifications";
 import { IconUsersGroup, IconCheck } from "@tabler/icons-react";
-import { useTranslations } from "next-intl";
+import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
 import {
   EmojiPicker,
   errorNotificationTemplate,
@@ -26,10 +23,8 @@ import {
   ModalTitle,
   successNotificationTemplate,
 } from "@bondery/mantine-next";
-import { API_ROUTES } from "@bondery/helpers/globals/paths";
-import type { GroupWithCount } from "@bondery/schemas";
 import { DEBOUNCE_MS } from "@/lib/config";
-import { revalidateGroups } from "../../actions";
+import { useUpdateGroupMutation } from "@/lib/query/hooks/useGroups";
 
 // Predefined color swatches
 const COLOR_SWATCHES = [
@@ -78,9 +73,9 @@ function EditGroupForm({
   initialColor,
   modalId,
 }: EditGroupModalProps & { modalId: string }) {
-  const router = useRouter();
   const t = useTranslations("GroupsPage");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const updateGroupMutation = useUpdateGroupMutation(groupId);
 
   useEffect(() => {
     modals.updateModal({
@@ -112,20 +107,11 @@ function EditGroupForm({
     });
 
     try {
-      const res = await fetch(`${API_ROUTES.GROUPS}/${groupId}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          label: values.label.trim(),
-          emoji: values.emoji.trim(),
-          color: values.color.trim(),
-        }),
+      await updateGroupMutation.mutateAsync({
+        label: values.label.trim(),
+        emoji: values.emoji.trim(),
+        color: values.color.trim(),
       });
-
-      if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.error || "Failed to update group");
-      }
 
       notifications.hide(loadingNotification);
 
@@ -137,8 +123,6 @@ function EditGroupForm({
       );
 
       modals.close(modalId);
-      await revalidateGroups();
-      router.refresh();
     } catch (error) {
       notifications.hide(loadingNotification);
 

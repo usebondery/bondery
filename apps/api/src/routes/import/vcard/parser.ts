@@ -1,6 +1,6 @@
 import { parseVCards, vCardToContactDraft } from "@bondery/vcard";
 import type { VCardPreparedContact } from "@bondery/schemas";
-import type { UploadFile } from "../../../lib/schemas.js";
+import type { UploadFile } from "../../../lib/queries.js";
 import {
   validateStreetAddress,
   cachedGeocodeLinkedInLocation,

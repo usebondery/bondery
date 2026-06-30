@@ -2,7 +2,7 @@
 
 import { Stack, Text, Progress } from "@mantine/core";
 import { IconLock } from "@tabler/icons-react";
-import { useTranslations } from "next-intl";
+import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
 import type { SubscriptionStatus } from "@bondery/schemas";
 import { UpgradeButton } from "@/components/shared";
 

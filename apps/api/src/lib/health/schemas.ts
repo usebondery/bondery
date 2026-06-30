@@ -1,51 +1,41 @@
-import { Type } from "@sinclair/typebox";
+import { z } from "zod";
 
-export const ServiceProbeResultSchema = Type.Object({
-  ok: Type.Boolean(),
-  latencyMs: Type.Optional(Type.Number()),
-  error: Type.Optional(Type.String()),
-  configured: Type.Optional(Type.Boolean()),
+export const serviceProbeResultSchema = z.object({
+  ok: z.boolean(),
+  latencyMs: z.number().optional(),
+  error: z.string().optional(),
+  configured: z.boolean().optional(),
 });
 
-export const SupabaseServiceStatusSchema = Type.Object({
-  auth: ServiceProbeResultSchema,
-  database: ServiceProbeResultSchema,
-  storage: ServiceProbeResultSchema,
+export const supabaseServiceStatusSchema = z.object({
+  auth: serviceProbeResultSchema,
+  database: serviceProbeResultSchema,
+  storage: serviceProbeResultSchema,
 });
 
-export const HealthServicesSchema = Type.Object({
-  supabase: SupabaseServiceStatusSchema,
-  redis: ServiceProbeResultSchema,
-  smtp: ServiceProbeResultSchema,
-  anthropic: ServiceProbeResultSchema,
-  polar: ServiceProbeResultSchema,
-  mapy: ServiceProbeResultSchema,
-  posthog: ServiceProbeResultSchema,
+export const healthServicesSchema = z.object({
+  supabase: supabaseServiceStatusSchema,
+  redis: serviceProbeResultSchema,
+  smtp: serviceProbeResultSchema,
+  anthropic: serviceProbeResultSchema,
+  polar: serviceProbeResultSchema,
+  mapy: serviceProbeResultSchema,
+  posthog: serviceProbeResultSchema,
 });
 
-export const HealthReportSchema = Type.Object({
-  status: Type.Union([
-    Type.Literal("ok"),
-    Type.Literal("degraded"),
-    Type.Literal("unhealthy"),
-  ]),
-  timestamp: Type.String({ format: "date-time" }),
-  cached: Type.Boolean({
-    description:
-      "True when this response was served from the in-process cache (refreshed at most once per minute).",
-  }),
-  cacheExpiresAt: Type.String({
-    format: "date-time",
-    description: "When the cached readiness snapshot expires and the next request will re-probe dependencies.",
-  }),
-  services: HealthServicesSchema,
+export const healthReportSchema = z.object({
+  status: z.enum(["ok", "degraded", "unhealthy"]),
+  timestamp: z.string().datetime(),
+  cached: z.boolean(),
+  cacheExpiresAt: z.string().datetime(),
+  services: healthServicesSchema,
 });
 
-export const LivenessStatusSchema = Type.Object({
-  status: Type.Literal("ok"),
-  timestamp: Type.String({ format: "date-time" }),
-  extension: Type.Object({
-    minVersion: Type.String(),
-    storeUrl: Type.String(),
+export const livenessStatusSchema = z.object({
+  status: z.literal("ok"),
+  timestamp: z.string().datetime(),
+  extension: z.object({
+    minVersion: z.string(),
+    storeUrl: z.string(),
   }),
 });

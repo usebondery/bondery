@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import { Stack, Title, Text, Alert, SimpleGrid } from "@mantine/core";
 import { IconChartBar } from "@tabler/icons-react";
-import { getTranslations } from "next-intl/server";
-import { getAuthHeaders } from "@/lib/authHeaders";
+import { getWebTranslations as getTranslations } from "@/lib/i18n/getWebTranslations";
 import { PageWrapper } from "../../components/PageWrapper";
 import { getStatsData } from "./getStatsData";
 import { ActiveUsersChart } from "./components/ActiveUsersCards";
@@ -15,9 +14,8 @@ export const metadata: Metadata = { title: "KPIs Dashboard" };
 
 export default async function StatsPage() {
   const t = await getTranslations("StatsPage");
-  const headers = await getAuthHeaders();
 
-  const { activeUsers, funnel, nps, totalUsers, githubStars } = await getStatsData(headers);
+  const { activeUsers, funnel, nps, totalUsers, githubStars } = await getStatsData();
 
   // If all sections failed it's likely a 403
   if (!activeUsers && !funnel && !nps && !totalUsers && !githubStars) {

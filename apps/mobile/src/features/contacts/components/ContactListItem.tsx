@@ -76,6 +76,9 @@ function areContactListItemPropsEqual(
 ): boolean {
   return (
     previous.contact.id === next.contact.id &&
+    previous.contact.firstName === next.contact.firstName &&
+    previous.contact.middleName === next.contact.middleName &&
+    previous.contact.lastName === next.contact.lastName &&
     previous.contact.updatedAt === next.contact.updatedAt &&
     previous.contact.avatar === next.contact.avatar &&
     previous.isMyselfRow === next.isMyselfRow &&

@@ -202,6 +202,45 @@ For masked phone inputs, forward the same props through `MaskedPhoneInput`.
 
 ---
 
+## Modals — no dismiss during blocking state
+
+When a modal is **submitting**, **loading**, or otherwise in a **blocking state** (an async action is in flight), the user must not be able to dismiss it. Closing mid-action can leave partial server work, orphaned requests, or UI that no longer matches what is still running on the server.
+
+### Rule
+
+While blocking:
+
+- Hide the **X** close button.
+- Disable **click outside** to dismiss.
+- Disable **Escape** to dismiss.
+
+Re-enable all three when the action finishes (success or error). Cancel buttons that explicitly abort a safe operation are fine when they are part of the footer — the point is to prevent accidental dismiss via chrome gestures while work is in progress.
+
+### Implementation (webapp)
+
+Drive modal chrome from the blocking flag with `modals.updateModal` in a `useEffect`:
+
+```tsx
+useEffect(() => {
+  modals.updateModal({
+    modalId,
+    closeOnEscape: !isSubmitting,
+    closeOnClickOutside: !isSubmitting,
+    withCloseButton: !isSubmitting,
+  });
+}, [modalId, isSubmitting]);
+```
+
+Use the same pattern for parsing/import pipelines (`isParsing`, `isImporting`, etc.) and any other non-submit blocking work. Examples: `AddGroupModal`, `AddContactModal`, `openStandardConfirmModal`, `openApiKeyModal`, import modals.
+
+### What to avoid
+
+- Leaving the X visible while `actionLoading` is true on the footer — users will close and lose context.
+- Only disabling the submit button without locking dismiss — both are required.
+- Forgetting to restore closability after an error — the user should be able to leave once the request has settled.
+
+---
+
 ## Forms — disable submit until valid
 
 Do not let users submit a form that cannot succeed. The primary action should stay disabled until every required field passes validation. This is clearer than accepting a tap and showing an error toast.

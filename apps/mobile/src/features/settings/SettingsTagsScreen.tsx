@@ -1,15 +1,15 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { Pressable, ScrollView, StyleSheet } from "react-native";
 import { useRouter } from "expo-router";
 import { IconPlus } from "@tabler/icons-react-native";
-import type { Tag, TagWithCount } from "@bondery/schemas";
+import type { TagWithCount } from "@bondery/schemas";
 import { StackNavBar } from "../../components/chrome";
-import { fetchTags, updateSettings } from "../../lib/api/client";
+import { updateSettings } from "../../lib/api/client";
+import { useTags } from "../../lib/sync/hooks/useSyncQuery";
 import type {
   MobilePreferencesState,
   TagSortOrder,
 } from "../../lib/preferences/useMobilePreferences";
-import { useTagsStore } from "../../lib/store";
 import { useMobilePreferences } from "../../lib/preferences/useMobilePreferences";
 import { useMobileTranslations } from "../../lib/i18n/useMobileTranslations";
 import {
@@ -30,11 +30,7 @@ export function SettingsTagsScreen() {
   const t = useMobileTranslations();
   const colors = useMobileThemeColors();
 
-  const tagsById = useTagsStore((state) => state.byId);
-  const upsertTag = useTagsStore((state) => state.upsertTag);
-  const upsertTags = useTagsStore((state) => state.upsertTags);
-  const removeTag = useTagsStore((state) => state.removeTag);
-  const [isLoading, setIsLoading] = useState(true);
+  const { data: syncedTags, isInitialSync, refresh: refreshTags } = useTags();
   const [loadError, setLoadError] = useState<string | null>(null);
   const [isCreateOpen, setCreateOpen] = useState(false);
   const [editingTag, setEditingTag] = useState<TagWithCount | null>(null);
@@ -46,13 +42,12 @@ export function SettingsTagsScreen() {
     (state: MobilePreferencesState) => state.setTagSortOrder,
   );
 
-  const tags = useMemo(() => Object.values(tagsById), [tagsById]);
   const sortedTags = useMemo(
-    () => sortTags(tags, tagSortOrder),
-    [tagSortOrder, tags],
+    () => sortTags(syncedTags, tagSortOrder),
+    [tagSortOrder, syncedTags],
   );
 
-  const editTags = useMemo(() => sortTags(tags, "alpha-asc"), [tags]);
+  const editTags = useMemo(() => sortTags(syncedTags, "alpha-asc"), [syncedTags]);
 
   const sortOptions: Array<{ value: TagSortOrder; label: string }> = [
     { value: "count-desc", label: t("MobileApp.Settings.GroupSortCountDesc") },
@@ -70,56 +65,28 @@ export function SettingsTagsScreen() {
     void updateSettings({ tagSortOrder: nextOrder });
   };
 
-  const reloadTags = useCallback(async () => {
-    setIsLoading(true);
-    setLoadError(null);
+  const isLoading = isInitialSync && syncedTags.length === 0;
 
-    try {
-      const response = await fetchTags();
-      upsertTags(response.tags);
-    } catch (err) {
-      setLoadError(
-        err instanceof Error
-          ? err.message
-          : t("MobileApp.Settings.TagsLoadErrorDescription"),
-      );
-    } finally {
-      setIsLoading(false);
-    }
-  }, [t, upsertTags]);
+  const reloadTags = useCallback(() => {
+    refreshTags();
+  }, [refreshTags]);
 
-  useEffect(() => {
-    void reloadTags();
-  }, [reloadTags]);
+  const handleTagCreated = useCallback(() => {
+    refreshTags();
+  }, [refreshTags]);
 
-  const handleTagCreated = useCallback((tag: Tag) => {
-    if (!tag?.id || !tag.label) {
-      return;
-    }
-
-    upsertTag(tag);
-  }, [upsertTag]);
-
-  const handleTagSaved = useCallback((tag: Tag) => {
-    if (!tag?.id || !tag.label) {
-      return;
-    }
-
-    upsertTag(tag);
+  const handleTagSaved = useCallback(() => {
     setEditingTag(null);
-  }, [upsertTag]);
+    refreshTags();
+  }, [refreshTags]);
 
   const handleTagDeleted = useCallback(() => {
-    if (!editingTag) {
-      return;
-    }
-
-    removeTag(editingTag.id);
     setEditingTag(null);
-  }, [editingTag, removeTag]);
+    refreshTags();
+  }, [refreshTags]);
 
   const previewCaption =
-    tags.length === 0 && !isLoading && !loadError
+    syncedTags.length === 0 && !isLoading && !loadError
       ? t("MobileApp.Settings.PreviewHintTagsEmpty")
       : t("MobileApp.Settings.PreviewHintTags");
 

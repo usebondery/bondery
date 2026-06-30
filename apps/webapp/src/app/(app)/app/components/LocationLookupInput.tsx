@@ -66,7 +66,7 @@ export function LocationLookupInput({
   const activeQueryRef = useRef<string | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
 
-  // Sync the flag when value changes externally (e.g. after enrichment / router.refresh())
+  // Sync the flag when value changes externally (e.g. after enrichment invalidates contact data)
   useEffect(() => {
     if (!userHasTyped.current) {
       setSelectedFlag(extractCountryCodeFromLabel(value));

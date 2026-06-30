@@ -2,7 +2,7 @@
 
 import { ActionIcon, Text, TextInput, Group, Divider, CardSection, Tooltip } from "@mantine/core";
 import { IconHelpCircle, IconMail, IconUserCircle, IconChevronRight } from "@tabler/icons-react";
-import { useTranslations } from "next-intl";
+import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
 import { PersonChip } from "@bondery/mantine-next";
 import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import { ProviderIntegrations } from "./ProviderIntegrations";

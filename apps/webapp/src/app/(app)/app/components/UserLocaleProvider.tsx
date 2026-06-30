@@ -1,35 +1,87 @@
-import { NextIntlClientProvider } from "next-intl";
+"use client";
+
+import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from "react";
+import { I18nProvider } from "next-i18next/client";
 import { DatesProvider } from "@mantine/dates";
-import type { ReactNode } from "react";
+import type { Resource } from "i18next";
+import { i18nConfig, SUPPORTED_LOCALES, type SupportedLocale } from "@bondery/translations";
+
+export interface UserLocaleSettings {
+  locale: SupportedLocale;
+  timezone: string;
+  timeFormat: "24h" | "12h";
+  applyUserLocale: (patch: Partial<Pick<UserLocaleSettings, "locale" | "timezone" | "timeFormat">>) => void;
+}
+
+const UserLocaleContext = createContext<UserLocaleSettings | null>(null);
+
+export function useUserLocale(): UserLocaleSettings {
+  const context = useContext(UserLocaleContext);
+  if (!context) {
+    throw new Error("useUserLocale must be used within LocaleProvider");
+  }
+  return context;
+}
+
+/** Convenience accessor for components that only need the language code. */
+export function useCurrentLocale(): SupportedLocale {
+  return useUserLocale().locale;
+}
 
 interface LocaleProviderProps {
   children: ReactNode;
-  locale: string;
+  locale: SupportedLocale;
   timezone: string;
   timeFormat: "24h" | "12h";
-  messages: any;
+  resources: Resource;
 }
 
 /**
- * Server component that provides locale settings via NextIntlClientProvider and DatesProvider.
- * Used to provide i18n context for routes that need translations.
- *
- * @param locale - The language code (e.g., 'en', 'cs')
- * @param timezone - The timezone (e.g., 'Europe/Prague', 'UTC')
- * @param messages - The translation messages for the locale
+ * Provides i18n translations (next-i18next) and user locale preferences
+ * (timezone, time format) for all routes under the (app) group.
  */
 export function LocaleProvider({
   children,
-  locale,
-  timezone,
-  timeFormat,
-  messages,
+  locale: initialLocale,
+  timezone: initialTimezone,
+  timeFormat: initialTimeFormat,
+  resources,
 }: LocaleProviderProps) {
-  const localeWithHourCycle = timeFormat === "12h" ? `${locale}-u-hc-h12` : `${locale}-u-hc-h23`;
+  const [locale, setLocale] = useState(initialLocale);
+  const [timezone, setTimezone] = useState(initialTimezone);
+  const [timeFormat, setTimeFormat] = useState<"24h" | "12h">(initialTimeFormat);
+
+  useEffect(() => {
+    setLocale(initialLocale);
+    setTimezone(initialTimezone);
+    setTimeFormat(initialTimeFormat);
+  }, [initialLocale, initialTimezone, initialTimeFormat]);
+
+  const applyUserLocale = useCallback(
+    (patch: Partial<Pick<UserLocaleSettings, "locale" | "timezone" | "timeFormat">>) => {
+      if (patch.locale) setLocale(patch.locale);
+      if (patch.timezone) setTimezone(patch.timezone);
+      if (patch.timeFormat) setTimeFormat(patch.timeFormat);
+    },
+    [],
+  );
 
   return (
-    <NextIntlClientProvider locale={localeWithHourCycle} timeZone={timezone} messages={messages}>
-      <DatesProvider settings={{ locale }}>{children}</DatesProvider>
-    </NextIntlClientProvider>
+    <UserLocaleContext.Provider value={{ locale, timezone, timeFormat, applyUserLocale }}>
+      <I18nProvider
+        language={locale}
+        resources={resources}
+        defaultNS={i18nConfig.defaultNS}
+        fallbackLng={i18nConfig.fallbackLng}
+        supportedLngs={[...SUPPORTED_LOCALES]}
+        i18nextOptions={{
+          keySeparator: i18nConfig.keySeparator,
+          nsSeparator: i18nConfig.nsSeparator,
+          interpolation: i18nConfig.interpolation,
+        }}
+      >
+        <DatesProvider settings={{ locale }}>{children}</DatesProvider>
+      </I18nProvider>
+    </UserLocaleContext.Provider>
   );
 }

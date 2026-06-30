@@ -9,7 +9,7 @@ import {
   extractNameParts,
   normalizeNameCase,
 } from "@bondery/helpers/name";
-import type { UploadFile } from "../../../lib/schemas.js";
+import type { UploadFile } from "../../../lib/queries.js";
 
 const LINKEDIN_REQUIRED_HEADERS = [
   "First Name",

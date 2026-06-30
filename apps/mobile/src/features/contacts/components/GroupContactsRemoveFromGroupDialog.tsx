@@ -1,10 +1,10 @@
 import { IconUsersMinus } from "@tabler/icons-react-native";
 import { ActionSheetPopup } from "../../../components/ActionSheetPopup";
-import { removeGroupMembers } from "../../../lib/api/client";
+import { groupsDomain } from "../../../lib/domains/groups";
 import { useMobileTranslations } from "../../../lib/i18n/useMobileTranslations";
 import { useAppToast } from "../../../lib/toast/useAppToast";
 import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
-import { buildGroupSelectionRemovePayload } from "../buildGroupSelectionRemovePayload";
+import { resolveContactsSelectionPersonIds } from "../resolveContactsSelectionPersonIds";
 import {
   useContactsEffectiveSelectedCount,
   useContactsSelection,
@@ -38,12 +38,16 @@ export function GroupContactsRemoveFromGroupDialog({
   const handleConfirmRemoveFromGroup = () => {
     void (async () => {
       const selectionState = useContactsSelection.getState();
-      const payload = buildGroupSelectionRemovePayload(selectionState, debouncedQuery);
+      const personIds = resolveContactsSelectionPersonIds(
+        selectionState,
+        debouncedQuery,
+        { groupId },
+      );
 
       setIsRemovingFromGroup(true);
 
       try {
-        await removeGroupMembers(groupId, payload);
+        groupsDomain.removeMembers(groupId, personIds);
 
         exitSelectionMode();
         setRemoveFromGroupConfirmOpen(false);

@@ -11,6 +11,7 @@ import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import { getAvatarColorFromName } from "@/lib/avatarColor";
 import { searchContacts } from "@/lib/searchContacts";
 import { DEBOUNCE_MS, HOTKEYS } from "@/lib/config";
+import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
 
 const [peopleStore, peopleSearchActions] = createSpotlight();
 export { peopleSearchActions };
@@ -20,6 +21,7 @@ const descriptionColor = "var(--action-description-color, var(--mantine-color-di
 const MIN_QUERY_LENGTH = 3;
 
 export function PeopleSearchSpotlight() {
+  const t = useTranslations("PeopleSearchSpotlight");
   const router = useRouter();
   const [results, setResults] = useState<Contact[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -63,7 +65,7 @@ export function PeopleSearchSpotlight() {
   }
 
   function handleSeeAll() {
-    router.push(`${WEBAPP_ROUTES.PEOPLE}?q=${encodeURIComponent(query.trim())}`);
+    router.push(`${WEBAPP_ROUTES.PEOPLE}?search=${encodeURIComponent(query.trim())}`);
   }
 
   const trimmed = query.trim();
@@ -82,12 +84,12 @@ export function PeopleSearchSpotlight() {
     >
       <Spotlight.Search
         leftSection={<IconSearch size={18} stroke={1.5} />}
-        placeholder="Search people by name…"
+        placeholder={t("SearchPlaceholder")}
       />
 
       <Spotlight.ActionsList>
         {belowMinLength && !isLoading && (
-          <Spotlight.Empty>Type at least 3 characters to search</Spotlight.Empty>
+          <Spotlight.Empty>{t("TypeMinChars")}</Spotlight.Empty>
         )}
 
         {!belowMinLength && isLoading && (
@@ -99,7 +101,7 @@ export function PeopleSearchSpotlight() {
         )}
 
         {!belowMinLength && !isLoading && results.length === 0 && (
-          <Spotlight.Empty>No people found</Spotlight.Empty>
+          <Spotlight.Empty>{t("NoPeopleFound")}</Spotlight.Empty>
         )}
 
         {!belowMinLength &&
@@ -150,7 +152,7 @@ export function PeopleSearchSpotlight() {
             <Group gap="xs" justify="center" style={{ color: descriptionColor }}>
               <IconUsers size={16} stroke={1.5} />
               <Text size="sm" c="inherit">
-                See all results in People
+                {t("SeeAllResults")}
               </Text>
             </Group>
           </Spotlight.Action>

@@ -51,7 +51,7 @@ interface FloatingBubbleTabBarProps {
     }
   >;
   navigation: any;
-  onChromeBoundsChange?: () => void;
+  onChromeBoundsChange?: (event: LayoutChangeEvent) => void;
 }
 
 /**
@@ -133,16 +133,18 @@ export const FloatingBubbleTabBar = forwardRef<View, FloatingBubbleTabBarProps>(
 
       if (isOpen) {
         menuHeight.value = withSpring(measuredHeight, FAB_SPEED_DIAL_MOTION.openSpring);
-        onChromeBoundsChange?.();
       }
     },
-    [isOpen, menuHeight, menuTargetHeight, onChromeBoundsChange],
+    [isOpen, menuHeight, menuTargetHeight],
   );
 
-  const handleChromeLayout = useCallback(() => {
-    measurePlusBubble();
-    onChromeBoundsChange?.();
-  }, [measurePlusBubble, onChromeBoundsChange]);
+  const handleChromeLayout = useCallback(
+    (event: LayoutChangeEvent) => {
+      measurePlusBubble();
+      onChromeBoundsChange?.(event);
+    },
+    [measurePlusBubble, onChromeBoundsChange],
+  );
 
   useEffect(() => {
     measurePlusBubble();
@@ -153,13 +155,11 @@ export const FloatingBubbleTabBar = forwardRef<View, FloatingBubbleTabBarProps>(
 
     if (isOpen && usesInlineMenu) {
       menuHeight.value = withSpring(targetHeight, FAB_SPEED_DIAL_MOTION.openSpring);
-      onChromeBoundsChange?.();
       return;
     }
 
     menuHeight.value = withTiming(0, { duration: FAB_SPEED_DIAL_MOTION.closeDurationMs });
-    onChromeBoundsChange?.();
-  }, [estimatedMenuHeight, isOpen, menuHeight, menuTargetHeight, onChromeBoundsChange, usesInlineMenu]);
+  }, [estimatedMenuHeight, isOpen, menuHeight, menuTargetHeight, usesInlineMenu]);
 
   useEffect(() => {
     const previous = dimensionsRef.current;

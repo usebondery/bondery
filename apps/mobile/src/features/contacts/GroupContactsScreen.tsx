@@ -15,7 +15,6 @@ import {
   IconUsersMinus,
 } from "@tabler/icons-react-native";
 import type { Contact, Group } from "@bondery/schemas";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ContactsSelectionActionBar } from "../../components/ContactsSelectionActionBar";
 import { ActionSheetPopup } from "../../components/ActionSheetPopup";
 import { MobileTextInput } from "../../components/MobileTextInput";
@@ -23,16 +22,13 @@ import {
   LoadErrorCard,
   loadErrorTabRootInset,
 } from "../../components/load-state";
+import { useScrollBottomInset } from "../../components/chrome";
 import { GroupContactsScreenHeader } from "./components/GroupContactsScreenHeader";
 import { GroupEditSheet } from "./components/GroupEditSheet";
 import { GroupDeleteDialog } from "./components/GroupDeleteDialog";
-import {
-  addContactsToGroup,
-  createGroup,
-  fetchGroup,
-  fetchGroupContacts,
-  fetchGroups,
-} from "../../lib/api/client";
+import { groupsDomain } from "../../lib/domains/groups";
+import { useGroups } from "../../lib/sync/hooks/useSyncQuery";
+import { useSync } from "../../lib/sync/SyncProvider";
 import {
   DEBOUNCE_MS,
   GROUP_CONTACTS_FETCH_LIMIT,
@@ -40,7 +36,6 @@ import {
   UI_TIMING_MS,
 } from "../../lib/config";
 import { useDebouncedValue } from "../../lib/hooks/useDebouncedValue";
-import { useContactsStore, useGroupsStore } from "../../lib/store";
 import {
   MobilePreferencesState,
   SwipeAction,
@@ -90,12 +85,12 @@ export function GroupContactsScreen({
   const { showToast } = useAppToast();
   const router = useRouter();
   const colors = useMobileThemeColors();
-  const insets = useSafeAreaInsets();
+  const scrollBottomInset = useScrollBottomInset("tabRoot");
   const flashListRef = useRef<FlashListRef<ContactsFlatRow>>(null);
   const pendingScrollIndexRef = useRef<number | null>(null);
   const scrollRetryCountRef = useRef(0);
   const latestRequestRef = useRef(0);
-  const [listContactIds, setListContactIds] = useState<string[]>([]);
+  const [contacts, setContacts] = useState<Contact[]>([]);
   const [totalCount, setTotalCount] = useState(0);
   const [searchInput, setSearchInput] = useState("");
   const debouncedQuery = useDebouncedValue(
@@ -105,11 +100,6 @@ export function GroupContactsScreen({
   const [loading, setLoading] = useState(true);
   const [isSearching, setIsSearching] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const contactsById = useContactsStore((state) => state.byId);
-  const upsertContacts = useContactsStore((state) => state.upsertContacts);
-  const groupsById = useGroupsStore((state) => state.byId);
-  const upsertGroup = useGroupsStore((state) => state.upsertGroup);
-  const upsertGroups = useGroupsStore((state) => state.upsertGroups);
   const [listViewportHeight, setListViewportHeight] = useState(0);
 
   // Local label/emoji updated after a successful edit so the header reflects changes without navigation.
@@ -146,21 +136,16 @@ export function GroupContactsScreen({
   const groupLastOpenedAt = useMobilePreferences(
     (state: MobilePreferencesState) => state.groupLastOpenedAt,
   );
+  const { data: syncedGroups, refresh: refreshGroupsList } = useGroups();
+  const { revision: syncRevision } = useSync();
+
   const recordGroupOpened = useMobilePreferences(
     (state: MobilePreferencesState) => state.recordGroupOpened,
   );
 
-  const groups = useMemo(() => Object.values(groupsById), [groupsById]);
   const sortedGroups = useMemo(
-    () => sortGroups(groups, groupSortOrder, groupLastOpenedAt),
-    [groups, groupSortOrder, groupLastOpenedAt],
-  );
-  const contacts = useMemo(
-    () =>
-      listContactIds
-        .map((contactId) => contactsById[contactId])
-        .filter((contact): contact is Contact => Boolean(contact)),
-    [contactsById, listContactIds],
+    () => sortGroups(syncedGroups, groupSortOrder, groupLastOpenedAt),
+    [syncedGroups, groupSortOrder, groupLastOpenedAt],
   );
 
   const rowTexts = useMemo(
@@ -197,7 +182,8 @@ export function GroupContactsScreen({
       setError(null);
 
       try {
-        const response = await fetchGroupContacts(groupId, {
+        const response = groupsDomain.listMembers({
+          groupId,
           query,
           limit: GROUP_CONTACTS_FETCH_LIMIT,
           offset: 0,
@@ -207,14 +193,9 @@ export function GroupContactsScreen({
           return;
         }
 
-        const fetchedContacts = response.contacts || [];
-        upsertContacts(fetchedContacts);
-        setListContactIds(fetchedContacts.map((contact) => contact.id));
-        setTotalCount(
-          Number.isFinite(response.totalCount)
-            ? response.totalCount
-            : fetchedContacts.length,
-        );
+        const fetchedContacts = response.contacts;
+        setContacts(fetchedContacts);
+        setTotalCount(response.totalCount);
       } catch (loadError) {
         if (requestId !== latestRequestRef.current) {
           return;
@@ -232,17 +213,12 @@ export function GroupContactsScreen({
         }
       }
     },
-    [groupId, t, upsertContacts],
+    [groupId, t],
   );
 
   const reloadGroups = useCallback(async () => {
-    try {
-      const groupsRes = await fetchGroups();
-      upsertGroups(groupsRes.groups || []);
-    } catch {
-      // Keep existing groups on refresh failure.
-    }
-  }, [upsertGroups]);
+    refreshGroupsList();
+  }, [refreshGroupsList]);
 
   const reloadMembers = useCallback(async () => {
     await fetchGroupContactsPage({ query: debouncedQuery });
@@ -253,14 +229,10 @@ export function GroupContactsScreen({
       query: debouncedQuery,
       showInitialLoader: true,
     });
-  }, [debouncedQuery, fetchGroupContactsPage]);
-
-  useEffect(() => {
-    void reloadGroups();
-  }, [reloadGroups]);
+  }, [debouncedQuery, fetchGroupContactsPage, syncRevision]);
 
   useContactsSelectionListSync({
-    contacts,
+    contactIds: contacts.map((contact) => contact.id),
     totalCount,
   });
 
@@ -373,17 +345,21 @@ export function GroupContactsScreen({
    * Lazily fetches full group details (includes color) the first time an action that
    * needs them is triggered. Returns the cached value if already loaded.
    */
-  const ensureGroupDetails = useCallback(async (): Promise<Group> => {
+  const ensureGroupDetails = useCallback((): Group => {
     if (groupDetails) return groupDetails;
 
-    const response = await fetchGroup(groupId);
-    setGroupDetails(response.group);
-    return response.group;
+    const group = groupsDomain.get(groupId);
+    if (!group) {
+      throw new Error("Group not found");
+    }
+
+    setGroupDetails(group);
+    return group;
   }, [groupDetails, groupId]);
 
-  const handleOpenEditGroup = useCallback(async () => {
+  const handleOpenEditGroup = useCallback(() => {
     try {
-      await ensureGroupDetails();
+      ensureGroupDetails();
     } catch {
       showToast({
         type: "error",
@@ -399,8 +375,7 @@ export function GroupContactsScreen({
     setLocalLabel(group.label);
     setLocalEmoji(group.emoji ?? "");
     setGroupDetails(group);
-    upsertGroup(group);
-  }, [upsertGroup]);
+  }, []);
 
   const handleConfirmDuplicateGroup = useCallback(async () => {
     if (isDuplicating) return;
@@ -408,17 +383,18 @@ export function GroupContactsScreen({
     setIsDuplicating(true);
 
     try {
-      const details = await ensureGroupDetails();
-      const { group: newGroup } = await createGroup({
+      const details = ensureGroupDetails();
+      const newGroup = groupsDomain.create({
         label: `${details.label} (copy)`,
         emoji: details.emoji?.trim() || "📁",
-        color: details.color,
+        color: details.color ?? "",
       });
 
       if (contacts.length > 0) {
-        await addContactsToGroup(newGroup.id, {
-          personIds: contacts.map((c) => c.id),
-        });
+        groupsDomain.addMembers(
+          newGroup.id,
+          contacts.map((c) => c.id),
+        );
       }
 
       setIsDuplicateDialogOpen(false);
@@ -557,10 +533,6 @@ export function GroupContactsScreen({
   );
 
   const showFullScreenLoader = loading && contacts.length === 0;
-  const listBottomInset = selectionMode
-    ? MOBILE_LAYOUT.floatingTabBar.selectionBarInset +
-      Math.max(insets.bottom, 8)
-    : 24;
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.appBackground }]}>
@@ -569,9 +541,7 @@ export function GroupContactsScreen({
         label={localLabel}
         emoji={localEmoji}
         onBack={handleBack}
-        onEditGroup={() => {
-          void handleOpenEditGroup();
-        }}
+        onEditGroup={handleOpenEditGroup}
         onDuplicateGroup={() => setIsDuplicateDialogOpen(true)}
         onDeleteGroup={() => setIsDeleteDialogOpen(true)}
         isDuplicating={isDuplicating}
@@ -643,7 +613,7 @@ export function GroupContactsScreen({
                 }
                 showsVerticalScrollIndicator={false}
                 ListEmptyComponent={listEmpty}
-                contentContainerStyle={{ paddingBottom: listBottomInset }}
+                contentContainerStyle={{ paddingBottom: scrollBottomInset }}
               />
             </View>
           </GestureDetector>

@@ -16,12 +16,9 @@ import { schemaResolver, useForm } from "@mantine/form";
 import { notifications } from "@mantine/notifications";
 import { IconCalendarPlus, IconCheck, IconUserPlus } from "@tabler/icons-react";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useTranslations } from "next-intl";
-import { useRouter } from "next/navigation";
+import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
 import { modals } from "@mantine/modals";
-import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import { interactionFormSchema, type Contact, type Activity } from "@bondery/schemas";
-import { revalidateInteractions } from "../../actions";
 import { AddContactForm } from "../../people/components/AddContactModal";
 import {
   ModalFooter,
@@ -36,6 +33,10 @@ import { getActivityTypeConfig } from "@/lib/activityTypes";
 import { captureEvent } from "@/lib/analytics/client";
 import { DEBOUNCE_MS } from "@/lib/config";
 import { searchContacts } from "@/lib/searchContacts";
+import {
+  useCreateInteractionMutation,
+  useUpdateInteractionMutation,
+} from "@/lib/query/hooks/useInteractions";
 
 interface OpenNewActivityModalParams {
   contacts: Contact[];
@@ -140,8 +141,9 @@ function NewActivityForm({
   initialParticipantIds,
   onCreated,
 }: NewActivityFormProps) {
-  const router = useRouter();
   const t = useTranslations("InteractionsPage");
+  const createInteractionMutation = useCreateInteractionMutation();
+  const updateInteractionMutation = useUpdateInteractionMutation(activity?.id ?? "");
   const [loading, setLoading] = useState(false);
   const [availableContacts, setAvailableContacts] = useState<Contact[]>(() => {
     if (!activity?.participants?.length) return contacts;
@@ -233,26 +235,14 @@ function NewActivityForm({
       const fallbackTime = activity ? new Date(activity.date) : new Date();
       const normalizedDate = withFallbackTime(dateValue, fallbackTime);
 
-      const endpoint = activity
-        ? `${API_ROUTES.INTERACTIONS}/${activity.id}`
-        : API_ROUTES.INTERACTIONS;
-      const method = activity ? "PATCH" : "POST";
+      const payload = {
+        ...values,
+        date: normalizedDate.toISOString(),
+      };
 
-      const res = await fetch(endpoint, {
-        method,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...values,
-          date: normalizedDate.toISOString(),
-        }),
-      });
-
-      if (!res.ok) {
-        const errorData = await res.json().catch(() => ({}));
-        throw new Error(errorData.error || errorData.message || "Failed to create activity");
-      }
-
-      const data = (await res.json()) as { id: string };
+      const data = activity
+        ? await updateInteractionMutation.mutateAsync(payload)
+        : await createInteractionMutation.mutateAsync(payload);
 
       captureEvent(activity ? "interaction_updated" : "interaction_created", {
         activity_type: values.type,
@@ -261,24 +251,21 @@ function NewActivityForm({
 
       notifications.show(
         successNotificationTemplate({
-          title: "Success",
+          title: t("SuccessTitle"),
           description: activity ? t("ActivityUpdated") : t("ActivityCreated"),
         }),
       );
 
       modals.close(modalId);
-      await revalidateInteractions();
-      if (onCreated && !isEditMode) {
-        onCreated(data.id);
-      } else {
-        router.refresh();
+      if (onCreated && !isEditMode && data.interaction?.id) {
+        onCreated(data.interaction.id);
       }
     } catch (error) {
       notifications.show(
         errorNotificationTemplate({
-          title: "Error",
+          title: t("ErrorTitle"),
           description:
-            error instanceof Error ? error.message : "Failed to create activity. Please try again.",
+            error instanceof Error ? error.message : t("CreateActivityFailed"),
         }),
       );
     } finally {
@@ -310,7 +297,7 @@ function NewActivityForm({
               searchDebounceMs={DEBOUNCE_MS.contactPicker}
               placeholder={t("AddParticipantsPlaceholder")}
               noResultsLabel={t("NoContactsFound")}
-              searchingLabel="Searching…"
+              searchingLabel={t("SearchingLabel")}
               inputRef={participantsInputRef}
               error={form.errors.participantIds}
               disabled={loading}

@@ -81,3 +81,7 @@ RefreshMergeRecommendationsResponse:
       type: boolean
     recommendationsCount:
       type: integer
+    recommendations:
+      type: array
+      items:
+        $ref: "#/MergeRecommendation"

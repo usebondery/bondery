@@ -11,8 +11,9 @@ import {
 } from "@tabler/icons-react";
 import { useMemo } from "react";
 import { useHotkeys } from "@mantine/hooks";
-import { useFormatter, useTranslations } from "next-intl";
-import type { Activity, Contact, UpcomingReminder } from "@bondery/schemas";
+import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
+import { useDateFormatter as useFormatter } from "@/lib/i18n/useDateFormatter";
+import type { Activity, Contact } from "@bondery/schemas";
 import { PageWrapper } from "@/app/(app)/app/components/PageWrapper";
 import { PageHeader } from "@/app/(app)/app/components/PageHeader";
 import { HomeStatsGrid } from "@/app/(app)/app/components/home/HomeStatsGrid";
@@ -21,7 +22,7 @@ import { openAddContactModal } from "@/app/(app)/app/people/components/AddContac
 import { InteractionsList } from "@/app/(app)/app/components/interactions/InteractionsList";
 import { openNewActivityModal } from "@/app/(app)/app/interactions/components/NewActivityModal";
 import Link from "next/link";
-import { API_ROUTES, WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
+import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import { notifications } from "@mantine/notifications";
 import { useRouter } from "next/navigation";
 import {
@@ -31,35 +32,32 @@ import {
   PersonChip,
   successNotificationTemplate,
 } from "@bondery/mantine-next";
-import { revalidateInteractions } from "../actions";
 import { openStandardConfirmModal } from "../components/modals/openStandardConfirmModal";
 import { HOTKEYS } from "@/lib/config";
 import { peopleSearchActions } from "../components/PeopleSearchSpotlight";
+import {
+  useCreateInteractionMutation,
+  useDeleteInteractionMutation,
+} from "@/lib/query/hooks/useInteractions";
+import {
+  useHomeStatsQuery,
+  useHomeTimelineQuery,
+  useRecentlyAddedContactsQuery,
+  useRecentlyInteractedContactsQuery,
+  useUpcomingRemindersQuery,
+} from "@/lib/query/hooks/useHome";
 
-interface HomeClientProps {
-  stats: {
-    totalContacts: number;
-    thisMonthInteractions: number;
-    newContactsThisYear: number;
-  };
-  reminders: UpcomingReminder[];
-  timelineContacts: Contact[];
-  timelineActivities: Activity[];
-  recentlyAdded: Contact[];
-  recentlyInteracted: Contact[];
-}
-
-export function HomeClient({
-  stats,
-  reminders,
-  timelineContacts,
-  timelineActivities,
-  recentlyAdded,
-  recentlyInteracted,
-}: HomeClientProps) {
+export function HomeClient() {
   const router = useRouter();
   const t = useTranslations("HomePage");
   const timelineT = useTranslations("InteractionsPage");
+  const deleteInteractionMutation = useDeleteInteractionMutation();
+  const createInteractionMutation = useCreateInteractionMutation();
+  const { data: stats } = useHomeStatsQuery();
+  const { data: reminders = [] } = useUpcomingRemindersQuery();
+  const { contacts: timelineContacts, activities: timelineActivities } = useHomeTimelineQuery();
+  const { data: recentlyAdded = [] } = useRecentlyAddedContactsQuery();
+  const { data: recentlyInteracted = [] } = useRecentlyInteractedContactsQuery();
   const formatter = useFormatter();
   const currentMonth = formatter.dateTime(new Date(), { month: "long" });
   const currentYear = formatter.dateTime(new Date(), { year: "numeric" });
@@ -139,27 +137,18 @@ export function HomeClient({
       confirmColor: "red",
       onConfirm: async () => {
         try {
-          const response = await fetch(`${API_ROUTES.INTERACTIONS}/${activity.id}`, {
-            method: "DELETE",
-          });
-
-          if (!response.ok) {
-            throw new Error("Failed to delete interaction");
-          }
+          await deleteInteractionMutation.mutateAsync(activity.id);
 
           notifications.show(
             successNotificationTemplate({
-              title: "Success",
+              title: timelineT("SuccessTitle"),
               description: timelineT("ActivityDeleted"),
             }),
           );
-
-          await revalidateInteractions();
-          router.refresh();
         } catch {
           notifications.show(
             errorNotificationTemplate({
-              title: "Error",
+              title: timelineT("ErrorTitle"),
               description: timelineT("DeleteFailed"),
             }),
           );
@@ -174,36 +163,25 @@ export function HomeClient({
       .filter((id): id is string => Boolean(id));
 
     try {
-      const response = await fetch(API_ROUTES.INTERACTIONS, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          title: activity.title || "",
-          type: activity.type,
-          description: activity.description || "",
-          date: activity.date,
-          participantIds,
-        }),
+      await createInteractionMutation.mutateAsync({
+        title: activity.title || "",
+        type: activity.type,
+        description: activity.description || "",
+        date: activity.date,
+        participantIds,
       });
-
-      if (!response.ok) {
-        throw new Error("Failed to duplicate interaction");
-      }
 
       notifications.show(
         successNotificationTemplate({
-          title: "Success",
+          title: timelineT("SuccessTitle"),
           description: timelineT("ActivityDuplicated"),
           icon: <IconCopy size={18} />,
         }),
       );
-
-      await revalidateInteractions();
-      router.refresh();
     } catch {
       notifications.show(
         errorNotificationTemplate({
-          title: "Error",
+          title: timelineT("ErrorTitle"),
           description: timelineT("DuplicateFailed"),
         }),
       );
@@ -262,7 +240,13 @@ export function HomeClient({
         />
 
         <HomeStatsGrid
-          stats={stats}
+          stats={
+            stats ?? {
+              totalContacts: 0,
+              thisMonthInteractions: 0,
+              newContactsThisYear: 0,
+            }
+          }
           labels={{
             totalContactsTitle: t("Stats.TotalContactsTitle"),
             totalContactsTooltip: t("Stats.TotalContactsTooltip"),

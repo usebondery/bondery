@@ -8,7 +8,7 @@ import {
   IconMessageCircle,
   IconChevronRight,
 } from "@tabler/icons-react";
-import { useTranslations } from "next-intl";
+import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
 import { modals } from "@mantine/modals";
 import { ModalTitle } from "@bondery/mantine-next";
 import { WEBSITE_ROUTES } from "@bondery/helpers/globals/paths";

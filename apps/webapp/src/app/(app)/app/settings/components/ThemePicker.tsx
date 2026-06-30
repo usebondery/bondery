@@ -1,16 +1,18 @@
+"use client";
+
 import { useMantineColorScheme } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import type { ColorSchemePreference } from "@bondery/schemas";
-import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import { useState } from "react";
 import type { ReactNode } from "react";
-import { useTranslations } from "next-intl";
+import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
 import {
   ThemePicker as SharedThemePicker,
   errorNotificationTemplate,
   loadingNotificationTemplate,
   successNotificationTemplate,
 } from "@bondery/mantine-next";
+import { useUpdateSettingsMutation } from "@/lib/query/hooks/useSettings";
 
 interface ThemePickerProps {
   initialValue: ColorSchemePreference;
@@ -21,6 +23,7 @@ export function ThemePicker({ initialValue, label }: ThemePickerProps) {
   const t = useTranslations("SettingsPage.Preferences");
   const [value, setValue] = useState<ColorSchemePreference>(initialValue);
   const { setColorScheme } = useMantineColorScheme();
+  const updateSettings = useUpdateSettingsMutation();
 
   const handleChange = async (nextValue: string) => {
     if (nextValue !== "light" && nextValue !== "dark" && nextValue !== "auto") {
@@ -39,19 +42,7 @@ export function ThemePicker({ initialValue, label }: ThemePickerProps) {
     });
 
     try {
-      const response = await fetch(API_ROUTES.ME_SETTINGS, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          colorScheme: nextValue,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to update color scheme");
-      }
+      await updateSettings.mutateAsync({ colorScheme: nextValue });
 
       notifications.hide(loadingNotification);
       notifications.show(

@@ -7,9 +7,8 @@ import type { Activity, Contact } from "@bondery/schemas";
 import { useEffect, useState } from "react";
 import { notifications } from "@mantine/notifications";
 import { API_ROUTES, WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
-import { useRouter } from "next/navigation";
 import { modals } from "@mantine/modals";
-import { useTranslations } from "next-intl";
+import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
 import {
   ActionIconLink,
   ModalFooter,
@@ -18,8 +17,11 @@ import {
   successNotificationTemplate,
 } from "@bondery/mantine-next";
 import { getAvatarColorFromName } from "@/lib/avatarColor";
-import { revalidateInteractions } from "../../actions";
 import { openStandardConfirmModal } from "@/app/(app)/app/components/modals/openStandardConfirmModal";
+import {
+  useDeleteInteractionMutation,
+  useUpdateInteractionMutation,
+} from "@/lib/query/hooks/useInteractions";
 
 interface OpenActivityDetailModalParams {
   activity: Activity;
@@ -50,7 +52,8 @@ function ActivityDetailModalTitle({ activity }: { activity: Activity }) {
 function ActivityDetailBody({ modalId, activity, contacts }: ActivityDetailBodyProps) {
   const [note, setNote] = useState(activity.description || "");
   const [loading, setLoading] = useState(false);
-  const router = useRouter();
+  const updateInteractionMutation = useUpdateInteractionMutation(activity.id);
+  const deleteInteractionMutation = useDeleteInteractionMutation();
   const t = useTranslations("InteractionsPage");
 
   useEffect(() => {
@@ -73,17 +76,9 @@ function ActivityDetailBody({ modalId, activity, contacts }: ActivityDetailBodyP
     setLoading(true);
 
     try {
-      const res = await fetch(`${API_ROUTES.INTERACTIONS}/${activity.id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          description: note,
-        }),
+      await updateInteractionMutation.mutateAsync({
+        description: note,
       });
-
-      if (!res.ok) {
-        throw new Error("Failed to update activity");
-      }
 
       notifications.show(
         successNotificationTemplate({
@@ -92,8 +87,6 @@ function ActivityDetailBody({ modalId, activity, contacts }: ActivityDetailBodyP
         }),
       );
 
-      await revalidateInteractions();
-      router.refresh();
       modals.close(modalId);
     } catch {
       notifications.show(
@@ -117,13 +110,7 @@ function ActivityDetailBody({ modalId, activity, contacts }: ActivityDetailBodyP
       onConfirm: async () => {
         setLoading(true);
         try {
-          const res = await fetch(`${API_ROUTES.INTERACTIONS}/${activity.id}`, {
-            method: "DELETE",
-          });
-
-          if (!res.ok) {
-            throw new Error("Failed to delete activity");
-          }
+          await deleteInteractionMutation.mutateAsync(activity.id);
 
           notifications.show(
             successNotificationTemplate({
@@ -132,8 +119,6 @@ function ActivityDetailBody({ modalId, activity, contacts }: ActivityDetailBodyP
             }),
           );
 
-          await revalidateInteractions();
-          router.refresh();
           modals.close(modalId);
         } catch {
           notifications.show(

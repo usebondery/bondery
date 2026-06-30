@@ -49,9 +49,18 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
       const {
         data: { subscription: authSubscription },
-      } = supabase.auth.onAuthStateChange((_event, updatedSession) => {
+      } = supabase.auth.onAuthStateChange(async (_event, updatedSession) => {
         if (!active) {
           return;
+        }
+
+        if (updatedSession) {
+          const { error } = await supabase.auth.getUser();
+          if (error) {
+            await supabase.auth.signOut({ scope: "local" });
+            setSession(null);
+            return;
+          }
         }
 
         setSession(updatedSession);

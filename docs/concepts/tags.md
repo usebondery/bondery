@@ -1,3 +1,7 @@
+---
+icon: tags
+---
+
 # Tags
 
 Tags are color-coded labels you can attach to any number of contacts. They let you slice and filter your network in a lightweight way — think "investors", "economics", or "follow-up-q2".
@@ -33,3 +37,9 @@ A single contact can have any number of tags.
 ## Filtering by tag
 
 The contacts list supports filtering by tag. Select a tag in the filter panel and only contacts with that tag will be shown. You can combine tag filters with the search box and other filters.
+
+## Related concepts
+
+* [People](people.md) — contacts you tag
+* [Groups](groups.md) — shared context vs flat labels ([Tags vs. Groups](#tags-vs-groups))
+* [Map view](map.md) — filter contacts geographically (web)

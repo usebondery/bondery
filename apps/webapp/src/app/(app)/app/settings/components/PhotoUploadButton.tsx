@@ -1,13 +1,13 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
 import { PhotoUploadModal } from "./PhotoUploadModal";
 import { PhotoConfirmModal } from "./PhotoConfirmModal";
 import { UserAvatar } from "@/app/(app)/app/components/UserAvatar";
 import { openPhotoUploadModal } from "@/lib/photoUpload";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
-import { revalidateSettings } from "@/app/(app)/app/actions";
-import { useRouter } from "next/navigation";
+import { getQueryClient } from "@/lib/query/client";
+import { invalidateSettings } from "@/lib/query/invalidation";
 
 interface PhotoUploadButtonProps {
   avatarUrl: string | null;
@@ -16,7 +16,6 @@ interface PhotoUploadButtonProps {
 
 export function PhotoUploadButton({ avatarUrl, userName }: PhotoUploadButtonProps) {
   const t = useTranslations("SettingsPage.Profile");
-  const router = useRouter();
 
   const openUploadModal = () => {
     openPhotoUploadModal(
@@ -25,8 +24,7 @@ export function PhotoUploadButton({ avatarUrl, userName }: PhotoUploadButtonProp
         avatarUrl,
         displayName: userName,
         onSuccess: async () => {
-          await revalidateSettings();
-          router.refresh();
+          await invalidateSettings(getQueryClient());
         },
       },
       {

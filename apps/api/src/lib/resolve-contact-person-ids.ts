@@ -7,7 +7,7 @@ export type ResolveContactPersonIdsExplicitBody = {
 };
 
 export type ResolveContactPersonIdsFilterBody = {
-  contactFilter: { q?: string };
+  contactFilter: { search?: string; sort?: string };
   excludePersonIds?: string[];
 };
 
@@ -27,7 +27,7 @@ export class ResolveContactPersonIdsError extends Error {
 
 /**
  * Resolves contact person IDs from an explicit list or a contacts-list filter.
- * Filter scope matches DELETE /api/contacts (all non-myself contacts, optional fuzzy q).
+ * Filter scope matches DELETE /api/contacts (all non-myself contacts, optional fuzzy search).
  */
 export async function resolveContactPersonIds(
   client: SupabaseClient<Database>,
@@ -79,7 +79,9 @@ export async function resolveContactPersonIds(
 
   if ("contactFilter" in body && body.contactFilter) {
     const search =
-      typeof body.contactFilter.q === "string" ? body.contactFilter.q.trim() : "";
+      typeof body.contactFilter.search === "string"
+        ? body.contactFilter.search.trim()
+        : "";
 
     if (search) {
       const { ranked, error: rpcError } = await searchPeopleIds(

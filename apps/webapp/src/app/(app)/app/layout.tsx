@@ -1,15 +1,11 @@
 import { AppShellWrapper } from "./components/AppShellWrapper";
-import { getAuthHeaders } from "@/lib/authHeaders";
+import { AppShellWithQueryBadges } from "./components/AppShellWithQueryBadges";
 import { getUserSettings } from "@/lib/user/getUserSettings";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import "leaflet/dist/leaflet.css";
-import { API_ROUTES, WEBAPP_ROUTES, WEBSITE_ROUTES } from "@bondery/helpers/globals/paths";
-import { API_URL } from "@/lib/config";
+import { WEBAPP_ROUTES, WEBSITE_ROUTES } from "@bondery/helpers/globals/paths";
 import { ColorSchemeSync } from "./components/ColorSchemeSync";
-import type { Contact, MergeRecommendation } from "@bondery/schemas";
-import { getMergeRecommendationsData } from "./fix/getMergeRecommendationsData";
-import { getKeepInTouchData } from "./keep-in-touch/getKeepInTouchData";
 import { EnrichStatusNotificationManager } from "@/lib/extension/EnrichStatusNotificationManager";
 import { EnrichResumeDetector } from "@/lib/extension/EnrichResumeDetector";
 import { ExtensionUpdateNotificationManager } from "@/lib/extension/ExtensionUpdateNotificationManager";
@@ -70,67 +66,14 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           </AppShellWrapper>
         }
       >
-        <AppShellWithBadges
+        <AppShellWithQueryBadges
           userName={userName}
           avatarUrl={avatarUrl}
           initialCollapsed={initialCollapsed}
         >
           {children}
-        </AppShellWithBadges>
+        </AppShellWithQueryBadges>
       </Suspense>
     </>
-  );
-}
-
-/**
- * Async server component that fetches sidebar badge indicator data in parallel
- * and renders the full app shell. Consumed inside a Suspense boundary so that
- * the shell structure is visible while these slower fetches are in-flight.
- */
-async function AppShellWithBadges({
-  userName,
-  avatarUrl,
-  initialCollapsed,
-  children,
-}: {
-  userName: string;
-  avatarUrl: string | null;
-  initialCollapsed: boolean;
-  children: React.ReactNode;
-}) {
-  const headers = await getAuthHeaders();
-
-  const [recommendations, keepInTouchData, enrichEligibleRes] = await Promise.all([
-    getMergeRecommendationsData(headers).catch(() => [] as MergeRecommendation[]),
-    getKeepInTouchData(headers).catch(() => ({ contacts: [] as Contact[] })),
-    fetch(`${API_URL}${API_ROUTES.CONTACTS}/enrich-queue/eligible-count`, { headers }).catch(
-      () => null,
-    ),
-  ]);
-
-  let enrichEligibleCount = 0;
-  if (enrichEligibleRes?.ok) {
-    const data = await enrichEligibleRes.json();
-    enrichEligibleCount = data.count ?? 0;
-  }
-
-  const hasActiveMergeRecommendations = recommendations.length > 0 || enrichEligibleCount > 0;
-  const hasOverdueKeepInTouch = keepInTouchData.contacts.some((c) => {
-    if (!c.keepFrequencyDays || !c.lastInteraction) return true;
-    const nextDue = new Date(c.lastInteraction);
-    nextDue.setDate(nextDue.getDate() + c.keepFrequencyDays);
-    return nextDue <= new Date();
-  });
-
-  return (
-    <AppShellWrapper
-      userName={userName}
-      avatarUrl={avatarUrl}
-      initialCollapsed={initialCollapsed}
-      hasActiveMergeRecommendations={hasActiveMergeRecommendations}
-      hasOverdueKeepInTouch={hasOverdueKeepInTouch}
-    >
-      {children}
-    </AppShellWrapper>
   );
 }

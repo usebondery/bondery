@@ -2,21 +2,18 @@ import { cache } from "react";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { getLocaleFromHeaders } from "./getLocaleFromHeaders";
 import { getUserSettings } from "@/lib/user/getUserSettings";
-import * as translations from "@bondery/translations";
 import type { SupportedLocale } from "@bondery/translations";
 
 export interface LocaleSettings {
   locale: SupportedLocale;
   timezone: string;
   timeFormat: "24h" | "12h";
-  messages: Record<string, unknown>;
 }
 
 const FALLBACK: LocaleSettings = {
   locale: "en",
   timezone: "UTC",
   timeFormat: "24h",
-  messages: translations.en,
 };
 
 /**
@@ -43,20 +40,15 @@ export const resolveLocaleSettings = cache(async (): Promise<LocaleSettings> => 
     } = await supabase.auth.getSession();
 
     if (!session) {
-      // Unauthenticated — use browser locale, default timezone/timeFormat.
       const locale = await getLocaleFromHeaders();
-      const messages = (translations[locale] ?? translations.en) as Record<string, unknown>;
-      return { locale, timezone: "UTC", timeFormat: "24h", messages };
+      return { locale, timezone: "UTC", timeFormat: "24h" };
     }
 
-    // Authenticated — use user settings (cache()-deduplicated with app layout).
     const settings = await getUserSettings();
-    const messages = (translations[settings.locale] ?? translations.en) as Record<string, unknown>;
     return {
       locale: settings.locale,
       timezone: settings.timezone,
       timeFormat: settings.timeFormat,
-      messages,
     };
   } catch {
     return FALLBACK;

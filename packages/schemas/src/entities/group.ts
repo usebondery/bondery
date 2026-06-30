@@ -10,6 +10,7 @@ import {
   labelFieldSchema,
   makeCollectionResponseSchema,
   makeListResponseSchema,
+  makePaginatedListResponseSchema,
   messageResponseSchema,
   personIdsSelectionSchema,
 } from "./_shared.js";
@@ -70,6 +71,11 @@ export const removeGroupMembersResponseSchema = messageResponseSchema.extend({
 
 export const groupsListResponseSchema = makeListResponseSchema("groups", groupWithCountSchema);
 
+export const groupMembersListResponseSchema = makePaginatedListResponseSchema(
+  "contacts",
+  contactPreviewSchema,
+);
+
 export const groupResponseSchema = z.object({
   group: groupSchema,
 });
@@ -91,6 +97,7 @@ export type AddContactsToGroupResponse = z.infer<typeof addContactsToGroupRespon
 export type RemoveGroupMembersRequest = z.infer<typeof removeGroupMembersRequestSchema>;
 export type RemoveGroupMembersResponse = z.infer<typeof removeGroupMembersResponseSchema>;
 export type GroupsListResponse = z.infer<typeof groupsListResponseSchema>;
+export type GroupMembersListResponse = z.infer<typeof groupMembersListResponseSchema>;
 export type GroupResponse = z.infer<typeof groupResponseSchema>;
 export type ContactGroupsResponse = z.infer<typeof contactGroupsResponseSchema>;
 export type DeleteGroupsRequest = z.infer<typeof deleteGroupsRequestSchema>;

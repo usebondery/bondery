@@ -18,15 +18,15 @@ import ContactsTable, {
   MenuAction,
   type SortOrder,
 } from "@/app/(app)/app/components/contacts/ContactsTableV2";
-import { useEffect, useDeferredValue, useMemo, useState, useTransition } from "react";
+import { useEffect, useDeferredValue, useMemo, useState, useTransition, useCallback } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 import { useDebouncedCallback } from "@mantine/hooks";
-import { useTranslations } from "next-intl";
+import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
 import { openAddPeopleToGroupModal } from "../../groups/components/AddPeopleToGroupModal";
 import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
-import { WEBSITE_URL, DEBOUNCE_MS } from "@/lib/config";
+import { DEBOUNCE_MS } from "@/lib/config";
 import { formatContactName } from "@/lib/nameHelpers";
-import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import { notifications } from "@mantine/notifications";
 import {
   errorNotificationTemplate,
@@ -35,9 +35,9 @@ import {
   successNotificationTemplate,
 } from "@bondery/mantine-next";
 import { openStandardConfirmModal } from "@/app/(app)/app/components/modals/openStandardConfirmModal";
-import { revalidateContacts, revalidateGroups } from "../../actions";
-import { openDeleteContactModal } from "@/app/(app)/app/components/contacts/openDeleteContactModal";
-import { openDeleteContactsModal } from "@/app/(app)/app/components/contacts/openDeleteContactsModal";
+import { useOpenDeleteContactModal } from "@/app/(app)/app/components/contacts/openDeleteContactModal";
+import { useOpenDeleteContactsModal } from "@/app/(app)/app/components/contacts/openDeleteContactsModal";
+import { useContactsTableCopy } from "@/lib/i18n/useContactsTableCopy";
 import { GroupCard } from "../../groups/components/GroupCard";
 import { openEditGroupModal } from "../../groups/components/EditGroupModal";
 import type { Contact, GroupWithCount } from "@bondery/schemas";
@@ -46,7 +46,14 @@ import { openMergeWithModal } from "../../people/components/MergeWithModal";
 import { searchContacts } from "@/lib/searchContacts";
 import { PageHeader } from "@/app/(app)/app/components/PageHeader";
 import { PageWrapper } from "@/app/(app)/app/components/PageWrapper";
-import { appendAvatarParams } from "@/lib/avatarParams";
+import { createGroupMembersQueryFn } from "@/lib/query/fetchers/groups";
+import { groupKeys } from "@/lib/query/keys";
+import {
+  useDeleteGroupMutation,
+  useDuplicateGroupMutation,
+  useGroupMembersQuery,
+  useRemoveContactsFromGroupMutation,
+} from "@/lib/query/hooks/useGroups";
 
 interface GroupDetailClientProps {
   groupId: string;
@@ -77,63 +84,96 @@ export function GroupDetailClient({
 }: GroupDetailClientProps) {
   const t = useTranslations("GroupsPage");
   const tGroupDetail = useTranslations("GroupDetailPage");
+  const tCommon = useTranslations("WebAppCommon");
+  const tPeople = useTranslations("PeoplePage");
   const tHeader = useTranslations("PageHeader");
+  const { columnDefinitions } = useContactsTableCopy();
+  const openDeleteContactModal = useOpenDeleteContactModal();
+  const openDeleteContactsModal = useOpenDeleteContactsModal();
   const router = useRouter();
+  const queryClient = useQueryClient();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const removeContactsMutation = useRemoveContactsFromGroupMutation(groupId);
+  const deleteGroupMutation = useDeleteGroupMutation();
+  const duplicateGroupMutation = useDuplicateGroupMutation();
+
+  const membersParams = useMemo(
+    () => ({
+      limit: 50,
+      offset: 0,
+      search: initialSearch || undefined,
+      sort: initialSort,
+    }),
+    [initialSearch, initialSort],
+  );
+
+  const { data: firstPageData } = useGroupMembersQuery(groupId, membersParams);
 
   const [contacts, setContacts] = useState<Contact[]>(initialContacts);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
-  const [loadedCount, setLoadedCount] = useState(initialContacts.length);
   const [totalAvailableCount, setTotalAvailableCount] = useState(totalCount);
+  const [hasMore, setHasMore] = useState(initialContacts.length < totalCount);
+  const loadedCount = contacts.length;
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [isAllTotalSelected, setIsAllTotalSelected] = useState(false);
   const [excludedIds, setExcludedIds] = useState<Set<string>>(new Set());
   const [lastSelectedIndex, setLastSelectedIndex] = useState<number | null>(null);
 
   useEffect(() => {
-    setContacts(initialContacts);
-    setLoadedCount(initialContacts.length);
-    setTotalAvailableCount(totalCount);
+    if (firstPageData) {
+      setContacts(firstPageData.contacts);
+      setTotalAvailableCount(firstPageData.pagination.totalCount);
+      setHasMore(firstPageData.pagination.hasMore);
+    }
     setSelectedIds(new Set());
     setIsAllTotalSelected(false);
     setExcludedIds(new Set());
     setLastSelectedIndex(null);
-  }, [initialContacts, totalCount]);
+  }, [firstPageData]);
 
-  const [columns, setColumns] = useState<ColumnConfig[]>([
+  const [columns, setColumns] = useState<ColumnConfig[]>(() => [
     {
       key: "name",
-      label: "Name",
+      label: columnDefinitions.name.label,
       visible: true,
-      icon: <IconUser size={16} />,
+      icon: columnDefinitions.name.icon,
       fixed: true,
     },
     {
       key: "headline",
-      label: "Headline",
+      label: columnDefinitions.headline.label,
       visible: true,
-      icon: <IconBriefcase size={16} />,
+      icon: columnDefinitions.headline.icon,
     },
     {
       key: "location",
-      label: "Location",
+      label: columnDefinitions.location.label,
       visible: true,
-      icon: <IconMapPin size={16} />,
+      icon: columnDefinitions.location.icon,
     },
     {
       key: "lastInteraction",
-      label: "Last Interaction",
+      label: columnDefinitions.lastInteraction.label,
       visible: true,
-      icon: <IconClock size={16} />,
+      icon: columnDefinitions.lastInteraction.icon,
     },
     {
       key: "social",
-      label: "Socials",
+      label: columnDefinitions.social.label,
       visible: true,
       icon: <IconBrandLinkedin size={16} />,
     },
   ]);
+
+  useEffect(() => {
+    setColumns((prev) =>
+      prev.map((col) => ({
+        ...col,
+        label: columnDefinitions[col.key as keyof typeof columnDefinitions]?.label ?? col.label,
+      })),
+    );
+  }, [columnDefinitions]);
 
   // Defer the columns update to prevent UI freezing
   const deferredColumns = useDeferredValue(columns);
@@ -150,50 +190,49 @@ export function GroupDetailClient({
   const handleSearchChange = useDebouncedCallback((query: string) => {
     const params = new URLSearchParams(searchParams);
     if (query) {
-      params.set("q", query);
+      params.set("search", query);
     } else {
-      params.delete("q");
+      params.delete("search");
     }
     startSearchTransition(() => {
       router.replace(`${pathname}?${params.toString()}`);
     });
   }, DEBOUNCE_MS.search);
 
+  const fetchMoreMembers = useCallback(
+    async (offset: number, limit: number) => {
+      const params = {
+        ...membersParams,
+        offset,
+        limit,
+      };
+      return queryClient.fetchQuery({
+        queryKey: groupKeys.members(groupId, params),
+        queryFn: createGroupMembersQueryFn(groupId, params),
+      });
+    },
+    [groupId, membersParams, queryClient],
+  );
+
   const handleLoadMore = async () => {
     if (isLoadingMore) return;
     setIsLoadingMore(true);
     try {
-      const params = new URLSearchParams();
-      params.set("limit", "50");
-      params.set("offset", String(loadedCount));
-      if (initialSearch) params.set("q", initialSearch);
-      if (initialSort) params.set("sort", initialSort);
-      appendAvatarParams(params, "small");
-
-      const response = await fetch(`${API_ROUTES.GROUPS}/${groupId}/contacts?${params.toString()}`);
-      if (!response.ok) throw new Error("Failed to load more contacts");
-
-      const data = await response.json();
-      const fetchedContacts = ((data.contacts || []) as Contact[]).map((c) => ({
-        ...c,
-        lastInteraction: c.lastInteraction ? new Date(c.lastInteraction) : null,
-        createdAt: c.createdAt ? new Date(c.createdAt) : null,
-      })) as unknown as Contact[];
-
+      const data = await fetchMoreMembers(loadedCount, 50);
       setContacts((prev) => {
-        const existingIds = new Set(prev.map((c) => c.id));
-        const uniqueNew = fetchedContacts.filter((c) => !existingIds.has(c.id));
+        const existingIds = new Set(prev.map((contact) => contact.id));
+        const uniqueNew = data.contacts.filter((contact) => !existingIds.has(contact.id));
         return [...prev, ...uniqueNew];
       });
-      setLoadedCount((prev) => prev + fetchedContacts.length);
-      if (Number.isFinite(data.totalCount)) {
-        setTotalAvailableCount(data.totalCount);
+      if (typeof data.pagination?.totalCount === "number" && Number.isFinite(data.pagination.totalCount)) {
+        setTotalAvailableCount(data.pagination.totalCount);
       }
+      setHasMore(data.pagination.hasMore);
     } catch {
       notifications.show(
         errorNotificationTemplate({
-          title: "Error",
-          description: "Failed to load more contacts. Please try again.",
+          title: tCommon("ErrorTitle"),
+          description: tPeople("LoadMoreError"),
         }),
       );
     } finally {
@@ -201,40 +240,33 @@ export function GroupDetailClient({
     }
   };
 
-  /**
-   * After removing/deleting contacts, if the loaded list drops below PAGE_SIZE
-   * and more members remain, automatically fetch enough to fill back up to PAGE_SIZE.
-   */
-  const refillToPageSize = async (remaining: Contact[], newTotal: number): Promise<Contact[]> => {
-    const PAGE_SIZE = 50;
-    const needed = Math.min(PAGE_SIZE - remaining.length, newTotal - remaining.length);
-    if (needed <= 0) return remaining;
+  const refillToPageSize = useCallback(
+    async (remaining: Contact[], newTotal: number): Promise<Contact[]> => {
+      const PAGE_SIZE = 50;
+      const needed = Math.min(PAGE_SIZE - remaining.length, newTotal - remaining.length);
+      if (needed <= 0) return remaining;
 
-    try {
-      const params = new URLSearchParams();
-      params.set("limit", String(needed));
-      params.set("offset", String(remaining.length));
-      if (initialSearch) params.set("q", initialSearch);
-      if (initialSort) params.set("sort", initialSort);
-      appendAvatarParams(params, "small");
+      try {
+        const data = await fetchMoreMembers(remaining.length, needed);
+        const existingIds = new Set(remaining.map((contact) => contact.id));
+        const uniqueExtra = data.contacts.filter((contact) => !existingIds.has(contact.id));
+        return [...remaining, ...uniqueExtra];
+      } catch {
+        return remaining;
+      }
+    },
+    [fetchMoreMembers],
+  );
 
-      const res = await fetch(`${API_ROUTES.GROUPS}/${groupId}/contacts?${params.toString()}`);
-      if (!res.ok) return remaining;
-
-      const data = await res.json();
-      const extra = ((data.contacts || []) as Contact[]).map((c) => ({
-        ...c,
-        lastInteraction: c.lastInteraction ? new Date(c.lastInteraction) : null,
-        createdAt: c.createdAt ? new Date(c.createdAt) : null,
-      })) as unknown as Contact[];
-
-      const existingIds = new Set(remaining.map((c) => c.id));
-      const uniqueExtra = extra.filter((c) => !existingIds.has(c.id));
-      return [...remaining, ...uniqueExtra];
-    } catch {
-      return remaining;
-    }
-  };
+  const applyLocalMemberRemoval = useCallback(
+    async (removedCount: number, remaining: Contact[]) => {
+      const newTotal = Math.max(0, totalAvailableCount - removedCount);
+      const refilled = await refillToPageSize(remaining, newTotal);
+      setContacts(refilled);
+      setTotalAvailableCount(newTotal);
+    },
+    [refillToPageSize, totalAvailableCount],
+  );
 
   const handleSelectAll = () => {
     if (isAllTotalSelected) {
@@ -309,36 +341,26 @@ export function GroupDetailClient({
 
     const loadingId = notifications.show({
       ...loadingNotificationTemplate({
-        title: "Removing contacts",
-        description: "Updating group members...",
+        title: tGroupDetail("RemoveContacts.LoadingTitle"),
+        description: tGroupDetail("RemoveContacts.LoadingDescription"),
       }),
     });
 
     try {
-      const body = isAllTotalSelected
-        ? {
-            memberFilter: { q: initialSearch || undefined, sort: initialSort || undefined },
+      const result = isAllTotalSelected
+        ? await removeContactsMutation.mutateAsync({
+            memberFilter: { search: initialSearch || undefined, sort: initialSort || undefined },
             excludePersonIds: Array.from(excludedIds),
-          }
-        : { personIds: ids };
-
-      const res = await fetch(`${API_ROUTES.GROUPS}/${groupId}/contacts`, {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      });
-
-      if (!res.ok) {
-        throw new Error("Failed to remove contacts from group");
-      }
-
-      const result = (await res.json().catch(() => ({}))) as { removedCount?: number };
+          })
+        : await removeContactsMutation.mutateAsync(ids);
       const removedCount = result.removedCount ?? ids.length;
 
       notifications.update({
         ...successNotificationTemplate({
-          title: "Success",
-          description: `${removedCount} contact(s) removed from group successfully`,
+          title: tCommon("SuccessTitle"),
+          description: tGroupDetail("RemoveContacts.SuccessDescription", {
+            count: removedCount,
+          }),
         }),
         id: loadingId,
       });
@@ -349,19 +371,13 @@ export function GroupDetailClient({
       const remaining = isAllTotalSelected
         ? contacts.filter((c) => excludedIds.has(c.id))
         : contacts.filter((c) => !ids.includes(c.id));
-      const newTotal = Math.max(0, totalAvailableCount - removedCount);
-      const refilled = await refillToPageSize(remaining, newTotal);
-      setContacts(refilled);
-      setLoadedCount(refilled.length);
-      setTotalAvailableCount(newTotal);
-      await revalidateGroups();
-      router.refresh();
+      await applyLocalMemberRemoval(removedCount, remaining);
     } catch (error) {
       console.error("Error removing contacts from group", error);
       notifications.update({
         ...errorNotificationTemplate({
-          title: "Error",
-          description: "Could not remove contacts from group. Please try again.",
+          title: tCommon("ErrorTitle"),
+          description: tGroupDetail("RemoveContacts.ErrorDescription"),
         }),
         id: loadingId,
       });
@@ -375,7 +391,7 @@ export function GroupDetailClient({
       contactIds: isAllTotalSelected ? [] : ids,
       filterPayload: isAllTotalSelected
         ? {
-            filter: { q: initialSearch || undefined, sort: initialSort || undefined },
+            filter: { search: initialSearch || undefined, sort: initialSort || undefined },
             excludeIds: Array.from(excludedIds),
           }
         : undefined,
@@ -387,14 +403,7 @@ export function GroupDetailClient({
         const remaining = isAllTotalSelected
           ? contacts.filter((c) => excludedIds.has(c.id))
           : contacts.filter((c) => !ids.includes(c.id));
-        const newTotal = Math.max(0, totalAvailableCount - removedCount);
-        const refilled = await refillToPageSize(remaining, newTotal);
-        setContacts(refilled);
-        setLoadedCount(refilled.length);
-        setTotalAvailableCount(newTotal);
-        await revalidateContacts();
-        await revalidateGroups();
-        router.refresh();
+        await applyLocalMemberRemoval(removedCount, remaining);
       },
     });
   };
@@ -402,44 +411,30 @@ export function GroupDetailClient({
   const removeFromGroup = async (contactId: string) => {
     const loadingId = notifications.show({
       ...loadingNotificationTemplate({
-        title: "Removing contact",
-        description: "Updating group members...",
+        title: tGroupDetail("RemoveContact.LoadingTitle"),
+        description: tGroupDetail("RemoveContact.LoadingDescription"),
       }),
     });
 
     try {
-      const res = await fetch(`${API_ROUTES.GROUPS}/${groupId}/contacts`, {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ personIds: [contactId] }),
-      });
-
-      if (!res.ok) {
-        throw new Error("Failed to remove contact from group");
-      }
+      await removeContactsMutation.mutateAsync([contactId]);
 
       notifications.update({
         ...successNotificationTemplate({
-          title: "Success",
-          description: "Contact removed from group successfully",
+          title: tCommon("SuccessTitle"),
+          description: tGroupDetail("RemoveContact.SuccessDescription"),
         }),
         id: loadingId,
       });
 
       const remaining = contacts.filter((c) => c.id !== contactId);
-      const newTotal = Math.max(0, totalAvailableCount - 1);
-      const refilled = await refillToPageSize(remaining, newTotal);
-      setContacts(refilled);
-      setLoadedCount(refilled.length);
-      setTotalAvailableCount(newTotal);
-      await revalidateGroups();
-      router.refresh();
+      await applyLocalMemberRemoval(1, remaining);
     } catch (error) {
       console.error("Error removing contact from group", error);
       notifications.update({
         ...errorNotificationTemplate({
-          title: "Error",
-          description: "Could not remove contact from group. Please try again.",
+          title: tCommon("ErrorTitle"),
+          description: tGroupDetail("RemoveContact.ErrorDescription"),
         }),
         id: loadingId,
       });
@@ -448,21 +443,14 @@ export function GroupDetailClient({
 
   const deleteContact = (contactId: string) => {
     const targetContact = contacts.find((contact) => contact.id === contactId);
-    const contactName = targetContact ? formatContactName(targetContact) : "this contact";
+    const contactName = targetContact ? formatContactName(targetContact) : tGroupDetail("ThisContactFallback");
 
     openDeleteContactModal({
       contactId,
       contactName,
       onDeleted: async () => {
         const remaining = contacts.filter((c) => c.id !== contactId);
-        const newTotal = Math.max(0, totalAvailableCount - 1);
-        const refilled = await refillToPageSize(remaining, newTotal);
-        setContacts(refilled);
-        setLoadedCount(refilled.length);
-        setTotalAvailableCount(newTotal);
-        await revalidateContacts();
-        await revalidateGroups();
-        router.refresh();
+        await applyLocalMemberRemoval(1, remaining);
       },
     });
   };
@@ -503,7 +491,7 @@ export function GroupDetailClient({
   const bulkSelectionActions: BulkSelectionAction[] = [
     {
       key: "removeFromGroup",
-      label: "Remove from group",
+      label: tGroupDetail("RemoveFromGroup"),
       icon: <IconUsersMinus size={16} />,
       onClick: () => handleBulkRemoveFromGroup(),
     },
@@ -512,7 +500,7 @@ export function GroupDetailClient({
   const menuActions: MenuAction[] = [
     {
       key: "removeFromGroup",
-      label: "Remove from group",
+      label: tGroupDetail("RemoveFromGroup"),
       icon: <IconUsersMinus size={14} />,
       onClick: removeFromGroup,
     },
@@ -556,47 +544,45 @@ export function GroupDetailClient({
 
   const handleDeleteGroup = (targetGroupId: string) => {
     openStandardConfirmModal({
-      title: <ModalTitle text="Delete group?" icon={<IconTrash size={20} />} isDangerous={true} />,
-      message: (
-        <Text size="sm">
-          Are you sure you want to delete "{groupLabel}"? This action cannot be undone. The contacts
-          in this group will not be deleted.
-        </Text>
+      title: (
+        <ModalTitle
+          text={t("DeleteGroup.Title")}
+          icon={<IconTrash size={20} />}
+          isDangerous={true}
+        />
       ),
-      confirmLabel: "Delete",
-      cancelLabel: "Cancel",
+      message: (
+        <Text size="sm">{t("DeleteGroup.Message", { label: groupLabel })}</Text>
+      ),
+      confirmLabel: tCommon("Delete"),
+      cancelLabel: tCommon("Cancel"),
       confirmColor: "red",
       onConfirm: async () => {
         const loadingNotification = notifications.show({
           ...loadingNotificationTemplate({
-            title: "Deleting...",
-            description: `Deleting group "${groupLabel}"`,
+            title: tCommon("Deleting"),
+            description: t("DeleteGroup.LoadingDescription", { label: groupLabel }),
           }),
         });
 
         try {
-          const res = await fetch(`${API_ROUTES.GROUPS}/${targetGroupId}`, {
-            method: "DELETE",
-          });
-
-          if (!res.ok) throw new Error("Failed to delete group");
+          await deleteGroupMutation.mutateAsync(targetGroupId);
 
           notifications.update({
             ...successNotificationTemplate({
-              title: "Success",
-              description: "Group deleted successfully",
+              title: tCommon("SuccessTitle"),
+              description: t("DeleteGroup.SuccessDescription"),
             }),
             id: loadingNotification,
           });
 
-          await revalidateGroups();
           router.push(WEBAPP_ROUTES.GROUPS);
         } catch (error) {
           console.error("Error deleting group:", error);
           notifications.update({
             ...errorNotificationTemplate({
-              title: "Error",
-              description: "Failed to delete group. Please try again.",
+              title: tCommon("ErrorTitle"),
+              description: t("DeleteGroup.ErrorDescription"),
             }),
             id: loadingNotification,
           });
@@ -608,69 +594,34 @@ export function GroupDetailClient({
   const handleDuplicateGroup = async (group: GroupWithCount) => {
     const loadingNotification = notifications.show({
       ...loadingNotificationTemplate({
-        title: "Duplicating...",
-        description: `Duplicating group "${group.label}"`,
+        title: tCommon("Duplicating"),
+        description: t("DuplicateGroup.LoadingDescription", { label: group.label }),
       }),
     });
 
     try {
-      const duplicateLabel = `${group.label} (Copy)`;
-
-      // Fetch up to 200 member IDs for duplication; groups larger than 200 will be partially duplicated.
-      const allMembersRes = await fetch(
-        `${API_ROUTES.GROUPS}/${group.id}/contacts?limit=200&offset=0`,
-      );
-      const allMembersData = allMembersRes.ok ? await allMembersRes.json() : { contacts: [] };
-      const personIds = ((allMembersData.contacts || []) as { id: string }[]).map((c) => c.id);
-
-      const res = await fetch(API_ROUTES.GROUPS, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          label: duplicateLabel,
+      await duplicateGroupMutation.mutateAsync({
+        sourceGroupId: group.id,
+        input: {
+          label: `${group.label}${t("DuplicateGroup.CopySuffix")}`,
           emoji: group.emoji || "",
           color: group.color || "#1971C2",
-        }),
+        },
       });
-
-      if (!res.ok) throw new Error("Failed to duplicate group");
-
-      const createdGroupPayload = (await res.json()) as { id?: string };
-      if (!createdGroupPayload.id) throw new Error("Failed to parse duplicated group id");
-
-      if (personIds.length > 0) {
-        const membershipRes = await fetch(
-          `${API_ROUTES.GROUPS}/${createdGroupPayload.id}/contacts`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ personIds }),
-          },
-        );
-
-        if (!membershipRes.ok) throw new Error("Failed to duplicate group members");
-      }
 
       notifications.update({
         ...successNotificationTemplate({
-          title: "Success",
-          description: "Group duplicated successfully",
+          title: tCommon("SuccessTitle"),
+          description: t("DuplicateGroup.SuccessDescription"),
         }),
         id: loadingNotification,
       });
-
-      await revalidateGroups();
-      router.refresh();
     } catch (error) {
       console.error("Error duplicating group:", error);
       notifications.update({
         ...errorNotificationTemplate({
-          title: "Error",
-          description: "Failed to duplicate group. Please try again.",
+          title: tCommon("ErrorTitle"),
+          description: t("DuplicateGroup.ErrorDescription"),
         }),
         id: loadingNotification,
       });
@@ -682,7 +633,7 @@ export function GroupDetailClient({
       <Stack gap="xl">
         <PageHeader
           icon={IconUsersGroup}
-          title={"Group's details"}
+          title={tGroupDetail("DetailPageTitle")}
           backOnClick={() => {
             if (typeof window !== "undefined" && window.history.length > 1) {
               router.back();
@@ -692,7 +643,7 @@ export function GroupDetailClient({
           }}
           action={
             <Button size="md" leftSection={<IconUserPlus size={16} />} onClick={handleAddContacts}>
-              Add people to group
+              {tGroupDetail("AddPeopleToGroup")}
             </Button>
           }
         />
@@ -743,11 +694,9 @@ export function GroupDetailClient({
               onClick: handleLoadMore,
               loading: isLoadingMore,
             }}
-            hasMoreToLoad={contacts.length < totalAvailableCount}
+            hasMore={hasMore}
             totalCount={totalAvailableCount}
-            onSelectAllTotal={
-              contacts.length < totalAvailableCount ? handleSelectAllTotal : undefined
-            }
+            onSelectAllTotal={hasMore ? handleSelectAllTotal : undefined}
             isAllTotalSelected={isAllTotalSelected}
             excludedIds={excludedIds}
           />

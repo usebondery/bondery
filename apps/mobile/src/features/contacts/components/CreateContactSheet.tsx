@@ -2,12 +2,13 @@ import { useEffect, useMemo, useRef } from "react";
 import { StyleSheet, Text, type TextInput } from "react-native";
 import { IconUserPlus } from "@tabler/icons-react-native";
 import { useRouter } from "expo-router";
-import { createContactInputSchema, createContactSchema } from "@bondery/schemas";
+import { createContactInputSchema } from "@bondery/schemas";
 import type { Contact } from "@bondery/schemas";
+import { createContactFromFullNameSchema } from "@bondery/helpers/forms";
 import { ActionSheetPopup } from "../../../components/ActionSheetPopup";
 import { SheetTextField } from "../../../components/form";
 import { UI_TIMING_MS } from "../../../lib/config";
-import { createContact } from "../../../lib/api/client";
+import { contactsDomain } from "../../../lib/domains/contacts";
 import { useSheetForm } from "../../../lib/forms/useSheetForm";
 import { useMobileTranslations } from "../../../lib/i18n/useMobileTranslations";
 import { useAppToast } from "../../../lib/toast/useAppToast";
@@ -59,10 +60,10 @@ export function CreateContactSheet({ open, onOpenChange, onCreated }: CreateCont
   };
 
   const onSubmit = handleSubmit(async ({ fullName }) => {
-    const parsed = createContactSchema.parse({ fullName });
+    const parsed = createContactFromFullNameSchema.parse({ fullName });
 
     try {
-      const { contact } = await createContact({
+      const contact = contactsDomain.create({
         firstName: parsed.firstName,
         middleName: parsed.middleName ?? undefined,
         lastName: parsed.lastName ?? undefined,

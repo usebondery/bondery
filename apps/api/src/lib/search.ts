@@ -23,16 +23,20 @@ export async function searchPeopleIds(
   query: string,
   limit: number,
   offset = 0,
-  groupId?: string,
+  options?: { groupId?: string; tagId?: string; keepInTouch?: boolean },
 ): Promise<{ ranked: RankedPerson[] | null; error: string | null }> {
   const params: Record<string, unknown> = {
     p_user_id: userId,
     p_query: query,
     p_limit: limit,
     p_offset: offset,
+    p_keep_in_touch: options?.keepInTouch ?? false,
   };
-  if (groupId) {
-    params.p_group_id = groupId;
+  if (options?.groupId) {
+    params.p_group_id = options.groupId;
+  }
+  if (options?.tagId) {
+    params.p_tag_id = options.tagId;
   }
 
   const { data: ranked, error } = await supabase.rpc("search_people_ids", params as any);
@@ -54,4 +58,41 @@ export async function searchPeopleIds(
 export function restoreRankedOrder<T extends { id: string }>(items: T[], rankedIds: string[]): T[] {
   const orderMap = new Map(rankedIds.map((id, i) => [id, i]));
   return [...items].sort((a, b) => (orderMap.get(a.id) ?? 999) - (orderMap.get(b.id) ?? 999));
+}
+
+/**
+ * Returns the total number of fuzzy-search matches via `count_search_people_ids`.
+ */
+export async function countSearchPeopleIds(
+  supabase: SupabaseClient<Database>,
+  userId: string,
+  query: string,
+  options?: { groupId?: string; tagId?: string; keepInTouch?: boolean },
+): Promise<{ count: number | null; error: string | null }> {
+  const params: Record<string, unknown> = {
+    p_user_id: userId,
+    p_query: query,
+    p_keep_in_touch: options?.keepInTouch ?? false,
+  };
+  if (options?.groupId) {
+    params.p_group_id = options.groupId;
+  }
+  if (options?.tagId) {
+    params.p_tag_id = options.tagId;
+  }
+
+  const { data, error } = await supabase.rpc(
+    "count_search_people_ids" as keyof Database["public"]["Functions"],
+    params as Database["public"]["Functions"]["count_search_people_ids"]["Args"],
+  );
+
+  if (error) {
+    return { count: null, error: error.message };
+  }
+
+  const count = typeof data === "number" ? data : Number(data);
+  return {
+    count: Number.isFinite(count) ? count : 0,
+    error: null,
+  };
 }

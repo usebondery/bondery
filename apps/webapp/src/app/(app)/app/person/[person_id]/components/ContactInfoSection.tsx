@@ -50,6 +50,7 @@ import {
   successNotificationTemplate,
 } from "@bondery/mantine-next";
 import { notifications } from "@mantine/notifications";
+import { useContactInfoLabels } from "@/lib/i18n/useContactInfoLabels";
 
 const MAX_PHONE_ENTRIES = CONTACT_LIMITS.maxPhones;
 const MAX_EMAIL_ENTRIES = CONTACT_LIMITS.maxEmails;
@@ -88,31 +89,10 @@ export interface ContactInfoLabels {
   emailPlaceholder: string;
   sendEmailAction: string;
   addEmail: string;
+  phonePrefixAriaLabel: string;
+  phoneActionsAriaLabel: string;
+  emailActionsAriaLabel: string;
 }
-
-const DEFAULT_CONTACT_INFO_LABELS: ContactInfoLabels = {
-  title: "Contact Info",
-  typeHome: "Home",
-  typeWork: "Work",
-  phoneNumbers: "Phone numbers",
-  phonePlaceholder: "Phone number",
-  typeLabel: "Type",
-  callAction: "Call",
-  sendSmsAction: "Send SMS",
-  copyAction: "Copy",
-  copySuccessTitle: "Success",
-  phoneCopiedMessage: "Phone number copied to clipboard",
-  emailCopiedMessage: "Email address copied to clipboard",
-  invalidEmailTitle: "Invalid email",
-  invalidEmailMessage: "Please enter a valid email address",
-  setAsPreferred: "Set as preferred",
-  deleteAction: "Delete",
-  addPhone: "Add phone",
-  emailAddresses: "Email addresses",
-  emailPlaceholder: "Email address",
-  sendEmailAction: "Send email",
-  addEmail: "Add email",
-};
 
 function createDraftPhone(): PhoneEntry {
   return {
@@ -178,8 +158,9 @@ export function ContactInfoSection({
   showTitle = true,
   labels,
 }: ContactInfoSectionProps) {
+  const defaultLabels = useContactInfoLabels();
   const text: ContactInfoLabels = {
-    ...DEFAULT_CONTACT_INFO_LABELS,
+    ...defaultLabels,
     ...labels,
   };
 
@@ -449,7 +430,7 @@ export function ContactInfoSection({
                     value={phone.prefix || "+1"}
                     onChange={(prefix) => handlePhonePrefixChange(index, prefix)}
                     style={{ flex: "0 0 110px" }}
-                    ariaLabel="Phone prefix"
+                    ariaLabel={text.phonePrefixAriaLabel}
                   />
 
                   <Input
@@ -488,7 +469,7 @@ export function ContactInfoSection({
                         ml="auto"
                         variant="subtle"
                         disabled={savingField === "phones"}
-                        aria-label="Phone actions"
+                        aria-label={text.phoneActionsAriaLabel}
                       >
                         <IconDotsVertical size={16} />
                       </ActionIcon>
@@ -572,7 +553,7 @@ export function ContactInfoSection({
                     value={draftPhone.prefix || "+1"}
                     onChange={(prefix) => setDraftPhone((previous) => ({ ...previous, prefix }))}
                     style={{ flex: "0 0 110px" }}
-                    ariaLabel="Phone prefix"
+                    ariaLabel={text.phonePrefixAriaLabel}
                   />
 
                   <Input
@@ -672,7 +653,7 @@ export function ContactInfoSection({
                         ml="auto"
                         variant="subtle"
                         disabled={savingField === "emails"}
-                        aria-label="Email actions"
+                        aria-label={text.emailActionsAriaLabel}
                       >
                         <IconDotsVertical size={16} />
                       </ActionIcon>

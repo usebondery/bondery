@@ -1,4 +1,5 @@
 import type { FastifyInstance, FastifyRequest } from "fastify";
+import type { AppFastifyInstance } from "./fastify-types.js";
 import type { FastifyRateLimitOptions } from "@fastify/rate-limit";
 import fastifyRateLimit from "@fastify/rate-limit";
 import { Redis } from "ioredis";
@@ -65,7 +66,7 @@ function buildErrorResponse(
   );
 }
 
-export async function registerRateLimit(fastify: FastifyInstance): Promise<void> {
+export async function registerRateLimit(fastify: AppFastifyInstance): Promise<void> {
   const redisUrl = fastify.config.PRIVATE_REDIS_URL;
   if (process.env.NODE_ENV === "production" && !redisUrl.trim()) {
     throw new Error(
@@ -82,8 +83,12 @@ export async function registerRateLimit(fastify: FastifyInstance): Promise<void>
     timeWindow: DEFAULT_WINDOW,
     redis,
     skipOnError: true,
-    keyGenerator: (request: FastifyRequest) =>
-      request.authUser?.id ? `user:${request.authUser.id}` : `ip:${request.ip}`,
+    keyGenerator: (request: FastifyRequest) => {
+      if (request.authApiKey?.id) {
+        return `apikey:${request.authApiKey.id}`;
+      }
+      return request.authUser?.id ? `user:${request.authUser.id}` : `ip:${request.ip}`;
+    },
     allowList: (request: FastifyRequest) => request.method === "OPTIONS",
     errorResponseBuilder: buildErrorResponse,
     onExceeded: (request: FastifyRequest, key: string) => {
@@ -103,7 +108,7 @@ export async function registerRateLimit(fastify: FastifyInstance): Promise<void>
   await fastify.register(fastifyRateLimit, options);
 }
 
-export function registerNotFoundRateLimit(fastify: FastifyInstance): void {
+export function registerNotFoundRateLimit(fastify: AppFastifyInstance): void {
   fastify.setNotFoundHandler(
     {
       preHandler: fastify.rateLimit(NOT_FOUND_TIER),

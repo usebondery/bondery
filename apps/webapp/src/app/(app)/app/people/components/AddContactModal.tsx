@@ -8,7 +8,7 @@ import { schemaResolver, useForm } from "@mantine/form";
 import { modals } from "@mantine/modals";
 import { notifications } from "@mantine/notifications";
 import { IconBrandLinkedin, IconUserPlus } from "@tabler/icons-react";
-import { useTranslations } from "next-intl";
+import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
 import {
   errorNotificationTemplate,
   loadingNotificationTemplate,
@@ -17,28 +17,36 @@ import {
   successNotificationTemplate,
 } from "@bondery/mantine-next";
 import { z } from "zod";
-import { API_ROUTES, WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
+import { useCreateContactMutation } from "@/lib/query/hooks/useContacts";
 import { getRandomExampleName } from "@bondery/helpers/name";
+import { createContactFromFullNameSchema } from "@bondery/helpers/forms";
 import {
   CONTACT_FIELD_MAX_LENGTHS,
   createContactInputSchema,
   firstZodErrorMessage,
   type Contact,
 } from "@bondery/schemas";
-import { revalidateContacts } from "../../actions";
+import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import { captureEvent } from "@/lib/analytics/client";
-import { extractUsername, parseFullName } from "@bondery/helpers";
+import { extractUsername } from "@bondery/helpers";
 
-const addContactFormSchema = createContactInputSchema.superRefine((value, context) => {
-  const parsed = parseFullName(value.fullName.trim());
-  if (!parsed.firstName) {
-    context.addIssue({
-      code: "custom",
-      path: ["fullName"],
-      message: "Name is required",
-    });
-  }
-});
+const addContactFormSchema = z
+  .object({
+    fullName: createContactInputSchema.shape.fullName,
+    linkedin: z.string(),
+  })
+  .superRefine((value, context) => {
+    const result = createContactFromFullNameSchema.safeParse({ fullName: value.fullName });
+    if (!result.success) {
+      for (const issue of result.error.issues) {
+        context.addIssue({
+          code: "custom",
+          path: issue.path,
+          message: issue.message,
+        });
+      }
+    }
+  });
 
 interface OpenAddContactModalOptions {
   onCreated?: (contact: Contact) => void;
@@ -82,6 +90,7 @@ export function AddContactForm({
   const safeModalId = modalId ?? "";
   const [focusedField, setFocusedField] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const createContactMutation = useCreateContactMutation();
 
   useEffect(() => {
     // In embedded mode (onClose prop provided), the parent <Modal> controls
@@ -118,46 +127,18 @@ export function AddContactForm({
     });
 
     try {
-      const { firstName, middleName, lastName } = parseFullName(values.fullName.trim());
+      const { firstName, middleName, lastName } = createContactFromFullNameSchema.parse({
+        fullName: values.fullName.trim(),
+      });
       const linkedinRaw = values.linkedin.trim();
       const linkedinHandle = linkedinRaw ? extractUsername("linkedin", linkedinRaw) : undefined;
 
-      const res = await fetch(API_ROUTES.CONTACTS, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          firstName,
-          ...(middleName ? { middleName } : {}),
-          ...(lastName ? { lastName } : {}),
-          ...(linkedinHandle ? { linkedin: linkedinHandle } : {}),
-        }),
+      const createdContact = await createContactMutation.mutateAsync({
+        firstName,
+        ...(middleName ? { middleName } : {}),
+        ...(lastName ? { lastName } : {}),
+        ...(linkedinHandle ? { linkedin: linkedinHandle } : {}),
       });
-
-      if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.error || "Failed to create contact");
-      }
-
-      const data = (await res.json()) as { id?: string };
-      const newContactId = data.id;
-
-      if (!newContactId) {
-        throw new Error("Contact was created but response did not include contact id");
-      }
-
-      let createdContactForCallback: Contact | null = null;
-
-      if (onCreated) {
-        const createdContactRes = await fetch(`${API_ROUTES.CONTACTS}/${newContactId}`);
-
-        if (!createdContactRes.ok) {
-          const createdContactError = await createdContactRes.json().catch(() => ({}));
-          throw new Error(createdContactError.error || "Failed to load created contact");
-        }
-
-        const createdContactData = (await createdContactRes.json()) as { contact: Contact };
-        createdContactForCallback = createdContactData.contact;
-      }
 
       // Hide loading notification
       notifications.hide(loadingNotification);
@@ -172,19 +153,13 @@ export function AddContactForm({
 
       captureEvent("contact_created");
 
-      await revalidateContacts();
-
       if (onCreated) {
-        if (!createdContactForCallback) {
-          throw new Error("Failed to load created contact");
-        }
-
         if (onClose) {
           onClose();
         } else {
           modals.close(safeModalId);
         }
-        onCreated(createdContactForCallback);
+        onCreated(createdContact);
         return;
       }
 
@@ -193,7 +168,7 @@ export function AddContactForm({
       } else {
         // Close modal and redirect to person page
         modals.close(safeModalId);
-        router.push(`${WEBAPP_ROUTES.PERSON}/${newContactId}`);
+        router.push(`${WEBAPP_ROUTES.PERSON}/${createdContact.id}`);
       }
     } catch (error) {
       // Hide loading notification

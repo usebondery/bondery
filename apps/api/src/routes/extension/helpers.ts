@@ -2,40 +2,22 @@
  * Extension route shared schemas and helper functions
  */
 
-import { Type } from "@sinclair/typebox";
 import type { SocialPlatform } from "../../lib/socials.js";
-import {
-  ScrapedWorkHistoryEntrySchema,
-  ScrapedEducationEntrySchema,
-  NullableString,
-} from "../../lib/schemas.js";
+import { redirectRequestSchema } from "@bondery/schemas";
+import { z } from "zod";
 
-export const RedirectBody = Type.Object({
-  instagram: Type.Optional(Type.String()),
-  linkedin: Type.Optional(Type.String()),
-  facebook: Type.Optional(Type.String()),
-  firstName: Type.Optional(Type.String()),
-  middleName: Type.Optional(NullableString),
-  lastName: Type.Optional(NullableString),
-  profileImageUrl: Type.Optional(NullableString),
-  headline: Type.Optional(NullableString),
-  location: Type.Optional(NullableString),
-  notes: Type.Optional(NullableString),
-  linkedinBio: Type.Optional(NullableString),
-  workHistory: Type.Optional(Type.Array(ScrapedWorkHistoryEntrySchema)),
-  educationHistory: Type.Optional(Type.Array(ScrapedEducationEntrySchema)),
-});
+export const redirectBodySchema = redirectRequestSchema;
 
-export const RedirectQuery = Type.Object({
-  instagram: Type.Optional(Type.String()),
-  linkedin: Type.Optional(Type.String()),
-  facebook: Type.Optional(Type.String()),
-  firstName: Type.Optional(Type.String()),
-  middleName: Type.Optional(Type.String()),
-  lastName: Type.Optional(Type.String()),
-  profileImageUrl: Type.Optional(Type.String()),
-  headline: Type.Optional(Type.String()),
-  location: Type.Optional(Type.String()),
+export const redirectQuerySchema = z.object({
+  instagram: z.string().optional(),
+  linkedin: z.string().optional(),
+  facebook: z.string().optional(),
+  firstName: z.string().optional(),
+  middleName: z.string().optional(),
+  lastName: z.string().optional(),
+  profileImageUrl: z.string().optional(),
+  headline: z.string().optional(),
+  location: z.string().optional(),
 });
 
 export function resolvePrimarySocial(payload: {

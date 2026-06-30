@@ -3,7 +3,8 @@
  * Returns the authenticated user's subscription status for frontend gating.
  */
 
-import type { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
+import type { FastifyReply } from "fastify";
+import type { AppRoutePlugin } from "../../lib/fastify-types.js";
 import { getAuth } from "../../lib/auth.js";
 import {
   checkChatQuota,
@@ -46,16 +47,18 @@ function toPolarInterval(
     : null;
 }
 
-export async function subscriptionRoutes(fastify: FastifyInstance) {
+export const subscriptionRoutes: AppRoutePlugin = async (fastify) => {
   fastify.addHook("onRoute", (routeOptions) => {
-    routeOptions.schema = { ...routeOptions.schema, tags: ["Subscriptions"] };
+    if (routeOptions.schema) {
+      routeOptions.schema.tags = ["Subscriptions"];
+    }
   });
   fastify.addHook("onRequest", fastify.auth([fastify.verifySession]));
 
   /**
    * GET /api/subscriptions - Get current user's subscription status
    */
-  fastify.get("/", async (request: FastifyRequest, reply: FastifyReply) => {
+  fastify.get("/", async (request, reply) => {
     const { client, user } = getAuth(request);
 
     const quota = await checkChatQuota(client, user.id);

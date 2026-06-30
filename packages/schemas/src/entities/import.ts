@@ -43,14 +43,19 @@ export const redirectRequestSchema = z.object({
 
 export const enrichContactRequestSchema = z.object({
   firstName: z.string().optional(),
-  middleName: z.string().optional(),
-  lastName: z.string().optional(),
-  profileImageUrl: z.string().optional(),
-  headline: z.string().optional(),
-  location: z.string().optional(),
-  linkedinBio: z.string().optional(),
+  middleName: z.string().nullable().optional(),
+  lastName: z.string().nullable().optional(),
+  profileImageUrl: z.string().nullable().optional(),
+  headline: z.string().nullable().optional(),
+  location: z.string().nullable().optional(),
+  linkedinBio: z.string().nullable().optional(),
   workHistory: z.array(scrapedWorkHistoryEntrySchema).optional(),
   educationHistory: z.array(scrapedEducationEntrySchema).optional(),
+});
+
+/** POST /api/contacts/:id/linkedin-data body. */
+export const linkedInDataRequestSchema = z.object({
+  workHistory: z.array(scrapedWorkHistoryEntrySchema).optional(),
 });
 
 export const redirectResponseSchema = z.object({
@@ -218,6 +223,7 @@ export type ScrapedWorkHistoryEntry = z.infer<typeof scrapedWorkHistoryEntrySche
 export type ScrapedEducationEntry = z.infer<typeof scrapedEducationEntrySchema>;
 export type RedirectRequest = z.infer<typeof redirectRequestSchema>;
 export type EnrichContactRequest = z.infer<typeof enrichContactRequestSchema>;
+export type LinkedInDataRequest = z.infer<typeof linkedInDataRequestSchema>;
 export type RedirectResponse = z.infer<typeof redirectResponseSchema>;
 export type LinkedInPreparedContact = z.infer<typeof linkedInPreparedContactSchema>;
 export type LinkedInParseResponse = z.infer<typeof linkedInParseResponseSchema>;

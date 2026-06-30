@@ -13,6 +13,7 @@
     "mobile": "turbo dev --filter=api --filter=mobile",
     "dev:extension": "turbo dev --filter=webapp --filter=api --filter=chrome-extension --filter=website",
     "dev:supabase": "turbo dev --filter=supabase-db",
+    "dev:sync": "turbo dev --filter=api --filter=mobile",
     "dev:website": "turbo dev --filter=website",
     "dev:polar-webhook": "npx localtunnel --port 3001",
     "build": "turbo build",
@@ -31,7 +32,7 @@
     "@fastify/pre-commit": "^2.2.1",
     "@redocly/cli": "^2.33.0",
     "ajv": "^8.18.0",
-    "turbo": "^2.9.5",
+    "turbo": "^2.10.0",
     "yaml": "^2.8.3"
   },
   "dependencies": {

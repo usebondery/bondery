@@ -3,17 +3,22 @@
  * Handles creation, retrieval, and deletion of relationships between contacts.
  */
 
-import type { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
-import { Type } from "@sinclair/typebox";
+import type { FastifyReply } from "fastify";
+import type { AppFastifyInstance } from "../../../lib/fastify-types.js";
+import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
 import { getAuth } from "../../../lib/auth.js";
-import { buildContactAvatarUrl } from "../../../lib/supabase.js";
+import { resolveContactAvatarUrl } from "../../../lib/supabase.js";
 import type { RelationshipType } from "@bondery/schemas";
 import {
-  UuidParam,
-  AvatarQualityEnum,
-  AvatarSizeEnum,
-  extractAvatarOptions,
-} from "../../../lib/schemas.js";
+  createContactRelationshipInputSchema,
+  updateContactRelationshipInputSchema,
+} from "@bondery/schemas";
+import { extractAvatarOptions } from "../../../lib/queries.js";
+import {
+  avatarTransformQuerySchema,
+  contactRelationshipIdParamSchema,
+  uuidParamSchema,
+} from "@bondery/schemas/http";
 
 // ── Constants ────────────────────────────────────────────────────
 
@@ -41,37 +46,6 @@ const RELATIONSHIP_TYPES: RelationshipType[] = [
   "other",
 ] satisfies RelationshipType[];
 
-// ── TypeBox Schemas ──────────────────────────────────────────────
-
-const RelationshipTypeEnum = Type.Union([
-  Type.Literal("parent"),
-  Type.Literal("child"),
-  Type.Literal("spouse"),
-  Type.Literal("partner"),
-  Type.Literal("sibling"),
-  Type.Literal("friend"),
-  Type.Literal("colleague"),
-  Type.Literal("neighbor"),
-  Type.Literal("guardian"),
-  Type.Literal("dependent"),
-  Type.Literal("other"),
-]);
-
-const RelationshipIdParams = Type.Object({
-  id: Type.String(),
-  relationshipId: Type.String(),
-});
-
-const CreateRelationshipBody = Type.Object({
-  relatedPersonId: Type.String({ minLength: 1 }),
-  relationshipType: RelationshipTypeEnum,
-});
-
-const UpdateRelationshipBody = Type.Object({
-  relatedPersonId: Type.String({ minLength: 1 }),
-  relationshipType: RelationshipTypeEnum,
-});
-
 // ── Helpers ──────────────────────────────────────────────────────
 
 function isRelationshipType(value: string): value is RelationshipType {
@@ -96,7 +70,7 @@ function toContactPreview(
 
 // ── Route Registration ───────────────────────────────────────────
 
-export function registerRelationshipRoutes(fastify: FastifyInstance): void {
+export function registerRelationshipRoutes(fastify: AppFastifyInstance): void {
   /**
    * GET /api/contacts/:id/relationships - Get all relationships for a person
    */
@@ -104,22 +78,13 @@ export function registerRelationshipRoutes(fastify: FastifyInstance): void {
     "/:id/relationships",
     {
       schema: {
-        params: UuidParam,
-        querystring: Type.Object({
-          avatarQuality: Type.Optional(AvatarQualityEnum),
-          avatarSize: Type.Optional(AvatarSizeEnum),
-        }),
-      },
+        params: uuidParamSchema,
+        querystring: avatarTransformQuerySchema,
+      } satisfies FastifyZodOpenApiSchema,
     },
-    async (
-      request: FastifyRequest<{
-        Params: typeof UuidParam.static;
-        Querystring: { avatarQuality?: string; avatarSize?: string };
-      }>,
-      reply: FastifyReply,
-    ) => {
+    async (request, reply) => {
       const { client, user } = getAuth(request);
-      const avatarOpts = extractAvatarOptions(request.query as any);
+      const avatarOpts = extractAvatarOptions(request.query);
       const { id: personId } = request.params;
 
       const { data: person, error: personError } = await client
@@ -159,7 +124,7 @@ export function registerRelationshipRoutes(fastify: FastifyInstance): void {
 
       const { data: peopleRows, error: peopleError } = await client
         .from("people")
-        .select("id, first_name, last_name, updated_at")
+        .select("id, first_name, last_name, updated_at, has_avatar")
         .in("id", personIds)
         .eq("user_id", user.id);
 
@@ -188,22 +153,28 @@ export function registerRelationshipRoutes(fastify: FastifyInstance): void {
             updatedAt: relationship.updated_at,
             sourcePerson: toContactPreview(
               sourcePerson,
-              buildContactAvatarUrl(
+              resolveContactAvatarUrl(
                 client,
                 user.id,
-                sourcePerson.id,
+                {
+                  id: sourcePerson.id,
+                  hasAvatar: sourcePerson.has_avatar,
+                  updatedAt: sourcePerson.updated_at,
+                },
                 avatarOpts,
-                sourcePerson.updated_at,
               ),
             ),
             targetPerson: toContactPreview(
               targetPerson,
-              buildContactAvatarUrl(
+              resolveContactAvatarUrl(
                 client,
                 user.id,
-                targetPerson.id,
+                {
+                  id: targetPerson.id,
+                  hasAvatar: targetPerson.has_avatar,
+                  updatedAt: targetPerson.updated_at,
+                },
                 avatarOpts,
-                targetPerson.updated_at,
               ),
             ),
           };
@@ -219,14 +190,13 @@ export function registerRelationshipRoutes(fastify: FastifyInstance): void {
    */
   fastify.post(
     "/:id/relationships",
-    { schema: { params: UuidParam, body: CreateRelationshipBody } },
-    async (
-      request: FastifyRequest<{
-        Params: typeof UuidParam.static;
-        Body: typeof CreateRelationshipBody.static;
-      }>,
-      reply: FastifyReply,
-    ) => {
+    {
+      schema: {
+        params: uuidParamSchema,
+        body: createContactRelationshipInputSchema,
+      } satisfies FastifyZodOpenApiSchema,
+    },
+    async (request, reply) => {
       const { client, user } = getAuth(request);
       const { id: sourcePersonId } = request.params;
       const { relatedPersonId, relationshipType } = request.body;
@@ -292,14 +262,13 @@ export function registerRelationshipRoutes(fastify: FastifyInstance): void {
    */
   fastify.patch(
     "/:id/relationships/:relationshipId",
-    { schema: { params: RelationshipIdParams, body: UpdateRelationshipBody } },
-    async (
-      request: FastifyRequest<{
-        Params: typeof RelationshipIdParams.static;
-        Body: typeof UpdateRelationshipBody.static;
-      }>,
-      reply: FastifyReply,
-    ) => {
+    {
+      schema: {
+        params: contactRelationshipIdParamSchema,
+        body: updateContactRelationshipInputSchema,
+      } satisfies FastifyZodOpenApiSchema,
+    },
+    async (request, reply) => {
       const { client, user } = getAuth(request);
       const { id: personId, relationshipId } = request.params;
       const { relatedPersonId, relationshipType } = request.body;
@@ -385,11 +354,12 @@ export function registerRelationshipRoutes(fastify: FastifyInstance): void {
    */
   fastify.delete(
     "/:id/relationships/:relationshipId",
-    { schema: { params: RelationshipIdParams } },
-    async (
-      request: FastifyRequest<{ Params: typeof RelationshipIdParams.static }>,
-      reply: FastifyReply,
-    ) => {
+    {
+      schema: {
+        params: contactRelationshipIdParamSchema,
+      } satisfies FastifyZodOpenApiSchema,
+    },
+    async (request, reply) => {
       const { client, user } = getAuth(request);
       const { id: personId, relationshipId } = request.params;
 

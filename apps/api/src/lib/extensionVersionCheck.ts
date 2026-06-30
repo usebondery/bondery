@@ -10,6 +10,7 @@
  */
 
 import type { FastifyInstance } from "fastify";
+import type { AppFastifyInstance } from "./fastify-types.js";
 import {
   isVersionBelow,
   CHROME_EXTENSION_URL,
@@ -22,7 +23,7 @@ import {
  *
  * @param fastify - The Fastify instance
  */
-export function registerExtensionVersionCheck(fastify: FastifyInstance): void {
+export function registerExtensionVersionCheck(fastify: AppFastifyInstance): void {
   fastify.addHook("onRequest", async (request, reply) => {
     // No enforcement when the minimum is the default "0.0.0"
     if (!MIN_EXTENSION_VERSION || MIN_EXTENSION_VERSION === "0.0.0") {

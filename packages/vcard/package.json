@@ -13,7 +13,7 @@
     }
   },
   "scripts": {
-    "build": "tsc",
+    "build": "rimraf dist && tsc",
     "check-types": "tsc --noEmit"
   },
   "dependencies": {
@@ -22,6 +22,7 @@
   },
   "devDependencies": {
     "@types/node": "^25",
+    "rimraf": "^6.0.1",
     "typescript": "^6"
   }
 }

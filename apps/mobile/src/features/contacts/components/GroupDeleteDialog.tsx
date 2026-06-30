@@ -4,7 +4,7 @@ import { ActionSheetPopup } from "../../../components/ActionSheetPopup";
 import { useMobileTranslations } from "../../../lib/i18n/useMobileTranslations";
 import { useAppToast } from "../../../lib/toast/useAppToast";
 import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
-import { deleteGroup } from "../../../lib/api/client";
+import { groupsDomain } from "../../../lib/domains/groups";
 
 interface GroupDeleteDialogProps {
   open: boolean;
@@ -32,7 +32,7 @@ export function GroupDeleteDialog({
     setIsDeleting(true);
 
     try {
-      await deleteGroup(groupId);
+      groupsDomain.delete(groupId);
       onOpenChange(false);
       onDeleted();
     } catch {

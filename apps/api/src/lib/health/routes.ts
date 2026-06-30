@@ -1,11 +1,13 @@
 import type { FastifyInstance } from "fastify";
+import type { AppFastifyInstance } from "../fastify-types.js";
+import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
 import {
   CHROME_EXTENSION_URL,
   MIN_EXTENSION_VERSION,
 } from "@bondery/helpers";
 import { HEALTH_TIER } from "../rate-limit.js";
 import { getHealthReport } from "./check.js";
-import { HealthReportSchema, LivenessStatusSchema } from "./schemas.js";
+import { healthReportSchema, livenessStatusSchema } from "./schemas.js";
 
 const LIVENESS_DESCRIPTION =
   "Liveness probe. Returns 200 when the API process is running. " +
@@ -18,10 +20,10 @@ const READINESS_DESCRIPTION =
   "Returns HTTP 503 when critical dependencies are unavailable (`status: unhealthy`). " +
   "Returns HTTP 200 when all critical dependencies are healthy (`status: ok` or `status: degraded`). " +
   "Supabase auth is checked via `GET /auth/v1/health`; " +
-  "Supabase database (PostgREST) via `GET /rest-admin/v1/live`; " +
+  "Supabase database (PostgREST) via `GET /rest-admin/v1/ready`; " +
   "Supabase storage via `GET /storage/v1/health`.";
 
-export function registerHealthRoutes(fastify: FastifyInstance): void {
+export function registerHealthRoutes(fastify: AppFastifyInstance): void {
   fastify.get(
     "/status",
     {
@@ -29,9 +31,9 @@ export function registerHealthRoutes(fastify: FastifyInstance): void {
         tags: ["Health"],
         description: LIVENESS_DESCRIPTION,
         response: {
-          200: LivenessStatusSchema,
+          200: livenessStatusSchema,
         },
-      },
+      } satisfies FastifyZodOpenApiSchema,
       config: { rateLimit: false },
     },
     async () => {
@@ -53,10 +55,10 @@ export function registerHealthRoutes(fastify: FastifyInstance): void {
         tags: ["Health"],
         description: READINESS_DESCRIPTION,
         response: {
-          200: HealthReportSchema,
-          503: HealthReportSchema,
+          200: healthReportSchema,
+          503: healthReportSchema,
         },
-      },
+      } satisfies FastifyZodOpenApiSchema,
       config: { rateLimit: HEALTH_TIER },
     },
     async (_request, reply) => {
@@ -69,7 +71,7 @@ export function registerHealthRoutes(fastify: FastifyInstance): void {
         smtpPass: fastify.config.PRIVATE_EMAIL_PASS,
         smtpAddress: fastify.config.PRIVATE_EMAIL_ADDRESS,
         smtpPort: fastify.config.PRIVATE_EMAIL_PORT,
-        anthropicApiKey: fastify.config.ANTHROPIC_API_KEY,
+        anthropicApiKey: fastify.config.PRIVATE_ANTHROPIC_API_KEY,
         polarAccessToken: fastify.config.POLAR_ACCESS_TOKEN,
         polarProductId: fastify.config.POLAR_PRODUCT_ID,
         polarWebhookSecret: fastify.config.POLAR_WEBHOOK_SECRET,

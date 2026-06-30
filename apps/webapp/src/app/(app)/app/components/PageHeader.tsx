@@ -5,6 +5,7 @@ import { IconArrowLeft, IconHelpCircle } from "@tabler/icons-react";
 import type { Icon } from "@tabler/icons-react";
 import type { ReactNode } from "react";
 import { ActionIconLink } from "@bondery/mantine-next";
+import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
 
 interface PageHeaderProps {
   icon: Icon;
@@ -29,6 +30,7 @@ export function PageHeader({
   backHref,
   backOnClick,
 }: PageHeaderProps) {
+  const tCommon = useTranslations("WebAppCommon");
   const resolvedAction =
     action ||
     (primaryAction || secondaryAction ? (
@@ -42,14 +44,14 @@ export function PageHeader({
     <Group justify={resolvedAction ? "space-between" : "flex-start"} gap="sm" mb={"xl"}>
       <Group gap="sm">
         {backOnClick ? (
-          <ActionIcon aria-label="Back" variant="default" size="xl" onClick={backOnClick}>
+          <ActionIcon aria-label={tCommon("BackAriaLabel")} variant="default" size="xl" onClick={backOnClick}>
             <IconArrowLeft size={20} />
           </ActionIcon>
         ) : null}
         {!backOnClick && backHref && (
           <ActionIconLink
             href={backHref}
-            ariaLabel="Back"
+            ariaLabel={tCommon("BackAriaLabel")}
             variant="default"
             size="xl"
             icon={<IconArrowLeft size={20} />}

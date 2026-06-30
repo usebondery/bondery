@@ -4,8 +4,8 @@
 
 * [🟣 Welcome](README.md)
 * [😎 Getting started](bondery/getting-started.md)
-* [� Myself — your profile card](bondery/myself.md)
-* [�📥 Import contacts](bondery/import.md)
+* [📱 Mobile app](bondery/mobile-app.md)
+* [📥 Import contacts](bondery/import.md)
 * [🧩 Chrome Extension](bondery/chrome-extension.md)
 * [🤔 Getting help and troubleshooting](bondery/getting-help-and-troubleshooting.md)
 * [‼️ Read before editing](bondery/read-before-editing.md)
@@ -13,6 +13,7 @@
 ## Core concepts
 
 * [People](concepts/people.md)
+* [Myself](concepts/myself.md)
 * [Groups](concepts/groups.md)
 * [Relationships](concepts/relationships.md)
 * [Interactions](concepts/interactions.md)
@@ -24,6 +25,7 @@
 
 ## API
 
+* [Authentication](api/authentication.md)
 * [API reference](api/api-reference/README.md)
   * ```yaml
     type: builtin:openapi
@@ -41,10 +43,11 @@
 
 * [🛠️ Contributing](contributing/README.md)
 * [Architecture](contributing/architecture.md)
+* [Sync architecture (mobile)](contributing/sync-architecture.md)
 * [Local development setup](contributing/local-setup.md)
 
 ***
 
 * [Changelog](changelog.md)
-* [How to write docs for AI agents](how-to-write-docs-for-ai-agents.md)
+* [How to write docs](how-to-write-docs.md)
 * [.OpenContact format specification](.opencontact-format-specification.md)

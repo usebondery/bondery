@@ -6,7 +6,7 @@ import { PageWrapper } from "@/app/(app)/app/components/PageWrapper";
 import { PeopleHeaderClient } from "./components/PeopleHeaderClient";
 import { PeopleTableLoader } from "./components/PeopleTableLoader";
 import { PeopleTableSkeleton } from "./components/PeopleSkeletons";
-import type { SortOrder } from "./getContactsData";
+import { parseContactsListParams } from "@/lib/query/fetchers/contactsListParams";
 import type { ColumnKey } from "@/app/(app)/app/components/contacts/ContactsTableV2";
 
 export const metadata: Metadata = { title: "People" };
@@ -25,15 +25,14 @@ const DEFAULT_VISIBLE_COLUMNS: ColumnKey[] = [
 export default async function PeoplePage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; sort?: string }>;
+  searchParams: Promise<{ search?: string; sort?: string }>;
 }) {
   // Await only the fast parts - params and cookies. The contacts DB query is
   // deferred to PeopleTableLoader so this component returns JSX immediately
   // and the header renders before data arrives.
   const [params, cookieStore] = await Promise.all([searchParams, cookies()]);
 
-  const query = params.q;
-  const sort = params.sort as SortOrder | undefined;
+  const filter = parseContactsListParams({ search: params.search, sort: params.sort });
 
   // Read column visibility preferences from cookie so the streamed PeopleClient
   // initialises with the correct columns - no client-side layout shift.
@@ -68,8 +67,7 @@ export default async function PeoplePage({
         {/* Table streams in once getContactsData resolves */}
         <Suspense fallback={<PeopleTableSkeleton columns={visibleColumns} />}>
           <PeopleTableLoader
-            query={query}
-            sort={sort}
+            filter={filter}
             savedColumnVisibility={savedColumnVisibility}
           />
         </Suspense>

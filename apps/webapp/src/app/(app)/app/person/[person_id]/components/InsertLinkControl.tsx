@@ -6,19 +6,17 @@ import { useWindowEvent } from "@mantine/hooks";
 import { RichTextEditor, useRichTextEditorContext } from "@mantine/tiptap";
 import { useEditorState } from "@tiptap/react";
 import { IconLink } from "@tabler/icons-react";
+import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
 
 /**
  * Custom insert-link control for RichTextEditor.
- * Always opens links in a new tab (_blank) without exposing a toggle.
- * Uses the editor context to read/write the link mark on the current selection.
  */
 export function InsertLinkControl() {
+  const t = useTranslations("NotesEditor");
   const { editor } = useRichTextEditorContext();
   const [opened, setOpened] = useState(false);
   const [url, setUrl] = useState("");
 
-  // Reactively track whether the cursor is inside a link so the toolbar button
-  // active-state stays in sync when the user navigates with keyboard shortcuts.
   const isLinkActive =
     useEditorState({
       editor,
@@ -36,7 +34,6 @@ export function InsertLinkControl() {
     setUrl("");
   };
 
-  // The @mantine/tiptap Link extension dispatches this event on Mod-k
   useWindowEvent("edit-link", handleOpen);
 
   const handleSave = () => {
@@ -44,7 +41,6 @@ export function InsertLinkControl() {
       editor?.chain().focus().extendMarkRange("link").unsetLink().run();
     } else {
       let href = url.trim();
-      // Auto-prefix with https:// when no protocol is given
       if (href && !/^https?:\/\//i.test(href) && !/^mailto:/i.test(href)) {
         href = `https://${href}`;
       }
@@ -72,10 +68,10 @@ export function InsertLinkControl() {
         label={
           <Stack gap={2}>
             <Text size="xs" fw={600} lh={1.3}>
-              Insert link
+              {t("InsertLink")}
             </Text>
             <Text size="xs" c="dimmed" lh={1.3}>
-              Ctrl+K
+              {t("InsertLinkHint")}
             </Text>
           </Stack>
         }
@@ -84,7 +80,7 @@ export function InsertLinkControl() {
       >
         <Popover.Target>
           <RichTextEditor.Control
-            aria-label="Insert link"
+            aria-label={t("InsertLinkAriaLabel")}
             onClick={handleOpen}
             active={isLinkActive}
           >
@@ -96,7 +92,7 @@ export function InsertLinkControl() {
       <Popover.Dropdown>
         <Stack gap="xs">
           <TextInput
-            placeholder="https://example.com"
+            placeholder={t("LinkPlaceholder")}
             value={url}
             onChange={(e) => setUrl(e.currentTarget.value)}
             size="xs"
@@ -109,7 +105,7 @@ export function InsertLinkControl() {
             }}
           />
           <Button size="xs" variant="default" onClick={handleSave}>
-            Save
+            {t("SaveLink")}
           </Button>
         </Stack>
       </Popover.Dropdown>

@@ -2,7 +2,8 @@
 
 import { Button, Divider, Stack, Text } from "@mantine/core";
 import { IconBrandLinkedin } from "@tabler/icons-react";
-import { useTranslations, useFormatter } from "next-intl";
+import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
+import { useDateFormatter as useFormatter } from "@/lib/i18n/useDateFormatter";
 import type { WorkHistoryEntry, EducationEntry } from "@bondery/schemas";
 import { WorkHistoryCard } from "./WorkHistoryCard";
 import { EducationCard } from "./EducationCard";

@@ -2,7 +2,7 @@
 
 import { Avatar, Group, Spoiler, Stack, Text } from "@mantine/core";
 import { IconSchool } from "@tabler/icons-react";
-import { useTranslations } from "next-intl";
+import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
 import type { EducationEntry } from "@bondery/schemas";
 import { formatDateRange, formatDuration } from "@bondery/helpers";
 import { AnchorLink } from "@bondery/mantine-next";

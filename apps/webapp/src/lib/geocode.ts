@@ -6,10 +6,10 @@ import {
   parseGeocodeTimezoneResponse,
   type ContactAddressEntry,
 } from "@bondery/schemas";
+import { clientApiJsonOrNull } from "@/lib/api/client";
 
 /**
- * Fetches address/place autocomplete suggestions from the Bondery geocode proxy.
- * Uses same-origin `/api` rewrite so session cookies are sent automatically.
+ * Fetches address/place autocomplete suggestions via the same-origin BFF.
  */
 export async function fetchGeocodeSuggestions(
   query: string,
@@ -22,16 +22,13 @@ export async function fetchGeocodeSuggestions(
   }
 
   try {
-    const response = await fetch(
+    const json = await clientApiJsonOrNull<unknown>(
       `${API_ROUTES.GEOCODE_SUGGEST}?${buildGeocodeSuggestQuery(trimmed, mode)}`,
       { signal },
     );
-
-    if (!response.ok) {
+    if (!json) {
       return [];
     }
-
-    const json: unknown = await response.json();
     return parseGeocodeSuggestResponse(json);
   } catch (error) {
     if (error instanceof Error && error.name === "AbortError") {
@@ -54,16 +51,13 @@ export async function fetchTimezoneForCoordinates(
   }
 
   try {
-    const response = await fetch(
+    const json = await clientApiJsonOrNull<unknown>(
       `${API_ROUTES.GEOCODE_TIMEZONE}?${buildGeocodeTimezoneQuery(lat, lon)}`,
       { signal },
     );
-
-    if (!response.ok) {
+    if (!json) {
       return null;
     }
-
-    const json: unknown = await response.json();
     return parseGeocodeTimezoneResponse(json);
   } catch (error) {
     if (error instanceof Error && error.name === "AbortError") {

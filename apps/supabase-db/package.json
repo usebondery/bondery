@@ -12,7 +12,6 @@
     "setup:local": "npx tsx scripts/setup.ts --env local",
     "setup:beta": "npx tsx scripts/setup.ts --env beta",
     "setup:production": "npx tsx scripts/setup.ts --env production",
-    "powersync:ssl": "powershell -ExecutionPolicy Bypass -File ./scripts/enable-powersync-ssl.ps1",
     "upload:secrets": "npx supabase secrets set --env-file .env.beta --project-ref <your-project-ref>",
     "migration:new": "npx supabase migration new",
     "db:seed": "npx supabase db seed",

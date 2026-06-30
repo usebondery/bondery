@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { Stack } from "expo-router";
-import { fetchSettings } from "../../src/lib/api/client";
+import { SyncErrorToasts } from "../../src/components/SyncErrorToasts";
+import { fetchSettings } from "../../src/lib/api/online-only";
 import type { MobilePreferencesState } from "../../src/lib/preferences/useMobilePreferences";
 import { useMobilePreferences } from "../../src/lib/preferences/useMobilePreferences";
 
@@ -42,6 +43,7 @@ function PreferencesHydration() {
 export default function AppLayout() {
   return (
     <>
+      <SyncErrorToasts />
       <PreferencesHydration />
       <Stack screenOptions={{ headerShown: false }} />
     </>

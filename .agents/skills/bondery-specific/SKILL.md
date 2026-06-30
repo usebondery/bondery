@@ -11,17 +11,95 @@ Consult these resources as needed:
 
 ```
 references/
-  ux-patterns.md    Feedback, progressive disclosure, destructive actions, autofocus, mobile settings previews & async states, mobile sheets & forms
+  api-design.md   List API tiers, pagination contract, query/response rules
+  api-usage.md      Transport wrappers (clientApi*/serverApi*/apiRequest), *Json vs *JsonOrNull, ApiError
+  api-mutations.md  Mutation responses — return full objects, no post-mutation GET
+  sync-architecture.md  Mobile offline sync — pull/bootstrap, push mutations, server-authoritative merge, versioning
+  ux-patterns.md    Feedback, progressive disclosure, destructive actions, autofocus, modal blocking dismiss, mobile settings previews & async states, mobile sheets & forms
   mobile-forms.md   React Hook Form patterns for ActionSheetPopup forms (typed useSheetForm, Sheet*Field wrappers, schema output, audit guardrails)
 ```
 
+# Package boundaries
+
+Monorepo shared packages follow a one-way dependency graph:
+
+- `@bondery/schemas` — contract layer (types, Zod **validation** schemas, constants). Must not import any other `@bondery/*` package.
+- `@bondery/helpers` — behavior layer (parsing, formatting, geocoding, routes). May depend on schemas.
+- `@bondery/helpers/forms` — Zod pipelines that validate with schemas then normalize with helpers. Use on form submit/save.
+
+| Need | Import from |
+|------|-------------|
+| Type or validation schema | `@bondery/schemas` |
+| Utility / formatter | `@bondery/helpers` (subpath) |
+| Form submit (validate + normalize) | `@bondery/helpers/forms` |
+
+See `packages/schemas/README.md` and `packages/helpers/README.md`.
+
+# API usage
+
+All Bondery clients call the Fastify API through a transport wrapper layer — never ad-hoc `fetch` with duplicated auth and error parsing. Read `references/api-usage.md` for:
+
+- Which wrapper to use per runtime (webapp browser vs server, mobile, chrome extension)
+- `*Json` vs `*JsonOrNull` — throw on error vs graceful `null`
+- `ApiError` and shared error parsing
+- **Unauthorized (401):** clear caches, local sign-out, hard redirect — see `references/api-usage.md` § Unauthorized sessions
+- Webapp: `lib/api/domains/*` + `lib/query/hooks/*` for app data (transport stays in `lib/api/client.ts`)
+- Status probe — webapp uses BFF `GET /api/status`; chrome extension calls Fastify `/status` directly
+
+Pair with `references/api-mutations.md` when implementing create/update flows.
+
+
+# Mobile local-first data
+
+Tier-1 domain data (contacts, groups, tags, and child tables in `SYNC_TABLE_KEYS`) is **local-first on mobile**:
+
+- **Reads:** `lib/sync/repositories/*` + `useSyncQuery` — never REST list/detail in `features/`.
+- **Writes:** `submitSyncMutation` via `lib/domains/*` — optimistic SQLite + unified outbox; drainer pushes immediately when online.
+- **Sync:** `PullManager` bootstraps and long-polls `GET /api/sync/pull`; materializers apply server rows into SQLite (server wins on pull).
+- **Online-only:** `lib/api/online-only.ts` (settings, geocode, photos, share, vCard, account delete).
+
+Run `npm run check-sync-patterns --workspace=mobile` in CI. Full architecture: `references/sync-architecture.md`.
+
+
+# API design
+
+List endpoints follow a shared pagination contract. Read `references/api-design.md` for:
+
+- Three response tiers (Paginated / Collection / Capped)
+- Query params: `limit`, `offset`, `search`, `sort` — no abbreviations
+- Nested `pagination` with `totalCount`, `hasMore`, and echoed `sort`/`search`
+- Server-side `hasMore` as the single source of truth for table “load more” UI
+
+
+# UI translations
+
+Do not hardcode user-facing strings in the webapp (or other clients that share `packages/translations`). All visible copy — labels, placeholders, buttons, notifications, aria labels, validation messages — belongs in translation files.
+
+- **Source of truth:** `packages/translations/src/en.json` and `packages/translations/src/cs.json` — add every new key to **both** locales.
+- **Webapp hook:** `useWebTranslations` from `@/lib/i18n/useWebTranslations` (same API as `useTranslations("Namespace")`).
+- **Namespaces:** Group keys by feature/page (e.g. `GroupsPage`, `ContactInfo`). Reuse `WebAppCommon` for shared chrome (`SuccessTitle`, `ErrorTitle`, `Cancel`, etc.).
+- **Patterns:** Prefer small hooks for repeated copy (e.g. `useContactInfoLabels`, `useContactsTableCopy`) over duplicating `useMemo` blocks. For modals opened outside React, set the title from the modal component via `modals.updateModal` once `t` is available.
+- **Exceptions:** Non-UI strings (logs, API field names, test IDs) and proper nouns/brand names that should not be translated.
+
+When touching UI, wire strings to translations in the same change — do not leave English literals for a follow-up.
+
+
 # Using avatars and logos
 
-The strategy for handling contact avatars involves removing the stored avatar column entirely and instead deriving the image URL deterministically from the user ID and contact ID (e.g., constructing avatars/{userId}/{contactId}.jpg on-the-fly when needed). This eliminates redundancy, prevents stale or outdated URLs after file moves/migrations, reduces row size by ~120 bytes per record, and avoids meaningless cache-busting timestamps baked into stored URLs. The frontend component always receives a predictable URL when an avatar is expected to exist; if no file is present, the browser or CDN returns a 404, which the <Avatar> component gracefully handles by falling back to displaying the contact's initials (a lightweight, performant pattern commonly used in high-scale apps for similar profile images). This approach keeps the database lean and simple, centralizes URL logic in a single helper function, and relies on client-side fallback rather than expensive pre-checks or additional metadata—ensuring clean, maintainable code without compromising user experience or performance.
+Contact photos live in Supabase Storage at `avatars/{userId}/{personId}.jpg`. The `people.has_avatar` boolean (maintained by API write paths on upload/delete) gates whether the API returns a public URL in `Contact.avatar` or `null`.
+
+- **Read path:** `resolveContactAvatarUrl()` in the API checks `has_avatar` before constructing the storage URL. Clients should treat `avatar: null` as “show initials” — no phantom requests or 404 fallbacks.
+- **Write path:** All avatar uploads and deletes go through `avatar-storage.ts` helpers that update both storage and `has_avatar` together.
+- **Backfill:** After deploying the migration, run `apps/api/scripts/backfill-has-avatar.ts` once to set flags for existing storage files.
+- **Components:** Use `PersonAvatar` / `ContactAvatar` / Mantine `Avatar` with `name` + `color` for initials fallback when `avatar` is null.
+
+LinkedIn company/school logos use the separate `linkedin_logos` bucket and are unrelated to `has_avatar`.
 
 # Fastify server
 
 Use Fastify built in console logging functions of `request.log` and `reply.log` instead of `console.log` for better performance, structured logging, and integration with Fastify's logging ecosystem.
+
+**Route schemas:** Use Zod from `@bondery/schemas` and `@bondery/schemas/http` with `fastify-zod-openapi` — not TypeBox. Export route plugins as `AppRoutePlugin` from `lib/fastify-types.ts`. Put `satisfies FastifyZodOpenApiSchema` on the inner `schema` object (not the route options wrapper). Do not annotate handlers with `reply: FastifyReply` — it breaks request type inference. In `onRoute` hooks, mutate `routeOptions.schema.tags` in place; never `{ ...routeOptions.schema }` (spread drops the plugin symbol config and breaks OpenAPI generation). Shared read models are registered for OpenAPI `$ref`s via `registerOpenApiComponentSchemas()` at API bootstrap.
 
 # Code review
 
@@ -33,7 +111,7 @@ When reviewing code, focus on the following aspects:
 4. **Security**: Check for any security vulnerabilities or potential risks in the code.
 5. **Edge Cases**: Consider how the code handles edge cases and unexpected inputs.
 6. **Documentation**: Verify that the code is well-documented, with clear comments and explanations where necessary.
-7. **UX** Consider the user experience implications of the code, ensuring it provides a smooth and intuitive experience for users. Read `references/ux-patterns.md` for Bondery-specific patterns covering feedback, progressive disclosure, destructive actions, and autofocus.
+7. **UX** Consider the user experience implications of the code, ensuring it provides a smooth and intuitive experience for users. Read `references/ux-patterns.md` for Bondery-specific patterns covering feedback, progressive disclosure, destructive actions, autofocus, and non-dismissible modals during blocking work.
 
 # Supabase extensions schema
 

@@ -36,6 +36,17 @@ export const personIdsSelectionSchema = z.object({
 
 export const excludePersonIdsSchema = z.array(idSchema).optional();
 
+export const paginationMetaSchema = z.object({
+  limit: z.number().int().positive(),
+  offset: z.number().int().nonnegative(),
+  totalCount: z.number().int().nonnegative(),
+  hasMore: z.boolean(),
+  sort: z.string().nullable(),
+  search: z.string().nullable(),
+});
+
+export type PaginationMeta = z.infer<typeof paginationMetaSchema>;
+
 export function labelFieldSchema(maxLength: number, fieldName = "Label") {
   return z
     .string()
@@ -73,6 +84,16 @@ export function makeListResponseSchema<K extends string, S extends z.ZodTypeAny>
     [key]: z.array(itemSchema),
     totalCount: z.number(),
   }) as z.ZodObject<Record<K, z.ZodArray<S>> & { totalCount: z.ZodNumber }>;
+}
+
+export function makePaginatedListResponseSchema<K extends string, S extends z.ZodTypeAny>(
+  key: K,
+  itemSchema: S,
+) {
+  return z.object({
+    [key]: z.array(itemSchema),
+    pagination: paginationMetaSchema,
+  }) as z.ZodObject<Record<K, z.ZodArray<S>> & { pagination: typeof paginationMetaSchema }>;
 }
 
 export function makeCollectionResponseSchema<K extends string, S extends z.ZodTypeAny>(

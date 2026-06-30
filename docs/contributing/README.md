@@ -9,7 +9,8 @@ Before you get started, please read through the guides in this section:
 ## Guides
 
 * [Architecture](architecture.md) — How the monorepo is structured, what each app does, and the tech decisions behind them
-* [Local development setup](local-setup.md) — Step-by-step instructions to run every app on your local machine
+* [Sync architecture (mobile)](sync-architecture.md) — Offline-first mobile sync: pull/bootstrap, SQLite, mutation outbox
+* [Local development setup](local-setup.md) — Step-by-step instructions to run every app, including mobile sync
 
 ## Workflow
 

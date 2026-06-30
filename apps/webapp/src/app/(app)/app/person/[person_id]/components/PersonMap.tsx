@@ -2,7 +2,7 @@
 
 import { useMemo } from "react";
 import { Stack, Text } from "@mantine/core";
-import { useTranslations } from "next-intl";
+import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
 import { PeopleMap } from "@/app/(app)/app/components/map/PeopleMap";
 
 interface PersonMapProps {

@@ -1,5 +1,4 @@
-import { getAuthHeaders } from "@/lib/authHeaders";
-import { API_URL } from "@/lib/config";
+import { serverApiFetch } from "@/lib/api/server";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import { ChatView } from "./ChatView";
 import type { SubscriptionStatus } from "@bondery/schemas";
@@ -9,22 +8,14 @@ import type { SubscriptionStatus } from "@bondery/schemas";
  * A new session is only created when the user sends their first message.
  */
 export default async function ChatPage() {
-  const headers = await getAuthHeaders();
-
   let avatarUrl: string | null = null;
   let userName: string | null = null;
   let subscriptionStatus: SubscriptionStatus | null = null;
 
   try {
     const [settingsRes, subscriptionRes] = await Promise.all([
-      fetch(`${API_URL}${API_ROUTES.ME_SETTINGS}`, {
-        next: { tags: ["settings"] },
-        headers,
-      }),
-      fetch(`${API_URL}${API_ROUTES.SUBSCRIPTIONS}`, {
-        cache: "no-store",
-        headers,
-      }),
+      serverApiFetch(API_ROUTES.ME_SETTINGS, undefined, { next: { tags: ["settings"] } }),
+      serverApiFetch(API_ROUTES.SUBSCRIPTIONS, undefined, { cache: "no-store" }),
     ]);
 
     if (settingsRes.ok) {
@@ -40,10 +31,7 @@ export default async function ChatPage() {
 
     // Fire-and-forget sync: bootstraps subscription for pre-existing Polar customers
     if (subscriptionStatus?.plan !== "premium") {
-      fetch(`${API_URL}${API_ROUTES.SUBSCRIPTIONS_SYNC}`, {
-        method: "POST",
-        headers,
-      }).catch(() => {});
+      serverApiFetch(API_ROUTES.SUBSCRIPTIONS_SYNC, { method: "POST" }).catch(() => {});
     }
   } catch {}
 

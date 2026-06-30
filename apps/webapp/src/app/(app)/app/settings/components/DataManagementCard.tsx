@@ -2,7 +2,7 @@
 
 import { Text, Group, Divider, CardSection } from "@mantine/core";
 import { IconDatabase } from "@tabler/icons-react";
-import { useTranslations } from "next-intl";
+import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
 import { LogoutSection } from "./LogoutSection";
 import { DeleteAccountSection } from "./DeleteAccountSection";
 import { LinkedInImportSection } from "./LinkedInImportSection";

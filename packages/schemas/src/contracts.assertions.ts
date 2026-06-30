@@ -14,6 +14,7 @@ import {
 } from "./entities/merge.js";
 import { subscriptionStatusSchema } from "./entities/subscription.js";
 import { createTagSchema, deleteTagsRequestSchema, updateTagSchema } from "./entities/tag.js";
+import { paginationQuerySchema } from "./http/index.js";
 
 function assert(condition: unknown, message: string): asserts condition {
   if (!condition) {
@@ -94,7 +95,7 @@ function run() {
   assert("ids" in deleteByIds, "deleteContactsRequestSchema should accept ids variant");
 
   const deleteByFilter = deleteContactsRequestSchema.parse({
-    filter: { q: "Ada", sort: "nameAsc" },
+    filter: { search: "Ada", sort: "nameAsc" },
   });
   assert("filter" in deleteByFilter, "deleteContactsRequestSchema should accept filter variant");
 
@@ -223,6 +224,14 @@ function run() {
 
   const mergeResponse = mergeRecommendationsResponseSchema.parse({
     recommendations: [mergeRecommendation],
+    pagination: {
+      totalCount: 1,
+      hasMore: false,
+      limit: 50,
+      offset: 0,
+      sort: null,
+      search: null,
+    },
   });
   assertEqual(
     mergeResponse.recommendations.length,
@@ -255,6 +264,15 @@ function run() {
     "ada",
     "instagramImportCommitRequestSchema should parse contacts",
   );
+
+  // HTTP pagination query coercion
+  const paginationDefaults = paginationQuerySchema.parse({});
+  assertEqual(paginationDefaults.limit, 50, "paginationQuerySchema default limit");
+  assertEqual(paginationDefaults.offset, 0, "paginationQuerySchema default offset");
+
+  const paginationCoerced = paginationQuerySchema.parse({ limit: "25", offset: "10" });
+  assertEqual(paginationCoerced.limit, 25, "paginationQuerySchema coerces limit");
+  assertEqual(paginationCoerced.offset, 10, "paginationQuerySchema coerces offset");
 }
 
 run();

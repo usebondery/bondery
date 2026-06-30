@@ -62,7 +62,8 @@ There are two ways to bulk-import contacts:
 
 ## What's next?
 
-* Read about [People](../concepts/people.md), [Groups](../concepts/groups.md), [Interactions](../concepts/interactions.md), and [Reminders](../concepts/reminders.md) to understand what each concept can hold
-* Set up the [Chrome Extension](chrome-extension.md) to speed up contact capture
+* Read about [People](../concepts/people.md), [Myself](../concepts/myself.md), [Groups](../concepts/groups.md), [Interactions](../concepts/interactions.md), and [Reminders](../concepts/reminders.md) to understand what each concept can hold
+* Set up the [Chrome Extension](chrome-extension.md) or [bulk import](import.md) to add contacts faster
+* Use the [Mobile app](mobile-app.md) for contacts on iOS and Android
 * If you're a developer, see the [API reference](../api/api-reference/README.md) or the [Contributing guide](../contributing/README.md)
 

@@ -3,7 +3,7 @@
 import { ActionIcon, Card, Group, Select, Stack, Text, Tooltip } from "@mantine/core";
 import { IconPlus, IconTrash } from "@tabler/icons-react";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useTranslations } from "next-intl";
+import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
 import type {
   ContactPreview,
   ContactRelationshipWithPeople,

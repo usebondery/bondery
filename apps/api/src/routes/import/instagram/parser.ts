@@ -9,7 +9,7 @@ import {
   COMMON_BRAND_NAME_TOKEN_SET as COMMON_BRANDS_NAME_TOKENS,
   COMMON_PERSON_NAME_TOKEN_SET as COMMON_NAME_TOKENS,
 } from "@bondery/helpers/name";
-import type { UploadFile } from "../../../lib/schemas.js";
+import type { UploadFile } from "../../../lib/queries.js";
 
 type InstagramStringData = {
   href?: unknown;

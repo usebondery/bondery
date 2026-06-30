@@ -40,3 +40,12 @@ export const AVATAR_UPLOAD = {
   maxFileSizeBytes: 5 * 1024 * 1024,
   maxFileSizeMB: 5,
 } as const;
+
+export const API_KEY_LIMITS = {
+  maxPerUser: 5,
+  labelMaxLength: 100,
+} as const;
+
+export const API_KEY_PREFIX = "bondery_key_" as const;
+
+export const API_KEY_PERMISSIONS = ["read", "full"] as const;

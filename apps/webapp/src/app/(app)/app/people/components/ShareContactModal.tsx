@@ -6,7 +6,7 @@ import { schemaResolver, useForm } from "@mantine/form";
 import { modals } from "@mantine/modals";
 import { notifications } from "@mantine/notifications";
 import { IconSend2, IconShare } from "@tabler/icons-react";
-import { useTranslations } from "next-intl";
+import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
 import { SelectableCard } from "@/app/(app)/app/components/SelectableCard";
 import {
   ModalFooter,
@@ -14,7 +14,7 @@ import {
   errorNotificationTemplate,
   successNotificationTemplate,
 } from "@bondery/mantine-next";
-import { API_ROUTES } from "@bondery/helpers/globals/paths";
+import { useShareContactMutation } from "@/lib/query/hooks/useContacts";
 import {
   shareContactEmailSchema,
   type Contact,
@@ -194,6 +194,7 @@ interface OpenShareContactModalParams {
 
 function ShareContactModalContent({ contact, modalId }: { contact: Contact; modalId: string }) {
   const tShare = useTranslations("ShareContactModal");
+  const shareContactMutation = useShareContactMutation();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const form = useForm({
     mode: "controlled",
@@ -235,20 +236,12 @@ function ShareContactModalContent({ contact, modalId }: { contact: Contact; moda
     setIsSubmitting(true);
 
     try {
-      const response = await fetch(API_ROUTES.CONTACTS_SHARE, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          personId: contact.id,
-          recipientEmails: values.recipientEmails,
-          message: values.message || undefined,
-          selectedFields: Array.from(new Set([...selectedFields, ...REQUIRED_FIELDS])),
-        }),
+      await shareContactMutation.mutateAsync({
+        personId: contact.id,
+        recipientEmails: values.recipientEmails,
+        message: values.message || undefined,
+        selectedFields: Array.from(new Set([...selectedFields, ...REQUIRED_FIELDS])),
       });
-
-      if (!response.ok) {
-        throw new Error("Failed to share contact");
-      }
 
       notifications.show(
         successNotificationTemplate({

@@ -1,26 +1,16 @@
-import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
-import { Type } from "@sinclair/typebox";
+import type { FastifyReply } from "fastify";
+import type { AppFastifyInstance, AppRoutePlugin } from "../../../lib/fastify-types.js";
+import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
 import { getAuth } from "../../../lib/auth.js";
+import { registerApiKeyProtectedHooks } from "../../../lib/api-key-access.js";
 import { parseLinkedInCsvUpload } from "./parser.js";
 import { assignContactsToDefaultImportGroup } from "../../../lib/default-import-groups.js";
-import type { LinkedInImportCommitResponse, LinkedInParseResponse } from "@bondery/schemas";
+import type {
+  LinkedInImportCommitResponse,
+  LinkedInParseResponse,
+} from "@bondery/schemas";
+import { linkedInImportCommitRequestSchema } from "@bondery/schemas";
 import { IMPORT_TIER } from "../../../lib/rate-limit.js";
-
-const LinkedInCommitContactSchema = Type.Object({
-  firstName: Type.String(),
-  lastName: Type.Union([Type.String(), Type.Null()]),
-  middleName: Type.Optional(Type.Union([Type.String(), Type.Null()])),
-  linkedinUsername: Type.String(),
-  email: Type.Optional(Type.Union([Type.String(), Type.Null()])),
-  position: Type.Optional(Type.Union([Type.String(), Type.Null()])),
-  company: Type.Optional(Type.Union([Type.String(), Type.Null()])),
-  connectedAt: Type.Optional(Type.Union([Type.String(), Type.Null()])),
-  isValid: Type.Boolean(),
-});
-
-const LinkedInCommitBody = Type.Object({
-  contacts: Type.Array(LinkedInCommitContactSchema, { minItems: 1 }),
-});
 
 const HANDLE_LOOKUP_CHUNK_SIZE = 150;
 
@@ -43,13 +33,15 @@ function buildImportedTitle(position: string | null, company: string | null): st
   return null;
 }
 
-export async function linkedInImportRoutes(fastify: FastifyInstance) {
+export const linkedInImportRoutes: AppRoutePlugin = async (fastify) => {
   fastify.addHook("onRoute", (routeOptions) => {
-    routeOptions.schema = { ...routeOptions.schema, tags: ["Import"] };
+    if (routeOptions.schema) {
+      routeOptions.schema.tags = ["Import"];
+    }
   });
-  fastify.addHook("onRequest", fastify.auth([fastify.verifySession]));
+  registerApiKeyProtectedHooks(fastify);
 
-  fastify.post("/parse", async (request: FastifyRequest, reply: FastifyReply) => {
+  fastify.post("/parse", async (request, reply) => {
     const { client, user } = getAuth(request);
 
     try {
@@ -143,11 +135,13 @@ export async function linkedInImportRoutes(fastify: FastifyInstance) {
 
   fastify.post(
     "/commit",
-    { schema: { body: LinkedInCommitBody }, config: { rateLimit: IMPORT_TIER } },
-    async (
-      request: FastifyRequest<{ Body: typeof LinkedInCommitBody.static }>,
-      reply: FastifyReply,
-    ) => {
+    {
+      schema: {
+        body: linkedInImportCommitRequestSchema,
+      } satisfies FastifyZodOpenApiSchema,
+      config: { rateLimit: IMPORT_TIER },
+    },
+    async (request, reply) => {
       const { client, user } = getAuth(request);
       const rawContacts = request.body.contacts;
 

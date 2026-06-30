@@ -1,8 +1,9 @@
 "use client";
 
 import { Menu, Button, MenuTarget, MenuDropdown, MenuItem } from "@mantine/core";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { IconArrowsSort } from "@tabler/icons-react";
+import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
 
 export type SortOption = "count-desc" | "count-asc" | "alpha-asc" | "alpha-desc";
 
@@ -11,15 +12,21 @@ interface SortMenuProps {
   setSortBy: (option: SortOption) => void;
 }
 
-const sortOptions: { value: SortOption; label: string }[] = [
-  { value: "count-desc", label: "Most people" },
-  { value: "count-asc", label: "Least people" },
-  { value: "alpha-asc", label: "A→Z" },
-  { value: "alpha-desc", label: "Z→A" },
-];
-
 export function SortMenu({ sortBy, setSortBy }: SortMenuProps) {
+  const t = useTranslations("GroupsPage.SortMenu");
   const [opened, setOpened] = useState(false);
+
+  const sortOptions = useMemo(
+    () =>
+      [
+        { value: "count-desc" as const, label: t("CountDesc") },
+        { value: "count-asc" as const, label: t("CountAsc") },
+        { value: "alpha-asc" as const, label: t("AlphaAsc") },
+        { value: "alpha-desc" as const, label: t("AlphaDesc") },
+      ],
+    [t],
+  );
+
   return (
     <Menu shadow="md" width={180} opened={opened} onChange={setOpened}>
       <MenuTarget>
@@ -29,7 +36,7 @@ export function SortMenu({ sortBy, setSortBy }: SortMenuProps) {
           leftSection={<IconArrowsSort size={16} />}
           className={opened ? "button-scale-effect-active" : undefined}
         >
-          Sort
+          {t("Label")}
         </Button>
       </MenuTarget>
       <MenuDropdown>

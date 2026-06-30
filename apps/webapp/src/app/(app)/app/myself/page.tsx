@@ -11,12 +11,11 @@ import type {
 } from "@bondery/schemas";
 import { getMergeRecommendationsData } from "@/app/(app)/app/fix/getMergeRecommendationsData";
 import PersonClient from "../person/[person_id]/PersonClient";
-import { getAuthHeaders } from "@/lib/authHeaders";
+import { serverApiFetch } from "@/lib/api/server";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import { PageWrapper } from "@/app/(app)/app/components/PageWrapper";
 import { ErrorPageHeader } from "@/app/(app)/app/components/ErrorPageHeader";
 import type { Group, Tag } from "@bondery/schemas";
-import { API_URL } from "@/lib/config";
 import { buildAvatarQueryString } from "@/lib/avatarParams";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -24,17 +23,12 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 async function getMyselfData() {
-  const headers = await getAuthHeaders();
-
-  const contactPromise = fetch(
-    `${API_URL}${API_ROUTES.ME_PERSON}?${buildAvatarQueryString("large")}`,
-    {
-      next: { tags: ["contacts"] },
-      headers,
-    },
+  const contactResponse = await serverApiFetch(
+    `${API_ROUTES.ME_PERSON}?${buildAvatarQueryString("large")}`,
+    undefined,
+    { next: { tags: ["contacts"] } },
   );
 
-  const contactResponse = await contactPromise;
   if (!contactResponse.ok) {
     return null;
   }
@@ -61,46 +55,32 @@ async function getMyselfData() {
     linkedInDataResponse,
     allMergeRecommendations,
   ] = await Promise.all([
-    fetch(`${API_URL}${API_ROUTES.GROUPS}`, {
-      next: { tags: ["groups"] },
-      headers,
-    }),
-    fetch(`${API_URL}${API_ROUTES.CONTACTS}/${personId}/groups`, {
+    serverApiFetch(API_ROUTES.GROUPS, undefined, { next: { tags: ["groups"] } }),
+    serverApiFetch(`${API_ROUTES.CONTACTS}/${personId}/groups`, undefined, {
       next: { tags: ["groups", "contacts"] },
-      headers,
     }),
-    fetch(`${API_URL}${API_ROUTES.INTERACTIONS}?${buildAvatarQueryString("medium")}`, {
+    serverApiFetch(`${API_ROUTES.INTERACTIONS}?${buildAvatarQueryString("medium")}`, undefined, {
       next: { tags: ["interactions"] },
-      headers,
     }),
-    fetch(
-      `${API_URL}${API_ROUTES.CONTACTS}/${personId}/relationships?${buildAvatarQueryString("small")}`,
-      {
-        next: { tags: ["relationships", "contacts"] },
-        headers,
-      },
+    serverApiFetch(
+      `${API_ROUTES.CONTACTS}/${personId}/relationships?${buildAvatarQueryString("small")}`,
+      undefined,
+      { next: { tags: ["relationships", "contacts"] } },
     ),
-    fetch(`${API_URL}${API_ROUTES.CONTACTS}/${personId}/important-dates`, {
+    serverApiFetch(`${API_ROUTES.CONTACTS}/${personId}/important-dates`, undefined, {
       next: { tags: ["important-dates", "contacts"] },
-      headers,
     }),
-    fetch(`${API_URL}${API_ROUTES.CONTACTS}?${buildAvatarQueryString("small")}`, {
+    serverApiFetch(`${API_ROUTES.CONTACTS}?${buildAvatarQueryString("small")}`, undefined, {
       next: { tags: ["contacts"] },
-      headers,
     }),
-    fetch(`${API_URL}${API_ROUTES.TAGS}?previewLimit=0`, {
-      next: { tags: ["tags"] },
-      headers,
-    }),
-    fetch(`${API_URL}${API_ROUTES.CONTACTS}/${personId}/tags`, {
+    serverApiFetch(`${API_ROUTES.TAGS}?previewLimit=0`, undefined, { next: { tags: ["tags"] } }),
+    serverApiFetch(`${API_ROUTES.CONTACTS}/${personId}/tags`, undefined, {
       next: { tags: ["tags", "contacts"] },
-      headers,
     }),
-    fetch(`${API_URL}${API_ROUTES.CONTACTS}/${personId}/linkedin-data`, {
+    serverApiFetch(`${API_ROUTES.CONTACTS}/${personId}/linkedin-data`, undefined, {
       next: { tags: ["contacts"] },
-      headers,
     }),
-    getMergeRecommendationsData(headers).catch(() => [] as MergeRecommendation[]),
+    getMergeRecommendationsData().catch(() => [] as MergeRecommendation[]),
   ]);
 
   const groupsData = groupsResponse.ok ? await groupsResponse.json() : { groups: [] };

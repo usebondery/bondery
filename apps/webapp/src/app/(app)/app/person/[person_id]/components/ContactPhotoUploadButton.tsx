@@ -1,12 +1,16 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { ContactAvatar } from "./ContactAvatar";
 import { openPhotoUploadModal } from "@/lib/photoUpload";
 import { PhotoUploadModal } from "@/app/(app)/app/settings/components/PhotoUploadModal";
 import { PhotoConfirmModal } from "@/app/(app)/app/settings/components/PhotoConfirmModal";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
-import { revalidateSettings } from "@/app/(app)/app/actions";
+import { getQueryClient } from "@/lib/query/client";
+import {
+  invalidateContactDetail,
+  invalidateSettings,
+} from "@/lib/query/invalidation";
+import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
 
 interface ContactPhotoUploadButtonProps {
   avatarUrl: string | null;
@@ -29,7 +33,7 @@ export function ContactPhotoUploadButton({
   lastName,
   isMyselfContact,
 }: ContactPhotoUploadButtonProps) {
-  const router = useRouter();
+  const t = useTranslations("ContactPhotoUpload");
 
   const openUploadModal = () => {
     openPhotoUploadModal(
@@ -37,27 +41,28 @@ export function ContactPhotoUploadButton({
         uploadEndpoint: `${API_ROUTES.CONTACTS}/${contactId}/photo`,
         avatarUrl,
         displayName: contactName,
-        onSuccess: isMyselfContact
-          ? async () => {
-              await revalidateSettings();
-              router.refresh();
-            }
-          : undefined,
+        onSuccess: async () => {
+          const queryClient = getQueryClient();
+          await Promise.all([
+            invalidateContactDetail(queryClient, contactId),
+            isMyselfContact ? invalidateSettings(queryClient) : Promise.resolve(),
+          ]);
+        },
       },
       {
-        TitleModal: "Upload Contact Photo",
-        AttachProfilePhoto: "Attach a photo for this contact",
-        UpdateError: "Error",
-        InvalidFile: "Invalid file",
-        DragImageHere: "Drag image here or click to select",
-        UpdateProfilePhoto: "Update Contact Photo",
-        Cancel: "Cancel",
-        ConfirmPhoto: "Confirm Photo",
-        UploadingPhoto: "Uploading...",
-        PleaseWait: "Please wait",
-        UpdateSuccess: "Success",
-        PhotoUpdateSuccess: "Contact photo updated successfully",
-        PhotoUpdateError: "Failed to update contact photo",
+        TitleModal: t("TitleModal"),
+        AttachProfilePhoto: t("AttachProfilePhoto"),
+        UpdateError: t("UpdateError"),
+        InvalidFile: t("InvalidFile"),
+        DragImageHere: t("DragImageHere"),
+        UpdateProfilePhoto: t("UpdateProfilePhoto"),
+        Cancel: t("Cancel"),
+        ConfirmPhoto: t("ConfirmPhoto"),
+        UploadingPhoto: t("UploadingPhoto"),
+        PleaseWait: t("PleaseWait"),
+        UpdateSuccess: t("UpdateSuccess"),
+        PhotoUpdateSuccess: t("PhotoUpdateSuccess"),
+        PhotoUpdateError: t("PhotoUpdateError"),
       },
       PhotoUploadModal,
       PhotoConfirmModal,

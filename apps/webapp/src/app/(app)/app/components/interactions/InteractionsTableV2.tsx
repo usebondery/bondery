@@ -11,7 +11,7 @@ import {
   IconTrash,
   IconUsers,
 } from "@tabler/icons-react";
-import { useLocale } from "next-intl";
+import { useCurrentLocale as useLocale } from "@/app/(app)/app/components/UserLocaleProvider";
 import type { Activity, Contact } from "@bondery/schemas";
 import {
   DataTable,

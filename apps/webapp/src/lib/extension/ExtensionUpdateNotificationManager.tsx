@@ -4,11 +4,11 @@ import { useEffect } from "react";
 import { Button, Stack, Text } from "@mantine/core";
 import { IconPuzzle } from "@tabler/icons-react";
 import { notifications } from "@mantine/notifications";
-import { useTranslations } from "next-intl";
+import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
 import { CHROME_EXTENSION_URL, isVersionBelow } from "@bondery/helpers";
 import { detectBonderyChromeExtension } from "./detectBonderyChromeExtension";
 import { statusNotificationsStore } from "@/lib/statusNotificationsStore";
-import { API_URL } from "@/lib/config";
+import { clientApiFetch } from "@/lib/api/client";
 
 const EXTENSION_UPDATE_ID = "extension-update";
 
@@ -31,7 +31,7 @@ export function ExtensionUpdateNotificationManager() {
       if (cancelled || detection.state !== "installed" || !detection.version) return;
 
       try {
-        const res = await fetch(`${API_URL}/status`);
+        const res = await clientApiFetch("/api/status");
         if (!res.ok) return;
 
         const data = await res.json();

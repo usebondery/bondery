@@ -25,7 +25,9 @@ export async function subscriptionSyncRoutes(
   fastify: FastifyInstance,
 ): Promise<void> {
   fastify.addHook("onRoute", (routeOptions) => {
-    routeOptions.schema = { ...routeOptions.schema, tags: ["Subscriptions"] };
+    if (routeOptions.schema) {
+      routeOptions.schema.tags = ["Subscriptions"];
+    }
   });
   fastify.addHook("onRequest", fastify.auth([fastify.verifySession]));
 

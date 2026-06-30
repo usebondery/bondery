@@ -1,8 +1,8 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@bondery/schemas/supabase.types";
 import type { ShareableField } from "@bondery/schemas";
-import { CONTACT_SELECT } from "../../../lib/schemas.js";
-import { buildContactAvatarUrl } from "../../../lib/supabase.js";
+import { CONTACT_SELECT } from "../../../lib/queries.js";
+import { resolveContactAvatarUrl } from "../../../lib/supabase.js";
 import {
   attachContactExtras,
   type FullContactExtras,
@@ -199,7 +199,7 @@ export async function shareContact(
   // Fetch sender's display name from myself contact
   const { data: myselfContact } = await client
     .from("people")
-    .select("first_name, middle_name, last_name")
+    .select("first_name, middle_name, last_name, has_avatar, updated_at")
     .eq("user_id", user.id)
     .eq("myself", true)
     .single();
@@ -271,7 +271,11 @@ export async function shareContact(
     senderEmail: user.email,
     recipientEmail: recipientEmails[0],
     senderAvatarUrl:
-      buildContactAvatarUrl(client, user.id, user.id) ?? undefined,
+      resolveContactAvatarUrl(client, user.id, {
+        id: user.id,
+        hasAvatar: myselfContact?.has_avatar ?? false,
+        updatedAt: myselfContact?.updated_at ?? null,
+      }) ?? undefined,
     message: message || undefined,
     contactName,
     contactAvatarUrl: enriched.avatar ?? undefined,

@@ -16,7 +16,7 @@ import {
   getRandomGroupColor,
 } from "../../../components/color-picker";
 import { EmojiPickerInput } from "../../../components/emoji-picker";
-import { createGroup, updateGroup } from "../../../lib/api/client";
+import { groupsDomain } from "../../../lib/domains/groups";
 import { UI_TIMING_MS } from "../../../lib/config";
 import { useSheetForm } from "../../../lib/forms/useSheetForm";
 import { useMobileTranslations } from "../../../lib/i18n/useMobileTranslations";
@@ -98,7 +98,7 @@ export function GroupEditSheet(props: GroupEditSheetProps) {
     if (!canSave) return;
     try {
       if (mode === "create") {
-        const { group } = await createGroup({
+        const group = groupsDomain.create({
           label: values.label,
           emoji: values.emoji,
           color: values.color,
@@ -108,7 +108,7 @@ export function GroupEditSheet(props: GroupEditSheetProps) {
         return;
       }
 
-      const { group } = await updateGroup(props.groupId, {
+      const group = groupsDomain.update(props.groupId, {
         label: values.label,
         emoji: values.emoji,
         color: values.color,

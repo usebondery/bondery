@@ -4,7 +4,8 @@ import { ActionIcon, Box, Menu, MenuItem, NavLink, ScrollArea, Text, Tooltip } f
 import { notifications } from "@mantine/notifications";
 import { IconMessagePlus, IconTrash } from "@tabler/icons-react";
 import { usePathname } from "next/navigation";
-import { useFormatter, useTranslations } from "next-intl";
+import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
+import { useDateFormatter as useFormatter } from "@/lib/i18n/useDateFormatter";
 import { useState } from "react";
 import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import type { ChatSession } from "@bondery/schemas";
@@ -17,6 +18,7 @@ import {
 import { openStandardConfirmModal } from "@/app/(app)/app/components/modals/openStandardConfirmModal";
 import { formatRelativeTime } from "@/lib/formatRelativeTime";
 import { useChatSessions } from "./ChatSessionsContext";
+import { useChatSessionsQuery, useDeleteChatSessionMutation } from "@/lib/query/hooks/useChat";
 
 interface SessionListItemProps {
   session: ChatSession;
@@ -73,11 +75,11 @@ export function ChatSessionSidebar() {
   const t = useTranslations("ChatPage");
   const formatter = useFormatter();
   const pathname = usePathname();
-  const { sessions, removeSession, triggerChatReset } = useChatSessions();
+  const { triggerChatReset } = useChatSessions();
+  const { data: sessions = [] } = useChatSessionsQuery();
+  const deleteSessionMutation = useDeleteChatSessionMutation();
 
   function handleNewSession() {
-    // Reset the ChatView via shared context (works even when history.pushState
-    // has desynced the browser URL from the Next.js router).
     window.history.pushState(null, "", WEBAPP_ROUTES.CHAT);
     triggerChatReset();
   }
@@ -92,29 +94,17 @@ export function ChatSessionSidebar() {
       confirmLeftSection: <IconTrash size={16} />,
       onConfirm: async () => {
         try {
-          const response = await fetch(`/api/chat/sessions/${sessionId}`, { method: "DELETE" });
-          if (response.ok) {
-            // Optimistic update — instant, no round-trip needed
-            removeSession(sessionId);
-            notifications.show(
-              successNotificationTemplate({
-                title: t("deleteSessionSuccess"),
-                description: "",
-              }),
-            );
-            // If we're viewing the deleted session, reset to new chat
-            const currentPath = window.location.pathname;
-            if (currentPath === `${WEBAPP_ROUTES.CHAT}/${sessionId}`) {
-              window.history.pushState(null, "", WEBAPP_ROUTES.CHAT);
-              triggerChatReset();
-            }
-          } else {
-            notifications.show(
-              errorNotificationTemplate({
-                title: t("deleteSessionError"),
-                description: "",
-              }),
-            );
+          await deleteSessionMutation.mutateAsync(sessionId);
+          notifications.show(
+            successNotificationTemplate({
+              title: t("deleteSessionSuccess"),
+              description: "",
+            }),
+          );
+          const currentPath = window.location.pathname;
+          if (currentPath === `${WEBAPP_ROUTES.CHAT}/${sessionId}`) {
+            window.history.pushState(null, "", WEBAPP_ROUTES.CHAT);
+            triggerChatReset();
           }
         } catch {
           notifications.show(
@@ -139,7 +129,6 @@ export function ChatSessionSidebar() {
         flexShrink: 0,
       }}
     >
-      {/* Header */}
       <Box
         style={{
           borderBottom: "1px solid var(--mantine-color-default-border)",
@@ -160,7 +149,6 @@ export function ChatSessionSidebar() {
         </Tooltip>
       </Box>
 
-      {/* Session list */}
       <ScrollArea flex={1} style={{ minHeight: 0 }}>
         <Box py="xs">
           {sessions.length === 0 ? (

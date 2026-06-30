@@ -10,7 +10,7 @@ export function buildContactsSelectionGroupPayload(
 ): AddContactsToGroupRequest {
   if (state.isAllTotalSelected) {
     return {
-      contactFilter: { q: debouncedQuery || undefined, sort: "nameAsc" },
+      contactFilter: { search: debouncedQuery || undefined, sort: "nameAsc" },
       excludePersonIds: state.getExcludedIds(),
     };
   }

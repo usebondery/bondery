@@ -27,17 +27,24 @@ import {
   useState,
   useDeferredValue,
 } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useTranslations } from "next-intl";
-import { API_ROUTES, WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
+import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
+import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import { DEBOUNCE_MS } from "@/lib/config";
+import {
+  createMapPinsQueryFn,
+  type MapPinsBounds,
+  type MapPinsMode,
+} from "@/lib/query/fetchers/contacts";
+import { contactKeys } from "@/lib/query/keys";
 import ContactsTable, {
   type ColumnConfig,
   type SortOrder,
 } from "@/app/(app)/app/components/contacts/ContactsTableV2";
 import { LocationLookupInput } from "@/app/(app)/app/components/LocationLookupInput";
-import { openDeleteContactModal } from "@/app/(app)/app/components/contacts/openDeleteContactModal";
-import { openDeleteContactsModal } from "@/app/(app)/app/components/contacts/openDeleteContactsModal";
+import { useOpenDeleteContactModal } from "@/app/(app)/app/components/contacts/openDeleteContactModal";
+import { useOpenDeleteContactsModal } from "@/app/(app)/app/components/contacts/openDeleteContactsModal";
 import { openAddPeopleToGroupSelectionModal } from "@/app/(app)/app/people/components/AddPeopleToGroupSelectionModal";
 import { openMergeWithModal } from "@/app/(app)/app/people/components/MergeWithModal";
 import { formatContactName } from "@/lib/nameHelpers";
@@ -51,10 +58,27 @@ import {
 import type { MapView, MapPin, AddressPin } from "./types";
 import type { ContactAddressEntry } from "@bondery/schemas";
 import { geocodeSuggestionDisplayLabel } from "@bondery/helpers/geocode";
-import { revalidateContacts } from "../actions";
 
 interface MapPageClientProps {
   view: MapView;
+}
+
+function mapViewToMode(view: MapView): MapPinsMode {
+  return view === "addresses" ? "address" : "contact";
+}
+
+function clampBounds(bounds: MapBounds): MapPinsBounds {
+  const clampLat = (v: number) => Math.max(-90, Math.min(90, v));
+  const clampLon = (v: number) => Math.max(-180, Math.min(180, v));
+  const lonSpan = bounds.maxLon - bounds.minLon;
+  const minLon = lonSpan >= 360 ? -180 : clampLon(bounds.minLon);
+  const maxLon = lonSpan >= 360 ? 180 : clampLon(bounds.maxLon);
+  return {
+    minLat: clampLat(bounds.minLat),
+    maxLat: clampLat(bounds.maxLat),
+    minLon,
+    maxLon,
+  };
 }
 
 function sortPins(list: MapPin[], order: SortOrder): MapPin[] {
@@ -80,9 +104,13 @@ function sortPins(list: MapPin[], order: SortOrder): MapPin[] {
 
 export function MapPageClient({ view }: MapPageClientProps) {
   const t = useTranslations("MapPage");
+  const tPeople = useTranslations("PeoplePage");
+  const openDeleteContactModal = useOpenDeleteContactModal();
+  const openDeleteContactsModal = useOpenDeleteContactsModal();
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const queryClient = useQueryClient();
 
   // Map location search
   const [locationQuery, setLocationQuery] = useState("");
@@ -116,40 +144,27 @@ export function MapPageClient({ view }: MapPageClientProps) {
   // can re-fetch without waiting for a map movement event.
   const lastBoundsRef = useRef<MapBounds | null>(null);
 
-  const fetchPins = useCallback(async (bounds: MapBounds) => {
-    // Clamp to valid API ranges. Leaflet reports values outside ±180/±90 when
-    // the viewport covers more than one world-width (common at low zoom levels).
-    const clampLat = (v: number) => Math.max(-90, Math.min(90, v));
-    const clampLon = (v: number) => Math.max(-180, Math.min(180, v));
-    const lonSpan = bounds.maxLon - bounds.minLon;
-    const minLon = lonSpan >= 360 ? -180 : clampLon(bounds.minLon);
-    const maxLon = lonSpan >= 360 ? 180 : clampLon(bounds.maxLon);
-    const params = new URLSearchParams({
-      minLat: String(clampLat(bounds.minLat)),
-      maxLat: String(clampLat(bounds.maxLat)),
-      minLon: String(minLon),
-      maxLon: String(maxLon),
-    });
+  const fetchPins = useCallback(
+    async (bounds: MapBounds) => {
+      const mode = mapViewToMode(viewRef.current);
+      const clamped = clampBounds(bounds);
 
-    const mode = viewRef.current;
-    const endpoint =
-      mode === "addresses"
-        ? API_ROUTES.CONTACTS_MAP_ADDRESS_PINS
-        : API_ROUTES.CONTACTS_MAP_PINS;
-
-    try {
-      const res = await fetch(`${endpoint}?${params}`);
-      if (!res.ok) return;
-      const json = await res.json();
-      if (mode === "addresses") {
-        setAddressPins(json.pins || []);
-      } else {
-        setLocationPins(json.pins || []);
+      try {
+        const json = await queryClient.fetchQuery({
+          queryKey: contactKeys.mapPins(mode, clamped),
+          queryFn: createMapPinsQueryFn(mode, clamped),
+        });
+        if (mode === "address") {
+          setAddressPins((json.pins as AddressPin[]) || []);
+        } else {
+          setLocationPins((json.pins as MapPin[]) || []);
+        }
+      } catch {
+        // silently ignore transient network errors
       }
-    } catch {
-      // silently ignore transient network errors
-    }
-  }, []); // stable — view is read from viewRef
+    },
+    [queryClient],
+  );
 
   const handleBoundsChange = useDebouncedCallback((bounds: MapBounds) => {
     lastBoundsRef.current = bounds;
@@ -367,11 +382,10 @@ export function MapPageClient({ view }: MapPageClientProps) {
       contactId,
       contactName: target
         ? [target.firstName, target.lastName].filter(Boolean).join(" ")
-        : "this contact",
+        : tPeople("ThisContactFallback"),
       onDeleted: async () => {
         setSelectedIds(new Set());
-        await revalidateContacts();
-        router.refresh();
+        if (lastBoundsRef.current) void fetchPins(lastBoundsRef.current);
       },
     });
   };
@@ -381,8 +395,7 @@ export function MapPageClient({ view }: MapPageClientProps) {
       contactIds: ids,
       onDeleted: async () => {
         setSelectedIds(new Set());
-        await revalidateContacts();
-        router.refresh();
+        if (lastBoundsRef.current) void fetchPins(lastBoundsRef.current);
       },
     });
   };

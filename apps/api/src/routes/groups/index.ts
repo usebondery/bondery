@@ -3,18 +3,14 @@
  * Handles CRUD operations for groups and group memberships
  */
 
-import type { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
-import { Type } from "@sinclair/typebox";
+import type { FastifyReply } from "fastify";
+import type { AppRoutePlugin, FastifyZodOpenApiSchema } from "../../lib/fastify-types.js";
 import { getAuth } from "../../lib/auth.js";
-import {
-  UuidParam,
-  IdsBody,
-  GROUP_SELECT,
-  AvatarQualityEnum,
-  AvatarSizeEnum,
-  extractAvatarOptions,
-} from "../../lib/schemas.js";
-import { buildContactAvatarUrl } from "../../lib/supabase.js";
+import { registerApiKeyProtectedHooks } from "../../lib/api-key-access.js";
+import { GROUP_SELECT, extractAvatarOptions } from "../../lib/queries.js";
+import { idsRequestBodySchema, previewListQuerySchema, uuidParamSchema } from "@bondery/schemas/http";
+import { createGroupSchema, updateGroupSchema } from "@bondery/schemas";
+import { resolveContactAvatarUrl } from "../../lib/supabase.js";
 import type {
   Group,
   GroupWithCount,
@@ -25,42 +21,25 @@ import { GROUP_LABEL_MAX_LENGTH } from "@bondery/schemas/constants";
 
 import { registerGroupContactRoutes } from "./contacts.js";
 
-// ── TypeBox Schemas ──────────────────────────────────────────────────────────
-
-const GroupsQuery = Type.Object({
-  previewLimit: Type.Optional(Type.String()),
-  avatarQuality: Type.Optional(AvatarQualityEnum),
-  avatarSize: Type.Optional(AvatarSizeEnum),
-});
-
-const CreateGroupBody = Type.Object({
-  label: Type.String({ minLength: 1, maxLength: GROUP_LABEL_MAX_LENGTH }),
-  emoji: Type.String({ minLength: 1 }),
-  color: Type.String({ minLength: 1 }),
-});
-
-const UpdateGroupBody = Type.Object({
-  label: Type.Optional(Type.String({ minLength: 1, maxLength: GROUP_LABEL_MAX_LENGTH })),
-  emoji: Type.Optional(Type.String({ minLength: 1 })),
-  color: Type.Optional(Type.String({ minLength: 1 })),
-});
-
-export async function groupRoutes(fastify: FastifyInstance) {
+export const groupRoutes: AppRoutePlugin = async (fastify) => {
   fastify.addHook("onRoute", (routeOptions) => {
-    routeOptions.schema = { ...routeOptions.schema, tags: ["Groups"] };
+    if (routeOptions.schema) {
+      routeOptions.schema.tags = ["Groups"];
+    }
   });
-  fastify.addHook("onRequest", fastify.auth([fastify.verifySession]));
+  registerApiKeyProtectedHooks(fastify);
 
   /**
    * GET /api/groups - List all groups with contact counts
    */
   fastify.get(
     "/",
-    { schema: { querystring: GroupsQuery } },
-    async (
-      request: FastifyRequest<{ Querystring: typeof GroupsQuery.static }>,
-      reply: FastifyReply,
-    ) => {
+    {
+      schema: {
+        querystring: previewListQuerySchema,
+      } satisfies FastifyZodOpenApiSchema,
+    },
+    async (request, reply) => {
       const { client, user } = getAuth(request);
 
       const previewLimitRaw = request.query?.previewLimit;
@@ -118,7 +97,7 @@ export async function groupRoutes(fastify: FastifyInstance) {
           const { data: previewContacts, error: previewError } = await client
             .from("people")
             .select(
-              `id, firstName:first_name, lastName:last_name, updatedAt:updated_at`,
+              `id, firstName:first_name, lastName:last_name, updatedAt:updated_at, hasAvatar:has_avatar`,
             )
             .in("id", previewIds)
             .eq("myself", false);
@@ -132,12 +111,15 @@ export async function groupRoutes(fastify: FastifyInstance) {
               contact.id,
               {
                 ...contact,
-                avatar: buildContactAvatarUrl(
+                avatar: resolveContactAvatarUrl(
                   client,
                   user.id,
-                  contact.id,
+                  {
+                    id: contact.id,
+                    hasAvatar: contact.hasAvatar,
+                    updatedAt: contact.updatedAt,
+                  },
                   avatarOptions,
-                  contact.updatedAt,
                 ),
               } as ContactPreview,
             ]),
@@ -174,13 +156,12 @@ export async function groupRoutes(fastify: FastifyInstance) {
    */
   fastify.post(
     "/",
-    { schema: { body: CreateGroupBody } },
-    async (
-      request: FastifyRequest<{
-        Body: { label: string; emoji: string; color: string };
-      }>,
-      reply: FastifyReply,
-    ) => {
+    {
+      schema: {
+        body: createGroupSchema,
+      } satisfies FastifyZodOpenApiSchema,
+    },
+    async (request, reply) => {
       const { client, user } = getAuth(request);
       const body = request.body;
 
@@ -211,11 +192,12 @@ export async function groupRoutes(fastify: FastifyInstance) {
    */
   fastify.get(
     "/:id",
-    { schema: { params: UuidParam } },
-    async (
-      request: FastifyRequest<{ Params: { id: string } }>,
-      reply: FastifyReply,
-    ) => {
+    {
+      schema: {
+        params: uuidParamSchema,
+      } satisfies FastifyZodOpenApiSchema,
+    },
+    async (request, reply) => {
       const { client, user } = getAuth(request);
       const { id } = request.params;
 
@@ -239,14 +221,13 @@ export async function groupRoutes(fastify: FastifyInstance) {
    */
   fastify.patch(
     "/:id",
-    { schema: { params: UuidParam, body: UpdateGroupBody } },
-    async (
-      request: FastifyRequest<{
-        Params: { id: string };
-        Body: { label?: string; emoji?: string; color?: string };
-      }>,
-      reply: FastifyReply,
-    ) => {
+    {
+      schema: {
+        params: uuidParamSchema,
+        body: updateGroupSchema,
+      } satisfies FastifyZodOpenApiSchema,
+    },
+    async (request, reply) => {
       const { client, user } = getAuth(request);
       const { id } = request.params;
       const body = request.body;
@@ -284,11 +265,12 @@ export async function groupRoutes(fastify: FastifyInstance) {
    */
   fastify.delete(
     "/",
-    { schema: { body: IdsBody } },
-    async (
-      request: FastifyRequest<{ Body: { ids: string[] } }>,
-      reply: FastifyReply,
-    ) => {
+    {
+      schema: {
+        body: idsRequestBodySchema,
+      } satisfies FastifyZodOpenApiSchema,
+    },
+    async (request, reply) => {
       const { client, user } = getAuth(request);
       const { ids } = request.body;
 
@@ -311,11 +293,12 @@ export async function groupRoutes(fastify: FastifyInstance) {
    */
   fastify.delete(
     "/:id",
-    { schema: { params: UuidParam } },
-    async (
-      request: FastifyRequest<{ Params: { id: string } }>,
-      reply: FastifyReply,
-    ) => {
+    {
+      schema: {
+        params: uuidParamSchema,
+      } satisfies FastifyZodOpenApiSchema,
+    },
+    async (request, reply) => {
       const { client, user } = getAuth(request);
       const { id } = request.params;
 

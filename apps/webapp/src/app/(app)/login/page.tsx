@@ -9,7 +9,7 @@ import {
 } from "@tabler/icons-react";
 import { notifications } from "@mantine/notifications";
 import { createBrowswerSupabaseClient } from "@/lib/supabase/client";
-import { useTranslations } from "next-intl";
+import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
 import { useSearchParams } from "next/navigation";
 import { INTEGRATION_PROVIDERS, WEBSITE_URL } from "@/lib/config";
 import { setLocalePreferencesCookie } from "@/lib/auth/detectLocale";

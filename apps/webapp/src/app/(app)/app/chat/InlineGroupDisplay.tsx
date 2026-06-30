@@ -1,18 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { Badge, Skeleton } from "@mantine/core";
 import { IconUsersGroup } from "@tabler/icons-react";
 import Link from "next/link";
-import { API_ROUTES } from "@bondery/helpers/globals/paths";
-
-interface CachedGroup {
-  emoji: string;
-  name: string;
-  color: string;
-}
-
-const groupCache = new Map<string, CachedGroup>();
+import { useChatGroupQuery } from "@/lib/query/hooks/useChat";
 
 interface InlineGroupDisplayProps {
   id: string;
@@ -23,33 +14,9 @@ interface InlineGroupDisplayProps {
  * Fetches emoji, name, and color by ID.
  */
 export function InlineGroupDisplay({ id }: InlineGroupDisplayProps) {
-  const [data, setData] = useState<CachedGroup | null>(() => groupCache.get(id) ?? null);
+  const { data: group, isLoading } = useChatGroupQuery(id);
 
-  useEffect(() => {
-    if (groupCache.has(id)) return;
-
-    let cancelled = false;
-
-    fetch(`${API_ROUTES.GROUPS}/${id}`)
-      .then((res) => (res.ok ? res.json() : null))
-      .then((json) => {
-        if (cancelled || !json?.group) return;
-        const cached: CachedGroup = {
-          emoji: json.group.emoji ?? "👥",
-          name: json.group.label ?? "",
-          color: json.group.color ?? "gray",
-        };
-        groupCache.set(id, cached);
-        setData(cached);
-      })
-      .catch(() => {});
-
-    return () => {
-      cancelled = true;
-    };
-  }, [id]);
-
-  if (!data) {
+  if (isLoading || !group) {
     return (
       <Skeleton
         height={22}
@@ -65,8 +32,8 @@ export function InlineGroupDisplay({ id }: InlineGroupDisplayProps) {
       <Badge
         variant="light"
         size="sm"
-        color={data.color}
-        leftSection={<span>{data.emoji}</span>}
+        color={group.color ?? "gray"}
+        leftSection={<span>{group.emoji ?? "👥"}</span>}
         rightSection={
           <span style={{ display: "inline-flex", alignItems: "center" }}>
             <IconUsersGroup size={14} />
@@ -77,7 +44,7 @@ export function InlineGroupDisplay({ id }: InlineGroupDisplayProps) {
           root: { cursor: "pointer", display: "inline-flex", verticalAlign: "middle" },
         }}
       >
-        {data.name}
+        {group.label}
       </Badge>
     </Link>
   );

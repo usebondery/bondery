@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { makePaginatedListResponseSchema } from "./_shared.js";
 
 /**
  * Keep snake_case keys to match the existing chat API payloads.
@@ -21,6 +22,18 @@ export const chatMessageSchema = z.object({
   created_at: z.string(),
 });
 
+export const chatSessionsListResponseSchema = makePaginatedListResponseSchema(
+  "sessions",
+  chatSessionSchema,
+);
+
+export const chatMessagesListResponseSchema = makePaginatedListResponseSchema(
+  "messages",
+  chatMessageSchema,
+);
+
 export type ChatSession = z.infer<typeof chatSessionSchema>;
 export type ChatMessageRole = z.infer<typeof chatMessageRoleSchema>;
 export type ChatMessage = z.infer<typeof chatMessageSchema>;
+export type ChatSessionsListResponse = z.infer<typeof chatSessionsListResponseSchema>;
+export type ChatMessagesListResponse = z.infer<typeof chatMessagesListResponseSchema>;

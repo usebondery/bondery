@@ -15,6 +15,8 @@ export interface CopyButtonProps extends Omit<ActionIconProps, "onClick" | "chil
   iconSize?: number;
   /** Duration in ms to show the copied state. Defaults to 2000. */
   copiedDuration?: number;
+  /** Called after a successful clipboard write. */
+  onCopied?: () => void;
 }
 
 /**
@@ -33,6 +35,7 @@ export function CopyButton({
   copiedLabel = "Copied!",
   iconSize = 14,
   copiedDuration = 2000,
+  onCopied,
   variant = "subtle",
   size = "xs",
   ...props
@@ -40,9 +43,11 @@ export function CopyButton({
   const [copied, setCopied] = useState(false);
 
   function handleCopy() {
-    navigator.clipboard.writeText(value);
-    setCopied(true);
-    setTimeout(() => setCopied(false), copiedDuration);
+    void navigator.clipboard.writeText(value).then(() => {
+      setCopied(true);
+      onCopied?.();
+      setTimeout(() => setCopied(false), copiedDuration);
+    });
   }
 
   return (

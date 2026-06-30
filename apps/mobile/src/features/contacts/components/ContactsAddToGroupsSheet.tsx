@@ -11,15 +11,14 @@ import {
   View,
   type ListRenderItemInfo,
 } from "react-native";
-import { addContactsToGroup } from "../../../lib/api/client";
+import { groupsDomain } from "../../../lib/domains/groups";
 import { MOBILE_OPACITY } from "../../../lib/config";
 import { useMobileTranslations } from "../../../lib/i18n/useMobileTranslations";
 import { useAppToast } from "../../../lib/toast/useAppToast";
 import { SearchActionSheet } from "../../../components/SearchActionSheet";
 import { MOBILE_LAYOUT, MOBILE_TYPOGRAPHY } from "../../../theme/tokens";
 import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
-import { buildContactsSelectionGroupPayload } from "../buildContactsSelectionGroupPayload";
-import { buildGroupSelectionMemberPersonIds } from "../buildGroupSelectionMemberPersonIds";
+import { resolveContactsSelectionPersonIds } from "../resolveContactsSelectionPersonIds";
 import {
   useContactsEffectiveSelectedCount,
   useContactsSelection,
@@ -118,15 +117,19 @@ export function ContactsAddToGroupsSheet({
       }
 
       const selectionState = useContactsSelection.getState();
-      const body = loadedGroupMembers
-        ? { personIds: buildGroupSelectionMemberPersonIds(selectionState, loadedGroupMembers) }
-        : buildContactsSelectionGroupPayload(selectionState, debouncedQuery);
+      const personIds = resolveContactsSelectionPersonIds(
+        selectionState,
+        debouncedQuery,
+        loadedGroupMembers ? { loadedGroupMembers } : undefined,
+      );
       const targetGroupIds = Array.from(selectedGroupIds);
 
       setIsAddingToGroups(true);
 
       try {
-        await Promise.all(targetGroupIds.map((groupId) => addContactsToGroup(groupId, body)));
+        for (const groupId of targetGroupIds) {
+          groupsDomain.addMembers(groupId, personIds);
+        }
 
         setAddToGroupsSheetOpen(false);
         exitSelectionMode();

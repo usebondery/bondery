@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useTranslations } from "next-intl";
+import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
 import { useRouter } from "next/navigation";
 import {
   Center,
@@ -26,6 +26,7 @@ import {
   successNotificationTemplate,
 } from "@bondery/mantine-next";
 import { API_ROUTES, WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
+import { useMergeContactsMutation } from "@/lib/query/hooks/useContacts";
 import type {
   Contact,
   ContactPreview,
@@ -33,7 +34,6 @@ import type {
   MergeConflictField,
   MergeContactsResponse,
 } from "@bondery/schemas";
-import { revalidateAll } from "../../actions";
 import { SelectableCard } from "@/app/(app)/app/components/SelectableCard";
 import { getAvatarColorFromName } from "@/lib/avatarColor";
 import { DEBOUNCE_MS } from "@/lib/config";
@@ -435,6 +435,7 @@ function MergeWithModal({
   initialConflictChoices,
 }: MergeWithModalProps) {
   const router = useRouter();
+  const mergeContactsMutation = useMergeContactsMutation();
   const t = useTranslations("MergeWithModal");
   const shouldSkipPickStep =
     disableLeftPicker && disableRightPicker && Boolean(initialRightPersonId);
@@ -591,20 +592,14 @@ function MergeWithModal({
     });
 
     try {
-      const response = await fetch(API_ROUTES.CONTACTS_MERGE, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          leftPersonId,
-          rightPersonId,
-          conflictResolutions,
-        }),
+      const result = await mergeContactsMutation.mutateAsync({
+        leftPersonId,
+        rightPersonId,
+        conflictResolutions,
       });
 
-      const result = (await response.json()) as MergeContactsResponse | { error?: string };
-
-      if (!response.ok || !("personId" in result)) {
-        throw new Error((result as { error?: string }).error || t("MergeFailed"));
+      if (!("personId" in result)) {
+        throw new Error(t("MergeFailed"));
       }
 
       notifications.hide(loadingNotificationId);
@@ -617,11 +612,9 @@ function MergeWithModal({
 
       modals.close(modalId);
       onSuccess?.();
-      await revalidateAll();
       if (redirectToMergedPerson) {
         router.push(`${WEBAPP_ROUTES.PERSON}/${result.personId}`);
       }
-      router.refresh();
     } catch (error) {
       notifications.hide(loadingNotificationId);
       notifications.show(

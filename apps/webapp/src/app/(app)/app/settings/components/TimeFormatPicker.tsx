@@ -4,8 +4,8 @@ import { SegmentedControl, Stack, Text } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { useState } from "react";
 import type { ReactNode } from "react";
-import { useTranslations } from "next-intl";
-import { API_ROUTES } from "@bondery/helpers/globals/paths";
+import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
+import { useUpdateSettingsMutation } from "@/lib/query/hooks/useSettings";
 import {
   errorNotificationTemplate,
   loadingNotificationTemplate,
@@ -28,6 +28,7 @@ export function TimeFormatPicker({
   description,
 }: TimeFormatPickerProps) {
   const t = useTranslations("SettingsPage.Preferences");
+  const updateSettingsMutation = useUpdateSettingsMutation();
   const [timeFormat, setTimeFormat] = useState<"24h" | "12h">(initialTimeFormat);
   const [savedTimeFormat, setSavedTimeFormat] = useState<"24h" | "12h">(initialTimeFormat);
 
@@ -44,19 +45,9 @@ export function TimeFormatPicker({
     });
 
     try {
-      const response = await fetch(API_ROUTES.ME_SETTINGS, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          timeFormat: nextFormat,
-        }),
+      await updateSettingsMutation.mutateAsync({
+        timeFormat: nextFormat,
       });
-
-      if (!response.ok) {
-        throw new Error("Failed to update time format");
-      }
 
       setSavedTimeFormat(nextFormat);
       onTimeFormatChange?.(nextFormat);

@@ -1,5 +1,4 @@
-import { API_URL } from "@/lib/config";
-import { getAuthHeaders } from "@/lib/authHeaders";
+import { serverApiFetch } from "@/lib/api/server";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import type { Activity, Contact } from "@bondery/schemas";
 import { buildAvatarQueryString } from "@/lib/avatarParams";
@@ -16,22 +15,16 @@ interface InteractionsDataResult {
  */
 export async function getInteractionsData(): Promise<InteractionsDataResult> {
   try {
-    const headers = await getAuthHeaders();
-
-    const contactsRes = await fetch(
-      `${API_URL}${API_ROUTES.CONTACTS}?limit=200&offset=0&${buildAvatarQueryString("small")}`,
-      {
-        next: { tags: ["contacts"] },
-        headers,
-      },
+    const contactsRes = await serverApiFetch(
+      `${API_ROUTES.CONTACTS}?limit=200&offset=0&${buildAvatarQueryString("small")}`,
+      undefined,
+      { next: { tags: ["contacts"] } },
     );
 
-    const interactionsRes = await fetch(
-      `${API_URL}${API_ROUTES.INTERACTIONS}?limit=50&offset=0&${buildAvatarQueryString("medium")}`,
-      {
-        next: { tags: ["interactions"] },
-        headers,
-      },
+    const interactionsRes = await serverApiFetch(
+      `${API_ROUTES.INTERACTIONS}?limit=50&offset=0&${buildAvatarQueryString("medium")}`,
+      undefined,
+      { next: { tags: ["interactions"] } },
     );
 
     if (!contactsRes.ok) {

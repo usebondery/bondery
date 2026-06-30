@@ -1,21 +1,19 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
 import { FlashList, type FlashListRef } from "@shopify/flash-list";
-import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { GestureDetector } from "react-native-gesture-handler";
 import { IconSearch } from "@tabler/icons-react-native";
-import type { Contact, Group, GroupWithCount } from "@bondery/schemas";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import type { Contact, GroupWithCount } from "@bondery/schemas";
 import { MobileTextInput } from "../../components/MobileTextInput";
 import {
   LoadErrorCard,
   loadErrorTabRootInset,
 } from "../../components/load-state";
-import {
-  fetchContacts,
-  fetchGroups,
-  fetchMyselfContact,
-} from "../../lib/api/client";
+import { useScrollBottomInset } from "../../components/chrome";
+import { contactsDomain } from "../../lib/domains/contacts";
+import { useGroups, useMyselfContact } from "../../lib/sync/hooks/useSyncQuery";
+import { useSync } from "../../lib/sync/SyncProvider";
 import {
   CONTACTS_PAGE_SIZE,
   DEBOUNCE_MS,
@@ -23,7 +21,6 @@ import {
   UI_TIMING_MS,
 } from "../../lib/config";
 import { useDebouncedValue } from "../../lib/hooks/useDebouncedValue";
-import { useContactsStore, useGroupsStore } from "../../lib/store";
 import {
   MobilePreferencesState,
   SwipeAction,
@@ -65,7 +62,7 @@ import { useNavigateToGroup } from "./hooks/useNavigateToGroup";
 export function ContactsScreen() {
   const t = useMobileTranslations();
   const colors = useMobileThemeColors();
-  const insets = useSafeAreaInsets();
+  const scrollBottomInset = useScrollBottomInset("tabRoot");
   const { showToast } = useAppToast();
   const router = useRouter();
   const navigateToGroup = useNavigateToGroup();
@@ -78,8 +75,9 @@ export function ContactsScreen() {
   const scrollRetryCountRef = useRef(0);
   const latestRequestRef = useRef(0);
   const shouldShowInitialLoaderRef = useRef(true);
-  const [listContactIds, setListContactIds] = useState<string[]>([]);
+  const [contacts, setContacts] = useState<Contact[]>([]);
   const [totalCount, setTotalCount] = useState(0);
+  const [hasMoreContacts, setHasMoreContacts] = useState(false);
   const [searchInput, setSearchInput] = useState("");
   const debouncedQuery = useDebouncedValue(
     searchInput.trim(),
@@ -92,17 +90,8 @@ export function ContactsScreen() {
   const [listHeaderHeight, setListHeaderHeight] = useState(0);
   const [listViewportHeight, setListViewportHeight] = useState(0);
   const [isCreateGroupOpen, setCreateGroupOpen] = useState(false);
-  const contactsById = useContactsStore((state) => state.byId);
-  const myselfContactId = useContactsStore(
-    (state) => state.myselfContactId ?? undefined,
-  );
-  const isListStale = useContactsStore((state) => state.isListStale);
-  const clearListStale = useContactsStore((state) => state.clearListStale);
-  const upsertContact = useContactsStore((state) => state.upsertContact);
-  const upsertContacts = useContactsStore((state) => state.upsertContacts);
-  const groupsById = useGroupsStore((state) => state.byId);
-  const upsertGroup = useGroupsStore((state) => state.upsertGroup);
-  const upsertGroups = useGroupsStore((state) => state.upsertGroups);
+  const { data: myselfContact } = useMyselfContact();
+  const myselfContactId = myselfContact?.id;
   const selectionMode = useContactsSelectionMode();
   const leftSwipeAction = useMobilePreferences(
     (state: MobilePreferencesState) => state.leftSwipeAction,
@@ -116,22 +105,12 @@ export function ContactsScreen() {
   const groupLastOpenedAt = useMobilePreferences(
     (state: MobilePreferencesState) => state.groupLastOpenedAt,
   );
+  const { revision: syncRevision } = useSync();
+  const { data: syncedGroups, refresh: refreshGroups } = useGroups();
 
-  const groups = useMemo(() => Object.values(groupsById), [groupsById]);
   const sortedGroups = useMemo(
-    () => sortGroups(groups, groupSortOrder, groupLastOpenedAt),
-    [groups, groupSortOrder, groupLastOpenedAt],
-  );
-  const contacts = useMemo(
-    () =>
-      listContactIds
-        .map((contactId) => contactsById[contactId])
-        .filter((contact): contact is Contact => Boolean(contact)),
-    [contactsById, listContactIds],
-  );
-  const myselfContact = useMemo(
-    () => (myselfContactId ? contactsById[myselfContactId] ?? null : null),
-    [contactsById, myselfContactId],
+    () => sortGroups(syncedGroups, groupSortOrder, groupLastOpenedAt),
+    [syncedGroups, groupSortOrder, groupLastOpenedAt],
   );
 
   const rowTexts = useMemo(
@@ -168,36 +147,32 @@ export function ContactsScreen() {
       setError(null);
 
       try {
-        const contactsResponse = await fetchContacts({
+        const local = contactsDomain.list({
           query,
-          sort: "nameAsc",
           limit: CONTACTS_PAGE_SIZE,
           offset,
         });
+        const fetchedContacts = local.contacts;
+        const total = local.totalCount;
+        const hasMore = offset + fetchedContacts.length < total;
 
         if (requestId !== latestRequestRef.current) {
           return;
         }
 
-        const fetchedContacts = contactsResponse.contacts || [];
-        setTotalCount(
-          Number.isFinite(contactsResponse.totalCount)
-            ? contactsResponse.totalCount
-            : fetchedContacts.length,
-        );
+        setTotalCount(total);
+        setHasMoreContacts(hasMore);
 
         if (append) {
-          upsertContacts(fetchedContacts);
-          setListContactIds((current) => {
-            const existingIds = new Set(current);
-            const uniqueNewIds = fetchedContacts
-              .map((contact) => contact.id)
-              .filter((contactId) => !existingIds.has(contactId));
-            return [...current, ...uniqueNewIds];
+          setContacts((current) => {
+            const existingIds = new Set(current.map((contact) => contact.id));
+            const uniqueNew = fetchedContacts.filter(
+              (contact) => !existingIds.has(contact.id),
+            );
+            return [...current, ...uniqueNew];
           });
         } else {
-          upsertContacts(fetchedContacts);
-          setListContactIds(fetchedContacts.map((contact) => contact.id));
+          setContacts(fetchedContacts);
         }
       } catch (loadError) {
         if (requestId !== latestRequestRef.current) {
@@ -217,35 +192,18 @@ export function ContactsScreen() {
         }
       }
     },
-    [t, upsertContacts],
+    [t],
   );
 
-  const loadMyselfContact = useCallback(async () => {
-    try {
-      const myselfResponse = await fetchMyselfContact();
-      if (myselfResponse?.contact) {
-        upsertContact(myselfResponse.contact);
-      }
-    } catch {
-      // Keep existing value on transient failures.
-    }
-  }, [upsertContact]);
-
   const reloadGroups = useCallback(async () => {
-    try {
-      const groupsRes = await fetchGroups();
-      upsertGroups(groupsRes.groups || []);
-    } catch {
-      // Keep existing groups on refresh failure.
-    }
-  }, [upsertGroups]);
+    refreshGroups();
+  }, [refreshGroups]);
 
   useEffect(() => {
     shouldShowInitialLoaderRef.current = true;
   }, [refreshKey, contactsListVersion]);
 
   useEffect(() => {
-    void loadMyselfContact();
     void fetchContactsPage({
       query: debouncedQuery,
       offset: 0,
@@ -257,30 +215,11 @@ export function ContactsScreen() {
     contactsListVersion,
     debouncedQuery,
     fetchContactsPage,
-    loadMyselfContact,
+    syncRevision,
   ]);
 
-  useEffect(() => {
-    void reloadGroups();
-  }, [reloadGroups]);
-
-  useFocusEffect(
-    useCallback(() => {
-      if (!isListStale) {
-        return;
-      }
-
-      clearListStale();
-      void fetchContactsPage({
-        query: debouncedQuery,
-        offset: 0,
-        showInitialLoader: false,
-      });
-    }, [clearListStale, debouncedQuery, fetchContactsPage, isListStale]),
-  );
-
   useContactsSelectionListSync({
-    contacts,
+    contactIds: contacts.map((contact) => contact.id),
     totalCount,
     myselfContactId,
   });
@@ -380,7 +319,6 @@ export function ContactsScreen() {
     letterToIndex,
   } = useMemo(() => buildContactsFlatRows(sections), [sections]);
 
-  const hasMoreContacts = listContactIds.length < totalCount;
   const isSearchActive = debouncedQuery.length > 0;
 
   const {
@@ -437,19 +375,15 @@ export function ContactsScreen() {
   );
 
   const handleGroupCreated = useCallback(
-    (group: Group) => {
-      upsertGroup(group);
+    (group: GroupWithCount) => {
       navigateToGroup(group);
     },
-    [navigateToGroup, upsertGroup],
+    [navigateToGroup],
   );
 
   const reloadContacts = useCallback(async () => {
-    await Promise.all([
-      fetchContactsPage({ query: debouncedQuery, offset: 0 }),
-      loadMyselfContact(),
-    ]);
-  }, [debouncedQuery, fetchContactsPage, loadMyselfContact]);
+    await fetchContactsPage({ query: debouncedQuery, offset: 0 });
+  }, [debouncedQuery, fetchContactsPage]);
 
   const handleEndReached = useCallback(() => {
     if (!hasMoreContacts || isLoadingMore || isSearching || loading) {
@@ -458,7 +392,7 @@ export function ContactsScreen() {
 
     void fetchContactsPage({
       query: debouncedQuery,
-      offset: listContactIds.length,
+      offset: contacts.length,
       append: true,
     });
   }, [
@@ -467,7 +401,7 @@ export function ContactsScreen() {
     hasMoreContacts,
     isLoadingMore,
     isSearching,
-    listContactIds.length,
+    contacts.length,
     loading,
   ]);
 
@@ -538,7 +472,8 @@ export function ContactsScreen() {
     () => (
       <View
         onLayout={(event) => {
-          setListHeaderHeight(event.nativeEvent.layout.height);
+          const height = event.nativeEvent.layout.height;
+          setListHeaderHeight((current) => (current === height ? current : height));
         }}
       >
         <ContactsGroupsHeader
@@ -596,10 +531,6 @@ export function ContactsScreen() {
   );
 
   const showFullScreenLoader = loading && contacts.length === 0;
-  const listBottomInset = selectionMode
-    ? MOBILE_LAYOUT.floatingTabBar.selectionBarInset +
-      Math.max(insets.bottom, 8)
-    : 24;
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.appBackground }]}>
@@ -654,7 +585,8 @@ export function ContactsScreen() {
             <View
               style={styles.listGestureTarget}
               onLayout={(event) => {
-                setListViewportHeight(event.nativeEvent.layout.height);
+                const height = event.nativeEvent.layout.height;
+                setListViewportHeight((current) => (current === height ? current : height));
               }}
             >
               <FlashList
@@ -677,7 +609,7 @@ export function ContactsScreen() {
                 ListHeaderComponent={isSearchActive ? null : listHeader}
                 ListEmptyComponent={listEmpty}
                 ListFooterComponent={listFooter}
-                contentContainerStyle={{ paddingBottom: listBottomInset }}
+                contentContainerStyle={{ paddingBottom: scrollBottomInset }}
               />
             </View>
           </GestureDetector>

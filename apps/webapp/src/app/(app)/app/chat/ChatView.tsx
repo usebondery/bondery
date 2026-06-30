@@ -14,25 +14,27 @@ import {
 } from "@mantine/core";
 import { IconMessageChatbot, IconSend } from "@tabler/icons-react";
 import { useRef, useEffect, useState, useMemo, useCallback } from "react";
-import { useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 import { ChatMessage } from "./ChatMessage";
 import { ChatQuotaAlert } from "./ChatQuotaAlert";
 import { ChatQuotaBadge } from "./ChatQuotaBadge";
-import { useTranslations } from "next-intl";
+import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
 import { PageHeader } from "@/app/(app)/app/components/PageHeader";
 import { WEBSITE_URL } from "@/lib/config";
 import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import type { SubscriptionStatus } from "@bondery/schemas";
 import { useChatSessions } from "./ChatSessionsContext";
+import { useCreateChatSessionMutation } from "@/lib/query/hooks/useChat";
+import { invalidateChatSessions } from "@/lib/query/invalidation";
 
-const SUGGESTED_PROMPTS = [
-  "Who have I not talked to in a while?",
-  "Show me contacts in New York",
-  "I had coffee with Blake today",
-  "Who speaks Spanish?",
-  "Create a contact for someone I just met",
-  "What interactions did I log this week?",
-];
+const SUGGESTED_PROMPT_KEYS = [
+  "NotTalkedInAWhile",
+  "ContactsInNewYork",
+  "CoffeeWithBlake",
+  "WhoSpeaksSpanish",
+  "CreateNewContact",
+  "InteractionsThisWeek",
+] as const;
 
 export function ChatView({
   sessionId,
@@ -48,8 +50,13 @@ export function ChatView({
   subscriptionStatus?: SubscriptionStatus | null;
 }) {
   const t = useTranslations("ChatPage");
-  const { addSession, updateSession, chatResetKey } = useChatSessions();
-  const router = useRouter();
+  const suggestedPrompts = useMemo(
+    () => SUGGESTED_PROMPT_KEYS.map((key) => t(`SuggestedPrompts.${key}`)),
+    [t],
+  );
+  const { chatResetKey } = useChatSessions();
+  const queryClient = useQueryClient();
+  const createChatSessionMutation = useCreateChatSessionMutation();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messageDatesRef = useRef<Map<string, Date>>(new Map());
   const [inputValue, setInputValue] = useState("");
@@ -108,8 +115,6 @@ export function ChatView({
       );
       messageDatesRef.current.clear();
       sessionIdRef.current = undefined;
-      // Refresh server data so the optimistic counter restarts from the true baseline.
-      router.refresh();
     }
   }, [chatResetKey, setMessages, subscriptionStatus]);
 
@@ -120,24 +125,12 @@ export function ChatView({
 
     if (wasStreaming && status === "ready" && sessionIdRef.current) {
       setMessagesSent((n) => n + 1);
-      const sid = sessionIdRef.current;
-      // Title generation is async on the server — give it a moment, then fetch
-      const timer = setTimeout(async () => {
-        try {
-          const res = await fetch("/api/chat/sessions");
-          if (!res.ok) return;
-          const { data } = await res.json();
-          const session = data?.find((s: { id: string }) => s.id === sid);
-          if (session?.title) {
-            updateSession(sid, { title: session.title });
-          }
-        } catch {
-          /* ignore */
-        }
+      const timer = setTimeout(() => {
+        void invalidateChatSessions(queryClient);
       }, 3000);
       return () => clearTimeout(timer);
     }
-  }, [status, updateSession]);
+  }, [status, queryClient]);
 
   // Auto-scroll to bottom on new messages
   useEffect(() => {
@@ -163,21 +156,9 @@ export function ChatView({
     // No session yet — create one, update URL silently, send immediately in this instance
     if (!sessionIdRef.current) {
       try {
-        const res = await fetch("/api/chat/sessions", { method: "POST" });
-        if (!res.ok) return;
-        const { data } = await res.json();
-        // Set ref BEFORE sendMessage so the transport picks up the new sessionId
-        sessionIdRef.current = data.id;
-        // Push URL without triggering a Next.js navigation (avoids remount + race condition)
-        window.history.pushState(null, "", `${WEBAPP_ROUTES.CHAT}/${data.id}`);
-        // Instantly add to sidebar via context — no router.refresh() round-trip needed
-        addSession({
-          id: data.id,
-          user_id: "",
-          title: null,
-          updated_at: new Date().toISOString(),
-          created_at: new Date().toISOString(),
-        });
+        const sessionId = await createChatSessionMutation.mutateAsync();
+        sessionIdRef.current = sessionId;
+        window.history.pushState(null, "", `${WEBAPP_ROUTES.CHAT}/${sessionId}`);
       } catch {
         return;
       }
@@ -188,7 +169,6 @@ export function ChatView({
   }
 
   // Called by the checkout hook's success event to clear the quota-exceeded state.
-  // router.refresh() is handled inside the hook after a 3s delay.
   const handleUpgradeSuccess = useCallback(() => {
     setQuotaExceeded(false);
   }, []);
@@ -235,7 +215,7 @@ export function ChatView({
                     {t("emptyState")}
                   </Text>
                   <Group justify="center" gap="sm" wrap="wrap">
-                    {SUGGESTED_PROMPTS.map((prompt) => (
+                    {suggestedPrompts.map((prompt) => (
                       <Button
                         key={prompt}
                         variant="light"

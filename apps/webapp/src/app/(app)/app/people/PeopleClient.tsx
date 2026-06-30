@@ -12,42 +12,37 @@ import {
   IconUserCircle,
 } from "@tabler/icons-react";
 import { notifications } from "@mantine/notifications";
-import { useEffect, useState, useRef, useTransition } from "react";
+import { useEffect, useState, useRef, useTransition, useMemo } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
 import { useDebouncedCallback } from "@mantine/hooks";
 import { DEBOUNCE_MS } from "@/lib/config";
 import ContactsTable, {
   ColumnConfig,
   type SortOrder,
 } from "@/app/(app)/app/components/contacts/ContactsTableV2";
-import { API_ROUTES } from "@bondery/helpers/globals/paths";
+import { downloadContactVcard } from "@/lib/api/domains/contacts";
 import { openAddContactModal } from "./components/AddContactModal";
 import { errorNotificationTemplate, successNotificationTemplate } from "@bondery/mantine-next";
 import { formatContactName } from "@/lib/nameHelpers";
-import { openDeleteContactModal } from "@/app/(app)/app/components/contacts/openDeleteContactModal";
-import { openDeleteContactsModal } from "@/app/(app)/app/components/contacts/openDeleteContactsModal";
+import { useOpenDeleteContactModal } from "@/app/(app)/app/components/contacts/openDeleteContactModal";
+import { useOpenDeleteContactsModal } from "@/app/(app)/app/components/contacts/openDeleteContactsModal";
+import { useContactsTableCopy } from "@/lib/i18n/useContactsTableCopy";
 import { openAddPeopleToGroupSelectionModal } from "./components/AddPeopleToGroupSelectionModal";
 import { openMergeWithModal } from "./components/MergeWithModal";
 import { openShareContactModal } from "./components/ShareContactModal";
 import { useBatchEnrichFromLinkedIn } from "@/lib/extension/useBatchEnrichFromLinkedIn";
 
 import type { Contact } from "@bondery/schemas";
-import { revalidateContacts } from "../actions";
-import { appendAvatarParams } from "@/lib/avatarParams";
+import { useContactsInfiniteQuery } from "@/lib/query/hooks/useContacts";
+import { parseContactsListParams } from "@/lib/query/fetchers/contactsListParams";
+import { useQueryClient } from "@tanstack/react-query";
 import { searchContacts } from "@/lib/searchContacts";
 import { useResponsiveColumns } from "@/hooks/useResponsiveColumns";
 
 const COLUMN_VISIBILITY_COOKIE = "bondery_contacts_columns";
 
-/** Default column definitions. Icons are stable JSX — defined once outside the component. */
-const DEFAULT_COLUMNS: Omit<ColumnConfig, "icon">[] = [
-  { key: "name", label: "Name", visible: true, fixed: true },
-  { key: "headline", label: "Headline", visible: true },
-  { key: "location", label: "Location", visible: true },
-  { key: "lastInteraction", label: "Last Interaction", visible: true },
-  { key: "social", label: "Socials", visible: true },
-];
+const DEFAULT_COLUMN_KEYS = ["name", "headline", "location", "lastInteraction", "social"] as const;
 
 /**
  * Merges saved visibility preferences into the default column list.
@@ -56,10 +51,17 @@ const DEFAULT_COLUMNS: Omit<ColumnConfig, "icon">[] = [
  */
 function applyColumnVisibility(
   saved: { key: string; visible: boolean }[] | undefined,
+  labels: Record<string, string>,
 ): Omit<ColumnConfig, "icon">[] {
-  if (!saved) return DEFAULT_COLUMNS;
+  const defaults: Omit<ColumnConfig, "icon">[] = DEFAULT_COLUMN_KEYS.map((key) => ({
+    key,
+    label: labels[key] ?? key,
+    visible: true,
+    fixed: key === "name",
+  }));
+  if (!saved) return defaults;
   const savedMap = new Map(saved.map((e) => [e.key, e.visible]));
-  return DEFAULT_COLUMNS.map((col) =>
+  return defaults.map((col) =>
     savedMap.has(col.key) ? { ...col, visible: savedMap.get(col.key)! } : col,
   );
 }
@@ -80,38 +82,57 @@ function saveColumnsToCookie(columns: ColumnConfig[]): void {
 }
 
 interface PeopleClientProps {
-  initialContacts: Contact[];
-  totalCount: number;
   /** Column visibility preferences resolved server-side from the cookie. */
   savedColumnVisibility?: { key: string; visible: boolean }[];
 }
 
-export function PeopleClient({
-  initialContacts,
-  totalCount,
-  savedColumnVisibility,
-}: PeopleClientProps) {
+export function PeopleClient({ savedColumnVisibility }: PeopleClientProps) {
+  const queryClient = useQueryClient();
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const t = useTranslations("PeoplePage");
+  const tCommon = useTranslations("WebAppCommon");
+  const { columnDefinitions } = useContactsTableCopy();
+  const openDeleteContactModal = useOpenDeleteContactModal();
+  const openDeleteContactsModal = useOpenDeleteContactsModal();
   const tShare = useTranslations("ShareContactModal");
   const tEnrich = useTranslations("EnrichFromLinkedIn");
   const tActions = useTranslations("ContactActionMenu");
   const { startForPerson } = useBatchEnrichFromLinkedIn();
-  // Get initial state from URL params
-  const initialSearch = searchParams.get("q") || "";
-  const initialSort = (searchParams.get("sort") as SortOrder) || "nameAsc";
+  const listFilter = parseContactsListParams({
+    search: searchParams.get("search") ?? undefined,
+    sort: searchParams.get("sort") ?? undefined,
+  });
+  const searchDefaultValue = listFilter.search ?? "";
+
+  const {
+    data,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isFetching,
+    isError,
+    refetch,
+  } = useContactsInfiniteQuery(listFilter);
+
+  const contacts = data?.pages.flatMap((page) => page.contacts) ?? [];
+  const totalAvailableCount = data?.pages[0]?.pagination.totalCount ?? 0;
+  const hasMore = data?.pages.at(-1)?.pagination.hasMore ?? false;
 
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [isAllTotalSelected, setIsAllTotalSelected] = useState(false);
   const [excludedIds, setExcludedIds] = useState<Set<string>>(new Set());
-  const [isLoadingMore, setIsLoadingMore] = useState(false);
-  const [contacts, setContacts] = useState<Contact[]>(initialContacts);
-  const [loadedCount, setLoadedCount] = useState(initialContacts.length);
-  const [totalAvailableCount, setTotalAvailableCount] = useState(totalCount);
   const [lastSelectedIndex, setLastSelectedIndex] = useState<number | null>(null);
   const paperRef = useRef<HTMLDivElement>(null);
+
+  const columnLabels = useMemo(
+    () =>
+      Object.fromEntries(
+        DEFAULT_COLUMN_KEYS.map((key) => [key, columnDefinitions[key].label]),
+      ),
+    [columnDefinitions],
+  );
 
   // Icons are stable references — defined inline so they can be merged with
   // server-resolved prefs (the cookie carries only key + visible, not JSX).
@@ -127,11 +148,20 @@ export function PeopleClient({
   // HTML already has the correct columns — no mount-time localStorage read,
   // no layout shift.
   const [columns, setColumns] = useState<ColumnConfig[]>(() =>
-    applyColumnVisibility(savedColumnVisibility).map((col) => ({
+    applyColumnVisibility(savedColumnVisibility, columnLabels).map((col) => ({
       ...col,
       icon: columnIcons[col.key],
     })),
   );
+
+  useEffect(() => {
+    setColumns((prev) =>
+      prev.map((col) => ({
+        ...col,
+        label: columnLabels[col.key] ?? col.label,
+      })),
+    );
+  }, [columnLabels]);
 
   // Defer the columns update to prevent UI freezing when toggling visibility
   const { effectiveColumns, onColumnsChange } = useResponsiveColumns(paperRef, columns);
@@ -151,14 +181,11 @@ export function PeopleClient({
   };
 
   useEffect(() => {
-    setContacts(initialContacts);
-    setLoadedCount(initialContacts.length);
-    setTotalAvailableCount(totalCount);
     setSelectedIds(new Set());
     setIsAllTotalSelected(false);
     setExcludedIds(new Set());
     setLastSelectedIndex(null);
-  }, [initialContacts, totalCount]);
+  }, [listFilter.search, listFilter.sort]);
 
   // Handle search: debounce the URL update so the server is only re-fetched
   // after the user pauses, while DataTable keeps the input responsive locally.
@@ -166,16 +193,14 @@ export function PeopleClient({
   const handleSearch = useDebouncedCallback((query: string) => {
     const params = new URLSearchParams(searchParams);
     if (query) {
-      params.set("q", query);
+      params.set("search", query);
     } else {
-      params.delete("q");
+      params.delete("search");
     }
     startSearchTransition(() => {
       router.replace(`${pathname}?${params.toString()}`);
     });
   }, DEBOUNCE_MS.search);
-
-  // Handle sort
   const handleSort = (order: SortOrder) => {
     const params = new URLSearchParams(searchParams);
     params.set("sort", order);
@@ -185,21 +210,13 @@ export function PeopleClient({
   const handleDeleteContact = (contactId: string) => {
     const targetContact = contacts.find((contact) => contact.id === contactId);
 
-    const contactName = targetContact ? formatContactName(targetContact) : "this contact";
+    const contactName = targetContact ? formatContactName(targetContact) : t("ThisContactFallback");
 
     openDeleteContactModal({
       contactId,
       contactName,
       onDeleted: async () => {
         setSelectedIds(new Set());
-        const remaining = contacts.filter((contact) => contact.id !== contactId);
-        const newTotal = Math.max(0, totalAvailableCount - 1);
-        const refilled = await refillToPageSize(remaining, newTotal);
-        setContacts(refilled);
-        setLoadedCount(refilled.length);
-        setTotalAvailableCount(newTotal);
-        await revalidateContacts();
-        router.refresh();
       },
     });
   };
@@ -225,7 +242,6 @@ export function PeopleClient({
 
   const handleSelectAll = () => {
     if (isAllTotalSelected) {
-      // In filter-mode: clear everything
       setIsAllTotalSelected(false);
       setExcludedIds(new Set());
       setSelectedIds(new Set());
@@ -238,40 +254,9 @@ export function PeopleClient({
     }
   };
 
-  /**
-   * After deleting contacts, if the loaded list drops below PAGE_SIZE and more
-   * contacts remain in the system, automatically fetch enough to fill back up.
-   */
-  const refillToPageSize = async (remaining: Contact[], newTotal: number): Promise<Contact[]> => {
-    const PAGE_SIZE = 50;
-    const needed = Math.min(PAGE_SIZE - remaining.length, newTotal - remaining.length);
-    if (needed <= 0) return remaining;
-
-    try {
-      const params = new URLSearchParams();
-      params.set("limit", String(needed));
-      params.set("offset", String(remaining.length));
-      if (initialSearch) params.set("q", initialSearch);
-      if (initialSort) params.set("sort", initialSort);
-      appendAvatarParams(params, "small");
-
-      const res = await fetch(`${API_ROUTES.CONTACTS}?${params.toString()}`);
-      if (!res.ok) return remaining;
-
-      const data = await res.json();
-      const extra = (data.contacts || []) as Contact[];
-      const existingIds = new Set(remaining.map((c) => c.id));
-      const uniqueExtra = extra.filter((c) => !existingIds.has(c.id));
-      return [...remaining, ...uniqueExtra];
-    } catch {
-      return remaining;
-    }
-  };
-
   const handleSelectOne = (id: string, options?: { shiftKey?: boolean; index?: number }) => {
     const currentIndex = options?.index ?? contacts.findIndex((contact) => contact.id === id);
 
-    // In filter-mode, toggle via excludedIds instead of selectedIds.
     if (isAllTotalSelected) {
       const newExcluded = new Set(excludedIds);
       if (newExcluded.has(id)) {
@@ -279,7 +264,6 @@ export function PeopleClient({
       } else {
         newExcluded.add(id);
       }
-      // If every single item was excluded, auto-clear filter mode.
       if (newExcluded.size >= totalAvailableCount) {
         setIsAllTotalSelected(false);
         setExcludedIds(new Set());
@@ -324,54 +308,18 @@ export function PeopleClient({
   };
 
   const handleLoadMore = async () => {
-    if (isLoadingMore) {
+    if (isFetchingNextPage || !hasNextPage) {
       return;
     }
-
-    setIsLoadingMore(true);
-
     try {
-      const params = new URLSearchParams();
-      params.set("limit", "50");
-      params.set("offset", String(loadedCount));
-
-      if (initialSearch) {
-        params.set("q", initialSearch);
-      }
-
-      if (initialSort) {
-        params.set("sort", initialSort);
-      }
-
-      appendAvatarParams(params, "small");
-
-      const response = await fetch(`${API_ROUTES.CONTACTS}?${params.toString()}`);
-
-      if (!response.ok) {
-        throw new Error("Failed to load more contacts");
-      }
-
-      const data = await response.json();
-      const fetchedContacts = (data.contacts || []) as Contact[];
-
-      setContacts((prev) => {
-        const existingIds = new Set(prev.map((c) => c.id));
-        const uniqueNew = fetchedContacts.filter((c) => !existingIds.has(c.id));
-        return [...prev, ...uniqueNew];
-      });
-      setLoadedCount((prev) => prev + fetchedContacts.length);
-      if (Number.isFinite(data.totalCount)) {
-        setTotalAvailableCount(data.totalCount);
-      }
+      await fetchNextPage();
     } catch {
       notifications.show(
         errorNotificationTemplate({
-          title: "Error",
-          description: "Failed to load more contacts. Please try again.",
+          title: tCommon("ErrorTitle"),
+          description: t("LoadMoreError"),
         }),
       );
-    } finally {
-      setIsLoadingMore(false);
     }
   };
 
@@ -380,25 +328,14 @@ export function PeopleClient({
       contactIds: isAllTotalSelected ? [] : ids,
       filterPayload: isAllTotalSelected
         ? {
-            filter: { q: initialSearch || undefined, sort: initialSort || undefined },
+            filter: { search: listFilter.search, sort: listFilter.sort },
             excludeIds: Array.from(excludedIds),
           }
         : undefined,
-      onDeleted: async (deletedCount?: number) => {
-        const removedCount = deletedCount ?? ids.length;
+      onDeleted: async () => {
         setIsAllTotalSelected(false);
         setExcludedIds(new Set());
         setSelectedIds(new Set());
-        const remaining = isAllTotalSelected
-          ? contacts.filter((c) => excludedIds.has(c.id))
-          : contacts.filter((contact) => !ids.includes(contact.id));
-        const newTotal = Math.max(0, totalAvailableCount - removedCount);
-        const refilled = await refillToPageSize(remaining, newTotal);
-        setContacts(refilled);
-        setLoadedCount(refilled.length);
-        setTotalAvailableCount(newTotal);
-        await revalidateContacts();
-        router.refresh();
       },
     });
   };
@@ -423,14 +360,15 @@ export function PeopleClient({
         contacts={contacts}
         selectedIds={selectedIds}
         isHeaderShown={true}
-        searchDefaultValue={initialSearch}
+        searchDefaultValue={searchDefaultValue}
         onSearchChange={handleSearch}
-        searchLoading={isSearchPending}
+        searchLoading={isSearchPending || (isFetching && !isFetchingNextPage)}
+        searchPlaceholder={t("SearchPlaceholder")}
         noContactsFound={t("NoContactsFound")}
         noContactsMatchSearch={t("NoContactsMatchSearch")}
         columnsForMenu={effectiveColumns}
         setColumnsForMenu={handleColumnsMenuChange}
-        sortOrderForMenu={initialSort}
+        sortOrderForMenu={listFilter.sort}
         setSortOrderForMenu={handleSort}
         visibleColumns={effectiveColumns}
         onSelectAll={handleSelectAll}
@@ -466,7 +404,7 @@ export function PeopleClient({
             icon: <IconId size={16} />,
             onClick: async (contactId) => {
               try {
-                const response = await fetch(`${API_ROUTES.CONTACTS}/${contactId}/vcard`);
+                const response = await downloadContactVcard(contactId);
                 if (!response.ok) throw new Error("Failed to export vCard");
                 const blob = await response.blob();
                 const url = window.URL.createObjectURL(blob);
@@ -507,13 +445,13 @@ export function PeopleClient({
           },
         ]}
         loadMoreAction={{
-          label: "Load another 50 contacts",
+          label: t("LoadMoreBatch"),
           onClick: handleLoadMore,
-          loading: isLoadingMore,
+          loading: isFetchingNextPage,
         }}
-        hasMoreToLoad={contacts.length < totalAvailableCount}
+        hasMore={hasMore}
         totalCount={totalAvailableCount}
-        onSelectAllTotal={contacts.length < totalAvailableCount ? handleSelectAllTotal : undefined}
+        onSelectAllTotal={hasMore ? handleSelectAllTotal : undefined}
         isAllTotalSelected={isAllTotalSelected}
         excludedIds={excludedIds}
       />

@@ -4,10 +4,11 @@
  * Also contains the core recomputeMergeRecommendations() logic.
  */
 
-import type { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
+import type { FastifyInstance, FastifyReply } from "fastify";
+import type { AppFastifyInstance } from "../../../lib/fastify-types.js";
+import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { getAuth } from "../../../lib/auth.js";
-import { buildContactAvatarUrl } from "../../../lib/supabase.js";
 import { attachContactExtras, type FullContactExtras } from "../../../lib/contact-enrichment.js";
 import type {
   Contact,
@@ -16,7 +17,13 @@ import type {
   MergeRecommendationsResponse,
   RefreshMergeRecommendationsResponse,
 } from "@bondery/schemas";
-import { UuidParam, CONTACT_SELECT, extractAvatarOptions } from "../../../lib/schemas.js";
+import { CONTACT_SELECT, extractAvatarOptions } from "../../../lib/queries.js";
+import { avatarTransformQuerySchema, uuidParamSchema } from "@bondery/schemas/http";
+import {
+  buildPaginatedResponse,
+  buildPaginationMeta,
+  parsePagination,
+} from "../../../lib/pagination.js";
 import {
   MERGE_RECOMMENDATION_ALGORITHM_VERSION,
   type MergeRecommendationCandidate,
@@ -26,14 +33,87 @@ import {
   toFullNameKey,
   diceCoefficient,
   countSetOverlap,
-  MergeRecommendationsQuery,
+  mergeRecommendationsQuerySchema,
   withEmptyChannels,
   withEmptySocials,
 } from "./helpers.js";
 
-// Suppress unused import warning — buildContactAvatarUrl is transitively needed
-// by attachContactExtras but referenced here to maintain the same import surface
-void buildContactAvatarUrl;
+type MergeRecommendationRow = {
+  id: string;
+  left_person_id: string;
+  right_person_id: string;
+  score: number | null;
+  reasons: unknown;
+};
+
+async function hydrateMergeRecommendations(
+  client: SupabaseClient<Database>,
+  userId: string,
+  recommendationRows: MergeRecommendationRow[],
+  avatarOptions: ReturnType<typeof extractAvatarOptions>,
+  log?: { error: (payload: unknown, message: string) => void },
+): Promise<MergeRecommendationsResponse["recommendations"]> {
+  const personIds = Array.from(
+    new Set(
+      recommendationRows.flatMap((row) => [row.left_person_id, row.right_person_id]),
+    ),
+  );
+
+  if (personIds.length === 0) {
+    return [];
+  }
+
+  const { data: personRows, error: personRowsError } = await client
+    .from("people")
+    .select(CONTACT_SELECT)
+    .eq("user_id", userId)
+    .in("id", personIds);
+
+  if (personRowsError) {
+    throw new Error(personRowsError.message);
+  }
+
+  let enrichedContacts: Array<{ id: string } & FullContactExtras> = [];
+  try {
+    enrichedContacts = await attachContactExtras(client, userId, personRows || [], {
+      addresses: true,
+      avatarOptions,
+    });
+  } catch (enrichError) {
+    log?.error(
+      { enrichError },
+      "Failed to attach contact extras for merge recommendations",
+    );
+    enrichedContacts = withEmptySocials(withEmptyChannels(personRows || []));
+  }
+
+  const contactsById = new Map(enrichedContacts.map((contact) => [contact.id, contact]));
+  const allowedReasons: MergeRecommendationReason[] = ["fullName", "email", "phone"];
+  const recommendations: MergeRecommendationsResponse["recommendations"] = [];
+
+  for (const row of recommendationRows) {
+    const leftPerson = contactsById.get(row.left_person_id);
+    const rightPerson = contactsById.get(row.right_person_id);
+
+    if (!leftPerson || !rightPerson) {
+      continue;
+    }
+
+    const reasons = (Array.isArray(row.reasons) ? row.reasons : []).filter((reason) =>
+      allowedReasons.includes(reason as MergeRecommendationReason),
+    ) as MergeRecommendationReason[];
+
+    recommendations.push({
+      id: row.id,
+      leftPerson: leftPerson as Contact,
+      rightPerson: rightPerson as Contact,
+      score: Number(row.score) || 0,
+      reasons,
+    });
+  }
+
+  return recommendations;
+}
 
 async function recomputeMergeRecommendations(
   client: SupabaseClient<Database>,
@@ -258,19 +338,21 @@ async function recomputeMergeRecommendations(
   return newCandidatesCount;
 }
 
-export function registerRecommendationRoutes(fastify: FastifyInstance): void {
+export function registerRecommendationRoutes(fastify: AppFastifyInstance): void {
   /**
    * GET /api/contacts/merge-recommendations - List merge recommendations
    */
   fastify.get(
     "/merge-recommendations",
-    { schema: { querystring: MergeRecommendationsQuery } },
-    async (
-      request: FastifyRequest<{ Querystring: typeof MergeRecommendationsQuery.static }>,
-      reply: FastifyReply,
-    ) => {
+    {
+      schema: {
+        querystring: mergeRecommendationsQuerySchema,
+      } satisfies FastifyZodOpenApiSchema,
+    },
+    async (request, reply) => {
       const { client, user } = getAuth(request);
       const avatarOptions = extractAvatarOptions(request.query);
+      const { limit, offset } = parsePagination(request.query);
       const declinedQuery = request.query?.declined;
       const showDeclined =
         typeof declinedQuery === "boolean"
@@ -279,13 +361,14 @@ export function registerRecommendationRoutes(fastify: FastifyInstance): void {
             ? declinedQuery.toLowerCase() === "true"
             : false;
 
-      let { data: recommendationRows, error: recommendationsError } = await client
+      let { data: recommendationRows, error: recommendationsError, count } = await client
         .from("people_merge_recommendations")
-        .select("id, left_person_id, right_person_id, score, reasons")
+        .select("id, left_person_id, right_person_id, score, reasons", { count: "exact" })
         .eq("user_id", user.id)
         .eq("is_declined", showDeclined)
         .order("score", { ascending: false })
-        .order("created_at", { ascending: false });
+        .order("created_at", { ascending: false })
+        .range(offset, offset + limit - 1);
 
       if (recommendationsError) {
         return reply.status(500).send({ error: recommendationsError.message });
@@ -315,14 +398,16 @@ export function registerRecommendationRoutes(fastify: FastifyInstance): void {
 
           const refreshed = await client
             .from("people_merge_recommendations")
-            .select("id, left_person_id, right_person_id, score, reasons")
+            .select("id, left_person_id, right_person_id, score, reasons", { count: "exact" })
             .eq("user_id", user.id)
             .eq("is_declined", false)
             .order("score", { ascending: false })
-            .order("created_at", { ascending: false });
+            .order("created_at", { ascending: false })
+            .range(offset, offset + limit - 1);
 
           recommendationRows = refreshed.data || [];
           recommendationsError = refreshed.error;
+          count = refreshed.count;
 
           if (recommendationsError) {
             return reply.status(500).send({ error: recommendationsError.message });
@@ -330,70 +415,47 @@ export function registerRecommendationRoutes(fastify: FastifyInstance): void {
         }
       }
 
-      const personIds = Array.from(
-        new Set(
-          (recommendationRows || []).flatMap((row) => [row.left_person_id, row.right_person_id]),
-        ),
-      );
+      const totalCount = typeof count === "number" ? count : (recommendationRows || []).length;
 
-      if (personIds.length === 0) {
-        const emptyResponse: MergeRecommendationsResponse = { recommendations: [] };
-        return emptyResponse;
+      if (!recommendationRows || recommendationRows.length === 0) {
+        const pagination = buildPaginationMeta({
+          limit,
+          offset,
+          totalCount,
+          itemCount: 0,
+          sort: "scoreDesc",
+          search: null,
+        });
+        return buildPaginatedResponse("recommendations", [], pagination);
       }
 
-      const { data: personRows, error: personRowsError } = await client
-        .from("people")
-        .select(CONTACT_SELECT)
-        .eq("user_id", user.id)
-        .in("id", personIds);
-
-      if (personRowsError) {
-        return reply.status(500).send({ error: personRowsError.message });
-      }
-
-      let enrichedContacts: Array<{ id: string } & FullContactExtras> = [];
+      let recommendations: MergeRecommendationsResponse["recommendations"];
       try {
-        enrichedContacts = await attachContactExtras(client, user.id, personRows || [], {
-          addresses: true,
+        recommendations = await hydrateMergeRecommendations(
+          client,
+          user.id,
+          recommendationRows || [],
           avatarOptions,
-        });
-      } catch (enrichError) {
-        fastify.log.error(
-          { enrichError },
-          "Failed to attach contact extras for merge recommendations",
+          fastify.log,
         );
-        enrichedContacts = withEmptySocials(withEmptyChannels(personRows || []));
+      } catch (hydrateError) {
+        const message =
+          hydrateError instanceof Error
+            ? hydrateError.message
+            : "Failed to load merge recommendations";
+        return reply.status(500).send({ error: message });
       }
 
-      const contacts = enrichedContacts;
-      const contactsById = new Map(contacts.map((contact) => [contact.id, contact]));
+      const pagination = buildPaginationMeta({
+        limit,
+        offset,
+        totalCount,
+        itemCount: recommendations.length,
+        sort: "scoreDesc",
+        search: null,
+      });
 
-      const allowedReasons: MergeRecommendationReason[] = ["fullName", "email", "phone"];
-      const recommendations: MergeRecommendationsResponse["recommendations"] = [];
-
-      for (const row of recommendationRows || []) {
-        const leftPerson = contactsById.get(row.left_person_id);
-        const rightPerson = contactsById.get(row.right_person_id);
-
-        if (!leftPerson || !rightPerson) {
-          continue;
-        }
-
-        const reasons = (Array.isArray(row.reasons) ? row.reasons : []).filter((reason) =>
-          allowedReasons.includes(reason as MergeRecommendationReason),
-        ) as MergeRecommendationReason[];
-
-        recommendations.push({
-          id: row.id,
-          leftPerson: leftPerson as Contact,
-          rightPerson: rightPerson as Contact,
-          score: Number(row.score) || 0,
-          reasons,
-        });
-      }
-
-      const response: MergeRecommendationsResponse = { recommendations };
-      return response;
+      return buildPaginatedResponse("recommendations", recommendations, pagination);
     },
   );
 
@@ -402,14 +464,42 @@ export function registerRecommendationRoutes(fastify: FastifyInstance): void {
    */
   fastify.post(
     "/merge-recommendations/refresh",
-    async (request: FastifyRequest, reply: FastifyReply) => {
+    {
+      schema: {
+        querystring: avatarTransformQuerySchema,
+      } satisfies FastifyZodOpenApiSchema,
+    },
+    async (request, reply) => {
       const { client, user } = getAuth(request);
+      const avatarOptions = extractAvatarOptions(request.query);
 
       try {
-        const recommendationsCount = await recomputeMergeRecommendations(client, user.id);
+        await recomputeMergeRecommendations(client, user.id);
+
+        const { data: recommendationRows, error: recommendationsError } = await client
+          .from("people_merge_recommendations")
+          .select("id, left_person_id, right_person_id, score, reasons")
+          .eq("user_id", user.id)
+          .eq("is_declined", false)
+          .order("score", { ascending: false })
+          .order("created_at", { ascending: false });
+
+        if (recommendationsError) {
+          return reply.status(500).send({ error: recommendationsError.message });
+        }
+
+        const recommendations = await hydrateMergeRecommendations(
+          client,
+          user.id,
+          recommendationRows || [],
+          avatarOptions,
+          fastify.log,
+        );
+
         const response: RefreshMergeRecommendationsResponse = {
           success: true,
-          recommendationsCount,
+          recommendationsCount: recommendations.length,
+          recommendations,
         };
 
         return response;
@@ -426,8 +516,12 @@ export function registerRecommendationRoutes(fastify: FastifyInstance): void {
    */
   fastify.patch(
     "/merge-recommendations/:id/decline",
-    { schema: { params: UuidParam } },
-    async (request: FastifyRequest<{ Params: typeof UuidParam.static }>, reply: FastifyReply) => {
+    {
+      schema: {
+        params: uuidParamSchema,
+      } satisfies FastifyZodOpenApiSchema,
+    },
+    async (request, reply) => {
       const { client, user } = getAuth(request);
       const recommendationId = request.params.id?.trim();
 
@@ -463,8 +557,12 @@ export function registerRecommendationRoutes(fastify: FastifyInstance): void {
    */
   fastify.patch(
     "/merge-recommendations/:id/restore",
-    { schema: { params: UuidParam } },
-    async (request: FastifyRequest<{ Params: typeof UuidParam.static }>, reply: FastifyReply) => {
+    {
+      schema: {
+        params: uuidParamSchema,
+      } satisfies FastifyZodOpenApiSchema,
+    },
+    async (request, reply) => {
       const { client, user } = getAuth(request);
       const recommendationId = request.params.id?.trim();
 

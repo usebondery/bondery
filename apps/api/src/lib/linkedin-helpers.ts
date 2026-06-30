@@ -8,6 +8,8 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database, ScrapedWorkHistoryEntry, ScrapedEducationEntry } from "@bondery/schemas";
 import { validateImageUpload, validateImageMagicBytes } from "./config.js";
+import { createAdminClient } from "./supabase.js";
+import { uploadContactAvatarAndSetFlag } from "./avatar-storage.js";
 import logger from "./logger.js";
 
 /**
@@ -60,15 +62,15 @@ export async function updateContactPhoto(
 
     if (!validateImageMagicBytes(buffer)) return;
 
-    const fileName = `${userId}/${contactId}.jpg`;
-    // Remove first to invalidate Supabase's render cache (upsert alone does not invalidate it)
-    await supabase.storage.from("avatars").remove([fileName]);
-    const { error: uploadError } = await supabase.storage.from("avatars").upload(fileName, buffer, {
-      contentType: blob.type,
-      upsert: true,
-    });
-
-    if (uploadError) return;
+    const adminClient = createAdminClient();
+    await uploadContactAvatarAndSetFlag(
+      supabase,
+      adminClient,
+      userId,
+      contactId,
+      buffer,
+      blob.type,
+    );
   } catch (error) {
     logger.error({ err: error }, "Error in updateContactPhoto");
   }

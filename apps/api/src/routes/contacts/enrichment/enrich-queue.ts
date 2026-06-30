@@ -3,12 +3,17 @@
  * Manages the LinkedIn enrichment queue (init, next-batch, status, complete/fail, cancel).
  */
 
-import type { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
-import { Type } from "@sinclair/typebox";
+import type { FastifyReply } from "fastify";
+import type { AppFastifyInstance } from "../../../lib/fastify-types.js";
+import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
 import { getAuth } from "../../../lib/auth.js";
-import { UuidParam, NullableString } from "../../../lib/schemas.js";
+import {
+  enrichQueueInitBodySchema,
+  enrichQueuePatchBodySchema,
+} from "@bondery/schemas";
+import { uuidParamSchema } from "@bondery/schemas/http";
 
-export function registerEnrichQueueRoutes(fastify: FastifyInstance): void {
+export function registerEnrichQueueRoutes(fastify: AppFastifyInstance): void {
   /**
    * GET /api/contacts/enrich-queue/eligible-count
    * Count people with a LinkedIn handle but no people_linkedin record (never synced).
@@ -16,7 +21,7 @@ export function registerEnrichQueueRoutes(fastify: FastifyInstance): void {
    */
   fastify.get(
     "/enrich-queue/eligible-count",
-    async (request: FastifyRequest, reply: FastifyReply) => {
+    async (request, reply) => {
       const { client, user } = getAuth(request);
 
       const { data, error } = await client.rpc("get_linkedin_enrich_eligible", {
@@ -38,7 +43,7 @@ export function registerEnrichQueueRoutes(fastify: FastifyInstance): void {
    */
   fastify.get(
     "/enrich-queue/status",
-    async (request: FastifyRequest, reply: FastifyReply) => {
+    async (request, reply) => {
       const { client, user } = getAuth(request);
 
       const { data, error } = await client
@@ -84,20 +89,12 @@ export function registerEnrichQueueRoutes(fastify: FastifyInstance): void {
     "/enrich-queue/init",
     {
       schema: {
-        body: Type.Optional(
-          Type.Object({
-            personId: Type.Optional(Type.String()),
-          }),
-        ),
-      },
+        body: enrichQueueInitBodySchema,
+      } satisfies FastifyZodOpenApiSchema,
     },
-    async (
-      request: FastifyRequest<{ Body?: { personId?: string } }>,
-      reply: FastifyReply,
-    ) => {
+    async (request, reply) => {
       const { client, user } = getAuth(request);
-      const personId = (request.body as { personId?: string } | undefined)
-        ?.personId;
+      const personId = request.body?.personId;
 
       // Clear any leftover rows from a previous run.
       await client
@@ -184,7 +181,7 @@ export function registerEnrichQueueRoutes(fastify: FastifyInstance): void {
    */
   fastify.get(
     "/enrich-queue/next-batch",
-    async (request: FastifyRequest, reply: FastifyReply) => {
+    async (request, reply) => {
       const BATCH_LIMIT = 50;
       const { client, user } = getAuth(request);
 
@@ -256,23 +253,11 @@ export function registerEnrichQueueRoutes(fastify: FastifyInstance): void {
     "/enrich-queue/:id",
     {
       schema: {
-        params: UuidParam,
-        body: Type.Object({
-          status: Type.Union([
-            Type.Literal("completed"),
-            Type.Literal("failed"),
-          ]),
-          errorMessage: Type.Optional(NullableString),
-        }),
-      },
+        params: uuidParamSchema,
+        body: enrichQueuePatchBodySchema,
+      } satisfies FastifyZodOpenApiSchema,
     },
-    async (
-      request: FastifyRequest<{
-        Params: typeof UuidParam.static;
-        Body: { status: "completed" | "failed"; errorMessage?: string | null };
-      }>,
-      reply: FastifyReply,
-    ) => {
+    async (request, reply) => {
       const { client, user } = getAuth(request);
       const { id } = request.params;
       const { status, errorMessage } = request.body;
@@ -301,7 +286,7 @@ export function registerEnrichQueueRoutes(fastify: FastifyInstance): void {
    */
   fastify.delete(
     "/enrich-queue",
-    async (request: FastifyRequest, reply: FastifyReply) => {
+    async (request, reply) => {
       const { client, user } = getAuth(request);
 
       const { error } = await client

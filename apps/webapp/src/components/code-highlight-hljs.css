@@ -1,0 +1,94 @@
+@import "highlight.js/styles/github.min.css";
+
+/* github-dark token colors scoped to Mantine dark scheme */
+[data-mantine-color-scheme="dark"] .hljs {
+  color: #c9d1d9;
+  background: #0d1117;
+}
+
+[data-mantine-color-scheme="dark"] .hljs-doctag,
+[data-mantine-color-scheme="dark"] .hljs-keyword,
+[data-mantine-color-scheme="dark"] .hljs-meta .hljs-keyword,
+[data-mantine-color-scheme="dark"] .hljs-template-tag,
+[data-mantine-color-scheme="dark"] .hljs-template-variable,
+[data-mantine-color-scheme="dark"] .hljs-type,
+[data-mantine-color-scheme="dark"] .hljs-variable.language_ {
+  color: #ff7b72;
+}
+
+[data-mantine-color-scheme="dark"] .hljs-title,
+[data-mantine-color-scheme="dark"] .hljs-title.class_,
+[data-mantine-color-scheme="dark"] .hljs-title.class_.inherited__,
+[data-mantine-color-scheme="dark"] .hljs-title.function_ {
+  color: #d2a8ff;
+}
+
+[data-mantine-color-scheme="dark"] .hljs-attr,
+[data-mantine-color-scheme="dark"] .hljs-attribute,
+[data-mantine-color-scheme="dark"] .hljs-literal,
+[data-mantine-color-scheme="dark"] .hljs-meta,
+[data-mantine-color-scheme="dark"] .hljs-number,
+[data-mantine-color-scheme="dark"] .hljs-operator,
+[data-mantine-color-scheme="dark"] .hljs-selector-attr,
+[data-mantine-color-scheme="dark"] .hljs-selector-class,
+[data-mantine-color-scheme="dark"] .hljs-selector-id,
+[data-mantine-color-scheme="dark"] .hljs-variable {
+  color: #79c0ff;
+}
+
+[data-mantine-color-scheme="dark"] .hljs-meta .hljs-string,
+[data-mantine-color-scheme="dark"] .hljs-regexp,
+[data-mantine-color-scheme="dark"] .hljs-string {
+  color: #a5d6ff;
+}
+
+[data-mantine-color-scheme="dark"] .hljs-built_in,
+[data-mantine-color-scheme="dark"] .hljs-symbol {
+  color: #ffa657;
+}
+
+[data-mantine-color-scheme="dark"] .hljs-comment,
+[data-mantine-color-scheme="dark"] .hljs-code,
+[data-mantine-color-scheme="dark"] .hljs-formula {
+  color: #8b949e;
+}
+
+[data-mantine-color-scheme="dark"] .hljs-name,
+[data-mantine-color-scheme="dark"] .hljs-quote,
+[data-mantine-color-scheme="dark"] .hljs-selector-pseudo,
+[data-mantine-color-scheme="dark"] .hljs-selector-tag {
+  color: #7ee787;
+}
+
+[data-mantine-color-scheme="dark"] .hljs-subst {
+  color: #c9d1d9;
+}
+
+[data-mantine-color-scheme="dark"] .hljs-section {
+  color: #1f6feb;
+  font-weight: bold;
+}
+
+[data-mantine-color-scheme="dark"] .hljs-bullet {
+  color: #f2cc60;
+}
+
+[data-mantine-color-scheme="dark"] .hljs-emphasis {
+  color: #c9d1d9;
+  font-style: italic;
+}
+
+[data-mantine-color-scheme="dark"] .hljs-strong {
+  color: #c9d1d9;
+  font-weight: bold;
+}
+
+[data-mantine-color-scheme="dark"] .hljs-addition {
+  color: #aff5b4;
+  background-color: #033a16;
+}
+
+[data-mantine-color-scheme="dark"] .hljs-deletion {
+  color: #ffdcd7;
+  background-color: #67060c;
+}

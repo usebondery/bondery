@@ -1,40 +1,18 @@
-import { API_URL } from "@/lib/config";
-import { getAuthHeaders } from "@/lib/authHeaders";
+import { serverApiJson } from "@/lib/api/server";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import type { Contact } from "@bondery/schemas";
 import { appendAvatarParams, type AvatarPreset } from "@/lib/avatarParams";
+import {
+  normalizeContactsList,
+  type ContactsDataResult,
+  type SortOrder,
+  type ContactsApiResponse,
+} from "@/lib/query/fetchers/contacts";
 
-export type SortOrder =
-  | "nameAsc"
-  | "nameDesc"
-  | "surnameAsc"
-  | "surnameDesc"
-  | "interactionAsc"
-  | "interactionDesc"
-  | "createdAtAsc"
-  | "createdAtDesc";
-
-export interface ContactsStats {
-  totalContacts: number;
-  thisMonthInteractions: number;
-  newContactsThisYear: number;
-}
-
-export interface ContactsDataResult {
-  contacts: Contact[];
-  totalCount: number;
-  stats: ContactsStats;
-}
+export type { SortOrder, ContactsDataResult, ContactsStats } from "@/lib/query/fetchers/contacts";
 
 /**
- * Fetches paginated contacts with aggregate stats from the contacts API endpoint.
- *
- * @param query - Optional search query.
- * @param sort - Optional contacts sorting mode.
- * @param limit - Page size for contacts fetch.
- * @param offset - Starting offset for contacts fetch.
- * @param avatarPreset - Avatar transform preset (small, medium, large).
- * @returns Contacts list, total count, and stats for dashboard usage.
+ * @deprecated Use lib/query fetchers directly. Shim for unmigrated server code.
  */
 export async function getContactsData(
   query?: string,
@@ -43,39 +21,18 @@ export async function getContactsData(
   offset = 0,
   avatarPreset: AvatarPreset = "small",
 ): Promise<ContactsDataResult> {
-  const headers = await getAuthHeaders();
   const params = new URLSearchParams();
   params.set("limit", String(limit));
   params.set("offset", String(offset));
-
-  if (query) {
-    params.set("q", query);
-  }
-
-  if (sort) {
-    params.set("sort", sort);
-  }
-
+  if (query) params.set("search", query);
+  if (sort) params.set("sort", sort);
   appendAvatarParams(params, avatarPreset);
 
-  const response = await fetch(`${API_URL}${API_ROUTES.CONTACTS}?${params.toString()}`, {
-    next: { tags: ["contacts"] },
-    headers,
-  });
+  const data = await serverApiJson<ContactsApiResponse>(
+    `${API_ROUTES.CONTACTS}?${params.toString()}`,
+    undefined,
+    { next: { tags: ["contacts"] } },
+  );
 
-  if (!response.ok) {
-    throw new Error(`Failed to fetch contacts: ${response.status} ${response.statusText}`);
-  }
-
-  const data = await response.json();
-
-  return {
-    contacts: (data.contacts || []) as Contact[],
-    totalCount: Number.isFinite(data.totalCount) ? data.totalCount : (data.contacts || []).length,
-    stats: {
-      totalContacts: data?.stats?.totalContacts ?? data.totalCount ?? 0,
-      thisMonthInteractions: data?.stats?.thisMonthInteractions ?? 0,
-      newContactsThisYear: data?.stats?.newContactsThisYear ?? 0,
-    },
-  };
+  return normalizeContactsList(data);
 }

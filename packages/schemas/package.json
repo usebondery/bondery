@@ -25,18 +25,29 @@
       "types": "./dist/supabase.types.d.ts",
       "import": "./dist/supabase.types.js",
       "require": "./dist/supabase.types.js"
+    },
+    "./sync": {
+      "types": "./dist/sync/index.d.ts",
+      "import": "./dist/sync/index.js",
+      "require": "./dist/sync/index.js"
+    },
+    "./http": {
+      "types": "./dist/http/index.d.ts",
+      "import": "./dist/http/index.js",
+      "require": "./dist/http/index.js"
     }
   },
   "scripts": {
-    "build": "tsc",
+    "build": "rimraf dist && tsc",
     "check-types": "tsc --noEmit",
-    "test:contracts": "npx tsx ./src/contracts.assertions.ts"
+    "test:contracts": "node scripts/check-no-internal-deps.mjs && npx tsx ./src/contracts.assertions.ts"
   },
+  "description": "Canonical types, Zod validation schemas, and constants for Bondery. Contract layer — no runtime business logic.",
   "dependencies": {
-    "@bondery/helpers": "*",
     "zod": "^4.3.6"
   },
   "devDependencies": {
+    "rimraf": "^6.0.1",
     "typescript": "^6"
   }
 }

@@ -12,6 +12,18 @@ export { PersonAvatar } from "./nextjs/PersonAvatar";
 export { PersonAvatarTooltip } from "./nextjs/PersonAvatar/PersonAvatarTooltip";
 export { PersonAvatarGroup } from "./nextjs/PersonAvatarGroup";
 export { TypePicker, type TypePickerOption } from "./TypePicker";
+export {
+  DescribedSelect,
+  type DescribedSelectOption,
+  type DescribedSelectProps,
+} from "./DescribedSelect";
+export {
+  CodeBlock,
+  type CodeBlockProps,
+  type CodeBlockSnippet,
+  type CodeBlockSingleProps,
+  type CodeBlockMultiProps,
+} from "./CodeBlock";
 export { PeopleMultiPickerInput } from "./PeopleMultiPickerInput";
 export { EmojiPicker, EmojiPickerDropdownContent, ALL_EMOJIS, getRandomEmoji } from "./EmojiPicker";
 export {

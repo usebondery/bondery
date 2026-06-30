@@ -14,7 +14,7 @@ import {
   DEFAULT_GROUP_COLOR,
   getRandomGroupColor,
 } from "../../../components/color-picker";
-import { createTag, updateTag } from "../../../lib/api/client";
+import { tagsDomain } from "../../../lib/domains/tags";
 import { UI_TIMING_MS } from "../../../lib/config";
 import { useSheetForm } from "../../../lib/forms/useSheetForm";
 import { useMobileTranslations } from "../../../lib/i18n/useMobileTranslations";
@@ -92,20 +92,13 @@ export function TagEditSheet(props: TagEditSheetProps) {
     if (!canSave) return;
     try {
       if (mode === "create") {
-        const { tag: created } = await createTag({ label: values.label });
-        let finalTag = created;
-
-        if (values.color && created.color !== values.color) {
-          const { tag: updated } = await updateTag(created.id, { color: values.color });
-          finalTag = updated;
-        }
-
+        let finalTag = tagsDomain.create({ label: values.label, color: values.color });
         onOpenChange(false);
         props.onCreated(finalTag);
         return;
       }
 
-      const { tag: updated } = await updateTag(props.tagId, {
+      const updated = tagsDomain.update(props.tagId, {
         label: values.label,
         color: values.color,
       });

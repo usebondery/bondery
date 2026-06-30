@@ -11,27 +11,7 @@ import {
 } from "@mantine/core";
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react";
 import type { TablerIcon } from "@tabler/icons-react";
-import {
-  IconH1,
-  IconH2,
-  IconH3,
-  IconPilcrow,
-  IconBold,
-  IconItalic,
-  IconUnderline,
-  IconStrikethrough,
-  IconHighlight,
-  IconCode,
-  IconList,
-  IconListNumbers,
-  IconListCheck,
-  IconBlockquote,
-  IconMinus,
-  IconLink,
-  IconMoodSmile,
-  IconAt,
-  IconCalendar,
-} from "@tabler/icons-react";
+import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
 
 export interface SlashCommandItem {
   id: string;
@@ -41,249 +21,6 @@ export interface SlashCommandItem {
   group: string;
   action: (editor: { chain: () => unknown; commands: Record<string, unknown> }) => void;
 }
-
-/** All available slash commands, grouped by category. */
-export const SLASH_COMMANDS: SlashCommandItem[] = [
-  // ── Text ───────────────────────────────────────────────────────────────
-  {
-    id: "heading1",
-    label: "Heading 1",
-    description: "Large section heading",
-    icon: IconH1,
-    group: "Text",
-    action: (editor) =>
-      (
-        editor.chain() as {
-          focus: () => { toggleHeading: (o: { level: number }) => { run: () => void } };
-        }
-      )
-        .focus()
-        .toggleHeading({ level: 1 })
-        .run(),
-  },
-  {
-    id: "heading2",
-    label: "Heading 2",
-    description: "Medium section heading",
-    icon: IconH2,
-    group: "Text",
-    action: (editor) =>
-      (
-        editor.chain() as {
-          focus: () => { toggleHeading: (o: { level: number }) => { run: () => void } };
-        }
-      )
-        .focus()
-        .toggleHeading({ level: 2 })
-        .run(),
-  },
-  {
-    id: "heading3",
-    label: "Heading 3",
-    description: "Small section heading",
-    icon: IconH3,
-    group: "Text",
-    action: (editor) =>
-      (
-        editor.chain() as {
-          focus: () => { toggleHeading: (o: { level: number }) => { run: () => void } };
-        }
-      )
-        .focus()
-        .toggleHeading({ level: 3 })
-        .run(),
-  },
-  {
-    id: "paragraph",
-    label: "Paragraph",
-    description: "Plain text block",
-    icon: IconPilcrow,
-    group: "Text",
-    action: (editor) =>
-      (editor.chain() as { focus: () => { setParagraph: () => { run: () => void } } })
-        .focus()
-        .setParagraph()
-        .run(),
-  },
-  // ── Marks ──────────────────────────────────────────────────────────────
-  {
-    id: "bold",
-    label: "Bold",
-    description: "Strong emphasis",
-    icon: IconBold,
-    group: "Marks",
-    action: (editor) =>
-      (editor.chain() as { focus: () => { toggleBold: () => { run: () => void } } })
-        .focus()
-        .toggleBold()
-        .run(),
-  },
-  {
-    id: "italic",
-    label: "Italic",
-    description: "Emphasis",
-    icon: IconItalic,
-    group: "Marks",
-    action: (editor) =>
-      (editor.chain() as { focus: () => { toggleItalic: () => { run: () => void } } })
-        .focus()
-        .toggleItalic()
-        .run(),
-  },
-  {
-    id: "underline",
-    label: "Underline",
-    description: "Underlined text",
-    icon: IconUnderline,
-    group: "Marks",
-    action: (editor) =>
-      (editor.chain() as { focus: () => { toggleUnderline: () => { run: () => void } } })
-        .focus()
-        .toggleUnderline()
-        .run(),
-  },
-  {
-    id: "strikethrough",
-    label: "Strikethrough",
-    description: "Crossed out text",
-    icon: IconStrikethrough,
-    group: "Marks",
-    action: (editor) =>
-      (editor.chain() as { focus: () => { toggleStrike: () => { run: () => void } } })
-        .focus()
-        .toggleStrike()
-        .run(),
-  },
-  {
-    id: "highlight",
-    label: "Highlight",
-    description: "Highlight text",
-    icon: IconHighlight,
-    group: "Marks",
-    action: (editor) =>
-      (editor.chain() as { focus: () => { toggleHighlight: () => { run: () => void } } })
-        .focus()
-        .toggleHighlight()
-        .run(),
-  },
-  {
-    id: "code",
-    label: "Inline Code",
-    description: "Monospace text",
-    icon: IconCode,
-    group: "Marks",
-    action: (editor) =>
-      (editor.chain() as { focus: () => { toggleCode: () => { run: () => void } } })
-        .focus()
-        .toggleCode()
-        .run(),
-  },
-  // ── Blocks ─────────────────────────────────────────────────────────────
-  {
-    id: "bulletList",
-    label: "Bullet List",
-    description: "Unordered list",
-    icon: IconList,
-    group: "Blocks",
-    action: (editor) =>
-      (editor.chain() as { focus: () => { toggleBulletList: () => { run: () => void } } })
-        .focus()
-        .toggleBulletList()
-        .run(),
-  },
-  {
-    id: "orderedList",
-    label: "Numbered List",
-    description: "Ordered list",
-    icon: IconListNumbers,
-    group: "Blocks",
-    action: (editor) =>
-      (editor.chain() as { focus: () => { toggleOrderedList: () => { run: () => void } } })
-        .focus()
-        .toggleOrderedList()
-        .run(),
-  },
-  {
-    id: "taskList",
-    label: "To-do List",
-    description: "Checklist with checkboxes",
-    icon: IconListCheck,
-    group: "Blocks",
-    action: (editor) =>
-      (editor.chain() as { focus: () => { toggleTaskList: () => { run: () => void } } })
-        .focus()
-        .toggleTaskList()
-        .run(),
-  },
-  {
-    id: "blockquote",
-    label: "Quote",
-    description: "Blockquote",
-    icon: IconBlockquote,
-    group: "Blocks",
-    action: (editor) =>
-      (editor.chain() as { focus: () => { toggleBlockquote: () => { run: () => void } } })
-        .focus()
-        .toggleBlockquote()
-        .run(),
-  },
-  {
-    id: "horizontalRule",
-    label: "Divider",
-    description: "Horizontal rule",
-    icon: IconMinus,
-    group: "Blocks",
-    action: (editor) =>
-      (editor.chain() as { focus: () => { setHorizontalRule: () => { run: () => void } } })
-        .focus()
-        .setHorizontalRule()
-        .run(),
-  },
-  // ── Insert ─────────────────────────────────────────────────────────────
-  {
-    id: "link",
-    label: "Link",
-    description: "Insert a hyperlink",
-    icon: IconLink,
-    group: "Insert",
-    action: () => {
-      window.dispatchEvent(new CustomEvent("edit-link"));
-    },
-  },
-  {
-    id: "emoji",
-    label: "Emoji",
-    description: "Insert an emoji",
-    icon: IconMoodSmile,
-    group: "Insert",
-    action: (editor) => {
-      (editor.commands as { insertContent: (c: string) => void }).insertContent(":");
-    },
-  },
-  {
-    id: "mention",
-    label: "Mention",
-    description: "Mention a person",
-    icon: IconAt,
-    group: "Insert",
-    action: (editor) => {
-      (editor.commands as { insertContent: (c: string) => void }).insertContent("@");
-    },
-  },
-  {
-    id: "date",
-    label: "Date",
-    description: "Insert today's date",
-    icon: IconCalendar,
-    group: "Insert",
-    action: (editor) => {
-      (editor.commands as { insertContent: (c: unknown) => void }).insertContent({
-        type: "inlineDate",
-        attrs: { timestamp: new Date().toISOString() },
-      });
-    },
-  },
-];
 
 interface SlashCommandListProps {
   items: SlashCommandItem[];
@@ -296,6 +33,7 @@ export interface SlashCommandListHandle {
 
 export const SlashCommandList = forwardRef<SlashCommandListHandle, SlashCommandListProps>(
   function SlashCommandList({ items, command }, ref) {
+    const t = useTranslations("NotesSlashCommands");
     const [selectedIndex, setSelectedIndex] = useState(0);
     const scrollAreaRef = useRef<HTMLDivElement>(null);
 
@@ -351,7 +89,7 @@ export const SlashCommandList = forwardRef<SlashCommandListHandle, SlashCommandL
       return (
         <Paper shadow="md" radius="md" withBorder p="sm" maw={280}>
           <Text size="sm" c="dimmed">
-            No results
+            {t("NoResults")}
           </Text>
         </Paper>
       );

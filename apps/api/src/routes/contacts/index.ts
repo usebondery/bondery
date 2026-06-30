@@ -3,11 +3,14 @@
  * Handles CRUD operations for contacts
  */
 
-import type { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
-import { Type } from "@sinclair/typebox";
+import type { FastifyInstance, FastifyReply } from "fastify";
+import type { AppFastifyInstance, AppRoutePlugin } from "../../lib/fastify-types.js";
+import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
+import { z } from "zod";
 import { getAuth } from "../../lib/auth.js";
-import { buildContactAvatarUrl } from "../../lib/supabase.js";
-import { searchPeopleIds, restoreRankedOrder } from "../../lib/search.js";
+import { registerApiKeyProtectedHooks } from "../../lib/api-key-access.js";
+import { resolveContactAvatarUrl } from "../../lib/supabase.js";
+import { searchPeopleIds, restoreRankedOrder, countSearchPeopleIds } from "../../lib/search.js";
 import {
   resolveContactPersonIds,
   ResolveContactPersonIdsError,
@@ -40,20 +43,32 @@ import type {
   TablesUpdate,
 } from "@bondery/schemas";
 import {
-  UuidParam,
-  ContactsFilterSchema,
-  ContactSortEnum,
-  NullableString,
-  NullableNumber,
-  PhoneEntrySchema,
-  EmailEntrySchema,
-  ContactAddressEntrySchema,
+  contactsFilterSchema,
+  createContactApiInputSchema,
+  deleteContactsRequestSchema,
+} from "@bondery/schemas";
+import {
+  contactAddressEntrySchema,
+  emailEntryEntitySchema,
+  phoneEntryEntitySchema,
+} from "@bondery/schemas";
+import {
+  avatarTransformQuerySchema,
+  peopleListQuerySchema,
+  uuidParamSchema,
+} from "@bondery/schemas/http";
+import {
   CONTACT_SELECT,
   GROUP_SELECT,
-  AvatarQualityEnum,
-  AvatarSizeEnum,
   extractAvatarOptions,
-} from "../../lib/schemas.js";
+} from "../../lib/queries.js";
+import {
+  buildPaginatedResponse,
+  buildPaginationMeta,
+  normalizeSearch,
+  parsePagination,
+  resolveSort,
+} from "../../lib/pagination.js";
 import { registerMergeRoutes } from "./merge/index.js";
 import { registerEnrichmentRoutes } from "./enrichment/index.js";
 import { registerRelationshipRoutes } from "./relationships/index.js";
@@ -63,6 +78,9 @@ import {
 } from "./important-dates/index.js";
 import { registerPhotoRoutes } from "./photo/index.js";
 import { registerTagRoutes } from "./tags/index.js";
+import { deleteOrphanedInteractionsForDeletedContacts } from "../../lib/delete-orphaned-interactions-for-contacts.js";
+import { createContact, updateContact, deleteContact } from "../../domains/contacts/index.js";
+import { handleDomainError } from "../../lib/sync/handle-domain-error.js";
 
 const LOOKUP_SOCIAL_PLATFORMS: SocialPlatform[] = [
   "instagram",
@@ -70,98 +88,63 @@ const LOOKUP_SOCIAL_PLATFORMS: SocialPlatform[] = [
   "facebook",
 ];
 
-// ── TypeBox Schemas ──────────────────────────────────────────────
+// ── Zod Schemas ──────────────────────────────────────────────────
 
-const LookupPlatformEnum = Type.Union([
-  Type.Literal("instagram"),
-  Type.Literal("linkedin"),
-  Type.Literal("facebook"),
-]);
+const nullableString = z.union([z.string(), z.null()]);
+const nullableNumber = z.union([z.number(), z.null()]);
 
-const ContactListQuery = Type.Object({
-  limit: Type.Optional(Type.Integer({ minimum: 1, maximum: 200, default: 50 })),
-  offset: Type.Optional(Type.Integer({ minimum: 0, default: 0 })),
-  q: Type.Optional(Type.String()),
-  sort: Type.Optional(ContactSortEnum),
-  keepInTouch: Type.Optional(Type.Boolean()),
-  avatarQuality: Type.Optional(AvatarQualityEnum),
-  avatarSize: Type.Optional(AvatarSizeEnum),
+const lookupPlatformSchema = z.enum(["instagram", "linkedin", "facebook"]);
+
+const createContactBodySchema = createContactApiInputSchema.extend({
+  id: z.string().uuid().optional(),
 });
 
-const CreateContactBody = Type.Object({
-  firstName: Type.String({ minLength: 1 }),
-  lastName: Type.Optional(Type.String()),
-  middleName: Type.Optional(Type.String()),
-  linkedin: Type.Optional(Type.String()),
+const patchContactBodySchema = z.object({
+  firstName: z.string().min(1).optional(),
+  middleName: nullableString.optional(),
+  lastName: nullableString.optional(),
+  headline: nullableString.optional(),
+  location: nullableString.optional(),
+  notes: nullableString.optional(),
+  language: nullableString.optional(),
+  timezone: nullableString.optional(),
+  gisPoint: nullableString.optional(),
+  latitude: nullableNumber.optional(),
+  longitude: nullableNumber.optional(),
+  lastInteraction: nullableString.optional(),
+  keepFrequencyDays: z.union([z.number().int().min(1), z.null()]).optional(),
+  phones: z.array(phoneEntryEntitySchema).optional(),
+  emails: z.array(emailEntryEntitySchema).optional(),
+  addresses: z.array(contactAddressEntrySchema).optional(),
+  linkedin: nullableString.optional(),
+  instagram: nullableString.optional(),
+  whatsapp: nullableString.optional(),
+  facebook: nullableString.optional(),
+  website: nullableString.optional(),
+  signal: nullableString.optional(),
 });
 
-const UpdateContactBody = Type.Object({
-  firstName: Type.Optional(Type.String({ minLength: 1 })),
-  middleName: Type.Optional(NullableString),
-  lastName: Type.Optional(NullableString),
-  headline: Type.Optional(NullableString),
-  location: Type.Optional(NullableString),
-  notes: Type.Optional(NullableString),
-  language: Type.Optional(NullableString),
-  timezone: Type.Optional(NullableString),
-  gisPoint: Type.Optional(NullableString),
-  latitude: Type.Optional(NullableNumber),
-  longitude: Type.Optional(NullableNumber),
-  lastInteraction: Type.Optional(NullableString),
-  keepFrequencyDays: Type.Optional(
-    Type.Union([Type.Integer({ minimum: 1 }), Type.Null()]),
-  ),
-  phones: Type.Optional(Type.Array(PhoneEntrySchema)),
-  emails: Type.Optional(Type.Array(EmailEntrySchema)),
-  addresses: Type.Optional(Type.Array(ContactAddressEntrySchema)),
-  linkedin: Type.Optional(NullableString),
-  instagram: Type.Optional(NullableString),
-  whatsapp: Type.Optional(NullableString),
-  facebook: Type.Optional(NullableString),
-  website: Type.Optional(NullableString),
-  signal: Type.Optional(NullableString),
+const deleteContactsBodySchema = deleteContactsRequestSchema;
+
+const bySocialQuerySchema = z.object({
+  platform: z.string().optional(),
+  handle: z.string().optional(),
+  avatarQuality: avatarTransformQuerySchema.shape.avatarQuality,
+  avatarSize: avatarTransformQuerySchema.shape.avatarSize,
 });
 
-const DeleteContactsBody = Type.Union([
-  Type.Object({
-    ids: Type.Array(Type.String(), { minItems: 1 }),
-  }),
-  Type.Object({
-    filter: ContactsFilterSchema,
-    excludeIds: Type.Optional(Type.Array(Type.String())),
-  }),
-]);
-
-const BySocialQuery = Type.Object({
-  platform: Type.Optional(Type.String()),
-  handle: Type.Optional(Type.String()),
-  avatarQuality: Type.Optional(AvatarQualityEnum),
-  avatarSize: Type.Optional(AvatarSizeEnum),
+const mapBoundsQuerySchema = z.object({
+  minLat: z.coerce.number().min(-90).max(90),
+  maxLat: z.coerce.number().min(-90).max(90),
+  minLon: z.coerce.number().min(-180).max(180),
+  maxLon: z.coerce.number().min(-180).max(180),
+  limit: z.coerce.number().int().min(1).max(1000).optional().default(500),
+  avatarQuality: avatarTransformQuerySchema.shape.avatarQuality,
+  avatarSize: avatarTransformQuerySchema.shape.avatarSize,
 });
 
-const MapPinsQuery = Type.Object({
-  minLat: Type.Number({ minimum: -90, maximum: 90 }),
-  maxLat: Type.Number({ minimum: -90, maximum: 90 }),
-  minLon: Type.Number({ minimum: -180, maximum: 180 }),
-  maxLon: Type.Number({ minimum: -180, maximum: 180 }),
-  limit: Type.Optional(
-    Type.Integer({ minimum: 1, maximum: 1000, default: 500 }),
-  ),
-  avatarQuality: Type.Optional(AvatarQualityEnum),
-  avatarSize: Type.Optional(AvatarSizeEnum),
-});
-
-const MapAddressPinsQuery = Type.Object({
-  minLat: Type.Number({ minimum: -90, maximum: 90 }),
-  maxLat: Type.Number({ minimum: -90, maximum: 90 }),
-  minLon: Type.Number({ minimum: -180, maximum: 180 }),
-  maxLon: Type.Number({ minimum: -180, maximum: 180 }),
-  limit: Type.Optional(
-    Type.Integer({ minimum: 1, maximum: 1000, default: 500 }),
-  ),
-  avatarQuality: Type.Optional(AvatarQualityEnum),
-  avatarSize: Type.Optional(AvatarSizeEnum),
-});
+const mapPinsQuerySchema = mapBoundsQuerySchema;
+const mapAddressPinsQuerySchema = mapBoundsQuerySchema;
 
 function isLookupPlatform(
   value: string,
@@ -172,18 +155,31 @@ function isLookupPlatform(
 }
 
 function toContactPreview(
+  client: Parameters<typeof resolveContactAvatarUrl>[0],
+  userId: string,
   person: {
     id: string;
     first_name: string;
     last_name: string | null;
+    has_avatar: boolean;
+    updated_at?: string | null;
   },
-  avatarUrl: string | null,
+  avatarOptions?: Parameters<typeof resolveContactAvatarUrl>[3],
 ) {
   return {
     id: person.id,
     firstName: person.first_name,
     lastName: person.last_name,
-    avatar: avatarUrl,
+    avatar: resolveContactAvatarUrl(
+      client,
+      userId,
+      {
+        id: person.id,
+        hasAvatar: person.has_avatar,
+        updatedAt: person.updated_at,
+      },
+      avatarOptions,
+    ),
   };
 }
 
@@ -225,114 +221,6 @@ function withEmptySocials<
     website: null,
     signal: null,
   }));
-}
-
-/**
- * Deletes interactions that would be left without participants after removing the given contacts.
- *
- * It only affects interactions owned by the current user and only interactions that currently include
- * at least one of the contacts being deleted.
- */
-async function deleteOrphanedInteractionsForDeletedContacts(
-  client: any,
-  userId: string,
-  contactIds: string[],
-) {
-  if (!Array.isArray(contactIds) || contactIds.length === 0) {
-    return;
-  }
-
-  const uniqueContactIds = Array.from(new Set(contactIds.filter(Boolean)));
-  if (uniqueContactIds.length === 0) {
-    return;
-  }
-
-  const { data: impactedMemberships, error: impactedMembershipsError } =
-    await client
-      .from("interaction_participants")
-      .select("interaction_id, person_id")
-      .in("person_id", uniqueContactIds);
-
-  if (impactedMembershipsError) {
-    throw new Error(impactedMembershipsError.message);
-  }
-
-  const impactedInteractionIds = Array.from(
-    new Set(
-      (impactedMemberships || []).map(
-        (membership: { interaction_id: string }) => membership.interaction_id,
-      ),
-    ),
-  );
-
-  if (impactedInteractionIds.length === 0) {
-    return;
-  }
-
-  const { data: ownedInteractions, error: ownedInteractionsError } =
-    await client
-      .from("interactions")
-      .select("id")
-      .eq("user_id", userId)
-      .in("id", impactedInteractionIds);
-
-  if (ownedInteractionsError) {
-    throw new Error(ownedInteractionsError.message);
-  }
-
-  const ownedInteractionIds = (ownedInteractions || []).map(
-    (interaction: { id: string }) => interaction.id,
-  );
-
-  if (ownedInteractionIds.length === 0) {
-    return;
-  }
-
-  const { data: allMemberships, error: allMembershipsError } = await client
-    .from("interaction_participants")
-    .select("interaction_id, person_id")
-    .in("interaction_id", ownedInteractionIds);
-
-  if (allMembershipsError) {
-    throw new Error(allMembershipsError.message);
-  }
-
-  const deleteIdSet = new Set<string>();
-
-  for (const interactionId of ownedInteractionIds) {
-    const participants = (allMemberships || []).filter(
-      (membership: { interaction_id: string; person_id: string }) =>
-        membership.interaction_id === interactionId,
-    );
-
-    if (participants.length === 0) {
-      continue;
-    }
-
-    const allParticipantsDeleted = participants.every(
-      (membership: { person_id: string }) =>
-        uniqueContactIds.includes(membership.person_id),
-    );
-
-    if (allParticipantsDeleted) {
-      deleteIdSet.add(interactionId);
-    }
-  }
-
-  const interactionIdsToDelete = Array.from(deleteIdSet);
-
-  if (interactionIdsToDelete.length === 0) {
-    return;
-  }
-
-  const { error: deleteInteractionsError } = await client
-    .from("interactions")
-    .delete()
-    .in("id", interactionIdsToDelete);
-
-  if (deleteInteractionsError) {
-    throw new Error(deleteInteractionsError.message);
-  }
 }
 
 /**
@@ -415,11 +303,13 @@ async function removeOrphanedLinkedInLogos(
   await client.storage.from("linkedin_logos").remove(paths);
 }
 
-export async function contactRoutes(fastify: FastifyInstance) {
+export const contactRoutes: AppRoutePlugin = async (fastify) => {
   fastify.addHook("onRoute", (routeOptions) => {
-    routeOptions.schema = { ...routeOptions.schema, tags: ["Contacts"] };
+    if (routeOptions.schema) {
+      routeOptions.schema.tags = ["Contacts"];
+    }
   });
-  fastify.addHook("onRequest", fastify.auth([fastify.verifySession]));
+  registerApiKeyProtectedHooks(fastify);
 
   registerMergeRoutes(fastify);
   registerEnrichmentRoutes(fastify);
@@ -431,11 +321,12 @@ export async function contactRoutes(fastify: FastifyInstance) {
    */
   fastify.get(
     "/map-pins",
-    { schema: { querystring: MapPinsQuery } },
-    async (
-      request: FastifyRequest<{ Querystring: typeof MapPinsQuery.static }>,
-      reply: FastifyReply,
-    ) => {
+    {
+      schema: {
+        querystring: mapPinsQuerySchema,
+      } satisfies FastifyZodOpenApiSchema,
+    },
+    async (request, reply) => {
       const { client, user } = getAuth(request);
       const { minLat, maxLat, minLon, maxLon, limit = 500 } = request.query;
       const avatarOptions = extractAvatarOptions(request.query);
@@ -465,6 +356,7 @@ export async function contactRoutes(fastify: FastifyInstance) {
           latitude: number;
           longitude: number;
           updated_at: string;
+          has_avatar: boolean;
         }) => ({
           id: row.id,
           firstName: row.first_name,
@@ -474,7 +366,16 @@ export async function contactRoutes(fastify: FastifyInstance) {
           lastInteraction: row.last_interaction,
           latitude: row.latitude,
           longitude: row.longitude,
-          avatar: buildContactAvatarUrl(client, user.id, row.id, avatarOptions),
+          avatar: resolveContactAvatarUrl(
+            client,
+            user.id,
+            {
+              id: row.id,
+              hasAvatar: row.has_avatar,
+              updatedAt: row.updated_at,
+            },
+            avatarOptions,
+          ),
         }),
       );
 
@@ -488,13 +389,12 @@ export async function contactRoutes(fastify: FastifyInstance) {
    */
   fastify.get(
     "/map-address-pins",
-    { schema: { querystring: MapAddressPinsQuery } },
-    async (
-      request: FastifyRequest<{
-        Querystring: typeof MapAddressPinsQuery.static;
-      }>,
-      reply: FastifyReply,
-    ) => {
+    {
+      schema: {
+        querystring: mapAddressPinsQuerySchema,
+      } satisfies FastifyZodOpenApiSchema,
+    },
+    async (request, reply) => {
       const { client, user } = getAuth(request);
       const { minLat, maxLat, minLon, maxLon, limit = 500 } = request.query;
       const avatarOptions = extractAvatarOptions(request.query);
@@ -526,6 +426,7 @@ export async function contactRoutes(fastify: FastifyInstance) {
           latitude: number;
           longitude: number;
           updated_at: string;
+          has_avatar: boolean;
         }) => ({
           addressId: row.address_id,
           personId: row.person_id,
@@ -537,10 +438,14 @@ export async function contactRoutes(fastify: FastifyInstance) {
           addressCountry: row.address_country,
           latitude: row.latitude,
           longitude: row.longitude,
-          avatar: buildContactAvatarUrl(
+          avatar: resolveContactAvatarUrl(
             client,
             user.id,
-            row.person_id,
+            {
+              id: row.person_id,
+              hasAvatar: row.has_avatar,
+              updatedAt: row.updated_at,
+            },
             avatarOptions,
           ),
         }),
@@ -555,20 +460,19 @@ export async function contactRoutes(fastify: FastifyInstance) {
    */
   fastify.get(
     "/",
-    { schema: { querystring: ContactListQuery } },
-    async (
-      request: FastifyRequest<{
-        Querystring: typeof ContactListQuery.static;
-      }>,
-      reply: FastifyReply,
-    ) => {
+    {
+      schema: {
+        querystring: peopleListQuerySchema,
+      } satisfies FastifyZodOpenApiSchema,
+    },
+    async (request, reply) => {
       const { client, user } = getAuth(request);
-      const query = request.query || {};
+      const query = request.query;
       const avatarOptions = extractAvatarOptions(query);
 
-      const limit = Math.min(query.limit ?? 50, 200);
-      const offset = query.offset ?? 0;
-      const search = typeof query.q === "string" ? query.q.trim() : "";
+      const { limit, offset } = parsePagination(query);
+      const search = normalizeSearch(query.search);
+      const effectiveSort = resolveSort(query.sort, "nameAsc");
 
       const now = new Date();
       const monthStart = new Date(
@@ -616,36 +520,33 @@ export async function contactRoutes(fastify: FastifyInstance) {
       let error: any = null;
 
       if (search) {
-        const { ranked, error: rpcError } = await searchPeopleIds(
-          client,
-          user.id,
-          search,
-          limit,
-          offset,
-        );
+        const keepInTouch = Boolean(query.keepInTouch);
+        const [searchResult, countResult] = await Promise.all([
+          searchPeopleIds(client, user.id, search, limit, offset, { keepInTouch }),
+          countSearchPeopleIds(client, user.id, search, { keepInTouch }),
+        ]);
 
-        if (rpcError) {
-          request.log.error({ err: rpcError }, "Error in fuzzy search RPC");
-          return reply.status(500).send({ error: rpcError });
+        if (searchResult.error) {
+          request.log.error({ err: searchResult.error }, "Error in fuzzy search RPC");
+          return reply.status(500).send({ error: searchResult.error });
         }
 
-        if (!ranked || ranked.length === 0) {
-          contacts = [];
-          count = 0;
-        } else {
-          const rankedIds = ranked.map((r) => r.id);
+        if (countResult.error) {
+          request.log.error({ err: countResult.error }, "Error in fuzzy search count RPC");
+          return reply.status(500).send({ error: countResult.error });
+        }
 
-          let fetchQuery = client
+        count = countResult.count ?? 0;
+
+        if (!searchResult.ranked || searchResult.ranked.length === 0) {
+          contacts = [];
+        } else {
+          const rankedIds = searchResult.ranked.map((r) => r.id);
+
+          const { data: fetchedContacts, error: fetchError } = await client
             .from("people")
             .select(CONTACT_SELECT)
             .in("id", rankedIds);
-
-          // Preserve keepInTouch filter even during search
-          if (query.keepInTouch) {
-            fetchQuery = fetchQuery.not("keep_frequency_days", "is", null);
-          }
-
-          const { data: fetchedContacts, error: fetchError } = await fetchQuery;
 
           if (fetchError) {
             request.log.error(
@@ -656,7 +557,6 @@ export async function contactRoutes(fastify: FastifyInstance) {
           }
 
           contacts = restoreRankedOrder(fetchedContacts || [], rankedIds);
-          count = contacts.length;
         }
       } else {
         // ── Standard list path (no search) ──────────────────────────────────
@@ -751,11 +651,18 @@ export async function contactRoutes(fastify: FastifyInstance) {
         enrichedContacts = withEmptySocials(withEmptyChannels(contacts || []));
       }
 
-      return {
-        contacts: enrichedContacts,
-        totalCount: typeof count === "number" ? count : enrichedContacts.length,
+      const totalCount = typeof count === "number" ? count : enrichedContacts.length;
+      const pagination = buildPaginationMeta({
         limit,
         offset,
+        totalCount,
+        itemCount: enrichedContacts.length,
+        sort: effectiveSort,
+        search,
+      });
+
+      return {
+        ...buildPaginatedResponse("contacts", enrichedContacts, pagination),
         stats: {
           totalContacts: totalContactsCount || 0,
           thisMonthInteractions: monthInteractionsCount || 0,
@@ -770,74 +677,32 @@ export async function contactRoutes(fastify: FastifyInstance) {
    */
   fastify.post(
     "/",
-    { schema: { body: CreateContactBody } },
-    async (
-      request: FastifyRequest<{ Body: typeof CreateContactBody.static }>,
-      reply: FastifyReply,
-    ) => {
+    {
+      schema: {
+        body: createContactBodySchema,
+      } satisfies FastifyZodOpenApiSchema,
+    },
+    async (request, reply) => {
       const { client, user } = getAuth(request);
       const body = request.body;
 
-      // Prepare insert data
-      const insertData: any = {
-        user_id: user.id,
-        first_name: body.firstName.trim(),
-        last_interaction: new Date().toISOString(),
-        myself: false,
-      };
+      try {
+        const { data, txid } = await createContact(
+          { client, user, log: request.log },
+          {
+            id: body.id,
+            firstName: body.firstName,
+            lastName: body.lastName,
+            middleName: body.middleName,
+            linkedin: body.linkedin,
+          },
+        );
 
-      if (body.lastName && body.lastName.trim().length > 0) {
-        insertData.last_name = body.lastName.trim();
+        return reply.status(201).send({ contact: data.contact, txid });
+      } catch (error) {
+        if (handleDomainError(error, reply)) return;
+        throw error;
       }
-
-      if (body.middleName && body.middleName.trim().length > 0) {
-        insertData.middle_name = body.middleName.trim();
-      }
-
-      // Insert contact
-      const { data: newContact, error } = await client
-        .from("people")
-        .insert(insertData)
-        .select("id")
-        .single();
-
-      if (error) {
-        return reply.status(500).send({ error: error.message });
-      }
-
-      if (body.linkedin && body.linkedin.trim().length > 0) {
-        try {
-          await upsertContactSocials(
-            client,
-            user.id,
-            newContact.id,
-            "linkedin",
-            body.linkedin,
-          );
-        } catch (socialError) {
-          const message =
-            socialError instanceof Error
-              ? socialError.message
-              : "Social upsert failed";
-          return reply.status(500).send({ error: message });
-        }
-      }
-
-      const contact = await loadEnrichedContact(
-        client,
-        user.id,
-        newContact.id,
-        undefined,
-        request.log,
-      );
-
-      if (!contact) {
-        return reply
-          .status(500)
-          .send({ error: "Contact was created but could not be reloaded" });
-      }
-
-      return reply.status(201).send({ contact });
     },
   );
 
@@ -847,11 +712,12 @@ export async function contactRoutes(fastify: FastifyInstance) {
    */
   fastify.delete(
     "/",
-    { schema: { body: DeleteContactsBody } },
-    async (
-      request: FastifyRequest<{ Body: typeof DeleteContactsBody.static }>,
-      reply: FastifyReply,
-    ) => {
+    {
+      schema: {
+        body: deleteContactsBodySchema,
+      } satisfies FastifyZodOpenApiSchema,
+    },
+    async (request, reply) => {
       const { client, user } = getAuth(request);
       const body = request.body;
 
@@ -898,6 +764,7 @@ export async function contactRoutes(fastify: FastifyInstance) {
           client,
           user.id,
           uniqueIds,
+          { includeParticipantlessInteractions: true },
         );
       } catch (cleanupError) {
         const message =
@@ -949,74 +816,22 @@ export async function contactRoutes(fastify: FastifyInstance) {
    */
   fastify.delete(
     "/:id",
-    { schema: { params: UuidParam } },
-    async (
-      request: FastifyRequest<{ Params: typeof UuidParam.static }>,
-      reply: FastifyReply,
-    ) => {
+    {
+      schema: {
+        params: uuidParamSchema,
+      } satisfies FastifyZodOpenApiSchema,
+    },
+    async (request, reply) => {
       const { client, user } = getAuth(request);
       const { id } = request.params;
 
-      // Check if this is the myself contact before doing anything destructive
-      const { data: contactCheck } = await client
-        .from("people")
-        .select("id, myself")
-        .eq("id", id)
-        .eq("user_id", user.id)
-        .single();
-
-      if (!contactCheck) {
-        return reply.status(404).send({ error: "Contact not found" });
-      }
-
-      if (contactCheck.myself) {
-        return reply
-          .status(403)
-          .send({ error: "Cannot delete your own contact card" });
-      }
-
       try {
-        await deleteOrphanedInteractionsForDeletedContacts(client, user.id, [
-          id,
-        ]);
-      } catch (cleanupError) {
-        const message =
-          cleanupError instanceof Error
-            ? cleanupError.message
-            : "Failed to clean up interactions for deleted contact";
-        return reply.status(500).send({ error: message });
+        await deleteContact({ client, user, log: request.log }, id);
+        return { message: "Contact deleted successfully" };
+      } catch (error) {
+        if (handleDomainError(error, reply)) return;
+        throw error;
       }
-
-      const candidateLogoIds = await collectLinkedInLogoIds(client, user.id, [
-        id,
-      ]);
-
-      const { data: deletedContact, error } = await client
-        .from("people")
-        .delete()
-        .eq("id", id)
-        .eq("user_id", user.id)
-        .select("id")
-        .single();
-
-      if (error || !deletedContact) {
-        return reply.status(404).send({ error: "Contact not found" });
-      }
-
-      // Clean up storage: delete avatar file for the deleted contact
-      await client.storage.from("avatars").remove([`${user.id}/${id}.jpg`]);
-
-      // Clean up orphaned LinkedIn logo files (best-effort, does not fail the response)
-      try {
-        await removeOrphanedLinkedInLogos(client, user.id, candidateLogoIds);
-      } catch (logoCleanupError) {
-        request.log.warn(
-          { logoCleanupError },
-          "[contacts] Failed to clean up orphaned LinkedIn logos",
-        );
-      }
-
-      return { message: "Contact deleted successfully" };
     },
   );
 
@@ -1025,13 +840,12 @@ export async function contactRoutes(fastify: FastifyInstance) {
    */
   fastify.get(
     "/by-social",
-    { schema: { querystring: BySocialQuery } },
-    async (
-      request: FastifyRequest<{
-        Querystring: typeof BySocialQuery.static;
-      }>,
-      reply: FastifyReply,
-    ) => {
+    {
+      schema: {
+        querystring: bySocialQuerySchema,
+      } satisfies FastifyZodOpenApiSchema,
+    },
+    async (request, reply) => {
       const { client, user } = getAuth(request);
       const platform = request.query.platform?.trim() ?? "";
       const handle = request.query.handle?.trim() ?? "";
@@ -1054,7 +868,7 @@ export async function contactRoutes(fastify: FastifyInstance) {
 
       const { data: person, error } = await client
         .from("people")
-        .select("id, first_name, last_name, updated_at")
+        .select("id, first_name, last_name, updated_at, has_avatar")
         .eq("user_id", user.id)
         .eq("id", personId)
         .single();
@@ -1067,16 +881,7 @@ export async function contactRoutes(fastify: FastifyInstance) {
 
       return {
         exists: true,
-        contact: toContactPreview(
-          person,
-          buildContactAvatarUrl(
-            client,
-            user.id,
-            person.id,
-            avatarOpts,
-            person.updated_at,
-          ),
-        ),
+        contact: toContactPreview(client, user.id, person, avatarOpts),
       };
     },
   );
@@ -1088,23 +893,14 @@ export async function contactRoutes(fastify: FastifyInstance) {
     "/:id",
     {
       schema: {
-        params: UuidParam,
-        querystring: Type.Object({
-          avatarQuality: Type.Optional(AvatarQualityEnum),
-          avatarSize: Type.Optional(AvatarSizeEnum),
-        }),
-      },
+        params: uuidParamSchema,
+        querystring: avatarTransformQuerySchema,
+      } satisfies FastifyZodOpenApiSchema,
     },
-    async (
-      request: FastifyRequest<{
-        Params: typeof UuidParam.static;
-        Querystring: { avatarQuality?: string; avatarSize?: string };
-      }>,
-      reply: FastifyReply,
-    ) => {
+    async (request, reply) => {
       const { client, user } = getAuth(request);
       const { id } = request.params;
-      const avatarOpts = extractAvatarOptions(request.query as any);
+      const avatarOpts = extractAvatarOptions(request.query);
 
       const enrichedContact = await loadEnrichedContact(
         client,
@@ -1127,11 +923,12 @@ export async function contactRoutes(fastify: FastifyInstance) {
    */
   fastify.get(
     "/:id/groups",
-    { schema: { params: UuidParam } },
-    async (
-      request: FastifyRequest<{ Params: typeof UuidParam.static }>,
-      reply: FastifyReply,
-    ) => {
+    {
+      schema: {
+        params: uuidParamSchema,
+      } satisfies FastifyZodOpenApiSchema,
+    },
+    async (request, reply) => {
       const { client } = getAuth(request);
       const { id: personId } = request.params;
 
@@ -1191,317 +988,31 @@ export async function contactRoutes(fastify: FastifyInstance) {
    */
   fastify.patch(
     "/:id",
-    { schema: { params: UuidParam, body: UpdateContactBody } },
-    async (
-      request: FastifyRequest<{
-        Params: typeof UuidParam.static;
-        Body: typeof UpdateContactBody.static;
-      }>,
-      reply: FastifyReply,
-    ) => {
+    {
+      schema: {
+        params: uuidParamSchema,
+        body: patchContactBodySchema,
+      } satisfies FastifyZodOpenApiSchema,
+    },
+    async (request, reply) => {
       const { client, user } = getAuth(request);
       const { id } = request.params;
       const body = request.body;
 
-      // Map camelCase to snake_case
-      const updates: TablesUpdate<"people"> = {};
-
-      if (body.firstName !== undefined) {
-        updates.first_name = body.firstName;
-      }
-      if (body.middleName !== undefined) updates.middle_name = body.middleName;
-      if (body.lastName !== undefined) updates.last_name = body.lastName;
-      if (body.headline !== undefined) updates.headline = body.headline;
-      if (body.location !== undefined) updates.location = body.location;
-      if (body.notes !== undefined) updates.notes = body.notes;
-      if (body.language !== undefined) updates.language = body.language;
-      if (body.timezone !== undefined) updates.timezone = body.timezone;
-      if (body.gisPoint !== undefined) updates.gis_point = body.gisPoint;
-
-      // Geocode location server-side when the client doesn't supply coordinates.
-      // If the client sends latitude/longitude or gisPoint explicitly, those take
-      // precedence and we skip geocoding to avoid overwriting client-provided data.
-      const clientProvidesCoords =
-        Object.prototype.hasOwnProperty.call(body, "latitude") ||
-        Object.prototype.hasOwnProperty.call(body, "longitude") ||
-        Object.prototype.hasOwnProperty.call(body, "gisPoint");
-
-      let geocodedLocation: { lat: number; lon: number } | null = null;
-
-      if (body.location && !clientProvidesCoords) {
-        try {
-          const geocoded = await cachedGeocodeLinkedInLocation(body.location);
-          if (geocoded) {
-            const { geo, timezone: tz } = geocoded;
-            if (geo.formattedLabel) updates.location = geo.formattedLabel;
-            geocodedLocation = { lat: geo.lat, lon: geo.lon };
-            if (tz && body.timezone === undefined) updates.timezone = tz;
-          }
-        } catch (err) {
-          request.log.warn(
-            { err },
-            "[PATCH contact] Geocode failed, continuing without coordinates",
-          );
-        }
-      }
-      if (body.lastInteraction !== undefined) {
-        updates.last_interaction = body.lastInteraction;
-        // Manual update clears the activity link — NULL signals "set manually"
-        updates.last_interaction_activity_id = null;
-      }
-      if (body.keepFrequencyDays !== undefined)
-        updates.keep_frequency_days = body.keepFrequencyDays;
-
-      const hasLatitudeField = Object.prototype.hasOwnProperty.call(
-        body,
-        "latitude",
-      );
-      const hasLongitudeField = Object.prototype.hasOwnProperty.call(
-        body,
-        "longitude",
-      );
-
-      let nextLatitude: number | null | undefined;
-      let nextLongitude: number | null | undefined;
-
-      if (hasLatitudeField || hasLongitudeField) {
-        nextLatitude = (body.latitude as number | null | undefined) ?? null;
-        nextLongitude = (body.longitude as number | null | undefined) ?? null;
-
-        if ((nextLatitude === null) !== (nextLongitude === null)) {
-          return reply
-            .status(400)
-            .send({
-              error: "Both latitude and longitude must be provided together",
-            });
-        }
-
-        if (
-          nextLatitude !== null &&
-          nextLongitude !== null &&
-          (!Number.isFinite(nextLatitude) || !Number.isFinite(nextLongitude))
-        ) {
-          return reply
-            .status(400)
-            .send({ error: "Invalid latitude/longitude values" });
-        }
-      }
-
-      let nextPhones: PhoneEntry[] | undefined;
-      if (body.phones !== undefined) {
-        try {
-          nextPhones = parsePhoneEntries(body.phones);
-        } catch (parseError) {
-          const message =
-            parseError instanceof Error
-              ? parseError.message
-              : "Invalid phones payload";
-          return reply.status(400).send({ error: message });
-        }
-      }
-
-      let nextEmails: EmailEntry[] | undefined;
-      if (body.emails !== undefined) {
-        try {
-          nextEmails = parseEmailEntries(body.emails);
-        } catch (parseError) {
-          const message =
-            parseError instanceof Error
-              ? parseError.message
-              : "Invalid emails payload";
-          return reply.status(400).send({ error: message });
-        }
-      }
-
-      let nextAddresses: ContactAddressEntry[] | undefined;
-      if (body.addresses !== undefined) {
-        try {
-          nextAddresses = parseAddressEntries(body.addresses);
-          request.log.info(
-            {
-              route: "PATCH /contacts/:id",
-              personId: id,
-              addressCount: nextAddresses.length,
-              addresses: nextAddresses.map((entry) => ({
-                type: entry.type,
-                value: entry.value,
-                latitude: entry.latitude,
-                longitude: entry.longitude,
-                addressFormatted: entry.addressFormatted,
-                addressGeocodeSource: entry.addressGeocodeSource,
-              })),
-            },
-            "Parsed addresses payload",
-          );
-        } catch (parseError) {
-          const message =
-            parseError instanceof Error
-              ? parseError.message
-              : "Invalid addresses payload";
-          return reply.status(400).send({ error: message });
-        }
-
-        // NOTE: people.location is NOT auto-synced from the preferred address here.
-        // The client sends a separate PATCH with { location, latitude, longitude }
-        // only when the user explicitly confirms the location update prompt.
-        // Auto-syncing here would overwrite a manually set location when the user declines.
-      }
-
-      const socialsUpdates: Array<{
-        platform: Parameters<typeof upsertContactSocials>[3];
-        handle: string | null | undefined;
-      }> = [];
-
-      if (body.linkedin !== undefined) {
-        socialsUpdates.push({ platform: "linkedin", handle: body.linkedin });
-      }
-      if (body.instagram !== undefined) {
-        socialsUpdates.push({ platform: "instagram", handle: body.instagram });
-      }
-      if (body.whatsapp !== undefined) {
-        socialsUpdates.push({ platform: "whatsapp", handle: body.whatsapp });
-      }
-      if (body.facebook !== undefined) {
-        socialsUpdates.push({ platform: "facebook", handle: body.facebook });
-      }
-      if (body.website !== undefined) {
-        socialsUpdates.push({ platform: "website", handle: body.website });
-      }
-      if (body.signal !== undefined) {
-        socialsUpdates.push({ platform: "signal", handle: body.signal });
-      }
-
-      updates.updated_at = new Date().toISOString();
-
-      const { data: updatedContact, error } = await client
-        .from("people")
-        .update(updates)
-        .eq("id", id)
-        .eq("user_id", user.id)
-        .select("id, myself")
-        .single();
-
-      if (error) {
-        return reply.status(500).send({ error: error.message });
-      }
-
-      if (!updatedContact) {
-        return reply.status(404).send({ error: "Contact not found" });
-      }
-
       try {
-        if (hasLatitudeField || hasLongitudeField) {
-          const { error: locationError } = await client.rpc(
-            "set_person_location",
-            {
-              p_person_id: id,
-              p_user_id: user.id,
-              // The SQL function handles null to clear coordinates; cast needed because
-              // generated types reflect the non-nullable Postgres signature.
-              p_latitude: (nextLatitude ?? null) as number,
-              p_longitude: (nextLongitude ?? null) as number,
-            },
-          );
+        const { data, txid } = await updateContact(
+          { client, user, log: request.log },
+          {
+            personId: id,
+            patch: body,
+          },
+        );
 
-          if (locationError) {
-            return reply.status(500).send({ error: locationError.message });
-          }
-        } else if (geocodedLocation) {
-          // Server-side geocoding resolved coordinates — update gis_point via the
-          // same RPC used for explicit lat/lon so generated latitude/longitude columns
-          // are updated correctly.
-          const { error: geoRpcError } = await client.rpc(
-            "set_person_location",
-            {
-              p_person_id: id,
-              p_user_id: user.id,
-              p_latitude: geocodedLocation.lat as number,
-              p_longitude: geocodedLocation.lon as number,
-            },
-          );
-          if (geoRpcError) {
-            // Non-fatal: text fields (location, timezone) were already persisted above.
-            request.log.warn(
-              { err: geoRpcError },
-              "[PATCH contact] Failed to set geocoded coordinates",
-            );
-          }
-        }
-
-        if (nextPhones !== undefined) {
-          request.log.info(
-            {
-              route: "PATCH /contacts/:id",
-              personId: id,
-              addresses: nextAddresses?.map((entry) => ({
-                type: entry.type,
-                value: entry.value,
-                latitude: entry.latitude,
-                longitude: entry.longitude,
-              })),
-            },
-            "Upserting contact channels",
-          );
-        }
-
-        // Run all replace operations in parallel — they operate on independent tables
-        const parallelOps: Promise<void>[] = [];
-
-        if (nextPhones !== undefined) {
-          parallelOps.push(
-            replaceContactPhones(client, user.id, id, nextPhones),
-          );
-        }
-        if (nextEmails !== undefined) {
-          parallelOps.push(
-            replaceContactEmails(client, user.id, id, nextEmails),
-          );
-        }
-        if (nextAddresses !== undefined) {
-          parallelOps.push(
-            replaceContactAddresses(client, user.id, id, nextAddresses),
-          );
-        }
-        if (socialsUpdates.length > 0) {
-          parallelOps.push(
-            Promise.all(
-              socialsUpdates.map((entry) =>
-                upsertContactSocials(
-                  client,
-                  user.id,
-                  id,
-                  entry.platform,
-                  entry.handle,
-                ),
-              ),
-            ).then(() => undefined),
-          );
-        }
-
-        if (parallelOps.length > 0) {
-          await Promise.all(parallelOps);
-        }
-      } catch (channelError) {
-        const message =
-          channelError instanceof Error
-            ? channelError.message
-            : "Unknown channel error";
-        return reply.status(500).send({ error: message });
+        return { contact: data.contact, txid };
+      } catch (error) {
+        if (handleDomainError(error, reply)) return;
+        throw error;
       }
-
-      const enrichedContact = await loadEnrichedContact(
-        client,
-        user.id,
-        id,
-        undefined,
-        request.log,
-      );
-
-      if (!enrichedContact) {
-        return reply.status(404).send({ error: "Contact not found" });
-      }
-
-      return { contact: enrichedContact };
     },
   );
 
@@ -1514,19 +1025,13 @@ export async function contactRoutes(fastify: FastifyInstance) {
     "/:id/vcard",
     {
       schema: {
-        params: UuidParam,
-        querystring: Type.Object({
-          avatarQuality: Type.Optional(AvatarQualityEnum),
-          avatarSize: Type.Optional(AvatarSizeEnum),
-        }),
-      },
+        params: uuidParamSchema,
+        querystring: avatarTransformQuerySchema,
+      } satisfies FastifyZodOpenApiSchema,
     },
-    async (
-      request: FastifyRequest<{ Params: typeof UuidParam.static }>,
-      reply: FastifyReply,
-    ) => {
+    async (request, reply) => {
       const { client, user } = getAuth(request);
-      const avatarOpts = extractAvatarOptions(request.query as any);
+      const avatarOpts = extractAvatarOptions(request.query);
       const { id } = request.params;
 
       // Fetch contact

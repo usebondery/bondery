@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 import { Image, StyleSheet, Text, View } from "react-native";
 import type { Contact } from "@bondery/schemas";
 import { normalizeMobileUrlForDevice } from "../../../lib/config";
@@ -61,7 +61,6 @@ export function SettingsAccountProfileCard({
   fallbackAvatarUrl,
 }: SettingsAccountProfileCardProps) {
   const colors = useMobileThemeColors();
-  const [avatarImageFailed, setAvatarImageFailed] = useState(false);
 
   const profileContact = useMemo(() => {
     if (contact) {
@@ -84,11 +83,7 @@ export function SettingsAccountProfileCard({
       ? normalizeMobileUrlForDevice(fallbackAvatarUrl)
       : undefined;
 
-  useEffect(() => {
-    setAvatarImageFailed(false);
-  }, [avatarUri]);
-
-  const shouldShowAvatarImage = !!avatarUri && !avatarImageFailed;
+  const shouldShowAvatarImage = !!avatarUri;
 
   return (
     <SettingsSectionCard>
@@ -106,7 +101,6 @@ export function SettingsAccountProfileCard({
               source={{ uri: avatarUri }}
               style={styles.avatarImage}
               resizeMode="cover"
-              onError={() => setAvatarImageFailed(true)}
             />
           ) : (
             <Text style={[styles.avatarText, { color: colors.textOnPrimary }]}>

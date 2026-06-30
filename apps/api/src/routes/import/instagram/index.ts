@@ -1,6 +1,8 @@
-import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
-import { Type } from "@sinclair/typebox";
+import type { FastifyReply } from "fastify";
+import type { AppFastifyInstance, AppRoutePlugin } from "../../../lib/fastify-types.js";
+import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
 import { getAuth } from "../../../lib/auth.js";
+import { registerApiKeyProtectedHooks } from "../../../lib/api-key-access.js";
 import {
   assignContactsToDefaultImportGroup,
   toInstagramImportGroupKeys,
@@ -12,22 +14,10 @@ import type {
   InstagramImportSource,
   InstagramImportStrategy,
   InstagramParseResponse,
+  InstagramPreparedContact,
 } from "@bondery/schemas";
+import { instagramImportCommitRequestSchema } from "@bondery/schemas";
 import { IMPORT_TIER } from "../../../lib/rate-limit.js";
-
-const InstagramCommitContactSchema = Type.Object({
-  firstName: Type.String(),
-  middleName: Type.Optional(Type.Union([Type.String(), Type.Null()])),
-  lastName: Type.Optional(Type.Union([Type.String(), Type.Null()])),
-  instagramUsername: Type.String(),
-  connectedAt: Type.Optional(Type.Union([Type.String(), Type.Null()])),
-  isValid: Type.Boolean(),
-  sources: Type.Optional(Type.Array(Type.String())),
-});
-
-const InstagramCommitBody = Type.Object({
-  contacts: Type.Array(InstagramCommitContactSchema, { minItems: 1 }),
-});
 
 const SUPPORTED_STRATEGIES: InstagramImportStrategy[] = [
   "close_friends",
@@ -47,13 +37,15 @@ function resolveStrategy(input: unknown): InstagramImportStrategy {
   return SUPPORTED_STRATEGIES.includes(normalized) ? normalized : "following_and_followers";
 }
 
-export async function instagramImportRoutes(fastify: FastifyInstance) {
+export const instagramImportRoutes: AppRoutePlugin = async (fastify) => {
   fastify.addHook("onRoute", (routeOptions) => {
-    routeOptions.schema = { ...routeOptions.schema, tags: ["Import"] };
+    if (routeOptions.schema) {
+      routeOptions.schema.tags = ["Import"];
+    }
   });
-  fastify.addHook("onRequest", fastify.auth([fastify.verifySession]));
+  registerApiKeyProtectedHooks(fastify);
 
-  fastify.post("/parse", async (request: FastifyRequest, reply: FastifyReply) => {
+  fastify.post("/parse", async (request, reply) => {
     const { client, user } = getAuth(request);
 
     try {
@@ -143,17 +135,19 @@ export async function instagramImportRoutes(fastify: FastifyInstance) {
 
   fastify.post(
     "/commit",
-    { schema: { body: InstagramCommitBody }, config: { rateLimit: IMPORT_TIER } },
-    async (
-      request: FastifyRequest<{ Body: typeof InstagramCommitBody.static }>,
-      reply: FastifyReply,
-    ) => {
+    {
+      schema: {
+        body: instagramImportCommitRequestSchema,
+      } satisfies FastifyZodOpenApiSchema,
+      config: { rateLimit: IMPORT_TIER },
+    },
+    async (request, reply) => {
       const { client, user } = getAuth(request);
       const rawContacts = request.body.contacts;
 
       // ── Pre-filter & deduplicate ────────────────────────────────────────────
       const seenHandles = new Set<string>();
-      const validContacts: (typeof InstagramCommitBody.static)["contacts"][number][] = [];
+      const validContacts: InstagramPreparedContact[] = [];
 
       for (const contact of rawContacts) {
         if (!contact.isValid || !contact.instagramUsername) continue;

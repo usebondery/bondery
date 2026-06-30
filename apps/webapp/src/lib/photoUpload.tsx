@@ -14,6 +14,7 @@ import {
   ModalTitle,
   successNotificationTemplate,
 } from "@bondery/mantine-next";
+import { clientApiFetch } from "@/lib/api/client";
 
 export interface PhotoUploadTranslations {
   TitleModal: string;
@@ -121,7 +122,7 @@ export async function openPhotoUploadModal(
       const formData = new FormData();
       formData.append("file", file);
 
-      const response = await fetch(config.uploadEndpoint, {
+      const response = await clientApiFetch(config.uploadEndpoint, {
         method: "POST",
         body: formData,
       });

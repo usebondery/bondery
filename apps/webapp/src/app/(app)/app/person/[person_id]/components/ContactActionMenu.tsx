@@ -9,12 +9,11 @@ import {
   IconTrash,
 } from "@tabler/icons-react";
 import type { Contact } from "@bondery/schemas";
-import { API_ROUTES } from "@bondery/helpers/globals/paths";
+import { downloadContactVcard } from "@/lib/api/domains/contacts";
 import { useState } from "react";
 import { errorNotificationTemplate, successNotificationTemplate } from "@bondery/mantine-next";
-import { useTranslations } from "next-intl";
+import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
 import { useBatchEnrichFromLinkedIn } from "@/lib/extension/useBatchEnrichFromLinkedIn";
-import { revalidateContacts } from "../../../actions";
 
 interface ContactActionMenuProps {
   contact: Contact;
@@ -42,7 +41,7 @@ export function ContactActionMenu({
 
   const handleExport = async () => {
     try {
-      const response = await fetch(`${API_ROUTES.CONTACTS}/${personId}/vcard`);
+      const response = await downloadContactVcard(personId);
       if (!response.ok) throw new Error("Failed to export vCard");
 
       const blob = await response.blob();

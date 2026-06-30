@@ -3,16 +3,16 @@
 import { Button, Card, Slider, Stack, Text, Textarea } from "@mantine/core";
 import { schemaResolver, useForm } from "@mantine/form";
 import { notifications } from "@mantine/notifications";
-import { useTranslations } from "next-intl";
+import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
 import { useState } from "react";
-import { API_ROUTES } from "@bondery/helpers/globals/paths";
+import { captureEvent } from "@/lib/analytics/client";
+import { submitFeedback } from "@/lib/api/domains/settings";
 import {
   errorNotificationTemplate,
   loadingNotificationTemplate,
   successNotificationTemplate,
 } from "@bondery/mantine-next";
 import { feedbackFormSchema, type FeedbackFormInput } from "@bondery/schemas";
-import { captureEvent } from "@/lib/analytics/client";
 
 const SLIDER_MARKS = [
   { value: 0, label: "0" },
@@ -45,17 +45,7 @@ export function FeedbackForm() {
     });
 
     try {
-      const response = await fetch(API_ROUTES.ME_FEEDBACK, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(values),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to submit feedback");
-      }
+      await submitFeedback(values);
 
       notifications.hide(loadingNotification);
       notifications.show(

@@ -1,6 +1,4 @@
-import { API_URL } from "@/lib/config";
 import type { NextConfig } from "next";
-import createNextIntlPlugin from "next-intl/plugin";
 
 const nextConfig: NextConfig = {
   experimental: {
@@ -37,18 +35,6 @@ const nextConfig: NextConfig = {
       },
     ];
   },
-  // API calls go to the Fastify server
-  async rewrites() {
-    return [
-      {
-        source: "/api/:path*",
-        destination: `${API_URL}/api/:path*`,
-      },
-    ];
-  },
 };
 
-const withNextIntl = createNextIntlPlugin("./src/lib/i18n/request.ts");
-// Type cast needed: root node_modules/next (from @react-email) and webapp's local next
-// resolve to different versions, causing a false type conflict at build time.
-export default withNextIntl(nextConfig as Parameters<typeof withNextIntl>[0]);
+export default nextConfig;

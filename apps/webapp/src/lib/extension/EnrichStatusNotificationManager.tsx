@@ -2,7 +2,7 @@
 
 import { useEffect, useSyncExternalStore } from "react";
 import { Notifications, notifications } from "@mantine/notifications";
-import { useTranslations } from "next-intl";
+import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
 import { statusNotificationTemplate } from "@bondery/mantine-next";
 import { defaultState, getState, subscribe } from "./enrichBatchStore";
 import { statusNotificationsStore } from "@/lib/statusNotificationsStore";

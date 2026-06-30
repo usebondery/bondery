@@ -5,7 +5,8 @@ import {
   extractUsername,
   type ContactSocialFieldKey,
 } from "@bondery/helpers";
-import { socialHandleInputSchema, socialHandleSchema } from "@bondery/schemas";
+import { socialHandleInputSchema } from "@bondery/schemas";
+import { normalizedSocialHandleSchema } from "@bondery/helpers/forms";
 import { ActionSheetPopup, type ActionSheetPopupAction } from "../../../components/ActionSheetPopup";
 import { SheetTextField } from "../../../components/form";
 import { UI_TIMING_MS } from "../../../lib/config";
@@ -134,7 +135,7 @@ export function EditSocialSheet({
   const onSubmit = handleSubmit(({ value: submittedValue }) => {
     if (!activePlatform || !canSubmit) return;
 
-    const parsed = socialHandleSchema.safeParse({
+    const parsed = normalizedSocialHandleSchema.safeParse({
       platform: activePlatform,
       value: submittedValue,
     });

@@ -3,42 +3,27 @@
  * Handles CRUD operations for timeline interactions
  */
 
-import type { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
-import { Type } from "@sinclair/typebox";
+import type { FastifyInstance, FastifyReply } from "fastify";
+import type { AppFastifyInstance, AppRoutePlugin } from "../../lib/fastify-types.js";
+import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
 import { getAuth } from "../../lib/auth.js";
+import { registerApiKeyProtectedHooks } from "../../lib/api-key-access.js";
+import { INTERACTION_SELECT, extractAvatarOptions } from "../../lib/queries.js";
 import {
-  UuidParam,
-  INTERACTION_SELECT,
-  AvatarQualityEnum,
-  AvatarSizeEnum,
-  extractAvatarOptions,
-} from "../../lib/schemas.js";
-import { buildContactAvatarUrl } from "../../lib/supabase.js";
-
-// ── TypeBox Schemas ──────────────────────────────────────────────────────────
-
-const InteractionsQuery = Type.Object({
-  limit: Type.Optional(Type.Integer({ minimum: 1, maximum: 200, default: 50 })),
-  offset: Type.Optional(Type.Integer({ minimum: 0, default: 0 })),
-  avatarQuality: Type.Optional(AvatarQualityEnum),
-  avatarSize: Type.Optional(AvatarSizeEnum),
-});
-
-const CreateInteractionBody = Type.Object({
-  type: Type.String({ minLength: 1 }),
-  date: Type.String({ minLength: 1 }),
-  title: Type.Optional(Type.String()),
-  description: Type.Optional(Type.String()),
-  participantIds: Type.Optional(Type.Array(Type.String())),
-});
-
-const UpdateInteractionBody = Type.Object({
-  type: Type.Optional(Type.String()),
-  date: Type.Optional(Type.String()),
-  title: Type.Optional(Type.String()),
-  description: Type.Optional(Type.String()),
-  participantIds: Type.Optional(Type.Array(Type.String())),
-});
+  avatarTransformQuerySchema,
+  interactionsListQuerySchema,
+  uuidParamSchema,
+} from "@bondery/schemas/http";
+import {
+  createInteractionInputSchema,
+  updateInteractionInputSchema,
+} from "@bondery/schemas";
+import { resolveContactAvatarUrl } from "../../lib/supabase.js";
+import {
+  buildPaginatedResponse,
+  buildPaginationMeta,
+  parsePagination,
+} from "../../lib/pagination.js";
 
 async function loadInteraction(
   client: ReturnType<typeof getAuth>["client"],
@@ -67,37 +52,38 @@ async function loadInteraction(
     updatedAt: interaction.updated_at,
     participants: interaction.participants.map((participant: any) => ({
       ...participant.person,
-      avatar: buildContactAvatarUrl(
+      avatar: resolveContactAvatarUrl(
         client,
         userId,
-        participant.person.id,
+        {
+          id: participant.person.id,
+          hasAvatar: participant.person.has_avatar,
+          updatedAt: participant.person.updated_at,
+        },
         avatarOptions,
-        participant.person.updated_at,
       ),
     })),
   };
 }
 
-export async function interactionRoutes(fastify: FastifyInstance) {
+export const interactionRoutes: AppRoutePlugin = async (fastify) => {
   fastify.addHook("onRoute", (routeOptions) => {
-    routeOptions.schema = { ...routeOptions.schema, tags: ["Interactions"] };
+    if (routeOptions.schema) {
+      routeOptions.schema.tags = ["Interactions"];
+    }
   });
-  fastify.addHook("onRequest", fastify.auth([fastify.verifySession]));
+  registerApiKeyProtectedHooks(fastify);
 
   /**
    * GET /api/interactions - List all interactions
    */
   fastify.get(
     "/",
-    { schema: { querystring: InteractionsQuery } },
-    async (
-      request: FastifyRequest<{ Querystring: typeof InteractionsQuery.static }>,
-      reply: FastifyReply,
-    ) => {
+    { schema: { querystring: interactionsListQuerySchema } },
+    async (request, reply) => {
       const { client, user } = getAuth(request);
 
-      const limit = Math.min(request.query.limit ?? 50, 200);
-      const offset = request.query.offset ?? 0;
+      const { limit, offset } = parsePagination(request.query);
       const avatarOptions = extractAvatarOptions(request.query);
 
       const {
@@ -126,22 +112,31 @@ export async function interactionRoutes(fastify: FastifyInstance) {
         updatedAt: interaction.updated_at,
         participants: interaction.participants.map((participant: any) => ({
           ...participant.person,
-          avatar: buildContactAvatarUrl(
+          avatar: resolveContactAvatarUrl(
             client,
             user.id,
-            participant.person.id,
+            {
+              id: participant.person.id,
+              hasAvatar: participant.person.has_avatar,
+              updatedAt: participant.person.updated_at,
+            },
             avatarOptions,
-            participant.person.updated_at,
           ),
         })),
       }));
 
-      return {
-        interactions: formattedInteractions,
-        totalCount: typeof count === "number" ? count : formattedInteractions.length,
+      const totalCount =
+        typeof count === "number" ? count : formattedInteractions.length;
+      const pagination = buildPaginationMeta({
         limit,
         offset,
-      };
+        totalCount,
+        itemCount: formattedInteractions.length,
+        sort: "dateDesc",
+        search: null,
+      });
+
+      return buildPaginatedResponse("interactions", formattedInteractions, pagination);
     },
   );
 
@@ -150,19 +145,8 @@ export async function interactionRoutes(fastify: FastifyInstance) {
    */
   fastify.post(
     "/",
-    { schema: { body: CreateInteractionBody } },
-    async (
-      request: FastifyRequest<{
-        Body: {
-          type: string;
-          date: string;
-          title?: string;
-          description?: string;
-          participantIds?: string[];
-        };
-      }>,
-      reply: FastifyReply,
-    ) => {
+    { schema: { body: createInteractionInputSchema } },
+    async (request, reply) => {
       const { client, user } = getAuth(request);
       const body = request.body;
 
@@ -224,14 +208,8 @@ export async function interactionRoutes(fastify: FastifyInstance) {
    */
   fastify.get(
     "/:id",
-    { schema: { params: UuidParam, querystring: InteractionsQuery } },
-    async (
-      request: FastifyRequest<{
-        Params: { id: string };
-        Querystring: typeof InteractionsQuery.static;
-      }>,
-      reply: FastifyReply,
-    ) => {
+    { schema: { params: uuidParamSchema, querystring: avatarTransformQuerySchema } },
+    async (request, reply) => {
       const { client, user } = getAuth(request);
       const { id } = request.params;
 
@@ -251,8 +229,8 @@ export async function interactionRoutes(fastify: FastifyInstance) {
    */
   fastify.delete(
     "/:id",
-    { schema: { params: UuidParam } },
-    async (request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+    { schema: { params: uuidParamSchema } },
+    async (request, reply) => {
       const { client, user } = getAuth(request);
       const { id } = request.params;
 
@@ -271,21 +249,9 @@ export async function interactionRoutes(fastify: FastifyInstance) {
    */
   fastify.patch(
     "/:id",
-    { schema: { params: UuidParam, body: UpdateInteractionBody } },
-    async (
-      request: FastifyRequest<{
-        Params: { id: string };
-        Body: {
-          type?: string;
-          date?: string;
-          title?: string;
-          description?: string;
-          participantIds?: string[];
-        };
-      }>,
-      reply: FastifyReply,
-    ) => {
-      const { client } = getAuth(request);
+    { schema: { params: uuidParamSchema, body: updateInteractionInputSchema } },
+    async (request, reply) => {
+      const { client, user } = getAuth(request);
       const { id } = request.params;
       const body = request.body;
 

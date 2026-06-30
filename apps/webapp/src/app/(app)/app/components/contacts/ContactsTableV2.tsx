@@ -1,6 +1,6 @@
 "use client";
 
-import { Avatar, Group, Space, Stack, Text, Tooltip } from "@mantine/core";
+import { Group, Space, Stack, Text, Tooltip } from "@mantine/core";
 import {
   IconArrowMerge,
   IconBrandFacebook,
@@ -25,6 +25,7 @@ import {
   ActionIconLink,
   DataTable,
   PersonChip,
+  PersonAvatar,
   type BulkAction,
   type DataColumnConfig,
   type DataTableLabels,
@@ -40,6 +41,7 @@ import {
 } from "@/lib/socialActionTooltips";
 import { getTelephoneReactMaskExpression, countryCodes } from "@bondery/helpers/phone";
 import { abbreviateLocationCountry } from "@bondery/helpers";
+import { useContactsTableCopy } from "@/lib/i18n/useContactsTableCopy";
 
 export type ColumnKey =
   | "name"
@@ -91,20 +93,6 @@ function formatPhoneForDisplay(prefix: string, value: string): string {
 
   return [prefix, formatted.trim()].filter(Boolean).join(" ");
 }
-
-const COLUMN_DEFINITIONS: Record<
-  ColumnKey,
-  { label: string; icon: ReactNode }
-> = {
-  name: { label: "Name", icon: <IconUser size={16} /> },
-  headline: { label: "Headline", icon: <IconBriefcase size={16} /> },
-  location: { label: "Location", icon: <IconMapPin size={16} /> },
-  lastInteraction: { label: "Last Interaction", icon: <IconClock size={16} /> },
-  social: { label: "Socials", icon: <IconUserCircle size={16} /> },
-  phone: { label: "Phone", icon: <IconPhone size={16} /> },
-  email: { label: "Email", icon: <IconMail size={16} /> },
-  avatar: { label: "", icon: null },
-};
 
 export interface ColumnConfig {
   key: ColumnKey;
@@ -192,7 +180,7 @@ interface ContactsTableV2Props {
   menuActions?: MenuAction[];
   bulkSelectionActions?: BulkSelectionAction[];
   loadMoreAction?: LoadMoreAction;
-  hasMoreToLoad?: boolean;
+  hasMore?: boolean;
   totalCount?: number;
   onSelectAllTotal?: () => void;
   /** Whether all items across all pages are selected (filter-scoped sentinel) */
@@ -305,7 +293,7 @@ function ContactSocialIcons({ contact }: { contact: Contact }) {
     signal: {
       key: "signal",
       icon: (
-        <Image src="/icons/signal.svg" alt="Signal" width={18} height={18} />
+        <Image src="/icons/brands/signal.svg" alt="Signal" width={18} height={18} />
       ),
       href: contact.signal || undefined,
       color: "indigo",
@@ -364,7 +352,7 @@ export default function ContactsTableV2({
   selectedIds,
   isHeaderShown = true,
   headerStickyTop = 0,
-  searchPlaceholder = "Search by name...",
+  searchPlaceholder,
   searchDefaultValue,
   searchValue,
   onSearchChange,
@@ -385,7 +373,7 @@ export default function ContactsTableV2({
   menuActions,
   bulkSelectionActions,
   loadMoreAction,
-  hasMoreToLoad,
+  hasMore,
   totalCount,
   onSelectAllTotal,
   isAllTotalSelected,
@@ -396,6 +384,7 @@ export default function ContactsTableV2({
   noContactsMatchSearch,
   renderLocationCell,
 }: ContactsTableV2Props) {
+  const { columnDefinitions, sortOptions, buildTableLabels, t } = useContactsTableCopy();
   const [searchIsActive, setSearchIsActive] = useState(() =>
     Boolean(searchValue ?? searchDefaultValue),
   );
@@ -422,7 +411,7 @@ export default function ContactsTableV2({
   if (standardActions?.onMergeOne) {
     standardMenuActions.push({
       key: "mergeWith",
-      label: standardActions.mergeMenuLabel || "Merge...",
+      label: standardActions.mergeMenuLabel || t("MergeMenu"),
       icon: <IconArrowMerge size={14} />,
       onClick: (contactId) => standardActions.onMergeOne?.(contactId),
     });
@@ -430,7 +419,7 @@ export default function ContactsTableV2({
   if (standardActions?.onAddToGroupsOne) {
     standardMenuActions.push({
       key: "addToGroups",
-      label: standardActions.addToGroupsMenuLabel || "Edit groups...",
+      label: standardActions.addToGroupsMenuLabel || t("EditGroupsMenu"),
       icon: <IconUsersPlus size={14} />,
       onClick: (contactId) => standardActions.onAddToGroupsOne?.(contactId),
     });
@@ -439,7 +428,7 @@ export default function ContactsTableV2({
     standardActions?.onDeleteOne
       ? {
           key: "deleteContact",
-          label: standardActions.deleteMenuLabel || "Delete",
+          label: standardActions.deleteMenuLabel || t("Delete"),
           icon: <IconTrash size={14} />,
           color: "red",
           onClick: (contactId) => standardActions.onDeleteOne?.(contactId),
@@ -450,7 +439,7 @@ export default function ContactsTableV2({
   if (standardActions?.onMergeSelected) {
     standardBulkSelectionActions.push({
       key: "mergeSelected",
-      label: standardActions.mergeBulkLabel || "Merge",
+      label: standardActions.mergeBulkLabel || t("MergeBulk"),
       icon: <IconArrowMerge size={16} />,
       onClick: () => {
         if (selectedContacts.length === 2) {
@@ -461,13 +450,13 @@ export default function ContactsTableV2({
         }
       },
       disabled: selectedContacts.length !== 2,
-      disabledTooltip: "Exactly two contacts must be selected.",
+      disabledTooltip: t("MergeExactlyTwoTooltip"),
     });
   }
   if (standardActions?.onAddToGroupsSelected) {
     standardBulkSelectionActions.push({
       key: "addSelectedToGroups",
-      label: standardActions.addToGroupsBulkLabel || "Edit groups",
+      label: standardActions.addToGroupsBulkLabel || t("EditGroupsBulk"),
       icon: <IconUsersPlus size={16} />,
       onClick: () => {
         const ids = selectedContacts.map((contact) => contact.id);
@@ -479,7 +468,7 @@ export default function ContactsTableV2({
     standardActions?.onDeleteSelected
       ? {
           key: "deleteSelected",
-          label: standardActions.deleteBulkLabel || "Delete",
+          label: standardActions.deleteBulkLabel || t("Delete"),
           icon: <IconTrash size={16} />,
           color: "red",
           onClick: () => {
@@ -507,8 +496,8 @@ export default function ContactsTableV2({
         ? visibleColumnsProp[0] && typeof visibleColumnsProp[0] === "string"
           ? (visibleColumnsProp as ColumnKey[]).map((key) => ({
               key,
-              label: COLUMN_DEFINITIONS[key].label,
-              icon: COLUMN_DEFINITIONS[key].icon,
+              label: columnDefinitions[key].label,
+              icon: columnDefinitions[key].icon,
               visible: true,
               fixed: key === "name",
               hideHeader: key === "name",
@@ -523,6 +512,7 @@ export default function ContactsTableV2({
             : `${c.key}:${Number(c.visible)}:${c.fixed ?? 0}`,
         )
         .join(","),
+      columnDefinitions,
     ],
   );
 
@@ -648,25 +638,18 @@ export default function ContactsTableV2({
                 </Tooltip>
               );
             }
-            case "avatar": {
-              const avatarSrc =
-                "avatarUri" in contact &&
-                contact.avatarUri &&
-                typeof contact.avatarUri === "string"
-                  ? contact.avatarUri
-                  : contact.avatar;
-              if (avatarSrc) {
-                return (
-                  <Avatar
-                    src={avatarSrc}
-                    alt={`${contact.firstName || ""} ${contact.lastName || ""}`.trim()}
-                    size={32}
-                    radius="xl"
-                  />
-                );
-              }
-              return null;
-            }
+            case "avatar":
+              return (
+                <PersonAvatar
+                  person={{
+                    id: contact.id,
+                    firstName: contact.firstName,
+                    lastName: contact.lastName,
+                    avatar: contact.avatar,
+                  }}
+                  size={32}
+                />
+              );
             default:
               return null;
           }
@@ -702,38 +685,11 @@ export default function ContactsTableV2({
     }),
   );
 
-  const sortOptions: SortOption<SortOrder>[] = [
-    { key: "nameAsc", label: "Name A→Z" },
-    { key: "nameDesc", label: "Name Z→A" },
-    { key: "surnameAsc", label: "Surname A→Z" },
-    { key: "surnameDesc", label: "Surname Z→A" },
-    { key: "interactionDesc", label: "Newest interaction" },
-    { key: "interactionAsc", label: "Oldest interaction" },
-    { key: "createdAtDesc", label: "Newest added" },
-    { key: "createdAtAsc", label: "Oldest added" },
-  ];
-
-  const labels: DataTableLabels = {
+  const labels: DataTableLabels = buildTableLabels({
     searchPlaceholder,
     emptyStateMessage: searchIsActive ? noContactsMatchSearch : noContactsFound,
     loadMoreLabel: loadMoreAction?.label,
-    selectedCountTemplate: "{count} people selected",
-    selectedSingularCountTemplate: "1 person selected",
-    totalCountTemplate: "{count} total people",
-    actionsAriaLabel: "Contact actions",
-    columnVisibility: {
-      buttonLabel: "Visible columns",
-      visibleSection: "Visible",
-      hiddenSection: "Hidden",
-      noVisible: "No visible columns",
-      noHidden: "No hidden columns",
-    },
-    selectAllTotalTemplate: "Select all {count} people",
-    clearAllTotalTemplate: "Clear selection ({count} people)",
-    sort: {
-      buttonLabel: "Sort",
-    },
-  };
+  });
 
   // allTotalSelected is now passed from the parent via isAllTotalSelected prop.
   const allTotalSelected = isAllTotalSelected ?? false;
@@ -775,7 +731,7 @@ export default function ContactsTableV2({
       }
       rowActions={rowActions.length > 0 ? rowActions : undefined}
       bulkActions={bulkActions.length > 0 ? bulkActions : undefined}
-      hasMore={Boolean(loadMoreAction && hasMoreToLoad)}
+      hasMore={Boolean(loadMoreAction && hasMore)}
       onLoadMore={loadMoreAction?.onClick}
       loadMoreLoading={loadMoreAction?.loading}
       totalCount={totalCount}

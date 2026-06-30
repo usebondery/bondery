@@ -3,13 +3,29 @@ root:
   get:
     summary: List all interactions
     description: >
-      Retrieve all interactions (timeline events) for the authenticated user,
-      ordered by date descending. Each interaction includes its participant contacts.
+      Retrieve paginated interactions (timeline events) for the authenticated user.
+      Each interaction includes its participant contacts.
     operationId: listInteractions
     tags:
       - Interactions
     security:
       - cookieAuth: []
+    parameters:
+      - name: limit
+        in: query
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 200
+          default: 50
+        description: Maximum number of interactions per page
+      - name: offset
+        in: query
+        schema:
+          type: integer
+          minimum: 0
+          default: 0
+        description: Number of interactions to skip
     responses:
       "200":
         description: List of interactions
@@ -17,14 +33,16 @@ root:
           application/json:
             schema:
               type: object
+              required:
+                - interactions
+                - pagination
               properties:
                 interactions:
                   type: array
                   items:
                     $ref: "../schemas/interaction.yaml#/Interaction"
-                totalCount:
-                  type: integer
-                  description: Number of interactions in the returned array (no server-side pagination)
+                pagination:
+                  $ref: "../schemas/pagination.yaml#/PaginationMeta"
       "401":
         $ref: "../../openapi.yaml#/components/responses/UnauthorizedError"
       "500":

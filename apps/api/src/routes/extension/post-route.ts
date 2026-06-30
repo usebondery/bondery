@@ -2,8 +2,10 @@
  * Extension POST route - Create or update contact from browser extension
  */
 
-import type { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
-import { buildContactAvatarUrl } from "../../lib/supabase.js";
+import type { FastifyInstance, FastifyReply } from "fastify";
+import type { AppFastifyInstance } from "../../lib/fastify-types.js";
+import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
+import { resolveContactAvatarUrl } from "../../lib/supabase.js";
 import { getAuth } from "../../lib/auth.js";
 import type {
   ScrapedWorkHistoryEntry,
@@ -23,25 +25,24 @@ import {
   uploadAllLinkedInLogos,
 } from "../../lib/linkedin-helpers.js";
 import {
-  RedirectBody,
+  redirectBodySchema,
   resolvePrimarySocial,
   resolveExtensionDefaultGroup,
 } from "./helpers.js";
 
-export function registerPostRoute(fastify: FastifyInstance): void {
+export function registerPostRoute(fastify: AppFastifyInstance): void {
   /**
    * POST /api/redirect - Create or find contact from browser extension
    */
   fastify.post(
     "/",
     {
-      schema: { body: RedirectBody },
+      schema: {
+        body: redirectBodySchema,
+      } satisfies FastifyZodOpenApiSchema,
       onRequest: fastify.auth([fastify.verifySession]),
     },
-    async (
-      request: FastifyRequest<{ Body: typeof RedirectBody.static }>,
-      reply: FastifyReply,
-    ) => {
+    async (request, reply) => {
       const { client, user } = getAuth(request);
 
       const {
@@ -105,13 +106,15 @@ export function registerPostRoute(fastify: FastifyInstance): void {
         location: string | null;
         latitude: number | null;
         notes: string | null;
+        has_avatar: boolean;
+        updated_at: string | null;
       } | null = null;
 
       if (existingContactId) {
         const { data: contactData, error: lookupError } = await (client
           .from("people")
           .select(
-            "id, first_name, last_name, headline, location, latitude, notes",
+            "id, first_name, last_name, headline, location, latitude, notes, has_avatar, updated_at",
           )
           .eq("user_id", user.id)
           .eq("id", existingContactId)
@@ -124,6 +127,8 @@ export function registerPostRoute(fastify: FastifyInstance): void {
             location: string | null;
             latitude: number | null;
             notes: string | null;
+            has_avatar: boolean;
+            updated_at: string | null;
           } | null;
           error: unknown;
         }>);
@@ -147,13 +152,7 @@ export function registerPostRoute(fastify: FastifyInstance): void {
       if (existingContact) {
         // Upload photo if provided and no avatar stored yet
         if (profileImageUrl) {
-          const { data: existingFiles } = await client.storage
-            .from("avatars")
-            .list(user.id, { search: `${existingContact.id}.jpg`, limit: 1 });
-          const hasAvatar = (existingFiles ?? []).some(
-            (f) => f.name === `${existingContact!.id}.jpg`,
-          );
-          if (!hasAvatar) {
+          if (!existingContact.has_avatar) {
             await updateContactPhoto(
               client,
               existingContact.id,
@@ -295,12 +294,23 @@ export function registerPostRoute(fastify: FastifyInstance): void {
           }
         }
 
+        const { data: refreshedContact } = await client
+          .from("people")
+          .select("has_avatar, updated_at")
+          .eq("id", existingContact.id)
+          .eq("user_id", user.id)
+          .single();
+
         return {
           contactId: existingContact.id,
           existed: true,
           firstName: existingContact.first_name ?? undefined,
           lastName: existingContact.last_name,
-          avatar: buildContactAvatarUrl(client, user.id, existingContact.id),
+          avatar: resolveContactAvatarUrl(client, user.id, {
+            id: existingContact.id,
+            hasAvatar: refreshedContact?.has_avatar ?? existingContact.has_avatar,
+            updatedAt: refreshedContact?.updated_at ?? existingContact.updated_at,
+          }),
         };
       }
 

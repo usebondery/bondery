@@ -2,7 +2,8 @@
 
 import { Alert } from "@mantine/core";
 import { IconSparkles } from "@tabler/icons-react";
-import { useFormatter, useTranslations } from "next-intl";
+import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
+import { useDateFormatter as useFormatter } from "@/lib/i18n/useDateFormatter";
 import { UpgradeButton } from "@/components/shared";
 
 /**

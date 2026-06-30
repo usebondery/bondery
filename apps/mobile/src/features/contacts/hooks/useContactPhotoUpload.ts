@@ -1,7 +1,7 @@
 import { useCallback, useState } from "react";
 import * as ImagePicker from "expo-image-picker";
-import { deleteContactPhoto, uploadContactPhoto } from "../../../lib/api/client";
-import { AVATAR_UPLOAD } from "../../../lib/config";
+import * as Network from "expo-network";
+import { deleteContactPhoto, uploadContactPhoto } from "../../../lib/api/client";import { AVATAR_UPLOAD } from "../../../lib/config";
 import { useMobileTranslations } from "../../../lib/i18n/useMobileTranslations";
 import { useAppToast } from "../../../lib/toast/useAppToast";
 
@@ -19,10 +19,26 @@ export function useContactPhotoUpload({
   const [isPhotoBusy, setIsPhotoBusy] = useState(false);
   const [isRemoveConfirmOpen, setRemoveConfirmOpen] = useState(false);
 
+  const ensureOnline = useCallback(async (): Promise<boolean> => {
+    const state = await Network.getNetworkStateAsync();
+    if (state.isConnected) {
+      return true;
+    }
+    showToast({
+      type: "error",
+      headline: t("MobileApp.Common.ErrorTitle"),
+      description: t("MobileApp.ContactIdentity.PhotoRequiresConnection"),
+    });
+    return false;
+  }, [showToast, t]);
+
   const uploadPhoto = useCallback(
     async (uri: string, mimeType: string) => {
-      setIsPhotoBusy(true);
+      if (!(await ensureOnline())) {
+        return;
+      }
 
+      setIsPhotoBusy(true);
       try {
         const { avatarUrl } = await uploadContactPhoto(contactId, uri, mimeType);
         onAvatarUpdated(avatarUrl);
@@ -39,12 +55,15 @@ export function useContactPhotoUpload({
         setIsPhotoBusy(false);
       }
     },
-    [contactId, onAvatarUpdated, showToast, t],
+    [contactId, ensureOnline, onAvatarUpdated, showToast, t],
   );
 
   const choosePhotoFromLibrary = useCallback(async () => {
-    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!(await ensureOnline())) {
+      return;
+    }
 
+    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!permission.granted) {
       showToast({
         type: "error",
@@ -82,11 +101,14 @@ export function useContactPhotoUpload({
     }
 
     await uploadPhoto(asset.uri, mimeType);
-  }, [showToast, t, uploadPhoto]);
+  }, [ensureOnline, showToast, t, uploadPhoto]);
 
   const removePhoto = useCallback(async () => {
-    setIsPhotoBusy(true);
+    if (!(await ensureOnline())) {
+      return;
+    }
 
+    setIsPhotoBusy(true);
     try {
       await deleteContactPhoto(contactId);
       onAvatarUpdated(null);
@@ -100,8 +122,7 @@ export function useContactPhotoUpload({
     } finally {
       setIsPhotoBusy(false);
     }
-  }, [contactId, onAvatarUpdated, showToast, t]);
-
+  }, [contactId, ensureOnline, onAvatarUpdated, showToast, t]);
   return {
     isPhotoBusy,
     isRemoveConfirmOpen,

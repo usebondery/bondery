@@ -1,7 +1,7 @@
-import NetInfo from "@react-native-community/netinfo";
+import * as Network from "expo-network";
 
 export async function isDeviceOffline(): Promise<boolean> {
-  const state = await NetInfo.fetch();
+  const state = await Network.getNetworkStateAsync();
 
   if (state.isConnected === false) {
     return true;

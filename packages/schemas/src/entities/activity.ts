@@ -1,5 +1,9 @@
 import { z } from "zod";
-import { entityAuditSchema, entityIdentitySchema } from "./_shared.js";
+import {
+  entityAuditSchema,
+  entityIdentitySchema,
+  makePaginatedListResponseSchema,
+} from "./_shared.js";
 
 export const interactionTypeSchema = z.enum([
   "Call",
@@ -62,12 +66,18 @@ export const updateInteractionInputSchema = z.object({
   participantIds: z.array(z.string()).optional(),
 });
 
+export const interactionsListResponseSchema = makePaginatedListResponseSchema(
+  "interactions",
+  interactionSchema,
+);
+
 export type InteractionType = z.infer<typeof interactionTypeSchema>;
 export type InteractionParticipant = z.infer<typeof interactionParticipantSchema>;
 export type Interaction = z.infer<typeof interactionSchema>;
 export type CreateInteractionInput = z.infer<typeof createInteractionInputSchema>;
 export type UpdateInteractionInput = z.infer<typeof updateInteractionInputSchema>;
 export type InteractionFormInput = z.infer<typeof interactionFormSchema>;
+export type InteractionsListResponse = z.infer<typeof interactionsListResponseSchema>;
 
 export type ActivityType = InteractionType;
 export type Activity = Interaction;

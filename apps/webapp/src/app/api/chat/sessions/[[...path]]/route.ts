@@ -1,7 +1,6 @@
 import { createServerSupabaseClient } from "@/lib/supabase/server";
-import { getAuthHeaders } from "@/lib/authHeaders";
+import { serverApiFetch } from "@/lib/api/server";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
-import { API_URL } from "@/lib/config";
 import { NextRequest } from "next/server";
 
 /**
@@ -17,12 +16,9 @@ async function proxyRequest(request: NextRequest, subPath: string) {
     return new Response("Unauthorized", { status: 401 });
   }
 
-  const headers = await getAuthHeaders();
-  const url = `${API_URL}${API_ROUTES.CHAT_SESSIONS}${subPath}`;
-
   const fetchOptions: RequestInit = {
     method: request.method,
-    headers: { ...headers, "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json" },
   };
 
   if (request.method !== "GET" && request.method !== "HEAD") {
@@ -33,7 +29,7 @@ async function proxyRequest(request: NextRequest, subPath: string) {
     }
   }
 
-  const apiResponse = await fetch(url, fetchOptions);
+  const apiResponse = await serverApiFetch(`${API_ROUTES.CHAT_SESSIONS}${subPath}`, fetchOptions);
   const responseBody = await apiResponse.text();
 
   return new Response(responseBody, {

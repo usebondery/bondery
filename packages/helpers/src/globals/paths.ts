@@ -29,6 +29,7 @@ export const API_ROUTES = {
   ME_PERSON: "/api/me/person",
   ME_PHOTO: "/api/me/photo",
   ME_SETTINGS: "/api/me/settings",
+  ME_API_KEYS: "/api/me/api-keys",
   ME_FEEDBACK: "/api/me/feedback",
   INTERNAL_REMINDER_DIGEST: "/api/internal/reminder-digest",
   EXTENSION: "/api/extension",
@@ -44,6 +45,9 @@ export const API_ROUTES = {
   WEBHOOKS_POLAR: "/api/webhooks/polar",
   GEOCODE_SUGGEST: "/api/geocode/suggest",
   GEOCODE_TIMEZONE: "/api/geocode/timezone",
+  SYNC_PUSH: "/api/sync/push",
+  SYNC_PULL: "/api/sync/pull",
+  SYNC_BOOTSTRAP: "/api/sync/bootstrap",
 } as const;
 
 export const CHROME_EXTENSION_URL =
@@ -57,6 +61,7 @@ export const CHROME_EXTENSION_URL =
 export const MIN_EXTENSION_VERSION: string = "1.4.2";
 
 export const HELP_DOCS_URL = "https://bondery.gitbook.io";
+export const CHANGELOG_URL = `${HELP_DOCS_URL}/changelog`;
 
 export const GITHUB_REPO_URL =
   "https://api.github.com/repos/usebondery/bondery";

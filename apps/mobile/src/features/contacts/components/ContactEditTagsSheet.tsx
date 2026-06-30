@@ -11,12 +11,8 @@ import {
   View,
   type ListRenderItemInfo,
 } from "react-native";
-import {
-  addTagToContact,
-  fetchContactTags,
-  fetchTags,
-  removeTagFromContact,
-} from "../../../lib/api/client";
+import { contactsDomain } from "../../../lib/domains/contacts";
+import { tagsDomain } from "../../../lib/domains/tags";
 import { MOBILE_OPACITY } from "../../../lib/config";
 import { useMobileTranslations } from "../../../lib/i18n/useMobileTranslations";
 import { useMobilePreferences } from "../../../lib/preferences/useMobilePreferences";
@@ -98,14 +94,17 @@ export function ContactEditTagsSheet({
     let cancelled = false;
     setIsLoadingTags(true);
 
-    void Promise.all([fetchTags(), fetchContactTags(contactId)])
-      .then(([tagsResponse, membershipResponse]) => {
+    void Promise.resolve()
+      .then(() => {
         if (cancelled) {
           return;
         }
 
-        setAllTags(tagsResponse.tags);
-        const memberIds = new Set(membershipResponse.tags.map((tag) => tag.id));
+        const allTags = tagsDomain.list();
+        setAllTags(allTags);
+        const memberIds = new Set(
+          contactsDomain.listTags(contactId).map((tag) => tag.id),
+        );
         setInitialSelectedIds(memberIds);
         setSelectedTagIds(new Set(memberIds));
       })
@@ -177,10 +176,12 @@ export function ContactEditTagsSheet({
       setIsSaving(true);
 
       try {
-        await Promise.all([
-          ...added.map((tagId) => addTagToContact(contactId, tagId)),
-          ...removed.map((tagId) => removeTagFromContact(contactId, tagId)),
-        ]);
+        for (const tagId of added) {
+          contactsDomain.addTag(contactId, tagId);
+        }
+        for (const tagId of removed) {
+          contactsDomain.removeTag(contactId, tagId);
+        }
 
         const newTags = allTags.filter((tag) => selectedTagIds.has(tag.id));
         onOpenChange(false);

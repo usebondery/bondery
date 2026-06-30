@@ -2,7 +2,7 @@
 
 import { Card, Text, Stack, Group, Box, SimpleGrid } from "@mantine/core";
 import { IconArrowNarrowDown } from "@tabler/icons-react";
-import { useTranslations } from "next-intl";
+import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
 import type { FunnelPeriod } from "../getStatsData";
 
 interface FunnelStepProps {

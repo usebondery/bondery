@@ -201,13 +201,16 @@ function getAuthTokensFromCookies(request: FastifyRequest): {
  */
 export async function createAuthenticatedClient(
   request: FastifyRequest,
+  accessTokenOverride?: string,
 ): Promise<{
   client: SupabaseClient<Database>;
   user: { id: string; email: string } | null;
+  authError?: string;
 }> {
   const { NEXT_PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_PUBLISHABLE_KEY } =
     getSupabaseConfig();
-  const { accessToken } = getAuthTokensFromCookies(request);
+  const { accessToken: cookieToken } = getAuthTokensFromCookies(request);
+  const accessToken = accessTokenOverride ?? cookieToken;
 
   // Build a client that forwards the Bearer token on every request (for RLS).
   // Using getUser() to validate because the token may be either a Supabase session
@@ -240,7 +243,7 @@ export async function createAuthenticatedClient(
       { errorMessage: error?.message, errorStatus: error?.status },
       "[createAuthenticatedClient] getUser error",
     );
-    return { client, user: null };
+    return { client, user: null, authError: error?.message };
   }
 
   return {
@@ -306,4 +309,26 @@ export function buildContactAvatarUrl(
   }
 
   return baseUrl;
+}
+
+export type ContactAvatarSource = {
+  id: string;
+  hasAvatar: boolean;
+  updatedAt?: string | null;
+};
+
+/**
+ * Returns the public avatar URL when the contact has a stored photo, otherwise null.
+ */
+export function resolveContactAvatarUrl(
+  client: SupabaseClient<Database>,
+  userId: string,
+  contact: ContactAvatarSource,
+  options?: AvatarTransformOptions,
+): string | null {
+  if (!contact.hasAvatar) {
+    return null;
+  }
+
+  return buildContactAvatarUrl(client, userId, contact.id, options, contact.updatedAt);
 }

@@ -7,7 +7,8 @@ import { SheetTextField } from "../../../components/form";
 import { INPUT_MAX_LENGTHS, UI_TIMING_MS } from "../../../lib/config";
 import { useSheetForm } from "../../../lib/forms/useSheetForm";
 import { updateContactIdentitySchema } from "@bondery/schemas";
-import { fetchSettings, updateContact } from "../../../lib/api/client";
+import { fetchSettings } from "../../../lib/api/client";
+import { contactsDomain } from "../../../lib/domains/contacts";
 import { useMobileTranslations } from "../../../lib/i18n/useMobileTranslations";
 import { useAppToast } from "../../../lib/toast/useAppToast";
 import { MOBILE_TYPOGRAPHY } from "../../../theme/tokens";
@@ -116,7 +117,7 @@ export function EditIdentitySheet({
   const onSubmit = handleSubmit(async (values) => {
     if (!canSubmit || isBusy) return;
     try {
-      const { contact: updated } = await updateContact(contact.id, values);
+      const updated = contactsDomain.update(contact.id, values, contact.updatedAt ?? undefined);
       onContactUpdated(updated);
       onClose();
     } catch (err) {

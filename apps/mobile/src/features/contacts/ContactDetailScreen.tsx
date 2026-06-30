@@ -27,26 +27,13 @@ import type {
   Contact,
   ContactAddressEntry,
   EmailEntry,
-  Group,
-  GroupWithCount,
   ImportantDate,
   PhoneEntry,
-  Tag,
-  TagWithCount,
 } from "@bondery/schemas";
 import type { ContactSocialFieldKey } from "@bondery/helpers";
 import { firstZodErrorMessage, replaceImportantDatesSchema } from "@bondery/schemas";
-import {
-  deleteContacts,
-  fetchContact,
-  fetchContactGroups,
-  fetchContactImportantDates,
-  fetchContactTags,
-  fetchMyselfContact,
-  replaceImportantDates,
-  updateContact,
-  type ImportantDateInput,
-} from "../../lib/api/client";
+import { contactsDomain } from "../../lib/domains/contacts";
+import { useContact, useMyselfContact, useSyncQuery } from "../../lib/sync/hooks/useSyncQuery";
 import { ActionSheetPopup } from "../../components/ActionSheetPopup";
 import { LoadErrorCard, loadErrorStackInset } from "../../components/load-state";
 import { StackNavBar } from "../../components/chrome";
@@ -55,7 +42,6 @@ import {
   normalizeMobileUrlForDevice,
 } from "../../lib/config";
 import { useMobileTranslations } from "../../lib/i18n/useMobileTranslations";
-import { useContactsStore } from "../../lib/store";
 import {
   ShareUnavailableError,
   shareContactVCard,
@@ -110,35 +96,50 @@ export function ContactDetailScreen({
   const colors = useMobileThemeColors();
   const t = useMobileTranslations();
   const { showToast } = useAppToast();
-  const upsertContact = useContactsStore((state) => state.upsertContact);
-  const removeContact = useContactsStore((state) => state.removeContact);
-  const contact = useContactsStore((state) => {
-    if (isMyselfMode) {
-      return state.myselfContactId ? state.byId[state.myselfContactId] ?? null : null;
-    }
-
-    if (!id) {
-      return null;
-    }
-
-    return state.byId[id] ?? null;
-  });
-  const [loading, setLoading] = useState(true);
+  const { data: syncedContact, isInitialSync: isContactInitialSync, refresh: refreshContact } =
+    useContact(isMyselfMode ? undefined : id);
+  const { data: myself, isInitialSync: isMyselfInitialSync, refresh: refreshMyself } =
+    useMyselfContact();
+  const contact = isMyselfMode ? myself : syncedContact;
+  const contactId = contact?.id;
+  const { data: importantDates, refresh: refreshImportantDates } = useSyncQuery(
+    () => (contactId ? contactsDomain.listImportantDates(contactId) : []),
+    [contactId],
+  );
+  const {
+    data: memberTags,
+    refresh: refreshTags,
+    isInitialSync: isTagsInitialSync,
+  } = useSyncQuery(
+    () =>
+      contactId
+        ? contactsDomain.listTags(contactId).map((tag) => ({ ...tag, contactCount: 0 }))
+        : [],
+    [contactId],
+  );
+  const {
+    data: memberGroups,
+    refresh: refreshGroups,
+    isInitialSync: isGroupsInitialSync,
+  } = useSyncQuery(
+    () =>
+      contactId && !isMyselfMode
+        ? contactsDomain.listGroups(contactId).map((group) => ({ ...group, contactCount: 0 }))
+        : [],
+    [contactId, isMyselfMode],
+  );
   const [error, setError] = useState<string | null>(null);
   const [notesExpanded, setNotesExpanded] = useState(false);
-  const [avatarImageFailed, setAvatarImageFailed] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isSharing, setIsSharing] = useState(false);
   const [isDeleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [isShareEmailSheetOpen, setShareEmailSheetOpen] = useState(false);
   const [isIdentitySheetOpen, setIdentitySheetOpen] = useState(false);
-  const [importantDates, setImportantDates] = useState<ImportantDate[]>([]);
-  const [memberGroups, setMemberGroups] = useState<GroupWithCount[]>([]);
-  const [groupsLoading, setGroupsLoading] = useState(true);
-  const [groupsError, setGroupsError] = useState<string | null>(null);
-  const [memberTags, setMemberTags] = useState<TagWithCount[]>([]);
-  const [tagsLoading, setTagsLoading] = useState(true);
-  const [tagsError, setTagsError] = useState<string | null>(null);
+  const loading = isMyselfMode ? isMyselfInitialSync && !contact : isContactInitialSync && !contact;
+  const tagsLoading = isTagsInitialSync && contactId != null;
+  const groupsLoading = !isMyselfMode && isGroupsInitialSync && contactId != null;
+  const tagsError = null;
+  const groupsError = null;
 
   const {
     contacts: mentionableContacts,
@@ -149,88 +150,13 @@ export function ContactDetailScreen({
     isMyselfMode,
   });
 
-  const loadContactImportantDates = useCallback(async (contactId: string) => {
-    try {
-      const { dates } = await fetchContactImportantDates(contactId);
-      setImportantDates(dates);
-    } catch {
-      setImportantDates([]);
-    }
-  }, []);
-
-  const loadContactTags = useCallback(async (contactId: string) => {
-    setTagsLoading(true);
-    setTagsError(null);
-
-    try {
-      const { tags } = await fetchContactTags(contactId);
-      setMemberTags(tags);
-    } catch (err) {
-      setTagsError(
-        err instanceof Error ? err.message : t("MobileApp.ContactDetail.TagsLoadError"),
-      );
-    } finally {
-      setTagsLoading(false);
-    }
-  }, [t]);
-
-  const loadContactGroups = useCallback(async (contactId: string) => {
-    setGroupsLoading(true);
-    setGroupsError(null);
-
-    try {
-      const { groups } = await fetchContactGroups(contactId);
-      setMemberGroups(groups);
-    } catch (err) {
-      setGroupsError(
-        err instanceof Error ? err.message : t("MobileApp.ContactDetail.GroupsLoadError"),
-      );
-    } finally {
-      setGroupsLoading(false);
-    }
-  }, [t]);
-
-  const loadContact = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-
+  useEffect(() => {
     if (!isMyselfMode && !id) {
       setError("Contact not found");
-      setLoading(false);
       return;
     }
-
-    try {
-      const { contact: loadedContact } = await (isMyselfMode
-        ? fetchMyselfContact()
-        : fetchContact(id as string));
-      upsertContact(loadedContact);
-      void loadContactImportantDates(loadedContact.id);
-      void loadContactTags(loadedContact.id);
-      if (!isMyselfMode) {
-        void loadContactGroups(loadedContact.id);
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load contact");
-    } finally {
-      setLoading(false);
-    }
-  }, [
-    id,
-    isMyselfMode,
-    loadContactGroups,
-    loadContactImportantDates,
-    loadContactTags,
-    upsertContact,
-  ]);
-
-  useEffect(() => {
-    void loadContact();
-  }, [loadContact]);
-
-  useEffect(() => {
-    setAvatarImageFailed(false);
-  }, [contact?.avatar]);
+    setError(null);
+  }, [id, isMyselfMode]);
 
   const notesMarkdown = useMemo(() => {
     const raw = htmlToMarkdown(contact?.notes ?? "");
@@ -263,6 +189,19 @@ export function ContactDetailScreen({
     [mentionableContacts, myselfContactId, router, showToast],
   );
 
+  const reloadContact = useCallback(() => {
+    if (isMyselfMode) {
+      refreshMyself();
+    } else {
+      refreshContact();
+    }
+    refreshImportantDates();
+    refreshTags();
+    if (!isMyselfMode) {
+      refreshGroups();
+    }
+  }, [isMyselfMode, refreshContact, refreshGroups, refreshImportantDates, refreshMyself, refreshTags]);
+
   if (loading || error || !contact) {
     return (
       <View style={[styles.screen, { backgroundColor: colors.appBackground }]}>
@@ -276,9 +215,7 @@ export function ContactDetailScreen({
             <LoadErrorCard
               title={t("MobileApp.Settings.LoadErrorTitle")}
               description={error ?? t("MobileApp.Common.UnknownError")}
-              onRetry={() => {
-                void loadContact();
-              }}
+              onRetry={reloadContact}
             />
           </View>
         )}
@@ -295,7 +232,7 @@ export function ContactDetailScreen({
   const avatarUri = activeContact.avatar
     ? normalizeMobileUrlForDevice(activeContact.avatar)
     : null;
-  const shouldShowAvatarImage = Boolean(avatarUri) && !avatarImageFailed;
+  const shouldShowAvatarImage = Boolean(avatarUri);
   const name = formatContactName(activeContact);
   const locationLabel = formatContactLocation(activeContact);
 
@@ -337,8 +274,7 @@ export function ContactDetailScreen({
       setIsDeleting(true);
 
       try {
-        await deleteContacts([activeContact.id]);
-        removeContact(activeContact.id);
+        contactsDomain.delete(activeContact.id, activeContact.updatedAt ?? undefined);
         setDeleteConfirmOpen(false);
         router.back();
       } catch {
@@ -353,35 +289,35 @@ export function ContactDetailScreen({
     })();
   }
 
-  async function handleUpdateSocial(
+  function handleUpdateSocial(
     platform: ContactSocialFieldKey,
     value: string,
   ) {
-    const { contact: updated } = await updateContact(activeContact.id, {
+    contactsDomain.update(activeContact.id, {
       [platform]: value,
-    });
-    upsertContact(updated);
+    }, activeContact.updatedAt ?? undefined);
+    reloadContact();
   }
 
-  async function handleSavePhones(nextPhones: PhoneEntry[]) {
-    const { contact: updated } = await updateContact(activeContact.id, {
+  function handleSavePhones(nextPhones: PhoneEntry[]) {
+    contactsDomain.update(activeContact.id, {
       phones: normalizePhonesForSave(nextPhones),
-    });
-    upsertContact(updated);
+    }, activeContact.updatedAt ?? undefined);
+    reloadContact();
   }
 
-  async function handleSaveEmails(nextEmails: EmailEntry[]) {
-    const { contact: updated } = await updateContact(activeContact.id, {
+  function handleSaveEmails(nextEmails: EmailEntry[]) {
+    contactsDomain.update(activeContact.id, {
       emails: normalizeEmailsForSave(nextEmails),
-    });
-    upsertContact(updated);
+    }, activeContact.updatedAt ?? undefined);
+    reloadContact();
   }
 
-  async function handleSaveAddresses(nextAddresses: ContactAddressEntry[]) {
-    const { contact: updated } = await updateContact(activeContact.id, {
+  function handleSaveAddresses(nextAddresses: ContactAddressEntry[]) {
+    contactsDomain.update(activeContact.id, {
       addresses: nextAddresses,
-    });
-    upsertContact(updated);
+    }, activeContact.updatedAt ?? undefined);
+    reloadContact();
   }
 
   function openPhone(phone: PhoneEntry) {
@@ -414,8 +350,8 @@ export function ContactDetailScreen({
     });
   }
 
-  async function handleSaveImportantDates(nextDates: ImportantDate[]) {
-    const payload: ImportantDateInput[] = nextDates
+  function handleSaveImportantDates(nextDates: ImportantDate[]) {
+    const payload = nextDates
       .filter((entry) => entry.date)
       .map((entry) => ({
         id: entry.id || undefined,
@@ -430,9 +366,8 @@ export function ContactDetailScreen({
       throw new Error(firstZodErrorMessage(parsed.error));
     }
 
-    const { dates } = await replaceImportantDates(activeContact.id, parsed.data);
-    setImportantDates(dates);
-    upsertContact({ ...activeContact, importantDates: dates });
+    contactsDomain.replaceImportantDates(activeContact.id, parsed.data);
+    reloadContact();
   }
 
   const hasInfo = Boolean(contact.lastInteraction);
@@ -504,7 +439,7 @@ export function ContactDetailScreen({
         isMyselfMode={isMyselfMode}
         onOpenChange={setIdentitySheetOpen}
         onClose={() => setIdentitySheetOpen(false)}
-        onContactUpdated={upsertContact}
+        onContactUpdated={reloadContact}
       />
 
       <ScrollView
@@ -546,7 +481,6 @@ export function ContactDetailScreen({
                   source={{ uri: avatarUri || undefined }}
                   style={styles.avatarImage}
                   resizeMode="cover"
-                  onError={() => setAvatarImageFailed(true)}
                 />
               ) : (
                 <Text
@@ -644,15 +578,9 @@ export function ContactDetailScreen({
           tags={memberTags}
           loading={tagsLoading}
           error={tagsError}
-          onRetry={() => void loadContactTags(contact.id)}
-          onTagAdded={(tag) =>
-            setMemberTags((prev) =>
-              prev.some((existing) => existing.id === tag.id)
-                ? prev
-                : [...prev, { ...tag, contactCount: 0 }],
-            )
-          }
-          onTagsReplaced={(tags) => setMemberTags(tags as TagWithCount[])}
+          onRetry={refreshTags}
+          onTagAdded={() => refreshTags()}
+          onTagsReplaced={() => refreshTags()}
         />
 
         {!isMyselfMode ? (
@@ -662,15 +590,9 @@ export function ContactDetailScreen({
             groups={memberGroups}
             loading={groupsLoading}
             error={groupsError}
-            onRetry={() => void loadContactGroups(contact.id)}
-            onGroupAdded={(group) =>
-              setMemberGroups((prev) =>
-                prev.some((existing) => existing.id === group.id)
-                  ? prev
-                  : [...prev, { ...group, contactCount: 0 }],
-              )
-            }
-            onGroupsReplaced={(groups) => setMemberGroups(groups as GroupWithCount[])}
+            onRetry={refreshGroups}
+            onGroupAdded={() => refreshGroups()}
+            onGroupsReplaced={() => refreshGroups()}
           />
         ) : null}
 

@@ -5,7 +5,8 @@ import { IconUnlink, IconPuzzle } from "@tabler/icons-react";
 import { IconBrandGithub, IconBrandLinkedin, IconBrowser } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
 import { notifications } from "@mantine/notifications";
-import { useTranslations } from "next-intl";
+import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
+import { Trans } from "next-i18next/client";
 import { INTEGRATION_PROVIDERS } from "@/lib/config";
 import { detectBonderyChromeExtension } from "@/lib/extension/detectBonderyChromeExtension";
 import { IntegrationCard } from "./IntegrationCard";
@@ -57,6 +58,7 @@ export function ProviderIntegrations({
 
   const t = useTranslations("SettingsPage.Profile");
   const tIntegration = useTranslations("SettingsPage.Integration");
+  const tCommon = useTranslations("WebAppCommon");
 
   useEffect(() => {
     let isMounted = true;
@@ -103,7 +105,7 @@ export function ProviderIntegrations({
       notifications.hide(loadingNotification);
       notifications.show(
         errorNotificationTemplate({
-          title: "Error",
+          title: tCommon("ErrorTitle"),
           description:
             error instanceof Error ? error.message : tIntegration("LinkError", { provider }),
         }),
@@ -128,10 +130,12 @@ export function ProviderIntegrations({
       ),
       message: (
         <Text size="sm">
-          {t.rich("UnlinkAccountMessage", {
-            provider: provider === "github" ? "GitHub" : "LinkedIn",
-            b: (chunks) => <b>{chunks}</b>,
-          })}
+          <Trans
+            t={t}
+            i18nKey="UnlinkAccountMessage"
+            values={{ provider: provider === "github" ? "GitHub" : "LinkedIn" }}
+            components={{ b: <b /> }}
+          />
         </Text>
       ),
       confirmLabel: t("UnlinkAccountButton"),
@@ -169,7 +173,7 @@ export function ProviderIntegrations({
     } catch (error) {
       notifications.show(
         errorNotificationTemplate({
-          title: "Error",
+          title: tCommon("ErrorTitle"),
           description:
             error instanceof Error ? error.message : tIntegration("UnlinkError", { provider }),
         }),

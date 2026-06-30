@@ -21,11 +21,8 @@ import {
   htmlToMarkdown,
   markdownToHtml,
 } from "@bondery/helpers/notes";
-import {
-  fetchContact,
-  fetchMyselfContact,
-  updateContact,
-} from "../../lib/api/client";
+import { contactsDomain } from "../../lib/domains/contacts";
+import { useContact, useMyselfContact } from "../../lib/sync/hooks/useSyncQuery";
 import { StackNavBar } from "../../components/chrome";
 import { MOBILE_TYPOGRAPHY } from "../../theme/tokens";
 import { useMobileThemeColors } from "../../theme/useMobileThemeColors";
@@ -119,23 +116,26 @@ export function ContactNotesEditor({
     return expandPersonMentionsForEditor(rawMarkdown, getContactNameForEditor);
   }, [rawMarkdown, getContactNameForEditor]);
 
+  const { data: fetchedContact } = useContact(isMyselfMode ? undefined : id);
+  const { data: fetchedMyself } = useMyselfContact();
+  const resolvedContact = isMyselfMode ? fetchedMyself : fetchedContact;
+
   useEffect(() => {
-    const request = isMyselfMode
-      ? fetchMyselfContact()
-      : fetchContact(id as string);
-    request
-      .then(({ contact }) => {
-        setContactId(contact.id);
-        setContactName(formatContactName(contact));
-        setLoadedContact(contact);
-        setNotesUpdatedAt(contact.notesUpdatedAt ?? null);
-        setRawMarkdown(htmlToMarkdown(contact.notes ?? ""));
-      })
-      .catch(() => {
+    if (!resolvedContact) {
+      if (!isMyselfMode && !id) {
         showToast({ type: "error", headline: "Failed to load notes" });
-      })
-      .finally(() => setLoading(false));
-  }, [id, isMyselfMode, showToast]);
+        setLoading(false);
+      }
+      return;
+    }
+
+    setContactId(resolvedContact.id);
+    setContactName(formatContactName(resolvedContact));
+    setLoadedContact(resolvedContact);
+    setNotesUpdatedAt(resolvedContact.notesUpdatedAt ?? null);
+    setRawMarkdown(htmlToMarkdown(resolvedContact.notes ?? ""));
+    setLoading(false);
+  }, [id, isMyselfMode, resolvedContact, showToast]);
 
   const saveNotes = useCallback(
     async (markdown: string) => {
@@ -146,7 +146,7 @@ export function ContactNotesEditor({
         const collapsed = collapsePersonMentionsFromEditor(markdown);
         const html = markdownToHtml(collapsed) || null;
         const payload = contactNotesUpdateSchema.parse({ notes: html });
-        const { contact: updated } = await updateContact(contactId, payload);
+        const updated = contactsDomain.update(contactId, payload);
         setNotesUpdatedAt(updated.notesUpdatedAt ?? null);
         setSaveStatus("saved");
       } catch {

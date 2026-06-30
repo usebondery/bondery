@@ -4,7 +4,7 @@ import { Text, Stack, Combobox, useCombobox, Input, ScrollArea, Group } from "@m
 import { IconLanguage } from "@tabler/icons-react";
 import { useState, useEffect } from "react";
 import type { ReactNode } from "react";
-import { useTranslations } from "next-intl";
+import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
 import { APP_LANGUAGES_DATA, WORLD_LANGUAGES_DATA, formatLanguageDisplayLabel, type LanguageData } from "@bondery/helpers/locale";
 
 interface LanguagePickerProps {

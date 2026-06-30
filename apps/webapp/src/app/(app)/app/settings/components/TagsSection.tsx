@@ -3,7 +3,7 @@
 import { CardSection, Group } from "@mantine/core";
 import { IconTag } from "@tabler/icons-react";
 import { useState } from "react";
-import { useTranslations } from "next-intl";
+import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
 import type { TagWithCount } from "@bondery/schemas";
 import { TagPill } from "@/app/(app)/app/components/tags/TagPill";
 import { openTagEditorModal } from "@/app/(app)/app/components/tags/openTagEditorModal";

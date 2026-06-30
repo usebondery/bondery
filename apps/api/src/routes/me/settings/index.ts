@@ -3,9 +3,14 @@
  * Handles user settings/preferences
  */
 
-import type { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
-import { Type } from "@sinclair/typebox";
+import type { FastifyReply } from "fastify";
+import type { AppFastifyInstance, AppRoutePlugin } from "../../../lib/fastify-types.js";
+import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
+import { z } from "zod";
+import type { SupabaseClient } from "@supabase/supabase-js";
+import type { Database } from "@bondery/schemas/supabase.types";
 import { createAdminClient } from "../../../lib/supabase.js";
+import { uploadContactAvatarAndSetFlag } from "../../../lib/avatar-storage.js";
 import { getAuth } from "../../../lib/auth.js";
 import {
   validateImageUpload,
@@ -13,61 +18,11 @@ import {
 } from "../../../lib/config.js";
 import logger from "../../../lib/logger.js";
 import type { TablesUpdate } from "@bondery/schemas";
+import { updateUserSettingsInputSchema } from "@bondery/schemas";
 import { getMyselfProfile } from "../../../lib/myself.js";
 
-// ── TypeBox Schemas ──────────────────────────────────────────────────────────
-
-const UpdateSettingsBody = Type.Object({
-  timezone: Type.Optional(Type.String()),
-  reminderSendHour: Type.Optional(
-    Type.String({ pattern: "^([01]\\d|2[0-3]):[0-5]\\d(:[0-5]\\d)?$" }),
-  ),
-  timeFormat: Type.Optional(
-    Type.Union([Type.Literal("24h"), Type.Literal("12h")]),
-  ),
-  language: Type.Optional(
-    Type.Union([Type.Literal("en"), Type.Literal("cs")]),
-  ),
-  colorScheme: Type.Optional(
-    Type.Union([
-      Type.Literal("light"),
-      Type.Literal("dark"),
-      Type.Literal("auto"),
-    ]),
-  ),
-  leftSwipeAction: Type.Optional(
-    Type.Union([
-      Type.Literal("call"),
-      Type.Literal("message"),
-      Type.Literal("email"),
-    ]),
-  ),
-  rightSwipeAction: Type.Optional(
-    Type.Union([
-      Type.Literal("call"),
-      Type.Literal("message"),
-      Type.Literal("email"),
-    ]),
-  ),
-  groupSortOrder: Type.Optional(
-    Type.Union([
-      Type.Literal("recent-opened"),
-      Type.Literal("count-desc"),
-      Type.Literal("count-asc"),
-      Type.Literal("alpha-asc"),
-      Type.Literal("alpha-desc"),
-    ]),
-  ),
-  tagSortOrder: Type.Optional(
-    Type.Union([
-      Type.Literal("count-desc"),
-      Type.Literal("count-asc"),
-      Type.Literal("alpha-asc"),
-      Type.Literal("alpha-desc"),
-    ]),
-  ),
-  /** When true, apply updates only for accounts created within the last 30 seconds. */
-  onlyIfNewSignup: Type.Optional(Type.Boolean()),
+const updateSettingsBodySchema = updateUserSettingsInputSchema.extend({
+  onlyIfNewSignup: z.boolean().optional(),
 });
 
 const AVATARS_BUCKET = "avatars";
@@ -198,6 +153,7 @@ function getMetadataAvatarUrl(
 }
 
 async function importMetadataAvatarToStorage(
+  client: SupabaseClient<Database>,
   userId: string,
   avatarUrl: string,
 ): Promise<string | null> {
@@ -249,29 +205,20 @@ async function importMetadataAvatarToStorage(
       return null;
     }
 
-    const fileName = getAccountAvatarFileName(userId);
     const adminClient = createAdminClient();
 
-    await adminClient.storage.from(AVATARS_BUCKET).remove([fileName]);
-
-    const { error: uploadError } = await adminClient.storage
-      .from(AVATARS_BUCKET)
-      .upload(fileName, buffer, {
-        contentType: validationType,
-        upsert: true,
-      });
-
-    if (uploadError) {
-      logger.warn(
-        { userId, fileName, message: uploadError.message },
-        "[settings] Failed to upload provider avatar",
-      );
-      return null;
-    }
+    await uploadContactAvatarAndSetFlag(
+      client,
+      adminClient,
+      userId,
+      userId,
+      buffer,
+      validationType,
+    );
 
     const { data: publicUrlData } = adminClient.storage
       .from(AVATARS_BUCKET)
-      .getPublicUrl(fileName);
+      .getPublicUrl(getAccountAvatarFileName(userId));
 
     return publicUrlData?.publicUrl
       ? `${publicUrlData.publicUrl}?t=${Date.now()}`
@@ -289,16 +236,18 @@ async function importMetadataAvatarToStorage(
   }
 }
 
-export async function meSettingsRoutes(fastify: FastifyInstance) {
+export const meSettingsRoutes: AppRoutePlugin = async (fastify) => {
   fastify.addHook("onRoute", (routeOptions) => {
-    routeOptions.schema = { ...routeOptions.schema, tags: ["Me"] };
+    if (routeOptions.schema) {
+      routeOptions.schema.tags = ["Me"];
+    }
   });
   fastify.addHook("onRequest", fastify.auth([fastify.verifySession]));
 
   /**
    * GET /api/me/settings - Get user settings
    */
-  fastify.get("/", async (request: FastifyRequest, reply: FastifyReply) => {
+  fastify.get("/", async (request, reply) => {
     const { client, user } = getAuth(request);
     const adminClient = createAdminClient();
 
@@ -347,17 +296,18 @@ export async function meSettingsRoutes(fastify: FastifyInstance) {
       resolvedSettings = newSettings;
     }
 
-    // Derive avatar URL deterministically from storage path.
     // Import provider avatar to storage on first load if not already stored.
-    const { data: existingFiles } = await adminClient.storage
-      .from(AVATARS_BUCKET)
-      .list(user.id, { search: `${user.id}.jpg`, limit: 1 });
-    const hasStoredAvatar = (existingFiles ?? []).some(
-      (f) => f.name === `${user.id}.jpg`,
-    );
+    const { data: myselfRow } = await client
+      .from("people")
+      .select("has_avatar")
+      .eq("user_id", user.id)
+      .eq("myself", true)
+      .single();
+
+    const hasStoredAvatar = myselfRow?.has_avatar ?? false;
 
     if (!hasStoredAvatar && metadataAvatarUrl) {
-      await importMetadataAvatarToStorage(user.id, metadataAvatarUrl);
+      await importMetadataAvatarToStorage(client, user.id, metadataAvatarUrl);
     }
 
     const { firstName, avatarUrl: resolvedAvatarUrl } = await getMyselfProfile(
@@ -400,29 +350,12 @@ export async function meSettingsRoutes(fastify: FastifyInstance) {
    */
   fastify.patch(
     "/",
-    { schema: { body: UpdateSettingsBody } },
-    async (
-      request: FastifyRequest<{
-        Body: {
-          timezone?: string;
-          reminderSendHour?: string;
-          timeFormat?: "24h" | "12h";
-          language?: "en" | "cs";
-          colorScheme?: "light" | "dark" | "auto";
-          leftSwipeAction?: "call" | "message" | "email";
-          rightSwipeAction?: "call" | "message" | "email";
-          groupSortOrder?:
-            | "recent-opened"
-            | "count-desc"
-            | "count-asc"
-            | "alpha-asc"
-            | "alpha-desc";
-          tagSortOrder?: "count-desc" | "count-asc" | "alpha-asc" | "alpha-desc";
-          onlyIfNewSignup?: boolean;
-        };
-      }>,
-      reply: FastifyReply,
-    ) => {
+    {
+      schema: {
+        body: updateSettingsBodySchema,
+      } satisfies FastifyZodOpenApiSchema,
+    },
+    async (request, reply) => {
       const { client, user } = getAuth(request);
       const {
         timezone,
@@ -435,7 +368,7 @@ export async function meSettingsRoutes(fastify: FastifyInstance) {
         tagSortOrder,
         timeFormat,
         onlyIfNewSignup,
-      } = request.body || {};
+      } = request.body;
 
       const updatePayload: TablesUpdate<"user_settings"> = {};
 

@@ -1,18 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { Badge, Skeleton } from "@mantine/core";
 import { IconTimelineEventText } from "@tabler/icons-react";
 import Link from "next/link";
 import { getActivityTypeConfig } from "@/lib/activityTypes";
-import { API_ROUTES } from "@bondery/helpers/globals/paths";
-
-interface CachedInteraction {
-  type: string;
-  title: string;
-}
-
-const interactionCache = new Map<string, CachedInteraction>();
+import { useChatInteractionQuery } from "@/lib/query/hooks/useChat";
 
 interface InlineInteractionDisplayProps {
   id: string;
@@ -23,34 +15,9 @@ interface InlineInteractionDisplayProps {
  * Fetches type + title by ID, then renders with the type's emoji and color.
  */
 export function InlineInteractionDisplay({ id }: InlineInteractionDisplayProps) {
-  const [data, setData] = useState<CachedInteraction | null>(
-    () => interactionCache.get(id) ?? null,
-  );
+  const { data: interaction, isLoading } = useChatInteractionQuery(id);
 
-  useEffect(() => {
-    if (interactionCache.has(id)) return;
-
-    let cancelled = false;
-
-    fetch(`${API_ROUTES.INTERACTIONS}/${id}`)
-      .then((res) => (res.ok ? res.json() : null))
-      .then((json) => {
-        if (cancelled || !json?.interaction) return;
-        const cached: CachedInteraction = {
-          type: json.interaction.type,
-          title: json.interaction.title ?? "",
-        };
-        interactionCache.set(id, cached);
-        setData(cached);
-      })
-      .catch(() => {});
-
-    return () => {
-      cancelled = true;
-    };
-  }, [id]);
-
-  if (!data) {
+  if (isLoading || !interaction) {
     return (
       <Skeleton
         height={22}
@@ -61,7 +28,7 @@ export function InlineInteractionDisplay({ id }: InlineInteractionDisplayProps) 
     );
   }
 
-  const { emoji, color } = getActivityTypeConfig(data.type);
+  const { emoji, color } = getActivityTypeConfig(interaction.type);
 
   return (
     <Link href="/app/interactions" style={{ textDecoration: "none" }}>
@@ -80,7 +47,7 @@ export function InlineInteractionDisplay({ id }: InlineInteractionDisplayProps) 
           root: { cursor: "pointer", display: "inline-flex", verticalAlign: "middle" },
         }}
       >
-        {data.title}
+        {interaction.title ?? ""}
       </Badge>
     </Link>
   );

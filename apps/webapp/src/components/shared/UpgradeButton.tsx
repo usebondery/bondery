@@ -3,7 +3,7 @@
 import type { ButtonProps } from "@mantine/core";
 import { Button } from "@mantine/core";
 import { IconSparkles } from "@tabler/icons-react";
-import { useTranslations } from "next-intl";
+import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
 import { useEmbeddedCheckout } from "@/hooks/useEmbeddedCheckout";
 
 type UpgradeButtonProps = Omit<ButtonProps, "onClick" | "loading"> & {

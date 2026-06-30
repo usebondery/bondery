@@ -1,10 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useTranslations } from "next-intl";
+import { useMemo } from "react";
+import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
 import { Button, Center, Stack, Text, Title } from "@mantine/core";
-import { API_ROUTES } from "@bondery/helpers/globals/paths";
-import { API_URL } from "@/lib/config";
+import { useSettingsQuery } from "@/lib/query/hooks/useSettings";
 
 interface StepProps {
   onNext: () => void;
@@ -12,24 +11,13 @@ interface StepProps {
 
 export function StepWelcome({ onNext }: StepProps) {
   const t = useTranslations("Onboarding.Welcome");
-  const [firstName, setFirstName] = useState<string | null>(null);
+  const { data: settingsData } = useSettingsQuery();
 
-  useEffect(() => {
-    async function fetchName() {
-      try {
-        const res = await fetch(`${API_URL}${API_ROUTES.ME_SETTINGS}`, {
-          credentials: "include",
-        });
-        if (!res.ok) return;
-        const data = await res.json();
-        const name = data.data?.name ?? "";
-        setFirstName(name.split(" ")[0] || null);
-      } catch {
-        // Silently fail — greeting will omit the name
-      }
-    }
-    void fetchName();
-  }, []);
+  const firstName = useMemo(() => {
+    const name = settingsData?.data?.name;
+    if (typeof name !== "string" || !name) return null;
+    return name.split(" ")[0] || null;
+  }, [settingsData?.data?.name]);
 
   const greeting = firstName != null ? t("TitleWithName", { name: firstName }) : t("TitleGeneric");
 

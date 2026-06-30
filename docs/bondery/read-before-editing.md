@@ -5,9 +5,10 @@ noIndex: true
 
 # ‼️ Read before editing
 
-Think about:
+See [How to write docs](../how-to-write-docs.md) for the full guide.
 
-* Who the audience is (developer, user, agent or someone else...)
-* What goal are they trying to achieve
-* Avoid jargon, use simple, clear and accurate language
+Quick reminders:
 
+* Know the audience (user, developer, or agent) and what they are trying to do
+* Write clear, concise, accurate prose — no fluff
+* Update `SUMMARY.md` and cross-links when you add or move pages
