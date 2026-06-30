@@ -7,11 +7,19 @@ import type { AppFastifyInstance, AppRoutePlugin } from "../../../lib/fastify-ty
 import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
 import { API_KEY_LIMITS } from "@bondery/schemas";
 import {
+  apiKeyCreatedSchema,
+  apiKeyListItemSchema,
+  apiKeysListResponseSchema,
   createApiKeyInputSchema,
   updateApiKeyLabelInputSchema,
 } from "@bondery/schemas";
-import { uuidParamSchema } from "@bondery/schemas/http";
+import { uuidParamSchema, noContentResponse, standardErrorResponses } from "@bondery/schemas/http";
 import { getAuth } from "../../../lib/auth.js";
+import { applyOpenApiRouteMeta } from "../../../lib/openapi-route-meta.js";
+import {
+  withCreatedResponse,
+  withOkResponse,
+} from "../../../lib/openapi-route-responses.js";
 import {
   formatApiKeyPrefix,
   generateApiKeyMaterial,
@@ -41,12 +49,21 @@ export const meApiKeysRoutes: AppRoutePlugin = async (fastify) => {
     if (routeOptions.schema) {
       routeOptions.schema.tags = ["Me"];
     }
+    applyOpenApiRouteMeta(routeOptions, { area: "session" });
   });
   fastify.addHook("onRequest", fastify.auth([fastify.verifySession]));
 
   const pepper = fastify.config.PRIVATE_API_KEY_PEPPER.trim();
 
-  fastify.get("/", async (request, reply) => {
+  fastify.get(
+    "/",
+    {
+      schema: {
+        description: "List API keys for the authenticated user.",
+        response: withOkResponse(apiKeysListResponseSchema, "API key list"),
+      } satisfies FastifyZodOpenApiSchema,
+    },
+    async (request, reply) => {
     const { client, user } = getAuth(request);
 
     const { data, error } = await client
@@ -72,7 +89,9 @@ export const meApiKeysRoutes: AppRoutePlugin = async (fastify) => {
     "/",
     {
       schema: {
+        description: "Create a new API key for the authenticated user.",
         body: createApiKeyInputSchema,
+        response: withCreatedResponse(apiKeyCreatedSchema, "API key created"),
       } satisfies FastifyZodOpenApiSchema,
     },
     async (request, reply) => {
@@ -127,8 +146,10 @@ export const meApiKeysRoutes: AppRoutePlugin = async (fastify) => {
     "/:id",
     {
       schema: {
+        description: "Update an API key label.",
         params: uuidParamSchema,
         body: updateApiKeyLabelInputSchema,
+        response: withOkResponse(apiKeyListItemSchema, "Updated API key"),
       } satisfies FastifyZodOpenApiSchema,
     },
     async (request, reply) => {
@@ -158,7 +179,12 @@ export const meApiKeysRoutes: AppRoutePlugin = async (fastify) => {
     "/:id",
     {
       schema: {
+        description: "Revoke and delete an API key.",
         params: uuidParamSchema,
+        response: {
+          ...noContentResponse,
+          ...standardErrorResponses,
+        },
       } satisfies FastifyZodOpenApiSchema,
     },
     async (request, reply) => {
@@ -181,7 +207,7 @@ export const meApiKeysRoutes: AppRoutePlugin = async (fastify) => {
         return reply.status(404).send({ error: "API key not found" });
       }
 
-      return reply.status(204).send();
+      return reply.status(204).send(null);
     },
   );
 }

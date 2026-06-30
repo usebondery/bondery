@@ -8,8 +8,16 @@
  */
 
 import type { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
+import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
+import { z } from "zod";
 import { getAuth } from "../../lib/auth.js";
+import { applyOpenApiRouteMeta } from "../../lib/openapi-route-meta.js";
+import { withOkResponse } from "../../lib/openapi-route-responses.js";
 import { getPolarClient, sanitizePolarLocale } from "../../lib/polar.js";
+
+const checkoutResponseSchema = z.object({
+  url: z.string(),
+});
 
 export async function subscriptionCheckoutRoutes(
   fastify: FastifyInstance,
@@ -18,13 +26,22 @@ export async function subscriptionCheckoutRoutes(
     if (routeOptions.schema) {
       routeOptions.schema.tags = ["Subscriptions"];
     }
+    applyOpenApiRouteMeta(routeOptions, { area: "session" });
   });
   fastify.addHook("onRequest", fastify.auth([fastify.verifySession]));
 
   /**
    * POST / — Create a Polar checkout session for embedded upgrade.
    */
-  fastify.post("/", async (request: FastifyRequest, reply: FastifyReply) => {
+  fastify.post(
+    "/",
+    {
+      schema: {
+        description: "Create a Polar checkout session for embedded upgrade.",
+        response: withOkResponse(checkoutResponseSchema, "Checkout session URL"),
+      } satisfies FastifyZodOpenApiSchema,
+    },
+    async (request: FastifyRequest, reply: FastifyReply) => {
     const { client, user } = getAuth(request);
     const productId = fastify.config.POLAR_PRODUCT_ID;
 

@@ -7,9 +7,11 @@ import type { FastifyReply } from "fastify";
 import type { AppRoutePlugin, FastifyZodOpenApiSchema } from "../../lib/fastify-types.js";
 import { getAuth } from "../../lib/auth.js";
 import { registerApiKeyProtectedHooks } from "../../lib/api-key-access.js";
+import { applyOpenApiRouteMeta } from "../../lib/openapi-route-meta.js";
+import { withCreatedResponse, withOkResponse } from "../../lib/openapi-route-responses.js";
 import { GROUP_SELECT, extractAvatarOptions } from "../../lib/queries.js";
 import { idsRequestBodySchema, previewListQuerySchema, uuidParamSchema } from "@bondery/schemas/http";
-import { createGroupSchema, updateGroupSchema } from "@bondery/schemas";
+import { createGroupSchema, groupResponseSchema, groupsListResponseSchema, messageResponseSchema, updateGroupSchema } from "@bondery/schemas";
 import { resolveContactAvatarUrl } from "../../lib/supabase.js";
 import type {
   Group,
@@ -26,6 +28,7 @@ export const groupRoutes: AppRoutePlugin = async (fastify) => {
     if (routeOptions.schema) {
       routeOptions.schema.tags = ["Groups"];
     }
+    applyOpenApiRouteMeta(routeOptions, { area: "integration" });
   });
   registerApiKeyProtectedHooks(fastify);
 
@@ -36,7 +39,9 @@ export const groupRoutes: AppRoutePlugin = async (fastify) => {
     "/",
     {
       schema: {
+        description: "List all groups with contact counts and optional member previews.",
         querystring: previewListQuerySchema,
+        response: withOkResponse(groupsListResponseSchema, "Group list"),
       } satisfies FastifyZodOpenApiSchema,
     },
     async (request, reply) => {
@@ -158,7 +163,9 @@ export const groupRoutes: AppRoutePlugin = async (fastify) => {
     "/",
     {
       schema: {
+        description: "Create a new group.",
         body: createGroupSchema,
+        response: withCreatedResponse(groupResponseSchema, "Group created"),
       } satisfies FastifyZodOpenApiSchema,
     },
     async (request, reply) => {
@@ -194,7 +201,9 @@ export const groupRoutes: AppRoutePlugin = async (fastify) => {
     "/:id",
     {
       schema: {
+        description: "Get a single group by ID.",
         params: uuidParamSchema,
+        response: withOkResponse(groupResponseSchema, "Group details"),
       } satisfies FastifyZodOpenApiSchema,
     },
     async (request, reply) => {
@@ -223,8 +232,10 @@ export const groupRoutes: AppRoutePlugin = async (fastify) => {
     "/:id",
     {
       schema: {
+        description: "Update a group by ID.",
         params: uuidParamSchema,
         body: updateGroupSchema,
+        response: withOkResponse(groupResponseSchema, "Updated group"),
       } satisfies FastifyZodOpenApiSchema,
     },
     async (request, reply) => {
@@ -267,7 +278,12 @@ export const groupRoutes: AppRoutePlugin = async (fastify) => {
     "/",
     {
       schema: {
+        description: "Delete multiple groups by ID.",
         body: idsRequestBodySchema,
+        response: withOkResponse(
+          messageResponseSchema,
+          "Groups deleted successfully",
+        ),
       } satisfies FastifyZodOpenApiSchema,
     },
     async (request, reply) => {
@@ -295,7 +311,12 @@ export const groupRoutes: AppRoutePlugin = async (fastify) => {
     "/:id",
     {
       schema: {
+        description: "Delete a single group by ID.",
         params: uuidParamSchema,
+        response: withOkResponse(
+          messageResponseSchema,
+          "Group deleted successfully",
+        ),
       } satisfies FastifyZodOpenApiSchema,
     },
     async (request, reply) => {

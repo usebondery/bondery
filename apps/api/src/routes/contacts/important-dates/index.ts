@@ -7,8 +7,13 @@ import type { FastifyReply } from "fastify";
 import type { AppFastifyInstance } from "../../../lib/fastify-types.js";
 import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
 import { getAuth } from "../../../lib/auth.js";
+import { withOkResponse } from "../../../lib/openapi-route-responses.js";
 import { resolveContactAvatarUrl } from "../../../lib/supabase.js";
 import type { ImportantDateType, UpcomingReminder, Database } from "@bondery/schemas";
+import {
+  importantDatesListResponseSchema,
+  upcomingRemindersResponseSchema,
+} from "@bondery/schemas";
 import { extractAvatarOptions } from "../../../lib/queries.js";
 import {
   avatarTransformQuerySchema,
@@ -143,7 +148,9 @@ export function registerImportantDateRoutes(fastify: AppFastifyInstance): void {
     "/important-dates/upcoming",
     {
       schema: {
+        description: "List upcoming important-date reminders with notifications configured.",
         querystring: avatarTransformQuerySchema,
+        response: withOkResponse(upcomingRemindersResponseSchema, "Upcoming reminders"),
       } satisfies FastifyZodOpenApiSchema,
     },
     async (request, reply) => {
@@ -279,7 +286,9 @@ export function registerImportantDateRoutes(fastify: AppFastifyInstance): void {
     "/:id/important-dates",
     {
       schema: {
+        description: "Get important dates for a contact.",
         params: uuidParamSchema,
+        response: withOkResponse(importantDatesListResponseSchema, "Important dates"),
       } satisfies FastifyZodOpenApiSchema,
     },
     async (request, reply) => {
@@ -321,8 +330,10 @@ export function registerImportantDateRoutes(fastify: AppFastifyInstance): void {
     "/:id/important-dates",
     {
       schema: {
+        description: "Replace all important dates for a contact.",
         params: uuidParamSchema,
         body: importantDatesReplaceBodySchema,
+        response: withOkResponse(importantDatesListResponseSchema, "Important dates replaced"),
       } satisfies FastifyZodOpenApiSchema,
     },
     async (request, reply) => {

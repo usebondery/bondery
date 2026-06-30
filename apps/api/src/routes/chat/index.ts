@@ -5,20 +5,30 @@
 
 import type { FastifyRequest } from "fastify";
 import type { AppRoutePlugin } from "../../lib/fastify-types.js";
+import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
+import { z } from "zod";
 import type { UIMessage } from "ai";
 import { convertToModelMessages } from "ai";
 import type { Json } from "@bondery/schemas/supabase.types";
+import { standardErrorResponses } from "@bondery/schemas/http";
 import { getAuth } from "../../lib/auth.js";
+import { applyOpenApiRouteMeta } from "../../lib/openapi-route-meta.js";
 import { runChatAgent } from "../../lib/chat/agent.js";
 import { generateSessionTitle } from "../../lib/chat/title.js";
 import { checkAndIncrementQuota } from "../../lib/chat/quota.js";
 import { AI_TIER } from "../../lib/rate-limit.js";
+
+const chatRequestSchema = z.object({
+  messages: z.array(z.record(z.string(), z.unknown())),
+  sessionId: z.string(),
+});
 
 export const chatRoutes: AppRoutePlugin = async (fastify) => {
   fastify.addHook("onRoute", (routeOptions) => {
     if (routeOptions.schema) {
       routeOptions.schema.tags = ["Chat"];
     }
+    applyOpenApiRouteMeta(routeOptions, { area: "session" });
   });
   fastify.addHook("onRequest", fastify.auth([fastify.verifySession]));
 
@@ -27,7 +37,24 @@ export const chatRoutes: AppRoutePlugin = async (fastify) => {
    */
   fastify.post(
     "/",
-    { config: { rateLimit: AI_TIER } },
+    {
+      config: { rateLimit: AI_TIER },
+      schema: {
+        description: "Stream an AI chat assistant response as Server-Sent Events.",
+        body: chatRequestSchema,
+        response: {
+          200: {
+            description: "UI message event stream (text/event-stream)",
+            content: {
+              "text/event-stream": {
+                schema: z.string(),
+              },
+            },
+          },
+          ...standardErrorResponses,
+        },
+      } satisfies FastifyZodOpenApiSchema,
+    },
     async (
       request: FastifyRequest<{
         Body: { messages: UIMessage[]; sessionId: string };

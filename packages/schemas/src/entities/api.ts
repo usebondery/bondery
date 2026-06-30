@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { contactIdSchema } from "../contact-id.js";
 import { AVATAR_UPLOAD, CONTACT_FIELD_MAX_LENGTHS } from "../constants/index.js";
 import { shareableFieldSchema } from "./contact.js";
 import { shareContactEmailSchema } from "./channels.js";
@@ -33,7 +34,7 @@ export const avatarTransformOptionsSchema = z.object({
 });
 
 export const shareContactRequestSchema = z.object({
-  personId: z.string(),
+  personId: contactIdSchema,
   recipientEmails: shareContactEmailSchema.shape.recipients,
   message: shareContactEmailSchema.shape.message,
   sendCopy: z.boolean(),

@@ -7,10 +7,14 @@ import type { FastifyReply } from "fastify";
 import type { AppFastifyInstance } from "../../../lib/fastify-types.js";
 import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
 import { getAuth } from "../../../lib/auth.js";
+import { withCreatedResponse, withOkResponse } from "../../../lib/openapi-route-responses.js";
 import { resolveContactAvatarUrl } from "../../../lib/supabase.js";
 import type { RelationshipType } from "@bondery/schemas";
 import {
+  contactRelationshipResponseSchema,
+  contactRelationshipsResponseSchema,
   createContactRelationshipInputSchema,
+  messageResponseSchema,
   updateContactRelationshipInputSchema,
 } from "@bondery/schemas";
 import { extractAvatarOptions } from "../../../lib/queries.js";
@@ -78,8 +82,10 @@ export function registerRelationshipRoutes(fastify: AppFastifyInstance): void {
     "/:id/relationships",
     {
       schema: {
+        description: "List relationships for a contact.",
         params: uuidParamSchema,
         querystring: avatarTransformQuerySchema,
+        response: withOkResponse(contactRelationshipsResponseSchema, "Contact relationships"),
       } satisfies FastifyZodOpenApiSchema,
     },
     async (request, reply) => {
@@ -192,8 +198,10 @@ export function registerRelationshipRoutes(fastify: AppFastifyInstance): void {
     "/:id/relationships",
     {
       schema: {
+        description: "Create a relationship between two contacts.",
         params: uuidParamSchema,
         body: createContactRelationshipInputSchema,
+        response: withCreatedResponse(contactRelationshipResponseSchema, "Relationship created"),
       } satisfies FastifyZodOpenApiSchema,
     },
     async (request, reply) => {
@@ -264,8 +272,10 @@ export function registerRelationshipRoutes(fastify: AppFastifyInstance): void {
     "/:id/relationships/:relationshipId",
     {
       schema: {
+        description: "Update a relationship for a contact.",
         params: contactRelationshipIdParamSchema,
         body: updateContactRelationshipInputSchema,
+        response: withOkResponse(contactRelationshipResponseSchema, "Relationship updated"),
       } satisfies FastifyZodOpenApiSchema,
     },
     async (request, reply) => {
@@ -356,7 +366,9 @@ export function registerRelationshipRoutes(fastify: AppFastifyInstance): void {
     "/:id/relationships/:relationshipId",
     {
       schema: {
+        description: "Delete a relationship for a contact.",
         params: contactRelationshipIdParamSchema,
+        response: withOkResponse(messageResponseSchema, "Relationship deleted"),
       } satisfies FastifyZodOpenApiSchema,
     },
     async (request, reply) => {

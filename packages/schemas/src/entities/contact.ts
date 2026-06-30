@@ -1,8 +1,9 @@
 import { z } from "zod";
 import { CONTACT_FIELD_MAX_LENGTHS } from "../constants/index.js";
-import { contactAddressEntrySchema } from "./address.js";
+import { contactAddressReadSchema } from "./address.js";
 import { emailEntryEntitySchema, phoneEntryEntitySchema } from "./channels.js";
 import { importantDateSchema } from "./important-date.js";
+import { contactIdSchema } from "../contact-id.js";
 import {
   createdAtSchema,
   entityAuditSchema,
@@ -10,6 +11,7 @@ import {
   idsRequestSchema,
   makeCollectionResponseSchema,
   makePaginatedListResponseSchema,
+  messageResponseSchema,
   updatedAtSchema,
 } from "./_shared.js";
 
@@ -49,7 +51,7 @@ export const contactSchema = entityIdentitySchema.extend({
   updatedAt: updatedAtSchema.nullable().optional(),
   phones: z.array(phoneEntryEntitySchema).nullable(),
   emails: z.array(emailEntryEntitySchema).nullable(),
-  addresses: z.array(contactAddressEntrySchema).nullable().optional(),
+  addresses: z.array(contactAddressReadSchema).nullable().optional(),
   linkedin: z.string().nullable(),
   instagram: z.string().nullable(),
   whatsapp: z.string().nullable(),
@@ -134,6 +136,44 @@ export const contactResponseSchema = z.object({
   contact: contactSchema,
 });
 
+export const createContactResponseSchema = contactResponseSchema.extend({
+  txid: z.string().optional(),
+});
+
+const mapPinSchema = z.object({
+  id: z.string(),
+  firstName: z.string(),
+  lastName: z.string().nullable(),
+  headline: z.string().nullable(),
+  location: z.string().nullable(),
+  lastInteraction: z.string().nullable(),
+  latitude: z.number(),
+  longitude: z.number(),
+  avatar: z.string().nullable(),
+});
+
+export const mapPinsResponseSchema = z.object({
+  pins: z.array(mapPinSchema),
+});
+
+const mapAddressPinSchema = z.object({
+  addressId: z.string(),
+  personId: z.string(),
+  firstName: z.string(),
+  lastName: z.string().nullable(),
+  addressType: z.string(),
+  addressFormatted: z.string().nullable(),
+  addressCity: z.string().nullable(),
+  addressCountry: z.string().nullable(),
+  latitude: z.number(),
+  longitude: z.number(),
+  avatar: z.string().nullable(),
+});
+
+export const mapAddressPinsResponseSchema = z.object({
+  pins: z.array(mapAddressPinSchema),
+});
+
 export const contactsListStatsSchema = z.object({
   totalContacts: z.number(),
   thisMonthInteractions: z.number(),
@@ -148,7 +188,7 @@ export const contactsListResponseSchema = makePaginatedListResponseSchema(
 });
 
 export const createContactRelationshipInputSchema = z.object({
-  relatedPersonId: z.string(),
+  relatedPersonId: contactIdSchema,
   relationshipType: relationshipTypeSchema,
 });
 
@@ -179,9 +219,15 @@ export const deleteContactsRequestSchema = z.union([
   idsRequestSchema,
   z.object({
     filter: contactsFilterSchema,
-    excludeIds: z.array(z.string()).optional(),
+    excludeIds: z.array(contactIdSchema).optional(),
   }),
 ]);
+
+export const deleteContactsResponseSchema = messageResponseSchema.extend({
+  deletedCount: z.number().int(),
+});
+
+export const deleteContactResponseSchema = messageResponseSchema;
 
 const linkedInHistoryFieldsSchema = z.object({
   peopleLinkedinId: z.string(),
@@ -240,6 +286,37 @@ export const enrichEligibleCountResponseSchema = z.object({
   count: z.number(),
 });
 
+export const enrichQueueStatusCountsSchema = z.object({
+  pending: z.number(),
+  completed: z.number(),
+  failed: z.number(),
+});
+
+export const enrichQueueInitResponseSchema = z.object({
+  totalEligible: z.number(),
+});
+
+export const enrichQueueNextBatchItemSchema = z.object({
+  queueItemId: z.string(),
+  personId: z.string(),
+  linkedinHandle: z.string().nullable(),
+  firstName: z.string().nullable(),
+  lastName: z.string().nullable(),
+});
+
+export const enrichQueueNextBatchResponseSchema = z.object({
+  items: z.array(enrichQueueNextBatchItemSchema),
+});
+
+export const linkedInDataUpsertResponseSchema = z.object({
+  success: z.literal(true),
+  count: z.number(),
+});
+
+export const contactRelationshipResponseSchema = z.object({
+  relationship: contactRelationshipSchema,
+});
+
 /** POST /api/contacts/enrich-queue/init optional body. */
 export const enrichQueueInitBodySchema = z
   .object({
@@ -291,6 +368,12 @@ export type LinkedInDataResponse = z.infer<typeof linkedInDataResponseSchema>;
 export type EnrichQueueStatus = z.infer<typeof enrichQueueStatusSchema>;
 export type EnrichQueueItem = z.infer<typeof enrichQueueItemSchema>;
 export type EnrichEligibleCountResponse = z.infer<typeof enrichEligibleCountResponseSchema>;
+export type EnrichQueueStatusCounts = z.infer<typeof enrichQueueStatusCountsSchema>;
+export type EnrichQueueInitResponse = z.infer<typeof enrichQueueInitResponseSchema>;
+export type EnrichQueueNextBatchItem = z.infer<typeof enrichQueueNextBatchItemSchema>;
+export type EnrichQueueNextBatchResponse = z.infer<typeof enrichQueueNextBatchResponseSchema>;
+export type LinkedInDataUpsertResponse = z.infer<typeof linkedInDataUpsertResponseSchema>;
+export type ContactRelationshipResponse = z.infer<typeof contactRelationshipResponseSchema>;
 export type EnrichQueueInitBody = z.infer<typeof enrichQueueInitBodySchema>;
 export type EnrichQueuePatchBody = z.infer<typeof enrichQueuePatchBodySchema>;
 export type ShareableField = z.infer<typeof shareableFieldSchema>;

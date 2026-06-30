@@ -71,6 +71,21 @@ export const interactionsListResponseSchema = makePaginatedListResponseSchema(
   interactionSchema,
 );
 
+const interactionDetailSchema = z.object({
+  id: z.string(),
+  title: z.string().nullable(),
+  type: z.string(),
+  description: z.string().nullable(),
+  date: z.string(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+  participants: z.array(z.object({}).passthrough()),
+});
+
+export const interactionResponseSchema = z.object({
+  interaction: interactionDetailSchema,
+});
+
 export type InteractionType = z.infer<typeof interactionTypeSchema>;
 export type InteractionParticipant = z.infer<typeof interactionParticipantSchema>;
 export type Interaction = z.infer<typeof interactionSchema>;

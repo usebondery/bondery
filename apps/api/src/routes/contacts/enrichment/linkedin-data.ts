@@ -7,8 +7,13 @@ import type { FastifyReply } from "fastify";
 import type { AppFastifyInstance } from "../../../lib/fastify-types.js";
 import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
 import { getAuth } from "../../../lib/auth.js";
+import { withOkResponse } from "../../../lib/openapi-route-responses.js";
 import { uuidParamSchema } from "@bondery/schemas/http";
-import { linkedInDataRequestSchema } from "@bondery/schemas";
+import {
+  linkedInDataRequestSchema,
+  linkedInDataResponseSchema,
+  linkedInDataUpsertResponseSchema,
+} from "@bondery/schemas";
 import { linkedinCompanyUrl } from "@bondery/helpers";
 import { ENRICH_TIER } from "../../../lib/rate-limit.js";
 
@@ -20,8 +25,10 @@ export function registerLinkedInDataRoutes(fastify: AppFastifyInstance): void {
     "/:id/linkedin-data",
     {
       schema: {
+        description: "Upsert scraped LinkedIn work history for a contact.",
         params: uuidParamSchema,
         body: linkedInDataRequestSchema,
+        response: withOkResponse(linkedInDataUpsertResponseSchema, "LinkedIn data upserted"),
       } satisfies FastifyZodOpenApiSchema,
       config: { rateLimit: ENRICH_TIER },
     },
@@ -107,7 +114,9 @@ export function registerLinkedInDataRoutes(fastify: AppFastifyInstance): void {
     "/:id/linkedin-data",
     {
       schema: {
+        description: "Get LinkedIn work history and education for a contact.",
         params: uuidParamSchema,
+        response: withOkResponse(linkedInDataResponseSchema, "LinkedIn data"),
       } satisfies FastifyZodOpenApiSchema,
     },
     async (request, reply) => {

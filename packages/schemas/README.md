@@ -25,7 +25,7 @@ Schemas may include lightweight structural transforms (trim-to-null, lowercase e
 | Import | Contents |
 |--------|----------|
 | `@bondery/schemas` | Entity schemas, types, shared utilities |
-| `@bondery/schemas/http` | Route transport primitives (params, coerced query, pagination) |
+| `@bondery/schemas/http` | Route transport primitives (params, coerced query, pagination), shared response helpers (`okResponse`, `standardErrorResponses`), `contactIdSchema` |
 | `@bondery/schemas/constants` | Field limits, product constants |
 | `@bondery/schemas/supabase.types` | Generated Supabase `Database` types |
 | `@bondery/schemas/database` | Alias for supabase types |
@@ -58,7 +58,7 @@ For form submit flows that start from a single full-name field or raw social inp
 |------|----------|---------|
 | **Wire** — HTTP request/response shapes | `@bondery/schemas` (`*ApiInputSchema`, `update*InputSchema`) | API routes, sync mutations |
 | **Form** — UI input with transforms (`fullName` → parts) | `@bondery/schemas` (`createContactInputSchema`, etc.) | Mobile/webapp forms only — never route `body` |
-| **Transport** — params, coerced query, pagination | `@bondery/schemas/http` | Fastify route `params` / `querystring` only |
+| **Transport** — params, coerced query, pagination, response kit | `@bondery/schemas/http` (`uuidParamSchema`, `okResponse`, `contactIdSchema`, …) | Fastify route `params` / `querystring` / `response` composition |
 | **Read** — list/detail response items | `@bondery/schemas` (`contactSchema`, `groupSchema`, …) | Route `response` schemas, clients |
 
 OpenAPI documents wire **input** shapes. Zod transforms/refines still run at runtime but may not appear fully in generated docs — behavioral contracts live in `src/contracts.assertions.ts`.

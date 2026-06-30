@@ -7,7 +7,9 @@ import type { AppFastifyInstance } from "../../../lib/fastify-types.js";
 import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
 import { z } from "zod";
 import { getAuth } from "../../../lib/auth.js";
+import { withOkResponse } from "../../../lib/openapi-route-responses.js";
 import { TAG_SELECT } from "../../../lib/queries.js";
+import { contactTagListResponseSchema, messageResponseSchema } from "@bondery/schemas";
 import { uuidParamSchema } from "@bondery/schemas/http";
 
 const contactTagBodySchema = z.object({
@@ -24,7 +26,9 @@ export function registerTagRoutes(fastify: AppFastifyInstance): void {
     "/:id/tags",
     {
       schema: {
+        description: "List tags assigned to a contact.",
         params: uuidParamSchema,
+        response: withOkResponse(contactTagListResponseSchema, "Contact tags"),
       } satisfies FastifyZodOpenApiSchema,
     },
     async (request, reply) => {
@@ -64,8 +68,10 @@ export function registerTagRoutes(fastify: AppFastifyInstance): void {
     "/:id/tags",
     {
       schema: {
+        description: "Add a tag to a contact.",
         params: uuidParamSchema,
         body: contactTagBodySchema,
+        response: withOkResponse(messageResponseSchema, "Tag added to contact"),
       } satisfies FastifyZodOpenApiSchema,
     },
     async (request, reply) => {
@@ -94,7 +100,9 @@ export function registerTagRoutes(fastify: AppFastifyInstance): void {
     "/:id/tags/:tagId",
     {
       schema: {
+        description: "Remove a tag from a contact.",
         params: contactTagIdParamsSchema,
+        response: withOkResponse(messageResponseSchema, "Tag removed from contact"),
       } satisfies FastifyZodOpenApiSchema,
     },
     async (request, reply) => {

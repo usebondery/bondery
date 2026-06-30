@@ -35,15 +35,13 @@ const mutableUserSettingsSchema = z.object({
   tagSortOrder: tagSortOrderPreferenceSchema,
 });
 
+/** Wire/API user settings (GET /api/me/settings). */
 export const userSettingsSchema = z.object({
-  id: z.string().optional(),
-  user_id: z.string(),
   name: z.string().nullable().optional(),
   ...mutableUserSettingsSchema.shape,
   avatarUrl: z.string().nullable(),
   onboardingCompletedAt: z.string().nullable(),
-  created_at: z.string().nullable().optional(),
-  updated_at: z.string().nullable().optional(),
+  aiMessagesUsed: z.number().optional(),
 });
 
 export const updateUserSettingsInputSchema = mutableUserSettingsSchema
@@ -67,7 +65,7 @@ export const userIdentitySchema = z.object({
 export const userSettingsResponseSchema = z.object({
   success: z.boolean(),
   data: userSettingsSchema.extend({
-    email: z.string().optional(),
+    email: z.string().nullable().optional(),
     providers: z.array(z.string()).optional(),
     identities: z.array(userIdentitySchema).optional(),
   }),

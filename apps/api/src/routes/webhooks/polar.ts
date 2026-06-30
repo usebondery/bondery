@@ -13,11 +13,19 @@
  */
 
 import type { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
+import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
+import { z } from "zod";
 import {
   validateEvent,
   WebhookVerificationError,
 } from "@polar-sh/sdk/webhooks";
+import { applyOpenApiRouteMeta } from "../../lib/openapi-route-meta.js";
+import { withOkResponse } from "../../lib/openapi-route-responses.js";
 import { createAdminClient } from "../../lib/supabase.js";
+
+const webhookAckResponseSchema = z.object({
+  received: z.boolean(),
+});
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -158,6 +166,7 @@ export async function polarWebhookRoutes(
     if (routeOptions.schema) {
       routeOptions.schema.tags = ["Webhooks"];
     }
+    applyOpenApiRouteMeta(routeOptions, { area: "internal" });
   });
 
   // Capture the raw request body as a Buffer so that `validateEvent` can
@@ -177,7 +186,13 @@ export async function polarWebhookRoutes(
    */
   fastify.post(
     "/",
-    { config: { rateLimit: false } },
+    {
+      config: { rateLimit: false },
+      schema: {
+        description: "Receive and process a Polar subscription lifecycle webhook event.",
+        response: withOkResponse(webhookAckResponseSchema, "Webhook acknowledged"),
+      } satisfies FastifyZodOpenApiSchema,
+    },
     async (request: FastifyRequest, reply: FastifyReply) => {
       const secret = fastify.config.PRIVATE_POLAR_WEBHOOK_SECRET;
 

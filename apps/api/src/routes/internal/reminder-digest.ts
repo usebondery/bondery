@@ -5,20 +5,25 @@ import { z } from "zod";
 import nodemailer from "nodemailer";
 import { render } from "@react-email/render";
 import { ReminderDigestEmail } from "@bondery/emails";
-import { reminderDigestRequestSchema } from "@bondery/schemas";
+import { reminderDigestRequestSchema, reminderDigestResponseSchema } from "@bondery/schemas";
+import { applyOpenApiRouteMeta } from "../../lib/openapi-route-meta.js";
+import { withOkResponse } from "../../lib/openapi-route-responses.js";
 
 export const reminderDigestRoutes: AppRoutePlugin = async (fastify) => {
   fastify.addHook("onRoute", (routeOptions) => {
     if (routeOptions.schema) {
       routeOptions.schema.tags = ["Internal"];
     }
+    applyOpenApiRouteMeta(routeOptions, { area: "internal" });
   });
 
   fastify.post(
     "/",
     {
       schema: {
+        description: "Send reminder digest emails for the given users and target date.",
         body: reminderDigestRequestSchema,
+        response: withOkResponse(reminderDigestResponseSchema, "Digest send result"),
       } satisfies FastifyZodOpenApiSchema,
       onRequest: fastify.auth([fastify.verifyServiceSecret]),
       config: { rateLimit: false },

@@ -18,11 +18,35 @@ import {
 } from "../../../lib/config.js";
 import logger from "../../../lib/logger.js";
 import type { TablesUpdate } from "@bondery/schemas";
-import { updateUserSettingsInputSchema } from "@bondery/schemas";
+import {
+  updateUserSettingsInputSchema,
+  userSettingsResponseSchema,
+} from "@bondery/schemas";
+import { applyOpenApiRouteMeta } from "../../../lib/openapi-route-meta.js";
+import { withOkResponse } from "../../../lib/openapi-route-responses.js";
 import { getMyselfProfile } from "../../../lib/myself.js";
 
 const updateSettingsBodySchema = updateUserSettingsInputSchema.extend({
   onlyIfNewSignup: z.boolean().optional(),
+});
+
+const settingsPatchResponseSchema = z.object({
+  success: z.boolean(),
+  skipped: z.boolean().optional(),
+  data: z
+    .object({
+      timezone: z.string().nullable().optional(),
+      reminderSendHour: z.string().nullable().optional(),
+      timeFormat: z.string().nullable().optional(),
+      language: z.string().nullable().optional(),
+      colorScheme: z.string().nullable().optional(),
+      leftSwipeAction: z.string().nullable().optional(),
+      rightSwipeAction: z.string().nullable().optional(),
+      groupSortOrder: z.string().nullable().optional(),
+      tagSortOrder: z.string().nullable().optional(),
+    })
+    .nullable()
+    .optional(),
 });
 
 const AVATARS_BUCKET = "avatars";
@@ -241,13 +265,22 @@ export const meSettingsRoutes: AppRoutePlugin = async (fastify) => {
     if (routeOptions.schema) {
       routeOptions.schema.tags = ["Me"];
     }
+    applyOpenApiRouteMeta(routeOptions, { area: "session" });
   });
   fastify.addHook("onRequest", fastify.auth([fastify.verifySession]));
 
   /**
    * GET /api/me/settings - Get user settings
    */
-  fastify.get("/", async (request, reply) => {
+  fastify.get(
+    "/",
+    {
+      schema: {
+        description: "Get user settings, profile info, and linked auth providers.",
+        response: withOkResponse(userSettingsResponseSchema, "User settings"),
+      } satisfies FastifyZodOpenApiSchema,
+    },
+    async (request, reply) => {
     const { client, user } = getAuth(request);
     const adminClient = createAdminClient();
 
@@ -352,7 +385,9 @@ export const meSettingsRoutes: AppRoutePlugin = async (fastify) => {
     "/",
     {
       schema: {
+        description: "Update user settings and preferences.",
         body: updateSettingsBodySchema,
+        response: withOkResponse(settingsPatchResponseSchema, "Updated settings"),
       } satisfies FastifyZodOpenApiSchema,
     },
     async (request, reply) => {

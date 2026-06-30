@@ -4,6 +4,7 @@
  */
 
 import type { AppRoutePlugin } from "../../lib/fastify-types.js";
+import { applyOpenApiRouteMeta } from "../../lib/openapi-route-meta.js";
 import { registerPostRoute } from "./post-route.js";
 
 export const extensionRoutes: AppRoutePlugin = async (fastify) => {
@@ -11,6 +12,7 @@ export const extensionRoutes: AppRoutePlugin = async (fastify) => {
     if (routeOptions.schema) {
       routeOptions.schema.tags = ["Extension"];
     }
+    applyOpenApiRouteMeta(routeOptions, { area: "session" });
   });
 
   registerPostRoute(fastify);

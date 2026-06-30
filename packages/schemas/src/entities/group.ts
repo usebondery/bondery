@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { GROUP_LABEL_MAX_LENGTH } from "../constants/index.js";
 import { hexColorSchema } from "../primitives/index.js";
-import { contactPreviewSchema, contactsFilterSchema } from "./contact.js";
+import { contactPreviewSchema, contactSchema, contactsFilterSchema } from "./contact.js";
 import {
   entityAuditSchema,
   entityIdentitySchema,
@@ -75,6 +75,16 @@ export const groupMembersListResponseSchema = makePaginatedListResponseSchema(
   "contacts",
   contactPreviewSchema,
 );
+
+export const groupContactsListResponseSchema = makePaginatedListResponseSchema(
+  "contacts",
+  contactSchema,
+).extend({
+  group: z.object({
+    id: z.string(),
+    label: z.string(),
+  }),
+});
 
 export const groupResponseSchema = z.object({
   group: groupSchema,

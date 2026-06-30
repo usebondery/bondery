@@ -43,6 +43,7 @@
 
 * [🛠️ Contributing](contributing/README.md)
 * [Architecture](contributing/architecture.md)
+* [API routes](contributing/api-routes.md)
 * [Sync architecture (mobile)](contributing/sync-architecture.md)
 * [Local development setup](contributing/local-setup.md)
 

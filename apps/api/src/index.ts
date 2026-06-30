@@ -23,7 +23,7 @@ import fastifyAuth from "@fastify/auth";
 import fastifySwagger from "@fastify/swagger";
 import { createRequire } from "module";
 import { API_ROUTES } from "@bondery/helpers";
-import { registerOpenApiComponentSchemas } from "@bondery/schemas";
+import { registerOpenApiComponentSchemas, openApiDocumentOpts } from "@bondery/schemas";
 import { registerAuthStrategies } from "./lib/auth.js";
 import { registerExtensionVersionCheck } from "./lib/extensionVersionCheck.js";
 import { registerHealthRoutes } from "./lib/health/routes.js";
@@ -271,7 +271,9 @@ async function buildServer() {
     },
   }).withTypeProvider<FastifyZodOpenApiTypeProvider>();
 
-  await fastify.register(fastifyZodOpenApiPlugin);
+  await fastify.register(fastifyZodOpenApiPlugin, {
+    documentOpts: openApiDocumentOpts,
+  });
   fastify.setValidatorCompiler(validatorCompiler);
   fastify.setSerializerCompiler(serializerCompiler);
 
@@ -363,6 +365,7 @@ async function buildServer() {
   registerExtensionVersionCheck(fastify);
 
   await fastify.register(fastifySwagger, {
+    hiddenTag: "Internal",
     openapi: {
       openapi: "3.0.3",
       info: {

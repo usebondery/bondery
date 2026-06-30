@@ -23,6 +23,28 @@ const addressCoreInputSchema = z.object({
 
 export const contactAddressSheetSchema = addressCoreInputSchema;
 
+/** Read-model address shape (no input transforms — safe for Fastify response serialization). */
+export const contactAddressReadSchema = z.object({
+  value: z.string(),
+  type: contactAddressTypeSchema,
+  label: z.string().nullable(),
+  latitude: z.number().nullable(),
+  longitude: z.number().nullable(),
+  addressLine1: z.string().nullable(),
+  addressLine2: z.string().nullable(),
+  addressCity: z.string().nullable(),
+  addressPostalCode: z.string().nullable(),
+  addressState: z.string().nullable(),
+  addressStateCode: z.string().nullable(),
+  addressCountry: z.string().nullable(),
+  addressCountryCode: z.string().nullable(),
+  addressGranularity: contactAddressGranularitySchema,
+  addressFormatted: z.string().nullable(),
+  addressGeocodeSource: contactAddressGeocodeSourceSchema.nullable(),
+  geocodeConfidence: contactAddressConfidenceSchema.nullable(),
+  timezone: z.string().nullable(),
+});
+
 export const contactAddressEntrySchema = addressCoreInputSchema.extend({
   label: optionalTrimmedString,
   latitude: z.number().nullable(),

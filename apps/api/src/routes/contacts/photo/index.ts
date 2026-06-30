@@ -6,6 +6,11 @@ import type { FastifyInstance, FastifyReply } from "fastify";
 import type { AppFastifyInstance } from "../../../lib/fastify-types.js";
 import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
 import { getAuth } from "../../../lib/auth.js";
+import { withOkResponse } from "../../../lib/openapi-route-responses.js";
+import {
+  apiSuccessResponseSchema,
+  photoUploadResponseSchema,
+} from "@bondery/schemas";
 import {
   uploadContactAvatarAndSetFlag,
   deleteContactAvatarAndClearFlag,
@@ -21,7 +26,9 @@ export function registerPhotoRoutes(fastify: AppFastifyInstance): void {
     "/:id/photo",
     {
       schema: {
+        description: "Upload a contact photo.",
         params: uuidParamSchema,
+        response: withOkResponse(photoUploadResponseSchema, "Photo uploaded"),
       } satisfies FastifyZodOpenApiSchema,
     },
     async (request, reply) => {
@@ -94,7 +101,9 @@ export function registerPhotoRoutes(fastify: AppFastifyInstance): void {
     "/:id/photo",
     {
       schema: {
+        description: "Delete a contact photo.",
         params: uuidParamSchema,
+        response: withOkResponse(apiSuccessResponseSchema, "Photo deleted"),
       } satisfies FastifyZodOpenApiSchema,
     },
     async (request, reply) => {

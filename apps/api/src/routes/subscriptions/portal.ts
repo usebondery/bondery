@@ -7,8 +7,11 @@
  */
 
 import type { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
+import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
 import { WEBAPP_ROUTES } from "@bondery/helpers";
+import { standardErrorResponses } from "@bondery/schemas/http";
 import { getAuth } from "../../lib/auth.js";
+import { applyOpenApiRouteMeta } from "../../lib/openapi-route-meta.js";
 import { getPolarClient } from "../../lib/polar.js";
 
 export async function subscriptionPortalRoutes(
@@ -18,13 +21,27 @@ export async function subscriptionPortalRoutes(
     if (routeOptions.schema) {
       routeOptions.schema.tags = ["Subscriptions"];
     }
+    applyOpenApiRouteMeta(routeOptions, { area: "session" });
   });
   fastify.addHook("onRequest", fastify.auth([fastify.verifySession]));
 
   /**
    * GET / — Redirect to the Polar customer portal for billing management.
    */
-  fastify.get("/", async (request: FastifyRequest, reply: FastifyReply) => {
+  fastify.get(
+    "/",
+    {
+      schema: {
+        description: "Redirect to the Polar customer portal for billing management.",
+        response: {
+          302: {
+            description: "Redirect to Polar customer portal",
+          },
+          ...standardErrorResponses,
+        },
+      } satisfies FastifyZodOpenApiSchema,
+    },
+    async (request: FastifyRequest, reply: FastifyReply) => {
     const { client, user } = getAuth(request);
     const settingsUrl = `${fastify.config.NEXT_PUBLIC_WEBAPP_URL}${WEBAPP_ROUTES.SETTINGS}`;
 

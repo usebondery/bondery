@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { GROUP_LABEL_MAX_LENGTH } from "../constants/index.js";
 import { hexColorSchema } from "../primitives/index.js";
-import { contactPreviewSchema } from "./contact.js";
+import { contactPreviewSchema, contactSchema } from "./contact.js";
 import {
   entityAuditSchema,
   entityIdentitySchema,
@@ -10,6 +10,7 @@ import {
   makeCollectionResponseSchema,
   makeListResponseSchema,
   makePaginatedListResponseSchema,
+  messageResponseSchema,
   personIdsSelectionSchema,
 } from "./_shared.js";
 
@@ -45,6 +46,19 @@ export const createTagInputSchema = z.object({ label: tagLabelSchema });
 
 export const updateTagSchema = createTagSchema.partial();
 
+export const tagResponseSchema = z.object({
+  tag: tagSchema,
+});
+
+export const tagUpdateResponseSchema = messageResponseSchema.extend({
+  tag: tagSchema,
+});
+
+export const tagContactsListResponseSchema = makePaginatedListResponseSchema(
+  "contacts",
+  contactSchema,
+);
+
 export const tagsListResponseSchema = makeListResponseSchema("tags", tagWithCountSchema);
 
 export const tagMembersListResponseSchema = makePaginatedListResponseSchema(
@@ -53,6 +67,8 @@ export const tagMembersListResponseSchema = makePaginatedListResponseSchema(
 );
 
 export const contactTagsResponseSchema = makeCollectionResponseSchema("tags", tagWithCountSchema);
+
+export const contactTagListResponseSchema = makeCollectionResponseSchema("tags", tagSchema);
 
 export const tagMembershipRequestSchema = personIdsSelectionSchema;
 
@@ -66,5 +82,6 @@ export type UpdateTagInput = z.infer<typeof updateTagSchema>;
 export type TagsListResponse = z.infer<typeof tagsListResponseSchema>;
 export type TagMembersListResponse = z.infer<typeof tagMembersListResponseSchema>;
 export type ContactTagsResponse = z.infer<typeof contactTagsResponseSchema>;
+export type ContactTagListResponse = z.infer<typeof contactTagListResponseSchema>;
 export type TagMembershipRequest = z.infer<typeof tagMembershipRequestSchema>;
 export type DeleteTagsRequest = z.infer<typeof deleteTagsRequestSchema>;

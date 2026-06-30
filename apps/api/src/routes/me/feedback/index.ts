@@ -6,8 +6,10 @@
 import type { FastifyInstance, FastifyReply } from "fastify";
 import type { AppFastifyInstance, AppRoutePlugin } from "../../../lib/fastify-types.js";
 import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
-import { feedbackFormSchema } from "@bondery/schemas";
+import { apiSuccessResponseSchema, feedbackFormSchema } from "@bondery/schemas";
 import { getAuth } from "../../../lib/auth.js";
+import { applyOpenApiRouteMeta } from "../../../lib/openapi-route-meta.js";
+import { withOkResponse } from "../../../lib/openapi-route-responses.js";
 import nodemailer from "nodemailer";
 import { render } from "@react-email/render";
 import { FeedbackEmail } from "@bondery/emails";
@@ -20,6 +22,7 @@ export const meFeedbackRoutes: AppRoutePlugin = async (fastify) => {
     if (routeOptions.schema) {
       routeOptions.schema.tags = ["Me"];
     }
+    applyOpenApiRouteMeta(routeOptions, { area: "session" });
   });
   fastify.addHook("onRequest", fastify.auth([fastify.verifySession]));
 
@@ -27,7 +30,9 @@ export const meFeedbackRoutes: AppRoutePlugin = async (fastify) => {
     "/",
     {
       schema: {
+        description: "Submit user feedback and send a notification email.",
         body: feedbackFormSchema,
+        response: withOkResponse(apiSuccessResponseSchema, "Feedback submitted"),
       } satisfies FastifyZodOpenApiSchema,
     },
     async (request, reply) => {

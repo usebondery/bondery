@@ -1,3 +1,4 @@
+import { EXAMPLE_CONTACT_ID } from "./contact-id.js";
 import { createInteractionInputSchema, interactionParticipantSchema } from "./entities/activity.js";
 import { contactPreviewSchema, deleteContactsRequestSchema } from "./entities/contact.js";
 import {
@@ -90,7 +91,7 @@ function run() {
 
   // ids/delete union contracts
   const deleteByIds = deleteContactsRequestSchema.parse({
-    ids: ["1", "2"],
+    ids: [EXAMPLE_CONTACT_ID, "6ba7b810-9dad-11d1-80b4-00c04fd430c8"],
   });
   assert("ids" in deleteByIds, "deleteContactsRequestSchema should accept ids variant");
 
@@ -99,10 +100,14 @@ function run() {
   });
   assert("filter" in deleteByFilter, "deleteContactsRequestSchema should accept filter variant");
 
-  const deleteGroups = deleteGroupsRequestSchema.parse({ ids: ["g-1"] });
+  const deleteGroups = deleteGroupsRequestSchema.parse({
+    ids: ["6ba7b810-9dad-11d1-80b4-00c04fd430c8"],
+  });
   assertEqual(deleteGroups.ids.length, 1, "deleteGroupsRequestSchema should parse ids payload");
 
-  const deleteTags = deleteTagsRequestSchema.parse({ ids: ["t-1", "t-2"] });
+  const deleteTags = deleteTagsRequestSchema.parse({
+    ids: [EXAMPLE_CONTACT_ID, "6ba7b810-9dad-11d1-80b4-00c04fd430c8"],
+  });
   assertEqual(deleteTags.ids.length, 2, "deleteTagsRequestSchema should parse ids payload");
 
   // interaction + participant contract

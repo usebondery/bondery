@@ -5,4 +5,6 @@ export * from "./geocode/index.js";
 export * from "./http/index.js";
 export * from "./primitives/index.js";
 export * from "./supabase.types.js";
-export { registerOpenApiComponentSchemas } from "./openapi-registry.js";
+export { contactIdSchema, EXAMPLE_CONTACT_ID } from "./contact-id.js";
+export { openApiDocumentOpts } from "./openapi/document-opts.js";
+export { registerOpenApiComponentSchemas } from "./openapi/registry.js";

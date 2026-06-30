@@ -3,6 +3,8 @@ import type { AppFastifyInstance, AppRoutePlugin } from "../../../lib/fastify-ty
 import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
 import { getAuth } from "../../../lib/auth.js";
 import { registerApiKeyProtectedHooks } from "../../../lib/api-key-access.js";
+import { applyOpenApiRouteMeta } from "../../../lib/openapi-route-meta.js";
+import { withOkResponse } from "../../../lib/openapi-route-responses.js";
 import {
   assignContactsToDefaultImportGroup,
   toInstagramImportGroupKeys,
@@ -16,7 +18,11 @@ import type {
   InstagramParseResponse,
   InstagramPreparedContact,
 } from "@bondery/schemas";
-import { instagramImportCommitRequestSchema } from "@bondery/schemas";
+import {
+  instagramImportCommitRequestSchema,
+  instagramImportCommitResponseSchema,
+  instagramParseResponseSchema,
+} from "@bondery/schemas";
 import { IMPORT_TIER } from "../../../lib/rate-limit.js";
 
 const SUPPORTED_STRATEGIES: InstagramImportStrategy[] = [
@@ -42,10 +48,19 @@ export const instagramImportRoutes: AppRoutePlugin = async (fastify) => {
     if (routeOptions.schema) {
       routeOptions.schema.tags = ["Import"];
     }
+    applyOpenApiRouteMeta(routeOptions, { area: "integration" });
   });
   registerApiKeyProtectedHooks(fastify);
 
-  fastify.post("/parse", async (request, reply) => {
+  fastify.post(
+    "/parse",
+    {
+      schema: {
+        description: "Parse an Instagram export and preview contacts for import.",
+        response: withOkResponse(instagramParseResponseSchema, "Parsed Instagram contacts"),
+      } satisfies FastifyZodOpenApiSchema,
+    },
+    async (request, reply) => {
     const { client, user } = getAuth(request);
 
     try {
@@ -131,13 +146,19 @@ export const instagramImportRoutes: AppRoutePlugin = async (fastify) => {
       const message = error instanceof Error ? error.message : "Failed to parse Instagram export";
       return reply.status(400).send({ error: message });
     }
-  });
+  },
+  );
 
   fastify.post(
     "/commit",
     {
       schema: {
+        description: "Commit an Instagram import from previously parsed contacts.",
         body: instagramImportCommitRequestSchema,
+        response: withOkResponse(
+          instagramImportCommitResponseSchema,
+          "Instagram import result",
+        ),
       } satisfies FastifyZodOpenApiSchema,
       config: { rateLimit: IMPORT_TIER },
     },

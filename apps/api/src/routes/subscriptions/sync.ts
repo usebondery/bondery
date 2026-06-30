@@ -16,10 +16,26 @@
  */
 
 import type { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
+import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
+import { z } from "zod";
 import { getAuth } from "../../lib/auth.js";
+import { createAdminClient } from "../../lib/supabase.js";
+import { applyOpenApiRouteMeta } from "../../lib/openapi-route-meta.js";
+import { withOkResponse } from "../../lib/openapi-route-responses.js";
 import { createAdminClient } from "../../lib/supabase.js";
 import { getPolarClient } from "../../lib/polar.js";
 import { upsertSubscription, mapStatus } from "../webhooks/polar.js";
+
+const subscriptionSyncResponseSchema = z.union([
+  z.object({
+    synced: z.literal(true),
+    source: z.enum(["pending", "polar_api"]),
+  }),
+  z.object({
+    synced: z.literal(false),
+    reason: z.string(),
+  }),
+]);
 
 export async function subscriptionSyncRoutes(
   fastify: FastifyInstance,
@@ -28,13 +44,22 @@ export async function subscriptionSyncRoutes(
     if (routeOptions.schema) {
       routeOptions.schema.tags = ["Subscriptions"];
     }
+    applyOpenApiRouteMeta(routeOptions, { area: "session" });
   });
   fastify.addHook("onRequest", fastify.auth([fastify.verifySession]));
 
   /**
    * POST /sync — Sync subscription state from Polar for the authenticated user.
    */
-  fastify.post("/", async (request: FastifyRequest, reply: FastifyReply) => {
+  fastify.post(
+    "/",
+    {
+      schema: {
+        description: "Sync subscription state from Polar for the authenticated user.",
+        response: withOkResponse(subscriptionSyncResponseSchema, "Subscription sync result"),
+      } satisfies FastifyZodOpenApiSchema,
+    },
+    async (request: FastifyRequest, reply: FastifyReply) => {
     const { client, user } = getAuth(request);
 
     // Early exit: already has an active or canceling subscription

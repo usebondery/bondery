@@ -49,5 +49,10 @@ export const reminderDigestResponseSchema = z.object({
     .optional(),
 });
 
+export const upcomingRemindersResponseSchema = z.object({
+  reminders: z.array(upcomingReminderSchema),
+});
+
 export type UpcomingReminder = z.infer<typeof upcomingReminderSchema>;
+export type UpcomingRemindersResponse = z.infer<typeof upcomingRemindersResponseSchema>;
 export type ReminderDigestRequest = z.infer<typeof reminderDigestRequestSchema>;

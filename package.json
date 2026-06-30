@@ -23,6 +23,8 @@
     "lint": "turbo lint",
     "format": "biome format --write .",
     "check-types": "turbo check-types",
+    "test:contracts": "npm run test:contracts -w @bondery/schemas",
+    "check-openapi": "npm run generate-openapi -w apps/api && npm run check-openapi -w apps/api && npm run check-api-schema-patterns -w apps/api && npx redocly lint apps/api/openapi.yaml",
     "generate-openapi": "npm run generate-openapi -w apps/api && git add apps/api/openapi.yaml",
     "generate-types": "npm run gen-types -w apps/supabase-db && git add packages/schemas/src/supabase.types.ts"
   },

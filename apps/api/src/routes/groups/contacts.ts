@@ -21,8 +21,12 @@ import { CONTACT_SELECT, extractAvatarOptions } from "../../lib/queries.js";
 import { peopleListQuerySchema, uuidParamSchema } from "@bondery/schemas/http";
 import {
   addContactsToGroupRequestSchema,
+  addContactsToGroupResponseSchema,
+  groupContactsListResponseSchema,
   removeGroupMembersRequestSchema,
+  removeGroupMembersResponseSchema,
 } from "@bondery/schemas";
+import { withOkResponse } from "../../lib/openapi-route-responses.js";
 import {
   buildPaginatedResponse,
   buildPaginationMeta,
@@ -68,8 +72,13 @@ export function registerGroupContactRoutes(fastify: AppFastifyInstance): void {
     "/:id/contacts",
     {
       schema: {
+        description: "List paginated contacts in a group.",
         params: uuidParamSchema,
         querystring: peopleListQuerySchema,
+        response: withOkResponse(
+          groupContactsListResponseSchema,
+          "Group members",
+        ),
       } satisfies FastifyZodOpenApiSchema,
     },
     async (request, reply) => {
@@ -270,8 +279,13 @@ export function registerGroupContactRoutes(fastify: AppFastifyInstance): void {
     "/:id/contacts",
     {
       schema: {
+        description: "Add contacts to a group by IDs or contact filter.",
         params: uuidParamSchema,
         body: addContactsToGroupRequestSchema,
+        response: withOkResponse(
+          addContactsToGroupResponseSchema,
+          "Contacts added to group",
+        ),
       } satisfies FastifyZodOpenApiSchema,
     },
     async (request, reply) => {
@@ -384,8 +398,13 @@ export function registerGroupContactRoutes(fastify: AppFastifyInstance): void {
     "/:id/contacts",
     {
       schema: {
+        description: "Remove contacts from a group by IDs or member filter.",
         params: uuidParamSchema,
         body: removeGroupMembersRequestSchema,
+        response: withOkResponse(
+          removeGroupMembersResponseSchema,
+          "Contacts removed from group",
+        ),
       } satisfies FastifyZodOpenApiSchema,
     },
     async (request, reply) => {

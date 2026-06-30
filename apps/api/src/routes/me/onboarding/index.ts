@@ -5,13 +5,18 @@
 
 import type { FastifyReply } from "fastify";
 import type { AppRoutePlugin } from "../../../lib/fastify-types.js";
+import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
+import { apiSuccessResponseSchema } from "@bondery/schemas";
 import { getAuth } from "../../../lib/auth.js";
+import { applyOpenApiRouteMeta } from "../../../lib/openapi-route-meta.js";
+import { withOkResponse } from "../../../lib/openapi-route-responses.js";
 
 export const meOnboardingRoutes: AppRoutePlugin = async (fastify) => {
   fastify.addHook("onRoute", (routeOptions) => {
     if (routeOptions.schema) {
       routeOptions.schema.tags = ["Me"];
     }
+    applyOpenApiRouteMeta(routeOptions, { area: "session" });
   });
   fastify.addHook("onRequest", fastify.auth([fastify.verifySession]));
 
@@ -20,7 +25,16 @@ export const meOnboardingRoutes: AppRoutePlugin = async (fastify) => {
    *
    * Idempotent: only sets onboarding_completed_at if currently NULL.
    */
-  fastify.patch("/", async (request, reply) => {
+  fastify.patch(
+    "/",
+    {
+      schema: {
+        description:
+          "Mark onboarding as completed. Idempotent — only sets onboarding_completed_at if currently null.",
+        response: withOkResponse(apiSuccessResponseSchema, "Onboarding completed"),
+      } satisfies FastifyZodOpenApiSchema,
+    },
+    async (request, reply) => {
     const { client, user } = getAuth(request);
 
     const { error } = await client

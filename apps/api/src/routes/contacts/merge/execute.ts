@@ -7,6 +7,7 @@ import type { FastifyInstance, FastifyReply } from "fastify";
 import type { AppFastifyInstance } from "../../../lib/fastify-types.js";
 import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
 import { getAuth } from "../../../lib/auth.js";
+import { withOkResponse } from "../../../lib/openapi-route-responses.js";
 import { loadEnrichedContact } from "../../../lib/contact-enrichment.js";
 import { replaceContactPhones, replaceContactEmails } from "../channels.js";
 import { upsertContactSocials } from "../../../lib/socials.js";
@@ -18,6 +19,7 @@ import type {
   MergeConflictChoice,
   TablesUpdate,
 } from "@bondery/schemas";
+import { mergeContactsResponseSchema } from "@bondery/schemas";
 import {
   MERGEABLE_FIELDS,
   MERGEABLE_SCALAR_FIELDS,
@@ -43,7 +45,9 @@ export function registerMergeExecuteRoute(fastify: AppFastifyInstance): void {
     "/merge",
     {
       schema: {
+        description: "Merge two duplicate contacts; the left contact survives.",
         body: mergeContactsBodySchema,
+        response: withOkResponse(mergeContactsResponseSchema, "Contacts merged"),
       } satisfies FastifyZodOpenApiSchema,
     },
     async (request, reply) => {

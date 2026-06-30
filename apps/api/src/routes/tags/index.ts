@@ -19,6 +19,10 @@ import { getAuth } from "../../lib/auth.js";
 
 import { registerApiKeyProtectedHooks } from "../../lib/api-key-access.js";
 
+import { applyOpenApiRouteMeta } from "../../lib/openapi-route-meta.js";
+
+import { withCreatedResponse, withOkResponse } from "../../lib/openapi-route-responses.js";
+
 import { resolveContactAvatarUrl } from "../../lib/supabase.js";
 
 import { searchPeopleIds, restoreRankedOrder, countSearchPeopleIds } from "../../lib/search.js";
@@ -64,6 +68,16 @@ import {
   tagMembershipRequestSchema,
 
   updateTagSchema,
+
+  tagsListResponseSchema,
+
+  tagResponseSchema,
+
+  messageResponseSchema,
+
+  tagMembersListResponseSchema,
+
+  tagUpdateResponseSchema,
 
   type Tag,
 
@@ -139,6 +153,8 @@ export const tagRoutes: AppRoutePlugin = async (fastify) => {
       routeOptions.schema.tags = ["Tags"];
     }
 
+    applyOpenApiRouteMeta(routeOptions, { area: "integration" });
+
   });
 
   registerApiKeyProtectedHooks(fastify);
@@ -158,7 +174,9 @@ export const tagRoutes: AppRoutePlugin = async (fastify) => {
     {
 
       schema: {
+        description: "List all tags with contact counts and optional member previews.",
         querystring: previewListQuerySchema,
+        response: withOkResponse(tagsListResponseSchema, "Tag list"),
       } satisfies FastifyZodOpenApiSchema,
 
     },
@@ -388,7 +406,9 @@ export const tagRoutes: AppRoutePlugin = async (fastify) => {
     {
 
       schema: {
+        description: "Create a new tag (color auto-assigned).",
         body: createTagInputSchema,
+        response: withCreatedResponse(tagResponseSchema, "Tag created"),
       } satisfies FastifyZodOpenApiSchema,
 
     },
@@ -446,7 +466,9 @@ export const tagRoutes: AppRoutePlugin = async (fastify) => {
     {
 
       schema: {
+        description: "Get a single tag by ID.",
         params: uuidParamSchema,
+        response: withOkResponse(tagResponseSchema, "Tag details"),
       } satisfies FastifyZodOpenApiSchema,
 
     },
@@ -502,8 +524,10 @@ export const tagRoutes: AppRoutePlugin = async (fastify) => {
     {
 
       schema: {
+        description: "Update a tag label or color.",
         params: uuidParamSchema,
         body: updateTagSchema,
+        response: withOkResponse(tagUpdateResponseSchema, "Tag updated"),
       } satisfies FastifyZodOpenApiSchema,
 
     },
@@ -589,7 +613,12 @@ export const tagRoutes: AppRoutePlugin = async (fastify) => {
     {
 
       schema: {
+        description: "Delete a single tag by ID.",
         params: uuidParamSchema,
+        response: withOkResponse(
+          messageResponseSchema,
+          "Tag deleted successfully",
+        ),
       } satisfies FastifyZodOpenApiSchema,
 
     },
@@ -643,7 +672,12 @@ export const tagRoutes: AppRoutePlugin = async (fastify) => {
     {
 
       schema: {
+        description: "Delete multiple tags by ID.",
         body: idsRequestBodySchema,
+        response: withOkResponse(
+          messageResponseSchema,
+          "Tags deleted successfully",
+        ),
       } satisfies FastifyZodOpenApiSchema,
 
     },
@@ -697,8 +731,13 @@ export const tagRoutes: AppRoutePlugin = async (fastify) => {
     {
 
       schema: {
+        description: "List paginated contacts that have this tag.",
         params: uuidParamSchema,
         querystring: peopleListQuerySchema,
+        response: withOkResponse(
+          tagMembersListResponseSchema,
+          "Tag members",
+        ),
       } satisfies FastifyZodOpenApiSchema,
 
     },
@@ -980,8 +1019,13 @@ export const tagRoutes: AppRoutePlugin = async (fastify) => {
     {
 
       schema: {
+        description: "Add contacts to a tag.",
         params: uuidParamSchema,
         body: tagMembershipRequestSchema,
+        response: withOkResponse(
+          messageResponseSchema,
+          "Contacts added to tag successfully",
+        ),
       } satisfies FastifyZodOpenApiSchema,
 
     },
@@ -1071,8 +1115,13 @@ export const tagRoutes: AppRoutePlugin = async (fastify) => {
     {
 
       schema: {
+        description: "Remove contacts from a tag.",
         params: uuidParamSchema,
         body: tagMembershipRequestSchema,
+        response: withOkResponse(
+          messageResponseSchema,
+          "Contacts removed from tag successfully",
+        ),
       } satisfies FastifyZodOpenApiSchema,
 
     },

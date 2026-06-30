@@ -15,4 +15,8 @@ export * from "./settings.js";
 export * from "./social.js";
 export * from "./subscription.js";
 export * from "./tag.js";
-export { paginationMetaSchema, type PaginationMeta } from "./_shared.js";
+export {
+  messageResponseSchema,
+  paginationMetaSchema,
+  type PaginationMeta,
+} from "./_shared.js";

@@ -6,7 +6,10 @@
 import type { FastifyReply } from "fastify";
 import type { AppFastifyInstance, AppRoutePlugin } from "../../lib/fastify-types.js";
 import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
+import { z } from "zod";
 import { createAdminClient, resolveContactAvatarUrl } from "../../lib/supabase.js";
+import { applyOpenApiRouteMeta } from "../../lib/openapi-route-meta.js";
+import { withOkResponse } from "../../lib/openapi-route-responses.js";
 import {
   uploadContactAvatarAndSetFlag,
   deleteContactAvatarAndClearFlag,
@@ -15,16 +18,27 @@ import { getAuth } from "../../lib/auth.js";
 import { validateImageUpload, validateImageMagicBytes } from "../../lib/config.js";
 import { CONTACT_SELECT, extractAvatarOptions } from "../../lib/queries.js";
 import { avatarTransformQuerySchema } from "@bondery/schemas/http";
-import { updateAccountInputSchema } from "@bondery/schemas";
+import {
+  apiSuccessResponseSchema,
+  contactResponseSchema,
+  updateAccountInputSchema,
+  userAccountResponseSchema,
+} from "@bondery/schemas";
 import { attachContactExtras } from "../../lib/contact-enrichment.js";
 
 const LINKEDIN_LOGOS_BUCKET = "linkedin_logos";
+
+const profilePhotoResponseSchema = z.object({
+  success: z.boolean(),
+  data: z.object({ avatarUrl: z.string() }),
+});
 
 export const meRoutes: AppRoutePlugin = async (fastify) => {
   fastify.addHook("onRoute", (routeOptions) => {
     if (routeOptions.schema) {
       routeOptions.schema.tags = ["Me"];
     }
+    applyOpenApiRouteMeta(routeOptions, { area: "session" });
   });
   fastify.addHook("onRequest", fastify.auth([fastify.verifySession]));
 
@@ -35,7 +49,9 @@ export const meRoutes: AppRoutePlugin = async (fastify) => {
     "/",
     {
       schema: {
+        description: "Update user account metadata (name fields).",
         body: updateAccountInputSchema,
+        response: withOkResponse(userAccountResponseSchema, "Updated account"),
       } satisfies FastifyZodOpenApiSchema,
     },
     async (request, reply) => {
@@ -57,7 +73,15 @@ export const meRoutes: AppRoutePlugin = async (fastify) => {
   /**
    * DELETE /api/me - Delete user account
    */
-  fastify.delete("/", async (request, reply) => {
+  fastify.delete(
+    "/",
+    {
+      schema: {
+        description: "Delete the authenticated user account and associated storage.",
+        response: withOkResponse(apiSuccessResponseSchema, "Account deleted"),
+      } satisfies FastifyZodOpenApiSchema,
+    },
+    async (request, reply) => {
     const { client, user } = getAuth(request);
     const adminClient = createAdminClient();
 
@@ -96,7 +120,15 @@ export const meRoutes: AppRoutePlugin = async (fastify) => {
   /**
    * POST /api/me/photo - Upload profile photo
    */
-  fastify.post("/photo", async (request, reply) => {
+  fastify.post(
+    "/photo",
+    {
+      schema: {
+        description: "Upload a profile photo for the authenticated user.",
+        response: withOkResponse(profilePhotoResponseSchema, "Profile photo uploaded"),
+      } satisfies FastifyZodOpenApiSchema,
+    },
+    async (request, reply) => {
     const { client, user } = getAuth(request);
     const adminClient = createAdminClient();
 
@@ -147,7 +179,15 @@ export const meRoutes: AppRoutePlugin = async (fastify) => {
   /**
    * DELETE /api/me/photo - Delete profile photo
    */
-  fastify.delete("/photo", async (request, reply) => {
+  fastify.delete(
+    "/photo",
+    {
+      schema: {
+        description: "Delete the authenticated user's profile photo.",
+        response: withOkResponse(apiSuccessResponseSchema, "Profile photo deleted"),
+      } satisfies FastifyZodOpenApiSchema,
+    },
+    async (request, reply) => {
     const { client, user } = getAuth(request);
     const adminClient = createAdminClient();
 
@@ -163,7 +203,9 @@ export const meRoutes: AppRoutePlugin = async (fastify) => {
     "/person",
     {
       schema: {
+        description: "Fetch the authenticated user's myself contact profile.",
         querystring: avatarTransformQuerySchema,
+        response: withOkResponse(contactResponseSchema, "Myself contact"),
       } satisfies FastifyZodOpenApiSchema,
     },
     async (request, reply) => {

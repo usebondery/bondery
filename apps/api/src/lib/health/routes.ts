@@ -6,6 +6,7 @@ import {
   MIN_EXTENSION_VERSION,
 } from "@bondery/helpers";
 import { HEALTH_TIER } from "../rate-limit.js";
+import { withOkResponse } from "../openapi-route-responses.js";
 import { getHealthReport } from "./check.js";
 import { healthReportSchema, livenessStatusSchema } from "./schemas.js";
 
@@ -30,9 +31,7 @@ export function registerHealthRoutes(fastify: AppFastifyInstance): void {
       schema: {
         tags: ["Health"],
         description: LIVENESS_DESCRIPTION,
-        response: {
-          200: livenessStatusSchema,
-        },
+        response: withOkResponse(livenessStatusSchema, "Liveness status"),
       } satisfies FastifyZodOpenApiSchema,
       config: { rateLimit: false },
     },
@@ -55,8 +54,15 @@ export function registerHealthRoutes(fastify: AppFastifyInstance): void {
         tags: ["Health"],
         description: READINESS_DESCRIPTION,
         response: {
-          200: healthReportSchema,
-          503: healthReportSchema,
+          ...withOkResponse(healthReportSchema, "Readiness report when dependencies are healthy or degraded"),
+          503: {
+            description: "Readiness report when critical dependencies are unavailable",
+            content: {
+              "application/json": {
+                schema: healthReportSchema,
+              },
+            },
+          },
         },
       } satisfies FastifyZodOpenApiSchema,
       config: { rateLimit: HEALTH_TIER },

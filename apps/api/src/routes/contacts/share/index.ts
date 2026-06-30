@@ -1,9 +1,10 @@
-import type { FastifyInstance, FastifyReply } from "fastify";
-import type { AppFastifyInstance, AppRoutePlugin } from "../../../lib/fastify-types.js";
+import type { AppRoutePlugin } from "../../../lib/fastify-types.js";
 import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
 import { getAuth } from "../../../lib/auth.js";
 import { registerApiKeyProtectedHooks } from "../../../lib/api-key-access.js";
-import { shareContactRequestSchema } from "@bondery/schemas";
+import { applyOpenApiRouteMeta } from "../../../lib/openapi-route-meta.js";
+import { withOkResponse } from "../../../lib/openapi-route-responses.js";
+import { apiSuccessResponseSchema, shareContactRequestSchema } from "@bondery/schemas";
 import { shareContact } from "./lib.js";
 
 export const shareRoutes: AppRoutePlugin = async (fastify) => {
@@ -11,6 +12,7 @@ export const shareRoutes: AppRoutePlugin = async (fastify) => {
     if (routeOptions.schema) {
       routeOptions.schema.tags = ["Share"];
     }
+    applyOpenApiRouteMeta(routeOptions, { area: "integration" });
   });
   registerApiKeyProtectedHooks(fastify);
 
@@ -18,7 +20,12 @@ export const shareRoutes: AppRoutePlugin = async (fastify) => {
     "/",
     {
       schema: {
+        description: "Share a contact via email with selected fields.",
         body: shareContactRequestSchema,
+        response: withOkResponse(
+          apiSuccessResponseSchema,
+          "Contact shared successfully",
+        ),
       } satisfies FastifyZodOpenApiSchema,
     },
     async (request, reply) => {
@@ -32,4 +39,4 @@ export const shareRoutes: AppRoutePlugin = async (fastify) => {
       return result;
     },
   );
-}
+};

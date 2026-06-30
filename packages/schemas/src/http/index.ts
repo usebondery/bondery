@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { contactIdSchema } from "../contact-id.js";
 import { avatarQualitySchema, avatarSizeSchema } from "../entities/api.js";
 import { contactSortOrderSchema } from "../entities/contact.js";
 import {
@@ -9,14 +10,17 @@ import {
 } from "../entities/address.js";
 import { replaceImportantDatesSchema } from "../entities/important-date.js";
 
+export * from "./ids.js";
+export * from "./responses.js";
+
 /** UUID path parameter (e.g. `:id`). */
 export const uuidParamSchema = z.object({
-  id: z.string().uuid(),
+  id: contactIdSchema,
 });
 
 /** Bulk ID body: `{ ids: string[] }` with at least one element. */
 export const idsRequestBodySchema = z.object({
-  ids: z.array(z.string()).min(1),
+  ids: z.array(contactIdSchema).min(1),
 });
 
 /** Optional pagination query params (limit: 1–200, default 50; offset: ≥0, default 0). */
@@ -95,8 +99,8 @@ export const syncPullQuerySchema = z.object({
 
 /** Contact + relationship path params. */
 export const contactRelationshipIdParamSchema = z.object({
-  id: z.string().uuid(),
-  relationshipId: z.string().uuid(),
+  id: contactIdSchema,
+  relationshipId: contactIdSchema,
 });
 
 /** PUT /api/contacts/:id/important-dates body. */

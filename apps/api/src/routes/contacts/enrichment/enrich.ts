@@ -7,6 +7,7 @@ import type { FastifyReply } from "fastify";
 import type { AppFastifyInstance } from "../../../lib/fastify-types.js";
 import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
 import { getAuth } from "../../../lib/auth.js";
+import { withOkResponse } from "../../../lib/openapi-route-responses.js";
 import {
   toPostgresDate,
   updateContactPhoto,
@@ -19,7 +20,7 @@ import type {
   ScrapedWorkHistoryEntry,
   ScrapedEducationEntry,
 } from "@bondery/schemas";
-import { enrichContactRequestSchema } from "@bondery/schemas";
+import { apiSuccessResponseSchema, enrichContactRequestSchema } from "@bondery/schemas";
 import { uuidParamSchema } from "@bondery/schemas/http";
 import { ENRICH_TIER } from "../../../lib/rate-limit.js";
 
@@ -35,8 +36,10 @@ export function registerEnrichRoutes(fastify: AppFastifyInstance): void {
     "/:id/enrich",
     {
       schema: {
+        description: "Update a contact with scraped LinkedIn profile data.",
         params: uuidParamSchema,
         body: enrichContactRequestSchema,
+        response: withOkResponse(apiSuccessResponseSchema, "Contact enriched"),
       } satisfies FastifyZodOpenApiSchema,
       config: { rateLimit: ENRICH_TIER },
     },

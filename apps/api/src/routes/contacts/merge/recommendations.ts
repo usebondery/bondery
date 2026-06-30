@@ -9,6 +9,7 @@ import type { AppFastifyInstance } from "../../../lib/fastify-types.js";
 import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { getAuth } from "../../../lib/auth.js";
+import { withOkResponse } from "../../../lib/openapi-route-responses.js";
 import { attachContactExtras, type FullContactExtras } from "../../../lib/contact-enrichment.js";
 import type {
   Contact,
@@ -16,6 +17,11 @@ import type {
   MergeRecommendationReason,
   MergeRecommendationsResponse,
   RefreshMergeRecommendationsResponse,
+} from "@bondery/schemas";
+import {
+  declineMergeRecommendationResponseSchema,
+  mergeRecommendationsResponseSchema,
+  refreshMergeRecommendationsResponseSchema,
 } from "@bondery/schemas";
 import { CONTACT_SELECT, extractAvatarOptions } from "../../../lib/queries.js";
 import { avatarTransformQuerySchema, uuidParamSchema } from "@bondery/schemas/http";
@@ -346,7 +352,9 @@ export function registerRecommendationRoutes(fastify: AppFastifyInstance): void 
     "/merge-recommendations",
     {
       schema: {
+        description: "List merge recommendations for duplicate contacts.",
         querystring: mergeRecommendationsQuerySchema,
+        response: withOkResponse(mergeRecommendationsResponseSchema, "Merge recommendations"),
       } satisfies FastifyZodOpenApiSchema,
     },
     async (request, reply) => {
@@ -466,7 +474,12 @@ export function registerRecommendationRoutes(fastify: AppFastifyInstance): void 
     "/merge-recommendations/refresh",
     {
       schema: {
+        description: "Recompute merge recommendations for the current user.",
         querystring: avatarTransformQuerySchema,
+        response: withOkResponse(
+          refreshMergeRecommendationsResponseSchema,
+          "Merge recommendations refreshed",
+        ),
       } satisfies FastifyZodOpenApiSchema,
     },
     async (request, reply) => {
@@ -518,7 +531,12 @@ export function registerRecommendationRoutes(fastify: AppFastifyInstance): void 
     "/merge-recommendations/:id/decline",
     {
       schema: {
+        description: "Decline a merge recommendation.",
         params: uuidParamSchema,
+        response: withOkResponse(
+          declineMergeRecommendationResponseSchema,
+          "Merge recommendation declined",
+        ),
       } satisfies FastifyZodOpenApiSchema,
     },
     async (request, reply) => {
@@ -559,7 +577,12 @@ export function registerRecommendationRoutes(fastify: AppFastifyInstance): void 
     "/merge-recommendations/:id/restore",
     {
       schema: {
+        description: "Restore a declined merge recommendation.",
         params: uuidParamSchema,
+        response: withOkResponse(
+          declineMergeRecommendationResponseSchema,
+          "Merge recommendation restored",
+        ),
       } satisfies FastifyZodOpenApiSchema,
     },
     async (request, reply) => {

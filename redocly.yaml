@@ -1,0 +1,11 @@
+extends:
+  - recommended
+
+rules:
+  operation-operationId: off
+  operation-description: error
+  operation-summary: off
+  nullable-type-sibling: off
+  no-empty-servers: off
+  info-license: off
+  security-defined: off

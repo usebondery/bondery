@@ -2,11 +2,11 @@
  * Extension POST route - Create or update contact from browser extension
  */
 
-import type { FastifyInstance, FastifyReply } from "fastify";
 import type { AppFastifyInstance } from "../../lib/fastify-types.js";
 import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
 import { resolveContactAvatarUrl } from "../../lib/supabase.js";
 import { getAuth } from "../../lib/auth.js";
+import { withOkResponse } from "../../lib/openapi-route-responses.js";
 import type {
   ScrapedWorkHistoryEntry,
   ScrapedEducationEntry,
@@ -29,6 +29,7 @@ import {
   resolvePrimarySocial,
   resolveExtensionDefaultGroup,
 } from "./helpers.js";
+import { redirectResponseSchema } from "@bondery/schemas";
 
 export function registerPostRoute(fastify: AppFastifyInstance): void {
   /**
@@ -38,7 +39,9 @@ export function registerPostRoute(fastify: AppFastifyInstance): void {
     "/",
     {
       schema: {
+        description: "Create or find a contact from browser extension scraped data.",
         body: redirectBodySchema,
+        response: withOkResponse(redirectResponseSchema, "Extension contact result"),
       } satisfies FastifyZodOpenApiSchema,
       onRequest: fastify.auth([fastify.verifySession]),
     },

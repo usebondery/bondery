@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { contactIdSchema } from "../contact-id.js";
 
 export const idSchema = z.string();
 export const userIdSchema = z.string();
@@ -21,7 +22,7 @@ export const entityNullableAuditSchema = z.object({
 });
 
 export const idsRequestSchema = z.object({
-  ids: z.array(idSchema),
+  ids: z.array(contactIdSchema).min(1),
 });
 
 export const messageSchema = z.string();
@@ -31,10 +32,10 @@ export const messageResponseSchema = z.object({
 });
 
 export const personIdsSelectionSchema = z.object({
-  personIds: z.array(idSchema),
+  personIds: z.array(contactIdSchema).min(1),
 });
 
-export const excludePersonIdsSchema = z.array(idSchema).optional();
+export const excludePersonIdsSchema = z.array(contactIdSchema).optional();
 
 export const paginationMetaSchema = z.object({
   limit: z.number().int().positive(),

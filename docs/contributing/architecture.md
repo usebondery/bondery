@@ -73,7 +73,18 @@ Central backend for all product data and privileged operations.
 | Domain layer | `src/domains/*` — shared by REST routes and sync push |
 | Sync | Changelog pull/bootstrap (`GET /api/sync/pull`, `GET /api/sync/bootstrap`), mutation push (`POST /api/sync/push`) |
 | Email | [Nodemailer](https://nodemailer.com/) + [React Email](https://react.email/) templates |
-| API contract | OpenAPI spec in `openapi.yaml`, generated from route modules |
+| API contract | Zod schemas in `@bondery/schemas` → generated `apps/api/openapi.yaml` → GitBook |
+
+**API documentation pipeline**
+
+```
+Route Zod schema (apps/api/src/routes/*)
+  → fastify-zod-openapi + @fastify/swagger
+  → apps/api/openapi.yaml (committed artifact)
+  → GitBook OpenAPI block in docs/SUMMARY.md
+```
+
+CI enforces: every public route has `description` + `response`; `openapi.yaml` is up to date; Redocly lint passes. See [API routes](api-routes.md).
 
 Every authenticated request validates the Supabase JWT. List endpoints follow a shared [pagination contract](../../.agents/skills/bondery-specific/references/api-design.md) (`limit`, `offset`, `search`, `sort`, nested `pagination` object).
 

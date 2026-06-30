@@ -56,8 +56,13 @@ Lead with the reader's goal. A user page explains *what to do*; a contributor pa
 
 ### API docs
 
-- The OpenAPI spec in `apps/api/openapi.yaml` is the source of truth for endpoints
-- Prose in `api/` should explain auth, base URL, and integration patterns — not duplicate every field
+- **Do not hand-write endpoint YAML.** The contract is compiled from Zod schemas on Fastify routes.
+- Zod wire schemas live in `@bondery/schemas` and `@bondery/schemas/http`; routes compose them in `schema.body`, `schema.params`, and `schema.response`.
+- Run `npm run generate-openapi -w apps/api` after route changes. Commit the updated `apps/api/openapi.yaml`.
+- CI runs `npm run check-openapi` — stale or incomplete specs fail the build.
+- GitBook embeds the generated spec from `apps/api/openapi.yaml` (see `docs/SUMMARY.md`).
+- Prose in `api/` should explain auth, base URL, and integration patterns — not duplicate every field.
+- See [API routes](contributing/api-routes.md) for the route schema checklist.
 
 ## Formatting conventions
 

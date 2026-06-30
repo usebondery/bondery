@@ -5,14 +5,24 @@
 
 import type { FastifyReply } from "fastify";
 import type { AppRoutePlugin } from "../../lib/fastify-types.js";
+import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
+import { z } from "zod";
 import { getAuth } from "../../lib/auth.js";
+import { applyOpenApiRouteMeta } from "../../lib/openapi-route-meta.js";
+import { withOkResponse } from "../../lib/openapi-route-responses.js";
 import {
   checkChatQuota,
   FREE_MESSAGE_LIMIT,
   PREMIUM_MESSAGE_LIMIT,
 } from "../../lib/chat/quota.js";
 import type { SubscriptionStatus } from "@bondery/schemas";
+import { subscriptionStatusSchema } from "@bondery/schemas";
 import { getPolarClient } from "../../lib/polar.js";
+
+const subscriptionStatusResponseSchema = z.object({
+  success: z.boolean(),
+  data: subscriptionStatusSchema,
+});
 
 const POLAR_STATUSES: SubscriptionStatus["polarStatus"][] = [
   "incomplete",
@@ -52,13 +62,22 @@ export const subscriptionRoutes: AppRoutePlugin = async (fastify) => {
     if (routeOptions.schema) {
       routeOptions.schema.tags = ["Subscriptions"];
     }
+    applyOpenApiRouteMeta(routeOptions, { area: "session" });
   });
   fastify.addHook("onRequest", fastify.auth([fastify.verifySession]));
 
   /**
    * GET /api/subscriptions - Get current user's subscription status
    */
-  fastify.get("/", async (request, reply) => {
+  fastify.get(
+    "/",
+    {
+      schema: {
+        description: "Get the authenticated user's subscription status and chat quota.",
+        response: withOkResponse(subscriptionStatusResponseSchema, "Subscription status"),
+      } satisfies FastifyZodOpenApiSchema,
+    },
+    async (request, reply) => {
     const { client, user } = getAuth(request);
 
     const quota = await checkChatQuota(client, user.id);

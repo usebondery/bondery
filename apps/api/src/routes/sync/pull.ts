@@ -3,7 +3,10 @@ import type { AppRoutePlugin } from "../../lib/fastify-types.js";
 import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
 import { syncPullQuerySchema } from "@bondery/schemas/http";
 import type { SyncBatch, SyncChange, SyncPullResponse } from "@bondery/schemas/sync";
+import { syncPullResponseSchema } from "@bondery/schemas/sync";
 import { getAuth } from "../../lib/auth.js";
+import { applyOpenApiRouteMeta } from "../../lib/openapi-route-meta.js";
+import { withOkResponse } from "../../lib/openapi-route-responses.js";
 import { createAdminClient } from "../../lib/supabase.js";
 import { getLastServerSequence } from "../../lib/sync/idempotency.js";
 import { logSyncPull } from "../../lib/sync/metrics.js";
@@ -98,6 +101,7 @@ export const syncPullRoutes: AppRoutePlugin = async (fastify): Promise<void> => 
     if (routeOptions.schema) {
       routeOptions.schema.tags = ["Sync"];
     }
+    applyOpenApiRouteMeta(routeOptions, { area: "session" });
   });
   fastify.addHook("onRequest", fastify.auth([fastify.verifySession]));
 
@@ -105,7 +109,9 @@ export const syncPullRoutes: AppRoutePlugin = async (fastify): Promise<void> => 
     "/pull",
     {
       schema: {
+        description: "Incremental sync pull — returns change batches since a server sequence.",
         querystring: syncPullQuerySchema,
+        response: withOkResponse(syncPullResponseSchema, "Sync change batches"),
       } satisfies FastifyZodOpenApiSchema,
     },
     async (request, reply) => {

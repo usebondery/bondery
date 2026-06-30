@@ -8,6 +8,8 @@ import type { AppFastifyInstance, AppRoutePlugin } from "../../../lib/fastify-ty
 import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
 import { z } from "zod";
 import { GITHUB_REPO_URL } from "@bondery/helpers/globals/paths";
+import { applyOpenApiRouteMeta } from "../../../lib/openapi-route-meta.js";
+import { withOkResponse } from "../../../lib/openapi-route-responses.js";
 import { createAdminClient } from "../../../lib/supabase.js";
 import { getActiveUsersTimeline, getNpsResults } from "../../../lib/posthog.js";
 
@@ -64,10 +66,6 @@ const githubStarsResponseSchema = z.object({
   repo: z.string(),
 });
 
-const errorResponseSchema = z.object({
-  error: z.string(),
-});
-
 // ── Route plugin ─────────────────────────────────────────────────────────────
 
 export const statsRoutes: AppRoutePlugin = async (fastify) => {
@@ -77,6 +75,7 @@ export const statsRoutes: AppRoutePlugin = async (fastify) => {
     if (routeOptions.schema) {
       routeOptions.schema.tags = ["Stats"];
     }
+    applyOpenApiRouteMeta(routeOptions, { area: "session" });
   });
 
   // All stats routes require admin access
@@ -90,11 +89,9 @@ export const statsRoutes: AppRoutePlugin = async (fastify) => {
     "/active-users",
     {
       schema: {
+        description: "Returns DAU/WAU/MAU timeline from PostHog.",
         querystring: activeUsersQuerySchema,
-        response: {
-          200: activeUsersResponseSchema,
-          503: errorResponseSchema,
-        },
+        response: withOkResponse(activeUsersResponseSchema, "Active users timeline"),
       } satisfies FastifyZodOpenApiSchema,
     },
     async (request, reply) => {
@@ -118,10 +115,9 @@ export const statsRoutes: AppRoutePlugin = async (fastify) => {
     "/funnel",
     {
       schema: {
-        response: {
-          200: funnelResponseSchema,
-          500: errorResponseSchema,
-        },
+        description:
+          "Returns period-based signup → contacts → interactions funnel from Supabase.",
+        response: withOkResponse(funnelResponseSchema, "Funnel conversion stats"),
       } satisfies FastifyZodOpenApiSchema,
     },
     async (request, reply) => {
@@ -156,10 +152,8 @@ export const statsRoutes: AppRoutePlugin = async (fastify) => {
     "/nps",
     {
       schema: {
-        response: {
-          200: npsResponseSchema,
-          503: errorResponseSchema,
-        },
+        description: "Returns NPS survey results from PostHog (last 90 days).",
+        response: withOkResponse(npsResponseSchema, "NPS survey results"),
       } satisfies FastifyZodOpenApiSchema,
     },
     async (_request, reply) => {
@@ -181,10 +175,8 @@ export const statsRoutes: AppRoutePlugin = async (fastify) => {
     "/total-users",
     {
       schema: {
-        response: {
-          200: totalUsersResponseSchema,
-          500: errorResponseSchema,
-        },
+        description: "Returns cumulative user count per day (all-time growth curve).",
+        response: withOkResponse(totalUsersResponseSchema, "Total users growth timeline"),
       } satisfies FastifyZodOpenApiSchema,
     },
     async (request, reply) => {
@@ -214,10 +206,8 @@ export const statsRoutes: AppRoutePlugin = async (fastify) => {
     "/github-stars",
     {
       schema: {
-        response: {
-          200: githubStarsResponseSchema,
-          502: errorResponseSchema,
-        },
+        description: "Returns the GitHub star count for the configured repository.",
+        response: withOkResponse(githubStarsResponseSchema, "GitHub star count"),
       } satisfies FastifyZodOpenApiSchema,
     },
     async (_request, reply) => {

@@ -5,7 +5,7 @@ import {
   IMPORTANT_DATE_NOTIFY_DAYS,
   IMPORTANT_DATE_TYPES,
 } from "../constants/index.js";
-import { entityAuditSchema, entityIdentitySchema } from "./_shared.js";
+import { entityAuditSchema, entityIdentitySchema, makeCollectionResponseSchema } from "./_shared.js";
 
 const isoDateSchema = z
   .string()
@@ -114,6 +114,12 @@ export const replaceImportantDatesSchema = z
     }
   });
 
+export const importantDatesListResponseSchema = makeCollectionResponseSchema(
+  "dates",
+  importantDateSchema,
+);
+
+export type ImportantDatesListResponse = z.infer<typeof importantDatesListResponseSchema>;
 export type ImportantDateType = z.infer<typeof importantDateTypeSchema>;
 export type ImportantDateNotifyDaysBefore = z.infer<typeof importantDateNotifyDaysSchema>;
 export type ImportantDate = z.infer<typeof importantDateSchema>;

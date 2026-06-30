@@ -1,8 +1,11 @@
 import type { FastifyReply } from "fastify";
 import type { AppRoutePlugin } from "../../lib/fastify-types.js";
 import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
-import { syncPushRequestSchema } from "@bondery/schemas/sync";
+import { syncPushRequestSchema, syncPushResponseSchema } from "@bondery/schemas/sync";
+import type { SyncPushResult } from "@bondery/schemas/sync";
 import { getAuth } from "../../lib/auth.js";
+import { applyOpenApiRouteMeta } from "../../lib/openapi-route-meta.js";
+import { withOkResponse } from "../../lib/openapi-route-responses.js";
 import { createAdminClient } from "../../lib/supabase.js";
 import { validateSyncProtocolHeaders } from "../../lib/sync/protocol.js";
 import { applySyncMutation } from "../../lib/sync/apply-mutation.js";
@@ -12,13 +15,13 @@ import {
   hashSyncMutationPayload,
   storeSyncReceipt,
 } from "../../lib/sync/idempotency.js";
-import type { SyncPushResult } from "@bondery/schemas/sync";
 
 export const syncPushRoutes: AppRoutePlugin = async (fastify): Promise<void> => {
   fastify.addHook("onRoute", (routeOptions) => {
     if (routeOptions.schema) {
       routeOptions.schema.tags = ["Sync"];
     }
+    applyOpenApiRouteMeta(routeOptions, { area: "session" });
   });
   fastify.addHook("onRequest", fastify.auth([fastify.verifySession]));
 
@@ -26,7 +29,9 @@ export const syncPushRoutes: AppRoutePlugin = async (fastify): Promise<void> => 
     "/push",
     {
       schema: {
+        description: "Apply sync mutations from the client device.",
         body: syncPushRequestSchema,
+        response: withOkResponse(syncPushResponseSchema, "Sync push results"),
       } satisfies FastifyZodOpenApiSchema,
     },
     async (request, reply) => {

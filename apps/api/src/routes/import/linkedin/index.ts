@@ -3,13 +3,19 @@ import type { AppFastifyInstance, AppRoutePlugin } from "../../../lib/fastify-ty
 import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
 import { getAuth } from "../../../lib/auth.js";
 import { registerApiKeyProtectedHooks } from "../../../lib/api-key-access.js";
+import { applyOpenApiRouteMeta } from "../../../lib/openapi-route-meta.js";
+import { withOkResponse } from "../../../lib/openapi-route-responses.js";
 import { parseLinkedInCsvUpload } from "./parser.js";
 import { assignContactsToDefaultImportGroup } from "../../../lib/default-import-groups.js";
 import type {
   LinkedInImportCommitResponse,
   LinkedInParseResponse,
 } from "@bondery/schemas";
-import { linkedInImportCommitRequestSchema } from "@bondery/schemas";
+import {
+  linkedInImportCommitRequestSchema,
+  linkedInImportCommitResponseSchema,
+  linkedInParseResponseSchema,
+} from "@bondery/schemas";
 import { IMPORT_TIER } from "../../../lib/rate-limit.js";
 
 const HANDLE_LOOKUP_CHUNK_SIZE = 150;
@@ -38,10 +44,19 @@ export const linkedInImportRoutes: AppRoutePlugin = async (fastify) => {
     if (routeOptions.schema) {
       routeOptions.schema.tags = ["Import"];
     }
+    applyOpenApiRouteMeta(routeOptions, { area: "integration" });
   });
   registerApiKeyProtectedHooks(fastify);
 
-  fastify.post("/parse", async (request, reply) => {
+  fastify.post(
+    "/parse",
+    {
+      schema: {
+        description: "Parse a LinkedIn CSV export and preview contacts for import.",
+        response: withOkResponse(linkedInParseResponseSchema, "Parsed LinkedIn contacts"),
+      } satisfies FastifyZodOpenApiSchema,
+    },
+    async (request, reply) => {
     const { client, user } = getAuth(request);
 
     try {
@@ -131,13 +146,19 @@ export const linkedInImportRoutes: AppRoutePlugin = async (fastify) => {
       const message = error instanceof Error ? error.message : "Failed to parse LinkedIn export";
       return reply.status(400).send({ error: message });
     }
-  });
+  },
+  );
 
   fastify.post(
     "/commit",
     {
       schema: {
+        description: "Commit a LinkedIn import from previously parsed contacts.",
         body: linkedInImportCommitRequestSchema,
+        response: withOkResponse(
+          linkedInImportCommitResponseSchema,
+          "LinkedIn import result",
+        ),
       } satisfies FastifyZodOpenApiSchema,
       config: { rateLimit: IMPORT_TIER },
     },

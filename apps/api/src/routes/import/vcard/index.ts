@@ -1,9 +1,15 @@
 import type { FastifyReply } from "fastify";
 import type { AppFastifyInstance, AppRoutePlugin } from "../../../lib/fastify-types.js";
 import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
-import { vcardImportCommitRequestSchema } from "@bondery/schemas";
+import {
+  vcardImportCommitRequestSchema,
+  vcardImportCommitResponseSchema,
+  vcardParseResponseSchema,
+} from "@bondery/schemas";
 import { getAuth } from "../../../lib/auth.js";
 import { registerApiKeyProtectedHooks } from "../../../lib/api-key-access.js";
+import { applyOpenApiRouteMeta } from "../../../lib/openapi-route-meta.js";
+import { withOkResponse } from "../../../lib/openapi-route-responses.js";
 import { parseVCardUpload } from "./parser.js";
 import { assignContactsToDefaultImportGroup } from "../../../lib/default-import-groups.js";
 import {
@@ -50,11 +56,18 @@ export const vcardImportRoutes: AppRoutePlugin = async (fastify) => {
     if (routeOptions.schema) {
       routeOptions.schema.tags = ["Import"];
     }
+    applyOpenApiRouteMeta(routeOptions, { area: "integration" });
   });
   registerApiKeyProtectedHooks(fastify);
 
   fastify.post(
     "/parse",
+    {
+      schema: {
+        description: "Parse a vCard file and preview contacts for import.",
+        response: withOkResponse(vcardParseResponseSchema, "Parsed vCard contacts"),
+      } satisfies FastifyZodOpenApiSchema,
+    },
     async (request, reply) => {
       try {
         const files: Array<{ fileName: string; content: Buffer }> = [];
@@ -97,7 +110,12 @@ export const vcardImportRoutes: AppRoutePlugin = async (fastify) => {
     "/commit",
     {
       schema: {
+        description: "Commit a vCard import from previously parsed contacts.",
         body: vcardImportCommitRequestSchema,
+        response: withOkResponse(
+          vcardImportCommitResponseSchema,
+          "vCard import result",
+        ),
       } satisfies FastifyZodOpenApiSchema,
       config: { rateLimit: IMPORT_TIER },
     },

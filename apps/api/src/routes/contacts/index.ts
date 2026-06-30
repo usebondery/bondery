@@ -9,6 +9,8 @@ import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
 import { z } from "zod";
 import { getAuth } from "../../lib/auth.js";
 import { registerApiKeyProtectedHooks } from "../../lib/api-key-access.js";
+import { applyOpenApiRouteMeta } from "../../lib/openapi-route-meta.js";
+import { withCreatedResponse, withOkResponse } from "../../lib/openapi-route-responses.js";
 import { resolveContactAvatarUrl } from "../../lib/supabase.js";
 import { searchPeopleIds, restoreRankedOrder, countSearchPeopleIds } from "../../lib/search.js";
 import {
@@ -44,8 +46,16 @@ import type {
 } from "@bondery/schemas";
 import {
   contactsFilterSchema,
+  contactGroupsResponseSchema,
+  contactResponseSchema,
+  contactsListResponseSchema,
   createContactApiInputSchema,
+  createContactResponseSchema,
+  deleteContactResponseSchema,
   deleteContactsRequestSchema,
+  deleteContactsResponseSchema,
+  mapAddressPinsResponseSchema,
+  mapPinsResponseSchema,
 } from "@bondery/schemas";
 import {
   contactAddressEntrySchema,
@@ -308,6 +318,7 @@ export const contactRoutes: AppRoutePlugin = async (fastify) => {
     if (routeOptions.schema) {
       routeOptions.schema.tags = ["Contacts"];
     }
+    applyOpenApiRouteMeta(routeOptions, { area: "integration" });
   });
   registerApiKeyProtectedHooks(fastify);
 
@@ -323,7 +334,12 @@ export const contactRoutes: AppRoutePlugin = async (fastify) => {
     "/map-pins",
     {
       schema: {
+        description: "Fetch lightweight map pins for contacts within a bounding box.",
         querystring: mapPinsQuerySchema,
+        response: withOkResponse(
+          mapPinsResponseSchema,
+          "Map pins within the bounding box",
+        ),
       } satisfies FastifyZodOpenApiSchema,
     },
     async (request, reply) => {
@@ -391,7 +407,13 @@ export const contactRoutes: AppRoutePlugin = async (fastify) => {
     "/map-address-pins",
     {
       schema: {
+        description:
+          "Fetch address-level map pins within a bounding box (one pin per address).",
         querystring: mapAddressPinsQuerySchema,
+        response: withOkResponse(
+          mapAddressPinsResponseSchema,
+          "Address map pins within the bounding box",
+        ),
       } satisfies FastifyZodOpenApiSchema,
     },
     async (request, reply) => {
@@ -462,7 +484,12 @@ export const contactRoutes: AppRoutePlugin = async (fastify) => {
     "/",
     {
       schema: {
+        description: "List contacts with pagination, search, sort, and list stats.",
         querystring: peopleListQuerySchema,
+        response: withOkResponse(
+          contactsListResponseSchema,
+          "Paginated contact list",
+        ),
       } satisfies FastifyZodOpenApiSchema,
     },
     async (request, reply) => {
@@ -679,7 +706,12 @@ export const contactRoutes: AppRoutePlugin = async (fastify) => {
     "/",
     {
       schema: {
+        description: "Create a new contact.",
         body: createContactBodySchema,
+        response: withCreatedResponse(
+          createContactResponseSchema,
+          "Contact created",
+        ),
       } satisfies FastifyZodOpenApiSchema,
     },
     async (request, reply) => {
@@ -714,7 +746,13 @@ export const contactRoutes: AppRoutePlugin = async (fastify) => {
     "/",
     {
       schema: {
+        description:
+          "Delete multiple contacts by IDs or by filter with optional exclusions.",
         body: deleteContactsBodySchema,
+        response: withOkResponse(
+          deleteContactsResponseSchema,
+          "Contacts deleted successfully",
+        ),
       } satisfies FastifyZodOpenApiSchema,
     },
     async (request, reply) => {
@@ -818,7 +856,12 @@ export const contactRoutes: AppRoutePlugin = async (fastify) => {
     "/:id",
     {
       schema: {
+        description: "Delete a single contact by ID.",
         params: uuidParamSchema,
+        response: withOkResponse(
+          deleteContactResponseSchema,
+          "Contact deleted successfully",
+        ),
       } satisfies FastifyZodOpenApiSchema,
     },
     async (request, reply) => {
@@ -842,7 +885,9 @@ export const contactRoutes: AppRoutePlugin = async (fastify) => {
     "/by-social",
     {
       schema: {
+        description: "Find a contact by social platform and handle.",
         querystring: bySocialQuerySchema,
+        response: withOkResponse(contactResponseSchema, "Matching contact"),
       } satisfies FastifyZodOpenApiSchema,
     },
     async (request, reply) => {
@@ -893,8 +938,10 @@ export const contactRoutes: AppRoutePlugin = async (fastify) => {
     "/:id",
     {
       schema: {
+        description: "Get a single contact by ID.",
         params: uuidParamSchema,
         querystring: avatarTransformQuerySchema,
+        response: withOkResponse(contactResponseSchema, "Contact details"),
       } satisfies FastifyZodOpenApiSchema,
     },
     async (request, reply) => {
@@ -925,7 +972,12 @@ export const contactRoutes: AppRoutePlugin = async (fastify) => {
     "/:id/groups",
     {
       schema: {
+        description: "List groups a contact belongs to.",
         params: uuidParamSchema,
+        response: withOkResponse(
+          contactGroupsResponseSchema,
+          "Groups for the contact",
+        ),
       } satisfies FastifyZodOpenApiSchema,
     },
     async (request, reply) => {
@@ -990,8 +1042,13 @@ export const contactRoutes: AppRoutePlugin = async (fastify) => {
     "/:id",
     {
       schema: {
+        description: "Update a contact by ID.",
         params: uuidParamSchema,
         body: patchContactBodySchema,
+        response: withOkResponse(
+          createContactResponseSchema,
+          "Updated contact",
+        ),
       } satisfies FastifyZodOpenApiSchema,
     },
     async (request, reply) => {
@@ -1025,8 +1082,13 @@ export const contactRoutes: AppRoutePlugin = async (fastify) => {
     "/:id/vcard",
     {
       schema: {
+        description: "Export a contact as a vCard (.vcf) file.",
         params: uuidParamSchema,
         querystring: avatarTransformQuerySchema,
+        response: withOkResponse(
+          z.string().meta({ description: "vCard file content" }),
+          "vCard export",
+        ),
       } satisfies FastifyZodOpenApiSchema,
     },
     async (request, reply) => {

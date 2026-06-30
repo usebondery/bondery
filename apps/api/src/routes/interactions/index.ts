@@ -8,6 +8,11 @@ import type { AppFastifyInstance, AppRoutePlugin } from "../../lib/fastify-types
 import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
 import { getAuth } from "../../lib/auth.js";
 import { registerApiKeyProtectedHooks } from "../../lib/api-key-access.js";
+import { applyOpenApiRouteMeta } from "../../lib/openapi-route-meta.js";
+import {
+  withCreatedResponse,
+  withOkResponse,
+} from "../../lib/openapi-route-responses.js";
 import { INTERACTION_SELECT, extractAvatarOptions } from "../../lib/queries.js";
 import {
   avatarTransformQuerySchema,
@@ -16,6 +21,9 @@ import {
 } from "@bondery/schemas/http";
 import {
   createInteractionInputSchema,
+  interactionResponseSchema,
+  interactionsListResponseSchema,
+  messageResponseSchema,
   updateInteractionInputSchema,
 } from "@bondery/schemas";
 import { resolveContactAvatarUrl } from "../../lib/supabase.js";
@@ -71,6 +79,7 @@ export const interactionRoutes: AppRoutePlugin = async (fastify) => {
     if (routeOptions.schema) {
       routeOptions.schema.tags = ["Interactions"];
     }
+    applyOpenApiRouteMeta(routeOptions, { area: "integration" });
   });
   registerApiKeyProtectedHooks(fastify);
 
@@ -79,7 +88,16 @@ export const interactionRoutes: AppRoutePlugin = async (fastify) => {
    */
   fastify.get(
     "/",
-    { schema: { querystring: interactionsListQuerySchema } },
+    {
+      schema: {
+        description: "List interactions with pagination.",
+        querystring: interactionsListQuerySchema,
+        response: withOkResponse(
+          interactionsListResponseSchema,
+          "Paginated interactions",
+        ),
+      } satisfies FastifyZodOpenApiSchema,
+    },
     async (request, reply) => {
       const { client, user } = getAuth(request);
 
@@ -145,7 +163,16 @@ export const interactionRoutes: AppRoutePlugin = async (fastify) => {
    */
   fastify.post(
     "/",
-    { schema: { body: createInteractionInputSchema } },
+    {
+      schema: {
+        description: "Create a new interaction.",
+        body: createInteractionInputSchema,
+        response: withCreatedResponse(
+          interactionResponseSchema,
+          "Interaction created",
+        ),
+      } satisfies FastifyZodOpenApiSchema,
+    },
     async (request, reply) => {
       const { client, user } = getAuth(request);
       const body = request.body;
@@ -208,7 +235,17 @@ export const interactionRoutes: AppRoutePlugin = async (fastify) => {
    */
   fastify.get(
     "/:id",
-    { schema: { params: uuidParamSchema, querystring: avatarTransformQuerySchema } },
+    {
+      schema: {
+        description: "Get a single interaction by ID.",
+        params: uuidParamSchema,
+        querystring: avatarTransformQuerySchema,
+        response: withOkResponse(
+          interactionResponseSchema,
+          "Interaction details",
+        ),
+      } satisfies FastifyZodOpenApiSchema,
+    },
     async (request, reply) => {
       const { client, user } = getAuth(request);
       const { id } = request.params;
@@ -229,7 +266,16 @@ export const interactionRoutes: AppRoutePlugin = async (fastify) => {
    */
   fastify.delete(
     "/:id",
-    { schema: { params: uuidParamSchema } },
+    {
+      schema: {
+        description: "Delete an interaction by ID.",
+        params: uuidParamSchema,
+        response: withOkResponse(
+          messageResponseSchema,
+          "Interaction deleted successfully",
+        ),
+      } satisfies FastifyZodOpenApiSchema,
+    },
     async (request, reply) => {
       const { client, user } = getAuth(request);
       const { id } = request.params;
@@ -249,7 +295,17 @@ export const interactionRoutes: AppRoutePlugin = async (fastify) => {
    */
   fastify.patch(
     "/:id",
-    { schema: { params: uuidParamSchema, body: updateInteractionInputSchema } },
+    {
+      schema: {
+        description: "Update an interaction by ID.",
+        params: uuidParamSchema,
+        body: updateInteractionInputSchema,
+        response: withOkResponse(
+          interactionResponseSchema,
+          "Updated interaction",
+        ),
+      } satisfies FastifyZodOpenApiSchema,
+    },
     async (request, reply) => {
       const { client, user } = getAuth(request);
       const { id } = request.params;

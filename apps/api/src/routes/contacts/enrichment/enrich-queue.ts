@@ -7,9 +7,15 @@ import type { FastifyReply } from "fastify";
 import type { AppFastifyInstance } from "../../../lib/fastify-types.js";
 import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
 import { getAuth } from "../../../lib/auth.js";
+import { withOkResponse } from "../../../lib/openapi-route-responses.js";
 import {
+  apiSuccessResponseSchema,
+  enrichEligibleCountResponseSchema,
   enrichQueueInitBodySchema,
+  enrichQueueInitResponseSchema,
+  enrichQueueNextBatchResponseSchema,
   enrichQueuePatchBodySchema,
+  enrichQueueStatusCountsSchema,
 } from "@bondery/schemas";
 import { uuidParamSchema } from "@bondery/schemas/http";
 
@@ -21,6 +27,16 @@ export function registerEnrichQueueRoutes(fastify: AppFastifyInstance): void {
    */
   fastify.get(
     "/enrich-queue/eligible-count",
+    {
+      schema: {
+        description:
+          "Count contacts with a LinkedIn handle but no synced LinkedIn profile data.",
+        response: withOkResponse(
+          enrichEligibleCountResponseSchema,
+          "Eligible enrichment count",
+        ),
+      } satisfies FastifyZodOpenApiSchema,
+    },
     async (request, reply) => {
       const { client, user } = getAuth(request);
 
@@ -43,6 +59,12 @@ export function registerEnrichQueueRoutes(fastify: AppFastifyInstance): void {
    */
   fastify.get(
     "/enrich-queue/status",
+    {
+      schema: {
+        description: "Return enrichment queue item counts grouped by status.",
+        response: withOkResponse(enrichQueueStatusCountsSchema, "Enrichment queue status"),
+      } satisfies FastifyZodOpenApiSchema,
+    },
     async (request, reply) => {
       const { client, user } = getAuth(request);
 
@@ -89,7 +111,10 @@ export function registerEnrichQueueRoutes(fastify: AppFastifyInstance): void {
     "/enrich-queue/init",
     {
       schema: {
+        description:
+          "Initialize a new enrichment run for one contact or all eligible contacts.",
         body: enrichQueueInitBodySchema,
+        response: withOkResponse(enrichQueueInitResponseSchema, "Enrichment queue initialized"),
       } satisfies FastifyZodOpenApiSchema,
     },
     async (request, reply) => {
@@ -181,6 +206,15 @@ export function registerEnrichQueueRoutes(fastify: AppFastifyInstance): void {
    */
   fastify.get(
     "/enrich-queue/next-batch",
+    {
+      schema: {
+        description: "Return the next batch of pending enrichment queue items.",
+        response: withOkResponse(
+          enrichQueueNextBatchResponseSchema,
+          "Next enrichment batch",
+        ),
+      } satisfies FastifyZodOpenApiSchema,
+    },
     async (request, reply) => {
       const BATCH_LIMIT = 50;
       const { client, user } = getAuth(request);
@@ -253,8 +287,10 @@ export function registerEnrichQueueRoutes(fastify: AppFastifyInstance): void {
     "/enrich-queue/:id",
     {
       schema: {
+        description: "Mark an enrichment queue item as completed or failed.",
         params: uuidParamSchema,
         body: enrichQueuePatchBodySchema,
+        response: withOkResponse(apiSuccessResponseSchema, "Queue item updated"),
       } satisfies FastifyZodOpenApiSchema,
     },
     async (request, reply) => {
@@ -286,6 +322,12 @@ export function registerEnrichQueueRoutes(fastify: AppFastifyInstance): void {
    */
   fastify.delete(
     "/enrich-queue",
+    {
+      schema: {
+        description: "Cancel the enrichment run by deleting pending queue items.",
+        response: withOkResponse(apiSuccessResponseSchema, "Enrichment queue cancelled"),
+      } satisfies FastifyZodOpenApiSchema,
+    },
     async (request, reply) => {
       const { client, user } = getAuth(request);
 

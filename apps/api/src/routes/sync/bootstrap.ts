@@ -1,7 +1,11 @@
 import type { FastifyReply } from "fastify";
 import type { AppRoutePlugin } from "../../lib/fastify-types.js";
+import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
 import type { SyncBatch, SyncBootstrapResponse } from "@bondery/schemas/sync";
+import { syncBootstrapResponseSchema } from "@bondery/schemas/sync";
 import { getAuth } from "../../lib/auth.js";
+import { applyOpenApiRouteMeta } from "../../lib/openapi-route-meta.js";
+import { withOkResponse } from "../../lib/openapi-route-responses.js";
 import { createAdminClient } from "../../lib/supabase.js";
 import { getLastServerSequence } from "../../lib/sync/idempotency.js";
 import { logSyncBootstrap } from "../../lib/sync/metrics.js";
@@ -13,10 +17,19 @@ export const syncBootstrapRoutes: AppRoutePlugin = async (fastify): Promise<void
     if (routeOptions.schema) {
       routeOptions.schema.tags = ["Sync"];
     }
+    applyOpenApiRouteMeta(routeOptions, { area: "session" });
   });
   fastify.addHook("onRequest", fastify.auth([fastify.verifySession]));
 
-  fastify.get("/bootstrap", async (request, reply) => {
+  fastify.get(
+    "/bootstrap",
+    {
+      schema: {
+        description: "Full sync bootstrap — returns all user tables and the latest server sequence.",
+        response: withOkResponse(syncBootstrapResponseSchema, "Sync bootstrap snapshot"),
+      } satisfies FastifyZodOpenApiSchema,
+    },
+    async (request, reply) => {
     if (!validateSyncProtocolHeaders(request, reply)) {
       return;
     }
