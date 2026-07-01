@@ -7,7 +7,7 @@
   "scripts": {
     "dev": "npm run check-env && tsx watch --env-file=.env.development.local src/index.ts",
     "prebuild": "tsx scripts/generate-openapi.ts",
-    "build": "tsc && node scripts/prepare-vercel.mjs",
+    "build": "tsc",
     "start": "node dist/index.js",
     "check-types": "tsx scripts/check-api-schema-patterns.ts && tsc --noEmit",
     "check-openapi": "tsx scripts/check-openapi.ts",
