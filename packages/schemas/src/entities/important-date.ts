@@ -34,7 +34,7 @@ const importantDateNoteSchema = z.string().nullable();
 
 const importantDateBaseFieldsSchema = importantDateCoreSchema.extend({
   note: importantDateNoteSchema,
-  notifyDaysBefore: z.number().nullable(),
+  notifyDaysBefore: importantDateNotifyDaysSchema,
 });
 
 export const importantDateSchema = entityIdentitySchema.extend({

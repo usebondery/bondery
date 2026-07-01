@@ -176,7 +176,7 @@ export function contactToVCard(contact: Contact): VCard {
         ? `geo:${contact.latitude},${contact.longitude}`
         : undefined,
     uid: `urn:uuid:${contact.id}`,
-    revision: contact.updatedAt ?? contact.createdAt,
+    revision: contact.updatedAt ?? contact.createdAt ?? undefined,
     productId: "-//BONDERY//NONSGML Bondery v1.0//EN",
     raw: {
       version: "4.0",
@@ -296,7 +296,7 @@ function parseAndroidCustomDate(property: VCardProperty): {
     const normalizedDate = normalizeVCardDate(dateStr);
     // Basic validation: check if date can be parsed
     const testDate = new Date(normalizedDate);
-    if (isNaN(testDate.getTime())) {
+    if (Number.isNaN(testDate.getTime())) {
       return null;
     }
 
@@ -425,7 +425,7 @@ function extractImportantDates(card: VCard): Array<{
     try {
       const normalizedDate = normalizeVCardDate(card.birthday.value);
       const testDate = new Date(normalizedDate);
-      if (!isNaN(testDate.getTime())) {
+      if (!Number.isNaN(testDate.getTime())) {
         dates.push({
           type: "birthday",
           date: normalizedDate,
@@ -442,7 +442,7 @@ function extractImportantDates(card: VCard): Array<{
     try {
       const normalizedDate = normalizeVCardDate(card.anniversary.value);
       const testDate = new Date(normalizedDate);
-      if (!isNaN(testDate.getTime())) {
+      if (!Number.isNaN(testDate.getTime())) {
         dates.push({
           type: "anniversary",
           date: normalizedDate,
