@@ -53,15 +53,20 @@ Nested route modules (e.g. `contacts/enrichment/*`) inherit `onRoute` from the p
 
 ## Vercel (separate API project)
 
-Each app (`apps/api`, `apps/webapp`, …) is its own Vercel project with **Root Directory** set to that app folder.
+Each app (`apps/api`, `apps/webapp`, …) is its own Vercel project with **Root Directory** set to that app folder (for the API: `apps/api`, **not** the monorepo root).
 
 The API project uses [`apps/api/vercel.json`](../../apps/api/vercel.json):
 
-1. **Install** — Vercel installs npm workspaces from the monorepo root (Root Directory = `apps/api`; no `cd ../..` needed).
+1. **Install** — Vercel installs npm workspaces from the monorepo root (no `cd ../..` needed).
 2. **Build** — `npm run build` runs `tsup` (bundles `@bondery/*` into `dist/index.js`) then copies the bundle to `api/index.js` for the serverless function.
 3. **Routing** — `rewrites` send all paths to the `/api` function; Fastify still serves `/api/contacts`, etc.
+4. **`framework: null`** — disables Vercel Fastify zero-config on `src/index.ts` (which would deploy unbundled source and fail on `@bondery/*/src/*.ts`).
 
 Do **not** use legacy `builds` / `routes` in `vercel.json` — they disable dashboard build settings and skip `buildCommand` (deploy completes in milliseconds with no install or bundle).
+
+[`apps/api/.vercelignore`](../../apps/api/.vercelignore) excludes `src/` from the deployment artifact so only `api/index.js` runs.
+
+**Troubleshooting:** If runtime errors mention `/var/task/apps/api/src/index.js`, Root Directory is set to the repo root — change it to `apps/api`. If errors mention `/var/task/src/index.js` with the same module-not-found pattern, Fastify detection is still winning; confirm `framework: null` is deployed and `api/index.js` exists after build.
 
 `openapi.yaml` is committed; generation is not part of the deploy build.
 
