@@ -14,6 +14,7 @@ import {
 import { feedbackFormSchema, type FeedbackFormInput } from "@bondery/schemas";
 import { captureEvent } from "@/lib/analytics/client";
 import type { TFunction } from "i18next";
+import { useModalBlocking } from "@/lib/modals";
 const SLIDER_MARKS = [
   { value: 0, label: "0" },
   { value: 5, label: "5" },
@@ -27,6 +28,7 @@ interface FeedbackModalProps {
 
 export function FeedbackModal({ modalId, t }: FeedbackModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  useModalBlocking(modalId, isSubmitting);
 
   const form = useForm<FeedbackFormInput>({
     mode: "controlled",

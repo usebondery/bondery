@@ -1,6 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database, AvatarTransformOptions } from "@bondery/schemas";
-import { resolveContactAvatarUrl } from "./supabase";
+import { resolveContactAvatarUrl } from "./supabase.js";
 
 export type MyselfProfile = {
   firstName: string | null;

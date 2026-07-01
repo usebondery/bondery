@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 import type { SyncMutation } from "@bondery/schemas/sync";
-import type { DomainSupabaseClient } from "../../domains/_shared/context";
+import type { DomainSupabaseClient } from "../../domains/_shared/context.js";
 
 type UntypedAdminClient = {
   from(table: string): {

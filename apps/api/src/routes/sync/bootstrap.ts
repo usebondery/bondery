@@ -1,16 +1,16 @@
 import type { FastifyReply } from "fastify";
-import type { AppRoutePlugin } from "../../lib/fastify-types";
+import type { AppRoutePlugin } from "../../lib/fastify-types.js";
 import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
 import type { SyncBatch, SyncBootstrapResponse } from "@bondery/schemas/sync";
 import { syncBootstrapResponseSchema } from "@bondery/schemas/sync";
-import { getAuth } from "../../lib/auth";
-import { applyOpenApiRouteMeta } from "../../lib/openapi-route-meta";
-import { withOkResponse } from "../../lib/openapi-route-responses";
-import { createAdminClient } from "../../lib/supabase";
-import { getLastServerSequence } from "../../lib/sync/idempotency";
-import { logSyncBootstrap } from "../../lib/sync/metrics";
-import { validateSyncProtocolHeaders } from "../../lib/sync/protocol";
-import { SYNC_TABLE_KEYS, type SyncTableKey } from "../../lib/sync/sync-tables";
+import { getAuth } from "../../lib/auth.js";
+import { applyOpenApiRouteMeta } from "../../lib/openapi-route-meta.js";
+import { withOkResponse } from "../../lib/openapi-route-responses.js";
+import { createAdminClient } from "../../lib/supabase.js";
+import { getLastServerSequence } from "../../lib/sync/idempotency.js";
+import { logSyncBootstrap } from "../../lib/sync/metrics.js";
+import { validateSyncProtocolHeaders } from "../../lib/sync/protocol.js";
+import { SYNC_TABLE_KEYS, type SyncTableKey } from "../../lib/sync/sync-tables.js";
 
 export const syncBootstrapRoutes: AppRoutePlugin = async (fastify): Promise<void> => {
   fastify.addHook("onRoute", (routeOptions) => {

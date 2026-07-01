@@ -53,6 +53,7 @@ import {
   useCommitInstagramImportMutation,
   useParseInstagramImportMutation,
 } from "@/lib/query/hooks/useImports";
+import { useModalBlocking } from "@/lib/modals";
 import { useImporterNavigationProgress } from "./useImporterNavigationProgress";
 
 type Step =
@@ -408,6 +409,8 @@ export function InstagramImportModal({
     modals.closeAll();
   };
 
+  useModalBlocking(modalId, isParsing || isImporting || step === "processing");
+
   useEffect(() => {
     if (!modalId) {
       return;
@@ -415,9 +418,6 @@ export function InstagramImportModal({
 
     modals.updateModal({
       modalId,
-      closeOnEscape: !(isParsing || isImporting || step === "processing"),
-      closeOnClickOutside: !(isParsing || isImporting || step === "processing"),
-      withCloseButton: !(isParsing || isImporting || step === "processing"),
       size: "lg",
       title: (
         <ModalTitle
@@ -426,7 +426,7 @@ export function InstagramImportModal({
         />
       ),
     });
-  }, [isImporting, isParsing, modalId, step, t]);
+  }, [modalId, t]);
 
   const handleToggleAll = useCallback(() => {
     if (allSelected) {

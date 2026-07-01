@@ -17,6 +17,7 @@ import {
 } from "@bondery/mantine-next";
 import { useEffect, useState } from "react";
 import { useCreateApiKeyMutation } from "@/lib/query/hooks/useApiKeys";
+import { createModalId, useModalBlocking } from "@/lib/modals";
 import { buildApiKeyPermissionOptions } from "./apiKeyPermissionOptions";
 import { buildApiKeyTestSnippets, resolveDefaultTestSnippetId } from "./buildApiKeyTestSnippets";
 
@@ -47,15 +48,14 @@ function ApiKeyModalBody({ modalId, t, onCreated, apiBaseUrl }: ApiKeyModalBodyP
   const trimmedLabel = label.trim();
   const canCreate = trimmedLabel.length > 0 && !createMutation.isPending;
 
+  useModalBlocking(modalId, createMutation.isPending);
+
   useEffect(() => {
     modals.updateModal({
       modalId,
       size: step === "reveal" ? "lg" : "md",
-      closeOnEscape: !createMutation.isPending,
-      closeOnClickOutside: !createMutation.isPending,
-      withCloseButton: !createMutation.isPending,
     });
-  }, [modalId, step, createMutation.isPending]);
+  }, [modalId, step]);
 
   const handleCreate = async () => {
     if (!canCreate) return;
@@ -153,7 +153,7 @@ function ApiKeyModalBody({ modalId, t, onCreated, apiBaseUrl }: ApiKeyModalBodyP
 }
 
 export function openApiKeyModal(options: OpenApiKeyModalOptions) {
-  const modalId = `api-key-create-${Math.random().toString(36).slice(2)}`;
+  const modalId = createModalId("api-key-create");
 
   modals.open({
     modalId,

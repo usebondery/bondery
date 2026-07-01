@@ -3,7 +3,8 @@
 import { Stack } from "@mantine/core";
 import { modals } from "@mantine/modals";
 import { ModalFooter } from "@bondery/mantine-next";
-import { useEffect, useState, type ReactNode } from "react";
+import { useState, type ReactNode } from "react";
+import { createModalId, useModalBlocking } from "@/lib/modals";
 
 interface OpenStandardConfirmModalOptions {
   title: ReactNode;
@@ -37,14 +38,7 @@ function StandardConfirmModalBody({
 }: StandardConfirmModalBodyProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  useEffect(() => {
-    modals.updateModal({
-      modalId,
-      closeOnClickOutside: !isSubmitting,
-      closeOnEscape: !isSubmitting,
-      withCloseButton: !isSubmitting,
-    });
-  }, [isSubmitting, modalId]);
+  useModalBlocking(modalId, isSubmitting);
 
   const handleConfirm = async () => {
     setIsSubmitting(true);
@@ -87,7 +81,7 @@ export function openStandardConfirmModal({
   confirmLeftSection,
   centered = true,
 }: OpenStandardConfirmModalOptions): void {
-  const modalId = `confirm-${Math.random().toString(36).slice(2)}`;
+  const modalId = createModalId("confirm");
 
   modals.open({
     modalId,

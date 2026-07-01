@@ -1,6 +1,6 @@
-import type { DomainSupabaseClient } from "../../domains/_shared/context";
-import { DomainError } from "../../domains/_shared/context";
-import { loadEnrichedContact } from "../contact-enrichment";
+import type { DomainSupabaseClient } from "../../domains/_shared/context.js";
+import { DomainError } from "../../domains/_shared/context.js";
+import { loadEnrichedContact } from "../contact-enrichment.js";
 
 export class SyncConflictError extends DomainError {
   constructor(

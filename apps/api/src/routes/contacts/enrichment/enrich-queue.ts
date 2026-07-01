@@ -4,10 +4,10 @@
  */
 
 import type { FastifyReply } from "fastify";
-import type { AppFastifyInstance } from "../../../lib/fastify-types";
+import type { AppFastifyInstance } from "../../../lib/fastify-types.js";
 import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
-import { getAuth } from "../../../lib/auth";
-import { withOkResponse } from "../../../lib/openapi-route-responses";
+import { getAuth } from "../../../lib/auth.js";
+import { withOkResponse } from "../../../lib/openapi-route-responses.js";
 import {
   apiSuccessResponseSchema,
   enrichEligibleCountResponseSchema,

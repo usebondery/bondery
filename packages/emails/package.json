@@ -8,26 +8,38 @@
   "exports": {
     ".": {
       "types": "./src/index.ts",
+      "import": "./src/index.ts",
+      "node": "./dist/index.js",
       "default": "./dist/index.js"
     },
     "./*": {
       "types": "./src/*.ts",
+      "import": "./src/*.ts",
+      "node": "./dist/*.js",
       "default": "./dist/*.js"
     },
     "./shared/EmailWrapper": {
       "types": "./src/shared/EmailWrapper.tsx",
+      "import": "./src/shared/EmailWrapper.tsx",
+      "node": "./dist/shared/EmailWrapper.js",
       "default": "./dist/shared/EmailWrapper.js"
     },
     "./templates/FeedbackEmail": {
       "types": "./src/templates/FeedbackEmail.tsx",
+      "import": "./src/templates/FeedbackEmail.tsx",
+      "node": "./dist/templates/FeedbackEmail.js",
       "default": "./dist/templates/FeedbackEmail.js"
     },
     "./templates/ReminderDigestEmail": {
       "types": "./src/templates/ReminderDigestEmail.tsx",
+      "import": "./src/templates/ReminderDigestEmail.tsx",
+      "node": "./dist/templates/ReminderDigestEmail.js",
       "default": "./dist/templates/ReminderDigestEmail.js"
     },
     "./templates/ShareContactEmail": {
       "types": "./src/templates/ShareContactEmail.tsx",
+      "import": "./src/templates/ShareContactEmail.tsx",
+      "node": "./dist/templates/ShareContactEmail.js",
       "default": "./dist/templates/ShareContactEmail.js"
     }
   },
@@ -37,7 +49,7 @@
   "scripts": {
     "preview": "email dev --dir ./src --port 3004",
     "dev": "tsc --watch --preserveWatchOutput",
-    "build": "rimraf dist && tsc"
+    "build": "rimraf dist && tsc && node ../../scripts/rewrite-package-hash-imports-in-dist.mjs emails"
   },
   "dependencies": {
     "@bondery/branding": "*",

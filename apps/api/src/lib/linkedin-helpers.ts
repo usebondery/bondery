@@ -7,10 +7,10 @@
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database, ScrapedWorkHistoryEntry, ScrapedEducationEntry } from "@bondery/schemas";
-import { validateImageUpload, validateImageMagicBytes } from "./config";
-import { createAdminClient } from "./supabase";
-import { uploadContactAvatarAndSetFlag } from "./avatar-storage";
-import logger from "./logger";
+import { validateImageUpload, validateImageMagicBytes } from "./config.js";
+import { createAdminClient } from "./supabase.js";
+import { uploadContactAvatarAndSetFlag } from "./avatar-storage.js";
+import logger from "./logger.js";
 
 /**
  * Converts a loose date string (YYYY, YYYY-MM, or YYYY-MM-DD) into a

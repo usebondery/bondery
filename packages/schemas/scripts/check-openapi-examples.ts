@@ -12,6 +12,7 @@ import {
 } from "#entities/activity.js";
 import {
   apiSuccessResponseSchema,
+  apiErrorResponseSchema,
   photoUploadResponseSchema,
 } from "#entities/api.js";
 import {
@@ -79,6 +80,7 @@ import {
 import { messageResponseSchema } from "#entities/_shared.js";
 import { syncBootstrapResponseSchema, syncPullResponseSchema } from "#sync/pull.js";
 import { syncPushResponseSchema } from "#sync/push.js";
+import { syncConflictErrorResponseSchema } from "#sync/conflict.js";
 import {
   geocodeSuggestResponseWireSchema,
   geocodeTimezoneResponseWireSchema,
@@ -92,6 +94,8 @@ type ExampleEntry = {
 const RESPONSE_SCHEMA_EXAMPLES: ExampleEntry[] = [
   { name: "messageResponseSchema", schema: messageResponseSchema },
   { name: "apiSuccessResponseSchema", schema: apiSuccessResponseSchema },
+  { name: "apiErrorResponseSchema", schema: apiErrorResponseSchema },
+  { name: "syncConflictErrorResponseSchema", schema: syncConflictErrorResponseSchema },
   { name: "photoUploadResponseSchema", schema: photoUploadResponseSchema },
   { name: "contactResponseSchema", schema: contactResponseSchema },
   { name: "createContactResponseSchema", schema: createContactResponseSchema },

@@ -1,6 +1,6 @@
 import type { FastifyReply } from "fastify";
-import { DomainError } from "../../domains/_shared/context";
-import { SyncConflictError } from "./conflict";
+import { DomainError } from "../../domains/_shared/context.js";
+import { SyncConflictError } from "./conflict.js";
 
 export function handleDomainError(error: unknown, reply: FastifyReply): boolean {
   if (error instanceof SyncConflictError) {

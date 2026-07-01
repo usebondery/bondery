@@ -2,11 +2,11 @@
  * Extension POST route - Create or update contact from browser extension
  */
 
-import type { AppFastifyInstance } from "../../lib/fastify-types";
+import type { AppFastifyInstance } from "../../lib/fastify-types.js";
 import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
-import { resolveContactAvatarUrl } from "../../lib/supabase";
-import { getAuth } from "../../lib/auth";
-import { withOkResponse } from "../../lib/openapi-route-responses";
+import { resolveContactAvatarUrl } from "../../lib/supabase.js";
+import { getAuth } from "../../lib/auth.js";
+import { withOkResponse } from "../../lib/openapi-route-responses.js";
 import type {
   ScrapedWorkHistoryEntry,
   ScrapedEducationEntry,
@@ -15,20 +15,20 @@ import type {
 import {
   findPersonIdBySocial,
   upsertContactSocials,
-} from "../../lib/socials";
+} from "../../lib/socials.js";
 import { cleanPersonName } from "@bondery/helpers/name";
-import { assignContactsToDefaultImportGroup } from "../../lib/default-import-groups";
-import { cachedGeocodeLinkedInLocation } from "../../lib/mapy";
+import { assignContactsToDefaultImportGroup } from "../../lib/default-import-groups.js";
+import { cachedGeocodeLinkedInLocation } from "../../lib/mapy.js";
 import {
   toPostgresDate,
   updateContactPhoto,
   uploadAllLinkedInLogos,
-} from "../../lib/linkedin-helpers";
+} from "../../lib/linkedin-helpers.js";
 import {
   redirectBodySchema,
   resolvePrimarySocial,
   resolveExtensionDefaultGroup,
-} from "./helpers";
+} from "./helpers.js";
 import { redirectResponseSchema } from "@bondery/schemas";
 
 export function registerPostRoute(fastify: AppFastifyInstance): void {

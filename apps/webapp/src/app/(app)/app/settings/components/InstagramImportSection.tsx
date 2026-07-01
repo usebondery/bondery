@@ -1,25 +1,13 @@
 "use client";
 
 import { Stack } from "@mantine/core";
-import { IconBrandInstagram, IconDownload } from "@tabler/icons-react";
+import { IconBrandInstagram } from "@tabler/icons-react";
 import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
-import { modals } from "@mantine/modals";
-import { ModalTitle } from "@bondery/mantine-next";
 import { IntegrationCard } from "@/components/shared/IntegrationCard";
-import { InstagramImportModal } from "@/app/(app)/app/settings/components/InstagramImportModal";
+import { openInstagramImportModal } from "./openInstagramImportModal";
 
 export function InstagramImportSection() {
   const t = useTranslations("SettingsPage.DataManagement.InstagramImport");
-
-  const openImporter = () => {
-    const modalId = "instagram-import-modal";
-    modals.open({
-      modalId,
-      title: <ModalTitle text={t("ModalTitle")} icon={<IconDownload size={20} stroke={1.5} />} />,
-      size: "lg",
-      children: <InstagramImportModal t={t} modalId={modalId} />,
-    });
-  };
 
   return (
     <Stack gap="sm">
@@ -33,7 +21,7 @@ export function InstagramImportSection() {
         isLinkable={false}
         connectedDescription={t("CardDescription")}
         unconnectedDescription={t("CardDescription")}
-        onClick={openImporter}
+        onClick={() => openInstagramImportModal({ t })}
       />
     </Stack>
   );

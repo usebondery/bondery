@@ -3,15 +3,15 @@
  * CRUD for chat sessions and message persistence
  */
 
-import type { AppRoutePlugin } from "../../lib/fastify-types";
+import type { AppRoutePlugin } from "../../lib/fastify-types.js";
 import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
 import { z } from "zod";
-import { getAuth } from "../../lib/auth";
-import { applyOpenApiRouteMeta } from "../../lib/openapi-route-meta";
+import { getAuth } from "../../lib/auth.js";
+import { applyOpenApiRouteMeta } from "../../lib/openapi-route-meta.js";
 import {
   withCreatedResponse,
   withOkResponse,
-} from "../../lib/openapi-route-responses";
+} from "../../lib/openapi-route-responses.js";
 import {
   chatMessagesListResponseSchema,
   paginationMetaSchema,
@@ -28,7 +28,7 @@ import {
   buildPaginatedResponse,
   buildPaginationMeta,
   parsePagination,
-} from "../../lib/pagination";
+} from "../../lib/pagination.js";
 
 const chatSessionListItemSchema = z.object({
   id: z.string(),

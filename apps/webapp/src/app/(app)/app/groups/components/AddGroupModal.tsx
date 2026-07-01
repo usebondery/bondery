@@ -38,6 +38,7 @@ import {
   useAddContactsToGroupByIdMutation,
   useCreateGroupMutation,
 } from "@/lib/query/hooks/useGroups";
+import { createModalId, useModalBlocking } from "@/lib/modals";
 
 // Predefined color swatches
 const COLOR_SWATCHES = [
@@ -72,7 +73,7 @@ function AddGroupModalTitle() {
 }
 
 export function openAddGroupModal(options: OpenAddGroupModalOptions = {}) {
-  const modalId = `add-group-${Math.random().toString(36).slice(2)}`;
+  const modalId = createModalId("add-group");
 
   modals.open({
     modalId,
@@ -123,14 +124,8 @@ function AddGroupForm({
     }
   }, [isContactsError, t]);
 
-  useEffect(() => {
-    modals.updateModal({
-      modalId,
-      closeOnEscape: !isSubmitting,
-      closeOnClickOutside: !isSubmitting,
-      withCloseButton: !isSubmitting,
-    });
-  }, [isSubmitting, modalId]);
+  const isBlocking = isSubmitting || isLoadingContacts;
+  useModalBlocking(modalId, isBlocking);
 
   const form = useForm({
     mode: "controlled",

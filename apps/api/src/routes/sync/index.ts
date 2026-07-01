@@ -1,8 +1,8 @@
-import type { AppRoutePlugin } from "../../lib/fastify-types";
-import { applyOpenApiRouteMeta } from "../../lib/openapi-route-meta";
-import { syncPushRoutes } from "./push";
-import { syncPullRoutes } from "./pull";
-import { syncBootstrapRoutes } from "./bootstrap";
+import type { AppRoutePlugin } from "../../lib/fastify-types.js";
+import { applyOpenApiRouteMeta } from "../../lib/openapi-route-meta.js";
+import { syncPushRoutes } from "./push.js";
+import { syncPullRoutes } from "./pull.js";
+import { syncBootstrapRoutes } from "./bootstrap.js";
 
 export const syncRoutes: AppRoutePlugin = async (fastify): Promise<void> => {
   fastify.addHook("onRoute", (routeOptions) => {

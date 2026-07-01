@@ -12,11 +12,11 @@
  */
 
 import type { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
-import type { AppFastifyInstance } from "./fastify-types";
+import type { AppFastifyInstance } from "./fastify-types.js";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@bondery/schemas/supabase.types";
 import type { ApiKeyPermission } from "@bondery/schemas";
-import { createAuthenticatedClient, createAdminClient } from "./supabase";
+import { createAuthenticatedClient, createAdminClient } from "./supabase.js";
 import {
   isApiKeyBearerToken,
   loadJwtSigningMaterial,
@@ -24,8 +24,8 @@ import {
   supabaseAuthIssuerUrl,
   validateApiKey,
   verifyJwtSigningJwkAgainstJwks,
-} from "./api-keys";
-import { assertApiKeyAccess } from "./api-key-access";
+} from "./api-keys.js";
+import { assertApiKeyAccess } from "./api-key-access.js";
 
 // ── Type augmentation ────────────────────────────────────────────────────────
 

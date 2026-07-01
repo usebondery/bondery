@@ -9,219 +9,325 @@
   "exports": {
     ".": {
       "types": "./src/index.ts",
+      "import": "./src/index.ts",
+      "node": "./dist/index.js",
       "default": "./dist/index.js"
     },
     "./*": {
       "types": "./src/*.ts",
+      "import": "./src/*.ts",
+      "node": "./dist/*.js",
       "default": "./dist/*.js"
     },
     "./address": {
       "types": "./src/address/index.ts",
+      "import": "./src/address/index.ts",
+      "node": "./dist/address/index.js",
       "default": "./dist/address/index.js"
     },
     "./contact": {
       "types": "./src/contact/index.ts",
+      "import": "./src/contact/index.ts",
+      "node": "./dist/contact/index.js",
       "default": "./dist/contact/index.js"
     },
     "./date": {
       "types": "./src/date/index.ts",
+      "import": "./src/date/index.ts",
+      "node": "./dist/date/index.js",
       "default": "./dist/date/index.js"
     },
     "./emoji": {
       "types": "./src/emoji/index.ts",
+      "import": "./src/emoji/index.ts",
+      "node": "./dist/emoji/index.js",
       "default": "./dist/emoji/index.js"
     },
     "./env": {
       "types": "./src/env/index.ts",
+      "import": "./src/env/index.ts",
+      "node": "./dist/env/index.js",
       "default": "./dist/env/index.js"
     },
     "./forms": {
       "types": "./src/forms/index.ts",
+      "import": "./src/forms/index.ts",
+      "node": "./dist/forms/index.js",
       "default": "./dist/forms/index.js"
     },
     "./geocode": {
       "types": "./src/geocode/index.ts",
+      "import": "./src/geocode/index.ts",
+      "node": "./dist/geocode/index.js",
       "default": "./dist/geocode/index.js"
     },
     "./globals": {
       "types": "./src/globals/index.ts",
+      "import": "./src/globals/index.ts",
+      "node": "./dist/globals/index.js",
       "default": "./dist/globals/index.js"
     },
     "./interactions": {
       "types": "./src/interactions/index.ts",
+      "import": "./src/interactions/index.ts",
+      "node": "./dist/interactions/index.js",
       "default": "./dist/interactions/index.js"
     },
     "./locale": {
       "types": "./src/locale/index.ts",
+      "import": "./src/locale/index.ts",
+      "node": "./dist/locale/index.js",
       "default": "./dist/locale/index.js"
     },
     "./name": {
       "types": "./src/name/index.ts",
+      "import": "./src/name/index.ts",
+      "node": "./dist/name/index.js",
       "default": "./dist/name/index.js"
     },
     "./notes": {
       "types": "./src/notes/index.ts",
+      "import": "./src/notes/index.ts",
+      "node": "./dist/notes/index.js",
       "default": "./dist/notes/index.js"
     },
     "./phone": {
       "types": "./src/phone/index.ts",
+      "import": "./src/phone/index.ts",
+      "node": "./dist/phone/index.js",
       "default": "./dist/phone/index.js"
     },
     "./platform": {
       "types": "./src/platform/index.ts",
+      "import": "./src/platform/index.ts",
+      "node": "./dist/platform/index.js",
       "default": "./dist/platform/index.js"
     },
     "./socials": {
       "types": "./src/socials/index.ts",
+      "import": "./src/socials/index.ts",
+      "node": "./dist/socials/index.js",
       "default": "./dist/socials/index.js"
     },
     "./text": {
       "types": "./src/text/index.ts",
+      "import": "./src/text/index.ts",
+      "node": "./dist/text/index.js",
       "default": "./dist/text/index.js"
     },
     "./version": {
       "types": "./src/version/index.ts",
+      "import": "./src/version/index.ts",
+      "node": "./dist/version/index.js",
       "default": "./dist/version/index.js"
     },
     "./address/address-utils": {
       "types": "./src/address/address-utils.ts",
+      "import": "./src/address/address-utils.ts",
+      "node": "./dist/address/address-utils.js",
       "default": "./dist/address/address-utils.js"
     },
     "./address/geocode-suggest-config": {
       "types": "./src/address/geocode-suggest-config.ts",
+      "import": "./src/address/geocode-suggest-config.ts",
+      "node": "./dist/address/geocode-suggest-config.js",
       "default": "./dist/address/geocode-suggest-config.js"
     },
     "./address/mapy-suggest": {
       "types": "./src/address/mapy-suggest.ts",
+      "import": "./src/address/mapy-suggest.ts",
+      "node": "./dist/address/mapy-suggest.js",
       "default": "./dist/address/mapy-suggest.js"
     },
     "./address/suggestion-to-contact-address": {
       "types": "./src/address/suggestion-to-contact-address.ts",
+      "import": "./src/address/suggestion-to-contact-address.ts",
+      "node": "./dist/address/suggestion-to-contact-address.js",
       "default": "./dist/address/suggestion-to-contact-address.js"
     },
     "./contact/channel-type-options": {
       "types": "./src/contact/channel-type-options.ts",
+      "import": "./src/contact/channel-type-options.ts",
+      "node": "./dist/contact/channel-type-options.js",
       "default": "./dist/contact/channel-type-options.js"
     },
     "./date/date-utils": {
       "types": "./src/date/date-utils.ts",
+      "import": "./src/date/date-utils.ts",
+      "node": "./dist/date/date-utils.js",
       "default": "./dist/date/date-utils.js"
     },
     "./emoji/emojiData": {
       "types": "./src/emoji/emojiData.ts",
+      "import": "./src/emoji/emojiData.ts",
+      "node": "./dist/emoji/emojiData.js",
       "default": "./dist/emoji/emojiData.js"
     },
     "./emoji/filterEmojiCategories": {
       "types": "./src/emoji/filterEmojiCategories.ts",
+      "import": "./src/emoji/filterEmojiCategories.ts",
+      "node": "./dist/emoji/filterEmojiCategories.js",
       "default": "./dist/emoji/filterEmojiCategories.js"
     },
     "./env/check-env": {
       "types": "./src/env/check-env.ts",
+      "import": "./src/env/check-env.ts",
+      "node": "./dist/env/check-env.js",
       "default": "./dist/env/check-env.js"
     },
     "./forms/create-contact": {
       "types": "./src/forms/create-contact.ts",
+      "import": "./src/forms/create-contact.ts",
+      "node": "./dist/forms/create-contact.js",
       "default": "./dist/forms/create-contact.js"
     },
     "./forms/social-handle": {
       "types": "./src/forms/social-handle.ts",
+      "import": "./src/forms/social-handle.ts",
+      "node": "./dist/forms/social-handle.js",
       "default": "./dist/forms/social-handle.js"
     },
     "./geocode/query": {
       "types": "./src/geocode/query.ts",
+      "import": "./src/geocode/query.ts",
+      "node": "./dist/geocode/query.js",
       "default": "./dist/geocode/query.js"
     },
     "./globals/important-dates": {
       "types": "./src/globals/important-dates.ts",
+      "import": "./src/globals/important-dates.ts",
+      "node": "./dist/globals/important-dates.js",
       "default": "./dist/globals/important-dates.js"
     },
     "./globals/paths": {
       "types": "./src/globals/paths.ts",
+      "import": "./src/globals/paths.ts",
+      "node": "./dist/globals/paths.js",
       "default": "./dist/globals/paths.js"
     },
     "./globals/social-platform-urls": {
       "types": "./src/globals/social-platform-urls.ts",
+      "import": "./src/globals/social-platform-urls.ts",
+      "node": "./dist/globals/social-platform-urls.js",
       "default": "./dist/globals/social-platform-urls.js"
     },
     "./instagram/parseInstagramUsername": {
       "types": "./src/instagram/parseInstagramUsername.ts",
+      "import": "./src/instagram/parseInstagramUsername.ts",
+      "node": "./dist/instagram/parseInstagramUsername.js",
       "default": "./dist/instagram/parseInstagramUsername.js"
     },
     "./interactions/interaction-types": {
       "types": "./src/interactions/interaction-types.ts",
+      "import": "./src/interactions/interaction-types.ts",
+      "node": "./dist/interactions/interaction-types.js",
       "default": "./dist/interactions/interaction-types.js"
     },
     "./locale/languages": {
       "types": "./src/locale/languages.ts",
+      "import": "./src/locale/languages.ts",
+      "node": "./dist/locale/languages.js",
       "default": "./dist/locale/languages.js"
     },
     "./locale/timezones": {
       "types": "./src/locale/timezones.ts",
+      "import": "./src/locale/timezones.ts",
+      "node": "./dist/locale/timezones.js",
       "default": "./dist/locale/timezones.js"
     },
     "./locale/world-languages": {
       "types": "./src/locale/world-languages.ts",
+      "import": "./src/locale/world-languages.ts",
+      "node": "./dist/locale/world-languages.js",
       "default": "./dist/locale/world-languages.js"
     },
     "./name/common-brand-name-tokens": {
       "types": "./src/name/common-brand-name-tokens.ts",
+      "import": "./src/name/common-brand-name-tokens.ts",
+      "node": "./dist/name/common-brand-name-tokens.js",
       "default": "./dist/name/common-brand-name-tokens.js"
     },
     "./name/common-person-name-tokens": {
       "types": "./src/name/common-person-name-tokens.ts",
+      "import": "./src/name/common-person-name-tokens.ts",
+      "node": "./dist/name/common-person-name-tokens.js",
       "default": "./dist/name/common-person-name-tokens.js"
     },
     "./name/example-names": {
       "types": "./src/name/example-names.ts",
+      "import": "./src/name/example-names.ts",
+      "node": "./dist/name/example-names.js",
       "default": "./dist/name/example-names.js"
     },
     "./name/name-utils": {
       "types": "./src/name/name-utils.ts",
+      "import": "./src/name/name-utils.ts",
+      "node": "./dist/name/name-utils.js",
       "default": "./dist/name/name-utils.js"
     },
     "./notes/htmlToMarkdown": {
       "types": "./src/notes/htmlToMarkdown.ts",
+      "import": "./src/notes/htmlToMarkdown.ts",
+      "node": "./dist/notes/htmlToMarkdown.js",
       "default": "./dist/notes/htmlToMarkdown.js"
     },
     "./notes/markdownToHtml": {
       "types": "./src/notes/markdownToHtml.ts",
+      "import": "./src/notes/markdownToHtml.ts",
+      "node": "./dist/notes/markdownToHtml.js",
       "default": "./dist/notes/markdownToHtml.js"
     },
     "./notes/personMentionFormat": {
       "types": "./src/notes/personMentionFormat.ts",
+      "import": "./src/notes/personMentionFormat.ts",
+      "node": "./dist/notes/personMentionFormat.js",
       "default": "./dist/notes/personMentionFormat.js"
     },
     "./platform/linkedin-utils": {
       "types": "./src/platform/linkedin-utils.ts",
+      "import": "./src/platform/linkedin-utils.ts",
+      "node": "./dist/platform/linkedin-utils.js",
       "default": "./dist/platform/linkedin-utils.js"
     },
     "./socials/normalize-website-url": {
       "types": "./src/socials/normalize-website-url.ts",
+      "import": "./src/socials/normalize-website-url.ts",
+      "node": "./dist/socials/normalize-website-url.js",
       "default": "./dist/socials/normalize-website-url.js"
     },
     "./socials/social-brand-colors": {
       "types": "./src/socials/social-brand-colors.ts",
+      "import": "./src/socials/social-brand-colors.ts",
+      "node": "./dist/socials/social-brand-colors.js",
       "default": "./dist/socials/social-brand-colors.js"
     },
     "./socials/socials-helpers": {
       "types": "./src/socials/socials-helpers.ts",
+      "import": "./src/socials/socials-helpers.ts",
+      "node": "./dist/socials/socials-helpers.js",
       "default": "./dist/socials/socials-helpers.js"
     },
     "./text/inline-tokens": {
       "types": "./src/text/inline-tokens.ts",
+      "import": "./src/text/inline-tokens.ts",
+      "node": "./dist/text/inline-tokens.js",
       "default": "./dist/text/inline-tokens.js"
     },
     "./text/reading-time": {
       "types": "./src/text/reading-time.ts",
+      "import": "./src/text/reading-time.ts",
+      "node": "./dist/text/reading-time.js",
       "default": "./dist/text/reading-time.js"
     },
     "./version/version-utils": {
       "types": "./src/version/version-utils.ts",
+      "import": "./src/version/version-utils.ts",
+      "node": "./dist/version/version-utils.js",
       "default": "./dist/version/version-utils.js"
     }
   },
   "scripts": {
-    "build": "rimraf dist && tsc",
+    "build": "rimraf dist && tsc && node ../../scripts/rewrite-package-hash-imports-in-dist.mjs helpers",
     "dev": "tsc --watch --preserveWatchOutput",
     "check-types": "tsc --noEmit"
   },

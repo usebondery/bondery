@@ -8,34 +8,50 @@
   "exports": {
     ".": {
       "types": "./src/index.ts",
+      "import": "./src/index.ts",
+      "node": "./dist/index.js",
       "default": "./dist/index.js"
     },
     "./*": {
       "types": "./src/*.ts",
+      "import": "./src/*.ts",
+      "node": "./dist/*.js",
       "default": "./dist/*.js"
     },
     "./react": {
       "types": "./src/react/index.ts",
+      "import": "./src/react/index.ts",
+      "node": "./dist/react/index.js",
       "default": "./dist/react/index.js"
     },
     "./react/BonderyIcon": {
       "types": "./src/react/BonderyIcon.tsx",
+      "import": "./src/react/BonderyIcon.tsx",
+      "node": "./dist/react/BonderyIcon.js",
       "default": "./dist/react/BonderyIcon.js"
     },
     "./react/BonderyIconWhite": {
       "types": "./src/react/BonderyIconWhite.tsx",
+      "import": "./src/react/BonderyIconWhite.tsx",
+      "node": "./dist/react/BonderyIconWhite.js",
       "default": "./dist/react/BonderyIconWhite.js"
     },
     "./react/BonderyLogotypeBlack": {
       "types": "./src/react/BonderyLogotypeBlack.tsx",
+      "import": "./src/react/BonderyLogotypeBlack.tsx",
+      "node": "./dist/react/BonderyLogotypeBlack.js",
       "default": "./dist/react/BonderyLogotypeBlack.js"
     },
     "./react/BonderyLogotypeWhite": {
       "types": "./src/react/BonderyLogotypeWhite.tsx",
+      "import": "./src/react/BonderyLogotypeWhite.tsx",
+      "node": "./dist/react/BonderyLogotypeWhite.js",
       "default": "./dist/react/BonderyLogotypeWhite.js"
     },
     "./react/index.d": {
       "types": "./src/react/index.d.ts",
+      "import": "./src/react/index.d.ts",
+      "node": "./dist/react/index.d.js",
       "default": "./dist/react/index.d.js"
     },
     "./icon-generator": {
@@ -49,7 +65,7 @@
     "src/assets"
   ],
   "scripts": {
-    "build": "rimraf dist && tsc",
+    "build": "rimraf dist && tsc && node ../../scripts/rewrite-package-hash-imports-in-dist.mjs branding",
     "dev": "tsc --watch --preserveWatchOutput"
   },
   "dependencies": {

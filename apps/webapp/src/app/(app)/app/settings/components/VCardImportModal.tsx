@@ -45,6 +45,7 @@ import {
   useCommitVCardImportMutation,
   useParseVCardImportMutation,
 } from "@/lib/query/hooks/useImports";
+import { useModalBlocking } from "@/lib/modals";
 import { useImporterNavigationProgress } from "./useImporterNavigationProgress";
 
 type Step = "intro" | "instructions" | "upload" | "processing" | "preview";
@@ -216,14 +217,13 @@ export function VCardImportModal({
     modals.closeAll();
   };
 
+  useModalBlocking(modalId, isParsing || isImporting || step === "processing");
+
   useEffect(() => {
     if (!modalId) return;
 
     modals.updateModal({
       modalId,
-      closeOnEscape: !(isParsing || isImporting || step === "processing"),
-      closeOnClickOutside: !(isParsing || isImporting || step === "processing"),
-      withCloseButton: !(isParsing || isImporting || step === "processing"),
       size:
         step === "preview" && !isImporting
           ? "80rem"

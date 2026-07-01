@@ -1,10 +1,10 @@
 import type { Contact, CreateContactInput as CreateContactPayload, TablesInsert } from "@bondery/schemas";
-import { loadEnrichedContact } from "../../lib/contact-enrichment";
-import { upsertContactSocials } from "../../lib/socials";
-import { buildContactSnapshotChanges } from "../../lib/sync/build-changes";
-import { emitSyncBatch } from "../../lib/sync/emit-change";
-import { withPersonTxid } from "../_shared/with-txid";
-import { DomainError, type DomainContext } from "../_shared/context";
+import { loadEnrichedContact } from "../../lib/contact-enrichment.js";
+import { upsertContactSocials } from "../../lib/socials.js";
+import { buildContactSnapshotChanges } from "../../lib/sync/build-changes.js";
+import { emitSyncBatch } from "../../lib/sync/emit-change.js";
+import { withPersonTxid } from "../_shared/with-txid.js";
+import { DomainError, type DomainContext } from "../_shared/context.js";
 
 export interface CreateContactDomainInput extends CreateContactPayload {
   id?: string;

@@ -2,7 +2,7 @@ import { tool } from "ai";
 import { z } from "zod";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@bondery/schemas/supabase.types";
-import { getContactSharingPreview, shareContact } from "../../../routes/contacts/share/lib";
+import { getContactSharingPreview, shareContact } from "../../../routes/contacts/share/lib.js";
 
 /**
  * Creates sharing-related tools for the AI chat agent.

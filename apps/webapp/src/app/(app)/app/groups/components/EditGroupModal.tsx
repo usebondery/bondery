@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   Stack,
   TextInput,
@@ -25,6 +25,7 @@ import {
 } from "@bondery/mantine-next";
 import { DEBOUNCE_MS } from "@/lib/config";
 import { useUpdateGroupMutation } from "@/lib/query/hooks/useGroups";
+import { createModalId, useModalBlocking } from "@/lib/modals";
 
 // Predefined color swatches
 const COLOR_SWATCHES = [
@@ -55,7 +56,7 @@ function EditGroupModalTitle() {
 }
 
 export function openEditGroupModal(props: EditGroupModalProps) {
-  const modalId = `edit-group-${Math.random().toString(36).slice(2)}`;
+  const modalId = createModalId("edit-group");
 
   modals.open({
     modalId,
@@ -77,14 +78,7 @@ function EditGroupForm({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const updateGroupMutation = useUpdateGroupMutation(groupId);
 
-  useEffect(() => {
-    modals.updateModal({
-      modalId,
-      closeOnEscape: !isSubmitting,
-      closeOnClickOutside: !isSubmitting,
-      withCloseButton: !isSubmitting,
-    });
-  }, [isSubmitting, modalId]);
+  useModalBlocking(modalId, isSubmitting);
 
   const form = useForm({
     mode: "controlled",

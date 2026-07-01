@@ -4,19 +4,19 @@
  */
 
 import type { FastifyReply } from "fastify";
-import type { AppFastifyInstance, AppRoutePlugin } from "../../lib/fastify-types";
+import type { AppFastifyInstance, AppRoutePlugin } from "../../lib/fastify-types.js";
 import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
 import { z } from "zod";
-import { createAdminClient, resolveContactAvatarUrl } from "../../lib/supabase";
-import { applyOpenApiRouteMeta } from "../../lib/openapi-route-meta";
-import { withOkResponse } from "../../lib/openapi-route-responses";
+import { createAdminClient, resolveContactAvatarUrl } from "../../lib/supabase.js";
+import { applyOpenApiRouteMeta } from "../../lib/openapi-route-meta.js";
+import { withOkResponse } from "../../lib/openapi-route-responses.js";
 import {
   uploadContactAvatarAndSetFlag,
   deleteContactAvatarAndClearFlag,
-} from "../../lib/avatar-storage";
-import { getAuth } from "../../lib/auth";
-import { validateImageUpload, validateImageMagicBytes } from "../../lib/config";
-import { CONTACT_SELECT, extractAvatarOptions } from "../../lib/queries";
+} from "../../lib/avatar-storage.js";
+import { getAuth } from "../../lib/auth.js";
+import { validateImageUpload, validateImageMagicBytes } from "../../lib/config.js";
+import { CONTACT_SELECT, extractAvatarOptions } from "../../lib/queries.js";
 import { avatarTransformQuerySchema } from "@bondery/schemas/http";
 import {
   apiSuccessResponseSchema,
@@ -25,7 +25,7 @@ import {
   updateAccountInputSchema,
   userAccountResponseSchema,
 } from "@bondery/schemas";
-import { attachContactExtras } from "../../lib/contact-enrichment";
+import { attachContactExtras } from "../../lib/contact-enrichment.js";
 
 const LINKEDIN_LOGOS_BUCKET = "linkedin_logos";
 

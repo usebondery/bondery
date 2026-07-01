@@ -4,7 +4,7 @@
  */
 
 import { generateText } from "ai";
-import { getChatModel } from "./provider";
+import { getChatModel } from "./provider.js";
 
 /**
  * Generate a short title for a chat session based on the user's first message.

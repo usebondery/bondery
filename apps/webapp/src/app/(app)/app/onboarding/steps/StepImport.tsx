@@ -16,14 +16,11 @@ import {
 import {
   IconBrandLinkedin,
   IconBrandInstagram,
-  IconDownload,
   IconCheck,
   IconArrowRight,
 } from "@tabler/icons-react";
-import { modals } from "@mantine/modals";
-import { ModalTitle } from "@bondery/mantine-next";
-import { LinkedInImportModal } from "@/app/(app)/app/settings/components/LinkedInImportModal";
-import { InstagramImportModal } from "@/app/(app)/app/settings/components/InstagramImportModal";
+import { openLinkedInImportModal } from "@/app/(app)/app/settings/components/openLinkedInImportModal";
+import { openInstagramImportModal } from "@/app/(app)/app/settings/components/openInstagramImportModal";
 
 interface StepProps {
   onNext: () => void;
@@ -51,46 +48,18 @@ export function StepImport({ onNext, onSkip }: StepProps) {
   };
 
   const openLinkedIn = () => {
-    const modalId = "onboarding-linkedin-import";
-    modals.open({
-      modalId,
-      title: (
-        <ModalTitle
-          text={linkedInT("ModalTitle")}
-          icon={<IconDownload size={20} stroke={1.5} />}
-        />
-      ),
-      size: "lg",
-      children: (
-        <LinkedInImportModal
-          t={linkedInT}
-          modalId={modalId}
-          onSuccess={handleImportSuccess}
-          showNavigationProgress={false}
-        />
-      ),
+    openLinkedInImportModal({
+      t: linkedInT,
+      onSuccess: handleImportSuccess,
+      showNavigationProgress: false,
     });
   };
 
   const openInstagram = () => {
-    const modalId = "onboarding-instagram-import";
-    modals.open({
-      modalId,
-      title: (
-        <ModalTitle
-          text={instagramT("ModalTitle")}
-          icon={<IconDownload size={20} stroke={1.5} />}
-        />
-      ),
-      size: "lg",
-      children: (
-        <InstagramImportModal
-          t={instagramT}
-          modalId={modalId}
-          onSuccess={handleImportSuccess}
-          showNavigationProgress={false}
-        />
-      ),
+    openInstagramImportModal({
+      t: instagramT,
+      onSuccess: handleImportSuccess,
+      showNavigationProgress: false,
     });
   };
 

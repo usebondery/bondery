@@ -1,6 +1,6 @@
 import type { SyncChange, SyncTableKey } from "@bondery/schemas/sync";
-import type { DomainSupabaseClient } from "../../domains/_shared/context";
-import { GROUP_SELECT } from "../queries";
+import type { DomainSupabaseClient } from "../../domains/_shared/context.js";
+import { GROUP_SELECT } from "../queries.js";
 
 type Row = Record<string, unknown>;
 

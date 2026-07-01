@@ -49,6 +49,16 @@ const spec = parse(readFileSync(specPath, "utf8")) as {
 
 const violations: string[] = [];
 
+function isEmptySchema(schema: unknown): boolean {
+  return (
+    schema === undefined ||
+    (typeof schema === "object" &&
+      schema !== null &&
+      !Array.isArray(schema) &&
+      Object.keys(schema).length === 0)
+  );
+}
+
 for (const [path, methods] of Object.entries(spec.paths ?? {})) {
   for (const [method, operation] of Object.entries(methods)) {
     if (method === "parameters") continue;
@@ -60,13 +70,26 @@ for (const [path, methods] of Object.entries(spec.paths ?? {})) {
       }
 
       const statusCode = Number(status);
-      if (!Number.isInteger(statusCode) || statusCode < 200 || statusCode >= 300) {
+      if (!Number.isInteger(statusCode)) {
         continue;
       }
 
       const jsonContent = response.content?.["application/json"];
       if (!jsonContent) {
         continue;
+      }
+
+      const isSuccess = statusCode >= 200 && statusCode < 300;
+      const isError = statusCode >= 400;
+
+      if (!isSuccess && !isError) {
+        continue;
+      }
+
+      if (isEmptySchema(jsonContent.schema)) {
+        violations.push(
+          `${method.toUpperCase()} ${path} ${status}: empty or missing application/json schema`,
+        );
       }
 
       if (jsonContent.example === undefined) {

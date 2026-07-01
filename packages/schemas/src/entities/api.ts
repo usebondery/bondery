@@ -3,16 +3,18 @@ import { contactIdSchema } from "#contact-id.js";
 import { AVATAR_UPLOAD, CONTACT_FIELD_MAX_LENGTHS } from "#constants/index.js";
 import { shareableFieldSchema } from "#entities/contact.js";
 import { shareContactEmailSchema } from "#entities/channels.js";
+import { EXAMPLE_ERROR_400 } from "#openapi/fixtures/errors.js";
 import {
   EXAMPLE_API_SUCCESS_RESPONSE,
   EXAMPLE_PHOTO_UPLOAD_RESPONSE,
 } from "#openapi/fixtures/responses.js";
 
-export const apiErrorResponseSchema = z.object({
-  error: z.string(),
-  description: z.string().optional(),
-  details: z.string().optional(),
-});
+export const apiErrorResponseSchema = z
+  .object({
+    error: z.string(),
+    retryAfter: z.number().int().positive().optional(),
+  })
+  .meta({ id: "ApiError", example: EXAMPLE_ERROR_400 });
 
 export const apiSuccessResponseSchema = z
   .object({

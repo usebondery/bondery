@@ -4,17 +4,17 @@
  * never leaves the server.
  */
 
-import type { AppRoutePlugin } from "../../lib/fastify-types";
+import type { AppRoutePlugin } from "../../lib/fastify-types.js";
 import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
 import {
   parseMapSuggestions,
   mapSuggestionToContactAddress,
 } from "@bondery/helpers/address";
-import { getTimezoneForCoordinates } from "../../lib/mapy";
-import { registerApiKeyProtectedHooks } from "../../lib/api-key-access";
-import { applyOpenApiRouteMeta } from "../../lib/openapi-route-meta";
-import { withOkResponse } from "../../lib/openapi-route-responses";
-import { GEOCODE_TIER } from "../../lib/rate-limit";
+import { getTimezoneForCoordinates } from "../../lib/mapy.js";
+import { registerApiKeyProtectedHooks } from "../../lib/api-key-access.js";
+import { applyOpenApiRouteMeta } from "../../lib/openapi-route-meta.js";
+import { withOkResponse } from "../../lib/openapi-route-responses.js";
+import { GEOCODE_TIER } from "../../lib/rate-limit.js";
 import {
   geocodeSuggestQuerySchema,
   geocodeSuggestResponseWireSchema,

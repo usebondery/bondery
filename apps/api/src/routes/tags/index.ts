@@ -9,23 +9,23 @@
 
 
 import type { FastifyInstance, FastifyReply } from "fastify";
-import type { AppFastifyInstance, AppRoutePlugin } from "../../lib/fastify-types";
+import type { AppFastifyInstance, AppRoutePlugin } from "../../lib/fastify-types.js";
 
 import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
 
 import { z } from "zod";
 
-import { getAuth } from "../../lib/auth";
+import { getAuth } from "../../lib/auth.js";
 
-import { registerApiKeyProtectedHooks } from "../../lib/api-key-access";
+import { registerApiKeyProtectedHooks } from "../../lib/api-key-access.js";
 
-import { applyOpenApiRouteMeta } from "../../lib/openapi-route-meta";
+import { applyOpenApiRouteMeta } from "../../lib/openapi-route-meta.js";
 
-import { withCreatedResponse, withOkResponse } from "../../lib/openapi-route-responses";
+import { withCreatedResponse, withOkResponse } from "../../lib/openapi-route-responses.js";
 
-import { resolveContactAvatarUrl } from "../../lib/supabase";
+import { resolveContactAvatarUrl } from "../../lib/supabase.js";
 
-import { searchPeopleIds, restoreRankedOrder, countSearchPeopleIds } from "../../lib/search";
+import { searchPeopleIds, restoreRankedOrder, countSearchPeopleIds } from "../../lib/search.js";
 
 import {
 
@@ -33,7 +33,7 @@ import {
 
   extractAvatarOptions,
 
-} from "../../lib/queries";
+} from "../../lib/queries.js";
 
 import {
 
@@ -59,7 +59,7 @@ import {
 
   resolveSort,
 
-} from "../../lib/pagination";
+} from "../../lib/pagination.js";
 
 import {
 

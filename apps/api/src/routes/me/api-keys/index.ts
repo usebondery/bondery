@@ -3,7 +3,7 @@
  */
 
 import type { FastifyInstance, FastifyReply } from "fastify";
-import type { AppFastifyInstance, AppRoutePlugin } from "../../../lib/fastify-types";
+import type { AppFastifyInstance, AppRoutePlugin } from "../../../lib/fastify-types.js";
 import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
 import { API_KEY_LIMITS } from "@bondery/schemas";
 import {
@@ -13,18 +13,18 @@ import {
   createApiKeyInputSchema,
   updateApiKeyLabelInputSchema,
 } from "@bondery/schemas";
-import { uuidParamSchema, noContentResponse, standardErrorResponses } from "@bondery/schemas/http";
-import { getAuth } from "../../../lib/auth";
-import { applyOpenApiRouteMeta } from "../../../lib/openapi-route-meta";
+import { uuidParamSchema, noContentResponse, standardErrorResponses, conflictResponse } from "@bondery/schemas/http";
+import { getAuth } from "../../../lib/auth.js";
+import { applyOpenApiRouteMeta } from "../../../lib/openapi-route-meta.js";
 import {
   withCreatedResponse,
   withOkResponse,
-} from "../../../lib/openapi-route-responses";
+} from "../../../lib/openapi-route-responses.js";
 import {
   formatApiKeyPrefix,
   generateApiKeyMaterial,
   hashApiKey,
-} from "../../../lib/api-keys";
+} from "../../../lib/api-keys.js";
 
 function mapApiKeyRow(row: {
   id: string;
@@ -91,7 +91,10 @@ export const meApiKeysRoutes: AppRoutePlugin = async (fastify) => {
       schema: {
         description: "Create a new API key for the authenticated user.",
         body: createApiKeyInputSchema,
-        response: withCreatedResponse(apiKeyCreatedSchema, "API key created"),
+        response: {
+          ...withCreatedResponse(apiKeyCreatedSchema, "API key created"),
+          ...conflictResponse,
+        },
       } satisfies FastifyZodOpenApiSchema,
     },
     async (request, reply) => {

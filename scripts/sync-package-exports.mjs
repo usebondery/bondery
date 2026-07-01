@@ -1,6 +1,6 @@
 /**
  * Regenerates compiled-package exports in package.json files.
- * Wildcard hybrid (Turborepo): types → src, default → dist.
+ * Wildcard hybrid: types/import → src (bundlers), node/default → dist (Node).
  * Scans src/ for directory barrels (index.ts/tsx) and adds explicit subpath entries.
  *
  * Run after adding new public subpaths: npm run sync-exports
@@ -26,6 +26,8 @@ const HASH_IMPORTS = {
 
 const HYBRID_ENTRY = (srcPath, distPath) => ({
   types: srcPath,
+  import: srcPath,
+  node: distPath,
   default: distPath,
 });
 

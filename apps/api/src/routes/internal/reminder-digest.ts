@@ -1,13 +1,13 @@
 import type { FastifyInstance, FastifyReply } from "fastify";
-import type { AppFastifyInstance, AppRoutePlugin } from "../../lib/fastify-types";
+import type { AppFastifyInstance, AppRoutePlugin } from "../../lib/fastify-types.js";
 import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
 import { z } from "zod";
 import nodemailer from "nodemailer";
 import { render } from "@react-email/render";
 import { ReminderDigestEmail } from "@bondery/emails";
 import { reminderDigestRequestSchema, reminderDigestResponseSchema } from "@bondery/schemas";
-import { applyOpenApiRouteMeta } from "../../lib/openapi-route-meta";
-import { withOkResponse } from "../../lib/openapi-route-responses";
+import { applyOpenApiRouteMeta } from "../../lib/openapi-route-meta.js";
+import { withOkResponse } from "../../lib/openapi-route-responses.js";
 
 export const reminderDigestRoutes: AppRoutePlugin = async (fastify) => {
   fastify.addHook("onRoute", (routeOptions) => {

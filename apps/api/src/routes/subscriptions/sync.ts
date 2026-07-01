@@ -18,15 +18,15 @@
 import type { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
 import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
 import { z } from "zod";
-import { getAuth } from "../../lib/auth";
-import { createAdminClient } from "../../lib/supabase";
-import { applyOpenApiRouteMeta } from "../../lib/openapi-route-meta";
-import { withOkResponse } from "../../lib/openapi-route-responses";
+import { getAuth } from "../../lib/auth.js";
+import { createAdminClient } from "../../lib/supabase.js";
+import { applyOpenApiRouteMeta } from "../../lib/openapi-route-meta.js";
+import { withOkResponse } from "../../lib/openapi-route-responses.js";
 import {
   EXAMPLE_SUBSCRIPTION_SYNC_SKIPPED_RESPONSE,
 } from "@bondery/schemas";
-import { getPolarClient } from "../../lib/polar";
-import { upsertSubscription, mapStatus } from "../webhooks/polar";
+import { getPolarClient } from "../../lib/polar.js";
+import { upsertSubscription, mapStatus } from "../webhooks/polar.js";
 
 const subscriptionSyncResponseSchema = z
   .union([

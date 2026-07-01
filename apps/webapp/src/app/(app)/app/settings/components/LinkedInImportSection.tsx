@@ -2,23 +2,11 @@
 
 import { IconBrandLinkedin, IconDownload } from "@tabler/icons-react";
 import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
-import { modals } from "@mantine/modals";
-import { ModalTitle } from "@bondery/mantine-next";
 import { IntegrationCard } from "@/components/shared/IntegrationCard";
-import { LinkedInImportModal } from "./LinkedInImportModal";
+import { openLinkedInImportModal } from "./openLinkedInImportModal";
 
 export function LinkedInImportSection() {
   const t = useTranslations("SettingsPage.DataManagement.LinkedInImport");
-
-  const openImporter = () => {
-    const modalId = "linkedin-import-modal";
-    modals.open({
-      modalId,
-      title: <ModalTitle text={t("ModalTitle")} icon={<IconDownload size={20} stroke={1.5} />} />,
-      size: "lg",
-      children: <LinkedInImportModal t={t} modalId={modalId} />,
-    });
-  };
 
   return (
     <IntegrationCard
@@ -31,7 +19,7 @@ export function LinkedInImportSection() {
       isLinkable={false}
       connectedDescription={t("CardDescription")}
       unconnectedDescription={t("CardDescription")}
-      onClick={openImporter}
+      onClick={() => openLinkedInImportModal({ t })}
     />
   );
 }

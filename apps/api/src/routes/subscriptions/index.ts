@@ -4,23 +4,23 @@
  */
 
 import type { FastifyReply } from "fastify";
-import type { AppRoutePlugin } from "../../lib/fastify-types";
+import type { AppRoutePlugin } from "../../lib/fastify-types.js";
 import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
 import { z } from "zod";
-import { getAuth } from "../../lib/auth";
-import { applyOpenApiRouteMeta } from "../../lib/openapi-route-meta";
-import { withOkResponse } from "../../lib/openapi-route-responses";
+import { getAuth } from "../../lib/auth.js";
+import { applyOpenApiRouteMeta } from "../../lib/openapi-route-meta.js";
+import { withOkResponse } from "../../lib/openapi-route-responses.js";
 import {
   checkChatQuota,
   FREE_MESSAGE_LIMIT,
   PREMIUM_MESSAGE_LIMIT,
-} from "../../lib/chat/quota";
+} from "../../lib/chat/quota.js";
 import type { SubscriptionStatus } from "@bondery/schemas";
 import {
   EXAMPLE_SUBSCRIPTION_STATUS_RESPONSE,
   subscriptionStatusSchema,
 } from "@bondery/schemas";
-import { getPolarClient } from "../../lib/polar";
+import { getPolarClient } from "../../lib/polar.js";
 
 const subscriptionStatusResponseSchema = z
   .object({

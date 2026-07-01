@@ -10,13 +10,14 @@
 import type { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
 import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
 import { z } from "zod";
-import { getAuth } from "../../lib/auth";
-import { applyOpenApiRouteMeta } from "../../lib/openapi-route-meta";
-import { withOkResponse } from "../../lib/openapi-route-responses";
+import { getAuth } from "../../lib/auth.js";
+import { applyOpenApiRouteMeta } from "../../lib/openapi-route-meta.js";
+import { withOkResponse } from "../../lib/openapi-route-responses.js";
+import { conflictResponse } from "@bondery/schemas/http";
 import {
   EXAMPLE_CHECKOUT_RESPONSE,
 } from "@bondery/schemas";
-import { getPolarClient, sanitizePolarLocale } from "../../lib/polar";
+import { getPolarClient, sanitizePolarLocale } from "../../lib/polar.js";
 
 const checkoutResponseSchema = z
   .object({
@@ -43,7 +44,10 @@ export async function subscriptionCheckoutRoutes(
     {
       schema: {
         description: "Create a Polar checkout session for embedded upgrade.",
-        response: withOkResponse(checkoutResponseSchema, "Checkout session URL"),
+        response: {
+          ...withOkResponse(checkoutResponseSchema, "Checkout session URL"),
+          ...conflictResponse,
+        },
       } satisfies FastifyZodOpenApiSchema,
     },
     async (request: FastifyRequest, reply: FastifyReply) => {

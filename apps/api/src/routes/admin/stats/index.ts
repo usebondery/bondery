@@ -4,7 +4,7 @@
  */
 
 import type { FastifyReply } from "fastify";
-import type { AppFastifyInstance, AppRoutePlugin } from "../../../lib/fastify-types";
+import type { AppFastifyInstance, AppRoutePlugin } from "../../../lib/fastify-types.js";
 import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
 import { z } from "zod";
 import { GITHUB_REPO_URL } from "@bondery/helpers/globals/paths";
@@ -15,10 +15,10 @@ import {
   EXAMPLE_NPS_RESPONSE,
   EXAMPLE_TOTAL_USERS_RESPONSE,
 } from "@bondery/schemas";
-import { applyOpenApiRouteMeta } from "../../../lib/openapi-route-meta";
-import { withOkResponse } from "../../../lib/openapi-route-responses";
-import { createAdminClient } from "../../../lib/supabase";
-import { getActiveUsersTimeline, getNpsResults } from "../../../lib/posthog";
+import { applyOpenApiRouteMeta } from "../../../lib/openapi-route-meta.js";
+import { withOkResponse } from "../../../lib/openapi-route-responses.js";
+import { createAdminClient } from "../../../lib/supabase.js";
+import { getActiveUsersTimeline, getNpsResults } from "../../../lib/posthog.js";
 
 // ── Response schemas ─────────────────────────────────────────────────────────
 

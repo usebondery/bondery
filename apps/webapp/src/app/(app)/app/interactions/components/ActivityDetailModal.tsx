@@ -4,7 +4,7 @@ import { Text, Group, Stack, Avatar, Button, Textarea, Box } from "@mantine/core
 import { IconCalendar, IconMail, IconBrandLinkedin } from "@tabler/icons-react";
 import { BonderyIcon } from "@bondery/branding/react";
 import type { Activity, Contact } from "@bondery/schemas";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { notifications } from "@mantine/notifications";
 import { API_ROUTES, WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import { modals } from "@mantine/modals";
@@ -22,6 +22,7 @@ import {
   useDeleteInteractionMutation,
   useUpdateInteractionMutation,
 } from "@/lib/query/hooks/useInteractions";
+import { createModalId, useModalBlocking } from "@/lib/modals";
 
 interface OpenActivityDetailModalParams {
   activity: Activity;
@@ -56,14 +57,7 @@ function ActivityDetailBody({ modalId, activity, contacts }: ActivityDetailBodyP
   const deleteInteractionMutation = useDeleteInteractionMutation();
   const t = useTranslations("InteractionsPage");
 
-  useEffect(() => {
-    modals.updateModal({
-      modalId,
-      closeOnEscape: !loading,
-      closeOnClickOutside: !loading,
-      withCloseButton: !loading,
-    });
-  }, [loading, modalId]);
+  useModalBlocking(modalId, loading);
 
   const participants = (activity.participants || [])
     .map((participant: any) => {
@@ -250,7 +244,7 @@ export function openActivityDetailModal({
   activity,
   contacts,
 }: OpenActivityDetailModalParams): void {
-  const modalId = `activity-detail-${Math.random().toString(36).slice(2)}`;
+  const modalId = createModalId("activity-detail");
 
   modals.open({
     modalId,

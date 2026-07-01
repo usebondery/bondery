@@ -8,35 +8,49 @@
   "exports": {
     ".": {
       "types": "./src/index.ts",
+      "import": "./src/index.ts",
+      "node": "./dist/index.js",
       "default": "./dist/index.js"
     },
     "./*": {
       "types": "./src/*.ts",
+      "import": "./src/*.ts",
+      "node": "./dist/*.js",
       "default": "./dist/*.js"
     },
     "./attachments": {
       "types": "./src/attachments.ts",
+      "import": "./src/attachments.ts",
+      "node": "./dist/attachments.js",
       "default": "./dist/attachments.js"
     },
     "./contact-mapping": {
       "types": "./src/contact-mapping.ts",
+      "import": "./src/contact-mapping.ts",
+      "node": "./dist/contact-mapping.js",
       "default": "./dist/contact-mapping.js"
     },
     "./model": {
       "types": "./src/model.ts",
+      "import": "./src/model.ts",
+      "node": "./dist/model.js",
       "default": "./dist/model.js"
     },
     "./parse": {
       "types": "./src/parse.ts",
+      "import": "./src/parse.ts",
+      "node": "./dist/parse.js",
       "default": "./dist/parse.js"
     },
     "./serialize": {
       "types": "./src/serialize.ts",
+      "import": "./src/serialize.ts",
+      "node": "./dist/serialize.js",
       "default": "./dist/serialize.js"
     }
   },
   "scripts": {
-    "build": "rimraf dist && tsc",
+    "build": "rimraf dist && tsc && node ../../scripts/rewrite-package-hash-imports-in-dist.mjs vcard",
     "dev": "tsc --watch --preserveWatchOutput",
     "check-types": "tsc --noEmit"
   },

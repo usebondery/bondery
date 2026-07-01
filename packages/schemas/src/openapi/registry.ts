@@ -16,11 +16,13 @@ import {
   EXAMPLE_INTERACTION,
   EXAMPLE_TAG,
 } from "#openapi/fixtures/entities.js";
+import { EXAMPLE_ERROR_400, EXAMPLE_SYNC_CONFLICT_ERROR } from "#openapi/fixtures/errors.js";
 import { EXAMPLE_PAGINATION } from "#openapi/fixtures/primitives.js";
 import {
   EXAMPLE_DELETE_CONTACT_RESPONSE,
   EXAMPLE_DELETE_CONTACTS_RESPONSE,
 } from "#openapi/fixtures/responses.js";
+import { syncConflictErrorResponseSchema } from "#sync/conflict.js";
 
 /**
  * Registers shared schemas for OpenAPI component $refs.
@@ -54,7 +56,12 @@ export function registerOpenApiComponentSchemas(): void {
   z.globalRegistry.add(apiErrorResponseSchema, {
     id: "ApiError",
     description: "Error response with a human-readable message",
-    example: { error: "Invalid request body" },
+    example: EXAMPLE_ERROR_400,
+  });
+  z.globalRegistry.add(syncConflictErrorResponseSchema, {
+    id: "SyncConflictError",
+    description: "Contact update conflict with the current server version",
+    example: EXAMPLE_SYNC_CONFLICT_ERROR,
   });
   z.globalRegistry.add(paginationMetaSchema, {
     id: "PaginationMeta",

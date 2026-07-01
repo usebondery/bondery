@@ -25,6 +25,7 @@ import {
   type ShareableField,
 } from "@bondery/schemas";
 import { z } from "zod";
+import { createModalId, useModalBlocking } from "@/lib/modals";
 
 const ALL_FIELDS: ShareableField[] = [
   "avatar",
@@ -60,7 +61,7 @@ function ShareContactModalTitle() {
 }
 
 export function openShareContactModal({ contact }: OpenShareContactModalParams) {
-  const modalId = `share-contact-${Math.random().toString(36).slice(2)}`;
+  const modalId = createModalId("share-contact");
 
   modals.open({
     modalId,
@@ -196,6 +197,7 @@ function ShareContactModalContent({ contact, modalId }: { contact: Contact; moda
   const tShare = useTranslations("ShareContactModal");
   const shareContactMutation = useShareContactMutation();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  useModalBlocking(modalId, isSubmitting);
   const form = useForm({
     mode: "controlled",
     initialValues: {

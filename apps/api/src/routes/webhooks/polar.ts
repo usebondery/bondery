@@ -19,10 +19,10 @@ import {
   validateEvent,
   WebhookVerificationError,
 } from "@polar-sh/sdk/webhooks";
-import { applyOpenApiRouteMeta } from "../../lib/openapi-route-meta";
-import { withOkResponse } from "../../lib/openapi-route-responses";
+import { applyOpenApiRouteMeta } from "../../lib/openapi-route-meta.js";
+import { withOkResponse } from "../../lib/openapi-route-responses.js";
 import { EXAMPLE_WEBHOOK_ACK_RESPONSE } from "@bondery/schemas";
-import { createAdminClient } from "../../lib/supabase";
+import { createAdminClient } from "../../lib/supabase.js";
 
 const webhookAckResponseSchema = z
   .object({

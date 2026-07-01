@@ -1,5 +1,5 @@
 import { Redis } from "ioredis";
-import type { ServiceProbeResult } from "./types";
+import type { ServiceProbeResult } from "./types.js";
 
 const DEFAULT_PROBE_TIMEOUT_MS = 5_000;
 

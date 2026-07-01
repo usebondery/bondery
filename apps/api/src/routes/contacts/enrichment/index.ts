@@ -3,10 +3,10 @@
  * Orchestrates LinkedIn data, enrich, and enrich-queue sub-modules.
  */
 
-import type { AppFastifyInstance } from "../../../lib/fastify-types";
-import { registerLinkedInDataRoutes } from "./linkedin-data";
-import { registerEnrichRoutes } from "./enrich";
-import { registerEnrichQueueRoutes } from "./enrich-queue";
+import type { AppFastifyInstance } from "../../../lib/fastify-types.js";
+import { registerLinkedInDataRoutes } from "./linkedin-data.js";
+import { registerEnrichRoutes } from "./enrich.js";
+import { registerEnrichQueueRoutes } from "./enrich-queue.js";
 
 export function registerEnrichmentRoutes(fastify: AppFastifyInstance): void {
   registerLinkedInDataRoutes(fastify);

@@ -37,6 +37,7 @@ import type {
 import { SelectableCard } from "@/app/(app)/app/components/SelectableCard";
 import { getAvatarColorFromName } from "@/lib/avatarColor";
 import { DEBOUNCE_MS } from "@/lib/config";
+import { createModalId, useModalBlocking } from "@/lib/modals";
 
 interface OpenMergeWithModalParams {
   contacts: Contact[];
@@ -384,7 +385,7 @@ export function openMergeWithModal({
   onSuccess,
   initialConflictChoices,
 }: OpenMergeWithModalParams) {
-  const modalId = `merge-with-${Math.random().toString(36).slice(2)}`;
+  const modalId = createModalId("merge-with");
 
   modals.open({
     modalId,
@@ -450,14 +451,7 @@ function MergeWithModal({
     Partial<Record<MergeConflictField, MergeConflictChoice>>
   >(initialConflictChoices ?? {});
 
-  useEffect(() => {
-    modals.updateModal({
-      modalId,
-      closeOnEscape: !isSubmitting,
-      closeOnClickOutside: !isSubmitting,
-      withCloseButton: !isSubmitting,
-    });
-  }, [isSubmitting, modalId]);
+  useModalBlocking(modalId, isSubmitting);
 
   useEffect(() => {
     contacts.forEach((c) => knownContactsRef.current.set(c.id, c));

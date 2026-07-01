@@ -4,19 +4,20 @@
  */
 
 import type { FastifyReply } from "fastify";
-import type { AppFastifyInstance } from "../../../lib/fastify-types";
+import type { AppFastifyInstance } from "../../../lib/fastify-types.js";
 import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
-import { getAuth } from "../../../lib/auth";
-import { withOkResponse } from "../../../lib/openapi-route-responses";
-import { resolveContactAvatarUrl } from "../../../lib/supabase";
+import { getAuth } from "../../../lib/auth.js";
+import { withOkResponse } from "../../../lib/openapi-route-responses.js";
+import { resolveContactAvatarUrl } from "../../../lib/supabase.js";
 import type { ImportantDateType, UpcomingReminder, Database } from "@bondery/schemas";
 import {
   importantDatesListResponseSchema,
   upcomingRemindersResponseSchema,
 } from "@bondery/schemas";
-import { extractAvatarOptions } from "../../../lib/queries";
+import { extractAvatarOptions } from "../../../lib/queries.js";
 import {
   avatarTransformQuerySchema,
+  conflictResponse,
   importantDatesReplaceBodySchema,
   uuidParamSchema,
 } from "@bondery/schemas/http";
@@ -333,7 +334,10 @@ export function registerImportantDateRoutes(fastify: AppFastifyInstance): void {
         description: "Replace all important dates for a contact.",
         params: uuidParamSchema,
         body: importantDatesReplaceBodySchema,
-        response: withOkResponse(importantDatesListResponseSchema, "Important dates replaced"),
+        response: {
+          ...withOkResponse(importantDatesListResponseSchema, "Important dates replaced"),
+          ...conflictResponse,
+        },
       } satisfies FastifyZodOpenApiSchema,
     },
     async (request, reply) => {

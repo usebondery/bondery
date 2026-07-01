@@ -22,6 +22,7 @@ import {
   useAddContactsToGroupMutation,
   useGroupMembersQuery,
 } from "@/lib/query/hooks/useGroups";
+import { createModalId, useModalBlocking } from "@/lib/modals";
 
 interface AddPeopleToGroupModalProps {
   groupId: string;
@@ -46,7 +47,7 @@ function AddPeopleToGroupModalTitle({ groupLabel }: { groupLabel: string }) {
  * Opens a modal that lets user select and add contacts to the provided group.
  */
 export function openAddPeopleToGroupModal(props: AddPeopleToGroupModalProps) {
-  const modalId = `add-people-to-group-${Math.random().toString(36).slice(2)}`;
+  const modalId = createModalId("add-people-to-group");
 
   modals.open({
     modalId,
@@ -90,14 +91,8 @@ function AddPeopleToGroupForm({ groupId, groupLabel, modalId }: AddPeopleToGroup
     }
   }, [isAllContactsError, isMembersError, t]);
 
-  useEffect(() => {
-    modals.updateModal({
-      modalId,
-      closeOnEscape: !isSubmitting,
-      closeOnClickOutside: !isSubmitting,
-      withCloseButton: !isSubmitting,
-    });
-  }, [isSubmitting, modalId]);
+  const isBlocking = isSubmitting || isLoading;
+  useModalBlocking(modalId, isBlocking);
 
   const handleSearch = useCallback(async (query: string): Promise<Contact[]> => {
     const results = await searchContacts(query);

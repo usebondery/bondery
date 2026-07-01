@@ -1,16 +1,16 @@
 import type { FastifyReply } from "fastify";
-import type { AppFastifyInstance, AppRoutePlugin } from "../../../lib/fastify-types";
+import type { AppFastifyInstance, AppRoutePlugin } from "../../../lib/fastify-types.js";
 import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
-import { getAuth } from "../../../lib/auth";
-import { registerApiKeyProtectedHooks } from "../../../lib/api-key-access";
-import { applyOpenApiRouteMeta } from "../../../lib/openapi-route-meta";
-import { withOkResponse } from "../../../lib/openapi-route-responses";
+import { getAuth } from "../../../lib/auth.js";
+import { registerApiKeyProtectedHooks } from "../../../lib/api-key-access.js";
+import { applyOpenApiRouteMeta } from "../../../lib/openapi-route-meta.js";
+import { withOkResponse } from "../../../lib/openapi-route-responses.js";
 import {
   assignContactsToDefaultImportGroup,
   toInstagramImportGroupKeys,
   type DefaultImportGroupKey,
-} from "../../../lib/default-import-groups";
-import { parseInstagramExportUpload } from "./parser";
+} from "../../../lib/default-import-groups.js";
+import { parseInstagramExportUpload } from "./parser.js";
 import type {
   InstagramImportCommitResponse,
   InstagramImportSource,
@@ -23,7 +23,7 @@ import {
   instagramImportCommitResponseSchema,
   instagramParseResponseSchema,
 } from "@bondery/schemas";
-import { IMPORT_TIER } from "../../../lib/rate-limit";
+import { IMPORT_TIER } from "../../../lib/rate-limit.js";
 
 const SUPPORTED_STRATEGIES: InstagramImportStrategy[] = [
   "close_friends",

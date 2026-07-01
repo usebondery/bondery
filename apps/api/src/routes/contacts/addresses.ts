@@ -1,6 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { ContactAddressEntry, ContactAddressType, Database } from "@bondery/schemas";
-import type { ContactWithId } from "../../lib/queries";
+import type { ContactWithId } from "../../lib/queries.js";
 
 type ContactWithAddresses = {
   addresses: ContactAddressEntry[];

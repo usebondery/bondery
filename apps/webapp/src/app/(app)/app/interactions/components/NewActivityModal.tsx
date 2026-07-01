@@ -1,25 +1,15 @@
 "use client";
 
-import {
-  Button,
-  TextInput,
-  Select,
-  Group,
-  Stack,
-  Textarea,
-  Text,
-  Avatar,
-  Modal,
-  getDefaultZIndex,
-} from "@mantine/core";
+import { Button, TextInput, Select, Group, Stack, Textarea, Text, Avatar } from "@mantine/core";
 import { schemaResolver, useForm } from "@mantine/form";
 import { notifications } from "@mantine/notifications";
-import { IconCalendarPlus, IconCheck, IconUserPlus } from "@tabler/icons-react";
+import { IconCalendarPlus, IconCheck } from "@tabler/icons-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
 import { modals } from "@mantine/modals";
 import { interactionFormSchema, type Contact, type Activity } from "@bondery/schemas";
-import { AddContactForm } from "../../people/components/AddContactModal";
+import { openAddContactModal } from "../../people/components/AddContactModal";
+import { createModalId, useModalBlocking } from "@/lib/modals";
 import {
   ModalFooter,
   PeopleMultiPickerInput,
@@ -157,7 +147,6 @@ function NewActivityForm({
     }
     return Array.from(pool.values());
   });
-  const [createPersonOpened, setCreatePersonOpened] = useState(false);
   const participantsInputRef = useRef<HTMLInputElement>(null);
   const isEditMode = Boolean(activity?.id);
 
@@ -171,14 +160,7 @@ function NewActivityForm({
     });
   }, [contacts]);
 
-  useEffect(() => {
-    modals.updateModal({
-      modalId,
-      closeOnEscape: !loading,
-      closeOnClickOutside: !loading,
-      withCloseButton: !loading,
-    });
-  }, [loading, modalId]);
+  useModalBlocking(modalId, loading);
 
   const resolvedInitialParticipantIds = useMemo(
     () =>
@@ -274,8 +256,7 @@ function NewActivityForm({
   };
 
   return (
-    <>
-      <form onSubmit={form.onSubmit(handleSubmit)}>
+    <form onSubmit={form.onSubmit(handleSubmit)}>
         <Stack gap="md">
           <TextInput
             label={t("Title")}
@@ -307,7 +288,7 @@ function NewActivityForm({
               variant="subtle"
               size="xs"
               onClick={() => {
-                setCreatePersonOpened(true);
+                openAddContactModal({ onCreated: handleContactCreated });
               }}
               disabled={loading}
               style={{ alignSelf: "flex-start", paddingLeft: 0 }}
@@ -381,26 +362,7 @@ function NewActivityForm({
             }
           />
         </Stack>
-      </form>
-
-      <Modal
-        opened={createPersonOpened}
-        onClose={() => setCreatePersonOpened(false)}
-        title={<ModalTitle text="Create person" icon={<IconUserPlus size={24} />} />}
-        trapFocus
-        closeOnEscape
-        closeOnClickOutside
-        zIndex={getDefaultZIndex("modal") + 2}
-      >
-        <AddContactForm
-          onClose={() => setCreatePersonOpened(false)}
-          onCreated={(contact) => {
-            setCreatePersonOpened(false);
-            handleContactCreated(contact);
-          }}
-        />
-      </Modal>
-    </>
+    </form>
   );
 }
 
@@ -410,7 +372,7 @@ export function openNewActivityModal({
   initialParticipantIds,
   onCreated,
 }: OpenNewActivityModalParams): void {
-  const modalId = `activity-${Math.random().toString(36).slice(2)}`;
+  const modalId = createModalId("activity");
 
   modals.open({
     modalId,

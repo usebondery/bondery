@@ -5,9 +5,9 @@
  * with coordinates, structured address fields, and IANA timezone identifiers.
  */
 
-import { createAdminClient } from "./supabase";
+import { createAdminClient } from "./supabase.js";
 import { formatPlaceLabel } from "@bondery/helpers/address";
-import logger from "./logger";
+import logger from "./logger.js";
 
 const MAPS_BASE_URL = "https://api.mapy.com";
 

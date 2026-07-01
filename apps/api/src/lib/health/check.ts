@@ -3,14 +3,14 @@ import type {
   HealthReport,
   HealthServices,
   HealthStatus,
-} from "./types";
+} from "./types.js";
 import {
   probeConfigured,
   probeRedis,
   probeSupabaseAuth,
   probeSupabaseDatabase,
   probeSupabaseStorage,
-} from "./probes";
+} from "./probes.js";
 
 const CACHE_TTL_MS = 60_000;
 

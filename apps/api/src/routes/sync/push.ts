@@ -1,20 +1,20 @@
 import type { FastifyReply } from "fastify";
-import type { AppRoutePlugin } from "../../lib/fastify-types";
+import type { AppRoutePlugin } from "../../lib/fastify-types.js";
 import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
 import { syncPushRequestSchema, syncPushResponseSchema } from "@bondery/schemas/sync";
 import type { SyncPushResult } from "@bondery/schemas/sync";
-import { getAuth } from "../../lib/auth";
-import { applyOpenApiRouteMeta } from "../../lib/openapi-route-meta";
-import { withOkResponse } from "../../lib/openapi-route-responses";
-import { createAdminClient } from "../../lib/supabase";
-import { validateSyncProtocolHeaders } from "../../lib/sync/protocol";
-import { applySyncMutation } from "../../lib/sync/apply-mutation";
+import { getAuth } from "../../lib/auth.js";
+import { applyOpenApiRouteMeta } from "../../lib/openapi-route-meta.js";
+import { withOkResponse } from "../../lib/openapi-route-responses.js";
+import { createAdminClient } from "../../lib/supabase.js";
+import { validateSyncProtocolHeaders } from "../../lib/sync/protocol.js";
+import { applySyncMutation } from "../../lib/sync/apply-mutation.js";
 import {
   findSyncReceipt,
   getLastServerSequence,
   hashSyncMutationPayload,
   storeSyncReceipt,
-} from "../../lib/sync/idempotency";
+} from "../../lib/sync/idempotency.js";
 
 export const syncPushRoutes: AppRoutePlugin = async (fastify): Promise<void> => {
   fastify.addHook("onRoute", (routeOptions) => {

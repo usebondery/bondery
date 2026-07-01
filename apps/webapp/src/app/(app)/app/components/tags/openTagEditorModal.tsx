@@ -40,6 +40,7 @@ import {
 } from "@/lib/query/hooks/useTags";
 import { createContactsListQueryFn } from "@/lib/query/fetchers/contacts";
 import { contactKeys } from "@/lib/query/keys";
+import { createModalId, useModalBlocking } from "@/lib/modals";
 
 const COLOR_SWATCHES = [
   ...DEFAULT_THEME.colors.red.slice(5, 8),
@@ -133,6 +134,9 @@ function TagEditorModalBody({
 
   const isLoadingContacts =
     isLoadingContactsList || (mode === "edit" && !!tag && isLoadingMembers);
+
+  const isBlocking = isSubmitting || isLoadingContacts;
+  useModalBlocking(modalId, isBlocking);
 
   const handleSearch = useCallback(
     async (query: string): Promise<Contact[]> => {
@@ -424,7 +428,7 @@ function TagEditorModalBody({
 }
 
 export function openTagEditorModal(options: OpenTagEditorModalOptions) {
-  const modalId = `tag-editor-${Math.random().toString(36).slice(2)}`;
+  const modalId = createModalId("tag-editor");
 
   modals.open({
     modalId,

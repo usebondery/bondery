@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 
 import { useRouter } from "next/navigation";
 import { Stack, TextInput, Text } from "@mantine/core";
@@ -29,6 +29,7 @@ import {
 import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import { captureEvent } from "@/lib/analytics/client";
 import { extractUsername } from "@bondery/helpers";
+import { createModalId, useModalBlocking } from "@/lib/modals";
 
 const addContactFormSchema = z
   .object({
@@ -55,9 +56,7 @@ interface OpenAddContactModalOptions {
 }
 
 interface AddContactFormProps extends OpenAddContactModalOptions {
-  modalId?: string;
-  /** When provided, used instead of the modals manager to close the modal (embedded mode). */
-  onClose?: () => void;
+  modalId: string;
 }
 
 function AddContactModalTitle() {
@@ -66,43 +65,29 @@ function AddContactModalTitle() {
 }
 
 export function openAddContactModal(options: OpenAddContactModalOptions = {}) {
-  const modalId = `add-contact-${Math.random().toString(36).slice(2)}`;
+  const modalId = createModalId("add-contact");
 
   modals.open({
     modalId,
     title: <AddContactModalTitle />,
     trapFocus: true,
-    children: (
-      <AddContactForm modalId={modalId} onClose={() => modals.close(modalId)} {...options} />
-    ),
+    children: <AddContactForm modalId={modalId} {...options} />,
   });
 }
 
 export function AddContactForm({
   modalId,
-  onClose,
   onCreated,
   initialFullName = "",
   initialLinkedin = "",
 }: AddContactFormProps) {
   const router = useRouter();
   const t = useTranslations("PeoplePage");
-  const safeModalId = modalId ?? "";
   const [focusedField, setFocusedField] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const createContactMutation = useCreateContactMutation();
 
-  useEffect(() => {
-    // In embedded mode (onClose prop provided), the parent <Modal> controls
-    // these behaviours directly — no need to go through the modals manager.
-    if (onClose) return;
-    modals.updateModal({
-      modalId: safeModalId,
-      closeOnEscape: !isSubmitting,
-      closeOnClickOutside: !isSubmitting,
-      withCloseButton: !isSubmitting,
-    });
-  }, [isSubmitting, safeModalId, onClose]);
+  useModalBlocking(modalId, isSubmitting);
 
   const exampleName = useMemo(() => getRandomExampleName(), []);
 
@@ -118,7 +103,6 @@ export function AddContactForm({
   const handleSubmit = async (values: typeof form.values) => {
     setIsSubmitting(true);
 
-    // Show loading notification
     const loadingNotification = notifications.show({
       ...loadingNotificationTemplate({
         title: t("AddContactModal.LoadingTitle"),
@@ -140,10 +124,8 @@ export function AddContactForm({
         ...(linkedinHandle ? { linkedin: linkedinHandle } : {}),
       });
 
-      // Hide loading notification
       notifications.hide(loadingNotification);
 
-      // Show success notification
       notifications.show(
         successNotificationTemplate({
           title: t("AddContactModal.SuccessTitle"),
@@ -153,28 +135,17 @@ export function AddContactForm({
 
       captureEvent("contact_created");
 
+      modals.close(modalId);
+
       if (onCreated) {
-        if (onClose) {
-          onClose();
-        } else {
-          modals.close(safeModalId);
-        }
         onCreated(createdContact);
         return;
       }
 
-      if (onClose) {
-        onClose();
-      } else {
-        // Close modal and redirect to person page
-        modals.close(safeModalId);
-        router.push(`${WEBAPP_ROUTES.PERSON}/${createdContact.id}`);
-      }
+      router.push(`${WEBAPP_ROUTES.PERSON}/${createdContact.id}`);
     } catch (error) {
-      // Hide loading notification
       notifications.hide(loadingNotification);
 
-      // Show error notification
       const fallbackMessage =
         error instanceof z.ZodError
           ? firstZodErrorMessage(error)
@@ -226,7 +197,6 @@ export function AddContactForm({
           onFocus={() => setFocusedField("linkedin")}
           onBlur={(e) => {
             setFocusedField(null);
-            // Extract handle from any URL format on blur
             const raw = e.currentTarget.value.trim();
             if (raw) {
               const extracted = extractUsername("linkedin", raw);
@@ -238,7 +208,7 @@ export function AddContactForm({
 
         <ModalFooter
           cancelLabel={t("AddContactModal.Cancel")}
-          onCancel={() => (onClose ? onClose() : modals.close(safeModalId))}
+          onCancel={() => modals.close(modalId)}
           cancelDisabled={isSubmitting}
           actionLabel={t("AddContactModal.AddToBondery")}
           actionType="submit"

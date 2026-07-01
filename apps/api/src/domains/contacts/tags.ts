@@ -1,12 +1,12 @@
 import type { Tag } from "@bondery/schemas";
-import { TAG_SELECT } from "../../lib/queries";
-import { withPersonTxid } from "../_shared/with-txid";
-import { DomainError, type DomainContext } from "../_shared/context";
+import { TAG_SELECT } from "../../lib/queries.js";
+import { withPersonTxid } from "../_shared/with-txid.js";
+import { DomainError, type DomainContext } from "../_shared/context.js";
 import {
   buildPeopleTagChange,
   findPeopleTagId,
-} from "../../lib/sync/build-changes";
-import { emitSyncBatch } from "../../lib/sync/emit-change";
+} from "../../lib/sync/build-changes.js";
+import { emitSyncBatch } from "../../lib/sync/emit-change.js";
 
 export async function addContactTag(
   ctx: DomainContext,

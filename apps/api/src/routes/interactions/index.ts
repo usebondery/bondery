@@ -4,16 +4,16 @@
  */
 
 import type { FastifyInstance, FastifyReply } from "fastify";
-import type { AppFastifyInstance, AppRoutePlugin } from "../../lib/fastify-types";
+import type { AppFastifyInstance, AppRoutePlugin } from "../../lib/fastify-types.js";
 import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
-import { getAuth } from "../../lib/auth";
-import { registerApiKeyProtectedHooks } from "../../lib/api-key-access";
-import { applyOpenApiRouteMeta } from "../../lib/openapi-route-meta";
+import { getAuth } from "../../lib/auth.js";
+import { registerApiKeyProtectedHooks } from "../../lib/api-key-access.js";
+import { applyOpenApiRouteMeta } from "../../lib/openapi-route-meta.js";
 import {
   withCreatedResponse,
   withOkResponse,
-} from "../../lib/openapi-route-responses";
-import { INTERACTION_SELECT, extractAvatarOptions } from "../../lib/queries";
+} from "../../lib/openapi-route-responses.js";
+import { INTERACTION_SELECT, extractAvatarOptions } from "../../lib/queries.js";
 import {
   avatarTransformQuerySchema,
   interactionsListQuerySchema,
@@ -26,12 +26,12 @@ import {
   messageResponseSchema,
   updateInteractionInputSchema,
 } from "@bondery/schemas";
-import { resolveContactAvatarUrl } from "../../lib/supabase";
+import { resolveContactAvatarUrl } from "../../lib/supabase.js";
 import {
   buildPaginatedResponse,
   buildPaginationMeta,
   parsePagination,
-} from "../../lib/pagination";
+} from "../../lib/pagination.js";
 
 async function loadInteraction(
   client: ReturnType<typeof getAuth>["client"],

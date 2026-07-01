@@ -42,6 +42,7 @@ import {
   useSyncContactGroupMembershipsMutation,
 } from "@/lib/query/hooks/useGroups";
 import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
+import { createModalId, useModalBlocking } from "@/lib/modals";
 
 export interface GroupMembershipUpdate {
   groups: GroupWithCount[];
@@ -58,7 +59,7 @@ interface AddPeopleToGroupSelectionFormProps extends AddPeopleToGroupSelectionMo
 }
 
 export function openAddPeopleToGroupSelectionModal(props: AddPeopleToGroupSelectionModalProps) {
-  const modalId = `edit-groups-${Math.random().toString(36).slice(2)}`;
+  const modalId = createModalId("edit-groups");
 
   modals.open({
     modalId,
@@ -105,14 +106,8 @@ function AddPeopleToGroupSelectionForm({
     });
   }, [modalId, t]);
 
-  useEffect(() => {
-    modals.updateModal({
-      modalId,
-      closeOnEscape: !isSubmitting,
-      closeOnClickOutside: !isSubmitting,
-      withCloseButton: !isSubmitting,
-    });
-  }, [isSubmitting, modalId]);
+  const isBlocking = isSubmitting || isLoadingGroupsData;
+  useModalBlocking(modalId, isBlocking);
 
   useEffect(() => {
     if (isGroupsError || isContactsError || membershipQueries.some((query) => query.isError)) {
