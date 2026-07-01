@@ -58,15 +58,15 @@ Each app (`apps/api`, `apps/webapp`, …) is its own Vercel project with **Root 
 The API project uses [`apps/api/vercel.json`](../../apps/api/vercel.json):
 
 1. **Install** — Vercel installs npm workspaces from the monorepo root (no `cd ../..` needed).
-2. **Build** — `npm run build` runs `tsup` (bundles `@bondery/*` into `dist/index.js`), copies the bundle to `api/index.js`, and creates an empty `public/` (Vercel expects a static output directory even for functions-only projects).
-3. **Routing** — `rewrites` send all paths to the `/api` function; Fastify still serves `/api/contacts`, etc.
+2. **Build** — `npm run build` runs `tsup` (bundles `@bondery/*` into `dist/index.js`), then writes [Build Output API v3](https://vercel.com/docs/build-output-api/v3) artifacts to `.vercel/output/` (`functions/api.func/index.js` + routing to `/api`).
+3. **Routing** — `config.json` routes all paths to the `/api` function; Fastify serves `/status`, `/api/contacts`, etc.
 4. **`framework: null`** — disables Vercel Fastify zero-config on `src/index.ts` (which would deploy unbundled source and fail on `@bondery/*/src/*.ts`).
 
 Do **not** use legacy `builds` / `routes` in `vercel.json` — they disable dashboard build settings and skip `buildCommand` (deploy completes in milliseconds with no install or bundle).
 
-Do **not** list `src/`, `scripts/`, or `tsup.config.ts` in `.vercelignore` — Vercel removes those files before `npm run build`, so `tsup` fails with “No input files”.
+Do **not** set `outputDirectory` to `public` for this project — that deploys only static files and skips the serverless function (404 on every route, no function logs).
 
-**Troubleshooting:** If runtime errors mention `/var/task/apps/api/src/index.js`, Root Directory is set to the repo root — change it to `apps/api`. If `tsup` fails with no input files, check `.vercelignore` is not excluding `src/`.
+**Troubleshooting:** If runtime errors mention `/var/task/apps/api/src/index.js`, Root Directory is set to the repo root — change it to `apps/api`. If `tsup` fails with no input files, check `.vercelignore` is not excluding `src/`. If every route is 404 with no function logs, the deploy likely shipped static output only — confirm `outputDirectory` is `.vercel/output` in `vercel.json`.
 
 `openapi.yaml` is committed; generation is not part of the deploy build.
 
