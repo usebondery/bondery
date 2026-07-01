@@ -54,8 +54,6 @@ next-env.d.ts
 
 # dist
 **/dist/**
-apps/api/api/index.js
-apps/api/public/**
 .env.local
 
 #ngrok

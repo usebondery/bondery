@@ -1,6 +1,5 @@
 import { readdir, readFile, stat, writeFile } from "node:fs/promises";
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
+import { join, resolve } from "node:path";
 
 async function getJsFiles(dir) {
   const entries = await readdir(dir);
@@ -18,8 +17,12 @@ async function getJsFiles(dir) {
 }
 
 function rewriteRelativeImports(code) {
-  return code.replace(/from\s+"(\.{1,2}\/[^\"]+)"/g, (full, specifier) => {
-    if (specifier.endsWith(".js") || specifier.endsWith(".json") || specifier.endsWith(".node")) {
+  return code.replace(/from\s+"(\.{1,2}\/[^"]+)"/g, (full, specifier) => {
+    if (
+      specifier.endsWith(".js") ||
+      specifier.endsWith(".json") ||
+      specifier.endsWith(".node")
+    ) {
       return full;
     }
     return full.replace(specifier, `${specifier}.js`);
@@ -27,8 +30,8 @@ function rewriteRelativeImports(code) {
 }
 
 async function main() {
-  const currentDir = dirname(fileURLToPath(import.meta.url));
-  const distDir = join(currentDir, "..", "dist");
+  const distArg = process.argv[2] ?? "dist";
+  const distDir = resolve(process.cwd(), distArg);
   const jsFiles = await getJsFiles(distDir);
 
   await Promise.all(

@@ -9,36 +9,42 @@
     ".": {
       "types": "./src/index.ts",
       "import": "./src/index.ts",
-      "require": "./src/index.ts"
+      "node": "./dist/index.js",
+      "default": "./dist/index.js"
     },
     "./constants": {
       "types": "./src/constants/index.ts",
       "import": "./src/constants/index.ts",
-      "require": "./src/constants/index.ts"
+      "node": "./dist/constants/index.js",
+      "default": "./dist/constants/index.js"
     },
     "./supabase.types": {
       "types": "./src/supabase.types.ts",
       "import": "./src/supabase.types.ts",
-      "require": "./src/supabase.types.ts"
+      "node": "./dist/supabase.types.js",
+      "default": "./dist/supabase.types.js"
     },
     "./database": {
       "types": "./src/supabase.types.ts",
       "import": "./src/supabase.types.ts",
-      "require": "./src/supabase.types.ts"
+      "node": "./dist/supabase.types.js",
+      "default": "./dist/supabase.types.js"
     },
     "./sync": {
       "types": "./src/sync/index.ts",
       "import": "./src/sync/index.ts",
-      "require": "./src/sync/index.ts"
+      "node": "./dist/sync/index.js",
+      "default": "./dist/sync/index.js"
     },
     "./http": {
       "types": "./src/http/index.ts",
       "import": "./src/http/index.ts",
-      "require": "./src/http/index.ts"
+      "node": "./dist/http/index.js",
+      "default": "./dist/http/index.js"
     }
   },
   "scripts": {
-    "build:types": "rimraf dist && tsc",
+    "build": "rimraf dist && tsc && node ../../scripts/fix-package-esm-imports.mjs",
     "check-types": "tsc --noEmit",
     "test:contracts": "node scripts/check-no-internal-deps.mjs && npx tsx ./src/contracts.assertions.ts"
   },

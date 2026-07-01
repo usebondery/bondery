@@ -9,11 +9,12 @@
     ".": {
       "types": "./src/index.ts",
       "import": "./src/index.ts",
-      "require": "./src/index.ts"
+      "node": "./dist/index.js",
+      "default": "./dist/index.js"
     }
   },
   "scripts": {
-    "build:types": "rimraf dist && tsc",
+    "build": "rimraf dist && tsc && node ../../scripts/fix-package-esm-imports.mjs",
     "check-types": "tsc --noEmit"
   },
   "dependencies": {

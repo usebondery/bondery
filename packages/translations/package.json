@@ -2,17 +2,36 @@
   "name": "@bondery/translations",
   "version": "1.4.2",
   "description": "Bondery internationalization translations",
-  "main": "src/index.ts",
-  "types": "src/index.ts",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
   "exports": {
     ".": {
+      "types": "./src/index.ts",
       "import": "./src/index.ts",
-      "require": "./src/index.ts"
+      "node": "./dist/index.js",
+      "default": "./dist/index.js"
     },
-    "./cs": "./src/cs.json",
-    "./en": "./src/en.json"
+    "./cs": {
+      "import": "./src/cs.json",
+      "default": "./dist/cs.json"
+    },
+    "./en": {
+      "import": "./src/en.json",
+      "default": "./dist/en.json"
+    }
   },
   "files": [
-    "src"
-  ]
+    "src",
+    "dist"
+  ],
+  "scripts": {
+    "build": "rimraf dist && tsc && node scripts/copy-json.mjs && node ../../scripts/fix-package-esm-imports.mjs",
+    "check-types": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "rimraf": "^6.0.1",
+    "typescript": "^6"
+  }
 }

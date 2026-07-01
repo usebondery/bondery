@@ -55,22 +55,17 @@ Nested route modules (e.g. `contacts/enrichment/*`) inherit `onRoute` from the p
 
 Each app (`apps/api`, `apps/webapp`, …) is its own Vercel project with **Root Directory** set to that app folder (for the API: `apps/api`, **not** the monorepo root).
 
+Workspace packages use **dual exports**: `import` → `./src/*.ts` (JIT for Next/Metro/Vite), `node` / `default` → `./dist/*.js` (Node on Vercel). When adding package subpaths, run `node scripts/sync-package-exports.mjs` from the repo root.
+
 The API project uses [`apps/api/vercel.json`](../../apps/api/vercel.json):
 
-1. **Install** — Vercel installs npm workspaces from the monorepo root (no `cd ../..` needed).
-2. **Build** — `npm run build` runs `tsup` (bundles `@bondery/*` into `dist/index.js`), then writes [Build Output API v3](https://vercel.com/docs/build-output-api/v3) artifacts to `.vercel/output/` (`functions/api.func/index.js` + routing to `/api`).
-3. **Routing** — `config.json` routes all paths to the `/api` function; Fastify serves `/status`, `/api/contacts`, etc.
-4. **`framework: null`** — disables Vercel Fastify zero-config on `src/index.ts` (which would deploy unbundled source and fail on `@bondery/*/src/*.ts`).
-
-Do **not** use legacy `builds` / `routes` in `vercel.json` — they disable dashboard build settings and skip `buildCommand` (deploy completes in milliseconds with no install or bundle).
-
-Do **not** set `outputDirectory` to `public` for this project — that deploys only static files and skips the serverless function (404 on every route, no function logs).
-
-**Troubleshooting:** If runtime errors mention `/var/task/apps/api/src/index.js`, Root Directory is set to the repo root — change it to `apps/api`. If `tsup` fails with no input files, check `.vercelignore` is not excluding `src/`. If every route is 404 with no function logs, the deploy likely shipped static output only — confirm `outputDirectory` is `.vercel/output` in `vercel.json`.
-
-`openapi.yaml` is committed; generation is not part of the deploy build.
+1. **Install** — Vercel installs npm workspaces from the monorepo root.
+2. **Build** — `cd ../.. && npx turbo build --filter=api` compiles workspace dependencies (`api#build` → `^build`) to `packages/*/dist`. Webapp/website builds skip package `tsc` and keep JIT via `import` → `src/`.
+3. **No API bundler** — no `tsup`, no custom Build Output API scripts.
 
 In the Vercel project settings, enable **Include source files outside of the Root Directory** so builds can read `packages/*`.
+
+`openapi.yaml` is committed; generation is not part of the deploy build.
 
 ## Shared primitives
 

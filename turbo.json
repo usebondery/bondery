@@ -55,6 +55,9 @@
       "dependsOn": [],
       "outputs": [".next/**", "!.next/cache/**", "dist/**", "public/**"]
     },
+    "api#build": {
+      "dependsOn": ["^build"]
+    },
 
     "check-types": {
       "dependsOn": ["^check-types"]
@@ -110,10 +113,6 @@
         "apps/website/.env.development.local",
         "apps/api/.env.development.local"
       ]
-    },
-    "api#build": {
-      "dependsOn": [],
-      "outputs": ["dist/**"]
     },
     "api#generate-openapi": {
       "dependsOn": [],

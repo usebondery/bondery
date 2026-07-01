@@ -1,2 +1,0 @@
-# Optional deploy trim only — do not ignore src/, scripts/, or tsup.config.ts (build needs them).
-openapi.yaml

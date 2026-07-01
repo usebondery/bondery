@@ -1,6 +1,4 @@
 import createMDX from "@next/mdx";
-import { WEBAPP_URL } from "@/lib/config";
-import { HELP_DOCS_URL, STATUS_PAGE_URL } from "@bondery/helpers";
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
@@ -12,6 +10,10 @@ const nextConfig: NextConfig = {
     "@bondery/translations",
   ],
   pageExtensions: ["ts", "tsx", "md", "mdx"],
+  // Outbound redirects (status, help, docs, login, auth/callback, oauth/consent, app)
+  // live in src/app/**/route.ts so they can import @bondery/helpers. Do not move them
+  // into redirects() here — next.config.ts is evaluated by Node and cannot load JIT
+  // workspace packages.
   async headers() {
     return [
       {
@@ -30,51 +32,6 @@ const nextConfig: NextConfig = {
             value: "same-origin",
           },
         ],
-      },
-    ];
-  },
-  async redirects() {
-    return [
-      {
-        source: "/status",
-        destination: STATUS_PAGE_URL,
-        permanent: false,
-      },
-      {
-        source: "/help",
-        destination: HELP_DOCS_URL,
-        permanent: true,
-      },
-      {
-        source: "/docs",
-        destination: HELP_DOCS_URL,
-        permanent: true,
-      },
-      {
-        source: "/docs/:path*",
-        destination: `${HELP_DOCS_URL}/:path*`,
-        permanent: true,
-      },
-      {
-        source: "/login",
-        destination: `${WEBAPP_URL}/login`,
-        permanent: true,
-      },
-      {
-        source: "/auth/callback/:path*",
-        destination: `${WEBAPP_URL}/auth/callback/:path*`,
-        permanent: false,
-      },
-      {
-        source: "/oauth/consent/:path*",
-        destination: `${WEBAPP_URL}/oauth/consent/:path*`,
-        permanent: false,
-      },
-
-      {
-        source: "/app/:path*",
-        destination: `${WEBAPP_URL}/app/:path*`,
-        permanent: false,
       },
     ];
   },
