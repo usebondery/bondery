@@ -9,6 +9,12 @@ mkdirSync(funcDir, { recursive: true });
 
 copyFileSync("dist/index.js", join(funcDir, "index.js"));
 
+// Vercel's function task dir has no app package.json — mark the bundle as ESM.
+writeFileSync(
+  join(funcDir, "package.json"),
+  `${JSON.stringify({ type: "module" }, null, 2)}\n`,
+);
+
 writeFileSync(
   join(funcDir, ".vc-config.json"),
   `${JSON.stringify(
