@@ -19,7 +19,7 @@ import {
   EXAMPLE_TAG_RESPONSE,
   EXAMPLE_TAG_UPDATE_RESPONSE,
   EXAMPLE_TAGS_LIST_RESPONSE,
-} from "#openapi/fixtures/responses.js";
+} from "#openapi/fixtures/schema-examples.js";
 
 const tagLabelSchema = labelFieldSchema(GROUP_LABEL_MAX_LENGTH);
 

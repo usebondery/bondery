@@ -21,7 +21,7 @@ import {
 } from "@polar-sh/sdk/webhooks";
 import { applyOpenApiRouteMeta } from "../../lib/openapi-route-meta.js";
 import { withOkResponse } from "../../lib/openapi-route-responses.js";
-import { EXAMPLE_WEBHOOK_ACK_RESPONSE } from "@bondery/schemas";
+import { EXAMPLE_WEBHOOK_ACK_RESPONSE } from "@bondery/schemas/openapi/fixtures/responses";
 import { createAdminClient } from "../../lib/supabase.js";
 
 const webhookAckResponseSchema = z

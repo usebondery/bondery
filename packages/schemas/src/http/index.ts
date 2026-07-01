@@ -12,10 +12,9 @@ import { replaceImportantDatesSchema } from "#entities/important-date.js";
 import {
   EXAMPLE_GEOCODE_SUGGEST_RESPONSE,
   EXAMPLE_GEOCODE_TIMEZONE_RESPONSE,
-} from "#openapi/fixtures/responses.js";
+} from "#openapi/fixtures/schema-examples.js";
 
 export * from "#http/ids.js";
-export * from "#http/responses.js";
 
 /** UUID path parameter (e.g. `:id`). */
 export const uuidParamSchema = z.object({

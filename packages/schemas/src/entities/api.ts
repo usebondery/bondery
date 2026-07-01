@@ -7,7 +7,7 @@ import { EXAMPLE_ERROR_400 } from "#openapi/fixtures/errors.js";
 import {
   EXAMPLE_API_SUCCESS_RESPONSE,
   EXAMPLE_PHOTO_UPLOAD_RESPONSE,
-} from "#openapi/fixtures/responses.js";
+} from "#openapi/fixtures/schema-examples.js";
 
 export const apiErrorResponseSchema = z
   .object({

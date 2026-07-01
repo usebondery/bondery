@@ -7,7 +7,7 @@ import {
 } from "@bondery/helpers";
 import { HEALTH_TIER } from "../rate-limit.js";
 import { withOkResponse } from "../openapi-route-responses.js";
-import { EXAMPLE_HEALTH_UNHEALTHY_RESPONSE } from "@bondery/schemas";
+import { EXAMPLE_HEALTH_UNHEALTHY_RESPONSE } from "@bondery/schemas/openapi/fixtures/responses";
 import { getHealthReport } from "./check.js";
 import { healthReportSchema, livenessStatusSchema } from "./schemas.js";
 

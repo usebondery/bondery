@@ -11,7 +11,7 @@ import { getAuth } from "../../lib/auth.js";
 import { registerApiKeyProtectedHooks } from "../../lib/api-key-access.js";
 import { applyOpenApiRouteMeta } from "../../lib/openapi-route-meta.js";
 import { withCreatedResponse, withOkResponse } from "../../lib/openapi-route-responses.js";
-import { syncConflictResponse } from "@bondery/schemas/http";
+import { syncConflictResponse } from "@bondery/schemas/http/responses";
 import { resolveContactAvatarUrl } from "../../lib/supabase.js";
 import { searchPeopleIds, restoreRankedOrder, countSearchPeopleIds } from "../../lib/search.js";
 import {
@@ -56,10 +56,10 @@ import {
   deleteContactResponseSchema,
   deleteContactsRequestSchema,
   deleteContactsResponseSchema,
-  EXAMPLE_VCARD_EXPORT,
   mapAddressPinsResponseSchema,
   mapPinsResponseSchema,
 } from "@bondery/schemas";
+import { EXAMPLE_VCARD_EXPORT } from "@bondery/schemas/openapi/fixtures/responses";
 import {
   contactAddressEntrySchema,
   emailEntryEntitySchema,

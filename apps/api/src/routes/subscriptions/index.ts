@@ -16,10 +16,8 @@ import {
   PREMIUM_MESSAGE_LIMIT,
 } from "../../lib/chat/quota.js";
 import type { SubscriptionStatus } from "@bondery/schemas";
-import {
-  EXAMPLE_SUBSCRIPTION_STATUS_RESPONSE,
-  subscriptionStatusSchema,
-} from "@bondery/schemas";
+import { subscriptionStatusSchema } from "@bondery/schemas";
+import { EXAMPLE_SUBSCRIPTION_STATUS_RESPONSE } from "@bondery/schemas/openapi/fixtures/responses";
 import { getPolarClient } from "../../lib/polar.js";
 
 const subscriptionStatusResponseSchema = z

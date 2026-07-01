@@ -13,7 +13,12 @@ import {
   createApiKeyInputSchema,
   updateApiKeyLabelInputSchema,
 } from "@bondery/schemas";
-import { uuidParamSchema, noContentResponse, standardErrorResponses, conflictResponse } from "@bondery/schemas/http";
+import {
+  conflictResponse,
+  noContentResponse,
+  standardErrorResponses,
+} from "@bondery/schemas/http/responses";
+import { uuidParamSchema } from "@bondery/schemas/http";
 import { getAuth } from "../../../lib/auth.js";
 import { applyOpenApiRouteMeta } from "../../../lib/openapi-route-meta.js";
 import {

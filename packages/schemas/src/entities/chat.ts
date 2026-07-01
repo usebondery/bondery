@@ -3,7 +3,7 @@ import { makePaginatedListResponseSchema } from "#entities/_shared.js";
 import {
   EXAMPLE_CHAT_MESSAGES_LIST_RESPONSE,
   EXAMPLE_CHAT_SESSIONS_LIST_RESPONSE,
-} from "#openapi/fixtures/responses.js";
+} from "#openapi/fixtures/schema-examples.js";
 
 /**
  * Keep snake_case keys to match the existing chat API payloads.

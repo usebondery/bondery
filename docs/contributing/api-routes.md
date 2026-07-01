@@ -2,6 +2,8 @@
 
 Every Fastify route in `apps/api/src/routes/` is part of the published API contract. Docs are **compiled** from Zod schemas — never hand-written per endpoint.
 
+See [schemas.md](./schemas.md) for which `@bondery/schemas` subpaths each app may import.
+
 ## Canonical route shape
 
 Relative imports within `apps/api` are **extensionless** (same as `packages/*`). `@bondery/*` workspace imports are unchanged.
@@ -49,6 +51,8 @@ Nested route modules (e.g. `contacts/enrichment/*`) inherit `onRoute` from the p
   - `internal` — hidden from GitBook (`webhooks`, `internal/*`)
 - [ ] Handler return shape matches the declared response schema
 - [ ] **OpenAPI example** on every success response schema (see below)
+- [ ] If the route returns **409**, spread `conflictResponse` or `syncConflictResponse` from `@bondery/schemas/http/responses`
+- [ ] If an error status returns a **non-ApiError JSON body**, override that status in `response` (see `GET /health` 503)
 - [ ] `npm run build:api` or `npx turbo build --filter=api` from repo root after route/schema changes
 - [ ] OpenAPI spec updates automatically via the pre-commit hook when `apps/api` or `packages/schemas` change; run `npm run check-openapi` manually before release if needed
 
@@ -64,7 +68,20 @@ When adding a new `*ResponseSchema`:
 
 For inline route-only schemas (e.g. admin stats), attach `.meta({ example })` on the schema in the route file and import the fixture from `@bondery/schemas`.
 
-`npm run test:contracts -w @bondery/schemas` validates every registered example with `schema.parse(example)`. `npm run check-openapi -w apps/api` fails if any `2xx` `application/json` response lacks an `example`.
+`npm run test:contracts -w @bondery/schemas` validates every registered example with `schema.parse(example)`. `npm run check-openapi -w apps/api` fails if any `2xx` or `4xx`/`5xx` `application/json` response lacks an `example` or has an empty schema.
+
+## OpenAPI error response examples
+
+Standard errors come from `standardErrorResponses` in `@bondery/schemas/http/responses` (400, 401, 403, 404, 429, 500, 503). They are included automatically by `withOkResponse` / `withCreatedResponse` — no per-route work for most endpoints.
+
+Error examples live in [`packages/schemas/src/openapi/fixtures/errors.ts`](../../packages/schemas/src/openapi/fixtures/errors.ts). The wire shape is `{ error: string }` with optional `retryAfter` on 429 (see `apiErrorResponseSchema`).
+
+| Helper | When to use |
+|--------|-------------|
+| `conflictResponse` | Route returns 409 with `{ error }` only (API keys, checkout, relationships, important dates) |
+| `syncConflictResponse` | Route returns 409 with `{ error, contact }` (contact PATCH sync conflict) |
+
+`generate-openapi` patches duplicate empty error schemas (`schema: {}`) to `$ref: ApiError` — a fastify-zod-openapi limitation when reusing the same Zod component across routes.
 
 ## Vercel (separate API project)
 
@@ -88,7 +105,7 @@ In the Vercel project settings, enable **Include source files outside of the Roo
 |--------|---------|
 | `contactIdSchema`, `EXAMPLE_CONTACT_ID` | UUID path/body params with OpenAPI examples |
 | `EXAMPLE_*` in `@bondery/schemas` | Composed OpenAPI response fixtures (`openapi/fixtures/`) |
-| `okResponse`, `createdResponse`, `standardErrorResponses` | Low-level response map builders in `@bondery/schemas/http` |
+| `okResponse`, `createdResponse`, `standardErrorResponses`, `conflictResponse`, `syncConflictResponse` | Low-level response map builders in `@bondery/schemas/http/responses` |
 | `withOkResponse`, `withCreatedResponse` | App-level helpers that add standard errors (`apps/api/src/lib/openapi-route-responses.ts`) |
 | `*ResponseSchema` in entity modules | List/detail/delete shapes (`contactsListResponseSchema`, etc.) |
 
@@ -97,7 +114,7 @@ In the Vercel project settings, enable **Include source files outside of the Roo
 | Command | What it checks |
 |---------|----------------|
 | `npm run check-api-schema-patterns -w apps/api` | Route files have descriptions, responses, `FastifyZodOpenApiSchema` |
-| `npm run check-openapi` | Regenerates spec, fails on drift, requires `2xx` JSON examples, bans "Default Response" on public paths |
+| `npm run check-openapi` | Regenerates spec, fails on drift, requires JSON examples on 2xx and 4xx/5xx, bans empty error schemas and "Default Response" on public paths |
 | `npm run test:contracts -w @bondery/schemas` | Schema boundary assertions + OpenAPI example validation (`check-openapi-examples.ts`) |
 
 CI runs all of the above on every pull request.

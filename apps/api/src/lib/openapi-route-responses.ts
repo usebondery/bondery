@@ -3,7 +3,7 @@ import {
   createdResponse,
   okResponse,
   standardErrorResponses,
-} from "@bondery/schemas/http";
+} from "@bondery/schemas/http/responses";
 
 /** HTTP 200 success plus standard API error responses. */
 export function withOkResponse<T extends z.ZodType>(schema: T, description: string) {

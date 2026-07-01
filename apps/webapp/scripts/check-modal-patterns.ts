@@ -65,14 +65,13 @@ function checkFile(absPath: string): Violation[] {
     });
   }
 
-  if (DISMISS_UPDATE_PATTERN.test(content) && !ALLOWED_UPDATE_MODAL_FILES.has(rel)) {
-    if (rel !== "lib/modals/useModalBlocking.ts") {
-      violations.push({
-        file: rel,
-        rule: "no-dismiss-update-modal",
-        detail: "Use useModalBlocking for dismiss chrome; never set closeOnEscape/closeOnClickOutside/withCloseButton in feature code",
-      });
-    }
+  if (DISMISS_UPDATE_PATTERN.test(content) && rel !== "lib/modals/useModalBlocking.ts") {
+    violations.push({
+      file: rel,
+      rule: "no-dismiss-update-modal",
+      detail:
+        "Use useModalBlocking for dismiss chrome; never set closeOnEscape/closeOnClickOutside/withCloseButton in feature code",
+    });
   }
 
   if (

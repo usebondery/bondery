@@ -21,7 +21,7 @@ import {
   EXAMPLE_GROUP_RESPONSE,
   EXAMPLE_GROUPS_LIST_RESPONSE,
   EXAMPLE_REMOVE_GROUP_MEMBERS_RESPONSE,
-} from "#openapi/fixtures/responses.js";
+} from "#openapi/fixtures/schema-examples.js";
 
 const groupEditableFieldsSchema = z.object({
   label: labelFieldSchema(GROUP_LABEL_MAX_LENGTH),

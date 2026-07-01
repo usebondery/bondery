@@ -8,7 +8,7 @@ import type { AppFastifyInstance } from "../../../lib/fastify-types.js";
 import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
 import { getAuth } from "../../../lib/auth.js";
 import { withCreatedResponse, withOkResponse } from "../../../lib/openapi-route-responses.js";
-import { conflictResponse } from "@bondery/schemas/http";
+import { conflictResponse } from "@bondery/schemas/http/responses";
 import { resolveContactAvatarUrl } from "../../../lib/supabase.js";
 import type { RelationshipType } from "@bondery/schemas";
 import {

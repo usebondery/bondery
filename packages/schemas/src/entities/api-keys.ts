@@ -4,7 +4,7 @@ import { labelFieldSchema } from "#entities/_shared.js";
 import {
   EXAMPLE_API_KEY_CREATED_RESPONSE,
   EXAMPLE_API_KEYS_LIST_RESPONSE,
-} from "#openapi/fixtures/responses.js";
+} from "#openapi/fixtures/schema-examples.js";
 
 export const apiKeyPermissionSchema = z.enum(API_KEY_PERMISSIONS);
 

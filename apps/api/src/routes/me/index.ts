@@ -21,10 +21,10 @@ import { avatarTransformQuerySchema } from "@bondery/schemas/http";
 import {
   apiSuccessResponseSchema,
   contactResponseSchema,
-  EXAMPLE_PROFILE_PHOTO_RESPONSE,
   updateAccountInputSchema,
   userAccountResponseSchema,
 } from "@bondery/schemas";
+import { EXAMPLE_PROFILE_PHOTO_RESPONSE } from "@bondery/schemas/openapi/fixtures/responses";
 import { attachContactExtras } from "../../lib/contact-enrichment.js";
 
 const LINKEDIN_LOGOS_BUCKET = "linkedin_logos";
@@ -113,9 +113,9 @@ export const meRoutes: AppRoutePlugin = async (fastify) => {
 
       return { success: true };
     } catch (error) {
+      request.log.error({ err: error }, "Error deleting account");
       return reply.status(500).send({
         error: "Internal server error",
-        description: String(error),
       });
     }
   });
@@ -160,9 +160,9 @@ export const meRoutes: AppRoutePlugin = async (fastify) => {
         data.mimetype,
       );
     } catch (uploadError) {
+      request.log.error({ err: uploadError }, "Failed to upload profile photo");
       return reply.status(500).send({
         error: "Failed to upload profile photo",
-        description: uploadError instanceof Error ? uploadError.message : String(uploadError),
       });
     }
 

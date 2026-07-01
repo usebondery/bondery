@@ -15,10 +15,12 @@ import {
 import {
   chatMessagesListResponseSchema,
   paginationMetaSchema,
+} from "@bondery/schemas";
+import {
   EXAMPLE_CHAT_SESSION_CREATED_RESPONSE,
   EXAMPLE_CHAT_SESSIONS_WIRE_LIST_RESPONSE,
-} from "@bondery/schemas";
-import { noContentResponse, standardErrorResponses } from "@bondery/schemas/http";
+} from "@bondery/schemas/openapi/fixtures/responses";
+import { noContentResponse, standardErrorResponses } from "@bondery/schemas/http/responses";
 import {
   chatMessagesQuerySchema,
   chatSessionIdParamSchema,

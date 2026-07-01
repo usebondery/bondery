@@ -3,7 +3,7 @@ import { SYNC_TABLE_KEYS } from "#sync/tables.js";
 import {
   EXAMPLE_SYNC_BOOTSTRAP_RESPONSE,
   EXAMPLE_SYNC_PULL_RESPONSE,
-} from "#openapi/fixtures/responses.js";
+} from "#openapi/fixtures/schema-examples.js";
 
 export const syncChangeOperationSchema = z.enum(["insert", "update", "delete"]);
 

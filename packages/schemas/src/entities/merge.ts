@@ -6,7 +6,7 @@ import {
   EXAMPLE_MERGE_CONTACTS_RESPONSE,
   EXAMPLE_MERGE_RECOMMENDATIONS_RESPONSE,
   EXAMPLE_REFRESH_MERGE_RECOMMENDATIONS_RESPONSE,
-} from "#openapi/fixtures/responses.js";
+} from "#openapi/fixtures/schema-examples.js";
 
 export const mergeConflictChoiceSchema = z.enum(["left", "right"]);
 

@@ -31,7 +31,7 @@ import {
   EXAMPLE_MAP_ADDRESS_PINS_RESPONSE,
   EXAMPLE_MAP_PINS_RESPONSE,
   EXAMPLE_MESSAGE_RESPONSE,
-} from "#openapi/fixtures/responses.js";
+} from "#openapi/fixtures/schema-examples.js";
 
 const trimmedNameField = (max: number, label: string) =>
   z

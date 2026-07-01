@@ -4,7 +4,7 @@ import { nullableTrimmedStringSchema } from "#entities/_shared.js";
 import {
   EXAMPLE_GEOCODE_SUGGEST_RESPONSE,
   EXAMPLE_GEOCODE_TIMEZONE_RESPONSE,
-} from "#openapi/fixtures/responses.js";
+} from "#openapi/fixtures/schema-examples.js";
 
 export const contactAddressTypeSchema = z.enum(["home", "work", "other"]);
 export const contactAddressGranularitySchema = z.enum(["address", "city", "state", "country"]);

@@ -9,7 +9,7 @@
 import type { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
 import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
 import { WEBAPP_ROUTES } from "@bondery/helpers";
-import { standardErrorResponses } from "@bondery/schemas/http";
+import { standardErrorResponses } from "@bondery/schemas/http/responses";
 import { getAuth } from "../../lib/auth.js";
 import { applyOpenApiRouteMeta } from "../../lib/openapi-route-meta.js";
 import { getPolarClient } from "../../lib/polar.js";

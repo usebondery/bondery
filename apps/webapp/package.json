@@ -13,11 +13,16 @@
     "build": "next build",
     "start": "next start",
     "lint": "biome lint .",
-    "check-types": "tsc --noEmit && npm run check-api-fetch:strict && npm run check-query-patterns:strict",
+    "check-types": "tsc --noEmit && npm run check-api-fetch:strict && npm run check-query-patterns:strict && npm run check-modal-patterns:strict && npm run check-schemas-imports:strict",
     "check-api-fetch": "tsx scripts/check-api-fetch-patterns.ts",
     "check-api-fetch:strict": "cross-env CHECK_API_FETCH_STRICT=1 tsx scripts/check-api-fetch-patterns.ts",
     "check-query-patterns": "tsx scripts/check-query-patterns.ts",
-    "check-query-patterns:strict": "cross-env CHECK_QUERY_PATTERNS_STRICT=1 tsx scripts/check-query-patterns.ts"
+    "check-query-patterns:strict": "cross-env CHECK_QUERY_PATTERNS_STRICT=1 tsx scripts/check-query-patterns.ts",
+    "check-modal-patterns": "tsx scripts/check-modal-patterns.ts",
+    "check-modal-patterns:strict": "cross-env CHECK_MODAL_PATTERNS_STRICT=1 tsx scripts/check-modal-patterns.ts",
+    "check-schemas-imports": "tsx scripts/check-schemas-imports.ts",
+    "check-schemas-imports:strict": "cross-env CHECK_SCHEMAS_IMPORTS_STRICT=1 tsx scripts/check-schemas-imports.ts",
+    "smoke-ssr": "node scripts/smoke-ssr-boot.mjs"
   },
   "browserslist": {
     "production": [

@@ -16,8 +16,10 @@ import {
 } from "@bondery/schemas";
 import { extractAvatarOptions } from "../../../lib/queries.js";
 import {
-  avatarTransformQuerySchema,
   conflictResponse,
+} from "@bondery/schemas/http/responses";
+import {
+  avatarTransformQuerySchema,
   importantDatesReplaceBodySchema,
   uuidParamSchema,
 } from "@bondery/schemas/http";

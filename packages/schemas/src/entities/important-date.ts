@@ -10,7 +10,7 @@ import {
   entityNullableAuditSchema,
   makeCollectionResponseSchema,
 } from "#entities/_shared.js";
-import { EXAMPLE_IMPORTANT_DATES_LIST_RESPONSE } from "#openapi/fixtures/responses.js";
+import { EXAMPLE_IMPORTANT_DATES_LIST_RESPONSE } from "#openapi/fixtures/schema-examples.js";
 
 const isoDateSchema = z
   .string()

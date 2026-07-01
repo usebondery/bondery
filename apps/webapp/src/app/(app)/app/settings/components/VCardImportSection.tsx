@@ -1,6 +1,6 @@
 "use client";
 
-import { IconAddressBook, IconDownload } from "@tabler/icons-react";
+import { IconAddressBook } from "@tabler/icons-react";
 import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
 import { IntegrationCard } from "@/components/shared/IntegrationCard";
 import { openVCardImportModal } from "./openVCardImportModal";

@@ -206,6 +206,8 @@ For masked phone inputs, forward the same props through `MaskedPhoneInput`.
 
 When a modal is **submitting**, **loading**, or otherwise in a **blocking state** (an async action is in flight), the user must not be able to dismiss it. Closing mid-action can leave partial server work, orphaned requests, or UI that no longer matches what is still running on the server.
 
+Web vocabulary: **`isBlocking`** (same rule as mobile **`isBusy`** on `ActionSheetPopup`).
+
 ### Rule
 
 While blocking:
@@ -216,28 +218,42 @@ While blocking:
 
 Re-enable all three when the action finishes (success or error). Cancel buttons that explicitly abort a safe operation are fine when they are part of the footer — the point is to prevent accidental dismiss via chrome gestures while work is in progress.
 
+Derive blocking from submit **and** load/parse/import states — not submit alone.
+
 ### Implementation (webapp)
 
-Drive modal chrome from the blocking flag with `modals.updateModal` in a `useEffect`:
+**Open imperatively only** — `open*Modal()` + `modals.open`. Do not use `<Modal>` in feature code. The onboarding wizard shell (`OnboardingFlow`) is the only documented exception. Photo upload closes before async work continues in a notification.
+
+**Lock dismiss chrome** with `useModalBlocking` from `@/lib/modals`:
 
 ```tsx
-useEffect(() => {
-  modals.updateModal({
-    modalId,
-    closeOnEscape: !isSubmitting,
-    closeOnClickOutside: !isSubmitting,
-    withCloseButton: !isSubmitting,
-  });
-}, [modalId, isSubmitting]);
+const isBlocking = isSubmitting || isLoading || mutation.isPending;
+useModalBlocking(modalId, isBlocking);
 ```
 
-Use the same pattern for parsing/import pipelines (`isParsing`, `isImporting`, etc.) and any other non-submit blocking work. Examples: `AddGroupModal`, `AddContactModal`, `openStandardConfirmModal`, `openApiKeyModal`, import modals.
+Never call `modals.updateModal` for dismiss flags in feature code. Title/size-only `updateModal` is allowlisted in rare cases (import preview sizing, API key reveal step).
+
+**Open helper pattern:**
+
+```tsx
+export function openMyFeatureModal() {
+  const modalId = createModalId("my-feature");
+  modals.open({
+    modalId,
+    title: <ModalTitle ... />,
+    children: <MyFeatureModalBody modalId={modalId} />,
+  });
+}
+```
+
+See `apps/webapp/src/lib/modals/README.md`. CI enforces via `npm run check-modal-patterns:strict`.
 
 ### What to avoid
 
 - Leaving the X visible while `actionLoading` is true on the footer — users will close and lose context.
 - Only disabling the submit button without locking dismiss — both are required.
 - Forgetting to restore closability after an error — the user should be able to leave once the request has settled.
+- Passing `onClose` props that disable blocking logic, or nesting a second `<Modal>` instead of stacking `modals.open`.
 
 ---
 

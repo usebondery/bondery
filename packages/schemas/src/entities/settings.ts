@@ -2,7 +2,7 @@ import { z } from "zod";
 import {
   EXAMPLE_USER_ACCOUNT_RESPONSE,
   EXAMPLE_USER_SETTINGS_RESPONSE,
-} from "#openapi/fixtures/responses.js";
+} from "#openapi/fixtures/schema-examples.js";
 
 export const colorSchemePreferenceSchema = z.enum(["light", "dark", "auto"]);
 export const timeFormatPreferenceSchema = z.enum(["24h", "12h"]);

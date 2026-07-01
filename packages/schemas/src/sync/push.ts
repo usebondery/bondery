@@ -3,7 +3,7 @@ import { contactSchema } from "#entities/contact.js";
 import { groupSchema } from "#entities/group.js";
 import { tagSchema } from "#entities/tag.js";
 import { syncMutationSchema } from "#sync/mutations.js";
-import { EXAMPLE_SYNC_PUSH_RESPONSE } from "#openapi/fixtures/responses.js";
+import { EXAMPLE_SYNC_PUSH_RESPONSE } from "#openapi/fixtures/schema-examples.js";
 
 export const syncPushRequestSchema = z.object({
   deviceId: z.string().uuid(),

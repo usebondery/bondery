@@ -1,4 +1,3 @@
-import { z } from "zod";
 import { EXAMPLE_CONTACT_ID } from "#contact-id.js";
 
 export { EXAMPLE_CONTACT_ID };
@@ -24,9 +23,3 @@ export const EXAMPLE_PAGINATION = {
   sort: null,
   search: null,
 } as const;
-
-/** Zod primitive for wire timestamps with OpenAPI-friendly metadata. */
-export const isoDateTimeSchema = z.string().datetime().meta({
-  description: "ISO 8601 UTC timestamp",
-  example: EXAMPLE_ISO_TIMESTAMP,
-});

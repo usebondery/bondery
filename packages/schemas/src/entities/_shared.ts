@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { contactIdSchema } from "#contact-id.js";
-import { EXAMPLE_MESSAGE_RESPONSE } from "#openapi/fixtures/responses.js";
+import { EXAMPLE_MESSAGE_RESPONSE } from "#openapi/fixtures/schema-examples.js";
 
 export const idSchema = z.string();
 export const userIdSchema = z.string();

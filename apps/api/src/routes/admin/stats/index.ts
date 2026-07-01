@@ -14,7 +14,7 @@ import {
   EXAMPLE_GITHUB_STARS_RESPONSE,
   EXAMPLE_NPS_RESPONSE,
   EXAMPLE_TOTAL_USERS_RESPONSE,
-} from "@bondery/schemas";
+} from "@bondery/schemas/openapi/fixtures/responses";
 import { applyOpenApiRouteMeta } from "../../../lib/openapi-route-meta.js";
 import { withOkResponse } from "../../../lib/openapi-route-responses.js";
 import { createAdminClient } from "../../../lib/supabase.js";

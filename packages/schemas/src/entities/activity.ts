@@ -7,7 +7,7 @@ import {
 import {
   EXAMPLE_INTERACTION_RESPONSE,
   EXAMPLE_INTERACTIONS_LIST_RESPONSE,
-} from "#openapi/fixtures/responses.js";
+} from "#openapi/fixtures/schema-examples.js";
 
 export const interactionTypeSchema = z.enum([
   "Call",

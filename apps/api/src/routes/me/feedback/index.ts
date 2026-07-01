@@ -79,10 +79,6 @@ export const meFeedbackRoutes: AppRoutePlugin = async (fastify) => {
         request.log.error({ err: emailError }, "Error sending feedback email");
         return reply.status(500).send({
           error: "Failed to render or send feedback email",
-          details:
-            emailError instanceof Error
-              ? emailError.message
-              : String(emailError),
         });
       }
 

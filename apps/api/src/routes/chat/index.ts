@@ -10,7 +10,7 @@ import { z } from "zod";
 import type { UIMessage } from "ai";
 import { convertToModelMessages } from "ai";
 import type { Json } from "@bondery/schemas/supabase.types";
-import { standardErrorResponses } from "@bondery/schemas/http";
+import { standardErrorResponses } from "@bondery/schemas/http/responses";
 import { getAuth } from "../../lib/auth.js";
 import { applyOpenApiRouteMeta } from "../../lib/openapi-route-meta.js";
 import { runChatAgent } from "../../lib/chat/agent.js";

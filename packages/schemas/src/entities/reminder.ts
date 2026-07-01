@@ -4,7 +4,7 @@ import { importantDateSchema, importantDateTypeSchema } from "#entities/importan
 import {
   EXAMPLE_REMINDER_DIGEST_RESPONSE,
   EXAMPLE_UPCOMING_REMINDERS_RESPONSE,
-} from "#openapi/fixtures/responses.js";
+} from "#openapi/fixtures/schema-examples.js";
 
 export const upcomingReminderSchema = z.object({
   importantDate: importantDateSchema,

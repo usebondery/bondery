@@ -2,7 +2,7 @@ import { z } from "zod";
 import {
   EXAMPLE_HEALTH_OK_RESPONSE,
   EXAMPLE_LIVENESS_STATUS_RESPONSE,
-} from "@bondery/schemas";
+} from "@bondery/schemas/openapi/fixtures/responses";
 
 export const serviceProbeResultSchema = z.object({
   ok: z.boolean(),

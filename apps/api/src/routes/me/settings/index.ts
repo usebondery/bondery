@@ -19,10 +19,10 @@ import {
 import logger from "../../../lib/logger.js";
 import type { TablesUpdate } from "@bondery/schemas";
 import {
-  EXAMPLE_SETTINGS_PATCH_RESPONSE,
   updateUserSettingsInputSchema,
   userSettingsResponseSchema,
 } from "@bondery/schemas";
+import { EXAMPLE_SETTINGS_PATCH_RESPONSE } from "@bondery/schemas/openapi/fixtures/responses";
 import { applyOpenApiRouteMeta } from "../../../lib/openapi-route-meta.js";
 import { withOkResponse } from "../../../lib/openapi-route-responses.js";
 import { getMyselfProfile } from "../../../lib/myself.js";

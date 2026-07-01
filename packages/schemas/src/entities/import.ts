@@ -10,7 +10,7 @@ import {
   EXAMPLE_REDIRECT_RESPONSE,
   EXAMPLE_VCARD_IMPORT_COMMIT_RESPONSE,
   EXAMPLE_VCARD_PARSE_RESPONSE,
-} from "#openapi/fixtures/responses.js";
+} from "#openapi/fixtures/schema-examples.js";
 
 export const scrapedWorkHistoryEntrySchema = z.object({
   title: z.string().optional(),

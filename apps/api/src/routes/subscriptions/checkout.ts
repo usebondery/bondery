@@ -13,10 +13,10 @@ import { z } from "zod";
 import { getAuth } from "../../lib/auth.js";
 import { applyOpenApiRouteMeta } from "../../lib/openapi-route-meta.js";
 import { withOkResponse } from "../../lib/openapi-route-responses.js";
-import { conflictResponse } from "@bondery/schemas/http";
+import { conflictResponse } from "@bondery/schemas/http/responses";
 import {
   EXAMPLE_CHECKOUT_RESPONSE,
-} from "@bondery/schemas";
+} from "@bondery/schemas/openapi/fixtures/responses";
 import { getPolarClient, sanitizePolarLocale } from "../../lib/polar.js";
 
 const checkoutResponseSchema = z

@@ -22,9 +22,7 @@ import { getAuth } from "../../lib/auth.js";
 import { createAdminClient } from "../../lib/supabase.js";
 import { applyOpenApiRouteMeta } from "../../lib/openapi-route-meta.js";
 import { withOkResponse } from "../../lib/openapi-route-responses.js";
-import {
-  EXAMPLE_SUBSCRIPTION_SYNC_SKIPPED_RESPONSE,
-} from "@bondery/schemas";
+import { EXAMPLE_SUBSCRIPTION_SYNC_SKIPPED_RESPONSE } from "@bondery/schemas/openapi/fixtures/responses";
 import { getPolarClient } from "../../lib/polar.js";
 import { upsertSubscription, mapStatus } from "../webhooks/polar.js";
 
