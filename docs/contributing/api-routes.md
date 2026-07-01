@@ -58,7 +58,7 @@ Each app (`apps/api`, `apps/webapp`, …) is its own Vercel project with **Root 
 The API project uses [`apps/api/vercel.json`](../../apps/api/vercel.json):
 
 1. **Install** — Vercel installs npm workspaces from the monorepo root (no `cd ../..` needed).
-2. **Build** — `npm run build` runs `tsup` (bundles `@bondery/*` into `dist/index.js`) then copies the bundle to `api/index.js` for the serverless function.
+2. **Build** — `npm run build` runs `tsup` (bundles `@bondery/*` into `dist/index.js`), copies the bundle to `api/index.js`, and creates an empty `public/` (Vercel expects a static output directory even for functions-only projects).
 3. **Routing** — `rewrites` send all paths to the `/api` function; Fastify still serves `/api/contacts`, etc.
 4. **`framework: null`** — disables Vercel Fastify zero-config on `src/index.ts` (which would deploy unbundled source and fail on `@bondery/*/src/*.ts`).
 
