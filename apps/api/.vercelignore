@@ -1,7 +1,2 @@
-# Deploy only the tsup bundle copied to api/index.js — not unbundled src (JIT workspace imports break at runtime).
-src/**
-dist/**
-scripts/**
+# Optional deploy trim only — do not ignore src/, scripts/, or tsup.config.ts (build needs them).
 openapi.yaml
-tsconfig.json
-tsup.config.ts

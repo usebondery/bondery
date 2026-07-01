@@ -64,9 +64,9 @@ The API project uses [`apps/api/vercel.json`](../../apps/api/vercel.json):
 
 Do **not** use legacy `builds` / `routes` in `vercel.json` — they disable dashboard build settings and skip `buildCommand` (deploy completes in milliseconds with no install or bundle).
 
-[`apps/api/.vercelignore`](../../apps/api/.vercelignore) excludes `src/` from the deployment artifact so only `api/index.js` runs.
+Do **not** list `src/`, `scripts/`, or `tsup.config.ts` in `.vercelignore` — Vercel removes those files before `npm run build`, so `tsup` fails with “No input files”.
 
-**Troubleshooting:** If runtime errors mention `/var/task/apps/api/src/index.js`, Root Directory is set to the repo root — change it to `apps/api`. If errors mention `/var/task/src/index.js` with the same module-not-found pattern, Fastify detection is still winning; confirm `framework: null` is deployed and `api/index.js` exists after build.
+**Troubleshooting:** If runtime errors mention `/var/task/apps/api/src/index.js`, Root Directory is set to the repo root — change it to `apps/api`. If `tsup` fails with no input files, check `.vercelignore` is not excluding `src/`.
 
 `openapi.yaml` is committed; generation is not part of the deploy build.
 
