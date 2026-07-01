@@ -3,8 +3,8 @@ import { z } from "zod";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@bondery/schemas/supabase.types";
 import { createSocialUrl } from "@bondery/helpers";
-import { resolveContactAvatarUrl } from "../../supabase.js";
-import { searchPeopleIds } from "../../search.js";
+import { resolveContactAvatarUrl } from "../../supabase";
+import { searchPeopleIds } from "../../search";
 
 /**
  * Fetches full details for a single contact by ID.

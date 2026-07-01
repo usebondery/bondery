@@ -7,11 +7,11 @@ import type {
   ContactAddressEntry,
   AvatarTransformOptions,
 } from "@bondery/schemas";
-import { attachContactChannels } from "../routes/contacts/channels.js";
-import { attachContactAddresses } from "../routes/contacts/addresses.js";
-import { attachContactSocials } from "./socials.js";
-import { CONTACT_SELECT, type ContactWithId } from "./queries.js";
-import { resolveContactAvatarUrl } from "./supabase.js";
+import { attachContactChannels } from "../routes/contacts/channels";
+import { attachContactAddresses } from "../routes/contacts/addresses";
+import { attachContactSocials } from "./socials";
+import { CONTACT_SELECT, type ContactWithId } from "./queries";
+import { resolveContactAvatarUrl } from "./supabase";
 
 type ChannelsAndSocialExtras = {
   phones: PhoneEntry[];

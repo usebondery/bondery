@@ -3,7 +3,7 @@
  */
 
 import type { FastifyInstance, FastifyReply } from "fastify";
-import type { AppFastifyInstance, AppRoutePlugin } from "../../../lib/fastify-types.js";
+import type { AppFastifyInstance, AppRoutePlugin } from "../../../lib/fastify-types";
 import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
 import { API_KEY_LIMITS } from "@bondery/schemas";
 import {
@@ -14,17 +14,17 @@ import {
   updateApiKeyLabelInputSchema,
 } from "@bondery/schemas";
 import { uuidParamSchema, noContentResponse, standardErrorResponses } from "@bondery/schemas/http";
-import { getAuth } from "../../../lib/auth.js";
-import { applyOpenApiRouteMeta } from "../../../lib/openapi-route-meta.js";
+import { getAuth } from "../../../lib/auth";
+import { applyOpenApiRouteMeta } from "../../../lib/openapi-route-meta";
 import {
   withCreatedResponse,
   withOkResponse,
-} from "../../../lib/openapi-route-responses.js";
+} from "../../../lib/openapi-route-responses";
 import {
   formatApiKeyPrefix,
   generateApiKeyMaterial,
   hashApiKey,
-} from "../../../lib/api-keys.js";
+} from "../../../lib/api-keys";
 
 function mapApiKeyRow(row: {
   id: string;

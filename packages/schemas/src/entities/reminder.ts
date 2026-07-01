@@ -1,6 +1,6 @@
 import { z } from "zod";
-import { contactPreviewSchema } from "./contact.js";
-import { importantDateSchema, importantDateTypeSchema } from "./important-date.js";
+import { contactPreviewSchema } from "./contact";
+import { importantDateSchema, importantDateTypeSchema } from "./important-date";
 
 export const upcomingReminderSchema = z.object({
   importantDate: importantDateSchema,

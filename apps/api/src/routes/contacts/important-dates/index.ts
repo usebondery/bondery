@@ -4,17 +4,17 @@
  */
 
 import type { FastifyReply } from "fastify";
-import type { AppFastifyInstance } from "../../../lib/fastify-types.js";
+import type { AppFastifyInstance } from "../../../lib/fastify-types";
 import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
-import { getAuth } from "../../../lib/auth.js";
-import { withOkResponse } from "../../../lib/openapi-route-responses.js";
-import { resolveContactAvatarUrl } from "../../../lib/supabase.js";
+import { getAuth } from "../../../lib/auth";
+import { withOkResponse } from "../../../lib/openapi-route-responses";
+import { resolveContactAvatarUrl } from "../../../lib/supabase";
 import type { ImportantDateType, UpcomingReminder, Database } from "@bondery/schemas";
 import {
   importantDatesListResponseSchema,
   upcomingRemindersResponseSchema,
 } from "@bondery/schemas";
-import { extractAvatarOptions } from "../../../lib/queries.js";
+import { extractAvatarOptions } from "../../../lib/queries";
 import {
   avatarTransformQuerySchema,
   importantDatesReplaceBodySchema,

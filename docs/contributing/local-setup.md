@@ -523,6 +523,24 @@ npm run dev:supabase
 
 These scripts are defined in the root `package.json` and orchestrated by Turborepo.
 
+### Production builds
+
+From the **repo root**, use Turborepo to build apps (caching, correct workspace context, same as CI/Vercel):
+
+```bash
+npx turbo build --filter=api
+npx turbo build --filter=webapp
+npx turbo build --filter=website
+npx turbo build --filter=chrome-extension
+
+# Everything that defines a build script
+npx turbo build
+```
+
+Shortcuts in root `package.json`: `npm run build` (all apps), `npm run build:api`, `build:webapp`, `build:website`.
+
+No manual `packages/*/dist` step is required — apps bundle workspace TypeScript source directly.
+
 ---
 
 ## Quick reference

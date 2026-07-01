@@ -1,9 +1,9 @@
 import type { Tag, TablesInsert, TablesUpdate } from "@bondery/schemas";
-import { TAG_SELECT } from "../../lib/queries.js";
-import { captureCurrentSyncTxid } from "../_shared/with-txid.js";
-import { DomainError, type DomainContext } from "../_shared/context.js";
-import { buildTagDeleteChange, buildTagRowChange } from "../../lib/sync/build-changes.js";
-import { emitSyncBatch } from "../../lib/sync/emit-change.js";
+import { TAG_SELECT } from "../../lib/queries";
+import { captureCurrentSyncTxid } from "../_shared/with-txid";
+import { DomainError, type DomainContext } from "../_shared/context";
+import { buildTagDeleteChange, buildTagRowChange } from "../../lib/sync/build-changes";
+import { emitSyncBatch } from "../../lib/sync/emit-change";
 
 const TAG_COLORS = [
   "#3B82F6",

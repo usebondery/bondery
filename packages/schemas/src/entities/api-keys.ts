@@ -1,6 +1,6 @@
 import { z } from "zod";
-import { API_KEY_LIMITS, API_KEY_PERMISSIONS } from "../constants/index.js";
-import { labelFieldSchema } from "./_shared.js";
+import { API_KEY_LIMITS, API_KEY_PERMISSIONS } from "../constants/index";
+import { labelFieldSchema } from "./_shared";
 
 export const apiKeyPermissionSchema = z.enum(API_KEY_PERMISSIONS);
 

@@ -1,8 +1,8 @@
-import { deleteOrphanedInteractionsForDeletedContacts } from "../../lib/delete-orphaned-interactions-for-contacts.js";
-import { captureCurrentSyncTxid } from "../_shared/with-txid.js";
-import { DomainError, type DomainContext } from "../_shared/context.js";
-import { buildPeopleDeleteChange } from "../../lib/sync/build-changes.js";
-import { emitSyncBatch } from "../../lib/sync/emit-change.js";
+import { deleteOrphanedInteractionsForDeletedContacts } from "../../lib/delete-orphaned-interactions-for-contacts";
+import { captureCurrentSyncTxid } from "../_shared/with-txid";
+import { DomainError, type DomainContext } from "../_shared/context";
+import { buildPeopleDeleteChange } from "../../lib/sync/build-changes";
+import { emitSyncBatch } from "../../lib/sync/emit-change";
 
 async function collectLinkedInLogoIds(
   client: DomainContext["client"],

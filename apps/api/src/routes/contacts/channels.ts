@@ -1,6 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database, EmailEntry, PhoneEntry } from "@bondery/schemas";
-import type { ContactWithId } from "../../lib/queries.js";
+import type { ContactWithId } from "../../lib/queries";
 
 type PersonChannelRows = {
   phones: PhoneEntry[];

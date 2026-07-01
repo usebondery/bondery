@@ -10,7 +10,7 @@
  */
 
 import type { FastifyInstance } from "fastify";
-import type { AppFastifyInstance } from "./fastify-types.js";
+import type { AppFastifyInstance } from "./fastify-types";
 import {
   isVersionBelow,
   CHROME_EXTENSION_URL,

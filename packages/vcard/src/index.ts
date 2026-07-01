@@ -1,7 +1,7 @@
-export { attachMedia, createDataUriAttachment, createMediaAttachment } from "./attachments.js";
-export { contactToVCard, vCardToContactDraft } from "./contact-mapping.js";
-export { parseVCard, parseVCards } from "./parse.js";
-export { serializeVCard } from "./serialize.js";
+export { attachMedia, createDataUriAttachment, createMediaAttachment } from "./attachments";
+export { contactToVCard, vCardToContactDraft } from "./contact-mapping";
+export { parseVCard, parseVCards } from "./parse";
+export { serializeVCard } from "./serialize";
 export type {
   ParsedVCard,
   VCard,
@@ -21,4 +21,4 @@ export type {
   VCardSerializeOptions,
   VCardTextValue,
   VCardTimezone,
-} from "./model.js";
+} from "./model";

@@ -1,8 +1,8 @@
 import { z } from "zod";
-import { contactIdSchema } from "../contact-id.js";
-import { AVATAR_UPLOAD, CONTACT_FIELD_MAX_LENGTHS } from "../constants/index.js";
-import { shareableFieldSchema } from "./contact.js";
-import { shareContactEmailSchema } from "./channels.js";
+import { contactIdSchema } from "../contact-id";
+import { AVATAR_UPLOAD, CONTACT_FIELD_MAX_LENGTHS } from "../constants/index";
+import { shareableFieldSchema } from "./contact";
+import { shareContactEmailSchema } from "./channels";
 
 export const apiErrorResponseSchema = z.object({
   error: z.string(),

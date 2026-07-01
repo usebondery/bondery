@@ -4,25 +4,25 @@
  */
 
 import type { FastifyReply } from "fastify";
-import type { AppFastifyInstance } from "../../../lib/fastify-types.js";
+import type { AppFastifyInstance } from "../../../lib/fastify-types";
 import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
-import { getAuth } from "../../../lib/auth.js";
-import { withOkResponse } from "../../../lib/openapi-route-responses.js";
+import { getAuth } from "../../../lib/auth";
+import { withOkResponse } from "../../../lib/openapi-route-responses";
 import {
   toPostgresDate,
   updateContactPhoto,
   uploadAllLinkedInLogos,
-} from "../../../lib/linkedin-helpers.js";
+} from "../../../lib/linkedin-helpers";
 import { cleanPersonName } from "@bondery/helpers/name";
 import type { TablesUpdate } from "@bondery/schemas";
-import { cachedGeocodeLinkedInLocation } from "../../../lib/mapy.js";
+import { cachedGeocodeLinkedInLocation } from "../../../lib/mapy";
 import type {
   ScrapedWorkHistoryEntry,
   ScrapedEducationEntry,
 } from "@bondery/schemas";
 import { apiSuccessResponseSchema, enrichContactRequestSchema } from "@bondery/schemas";
 import { uuidParamSchema } from "@bondery/schemas/http";
-import { ENRICH_TIER } from "../../../lib/rate-limit.js";
+import { ENRICH_TIER } from "../../../lib/rate-limit";
 
 export function registerEnrichRoutes(fastify: AppFastifyInstance): void {
   /**

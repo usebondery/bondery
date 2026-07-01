@@ -4,112 +4,113 @@
   "description": "Shared runtime utilities and form normalization pipelines for Bondery. Depends on @bondery/schemas.",
   "private": true,
   "type": "module",
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
   "exports": {
     ".": {
-      "import": "./dist/index.js",
-      "require": "./dist/index.js",
-      "types": "./dist/index.d.ts"
+      "types": "./src/index.ts",
+      "import": "./src/index.ts",
+      "require": "./src/index.ts"
     },
     "./globals": {
-      "import": "./dist/globals/index.js",
-      "require": "./dist/globals/index.js",
-      "types": "./dist/globals/index.d.ts"
+      "types": "./src/globals/index.ts",
+      "import": "./src/globals/index.ts",
+      "require": "./src/globals/index.ts"
     },
     "./globals/paths": {
-      "import": "./dist/globals/paths.js",
-      "require": "./dist/globals/paths.js",
-      "types": "./dist/globals/paths.d.ts"
+      "types": "./src/globals/paths.ts",
+      "import": "./src/globals/paths.ts",
+      "require": "./src/globals/paths.ts"
     },
     "./globals/dev-ports": {
-      "import": "./dist/globals/dev-ports.js",
-      "require": "./dist/globals/dev-ports.js",
-      "types": "./dist/globals/dev-ports.d.ts"
+      "types": "./src/globals/dev-ports.ts",
+      "import": "./src/globals/dev-ports.ts",
+      "require": "./src/globals/dev-ports.ts"
     },
     "./platform": {
-      "import": "./dist/platform/index.js",
-      "require": "./dist/platform/index.js",
-      "types": "./dist/platform/index.d.ts"
+      "types": "./src/platform/index.ts",
+      "import": "./src/platform/index.ts",
+      "require": "./src/platform/index.ts"
     },
     "./name": {
-      "import": "./dist/name/index.js",
-      "require": "./dist/name/index.js",
-      "types": "./dist/name/index.d.ts"
+      "types": "./src/name/index.ts",
+      "import": "./src/name/index.ts",
+      "require": "./src/name/index.ts"
     },
     "./address": {
-      "import": "./dist/address/index.js",
-      "require": "./dist/address/index.js",
-      "types": "./dist/address/index.d.ts"
+      "types": "./src/address/index.ts",
+      "import": "./src/address/index.ts",
+      "require": "./src/address/index.ts"
     },
     "./date": {
-      "import": "./dist/date/index.js",
-      "require": "./dist/date/index.js",
-      "types": "./dist/date/index.d.ts"
+      "types": "./src/date/index.ts",
+      "import": "./src/date/index.ts",
+      "require": "./src/date/index.ts"
     },
     "./text": {
-      "import": "./dist/text/index.js",
-      "require": "./dist/text/index.js",
-      "types": "./dist/text/index.d.ts"
+      "types": "./src/text/index.ts",
+      "import": "./src/text/index.ts",
+      "require": "./src/text/index.ts"
     },
     "./version": {
-      "import": "./dist/version/index.js",
-      "require": "./dist/version/index.js",
-      "types": "./dist/version/index.d.ts"
+      "types": "./src/version/index.ts",
+      "import": "./src/version/index.ts",
+      "require": "./src/version/index.ts"
     },
     "./interactions": {
-      "import": "./dist/interactions/index.js",
-      "require": "./dist/interactions/index.js",
-      "types": "./dist/interactions/index.d.ts"
+      "types": "./src/interactions/index.ts",
+      "import": "./src/interactions/index.ts",
+      "require": "./src/interactions/index.ts"
     },
     "./env": {
-      "import": "./dist/env/index.js",
-      "require": "./dist/env/index.js",
-      "types": "./dist/env/index.d.ts"
+      "types": "./src/env/index.ts",
+      "import": "./src/env/index.ts",
+      "require": "./src/env/index.ts"
     },
     "./locale": {
-      "import": "./dist/locale/index.js",
-      "require": "./dist/locale/index.js",
-      "types": "./dist/locale/index.d.ts"
+      "types": "./src/locale/index.ts",
+      "import": "./src/locale/index.ts",
+      "require": "./src/locale/index.ts"
     },
     "./socials": {
-      "import": "./dist/socials/index.js",
-      "require": "./dist/socials/index.js",
-      "types": "./dist/socials/index.d.ts"
+      "types": "./src/socials/index.ts",
+      "import": "./src/socials/index.ts",
+      "require": "./src/socials/index.ts"
     },
     "./phone": {
-      "import": "./dist/phone/index.js",
-      "require": "./dist/phone/index.js",
-      "types": "./dist/phone/index.d.ts"
+      "types": "./src/phone/index.ts",
+      "import": "./src/phone/index.ts",
+      "require": "./src/phone/index.ts"
     },
     "./contact": {
-      "import": "./dist/contact/index.js",
-      "require": "./dist/contact/index.js",
-      "types": "./dist/contact/index.d.ts"
+      "types": "./src/contact/index.ts",
+      "import": "./src/contact/index.ts",
+      "require": "./src/contact/index.ts"
     },
     "./geocode": {
-      "import": "./dist/geocode/index.js",
-      "require": "./dist/geocode/index.js",
-      "types": "./dist/geocode/index.d.ts"
+      "types": "./src/geocode/index.ts",
+      "import": "./src/geocode/index.ts",
+      "require": "./src/geocode/index.ts"
     },
     "./emoji": {
-      "import": "./dist/emoji/index.js",
-      "require": "./dist/emoji/index.js",
-      "types": "./dist/emoji/index.d.ts"
+      "types": "./src/emoji/index.ts",
+      "import": "./src/emoji/index.ts",
+      "require": "./src/emoji/index.ts"
     },
     "./notes": {
-      "import": "./dist/notes/index.js",
-      "require": "./dist/notes/index.js",
-      "types": "./dist/notes/index.d.ts"
+      "types": "./src/notes/index.ts",
+      "import": "./src/notes/index.ts",
+      "require": "./src/notes/index.ts"
     },
     "./forms": {
-      "import": "./dist/forms/index.js",
-      "require": "./dist/forms/index.js",
-      "types": "./dist/forms/index.d.ts"
+      "types": "./src/forms/index.ts",
+      "import": "./src/forms/index.ts",
+      "require": "./src/forms/index.ts"
     }
   },
   "scripts": {
-    "build": "rimraf dist && tsc"
+    "build:types": "rimraf dist && tsc",
+    "check-types": "tsc --noEmit"
   },
   "dependencies": {
     "@bondery/schemas": "*",

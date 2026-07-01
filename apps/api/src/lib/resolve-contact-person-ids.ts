@@ -1,6 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@bondery/schemas/supabase.types";
-import { searchPeopleIds } from "./search.js";
+import { searchPeopleIds } from "./search";
 
 export type ResolveContactPersonIdsExplicitBody = {
   personIds: string[];

@@ -5,12 +5,12 @@
  */
 
 import type { FastifyInstance, FastifyReply } from "fastify";
-import type { AppFastifyInstance } from "../../../lib/fastify-types.js";
+import type { AppFastifyInstance } from "../../../lib/fastify-types";
 import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { getAuth } from "../../../lib/auth.js";
-import { withOkResponse } from "../../../lib/openapi-route-responses.js";
-import { attachContactExtras, type FullContactExtras } from "../../../lib/contact-enrichment.js";
+import { getAuth } from "../../../lib/auth";
+import { withOkResponse } from "../../../lib/openapi-route-responses";
+import { attachContactExtras, type FullContactExtras } from "../../../lib/contact-enrichment";
 import type {
   Contact,
   Database,
@@ -23,13 +23,13 @@ import {
   mergeRecommendationsResponseSchema,
   refreshMergeRecommendationsResponseSchema,
 } from "@bondery/schemas";
-import { CONTACT_SELECT, extractAvatarOptions } from "../../../lib/queries.js";
+import { CONTACT_SELECT, extractAvatarOptions } from "../../../lib/queries";
 import { avatarTransformQuerySchema, uuidParamSchema } from "@bondery/schemas/http";
 import {
   buildPaginatedResponse,
   buildPaginationMeta,
   parsePagination,
-} from "../../../lib/pagination.js";
+} from "../../../lib/pagination";
 import {
   MERGE_RECOMMENDATION_ALGORITHM_VERSION,
   type MergeRecommendationCandidate,
@@ -42,7 +42,7 @@ import {
   mergeRecommendationsQuerySchema,
   withEmptyChannels,
   withEmptySocials,
-} from "./helpers.js";
+} from "./helpers";
 
 type MergeRecommendationRow = {
   id: string;

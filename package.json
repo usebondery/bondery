@@ -18,6 +18,9 @@
     "dev:polar-webhook": "npx localtunnel --port 3001",
     "build": "turbo build",
     "build:api": "turbo build --filter=api",
+    "build:webapp": "turbo build --filter=webapp",
+    "build:website": "turbo build --filter=website",
+    "build:chrome-extension": "turbo build --filter=chrome-extension",
     "turbo:clean": "turbo daemon clean",
     "start": "turbo start",
     "lint": "turbo lint",
@@ -25,18 +28,16 @@
     "check-types": "turbo check-types",
     "test:contracts": "npm run test:contracts -w @bondery/schemas",
     "check-openapi": "npm run generate-openapi -w apps/api && npm run check-openapi -w apps/api && npm run check-api-schema-patterns -w apps/api && npx redocly lint apps/api/openapi.yaml",
-    "generate-openapi": "npm run generate-openapi -w apps/api && git add apps/api/openapi.yaml",
-    "generate-types": "npm run gen-types -w apps/supabase-db && git add packages/schemas/src/supabase.types.ts"
+    "generate-openapi": "turbo generate-openapi --filter=api",
+    "generate-types": "npm run gen-types -w apps/supabase-db && git add packages/schemas/src/supabase.types.ts",
+    "prepare": "husky"
   },
-  "pre-commit": [
-    "generate-openapi"
-  ],
   "devDependencies": {
     "@biomejs/biome": "^2.5.0",
-    "@fastify/pre-commit": "^2.2.1",
     "@redocly/cli": "^2.33.0",
-    "ajv": "^8.18.0",
-    "turbo": "^2.10.1",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.1.5",
+    "turbo": "^2.10.2",
     "yaml": "^2.8.3"
   },
   "dependencies": {
@@ -53,7 +54,6 @@
     "protobufjs@7.6.4": true,
     "sharp@0.34.5": true,
     "spawn-sync@1.0.15": true,
-    "@fastify/pre-commit@2.2.1": true,
     "@parcel/watcher@2.5.6": true,
     "@swc/core@1.15.41": true
   }

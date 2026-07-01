@@ -5,17 +5,17 @@ import {
   deleteContact,
   addContactTag,
   removeContactTag,
-} from "../../domains/contacts/index.js";
+} from "../../domains/contacts/index";
 import {
   createGroup,
   updateGroup,
   deleteGroup,
   addGroupMembers,
   removeGroupMembers,
-} from "../../domains/groups/index.js";
-import { createTag, updateTag, deleteTag } from "../../domains/tags/index.js";
-import { DomainError, type DomainContext } from "../../domains/_shared/context.js";
-import { SyncConflictError } from "./conflict.js";
+} from "../../domains/groups/index";
+import { createTag, updateTag, deleteTag } from "../../domains/tags/index";
+import { DomainError, type DomainContext } from "../../domains/_shared/context";
+import { SyncConflictError } from "./conflict";
 
 export async function applySyncMutation(
   ctx: DomainContext,

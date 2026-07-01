@@ -1,6 +1,6 @@
 import { z } from "zod";
-import { contactSchema } from "./contact.js";
-import { makePaginatedListResponseSchema } from "./_shared.js";
+import { contactSchema } from "./contact";
+import { makePaginatedListResponseSchema } from "./_shared";
 
 export const mergeConflictChoiceSchema = z.enum(["left", "right"]);
 

@@ -1,11 +1,11 @@
 import { parseVCards, vCardToContactDraft } from "@bondery/vcard";
 import type { VCardPreparedContact } from "@bondery/schemas";
-import type { UploadFile } from "../../../lib/queries.js";
+import type { UploadFile } from "../../../lib/queries";
 import {
   validateStreetAddress,
   cachedGeocodeLinkedInLocation,
   getTimezoneForCoordinates,
-} from "../../../lib/mapy.js";
+} from "../../../lib/mapy";
 import { formatAddressLabel } from "@bondery/helpers";
 
 type PreparedAddress = VCardPreparedContact["addresses"][0];

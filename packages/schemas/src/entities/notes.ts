@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { CONTACT_FIELD_MAX_LENGTHS } from "../constants/index.js";
+import { CONTACT_FIELD_MAX_LENGTHS } from "../constants/index";
 
 export const contactNotesUpdateSchema = z.object({
   notes: z

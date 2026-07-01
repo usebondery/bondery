@@ -3,9 +3,9 @@
  * Orchestrates merge recommendations and merge-execute sub-modules.
  */
 
-import type { AppFastifyInstance } from "../../../lib/fastify-types.js";
-import { registerRecommendationRoutes } from "./recommendations.js";
-import { registerMergeExecuteRoute } from "./execute.js";
+import type { AppFastifyInstance } from "../../../lib/fastify-types";
+import { registerRecommendationRoutes } from "./recommendations";
+import { registerMergeExecuteRoute } from "./execute";
 
 export function registerMergeRoutes(fastify: AppFastifyInstance): void {
   registerRecommendationRoutes(fastify);

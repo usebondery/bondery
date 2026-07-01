@@ -3,12 +3,12 @@
  */
 
 import type { FastifyInstance, FastifyReply } from "fastify";
-import type { AppFastifyInstance } from "../../../lib/fastify-types.js";
+import type { AppFastifyInstance } from "../../../lib/fastify-types";
 import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
 import { z } from "zod";
-import { getAuth } from "../../../lib/auth.js";
-import { withOkResponse } from "../../../lib/openapi-route-responses.js";
-import { TAG_SELECT } from "../../../lib/queries.js";
+import { getAuth } from "../../../lib/auth";
+import { withOkResponse } from "../../../lib/openapi-route-responses";
+import { TAG_SELECT } from "../../../lib/queries";
 import { contactTagListResponseSchema, messageResponseSchema } from "@bondery/schemas";
 import { uuidParamSchema } from "@bondery/schemas/http";
 

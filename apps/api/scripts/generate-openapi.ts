@@ -35,7 +35,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 async function main() {
-  const { buildServer } = await import("../src/index.js");
+  const { buildServer } = await import("../src/index");
   const server = await buildServer();
   await server.ready();
 

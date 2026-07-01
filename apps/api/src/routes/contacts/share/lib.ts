@@ -1,12 +1,12 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@bondery/schemas/supabase.types";
 import type { ShareableField } from "@bondery/schemas";
-import { CONTACT_SELECT } from "../../../lib/queries.js";
-import { resolveContactAvatarUrl } from "../../../lib/supabase.js";
+import { CONTACT_SELECT } from "../../../lib/queries";
+import { resolveContactAvatarUrl } from "../../../lib/supabase";
 import {
   attachContactExtras,
   type FullContactExtras,
-} from "../../../lib/contact-enrichment.js";
+} from "../../../lib/contact-enrichment";
 import nodemailer from "nodemailer";
 import { render } from "@react-email/render";
 import { ShareContactEmail } from "@bondery/emails";

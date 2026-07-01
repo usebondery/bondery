@@ -4,19 +4,19 @@
  */
 
 import type { FastifyRequest } from "fastify";
-import type { AppRoutePlugin } from "../../lib/fastify-types.js";
+import type { AppRoutePlugin } from "../../lib/fastify-types";
 import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
 import { z } from "zod";
 import type { UIMessage } from "ai";
 import { convertToModelMessages } from "ai";
 import type { Json } from "@bondery/schemas/supabase.types";
 import { standardErrorResponses } from "@bondery/schemas/http";
-import { getAuth } from "../../lib/auth.js";
-import { applyOpenApiRouteMeta } from "../../lib/openapi-route-meta.js";
-import { runChatAgent } from "../../lib/chat/agent.js";
-import { generateSessionTitle } from "../../lib/chat/title.js";
-import { checkAndIncrementQuota } from "../../lib/chat/quota.js";
-import { AI_TIER } from "../../lib/rate-limit.js";
+import { getAuth } from "../../lib/auth";
+import { applyOpenApiRouteMeta } from "../../lib/openapi-route-meta";
+import { runChatAgent } from "../../lib/chat/agent";
+import { generateSessionTitle } from "../../lib/chat/title";
+import { checkAndIncrementQuota } from "../../lib/chat/quota";
+import { AI_TIER } from "../../lib/rate-limit";
 
 const chatRequestSchema = z.object({
   messages: z.array(z.record(z.string(), z.unknown())),

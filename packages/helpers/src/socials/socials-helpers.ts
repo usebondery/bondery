@@ -1,6 +1,6 @@
-import { combinePhoneNumber } from "../phone/index.js";
-import { SOCIAL_PLATFORM_URL_DETAILS } from "../globals/social-platform-urls.js";
-import { normalizeWebsiteUrl } from "./normalize-website-url.js";
+import { combinePhoneNumber } from "../phone/index";
+import { SOCIAL_PLATFORM_URL_DETAILS } from "../globals/social-platform-urls";
+import { normalizeWebsiteUrl } from "./normalize-website-url";
 
 export interface SocialPlatformConfig {
   name: string;

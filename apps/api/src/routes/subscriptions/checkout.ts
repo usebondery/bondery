@@ -10,10 +10,10 @@
 import type { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
 import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
 import { z } from "zod";
-import { getAuth } from "../../lib/auth.js";
-import { applyOpenApiRouteMeta } from "../../lib/openapi-route-meta.js";
-import { withOkResponse } from "../../lib/openapi-route-responses.js";
-import { getPolarClient, sanitizePolarLocale } from "../../lib/polar.js";
+import { getAuth } from "../../lib/auth";
+import { applyOpenApiRouteMeta } from "../../lib/openapi-route-meta";
+import { withOkResponse } from "../../lib/openapi-route-responses";
+import { getPolarClient, sanitizePolarLocale } from "../../lib/polar";
 
 const checkoutResponseSchema = z.object({
   url: z.string(),

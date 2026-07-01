@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { contactIdSchema } from "../contact-id.js";
+import { contactIdSchema } from "../contact-id";
 
 export const idSchema = z.string();
 export const userIdSchema = z.string();

@@ -4,20 +4,20 @@
  */
 
 import type { FastifyReply } from "fastify";
-import type { AppFastifyInstance } from "../../lib/fastify-types.js";
+import type { AppFastifyInstance } from "../../lib/fastify-types";
 import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
-import { getAuth } from "../../lib/auth.js";
-import { searchPeopleIds, restoreRankedOrder, countSearchPeopleIds } from "../../lib/search.js";
-import { attachContactExtras } from "../../lib/contact-enrichment.js";
+import { getAuth } from "../../lib/auth";
+import { searchPeopleIds, restoreRankedOrder, countSearchPeopleIds } from "../../lib/search";
+import { attachContactExtras } from "../../lib/contact-enrichment";
 import {
   resolveContactPersonIds,
   ResolveContactPersonIdsError,
-} from "../../lib/resolve-contact-person-ids.js";
+} from "../../lib/resolve-contact-person-ids";
 import {
   resolveGroupMemberPersonIds,
   ResolveGroupMemberPersonIdsError,
-} from "../../lib/resolve-group-member-person-ids.js";
-import { CONTACT_SELECT, extractAvatarOptions } from "../../lib/queries.js";
+} from "../../lib/resolve-group-member-person-ids";
+import { CONTACT_SELECT, extractAvatarOptions } from "../../lib/queries";
 import { peopleListQuerySchema, uuidParamSchema } from "@bondery/schemas/http";
 import {
   addContactsToGroupRequestSchema,
@@ -26,14 +26,14 @@ import {
   removeGroupMembersRequestSchema,
   removeGroupMembersResponseSchema,
 } from "@bondery/schemas";
-import { withOkResponse } from "../../lib/openapi-route-responses.js";
+import { withOkResponse } from "../../lib/openapi-route-responses";
 import {
   buildPaginatedResponse,
   buildPaginationMeta,
   normalizeSearch,
   parsePagination,
   resolveSort,
-} from "../../lib/pagination.js";
+} from "../../lib/pagination";
 
 const EXISTING_MEMBERSHIP_LOOKUP_CHUNK_SIZE = 500;
 

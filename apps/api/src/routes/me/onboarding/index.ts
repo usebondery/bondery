@@ -4,12 +4,12 @@
  */
 
 import type { FastifyReply } from "fastify";
-import type { AppRoutePlugin } from "../../../lib/fastify-types.js";
+import type { AppRoutePlugin } from "../../../lib/fastify-types";
 import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
 import { apiSuccessResponseSchema } from "@bondery/schemas";
-import { getAuth } from "../../../lib/auth.js";
-import { applyOpenApiRouteMeta } from "../../../lib/openapi-route-meta.js";
-import { withOkResponse } from "../../../lib/openapi-route-responses.js";
+import { getAuth } from "../../../lib/auth";
+import { applyOpenApiRouteMeta } from "../../../lib/openapi-route-meta";
+import { withOkResponse } from "../../../lib/openapi-route-responses";
 
 export const meOnboardingRoutes: AppRoutePlugin = async (fastify) => {
   fastify.addHook("onRoute", (routeOptions) => {

@@ -1,14 +1,14 @@
 import type { FastifyInstance } from "fastify";
-import type { AppFastifyInstance } from "../fastify-types.js";
+import type { AppFastifyInstance } from "../fastify-types";
 import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
 import {
   CHROME_EXTENSION_URL,
   MIN_EXTENSION_VERSION,
 } from "@bondery/helpers";
-import { HEALTH_TIER } from "../rate-limit.js";
-import { withOkResponse } from "../openapi-route-responses.js";
-import { getHealthReport } from "./check.js";
-import { healthReportSchema, livenessStatusSchema } from "./schemas.js";
+import { HEALTH_TIER } from "../rate-limit";
+import { withOkResponse } from "../openapi-route-responses";
+import { getHealthReport } from "./check";
+import { healthReportSchema, livenessStatusSchema } from "./schemas";
 
 const LIVENESS_DESCRIPTION =
   "Liveness probe. Returns 200 when the API process is running. " +

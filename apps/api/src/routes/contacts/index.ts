@@ -4,37 +4,37 @@
  */
 
 import type { FastifyInstance, FastifyReply } from "fastify";
-import type { AppFastifyInstance, AppRoutePlugin } from "../../lib/fastify-types.js";
+import type { AppFastifyInstance, AppRoutePlugin } from "../../lib/fastify-types";
 import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
 import { z } from "zod";
-import { getAuth } from "../../lib/auth.js";
-import { registerApiKeyProtectedHooks } from "../../lib/api-key-access.js";
-import { applyOpenApiRouteMeta } from "../../lib/openapi-route-meta.js";
-import { withCreatedResponse, withOkResponse } from "../../lib/openapi-route-responses.js";
-import { resolveContactAvatarUrl } from "../../lib/supabase.js";
-import { searchPeopleIds, restoreRankedOrder, countSearchPeopleIds } from "../../lib/search.js";
+import { getAuth } from "../../lib/auth";
+import { registerApiKeyProtectedHooks } from "../../lib/api-key-access";
+import { applyOpenApiRouteMeta } from "../../lib/openapi-route-meta";
+import { withCreatedResponse, withOkResponse } from "../../lib/openapi-route-responses";
+import { resolveContactAvatarUrl } from "../../lib/supabase";
+import { searchPeopleIds, restoreRankedOrder, countSearchPeopleIds } from "../../lib/search";
 import {
   resolveContactPersonIds,
   ResolveContactPersonIdsError,
-} from "../../lib/resolve-contact-person-ids.js";
-import { generateVCard } from "./vcard.js";
+} from "../../lib/resolve-contact-person-ids";
+import { generateVCard } from "./vcard";
 import {
   parseEmailEntries,
   parsePhoneEntries,
   replaceContactEmails,
   replaceContactPhones,
-} from "./channels.js";
-import { parseAddressEntries, replaceContactAddresses } from "./addresses.js";
+} from "./channels";
+import { parseAddressEntries, replaceContactAddresses } from "./addresses";
 import {
   findPersonIdBySocial,
   upsertContactSocials,
-} from "../../lib/socials.js";
-import { cachedGeocodeLinkedInLocation } from "../../lib/mapy.js";
+} from "../../lib/socials";
+import { cachedGeocodeLinkedInLocation } from "../../lib/mapy";
 import {
   attachContactExtras,
   loadEnrichedContact,
   type FullContactExtras,
-} from "../../lib/contact-enrichment.js";
+} from "../../lib/contact-enrichment";
 import type {
   Contact,
   ContactAddressEntry,
@@ -72,26 +72,26 @@ import {
   CONTACT_SELECT,
   GROUP_SELECT,
   extractAvatarOptions,
-} from "../../lib/queries.js";
+} from "../../lib/queries";
 import {
   buildPaginatedResponse,
   buildPaginationMeta,
   normalizeSearch,
   parsePagination,
   resolveSort,
-} from "../../lib/pagination.js";
-import { registerMergeRoutes } from "./merge/index.js";
-import { registerEnrichmentRoutes } from "./enrichment/index.js";
-import { registerRelationshipRoutes } from "./relationships/index.js";
+} from "../../lib/pagination";
+import { registerMergeRoutes } from "./merge/index";
+import { registerEnrichmentRoutes } from "./enrichment/index";
+import { registerRelationshipRoutes } from "./relationships/index";
 import {
   registerImportantDateRoutes,
   IMPORTANT_DATE_TYPES,
-} from "./important-dates/index.js";
-import { registerPhotoRoutes } from "./photo/index.js";
-import { registerTagRoutes } from "./tags/index.js";
-import { deleteOrphanedInteractionsForDeletedContacts } from "../../lib/delete-orphaned-interactions-for-contacts.js";
-import { createContact, updateContact, deleteContact } from "../../domains/contacts/index.js";
-import { handleDomainError } from "../../lib/sync/handle-domain-error.js";
+} from "./important-dates/index";
+import { registerPhotoRoutes } from "./photo/index";
+import { registerTagRoutes } from "./tags/index";
+import { deleteOrphanedInteractionsForDeletedContacts } from "../../lib/delete-orphaned-interactions-for-contacts";
+import { createContact, updateContact, deleteContact } from "../../domains/contacts/index";
+import { handleDomainError } from "../../lib/sync/handle-domain-error";
 
 const LOOKUP_SOCIAL_PLATFORMS: SocialPlatform[] = [
   "instagram",

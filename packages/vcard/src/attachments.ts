@@ -3,7 +3,7 @@ import type {
   VCardMedia,
   VCardMediaAttachmentInput,
   VCardMediaPropertyName,
-} from "./model.js";
+} from "./model";
 
 const BASE64_ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 

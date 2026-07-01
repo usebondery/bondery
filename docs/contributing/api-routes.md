@@ -4,10 +4,12 @@ Every Fastify route in `apps/api/src/routes/` is part of the published API contr
 
 ## Canonical route shape
 
+Relative imports within `apps/api` are **extensionless** (same as `packages/*`). `@bondery/*` workspace imports are unchanged.
+
 ```typescript
 import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
-import { applyOpenApiRouteMeta } from "../../lib/openapi-route-meta.js";
-import { withOkResponse, withCreatedResponse } from "../../lib/openapi-route-responses.js";
+import { applyOpenApiRouteMeta } from "../../lib/openapi-route-meta";
+import { withOkResponse, withCreatedResponse } from "../../lib/openapi-route-responses";
 import { contactResponseSchema } from "@bondery/schemas";
 import { uuidParamSchema } from "@bondery/schemas/http";
 
@@ -46,7 +48,21 @@ Nested route modules (e.g. `contacts/enrichment/*`) inherit `onRoute` from the p
   - `session` — bearer only (me, chat, sync, subscriptions, extension, admin)
   - `internal` — hidden from GitBook (`webhooks`, `internal/*`)
 - [ ] Handler return shape matches the declared response schema
-- [ ] `npm run generate-openapi -w apps/api` and commit `apps/api/openapi.yaml`
+- [ ] `npm run build:api` or `npx turbo build --filter=api` from repo root after route/schema changes
+- [ ] OpenAPI spec updates automatically via the pre-commit hook when `apps/api` or `packages/schemas` change; run `npm run check-openapi` manually before release if needed
+
+## Vercel (separate API project)
+
+Each app (`apps/api`, `apps/webapp`, …) is its own Vercel project with **Root Directory** set to that app folder.
+
+The API project uses [`apps/api/vercel.json`](../../apps/api/vercel.json):
+
+1. **Install** — `cd ../.. && npm ci` so workspace packages link from the monorepo root
+2. **Build** — `cd ../.. && turbo build --filter=api` (runs `tsup` to bundle workspace source into `apps/api/dist`)
+
+`openapi.yaml` is committed; generation is not part of the deploy build.
+
+In the Vercel project settings, enable **Include source files outside of the Root Directory** so builds can read `packages/*`.
 
 ## Shared primitives
 

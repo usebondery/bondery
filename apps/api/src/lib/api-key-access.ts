@@ -3,7 +3,7 @@
  */
 
 import type { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
-import type { AppFastifyInstance } from "./fastify-types.js";
+import type { AppFastifyInstance } from "./fastify-types";
 import type { ApiKeyPermission } from "@bondery/schemas";
 
 /** Routes API keys may access (tier-1 + share + imports + geocode). */

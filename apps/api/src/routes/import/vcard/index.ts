@@ -1,31 +1,31 @@
 import type { FastifyReply } from "fastify";
-import type { AppFastifyInstance, AppRoutePlugin } from "../../../lib/fastify-types.js";
+import type { AppFastifyInstance, AppRoutePlugin } from "../../../lib/fastify-types";
 import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
 import {
   vcardImportCommitRequestSchema,
   vcardImportCommitResponseSchema,
   vcardParseResponseSchema,
 } from "@bondery/schemas";
-import { getAuth } from "../../../lib/auth.js";
-import { registerApiKeyProtectedHooks } from "../../../lib/api-key-access.js";
-import { applyOpenApiRouteMeta } from "../../../lib/openapi-route-meta.js";
-import { withOkResponse } from "../../../lib/openapi-route-responses.js";
-import { parseVCardUpload } from "./parser.js";
-import { assignContactsToDefaultImportGroup } from "../../../lib/default-import-groups.js";
+import { getAuth } from "../../../lib/auth";
+import { registerApiKeyProtectedHooks } from "../../../lib/api-key-access";
+import { applyOpenApiRouteMeta } from "../../../lib/openapi-route-meta";
+import { withOkResponse } from "../../../lib/openapi-route-responses";
+import { parseVCardUpload } from "./parser";
+import { assignContactsToDefaultImportGroup } from "../../../lib/default-import-groups";
 import {
   validateImageUpload,
   validateImageMagicBytes,
-} from "../../../lib/config.js";
+} from "../../../lib/config";
 import type {
   VCardImportCommitResponse,
   VCardParseResponse,
   TablesUpdate,
 } from "@bondery/schemas";
-import logger from "../../../lib/logger.js";
-import { createAdminClient } from "../../../lib/supabase.js";
-import { uploadContactAvatarAndSetFlag } from "../../../lib/avatar-storage.js";
+import logger from "../../../lib/logger";
+import { createAdminClient } from "../../../lib/supabase";
+import { uploadContactAvatarAndSetFlag } from "../../../lib/avatar-storage";
 import { formatPlaceLabel } from "@bondery/helpers";
-import { IMPORT_TIER } from "../../../lib/rate-limit.js";
+import { IMPORT_TIER } from "../../../lib/rate-limit";
 
 const AVATARS_BUCKET = "avatars";
 

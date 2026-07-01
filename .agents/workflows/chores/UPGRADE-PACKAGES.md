@@ -148,18 +148,20 @@ deps(webapp): upgrade Next.js 16.x → 17.x
 Build each workspace you changed. If a shared package changed, also build its consumers.
 
 ```bash
-# Packages with a build script
-npm run build -w packages/schemas
-npm run build -w packages/helpers
-npm run build -w packages/emails
-npm run build -w packages/vcard
-npm run build -w packages/branding
+# Apps (from repo root — prefer Turbo; matches CI/Vercel)
+npx turbo build --filter=api
+npx turbo build --filter=webapp
+npx turbo build --filter=website
+npx turbo build --filter=chrome-extension
 
-# Apps
-npm run build -w apps/api
-npm run build -w apps/webapp
-npm run build -w apps/website
-npm run build -w apps/chrome-extension
+# Or shortcuts: npm run build:api, build:webapp, build:website
+
+# Packages — optional emit of dist/ for types only (not required for app builds)
+npm run build:types -w @bondery/schemas
+npm run build:types -w @bondery/helpers
+npm run build:types -w @bondery/emails
+npm run build:types -w @bondery/vcard
+npm run build:types -w @bondery/branding
 
 # Packages without build — verify via consumers
 npm run check-types -w packages/mantine-next
@@ -170,17 +172,17 @@ npm run check-types -w apps/mobile
 npx expo-doctor                        # run inside apps/mobile
 
 # Large PR — full check before merge
-npm run build
+npm run build                          # turbo build (all apps)
 ```
 
 | Workspace | Build command | Requires |
 |-----------|---------------|----------|
-| `apps/api` | `npm run build -w apps/api` | `apps/api/.env.production.local` |
-| `apps/webapp` | `npm run build -w apps/webapp` | `.env.production.local`, runs icon generation |
-| `apps/website` | `npm run build -w apps/website` | `.env.production.local` |
-| `apps/chrome-extension` | `npm run build -w apps/chrome-extension` | extension env files |
+| `apps/api` | `npx turbo build --filter=api` | `apps/api/.env.production.local` |
+| `apps/webapp` | `npx turbo build --filter=webapp` | `.env.production.local`, runs icon generation |
+| `apps/website` | `npx turbo build --filter=website` | `.env.production.local` |
+| `apps/chrome-extension` | `npx turbo build --filter=chrome-extension` | extension env files |
 | `apps/mobile` | `check-types` + `expo-doctor` | — |
-| `packages/*` | `npm run build -w packages/<name>` if script exists | — |
+| `packages/*` | `npm run build:types -w @bondery/<name>` if you need `dist/` | — |
 
 **Webapp note:** `check-types` also runs `check-api-fetch:strict` and `check-query-patterns:strict` — run it even when build passes.
 

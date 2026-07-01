@@ -4,12 +4,12 @@ import {
   CONTACT_LIMITS,
   IMPORTANT_DATE_NOTIFY_DAYS,
   IMPORTANT_DATE_TYPES,
-} from "../constants/index.js";
+} from "../constants/index";
 import {
   entityIdentitySchema,
   entityNullableAuditSchema,
   makeCollectionResponseSchema,
-} from "./_shared.js";
+} from "./_shared";
 
 const isoDateSchema = z
   .string()
@@ -25,6 +25,9 @@ export const importantDateNotifyDaysSchema = z.union([
   z.null(),
 ]);
 
+/** Wire/read shape — DB may return any integer before validation normalizes. */
+const importantDateNotifyDaysWireSchema = z.number().int().nullable();
+
 const importantDateCoreSchema = z.object({
   type: importantDateTypeSchema,
   date: isoDateSchema,
@@ -34,7 +37,7 @@ const importantDateNoteSchema = z.string().nullable();
 
 const importantDateBaseFieldsSchema = importantDateCoreSchema.extend({
   note: importantDateNoteSchema,
-  notifyDaysBefore: importantDateNotifyDaysSchema,
+  notifyDaysBefore: importantDateNotifyDaysWireSchema,
 });
 
 export const importantDateSchema = entityIdentitySchema.extend({

@@ -1,6 +1,6 @@
 import { z } from "zod";
-import { CONTACT_FIELD_MAX_LENGTHS, CONTACT_LIMITS } from "../constants/index.js";
-import { nullableTrimmedStringSchema } from "./_shared.js";
+import { CONTACT_FIELD_MAX_LENGTHS, CONTACT_LIMITS } from "../constants/index";
+import { nullableTrimmedStringSchema } from "./_shared";
 
 export const contactAddressTypeSchema = z.enum(["home", "work", "other"]);
 export const contactAddressGranularitySchema = z.enum(["address", "city", "state", "country"]);

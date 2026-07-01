@@ -4,27 +4,27 @@
  */
 
 import type { FastifyReply } from "fastify";
-import type { AppFastifyInstance, AppRoutePlugin } from "../../../lib/fastify-types.js";
+import type { AppFastifyInstance, AppRoutePlugin } from "../../../lib/fastify-types";
 import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
 import { z } from "zod";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@bondery/schemas/supabase.types";
-import { createAdminClient } from "../../../lib/supabase.js";
-import { uploadContactAvatarAndSetFlag } from "../../../lib/avatar-storage.js";
-import { getAuth } from "../../../lib/auth.js";
+import { createAdminClient } from "../../../lib/supabase";
+import { uploadContactAvatarAndSetFlag } from "../../../lib/avatar-storage";
+import { getAuth } from "../../../lib/auth";
 import {
   validateImageUpload,
   validateImageMagicBytes,
-} from "../../../lib/config.js";
-import logger from "../../../lib/logger.js";
+} from "../../../lib/config";
+import logger from "../../../lib/logger";
 import type { TablesUpdate } from "@bondery/schemas";
 import {
   updateUserSettingsInputSchema,
   userSettingsResponseSchema,
 } from "@bondery/schemas";
-import { applyOpenApiRouteMeta } from "../../../lib/openapi-route-meta.js";
-import { withOkResponse } from "../../../lib/openapi-route-responses.js";
-import { getMyselfProfile } from "../../../lib/myself.js";
+import { applyOpenApiRouteMeta } from "../../../lib/openapi-route-meta";
+import { withOkResponse } from "../../../lib/openapi-route-responses";
+import { getMyselfProfile } from "../../../lib/myself";
 
 const updateSettingsBodySchema = updateUserSettingsInputSchema.extend({
   onlyIfNewSignup: z.boolean().optional(),

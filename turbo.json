@@ -52,7 +52,7 @@
         "apps/website/.env.production.local",
         "apps/api/.env.production.local"
       ],
-      "dependsOn": ["^build"],
+      "dependsOn": [],
       "outputs": [".next/**", "!.next/cache/**", "dist/**", "public/**"]
     },
 
@@ -77,7 +77,7 @@
       ]
     },
     "dev": {
-      "dependsOn": ["^build"],
+      "dependsOn": [],
       "persistent": true,
       "cache": true,
       "env": [
@@ -111,28 +111,14 @@
         "apps/api/.env.development.local"
       ]
     },
-    "@bondery/branding#build": {
-      "outputs": ["dist/**"],
-      "env": []
+    "api#build": {
+      "dependsOn": [],
+      "outputs": ["dist/**"]
     },
-    "@bondery/emails#build": {
-      "dependsOn": ["@bondery/branding#build", "@bondery/mantine-next#build"],
-      "outputs": ["dist/**"],
-      "env": []
-    },
-    "@bondery/helpers#build": {
-      "dependsOn": ["@bondery/schemas#build"],
-      "outputs": ["dist/**"],
-      "env": []
-    },
-    "@bondery/schemas#build": {
-      "outputs": ["dist/**"],
-      "env": []
-    },
-    "@bondery/vcard#build": {
-      "dependsOn": ["@bondery/helpers#build", "@bondery/schemas#build"],
-      "outputs": ["dist/**"],
-      "env": []
+    "api#generate-openapi": {
+      "dependsOn": [],
+      "outputs": ["openapi.yaml"],
+      "cache": true
     },
     "start": {
       "persistent": true,

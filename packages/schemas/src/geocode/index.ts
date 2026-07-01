@@ -1,1 +1,1 @@
-export { parseGeocodeSuggestResponse, parseGeocodeTimezoneResponse } from "./client.js";
+export { parseGeocodeSuggestResponse, parseGeocodeTimezoneResponse } from "./client";

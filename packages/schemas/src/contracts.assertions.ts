@@ -1,21 +1,21 @@
-import { EXAMPLE_CONTACT_ID } from "./contact-id.js";
-import { createInteractionInputSchema, interactionParticipantSchema } from "./entities/activity.js";
-import { contactPreviewSchema, deleteContactsRequestSchema } from "./entities/contact.js";
+import { EXAMPLE_CONTACT_ID } from "./contact-id";
+import { createInteractionInputSchema, interactionParticipantSchema } from "./entities/activity";
+import { contactPreviewSchema, deleteContactsRequestSchema } from "./entities/contact";
 import {
   createGroupSchema,
   deleteGroupsRequestSchema,
   updateGroupSchema,
-} from "./entities/group.js";
-import { importantDateSheetSchema } from "./entities/important-date.js";
-import { instagramImportCommitRequestSchema } from "./entities/import.js";
+} from "./entities/group";
+import { importantDateSheetSchema } from "./entities/important-date";
+import { instagramImportCommitRequestSchema } from "./entities/import";
 import {
   mergeContactsRequestSchema,
   mergeRecommendationSchema,
   mergeRecommendationsResponseSchema,
-} from "./entities/merge.js";
-import { subscriptionStatusSchema } from "./entities/subscription.js";
-import { createTagSchema, deleteTagsRequestSchema, updateTagSchema } from "./entities/tag.js";
-import { paginationQuerySchema } from "./http/index.js";
+} from "./entities/merge";
+import { subscriptionStatusSchema } from "./entities/subscription";
+import { createTagSchema, deleteTagsRequestSchema, updateTagSchema } from "./entities/tag";
+import { paginationQuerySchema } from "./http/index";
 
 function assert(condition: unknown, message: string): asserts condition {
   if (!condition) {

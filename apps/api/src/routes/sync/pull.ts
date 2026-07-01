@@ -1,17 +1,17 @@
 import type { FastifyReply } from "fastify";
-import type { AppRoutePlugin } from "../../lib/fastify-types.js";
+import type { AppRoutePlugin } from "../../lib/fastify-types";
 import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
 import { syncPullQuerySchema } from "@bondery/schemas/http";
 import type { SyncBatch, SyncChange, SyncPullResponse } from "@bondery/schemas/sync";
 import { syncPullResponseSchema } from "@bondery/schemas/sync";
-import { getAuth } from "../../lib/auth.js";
-import { applyOpenApiRouteMeta } from "../../lib/openapi-route-meta.js";
-import { withOkResponse } from "../../lib/openapi-route-responses.js";
-import { createAdminClient } from "../../lib/supabase.js";
-import { getLastServerSequence } from "../../lib/sync/idempotency.js";
-import { logSyncPull } from "../../lib/sync/metrics.js";
-import { validateSyncProtocolHeaders } from "../../lib/sync/protocol.js";
-import { isSyncTableKey } from "../../lib/sync/sync-tables.js";
+import { getAuth } from "../../lib/auth";
+import { applyOpenApiRouteMeta } from "../../lib/openapi-route-meta";
+import { withOkResponse } from "../../lib/openapi-route-responses";
+import { createAdminClient } from "../../lib/supabase";
+import { getLastServerSequence } from "../../lib/sync/idempotency";
+import { logSyncPull } from "../../lib/sync/metrics";
+import { validateSyncProtocolHeaders } from "../../lib/sync/protocol";
+import { isSyncTableKey } from "../../lib/sync/sync-tables";
 
 const DEFAULT_LIMIT = 100;
 const MAX_LIMIT = 100;

@@ -19,9 +19,9 @@ import {
   validateEvent,
   WebhookVerificationError,
 } from "@polar-sh/sdk/webhooks";
-import { applyOpenApiRouteMeta } from "../../lib/openapi-route-meta.js";
-import { withOkResponse } from "../../lib/openapi-route-responses.js";
-import { createAdminClient } from "../../lib/supabase.js";
+import { applyOpenApiRouteMeta } from "../../lib/openapi-route-meta";
+import { withOkResponse } from "../../lib/openapi-route-responses";
+import { createAdminClient } from "../../lib/supabase";
 
 const webhookAckResponseSchema = z.object({
   received: z.boolean(),

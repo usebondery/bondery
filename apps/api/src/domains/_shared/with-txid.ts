@@ -1,5 +1,5 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
-import type { DomainSupabaseClient } from "./context.js";
+import type { DomainSupabaseClient } from "./context";
 
 export async function capturePersonSyncTxid(
   client: DomainSupabaseClient,

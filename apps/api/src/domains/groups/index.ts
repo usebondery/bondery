@@ -1,13 +1,13 @@
 import type { Group, TablesInsert, TablesUpdate } from "@bondery/schemas";
-import { GROUP_SELECT } from "../../lib/queries.js";
-import { captureCurrentSyncTxid } from "../_shared/with-txid.js";
-import { DomainError, type DomainContext } from "../_shared/context.js";
+import { GROUP_SELECT } from "../../lib/queries";
+import { captureCurrentSyncTxid } from "../_shared/with-txid";
+import { DomainError, type DomainContext } from "../_shared/context";
 import {
   buildGroupDeleteChange,
   buildGroupRowChange,
   buildPeopleGroupsChanges,
-} from "../../lib/sync/build-changes.js";
-import { emitSyncBatch } from "../../lib/sync/emit-change.js";
+} from "../../lib/sync/build-changes";
+import { emitSyncBatch } from "../../lib/sync/emit-change";
 
 export interface CreateGroupInput {
   id?: string;

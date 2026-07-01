@@ -4,15 +4,15 @@
  */
 
 import type { FastifyReply } from "fastify";
-import type { AppRoutePlugin, FastifyZodOpenApiSchema } from "../../lib/fastify-types.js";
-import { getAuth } from "../../lib/auth.js";
-import { registerApiKeyProtectedHooks } from "../../lib/api-key-access.js";
-import { applyOpenApiRouteMeta } from "../../lib/openapi-route-meta.js";
-import { withCreatedResponse, withOkResponse } from "../../lib/openapi-route-responses.js";
-import { GROUP_SELECT, extractAvatarOptions } from "../../lib/queries.js";
+import type { AppRoutePlugin, FastifyZodOpenApiSchema } from "../../lib/fastify-types";
+import { getAuth } from "../../lib/auth";
+import { registerApiKeyProtectedHooks } from "../../lib/api-key-access";
+import { applyOpenApiRouteMeta } from "../../lib/openapi-route-meta";
+import { withCreatedResponse, withOkResponse } from "../../lib/openapi-route-responses";
+import { GROUP_SELECT, extractAvatarOptions } from "../../lib/queries";
 import { idsRequestBodySchema, previewListQuerySchema, uuidParamSchema } from "@bondery/schemas/http";
 import { createGroupSchema, groupResponseSchema, groupsListResponseSchema, messageResponseSchema, updateGroupSchema } from "@bondery/schemas";
-import { resolveContactAvatarUrl } from "../../lib/supabase.js";
+import { resolveContactAvatarUrl } from "../../lib/supabase";
 import type {
   Group,
   GroupWithCount,
@@ -21,7 +21,7 @@ import type {
 } from "@bondery/schemas";
 import { GROUP_LABEL_MAX_LENGTH } from "@bondery/schemas/constants";
 
-import { registerGroupContactRoutes } from "./contacts.js";
+import { registerGroupContactRoutes } from "./contacts";
 
 export const groupRoutes: AppRoutePlugin = async (fastify) => {
   fastify.addHook("onRoute", (routeOptions) => {

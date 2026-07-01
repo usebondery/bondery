@@ -3,7 +3,7 @@ import {
   entityAuditSchema,
   entityIdentitySchema,
   makePaginatedListResponseSchema,
-} from "./_shared.js";
+} from "./_shared";
 
 export const interactionTypeSchema = z.enum([
   "Call",

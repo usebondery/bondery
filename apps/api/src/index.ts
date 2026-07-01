@@ -4,7 +4,7 @@
  */
 
 import Fastify from "fastify";
-import type { AppFastifyInstance } from "./lib/fastify-types.js";
+import type { AppFastifyInstance } from "./lib/fastify-types";
 import type { FastifyError } from "fastify";
 import {
   fastifyZodOpenApiPlugin,
@@ -24,39 +24,39 @@ import fastifySwagger from "@fastify/swagger";
 import { createRequire } from "module";
 import { API_ROUTES } from "@bondery/helpers";
 import { registerOpenApiComponentSchemas, openApiDocumentOpts } from "@bondery/schemas";
-import { registerAuthStrategies } from "./lib/auth.js";
-import { registerExtensionVersionCheck } from "./lib/extensionVersionCheck.js";
-import { registerHealthRoutes } from "./lib/health/routes.js";
+import { registerAuthStrategies } from "./lib/auth";
+import { registerExtensionVersionCheck } from "./lib/extensionVersionCheck";
+import { registerHealthRoutes } from "./lib/health/routes";
 import {
   registerNotFoundRateLimit,
   registerRateLimit,
-} from "./lib/rate-limit.js";
+} from "./lib/rate-limit";
 
-import { contactRoutes } from "./routes/contacts/index.js";
-import { meRoutes } from "./routes/me/index.js";
-import { meSettingsRoutes } from "./routes/me/settings/index.js";
-import { meApiKeysRoutes } from "./routes/me/api-keys/index.js";
-import { extensionRoutes } from "./routes/extension/index.js";
-import { meFeedbackRoutes } from "./routes/me/feedback/index.js";
-import { reminderDigestRoutes } from "./routes/internal/reminder-digest.js";
-import { groupRoutes } from "./routes/groups/index.js";
-import { tagRoutes } from "./routes/tags/index.js";
-import { interactionRoutes } from "./routes/interactions/index.js";
-import { linkedInImportRoutes } from "./routes/import/linkedin/index.js";
-import { instagramImportRoutes } from "./routes/import/instagram/index.js";
-import { vcardImportRoutes } from "./routes/import/vcard/index.js";
-import { shareRoutes } from "./routes/contacts/share/index.js";
-import { statsRoutes } from "./routes/admin/stats/index.js";
-import { meOnboardingRoutes } from "./routes/me/onboarding/index.js";
-import { chatRoutes } from "./routes/chat/index.js";
-import { chatSessionRoutes } from "./routes/chat/sessions.js";
-import { subscriptionRoutes } from "./routes/subscriptions/index.js";
-import { subscriptionCheckoutRoutes } from "./routes/subscriptions/checkout.js";
-import { subscriptionPortalRoutes } from "./routes/subscriptions/portal.js";
-import { subscriptionSyncRoutes } from "./routes/subscriptions/sync.js";
-import { polarWebhookRoutes } from "./routes/webhooks/polar.js";
-import { geocodeRoutes } from "./routes/geocode/index.js";
-import { syncRoutes } from "./routes/sync/index.js";
+import { contactRoutes } from "./routes/contacts/index";
+import { meRoutes } from "./routes/me/index";
+import { meSettingsRoutes } from "./routes/me/settings/index";
+import { meApiKeysRoutes } from "./routes/me/api-keys/index";
+import { extensionRoutes } from "./routes/extension/index";
+import { meFeedbackRoutes } from "./routes/me/feedback/index";
+import { reminderDigestRoutes } from "./routes/internal/reminder-digest";
+import { groupRoutes } from "./routes/groups/index";
+import { tagRoutes } from "./routes/tags/index";
+import { interactionRoutes } from "./routes/interactions/index";
+import { linkedInImportRoutes } from "./routes/import/linkedin/index";
+import { instagramImportRoutes } from "./routes/import/instagram/index";
+import { vcardImportRoutes } from "./routes/import/vcard/index";
+import { shareRoutes } from "./routes/contacts/share/index";
+import { statsRoutes } from "./routes/admin/stats/index";
+import { meOnboardingRoutes } from "./routes/me/onboarding/index";
+import { chatRoutes } from "./routes/chat/index";
+import { chatSessionRoutes } from "./routes/chat/sessions";
+import { subscriptionRoutes } from "./routes/subscriptions/index";
+import { subscriptionCheckoutRoutes } from "./routes/subscriptions/checkout";
+import { subscriptionPortalRoutes } from "./routes/subscriptions/portal";
+import { subscriptionSyncRoutes } from "./routes/subscriptions/sync";
+import { polarWebhookRoutes } from "./routes/webhooks/polar";
+import { geocodeRoutes } from "./routes/geocode/index";
+import { syncRoutes } from "./routes/sync/index";
 
 // Environment variable schema
 const envSchema = {

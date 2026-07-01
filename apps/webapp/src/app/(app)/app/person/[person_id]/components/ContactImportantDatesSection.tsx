@@ -31,7 +31,7 @@ interface ImportantDateDraft {
   type: ImportantDateType | null;
   date: Date | null;
   note: string;
-  notifyDaysBefore: 1 | 3 | 7 | null;
+  notifyDaysBefore: number | null;
 }
 
 interface ContactImportantDatesSectionProps {
@@ -52,7 +52,7 @@ export interface ImportantDateRowCardProps {
   type: ImportantDateType | null;
   date: Date | null;
   note: string;
-  notifyDaysBefore: 1 | 3 | 7 | null;
+  notifyDaysBefore: number | null;
   disabled: boolean;
   loading: boolean;
   typeOptions: DateTypeOption[];

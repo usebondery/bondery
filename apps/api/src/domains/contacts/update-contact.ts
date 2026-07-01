@@ -6,29 +6,29 @@ import type {
   TablesUpdate,
   UpdateContactInput,
 } from "@bondery/schemas";
-import { cachedGeocodeLinkedInLocation } from "../../lib/mapy.js";
-import { loadEnrichedContact } from "../../lib/contact-enrichment.js";
-import { upsertContactSocials } from "../../lib/socials.js";
+import { cachedGeocodeLinkedInLocation } from "../../lib/mapy";
+import { loadEnrichedContact } from "../../lib/contact-enrichment";
+import { upsertContactSocials } from "../../lib/socials";
 import {
   parseEmailEntries,
   parsePhoneEntries,
   replaceContactEmails,
   replaceContactPhones,
-} from "../../routes/contacts/channels.js";
+} from "../../routes/contacts/channels";
 import {
   parseAddressEntries,
   replaceContactAddresses,
-} from "../../routes/contacts/addresses.js";
-import { withPersonTxid } from "../_shared/with-txid.js";
-import { DomainError, type DomainContext } from "../_shared/context.js";
-import { checkContactUpdateConflict } from "../../lib/sync/conflict.js";
+} from "../../routes/contacts/addresses";
+import { withPersonTxid } from "../_shared/with-txid";
+import { DomainError, type DomainContext } from "../_shared/context";
+import { checkContactUpdateConflict } from "../../lib/sync/conflict";
 import type { SyncChange } from "@bondery/schemas/sync";
 import {
   buildChildTableReplaceChanges,
   buildPeopleRowChange,
   listContactChildIds,
-} from "../../lib/sync/build-changes.js";
-import { emitSyncBatch } from "../../lib/sync/emit-change.js";
+} from "../../lib/sync/build-changes";
+import { emitSyncBatch } from "../../lib/sync/emit-change";
 
 export interface UpdateContactDomainInput {
   personId: string;

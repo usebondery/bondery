@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { contactIdSchema, EXAMPLE_CONTACT_ID } from "../contact-id.js";
+import { contactIdSchema, EXAMPLE_CONTACT_ID } from "../contact-id";
 
 export { contactIdSchema, EXAMPLE_CONTACT_ID };
 

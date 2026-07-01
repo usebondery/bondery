@@ -1,4 +1,4 @@
-import type { LanguageData } from "./languages.js";
+import type { LanguageData } from "./languages";
 
 /** World languages for contact language preferences (web + mobile). */
 export const WORLD_LANGUAGES_DATA: LanguageData[] = [

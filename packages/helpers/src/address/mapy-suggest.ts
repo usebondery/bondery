@@ -6,7 +6,7 @@
  * responses into typed {@link MapSuggestionItem} objects.
  */
 
-import { formatAddressLabel, formatPlaceLabel } from "./address-utils.js";
+import { formatAddressLabel, formatPlaceLabel } from "./address-utils";
 
 export interface MapSuggestionRegionalEntry {
   type?: string;

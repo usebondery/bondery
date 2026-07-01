@@ -4,7 +4,7 @@ import {
   buildGroupDeleteChange,
   buildPeopleDeleteChange,
   buildTagDeleteChange,
-} from "./build-changes.js";
+} from "./build-changes";
 
 describe("build-changes", () => {
   it("builds people delete change", () => {

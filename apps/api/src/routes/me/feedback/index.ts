@@ -4,12 +4,12 @@
  */
 
 import type { FastifyInstance, FastifyReply } from "fastify";
-import type { AppFastifyInstance, AppRoutePlugin } from "../../../lib/fastify-types.js";
+import type { AppFastifyInstance, AppRoutePlugin } from "../../../lib/fastify-types";
 import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
 import { apiSuccessResponseSchema, feedbackFormSchema } from "@bondery/schemas";
-import { getAuth } from "../../../lib/auth.js";
-import { applyOpenApiRouteMeta } from "../../../lib/openapi-route-meta.js";
-import { withOkResponse } from "../../../lib/openapi-route-responses.js";
+import { getAuth } from "../../../lib/auth";
+import { applyOpenApiRouteMeta } from "../../../lib/openapi-route-meta";
+import { withOkResponse } from "../../../lib/openapi-route-responses";
 import nodemailer from "nodemailer";
 import { render } from "@react-email/render";
 import { FeedbackEmail } from "@bondery/emails";

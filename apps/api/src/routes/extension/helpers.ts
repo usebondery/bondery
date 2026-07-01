@@ -2,7 +2,7 @@
  * Extension route shared schemas and helper functions
  */
 
-import type { SocialPlatform } from "../../lib/socials.js";
+import type { SocialPlatform } from "../../lib/socials";
 import { redirectRequestSchema } from "@bondery/schemas";
 import { z } from "zod";
 

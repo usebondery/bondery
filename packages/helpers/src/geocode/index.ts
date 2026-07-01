@@ -3,4 +3,4 @@ export {
   buildGeocodeTimezoneQuery,
   geocodeSuggestionDisplayKey,
   geocodeSuggestionDisplayLabel,
-} from "./query.js";
+} from "./query";

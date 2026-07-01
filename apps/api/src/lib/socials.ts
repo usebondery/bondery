@@ -1,6 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database, SocialPlatform } from "@bondery/schemas";
-import type { ContactWithId } from "./queries.js";
+import type { ContactWithId } from "./queries";
 
 const SOCIAL_PLATFORMS: SocialPlatform[] = [
   "linkedin",

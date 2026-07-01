@@ -13,6 +13,6 @@ export {
   METADATA_TITLE_DIVIDER,
   WEBAPP_NAME,
   formatMetadataTitle,
-} from "./paths.js";
-export { SOCIAL_PLATFORM_URL_DETAILS } from "./social-platform-urls.js";
-export { IMPORTANT_DATE_TYPE_META } from "./important-dates.js";
+} from "./paths";
+export { SOCIAL_PLATFORM_URL_DETAILS } from "./social-platform-urls";
+export { IMPORTANT_DATE_TYPE_META } from "./important-dates";

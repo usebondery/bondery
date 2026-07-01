@@ -3,10 +3,10 @@
  */
 
 import type { FastifyInstance, FastifyReply } from "fastify";
-import type { AppFastifyInstance } from "../../../lib/fastify-types.js";
+import type { AppFastifyInstance } from "../../../lib/fastify-types";
 import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
-import { getAuth } from "../../../lib/auth.js";
-import { withOkResponse } from "../../../lib/openapi-route-responses.js";
+import { getAuth } from "../../../lib/auth";
+import { withOkResponse } from "../../../lib/openapi-route-responses";
 import {
   apiSuccessResponseSchema,
   photoUploadResponseSchema,
@@ -14,8 +14,8 @@ import {
 import {
   uploadContactAvatarAndSetFlag,
   deleteContactAvatarAndClearFlag,
-} from "../../../lib/avatar-storage.js";
-import { createAdminClient, resolveContactAvatarUrl } from "../../../lib/supabase.js";
+} from "../../../lib/avatar-storage";
+import { createAdminClient, resolveContactAvatarUrl } from "../../../lib/supabase";
 import { uuidParamSchema } from "@bondery/schemas/http";
 
 export function registerPhotoRoutes(fastify: AppFastifyInstance): void {
@@ -41,7 +41,7 @@ export function registerPhotoRoutes(fastify: AppFastifyInstance): void {
       }
 
       const { validateImageUpload, validateImageMagicBytes } =
-        await import("../../../lib/config.js");
+        await import("../../../lib/config");
       const validation = validateImageUpload({ type: data.mimetype, size: 0 });
       if (!validation.isValid) {
         return reply.status(400).send({ error: validation.error ?? "Invalid upload" });

@@ -7,7 +7,7 @@ import { createClient, SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@bondery/schemas/supabase.types";
 import type { AvatarTransformOptions } from "@bondery/schemas";
 import type { FastifyRequest } from "fastify";
-import logger from "./logger.js";
+import logger from "./logger";
 
 /**
  * Gets Supabase configuration from environment

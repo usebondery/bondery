@@ -1,22 +1,22 @@
-export * from "./activity.js";
-export * from "./api-keys.js";
-export * from "./address.js";
-export * from "./api.js";
-export * from "./channels.js";
-export * from "./chat.js";
-export * from "./contact.js";
-export * from "./group.js";
-export * from "./import.js";
-export * from "./important-date.js";
-export * from "./merge.js";
-export * from "./notes.js";
-export * from "./reminder.js";
-export * from "./settings.js";
-export * from "./social.js";
-export * from "./subscription.js";
-export * from "./tag.js";
+export * from "./activity";
+export * from "./api-keys";
+export * from "./address";
+export * from "./api";
+export * from "./channels";
+export * from "./chat";
+export * from "./contact";
+export * from "./group";
+export * from "./import";
+export * from "./important-date";
+export * from "./merge";
+export * from "./notes";
+export * from "./reminder";
+export * from "./settings";
+export * from "./social";
+export * from "./subscription";
+export * from "./tag";
 export {
   messageResponseSchema,
   paginationMetaSchema,
   type PaginationMeta,
-} from "./_shared.js";
+} from "./_shared";

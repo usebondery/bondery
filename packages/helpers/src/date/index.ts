@@ -1,1 +1,1 @@
-export { formatDateRange, formatDuration } from "./date-utils.js";
+export { formatDateRange, formatDuration } from "./date-utils";

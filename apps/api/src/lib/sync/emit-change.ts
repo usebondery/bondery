@@ -1,5 +1,5 @@
-import { createAdminClient } from "../supabase.js";
-import { allocateServerSequences } from "./idempotency.js";
+import { createAdminClient } from "../supabase";
+import { allocateServerSequences } from "./idempotency";
 import type { SyncChange } from "@bondery/schemas/sync";
 import type { Json } from "@bondery/schemas/supabase.types";
 

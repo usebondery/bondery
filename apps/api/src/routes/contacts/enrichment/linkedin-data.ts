@@ -4,10 +4,10 @@
  */
 
 import type { FastifyReply } from "fastify";
-import type { AppFastifyInstance } from "../../../lib/fastify-types.js";
+import type { AppFastifyInstance } from "../../../lib/fastify-types";
 import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
-import { getAuth } from "../../../lib/auth.js";
-import { withOkResponse } from "../../../lib/openapi-route-responses.js";
+import { getAuth } from "../../../lib/auth";
+import { withOkResponse } from "../../../lib/openapi-route-responses";
 import { uuidParamSchema } from "@bondery/schemas/http";
 import {
   linkedInDataRequestSchema,
@@ -15,7 +15,7 @@ import {
   linkedInDataUpsertResponseSchema,
 } from "@bondery/schemas";
 import { linkedinCompanyUrl } from "@bondery/helpers";
-import { ENRICH_TIER } from "../../../lib/rate-limit.js";
+import { ENRICH_TIER } from "../../../lib/rate-limit";
 
 export function registerLinkedInDataRoutes(fastify: AppFastifyInstance): void {
   /**

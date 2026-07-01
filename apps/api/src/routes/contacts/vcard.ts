@@ -5,7 +5,7 @@
 
 import type { Contact } from "@bondery/schemas";
 import { attachMedia, contactToVCard, serializeVCard } from "@bondery/vcard";
-import logger from "../../lib/logger.js";
+import logger from "../../lib/logger";
 
 type VCardExportImportantDate = {
   type: "birthday" | "anniversary" | "nameday" | "graduation" | "other";

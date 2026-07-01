@@ -1,8 +1,8 @@
 import { z } from "zod";
-import { contactSchema } from "../entities/contact.js";
-import { groupSchema } from "../entities/group.js";
-import { tagSchema } from "../entities/tag.js";
-import { syncMutationSchema } from "./mutations.js";
+import { contactSchema } from "../entities/contact";
+import { groupSchema } from "../entities/group";
+import { tagSchema } from "../entities/tag";
+import { syncMutationSchema } from "./mutations";
 
 export const syncPushRequestSchema = z.object({
   deviceId: z.string().uuid(),

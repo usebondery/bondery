@@ -1,6 +1,13 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  transpilePackages: [
+    "@bondery/schemas",
+    "@bondery/helpers",
+    "@bondery/branding",
+    "@bondery/mantine-next",
+    "@bondery/translations",
+  ],
   experimental: {
     proxyClientMaxBodySize: "50mb",
   },

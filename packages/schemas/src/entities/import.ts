@@ -1,7 +1,7 @@
 import { z } from "zod";
-import { contactAddressTypeSchema } from "./address.js";
-import { channelTypeSchema } from "../primitives/index.js";
-import { importantDateTypeSchema } from "./important-date.js";
+import { contactAddressTypeSchema } from "./address";
+import { channelTypeSchema } from "../primitives/index";
+import { importantDateTypeSchema } from "./important-date";
 
 export const scrapedWorkHistoryEntrySchema = z.object({
   title: z.string().optional(),

@@ -65,6 +65,6 @@ OpenAPI documents wire **input** shapes. Zod transforms/refines still run at run
 
 ## Scripts
 
-- `npm run build` — compile TypeScript to `dist/`
+- `npm run build:types` — optional compile to `dist/` (apps import from `src/`; not required for deploy)
 - `npm run check-types` — typecheck without emit
 - `npm run test:contracts` — boundary checks + schema contract assertions

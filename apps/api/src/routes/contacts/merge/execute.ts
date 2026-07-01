@@ -4,13 +4,13 @@
  */
 
 import type { FastifyInstance, FastifyReply } from "fastify";
-import type { AppFastifyInstance } from "../../../lib/fastify-types.js";
+import type { AppFastifyInstance } from "../../../lib/fastify-types";
 import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
-import { getAuth } from "../../../lib/auth.js";
-import { withOkResponse } from "../../../lib/openapi-route-responses.js";
-import { loadEnrichedContact } from "../../../lib/contact-enrichment.js";
-import { replaceContactPhones, replaceContactEmails } from "../channels.js";
-import { upsertContactSocials } from "../../../lib/socials.js";
+import { getAuth } from "../../../lib/auth";
+import { withOkResponse } from "../../../lib/openapi-route-responses";
+import { loadEnrichedContact } from "../../../lib/contact-enrichment";
+import { replaceContactPhones, replaceContactEmails } from "../channels";
+import { upsertContactSocials } from "../../../lib/socials";
 import type {
   EmailEntry,
   PhoneEntry,
@@ -31,7 +31,7 @@ import {
   hasMeaningfulValue,
   areValuesEquivalent,
   resolveConflictChoice,
-} from "./helpers.js";
+} from "./helpers";
 
 // Suppress unused import warning — upsertContactSocials kept for future social upsert path
 void upsertContactSocials;

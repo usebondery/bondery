@@ -2,8 +2,8 @@ export {
   createContactFromFullNameSchema,
   type CreateContactFromFullNameInput,
   type CreateContactFromFullNameOutput,
-} from "./create-contact.js";
+} from "./create-contact";
 export {
   normalizedSocialHandleSchema,
   type NormalizedSocialHandle,
-} from "./social-handle.js";
+} from "./social-handle";

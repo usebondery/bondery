@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { SYNC_TABLE_KEYS } from "./tables.js";
+import { SYNC_TABLE_KEYS } from "./tables";
 
 export const syncChangeOperationSchema = z.enum(["insert", "update", "delete"]);
 

@@ -1,17 +1,17 @@
 import { z } from "zod";
-import { contactIdSchema } from "../contact-id.js";
-import { avatarQualitySchema, avatarSizeSchema } from "../entities/api.js";
-import { contactSortOrderSchema } from "../entities/contact.js";
+import { contactIdSchema } from "../contact-id";
+import { avatarQualitySchema, avatarSizeSchema } from "../entities/api";
+import { contactSortOrderSchema } from "../entities/contact";
 import {
   contactAddressConfidenceSchema,
   contactAddressGeocodeSourceSchema,
   contactAddressGranularitySchema,
   contactAddressTypeSchema,
-} from "../entities/address.js";
-import { replaceImportantDatesSchema } from "../entities/important-date.js";
+} from "../entities/address";
+import { replaceImportantDatesSchema } from "../entities/important-date";
 
-export * from "./ids.js";
-export * from "./responses.js";
+export * from "./ids";
+export * from "./responses";
 
 /** UUID path parameter (e.g. `:id`). */
 export const uuidParamSchema = z.object({

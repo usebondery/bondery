@@ -1,5 +1,5 @@
 import type { z } from "zod";
-import { apiErrorResponseSchema as baseApiErrorResponseSchema } from "../entities/api.js";
+import { apiErrorResponseSchema as baseApiErrorResponseSchema } from "../entities/api";
 
 function jsonResponse<T extends z.ZodType>(schema: T, description: string) {
   return {

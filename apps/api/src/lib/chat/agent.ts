@@ -2,13 +2,13 @@ import { streamText, stepCountIs, type ModelMessage } from "ai";
 import type { ServerResponse } from "http";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@bondery/schemas/supabase.types";
-import { getChatModel } from "./provider.js";
-import { SYSTEM_PROMPT } from "./system-prompt.js";
-import { createContactTools } from "./tools/contacts.js";
-import { createInteractionTools } from "./tools/interactions.js";
-import { createGroupTools } from "./tools/groups.js";
-import { createTagTools } from "./tools/tags.js";
-import { createSharingTools } from "./tools/sharing.js";
+import { getChatModel } from "./provider";
+import { SYSTEM_PROMPT } from "./system-prompt";
+import { createContactTools } from "./tools/contacts";
+import { createInteractionTools } from "./tools/interactions";
+import { createGroupTools } from "./tools/groups";
+import { createTagTools } from "./tools/tags";
+import { createSharingTools } from "./tools/sharing";
 
 /**
  * Runs the AI chat agent with the given messages and Supabase client.

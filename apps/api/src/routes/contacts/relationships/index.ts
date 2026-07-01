@@ -4,11 +4,11 @@
  */
 
 import type { FastifyReply } from "fastify";
-import type { AppFastifyInstance } from "../../../lib/fastify-types.js";
+import type { AppFastifyInstance } from "../../../lib/fastify-types";
 import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
-import { getAuth } from "../../../lib/auth.js";
-import { withCreatedResponse, withOkResponse } from "../../../lib/openapi-route-responses.js";
-import { resolveContactAvatarUrl } from "../../../lib/supabase.js";
+import { getAuth } from "../../../lib/auth";
+import { withCreatedResponse, withOkResponse } from "../../../lib/openapi-route-responses";
+import { resolveContactAvatarUrl } from "../../../lib/supabase";
 import type { RelationshipType } from "@bondery/schemas";
 import {
   contactRelationshipResponseSchema,
@@ -17,7 +17,7 @@ import {
   messageResponseSchema,
   updateContactRelationshipInputSchema,
 } from "@bondery/schemas";
-import { extractAvatarOptions } from "../../../lib/queries.js";
+import { extractAvatarOptions } from "../../../lib/queries";
 import {
   avatarTransformQuerySchema,
   contactRelationshipIdParamSchema,

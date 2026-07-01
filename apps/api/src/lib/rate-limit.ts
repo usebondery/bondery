@@ -1,5 +1,5 @@
 import type { FastifyInstance, FastifyRequest } from "fastify";
-import type { AppFastifyInstance } from "./fastify-types.js";
+import type { AppFastifyInstance } from "./fastify-types";
 import type { FastifyRateLimitOptions } from "@fastify/rate-limit";
 import fastifyRateLimit from "@fastify/rate-limit";
 import { Redis } from "ioredis";

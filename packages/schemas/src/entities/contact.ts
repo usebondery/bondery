@@ -1,9 +1,9 @@
 import { z } from "zod";
-import { CONTACT_FIELD_MAX_LENGTHS } from "../constants/index.js";
-import { contactAddressReadSchema } from "./address.js";
-import { emailEntryEntitySchema, phoneEntryEntitySchema } from "./channels.js";
-import { importantDateSchema } from "./important-date.js";
-import { contactIdSchema } from "../contact-id.js";
+import { CONTACT_FIELD_MAX_LENGTHS } from "../constants/index";
+import { contactAddressReadSchema } from "./address";
+import { emailEntryEntitySchema, phoneEntryEntitySchema } from "./channels";
+import { importantDateSchema } from "./important-date";
+import { contactIdSchema } from "../contact-id";
 import {
   createdAtSchema,
   entityIdentitySchema,
@@ -13,7 +13,7 @@ import {
   makePaginatedListResponseSchema,
   messageResponseSchema,
   updatedAtSchema,
-} from "./_shared.js";
+} from "./_shared";
 
 const trimmedNameField = (max: number, label: string) =>
   z

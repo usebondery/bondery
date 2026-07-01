@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { makePaginatedListResponseSchema } from "./_shared.js";
+import { makePaginatedListResponseSchema } from "./_shared";
 
 /**
  * Keep snake_case keys to match the existing chat API payloads.

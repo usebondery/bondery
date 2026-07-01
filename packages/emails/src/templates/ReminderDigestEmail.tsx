@@ -8,7 +8,7 @@ import {
   Section,
   Text,
 } from "react-email";
-import { EmailWrapper } from "../shared/EmailWrapper.js";
+import { EmailWrapper } from "../shared/EmailWrapper";
 import { IMPORTANT_DATE_TYPE_META } from "@bondery/helpers";
 import * as React from "react";
 

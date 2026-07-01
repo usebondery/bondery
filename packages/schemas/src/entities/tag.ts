@@ -1,7 +1,7 @@
 import { z } from "zod";
-import { GROUP_LABEL_MAX_LENGTH } from "../constants/index.js";
-import { hexColorSchema } from "../primitives/index.js";
-import { contactPreviewSchema, contactSchema } from "./contact.js";
+import { GROUP_LABEL_MAX_LENGTH } from "../constants/index";
+import { hexColorSchema } from "../primitives/index";
+import { contactPreviewSchema, contactSchema } from "./contact";
 import {
   entityIdentitySchema,
   entityNullableAuditSchema,
@@ -12,7 +12,7 @@ import {
   makePaginatedListResponseSchema,
   messageResponseSchema,
   personIdsSelectionSchema,
-} from "./_shared.js";
+} from "./_shared";
 
 const tagLabelSchema = labelFieldSchema(GROUP_LABEL_MAX_LENGTH);
 

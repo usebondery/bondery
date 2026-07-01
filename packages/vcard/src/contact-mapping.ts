@@ -6,7 +6,7 @@ import type {
   VCardPhone,
   VCardProperty,
   VCardTextValue,
-} from "./model.js";
+} from "./model";
 
 function normalizePreferred(pref?: number): boolean {
   return pref === 1;

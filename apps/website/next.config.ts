@@ -4,6 +4,13 @@ import { HELP_DOCS_URL, STATUS_PAGE_URL } from "@bondery/helpers";
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  transpilePackages: [
+    "@bondery/schemas",
+    "@bondery/helpers",
+    "@bondery/branding",
+    "@bondery/mantine-next",
+    "@bondery/translations",
+  ],
   pageExtensions: ["ts", "tsx", "md", "mdx"],
   async headers() {
     return [
