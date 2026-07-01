@@ -1,5 +1,6 @@
 import { z } from "zod";
-import { contactIdSchema } from "../contact-id";
+import { contactIdSchema } from "#contact-id.js";
+import { EXAMPLE_MESSAGE_RESPONSE } from "#openapi/fixtures/responses.js";
 
 export const idSchema = z.string();
 export const userIdSchema = z.string();
@@ -27,9 +28,11 @@ export const idsRequestSchema = z.object({
 
 export const messageSchema = z.string();
 
-export const messageResponseSchema = z.object({
-  message: messageSchema,
-});
+export const messageResponseSchema = z
+  .object({
+    message: messageSchema,
+  })
+  .meta({ example: EXAMPLE_MESSAGE_RESPONSE });
 
 export const personIdsSelectionSchema = z.object({
   personIds: z.array(contactIdSchema).min(1),

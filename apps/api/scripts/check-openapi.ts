@@ -29,7 +29,21 @@ try {
 const spec = parse(readFileSync(specPath, "utf8")) as {
   paths?: Record<
     string,
-    Record<string, { responses?: Record<string, { description?: string; content?: unknown }> }>
+    Record<
+      string,
+      {
+        responses?: Record<
+          string,
+          {
+            description?: string;
+            content?: Record<
+              string,
+              { schema?: unknown; example?: unknown }
+            >;
+          }
+        >;
+      }
+    >
   >;
 };
 
@@ -43,6 +57,22 @@ for (const [path, methods] of Object.entries(spec.paths ?? {})) {
     for (const [status, response] of Object.entries(responses)) {
       if (response.description === "Default Response") {
         violations.push(`${method.toUpperCase()} ${path} ${status}: Default Response`);
+      }
+
+      const statusCode = Number(status);
+      if (!Number.isInteger(statusCode) || statusCode < 200 || statusCode >= 300) {
+        continue;
+      }
+
+      const jsonContent = response.content?.["application/json"];
+      if (!jsonContent) {
+        continue;
+      }
+
+      if (jsonContent.example === undefined) {
+        violations.push(
+          `${method.toUpperCase()} ${path} ${status}: missing application/json example`,
+        );
       }
     }
   }

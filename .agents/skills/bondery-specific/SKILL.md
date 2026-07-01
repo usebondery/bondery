@@ -35,6 +35,16 @@ Monorepo shared packages follow a one-way dependency graph:
 
 See `packages/schemas/README.md` and `packages/helpers/README.md`.
 
+## Compiled workspace packages
+
+Shared packages follow the [Turborepo compiled-package model](https://turborepo.dev/docs/guides/tools/typescript#compiled-packages):
+
+- **TypeScript:** extend `@bondery/typescript-config` (`base.json` or `react-library.json`); `module` / `moduleResolution` = NodeNext.
+- **Exports:** `types` → `src/`, `default` → `dist/`; run `npm run sync-exports` after adding public subpaths.
+- **Internal imports:** `#*` hash paths with `.js` suffix (not `tsconfig` paths).
+- **Build:** `rimraf dist && tsc`; **dev:** `tsc --watch`; root `npm run dev` runs `turbo watch dev` with `^build` on cold start.
+- **Apps:** consume `dist/` via exports — no `transpilePackages`, no `packages/*/src` aliases.
+
 # API usage
 
 All Bondery clients call the Fastify API through a transport wrapper layer — never ad-hoc `fetch` with duplicated auth and error parsing. Read `references/api-usage.md` for:

@@ -1,6 +1,10 @@
 import { z } from "zod";
-import { contactPreviewSchema } from "./contact";
-import { importantDateSchema, importantDateTypeSchema } from "./important-date";
+import { contactPreviewSchema } from "#entities/contact.js";
+import { importantDateSchema, importantDateTypeSchema } from "#entities/important-date.js";
+import {
+  EXAMPLE_REMINDER_DIGEST_RESPONSE,
+  EXAMPLE_UPCOMING_REMINDERS_RESPONSE,
+} from "#openapi/fixtures/responses.js";
 
 export const upcomingReminderSchema = z.object({
   importantDate: importantDateSchema,
@@ -33,25 +37,29 @@ export const reminderDigestRequestSchema = z.object({
   users: z.array(reminderDigestUserSchema),
 });
 
-export const reminderDigestResponseSchema = z.object({
-  success: z.boolean(),
-  targetDate: z.string(),
-  sentUsers: z.number(),
-  failedUsers: z.number(),
-  failures: z
-    .array(
-      z.object({
-        userId: z.string(),
-        email: z.string(),
-        error: z.string(),
-      }),
-    )
-    .optional(),
-});
+export const reminderDigestResponseSchema = z
+  .object({
+    success: z.boolean(),
+    targetDate: z.string(),
+    sentUsers: z.number(),
+    failedUsers: z.number(),
+    failures: z
+      .array(
+        z.object({
+          userId: z.string(),
+          email: z.string(),
+          error: z.string(),
+        }),
+      )
+      .optional(),
+  })
+  .meta({ example: EXAMPLE_REMINDER_DIGEST_RESPONSE });
 
-export const upcomingRemindersResponseSchema = z.object({
-  reminders: z.array(upcomingReminderSchema),
-});
+export const upcomingRemindersResponseSchema = z
+  .object({
+    reminders: z.array(upcomingReminderSchema),
+  })
+  .meta({ example: EXAMPLE_UPCOMING_REMINDERS_RESPONSE });
 
 export type UpcomingReminder = z.infer<typeof upcomingReminderSchema>;
 export type UpcomingRemindersResponse = z.infer<typeof upcomingRemindersResponseSchema>;

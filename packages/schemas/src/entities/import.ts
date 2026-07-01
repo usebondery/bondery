@@ -1,7 +1,16 @@
 import { z } from "zod";
-import { contactAddressTypeSchema } from "./address";
-import { channelTypeSchema } from "../primitives/index";
-import { importantDateTypeSchema } from "./important-date";
+import { contactAddressTypeSchema } from "#entities/address.js";
+import { channelTypeSchema } from "#primitives/index.js";
+import { importantDateTypeSchema } from "#entities/important-date.js";
+import {
+  EXAMPLE_INSTAGRAM_IMPORT_COMMIT_RESPONSE,
+  EXAMPLE_INSTAGRAM_PARSE_RESPONSE,
+  EXAMPLE_LINKEDIN_IMPORT_COMMIT_RESPONSE,
+  EXAMPLE_LINKEDIN_PARSE_RESPONSE,
+  EXAMPLE_REDIRECT_RESPONSE,
+  EXAMPLE_VCARD_IMPORT_COMMIT_RESPONSE,
+  EXAMPLE_VCARD_PARSE_RESPONSE,
+} from "#openapi/fixtures/responses.js";
 
 export const scrapedWorkHistoryEntrySchema = z.object({
   title: z.string().optional(),
@@ -58,13 +67,15 @@ export const linkedInDataRequestSchema = z.object({
   workHistory: z.array(scrapedWorkHistoryEntrySchema).optional(),
 });
 
-export const redirectResponseSchema = z.object({
-  contactId: z.string(),
-  existed: z.boolean(),
-  firstName: z.string().optional(),
-  lastName: z.string().nullable().optional(),
-  avatar: z.string().nullable().optional(),
-});
+export const redirectResponseSchema = z
+  .object({
+    contactId: z.string(),
+    existed: z.boolean(),
+    firstName: z.string().optional(),
+    lastName: z.string().nullable().optional(),
+    avatar: z.string().nullable().optional(),
+  })
+  .meta({ example: EXAMPLE_REDIRECT_RESPONSE });
 
 export const linkedInPreparedContactSchema = z.object({
   tempId: z.string(),
@@ -83,22 +94,26 @@ export const linkedInPreparedContactSchema = z.object({
   issues: z.array(z.string()),
 });
 
-export const linkedInParseResponseSchema = z.object({
-  contacts: z.array(linkedInPreparedContactSchema),
-  totalCount: z.number(),
-  validCount: z.number(),
-  invalidCount: z.number(),
-});
+export const linkedInParseResponseSchema = z
+  .object({
+    contacts: z.array(linkedInPreparedContactSchema),
+    totalCount: z.number(),
+    validCount: z.number(),
+    invalidCount: z.number(),
+  })
+  .meta({ example: EXAMPLE_LINKEDIN_PARSE_RESPONSE });
 
 export const linkedInImportCommitRequestSchema = z.object({
   contacts: z.array(linkedInPreparedContactSchema),
 });
 
-export const linkedInImportCommitResponseSchema = z.object({
-  importedCount: z.number(),
-  updatedCount: z.number(),
-  skippedCount: z.number(),
-});
+export const linkedInImportCommitResponseSchema = z
+  .object({
+    importedCount: z.number(),
+    updatedCount: z.number(),
+    skippedCount: z.number(),
+  })
+  .meta({ example: EXAMPLE_LINKEDIN_IMPORT_COMMIT_RESPONSE });
 
 export const instagramImportStrategySchema = z.enum([
   "close_friends",
@@ -126,22 +141,26 @@ export const instagramPreparedContactSchema = z.object({
   issues: z.array(z.string()),
 });
 
-export const instagramParseResponseSchema = z.object({
-  contacts: z.array(instagramPreparedContactSchema),
-  totalCount: z.number(),
-  validCount: z.number(),
-  invalidCount: z.number(),
-});
+export const instagramParseResponseSchema = z
+  .object({
+    contacts: z.array(instagramPreparedContactSchema),
+    totalCount: z.number(),
+    validCount: z.number(),
+    invalidCount: z.number(),
+  })
+  .meta({ example: EXAMPLE_INSTAGRAM_PARSE_RESPONSE });
 
 export const instagramImportCommitRequestSchema = z.object({
   contacts: z.array(instagramPreparedContactSchema),
 });
 
-export const instagramImportCommitResponseSchema = z.object({
-  importedCount: z.number(),
-  updatedCount: z.number(),
-  skippedCount: z.number(),
-});
+export const instagramImportCommitResponseSchema = z
+  .object({
+    importedCount: z.number(),
+    updatedCount: z.number(),
+    skippedCount: z.number(),
+  })
+  .meta({ example: EXAMPLE_INSTAGRAM_IMPORT_COMMIT_RESPONSE });
 
 const vcardPreparedPhoneSchema = z.object({
   prefix: z.string(),
@@ -203,21 +222,25 @@ export const vcardPreparedContactSchema = z.object({
   issues: z.array(z.string()),
 });
 
-export const vcardParseResponseSchema = z.object({
-  contacts: z.array(vcardPreparedContactSchema),
-  totalCount: z.number(),
-  validCount: z.number(),
-  invalidCount: z.number(),
-});
+export const vcardParseResponseSchema = z
+  .object({
+    contacts: z.array(vcardPreparedContactSchema),
+    totalCount: z.number(),
+    validCount: z.number(),
+    invalidCount: z.number(),
+  })
+  .meta({ example: EXAMPLE_VCARD_PARSE_RESPONSE });
 
 export const vcardImportCommitRequestSchema = z.object({
   contacts: z.array(vcardPreparedContactSchema),
 });
 
-export const vcardImportCommitResponseSchema = z.object({
-  importedCount: z.number(),
-  skippedCount: z.number(),
-});
+export const vcardImportCommitResponseSchema = z
+  .object({
+    importedCount: z.number(),
+    skippedCount: z.number(),
+  })
+  .meta({ example: EXAMPLE_VCARD_IMPORT_COMMIT_RESPONSE });
 
 export type ScrapedWorkHistoryEntry = z.infer<typeof scrapedWorkHistoryEntrySchema>;
 export type ScrapedEducationEntry = z.infer<typeof scrapedEducationEntrySchema>;

@@ -26,7 +26,7 @@ import {
   BonderyLogotypeWhite,
   BonderyIcon,
   BonderyIconWhite,
-} from "@bondery/branding-src";
+} from "@bondery/branding/react";
 import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
 
 type NavigationLinkDef = {

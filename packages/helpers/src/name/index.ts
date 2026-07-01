@@ -6,8 +6,8 @@ export {
   normalizeNameCase,
   cleanPersonName,
   parseFullName,
-} from "./name-utils";
-export { getRandomExampleName } from "./example-names";
-export type { ExampleName } from "./example-names";
-export { COMMON_BRAND_NAME_TOKENS, COMMON_BRAND_NAME_TOKEN_SET } from "./common-brand-name-tokens";
-export { COMMON_PERSON_NAME_TOKENS, COMMON_PERSON_NAME_TOKEN_SET } from "./common-person-name-tokens";
+} from "#name/name-utils.js";
+export { getRandomExampleName } from "#name/example-names.js";
+export type { ExampleName } from "#name/example-names.js";
+export { COMMON_BRAND_NAME_TOKENS, COMMON_BRAND_NAME_TOKEN_SET } from "#name/common-brand-name-tokens.js";
+export { COMMON_PERSON_NAME_TOKENS, COMMON_PERSON_NAME_TOKEN_SET } from "#name/common-person-name-tokens.js";

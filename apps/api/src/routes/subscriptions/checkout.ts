@@ -13,11 +13,16 @@ import { z } from "zod";
 import { getAuth } from "../../lib/auth";
 import { applyOpenApiRouteMeta } from "../../lib/openapi-route-meta";
 import { withOkResponse } from "../../lib/openapi-route-responses";
+import {
+  EXAMPLE_CHECKOUT_RESPONSE,
+} from "@bondery/schemas";
 import { getPolarClient, sanitizePolarLocale } from "../../lib/polar";
 
-const checkoutResponseSchema = z.object({
-  url: z.string(),
-});
+const checkoutResponseSchema = z
+  .object({
+    url: z.string(),
+  })
+  .meta({ example: EXAMPLE_CHECKOUT_RESPONSE });
 
 export async function subscriptionCheckoutRoutes(
   fastify: FastifyInstance,

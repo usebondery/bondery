@@ -1,9 +1,9 @@
 import { z } from "zod";
-import { CONTACT_FIELD_MAX_LENGTHS } from "../constants/index";
-import { contactAddressReadSchema } from "./address";
-import { emailEntryEntitySchema, phoneEntryEntitySchema } from "./channels";
-import { importantDateSchema } from "./important-date";
-import { contactIdSchema } from "../contact-id";
+import { CONTACT_FIELD_MAX_LENGTHS } from "#constants/index.js";
+import { contactAddressReadSchema } from "#entities/address.js";
+import { emailEntryEntitySchema, phoneEntryEntitySchema } from "#entities/channels.js";
+import { importantDateSchema } from "#entities/important-date.js";
+import { contactIdSchema } from "#contact-id.js";
 import {
   createdAtSchema,
   entityIdentitySchema,
@@ -13,7 +13,25 @@ import {
   makePaginatedListResponseSchema,
   messageResponseSchema,
   updatedAtSchema,
-} from "./_shared";
+} from "#entities/_shared.js";
+import {
+  EXAMPLE_BY_SOCIAL_LOOKUP_RESPONSE,
+  EXAMPLE_CONTACT_RELATIONSHIP_RESPONSE,
+  EXAMPLE_CONTACT_RELATIONSHIPS_RESPONSE,
+  EXAMPLE_CONTACT_RESPONSE,
+  EXAMPLE_CONTACTS_LIST_RESPONSE,
+  EXAMPLE_CREATE_CONTACT_RESPONSE,
+  EXAMPLE_DELETE_CONTACTS_RESPONSE,
+  EXAMPLE_ENRICH_ELIGIBLE_COUNT_RESPONSE,
+  EXAMPLE_ENRICH_QUEUE_INIT_RESPONSE,
+  EXAMPLE_ENRICH_QUEUE_NEXT_BATCH_RESPONSE,
+  EXAMPLE_ENRICH_QUEUE_STATUS_COUNTS_RESPONSE,
+  EXAMPLE_LINKEDIN_DATA_RESPONSE,
+  EXAMPLE_LINKEDIN_DATA_UPSERT_RESPONSE,
+  EXAMPLE_MAP_ADDRESS_PINS_RESPONSE,
+  EXAMPLE_MAP_PINS_RESPONSE,
+  EXAMPLE_MESSAGE_RESPONSE,
+} from "#openapi/fixtures/responses.js";
 
 const trimmedNameField = (max: number, label: string) =>
   z
@@ -132,13 +150,17 @@ export const updateContactInputSchema = contactSchema.partial().omit({
   createdAt: true,
 });
 
-export const contactResponseSchema = z.object({
-  contact: contactSchema,
-});
+export const contactResponseSchema = z
+  .object({
+    contact: contactSchema,
+  })
+  .meta({ example: EXAMPLE_CONTACT_RESPONSE });
 
-export const createContactResponseSchema = contactResponseSchema.extend({
-  txid: z.string().optional(),
-});
+export const createContactResponseSchema = contactResponseSchema
+  .extend({
+    txid: z.string().optional(),
+  })
+  .meta({ example: EXAMPLE_CREATE_CONTACT_RESPONSE });
 
 const mapPinSchema = z.object({
   id: z.string(),
@@ -152,9 +174,11 @@ const mapPinSchema = z.object({
   avatar: z.string().nullable(),
 });
 
-export const mapPinsResponseSchema = z.object({
-  pins: z.array(mapPinSchema),
-});
+export const mapPinsResponseSchema = z
+  .object({
+    pins: z.array(mapPinSchema),
+  })
+  .meta({ example: EXAMPLE_MAP_PINS_RESPONSE });
 
 const mapAddressPinSchema = z.object({
   addressId: z.string(),
@@ -170,9 +194,11 @@ const mapAddressPinSchema = z.object({
   avatar: z.string().nullable(),
 });
 
-export const mapAddressPinsResponseSchema = z.object({
-  pins: z.array(mapAddressPinSchema),
-});
+export const mapAddressPinsResponseSchema = z
+  .object({
+    pins: z.array(mapAddressPinSchema),
+  })
+  .meta({ example: EXAMPLE_MAP_ADDRESS_PINS_RESPONSE });
 
 export const contactsListStatsSchema = z.object({
   totalContacts: z.number(),
@@ -183,9 +209,11 @@ export const contactsListStatsSchema = z.object({
 export const contactsListResponseSchema = makePaginatedListResponseSchema(
   "contacts",
   contactSchema,
-).extend({
-  stats: contactsListStatsSchema,
-});
+)
+  .extend({
+    stats: contactsListStatsSchema,
+  })
+  .meta({ example: EXAMPLE_CONTACTS_LIST_RESPONSE });
 
 export const createContactRelationshipInputSchema = z.object({
   relatedPersonId: contactIdSchema,
@@ -197,7 +225,7 @@ export const updateContactRelationshipInputSchema = createContactRelationshipInp
 export const contactRelationshipsResponseSchema = makeCollectionResponseSchema(
   "relationships",
   contactRelationshipWithPeopleSchema,
-);
+).meta({ example: EXAMPLE_CONTACT_RELATIONSHIPS_RESPONSE });
 
 export const contactSortOrderSchema = z.enum([
   "nameAsc",
@@ -223,16 +251,22 @@ export const deleteContactsRequestSchema = z.union([
   }),
 ]);
 
-export const deleteContactsResponseSchema = messageResponseSchema.extend({
-  deletedCount: z.number().int().optional(),
-});
+export const deleteContactsResponseSchema = messageResponseSchema
+  .extend({
+    deletedCount: z.number().int().optional(),
+  })
+  .meta({ example: EXAMPLE_DELETE_CONTACTS_RESPONSE });
 
-export const bySocialLookupResponseSchema = z.object({
-  exists: z.boolean(),
-  contact: contactPreviewSchema.optional(),
-});
+export const bySocialLookupResponseSchema = z
+  .object({
+    exists: z.boolean(),
+    contact: contactPreviewSchema.optional(),
+  })
+  .meta({ example: EXAMPLE_BY_SOCIAL_LOOKUP_RESPONSE });
 
-export const deleteContactResponseSchema = messageResponseSchema;
+export const deleteContactResponseSchema = messageResponseSchema.meta({
+  example: EXAMPLE_MESSAGE_RESPONSE,
+});
 
 const linkedInHistoryFieldsSchema = z.object({
   peopleLinkedinId: z.string(),
@@ -264,12 +298,14 @@ export const educationEntrySchema = entityIdentitySchema.extend({
   endDate: z.string().nullable(),
 });
 
-export const linkedInDataResponseSchema = z.object({
-  linkedinBio: z.string().nullable(),
-  syncedAt: z.string().nullable(),
-  workHistory: z.array(workHistoryEntrySchema),
-  education: z.array(educationEntrySchema),
-});
+export const linkedInDataResponseSchema = z
+  .object({
+    linkedinBio: z.string().nullable(),
+    syncedAt: z.string().nullable(),
+    workHistory: z.array(workHistoryEntrySchema),
+    education: z.array(educationEntrySchema),
+  })
+  .meta({ example: EXAMPLE_LINKEDIN_DATA_RESPONSE });
 
 export const enrichQueueStatusSchema = z.enum([
   "pending",
@@ -287,19 +323,25 @@ export const enrichQueueItemSchema = entityIdentitySchema.extend({
   linkedinHandle: z.string().optional(),
 });
 
-export const enrichEligibleCountResponseSchema = z.object({
-  count: z.number(),
-});
+export const enrichEligibleCountResponseSchema = z
+  .object({
+    count: z.number(),
+  })
+  .meta({ example: EXAMPLE_ENRICH_ELIGIBLE_COUNT_RESPONSE });
 
-export const enrichQueueStatusCountsSchema = z.object({
-  pending: z.number(),
-  completed: z.number(),
-  failed: z.number(),
-});
+export const enrichQueueStatusCountsSchema = z
+  .object({
+    pending: z.number(),
+    completed: z.number(),
+    failed: z.number(),
+  })
+  .meta({ example: EXAMPLE_ENRICH_QUEUE_STATUS_COUNTS_RESPONSE });
 
-export const enrichQueueInitResponseSchema = z.object({
-  totalEligible: z.number(),
-});
+export const enrichQueueInitResponseSchema = z
+  .object({
+    totalEligible: z.number(),
+  })
+  .meta({ example: EXAMPLE_ENRICH_QUEUE_INIT_RESPONSE });
 
 export const enrichQueueNextBatchItemSchema = z.object({
   queueItemId: z.string(),
@@ -309,18 +351,24 @@ export const enrichQueueNextBatchItemSchema = z.object({
   lastName: z.string().nullable(),
 });
 
-export const enrichQueueNextBatchResponseSchema = z.object({
-  items: z.array(enrichQueueNextBatchItemSchema),
-});
+export const enrichQueueNextBatchResponseSchema = z
+  .object({
+    items: z.array(enrichQueueNextBatchItemSchema),
+  })
+  .meta({ example: EXAMPLE_ENRICH_QUEUE_NEXT_BATCH_RESPONSE });
 
-export const linkedInDataUpsertResponseSchema = z.object({
-  success: z.boolean(),
-  count: z.number(),
-});
+export const linkedInDataUpsertResponseSchema = z
+  .object({
+    success: z.boolean(),
+    count: z.number(),
+  })
+  .meta({ example: EXAMPLE_LINKEDIN_DATA_UPSERT_RESPONSE });
 
-export const contactRelationshipResponseSchema = z.object({
-  relationship: contactRelationshipSchema,
-});
+export const contactRelationshipResponseSchema = z
+  .object({
+    relationship: contactRelationshipSchema,
+  })
+  .meta({ example: EXAMPLE_CONTACT_RELATIONSHIP_RESPONSE });
 
 /** POST /api/contacts/enrich-queue/init optional body. */
 export const enrichQueueInitBodySchema = z

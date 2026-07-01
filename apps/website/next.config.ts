@@ -2,18 +2,9 @@ import createMDX from "@next/mdx";
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  transpilePackages: [
-    "@bondery/schemas",
-    "@bondery/helpers",
-    "@bondery/branding",
-    "@bondery/mantine-next",
-    "@bondery/translations",
-  ],
   pageExtensions: ["ts", "tsx", "md", "mdx"],
   // Outbound redirects (status, help, docs, login, auth/callback, oauth/consent, app)
-  // live in src/app/**/route.ts so they can import @bondery/helpers. Do not move them
-  // into redirects() here — next.config.ts is evaluated by Node and cannot load JIT
-  // workspace packages.
+  // live in src/app/**/route.ts so they can import @bondery/helpers.
   async headers() {
     return [
       {

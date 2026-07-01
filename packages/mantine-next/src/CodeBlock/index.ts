@@ -4,4 +4,4 @@ export {
   type CodeBlockSnippet,
   type CodeBlockSingleProps,
   type CodeBlockMultiProps,
-} from "./CodeBlock";
+} from "#CodeBlock/CodeBlock.js";

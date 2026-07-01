@@ -3,43 +3,44 @@
   "version": "1.4.2",
   "type": "module",
   "description": "Bondery branding assets and icons",
-  "main": "./src/index.ts",
+  "main": "./dist/index.js",
   "types": "./src/index.ts",
   "exports": {
     ".": {
       "types": "./src/index.ts",
-      "node": "./dist/index.js",
-      "import": "./src/index.ts",
       "default": "./dist/index.js"
     },
-    "./src": {
-      "types": "./src/index.ts",
-      "node": "./dist/index.js",
-      "import": "./src/index.ts",
-      "default": "./dist/index.js"
-    },
-    "./icons": {
-      "types": "./src/react/index.ts",
-      "node": "./dist/react/index.js",
-      "import": "./src/react/index.ts",
-      "default": "./dist/react/index.js"
+    "./*": {
+      "types": "./src/*.ts",
+      "default": "./dist/*.js"
     },
     "./react": {
       "types": "./src/react/index.ts",
-      "node": "./dist/react/index.js",
-      "import": "./src/react/index.ts",
       "default": "./dist/react/index.js"
     },
-    "./react/src": {
-      "types": "./src/react/index.ts",
-      "node": "./dist/react/index.js",
-      "import": "./src/react/index.ts",
-      "default": "./dist/react/index.js"
+    "./react/BonderyIcon": {
+      "types": "./src/react/BonderyIcon.tsx",
+      "default": "./dist/react/BonderyIcon.js"
+    },
+    "./react/BonderyIconWhite": {
+      "types": "./src/react/BonderyIconWhite.tsx",
+      "default": "./dist/react/BonderyIconWhite.js"
+    },
+    "./react/BonderyLogotypeBlack": {
+      "types": "./src/react/BonderyLogotypeBlack.tsx",
+      "default": "./dist/react/BonderyLogotypeBlack.js"
+    },
+    "./react/BonderyLogotypeWhite": {
+      "types": "./src/react/BonderyLogotypeWhite.tsx",
+      "default": "./dist/react/BonderyLogotypeWhite.js"
+    },
+    "./react/index.d": {
+      "types": "./src/react/index.d.ts",
+      "default": "./dist/react/index.d.js"
     },
     "./icon-generator": {
       "types": "./scripts/icon-generator.d.ts",
-      "import": "./scripts/generate-icons.ts",
-      "require": "./scripts/generate-icons.ts"
+      "default": "./scripts/generate-icons.ts"
     }
   },
   "files": [
@@ -48,7 +49,8 @@
     "src/assets"
   ],
   "scripts": {
-    "build": "rimraf dist && tsc && node ../../scripts/fix-package-esm-imports.mjs"
+    "build": "rimraf dist && tsc",
+    "dev": "tsc --watch --preserveWatchOutput"
   },
   "dependencies": {
     "sharp": "^0.35.1"
@@ -56,7 +58,20 @@
   "devDependencies": {
     "@types/node": "^25",
     "rimraf": "^6.0.1",
+    "@bondery/typescript-config": "*",
     "tsx": "^4.21.0",
     "typescript": "^6"
+  },
+  "imports": {
+    "#*": [
+      "./dist/*",
+      "./dist/*.js",
+      "./dist/*/index.js",
+      "./src/*",
+      "./src/*.ts",
+      "./src/*.tsx",
+      "./src/*/index.ts",
+      "./src/*/index.tsx"
+    ]
   }
 }

@@ -1,5 +1,9 @@
 import { z } from "zod";
-import { makePaginatedListResponseSchema } from "./_shared";
+import { makePaginatedListResponseSchema } from "#entities/_shared.js";
+import {
+  EXAMPLE_CHAT_MESSAGES_LIST_RESPONSE,
+  EXAMPLE_CHAT_SESSIONS_LIST_RESPONSE,
+} from "#openapi/fixtures/responses.js";
 
 /**
  * Keep snake_case keys to match the existing chat API payloads.
@@ -25,12 +29,12 @@ export const chatMessageSchema = z.object({
 export const chatSessionsListResponseSchema = makePaginatedListResponseSchema(
   "sessions",
   chatSessionSchema,
-);
+).meta({ example: EXAMPLE_CHAT_SESSIONS_LIST_RESPONSE });
 
 export const chatMessagesListResponseSchema = makePaginatedListResponseSchema(
   "messages",
   chatMessageSchema,
-);
+).meta({ example: EXAMPLE_CHAT_MESSAGES_LIST_RESPONSE });
 
 export type ChatSession = z.infer<typeof chatSessionSchema>;
 export type ChatMessageRole = z.infer<typeof chatMessageRoleSchema>;

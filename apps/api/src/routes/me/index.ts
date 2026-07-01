@@ -21,6 +21,7 @@ import { avatarTransformQuerySchema } from "@bondery/schemas/http";
 import {
   apiSuccessResponseSchema,
   contactResponseSchema,
+  EXAMPLE_PROFILE_PHOTO_RESPONSE,
   updateAccountInputSchema,
   userAccountResponseSchema,
 } from "@bondery/schemas";
@@ -28,10 +29,12 @@ import { attachContactExtras } from "../../lib/contact-enrichment";
 
 const LINKEDIN_LOGOS_BUCKET = "linkedin_logos";
 
-const profilePhotoResponseSchema = z.object({
-  success: z.boolean(),
-  data: z.object({ avatarUrl: z.string() }),
-});
+const profilePhotoResponseSchema = z
+  .object({
+    success: z.boolean(),
+    data: z.object({ avatarUrl: z.string() }),
+  })
+  .meta({ example: EXAMPLE_PROFILE_PHOTO_RESPONSE });
 
 export const meRoutes: AppRoutePlugin = async (fastify) => {
   fastify.addHook("onRoute", (routeOptions) => {

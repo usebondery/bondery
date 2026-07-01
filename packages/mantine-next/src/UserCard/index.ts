@@ -1,1 +1,1 @@
-export { UserCard, type UserCardProps } from "./UserCard";
+export { UserCard, type UserCardProps } from "#UserCard/UserCard.js";

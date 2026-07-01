@@ -48,19 +48,34 @@ Nested route modules (e.g. `contacts/enrichment/*`) inherit `onRoute` from the p
   - `session` — bearer only (me, chat, sync, subscriptions, extension, admin)
   - `internal` — hidden from GitBook (`webhooks`, `internal/*`)
 - [ ] Handler return shape matches the declared response schema
+- [ ] **OpenAPI example** on every success response schema (see below)
 - [ ] `npm run build:api` or `npx turbo build --filter=api` from repo root after route/schema changes
 - [ ] OpenAPI spec updates automatically via the pre-commit hook when `apps/api` or `packages/schemas` change; run `npm run check-openapi` manually before release if needed
+
+## OpenAPI response examples
+
+GitBook shows route-level `example` payloads (not auto-generated model placeholders). Examples are attached via Zod `.meta({ example })` and wired automatically by `withOkResponse` / `withCreatedResponse` — **no per-route example argument**.
+
+When adding a new `*ResponseSchema`:
+
+1. Add `EXAMPLE_*` to [`packages/schemas/src/openapi/fixtures/responses.ts`](../../packages/schemas/src/openapi/fixtures/responses.ts) (compose from [`fixtures/entities.ts`](../../packages/schemas/src/openapi/fixtures/entities.ts) and [`fixtures/primitives.ts`](../../packages/schemas/src/openapi/fixtures/primitives.ts)).
+2. Chain `.meta({ example: EXAMPLE_* })` on the response schema export.
+3. Register the schema in [`packages/schemas/scripts/check-openapi-examples.ts`](../../packages/schemas/scripts/check-openapi-examples.ts) if it is a new export.
+
+For inline route-only schemas (e.g. admin stats), attach `.meta({ example })` on the schema in the route file and import the fixture from `@bondery/schemas`.
+
+`npm run test:contracts -w @bondery/schemas` validates every registered example with `schema.parse(example)`. `npm run check-openapi -w apps/api` fails if any `2xx` `application/json` response lacks an `example`.
 
 ## Vercel (separate API project)
 
 Each app (`apps/api`, `apps/webapp`, …) is its own Vercel project with **Root Directory** set to that app folder (for the API: `apps/api`, **not** the monorepo root).
 
-Workspace packages use **dual exports**: `import` → `./src/*.ts` (JIT for Next/Metro/Vite), `node` / `default` → `./dist/*.js` (Node on Vercel). When adding package subpaths, run `node scripts/sync-package-exports.mjs` from the repo root.
+Workspace packages follow the [Turborepo compiled-package model](https://turborepo.dev/docs/guides/tools/typescript#compiled-packages): `types` → `./src/*.ts` (editor IntelliSense), `default` → `./dist/*.js` (runtime). All `build` and `dev` tasks depend on `^build`, so `packages/*/dist` exists before apps start. When adding package subpaths (especially directory barrels like `src/foo/index.ts`), run `npm run sync-exports` from the repo root.
 
 The API project uses [`apps/api/vercel.json`](../../apps/api/vercel.json):
 
 1. **Install** — Vercel installs npm workspaces from the monorepo root.
-2. **Build** — `cd ../.. && npx turbo build --filter=api` compiles workspace dependencies (`api#build` → `^build`) to `packages/*/dist`. Webapp/website builds skip package `tsc` and keep JIT via `import` → `src/`.
+2. **Build** — `turbo build --filter=api` builds workspace packages (`^build`) then the API. No separate package compile step in `vercel.json`.
 3. **No API bundler** — no `tsup`, no custom Build Output API scripts.
 
 In the Vercel project settings, enable **Include source files outside of the Root Directory** so builds can read `packages/*`.
@@ -72,6 +87,7 @@ In the Vercel project settings, enable **Include source files outside of the Roo
 | Import | Purpose |
 |--------|---------|
 | `contactIdSchema`, `EXAMPLE_CONTACT_ID` | UUID path/body params with OpenAPI examples |
+| `EXAMPLE_*` in `@bondery/schemas` | Composed OpenAPI response fixtures (`openapi/fixtures/`) |
 | `okResponse`, `createdResponse`, `standardErrorResponses` | Low-level response map builders in `@bondery/schemas/http` |
 | `withOkResponse`, `withCreatedResponse` | App-level helpers that add standard errors (`apps/api/src/lib/openapi-route-responses.ts`) |
 | `*ResponseSchema` in entity modules | List/detail/delete shapes (`contactsListResponseSchema`, etc.) |
@@ -81,8 +97,8 @@ In the Vercel project settings, enable **Include source files outside of the Roo
 | Command | What it checks |
 |---------|----------------|
 | `npm run check-api-schema-patterns -w apps/api` | Route files have descriptions, responses, `FastifyZodOpenApiSchema` |
-| `npm run check-openapi` | Regenerates spec, fails on drift, bans "Default Response" on public paths, Redocly lint |
-| `npm run test:contracts -w @bondery/schemas` | Schema boundary assertions |
+| `npm run check-openapi` | Regenerates spec, fails on drift, requires `2xx` JSON examples, bans "Default Response" on public paths |
+| `npm run test:contracts -w @bondery/schemas` | Schema boundary assertions + OpenAPI example validation (`check-openapi-examples.ts`) |
 
 CI runs all of the above on every pull request.
 

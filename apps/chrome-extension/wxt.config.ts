@@ -1,5 +1,4 @@
 import { defineConfig } from "wxt";
-import { resolve } from "path";
 import { createRequire } from "module";
 
 const require = createRequire(import.meta.url);
@@ -73,13 +72,6 @@ export default defineConfig({
     // as raw bytes that Chrome rejects with "It isn't UTF-8 encoded".
     esbuild: {
       charset: "utf8",
-    },
-    resolve: {
-      alias: {
-        "@bondery/schemas": resolve(__dirname, "../../packages/schemas/src"),
-        "@bondery/helpers": resolve(__dirname, "../../packages/helpers/src"),
-        "@bondery/branding-src": resolve(__dirname, "../../packages/branding/src/index.ts"),
-      },
     },
     css: {
       postcss: {},

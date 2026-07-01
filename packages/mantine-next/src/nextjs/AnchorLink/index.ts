@@ -1,1 +1,1 @@
-export { AnchorLink, type AnchorLinkProps } from "./AnchorLink";
+export { AnchorLink, type AnchorLinkProps } from "#nextjs/AnchorLink/AnchorLink.js";

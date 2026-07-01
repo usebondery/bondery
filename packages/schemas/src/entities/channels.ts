@@ -1,6 +1,6 @@
 import { z } from "zod";
-import { CONTACT_LIMITS } from "../constants/index";
-import { channelTypeSchema } from "../primitives/index";
+import { CONTACT_LIMITS } from "#constants/index.js";
+import { channelTypeSchema } from "#primitives/index.js";
 
 const SHARE_CONTACT_EMAIL_MAX_RECIPIENTS = 10;
 const SHARE_CONTACT_EMAIL_MAX_MESSAGE_LENGTH = 2000;

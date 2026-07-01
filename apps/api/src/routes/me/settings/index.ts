@@ -19,6 +19,7 @@ import {
 import logger from "../../../lib/logger";
 import type { TablesUpdate } from "@bondery/schemas";
 import {
+  EXAMPLE_SETTINGS_PATCH_RESPONSE,
   updateUserSettingsInputSchema,
   userSettingsResponseSchema,
 } from "@bondery/schemas";
@@ -30,24 +31,26 @@ const updateSettingsBodySchema = updateUserSettingsInputSchema.extend({
   onlyIfNewSignup: z.boolean().optional(),
 });
 
-const settingsPatchResponseSchema = z.object({
-  success: z.boolean(),
-  skipped: z.boolean().optional(),
-  data: z
-    .object({
-      timezone: z.string().nullable().optional(),
-      reminderSendHour: z.string().nullable().optional(),
-      timeFormat: z.string().nullable().optional(),
-      language: z.string().nullable().optional(),
-      colorScheme: z.string().nullable().optional(),
-      leftSwipeAction: z.string().nullable().optional(),
-      rightSwipeAction: z.string().nullable().optional(),
-      groupSortOrder: z.string().nullable().optional(),
-      tagSortOrder: z.string().nullable().optional(),
-    })
-    .nullable()
-    .optional(),
-});
+const settingsPatchResponseSchema = z
+  .object({
+    success: z.boolean(),
+    skipped: z.boolean().optional(),
+    data: z
+      .object({
+        timezone: z.string().nullable().optional(),
+        reminderSendHour: z.string().nullable().optional(),
+        timeFormat: z.string().nullable().optional(),
+        language: z.string().nullable().optional(),
+        colorScheme: z.string().nullable().optional(),
+        leftSwipeAction: z.string().nullable().optional(),
+        rightSwipeAction: z.string().nullable().optional(),
+        groupSortOrder: z.string().nullable().optional(),
+        tagSortOrder: z.string().nullable().optional(),
+      })
+      .nullable()
+      .optional(),
+  })
+  .meta({ example: EXAMPLE_SETTINGS_PATCH_RESPONSE });
 
 const AVATARS_BUCKET = "avatars";
 const DEFAULT_REMINDER_SEND_HOUR = "08:00:00";

@@ -4,12 +4,13 @@ import {
   CONTACT_LIMITS,
   IMPORTANT_DATE_NOTIFY_DAYS,
   IMPORTANT_DATE_TYPES,
-} from "../constants/index";
+} from "#constants/index.js";
 import {
   entityIdentitySchema,
   entityNullableAuditSchema,
   makeCollectionResponseSchema,
-} from "./_shared";
+} from "#entities/_shared.js";
+import { EXAMPLE_IMPORTANT_DATES_LIST_RESPONSE } from "#openapi/fixtures/responses.js";
 
 const isoDateSchema = z
   .string()
@@ -124,7 +125,7 @@ export const replaceImportantDatesSchema = z
 export const importantDatesListResponseSchema = makeCollectionResponseSchema(
   "dates",
   importantDateSchema,
-);
+).meta({ example: EXAMPLE_IMPORTANT_DATES_LIST_RESPONSE });
 
 export type ImportantDatesListResponse = z.infer<typeof importantDatesListResponseSchema>;
 export type ImportantDateType = z.infer<typeof importantDateTypeSchema>;

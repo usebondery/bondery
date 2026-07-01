@@ -1,1 +1,1 @@
-export { compareVersions, isVersionBelow } from "./version-utils";
+export { compareVersions, isVersionBelow } from "#version/version-utils.js";

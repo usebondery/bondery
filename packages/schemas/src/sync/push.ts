@@ -1,8 +1,9 @@
 import { z } from "zod";
-import { contactSchema } from "../entities/contact";
-import { groupSchema } from "../entities/group";
-import { tagSchema } from "../entities/tag";
-import { syncMutationSchema } from "./mutations";
+import { contactSchema } from "#entities/contact.js";
+import { groupSchema } from "#entities/group.js";
+import { tagSchema } from "#entities/tag.js";
+import { syncMutationSchema } from "#sync/mutations.js";
+import { EXAMPLE_SYNC_PUSH_RESPONSE } from "#openapi/fixtures/responses.js";
 
 export const syncPushRequestSchema = z.object({
   deviceId: z.string().uuid(),
@@ -57,11 +58,13 @@ export const syncPushResultSchema = z.discriminatedUnion("status", [
 
 export type SyncPushResult = z.infer<typeof syncPushResultSchema>;
 
-export const syncPushResponseSchema = z.object({
-  results: z.array(syncPushResultSchema),
-  serverTime: z.string().datetime(),
-  nextServerSequence: z.number().int().nonnegative(),
-});
+export const syncPushResponseSchema = z
+  .object({
+    results: z.array(syncPushResultSchema),
+    serverTime: z.string().datetime(),
+    nextServerSequence: z.number().int().nonnegative(),
+  })
+  .meta({ example: EXAMPLE_SYNC_PUSH_RESPONSE });
 
 export type SyncPushResponse = z.infer<typeof syncPushResponseSchema>;
 

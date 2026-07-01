@@ -3,50 +3,207 @@
   "version": "1.4.2",
   "private": true,
   "type": "module",
-  "main": "./src/index.ts",
+  "main": "./dist/index.js",
   "types": "./src/index.ts",
   "exports": {
     ".": {
       "types": "./src/index.ts",
-      "node": "./dist/index.js",
-      "import": "./src/index.ts",
       "default": "./dist/index.js"
+    },
+    "./*": {
+      "types": "./src/*.ts",
+      "default": "./dist/*.js"
     },
     "./constants": {
       "types": "./src/constants/index.ts",
-      "node": "./dist/constants/index.js",
-      "import": "./src/constants/index.ts",
       "default": "./dist/constants/index.js"
     },
-    "./supabase.types": {
-      "types": "./src/supabase.types.ts",
-      "node": "./dist/supabase.types.js",
-      "import": "./src/supabase.types.ts",
-      "default": "./dist/supabase.types.js"
+    "./entities": {
+      "types": "./src/entities/index.ts",
+      "default": "./dist/entities/index.js"
     },
-    "./database": {
-      "types": "./src/supabase.types.ts",
-      "node": "./dist/supabase.types.js",
-      "import": "./src/supabase.types.ts",
-      "default": "./dist/supabase.types.js"
-    },
-    "./sync": {
-      "types": "./src/sync/index.ts",
-      "node": "./dist/sync/index.js",
-      "import": "./src/sync/index.ts",
-      "default": "./dist/sync/index.js"
+    "./geocode": {
+      "types": "./src/geocode/index.ts",
+      "default": "./dist/geocode/index.js"
     },
     "./http": {
       "types": "./src/http/index.ts",
-      "node": "./dist/http/index.js",
-      "import": "./src/http/index.ts",
       "default": "./dist/http/index.js"
+    },
+    "./openapi/fixtures": {
+      "types": "./src/openapi/fixtures/index.ts",
+      "default": "./dist/openapi/fixtures/index.js"
+    },
+    "./primitives": {
+      "types": "./src/primitives/index.ts",
+      "default": "./dist/primitives/index.js"
+    },
+    "./sync": {
+      "types": "./src/sync/index.ts",
+      "default": "./dist/sync/index.js"
+    },
+    "./contact-id": {
+      "types": "./src/contact-id.ts",
+      "default": "./dist/contact-id.js"
+    },
+    "./contracts.assertions": {
+      "types": "./src/contracts.assertions.ts",
+      "default": "./dist/contracts.assertions.js"
+    },
+    "./entities/_shared": {
+      "types": "./src/entities/_shared.ts",
+      "default": "./dist/entities/_shared.js"
+    },
+    "./entities/activity": {
+      "types": "./src/entities/activity.ts",
+      "default": "./dist/entities/activity.js"
+    },
+    "./entities/address": {
+      "types": "./src/entities/address.ts",
+      "default": "./dist/entities/address.js"
+    },
+    "./entities/api": {
+      "types": "./src/entities/api.ts",
+      "default": "./dist/entities/api.js"
+    },
+    "./entities/api-keys": {
+      "types": "./src/entities/api-keys.ts",
+      "default": "./dist/entities/api-keys.js"
+    },
+    "./entities/channels": {
+      "types": "./src/entities/channels.ts",
+      "default": "./dist/entities/channels.js"
+    },
+    "./entities/chat": {
+      "types": "./src/entities/chat.ts",
+      "default": "./dist/entities/chat.js"
+    },
+    "./entities/contact": {
+      "types": "./src/entities/contact.ts",
+      "default": "./dist/entities/contact.js"
+    },
+    "./entities/group": {
+      "types": "./src/entities/group.ts",
+      "default": "./dist/entities/group.js"
+    },
+    "./entities/import": {
+      "types": "./src/entities/import.ts",
+      "default": "./dist/entities/import.js"
+    },
+    "./entities/important-date": {
+      "types": "./src/entities/important-date.ts",
+      "default": "./dist/entities/important-date.js"
+    },
+    "./entities/merge": {
+      "types": "./src/entities/merge.ts",
+      "default": "./dist/entities/merge.js"
+    },
+    "./entities/notes": {
+      "types": "./src/entities/notes.ts",
+      "default": "./dist/entities/notes.js"
+    },
+    "./entities/reminder": {
+      "types": "./src/entities/reminder.ts",
+      "default": "./dist/entities/reminder.js"
+    },
+    "./entities/settings": {
+      "types": "./src/entities/settings.ts",
+      "default": "./dist/entities/settings.js"
+    },
+    "./entities/social": {
+      "types": "./src/entities/social.ts",
+      "default": "./dist/entities/social.js"
+    },
+    "./entities/subscription": {
+      "types": "./src/entities/subscription.ts",
+      "default": "./dist/entities/subscription.js"
+    },
+    "./entities/tag": {
+      "types": "./src/entities/tag.ts",
+      "default": "./dist/entities/tag.js"
+    },
+    "./format": {
+      "types": "./src/format.ts",
+      "default": "./dist/format.js"
+    },
+    "./geocode/client": {
+      "types": "./src/geocode/client.ts",
+      "default": "./dist/geocode/client.js"
+    },
+    "./http/ids": {
+      "types": "./src/http/ids.ts",
+      "default": "./dist/http/ids.js"
+    },
+    "./http/responses": {
+      "types": "./src/http/responses.ts",
+      "default": "./dist/http/responses.js"
+    },
+    "./openapi/document-opts": {
+      "types": "./src/openapi/document-opts.ts",
+      "default": "./dist/openapi/document-opts.js"
+    },
+    "./openapi/fixtures/entities": {
+      "types": "./src/openapi/fixtures/entities.ts",
+      "default": "./dist/openapi/fixtures/entities.js"
+    },
+    "./openapi/fixtures/primitives": {
+      "types": "./src/openapi/fixtures/primitives.ts",
+      "default": "./dist/openapi/fixtures/primitives.js"
+    },
+    "./openapi/fixtures/responses": {
+      "types": "./src/openapi/fixtures/responses.ts",
+      "default": "./dist/openapi/fixtures/responses.js"
+    },
+    "./openapi/get-schema-example": {
+      "types": "./src/openapi/get-schema-example.ts",
+      "default": "./dist/openapi/get-schema-example.js"
+    },
+    "./openapi/registry": {
+      "types": "./src/openapi/registry.ts",
+      "default": "./dist/openapi/registry.js"
+    },
+    "./primitives/channel": {
+      "types": "./src/primitives/channel.ts",
+      "default": "./dist/primitives/channel.js"
+    },
+    "./primitives/color": {
+      "types": "./src/primitives/color.ts",
+      "default": "./dist/primitives/color.js"
+    },
+    "./supabase.types": {
+      "types": "./src/supabase.types.ts",
+      "default": "./dist/supabase.types.js"
+    },
+    "./sync/mutations": {
+      "types": "./src/sync/mutations.ts",
+      "default": "./dist/sync/mutations.js"
+    },
+    "./sync/protocol": {
+      "types": "./src/sync/protocol.ts",
+      "default": "./dist/sync/protocol.js"
+    },
+    "./sync/pull": {
+      "types": "./src/sync/pull.ts",
+      "default": "./dist/sync/pull.js"
+    },
+    "./sync/push": {
+      "types": "./src/sync/push.ts",
+      "default": "./dist/sync/push.js"
+    },
+    "./sync/tables": {
+      "types": "./src/sync/tables.ts",
+      "default": "./dist/sync/tables.js"
+    },
+    "./database": {
+      "types": "./src/supabase.types.ts",
+      "default": "./dist/supabase.types.js"
     }
   },
   "scripts": {
-    "build": "rimraf dist && tsc && node ../../scripts/fix-package-esm-imports.mjs",
+    "build": "rimraf dist && tsc",
+    "dev": "tsc --watch --preserveWatchOutput",
     "check-types": "tsc --noEmit",
-    "test:contracts": "node scripts/check-no-internal-deps.mjs && npx tsx ./src/contracts.assertions.ts"
+    "test:contracts": "node scripts/check-no-internal-deps.mjs && npx tsx ./src/contracts.assertions.ts && npx tsx ./scripts/check-openapi-examples.ts"
   },
   "description": "Canonical types, Zod validation schemas, and constants for Bondery. Contract layer — no runtime business logic.",
   "dependencies": {
@@ -54,6 +211,19 @@
   },
   "devDependencies": {
     "rimraf": "^6.0.1",
+    "@bondery/typescript-config": "*",
     "typescript": "^6"
+  },
+  "imports": {
+    "#*": [
+      "./dist/*",
+      "./dist/*.js",
+      "./dist/*/index.js",
+      "./src/*",
+      "./src/*.ts",
+      "./src/*.tsx",
+      "./src/*/index.ts",
+      "./src/*/index.tsx"
+    ]
   }
 }

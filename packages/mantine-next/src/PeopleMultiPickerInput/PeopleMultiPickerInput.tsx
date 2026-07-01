@@ -13,9 +13,9 @@ import {
 import { useDebouncedCallback } from "@mantine/hooks";
 import { useEffect, useMemo, useState } from "react";
 import type { Contact } from "@bondery/schemas";
-import { PersonChip } from "../nextjs/PersonChip";
-import { getAvatarColorFromName } from "../utils/avatarColor";
-import { formatContactName } from "../utils/nameHelpers";
+import { PersonChip } from "#nextjs/PersonChip/index.js";
+import { getAvatarColorFromName } from "#utils/avatarColor.js";
+import { formatContactName } from "#utils/nameHelpers.js";
 
 const MAX_DROPDOWN_OPTIONS = 5;
 

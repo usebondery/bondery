@@ -1,1 +1,1 @@
-export { INTERACTION_TYPES } from "./interaction-types";
+export { INTERACTION_TYPES } from "#interactions/interaction-types.js";

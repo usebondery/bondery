@@ -15,10 +15,10 @@ export {
   formatMetadataTitle,
   SOCIAL_PLATFORM_URL_DETAILS,
   IMPORTANT_DATE_TYPE_META,
-} from "./globals/index";
+} from "#globals/index.js";
 
-export { parseInstagramUsername, linkedinCompanyUrl, extractLinkedinId } from "./platform/index";
-export type { ParseInstagramUsernameInput, ParsedInstagramName } from "./platform/index";
+export { parseInstagramUsername, linkedinCompanyUrl, extractLinkedinId } from "#platform/index.js";
+export type { ParseInstagramUsernameInput, ParsedInstagramName } from "#platform/index.js";
 
 export {
   stripEmojis,
@@ -26,9 +26,9 @@ export {
   extractNameParts,
   cleanPersonName,
   parseFullName,
-} from "./name/index";
+} from "#name/index.js";
 
-export { formatDateRange, formatDuration } from "./date/index";
+export { formatDateRange, formatDuration } from "#date/index.js";
 
 export {
   getReadingTime,
@@ -36,25 +36,25 @@ export {
   tokenToString,
   tokensToString,
   BP_TOKEN_RE,
-} from "./text/index";
-export type { InlineToken, InlineTokenType } from "./text/index";
+} from "#text/index.js";
+export type { InlineToken, InlineTokenType } from "#text/index.js";
 
 export {
   formatPlaceLabel,
   formatAddressLabel,
   abbreviateLocationCountry,
-} from "./address/index";
-export type { PlaceLabelFields, AddressLabelFields } from "./address/index";
+} from "#address/index.js";
+export type { PlaceLabelFields, AddressLabelFields } from "#address/index.js";
 
 export {
   CONTACT_ADDRESS_TYPE_OPTIONS,
   CONTACT_CHANNEL_TYPE_OPTIONS,
   getContactAddressTypeEmoji,
   getContactChannelTypeEmoji,
-} from "./contact/index";
-export type { ContactAddressTypeOption, ContactChannelTypeOption } from "./contact/index";
+} from "#contact/index.js";
+export type { ContactAddressTypeOption, ContactChannelTypeOption } from "#contact/index.js";
 
-export { compareVersions, isVersionBelow } from "./version/index";
+export { compareVersions, isVersionBelow } from "#version/index.js";
 
 export {
   CONTACT_SOCIAL_BRAND_COLORS,
@@ -66,32 +66,32 @@ export {
   normalizeWebsiteUrl,
   processContactSocialFieldValue,
   socialPlatforms,
-} from "./socials/index";
+} from "#socials/index.js";
 export type {
   ContactSocialFieldKey,
   ContactSocialPlatform,
   ProcessContactSocialFieldResult,
   SocialPlatformConfig,
-} from "./socials/index";
+} from "#socials/index.js";
 
-export { INTERACTION_TYPES } from "./interactions/index";
+export { INTERACTION_TYPES } from "#interactions/index.js";
 
 export {
   createContactFromFullNameSchema,
   normalizedSocialHandleSchema,
-} from "./forms/index";
+} from "#forms/index.js";
 export type {
   CreateContactFromFullNameInput,
   CreateContactFromFullNameOutput,
   NormalizedSocialHandle,
-} from "./forms/index";
+} from "#forms/index.js";
 
 export {
   buildGeocodeSuggestQuery,
   buildGeocodeTimezoneQuery,
   geocodeSuggestionDisplayKey,
   geocodeSuggestionDisplayLabel,
-} from "./geocode/index";
+} from "#geocode/index.js";
 
 export {
   combinePhoneNumber,
@@ -101,5 +101,5 @@ export {
   getTelephoneReactMaskExpression,
   parsePhoneNumber,
   TELEPHONE_PREFIX_OPTIONS,
-} from "./phone/index";
-export type { CountryCode, TelephonePrefixOption } from "./phone/index";
+} from "#phone/index.js";
+export type { CountryCode, TelephonePrefixOption } from "#phone/index.js";

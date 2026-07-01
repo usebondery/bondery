@@ -1,3 +1,3 @@
-export { EmojiPicker } from "./EmojiPicker";
-export { EmojiPickerDropdownContent } from "./EmojiPickerDropdownContent";
-export { ALL_EMOJIS, getRandomEmoji } from "./emojiData";
+export { EmojiPicker } from "#EmojiPicker/EmojiPicker.js";
+export { EmojiPickerDropdownContent } from "#EmojiPicker/EmojiPickerDropdownContent.js";
+export { ALL_EMOJIS, getRandomEmoji } from "#EmojiPicker/emojiData.js";

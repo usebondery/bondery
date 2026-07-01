@@ -9,7 +9,7 @@ import {
   Section,
   Text,
 } from "react-email";
-import { EmailWrapper } from "../shared/EmailWrapper";
+import { EmailWrapper } from "#shared/EmailWrapper.js";
 import * as React from "react";
 
 export interface ShareContactEmailPhone {

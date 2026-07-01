@@ -62,11 +62,8 @@
         "apps/website/.env.production.local",
         "apps/api/.env.production.local"
       ],
-      "dependsOn": [],
+      "dependsOn": ["^build"],
       "outputs": [".next/**", "!.next/cache/**", "dist/**", "public/**"]
-    },
-    "api#build": {
-      "dependsOn": ["^build"]
     },
 
     "check-types": {
@@ -90,7 +87,7 @@
       ]
     },
     "dev": {
-      "dependsOn": [],
+      "dependsOn": ["^build"],
       "persistent": true,
       "cache": true,
       "env": [

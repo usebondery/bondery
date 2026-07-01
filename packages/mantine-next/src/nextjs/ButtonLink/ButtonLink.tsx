@@ -1,7 +1,7 @@
 "use client";
 
 import { Button, type ButtonProps } from "@mantine/core";
-import Link from "next/link";
+import Link from "#nextjs/NextLink.js";
 import type { ReactNode } from "react";
 
 export type ButtonLinkProps = Omit<

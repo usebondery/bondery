@@ -1,17 +1,21 @@
 import { z } from "zod";
-import { contactIdSchema } from "../contact-id";
-import { avatarQualitySchema, avatarSizeSchema } from "../entities/api";
-import { contactSortOrderSchema } from "../entities/contact";
+import { contactIdSchema } from "#contact-id.js";
+import { avatarQualitySchema, avatarSizeSchema } from "#entities/api.js";
+import { contactSortOrderSchema } from "#entities/contact.js";
 import {
   contactAddressConfidenceSchema,
   contactAddressGeocodeSourceSchema,
   contactAddressGranularitySchema,
   contactAddressTypeSchema,
-} from "../entities/address";
-import { replaceImportantDatesSchema } from "../entities/important-date";
+} from "#entities/address.js";
+import { replaceImportantDatesSchema } from "#entities/important-date.js";
+import {
+  EXAMPLE_GEOCODE_SUGGEST_RESPONSE,
+  EXAMPLE_GEOCODE_TIMEZONE_RESPONSE,
+} from "#openapi/fixtures/responses.js";
 
-export * from "./ids";
-export * from "./responses";
+export * from "#http/ids.js";
+export * from "#http/responses.js";
 
 /** UUID path parameter (e.g. `:id`). */
 export const uuidParamSchema = z.object({
@@ -130,13 +134,17 @@ const geocodeSuggestAddressWireSchema = z.object({
   timezone: z.string().nullable(),
 });
 
-export const geocodeSuggestResponseWireSchema = z.object({
-  addresses: z.array(geocodeSuggestAddressWireSchema),
-});
+export const geocodeSuggestResponseWireSchema = z
+  .object({
+    addresses: z.array(geocodeSuggestAddressWireSchema),
+  })
+  .meta({ example: EXAMPLE_GEOCODE_SUGGEST_RESPONSE });
 
-export const geocodeTimezoneResponseWireSchema = z.object({
-  timezone: z.string().nullable(),
-});
+export const geocodeTimezoneResponseWireSchema = z
+  .object({
+    timezone: z.string().nullable(),
+  })
+  .meta({ example: EXAMPLE_GEOCODE_TIMEZONE_RESPONSE });
 
 export type UuidParam = z.infer<typeof uuidParamSchema>;
 export type PaginationQuery = z.infer<typeof paginationQuerySchema>;

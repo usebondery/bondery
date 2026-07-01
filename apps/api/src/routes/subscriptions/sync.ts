@@ -22,19 +22,24 @@ import { getAuth } from "../../lib/auth";
 import { createAdminClient } from "../../lib/supabase";
 import { applyOpenApiRouteMeta } from "../../lib/openapi-route-meta";
 import { withOkResponse } from "../../lib/openapi-route-responses";
+import {
+  EXAMPLE_SUBSCRIPTION_SYNC_SKIPPED_RESPONSE,
+} from "@bondery/schemas";
 import { getPolarClient } from "../../lib/polar";
 import { upsertSubscription, mapStatus } from "../webhooks/polar";
 
-const subscriptionSyncResponseSchema = z.union([
-  z.object({
-    synced: z.literal(true),
-    source: z.enum(["pending", "polar_api"]),
-  }),
-  z.object({
-    synced: z.literal(false),
-    reason: z.string(),
-  }),
-]);
+const subscriptionSyncResponseSchema = z
+  .union([
+    z.object({
+      synced: z.literal(true),
+      source: z.enum(["pending", "polar_api"]),
+    }),
+    z.object({
+      synced: z.literal(false),
+      reason: z.string(),
+    }),
+  ])
+  .meta({ example: EXAMPLE_SUBSCRIPTION_SYNC_SKIPPED_RESPONSE });
 
 export async function subscriptionSyncRoutes(
   fastify: FastifyInstance,

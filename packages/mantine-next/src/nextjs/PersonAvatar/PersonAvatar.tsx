@@ -2,10 +2,10 @@
 
 import { Avatar } from "@mantine/core";
 import type { ContactPreview } from "@bondery/schemas";
-import Link from "next/link";
+import Link from "#nextjs/NextLink.js";
 import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
-import { getAvatarColorFromName } from "../../utils/avatarColor";
-import { PersonAvatarTooltip } from "./PersonAvatarTooltip";
+import { getAvatarColorFromName } from "#utils/avatarColor.js";
+import { PersonAvatarTooltip } from "#nextjs/PersonAvatar/PersonAvatarTooltip.js";
 
 type PersonAvatarIdentity = ContactPreview & {
   middleName?: string | null;

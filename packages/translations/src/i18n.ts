@@ -1,5 +1,5 @@
-import csTranslations from "./cs.json";
-import enTranslations from "./en.json";
+import csTranslations from "./cs.json" with { type: "json" };
+import enTranslations from "./en.json" with { type: "json" };
 
 export const i18nConfig = {
   fallbackLng: "en" as const,

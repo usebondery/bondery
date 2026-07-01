@@ -33,9 +33,9 @@ import {
   VisuallyHidden,
 } from "@mantine/core";
 import { IconChecks, IconSearch } from "@tabler/icons-react";
-import { DotsMenuButton } from "../DotsMenuButton";
-import { ColumnVisibilityMenu } from "./ColumnVisibilityMenu";
-import { SortMenu } from "./SortMenu";
+import { DotsMenuButton } from "#DotsMenuButton/index.js";
+import { ColumnVisibilityMenu } from "#DataTable/ColumnVisibilityMenu.js";
+import { SortMenu } from "#DataTable/SortMenu.js";
 
 /**
  * Isolated search input that owns its own local state.
@@ -75,7 +75,7 @@ import type {
   DataTableLabels,
   RowAction,
   SortOption,
-} from "./types";
+} from "#DataTable/types.js";
 
 interface DataTableRowInternalProps<TRow> {
   row: TRow;

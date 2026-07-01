@@ -7,14 +7,14 @@ export type {
   ColumnVisibilityLabels,
   SortMenuLabels,
   DataTableLabels,
-} from "./types";
+} from "#DataTable/types.js";
 
 // Components
-export { DataTable, type DataTableProps } from "./DataTable";
-export { ColumnVisibilityMenu, type ColumnVisibilityMenuProps } from "./ColumnVisibilityMenu";
-export { SortMenu, type SortMenuProps } from "./SortMenu";
+export { DataTable, type DataTableProps } from "#DataTable/DataTable.js";
+export { ColumnVisibilityMenu, type ColumnVisibilityMenuProps } from "#DataTable/ColumnVisibilityMenu.js";
+export { SortMenu, type SortMenuProps } from "#DataTable/SortMenu.js";
 export {
   SortableColumnItem,
   type SortableColumnItemProps,
   type SortableColumnItemColumn,
-} from "./SortableColumnItem";
+} from "#DataTable/SortableColumnItem.js";

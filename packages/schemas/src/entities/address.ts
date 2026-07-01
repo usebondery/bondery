@@ -1,6 +1,10 @@
 import { z } from "zod";
-import { CONTACT_FIELD_MAX_LENGTHS, CONTACT_LIMITS } from "../constants/index";
-import { nullableTrimmedStringSchema } from "./_shared";
+import { CONTACT_FIELD_MAX_LENGTHS, CONTACT_LIMITS } from "#constants/index.js";
+import { nullableTrimmedStringSchema } from "#entities/_shared.js";
+import {
+  EXAMPLE_GEOCODE_SUGGEST_RESPONSE,
+  EXAMPLE_GEOCODE_TIMEZONE_RESPONSE,
+} from "#openapi/fixtures/responses.js";
 
 export const contactAddressTypeSchema = z.enum(["home", "work", "other"]);
 export const contactAddressGranularitySchema = z.enum(["address", "city", "state", "country"]);
@@ -66,13 +70,17 @@ export const contactAddressEntrySchema = addressCoreInputSchema.extend({
 
 export const geocodeSuggestAddressSchema = contactAddressEntrySchema;
 
-export const geocodeSuggestResponseSchema = z.object({
-  addresses: z.array(geocodeSuggestAddressSchema),
-});
+export const geocodeSuggestResponseSchema = z
+  .object({
+    addresses: z.array(geocodeSuggestAddressSchema),
+  })
+  .meta({ example: EXAMPLE_GEOCODE_SUGGEST_RESPONSE });
 
-export const geocodeTimezoneResponseSchema = z.object({
-  timezone: nullableTrimmedStringSchema(),
-});
+export const geocodeTimezoneResponseSchema = z
+  .object({
+    timezone: nullableTrimmedStringSchema(),
+  })
+  .meta({ example: EXAMPLE_GEOCODE_TIMEZONE_RESPONSE });
 
 export const replaceAddressesSchema = z
   .array(contactAddressEntrySchema)

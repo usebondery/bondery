@@ -1,1 +1,1 @@
-export { DotsMenuButton, type DotsMenuButtonProps } from "./DotsMenuButton";
+export { DotsMenuButton, type DotsMenuButtonProps } from "#DotsMenuButton/DotsMenuButton.js";

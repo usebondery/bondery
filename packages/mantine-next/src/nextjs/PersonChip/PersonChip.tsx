@@ -17,10 +17,10 @@ import { useDebouncedCallback } from "@mantine/hooks";
 import { IconChevronDown, IconX } from "@tabler/icons-react";
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import type { ContactPreview } from "@bondery/schemas";
-import Link from "next/link";
+import Link from "#nextjs/NextLink.js";
 import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
-import { getAvatarColorFromName } from "../../utils/avatarColor";
-import { PersonAvatarTooltip } from "../PersonAvatar/PersonAvatarTooltip";
+import { getAvatarColorFromName } from "#utils/avatarColor.js";
+import { PersonAvatarTooltip } from "#nextjs/PersonAvatar/PersonAvatarTooltip.js";
 
 type PersonChipIdentity = ContactPreview & {
   middleName?: string | null;

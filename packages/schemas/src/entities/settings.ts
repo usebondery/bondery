@@ -1,4 +1,8 @@
 import { z } from "zod";
+import {
+  EXAMPLE_USER_ACCOUNT_RESPONSE,
+  EXAMPLE_USER_SETTINGS_RESPONSE,
+} from "#openapi/fixtures/responses.js";
 
 export const colorSchemePreferenceSchema = z.enum(["light", "dark", "auto"]);
 export const timeFormatPreferenceSchema = z.enum(["24h", "12h"]);
@@ -75,14 +79,16 @@ export const userIdentitySchema = z.object({
   provider: z.string(),
 });
 
-export const userSettingsResponseSchema = z.object({
-  success: z.boolean(),
-  data: userSettingsSchema.extend({
-    email: z.string().nullable().optional(),
-    providers: z.array(z.string()).optional(),
-    identities: z.array(userIdentitySchema).optional(),
-  }),
-});
+export const userSettingsResponseSchema = z
+  .object({
+    success: z.boolean(),
+    data: userSettingsSchema.extend({
+      email: z.string().nullable().optional(),
+      providers: z.array(z.string()).optional(),
+      identities: z.array(userIdentitySchema).optional(),
+    }),
+  })
+  .meta({ example: EXAMPLE_USER_SETTINGS_RESPONSE });
 
 export const authUserSchema = z.object({
   id: z.string(),
@@ -90,21 +96,23 @@ export const authUserSchema = z.object({
   name: z.string(),
 });
 
-export const userAccountResponseSchema = z.object({
-  success: z.boolean(),
-  data: z.object({
-    id: z.string(),
-    email: z.string().optional(),
-    user_metadata: z
-      .object({
-        name: z.string().optional(),
-        middlename: z.string().optional(),
-        surname: z.string().optional(),
-        avatar_url: z.string().nullable().optional(),
-      })
-      .passthrough(),
-  }),
-});
+export const userAccountResponseSchema = z
+  .object({
+    success: z.boolean(),
+    data: z.object({
+      id: z.string(),
+      email: z.string().optional(),
+      user_metadata: z
+        .object({
+          name: z.string().optional(),
+          middlename: z.string().optional(),
+          surname: z.string().optional(),
+          avatar_url: z.string().nullable().optional(),
+        })
+        .passthrough(),
+    }),
+  })
+  .meta({ example: EXAMPLE_USER_ACCOUNT_RESPONSE });
 
 export const updateAccountInputSchema = z.object({
   name: z.string().trim().min(1, { error: "First name is required" }).optional(),

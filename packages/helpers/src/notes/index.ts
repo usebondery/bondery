@@ -1,9 +1,9 @@
-export { htmlToMarkdown } from "./htmlToMarkdown";
-export { markdownToHtml } from "./markdownToHtml";
+export { htmlToMarkdown } from "#notes/htmlToMarkdown.js";
+export { markdownToHtml } from "#notes/markdownToHtml.js";
 export {
   BP_PERSON_URL_PREFIX,
   collapsePersonMentionsFromEditor,
   expandPersonMentionsForEditor,
   formatPersonMentionLink,
   parsePersonMentionUrl,
-} from "./personMentionFormat";
+} from "#notes/personMentionFormat.js";

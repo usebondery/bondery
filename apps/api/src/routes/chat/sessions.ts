@@ -15,6 +15,8 @@ import {
 import {
   chatMessagesListResponseSchema,
   paginationMetaSchema,
+  EXAMPLE_CHAT_SESSION_CREATED_RESPONSE,
+  EXAMPLE_CHAT_SESSIONS_WIRE_LIST_RESPONSE,
 } from "@bondery/schemas";
 import { noContentResponse, standardErrorResponses } from "@bondery/schemas/http";
 import {
@@ -35,21 +37,25 @@ const chatSessionListItemSchema = z.object({
   updated_at: z.string().nullable(),
 });
 
-const chatSessionsListResponseWireSchema = z.object({
-  sessions: z.array(chatSessionListItemSchema),
-  pagination: paginationMetaSchema,
-});
+const chatSessionsListResponseWireSchema = z
+  .object({
+    sessions: z.array(chatSessionListItemSchema),
+    pagination: paginationMetaSchema,
+  })
+  .meta({ example: EXAMPLE_CHAT_SESSIONS_WIRE_LIST_RESPONSE });
 
 const updateChatSessionBodySchema = z.object({
   title: z.string(),
 });
 
-const chatSessionCreatedResponseSchema = z.object({
-  data: z.object({
-    id: z.string(),
-    created_at: z.string().nullable(),
-  }),
-});
+const chatSessionCreatedResponseSchema = z
+  .object({
+    data: z.object({
+      id: z.string(),
+      created_at: z.string().nullable(),
+    }),
+  })
+  .meta({ example: EXAMPLE_CHAT_SESSION_CREATED_RESPONSE });
 
 export const chatSessionRoutes: AppRoutePlugin = async (fastify) => {
   fastify.addHook("onRoute", (routeOptions) => {

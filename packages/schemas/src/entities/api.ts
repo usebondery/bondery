@@ -1,8 +1,12 @@
 import { z } from "zod";
-import { contactIdSchema } from "../contact-id";
-import { AVATAR_UPLOAD, CONTACT_FIELD_MAX_LENGTHS } from "../constants/index";
-import { shareableFieldSchema } from "./contact";
-import { shareContactEmailSchema } from "./channels";
+import { contactIdSchema } from "#contact-id.js";
+import { AVATAR_UPLOAD, CONTACT_FIELD_MAX_LENGTHS } from "#constants/index.js";
+import { shareableFieldSchema } from "#entities/contact.js";
+import { shareContactEmailSchema } from "#entities/channels.js";
+import {
+  EXAMPLE_API_SUCCESS_RESPONSE,
+  EXAMPLE_PHOTO_UPLOAD_RESPONSE,
+} from "#openapi/fixtures/responses.js";
 
 export const apiErrorResponseSchema = z.object({
   error: z.string(),
@@ -10,16 +14,20 @@ export const apiErrorResponseSchema = z.object({
   details: z.string().optional(),
 });
 
-export const apiSuccessResponseSchema = z.object({
-  success: z.boolean(),
-  message: z.string().optional(),
-});
+export const apiSuccessResponseSchema = z
+  .object({
+    success: z.boolean(),
+    message: z.string().optional(),
+  })
+  .meta({ example: EXAMPLE_API_SUCCESS_RESPONSE });
 
-export const photoUploadResponseSchema = z.object({
-  success: z.boolean(),
-  avatarUrl: z.string().nullable().optional(),
-  error: z.string().optional(),
-});
+export const photoUploadResponseSchema = z
+  .object({
+    success: z.boolean(),
+    avatarUrl: z.string().nullable().optional(),
+    error: z.string().optional(),
+  })
+  .meta({ example: EXAMPLE_PHOTO_UPLOAD_RESPONSE });
 
 export const imageValidationResultSchema = z.object({
   isValid: z.boolean(),

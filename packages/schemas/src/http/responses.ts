@@ -1,12 +1,19 @@
 import type { z } from "zod";
-import { apiErrorResponseSchema as baseApiErrorResponseSchema } from "../entities/api";
+import { apiErrorResponseSchema as baseApiErrorResponseSchema } from "#entities/api.js";
+import { getSchemaExample } from "#openapi/get-schema-example.js";
 
-function jsonResponse<T extends z.ZodType>(schema: T, description: string) {
+function jsonResponse<T extends z.ZodType>(
+  schema: T,
+  description: string,
+  exampleOverride?: unknown,
+) {
+  const example = exampleOverride ?? getSchemaExample(schema);
   return {
     description,
     content: {
       "application/json": {
         schema,
+        ...(example !== undefined && { example }),
       },
     },
   } as const;
@@ -28,9 +35,13 @@ export const standardErrorResponses = {
 } as const;
 
 /** Wrap a success schema as HTTP 200 with a documented description. */
-export function okResponse<T extends z.ZodType>(schema: T, description: string) {
+export function okResponse<T extends z.ZodType>(
+  schema: T,
+  description: string,
+  example?: unknown,
+) {
   return {
-    200: jsonResponse(schema, description),
+    200: jsonResponse(schema, description, example),
   } as const;
 }
 
@@ -38,9 +49,10 @@ export function okResponse<T extends z.ZodType>(schema: T, description: string) 
 export function createdResponse<T extends z.ZodType>(
   schema: T,
   description: string,
+  example?: unknown,
 ) {
   return {
-    201: jsonResponse(schema, description),
+    201: jsonResponse(schema, description, example),
   } as const;
 }
 

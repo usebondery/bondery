@@ -1,1 +1,1 @@
-export { ActionIconLink, type ActionIconLinkProps } from "./ActionIconLink";
+export { ActionIconLink, type ActionIconLinkProps } from "#nextjs/ActionIconLink/ActionIconLink.js";

@@ -1,2 +1,2 @@
-export { ModalTitle, type ModalTitleProps } from "./ModalTitle";
-export { ModalFooter, type ModalFooterProps } from "./ModalFooter";
+export { ModalTitle, type ModalTitleProps } from "#Modal/ModalTitle.js";
+export { ModalFooter, type ModalFooterProps } from "#Modal/ModalFooter.js";

@@ -29,8 +29,8 @@ import {
 import {
   SortableColumnItem,
   type SortableColumnItemColumn,
-} from "./SortableColumnItem";
-import type { ColumnVisibilityLabels } from "./types";
+} from "#DataTable/SortableColumnItem.js";
+import type { ColumnVisibilityLabels } from "#DataTable/types.js";
 
 export interface ColumnVisibilityMenuProps<
   TColumn extends SortableColumnItemColumn,

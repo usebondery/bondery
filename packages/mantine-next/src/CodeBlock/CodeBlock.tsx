@@ -3,7 +3,7 @@
 import { Box, Group, SegmentedControl, Text } from "@mantine/core";
 import { CodeHighlight } from "@mantine/code-highlight";
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { CopyButton } from "../CopyButton";
+import { CopyButton } from "#CopyButton/index.js";
 
 export interface CodeBlockSnippet {
   id: string;

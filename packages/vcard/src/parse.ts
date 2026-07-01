@@ -12,7 +12,7 @@ import type {
   VCardRelated,
   VCardTextValue,
   VCardTimezone,
-} from "./model";
+} from "#model.js";
 
 const LEGACY_VERSIONS = new Set(["2.1", "3.0", "4.0"]);
 const STRUCTURED_PROPERTIES = new Set(["N", "ADR", "ORG"]);

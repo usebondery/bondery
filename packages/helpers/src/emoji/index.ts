@@ -3,6 +3,6 @@ export {
   CATEGORY_ORDER,
   EMOJI_CATEGORIES,
   getRandomEmoji,
-} from "./emojiData";
-export type { EmojiCategoryName, EmojiData } from "./emojiData";
-export { filterEmojiCategories } from "./filterEmojiCategories";
+} from "#emoji/emojiData.js";
+export type { EmojiCategoryName, EmojiData } from "#emoji/emojiData.js";
+export { filterEmojiCategories } from "#emoji/filterEmojiCategories.js";

@@ -25,9 +25,6 @@
     "paths": {
       "@/*": [
         "./src/*"
-      ],
-      "@bondery/branding-src": [
-        "../../packages/branding/src/index.ts"
       ]
     }
   },

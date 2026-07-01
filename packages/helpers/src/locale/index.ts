@@ -3,10 +3,10 @@ export {
   formatLanguageDisplayLabel,
   getAppLanguageByValue,
   getAppLanguageExonymTranslationKey,
-} from "./languages";
-export type { LanguageData } from "./languages";
+} from "#locale/languages.js";
+export type { LanguageData } from "#locale/languages.js";
 
-export { WORLD_LANGUAGES_DATA, getWorldLanguageByValue } from "./world-languages";
+export { WORLD_LANGUAGES_DATA, getWorldLanguageByValue } from "#locale/world-languages.js";
 
 export {
   TIMEZONES_DATA,
@@ -18,5 +18,5 @@ export {
   getCurrentTimeInTimezone,
   getGroupedTimezones,
   countryCodeToFlagEmoji,
-} from "./timezones";
-export type { TimezoneData, TimezoneSelectOption, GroupedTimezoneGroup, GroupedTimezoneItem } from "./timezones";
+} from "#locale/timezones.js";
+export type { TimezoneData, TimezoneSelectOption, GroupedTimezoneGroup, GroupedTimezoneItem } from "#locale/timezones.js";

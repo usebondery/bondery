@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Popover, Button, Text, Stack } from "@mantine/core";
-import { EmojiPickerDropdownContent } from "./EmojiPickerDropdownContent";
+import { EmojiPickerDropdownContent } from "#EmojiPicker/EmojiPickerDropdownContent.js";
 
 interface EmojiPickerProps {
   value: string;

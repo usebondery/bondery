@@ -1,4 +1,4 @@
-import { COMMON_PERSON_NAME_TOKEN_SET } from "../name/common-person-name-tokens";
+import { COMMON_PERSON_NAME_TOKEN_SET } from "#name/common-person-name-tokens.js";
 
 export interface ParsedInstagramName {
   firstName: string;

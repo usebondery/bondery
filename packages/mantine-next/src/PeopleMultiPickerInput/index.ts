@@ -1,1 +1,1 @@
-export { PeopleMultiPickerInput } from "./PeopleMultiPickerInput";
+export { PeopleMultiPickerInput } from "#PeopleMultiPickerInput/PeopleMultiPickerInput.js";

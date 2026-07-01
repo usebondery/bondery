@@ -3,22 +3,41 @@
   "version": "1.4.2",
   "description": "Bondery email templates using React Email",
   "type": "module",
-  "main": "./src/index.ts",
+  "main": "./dist/index.js",
   "types": "./src/index.ts",
   "exports": {
     ".": {
       "types": "./src/index.ts",
-      "node": "./dist/index.js",
-      "import": "./src/index.ts",
       "default": "./dist/index.js"
+    },
+    "./*": {
+      "types": "./src/*.ts",
+      "default": "./dist/*.js"
+    },
+    "./shared/EmailWrapper": {
+      "types": "./src/shared/EmailWrapper.tsx",
+      "default": "./dist/shared/EmailWrapper.js"
+    },
+    "./templates/FeedbackEmail": {
+      "types": "./src/templates/FeedbackEmail.tsx",
+      "default": "./dist/templates/FeedbackEmail.js"
+    },
+    "./templates/ReminderDigestEmail": {
+      "types": "./src/templates/ReminderDigestEmail.tsx",
+      "default": "./dist/templates/ReminderDigestEmail.js"
+    },
+    "./templates/ShareContactEmail": {
+      "types": "./src/templates/ShareContactEmail.tsx",
+      "default": "./dist/templates/ShareContactEmail.js"
     }
   },
   "files": [
     "src"
   ],
   "scripts": {
-    "dev": "email dev --dir ./src --port 3004",
-    "build": "rimraf dist && tsc && node ../../scripts/fix-package-esm-imports.mjs"
+    "preview": "email dev --dir ./src --port 3004",
+    "dev": "tsc --watch --preserveWatchOutput",
+    "build": "rimraf dist && tsc"
   },
   "dependencies": {
     "@bondery/branding": "*",
@@ -36,6 +55,19 @@
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
     "rimraf": "^6.0.1",
+    "@bondery/typescript-config": "*",
     "typescript": "^6"
+  },
+  "imports": {
+    "#*": [
+      "./dist/*",
+      "./dist/*.js",
+      "./dist/*/index.js",
+      "./src/*",
+      "./src/*.ts",
+      "./src/*.tsx",
+      "./src/*/index.ts",
+      "./src/*/index.tsx"
+    ]
   }
 }

@@ -3,32 +3,261 @@
   "version": "1.4.2",
   "private": true,
   "type": "module",
-  "main": "./src/index.ts",
+  "main": "./dist/index.js",
   "types": "./src/index.ts",
   "exports": {
     ".": {
       "types": "./src/index.ts",
-      "node": "./dist/index.js",
-      "import": "./src/index.ts",
       "default": "./dist/index.js"
+    },
+    "./*": {
+      "types": "./src/*.ts",
+      "default": "./dist/*.js"
+    },
+    "./CodeBlock": {
+      "types": "./src/CodeBlock/index.ts",
+      "default": "./dist/CodeBlock/index.js"
+    },
+    "./CopyButton": {
+      "types": "./src/CopyButton/index.ts",
+      "default": "./dist/CopyButton/index.js"
+    },
+    "./DataTable": {
+      "types": "./src/DataTable/index.ts",
+      "default": "./dist/DataTable/index.js"
+    },
+    "./DescribedSelect": {
+      "types": "./src/DescribedSelect/index.ts",
+      "default": "./dist/DescribedSelect/index.js"
+    },
+    "./DotsMenuButton": {
+      "types": "./src/DotsMenuButton/index.ts",
+      "default": "./dist/DotsMenuButton/index.js"
+    },
+    "./Dropzone": {
+      "types": "./src/Dropzone/index.ts",
+      "default": "./dist/Dropzone/index.js"
+    },
+    "./EmojiPicker": {
+      "types": "./src/EmojiPicker/index.ts",
+      "default": "./dist/EmojiPicker/index.js"
+    },
+    "./LogoIcon": {
+      "types": "./src/LogoIcon/index.ts",
+      "default": "./dist/LogoIcon/index.js"
+    },
+    "./Modal": {
+      "types": "./src/Modal/index.ts",
+      "default": "./dist/Modal/index.js"
+    },
+    "./Notifications": {
+      "types": "./src/Notifications/index.ts",
+      "default": "./dist/Notifications/index.js"
+    },
+    "./PeopleMultiPickerInput": {
+      "types": "./src/PeopleMultiPickerInput/index.ts",
+      "default": "./dist/PeopleMultiPickerInput/index.js"
+    },
+    "./ThemePicker": {
+      "types": "./src/ThemePicker/index.ts",
+      "default": "./dist/ThemePicker/index.js"
+    },
+    "./TypePicker": {
+      "types": "./src/TypePicker/index.ts",
+      "default": "./dist/TypePicker/index.js"
+    },
+    "./UserCard": {
+      "types": "./src/UserCard/index.ts",
+      "default": "./dist/UserCard/index.js"
+    },
+    "./nextjs/ActionIconLink": {
+      "types": "./src/nextjs/ActionIconLink/index.ts",
+      "default": "./dist/nextjs/ActionIconLink/index.js"
+    },
+    "./nextjs/AnchorLink": {
+      "types": "./src/nextjs/AnchorLink/index.ts",
+      "default": "./dist/nextjs/AnchorLink/index.js"
+    },
+    "./nextjs/ButtonLink": {
+      "types": "./src/nextjs/ButtonLink/index.ts",
+      "default": "./dist/nextjs/ButtonLink/index.js"
+    },
+    "./nextjs/PersonAvatar": {
+      "types": "./src/nextjs/PersonAvatar/index.ts",
+      "default": "./dist/nextjs/PersonAvatar/index.js"
+    },
+    "./nextjs/PersonAvatarGroup": {
+      "types": "./src/nextjs/PersonAvatarGroup/index.ts",
+      "default": "./dist/nextjs/PersonAvatarGroup/index.js"
+    },
+    "./nextjs/PersonCard": {
+      "types": "./src/nextjs/PersonCard/index.ts",
+      "default": "./dist/nextjs/PersonCard/index.js"
+    },
+    "./nextjs/PersonChip": {
+      "types": "./src/nextjs/PersonChip/index.ts",
+      "default": "./dist/nextjs/PersonChip/index.js"
+    },
+    "./CodeBlock/CodeBlock": {
+      "types": "./src/CodeBlock/CodeBlock.tsx",
+      "default": "./dist/CodeBlock/CodeBlock.js"
+    },
+    "./CopyButton/CopyButton": {
+      "types": "./src/CopyButton/CopyButton.tsx",
+      "default": "./dist/CopyButton/CopyButton.js"
+    },
+    "./DataTable/ColumnVisibilityMenu": {
+      "types": "./src/DataTable/ColumnVisibilityMenu.tsx",
+      "default": "./dist/DataTable/ColumnVisibilityMenu.js"
+    },
+    "./DataTable/DataTable": {
+      "types": "./src/DataTable/DataTable.tsx",
+      "default": "./dist/DataTable/DataTable.js"
+    },
+    "./DataTable/SortMenu": {
+      "types": "./src/DataTable/SortMenu.tsx",
+      "default": "./dist/DataTable/SortMenu.js"
+    },
+    "./DataTable/SortableColumnItem": {
+      "types": "./src/DataTable/SortableColumnItem.tsx",
+      "default": "./dist/DataTable/SortableColumnItem.js"
+    },
+    "./DataTable/types": {
+      "types": "./src/DataTable/types.ts",
+      "default": "./dist/DataTable/types.js"
+    },
+    "./DescribedSelect/DescribedSelect": {
+      "types": "./src/DescribedSelect/DescribedSelect.tsx",
+      "default": "./dist/DescribedSelect/DescribedSelect.js"
+    },
+    "./DotsMenuButton/DotsMenuButton": {
+      "types": "./src/DotsMenuButton/DotsMenuButton.tsx",
+      "default": "./dist/DotsMenuButton/DotsMenuButton.js"
+    },
+    "./Dropzone/DropzoneContent": {
+      "types": "./src/Dropzone/DropzoneContent.tsx",
+      "default": "./dist/Dropzone/DropzoneContent.js"
+    },
+    "./EmojiPicker/EmojiPicker": {
+      "types": "./src/EmojiPicker/EmojiPicker.tsx",
+      "default": "./dist/EmojiPicker/EmojiPicker.js"
+    },
+    "./EmojiPicker/EmojiPickerDropdownContent": {
+      "types": "./src/EmojiPicker/EmojiPickerDropdownContent.tsx",
+      "default": "./dist/EmojiPicker/EmojiPickerDropdownContent.js"
+    },
+    "./EmojiPicker/emojiData": {
+      "types": "./src/EmojiPicker/emojiData.ts",
+      "default": "./dist/EmojiPicker/emojiData.js"
+    },
+    "./LogoIcon/LogoIcon": {
+      "types": "./src/LogoIcon/LogoIcon.tsx",
+      "default": "./dist/LogoIcon/LogoIcon.js"
+    },
+    "./Modal/ModalFooter": {
+      "types": "./src/Modal/ModalFooter.tsx",
+      "default": "./dist/Modal/ModalFooter.js"
+    },
+    "./Modal/ModalTitle": {
+      "types": "./src/Modal/ModalTitle.tsx",
+      "default": "./dist/Modal/ModalTitle.js"
+    },
+    "./Notifications/ErrorNotificationTemplate": {
+      "types": "./src/Notifications/ErrorNotificationTemplate.ts",
+      "default": "./dist/Notifications/ErrorNotificationTemplate.js"
+    },
+    "./Notifications/InformationNotificationTemplate": {
+      "types": "./src/Notifications/InformationNotificationTemplate.ts",
+      "default": "./dist/Notifications/InformationNotificationTemplate.js"
+    },
+    "./Notifications/LoadingNotificationTemplate": {
+      "types": "./src/Notifications/LoadingNotificationTemplate.ts",
+      "default": "./dist/Notifications/LoadingNotificationTemplate.js"
+    },
+    "./Notifications/StatusNotificationTemplate": {
+      "types": "./src/Notifications/StatusNotificationTemplate.ts",
+      "default": "./dist/Notifications/StatusNotificationTemplate.js"
+    },
+    "./Notifications/SuccessNotificationTemplate": {
+      "types": "./src/Notifications/SuccessNotificationTemplate.ts",
+      "default": "./dist/Notifications/SuccessNotificationTemplate.js"
+    },
+    "./Notifications/WarningNotificationTemplate": {
+      "types": "./src/Notifications/WarningNotificationTemplate.ts",
+      "default": "./dist/Notifications/WarningNotificationTemplate.js"
+    },
+    "./PeopleMultiPickerInput/PeopleMultiPickerInput": {
+      "types": "./src/PeopleMultiPickerInput/PeopleMultiPickerInput.tsx",
+      "default": "./dist/PeopleMultiPickerInput/PeopleMultiPickerInput.js"
+    },
+    "./ThemePicker/ThemePicker": {
+      "types": "./src/ThemePicker/ThemePicker.tsx",
+      "default": "./dist/ThemePicker/ThemePicker.js"
+    },
+    "./TypePicker/TypePicker": {
+      "types": "./src/TypePicker/TypePicker.tsx",
+      "default": "./dist/TypePicker/TypePicker.js"
+    },
+    "./UserCard/UserCard": {
+      "types": "./src/UserCard/UserCard.tsx",
+      "default": "./dist/UserCard/UserCard.js"
+    },
+    "./nextjs/ActionIconLink/ActionIconLink": {
+      "types": "./src/nextjs/ActionIconLink/ActionIconLink.tsx",
+      "default": "./dist/nextjs/ActionIconLink/ActionIconLink.js"
+    },
+    "./nextjs/AnchorLink/AnchorLink": {
+      "types": "./src/nextjs/AnchorLink/AnchorLink.tsx",
+      "default": "./dist/nextjs/AnchorLink/AnchorLink.js"
+    },
+    "./nextjs/ButtonLink/ButtonLink": {
+      "types": "./src/nextjs/ButtonLink/ButtonLink.tsx",
+      "default": "./dist/nextjs/ButtonLink/ButtonLink.js"
+    },
+    "./nextjs/NextLink": {
+      "types": "./src/nextjs/NextLink.tsx",
+      "default": "./dist/nextjs/NextLink.js"
+    },
+    "./nextjs/PersonAvatar/PersonAvatar": {
+      "types": "./src/nextjs/PersonAvatar/PersonAvatar.tsx",
+      "default": "./dist/nextjs/PersonAvatar/PersonAvatar.js"
+    },
+    "./nextjs/PersonAvatar/PersonAvatarTooltip": {
+      "types": "./src/nextjs/PersonAvatar/PersonAvatarTooltip.tsx",
+      "default": "./dist/nextjs/PersonAvatar/PersonAvatarTooltip.js"
+    },
+    "./nextjs/PersonAvatarGroup/PersonAvatarGroup": {
+      "types": "./src/nextjs/PersonAvatarGroup/PersonAvatarGroup.tsx",
+      "default": "./dist/nextjs/PersonAvatarGroup/PersonAvatarGroup.js"
+    },
+    "./nextjs/PersonCard/PersonCard": {
+      "types": "./src/nextjs/PersonCard/PersonCard.tsx",
+      "default": "./dist/nextjs/PersonCard/PersonCard.js"
+    },
+    "./nextjs/PersonChip/PersonChip": {
+      "types": "./src/nextjs/PersonChip/PersonChip.tsx",
+      "default": "./dist/nextjs/PersonChip/PersonChip.js"
+    },
+    "./styles.d": {
+      "types": "./src/styles.d.ts",
+      "default": "./dist/styles.d.js"
     },
     "./theme": {
       "types": "./src/theme.ts",
-      "node": "./dist/theme.js",
-      "import": "./src/theme.ts",
       "default": "./dist/theme.js"
     },
-    "./theme/src": {
-      "types": "./src/theme.ts",
-      "node": "./dist/theme.js",
-      "import": "./src/theme.ts",
-      "default": "./dist/theme.js"
+    "./utils/avatarColor": {
+      "types": "./src/utils/avatarColor.ts",
+      "default": "./dist/utils/avatarColor.js"
+    },
+    "./utils/nameHelpers": {
+      "types": "./src/utils/nameHelpers.ts",
+      "default": "./dist/utils/nameHelpers.js"
     },
     "./styles": {
       "types": "./src/styles.d.ts",
       "style": "./src/styles.css",
-      "import": "./src/styles.css",
-      "require": "./src/styles.css"
+      "default": "./src/styles.css"
     }
   },
   "dependencies": {
@@ -40,11 +269,19 @@
     "@dnd-kit/utilities": "^3.2.2"
   },
   "scripts": {
-    "build": "rimraf dist && tsc && node ../../scripts/fix-package-esm-imports.mjs",
+    "build": "rimraf dist && tsc",
+    "dev": "tsc --watch --preserveWatchOutput",
     "check-types": "tsc --noEmit"
   },
   "devDependencies": {
     "rimraf": "^6.0.1",
+    "@bondery/typescript-config": "*",
+    "@mantine/core": "^9.0.0",
+    "@mantine/hooks": "^9.0.0",
+    "@tabler/icons-react": "^3.34.1",
+    "next": "^16.0.0",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
     "typescript": "^6"
   },
   "peerDependencies": {
@@ -56,5 +293,17 @@
     "next": "^16.0.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
+  },
+  "imports": {
+    "#*": [
+      "./dist/*",
+      "./dist/*.js",
+      "./dist/*/index.js",
+      "./src/*",
+      "./src/*.ts",
+      "./src/*.tsx",
+      "./src/*/index.ts",
+      "./src/*/index.tsx"
+    ]
   }
 }

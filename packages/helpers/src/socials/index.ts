@@ -6,14 +6,14 @@ export {
   normalizePhoneSocialValue,
   processContactSocialFieldValue,
   socialPlatforms,
-} from "./socials-helpers";
+} from "#socials/socials-helpers.js";
 export type {
   ContactSocialFieldKey,
   ProcessContactSocialFieldResult,
   SocialPlatformConfig,
-} from "./socials-helpers";
+} from "#socials/socials-helpers.js";
 
-export { CONTACT_SOCIAL_BRAND_COLORS } from "./social-brand-colors";
-export type { ContactSocialPlatform } from "./social-brand-colors";
+export { CONTACT_SOCIAL_BRAND_COLORS } from "#socials/social-brand-colors.js";
+export type { ContactSocialPlatform } from "#socials/social-brand-colors.js";
 
-export { normalizeWebsiteUrl } from "./normalize-website-url";
+export { normalizeWebsiteUrl } from "#socials/normalize-website-url.js";

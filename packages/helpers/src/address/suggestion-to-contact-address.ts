@@ -1,6 +1,6 @@
 import type { ContactAddressEntry, ContactAddressType } from "@bondery/schemas";
-import { formatAddressLabel } from "./address-utils";
-import type { MapSuggestionItem, MapSuggestionRegionalEntry } from "./mapy-suggest";
+import { formatAddressLabel } from "#address/address-utils.js";
+import type { MapSuggestionItem, MapSuggestionRegionalEntry } from "#address/mapy-suggest.js";
 
 export interface SuggestionToContactAddressOptions {
   type?: ContactAddressType;

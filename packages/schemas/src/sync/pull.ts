@@ -1,5 +1,9 @@
 import { z } from "zod";
-import { SYNC_TABLE_KEYS } from "./tables";
+import { SYNC_TABLE_KEYS } from "#sync/tables.js";
+import {
+  EXAMPLE_SYNC_BOOTSTRAP_RESPONSE,
+  EXAMPLE_SYNC_PULL_RESPONSE,
+} from "#openapi/fixtures/responses.js";
 
 export const syncChangeOperationSchema = z.enum(["insert", "update", "delete"]);
 
@@ -19,11 +23,13 @@ export const syncBatchSchema = z.object({
 
 export type SyncBatch = z.infer<typeof syncBatchSchema>;
 
-export const syncPullResponseSchema = z.object({
-  batches: z.array(syncBatchSchema),
-  nextServerSequence: z.number().int().nonnegative(),
-  requiresBootstrap: z.boolean().optional(),
-});
+export const syncPullResponseSchema = z
+  .object({
+    batches: z.array(syncBatchSchema),
+    nextServerSequence: z.number().int().nonnegative(),
+    requiresBootstrap: z.boolean().optional(),
+  })
+  .meta({ example: EXAMPLE_SYNC_PULL_RESPONSE });
 
 export type SyncPullResponse = z.infer<typeof syncPullResponseSchema>;
 
@@ -32,9 +38,11 @@ export const syncBootstrapTablesSchema = z.record(
   z.array(z.record(z.string(), z.unknown())),
 );
 
-export const syncBootstrapResponseSchema = z.object({
-  tables: syncBootstrapTablesSchema,
-  nextServerSequence: z.number().int().nonnegative(),
-});
+export const syncBootstrapResponseSchema = z
+  .object({
+    tables: syncBootstrapTablesSchema,
+    nextServerSequence: z.number().int().nonnegative(),
+  })
+  .meta({ example: EXAMPLE_SYNC_BOOTSTRAP_RESPONSE });
 
 export type SyncBootstrapResponse = z.infer<typeof syncBootstrapResponseSchema>;

@@ -16,13 +16,18 @@ import {
   PREMIUM_MESSAGE_LIMIT,
 } from "../../lib/chat/quota";
 import type { SubscriptionStatus } from "@bondery/schemas";
-import { subscriptionStatusSchema } from "@bondery/schemas";
+import {
+  EXAMPLE_SUBSCRIPTION_STATUS_RESPONSE,
+  subscriptionStatusSchema,
+} from "@bondery/schemas";
 import { getPolarClient } from "../../lib/polar";
 
-const subscriptionStatusResponseSchema = z.object({
-  success: z.boolean(),
-  data: subscriptionStatusSchema,
-});
+const subscriptionStatusResponseSchema = z
+  .object({
+    success: z.boolean(),
+    data: subscriptionStatusSchema,
+  })
+  .meta({ example: EXAMPLE_SUBSCRIPTION_STATUS_RESPONSE });
 
 const POLAR_STATUSES: SubscriptionStatus["polarStatus"][] = [
   "incomplete",

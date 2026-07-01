@@ -3,7 +3,7 @@
 import { Tooltip } from "@mantine/core";
 import type { ReactNode } from "react";
 import type { ContactPreview } from "@bondery/schemas";
-import { PersonCard } from "../PersonCard";
+import { PersonCard } from "#nextjs/PersonCard/index.js";
 
 type PersonAvatarTooltipIdentity = ContactPreview & {
   middleName?: string | null;

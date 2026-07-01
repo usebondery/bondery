@@ -3,7 +3,7 @@ import { StrictMode } from "react";
 import ReactDOM from "react-dom/client";
 import "@mantine/core/styles.css";
 import "flag-icons/css/flag-icons.min.css";
-import "../../../../../packages/mantine-next/src/styles.css";
+import "@bondery/mantine-next/styles";
 import { MantineWrapper } from "../../shared/MantineWrapper";
 import WelcomeApp from "../../welcome/WelcomeApp";
 

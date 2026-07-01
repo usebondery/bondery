@@ -2,19 +2,19 @@ export {
   formatPlaceLabel,
   formatAddressLabel,
   abbreviateLocationCountry,
-} from "./address-utils";
-export type { PlaceLabelFields, AddressLabelFields } from "./address-utils";
+} from "#address/address-utils.js";
+export type { PlaceLabelFields, AddressLabelFields } from "#address/address-utils.js";
 
-export { parseMapSuggestionItem, parseMapSuggestions } from "./mapy-suggest";
-export type { MapSuggestionItem, MapSuggestionRegionalEntry } from "./mapy-suggest";
+export { parseMapSuggestionItem, parseMapSuggestions } from "#address/mapy-suggest.js";
+export type { MapSuggestionItem, MapSuggestionRegionalEntry } from "#address/mapy-suggest.js";
 
 export {
   mapSuggestionToContactAddress,
   buildManualContactAddress,
-} from "./suggestion-to-contact-address";
-export type { SuggestionToContactAddressOptions } from "./suggestion-to-contact-address";
+} from "#address/suggestion-to-contact-address.js";
+export type { SuggestionToContactAddressOptions } from "#address/suggestion-to-contact-address.js";
 
 export {
   GEOCODE_SUGGEST_DEBOUNCE_MS,
   GEOCODE_SUGGEST_MIN_QUERY_LENGTH,
-} from "./geocode-suggest-config";
+} from "#address/geocode-suggest-config.js";

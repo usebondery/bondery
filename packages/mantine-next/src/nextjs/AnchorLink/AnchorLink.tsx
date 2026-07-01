@@ -1,7 +1,7 @@
 "use client";
 
 import { Anchor, type AnchorProps } from "@mantine/core";
-import NextLink from "next/link";
+import NextLink from "#nextjs/NextLink.js";
 import type { ReactNode } from "react";
 
 export type AnchorLinkProps = Omit<

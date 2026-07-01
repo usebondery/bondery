@@ -8,6 +8,13 @@ import type { AppFastifyInstance, AppRoutePlugin } from "../../../lib/fastify-ty
 import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
 import { z } from "zod";
 import { GITHUB_REPO_URL } from "@bondery/helpers/globals/paths";
+import {
+  EXAMPLE_ACTIVE_USERS_RESPONSE,
+  EXAMPLE_FUNNEL_RESPONSE,
+  EXAMPLE_GITHUB_STARS_RESPONSE,
+  EXAMPLE_NPS_RESPONSE,
+  EXAMPLE_TOTAL_USERS_RESPONSE,
+} from "@bondery/schemas";
 import { applyOpenApiRouteMeta } from "../../../lib/openapi-route-meta";
 import { withOkResponse } from "../../../lib/openapi-route-responses";
 import { createAdminClient } from "../../../lib/supabase";
@@ -22,9 +29,11 @@ const activeUsersTimelinePointSchema = z.object({
   mau: z.number(),
 });
 
-const activeUsersResponseSchema = z.object({
-  timeline: z.array(activeUsersTimelinePointSchema),
-});
+const activeUsersResponseSchema = z
+  .object({
+    timeline: z.array(activeUsersTimelinePointSchema),
+  })
+  .meta({ example: EXAMPLE_ACTIVE_USERS_RESPONSE });
 
 const activeUsersQuerySchema = z.object({
   days: z.coerce.number().int().min(30).max(180).optional().default(90),
@@ -40,31 +49,39 @@ const funnelPeriodSchema = z.object({
   contactsToInteractionsPct: z.number(),
 });
 
-const funnelResponseSchema = z.object({
-  periods: z.array(funnelPeriodSchema),
-});
+const funnelResponseSchema = z
+  .object({
+    periods: z.array(funnelPeriodSchema),
+  })
+  .meta({ example: EXAMPLE_FUNNEL_RESPONSE });
 
-const npsResponseSchema = z.object({
-  score: z.number().nullable(),
-  responses: z.number(),
-  promoters: z.number(),
-  passives: z.number(),
-  detractors: z.number(),
-});
+const npsResponseSchema = z
+  .object({
+    score: z.number().nullable(),
+    responses: z.number(),
+    promoters: z.number(),
+    passives: z.number(),
+    detractors: z.number(),
+  })
+  .meta({ example: EXAMPLE_NPS_RESPONSE });
 
 const totalUsersPointSchema = z.object({
   date: z.string(),
   total: z.number(),
 });
 
-const totalUsersResponseSchema = z.object({
-  timeline: z.array(totalUsersPointSchema),
-});
+const totalUsersResponseSchema = z
+  .object({
+    timeline: z.array(totalUsersPointSchema),
+  })
+  .meta({ example: EXAMPLE_TOTAL_USERS_RESPONSE });
 
-const githubStarsResponseSchema = z.object({
-  stars: z.number(),
-  repo: z.string(),
-});
+const githubStarsResponseSchema = z
+  .object({
+    stars: z.number(),
+    repo: z.string(),
+  })
+  .meta({ example: EXAMPLE_GITHUB_STARS_RESPONSE });
 
 // ── Route plugin ─────────────────────────────────────────────────────────────
 

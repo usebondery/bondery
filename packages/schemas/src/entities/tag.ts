@@ -1,7 +1,7 @@
 import { z } from "zod";
-import { GROUP_LABEL_MAX_LENGTH } from "../constants/index";
-import { hexColorSchema } from "../primitives/index";
-import { contactPreviewSchema, contactSchema } from "./contact";
+import { GROUP_LABEL_MAX_LENGTH } from "#constants/index.js";
+import { hexColorSchema } from "#primitives/index.js";
+import { contactPreviewSchema, contactSchema } from "#entities/contact.js";
 import {
   entityIdentitySchema,
   entityNullableAuditSchema,
@@ -12,7 +12,14 @@ import {
   makePaginatedListResponseSchema,
   messageResponseSchema,
   personIdsSelectionSchema,
-} from "./_shared";
+} from "#entities/_shared.js";
+import {
+  EXAMPLE_CONTACT_TAG_LIST_RESPONSE,
+  EXAMPLE_TAG_MEMBERS_LIST_RESPONSE,
+  EXAMPLE_TAG_RESPONSE,
+  EXAMPLE_TAG_UPDATE_RESPONSE,
+  EXAMPLE_TAGS_LIST_RESPONSE,
+} from "#openapi/fixtures/responses.js";
 
 const tagLabelSchema = labelFieldSchema(GROUP_LABEL_MAX_LENGTH);
 
@@ -46,29 +53,39 @@ export const createTagInputSchema = z.object({ label: tagLabelSchema });
 
 export const updateTagSchema = createTagSchema.partial();
 
-export const tagResponseSchema = z.object({
-  tag: tagSchema,
-});
+export const tagResponseSchema = z
+  .object({
+    tag: tagSchema,
+  })
+  .meta({ example: EXAMPLE_TAG_RESPONSE });
 
-export const tagUpdateResponseSchema = messageResponseSchema.extend({
-  tag: tagSchema,
-});
+export const tagUpdateResponseSchema = messageResponseSchema
+  .extend({
+    tag: tagSchema,
+  })
+  .meta({ example: EXAMPLE_TAG_UPDATE_RESPONSE });
 
 export const tagContactsListResponseSchema = makePaginatedListResponseSchema(
   "contacts",
   contactSchema,
 );
 
-export const tagsListResponseSchema = makeListResponseSchema("tags", tagWithCountSchema);
+export const tagsListResponseSchema = makeListResponseSchema(
+  "tags",
+  tagWithCountSchema,
+).meta({ example: EXAMPLE_TAGS_LIST_RESPONSE });
 
 export const tagMembersListResponseSchema = makePaginatedListResponseSchema(
   "contacts",
   contactPreviewSchema,
-);
+).meta({ example: EXAMPLE_TAG_MEMBERS_LIST_RESPONSE });
 
 export const contactTagsResponseSchema = makeCollectionResponseSchema("tags", tagWithCountSchema);
 
-export const contactTagListResponseSchema = makeCollectionResponseSchema("tags", tagSchema);
+export const contactTagListResponseSchema = makeCollectionResponseSchema(
+  "tags",
+  tagSchema,
+).meta({ example: EXAMPLE_CONTACT_TAG_LIST_RESPONSE });
 
 export const tagMembershipRequestSchema = personIdsSelectionSchema;
 

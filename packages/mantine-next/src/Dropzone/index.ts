@@ -1,1 +1,1 @@
-export { DropzoneContent, type DropzoneContentProps } from "./DropzoneContent";
+export { DropzoneContent, type DropzoneContentProps } from "#Dropzone/DropzoneContent.js";

@@ -1,2 +1,2 @@
-export { hexColorSchema, type HexColor } from "./color";
-export { channelTypeSchema, type ChannelType } from "./channel";
+export { hexColorSchema, type HexColor } from "#primitives/color.js";
+export { channelTypeSchema, type ChannelType } from "#primitives/channel.js";

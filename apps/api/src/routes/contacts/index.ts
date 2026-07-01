@@ -55,6 +55,7 @@ import {
   deleteContactResponseSchema,
   deleteContactsRequestSchema,
   deleteContactsResponseSchema,
+  EXAMPLE_VCARD_EXPORT,
   mapAddressPinsResponseSchema,
   mapPinsResponseSchema,
 } from "@bondery/schemas";
@@ -1091,7 +1092,7 @@ export const contactRoutes: AppRoutePlugin = async (fastify) => {
         params: uuidParamSchema,
         querystring: avatarTransformQuerySchema,
         response: withOkResponse(
-          z.string().meta({ description: "vCard file content" }),
+          z.string().meta({ description: "vCard file content", example: EXAMPLE_VCARD_EXPORT }),
           "vCard export",
         ),
       } satisfies FastifyZodOpenApiSchema,

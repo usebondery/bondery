@@ -539,7 +539,16 @@ npx turbo build
 
 Shortcuts in root `package.json`: `npm run build` (all apps), `npm run build:api`, `build:webapp`, `build:website`.
 
-No manual `packages/*/dist` step is required — apps bundle workspace TypeScript source directly.
+`turbo build` runs `^build` first, so workspace packages compile to `packages/*/dist` automatically. Apps consume compiled `dist/` via `package.json` exports — no `transpilePackages` or src aliases required.
+
+### Local dev watch
+
+```bash
+npm run dev              # turbo watch dev — package tsc --watch + app dev servers
+npm run dev:core         # webapp + api + React Email preview
+```
+
+Cold start builds packages once (`dev` → `^build`); edits under `packages/*/src` rebuild `dist/` via each package's `dev` script (`tsc --watch`).
 
 ---
 

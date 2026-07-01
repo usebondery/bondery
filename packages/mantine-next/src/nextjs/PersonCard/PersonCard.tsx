@@ -3,7 +3,7 @@
 import { Avatar, Group, Paper, Stack, Text } from "@mantine/core";
 import { IconBriefcase, IconCompass } from "@tabler/icons-react";
 import type { ContactPreview } from "@bondery/schemas";
-import { getAvatarColorFromName } from "../../utils/avatarColor";
+import { getAvatarColorFromName } from "#utils/avatarColor.js";
 
 type PersonCardIdentity = ContactPreview & {
   middleName?: string | null;

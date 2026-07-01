@@ -1,101 +1,176 @@
 /**
- * Regenerates dual-export blocks in package.json files from export manifest.
- * Run after adding new subpath exports: node scripts/sync-package-exports.mjs
+ * Regenerates compiled-package exports in package.json files.
+ * Wildcard hybrid (Turborepo): types → src, default → dist.
+ * Scans src/ for directory barrels (index.ts/tsx) and adds explicit subpath entries.
+ *
+ * Run after adding new public subpaths: npm run sync-exports
  */
-import { readFileSync, writeFileSync } from "node:fs";
-import { dirname, join } from "node:path";
+import { readdir, readFile, stat, writeFile } from "node:fs/promises";
+import { dirname, join, posix, relative } from "node:path";
 import { fileURLToPath } from "node:url";
-import { dualExport, dualJsonExport } from "./lib/dual-exports.mjs";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 
-const manifests = {
-  "packages/schemas/package.json": {
-    ".": "./src/index.ts",
-    "./constants": "./src/constants/index.ts",
-    "./supabase.types": "./src/supabase.types.ts",
-    "./database": "./src/supabase.types.ts",
-    "./sync": "./src/sync/index.ts",
-    "./http": "./src/http/index.ts",
-  },
-  "packages/helpers/package.json": {
-    ".": "./src/index.ts",
-    "./globals": "./src/globals/index.ts",
-    "./globals/paths": "./src/globals/paths.ts",
-    "./globals/dev-ports": "./src/globals/dev-ports.ts",
-    "./platform": "./src/platform/index.ts",
-    "./name": "./src/name/index.ts",
-    "./address": "./src/address/index.ts",
-    "./date": "./src/date/index.ts",
-    "./text": "./src/text/index.ts",
-    "./version": "./src/version/index.ts",
-    "./interactions": "./src/interactions/index.ts",
-    "./env": "./src/env/index.ts",
-    "./locale": "./src/locale/index.ts",
-    "./socials": "./src/socials/index.ts",
-    "./phone": "./src/phone/index.ts",
-    "./contact": "./src/contact/index.ts",
-    "./geocode": "./src/geocode/index.ts",
-    "./emoji": "./src/emoji/index.ts",
-    "./notes": "./src/notes/index.ts",
-    "./forms": "./src/forms/index.ts",
-  },
-  "packages/vcard/package.json": {
-    ".": "./src/index.ts",
-  },
-  "packages/emails/package.json": {
-    ".": "./src/index.ts",
-  },
-  "packages/branding/package.json": {
-    ".": "./src/index.ts",
-    "./src": "./src/index.ts",
-    "./icons": "./src/react/index.ts",
-    "./react": "./src/react/index.ts",
-    "./react/src": "./src/react/index.ts",
-  },
-  "packages/mantine-next/package.json": {
-    ".": "./src/index.ts",
-    "./theme": "./src/theme.ts",
-    "./theme/src": "./src/theme.ts",
-  },
-  "packages/translations/package.json": {
-    ".": "./src/index.ts",
-    "./cs": "./src/cs.json",
-    "./en": "./src/en.json",
-  },
+const HASH_IMPORTS = {
+  "#*": [
+    "./dist/*",
+    "./dist/*.js",
+    "./dist/*/index.js",
+    "./src/*",
+    "./src/*.ts",
+    "./src/*.tsx",
+    "./src/*/index.ts",
+    "./src/*/index.tsx",
+  ],
 };
 
-for (const [relPath, manifest] of Object.entries(manifests)) {
-  const pkgPath = join(root, relPath);
-  const pkg = JSON.parse(readFileSync(pkgPath, "utf8"));
-  const exports = {};
+const HYBRID_ENTRY = (srcPath, distPath) => ({
+  types: srcPath,
+  default: distPath,
+});
 
-  for (const [subpath, src] of Object.entries(manifest)) {
-    exports[subpath] = src.endsWith(".json")
-      ? dualJsonExport(src)
-      : dualExport(src);
+const PACKAGE_CONFIGS = {
+  "packages/schemas/package.json": {
+    srcDir: "src",
+    extraExports: {
+      "./database": {
+        types: "./src/supabase.types.ts",
+        default: "./dist/supabase.types.js",
+      },
+    },
+  },
+  "packages/helpers/package.json": { srcDir: "src" },
+  "packages/vcard/package.json": { srcDir: "src" },
+  "packages/emails/package.json": { srcDir: "src" },
+  "packages/branding/package.json": { srcDir: "src" },
+  "packages/mantine-next/package.json": { srcDir: "src" },
+  "packages/translations/package.json": { srcDir: "src", jsonWildcard: true },
+};
+
+async function collectModuleSubpaths(srcDir) {
+  const modules = new Set();
+  const srcRoot = join(root, srcDir);
+
+  async function walk(dir, prefix = "") {
+    const entries = await readdir(dir, { withFileTypes: true });
+    for (const entry of entries) {
+      const rel = prefix ? `${prefix}/${entry.name}` : entry.name;
+      const full = join(dir, entry.name);
+      if (entry.isDirectory()) {
+        await walk(full, rel);
+        continue;
+      }
+      if (!/\.tsx?$/.test(entry.name)) continue;
+      if (entry.name === "index.ts" || entry.name === "index.tsx") continue;
+      const subpath = `./${rel.replace(/\\/g, "/").replace(/\.tsx?$/, "")}`;
+      modules.add(subpath);
+    }
   }
 
-  if (relPath === "packages/branding/package.json") {
+  await walk(srcRoot);
+  return [...modules].sort();
+}
+
+async function collectBarrelSubpaths(srcDir) {
+  const barrels = new Set();
+  const srcRoot = join(root, srcDir);
+
+  async function walk(dir, prefix = "") {
+    const entries = await readdir(dir, { withFileTypes: true });
+    for (const entry of entries) {
+      if (!entry.isDirectory()) continue;
+      const rel = prefix ? `${prefix}/${entry.name}` : entry.name;
+      const full = join(dir, entry.name);
+      const children = await readdir(full);
+      if (children.includes("index.ts") || children.includes("index.tsx")) {
+        barrels.add(`./${rel.replace(/\\/g, "/")}`);
+      }
+      await walk(full, rel);
+    }
+  }
+
+  await walk(srcRoot);
+  return [...barrels].sort();
+}
+
+function tsToDist(srcPath) {
+  return srcPath
+    .replace(/^\.\/src\//, "./dist/")
+    .replace(/\.tsx$/, ".js")
+    .replace(/\.ts$/, ".js");
+}
+
+async function buildExports(pkgRel, config) {
+  const pkgDir = dirname(join(root, pkgRel));
+  const srcRoot = join(pkgDir, config.srcDir);
+  const exports = {
+    ".": HYBRID_ENTRY("./src/index.ts", "./dist/index.js"),
+    "./*": HYBRID_ENTRY("./src/*.ts", "./dist/*.js"),
+  };
+
+  const srcDirRel = pkgRel.replace(/package\.json$/, config.srcDir);
+  const barrels = await collectBarrelSubpaths(srcDirRel);
+  for (const subpath of barrels) {
+    const indexTs = `${subpath}/index.ts`;
+    const indexTsx = `${subpath}/index.tsx`;
+    let srcPath = `./src${subpath.slice(1)}/index.ts`;
+    try {
+      await stat(join(pkgDir, "src", subpath.slice(2), "index.tsx"));
+      srcPath = `./src${subpath.slice(1)}/index.tsx`;
+    } catch {
+      // use index.ts
+    }
+    exports[subpath] = HYBRID_ENTRY(srcPath, tsToDist(srcPath));
+  }
+
+  const modules = await collectModuleSubpaths(srcDirRel);
+  for (const subpath of modules) {
+    const base = subpath.slice(2);
+    let srcPath = `./src/${base}.ts`;
+    try {
+      await stat(join(pkgDir, "src", `${base}.tsx`));
+      srcPath = `./src/${base}.tsx`;
+    } catch {
+      // use .ts
+    }
+    exports[subpath] = HYBRID_ENTRY(srcPath, tsToDist(srcPath));
+  }
+
+  if (config.extraExports) {
+    for (const [subpath, paths] of Object.entries(config.extraExports)) {
+      exports[subpath] = HYBRID_ENTRY(paths.types, paths.default);
+    }
+  }
+
+  if (config.jsonWildcard) {
+    exports["./*.json"] = { default: "./dist/*.json" };
+  }
+
+  if (pkgRel === "packages/branding/package.json") {
     exports["./icon-generator"] = {
       types: "./scripts/icon-generator.d.ts",
-      import: "./scripts/generate-icons.ts",
-      require: "./scripts/generate-icons.ts",
+      default: "./scripts/generate-icons.ts",
     };
   }
 
-  if (relPath === "packages/mantine-next/package.json") {
+  if (pkgRel === "packages/mantine-next/package.json") {
     exports["./styles"] = {
       types: "./src/styles.d.ts",
       style: "./src/styles.css",
-      import: "./src/styles.css",
-      require: "./src/styles.css",
+      default: "./src/styles.css",
     };
   }
 
-  pkg.exports = exports;
-  pkg.main = manifest["."];
-  pkg.types = manifest["."];
-  writeFileSync(pkgPath, `${JSON.stringify(pkg, null, 2)}\n`);
+  return exports;
+}
+
+for (const [relPath, config] of Object.entries(PACKAGE_CONFIGS)) {
+  const pkgPath = join(root, relPath);
+  const pkg = JSON.parse(await readFile(pkgPath, "utf8"));
+  pkg.exports = await buildExports(relPath, config);
+  pkg.imports = HASH_IMPORTS;
+  pkg.main = "./dist/index.js";
+  pkg.types = "./src/index.ts";
+  await writeFile(pkgPath, `${JSON.stringify(pkg, null, 2)}\n`);
   console.log(`Updated ${relPath}`);
 }

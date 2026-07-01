@@ -1,7 +1,7 @@
 "use client";
 
 import { ActionIcon, Center, type ActionIconProps } from "@mantine/core";
-import Link from "next/link";
+import Link from "#nextjs/NextLink.js";
 import {
   cloneElement,
   isValidElement,

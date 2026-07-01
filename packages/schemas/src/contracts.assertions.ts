@@ -1,21 +1,22 @@
-import { EXAMPLE_CONTACT_ID } from "./contact-id";
-import { createInteractionInputSchema, interactionParticipantSchema } from "./entities/activity";
-import { contactPreviewSchema, deleteContactsRequestSchema } from "./entities/contact";
+import { EXAMPLE_CONTACT_ID } from "#contact-id.js";
+import { EXAMPLE_MERGE_RECOMMENDATION, EXAMPLE_PAGINATION } from "#openapi/fixtures/index.js";
+import { createInteractionInputSchema, interactionParticipantSchema } from "#entities/activity.js";
+import { contactPreviewSchema, deleteContactsRequestSchema } from "#entities/contact.js";
 import {
   createGroupSchema,
   deleteGroupsRequestSchema,
   updateGroupSchema,
-} from "./entities/group";
-import { importantDateSheetSchema } from "./entities/important-date";
-import { instagramImportCommitRequestSchema } from "./entities/import";
+} from "#entities/group.js";
+import { importantDateSheetSchema } from "#entities/important-date.js";
+import { instagramImportCommitRequestSchema } from "#entities/import.js";
 import {
   mergeContactsRequestSchema,
   mergeRecommendationSchema,
   mergeRecommendationsResponseSchema,
-} from "./entities/merge";
-import { subscriptionStatusSchema } from "./entities/subscription";
-import { createTagSchema, deleteTagsRequestSchema, updateTagSchema } from "./entities/tag";
-import { paginationQuerySchema } from "./http/index";
+} from "#entities/merge.js";
+import { subscriptionStatusSchema } from "#entities/subscription.js";
+import { createTagSchema, deleteTagsRequestSchema, updateTagSchema } from "#entities/tag.js";
+import { paginationQuerySchema } from "#http/index.js";
 
 function assert(condition: unknown, message: string): asserts condition {
   if (!condition) {
@@ -162,81 +163,12 @@ function run() {
     "mergeContactsRequestSchema should parse conflict map",
   );
 
-  const mergeRecommendation = mergeRecommendationSchema.parse({
-    id: "mr-1",
-    leftPerson: {
-      id: "left",
-      userId: "user",
-      firstName: "Ada",
-      middleName: null,
-      lastName: "Lovelace",
-      headline: null,
-      location: null,
-      notes: null,
-      avatar: null,
-      lastInteraction: null,
-      lastInteractionActivityId: null,
-      keepFrequencyDays: null,
-      createdAt: "2026-01-01T00:00:00.000Z",
-      phones: [],
-      emails: [],
-      linkedin: null,
-      instagram: null,
-      whatsapp: null,
-      facebook: null,
-      website: null,
-      signal: null,
-      myself: null,
-      language: null,
-      timezone: null,
-      gisPoint: null,
-      latitude: null,
-      longitude: null,
-    },
-    rightPerson: {
-      id: "right",
-      userId: "user",
-      firstName: "Ada",
-      middleName: null,
-      lastName: "Lovelace",
-      headline: null,
-      location: null,
-      notes: null,
-      avatar: null,
-      lastInteraction: null,
-      lastInteractionActivityId: null,
-      keepFrequencyDays: null,
-      createdAt: "2026-01-01T00:00:00.000Z",
-      phones: [],
-      emails: [],
-      linkedin: null,
-      instagram: null,
-      whatsapp: null,
-      facebook: null,
-      website: null,
-      signal: null,
-      myself: null,
-      language: null,
-      timezone: null,
-      gisPoint: null,
-      latitude: null,
-      longitude: null,
-    },
-    score: 0.95,
-    reasons: ["fullName"],
-  });
+  const mergeRecommendation = mergeRecommendationSchema.parse(EXAMPLE_MERGE_RECOMMENDATION);
   assertEqual(mergeRecommendation.reasons[0], "fullName", "mergeRecommendationSchema should parse");
 
   const mergeResponse = mergeRecommendationsResponseSchema.parse({
     recommendations: [mergeRecommendation],
-    pagination: {
-      totalCount: 1,
-      hasMore: false,
-      limit: 50,
-      offset: 0,
-      sort: null,
-      search: null,
-    },
+    pagination: EXAMPLE_PAGINATION,
   });
   assertEqual(
     mergeResponse.recommendations.length,

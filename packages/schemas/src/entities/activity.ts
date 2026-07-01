@@ -3,7 +3,11 @@ import {
   entityAuditSchema,
   entityIdentitySchema,
   makePaginatedListResponseSchema,
-} from "./_shared";
+} from "#entities/_shared.js";
+import {
+  EXAMPLE_INTERACTION_RESPONSE,
+  EXAMPLE_INTERACTIONS_LIST_RESPONSE,
+} from "#openapi/fixtures/responses.js";
 
 export const interactionTypeSchema = z.enum([
   "Call",
@@ -69,7 +73,7 @@ export const updateInteractionInputSchema = z.object({
 export const interactionsListResponseSchema = makePaginatedListResponseSchema(
   "interactions",
   interactionSchema,
-);
+).meta({ example: EXAMPLE_INTERACTIONS_LIST_RESPONSE });
 
 const interactionDetailSchema = z.object({
   id: z.string(),
@@ -82,9 +86,11 @@ const interactionDetailSchema = z.object({
   participants: z.array(z.object({}).passthrough()),
 });
 
-export const interactionResponseSchema = z.object({
-  interaction: interactionDetailSchema,
-});
+export const interactionResponseSchema = z
+  .object({
+    interaction: interactionDetailSchema,
+  })
+  .meta({ example: EXAMPLE_INTERACTION_RESPONSE });
 
 export type InteractionType = z.infer<typeof interactionTypeSchema>;
 export type InteractionParticipant = z.infer<typeof interactionParticipantSchema>;

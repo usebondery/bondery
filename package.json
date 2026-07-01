@@ -8,8 +8,8 @@
     "packages/*"
   ],
   "scripts": {
-    "dev": "turbo dev",
-    "dev:core": "turbo dev --filter=webapp --filter=api --filter=@bondery/emails",
+    "dev": "turbo watch dev",
+    "dev:core": "turbo watch dev --filter=webapp --filter=api --filter=@bondery/emails#preview",
     "mobile": "turbo dev --filter=api --filter=mobile",
     "dev:extension": "turbo dev --filter=webapp --filter=api --filter=chrome-extension --filter=website",
     "dev:supabase": "turbo dev --filter=supabase-db",
@@ -30,6 +30,7 @@
     "check-openapi": "npm run generate-openapi -w apps/api && npm run check-openapi -w apps/api && npm run check-api-schema-patterns -w apps/api && npx redocly lint apps/api/openapi.yaml",
     "generate-openapi": "turbo generate-openapi --filter=api",
     "generate-types": "npm run gen-types -w apps/supabase-db && git add packages/schemas/src/supabase.types.ts",
+    "sync-exports": "node scripts/sync-package-exports.mjs",
     "prepare": "husky"
   },
   "devDependencies": {

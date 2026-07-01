@@ -2,7 +2,7 @@
 
 import { Avatar, AvatarGroup, Stack, Tooltip } from "@mantine/core";
 import type { ContactPreview } from "@bondery/schemas";
-import { PersonAvatar } from "../PersonAvatar";
+import { PersonAvatar } from "#nextjs/PersonAvatar/index.js";
 
 type PersonAvatarGroupIdentity = ContactPreview & {
   middleName?: string | null;

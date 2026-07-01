@@ -1,1 +1,1 @@
-export { TypePicker, type TypePickerOption } from "./TypePicker";
+export { TypePicker, type TypePickerOption } from "#TypePicker/TypePicker.js";

@@ -21,11 +21,14 @@ import {
 } from "@polar-sh/sdk/webhooks";
 import { applyOpenApiRouteMeta } from "../../lib/openapi-route-meta";
 import { withOkResponse } from "../../lib/openapi-route-responses";
+import { EXAMPLE_WEBHOOK_ACK_RESPONSE } from "@bondery/schemas";
 import { createAdminClient } from "../../lib/supabase";
 
-const webhookAckResponseSchema = z.object({
-  received: z.boolean(),
-});
+const webhookAckResponseSchema = z
+  .object({
+    received: z.boolean(),
+  })
+  .meta({ example: EXAMPLE_WEBHOOK_ACK_RESPONSE });
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 

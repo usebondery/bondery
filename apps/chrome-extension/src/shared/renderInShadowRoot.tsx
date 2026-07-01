@@ -23,7 +23,7 @@ import { MantineWrapper } from "./MantineWrapper";
 // automatically inject them into the Shadow Root instead of the host page.
 import "@mantine/core/styles.css";
 import "flag-icons/css/flag-icons.min.css";
-import "../../../../packages/mantine-next/src/styles.css";
+import "@bondery/mantine-next/styles";
 
 interface RenderInShadowRootOptions {
   name: string;

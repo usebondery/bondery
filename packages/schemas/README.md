@@ -65,6 +65,7 @@ OpenAPI documents wire **input** shapes. Zod transforms/refines still run at run
 
 ## Scripts
 
-- `npm run build` — compile to `dist/` for Node (API / Vercel); bundler apps still use `import` → `src/`
+- `npm run build` — compile to `dist/` (`tsc` with NodeNext; required before Node consumers run)
+- `npm run dev` — `tsc --watch` (orchestrated via root `turbo watch dev`)
 - `npm run check-types` — typecheck without emit
 - `npm run test:contracts` — boundary checks + schema contract assertions

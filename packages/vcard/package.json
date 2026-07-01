@@ -3,18 +3,41 @@
   "version": "1.4.2",
   "private": true,
   "type": "module",
-  "main": "./src/index.ts",
+  "main": "./dist/index.js",
   "types": "./src/index.ts",
   "exports": {
     ".": {
       "types": "./src/index.ts",
-      "node": "./dist/index.js",
-      "import": "./src/index.ts",
       "default": "./dist/index.js"
+    },
+    "./*": {
+      "types": "./src/*.ts",
+      "default": "./dist/*.js"
+    },
+    "./attachments": {
+      "types": "./src/attachments.ts",
+      "default": "./dist/attachments.js"
+    },
+    "./contact-mapping": {
+      "types": "./src/contact-mapping.ts",
+      "default": "./dist/contact-mapping.js"
+    },
+    "./model": {
+      "types": "./src/model.ts",
+      "default": "./dist/model.js"
+    },
+    "./parse": {
+      "types": "./src/parse.ts",
+      "default": "./dist/parse.js"
+    },
+    "./serialize": {
+      "types": "./src/serialize.ts",
+      "default": "./dist/serialize.js"
     }
   },
   "scripts": {
-    "build": "rimraf dist && tsc && node ../../scripts/fix-package-esm-imports.mjs",
+    "build": "rimraf dist && tsc",
+    "dev": "tsc --watch --preserveWatchOutput",
     "check-types": "tsc --noEmit"
   },
   "dependencies": {
@@ -24,6 +47,19 @@
   "devDependencies": {
     "@types/node": "^25",
     "rimraf": "^6.0.1",
+    "@bondery/typescript-config": "*",
     "typescript": "^6"
+  },
+  "imports": {
+    "#*": [
+      "./dist/*",
+      "./dist/*.js",
+      "./dist/*/index.js",
+      "./src/*",
+      "./src/*.ts",
+      "./src/*.tsx",
+      "./src/*/index.ts",
+      "./src/*/index.tsx"
+    ]
   }
 }

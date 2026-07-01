@@ -4,22 +4,23 @@
   "description": "Bondery internationalization translations",
   "private": true,
   "type": "module",
-  "main": "./src/index.ts",
+  "main": "./dist/index.js",
   "types": "./src/index.ts",
   "exports": {
     ".": {
       "types": "./src/index.ts",
-      "node": "./dist/index.js",
-      "import": "./src/index.ts",
       "default": "./dist/index.js"
     },
-    "./cs": {
-      "default": "./dist/cs.json",
-      "import": "./src/cs.json"
+    "./*": {
+      "types": "./src/*.ts",
+      "default": "./dist/*.js"
     },
-    "./en": {
-      "default": "./dist/en.json",
-      "import": "./src/en.json"
+    "./i18n": {
+      "types": "./src/i18n.ts",
+      "default": "./dist/i18n.js"
+    },
+    "./*.json": {
+      "default": "./dist/*.json"
     }
   },
   "files": [
@@ -27,11 +28,25 @@
     "dist"
   ],
   "scripts": {
-    "build": "rimraf dist && tsc && node scripts/copy-json.mjs && node ../../scripts/fix-package-esm-imports.mjs",
+    "build": "rimraf dist && tsc && node scripts/copy-json.mjs",
+    "dev": "tsc --watch --preserveWatchOutput",
     "check-types": "tsc --noEmit"
   },
   "devDependencies": {
     "rimraf": "^6.0.1",
+    "@bondery/typescript-config": "*",
     "typescript": "^6"
+  },
+  "imports": {
+    "#*": [
+      "./dist/*",
+      "./dist/*.js",
+      "./dist/*/index.js",
+      "./src/*",
+      "./src/*.ts",
+      "./src/*.tsx",
+      "./src/*/index.ts",
+      "./src/*/index.tsx"
+    ]
   }
 }

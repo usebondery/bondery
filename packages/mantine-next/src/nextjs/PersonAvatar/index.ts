@@ -1,1 +1,1 @@
-export { PersonAvatar } from "./PersonAvatar";
+export { PersonAvatar } from "#nextjs/PersonAvatar/PersonAvatar.js";

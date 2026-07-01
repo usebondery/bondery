@@ -154,6 +154,21 @@ Run `npm run gen-types` after schema changes to refresh `packages/schemas/src/su
 
 ## Shared packages
 
+All compilable packages extend `@bondery/typescript-config` (NodeNext, `declaration` + `declarationMap`). Internal imports use `#*` subpath imports with `.js` extensions; external consumers use `package.json` `exports` (`default` → `dist/`).
+
+| Package | Role |
+|---------|------|
+| `packages/typescript-config` | Shared `base.json`, `react-library.json`, `nextjs.json` tsconfigs |
+| `packages/schemas` | Zod schemas, types, Supabase DB types, sync protocol |
+| `packages/translations` | User-facing strings (EN, CS) |
+| `packages/helpers` | Shared utilities, `API_ROUTES`, dev port constants |
+| `packages/emails` | React Email templates (`preview` for dev server, `dev` for `tsc --watch`) |
+| `packages/mantine-next` | Reusable Mantine components for Next.js apps |
+| `packages/branding` | Logos, icon assets, React icon components (`@bondery/branding/react`) |
+| `packages/vcard` | vCard generation for API export and share flows |
+
+**Build:** `rimraf dist && tsc` per package. **Exports:** run `npm run sync-exports` after adding public subpaths. **Go-to-definition:** `declarationMap` maps from `dist/*.d.ts` back to `src/`.
+
 ### `packages/schemas`
 
 Single source of truth for Zod schemas, inferred TypeScript types, Supabase database types, and the mobile sync protocol (`src/sync/`). Import domain types from here — do not redefine them in apps.

@@ -1,7 +1,7 @@
 import { z } from "zod";
-import { GROUP_LABEL_MAX_LENGTH } from "../constants/index";
-import { hexColorSchema } from "../primitives/index";
-import { contactPreviewSchema, contactSchema, contactsFilterSchema } from "./contact";
+import { GROUP_LABEL_MAX_LENGTH } from "#constants/index.js";
+import { hexColorSchema } from "#primitives/index.js";
+import { contactPreviewSchema, contactSchema, contactsFilterSchema } from "#entities/contact.js";
 import {
   entityIdentitySchema,
   entityNullableAuditSchema,
@@ -13,7 +13,15 @@ import {
   makePaginatedListResponseSchema,
   messageResponseSchema,
   personIdsSelectionSchema,
-} from "./_shared";
+} from "#entities/_shared.js";
+import {
+  EXAMPLE_ADD_CONTACTS_TO_GROUP_RESPONSE,
+  EXAMPLE_CONTACT_GROUPS_RESPONSE,
+  EXAMPLE_GROUP_CONTACTS_LIST_RESPONSE,
+  EXAMPLE_GROUP_RESPONSE,
+  EXAMPLE_GROUPS_LIST_RESPONSE,
+  EXAMPLE_REMOVE_GROUP_MEMBERS_RESPONSE,
+} from "#openapi/fixtures/responses.js";
 
 const groupEditableFieldsSchema = z.object({
   label: labelFieldSchema(GROUP_LABEL_MAX_LENGTH),
@@ -52,10 +60,12 @@ export const addContactsToGroupRequestSchema = z.union([
   }),
 ]);
 
-export const addContactsToGroupResponseSchema = messageResponseSchema.extend({
-  addedCount: z.number(),
-  skippedCount: z.number(),
-});
+export const addContactsToGroupResponseSchema = messageResponseSchema
+  .extend({
+    addedCount: z.number(),
+    skippedCount: z.number(),
+  })
+  .meta({ example: EXAMPLE_ADD_CONTACTS_TO_GROUP_RESPONSE });
 
 export const removeGroupMembersRequestSchema = z.union([
   personIdsSelectionSchema,
@@ -65,11 +75,16 @@ export const removeGroupMembersRequestSchema = z.union([
   }),
 ]);
 
-export const removeGroupMembersResponseSchema = messageResponseSchema.extend({
-  removedCount: z.number().optional(),
-});
+export const removeGroupMembersResponseSchema = messageResponseSchema
+  .extend({
+    removedCount: z.number().optional(),
+  })
+  .meta({ example: EXAMPLE_REMOVE_GROUP_MEMBERS_RESPONSE });
 
-export const groupsListResponseSchema = makeListResponseSchema("groups", groupWithCountSchema);
+export const groupsListResponseSchema = makeListResponseSchema(
+  "groups",
+  groupWithCountSchema,
+).meta({ example: EXAMPLE_GROUPS_LIST_RESPONSE });
 
 export const groupMembersListResponseSchema = makePaginatedListResponseSchema(
   "contacts",
@@ -79,21 +94,25 @@ export const groupMembersListResponseSchema = makePaginatedListResponseSchema(
 export const groupContactsListResponseSchema = makePaginatedListResponseSchema(
   "contacts",
   contactSchema,
-).extend({
-  group: z.object({
-    id: z.string(),
-    label: z.string(),
-  }),
-});
+)
+  .extend({
+    group: z.object({
+      id: z.string(),
+      label: z.string(),
+    }),
+  })
+  .meta({ example: EXAMPLE_GROUP_CONTACTS_LIST_RESPONSE });
 
-export const groupResponseSchema = z.object({
-  group: groupSchema,
-});
+export const groupResponseSchema = z
+  .object({
+    group: groupSchema,
+  })
+  .meta({ example: EXAMPLE_GROUP_RESPONSE });
 
 export const contactGroupsResponseSchema = makeCollectionResponseSchema(
   "groups",
   groupWithCountSchema,
-);
+).meta({ example: EXAMPLE_CONTACT_GROUPS_RESPONSE });
 
 export const deleteGroupsRequestSchema = idsRequestSchema;
 

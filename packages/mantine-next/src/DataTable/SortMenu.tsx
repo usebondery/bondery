@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Button, Menu, MenuDropdown, MenuItem, MenuTarget } from "@mantine/core";
 import { IconArrowsSort } from "@tabler/icons-react";
-import type { SortMenuLabels, SortOption } from "./types";
+import type { SortMenuLabels, SortOption } from "#DataTable/types.js";
 
 export interface SortMenuProps<TSortKey extends string> {
   /** Available sort options */

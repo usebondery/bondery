@@ -6,7 +6,7 @@ import type {
   VCardProperty,
   VCardSerializeOptions,
   VCardTextValue,
-} from "./model";
+} from "#model.js";
 
 const UTF8_ENCODER = new TextEncoder();
 

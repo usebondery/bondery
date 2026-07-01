@@ -156,16 +156,9 @@ npx turbo build --filter=chrome-extension
 
 # Or shortcuts: npm run build:api, build:webapp, build:website
 
-# Packages — optional emit of dist/ for types only (not required for app builds)
-npm run build -w @bondery/schemas
-npm run build -w @bondery/helpers
-npm run build -w @bondery/emails
-npm run build -w @bondery/vcard
-npm run build -w @bondery/branding
-
-# Packages without build — verify via consumers
-npm run check-types -w packages/mantine-next
-npm run check-types -w packages/translations
+# Packages — compiled workspace libraries (required before app builds)
+npx turbo build --filter=./packages/*
+# Or per package: npm run build -w @bondery/schemas
 
 # Mobile — no build script; use:
 npm run check-types -w apps/mobile
@@ -182,7 +175,7 @@ npm run build                          # turbo build (all apps)
 | `apps/website` | `npx turbo build --filter=website` | `.env.production.local` |
 | `apps/chrome-extension` | `npx turbo build --filter=chrome-extension` | extension env files |
 | `apps/mobile` | `check-types` + `expo-doctor` | — |
-| `packages/*` | `npm run build -w @bondery/<name>` if you need `dist/` | — |
+| `packages/*` | `npx turbo build --filter=./packages/*` or `npm run build -w @bondery/<name>` | — |
 
 **Webapp note:** `check-types` also runs `check-api-fetch:strict` and `check-query-patterns:strict` — run it even when build passes.
 

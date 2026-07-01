@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { createContactApiInputSchema, updateContactInputSchema } from "../entities/contact";
+import { createContactApiInputSchema, updateContactInputSchema } from "#entities/contact.js";
 
 export const syncMutationTypeSchema = z.enum([
   "contact.create",

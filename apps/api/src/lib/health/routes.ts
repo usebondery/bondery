@@ -7,6 +7,7 @@ import {
 } from "@bondery/helpers";
 import { HEALTH_TIER } from "../rate-limit";
 import { withOkResponse } from "../openapi-route-responses";
+import { EXAMPLE_HEALTH_UNHEALTHY_RESPONSE } from "@bondery/schemas";
 import { getHealthReport } from "./check";
 import { healthReportSchema, livenessStatusSchema } from "./schemas";
 
@@ -60,6 +61,7 @@ export function registerHealthRoutes(fastify: AppFastifyInstance): void {
             content: {
               "application/json": {
                 schema: healthReportSchema,
+                example: EXAMPLE_HEALTH_UNHEALTHY_RESPONSE,
               },
             },
           },

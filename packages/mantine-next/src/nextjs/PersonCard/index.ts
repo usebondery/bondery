@@ -1,1 +1,1 @@
-export { PersonCard, type PersonCardProps } from "./PersonCard";
+export { PersonCard, type PersonCardProps } from "#nextjs/PersonCard/PersonCard.js";
