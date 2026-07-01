@@ -95,7 +95,7 @@ function GroupCardShell({
   highlightColor?: HighlightColor;
   onClick: (e: MouseEvent) => void;
   className: string;
-  sectionBg: string;
+  sectionBg?: string;
   sectionContent: ReactNode;
   sectionOverlay?: ReactNode;
   label: string;
