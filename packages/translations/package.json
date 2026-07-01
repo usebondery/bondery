@@ -9,17 +9,17 @@
   "exports": {
     ".": {
       "types": "./src/index.ts",
-      "import": "./src/index.ts",
       "node": "./dist/index.js",
+      "import": "./src/index.ts",
       "default": "./dist/index.js"
     },
     "./cs": {
-      "import": "./src/cs.json",
-      "default": "./dist/cs.json"
+      "default": "./dist/cs.json",
+      "import": "./src/cs.json"
     },
     "./en": {
-      "import": "./src/en.json",
-      "default": "./dist/en.json"
+      "default": "./dist/en.json",
+      "import": "./src/en.json"
     }
   },
   "files": [

@@ -5,8 +5,11 @@ export function dualExport(srcPath) {
     .replace(/\.ts$/, ".js");
   return {
     types: srcPath,
-    import: srcPath,
+    // Key order matters: Node ESM matches export keys in insertion order. `node`
+    // must precede `import` so runtime resolves dist; bundlers skip `node` and
+    // still hit `import` → src for JIT (Next transpilePackages, Metro, Vite).
     node: nodePath,
+    import: srcPath,
     default: nodePath,
   };
 }
@@ -14,7 +17,7 @@ export function dualExport(srcPath) {
 export function dualJsonExport(srcPath) {
   const nodePath = srcPath.replace(/^\.\/src\//, "./dist/");
   return {
-    import: srcPath,
     default: nodePath,
+    import: srcPath,
   };
 }

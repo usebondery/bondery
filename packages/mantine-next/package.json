@@ -8,20 +8,20 @@
   "exports": {
     ".": {
       "types": "./src/index.ts",
-      "import": "./src/index.ts",
       "node": "./dist/index.js",
+      "import": "./src/index.ts",
       "default": "./dist/index.js"
     },
     "./theme": {
       "types": "./src/theme.ts",
-      "import": "./src/theme.ts",
       "node": "./dist/theme.js",
+      "import": "./src/theme.ts",
       "default": "./dist/theme.js"
     },
     "./theme/src": {
       "types": "./src/theme.ts",
-      "import": "./src/theme.ts",
       "node": "./dist/theme.js",
+      "import": "./src/theme.ts",
       "default": "./dist/theme.js"
     },
     "./styles": {

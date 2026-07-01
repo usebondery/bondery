@@ -9,122 +9,122 @@
   "exports": {
     ".": {
       "types": "./src/index.ts",
-      "import": "./src/index.ts",
       "node": "./dist/index.js",
+      "import": "./src/index.ts",
       "default": "./dist/index.js"
     },
     "./globals": {
       "types": "./src/globals/index.ts",
-      "import": "./src/globals/index.ts",
       "node": "./dist/globals/index.js",
+      "import": "./src/globals/index.ts",
       "default": "./dist/globals/index.js"
     },
     "./globals/paths": {
       "types": "./src/globals/paths.ts",
-      "import": "./src/globals/paths.ts",
       "node": "./dist/globals/paths.js",
+      "import": "./src/globals/paths.ts",
       "default": "./dist/globals/paths.js"
     },
     "./globals/dev-ports": {
       "types": "./src/globals/dev-ports.ts",
-      "import": "./src/globals/dev-ports.ts",
       "node": "./dist/globals/dev-ports.js",
+      "import": "./src/globals/dev-ports.ts",
       "default": "./dist/globals/dev-ports.js"
     },
     "./platform": {
       "types": "./src/platform/index.ts",
-      "import": "./src/platform/index.ts",
       "node": "./dist/platform/index.js",
+      "import": "./src/platform/index.ts",
       "default": "./dist/platform/index.js"
     },
     "./name": {
       "types": "./src/name/index.ts",
-      "import": "./src/name/index.ts",
       "node": "./dist/name/index.js",
+      "import": "./src/name/index.ts",
       "default": "./dist/name/index.js"
     },
     "./address": {
       "types": "./src/address/index.ts",
-      "import": "./src/address/index.ts",
       "node": "./dist/address/index.js",
+      "import": "./src/address/index.ts",
       "default": "./dist/address/index.js"
     },
     "./date": {
       "types": "./src/date/index.ts",
-      "import": "./src/date/index.ts",
       "node": "./dist/date/index.js",
+      "import": "./src/date/index.ts",
       "default": "./dist/date/index.js"
     },
     "./text": {
       "types": "./src/text/index.ts",
-      "import": "./src/text/index.ts",
       "node": "./dist/text/index.js",
+      "import": "./src/text/index.ts",
       "default": "./dist/text/index.js"
     },
     "./version": {
       "types": "./src/version/index.ts",
-      "import": "./src/version/index.ts",
       "node": "./dist/version/index.js",
+      "import": "./src/version/index.ts",
       "default": "./dist/version/index.js"
     },
     "./interactions": {
       "types": "./src/interactions/index.ts",
-      "import": "./src/interactions/index.ts",
       "node": "./dist/interactions/index.js",
+      "import": "./src/interactions/index.ts",
       "default": "./dist/interactions/index.js"
     },
     "./env": {
       "types": "./src/env/index.ts",
-      "import": "./src/env/index.ts",
       "node": "./dist/env/index.js",
+      "import": "./src/env/index.ts",
       "default": "./dist/env/index.js"
     },
     "./locale": {
       "types": "./src/locale/index.ts",
-      "import": "./src/locale/index.ts",
       "node": "./dist/locale/index.js",
+      "import": "./src/locale/index.ts",
       "default": "./dist/locale/index.js"
     },
     "./socials": {
       "types": "./src/socials/index.ts",
-      "import": "./src/socials/index.ts",
       "node": "./dist/socials/index.js",
+      "import": "./src/socials/index.ts",
       "default": "./dist/socials/index.js"
     },
     "./phone": {
       "types": "./src/phone/index.ts",
-      "import": "./src/phone/index.ts",
       "node": "./dist/phone/index.js",
+      "import": "./src/phone/index.ts",
       "default": "./dist/phone/index.js"
     },
     "./contact": {
       "types": "./src/contact/index.ts",
-      "import": "./src/contact/index.ts",
       "node": "./dist/contact/index.js",
+      "import": "./src/contact/index.ts",
       "default": "./dist/contact/index.js"
     },
     "./geocode": {
       "types": "./src/geocode/index.ts",
-      "import": "./src/geocode/index.ts",
       "node": "./dist/geocode/index.js",
+      "import": "./src/geocode/index.ts",
       "default": "./dist/geocode/index.js"
     },
     "./emoji": {
       "types": "./src/emoji/index.ts",
-      "import": "./src/emoji/index.ts",
       "node": "./dist/emoji/index.js",
+      "import": "./src/emoji/index.ts",
       "default": "./dist/emoji/index.js"
     },
     "./notes": {
       "types": "./src/notes/index.ts",
-      "import": "./src/notes/index.ts",
       "node": "./dist/notes/index.js",
+      "import": "./src/notes/index.ts",
       "default": "./dist/notes/index.js"
     },
     "./forms": {
       "types": "./src/forms/index.ts",
-      "import": "./src/forms/index.ts",
       "node": "./dist/forms/index.js",
+      "import": "./src/forms/index.ts",
       "default": "./dist/forms/index.js"
     }
   },
