@@ -8,43 +8,43 @@
   "exports": {
     ".": {
       "types": "./src/index.ts",
-      "import": "./src/index.ts",
+      "import": "./dist/index.js",
       "node": "./dist/index.js",
       "default": "./dist/index.js"
     },
     "./*": {
       "types": "./src/*.ts",
-      "import": "./src/*.ts",
+      "import": "./dist/*.js",
       "node": "./dist/*.js",
       "default": "./dist/*.js"
     },
     "./attachments": {
       "types": "./src/attachments.ts",
-      "import": "./src/attachments.ts",
+      "import": "./dist/attachments.js",
       "node": "./dist/attachments.js",
       "default": "./dist/attachments.js"
     },
     "./contact-mapping": {
       "types": "./src/contact-mapping.ts",
-      "import": "./src/contact-mapping.ts",
+      "import": "./dist/contact-mapping.js",
       "node": "./dist/contact-mapping.js",
       "default": "./dist/contact-mapping.js"
     },
     "./model": {
       "types": "./src/model.ts",
-      "import": "./src/model.ts",
+      "import": "./dist/model.js",
       "node": "./dist/model.js",
       "default": "./dist/model.js"
     },
     "./parse": {
       "types": "./src/parse.ts",
-      "import": "./src/parse.ts",
+      "import": "./dist/parse.js",
       "node": "./dist/parse.js",
       "default": "./dist/parse.js"
     },
     "./serialize": {
       "types": "./src/serialize.ts",
-      "import": "./src/serialize.ts",
+      "import": "./dist/serialize.js",
       "node": "./dist/serialize.js",
       "default": "./dist/serialize.js"
     }

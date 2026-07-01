@@ -1,6 +1,6 @@
 /**
  * Regenerates compiled-package exports in package.json files.
- * Wildcard hybrid: types/import → src (bundlers), node/default → dist (Node).
+ * types → src (editor IntelliSense); import/node/default → dist (Node + bundlers).
  * Scans src/ for directory barrels (index.ts/tsx) and adds explicit subpath entries.
  *
  * Run after adding new public subpaths: npm run sync-exports
@@ -24,9 +24,9 @@ const HASH_IMPORTS = {
   ],
 };
 
-const HYBRID_ENTRY = (srcPath, distPath) => ({
+const COMPILED_ENTRY = (srcPath, distPath) => ({
   types: srcPath,
-  import: srcPath,
+  import: distPath,
   node: distPath,
   default: distPath,
 });
@@ -106,8 +106,8 @@ async function buildExports(pkgRel, config) {
   const pkgDir = dirname(join(root, pkgRel));
   const srcRoot = join(pkgDir, config.srcDir);
   const exports = {
-    ".": HYBRID_ENTRY("./src/index.ts", "./dist/index.js"),
-    "./*": HYBRID_ENTRY("./src/*.ts", "./dist/*.js"),
+    ".": COMPILED_ENTRY("./src/index.ts", "./dist/index.js"),
+    "./*": COMPILED_ENTRY("./src/*.ts", "./dist/*.js"),
   };
 
   const srcDirRel = pkgRel.replace(/package\.json$/, config.srcDir);
@@ -122,7 +122,7 @@ async function buildExports(pkgRel, config) {
     } catch {
       // use index.ts
     }
-    exports[subpath] = HYBRID_ENTRY(srcPath, tsToDist(srcPath));
+    exports[subpath] = COMPILED_ENTRY(srcPath, tsToDist(srcPath));
   }
 
   const modules = await collectModuleSubpaths(srcDirRel);
@@ -135,12 +135,12 @@ async function buildExports(pkgRel, config) {
     } catch {
       // use .ts
     }
-    exports[subpath] = HYBRID_ENTRY(srcPath, tsToDist(srcPath));
+    exports[subpath] = COMPILED_ENTRY(srcPath, tsToDist(srcPath));
   }
 
   if (config.extraExports) {
     for (const [subpath, paths] of Object.entries(config.extraExports)) {
-      exports[subpath] = HYBRID_ENTRY(paths.types, paths.default);
+      exports[subpath] = COMPILED_ENTRY(paths.types, paths.default);
     }
   }
 
