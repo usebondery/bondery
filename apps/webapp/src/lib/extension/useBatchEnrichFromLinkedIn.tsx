@@ -4,7 +4,7 @@ import { useCallback, useSyncExternalStore } from "react";
 import { notifications } from "@mantine/notifications";
 import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
-import { clientApiFetch } from "@/lib/api/client";
+import { clientApiFetch, applyTransportResponsePolicy } from "@/lib/api/client";
 import { checkExtensionAuth } from "@/lib/extension/checkExtensionAuth";
 import {
   errorNotificationTemplate,
@@ -174,6 +174,7 @@ export function useBatchEnrichFromLinkedIn() {
         );
 
         if (!batchRes.ok) {
+          applyTransportResponsePolicy(batchRes);
           const description = await getResponseErrorDescription(
             batchRes,
             t("ErrorDescription"),
@@ -293,6 +294,7 @@ export function useBatchEnrichFromLinkedIn() {
     });
 
     if (!initRes.ok) {
+      applyTransportResponsePolicy(initRes);
       const description = await getResponseErrorDescription(
         initRes,
         t("ErrorDescription"),
@@ -432,6 +434,7 @@ export function useBatchEnrichFromLinkedIn() {
       });
 
       if (!initRes.ok) {
+        applyTransportResponsePolicy(initRes);
         const description = await getResponseErrorDescription(
           initRes,
           t("ErrorDescription"),

@@ -141,6 +141,7 @@ function toPreviewContact(contact: LinkedInPreparedContact): Contact {
     lastInteractionActivityId: null,
     keepFrequencyDays: null,
     createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
     phones: [],
     emails: [],
     linkedin: contact.linkedinUrl,
@@ -197,7 +198,7 @@ export function LinkedInImportModal({
     key: keyof LinkedInImportTranslations,
     values?: Record<string, string | number>,
   ) => string;
-  modalId?: string;
+  modalId: string;
   onSuccess?: (stats: {
     imported: number;
     updated: number;
@@ -274,21 +275,12 @@ export function LinkedInImportModal({
   );
 
   const closeModal = () => {
-    if (modalId) {
-      modals.close(modalId);
-      return;
-    }
-
-    modals.closeAll();
+    modals.close(modalId);
   };
 
   useModalBlocking(modalId, isParsing || isImporting || step === "processing");
 
   useEffect(() => {
-    if (!modalId) {
-      return;
-    }
-
     modals.updateModal({
       modalId,
       size:
@@ -463,11 +455,7 @@ export function LinkedInImportModal({
         }),
       );
 
-      if (modalId) {
-        modals.close(modalId);
-      } else {
-        modals.closeAll();
-      }
+      modals.close(modalId);
 
       if (onSuccess) {
         onSuccess({

@@ -7,6 +7,7 @@ import {
   EXAMPLE_MERGE_RECOMMENDATIONS_RESPONSE,
   EXAMPLE_REFRESH_MERGE_RECOMMENDATIONS_RESPONSE,
 } from "#openapi/fixtures/schema-examples.js";
+import { EXAMPLE_MERGE_CONTACTS_REQUEST } from "#openapi/fixtures/requests.js";
 
 export const mergeConflictChoiceSchema = z.enum(["left", "right"]);
 
@@ -49,7 +50,7 @@ export const mergeContactsRequestSchema = z.object({
   leftPersonId: z.string(),
   rightPersonId: z.string(),
   conflictResolutions: z.partialRecord(mergeConflictFieldSchema, mergeConflictChoiceSchema).optional(),
-});
+}).meta({ example: EXAMPLE_MERGE_CONTACTS_REQUEST });
 
 export const mergeContactsResponseSchema = z
   .object({

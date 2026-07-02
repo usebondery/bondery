@@ -1,7 +1,7 @@
 import type {
   Contact,
   CreateContactInput,
-  ImportantDate,
+  ReplaceImportantDatesInput,
   UpdateContactInput,
 } from "@bondery/schemas";
 import { submitSyncMutation } from "../sync/mutation-service";
@@ -87,7 +87,7 @@ export const contactsDomain = {
     }
   },
 
-  replaceImportantDates(personId: string, dates: ImportantDate[]): Contact {
+  replaceImportantDates(personId: string, dates: ReplaceImportantDatesInput): Contact {
     return contactsDomain.update(personId, { importantDates: dates });
   },
 

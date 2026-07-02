@@ -101,9 +101,9 @@ export function InteractionsClient({
 
           return {
             id: participantId,
-            firstName: participant.firstName || participant.first_name || "Unknown",
+            firstName: participant.firstName || "Unknown",
             middleName: participant.middleName || participant.middle_name || null,
-            lastName: participant.lastName || participant.last_name || null,
+            lastName: participant.lastName || null,
             avatar: participant.avatar || null,
           } as Contact;
         })

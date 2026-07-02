@@ -195,6 +195,39 @@ export const groupRoutes: AppRoutePlugin = async (fastify) => {
   );
 
   /**
+   * DELETE /api/groups - Delete multiple groups
+   */
+  fastify.delete(
+    "/",
+    {
+      schema: {
+        description: "Delete multiple groups by ID.",
+        body: idsRequestBodySchema,
+        response: withOkResponse(
+          messageResponseSchema,
+          "Groups deleted successfully",
+        ),
+      } satisfies FastifyZodOpenApiSchema,
+    },
+    async (request, reply) => {
+      const { client, user } = getAuth(request);
+      const { ids } = request.body;
+
+      const { error } = await client
+        .from("groups")
+        .delete()
+        .eq("user_id", user.id)
+        .in("id", ids);
+
+      if (error) {
+        return reply.status(500).send({ error: error.message });
+      }
+
+      return { message: "Groups deleted successfully" };
+    },
+  );
+
+  /**
    * GET /api/groups/:id - Get a single group
    */
   fastify.get(
@@ -268,39 +301,6 @@ export const groupRoutes: AppRoutePlugin = async (fastify) => {
       }
 
       return { group };
-    },
-  );
-
-  /**
-   * DELETE /api/groups - Delete multiple groups
-   */
-  fastify.delete(
-    "/",
-    {
-      schema: {
-        description: "Delete multiple groups by ID.",
-        body: idsRequestBodySchema,
-        response: withOkResponse(
-          messageResponseSchema,
-          "Groups deleted successfully",
-        ),
-      } satisfies FastifyZodOpenApiSchema,
-    },
-    async (request, reply) => {
-      const { client, user } = getAuth(request);
-      const { ids } = request.body;
-
-      const { error } = await client
-        .from("groups")
-        .delete()
-        .eq("user_id", user.id)
-        .in("id", ids);
-
-      if (error) {
-        return reply.status(500).send({ error: error.message });
-      }
-
-      return { message: "Groups deleted successfully" };
     },
   );
 

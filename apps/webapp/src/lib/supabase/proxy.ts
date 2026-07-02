@@ -52,21 +52,14 @@ export async function updateSession(request: NextRequest, requestHeaders?: Heade
 
   const user = data?.claims;
 
-  // 1. If user is logged in and visiting login page, redirect to app
-  if (user && request.nextUrl.pathname.startsWith(WEBAPP_ROUTES.LOGIN)) {
-    const url = request.nextUrl.clone();
-    url.pathname = WEBAPP_ROUTES.DEFAULT_PAGE_AFTER_LOGIN;
-    return NextResponse.redirect(url);
-  }
-
-  // 2. If no user and trying to access protected routes (/app/*), redirect to login
+  // 1. If no user and trying to access protected routes (/app/*), redirect to login
   if (!user && request.nextUrl.pathname.startsWith(WEBAPP_ROUTES.APP_GROUP)) {
     const url = request.nextUrl.clone();
     url.pathname = WEBAPP_ROUTES.LOGIN;
     return NextResponse.redirect(url);
   }
 
-  // 3. Redirect /app to the default app page
+  // 2. Redirect /app to the default app page
   if (user && request.nextUrl.pathname === WEBAPP_ROUTES.APP_GROUP) {
     const url = request.nextUrl.clone();
     url.pathname = WEBAPP_ROUTES.DEFAULT_PAGE_AFTER_LOGIN;

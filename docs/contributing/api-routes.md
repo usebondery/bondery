@@ -39,6 +39,39 @@ export const myRoutes: AppRoutePlugin = async (fastify) => {
 
 Nested route modules (e.g. `contacts/enrichment/*`) inherit `onRoute` from the parent plugin — only add `description` and `response` there.
 
+## Route ordering in API docs
+
+GitBook renders endpoints in **Fastify registration order** — there is no separate sort step. Full rationale and examples: [`.agents/skills/bondery-specific/references/api-route-ordering.md`](../../.agents/skills/bondery-specific/references/api-route-ordering.md).
+
+### Path tiers
+
+| Tier | Name | Examples |
+|------|------|----------|
+| 1 | Collection | `GET/POST/DELETE /api/contacts` |
+| 2 | Static siblings | `/map-pins`, `/by-social`, `/important-dates/upcoming` |
+| 3 | Single resource | `GET/PATCH/DELETE /api/contacts/{id}` |
+| 4 | Sub-resources | `/api/contacts/{id}/groups`, `/api/groups/{id}/contacts` |
+| 5 | Auxiliary | merge, enrich-queue (`AUXILIARY_FIRST_SEGMENTS` in `@bondery/schemas/openapi/route-order`) |
+
+Same tier → alphabetical by path segment.
+
+### HTTP methods (same path)
+
+`GET → POST → PUT → PATCH → DELETE`
+
+### Sidebar tag order
+
+Integrator dependency order in the `tags` array in [`apps/api/src/index.ts`](../../apps/api/src/index.ts):
+
+`Health → Contacts → Groups → Tags → Interactions → Import → Share → Geocode → Me → Sync → Extension → Chat → Subscriptions → Stats → Webhooks → Internal`
+
+### Checklist when adding routes
+
+- [ ] Route registered in the correct tier (not appended at file bottom by default)
+- [ ] Same-path methods follow GET → POST → PUT → PATCH → DELETE
+- [ ] New auxiliary paths added to `AUXILIARY_FIRST_SEGMENTS` when tier 5
+- [ ] `npm run check-openapi` passes (includes route-order CI check)
+
 ## Checklist for new or changed routes
 
 - [ ] `description` on every route `schema`
@@ -51,6 +84,7 @@ Nested route modules (e.g. `contacts/enrichment/*`) inherit `onRoute` from the p
   - `internal` — hidden from GitBook (`webhooks`, `internal/*`)
 - [ ] Handler return shape matches the declared response schema
 - [ ] **OpenAPI example** on every success response schema (see below)
+- [ ] **OpenAPI example** on every JSON request body schema (see below)
 - [ ] If the route returns **409**, spread `conflictResponse` or `syncConflictResponse` from `@bondery/schemas/http/responses`
 - [ ] If an error status returns a **non-ApiError JSON body**, override that status in `response` (see `GET /health` 503)
 - [ ] `npm run build:api` or `npx turbo build --filter=api` from repo root after route/schema changes
@@ -68,7 +102,25 @@ When adding a new `*ResponseSchema`:
 
 For inline route-only schemas (e.g. admin stats), attach `.meta({ example })` on the schema in the route file and import the fixture from `@bondery/schemas`.
 
-`npm run test:contracts -w @bondery/schemas` validates every registered example with `schema.parse(example)`. `npm run check-openapi -w apps/api` fails if any `2xx` or `4xx`/`5xx` `application/json` response lacks an `example` or has an empty schema.
+`npm run test:contracts -w @bondery/schemas` validates every registered example with `schema.parse(example)`. `npm run check-openapi -w apps/api` fails if any `2xx` or `4xx`/`5xx` `application/json` response lacks an `example` or has an empty schema, and if any `POST`/`PUT`/`PATCH` JSON request body lacks an `example`.
+
+## OpenAPI request examples
+
+GitBook shows copy-pasteable request payloads on mutation routes. Examples attach via Zod `.meta({ example })` on the same schema used in `schema.body` — no per-route example argument.
+
+When adding or changing a request body schema:
+
+1. Add `EXAMPLE_*_REQUEST` to [`packages/schemas/src/openapi/fixtures/requests.ts`](../../packages/schemas/src/openapi/fixtures/requests.ts) (compose from [`fixtures/entities.ts`](../../packages/schemas/src/openapi/fixtures/entities.ts) and [`fixtures/primitives.ts`](../../packages/schemas/src/openapi/fixtures/primitives.ts)).
+2. Chain `.meta({ example: EXAMPLE_*_REQUEST })` on the body schema export in `@bondery/schemas`.
+3. Register the schema in [`packages/schemas/scripts/check-openapi-examples.ts`](../../packages/schemas/scripts/check-openapi-examples.ts) under `REQUEST_SCHEMA_EXAMPLES`.
+
+Guidelines:
+
+- **Create** (`POST`): show required fields only.
+- **Update** (`PATCH`/`PUT`): show a small partial payload (one to three fields).
+- **Wire shape**: examples are what the client sends (pre-transform input).
+- **Shared bodies** (`idsRequestBodySchema`, `tagMembershipRequestSchema`, …): one example reused across routes.
+- **No JSON example**: multipart uploads (`POST …/photo`) and body-less creates (`POST /api/chat/sessions`) — document in `description` instead.
 
 ## OpenAPI error response examples
 

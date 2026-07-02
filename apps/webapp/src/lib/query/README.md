@@ -32,9 +32,14 @@ After every successful mutation, call `invalidateQueries` on affected keys. Do *
 
 Keep **local state** while typing. On save: show loader → domain mutation → `invalidateQueries` → refetch updates UI. On error: revert local state from query data.
 
-## Auth
+## Auth and API outages
 
-On `ApiError` 401 / `BFF_UNAUTHORIZED`, `handleUnauthorizedSession()` clears the query cache, signs out locally, and `location.replace`s to login. Wired in `lib/query/client.ts` and `lib/api/client.ts`. See bondery-specific `references/api-usage.md` § Unauthorized sessions.
+401 and API-unavailable redirects are handled in **`lib/api/client.ts`** (transport), not in this query layer.
+
+- `clientApiJson` → `applyTransportErrorPolicy` → `endSession` (401) or `/app/unavailable` (502/503/504/network)
+- This module only configures cache defaults and skips retries for classified transport errors
+
+See bondery-specific `references/api-usage.md` § Session teardown and § API unavailable handling.
 
 ## Fetchers
 

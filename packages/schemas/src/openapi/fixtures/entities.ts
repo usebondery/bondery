@@ -126,12 +126,12 @@ export const EXAMPLE_INTERACTION = {
   title: "Coffee catch-up",
   type: "Coffee" as const,
   description: "Discussed project updates.",
-  date: EXAMPLE_DATE,
+  date: EXAMPLE_ISO_TIMESTAMP,
   participants: [
     {
       id: EXAMPLE_CONTACT_ID,
-      first_name: "Ada",
-      last_name: "Lovelace",
+      firstName: "Ada",
+      lastName: "Lovelace",
       avatar: null,
     },
   ],
@@ -288,18 +288,18 @@ export const EXAMPLE_USER_SETTINGS = {
 
 export const EXAMPLE_CHAT_SESSION = {
   id: "ff0e8400-e29b-41d4-a716-446655440009",
-  user_id: EXAMPLE_USER_ID,
+  userId: EXAMPLE_USER_ID,
   title: "Who should I follow up with?",
-  created_at: EXAMPLE_ISO_TIMESTAMP,
-  updated_at: EXAMPLE_ISO_TIMESTAMP,
+  createdAt: EXAMPLE_ISO_TIMESTAMP,
+  updatedAt: EXAMPLE_ISO_TIMESTAMP,
 };
 
 export const EXAMPLE_CHAT_MESSAGE = {
   id: "000e8400-e29b-41d4-a716-44665544000a",
-  session_id: "ff0e8400-e29b-41d4-a716-446655440009",
+  sessionId: "ff0e8400-e29b-41d4-a716-446655440009",
   role: "user",
   content: "Who haven't I spoken to in 90 days?",
-  created_at: EXAMPLE_ISO_TIMESTAMP,
+  createdAt: EXAMPLE_ISO_TIMESTAMP,
 };
 
 export const EXAMPLE_GEOCODE_ADDRESS = {

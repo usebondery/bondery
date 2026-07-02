@@ -1,13 +1,19 @@
 import { z } from "zod";
 import {
+  createdAtSchema,
   entityAuditSchema,
   entityIdentitySchema,
+  updatedAtSchema,
   makePaginatedListResponseSchema,
 } from "#entities/_shared.js";
 import {
   EXAMPLE_INTERACTION_RESPONSE,
   EXAMPLE_INTERACTIONS_LIST_RESPONSE,
 } from "#openapi/fixtures/schema-examples.js";
+import {
+  EXAMPLE_CREATE_INTERACTION_REQUEST,
+  EXAMPLE_PATCH_INTERACTION_REQUEST,
+} from "#openapi/fixtures/requests.js";
 
 export const interactionTypeSchema = z.enum([
   "Call",
@@ -24,16 +30,12 @@ export const interactionTypeSchema = z.enum([
   "Custom",
 ]);
 
-/**
- * Embedded participant shape returned by interaction endpoints.
- * Keep snake_case keys to match the current API wire contract.
- */
 export const interactionParticipantSchema = z.object({
   id: z.string(),
-  first_name: z.string(),
-  last_name: z.string().nullable(),
+  firstName: z.string(),
+  lastName: z.string().nullable(),
   avatar: z.string().nullable(),
-  updated_at: z.string().optional(),
+  updatedAt: updatedAtSchema.optional(),
 });
 
 export const interactionSchema = entityIdentitySchema
@@ -41,7 +43,7 @@ export const interactionSchema = entityIdentitySchema
     title: z.string().nullable(),
     type: interactionTypeSchema,
     description: z.string().nullable(),
-    date: z.string(),
+    date: createdAtSchema,
     participants: z.union([z.array(interactionParticipantSchema), z.array(z.string())]).optional(),
   })
   .extend(entityAuditSchema.shape);
@@ -50,9 +52,9 @@ export const createInteractionInputSchema = z.object({
   title: z.string().optional(),
   type: z.string(),
   description: z.string().optional(),
-  date: z.string(),
+  date: createdAtSchema,
   participantIds: z.array(z.string()),
-});
+}).meta({ example: EXAMPLE_CREATE_INTERACTION_REQUEST });
 
 export const interactionFormSchema = z.object({
   title: z.string().trim().min(1, { error: "Title is required" }),
@@ -66,9 +68,9 @@ export const updateInteractionInputSchema = z.object({
   title: z.string().optional(),
   type: z.string().optional(),
   description: z.string().optional(),
-  date: z.string().optional(),
+  date: createdAtSchema.optional(),
   participantIds: z.array(z.string()).optional(),
-});
+}).meta({ example: EXAMPLE_PATCH_INTERACTION_REQUEST });
 
 export const interactionsListResponseSchema = makePaginatedListResponseSchema(
   "interactions",
@@ -80,11 +82,9 @@ const interactionDetailSchema = z.object({
   title: z.string().nullable(),
   type: z.string(),
   description: z.string().nullable(),
-  date: z.string(),
-  createdAt: z.string(),
-  updatedAt: z.string(),
+  date: createdAtSchema,
   participants: z.array(z.object({}).passthrough()),
-});
+}).extend(entityAuditSchema.shape);
 
 export const interactionResponseSchema = z
   .object({

@@ -1,7 +1,7 @@
 import { cache } from "react";
+import { getAppBootstrap } from "@/lib/app/getAppBootstrap";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { getLocaleFromHeaders } from "./getLocaleFromHeaders";
-import { getUserSettings } from "@/lib/user/getUserSettings";
 import type { SupportedLocale } from "@bondery/translations";
 
 export interface LocaleSettings {
@@ -22,15 +22,12 @@ const FALLBACK: LocaleSettings = {
  * Strategy:
  * - If no session: derive locale from the browser's Accept-Language header,
  *   use UTC / 24h defaults (locale is cosmetic on unauthenticated routes).
- * - If session exists: use the user's saved settings (locale, timezone, timeFormat)
- *   fetched via getUserSettings(), which is cache()-deduplicated so the API
- *   call runs at most once per render even when multiple layouts call this.
+ * - If session exists: use the user's saved settings from getAppBootstrap(),
+ *   which is cache()-deduplicated so the API call runs at most once per render.
  *
  * IMPORTANT: this function uses getSession() (cookie read, no network) to check
  * auth status. It is NOT an auth guard — never use it for access control.
- * Auth guards must use getUser() which verifies with the Supabase server.
- *
- * Falls back to hardcoded defaults ("en", UTC, 24h) if anything throws.
+ * Auth guards must use resolveServerSession() which verifies with Supabase.
  */
 export const resolveLocaleSettings = cache(async (): Promise<LocaleSettings> => {
   try {
@@ -44,11 +41,15 @@ export const resolveLocaleSettings = cache(async (): Promise<LocaleSettings> => 
       return { locale, timezone: "UTC", timeFormat: "24h" };
     }
 
-    const settings = await getUserSettings();
+    const bootstrap = await getAppBootstrap();
+    if (bootstrap.status !== "ok") {
+      return FALLBACK;
+    }
+
     return {
-      locale: settings.locale,
-      timezone: settings.timezone,
-      timeFormat: settings.timeFormat,
+      locale: bootstrap.settings.locale,
+      timezone: bootstrap.settings.timezone,
+      timeFormat: bootstrap.settings.timeFormat,
     };
   } catch {
     return FALLBACK;

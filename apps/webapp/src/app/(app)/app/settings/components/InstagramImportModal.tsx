@@ -230,6 +230,7 @@ function toPreviewContact(contact: InstagramPreparedContact): Contact {
     lastInteractionActivityId: null,
     keepFrequencyDays: null,
     createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
     phones: [],
     emails: [],
     linkedin: null,
@@ -316,7 +317,7 @@ export function InstagramImportModal({
     key: keyof InstagramImportTranslations,
     values?: Record<string, string | number>,
   ) => string;
-  modalId?: string;
+  modalId: string;
   onSuccess?: (stats: {
     imported: number;
     updated: number;
@@ -401,21 +402,12 @@ export function InstagramImportModal({
   );
 
   const closeModal = () => {
-    if (modalId) {
-      modals.close(modalId);
-      return;
-    }
-
-    modals.closeAll();
+    modals.close(modalId);
   };
 
   useModalBlocking(modalId, isParsing || isImporting || step === "processing");
 
   useEffect(() => {
-    if (!modalId) {
-      return;
-    }
-
     modals.updateModal({
       modalId,
       size: "lg",
@@ -614,7 +606,7 @@ export function InstagramImportModal({
         }),
       );
 
-      modals.closeAll();
+      modals.close(modalId);
 
       if (onSuccess) {
         onSuccess({

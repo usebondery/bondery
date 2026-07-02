@@ -127,11 +127,11 @@ function run() {
 
   const participant = interactionParticipantSchema.parse({
     id: "p-1",
-    first_name: "Ada",
-    last_name: "Lovelace",
+    firstName: "Ada",
+    lastName: "Lovelace",
     avatar: null,
   });
-  assertEqual(participant.first_name, "Ada", "interactionParticipantSchema should keep snake_case");
+  assertEqual(participant.firstName, "Ada", "interactionParticipantSchema should use camelCase");
 
   // subscription dto contract
   const subscriptionStatus = subscriptionStatusSchema.parse({

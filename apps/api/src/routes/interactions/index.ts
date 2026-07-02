@@ -33,6 +33,36 @@ import {
   parsePagination,
 } from "../../lib/pagination.js";
 
+function mapInteractionParticipant(
+  client: ReturnType<typeof getAuth>["client"],
+  userId: string,
+  person: {
+    id: string;
+    first_name: string;
+    last_name: string | null;
+    has_avatar: boolean;
+    updated_at: string;
+  },
+  avatarOptions?: ReturnType<typeof extractAvatarOptions>,
+) {
+  return {
+    id: person.id,
+    firstName: person.first_name,
+    lastName: person.last_name,
+    avatar: resolveContactAvatarUrl(
+      client,
+      userId,
+      {
+        id: person.id,
+        hasAvatar: person.has_avatar,
+        updatedAt: person.updated_at,
+      },
+      avatarOptions,
+    ),
+    updatedAt: person.updated_at,
+  };
+}
+
 async function loadInteraction(
   client: ReturnType<typeof getAuth>["client"],
   userId: string,
@@ -58,19 +88,9 @@ async function loadInteraction(
     date: interaction.date,
     createdAt: interaction.created_at,
     updatedAt: interaction.updated_at,
-    participants: interaction.participants.map((participant: any) => ({
-      ...participant.person,
-      avatar: resolveContactAvatarUrl(
-        client,
-        userId,
-        {
-          id: participant.person.id,
-          hasAvatar: participant.person.has_avatar,
-          updatedAt: participant.person.updated_at,
-        },
-        avatarOptions,
-      ),
-    })),
+    participants: interaction.participants.map((participant: any) =>
+      mapInteractionParticipant(client, userId, participant.person, avatarOptions),
+    ),
   };
 }
 
@@ -128,19 +148,9 @@ export const interactionRoutes: AppRoutePlugin = async (fastify) => {
         date: interaction.date,
         createdAt: interaction.created_at,
         updatedAt: interaction.updated_at,
-        participants: interaction.participants.map((participant: any) => ({
-          ...participant.person,
-          avatar: resolveContactAvatarUrl(
-            client,
-            user.id,
-            {
-              id: participant.person.id,
-              hasAvatar: participant.person.has_avatar,
-              updatedAt: participant.person.updated_at,
-            },
-            avatarOptions,
-          ),
-        })),
+        participants: interaction.participants.map((participant: any) =>
+          mapInteractionParticipant(client, user.id, participant.person, avatarOptions),
+        ),
       }));
 
       const totalCount =
@@ -262,35 +272,6 @@ export const interactionRoutes: AppRoutePlugin = async (fastify) => {
   );
 
   /**
-   * DELETE /api/interactions/:id - Delete an interaction
-   */
-  fastify.delete(
-    "/:id",
-    {
-      schema: {
-        description: "Delete an interaction by ID.",
-        params: uuidParamSchema,
-        response: withOkResponse(
-          messageResponseSchema,
-          "Interaction deleted successfully",
-        ),
-      } satisfies FastifyZodOpenApiSchema,
-    },
-    async (request, reply) => {
-      const { client, user } = getAuth(request);
-      const { id } = request.params;
-
-      const { error } = await client.from("interactions").delete().eq("id", id);
-
-      if (error) {
-        return reply.status(500).send({ error: error.message });
-      }
-
-      return { message: "Interaction deleted successfully" };
-    },
-  );
-
-  /**
    * PATCH /api/interactions/:id - Update an interaction
    */
   fastify.patch(
@@ -356,12 +337,43 @@ export const interactionRoutes: AppRoutePlugin = async (fastify) => {
         }
       }
 
-      const interaction = await loadInteraction(client, user.id, id);
+      const avatarOptions = extractAvatarOptions(request.query);
+      const interaction = await loadInteraction(client, user.id, id, avatarOptions);
+
       if (!interaction) {
         return reply.status(404).send({ error: "Interaction not found" });
       }
 
       return { interaction };
+    },
+  );
+
+  /**
+   * DELETE /api/interactions/:id - Delete an interaction
+   */
+  fastify.delete(
+    "/:id",
+    {
+      schema: {
+        description: "Delete an interaction by ID.",
+        params: uuidParamSchema,
+        response: withOkResponse(
+          messageResponseSchema,
+          "Interaction deleted successfully",
+        ),
+      } satisfies FastifyZodOpenApiSchema,
+    },
+    async (request, reply) => {
+      const { client, user } = getAuth(request);
+      const { id } = request.params;
+
+      const { error } = await client.from("interactions").delete().eq("id", id);
+
+      if (error) {
+        return reply.status(500).send({ error: error.message });
+      }
+
+      return { message: "Interaction deleted successfully" };
     },
   );
 }

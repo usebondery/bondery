@@ -1,15 +1,14 @@
 /**
  * Global Fastify hook that enforces a minimum Chrome extension version.
  *
- * Requests from the extension (identified by the absence of a Cookie header)
- * must include a valid `X-Bondery-Extension-Version` header whose value is at or above
- * `MIN_EXTENSION_VERSION`. Requests that fail this check receive 426 Upgrade Required.
+ * Unauthenticated requests (no Bearer, no Cookie) receive 401 before route auth.
+ * Extension clients without `X-Bondery-Extension-Version` are treated as
+ * unauthenticated. Outdated extension versions receive 426 Upgrade Required.
  *
- * Webapp requests always carry a Cookie header alongside their Bearer token,
- * so they bypass this check entirely.
+ * Webapp browser requests include a Cookie header; mobile and server clients
+ * use Bearer and bypass extension version enforcement.
  */
 
-import type { FastifyInstance } from "fastify";
 import type { AppFastifyInstance } from "./fastify-types.js";
 import {
   isVersionBelow,
@@ -18,10 +17,8 @@ import {
 } from "@bondery/helpers";
 
 /**
- * Registers a global `onRequest` hook that rejects outdated or header-less
- * extension requests with HTTP 426 Upgrade Required.
- *
- * @param fastify - The Fastify instance
+ * Registers a global `onRequest` hook for extension version enforcement and
+ * early 401 rejection of unauthenticated headless requests.
  */
 export function registerExtensionVersionCheck(fastify: AppFastifyInstance): void {
   fastify.addHook("onRequest", async (request, reply) => {
@@ -42,15 +39,13 @@ export function registerExtensionVersionCheck(fastify: AppFastifyInstance): void
       return;
     }
 
-    // Mobile and other headless clients authenticate with a Bearer token and
-    // do not send browser cookies. They are not extension traffic and should
-    // bypass extension version enforcement.
+    // Mobile, webapp server, and extension OAuth flows authenticate with Bearer.
     const authorization = request.headers.authorization;
     if (typeof authorization === "string" && authorization.startsWith("Bearer ")) {
       return;
     }
 
-    // Webapp requests always include a Cookie header — let them through
+    // Webapp browser requests include a Cookie header — let auth strategies decide.
     if (request.headers.cookie) {
       return;
     }
@@ -59,18 +54,15 @@ export function registerExtensionVersionCheck(fastify: AppFastifyInstance): void
       | string
       | undefined;
 
-    // Missing header + no cookie = old extension without header support → reject
+    // No credentials and no extension identity → unauthenticated, not outdated extension.
     if (!extensionVersion) {
-      reply.code(426).header("Upgrade", "X-Bondery-Extension-Version").send({
-        error: "Extension update required",
-        code: "EXTENSION_OUTDATED",
-        minVersion: MIN_EXTENSION_VERSION,
-        storeUrl: CHROME_EXTENSION_URL,
+      reply.code(401).send({
+        error: "Unauthorized - Please log in",
       });
       return;
     }
 
-    // Header present but version too low → reject
+    // Extension identified but version too low → upgrade required.
     if (isVersionBelow(extensionVersion, MIN_EXTENSION_VERSION)) {
       reply.code(426).header("Upgrade", "X-Bondery-Extension-Version").send({
         error: "Extension update required",

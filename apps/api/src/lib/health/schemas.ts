@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { createdAtSchema } from "@bondery/schemas/entities/_shared";
 import {
   EXAMPLE_HEALTH_OK_RESPONSE,
   EXAMPLE_LIVENESS_STATUS_RESPONSE,
@@ -30,9 +31,9 @@ export const healthServicesSchema = z.object({
 export const healthReportSchema = z
   .object({
     status: z.enum(["ok", "degraded", "unhealthy"]),
-    timestamp: z.string().datetime(),
+    timestamp: createdAtSchema,
     cached: z.boolean(),
-    cacheExpiresAt: z.string().datetime(),
+    cacheExpiresAt: createdAtSchema,
     services: healthServicesSchema,
   })
   .meta({ example: EXAMPLE_HEALTH_OK_RESPONSE });
@@ -40,7 +41,7 @@ export const healthReportSchema = z
 export const livenessStatusSchema = z
   .object({
     status: z.literal("ok"),
-    timestamp: z.string().datetime(),
+    timestamp: createdAtSchema,
     extension: z.object({
       minVersion: z.string(),
       storeUrl: z.string(),

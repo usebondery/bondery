@@ -20,7 +20,7 @@ const ALLOWED_REFRESH_FILES = new Set([
 
 const ALLOWED_CLIENT_API_PREFIXES = [
   "hooks/useEmbeddedCheckout.ts",
-  "lib/photoUpload.tsx",
+  "app/(app)/app/components/photo/openPhotoUploadModal.tsx",
   "lib/extension/",
   "lib/geocode.ts",
   "lib/query/fetchers/",

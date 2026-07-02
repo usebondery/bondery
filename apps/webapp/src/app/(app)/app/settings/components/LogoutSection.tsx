@@ -2,36 +2,24 @@
 
 import { Text, Button, Group } from "@mantine/core";
 import { IconLogout } from "@tabler/icons-react";
-import { useRouter } from "next/navigation";
 import { notifications } from "@mantine/notifications";
 import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
-import { createBrowswerSupabaseClient } from "@/lib/supabase/client";
-import { WEBSITE_ROUTES } from "@bondery/helpers/globals/paths";
+import { endSession } from "@/lib/auth/endSession";
 import { errorNotificationTemplate, loadingNotificationTemplate } from "@bondery/mantine-next";
 
 export function LogoutSection() {
-  const router = useRouter();
   const t = useTranslations("SettingsPage.DataManagement");
 
   const handleLogout = async () => {
+    const loadingNotification = notifications.show({
+      ...loadingNotificationTemplate({
+        title: t("SigningOut"),
+        description: t("SignOutWait"),
+      }),
+    });
+
     try {
-      const loadingNotification = notifications.show({
-        ...loadingNotificationTemplate({
-          title: t("SigningOut"),
-          description: t("SignOutWait"),
-        }),
-      });
-
-      const supabase = createBrowswerSupabaseClient();
-      const { error } = await supabase.auth.signOut();
-
-      notifications.hide(loadingNotification);
-
-      if (error) {
-        throw new Error(error.message || "Failed to sign out");
-      }
-
-      router.push(WEBSITE_ROUTES.LOGIN);
+      await endSession({ reason: "user_initiated" });
     } catch (error) {
       notifications.show(
         errorNotificationTemplate({
@@ -39,6 +27,8 @@ export function LogoutSection() {
           description: error instanceof Error ? error.message : t("SignOutError"),
         }),
       );
+    } finally {
+      notifications.hide(loadingNotification);
     }
   };
 

@@ -1,15 +1,11 @@
-import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { resolveServerSession } from "@/lib/auth/resolveServerSession";
 import { serverApiFetch } from "@/lib/api/server";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
 
 export async function POST(request: Request) {
-  const supabase = await createServerSupabaseClient();
+  const session = await resolveServerSession();
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
+  if (session.status !== "ok") {
     return new Response("Unauthorized", { status: 401 });
   }
 

@@ -10,7 +10,7 @@
     "build": "tsc",
     "start": "node dist/index.js",
     "check-types": "tsx scripts/check-api-schema-patterns.ts && tsc --noEmit",
-    "check-openapi": "tsx scripts/check-openapi.ts",
+    "check-openapi": "tsx scripts/check-openapi.ts && tsx scripts/check-api-route-order.ts",
     "check-api-schema-patterns": "tsx scripts/check-api-schema-patterns.ts",
     "check-env": "tsx scripts/check-env.ts",
     "test:sync": "tsx --test src/lib/sync/build-changes.test.ts",

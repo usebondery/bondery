@@ -9,12 +9,8 @@ import { z } from "zod";
 import { getAuth } from "../../../lib/auth.js";
 import { withOkResponse } from "../../../lib/openapi-route-responses.js";
 import { TAG_SELECT } from "../../../lib/queries.js";
-import { contactTagListResponseSchema, messageResponseSchema } from "@bondery/schemas";
+import { contactTagBodySchema, contactTagListResponseSchema, messageResponseSchema } from "@bondery/schemas";
 import { uuidParamSchema } from "@bondery/schemas/http";
-
-const contactTagBodySchema = z.object({
-  tagId: z.string().min(1),
-});
 
 const contactTagIdParamsSchema = z.object({
   id: z.string(),

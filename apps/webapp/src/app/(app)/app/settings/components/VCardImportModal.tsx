@@ -112,6 +112,7 @@ function toPreviewContact(contact: VCardPreparedContact): Contact {
     lastInteractionActivityId: null,
     keepFrequencyDays: null,
     createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
     phones: contact.phones,
     emails: contact.emails,
     linkedin: contact.linkedin,
@@ -153,7 +154,7 @@ export function VCardImportModal({
     key: keyof VCardImportTranslations,
     values?: Record<string, string | number>,
   ) => string;
-  modalId?: string;
+  modalId: string;
   showNavigationProgress?: boolean;
 }) {
   const router = useRouter();
@@ -210,18 +211,12 @@ export function VCardImportModal({
   );
 
   const closeModal = () => {
-    if (modalId) {
-      modals.close(modalId);
-      return;
-    }
-    modals.closeAll();
+    modals.close(modalId);
   };
 
   useModalBlocking(modalId, isParsing || isImporting || step === "processing");
 
   useEffect(() => {
-    if (!modalId) return;
-
     modals.updateModal({
       modalId,
       size:
@@ -376,11 +371,7 @@ export function VCardImportModal({
         }),
       );
 
-      if (modalId) {
-        modals.close(modalId);
-      } else {
-        modals.closeAll();
-      }
+      modals.close(modalId);
       router.push(WEBAPP_ROUTES.PEOPLE);
     } catch (error) {
       notifications.show(

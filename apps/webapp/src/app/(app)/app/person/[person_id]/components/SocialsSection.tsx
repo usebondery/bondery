@@ -11,9 +11,8 @@ import {
   IconWorld,
 } from "@tabler/icons-react";
 import Image from "next/image";
-import { modals } from "@mantine/modals";
 import { notifications } from "@mantine/notifications";
-import { memo, useCallback, useEffect, useMemo, useRef, useState, type ComponentProps, type ReactNode } from "react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import {
   firstZodErrorMessage,
   type Contact,
@@ -33,15 +32,16 @@ import { createSocialUrl, normalizeWebsiteUrl } from "@bondery/helpers";
 import {
   ActionIconLink,
   errorNotificationTemplate,
-  ModalTitle,
   successNotificationTemplate,
 } from "@bondery/mantine-next";
 import { useUpdateContactMutation } from "@/lib/query/hooks/useContacts";
-import { ContactInfoSection } from "./ContactInfoSection";
 import { useContactInfoLabels } from "@/lib/i18n/useContactInfoLabels";
 import { InlineEditableInput } from "./InlineEditableInput";
 import { getSocialActionTooltip } from "@/lib/socialActionTooltips";
-import { createModalId, useModalBlocking } from "@/lib/modals";
+import {
+  openContactEmailsModal,
+  openContactPhonesModal,
+} from "./openContactInfoModals";
 
 interface SocialsSectionProps {
   contact: Contact;
@@ -57,22 +57,6 @@ interface SocialsSectionProps {
 type SocialFieldKey = "linkedin" | "instagram" | "facebook" | "website" | "whatsapp" | "signal";
 
 type SocialFieldValues = Record<SocialFieldKey, string>;
-
-type ContactInfoModalBodyProps = {
-  modalId: string;
-  savingField: string | null;
-  blockingField: "phones" | "emails";
-} & ComponentProps<typeof ContactInfoSection>;
-
-function ContactInfoModalBody({
-  modalId,
-  savingField,
-  blockingField,
-  ...contactInfoProps
-}: ContactInfoModalBodyProps) {
-  useModalBlocking(modalId, savingField === blockingField);
-  return <ContactInfoSection savingField={savingField} {...contactInfoProps} />;
-}
 
 function getInitialValues(contact: Contact): SocialFieldValues {
   const whatsappParsed = parsePhoneNumber(contact.whatsapp || "");
@@ -454,26 +438,16 @@ export function SocialsSection({
   const openPhoneModal = useCallback(() => {
     clearCloseTimeout();
     setOpenField(null);
-    const modalId = createModalId("contact-phones");
-    modals.open({
-      modalId,
-      title: <ModalTitle text={tContactInfo("PhoneNumbers")} icon={<IconPhone size={20} />} />,
-      size: "lg",
-      children: (
-        <ContactInfoModalBody
-          modalId={modalId}
-          blockingField="phones"
-          phones={phones}
-          emails={emails}
-          savingField={savingField}
-          onPhonesChange={onPhonesChange}
-          onEmailsChange={onEmailsChange}
-          onSave={onSaveContactInfo}
-          mode="phones"
-          showTitle={false}
-          labels={contactInfoLabels}
-        />
-      ),
+    openContactPhonesModal({
+      phones,
+      emails,
+      savingField,
+      onPhonesChange,
+      onEmailsChange,
+      onSaveContactInfo,
+      labels: contactInfoLabels,
+      phoneTitle: tContactInfo("PhoneNumbers"),
+      emailTitle: tContactInfo("EmailAddresses"),
     });
   }, [
     clearCloseTimeout,
@@ -490,26 +464,16 @@ export function SocialsSection({
   const openEmailModal = useCallback(() => {
     clearCloseTimeout();
     setOpenField(null);
-    const modalId = createModalId("contact-emails");
-    modals.open({
-      modalId,
-      title: <ModalTitle text={tContactInfo("EmailAddresses")} icon={<IconMail size={20} />} />,
-      size: "lg",
-      children: (
-        <ContactInfoModalBody
-          modalId={modalId}
-          blockingField="emails"
-          phones={phones}
-          emails={emails}
-          savingField={savingField}
-          onPhonesChange={onPhonesChange}
-          onEmailsChange={onEmailsChange}
-          onSave={onSaveContactInfo}
-          mode="emails"
-          showTitle={false}
-          labels={contactInfoLabels}
-        />
-      ),
+    openContactEmailsModal({
+      phones,
+      emails,
+      savingField,
+      onPhonesChange,
+      onEmailsChange,
+      onSaveContactInfo,
+      labels: contactInfoLabels,
+      phoneTitle: tContactInfo("PhoneNumbers"),
+      emailTitle: tContactInfo("EmailAddresses"),
     });
   }, [
     clearCloseTimeout,

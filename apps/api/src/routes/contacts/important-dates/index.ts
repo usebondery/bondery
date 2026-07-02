@@ -84,8 +84,8 @@ export function toImportantDate(event: {
   note: string | null;
   notify_on: string | null;
   notify_days_before: number | null;
-  created_at: string | null;
-  updated_at: string | null;
+  created_at: string;
+  updated_at: string;
 }) {
   return {
     id: event.id,
@@ -143,7 +143,7 @@ export function deriveReminderDateKey(entry: {
 
 // ── Route Registration ───────────────────────────────────────────
 
-export function registerImportantDateRoutes(fastify: AppFastifyInstance): void {
+export function registerUpcomingImportantDateRoutes(fastify: AppFastifyInstance): void {
   /**
    * GET /api/contacts/important-dates/upcoming - List upcoming reminders with notification configured
    */
@@ -281,7 +281,9 @@ export function registerImportantDateRoutes(fastify: AppFastifyInstance): void {
       return { reminders };
     },
   );
+}
 
+export function registerContactImportantDateRoutes(fastify: AppFastifyInstance): void {
   /**
    * GET /api/contacts/:id/important-dates - Get normalized important dates for a person
    */

@@ -274,7 +274,7 @@ export async function shareContact(
       resolveContactAvatarUrl(client, user.id, {
         id: user.id,
         hasAvatar: myselfContact?.has_avatar ?? false,
-        updatedAt: myselfContact?.updated_at ?? null,
+        updatedAt: myselfContact?.updated_at,
       }) ?? undefined,
     message: message || undefined,
     contactName,

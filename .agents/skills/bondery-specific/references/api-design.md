@@ -85,3 +85,7 @@ Bondery owns API + webapp + mobile. Ship contract changes in one coordinated dep
 - API helpers: `apps/api/src/lib/pagination.ts`
 - Search count: `count_search_people_ids` RPC via `countSearchPeopleIds()` in `apps/api/src/lib/search.ts`
 - Client normalizer: `normalizePaginatedList` in webapp/mobile fetchers
+
+## Documentation order
+
+GitBook API reference order follows Fastify route registration order. Path tiers, HTTP method order, sidebar tag order, and CI checks are documented in [api-route-ordering.md](./api-route-ordering.md).

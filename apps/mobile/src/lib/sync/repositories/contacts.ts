@@ -29,8 +29,8 @@ type PeopleRow = {
   has_avatar: number;
   notes_updated_at: string | null;
   last_interaction_activity_id: string | null;
-  created_at: string | null;
-  updated_at: string | null;
+  created_at: string;
+  updated_at: string;
 };
 
 function loadSocials(personId: string): Record<string, string | null> {
@@ -154,8 +154,8 @@ function mapPeopleRowToContact(row: PeopleRow, includeChildren: boolean): Contac
           note: string | null;
           notify_days_before: number | null;
           notify_on: string | null;
-          created_at: string | null;
-          updated_at: string | null;
+          created_at: string;
+          updated_at: string;
         }>(
           "SELECT id, person_id, user_id, type, date, note, notify_days_before, notify_on, created_at, updated_at FROM people_important_dates WHERE person_id = ?",
           row.id,
@@ -170,8 +170,8 @@ function mapPeopleRowToContact(row: PeopleRow, includeChildren: boolean): Contac
             note: d.note,
             notifyDaysBefore: d.notify_days_before as ImportantDate["notifyDaysBefore"],
             notifyOn: d.notify_on,
-            createdAt: d.created_at ?? new Date(0).toISOString(),
-            updatedAt: d.updated_at ?? new Date(0).toISOString(),
+            createdAt: d.created_at,
+            updatedAt: d.updated_at,
           }),
         )
     : null;
@@ -206,7 +206,7 @@ function mapPeopleRowToContact(row: PeopleRow, includeChildren: boolean): Contac
     emails,
     addresses,
     importantDates,
-    createdAt: row.created_at ?? new Date(0).toISOString(),
+    createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
 }

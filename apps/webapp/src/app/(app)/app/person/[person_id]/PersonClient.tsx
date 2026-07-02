@@ -94,7 +94,7 @@ import { PageWrapper } from "@/app/(app)/app/components/PageWrapper";
 import { PageHeader } from "@/app/(app)/app/components/PageHeader";
 import { fetchTimezoneForCoordinates } from "@/lib/geocode";
 import { resolveToCanonicalTimezone } from "@bondery/helpers/locale";
-import { useOpenDeleteContactModal } from "@/app/(app)/app/components/contacts/openDeleteContactModal";
+import { openDeleteContactModal } from "@/app/(app)/app/components/contacts/openDeleteContactModal";
 import { openStandardConfirmModal } from "@/app/(app)/app/components/modals/openStandardConfirmModal";
 import { GroupCard } from "../../groups/components/GroupCard";
 import { PersonTagsInput } from "./components/PersonTagsInput";
@@ -201,7 +201,6 @@ export default function PersonClient({
   const tTabs = useTranslations("PersonTabs");
   const tInteractions = useTranslations("InteractionsPage");
   const tContactInfo = useTranslations("ContactInfo");
-  const openDeleteContactModal = useOpenDeleteContactModal();
   const slashCommands = useSlashCommands();
   const slashCommandSuggestion = useMemo(
     () => createSlashCommandSuggestion(slashCommands),

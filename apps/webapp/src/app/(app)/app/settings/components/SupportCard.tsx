@@ -9,11 +9,9 @@ import {
   IconChevronRight,
 } from "@tabler/icons-react";
 import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
-import { modals } from "@mantine/modals";
-import { ModalTitle } from "@bondery/mantine-next";
 import { WEBSITE_ROUTES } from "@bondery/helpers/globals/paths";
 import { WEBSITE_URL } from "@/lib/config";
-import { FeedbackModal } from "./FeedbackModal";
+import { openFeedbackModal } from "./openFeedbackModal";
 import { SettingsSection } from "./SettingsSection";
 import type { ComponentType } from "react";
 
@@ -83,16 +81,8 @@ export function SupportCard() {
   const t = useTranslations("SettingsPage.Support");
   const tFeedback = useTranslations("FeedbackPage");
 
-  const openFeedbackModal = () => {
-    const modalId = "feedback-modal";
-    modals.open({
-      modalId,
-      title: (
-        <ModalTitle text={t("FeedbackTitle")} icon={<IconMessageCircle size={20} stroke={1.5} />} />
-      ),
-      size: "lg",
-      children: <FeedbackModal modalId={modalId} t={tFeedback} />,
-    });
+  const handleOpenFeedbackModal = () => {
+    openFeedbackModal({ title: t("FeedbackTitle"), t: tFeedback });
   };
 
   return (
@@ -115,7 +105,7 @@ export function SupportCard() {
             icon={IconMessageCircle}
             title={t("FeedbackTitle")}
             description={t("FeedbackDescription")}
-            onClick={openFeedbackModal}
+            onClick={handleOpenFeedbackModal}
           />
         </Group>
       </CardSection>

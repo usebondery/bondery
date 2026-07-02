@@ -350,7 +350,7 @@ export function ContactDetailScreen({
     });
   }
 
-  function handleSaveImportantDates(nextDates: ImportantDate[]) {
+  function handleSaveImportantDates(nextDates: ImportantDate[]): Promise<void> {
     const payload = nextDates
       .filter((entry) => entry.date)
       .map((entry) => ({
@@ -368,6 +368,7 @@ export function ContactDetailScreen({
 
     contactsDomain.replaceImportantDates(activeContact.id, parsed.data);
     reloadContact();
+    return Promise.resolve();
   }
 
   const hasInfo = Boolean(contact.lastInteraction);

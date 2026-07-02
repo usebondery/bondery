@@ -27,28 +27,6 @@ const READINESS_DESCRIPTION =
 
 export function registerHealthRoutes(fastify: AppFastifyInstance): void {
   fastify.get(
-    "/status",
-    {
-      schema: {
-        tags: ["Health"],
-        description: LIVENESS_DESCRIPTION,
-        response: withOkResponse(livenessStatusSchema, "Liveness status"),
-      } satisfies FastifyZodOpenApiSchema,
-      config: { rateLimit: false },
-    },
-    async () => {
-      return {
-        status: "ok" as const,
-        timestamp: new Date().toISOString(),
-        extension: {
-          minVersion: MIN_EXTENSION_VERSION,
-          storeUrl: CHROME_EXTENSION_URL,
-        },
-      };
-    },
-  );
-
-  fastify.get(
     "/health",
     {
       schema: {
@@ -90,6 +68,28 @@ export function registerHealthRoutes(fastify: AppFastifyInstance): void {
 
       const statusCode = report.status === "unhealthy" ? 503 : 200;
       return reply.status(statusCode).send(report);
+    },
+  );
+
+  fastify.get(
+    "/status",
+    {
+      schema: {
+        tags: ["Health"],
+        description: LIVENESS_DESCRIPTION,
+        response: withOkResponse(livenessStatusSchema, "Liveness status"),
+      } satisfies FastifyZodOpenApiSchema,
+      config: { rateLimit: false },
+    },
+    async () => {
+      return {
+        status: "ok" as const,
+        timestamp: new Date().toISOString(),
+        extension: {
+          minVersion: MIN_EXTENSION_VERSION,
+          storeUrl: CHROME_EXTENSION_URL,
+        },
+      };
     },
   );
 }

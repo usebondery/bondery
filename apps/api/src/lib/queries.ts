@@ -9,7 +9,7 @@ import type { AvatarTransformQuery } from "@bondery/schemas/http";
 export type ContactWithId = {
   id: string;
   hasAvatar: boolean;
-  updatedAt?: string | null;
+  updatedAt?: string;
 };
 
 /** File received from a multipart upload */

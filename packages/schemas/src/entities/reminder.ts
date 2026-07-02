@@ -1,16 +1,18 @@
 import { z } from "zod";
 import { contactPreviewSchema } from "#entities/contact.js";
 import { importantDateSchema, importantDateTypeSchema } from "#entities/important-date.js";
+import { nullableDateTimeSchema } from "#entities/_shared.js";
 import {
   EXAMPLE_REMINDER_DIGEST_RESPONSE,
   EXAMPLE_UPCOMING_REMINDERS_RESPONSE,
 } from "#openapi/fixtures/schema-examples.js";
+import { EXAMPLE_REMINDER_DIGEST_REQUEST } from "#openapi/fixtures/requests.js";
 
 export const upcomingReminderSchema = z.object({
   importantDate: importantDateSchema,
   person: contactPreviewSchema,
   notificationSent: z.boolean(),
-  notificationSentAt: z.string().nullable(),
+  notificationSentAt: nullableDateTimeSchema,
 });
 
 export const reminderDigestItemSchema = z.object({
@@ -35,7 +37,7 @@ export const reminderDigestUserSchema = z.object({
 export const reminderDigestRequestSchema = z.object({
   targetDate: z.string(),
   users: z.array(reminderDigestUserSchema),
-});
+}).meta({ example: EXAMPLE_REMINDER_DIGEST_REQUEST });
 
 export const reminderDigestResponseSchema = z
   .object({

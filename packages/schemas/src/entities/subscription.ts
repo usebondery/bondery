@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { entityAuditSchema, nullableDateTimeSchema } from "#entities/_shared.js";
 
 export const subscriptionStatusValueSchema = z.enum([
   "active",
@@ -8,21 +9,18 @@ export const subscriptionStatusValueSchema = z.enum([
   "past_due",
 ]);
 
-/**
- * Subscription table row shape from API/database.
- * Keep snake_case keys to preserve the current wire contract.
- */
-export const subscriptionSchema = z.object({
-  id: z.string(),
-  user_id: z.string(),
-  polar_customer_id: z.string(),
-  polar_subscription_id: z.string(),
-  status: subscriptionStatusValueSchema,
-  current_period_end: z.string().nullable(),
-  cancel_at_period_end: z.boolean(),
-  created_at: z.string(),
-  updated_at: z.string(),
-});
+/** Subscription table row shape (internal). */
+export const subscriptionSchema = z
+  .object({
+    id: z.string(),
+    userId: z.string(),
+    polarCustomerId: z.string(),
+    polarSubscriptionId: z.string(),
+    status: subscriptionStatusValueSchema,
+    currentPeriodEnd: nullableDateTimeSchema,
+    cancelAtPeriodEnd: z.boolean(),
+  })
+  .extend(entityAuditSchema.shape);
 
 export const planTierSchema = z.enum(["free", "premium"]);
 
@@ -42,12 +40,12 @@ export const subscriptionStatusSchema = z.object({
   plan: planTierSchema,
   aiMessagesUsed: z.number(),
   aiMessageLimit: z.number(),
-  aiMonthlyResetAt: z.string().nullable(),
+  aiMonthlyResetAt: nullableDateTimeSchema,
   canUseChat: z.boolean(),
-  currentPeriodEnd: z.string().nullable(),
+  currentPeriodEnd: nullableDateTimeSchema,
   cancelAtPeriodEnd: z.boolean(),
   polarStatus: polarSubscriptionStatusSchema.nullable(),
-  trialEndsAt: z.string().nullable(),
+  trialEndsAt: nullableDateTimeSchema,
   amount: z.number().nullable(),
   currency: z.string().nullable(),
   productName: z.string().nullable(),

@@ -11,7 +11,8 @@ Consult these resources as needed:
 
 ```
 references/
-  api-design.md   List API tiers, pagination contract, query/response rules
+  api-design.md        List API tiers, pagination contract, query/response rules
+  api-route-ordering.md  Published API doc order (registration order, path tiers, tag sidebar)
   api-usage.md      Transport wrappers (clientApi*/serverApi*/apiRequest), *Json vs *JsonOrNull, ApiError
   api-mutations.md  Mutation responses — return full objects, no post-mutation GET
   sync-architecture.md  Mobile offline sync — pull/bootstrap, push mutations, server-authoritative merge, versioning
@@ -80,6 +81,8 @@ List endpoints follow a shared pagination contract. Read `references/api-design.
 - Nested `pagination` with `totalCount`, `hasMore`, and echoed `sort`/`search`
 - Server-side `hasMore` as the single source of truth for table “load more” UI
 
+Published API reference order follows Fastify **registration order**. Read `references/api-route-ordering.md` when adding or reordering routes — path tiers, HTTP method order, sidebar tag order, and CI enforcement.
+
 
 # UI translations
 
@@ -108,7 +111,7 @@ LinkedIn company/school logos use the separate `linkedin_logos` bucket and are u
 
 Use Fastify built in console logging functions of `request.log` and `reply.log` instead of `console.log` for better performance, structured logging, and integration with Fastify's logging ecosystem.
 
-**Route schemas:** Use Zod from `@bondery/schemas` and `@bondery/schemas/http` with `fastify-zod-openapi` — not TypeBox. Export route plugins as `AppRoutePlugin` from `lib/fastify-types.ts`. Put `satisfies FastifyZodOpenApiSchema` on the inner `schema` object (not the route options wrapper). Do not annotate handlers with `reply: FastifyReply` — it breaks request type inference. In `onRoute` hooks, mutate `routeOptions.schema.tags` in place; never `{ ...routeOptions.schema }` (spread drops the plugin symbol config and breaks OpenAPI generation). Call `applyOpenApiRouteMeta(routeOptions, { area })` from `lib/openapi-route-meta.ts` on every top-level route plugin (`integration` = API key + bearer, `session` = bearer only, `internal` = hidden from public docs). Every route `schema` must include `description` and `response` — use `withOkResponse` / `withCreatedResponse` from `lib/openapi-route-responses.ts` for standard success + error shapes. Shared read models are registered for OpenAPI `$ref`s via `registerOpenApiComponentSchemas()` at API bootstrap. Regenerate `apps/api/openapi.yaml` after route changes; see `docs/contributing/api-routes.md`.
+**Route schemas:** Use Zod from `@bondery/schemas` and `@bondery/schemas/http` with `fastify-zod-openapi` — not TypeBox. Export route plugins as `AppRoutePlugin` from `lib/fastify-types.ts`. Put `satisfies FastifyZodOpenApiSchema` on the inner `schema` object (not the route options wrapper). Do not annotate handlers with `reply: FastifyReply` — it breaks request type inference. In `onRoute` hooks, mutate `routeOptions.schema.tags` in place; never `{ ...routeOptions.schema }` (spread drops the plugin symbol config and breaks OpenAPI generation). Call `applyOpenApiRouteMeta(routeOptions, { area })` from `lib/openapi-route-meta.ts` on every top-level route plugin (`integration` = API key + bearer, `session` = bearer only, `internal` = hidden from public docs). Every route `schema` must include `description` and `response` — use `withOkResponse` / `withCreatedResponse` from `lib/openapi-route-responses.ts` for standard success + error shapes. Shared read models are registered for OpenAPI `$ref`s via `registerOpenApiComponentSchemas()` at API bootstrap. **Registration order is published doc order** — follow `references/api-route-ordering.md` when adding routes. Regenerate `apps/api/openapi.yaml` after route changes; see `docs/contributing/api-routes.md`.
 
 # Code review
 

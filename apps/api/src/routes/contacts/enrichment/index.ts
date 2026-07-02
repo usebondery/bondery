@@ -8,8 +8,17 @@ import { registerLinkedInDataRoutes } from "./linkedin-data.js";
 import { registerEnrichRoutes } from "./enrich.js";
 import { registerEnrichQueueRoutes } from "./enrich-queue.js";
 
-export function registerEnrichmentRoutes(fastify: AppFastifyInstance): void {
-  registerLinkedInDataRoutes(fastify);
+/** Tier 4 — per-contact enrichment (`/:id/…`). */
+export function registerContactEnrichmentRoutes(fastify: AppFastifyInstance): void {
   registerEnrichRoutes(fastify);
+  registerLinkedInDataRoutes(fastify);
+}
+
+/** Tier 5 — batch enrich-queue workflows. */
+export { registerEnrichQueueRoutes };
+
+/** @deprecated Use registerContactEnrichmentRoutes + registerEnrichQueueRoutes at the correct tiers. */
+export function registerEnrichmentRoutes(fastify: AppFastifyInstance): void {
+  registerContactEnrichmentRoutes(fastify);
   registerEnrichQueueRoutes(fastify);
 }

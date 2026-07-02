@@ -11,11 +11,13 @@ This mirrors how Stripe SDKs work: a thin HTTP client (`StripeClient`) plus opti
 | Client | Runtime | Transport | Base URL | Auth |
 |--------|---------|-----------|----------|------|
 | **Webapp (browser)** | Client component | `clientApiFetch` / `clientApiJson` / `clientApiJsonOrNull` | Same-origin `/api/*` (BFF) | BFF injects Bearer |
-| **Webapp (server)** | RSC, loaders, route handlers | `serverApiFetch` / `serverApiJson` / `serverApiJsonOrNull` | `API_URL` + path | `getAuthHeaders()` |
+| **Webapp (server)** | RSC, loaders, route handlers | `serverApiFetch` / `serverApiJson` / `serverApiJsonOrNull` | `API_URL` + path | `resolveServerSession()` → Bearer |
 | **Mobile** | React Native | `apiRequest()` via `mobileFetch()` | `EXPO_PUBLIC_API_URL` + path | Supabase session Bearer |
 | **Chrome extension** | Service worker / popup | `authenticatedFetch()` | `config.apiUrl` + path | OAuth access token + `X-Bondery-Extension-Version` |
 
 **Webapp BFF:** Browser calls `/api/contacts`; Next.js route handler validates the session and proxies to Fastify with Bearer. The browser never calls `API_URL` for authenticated resources.
+
+**Webapp server session:** Route guards and server transport share `resolveServerSession()` (`lib/auth/resolveServerSession.ts`) — one cached `getUser()` + access token per request. Layout, BFF, `serverApiFetch`, and `getAppBootstrap` all read from it. Do not call `supabase.auth.getUser()` directly in server code for auth gates.
 
 **Status probe (webapp):** The webapp exposes `GET /api/status` as a BFF route (`app/api/status/route.ts`) that proxies to Fastify `/status` with normal auth headers. Browser code calls `clientApiFetch("/api/status")` — same as other BFF routes. The chrome extension calls `${config.apiUrl}/status` directly (no webapp hop).
 
@@ -84,9 +86,30 @@ class ApiError extends Error {
 
 1. **One parser** — `{ error, message, code }` JSON, HTML 502 pages, and network failures are normalized in `parseApiError.ts`, not copied at 40 call sites.
 2. **Structured handling** — UI can branch on `error.status === 401` or `error.code === "BFF_UNAUTHORIZED"` instead of string-matching `"Unauthorized"`.
-3. **Future global handler** — a single toast or redirect-on-401 hook can catch `ApiError` in one place.
+3. **Global policy** — `applyTransportErrorPolicy` in `clientApiJson` handles 401 and API-unavailable redirects in one place.
 
 Mobile uses the same idea with `resolveApiErrorMessage()` + plain `Error`; webapp typed it as `ApiError` for instanceof checks.
+
+---
+
+## Failure handling — three layers (webapp)
+
+| Layer | Location | Responsibility |
+|-------|----------|----------------|
+| **1 — Server bootstrap** | `lib/app/getAppBootstrap.ts`, `app/(app)/app/layout.tsx` | Cold-load routing: unauthorized → login, unavailable → `/app/unavailable`, ok → onboarding/shell |
+| **2 — Classification** | `lib/api/availability.ts`, `lib/auth/unauthorized.ts` | `isApiUnavailableError`, `isUnauthorizedApiError` (no side effects) |
+| **3 — Transport policy** | `lib/api/applyTransportErrorPolicy.ts`, `lib/api/client.ts` | Apply 401 / unavailable side effects for browser fetches |
+
+**React Query** (`lib/query/client.ts`) owns cache config and retry rules only — not session or outage redirects.
+
+| Signal | Transport action | Sign out? |
+|--------|------------------|-----------|
+| 401 / `BFF_UNAUTHORIZED` | `handleUnauthorizedSession` → `endSession` | Yes |
+| 502 / 503 / 504 / network `TypeError` | `handleApiUnavailable` → `/app/unavailable` | No |
+| `*JsonOrNull` failure | Return `null` (401 still ends session) | Optional fetch only |
+| Raw `clientApiFetch` + `!response.ok` | Call `applyTransportResponsePolicy(response)` | Per status |
+
+**Health probe:** `GET /api/health` (BFF → Fastify `/health`) for the unavailable page status panel. `GET /api/status` remains the liveness + extension version probe.
 
 ---
 
@@ -117,6 +140,56 @@ See [api-mutations.md](./api-mutations.md): create/update endpoints return the f
 
 ---
 
+## Session teardown (webapp)
+
+**Rule: one obvious way to end an authenticated client session.** Feature code must not call `supabase.auth.signOut()` or navigate to login directly. Use `endSession()` from `apps/webapp/src/lib/auth/endSession.ts`.
+
+### When to use `endSession()`
+
+| Trigger | `reason` | Supabase sign-out scope |
+|---------|----------|-------------------------|
+| Settings → Log out | `user_initiated` | global (revokes refresh tokens) |
+| API 401 / `BFF_UNAUTHORIZED` | `session_expired` | `local` |
+| Account deleted | `account_deleted` | `local` |
+
+### What `endSession()` clears
+
+In order, each step is best-effort (failures do not block later steps):
+
+1. TanStack Query — `cancelQueries()` then `clear()`
+2. `enrichBatchStore` — `resetState()`
+3. Mantine notifications — default store and `statusNotificationsStore`
+4. Mantine modals — `closeAll()`
+5. Supabase session — `signOut()` per scope above
+6. Hard navigation — `window.location.replace` to login (never `router.push`)
+
+### 401 handling
+
+The **transport layer** detects expired sessions and delegates to session teardown:
+
+- `clientApiJson` → `applyTransportErrorPolicy` → `handleUnauthorizedSession()` → `endSession({ reason: "session_expired" })`
+- `clientApiJsonOrNull` → 401 on response status only (same session teardown)
+- Raw `clientApiFetch` callers → `applyTransportResponsePolicy(response)` when `!response.ok`
+
+Do not handle 401 in feature components or React Query global handlers.
+
+### API unavailable handling
+
+When the BFF or upstream API is down (502/503/504 or fetch network failure):
+
+- `clientApiJson` → `handleApiUnavailable()` → `/app/unavailable` (session stays active)
+- Server cold load → `getAppBootstrap()` returns `unavailable` → layout redirects before AppShell mounts
+- `clientApiJsonOrNull` does **not** redirect on unavailable — optional fetches degrade to `null`
+- Raw `clientApiFetch` callers → `applyTransportResponsePolicy(response)` when `!response.ok`
+
+Do not call `endSession()` for outage responses.
+
+### What is not session teardown
+
+Middleware and RSC layout redirects when there is **no user** (`proxy.ts`, `app/layout.tsx`) only block access — they run before the client app shell loads and do not call `endSession()`.
+
+---
+
 ## Regression guards (webapp)
 
 ```bash
@@ -140,8 +213,12 @@ npm run check-api-fetch:strict   # part of check-types
 | Concern | Path |
 |---------|------|
 | Webapp browser transport | `apps/webapp/src/lib/api/client.ts` |
+| Webapp transport policy | `apps/webapp/src/lib/api/applyTransportErrorPolicy.ts` |
+| Webapp server bootstrap | `apps/webapp/src/lib/app/getAppBootstrap.ts` |
+| Webapp API unavailable redirect | `apps/webapp/src/lib/auth/handleApiUnavailable.ts` |
 | Webapp server transport | `apps/webapp/src/lib/api/server.ts` |
-| Webapp 401 session handler | `apps/webapp/src/lib/auth/handleUnauthorizedSession.ts` |
+| Webapp session teardown | `apps/webapp/src/lib/auth/endSession.ts` |
+| Webapp 401 → session teardown | `apps/webapp/src/lib/auth/handleUnauthorizedSession.ts` |
 | Mobile transport + helpers | `apps/mobile/src/lib/api/client.ts` |
 | Extension transport | `apps/chrome-extension/src/utils/api.ts` |
 | Mutation response rule | `references/api-mutations.md` |

@@ -1,10 +1,9 @@
 "use client";
 
-import { Stack } from "@mantine/core";
 import { modals } from "@mantine/modals";
-import { ModalFooter } from "@bondery/mantine-next";
-import { useState, type ReactNode } from "react";
-import { createModalId, useModalBlocking } from "@/lib/modals";
+import { type ReactNode } from "react";
+import { createModalId } from "@/lib/modals";
+import { StandardConfirmModalBody } from "./StandardConfirmModalBody";
 
 interface OpenStandardConfirmModalOptions {
   title: ReactNode;
@@ -15,60 +14,6 @@ interface OpenStandardConfirmModalOptions {
   confirmColor?: string;
   confirmLeftSection?: ReactNode;
   centered?: boolean;
-}
-
-interface StandardConfirmModalBodyProps {
-  modalId: string;
-  message: ReactNode;
-  confirmLabel: string;
-  cancelLabel: string;
-  onConfirm: () => Promise<void> | void;
-  confirmColor?: string;
-  confirmLeftSection?: ReactNode;
-}
-
-function StandardConfirmModalBody({
-  modalId,
-  message,
-  confirmLabel,
-  cancelLabel,
-  onConfirm,
-  confirmColor,
-  confirmLeftSection,
-}: StandardConfirmModalBodyProps) {
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  useModalBlocking(modalId, isSubmitting);
-
-  const handleConfirm = async () => {
-    setIsSubmitting(true);
-
-    try {
-      await onConfirm();
-      modals.close(modalId);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  return (
-    <Stack gap="md">
-      {message}
-      <ModalFooter
-        cancelLabel={cancelLabel}
-        onCancel={() => modals.close(modalId)}
-        cancelDisabled={isSubmitting}
-        actionLabel={confirmLabel}
-        actionColor={confirmColor}
-        actionLeftSection={confirmLeftSection}
-        actionLoading={isSubmitting}
-        actionDisabled={isSubmitting}
-        onAction={() => {
-          void handleConfirm();
-        }}
-      />
-    </Stack>
-  );
 }
 
 export function openStandardConfirmModal({
@@ -87,8 +32,6 @@ export function openStandardConfirmModal({
     modalId,
     title,
     centered,
-    closeOnClickOutside: false,
-    closeOnEscape: false,
     children: (
       <StandardConfirmModalBody
         modalId={modalId}

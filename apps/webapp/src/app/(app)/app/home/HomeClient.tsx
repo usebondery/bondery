@@ -107,8 +107,8 @@ export function HomeClient() {
 
         return {
           id: participantId,
-          firstName: participant.firstName || participant.first_name || "Unknown",
-          lastName: participant.lastName || participant.last_name || null,
+          firstName: participant.firstName || "Unknown",
+          lastName: participant.lastName || null,
           avatar: participant.avatar || null,
         } as Contact;
       })

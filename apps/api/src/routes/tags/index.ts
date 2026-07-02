@@ -455,6 +455,65 @@ export const tagRoutes: AppRoutePlugin = async (fastify) => {
 
   /**
 
+   * DELETE /api/tags - Delete multiple tags
+
+   */
+
+  fastify.delete(
+
+    "/",
+
+    {
+
+      schema: {
+        description: "Delete multiple tags by ID.",
+        body: idsRequestBodySchema,
+        response: withOkResponse(
+          messageResponseSchema,
+          "Tags deleted successfully",
+        ),
+      } satisfies FastifyZodOpenApiSchema,
+
+    },
+
+    async (request, reply) => {
+
+      const { client, user } = getAuth(request);
+
+      const { ids } = request.body;
+
+
+
+      const { error } = await client
+
+        .from("tags")
+
+        .delete()
+
+        .eq("user_id", user.id)
+
+        .in("id", ids);
+
+
+
+      if (error) {
+
+        return reply.status(500).send({ error: error.message });
+
+      }
+
+
+
+      return { message: "Tags deleted successfully" };
+
+    },
+
+  );
+
+
+
+  /**
+
    * GET /api/tags/:id - Get a single tag
 
    */
@@ -661,65 +720,6 @@ export const tagRoutes: AppRoutePlugin = async (fastify) => {
 
   /**
 
-   * DELETE /api/tags - Delete multiple tags
-
-   */
-
-  fastify.delete(
-
-    "/",
-
-    {
-
-      schema: {
-        description: "Delete multiple tags by ID.",
-        body: idsRequestBodySchema,
-        response: withOkResponse(
-          messageResponseSchema,
-          "Tags deleted successfully",
-        ),
-      } satisfies FastifyZodOpenApiSchema,
-
-    },
-
-    async (request, reply) => {
-
-      const { client, user } = getAuth(request);
-
-      const { ids } = request.body;
-
-
-
-      const { error } = await client
-
-        .from("tags")
-
-        .delete()
-
-        .eq("user_id", user.id)
-
-        .in("id", ids);
-
-
-
-      if (error) {
-
-        return reply.status(500).send({ error: error.message });
-
-      }
-
-
-
-      return { message: "Tags deleted successfully" };
-
-    },
-
-  );
-
-
-
-  /**
-
    * GET /api/tags/:id/contacts - Get contacts that have this tag
 
    */
@@ -790,7 +790,7 @@ export const tagRoutes: AppRoutePlugin = async (fastify) => {
 
         lastName: string | null;
 
-        updatedAt: string | null;
+        updatedAt: string;
 
         hasAvatar: boolean;
 

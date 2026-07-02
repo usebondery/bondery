@@ -43,8 +43,8 @@ import ContactsTable, {
   type SortOrder,
 } from "@/app/(app)/app/components/contacts/ContactsTableV2";
 import { LocationLookupInput } from "@/app/(app)/app/components/LocationLookupInput";
-import { useOpenDeleteContactModal } from "@/app/(app)/app/components/contacts/openDeleteContactModal";
-import { useOpenDeleteContactsModal } from "@/app/(app)/app/components/contacts/openDeleteContactsModal";
+import { openDeleteContactModal } from "@/app/(app)/app/components/contacts/openDeleteContactModal";
+import { openDeleteContactsModal } from "@/app/(app)/app/components/contacts/openDeleteContactsModal";
 import { openAddPeopleToGroupSelectionModal } from "@/app/(app)/app/people/components/AddPeopleToGroupSelectionModal";
 import { openMergeWithModal } from "@/app/(app)/app/people/components/MergeWithModal";
 import { formatContactName } from "@/lib/nameHelpers";
@@ -105,8 +105,6 @@ function sortPins(list: MapPin[], order: SortOrder): MapPin[] {
 export function MapPageClient({ view }: MapPageClientProps) {
   const t = useTranslations("MapPage");
   const tPeople = useTranslations("PeoplePage");
-  const openDeleteContactModal = useOpenDeleteContactModal();
-  const openDeleteContactsModal = useOpenDeleteContactsModal();
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();

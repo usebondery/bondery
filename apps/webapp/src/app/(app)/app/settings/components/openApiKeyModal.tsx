@@ -160,8 +160,6 @@ export function openApiKeyModal(options: OpenApiKeyModalOptions) {
     title: <ModalTitle text={options.t("CreateTitle")} icon={<IconKey size={20} stroke={1.5} />} />,
     size: "md",
     centered: true,
-    closeOnClickOutside: true,
-    withCloseButton: true,
     children: <ApiKeyModalBody modalId={modalId} {...options} />,
   });
 }

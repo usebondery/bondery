@@ -3,8 +3,9 @@ import { GROUP_LABEL_MAX_LENGTH } from "#constants/index.js";
 import { hexColorSchema } from "#primitives/index.js";
 import { contactPreviewSchema, contactSchema } from "#entities/contact.js";
 import {
+  createdAtSchema,
+  entityAuditSchema,
   entityIdentitySchema,
-  entityNullableAuditSchema,
   idsRequestSchema,
   labelFieldSchema,
   makeCollectionResponseSchema,
@@ -20,6 +21,12 @@ import {
   EXAMPLE_TAG_UPDATE_RESPONSE,
   EXAMPLE_TAGS_LIST_RESPONSE,
 } from "#openapi/fixtures/schema-examples.js";
+import {
+  EXAMPLE_CONTACT_TAG_REQUEST,
+  EXAMPLE_CREATE_TAG_REQUEST,
+  EXAMPLE_PATCH_TAG_REQUEST,
+  EXAMPLE_TAG_MEMBERSHIP_REQUEST,
+} from "#openapi/fixtures/requests.js";
 
 const tagLabelSchema = labelFieldSchema(GROUP_LABEL_MAX_LENGTH);
 
@@ -31,7 +38,7 @@ const tagEditableFieldsSchema = z.object({
 export const tagSchema = entityIdentitySchema.extend({
   label: z.string(),
   color: z.string().nullable(),
-}).extend(entityNullableAuditSchema.shape);
+}).extend(entityAuditSchema.shape);
 
 export const tagWithCountSchema = tagSchema.extend({
   contactCount: z.number(),
@@ -43,15 +50,19 @@ export const peopleTagSchema = z.object({
   personId: z.string(),
   tagId: z.string(),
   userId: z.string(),
-  createdAt: z.string().nullable(),
+  created_at: createdAtSchema,
 });
 
 export const createTagSchema = tagEditableFieldsSchema;
 
 /** API payload for creating a tag. */
-export const createTagInputSchema = z.object({ label: tagLabelSchema });
+export const createTagInputSchema = z.object({ label: tagLabelSchema }).meta({
+  example: EXAMPLE_CREATE_TAG_REQUEST,
+});
 
-export const updateTagSchema = createTagSchema.partial();
+export const updateTagSchema = createTagSchema.partial().meta({
+  example: EXAMPLE_PATCH_TAG_REQUEST,
+});
 
 export const tagResponseSchema = z
   .object({
@@ -87,7 +98,13 @@ export const contactTagListResponseSchema = makeCollectionResponseSchema(
   tagSchema,
 ).meta({ example: EXAMPLE_CONTACT_TAG_LIST_RESPONSE });
 
-export const tagMembershipRequestSchema = personIdsSelectionSchema;
+export const tagMembershipRequestSchema = personIdsSelectionSchema.meta({
+  example: EXAMPLE_TAG_MEMBERSHIP_REQUEST,
+});
+
+export const contactTagBodySchema = z.object({
+  tagId: z.string().min(1),
+}).meta({ example: EXAMPLE_CONTACT_TAG_REQUEST });
 
 export const deleteTagsRequestSchema = idsRequestSchema;
 

@@ -8,6 +8,10 @@ import {
   EXAMPLE_API_SUCCESS_RESPONSE,
   EXAMPLE_PHOTO_UPLOAD_RESPONSE,
 } from "#openapi/fixtures/schema-examples.js";
+import {
+  EXAMPLE_FEEDBACK_REQUEST,
+  EXAMPLE_SHARE_CONTACT_REQUEST,
+} from "#openapi/fixtures/requests.js";
 
 export const apiErrorResponseSchema = z
   .object({
@@ -50,13 +54,13 @@ export const shareContactRequestSchema = z.object({
   message: shareContactEmailSchema.shape.message,
   sendCopy: z.boolean(),
   selectedFields: z.array(shareableFieldSchema),
-});
+}).meta({ example: EXAMPLE_SHARE_CONTACT_REQUEST });
 
 export const feedbackFormSchema = z.object({
   npsScore: z.number().min(0).max(10),
   npsReason: z.string(),
   generalFeedback: z.string(),
-});
+}).meta({ example: EXAMPLE_FEEDBACK_REQUEST });
 
 export const inputMaxLengthsSchema = z.object({
   firstName: z.number(),

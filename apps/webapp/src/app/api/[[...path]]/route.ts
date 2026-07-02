@@ -1,4 +1,4 @@
-import { getAuthHeaders } from "@/lib/authHeaders";
+import { resolveServerSession } from "@/lib/auth/resolveServerSession";
 import { serverApiFetch } from "@/lib/api/server";
 import { NextRequest } from "next/server";
 
@@ -9,16 +9,9 @@ type RouteContext = { params: Promise<{ path?: string[] }> };
  * Bearer token — the same auth path used by server components and chat routes.
  */
 async function proxyToApi(request: NextRequest, pathSegments: string[]) {
-  const authHeaders = await getAuthHeaders();
-  const authorization =
-    typeof authHeaders === "object" &&
-    authHeaders !== null &&
-    !Array.isArray(authHeaders) &&
-    "Authorization" in authHeaders
-      ? authHeaders.Authorization
-      : undefined;
+  const session = await resolveServerSession();
 
-  if (!authorization) {
+  if (session.status !== "ok") {
     return Response.json({ error: "Unauthorized - Please log in", code: "BFF_UNAUTHORIZED" }, { status: 401 });
   }
 

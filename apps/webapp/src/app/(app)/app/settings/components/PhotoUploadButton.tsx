@@ -1,10 +1,8 @@
 "use client";
 
 import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
-import { PhotoUploadModal } from "./PhotoUploadModal";
-import { PhotoConfirmModal } from "./PhotoConfirmModal";
 import { UserAvatar } from "@/app/(app)/app/components/UserAvatar";
-import { openPhotoUploadModal } from "@/lib/photoUpload";
+import { openPhotoUploadModal } from "@/app/(app)/app/components/photo/openPhotoUploadModal";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import { getQueryClient } from "@/lib/query/client";
 import { invalidateSettings } from "@/lib/query/invalidation";
@@ -17,17 +15,13 @@ interface PhotoUploadButtonProps {
 export function PhotoUploadButton({ avatarUrl, userName }: PhotoUploadButtonProps) {
   const t = useTranslations("SettingsPage.Profile");
 
-  const openUploadModal = () => {
-    openPhotoUploadModal(
-      {
-        uploadEndpoint: API_ROUTES.ME_PHOTO,
-        avatarUrl,
-        displayName: userName,
-        onSuccess: async () => {
-          await invalidateSettings(getQueryClient());
-        },
+  const handleOpenUploadModal = () => {
+    openPhotoUploadModal({
+      uploadEndpoint: API_ROUTES.ME_PHOTO,
+      onSuccess: async () => {
+        await invalidateSettings(getQueryClient());
       },
-      {
+      translations: {
         TitleModal: t("TitleModal"),
         AttachProfilePhoto: t("AttachProfilePhoto"),
         UpdateError: t("UpdateError"),
@@ -42,9 +36,7 @@ export function PhotoUploadButton({ avatarUrl, userName }: PhotoUploadButtonProp
         PhotoUpdateSuccess: t("PhotoUpdateSuccess"),
         PhotoUpdateError: t("PhotoUpdateError"),
       },
-      PhotoUploadModal,
-      PhotoConfirmModal,
-    );
+    });
   };
 
   return (
@@ -54,7 +46,7 @@ export function PhotoUploadButton({ avatarUrl, userName }: PhotoUploadButtonProp
       size="lg"
       radius={"xl"}
       style={{ cursor: "pointer" }}
-      onClick={openUploadModal}
+      onClick={handleOpenUploadModal}
     />
   );
 }

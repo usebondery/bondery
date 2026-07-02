@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { contactAddressTypeSchema } from "#entities/address.js";
+import { nullableDateTimeSchema } from "#entities/_shared.js";
 import { channelTypeSchema } from "#primitives/index.js";
 import { importantDateTypeSchema } from "#entities/important-date.js";
 import {
@@ -11,6 +12,14 @@ import {
   EXAMPLE_VCARD_IMPORT_COMMIT_RESPONSE,
   EXAMPLE_VCARD_PARSE_RESPONSE,
 } from "#openapi/fixtures/schema-examples.js";
+import {
+  EXAMPLE_ENRICH_CONTACT_REQUEST,
+  EXAMPLE_EXTENSION_REDIRECT_REQUEST,
+  EXAMPLE_INSTAGRAM_IMPORT_COMMIT_REQUEST,
+  EXAMPLE_LINKEDIN_DATA_REQUEST,
+  EXAMPLE_LINKEDIN_IMPORT_COMMIT_REQUEST,
+  EXAMPLE_VCARD_IMPORT_COMMIT_REQUEST,
+} from "#openapi/fixtures/requests.js";
 
 export const scrapedWorkHistoryEntrySchema = z.object({
   title: z.string().optional(),
@@ -48,7 +57,7 @@ export const redirectRequestSchema = z.object({
   workHistory: z.array(scrapedWorkHistoryEntrySchema).optional(),
   educationHistory: z.array(scrapedEducationEntrySchema).optional(),
   linkedinBio: z.string().optional(),
-});
+}).meta({ example: EXAMPLE_EXTENSION_REDIRECT_REQUEST });
 
 export const enrichContactRequestSchema = z.object({
   firstName: z.string().optional(),
@@ -60,12 +69,12 @@ export const enrichContactRequestSchema = z.object({
   linkedinBio: z.string().nullable().optional(),
   workHistory: z.array(scrapedWorkHistoryEntrySchema).optional(),
   educationHistory: z.array(scrapedEducationEntrySchema).optional(),
-});
+}).meta({ example: EXAMPLE_ENRICH_CONTACT_REQUEST });
 
 /** POST /api/contacts/:id/linkedin-data body. */
 export const linkedInDataRequestSchema = z.object({
   workHistory: z.array(scrapedWorkHistoryEntrySchema).optional(),
-});
+}).meta({ example: EXAMPLE_LINKEDIN_DATA_REQUEST });
 
 export const redirectResponseSchema = z
   .object({
@@ -88,7 +97,7 @@ export const linkedInPreparedContactSchema = z.object({
   email: z.string().nullable(),
   company: z.string().nullable(),
   position: z.string().nullable(),
-  connectedAt: z.string().nullable(),
+  connectedAt: nullableDateTimeSchema,
   connectedOnRaw: z.string().nullable(),
   isValid: z.boolean(),
   issues: z.array(z.string()),
@@ -105,7 +114,7 @@ export const linkedInParseResponseSchema = z
 
 export const linkedInImportCommitRequestSchema = z.object({
   contacts: z.array(linkedInPreparedContactSchema),
-});
+}).meta({ example: EXAMPLE_LINKEDIN_IMPORT_COMMIT_REQUEST });
 
 export const linkedInImportCommitResponseSchema = z
   .object({
@@ -134,7 +143,7 @@ export const instagramPreparedContactSchema = z.object({
   instagramUsername: z.string(),
   alreadyExists: z.boolean(),
   likelyPerson: z.boolean(),
-  connectedAt: z.string().nullable(),
+  connectedAt: nullableDateTimeSchema,
   connectedOnRaw: z.number().nullable(),
   sources: z.array(instagramImportSourceSchema),
   isValid: z.boolean(),
@@ -152,7 +161,7 @@ export const instagramParseResponseSchema = z
 
 export const instagramImportCommitRequestSchema = z.object({
   contacts: z.array(instagramPreparedContactSchema),
-});
+}).meta({ example: EXAMPLE_INSTAGRAM_IMPORT_COMMIT_REQUEST });
 
 export const instagramImportCommitResponseSchema = z
   .object({
@@ -233,7 +242,7 @@ export const vcardParseResponseSchema = z
 
 export const vcardImportCommitRequestSchema = z.object({
   contacts: z.array(vcardPreparedContactSchema),
-});
+}).meta({ example: EXAMPLE_VCARD_IMPORT_COMMIT_REQUEST });
 
 export const vcardImportCommitResponseSchema = z
   .object({

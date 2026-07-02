@@ -1,7 +1,7 @@
-import type { Tag, TagWithCount } from "@bondery/schemas";
+import type { TagWithCount } from "@bondery/schemas";
 import type { TagSortOrder } from "../../lib/preferences/useMobilePreferences";
 
-function compareTagLabels(left: Tag, right: Tag): number {
+function compareTagLabels(left: TagWithCount, right: TagWithCount): number {
   return (left.label ?? "").localeCompare(right.label ?? "");
 }
 
@@ -28,6 +28,6 @@ export function sortTags(tags: TagWithCount[], sortOrder: TagSortOrder): TagWith
   }
 }
 
-export function sortTagsByLabel<T extends Tag>(tags: T[]): T[] {
-  return sortTags(tags as TagWithCount[], "alpha-asc") as T[];
+export function sortTagsByLabel<T extends TagWithCount>(tags: T[]): T[] {
+  return [...tags].sort(compareTagLabels);
 }

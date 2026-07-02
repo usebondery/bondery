@@ -29,7 +29,7 @@ export async function getMyselfProfile(
     {
       id: userId,
       hasAvatar: myself?.has_avatar ?? false,
-      updatedAt: myself?.updated_at ?? null,
+      updatedAt: myself?.updated_at,
     },
     avatarOptions,
   );

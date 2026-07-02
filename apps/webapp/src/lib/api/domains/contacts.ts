@@ -11,7 +11,7 @@ import type {
   RelationshipType,
   UpdateContactInput,
 } from "@bondery/schemas";
-import { clientApiFetch, clientApiJson } from "@/lib/api/client";
+import { applyTransportResponsePolicy, clientApiFetch, clientApiJson } from "@/lib/api/client";
 
 export async function listContacts(path: string): Promise<{
   contacts?: Contact[];
@@ -154,7 +154,11 @@ export async function declineMergeRecommendation(recommendationId: string): Prom
 }
 
 export async function downloadContactVcard(id: string): Promise<Response> {
-  return clientApiFetch(`${API_ROUTES.CONTACTS}/${id}/vcard`);
+  const response = await clientApiFetch(`${API_ROUTES.CONTACTS}/${id}/vcard`);
+  if (!response.ok) {
+    applyTransportResponsePolicy(response);
+  }
+  return response;
 }
 
 export async function createContactRelationship(

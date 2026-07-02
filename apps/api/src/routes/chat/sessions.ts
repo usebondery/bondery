@@ -5,7 +5,6 @@
 
 import type { AppRoutePlugin } from "../../lib/fastify-types.js";
 import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
-import { z } from "zod";
 import { getAuth } from "../../lib/auth.js";
 import { applyOpenApiRouteMeta } from "../../lib/openapi-route-meta.js";
 import {
@@ -14,12 +13,10 @@ import {
 } from "../../lib/openapi-route-responses.js";
 import {
   chatMessagesListResponseSchema,
-  paginationMetaSchema,
+  chatSessionCreatedResponseSchema,
+  chatSessionsListResponseSchema,
+  updateChatSessionBodySchema,
 } from "@bondery/schemas";
-import {
-  EXAMPLE_CHAT_SESSION_CREATED_RESPONSE,
-  EXAMPLE_CHAT_SESSIONS_WIRE_LIST_RESPONSE,
-} from "@bondery/schemas/openapi/fixtures/responses";
 import { noContentResponse, standardErrorResponses } from "@bondery/schemas/http/responses";
 import {
   chatMessagesQuerySchema,
@@ -32,32 +29,11 @@ import {
   parsePagination,
 } from "../../lib/pagination.js";
 
-const chatSessionListItemSchema = z.object({
-  id: z.string(),
-  title: z.string().nullable(),
-  created_at: z.string().nullable(),
-  updated_at: z.string().nullable(),
-});
+const CHAT_SESSION_SELECT =
+  "id, userId:user_id, title, createdAt:created_at, updatedAt:updated_at";
 
-const chatSessionsListResponseWireSchema = z
-  .object({
-    sessions: z.array(chatSessionListItemSchema),
-    pagination: paginationMetaSchema,
-  })
-  .meta({ example: EXAMPLE_CHAT_SESSIONS_WIRE_LIST_RESPONSE });
-
-const updateChatSessionBodySchema = z.object({
-  title: z.string(),
-});
-
-const chatSessionCreatedResponseSchema = z
-  .object({
-    data: z.object({
-      id: z.string(),
-      created_at: z.string().nullable(),
-    }),
-  })
-  .meta({ example: EXAMPLE_CHAT_SESSION_CREATED_RESPONSE });
+const CHAT_MESSAGE_SELECT =
+  "id, sessionId:session_id, role, content, createdAt:created_at";
 
 export const chatSessionRoutes: AppRoutePlugin = async (fastify) => {
   fastify.addHook("onRoute", (routeOptions) => {
@@ -74,7 +50,7 @@ export const chatSessionRoutes: AppRoutePlugin = async (fastify) => {
       schema: {
         description: "List chat sessions for the authenticated user.",
         querystring: paginationQuerySchema,
-        response: withOkResponse(chatSessionsListResponseWireSchema, "Paginated chat sessions"),
+        response: withOkResponse(chatSessionsListResponseSchema, "Paginated chat sessions"),
       } satisfies FastifyZodOpenApiSchema,
     },
     async (request, reply) => {
@@ -87,7 +63,7 @@ export const chatSessionRoutes: AppRoutePlugin = async (fastify) => {
         count,
       } = await client
         .from("chat_sessions")
-        .select("id, title, created_at, updated_at", { count: "exact" })
+        .select(CHAT_SESSION_SELECT, { count: "exact" })
         .eq("user_id", user.id)
         .order("updated_at", { ascending: false })
         .range(offset, offset + limit - 1);
@@ -121,21 +97,22 @@ export const chatSessionRoutes: AppRoutePlugin = async (fastify) => {
       } satisfies FastifyZodOpenApiSchema,
     },
     async (request, reply) => {
-    const { client, user } = getAuth(request);
+      const { client, user } = getAuth(request);
 
-    const { data, error } = await client
-      .from("chat_sessions")
-      .insert({ user_id: user.id })
-      .select("id, created_at")
-      .single();
+      const { data, error } = await client
+        .from("chat_sessions")
+        .insert({ user_id: user.id })
+        .select("id, createdAt:created_at")
+        .single();
 
-    if (error) {
-      request.log.error(error, "Failed to create chat session");
-      return reply.status(500).send({ error: "Failed to create session" });
-    }
+      if (error) {
+        request.log.error(error, "Failed to create chat session");
+        return reply.status(500).send({ error: "Failed to create session" });
+      }
 
-    return reply.status(201).send({ data });
-  });
+      return reply.status(201).send({ data });
+    },
+  );
 
   fastify.patch(
     "/:sessionId",
@@ -214,7 +191,7 @@ export const chatSessionRoutes: AppRoutePlugin = async (fastify) => {
         count,
       } = await client
         .from("chat_messages")
-        .select("id, session_id, role, content, created_at", { count: "exact" })
+        .select(CHAT_MESSAGE_SELECT, { count: "exact" })
         .eq("session_id", sessionId)
         .order("created_at", { ascending: true })
         .range(offset, offset + limit - 1);
@@ -238,5 +215,4 @@ export const chatSessionRoutes: AppRoutePlugin = async (fastify) => {
       return reply.send(buildPaginatedResponse("messages", items, pagination));
     },
   );
-}
-
+};

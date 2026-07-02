@@ -1,9 +1,7 @@
 "use client";
 
 import { ContactAvatar } from "./ContactAvatar";
-import { openPhotoUploadModal } from "@/lib/photoUpload";
-import { PhotoUploadModal } from "@/app/(app)/app/settings/components/PhotoUploadModal";
-import { PhotoConfirmModal } from "@/app/(app)/app/settings/components/PhotoConfirmModal";
+import { openPhotoUploadModal } from "@/app/(app)/app/components/photo/openPhotoUploadModal";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import { getQueryClient } from "@/lib/query/client";
 import {
@@ -35,21 +33,17 @@ export function ContactPhotoUploadButton({
 }: ContactPhotoUploadButtonProps) {
   const t = useTranslations("ContactPhotoUpload");
 
-  const openUploadModal = () => {
-    openPhotoUploadModal(
-      {
-        uploadEndpoint: `${API_ROUTES.CONTACTS}/${contactId}/photo`,
-        avatarUrl,
-        displayName: contactName,
-        onSuccess: async () => {
-          const queryClient = getQueryClient();
-          await Promise.all([
-            invalidateContactDetail(queryClient, contactId),
-            isMyselfContact ? invalidateSettings(queryClient) : Promise.resolve(),
-          ]);
-        },
+  const handleOpenUploadModal = () => {
+    openPhotoUploadModal({
+      uploadEndpoint: `${API_ROUTES.CONTACTS}/${contactId}/photo`,
+      onSuccess: async () => {
+        const queryClient = getQueryClient();
+        await Promise.all([
+          invalidateContactDetail(queryClient, contactId),
+          isMyselfContact ? invalidateSettings(queryClient) : Promise.resolve(),
+        ]);
       },
-      {
+      translations: {
         TitleModal: t("TitleModal"),
         AttachProfilePhoto: t("AttachProfilePhoto"),
         UpdateError: t("UpdateError"),
@@ -64,9 +58,7 @@ export function ContactPhotoUploadButton({
         PhotoUpdateSuccess: t("PhotoUpdateSuccess"),
         PhotoUpdateError: t("PhotoUpdateError"),
       },
-      PhotoUploadModal,
-      PhotoConfirmModal,
-    );
+    });
   };
 
   return (
@@ -77,7 +69,7 @@ export function ContactPhotoUploadButton({
       lastName={lastName}
       size={128}
       className="cursor-pointer rounded-full!"
-      onClick={openUploadModal}
+      onClick={handleOpenUploadModal}
     />
   );
 }

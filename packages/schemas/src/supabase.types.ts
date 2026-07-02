@@ -11,7 +11,7 @@ export type Database = {
     Tables: {
       api_keys: {
         Row: {
-          created_at: string | null
+          created_at: string
           id: string
           key_hash: string
           key_id: string
@@ -19,11 +19,11 @@ export type Database = {
           label: string
           last_used_at: string | null
           permission: string
-          updated_at: string | null
+          updated_at: string
           user_id: string
         }
         Insert: {
-          created_at?: string | null
+          created_at?: string
           id?: string
           key_hash: string
           key_id: string
@@ -31,11 +31,11 @@ export type Database = {
           label: string
           last_used_at?: string | null
           permission: string
-          updated_at?: string | null
+          updated_at?: string
           user_id: string
         }
         Update: {
-          created_at?: string | null
+          created_at?: string
           id?: string
           key_hash?: string
           key_id?: string
@@ -43,7 +43,7 @@ export type Database = {
           label?: string
           last_used_at?: string | null
           permission?: string
-          updated_at?: string | null
+          updated_at?: string
           user_id?: string
         }
         Relationships: []
@@ -51,21 +51,21 @@ export type Database = {
       chat_messages: {
         Row: {
           content: Json
-          created_at: string | null
+          created_at: string
           id: string
           role: string
           session_id: string
         }
         Insert: {
           content: Json
-          created_at?: string | null
+          created_at?: string
           id?: string
           role: string
           session_id: string
         }
         Update: {
           content?: Json
-          created_at?: string | null
+          created_at?: string
           id?: string
           role?: string
           session_id?: string
@@ -82,24 +82,24 @@ export type Database = {
       }
       chat_sessions: {
         Row: {
-          created_at: string | null
+          created_at: string
           id: string
           title: string | null
-          updated_at: string | null
+          updated_at: string
           user_id: string
         }
         Insert: {
-          created_at?: string | null
+          created_at?: string
           id?: string
           title?: string | null
-          updated_at?: string | null
+          updated_at?: string
           user_id: string
         }
         Update: {
-          created_at?: string | null
+          created_at?: string
           id?: string
           title?: string | null
-          updated_at?: string | null
+          updated_at?: string
           user_id?: string
         }
         Relationships: []
@@ -167,29 +167,29 @@ export type Database = {
       groups: {
         Row: {
           color: string | null
-          created_at: string | null
+          created_at: string
           emoji: string | null
           id: string
           label: string
-          updated_at: string | null
+          updated_at: string
           user_id: string
         }
         Insert: {
           color?: string | null
-          created_at?: string | null
+          created_at?: string
           emoji?: string | null
           id?: string
           label: string
-          updated_at?: string | null
+          updated_at?: string
           user_id: string
         }
         Update: {
           color?: string | null
-          created_at?: string | null
+          created_at?: string
           emoji?: string | null
           id?: string
           label?: string
-          updated_at?: string | null
+          updated_at?: string
           user_id?: string
         }
         Relationships: []
@@ -333,7 +333,7 @@ export type Database = {
       }
       people: {
         Row: {
-          created_at: string | null
+          created_at: string
           first_name: string
           gis_point: unknown
           has_avatar: boolean
@@ -352,11 +352,11 @@ export type Database = {
           notes: string | null
           notes_updated_at: string | null
           timezone: string | null
-          updated_at: string | null
+          updated_at: string
           user_id: string
         }
         Insert: {
-          created_at?: string | null
+          created_at?: string
           first_name: string
           gis_point?: unknown
           has_avatar?: boolean
@@ -375,11 +375,11 @@ export type Database = {
           notes?: string | null
           notes_updated_at?: string | null
           timezone?: string | null
-          updated_at?: string | null
+          updated_at?: string
           user_id: string
         }
         Update: {
-          created_at?: string | null
+          created_at?: string
           first_name?: string
           gis_point?: unknown
           has_avatar?: boolean
@@ -398,7 +398,7 @@ export type Database = {
           notes?: string | null
           notes_updated_at?: string | null
           timezone?: string | null
-          updated_at?: string | null
+          updated_at?: string
           user_id?: string
         }
         Relationships: [
@@ -599,21 +599,21 @@ export type Database = {
       }
       people_groups: {
         Row: {
-          created_at: string | null
+          created_at: string
           group_id: string
           id: string
           person_id: string
           user_id: string
         }
         Insert: {
-          created_at?: string | null
+          created_at?: string
           group_id: string
           id?: string
           person_id: string
           user_id: string
         }
         Update: {
-          created_at?: string | null
+          created_at?: string
           group_id?: string
           id?: string
           person_id?: string
@@ -907,21 +907,21 @@ export type Database = {
       }
       people_tags: {
         Row: {
-          created_at: string | null
+          created_at: string
           id: string
           person_id: string
           tag_id: string
           user_id: string
         }
         Insert: {
-          created_at?: string | null
+          created_at?: string
           id?: string
           person_id: string
           tag_id: string
           user_id: string
         }
         Update: {
-          created_at?: string | null
+          created_at?: string
           id?: string
           person_id?: string
           tag_id?: string
@@ -1027,38 +1027,38 @@ export type Database = {
       subscriptions: {
         Row: {
           cancel_at_period_end: boolean
-          created_at: string | null
+          created_at: string
           current_period_end: string | null
           current_period_start: string | null
           id: string
           polar_customer_id: string
           polar_subscription_id: string
           status: string
-          updated_at: string | null
+          updated_at: string
           user_id: string
         }
         Insert: {
           cancel_at_period_end?: boolean
-          created_at?: string | null
+          created_at?: string
           current_period_end?: string | null
           current_period_start?: string | null
           id?: string
           polar_customer_id: string
           polar_subscription_id: string
           status?: string
-          updated_at?: string | null
+          updated_at?: string
           user_id: string
         }
         Update: {
           cancel_at_period_end?: boolean
-          created_at?: string | null
+          created_at?: string
           current_period_end?: string | null
           current_period_start?: string | null
           id?: string
           polar_customer_id?: string
           polar_subscription_id?: string
           status?: string
-          updated_at?: string | null
+          updated_at?: string
           user_id?: string
         }
         Relationships: []
@@ -1066,26 +1066,26 @@ export type Database = {
       tags: {
         Row: {
           color: string | null
-          created_at: string | null
+          created_at: string
           id: string
           label: string
-          updated_at: string | null
+          updated_at: string
           user_id: string
         }
         Insert: {
           color?: string | null
-          created_at?: string | null
+          created_at?: string
           id?: string
           label: string
-          updated_at?: string | null
+          updated_at?: string
           user_id: string
         }
         Update: {
           color?: string | null
-          created_at?: string | null
+          created_at?: string
           id?: string
           label?: string
-          updated_at?: string | null
+          updated_at?: string
           user_id?: string
         }
         Relationships: []
@@ -1174,7 +1174,7 @@ export type Database = {
           ai_messages_this_month: number
           ai_messages_used: number
           color_scheme: Database["public"]["Enums"]["color_scheme"]
-          created_at: string | null
+          created_at: string
           group_sort_order: string
           id: string
           is_admin: boolean
@@ -1187,7 +1187,7 @@ export type Database = {
           tag_sort_order: string
           time_format: string
           timezone: string | null
-          updated_at: string | null
+          updated_at: string
           user_id: string
         }
         Insert: {
@@ -1195,7 +1195,7 @@ export type Database = {
           ai_messages_this_month?: number
           ai_messages_used?: number
           color_scheme?: Database["public"]["Enums"]["color_scheme"]
-          created_at?: string | null
+          created_at?: string
           group_sort_order?: string
           id?: string
           is_admin?: boolean
@@ -1208,7 +1208,7 @@ export type Database = {
           tag_sort_order?: string
           time_format?: string
           timezone?: string | null
-          updated_at?: string | null
+          updated_at?: string
           user_id: string
         }
         Update: {
@@ -1216,7 +1216,7 @@ export type Database = {
           ai_messages_this_month?: number
           ai_messages_used?: number
           color_scheme?: Database["public"]["Enums"]["color_scheme"]
-          created_at?: string | null
+          created_at?: string
           group_sort_order?: string
           id?: string
           is_admin?: boolean
@@ -1229,7 +1229,7 @@ export type Database = {
           tag_sort_order?: string
           time_format?: string
           timezone?: string | null
-          updated_at?: string | null
+          updated_at?: string
           user_id?: string
         }
         Relationships: []

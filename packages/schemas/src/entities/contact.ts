@@ -2,17 +2,16 @@ import { z } from "zod";
 import { CONTACT_FIELD_MAX_LENGTHS } from "#constants/index.js";
 import { contactAddressReadSchema } from "#entities/address.js";
 import { emailEntryEntitySchema, phoneEntryEntitySchema } from "#entities/channels.js";
-import { importantDateSchema } from "#entities/important-date.js";
+import { importantDateSchema, replaceImportantDatesSchema } from "#entities/important-date.js";
 import { contactIdSchema } from "#contact-id.js";
 import {
-  createdAtSchema,
+  entityAuditSchema,
   entityIdentitySchema,
-  entityNullableAuditSchema,
   idsRequestSchema,
   makeCollectionResponseSchema,
   makePaginatedListResponseSchema,
   messageResponseSchema,
-  updatedAtSchema,
+  nullableDateTimeSchema,
 } from "#entities/_shared.js";
 import {
   EXAMPLE_BY_SOCIAL_LOOKUP_RESPONSE,
@@ -32,6 +31,15 @@ import {
   EXAMPLE_MAP_PINS_RESPONSE,
   EXAMPLE_MESSAGE_RESPONSE,
 } from "#openapi/fixtures/schema-examples.js";
+import {
+  EXAMPLE_CREATE_CONTACT_REQUEST,
+  EXAMPLE_CREATE_RELATIONSHIP_REQUEST,
+  EXAMPLE_DELETE_CONTACTS_REQUEST,
+  EXAMPLE_ENRICH_QUEUE_INIT_REQUEST,
+  EXAMPLE_ENRICH_QUEUE_PATCH_REQUEST,
+  EXAMPLE_PATCH_CONTACT_REQUEST,
+  EXAMPLE_PATCH_RELATIONSHIP_REQUEST,
+} from "#openapi/fixtures/requests.js";
 
 const trimmedNameField = (max: number, label: string) =>
   z
@@ -60,13 +68,11 @@ export const contactSchema = entityIdentitySchema.extend({
   headline: z.string().nullable(),
   location: z.string().nullable(),
   notes: z.string().nullable(),
-  notesUpdatedAt: z.string().nullable().optional(),
+  notesUpdatedAt: nullableDateTimeSchema.optional(),
   avatar: z.string().nullable(),
-  lastInteraction: z.string().nullable(),
+  lastInteraction: nullableDateTimeSchema,
   lastInteractionActivityId: z.string().nullable(),
   keepFrequencyDays: z.number().nullable(),
-  createdAt: createdAtSchema.nullable(),
-  updatedAt: updatedAtSchema.nullable().optional(),
   phones: z.array(phoneEntryEntitySchema).nullable(),
   emails: z.array(emailEntryEntitySchema).nullable(),
   addresses: z.array(contactAddressReadSchema).nullable().optional(),
@@ -84,7 +90,7 @@ export const contactSchema = entityIdentitySchema.extend({
   gisPoint: z.unknown().nullable(),
   latitude: z.number().nullable(),
   longitude: z.number().nullable(),
-});
+}).extend(entityAuditSchema.shape);
 
 export const contactPreviewSchema = contactSchema.pick({
   id: true,
@@ -97,7 +103,7 @@ export const contactRelationshipSchema = entityIdentitySchema.extend({
   sourcePersonId: z.string(),
   targetPersonId: z.string(),
   relationshipType: relationshipTypeSchema,
-}).extend(entityNullableAuditSchema.shape);
+}).extend(entityAuditSchema.shape);
 
 export const contactRelationshipWithPeopleSchema = contactRelationshipSchema.extend({
   sourcePerson: contactPreviewSchema,
@@ -109,7 +115,12 @@ export const createContactApiInputSchema = z.object({
   middleName: z.string().optional(),
   lastName: z.string().optional(),
   linkedin: z.string().optional(),
-});
+}).meta({ example: EXAMPLE_CREATE_CONTACT_REQUEST });
+
+/** POST /api/contacts body (optional client-supplied id). */
+export const createContactBodySchema = createContactApiInputSchema.extend({
+  id: contactIdSchema.optional(),
+}).meta({ example: EXAMPLE_CREATE_CONTACT_REQUEST });
 
 /** PATCH /api/contacts/:id — identity fields edited from mobile identity sheet. */
 export const updateContactIdentitySchema = z
@@ -148,7 +159,10 @@ export const createContactInputSchema = z.object({
 export const updateContactInputSchema = contactSchema.partial().omit({
   id: true,
   createdAt: true,
-});
+  importantDates: true,
+}).extend({
+  importantDates: replaceImportantDatesSchema.nullable().optional(),
+}).meta({ example: EXAMPLE_PATCH_CONTACT_REQUEST });
 
 export const contactResponseSchema = z
   .object({
@@ -168,7 +182,7 @@ const mapPinSchema = z.object({
   lastName: z.string().nullable(),
   headline: z.string().nullable(),
   location: z.string().nullable(),
-  lastInteraction: z.string().nullable(),
+  lastInteraction: nullableDateTimeSchema,
   latitude: z.number(),
   longitude: z.number(),
   avatar: z.string().nullable(),
@@ -218,9 +232,10 @@ export const contactsListResponseSchema = makePaginatedListResponseSchema(
 export const createContactRelationshipInputSchema = z.object({
   relatedPersonId: contactIdSchema,
   relationshipType: relationshipTypeSchema,
-});
+}).meta({ example: EXAMPLE_CREATE_RELATIONSHIP_REQUEST });
 
-export const updateContactRelationshipInputSchema = createContactRelationshipInputSchema;
+export const updateContactRelationshipInputSchema = createContactRelationshipInputSchema
+  .meta({ example: EXAMPLE_PATCH_RELATIONSHIP_REQUEST });
 
 export const contactRelationshipsResponseSchema = makeCollectionResponseSchema(
   "relationships",
@@ -249,7 +264,7 @@ export const deleteContactsRequestSchema = z.union([
     filter: contactsFilterSchema,
     excludeIds: z.array(contactIdSchema).optional(),
   }),
-]);
+]).meta({ example: EXAMPLE_DELETE_CONTACTS_REQUEST });
 
 export const deleteContactsResponseSchema = messageResponseSchema
   .extend({
@@ -270,9 +285,7 @@ export const deleteContactResponseSchema = messageResponseSchema.meta({
 
 const linkedInHistoryFieldsSchema = z.object({
   peopleLinkedinId: z.string(),
-  createdAt: createdAtSchema,
-  updatedAt: updatedAtSchema,
-});
+}).extend(entityAuditSchema.shape);
 
 export const workHistoryEntrySchema = entityIdentitySchema.extend({
   ...linkedInHistoryFieldsSchema.shape,
@@ -301,7 +314,7 @@ export const educationEntrySchema = entityIdentitySchema.extend({
 export const linkedInDataResponseSchema = z
   .object({
     linkedinBio: z.string().nullable(),
-    syncedAt: z.string().nullable(),
+    syncedAt: nullableDateTimeSchema,
     workHistory: z.array(workHistoryEntrySchema),
     education: z.array(educationEntrySchema),
   })
@@ -318,10 +331,8 @@ export const enrichQueueItemSchema = entityIdentitySchema.extend({
   personId: z.string(),
   status: enrichQueueStatusSchema,
   errorMessage: z.string().nullable(),
-  createdAt: createdAtSchema.nullable(),
-  updatedAt: updatedAtSchema.nullable(),
   linkedinHandle: z.string().optional(),
-});
+}).extend(entityAuditSchema.shape);
 
 export const enrichEligibleCountResponseSchema = z
   .object({
@@ -375,13 +386,14 @@ export const enrichQueueInitBodySchema = z
   .object({
     personId: z.string().optional(),
   })
-  .optional();
+  .optional()
+  .meta({ example: EXAMPLE_ENRICH_QUEUE_INIT_REQUEST });
 
 /** PATCH /api/contacts/enrich-queue/:id body. */
 export const enrichQueuePatchBodySchema = z.object({
   status: z.enum(["completed", "failed"]),
   errorMessage: z.string().nullable().optional(),
-});
+}).meta({ example: EXAMPLE_ENRICH_QUEUE_PATCH_REQUEST });
 
 export const shareableFieldSchema = z.enum([
   "name",

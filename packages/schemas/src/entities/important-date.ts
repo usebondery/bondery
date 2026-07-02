@@ -6,8 +6,8 @@ import {
   IMPORTANT_DATE_TYPES,
 } from "#constants/index.js";
 import {
+  entityAuditSchema,
   entityIdentitySchema,
-  entityNullableAuditSchema,
   makeCollectionResponseSchema,
 } from "#entities/_shared.js";
 import { EXAMPLE_IMPORTANT_DATES_LIST_RESPONSE } from "#openapi/fixtures/schema-examples.js";
@@ -45,7 +45,7 @@ export const importantDateSchema = entityIdentitySchema.extend({
   personId: z.string(),
   ...importantDateBaseFieldsSchema.shape,
   notifyOn: z.string().nullable(),
-}).extend(entityNullableAuditSchema.shape);
+}).extend(entityAuditSchema.shape);
 
 const importantDateNotifyDaysInputSchema = z.preprocess((value) => {
   if (value === "none" || value === "") {

@@ -37,6 +37,7 @@ function buildFallbackContact(name: string): Contact {
     lastInteractionActivityId: null,
     keepFrequencyDays: null,
     createdAt: "",
+    updatedAt: "",
     phones: null,
     emails: null,
     linkedin: null,

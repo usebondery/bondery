@@ -1,8 +1,13 @@
 import { z } from "zod";
+import { nullableDateTimeSchema } from "#entities/_shared.js";
 import {
   EXAMPLE_USER_ACCOUNT_RESPONSE,
   EXAMPLE_USER_SETTINGS_RESPONSE,
 } from "#openapi/fixtures/schema-examples.js";
+import {
+  EXAMPLE_UPDATE_ACCOUNT_REQUEST,
+  EXAMPLE_UPDATE_SETTINGS_REQUEST,
+} from "#openapi/fixtures/requests.js";
 
 export const colorSchemePreferenceSchema = z.enum(["light", "dark", "auto"]);
 export const timeFormatPreferenceSchema = z.enum(["24h", "12h"]);
@@ -57,7 +62,7 @@ export const userSettingsSchema = z.object({
   name: z.string().nullable().optional(),
   ...mutableUserSettingsSchema.shape,
   avatarUrl: z.string().nullable(),
-  onboardingCompletedAt: z.string().nullable(),
+  onboardingCompletedAt: nullableDateTimeSchema,
   aiMessagesUsed: z.number().optional(),
 });
 
@@ -67,10 +72,13 @@ export const updateUserSettingsInputSchema = mutableUserSettingsInputSchema
     timezone: z.string().optional(),
     language: z.string().optional(),
   })
-  .partial();
+  .partial()
+  .meta({ example: EXAMPLE_UPDATE_SETTINGS_REQUEST });
 
-/** Alias retained for naming consistency in docs/plans. */
-export const updateUserSettingsSchema = updateUserSettingsInputSchema;
+/** PATCH /api/me/settings body (includes signup-only flag). */
+export const updateSettingsBodySchema = updateUserSettingsInputSchema.extend({
+  onlyIfNewSignup: z.boolean().optional(),
+}).meta({ example: EXAMPLE_UPDATE_SETTINGS_REQUEST });
 
 export const userIdentitySchema = z.object({
   id: z.string(),
@@ -118,7 +126,10 @@ export const updateAccountInputSchema = z.object({
   name: z.string().trim().min(1, { error: "First name is required" }).optional(),
   middlename: z.string().optional(),
   surname: z.string().optional(),
-});
+}).meta({ example: EXAMPLE_UPDATE_ACCOUNT_REQUEST });
+
+/** Alias retained for naming consistency in docs/plans. */
+export const updateUserSettingsSchema = updateUserSettingsInputSchema;
 
 export type ColorSchemePreference = z.infer<typeof colorSchemePreferenceSchema>;
 export type TimeFormatPreference = z.infer<typeof timeFormatPreferenceSchema>;

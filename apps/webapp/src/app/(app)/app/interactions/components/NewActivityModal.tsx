@@ -57,10 +57,9 @@ function parseLocalDateInputValue(value: string): Date {
 
 /**
  * Build a minimal Contact stub from a raw participant object returned by the
- * GET /interactions API. The API embeds participant data (snake_case) directly
- * on each activity so that chips can resolve to a name even when the participant
- * is not present in the caller's `contacts` prop (e.g. contacts are paginated,
- * or the modal was opened from a narrow contacts subset like PersonInteractionsSection).
+ * GET /interactions API. The API embeds participant data directly on each
+ * activity so chips can resolve to a name even when the participant is not in
+ * the caller's `contacts` prop.
  */
 function buildParticipantSeed(p: unknown): Contact | null {
   if (!p || typeof p === "string") return null;
@@ -70,9 +69,9 @@ function buildParticipantSeed(p: unknown): Contact | null {
   return {
     id,
     userId: "",
-    firstName: (raw.firstName ?? raw.first_name ?? "") as string,
-    middleName: (raw.middleName ?? raw.middle_name ?? null) as string | null,
-    lastName: (raw.lastName ?? raw.last_name ?? null) as string | null,
+    firstName: (raw.firstName ?? "") as string,
+    middleName: (raw.middleName ?? null) as string | null,
+    lastName: (raw.lastName ?? null) as string | null,
     headline: null,
     location: null,
     notes: null,
@@ -80,7 +79,8 @@ function buildParticipantSeed(p: unknown): Contact | null {
     lastInteraction: null,
     lastInteractionActivityId: null,
     keepFrequencyDays: null,
-    createdAt: (raw.updated_at ?? raw.updatedAt ?? "") as string,
+    createdAt: typeof raw.createdAt === "string" ? raw.createdAt : "1970-01-01T00:00:00.000Z",
+    updatedAt: typeof raw.updatedAt === "string" ? raw.updatedAt : "1970-01-01T00:00:00.000Z",
     phones: null,
     emails: null,
     linkedin: null,

@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { createContactApiInputSchema, updateContactInputSchema } from "#entities/contact.js";
+import { updatedAtSchema } from "#entities/_shared.js";
 
 export const syncMutationTypeSchema = z.enum([
   "contact.create",
@@ -22,7 +23,7 @@ export type SyncMutationType = z.infer<typeof syncMutationTypeSchema>;
 const syncMutationBaseSchema = z.object({
   id: z.uuid(),
   clientSequence: z.number().int().positive(),
-  baseUpdatedAt: z.string().datetime().optional(),
+  baseUpdatedAt: updatedAtSchema.optional(),
 });
 
 export const contactCreatePayloadSchema = createContactApiInputSchema.extend({

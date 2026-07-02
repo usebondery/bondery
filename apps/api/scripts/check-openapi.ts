@@ -32,6 +32,9 @@ const spec = parse(readFileSync(specPath, "utf8")) as {
     Record<
       string,
       {
+        requestBody?: {
+          content?: Record<string, { schema?: unknown; example?: unknown }>;
+        };
         responses?: Record<
           string,
           {
@@ -62,6 +65,22 @@ function isEmptySchema(schema: unknown): boolean {
 for (const [path, methods] of Object.entries(spec.paths ?? {})) {
   for (const [method, operation] of Object.entries(methods)) {
     if (method === "parameters") continue;
+
+    if (["post", "put", "patch"].includes(method)) {
+      const requestJson = operation.requestBody?.content?.["application/json"];
+      if (requestJson) {
+        if (isEmptySchema(requestJson.schema)) {
+          violations.push(
+            `${method.toUpperCase()} ${path}: empty or missing application/json request schema`,
+          );
+        }
+        if (requestJson.example === undefined) {
+          violations.push(
+            `${method.toUpperCase()} ${path}: missing application/json request example`,
+          );
+        }
+      }
+    }
 
     const responses = operation.responses ?? {};
     for (const [status, response] of Object.entries(responses)) {

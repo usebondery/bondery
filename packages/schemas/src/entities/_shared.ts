@@ -4,8 +4,9 @@ import { EXAMPLE_MESSAGE_RESPONSE } from "#openapi/fixtures/schema-examples.js";
 
 export const idSchema = z.string();
 export const userIdSchema = z.string();
-export const createdAtSchema = z.string();
-export const updatedAtSchema = z.string();
+export const createdAtSchema = z.iso.datetime({ offset: true });
+export const updatedAtSchema = z.iso.datetime({ offset: true });
+export const nullableDateTimeSchema = createdAtSchema.nullable();
 
 export const entityIdentitySchema = z.object({
   id: idSchema,
@@ -15,11 +16,6 @@ export const entityIdentitySchema = z.object({
 export const entityAuditSchema = z.object({
   createdAt: createdAtSchema,
   updatedAt: updatedAtSchema,
-});
-
-export const entityNullableAuditSchema = z.object({
-  createdAt: createdAtSchema.nullable(),
-  updatedAt: updatedAtSchema.nullable(),
 });
 
 export const idsRequestSchema = z.object({

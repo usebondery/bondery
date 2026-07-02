@@ -12,7 +12,8 @@ import {
 import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
 import type { PolarEmbedCheckout } from "@polar-sh/checkout/embed";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
-import { clientApiFetch } from "@/lib/api/client";
+import { ApiError, clientApiJson } from "@/lib/api/client";
+import { isUnauthorizedApiError } from "@/lib/auth/handleUnauthorizedSession";
 import { createBrowswerSupabaseClient } from "@/lib/supabase/client";
 
 /** Maximum ms to wait for the Polar iframe onLoaded event before resetting loading state. */
@@ -72,21 +73,13 @@ export function useEmbeddedCheckout({
 
     let url: string;
     try {
-      const res = await clientApiFetch(API_ROUTES.SUBSCRIPTIONS_CHECKOUT, { method: "POST" });
-
-      if (res.status === 401) {
-        notifications.show(
-          errorNotificationTemplate({
-            title: t("errorTitle"),
-            description: t("errorUnauthorized"),
-          }),
-        );
-        setIsLoading(false);
-        return;
-      }
-
-      if (res.status === 409) {
-        // User is already subscribed — no need to open checkout
+      const checkoutSession = await clientApiJson<{ url: string }>(
+        API_ROUTES.SUBSCRIPTIONS_CHECKOUT,
+        { method: "POST" },
+      );
+      url = checkoutSession.url;
+    } catch (error) {
+      if (error instanceof ApiError && error.status === 409) {
         notifications.show(
           warningNotificationTemplate({
             title: t("alreadySubscribedTitle"),
@@ -97,20 +90,11 @@ export function useEmbeddedCheckout({
         return;
       }
 
-      if (!res.ok) {
-        notifications.show(
-          errorNotificationTemplate({
-            title: t("errorTitle"),
-            description: t("errorMessage"),
-          }),
-        );
+      if (isUnauthorizedApiError(error)) {
         setIsLoading(false);
         return;
       }
 
-      const json = await res.json();
-      url = json.url as string;
-    } catch {
       notifications.show(
         errorNotificationTemplate({
           title: t("errorTitle"),

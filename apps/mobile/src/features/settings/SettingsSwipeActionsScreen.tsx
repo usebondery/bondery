@@ -37,6 +37,7 @@ function createPreviewContact(name: ReturnType<typeof getRandomExampleName>): Co
     lastInteractionActivityId: null,
     keepFrequencyDays: null,
     createdAt: new Date(0).toISOString(),
+    updatedAt: new Date(0).toISOString(),
     phones: null,
     emails: null,
     linkedin: null,

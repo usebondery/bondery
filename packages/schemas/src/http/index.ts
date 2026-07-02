@@ -13,6 +13,7 @@ import {
   EXAMPLE_GEOCODE_SUGGEST_RESPONSE,
   EXAMPLE_GEOCODE_TIMEZONE_RESPONSE,
 } from "#openapi/fixtures/schema-examples.js";
+import { EXAMPLE_IDS_REQUEST, EXAMPLE_REPLACE_IMPORTANT_DATES_REQUEST } from "#openapi/fixtures/requests.js";
 
 export * from "#http/ids.js";
 
@@ -24,7 +25,7 @@ export const uuidParamSchema = z.object({
 /** Bulk ID body: `{ ids: string[] }` with at least one element. */
 export const idsRequestBodySchema = z.object({
   ids: z.array(contactIdSchema).min(1),
-});
+}).meta({ example: EXAMPLE_IDS_REQUEST });
 
 /** Optional pagination query params (limit: 1–200, default 50; offset: ≥0, default 0). */
 export const paginationQuerySchema = z.object({
@@ -109,7 +110,7 @@ export const contactRelationshipIdParamSchema = z.object({
 /** PUT /api/contacts/:id/important-dates body. */
 export const importantDatesReplaceBodySchema = z.object({
   dates: replaceImportantDatesSchema,
-});
+}).meta({ example: EXAMPLE_REPLACE_IMPORTANT_DATES_REQUEST });
 
 /** Wire geocode response schemas (no Zod transforms — safe for Fastify serializers). */
 const geocodeSuggestAddressWireSchema = z.object({

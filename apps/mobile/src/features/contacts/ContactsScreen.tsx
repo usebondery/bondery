@@ -4,7 +4,7 @@ import { FlashList, type FlashListRef } from "@shopify/flash-list";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { GestureDetector } from "react-native-gesture-handler";
 import { IconSearch } from "@tabler/icons-react-native";
-import type { Contact, GroupWithCount } from "@bondery/schemas";
+import type { Contact, Group, GroupWithCount } from "@bondery/schemas";
 import { MobileTextInput } from "../../components/MobileTextInput";
 import {
   LoadErrorCard,
@@ -375,7 +375,7 @@ export function ContactsScreen() {
   );
 
   const handleGroupCreated = useCallback(
-    (group: GroupWithCount) => {
+    (group: Group) => {
       navigateToGroup(group);
     },
     [navigateToGroup],

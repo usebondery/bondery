@@ -370,6 +370,17 @@
     "Title": "Page Not Found",
     "Description": "The page you are looking for does not exist."
   },
+  "UnavailablePage": {
+    "Title": "Service temporarily unavailable",
+    "Description": "We cannot reach the Bondery API right now. Your session is still active — try again in a moment.",
+    "Retry": "Try again",
+    "HealthTitle": "API health",
+    "HealthLoading": "Checking API status…",
+    "BffStatus": "Web app API:",
+    "BffReachable": "Reachable (HTTP {status})",
+    "BffUnreachable": "Unreachable",
+    "ApiStatus": "Backend readiness:"
+  },
   "LoginPage": {
     "Title": "Bondery",
     "Description": "We'll log you in or create a new account if you don't have one yet.",

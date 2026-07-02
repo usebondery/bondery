@@ -110,4 +110,5 @@ export const WEBAPP_ROUTES = {
   APP_GROUP: "/app",
   DEFAULT_PAGE_AFTER_LOGIN: "/app/home",
   ONBOARDING: "/app/onboarding",
+  UNAVAILABLE: "/app/unavailable",
 };

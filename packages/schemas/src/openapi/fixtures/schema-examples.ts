@@ -399,20 +399,8 @@ export const EXAMPLE_CHAT_MESSAGES_LIST_RESPONSE = {
 export const EXAMPLE_CHAT_SESSION_CREATED_RESPONSE = {
   data: {
     id: EXAMPLE_CHAT_SESSION.id,
-    created_at: EXAMPLE_CHAT_SESSION.created_at,
+    createdAt: EXAMPLE_CHAT_SESSION.createdAt,
   },
-};
-
-export const EXAMPLE_CHAT_SESSION_LIST_ITEM = {
-  id: EXAMPLE_CHAT_SESSION.id,
-  title: EXAMPLE_CHAT_SESSION.title,
-  created_at: EXAMPLE_CHAT_SESSION.created_at,
-  updated_at: EXAMPLE_CHAT_SESSION.updated_at,
-};
-
-export const EXAMPLE_CHAT_SESSIONS_WIRE_LIST_RESPONSE = {
-  sessions: [EXAMPLE_CHAT_SESSION_LIST_ITEM],
-  pagination: EXAMPLE_PAGINATION,
 };
 
 export const EXAMPLE_SUBSCRIPTION_STATUS_RESPONSE = {

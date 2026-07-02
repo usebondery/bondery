@@ -31,6 +31,7 @@ import { resolve, dirname } from "path";
 import { fileURLToPath } from "url";
 import { stringify } from "yaml";
 import { patchOpenApiErrorSchemas } from "./patch-openapi-error-schemas.js";
+import { patchOpenApiRequestExamples } from "./patch-openapi-request-examples.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -42,6 +43,7 @@ async function main() {
 
   const spec = server.swagger();
   patchOpenApiErrorSchemas(spec);
+  patchOpenApiRequestExamples(spec);
   const yamlContent = stringify(spec, { lineWidth: 120 });
 
   const outputPath = resolve(__dirname, "..", "openapi.yaml");

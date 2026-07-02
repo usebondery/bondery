@@ -373,13 +373,6 @@ async function buildServer() {
         title: "Bondery API",
         description:
           "REST API for the Bondery application — a contact and relationship management platform.\n\n" +
-          "## Health checks\n\n" +
-          "- `GET /status` — **Liveness**. Returns 200 when the API process is running. " +
-          "Does not probe external dependencies.\n" +
-          "- `GET /health` — **Readiness**. Probes Supabase (auth, database, storage), Redis, " +
-          "and reports configuration status for other integrations. Cached for one minute; " +
-          "rate limited to one request per minute per client. Returns 503 when critical " +
-          "dependencies are unavailable.\n\n" +
           "## Authentication\n\n" +
           "Most endpoints require authentication via a Supabase session cookie or a " +
           "Bearer token (session JWT or long-lived API key).\n\n" +
@@ -406,39 +399,40 @@ async function buildServer() {
         {
           name: "Health",
           description:
-            "Liveness (`GET /status`) and readiness (`GET /health`) probes",
+            "Liveness and readiness probes. `GET /status` returns 200 when the process is running (no dependency checks). `GET /health` probes Supabase, Redis, and integration config; cached for one minute, rate limited to one request per minute per client; returns 503 when critical dependencies are unavailable.",
         },
         { name: "Contacts", description: "Contact management operations" },
         { name: "Groups", description: "Group management operations" },
         { name: "Tags", description: "Tag management operations" },
         { name: "Interactions", description: "Interaction timeline events" },
         { name: "Import", description: "Contact import from social platforms" },
+        { name: "Share", description: "Share contacts via email" },
+        { name: "Geocode", description: "Address autocomplete and geocoding proxy" },
         {
           name: "Me",
           description: "Authenticated user profile, settings, and feedback",
         },
         {
+          name: "Sync",
+          description: "Mobile offline sync — bootstrap, pull, and push",
+        },
+        {
           name: "Extension",
           description: "Browser extension integration endpoints",
         },
-        {
-          name: "Internal",
-          description: "Service-to-service endpoints (not user-facing)",
-        },
-        { name: "Share", description: "Share contacts via email" },
-        { name: "Stats", description: "Admin KPI dashboard metrics" },
         { name: "Chat", description: "AI chat assistant" },
         {
           name: "Subscriptions",
           description: "Subscription and billing management",
         },
+        { name: "Stats", description: "Admin KPI dashboard metrics" },
         {
           name: "Webhooks",
           description: "Inbound webhooks from third-party services",
         },
         {
-          name: "Geocode",
-          description: "Address autocomplete and geocoding proxy",
+          name: "Internal",
+          description: "Service-to-service endpoints (not user-facing)",
         },
       ],
       components: {
@@ -469,7 +463,7 @@ async function buildServer() {
 
   registerHealthRoutes(fastify);
 
-  // Register route modules
+  // Register route modules (order = published API doc order within shared tags)
   await fastify.register(contactRoutes, { prefix: API_ROUTES.CONTACTS });
   await fastify.register(linkedInImportRoutes, {
     prefix: API_ROUTES.CONTACTS_IMPORT_LINKEDIN,
@@ -482,22 +476,20 @@ async function buildServer() {
   });
   await fastify.register(groupRoutes, { prefix: API_ROUTES.GROUPS });
   await fastify.register(tagRoutes, { prefix: API_ROUTES.TAGS });
-  await fastify.register(meRoutes, { prefix: API_ROUTES.ME });
-  await fastify.register(meSettingsRoutes, { prefix: API_ROUTES.ME_SETTINGS });
-  await fastify.register(meApiKeysRoutes, { prefix: API_ROUTES.ME_API_KEYS });
-  await fastify.register(extensionRoutes, { prefix: API_ROUTES.EXTENSION });
-  await fastify.register(meFeedbackRoutes, { prefix: API_ROUTES.ME_FEEDBACK });
-  await fastify.register(reminderDigestRoutes, {
-    prefix: API_ROUTES.INTERNAL_REMINDER_DIGEST,
-  });
   await fastify.register(interactionRoutes, {
     prefix: API_ROUTES.INTERACTIONS,
   });
   await fastify.register(shareRoutes, { prefix: API_ROUTES.CONTACTS_SHARE });
-  await fastify.register(statsRoutes, { prefix: API_ROUTES.ADMIN_STATS });
+  await fastify.register(geocodeRoutes, { prefix: "/api/geocode" });
+  await fastify.register(meRoutes, { prefix: API_ROUTES.ME });
   await fastify.register(meOnboardingRoutes, {
     prefix: API_ROUTES.ME_ONBOARDING_COMPLETE,
   });
+  await fastify.register(meSettingsRoutes, { prefix: API_ROUTES.ME_SETTINGS });
+  await fastify.register(meFeedbackRoutes, { prefix: API_ROUTES.ME_FEEDBACK });
+  await fastify.register(meApiKeysRoutes, { prefix: API_ROUTES.ME_API_KEYS });
+  await fastify.register(syncRoutes, { prefix: "/api/sync" });
+  await fastify.register(extensionRoutes, { prefix: API_ROUTES.EXTENSION });
   await fastify.register(chatRoutes, { prefix: API_ROUTES.CHAT });
   await fastify.register(chatSessionRoutes, {
     prefix: API_ROUTES.CHAT_SESSIONS,
@@ -514,11 +506,13 @@ async function buildServer() {
   await fastify.register(subscriptionSyncRoutes, {
     prefix: API_ROUTES.SUBSCRIPTIONS_SYNC,
   });
+  await fastify.register(statsRoutes, { prefix: API_ROUTES.ADMIN_STATS });
   await fastify.register(polarWebhookRoutes, {
     prefix: API_ROUTES.WEBHOOKS_POLAR,
   });
-  await fastify.register(geocodeRoutes, { prefix: "/api/geocode" });
-  await fastify.register(syncRoutes, { prefix: "/api/sync" });
+  await fastify.register(reminderDigestRoutes, {
+    prefix: API_ROUTES.INTERNAL_REMINDER_DIGEST,
+  });
 
   return fastify;
 }

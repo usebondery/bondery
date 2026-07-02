@@ -7,13 +7,17 @@
 
 import { ApiError } from "@/lib/api/ApiError";
 import {
+  applyTransportErrorPolicy,
+  applyTransportResponsePolicy,
+} from "@/lib/api/applyTransportErrorPolicy";
+import {
   handleUnauthorizedSession,
-  isUnauthorizedApiError,
   isUnauthorizedResponseStatus,
 } from "@/lib/auth/handleUnauthorizedSession";
 import { parseApiJsonResponse, parseApiJsonResponseOrNull } from "./parseResponse";
 
 export { ApiError } from "./ApiError";
+export { applyTransportErrorPolicy, applyTransportResponsePolicy } from "./applyTransportErrorPolicy";
 
 export async function clientApiFetch(
   path: string,
@@ -29,12 +33,12 @@ export async function clientApiJson<T>(
   path: string,
   init?: RequestInit,
 ): Promise<T> {
-  const response = await clientApiFetch(path, init);
   try {
+    const response = await clientApiFetch(path, init);
     return await parseApiJsonResponse<T>(response);
   } catch (error) {
-    if (isUnauthorizedApiError(error)) {
-      void handleUnauthorizedSession();
+    if (!(error instanceof Error && error.name === "AbortError")) {
+      applyTransportErrorPolicy(error);
     }
     throw error;
   }

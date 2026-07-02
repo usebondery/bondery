@@ -35,8 +35,8 @@ import {
   successNotificationTemplate,
 } from "@bondery/mantine-next";
 import { openStandardConfirmModal } from "@/app/(app)/app/components/modals/openStandardConfirmModal";
-import { useOpenDeleteContactModal } from "@/app/(app)/app/components/contacts/openDeleteContactModal";
-import { useOpenDeleteContactsModal } from "@/app/(app)/app/components/contacts/openDeleteContactsModal";
+import { openDeleteContactModal } from "@/app/(app)/app/components/contacts/openDeleteContactModal";
+import { openDeleteContactsModal } from "@/app/(app)/app/components/contacts/openDeleteContactsModal";
 import { useContactsTableCopy } from "@/lib/i18n/useContactsTableCopy";
 import { GroupCard } from "../../groups/components/GroupCard";
 import { openEditGroupModal } from "../../groups/components/EditGroupModal";
@@ -88,8 +88,6 @@ export function GroupDetailClient({
   const tPeople = useTranslations("PeoplePage");
   const tHeader = useTranslations("PageHeader");
   const { columnDefinitions } = useContactsTableCopy();
-  const openDeleteContactModal = useOpenDeleteContactModal();
-  const openDeleteContactsModal = useOpenDeleteContactsModal();
   const router = useRouter();
   const queryClient = useQueryClient();
   const pathname = usePathname();

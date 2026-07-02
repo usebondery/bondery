@@ -9,7 +9,7 @@ export const syncRoutes: AppRoutePlugin = async (fastify): Promise<void> => {
     applyOpenApiRouteMeta(routeOptions, { area: "session" });
   });
 
-  await fastify.register(syncPushRoutes);
-  await fastify.register(syncPullRoutes);
   await fastify.register(syncBootstrapRoutes);
+  await fastify.register(syncPullRoutes);
+  await fastify.register(syncPushRoutes);
 }

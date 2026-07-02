@@ -23,10 +23,14 @@ const ALLOWED_UPDATE_MODAL_FILES = new Set([
   "app/(app)/app/settings/components/LinkedInImportModal.tsx",
   "app/(app)/app/settings/components/InstagramImportModal.tsx",
   "app/(app)/app/settings/components/VCardImportModal.tsx",
+  "app/(app)/app/components/photo/openPhotoUploadModal.tsx",
 ]);
 
 const DISMISS_UPDATE_PATTERN =
-  /modals\.updateModal\(\{[\s\S]*?(closeOnEscape|closeOnClickOutside|withCloseButton)/;
+  /modals\.updateModal\(\{(?:(?!\bmodals\.(?:open|close)\b)[\s\S])*?(closeOnEscape|closeOnClickOutside|withCloseButton)/;
+
+const DISMISS_OPEN_PATTERN =
+  /modals\.open\(\{(?:(?!\bmodals\.(?:open|updateModal|close)\b)[\s\S])*?(closeOnEscape|closeOnClickOutside|withCloseButton)/;
 
 const BLOCKING_STATE_PATTERN =
   /\b(isSubmitting|isPending|actionLoading|isParsing|isImporting)\b/;
@@ -71,6 +75,18 @@ function checkFile(absPath: string): Violation[] {
       rule: "no-dismiss-update-modal",
       detail:
         "Use useModalBlocking for dismiss chrome; never set closeOnEscape/closeOnClickOutside/withCloseButton in feature code",
+    });
+  }
+
+  if (
+    DISMISS_OPEN_PATTERN.test(content) &&
+    rel !== "app/(app)/app/onboarding/OnboardingFlow.tsx"
+  ) {
+    violations.push({
+      file: rel,
+      rule: "no-dismiss-open-modal",
+      detail:
+        "Use useModalBlocking for dismiss chrome; never set closeOnEscape/closeOnClickOutside/withCloseButton in modals.open",
     });
   }
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, Slider, Stack, Text, Textarea } from "@mantine/core";
+import { Slider, Stack, Text, Textarea } from "@mantine/core";
 import { schemaResolver, useForm } from "@mantine/form";
 import { modals } from "@mantine/modals";
 import { notifications } from "@mantine/notifications";
@@ -9,6 +9,7 @@ import { submitFeedback } from "@/lib/api/domains/settings";
 import {
   errorNotificationTemplate,
   loadingNotificationTemplate,
+  ModalFooter,
   successNotificationTemplate,
 } from "@bondery/mantine-next";
 import { feedbackFormSchema, type FeedbackFormInput } from "@bondery/schemas";
@@ -114,9 +115,12 @@ export function FeedbackModal({ modalId, t }: FeedbackModalProps) {
           {...form.getInputProps("generalFeedback")}
         />
 
-        <Button type="submit" loading={isSubmitting} fullWidth size="md">
-          {t("SubmitButton")}
-        </Button>
+        <ModalFooter
+          actionLabel={t("SubmitButton")}
+          actionType="submit"
+          actionLoading={isSubmitting}
+          actionDisabled={isSubmitting}
+        />
       </Stack>
     </form>
   );

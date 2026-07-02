@@ -121,6 +121,46 @@ export const meRoutes: AppRoutePlugin = async (fastify) => {
   });
 
   /**
+   * GET /api/me/person - Fetch the authenticated user's "myself" contact
+   */
+  fastify.get(
+    "/person",
+    {
+      schema: {
+        description: "Fetch the authenticated user's myself contact profile.",
+        querystring: avatarTransformQuerySchema,
+        response: withOkResponse(contactResponseSchema, "Myself contact"),
+      } satisfies FastifyZodOpenApiSchema,
+    },
+    async (request, reply) => {
+      const { client, user } = getAuth(request);
+      const avatarOpts = extractAvatarOptions(request.query);
+
+      const { data: contact, error } = await client
+        .from("people")
+        .select(CONTACT_SELECT)
+        .eq("user_id", user.id)
+        .eq("myself", true)
+        .single();
+
+      if (error || !contact) {
+        return reply.status(404).send({ error: "Myself contact not found" });
+      }
+
+      try {
+        const [enrichedContact] = await attachContactExtras(client, user.id, [contact], {
+          addresses: true,
+          avatarOptions: avatarOpts,
+        });
+        return { contact: enrichedContact };
+      } catch (enrichError) {
+        request.log.error({ enrichError }, "Failed to enrich myself contact");
+        return reply.status(500).send({ error: "Failed to load profile contact" });
+      }
+    },
+  );
+
+  /**
    * POST /api/me/photo - Upload profile photo
    */
   fastify.post(
@@ -198,44 +238,4 @@ export const meRoutes: AppRoutePlugin = async (fastify) => {
 
     return { success: true };
   });
-
-  /**
-   * GET /api/me/person - Fetch the authenticated user's "myself" contact
-   */
-  fastify.get(
-    "/person",
-    {
-      schema: {
-        description: "Fetch the authenticated user's myself contact profile.",
-        querystring: avatarTransformQuerySchema,
-        response: withOkResponse(contactResponseSchema, "Myself contact"),
-      } satisfies FastifyZodOpenApiSchema,
-    },
-    async (request, reply) => {
-      const { client, user } = getAuth(request);
-      const avatarOpts = extractAvatarOptions(request.query);
-
-      const { data: contact, error } = await client
-        .from("people")
-        .select(CONTACT_SELECT)
-        .eq("user_id", user.id)
-        .eq("myself", true)
-        .single();
-
-      if (error || !contact) {
-        return reply.status(404).send({ error: "Myself contact not found" });
-      }
-
-      try {
-        const [enrichedContact] = await attachContactExtras(client, user.id, [contact], {
-          addresses: true,
-          avatarOptions: avatarOpts,
-        });
-        return { contact: enrichedContact };
-      } catch (enrichError) {
-        request.log.error({ enrichError }, "Failed to enrich myself contact");
-        return reply.status(500).send({ error: "Failed to load profile contact" });
-      }
-    },
-  );
 }

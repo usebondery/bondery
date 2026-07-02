@@ -51,20 +51,16 @@ import {
   contactGroupsResponseSchema,
   contactResponseSchema,
   contactsListResponseSchema,
-  createContactApiInputSchema,
+  createContactBodySchema,
   createContactResponseSchema,
   deleteContactResponseSchema,
   deleteContactsRequestSchema,
   deleteContactsResponseSchema,
   mapAddressPinsResponseSchema,
   mapPinsResponseSchema,
+  updateContactInputSchema,
 } from "@bondery/schemas";
 import { EXAMPLE_VCARD_EXPORT } from "@bondery/schemas/openapi/fixtures/responses";
-import {
-  contactAddressEntrySchema,
-  emailEntryEntitySchema,
-  phoneEntryEntitySchema,
-} from "@bondery/schemas";
 import {
   avatarTransformQuerySchema,
   peopleListQuerySchema,
@@ -83,10 +79,14 @@ import {
   resolveSort,
 } from "../../lib/pagination.js";
 import { registerMergeRoutes } from "./merge/index.js";
-import { registerEnrichmentRoutes } from "./enrichment/index.js";
+import {
+  registerContactEnrichmentRoutes,
+  registerEnrichQueueRoutes,
+} from "./enrichment/index.js";
 import { registerRelationshipRoutes } from "./relationships/index.js";
 import {
-  registerImportantDateRoutes,
+  registerUpcomingImportantDateRoutes,
+  registerContactImportantDateRoutes,
   IMPORTANT_DATE_TYPES,
 } from "./important-dates/index.js";
 import { registerPhotoRoutes } from "./photo/index.js";
@@ -103,41 +103,7 @@ const LOOKUP_SOCIAL_PLATFORMS: SocialPlatform[] = [
 
 // ── Zod Schemas ──────────────────────────────────────────────────
 
-const nullableString = z.union([z.string(), z.null()]);
-const nullableNumber = z.union([z.number(), z.null()]);
-
 const lookupPlatformSchema = z.enum(["instagram", "linkedin", "facebook"]);
-
-const createContactBodySchema = createContactApiInputSchema.extend({
-  id: z.string().uuid().optional(),
-});
-
-const patchContactBodySchema = z.object({
-  firstName: z.string().min(1).optional(),
-  middleName: nullableString.optional(),
-  lastName: nullableString.optional(),
-  headline: nullableString.optional(),
-  location: nullableString.optional(),
-  notes: nullableString.optional(),
-  language: nullableString.optional(),
-  timezone: nullableString.optional(),
-  gisPoint: nullableString.optional(),
-  latitude: nullableNumber.optional(),
-  longitude: nullableNumber.optional(),
-  lastInteraction: nullableString.optional(),
-  keepFrequencyDays: z.union([z.number().int().min(1), z.null()]).optional(),
-  phones: z.array(phoneEntryEntitySchema).optional(),
-  emails: z.array(emailEntryEntitySchema).optional(),
-  addresses: z.array(contactAddressEntrySchema).optional(),
-  linkedin: nullableString.optional(),
-  instagram: nullableString.optional(),
-  whatsapp: nullableString.optional(),
-  facebook: nullableString.optional(),
-  website: nullableString.optional(),
-  signal: nullableString.optional(),
-});
-
-const deleteContactsBodySchema = deleteContactsRequestSchema;
 
 const bySocialQuerySchema = z.object({
   platform: z.string().optional(),
@@ -325,160 +291,7 @@ export const contactRoutes: AppRoutePlugin = async (fastify) => {
   });
   registerApiKeyProtectedHooks(fastify);
 
-  registerMergeRoutes(fastify);
-  registerEnrichmentRoutes(fastify);
-  registerRelationshipRoutes(fastify);
-  registerImportantDateRoutes(fastify);
-
-  /**
-   * GET /api/contacts/map-pins - Fetch lightweight pin data for contacts within a bounding box
-   */
-  fastify.get(
-    "/map-pins",
-    {
-      schema: {
-        description: "Fetch lightweight map pins for contacts within a bounding box.",
-        querystring: mapPinsQuerySchema,
-        response: withOkResponse(
-          mapPinsResponseSchema,
-          "Map pins within the bounding box",
-        ),
-      } satisfies FastifyZodOpenApiSchema,
-    },
-    async (request, reply) => {
-      const { client, user } = getAuth(request);
-      const { minLat, maxLat, minLon, maxLon, limit = 500 } = request.query;
-      const avatarOptions = extractAvatarOptions(request.query);
-
-      const { data, error } = await client.rpc("get_map_pins_in_bbox", {
-        p_user_id: user.id,
-        p_min_lat: minLat,
-        p_max_lat: maxLat,
-        p_min_lon: minLon,
-        p_max_lon: maxLon,
-        p_limit: Math.min(limit, 1000),
-      });
-
-      if (error) {
-        request.log.error({ err: error }, "Error fetching map pins");
-        return reply.status(500).send({ error: error.message });
-      }
-
-      const pins = (data || []).map(
-        (row: {
-          id: string;
-          first_name: string;
-          last_name: string | null;
-          headline: string | null;
-          location: string | null;
-          last_interaction: string | null;
-          latitude: number;
-          longitude: number;
-          updated_at: string;
-          has_avatar: boolean;
-        }) => ({
-          id: row.id,
-          firstName: row.first_name,
-          lastName: row.last_name,
-          headline: row.headline,
-          location: row.location,
-          lastInteraction: row.last_interaction,
-          latitude: row.latitude,
-          longitude: row.longitude,
-          avatar: resolveContactAvatarUrl(
-            client,
-            user.id,
-            {
-              id: row.id,
-              hasAvatar: row.has_avatar,
-              updatedAt: row.updated_at,
-            },
-            avatarOptions,
-          ),
-        }),
-      );
-
-      return { pins };
-    },
-  );
-
-  /**
-   * GET /api/contacts/map-address-pins - Fetch address pin data within a bounding box.
-   * Returns one row per people_addresses record (not deduplicated by person).
-   */
-  fastify.get(
-    "/map-address-pins",
-    {
-      schema: {
-        description:
-          "Fetch address-level map pins within a bounding box (one pin per address).",
-        querystring: mapAddressPinsQuerySchema,
-        response: withOkResponse(
-          mapAddressPinsResponseSchema,
-          "Address map pins within the bounding box",
-        ),
-      } satisfies FastifyZodOpenApiSchema,
-    },
-    async (request, reply) => {
-      const { client, user } = getAuth(request);
-      const { minLat, maxLat, minLon, maxLon, limit = 500 } = request.query;
-      const avatarOptions = extractAvatarOptions(request.query);
-
-      const { data, error } = await client.rpc("get_map_address_pins_in_bbox", {
-        p_user_id: user.id,
-        p_min_lat: minLat,
-        p_max_lat: maxLat,
-        p_min_lon: minLon,
-        p_max_lon: maxLon,
-        p_limit: Math.min(limit, 1000),
-      });
-
-      if (error) {
-        request.log.error({ err: error }, "Error fetching map address pins");
-        return reply.status(500).send({ error: error.message });
-      }
-
-      const pins = (data || []).map(
-        (row: {
-          address_id: string;
-          person_id: string;
-          first_name: string;
-          last_name: string | null;
-          address_type: string;
-          address_formatted: string | null;
-          address_city: string | null;
-          address_country: string | null;
-          latitude: number;
-          longitude: number;
-          updated_at: string;
-          has_avatar: boolean;
-        }) => ({
-          addressId: row.address_id,
-          personId: row.person_id,
-          firstName: row.first_name,
-          lastName: row.last_name,
-          addressType: row.address_type,
-          addressFormatted: row.address_formatted,
-          addressCity: row.address_city,
-          addressCountry: row.address_country,
-          latitude: row.latitude,
-          longitude: row.longitude,
-          avatar: resolveContactAvatarUrl(
-            client,
-            user.id,
-            {
-              id: row.person_id,
-              hasAvatar: row.has_avatar,
-              updatedAt: row.updated_at,
-            },
-            avatarOptions,
-          ),
-        }),
-      );
-
-      return { pins };
-    },
-  );
+  // --- Tier 1–4: inline routes (doc order) ---
 
   /**
    * GET /api/contacts - List all contacts
@@ -755,7 +568,7 @@ export const contactRoutes: AppRoutePlugin = async (fastify) => {
       schema: {
         description:
           "Delete multiple contacts by IDs or by filter with optional exclusions.",
-        body: deleteContactsBodySchema,
+        body: deleteContactsRequestSchema,
         response: withOkResponse(
           deleteContactsResponseSchema,
           "Contacts deleted successfully",
@@ -857,35 +670,6 @@ export const contactRoutes: AppRoutePlugin = async (fastify) => {
   );
 
   /**
-   * DELETE /api/contacts/:id - Delete a single contact
-   */
-  fastify.delete(
-    "/:id",
-    {
-      schema: {
-        description: "Delete a single contact by ID.",
-        params: uuidParamSchema,
-        response: withOkResponse(
-          deleteContactResponseSchema,
-          "Contact deleted successfully",
-        ),
-      } satisfies FastifyZodOpenApiSchema,
-    },
-    async (request, reply) => {
-      const { client, user } = getAuth(request);
-      const { id } = request.params;
-
-      try {
-        await deleteContact({ client, user, log: request.log }, id);
-        return { message: "Contact deleted successfully" };
-      } catch (error) {
-        if (handleDomainError(error, reply)) return;
-        throw error;
-      }
-    },
-  );
-
-  /**
    * GET /api/contacts/by-social - Find contact by social media platform + handle
    */
   fastify.get(
@@ -939,6 +723,155 @@ export const contactRoutes: AppRoutePlugin = async (fastify) => {
   );
 
   /**
+   * GET /api/contacts/map-address-pins - Fetch address pin data within a bounding box.
+   * Returns one row per people_addresses record (not deduplicated by person).
+   */
+  fastify.get(
+    "/map-address-pins",
+    {
+      schema: {
+        description:
+          "Fetch address-level map pins within a bounding box (one pin per address).",
+        querystring: mapAddressPinsQuerySchema,
+        response: withOkResponse(
+          mapAddressPinsResponseSchema,
+          "Address map pins within the bounding box",
+        ),
+      } satisfies FastifyZodOpenApiSchema,
+    },
+    async (request, reply) => {
+      const { client, user } = getAuth(request);
+      const { minLat, maxLat, minLon, maxLon, limit = 500 } = request.query;
+      const avatarOptions = extractAvatarOptions(request.query);
+
+      const { data, error } = await client.rpc("get_map_address_pins_in_bbox", {
+        p_user_id: user.id,
+        p_min_lat: minLat,
+        p_max_lat: maxLat,
+        p_min_lon: minLon,
+        p_max_lon: maxLon,
+        p_limit: Math.min(limit, 1000),
+      });
+
+      if (error) {
+        request.log.error({ err: error }, "Error fetching map address pins");
+        return reply.status(500).send({ error: error.message });
+      }
+
+      const pins = (data || []).map(
+        (row: {
+          address_id: string;
+          person_id: string;
+          first_name: string;
+          last_name: string | null;
+          address_type: string;
+          address_formatted: string | null;
+          address_city: string | null;
+          address_country: string | null;
+          latitude: number;
+          longitude: number;
+          updated_at: string;
+          has_avatar: boolean;
+        }) => ({
+          addressId: row.address_id,
+          personId: row.person_id,
+          firstName: row.first_name,
+          lastName: row.last_name,
+          addressType: row.address_type,
+          addressFormatted: row.address_formatted,
+          addressCity: row.address_city,
+          addressCountry: row.address_country,
+          latitude: row.latitude,
+          longitude: row.longitude,
+          avatar: resolveContactAvatarUrl(
+            client,
+            user.id,
+            {
+              id: row.person_id,
+              hasAvatar: row.has_avatar,
+              updatedAt: row.updated_at,
+            },
+            avatarOptions,
+          ),
+        }),
+      );
+
+      return { pins };
+    },
+  );
+
+  fastify.get(
+    "/map-pins",
+    {
+      schema: {
+        description: "Fetch lightweight map pins for contacts within a bounding box.",
+        querystring: mapPinsQuerySchema,
+        response: withOkResponse(
+          mapPinsResponseSchema,
+          "Map pins within the bounding box",
+        ),
+      } satisfies FastifyZodOpenApiSchema,
+    },
+    async (request, reply) => {
+      const { client, user } = getAuth(request);
+      const { minLat, maxLat, minLon, maxLon, limit = 500 } = request.query;
+      const avatarOptions = extractAvatarOptions(request.query);
+
+      const { data, error } = await client.rpc("get_map_pins_in_bbox", {
+        p_user_id: user.id,
+        p_min_lat: minLat,
+        p_max_lat: maxLat,
+        p_min_lon: minLon,
+        p_max_lon: maxLon,
+        p_limit: Math.min(limit, 1000),
+      });
+
+      if (error) {
+        request.log.error({ err: error }, "Error fetching map pins");
+        return reply.status(500).send({ error: error.message });
+      }
+
+      const pins = (data || []).map(
+        (row: {
+          id: string;
+          first_name: string;
+          last_name: string | null;
+          headline: string | null;
+          location: string | null;
+          last_interaction: string | null;
+          latitude: number;
+          longitude: number;
+          updated_at: string;
+          has_avatar: boolean;
+        }) => ({
+          id: row.id,
+          firstName: row.first_name,
+          lastName: row.last_name,
+          headline: row.headline,
+          location: row.location,
+          lastInteraction: row.last_interaction,
+          latitude: row.latitude,
+          longitude: row.longitude,
+          avatar: resolveContactAvatarUrl(
+            client,
+            user.id,
+            {
+              id: row.id,
+              hasAvatar: row.has_avatar,
+              updatedAt: row.updated_at,
+            },
+            avatarOptions,
+          ),
+        }),
+      );
+
+      return { pins };
+    },
+  );
+
+  registerUpcomingImportantDateRoutes(fastify);
+
+  /**
    * GET /api/contacts/:id - Get a single contact
    */
   fastify.get(
@@ -969,6 +902,76 @@ export const contactRoutes: AppRoutePlugin = async (fastify) => {
       }
 
       return { contact: enrichedContact };
+    },
+  );
+
+  /**
+   * PATCH /api/contacts/:id - Update a contact
+   */
+  fastify.patch(
+    "/:id",
+    {
+      schema: {
+        description: "Update a contact by ID.",
+        params: uuidParamSchema,
+        body: updateContactInputSchema,
+        response: {
+          ...withOkResponse(
+          createContactResponseSchema,
+          "Updated contact",
+        ),
+          ...syncConflictResponse,
+        },
+      } satisfies FastifyZodOpenApiSchema,
+    },
+    async (request, reply) => {
+      const { client, user } = getAuth(request);
+      const { id } = request.params;
+      const body = request.body;
+
+      try {
+        const { data, txid } = await updateContact(
+          { client, user, log: request.log },
+          {
+            personId: id,
+            patch: body,
+          },
+        );
+
+        return { contact: data.contact, txid };
+      } catch (error) {
+        if (handleDomainError(error, reply)) return;
+        throw error;
+      }
+    },
+  );
+
+  /**
+   * DELETE /api/contacts/:id - Delete a single contact
+   */
+  fastify.delete(
+    "/:id",
+    {
+      schema: {
+        description: "Delete a single contact by ID.",
+        params: uuidParamSchema,
+        response: withOkResponse(
+          deleteContactResponseSchema,
+          "Contact deleted successfully",
+        ),
+      } satisfies FastifyZodOpenApiSchema,
+    },
+    async (request, reply) => {
+      const { client, user } = getAuth(request);
+      const { id } = request.params;
+
+      try {
+        await deleteContact({ client, user, log: request.log }, id);
+        return { message: "Contact deleted successfully" };
+      } catch (error) {
+        if (handleDomainError(error, reply)) return;
+        throw error;
+      }
     },
   );
 
@@ -1039,51 +1042,6 @@ export const contactRoutes: AppRoutePlugin = async (fastify) => {
       return { groups: groupsWithCounts };
     },
   );
-
-  registerTagRoutes(fastify);
-
-  /**
-   * PATCH /api/contacts/:id - Update a contact
-   */
-  fastify.patch(
-    "/:id",
-    {
-      schema: {
-        description: "Update a contact by ID.",
-        params: uuidParamSchema,
-        body: patchContactBodySchema,
-        response: {
-          ...withOkResponse(
-          createContactResponseSchema,
-          "Updated contact",
-        ),
-          ...syncConflictResponse,
-        },
-      } satisfies FastifyZodOpenApiSchema,
-    },
-    async (request, reply) => {
-      const { client, user } = getAuth(request);
-      const { id } = request.params;
-      const body = request.body;
-
-      try {
-        const { data, txid } = await updateContact(
-          { client, user, log: request.log },
-          {
-            personId: id,
-            patch: body,
-          },
-        );
-
-        return { contact: data.contact, txid };
-      } catch (error) {
-        if (handleDomainError(error, reply)) return;
-        throw error;
-      }
-    },
-  );
-
-  registerPhotoRoutes(fastify);
 
   /**
    * GET /api/contacts/:id/vcard - Export contact as vCard file
@@ -1237,4 +1195,15 @@ export const contactRoutes: AppRoutePlugin = async (fastify) => {
       return vcard;
     },
   );
+
+  // --- Tier 4: sub-resources ---
+  registerTagRoutes(fastify);
+  registerPhotoRoutes(fastify);
+  registerRelationshipRoutes(fastify);
+  registerContactImportantDateRoutes(fastify);
+  registerContactEnrichmentRoutes(fastify);
+
+  // --- Tier 5: auxiliary ---
+  registerMergeRoutes(fastify);
+  registerEnrichQueueRoutes(fastify);
 }

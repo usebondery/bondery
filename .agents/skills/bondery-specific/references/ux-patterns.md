@@ -222,7 +222,7 @@ Derive blocking from submit **and** load/parse/import states — not submit alon
 
 ### Implementation (webapp)
 
-**Open imperatively only** — `open*Modal()` + `modals.open`. Do not use `<Modal>` in feature code. The onboarding wizard shell (`OnboardingFlow`) is the only documented exception. Photo upload closes before async work continues in a notification.
+**Open imperatively only** — `open*Modal()` + `modals.open`. Do not use `<Modal>` in feature code. The onboarding wizard shell (`OnboardingFlow`) is the only documented exception.
 
 **Lock dismiss chrome** with `useModalBlocking` from `@/lib/modals`:
 

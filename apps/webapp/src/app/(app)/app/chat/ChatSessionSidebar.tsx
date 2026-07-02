@@ -159,7 +159,7 @@ export function ChatSessionSidebar() {
             sessions.map((session) => {
               const isActive = pathname === `${WEBAPP_ROUTES.CHAT}/${session.id}`;
               const relativeTime = formatRelativeTime(
-                new Date(session.updated_at),
+                new Date(session.updatedAt),
                 formatter,
                 t("lessThanMinuteAgo"),
               );

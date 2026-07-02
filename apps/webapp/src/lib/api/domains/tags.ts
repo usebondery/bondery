@@ -1,6 +1,6 @@
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import type { ContactPreview, Tag, TagWithCount, UpdateTagInput } from "@bondery/schemas";
-import { clientApiFetch, clientApiJson } from "@/lib/api/client";
+import { clientApiFetch, clientApiJson, applyTransportResponsePolicy } from "@/lib/api/client";
 import {
   buildTagMembersPath,
   buildTagsListPath,
@@ -39,7 +39,11 @@ export async function updateTag(id: string, patch: UpdateTagInput) {
 }
 
 export async function deleteTag(id: string) {
-  await clientApiFetch(`${API_ROUTES.TAGS}/${id}`, { method: "DELETE" });
+  const response = await clientApiFetch(`${API_ROUTES.TAGS}/${id}`, { method: "DELETE" });
+  if (!response.ok) {
+    applyTransportResponsePolicy(response);
+    throw new Error("Failed to delete tag");
+  }
 }
 
 export async function addTagToContact(contactId: string, tagId: string) {

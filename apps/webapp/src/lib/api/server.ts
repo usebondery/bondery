@@ -1,5 +1,5 @@
 import { API_URL } from "@/lib/config";
-import { getAuthHeaders } from "@/lib/authHeaders";
+import { resolveServerSession } from "@/lib/auth/resolveServerSession";
 import { parseApiJsonResponse, parseApiJsonResponseOrNull } from "./parseResponse";
 
 export { ApiError } from "./ApiError";
@@ -28,14 +28,10 @@ function resolveServerUrl(path: string): string {
 
 async function buildServerHeaders(init: RequestInit | undefined): Promise<Headers> {
   const headers = new Headers(init?.headers);
-  const authHeaders = await getAuthHeaders();
+  const session = await resolveServerSession();
 
-  if (typeof authHeaders === "object" && authHeaders !== null && !Array.isArray(authHeaders)) {
-    for (const [key, value] of Object.entries(authHeaders)) {
-      if (value !== undefined) {
-        headers.set(key, String(value));
-      }
-    }
+  if (session.status === "ok") {
+    headers.set("Authorization", `Bearer ${session.accessToken}`);
   }
 
   return headers;

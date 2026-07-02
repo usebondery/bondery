@@ -1,7 +1,7 @@
 "use client";
 
 import { Group, Stack, Text } from "@mantine/core";
-import { IconUnlink, IconPuzzle } from "@tabler/icons-react";
+import { IconUnlink } from "@tabler/icons-react";
 import { IconBrandGithub, IconBrandLinkedin, IconBrowser } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
 import { notifications } from "@mantine/notifications";
@@ -18,8 +18,7 @@ import {
   successNotificationTemplate,
 } from "@bondery/mantine-next";
 import { openStandardConfirmModal } from "../../components/modals/openStandardConfirmModal";
-import { modals } from "@mantine/modals";
-import { ChromeExtensionModal } from "./ChromeExtensionModal";
+import { openChromeExtensionModal } from "./openChromeExtensionModal";
 import { usePWAInstall } from "@/hooks/usePWAInstall";
 import { IconDeviceDesktop } from "@tabler/icons-react";
 
@@ -251,22 +250,9 @@ export function ProviderIntegrations({
                 return;
               }
 
-              const modalId = "chrome-extension-modal";
-              modals.open({
-                modalId,
-                title: (
-                  <ModalTitle
-                    text={tIntegration("ExtensionModalTitle")}
-                    icon={<IconPuzzle size={20} stroke={1.5} />}
-                  />
-                ),
-                size: "md",
-                children: (
-                  <ChromeExtensionModal
-                    modalId={modalId}
-                    t={(key) => tIntegration(`ChromeExtensionModal.${key}` as never)}
-                  />
-                ),
+              openChromeExtensionModal({
+                title: tIntegration("ExtensionModalTitle"),
+                t: (key) => tIntegration(`ChromeExtensionModal.${key}` as never),
               });
             }}
           />

@@ -1,7 +1,10 @@
 import { AppShellWrapper } from "./components/AppShellWrapper";
 import { AppShellWithQueryBadges } from "./components/AppShellWithQueryBadges";
-import { getUserSettings } from "@/lib/user/getUserSettings";
-import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { getAppBootstrap } from "@/lib/app/getAppBootstrap";
+import {
+  resolveServerSession,
+  signOutServerSession,
+} from "@/lib/auth/resolveServerSession";
 import { redirect } from "next/navigation";
 import "leaflet/dist/leaflet.css";
 import { WEBAPP_ROUTES, WEBSITE_ROUTES } from "@bondery/helpers/globals/paths";
@@ -14,27 +17,37 @@ import { Suspense } from "react";
 import { cookies, headers } from "next/headers";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
-  const supabase = await createServerSupabaseClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const session = await resolveServerSession();
 
-  if (!user) {
+  if (session.status !== "ok") {
+    await signOutServerSession();
     redirect(WEBSITE_ROUTES.LOGIN);
   }
 
-  // getUserSettings() is cache()-wrapped: the fetch runs once and is shared with
-  // resolveLocaleSettings() in the group layout — no duplicate API calls.
-  const [settings, cookieStore, headersList] = await Promise.all([
-    getUserSettings(),
-    cookies(),
-    headers(),
-  ]);
-
-  // Route guard: redirect to onboarding if not yet completed.
-  // Runs BEFORE the Suspense boundary so AppShellWithBadges (3 heavy fetches)
-  // never mounts for onboarding users.
+  const [cookieStore, headersList] = await Promise.all([cookies(), headers()]);
   const pathname = headersList.get("x-pathname") ?? "";
+
+  // getAppBootstrap() is cache()-wrapped: shared with resolveLocaleSettings().
+  const bootstrap = await getAppBootstrap();
+
+  if (bootstrap.status === "unauthorized") {
+    await signOutServerSession();
+    redirect(WEBSITE_ROUTES.LOGIN);
+  }
+
+  if (bootstrap.status === "unavailable") {
+    if (!pathname.startsWith(WEBAPP_ROUTES.UNAVAILABLE)) {
+      redirect(WEBAPP_ROUTES.UNAVAILABLE);
+    }
+    return <>{children}</>;
+  }
+
+  if (pathname.startsWith(WEBAPP_ROUTES.UNAVAILABLE)) {
+    redirect(WEBAPP_ROUTES.HOME);
+  }
+
+  const { settings } = bootstrap;
+
   if (!settings.onboardingCompletedAt && !pathname.startsWith(WEBAPP_ROUTES.ONBOARDING)) {
     redirect(WEBAPP_ROUTES.ONBOARDING);
   }
@@ -49,10 +62,6 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       <EnrichStatusNotificationManager />
       <EnrichResumeDetector />
       <ExtensionUpdateNotificationManager />
-      {/*
-       * Suspense boundary: show the shell with default (no-badge) state immediately,
-       * then replace with actual badge data once the slower parallel fetches resolve.
-       */}
       <Suspense
         fallback={
           <AppShellWrapper

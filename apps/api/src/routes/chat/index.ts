@@ -6,22 +6,18 @@
 import type { FastifyRequest } from "fastify";
 import type { AppRoutePlugin } from "../../lib/fastify-types.js";
 import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
-import { z } from "zod";
 import type { UIMessage } from "ai";
+import { z } from "zod";
 import { convertToModelMessages } from "ai";
 import type { Json } from "@bondery/schemas/supabase.types";
 import { standardErrorResponses } from "@bondery/schemas/http/responses";
+import { chatRequestSchema } from "@bondery/schemas";
 import { getAuth } from "../../lib/auth.js";
 import { applyOpenApiRouteMeta } from "../../lib/openapi-route-meta.js";
 import { runChatAgent } from "../../lib/chat/agent.js";
 import { generateSessionTitle } from "../../lib/chat/title.js";
 import { checkAndIncrementQuota } from "../../lib/chat/quota.js";
 import { AI_TIER } from "../../lib/rate-limit.js";
-
-const chatRequestSchema = z.object({
-  messages: z.array(z.record(z.string(), z.unknown())),
-  sessionId: z.string(),
-});
 
 export const chatRoutes: AppRoutePlugin = async (fastify) => {
   fastify.addHook("onRoute", (routeOptions) => {

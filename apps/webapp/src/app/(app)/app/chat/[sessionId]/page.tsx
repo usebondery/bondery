@@ -10,7 +10,7 @@ interface ChatMessageRow {
   id: string;
   role: "user" | "assistant";
   content: { text?: string };
-  created_at: string;
+  createdAt: string;
 }
 
 /**
@@ -72,7 +72,7 @@ export default async function ChatSessionPage({
         role: msg.role,
         content: msg.content?.text ?? "",
         parts: [{ type: "text" as const, text: msg.content?.text ?? "" }],
-        createdAt: new Date(msg.created_at),
+        createdAt: new Date(msg.createdAt),
       }));
     }
   } catch {}

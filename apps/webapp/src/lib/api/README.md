@@ -22,11 +22,23 @@ Import from `@/lib/api/client`. Always use same-origin paths from `API_ROUTES` (
 
 | `clientApiJsonOrNull<T>` | Prefetch, search, chips — return `null` on failure |
 
-| `clientApiFetch` | FormData uploads, blob downloads, custom status handling (401/409) |
+| `clientApiFetch` | FormData uploads, blob downloads, custom status handling — call `applyTransportResponsePolicy` when `!response.ok` |
 
 
 
 **Never** import `API_URL` in `"use client"` files.
+
+
+
+## Transport policy (401 + API unavailable)
+
+
+
+`clientApiJson` applies global policy via `applyTransportErrorPolicy` (401 → sign out, 502/503/504/network → `/app/unavailable`). React Query does not duplicate this — see [`lib/query/README.md`](../query/README.md).
+
+
+
+Raw `clientApiFetch` callers must call `applyTransportResponsePolicy(response)` on non-2xx before local error UI.
 
 
 
@@ -35,6 +47,8 @@ Import from `@/lib/api/client`. Always use same-origin paths from `API_ROUTES` (
 
 
 Import from `@/lib/api/server`. Used in RSC pages, loaders, and route handlers.
+
+Auth: `serverApiFetch` attaches `Authorization: Bearer …` via `resolveServerSession()` (`lib/auth/resolveServerSession.ts`). Route guards and BFF 401 gates use the same function — do not duplicate `getUser()` in server code.
 
 
 

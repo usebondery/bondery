@@ -37,7 +37,7 @@ function mapApiKeyRow(row: {
   permission: string;
   key_prefix: string;
   last_used_at: string | null;
-  created_at: string | null;
+  created_at: string;
 }) {
   return {
     id: row.id,
@@ -45,7 +45,7 @@ function mapApiKeyRow(row: {
     permission: row.permission === "read" ? ("read" as const) : ("full" as const),
     keyPrefix: row.key_prefix,
     lastUsedAt: row.last_used_at,
-    createdAt: row.created_at ?? new Date(0).toISOString(),
+    createdAt: row.created_at,
   };
 }
 

@@ -10,6 +10,10 @@ interface PhotoConfirmModalProps {
   onBack: () => void;
   onCancel: () => void;
   onConfirm: () => void;
+  actionLoading?: boolean;
+  actionDisabled?: boolean;
+  backDisabled?: boolean;
+  cancelDisabled?: boolean;
   translations: {
     UpdateProfilePhoto: string;
     Back?: string;
@@ -23,6 +27,10 @@ export function PhotoConfirmModal({
   onBack,
   onCancel,
   onConfirm,
+  actionLoading = false,
+  actionDisabled = false,
+  backDisabled = false,
+  cancelDisabled = false,
   translations,
 }: PhotoConfirmModalProps) {
   return (
@@ -34,11 +42,15 @@ export function PhotoConfirmModal({
         backLabel={translations.Back || "Back"}
         onBack={onBack}
         backLeftSection={<IconArrowLeft size={16} />}
+        backDisabled={backDisabled}
         cancelLabel={translations.Cancel}
         onCancel={onCancel}
+        cancelDisabled={cancelDisabled}
         actionLabel={translations.ConfirmPhoto}
         onAction={onConfirm}
         actionLeftSection={<IconCheck size={16} />}
+        actionLoading={actionLoading}
+        actionDisabled={actionDisabled}
       />
     </Stack>
   );
