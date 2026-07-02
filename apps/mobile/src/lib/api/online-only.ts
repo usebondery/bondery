@@ -8,7 +8,7 @@ import type {
   UpdateUserSettingsInput,
   UserSettingsResponse,
 } from "@bondery/schemas";
-import { parseGeocodeSuggestResponse } from "@bondery/schemas";
+import { parseGeocodeSuggestResponse } from "@bondery/schemas/geocode";
 import { File, UploadTask, UploadType } from "expo-file-system";
 import { API_URL, normalizeMobileUrlForDevice } from "../config";
 import { apiRequest, getBearerHeaders, throwApiResponseError } from "./transport";

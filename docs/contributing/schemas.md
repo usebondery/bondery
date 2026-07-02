@@ -20,7 +20,15 @@
 
 ## API OpenAPI examples
 
-Route-level examples live in `@bondery/schemas/openapi/fixtures/responses`. Entity schema `.meta({ example })` values come from the internal `schema-examples` module (fixture data only, no Zod datetime init).
+Route-level examples live in `@bondery/schemas/openapi/fixtures/*`. **Runtime modules** (`entities/*`, `sync/*`, root `index.ts`, `contact-id.ts`) must not import those fixtures or attach `.meta({ example })` at module init.
+
+OpenAPI example validation runs in CI only:
+
+- `scripts/openapi-example-fixtures.ts` — maps schema export names → fixture payloads
+- `scripts/check-openapi-examples.ts` — validates fixtures against runtime Zod schemas
+- `scripts/check-no-init-cycles.mjs` — blocks `#openapi/` imports in runtime paths
+
+`http/index.ts` may inline small request/response samples; it must not import `schema-examples` or `requests` fixture barrels.
 
 ## Why this matters
 

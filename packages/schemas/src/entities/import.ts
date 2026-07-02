@@ -3,23 +3,6 @@ import { contactAddressTypeSchema } from "#entities/address.js";
 import { nullableDateTimeSchema } from "#entities/_shared.js";
 import { channelTypeSchema } from "#primitives/index.js";
 import { importantDateTypeSchema } from "#entities/important-date.js";
-import {
-  EXAMPLE_INSTAGRAM_IMPORT_COMMIT_RESPONSE,
-  EXAMPLE_INSTAGRAM_PARSE_RESPONSE,
-  EXAMPLE_LINKEDIN_IMPORT_COMMIT_RESPONSE,
-  EXAMPLE_LINKEDIN_PARSE_RESPONSE,
-  EXAMPLE_REDIRECT_RESPONSE,
-  EXAMPLE_VCARD_IMPORT_COMMIT_RESPONSE,
-  EXAMPLE_VCARD_PARSE_RESPONSE,
-} from "#openapi/fixtures/schema-examples.js";
-import {
-  EXAMPLE_ENRICH_CONTACT_REQUEST,
-  EXAMPLE_EXTENSION_REDIRECT_REQUEST,
-  EXAMPLE_INSTAGRAM_IMPORT_COMMIT_REQUEST,
-  EXAMPLE_LINKEDIN_DATA_REQUEST,
-  EXAMPLE_LINKEDIN_IMPORT_COMMIT_REQUEST,
-  EXAMPLE_VCARD_IMPORT_COMMIT_REQUEST,
-} from "#openapi/fixtures/requests.js";
 
 export const scrapedWorkHistoryEntrySchema = z.object({
   title: z.string().optional(),
@@ -57,7 +40,7 @@ export const redirectRequestSchema = z.object({
   workHistory: z.array(scrapedWorkHistoryEntrySchema).optional(),
   educationHistory: z.array(scrapedEducationEntrySchema).optional(),
   linkedinBio: z.string().optional(),
-}).meta({ example: EXAMPLE_EXTENSION_REDIRECT_REQUEST });
+});
 
 export const enrichContactRequestSchema = z.object({
   firstName: z.string().optional(),
@@ -69,12 +52,12 @@ export const enrichContactRequestSchema = z.object({
   linkedinBio: z.string().nullable().optional(),
   workHistory: z.array(scrapedWorkHistoryEntrySchema).optional(),
   educationHistory: z.array(scrapedEducationEntrySchema).optional(),
-}).meta({ example: EXAMPLE_ENRICH_CONTACT_REQUEST });
+});
 
 /** POST /api/contacts/:id/linkedin-data body. */
 export const linkedInDataRequestSchema = z.object({
   workHistory: z.array(scrapedWorkHistoryEntrySchema).optional(),
-}).meta({ example: EXAMPLE_LINKEDIN_DATA_REQUEST });
+});
 
 export const redirectResponseSchema = z
   .object({
@@ -84,7 +67,7 @@ export const redirectResponseSchema = z
     lastName: z.string().nullable().optional(),
     avatar: z.string().nullable().optional(),
   })
-  .meta({ example: EXAMPLE_REDIRECT_RESPONSE });
+  ;
 
 export const linkedInPreparedContactSchema = z.object({
   tempId: z.string(),
@@ -110,11 +93,11 @@ export const linkedInParseResponseSchema = z
     validCount: z.number(),
     invalidCount: z.number(),
   })
-  .meta({ example: EXAMPLE_LINKEDIN_PARSE_RESPONSE });
+  ;
 
 export const linkedInImportCommitRequestSchema = z.object({
   contacts: z.array(linkedInPreparedContactSchema),
-}).meta({ example: EXAMPLE_LINKEDIN_IMPORT_COMMIT_REQUEST });
+});
 
 export const linkedInImportCommitResponseSchema = z
   .object({
@@ -122,7 +105,7 @@ export const linkedInImportCommitResponseSchema = z
     updatedCount: z.number(),
     skippedCount: z.number(),
   })
-  .meta({ example: EXAMPLE_LINKEDIN_IMPORT_COMMIT_RESPONSE });
+  ;
 
 export const instagramImportStrategySchema = z.enum([
   "close_friends",
@@ -157,11 +140,11 @@ export const instagramParseResponseSchema = z
     validCount: z.number(),
     invalidCount: z.number(),
   })
-  .meta({ example: EXAMPLE_INSTAGRAM_PARSE_RESPONSE });
+  ;
 
 export const instagramImportCommitRequestSchema = z.object({
   contacts: z.array(instagramPreparedContactSchema),
-}).meta({ example: EXAMPLE_INSTAGRAM_IMPORT_COMMIT_REQUEST });
+});
 
 export const instagramImportCommitResponseSchema = z
   .object({
@@ -169,7 +152,7 @@ export const instagramImportCommitResponseSchema = z
     updatedCount: z.number(),
     skippedCount: z.number(),
   })
-  .meta({ example: EXAMPLE_INSTAGRAM_IMPORT_COMMIT_RESPONSE });
+  ;
 
 const vcardPreparedPhoneSchema = z.object({
   prefix: z.string(),
@@ -238,18 +221,18 @@ export const vcardParseResponseSchema = z
     validCount: z.number(),
     invalidCount: z.number(),
   })
-  .meta({ example: EXAMPLE_VCARD_PARSE_RESPONSE });
+  ;
 
 export const vcardImportCommitRequestSchema = z.object({
   contacts: z.array(vcardPreparedContactSchema),
-}).meta({ example: EXAMPLE_VCARD_IMPORT_COMMIT_REQUEST });
+});
 
 export const vcardImportCommitResponseSchema = z
   .object({
     importedCount: z.number(),
     skippedCount: z.number(),
   })
-  .meta({ example: EXAMPLE_VCARD_IMPORT_COMMIT_RESPONSE });
+  ;
 
 export type ScrapedWorkHistoryEntry = z.infer<typeof scrapedWorkHistoryEntrySchema>;
 export type ScrapedEducationEntry = z.infer<typeof scrapedEducationEntrySchema>;

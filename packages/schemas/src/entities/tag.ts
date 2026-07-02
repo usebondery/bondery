@@ -14,19 +14,6 @@ import {
   messageResponseSchema,
   personIdsSelectionSchema,
 } from "#entities/_shared.js";
-import {
-  EXAMPLE_CONTACT_TAG_LIST_RESPONSE,
-  EXAMPLE_TAG_MEMBERS_LIST_RESPONSE,
-  EXAMPLE_TAG_RESPONSE,
-  EXAMPLE_TAG_UPDATE_RESPONSE,
-  EXAMPLE_TAGS_LIST_RESPONSE,
-} from "#openapi/fixtures/schema-examples.js";
-import {
-  EXAMPLE_CONTACT_TAG_REQUEST,
-  EXAMPLE_CREATE_TAG_REQUEST,
-  EXAMPLE_PATCH_TAG_REQUEST,
-  EXAMPLE_TAG_MEMBERSHIP_REQUEST,
-} from "#openapi/fixtures/requests.js";
 
 const tagLabelSchema = labelFieldSchema(GROUP_LABEL_MAX_LENGTH);
 
@@ -56,25 +43,21 @@ export const peopleTagSchema = z.object({
 export const createTagSchema = tagEditableFieldsSchema;
 
 /** API payload for creating a tag. */
-export const createTagInputSchema = z.object({ label: tagLabelSchema }).meta({
-  example: EXAMPLE_CREATE_TAG_REQUEST,
-});
+export const createTagInputSchema = z.object({ label: tagLabelSchema });
 
-export const updateTagSchema = createTagSchema.partial().meta({
-  example: EXAMPLE_PATCH_TAG_REQUEST,
-});
+export const updateTagSchema = createTagSchema.partial();
 
 export const tagResponseSchema = z
   .object({
     tag: tagSchema,
   })
-  .meta({ example: EXAMPLE_TAG_RESPONSE });
+  ;
 
 export const tagUpdateResponseSchema = messageResponseSchema
   .extend({
     tag: tagSchema,
   })
-  .meta({ example: EXAMPLE_TAG_UPDATE_RESPONSE });
+  ;
 
 export const tagContactsListResponseSchema = makePaginatedListResponseSchema(
   "contacts",
@@ -84,27 +67,25 @@ export const tagContactsListResponseSchema = makePaginatedListResponseSchema(
 export const tagsListResponseSchema = makeListResponseSchema(
   "tags",
   tagWithCountSchema,
-).meta({ example: EXAMPLE_TAGS_LIST_RESPONSE });
+);
 
 export const tagMembersListResponseSchema = makePaginatedListResponseSchema(
   "contacts",
   contactPreviewSchema,
-).meta({ example: EXAMPLE_TAG_MEMBERS_LIST_RESPONSE });
+);
 
 export const contactTagsResponseSchema = makeCollectionResponseSchema("tags", tagWithCountSchema);
 
 export const contactTagListResponseSchema = makeCollectionResponseSchema(
   "tags",
   tagSchema,
-).meta({ example: EXAMPLE_CONTACT_TAG_LIST_RESPONSE });
+);
 
-export const tagMembershipRequestSchema = personIdsSelectionSchema.meta({
-  example: EXAMPLE_TAG_MEMBERSHIP_REQUEST,
-});
+export const tagMembershipRequestSchema = personIdsSelectionSchema;
 
 export const contactTagBodySchema = z.object({
   tagId: z.string().min(1),
-}).meta({ example: EXAMPLE_CONTACT_TAG_REQUEST });
+});
 
 export const deleteTagsRequestSchema = idsRequestSchema;
 

@@ -5,6 +5,7 @@
  */
 
 import type { z } from "zod";
+import { OPENAPI_SCHEMA_EXAMPLES } from "./openapi-example-fixtures.js";
 import {
   createApiKeyInputSchema,
   apiKeyCreatedSchema,
@@ -28,7 +29,7 @@ import {
 import {
   geocodeSuggestResponseSchema,
   geocodeTimezoneResponseSchema,
-} from "#entities/address.js";
+} from "#geocode/schemas.js";
 import {
   createContactApiInputSchema,
   createContactBodySchema,
@@ -184,7 +185,11 @@ const RESPONSE_SCHEMA_EXAMPLES: ExampleEntry[] = [
   { name: "geocodeTimezoneResponseWireSchema", schema: geocodeTimezoneResponseWireSchema },
 ];
 
-function getExample(schema: z.ZodType): unknown {
+function getExample(name: string, schema: z.ZodType): unknown {
+  if (name in OPENAPI_SCHEMA_EXAMPLES) {
+    return OPENAPI_SCHEMA_EXAMPLES[name];
+  }
+
   const meta = schema.meta();
   if (meta && typeof meta === "object" && "example" in meta) {
     return meta.example;
@@ -234,9 +239,9 @@ const REQUEST_SCHEMA_EXAMPLES: ExampleEntry[] = [
 
 function validateExamples(entries: ExampleEntry[], failures: string[]) {
   for (const { name, schema } of entries) {
-    const example = getExample(schema);
+    const example = getExample(name, schema);
     if (example === undefined) {
-      failures.push(`${name}: missing .meta({ example })`);
+      failures.push(`${name}: missing OpenAPI example (add to openapi-example-fixtures.ts or .meta({ example }))`);
       continue;
     }
 

@@ -10,7 +10,6 @@ import {
   entityIdentitySchema,
   makeCollectionResponseSchema,
 } from "#entities/_shared.js";
-import { EXAMPLE_IMPORTANT_DATES_LIST_RESPONSE } from "#openapi/fixtures/schema-examples.js";
 
 const isoDateSchema = z
   .string()
@@ -125,7 +124,7 @@ export const replaceImportantDatesSchema = z
 export const importantDatesListResponseSchema = makeCollectionResponseSchema(
   "dates",
   importantDateSchema,
-).meta({ example: EXAMPLE_IMPORTANT_DATES_LIST_RESPONSE });
+);
 
 export type ImportantDatesListResponse = z.infer<typeof importantDatesListResponseSchema>;
 export type ImportantDateType = z.infer<typeof importantDateTypeSchema>;

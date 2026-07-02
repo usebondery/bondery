@@ -6,14 +6,6 @@ import {
   updatedAtSchema,
   makePaginatedListResponseSchema,
 } from "#entities/_shared.js";
-import {
-  EXAMPLE_INTERACTION_RESPONSE,
-  EXAMPLE_INTERACTIONS_LIST_RESPONSE,
-} from "#openapi/fixtures/schema-examples.js";
-import {
-  EXAMPLE_CREATE_INTERACTION_REQUEST,
-  EXAMPLE_PATCH_INTERACTION_REQUEST,
-} from "#openapi/fixtures/requests.js";
 
 export const interactionTypeSchema = z.enum([
   "Call",
@@ -54,7 +46,7 @@ export const createInteractionInputSchema = z.object({
   description: z.string().optional(),
   date: createdAtSchema,
   participantIds: z.array(z.string()),
-}).meta({ example: EXAMPLE_CREATE_INTERACTION_REQUEST });
+});
 
 export const interactionFormSchema = z.object({
   title: z.string().trim().min(1, { error: "Title is required" }),
@@ -70,12 +62,12 @@ export const updateInteractionInputSchema = z.object({
   description: z.string().optional(),
   date: createdAtSchema.optional(),
   participantIds: z.array(z.string()).optional(),
-}).meta({ example: EXAMPLE_PATCH_INTERACTION_REQUEST });
+});
 
 export const interactionsListResponseSchema = makePaginatedListResponseSchema(
   "interactions",
   interactionSchema,
-).meta({ example: EXAMPLE_INTERACTIONS_LIST_RESPONSE });
+);
 
 const interactionDetailSchema = z.object({
   id: z.string(),
@@ -90,7 +82,7 @@ export const interactionResponseSchema = z
   .object({
     interaction: interactionDetailSchema,
   })
-  .meta({ example: EXAMPLE_INTERACTION_RESPONSE });
+  ;
 
 export type InteractionType = z.infer<typeof interactionTypeSchema>;
 export type InteractionParticipant = z.infer<typeof interactionParticipantSchema>;

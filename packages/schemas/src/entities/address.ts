@@ -1,11 +1,6 @@
 import { z } from "zod";
 import { CONTACT_FIELD_MAX_LENGTHS, CONTACT_LIMITS } from "#constants/index.js";
 import { nullableTrimmedStringSchema } from "#entities/_shared.js";
-import {
-  EXAMPLE_GEOCODE_SUGGEST_RESPONSE,
-  EXAMPLE_GEOCODE_TIMEZONE_RESPONSE,
-} from "#openapi/fixtures/schema-examples.js";
-
 export const contactAddressTypeSchema = z.enum(["home", "work", "other"]);
 export const contactAddressGranularitySchema = z.enum(["address", "city", "state", "country"]);
 export const contactAddressGeocodeSourceSchema = z.enum(["mapy.com", "manual"]);
@@ -70,18 +65,6 @@ export const contactAddressEntrySchema = addressCoreInputSchema.extend({
 
 export const geocodeSuggestAddressSchema = contactAddressEntrySchema;
 
-export const geocodeSuggestResponseSchema = z
-  .object({
-    addresses: z.array(geocodeSuggestAddressSchema),
-  })
-  .meta({ example: EXAMPLE_GEOCODE_SUGGEST_RESPONSE });
-
-export const geocodeTimezoneResponseSchema = z
-  .object({
-    timezone: nullableTrimmedStringSchema(),
-  })
-  .meta({ example: EXAMPLE_GEOCODE_TIMEZONE_RESPONSE });
-
 export const replaceAddressesSchema = z
   .array(contactAddressEntrySchema)
   .max(CONTACT_LIMITS.maxAddresses, {
@@ -96,8 +79,4 @@ export type ContactAddressEntryInput = z.input<typeof contactAddressEntrySchema>
 export type ContactAddressEntryOutput = z.output<typeof contactAddressEntrySchema>;
 export type GeocodeSuggestAddressInput = z.input<typeof geocodeSuggestAddressSchema>;
 export type GeocodeSuggestAddressOutput = z.output<typeof geocodeSuggestAddressSchema>;
-export type GeocodeSuggestResponseInput = z.input<typeof geocodeSuggestResponseSchema>;
-export type GeocodeSuggestResponseOutput = z.output<typeof geocodeSuggestResponseSchema>;
-export type GeocodeTimezoneResponseInput = z.input<typeof geocodeTimezoneResponseSchema>;
-export type GeocodeTimezoneResponseOutput = z.output<typeof geocodeTimezoneResponseSchema>;
 export type ReplaceAddressesInput = z.infer<typeof replaceAddressesSchema>;

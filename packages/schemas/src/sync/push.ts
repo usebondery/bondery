@@ -4,14 +4,11 @@ import { contactSchema } from "#entities/contact.js";
 import { groupSchema } from "#entities/group.js";
 import { tagSchema } from "#entities/tag.js";
 import { syncMutationSchema } from "#sync/mutations.js";
-import { EXAMPLE_SYNC_PUSH_RESPONSE } from "#openapi/fixtures/schema-examples.js";
-import { EXAMPLE_SYNC_PUSH_REQUEST } from "#openapi/fixtures/requests.js";
 
 export const syncPushRequestSchema = z.object({
   deviceId: z.string().uuid(),
   mutations: z.array(syncMutationSchema).min(1).max(50),
-}).meta({ example: EXAMPLE_SYNC_PUSH_REQUEST });
-
+});
 export type SyncPushRequest = z.infer<typeof syncPushRequestSchema>;
 
 export const writeResultSchema = z.object({
@@ -60,14 +57,11 @@ export const syncPushResultSchema = z.discriminatedUnion("status", [
 
 export type SyncPushResult = z.infer<typeof syncPushResultSchema>;
 
-export const syncPushResponseSchema = z
-  .object({
-    results: z.array(syncPushResultSchema),
-    serverTime: createdAtSchema,
-    nextServerSequence: z.number().int().nonnegative(),
-  })
-  .meta({ example: EXAMPLE_SYNC_PUSH_RESPONSE });
-
+export const syncPushResponseSchema = z.object({
+  results: z.array(syncPushResultSchema),
+  serverTime: createdAtSchema,
+  nextServerSequence: z.number().int().nonnegative(),
+});
 export type SyncPushResponse = z.infer<typeof syncPushResponseSchema>;
 
 export const syncContactWriteDataSchema = z.object({ contact: contactSchema });

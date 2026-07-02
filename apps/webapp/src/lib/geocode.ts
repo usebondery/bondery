@@ -5,7 +5,7 @@ import {
   parseGeocodeSuggestResponse,
   parseGeocodeTimezoneResponse,
   type ContactAddressEntry,
-} from "@bondery/schemas";
+} from "@bondery/schemas/geocode";
 import { clientApiJsonOrNull } from "@/lib/api/client";
 
 /**

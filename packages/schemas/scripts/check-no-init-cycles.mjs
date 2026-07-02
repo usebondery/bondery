@@ -1,5 +1,5 @@
 /**
- * Ensures web-safe schema modules do not import API-only OpenAPI/HTTP response graphs
+ * Ensures runtime schema modules do not import API-only OpenAPI fixture graphs
  * that can create Turbopack SSR initialization cycles.
  */
 import { readFileSync, readdirSync, statSync } from "node:fs";
@@ -10,24 +10,22 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const packageRoot = join(__dirname, "..");
 const srcRoot = join(packageRoot, "src");
 
-const FORBIDDEN_IMPORTS = [
-  "#openapi/fixtures/responses.js",
-  "#openapi/registry.js",
-  "#http/responses.js",
-  "#sync/conflict.js",
-];
-
-const HTTP_INDEX_FORBIDDEN_IMPORTS = [
-  "#openapi/fixtures/requests.js",
-];
-
+/** Paths that ship in web/mobile runtime graphs — must not touch OpenAPI fixtures. */
 const GUARDED_RELATIVE_PATHS = [
   "entities",
   "constants",
   "format.ts",
   "primitives",
-  "http/index.ts",
+  "sync",
+  "geocode",
+  "contact-id.ts",
+  "index.ts",
 ];
+
+/** API route helpers: no fixture barrels (inline small examples instead). */
+const HTTP_INDEX_PATH = "http/index.ts";
+
+const OPENAPI_IMPORT_MARKERS = ["#openapi/", "@bondery/schemas/openapi"];
 
 function collectSourceFiles(dir) {
   const entries = readdirSync(dir);
@@ -62,30 +60,44 @@ const violations = [];
 
 for (const file of collectSourceFiles(srcRoot)) {
   const rel = relative(srcRoot, file);
-  if (!isGuardedFile(rel)) {
-    continue;
-  }
-
+  const normalized = rel.replace(/\\/g, "/");
   const content = readFileSync(file, "utf8");
-  for (const forbidden of FORBIDDEN_IMPORTS) {
-    if (content.includes(forbidden)) {
-      violations.push({ file: rel, forbidden });
+
+  if (isGuardedFile(rel)) {
+    for (const marker of OPENAPI_IMPORT_MARKERS) {
+      if (content.includes(marker)) {
+        violations.push({ file: rel, forbidden: marker });
+      }
+    }
+
+    if (normalized.startsWith("entities/") && content.includes("#geocode/")) {
+      violations.push({ file: rel, forbidden: "#geocode/*" });
+    }
+
+    if (
+      normalized.startsWith("entities/") &&
+      /\.meta\(\s*\{[^}]*\bexample\s*:/s.test(content)
+    ) {
+      violations.push({
+        file: rel,
+        forbidden: ".meta({ example }) on entity schemas",
+      });
     }
   }
 
-  if (rel.replace(/\\/g, "/") === "http/index.ts") {
-    for (const forbidden of HTTP_INDEX_FORBIDDEN_IMPORTS) {
-      if (content.includes(forbidden)) {
-        violations.push({ file: rel, forbidden });
+  if (normalized === HTTP_INDEX_PATH) {
+    for (const marker of OPENAPI_IMPORT_MARKERS) {
+      if (content.includes(marker)) {
+        violations.push({ file: rel, forbidden: marker });
       }
     }
   }
 }
 
 if (violations.length > 0) {
-  console.error("Web-safe schema modules must not import API-only fixture graphs:\n");
+  console.error("Runtime schema modules must not import API-only OpenAPI graphs:\n");
   for (const { file, forbidden } of violations) {
-    console.error(`  - src/${file} imports ${forbidden}`);
+    console.error(`  - src/${file}: ${forbidden}`);
   }
   process.exit(1);
 }
@@ -95,6 +107,13 @@ const indexContent = readFileSync(indexPath, "utf8");
 if (indexContent.includes("#http/index.js")) {
   console.error(
     "src/index.ts must not re-export #http/index.js — use @bondery/schemas/http in API routes only.",
+  );
+  process.exit(1);
+}
+
+if (indexContent.includes("#geocode/index.js")) {
+  console.error(
+    "src/index.ts must not re-export #geocode/index.js — use @bondery/schemas/geocode to avoid SSR init cycles.",
   );
   process.exit(1);
 }

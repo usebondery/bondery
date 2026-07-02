@@ -3,29 +3,20 @@ import { contactIdSchema } from "#contact-id.js";
 import { AVATAR_UPLOAD, CONTACT_FIELD_MAX_LENGTHS } from "#constants/index.js";
 import { shareableFieldSchema } from "#entities/contact.js";
 import { shareContactEmailSchema } from "#entities/channels.js";
-import { EXAMPLE_ERROR_400 } from "#openapi/fixtures/errors.js";
-import {
-  EXAMPLE_API_SUCCESS_RESPONSE,
-  EXAMPLE_PHOTO_UPLOAD_RESPONSE,
-} from "#openapi/fixtures/schema-examples.js";
-import {
-  EXAMPLE_FEEDBACK_REQUEST,
-  EXAMPLE_SHARE_CONTACT_REQUEST,
-} from "#openapi/fixtures/requests.js";
 
 export const apiErrorResponseSchema = z
   .object({
     error: z.string(),
     retryAfter: z.number().int().positive().optional(),
   })
-  .meta({ id: "ApiError", example: EXAMPLE_ERROR_400 });
+  .meta({ id: "ApiError" });
 
 export const apiSuccessResponseSchema = z
   .object({
     success: z.boolean(),
     message: z.string().optional(),
   })
-  .meta({ example: EXAMPLE_API_SUCCESS_RESPONSE });
+  ;
 
 export const photoUploadResponseSchema = z
   .object({
@@ -33,7 +24,7 @@ export const photoUploadResponseSchema = z
     avatarUrl: z.string().nullable().optional(),
     error: z.string().optional(),
   })
-  .meta({ example: EXAMPLE_PHOTO_UPLOAD_RESPONSE });
+  ;
 
 export const imageValidationResultSchema = z.object({
   isValid: z.boolean(),
@@ -54,13 +45,13 @@ export const shareContactRequestSchema = z.object({
   message: shareContactEmailSchema.shape.message,
   sendCopy: z.boolean(),
   selectedFields: z.array(shareableFieldSchema),
-}).meta({ example: EXAMPLE_SHARE_CONTACT_REQUEST });
+});
 
 export const feedbackFormSchema = z.object({
   npsScore: z.number().min(0).max(10),
   npsReason: z.string(),
   generalFeedback: z.string(),
-}).meta({ example: EXAMPLE_FEEDBACK_REQUEST });
+});
 
 export const inputMaxLengthsSchema = z.object({
   firstName: z.number(),

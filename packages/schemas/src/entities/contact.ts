@@ -13,33 +13,6 @@ import {
   messageResponseSchema,
   nullableDateTimeSchema,
 } from "#entities/_shared.js";
-import {
-  EXAMPLE_BY_SOCIAL_LOOKUP_RESPONSE,
-  EXAMPLE_CONTACT_RELATIONSHIP_RESPONSE,
-  EXAMPLE_CONTACT_RELATIONSHIPS_RESPONSE,
-  EXAMPLE_CONTACT_RESPONSE,
-  EXAMPLE_CONTACTS_LIST_RESPONSE,
-  EXAMPLE_CREATE_CONTACT_RESPONSE,
-  EXAMPLE_DELETE_CONTACTS_RESPONSE,
-  EXAMPLE_ENRICH_ELIGIBLE_COUNT_RESPONSE,
-  EXAMPLE_ENRICH_QUEUE_INIT_RESPONSE,
-  EXAMPLE_ENRICH_QUEUE_NEXT_BATCH_RESPONSE,
-  EXAMPLE_ENRICH_QUEUE_STATUS_COUNTS_RESPONSE,
-  EXAMPLE_LINKEDIN_DATA_RESPONSE,
-  EXAMPLE_LINKEDIN_DATA_UPSERT_RESPONSE,
-  EXAMPLE_MAP_ADDRESS_PINS_RESPONSE,
-  EXAMPLE_MAP_PINS_RESPONSE,
-  EXAMPLE_MESSAGE_RESPONSE,
-} from "#openapi/fixtures/schema-examples.js";
-import {
-  EXAMPLE_CREATE_CONTACT_REQUEST,
-  EXAMPLE_CREATE_RELATIONSHIP_REQUEST,
-  EXAMPLE_DELETE_CONTACTS_REQUEST,
-  EXAMPLE_ENRICH_QUEUE_INIT_REQUEST,
-  EXAMPLE_ENRICH_QUEUE_PATCH_REQUEST,
-  EXAMPLE_PATCH_CONTACT_REQUEST,
-  EXAMPLE_PATCH_RELATIONSHIP_REQUEST,
-} from "#openapi/fixtures/requests.js";
 
 const trimmedNameField = (max: number, label: string) =>
   z
@@ -115,12 +88,12 @@ export const createContactApiInputSchema = z.object({
   middleName: z.string().optional(),
   lastName: z.string().optional(),
   linkedin: z.string().optional(),
-}).meta({ example: EXAMPLE_CREATE_CONTACT_REQUEST });
+});
 
 /** POST /api/contacts body (optional client-supplied id). */
 export const createContactBodySchema = createContactApiInputSchema.extend({
   id: contactIdSchema.optional(),
-}).meta({ example: EXAMPLE_CREATE_CONTACT_REQUEST });
+});
 
 /** PATCH /api/contacts/:id — identity fields edited from mobile identity sheet. */
 export const updateContactIdentitySchema = z
@@ -162,19 +135,19 @@ export const updateContactInputSchema = contactSchema.partial().omit({
   importantDates: true,
 }).extend({
   importantDates: replaceImportantDatesSchema.nullable().optional(),
-}).meta({ example: EXAMPLE_PATCH_CONTACT_REQUEST });
+});
 
 export const contactResponseSchema = z
   .object({
     contact: contactSchema,
   })
-  .meta({ example: EXAMPLE_CONTACT_RESPONSE });
+  ;
 
 export const createContactResponseSchema = contactResponseSchema
   .extend({
     txid: z.string().optional(),
   })
-  .meta({ example: EXAMPLE_CREATE_CONTACT_RESPONSE });
+  ;
 
 const mapPinSchema = z.object({
   id: z.string(),
@@ -192,7 +165,7 @@ export const mapPinsResponseSchema = z
   .object({
     pins: z.array(mapPinSchema),
   })
-  .meta({ example: EXAMPLE_MAP_PINS_RESPONSE });
+  ;
 
 const mapAddressPinSchema = z.object({
   addressId: z.string(),
@@ -212,7 +185,7 @@ export const mapAddressPinsResponseSchema = z
   .object({
     pins: z.array(mapAddressPinSchema),
   })
-  .meta({ example: EXAMPLE_MAP_ADDRESS_PINS_RESPONSE });
+  ;
 
 export const contactsListStatsSchema = z.object({
   totalContacts: z.number(),
@@ -227,20 +200,20 @@ export const contactsListResponseSchema = makePaginatedListResponseSchema(
   .extend({
     stats: contactsListStatsSchema,
   })
-  .meta({ example: EXAMPLE_CONTACTS_LIST_RESPONSE });
+  ;
 
 export const createContactRelationshipInputSchema = z.object({
   relatedPersonId: contactIdSchema,
   relationshipType: relationshipTypeSchema,
-}).meta({ example: EXAMPLE_CREATE_RELATIONSHIP_REQUEST });
+});
 
 export const updateContactRelationshipInputSchema = createContactRelationshipInputSchema
-  .meta({ example: EXAMPLE_PATCH_RELATIONSHIP_REQUEST });
+  ;
 
 export const contactRelationshipsResponseSchema = makeCollectionResponseSchema(
   "relationships",
   contactRelationshipWithPeopleSchema,
-).meta({ example: EXAMPLE_CONTACT_RELATIONSHIPS_RESPONSE });
+);
 
 export const contactSortOrderSchema = z.enum([
   "nameAsc",
@@ -264,24 +237,22 @@ export const deleteContactsRequestSchema = z.union([
     filter: contactsFilterSchema,
     excludeIds: z.array(contactIdSchema).optional(),
   }),
-]).meta({ example: EXAMPLE_DELETE_CONTACTS_REQUEST });
+]);
 
 export const deleteContactsResponseSchema = messageResponseSchema
   .extend({
     deletedCount: z.number().int().optional(),
   })
-  .meta({ example: EXAMPLE_DELETE_CONTACTS_RESPONSE });
+  ;
 
 export const bySocialLookupResponseSchema = z
   .object({
     exists: z.boolean(),
     contact: contactPreviewSchema.optional(),
   })
-  .meta({ example: EXAMPLE_BY_SOCIAL_LOOKUP_RESPONSE });
+  ;
 
-export const deleteContactResponseSchema = messageResponseSchema.meta({
-  example: EXAMPLE_MESSAGE_RESPONSE,
-});
+export const deleteContactResponseSchema = messageResponseSchema;
 
 const linkedInHistoryFieldsSchema = z.object({
   peopleLinkedinId: z.string(),
@@ -318,7 +289,7 @@ export const linkedInDataResponseSchema = z
     workHistory: z.array(workHistoryEntrySchema),
     education: z.array(educationEntrySchema),
   })
-  .meta({ example: EXAMPLE_LINKEDIN_DATA_RESPONSE });
+  ;
 
 export const enrichQueueStatusSchema = z.enum([
   "pending",
@@ -338,7 +309,7 @@ export const enrichEligibleCountResponseSchema = z
   .object({
     count: z.number(),
   })
-  .meta({ example: EXAMPLE_ENRICH_ELIGIBLE_COUNT_RESPONSE });
+  ;
 
 export const enrichQueueStatusCountsSchema = z
   .object({
@@ -346,13 +317,13 @@ export const enrichQueueStatusCountsSchema = z
     completed: z.number(),
     failed: z.number(),
   })
-  .meta({ example: EXAMPLE_ENRICH_QUEUE_STATUS_COUNTS_RESPONSE });
+  ;
 
 export const enrichQueueInitResponseSchema = z
   .object({
     totalEligible: z.number(),
   })
-  .meta({ example: EXAMPLE_ENRICH_QUEUE_INIT_RESPONSE });
+  ;
 
 export const enrichQueueNextBatchItemSchema = z.object({
   queueItemId: z.string(),
@@ -366,20 +337,20 @@ export const enrichQueueNextBatchResponseSchema = z
   .object({
     items: z.array(enrichQueueNextBatchItemSchema),
   })
-  .meta({ example: EXAMPLE_ENRICH_QUEUE_NEXT_BATCH_RESPONSE });
+  ;
 
 export const linkedInDataUpsertResponseSchema = z
   .object({
     success: z.boolean(),
     count: z.number(),
   })
-  .meta({ example: EXAMPLE_LINKEDIN_DATA_UPSERT_RESPONSE });
+  ;
 
 export const contactRelationshipResponseSchema = z
   .object({
     relationship: contactRelationshipSchema,
   })
-  .meta({ example: EXAMPLE_CONTACT_RELATIONSHIP_RESPONSE });
+  ;
 
 /** POST /api/contacts/enrich-queue/init optional body. */
 export const enrichQueueInitBodySchema = z
@@ -387,13 +358,13 @@ export const enrichQueueInitBodySchema = z
     personId: z.string().optional(),
   })
   .optional()
-  .meta({ example: EXAMPLE_ENRICH_QUEUE_INIT_REQUEST });
+  ;
 
 /** PATCH /api/contacts/enrich-queue/:id body. */
 export const enrichQueuePatchBodySchema = z.object({
   status: z.enum(["completed", "failed"]),
   errorMessage: z.string().nullable().optional(),
-}).meta({ example: EXAMPLE_ENRICH_QUEUE_PATCH_REQUEST });
+});
 
 export const shareableFieldSchema = z.enum([
   "name",

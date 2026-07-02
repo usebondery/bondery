@@ -10,14 +10,9 @@ import {
 } from "#entities/address.js";
 import { replaceImportantDatesSchema } from "#entities/important-date.js";
 import { EXAMPLE_CONTACT_ID } from "#contact-id.js";
-import {
-  EXAMPLE_GEOCODE_SUGGEST_RESPONSE,
-  EXAMPLE_GEOCODE_TIMEZONE_RESPONSE,
-} from "#openapi/fixtures/schema-examples.js";
-import { EXAMPLE_DATE } from "#openapi/fixtures/primitives.js";
-
 /** Inline request examples — do not import the OpenAPI requests fixture module (SSR init cycle risk). */
 const EXAMPLE_IDS_REQUEST = { ids: [EXAMPLE_CONTACT_ID] } as const;
+const EXAMPLE_DATE = "2026-01-15";
 const EXAMPLE_REPLACE_IMPORTANT_DATES_REQUEST = {
   dates: [
     {
@@ -29,6 +24,35 @@ const EXAMPLE_REPLACE_IMPORTANT_DATES_REQUEST = {
   ],
 } as const;
 
+/** Inline geocode wire examples — do not import schema-examples (fixture graph). */
+const EXAMPLE_GEOCODE_SUGGEST_RESPONSE = {
+  addresses: [
+    {
+      value: "10 Downing Street, London",
+      type: "home" as const,
+      label: null,
+      latitude: 51.5034,
+      longitude: -0.1276,
+      addressLine1: "10 Downing Street",
+      addressLine2: null,
+      addressCity: "London",
+      addressPostalCode: "SW1A 2AA",
+      addressState: null,
+      addressStateCode: null,
+      addressCountry: "United Kingdom",
+      addressCountryCode: "GB",
+      addressGranularity: "address" as const,
+      addressFormatted: "10 Downing Street, London SW1A 2AA, UK",
+      addressGeocodeSource: "mapy.com" as const,
+      geocodeConfidence: "verified" as const,
+      timezone: "Europe/London",
+    },
+  ],
+} as const;
+
+const EXAMPLE_GEOCODE_TIMEZONE_RESPONSE = {
+  timezone: "Europe/London",
+} as const;
 export * from "#http/ids.js";
 
 /** UUID path parameter (e.g. `:id`). */

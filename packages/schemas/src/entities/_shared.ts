@@ -1,11 +1,18 @@
 import { z } from "zod";
 import { contactIdSchema } from "#contact-id.js";
-import { EXAMPLE_MESSAGE_RESPONSE } from "#openapi/fixtures/schema-examples.js";
+
+/** RFC 3339 datetime with timezone offset — avoids Zod `iso.datetime` (Turbopack SSR TDZ). */
+const ISO_DATETIME_OFFSET_PATTERN =
+  /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$/;
+
+const isoDateTimeSchema = z.string().regex(ISO_DATETIME_OFFSET_PATTERN, {
+  message: "Expected ISO 8601 datetime with timezone offset",
+});
 
 export const idSchema = z.string();
 export const userIdSchema = z.string();
-export const createdAtSchema = z.iso.datetime({ offset: true });
-export const updatedAtSchema = z.iso.datetime({ offset: true });
+export const createdAtSchema = isoDateTimeSchema;
+export const updatedAtSchema = isoDateTimeSchema;
 export const nullableDateTimeSchema = createdAtSchema.nullable();
 
 export const entityIdentitySchema = z.object({
@@ -28,7 +35,7 @@ export const messageResponseSchema = z
   .object({
     message: messageSchema,
   })
-  .meta({ example: EXAMPLE_MESSAGE_RESPONSE });
+  ;
 
 export const personIdsSelectionSchema = z.object({
   personIds: z.array(contactIdSchema).min(1),
