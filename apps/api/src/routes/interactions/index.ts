@@ -280,6 +280,7 @@ export const interactionRoutes: AppRoutePlugin = async (fastify) => {
       schema: {
         description: "Update an interaction by ID.",
         params: uuidParamSchema,
+        querystring: avatarTransformQuerySchema,
         body: updateInteractionInputSchema,
         response: withOkResponse(
           interactionResponseSchema,

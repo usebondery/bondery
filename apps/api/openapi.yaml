@@ -11412,6 +11412,22 @@ paths:
               description: Discussed project updates.
       parameters:
         - schema:
+            type: string
+            enum:
+              - low
+              - medium
+              - high
+          in: query
+          name: avatarQuality
+        - schema:
+            type: string
+            enum:
+              - small
+              - medium
+              - large
+          in: query
+          name: avatarSize
+        - schema:
             $ref: "#/components/schemas/ContactId"
           in: path
           name: id
