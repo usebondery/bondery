@@ -90,14 +90,14 @@ components:
         notesUpdatedAt:
           nullable: true
           type: string
-          format: date-time
+          pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
         avatar:
           nullable: true
           type: string
         lastInteraction:
           nullable: true
           type: string
-          format: date-time
+          pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
         lastInteractionActivityId:
           nullable: true
           type: string
@@ -296,10 +296,10 @@ components:
                 type: string
               createdAt:
                 type: string
-                format: date-time
+                pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
               updatedAt:
                 type: string
-                format: date-time
+                pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
             required:
               - id
               - userId
@@ -333,10 +333,10 @@ components:
           type: number
         createdAt:
           type: string
-          format: date-time
+          pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
         updatedAt:
           type: string
-          format: date-time
+          pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
       required:
         - id
         - userId
@@ -526,9 +526,9 @@ components:
       required:
         - message
       additionalProperties: false
+      description: Single contact delete result
       example:
         message: OK
-      description: Single contact delete result
     Tag:
       type: object
       properties:
@@ -543,10 +543,10 @@ components:
           type: string
         createdAt:
           type: string
-          format: date-time
+          pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
         updatedAt:
           type: string
-          format: date-time
+          pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
       required:
         - id
         - userId
@@ -580,10 +580,10 @@ components:
           type: string
         createdAt:
           type: string
-          format: date-time
+          pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
         updatedAt:
           type: string
-          format: date-time
+          pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
       required:
         - id
         - userId
@@ -632,7 +632,7 @@ components:
           type: string
         date:
           type: string
-          format: date-time
+          pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
         participants:
           anyOf:
             - type: array
@@ -651,7 +651,7 @@ components:
                     type: string
                   updatedAt:
                     type: string
-                    format: date-time
+                    pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
                 required:
                   - id
                   - firstName
@@ -663,10 +663,10 @@ components:
                 type: string
         createdAt:
           type: string
-          format: date-time
+          pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
         updatedAt:
           type: string
-          format: date-time
+          pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
       required:
         - id
         - userId
@@ -752,12 +752,12 @@ paths:
                       - unhealthy
                   timestamp:
                     type: string
-                    format: date-time
+                    pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
                   cached:
                     type: boolean
                   cacheExpiresAt:
                     type: string
-                    format: date-time
+                    pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
                   services:
                     type: object
                     properties:
@@ -1043,12 +1043,12 @@ paths:
                       - unhealthy
                   timestamp:
                     type: string
-                    format: date-time
+                    pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
                   cached:
                     type: boolean
                   cacheExpiresAt:
                     type: string
-                    format: date-time
+                    pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
                   services:
                     type: object
                     properties:
@@ -1262,7 +1262,7 @@ paths:
                       - ok
                   timestamp:
                     type: string
-                    format: date-time
+                    pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
                   extension:
                     type: object
                     properties:
@@ -1407,58 +1407,6 @@ paths:
           description: Paginated contact list
           content:
             application/json:
-              example:
-                contacts:
-                  - id: 550e8400-e29b-41d4-a716-446655440000
-                    userId: 6ba7b810-9dad-11d1-80b4-00c04fd430c8
-                    firstName: Ada
-                    lastName: Lovelace
-                    middleName: null
-                    headline: Mathematician
-                    location: London, UK
-                    notes: null
-                    notesUpdatedAt: null
-                    avatar: null
-                    lastInteraction: 2026-01-15T12:00:00.000Z
-                    lastInteractionActivityId: null
-                    keepFrequencyDays: 90
-                    createdAt: 2026-01-15T12:00:00.000Z
-                    updatedAt: 2026-01-15T12:00:00.000Z
-                    phones:
-                      - prefix: "+44"
-                        value: "2079460958"
-                        type: home
-                        preferred: true
-                    emails:
-                      - value: ada.lovelace@example.com
-                        type: work
-                        preferred: true
-                    addresses: null
-                    linkedin: https://linkedin.com/in/ada-lovelace
-                    instagram: null
-                    whatsapp: null
-                    facebook: null
-                    website: https://example.com
-                    signal: null
-                    importantDates: null
-                    myself: false
-                    position: null
-                    language: en
-                    timezone: Europe/London
-                    gisPoint: null
-                    latitude: 51.5074
-                    longitude: -0.1278
-                pagination:
-                  limit: 50
-                  offset: 0
-                  totalCount: 1
-                  hasMore: false
-                  sort: null
-                  search: null
-                stats:
-                  totalContacts: 128
-                  thisMonthInteractions: 14
-                  newContactsThisYear: 22
               schema:
                 type: object
                 properties:
@@ -1487,58 +1435,6 @@ paths:
                   - pagination
                   - stats
                 additionalProperties: false
-                example:
-                  contacts:
-                    - id: 550e8400-e29b-41d4-a716-446655440000
-                      userId: 6ba7b810-9dad-11d1-80b4-00c04fd430c8
-                      firstName: Ada
-                      lastName: Lovelace
-                      middleName: null
-                      headline: Mathematician
-                      location: London, UK
-                      notes: null
-                      notesUpdatedAt: null
-                      avatar: null
-                      lastInteraction: 2026-01-15T12:00:00.000Z
-                      lastInteractionActivityId: null
-                      keepFrequencyDays: 90
-                      createdAt: 2026-01-15T12:00:00.000Z
-                      updatedAt: 2026-01-15T12:00:00.000Z
-                      phones:
-                        - prefix: "+44"
-                          value: "2079460958"
-                          type: home
-                          preferred: true
-                      emails:
-                        - value: ada.lovelace@example.com
-                          type: work
-                          preferred: true
-                      addresses: null
-                      linkedin: https://linkedin.com/in/ada-lovelace
-                      instagram: null
-                      whatsapp: null
-                      facebook: null
-                      website: https://example.com
-                      signal: null
-                      importantDates: null
-                      myself: false
-                      position: null
-                      language: en
-                      timezone: Europe/London
-                      gisPoint: null
-                      latitude: 51.5074
-                      longitude: -0.1278
-                  pagination:
-                    limit: 50
-                    offset: 0
-                    totalCount: 1
-                    hasMore: false
-                    sort: null
-                    search: null
-                  stats:
-                    totalContacts: 128
-                    thisMonthInteractions: 14
-                    newContactsThisYear: 22
         "400":
           description: Invalid request
           content:
@@ -1621,57 +1517,12 @@ paths:
                     - $ref: "#/components/schemas/ContactId"
               required:
                 - firstName
-            example:
-              firstName: Ada
-              lastName: Lovelace
       security: *a1
       responses:
         "201":
           description: Contact created
           content:
             application/json:
-              example:
-                contact:
-                  id: 550e8400-e29b-41d4-a716-446655440000
-                  userId: 6ba7b810-9dad-11d1-80b4-00c04fd430c8
-                  firstName: Ada
-                  lastName: Lovelace
-                  middleName: null
-                  headline: Mathematician
-                  location: London, UK
-                  notes: null
-                  notesUpdatedAt: null
-                  avatar: null
-                  lastInteraction: 2026-01-15T12:00:00.000Z
-                  lastInteractionActivityId: null
-                  keepFrequencyDays: 90
-                  createdAt: 2026-01-15T12:00:00.000Z
-                  updatedAt: 2026-01-15T12:00:00.000Z
-                  phones:
-                    - prefix: "+44"
-                      value: "2079460958"
-                      type: home
-                      preferred: true
-                  emails:
-                    - value: ada.lovelace@example.com
-                      type: work
-                      preferred: true
-                  addresses: null
-                  linkedin: https://linkedin.com/in/ada-lovelace
-                  instagram: null
-                  whatsapp: null
-                  facebook: null
-                  website: https://example.com
-                  signal: null
-                  importantDates: null
-                  myself: false
-                  position: null
-                  language: en
-                  timezone: Europe/London
-                  gisPoint: null
-                  latitude: 51.5074
-                  longitude: -0.1278
-                txid: tx-550e8400-e29b-41d4-a716-446655440000
               schema:
                 type: object
                 properties:
@@ -1682,48 +1533,6 @@ paths:
                 required:
                   - contact
                 additionalProperties: false
-                example:
-                  contact:
-                    id: 550e8400-e29b-41d4-a716-446655440000
-                    userId: 6ba7b810-9dad-11d1-80b4-00c04fd430c8
-                    firstName: Ada
-                    lastName: Lovelace
-                    middleName: null
-                    headline: Mathematician
-                    location: London, UK
-                    notes: null
-                    notesUpdatedAt: null
-                    avatar: null
-                    lastInteraction: 2026-01-15T12:00:00.000Z
-                    lastInteractionActivityId: null
-                    keepFrequencyDays: 90
-                    createdAt: 2026-01-15T12:00:00.000Z
-                    updatedAt: 2026-01-15T12:00:00.000Z
-                    phones:
-                      - prefix: "+44"
-                        value: "2079460958"
-                        type: home
-                        preferred: true
-                    emails:
-                      - value: ada.lovelace@example.com
-                        type: work
-                        preferred: true
-                    addresses: null
-                    linkedin: https://linkedin.com/in/ada-lovelace
-                    instagram: null
-                    whatsapp: null
-                    facebook: null
-                    website: https://example.com
-                    signal: null
-                    importantDates: null
-                    myself: false
-                    position: null
-                    language: en
-                    timezone: Europe/London
-                    gisPoint: null
-                    latitude: 51.5074
-                    longitude: -0.1278
-                  txid: tx-550e8400-e29b-41d4-a716-446655440000
         "400":
           description: Invalid request
           content:
@@ -1824,9 +1633,6 @@ paths:
                         $ref: "#/components/schemas/ContactId"
                   required:
                     - filter
-              example:
-                ids:
-                  - 550e8400-e29b-41d4-a716-446655440000
       security: *a1
       responses:
         "200":
@@ -1931,13 +1737,6 @@ paths:
           description: Matching contact
           content:
             application/json:
-              example:
-                exists: true
-                contact:
-                  id: 550e8400-e29b-41d4-a716-446655440000
-                  firstName: Ada
-                  lastName: Lovelace
-                  avatar: null
               schema:
                 type: object
                 properties:
@@ -1965,13 +1764,6 @@ paths:
                 required:
                   - exists
                 additionalProperties: false
-                example:
-                  exists: true
-                  contact:
-                    id: 550e8400-e29b-41d4-a716-446655440000
-                    firstName: Ada
-                    lastName: Lovelace
-                    avatar: null
         "400":
           description: Invalid request
           content:
@@ -2092,19 +1884,6 @@ paths:
           description: Address map pins within the bounding box
           content:
             application/json:
-              example:
-                pins:
-                  - addressId: addr-1
-                    personId: 550e8400-e29b-41d4-a716-446655440000
-                    firstName: Ada
-                    lastName: Lovelace
-                    addressType: home
-                    addressFormatted: London, UK
-                    addressCity: London
-                    addressCountry: United Kingdom
-                    latitude: 51.5074
-                    longitude: -0.1278
-                    avatar: null
               schema:
                 type: object
                 properties:
@@ -2156,19 +1935,6 @@ paths:
                 required:
                   - pins
                 additionalProperties: false
-                example:
-                  pins:
-                    - addressId: addr-1
-                      personId: 550e8400-e29b-41d4-a716-446655440000
-                      firstName: Ada
-                      lastName: Lovelace
-                      addressType: home
-                      addressFormatted: London, UK
-                      addressCity: London
-                      addressCountry: United Kingdom
-                      latitude: 51.5074
-                      longitude: -0.1278
-                      avatar: null
         "400":
           description: Invalid request
           content:
@@ -2289,17 +2055,6 @@ paths:
           description: Map pins within the bounding box
           content:
             application/json:
-              example:
-                pins:
-                  - id: 550e8400-e29b-41d4-a716-446655440000
-                    firstName: Ada
-                    lastName: Lovelace
-                    headline: Mathematician
-                    location: London, UK
-                    lastInteraction: 2026-01-15T12:00:00.000Z
-                    latitude: 51.5074
-                    longitude: -0.1278
-                    avatar: null
               schema:
                 type: object
                 properties:
@@ -2324,7 +2079,7 @@ paths:
                         lastInteraction:
                           nullable: true
                           type: string
-                          format: date-time
+                          pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
                         latitude:
                           type: number
                         longitude:
@@ -2346,17 +2101,6 @@ paths:
                 required:
                   - pins
                 additionalProperties: false
-                example:
-                  pins:
-                    - id: 550e8400-e29b-41d4-a716-446655440000
-                      firstName: Ada
-                      lastName: Lovelace
-                      headline: Mathematician
-                      location: London, UK
-                      lastInteraction: 2026-01-15T12:00:00.000Z
-                      latitude: 51.5074
-                      longitude: -0.1278
-                      avatar: null
         "400":
           description: Invalid request
           content:
@@ -2442,26 +2186,6 @@ paths:
           description: Upcoming reminders
           content:
             application/json:
-              example:
-                reminders:
-                  - importantDate:
-                      id: aa0e8400-e29b-41d4-a716-446655440004
-                      userId: 6ba7b810-9dad-11d1-80b4-00c04fd430c8
-                      personId: 550e8400-e29b-41d4-a716-446655440000
-                      type: birthday
-                      date: 1815-12-10
-                      note: Send a card
-                      notifyDaysBefore: 7
-                      notifyOn: 2026-12-03
-                      createdAt: 2026-01-15T12:00:00.000Z
-                      updatedAt: 2026-01-15T12:00:00.000Z
-                    person:
-                      id: 550e8400-e29b-41d4-a716-446655440000
-                      firstName: Ada
-                      lastName: Lovelace
-                      avatar: null
-                    notificationSent: false
-                    notificationSentAt: null
               schema:
                 type: object
                 properties:
@@ -2503,10 +2227,10 @@ paths:
                               type: string
                             createdAt:
                               type: string
-                              format: date-time
+                              pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
                             updatedAt:
                               type: string
-                              format: date-time
+                              pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
                           required:
                             - id
                             - userId
@@ -2543,7 +2267,7 @@ paths:
                         notificationSentAt:
                           nullable: true
                           type: string
-                          format: date-time
+                          pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
                       required:
                         - importantDate
                         - person
@@ -2553,26 +2277,6 @@ paths:
                 required:
                   - reminders
                 additionalProperties: false
-                example:
-                  reminders:
-                    - importantDate:
-                        id: aa0e8400-e29b-41d4-a716-446655440004
-                        userId: 6ba7b810-9dad-11d1-80b4-00c04fd430c8
-                        personId: 550e8400-e29b-41d4-a716-446655440000
-                        type: birthday
-                        date: 1815-12-10
-                        note: Send a card
-                        notifyDaysBefore: 7
-                        notifyOn: 2026-12-03
-                        createdAt: 2026-01-15T12:00:00.000Z
-                        updatedAt: 2026-01-15T12:00:00.000Z
-                      person:
-                        id: 550e8400-e29b-41d4-a716-446655440000
-                        firstName: Ada
-                        lastName: Lovelace
-                        avatar: null
-                      notificationSent: false
-                      notificationSentAt: null
         "400":
           description: Invalid request
           content:
@@ -2664,47 +2368,6 @@ paths:
           description: Contact details
           content:
             application/json:
-              example:
-                contact:
-                  id: 550e8400-e29b-41d4-a716-446655440000
-                  userId: 6ba7b810-9dad-11d1-80b4-00c04fd430c8
-                  firstName: Ada
-                  lastName: Lovelace
-                  middleName: null
-                  headline: Mathematician
-                  location: London, UK
-                  notes: null
-                  notesUpdatedAt: null
-                  avatar: null
-                  lastInteraction: 2026-01-15T12:00:00.000Z
-                  lastInteractionActivityId: null
-                  keepFrequencyDays: 90
-                  createdAt: 2026-01-15T12:00:00.000Z
-                  updatedAt: 2026-01-15T12:00:00.000Z
-                  phones:
-                    - prefix: "+44"
-                      value: "2079460958"
-                      type: home
-                      preferred: true
-                  emails:
-                    - value: ada.lovelace@example.com
-                      type: work
-                      preferred: true
-                  addresses: null
-                  linkedin: https://linkedin.com/in/ada-lovelace
-                  instagram: null
-                  whatsapp: null
-                  facebook: null
-                  website: https://example.com
-                  signal: null
-                  importantDates: null
-                  myself: false
-                  position: null
-                  language: en
-                  timezone: Europe/London
-                  gisPoint: null
-                  latitude: 51.5074
-                  longitude: -0.1278
               schema:
                 type: object
                 properties:
@@ -2713,47 +2376,6 @@ paths:
                 required:
                   - contact
                 additionalProperties: false
-                example:
-                  contact:
-                    id: 550e8400-e29b-41d4-a716-446655440000
-                    userId: 6ba7b810-9dad-11d1-80b4-00c04fd430c8
-                    firstName: Ada
-                    lastName: Lovelace
-                    middleName: null
-                    headline: Mathematician
-                    location: London, UK
-                    notes: null
-                    notesUpdatedAt: null
-                    avatar: null
-                    lastInteraction: 2026-01-15T12:00:00.000Z
-                    lastInteractionActivityId: null
-                    keepFrequencyDays: 90
-                    createdAt: 2026-01-15T12:00:00.000Z
-                    updatedAt: 2026-01-15T12:00:00.000Z
-                    phones:
-                      - prefix: "+44"
-                        value: "2079460958"
-                        type: home
-                        preferred: true
-                    emails:
-                      - value: ada.lovelace@example.com
-                        type: work
-                        preferred: true
-                    addresses: null
-                    linkedin: https://linkedin.com/in/ada-lovelace
-                    instagram: null
-                    whatsapp: null
-                    facebook: null
-                    website: https://example.com
-                    signal: null
-                    importantDates: null
-                    myself: false
-                    position: null
-                    language: en
-                    timezone: Europe/London
-                    gisPoint: null
-                    latitude: 51.5074
-                    longitude: -0.1278
         "400":
           description: Invalid request
           content:
@@ -2844,14 +2466,14 @@ paths:
                 notesUpdatedAt:
                   nullable: true
                   type: string
-                  format: date-time
+                  pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
                 avatar:
                   nullable: true
                   type: string
                 lastInteraction:
                   nullable: true
                   type: string
-                  format: date-time
+                  pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
                 lastInteractionActivityId:
                   nullable: true
                   type: string
@@ -3032,7 +2654,7 @@ paths:
                   type: number
                 updatedAt:
                   type: string
-                  format: date-time
+                  pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
                 importantDates:
                   nullable: true
                   maxItems: 5
@@ -3075,8 +2697,6 @@ paths:
                     required:
                       - type
                       - date
-            example:
-              notes: Met at the Analytical Society dinner.
       parameters:
         - schema:
             $ref: "#/components/schemas/ContactId"
@@ -3090,48 +2710,6 @@ paths:
           description: Updated contact
           content:
             application/json:
-              example:
-                contact:
-                  id: 550e8400-e29b-41d4-a716-446655440000
-                  userId: 6ba7b810-9dad-11d1-80b4-00c04fd430c8
-                  firstName: Ada
-                  lastName: Lovelace
-                  middleName: null
-                  headline: Mathematician
-                  location: London, UK
-                  notes: null
-                  notesUpdatedAt: null
-                  avatar: null
-                  lastInteraction: 2026-01-15T12:00:00.000Z
-                  lastInteractionActivityId: null
-                  keepFrequencyDays: 90
-                  createdAt: 2026-01-15T12:00:00.000Z
-                  updatedAt: 2026-01-15T12:00:00.000Z
-                  phones:
-                    - prefix: "+44"
-                      value: "2079460958"
-                      type: home
-                      preferred: true
-                  emails:
-                    - value: ada.lovelace@example.com
-                      type: work
-                      preferred: true
-                  addresses: null
-                  linkedin: https://linkedin.com/in/ada-lovelace
-                  instagram: null
-                  whatsapp: null
-                  facebook: null
-                  website: https://example.com
-                  signal: null
-                  importantDates: null
-                  myself: false
-                  position: null
-                  language: en
-                  timezone: Europe/London
-                  gisPoint: null
-                  latitude: 51.5074
-                  longitude: -0.1278
-                txid: tx-550e8400-e29b-41d4-a716-446655440000
               schema:
                 type: object
                 properties:
@@ -3142,48 +2720,6 @@ paths:
                 required:
                   - contact
                 additionalProperties: false
-                example:
-                  contact:
-                    id: 550e8400-e29b-41d4-a716-446655440000
-                    userId: 6ba7b810-9dad-11d1-80b4-00c04fd430c8
-                    firstName: Ada
-                    lastName: Lovelace
-                    middleName: null
-                    headline: Mathematician
-                    location: London, UK
-                    notes: null
-                    notesUpdatedAt: null
-                    avatar: null
-                    lastInteraction: 2026-01-15T12:00:00.000Z
-                    lastInteractionActivityId: null
-                    keepFrequencyDays: 90
-                    createdAt: 2026-01-15T12:00:00.000Z
-                    updatedAt: 2026-01-15T12:00:00.000Z
-                    phones:
-                      - prefix: "+44"
-                        value: "2079460958"
-                        type: home
-                        preferred: true
-                    emails:
-                      - value: ada.lovelace@example.com
-                        type: work
-                        preferred: true
-                    addresses: null
-                    linkedin: https://linkedin.com/in/ada-lovelace
-                    instagram: null
-                    whatsapp: null
-                    facebook: null
-                    website: https://example.com
-                    signal: null
-                    importantDates: null
-                    myself: false
-                    position: null
-                    language: en
-                    timezone: Europe/London
-                    gisPoint: null
-                    latitude: 51.5074
-                    longitude: -0.1278
-                  txid: tx-550e8400-e29b-41d4-a716-446655440000
         "400":
           description: Invalid request
           content:
@@ -3220,48 +2756,6 @@ paths:
           description: Contact was modified on another device
           content:
             application/json:
-              example:
-                error: Contact was modified on another device
-                contact:
-                  id: 550e8400-e29b-41d4-a716-446655440000
-                  userId: 6ba7b810-9dad-11d1-80b4-00c04fd430c8
-                  firstName: Ada
-                  lastName: Lovelace
-                  middleName: null
-                  headline: Mathematician
-                  location: London, UK
-                  notes: null
-                  notesUpdatedAt: null
-                  avatar: null
-                  lastInteraction: 2026-01-15T12:00:00.000Z
-                  lastInteractionActivityId: null
-                  keepFrequencyDays: 90
-                  createdAt: 2026-01-15T12:00:00.000Z
-                  updatedAt: 2026-01-15T12:00:00.000Z
-                  phones:
-                    - prefix: "+44"
-                      value: "2079460958"
-                      type: home
-                      preferred: true
-                  emails:
-                    - value: ada.lovelace@example.com
-                      type: work
-                      preferred: true
-                  addresses: null
-                  linkedin: https://linkedin.com/in/ada-lovelace
-                  instagram: null
-                  whatsapp: null
-                  facebook: null
-                  website: https://example.com
-                  signal: null
-                  importantDates: null
-                  myself: false
-                  position: null
-                  language: en
-                  timezone: Europe/London
-                  gisPoint: null
-                  latitude: 51.5074
-                  longitude: -0.1278
               schema:
                 $ref: "#/components/schemas/SyncConflictError"
         "429":
@@ -3385,21 +2879,6 @@ paths:
           description: Groups for the contact
           content:
             application/json:
-              example:
-                groups:
-                  - id: 770e8400-e29b-41d4-a716-446655440001
-                    userId: 6ba7b810-9dad-11d1-80b4-00c04fd430c8
-                    label: Inner Circle
-                    emoji: ⭐
-                    color: "#6366f1"
-                    createdAt: 2026-01-15T12:00:00.000Z
-                    updatedAt: 2026-01-15T12:00:00.000Z
-                    contactCount: 12
-                    previewContacts:
-                      - id: 550e8400-e29b-41d4-a716-446655440000
-                        firstName: Ada
-                        lastName: Lovelace
-                        avatar: null
               schema:
                 type: object
                 properties:
@@ -3422,10 +2901,10 @@ paths:
                           type: string
                         createdAt:
                           type: string
-                          format: date-time
+                          pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
                         updatedAt:
                           type: string
-                          format: date-time
+                          pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
                         contactCount:
                           type: number
                         previewContacts:
@@ -3462,21 +2941,6 @@ paths:
                 required:
                   - groups
                 additionalProperties: false
-                example:
-                  groups:
-                    - id: 770e8400-e29b-41d4-a716-446655440001
-                      userId: 6ba7b810-9dad-11d1-80b4-00c04fd430c8
-                      label: Inner Circle
-                      emoji: ⭐
-                      color: "#6366f1"
-                      createdAt: 2026-01-15T12:00:00.000Z
-                      updatedAt: 2026-01-15T12:00:00.000Z
-                      contactCount: 12
-                      previewContacts:
-                        - id: 550e8400-e29b-41d4-a716-446655440000
-                          firstName: Ada
-                          lastName: Lovelace
-                          avatar: null
         "400":
           description: Invalid request
           content:
@@ -3660,14 +3124,6 @@ paths:
           description: Contact tags
           content:
             application/json:
-              example:
-                tags:
-                  - id: 880e8400-e29b-41d4-a716-446655440002
-                    userId: 6ba7b810-9dad-11d1-80b4-00c04fd430c8
-                    label: VIP
-                    color: "#f59e0b"
-                    createdAt: 2026-01-15T12:00:00.000Z
-                    updatedAt: 2026-01-15T12:00:00.000Z
               schema:
                 type: object
                 properties:
@@ -3678,14 +3134,6 @@ paths:
                 required:
                   - tags
                 additionalProperties: false
-                example:
-                  tags:
-                    - id: 880e8400-e29b-41d4-a716-446655440002
-                      userId: 6ba7b810-9dad-11d1-80b4-00c04fd430c8
-                      label: VIP
-                      color: "#f59e0b"
-                      createdAt: 2026-01-15T12:00:00.000Z
-                      updatedAt: 2026-01-15T12:00:00.000Z
         "400":
           description: Invalid request
           content:
@@ -3759,8 +3207,6 @@ paths:
                   minLength: 1
               required:
                 - tagId
-            example:
-              tagId: 880e8400-e29b-41d4-a716-446655440002
       parameters:
         - schema:
             $ref: "#/components/schemas/ContactId"
@@ -3777,15 +3223,7 @@ paths:
               example:
                 message: OK
               schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                required:
-                  - message
-                additionalProperties: false
-                example:
-                  message: OK
+                $ref: "#/components/schemas/DeleteContactResponse"
         "400":
           description: Invalid request
           content:
@@ -3868,15 +3306,7 @@ paths:
               example:
                 message: OK
               schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                required:
-                  - message
-                additionalProperties: false
-                example:
-                  message: OK
+                $ref: "#/components/schemas/DeleteContactResponse"
         "400":
           description: Invalid request
           content:
@@ -3952,9 +3382,6 @@ paths:
           description: Photo uploaded
           content:
             application/json:
-              example:
-                success: true
-                avatarUrl: https://cdn.example.com/avatars/ada.jpg
               schema:
                 type: object
                 properties:
@@ -3968,9 +3395,6 @@ paths:
                 required:
                   - success
                 additionalProperties: false
-                example:
-                  success: true
-                  avatarUrl: https://cdn.example.com/avatars/ada.jpg
         "400":
           description: Invalid request
           content:
@@ -4045,9 +3469,6 @@ paths:
           description: Photo deleted
           content:
             application/json:
-              example:
-                success: true
-                message: Operation completed
               schema:
                 type: object
                 properties:
@@ -4058,9 +3479,6 @@ paths:
                 required:
                   - success
                 additionalProperties: false
-                example:
-                  success: true
-                  message: Operation completed
         "400":
           description: Invalid request
           content:
@@ -4152,25 +3570,6 @@ paths:
           description: Contact relationships
           content:
             application/json:
-              example:
-                relationships:
-                  - id: bb0e8400-e29b-41d4-a716-446655440005
-                    userId: 6ba7b810-9dad-11d1-80b4-00c04fd430c8
-                    sourcePersonId: 550e8400-e29b-41d4-a716-446655440000
-                    targetPersonId: 6ba7b811-9dad-11d1-80b4-00c04fd430c8
-                    relationshipType: colleague
-                    createdAt: 2026-01-15T12:00:00.000Z
-                    updatedAt: 2026-01-15T12:00:00.000Z
-                    sourcePerson:
-                      id: 550e8400-e29b-41d4-a716-446655440000
-                      firstName: Ada
-                      lastName: Lovelace
-                      avatar: null
-                    targetPerson:
-                      id: 6ba7b811-9dad-11d1-80b4-00c04fd430c8
-                      firstName: Charles
-                      lastName: Babbage
-                      avatar: null
               schema:
                 type: object
                 properties:
@@ -4203,10 +3602,10 @@ paths:
                             - other
                         createdAt:
                           type: string
-                          format: date-time
+                          pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
                         updatedAt:
                           type: string
-                          format: date-time
+                          pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
                         sourcePerson:
                           type: object
                           properties:
@@ -4259,25 +3658,6 @@ paths:
                 required:
                   - relationships
                 additionalProperties: false
-                example:
-                  relationships:
-                    - id: bb0e8400-e29b-41d4-a716-446655440005
-                      userId: 6ba7b810-9dad-11d1-80b4-00c04fd430c8
-                      sourcePersonId: 550e8400-e29b-41d4-a716-446655440000
-                      targetPersonId: 6ba7b811-9dad-11d1-80b4-00c04fd430c8
-                      relationshipType: colleague
-                      createdAt: 2026-01-15T12:00:00.000Z
-                      updatedAt: 2026-01-15T12:00:00.000Z
-                      sourcePerson:
-                        id: 550e8400-e29b-41d4-a716-446655440000
-                        firstName: Ada
-                        lastName: Lovelace
-                        avatar: null
-                      targetPerson:
-                        id: 6ba7b811-9dad-11d1-80b4-00c04fd430c8
-                        firstName: Charles
-                        lastName: Babbage
-                        avatar: null
         "400":
           description: Invalid request
           content:
@@ -4365,9 +3745,6 @@ paths:
               required:
                 - relatedPersonId
                 - relationshipType
-            example:
-              relatedPersonId: 6ba7b811-9dad-11d1-80b4-00c04fd430c8
-              relationshipType: colleague
       parameters:
         - schema:
             $ref: "#/components/schemas/ContactId"
@@ -4381,15 +3758,6 @@ paths:
           description: Relationship created
           content:
             application/json:
-              example:
-                relationship:
-                  id: bb0e8400-e29b-41d4-a716-446655440005
-                  userId: 6ba7b810-9dad-11d1-80b4-00c04fd430c8
-                  sourcePersonId: 550e8400-e29b-41d4-a716-446655440000
-                  targetPersonId: 6ba7b811-9dad-11d1-80b4-00c04fd430c8
-                  relationshipType: colleague
-                  createdAt: 2026-01-15T12:00:00.000Z
-                  updatedAt: 2026-01-15T12:00:00.000Z
               schema:
                 type: object
                 properties:
@@ -4420,10 +3788,10 @@ paths:
                           - other
                       createdAt:
                         type: string
-                        format: date-time
+                        pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
                       updatedAt:
                         type: string
-                        format: date-time
+                        pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
                     required:
                       - id
                       - userId
@@ -4436,15 +3804,6 @@ paths:
                 required:
                   - relationship
                 additionalProperties: false
-                example:
-                  relationship:
-                    id: bb0e8400-e29b-41d4-a716-446655440005
-                    userId: 6ba7b810-9dad-11d1-80b4-00c04fd430c8
-                    sourcePersonId: 550e8400-e29b-41d4-a716-446655440000
-                    targetPersonId: 6ba7b811-9dad-11d1-80b4-00c04fd430c8
-                    relationshipType: colleague
-                    createdAt: 2026-01-15T12:00:00.000Z
-                    updatedAt: 2026-01-15T12:00:00.000Z
         "400":
           description: Invalid request
           content:
@@ -4541,9 +3900,6 @@ paths:
               required:
                 - relatedPersonId
                 - relationshipType
-            example:
-              relatedPersonId: 6ba7b811-9dad-11d1-80b4-00c04fd430c8
-              relationshipType: friend
       parameters:
         - schema:
             $ref: "#/components/schemas/ContactId"
@@ -4563,15 +3919,6 @@ paths:
           description: Relationship updated
           content:
             application/json:
-              example:
-                relationship:
-                  id: bb0e8400-e29b-41d4-a716-446655440005
-                  userId: 6ba7b810-9dad-11d1-80b4-00c04fd430c8
-                  sourcePersonId: 550e8400-e29b-41d4-a716-446655440000
-                  targetPersonId: 6ba7b811-9dad-11d1-80b4-00c04fd430c8
-                  relationshipType: colleague
-                  createdAt: 2026-01-15T12:00:00.000Z
-                  updatedAt: 2026-01-15T12:00:00.000Z
               schema:
                 type: object
                 properties:
@@ -4602,10 +3949,10 @@ paths:
                           - other
                       createdAt:
                         type: string
-                        format: date-time
+                        pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
                       updatedAt:
                         type: string
-                        format: date-time
+                        pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
                     required:
                       - id
                       - userId
@@ -4618,15 +3965,6 @@ paths:
                 required:
                   - relationship
                 additionalProperties: false
-                example:
-                  relationship:
-                    id: bb0e8400-e29b-41d4-a716-446655440005
-                    userId: 6ba7b810-9dad-11d1-80b4-00c04fd430c8
-                    sourcePersonId: 550e8400-e29b-41d4-a716-446655440000
-                    targetPersonId: 6ba7b811-9dad-11d1-80b4-00c04fd430c8
-                    relationshipType: colleague
-                    createdAt: 2026-01-15T12:00:00.000Z
-                    updatedAt: 2026-01-15T12:00:00.000Z
         "400":
           description: Invalid request
           content:
@@ -4718,15 +4056,7 @@ paths:
               example:
                 message: OK
               schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                required:
-                  - message
-                additionalProperties: false
-                example:
-                  message: OK
+                $ref: "#/components/schemas/DeleteContactResponse"
         "400":
           description: Invalid request
           content:
@@ -4802,18 +4132,6 @@ paths:
           description: Important dates
           content:
             application/json:
-              example:
-                dates:
-                  - id: aa0e8400-e29b-41d4-a716-446655440004
-                    userId: 6ba7b810-9dad-11d1-80b4-00c04fd430c8
-                    personId: 550e8400-e29b-41d4-a716-446655440000
-                    type: birthday
-                    date: 1815-12-10
-                    note: Send a card
-                    notifyDaysBefore: 7
-                    notifyOn: 2026-12-03
-                    createdAt: 2026-01-15T12:00:00.000Z
-                    updatedAt: 2026-01-15T12:00:00.000Z
               schema:
                 type: object
                 properties:
@@ -4852,10 +4170,10 @@ paths:
                           type: string
                         createdAt:
                           type: string
-                          format: date-time
+                          pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
                         updatedAt:
                           type: string
-                          format: date-time
+                          pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
                       required:
                         - id
                         - userId
@@ -4871,18 +4189,6 @@ paths:
                 required:
                   - dates
                 additionalProperties: false
-                example:
-                  dates:
-                    - id: aa0e8400-e29b-41d4-a716-446655440004
-                      userId: 6ba7b810-9dad-11d1-80b4-00c04fd430c8
-                      personId: 550e8400-e29b-41d4-a716-446655440000
-                      type: birthday
-                      date: 1815-12-10
-                      note: Send a card
-                      notifyDaysBefore: 7
-                      notifyOn: 2026-12-03
-                      createdAt: 2026-01-15T12:00:00.000Z
-                      updatedAt: 2026-01-15T12:00:00.000Z
         "400":
           description: Invalid request
           content:
@@ -5013,18 +4319,6 @@ paths:
           description: Important dates replaced
           content:
             application/json:
-              example:
-                dates:
-                  - id: aa0e8400-e29b-41d4-a716-446655440004
-                    userId: 6ba7b810-9dad-11d1-80b4-00c04fd430c8
-                    personId: 550e8400-e29b-41d4-a716-446655440000
-                    type: birthday
-                    date: 1815-12-10
-                    note: Send a card
-                    notifyDaysBefore: 7
-                    notifyOn: 2026-12-03
-                    createdAt: 2026-01-15T12:00:00.000Z
-                    updatedAt: 2026-01-15T12:00:00.000Z
               schema:
                 type: object
                 properties:
@@ -5063,10 +4357,10 @@ paths:
                           type: string
                         createdAt:
                           type: string
-                          format: date-time
+                          pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
                         updatedAt:
                           type: string
-                          format: date-time
+                          pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
                       required:
                         - id
                         - userId
@@ -5082,18 +4376,6 @@ paths:
                 required:
                   - dates
                 additionalProperties: false
-                example:
-                  dates:
-                    - id: aa0e8400-e29b-41d4-a716-446655440004
-                      userId: 6ba7b810-9dad-11d1-80b4-00c04fd430c8
-                      personId: 550e8400-e29b-41d4-a716-446655440000
-                      type: birthday
-                      date: 1815-12-10
-                      note: Send a card
-                      notifyDaysBefore: 7
-                      notifyOn: 2026-12-03
-                      createdAt: 2026-01-15T12:00:00.000Z
-                      updatedAt: 2026-01-15T12:00:00.000Z
         "400":
           description: Invalid request
           content:
@@ -5237,9 +4519,6 @@ paths:
                         type: string
                     required:
                       - schoolName
-            example:
-              headline: Mathematician
-              location: London, UK
       parameters:
         - schema:
             $ref: "#/components/schemas/ContactId"
@@ -5253,9 +4532,6 @@ paths:
           description: Contact enriched
           content:
             application/json:
-              example:
-                success: true
-                message: Operation completed
               schema:
                 type: object
                 properties:
@@ -5266,9 +4542,6 @@ paths:
                 required:
                   - success
                 additionalProperties: false
-                example:
-                  success: true
-                  message: Operation completed
         "400":
           description: Invalid request
           content:
@@ -5363,10 +4636,6 @@ paths:
                         type: string
                     required:
                       - companyName
-            example:
-              workHistory:
-                - title: Mathematician
-                  companyName: Analytical Engines Ltd
       parameters:
         - schema:
             $ref: "#/components/schemas/ContactId"
@@ -5380,9 +4649,6 @@ paths:
           description: LinkedIn data upserted
           content:
             application/json:
-              example:
-                success: true
-                count: 3
               schema:
                 type: object
                 properties:
@@ -5394,9 +4660,6 @@ paths:
                   - success
                   - count
                 additionalProperties: false
-                example:
-                  success: true
-                  count: 3
         "400":
           description: Invalid request
           content:
@@ -5471,11 +4734,6 @@ paths:
           description: LinkedIn data
           content:
             application/json:
-              example:
-                linkedinBio: Mathematician and writer.
-                syncedAt: 2026-01-15T12:00:00.000Z
-                workHistory: []
-                education: []
               schema:
                 type: object
                 properties:
@@ -5485,7 +4743,7 @@ paths:
                   syncedAt:
                     nullable: true
                     type: string
-                    format: date-time
+                    pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
                   workHistory:
                     type: array
                     items:
@@ -5499,10 +4757,10 @@ paths:
                           type: string
                         createdAt:
                           type: string
-                          format: date-time
+                          pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
                         updatedAt:
                           type: string
-                          format: date-time
+                          pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
                         companyName:
                           type: string
                         companyLinkedinUrl:
@@ -5558,10 +4816,10 @@ paths:
                           type: string
                         createdAt:
                           type: string
-                          format: date-time
+                          pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
                         updatedAt:
                           type: string
-                          format: date-time
+                          pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
                         schoolName:
                           type: string
                         schoolLinkedinUrl:
@@ -5602,11 +4860,6 @@ paths:
                   - workHistory
                   - education
                 additionalProperties: false
-                example:
-                  linkedinBio: Mathematician and writer.
-                  syncedAt: 2026-01-15T12:00:00.000Z
-                  workHistory: []
-                  education: []
         "400":
           description: Invalid request
           content:
@@ -5710,92 +4963,6 @@ paths:
           description: Merge recommendations
           content:
             application/json:
-              example:
-                recommendations:
-                  - id: cc0e8400-e29b-41d4-a716-446655440006
-                    leftPerson:
-                      id: 550e8400-e29b-41d4-a716-446655440000
-                      userId: 6ba7b810-9dad-11d1-80b4-00c04fd430c8
-                      firstName: Ada
-                      lastName: Lovelace
-                      middleName: null
-                      headline: Mathematician
-                      location: London, UK
-                      notes: null
-                      notesUpdatedAt: null
-                      avatar: null
-                      lastInteraction: 2026-01-15T12:00:00.000Z
-                      lastInteractionActivityId: null
-                      keepFrequencyDays: 90
-                      createdAt: 2026-01-15T12:00:00.000Z
-                      updatedAt: 2026-01-15T12:00:00.000Z
-                      phones:
-                        - prefix: "+44"
-                          value: "2079460958"
-                          type: home
-                          preferred: true
-                      emails:
-                        - value: ada.lovelace@example.com
-                          type: work
-                          preferred: true
-                      addresses: null
-                      linkedin: https://linkedin.com/in/ada-lovelace
-                      instagram: null
-                      whatsapp: null
-                      facebook: null
-                      website: https://example.com
-                      signal: null
-                      importantDates: null
-                      myself: false
-                      position: null
-                      language: en
-                      timezone: Europe/London
-                      gisPoint: null
-                      latitude: 51.5074
-                      longitude: -0.1278
-                    rightPerson:
-                      id: 6ba7b811-9dad-11d1-80b4-00c04fd430c8
-                      userId: 6ba7b810-9dad-11d1-80b4-00c04fd430c8
-                      firstName: Ada
-                      middleName: null
-                      lastName: Lovelace
-                      headline: null
-                      location: null
-                      notes: null
-                      notesUpdatedAt: null
-                      avatar: null
-                      lastInteraction: null
-                      lastInteractionActivityId: null
-                      keepFrequencyDays: null
-                      createdAt: 2026-01-15T12:00:00.000Z
-                      updatedAt: 2026-01-15T12:00:00.000Z
-                      phones: []
-                      emails: []
-                      addresses: null
-                      linkedin: null
-                      instagram: null
-                      whatsapp: null
-                      facebook: null
-                      website: null
-                      signal: null
-                      importantDates: null
-                      myself: null
-                      position: null
-                      language: null
-                      timezone: null
-                      gisPoint: null
-                      latitude: null
-                      longitude: null
-                    score: 0.95
-                    reasons:
-                      - fullName
-                pagination:
-                  limit: 50
-                  offset: 0
-                  totalCount: 1
-                  hasMore: false
-                  sort: null
-                  search: null
               schema:
                 type: object
                 properties:
@@ -5833,92 +5000,6 @@ paths:
                   - recommendations
                   - pagination
                 additionalProperties: false
-                example:
-                  recommendations:
-                    - id: cc0e8400-e29b-41d4-a716-446655440006
-                      leftPerson:
-                        id: 550e8400-e29b-41d4-a716-446655440000
-                        userId: 6ba7b810-9dad-11d1-80b4-00c04fd430c8
-                        firstName: Ada
-                        lastName: Lovelace
-                        middleName: null
-                        headline: Mathematician
-                        location: London, UK
-                        notes: null
-                        notesUpdatedAt: null
-                        avatar: null
-                        lastInteraction: 2026-01-15T12:00:00.000Z
-                        lastInteractionActivityId: null
-                        keepFrequencyDays: 90
-                        createdAt: 2026-01-15T12:00:00.000Z
-                        updatedAt: 2026-01-15T12:00:00.000Z
-                        phones:
-                          - prefix: "+44"
-                            value: "2079460958"
-                            type: home
-                            preferred: true
-                        emails:
-                          - value: ada.lovelace@example.com
-                            type: work
-                            preferred: true
-                        addresses: null
-                        linkedin: https://linkedin.com/in/ada-lovelace
-                        instagram: null
-                        whatsapp: null
-                        facebook: null
-                        website: https://example.com
-                        signal: null
-                        importantDates: null
-                        myself: false
-                        position: null
-                        language: en
-                        timezone: Europe/London
-                        gisPoint: null
-                        latitude: 51.5074
-                        longitude: -0.1278
-                      rightPerson:
-                        id: 6ba7b811-9dad-11d1-80b4-00c04fd430c8
-                        userId: 6ba7b810-9dad-11d1-80b4-00c04fd430c8
-                        firstName: Ada
-                        middleName: null
-                        lastName: Lovelace
-                        headline: null
-                        location: null
-                        notes: null
-                        notesUpdatedAt: null
-                        avatar: null
-                        lastInteraction: null
-                        lastInteractionActivityId: null
-                        keepFrequencyDays: null
-                        createdAt: 2026-01-15T12:00:00.000Z
-                        updatedAt: 2026-01-15T12:00:00.000Z
-                        phones: []
-                        emails: []
-                        addresses: null
-                        linkedin: null
-                        instagram: null
-                        whatsapp: null
-                        facebook: null
-                        website: null
-                        signal: null
-                        importantDates: null
-                        myself: null
-                        position: null
-                        language: null
-                        timezone: null
-                        gisPoint: null
-                        latitude: null
-                        longitude: null
-                      score: 0.95
-                      reasons:
-                        - fullName
-                  pagination:
-                    limit: 50
-                    offset: 0
-                    totalCount: 1
-                    hasMore: false
-                    sort: null
-                    search: null
         "400":
           description: Invalid request
           content:
@@ -6004,87 +5085,6 @@ paths:
           description: Merge recommendations refreshed
           content:
             application/json:
-              example:
-                success: true
-                recommendationsCount: 1
-                recommendations:
-                  - id: cc0e8400-e29b-41d4-a716-446655440006
-                    leftPerson:
-                      id: 550e8400-e29b-41d4-a716-446655440000
-                      userId: 6ba7b810-9dad-11d1-80b4-00c04fd430c8
-                      firstName: Ada
-                      lastName: Lovelace
-                      middleName: null
-                      headline: Mathematician
-                      location: London, UK
-                      notes: null
-                      notesUpdatedAt: null
-                      avatar: null
-                      lastInteraction: 2026-01-15T12:00:00.000Z
-                      lastInteractionActivityId: null
-                      keepFrequencyDays: 90
-                      createdAt: 2026-01-15T12:00:00.000Z
-                      updatedAt: 2026-01-15T12:00:00.000Z
-                      phones:
-                        - prefix: "+44"
-                          value: "2079460958"
-                          type: home
-                          preferred: true
-                      emails:
-                        - value: ada.lovelace@example.com
-                          type: work
-                          preferred: true
-                      addresses: null
-                      linkedin: https://linkedin.com/in/ada-lovelace
-                      instagram: null
-                      whatsapp: null
-                      facebook: null
-                      website: https://example.com
-                      signal: null
-                      importantDates: null
-                      myself: false
-                      position: null
-                      language: en
-                      timezone: Europe/London
-                      gisPoint: null
-                      latitude: 51.5074
-                      longitude: -0.1278
-                    rightPerson:
-                      id: 6ba7b811-9dad-11d1-80b4-00c04fd430c8
-                      userId: 6ba7b810-9dad-11d1-80b4-00c04fd430c8
-                      firstName: Ada
-                      middleName: null
-                      lastName: Lovelace
-                      headline: null
-                      location: null
-                      notes: null
-                      notesUpdatedAt: null
-                      avatar: null
-                      lastInteraction: null
-                      lastInteractionActivityId: null
-                      keepFrequencyDays: null
-                      createdAt: 2026-01-15T12:00:00.000Z
-                      updatedAt: 2026-01-15T12:00:00.000Z
-                      phones: []
-                      emails: []
-                      addresses: null
-                      linkedin: null
-                      instagram: null
-                      whatsapp: null
-                      facebook: null
-                      website: null
-                      signal: null
-                      importantDates: null
-                      myself: null
-                      position: null
-                      language: null
-                      timezone: null
-                      gisPoint: null
-                      latitude: null
-                      longitude: null
-                    score: 0.95
-                    reasons:
-                      - fullName
               schema:
                 type: object
                 properties:
@@ -6125,87 +5125,6 @@ paths:
                   - recommendationsCount
                   - recommendations
                 additionalProperties: false
-                example:
-                  success: true
-                  recommendationsCount: 1
-                  recommendations:
-                    - id: cc0e8400-e29b-41d4-a716-446655440006
-                      leftPerson:
-                        id: 550e8400-e29b-41d4-a716-446655440000
-                        userId: 6ba7b810-9dad-11d1-80b4-00c04fd430c8
-                        firstName: Ada
-                        lastName: Lovelace
-                        middleName: null
-                        headline: Mathematician
-                        location: London, UK
-                        notes: null
-                        notesUpdatedAt: null
-                        avatar: null
-                        lastInteraction: 2026-01-15T12:00:00.000Z
-                        lastInteractionActivityId: null
-                        keepFrequencyDays: 90
-                        createdAt: 2026-01-15T12:00:00.000Z
-                        updatedAt: 2026-01-15T12:00:00.000Z
-                        phones:
-                          - prefix: "+44"
-                            value: "2079460958"
-                            type: home
-                            preferred: true
-                        emails:
-                          - value: ada.lovelace@example.com
-                            type: work
-                            preferred: true
-                        addresses: null
-                        linkedin: https://linkedin.com/in/ada-lovelace
-                        instagram: null
-                        whatsapp: null
-                        facebook: null
-                        website: https://example.com
-                        signal: null
-                        importantDates: null
-                        myself: false
-                        position: null
-                        language: en
-                        timezone: Europe/London
-                        gisPoint: null
-                        latitude: 51.5074
-                        longitude: -0.1278
-                      rightPerson:
-                        id: 6ba7b811-9dad-11d1-80b4-00c04fd430c8
-                        userId: 6ba7b810-9dad-11d1-80b4-00c04fd430c8
-                        firstName: Ada
-                        middleName: null
-                        lastName: Lovelace
-                        headline: null
-                        location: null
-                        notes: null
-                        notesUpdatedAt: null
-                        avatar: null
-                        lastInteraction: null
-                        lastInteractionActivityId: null
-                        keepFrequencyDays: null
-                        createdAt: 2026-01-15T12:00:00.000Z
-                        updatedAt: 2026-01-15T12:00:00.000Z
-                        phones: []
-                        emails: []
-                        addresses: null
-                        linkedin: null
-                        instagram: null
-                        whatsapp: null
-                        facebook: null
-                        website: null
-                        signal: null
-                        importantDates: null
-                        myself: null
-                        position: null
-                        language: null
-                        timezone: null
-                        gisPoint: null
-                        latitude: null
-                        longitude: null
-                      score: 0.95
-                      reasons:
-                        - fullName
         "400":
           description: Invalid request
           content:
@@ -6281,8 +5200,6 @@ paths:
           description: Merge recommendation declined
           content:
             application/json:
-              example:
-                success: true
               schema:
                 type: object
                 properties:
@@ -6291,8 +5208,6 @@ paths:
                 required:
                   - success
                 additionalProperties: false
-                example:
-                  success: true
         "400":
           description: Invalid request
           content:
@@ -6368,8 +5283,6 @@ paths:
           description: Merge recommendation restored
           content:
             application/json:
-              example:
-                success: true
               schema:
                 type: object
                 properties:
@@ -6378,8 +5291,6 @@ paths:
                 required:
                   - success
                 additionalProperties: false
-                example:
-                  success: true
         "400":
           description: Invalid request
           content:
@@ -6463,62 +5374,12 @@ paths:
               required:
                 - leftPersonId
                 - rightPersonId
-            example:
-              leftPersonId: 550e8400-e29b-41d4-a716-446655440000
-              rightPersonId: 6ba7b811-9dad-11d1-80b4-00c04fd430c8
-              conflictResolutions:
-                firstName: left
       security: *a1
       responses:
         "200":
           description: Contacts merged
           content:
             application/json:
-              example:
-                personId: 550e8400-e29b-41d4-a716-446655440000
-                userId: 6ba7b810-9dad-11d1-80b4-00c04fd430c8
-                mergedIntoPersonId: 550e8400-e29b-41d4-a716-446655440000
-                mergedFromPersonId: 6ba7b811-9dad-11d1-80b4-00c04fd430c8
-                contact:
-                  id: 550e8400-e29b-41d4-a716-446655440000
-                  userId: 6ba7b810-9dad-11d1-80b4-00c04fd430c8
-                  firstName: Ada
-                  lastName: Lovelace
-                  middleName: null
-                  headline: Mathematician
-                  location: London, UK
-                  notes: null
-                  notesUpdatedAt: null
-                  avatar: null
-                  lastInteraction: 2026-01-15T12:00:00.000Z
-                  lastInteractionActivityId: null
-                  keepFrequencyDays: 90
-                  createdAt: 2026-01-15T12:00:00.000Z
-                  updatedAt: 2026-01-15T12:00:00.000Z
-                  phones:
-                    - prefix: "+44"
-                      value: "2079460958"
-                      type: home
-                      preferred: true
-                  emails:
-                    - value: ada.lovelace@example.com
-                      type: work
-                      preferred: true
-                  addresses: null
-                  linkedin: https://linkedin.com/in/ada-lovelace
-                  instagram: null
-                  whatsapp: null
-                  facebook: null
-                  website: https://example.com
-                  signal: null
-                  importantDates: null
-                  myself: false
-                  position: null
-                  language: en
-                  timezone: Europe/London
-                  gisPoint: null
-                  latitude: 51.5074
-                  longitude: -0.1278
               schema:
                 type: object
                 properties:
@@ -6541,51 +5402,6 @@ paths:
                   - mergedFromPersonId
                   - contact
                 additionalProperties: false
-                example:
-                  personId: 550e8400-e29b-41d4-a716-446655440000
-                  userId: 6ba7b810-9dad-11d1-80b4-00c04fd430c8
-                  mergedIntoPersonId: 550e8400-e29b-41d4-a716-446655440000
-                  mergedFromPersonId: 6ba7b811-9dad-11d1-80b4-00c04fd430c8
-                  contact:
-                    id: 550e8400-e29b-41d4-a716-446655440000
-                    userId: 6ba7b810-9dad-11d1-80b4-00c04fd430c8
-                    firstName: Ada
-                    lastName: Lovelace
-                    middleName: null
-                    headline: Mathematician
-                    location: London, UK
-                    notes: null
-                    notesUpdatedAt: null
-                    avatar: null
-                    lastInteraction: 2026-01-15T12:00:00.000Z
-                    lastInteractionActivityId: null
-                    keepFrequencyDays: 90
-                    createdAt: 2026-01-15T12:00:00.000Z
-                    updatedAt: 2026-01-15T12:00:00.000Z
-                    phones:
-                      - prefix: "+44"
-                        value: "2079460958"
-                        type: home
-                        preferred: true
-                    emails:
-                      - value: ada.lovelace@example.com
-                        type: work
-                        preferred: true
-                    addresses: null
-                    linkedin: https://linkedin.com/in/ada-lovelace
-                    instagram: null
-                    whatsapp: null
-                    facebook: null
-                    website: https://example.com
-                    signal: null
-                    importantDates: null
-                    myself: false
-                    position: null
-                    language: en
-                    timezone: Europe/London
-                    gisPoint: null
-                    latitude: 51.5074
-                    longitude: -0.1278
         "400":
           description: Invalid request
           content:
@@ -6654,8 +5470,6 @@ paths:
           description: Eligible enrichment count
           content:
             application/json:
-              example:
-                count: 42
               schema:
                 type: object
                 properties:
@@ -6664,8 +5478,6 @@ paths:
                 required:
                   - count
                 additionalProperties: false
-                example:
-                  count: 42
         "400":
           description: Invalid request
           content:
@@ -6734,10 +5546,6 @@ paths:
           description: Enrichment queue status
           content:
             application/json:
-              example:
-                pending: 5
-                completed: 12
-                failed: 1
               schema:
                 type: object
                 properties:
@@ -6752,10 +5560,6 @@ paths:
                   - completed
                   - failed
                 additionalProperties: false
-                example:
-                  pending: 5
-                  completed: 12
-                  failed: 1
         "400":
           description: Invalid request
           content:
@@ -6828,16 +5632,12 @@ paths:
               properties:
                 personId:
                   type: string
-            example:
-              personId: 550e8400-e29b-41d4-a716-446655440000
       security: *a1
       responses:
         "200":
           description: Enrichment queue initialized
           content:
             application/json:
-              example:
-                totalEligible: 42
               schema:
                 type: object
                 properties:
@@ -6846,8 +5646,6 @@ paths:
                 required:
                   - totalEligible
                 additionalProperties: false
-                example:
-                  totalEligible: 42
         "400":
           description: Invalid request
           content:
@@ -6916,13 +5714,6 @@ paths:
           description: Next enrichment batch
           content:
             application/json:
-              example:
-                items:
-                  - queueItemId: queue-1
-                    personId: 550e8400-e29b-41d4-a716-446655440000
-                    linkedinHandle: ada-lovelace
-                    firstName: Ada
-                    lastName: Lovelace
               schema:
                 type: object
                 properties:
@@ -6954,13 +5745,6 @@ paths:
                 required:
                   - items
                 additionalProperties: false
-                example:
-                  items:
-                    - queueItemId: queue-1
-                      personId: 550e8400-e29b-41d4-a716-446655440000
-                      linkedinHandle: ada-lovelace
-                      firstName: Ada
-                      lastName: Lovelace
         "400":
           description: Invalid request
           content:
@@ -7040,8 +5824,6 @@ paths:
                   type: string
               required:
                 - status
-            example:
-              status: completed
       parameters:
         - schema:
             $ref: "#/components/schemas/ContactId"
@@ -7055,9 +5837,6 @@ paths:
           description: Queue item updated
           content:
             application/json:
-              example:
-                success: true
-                message: Operation completed
               schema:
                 type: object
                 properties:
@@ -7068,9 +5847,6 @@ paths:
                 required:
                   - success
                 additionalProperties: false
-                example:
-                  success: true
-                  message: Operation completed
         "400":
           description: Invalid request
           content:
@@ -7139,9 +5915,6 @@ paths:
           description: Enrichment queue cancelled
           content:
             application/json:
-              example:
-                success: true
-                message: Operation completed
               schema:
                 type: object
                 properties:
@@ -7152,9 +5925,6 @@ paths:
                 required:
                   - success
                 additionalProperties: false
-                example:
-                  success: true
-                  message: Operation completed
         "400":
           description: Invalid request
           content:
@@ -7223,25 +5993,6 @@ paths:
           description: Parsed LinkedIn contacts
           content:
             application/json:
-              example:
-                contacts:
-                  - tempId: tmp-linkedin-1
-                    firstName: Ada
-                    middleName: null
-                    lastName: Lovelace
-                    linkedinUrl: https://linkedin.com/in/ada-lovelace
-                    linkedinUsername: ada-lovelace
-                    alreadyExists: false
-                    email: ada.lovelace@example.com
-                    company: Analytical Engines Ltd
-                    position: Mathematician
-                    connectedAt: 2026-01-15T12:00:00.000Z
-                    connectedOnRaw: 15 Jan 2026
-                    isValid: true
-                    issues: []
-                totalCount: 1
-                validCount: 1
-                invalidCount: 0
               schema:
                 type: object
                 properties:
@@ -7277,7 +6028,7 @@ paths:
                         connectedAt:
                           nullable: true
                           type: string
-                          format: date-time
+                          pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
                         connectedOnRaw:
                           nullable: true
                           type: string
@@ -7315,25 +6066,6 @@ paths:
                   - validCount
                   - invalidCount
                 additionalProperties: false
-                example:
-                  contacts:
-                    - tempId: tmp-linkedin-1
-                      firstName: Ada
-                      middleName: null
-                      lastName: Lovelace
-                      linkedinUrl: https://linkedin.com/in/ada-lovelace
-                      linkedinUsername: ada-lovelace
-                      alreadyExists: false
-                      email: ada.lovelace@example.com
-                      company: Analytical Engines Ltd
-                      position: Mathematician
-                      connectedAt: 2026-01-15T12:00:00.000Z
-                      connectedOnRaw: 15 Jan 2026
-                      isValid: true
-                      issues: []
-                  totalCount: 1
-                  validCount: 1
-                  invalidCount: 0
         "400":
           description: Invalid request
           content:
@@ -7435,7 +6167,7 @@ paths:
                       connectedAt:
                         nullable: true
                         type: string
-                        format: date-time
+                        pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
                       connectedOnRaw:
                         nullable: true
                         type: string
@@ -7462,32 +6194,12 @@ paths:
                       - issues
               required:
                 - contacts
-            example:
-              contacts:
-                - tempId: tmp-linkedin-1
-                  firstName: Ada
-                  middleName: null
-                  lastName: Lovelace
-                  linkedinUrl: https://linkedin.com/in/ada-lovelace
-                  linkedinUsername: ada-lovelace
-                  alreadyExists: false
-                  email: ada.lovelace@example.com
-                  company: Analytical Engines Ltd
-                  position: Mathematician
-                  connectedAt: 2026-01-15T12:00:00.000Z
-                  connectedOnRaw: 15 Jan 2026
-                  isValid: true
-                  issues: []
       security: *a1
       responses:
         "200":
           description: LinkedIn import result
           content:
             application/json:
-              example:
-                importedCount: 5
-                updatedCount: 2
-                skippedCount: 1
               schema:
                 type: object
                 properties:
@@ -7502,10 +6214,6 @@ paths:
                   - updatedCount
                   - skippedCount
                 additionalProperties: false
-                example:
-                  importedCount: 5
-                  updatedCount: 2
-                  skippedCount: 1
         "400":
           description: Invalid request
           content:
@@ -7574,25 +6282,6 @@ paths:
           description: Parsed Instagram contacts
           content:
             application/json:
-              example:
-                contacts:
-                  - tempId: tmp-instagram-1
-                    firstName: Ada
-                    middleName: null
-                    lastName: Lovelace
-                    instagramUrl: https://instagram.com/ada
-                    instagramUsername: ada
-                    alreadyExists: false
-                    likelyPerson: true
-                    connectedAt: null
-                    connectedOnRaw: null
-                    sources:
-                      - following
-                    isValid: true
-                    issues: []
-                totalCount: 1
-                validCount: 1
-                invalidCount: 0
               schema:
                 type: object
                 properties:
@@ -7621,7 +6310,7 @@ paths:
                         connectedAt:
                           nullable: true
                           type: string
-                          format: date-time
+                          pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
                         connectedOnRaw:
                           nullable: true
                           type: number
@@ -7666,25 +6355,6 @@ paths:
                   - validCount
                   - invalidCount
                 additionalProperties: false
-                example:
-                  contacts:
-                    - tempId: tmp-instagram-1
-                      firstName: Ada
-                      middleName: null
-                      lastName: Lovelace
-                      instagramUrl: https://instagram.com/ada
-                      instagramUsername: ada
-                      alreadyExists: false
-                      likelyPerson: true
-                      connectedAt: null
-                      connectedOnRaw: null
-                      sources:
-                        - following
-                      isValid: true
-                      issues: []
-                  totalCount: 1
-                  validCount: 1
-                  invalidCount: 0
         "400":
           description: Invalid request
           content:
@@ -7779,7 +6449,7 @@ paths:
                       connectedAt:
                         nullable: true
                         type: string
-                        format: date-time
+                        pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
                       connectedOnRaw:
                         nullable: true
                         type: number
@@ -7813,32 +6483,12 @@ paths:
                       - issues
               required:
                 - contacts
-            example:
-              contacts:
-                - tempId: tmp-instagram-1
-                  firstName: Ada
-                  middleName: null
-                  lastName: Lovelace
-                  instagramUrl: https://instagram.com/ada
-                  instagramUsername: ada
-                  alreadyExists: false
-                  likelyPerson: true
-                  connectedAt: null
-                  connectedOnRaw: null
-                  sources:
-                    - following
-                  isValid: true
-                  issues: []
       security: *a1
       responses:
         "200":
           description: Instagram import result
           content:
             application/json:
-              example:
-                importedCount: 8
-                updatedCount: 0
-                skippedCount: 2
               schema:
                 type: object
                 properties:
@@ -7853,10 +6503,6 @@ paths:
                   - updatedCount
                   - skippedCount
                 additionalProperties: false
-                example:
-                  importedCount: 8
-                  updatedCount: 0
-                  skippedCount: 2
         "400":
           description: Invalid request
           content:
@@ -7925,36 +6571,6 @@ paths:
           description: Parsed vCard contacts
           content:
             application/json:
-              example:
-                contacts:
-                  - tempId: tmp-vcard-1
-                    firstName: Ada
-                    middleName: null
-                    lastName: Lovelace
-                    headline: Mathematician
-                    phones:
-                      - prefix: "+44"
-                        value: "2079460958"
-                        type: home
-                        preferred: true
-                    emails:
-                      - value: ada@example.com
-                        type: work
-                        preferred: true
-                    addresses: []
-                    linkedin: null
-                    instagram: null
-                    whatsapp: null
-                    facebook: null
-                    signal: null
-                    website: null
-                    avatarUri: null
-                    importantDates: null
-                    isValid: true
-                    issues: []
-                totalCount: 1
-                validCount: 1
-                invalidCount: 0
               schema:
                 type: object
                 properties:
@@ -8180,36 +6796,6 @@ paths:
                   - validCount
                   - invalidCount
                 additionalProperties: false
-                example:
-                  contacts:
-                    - tempId: tmp-vcard-1
-                      firstName: Ada
-                      middleName: null
-                      lastName: Lovelace
-                      headline: Mathematician
-                      phones:
-                        - prefix: "+44"
-                          value: "2079460958"
-                          type: home
-                          preferred: true
-                      emails:
-                        - value: ada@example.com
-                          type: work
-                          preferred: true
-                      addresses: []
-                      linkedin: null
-                      instagram: null
-                      whatsapp: null
-                      facebook: null
-                      signal: null
-                      website: null
-                      avatarUri: null
-                      importantDates: null
-                      isValid: true
-                      issues: []
-                  totalCount: 1
-                  validCount: 1
-                  invalidCount: 0
         "400":
           description: Invalid request
           content:
@@ -8486,42 +7072,12 @@ paths:
                       - issues
               required:
                 - contacts
-            example:
-              contacts:
-                - tempId: tmp-vcard-1
-                  firstName: Ada
-                  middleName: null
-                  lastName: Lovelace
-                  headline: Mathematician
-                  phones:
-                    - prefix: "+44"
-                      value: "2079460958"
-                      type: home
-                      preferred: true
-                  emails:
-                    - value: ada@example.com
-                      type: work
-                      preferred: true
-                  addresses: []
-                  linkedin: null
-                  instagram: null
-                  whatsapp: null
-                  facebook: null
-                  signal: null
-                  website: null
-                  avatarUri: null
-                  importantDates: null
-                  isValid: true
-                  issues: []
       security: *a1
       responses:
         "200":
           description: vCard import result
           content:
             application/json:
-              example:
-                importedCount: 12
-                skippedCount: 0
               schema:
                 type: object
                 properties:
@@ -8533,9 +7089,6 @@ paths:
                   - importedCount
                   - skippedCount
                 additionalProperties: false
-                example:
-                  importedCount: 12
-                  skippedCount: 0
         "400":
           description: Invalid request
           content:
@@ -8625,22 +7178,6 @@ paths:
           description: Group list
           content:
             application/json:
-              example:
-                groups:
-                  - id: 770e8400-e29b-41d4-a716-446655440001
-                    userId: 6ba7b810-9dad-11d1-80b4-00c04fd430c8
-                    label: Inner Circle
-                    emoji: ⭐
-                    color: "#6366f1"
-                    createdAt: 2026-01-15T12:00:00.000Z
-                    updatedAt: 2026-01-15T12:00:00.000Z
-                    contactCount: 12
-                    previewContacts:
-                      - id: 550e8400-e29b-41d4-a716-446655440000
-                        firstName: Ada
-                        lastName: Lovelace
-                        avatar: null
-                totalCount: 1
               schema:
                 type: object
                 properties:
@@ -8663,10 +7200,10 @@ paths:
                           type: string
                         createdAt:
                           type: string
-                          format: date-time
+                          pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
                         updatedAt:
                           type: string
-                          format: date-time
+                          pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
                         contactCount:
                           type: number
                         previewContacts:
@@ -8706,22 +7243,6 @@ paths:
                   - groups
                   - totalCount
                 additionalProperties: false
-                example:
-                  groups:
-                    - id: 770e8400-e29b-41d4-a716-446655440001
-                      userId: 6ba7b810-9dad-11d1-80b4-00c04fd430c8
-                      label: Inner Circle
-                      emoji: ⭐
-                      color: "#6366f1"
-                      createdAt: 2026-01-15T12:00:00.000Z
-                      updatedAt: 2026-01-15T12:00:00.000Z
-                      contactCount: 12
-                      previewContacts:
-                        - id: 550e8400-e29b-41d4-a716-446655440000
-                          firstName: Ada
-                          lastName: Lovelace
-                          avatar: null
-                  totalCount: 1
         "400":
           description: Invalid request
           content:
@@ -8804,25 +7325,12 @@ paths:
                 - label
                 - emoji
                 - color
-            example:
-              label: Inner Circle
-              emoji: ⭐
-              color: "#6366f1"
       security: *a1
       responses:
         "201":
           description: Group created
           content:
             application/json:
-              example:
-                group:
-                  id: 770e8400-e29b-41d4-a716-446655440001
-                  userId: 6ba7b810-9dad-11d1-80b4-00c04fd430c8
-                  label: Inner Circle
-                  emoji: ⭐
-                  color: "#6366f1"
-                  createdAt: 2026-01-15T12:00:00.000Z
-                  updatedAt: 2026-01-15T12:00:00.000Z
               schema:
                 type: object
                 properties:
@@ -8831,15 +7339,6 @@ paths:
                 required:
                   - group
                 additionalProperties: false
-                example:
-                  group:
-                    id: 770e8400-e29b-41d4-a716-446655440001
-                    userId: 6ba7b810-9dad-11d1-80b4-00c04fd430c8
-                    label: Inner Circle
-                    emoji: ⭐
-                    color: "#6366f1"
-                    createdAt: 2026-01-15T12:00:00.000Z
-                    updatedAt: 2026-01-15T12:00:00.000Z
         "400":
           description: Invalid request
           content:
@@ -8927,15 +7426,7 @@ paths:
               example:
                 message: OK
               schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                required:
-                  - message
-                additionalProperties: false
-                example:
-                  message: OK
+                $ref: "#/components/schemas/DeleteContactResponse"
         "400":
           description: Invalid request
           content:
@@ -9011,15 +7502,6 @@ paths:
           description: Group details
           content:
             application/json:
-              example:
-                group:
-                  id: 770e8400-e29b-41d4-a716-446655440001
-                  userId: 6ba7b810-9dad-11d1-80b4-00c04fd430c8
-                  label: Inner Circle
-                  emoji: ⭐
-                  color: "#6366f1"
-                  createdAt: 2026-01-15T12:00:00.000Z
-                  updatedAt: 2026-01-15T12:00:00.000Z
               schema:
                 type: object
                 properties:
@@ -9028,15 +7510,6 @@ paths:
                 required:
                   - group
                 additionalProperties: false
-                example:
-                  group:
-                    id: 770e8400-e29b-41d4-a716-446655440001
-                    userId: 6ba7b810-9dad-11d1-80b4-00c04fd430c8
-                    label: Inner Circle
-                    emoji: ⭐
-                    color: "#6366f1"
-                    createdAt: 2026-01-15T12:00:00.000Z
-                    updatedAt: 2026-01-15T12:00:00.000Z
         "400":
           description: Invalid request
           content:
@@ -9115,8 +7588,6 @@ paths:
                 color:
                   type: string
                   pattern: ^#?[0-9a-fA-F]{6}$
-            example:
-              label: Close friends
       parameters:
         - schema:
             $ref: "#/components/schemas/ContactId"
@@ -9130,15 +7601,6 @@ paths:
           description: Updated group
           content:
             application/json:
-              example:
-                group:
-                  id: 770e8400-e29b-41d4-a716-446655440001
-                  userId: 6ba7b810-9dad-11d1-80b4-00c04fd430c8
-                  label: Inner Circle
-                  emoji: ⭐
-                  color: "#6366f1"
-                  createdAt: 2026-01-15T12:00:00.000Z
-                  updatedAt: 2026-01-15T12:00:00.000Z
               schema:
                 type: object
                 properties:
@@ -9147,15 +7609,6 @@ paths:
                 required:
                   - group
                 additionalProperties: false
-                example:
-                  group:
-                    id: 770e8400-e29b-41d4-a716-446655440001
-                    userId: 6ba7b810-9dad-11d1-80b4-00c04fd430c8
-                    label: Inner Circle
-                    emoji: ⭐
-                    color: "#6366f1"
-                    createdAt: 2026-01-15T12:00:00.000Z
-                    updatedAt: 2026-01-15T12:00:00.000Z
         "400":
           description: Invalid request
           content:
@@ -9233,15 +7686,7 @@ paths:
               example:
                 message: OK
               schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                required:
-                  - message
-                additionalProperties: false
-                example:
-                  message: OK
+                $ref: "#/components/schemas/DeleteContactResponse"
         "400":
           description: Invalid request
           content:
@@ -9368,57 +7813,6 @@ paths:
           description: Group members
           content:
             application/json:
-              example:
-                contacts:
-                  - id: 550e8400-e29b-41d4-a716-446655440000
-                    userId: 6ba7b810-9dad-11d1-80b4-00c04fd430c8
-                    firstName: Ada
-                    lastName: Lovelace
-                    middleName: null
-                    headline: Mathematician
-                    location: London, UK
-                    notes: null
-                    notesUpdatedAt: null
-                    avatar: null
-                    lastInteraction: 2026-01-15T12:00:00.000Z
-                    lastInteractionActivityId: null
-                    keepFrequencyDays: 90
-                    createdAt: 2026-01-15T12:00:00.000Z
-                    updatedAt: 2026-01-15T12:00:00.000Z
-                    phones:
-                      - prefix: "+44"
-                        value: "2079460958"
-                        type: home
-                        preferred: true
-                    emails:
-                      - value: ada.lovelace@example.com
-                        type: work
-                        preferred: true
-                    addresses: null
-                    linkedin: https://linkedin.com/in/ada-lovelace
-                    instagram: null
-                    whatsapp: null
-                    facebook: null
-                    website: https://example.com
-                    signal: null
-                    importantDates: null
-                    myself: false
-                    position: null
-                    language: en
-                    timezone: Europe/London
-                    gisPoint: null
-                    latitude: 51.5074
-                    longitude: -0.1278
-                pagination:
-                  limit: 50
-                  offset: 0
-                  totalCount: 1
-                  hasMore: false
-                  sort: null
-                  search: null
-                group:
-                  id: 770e8400-e29b-41d4-a716-446655440001
-                  label: Inner Circle
               schema:
                 type: object
                 properties:
@@ -9444,57 +7838,6 @@ paths:
                   - pagination
                   - group
                 additionalProperties: false
-                example:
-                  contacts:
-                    - id: 550e8400-e29b-41d4-a716-446655440000
-                      userId: 6ba7b810-9dad-11d1-80b4-00c04fd430c8
-                      firstName: Ada
-                      lastName: Lovelace
-                      middleName: null
-                      headline: Mathematician
-                      location: London, UK
-                      notes: null
-                      notesUpdatedAt: null
-                      avatar: null
-                      lastInteraction: 2026-01-15T12:00:00.000Z
-                      lastInteractionActivityId: null
-                      keepFrequencyDays: 90
-                      createdAt: 2026-01-15T12:00:00.000Z
-                      updatedAt: 2026-01-15T12:00:00.000Z
-                      phones:
-                        - prefix: "+44"
-                          value: "2079460958"
-                          type: home
-                          preferred: true
-                      emails:
-                        - value: ada.lovelace@example.com
-                          type: work
-                          preferred: true
-                      addresses: null
-                      linkedin: https://linkedin.com/in/ada-lovelace
-                      instagram: null
-                      whatsapp: null
-                      facebook: null
-                      website: https://example.com
-                      signal: null
-                      importantDates: null
-                      myself: false
-                      position: null
-                      language: en
-                      timezone: Europe/London
-                      gisPoint: null
-                      latitude: 51.5074
-                      longitude: -0.1278
-                  pagination:
-                    limit: 50
-                    offset: 0
-                    totalCount: 1
-                    hasMore: false
-                    sort: null
-                    search: null
-                  group:
-                    id: 770e8400-e29b-41d4-a716-446655440001
-                    label: Inner Circle
         "400":
           description: Invalid request
           content:
@@ -9595,9 +7938,6 @@ paths:
                         $ref: "#/components/schemas/ContactId"
                   required:
                     - contactFilter
-            example:
-              personIds:
-                - 550e8400-e29b-41d4-a716-446655440000
       parameters:
         - schema:
             $ref: "#/components/schemas/ContactId"
@@ -9611,10 +7951,6 @@ paths:
           description: Contacts added to group
           content:
             application/json:
-              example:
-                message: Contacts added to group
-                addedCount: 3
-                skippedCount: 1
               schema:
                 type: object
                 properties:
@@ -9629,10 +7965,6 @@ paths:
                   - addedCount
                   - skippedCount
                 additionalProperties: false
-                example:
-                  message: Contacts added to group
-                  addedCount: 3
-                  skippedCount: 1
         "400":
           description: Invalid request
           content:
@@ -9733,9 +8065,6 @@ paths:
                         $ref: "#/components/schemas/ContactId"
                   required:
                     - memberFilter
-              example:
-                personIds:
-                  - 550e8400-e29b-41d4-a716-446655440000
       parameters:
         - schema:
             $ref: "#/components/schemas/ContactId"
@@ -9749,9 +8078,6 @@ paths:
           description: Contacts removed from group
           content:
             application/json:
-              example:
-                message: Members removed from group
-                removedCount: 2
               schema:
                 type: object
                 properties:
@@ -9762,9 +8088,6 @@ paths:
                 required:
                   - message
                 additionalProperties: false
-                example:
-                  message: Members removed from group
-                  removedCount: 2
         "400":
           description: Invalid request
           content:
@@ -9854,21 +8177,6 @@ paths:
           description: Tag list
           content:
             application/json:
-              example:
-                tags:
-                  - id: 880e8400-e29b-41d4-a716-446655440002
-                    userId: 6ba7b810-9dad-11d1-80b4-00c04fd430c8
-                    label: VIP
-                    color: "#f59e0b"
-                    createdAt: 2026-01-15T12:00:00.000Z
-                    updatedAt: 2026-01-15T12:00:00.000Z
-                    contactCount: 5
-                    previewContacts:
-                      - id: 550e8400-e29b-41d4-a716-446655440000
-                        firstName: Ada
-                        lastName: Lovelace
-                        avatar: null
-                totalCount: 1
               schema:
                 type: object
                 properties:
@@ -9888,10 +8196,10 @@ paths:
                           type: string
                         createdAt:
                           type: string
-                          format: date-time
+                          pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
                         updatedAt:
                           type: string
-                          format: date-time
+                          pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
                         contactCount:
                           type: number
                         previewContacts:
@@ -9930,21 +8238,6 @@ paths:
                   - tags
                   - totalCount
                 additionalProperties: false
-                example:
-                  tags:
-                    - id: 880e8400-e29b-41d4-a716-446655440002
-                      userId: 6ba7b810-9dad-11d1-80b4-00c04fd430c8
-                      label: VIP
-                      color: "#f59e0b"
-                      createdAt: 2026-01-15T12:00:00.000Z
-                      updatedAt: 2026-01-15T12:00:00.000Z
-                      contactCount: 5
-                      previewContacts:
-                        - id: 550e8400-e29b-41d4-a716-446655440000
-                          firstName: Ada
-                          lastName: Lovelace
-                          avatar: null
-                  totalCount: 1
         "400":
           description: Invalid request
           content:
@@ -10019,22 +8312,12 @@ paths:
                   maxLength: 100
               required:
                 - label
-            example:
-              label: Investors
       security: *a1
       responses:
         "201":
           description: Tag created
           content:
             application/json:
-              example:
-                tag:
-                  id: 880e8400-e29b-41d4-a716-446655440002
-                  userId: 6ba7b810-9dad-11d1-80b4-00c04fd430c8
-                  label: VIP
-                  color: "#f59e0b"
-                  createdAt: 2026-01-15T12:00:00.000Z
-                  updatedAt: 2026-01-15T12:00:00.000Z
               schema:
                 type: object
                 properties:
@@ -10043,14 +8326,6 @@ paths:
                 required:
                   - tag
                 additionalProperties: false
-                example:
-                  tag:
-                    id: 880e8400-e29b-41d4-a716-446655440002
-                    userId: 6ba7b810-9dad-11d1-80b4-00c04fd430c8
-                    label: VIP
-                    color: "#f59e0b"
-                    createdAt: 2026-01-15T12:00:00.000Z
-                    updatedAt: 2026-01-15T12:00:00.000Z
         "400":
           description: Invalid request
           content:
@@ -10138,15 +8413,7 @@ paths:
               example:
                 message: OK
               schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                required:
-                  - message
-                additionalProperties: false
-                example:
-                  message: OK
+                $ref: "#/components/schemas/DeleteContactResponse"
         "400":
           description: Invalid request
           content:
@@ -10222,14 +8489,6 @@ paths:
           description: Tag details
           content:
             application/json:
-              example:
-                tag:
-                  id: 880e8400-e29b-41d4-a716-446655440002
-                  userId: 6ba7b810-9dad-11d1-80b4-00c04fd430c8
-                  label: VIP
-                  color: "#f59e0b"
-                  createdAt: 2026-01-15T12:00:00.000Z
-                  updatedAt: 2026-01-15T12:00:00.000Z
               schema:
                 type: object
                 properties:
@@ -10238,14 +8497,6 @@ paths:
                 required:
                   - tag
                 additionalProperties: false
-                example:
-                  tag:
-                    id: 880e8400-e29b-41d4-a716-446655440002
-                    userId: 6ba7b810-9dad-11d1-80b4-00c04fd430c8
-                    label: VIP
-                    color: "#f59e0b"
-                    createdAt: 2026-01-15T12:00:00.000Z
-                    updatedAt: 2026-01-15T12:00:00.000Z
         "400":
           description: Invalid request
           content:
@@ -10321,8 +8572,6 @@ paths:
                 color:
                   type: string
                   pattern: ^#?[0-9a-fA-F]{6}$
-            example:
-              color: "#6366F1"
       parameters:
         - schema:
             $ref: "#/components/schemas/ContactId"
@@ -10336,15 +8585,6 @@ paths:
           description: Tag updated
           content:
             application/json:
-              example:
-                message: Tag updated
-                tag:
-                  id: 880e8400-e29b-41d4-a716-446655440002
-                  userId: 6ba7b810-9dad-11d1-80b4-00c04fd430c8
-                  label: VIP
-                  color: "#f59e0b"
-                  createdAt: 2026-01-15T12:00:00.000Z
-                  updatedAt: 2026-01-15T12:00:00.000Z
               schema:
                 type: object
                 properties:
@@ -10356,15 +8596,6 @@ paths:
                   - message
                   - tag
                 additionalProperties: false
-                example:
-                  message: Tag updated
-                  tag:
-                    id: 880e8400-e29b-41d4-a716-446655440002
-                    userId: 6ba7b810-9dad-11d1-80b4-00c04fd430c8
-                    label: VIP
-                    color: "#f59e0b"
-                    createdAt: 2026-01-15T12:00:00.000Z
-                    updatedAt: 2026-01-15T12:00:00.000Z
         "400":
           description: Invalid request
           content:
@@ -10442,15 +8673,7 @@ paths:
               example:
                 message: OK
               schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                required:
-                  - message
-                additionalProperties: false
-                example:
-                  message: OK
+                $ref: "#/components/schemas/DeleteContactResponse"
         "400":
           description: Invalid request
           content:
@@ -10577,19 +8800,6 @@ paths:
           description: Tag members
           content:
             application/json:
-              example:
-                contacts:
-                  - id: 550e8400-e29b-41d4-a716-446655440000
-                    firstName: Ada
-                    lastName: Lovelace
-                    avatar: null
-                pagination:
-                  limit: 50
-                  offset: 0
-                  totalCount: 1
-                  hasMore: false
-                  sort: null
-                  search: null
               schema:
                 type: object
                 properties:
@@ -10620,19 +8830,6 @@ paths:
                   - contacts
                   - pagination
                 additionalProperties: false
-                example:
-                  contacts:
-                    - id: 550e8400-e29b-41d4-a716-446655440000
-                      firstName: Ada
-                      lastName: Lovelace
-                      avatar: null
-                  pagination:
-                    limit: 50
-                    offset: 0
-                    totalCount: 1
-                    hasMore: false
-                    sort: null
-                    search: null
         "400":
           description: Invalid request
           content:
@@ -10708,9 +8905,6 @@ paths:
                     $ref: "#/components/schemas/ContactId"
               required:
                 - personIds
-            example:
-              personIds:
-                - 550e8400-e29b-41d4-a716-446655440000
       parameters:
         - schema:
             $ref: "#/components/schemas/ContactId"
@@ -10727,15 +8921,7 @@ paths:
               example:
                 message: OK
               schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                required:
-                  - message
-                additionalProperties: false
-                example:
-                  message: OK
+                $ref: "#/components/schemas/DeleteContactResponse"
         "400":
           description: Invalid request
           content:
@@ -10811,9 +8997,6 @@ paths:
                     $ref: "#/components/schemas/ContactId"
               required:
                 - personIds
-              example:
-                personIds:
-                  - 550e8400-e29b-41d4-a716-446655440000
       parameters:
         - schema:
             $ref: "#/components/schemas/ContactId"
@@ -10830,15 +9013,7 @@ paths:
               example:
                 message: OK
               schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                required:
-                  - message
-                additionalProperties: false
-                example:
-                  message: OK
+                $ref: "#/components/schemas/DeleteContactResponse"
         "400":
           description: Invalid request
           content:
@@ -10938,28 +9113,6 @@ paths:
           description: Paginated interactions
           content:
             application/json:
-              example:
-                interactions:
-                  - id: 990e8400-e29b-41d4-a716-446655440003
-                    userId: 6ba7b810-9dad-11d1-80b4-00c04fd430c8
-                    title: Coffee catch-up
-                    type: Coffee
-                    description: Discussed project updates.
-                    date: 2026-01-15T12:00:00.000Z
-                    participants:
-                      - id: 550e8400-e29b-41d4-a716-446655440000
-                        firstName: Ada
-                        lastName: Lovelace
-                        avatar: null
-                    createdAt: 2026-01-15T12:00:00.000Z
-                    updatedAt: 2026-01-15T12:00:00.000Z
-                pagination:
-                  limit: 50
-                  offset: 0
-                  totalCount: 1
-                  hasMore: false
-                  sort: null
-                  search: null
               schema:
                 type: object
                 properties:
@@ -10973,28 +9126,6 @@ paths:
                   - interactions
                   - pagination
                 additionalProperties: false
-                example:
-                  interactions:
-                    - id: 990e8400-e29b-41d4-a716-446655440003
-                      userId: 6ba7b810-9dad-11d1-80b4-00c04fd430c8
-                      title: Coffee catch-up
-                      type: Coffee
-                      description: Discussed project updates.
-                      date: 2026-01-15T12:00:00.000Z
-                      participants:
-                        - id: 550e8400-e29b-41d4-a716-446655440000
-                          firstName: Ada
-                          lastName: Lovelace
-                          avatar: null
-                      createdAt: 2026-01-15T12:00:00.000Z
-                      updatedAt: 2026-01-15T12:00:00.000Z
-                  pagination:
-                    limit: 50
-                    offset: 0
-                    totalCount: 1
-                    hasMore: false
-                    sort: null
-                    search: null
         "400":
           description: Invalid request
           content:
@@ -11071,7 +9202,7 @@ paths:
                   type: string
                 date:
                   type: string
-                  format: date-time
+                  pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
                 participantIds:
                   type: array
                   items:
@@ -11080,32 +9211,12 @@ paths:
                 - type
                 - date
                 - participantIds
-            example:
-              type: Coffee
-              date: 2026-01-15T12:00:00.000Z
-              participantIds:
-                - 550e8400-e29b-41d4-a716-446655440000
-              title: Coffee catch-up
       security: *a1
       responses:
         "201":
           description: Interaction created
           content:
             application/json:
-              example:
-                interaction:
-                  id: 990e8400-e29b-41d4-a716-446655440003
-                  title: Coffee catch-up
-                  type: Coffee
-                  description: Discussed project updates.
-                  date: 2026-01-15T12:00:00.000Z
-                  createdAt: 2026-01-15T12:00:00.000Z
-                  updatedAt: 2026-01-15T12:00:00.000Z
-                  participants:
-                    - id: 550e8400-e29b-41d4-a716-446655440000
-                      firstName: Ada
-                      lastName: Lovelace
-                      avatar: null
               schema:
                 type: object
                 properties:
@@ -11124,7 +9235,7 @@ paths:
                         type: string
                       date:
                         type: string
-                        format: date-time
+                        pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
                       participants:
                         type: array
                         items:
@@ -11133,10 +9244,10 @@ paths:
                           additionalProperties: {}
                       createdAt:
                         type: string
-                        format: date-time
+                        pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
                       updatedAt:
                         type: string
-                        format: date-time
+                        pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
                     required:
                       - id
                       - title
@@ -11150,20 +9261,6 @@ paths:
                 required:
                   - interaction
                 additionalProperties: false
-                example:
-                  interaction:
-                    id: 990e8400-e29b-41d4-a716-446655440003
-                    title: Coffee catch-up
-                    type: Coffee
-                    description: Discussed project updates.
-                    date: 2026-01-15T12:00:00.000Z
-                    createdAt: 2026-01-15T12:00:00.000Z
-                    updatedAt: 2026-01-15T12:00:00.000Z
-                    participants:
-                      - id: 550e8400-e29b-41d4-a716-446655440000
-                        firstName: Ada
-                        lastName: Lovelace
-                        avatar: null
         "400":
           description: Invalid request
           content:
@@ -11255,20 +9352,6 @@ paths:
           description: Interaction details
           content:
             application/json:
-              example:
-                interaction:
-                  id: 990e8400-e29b-41d4-a716-446655440003
-                  title: Coffee catch-up
-                  type: Coffee
-                  description: Discussed project updates.
-                  date: 2026-01-15T12:00:00.000Z
-                  createdAt: 2026-01-15T12:00:00.000Z
-                  updatedAt: 2026-01-15T12:00:00.000Z
-                  participants:
-                    - id: 550e8400-e29b-41d4-a716-446655440000
-                      firstName: Ada
-                      lastName: Lovelace
-                      avatar: null
               schema:
                 type: object
                 properties:
@@ -11287,7 +9370,7 @@ paths:
                         type: string
                       date:
                         type: string
-                        format: date-time
+                        pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
                       participants:
                         type: array
                         items:
@@ -11296,10 +9379,10 @@ paths:
                           additionalProperties: {}
                       createdAt:
                         type: string
-                        format: date-time
+                        pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
                       updatedAt:
                         type: string
-                        format: date-time
+                        pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
                     required:
                       - id
                       - title
@@ -11313,20 +9396,6 @@ paths:
                 required:
                   - interaction
                 additionalProperties: false
-                example:
-                  interaction:
-                    id: 990e8400-e29b-41d4-a716-446655440003
-                    title: Coffee catch-up
-                    type: Coffee
-                    description: Discussed project updates.
-                    date: 2026-01-15T12:00:00.000Z
-                    createdAt: 2026-01-15T12:00:00.000Z
-                    updatedAt: 2026-01-15T12:00:00.000Z
-                    participants:
-                      - id: 550e8400-e29b-41d4-a716-446655440000
-                        firstName: Ada
-                        lastName: Lovelace
-                        avatar: null
         "400":
           description: Invalid request
           content:
@@ -11403,13 +9472,11 @@ paths:
                   type: string
                 date:
                   type: string
-                  format: date-time
+                  pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
                 participantIds:
                   type: array
                   items:
                     type: string
-            example:
-              description: Discussed project updates.
       parameters:
         - schema:
             type: string
@@ -11439,20 +9506,6 @@ paths:
           description: Updated interaction
           content:
             application/json:
-              example:
-                interaction:
-                  id: 990e8400-e29b-41d4-a716-446655440003
-                  title: Coffee catch-up
-                  type: Coffee
-                  description: Discussed project updates.
-                  date: 2026-01-15T12:00:00.000Z
-                  createdAt: 2026-01-15T12:00:00.000Z
-                  updatedAt: 2026-01-15T12:00:00.000Z
-                  participants:
-                    - id: 550e8400-e29b-41d4-a716-446655440000
-                      firstName: Ada
-                      lastName: Lovelace
-                      avatar: null
               schema:
                 type: object
                 properties:
@@ -11471,7 +9524,7 @@ paths:
                         type: string
                       date:
                         type: string
-                        format: date-time
+                        pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
                       participants:
                         type: array
                         items:
@@ -11480,10 +9533,10 @@ paths:
                           additionalProperties: {}
                       createdAt:
                         type: string
-                        format: date-time
+                        pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
                       updatedAt:
                         type: string
-                        format: date-time
+                        pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
                     required:
                       - id
                       - title
@@ -11497,20 +9550,6 @@ paths:
                 required:
                   - interaction
                 additionalProperties: false
-                example:
-                  interaction:
-                    id: 990e8400-e29b-41d4-a716-446655440003
-                    title: Coffee catch-up
-                    type: Coffee
-                    description: Discussed project updates.
-                    date: 2026-01-15T12:00:00.000Z
-                    createdAt: 2026-01-15T12:00:00.000Z
-                    updatedAt: 2026-01-15T12:00:00.000Z
-                    participants:
-                      - id: 550e8400-e29b-41d4-a716-446655440000
-                        firstName: Ada
-                        lastName: Lovelace
-                        avatar: null
         "400":
           description: Invalid request
           content:
@@ -11588,15 +9627,7 @@ paths:
               example:
                 message: OK
               schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                required:
-                  - message
-                additionalProperties: false
-                example:
-                  message: OK
+                $ref: "#/components/schemas/DeleteContactResponse"
         "400":
           description: Invalid request
           content:
@@ -11706,25 +9737,12 @@ paths:
                 - recipientEmails
                 - sendCopy
                 - selectedFields
-            example:
-              personId: 550e8400-e29b-41d4-a716-446655440000
-              recipientEmails:
-                - friend@example.com
-              message: Sharing Ada's contact card.
-              sendCopy: true
-              selectedFields:
-                - name
-                - emails
-                - phones
       security: *a1
       responses:
         "200":
           description: Contact shared successfully
           content:
             application/json:
-              example:
-                success: true
-                message: Operation completed
               schema:
                 type: object
                 properties:
@@ -11735,9 +9753,6 @@ paths:
                 required:
                   - success
                 additionalProperties: false
-                example:
-                  success: true
-                  message: Operation completed
         "400":
           description: Invalid request
           content:
@@ -11824,21 +9839,21 @@ paths:
             application/json:
               example:
                 addresses:
-                  - value: 10 Downing Street, London SW1A 2AA, UK
+                  - value: 10 Downing Street, London
                     type: home
-                    label: 10 Downing Street
+                    label: null
                     latitude: 51.5034
                     longitude: -0.1276
                     addressLine1: 10 Downing Street
                     addressLine2: null
                     addressCity: London
                     addressPostalCode: SW1A 2AA
-                    addressState: England
-                    addressStateCode: ENG
+                    addressState: null
+                    addressStateCode: null
                     addressCountry: United Kingdom
                     addressCountryCode: GB
                     addressGranularity: address
-                    addressFormatted: 10 Downing St, London SW1A 2AA, UK
+                    addressFormatted: 10 Downing Street, London SW1A 2AA, UK
                     addressGeocodeSource: mapy.com
                     geocodeConfidence: verified
                     timezone: Europe/London
@@ -11941,21 +9956,21 @@ paths:
                 additionalProperties: false
                 example:
                   addresses:
-                    - value: 10 Downing Street, London SW1A 2AA, UK
+                    - value: 10 Downing Street, London
                       type: home
-                      label: 10 Downing Street
+                      label: null
                       latitude: 51.5034
                       longitude: -0.1276
                       addressLine1: 10 Downing Street
                       addressLine2: null
                       addressCity: London
                       addressPostalCode: SW1A 2AA
-                      addressState: England
-                      addressStateCode: ENG
+                      addressState: null
+                      addressStateCode: null
                       addressCountry: United Kingdom
                       addressCountryCode: GB
                       addressGranularity: address
-                      addressFormatted: 10 Downing St, London SW1A 2AA, UK
+                      addressFormatted: 10 Downing Street, London SW1A 2AA, UK
                       addressGeocodeSource: mapy.com
                       geocodeConfidence: verified
                       timezone: Europe/London
@@ -12131,9 +10146,6 @@ paths:
                   type: string
                 surname:
                   type: string
-            example:
-              name: Ada
-              surname: Lovelace
       security: &a2
         - bearerAuth: []
       responses:
@@ -12141,15 +10153,6 @@ paths:
           description: Updated account
           content:
             application/json:
-              example:
-                success: true
-                data:
-                  id: 6ba7b810-9dad-11d1-80b4-00c04fd430c8
-                  email: ada@example.com
-                  user_metadata:
-                    name: Ada
-                    surname: Lovelace
-                    avatar_url: null
               schema:
                 type: object
                 properties:
@@ -12183,15 +10186,6 @@ paths:
                   - success
                   - data
                 additionalProperties: false
-                example:
-                  success: true
-                  data:
-                    id: 6ba7b810-9dad-11d1-80b4-00c04fd430c8
-                    email: ada@example.com
-                    user_metadata:
-                      name: Ada
-                      surname: Lovelace
-                      avatar_url: null
         "400":
           description: Invalid request
           content:
@@ -12259,9 +10253,6 @@ paths:
           description: Account deleted
           content:
             application/json:
-              example:
-                success: true
-                message: Operation completed
               schema:
                 type: object
                 properties:
@@ -12272,9 +10263,6 @@ paths:
                 required:
                   - success
                 additionalProperties: false
-                example:
-                  success: true
-                  message: Operation completed
         "400":
           description: Invalid request
           content:
@@ -12360,47 +10348,6 @@ paths:
           description: Myself contact
           content:
             application/json:
-              example:
-                contact:
-                  id: 550e8400-e29b-41d4-a716-446655440000
-                  userId: 6ba7b810-9dad-11d1-80b4-00c04fd430c8
-                  firstName: Ada
-                  lastName: Lovelace
-                  middleName: null
-                  headline: Mathematician
-                  location: London, UK
-                  notes: null
-                  notesUpdatedAt: null
-                  avatar: null
-                  lastInteraction: 2026-01-15T12:00:00.000Z
-                  lastInteractionActivityId: null
-                  keepFrequencyDays: 90
-                  createdAt: 2026-01-15T12:00:00.000Z
-                  updatedAt: 2026-01-15T12:00:00.000Z
-                  phones:
-                    - prefix: "+44"
-                      value: "2079460958"
-                      type: home
-                      preferred: true
-                  emails:
-                    - value: ada.lovelace@example.com
-                      type: work
-                      preferred: true
-                  addresses: null
-                  linkedin: https://linkedin.com/in/ada-lovelace
-                  instagram: null
-                  whatsapp: null
-                  facebook: null
-                  website: https://example.com
-                  signal: null
-                  importantDates: null
-                  myself: false
-                  position: null
-                  language: en
-                  timezone: Europe/London
-                  gisPoint: null
-                  latitude: 51.5074
-                  longitude: -0.1278
               schema:
                 type: object
                 properties:
@@ -12409,47 +10356,6 @@ paths:
                 required:
                   - contact
                 additionalProperties: false
-                example:
-                  contact:
-                    id: 550e8400-e29b-41d4-a716-446655440000
-                    userId: 6ba7b810-9dad-11d1-80b4-00c04fd430c8
-                    firstName: Ada
-                    lastName: Lovelace
-                    middleName: null
-                    headline: Mathematician
-                    location: London, UK
-                    notes: null
-                    notesUpdatedAt: null
-                    avatar: null
-                    lastInteraction: 2026-01-15T12:00:00.000Z
-                    lastInteractionActivityId: null
-                    keepFrequencyDays: 90
-                    createdAt: 2026-01-15T12:00:00.000Z
-                    updatedAt: 2026-01-15T12:00:00.000Z
-                    phones:
-                      - prefix: "+44"
-                        value: "2079460958"
-                        type: home
-                        preferred: true
-                    emails:
-                      - value: ada.lovelace@example.com
-                        type: work
-                        preferred: true
-                    addresses: null
-                    linkedin: https://linkedin.com/in/ada-lovelace
-                    instagram: null
-                    whatsapp: null
-                    facebook: null
-                    website: https://example.com
-                    signal: null
-                    importantDates: null
-                    myself: false
-                    position: null
-                    language: en
-                    timezone: Europe/London
-                    gisPoint: null
-                    latitude: 51.5074
-                    longitude: -0.1278
         "400":
           description: Invalid request
           content:
@@ -12610,9 +10516,6 @@ paths:
           description: Profile photo deleted
           content:
             application/json:
-              example:
-                success: true
-                message: Operation completed
               schema:
                 type: object
                 properties:
@@ -12623,9 +10526,6 @@ paths:
                 required:
                   - success
                 additionalProperties: false
-                example:
-                  success: true
-                  message: Operation completed
         "400":
           description: Invalid request
           content:
@@ -12694,9 +10594,6 @@ paths:
           description: Onboarding completed
           content:
             application/json:
-              example:
-                success: true
-                message: Operation completed
               schema:
                 type: object
                 properties:
@@ -12707,9 +10604,6 @@ paths:
                 required:
                   - success
                 additionalProperties: false
-                example:
-                  success: true
-                  message: Operation completed
         "400":
           description: Invalid request
           content:
@@ -12778,30 +10672,6 @@ paths:
           description: User settings
           content:
             application/json:
-              example:
-                success: true
-                data:
-                  name: Ada Lovelace
-                  timezone: Europe/London
-                  reminderSendHour: 09:00
-                  timeFormat: 24h
-                  language: en
-                  colorScheme: auto
-                  leftSwipeAction: call
-                  rightSwipeAction: email
-                  groupSortOrder: alpha-asc
-                  tagSortOrder: count-desc
-                  avatarUrl: null
-                  onboardingCompletedAt: 2026-01-15T12:00:00.000Z
-                  aiMessagesUsed: 12
-                  email: ada@example.com
-                  providers:
-                    - email
-                  identities:
-                    - id: ee0e8400-e29b-41d4-a716-446655440008
-                      user_id: 6ba7b810-9dad-11d1-80b4-00c04fd430c8
-                      identity_id: identity-1
-                      provider: email
               schema:
                 type: object
                 properties:
@@ -12844,7 +10714,7 @@ paths:
                       onboardingCompletedAt:
                         nullable: true
                         type: string
-                        format: date-time
+                        pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
                       aiMessagesUsed:
                         type: number
                       email:
@@ -12890,30 +10760,6 @@ paths:
                   - success
                   - data
                 additionalProperties: false
-                example:
-                  success: true
-                  data:
-                    name: Ada Lovelace
-                    timezone: Europe/London
-                    reminderSendHour: 09:00
-                    timeFormat: 24h
-                    language: en
-                    colorScheme: auto
-                    leftSwipeAction: call
-                    rightSwipeAction: email
-                    groupSortOrder: alpha-asc
-                    tagSortOrder: count-desc
-                    avatarUrl: null
-                    onboardingCompletedAt: 2026-01-15T12:00:00.000Z
-                    aiMessagesUsed: 12
-                    email: ada@example.com
-                    providers:
-                      - email
-                    identities:
-                      - id: ee0e8400-e29b-41d4-a716-446655440008
-                        user_id: 6ba7b810-9dad-11d1-80b4-00c04fd430c8
-                        identity_id: identity-1
-                        provider: email
         "400":
           description: Invalid request
           content:
@@ -13029,9 +10875,6 @@ paths:
                   type: string
                 onlyIfNewSignup:
                   type: boolean
-            example:
-              colorScheme: dark
-              timeFormat: 24h
       security: *a2
       responses:
         "200":
@@ -13185,19 +11028,12 @@ paths:
                 - npsScore
                 - npsReason
                 - generalFeedback
-            example:
-              npsScore: 9
-              npsReason: Great contact management UX.
-              generalFeedback: Would love calendar sync.
       security: *a2
       responses:
         "200":
           description: Feedback submitted
           content:
             application/json:
-              example:
-                success: true
-                message: Operation completed
               schema:
                 type: object
                 properties:
@@ -13208,9 +11044,6 @@ paths:
                 required:
                   - success
                 additionalProperties: false
-                example:
-                  success: true
-                  message: Operation completed
         "400":
           description: Invalid request
           content:
@@ -13279,15 +11112,6 @@ paths:
           description: API key list
           content:
             application/json:
-              example:
-                apiKeys:
-                  - id: dd0e8400-e29b-41d4-a716-446655440007
-                    label: Zapier integration
-                    permission: read
-                    keyPrefix: bondery_key_dd0e8400
-                    lastUsedAt: 2026-01-15T12:00:00.000Z
-                    createdAt: 2026-01-15T12:00:00.000Z
-                totalCount: 1
               schema:
                 type: object
                 properties:
@@ -13311,10 +11135,10 @@ paths:
                         lastUsedAt:
                           nullable: true
                           type: string
-                          format: date-time
+                          pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
                         createdAt:
                           type: string
-                          format: date-time
+                          pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
                       required:
                         - id
                         - label
@@ -13323,28 +11147,12 @@ paths:
                         - lastUsedAt
                         - createdAt
                       additionalProperties: false
-                      example:
-                        id: dd0e8400-e29b-41d4-a716-446655440007
-                        label: Zapier integration
-                        permission: read
-                        keyPrefix: bondery_key_dd0e8400
-                        lastUsedAt: 2026-01-15T12:00:00.000Z
-                        createdAt: 2026-01-15T12:00:00.000Z
                   totalCount:
                     type: number
                 required:
                   - apiKeys
                   - totalCount
                 additionalProperties: false
-                example:
-                  apiKeys:
-                    - id: dd0e8400-e29b-41d4-a716-446655440007
-                      label: Zapier integration
-                      permission: read
-                      keyPrefix: bondery_key_dd0e8400
-                      lastUsedAt: 2026-01-15T12:00:00.000Z
-                      createdAt: 2026-01-15T12:00:00.000Z
-                  totalCount: 1
         "400":
           description: Invalid request
           content:
@@ -13425,23 +11233,12 @@ paths:
                     - full
               required:
                 - label
-            example:
-              label: Zapier integration
-              permission: read
       security: *a2
       responses:
         "201":
           description: API key created
           content:
             application/json:
-              example:
-                id: dd0e8400-e29b-41d4-a716-446655440007
-                label: Zapier integration
-                permission: read
-                keyPrefix: bondery_key_dd0e8400
-                lastUsedAt: 2026-01-15T12:00:00.000Z
-                createdAt: 2026-01-15T12:00:00.000Z
-                secret: bondery_key_dd0e8400_secret_example
               schema:
                 type: object
                 properties:
@@ -13460,10 +11257,10 @@ paths:
                   lastUsedAt:
                     nullable: true
                     type: string
-                    format: date-time
+                    pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
                   createdAt:
                     type: string
-                    format: date-time
+                    pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
                   secret:
                     type: string
                 required:
@@ -13475,14 +11272,6 @@ paths:
                   - createdAt
                   - secret
                 additionalProperties: false
-                example:
-                  id: dd0e8400-e29b-41d4-a716-446655440007
-                  label: Zapier integration
-                  permission: read
-                  keyPrefix: bondery_key_dd0e8400
-                  lastUsedAt: 2026-01-15T12:00:00.000Z
-                  createdAt: 2026-01-15T12:00:00.000Z
-                  secret: bondery_key_dd0e8400_secret_example
         "400":
           description: Invalid request
           content:
@@ -13566,8 +11355,6 @@ paths:
                   maxLength: 100
               required:
                 - label
-            example:
-              label: CRM sync
       parameters:
         - schema:
             $ref: "#/components/schemas/ContactId"
@@ -13581,13 +11368,6 @@ paths:
           description: Updated API key
           content:
             application/json:
-              example:
-                id: dd0e8400-e29b-41d4-a716-446655440007
-                label: Zapier integration
-                permission: read
-                keyPrefix: bondery_key_dd0e8400
-                lastUsedAt: 2026-01-15T12:00:00.000Z
-                createdAt: 2026-01-15T12:00:00.000Z
               schema:
                 type: object
                 properties:
@@ -13606,10 +11386,10 @@ paths:
                   lastUsedAt:
                     nullable: true
                     type: string
-                    format: date-time
+                    pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
                   createdAt:
                     type: string
-                    format: date-time
+                    pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
                 required:
                   - id
                   - label
@@ -13618,13 +11398,6 @@ paths:
                   - lastUsedAt
                   - createdAt
                 additionalProperties: false
-                example:
-                  id: dd0e8400-e29b-41d4-a716-446655440007
-                  label: Zapier integration
-                  permission: read
-                  keyPrefix: bondery_key_dd0e8400
-                  lastUsedAt: 2026-01-15T12:00:00.000Z
-                  createdAt: 2026-01-15T12:00:00.000Z
         "400":
           description: Invalid request
           content:
@@ -13765,22 +11538,6 @@ paths:
           description: Sync bootstrap snapshot
           content:
             application/json:
-              example:
-                tables:
-                  people:
-                    - id: 550e8400-e29b-41d4-a716-446655440000
-                      first_name: Ada
-                      last_name: Lovelace
-                  people_phones: []
-                  people_emails: []
-                  people_addresses: []
-                  people_socials: []
-                  groups: []
-                  people_groups: []
-                  tags: []
-                  people_tags: []
-                  people_important_dates: []
-                nextServerSequence: 1
               schema:
                 type: object
                 properties:
@@ -13810,22 +11567,6 @@ paths:
                   - tables
                   - nextServerSequence
                 additionalProperties: false
-                example:
-                  tables:
-                    people:
-                      - id: 550e8400-e29b-41d4-a716-446655440000
-                        first_name: Ada
-                        last_name: Lovelace
-                    people_phones: []
-                    people_emails: []
-                    people_addresses: []
-                    people_socials: []
-                    groups: []
-                    people_groups: []
-                    tags: []
-                    people_tags: []
-                    people_important_dates: []
-                  nextServerSequence: 1
         "400":
           description: Invalid request
           content:
@@ -13914,16 +11655,6 @@ paths:
           description: Sync change batches
           content:
             application/json:
-              example:
-                batches:
-                  - serverSequence: 1
-                    changes:
-                      - table: people
-                        operation: update
-                        entityId: 550e8400-e29b-41d4-a716-446655440000
-                        value:
-                          first_name: Ada
-                nextServerSequence: 2
               schema:
                 type: object
                 properties:
@@ -13989,16 +11720,6 @@ paths:
                   - batches
                   - nextServerSequence
                 additionalProperties: false
-                example:
-                  batches:
-                    - serverSequence: 1
-                      changes:
-                        - table: people
-                          operation: update
-                          entityId: 550e8400-e29b-41d4-a716-446655440000
-                          value:
-                            first_name: Ada
-                  nextServerSequence: 2
         "400":
           description: Invalid request
           content:
@@ -14089,7 +11810,7 @@ paths:
                             maximum: 9007199254740991
                           baseUpdatedAt:
                             type: string
-                            format: date-time
+                            pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
                           type:
                             type: string
                             enum:
@@ -14128,7 +11849,7 @@ paths:
                             maximum: 9007199254740991
                           baseUpdatedAt:
                             type: string
-                            format: date-time
+                            pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
                           type:
                             type: string
                             enum:
@@ -14161,14 +11882,14 @@ paths:
                               notesUpdatedAt:
                                 nullable: true
                                 type: string
-                                format: date-time
+                                pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
                               avatar:
                                 nullable: true
                                 type: string
                               lastInteraction:
                                 nullable: true
                                 type: string
-                                format: date-time
+                                pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
                               lastInteractionActivityId:
                                 nullable: true
                                 type: string
@@ -14349,7 +12070,7 @@ paths:
                                 type: number
                               updatedAt:
                                 type: string
-                                format: date-time
+                                pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
                               importantDates:
                                 nullable: true
                                 maxItems: 5
@@ -14392,8 +12113,6 @@ paths:
                                   required:
                                     - type
                                     - date
-                            example:
-                              notes: Met at the Analytical Society dinner.
                         required:
                           - id
                           - clientSequence
@@ -14412,7 +12131,7 @@ paths:
                             maximum: 9007199254740991
                           baseUpdatedAt:
                             type: string
-                            format: date-time
+                            pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
                           type:
                             type: string
                             enum:
@@ -14440,7 +12159,7 @@ paths:
                             maximum: 9007199254740991
                           baseUpdatedAt:
                             type: string
-                            format: date-time
+                            pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
                           type:
                             type: string
                             enum:
@@ -14474,7 +12193,7 @@ paths:
                             maximum: 9007199254740991
                           baseUpdatedAt:
                             type: string
-                            format: date-time
+                            pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
                           type:
                             type: string
                             enum:
@@ -14508,7 +12227,7 @@ paths:
                             maximum: 9007199254740991
                           baseUpdatedAt:
                             type: string
-                            format: date-time
+                            pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
                           type:
                             type: string
                             enum:
@@ -14549,7 +12268,7 @@ paths:
                             maximum: 9007199254740991
                           baseUpdatedAt:
                             type: string
-                            format: date-time
+                            pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
                           type:
                             type: string
                             enum:
@@ -14587,7 +12306,7 @@ paths:
                             maximum: 9007199254740991
                           baseUpdatedAt:
                             type: string
-                            format: date-time
+                            pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
                           type:
                             type: string
                             enum:
@@ -14615,7 +12334,7 @@ paths:
                             maximum: 9007199254740991
                           baseUpdatedAt:
                             type: string
-                            format: date-time
+                            pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
                           type:
                             type: string
                             enum:
@@ -14652,7 +12371,7 @@ paths:
                             maximum: 9007199254740991
                           baseUpdatedAt:
                             type: string
-                            format: date-time
+                            pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
                           type:
                             type: string
                             enum:
@@ -14689,7 +12408,7 @@ paths:
                             maximum: 9007199254740991
                           baseUpdatedAt:
                             type: string
-                            format: date-time
+                            pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
                           type:
                             type: string
                             enum:
@@ -14724,7 +12443,7 @@ paths:
                             maximum: 9007199254740991
                           baseUpdatedAt:
                             type: string
-                            format: date-time
+                            pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
                           type:
                             type: string
                             enum:
@@ -14758,7 +12477,7 @@ paths:
                             maximum: 9007199254740991
                           baseUpdatedAt:
                             type: string
-                            format: date-time
+                            pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
                           type:
                             type: string
                             enum:
@@ -14778,70 +12497,12 @@ paths:
               required:
                 - deviceId
                 - mutations
-            example:
-              deviceId: 6ba7b812-9dad-11d1-80b4-00c04fd430c8
-              mutations:
-                - id: 6ba7b813-9dad-11d1-80b4-00c04fd430c8
-                  clientSequence: 1
-                  type: contact.create
-                  payload:
-                    firstName: Ada
-                    lastName: Lovelace
       security: *a2
       responses:
         "200":
           description: Sync push results
           content:
             application/json:
-              example:
-                results:
-                  - id: 550e8400-e29b-41d4-a716-446655440000
-                    status: applied
-                    serverSequence: 3
-                    txid: tx-1
-                    data:
-                      contact:
-                        id: 550e8400-e29b-41d4-a716-446655440000
-                        userId: 6ba7b810-9dad-11d1-80b4-00c04fd430c8
-                        firstName: Ada
-                        lastName: Lovelace
-                        middleName: null
-                        headline: Mathematician
-                        location: London, UK
-                        notes: null
-                        notesUpdatedAt: null
-                        avatar: null
-                        lastInteraction: 2026-01-15T12:00:00.000Z
-                        lastInteractionActivityId: null
-                        keepFrequencyDays: 90
-                        createdAt: 2026-01-15T12:00:00.000Z
-                        updatedAt: 2026-01-15T12:00:00.000Z
-                        phones:
-                          - prefix: "+44"
-                            value: "2079460958"
-                            type: home
-                            preferred: true
-                        emails:
-                          - value: ada.lovelace@example.com
-                            type: work
-                            preferred: true
-                        addresses: null
-                        linkedin: https://linkedin.com/in/ada-lovelace
-                        instagram: null
-                        whatsapp: null
-                        facebook: null
-                        website: https://example.com
-                        signal: null
-                        importantDates: null
-                        myself: false
-                        position: null
-                        language: en
-                        timezone: Europe/London
-                        gisPoint: null
-                        latitude: 51.5074
-                        longitude: -0.1278
-                serverTime: 2026-01-15T12:00:00.000Z
-                nextServerSequence: 4
               schema:
                 type: object
                 properties:
@@ -14933,7 +12594,7 @@ paths:
                       type: object
                   serverTime:
                     type: string
-                    format: date-time
+                    pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
                   nextServerSequence:
                     type: integer
                     minimum: 0
@@ -14943,55 +12604,6 @@ paths:
                   - serverTime
                   - nextServerSequence
                 additionalProperties: false
-                example:
-                  results:
-                    - id: 550e8400-e29b-41d4-a716-446655440000
-                      status: applied
-                      serverSequence: 3
-                      txid: tx-1
-                      data:
-                        contact:
-                          id: 550e8400-e29b-41d4-a716-446655440000
-                          userId: 6ba7b810-9dad-11d1-80b4-00c04fd430c8
-                          firstName: Ada
-                          lastName: Lovelace
-                          middleName: null
-                          headline: Mathematician
-                          location: London, UK
-                          notes: null
-                          notesUpdatedAt: null
-                          avatar: null
-                          lastInteraction: 2026-01-15T12:00:00.000Z
-                          lastInteractionActivityId: null
-                          keepFrequencyDays: 90
-                          createdAt: 2026-01-15T12:00:00.000Z
-                          updatedAt: 2026-01-15T12:00:00.000Z
-                          phones:
-                            - prefix: "+44"
-                              value: "2079460958"
-                              type: home
-                              preferred: true
-                          emails:
-                            - value: ada.lovelace@example.com
-                              type: work
-                              preferred: true
-                          addresses: null
-                          linkedin: https://linkedin.com/in/ada-lovelace
-                          instagram: null
-                          whatsapp: null
-                          facebook: null
-                          website: https://example.com
-                          signal: null
-                          importantDates: null
-                          myself: false
-                          position: null
-                          language: en
-                          timezone: Europe/London
-                          gisPoint: null
-                          latitude: 51.5074
-                          longitude: -0.1278
-                  serverTime: 2026-01-15T12:00:00.000Z
-                  nextServerSequence: 4
         "400":
           description: Invalid request
           content:
@@ -15129,22 +12741,12 @@ paths:
                       - schoolName
                 linkedinBio:
                   type: string
-            example:
-              linkedin: https://linkedin.com/in/ada-lovelace
-              firstName: Ada
-              lastName: Lovelace
       security: *a2
       responses:
         "200":
           description: Extension contact result
           content:
             application/json:
-              example:
-                contactId: 550e8400-e29b-41d4-a716-446655440000
-                existed: false
-                firstName: Ada
-                lastName: Lovelace
-                avatar: null
               schema:
                 type: object
                 properties:
@@ -15164,12 +12766,6 @@ paths:
                   - contactId
                   - existed
                 additionalProperties: false
-                example:
-                  contactId: 550e8400-e29b-41d4-a716-446655440000
-                  existed: false
-                  firstName: Ada
-                  lastName: Lovelace
-                  avatar: null
         "400":
           description: Invalid request
           content:
@@ -15249,14 +12845,6 @@ paths:
               required:
                 - messages
                 - sessionId
-            example:
-              sessionId: ff0e8400-e29b-41d4-a716-446655440009
-              messages:
-                - id: msg-1
-                  role: user
-                  parts:
-                    - type: text
-                      text: Who should I follow up with?
       security: *a2
       responses:
         "200":
@@ -15348,20 +12936,6 @@ paths:
           description: Paginated chat sessions
           content:
             application/json:
-              example:
-                sessions:
-                  - id: ff0e8400-e29b-41d4-a716-446655440009
-                    userId: 6ba7b810-9dad-11d1-80b4-00c04fd430c8
-                    title: Who should I follow up with?
-                    createdAt: 2026-01-15T12:00:00.000Z
-                    updatedAt: 2026-01-15T12:00:00.000Z
-                pagination:
-                  limit: 50
-                  offset: 0
-                  totalCount: 1
-                  hasMore: false
-                  sort: null
-                  search: null
               schema:
                 type: object
                 properties:
@@ -15379,10 +12953,10 @@ paths:
                           type: string
                         createdAt:
                           type: string
-                          format: date-time
+                          pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
                         updatedAt:
                           type: string
-                          format: date-time
+                          pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
                       required:
                         - id
                         - userId
@@ -15396,20 +12970,6 @@ paths:
                   - sessions
                   - pagination
                 additionalProperties: false
-                example:
-                  sessions:
-                    - id: ff0e8400-e29b-41d4-a716-446655440009
-                      userId: 6ba7b810-9dad-11d1-80b4-00c04fd430c8
-                      title: Who should I follow up with?
-                      createdAt: 2026-01-15T12:00:00.000Z
-                      updatedAt: 2026-01-15T12:00:00.000Z
-                  pagination:
-                    limit: 50
-                    offset: 0
-                    totalCount: 1
-                    hasMore: false
-                    sort: null
-                    search: null
         "400":
           description: Invalid request
           content:
@@ -15477,10 +13037,6 @@ paths:
           description: Chat session created
           content:
             application/json:
-              example:
-                data:
-                  id: ff0e8400-e29b-41d4-a716-446655440009
-                  createdAt: 2026-01-15T12:00:00.000Z
               schema:
                 type: object
                 properties:
@@ -15491,7 +13047,7 @@ paths:
                         type: string
                       createdAt:
                         type: string
-                        format: date-time
+                        pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
                     required:
                       - id
                       - createdAt
@@ -15499,10 +13055,6 @@ paths:
                 required:
                   - data
                 additionalProperties: false
-                example:
-                  data:
-                    id: ff0e8400-e29b-41d4-a716-446655440009
-                    createdAt: 2026-01-15T12:00:00.000Z
         "400":
           description: Invalid request
           content:
@@ -15576,8 +13128,6 @@ paths:
                   type: string
               required:
                 - title
-            example:
-              title: Follow-up ideas
       parameters:
         - schema:
             type: string
@@ -15753,20 +13303,6 @@ paths:
           description: Paginated chat messages
           content:
             application/json:
-              example:
-                messages:
-                  - id: 000e8400-e29b-41d4-a716-44665544000a
-                    sessionId: ff0e8400-e29b-41d4-a716-446655440009
-                    role: user
-                    content: Who haven't I spoken to in 90 days?
-                    createdAt: 2026-01-15T12:00:00.000Z
-                pagination:
-                  limit: 50
-                  offset: 0
-                  totalCount: 1
-                  hasMore: false
-                  sort: null
-                  search: null
               schema:
                 type: object
                 properties:
@@ -15784,7 +13320,7 @@ paths:
                         content: {}
                         createdAt:
                           type: string
-                          format: date-time
+                          pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
                       required:
                         - id
                         - sessionId
@@ -15798,20 +13334,6 @@ paths:
                   - messages
                   - pagination
                 additionalProperties: false
-                example:
-                  messages:
-                    - id: 000e8400-e29b-41d4-a716-44665544000a
-                      sessionId: ff0e8400-e29b-41d4-a716-446655440009
-                      role: user
-                      content: Who haven't I spoken to in 90 days?
-                      createdAt: 2026-01-15T12:00:00.000Z
-                  pagination:
-                    limit: 50
-                    offset: 0
-                    totalCount: 1
-                    hasMore: false
-                    sort: null
-                    search: null
         "400":
           description: Invalid request
           content:
@@ -15916,13 +13438,13 @@ paths:
                       aiMonthlyResetAt:
                         nullable: true
                         type: string
-                        format: date-time
+                        pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
                       canUseChat:
                         type: boolean
                       currentPeriodEnd:
                         nullable: true
                         type: string
-                        format: date-time
+                        pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
                       cancelAtPeriodEnd:
                         type: boolean
                       polarStatus:
@@ -15939,7 +13461,7 @@ paths:
                       trialEndsAt:
                         nullable: true
                         type: string
-                        format: date-time
+                        pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
                       amount:
                         nullable: true
                         type: number
