@@ -33,6 +33,41 @@ function isAllowedClientFetchFile(rel: string): boolean {
   return rel.replace(/\\/g, "/").startsWith("lib/api/");
 }
 
+function isApiRouteFile(rel: string): boolean {
+  const normalized = rel.replace(/\\/g, "/");
+  return normalized.startsWith("app/api/");
+}
+
+function checkApiRouteFile(absPath: string): Violation[] {
+  const rel = relative(WEBAPP_SRC, absPath);
+  const content = readFileSync(absPath, "utf8");
+  const violations: Violation[] = [];
+
+  if (!isApiRouteFile(rel)) {
+    return violations;
+  }
+
+  if (!/\bserverApiFetch\b/.test(content)) {
+    return violations;
+  }
+
+  if (/\bbffProxyFetch\b/.test(content)) {
+    return violations;
+  }
+
+  if (/transportPolicy:\s*false/.test(content)) {
+    return violations;
+  }
+
+  violations.push({
+    file: rel,
+    rule: "api-route-use-bff-proxy",
+    detail: "app/api route handlers must use bffProxyFetch instead of serverApiFetch",
+  });
+
+  return violations;
+}
+
 function checkFile(absPath: string): Violation[] {
   const rel = relative(WEBAPP_SRC, absPath);
   const content = readFileSync(absPath, "utf8");
@@ -83,7 +118,7 @@ function checkFile(absPath: string): Violation[] {
 
 function main(): void {
   const files = walk(WEBAPP_SRC);
-  const violations = files.flatMap(checkFile);
+  const violations = files.flatMap((file) => [...checkFile(file), ...checkApiRouteFile(file)]);
 
   if (violations.length === 0) {
     console.log("check-api-fetch-patterns: OK");

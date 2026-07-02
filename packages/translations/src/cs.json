@@ -368,15 +368,19 @@
     "Description": "Stránka, kterou hledáte, neexistuje."
   },
   "UnavailablePage": {
-    "Title": "Služba je dočasně nedostupná",
-    "Description": "Momentálně se nemůžeme spojit s API Bondery. Vaše přihlášení zůstává aktivní — zkuste to prosím za chvíli znovu.",
+    "Title": "Máme potíže s připojením",
+    "Description": "Váš účet je v bezpečí a jste stále přihlášeni. Budeme to dál kontrolovat — obvykle to netrvá dlouho.",
     "Retry": "Zkusit znovu",
-    "HealthTitle": "Stav API",
-    "HealthLoading": "Kontroluji stav API…",
-    "BffStatus": "API webové aplikace:",
-    "BffReachable": "Dostupné (HTTP {status})",
-    "BffUnreachable": "Nedostupné",
-    "ApiStatus": "Připravenost backendu:"
+    "StatusChecking": "Kontroluji připojení…",
+    "StatusOffline": "Bondery je dočasně nedostupné",
+    "StatusDegraded": "Některé funkce mohou být pomalejší",
+    "StatusOnline": "Jsme zpět online — vracíme vás…",
+    "TechnicalDetails": "Technické podrobnosti",
+    "TechnicalHttpStatus": "HTTP stav: {status}",
+    "TechnicalUnreachable": "nedostupné",
+    "TechnicalBackendStatus": "Backend: {status}",
+    "StatusPageLink": "Zobrazit stav služby",
+    "CheckingAgain": "Další kontrola za {seconds} s…"
   },
   "LoginPage": {
     "Title": "Bondery",

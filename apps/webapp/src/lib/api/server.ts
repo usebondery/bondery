@@ -1,13 +1,28 @@
 import { API_URL } from "@/lib/config";
 import { resolveServerSession } from "@/lib/auth/resolveServerSession";
+import {
+  applyServerTransportErrorPolicy,
+  applyServerTransportResponsePolicy,
+} from "@/lib/api/applyServerTransportPolicy";
+import { handleServerUnauthorizedSession } from "@/lib/auth/handleServerUnauthorizedSession";
+import { isUnauthorizedResponseStatus } from "@/lib/auth/unauthorized";
 import { parseApiJsonResponse, parseApiJsonResponseOrNull } from "./parseResponse";
 
 export { ApiError } from "./ApiError";
+export {
+  applyServerTransportErrorPolicy,
+  applyServerTransportResponsePolicy,
+} from "@/lib/api/applyServerTransportPolicy";
 
 export type ServerApiFetchOptions = {
   /** Next.js fetch cache options passed through to fetch(). */
   next?: { tags?: string[]; revalidate?: number | false };
   cache?: RequestCache;
+  /**
+   * Default true for RSC. When true, 401/outage signals redirect via transport policy.
+   * Set false for BFF routes and routing probes (getAppBootstrap).
+   */
+  transportPolicy?: boolean;
 };
 
 function resolveServerUrl(path: string): string {
@@ -42,15 +57,29 @@ export async function serverApiFetch(
   init?: RequestInit,
   options: ServerApiFetchOptions = {},
 ): Promise<Response> {
+  const { transportPolicy = true, next, cache } = options;
   const url = resolveServerUrl(path);
   const headers = await buildServerHeaders(init);
 
-  return fetch(url, {
-    ...init,
-    headers,
-    ...(options.next !== undefined ? { next: options.next } : {}),
-    ...(options.cache !== undefined ? { cache: options.cache } : {}),
-  });
+  try {
+    const response = await fetch(url, {
+      ...init,
+      headers,
+      ...(next !== undefined ? { next } : {}),
+      ...(cache !== undefined ? { cache } : {}),
+    });
+
+    if (transportPolicy) {
+      await applyServerTransportResponsePolicy(response);
+    }
+
+    return response;
+  } catch (error) {
+    if (transportPolicy) {
+      await applyServerTransportErrorPolicy(error);
+    }
+    throw error;
+  }
 }
 
 export async function serverApiJson<T>(
@@ -58,19 +87,38 @@ export async function serverApiJson<T>(
   init?: RequestInit,
   options: ServerApiFetchOptions = {},
 ): Promise<T> {
-  const response = await serverApiFetch(path, init, options);
-  return parseApiJsonResponse<T>(response);
+  try {
+    const response = await serverApiFetch(path, init, options);
+    return await parseApiJsonResponse<T>(response);
+  } catch (error) {
+    if (options.transportPolicy !== false) {
+      await applyServerTransportErrorPolicy(error);
+    }
+    throw error;
+  }
 }
 
+/** Returns null on network failure or non-2xx — for prefetch / graceful degradation. */
 export async function serverApiJsonOrNull<T>(
   path: string,
   init?: RequestInit,
   options: ServerApiFetchOptions = {},
 ): Promise<T | null> {
   try {
-    const response = await serverApiFetch(path, init, options);
+    const response = await serverApiFetch(path, init, {
+      ...options,
+      transportPolicy: false,
+    });
+
+    if (isUnauthorizedResponseStatus(response.status)) {
+      await handleServerUnauthorizedSession();
+    }
+
     return parseApiJsonResponseOrNull<T>(response);
-  } catch {
+  } catch (error) {
+    if (error instanceof Error && error.name === "AbortError") {
+      throw error;
+    }
     return null;
   }
 }

@@ -1,8 +1,8 @@
-import { serverApiFetch } from "@/lib/api/server";
+import { bffProxyFetch } from "@/lib/api/bffProxy";
 
 /** Liveness + extension version probe (proxied through webapp BFF). */
 export async function GET() {
-  const apiResponse = await serverApiFetch("/status", undefined, {
+  const apiResponse = await bffProxyFetch("/status", undefined, {
     cache: "no-store",
   });
   const body = await apiResponse.text();

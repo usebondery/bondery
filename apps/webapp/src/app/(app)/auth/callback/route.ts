@@ -30,15 +30,19 @@ async function applyLocalePrefsViaApi(localePrefs: {
   timeFormat: "12h" | "24h";
 }): Promise<void> {
   try {
-    await serverApiFetch(API_ROUTES.ME_SETTINGS, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        timezone: localePrefs.timezone,
-        timeFormat: localePrefs.timeFormat,
-        onlyIfNewSignup: true,
-      }),
-    });
+    await serverApiFetch(
+      API_ROUTES.ME_SETTINGS,
+      {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          timezone: localePrefs.timezone,
+          timeFormat: localePrefs.timeFormat,
+          onlyIfNewSignup: true,
+        }),
+      },
+      { transportPolicy: false },
+    );
   } catch {
     // Non-blocking: signup locale seeding is best-effort
   }

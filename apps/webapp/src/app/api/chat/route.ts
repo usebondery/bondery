@@ -1,5 +1,5 @@
 import { resolveServerSession } from "@/lib/auth/resolveServerSession";
-import { serverApiFetch } from "@/lib/api/server";
+import { bffProxyFetch } from "@/lib/api/bffProxy";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
 
 export async function POST(request: Request) {
@@ -11,7 +11,7 @@ export async function POST(request: Request) {
 
   const body = await request.json();
 
-  const apiResponse = await serverApiFetch(API_ROUTES.CHAT, {
+  const apiResponse = await bffProxyFetch(API_ROUTES.CHAT, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),

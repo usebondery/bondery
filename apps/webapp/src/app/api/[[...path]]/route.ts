@@ -1,5 +1,5 @@
 import { resolveServerSession } from "@/lib/auth/resolveServerSession";
-import { serverApiFetch } from "@/lib/api/server";
+import { bffProxyFetch } from "@/lib/api/bffProxy";
 import { NextRequest } from "next/server";
 
 type RouteContext = { params: Promise<{ path?: string[] }> };
@@ -42,7 +42,7 @@ async function proxyToApi(request: NextRequest, pathSegments: string[]) {
     }
   }
 
-  const apiResponse = await serverApiFetch(apiPath, init);
+  const apiResponse = await bffProxyFetch(apiPath, init);
 
   const responseHeaders = new Headers();
   const responseContentType = apiResponse.headers.get("Content-Type");

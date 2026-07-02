@@ -64,6 +64,7 @@ export const getAppBootstrap = cache(async (): Promise<AppBootstrapResult> => {
   try {
     const response = await serverApiFetch(API_ROUTES.ME_SETTINGS, undefined, {
       cache: "no-store",
+      transportPolicy: false,
     });
 
     if (response.status === 401) {

@@ -96,18 +96,19 @@ Mobile uses the same idea with `resolveApiErrorMessage()` + plain `Error`; webap
 
 | Layer | Location | Responsibility |
 |-------|----------|----------------|
-| **1 — Server bootstrap** | `lib/app/getAppBootstrap.ts`, `app/(app)/app/layout.tsx` | Cold-load routing: unauthorized → login, unavailable → `/app/unavailable`, ok → onboarding/shell |
+| **1 — Server bootstrap** | `lib/app/getAppBootstrap.ts`, `app/(app)/app/layout.tsx` | Routing probe + layout guards: unauthorized → login, unavailable → `/app/unavailable` |
 | **2 — Classification** | `lib/api/availability.ts`, `lib/auth/unauthorized.ts` | `isApiUnavailableError`, `isUnauthorizedApiError` (no side effects) |
-| **3 — Transport policy** | `lib/api/applyTransportErrorPolicy.ts`, `lib/api/client.ts` | Apply 401 / unavailable side effects for browser fetches |
+| **3 — Transport policy** | `applyTransportErrorPolicy.ts` + `client.ts`; `applyServerTransportPolicy.ts` + `server.ts` | Apply 401 / unavailable side effects per runtime |
 
 **React Query** (`lib/query/client.ts`) owns cache config and retry rules only — not session or outage redirects.
 
-| Signal | Transport action | Sign out? |
-|--------|------------------|-----------|
-| 401 / `BFF_UNAUTHORIZED` | `handleUnauthorizedSession` → `endSession` | Yes |
-| 502 / 503 / 504 / network `TypeError` | `handleApiUnavailable` → `/app/unavailable` | No |
-| `*JsonOrNull` failure | Return `null` (401 still ends session) | Optional fetch only |
-| Raw `clientApiFetch` + `!response.ok` | Call `applyTransportResponsePolicy(response)` | Per status |
+| Signal | Client action | Server action (RSC, `transportPolicy: true`) | Sign out? |
+|--------|---------------|--------------------------------------------|-----------|
+| 401 / `BFF_UNAUTHORIZED` | `handleUnauthorizedSession` → `endSession` | `handleServerUnauthorizedSession` → `signOutServerSession` + redirect login | Yes |
+| 502 / 503 / 504 / network `TypeError` | `handleApiUnavailable` → `/app/unavailable` | `redirect(/app/unavailable)` if session valid; else login | No |
+| `*JsonOrNull` outage | Return `null` | Return `null` | No |
+| `*JsonOrNull` 401 | Ends session | Signs out + redirects | Yes |
+| BFF `app/api/**` | N/A | `bffProxyFetch` — passthrough status or synthetic 503 JSON | Per status |
 
 **Health probe:** `GET /api/health` (BFF → Fastify `/health`) for the unavailable page status panel. `GET /api/status` remains the liveness + extension version probe.
 
@@ -168,8 +169,10 @@ In order, each step is best-effort (failures do not block later steps):
 The **transport layer** detects expired sessions and delegates to session teardown:
 
 - `clientApiJson` → `applyTransportErrorPolicy` → `handleUnauthorizedSession()` → `endSession({ reason: "session_expired" })`
-- `clientApiJsonOrNull` → 401 on response status only (same session teardown)
+- `serverApiJson` / `serverApiFetch` (default) → `applyServerTransportPolicy` → `handleServerUnauthorizedSession()` → `signOutServerSession` + redirect login
+- `clientApiJsonOrNull` / `serverApiJsonOrNull` → 401 on response status (same session teardown)
 - Raw `clientApiFetch` callers → `applyTransportResponsePolicy(response)` when `!response.ok`
+- BFF routes → passthrough 401 JSON; browser transport handles teardown
 
 Do not handle 401 in feature components or React Query global handlers.
 
@@ -178,9 +181,10 @@ Do not handle 401 in feature components or React Query global handlers.
 When the BFF or upstream API is down (502/503/504 or fetch network failure):
 
 - `clientApiJson` → `handleApiUnavailable()` → `/app/unavailable` (session stays active)
-- Server cold load → `getAppBootstrap()` returns `unavailable` → layout redirects before AppShell mounts
-- `clientApiJsonOrNull` does **not** redirect on unavailable — optional fetches degrade to `null`
-- Raw `clientApiFetch` callers → `applyTransportResponsePolicy(response)` when `!response.ok`
+- `serverApiFetch` / `serverApiJson` (default) → `redirect(/app/unavailable)` when session valid; login when not
+- `getAppBootstrap()` with `transportPolicy: false` → layout redirects (probe, not sole gate)
+- BFF routes → `bffProxyFetch` returns 503 JSON on network failure; browser client policy handles redirect
+- `*JsonOrNull` does **not** redirect on unavailable — optional fetches degrade to `null`
 
 Do not call `endSession()` for outage responses.
 
@@ -214,6 +218,8 @@ npm run check-api-fetch:strict   # part of check-types
 |---------|------|
 | Webapp browser transport | `apps/webapp/src/lib/api/client.ts` |
 | Webapp transport policy | `apps/webapp/src/lib/api/applyTransportErrorPolicy.ts` |
+| Webapp server transport policy | `apps/webapp/src/lib/api/applyServerTransportPolicy.ts` |
+| Webapp BFF proxy | `apps/webapp/src/lib/api/bffProxy.ts` |
 | Webapp server bootstrap | `apps/webapp/src/lib/app/getAppBootstrap.ts` |
 | Webapp API unavailable redirect | `apps/webapp/src/lib/auth/handleApiUnavailable.ts` |
 | Webapp server transport | `apps/webapp/src/lib/api/server.ts` |

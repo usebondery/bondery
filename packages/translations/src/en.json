@@ -371,15 +371,19 @@
     "Description": "The page you are looking for does not exist."
   },
   "UnavailablePage": {
-    "Title": "Service temporarily unavailable",
-    "Description": "We cannot reach the Bondery API right now. Your session is still active — try again in a moment.",
+    "Title": "We're having trouble connecting",
+    "Description": "Your account is safe and you're still signed in. We'll keep checking, this is usually brief.",
     "Retry": "Try again",
-    "HealthTitle": "API health",
-    "HealthLoading": "Checking API status…",
-    "BffStatus": "Web app API:",
-    "BffReachable": "Reachable (HTTP {status})",
-    "BffUnreachable": "Unreachable",
-    "ApiStatus": "Backend readiness:"
+    "StatusChecking": "Checking connection…",
+    "StatusOffline": "Bondery is temporarily unavailable",
+    "StatusDegraded": "Some features may be slow right now",
+    "StatusOnline": "Back online. Taking you back…",
+    "TechnicalDetails": "Technical details",
+    "TechnicalHttpStatus": "HTTP status: {status}",
+    "TechnicalUnreachable": "unreachable",
+    "TechnicalBackendStatus": "Backend: {status}",
+    "StatusPageLink": "View status page",
+    "CheckingAgain": "Checking again in {seconds}s…"
   },
   "LoginPage": {
     "Title": "Bondery",

@@ -1,5 +1,5 @@
 import { resolveServerSession } from "@/lib/auth/resolveServerSession";
-import { serverApiFetch } from "@/lib/api/server";
+import { bffProxyFetch } from "@/lib/api/bffProxy";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import { NextRequest } from "next/server";
 
@@ -26,7 +26,7 @@ async function proxyRequest(request: NextRequest, subPath: string) {
     }
   }
 
-  const apiResponse = await serverApiFetch(`${API_ROUTES.CHAT_SESSIONS}${subPath}`, fetchOptions);
+  const apiResponse = await bffProxyFetch(`${API_ROUTES.CHAT_SESSIONS}${subPath}`, fetchOptions);
   const responseBody = await apiResponse.text();
 
   return new Response(responseBody, {

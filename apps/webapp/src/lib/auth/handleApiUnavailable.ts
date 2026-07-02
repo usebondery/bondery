@@ -2,6 +2,8 @@
 
 import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 
+export const RETURN_TO_STORAGE_KEY = "bondery:returnTo";
+
 let isNavigatingToUnavailable = false;
 
 /**
@@ -18,5 +20,9 @@ export function handleApiUnavailable(): void {
   }
 
   isNavigatingToUnavailable = true;
+  sessionStorage.setItem(
+    RETURN_TO_STORAGE_KEY,
+    window.location.pathname + window.location.search,
+  );
   window.location.assign(WEBAPP_ROUTES.UNAVAILABLE);
 }

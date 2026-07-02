@@ -1,8 +1,8 @@
-import { serverApiFetch } from "@/lib/api/server";
+import { bffProxyFetch } from "@/lib/api/bffProxy";
 
 /** Readiness probe (proxied through webapp BFF). */
 export async function GET() {
-  const apiResponse = await serverApiFetch("/health", undefined, {
+  const apiResponse = await bffProxyFetch("/health", undefined, {
     cache: "no-store",
   });
   const body = await apiResponse.text();

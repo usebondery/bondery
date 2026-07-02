@@ -32,23 +32,31 @@ Import from `@/lib/api/client`. Always use same-origin paths from `API_ROUTES` (
 
 ## Transport policy (401 + API unavailable)
 
+| Runtime | Policy module | On 401 | On outage |
+|---------|---------------|--------|-----------|
+| Browser | `applyTransportErrorPolicy` | `endSession` → login | `handleApiUnavailable` → `/app/unavailable` |
+| Server RSC | `applyServerTransportPolicy` | `signOutServerSession` → login | `redirect(/app/unavailable)` if session valid, else login |
 
+`clientApiJson` and `serverApiFetch` (default) apply policy automatically. Unavailable redirects on the server are **session-gated** — no valid session routes to login, not unavailable (matches BFF 401-before-upstream on the client).
 
-`clientApiJson` applies global policy via `applyTransportErrorPolicy` (401 → sign out, 502/503/504/network → `/app/unavailable`). React Query does not duplicate this — see [`lib/query/README.md`](../query/README.md).
+`serverApiJsonOrNull` / `clientApiJsonOrNull`: 401 ends session; outage returns `null`.
 
-
-
-Raw `clientApiFetch` callers must call `applyTransportResponsePolicy(response)` on non-2xx before local error UI.
-
-
+Raw `clientApiFetch` callers must call `applyTransportResponsePolicy(response)` on non-2xx.
 
 ## Server (`serverApi*`)
 
+Import from `@/lib/api/server`. Used in RSC pages and loaders.
 
+| Function | `transportPolicy` | Use when |
+|----------|-------------------|----------|
+| `serverApiFetch` / `serverApiJson` | default `true` | RSC data loads |
+| `serverApiFetch` / `serverApiJson` | `false` | Routing probes (`getAppBootstrap`) |
+| `serverApiJsonOrNull` | always off for outage | Optional RSC prefetch |
+| `bffProxyFetch` | N/A (imports from `@/lib/api/bffProxy`) | **`app/api/**` route handlers only** |
 
-Import from `@/lib/api/server`. Used in RSC pages, loaders, and route handlers.
+Auth: `serverApiFetch` attaches `Authorization: Bearer …` via `resolveServerSession()`. Route guards and BFF 401 gates use the same function — do not duplicate `getUser()` in server code.
 
-Auth: `serverApiFetch` attaches `Authorization: Bearer …` via `resolveServerSession()` (`lib/auth/resolveServerSession.ts`). Route guards and BFF 401 gates use the same function — do not duplicate `getUser()` in server code.
+Bootstrap (`getAppBootstrap`) **probes** API health; transport policy on every RSC fetch is the enforcement layer (layout is belt-and-suspenders).
 
 
 
