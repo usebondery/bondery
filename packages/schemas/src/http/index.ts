@@ -9,11 +9,25 @@ import {
   contactAddressTypeSchema,
 } from "#entities/address.js";
 import { replaceImportantDatesSchema } from "#entities/important-date.js";
+import { EXAMPLE_CONTACT_ID } from "#contact-id.js";
 import {
   EXAMPLE_GEOCODE_SUGGEST_RESPONSE,
   EXAMPLE_GEOCODE_TIMEZONE_RESPONSE,
 } from "#openapi/fixtures/schema-examples.js";
-import { EXAMPLE_IDS_REQUEST, EXAMPLE_REPLACE_IMPORTANT_DATES_REQUEST } from "#openapi/fixtures/requests.js";
+import { EXAMPLE_DATE } from "#openapi/fixtures/primitives.js";
+
+/** Inline request examples — do not import the OpenAPI requests fixture module (SSR init cycle risk). */
+const EXAMPLE_IDS_REQUEST = { ids: [EXAMPLE_CONTACT_ID] } as const;
+const EXAMPLE_REPLACE_IMPORTANT_DATES_REQUEST = {
+  dates: [
+    {
+      type: "birthday" as const,
+      date: EXAMPLE_DATE,
+      note: null,
+      notifyDaysBefore: 7,
+    },
+  ],
+} as const;
 
 export * from "#http/ids.js";
 

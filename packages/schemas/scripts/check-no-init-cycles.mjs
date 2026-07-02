@@ -17,6 +17,10 @@ const FORBIDDEN_IMPORTS = [
   "#sync/conflict.js",
 ];
 
+const HTTP_INDEX_FORBIDDEN_IMPORTS = [
+  "#openapi/fixtures/requests.js",
+];
+
 const GUARDED_RELATIVE_PATHS = [
   "entities",
   "constants",
@@ -68,6 +72,14 @@ for (const file of collectSourceFiles(srcRoot)) {
       violations.push({ file: rel, forbidden });
     }
   }
+
+  if (rel.replace(/\\/g, "/") === "http/index.ts") {
+    for (const forbidden of HTTP_INDEX_FORBIDDEN_IMPORTS) {
+      if (content.includes(forbidden)) {
+        violations.push({ file: rel, forbidden });
+      }
+    }
+  }
 }
 
 if (violations.length > 0) {
@@ -75,6 +87,15 @@ if (violations.length > 0) {
   for (const { file, forbidden } of violations) {
     console.error(`  - src/${file} imports ${forbidden}`);
   }
+  process.exit(1);
+}
+
+const indexPath = join(srcRoot, "index.ts");
+const indexContent = readFileSync(indexPath, "utf8");
+if (indexContent.includes("#http/index.js")) {
+  console.error(
+    "src/index.ts must not re-export #http/index.js — use @bondery/schemas/http in API routes only.",
+  );
   process.exit(1);
 }
 

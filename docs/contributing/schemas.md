@@ -6,7 +6,7 @@
 
 | Consumer | Allowed imports |
 |----------|-----------------|
-| webapp | `@bondery/schemas` (types + entity schemas + constants), `@bondery/schemas/constants`, `@bondery/schemas/entities/*`, `@bondery/schemas/supabase.types` |
+| webapp | `@bondery/schemas` (types + entity schemas + constants), `@bondery/schemas/constants`, `@bondery/schemas/entities/*`, `@bondery/schemas/supabase.types` — not `@bondery/schemas/http` |
 | mobile | `@bondery/schemas`, `@bondery/schemas/sync`, entity subpaths, constants |
 | API | Any subpath, including `@bondery/schemas/openapi/*`, `@bondery/schemas/http/responses` |
 
@@ -24,4 +24,4 @@ Route-level examples live in `@bondery/schemas/openapi/fixtures/responses`. Enti
 
 ## Why this matters
 
-Importing the full OpenAPI fixture barrel from entity modules created a circular module graph when Turbopack bundled `@bondery/schemas` with Zod for SSR, causing `Cannot access '…' before initialization` at runtime. The root barrel must stay web-safe.
+Importing the full OpenAPI fixture barrel from entity modules created a circular module graph when Turbopack bundled `@bondery/schemas` with Zod for SSR, causing `Cannot access '…' before initialization` at runtime. The root barrel must stay web-safe: do not re-export `#http/index.js` or OpenAPI fixture barrels from `src/index.ts`.
