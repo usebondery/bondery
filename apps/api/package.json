@@ -6,11 +6,10 @@
   "description": "Bondery API",
   "scripts": {
     "dev": "npm run check-env && tsx watch --env-file=.env.development.local src/index.ts",
-    "prebuild": "tsx scripts/generate-openapi.ts",
     "build": "tsc",
     "start": "node dist/index.js",
     "check-types": "tsx scripts/check-api-schema-patterns.ts && tsc --noEmit",
-    "check-openapi": "tsx scripts/check-openapi.ts && tsx scripts/check-api-route-order.ts",
+    "check-openapi": "npm run generate-openapi && tsx scripts/check-openapi.ts && tsx scripts/check-api-route-order.ts",
     "check-api-schema-patterns": "tsx scripts/check-api-schema-patterns.ts",
     "check-env": "tsx scripts/check-env.ts",
     "test:sync": "tsx --test src/lib/sync/build-changes.test.ts src/lib/sync/emit-wake.test.ts src/lib/sync/wake/hub.test.ts src/lib/sync/wake/tickets.test.ts src/lib/sync/wake/in-memory-bus.test.ts",

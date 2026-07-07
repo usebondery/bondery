@@ -23,6 +23,9 @@ jobs:
       - name: Validate doc links
         run: npm run check-doc-links
 
+      - name: Check OpenAPI spec
+        run: npm run check-openapi
+
       - name: Schema contract tests
         run: npm run test:contracts
 

@@ -1,4 +1,5 @@
 import type { FastifyBaseLogger } from "fastify";
+import type { Redis } from "ioredis";
 import type { SyncWakeEvent } from "@bondery/schemas/sync";
 import type { SyncWakeBus } from "./types.js";
 import { InMemorySyncWakeBus } from "./in-memory-bus.js";
@@ -14,6 +15,7 @@ export type SyncWakeRuntime = {
   bus: SyncWakeBus;
   tickets: SyncWsTicketStore;
   redisWakeBus: RedisSyncWakeBus | null;
+  ticketsRedis: Redis | null;
   enabled: boolean;
 };
 
@@ -28,7 +30,7 @@ function isWakeEnabled(): boolean {
 export function createSyncWakeRuntime(log?: FastifyBaseLogger): SyncWakeRuntime {
   const redisUrl = process.env.PRIVATE_REDIS_URL?.trim() ?? "";
   const hub = new SyncConnectionHub(log);
-  const tickets = createSyncWsTicketStore(redisUrl || undefined);
+  const { store: tickets, redis: ticketsRedis } = createSyncWsTicketStore(redisUrl || undefined);
 
   let bus: SyncWakeBus;
   let redisWakeBus: RedisSyncWakeBus | null = null;
@@ -45,6 +47,7 @@ export function createSyncWakeRuntime(log?: FastifyBaseLogger): SyncWakeRuntime 
     bus,
     tickets,
     redisWakeBus,
+    ticketsRedis,
     enabled: isWakeEnabled(),
   };
 }
@@ -72,6 +75,9 @@ export async function initSyncWakeRuntime(log?: FastifyBaseLogger): Promise<Sync
 export async function shutdownSyncWakeRuntime(): Promise<void> {
   if (!runtime) return;
   await runtime.bus.stop();
+  if (runtime.ticketsRedis) {
+    await runtime.ticketsRedis.quit();
+  }
   runtime = null;
 }
 

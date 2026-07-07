@@ -1,8 +1,6 @@
-/**
- * Verifies generated OpenAPI spec is fresh and meets documentation quality rules.
- *
- * Usage: npx tsx scripts/check-openapi.ts
- */
+// Verifies committed OpenAPI spec is fresh (run generate-openapi first) and meets doc quality rules.
+//
+// Usage: npm run check-openapi -w apps/api
 
 import { execSync } from "node:child_process";
 import { readFileSync } from "node:fs";
@@ -13,11 +11,6 @@ import { parse } from "yaml";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const apiRoot = join(__dirname, "..");
 const specPath = join(apiRoot, "openapi.yaml");
-
-execSync("npx tsx scripts/generate-openapi.ts", {
-  cwd: apiRoot,
-  stdio: "inherit",
-});
 
 try {
   execSync("git diff --exit-code openapi.yaml", { cwd: apiRoot, stdio: "pipe" });

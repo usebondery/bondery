@@ -66,15 +66,18 @@ export class RedisSyncWsTicketStore implements SyncWsTicketStore {
   }
 }
 
-export function createSyncWsTicketStore(redisUrl: string | undefined): SyncWsTicketStore {
+export function createSyncWsTicketStore(redisUrl: string | undefined): {
+  store: SyncWsTicketStore;
+  redis: Redis | null;
+} {
   const trimmed = redisUrl?.trim() ?? "";
   if (!trimmed) {
-    return new InMemorySyncWsTicketStore();
+    return { store: new InMemorySyncWsTicketStore(), redis: null };
   }
   const redis = new Redis(trimmed, {
     connectTimeout: 500,
     maxRetriesPerRequest: 1,
     lazyConnect: false,
   });
-  return new RedisSyncWsTicketStore(redis);
+  return { store: new RedisSyncWsTicketStore(redis), redis };
 }

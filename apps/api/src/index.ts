@@ -528,6 +528,7 @@ async function buildServer() {
   });
 
   fastify.addHook("onReady", async () => {
+    if (process.env.GENERATE_OPENAPI === "true") return;
     await initSyncWakeRuntime(fastify.log);
   });
 
