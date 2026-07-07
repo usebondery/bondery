@@ -61,7 +61,7 @@ Same tier → alphabetical by path segment.
 
 ### Sidebar tag order
 
-Integrator dependency order in the `tags` array in [`apps/api/src/index.ts`](../../apps/api/src/index.ts):
+Integrator dependency order in the `tags` array in [`apps/api/src/build-app.ts`](../../apps/api/src/build-app.ts):
 
 `Health → Contacts → Groups → Tags → Interactions → Import → Share → Geocode → Me → Sync → Extension → Chat → Subscriptions → Stats → Webhooks → Internal`
 
@@ -134,6 +134,17 @@ Error examples live in [`packages/schemas/src/openapi/fixtures/errors.ts`](../..
 | `syncConflictResponse` | Route returns 409 with `{ error, contact }` (contact PATCH sync conflict) |
 
 `generate-openapi` patches duplicate empty error schemas (`schema: {}`) to `$ref: ApiError` — a fastify-zod-openapi limitation when reusing the same Zod component across routes.
+
+## Server bootstrap
+
+The API separates **app assembly** from **runtime boot**:
+
+| Function | Module | Use |
+|----------|--------|-----|
+| `buildApp()` | [`apps/api/src/build-app.ts`](../../apps/api/src/build-app.ts) | Plugins, swagger, routes — no Redis, JWKS verify, or listen |
+| `buildServer()` | [`apps/api/src/build-server.ts`](../../apps/api/src/build-server.ts) | `buildApp()` plus `onReady` (auth JWKS verify, sync wake) and `onClose` shutdown |
+
+[`apps/api/scripts/generate-openapi.ts`](../../apps/api/scripts/generate-openapi.ts) imports `build-app.ts` directly so OpenAPI generation never loads `index.ts` side effects (auto-listen, Vercel handler). New runtime startup hooks belong in `build-server.ts`, not `build-app.ts`.
 
 ## Vercel (separate API project)
 

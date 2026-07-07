@@ -73,35 +73,6 @@ export function registerAuthStrategies(fastify: AppFastifyInstance): void {
   const jwtSigningJwk = fastify.config.PRIVATE_SUPABASE_JWT_SIGNING_JWK.trim();
   const jwtIssuerUrl = supabaseAuthIssuerUrl(fastify.config.NEXT_PUBLIC_SUPABASE_URL);
 
-  fastify.addHook("onReady", async () => {
-    await loadJwtSigningMaterial(jwtSigningJwk);
-    if (process.env.GENERATE_OPENAPI === "true") {
-      return;
-    }
-    const jwksCheck = await verifyJwtSigningJwkAgainstJwks(
-      jwtSigningJwk,
-      jwtIssuerUrl,
-    );
-    if (!jwksCheck.ok) {
-      fastify.log.error(
-        {
-          envKid: jwksCheck.envKid,
-          jwksKids: jwksCheck.jwksKids,
-          jwksFetchError: jwksCheck.jwksFetchError,
-        },
-        jwksCheck.message ?? "JWT signing JWK does not match Supabase JWKS",
-      );
-      throw new Error(
-        jwksCheck.message ??
-          "PRIVATE_SUPABASE_JWT_SIGNING_JWK does not match Supabase JWKS",
-      );
-    }
-    fastify.log.info(
-      { envKid: jwksCheck.envKid, jwksKids: jwksCheck.jwksKids },
-      "JWT signing JWK matches Supabase JWKS",
-    );
-  });
-
   // ── verifySession ────────────────────────────────────────────────────────
   // Extracts Supabase session from cookies / Bearer token.
   // On success: populates request.authUser and request.authClient.
@@ -303,6 +274,40 @@ export function registerAuthStrategies(fastify: AppFastifyInstance): void {
         throw err;
       }
     },
+  );
+}
+
+/**
+ * Loads JWT signing material and verifies the env JWK against Supabase JWKS.
+ * Called from buildServer onReady only — not during OpenAPI generation.
+ */
+export async function verifyAuthAtStartup(fastify: AppFastifyInstance): Promise<void> {
+  const jwtSigningJwk = fastify.config.PRIVATE_SUPABASE_JWT_SIGNING_JWK.trim();
+  const jwtIssuerUrl = supabaseAuthIssuerUrl(fastify.config.NEXT_PUBLIC_SUPABASE_URL);
+
+  await loadJwtSigningMaterial(jwtSigningJwk);
+
+  const jwksCheck = await verifyJwtSigningJwkAgainstJwks(
+    jwtSigningJwk,
+    jwtIssuerUrl,
+  );
+  if (!jwksCheck.ok) {
+    fastify.log.error(
+      {
+        envKid: jwksCheck.envKid,
+        jwksKids: jwksCheck.jwksKids,
+        jwksFetchError: jwksCheck.jwksFetchError,
+      },
+      jwksCheck.message ?? "JWT signing JWK does not match Supabase JWKS",
+    );
+    throw new Error(
+      jwksCheck.message ??
+        "PRIVATE_SUPABASE_JWT_SIGNING_JWK does not match Supabase JWKS",
+    );
+  }
+  fastify.log.info(
+    { envKid: jwksCheck.envKid, jwksKids: jwksCheck.jwksKids },
+    "JWT signing JWK matches Supabase JWKS",
   );
 }
 
