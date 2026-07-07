@@ -6,7 +6,7 @@
 * [😎 Getting started](bondery/getting-started.md)
 * [📱 Mobile app](bondery/mobile-app.md)
 * [📥 Import contacts](bondery/import.md)
-* [🧩 Chrome Extension](bondery/chrome-extension.md)
+* [Chrome Extension](bondery/chrome-extension.md)
 * [🤔 Getting help and troubleshooting](bondery/getting-help-and-troubleshooting.md)
 * [‼️ Read before editing](bondery/read-before-editing.md)
 
@@ -28,10 +28,10 @@
 * [Authentication](api/authentication.md)
 * [API reference](api/api-reference/README.md)
   * ```yaml
-    type: builtin:openapi
     props:
       models: false
       downloadLink: true
+    type: builtin:openapi
     dependencies:
       spec:
         ref:
