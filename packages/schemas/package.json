@@ -317,7 +317,7 @@
     "build": "rimraf dist && tsc && node ../../scripts/rewrite-package-hash-imports-in-dist.mjs schemas",
     "dev": "tsc --watch --preserveWatchOutput",
     "check-types": "tsc --noEmit",
-    "test:contracts": "node scripts/check-no-internal-deps.mjs && node scripts/check-no-init-cycles.mjs && npx tsx ./src/contracts.assertions.ts && npx tsx ./scripts/check-openapi-examples.ts"
+    "test:contracts": "node scripts/check-no-internal-deps.mjs && node scripts/check-no-init-cycles.mjs && npm run build && npx tsx ./src/contracts.assertions.ts && npx tsx ./scripts/check-openapi-examples.ts"
   },
   "description": "Canonical types, Zod validation schemas, and constants for Bondery. Contract layer — no runtime business logic.",
   "dependencies": {
