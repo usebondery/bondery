@@ -7,6 +7,7 @@ import { serverApiFetch } from "@/lib/api/server";
 
 import { ErrorPageHeader } from "@/app/(app)/app/components/ErrorPageHeader";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
+import { HashScrollOnMount } from "../components/HashScrollOnMount";
 import { PageWrapper } from "../components/PageWrapper";
 import { PreferencesCard } from "./components/PreferencesCard";
 import { TagsSection } from "./components/TagsSection";
@@ -19,7 +20,10 @@ import type { SupportedLocale } from "@bondery/translations";
 import { buildAvatarQueryString } from "@/lib/avatarParams";
 import { API_URL } from "@/lib/config";
 
-export const metadata: Metadata = { title: "Settings" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("SettingsPage");
+  return { title: t("Title") };
+}
 
 export default async function SettingsPage() {
   const [response, tagsResponse, personResponse, subscriptionResponse, apiKeysResponse] =
@@ -82,6 +86,7 @@ export default async function SettingsPage() {
 
   return (
     <PageWrapper>
+      <HashScrollOnMount />
       <ErrorPageHeader iconType="settings" title={t("Title")} />
       <Stack gap="xl">
         <SupportCard />

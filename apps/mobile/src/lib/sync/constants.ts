@@ -10,6 +10,7 @@ export const SYNC_META_KEYS = {
   deviceId: "device_id",
   clientSequenceCounter: "client_sequence_counter",
   lastServerSequence: "last_server_sequence",
+  bootstrapCompleted: "bootstrap_completed",
   sqliteSchemaVersion: "sqlite_schema_version",
 } as const;
 

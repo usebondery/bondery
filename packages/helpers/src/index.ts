@@ -17,6 +17,8 @@ export {
   IMPORTANT_DATE_TYPE_META,
 } from "#globals/index.js";
 
+export { docHref, DOC_LINKS, type DocId } from "#docs/index.js";
+
 export { parseInstagramUsername, linkedinCompanyUrl, extractLinkedinId } from "#platform/index.js";
 export type { ParseInstagramUsernameInput, ParsedInstagramName } from "#platform/index.js";
 
@@ -65,12 +67,19 @@ export {
   normalizePhoneSocialValue,
   normalizeWebsiteUrl,
   processContactSocialFieldValue,
+  resolveContactSocialFieldCommit,
+  analyzeSocialFieldInput,
   socialPlatforms,
 } from "#socials/index.js";
 export type {
+  AnalyzeSocialFieldInputOptions,
+  AnalyzeSocialFieldInputResult,
+  ContactSocialFieldCommitAction,
+  ContactSocialFieldCommitErrorCode,
   ContactSocialFieldKey,
   ContactSocialPlatform,
   ProcessContactSocialFieldResult,
+  SocialInputRerouteReason,
   SocialPlatformConfig,
 } from "#socials/index.js";
 

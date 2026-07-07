@@ -9,13 +9,12 @@ import {
   Stack,
   Text,
   TextInput,
-  Button,
 } from "@mantine/core";
 import { schemaResolver, useForm } from "@mantine/form";
 import { modals } from "@mantine/modals";
 import { notifications } from "@mantine/notifications";
 import { flushSync } from "react-dom";
-import { IconTag, IconTagMinus, IconTagPlus, IconTrash } from "@tabler/icons-react";
+import { IconTag, IconTagPlus, IconTrash } from "@tabler/icons-react";
 import { createTagSchema, type Contact, type ContactPreview, type TagWithCount } from "@bondery/schemas";
 import {
   errorNotificationTemplate,
@@ -396,32 +395,19 @@ function TagEditorModalBody({
           )}
         </Stack>
 
-        <Group justify="space-between" mt="md">
-          {mode === "edit" ? (
-            <Button
-              variant="light"
-              color="red"
-              leftSection={<IconTagMinus size={16} />}
-              onClick={requestDelete}
-              disabled={isSubmitting}
-            >
-              {t("DeleteButton")}
-            </Button>
-          ) : (
-            <span />
-          )}
-
-          <ModalFooter
-            cancelLabel={t("CancelButton")}
-            onCancel={() => modals.close(modalId)}
-            cancelDisabled={isSubmitting}
-            actionLabel={mode === "create" ? t("CreateButton") : t("SaveButton")}
-            actionLeftSection={mode === "create" ? <IconTagPlus size={16} /> : undefined}
-            actionLoading={isSubmitting}
-            actionDisabled={isSubmitting || !form.values.label.trim() || !form.values.color.trim()}
-            actionType="submit"
-          />
-        </Group>
+        <ModalFooter
+          dangerLabel={mode === "edit" ? t("DeleteButton") : undefined}
+          onDanger={mode === "edit" ? requestDelete : undefined}
+          dangerDisabled={isSubmitting}
+          cancelLabel={t("CancelButton")}
+          onCancel={() => modals.close(modalId)}
+          cancelDisabled={isSubmitting}
+          actionLabel={mode === "create" ? t("CreateButton") : t("SaveButton")}
+          actionLeftSection={mode === "create" ? <IconTagPlus size={16} /> : undefined}
+          actionLoading={isSubmitting}
+          actionDisabled={isSubmitting || !form.values.label.trim() || !form.values.color.trim()}
+          actionType="submit"
+        />
       </Stack>
     </form>
   );
@@ -444,7 +430,7 @@ export function openTagEditorModal(options: OpenTagEditorModalOptions) {
         }
       />
     ),
-    size: "lg",
+    size: "md",
     centered: true,
     children: <TagEditorModalBody modalId={modalId} {...options} />,
   });

@@ -1,7 +1,7 @@
 import type { Tag } from "@bondery/schemas";
 import { TAG_SELECT } from "../../lib/queries.js";
 import { withPersonTxid } from "../_shared/with-txid.js";
-import { DomainError, type DomainContext } from "../_shared/context.js";
+import { DomainError, syncEmitMetaFromContext, type DomainContext } from "../_shared/context.js";
 import {
   buildPeopleTagChange,
   findPeopleTagId,
@@ -38,7 +38,7 @@ export async function addContactTag(
   const { txid } = await withPersonTxid(client, user.id, async () => ({ personId }));
   const tagChange = await buildPeopleTagChange(client, user.id, personId, tagId);
   const changes = tagChange ? [tagChange] : [];
-  const serverSequence = (await emitSyncBatch(user.id, changes)) ?? 0;
+  const serverSequence = (await emitSyncBatch(user.id, changes, syncEmitMetaFromContext(ctx))) ?? 0;
   return { data: { tag: tag as Tag, personId }, txid, serverSequence };
 }
 
@@ -67,6 +67,6 @@ export async function removeContactTag(
     peopleTagId ?
       [{ table: "people_tags" as const, operation: "delete" as const, entityId: peopleTagId, value: null }]
     : [];
-  const serverSequence = (await emitSyncBatch(user.id, changes)) ?? 0;
+  const serverSequence = (await emitSyncBatch(user.id, changes, syncEmitMetaFromContext(ctx))) ?? 0;
   return { data: { personId, tagId }, txid, serverSequence };
 }

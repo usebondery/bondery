@@ -24,6 +24,24 @@ export const tagSortOrderPreferenceSchema = z.enum([
   "alpha-desc",
 ]);
 
+export const importFollowupStatusSchema = z.enum(["awaiting_export", "dismissed"]);
+export const importFollowupPlatformSchema = z.enum(["linkedin", "instagram"]);
+
+export const updateImportFollowupBodySchema = z
+  .object({
+    status: importFollowupStatusSchema,
+    platform: importFollowupPlatformSchema.optional(),
+  })
+  .superRefine((body, ctx) => {
+    if (body.status === "awaiting_export" && !body.platform) {
+      ctx.addIssue({
+        code: "custom",
+        message: "platform is required when status is awaiting_export",
+        path: ["platform"],
+      });
+    }
+  });
+
 const mutableUserSettingsInputSchema = z.object({
   timezone: z.string().nullable(),
   reminderSendHour: reminderSendHourSchema,
@@ -55,6 +73,10 @@ export const userSettingsSchema = z.object({
   ...mutableUserSettingsSchema.shape,
   avatarUrl: z.string().nullable(),
   onboardingCompletedAt: nullableDateTimeSchema,
+  importFollowupStatus: importFollowupStatusSchema.nullable().optional(),
+  importFollowupPlatform: importFollowupPlatformSchema.nullable().optional(),
+  importCompletedAt: nullableDateTimeSchema.optional(),
+  gettingStartedDismissedAt: nullableDateTimeSchema.optional(),
   aiMessagesUsed: z.number().optional(),
 });
 
@@ -135,3 +157,6 @@ export type UpdateUserSettingsInput = z.infer<typeof updateUserSettingsInputSche
 export type AuthUser = z.infer<typeof authUserSchema>;
 export type UserAccountResponse = z.infer<typeof userAccountResponseSchema>;
 export type UpdateAccountInput = z.infer<typeof updateAccountInputSchema>;
+export type ImportFollowupStatus = z.infer<typeof importFollowupStatusSchema>;
+export type ImportFollowupPlatform = z.infer<typeof importFollowupPlatformSchema>;
+export type UpdateImportFollowupBody = z.infer<typeof updateImportFollowupBodySchema>;

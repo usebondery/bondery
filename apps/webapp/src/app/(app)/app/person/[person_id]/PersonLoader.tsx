@@ -5,12 +5,12 @@ import type {
   ContactRelationshipWithPeople,
   Group,
   ImportantDate,
+  LinkedInDataResponse,
   MergeRecommendation,
   Tag,
   WorkHistoryEntry,
   EducationEntry,
 } from "@bondery/schemas";
-import { createContactDetailQueryFn } from "@/lib/query/fetchers/serverQueryFns";
 import { contactKeys } from "@/lib/query/keys";
 import { getQueryClient } from "@/lib/query/client";
 import PersonClient from "./PersonClient";
@@ -40,14 +40,20 @@ export async function PersonLoader({
   personId,
   initialTab,
   myselfMode,
+  initialContact,
   ...personClientProps
 }: PersonLoaderProps) {
   const queryClient = getQueryClient();
 
-  await queryClient.prefetchQuery({
-    queryKey: contactKeys.detail(personId),
-    queryFn: createContactDetailQueryFn(personId),
-  });
+  queryClient.setQueryData(contactKeys.detail(personId), initialContact);
+
+  const linkedInInitialData: LinkedInDataResponse = {
+    workHistory: personClientProps.initialWorkHistory,
+    education: personClientProps.initialEducation,
+    linkedinBio: personClientProps.initialLinkedinBio ?? null,
+    syncedAt: personClientProps.initialSyncedAt ?? null,
+  };
+  queryClient.setQueryData(contactKeys.linkedin(personId), linkedInInitialData);
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
@@ -55,6 +61,7 @@ export async function PersonLoader({
         personId={personId}
         initialTab={initialTab}
         myselfMode={myselfMode}
+        initialContact={initialContact}
         {...personClientProps}
       />
     </HydrationBoundary>

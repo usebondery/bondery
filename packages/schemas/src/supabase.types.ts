@@ -1,4 +1,4 @@
-﻿export type Json =
+export type Json =
   | string
   | number
   | boolean
@@ -7,6 +7,31 @@
   | Json[]
 
 export type Database = {
+  graphql_public: {
+    Tables: {
+      [_ in never]: never
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      graphql: {
+        Args: {
+          extensions?: Json
+          operationName?: string
+          query?: string
+          variables?: Json
+        }
+        Returns: Json
+      }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
   public: {
     Tables: {
       api_keys: {
@@ -1063,33 +1088,6 @@ export type Database = {
         }
         Relationships: []
       }
-      tags: {
-        Row: {
-          color: string | null
-          created_at: string
-          id: string
-          label: string
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          color?: string | null
-          created_at?: string
-          id?: string
-          label: string
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          color?: string | null
-          created_at?: string
-          id?: string
-          label?: string
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
       sync_change_log: {
         Row: {
           change_index: number
@@ -1168,6 +1166,33 @@ export type Database = {
         }
         Relationships: []
       }
+      tags: {
+        Row: {
+          color: string | null
+          created_at: string
+          id: string
+          label: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string
+          id?: string
+          label: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          color?: string | null
+          created_at?: string
+          id?: string
+          label?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_settings: {
         Row: {
           ai_messages_month_reset_at: string
@@ -1175,8 +1200,12 @@ export type Database = {
           ai_messages_used: number
           color_scheme: Database["public"]["Enums"]["color_scheme"]
           created_at: string
+          getting_started_dismissed_at: string | null
           group_sort_order: string
           id: string
+          import_completed_at: string | null
+          import_followup_platform: string | null
+          import_followup_status: string | null
           is_admin: boolean
           language: string | null
           left_swipe_action: string
@@ -1196,8 +1225,12 @@ export type Database = {
           ai_messages_used?: number
           color_scheme?: Database["public"]["Enums"]["color_scheme"]
           created_at?: string
+          getting_started_dismissed_at?: string | null
           group_sort_order?: string
           id?: string
+          import_completed_at?: string | null
+          import_followup_platform?: string | null
+          import_followup_status?: string | null
           is_admin?: boolean
           language?: string | null
           left_swipe_action?: string
@@ -1217,8 +1250,12 @@ export type Database = {
           ai_messages_used?: number
           color_scheme?: Database["public"]["Enums"]["color_scheme"]
           created_at?: string
+          getting_started_dismissed_at?: string | null
           group_sort_order?: string
           id?: string
+          import_completed_at?: string | null
+          import_followup_platform?: string | null
+          import_followup_status?: string | null
           is_admin?: boolean
           language?: string | null
           left_swipe_action?: string
@@ -1239,6 +1276,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      allocate_sync_server_sequence: {
+        Args: { p_count?: number; p_user_id: string }
+        Returns: number
+      }
       authenticate_api_key: {
         Args: { p_key_id: string; p_provided_hash: string }
         Returns: {
@@ -1247,6 +1288,10 @@ export type Database = {
           permission: string
           user_id: string
         }[]
+      }
+      bump_person_updated_at_for_sync: {
+        Args: { p_person_id: string; p_user_id: string }
+        Returns: string
       }
       check_and_increment_ai_messages: {
         Args: { p_is_premium: boolean; p_limit: number; p_user_id: string }
@@ -1265,6 +1310,18 @@ export type Database = {
         }
         Returns: string
       }
+      count_search_people_ids: {
+        Args: {
+          p_group_id?: string
+          p_keep_in_touch?: boolean
+          p_query: string
+          p_tag_id?: string
+          p_threshold?: number
+          p_user_id: string
+        }
+        Returns: number
+      }
+      get_current_sync_txid: { Args: never; Returns: string }
       get_funnel_periods: {
         Args: never
         Returns: {
@@ -1348,10 +1405,6 @@ export type Database = {
           total: number
         }[]
       }
-      allocate_sync_server_sequence: {
-        Args: { p_count?: number; p_user_id: string }
-        Returns: number
-      }
       get_user_id_by_email: { Args: { p_email: string }; Returns: string }
       get_user_settings_is_admin: {
         Args: { p_row_id: string }
@@ -1370,33 +1423,37 @@ export type Database = {
         Args: { p_people_linkedin_id: string; p_rows: Json; p_user_id: string }
         Returns: undefined
       }
-      search_people_ids: {
-        Args: {
-          p_group_id?: string
-          p_keep_in_touch?: boolean
-          p_limit?: number
-          p_offset?: number
-          p_query: string
-          p_tag_id?: string
-          p_threshold?: number
-          p_user_id: string
-        }
-        Returns: {
-          id: string
-          rank: number
-        }[]
-      }
-      count_search_people_ids: {
-        Args: {
-          p_group_id?: string
-          p_keep_in_touch?: boolean
-          p_query: string
-          p_tag_id?: string
-          p_threshold?: number
-          p_user_id: string
-        }
-        Returns: number
-      }
+      search_people_ids:
+        | {
+            Args: {
+              p_group_id?: string
+              p_keep_in_touch?: boolean
+              p_limit?: number
+              p_offset?: number
+              p_query: string
+              p_tag_id?: string
+              p_threshold?: number
+              p_user_id: string
+            }
+            Returns: {
+              id: string
+              rank: number
+            }[]
+          }
+        | {
+            Args: {
+              p_group_id?: string
+              p_limit?: number
+              p_offset?: number
+              p_query: string
+              p_threshold?: number
+              p_user_id: string
+            }
+            Returns: {
+              id: string
+              rank: number
+            }[]
+          }
       send_daily_reminder_digests: {
         Args: { target_date?: string }
         Returns: Json
@@ -1539,6 +1596,9 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
+  graphql_public: {
+    Enums: {},
+  },
   public: {
     Enums: {
       color_scheme: ["light", "dark", "auto"],

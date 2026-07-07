@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { browser } from "wxt/browser";
 import { config } from "../config";
 import { WEBAPP_ROUTES } from "@bondery/helpers";
@@ -35,11 +35,7 @@ export default function PopupApp() {
   const [loginLoading, setLoginLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    checkAuthAndPreview();
-  }, [checkAuthAndPreview]);
-
-  async function checkAuthAndPreview() {
+  const checkAuthAndPreview = useCallback(async () => {
     try {
       // Check if an update is required before proceeding
       const versionResponse: VersionCheckResponse = await browser.runtime.sendMessage({
@@ -114,7 +110,11 @@ export default function PopupApp() {
       console.error("[popup] Init error:", err);
       setState("logged-out");
     }
-  }
+  }, []);
+
+  useEffect(() => {
+    void checkAuthAndPreview();
+  }, [checkAuthAndPreview]);
 
   async function handleLogin() {
     setLoginLoading(true);

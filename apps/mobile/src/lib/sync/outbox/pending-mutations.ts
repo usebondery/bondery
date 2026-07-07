@@ -3,7 +3,7 @@ import type { SyncMutation } from "@bondery/schemas/sync";
 import { getSyncDatabase } from "../db";
 import { SYNC_META_KEYS } from "../constants";
 import { normalizeSyncDatetime } from "../sync-datetime";
-import { generateUuid, isValidUuid } from "../uuid";
+import { generateUuid, isValidUuid } from "../ids";
 
 function getMeta(db: SQLiteDatabase, key: string): string | null {
   const row = db.getFirstSync<{ value: string }>(
@@ -153,4 +153,14 @@ export function getLastServerSequence(): number {
   const raw = getMeta(db, SYNC_META_KEYS.lastServerSequence);
   const parsed = raw ? Number(raw) : 0;
   return Number.isFinite(parsed) ? parsed : 0;
+}
+
+export function getBootstrapCompleted(): boolean {
+  const db = getSyncDatabase();
+  return getMeta(db, SYNC_META_KEYS.bootstrapCompleted) === "1";
+}
+
+export function setBootstrapCompleted(completed: boolean): void {
+  const db = getSyncDatabase();
+  setMeta(db, SYNC_META_KEYS.bootstrapCompleted, completed ? "1" : "0");
 }

@@ -1,6 +1,6 @@
 {
   "name": "@bondery/typescript-config",
-  "version": "1.4.2",
+  "version": "1.7.0",
   "private": true,
   "description": "Shared TypeScript configs for the Bondery monorepo (Turborepo compiled-package model)",
   "exports": {

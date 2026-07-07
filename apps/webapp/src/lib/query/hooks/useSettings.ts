@@ -4,7 +4,9 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   completeOnboarding,
   deleteAccount,
+  dismissGettingStarted,
   submitFeedback,
+  updateImportFollowup,
   updateSettings,
 } from "@/lib/api/domains/settings";
 import { settingsKeys } from "@/lib/query/keys";
@@ -45,6 +47,26 @@ export function useCompleteOnboardingMutation() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: completeOnboarding,
+    onSuccess: async () => {
+      await invalidateSettings(queryClient);
+    },
+  });
+}
+
+export function useUpdateImportFollowupMutation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: updateImportFollowup,
+    onSuccess: async () => {
+      await invalidateSettings(queryClient);
+    },
+  });
+}
+
+export function useDismissGettingStartedMutation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: dismissGettingStarted,
     onSuccess: async () => {
       await invalidateSettings(queryClient);
     },

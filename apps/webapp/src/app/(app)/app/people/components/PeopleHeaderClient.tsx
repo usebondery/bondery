@@ -4,11 +4,11 @@ import { Button, Group, Kbd, Text, Tooltip } from "@mantine/core";
 import { IconAddressBook, IconUser, IconUserPlus } from "@tabler/icons-react";
 import { useHotkeys } from "@mantine/hooks";
 import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
-import { useRouter } from "next/navigation";
+import { ButtonLink } from "@bondery/mantine-next";
 import { PageHeader } from "@/app/(app)/app/components/PageHeader";
 import { openAddContactModal } from "./AddContactModal";
 import { peopleSearchActions } from "../../components/PeopleSearchSpotlight";
-import { HOTKEYS, WEBSITE_URL } from "@/lib/config";
+import { HOTKEYS } from "@/lib/config";
 import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 
 /**
@@ -18,7 +18,6 @@ import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
  */
 export function PeopleHeaderClient() {
   const t = useTranslations("PeoplePage");
-  const router = useRouter();
 
   useHotkeys([
     [HOTKEYS.ADD_PERSON, () => openAddContactModal()],
@@ -29,19 +28,18 @@ export function PeopleHeaderClient() {
     <PageHeader
       icon={IconUser}
       title={t("Title")}
-      helpHref={`${WEBSITE_URL}/docs/concepts/people`}
+      helpDoc="concepts.people"
       helpLabel={t("HeaderDescription")}
       secondaryAction={
-        <Button
+        <ButtonLink
           variant="outline"
           size="md"
+          href={`${WEBAPP_ROUTES.SETTINGS}#data-management`}
+          scroll={false}
           leftSection={<IconAddressBook size={16} />}
-          onClick={() =>
-            router.push(`${WEBAPP_ROUTES.SETTINGS}#data-management`)
-          }
         >
           {t("ImportContacts")}
-        </Button>
+        </ButtonLink>
       }
       primaryAction={
         <Tooltip

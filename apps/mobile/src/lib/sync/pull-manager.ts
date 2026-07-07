@@ -6,17 +6,38 @@ import { syncRequestHeaders } from "./constants";
 import { getSyncDatabase } from "./db";
 import { applyBootstrapTables, applySyncBatches } from "./materializer";
 import {
+  getBootstrapCompleted,
   getLastServerSequence,
+  setBootstrapCompleted,
   setLastServerSequence,
 } from "./outbox/pending-mutations";
 import { logSyncPullError, logSyncPullResponse } from "./sync-logger";
+import { shouldSchedulePullOnWake } from "./pull-wake";
 
 type SyncSubscriber = () => void;
+export type SyncPullReason =
+  | "wake"
+  | "reconnect"
+  | "safety"
+  | "foreground"
+  | "background"
+  | "long_poll"
+  | "manual";
+
+type SyncPullMode = "long_poll" | "websocket_wake";
+
+const LONG_POLL_WAIT_MS = 25_000;
+const SAFETY_PULL_INTERVAL_MS = 300_000;
 
 const subscribers = new Set<SyncSubscriber>();
 let pullAbort: AbortController | null = null;
 let pullLoopRunning = false;
-let hasCompletedBootstrap = false;
+let pullMode: SyncPullMode = "long_poll";
+let safetyTimer: ReturnType<typeof setInterval> | null = null;
+
+let pullInFlight: Promise<boolean> | null = null;
+let pullPending = false;
+let wakeDebounceTimer: ReturnType<typeof setTimeout> | null = null;
 
 export function subscribeSyncUpdates(listener: SyncSubscriber): () => void {
   subscribers.add(listener);
@@ -30,11 +51,80 @@ export function notifySyncSubscribers(): void {
 }
 
 export function getHasInitialSyncSnapshot(): boolean {
-  return hasCompletedBootstrap;
+  try {
+    return getBootstrapCompleted();
+  } catch {
+    return false;
+  }
 }
 
 export function resetInitialSyncSnapshot(): void {
-  hasCompletedBootstrap = false;
+  try {
+    setBootstrapCompleted(false);
+  } catch {
+    // Database may not be open during early logout.
+  }
+}
+
+export function setSyncPullMode(mode: SyncPullMode): void {
+  if (pullMode === mode) return;
+  pullMode = mode;
+
+  if (mode === "websocket_wake") {
+    startSafetyTimer();
+  } else {
+    stopSafetyTimer();
+    if (pullAbort && !pullAbort.signal.aborted && !pullLoopRunning) {
+      void pullLoop();
+    }
+  }
+}
+
+export function onSyncWakeEvent(input: {
+  serverSequence: number;
+  sourceDeviceId?: string;
+  myDeviceId?: string;
+}): void {
+  if (
+    !shouldSchedulePullOnWake({
+      serverSequence: input.serverSequence,
+      lastServerSequence: getLastServerSequence(),
+      sourceDeviceId: input.sourceDeviceId,
+      myDeviceId: input.myDeviceId,
+    })
+  ) {
+    return;
+  }
+
+  if (wakeDebounceTimer) {
+    clearTimeout(wakeDebounceTimer);
+  }
+
+  wakeDebounceTimer = setTimeout(() => {
+    wakeDebounceTimer = null;
+    void schedulePull({ reason: "wake" });
+  }, 50);
+}
+
+export function onSyncWakeReconnect(): void {
+  void schedulePull({ reason: "reconnect" });
+}
+
+export function schedulePull(input: { reason: SyncPullReason }): Promise<boolean> {
+  if (pullInFlight) {
+    pullPending = true;
+    return pullInFlight;
+  }
+
+  pullInFlight = pullOnce(pullAbort?.signal, input.reason).finally(() => {
+    pullInFlight = null;
+    if (pullPending) {
+      pullPending = false;
+      void schedulePull({ reason: input.reason });
+    }
+  });
+
+  return pullInFlight;
 }
 
 async function getAccessToken(): Promise<string | null> {
@@ -70,21 +160,26 @@ export async function bootstrapSync(signal?: AbortSignal): Promise<void> {
   getSyncDatabase();
   applyBootstrapTables(payload.tables);
   setLastServerSequence(payload.nextServerSequence);
-  hasCompletedBootstrap = true;
+  setBootstrapCompleted(true);
   notifySyncSubscribers();
 }
 
-export async function pullOnce(signal?: AbortSignal): Promise<boolean> {
-  const since = getLastServerSequence();
-  if (since === 0) {
+export async function pullOnce(
+  signal?: AbortSignal,
+  reason: SyncPullReason = "manual",
+): Promise<boolean> {
+  if (!getHasInitialSyncSnapshot()) {
     await bootstrapSync(signal);
     return true;
   }
 
+  const since = getLastServerSequence();
+  const waitMs = pullMode === "long_poll" ? LONG_POLL_WAIT_MS : 0;
+
   const query = new URLSearchParams({
     since: String(since),
     limit: "100",
-    waitMs: "25000",
+    waitMs: String(waitMs),
   });
 
   const payload = await syncFetch<SyncPullResponse>(
@@ -92,7 +187,7 @@ export async function pullOnce(signal?: AbortSignal): Promise<boolean> {
     signal,
   );
 
-  logSyncPullResponse(payload.batches.length, payload.nextServerSequence);
+  logSyncPullResponse(payload.batches.length, payload.nextServerSequence, reason);
 
   if (payload.requiresBootstrap) {
     await bootstrapSync(signal);
@@ -109,7 +204,7 @@ export async function pullOnce(signal?: AbortSignal): Promise<boolean> {
   getSyncDatabase();
   applySyncBatches(payload.batches);
   setLastServerSequence(payload.nextServerSequence);
-  hasCompletedBootstrap = true;
+  setBootstrapCompleted(true);
   notifySyncSubscribers();
   return true;
 }
@@ -119,9 +214,9 @@ async function pullLoop(): Promise<void> {
   pullLoopRunning = true;
 
   try {
-    while (pullAbort && !pullAbort.signal.aborted) {
+    while (pullAbort && !pullAbort.signal.aborted && pullMode === "long_poll") {
       try {
-        await pullOnce(pullAbort.signal);
+        await pullOnce(pullAbort.signal, "long_poll");
       } catch (error) {
         if (pullAbort.signal.aborted) break;
         logSyncPullError(error);
@@ -133,12 +228,26 @@ async function pullLoop(): Promise<void> {
   }
 }
 
+function startSafetyTimer(): void {
+  stopSafetyTimer();
+  safetyTimer = setInterval(() => {
+    void schedulePull({ reason: "safety" });
+  }, SAFETY_PULL_INTERVAL_MS);
+}
+
+function stopSafetyTimer(): void {
+  if (safetyTimer) {
+    clearInterval(safetyTimer);
+    safetyTimer = null;
+  }
+}
+
 export async function startPullSync(): Promise<void> {
   await stopPullSync();
   pullAbort = new AbortController();
   getSyncDatabase();
 
-  if (getLastServerSequence() === 0) {
+  if (!getHasInitialSyncSnapshot()) {
     try {
       await bootstrapSync(pullAbort.signal);
     } catch (error) {
@@ -146,19 +255,27 @@ export async function startPullSync(): Promise<void> {
     }
   }
 
-  void pullLoop();
+  if (pullMode === "long_poll") {
+    void pullLoop();
+  } else {
+    startSafetyTimer();
+  }
 }
 
 export async function stopPullSync(): Promise<void> {
   pullAbort?.abort();
   pullAbort = null;
+  stopSafetyTimer();
+  if (wakeDebounceTimer) {
+    clearTimeout(wakeDebounceTimer);
+    wakeDebounceTimer = null;
+  }
 }
 
 export function resumePullSync(): void {
   void startPullSync();
 }
 
-// Legacy aliases for background task and imports
 export const startAllShapeSync = startPullSync;
 export const stopAllShapeSync = stopPullSync;
 export const resumeAllShapeSync = resumePullSync;

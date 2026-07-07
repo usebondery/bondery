@@ -19,6 +19,7 @@ import { notifications } from "@mantine/notifications";
 import { IconArrowLeft, IconArrowMerge, IconArrowRight, IconCheck } from "@tabler/icons-react";
 import {
   ModalFooter,
+  ModalScrollLayout,
   PersonChip,
   errorNotificationTemplate,
   loadingNotificationTemplate,
@@ -690,8 +691,33 @@ function MergeWithModal({
       ) : null}
 
       {step === "resolve" ? (
-        <Stack gap="sm">
-          {(() => {
+        <ModalScrollLayout
+          footer={
+            <ModalFooter
+              mt={0}
+              {...(shouldSkipPickStep
+                ? {}
+                : {
+                    backLabel: t("Back"),
+                    backLeftSection: <IconArrowLeft size={16} />,
+                    onBack: () => setStep("pick"),
+                    backDisabled: isSubmitting,
+                  })}
+              cancelLabel={t("Cancel")}
+              onCancel={() => modals.close(modalId)}
+              cancelDisabled={isSubmitting}
+              actionLabel={t("Merge")}
+              onAction={() => {
+                void handleMerge();
+              }}
+              actionLeftSection={<IconArrowMerge size={16} />}
+              actionLoading={isSubmitting}
+              actionDisabled={isSubmitting}
+            />
+          }
+        >
+          <Stack gap="sm">
+            {(() => {
             // Show avatar picker when the user is explicitly in the resolve step
             // (not the auto-merge fast path where shouldSkipPickStep && no field conflicts)
             const showAvatarPicker =
@@ -798,29 +824,9 @@ function MergeWithModal({
                 })()}
               </Stack>
             );
-          })()}
-
-          <ModalFooter
-            {...(shouldSkipPickStep
-              ? {}
-              : {
-                  backLabel: t("Back"),
-                  backLeftSection: <IconArrowLeft size={16} />,
-                  onBack: () => setStep("pick"),
-                  backDisabled: isSubmitting,
-                })}
-            cancelLabel={t("Cancel")}
-            onCancel={() => modals.close(modalId)}
-            cancelDisabled={isSubmitting}
-            actionLabel={t("Merge")}
-            onAction={() => {
-              void handleMerge();
-            }}
-            actionLeftSection={<IconArrowMerge size={16} />}
-            actionLoading={isSubmitting}
-            actionDisabled={isSubmitting}
-          />
-        </Stack>
+            })()}
+          </Stack>
+        </ModalScrollLayout>
       ) : null}
 
       {step === "processing" ? (

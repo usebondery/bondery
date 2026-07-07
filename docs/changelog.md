@@ -2,6 +2,50 @@
 
 All notable changes to this project are documented in this file. For format and commit prefixes, see [changelog instructions](../.github/instructions/changelog.instructions.md).
 
+## [1.7.0] - 07.07.2026
+
+### ✨ Added
+
+- AI Assistant chat workspace with session history, premium monthly quota enforcement, and billing-aligned resets.
+- Real-time sync wake: WebSocket notifications push remote changes to web and mobile clients without polling-only refresh.
+- Getting Started progress rail on the home page with import follow-up onboarding step.
+- Social field editor on person pages: inline popover inputs for handles and phones with reroute nudges when a value belongs on another field.
+- `HelpButton` component in `@bondery/mantine-next` for consistent in-app documentation affordances.
+- Stable doc link registry (`docId` frontmatter → `docHref()`) with CI validation for in-app help URLs.
+- Chrome extension: Voyager-primary LinkedIn scrape pipeline (SDUI identity, unified `scrapeProfile` orchestrator) replacing legacy DOM-heavy paths.
+- Chrome extension: background enrich orchestration with session-persisted pending jobs and tab wake messages.
+- Webapp: enrich recommendation card uses live LinkedIn sync state; help link to enrichment docs.
+- Map: fix for `get_map_pins_in_bbox` last-interaction timestamp type mismatch.
+
+### 🐛 Fixed
+
+- Enrich recommendation card stayed visible after successful enrichment until hard reload (SSR `syncedAt` vs live query mismatch).
+- Enrichment ICU toast plural strings (`{# contacts}}` artifact) for single-contact completion.
+- LinkedIn enrichment location: Voyager GraphQL geo is now the sole source (no unreliable topcard DOM fallback).
+- Chrome extension: enrich flow reliability (pending job registration, `RUN_PENDING_ENRICH`, 90s webapp timeout).
+- Fix & Merge page and other areas using frozen SSR props for recommendation visibility.
+
+### 🔄 Changed
+
+- Monorepo package exports and build pipeline refactored for ESM `dist` outputs and Vercel deployment.
+- OpenAPI generation and schema examples reorganized for maintainability.
+- In-app help links migrated from hardcoded `HELP_DOCS_URL` / `WEBSITE_URL/docs` paths to typed `docId` references.
+- Chrome extension LinkedIn work/education extraction slimmed to SDUI + Voyager with legacy paths removed.
+- Mobile sync: shared ID utilities, pull-wake listener, and background sync improvements.
+
+### 📝 Documentation
+
+- Chrome Extension docs: expanded enrichment section (what it means, benefits, user flow, where to find it).
+- Doc authoring guide: `docId` / `docSections` frontmatter workflow for in-app help links.
+
+### 🤖 CI
+
+- `check-doc-links` validates doc registry, local markdown files, anchors, and bans hardcoded doc URL patterns.
+
+### 📦 Dependencies
+
+- Bumped minimum Chrome extension version to 1.7.0.
+
 ## [1.4.2] - 04.04.2026
 
 ### ✨ Added

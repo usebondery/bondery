@@ -213,6 +213,12 @@ export interface EnrichContextResult {
   } | null;
 }
 
+/** Service worker → LinkedIn content script: run pending enrich scrape */
+export interface RunPendingEnrich {
+  type: "RUN_PENDING_ENRICH";
+  payload: { requestId: string };
+}
+
 /** LinkedIn content script → Service worker: scraped data for enrich */
 export interface SubmitEnrichData {
   type: "SUBMIT_ENRICH_DATA";
@@ -280,6 +286,7 @@ export type ExtensionMessage =
   | EnrichError
   | GetEnrichContext
   | EnrichContextResult
+  | RunPendingEnrich
   | SubmitEnrichData
   | EnrichPersonResult
   | VersionCheckRequest

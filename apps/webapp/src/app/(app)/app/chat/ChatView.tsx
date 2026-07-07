@@ -20,7 +20,6 @@ import { ChatQuotaAlert } from "./ChatQuotaAlert";
 import { ChatQuotaBadge } from "./ChatQuotaBadge";
 import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
 import { PageHeader } from "@/app/(app)/app/components/PageHeader";
-import { WEBSITE_URL } from "@/lib/config";
 import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import type { SubscriptionStatus } from "@bondery/schemas";
 import { useChatSessions } from "./ChatSessionsContext";
@@ -204,7 +203,7 @@ export function ChatView({
           <PageHeader
             title={t("title")}
             icon={IconMessageChatbot}
-            helpHref={`${WEBSITE_URL}/docs/concepts/chat`}
+            helpDoc="concepts.chat"
             helpLabel={t("description")}
           />
           <Box style={{ maxWidth: 800, margin: "0 auto", width: "100%" }}>

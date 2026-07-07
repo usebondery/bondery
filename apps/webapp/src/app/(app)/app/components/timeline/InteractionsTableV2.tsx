@@ -23,6 +23,7 @@ import {
   type SortOption,
 } from "@bondery/mantine-next";
 import { getActivityTypeConfig } from "@/lib/activityTypes";
+import { useInteractionTypeLabel } from "@/lib/i18n/useInteractionTypeLabel";
 import type { ReactNode } from "react";
 
 // --- Column Key Types ---
@@ -127,6 +128,7 @@ export function InteractionsTableV2({
   labels,
 }: InteractionsTableV2Props) {
   const locale = useLocale();
+  const getInteractionTypeLabel = useInteractionTypeLabel();
 
   const dateFormatter = useMemo(
     () =>
@@ -234,7 +236,7 @@ export function InteractionsTableV2({
           const typeConfig = getActivityTypeConfig(activity.type);
           return (
             <Badge variant="light" color={typeConfig.color} radius="xl" tt="none">
-              {typeConfig.emoji} {activity.type}
+              {typeConfig.emoji} {getInteractionTypeLabel(activity.type)}
             </Badge>
           );
         }

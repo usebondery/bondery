@@ -1,6 +1,6 @@
 {
   "name": "api",
-  "version": "1.4.2",
+  "version": "1.7.0",
   "private": true,
   "type": "module",
   "description": "Bondery API",
@@ -13,7 +13,7 @@
     "check-openapi": "tsx scripts/check-openapi.ts && tsx scripts/check-api-route-order.ts",
     "check-api-schema-patterns": "tsx scripts/check-api-schema-patterns.ts",
     "check-env": "tsx scripts/check-env.ts",
-    "test:sync": "tsx --test src/lib/sync/build-changes.test.ts",
+    "test:sync": "tsx --test src/lib/sync/build-changes.test.ts src/lib/sync/emit-wake.test.ts src/lib/sync/wake/hub.test.ts src/lib/sync/wake/tickets.test.ts src/lib/sync/wake/in-memory-bus.test.ts",
     "generate-openapi": "tsx scripts/generate-openapi.ts"
   },
   "dependencies": {
@@ -30,6 +30,7 @@
     "@fastify/multipart": "^10.0.0",
     "@fastify/rate-limit": "^11.0.0",
     "@fastify/swagger": "^9.7.0",
+    "@fastify/websocket": "^11.2.0",
     "@polar-sh/sdk": "^0.48.1",
     "@react-email/render": "^2.0.4",
     "@supabase/supabase-js": "^2.99.3",

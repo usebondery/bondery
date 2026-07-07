@@ -34,6 +34,7 @@ import {
 import { useRouter, usePathname } from "next/navigation";
 import { useEffect, useMemo, useState, useCallback, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useInteractionTypeLabel } from "@/lib/i18n/useInteractionTypeLabel";
 import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
 import { extractUsername } from "@bondery/helpers";
 import { parsePhoneNumber, combinePhoneNumber } from "@bondery/helpers/phone";
@@ -71,7 +72,6 @@ import { LinkedInTab } from "./components/LinkedInTab";
 import { useBatchEnrichFromLinkedIn } from "@/lib/extension/useBatchEnrichFromLinkedIn";
 // import { ContactPGPSection } from "./components/ContactPGPSection";
 import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
-import { HELP_DOCS_URL } from "@bondery/helpers";
 import {
   createContactImportantDatesQueryFn,
   createContactRelationshipsQueryFn,
@@ -79,6 +79,7 @@ import {
 import { contactKeys } from "@/lib/query/keys";
 import {
   useContactQuery,
+  useContactLinkedInDataQuery,
   useCreateContactRelationshipMutation,
   useDeleteContactRelationshipMutation,
   usePutContactImportantDatesMutation,
@@ -164,6 +165,19 @@ export default function PersonClient({
   const deleteRelationshipMutation = useDeleteContactRelationshipMutation(personId);
   const putImportantDatesMutation = usePutContactImportantDatesMutation(personId);
   const { data: fetchedContact } = useContactQuery(personId);
+  const linkedInInitialData = useMemo(
+    () => ({
+      workHistory: initialWorkHistory,
+      education: initialEducation,
+      linkedinBio: initialLinkedinBio ?? null,
+      syncedAt: initialSyncedAt ?? null,
+    }),
+    [initialWorkHistory, initialEducation, initialLinkedinBio, initialSyncedAt],
+  );
+  const { data: linkedInData = linkedInInitialData } = useContactLinkedInDataQuery(
+    personId,
+    linkedInInitialData,
+  );
   const { data: relationships = initialRelationships } = useQuery({
     queryKey: contactKeys.relationships(personId),
     queryFn: createContactRelationshipsQueryFn(personId),
@@ -201,6 +215,8 @@ export default function PersonClient({
   const tTabs = useTranslations("PersonTabs");
   const tInteractions = useTranslations("InteractionsPage");
   const tContactInfo = useTranslations("ContactInfo");
+  const tEditGroups = useTranslations("AddPeopleToGroupSelectionModal");
+  const getInteractionTypeLabel = useInteractionTypeLabel();
   const slashCommands = useSlashCommands();
   const slashCommandSuggestion = useMemo(
     () => createSlashCommandSuggestion(slashCommands),
@@ -1222,8 +1238,8 @@ export default function PersonClient({
       <Stack gap="xl">
         <PageHeader
           icon={myselfMode ? IconUserCircle : IconUser}
-          title={myselfMode ? tPersonPage("MyselfPageTitle") : "Person's details"}
-          helpHref={myselfMode ? `${HELP_DOCS_URL}/concepts/myself` : undefined}
+          title={myselfMode ? tPersonPage("MyselfPageTitle") : tPersonPage("DetailsPageTitle")}
+          helpDoc={myselfMode ? "concepts.myself" : undefined}
           helpLabel={myselfMode ? tPersonPage("MyselfPageDescription") : undefined}
           backOnClick={
             myselfMode
@@ -1252,7 +1268,7 @@ export default function PersonClient({
           mergeRecommendation={mergeRecommendation}
           onMergeAccepted={() => setMergeRecommendation(null)}
           onMergeDeclined={() => setMergeRecommendation(null)}
-          showEnrichCard={!!contact.linkedin && !initialSyncedAt}
+          showEnrichCard={!!contact.linkedin && !linkedInData.syncedAt}
           personId={personId}
           linkedinHandle={contact.linkedin ?? null}
         />
@@ -1316,7 +1332,7 @@ export default function PersonClient({
                         <Text size="xs" c="dimmed">
                           {lastInteractionSource.type === "activity"
                             ? tInteractions("LastInteractionViaActivity", {
-                                type: lastInteractionSource.activityType,
+                                type: getInteractionTypeLabel(lastInteractionSource.activityType),
                               })
                             : tInteractions("LastInteractionManual")}
                         </Text>
@@ -1333,7 +1349,7 @@ export default function PersonClient({
                   </Group>
                   <Stack gap="xs">
                     <Text fw={600} size="sm">
-                      Interactions
+                      {tTabs("Interactions")}
                     </Text>
                     <Button
                       variant="light"
@@ -1406,7 +1422,7 @@ export default function PersonClient({
 
                   <Stack gap="xs">
                     <Text size="sm" fw={500}>
-                      Groups
+                      {tTabs("Groups")}
                     </Text>
                     <Group gap="sm" align="flex-start" wrap="wrap">
                       {personGroups.map((group) => (
@@ -1431,7 +1447,7 @@ export default function PersonClient({
 
                       <GroupCard
                         variant="action"
-                        actionLabel="Edit groups"
+                        actionLabel={tEditGroups("Title")}
                         shadow="none"
                         interactive={!groupsSaving}
                         cursorType={groupsSaving ? "default" : "pointer"}
@@ -1444,10 +1460,10 @@ export default function PersonClient({
 
               <Tabs.Panel value="linkedin" pt="md">
                 <LinkedInTab
-                  workHistory={initialWorkHistory}
-                  education={initialEducation}
-                  linkedinBio={initialLinkedinBio}
-                  syncedAt={initialSyncedAt}
+                  workHistory={linkedInData.workHistory}
+                  education={linkedInData.education}
+                  linkedinBio={linkedInData.linkedinBio}
+                  syncedAt={linkedInData.syncedAt}
                   onEnrich={() => startForPerson(personId, contact.linkedin)}
                   enrichLabel={tEnrich("MenuLabel")}
                 />

@@ -6136,6 +6136,7 @@ paths:
               type: object
               properties:
                 contacts:
+                  maxItems: 100
                   type: array
                   items:
                     type: object
@@ -6425,6 +6426,7 @@ paths:
               type: object
               properties:
                 contacts:
+                  maxItems: 100
                   type: array
                   items:
                     type: object
@@ -6866,6 +6868,7 @@ paths:
               type: object
               properties:
                 contacts:
+                  maxItems: 25
                   type: array
                   items:
                     type: object
@@ -10661,6 +10664,103 @@ paths:
                 error: Service unavailable
               schema:
                 $ref: "#/components/schemas/ApiError"
+  /api/me/onboarding/import-followup:
+    patch:
+      tags:
+        - Me
+      description: Record import follow-up intent after onboarding (awaiting export or dismissed).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+                  enum:
+                    - awaiting_export
+                    - dismissed
+                platform:
+                  type: string
+                  enum:
+                    - linkedin
+                    - instagram
+              required:
+                - status
+      security: *a2
+      responses:
+        "200":
+          description: Import follow-up updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                required:
+                  - success
+                additionalProperties: false
+        "400":
+          description: Invalid request
+          content:
+            application/json:
+              example:
+                error: body.email Invalid input
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              example:
+                error: Unauthorized - Please log in
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              example:
+                error: Forbidden
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "404":
+          description: Resource not found
+          content:
+            application/json:
+              example:
+                error: Contact not found
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "429":
+          description: Too many requests
+          content:
+            application/json:
+              example:
+                error: Rate limit exceeded. Retry in 42 seconds.
+                retryAfter: 42
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              example:
+                error: Internal Server Error
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "503":
+          description: Service unavailable
+          content:
+            application/json:
+              example:
+                error: Service unavailable
+              schema:
+                $ref: "#/components/schemas/ApiError"
   /api/me/settings:
     get:
       tags:
@@ -10712,6 +10812,26 @@ paths:
                         nullable: true
                         type: string
                       onboardingCompletedAt:
+                        nullable: true
+                        type: string
+                        pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
+                      importFollowupStatus:
+                        nullable: true
+                        type: string
+                        enum:
+                          - awaiting_export
+                          - dismissed
+                      importFollowupPlatform:
+                        nullable: true
+                        type: string
+                        enum:
+                          - linkedin
+                          - instagram
+                      importCompletedAt:
+                        nullable: true
+                        type: string
+                        pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
+                      gettingStartedDismissedAt:
                         nullable: true
                         type: string
                         pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
@@ -10947,6 +11067,84 @@ paths:
                     rightSwipeAction: email
                     groupSortOrder: alpha-asc
                     tagSortOrder: count-desc
+        "400":
+          description: Invalid request
+          content:
+            application/json:
+              example:
+                error: body.email Invalid input
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              example:
+                error: Unauthorized - Please log in
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              example:
+                error: Forbidden
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "404":
+          description: Resource not found
+          content:
+            application/json:
+              example:
+                error: Contact not found
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "429":
+          description: Too many requests
+          content:
+            application/json:
+              example:
+                error: Rate limit exceeded. Retry in 42 seconds.
+                retryAfter: 42
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              example:
+                error: Internal Server Error
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "503":
+          description: Service unavailable
+          content:
+            application/json:
+              example:
+                error: Service unavailable
+              schema:
+                $ref: "#/components/schemas/ApiError"
+  /api/me/settings/getting-started-dismiss:
+    patch:
+      tags:
+        - Me
+      description: Dismiss the getting-started progress rail on the home page.
+      security: *a2
+      responses:
+        "200":
+          description: Getting started dismissed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                required:
+                  - success
+                additionalProperties: false
         "400":
           description: Invalid request
           content:
@@ -11543,11 +11741,57 @@ paths:
                 properties:
                   tables:
                     type: object
-                    additionalProperties:
-                      type: array
-                      items:
-                        type: object
-                        additionalProperties: {}
+                    properties:
+                      people:
+                        type: array
+                        items:
+                          type: object
+                          additionalProperties: {}
+                      people_phones:
+                        type: array
+                        items:
+                          type: object
+                          additionalProperties: {}
+                      people_emails:
+                        type: array
+                        items:
+                          type: object
+                          additionalProperties: {}
+                      people_addresses:
+                        type: array
+                        items:
+                          type: object
+                          additionalProperties: {}
+                      people_socials:
+                        type: array
+                        items:
+                          type: object
+                          additionalProperties: {}
+                      groups:
+                        type: array
+                        items:
+                          type: object
+                          additionalProperties: {}
+                      people_groups:
+                        type: array
+                        items:
+                          type: object
+                          additionalProperties: {}
+                      tags:
+                        type: array
+                        items:
+                          type: object
+                          additionalProperties: {}
+                      people_tags:
+                        type: array
+                        items:
+                          type: object
+                          additionalProperties: {}
+                      people_important_dates:
+                        type: array
+                        items:
+                          type: object
+                          additionalProperties: {}
                     required:
                       - people
                       - people_phones
@@ -11559,6 +11803,7 @@ paths:
                       - tags
                       - people_tags
                       - people_important_dates
+                    additionalProperties: false
                   nextServerSequence:
                     type: integer
                     minimum: 0
@@ -12603,6 +12848,89 @@ paths:
                   - results
                   - serverTime
                   - nextServerSequence
+                additionalProperties: false
+        "400":
+          description: Invalid request
+          content:
+            application/json:
+              example:
+                error: body.email Invalid input
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              example:
+                error: Unauthorized - Please log in
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              example:
+                error: Forbidden
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "404":
+          description: Resource not found
+          content:
+            application/json:
+              example:
+                error: Contact not found
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "429":
+          description: Too many requests
+          content:
+            application/json:
+              example:
+                error: Rate limit exceeded. Retry in 42 seconds.
+                retryAfter: 42
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              example:
+                error: Internal Server Error
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "503":
+          description: Service unavailable
+          content:
+            application/json:
+              example:
+                error: Service unavailable
+              schema:
+                $ref: "#/components/schemas/ApiError"
+  /api/sync/ws-ticket:
+    get:
+      tags:
+        - Sync
+      description: Issue a short-lived WebSocket ticket for sync wake notifications.
+      security: *a2
+      responses:
+        "200":
+          description: WebSocket ticket
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ticket:
+                    type: string
+                    minLength: 1
+                  expiresAt:
+                    type: integer
+                    minimum: 0
+                    exclusiveMinimum: true
+                    maximum: 9007199254740991
+                required:
+                  - ticket
+                  - expiresAt
                 additionalProperties: false
         "400":
           description: Invalid request

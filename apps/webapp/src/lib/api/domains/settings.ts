@@ -34,6 +34,23 @@ export async function completeOnboarding(): Promise<void> {
   });
 }
 
+export async function updateImportFollowup(body: {
+  status: "awaiting_export" | "dismissed";
+  platform?: "linkedin" | "instagram";
+}): Promise<void> {
+  await clientApiJson(API_ROUTES.ME_ONBOARDING_IMPORT_FOLLOWUP, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+}
+
+export async function dismissGettingStarted(): Promise<void> {
+  await clientApiJson(API_ROUTES.ME_SETTINGS_GETTING_STARTED_DISMISS, {
+    method: "PATCH",
+  });
+}
+
 export async function deleteAccount(): Promise<void> {
   await clientApiJson(API_ROUTES.ME, {
     method: "DELETE",

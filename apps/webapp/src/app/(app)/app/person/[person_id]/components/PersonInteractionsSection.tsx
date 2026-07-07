@@ -99,7 +99,7 @@ export function PersonInteractionsSection({
         }
         return {
           id: participantId,
-          firstName: participant.firstName || "Unknown",
+          firstName: participant.firstName || t("UnknownPerson"),
           lastName: participant.lastName || null,
           avatar: participant.avatar || null,
         } as Contact;

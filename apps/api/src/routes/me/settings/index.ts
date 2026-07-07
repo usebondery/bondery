@@ -21,6 +21,9 @@ import type { TablesUpdate } from "@bondery/schemas";
 import {
   updateSettingsBodySchema,
   userSettingsResponseSchema,
+  apiSuccessResponseSchema,
+  type ImportFollowupPlatform,
+  type ImportFollowupStatus,
 } from "@bondery/schemas";
 import { EXAMPLE_SETTINGS_PATCH_RESPONSE } from "@bondery/schemas/openapi/fixtures/responses";
 import { applyOpenApiRouteMeta } from "../../../lib/openapi-route-meta.js";
@@ -128,6 +131,26 @@ function normalizeReminderSendHour(value: string): string {
   const normalizedSecond = (secondPart || "00").padStart(2, "0");
 
   return `${normalizedHour}:${normalizedMinute}:${normalizedSecond}`;
+}
+
+function parseImportFollowupStatus(
+  value: string | null | undefined,
+): ImportFollowupStatus | null {
+  if (value === "awaiting_export" || value === "dismissed") {
+    return value;
+  }
+
+  return null;
+}
+
+function parseImportFollowupPlatform(
+  value: string | null | undefined,
+): ImportFollowupPlatform | null {
+  if (value === "linkedin" || value === "instagram") {
+    return value;
+  }
+
+  return null;
 }
 
 function getAccountAvatarFileName(userId: string): string {
@@ -369,6 +392,14 @@ export const meSettingsRoutes: AppRoutePlugin = async (fastify) => {
         tagSortOrder: resolvedSettings.tag_sort_order ?? DEFAULT_TAG_SORT_ORDER,
         avatarUrl: resolvedAvatarUrl,
         onboardingCompletedAt: resolvedSettings.onboarding_completed_at ?? null,
+        importFollowupStatus: parseImportFollowupStatus(
+          resolvedSettings.import_followup_status,
+        ),
+        importFollowupPlatform: parseImportFollowupPlatform(
+          resolvedSettings.import_followup_platform,
+        ),
+        importCompletedAt: resolvedSettings.import_completed_at ?? null,
+        gettingStartedDismissedAt: resolvedSettings.getting_started_dismissed_at ?? null,
         aiMessagesUsed: resolvedSettings.ai_messages_used ?? 0,
         email: userData?.user?.email,
         providers: userData?.user?.app_metadata?.providers || [],
@@ -501,6 +532,34 @@ export const meSettingsRoutes: AppRoutePlugin = async (fastify) => {
         success: true,
         data: formatSettingsPatchData(result),
       };
+    },
+  );
+
+  /**
+   * PATCH /api/me/settings/getting-started-dismiss - Dismiss the home getting-started rail
+   */
+  fastify.patch(
+    "/getting-started-dismiss",
+    {
+      schema: {
+        description: "Dismiss the getting-started progress rail on the home page.",
+        response: withOkResponse(apiSuccessResponseSchema, "Getting started dismissed"),
+      } satisfies FastifyZodOpenApiSchema,
+    },
+    async (request, reply) => {
+      const { client, user } = getAuth(request);
+
+      const { error } = await client
+        .from("user_settings")
+        .update({ getting_started_dismissed_at: new Date().toISOString() })
+        .eq("user_id", user.id);
+
+      if (error) {
+        request.log.error({ error }, "[settings] Failed to dismiss getting started");
+        return reply.status(500).send({ error: "Failed to dismiss getting started" });
+      }
+
+      return { success: true };
     },
   );
 }

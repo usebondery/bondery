@@ -7,7 +7,7 @@ import { notifications } from "@mantine/notifications";
 import { IconAlertTriangle, IconFileText, IconKey } from "@tabler/icons-react";
 import type { ApiKeyCreated, ApiKeyPermission } from "@bondery/schemas";
 import { API_KEY_LIMITS } from "@bondery/schemas";
-import { HELP_DOCS_URL } from "@bondery/helpers/globals/paths";
+import { docHref } from "@bondery/helpers";
 import {
   CodeBlock,
   DescribedSelect,
@@ -41,7 +41,7 @@ function ApiKeyModalBody({ modalId, t, onCreated, apiBaseUrl }: ApiKeyModalBodyP
 
   const createMutation = useCreateApiKeyMutation();
   const permissionOptions = buildApiKeyPermissionOptions(t);
-  const docsUrl = `${HELP_DOCS_URL}/api/authentication`;
+  const docsUrl = docHref("api.authentication");
   const os = useOs();
   const defaultTestSnippetId = resolveDefaultTestSnippetId(os);
 

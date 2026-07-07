@@ -10,6 +10,7 @@ import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslat
 import { SelectableCard } from "@/app/(app)/app/components/SelectableCard";
 import {
   ModalFooter,
+  ModalScrollLayout,
   ModalTitle,
   errorNotificationTemplate,
   successNotificationTemplate,
@@ -267,70 +268,10 @@ function ShareContactModalContent({ contact, modalId }: { contact: Contact; moda
   const contactName = [contact.firstName, contact.lastName].filter(Boolean).join(" ");
 
   return (
-    <form onSubmit={form.onSubmit(handleSubmit)}>
-      <Stack gap="md">
-        <TagsInput
-          label={tShare("RecipientsLabel")}
-          placeholder={form.values.recipientEmails.length > 0 ? "" : tShare("RecipientsPlaceholder")}
-          value={form.values.recipientEmails}
-          onChange={(values) => form.setFieldValue("recipientEmails", values)}
-          error={form.errors.recipientEmails}
-          required
-          data-autofocus
-          splitChars={[",", " "]}
-          clearable
-        />
-
-        <Textarea
-          label={tShare("MessageLabel")}
-          placeholder={tShare("MessagePlaceholder")}
-          value={form.values.message}
-          onChange={(e) => form.setFieldValue("message", e.currentTarget.value)}
-          rows={3}
-        />
-
-        <Tooltip label={tShare("SendCopyTooltip")} withArrow>
-          <Checkbox label={tShare("SendCopyCheckbox")} checked disabled onChange={() => {}} />
-        </Tooltip>
-
-        <Text fw={500} size="sm">
-          {tShare("SelectFieldsLabel")}
-        </Text>
-
-        <SimpleGrid cols={{ base: 2, sm: 3 }} spacing="xs">
-          {availableFields.map((field) => {
-            const isRequiredField = REQUIRED_FIELDS.includes(field);
-
-            return (
-              <Tooltip
-                key={field}
-                label={
-                  field === "avatar"
-                    ? tShare("AvatarRequiredTooltip")
-                    : tShare("RequiredFieldTooltip")
-                }
-                disabled={!isRequiredField}
-                withArrow
-              >
-                <div>
-                  <SelectableCard
-                    label={tShare(`Fields.${field}`)}
-                    description={
-                      field === "avatar"
-                        ? tShare("AvatarDescription", { name: contactName })
-                        : getFieldPreview(contact, field) || undefined
-                    }
-                    selected={selectedFields.has(field)}
-                    disabled={isRequiredField}
-                    onClick={() => toggleField(field)}
-                  />
-                </div>
-              </Tooltip>
-            );
-          })}
-        </SimpleGrid>
-
+    <ModalScrollLayout
+      footer={
         <ModalFooter
+          mt={0}
           cancelLabel={tShare("CancelButton")}
           onCancel={() => modals.close(modalId)}
           cancelDisabled={isSubmitting}
@@ -341,12 +282,77 @@ function ShareContactModalContent({ contact, modalId }: { contact: Contact; moda
                 ? tShare("SubmitButtonWithCount", { count: form.values.recipientEmails.length })
                 : tShare("SubmitButton")
           }
-          actionType="submit"
+          onAction={() => form.onSubmit(handleSubmit)()}
           actionLoading={isSubmitting}
           actionDisabled={isSubmitting}
           actionLeftSection={<IconSend2 size={16} />}
         />
-      </Stack>
-    </form>
+      }
+    >
+        <Stack gap="md">
+          <TagsInput
+            label={tShare("RecipientsLabel")}
+            placeholder={
+              form.values.recipientEmails.length > 0 ? "" : tShare("RecipientsPlaceholder")
+            }
+            value={form.values.recipientEmails}
+            onChange={(values) => form.setFieldValue("recipientEmails", values)}
+            error={form.errors.recipientEmails}
+            required
+            data-autofocus
+            splitChars={[",", " "]}
+            clearable
+          />
+
+          <Textarea
+            label={tShare("MessageLabel")}
+            placeholder={tShare("MessagePlaceholder")}
+            value={form.values.message}
+            onChange={(e) => form.setFieldValue("message", e.currentTarget.value)}
+            rows={3}
+          />
+
+          <Tooltip label={tShare("SendCopyTooltip")} withArrow>
+            <Checkbox label={tShare("SendCopyCheckbox")} checked disabled onChange={() => {}} />
+          </Tooltip>
+
+          <Text fw={500} size="sm">
+            {tShare("SelectFieldsLabel")}
+          </Text>
+
+          <SimpleGrid cols={{ base: 2, sm: 3 }} spacing="xs">
+            {availableFields.map((field) => {
+              const isRequiredField = REQUIRED_FIELDS.includes(field);
+
+              return (
+                <Tooltip
+                  key={field}
+                  label={
+                    field === "avatar"
+                      ? tShare("AvatarRequiredTooltip")
+                      : tShare("RequiredFieldTooltip")
+                  }
+                  disabled={!isRequiredField}
+                  withArrow
+                >
+                  <div>
+                    <SelectableCard
+                      label={tShare(`Fields.${field}`)}
+                      description={
+                        field === "avatar"
+                          ? tShare("AvatarDescription", { name: contactName })
+                          : getFieldPreview(contact, field) || undefined
+                      }
+                      selected={selectedFields.has(field)}
+                      disabled={isRequiredField}
+                      onClick={() => toggleField(field)}
+                    />
+                  </div>
+                </Tooltip>
+              );
+            })}
+          </SimpleGrid>
+        </Stack>
+    </ModalScrollLayout>
   );
 }

@@ -2,10 +2,13 @@
 
 import { useState, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
 import { Modal } from "@mantine/core";
 import { nprogress, NavigationProgress } from "@mantine/nprogress";
-import { completeOnboarding as completeOnboardingRequest } from "@/lib/api/domains/settings";
+import {
+  completeOnboarding as completeOnboardingRequest,
+  updateImportFollowup,
+} from "@/lib/api/domains/settings";
+import type { ImportFollowupPlatform } from "@bondery/schemas";
 import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import { OnboardingProvider } from "./OnboardingContext";
 import { StepLoading } from "./steps/StepLoading";
@@ -23,7 +26,6 @@ const STEP_PROGRESS: Record<number, number> = {
 /** Inner component rendered inside OnboardingProvider so it can read context. */
 function OnboardingFlowContent() {
   const router = useRouter();
-  const t = useTranslations("Onboarding");
   const [step, setStep] = useState(0);
   const [isCompleting, setIsCompleting] = useState(false);
 
@@ -35,17 +37,33 @@ function OnboardingFlowContent() {
     setStep((s) => s + 1);
   }, []);
 
-  const completeOnboarding = useCallback(async () => {
-    if (isCompleting) return;
-    setIsCompleting(true);
-    nprogress.set(100);
-    try {
-      await completeOnboardingRequest();
-      router.push(WEBAPP_ROUTES.HOME);
-    } catch {
-      setIsCompleting(false);
-    }
-  }, [router, isCompleting]);
+  const finishOnboarding = useCallback(
+    async (followup?: {
+      status: "awaiting_export" | "dismissed";
+      platform?: ImportFollowupPlatform;
+    }) => {
+      if (isCompleting) return;
+      setIsCompleting(true);
+      nprogress.set(100);
+      try {
+        if (followup) {
+          await updateImportFollowup(followup);
+        }
+        await completeOnboardingRequest();
+        router.push(WEBAPP_ROUTES.HOME);
+      } catch {
+        setIsCompleting(false);
+      }
+    },
+    [router, isCompleting],
+  );
+
+  const handleAwaitingExportFromModal = useCallback(
+    async (platform: ImportFollowupPlatform) => {
+      await finishOnboarding({ status: "awaiting_export", platform });
+    },
+    [finishOnboarding],
+  );
 
   const renderStep = () => {
     switch (step) {
@@ -56,7 +74,13 @@ function OnboardingFlowContent() {
       case 2:
         return <StepIntent onNext={nextStep} />;
       case 3:
-        return <StepImport onNext={completeOnboarding} onSkip={completeOnboarding} />;
+        return (
+          <StepImport
+            onComplete={() => void finishOnboarding()}
+            onSkipImport={() => void finishOnboarding({ status: "dismissed" })}
+            onAwaitingExportFromModal={handleAwaitingExportFromModal}
+          />
+        );
       default:
         return null;
     }

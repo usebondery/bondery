@@ -9,7 +9,6 @@ import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslat
 import { PageHeader } from "@/app/(app)/app/components/PageHeader";
 import { PageWrapper } from "@/app/(app)/app/components/PageWrapper";
 import type { GroupWithCount } from "@bondery/schemas";
-import { WEBSITE_URL } from "@/lib/config";
 import { openAddGroupModal } from "./components/AddGroupModal";
 import { openEditGroupModal } from "./components/EditGroupModal";
 import { openAddPeopleToGroupModal } from "./components/AddPeopleToGroupModal";
@@ -188,7 +187,7 @@ export function GroupsClient() {
         <PageHeader
           icon={IconUsersGroup}
           title={t("Title")}
-          helpHref={`${WEBSITE_URL}/docs/concepts/groups`}
+          helpDoc="concepts.groups"
           helpLabel={t("HeaderDescription")}
           action={
             <Button
@@ -228,7 +227,7 @@ export function GroupsClient() {
               </SimpleGrid>
             ) : (
               <Text ta="center" c="dimmed" py="xl">
-                No groups found. Create your first group to organize your contacts.
+                {t("Empty")}
               </Text>
             )}
           </Stack>

@@ -89,9 +89,26 @@ Update docs in the **same change** when behavior, architecture, or setup steps c
 
 1. The page content and location
 2. `docs/SUMMARY.md`
-3. In-app help links (e.g. `HELP_DOCS_URL` paths in the webapp)
+3. In-app help links — add or update `docId` (and `docSections` for section anchors) in the page frontmatter, then run `npm run generate-doc-links`. Use `helpDoc="your.docId"` or `doc="your.docId"` in the webapp; never hardcode `HELP_DOCS_URL` paths.
 4. Cross-links from related concept pages
 5. [docs/changelog.md](changelog.md) for user-visible release notes
+
+### In-app doc link frontmatter
+
+Pages linked from the app need stable identifiers in YAML frontmatter:
+
+```yaml
+---
+docId: concepts.people
+docSections:           # optional; maps section docId suffix → anchor id
+  enriching-contact: enriching-contact
+---
+```
+
+- `docId` is permanent once shipped — app code references it, not file paths.
+- `docPath` is auto-derived from the file location; override only when the GitBook slug differs.
+- Section anchors must be explicit in markdown: `## Heading {#anchor-id}`.
+- Run `npm run generate-doc-links` after changing frontmatter; CI validates files and anchors.
 
 ## Checklist before opening a PR
 

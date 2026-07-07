@@ -1,12 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Box } from "@mantine/core";
 import { motion, AnimatePresence } from "motion/react";
 import { IconBrandLinkedin } from "@tabler/icons-react";
 import { BonderyIcon } from "@bondery/branding/react";
+import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
 
-const LABELS = ["Profile picture", "Work history", "Education", "Job title"];
 const LINKEDIN_BLUE = "#0A66C2";
 
 // Use Mantine CSS custom properties so colors respond to the color scheme at
@@ -25,18 +25,28 @@ const BONDERY = { x: 90, y: NODE_Y, size: 68, radius: 16 };
 const LINKEDIN = { x: 210, y: NODE_Y, size: 60 };
 
 export function ExtensionLinkedInAnimation() {
+  const t = useTranslations("SettingsPage.Integration.ChromeExtensionModal");
+  const labels = useMemo(
+    () => [
+      t("AnimationProfilePicture"),
+      t("AnimationWorkHistory"),
+      t("AnimationEducation"),
+      t("AnimationJobTitle"),
+    ],
+    [t],
+  );
   const [labelIndex, setLabelIndex] = useState(0);
   const [bubbleKey, setBubbleKey] = useState(0);
   const [pulseKey, setPulseKey] = useState(0);
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setLabelIndex((prev) => (prev + 1) % LABELS.length);
+      setLabelIndex((prev) => (prev + 1) % labels.length);
       setBubbleKey((prev) => prev + 1);
       setPulseKey((prev) => prev + 1);
     }, 4000); // match website cadence
     return () => clearInterval(interval);
-  }, []);
+  }, [labels.length]);
 
   return (
     <Box style={{ width: 300, margin: "0 auto", position: "relative", height: PILL_H + ANIM_H }}>
@@ -52,7 +62,7 @@ export function ExtensionLinkedInAnimation() {
       >
         <AnimatePresence mode="wait">
           <motion.div
-            key={LABELS[labelIndex]}
+            key={labels[labelIndex]}
             initial={{ opacity: 0, y: -8, scale: 0.9 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 8, scale: 0.9 }}
@@ -84,7 +94,7 @@ export function ExtensionLinkedInAnimation() {
               <IconBrandLinkedin size={13} color="white" />
             </div>
             <span style={{ fontSize: 13, fontWeight: 500, color: TEXT_COL }}>
-              {LABELS[labelIndex]}
+              {labels[labelIndex]}
             </span>
           </motion.div>
         </AnimatePresence>

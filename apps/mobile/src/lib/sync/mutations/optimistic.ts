@@ -1,6 +1,6 @@
 import type { SyncMutation } from "@bondery/schemas/sync";
 import { getSyncDatabase } from "../db";
-import { generateUuid, isValidUuid } from "../uuid";
+import { generateUuid, isValidUuid } from "../ids";
 
 function nowIso(): string {
   return new Date().toISOString();

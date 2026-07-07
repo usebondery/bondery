@@ -39,10 +39,15 @@ export const syncPushRoutes: AppRoutePlugin = async (fastify): Promise<void> => 
         return;
       }
 
-      const { mutations } = request.body;
+      const { mutations, deviceId } = request.body;
       const { client, user } = getAuth(request);
       const admin = createAdminClient();
-      const ctx = { client, user, log: request.log };
+      const ctx = {
+        client,
+        user,
+        log: request.log,
+        wakeMeta: { sourceDeviceId: deviceId },
+      };
 
       const sortedMutations = [...mutations].sort(
         (a, b) => a.clientSequence - b.clientSequence,

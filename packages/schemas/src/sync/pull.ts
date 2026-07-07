@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { SYNC_TABLE_KEYS } from "#sync/tables.js";
+import { SYNC_TABLE_KEYS, type SyncTableKey } from "#sync/tables.js";
 export const syncChangeOperationSchema = z.enum(["insert", "update", "delete"]);
 
 export const syncChangeSchema = z.object({
@@ -25,10 +25,14 @@ export const syncPullResponseSchema = z.object({
 });
 export type SyncPullResponse = z.infer<typeof syncPullResponseSchema>;
 
-export const syncBootstrapTablesSchema = z.record(
-  z.enum(SYNC_TABLE_KEYS as [string, ...string[]]),
-  z.array(z.record(z.string(), z.unknown())),
-);
+const syncTableRowsSchema = z.array(z.record(z.string(), z.unknown()));
+
+/** Explicit object shape — z.record(z.enum(...)) breaks fast-json-stringify (invalid JSON). */
+const bootstrapTablesShape = Object.fromEntries(
+  SYNC_TABLE_KEYS.map((key) => [key, syncTableRowsSchema]),
+) as Record<SyncTableKey, typeof syncTableRowsSchema>;
+
+export const syncBootstrapTablesSchema = z.object(bootstrapTablesShape);
 
 export const syncBootstrapResponseSchema = z.object({
   tables: syncBootstrapTablesSchema,

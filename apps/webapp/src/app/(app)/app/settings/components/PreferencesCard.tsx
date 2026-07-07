@@ -1,7 +1,7 @@
 "use client";
 
-import { ActionIcon, CardSection, Group, Text, Tooltip } from "@mantine/core";
-import { IconAdjustmentsHorizontal, IconHelpCircle } from "@tabler/icons-react";
+import { CardSection, Group, Text } from "@mantine/core";
+import { IconAdjustmentsHorizontal } from "@tabler/icons-react";
 import { getQueryClient } from "@/lib/query/client";
 import { invalidateSettings } from "@/lib/query/invalidation";
 import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
@@ -10,6 +10,7 @@ import { notifications } from "@mantine/notifications";
 import { useState } from "react";
 import {
   errorNotificationTemplate,
+  HelpButton,
   loadingNotificationTemplate,
   successNotificationTemplate,
 } from "@bondery/mantine-next";
@@ -54,11 +55,7 @@ export function PreferencesCard({
       <Text component="span" size="sm" fw={500}>
         {label}
       </Text>
-      <Tooltip label={tooltip} multiline maw={320}>
-        <ActionIcon variant="subtle" color="gray" size="sm" aria-label={`${label} information`}>
-          <IconHelpCircle size={14} />
-        </ActionIcon>
-      </Tooltip>
+      <HelpButton label={tooltip} ariaLabel={`${label} information`} variant="subtle" />
     </Group>
   );
 

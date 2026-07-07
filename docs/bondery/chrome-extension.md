@@ -1,5 +1,8 @@
 ---
 icon: puzzle-piece
+docId: bondery.chrome-extension
+docSections:
+  enriching-contact: enriching-contact
 ---
 
 # Chrome Extension
@@ -40,18 +43,66 @@ Work history and education are fetched in full, even when LinkedIn truncates the
 2. An **Add to Bondery** button appears on the profile.
 3. Click it. The person is added to Bondery with their Instagram username and display name.
 
-## Enriching an existing contact
+## Enriching an existing contact {#enriching-contact}
 
-If a contact already exists in Bondery and has a LinkedIn handle set, you can refresh their profile data at any time without visiting LinkedIn manually.
+### What enrichment means
 
-1. Open the contact's page in Bondery.
-2. Click **Enrich from LinkedIn** (available in the contact action menu on the People page, or from the contact's LinkedIn tab).
-3. The extension opens the LinkedIn profile in the background, scrapes the latest data, and updates the contact automatically.
-4. A notification confirms when enrichment is complete.
+**Enrichment** fills in or refreshes a contact's LinkedIn profile details inside Bondery — without you copying fields by hand or leaving the app.
+
+Think of it as asking Bondery to visit the person's LinkedIn profile for you, read what's there, and write the useful parts back to the contact record.
+
+### When to use it
+
+Enrichment is helpful when a contact **already exists** in Bondery and has a **LinkedIn handle** set, but the profile details are missing, incomplete, or out of date. Common situations:
+
+* You added someone manually with only a name and LinkedIn URL.
+* You imported a contact from a vCard, CSV, or another source that did not include work history or education.
+* The person changed jobs, moved, or updated their headline on LinkedIn since you last saved them.
+* You are preparing for a meeting and want their current role, company, and bio in one place.
+
+Enrichment is **not** for creating a brand-new contact from LinkedIn — use **Add to Bondery** on the LinkedIn profile page for that. Enrichment updates contacts you already have.
+
+### What gets updated
+
+After enrichment completes, Bondery updates fields such as:
+
+| Area | Examples |
+|---|---|
+| Profile summary | Headline, location, profile photo, LinkedIn bio |
+| Work history | Job titles, companies, dates — including entries LinkedIn truncates on the page |
+| Education | Schools, degrees, dates |
+
+Your notes, tags, groups, relationships, and interactions are **not** overwritten. Enrichment only refreshes LinkedIn-sourced profile data.
+
+### Why it helps
+
+* **Less manual work** — no tab-switching to copy headline, employer, or school names.
+* **Richer contact records** — work and education timelines make search, filtering, and context before calls much easier.
+* **Stays current** — run enrichment again any time someone's LinkedIn profile changes.
+* **Runs in the background** — you can keep working in Bondery while the extension fetches data.
+
+### How it works (step by step)
+
+1. Open the contact in Bondery (or select contacts on the **Fix & Merge** page for batch enrichment).
+2. Click **Enrich** or **Enrich from LinkedIn** — on the contact page recommendation card, in the contact action menu on the People page, or from the LinkedIn tab.
+3. Bondery asks the Chrome Extension to open that person's LinkedIn profile in a **background tab**.
+4. The extension reads the latest profile data and sends it to Bondery.
+5. The contact page updates automatically. A notification confirms when enrichment is finished.
+
+You do not need to interact with the LinkedIn tab. If enrichment is interrupted, you can resume from where you left off.
 
 {% hint style="info" %}
-Enrichment requires the extension to be installed and you to be signed in to LinkedIn in your browser.
+Enrichment requires the [Chrome Extension](#how-to-install) to be installed, you to be signed in to Bondery in the extension, and you to be signed in to LinkedIn in the **same browser profile**.
 {% endhint %}
+
+### Where to find it in the app
+
+| Location | What you see |
+|---|---|
+| Contact page | A recommendation card when the contact has LinkedIn but has never been enriched |
+| People page | **Enrich from LinkedIn** in a contact's action menu |
+| Contact → LinkedIn tab | Enrich action alongside imported LinkedIn data |
+| Fix & Merge | Batch **Enrich all** for every contact that still needs enrichment |
 
 ## Requirements
 

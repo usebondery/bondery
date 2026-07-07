@@ -1,6 +1,6 @@
 import type { Group } from "@bondery/schemas";
 import { submitSyncMutation } from "../sync/mutation-service";
-import { generateUuid } from "../sync/uuid";
+import { generateUuid } from "../sync/ids";
 import { getGroup, listGroupContacts, listGroups } from "../sync/repositories/groups";
 
 function newId(): string {

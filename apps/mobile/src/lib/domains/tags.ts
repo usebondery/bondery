@@ -1,6 +1,6 @@
 import type { Tag } from "@bondery/schemas";
 import { submitSyncMutation } from "../sync/mutation-service";
-import { generateUuid } from "../sync/uuid";
+import { generateUuid } from "../sync/ids";
 import { getTag, listTags, listTagsForContact } from "../sync/repositories/tags";
 
 function newId(): string {

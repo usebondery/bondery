@@ -1,5 +1,6 @@
 ---
 icon: key
+docId: api.authentication
 ---
 
 # Authentication

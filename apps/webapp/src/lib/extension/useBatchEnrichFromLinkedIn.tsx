@@ -21,6 +21,10 @@ import {
   setPendingQueueStatus,
 } from "@/lib/extension/enrichBatchStore";
 import { captureEvent } from "@/lib/analytics/client";
+import { getQueryClient } from "@/lib/query/client";
+import { contactKeys } from "@/lib/query/keys";
+import { invalidateAfterEnrichBatch } from "@/lib/query/invalidation";
+import type { LinkedInDataResponse } from "@bondery/schemas";
 
 /** Number of consecutive timeouts before the circuit breaker aborts the loop. */
 const MAX_CONSECUTIVE_TIMEOUTS = 5;
@@ -104,7 +108,7 @@ export function useBatchEnrichFromLinkedIn() {
         const timeout = setTimeout(() => {
           cleanup();
           resolve({ success: false, error: "timeout" });
-        }, 20_000);
+        }, 90_000);
 
         const onMessage = (event: MessageEvent) => {
           if (event.source !== window) return;
@@ -374,7 +378,10 @@ export function useBatchEnrichFromLinkedIn() {
       notifications.show(
         successNotificationTemplate({
           title: t("AllDoneTitle"),
-          description: t("AllDoneDescription", { count: completedCount }),
+          description:
+            completedCount === 1
+              ? t("AllDoneDescriptionSingle")
+              : t("AllDoneDescriptionMultiple", { count: completedCount }),
         }),
       );
     }
@@ -462,6 +469,19 @@ export function useBatchEnrichFromLinkedIn() {
 
       const { completedCount, abortReason } = await runEnrichLoop(0, 0);
 
+      if (!isCancelled() && !abortReason && completedCount > 0) {
+        const queryClient = getQueryClient();
+        queryClient.setQueryData(
+          contactKeys.linkedin(contactId),
+          (prev: LinkedInDataResponse | undefined) => ({
+            workHistory: prev?.workHistory ?? [],
+            education: prev?.education ?? [],
+            linkedinBio: prev?.linkedinBio ?? null,
+            syncedAt: new Date().toISOString(),
+          }),
+        );
+      }
+
       setState({
         isRunning: false,
         isLoading: false,
@@ -491,10 +511,11 @@ export function useBatchEnrichFromLinkedIn() {
         );
       } else if (!isCancelled() && completedCount > 0) {
         captureEvent("contact_enriched_linkedin");
+        void invalidateAfterEnrichBatch(getQueryClient());
         notifications.show(
           successNotificationTemplate({
             title: t("AllDoneTitle"),
-            description: t("AllDoneDescription", { count: 1 }),
+            description: t("AllDoneDescriptionSingle"),
           }),
         );
       }
@@ -589,7 +610,10 @@ export function useBatchEnrichFromLinkedIn() {
         notifications.show(
           successNotificationTemplate({
             title: t("AllDoneTitle"),
-            description: t("AllDoneDescription", { count: completedCount }),
+            description:
+            completedCount === 1
+              ? t("AllDoneDescriptionSingle")
+              : t("AllDoneDescriptionMultiple", { count: completedCount }),
           }),
         );
       }

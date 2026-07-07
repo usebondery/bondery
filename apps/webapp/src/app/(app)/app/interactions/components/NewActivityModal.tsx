@@ -20,6 +20,7 @@ import {
 import { DatePickerWithPresets } from "../../components/interactions/DatePickerWithPresets";
 import { ACTIVITY_TYPE_OPTIONS } from "@/lib/activityTypes";
 import { getActivityTypeConfig } from "@/lib/activityTypes";
+import { useInteractionTypeLabel } from "@/lib/i18n/useInteractionTypeLabel";
 import { captureEvent } from "@/lib/analytics/client";
 import { DEBOUNCE_MS } from "@/lib/config";
 import { searchContacts } from "@/lib/searchContacts";
@@ -132,6 +133,7 @@ function NewActivityForm({
   onCreated,
 }: NewActivityFormProps) {
   const t = useTranslations("InteractionsPage");
+  const getInteractionTypeLabel = useInteractionTypeLabel();
   const createInteractionMutation = useCreateInteractionMutation();
   const updateInteractionMutation = useUpdateInteractionMutation(activity?.id ?? "");
   const [loading, setLoading] = useState(false);
@@ -182,8 +184,12 @@ function NewActivityForm({
   });
 
   const activityTypeSelectOptions = useMemo(
-    () => ACTIVITY_TYPE_OPTIONS.map((type) => ({ value: type, label: type })),
-    [],
+    () =>
+      ACTIVITY_TYPE_OPTIONS.map((type) => ({
+        value: type,
+        label: getInteractionTypeLabel(type),
+      })),
+    [getInteractionTypeLabel],
   );
 
   const selectedTypeConfig = getActivityTypeConfig(form.values.type);

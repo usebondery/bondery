@@ -5,11 +5,16 @@ import { useAuth } from "../auth/useAuth";
 import { getSyncDatabase } from "./db";
 import { resetLocalSyncState } from "./reset-local-sync-state";
 import {
+  schedulePull,
   startPullSync,
   stopPullSync,
   subscribeSyncUpdates,
   getHasInitialSyncSnapshot,
 } from "./pull-manager";
+import {
+  startSyncWakeClient,
+  stopSyncWakeClient,
+} from "./sync-wake-client";
 import {
   countConflictMutations,
   countPendingMutations,
@@ -67,6 +72,7 @@ export function SyncProvider({ children }: SyncProviderProps) {
   useEffect(() => {
     if (!isAuthenticated || !userId) {
       void unregisterSyncBackgroundTask();
+      stopSyncWakeClient();
       resetLocalSyncState();
       previousUserIdRef.current = null;
       setIsReady(false);
@@ -85,10 +91,13 @@ export function SyncProvider({ children }: SyncProviderProps) {
 
     let active = true;
 
+    let wakeClient: Awaited<ReturnType<typeof startSyncWakeClient>> | null = null;
+
     void (async () => {
       getSyncDatabase();
       await registerSyncBackgroundTask();
       await startPullSync();
+      wakeClient = await startSyncWakeClient();
       scheduleSyncDrain();
 
       if (active) {
@@ -113,8 +122,13 @@ export function SyncProvider({ children }: SyncProviderProps) {
 
     const appStateSub = AppState.addEventListener("change", (nextState) => {
       if (nextState === "active") {
-        void startPullSync();
+        void schedulePull({ reason: "foreground" });
         scheduleSyncDrain();
+        if (!wakeClient) {
+          void startSyncWakeClient().then((client) => {
+            wakeClient = client;
+          });
+        }
       }
     });
 
@@ -123,6 +137,9 @@ export function SyncProvider({ children }: SyncProviderProps) {
       unsubscribe();
       networkSub.remove();
       appStateSub.remove();
+      wakeClient?.stop();
+      wakeClient = null;
+      stopSyncWakeClient();
       void stopPullSync();
     };
   }, [isAuthenticated, userId]);

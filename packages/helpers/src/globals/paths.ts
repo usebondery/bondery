@@ -36,6 +36,8 @@ export const API_ROUTES = {
   CONTACTS_SHARE: "/api/contacts/share",
   ADMIN_STATS: "/api/admin/stats",
   ME_ONBOARDING_COMPLETE: "/api/me/onboarding/complete",
+  ME_ONBOARDING_IMPORT_FOLLOWUP: "/api/me/onboarding/import-followup",
+  ME_SETTINGS_GETTING_STARTED_DISMISS: "/api/me/settings/getting-started-dismiss",
   CHAT: "/api/chat",
   CHAT_SESSIONS: "/api/chat/sessions",
   SUBSCRIPTIONS: "/api/subscriptions",
@@ -48,6 +50,8 @@ export const API_ROUTES = {
   SYNC_PUSH: "/api/sync/push",
   SYNC_PULL: "/api/sync/pull",
   SYNC_BOOTSTRAP: "/api/sync/bootstrap",
+  SYNC_WS: "/api/sync/ws",
+  SYNC_WS_TICKET: "/api/sync/ws-ticket",
 } as const;
 
 export const CHROME_EXTENSION_URL =
@@ -58,7 +62,7 @@ export const CHROME_EXTENSION_URL =
  * Requests from extensions below this version receive HTTP 426 Upgrade Required.
  * Set to "0.0.0" to disable enforcement.
  */
-export const MIN_EXTENSION_VERSION: string = "1.4.2";
+export const MIN_EXTENSION_VERSION: string = "1.7.0";
 
 export const HELP_DOCS_URL = "https://bondery.gitbook.io";
 export const CHANGELOG_URL = `${HELP_DOCS_URL}/changelog`;

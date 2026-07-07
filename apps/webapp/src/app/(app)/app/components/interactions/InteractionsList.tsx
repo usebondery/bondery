@@ -4,6 +4,7 @@ import { Group, Stack, Text, ThemeIcon, Timeline } from "@mantine/core";
 import type { Activity, Contact } from "@bondery/schemas";
 import { useMemo } from "react";
 import { getActivityTypeConfig } from "@/lib/activityTypes";
+import { useDateFormatter as useFormatter } from "@/lib/i18n/useDateFormatter";
 import { PersonAvatarGroup } from "@bondery/mantine-next";
 import { ActivityCard } from "./ActivityCard";
 
@@ -36,12 +37,14 @@ export function InteractionsList({
   onDuplicate,
   onDelete,
 }: InteractionsListProps) {
+  const formatter = useFormatter();
+
   const groupedActivities = useMemo(() => {
     const groups: Record<string, Activity[]> = {};
 
     activities.forEach((activity) => {
       const date = new Date(activity.date);
-      const key = date.toLocaleDateString("en-US", { month: "long", year: "numeric" });
+      const key = formatter.dateTime(date, { month: "long", year: "numeric" });
       if (!groups[key]) {
         groups[key] = [];
       }
@@ -49,7 +52,7 @@ export function InteractionsList({
     });
 
     return groups;
-  }, [activities]);
+  }, [activities, formatter]);
 
   return (
     <Stack gap="lg">

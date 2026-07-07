@@ -2,6 +2,7 @@ import type { FastifyInstance, FastifyRequest } from "fastify";
 import type { AppFastifyInstance } from "./fastify-types.js";
 import type { FastifyRateLimitOptions } from "@fastify/rate-limit";
 import fastifyRateLimit from "@fastify/rate-limit";
+import { IMPORT_COMMIT_RATE_LIMIT } from "@bondery/schemas/constants";
 import { Redis } from "ioredis";
 
 const DEFAULT_MAX_REQUESTS = 300;
@@ -12,10 +13,7 @@ export const AI_TIER = {
   timeWindow: "60 seconds",
 } as const;
 
-export const IMPORT_TIER = {
-  max: 10,
-  timeWindow: "10 minutes",
-} as const;
+export const IMPORT_TIER = IMPORT_COMMIT_RATE_LIMIT;
 
 export const ENRICH_TIER = {
   max: 100,

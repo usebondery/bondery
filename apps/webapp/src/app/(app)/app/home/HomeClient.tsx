@@ -17,6 +17,7 @@ import type { Activity, Contact } from "@bondery/schemas";
 import { PageWrapper } from "@/app/(app)/app/components/PageWrapper";
 import { PageHeader } from "@/app/(app)/app/components/PageHeader";
 import { HomeStatsGrid } from "@/app/(app)/app/components/home/HomeStatsGrid";
+import { GettingStartedProgressRail } from "@/app/(app)/app/components/home/GettingStartedProgressRail";
 import { UpcomingReminderCard } from "@/app/(app)/app/components/home/UpcomingReminderCard";
 import { openAddContactModal } from "@/app/(app)/app/people/components/AddContactModal";
 import { InteractionsList } from "@/app/(app)/app/components/interactions/InteractionsList";
@@ -42,10 +43,12 @@ import {
 import {
   useHomeStatsQuery,
   useHomeTimelineQuery,
+  useHasAnyInteractionQuery,
   useRecentlyAddedContactsQuery,
   useRecentlyInteractedContactsQuery,
   useUpcomingRemindersQuery,
 } from "@/lib/query/hooks/useHome";
+import { useSettingsQuery } from "@/lib/query/hooks/useSettings";
 
 export function HomeClient() {
   const router = useRouter();
@@ -54,6 +57,8 @@ export function HomeClient() {
   const deleteInteractionMutation = useDeleteInteractionMutation();
   const createInteractionMutation = useCreateInteractionMutation();
   const { data: stats } = useHomeStatsQuery();
+  const { data: settingsResult } = useSettingsQuery();
+  const { data: hasInteraction = false } = useHasAnyInteractionQuery();
   const { data: reminders = [] } = useUpcomingRemindersQuery();
   const { contacts: timelineContacts, activities: timelineActivities } = useHomeTimelineQuery();
   const { data: recentlyAdded = [] } = useRecentlyAddedContactsQuery();
@@ -107,7 +112,7 @@ export function HomeClient() {
 
         return {
           id: participantId,
-          firstName: participant.firstName || "Unknown",
+          firstName: participant.firstName || t("UnknownPerson"),
           lastName: participant.lastName || null,
           avatar: participant.avatar || null,
         } as Contact;
@@ -237,6 +242,13 @@ export function HomeClient() {
               </Button>
             </Tooltip>
           }
+        />
+
+        <GettingStartedProgressRail
+          settingsData={settingsResult?.data}
+          totalContacts={stats?.totalContacts ?? 0}
+          hasInteraction={hasInteraction}
+          timelineContacts={timelineContacts}
         />
 
         <HomeStatsGrid

@@ -104,6 +104,27 @@ Friction on a destructive action should match its consequences, not developer pr
 - Confirming without explaining consequences — "Are you sure?" alone is not enough.
 - Skipping confirmation for hard deletes because "the user just pressed the button" — one extra tap is worth it.
 
+### Delete icon in modal footers (third action)
+
+When an edit modal has **three** footer actions — destructive delete on the left, cancel + save on the right — pass them through **`ModalFooter`** danger props. Do not hand-roll a nested `Group` around `ModalFooter`.
+
+| `ModalFooter` prop | Role |
+|--------------------|------|
+| `dangerLabel` + `onDanger` | Left-aligned destructive trigger (defaults to red light button + `IconTrash`) |
+| `cancelLabel` + `onCancel` | Secondary dismiss |
+| `actionLabel` + `actionType="submit"` | Primary save/create |
+
+**Icons:**
+
+| Action | Icon |
+|--------|------|
+| Create entity (modal primary) | Domain plus icon is fine (e.g. `IconTagPlus`) |
+| Delete entity (`dangerLabel`) | `IconTrash` (default on `ModalFooter`) |
+| Delete confirm dialog (primary confirm) | `IconTrash` — `StandardConfirmModalBody` defaults this when `confirmColor="red"` |
+| Remove association (not entity delete) | Minus / X — different action; not a `dangerLabel` |
+
+Example: `openTagEditorModal.tsx`.
+
 ---
 
 ## Autofocus and keyboard intent
@@ -254,6 +275,56 @@ See `apps/webapp/src/lib/modals/README.md`. CI enforces via `npm run check-modal
 - Only disabling the submit button without locking dismiss — both are required.
 - Forgetting to restore closability after an error — the user should be able to leave once the request has settled.
 - Passing `onClose` props that disable blocking logic, or nesting a second `<Modal>` instead of stacking `modals.open`.
+
+### Footer actions — `ModalFooter`
+
+Standard modal footers use **`ModalFooter`** from `@bondery/mantine-next` (`packages/mantine-next/src/Modal/ModalFooter.tsx`). One component owns the full button row — do not nest it inside another footer `Group`.
+
+| Props | Role |
+|-------|------|
+| `dangerLabel` + `onDanger` | Left destructive action (entity delete in edit modals). Red light button, `IconTrash` by default. |
+| `backLabel` + `onBack` | Left-aligned back (import wizards). Can coexist with `dangerLabel` in a left cluster. |
+| `cancelLabel` + `onCancel` | Secondary dismiss |
+| `actionLabel` + `onAction` or `actionType="submit"` | Primary action (defaults to check icon when paired with cancel) |
+| `mt` | Top margin above the row (default `"md"`) |
+
+**Layouts (all handled inside `ModalFooter`):**
+
+- Cancel + action → right-aligned cluster
+- Back + cancel + action → back left, cancel + action right
+- Danger + cancel + action → delete left, cancel + action right (tag editor)
+
+### Scrollable modal bodies — `ModalScrollLayout`
+
+When modal body content can exceed viewport height (tables, long card grids, merge conflict lists), pin the footer outside the scroll region. **`ModalFooter`** owns button semantics; **`ModalScrollLayout`** owns scroll geometry.
+
+| Situation | Pattern |
+|-----------|---------|
+| Short form or confirm dialog | `Stack` + inline `ModalFooter` (unchanged) |
+| Table, long list, or tall card grid in modal | `ModalScrollLayout` with `footer={<ModalFooter mt={0} ... />}` |
+| Per-modal `ScrollArea h={…}` for footer reachability | Do not — use `ModalScrollLayout` instead |
+
+**Web parity:** Mobile `ActionSheetPopup` already splits header · scrollable body · fixed action footer. Web long modals should match that contract.
+
+```tsx
+<ModalScrollLayout
+  footer={
+    <ModalFooter
+      mt={0}
+      cancelLabel={t("Cancel")}
+      onCancel={() => modals.close(modalId)}
+      actionLabel={t("Save")}
+      onAction={handleSave}
+    />
+  }
+>
+  <Stack gap="md">
+    {/* scrollable content */}
+  </Stack>
+</ModalScrollLayout>
+```
+
+**Forms with submit:** Wrap `<form>` around `ModalScrollLayout` (or around scroll children only if footer uses `onAction` instead of `actionType="submit"`).
 
 ---
 

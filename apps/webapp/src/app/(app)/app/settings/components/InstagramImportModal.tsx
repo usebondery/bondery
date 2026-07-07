@@ -39,9 +39,11 @@ import type {
   InstagramImportStrategy,
   InstagramPreparedContact,
 } from "@bondery/schemas";
+import { SOCIAL_IMPORT_COMMIT_BATCH_SIZE } from "@bondery/schemas/constants";
 import {
   DropzoneContent,
   ModalFooter,
+  ModalScrollLayout,
   errorNotificationTemplate,
   ModalTitle,
   successNotificationTemplate,
@@ -53,6 +55,7 @@ import {
   useCommitInstagramImportMutation,
   useParseInstagramImportMutation,
 } from "@/lib/query/hooks/useImports";
+import { useUpdateImportFollowupMutation } from "@/lib/query/hooks/useSettings";
 import { useModalBlocking } from "@/lib/modals";
 import { useImporterNavigationProgress } from "./useImporterNavigationProgress";
 
@@ -64,7 +67,8 @@ type Step =
   | "processing"
   | "preview";
 
-const IMPORT_BATCH_SIZE = 25;
+export type InstagramImportStep = Step;
+
 const INSTAGRAM_MAX_FILE_SIZE_BYTES = 100 * 1024 * 1024;
 
 const STEP_PROGRESS: Record<Step, number> = {
@@ -94,6 +98,8 @@ interface InstagramImportTranslations {
   InstructionStep10: string;
   InstructionStep11: string;
   HaveZipFile: string;
+  ComeBackWhenReady: string;
+  RequestedExport: string;
   DropzoneTitle: string;
   DropzoneDescription: string;
   SelectZipFile: string;
@@ -123,6 +129,12 @@ interface InstagramImportTranslations {
   ParseError: string;
   ImportError: string;
   InvalidFile: string;
+  ZipNoFile: string;
+  ZipTooLarge: string;
+  ZipInvalidExtension: string;
+  ZipInvalidMime: string;
+  ZipTooManyFiles: string;
+  ZipInvalidType: string;
   MissingUpload: string;
   Back: string;
   Cancel: string;
@@ -203,13 +215,13 @@ function getZipValidationMessage(
 ): string {
   switch (code) {
     case "no-file":
-      return "No file selected. Please choose one Instagram ZIP file.";
+      return t("ZipNoFile");
     case "file-too-large":
-      return "Selected file is too large. Keep Instagram ZIP under 100 MB.";
+      return t("ZipTooLarge");
     case "invalid-extension":
-      return "Invalid file extension. Please select a .zip export file.";
+      return t("ZipInvalidExtension");
     case "invalid-mime":
-      return "Invalid ZIP mime type reported by browser. Please re-download and try again.";
+      return t("ZipInvalidMime");
     default:
       return t("InvalidFile");
   }
@@ -312,6 +324,8 @@ export function InstagramImportModal({
   modalId,
   onSuccess,
   showNavigationProgress = true,
+  initialStep = "intro",
+  onAwaitingExport,
 }: {
   t: (
     key: keyof InstagramImportTranslations,
@@ -324,11 +338,14 @@ export function InstagramImportModal({
     skipped: number;
   }) => void;
   showNavigationProgress?: boolean;
+  initialStep?: Step;
+  onAwaitingExport?: () => void | Promise<void>;
 }) {
   const router = useRouter();
   const parseImport = useParseInstagramImportMutation();
   const commitImport = useCommitInstagramImportMutation();
-  const [step, setStep] = useState<Step>("intro");
+  const followupMutation = useUpdateImportFollowupMutation();
+  const [step, setStep] = useState<Step>(initialStep);
   const [isParsing, setIsParsing] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
   const [importProgress, setImportProgress] = useState<{
@@ -403,6 +420,20 @@ export function InstagramImportModal({
 
   const closeModal = () => {
     modals.close(modalId);
+  };
+
+  const isOnboardingFlow = Boolean(onAwaitingExport);
+
+  const handleRequestedExport = async () => {
+    if (onAwaitingExport) {
+      await onAwaitingExport();
+    } else {
+      await followupMutation.mutateAsync({
+        status: "awaiting_export",
+        platform: "instagram",
+      });
+    }
+    closeModal();
   };
 
   useModalBlocking(modalId, isParsing || isImporting || step === "processing");
@@ -495,7 +526,7 @@ export function InstagramImportModal({
       notifications.show(
         errorNotificationTemplate({
           title: t("ErrorTitle"),
-          description: "Please upload exactly one Instagram ZIP file.",
+          description: t("ZipTooManyFiles"),
         }),
       );
 
@@ -576,9 +607,10 @@ export function InstagramImportModal({
     let totalSkipped = 0;
 
     try {
-      for (let i = 0; i < selectedContacts.length; i += IMPORT_BATCH_SIZE) {
-        const batch = selectedContacts.slice(i, i + IMPORT_BATCH_SIZE);
-        const isLastBatch = i + IMPORT_BATCH_SIZE >= selectedContacts.length;
+      const batchSize = SOCIAL_IMPORT_COMMIT_BATCH_SIZE;
+      for (let i = 0; i < selectedContacts.length; i += batchSize) {
+        const batch = selectedContacts.slice(i, i + batchSize);
+        const isLastBatch = i + batchSize >= selectedContacts.length;
 
         const data = await commitImport.mutateAsync({
           body: { contacts: batch },
@@ -590,7 +622,7 @@ export function InstagramImportModal({
         totalSkipped += readNumberField(data, "skippedCount");
 
         setImportProgress({
-          current: Math.min(i + IMPORT_BATCH_SIZE, selectedContacts.length),
+          current: Math.min(i + batchSize, selectedContacts.length),
           total: selectedContacts.length,
         });
       }
@@ -801,11 +833,18 @@ export function InstagramImportModal({
           backLabel={t("Back")}
           backLeftSection={<IconArrowLeft size={16} />}
           onBack={() => setStep("intro")}
-          cancelLabel={t("Cancel")}
-          onCancel={closeModal}
-          actionLabel={t("HaveZipFile")}
-          onAction={() => setStep("upload")}
-          actionRightSection={<IconArrowRight size={16} />}
+          {...(isOnboardingFlow
+            ? {
+                cancelLabel: t("HaveZipFile"),
+                onCancel: () => setStep("upload"),
+                actionLabel: t("RequestedExport"),
+                onAction: () => void handleRequestedExport(),
+              }
+            : {
+                actionLabel: t("HaveZipFile"),
+                onAction: () => setStep("upload"),
+                actionLeftSection: <IconFileZip size={16} />,
+              })}
         />
       </Stack>,
     );
@@ -821,11 +860,11 @@ export function InstagramImportModal({
             const firstError = rejections[0]?.errors?.[0];
             const rejectionMessage =
               firstError?.code === "file-too-large"
-                ? "Selected file is too large. Keep Instagram ZIP under 100 MB."
+                ? t("ZipTooLarge")
                 : firstError?.code === "too-many-files"
-                  ? "Please upload exactly one Instagram ZIP file."
+                  ? t("ZipTooManyFiles")
                   : firstError?.code === "file-invalid-type"
-                    ? "Invalid file type. Please select a .zip export file."
+                    ? t("ZipInvalidType")
                     : firstError?.message || t("InvalidFile");
             notifications.show(
               errorNotificationTemplate({
@@ -948,81 +987,86 @@ export function InstagramImportModal({
   }
 
   return renderWithNavigationProgress(
-    <Stack gap="md">
-      <Group justify="space-between">
-        <Group gap="xs">
-          <Badge color="blue" variant="light">
-            {t("Total", { count: parsedContacts.length })}
-          </Badge>
-          <Badge
-            color="green"
-            variant="light"
-            leftSection={<IconCircleCheck size={12} />}
-          >
-            {t("Valid", { count: validContactsCount })}
-          </Badge>
-          {invalidContactsCount > 0 ? (
+    <ModalScrollLayout
+      footer={
+        <ModalFooter
+          mt={0}
+          backLabel={t("Back")}
+          backLeftSection={<IconArrowLeft size={16} />}
+          onBack={() => setStep("strategy")}
+          backDisabled={isImporting}
+          cancelLabel={t("Cancel")}
+          onCancel={closeModal}
+          cancelDisabled={isImporting}
+          actionLabel={t("ImportSelected", { count: selectedIds.size })}
+          onAction={() => {
+            void handleImport();
+          }}
+          actionLeftSection={
+            !isImporting ? <IconBrandInstagram size={16} /> : undefined
+          }
+          actionLoading={isImporting}
+          actionDisabled={isImporting}
+        />
+      }
+    >
+      <Stack gap="md">
+        <Group justify="space-between">
+          <Group gap="xs">
+            <Badge color="blue" variant="light">
+              {t("Total", { count: parsedContacts.length })}
+            </Badge>
             <Badge
-              color="orange"
+              color="green"
               variant="light"
-              leftSection={<IconAlertTriangle size={12} />}
+              leftSection={<IconCircleCheck size={12} />}
             >
-              {t("Invalid", { count: invalidContactsCount })}
+              {t("Valid", { count: validContactsCount })}
             </Badge>
-          ) : null}
-          {alreadyExistsCount > 0 ? (
-            <Badge color="gray" variant="light">
-              {t("AlreadyExists", { count: alreadyExistsCount })}
-            </Badge>
-          ) : null}
-          {likelyInfluencersCount > 0 ? (
-            <Badge color="violet" variant="light">
-              {t("LikelyBusinessAndInfluencers", {
-                count: likelyInfluencersCount,
-              })}
-            </Badge>
-          ) : null}
+            {invalidContactsCount > 0 ? (
+              <Badge
+                color="orange"
+                variant="light"
+                leftSection={<IconAlertTriangle size={12} />}
+              >
+                {t("Invalid", { count: invalidContactsCount })}
+              </Badge>
+            ) : null}
+            {alreadyExistsCount > 0 ? (
+              <Badge color="gray" variant="light">
+                {t("AlreadyExists", { count: alreadyExistsCount })}
+              </Badge>
+            ) : null}
+            {likelyInfluencersCount > 0 ? (
+              <Badge color="violet" variant="light">
+                {t("LikelyBusinessAndInfluencers", {
+                  count: likelyInfluencersCount,
+                })}
+              </Badge>
+            ) : null}
+          </Group>
         </Group>
-      </Group>
 
-      <Text size="sm" c="dimmed">
-        {t("ChooseContactsHint")}
-      </Text>
+        <Text size="sm" c="dimmed">
+          {t("ChooseContactsHint")}
+        </Text>
 
-      <ContactsTable
-        contacts={previewContacts}
-        visibleColumns={["name", "social"]}
-        selectedIds={selectedIds}
-        showSelection
-        allSelected={allSelected}
-        someSelected={someSelected}
-        onSelectAll={handleToggleAll}
-        onSelectOne={handleToggleOne}
-        nonSelectableIds={nonSelectableIds}
-        nonSelectableTooltip={t("ExistingHandleTooltip")}
-        disableNameLink
-        noContactsFound={t("NoContactsFound")}
-        noContactsMatchSearch={t("NoContactsMatchSearch")}
-      />
-
-      <ModalFooter
-        backLabel={t("Back")}
-        backLeftSection={<IconArrowLeft size={16} />}
-        onBack={() => setStep("strategy")}
-        backDisabled={isImporting}
-        cancelLabel={t("Cancel")}
-        onCancel={closeModal}
-        cancelDisabled={isImporting}
-        actionLabel={t("ImportSelected", { count: selectedIds.size })}
-        onAction={() => {
-          void handleImport();
-        }}
-        actionLeftSection={
-          !isImporting ? <IconBrandInstagram size={16} /> : undefined
-        }
-        actionLoading={isImporting}
-        actionDisabled={isImporting}
-      />
-    </Stack>,
+        <ContactsTable
+          contacts={previewContacts}
+          visibleColumns={["name", "social"]}
+          selectedIds={selectedIds}
+          showSelection
+          allSelected={allSelected}
+          someSelected={someSelected}
+          onSelectAll={handleToggleAll}
+          onSelectOne={handleToggleOne}
+          nonSelectableIds={nonSelectableIds}
+          nonSelectableTooltip={t("ExistingHandleTooltip")}
+          disableNameLink
+          noContactsFound={t("NoContactsFound")}
+          noContactsMatchSearch={t("NoContactsMatchSearch")}
+        />
+      </Stack>
+    </ModalScrollLayout>,
   );
 }

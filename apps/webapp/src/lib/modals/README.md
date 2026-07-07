@@ -40,3 +40,9 @@ function MyFeatureModalBody({ modalId }: { modalId: string }) {
 - Do not use `<Modal>` in feature code; onboarding shell is the only exception.
 - Derive `isBlocking` from submit **and** load/parse/import states.
 - Web `isBlocking` matches mobile `ActionSheetPopup` `isBusy`.
+
+## Scrollable modal bodies
+
+When a modal can scroll (tables, long card grids, merge conflicts), use **`ModalScrollLayout`** from `@bondery/mantine-next` so `ModalFooter` stays visible. Pass `footer={<ModalFooter mt={0} ... />}` and put scrollable content in `children`.
+
+Short forms and confirm dialogs keep `Stack` + inline `ModalFooter` — no layout wrapper needed.

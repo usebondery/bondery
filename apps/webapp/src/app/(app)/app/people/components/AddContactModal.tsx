@@ -142,6 +142,7 @@ export function AddContactForm({
         return;
       }
 
+      router.refresh();
       router.push(`${WEBAPP_ROUTES.PERSON}/${createdContact.id}`);
     } catch (error) {
       notifications.hide(loadingNotification);

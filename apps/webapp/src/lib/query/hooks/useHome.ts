@@ -67,3 +67,11 @@ export function useRecentlyInteractedContactsQuery() {
     select: (data) => data.contacts,
   });
 }
+
+export function useHasAnyInteractionQuery() {
+  return useQuery({
+    queryKey: interactionKeys.list({ limit: 1, offset: 0 }),
+    queryFn: createInteractionsListQueryFn({ limit: 1, offset: 0 }),
+    select: (data) => data.activities.length > 0,
+  });
+}

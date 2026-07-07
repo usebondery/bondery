@@ -4,6 +4,7 @@ import { Group, Checkbox, TextInput, Text, Loader } from "@mantine/core";
 import { IconGift } from "@tabler/icons-react";
 import { INPUT_MAX_LENGTHS } from "@/lib/config";
 import { DatePickerWithPresets } from "../../../components/interactions/DatePickerWithPresets";
+import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
 
 interface DateWithNotificationProps {
   title: string;
@@ -21,6 +22,7 @@ interface DateWithNotificationProps {
   onFocus?: (field: string) => void;
   onBlur?: (field: string) => void;
   fieldPrefix?: string;
+  notifyLabel?: string;
 }
 
 function normalizePickerDate(value: Date | string | null): Date | null {
@@ -61,7 +63,9 @@ export default function DateWithNotification({
   onFocus,
   onBlur,
   fieldPrefix = "",
+  notifyLabel,
 }: DateWithNotificationProps) {
+  const t = useTranslations("ContactImportantDates");
   const dateFieldName = fieldPrefix ? `${fieldPrefix}-date` : "date";
   const nameFieldName = fieldPrefix ? `${fieldPrefix}-name` : "name";
 
@@ -104,7 +108,7 @@ export default function DateWithNotification({
           />
         )}
         <Checkbox
-          label="Notify me"
+          label={notifyLabel ?? t("NotifyMe")}
           checked={notifyValue}
           onChange={(e) => onNotifyChange(e.currentTarget.checked)}
           disabled={!dateValue}

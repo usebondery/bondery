@@ -7,7 +7,7 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
-import type { Contact } from "@bondery/schemas";
+import type { Contact, LinkedInDataResponse } from "@bondery/schemas";
 import {
   createContact,
   createContactRelationship,
@@ -25,6 +25,7 @@ import {
 import {
   createContactsListQueryFn,
   createContactDetailQueryFn,
+  createContactLinkedInDataQueryFn,
   createContactGroupsQueryFn,
   createMapPinsQueryFn,
   type ContactsListParams,
@@ -40,6 +41,7 @@ import {
   invalidateContactDomain,
   invalidateContactImportantDates,
   invalidateContactLists,
+  invalidateContactMapPins,
   invalidateContactRelationships,
 } from "@/lib/query/invalidation";
 
@@ -47,6 +49,16 @@ type UpdateContactPatch = Parameters<typeof updateContact>[1];
 
 function patchAffectsKeepInTouch(patch: UpdateContactPatch): boolean {
   return "lastInteraction" in patch || "keepFrequencyDays" in patch;
+}
+
+function patchAffectsMapPins(patch: UpdateContactPatch): boolean {
+  return (
+    "location" in patch ||
+    "latitude" in patch ||
+    "longitude" in patch ||
+    "gisPoint" in patch ||
+    "addresses" in patch
+  );
 }
 
 async function invalidateAfterContactUpdate(
@@ -57,6 +69,7 @@ async function invalidateAfterContactUpdate(
   await Promise.all([
     invalidateContactDetail(queryClient, contactId),
     invalidateContactLists(queryClient),
+    ...(patchAffectsMapPins(patch) ? [invalidateContactMapPins(queryClient)] : []),
     ...(patchAffectsKeepInTouch(patch)
       ? [queryClient.invalidateQueries({ queryKey: contactKeys.keepInTouch() })]
       : []),
@@ -108,6 +121,19 @@ export function useContactQuery(id: string, enabled = true) {
     queryKey: contactKeys.detail(id),
     queryFn: createContactDetailQueryFn(id),
     enabled: enabled && !!id,
+  });
+}
+
+export function useContactLinkedInDataQuery(
+  id: string,
+  initialData?: LinkedInDataResponse,
+  enabled = true,
+) {
+  return useQuery({
+    queryKey: contactKeys.linkedin(id),
+    queryFn: createContactLinkedInDataQueryFn(id),
+    enabled: enabled && !!id,
+    initialData,
   });
 }
 

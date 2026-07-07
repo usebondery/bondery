@@ -1,5 +1,6 @@
 ---
 icon: bell
+docId: concepts.reminders
 ---
 
 # Reminders

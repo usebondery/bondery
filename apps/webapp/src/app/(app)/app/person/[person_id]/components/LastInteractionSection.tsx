@@ -1,24 +1,31 @@
+"use client";
+
 import { Text } from "@mantine/core";
 import type { Contact } from "@bondery/schemas";
+import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
+import { useDateFormatter as useFormatter } from "@/lib/i18n/useDateFormatter";
 
 interface LastInteractionSectionProps {
   contact: Contact;
 }
 
 export function LastInteractionSection({ contact }: LastInteractionSectionProps) {
+  const t = useTranslations("InteractionsPage");
+  const formatter = useFormatter();
+
   return (
     <div>
       <Text size="sm" fw={600} mb="xs">
-        Last Interaction
+        {t("LastInteractionInput")}
       </Text>
       <Text size="sm" c="dimmed">
         {contact.lastInteraction
-          ? new Date(contact.lastInteraction).toLocaleDateString("en-US", {
+          ? formatter.dateTime(new Date(contact.lastInteraction), {
               year: "numeric",
               month: "long",
               day: "numeric",
             })
-          : "No interaction recorded"}
+          : t("NoInteractionRecorded")}
       </Text>
     </div>
   );

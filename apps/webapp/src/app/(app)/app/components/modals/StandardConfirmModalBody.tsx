@@ -2,6 +2,7 @@
 
 import { Stack } from "@mantine/core";
 import { modals } from "@mantine/modals";
+import { IconTrash } from "@tabler/icons-react";
 import { ModalFooter } from "@bondery/mantine-next";
 import { useState, type ReactNode } from "react";
 import { useModalBlocking } from "@/lib/modals";
@@ -40,6 +41,9 @@ export function StandardConfirmModalBody({
     }
   };
 
+  const resolvedConfirmLeftSection =
+    confirmLeftSection ?? (confirmColor === "red" ? <IconTrash size={16} /> : undefined);
+
   return (
     <Stack gap="md">
       {message}
@@ -49,7 +53,7 @@ export function StandardConfirmModalBody({
         cancelDisabled={isSubmitting}
         actionLabel={confirmLabel}
         actionColor={confirmColor}
-        actionLeftSection={confirmLeftSection}
+        actionLeftSection={resolvedConfirmLeftSection}
         actionLoading={isSubmitting}
         actionDisabled={isSubmitting}
         onAction={() => {

@@ -16,9 +16,9 @@ import {
   linkedInImportCommitResponseSchema,
   linkedInParseResponseSchema,
 } from "@bondery/schemas";
+import { IMPORT_HANDLE_LOOKUP_CHUNK_SIZE } from "@bondery/schemas/constants";
 import { IMPORT_TIER } from "../../../lib/rate-limit.js";
-
-const HANDLE_LOOKUP_CHUNK_SIZE = 150;
+import { markBulkImportCompleted } from "../../../lib/import-followup.js";
 
 function buildImportedTitle(position: string | null, company: string | null): string | null {
   const normalizedPosition = typeof position === "string" ? position.trim() : "";
@@ -90,8 +90,8 @@ export const linkedInImportRoutes: AppRoutePlugin = async (fastify) => {
       const existingHandleSet = new Set<string>();
 
       if (normalizedHandles.length > 0) {
-        for (let index = 0; index < normalizedHandles.length; index += HANDLE_LOOKUP_CHUNK_SIZE) {
-          const handleChunk = normalizedHandles.slice(index, index + HANDLE_LOOKUP_CHUNK_SIZE);
+        for (let index = 0; index < normalizedHandles.length; index += IMPORT_HANDLE_LOOKUP_CHUNK_SIZE) {
+          const handleChunk = normalizedHandles.slice(index, index + IMPORT_HANDLE_LOOKUP_CHUNK_SIZE);
 
           const { data: existingRows, error: existingError } = await client
             .from("people_socials")
@@ -362,6 +362,17 @@ export const linkedInImportRoutes: AppRoutePlugin = async (fastify) => {
         const message =
           groupError instanceof Error ? groupError.message : "Failed to assign imported contacts";
         return reply.status(500).send({ error: message });
+      }
+
+      if (importedCount + updatedCount > 0) {
+        try {
+          await markBulkImportCompleted(client, user.id);
+        } catch (followupError) {
+          request.log.error(
+            { err: followupError },
+            "[linkedin-import] Failed to mark import completed",
+          );
+        }
       }
 
       const response: LinkedInImportCommitResponse = {

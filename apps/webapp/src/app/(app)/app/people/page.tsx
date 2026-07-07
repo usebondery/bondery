@@ -8,8 +8,12 @@ import { PeopleTableLoader } from "./components/PeopleTableLoader";
 import { PeopleTableSkeleton } from "./components/PeopleSkeletons";
 import { parseContactsListParams } from "@/lib/query/fetchers/contactsListParams";
 import type { ColumnKey } from "@/app/(app)/app/components/contacts/ContactsTableV2";
+import { getWebTranslations as getTranslations } from "@/lib/i18n/getWebTranslations";
 
-export const metadata: Metadata = { title: "People" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("PeoplePage");
+  return { title: t("Title") };
+}
 
 const COLUMN_VISIBILITY_COOKIE = "bondery_contacts_columns";
 

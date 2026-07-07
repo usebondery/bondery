@@ -8,7 +8,7 @@ import { scheduleSyncDrain } from "./outbox/sync-worker";
 import { notifySyncSubscribers } from "./pull-manager";
 import { logSyncMutationEnqueued } from "./sync-logger";
 
-import { generateUuid } from "./uuid";
+import { generateUuid } from "./ids";
 
 export function submitSyncMutation(mutation: SyncMutationInput): SyncMutation {
   const full = {

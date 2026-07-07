@@ -16,6 +16,7 @@ import { useMemo, useState } from "react";
 import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import { AnchorLink } from "@bondery/mantine-next";
 import type { AddressPin } from "@/app/(app)/app/map/types";
+import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
 
 interface AddressPinsTableProps {
   pins: AddressPin[];
@@ -45,7 +46,20 @@ export function AddressPinsTable({
   noAddressesFound,
   noAddressesMatchSearch,
 }: AddressPinsTableProps) {
+  const t = useTranslations("MapPage");
+  const tAddress = useTranslations("ContactAddress");
   const [search, setSearch] = useState("");
+
+  const addressTypeLabel = (type: string) => {
+    switch (type) {
+      case "home":
+        return tAddress("TypeHome");
+      case "work":
+        return tAddress("TypeWork");
+      default:
+        return tAddress("TypeOther");
+    }
+  };
 
   const handleSearch = useDebouncedCallback((q: string) => setSearch(q), DEBOUNCE_MS.tableSearch);
 
@@ -94,9 +108,9 @@ export function AddressPinsTable({
           <Table highlightOnHover>
             <Table.Thead>
               <Table.Tr>
-                <Table.Th>Name</Table.Th>
-                <Table.Th>Type</Table.Th>
-                <Table.Th>Address</Table.Th>
+                <Table.Th>{t("PinColumnName")}</Table.Th>
+                <Table.Th>{t("PinColumnType")}</Table.Th>
+                <Table.Th>{t("PinColumnAddress")}</Table.Th>
               </Table.Tr>
             </Table.Thead>
             <Table.Tbody>
@@ -124,7 +138,7 @@ export function AddressPinsTable({
                         color={ADDRESS_TYPE_COLORS[pin.addressType] ?? "gray"}
                         leftSection={<IconHome size={10} />}
                       >
-                        {pin.addressType}
+                        {addressTypeLabel(pin.addressType)}
                       </Badge>
                     </Table.Td>
                     <Table.Td>

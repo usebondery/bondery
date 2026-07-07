@@ -14,6 +14,7 @@
     "lint": "eslint .",
     "check-types": "tsc --noEmit",
     "check-sync-patterns": "tsx scripts/check-mobile-sync-patterns.ts",
+    "test:sync": "tsx --test src/lib/sync/pull-wake.test.ts",
     "audit:forms": "tsx scripts/audit-mobile-forms.ts"
   },
   "dependencies": {

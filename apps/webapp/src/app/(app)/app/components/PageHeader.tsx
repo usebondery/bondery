@@ -1,16 +1,17 @@
 "use client";
 
-import { ActionIcon, Group, Title, Tooltip } from "@mantine/core";
-import { IconArrowLeft, IconHelpCircle } from "@tabler/icons-react";
+import { ActionIcon, Group, Title } from "@mantine/core";
+import { IconArrowLeft } from "@tabler/icons-react";
 import type { Icon } from "@tabler/icons-react";
+import type { DocId } from "@bondery/helpers";
 import type { ReactNode } from "react";
-import { ActionIconLink } from "@bondery/mantine-next";
+import { ActionIconLink, HelpButton } from "@bondery/mantine-next";
 import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
 
 interface PageHeaderProps {
   icon: Icon;
   title: string;
-  helpHref?: string;
+  helpDoc?: DocId;
   helpLabel?: string;
   action?: ReactNode;
   primaryAction?: ReactNode;
@@ -22,7 +23,7 @@ interface PageHeaderProps {
 export function PageHeader({
   icon: Icon,
   title,
-  helpHref,
+  helpDoc,
   helpLabel,
   action,
   primaryAction,
@@ -59,27 +60,7 @@ export function PageHeader({
         )}
         <Icon size={32} stroke={1.5} />
         <Title order={1}>{title}</Title>
-        {helpLabel ? (
-          <Tooltip label={helpLabel}>
-            {helpHref ? (
-              <ActionIconLink
-                href={helpHref}
-                target="_blank"
-                rel="noopener noreferrer"
-                ariaLabel={helpLabel}
-                variant="light"
-                color="gray"
-                radius="xl"
-                size="sm"
-                icon={<IconHelpCircle size={14} />}
-              />
-            ) : (
-              <ActionIcon variant="light" color="gray" radius="xl" size="sm">
-                <IconHelpCircle size={14} />
-              </ActionIcon>
-            )}
-          </Tooltip>
-        ) : null}
+        {helpLabel ? <HelpButton doc={helpDoc} label={helpLabel} /> : null}
       </Group>
       {resolvedAction}
     </Group>

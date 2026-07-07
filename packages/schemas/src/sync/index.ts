@@ -4,3 +4,4 @@ export * from "#sync/push.js";
 export * from "#sync/pull.js";
 export * from "#sync/tables.js";
 export * from "#sync/conflict.js";
+export * from "#sync/ws.js";

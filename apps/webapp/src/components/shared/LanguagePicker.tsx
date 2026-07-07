@@ -125,7 +125,13 @@ export function LanguagePicker({
           </Input>
         </Combobox.Target>
 
-        <Combobox.Dropdown>
+        <Combobox.Dropdown
+          styles={{
+            dropdown: {
+              "--combobox-option-active-bg": "var(--mantine-color-branding-primary-filled-hover)",
+            },
+          }}
+        >
           <Combobox.Search
             value={searchValue}
             className="transform-none"
@@ -133,7 +139,7 @@ export function LanguagePicker({
             placeholder={placeholder || t("LanguageSearch")}
           />
           <Combobox.Options>
-            <ScrollArea.Autosize mah={200}>
+            <ScrollArea.Autosize className="max-h-60">
               {languages
                 .filter((lang) => {
                   const query = searchValue.toLowerCase();
@@ -155,6 +161,7 @@ export function LanguagePicker({
                         backgroundColor: isSelected
                           ? "var(--mantine-color-branding-primary-filled)"
                           : undefined,
+                        color: isSelected ? "white" : undefined,
                       }}
                     >
                       <Group gap="xs" wrap="nowrap">
@@ -162,22 +169,9 @@ export function LanguagePicker({
                           className={`fi fi-${lang.flag}`}
                           style={{ width: 20, flexShrink: 0 }}
                         />
-                        <div style={{ flex: 1 }}>
-                          {isSelected && (
-                            <Text
-                              component="span"
-                              c="var(--mantine-color-default-color)"
-                              size="sm"
-                              mr={4}
-                              fw={400}
-                            >
-                              ✓ {t("CurrentlySelected")}:
-                            </Text>
-                          )}
-                          <Text component="span" size="sm" fw={400}>
-                            {getDisplayLabel(lang)}
-                          </Text>
-                        </div>
+                        <Text component="span" size="sm" fw={400}>
+                          {getDisplayLabel(lang)}
+                        </Text>
                       </Group>
                     </Combobox.Option>
                   );

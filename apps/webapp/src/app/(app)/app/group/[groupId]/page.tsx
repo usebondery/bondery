@@ -4,6 +4,7 @@ import { serverApiFetch } from "@/lib/api/server";
 import type { Contact } from "@bondery/schemas";
 import { notFound } from "next/navigation";
 import { API_ROUTES, formatMetadataTitle } from "@bondery/helpers/globals/paths";
+import { getWebTranslations as getTranslations } from "@/lib/i18n/getWebTranslations";
 import { appendAvatarParams } from "@/lib/avatarParams";
 import {
   parseContactsListParams,
@@ -19,15 +20,19 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   try {
     const { groupId } = await params;
+    const t = await getTranslations("GroupsPage");
     const res = await serverApiFetch(`${API_ROUTES.GROUPS}/${groupId}`, undefined, {
       next: { tags: ["groups"] },
     });
-    if (!res.ok) return { title: "Group" };
+    if (!res.ok) {
+      return { title: formatMetadataTitle(t("FallbackTitle")) };
+    }
     const data = await res.json();
-    const label = data.group?.label || "Group";
+    const label = data.group?.label || t("FallbackTitle");
     return { title: formatMetadataTitle(label) };
   } catch {
-    return { title: "Group" };
+    const t = await getTranslations("GroupsPage");
+    return { title: formatMetadataTitle(t("FallbackTitle")) };
   }
 }
 

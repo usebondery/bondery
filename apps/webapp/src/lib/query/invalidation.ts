@@ -18,6 +18,11 @@ export async function invalidateContactLists(queryClient: QueryClient): Promise<
   await queryClient.invalidateQueries({ queryKey: contactKeys.lists() });
 }
 
+/** Map pins are viewport-scoped but must refresh after geo/address edits. */
+export async function invalidateContactMapPins(queryClient: QueryClient): Promise<void> {
+  await queryClient.invalidateQueries({ queryKey: [...contactKeys.all, "map-pins"] });
+}
+
 export async function invalidateContactDetail(
   queryClient: QueryClient,
   id: string,
@@ -77,6 +82,7 @@ export async function invalidateAfterImport(queryClient: QueryClient): Promise<v
     invalidateContactDomain(queryClient),
     invalidateMergeRecommendationDomain(queryClient),
     invalidateGroupDomain(queryClient),
+    invalidateSettings(queryClient),
   ]);
 }
 

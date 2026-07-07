@@ -133,10 +133,6 @@ export const syncPullRoutes: AppRoutePlugin = async (fastify): Promise<void> => 
       return reply.status(400).send({ error: "since must be a non-negative integer" });
     }
 
-    if (since === 0) {
-      return reply.status(400).send({ error: "call GET /api/sync/bootstrap when since=0" });
-    }
-
     const { user } = getAuth(request);
     const admin = createAdminClient();
     const head = await getLastServerSequence(admin, user.id);

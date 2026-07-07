@@ -1,5 +1,5 @@
 import type { Contact } from "@bondery/schemas";
-import { File, Paths } from "expo-file-system/next";
+import { File, Paths } from "expo-file-system";
 import * as Sharing from "expo-sharing";
 import { fetchContactVCard } from "../api/client";
 

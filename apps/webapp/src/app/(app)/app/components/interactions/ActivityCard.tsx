@@ -16,7 +16,9 @@ import {
 import { IconCopy, IconDotsVertical, IconEdit, IconTrash } from "@tabler/icons-react";
 import type { Activity } from "@bondery/schemas";
 import type { ReactNode } from "react";
-import { getActivityTypeConfig, type ActivityTypeConfig } from "@/lib/activityTypes";
+import { getActivityTypeConfig } from "@/lib/activityTypes";
+import { useInteractionTypeLabel } from "@/lib/i18n/useInteractionTypeLabel";
+import { useDateFormatter as useFormatter } from "@/lib/i18n/useDateFormatter";
 
 interface ActivityCardProps {
   activity: Activity;
@@ -30,10 +32,6 @@ interface ActivityCardProps {
   onDelete: () => void;
 }
 
-function getTypeLabel(type: string, typeConfig: ActivityTypeConfig): string {
-  return type.toUpperCase() || typeConfig.emoji;
-}
-
 export function ActivityCard({
   activity,
   editLabel,
@@ -45,8 +43,11 @@ export function ActivityCard({
   onDuplicate,
   onDelete,
 }: ActivityCardProps) {
+  const getInteractionTypeLabel = useInteractionTypeLabel();
+  const formatter = useFormatter();
   const typeConfig = getActivityTypeConfig(activity.type);
   const date = new Date(activity.date);
+  const typeLabel = getInteractionTypeLabel(activity.type) || typeConfig.emoji;
 
   return (
     <Paper
@@ -108,7 +109,7 @@ export function ActivityCard({
         <Stack gap="2" style={{ flex: 1 }}>
           <Group gap="xs" align="center" wrap="nowrap">
             <Text c="dimmed" size="xs">
-              {date.toLocaleDateString("en-US", {
+              {formatter.dateTime(date, {
                 month: "short",
                 day: "numeric",
                 year: "numeric",
@@ -121,12 +122,12 @@ export function ActivityCard({
               size="xs"
               leftSection={typeConfig.emoji}
             >
-              {getTypeLabel(activity.type, typeConfig)}
+              {typeLabel}
             </Badge>
           </Group>
 
           <Text fw={700} size="md">
-            {activity.title || activity.type}
+            {activity.title || typeLabel}
           </Text>
 
           {activity.description && (

@@ -4,7 +4,14 @@ export { ButtonLink, type ButtonLinkProps } from "#nextjs/ButtonLink/index.js";
 export { LogoIcon, type LogoIconProps } from "#LogoIcon/index.js";
 export { ThemePicker, type ThemePickerProps, type ThemePreference } from "#ThemePicker/index.js";
 export { UserCard, type UserCardProps } from "#UserCard/index.js";
-export { ModalTitle, type ModalTitleProps, ModalFooter, type ModalFooterProps } from "#Modal/index.js";
+export {
+  ModalTitle,
+  type ModalTitleProps,
+  ModalFooter,
+  type ModalFooterProps,
+  ModalScrollLayout,
+  type ModalScrollLayoutProps,
+} from "#Modal/index.js";
 export { DropzoneContent, type DropzoneContentProps } from "#Dropzone/index.js";
 export { PersonChip } from "#nextjs/PersonChip/index.js";
 export { PersonCard, type PersonCardProps } from "#nextjs/PersonCard/index.js";
@@ -43,6 +50,7 @@ export {
 export { bonderyTheme, primaryColor } from "#theme.js";
 export { DotsMenuButton, type DotsMenuButtonProps } from "#DotsMenuButton/index.js";
 export { CopyButton, type CopyButtonProps } from "#CopyButton/index.js";
+export { HelpButton, type HelpButtonProps } from "#HelpButton/index.js";
 
 // DataTable
 export {

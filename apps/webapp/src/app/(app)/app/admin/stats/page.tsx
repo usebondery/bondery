@@ -10,7 +10,10 @@ import { NpsCard } from "./components/NpsCard";
 import { TotalUsersChart } from "./components/TotalUsersChart";
 import { GithubStarsCard } from "./components/GithubStarsCard";
 
-export const metadata: Metadata = { title: "KPIs Dashboard" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("StatsPage");
+  return { title: t("Title") };
+}
 
 export default async function StatsPage() {
   const t = await getTranslations("StatsPage");

@@ -1,6 +1,6 @@
 {
   "name": "bondery-monorepo",
-  "version": "1.4.2",
+  "version": "1.7.0",
   "private": true,
   "packageManager": "npm@11.12.0",
   "workspaces": [
@@ -32,6 +32,8 @@
     "generate-types": "npm run gen-types -w apps/supabase-db && git add packages/schemas/src/supabase.types.ts",
     "sync-exports": "node scripts/sync-package-exports.mjs",
     "check-package-imports": "node scripts/check-package-import-extensions.mjs",
+    "generate-doc-links": "node scripts/generate-doc-links.mjs",
+    "check-doc-links": "node scripts/check-doc-links.mjs",
     "prepare": "husky"
   },
   "devDependencies": {

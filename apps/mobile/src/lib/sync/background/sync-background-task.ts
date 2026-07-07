@@ -1,6 +1,6 @@
 import * as BackgroundTask from "expo-background-task";
 import * as TaskManager from "expo-task-manager";
-import { pullOnce } from "../pull-manager";
+import { schedulePull } from "../pull-manager";
 import { pushSync } from "../outbox/sync-worker";
 
 export const SYNC_BACKGROUND_TASK = "bondery-sync";
@@ -8,7 +8,7 @@ export const SYNC_BACKGROUND_TASK = "bondery-sync";
 TaskManager.defineTask(SYNC_BACKGROUND_TASK, async () => {
   try {
     await pushSync();
-    await pullOnce();
+    await schedulePull({ reason: "background" });
     return BackgroundTask.BackgroundTaskResult.Success;
   } catch {
     return BackgroundTask.BackgroundTaskResult.Failed;

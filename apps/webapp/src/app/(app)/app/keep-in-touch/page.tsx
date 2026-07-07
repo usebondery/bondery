@@ -1,7 +1,11 @@
 import type { Metadata } from "next";
+import { getWebTranslations as getTranslations } from "@/lib/i18n/getWebTranslations";
 import { KeepInTouchLoader } from "./KeepInTouchLoader";
 
-export const metadata: Metadata = { title: "Keep in touch" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("KeepInTouch");
+  return { title: t("Title") };
+}
 
 function defaultEndDate(): string {
   const d = new Date();

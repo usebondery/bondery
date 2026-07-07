@@ -1,7 +1,7 @@
 import type { Group, TablesInsert, TablesUpdate } from "@bondery/schemas";
 import { GROUP_SELECT } from "../../lib/queries.js";
 import { captureCurrentSyncTxid } from "../_shared/with-txid.js";
-import { DomainError, type DomainContext } from "../_shared/context.js";
+import { DomainError, syncEmitMetaFromContext, type DomainContext } from "../_shared/context.js";
 import {
   buildGroupDeleteChange,
   buildGroupRowChange,
@@ -49,7 +49,7 @@ export async function createGroup(
 
   const txid = await captureCurrentSyncTxid(client);
   const serverSequence =
-    (await emitSyncBatch(user.id, [buildGroupRowChange(newGroup as Record<string, unknown>)])) ?? 0;
+    (await emitSyncBatch(user.id, [buildGroupRowChange(newGroup as Record<string, unknown>)], syncEmitMetaFromContext(ctx))) ?? 0;
   return { data: { group: newGroup as Group }, txid, serverSequence };
 }
 
@@ -83,7 +83,7 @@ export async function updateGroup(
 
   const txid = await captureCurrentSyncTxid(client);
   const serverSequence =
-    (await emitSyncBatch(user.id, [buildGroupRowChange(group as Record<string, unknown>)])) ?? 0;
+    (await emitSyncBatch(user.id, [buildGroupRowChange(group as Record<string, unknown>)], syncEmitMetaFromContext(ctx))) ?? 0;
   return { data: { group: group as Group }, txid, serverSequence };
 }
 
@@ -106,7 +106,7 @@ export async function deleteGroup(
   }
 
   const txid = await captureCurrentSyncTxid(client);
-  const serverSequence = (await emitSyncBatch(user.id, [buildGroupDeleteChange(groupId)])) ?? 0;
+  const serverSequence = (await emitSyncBatch(user.id, [buildGroupDeleteChange(groupId)], syncEmitMetaFromContext(ctx))) ?? 0;
   return { data: { deletedId: groupId }, txid, serverSequence };
 }
 
@@ -165,7 +165,7 @@ export async function addGroupMembers(
 
   const txid = await captureCurrentSyncTxid(client);
   const changes = await buildPeopleGroupsChanges(client, user.id, groupId, newPersonIds, "insert");
-  const serverSequence = (await emitSyncBatch(user.id, changes)) ?? 0;
+  const serverSequence = (await emitSyncBatch(user.id, changes, syncEmitMetaFromContext(ctx))) ?? 0;
   return {
     data: { addedCount: newPersonIds.length, skippedCount },
     txid,
@@ -194,6 +194,6 @@ export async function removeGroupMembers(
   }
 
   const txid = await captureCurrentSyncTxid(client);
-  const serverSequence = (await emitSyncBatch(user.id, changes)) ?? 0;
+  const serverSequence = (await emitSyncBatch(user.id, changes, syncEmitMetaFromContext(ctx))) ?? 0;
   return { data: { removedCount: personIds.length }, txid, serverSequence };
 }

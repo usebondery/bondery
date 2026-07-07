@@ -1,15 +1,15 @@
 "use client";
 
-import { Card, CardSection, Group, Text, Tooltip } from "@mantine/core";
-import { IconHelpCircle } from "@tabler/icons-react";
+import { Card, CardSection, Group, Text } from "@mantine/core";
+import type { DocId } from "@bondery/helpers";
 import type { ReactNode } from "react";
-import { ActionIconLink } from "@bondery/mantine-next";
+import { HelpButton } from "@bondery/mantine-next";
 
 interface SettingsSectionProps {
   id?: string;
   icon: ReactNode;
   title: string;
-  helpHref?: string;
+  helpDoc?: DocId;
   helpLabel?: string;
   action?: ReactNode;
   children: ReactNode;
@@ -25,13 +25,18 @@ export function SettingsSection({
   id,
   icon,
   title,
-  helpHref,
+  helpDoc,
   helpLabel,
   action,
   children,
 }: SettingsSectionProps) {
   return (
-    <Card id={id} withBorder shadow="sm">
+    <Card
+      id={id}
+      withBorder
+      shadow="sm"
+      style={id ? { scrollMarginTop: "var(--mantine-spacing-md)" } : undefined}
+    >
       <CardSection withBorder inheritPadding py="md">
         <Group justify="space-between" wrap="nowrap" gap="sm">
           <Group gap="xs" wrap="nowrap" style={{ minWidth: 0 }}>
@@ -39,21 +44,7 @@ export function SettingsSection({
             <Text size="lg" fw={600}>
               {title}
             </Text>
-            {helpHref && helpLabel ? (
-              <Tooltip label={helpLabel} multiline maw={320}>
-                <ActionIconLink
-                  href={helpHref}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  ariaLabel={helpLabel}
-                  variant="light"
-                  color="gray"
-                  radius="xl"
-                  size="sm"
-                  icon={<IconHelpCircle size={14} />}
-                />
-              </Tooltip>
-            ) : null}
+            {helpLabel ? <HelpButton doc={helpDoc} label={helpLabel} /> : null}
           </Group>
           {action}
         </Group>

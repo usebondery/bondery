@@ -35,10 +35,10 @@ import {
 import { formatContactName } from "@/lib/nameHelpers";
 import { createSocialUrl } from "@bondery/helpers";
 import {
-  getSocialActionTooltip,
   SOCIAL_ACTION_ORDER,
   type SocialActionKey,
 } from "@/lib/socialActionTooltips";
+import { useSocialActionTooltips } from "@/lib/i18n/useSocialActionTooltips";
 import { getTelephoneReactMaskExpression, countryCodes } from "@bondery/helpers/phone";
 import { abbreviateLocationCountry } from "@bondery/helpers";
 import { useContactsTableCopy } from "@/lib/i18n/useContactsTableCopy";
@@ -203,7 +203,10 @@ interface SocialLink {
 }
 
 function ContactSocialIcons({ contact }: { contact: Contact }) {
-  const socialByKey: Record<SocialActionKey, SocialLink> = {
+  const { getSocialActionTooltip, getSocialActionLabel } = useSocialActionTooltips();
+
+  const socialByKey: Record<SocialActionKey, SocialLink> = useMemo(
+    () => ({
     phone: {
       key: "phone",
       icon: <IconPhone size={18} />,
@@ -221,7 +224,7 @@ function ContactSocialIcons({ contact }: { contact: Contact }) {
         }
       })(),
       color: "blue",
-      label: "Phone",
+      label: getSocialActionLabel("phone"),
       disabled: (() => {
         const phones = Array.isArray(contact.phones) ? contact.phones : [];
         return phones.length === 0;
@@ -244,7 +247,7 @@ function ContactSocialIcons({ contact }: { contact: Contact }) {
         }
       })(),
       color: "red",
-      label: "Email",
+      label: getSocialActionLabel("email"),
       disabled: (() => {
         const emails = Array.isArray(contact.emails) ? contact.emails : [];
         return emails.length === 0;
@@ -257,7 +260,7 @@ function ContactSocialIcons({ contact }: { contact: Contact }) {
         ? createSocialUrl("linkedin", contact.linkedin)
         : undefined,
       color: "blue",
-      label: "LinkedIn",
+      label: getSocialActionLabel("linkedin"),
       disabled: !contact.linkedin,
     },
     instagram: {
@@ -267,7 +270,7 @@ function ContactSocialIcons({ contact }: { contact: Contact }) {
         ? createSocialUrl("instagram", contact.instagram)
         : undefined,
       color: "pink",
-      label: "Instagram",
+      label: getSocialActionLabel("instagram"),
       disabled: !contact.instagram,
     },
     whatsapp: {
@@ -277,7 +280,7 @@ function ContactSocialIcons({ contact }: { contact: Contact }) {
         ? createSocialUrl("whatsapp", contact.whatsapp)
         : undefined,
       color: "green",
-      label: "WhatsApp",
+      label: getSocialActionLabel("whatsapp"),
       disabled: !contact.whatsapp,
     },
     facebook: {
@@ -287,7 +290,7 @@ function ContactSocialIcons({ contact }: { contact: Contact }) {
         ? createSocialUrl("facebook", contact.facebook)
         : undefined,
       color: "blue",
-      label: "Facebook",
+      label: getSocialActionLabel("facebook"),
       disabled: !contact.facebook,
     },
     signal: {
@@ -297,10 +300,12 @@ function ContactSocialIcons({ contact }: { contact: Contact }) {
       ),
       href: contact.signal || undefined,
       color: "indigo",
-      label: "Signal",
+      label: getSocialActionLabel("signal"),
       disabled: !contact.signal,
     },
-  };
+    }),
+    [contact, getSocialActionLabel],
+  );
 
   const socials: SocialLink[] = SOCIAL_ACTION_ORDER.map(
     (key) => socialByKey[key],

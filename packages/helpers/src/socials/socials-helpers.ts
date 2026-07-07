@@ -146,6 +146,44 @@ export interface ProcessContactSocialFieldResult {
   error?: string;
 }
 
+export type ContactSocialFieldCommitErrorCode = "invalid_website";
+
+export type ContactSocialFieldCommitAction =
+  | { action: "noop" }
+  | { action: "clear" }
+  | { action: "save"; value: string }
+  | { action: "error"; code: ContactSocialFieldCommitErrorCode };
+
+/**
+ * Resolves what a social-field commit should do given draft input and persisted value.
+ * Empty input with a prior value clears; empty with no prior value is a noop.
+ */
+export function resolveContactSocialFieldCommit(
+  field: ContactSocialFieldKey,
+  rawValue: string,
+  persistedValue: string,
+  options?: { dialCode?: string },
+): ContactSocialFieldCommitAction {
+  const persisted = persistedValue.trim();
+  const processed = processContactSocialFieldValue(field, rawValue, options);
+
+  if (processed.error === "invalid_website") {
+    return { action: "error", code: "invalid_website" };
+  }
+
+  const nextValue = processed.value;
+
+  if (nextValue === persisted) {
+    return { action: "noop" };
+  }
+
+  if (!nextValue) {
+    return persisted ? { action: "clear" } : { action: "noop" };
+  }
+
+  return { action: "save", value: nextValue };
+}
+
 /**
  * Processes raw user input for a contact social field before PATCH.
  * Mirrors webapp SocialsSection saveField behavior.

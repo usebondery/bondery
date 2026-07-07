@@ -13,6 +13,9 @@ export interface DomainContext {
   client: DomainSupabaseClient;
   user: DomainAuthUser;
   log?: FastifyBaseLogger;
+  wakeMeta?: {
+    sourceDeviceId?: string;
+  };
 }
 
 export class DomainError extends Error {
@@ -30,4 +33,10 @@ export function assertDomain(condition: unknown, message: string, statusCode = 4
   if (!condition) {
     throw new DomainError(message, statusCode);
   }
+}
+
+export function syncEmitMetaFromContext(ctx: DomainContext) {
+  return ctx.wakeMeta?.sourceDeviceId
+    ? { sourceDeviceId: ctx.wakeMeta.sourceDeviceId }
+    : undefined;
 }

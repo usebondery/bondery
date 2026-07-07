@@ -165,7 +165,7 @@ export default function UnavailablePage() {
   const actionStack = (centered: boolean) => (
     <Stack gap={4} align={centered ? "center" : "flex-start"}>
       {healthLoading ? (
-        <Loader size="sm" type="dots" />
+        <Loader />
       ) : (
         <Group gap="sm" wrap="wrap" justify={centered ? "center" : "flex-start"}>
           <Button
@@ -249,7 +249,7 @@ export default function UnavailablePage() {
       <Box pb="xl" px={{ base: "xl", sm: 48, lg: 80 }}>
         <Stack gap="xs" align="center">
           {healthLoading ? (
-            <Loader size="sm" type="dots" />
+            <Loader />
           ) : (
             <Text size="sm" c="dimmed" ta="center">
               {statusLabel(t, userStatus)}

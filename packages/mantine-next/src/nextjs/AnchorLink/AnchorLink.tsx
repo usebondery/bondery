@@ -11,6 +11,7 @@ export type AnchorLinkProps = Omit<
   href: string;
   children: ReactNode;
   target?: string;
+  scroll?: boolean;
   onClick?: () => void;
 };
 
@@ -23,10 +24,11 @@ export type AnchorLinkProps = Omit<
 export function AnchorLink({
   href,
   children,
+  scroll,
   ...anchorProps
 }: AnchorLinkProps) {
   return (
-    <Anchor component={NextLink as any} href={href} {...anchorProps}>
+    <Anchor component={NextLink as any} href={href} scroll={scroll} {...anchorProps}>
       {children}
     </Anchor>
   );

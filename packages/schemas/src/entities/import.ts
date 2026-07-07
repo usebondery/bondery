@@ -1,4 +1,8 @@
 import { z } from "zod";
+import {
+  SOCIAL_IMPORT_COMMIT_BATCH_SIZE,
+  VCARD_IMPORT_COMMIT_BATCH_SIZE,
+} from "#constants/import.js";
 import { contactAddressTypeSchema } from "#entities/address.js";
 import { nullableDateTimeSchema } from "#entities/_shared.js";
 import { channelTypeSchema } from "#primitives/index.js";
@@ -96,7 +100,7 @@ export const linkedInParseResponseSchema = z
   ;
 
 export const linkedInImportCommitRequestSchema = z.object({
-  contacts: z.array(linkedInPreparedContactSchema),
+  contacts: z.array(linkedInPreparedContactSchema).max(SOCIAL_IMPORT_COMMIT_BATCH_SIZE),
 });
 
 export const linkedInImportCommitResponseSchema = z
@@ -143,7 +147,7 @@ export const instagramParseResponseSchema = z
   ;
 
 export const instagramImportCommitRequestSchema = z.object({
-  contacts: z.array(instagramPreparedContactSchema),
+  contacts: z.array(instagramPreparedContactSchema).max(SOCIAL_IMPORT_COMMIT_BATCH_SIZE),
 });
 
 export const instagramImportCommitResponseSchema = z
@@ -224,7 +228,7 @@ export const vcardParseResponseSchema = z
   ;
 
 export const vcardImportCommitRequestSchema = z.object({
-  contacts: z.array(vcardPreparedContactSchema),
+  contacts: z.array(vcardPreparedContactSchema).max(VCARD_IMPORT_COMMIT_BATCH_SIZE),
 });
 
 export const vcardImportCommitResponseSchema = z

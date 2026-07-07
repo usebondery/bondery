@@ -30,7 +30,11 @@ function isClientFile(content: string): boolean {
 }
 
 function isAllowedClientFetchFile(rel: string): boolean {
-  return rel.replace(/\\/g, "/").startsWith("lib/api/");
+  const normalized = rel.replace(/\\/g, "/");
+  return (
+    normalized.startsWith("lib/api/") ||
+    normalized === "lib/sync/sync-wake-client.ts"
+  );
 }
 
 function isApiRouteFile(rel: string): boolean {

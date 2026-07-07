@@ -6,6 +6,7 @@ export type NextLinkComponentProps = {
   children?: ReactNode;
   target?: string;
   rel?: string;
+  scroll?: boolean;
 };
 
 /** NodeNext resolves `next/link.js` as a module namespace; cast for JSX and Mantine `component` usage. */

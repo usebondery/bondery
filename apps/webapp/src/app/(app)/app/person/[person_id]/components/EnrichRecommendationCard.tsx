@@ -1,7 +1,7 @@
 "use client";
 
 import { Box, Button, Group, Loader, Paper, Progress, Stack, Text, Tooltip } from "@mantine/core";
-import { PersonChip } from "@bondery/mantine-next";
+import { HelpButton, PersonChip } from "@bondery/mantine-next";
 import {
   IconBrandLinkedin,
   IconPlayerPause,
@@ -78,18 +78,21 @@ export function EnrichRecommendationCard({
                 </Text>
               </Group>
             </Tooltip>
-            <Text size="sm" fw={500}>
-              {isRunning
-                ? failed > 0
-                  ? t("ProgressLabelWithFailed", { completed, failed, totalEligible })
-                  : t("ProgressLabel", { completed, totalEligible })
-                : hasInterruptedRun
-                  ? t("ResumeLabel", {
-                      completed: pendingQueueStatus!.completed,
-                      pending: pendingQueueStatus!.pending,
-                    })
-                  : t("PersonEligibleLabel")}
-            </Text>
+            <Group gap={4} align="center" wrap="nowrap">
+              <Text size="sm" fw={500}>
+                {isRunning
+                  ? failed > 0
+                    ? t("ProgressLabelWithFailed", { completed, failed, totalEligible })
+                    : t("ProgressLabel", { completed, totalEligible })
+                  : hasInterruptedRun
+                    ? t("ResumeLabel", {
+                        completed: pendingQueueStatus!.completed,
+                        pending: pendingQueueStatus!.pending,
+                      })
+                    : t("PersonEligibleLabel")}
+              </Text>
+              <HelpButton doc="bondery.chrome-extension.enriching-contact" label={t("HelpTooltip")} />
+            </Group>
           </Group>
 
           {isRunning && currentPerson && (

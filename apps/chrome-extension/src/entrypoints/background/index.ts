@@ -731,6 +731,93 @@ async function handleActiveProfileContext(
 
 const ENRICH_TIMEOUT_MINUTES = 1.5; // Chrome alarms minimum is 1 min; 1.5 min ≈ 90s
 const ENRICH_KEEPALIVE_MINUTES = 0.4; // Fires every ~24s to keep SW alive
+const PENDING_ENRICH_SESSION_KEY = "pendingEnrich";
+
+/** tabs.onUpdated listeners keyed by LinkedIn tab id — removed when enrich completes */
+const enrichTabListeners = new Map<
+  number,
+  (tabId: number, changeInfo: { status?: string }) => void
+>();
+
+async function persistPendingEnrich(): Promise<void> {
+  try {
+    if (pendingEnrich) {
+      await browser.storage.session.set({ [PENDING_ENRICH_SESSION_KEY]: pendingEnrich });
+    } else {
+      await browser.storage.session.remove(PENDING_ENRICH_SESSION_KEY);
+    }
+  } catch {
+    /* session storage may be unavailable */
+  }
+}
+
+function removeEnrichTabListener(tabId: number): void {
+  const listener = enrichTabListeners.get(tabId);
+  if (!listener) return;
+  browser.tabs.onUpdated.removeListener(listener);
+  enrichTabListeners.delete(tabId);
+}
+
+/**
+ * Pushes RUN_PENDING_ENRICH to the LinkedIn tab once its content script is ready.
+ * Retries on tab complete and on a staggered schedule — passive polling alone is unreliable.
+ */
+function scheduleEnrichTriggerOnTab(tabId: number, requestId: string): void {
+  removeEnrichTabListener(tabId);
+
+  const tryTrigger = async (source: string) => {
+    if (
+      !pendingEnrich ||
+      pendingEnrich.requestId !== requestId ||
+      pendingEnrich.linkedinTabId !== tabId
+    ) {
+      return;
+    }
+
+    try {
+      await browser.tabs.sendMessage(tabId, {
+        type: "RUN_PENDING_ENRICH",
+        payload: { requestId },
+      });
+      console.log("[background][enrich] RUN_PENDING_ENRICH delivered", { tabId, requestId, source });
+    } catch {
+      console.log("[background][enrich] RUN_PENDING_ENRICH not ready yet", { tabId, requestId, source });
+    }
+  };
+
+  const onUpdated = (updatedTabId: number, changeInfo: { status?: string }) => {
+    if (updatedTabId !== tabId || changeInfo.status !== "complete") return;
+    void tryTrigger("tab-complete");
+  };
+
+  browser.tabs.onUpdated.addListener(onUpdated);
+  enrichTabListeners.set(tabId, onUpdated);
+
+  void tryTrigger("immediate");
+  for (const delay of [400, 1000, 2000, 4000, 7000, 12000]) {
+    setTimeout(() => void tryTrigger(`retry-${delay}ms`), delay);
+  }
+}
+
+async function restorePendingEnrichIfAny(): Promise<void> {
+  try {
+    const stored = await browser.storage.session.get(PENDING_ENRICH_SESSION_KEY);
+    const value = stored[PENDING_ENRICH_SESSION_KEY] as typeof pendingEnrich;
+    if (!value?.requestId || !value.linkedinTabId || value.linkedinTabId < 1) return;
+
+    pendingEnrich = value;
+    console.log("[background][enrich] restored pending enrich from session", {
+      requestId: value.requestId,
+      linkedinTabId: value.linkedinTabId,
+    });
+
+    scheduleEnrichTriggerOnTab(value.linkedinTabId, value.requestId);
+    await browser.alarms.create("enrich-timeout", { delayInMinutes: ENRICH_TIMEOUT_MINUTES });
+    await browser.alarms.create("enrich-keepalive", { periodInMinutes: ENRICH_KEEPALIVE_MINUTES });
+  } catch (error) {
+    console.warn("[background][enrich] session restore failed", error);
+  }
+}
 
 /**
  * Clears the pending enrich state, cancels alarms, and optionally notifies
@@ -743,6 +830,8 @@ async function clearPendingEnrich(reason?: string): Promise<void> {
 
   const { senderTabId, linkedinTabId, requestId } = pendingEnrich;
   pendingEnrich = null;
+  removeEnrichTabListener(linkedinTabId);
+  void persistPendingEnrich();
 
   // Cancel alarms
   try {
@@ -757,6 +846,8 @@ async function clearPendingEnrich(reason?: string): Promise<void> {
   }
 
   if (reason) {
+    console.warn("[background][enrich] clearing pending enrich:", reason, { requestId });
+
     // Close the LinkedIn tab
     try {
       await browser.tabs.remove(linkedinTabId);
@@ -796,10 +887,20 @@ async function handleEnrichPersonRequest(
   await clearPendingEnrich("Cancelled — a new enrich request was started");
 
   const senderTabId = sender.tab?.id ?? 0;
+  if (!senderTabId) {
+    console.warn("[background][enrich] missing sender.tab.id — webapp result push may fail");
+  }
 
-  // Open a LinkedIn tab for the target profile
-  // Decode first to normalize (handle may already be URL-encoded in the DB),
-  // then re-encode to produce a valid URL without double-encoding %xx sequences.
+  // Register pending enrich BEFORE opening the tab so the LinkedIn content script
+  // can find context even if it loads while tabs.create is in flight.
+  pendingEnrich = {
+    contactId,
+    linkedinHandle,
+    requestId,
+    linkedinTabId: -1,
+    senderTabId,
+  };
+
   const normalizedHandle = (() => {
     try {
       return decodeURIComponent(linkedinHandle);
@@ -808,9 +909,12 @@ async function handleEnrichPersonRequest(
     }
   })();
   const linkedinUrl = `https://www.linkedin.com/in/${encodeURIComponent(normalizedHandle)}/`;
+  console.log("[background][enrich] opening LinkedIn tab", { requestId, linkedinUrl, senderTabId });
+
   const tab = await browser.tabs.create({ url: linkedinUrl, active: false });
 
   if (!tab.id) {
+    pendingEnrich = null;
     sendResponse({
       type: "ENRICH_PERSON_RESULT",
       payload: { requestId, success: false, error: "Failed to open LinkedIn tab" },
@@ -818,19 +922,21 @@ async function handleEnrichPersonRequest(
     return;
   }
 
+  if (pendingEnrich?.requestId === requestId) {
+    pendingEnrich.linkedinTabId = tab.id;
+  }
+
+  console.log("[background][enrich] tab opened", { requestId, linkedinTabId: tab.id });
+  await persistPendingEnrich();
+  scheduleEnrichTriggerOnTab(tab.id, requestId);
+
   // Use alarms instead of setTimeout to survive SW idle termination.
   // The timeout alarm fires once after ~90s; the keepalive alarm pings
   // periodically (~24s) to prevent Chrome from killing the SW mid-enrich.
   await browser.alarms.create("enrich-timeout", { delayInMinutes: ENRICH_TIMEOUT_MINUTES });
   await browser.alarms.create("enrich-keepalive", { periodInMinutes: ENRICH_KEEPALIVE_MINUTES });
 
-  pendingEnrich = {
-    contactId,
-    linkedinHandle,
-    requestId,
-    linkedinTabId: tab.id,
-    senderTabId,
-  };
+  // pendingEnrich was set before tabs.create; linkedinTabId updated above.
 
   // Respond with a typed ack so the webapp.content bridge’s
   // runtime.sendMessage promise resolves. The real result arrives
@@ -884,6 +990,13 @@ async function handleSubmitEnrichData(
 
   const { senderTabId, linkedinTabId } = pendingEnrich;
   await clearPendingEnrich();
+
+  console.log("[background][enrich] submitting to API", {
+    requestId,
+    contactId,
+    workCount: profile.workHistory?.length ?? 0,
+    eduCount: profile.educationHistory?.length ?? 0,
+  });
 
   try {
     await enrichPersonFromLinkedIn(contactId, {
@@ -1000,6 +1113,11 @@ async function handleMessage(
 
       case "GET_ENRICH_CONTEXT":
         // LinkedIn content script asking if it should auto-enrich
+        console.log("[background][enrich] GET_ENRICH_CONTEXT", {
+          senderTabId: sender.tab?.id,
+          pendingTabId: pendingEnrich?.linkedinTabId,
+          requestId: pendingEnrich?.requestId,
+        });
         if (pendingEnrich && sender.tab?.id === pendingEnrich.linkedinTabId) {
           sendResponse({
             type: "ENRICH_CONTEXT_RESULT",
@@ -1171,6 +1289,8 @@ function initBackground(): void {
       }
     }
   });
+
+  void restorePendingEnrichIfAny();
 
   console.log("[background] Service worker initialized");
 }

@@ -1,6 +1,7 @@
 import { ActionIcon, Group, Paper, Text, ThemeIcon, Tooltip } from "@mantine/core";
 import { IconInfoCircle } from "@tabler/icons-react";
 import type { ReactNode } from "react";
+import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
 
 interface StatsCardProps {
   title: string;
@@ -12,6 +13,8 @@ interface StatsCardProps {
 }
 
 export function StatsCard({ title, value, tooltip, icon, color = "blue", href }: StatsCardProps) {
+  const tCommon = useTranslations("WebAppCommon");
+
   return (
     <Paper
       component={href ? "a" : "div"}
@@ -28,7 +31,7 @@ export function StatsCard({ title, value, tooltip, icon, color = "blue", href }:
               {title}
             </Text>
             <Tooltip label={tooltip} multiline maw={220} withArrow>
-              <ActionIcon variant="transparent" color="gray" size="xs" aria-label="Info">
+              <ActionIcon variant="transparent" color="gray" size="xs" aria-label={tCommon("InfoAriaLabel")}>
                 <IconInfoCircle size={13} stroke={1.5} />
               </ActionIcon>
             </Tooltip>

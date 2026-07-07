@@ -1,7 +1,7 @@
 import type { FastifyReply } from "fastify";
 import type { AppRoutePlugin } from "../../lib/fastify-types.js";
 import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
-import type { SyncBatch, SyncBootstrapResponse } from "@bondery/schemas/sync";
+import type { SyncBootstrapResponse } from "@bondery/schemas/sync";
 import { syncBootstrapResponseSchema } from "@bondery/schemas/sync";
 import { getAuth } from "../../lib/auth.js";
 import { applyOpenApiRouteMeta } from "../../lib/openapi-route-meta.js";
@@ -10,7 +10,7 @@ import { createAdminClient } from "../../lib/supabase.js";
 import { getLastServerSequence } from "../../lib/sync/idempotency.js";
 import { logSyncBootstrap } from "../../lib/sync/metrics.js";
 import { validateSyncProtocolHeaders } from "../../lib/sync/protocol.js";
-import { SYNC_TABLE_KEYS, type SyncTableKey } from "../../lib/sync/sync-tables.js";
+import { SYNC_TABLE_KEYS } from "../../lib/sync/sync-tables.js";
 
 export const syncBootstrapRoutes: AppRoutePlugin = async (fastify): Promise<void> => {
   fastify.addHook("onRoute", (routeOptions) => {
@@ -38,7 +38,9 @@ export const syncBootstrapRoutes: AppRoutePlugin = async (fastify): Promise<void
     const { user } = getAuth(request);
     const admin = createAdminClient();
 
-    const tables = {} as SyncBootstrapResponse["tables"];
+    const tables = Object.fromEntries(
+      SYNC_TABLE_KEYS.map((table) => [table, [] as Record<string, unknown>[]]),
+    ) as SyncBootstrapResponse["tables"];
     let rowCount = 0;
 
     await Promise.all(
@@ -53,7 +55,7 @@ export const syncBootstrapRoutes: AppRoutePlugin = async (fastify): Promise<void
         }
 
         const rows = (data ?? []) as Record<string, unknown>[];
-        tables[table as SyncTableKey] = rows;
+        tables[table] = rows;
         rowCount += rows.length;
       }),
     );

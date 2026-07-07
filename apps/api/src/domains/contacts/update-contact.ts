@@ -20,7 +20,7 @@ import {
   replaceContactAddresses,
 } from "../../routes/contacts/addresses.js";
 import { withPersonTxid } from "../_shared/with-txid.js";
-import { DomainError, type DomainContext } from "../_shared/context.js";
+import { DomainError, syncEmitMetaFromContext, type DomainContext } from "../_shared/context.js";
 import { checkContactUpdateConflict } from "../../lib/sync/conflict.js";
 import type { SyncChange } from "@bondery/schemas/sync";
 import {
@@ -314,7 +314,7 @@ export async function updateContact(
     }
   }
 
-  const serverSequence = await emitSyncBatch(user.id, changes);
+  const serverSequence = await emitSyncBatch(user.id, changes, syncEmitMetaFromContext(ctx));
 
   return {
     data: { contact: enrichedContact, personId },

@@ -4,7 +4,7 @@ import { modals } from "@mantine/modals";
 import { IconDownload } from "@tabler/icons-react";
 import { ModalTitle } from "@bondery/mantine-next";
 import { createModalId } from "@/lib/modals";
-import { LinkedInImportModal } from "./LinkedInImportModal";
+import { LinkedInImportModal, type LinkedInImportStep } from "./LinkedInImportModal";
 
 type TranslateFn = (key: string, values?: Record<string, string | number>) => string;
 
@@ -12,12 +12,16 @@ interface OpenLinkedInImportModalOptions {
   t: TranslateFn;
   onSuccess?: (stats: { imported: number; updated: number; skipped: number }) => void;
   showNavigationProgress?: boolean;
+  initialStep?: LinkedInImportStep;
+  onAwaitingExport?: () => void | Promise<void>;
 }
 
 export function openLinkedInImportModal({
   t,
   onSuccess,
   showNavigationProgress = true,
+  initialStep,
+  onAwaitingExport,
 }: OpenLinkedInImportModalOptions) {
   const modalId = createModalId("linkedin-import");
 
@@ -31,6 +35,8 @@ export function openLinkedInImportModal({
         modalId={modalId}
         onSuccess={onSuccess}
         showNavigationProgress={showNavigationProgress}
+        initialStep={initialStep}
+        onAwaitingExport={onAwaitingExport}
       />
     ),
   });

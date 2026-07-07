@@ -31,7 +31,6 @@ import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import { computeNextDueDate } from "./keepInTouchConfig";
 import { KeepInTouchSelect } from "./KeepInTouchSelect";
 import { PageHeader } from "@/app/(app)/app/components/PageHeader";
-import { WEBSITE_URL } from "@/lib/config";
 import { useKeepInTouchQuery } from "@/lib/query/hooks/useKeepInTouch";
 import { usePatchContactMutation } from "@/lib/query/hooks/useContacts";
 
@@ -203,7 +202,7 @@ export function KeepInTouchClient({ endDate }: KeepInTouchClientProps) {
         <PageHeader
           icon={IconHeartHandshake}
           title={t("Title")}
-          helpHref={`${WEBSITE_URL}/docs/concepts/reminders`}
+          helpDoc="concepts.reminders"
           helpLabel={t("Description")}
           secondaryAction={windowPicker}
         />
@@ -226,7 +225,7 @@ export function KeepInTouchClient({ endDate }: KeepInTouchClientProps) {
       <PageHeader
         icon={IconHeartHandshake}
         title={t("Title")}
-        helpHref={`${WEBSITE_URL}/docs/concepts/reminders`}
+        helpDoc="concepts.reminders"
         helpLabel={t("Description")}
         secondaryAction={windowPicker}
       />

@@ -1,10 +1,9 @@
 "use client";
 
-import { ActionIcon, Text, TextInput, Group, Divider, CardSection, Tooltip } from "@mantine/core";
-import { IconHelpCircle, IconMail, IconUserCircle, IconChevronRight } from "@tabler/icons-react";
+import { Text, TextInput, Group, Divider, CardSection } from "@mantine/core";
+import { IconMail, IconUserCircle, IconChevronRight } from "@tabler/icons-react";
 import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
-import { PersonChip } from "@bondery/mantine-next";
-import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
+import { HelpButton, PersonChip } from "@bondery/mantine-next";import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import { ProviderIntegrations } from "./ProviderIntegrations";
 import { SettingsSection } from "./SettingsSection";
 
@@ -58,12 +57,12 @@ export function ProfileCard({ email, providers, userIdentities, myselfPerson }: 
               <Text size="sm" fw={500}>
                 {t("Email")}
               </Text>
-              <Tooltip label={t("EmailDisabledTooltip")} multiline maw={360}>
-                <ActionIcon variant="subtle" color="gray" size="sm" aria-label="Email information">
-                  <IconHelpCircle size={14} />
-                </ActionIcon>
-              </Tooltip>
-            </Group>
+              <HelpButton
+                label={t("EmailDisabledTooltip")}
+                ariaLabel={t("EmailInfoAriaLabel")}
+                variant="subtle"
+                tooltipMaxWidth={360}
+              />            </Group>
           }
           placeholder={t("EmailPlaceholder")}
           type="email"

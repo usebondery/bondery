@@ -1,0 +1,86 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "ngrok: ngrok.yml",
+			"type": "shell",
+			"command": "node",
+			"args": ["scripts/start-ngrok-config.mjs", "ngrok.yml"],
+			"options": {
+				"cwd": "${workspaceFolder}"
+			},
+			"isBackground": true,
+			"problemMatcher": {
+				"owner": "ngrok",
+				"pattern": { "regexp": "^$" },
+				"background": {
+					"activeOnStart": true,
+					"beginsPattern": ".",
+					"endsPattern": "(started tunnel|Tunnel session established)"
+				}
+			},
+			"presentation": {
+				"reveal": "silent",
+				"panel": "dedicated",
+				"group": "ngrok"
+			},
+			"runOptions": {
+				"runOn": "folderOpen"
+			}
+		},
+		{
+			"label": "ngrok: ngrok1.yml (supabase)",
+			"type": "shell",
+			"command": "node",
+			"args": ["scripts/start-ngrok-config.mjs", "ngrok1.yml"],
+			"options": {
+				"cwd": "${workspaceFolder}"
+			},
+			"isBackground": true,
+			"problemMatcher": {
+				"owner": "ngrok",
+				"pattern": { "regexp": "^$" },
+				"background": {
+					"activeOnStart": true,
+					"beginsPattern": ".",
+					"endsPattern": "(started tunnel|Tunnel session established)"
+				}
+			},
+			"presentation": {
+				"reveal": "silent",
+				"panel": "dedicated",
+				"group": "ngrok"
+			},
+			"runOptions": {
+				"runOn": "folderOpen"
+			}
+		},
+		{
+			"label": "ngrok: ngrok2.yml (api)",
+			"type": "shell",
+			"command": "node",
+			"args": ["scripts/start-ngrok-config.mjs", "ngrok2.yml"],
+			"options": {
+				"cwd": "${workspaceFolder}"
+			},
+			"isBackground": true,
+			"problemMatcher": {
+				"owner": "ngrok",
+				"pattern": { "regexp": "^$" },
+				"background": {
+					"activeOnStart": true,
+					"beginsPattern": ".",
+					"endsPattern": "(started tunnel|Tunnel session established)"
+				}
+			},
+			"presentation": {
+				"reveal": "silent",
+				"panel": "dedicated",
+				"group": "ngrok"
+			},
+			"runOptions": {
+				"runOn": "folderOpen"
+			}
+		},
+	]
+}

@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
+import { getWebTranslations as getTranslations } from "@/lib/i18n/getWebTranslations";
 
-export const metadata: Metadata = { title: "Onboarding" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("Onboarding");
+  return { title: t("MetadataTitle") };
+}
 
 /**
  * Onboarding layout — the Modal overlay handles positioning.

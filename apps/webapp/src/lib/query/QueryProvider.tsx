@@ -5,9 +5,11 @@ import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { useState, type ReactNode } from "react";
 import { getQueryClient } from "./client";
 import { useEnrichBatchInvalidation } from "./enrichInvalidation";
+import { useSyncWakeInvalidation } from "./useSyncWakeInvalidation";
 
 function QueryProviderInner({ children }: { children: ReactNode }) {
   useEnrichBatchInvalidation();
+  useSyncWakeInvalidation();
   return <>{children}</>;
 }
 

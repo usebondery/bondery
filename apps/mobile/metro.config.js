@@ -107,6 +107,72 @@ config.resolver.nodeModulesPaths = [
 const DEDUPLICATED = ["react", "react-dom", "react-native"];
 const localNodeModules = path.resolve(projectRoot, "node_modules");
 
+// Metro package "exports" blocks relative imports between compiled dist files
+// (e.g. dist/entities/address.js → ../constants/index.js). Resolve workspace
+// packages from TypeScript source and handle their internal "#…" imports here.
+const WORKSPACE_SOURCE_PACKAGES = [
+  { name: "@bondery/schemas", root: path.join(workspacePackagesRoot, "schemas") },
+  { name: "@bondery/helpers", root: path.join(workspacePackagesRoot, "helpers") },
+  {
+    name: "@bondery/translations",
+    root: path.join(workspacePackagesRoot, "translations"),
+  },
+];
+
+function normalizePath(filePath) {
+  return filePath.replace(/\\/g, "/");
+}
+
+function resolveWorkspaceSourceFile(pkgRoot, subpath) {
+  const clean = subpath.replace(/\.(js|ts|tsx)$/, "");
+  const candidates = [
+    path.join(pkgRoot, "src", `${clean}.ts`),
+    path.join(pkgRoot, "src", `${clean}.tsx`),
+    path.join(pkgRoot, "src", clean, "index.ts"),
+    path.join(pkgRoot, "src", clean, "index.tsx"),
+    path.join(pkgRoot, "src", `${clean}.json`),
+  ];
+  for (const filePath of candidates) {
+    if (fs.existsSync(filePath)) {
+      return filePath;
+    }
+  }
+  return null;
+}
+
+function resolveWorkspacePackage(moduleName) {
+  for (const { name, root } of WORKSPACE_SOURCE_PACKAGES) {
+    if (moduleName !== name && !moduleName.startsWith(`${name}/`)) {
+      continue;
+    }
+    const subpath = moduleName === name ? "index" : moduleName.slice(name.length + 1);
+    const filePath = resolveWorkspaceSourceFile(root, subpath);
+    if (filePath) {
+      return { type: "sourceFile", filePath };
+    }
+  }
+  return null;
+}
+
+function resolveWorkspaceHashImport(originModulePath, moduleName) {
+  if (!moduleName.startsWith("#")) {
+    return null;
+  }
+  const normalizedOrigin = normalizePath(originModulePath);
+  const specifier = moduleName.slice(1);
+  for (const { root } of WORKSPACE_SOURCE_PACKAGES) {
+    const srcRoot = normalizePath(path.join(root, "src"));
+    if (!normalizedOrigin.includes(`${srcRoot}/`)) {
+      continue;
+    }
+    const filePath = resolveWorkspaceSourceFile(root, specifier);
+    if (filePath) {
+      return { type: "sourceFile", filePath };
+    }
+  }
+  return null;
+}
+
 config.resolver.resolveRequest = (context, moduleName, platform) => {
   const base = moduleName.split("/")[0];
 
@@ -125,6 +191,16 @@ config.resolver.resolveRequest = (context, moduleName, platform) => {
       moduleName,
       platform,
     );
+  }
+
+  const hashImport = resolveWorkspaceHashImport(context.originModulePath, moduleName);
+  if (hashImport) {
+    return hashImport;
+  }
+
+  const workspacePackage = resolveWorkspacePackage(moduleName);
+  if (workspacePackage) {
+    return workspacePackage;
   }
 
   return context.resolveRequest(context, moduleName, platform);

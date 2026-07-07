@@ -1,6 +1,6 @@
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
 
-import type { Contact, ContactRelationshipWithPeople, GroupWithCount, ImportantDate, PaginationMeta } from "@bondery/schemas";
+import type { Contact, ContactRelationshipWithPeople, GroupWithCount, ImportantDate, LinkedInDataResponse, PaginationMeta } from "@bondery/schemas";
 
 import { appendAvatarParams, type AvatarPreset } from "@/lib/avatarParams";
 
@@ -244,6 +244,13 @@ export function createContactImportantDatesQueryFn(id: string) {
 
   };
 
+}
+
+export function createContactLinkedInDataQueryFn(id: string) {
+  const fetch = createClientFetcher();
+  const path = `${API_ROUTES.CONTACTS}/${id}/linkedin-data`;
+
+  return async (): Promise<LinkedInDataResponse> => fetch<LinkedInDataResponse>(path);
 }
 
 

@@ -7,7 +7,6 @@ import {
   Center,
   Group,
   Loader,
-  ScrollArea,
   Stack,
   Text,
   TextInput,
@@ -27,6 +26,7 @@ import {
   errorNotificationTemplate,
   loadingNotificationTemplate,
   ModalFooter,
+  ModalScrollLayout,
   ModalTitle,
   successNotificationTemplate,
 } from "@bondery/mantine-next";
@@ -58,12 +58,17 @@ interface AddPeopleToGroupSelectionFormProps extends AddPeopleToGroupSelectionMo
   modalId: string;
 }
 
+function EditGroupsModalTitle() {
+  const t = useTranslations("AddPeopleToGroupSelectionModal");
+  return <ModalTitle text={t("Title")} icon={<IconUsersGroup size={24} />} />;
+}
+
 export function openAddPeopleToGroupSelectionModal(props: AddPeopleToGroupSelectionModalProps) {
   const modalId = createModalId("edit-groups");
 
   modals.open({
     modalId,
-    title: <ModalTitle text="Edit groups" icon={<IconUsersGroup size={24} />} />,
+    title: <EditGroupsModalTitle />,
     trapFocus: true,
     size: "xl",
     children: <AddPeopleToGroupSelectionForm {...props} modalId={modalId} />,
@@ -121,6 +126,10 @@ function AddPeopleToGroupSelectionForm({
   }, [isGroupsError, isContactsError, membershipQueries, t, tCommon]);
 
   useEffect(() => {
+    if (hasInitialized) {
+      return;
+    }
+
     if (
       isLoadingGroups ||
       isLoadingContacts ||
@@ -163,10 +172,10 @@ function AddPeopleToGroupSelectionForm({
     contactsData,
     deduplicatedPersonIds,
     groupsData,
+    hasInitialized,
     isLoadingContacts,
     isLoadingGroups,
     isLoadingMemberships,
-    membershipQueries,
   ]);
 
   const filteredGroups = useMemo(() => {
@@ -302,24 +311,40 @@ function AddPeopleToGroupSelectionForm({
   }
 
   return (
-    <Stack gap="md">
-      {selectedPeople.length > 0 && (
-        <Group gap="xs" align="center" wrap="wrap">
-          {selectedPeople.map((person) => (
-            <PersonChip key={person.id} person={person} size="sm" isClickable={false} />
-          ))}
-        </Group>
-      )}
+    <ModalScrollLayout
+      footer={
+        <ModalFooter
+          mt={0}
+          cancelLabel={t("Cancel")}
+          onCancel={() => modals.close(modalId)}
+          cancelDisabled={isSubmitting}
+          actionLabel={t("Submit")}
+          onAction={() => {
+            void handleSubmit();
+          }}
+          actionLoading={isSubmitting}
+          actionDisabled={deduplicatedPersonIds.length === 0 || isSubmitting}
+          actionLeftSection={<IconUsersGroup size={16} />}
+        />
+      }
+    >
+      <Stack gap="md">
+        {selectedPeople.length > 0 && (
+          <Group gap="xs" align="center" wrap="wrap">
+            {selectedPeople.map((person) => (
+              <PersonChip key={person.id} person={person} size="sm" isClickable={false} />
+            ))}
+          </Group>
+        )}
 
-      <TextInput
-        label={t("SearchLabel")}
-        placeholder={t("SearchPlaceholder")}
-        leftSection={<IconSearch size={16} />}
-        value={search}
-        onChange={(event) => setSearch(event.currentTarget.value)}
-      />
+        <TextInput
+          label={t("SearchLabel")}
+          placeholder={t("SearchPlaceholder")}
+          leftSection={<IconSearch size={16} />}
+          value={search}
+          onChange={(event) => setSearch(event.currentTarget.value)}
+        />
 
-      <ScrollArea h={360} type="auto">
         <Group gap="sm" align="flex-start" justify="flex-start" wrap="wrap" w="full">
           <Box
             style={{
@@ -447,20 +472,7 @@ function AddPeopleToGroupSelectionForm({
             ))
           )}
         </Group>
-      </ScrollArea>
-
-      <ModalFooter
-        cancelLabel={t("Cancel")}
-        onCancel={() => modals.close(modalId)}
-        cancelDisabled={isSubmitting}
-        actionLabel={t("Submit")}
-        onAction={() => {
-          void handleSubmit();
-        }}
-        actionLoading={isSubmitting}
-        actionDisabled={deduplicatedPersonIds.length === 0 || isSubmitting}
-        actionLeftSection={<IconUsersGroup size={16} />}
-      />
-    </Stack>
+      </Stack>
+    </ModalScrollLayout>
   );
 }

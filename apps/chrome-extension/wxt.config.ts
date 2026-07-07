@@ -63,16 +63,10 @@ export default defineConfig({
     build:
       mode === "development"
         ? {
-            minify: "esbuild" as const,
+            minify: "oxc",
             sourcemap: false,
           }
         : {},
-    // Force esbuild to escape all non-ASCII characters so the output file is
-    // valid UTF-8. Without this the transliteration character-map gets embedded
-    // as raw bytes that Chrome rejects with "It isn't UTF-8 encoded".
-    esbuild: {
-      charset: "utf8",
-    },
     css: {
       postcss: {},
     },

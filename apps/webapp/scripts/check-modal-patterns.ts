@@ -116,6 +116,19 @@ function checkFile(absPath: string): Violation[] {
     });
   }
 
+  if (
+    /<ContactsTable[\s>]/.test(content) &&
+    content.includes("ModalFooter") &&
+    !content.includes("ModalScrollLayout")
+  ) {
+    violations.push({
+      file: rel,
+      rule: "missing-modal-scroll-layout",
+      detail:
+        "Modal bodies with ContactsTable must use ModalScrollLayout so footer actions stay visible",
+    });
+  }
+
   return violations;
 }
 

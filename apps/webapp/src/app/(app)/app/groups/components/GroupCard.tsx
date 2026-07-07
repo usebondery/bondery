@@ -5,6 +5,7 @@ import { IconCopy, IconEdit, IconFolderCog, IconTrash, IconUserPlus } from "@tab
 import { useState, type MouseEvent, type ReactNode } from "react";
 import type { GroupWithCount } from "@bondery/schemas";
 import { PersonAvatarGroup, DotsMenuButton } from "@bondery/mantine-next";
+import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
 
 // ── Color maps ──────────────────────────────────────────
 
@@ -156,6 +157,9 @@ function GroupCardMenu({
   onDelete: (groupId: string) => void;
   iconSize: "sm" | "md";
 }) {
+  const t = useTranslations("GroupsPage");
+  const tCommon = useTranslations("WebAppCommon");
+
   return (
     <Menu shadow="md" opened={menuOpened} onChange={setMenuOpened} position="bottom-end">
       <MenuTarget>
@@ -177,7 +181,7 @@ function GroupCardMenu({
             onAddPeople(group);
           }}
         >
-          Add people to group
+          {t("AddPeopleToGroup")}
         </MenuItem>
         <MenuItem
           leftSection={<IconEdit size={16} />}
@@ -187,7 +191,7 @@ function GroupCardMenu({
             onEdit(group);
           }}
         >
-          Edit
+          {t("Edit")}
         </MenuItem>
         <MenuItem
           leftSection={<IconCopy size={16} />}
@@ -197,7 +201,7 @@ function GroupCardMenu({
             onDuplicate(group);
           }}
         >
-          Duplicate
+          {t("Duplicate")}
         </MenuItem>
         <MenuItem
           leftSection={<IconTrash size={16} />}
@@ -208,7 +212,7 @@ function GroupCardMenu({
             onDelete(group.id);
           }}
         >
-          Delete
+          {tCommon("Delete")}
         </MenuItem>
       </MenuDropdown>
     </Menu>

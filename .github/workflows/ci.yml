@@ -20,6 +20,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Validate doc links
+        run: npm run check-doc-links
+
       - name: Schema contract tests
         run: npm run test:contracts
 

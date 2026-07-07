@@ -6,7 +6,7 @@ import type {
 } from "@bondery/schemas";
 import { submitSyncMutation } from "../sync/mutation-service";
 import { normalizeSyncDatetime } from "../sync/sync-datetime";
-import { generateUuid } from "../sync/uuid";
+import { generateUuid } from "../sync/ids";
 import {
   getContact,
   getMyselfContact,

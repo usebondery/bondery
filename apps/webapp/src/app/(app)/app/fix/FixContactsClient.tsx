@@ -145,6 +145,7 @@ export function FixContactsClient() {
             </Button>
           }
           helpLabel={t("Description")}
+          helpDoc="concepts.merge"
         />
 
         {!showDeclined && (

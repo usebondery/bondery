@@ -41,10 +41,14 @@ export function logSyncPushError(message: string, details?: Record<string, unkno
   console.warn(LOG_PREFIX, "push error", { message, ...details });
 }
 
-export function logSyncPullResponse(batchCount: number, nextServerSequence: number): void {
+export function logSyncPullResponse(
+  batchCount: number,
+  nextServerSequence: number,
+  reason?: string,
+): void {
   if (!__DEV__) return;
   if (batchCount === 0 && !VERBOSE) return;
-  console.log(LOG_PREFIX, "pull response", { batchCount, nextServerSequence });
+  console.log(LOG_PREFIX, "pull response", { batchCount, nextServerSequence, reason });
 }
 
 export function logSyncPullError(error: unknown): void {

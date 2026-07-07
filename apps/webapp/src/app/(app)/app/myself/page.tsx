@@ -17,9 +17,11 @@ import { PageWrapper } from "@/app/(app)/app/components/PageWrapper";
 import { ErrorPageHeader } from "@/app/(app)/app/components/ErrorPageHeader";
 import type { Group, Tag } from "@bondery/schemas";
 import { buildAvatarQueryString } from "@/lib/avatarParams";
+import { getWebTranslations as getTranslations } from "@/lib/i18n/getWebTranslations";
 
 export async function generateMetadata(): Promise<Metadata> {
-  return { title: "Myself" };
+  const t = await getTranslations("SingleContactPage");
+  return { title: t("MyselfPageTitle") };
 }
 
 async function getMyselfData() {
@@ -137,15 +139,16 @@ export default async function MyselfPage({
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const { tab } = await searchParams;
+  const t = await getTranslations("SingleContactPage");
 
   const data = await getMyselfData();
 
   if (!data) {
     return (
       <PageWrapper>
-        <ErrorPageHeader iconType="user" title="Profile not found" backHref={API_ROUTES.CONTACTS} />
+        <ErrorPageHeader iconType="user" title={t("ProfileNotFound")} backHref={API_ROUTES.CONTACTS} />
         <Stack gap="xl">
-          <Text c="dimmed">Your profile contact could not be found.</Text>
+          <Text c="dimmed">{t("ProfileNotFoundDescription")}</Text>
         </Stack>
       </PageWrapper>
     );

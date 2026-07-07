@@ -1,6 +1,6 @@
 {
   "name": "@bondery/translations",
-  "version": "1.4.2",
+  "version": "1.7.0",
   "description": "Bondery internationalization translations",
   "private": true,
   "type": "module",
@@ -35,7 +35,7 @@
   ],
   "scripts": {
     "build": "rimraf dist && tsc && node ../../scripts/rewrite-package-hash-imports-in-dist.mjs translations && node scripts/copy-json.mjs",
-    "dev": "tsc --watch --preserveWatchOutput",
+    "dev": "node scripts/dev.mjs",
     "check-types": "tsc --noEmit"
   },
   "devDependencies": {

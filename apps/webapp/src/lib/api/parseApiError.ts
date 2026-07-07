@@ -56,10 +56,20 @@ export function resolveApiErrorMessage({
   status,
   bodyText,
   contentType,
+  fallbacks = {
+    unavailable: "The API is temporarily unavailable. Please try again.",
+    serverError: "Something went wrong on the server. Please try again.",
+    requestFailed: "Request failed. Please try again.",
+  },
 }: {
   status: number;
   bodyText: string;
   contentType?: string | null;
+  fallbacks?: {
+    unavailable: string;
+    serverError: string;
+    requestFailed: string;
+  };
 }): string {
   const trimmedBody = bodyText.trim();
   const { message: jsonMessage } = extractApiErrorFields(trimmedBody);
@@ -78,12 +88,12 @@ export function resolveApiErrorMessage({
     contentType?.toLowerCase().includes("text/html") ||
     isHtmlLike(trimmedBody)
   ) {
-    return "The API is temporarily unavailable. Please try again.";
+    return fallbacks.unavailable;
   }
 
   if (status >= 500) {
-    return "Something went wrong on the server. Please try again.";
+    return fallbacks.serverError;
   }
 
-  return "Request failed. Please try again.";
+  return fallbacks.requestFailed;
 }

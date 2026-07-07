@@ -4,7 +4,7 @@ import { upsertContactSocials } from "../../lib/socials.js";
 import { buildContactSnapshotChanges } from "../../lib/sync/build-changes.js";
 import { emitSyncBatch } from "../../lib/sync/emit-change.js";
 import { withPersonTxid } from "../_shared/with-txid.js";
-import { DomainError, type DomainContext } from "../_shared/context.js";
+import { DomainError, syncEmitMetaFromContext, type DomainContext } from "../_shared/context.js";
 
 export interface CreateContactDomainInput extends CreateContactPayload {
   id?: string;
@@ -80,7 +80,7 @@ export async function createContact(
   );
 
   const changes = await buildContactSnapshotChanges(client, user.id, newContact.id);
-  const serverSequence = await emitSyncBatch(user.id, changes);
+  const serverSequence = await emitSyncBatch(user.id, changes, syncEmitMetaFromContext(ctx));
 
   return {
     data: { contact, personId: newContact.id },

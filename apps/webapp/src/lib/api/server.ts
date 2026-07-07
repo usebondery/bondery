@@ -7,6 +7,7 @@ import {
 import { handleServerUnauthorizedSession } from "@/lib/auth/handleServerUnauthorizedSession";
 import { isUnauthorizedResponseStatus } from "@/lib/auth/unauthorized";
 import { parseApiJsonResponse, parseApiJsonResponseOrNull } from "./parseResponse";
+import { getApiErrorFallbacksOnServer } from "@/lib/i18n/getApiErrorFallbacks.server";
 
 export { ApiError } from "./ApiError";
 export {
@@ -89,7 +90,8 @@ export async function serverApiJson<T>(
 ): Promise<T> {
   try {
     const response = await serverApiFetch(path, init, options);
-    return await parseApiJsonResponse<T>(response);
+    const fallbacks = await getApiErrorFallbacksOnServer();
+    return await parseApiJsonResponse<T>(response, fallbacks);
   } catch (error) {
     if (options.transportPolicy !== false) {
       await applyServerTransportErrorPolicy(error);

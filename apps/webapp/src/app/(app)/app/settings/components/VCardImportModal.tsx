@@ -30,9 +30,11 @@ import {
 import { notifications } from "@mantine/notifications";
 import { modals } from "@mantine/modals";
 import type { Contact, VCardPreparedContact } from "@bondery/schemas";
+import { VCARD_IMPORT_COMMIT_BATCH_SIZE } from "@bondery/schemas/constants";
 import {
   DropzoneContent,
   ModalFooter,
+  ModalScrollLayout,
   errorNotificationTemplate,
   ModalTitle,
   successNotificationTemplate,
@@ -49,8 +51,6 @@ import { useModalBlocking } from "@/lib/modals";
 import { useImporterNavigationProgress } from "./useImporterNavigationProgress";
 
 type Step = "intro" | "instructions" | "upload" | "processing" | "preview";
-
-const IMPORT_BATCH_SIZE = 25;
 
 const STEP_PROGRESS: Record<Step, number> = {
   intro: 12,
@@ -343,9 +343,10 @@ export function VCardImportModal({
     let totalSkipped = 0;
 
     try {
-      for (let i = 0; i < selectedContacts.length; i += IMPORT_BATCH_SIZE) {
-        const batch = selectedContacts.slice(i, i + IMPORT_BATCH_SIZE);
-        const isLastBatch = i + IMPORT_BATCH_SIZE >= selectedContacts.length;
+      const batchSize = VCARD_IMPORT_COMMIT_BATCH_SIZE;
+      for (let i = 0; i < selectedContacts.length; i += batchSize) {
+        const batch = selectedContacts.slice(i, i + batchSize);
+        const isLastBatch = i + batchSize >= selectedContacts.length;
 
         const result = await commitImport.mutateAsync({
           body: { contacts: batch },
@@ -356,7 +357,7 @@ export function VCardImportModal({
         totalSkipped += result.skippedCount ?? 0;
 
         setImportProgress({
-          current: Math.min(i + IMPORT_BATCH_SIZE, selectedContacts.length),
+          current: Math.min(i + batchSize, selectedContacts.length),
           total: selectedContacts.length,
         });
       }
@@ -577,67 +578,72 @@ export function VCardImportModal({
   }
 
   return renderWithNavigationProgress(
-    <Stack gap="md">
-      <Group justify="space-between">
-        <Group gap="xs">
-          <Badge color="blue" variant="light">
-            {t("Total", { count: parsedContacts.length })}
-          </Badge>
-          <Badge
-            color="green"
-            variant="light"
-            leftSection={<IconCircleCheck size={12} />}
-          >
-            {t("Valid", { count: validContactsCount })}
-          </Badge>
-          {invalidContactsCount > 0 ? (
-            <Badge
-              color="orange"
-              variant="light"
-              leftSection={<IconAlertTriangle size={12} />}
-            >
-              {t("Invalid", { count: invalidContactsCount })}
+    <ModalScrollLayout
+      footer={
+        <ModalFooter
+          mt={0}
+          backLabel={t("Back")}
+          backLeftSection={<IconArrowLeft size={16} />}
+          onBack={() => setStep("upload")}
+          backDisabled={isImporting}
+          cancelLabel={t("Cancel")}
+          onCancel={closeModal}
+          cancelDisabled={isImporting}
+          actionLabel={t("ImportSelected", { count: selectedIds.size })}
+          onAction={() => {
+            void handleImport();
+          }}
+          actionLeftSection={
+            !isImporting ? <IconAddressBook size={16} /> : undefined
+          }
+          actionLoading={isImporting}
+          actionDisabled={isImporting}
+        />
+      }
+    >
+      <Stack gap="md">
+        <Group justify="space-between">
+          <Group gap="xs">
+            <Badge color="blue" variant="light">
+              {t("Total", { count: parsedContacts.length })}
             </Badge>
-          ) : null}
+            <Badge
+              color="green"
+              variant="light"
+              leftSection={<IconCircleCheck size={12} />}
+            >
+              {t("Valid", { count: validContactsCount })}
+            </Badge>
+            {invalidContactsCount > 0 ? (
+              <Badge
+                color="orange"
+                variant="light"
+                leftSection={<IconAlertTriangle size={12} />}
+              >
+                {t("Invalid", { count: invalidContactsCount })}
+              </Badge>
+            ) : null}
+          </Group>
         </Group>
-      </Group>
 
-      <Text size="sm" c="dimmed">
-        {t("ChooseContactsHint")}
-      </Text>
+        <Text size="sm" c="dimmed">
+          {t("ChooseContactsHint")}
+        </Text>
 
-      <ContactsTable
-        contacts={previewContacts}
-        visibleColumns={["name", "headline", "phone", "email"]}
-        selectedIds={selectedIds}
-        showSelection
-        allSelected={allSelected}
-        someSelected={someSelected}
-        onSelectAll={handleToggleAll}
-        onSelectOne={handleToggleOne}
-        disableNameLink
-        noContactsFound={t("NoContactsFound")}
-        noContactsMatchSearch={t("NoContactsMatchSearch")}
-      />
-
-      <ModalFooter
-        backLabel={t("Back")}
-        backLeftSection={<IconArrowLeft size={16} />}
-        onBack={() => setStep("upload")}
-        backDisabled={isImporting}
-        cancelLabel={t("Cancel")}
-        onCancel={closeModal}
-        cancelDisabled={isImporting}
-        actionLabel={t("ImportSelected", { count: selectedIds.size })}
-        onAction={() => {
-          void handleImport();
-        }}
-        actionLeftSection={
-          !isImporting ? <IconAddressBook size={16} /> : undefined
-        }
-        actionLoading={isImporting}
-        actionDisabled={isImporting}
-      />
-    </Stack>,
+        <ContactsTable
+          contacts={previewContacts}
+          visibleColumns={["name", "headline", "phone", "email"]}
+          selectedIds={selectedIds}
+          showSelection
+          allSelected={allSelected}
+          someSelected={someSelected}
+          onSelectAll={handleToggleAll}
+          onSelectOne={handleToggleOne}
+          disableNameLink
+          noContactsFound={t("NoContactsFound")}
+          noContactsMatchSearch={t("NoContactsMatchSearch")}
+        />
+      </Stack>
+    </ModalScrollLayout>,
   );
 }

@@ -1,6 +1,6 @@
 {
   "name": "@bondery/mantine-next",
-  "version": "1.4.2",
+  "version": "1.7.0",
   "private": true,
   "type": "module",
   "main": "./dist/index.js",
@@ -233,6 +233,12 @@
       "import": "./dist/Modal/ModalFooter.js",
       "node": "./dist/Modal/ModalFooter.js",
       "default": "./dist/Modal/ModalFooter.js"
+    },
+    "./Modal/ModalScrollLayout": {
+      "types": "./src/Modal/ModalScrollLayout.tsx",
+      "import": "./dist/Modal/ModalScrollLayout.js",
+      "node": "./dist/Modal/ModalScrollLayout.js",
+      "default": "./dist/Modal/ModalScrollLayout.js"
     },
     "./Modal/ModalTitle": {
       "types": "./src/Modal/ModalTitle.tsx",

@@ -12,6 +12,7 @@ export type ButtonLinkProps = Omit<
   children: ReactNode;
   target?: string;
   rel?: string;
+  scroll?: boolean;
   className?: string;
 };
 
@@ -26,6 +27,7 @@ export function ButtonLink({
   children,
   target,
   rel,
+  scroll,
   className,
   ...buttonProps
 }: ButtonLinkProps) {
@@ -35,6 +37,7 @@ export function ButtonLink({
       href={href}
       target={target}
       rel={rel}
+      scroll={scroll}
       className={className}
       {...buttonProps}
     >

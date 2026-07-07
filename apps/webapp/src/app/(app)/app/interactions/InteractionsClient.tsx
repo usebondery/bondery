@@ -7,7 +7,7 @@ import { useDebouncedCallback, useHotkeys } from "@mantine/hooks";
 import { PageWrapper } from "@/app/(app)/app/components/PageWrapper";
 import { openNewActivityModal } from "./components/NewActivityModal";
 import type { Contact, Activity } from "@bondery/schemas";
-import { WEBSITE_URL, DEBOUNCE_MS, HOTKEYS } from "@/lib/config";
+import { DEBOUNCE_MS, HOTKEYS } from "@/lib/config";
 import { peopleSearchActions } from "../components/PeopleSearchSpotlight";
 import { PageHeader } from "../components/PageHeader";
 import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
@@ -101,7 +101,7 @@ export function InteractionsClient({
 
           return {
             id: participantId,
-            firstName: participant.firstName || "Unknown",
+            firstName: participant.firstName || t("UnknownPerson"),
             middleName: participant.middleName || participant.middle_name || null,
             lastName: participant.lastName || null,
             avatar: participant.avatar || null,
@@ -253,7 +253,7 @@ export function InteractionsClient({
         <PageHeader
           title={t("PageTitle")}
           icon={IconTimelineEventText}
-          helpHref={`${WEBSITE_URL}/docs/concepts/interactions`}
+          helpDoc="concepts.interactions"
           helpLabel={t("HeaderDescription")}
           secondaryAction={
             <SegmentedControl

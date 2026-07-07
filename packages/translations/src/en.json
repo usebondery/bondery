@@ -121,6 +121,9 @@
     "TypeDisabledHint": "{firstName} has already defined birthdate or name day",
     "NotePlaceholder": "Optional note",
     "AddAction": "Add date",
+    "AddImportantDate": "Add Important Date",
+    "BirthdayDateLabel": "Select birthday",
+    "NotifyMe": "Notify me",
     "AddHint": "To add a new date, specify all information.",
     "NotifyNone": "Don't notify",
     "NotifyDayBefore": "Notify {count} day before",
@@ -171,7 +174,27 @@
     "FieldSignal": "Signal",
     "FieldWebsite": "Website",
     "AriaPhone": "Phone",
-    "AriaEmail": "Email"
+    "AriaEmail": "Email",
+    "RerouteWrongPlatformDescription": "This is a {platform} link",
+    "RerouteWrongPlatformBody": "You pasted this into the {field} field. Set it as {platform}, or set it here on {field}.",
+    "RerouteWrongPlatformBodyConflict": "You pasted this into the {field} field, but {platform} is already set for this contact. Replace {platform} with this value, or set it here on {field}.",
+    "RerouteLooksLikePhoneDescription": "This looks like a phone number",
+    "RerouteLooksLikePhoneBody": "You entered a phone number in the {field} field. Set it as {platform}, or set it here on {field}.",
+    "RerouteLooksLikePhoneBodyConflict": "You entered a phone number in the {field} field, but {platform} is already set. Replace {platform} with this number, or set it here on {field}.",
+    "RerouteLooksLikeWebsiteDescription": "This looks like a website",
+    "RerouteLooksLikeWebsiteBody": "You entered a website URL in the {field} field. Set it as Website, or set it here on {field}.",
+    "RerouteLooksLikeWebsiteBodyConflict": "You entered a website URL in the {field} field, but Website is already set. Replace it with this URL, or set it here on {field}.",
+    "RerouteSetAs": "Set as {platform}",
+    "RerouteReplace": "Replace existing",
+    "RerouteSetHere": "Set here",
+    "TooltipCall": "Call {name}",
+    "TooltipEmail": "Send email to {name}",
+    "TooltipLinkedIn": "Open {name} on LinkedIn",
+    "TooltipInstagram": "Open {name} on Instagram",
+    "TooltipWhatsApp": "Open {name} on WhatsApp",
+    "TooltipFacebook": "Open {name} on Facebook",
+    "TooltipSignal": "Open {name} on Signal",
+    "InvalidWebsiteUrl": "Please enter a valid website URL"
   },
   "ContactPage": {
     "Title": "Contact us",
@@ -233,7 +256,14 @@
     "TimezoneUpdateFailed": "Failed to update timezone",
     "FirstNameRequired": "First name is required",
     "ValidationErrorTitle": "Validation Error",
-    "NameUpdateFailed": "Failed to update name"
+    "NameUpdateFailed": "Failed to update name",
+    "PersonNotFound": "Person not found",
+    "PersonNotSelected": "Please select a person to view their details.",
+    "PersonNotFoundDescription": "The requested contact could not be found.",
+    "ProfileNotFound": "Profile not found",
+    "ProfileNotFoundDescription": "Your profile contact could not be found.",
+    "PersonFallbackTitle": "Person",
+    "DetailsPageTitle": "Person's details"
   },
   "ContactPhotoUpload": {
     "TitleModal": "Upload Contact Photo",
@@ -353,7 +383,8 @@
     "Interactions": "Interactions",
     "About": "About",
     "Organize": "Organize",
-    "LinkedIn": "LinkedIn"
+    "LinkedIn": "LinkedIn",
+    "Groups": "Groups"
   },
   "LinkedInData": {
     "About": "About",
@@ -383,7 +414,8 @@
     "TechnicalUnreachable": "unreachable",
     "TechnicalBackendStatus": "Backend: {status}",
     "StatusPageLink": "View status page",
-    "CheckingAgain": "Checking again in {seconds}s…"
+    "CheckingAgain": "Checking again in {seconds}s…",
+    "MetadataTitle": "Service Unavailable"
   },
   "LoginPage": {
     "Title": "Bondery",
@@ -463,7 +495,8 @@
       "DragImageHere": "Drop image or click to select",
       "TitleModal": "Change your profile photo",
       "AttachProfilePhoto": "Only image files are allowed, and the file must not exceed 5MB",
-      "ConfirmPhoto": "Yes, change profile photo"
+      "ConfirmPhoto": "Yes, change profile photo",
+      "EmailInfoAriaLabel": "Email information"
     },
     "Integration": {
       "LinkingAccount": "Linking account...",
@@ -500,7 +533,11 @@
         "IntroDescription2": "Automatically enriches contact data: headline, company, location and more",
         "IntroDescription3": "Works seamlessly inside LinkedIn in your browser. No manual copy-pasting",
         "InstallButton": "Install from Chrome Web Store",
-        "Close": "Close"
+        "Close": "Close",
+        "AnimationProfilePicture": "Profile picture",
+        "AnimationWorkHistory": "Work history",
+        "AnimationEducation": "Education",
+        "AnimationJobTitle": "Job title"
       }
     },
     "Preferences": {
@@ -615,6 +652,8 @@
         "FilesAlertFileConnectionsBold": "connections.csv",
         "FilesAlertDescriptionSuffix": "This helps keep the file small and parsing fast.",
         "HaveZipFile": "I have the ZIP file",
+        "RequestedExport": "I requested my export",
+        "ComeBackWhenReady": "I'll come back when it's ready",
         "DropzoneTitle": "Drop the LinkedIn ZIP",
         "DropzoneDescription": "We will locate Connections.csv and prepare contacts for import.",
         "SelectZipFile": "Select ZIP file",
@@ -661,6 +700,7 @@
         "InstructionStep5": "Select Contacts",
         "InstructionStep6": "Select Followers and following",
         "InstructionStep8": "Click Format > Select JSON > Save",
+        "InstructionStep9": "Select JSON",
         "InstructionStep10": "Start export",
         "InstructionStep11": "You will receive your information copy in your email when it is ready",
         "FilesAlertTitle": "Reduce the file size",
@@ -668,6 +708,8 @@
         "FilesAlertFilesBold": "following.json, followers_*.json and close_friends.json",
         "FilesAlertDescriptionSuffix": "This helps keep the uploaded file small and parsing fast.",
         "HaveZipFile": "I have the ZIP file",
+        "RequestedExport": "I requested my export",
+        "ComeBackWhenReady": "I'll come back when it's ready",
         "DropzoneTitle": "Drop the Instagram ZIP",
         "DropzoneDescription": "We will validate the data, and prepare contacts for import.",
         "SelectZipFile": "Select ZIP file",
@@ -681,6 +723,13 @@
         "StrategyMutualFollowing": "Followers that I follow back",
         "StrategyHelpTitle": "What is import strategy?",
         "StrategyHelpDescription": "Import strategy decides which Instagram relationship lists will be used to import contacts. For example, if you choose 'Only followers', only people who follow you on Instagram will be offered to import in the next step as contacts.",
+        "StrategyHelpOptions": "Use Following and followers for a broader import, Followers for mutual contacts, and Only close friends for your closest circle.",
+        "ZipNoFile": "No file selected. Please choose one Instagram ZIP file.",
+        "ZipTooLarge": "Selected file is too large. Keep Instagram ZIP under 100 MB.",
+        "ZipInvalidExtension": "Invalid file extension. Please select a .zip export file.",
+        "ZipInvalidMime": "Invalid ZIP mime type reported by browser. Please re-download and try again.",
+        "ZipTooManyFiles": "Please upload exactly one Instagram ZIP file.",
+        "ZipInvalidType": "Invalid file type. Please select a .zip export file.",
         "ParseUploaded": "Prepare contacts",
         "UploadAnother": "Upload a different file",
         "Total": "Total: {count}",
@@ -899,7 +948,10 @@
       "CountAsc": "Least people",
       "AlphaAsc": "A→Z",
       "AlphaDesc": "Z→A"
-    }
+    },
+    "Edit": "Edit",
+    "Duplicate": "Duplicate",
+    "FallbackTitle": "Group"
   },
   "GroupDetailPage": {
     "Title": "Group: {label}",
@@ -1001,8 +1053,6 @@
     "NoAttendees": "No attendees",
     "ActivityDetailNotePlaceholder": "Add a note for this meeting. Press (r) to focus.",
     "DeleteActivity": "Delete activity",
-    "Cancel": "Cancel",
-    "SaveChanges": "Save changes",
     "DeleteActivityConfirmMessage": "Are you sure you want to delete this activity? This action cannot be undone.",
     "DuplicateFailed": "Failed to duplicate interaction",
     "CreateActivityFailed": "Failed to create activity. Please try again.",
@@ -1012,6 +1062,7 @@
     "LastInteractionUpdateFailed": "Failed to update last interaction",
     "LastInteractionViaActivity": "From a {type}",
     "LastInteractionManual": "Manually set",
+    "NoInteractionRecorded": "No interaction recorded",
     "KeepInTouchFrequency": "Keep in touch",
     "KeepInTouchNone": "None",
     "FrequencyWeekly": "Weekly",
@@ -1023,7 +1074,14 @@
     "NextDue": "Next due",
     "KeepInTouchUpdated": "Keep in touch updated",
     "KeepInTouchUpdatedDescription": "Frequency updated successfully",
-    "KeepInTouchUpdateFailed": "Failed to update keep in touch frequency"
+    "KeepInTouchUpdateFailed": "Failed to update keep in touch frequency",
+    "DatePresetTomorrow": "Tomorrow",
+    "DatePresetToday": "Today",
+    "DatePresetYesterday": "Yesterday",
+    "DatePresetLastWeek": "Last week",
+    "DatePresetLastMonth": "Last month",
+    "DatePresetLastYear": "Last year",
+    "UnknownPerson": "Unknown person"
   },
   "HomePage": {
     "Title": "Home",
@@ -1063,10 +1121,19 @@
       "Title": "Getting started",
       "Progress": "{completed} of {total} completed",
       "Tasks": {
+        "ImportContacts": "Import your contacts",
         "AddContacts": "Add your first contacts",
         "LogInteraction": "Log your first interaction",
         "SetReminder": "Set up a reminder"
-      }
+      },
+      "AwaitingExport": "Your {platform} export is on the way. Exports usually arrive in 5–15 minutes.",
+      "HaveZipFile": "I have the file",
+      "SkipImport": "Skip import",
+      "Dismiss": "Dismiss",
+      "AllDone": "You're all set!",
+      "ChoosePlatform": "Choose a platform to import from",
+      "LinkedIn": "LinkedIn",
+      "Instagram": "Instagram"
     },
     "ExtensionNudge": {
       "Title": "Supercharge Bondery with our Chrome extension",
@@ -1112,6 +1179,7 @@
     "EnrichAll": "Enrich all",
     "Enrich": "Enrich",
     "PersonEligibleLabel": "This contact could be enriched from LinkedIn",
+    "HelpTooltip": "Pull the latest LinkedIn profile data into this contact. Click to learn how enrichment works.",
     "CurrentlyEnriching": "Currently enriching:",
     "Pause": "Pause",
     "PausingTooltip": "Finishing current contact, then pausing...",
@@ -1174,7 +1242,12 @@
       "Timeline": "Interactions",
       "People": "People",
       "Groups": "Groups",
-      "KeepInTouch": "Keep in touch"
+      "KeepInTouch": "Keep in touch",
+      "Home": "Home",
+      "GroupDetail": "this group",
+      "Map": "the map",
+      "FixAndMerge": "fix and merge",
+      "PersonDetails": "person details"
     }
   },
   "MergeWithModal": {
@@ -1259,7 +1332,11 @@
       "Name": "Name",
       "Location": "Location",
       "Coordinates": "Coordinates"
-    }
+    },
+    "Back": "Back",
+    "PinColumnName": "Name",
+    "PinColumnType": "Type",
+    "PinColumnAddress": "Address"
   },
   "ContactAddress": {
     "Title": "Addresses",
@@ -1400,7 +1477,11 @@
     "Deleting": "Deleting...",
     "Duplicating": "Duplicating...",
     "InfoAriaLabel": "Info",
-    "BackAriaLabel": "Back"
+    "BackAriaLabel": "Back",
+    "AppDescription": "Build bonds that last forever.",
+    "ApiTemporarilyUnavailable": "The API is temporarily unavailable. Please try again.",
+    "ServerErrorGeneric": "Something went wrong on the server. Please try again.",
+    "RequestFailedGeneric": "Request failed. Please try again."
   },
   "CommandPalette": {
     "NothingFound": "No actions found",
@@ -1930,7 +2011,8 @@
     "BatchCompletedTitle": "Batch enriched",
     "BatchCompletedDescription": "{completed, plural, one {# contact} other {# contacts}} enriched successfully.",
     "AllDoneTitle": "Enrichment complete",
-    "AllDoneDescription": "All {count, plural, one {# contact} other {# contacts}} enriched successfully.",
+    "AllDoneDescriptionSingle": "1 contact enriched successfully.",
+    "AllDoneDescriptionMultiple": "{count} contacts enriched successfully.",
     "CurrentlyEnriching": "Currently enriching:",
     "ProgressCount": "{completed} / {totalEligible}",
     "ExtensionNotRespondingTitle": "Extension not responding",
@@ -2103,11 +2185,14 @@
       "LinkedInDescription": "Upload your LinkedIn connections export file.",
       "InstagramDescription": "Upload your Instagram followers/following data.",
       "ManualAdd": "Create manually",
-      "SkipForNow": "Skip for now",
+      "SkipImport": "Skip import",
+      "WaitingForExport": "I'm waiting for my export",
+      "ChoosePlatform": "Which platform did you request?",
       "SuccessTitle": "Import complete!",
       "SuccessDescription": "{imported} imported, {updated} updated, {skipped} skipped.",
       "Finish": "Get started"
-    }
+    },
+    "MetadataTitle": "Onboarding"
   },
   "ChatPage": {
     "title": "AI Assistant",
@@ -2161,5 +2246,19 @@
     "alreadySubscribedMessage": "You already have an active Premium subscription.",
     "upgradePendingTitle": "Payment received",
     "upgradePendingMessage": "Your account will upgrade to Premium shortly."
+  },
+  "InteractionTypes": {
+    "Call": "Call",
+    "Coffee": "Coffee",
+    "Email": "Email",
+    "Meal": "Meal",
+    "Meeting": "Meeting",
+    "NetworkingEvent": "Networking event",
+    "Note": "Note",
+    "Other": "Other",
+    "PartySocial": "Party/Social",
+    "TextMessaging": "Text/Messaging",
+    "CompetitionHackathon": "Competition/Hackathon",
+    "Custom": "Custom"
   }
 }

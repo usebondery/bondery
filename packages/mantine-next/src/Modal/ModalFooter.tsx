@@ -1,8 +1,14 @@
 import { Button, Group, Stack } from "@mantine/core";
-import { IconCheck } from "@tabler/icons-react";
+import type { MantineSpacing } from "@mantine/core";
+import { IconCheck, IconTrash } from "@tabler/icons-react";
 import type { ReactNode } from "react";
 
 export interface ModalFooterProps {
+  mt?: MantineSpacing;
+  dangerLabel?: string;
+  onDanger?: () => void;
+  dangerDisabled?: boolean;
+  dangerLeftSection?: ReactNode;
   backLabel?: string;
   onBack?: () => void;
   backDisabled?: boolean;
@@ -22,6 +28,11 @@ export interface ModalFooterProps {
 }
 
 export function ModalFooter({
+  mt = "md",
+  dangerLabel,
+  onDanger,
+  dangerDisabled,
+  dangerLeftSection,
   backLabel,
   onBack,
   backDisabled,
@@ -39,17 +50,20 @@ export function ModalFooter({
   actionLoading = false,
   actionDisabled,
 }: ModalFooterProps) {
+  const showDanger = Boolean(dangerLabel && onDanger);
   const showBack = Boolean(backLabel && onBack);
   const showCancel = Boolean(cancelLabel && onCancel);
   const showAction = Boolean(actionLabel);
-  const singleAction = showAction && !showCancel && !showBack;
+  const showRightCluster = showCancel || showAction;
+  const singleAction = showAction && !showCancel && !showBack && !showDanger;
   const resolvedActionLeftSection = singleAction
     ? actionLeftSection
     : actionLeftSection || (!actionRightSection && showAction ? <IconCheck size={16} /> : undefined);
+  const resolvedDangerLeftSection = dangerLeftSection ?? <IconTrash size={16} />;
 
   if (singleAction) {
     return (
-      <Stack mt="md">
+      <Stack mt={mt}>
         <Button
           type={actionType}
           color={actionColor}
@@ -67,20 +81,43 @@ export function ModalFooter({
     );
   }
 
-  return (
-    <Group justify={showBack ? "space-between" : "flex-end"} mt="md">
-      {showBack ? (
-        <Button
-          variant="default"
-          leftSection={backLeftSection}
-          onClick={onBack}
-          disabled={backDisabled}
-        >
-          {backLabel}
-        </Button>
-      ) : null}
+  const leftSlot =
+    showDanger || showBack ? (
+      <Group gap="sm">
+        {showDanger ? (
+          <Button
+            type="button"
+            variant="light"
+            color="red"
+            leftSection={resolvedDangerLeftSection}
+            onClick={onDanger}
+            disabled={dangerDisabled}
+          >
+            {dangerLabel}
+          </Button>
+        ) : null}
+        {showBack ? (
+          <Button
+            variant="default"
+            leftSection={backLeftSection}
+            onClick={onBack}
+            disabled={backDisabled}
+          >
+            {backLabel}
+          </Button>
+        ) : null}
+      </Group>
+    ) : null;
 
-      {(showCancel || showAction) && (
+  return (
+    <Group
+      justify={showDanger || showBack ? "space-between" : "flex-end"}
+      align="center"
+      mt={mt}
+    >
+      {leftSlot}
+
+      {showRightCluster ? (
         <Group>
           {showCancel ? (
             <Button variant="default" onClick={onCancel} disabled={cancelDisabled}>
@@ -103,7 +140,7 @@ export function ModalFooter({
             </Button>
           ) : null}
         </Group>
-      )}
+      ) : null}
     </Group>
   );
 }

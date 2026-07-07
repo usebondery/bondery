@@ -13,6 +13,7 @@ import { getMergeRecommendationsData } from "@/app/(app)/app/fix/getMergeRecomme
 import { PersonLoader } from "./PersonLoader";
 import { serverApiFetch } from "@/lib/api/server";
 import { API_ROUTES, formatMetadataTitle } from "@bondery/helpers/globals/paths";
+import { getWebTranslations as getTranslations } from "@/lib/i18n/getWebTranslations";
 import { PageWrapper } from "@/app/(app)/app/components/PageWrapper";
 import { ErrorPageHeader } from "@/app/(app)/app/components/ErrorPageHeader";
 import type { Group, Tag } from "@bondery/schemas";
@@ -26,9 +27,12 @@ export async function generateMetadata({
   try {
     const { person_id: personId } = await params;
     const res = await serverApiFetch(`${API_ROUTES.CONTACTS}/${personId}`, undefined, {
-      next: { tags: ["contacts"] },
+      cache: "no-store",
     });
-    if (!res.ok) return { title: "Person" };
+    if (!res.ok) {
+      const t = await getTranslations("SingleContactPage");
+      return { title: formatMetadataTitle(t("PersonFallbackTitle")) };
+    }
     const data = await res.json();
     const contact = data.contact;
     const fullName = [contact.firstName, contact.middleName, contact.lastName]
@@ -36,7 +40,8 @@ export async function generateMetadata({
       .join(" ");
     return { title: formatMetadataTitle(fullName) };
   } catch {
-    return { title: "Person" };
+    const t = await getTranslations("SingleContactPage");
+    return { title: formatMetadataTitle(t("PersonFallbackTitle")) };
   }
 }
 
@@ -44,7 +49,7 @@ async function getPersonData(personId: string) {
   const contactPromise = serverApiFetch(
     `${API_ROUTES.CONTACTS}/${personId}?${buildAvatarQueryString("large")}`,
     undefined,
-    { next: { tags: ["contacts"] } },
+    { cache: "no-store" },
   );
 
   const groupsPromise = serverApiFetch(API_ROUTES.GROUPS, undefined, {
@@ -192,13 +197,14 @@ export default async function PersonPage({
 }) {
   const { person_id: personId } = await params;
   const { tab } = await searchParams;
+  const t = await getTranslations("SingleContactPage");
 
   if (!personId) {
     return (
       <PageWrapper>
-        <ErrorPageHeader iconType="user" title="Person not found" backHref={API_ROUTES.CONTACTS} />
+        <ErrorPageHeader iconType="user" title={t("PersonNotFound")} backHref={API_ROUTES.CONTACTS} />
         <Stack gap="xl">
-          <Text c="dimmed">Please select a person to view their details.</Text>
+          <Text c="dimmed">{t("PersonNotSelected")}</Text>
         </Stack>
       </PageWrapper>
     );
@@ -209,9 +215,9 @@ export default async function PersonPage({
   if (!data) {
     return (
       <PageWrapper>
-        <ErrorPageHeader iconType="user" title="Person not found" backHref={API_ROUTES.CONTACTS} />
+        <ErrorPageHeader iconType="user" title={t("PersonNotFound")} backHref={API_ROUTES.CONTACTS} />
         <Stack gap="xl">
-          <Text c="dimmed">The requested contact could not be found.</Text>
+          <Text c="dimmed">{t("PersonNotFoundDescription")}</Text>
         </Stack>
       </PageWrapper>
     );

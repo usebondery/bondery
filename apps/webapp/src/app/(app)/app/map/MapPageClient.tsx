@@ -19,14 +19,7 @@ import {
   IconMapPin,
   IconUser,
 } from "@tabler/icons-react";
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  useDeferredValue,
-} from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, useDeferredValue, type ReactNode } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
@@ -58,6 +51,16 @@ import {
 import type { MapView, MapPin, AddressPin } from "./types";
 import type { ContactAddressEntry } from "@bondery/schemas";
 import { geocodeSuggestionDisplayLabel } from "@bondery/helpers/geocode";
+import { useContactsTableCopy } from "@/lib/i18n/useContactsTableCopy";
+import type { ColumnKey } from "@/app/(app)/app/components/contacts/ContactsTableV2";
+
+const MAP_TABLE_COLUMN_KEYS: ColumnKey[] = [
+  "name",
+  "headline",
+  "location",
+  "lastInteraction",
+  "social",
+];
 
 interface MapPageClientProps {
   view: MapView;
@@ -105,6 +108,7 @@ function sortPins(list: MapPin[], order: SortOrder): MapPin[] {
 export function MapPageClient({ view }: MapPageClientProps) {
   const t = useTranslations("MapPage");
   const tPeople = useTranslations("PeoplePage");
+  const { columnDefinitions } = useContactsTableCopy();
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -151,14 +155,16 @@ export function MapPageClient({ view }: MapPageClientProps) {
         const json = await queryClient.fetchQuery({
           queryKey: contactKeys.mapPins(mode, clamped),
           queryFn: createMapPinsQueryFn(mode, clamped),
+          // Pins change when contacts are edited; never serve a cached empty viewport.
+          staleTime: 0,
         });
         if (mode === "address") {
           setAddressPins((json.pins as AddressPin[]) || []);
         } else {
           setLocationPins((json.pins as MapPin[]) || []);
         }
-      } catch {
-        // silently ignore transient network errors
+      } catch (error) {
+        console.error("[MapPage] Failed to fetch map pins", error);
       }
     },
     [queryClient],
@@ -257,39 +263,43 @@ export function MapPageClient({ view }: MapPageClientProps) {
     null,
   );
 
-  const [columns, setColumns] = useState<ColumnConfig[]>([
-    {
-      key: "name",
-      label: "Name",
-      visible: true,
-      icon: <IconUser size={16} />,
-      fixed: true,
-    },
-    {
-      key: "headline",
-      label: "Headline",
-      visible: true,
-      icon: <IconBriefcase size={16} />,
-    },
-    {
-      key: "location",
-      label: "Location",
-      visible: true,
-      icon: <IconMapPin size={16} />,
-    },
-    {
-      key: "lastInteraction",
-      label: "Last Interaction",
-      visible: true,
-      icon: <IconClock size={16} />,
-    },
-    {
-      key: "social",
-      label: "Socials",
-      visible: false,
-      icon: <IconBrandLinkedin size={16} />,
-    },
-  ]);
+  const columnLabels = useMemo(
+    () =>
+      Object.fromEntries(
+        MAP_TABLE_COLUMN_KEYS.map((key) => [key, columnDefinitions[key].label]),
+      ) as Record<ColumnKey, string>,
+    [columnDefinitions],
+  );
+
+  const columnIcons: Record<ColumnKey, ReactNode> = {
+    name: <IconUser size={16} />,
+    headline: <IconBriefcase size={16} />,
+    location: <IconMapPin size={16} />,
+    lastInteraction: <IconClock size={16} />,
+    social: <IconBrandLinkedin size={16} />,
+    phone: null,
+    email: null,
+    avatar: null,
+  };
+
+  const [columns, setColumns] = useState<ColumnConfig[]>(() =>
+    MAP_TABLE_COLUMN_KEYS.map((key) => ({
+      key,
+      label: columnDefinitions[key].label,
+      visible: key !== "social",
+      icon: columnIcons[key],
+      fixed: key === "name",
+    })),
+  );
+
+  useEffect(() => {
+    setColumns((prev) =>
+      prev.map((col) => ({
+        ...col,
+        label: columnLabels[col.key as ColumnKey] ?? col.label,
+      })),
+    );
+  }, [columnLabels]);
 
   const deferredColumns = useDeferredValue(columns);
   const visibleColumns = deferredColumns.filter((c) => c.visible);
@@ -418,6 +428,7 @@ export function MapPageClient({ view }: MapPageClientProps) {
         <PageHeader
           icon={IconMap2}
           title={t("Title")}
+          helpDoc="concepts.map"
           helpLabel={t("Subtitle")}
           secondaryAction={
             <SegmentedControl

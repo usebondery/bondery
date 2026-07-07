@@ -688,7 +688,7 @@ export function GroupDetailClient({
             menuActions={menuActions}
             bulkSelectionActions={bulkSelectionActions}
             loadMoreAction={{
-              label: "Load another 50 contacts",
+              label: tPeople("LoadMoreBatch"),
               onClick: handleLoadMore,
               loading: isLoadingMore,
             }}

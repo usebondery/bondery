@@ -3,7 +3,8 @@
 import { DatePickerInput } from "@mantine/dates";
 import { IconCalendar } from "@tabler/icons-react";
 import type { ComponentProps } from "react";
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
+import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
 
 type DatePickerWithPresetsProps = Omit<ComponentProps<typeof DatePickerInput>, "onDropdownOpen"> & {
   onDropdownOpen?: () => void;
@@ -21,6 +22,7 @@ export function DatePickerWithPresets({
   classNames,
   ...props
 }: DatePickerWithPresetsProps) {
+  const t = useTranslations("InteractionsPage");
   const now = new Date();
   const toDatePreset = (value: Date) => {
     const year = value.getFullYear();
@@ -41,29 +43,32 @@ export function DatePickerWithPresets({
     return null;
   };
 
-  const presets = [
-    {
-      value: toDatePreset(new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1)),
-      label: "Tomorrow",
-    },
-    { value: toDatePreset(new Date(now)), label: "Today" },
-    {
-      value: toDatePreset(new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1)),
-      label: "Yesterday",
-    },
-    {
-      value: toDatePreset(new Date(now.getFullYear(), now.getMonth(), now.getDate() - 7)),
-      label: "Last week",
-    },
-    {
-      value: toDatePreset(new Date(now.getFullYear(), now.getMonth() - 1, now.getDate())),
-      label: "Last month",
-    },
-    {
-      value: toDatePreset(new Date(now.getFullYear() - 1, now.getMonth(), now.getDate())),
-      label: "Last year",
-    },
-  ];
+  const presets = useMemo(
+    () => [
+      {
+        value: toDatePreset(new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1)),
+        label: t("DatePresetTomorrow"),
+      },
+      { value: toDatePreset(new Date(now)), label: t("DatePresetToday") },
+      {
+        value: toDatePreset(new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1)),
+        label: t("DatePresetYesterday"),
+      },
+      {
+        value: toDatePreset(new Date(now.getFullYear(), now.getMonth(), now.getDate() - 7)),
+        label: t("DatePresetLastWeek"),
+      },
+      {
+        value: toDatePreset(new Date(now.getFullYear(), now.getMonth() - 1, now.getDate())),
+        label: t("DatePresetLastMonth"),
+      },
+      {
+        value: toDatePreset(new Date(now.getFullYear() - 1, now.getMonth(), now.getDate())),
+        label: t("DatePresetLastYear"),
+      },
+    ],
+    [now, t],
+  );
 
   // Stable ref to the current presets array so `markActivePreset` can look up
   // a preset by its label text instead of by DOM index (which is unreliable).

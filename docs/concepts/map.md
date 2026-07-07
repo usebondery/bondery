@@ -1,5 +1,6 @@
 ---
 icon: map-location-dot
+docId: concepts.map
 ---
 
 # Map view

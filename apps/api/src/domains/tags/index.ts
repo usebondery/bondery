@@ -1,7 +1,7 @@
 import type { Tag, TablesInsert, TablesUpdate } from "@bondery/schemas";
 import { TAG_SELECT } from "../../lib/queries.js";
 import { captureCurrentSyncTxid } from "../_shared/with-txid.js";
-import { DomainError, type DomainContext } from "../_shared/context.js";
+import { DomainError, syncEmitMetaFromContext, type DomainContext } from "../_shared/context.js";
 import { buildTagDeleteChange, buildTagRowChange } from "../../lib/sync/build-changes.js";
 import { emitSyncBatch } from "../../lib/sync/emit-change.js";
 
@@ -66,7 +66,7 @@ export async function createTag(
 
   const txid = await captureCurrentSyncTxid(client);
   const serverSequence =
-    (await emitSyncBatch(user.id, [buildTagRowChange(newTag as Record<string, unknown>)])) ?? 0;
+    (await emitSyncBatch(user.id, [buildTagRowChange(newTag as Record<string, unknown>)], syncEmitMetaFromContext(ctx))) ?? 0;
   return { data: { tag: newTag as Tag }, txid, serverSequence };
 }
 
@@ -99,7 +99,7 @@ export async function updateTag(
 
   const txid = await captureCurrentSyncTxid(client);
   const serverSequence =
-    (await emitSyncBatch(user.id, [buildTagRowChange(tag as Record<string, unknown>)])) ?? 0;
+    (await emitSyncBatch(user.id, [buildTagRowChange(tag as Record<string, unknown>)], syncEmitMetaFromContext(ctx))) ?? 0;
   return { data: { tag: tag as Tag }, txid, serverSequence };
 }
 
@@ -122,6 +122,6 @@ export async function deleteTag(
   }
 
   const txid = await captureCurrentSyncTxid(client);
-  const serverSequence = (await emitSyncBatch(user.id, [buildTagDeleteChange(tagId)])) ?? 0;
+  const serverSequence = (await emitSyncBatch(user.id, [buildTagDeleteChange(tagId)], syncEmitMetaFromContext(ctx))) ?? 0;
   return { data: { deletedId: tagId }, txid, serverSequence };
 }

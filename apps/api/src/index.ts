@@ -49,6 +49,7 @@ import { vcardImportRoutes } from "./routes/import/vcard/index.js";
 import { shareRoutes } from "./routes/contacts/share/index.js";
 import { statsRoutes } from "./routes/admin/stats/index.js";
 import { meOnboardingRoutes } from "./routes/me/onboarding/index.js";
+import { meOnboardingImportFollowupRoutes } from "./routes/me/onboarding/import-followup.js";
 import { chatRoutes } from "./routes/chat/index.js";
 import { chatSessionRoutes } from "./routes/chat/sessions.js";
 import { subscriptionRoutes } from "./routes/subscriptions/index.js";
@@ -58,6 +59,10 @@ import { subscriptionSyncRoutes } from "./routes/subscriptions/sync.js";
 import { polarWebhookRoutes } from "./routes/webhooks/polar.js";
 import { geocodeRoutes } from "./routes/geocode/index.js";
 import { syncRoutes } from "./routes/sync/index.js";
+import {
+  initSyncWakeRuntime,
+  shutdownSyncWakeRuntime,
+} from "./lib/sync/wake/index.js";
 
 // Environment variable schema
 const envSchema = {
@@ -171,6 +176,10 @@ const envSchema = {
     PRIVATE_SUPABASE_JWT_SIGNING_JWK: {
       type: "string",
     },
+    SYNC_WAKE_ENABLED: {
+      type: "string",
+      default: "true",
+    },
   },
 } as const;
 
@@ -204,6 +213,7 @@ declare module "fastify" {
       PRIVATE_REDIS_URL: string;
       PRIVATE_API_KEY_PEPPER: string;
       PRIVATE_SUPABASE_JWT_SIGNING_JWK: string;
+      SYNC_WAKE_ENABLED: string;
     };
   }
 }
@@ -485,6 +495,9 @@ async function buildServer() {
   await fastify.register(meOnboardingRoutes, {
     prefix: API_ROUTES.ME_ONBOARDING_COMPLETE,
   });
+  await fastify.register(meOnboardingImportFollowupRoutes, {
+    prefix: API_ROUTES.ME_ONBOARDING_IMPORT_FOLLOWUP,
+  });
   await fastify.register(meSettingsRoutes, { prefix: API_ROUTES.ME_SETTINGS });
   await fastify.register(meFeedbackRoutes, { prefix: API_ROUTES.ME_FEEDBACK });
   await fastify.register(meApiKeysRoutes, { prefix: API_ROUTES.ME_API_KEYS });
@@ -512,6 +525,14 @@ async function buildServer() {
   });
   await fastify.register(reminderDigestRoutes, {
     prefix: API_ROUTES.INTERNAL_REMINDER_DIGEST,
+  });
+
+  fastify.addHook("onReady", async () => {
+    await initSyncWakeRuntime(fastify.log);
+  });
+
+  fastify.addHook("onClose", async () => {
+    await shutdownSyncWakeRuntime();
   });
 
   return fastify;

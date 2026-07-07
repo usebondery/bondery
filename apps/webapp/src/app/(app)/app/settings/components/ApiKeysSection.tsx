@@ -16,7 +16,6 @@ import { notifications } from "@mantine/notifications";
 import { IconAlertCircle, IconKey, IconPlus, IconTrash } from "@tabler/icons-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { API_KEY_LIMITS, type ApiKeyCreated, type ApiKeyListItem } from "@bondery/schemas";
-import { HELP_DOCS_URL } from "@bondery/helpers/globals/paths";
 import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
 import { formatLastUsedAtWithFormatter, useDateFormatter } from "@/lib/i18n/useDateFormatter";
 import { openStandardConfirmModal } from "@/app/(app)/app/components/modals/openStandardConfirmModal";
@@ -168,7 +167,6 @@ export function ApiKeysSection({ initialApiKeys, apiBaseUrl }: ApiKeysSectionPro
   const deleteMutation = useDeleteApiKeyMutation();
 
   const atLimit = apiKeys.length >= API_KEY_LIMITS.maxPerUser;
-  const docsUrl = `${HELP_DOCS_URL}/api/authentication`;
   const permissionOptions = useMemo(() => buildApiKeyPermissionOptions(t), [t]);
 
   const lastUsedLabel = (lastUsedAt: string | null) =>
@@ -242,7 +240,7 @@ export function ApiKeysSection({ initialApiKeys, apiBaseUrl }: ApiKeysSectionPro
       id="api-keys"
       icon={<IconKey size={20} stroke={1.5} />}
       title={t("Title")}
-      helpHref={docsUrl}
+      helpDoc="api.authentication"
       helpLabel={t("DocsHelpLabel")}
       action={createButton}
     >
@@ -253,12 +251,9 @@ export function ApiKeysSection({ initialApiKeys, apiBaseUrl }: ApiKeysSectionPro
           </Text>
 
           {apiKeys.length === 0 ? (
-            <Stack align="center" gap="xs" py="lg">
-              <Text fw={500}>{t("EmptyTitle")}</Text>
-              <Text size="sm" c="dimmed" ta="center">
-                {t("EmptyDescription")}
-              </Text>
-            </Stack>
+            <Text size="sm" c="dimmed">
+              {t("EmptyTitle")}
+            </Text>
           ) : (
             <Stack gap="sm">
               {apiKeys.map((key) => (

@@ -1,5 +1,6 @@
 ---
 icon: message-chatbot
+docId: concepts.chat
 ---
 
 # AI Assistant

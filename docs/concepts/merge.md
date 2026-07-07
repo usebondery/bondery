@@ -1,5 +1,6 @@
 ---
 icon: code-merge
+docId: concepts.merge
 ---
 
 # Merge contacts

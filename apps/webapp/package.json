@@ -1,6 +1,6 @@
 {
   "name": "webapp",
-  "version": "1.4.2",
+  "version": "1.7.0",
   "private": true,
   "type": "module",
   "description": "Bondery Webapp",
@@ -22,6 +22,7 @@
     "check-modal-patterns:strict": "cross-env CHECK_MODAL_PATTERNS_STRICT=1 tsx scripts/check-modal-patterns.ts",
     "check-schemas-imports": "tsx scripts/check-schemas-imports.ts",
     "check-schemas-imports:strict": "cross-env CHECK_SCHEMAS_IMPORTS_STRICT=1 tsx scripts/check-schemas-imports.ts",
+    "test:sync": "tsx --test src/lib/sync/sync-wake-client.test.ts",
     "smoke-ssr": "node scripts/smoke-ssr-boot.mjs"
   },
   "browserslist": {

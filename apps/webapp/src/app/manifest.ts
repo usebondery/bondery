@@ -1,12 +1,18 @@
 import type { MetadataRoute } from "next";
 import { BRAND_PRIMARY_COLOR } from "@bondery/branding";
 import { WEBAPP_NAME } from "@bondery/helpers";
+import { resolveLocaleSettings } from "@/lib/i18n/resolveLocaleSettings";
+import { loadTranslation } from "@bondery/translations/i18n";
 
-export default function manifest(): MetadataRoute.Manifest {
+export default async function manifest(): Promise<MetadataRoute.Manifest> {
+  const { locale } = await resolveLocaleSettings();
+  const translations = loadTranslation(locale);
+  const common = translations.WebAppCommon as Record<string, string>;
+
   return {
     name: `${WEBAPP_NAME} PWA`,
     short_name: `${WEBAPP_NAME} PWA`,
-    description: "Build bonds that last forever.",
+    description: common.AppDescription,
     start_url: "/",
     display: "standalone",
     background_color: "#ffffff",

@@ -1,5 +1,8 @@
+"use client";
+
 import DateWithNotification from "./DateWithNotification";
 import { Group, Button } from "@mantine/core";
+import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
 
 interface ImportantDate {
   date: Date | null;
@@ -38,11 +41,13 @@ export function ContactDatesSection({
   focusedField,
   setFocusedField,
 }: ContactDatesSectionProps) {
+  const t = useTranslations("ContactImportantDates");
+
   return (
     <>
       <DateWithNotification
-        title="Birthday"
-        dateLabel="Select birthday"
+        title={t("Types.birthday")}
+        dateLabel={t("BirthdayDateLabel")}
         dateValue={birthday}
         notifyValue={notifyBirthday}
         onDateChange={onBirthdayChange}
@@ -54,7 +59,7 @@ export function ContactDatesSection({
         fieldPrefix="birthday"
       />
       <Group>
-        <Button onClick={onAddImportantDate}>Add Important Date</Button>
+        <Button onClick={onAddImportantDate}>{t("AddImportantDate")}</Button>
       </Group>
       {/* Render important dates here as needed */}
     </>

@@ -121,6 +121,9 @@
     "TypeDisabledHint": "{firstName} už má definované narozeniny nebo jmeniny",
     "NotePlaceholder": "Volitelná poznámka",
     "AddAction": "Přidat datum",
+    "AddImportantDate": "Přidat důležité datum",
+    "BirthdayDateLabel": "Vyberte narozeniny",
+    "NotifyMe": "Upozornit mě",
     "AddHint": "Pro přidání nového data vyplňte všechny informace.",
     "NotifyNone": "Neupozorňovat",
     "NotifyDayBefore": "Upozornit {count} den předem",
@@ -171,7 +174,27 @@
     "FieldSignal": "Signal",
     "FieldWebsite": "Web",
     "AriaPhone": "Telefon",
-    "AriaEmail": "E-mail"
+    "AriaEmail": "E-mail",
+    "RerouteWrongPlatformDescription": "Toto je odkaz na {platform}",
+    "RerouteWrongPlatformBody": "Vložili jste to do pole {field}. Nastavte to jako {platform}, nebo to ponechte zde v poli {field}.",
+    "RerouteWrongPlatformBodyConflict": "Vložili jste to do pole {field}, ale {platform} už je u tohoto kontaktu nastaveno. Nahraďte {platform} touto hodnotou, nebo to ponechte zde v poli {field}.",
+    "RerouteLooksLikePhoneDescription": "Vypadá to jako telefonní číslo",
+    "RerouteLooksLikePhoneBody": "Zadali jste telefonní číslo do pole {field}. Nastavte ho jako {platform}, nebo ho ponechte zde v poli {field}.",
+    "RerouteLooksLikePhoneBodyConflict": "Zadali jste telefonní číslo do pole {field}, ale {platform} už je nastaveno. Nahraďte {platform} tímto číslem, nebo ho ponechte zde v poli {field}.",
+    "RerouteLooksLikeWebsiteDescription": "Vypadá to jako webová stránka",
+    "RerouteLooksLikeWebsiteBody": "Zadali jste URL webu do pole {field}. Nastavte ho jako Web, nebo ho ponechte zde v poli {field}.",
+    "RerouteLooksLikeWebsiteBodyConflict": "Zadali jste URL webu do pole {field}, ale Web už je nastaven. Nahraďte ho touto URL, nebo ji ponechte zde v poli {field}.",
+    "RerouteSetAs": "Nastavit jako {platform}",
+    "RerouteReplace": "Nahradit stávající",
+    "RerouteSetHere": "Nastavit zde",
+    "TooltipCall": "Zavolat {name}",
+    "TooltipEmail": "Poslat e-mail na {name}",
+    "TooltipLinkedIn": "Otevřít {name} na LinkedIn",
+    "TooltipInstagram": "Otevřít {name} na Instagramu",
+    "TooltipWhatsApp": "Otevřít {name} na WhatsApp",
+    "TooltipFacebook": "Otevřít {name} na Facebooku",
+    "TooltipSignal": "Otevřít {name} na Signal",
+    "InvalidWebsiteUrl": "Zadejte prosím platnou URL webu"
   },
   "ContactPage": {
     "Title": "Kontaktujte nás",
@@ -230,7 +253,14 @@
     "TimezoneUpdateFailed": "Nepodařilo se aktualizovat časové pásmo",
     "FirstNameRequired": "Jméno je povinné",
     "ValidationErrorTitle": "Chyba validace",
-    "NameUpdateFailed": "Nepodařilo se aktualizovat jméno"
+    "NameUpdateFailed": "Nepodařilo se aktualizovat jméno",
+    "PersonNotFound": "Osoba nenalezena",
+    "PersonNotSelected": "Vyberte prosím osobu, jejíž detaily chcete zobrazit.",
+    "PersonNotFoundDescription": "Požadovaný kontakt nebyl nalezen.",
+    "ProfileNotFound": "Profil nenalezen",
+    "ProfileNotFoundDescription": "Váš profilový kontakt nebyl nalezen.",
+    "PersonFallbackTitle": "Osoba",
+    "DetailsPageTitle": "Detail osoby"
   },
   "ContactPhotoUpload": {
     "TitleModal": "Nahrát fotku kontaktu",
@@ -350,7 +380,8 @@
     "Interactions": "Interakce",
     "About": "O kontaktu",
     "Organize": "Organizace",
-    "LinkedIn": "LinkedIn"
+    "LinkedIn": "LinkedIn",
+    "Groups": "Skupiny"
   },
   "LinkedInData": {
     "About": "O mně",
@@ -380,7 +411,8 @@
     "TechnicalUnreachable": "nedostupné",
     "TechnicalBackendStatus": "Backend: {status}",
     "StatusPageLink": "Zobrazit stav služby",
-    "CheckingAgain": "Další kontrola za {seconds} s…"
+    "CheckingAgain": "Další kontrola za {seconds} s…",
+    "MetadataTitle": "Služba nedostupná"
   },
   "LoginPage": {
     "Title": "Bondery",
@@ -450,7 +482,7 @@
       "EmailDisabledTooltip": "Změna e-mailu je nyní vypnutá, protože přihlášení je spravováno přes OAuth poskytovatele třetích stran.",
       "UnlinkAccountTitle": "Odpojit účet",
       "UnlinkAccountMessage": "Opravdu chcete odpojit svůj účet <b>{provider}</b>? Můžete ho kdykoliv znovu propojit.",
-      "Cancel": "No, cancel",
+      "Cancel": "Ne, zrušit",
       "UnlinkAccountButton": "Odpojit účet",
       "UpdateProfilePhoto": "Aktualizovat profilovou fotku",
       "UploadingPhoto": "Nahrávání fotky...",
@@ -459,7 +491,9 @@
       "InvalidFile": "Neplatný soubor",
       "DragImageHere": "Přetáhněte obrázek sem nebo klikněte pro výběr",
       "AttachProfilePhoto": "Připojte svou profilovou fotku, soubor nesmí přesáhnout 5MB",
-      "ConfirmPhoto": "Ano, změnit profilovou fotku"
+      "ConfirmPhoto": "Ano, změnit profilovou fotku",
+      "EmailInfoAriaLabel": "Informace o e-mailu",
+      "TitleModal": "Změnit profilovou fotku"
     },
     "Integration": {
       "LinkingAccount": "Propojování účtu...",
@@ -496,7 +530,11 @@
         "IntroDescription2": "Automaticky doplní kontaktní data — nadpis, společnost, polohu a další",
         "IntroDescription3": "Funguje přímo ve vašem prohlížeči na LinkedIn — žádné manuální kopírování",
         "InstallButton": "Nainstalovat z Chrome Web Store",
-        "Close": "Zavřít"
+        "Close": "Zavřít",
+        "AnimationProfilePicture": "Profilová fotka",
+        "AnimationWorkHistory": "Pracovní historie",
+        "AnimationEducation": "Vzdělání",
+        "AnimationJobTitle": "Pracovní pozice"
       }
     },
     "Preferences": {
@@ -611,6 +649,7 @@
         "FilesAlertFileConnectionsBold": "connections.csv",
         "FilesAlertDescriptionSuffix": "To pomáhá udržet soubor malý a zrychlit zpracování.",
         "HaveZipFile": "Mám ZIP soubor",
+        "RequestedExport": "Požádal(a) jsem o export",
         "DropzoneTitle": "Přetáhněte LinkedIn ZIP nebo exportovanou složku",
         "DropzoneDescription": "Najdeme Connections.csv, ověříme formát a připravíme kontakty k importu.",
         "SelectZipFile": "Vybrat ZIP soubor",
@@ -636,7 +675,8 @@
         "ErrorTitle": "Import selhal",
         "ProcessingConnections": "Zpracovávám kontakty",
         "ImportingTitle": "Importuji kontakty...",
-        "ImportingProgress": "{current} z {total} kontaktů zpracováno"
+        "ImportingProgress": "{current} z {total} kontaktů zpracováno",
+        "ComeBackWhenReady": "Vrátím se, až bude export připravený"
       },
       "InstagramImport": {
         "SectionTitle": "Import kontaktů",
@@ -665,6 +705,7 @@
         "FilesAlertFilesBold": "following.json, followers_*.json a close_friends.json",
         "FilesAlertDescriptionSuffix": "To pomáhá udržet nahraný soubor malý a zrychlit zpracování.",
         "HaveZipFile": "Mám ZIP soubor",
+        "RequestedExport": "Požádal(a) jsem o export",
         "DropzoneTitle": "Přetáhněte Instagram ZIP",
         "DropzoneDescription": "Ověříme strukturu JSON a připravíme kontakty podle vybrané strategie.",
         "SelectZipFile": "Vybrat ZIP soubor",
@@ -704,47 +745,54 @@
         "InstructionsTitle": "Instrukce",
         "ImportingTitle": "Importuji kontakty...",
         "ImportingProgress": "{current} z {total} kontaktů zpracováno",
-        "ChooseContactsHint": "Vyberte, kter\u00e9 kontakty chcete importovat",
-        "NoContactsFound": "\u017d\u00e1dn\u00e9 kontakty k n\u00e1hledu.",
-        "NoContactsMatchSearch": "\u017d\u00e1dn\u00fd takov\u00fd kontakt nenalezen."
+        "ChooseContactsHint": "Vyberte, které kontakty chcete importovat",
+        "NoContactsFound": "Žádné kontakty k náhledu.",
+        "NoContactsMatchSearch": "Žádný takový kontakt nenalezen.",
+        "ComeBackWhenReady": "Vrátím se, až bude export připravený",
+        "ZipNoFile": "Nebyl vybrán žádný soubor. Vyberte prosím jeden Instagram ZIP soubor.",
+        "ZipTooLarge": "Vybraný soubor je příliš velký. Instagram ZIP musí být menší než 100 MB.",
+        "ZipInvalidExtension": "Neplatná přípona souboru. Vyberte prosím exportní soubor .zip.",
+        "ZipInvalidMime": "Prohlížeč nahlásil neplatný MIME typ ZIP souboru. Stáhněte export znovu a zkuste to znovu.",
+        "ZipTooManyFiles": "Nahrajte prosím právě jeden Instagram ZIP soubor.",
+        "ZipInvalidType": "Neplatný typ souboru. Vyberte prosím exportní soubor .zip."
       },
       "VCardImport": {
-        "ModalTitle": "Import mobiln\u00edch kontakt\u016f",
-        "MobileContacts": "Mobiln\u00ed kontakty",
+        "ModalTitle": "Import mobilních kontaktů",
+        "MobileContacts": "Mobilní kontakty",
         "CardDescription": "Importujte kontakty z vCard (.vcf) souboru",
         "IntroTitle": "Jak funguje import vCard",
-        "IntroDescription1": "M\u016f\u017eete nahr\u00e1t kontakty exportovan\u00e9 z telefonu jako .vcf (vCard) soubor.",
-        "IntroDescription2": "Po nahr\u00e1n\u00ed zpracujeme v\u0161echny kontakty a nech\u00e1me v\u00e1s vybrat, kter\u00e9 chcete importovat.",
-        "IntroDescription3": "Nahr\u00e1van\u00e9 soubory slou\u017e\u00ed pouze ke zpracov\u00e1n\u00ed a na serveru je neukl\u00e1d\u00e1me.",
-        "Continue": "Pokra\u010dovat",
+        "IntroDescription1": "Můžete nahrát kontakty exportované z telefonu jako .vcf (vCard) soubor.",
+        "IntroDescription2": "Po nahrání zpracujeme všechny kontakty a necháme vás vybrat, které chcete importovat.",
+        "IntroDescription3": "Nahrávané soubory slouží pouze ke zpracování a na serveru je neukládáme.",
+        "Continue": "Pokračovat",
         "InstructionsTitle": "Jak exportovat kontakty",
-        "InstructionStep1": "Na iPhone: Otev\u0159ete Kontakty, vyberte kontakty, klepn\u011bte na Sd\u00edlet a zvolte \"Exportovat vCard\"",
-        "InstructionStep2": "Na Androidu: Otev\u0159ete Kontakty, p\u0159ejd\u011bte do Nastaven\u00ed/Export a ulo\u017ete jako .vcf soubor",
-        "InstructionStep3": "P\u0159eneste .vcf soubor do po\u010d\u00edta\u010de (nap\u0159. e-mailem, p\u0159es cloud nebo kabelem)",
-        "InstructionStep4": "V dal\u0161\u00edm kroku soubor .vcf nahrajte",
-        "HaveVcfFile": "M\u00e1m .vcf soubor",
-        "DropzoneTitle": "P\u0159et\u00e1hn\u011bte .vcf soubor sem",
-        "DropzoneDescription": "Zpracujeme v\u0161echny kontakty a p\u0159iprav\u00edme je k importu.",
+        "InstructionStep1": "Na iPhone: Otevřete Kontakty, vyberte kontakty, klepněte na Sdílet a zvolte \"Exportovat vCard\"",
+        "InstructionStep2": "Na Androidu: Otevřete Kontakty, přejděte do Nastavení/Export a uložte jako .vcf soubor",
+        "InstructionStep3": "Přeneste .vcf soubor do počítače (např. e-mailem, přes cloud nebo kabelem)",
+        "InstructionStep4": "V dalším kroku soubor .vcf nahrajte",
+        "HaveVcfFile": "Mám .vcf soubor",
+        "DropzoneTitle": "Přetáhněte .vcf soubor sem",
+        "DropzoneDescription": "Zpracujeme všechny kontakty a připravíme je k importu.",
         "SelectVcfFile": "Vybrat .vcf soubor",
         "Total": "Celkem: {count}",
-        "Valid": "Platn\u00e9: {count}",
-        "Invalid": "Neplatn\u00e9: {count}",
-        "ImportSelected": "Importovat vybran\u00e9 ({count})",
-        "ChooseContactsHint": "Vyberte, kter\u00e9 kontakty chcete importovat",
-        "ImportSuccess": "Importov\u00e1no: {imported}, p\u0159esko\u010deno: {skipped}",
-        "NoContactsSelected": "Vyberte alespo\u0148 jeden kontakt k importu.",
-        "ParseError": "Nepoda\u0159ilo se zpracovat vCard soubor.",
-        "ImportError": "Nepoda\u0159ilo se importovat vybran\u00e9 kontakty.",
-        "InvalidFile": "Neplatn\u00fd soubor. Nahrajte .vcf (vCard) soubor.",
-        "Back": "Zp\u011bt",
-        "Cancel": "Zru\u0161it",
-        "SuccessTitle": "Import dokon\u010den",
+        "Valid": "Platné: {count}",
+        "Invalid": "Neplatné: {count}",
+        "ImportSelected": "Importovat vybrané ({count})",
+        "ChooseContactsHint": "Vyberte, které kontakty chcete importovat",
+        "ImportSuccess": "Importováno: {imported}, přeskočeno: {skipped}",
+        "NoContactsSelected": "Vyberte alespoň jeden kontakt k importu.",
+        "ParseError": "Nepodařilo se zpracovat vCard soubor.",
+        "ImportError": "Nepodařilo se importovat vybrané kontakty.",
+        "InvalidFile": "Neplatný soubor. Nahrajte .vcf (vCard) soubor.",
+        "Back": "Zpět",
+        "Cancel": "Zrušit",
+        "SuccessTitle": "Import dokončen",
         "ErrorTitle": "Import selhal",
-        "ProcessingContacts": "Zpracov\u00e1v\u00e1m kontakty",
+        "ProcessingContacts": "Zpracovávám kontakty",
         "ImportingTitle": "Importuji kontakty...",
-        "ImportingProgress": "{current} z {total} kontakt\u016f zpracov\u00e1no",
-        "NoContactsFound": "\u017d\u00e1dn\u00e9 kontakty k n\u00e1hledu.",
-        "NoContactsMatchSearch": "\u017d\u00e1dn\u00fd takov\u00fd kontakt nenalezen."
+        "ImportingProgress": "{current} z {total} kontaktů zpracováno",
+        "NoContactsFound": "Žádné kontakty k náhledu.",
+        "NoContactsMatchSearch": "Žádný takový kontakt nenalezen."
       }
     },
     "ApiKeys": {
@@ -792,11 +840,11 @@
     "Support": {
       "Title": "Podpora",
       "DocumentationTitle": "Dokumentace",
-      "DocumentationDescription": "Prohl\u00e9dn\u011bte si pr\u016fvodce, tutori\u00e1ly a reference pro lep\u0161\u00ed vyu\u017eit\u00ed Bondery.",
-      "ContactTitle": "Kontaktujte n\u00e1s",
-      "ContactDescription": "M\u00e1te ot\u00e1zku nebo pot\u0159ebujete pomoc? Napi\u0161te n\u00e1m.",
-      "FeedbackTitle": "Odeslat zp\u011btnou vazbu",
-      "FeedbackDescription": "Pomozte n\u00e1m vylep\u0161it Bondery sd\u00edlen\u00edm va\u0161ich n\u00e1zor\u016f."
+      "DocumentationDescription": "Prohlédněte si průvodce, tutoriály a reference pro lepší využití Bondery.",
+      "ContactTitle": "Kontaktujte nás",
+      "ContactDescription": "Máte otázku nebo potřebujete pomoc? Napište nám.",
+      "FeedbackTitle": "Odeslat zpětnou vazbu",
+      "FeedbackDescription": "Pomozte nám vylepšit Bondery sdílením vašich názorů."
     }
   },
   "GroupsPage": {
@@ -897,7 +945,10 @@
       "CountAsc": "Nejméně lidí",
       "AlphaAsc": "A→Z",
       "AlphaDesc": "Z→A"
-    }
+    },
+    "Edit": "Upravit",
+    "Duplicate": "Duplikovat",
+    "FallbackTitle": "Skupina"
   },
   "GroupDetailPage": {
     "Title": "Skupina: {label}",
@@ -999,8 +1050,6 @@
     "NoAttendees": "Žádní účastníci",
     "ActivityDetailNotePlaceholder": "Přidejte poznámku k tomuto setkání.",
     "DeleteActivity": "Smazat interakci",
-    "Cancel": "Zrušit",
-    "SaveChanges": "Uložit změny",
     "DeleteActivityConfirmMessage": "Opravdu chcete smazat tuto aktivitu? Tuto akci nelze vrátit zpět.",
     "DuplicateFailed": "Interakci se nepodařilo duplikovat",
     "CreateActivityFailed": "Nepodařilo se vytvořit interakci. Zkuste to prosím znovu.",
@@ -1010,6 +1059,7 @@
     "LastInteractionUpdateFailed": "Nepodařilo se aktualizovat poslední interakci",
     "LastInteractionViaActivity": "Z {type}",
     "LastInteractionManual": "Nastaveno ručně",
+    "NoInteractionRecorded": "Žádná interakce nezaznamenána",
     "KeepInTouchFrequency": "Zůstat v kontaktu",
     "KeepInTouchNone": "Žádná",
     "FrequencyWeekly": "Týdně",
@@ -1021,7 +1071,14 @@
     "NextDue": "Příští kontakt",
     "KeepInTouchUpdated": "Zůstat v kontaktu aktualizováno",
     "KeepInTouchUpdatedDescription": "Frekvence byla úspěšně aktualizována",
-    "KeepInTouchUpdateFailed": "Nepodařilo se aktualizovat frekvenci"
+    "KeepInTouchUpdateFailed": "Nepodařilo se aktualizovat frekvenci",
+    "DatePresetTomorrow": "Zítra",
+    "DatePresetToday": "Dnes",
+    "DatePresetYesterday": "Včera",
+    "DatePresetLastWeek": "Minulý týden",
+    "DatePresetLastMonth": "Minulý měsíc",
+    "DatePresetLastYear": "Minulý rok",
+    "UnknownPerson": "Neznámá osoba"
   },
   "HomePage": {
     "Title": "Domů",
@@ -1061,10 +1118,19 @@
       "Title": "Začínáme",
       "Progress": "{completed} z {total} dokončeno",
       "Tasks": {
+        "ImportContacts": "Importujte kontakty",
         "AddContacts": "Přidejte první kontakty",
         "LogInteraction": "Zaznamenejte první interakci",
         "SetReminder": "Nastavte připomínku"
-      }
+      },
+      "AwaitingExport": "Váš export z {platform} je na cestě. Obvykle dorazí za 5–15 minut.",
+      "HaveZipFile": "Mám soubor",
+      "SkipImport": "Přeskočit import",
+      "Dismiss": "Zavřít",
+      "AllDone": "Vše je připraveno!",
+      "ChoosePlatform": "Vyberte platformu pro import",
+      "LinkedIn": "LinkedIn",
+      "Instagram": "Instagram"
     },
     "ExtensionNudge": {
       "Title": "Vylepšete Bondery naším Chrome rozšířením",
@@ -1110,6 +1176,7 @@
     "EnrichAll": "Obohatit vše",
     "Enrich": "Obohatit",
     "PersonEligibleLabel": "Tento kontakt může být obohacen z LinkedIn",
+    "HelpTooltip": "Stáhne do kontaktu aktuální údaje z LinkedIn profilu. Kliknutím zjistíte, jak obohacení funguje.",
     "CurrentlyEnriching": "Právě obohacuji:",
     "Pause": "Pozastavit",
     "PausingTooltip": "Dokončuji aktuální kontakt, pak se zastavím...",
@@ -1262,7 +1329,11 @@
       "Name": "Jméno",
       "Location": "Místo",
       "Coordinates": "Souřadnice"
-    }
+    },
+    "ViewAddresses": "Adresy",
+    "PinColumnName": "Jméno",
+    "PinColumnType": "Typ",
+    "PinColumnAddress": "Adresa"
   },
   "ContactAddress": {
     "Title": "Adresy",
@@ -1319,10 +1390,9 @@
     "SaveErrorTitle": "Chyba",
     "SaveErrorMessage": "Adresy se nepodařilo aktualizovat",
     "LocationUpdateModalTitle": "Chcete také aktualizovat polohu kontaktu?",
-    "LocationUpdateModalMessage": "Chcete také aktualizovat polohu kontaktu a časové pásmo z adresy?",
+    "LocationUpdateModalMessage": "Chcete aktualizovat polohu kontaktu podle uložené adresy?",
     "TimezoneUpdateModalTitle": "Aktualizovat časové pásmo?",
     "TimezoneUpdateModalMessage": "Chcete také aktualizovat časové pásmo kontaktu na základě nové polohy?",
-    "LocationUpdateModalMessage": "Chcete aktualizovat polohu kontaktu podle uložené adresy?",
     "LocationUpdateConfirm": "Ano, aktualizovat polohu",
     "LocationUpdateCancel": "Ne",
     "LocationUpdateSuccessTitle": "Úspěch",
@@ -1404,7 +1474,11 @@
     "Deleting": "Mazání...",
     "Duplicating": "Duplikování...",
     "InfoAriaLabel": "Informace",
-    "BackAriaLabel": "Zpět"
+    "BackAriaLabel": "Zpět",
+    "AppDescription": "Budujte vazby, které vydrží navždy.",
+    "ApiTemporarilyUnavailable": "API je dočasně nedostupné. Zkuste to prosím znovu.",
+    "ServerErrorGeneric": "Na serveru se něco pokazilo. Zkuste to prosím znovu.",
+    "RequestFailedGeneric": "Požadavek selhal. Zkuste to prosím znovu."
   },
   "CommandPalette": {
     "NothingFound": "Žádné akce nenalezeny",
@@ -1934,7 +2008,8 @@
     "BatchCompletedTitle": "Dávka obohacena",
     "BatchCompletedDescription": "{completed, plural, one {# kontakt} other {# kontaktů}} úspěšně obohaceno.",
     "AllDoneTitle": "Obohacení dokončeno",
-    "AllDoneDescription": "Celkem {count, plural, one {# kontakt} other {# kontaktů}} úspěšně obohaceno.",
+    "AllDoneDescriptionSingle": "1 kontakt byl úspěšně obohacen.",
+    "AllDoneDescriptionMultiple": "{count} kontaktů úspěšně obohaceno.",
     "CurrentlyEnriching": "Právě obohacuji:",
     "ProgressCount": "{completed} / {totalEligible}",
     "ExtensionNotRespondingTitle": "Rozšíření neodpovídá",
@@ -2107,11 +2182,14 @@
       "LinkedInDescription": "Nahrajte exportovaný soubor vašich LinkedIn kontaktů.",
       "InstagramDescription": "Nahrajte export vašich Instagram sledujících/sledovaných.",
       "ManualAdd": "Vytvořit ručně",
-      "SkipForNow": "Přeskočit",
+      "SkipImport": "Přeskočit import",
+      "WaitingForExport": "Čekám na export",
+      "ChoosePlatform": "Kterou platformu jste požádali?",
       "SuccessTitle": "Import dokončen!",
       "SuccessDescription": "{imported} importováno, {updated} aktualizováno, {skipped} přeskočeno.",
       "Finish": "Začít používat"
-    }
+    },
+    "MetadataTitle": "Úvodní nastavení"
   },
   "ChatPage": {
     "title": "AI Asistent",
@@ -2165,5 +2243,19 @@
     "alreadySubscribedMessage": "Již máte aktivní předplatné Premium.",
     "upgradePendingTitle": "Platba přijata",
     "upgradePendingMessage": "Váš účet bude brzy upgradován na Premium."
+  },
+  "InteractionTypes": {
+    "Call": "Hovor",
+    "Coffee": "Káva",
+    "Email": "E-mail",
+    "Meal": "Jídlo",
+    "Meeting": "Schůzka",
+    "NetworkingEvent": "Networkingová akce",
+    "Note": "Poznámka",
+    "Other": "Jiné",
+    "PartySocial": "Večírek/Social",
+    "TextMessaging": "SMS/Zprávy",
+    "CompetitionHackathon": "Soutěž/Hackathon",
+    "Custom": "Vlastní"
   }
 }

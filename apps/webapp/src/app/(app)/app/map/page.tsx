@@ -1,8 +1,12 @@
 import type { Metadata } from "next";
 import { MapPageClient } from "./MapPageClient";
 import type { MapView } from "./types";
+import { getWebTranslations as getTranslations } from "@/lib/i18n/getWebTranslations";
 
-export const metadata: Metadata = { title: "Map" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("MapPage");
+  return { title: t("Title") };
+}
 
 export default async function MapPage({
   searchParams,

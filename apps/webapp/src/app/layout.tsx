@@ -22,11 +22,19 @@ import {
 } from "@mantine/core";
 import { headers } from "next/headers";
 import { WEBAPP_NAME } from "@bondery/helpers";
+import { resolveLocaleSettings } from "@/lib/i18n/resolveLocaleSettings";
+import { loadTranslation } from "@bondery/translations/i18n";
 
-export const metadata: Metadata = {
-  title: WEBAPP_NAME,
-  description: "Build bonds that last forever.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const { locale } = await resolveLocaleSettings();
+  const translations = loadTranslation(locale);
+  const common = translations.WebAppCommon as Record<string, string>;
+
+  return {
+    title: WEBAPP_NAME,
+    description: common.AppDescription,
+  };
+}
 
 const lexend = Lexend({
   subsets: ["latin"],

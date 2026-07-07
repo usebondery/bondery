@@ -78,7 +78,41 @@ Mismatch → **426** — force resync / app update.
 
 ## Background sync
 
-`expo-background-task` drains outbox and runs `pullOnce()` when the OS permits.
+`expo-background-task` drains outbox and runs `schedulePull({ reason: "background" })` when the OS permits.
+
+## Realtime wake (WebSocket)
+
+Cross-device freshness uses a **thin wake channel** — not a second sync protocol.
+
+| Layer | Responsibility |
+|-------|----------------|
+| **`emitSyncBatch`** | Writes `sync_change_log` then async `notifySyncWake` |
+| **`SyncWakeBus`** | In-memory (dev) or Redis pub/sub (prod) fanout across API instances |
+| **`GET /api/sync/ws-ticket`** | Short-lived ticket (60s, single-use) — no JWT in WS URL |
+| **`GET /api/sync/ws`** | WebSocket doorbell: `sync.hello`, `sync.batch`, `ping`/`pong` |
+| **Mobile** | `sync-wake-client.ts` → `schedulePull` on wake; long-poll when WS down |
+| **Web** | BFF ticket + direct WS to API → TanStack Query invalidation by `affectedTables` |
+
+**Source of truth unchanged:** `sync_change_log` + pull (mobile) / REST refetch (web).
+
+**Mobile pull modes:**
+
+| Mode | When | Behavior |
+|------|------|----------|
+| `long_poll` | WS disconnected | `GET /api/sync/pull?waitMs=25000` loop |
+| `websocket_wake` | WS connected | Event-driven `schedulePull` + 300s safety pull |
+
+**Rollback:** set `SYNC_WAKE_ENABLED=false` on API to disable publish without client changes.
+
+**Manual verification checklist:**
+
+- Web edit → mobile UI updates within ~2s with WS healthy
+- Mobile edit → web list/detail updates within ~2s without tab focus
+- Kill WS → mobile resumes long-poll; web relies on staleTime/focus refetch
+- `SYNC_WAKE_ENABLED=false` → behavior matches pre-wake (long-poll / focus only)
+- Reconnect after deploy → `sync.hello` triggers catch-up pull without duplicate rows
+
+**Web exception:** WS connects to `NEXT_PUBLIC_API_URL` (not BFF) — browsers cannot upgrade WebSockets through Next.js proxy. Ticket is fetched via same-origin `/api/sync/ws-ticket` BFF route.
 
 ## Guardrails
 

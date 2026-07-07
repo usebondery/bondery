@@ -2,10 +2,10 @@
  * LinkedIn Full History Fetcher
  *
  * Strategy (in order):
- * 1. Mine the LIVE page's embedded `<code>` blocks for Voyager data
- *    (LinkedIn embeds full API responses there even though the UI only renders ~5)
- * 2. Fall back to the `dash` Voyager REST API endpoints with CSRF auth
- * 3. Return [] so the caller falls back to live-DOM scraping
+ * 1. Resolve profileUrn from SDUI topcard componentkey (primary)
+ * 2. Mine embedded `<code>` JSON blocks for Voyager data (secondary URN source)
+ * 3. Voyager dash REST API endpoints with CSRF auth
+ * 4. Return [] so the caller falls back to SDUI DOM scraping
  *
  * The content script runs on linkedin.com, so both approaches have full
  * cookie / same-origin access.
@@ -13,6 +13,7 @@
 
 import type { WorkEntry } from "./workExperience";
 import type { EducationEntry } from "./education";
+import { extractProfileUrnFromComponentKey } from "./sduiProfile";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -200,89 +201,232 @@ async function voyagerFetch(path: string): Promise<Record<string, unknown> | nul
 }
 
 /**
- * Extracts the fsd_profile URN for the VIEWED profile (not the logged-in user).
- * Matches on `publicIdentifier === username` to avoid picking up the viewer's own data.
+ * Extracts the fsd_profile URN for the viewed profile on SDUI pages.
  */
 function extractProfileUrn(entities: Record<string, unknown>[], username: string): string | null {
-  console.log(
-    `[linkedin][fetchDetails] Looking for profileUrn for "${username}" among ${entities.length} entities`,
-  );
+  // 1. SDUI topcard componentkey (primary — validated on current LinkedIn UI)
+  const fromComponentKey = extractProfileUrnFromComponentKey();
+  if (fromComponentKey) {
+    console.log(`[linkedin][fetchDetails] profileUrn source: componentkey → ${fromComponentKey}`);
+    return fromComponentKey;
+  }
 
-  // Normalise to NFC so diacritical-mark profiles (e.g. "antonín-müller-…")
-  // match even when the URL was decoded to NFD combining characters.
+  // 2. Embedded <code> JSON blocks (secondary — when Voyager data is inlined)
   const normalizedUsername = username.normalize("NFC");
-
-  // 1. Find the Profile / MiniProfile entity whose publicIdentifier matches the viewed user
   for (const e of entities) {
     const pubId = (e.publicIdentifier ?? e.vanityName) as string | undefined;
-    if (pubId?.normalize("NFC") === normalizedUsername) {
-      const urn = (e.entityUrn ?? e.objectUrn ?? e.dashEntityUrn ?? e["*profile"]) as
-        | string
-        | undefined;
-      if (urn && typeof urn === "string") {
-        // Normalise to fsd_profile URN
-        if (urn.startsWith("urn:li:fsd_profile:")) {
-          console.log(`[linkedin][fetchDetails] Matched profileUrn: ${urn} (pubId=${pubId})`);
-          return urn;
-        }
-        const idMatch = urn.match(/:([A-Za-z0-9_-]+)$/);
-        if (idMatch) {
-          const fsdUrn = `urn:li:fsd_profile:${idMatch[1]}`;
-          console.log(
-            `[linkedin][fetchDetails] Derived profileUrn: ${fsdUrn} from ${urn} (pubId=${pubId})`,
-          );
-          return fsdUrn;
-        }
-      }
+    if (pubId?.normalize("NFC") !== normalizedUsername) continue;
+
+    const urn = (e.entityUrn ?? e.objectUrn ?? e.dashEntityUrn ?? e["*profile"]) as
+      | string
+      | undefined;
+    if (!urn || typeof urn !== "string") continue;
+
+    if (urn.startsWith("urn:li:fsd_profile:")) {
+      console.log(`[linkedin][fetchDetails] profileUrn source: embedded → ${urn}`);
+      return urn;
+    }
+    const idMatch = urn.match(/:([A-Za-z0-9_-]+)$/);
+    if (idMatch) {
+      const fsdUrn = `urn:li:fsd_profile:${idMatch[1]}`;
+      console.log(`[linkedin][fetchDetails] profileUrn source: embedded → ${fsdUrn}`);
+      return fsdUrn;
     }
   }
 
-  // 2. Sliding-window search of the raw page HTML.
-  //    The old regex used [^}]* which silently fails when nested JSON objects
-  //    appear between publicIdentifier and entityUrn. Instead, we locate every
-  //    occurrence of the username string and scan a ±1500-char window for an
-  //    fsd_profile URN — nested braces are no longer an obstacle.
-  const pageHtml = document.documentElement.innerHTML;
-  const usernameToken = `"${username}"`;
-  let idx = pageHtml.indexOf(usernameToken);
-  while (idx !== -1) {
-    const windowStart = Math.max(0, idx - 1000);
-    const windowEnd = Math.min(pageHtml.length, idx + usernameToken.length + 1000);
-    const slice = pageHtml.slice(windowStart, windowEnd);
-    const urnMatch = slice.match(/urn:li:fsd_profile:[A-Za-z0-9_-]+/);
-    if (urnMatch) {
-      console.log(
-        `[linkedin][fetchDetails] Found profileUrn via sliding-window HTML search: ${urnMatch[0]}`,
-      );
-      return urnMatch[0];
-    }
-    idx = pageHtml.indexOf(usernameToken, idx + 1);
-  }
-
-  // 3. DOM fallback: section[data-member-id] gives the numeric member ID.
-  //    Search for any co-located fsd_profile URN in a window around it.
-  const memberSection = document.querySelector("section[data-member-id]");
-  const memberId = memberSection?.getAttribute("data-member-id");
-  if (memberId) {
-    const memberToken = `"${memberId}"`;
-    let mIdx = pageHtml.indexOf(memberToken);
-    while (mIdx !== -1) {
-      const windowStart = Math.max(0, mIdx - 500);
-      const windowEnd = Math.min(pageHtml.length, mIdx + memberToken.length + 500);
-      const slice = pageHtml.slice(windowStart, windowEnd);
-      const urnMatch = slice.match(/urn:li:fsd_profile:[A-Za-z0-9_-]+/);
-      if (urnMatch) {
-        console.log(
-          `[linkedin][fetchDetails] Found profileUrn via memberId sliding-window: ${urnMatch[0]}`,
-        );
-        return urnMatch[0];
-      }
-      mIdx = pageHtml.indexOf(memberToken, mIdx + 1);
-    }
-  }
-
-  console.warn(`[linkedin][fetchDetails] Could not find profileUrn for ${username}`);
+  console.warn(`[linkedin][fetchDetails] profileUrn source: none for ${username}`);
   return null;
+}
+
+function buildGeoEntityMap(entities: Record<string, unknown>[]): Map<string, Record<string, unknown>> {
+  const map = new Map<string, Record<string, unknown>>();
+  for (const e of entities) {
+    const urn = e.entityUrn as string | undefined;
+    const type = e.$type as string | undefined;
+    if (urn && type?.includes("Geo")) {
+      map.set(urn, e);
+    }
+  }
+  return map;
+}
+
+function resolveGeoDisplayName(
+  geoEntity: Record<string, unknown>,
+  geoByUrn: Map<string, Record<string, unknown>>,
+): string | undefined {
+  const localized = (
+    geoEntity.defaultLocalizedName ??
+    geoEntity.defaultLocalizedNameWithoutCountryName ??
+    geoEntity.name
+  ) as string | undefined;
+  if (localized?.trim()) return localized.trim();
+
+  const cityPart = (geoEntity.defaultLocalizedNameWithoutCountryName as string | undefined)?.trim();
+  const countryUrn = geoEntity["*country"] as string | undefined;
+  if (countryUrn) {
+    const country = geoByUrn.get(countryUrn);
+    const countryName = (
+      country?.defaultLocalizedName ??
+      country?.name
+    ) as string | undefined;
+    if (cityPart && countryName?.trim()) return `${cityPart}, ${countryName.trim()}`;
+    if (countryName?.trim()) return countryName.trim();
+  }
+
+  // Country-only geo (URN query sometimes returns just ISO with no localized name)
+  const iso = (geoEntity.countryISOCode as string | undefined)?.trim();
+  if (iso && !cityPart) return undefined;
+
+  return undefined;
+}
+
+function extractProfileLocationFromEntities(
+  entities: Record<string, unknown>[],
+  username: string,
+  profileUrn: string | null,
+): string | undefined {
+  const entityByUrn = buildEntityByUrn(entities);
+
+  for (const e of entities) {
+    const type = e.$type as string | undefined;
+    if (!type?.includes("identity.profile.Profile")) continue;
+    if (/PrivacySettings|ProfileCard|MiniProfile/i.test(type)) continue;
+
+    const pubId = (e.publicIdentifier ?? e.vanityName) as string | undefined;
+    const entityUrn = e.entityUrn as string | undefined;
+    const matchesUser =
+      pubId?.normalize("NFC") === username.normalize("NFC") ||
+      (!!profileUrn && entityUrn === profileUrn);
+    if (!matchesUser) continue;
+
+    const loc = resolveGeoFromProfileEntity(e, entityByUrn);
+    if (loc) return loc;
+  }
+
+  return undefined;
+}
+
+function buildEntityByUrn(entities: Record<string, unknown>[]): Map<string, Record<string, unknown>> {
+  const map = new Map<string, Record<string, unknown>>();
+  for (const e of entities) {
+    const urn = e.entityUrn as string | undefined;
+    if (urn) map.set(urn, e);
+    const id = e.$id as string | undefined;
+    if (id) map.set(id, e);
+  }
+  return map;
+}
+
+function resolveGeoFromProfileEntity(
+  profile: Record<string, unknown>,
+  entityByUrn: Map<string, Record<string, unknown>>,
+): string | undefined {
+  const geoByUrn = buildGeoEntityMap([...entityByUrn.values()]);
+  const geoLocation = profile.geoLocation as Record<string, unknown> | undefined;
+  if (!geoLocation) return undefined;
+
+  const localized = (geoLocation.defaultLocalizedName ?? geoLocation.defaultLocalizedNameWithoutCountryName) as
+    | string
+    | undefined;
+  if (localized?.trim()) return localized.trim();
+
+  const geoUrn = (geoLocation["*geo"] ?? geoLocation.geoUrn) as string | undefined;
+  if (!geoUrn) return undefined;
+
+  const geoEntity = geoByUrn.get(geoUrn) ?? entityByUrn.get(geoUrn);
+  if (!geoEntity) return undefined;
+
+  return resolveGeoDisplayName(geoEntity, geoByUrn);
+}
+
+function extractLocationFromApiResponse(
+  response: Record<string, unknown> | null,
+  profileUrn: string | null,
+): string | undefined {
+  if (!response) return undefined;
+
+  const entities = collectIncludedEntities([response]);
+  const entityByUrn = buildEntityByUrn(entities);
+
+  for (const e of entities) {
+    const type = e.$type as string | undefined;
+    if (!type?.includes("identity.profile.Profile")) continue;
+    if (/PrivacySettings|ProfileCard|MiniProfile/i.test(type)) continue;
+    if (profileUrn && e.entityUrn !== profileUrn) continue;
+
+    const loc = resolveGeoFromProfileEntity(e, entityByUrn);
+    if (loc) return loc;
+  }
+
+  // Last resort within this response: first profile entity that has geo
+  for (const e of entities) {
+    const type = e.$type as string | undefined;
+    if (!type?.includes("identity.profile.Profile")) continue;
+    if (/PrivacySettings|ProfileCard|MiniProfile/i.test(type)) continue;
+
+    const loc = resolveGeoFromProfileEntity(e, entityByUrn);
+    if (loc) return loc;
+  }
+
+  return undefined;
+}
+
+const PROFILE_GRAPHQL_BY_URN = "voyagerIdentityDashProfiles.7bab95a76318a84301169b923d563eb1";
+const PROFILE_GRAPHQL_BY_VANITY = "voyagerIdentityDashProfiles.34ead06db82a2cc9a778fac97f69ad6a";
+
+function profileGraphqlPathByUrn(profileUrn: string): string {
+  const variables = `(profileUrn:${encodeURIComponent(profileUrn)})`;
+  return `/voyager/api/graphql?includeWebMetadata=true&variables=${variables}&queryId=${PROFILE_GRAPHQL_BY_URN}`;
+}
+
+function profileGraphqlPathByVanity(username: string): string {
+  const variables = `(vanityName:${encodeURIComponent(username)})`;
+  return `/voyager/api/graphql?includeWebMetadata=true&variables=${variables}&queryId=${PROFILE_GRAPHQL_BY_VANITY}`;
+}
+
+/**
+ * Resolves profile location from Voyager — never from topcard DOM text.
+ *
+ * Priority: GraphQL by vanity (richest geo names) → GraphQL by URN → embedded entities.
+ * The URN query often returns Geo with only countryISO; vanity includes defaultLocalizedName.
+ */
+export async function fetchProfileLocation(username: string): Promise<string | undefined> {
+  const normalizedHandle = (() => {
+    try {
+      return decodeURIComponent(username);
+    } catch {
+      return username;
+    }
+  })();
+
+  const blocks = extractLivePageJsonBlocks();
+  const entities = collectIncludedEntities(blocks);
+  const profileUrn = extractProfileUrn(entities, normalizedHandle);
+
+  const byVanity = await voyagerFetch(profileGraphqlPathByVanity(normalizedHandle));
+  const fromVanity = extractLocationFromApiResponse(byVanity, profileUrn);
+  if (fromVanity) {
+    console.log(`[linkedin][fetchDetails] profile location: graphql/vanity → ${fromVanity}`);
+    return fromVanity;
+  }
+
+  if (profileUrn) {
+    const byUrn = await voyagerFetch(profileGraphqlPathByUrn(profileUrn));
+    const fromUrn = extractLocationFromApiResponse(byUrn, profileUrn);
+    if (fromUrn) {
+      console.log(`[linkedin][fetchDetails] profile location: graphql/urn → ${fromUrn}`);
+      return fromUrn;
+    }
+  }
+
+  const embedded = extractProfileLocationFromEntities(entities, normalizedHandle, profileUrn);
+  if (embedded) {
+    console.log(`[linkedin][fetchDetails] profile location: embedded → ${embedded}`);
+    return embedded;
+  }
+
+  console.log(`[linkedin][fetchDetails] profile location: none for ${normalizedHandle}`);
+  return undefined;
 }
 
 // ─── Mappers ────────────────────────────────────────────────────────────────
@@ -1015,33 +1159,6 @@ function extractNestedPositions(
 
 // ─── Endpoint discovery: try multiple dash API paths ────────────────────────
 
-/**
- * Fetches the fsd_profile URN for a LinkedIn profile by calling the classic
- * Voyager profiles endpoint. Only used when the URN cannot be found in the
- * embedded page JSON (e.g. server-side-rendered pages with no <code> blocks).
- */
-async function fetchProfileUrnByApi(username: string): Promise<string | null> {
-  const data = await voyagerFetch(`/voyager/api/identity/profiles/${encodeURIComponent(username)}`);
-  if (!data) return null;
-
-  // The profile entity is either in included[], data.data, or data itself
-  const candidates: Record<string, unknown>[] = [
-    ...collectIncludedEntities([data]),
-    ...(data.data && typeof data.data === "object" ? [data.data as Record<string, unknown>] : []),
-    data,
-  ];
-
-  for (const e of candidates) {
-    const urn = (e.dashEntityUrn ?? e.entityUrn ?? e.objectUrn) as string | undefined;
-    if (urn?.startsWith("urn:li:fsd_profile:")) {
-      console.log(`[linkedin][fetchDetails] Resolved profileUrn via API profile fetch: ${urn}`);
-      return urn;
-    }
-  }
-
-  return null;
-}
-
 /** Endpoints to try for work history (in priority order). */
 const WORK_ENDPOINTS = (urn: string) => [
   // Individual positions endpoint (has title, companyName, etc.)
@@ -1088,12 +1205,7 @@ export async function fetchFullWorkHistory(
   const entities = collectIncludedEntities(blocks);
   logEntityTypes(entities, "live page");
 
-  let profileUrn = extractProfileUrn(entities, username);
-
-  // If the URN wasn't embedded in the page, try fetching it from the API directly.
-  if (!profileUrn) {
-    profileUrn = await fetchProfileUrnByApi(username);
-  }
+  const profileUrn = extractProfileUrn(entities, username);
 
   // ── Step 2: Try dash API endpoints (authoritative — requests up to 100 entries) ──
   if (profileUrn) {
@@ -1202,12 +1314,7 @@ export async function fetchFullEducation(username: string): Promise<EducationEnt
   const blocks = extractLivePageJsonBlocks();
   const entities = collectIncludedEntities(blocks);
 
-  let profileUrn = extractProfileUrn(entities, username);
-
-  // If the URN wasn't embedded in the page, try the API profile endpoint.
-  if (!profileUrn) {
-    profileUrn = await fetchProfileUrnByApi(username);
-  }
+  const profileUrn = extractProfileUrn(entities, username);
 
   // ── Step 2: Try dash API (authoritative — requests up to 100 entries) ──
   if (profileUrn) {

@@ -1,5 +1,6 @@
 ---
 icon: people-group
+docId: concepts.groups
 ---
 
 # Groups

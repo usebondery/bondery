@@ -24,6 +24,8 @@ import {
   instagramParseResponseSchema,
 } from "@bondery/schemas";
 import { IMPORT_TIER } from "../../../lib/rate-limit.js";
+import { IMPORT_HANDLE_LOOKUP_CHUNK_SIZE } from "@bondery/schemas/constants";
+import { markBulkImportCompleted } from "../../../lib/import-followup.js";
 
 const SUPPORTED_STRATEGIES: InstagramImportStrategy[] = [
   "close_friends",
@@ -32,7 +34,6 @@ const SUPPORTED_STRATEGIES: InstagramImportStrategy[] = [
   "following_and_followers",
   "mutual_following",
 ];
-const HANDLE_LOOKUP_CHUNK_SIZE = 150;
 
 function resolveStrategy(input: unknown): InstagramImportStrategy {
   if (typeof input !== "string") {
@@ -99,8 +100,8 @@ export const instagramImportRoutes: AppRoutePlugin = async (fastify) => {
       const existingHandleSet = new Set<string>();
 
       if (normalizedHandles.length > 0) {
-        for (let index = 0; index < normalizedHandles.length; index += HANDLE_LOOKUP_CHUNK_SIZE) {
-          const handleChunk = normalizedHandles.slice(index, index + HANDLE_LOOKUP_CHUNK_SIZE);
+        for (let index = 0; index < normalizedHandles.length; index += IMPORT_HANDLE_LOOKUP_CHUNK_SIZE) {
+          const handleChunk = normalizedHandles.slice(index, index + IMPORT_HANDLE_LOOKUP_CHUNK_SIZE);
 
           const { data: existingRows, error: existingError } = await client
             .from("people_socials")
@@ -198,8 +199,8 @@ export const instagramImportRoutes: AppRoutePlugin = async (fastify) => {
       // Chunk handles to stay within Postgres IN-list limits
       const handleToPersonId = new Map<string, string>();
 
-      for (let i = 0; i < handles.length; i += HANDLE_LOOKUP_CHUNK_SIZE) {
-        const chunk = handles.slice(i, i + HANDLE_LOOKUP_CHUNK_SIZE);
+      for (let i = 0; i < handles.length; i += IMPORT_HANDLE_LOOKUP_CHUNK_SIZE) {
+        const chunk = handles.slice(i, i + IMPORT_HANDLE_LOOKUP_CHUNK_SIZE);
 
         const { data: existingRows, error: lookupError } = await client
           .from("people_socials")
@@ -330,6 +331,17 @@ export const instagramImportRoutes: AppRoutePlugin = async (fastify) => {
         const message =
           groupError instanceof Error ? groupError.message : "Failed to assign imported contacts";
         return reply.status(500).send({ error: message });
+      }
+
+      if (importedCount + updatedCount > 0) {
+        try {
+          await markBulkImportCompleted(client, user.id);
+        } catch (followupError) {
+          request.log.error(
+            { err: followupError },
+            "[instagram-import] Failed to mark import completed",
+          );
+        }
       }
 
       const response: InstagramImportCommitResponse = {
