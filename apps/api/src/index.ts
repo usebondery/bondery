@@ -2,6 +2,7 @@
  * Bondery API Server entry point.
  */
 
+import "fastify";
 import { buildApp } from "./build-app.js";
 import { buildServer } from "./build-server.js";
 
