@@ -1,4 +1,4 @@
-import { SettingsPageSkeleton } from "./components/SettingsSkeletons";
+import { SettingsPageSkeleton } from "./components/chrome/SettingsSkeletons";
 
 export default function SettingsLoading() {
   return <SettingsPageSkeleton />;

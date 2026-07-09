@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import {
   errorNotificationTemplate,
@@ -12,6 +12,7 @@ import { notifications } from "@mantine/notifications";
 import { IconTrash, IconUsersGroup, IconUsersPlus } from "@tabler/icons-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useMemo } from "react";
+import { openStandardConfirmModal } from "@/components/modals/openStandardConfirmModal";
 import { PageHeader } from "@/components/shell/PageHeader";
 import { PageWrapper } from "@/components/shell/PageWrapper";
 import { captureEvent } from "@/lib/analytics/client";
@@ -23,7 +24,6 @@ import {
   useDuplicateGroupMutation,
   useGroupsListQuery,
 } from "@/lib/query/hooks/useGroups";
-import { openStandardConfirmModal } from "../components/modals/openStandardConfirmModal";
 import { openAddGroupModal } from "./components/AddGroupModal";
 import { openAddPeopleToGroupModal } from "./components/AddPeopleToGroupModal";
 import { openEditGroupModal } from "./components/EditGroupModal";

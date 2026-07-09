@@ -1,4 +1,4 @@
-﻿import { API_ROUTES } from "@bondery/helpers/globals/paths";
+import { API_ROUTES } from "@bondery/helpers/globals/paths";
 
 import { Stack, Text } from "@mantine/core";
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
@@ -8,7 +8,7 @@ import { getMePersonServer } from "@/lib/api/domains/server/mePerson";
 import { getWebTranslations as getTranslations } from "@/lib/i18n/getWebTranslations";
 import { getQueryClient } from "@/lib/query/client";
 import { contactKeys, settingsKeys } from "@/lib/query/keys";
-import PersonClient from "../person/[personId]/PersonClient";
+import { PersonClient } from "../person/[personId]/PersonClient";
 import { prefetchPersonPageQueries } from "../person/[personId]/prefetchPersonPageQueries";
 
 interface MyselfLoaderProps {

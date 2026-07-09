@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { getWebTranslations as getTranslations } from "@/lib/i18n/getWebTranslations";
 import { staticPageTitle } from "@/lib/metadata/pageTitles";
-import { MapPageClient } from "./MapPageClient";
+import { MapClient } from "./MapClient";
 import type { MapView } from "./utils/types";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -16,5 +16,5 @@ export default async function MapPage({
 }) {
   const { view } = await searchParams;
   const resolvedView: MapView = view === "addresses" ? "addresses" : "locations";
-  return <MapPageClient view={resolvedView} />;
+  return <MapClient view={resolvedView} />;
 }

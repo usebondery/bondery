@@ -1,6 +1,6 @@
 import { SimpleGrid } from "@mantine/core";
 import { IconMessageCircle, IconUser, IconUserPlus } from "@tabler/icons-react";
-import { StatsCard } from "@/app/(app)/app/people/components/StatsCard";
+import { StatsCard } from "@/app/(app)/app/people/components/chrome/StatsCard";
 
 interface HomeStatsGridProps {
   labels: {

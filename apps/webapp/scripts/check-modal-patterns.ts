@@ -16,11 +16,11 @@ const ALLOWED_DECLARATIVE_MODAL_FILES = new Set(["app/(app)/app/onboarding/Onboa
 
 const ALLOWED_UPDATE_MODAL_FILES = new Set([
   "lib/modals/useModalBlocking.ts",
-  "app/(app)/app/people/components/AddPeopleToGroupSelectionModal.tsx",
-  "app/(app)/app/settings/components/openApiKeyModal.tsx",
-  "app/(app)/app/settings/components/LinkedInImportModal.tsx",
-  "app/(app)/app/settings/components/InstagramImportModal.tsx",
-  "app/(app)/app/settings/components/VCardImportModal.tsx",
+  "app/(app)/app/people/components/modals/AddPeopleToGroupSelectionModal.tsx",
+  "app/(app)/app/settings/components/modals/openApiKeyModal.tsx",
+  "app/(app)/app/settings/components/modals/LinkedInImportModal.tsx",
+  "app/(app)/app/settings/components/modals/InstagramImportModal.tsx",
+  "app/(app)/app/settings/components/modals/VCardImportModal.tsx",
   "components/photo/openPhotoUploadModal.tsx",
 ]);
 

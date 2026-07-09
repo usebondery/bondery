@@ -5,7 +5,7 @@ import { PageHeaderSkeleton } from "@/components/shell/PageHeaderSkeleton";
  * Skeleton for a single GroupCard.
  * Mirrors: Paper withBorder → header (label + count badge) + avatar preview row + member count text.
  */
-function GroupCardSkeleton({ opacity = 1 }: { opacity?: number }) {
+export function GroupCardSkeleton({ opacity = 1 }: { opacity?: number }) {
   return (
     <Paper p="md" radius="md" style={{ opacity }} withBorder>
       <Stack gap="sm">

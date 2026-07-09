@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { formatContactName } from "@bondery/helpers/contact";
 import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
@@ -26,8 +26,8 @@ import {
   useRemoveContactsFromGroupMutation,
 } from "@/lib/query/hooks/useGroups";
 import { openEditGroupModal } from "../../../groups/components/EditGroupModal";
-import { openAddPeopleToGroupSelectionModal } from "../../../people/components/AddPeopleToGroupSelectionModal";
-import { openMergeWithModal } from "../../../people/components/MergeWithModal";
+import { openAddPeopleToGroupSelectionModal } from "../../../people/components/modals/AddPeopleToGroupSelectionModal";
+import { openMergeWithModal } from "../../../people/components/modals/MergeWithModal";
 
 interface UseGroupDetailActionsParams {
   cardPreviewContacts: Contact[];

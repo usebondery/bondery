@@ -1,4 +1,4 @@
-﻿import { Stack } from "@mantine/core";
+import { Stack } from "@mantine/core";
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import { Suspense } from "react";
@@ -8,9 +8,9 @@ import { COLUMN_VISIBILITY_COOKIE } from "@/lib/cookies/constants";
 import { getWebTranslations as getTranslations } from "@/lib/i18n/getWebTranslations";
 import { staticPageTitle } from "@/lib/metadata/pageTitles";
 import { parseContactsListParams } from "@/lib/query/contactsListParams";
-import { PeopleHeaderClient } from "./components/PeopleHeaderClient";
-import { PeopleTableSkeleton } from "./components/PeopleSkeletons";
-import { PeopleTableLoader } from "./components/PeopleTableLoader";
+import { PeopleHeaderClient } from "./components/chrome/PeopleHeaderClient";
+import { PeopleTableSkeleton } from "./components/chrome/PeopleSkeletons";
+import { PeopleTableLoader } from "./components/chrome/PeopleTableLoader";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("PeoplePage");

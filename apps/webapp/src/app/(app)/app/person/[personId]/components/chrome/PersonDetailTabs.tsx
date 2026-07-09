@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import type {
   Contact,
@@ -18,7 +18,7 @@ import {
   IconUserCircle,
 } from "@tabler/icons-react";
 import type { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
-import { KeepInTouchSelect } from "@/app/(app)/app/keep-in-touch/KeepInTouchSelect";
+import { KeepInTouchSelect } from "@/app/(app)/app/keep-in-touch/components/KeepInTouchSelect";
 import { computeNextDueDate } from "@/app/(app)/app/keep-in-touch/utils/keepInTouchConfig";
 import { DatePickerWithPresets } from "@/components/interactions/DatePickerWithPresets";
 import { datePickerValueToIsoDateTime } from "@/lib/dates/toIsoDateTime";

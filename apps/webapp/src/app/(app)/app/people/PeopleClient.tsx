@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { formatContactName } from "@bondery/helpers/contact";
 import { errorNotificationTemplate, successNotificationTemplate } from "@bondery/mantine-next";
@@ -35,9 +35,9 @@ import { useCommonTranslations, useWebTranslations } from "@/lib/i18n/useWebTran
 import { DEBOUNCE_MS } from "@/lib/platform/config";
 import { parseContactsListParams } from "@/lib/query/contactsListParams";
 import { useContactsInfiniteQuery } from "@/lib/query/hooks/useContacts";
-import { openAddPeopleToGroupSelectionModal } from "./components/AddPeopleToGroupSelectionModal";
-import { openMergeWithModal } from "./components/MergeWithModal";
-import { openShareContactModal } from "./components/ShareContactModal";
+import { openAddPeopleToGroupSelectionModal } from "./components/modals/AddPeopleToGroupSelectionModal";
+import { openMergeWithModal } from "./components/modals/MergeWithModal";
+import { openShareContactModal } from "./components/modals/ShareContactModal";
 
 const DEFAULT_COLUMN_KEYS = ["name", "headline", "location", "lastInteraction", "social"] as const;
 

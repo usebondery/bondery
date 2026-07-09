@@ -1,6 +1,6 @@
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { getQueryClient } from "@/lib/query/client";
-import PersonClient from "./PersonClient";
+import { PersonClient } from "./PersonClient";
 import { prefetchPersonPageQueries } from "./prefetchPersonPageQueries";
 
 interface PersonLoaderProps {

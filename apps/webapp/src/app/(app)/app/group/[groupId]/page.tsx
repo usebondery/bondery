@@ -5,7 +5,7 @@ import { getGroupDetailServer } from "@/lib/api/domains/server/groups";
 import { getWebTranslations as getTranslations } from "@/lib/i18n/getWebTranslations";
 import { entityPageTitle } from "@/lib/metadata/pageTitles";
 import { parseContactsListParams } from "@/lib/query/contactsListParams";
-import { GroupDetailLoader } from "./GroupDetailLoader";
+import { GroupLoader } from "./GroupLoader";
 
 const getGroupForPage = cache(getGroupDetailServer);
 
@@ -40,5 +40,5 @@ export default async function GroupDetailPage({
     notFound();
   }
 
-  return <GroupDetailLoader filter={filter} groupId={groupId} />;
+  return <GroupLoader filter={filter} groupId={groupId} />;
 }

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { getWebTranslations as getTranslations } from "@/lib/i18n/getWebTranslations";
 import { staticPageTitle } from "@/lib/metadata/pageTitles";
-import { FixContactsLoader } from "./FixContactsLoader";
+import { FixLoader } from "./FixLoader";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("FixContactsPage");
@@ -9,5 +9,5 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default function FixPage() {
-  return <FixContactsLoader />;
+  return <FixLoader />;
 }

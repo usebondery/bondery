@@ -3,7 +3,7 @@
 import { createContext, useCallback, useContext, useState } from "react";
 
 interface ChatSessionsContextValue {
-  /** Incremented when the user clicks "new chat" — ChatView watches this to reset. */
+  /** Incremented when the user clicks "new chat" — ChatClient watches this to reset. */
   chatResetKey: number;
   triggerChatReset: () => void;
 }

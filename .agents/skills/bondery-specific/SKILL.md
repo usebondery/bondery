@@ -52,7 +52,7 @@ All Bondery clients call the Fastify API through a transport wrapper layer — n
 
 - Which wrapper to use per runtime (webapp browser vs server, mobile, chrome extension)
 - `*Json` vs `*JsonOrNull` — throw on error vs graceful `null`
-- `ApiError` and shared error parsing
+- `@bondery/helpers/api` — `ApiError`, nested error parsing, `getUserFacingError`
 - **Unauthorized (401):** clear caches, local sign-out, hard redirect — see `references/api-usage.md` § Unauthorized sessions
 - Webapp: `lib/api/domains/*` + `lib/query/hooks/*` for app data (transport stays in `lib/api/client.ts`)
 - Status probe — webapp uses BFF `GET /api/status`; chrome extension calls Fastify `/status` directly

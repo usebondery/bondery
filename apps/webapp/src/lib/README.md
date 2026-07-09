@@ -60,6 +60,8 @@ Cross-route UI shared by multiple `/app/*` routes lives under `src/components/`:
 | `extension/` | Chrome extension notification UI |
 
 Feature-only UI stays in `app/(app)/app/<feature>/components/`.
+When a feature `components/` folder grows to **8 or more** files at the same depth, subdivide into focused subfolders (e.g. `chrome/`, `modals/`, `message/`, `cards/`, `import/`) instead of adding more flat files.
+
 
 
 Routes under `app/(app)/app/<feature>/` follow a tiered template. Not every tier needs every folder — create `hooks/`, `utils/`, and `editor/` when the first file appears.
@@ -81,10 +83,10 @@ Routes under `app/(app)/app/<feature>/` follow a tiered template. Not every tier
 
 | Tier | Pattern | Examples |
 |------|---------|----------|
-| **A** | `page → Loader → Client → components/` | settings, home, groups, fix, keep-in-touch, interactions, admin/stats |
+| **A** | `page → Loader → Client → components/` | settings, home, groups, fix (`FixClient`), keep-in-touch, interactions, admin/stats, chat (`ChatClient`) |
 | **B** | `page` + `Suspense` → sub-loader in `components/` | people |
-| **C** | `page → Client` (no prefetch) | map, onboarding, unavailable |
-| **D** | Tier A + `hooks/`, `utils/`, subdivided `components/` | person, group |
+| **C** | `page → Client` (no prefetch) | map (`MapClient`), onboarding, unavailable (`UnavailableClient`) |
+| **D** | Tier A + `hooks/`, `utils/`, subdivided `components/` | person (`PersonClient`), group (`GroupClient`), settings |
 
 Onboarding wizard steps live in `components/Step*.tsx`, not a `steps/` folder.
 

@@ -14,7 +14,7 @@ import {
 } from "@tabler/icons-react";
 import { useRouter } from "next/navigation";
 import { openNewActivityModal } from "@/app/(app)/app/interactions/components/NewActivityModal";
-import { openAddContactModal } from "@/app/(app)/app/people/components/AddContactModal";
+import { openAddContactModal } from "@/app/(app)/app/people/components/modals/AddContactModal";
 import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
 import { optimisticPersonDocumentTitle } from "@/lib/metadata/optimisticTitles";
 import { useNavigateWithTitle } from "@/lib/metadata/useNavigateWithTitle";

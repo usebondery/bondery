@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import {
   errorNotificationTemplate,
@@ -23,7 +23,17 @@ import {
   IconTrash,
 } from "@tabler/icons-react";
 import { useCallback, useMemo, useState } from "react";
+import { InteractionsList } from "@/components/interactions/InteractionsList";
+import {
+  createDefaultInteractionColumns,
+  type InteractionColumnConfig,
+  type InteractionSortOrder,
+  InteractionsTableV2,
+} from "@/components/interactions/InteractionsTableV2";
+import { openStandardConfirmModal } from "@/components/modals/openStandardConfirmModal";
+import { PageHeader } from "@/components/shell/PageHeader";
 import { PageWrapper } from "@/components/shell/PageWrapper";
+import { peopleSearchActions } from "@/components/shell/PeopleSearchSpotlight";
 import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
 import { DEBOUNCE_MS, HOTKEYS } from "@/lib/platform/config";
 import { useContactsListQuery } from "@/lib/query/hooks/useContacts";
@@ -33,16 +43,6 @@ import {
   useInteractionsListQuery,
 } from "@/lib/query/hooks/useInteractions";
 import { INTERACTIONS_TIMELINE, SELECTABLE_CONTACTS } from "@/lib/query/sharedListParams";
-import { InteractionsList } from "../components/interactions/InteractionsList";
-import {
-  createDefaultInteractionColumns,
-  type InteractionColumnConfig,
-  type InteractionSortOrder,
-  InteractionsTableV2,
-} from "../components/interactions/InteractionsTableV2";
-import { openStandardConfirmModal } from "../components/modals/openStandardConfirmModal";
-import { PageHeader } from "../components/PageHeader";
-import { peopleSearchActions } from "../components/PeopleSearchSpotlight";
 import { openNewActivityModal } from "./components/NewActivityModal";
 
 export function InteractionsClient() {

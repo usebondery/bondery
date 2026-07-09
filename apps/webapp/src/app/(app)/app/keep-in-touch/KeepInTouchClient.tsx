@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import {
@@ -33,7 +33,7 @@ import { setOptimisticDocumentTitle } from "@/lib/metadata/navigationTitleStore"
 import { optimisticPersonDocumentTitle } from "@/lib/metadata/optimisticTitles";
 import { usePatchContactMutation } from "@/lib/query/hooks/useContacts";
 import { useKeepInTouchQuery } from "@/lib/query/hooks/useKeepInTouch";
-import { KeepInTouchSelect } from "./KeepInTouchSelect";
+import { KeepInTouchSelect } from "./components/KeepInTouchSelect";
 import { computeNextDueDate } from "./utils/keepInTouchConfig";
 
 interface KeepInTouchContact extends Contact {

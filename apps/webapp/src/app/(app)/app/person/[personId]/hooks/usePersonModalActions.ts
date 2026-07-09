@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { formatContactName } from "@bondery/helpers/contact";
 import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
@@ -7,9 +7,9 @@ import { useRouter } from "next/navigation";
 import { useCallback } from "react";
 import { openDeleteContactModal } from "@/components/contacts/openDeleteContactModal";
 import { searchContacts } from "@/lib/contacts/searchContacts";
-import { openAddPeopleToGroupSelectionModal } from "../../../people/components/AddPeopleToGroupSelectionModal";
-import { openMergeWithModal } from "../../../people/components/MergeWithModal";
-import { openShareContactModal } from "../../../people/components/ShareContactModal";
+import { openAddPeopleToGroupSelectionModal } from "../../../people/components/modals/AddPeopleToGroupSelectionModal";
+import { openMergeWithModal } from "../../../people/components/modals/MergeWithModal";
+import { openShareContactModal } from "../../../people/components/modals/ShareContactModal";
 
 interface UsePersonModalActionsOptions {
   contact: Contact | null;

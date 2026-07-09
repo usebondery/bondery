@@ -5,7 +5,7 @@ import { ApiError } from "@/lib/api/server";
 import { getQueryClient } from "@/lib/query/client";
 
 import { prefetchChatSessionMessages } from "@/lib/query/prefetch";
-import { ChatView } from "./components/ChatView";
+import { ChatClient } from "./ChatClient";
 
 interface ChatSessionLoaderProps {
   sessionId: string;
@@ -26,7 +26,7 @@ export async function ChatSessionLoader({ sessionId }: ChatSessionLoaderProps) {
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
-      <ChatView sessionId={sessionId} />
+      <ChatClient sessionId={sessionId} />
     </HydrationBoundary>
   );
 }

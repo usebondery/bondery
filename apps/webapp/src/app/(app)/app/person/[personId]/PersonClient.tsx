@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { formatContactName } from "@bondery/helpers/contact";
 import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
@@ -49,11 +49,7 @@ interface PersonClientProps {
   personId: string;
 }
 
-export default function PersonClient({
-  personId,
-  initialTab,
-  myselfMode = false,
-}: PersonClientProps) {
+export function PersonClient({ personId, initialTab, myselfMode = false }: PersonClientProps) {
   const router = useRouter();
   const tCommon = useCommonTranslations();
   const tEnrich = useWebTranslations("EnrichFromLinkedIn");

@@ -30,7 +30,7 @@ import {
   useUpdateInteractionMutation,
 } from "@/lib/query/hooks/useInteractions";
 import { DatePickerWithPresets } from "../../components/interactions/DatePickerWithPresets";
-import { openAddContactModal } from "../../people/components/AddContactModal";
+import { openAddContactModal } from "../../people/components/modals/AddContactModal";
 
 interface OpenNewActivityModalParams {
   activity?: Activity | null;

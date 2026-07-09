@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import {
@@ -29,13 +29,15 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo } from "react";
 import { openNewActivityModal } from "@/app/(app)/app/interactions/components/NewActivityModal";
-import { openAddContactModal } from "@/app/(app)/app/people/components/AddContactModal";
+import { openAddContactModal } from "@/app/(app)/app/people/components/modals/AddContactModal";
 import { GettingStartedProgressRail } from "@/components/home/GettingStartedProgressRail";
 import { HomeStatsGrid } from "@/components/home/HomeStatsGrid";
 import { UpcomingReminderCard } from "@/components/home/UpcomingReminderCard";
 import { InteractionsList } from "@/components/interactions/InteractionsList";
+import { openStandardConfirmModal } from "@/components/modals/openStandardConfirmModal";
 import { PageHeader } from "@/components/shell/PageHeader";
 import { PageWrapper } from "@/components/shell/PageWrapper";
+import { peopleSearchActions } from "@/components/shell/PeopleSearchSpotlight";
 import { useDateFormatter as useFormatter } from "@/lib/i18n/useDateFormatter";
 import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
 import { setOptimisticDocumentTitle } from "@/lib/metadata/navigationTitleStore";
@@ -55,8 +57,6 @@ import {
   useDeleteInteractionMutation,
 } from "@/lib/query/hooks/useInteractions";
 import { useSettingsQuery } from "@/lib/query/hooks/useSettings";
-import { openStandardConfirmModal } from "../components/modals/openStandardConfirmModal";
-import { peopleSearchActions } from "../components/PeopleSearchSpotlight";
 
 export function HomeClient() {
   const _router = useRouter();

@@ -8,7 +8,7 @@ import { useRouter } from "next/navigation";
 import { useMemo } from "react";
 import { openNewActivityModal } from "@/app/(app)/app/interactions/components/NewActivityModal";
 
-import { openAddContactModal } from "@/app/(app)/app/people/components/AddContactModal";
+import { openAddContactModal } from "@/app/(app)/app/people/components/modals/AddContactModal";
 import {
   buildGettingStartedState,
   type GettingStartedTaskId,

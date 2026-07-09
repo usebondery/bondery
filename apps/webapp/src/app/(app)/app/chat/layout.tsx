@@ -9,7 +9,7 @@ import { resolveLocaleSettings } from "@/lib/i18n/resolveLocaleSettings";
 import { getQueryClient } from "@/lib/query/client";
 import { settingsKeys } from "@/lib/query/keys";
 import { prefetchChatSessions, prefetchSubscription } from "@/lib/query/prefetch";
-import { ChatSessionSidebar } from "./components/ChatSessionSidebar";
+import { ChatSessionSidebar } from "./components/chrome/ChatSessionSidebar";
 import { ChatSessionsProvider } from "./hooks/ChatSessionsContext";
 
 /** Chat layout — prefetches sessions, settings, and subscription into TanStack Query. */

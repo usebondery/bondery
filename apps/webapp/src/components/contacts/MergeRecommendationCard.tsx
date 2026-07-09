@@ -16,7 +16,7 @@ import { Button, Group, Paper, Text, Tooltip } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { IconCheck, IconUsers, IconX } from "@tabler/icons-react";
 import { useState } from "react";
-import { openMergeWithModal } from "@/app/(app)/app/people/components/MergeWithModal";
+import { openMergeWithModal } from "@/app/(app)/app/people/components/modals/MergeWithModal";
 import { useCommonTranslations, useWebTranslations } from "@/lib/i18n/useWebTranslations";
 import { useDeclineMergeRecommendationMutation } from "@/lib/query/hooks/useMergeRecommendations";
 
