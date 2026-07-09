@@ -1,6 +1,6 @@
-import { Box, Paper, SimpleGrid, Skeleton } from "@mantine/core";
-import { PageHeaderSkeleton } from "@/app/(app)/app/components/PageHeaderSkeleton";
+﻿import { Box, Paper, SimpleGrid, Skeleton } from "@mantine/core";
 import { PeopleTableSkeleton } from "@/app/(app)/app/people/components/PeopleSkeletons";
+import { PageHeaderSkeleton } from "@/components/shell/PageHeaderSkeleton";
 
 /**
  * Full-page skeleton for the Map page.

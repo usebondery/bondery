@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import {
@@ -28,14 +28,14 @@ import {
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo } from "react";
-import { GettingStartedProgressRail } from "@/app/(app)/app/components/home/GettingStartedProgressRail";
-import { HomeStatsGrid } from "@/app/(app)/app/components/home/HomeStatsGrid";
-import { UpcomingReminderCard } from "@/app/(app)/app/components/home/UpcomingReminderCard";
-import { InteractionsList } from "@/app/(app)/app/components/interactions/InteractionsList";
-import { PageHeader } from "@/app/(app)/app/components/PageHeader";
-import { PageWrapper } from "@/app/(app)/app/components/PageWrapper";
 import { openNewActivityModal } from "@/app/(app)/app/interactions/components/NewActivityModal";
 import { openAddContactModal } from "@/app/(app)/app/people/components/AddContactModal";
+import { GettingStartedProgressRail } from "@/components/home/GettingStartedProgressRail";
+import { HomeStatsGrid } from "@/components/home/HomeStatsGrid";
+import { UpcomingReminderCard } from "@/components/home/UpcomingReminderCard";
+import { InteractionsList } from "@/components/interactions/InteractionsList";
+import { PageHeader } from "@/components/shell/PageHeader";
+import { PageWrapper } from "@/components/shell/PageWrapper";
 import { useDateFormatter as useFormatter } from "@/lib/i18n/useDateFormatter";
 import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
 import { setOptimisticDocumentTitle } from "@/lib/metadata/navigationTitleStore";

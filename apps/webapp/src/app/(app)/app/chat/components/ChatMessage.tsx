@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { type InlineToken, parseInlineTokens } from "@bondery/helpers";
 import { AnchorLink, CopyButton } from "@bondery/mantine-next";
@@ -6,7 +6,7 @@ import { Avatar, Box, List, ListItem, Paper, Text } from "@mantine/core";
 import { IconMessageChatbot } from "@tabler/icons-react";
 import type { UIMessage } from "ai";
 import type { ReactNode } from "react";
-import { InlineDateDisplay } from "@/app/(app)/app/person/[person_id]/components/notes/InlineDateDisplay";
+import { InlineDateDisplay } from "@/app/(app)/app/person/[personId]/components/notes/InlineDateDisplay";
 import { useDateFormatter as useFormatter } from "@/lib/i18n/useDateFormatter";
 import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
 import { ChatPersonChip } from "./ChatPersonChip";

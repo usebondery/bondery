@@ -1,7 +1,7 @@
-"use client";
+﻿"use client";
 
 import { Skeleton } from "@mantine/core";
-import { TagPill } from "@/app/(app)/app/components/tags/TagPill";
+import { TagPill } from "@/components/tags/TagPill";
 import { useChatTagQuery } from "@/lib/query/hooks/useChat";
 
 interface InlineTagDisplayProps {

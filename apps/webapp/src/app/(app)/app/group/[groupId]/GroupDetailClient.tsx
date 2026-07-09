@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import { Button, Paper, Stack } from "@mantine/core";
@@ -16,9 +16,9 @@ import ContactsTable, {
   type ColumnConfig,
   type MenuAction,
   type SortOrder,
-} from "@/app/(app)/app/components/contacts/ContactsTableV2";
-import { PageHeader } from "@/app/(app)/app/components/PageHeader";
-import { PageWrapper } from "@/app/(app)/app/components/PageWrapper";
+} from "@/components/contacts/ContactsTableV2";
+import { PageHeader } from "@/components/shell/PageHeader";
+import { PageWrapper } from "@/components/shell/PageWrapper";
 import { usePatchDocumentTitle } from "@/lib/documentTitle";
 import { useContactsTableCopy } from "@/lib/i18n/useContactsTableCopy";
 import { useWebTranslations } from "@/lib/i18n/useWebTranslations";

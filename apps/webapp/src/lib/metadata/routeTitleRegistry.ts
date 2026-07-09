@@ -1,4 +1,4 @@
-import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
+﻿import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import { type AppNavLinkDef, allAppNavLinks } from "@/lib/navigation/appNavLinks";
 
 export type StaticRouteTitleEntry = {
@@ -67,7 +67,7 @@ export function listNavLinkDefs(): AppNavLinkDef[] {
 
 /** Dynamic route page file segments covered by the registry (CI). */
 export const DYNAMIC_ROUTE_PAGE_SEGMENTS = [
-  "person/[person_id]",
+  "person/[personId]",
   "group/[groupId]",
   "myself",
 ] as const;

@@ -1,5 +1,5 @@
-import { Center, Loader } from "@mantine/core";
-import { PageWrapper } from "@/app/(app)/app/components/PageWrapper";
+﻿import { Center, Loader } from "@mantine/core";
+import { PageWrapper } from "@/components/shell/PageWrapper";
 
 export function StatsPageSkeleton() {
   return (

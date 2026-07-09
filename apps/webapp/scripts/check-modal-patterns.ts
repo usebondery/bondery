@@ -21,7 +21,7 @@ const ALLOWED_UPDATE_MODAL_FILES = new Set([
   "app/(app)/app/settings/components/LinkedInImportModal.tsx",
   "app/(app)/app/settings/components/InstagramImportModal.tsx",
   "app/(app)/app/settings/components/VCardImportModal.tsx",
-  "app/(app)/app/components/photo/openPhotoUploadModal.tsx",
+  "components/photo/openPhotoUploadModal.tsx",
 ]);
 
 const DISMISS_UPDATE_PATTERN =

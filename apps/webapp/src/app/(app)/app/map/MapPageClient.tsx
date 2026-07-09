@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import type { ContactNameFields } from "@bondery/helpers/contact";
 import { formatContactName } from "@bondery/helpers/contact";
@@ -28,24 +28,20 @@ import {
 } from "@tabler/icons-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { type ReactNode, useDeferredValue, useEffect, useMemo, useState } from "react";
-import type { ColumnKey } from "@/app/(app)/app/components/contacts/ContactsTableV2";
+import { openAddPeopleToGroupSelectionModal } from "@/app/(app)/app/people/components/AddPeopleToGroupSelectionModal";
+import { openMergeWithModal } from "@/app/(app)/app/people/components/MergeWithModal";
+import type { ColumnKey } from "@/components/contacts/ContactsTableV2";
 import ContactsTable, {
   type ColumnConfig,
   type ContactTableRow,
   type SortOrder,
-} from "@/app/(app)/app/components/contacts/ContactsTableV2";
-import { openDeleteContactModal } from "@/app/(app)/app/components/contacts/openDeleteContactModal";
-import { openDeleteContactsModal } from "@/app/(app)/app/components/contacts/openDeleteContactsModal";
-import { LocationLookupInput } from "@/app/(app)/app/components/LocationLookupInput";
-import {
-  type MapBounds,
-  PeopleMap,
-  type PeopleMapFocus,
-} from "@/app/(app)/app/components/map/PeopleMap";
-import { PageHeader } from "@/app/(app)/app/components/PageHeader";
-import { PageWrapper } from "@/app/(app)/app/components/PageWrapper";
-import { openAddPeopleToGroupSelectionModal } from "@/app/(app)/app/people/components/AddPeopleToGroupSelectionModal";
-import { openMergeWithModal } from "@/app/(app)/app/people/components/MergeWithModal";
+} from "@/components/contacts/ContactsTableV2";
+import { openDeleteContactModal } from "@/components/contacts/openDeleteContactModal";
+import { openDeleteContactsModal } from "@/components/contacts/openDeleteContactsModal";
+import { type MapBounds, PeopleMap, type PeopleMapFocus } from "@/components/map/PeopleMap";
+import { LocationLookupInput } from "@/components/shell/LocationLookupInput";
+import { PageHeader } from "@/components/shell/PageHeader";
+import { PageWrapper } from "@/components/shell/PageWrapper";
 import type { MapPinsBounds } from "@/lib/api/resources/contacts";
 import { useContactsTableCopy } from "@/lib/i18n/useContactsTableCopy";
 import { useWebTranslations } from "@/lib/i18n/useWebTranslations";

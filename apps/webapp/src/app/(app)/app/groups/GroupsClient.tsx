@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import {
   errorNotificationTemplate,
@@ -12,8 +12,8 @@ import { notifications } from "@mantine/notifications";
 import { IconTrash, IconUsersGroup, IconUsersPlus } from "@tabler/icons-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useMemo } from "react";
-import { PageHeader } from "@/app/(app)/app/components/PageHeader";
-import { PageWrapper } from "@/app/(app)/app/components/PageWrapper";
+import { PageHeader } from "@/components/shell/PageHeader";
+import { PageWrapper } from "@/components/shell/PageWrapper";
 import { captureEvent } from "@/lib/analytics/client";
 import { useCommonTranslations, useWebTranslations } from "@/lib/i18n/useWebTranslations";
 import { optimisticGroupDocumentTitle } from "@/lib/metadata/optimisticTitles";

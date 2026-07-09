@@ -1,7 +1,7 @@
-"use client";
+﻿"use client";
 
 import { useMemo } from "react";
-import { useUserLocale } from "@/app/(app)/app/components/UserLocaleProvider";
+import { useUserLocale } from "@/components/shell/UserLocaleProvider";
 import {
   type DateFormatterLike,
   formatLastUsedAt,

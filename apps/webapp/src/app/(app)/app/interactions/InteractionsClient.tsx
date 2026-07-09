@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import {
   errorNotificationTemplate,
@@ -23,7 +23,7 @@ import {
   IconTrash,
 } from "@tabler/icons-react";
 import { useCallback, useMemo, useState } from "react";
-import { PageWrapper } from "@/app/(app)/app/components/PageWrapper";
+import { PageWrapper } from "@/components/shell/PageWrapper";
 import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
 import { DEBOUNCE_MS, HOTKEYS } from "@/lib/platform/config";
 import { useContactsListQuery } from "@/lib/query/hooks/useContacts";

@@ -284,12 +284,13 @@
     "web.feedback": ["FeedbackPage"],
     "web.fix": ["FixContactsPage", "MergeWithModal", "EnrichRecommendationCard"],
     "web.groups": ["GroupsPage", "GroupDetailPage"],
-    "web.home": ["HomePage", "Onboarding"],
+    "web.home": ["HomePage"],
     "web.interactions": ["InteractionsPage", "InteractionTypes"],
     "web.keepInTouch": ["KeepInTouch"],
     "web.login": ["LoginPage"],
     "web.map": ["MapPage", "MapCommon"],
     "web.oauth": ["OAuthConsent"],
+    "web.onboarding": ["Onboarding"],
     "web.people": ["PeoplePage", "ContactsTable", "PeopleSearchSpotlight"],
     "web.person": [
       "SingleContactPage",
@@ -312,6 +313,7 @@
       "AppNavigation",
       "CommandPalette",
       "PageHeader"
-    ]
+    ],
+    "web.unavailable": ["UnavailablePage"]
   }
 }

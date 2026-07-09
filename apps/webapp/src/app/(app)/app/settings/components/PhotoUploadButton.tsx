@@ -1,7 +1,7 @@
-"use client";
+﻿"use client";
 
-import { openPhotoUploadModal } from "@/app/(app)/app/components/photo/openPhotoUploadModal";
-import { UserAvatar } from "@/app/(app)/app/components/UserAvatar";
+import { openPhotoUploadModal } from "@/components/photo/openPhotoUploadModal";
+import { UserAvatar } from "@/components/shell/UserAvatar";
 import { useUploadMePhotoMutation } from "@/lib/query/hooks/useSettings";
 
 interface PhotoUploadButtonProps {

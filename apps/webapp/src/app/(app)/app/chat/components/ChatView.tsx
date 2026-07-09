@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useChat } from "@ai-sdk/react";
 import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
@@ -6,7 +6,7 @@ import { ActionIcon, Box, Button, Group, Stack, Text, TextInput } from "@mantine
 import { IconMessageChatbot, IconSend } from "@tabler/icons-react";
 import { DefaultChatTransport } from "ai";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { PageHeader } from "@/app/(app)/app/components/PageHeader";
+import { PageHeader } from "@/components/shell/PageHeader";
 import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
 import {
   useChatSessionMessagesQuery,

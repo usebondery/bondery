@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { formatContactName } from "@bondery/helpers/contact";
 import { errorNotificationTemplate, successNotificationTemplate } from "@bondery/mantine-next";
@@ -21,9 +21,9 @@ import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import ContactsTable, {
   type ColumnConfig,
   type SortOrder,
-} from "@/app/(app)/app/components/contacts/ContactsTableV2";
-import { openDeleteContactModal } from "@/app/(app)/app/components/contacts/openDeleteContactModal";
-import { openDeleteContactsModal } from "@/app/(app)/app/components/contacts/openDeleteContactsModal";
+} from "@/components/contacts/ContactsTableV2";
+import { openDeleteContactModal } from "@/components/contacts/openDeleteContactModal";
+import { openDeleteContactsModal } from "@/components/contacts/openDeleteContactsModal";
 import { useBatchEnrichFromLinkedIn } from "@/components/extension/useBatchEnrichFromLinkedIn";
 import { useResponsiveColumns } from "@/hooks/useResponsiveColumns";
 import { downloadContactVcard } from "@/lib/api/domains/contacts";

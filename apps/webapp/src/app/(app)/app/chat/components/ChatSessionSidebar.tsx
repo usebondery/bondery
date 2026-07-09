@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import {
@@ -13,7 +13,7 @@ import { notifications } from "@mantine/notifications";
 import { IconMessagePlus, IconTrash } from "@tabler/icons-react";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { openStandardConfirmModal } from "@/app/(app)/app/components/modals/openStandardConfirmModal";
+import { openStandardConfirmModal } from "@/components/modals/openStandardConfirmModal";
 import { formatRelativeTime } from "@/lib/i18n/formatRelativeTime";
 import { useDateFormatter as useFormatter } from "@/lib/i18n/useDateFormatter";
 import { useWebTranslations } from "@/lib/i18n/useWebTranslations";

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { ModalFooter, ModalScrollLayout } from "@bondery/mantine-next";
 import type { Contact } from "@bondery/schemas";
@@ -9,7 +9,7 @@ import {
   IconBrandInstagram,
   IconCircleCheck,
 } from "@tabler/icons-react";
-import ContactsTable from "@/app/(app)/app/components/contacts/ContactsTableV2";
+import ContactsTable from "@/components/contacts/ContactsTableV2";
 
 interface InstagramImportPreviewStepProps {
   allSelected: boolean;

@@ -1,15 +1,15 @@
-import { API_ROUTES } from "@bondery/helpers/globals/paths";
+﻿import { API_ROUTES } from "@bondery/helpers/globals/paths";
 
 import { Stack, Text } from "@mantine/core";
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
-import { ErrorPageHeader } from "@/app/(app)/app/components/ErrorPageHeader";
-import { PageWrapper } from "@/app/(app)/app/components/PageWrapper";
+import { ErrorPageHeader } from "@/components/shell/ErrorPageHeader";
+import { PageWrapper } from "@/components/shell/PageWrapper";
 import { getMePersonServer } from "@/lib/api/domains/server/mePerson";
 import { getWebTranslations as getTranslations } from "@/lib/i18n/getWebTranslations";
 import { getQueryClient } from "@/lib/query/client";
 import { contactKeys, settingsKeys } from "@/lib/query/keys";
-import PersonClient from "../person/[person_id]/PersonClient";
-import { prefetchPersonPageQueries } from "../person/[person_id]/prefetchPersonPageQueries";
+import PersonClient from "../person/[personId]/PersonClient";
+import { prefetchPersonPageQueries } from "../person/[personId]/prefetchPersonPageQueries";
 
 interface MyselfLoaderProps {
   initialTab?: string;

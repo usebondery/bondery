@@ -1,11 +1,11 @@
-"use client";
+﻿"use client";
 
 import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import { ButtonLink, Kbd, parseShortcutKeys } from "@bondery/mantine-next";
 import { Button, Group, Text, Tooltip } from "@mantine/core";
 import { useHotkeys } from "@mantine/hooks";
 import { IconAddressBook, IconUser, IconUserPlus } from "@tabler/icons-react";
-import { PageHeader } from "@/app/(app)/app/components/PageHeader";
+import { PageHeader } from "@/components/shell/PageHeader";
 import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
 import { HOTKEYS } from "@/lib/platform/config";
 import { peopleSearchActions } from "../../components/PeopleSearchSpotlight";

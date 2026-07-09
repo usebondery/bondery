@@ -1,5 +1,5 @@
-import { Box, Group, Paper, Skeleton, Stack } from "@mantine/core";
-import { PageHeaderSkeleton } from "@/app/(app)/app/components/PageHeaderSkeleton";
+﻿import { Box, Group, Paper, Skeleton, Stack } from "@mantine/core";
+import { PageHeaderSkeleton } from "@/components/shell/PageHeaderSkeleton";
 
 /**
  * Skeleton for a single interaction row in the timeline view.

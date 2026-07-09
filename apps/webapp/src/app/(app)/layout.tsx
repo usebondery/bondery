@@ -1,8 +1,8 @@
-import { preloadGroup } from "@bondery/translations";
+﻿import { preloadGroup } from "@bondery/translations";
 import { ModalsProvider } from "@mantine/modals";
 import { getResources, getT, initServerI18next } from "next-i18next/server";
-import { LocaleProvider } from "@/app/(app)/app/components/UserLocaleProvider";
 import { CodeHighlightProvider } from "@/components/CodeHighlightProvider";
+import { LocaleProvider } from "@/components/shell/UserLocaleProvider";
 import i18nConfig from "@/i18n.config";
 import { preloadWebNamespaces } from "@/lib/i18n/preloadNamespaces.server";
 import { resolveLocaleSettings } from "@/lib/i18n/resolveLocaleSettings";

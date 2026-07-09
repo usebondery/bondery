@@ -1,5 +1,5 @@
-import { Box, Group, Paper, Skeleton, Stack } from "@mantine/core";
-import { PageHeaderSkeleton } from "@/app/(app)/app/components/PageHeaderSkeleton";
+﻿import { Box, Group, Paper, Skeleton, Stack } from "@mantine/core";
+import { PageHeaderSkeleton } from "@/components/shell/PageHeaderSkeleton";
 import type { ColumnKey } from "@/lib/contacts/table-types";
 
 const DEFAULT_VISIBLE_COLUMNS: ColumnKey[] = [

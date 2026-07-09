@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import {
   errorNotificationTemplate,
@@ -23,7 +23,7 @@ import { notifications } from "@mantine/notifications";
 import { IconSend2, IconShare } from "@tabler/icons-react";
 import { useState } from "react";
 import { z } from "zod";
-import { SelectableCard } from "@/app/(app)/app/components/SelectableCard";
+import { SelectableCard } from "@/components/shell/SelectableCard";
 import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
 import { createModalId, useModalDismiss } from "@/lib/modals";
 import { useShareContactMutation } from "@/lib/query/hooks/useContacts";

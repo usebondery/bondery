@@ -1,8 +1,8 @@
-import { Stack } from "@mantine/core";
+﻿import { Stack } from "@mantine/core";
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import { Suspense } from "react";
-import { PageWrapper } from "@/app/(app)/app/components/PageWrapper";
+import { PageWrapper } from "@/components/shell/PageWrapper";
 import type { ColumnKey } from "@/lib/contacts/table-types";
 import { COLUMN_VISIBILITY_COOKIE } from "@/lib/cookies/constants";
 import { getWebTranslations as getTranslations } from "@/lib/i18n/getWebTranslations";

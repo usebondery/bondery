@@ -1,8 +1,8 @@
-"use client";
+﻿"use client";
 
 import { Select, Stack, Text } from "@mantine/core";
 import { IconHeartHandshake } from "@tabler/icons-react";
-import { useCurrentLocale as useLocale } from "@/app/(app)/app/components/UserLocaleProvider";
+import { useCurrentLocale as useLocale } from "@/components/shell/UserLocaleProvider";
 import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
 import { KEEP_IN_TOUCH_PRESETS } from "./utils/keepInTouchConfig";
 

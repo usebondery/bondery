@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { formatContactName } from "@bondery/helpers/contact";
 import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
@@ -14,9 +14,9 @@ import { notifications } from "@mantine/notifications";
 import { IconTrash } from "@tabler/icons-react";
 import { useRouter } from "next/navigation";
 import { useMemo } from "react";
-import { openDeleteContactModal } from "@/app/(app)/app/components/contacts/openDeleteContactModal";
-import { openDeleteContactsModal } from "@/app/(app)/app/components/contacts/openDeleteContactsModal";
-import { openStandardConfirmModal } from "@/app/(app)/app/components/modals/openStandardConfirmModal";
+import { openDeleteContactModal } from "@/components/contacts/openDeleteContactModal";
+import { openDeleteContactsModal } from "@/components/contacts/openDeleteContactsModal";
+import { openStandardConfirmModal } from "@/components/modals/openStandardConfirmModal";
 import { searchContacts } from "@/lib/contacts/searchContacts";
 import { useCommonTranslations, useWebTranslations } from "@/lib/i18n/useWebTranslations";
 import type { ContactsListFilterParams } from "@/lib/query/contactsListParams";
@@ -25,9 +25,9 @@ import {
   useDuplicateGroupMutation,
   useRemoveContactsFromGroupMutation,
 } from "@/lib/query/hooks/useGroups";
-import { openEditGroupModal } from "../../groups/components/EditGroupModal";
-import { openAddPeopleToGroupSelectionModal } from "../../people/components/AddPeopleToGroupSelectionModal";
-import { openMergeWithModal } from "../../people/components/MergeWithModal";
+import { openEditGroupModal } from "../../../groups/components/EditGroupModal";
+import { openAddPeopleToGroupSelectionModal } from "../../../people/components/AddPeopleToGroupSelectionModal";
+import { openMergeWithModal } from "../../../people/components/MergeWithModal";
 
 interface UseGroupDetailActionsParams {
   cardPreviewContacts: Contact[];

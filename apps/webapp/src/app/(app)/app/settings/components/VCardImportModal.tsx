@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { getUserFacingError } from "@bondery/helpers/api";
 import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
@@ -41,7 +41,7 @@ import {
 import { useRouter } from "next/navigation";
 import type { JSX } from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import ContactsTable from "@/app/(app)/app/components/contacts/ContactsTableV2";
+import ContactsTable from "@/components/contacts/ContactsTableV2";
 import { useCommonTranslations, useWebTranslations } from "@/lib/i18n/useWebTranslations";
 import { useModalDismiss } from "@/lib/modals";
 import {

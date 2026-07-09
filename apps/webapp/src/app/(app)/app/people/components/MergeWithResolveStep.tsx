@@ -1,10 +1,10 @@
-"use client";
+﻿"use client";
 
 import { ModalFooter, ModalScrollLayout, PersonChip } from "@bondery/mantine-next";
 import type { Contact, MergeConflictChoice, MergeConflictField } from "@bondery/schemas";
 import { Center, Paper, SimpleGrid, Stack, Text } from "@mantine/core";
 import { IconArrowLeft, IconArrowMerge } from "@tabler/icons-react";
-import { SelectableCard } from "@/app/(app)/app/components/SelectableCard";
+import { SelectableCard } from "@/components/shell/SelectableCard";
 import {
   formatConflictDisplayValue,
   normalizeDisplayText,

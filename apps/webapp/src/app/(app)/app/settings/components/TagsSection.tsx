@@ -1,10 +1,10 @@
-"use client";
+﻿"use client";
 
 import { CardSection, Group } from "@mantine/core";
 import { IconTag } from "@tabler/icons-react";
-import { AddNewTagButton } from "@/app/(app)/app/components/tags/AddNewTagButton";
-import { openTagEditorModal } from "@/app/(app)/app/components/tags/openTagEditorModal";
-import { TagPill } from "@/app/(app)/app/components/tags/TagPill";
+import { AddNewTagButton } from "@/components/tags/AddNewTagButton";
+import { openTagEditorModal } from "@/components/tags/openTagEditorModal";
+import { TagPill } from "@/components/tags/TagPill";
 import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
 import { useTagsListQuery } from "@/lib/query/hooks/useTags";
 import { SETTINGS_TAGS_PREVIEW } from "@/lib/query/settingsPageQueryParams";

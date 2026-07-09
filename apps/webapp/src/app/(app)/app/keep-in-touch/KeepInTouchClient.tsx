@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import {
@@ -24,9 +24,9 @@ import { notifications } from "@mantine/notifications";
 import { IconCalendarPlus, IconCheck, IconClock, IconHeartHandshake } from "@tabler/icons-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useMemo, useState } from "react";
-import { PageHeader } from "@/app/(app)/app/components/PageHeader";
-import { useCurrentLocale as useLocale } from "@/app/(app)/app/components/UserLocaleProvider";
 import { openNewActivityModal } from "@/app/(app)/app/interactions/components/NewActivityModal";
+import { PageHeader } from "@/components/shell/PageHeader";
+import { useCurrentLocale as useLocale } from "@/components/shell/UserLocaleProvider";
 import { useDateFormatter as useFormatter } from "@/lib/i18n/useDateFormatter";
 import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
 import { setOptimisticDocumentTitle } from "@/lib/metadata/navigationTitleStore";

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { DescribedSelect, errorNotificationTemplate, ModalTitle } from "@bondery/mantine-next";
 import { API_KEY_LIMITS, type ApiKeyCreated, type ApiKeyListItem } from "@bondery/schemas";
@@ -17,8 +17,8 @@ import {
 import { notifications } from "@mantine/notifications";
 import { IconAlertCircle, IconKey, IconPlus, IconTrash } from "@tabler/icons-react";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { openStandardConfirmModal } from "@/app/(app)/app/components/modals/openStandardConfirmModal";
-import { InlineEditableInput } from "@/app/(app)/app/person/[person_id]/components/info/InlineEditableInput";
+import { InlineEditableInput } from "@/app/(app)/app/person/[personId]/components/info/InlineEditableInput";
+import { openStandardConfirmModal } from "@/components/modals/openStandardConfirmModal";
 import { formatLastUsedAtWithFormatter, useDateFormatter } from "@/lib/i18n/useDateFormatter";
 import { useCommonTranslations, useWebTranslations } from "@/lib/i18n/useWebTranslations";
 import {

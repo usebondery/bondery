@@ -46,9 +46,21 @@ Transport    →  lib/api/client | lib/api/server  (not in app components)
 | Extension notification UI | `components/extension/` |
 | Reusable picker/button | `components/shared/` |
 | Page-specific UI | `app/(app)/app/<feature>/` — see **Feature route folders** below |
-| Cross-route chrome (shell, shared tables) | `app/(app)/app/components/<domain>/` |
+| Cross-route chrome (shell, shared tables) | `components/<domain>/` (shell → `components/shell/`) |
 
-## Feature route folders
+## `src/components/` layout
+
+Cross-route UI shared by multiple `/app/*` routes lives under `src/components/`:
+
+| Subfolder | Contents |
+|-----------|----------|
+| `shell/` | App shell, page chrome, `UserLocaleProvider` |
+| `contacts/`, `map/`, `tags/`, … | Domain widgets used on 2+ routes |
+| `shared/` | Generic pickers and buttons |
+| `extension/` | Chrome extension notification UI |
+
+Feature-only UI stays in `app/(app)/app/<feature>/components/`.
+
 
 Routes under `app/(app)/app/<feature>/` follow a tiered template. Not every tier needs every folder — create `hooks/`, `utils/`, and `editor/` when the first file appears.
 
@@ -83,9 +95,7 @@ Page-specific prefetch orchestration (e.g. `prefetchPersonPageQueries.ts`) may s
 - `components/` — JSX and modal openers only; no `use*` hooks; no `*Utils.ts` / `*-helpers.ts`
 - `hooks/` — all `use*` files for the route
 - `utils/` — pure functions and constants; promote to `lib/contacts/` when shared across routes
-- Used on 2+ routes — `app/(app)/app/components/<domain>/` with optional `hooks/` and `utils/` subfolders
-
-Run `npm run check-route-structure` in CI.
+- Used on 2+ routes — `components/<domain>/` with optional `hooks/` and `utils/` subfolders
 
 ## Layering
 

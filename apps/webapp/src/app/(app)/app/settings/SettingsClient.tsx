@@ -1,7 +1,7 @@
-"use client";
+﻿"use client";
 
 import { Stack } from "@mantine/core";
-import { ErrorPageHeader } from "@/app/(app)/app/components/ErrorPageHeader";
+import { ErrorPageHeader } from "@/components/shell/ErrorPageHeader";
 import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
 import { API_URL } from "@/lib/platform/config";
 import { HashScrollOnMount } from "../components/HashScrollOnMount";

@@ -1,0 +1,11 @@
+{
+  "recommendations": [
+    "biomejs.biome",
+    "expo.vscode-expo-tools",
+    "inlang.vs-code-extension",
+    "bradlc.vscode-tailwindcss",
+    "aaron-bond.better-comments",
+    "akamud.vscode-theme-onedark",
+    "mikestead.dotenv"
+  ]
+}

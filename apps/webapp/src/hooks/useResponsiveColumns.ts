@@ -1,7 +1,7 @@
-"use client";
+﻿"use client";
 
 import { type RefObject, useEffect, useMemo, useState } from "react";
-import type { ColumnConfig } from "@/app/(app)/app/components/contacts/ContactsTableV2";
+import type { ColumnConfig } from "@/components/contacts/ContactsTableV2";
 import type { ColumnKey } from "@/lib/contacts/table-types";
 
 /**

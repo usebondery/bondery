@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { getUserFacingError } from "@bondery/helpers/api";
 import {
@@ -10,8 +10,8 @@ import { Button, Group, Paper, SegmentedControl, Stack, Text } from "@mantine/co
 import { notifications } from "@mantine/notifications";
 import { IconArrowMerge, IconEye, IconEyeOff, IconRefresh } from "@tabler/icons-react";
 import { useState } from "react";
-import { PageHeader } from "@/app/(app)/app/components/PageHeader";
-import { PageWrapper } from "@/app/(app)/app/components/PageWrapper";
+import { PageHeader } from "@/components/shell/PageHeader";
+import { PageWrapper } from "@/components/shell/PageWrapper";
 import { useCommonTranslations, useWebTranslations } from "@/lib/i18n/useWebTranslations";
 import {
   useEnrichEligibleCountQuery,
