@@ -84,9 +84,11 @@ export function PersonAvatarGroup({
 
     return (
       <Stack gap="0">
-        {rows.map((row) => (
+        {rows.map((row, rowIndex) => (
           <AvatarGroup
-            key={row[0]?.id ?? row.map((item) => item.id).join("-")}
+            key={row
+              .map((item) => (item.type === "person" ? item.person.id : "overflow"))
+              .join("-")}
             spacing="sm"
             style={
               rowIndex === 1 ? { marginTop: "calc(var(--mantine-spacing-sm) * -1)" } : undefined

@@ -1,8 +1,8 @@
 "use client";
 
 import { Anchor, type AnchorProps } from "@mantine/core";
-import type { ElementType, ReactNode } from "react";
-import NextLink from "#nextjs/NextLink.js";
+import type { ReactNode } from "react";
+import { mantineLinkComponent } from "#nextjs/NextLink.js";
 
 export type AnchorLinkProps = Omit<AnchorProps, "component" | "href" | "children"> & {
   href: string;
@@ -20,7 +20,7 @@ export type AnchorLinkProps = Omit<AnchorProps, "component" | "href" | "children
  */
 export function AnchorLink({ href, children, scroll, ...anchorProps }: AnchorLinkProps) {
   return (
-    <Anchor component={NextLink as ElementType} href={href} scroll={scroll} {...anchorProps}>
+    <Anchor component={mantineLinkComponent} href={href} scroll={scroll} {...anchorProps}>
       {children}
     </Anchor>
   );

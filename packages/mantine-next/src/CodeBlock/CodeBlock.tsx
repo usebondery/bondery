@@ -99,6 +99,7 @@ export function CodeBlock(props: CodeBlockProps) {
 
   return (
     <CodeBlockShell
+      code={props.code}
       copiedLabel={copiedLabel}
       copyLabel={copyLabel}
       headerLeft={

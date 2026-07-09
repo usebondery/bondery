@@ -1,7 +1,6 @@
 "use client";
 
 import { ActionIcon, type ActionIconProps, Center } from "@mantine/core";
-import type { ElementType } from "react";
 import {
   type CSSProperties,
   cloneElement,
@@ -9,7 +8,7 @@ import {
   type ReactElement,
   type ReactNode,
 } from "react";
-import Link from "#nextjs/NextLink.js";
+import { mantineLinkComponent } from "#nextjs/NextLink.js";
 
 export type ActionIconLinkProps = Omit<ActionIconProps, "component" | "href" | "children"> & {
   href?: string;
@@ -75,7 +74,7 @@ export function ActionIconLink({
   return (
     <ActionIcon
       aria-label={ariaLabel}
-      component={Link as ElementType}
+      component={mantineLinkComponent}
       href={href}
       rel={rel}
       target={target}

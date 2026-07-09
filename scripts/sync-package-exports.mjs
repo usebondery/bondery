@@ -42,6 +42,9 @@ const PACKAGE_CONFIGS = {
         default: "./dist/supabase.types.js",
         types: "./src/supabase.types.ts",
       },
+      "./locale/supported-locales.json": {
+        default: "./dist/locale/supported-locales.json",
+      },
     },
     srcDir: "src",
   },
@@ -146,7 +149,9 @@ async function buildExports(pkgRel, config) {
 
   if (config.extraExports) {
     for (const [subpath, paths] of Object.entries(config.extraExports)) {
-      exports[subpath] = COMPILED_ENTRY(paths.types, paths.default);
+      exports[subpath] = paths.types
+        ? COMPILED_ENTRY(paths.types, paths.default)
+        : { default: paths.default };
     }
   }
 
