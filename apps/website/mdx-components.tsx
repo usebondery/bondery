@@ -1,46 +1,46 @@
+import { Anchor, Blockquote, Code, List, ListItem, Text, Title } from "@mantine/core";
 import type { MDXComponents } from "mdx/types";
-import { Anchor, Code, Title, Text, Blockquote, List, ListItem } from "@mantine/core";
 
 export function useMDXComponents(components: MDXComponents): MDXComponents {
   return {
+    a: ({ href, children }) => (
+      <Anchor href={href} rel="noopener noreferrer" target="_blank">
+        {children}
+      </Anchor>
+    ),
+    blockquote: ({ children }) => <Blockquote mb="md">{children}</Blockquote>,
+    code: ({ children }) => <Code>{children}</Code>,
     h1: ({ children }) => (
-      <Title order={1} mb="md">
+      <Title mb="md" order={1}>
         {children}
       </Title>
     ),
     h2: ({ children }) => (
-      <Title order={2} mb="sm" mt="xl">
+      <Title mb="sm" mt="xl" order={2}>
         {children}
       </Title>
     ),
     h3: ({ children }) => (
-      <Title order={3} mb="xs" mt="lg">
+      <Title mb="xs" mt="lg" order={3}>
         {children}
       </Title>
     ),
+    li: ({ children }) => <ListItem>{children}</ListItem>,
+    ol: ({ children }) => (
+      <List mb="md" size="lg" spacing="sm" type="ordered" withPadding>
+        {children}
+      </List>
+    ),
     p: ({ children }) => (
-      <Text mb="md" size="lg" lh={1.8}>
+      <Text lh={1.8} mb="md" size="lg">
         {children}
       </Text>
     ),
-    a: ({ href, children }) => (
-      <Anchor href={href} target="_blank" rel="noopener noreferrer">
-        {children}
-      </Anchor>
-    ),
-    code: ({ children }) => <Code>{children}</Code>,
-    blockquote: ({ children }) => <Blockquote mb="md">{children}</Blockquote>,
     ul: ({ children }) => (
-      <List spacing="sm" size="lg" mb="md" withPadding listStyleType="disc">
+      <List listStyleType="disc" mb="md" size="lg" spacing="sm" withPadding>
         {children}
       </List>
     ),
-    ol: ({ children }) => (
-      <List type="ordered" spacing="sm" size="lg" mb="md" withPadding>
-        {children}
-      </List>
-    ),
-    li: ({ children }) => <ListItem>{children}</ListItem>,
     ...components,
   };
 }

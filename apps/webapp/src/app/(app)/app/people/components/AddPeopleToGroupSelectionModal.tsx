@@ -1,6 +1,16 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { getUserFacingError } from "@bondery/helpers/api";
+import {
+  errorNotificationTemplate,
+  loadingNotificationTemplate,
+  ModalFooter,
+  ModalScrollLayout,
+  ModalTitle,
+  PersonChip,
+  successNotificationTemplate,
+} from "@bondery/mantine-next";
+import type { ContactPreview, GroupWithCount } from "@bondery/schemas";
 import {
   Badge,
   Box,
@@ -15,34 +25,24 @@ import {
 import { modals } from "@mantine/modals";
 import { notifications } from "@mantine/notifications";
 import {
+  IconFolderPlus,
   IconMinus,
   IconPlus,
   IconSearch,
   IconUsersGroup,
-  IconFolderPlus,
 } from "@tabler/icons-react";
-import {
-  PersonChip,
-  errorNotificationTemplate,
-  loadingNotificationTemplate,
-  ModalFooter,
-  ModalScrollLayout,
-  ModalTitle,
-  successNotificationTemplate,
-} from "@bondery/mantine-next";
-import type { ContactPreview, GroupWithCount } from "@bondery/schemas";
-import { GroupCard, GROUP_CARD_MAX_WIDTH_BY_VARIANT } from "../../groups/components/GroupCard";
-import { openAddGroupModal } from "../../groups/components/AddGroupModal";
-import {
-  useContactGroupsQueries,
-  useContactsListQuery,
-} from "@/lib/query/hooks/useContacts";
+import { useEffect, useMemo, useState } from "react";
+import { compoundPluralKey } from "@/lib/i18n/compoundPluralKey";
+import { optionalPluralFragment } from "@/lib/i18n/optionalPluralFragment";
+import { useCommonTranslations, useWebTranslations } from "@/lib/i18n/useWebTranslations";
+import { createModalId, useModalDismiss } from "@/lib/modals";
+import { useContactGroupsQueries, useContactsListQuery } from "@/lib/query/hooks/useContacts";
 import {
   useGroupsListQuery,
   useSyncContactGroupMembershipsMutation,
 } from "@/lib/query/hooks/useGroups";
-import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
-import { createModalId, useModalBlocking } from "@/lib/modals";
+import { openAddGroupModal } from "../../groups/components/AddGroupModal";
+import { GROUP_CARD_MAX_WIDTH_BY_VARIANT, GroupCard } from "../../groups/components/GroupCard";
 
 export interface GroupMembershipUpdate {
   groups: GroupWithCount[];
@@ -50,8 +50,8 @@ export interface GroupMembershipUpdate {
 }
 
 interface AddPeopleToGroupSelectionModalProps {
-  personIds: string[];
   onUpdated?: (update: GroupMembershipUpdate) => Promise<void> | void;
+  personIds: string[];
 }
 
 interface AddPeopleToGroupSelectionFormProps extends AddPeopleToGroupSelectionModalProps {
@@ -59,19 +59,19 @@ interface AddPeopleToGroupSelectionFormProps extends AddPeopleToGroupSelectionMo
 }
 
 function EditGroupsModalTitle() {
-  const t = useTranslations("AddPeopleToGroupSelectionModal");
-  return <ModalTitle text={t("Title")} icon={<IconUsersGroup size={24} />} />;
+  const t = useWebTranslations("AddPeopleToGroupSelectionModal");
+  return <ModalTitle icon={<IconUsersGroup size={24} />} text={t("Title")} />;
 }
 
 export function openAddPeopleToGroupSelectionModal(props: AddPeopleToGroupSelectionModalProps) {
   const modalId = createModalId("edit-groups");
 
   modals.open({
+    children: <AddPeopleToGroupSelectionForm {...props} modalId={modalId} />,
     modalId,
+    size: "xl",
     title: <EditGroupsModalTitle />,
     trapFocus: true,
-    size: "xl",
-    children: <AddPeopleToGroupSelectionForm {...props} modalId={modalId} />,
   });
 }
 
@@ -80,8 +80,8 @@ function AddPeopleToGroupSelectionForm({
   onUpdated,
   modalId,
 }: AddPeopleToGroupSelectionFormProps) {
-  const t = useTranslations("AddPeopleToGroupSelectionModal");
-  const tCommon = useTranslations("WebAppCommon");
+  const t = useWebTranslations("AddPeopleToGroupSelectionModal");
+  const tCommon = useCommonTranslations();
   const modalGroupCardVariant = "small" as const;
   const modalGroupCardWidth = GROUP_CARD_MAX_WIDTH_BY_VARIANT[modalGroupCardVariant];
   const [groups, setGroups] = useState<GroupWithCount[]>([]);
@@ -93,11 +93,17 @@ function AddPeopleToGroupSelectionForm({
   const [hasInitialized, setHasInitialized] = useState(false);
 
   const deduplicatedPersonIds = useMemo(() => Array.from(new Set(personIds)), [personIds]);
-  const { data: groupsData, isLoading: isLoadingGroups, isError: isGroupsError } =
-    useGroupsListQuery({ previewLimit: 3 });
+  const {
+    data: groupsData,
+    isLoading: isLoadingGroups,
+    isError: isGroupsError,
+  } = useGroupsListQuery({ previewLimit: 3 });
   const membershipQueries = useContactGroupsQueries(deduplicatedPersonIds);
-  const { data: contactsData, isLoading: isLoadingContacts, isError: isContactsError } =
-    useContactsListQuery({ limit: 200, enabled: deduplicatedPersonIds.length > 0 });
+  const {
+    data: contactsData,
+    isLoading: isLoadingContacts,
+    isError: isContactsError,
+  } = useContactsListQuery({ enabled: deduplicatedPersonIds.length > 0, limit: 200 });
   const syncMembershipsMutation = useSyncContactGroupMembershipsMutation();
 
   const isLoadingMemberships = membershipQueries.some((query) => query.isLoading);
@@ -107,19 +113,19 @@ function AddPeopleToGroupSelectionForm({
   useEffect(() => {
     modals.updateModal({
       modalId,
-      title: <ModalTitle text={t("Title")} icon={<IconUsersGroup size={24} />} />,
+      title: <ModalTitle icon={<IconUsersGroup size={24} />} text={t("Title")} />,
     });
   }, [modalId, t]);
 
   const isBlocking = isSubmitting || isLoadingGroupsData;
-  useModalBlocking(modalId, isBlocking);
+  const { closeModal, closeModalSync } = useModalDismiss(modalId, isBlocking);
 
   useEffect(() => {
     if (isGroupsError || isContactsError || membershipQueries.some((query) => query.isError)) {
       notifications.show(
         errorNotificationTemplate({
-          title: tCommon("ErrorTitle"),
           description: t("LoadError"),
+          title: tCommon("feedback.errorTitle"),
         }),
       );
     }
@@ -146,9 +152,7 @@ function AddPeopleToGroupSelectionForm({
 
     const intersection = memberships.reduce<Set<string>>(
       (sharedGroupIds, membershipSet) => {
-        return new Set(
-          Array.from(sharedGroupIds).filter((groupId) => membershipSet.has(groupId)),
-        );
+        return new Set(Array.from(sharedGroupIds).filter((groupId) => membershipSet.has(groupId)));
       },
       memberships[0] ? new Set(memberships[0]) : new Set(),
     );
@@ -157,10 +161,10 @@ function AddPeopleToGroupSelectionForm({
     const personChips = (contactsData.contacts || [])
       .filter((person) => selectedPersonIdsSet.has(person.id))
       .map((person) => ({
-        id: person.id,
-        firstName: person.firstName,
-        lastName: person.lastName,
         avatar: person.avatar,
+        firstName: person.firstName,
+        id: person.id,
+        lastName: person.lastName,
       }));
 
     setGroups(groupsData.groups || []);
@@ -176,6 +180,7 @@ function AddPeopleToGroupSelectionForm({
     isLoadingContacts,
     isLoadingGroups,
     isLoadingMemberships,
+    membershipQueries.map,
   ]);
 
   const filteredGroups = useMemo(() => {
@@ -218,70 +223,54 @@ function AddPeopleToGroupSelectionForm({
 
     const loadingNotification = notifications.show({
       ...loadingNotificationTemplate({
-        title: t("AddingTitle"),
         description: t("AddingDescription"),
+        title: t("AddingTitle"),
       }),
     });
 
     try {
       const addResults = await syncMembershipsMutation.mutateAsync({
-        personIds: deduplicatedPersonIds,
         addToGroupIds: targetGroupIds,
+        personIds: deduplicatedPersonIds,
         removeFromGroupIds: removedGroupIds,
       });
 
-      const totalAdded = addResults.reduce(
-        (sum, result) => sum + (result.addedCount ?? 0),
-        0,
-      );
-      const totalSkipped = addResults.reduce(
-        (sum, result) => sum + (result.skippedCount ?? 0),
-        0,
-      );
+      const totalAdded = addResults.reduce((sum, result) => sum + (result.addedCount ?? 0), 0);
+      const totalSkipped = addResults.reduce((sum, result) => sum + (result.skippedCount ?? 0), 0);
 
       notifications.hide(loadingNotification);
 
-      const peopleLabel = totalAdded === 1 ? t("PersonSingular") : t("PeoplePlural");
-      const groupsLabel =
-        targetGroupIds.length === 1 ? t("GroupSingular") : t("GroupsPlural");
-      const skippedSuffix =
-        totalSkipped > 0
-          ? totalSkipped === 1
-            ? t("SkippedSuffixSingular", { count: totalSkipped })
-            : t("SkippedSuffixPlural", { count: totalSkipped })
-          : "";
+      const skippedDetails = optionalPluralFragment(t, "SkippedSuffix", totalSkipped);
 
       const membershipSummary =
         totalAdded === 0 && totalSkipped > 0
           ? t("AllAlreadyInGroups")
-          : t("AddedSummary", {
+          : t(compoundPluralKey("AddedSummary", [totalAdded, targetGroupIds.length]), {
               count: totalAdded,
-              peopleLabel,
-              skippedSuffix,
               groupCount: targetGroupIds.length,
-              groupsLabel,
+              skippedDetails,
             });
 
       notifications.show(
         successNotificationTemplate({
-          title: tCommon("SuccessTitle"),
           description:
             removedGroupIds.length > 0
-              ? t("MembershipUpdated", {
-                  count: deduplicatedPersonIds.length,
-                  peopleLabel:
-                    deduplicatedPersonIds.length === 1
-                      ? t("PersonSingular")
-                      : t("PeoplePlural"),
-                  groupCount: selectedGroupIds.size,
-                  groupsLabel:
-                    selectedGroupIds.size === 1 ? t("GroupSingular") : t("GroupsPlural"),
-                })
+              ? t(
+                  compoundPluralKey("MembershipUpdated", [
+                    deduplicatedPersonIds.length,
+                    selectedGroupIds.size,
+                  ]),
+                  {
+                    count: deduplicatedPersonIds.length,
+                    groupCount: selectedGroupIds.size,
+                  },
+                )
               : membershipSummary,
+          title: tCommon("feedback.successTitle"),
         }),
       );
 
-      modals.close(modalId);
+      closeModalSync();
       if (onUpdated) {
         await onUpdated({
           groups,
@@ -293,8 +282,8 @@ function AddPeopleToGroupSelectionForm({
 
       notifications.show(
         errorNotificationTemplate({
-          title: tCommon("ErrorTitle"),
-          description: error instanceof Error ? error.message : t("SubmitError"),
+          description: getUserFacingError(error, tCommon),
+          title: tCommon("feedback.errorTitle"),
         }),
       );
     } finally {
@@ -314,54 +303,53 @@ function AddPeopleToGroupSelectionForm({
     <ModalScrollLayout
       footer={
         <ModalFooter
-          mt={0}
-          cancelLabel={t("Cancel")}
-          onCancel={() => modals.close(modalId)}
-          cancelDisabled={isSubmitting}
+          actionDisabled={deduplicatedPersonIds.length === 0 || isSubmitting}
           actionLabel={t("Submit")}
+          actionLeftSection={<IconUsersGroup size={16} />}
+          actionLoading={isSubmitting}
+          cancelDisabled={isSubmitting}
+          cancelLabel={t("Cancel")}
+          mt={0}
           onAction={() => {
             void handleSubmit();
           }}
-          actionLoading={isSubmitting}
-          actionDisabled={deduplicatedPersonIds.length === 0 || isSubmitting}
-          actionLeftSection={<IconUsersGroup size={16} />}
+          onCancel={closeModal}
         />
       }
     >
       <Stack gap="md">
         {selectedPeople.length > 0 && (
-          <Group gap="xs" align="center" wrap="wrap">
+          <Group align="center" gap="xs" wrap="wrap">
             {selectedPeople.map((person) => (
-              <PersonChip key={person.id} person={person} size="sm" isClickable={false} />
+              <PersonChip isClickable={false} key={person.id} person={person} size="sm" />
             ))}
           </Group>
         )}
 
         <TextInput
           label={t("SearchLabel")}
-          placeholder={t("SearchPlaceholder")}
           leftSection={<IconSearch size={16} />}
-          value={search}
           onChange={(event) => setSearch(event.currentTarget.value)}
+          placeholder={t("SearchPlaceholder")}
+          value={search}
         />
 
-        <Group gap="sm" align="flex-start" justify="flex-start" wrap="wrap" w="full">
+        <Group align="flex-start" gap="sm" justify="flex-start" w="full" wrap="wrap">
           <Box
             style={{
               flex: `1 1 ${modalGroupCardWidth}`,
-              width: modalGroupCardWidth,
               maxWidth: modalGroupCardWidth,
+              width: modalGroupCardWidth,
             }}
           >
             <GroupCard
-              variant="action"
-              actionLabel={t("CreateNewGroup")}
-              actionIcon={<IconFolderPlus size={20} />}
               actionColor="green"
+              actionIcon={<IconFolderPlus size={20} />}
+              actionLabel={t("CreateNewGroup")}
               onActionClick={() => {
                 openAddGroupModal({
-                  initialSelectedIds: deduplicatedPersonIds,
                   initialLabel: search.trim(),
+                  initialSelectedIds: deduplicatedPersonIds,
                   onCreated: (newGroup) => {
                     setGroups((prev) => [...prev, newGroup]);
                     setInitialSelectedGroupIds((prev) => new Set([...prev, newGroup.id]));
@@ -369,12 +357,13 @@ function AddPeopleToGroupSelectionForm({
                   },
                 });
               }}
+              variant="action"
             />
           </Box>
 
           {filteredGroups.length === 0 ? (
             groups.length > 0 && search.trim() ? (
-              <Text c="dimmed" ta="center" py="lg" style={{ width: "100%" }}>
+              <Text c="dimmed" py="lg" style={{ width: "100%" }} ta="center">
                 {t("NoGroupsMatch")}
               </Text>
             ) : null
@@ -384,10 +373,10 @@ function AddPeopleToGroupSelectionForm({
                 key={group.id}
                 onClick={() => handleToggleGroup(group.id)}
                 style={{
-                  textAlign: "left",
                   flex: `1 1 ${modalGroupCardWidth}`,
-                  width: modalGroupCardWidth,
                   maxWidth: modalGroupCardWidth,
+                  textAlign: "left",
+                  width: modalGroupCardWidth,
                 }}
               >
                 {(() => {
@@ -406,9 +395,9 @@ function AddPeopleToGroupSelectionForm({
                     <Box pos="relative">
                       {selectionState === "remove" && (
                         <Badge
-                          size="xs"
-                          leftSection={<IconMinus size={10} />}
                           className="top-2 absolute right-2 z-10"
+                          leftSection={<IconMinus size={10} />}
+                          size="xs"
                           style={{
                             backgroundColor: "var(--mantine-color-red-filled)",
                             color: "var(--mantine-color-white)",
@@ -419,9 +408,9 @@ function AddPeopleToGroupSelectionForm({
                       )}
                       {selectionState === "add" && (
                         <Badge
-                          size="xs"
-                          leftSection={<IconPlus size={10} />}
                           className="top-2 absolute right-2 z-10"
+                          leftSection={<IconPlus size={10} />}
+                          size="xs"
                           style={{
                             backgroundColor: "var(--mantine-color-green-filled)",
                             color: "var(--mantine-color-white)",
@@ -432,8 +421,8 @@ function AddPeopleToGroupSelectionForm({
                       )}
                       {selectionState === "already" && (
                         <Badge
-                          size="xs"
                           className="top-2 absolute right-2 z-10"
+                          size="xs"
                           style={{
                             backgroundColor: "var(--mantine-primary-color-filled)",
                             color: "var(--mantine-color-white)",
@@ -444,17 +433,8 @@ function AddPeopleToGroupSelectionForm({
                       )}
 
                       <GroupCard
-                        group={group}
-                        onClick={() => {}}
-                        onAddPeople={() => {}}
-                        onEdit={() => {}}
-                        onDuplicate={() => {}}
-                        onDelete={() => {}}
-                        interactive={false}
                         cursorType="pointer"
-                        variant={modalGroupCardVariant}
-                        showMenu={false}
-                        selected={isCurrentlySelected}
+                        group={group}
                         highlightColor={
                           selectionState === "add"
                             ? "green"
@@ -464,6 +444,15 @@ function AddPeopleToGroupSelectionForm({
                                 ? "primary"
                                 : undefined
                         }
+                        interactive={false}
+                        onAddPeople={() => {}}
+                        onClick={() => {}}
+                        onDelete={() => {}}
+                        onDuplicate={() => {}}
+                        onEdit={() => {}}
+                        selected={isCurrentlySelected}
+                        showMenu={false}
+                        variant={modalGroupCardVariant}
                       />
                     </Box>
                   );

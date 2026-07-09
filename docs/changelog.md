@@ -2,6 +2,12 @@
 
 All notable changes to this project are documented in this file. For format and commit prefixes, see [changelog instructions](../.github/instructions/changelog.instructions.md).
 
+## [Unreleased]
+
+### Breaking
+
+- **Local dev ports (Dial BOND):** Bondery apps now use the `2663x` port block (`26630` website, `26631` API, `26632` webapp, `26633` extension, `26634` mobile Metro, `26639` email preview). Supabase stays on `5432x`. Re-copy `*.env.development.example` → `*.env.development.local` or see [architecture.md](contributing/architecture.md#apps).
+
 ## [1.7.0] - 07.07.2026
 
 ### ✨ Added

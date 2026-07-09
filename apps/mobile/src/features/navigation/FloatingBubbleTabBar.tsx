@@ -1,11 +1,12 @@
+import type { BottomTabBarProps } from "@react-navigation/bottom-tabs";
 import { IconPlus, IconX } from "@tabler/icons-react-native";
-import { forwardRef, useCallback, useEffect, useMemo, useRef, type ReactNode } from "react";
+import { forwardRef, useCallback, useEffect, useMemo, useRef } from "react";
 import {
   BackHandler,
+  type LayoutChangeEvent,
   StyleSheet,
   useWindowDimensions,
   View,
-  type LayoutChangeEvent,
 } from "react-native";
 import { GestureDetector } from "react-native-gesture-handler";
 import Animated, {
@@ -20,14 +21,11 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { FAB_GESTURE, UI_TIMING_MS } from "../../lib/config";
 import { useMobileTranslations } from "../../lib/i18n/useMobileTranslations";
 import { FAB_SPEED_DIAL_MOTION, TAMAGUI_TRANSITION } from "../../theme/animations";
-import { Tappable } from "../../theme/Tappable";
 import { floatingBarStyles } from "../../theme/floatingBarStyles";
+import { Tappable } from "../../theme/Tappable";
 import { MOBILE_LAYOUT } from "../../theme/tokens";
 import { useMobileThemeColors } from "../../theme/useMobileThemeColors";
-import {
-  estimateFabMenuContentHeight,
-  FabSpeedDialMenuItem,
-} from "./FabSpeedDialMenuItem";
+import { estimateFabMenuContentHeight, FabSpeedDialMenuItem } from "./FabSpeedDialMenuItem";
 import { FabSpeedDialOverflowSheet } from "./FabSpeedDialOverflowSheet";
 import { useFabSpeedDial } from "./fabSpeedDialContext";
 import type { FabSpeedDialMenuItemLayout } from "./fabSpeedDialTypes";
@@ -38,19 +36,8 @@ type RootTabRoute = "contacts" | "settings";
 const CHROME_RADIUS_CLOSED = MOBILE_LAYOUT.borderRadius.pill;
 const CHROME_RADIUS_OPEN = MOBILE_LAYOUT.floatingTabBar.speedDialChromeRadiusOpen;
 
-interface FloatingBubbleTabBarProps {
-  state: any;
-  descriptors: Record<
-    string,
-    {
-      options: {
-        tabBarIcon?: (props: { focused: boolean; color: string; size: number }) => ReactNode;
-        tabBarAccessibilityLabel?: string;
-        tabBarButtonTestID?: string;
-      };
-    }
-  >;
-  navigation: any;
+interface FloatingBubbleTabBarProps
+  extends Pick<BottomTabBarProps, "descriptors" | "navigation" | "state"> {
   onChromeBoundsChange?: (event: LayoutChangeEvent) => void;
 }
 
@@ -62,250 +49,256 @@ export const FloatingBubbleTabBar = forwardRef<View, FloatingBubbleTabBarProps>(
     { state, descriptors, navigation, onChromeBoundsChange },
     forwardedRef,
   ) {
-  const insets = useSafeAreaInsets();
-  const t = useMobileTranslations();
-  const colors = useMobileThemeColors();
-  const { width: windowWidth, height: windowHeight } = useWindowDimensions();
-  const plusRef = useRef<View>(null);
-  const chromeMeasureRef = useRef<View>(null);
+    const insets = useSafeAreaInsets();
+    const t = useMobileTranslations();
+    const colors = useMobileThemeColors();
+    const { width: windowWidth, height: windowHeight } = useWindowDimensions();
+    const plusRef = useRef<View>(null);
+    const chromeMeasureRef = useRef<View>(null);
 
-  const assignChromeMeasureRef = useCallback(
-    (node: View | null) => {
-      chromeMeasureRef.current = node;
-      if (typeof forwardedRef === "function") {
-        forwardedRef(node);
+    const assignChromeMeasureRef = useCallback(
+      (node: View | null) => {
+        chromeMeasureRef.current = node;
+        if (typeof forwardedRef === "function") {
+          forwardedRef(node);
+          return;
+        }
+        if (forwardedRef) {
+          forwardedRef.current = node;
+        }
+      },
+      [forwardedRef],
+    );
+    const plusCancelYRef = useRef<number | null>(null);
+    const dimensionsRef = useRef({ height: windowHeight, width: windowWidth });
+    const suppressNextPressRef = useRef(false);
+
+    const {
+      actions,
+      isOpen,
+      isOverflowSheetOpen,
+      highlightedActionId,
+      usesInlineMenu,
+      closeMenu,
+      closeOverflowSheet,
+      openMenu,
+      toggleMenu,
+      registerMenuItemLayout,
+      runAction,
+    } = useFabSpeedDial();
+
+    const menuHeight = useSharedValue(0);
+    const menuTargetHeight = useSharedValue(estimateFabMenuContentHeight(actions.length));
+
+    const estimatedMenuHeight = useMemo(
+      () => estimateFabMenuContentHeight(actions.length),
+      [actions.length],
+    );
+
+    useEffect(() => {
+      menuTargetHeight.value = estimatedMenuHeight;
+    }, [estimatedMenuHeight, menuTargetHeight]);
+
+    const measurePlusBubble = useCallback(() => {
+      plusRef.current?.measureInWindow((_x, y, _width, height) => {
+        plusCancelYRef.current = y + height / 2 + FAB_GESTURE.cancelZoneBelowPx;
+      });
+    }, []);
+
+    const getPlusCancelY = useCallback(() => plusCancelYRef.current, []);
+
+    const plusGesture = useFabPlusGesture({ getPlusCancelY, measurePlusBubble });
+
+    const handleMenuContentLayout = useCallback(
+      (event: LayoutChangeEvent) => {
+        const measuredHeight = event.nativeEvent.layout.height;
+        if (measuredHeight <= 0) {
+          return;
+        }
+
+        menuTargetHeight.value = measuredHeight;
+
+        if (isOpen) {
+          menuHeight.value = withSpring(measuredHeight, FAB_SPEED_DIAL_MOTION.openSpring);
+        }
+      },
+      [isOpen, menuHeight, menuTargetHeight],
+    );
+
+    const handleChromeLayout = useCallback(
+      (event: LayoutChangeEvent) => {
+        measurePlusBubble();
+        onChromeBoundsChange?.(event);
+      },
+      [measurePlusBubble, onChromeBoundsChange],
+    );
+
+    useEffect(() => {
+      void windowWidth;
+      void windowHeight;
+      void insets.bottom;
+      void isOpen;
+      measurePlusBubble();
+    }, [insets.bottom, isOpen, measurePlusBubble, windowHeight, windowWidth]);
+
+    useEffect(() => {
+      const targetHeight = Math.max(menuTargetHeight.value, estimatedMenuHeight);
+
+      if (isOpen && usesInlineMenu) {
+        menuHeight.value = withSpring(targetHeight, FAB_SPEED_DIAL_MOTION.openSpring);
         return;
       }
-      if (forwardedRef) {
-        forwardedRef.current = node;
-      }
-    },
-    [forwardedRef],
-  );
-  const plusCancelYRef = useRef<number | null>(null);
-  const dimensionsRef = useRef({ width: windowWidth, height: windowHeight });
-  const suppressNextPressRef = useRef(false);
 
-  const {
-    actions,
-    isOpen,
-    isOverflowSheetOpen,
-    highlightedActionId,
-    usesInlineMenu,
-    closeMenu,
-    closeOverflowSheet,
-    openMenu,
-    toggleMenu,
-    registerMenuItemLayout,
-    runAction,
-  } = useFabSpeedDial();
+      menuHeight.value = withTiming(0, { duration: FAB_SPEED_DIAL_MOTION.closeDurationMs });
+    }, [estimatedMenuHeight, isOpen, menuHeight, menuTargetHeight, usesInlineMenu]);
 
-  const menuHeight = useSharedValue(0);
-  const menuTargetHeight = useSharedValue(estimateFabMenuContentHeight(actions.length));
-
-  const estimatedMenuHeight = useMemo(
-    () => estimateFabMenuContentHeight(actions.length),
-    [actions.length],
-  );
-
-  useEffect(() => {
-    menuTargetHeight.value = estimatedMenuHeight;
-  }, [estimatedMenuHeight, menuTargetHeight]);
-
-  const measurePlusBubble = useCallback(() => {
-    plusRef.current?.measureInWindow((_x, y, _width, height) => {
-      plusCancelYRef.current = y + height / 2 + FAB_GESTURE.cancelZoneBelowPx;
-    });
-  }, []);
-
-  const getPlusCancelY = useCallback(() => plusCancelYRef.current, []);
-
-  const plusGesture = useFabPlusGesture({ measurePlusBubble, getPlusCancelY });
-
-  const handleMenuContentLayout = useCallback(
-    (event: LayoutChangeEvent) => {
-      const measuredHeight = event.nativeEvent.layout.height;
-      if (measuredHeight <= 0) {
+    useEffect(() => {
+      const previous = dimensionsRef.current;
+      if (previous.width === windowWidth && previous.height === windowHeight) {
         return;
       }
 
-      menuTargetHeight.value = measuredHeight;
+      dimensionsRef.current = { height: windowHeight, width: windowWidth };
 
       if (isOpen) {
-        menuHeight.value = withSpring(measuredHeight, FAB_SPEED_DIAL_MOTION.openSpring);
+        closeMenu();
       }
-    },
-    [isOpen, menuHeight, menuTargetHeight],
-  );
+    }, [closeMenu, isOpen, windowHeight, windowWidth]);
 
-  const handleChromeLayout = useCallback(
-    (event: LayoutChangeEvent) => {
+    useEffect(() => {
+      if (!isOpen && !isOverflowSheetOpen) {
+        return;
+      }
+
+      const subscription = BackHandler.addEventListener("hardwareBackPress", () => {
+        closeMenu();
+        closeOverflowSheet();
+        return true;
+      });
+
+      return () => {
+        subscription.remove();
+      };
+    }, [closeMenu, closeOverflowSheet, isOpen, isOverflowSheetOpen]);
+
+    const menuColumnAnimatedStyle = useAnimatedStyle(() => ({
+      height: menuHeight.value,
+    }));
+
+    const chromeAnimatedStyle = useAnimatedStyle(() => ({
+      borderRadius: interpolate(
+        menuHeight.value,
+        [0, Math.max(menuTargetHeight.value, 1)],
+        [CHROME_RADIUS_CLOSED, CHROME_RADIUS_OPEN],
+        Extrapolation.CLAMP,
+      ),
+    }));
+
+    const handleItemLayoutMeasured = useCallback(
+      (layout: FabSpeedDialMenuItemLayout) => {
+        registerMenuItemLayout(layout);
+      },
+      [registerMenuItemLayout],
+    );
+
+    const handlePlusPress = () => {
+      if (suppressNextPressRef.current) {
+        suppressNextPressRef.current = false;
+        return;
+      }
+
       measurePlusBubble();
-      onChromeBoundsChange?.(event);
-    },
-    [measurePlusBubble, onChromeBoundsChange],
-  );
-
-  useEffect(() => {
-    measurePlusBubble();
-  }, [measurePlusBubble, windowWidth, windowHeight, insets.bottom, isOpen]);
-
-  useEffect(() => {
-    const targetHeight = Math.max(menuTargetHeight.value, estimatedMenuHeight);
-
-    if (isOpen && usesInlineMenu) {
-      menuHeight.value = withSpring(targetHeight, FAB_SPEED_DIAL_MOTION.openSpring);
-      return;
-    }
-
-    menuHeight.value = withTiming(0, { duration: FAB_SPEED_DIAL_MOTION.closeDurationMs });
-  }, [estimatedMenuHeight, isOpen, menuHeight, menuTargetHeight, usesInlineMenu]);
-
-  useEffect(() => {
-    const previous = dimensionsRef.current;
-    if (previous.width === windowWidth && previous.height === windowHeight) {
-      return;
-    }
-
-    dimensionsRef.current = { width: windowWidth, height: windowHeight };
-
-    if (isOpen) {
-      closeMenu();
-    }
-  }, [closeMenu, isOpen, windowHeight, windowWidth]);
-
-  useEffect(() => {
-    if (!isOpen && !isOverflowSheetOpen) {
-      return;
-    }
-
-    const subscription = BackHandler.addEventListener("hardwareBackPress", () => {
-      closeMenu();
-      closeOverflowSheet();
-      return true;
-    });
-
-    return () => {
-      subscription.remove();
+      toggleMenu();
     };
-  }, [closeMenu, closeOverflowSheet, isOpen, isOverflowSheetOpen]);
 
-  const menuColumnAnimatedStyle = useAnimatedStyle(() => ({
-    height: menuHeight.value,
-  }));
+    const handlePlusLongPress = () => {
+      suppressNextPressRef.current = true;
+      measurePlusBubble();
 
-  const chromeAnimatedStyle = useAnimatedStyle(() => ({
-    borderRadius: interpolate(
-      menuHeight.value,
-      [0, Math.max(menuTargetHeight.value, 1)],
-      [CHROME_RADIUS_CLOSED, CHROME_RADIUS_OPEN],
-      Extrapolation.CLAMP,
-    ),
-  }));
-
-  const handleItemLayoutMeasured = useCallback(
-    (layout: FabSpeedDialMenuItemLayout) => {
-      registerMenuItemLayout(layout);
-    },
-    [registerMenuItemLayout],
-  );
-
-  const handlePlusPress = () => {
-    if (suppressNextPressRef.current) {
-      suppressNextPressRef.current = false;
-      return;
-    }
-
-    measurePlusBubble();
-    toggleMenu();
-  };
-
-  const handlePlusLongPress = () => {
-    suppressNextPressRef.current = true;
-    measurePlusBubble();
-
-    if (!isOpen && usesInlineMenu) {
-      openMenu();
-    }
-  };
-
-  const renderTabBubble = (routeName: RootTabRoute) => {
-    const routeIndex = state.routes.findIndex((route: { name: string }) => route.name === routeName);
-
-    if (routeIndex < 0) {
-      return null;
-    }
-
-    const route = state.routes[routeIndex];
-    const descriptor = descriptors[route.key];
-    const options = descriptor.options;
-    const isFocused = state.index === routeIndex;
-    const defaultLabel =
-      routeName === "contacts"
-        ? t("MobileApp.Navigation.Contacts")
-        : t("MobileApp.Navigation.Settings");
-
-    const icon = options.tabBarIcon
-      ? options.tabBarIcon({
-          focused: isFocused,
-          color: isFocused ? colors.textOnPrimary : colors.iconSecondary,
-          size: 22,
-        })
-      : null;
-
-    const onPress = () => {
-      const shouldNavigate = !isFocused;
-      closeMenu();
-      closeOverflowSheet();
-
-      const event = navigation.emit({
-        type: "tabPress",
-        target: route.key,
-        canPreventDefault: true,
-      });
-
-      if (shouldNavigate && !event.defaultPrevented) {
-        navigation.navigate(route.name, route.params);
+      if (!isOpen && usesInlineMenu) {
+        openMenu();
       }
     };
 
-    const onLongPress = () => {
-      navigation.emit({
-        type: "tabLongPress",
-        target: route.key,
-      });
+    const renderTabBubble = (routeName: RootTabRoute) => {
+      const routeIndex = state.routes.findIndex(
+        (route: { name: string }) => route.name === routeName,
+      );
+
+      if (routeIndex < 0) {
+        return null;
+      }
+
+      const route = state.routes[routeIndex];
+      const descriptor = descriptors[route.key];
+      const options = descriptor.options;
+      const isFocused = state.index === routeIndex;
+      const defaultLabel =
+        routeName === "contacts"
+          ? t("Contacts", { ns: "MobileNavigation" })
+          : t("Settings", { ns: "MobileNavigation" });
+
+      const icon = options.tabBarIcon
+        ? options.tabBarIcon({
+            color: isFocused ? colors.textOnPrimary : colors.iconSecondary,
+            focused: isFocused,
+            size: 22,
+          })
+        : null;
+
+      const onPress = () => {
+        const shouldNavigate = !isFocused;
+        closeMenu();
+        closeOverflowSheet();
+
+        const event = navigation.emit({
+          canPreventDefault: true,
+          target: route.key,
+          type: "tabPress",
+        });
+
+        if (shouldNavigate && !event.defaultPrevented) {
+          navigation.navigate(route.name, route.params);
+        }
+      };
+
+      const onLongPress = () => {
+        navigation.emit({
+          target: route.key,
+          type: "tabLongPress",
+        });
+      };
+
+      return (
+        <Tappable
+          accessibilityLabel={options.tabBarAccessibilityLabel ?? defaultLabel}
+          accessibilityRole="tab"
+          accessibilityState={isFocused ? { selected: true } : {}}
+          key={route.key}
+          onLongPress={onLongPress}
+          onPress={onPress}
+          pressStyle={{ opacity: 0.9, transition: TAMAGUI_TRANSITION.quick }}
+          style={[
+            styles.tabBubble,
+            { backgroundColor: isFocused ? colors.primary : "transparent" },
+          ]}
+          testID={options.tabBarButtonTestID}
+          variant="subtle"
+        >
+          {icon}
+        </Tappable>
+      );
     };
 
     return (
-      <Tappable
-        key={route.key}
-        onPress={onPress}
-        onLongPress={onLongPress}
-        accessibilityRole="tab"
-        accessibilityState={isFocused ? { selected: true } : {}}
-        accessibilityLabel={options.tabBarAccessibilityLabel ?? defaultLabel}
-        testID={options.tabBarButtonTestID}
-        variant="subtle"
-        style={[
-          styles.tabBubble,
-          { backgroundColor: isFocused ? colors.primary : "transparent" },
-        ]}
-        pressStyle={{ opacity: 0.9, transition: TAMAGUI_TRANSITION.quick }}
-      >
-        {icon}
-      </Tappable>
-    );
-  };
-
-  return (
-    <>
-      <View
-        ref={assignChromeMeasureRef}
-        collapsable={false}
-        onLayout={handleChromeLayout}
-        style={styles.chromeMeasureHost}
-      >
-        <Animated.View
+      <>
+        <View
+          collapsable={false}
+          onLayout={handleChromeLayout}
+          ref={assignChromeMeasureRef}
+          style={styles.chromeMeasureHost}
+        >
+          <Animated.View
             style={[
               floatingBarStyles.speedDialChrome,
               chromeAnimatedStyle,
@@ -318,24 +311,24 @@ export const FloatingBubbleTabBar = forwardRef<View, FloatingBubbleTabBarProps>(
           >
             {usesInlineMenu ? (
               <Animated.View
-                style={[floatingBarStyles.speedDialMenuColumn, menuColumnAnimatedStyle]}
                 pointerEvents={isOpen ? "auto" : "none"}
+                style={[floatingBarStyles.speedDialMenuColumn, menuColumnAnimatedStyle]}
               >
                 <View
                   onLayout={handleMenuContentLayout}
                   style={{
-                    paddingBottom: MOBILE_LAYOUT.floatingTabBar.speedDialMenuPadding,
                     gap: MOBILE_LAYOUT.floatingTabBar.speedDialItemGap,
+                    paddingBottom: MOBILE_LAYOUT.floatingTabBar.speedDialMenuPadding,
                   }}
                 >
                   {actions.map((action, index) => (
                     <FabSpeedDialMenuItem
-                      key={action.id}
                       action={action}
                       isHighlighted={highlightedActionId === action.id}
                       isLast={index === actions.length - 1}
-                      onPress={() => runAction(action.id)}
+                      key={action.id}
                       onLayoutMeasured={handleItemLayoutMeasured}
+                      onPress={() => runAction(action.id)}
                     />
                   ))}
                 </View>
@@ -346,24 +339,24 @@ export const FloatingBubbleTabBar = forwardRef<View, FloatingBubbleTabBarProps>(
               {renderTabBubble("contacts")}
 
               <View
+                collapsable={false}
+                onLayout={measurePlusBubble}
                 ref={plusRef}
                 style={styles.plusWrap}
-                onLayout={measurePlusBubble}
-                collapsable={false}
               >
                 <GestureDetector gesture={plusGesture}>
                   <Tappable
-                    onPress={handlePlusPress}
-                    onLongPress={handlePlusLongPress}
-                    delayLongPress={UI_TIMING_MS.fabDragRevealMs}
-                    accessibilityRole="button"
                     accessibilityLabel={
                       isOpen
-                        ? t("MobileApp.Navigation.CloseAddMenu")
-                        : t("MobileApp.Navigation.Add")
+                        ? t("CloseAddMenu", { ns: "MobileNavigation" })
+                        : t("Add", { ns: "MobileNavigation" })
                     }
+                    accessibilityRole="button"
                     accessibilityState={{ expanded: isOpen }}
-                    variant="subtle"
+                    delayLongPress={UI_TIMING_MS.fabDragRevealMs}
+                    onLongPress={handlePlusLongPress}
+                    onPress={handlePlusPress}
+                    pressStyle={{ opacity: 0.9, transition: TAMAGUI_TRANSITION.quick }}
                     style={[
                       styles.plusBubble,
                       {
@@ -371,7 +364,7 @@ export const FloatingBubbleTabBar = forwardRef<View, FloatingBubbleTabBarProps>(
                         borderColor: isOpen ? colors.primary : colors.borderStrong,
                       },
                     ]}
-                    pressStyle={{ opacity: 0.9, transition: TAMAGUI_TRANSITION.quick }}
+                    variant="subtle"
                   >
                     {isOpen ? (
                       <IconX size={22} stroke={colors.textOnPrimary} />
@@ -384,38 +377,38 @@ export const FloatingBubbleTabBar = forwardRef<View, FloatingBubbleTabBarProps>(
 
               {renderTabBubble("settings")}
             </View>
-        </Animated.View>
-      </View>
+          </Animated.View>
+        </View>
 
-      <FabSpeedDialOverflowSheet />
-    </>
-  );
-},
+        <FabSpeedDialOverflowSheet />
+      </>
+    );
+  },
 );
 
 const styles = StyleSheet.create({
   chromeMeasureHost: {
-    width: "100%",
-    maxWidth: 240,
     alignSelf: "center",
-  },
-  tabBubble: {
-    width: MOBILE_LAYOUT.floatingTabBar.tabBubble,
-    height: MOBILE_LAYOUT.floatingTabBar.tabBubble,
-    borderRadius: MOBILE_LAYOUT.floatingTabBar.tabBubble / 2,
-    alignItems: "center",
-    justifyContent: "center",
+    maxWidth: 240,
+    width: "100%",
   },
   plusBubble: {
-    width: MOBILE_LAYOUT.floatingTabBar.plusBubble,
-    height: MOBILE_LAYOUT.floatingTabBar.plusBubble,
-    borderRadius: MOBILE_LAYOUT.floatingTabBar.plusBubble / 2,
     alignItems: "center",
-    justifyContent: "center",
+    borderRadius: MOBILE_LAYOUT.floatingTabBar.plusBubble / 2,
     borderWidth: 1,
+    height: MOBILE_LAYOUT.floatingTabBar.plusBubble,
+    justifyContent: "center",
+    width: MOBILE_LAYOUT.floatingTabBar.plusBubble,
   },
   plusWrap: {
     alignItems: "center",
     justifyContent: "center",
+  },
+  tabBubble: {
+    alignItems: "center",
+    borderRadius: MOBILE_LAYOUT.floatingTabBar.tabBubble / 2,
+    height: MOBILE_LAYOUT.floatingTabBar.tabBubble,
+    justifyContent: "center",
+    width: MOBILE_LAYOUT.floatingTabBar.tabBubble,
   },
 });

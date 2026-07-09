@@ -1,8 +1,5 @@
 import { z } from "zod";
 import { CONTACT_FIELD_MAX_LENGTHS } from "#constants/index.js";
-import { contactAddressReadSchema } from "#entities/address.js";
-import { emailEntryEntitySchema, phoneEntryEntitySchema } from "#entities/channels.js";
-import { importantDateSchema, replaceImportantDatesSchema } from "#entities/important-date.js";
 import { contactIdSchema } from "#contact-id.js";
 import {
   entityAuditSchema,
@@ -13,6 +10,9 @@ import {
   messageResponseSchema,
   nullableDateTimeSchema,
 } from "#entities/_shared.js";
+import { contactAddressReadSchema } from "#entities/address.js";
+import { emailEntryEntitySchema, phoneEntryEntitySchema } from "#entities/channels.js";
+import { importantDateSchema, replaceImportantDatesSchema } from "#entities/important-date.js";
 
 const trimmedNameField = (max: number, label: string) =>
   z
@@ -34,49 +34,53 @@ export const relationshipTypeSchema = z.enum([
   "other",
 ]);
 
-export const contactSchema = entityIdentitySchema.extend({
-  firstName: z.string(),
-  middleName: z.string().nullable(),
-  lastName: z.string().nullable(),
-  headline: z.string().nullable(),
-  location: z.string().nullable(),
-  notes: z.string().nullable(),
-  notesUpdatedAt: nullableDateTimeSchema.optional(),
-  avatar: z.string().nullable(),
-  lastInteraction: nullableDateTimeSchema,
-  lastInteractionActivityId: z.string().nullable(),
-  keepFrequencyDays: z.number().nullable(),
-  phones: z.array(phoneEntryEntitySchema).nullable(),
-  emails: z.array(emailEntryEntitySchema).nullable(),
-  addresses: z.array(contactAddressReadSchema).nullable().optional(),
-  linkedin: z.string().nullable(),
-  instagram: z.string().nullable(),
-  whatsapp: z.string().nullable(),
-  facebook: z.string().nullable(),
-  website: z.string().nullable(),
-  signal: z.string().nullable(),
-  importantDates: z.array(importantDateSchema).nullable().optional(),
-  myself: z.boolean().nullable(),
-  position: z.unknown().nullable().optional(),
-  language: z.string().nullable(),
-  timezone: z.string().nullable(),
-  gisPoint: z.unknown().nullable(),
-  latitude: z.number().nullable(),
-  longitude: z.number().nullable(),
-}).extend(entityAuditSchema.shape);
+export const contactSchema = entityIdentitySchema
+  .extend({
+    addresses: z.array(contactAddressReadSchema).nullable().optional(),
+    avatar: z.string().nullable(),
+    emails: z.array(emailEntryEntitySchema).nullable(),
+    facebook: z.string().nullable(),
+    firstName: z.string(),
+    gisPoint: z.unknown().nullable(),
+    headline: z.string().nullable(),
+    importantDates: z.array(importantDateSchema).nullable().optional(),
+    instagram: z.string().nullable(),
+    keepFrequencyDays: z.number().nullable(),
+    language: z.string().nullable(),
+    lastInteraction: nullableDateTimeSchema,
+    lastInteractionActivityId: z.string().nullable(),
+    lastName: z.string().nullable(),
+    latitude: z.number().nullable(),
+    linkedin: z.string().nullable(),
+    location: z.string().nullable(),
+    longitude: z.number().nullable(),
+    middleName: z.string().nullable(),
+    myself: z.boolean().nullable(),
+    notes: z.string().nullable(),
+    notesUpdatedAt: nullableDateTimeSchema.optional(),
+    phones: z.array(phoneEntryEntitySchema).nullable(),
+    position: z.unknown().nullable().optional(),
+    signal: z.string().nullable(),
+    timezone: z.string().nullable(),
+    website: z.string().nullable(),
+    whatsapp: z.string().nullable(),
+  })
+  .extend(entityAuditSchema.shape);
 
 export const contactPreviewSchema = contactSchema.pick({
-  id: true,
-  firstName: true,
-  lastName: true,
   avatar: true,
+  firstName: true,
+  id: true,
+  lastName: true,
 });
 
-export const contactRelationshipSchema = entityIdentitySchema.extend({
-  sourcePersonId: z.string(),
-  targetPersonId: z.string(),
-  relationshipType: relationshipTypeSchema,
-}).extend(entityAuditSchema.shape);
+export const contactRelationshipSchema = entityIdentitySchema
+  .extend({
+    relationshipType: relationshipTypeSchema,
+    sourcePersonId: z.string(),
+    targetPersonId: z.string(),
+  })
+  .extend(entityAuditSchema.shape);
 
 export const contactRelationshipWithPeopleSchema = contactRelationshipSchema.extend({
   sourcePerson: contactPreviewSchema,
@@ -85,9 +89,9 @@ export const contactRelationshipWithPeopleSchema = contactRelationshipSchema.ext
 
 export const createContactApiInputSchema = z.object({
   firstName: z.string().trim().min(1, { error: "First name is required" }),
-  middleName: z.string().optional(),
   lastName: z.string().optional(),
   linkedin: z.string().optional(),
+  middleName: z.string().optional(),
 });
 
 /** POST /api/contacts body (optional client-supplied id). */
@@ -101,21 +105,30 @@ export const updateContactIdentitySchema = z
     firstName: trimmedNameField(CONTACT_FIELD_MAX_LENGTHS.firstName, "First name").min(1, {
       error: "First name is required",
     }),
-    middleName: z.string().trim().max(CONTACT_FIELD_MAX_LENGTHS.middleName, {
-      error: `Middle name must be at most ${CONTACT_FIELD_MAX_LENGTHS.middleName} characters`,
-    }),
-    lastName: z.string().trim().max(CONTACT_FIELD_MAX_LENGTHS.lastName, {
-      error: `Last name must be at most ${CONTACT_FIELD_MAX_LENGTHS.lastName} characters`,
-    }),
-    headline: z.string().trim().max(CONTACT_FIELD_MAX_LENGTHS.headline, {
-      error: `Headline must be at most ${CONTACT_FIELD_MAX_LENGTHS.headline} characters`,
-    }),
+    headline: z
+      .string()
+      .trim()
+      .max(CONTACT_FIELD_MAX_LENGTHS.headline, {
+        error: `Headline must be at most ${CONTACT_FIELD_MAX_LENGTHS.headline} characters`,
+      }),
+    lastName: z
+      .string()
+      .trim()
+      .max(CONTACT_FIELD_MAX_LENGTHS.lastName, {
+        error: `Last name must be at most ${CONTACT_FIELD_MAX_LENGTHS.lastName} characters`,
+      }),
+    middleName: z
+      .string()
+      .trim()
+      .max(CONTACT_FIELD_MAX_LENGTHS.middleName, {
+        error: `Middle name must be at most ${CONTACT_FIELD_MAX_LENGTHS.middleName} characters`,
+      }),
   })
   .transform(({ firstName, middleName, lastName, headline }) => ({
     firstName,
-    middleName: middleName || null,
-    lastName: lastName || null,
     headline: headline || null,
+    lastName: lastName || null,
+    middleName: middleName || null,
   }));
 
 /** POST /api/contacts — minimal create from mobile FAB sheet. */
@@ -129,86 +142,82 @@ export const createContactInputSchema = z.object({
     }),
 });
 
-export const updateContactInputSchema = contactSchema.partial().omit({
-  id: true,
-  createdAt: true,
-  importantDates: true,
-}).extend({
-  importantDates: replaceImportantDatesSchema.nullable().optional(),
-});
-
-export const contactResponseSchema = z
-  .object({
-    contact: contactSchema,
+export const updateContactInputSchema = contactSchema
+  .partial()
+  .omit({
+    createdAt: true,
+    id: true,
+    importantDates: true,
   })
-  ;
-
-export const createContactResponseSchema = contactResponseSchema
   .extend({
-    txid: z.string().optional(),
-  })
-  ;
+    importantDates: replaceImportantDatesSchema.nullable().optional(),
+  });
 
-const mapPinSchema = z.object({
-  id: z.string(),
-  firstName: z.string(),
-  lastName: z.string().nullable(),
-  headline: z.string().nullable(),
-  location: z.string().nullable(),
-  lastInteraction: nullableDateTimeSchema,
-  latitude: z.number(),
-  longitude: z.number(),
-  avatar: z.string().nullable(),
+export const contactResponseSchema = z.object({
+  contact: contactSchema,
 });
 
-export const mapPinsResponseSchema = z
-  .object({
-    pins: z.array(mapPinSchema),
-  })
-  ;
+export const createContactResponseSchema = contactResponseSchema.extend({
+  txid: z.string().optional(),
+});
 
-const mapAddressPinSchema = z.object({
-  addressId: z.string(),
-  personId: z.string(),
+export const mapPinSchema = z.object({
+  avatar: z.string().nullable(),
   firstName: z.string(),
+  headline: z.string().nullable(),
+  id: z.string(),
+  lastInteraction: nullableDateTimeSchema,
   lastName: z.string().nullable(),
-  addressType: z.string(),
-  addressFormatted: z.string().nullable(),
+  latitude: z.number(),
+  location: z.string().nullable(),
+  longitude: z.number(),
+});
+
+export type MapPin = z.infer<typeof mapPinSchema>;
+
+export const mapPinsResponseSchema = z.object({
+  pins: z.array(mapPinSchema),
+});
+
+export const mapAddressPinSchema = z.object({
   addressCity: z.string().nullable(),
   addressCountry: z.string().nullable(),
+  addressFormatted: z.string().nullable(),
+  addressId: z.string(),
+  addressType: z.enum(["home", "work", "other"]),
+  avatar: z.string().nullable(),
+  firstName: z.string(),
+  lastName: z.string().nullable(),
   latitude: z.number(),
   longitude: z.number(),
-  avatar: z.string().nullable(),
+  personId: z.string(),
 });
 
-export const mapAddressPinsResponseSchema = z
-  .object({
-    pins: z.array(mapAddressPinSchema),
-  })
-  ;
+export type AddressPin = z.infer<typeof mapAddressPinSchema>;
+
+export const mapAddressPinsResponseSchema = z.object({
+  pins: z.array(mapAddressPinSchema),
+});
 
 export const contactsListStatsSchema = z.object({
-  totalContacts: z.number(),
-  thisMonthInteractions: z.number(),
   newContactsThisYear: z.number(),
+  thisMonthInteractions: z.number(),
+  totalContacts: z.number(),
 });
 
 export const contactsListResponseSchema = makePaginatedListResponseSchema(
   "contacts",
   contactSchema,
-)
-  .extend({
-    stats: contactsListStatsSchema,
-  })
-  ;
+).extend({
+  stats: contactsListStatsSchema,
+});
 
 export const createContactRelationshipInputSchema = z.object({
   relatedPersonId: contactIdSchema,
   relationshipType: relationshipTypeSchema,
 });
 
-export const updateContactRelationshipInputSchema = createContactRelationshipInputSchema
-  ;
+export const updateContactRelationshipInputSchema = createContactRelationshipInputSchema;
 
 export const contactRelationshipsResponseSchema = makeCollectionResponseSchema(
   "relationships",
@@ -234,136 +243,116 @@ export const contactsFilterSchema = z.object({
 export const deleteContactsRequestSchema = z.union([
   idsRequestSchema,
   z.object({
-    filter: contactsFilterSchema,
     excludeIds: z.array(contactIdSchema).optional(),
+    filter: contactsFilterSchema,
   }),
 ]);
 
-export const deleteContactsResponseSchema = messageResponseSchema
-  .extend({
-    deletedCount: z.number().int().optional(),
-  })
-  ;
+export const deleteContactsResponseSchema = messageResponseSchema.extend({
+  deletedCount: z.number().int().optional(),
+});
 
-export const bySocialLookupResponseSchema = z
-  .object({
-    exists: z.boolean(),
-    contact: contactPreviewSchema.optional(),
-  })
-  ;
+export const bySocialLookupResponseSchema = z.object({
+  contact: contactPreviewSchema.optional(),
+  exists: z.boolean(),
+});
 
 export const deleteContactResponseSchema = messageResponseSchema;
 
-const linkedInHistoryFieldsSchema = z.object({
-  peopleLinkedinId: z.string(),
-}).extend(entityAuditSchema.shape);
+const linkedInHistoryFieldsSchema = z
+  .object({
+    peopleLinkedinId: z.string(),
+  })
+  .extend(entityAuditSchema.shape);
 
 export const workHistoryEntrySchema = entityIdentitySchema.extend({
   ...linkedInHistoryFieldsSchema.shape,
-  companyName: z.string(),
   companyLinkedinUrl: z.string().nullable(),
   companyLogoUrl: z.string().nullable(),
-  title: z.string().nullable(),
+  companyName: z.string(),
   description: z.string().nullable(),
-  startDate: z.string().nullable(),
-  endDate: z.string().nullable(),
   employmentType: z.string().nullable(),
+  endDate: z.string().nullable(),
   location: z.string().nullable(),
+  startDate: z.string().nullable(),
+  title: z.string().nullable(),
 });
 
 export const educationEntrySchema = entityIdentitySchema.extend({
   ...linkedInHistoryFieldsSchema.shape,
-  schoolName: z.string(),
-  schoolLinkedinUrl: z.string().nullable(),
-  schoolLogoUrl: z.string().nullable(),
   degree: z.string().nullable(),
   description: z.string().nullable(),
-  startDate: z.string().nullable(),
   endDate: z.string().nullable(),
+  schoolLinkedinUrl: z.string().nullable(),
+  schoolLogoUrl: z.string().nullable(),
+  schoolName: z.string(),
+  startDate: z.string().nullable(),
 });
 
-export const linkedInDataResponseSchema = z
-  .object({
-    linkedinBio: z.string().nullable(),
-    syncedAt: nullableDateTimeSchema,
-    workHistory: z.array(workHistoryEntrySchema),
-    education: z.array(educationEntrySchema),
+export const linkedInDataResponseSchema = z.object({
+  education: z.array(educationEntrySchema),
+  linkedinBio: z.string().nullable(),
+  syncedAt: nullableDateTimeSchema,
+  workHistory: z.array(workHistoryEntrySchema),
+});
+
+export const enrichQueueStatusSchema = z.enum(["pending", "processing", "completed", "failed"]);
+
+export const enrichQueueItemSchema = entityIdentitySchema
+  .extend({
+    errorMessage: z.string().nullable(),
+    linkedinHandle: z.string().optional(),
+    personId: z.string(),
+    status: enrichQueueStatusSchema,
   })
-  ;
+  .extend(entityAuditSchema.shape);
 
-export const enrichQueueStatusSchema = z.enum([
-  "pending",
-  "processing",
-  "completed",
-  "failed",
-]);
+export const enrichEligibleCountResponseSchema = z.object({
+  count: z.number(),
+});
 
-export const enrichQueueItemSchema = entityIdentitySchema.extend({
-  personId: z.string(),
-  status: enrichQueueStatusSchema,
-  errorMessage: z.string().nullable(),
-  linkedinHandle: z.string().optional(),
-}).extend(entityAuditSchema.shape);
+export const enrichQueueStatusCountsSchema = z.object({
+  completed: z.number(),
+  failed: z.number(),
+  pending: z.number(),
+});
 
-export const enrichEligibleCountResponseSchema = z
-  .object({
-    count: z.number(),
-  })
-  ;
-
-export const enrichQueueStatusCountsSchema = z
-  .object({
-    pending: z.number(),
-    completed: z.number(),
-    failed: z.number(),
-  })
-  ;
-
-export const enrichQueueInitResponseSchema = z
-  .object({
-    totalEligible: z.number(),
-  })
-  ;
+export const enrichQueueInitResponseSchema = z.object({
+  totalEligible: z.number(),
+});
 
 export const enrichQueueNextBatchItemSchema = z.object({
-  queueItemId: z.string(),
-  personId: z.string(),
-  linkedinHandle: z.string().nullable(),
   firstName: z.string().nullable(),
   lastName: z.string().nullable(),
+  linkedinHandle: z.string().nullable(),
+  personId: z.string(),
+  queueItemId: z.string(),
 });
 
-export const enrichQueueNextBatchResponseSchema = z
-  .object({
-    items: z.array(enrichQueueNextBatchItemSchema),
-  })
-  ;
+export const enrichQueueNextBatchResponseSchema = z.object({
+  items: z.array(enrichQueueNextBatchItemSchema),
+});
 
-export const linkedInDataUpsertResponseSchema = z
-  .object({
-    success: z.boolean(),
-    count: z.number(),
-  })
-  ;
+export const linkedInDataUpsertResponseSchema = z.object({
+  count: z.number(),
+  success: z.boolean(),
+});
 
-export const contactRelationshipResponseSchema = z
-  .object({
-    relationship: contactRelationshipSchema,
-  })
-  ;
+export const contactRelationshipResponseSchema = z.object({
+  relationship: contactRelationshipSchema,
+});
 
 /** POST /api/contacts/enrich-queue/init optional body. */
 export const enrichQueueInitBodySchema = z
   .object({
     personId: z.string().optional(),
   })
-  .optional()
-  ;
+  .optional();
 
 /** PATCH /api/contacts/enrich-queue/:id body. */
 export const enrichQueuePatchBodySchema = z.object({
-  status: z.enum(["completed", "failed"]),
   errorMessage: z.string().nullable().optional(),
+  status: z.enum(["completed", "failed"]),
 });
 
 export const shareableFieldSchema = z.enum([

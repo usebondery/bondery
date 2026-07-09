@@ -1,5 +1,5 @@
-import { memo, useCallback } from "react";
 import type { Contact } from "@bondery/schemas";
+import { memo, useCallback } from "react";
 import type { SwipeAction } from "../../../lib/preferences/useMobilePreferences";
 import {
   useContactIsSelected,
@@ -13,15 +13,15 @@ interface ContactListItemProps {
   isMyselfRow: boolean;
   isSwipeEnabled?: boolean;
   leftSwipeAction: SwipeAction;
+  onExecuteAction: (contact: Contact, action: SwipeAction) => void;
+  onOpenContact: (contactId: string) => void;
+  onOpenMyself: () => void;
   rightSwipeAction: SwipeAction;
   texts: {
     call: string;
     message: string;
     email: string;
   };
-  onExecuteAction: (contact: Contact, action: SwipeAction) => void;
-  onOpenContact: (contactId: string) => void;
-  onOpenMyself: () => void;
 }
 
 function ContactListItemComponent({
@@ -55,17 +55,17 @@ function ContactListItemComponent({
   return (
     <ContactRow
       contact={contact}
-      selected={selected}
-      selectionMode={selectionMode}
       isDisabled={isMyselfRow}
       isSwipeEnabled={isSwipeEnabled && !isMyselfRow}
       leftSwipeAction={leftSwipeAction}
-      rightSwipeAction={rightSwipeAction}
-      texts={texts}
-      onToggleSelect={toggleContact}
       onEnterSelection={enterSelectionSession}
       onExecuteAction={onExecuteAction}
       onPress={handlePress}
+      onToggleSelect={toggleContact}
+      rightSwipeAction={rightSwipeAction}
+      selected={selected}
+      selectionMode={selectionMode}
+      texts={texts}
     />
   );
 }

@@ -7,17 +7,16 @@ const nextConfig: NextConfig = {
   async headers() {
     return [
       {
-        // Prevent browsers from caching a stale service worker script
-        source: "/sw.js",
         headers: [
           {
             key: "Cache-Control",
             value: "no-cache, no-store, must-revalidate",
           },
         ],
+        // Prevent browsers from caching a stale service worker script
+        source: "/sw.js",
       },
       {
-        source: "/:path*",
         headers: [
           {
             key: "Strict-Transport-Security",
@@ -32,6 +31,7 @@ const nextConfig: NextConfig = {
             value: "same-origin",
           },
         ],
+        source: "/:path*",
       },
     ];
   },

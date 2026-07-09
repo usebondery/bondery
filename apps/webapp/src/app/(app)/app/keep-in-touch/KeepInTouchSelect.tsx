@@ -2,25 +2,25 @@
 
 import { Select, Stack, Text } from "@mantine/core";
 import { IconHeartHandshake } from "@tabler/icons-react";
-import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
 import { useCurrentLocale as useLocale } from "@/app/(app)/app/components/UserLocaleProvider";
-import { KEEP_IN_TOUCH_PRESETS } from "./keepInTouchConfig";
+import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
+import { KEEP_IN_TOUCH_PRESETS } from "./utils/keepInTouchConfig";
 
 interface KeepInTouchSelectProps {
-  /** Current value: frequency days as string (e.g. "7") or "none" */
-  value: string | null;
-  onChange: (value: string | null) => void;
-  disabled?: boolean;
+  ariaLabel?: string;
   /**
    * When true, renders a compact xs select with no label or icon.
    * Use in dense list contexts such as the Keep-in-touch page rows.
    */
   compact?: boolean;
+  disabled?: boolean;
   /**
    * When provided (full mode only), shows a "Next due: {date}" hint below the select.
    */
   nextDueDate?: Date | null;
-  ariaLabel?: string;
+  onChange: (value: string | null) => void;
+  /** Current value: frequency days as string (e.g. "7") or "none" */
+  value: string | null;
 }
 
 /**
@@ -37,33 +37,35 @@ export function KeepInTouchSelect({
   nextDueDate,
   ariaLabel,
 }: KeepInTouchSelectProps) {
-  const t = useTranslations("KeepInTouch");
+  const t = useWebTranslations("KeepInTouch");
   const locale = useLocale();
 
   const data = [
     ...KEEP_IN_TOUCH_PRESETS.map((p) => ({
-      value: p.value,
       label: t(p.labelKey as Parameters<typeof t>[0]),
+      value: p.value,
     })),
-    { value: "none", label: t("FrequencyNone") },
+    { label: t("FrequencyNone"), value: "none" },
   ];
 
   const select = (
     <Select
+      allowDeselect={false}
+      aria-label={ariaLabel}
+      data={data}
+      disabled={disabled}
       label={compact ? undefined : t("Label")}
       leftSection={<IconHeartHandshake size={compact ? 14 : 16} />}
-      size={compact ? "xs" : undefined}
-      w={compact ? 150 : undefined}
-      allowDeselect={false}
-      value={value ?? "none"}
-      data={data}
       onChange={onChange}
-      disabled={disabled}
-      aria-label={ariaLabel}
+      size={compact ? "xs" : undefined}
+      value={value ?? "none"}
+      w={compact ? 150 : undefined}
     />
   );
 
-  if (compact) return select;
+  if (compact) {
+    return select;
+  }
 
   const formattedNextDue = nextDueDate
     ? new Intl.DateTimeFormat(locale || "en-US", { dateStyle: "short" }).format(nextDueDate)
@@ -73,7 +75,7 @@ export function KeepInTouchSelect({
     <Stack gap={4}>
       {select}
       {formattedNextDue && (
-        <Text size="xs" c="dimmed">
+        <Text c="dimmed" size="xs">
           {t("NextDue")}: {formattedNextDue}
         </Text>
       )}

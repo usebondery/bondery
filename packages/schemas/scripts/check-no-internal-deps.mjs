@@ -1,7 +1,7 @@
 /**
  * Ensures @bondery/schemas does not depend on other @bondery/* packages.
  */
-import { readFileSync, readdirSync, statSync } from "node:fs";
+import { readdirSync, readFileSync, statSync } from "node:fs";
 import { dirname, join, relative } from "node:path";
 import { fileURLToPath } from "node:url";
 

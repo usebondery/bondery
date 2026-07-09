@@ -8,8 +8,8 @@ import { PageHeaderSkeleton } from "@/app/(app)/app/components/PageHeaderSkeleto
 function SuggestedPromptsSkeleton() {
   return (
     <Group gap="sm" justify="center" wrap="wrap">
-      {[160, 140, 180, 150, 170, 145].map((w, i) => (
-        <Skeleton key={i} height={36} width={w} radius="xl" />
+      {[160, 140, 180, 150, 170, 145].map((w) => (
+        <Skeleton height={36} key={w} radius="xl" width={w} />
       ))}
     </Group>
   );
@@ -33,30 +33,20 @@ export function ChatPageSkeleton() {
       <PageHeaderSkeleton />
 
       {/* Empty chat area: centered logo + suggested prompts */}
-      <Stack
-        gap="xl"
-        align="center"
-        justify="center"
-        style={{ flex: 1, paddingBottom: 80 }}
-      >
-        <Skeleton height={48} width={48} radius="xl" />
-        <Stack gap="xs" align="center">
-          <Skeleton height={24} width={220} radius="sm" />
-          <Skeleton height={16} width={300} radius="sm" />
+      <Stack align="center" gap="xl" justify="center" style={{ flex: 1, paddingBottom: 80 }}>
+        <Skeleton height={48} radius="xl" width={48} />
+        <Stack align="center" gap="xs">
+          <Skeleton height={24} radius="sm" width={220} />
+          <Skeleton height={16} radius="sm" width={300} />
         </Stack>
         <SuggestedPromptsSkeleton />
       </Stack>
 
       {/* Input bar pinned to bottom */}
-      <Paper
-        withBorder
-        radius="md"
-        p="sm"
-        style={{ position: "sticky", bottom: 16 }}
-      >
+      <Paper p="sm" radius="md" style={{ bottom: 16, position: "sticky" }} withBorder>
         <Group gap="sm">
           <Skeleton height={40} radius="sm" style={{ flex: 1 }} />
-          <Skeleton height={40} width={40} radius="sm" />
+          <Skeleton height={40} radius="sm" width={40} />
         </Group>
       </Paper>
     </Box>

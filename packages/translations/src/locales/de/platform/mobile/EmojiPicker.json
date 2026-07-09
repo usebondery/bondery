@@ -1,0 +1,21 @@
+{
+  "Category": {
+    "Activities": "Aktivitäten",
+    "Animals": "Tiere",
+    "Buildings": "Gebäude",
+    "Celebrations": "Feiern",
+    "Food": "Essen",
+    "Hearts": "Herzen",
+    "Humans": "Menschen",
+    "Miscellaneous": "Verschiedenes",
+    "Nature": "Natur",
+    "Objects": "Objekte",
+    "Sports": "Sport",
+    "Travel": "Reisen",
+    "Work": "Arbeit"
+  },
+  "EmptySearch": "Keine Emojis gefunden",
+  "RandomAccessibilityLabel": "Zufälliges Emoji wählen",
+  "SearchPlaceholder": "Emojis suchen…",
+  "TriggerAccessibilityHint": "Öffnet die Emoji-Auswahl"
+}

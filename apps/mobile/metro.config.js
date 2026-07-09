@@ -1,6 +1,6 @@
-const fs = require("fs");
+const fs = require("node:fs");
 const { getDefaultConfig } = require("expo/metro-config");
-const path = require("path");
+const path = require("node:path");
 
 // Patch fs.promises.readFile to retry on EMFILE / ENFILE.
 //
@@ -34,9 +34,7 @@ const workspacePackagesRoot = path.resolve(workspaceRoot, "packages");
 // Watching unrelated packages (emails, branding, mantine-next, vcard, …) adds
 // unnecessary files to Metro's crawl surface and slows down the initial file map
 // build and HMR watching.
-const mobilePkg = JSON.parse(
-  fs.readFileSync(path.resolve(projectRoot, "package.json"), "utf8"),
-);
+const mobilePkg = JSON.parse(fs.readFileSync(path.resolve(projectRoot, "package.json"), "utf8"));
 const mobileDeps = new Set([
   ...Object.keys(mobilePkg.dependencies ?? {}),
   ...Object.keys(mobilePkg.devDependencies ?? {}),
@@ -48,9 +46,11 @@ const workspacePackageFolders = fs
   .map((entry) => {
     const folderPath = path.resolve(workspacePackagesRoot, entry.name);
     const pkgJsonPath = path.resolve(folderPath, "package.json");
-    if (!fs.existsSync(pkgJsonPath)) return null;
+    if (!fs.existsSync(pkgJsonPath)) {
+      return null;
+    }
     const name = JSON.parse(fs.readFileSync(pkgJsonPath, "utf8")).name;
-    return { name, folderPath };
+    return { folderPath, name };
   })
   .filter((entry) => entry !== null && mobileDeps.has(entry.name))
   .map((entry) => entry.folderPath);
@@ -74,7 +74,7 @@ if (metroMaxWorkers) {
 function toBlockPattern(dir) {
   // blockList entries must be RegExps. Escape path separators and regex
   // metacharacters (critical on Windows) and match everything under `dir`.
-  return new RegExp(dir.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + ".*");
+  return new RegExp(`${dir.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}.*`);
 }
 
 const blockListPatterns = [
@@ -148,7 +148,7 @@ function resolveWorkspacePackage(moduleName) {
     const subpath = moduleName === name ? "index" : moduleName.slice(name.length + 1);
     const filePath = resolveWorkspaceSourceFile(root, subpath);
     if (filePath) {
-      return { type: "sourceFile", filePath };
+      return { filePath, type: "sourceFile" };
     }
   }
   return null;
@@ -167,7 +167,7 @@ function resolveWorkspaceHashImport(originModulePath, moduleName) {
     }
     const filePath = resolveWorkspaceSourceFile(root, specifier);
     if (filePath) {
-      return { type: "sourceFile", filePath };
+      return { filePath, type: "sourceFile" };
     }
   }
   return null;
@@ -179,10 +179,7 @@ config.resolver.resolveRequest = (context, moduleName, platform) => {
   // Only override if the import is coming from *outside* the local node_modules,
   // e.g. from root workspace packages or shared packages. This avoids infinite
   // recursion when React packages require each other internally.
-  if (
-    DEDUPLICATED.includes(base) &&
-    !context.originModulePath.startsWith(localNodeModules)
-  ) {
+  if (DEDUPLICATED.includes(base) && !context.originModulePath.startsWith(localNodeModules)) {
     return context.resolveRequest(
       {
         ...context,

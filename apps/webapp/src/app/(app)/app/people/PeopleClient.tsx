@@ -1,46 +1,43 @@
 "use client";
 
+import { formatContactName } from "@bondery/helpers/contact";
+import { errorNotificationTemplate, successNotificationTemplate } from "@bondery/mantine-next";
 import { Paper } from "@mantine/core";
+import { useDebouncedCallback } from "@mantine/hooks";
+import { notifications } from "@mantine/notifications";
 import {
   IconBrandLinkedin,
+  IconBriefcase,
+  IconClock,
   IconId,
+  IconMapPin,
   IconShare,
   IconUser,
-  IconBriefcase,
-  IconMapPin,
-  IconClock,
   IconUserCircle,
 } from "@tabler/icons-react";
-import { notifications } from "@mantine/notifications";
-import { useEffect, useState, useRef, useTransition, useMemo } from "react";
-import { useRouter, usePathname, useSearchParams } from "next/navigation";
-import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
-import { useDebouncedCallback } from "@mantine/hooks";
-import { DEBOUNCE_MS } from "@/lib/config";
+import { useQueryClient } from "@tanstack/react-query";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import ContactsTable, {
-  ColumnConfig,
+  type ColumnConfig,
   type SortOrder,
 } from "@/app/(app)/app/components/contacts/ContactsTableV2";
-import { downloadContactVcard } from "@/lib/api/domains/contacts";
-import { openAddContactModal } from "./components/AddContactModal";
-import { errorNotificationTemplate, successNotificationTemplate } from "@bondery/mantine-next";
-import { formatContactName } from "@/lib/nameHelpers";
 import { openDeleteContactModal } from "@/app/(app)/app/components/contacts/openDeleteContactModal";
 import { openDeleteContactsModal } from "@/app/(app)/app/components/contacts/openDeleteContactsModal";
+import { useBatchEnrichFromLinkedIn } from "@/components/extension/useBatchEnrichFromLinkedIn";
+import { useResponsiveColumns } from "@/hooks/useResponsiveColumns";
+import { downloadContactVcard } from "@/lib/api/domains/contacts";
+import { searchContacts } from "@/lib/contacts/searchContacts";
+import { setClientCookie } from "@/lib/cookies/client";
+import { COLUMN_VISIBILITY_COOKIE } from "@/lib/cookies/constants";
 import { useContactsTableCopy } from "@/lib/i18n/useContactsTableCopy";
+import { useCommonTranslations, useWebTranslations } from "@/lib/i18n/useWebTranslations";
+import { DEBOUNCE_MS } from "@/lib/platform/config";
+import { parseContactsListParams } from "@/lib/query/contactsListParams";
+import { useContactsInfiniteQuery } from "@/lib/query/hooks/useContacts";
 import { openAddPeopleToGroupSelectionModal } from "./components/AddPeopleToGroupSelectionModal";
 import { openMergeWithModal } from "./components/MergeWithModal";
 import { openShareContactModal } from "./components/ShareContactModal";
-import { useBatchEnrichFromLinkedIn } from "@/lib/extension/useBatchEnrichFromLinkedIn";
-
-import type { Contact } from "@bondery/schemas";
-import { useContactsInfiniteQuery } from "@/lib/query/hooks/useContacts";
-import { parseContactsListParams } from "@/lib/query/fetchers/contactsListParams";
-import { useQueryClient } from "@tanstack/react-query";
-import { searchContacts } from "@/lib/searchContacts";
-import { useResponsiveColumns } from "@/hooks/useResponsiveColumns";
-
-const COLUMN_VISIBILITY_COOKIE = "bondery_contacts_columns";
 
 const DEFAULT_COLUMN_KEYS = ["name", "headline", "location", "lastInteraction", "social"] as const;
 
@@ -54,28 +51,31 @@ function applyColumnVisibility(
   labels: Record<string, string>,
 ): Omit<ColumnConfig, "icon">[] {
   const defaults: Omit<ColumnConfig, "icon">[] = DEFAULT_COLUMN_KEYS.map((key) => ({
+    fixed: key === "name",
     key,
     label: labels[key] ?? key,
     visible: true,
-    fixed: key === "name",
   }));
-  if (!saved) return defaults;
+  if (!saved) {
+    return defaults;
+  }
   const savedMap = new Map(saved.map((e) => [e.key, e.visible]));
-  return defaults.map((col) =>
-    savedMap.has(col.key) ? { ...col, visible: savedMap.get(col.key)! } : col,
-  );
+  return defaults.map((col) => {
+    const visible = savedMap.get(col.key);
+    return visible === undefined ? col : { ...col, visible };
+  });
 }
 
 /**
  * Writes column visibility to a cookie so it can be read server-side on the
  * next request, preventing a layout shift from client-only state rehydration.
  */
-function saveColumnsToCookie(columns: ColumnConfig[]): void {
+async function saveColumnsToCookie(columns: ColumnConfig[]): Promise<void> {
   try {
     const value = encodeURIComponent(
       JSON.stringify(columns.map(({ key, visible }) => ({ key, visible }))),
     );
-    document.cookie = `${COLUMN_VISIBILITY_COOKIE}=${value}; path=/; max-age=31536000; SameSite=Lax`;
+    await setClientCookie(COLUMN_VISIBILITY_COOKIE, value);
   } catch {
     // Cookie writes can fail in restrictive environments — fail silently
   }
@@ -87,16 +87,16 @@ interface PeopleClientProps {
 }
 
 export function PeopleClient({ savedColumnVisibility }: PeopleClientProps) {
-  const queryClient = useQueryClient();
+  const _queryClient = useQueryClient();
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const t = useTranslations("PeoplePage");
-  const tCommon = useTranslations("WebAppCommon");
+  const t = useWebTranslations("PeoplePage");
+  const tCommon = useCommonTranslations();
   const { columnDefinitions } = useContactsTableCopy();
-  const tShare = useTranslations("ShareContactModal");
-  const tEnrich = useTranslations("EnrichFromLinkedIn");
-  const tActions = useTranslations("ContactActionMenu");
+  const tShare = useWebTranslations("ShareContactModal");
+  const tEnrich = useWebTranslations("EnrichFromLinkedIn");
+  const tActions = useWebTranslations("ContactActionMenu");
   const { startForPerson } = useBatchEnrichFromLinkedIn();
   const listFilter = parseContactsListParams({
     search: searchParams.get("search") ?? undefined,
@@ -104,15 +104,8 @@ export function PeopleClient({ savedColumnVisibility }: PeopleClientProps) {
   });
   const searchDefaultValue = listFilter.search ?? "";
 
-  const {
-    data,
-    fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage,
-    isFetching,
-    isError,
-    refetch,
-  } = useContactsInfiniteQuery(listFilter);
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isFetching, isError, refetch } =
+    useContactsInfiniteQuery(listFilter);
 
   const contacts = data?.pages.flatMap((page) => page.contacts) ?? [];
   const totalAvailableCount = data?.pages[0]?.pagination.totalCount ?? 0;
@@ -125,20 +118,17 @@ export function PeopleClient({ savedColumnVisibility }: PeopleClientProps) {
   const paperRef = useRef<HTMLDivElement>(null);
 
   const columnLabels = useMemo(
-    () =>
-      Object.fromEntries(
-        DEFAULT_COLUMN_KEYS.map((key) => [key, columnDefinitions[key].label]),
-      ),
+    () => Object.fromEntries(DEFAULT_COLUMN_KEYS.map((key) => [key, columnDefinitions[key].label])),
     [columnDefinitions],
   );
 
   // Icons are stable references — defined inline so they can be merged with
   // server-resolved prefs (the cookie carries only key + visible, not JSX).
   const columnIcons: Record<string, React.ReactNode> = {
-    name: <IconUser size={16} />,
     headline: <IconBriefcase size={16} />,
-    location: <IconMapPin size={16} />,
     lastInteraction: <IconClock size={16} />,
+    location: <IconMapPin size={16} />,
+    name: <IconUser size={16} />,
     social: <IconUserCircle size={16} />,
   };
 
@@ -173,7 +163,7 @@ export function PeopleClient({ savedColumnVisibility }: PeopleClientProps) {
       onColumnsChange(nextColumns);
       // Write to cookie so the server can render the correct columns on the next
       // request, eliminating layout shift from client-only rehydration.
-      saveColumnsToCookie(nextColumns);
+      void saveColumnsToCookie(nextColumns);
       return nextColumns;
     });
   };
@@ -183,7 +173,7 @@ export function PeopleClient({ savedColumnVisibility }: PeopleClientProps) {
     setIsAllTotalSelected(false);
     setExcludedIds(new Set());
     setLastSelectedIndex(null);
-  }, [listFilter.search, listFilter.sort]);
+  }, []);
 
   // Handle search: debounce the URL update so the server is only re-fetched
   // after the user pauses, while DataTable keeps the input responsive locally.
@@ -230,11 +220,11 @@ export function PeopleClient({ savedColumnVisibility }: PeopleClientProps) {
   const openMergeModal = (leftPersonId: string, rightPersonId?: string, lockBoth?: boolean) => {
     openMergeWithModal({
       contacts,
-      leftPersonId,
-      rightPersonId,
       disableLeftPicker: true,
       disableRightPicker: Boolean(lockBoth),
+      leftPersonId,
       onSearch: searchContacts,
+      rightPersonId,
     });
   };
 
@@ -269,7 +259,9 @@ export function PeopleClient({ savedColumnVisibility }: PeopleClientProps) {
       } else {
         setExcludedIds(newExcluded);
       }
-      if (currentIndex >= 0) setLastSelectedIndex(currentIndex);
+      if (currentIndex >= 0) {
+        setLastSelectedIndex(currentIndex);
+      }
       return;
     }
 
@@ -282,9 +274,13 @@ export function PeopleClient({ savedColumnVisibility }: PeopleClientProps) {
       const newSelected = new Set(selectedIds);
 
       if (shouldSelect) {
-        rangeIds.forEach((rangeId) => newSelected.add(rangeId));
+        for (const rangeId of rangeIds) {
+          newSelected.add(rangeId);
+        }
       } else {
-        rangeIds.forEach((rangeId) => newSelected.delete(rangeId));
+        for (const rangeId of rangeIds) {
+          newSelected.delete(rangeId);
+        }
       }
 
       setSelectedIds(newSelected);
@@ -314,8 +310,8 @@ export function PeopleClient({ savedColumnVisibility }: PeopleClientProps) {
     } catch {
       notifications.show(
         errorNotificationTemplate({
-          title: tCommon("ErrorTitle"),
           description: t("LoadMoreError"),
+          title: tCommon("feedback.errorTitle"),
         }),
       );
     }
@@ -326,8 +322,8 @@ export function PeopleClient({ savedColumnVisibility }: PeopleClientProps) {
       contactIds: isAllTotalSelected ? [] : ids,
       filterPayload: isAllTotalSelected
         ? {
-            filter: { search: listFilter.search, sort: listFilter.sort },
             excludeIds: Array.from(excludedIds),
+            filter: { search: listFilter.search, sort: listFilter.sort },
           }
         : undefined,
       onDeleted: async () => {
@@ -353,42 +349,25 @@ export function PeopleClient({ savedColumnVisibility }: PeopleClientProps) {
     : !allSelected && selectedIds.size > 0;
 
   return (
-    <Paper ref={paperRef} withBorder shadow="sm" radius="md" p="md">
+    <Paper p="md" radius="md" ref={paperRef} shadow="sm" withBorder>
       <ContactsTable
-        contacts={contacts}
-        selectedIds={selectedIds}
-        isHeaderShown={true}
-        searchDefaultValue={searchDefaultValue}
-        onSearchChange={handleSearch}
-        searchLoading={isSearchPending || (isFetching && !isFetchingNextPage)}
-        searchPlaceholder={t("SearchPlaceholder")}
-        noContactsFound={t("NoContactsFound")}
-        noContactsMatchSearch={t("NoContactsMatchSearch")}
-        columnsForMenu={effectiveColumns}
-        setColumnsForMenu={handleColumnsMenuChange}
-        sortOrderForMenu={listFilter.sort}
-        setSortOrderForMenu={handleSort}
-        visibleColumns={effectiveColumns}
-        onSelectAll={handleSelectAll}
-        onSelectOne={handleSelectOne}
         allSelected={allSelected}
-        someSelected={someSelected}
-        showSelection={true}
-        standardActions={{
-          onMergeOne: (contactId) => openMergeModal(contactId),
-          onMergeSelected: (leftContactId, rightContactId) =>
-            openMergeModal(leftContactId, rightContactId, true),
-          mergeDisabledTooltip: tActions("CannotMergeMyself"),
-          onAddToGroupsOne: (contactId) => handleAddToGroup([contactId]),
-          onAddToGroupsSelected: (contactIds) => handleAddToGroup(contactIds),
-          onDeleteOne: handleDeleteContact,
-          onDeleteSelected: handleDeleteSelected,
+        columnsForMenu={effectiveColumns}
+        contacts={contacts}
+        excludedIds={excludedIds}
+        hasMore={hasMore}
+        isAllTotalSelected={isAllTotalSelected}
+        isHeaderShown={true}
+        loadMoreAction={{
+          label: t("LoadMoreBatch"),
+          loading: isFetchingNextPage,
+          onClick: handleLoadMore,
         }}
         menuActions={[
           {
+            icon: <IconShare size={16} />,
             key: "share",
             label: tShare("ActionLabelMenu"),
-            icon: <IconShare size={16} />,
             onClick: (contactId) => {
               const contact = contacts.find((c) => c.id === contactId);
               if (contact) {
@@ -397,13 +376,15 @@ export function PeopleClient({ savedColumnVisibility }: PeopleClientProps) {
             },
           },
           {
+            icon: <IconId size={16} />,
             key: "download-vcard",
             label: tActions("DownloadVCard"),
-            icon: <IconId size={16} />,
             onClick: async (contactId) => {
               try {
                 const response = await downloadContactVcard(contactId);
-                if (!response.ok) throw new Error("Failed to export vCard");
+                if (!response.ok) {
+                  throw new Error("Failed to export vCard");
+                }
                 const blob = await response.blob();
                 const url = window.URL.createObjectURL(blob);
                 const a = document.createElement("a");
@@ -418,40 +399,57 @@ export function PeopleClient({ savedColumnVisibility }: PeopleClientProps) {
                 window.URL.revokeObjectURL(url);
                 notifications.show(
                   successNotificationTemplate({
-                    title: tActions("ExportSuccess"),
                     description: tActions("ExportSuccessDescription"),
+                    title: tActions("ExportSuccess"),
                   }),
                 );
               } catch {
                 notifications.show(
                   errorNotificationTemplate({
-                    title: tActions("ExportError"),
                     description: tActions("ExportErrorDescription"),
+                    title: tActions("ExportError"),
                   }),
                 );
               }
             },
           },
           {
+            icon: <IconBrandLinkedin size={16} />,
             key: "enrich-linkedin",
             label: tEnrich("MenuLabel"),
-            icon: <IconBrandLinkedin size={16} />,
             onClick: (contactId) => {
               const contact = contacts.find((c) => c.id === contactId);
               startForPerson(contactId, contact?.linkedin);
             },
           },
         ]}
-        loadMoreAction={{
-          label: t("LoadMoreBatch"),
-          onClick: handleLoadMore,
-          loading: isFetchingNextPage,
-        }}
-        hasMore={hasMore}
-        totalCount={totalAvailableCount}
+        noContactsFound={t("NoContactsFound")}
+        noContactsMatchSearch={t("NoContactsMatchSearch")}
+        onSearchChange={handleSearch}
+        onSelectAll={handleSelectAll}
         onSelectAllTotal={hasMore ? handleSelectAllTotal : undefined}
-        isAllTotalSelected={isAllTotalSelected}
-        excludedIds={excludedIds}
+        onSelectOne={handleSelectOne}
+        searchDefaultValue={searchDefaultValue}
+        searchLoading={isSearchPending || (isFetching && !isFetchingNextPage)}
+        searchPlaceholder={t("SearchPlaceholder")}
+        selectedIds={selectedIds}
+        setColumnsForMenu={handleColumnsMenuChange}
+        setSortOrderForMenu={handleSort}
+        showSelection={true}
+        someSelected={someSelected}
+        sortOrderForMenu={listFilter.sort}
+        standardActions={{
+          mergeDisabledTooltip: tActions("CannotMergeMyself"),
+          onAddToGroupsOne: (contactId) => handleAddToGroup([contactId]),
+          onAddToGroupsSelected: (contactIds) => handleAddToGroup(contactIds),
+          onDeleteOne: handleDeleteContact,
+          onDeleteSelected: handleDeleteSelected,
+          onMergeOne: (contactId) => openMergeModal(contactId),
+          onMergeSelected: (leftContactId, rightContactId) =>
+            openMergeModal(leftContactId, rightContactId, true),
+        }}
+        totalCount={totalAvailableCount}
+        visibleColumns={effectiveColumns}
       />
     </Paper>
   );

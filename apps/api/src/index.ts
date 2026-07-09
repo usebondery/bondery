@@ -2,29 +2,30 @@
  * Bondery API Server entry point.
  */
 
+import type { IncomingMessage, ServerResponse } from "node:http";
 import "fastify";
 import { buildApp } from "./build-app.js";
 import { buildServer } from "./build-server.js";
+import logger from "./lib/platform/logger.js";
 
 function resolveListenAddress(config: {
   NEXT_PUBLIC_API_URL: string;
   API_PORT: number;
   API_HOST: string;
 }) {
-  const fallbackPort =
-    Number(process.env.PORT) || Number(config.API_PORT) || 3000;
+  const fallbackPort = Number(process.env.PORT) || Number(config.API_PORT) || 26631;
   const fallbackHost = config.API_HOST || "0.0.0.0";
 
   try {
     const url = new URL(config.NEXT_PUBLIC_API_URL);
     const urlPort = url.port ? Number(url.port) : undefined;
     return {
-      port: urlPort || fallbackPort,
       host: fallbackHost,
+      port: urlPort || fallbackPort,
     };
   } catch (error) {
-    console.warn("Invalid NEXT_PUBLIC_API_URL, using defaults", error);
-    return { port: fallbackPort, host: fallbackHost };
+    logger.warn({ err: error }, "Invalid NEXT_PUBLIC_API_URL, using defaults");
+    return { host: fallbackHost, port: fallbackPort };
   }
 }
 
@@ -33,8 +34,8 @@ async function start() {
   const { port, host } = resolveListenAddress(server.config);
 
   try {
-    await server.listen({ port, host });
-    console.log(`🚀 Bondery API Server running at http://${host}:${port}`);
+    await server.listen({ host, port });
+    server.log.info(`Bondery API Server running at http://${host}:${port}`);
   } catch (err) {
     server.log.error(err);
     process.exit(1);
@@ -45,7 +46,7 @@ export { buildApp, buildServer };
 
 let serverPromise: ReturnType<typeof buildServer> | null = null;
 
-export default async function handler(req: any, res: any) {
+export default async function handler(req: IncomingMessage, res: ServerResponse) {
   if (!serverPromise) {
     serverPromise = buildServer();
   }

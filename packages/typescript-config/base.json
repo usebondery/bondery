@@ -1,16 +1,16 @@
 {
   "$schema": "https://json.schemastore.org/tsconfig",
   "compilerOptions": {
-    "target": "ES2022",
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "strict": true,
-    "isolatedModules": true,
     "declaration": true,
     "declarationMap": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "isolatedModules": true,
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
     "resolveJsonModule": true,
-    "forceConsistentCasingInFileNames": true
+    "skipLibCheck": true,
+    "strict": true,
+    "target": "ES2022"
   }
 }

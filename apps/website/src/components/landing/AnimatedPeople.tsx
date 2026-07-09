@@ -1,38 +1,38 @@
 "use client";
 
 import { ActionIcon, Box, Card, Group, Image, Title } from "@mantine/core";
+import { useMediaQuery } from "@mantine/hooks";
 import { IconArrowLeft, IconArrowRight } from "@tabler/icons-react";
-import { motion, AnimatePresence } from "motion/react";
+import { AnimatePresence, motion } from "motion/react";
 import NextImage from "next/image";
 import { useEffect, useState } from "react";
-import { useMediaQuery } from "@mantine/hooks";
 
 interface PersonContent {
-  quote: string;
   name: string;
+  quote: string;
   src: string;
 }
 
 const people: PersonContent[] = [
   {
-    src: "/images/persons/person_birthday.jpg",
     name: "Your niece's birthday",
     quote: "Get notification about it",
+    src: "/images/persons/person_birthday.jpg",
   },
   {
-    src: "/images/persons/person_job.jpg",
     name: "Colleague's new job",
     quote: "Automatically fetched from LinkedIn",
+    src: "/images/persons/person_job.jpg",
   },
   {
-    src: "/images/persons/person_buddy.jpg",
     name: "Schoolmate's address",
     quote: "Put onto a searchable map",
+    src: "/images/persons/person_buddy.jpg",
   },
   {
-    src: "/images/persons/person_restaurant.jpg",
     name: "Friend's favorite bistro",
     quote: "Sometimes it's the details that matter",
+    src: "/images/persons/person_restaurant.jpg",
   },
 ];
 
@@ -53,23 +53,27 @@ export function AnimatedPeople() {
   };
 
   useEffect(() => {
-    const interval = setInterval(handleNext, 4000);
+    const interval = setInterval(() => {
+      setActive((prev) => (prev + 1) % people.length);
+    }, 4000);
     return () => clearInterval(interval);
-  }, [handleNext]);
+  }, []);
 
   const getRotation = (index: number, isActive: boolean) => {
-    if (isActive) return 0;
+    if (isActive) {
+      return 0;
+    }
     const rotations = [-8, 3, -11, 7, -4, 9, -6];
     return rotations[index % rotations.length];
   };
 
   return (
     <Card
-      shadow="sm"
+      className="mx-auto w-full md:w-150 h-full"
       padding="xl"
       radius="lg"
+      shadow="sm"
       withBorder
-      className="mx-auto w-full md:w-150 h-full"
     >
       <div className="relative grid grid-cols-1 gap-6 md:gap-8 md:grid-cols-[200px_1fr] items-center">
         <div className="flex justify-center md:block">
@@ -77,44 +81,44 @@ export function AnimatedPeople() {
             <AnimatePresence mode="popLayout">
               {people.map((person, index) => (
                 <motion.div
-                  key={person.src}
-                  initial={{
-                    opacity: 0,
-                    scale: 0.9,
-                    z: -100,
-                    rotate: getRotation(index, false),
-                  }}
                   animate={{
                     opacity: isActive(index) ? 1 : 0.7,
-                    scale: isActive(index) ? 1 : 0.95,
-                    z: isActive(index) ? 0 : -100,
                     rotate: getRotation(index, isActive(index)),
-                    zIndex: isActive(index) ? 40 : people.length + 2 - index,
+                    scale: isActive(index) ? 1 : 0.95,
                     y: isActive(index) ? [0, -80, 0] : 0,
+                    z: isActive(index) ? 0 : -100,
+                    zIndex: isActive(index) ? 40 : people.length + 2 - index,
                   }}
+                  className="absolute inset-0 origin-bottom"
                   exit={{
                     opacity: 0,
+                    rotate: getRotation(index, false),
                     scale: 0.9,
                     z: 100,
-                    rotate: getRotation(index, false),
                   }}
+                  initial={{
+                    opacity: 0,
+                    rotate: getRotation(index, false),
+                    scale: 0.9,
+                    z: -100,
+                  }}
+                  key={person.src}
                   transition={{
                     duration: 0.4,
                     ease: "easeInOut",
                   }}
-                  className="absolute inset-0 origin-bottom"
                 >
                   <Image
-                    component={NextImage}
-                    src={person.src}
                     alt={person.name}
-                    width={200}
+                    className="h-full w-full rounded-3xl object-cover object-center"
+                    component={NextImage}
+                    draggable={false}
+                    fetchPriority={isActive(index) ? "high" : "auto"}
                     height={267}
                     loading={isActive(index) ? "eager" : "lazy"}
-                    fetchPriority={isActive(index) ? "high" : "auto"}
-                    draggable={false}
-                    className="h-full w-full rounded-3xl object-cover object-center"
                     radius="lg"
+                    src={person.src}
+                    width={200}
                   />
                 </motion.div>
               ))}
@@ -125,13 +129,13 @@ export function AnimatedPeople() {
           <div className="h-35 flex flex-col justify-center">
             <AnimatePresence mode="wait">
               <motion.div
-                key={active}
-                initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -20 }}
+                initial={{ opacity: 0, x: 20 }}
+                key={active}
                 transition={{ duration: 0.3 }}
               >
-                <Title order={3} className="text-xl md:text-2xl font-bold mb-2">
+                <Title className="text-xl md:text-2xl font-bold mb-2" order={3}>
                   {people[active].name}
                 </Title>
                 <Box>
@@ -141,22 +145,22 @@ export function AnimatedPeople() {
             </AnimatePresence>
           </div>
 
-          <Group gap="md" mt="md" justify={isDesktop ? "flex-start" : "center"}>
+          <Group gap="md" justify={isDesktop ? "flex-start" : "center"} mt="md">
             <ActionIcon
-              onClick={handlePrev}
-              variant="default"
-              size="xl"
-              radius="xl"
               aria-label="Previous"
+              onClick={handlePrev}
+              radius="xl"
+              size="xl"
+              variant="default"
             >
               <IconArrowLeft size={18} />
             </ActionIcon>
             <ActionIcon
-              onClick={handleNext}
-              variant="default"
-              size="xl"
-              radius="xl"
               aria-label="Next"
+              onClick={handleNext}
+              radius="xl"
+              size="xl"
+              variant="default"
             >
               <IconArrowRight size={18} />
             </ActionIcon>

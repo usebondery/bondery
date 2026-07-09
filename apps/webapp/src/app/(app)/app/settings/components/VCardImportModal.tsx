@@ -1,162 +1,122 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import type { JSX } from "react";
-import { useRouter } from "next/navigation";
-import {
-  Divider,
-  Group,
-  Paper,
-  Stack,
-  Text,
-  Title,
-  Badge,
-  List,
-  ThemeIcon,
-  Center,
-  Loader,
-  Progress,
-} from "@mantine/core";
-import { Dropzone } from "@mantine/dropzone";
-import {
-  IconArrowLeft,
-  IconArrowRight,
-  IconUpload,
-  IconDeviceMobile,
-  IconCircleCheck,
-  IconAlertTriangle,
-  IconAddressBook,
-} from "@tabler/icons-react";
-import { notifications } from "@mantine/notifications";
-import { modals } from "@mantine/modals";
-import type { Contact, VCardPreparedContact } from "@bondery/schemas";
-import { VCARD_IMPORT_COMMIT_BATCH_SIZE } from "@bondery/schemas/constants";
+import { getUserFacingError } from "@bondery/helpers/api";
+import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import {
   DropzoneContent,
+  errorNotificationTemplate,
   ModalFooter,
   ModalScrollLayout,
-  errorNotificationTemplate,
   ModalTitle,
   successNotificationTemplate,
   warningNotificationTemplate,
 } from "@bondery/mantine-next";
+import type { Contact, VCardPreparedContact } from "@bondery/schemas";
+import { VCARD_IMPORT_COMMIT_BATCH_SIZE } from "@bondery/schemas/constants";
+import {
+  Badge,
+  Center,
+  Divider,
+  Group,
+  Loader,
+  Paper,
+  Progress,
+  Stack,
+  Text,
+  ThemeIcon,
+  Title,
+} from "@mantine/core";
+import { Dropzone } from "@mantine/dropzone";
+import { modals } from "@mantine/modals";
+import { notifications } from "@mantine/notifications";
 import { NavigationProgress } from "@mantine/nprogress";
-import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
+import {
+  IconAddressBook,
+  IconAlertTriangle,
+  IconArrowLeft,
+  IconArrowRight,
+  IconCircleCheck,
+  IconDeviceMobile,
+} from "@tabler/icons-react";
+import { useRouter } from "next/navigation";
+import type { JSX } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import ContactsTable from "@/app/(app)/app/components/contacts/ContactsTableV2";
+import { useCommonTranslations, useWebTranslations } from "@/lib/i18n/useWebTranslations";
+import { useModalDismiss } from "@/lib/modals";
 import {
   useCommitVCardImportMutation,
   useParseVCardImportMutation,
 } from "@/lib/query/hooks/useImports";
-import { useModalBlocking } from "@/lib/modals";
-import { useImporterNavigationProgress } from "./useImporterNavigationProgress";
+import { useImporterNavigationProgress } from "../hooks/useImporterNavigationProgress";
 
 type Step = "intro" | "instructions" | "upload" | "processing" | "preview";
 
 const STEP_PROGRESS: Record<Step, number> = {
-  intro: 12,
   instructions: 30,
-  upload: 50,
-  processing: 68,
+  intro: 12,
   preview: 84,
+  processing: 68,
+  upload: 50,
 };
-
-interface VCardImportTranslations {
-  ModalTitle: string;
-  IntroTitle: string;
-  IntroDescription1: string;
-  IntroDescription2: string;
-  IntroDescription3: string;
-  Continue: string;
-  InstructionsTitle: string;
-  InstructionStep1: string;
-  InstructionStep2: string;
-  InstructionStep3: string;
-  InstructionStep4: string;
-  HaveVcfFile: string;
-  DropzoneTitle: string;
-  DropzoneDescription: string;
-  SelectVcfFile: string;
-  Total: string;
-  Valid: string;
-  Invalid: string;
-  ImportSelected: string;
-  ChooseContactsHint: string;
-  ImportSuccess: string;
-  NoContactsSelected: string;
-  ParseError: string;
-  ImportError: string;
-  InvalidFile: string;
-  Back: string;
-  Cancel: string;
-  SuccessTitle: string;
-  ErrorTitle: string;
-  ProcessingContacts: string;
-  ImportingTitle: string;
-  ImportingProgress: string;
-  NoContactsFound: string;
-  NoContactsMatchSearch: string;
-}
 
 function toPreviewContact(contact: VCardPreparedContact): Contact {
   return {
-    id: contact.tempId,
-    userId: "",
-    firstName: contact.firstName,
-    middleName: contact.middleName,
-    lastName: contact.lastName,
-    headline: contact.headline,
-    location: null,
-    notes: null,
     avatar: contact.avatarUri,
+    createdAt: new Date().toISOString(),
+    emails: contact.emails,
+    facebook: contact.facebook,
+    firstName: contact.firstName,
+    gisPoint: null,
+    headline: contact.headline,
+    id: contact.tempId,
+    importantDates: null,
+    instagram: contact.instagram,
+    keepFrequencyDays: null,
+    language: null,
     lastInteraction: null,
     lastInteractionActivityId: null,
-    keepFrequencyDays: null,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-    phones: contact.phones,
-    emails: contact.emails,
-    linkedin: contact.linkedin,
-    instagram: contact.instagram,
-    whatsapp: contact.whatsapp,
-    facebook: contact.facebook,
-    website: contact.website,
-    signal: contact.signal,
-    importantDates: null,
-    myself: false,
-    language: null,
-    timezone: null,
+    lastName: contact.lastName,
     latitude: null,
+    linkedin: contact.linkedin,
+    location: null,
     longitude: null,
-    gisPoint: null,
+    middleName: contact.middleName,
+    myself: false,
+    notes: null,
+    phones: contact.phones,
+    signal: contact.signal,
+    timezone: null,
+    updatedAt: new Date().toISOString(),
+    userId: "",
+    website: contact.website,
+    whatsapp: contact.whatsapp,
   };
 }
 
-function sortVCardContactsForPreview(
-  contacts: VCardPreparedContact[],
-): VCardPreparedContact[] {
+function sortVCardContactsForPreview(contacts: VCardPreparedContact[]): VCardPreparedContact[] {
   return contacts
     .map((contact, index) => ({ contact, index }))
     .sort((left, right) => {
       const leftRank = left.contact.isValid ? 0 : 1;
       const rightRank = right.contact.isValid ? 0 : 1;
-      if (leftRank !== rightRank) return leftRank - rightRank;
+      if (leftRank !== rightRank) {
+        return leftRank - rightRank;
+      }
       return left.index - right.index;
     })
     .map((entry) => entry.contact);
 }
 
 export function VCardImportModal({
-  t,
   modalId,
   showNavigationProgress = true,
 }: {
-  t: (
-    key: keyof VCardImportTranslations,
-    values?: Record<string, string | number>,
-  ) => string;
   modalId: string;
   showNavigationProgress?: boolean;
 }) {
+  const tCommon = useCommonTranslations();
+  const t = useWebTranslations("SettingsPage", "DataManagement.VCardImport");
   const router = useRouter();
   const parseImport = useParseVCardImportMutation();
   const commitImport = useCommitVCardImportMutation();
@@ -167,16 +127,13 @@ export function VCardImportModal({
     current: number;
     total: number;
   } | null>(null);
-  const [parsedContacts, setParsedContacts] = useState<VCardPreparedContact[]>(
-    [],
-  );
+  const [parsedContacts, setParsedContacts] = useState<VCardPreparedContact[]>([]);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const openRef = useRef<() => void>(null);
   const lastSelectedIndexRef = useRef<number | null>(null);
 
   const previewContacts = useMemo(
-    () =>
-      parsedContacts.filter((contact) => contact.isValid).map(toPreviewContact),
+    () => parsedContacts.filter((contact) => contact.isValid).map(toPreviewContact),
     [parsedContacts],
   );
 
@@ -192,15 +149,13 @@ export function VCardImportModal({
     [previewContacts],
   );
 
-  const allSelected =
-    selectableIds.length > 0 &&
-    selectableIds.every((id) => selectedIds.has(id));
+  const allSelected = selectableIds.length > 0 && selectableIds.every((id) => selectedIds.has(id));
   const someSelected = selectedIds.size > 0 && !allSelected;
 
   useImporterNavigationProgress({
+    importProgress,
     step,
     stepProgress: STEP_PROGRESS,
-    importProgress,
   });
 
   const renderWithNavigationProgress = (content: JSX.Element) => (
@@ -210,11 +165,8 @@ export function VCardImportModal({
     </>
   );
 
-  const closeModal = () => {
-    modals.close(modalId);
-  };
-
-  useModalBlocking(modalId, isParsing || isImporting || step === "processing");
+  const isBlocking = isParsing || isImporting || step === "processing";
+  const { closeModal } = useModalDismiss(modalId, isBlocking);
 
   useEffect(() => {
     modals.updateModal({
@@ -230,19 +182,17 @@ export function VCardImportModal({
             ? "lg"
             : "xl",
       title: (
-        <ModalTitle
-          text={t("ModalTitle")}
-          icon={<IconAddressBook size={20} stroke={1.5} />}
-        />
+        <ModalTitle icon={<IconAddressBook size={20} stroke={1.5} />} text={t("ModalTitle")} />
       ),
     });
-  }, [isImporting, isParsing, modalId, step, t]);
+  }, [isImporting, modalId, step, t]);
 
   const handleToggleAll = useCallback(() => {
     setSelectedIds((prev) => {
-      const isAllSelected =
-        selectableIds.length > 0 && selectableIds.every((id) => prev.has(id));
-      if (isAllSelected) return new Set<string>();
+      const isAllSelected = selectableIds.length > 0 && selectableIds.every((id) => prev.has(id));
+      if (isAllSelected) {
+        return new Set<string>();
+      }
       return new Set(selectableIds);
     });
   }, [selectableIds]);
@@ -259,11 +209,17 @@ export function VCardImportModal({
           lastSelectedIndexRef.current !== null;
 
         if (hasRangeSelection && typeof rowIndex === "number") {
-          const start = Math.min(lastSelectedIndexRef.current!, rowIndex);
-          const end = Math.max(lastSelectedIndexRef.current!, rowIndex);
+          const anchorIndex = lastSelectedIndexRef.current;
+          if (anchorIndex === null) {
+            return prev;
+          }
+          const start = Math.min(anchorIndex, rowIndex);
+          const end = Math.max(anchorIndex, rowIndex);
           for (let index = start; index <= end; index += 1) {
             const row = previewContacts[index];
-            if (row) next.add(row.id);
+            if (row) {
+              next.add(row.id);
+            }
           }
         } else if (next.has(id)) {
           next.delete(id);
@@ -282,7 +238,9 @@ export function VCardImportModal({
   );
 
   const parseUpload = async (files: File[]) => {
-    if (files.length === 0) return;
+    if (files.length === 0) {
+      return;
+    }
 
     setIsParsing(true);
     setStep("processing");
@@ -301,18 +259,14 @@ export function VCardImportModal({
       setParsedContacts(sortedContacts);
       lastSelectedIndexRef.current = null;
       setSelectedIds(
-        new Set(
-          sortedContacts
-            .filter((item) => item.isValid)
-            .map((item) => item.tempId),
-        ),
+        new Set(sortedContacts.filter((item) => item.isValid).map((item) => item.tempId)),
       );
       setStep("preview");
     } catch (error) {
       notifications.show(
         errorNotificationTemplate({
+          description: getUserFacingError(error, tCommon),
           title: t("ErrorTitle"),
-          description: error instanceof Error ? error.message : t("ParseError"),
         }),
       );
       setStep("upload");
@@ -322,15 +276,13 @@ export function VCardImportModal({
   };
 
   const handleImport = async () => {
-    const selectedContacts = parsedContacts.filter((contact) =>
-      selectedIds.has(contact.tempId),
-    );
+    const selectedContacts = parsedContacts.filter((contact) => selectedIds.has(contact.tempId));
 
     if (selectedContacts.length === 0) {
       notifications.show(
         warningNotificationTemplate({
-          title: t("ErrorTitle"),
           description: t("NoContactsSelected"),
+          title: t("ErrorTitle"),
         }),
       );
       return;
@@ -364,22 +316,21 @@ export function VCardImportModal({
 
       notifications.show(
         successNotificationTemplate({
-          title: t("SuccessTitle"),
           description: t("ImportSuccess", {
             imported: totalImported,
             skipped: totalSkipped,
           }),
+          title: t("SuccessTitle"),
         }),
       );
 
-      modals.close(modalId);
+      closeModal();
       router.push(WEBAPP_ROUTES.PEOPLE);
     } catch (error) {
       notifications.show(
         errorNotificationTemplate({
+          description: getUserFacingError(error, tCommon),
           title: t("ErrorTitle"),
-          description:
-            error instanceof Error ? error.message : t("ImportError"),
         }),
       );
     } finally {
@@ -392,7 +343,7 @@ export function VCardImportModal({
     return renderWithNavigationProgress(
       <Stack gap="xl">
         <Stack align="center" gap="md" pt="sm">
-          <ThemeIcon size={110} radius="xl" variant="light" color="green">
+          <ThemeIcon color="green" radius="xl" size={110} variant="light">
             <IconDeviceMobile size={64} />
           </ThemeIcon>
           <Title order={4} ta="center">
@@ -400,37 +351,37 @@ export function VCardImportModal({
           </Title>
         </Stack>
 
-        <Paper withBorder p="md" radius="md">
+        <Paper p="md" radius="md" withBorder>
           <Stack gap="sm">
-            <Group gap="sm" wrap="nowrap" align="flex-start">
+            <Group align="flex-start" gap="sm" wrap="nowrap">
               <IconCircleCheck
                 size={18}
                 style={{
+                  color: "var(--mantine-color-green-6)",
                   flexShrink: 0,
                   marginTop: 1,
-                  color: "var(--mantine-color-green-6)",
                 }}
               />
               <Text size="sm">{t("IntroDescription1")}</Text>
             </Group>
-            <Group gap="sm" wrap="nowrap" align="flex-start">
+            <Group align="flex-start" gap="sm" wrap="nowrap">
               <IconCircleCheck
                 size={18}
                 style={{
+                  color: "var(--mantine-color-green-6)",
                   flexShrink: 0,
                   marginTop: 1,
-                  color: "var(--mantine-color-green-6)",
                 }}
               />
               <Text size="sm">{t("IntroDescription2")}</Text>
             </Group>
-            <Group gap="sm" wrap="nowrap" align="flex-start">
+            <Group align="flex-start" gap="sm" wrap="nowrap">
               <IconCircleCheck
                 size={18}
                 style={{
+                  color: "var(--mantine-color-green-6)",
                   flexShrink: 0,
                   marginTop: 1,
-                  color: "var(--mantine-color-green-6)",
                 }}
               />
               <Text size="sm">{t("IntroDescription3")}</Text>
@@ -439,11 +390,11 @@ export function VCardImportModal({
         </Paper>
 
         <ModalFooter
-          cancelLabel={t("Cancel")}
-          onCancel={closeModal}
           actionLabel={t("Continue")}
-          onAction={() => setStep("instructions")}
           actionRightSection={<IconArrowRight size={16} />}
+          cancelLabel={t("Cancel")}
+          onAction={() => setStep("instructions")}
+          onCancel={closeModal}
         />
       </Stack>,
     );
@@ -452,28 +403,28 @@ export function VCardImportModal({
   if (step === "instructions") {
     return renderWithNavigationProgress(
       <Stack gap="md">
-        <Paper withBorder p="md" radius="md">
+        <Paper p="md" radius="md" withBorder>
           <Stack gap="sm">
             <Text fw={600} size="sm" ta="center">
               {t("InstructionsTitle")}
             </Text>
             <Divider />
             {[
-              t("InstructionStep1"),
-              t("InstructionStep2"),
-              t("InstructionStep3"),
-              t("InstructionStep4"),
-            ].map((step, i) => (
-              <Group key={i} gap="sm" wrap="nowrap" align="center">
+              { number: 1, step: t("InstructionStep1") },
+              { number: 2, step: t("InstructionStep2") },
+              { number: 3, step: t("InstructionStep3") },
+              { number: 4, step: t("InstructionStep4") },
+            ].map(({ step, number }) => (
+              <Group align="center" gap="sm" key={step} wrap="nowrap">
                 <ThemeIcon
-                  size={22}
-                  radius="xl"
-                  variant="filled"
                   color="green"
+                  radius="xl"
+                  size={22}
                   style={{ flexShrink: 0 }}
+                  variant="filled"
                 >
-                  <Text component="span" size="xs" fw={700} lh={1}>
-                    {i + 1}
+                  <Text component="span" fw={700} lh={1} size="xs">
+                    {number}
                   </Text>
                 </ThemeIcon>
                 <Text size="sm">{step}</Text>
@@ -483,14 +434,14 @@ export function VCardImportModal({
         </Paper>
 
         <ModalFooter
+          actionLabel={t("HaveVcfFile")}
+          actionRightSection={<IconArrowRight size={16} />}
           backLabel={t("Back")}
           backLeftSection={<IconArrowLeft size={16} />}
-          onBack={() => setStep("intro")}
           cancelLabel={t("Cancel")}
-          onCancel={closeModal}
-          actionLabel={t("HaveVcfFile")}
           onAction={() => setStep("upload")}
-          actionRightSection={<IconArrowRight size={16} />}
+          onBack={() => setStep("intro")}
+          onCancel={closeModal}
         />
       </Stack>,
     );
@@ -500,43 +451,40 @@ export function VCardImportModal({
     return renderWithNavigationProgress(
       <Stack gap="md">
         <Dropzone
-          openRef={openRef}
+          accept={{
+            "application/octet-stream": [".vcf"],
+            "text/directory": [".vcf"],
+            "text/vcard": [".vcf"],
+            "text/x-vcard": [".vcf"],
+          }}
+          loading={isParsing}
+          maxFiles={1}
+          maxSize={30 * 1024 * 1024}
           onDrop={(files) => {
             void parseUpload(files);
           }}
           onReject={() => {
             notifications.show(
               errorNotificationTemplate({
-                title: t("ErrorTitle"),
                 description: t("InvalidFile"),
+                title: t("ErrorTitle"),
               }),
             );
           }}
-          loading={isParsing}
-          maxSize={30 * 1024 * 1024}
-          maxFiles={1}
-          accept={{
-            "text/vcard": [".vcf"],
-            "text/x-vcard": [".vcf"],
-            "text/directory": [".vcf"],
-            "application/octet-stream": [".vcf"],
-          }}
+          openRef={openRef}
         >
-          <DropzoneContent
-            title={t("DropzoneTitle")}
-            description={t("DropzoneDescription")}
-          />
+          <DropzoneContent description={t("DropzoneDescription")} title={t("DropzoneTitle")} />
         </Dropzone>
 
         <ModalFooter
+          actionLabel={t("SelectVcfFile")}
+          actionLeftSection={<IconAddressBook size={16} />}
           backLabel={t("Back")}
           backLeftSection={<IconArrowLeft size={16} />}
-          onBack={() => setStep("instructions")}
           cancelLabel={t("Cancel")}
-          onCancel={closeModal}
-          actionLabel={t("SelectVcfFile")}
           onAction={() => openRef.current?.()}
-          actionLeftSection={<IconAddressBook size={16} />}
+          onBack={() => setStep("instructions")}
+          onCancel={closeModal}
         />
       </Stack>,
     );
@@ -556,16 +504,14 @@ export function VCardImportModal({
   }
 
   if (isImporting && importProgress !== null) {
-    const percentage = Math.round(
-      (importProgress.current / importProgress.total) * 100,
-    );
+    const percentage = Math.round((importProgress.current / importProgress.total) * 100);
     return renderWithNavigationProgress(
       <Stack gap="lg" py="md">
         <Center>
-          <Stack align="center" gap="md" w="100%" maw={400}>
+          <Stack align="center" gap="md" maw={400} w="100%">
             <Text fw={600}>{t("ImportingTitle")}</Text>
-            <Progress value={percentage} w="100%" size="lg" />
-            <Text size="sm" c="dimmed">
+            <Progress size="lg" value={percentage} w="100%" />
+            <Text c="dimmed" size="sm">
               {t("ImportingProgress", {
                 current: importProgress.current,
                 total: importProgress.total,
@@ -581,23 +527,21 @@ export function VCardImportModal({
     <ModalScrollLayout
       footer={
         <ModalFooter
-          mt={0}
+          actionDisabled={isImporting}
+          actionLabel={t("ImportSelected", { count: selectedIds.size })}
+          actionLeftSection={!isImporting ? <IconAddressBook size={16} /> : undefined}
+          actionLoading={isImporting}
+          backDisabled={isImporting}
           backLabel={t("Back")}
           backLeftSection={<IconArrowLeft size={16} />}
-          onBack={() => setStep("upload")}
-          backDisabled={isImporting}
-          cancelLabel={t("Cancel")}
-          onCancel={closeModal}
           cancelDisabled={isImporting}
-          actionLabel={t("ImportSelected", { count: selectedIds.size })}
+          cancelLabel={t("Cancel")}
+          mt={0}
           onAction={() => {
             void handleImport();
           }}
-          actionLeftSection={
-            !isImporting ? <IconAddressBook size={16} /> : undefined
-          }
-          actionLoading={isImporting}
-          actionDisabled={isImporting}
+          onBack={() => setStep("upload")}
+          onCancel={closeModal}
         />
       }
     >
@@ -607,41 +551,33 @@ export function VCardImportModal({
             <Badge color="blue" variant="light">
               {t("Total", { count: parsedContacts.length })}
             </Badge>
-            <Badge
-              color="green"
-              variant="light"
-              leftSection={<IconCircleCheck size={12} />}
-            >
+            <Badge color="green" leftSection={<IconCircleCheck size={12} />} variant="light">
               {t("Valid", { count: validContactsCount })}
             </Badge>
             {invalidContactsCount > 0 ? (
-              <Badge
-                color="orange"
-                variant="light"
-                leftSection={<IconAlertTriangle size={12} />}
-              >
+              <Badge color="orange" leftSection={<IconAlertTriangle size={12} />} variant="light">
                 {t("Invalid", { count: invalidContactsCount })}
               </Badge>
             ) : null}
           </Group>
         </Group>
 
-        <Text size="sm" c="dimmed">
+        <Text c="dimmed" size="sm">
           {t("ChooseContactsHint")}
         </Text>
 
         <ContactsTable
-          contacts={previewContacts}
-          visibleColumns={["name", "headline", "phone", "email"]}
-          selectedIds={selectedIds}
-          showSelection
           allSelected={allSelected}
-          someSelected={someSelected}
-          onSelectAll={handleToggleAll}
-          onSelectOne={handleToggleOne}
+          contacts={previewContacts}
           disableNameLink
           noContactsFound={t("NoContactsFound")}
           noContactsMatchSearch={t("NoContactsMatchSearch")}
+          onSelectAll={handleToggleAll}
+          onSelectOne={handleToggleOne}
+          selectedIds={selectedIds}
+          showSelection
+          someSelected={someSelected}
+          visibleColumns={["name", "headline", "phone", "email"]}
         />
       </Stack>
     </ModalScrollLayout>,

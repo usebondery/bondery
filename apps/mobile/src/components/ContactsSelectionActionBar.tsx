@@ -1,11 +1,11 @@
 import { IconTrash, IconUsersPlus } from "@tabler/icons-react-native";
 import { useMemo } from "react";
-import { useMobileTranslations } from "../lib/i18n/useMobileTranslations";
-import { useMobileThemeColors } from "../theme/useMobileThemeColors";
 import {
   useContactsEffectiveSelectedCount,
   useContactsSelection,
 } from "../features/contacts/contactsSelectionStore";
+import { useMobileTranslations } from "../lib/i18n/useMobileTranslations";
+import { useMobileThemeColors } from "../theme/useMobileThemeColors";
 import { FloatingActionBar, type FloatingActionBarAction } from "./FloatingActionBar";
 
 interface ContactsSelectionActionBarProps {
@@ -31,22 +31,22 @@ export function ContactsSelectionActionBar({ extraActions = [] }: ContactsSelect
   const actions = useMemo<FloatingActionBarAction[]>(
     () => [
       {
-        id: "add-to-groups",
-        icon: <IconUsersPlus size={20} stroke={colors.iconSecondary} />,
-        accessibilityLabel: t("MobileApp.Contacts.AddToGroups"),
-        onPress: () => setAddToGroupsSheetOpen(true),
+        accessibilityLabel: t("AddToGroups", { ns: "MobileContacts" }),
         disabled: effectiveSelectedCount === 0 || isBusy,
+        icon: <IconUsersPlus size={20} stroke={colors.iconSecondary} />,
+        id: "add-to-groups",
         loading: isAddingToGroups,
+        onPress: () => setAddToGroupsSheetOpen(true),
       },
       ...extraActions,
       {
-        id: "delete",
-        icon: <IconTrash size={20} stroke={colors.dangerAccent} />,
-        tone: "danger",
-        accessibilityLabel: t("MobileApp.Common.Delete"),
-        onPress: () => setDeleteConfirmOpen(true),
+        accessibilityLabel: t("actions.delete", { ns: "common" }),
         disabled: effectiveSelectedCount === 0 || isBusy,
+        icon: <IconTrash size={20} stroke={colors.dangerAccent} />,
+        id: "delete",
         loading: isDeleting,
+        onPress: () => setDeleteConfirmOpen(true),
+        tone: "danger",
       },
     ],
     [
@@ -65,7 +65,7 @@ export function ContactsSelectionActionBar({ extraActions = [] }: ContactsSelect
 
   return (
     <FloatingActionBar
-      accessibilityLabel={t("MobileApp.Contacts.SelectionActionsTitle")}
+      accessibilityLabel={t("SelectionActionsTitle", { ns: "MobileContacts" })}
       actions={actions}
     />
   );

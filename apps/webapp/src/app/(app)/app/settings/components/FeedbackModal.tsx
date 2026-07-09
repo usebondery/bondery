@@ -1,43 +1,43 @@
 "use client";
 
-import { Slider, Stack, Text, Textarea } from "@mantine/core";
-import { schemaResolver, useForm } from "@mantine/form";
-import { modals } from "@mantine/modals";
-import { notifications } from "@mantine/notifications";
-import { useState } from "react";
-import { submitFeedback } from "@/lib/api/domains/settings";
 import {
   errorNotificationTemplate,
   loadingNotificationTemplate,
   ModalFooter,
   successNotificationTemplate,
 } from "@bondery/mantine-next";
-import { feedbackFormSchema, type FeedbackFormInput } from "@bondery/schemas";
+import { type FeedbackFormInput, feedbackFormSchema } from "@bondery/schemas";
+import { Slider, Stack, Text, Textarea } from "@mantine/core";
+import { schemaResolver, useForm } from "@mantine/form";
+import { notifications } from "@mantine/notifications";
+import { useState } from "react";
 import { captureEvent } from "@/lib/analytics/client";
-import type { TFunction } from "i18next";
-import { useModalBlocking } from "@/lib/modals";
+import { submitFeedback } from "@/lib/api/domains/settings";
+import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
+import { useModalDismiss } from "@/lib/modals";
+
 const SLIDER_MARKS = [
-  { value: 0, label: "0" },
-  { value: 5, label: "5" },
-  { value: 10, label: "10" },
+  { label: "0", value: 0 },
+  { label: "5", value: 5 },
+  { label: "10", value: 10 },
 ];
 
 interface FeedbackModalProps {
   modalId: string;
-  t: TFunction;
 }
 
-export function FeedbackModal({ modalId, t }: FeedbackModalProps) {
+export function FeedbackModal({ modalId }: FeedbackModalProps) {
+  const t = useWebTranslations("FeedbackPage");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  useModalBlocking(modalId, isSubmitting);
+  const { closeModal } = useModalDismiss(modalId, isSubmitting);
 
   const form = useForm<FeedbackFormInput>({
-    mode: "controlled",
     initialValues: {
-      npsScore: 5,
-      npsReason: "",
       generalFeedback: "",
+      npsReason: "",
+      npsScore: 5,
     },
+    mode: "controlled",
     validate: schemaResolver(feedbackFormSchema, { sync: true }),
   });
 
@@ -46,8 +46,8 @@ export function FeedbackModal({ modalId, t }: FeedbackModalProps) {
 
     const loadingNotification = notifications.show({
       ...loadingNotificationTemplate({
-        title: t("SubmittingTitle"),
         description: t("SubmittingMessage"),
+        title: t("SubmittingTitle"),
       }),
     });
 
@@ -57,24 +57,24 @@ export function FeedbackModal({ modalId, t }: FeedbackModalProps) {
       notifications.hide(loadingNotification);
       notifications.show(
         successNotificationTemplate({
-          title: t("SuccessTitle"),
           description: t("SuccessMessage"),
+          title: t("SuccessTitle"),
         }),
       );
 
       captureEvent("nps_submitted", {
-        score: values.npsScore,
-        has_reason: values.npsReason.trim().length > 0,
         has_general_feedback: values.generalFeedback.trim().length > 0,
+        has_reason: values.npsReason.trim().length > 0,
+        score: values.npsScore,
       });
 
-      modals.close(modalId);
+      closeModal();
     } catch {
       notifications.hide(loadingNotification);
       notifications.show(
         errorNotificationTemplate({
-          title: t("ErrorTitle"),
           description: t("ErrorMessage"),
+          title: t("ErrorTitle"),
         }),
       );
     } finally {
@@ -88,38 +88,38 @@ export function FeedbackModal({ modalId, t }: FeedbackModalProps) {
         <Stack gap="md">
           <Text fw={500}>{t("NpsLabel")}</Text>
           <Slider
-            min={0}
-            max={10}
-            step={1}
-            size="xl"
-            marks={SLIDER_MARKS}
             label={(value) => value.toString()}
+            marks={SLIDER_MARKS}
+            max={10}
+            min={0}
+            size="xl"
+            step={1}
             {...form.getInputProps("npsScore")}
             mb="md"
           />
         </Stack>
 
         <Textarea
-          label={t("NpsReasonLabel", { score: form.values.npsScore })}
-          placeholder={t("NpsReasonPlaceholder")}
-          minRows={3}
           autosize
+          label={t("NpsReasonLabel", { score: form.values.npsScore })}
+          minRows={3}
+          placeholder={t("NpsReasonPlaceholder")}
           {...form.getInputProps("npsReason")}
         />
 
         <Textarea
-          label={t("GeneralFeedbackLabel")}
-          placeholder={t("GeneralFeedbackPlaceholder")}
-          minRows={3}
           autosize
+          label={t("GeneralFeedbackLabel")}
+          minRows={3}
+          placeholder={t("GeneralFeedbackPlaceholder")}
           {...form.getInputProps("generalFeedback")}
         />
 
         <ModalFooter
-          actionLabel={t("SubmitButton")}
-          actionType="submit"
-          actionLoading={isSubmitting}
           actionDisabled={isSubmitting}
+          actionLabel={t("SubmitButton")}
+          actionLoading={isSubmitting}
+          actionType="submit"
         />
       </Stack>
     </form>

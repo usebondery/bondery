@@ -8,37 +8,42 @@ const VERBOSE =
 
 function summarizeMutations(mutations: SyncMutation[]) {
   return mutations.map((mutation) => ({
+    clientSequence: mutation.clientSequence,
+    entityId: "entityId" in mutation ? mutation.entityId : undefined,
     id: mutation.id,
     type: mutation.type,
-    entityId: "entityId" in mutation ? mutation.entityId : undefined,
-    clientSequence: mutation.clientSequence,
   }));
 }
 
+function writeDevLog(level: "log" | "warn", ...args: unknown[]): void {
+  // biome-ignore lint/suspicious/noConsole: centralized dev-only sync diagnostics sink
+  console[level](...args);
+}
+
 export function logSyncPushRequest(deviceId: string, mutations: SyncMutation[]): void {
-  if (!__DEV__) return;
-  console.log(LOG_PREFIX, "push request", {
+  if (!__DEV__) {
+    return;
+  }
+  writeDevLog("log", LOG_PREFIX, "push request", {
     deviceId,
     mutationCount: mutations.length,
     mutations: summarizeMutations(mutations),
   });
 }
 
-export function logSyncPushResponse(
-  status: number,
-  payload: unknown,
-  rawBody?: string,
-): void {
-  if (!__DEV__) return;
-  console.log(LOG_PREFIX, "push response", {
-    status,
+export function logSyncPushResponse(status: number, payload: unknown, rawBody?: string): void {
+  if (!__DEV__) {
+    return;
+  }
+  writeDevLog("log", LOG_PREFIX, "push response", {
     payload,
+    status,
     ...(rawBody && status >= 400 ? { rawBody } : {}),
   });
 }
 
 export function logSyncPushError(message: string, details?: Record<string, unknown>): void {
-  console.warn(LOG_PREFIX, "push error", { message, ...details });
+  writeDevLog("warn", LOG_PREFIX, "push error", { message, ...details });
 }
 
 export function logSyncPullResponse(
@@ -46,22 +51,28 @@ export function logSyncPullResponse(
   nextServerSequence: number,
   reason?: string,
 ): void {
-  if (!__DEV__) return;
-  if (batchCount === 0 && !VERBOSE) return;
-  console.log(LOG_PREFIX, "pull response", { batchCount, nextServerSequence, reason });
+  if (!__DEV__) {
+    return;
+  }
+  if (batchCount === 0 && !VERBOSE) {
+    return;
+  }
+  writeDevLog("log", LOG_PREFIX, "pull response", { batchCount, nextServerSequence, reason });
 }
 
 export function logSyncPullError(error: unknown): void {
-  console.warn(LOG_PREFIX, "pull error", {
+  writeDevLog("warn", LOG_PREFIX, "pull error", {
     message: error instanceof Error ? error.message : String(error),
   });
 }
 
 export function logSyncMutationEnqueued(mutation: SyncMutation): void {
-  if (!__DEV__) return;
-  console.log(LOG_PREFIX, "mutation enqueued", {
+  if (!__DEV__) {
+    return;
+  }
+  writeDevLog("log", LOG_PREFIX, "mutation enqueued", {
+    clientSequence: mutation.clientSequence,
     id: mutation.id,
     type: mutation.type,
-    clientSequence: mutation.clientSequence,
   });
 }

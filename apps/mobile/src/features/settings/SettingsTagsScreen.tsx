@@ -1,21 +1,18 @@
+import type { TagWithCount } from "@bondery/schemas";
+import { IconPlus } from "@tabler/icons-react-native";
+import { useRouter } from "expo-router";
 import { useCallback, useMemo, useState } from "react";
 import { Pressable, ScrollView, StyleSheet } from "react-native";
-import { useRouter } from "expo-router";
-import { IconPlus } from "@tabler/icons-react-native";
-import type { TagWithCount } from "@bondery/schemas";
 import { StackNavBar } from "../../components/chrome";
 import { updateSettings } from "../../lib/api/client";
-import { useTags } from "../../lib/sync/hooks/useSyncQuery";
+import { useMobileTranslations } from "../../lib/i18n/useMobileTranslations";
 import type {
   MobilePreferencesState,
   TagSortOrder,
 } from "../../lib/preferences/useMobilePreferences";
 import { useMobilePreferences } from "../../lib/preferences/useMobilePreferences";
-import { useMobileTranslations } from "../../lib/i18n/useMobileTranslations";
-import {
-  MOBILE_HIT_SLOP,
-  MOBILE_LAYOUT,
-} from "../../theme/tokens";
+import { useTags } from "../../lib/sync/hooks/useSyncQuery";
+import { MOBILE_HIT_SLOP, MOBILE_LAYOUT } from "../../theme/tokens";
 import { useMobileThemeColors } from "../../theme/useMobileThemeColors";
 import { ContactsTagsHeader } from "../contacts/components/ContactsTagsHeader";
 import { TagEditSheet } from "../contacts/components/TagEditSheet";
@@ -31,29 +28,24 @@ export function SettingsTagsScreen() {
   const colors = useMobileThemeColors();
 
   const { data: syncedTags, isInitialSync, refresh: refreshTags } = useTags();
-  const [loadError, setLoadError] = useState<string | null>(null);
+  const [loadError, _setLoadError] = useState<string | null>(null);
   const [isCreateOpen, setCreateOpen] = useState(false);
   const [editingTag, setEditingTag] = useState<TagWithCount | null>(null);
 
-  const tagSortOrder = useMobilePreferences(
-    (state: MobilePreferencesState) => state.tagSortOrder,
-  );
+  const tagSortOrder = useMobilePreferences((state: MobilePreferencesState) => state.tagSortOrder);
   const setTagSortOrder = useMobilePreferences(
     (state: MobilePreferencesState) => state.setTagSortOrder,
   );
 
-  const sortedTags = useMemo(
-    () => sortTags(syncedTags, tagSortOrder),
-    [tagSortOrder, syncedTags],
-  );
+  const sortedTags = useMemo(() => sortTags(syncedTags, tagSortOrder), [tagSortOrder, syncedTags]);
 
   const editTags = useMemo(() => sortTags(syncedTags, "alpha-asc"), [syncedTags]);
 
   const sortOptions: Array<{ value: TagSortOrder; label: string }> = [
-    { value: "count-desc", label: t("MobileApp.Settings.GroupSortCountDesc") },
-    { value: "count-asc", label: t("MobileApp.Settings.GroupSortCountAsc") },
-    { value: "alpha-asc", label: t("MobileApp.Settings.GroupSortAlphaAsc") },
-    { value: "alpha-desc", label: t("MobileApp.Settings.GroupSortAlphaDesc") },
+    { label: t("GroupSortCountDesc", { ns: "MobileSettings" }), value: "count-desc" },
+    { label: t("GroupSortCountAsc", { ns: "MobileSettings" }), value: "count-asc" },
+    { label: t("GroupSortAlphaAsc", { ns: "MobileSettings" }), value: "alpha-asc" },
+    { label: t("GroupSortAlphaDesc", { ns: "MobileSettings" }), value: "alpha-desc" },
   ];
 
   const handleSortChange = (nextOrder: TagSortOrder) => {
@@ -87,13 +79,13 @@ export function SettingsTagsScreen() {
 
   const previewCaption =
     syncedTags.length === 0 && !isLoading && !loadError
-      ? t("MobileApp.Settings.PreviewHintTagsEmpty")
-      : t("MobileApp.Settings.PreviewHintTags");
+      ? t("PreviewHintTagsEmpty", { ns: "MobileSettings" })
+      : t("PreviewHintTags", { ns: "MobileSettings" });
 
   const createButton = (
     <Pressable
+      accessibilityLabel={t("AddNewTag", { ns: "TagsSettings" })}
       accessibilityRole="button"
-      accessibilityLabel={t("MobileApp.TagsSettings.AddNewTag")}
       hitSlop={MOBILE_HIT_SLOP}
       onPress={() => setCreateOpen(true)}
       style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
@@ -105,54 +97,50 @@ export function SettingsTagsScreen() {
   return (
     <>
       <StackNavBar
-        variant="elevated"
-        title={t("MobileApp.TagsSettings.Title")}
         onBack={() => router.back()}
         right={createButton}
+        title={t("Title", { ns: "TagsSettings" })}
+        variant="elevated"
       />
 
       <ScrollView
-        style={[styles.screen, { backgroundColor: colors.appBackground }]}
         contentContainerStyle={styles.content}
+        style={[styles.screen, { backgroundColor: colors.appBackground }]}
       >
-        <SettingsFieldLabel>
-          {t("MobileApp.Settings.TagSortSelectLabel")}
-        </SettingsFieldLabel>
+        <SettingsFieldLabel>{t("TagSortSelectLabel", { ns: "MobileSettings" })}</SettingsFieldLabel>
         <SettingsSelect
-          label={t("MobileApp.Settings.TagSortSelectLabel")}
+          label={t("TagSortSelectLabel", { ns: "MobileSettings" })}
+          onValueChange={handleSortChange}
           options={sortOptions}
           value={tagSortOrder}
-          onValueChange={handleSortChange}
         />
 
         <SettingsPreviewSection caption={previewCaption}>
           <SettingsAsyncState
-            isLoading={isLoading}
-            errorTitle={t("MobileApp.Settings.TagsLoadErrorTitle")}
             errorDescription={loadError}
+            errorTitle={t("TagsLoadErrorTitle", { ns: "MobileSettings" })}
+            isLoading={isLoading}
             onRetry={() => {
               void reloadTags();
             }}
           >
             <ContactsTagsHeader
               layout="chipRow"
-              tags={sortedTags}
               shouldShowCreateAction={false}
               showEmptyPlaceholder
+              tags={sortedTags}
             />
           </SettingsAsyncState>
         </SettingsPreviewSection>
 
         {!isLoading && !loadError ? (
           <>
-            <SettingsFieldLabel>
-              {t("MobileApp.TagsSettings.ManageTags")}
-            </SettingsFieldLabel>
+            <SettingsFieldLabel>{t("ManageTags", { ns: "TagsSettings" })}</SettingsFieldLabel>
             <ContactsTagsHeader
               layout="wrap"
-              tags={editTags}
-              onTagPress={(tag) => setEditingTag(tag)}
               onCreatePress={() => setCreateOpen(true)}
+              onTagPress={(tag) => setEditingTag(tag)}
+              tags={editTags}
             />
           </>
         ) : null}
@@ -160,37 +148,37 @@ export function SettingsTagsScreen() {
 
       <TagEditSheet
         mode="create"
-        open={isCreateOpen}
-        onOpenChange={setCreateOpen}
         onCreated={handleTagCreated}
+        onOpenChange={setCreateOpen}
+        open={isCreateOpen}
       />
 
       <TagEditSheet
-        mode="edit"
-        open={editingTag !== null}
-        tagId={editingTag?.id ?? ""}
-        initialLabel={editingTag?.label ?? ""}
         initialColor={editingTag?.color ?? ""}
+        initialLabel={editingTag?.label ?? ""}
+        mode="edit"
+        onDeleted={handleTagDeleted}
         onOpenChange={(open) => {
           if (!open) {
             setEditingTag(null);
           }
         }}
         onSaved={handleTagSaved}
-        onDeleted={handleTagDeleted}
+        open={editingTag !== null}
+        tagId={editingTag?.id ?? ""}
       />
     </>
   );
 }
 
 const styles = StyleSheet.create({
+  content: {
+    gap: 16,
+    paddingBottom: MOBILE_LAYOUT.spacing.contentBottom,
+    paddingHorizontal: MOBILE_LAYOUT.spacing.horizontal,
+    paddingTop: MOBILE_LAYOUT.spacing.contentTop,
+  },
   screen: {
     flex: 1,
-  },
-  content: {
-    paddingTop: MOBILE_LAYOUT.spacing.contentTop,
-    paddingHorizontal: MOBILE_LAYOUT.spacing.horizontal,
-    paddingBottom: MOBILE_LAYOUT.spacing.contentBottom,
-    gap: 16,
   },
 });

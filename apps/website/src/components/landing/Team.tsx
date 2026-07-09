@@ -1,6 +1,6 @@
-import { Avatar, Card, Container, Group, Text, Title, Stack, Flex } from "@mantine/core";
-import { IconBrandLinkedin, IconBrandX } from "@tabler/icons-react";
 import { ActionIconLink } from "@bondery/mantine-next";
+import { Avatar, Card, Container, Flex, Group, Stack, Text, Title } from "@mantine/core";
+import { IconBrandLinkedin, IconBrandX } from "@tabler/icons-react";
 import { TEAM_MEMBERS, type TeamMember } from "@/data/team";
 
 interface TeamProps {
@@ -9,43 +9,43 @@ interface TeamProps {
 
 function TeamCard({ member }: { member: TeamMember }) {
   return (
-    <Card padding="lg" withBorder className="card-scale-effect">
-      <Group gap="lg" align="center">
-        <Avatar size={160} src={member.image} alt={member.name} />
-        <Stack gap="sm" align="left">
+    <Card className="card-scale-effect" padding="lg" withBorder>
+      <Group align="center" gap="lg">
+        <Avatar alt={member.name} size={160} src={member.image} />
+        <Stack align="left" gap="sm">
           <Stack gap={0}>
-            <Text size="xl" fw={"bold"} c={"var(--mantine-default-text-color)"}>
+            <Text c={"var(--mantine-default-text-color)"} fw={"bold"} size="xl">
               {member.name}
             </Text>
-            <Text size="md" c="dimmed" fw={500}>
+            <Text c="dimmed" fw={500} size="md">
               {member.role}
             </Text>
           </Stack>
-          <Text size="sm" c="dimmed" miw={200}>
+          <Text c="dimmed" miw={200} size="sm">
             {member.description}
           </Text>
 
           <Group gap="xs">
             <ActionIconLink
-              size="lg"
-              variant="subtle"
+              ariaLabel={`${member.name} on LinkedIn`}
               color="gray"
               href={member.linkedin}
-              target="_blank"
-              rel="noopener noreferrer"
-              ariaLabel={`${member.name} on LinkedIn`}
               icon={<IconBrandLinkedin />}
+              rel="noopener noreferrer"
+              size="lg"
+              target="_blank"
+              variant="subtle"
             />
             {member.x && (
               <ActionIconLink
-                size="lg"
-                variant="subtle"
+                ariaLabel={`${member.name} on X`}
                 color="gray"
                 href={member.x}
-                target="_blank"
-                rel="noopener noreferrer"
-                ariaLabel={`${member.name} on X`}
                 icon={<IconBrandX />}
+                rel="noopener noreferrer"
+                size="lg"
+                target="_blank"
+                variant="subtle"
               />
             )}
           </Group>
@@ -57,11 +57,11 @@ function TeamCard({ member }: { member: TeamMember }) {
 
 export function Team({ title }: TeamProps) {
   return (
-    <Container id="team" size="lg" py="xl" mb={"xl"}>
-      <Title order={2} ta="center" className="text-3xl! mb-12!">
+    <Container id="team" mb={"xl"} py="xl" size="lg">
+      <Title className="text-3xl! mb-12!" order={2} ta="center">
         {title ?? "Who will answer your questions?"}
       </Title>
-      <Flex justify={"center"} gap={"xl"} wrap={"wrap"}>
+      <Flex gap={"xl"} justify={"center"} wrap={"wrap"}>
         {TEAM_MEMBERS.map((member) => (
           <TeamCard key={member.name} member={member} />
         ))}

@@ -9,8 +9,6 @@ export const contactAddressConfidenceSchema = z.enum(["verified", "unverifiable"
 const optionalTrimmedString = nullableTrimmedStringSchema();
 
 const addressCoreInputSchema = z.object({
-  value: z.string().trim().min(1, { error: "Address is required" }),
-  type: contactAddressTypeSchema,
   label: z
     .string()
     .trim()
@@ -18,48 +16,50 @@ const addressCoreInputSchema = z.object({
       error: `Label must be at most ${CONTACT_FIELD_MAX_LENGTHS.addressLabel} characters`,
     })
     .transform((value) => value || null),
+  type: contactAddressTypeSchema,
+  value: z.string().trim().min(1, { error: "Address is required" }),
 });
 
 export const contactAddressSheetSchema = addressCoreInputSchema;
 
 /** Read-model address shape (no input transforms — safe for Fastify response serialization). */
 export const contactAddressReadSchema = z.object({
-  value: z.string(),
-  type: contactAddressTypeSchema,
-  label: z.string().nullable(),
-  latitude: z.number().nullable(),
-  longitude: z.number().nullable(),
+  addressCity: z.string().nullable(),
+  addressCountry: z.string().nullable(),
+  addressCountryCode: z.string().nullable(),
+  addressFormatted: z.string().nullable(),
+  addressGeocodeSource: contactAddressGeocodeSourceSchema.nullable(),
+  addressGranularity: contactAddressGranularitySchema,
   addressLine1: z.string().nullable(),
   addressLine2: z.string().nullable(),
-  addressCity: z.string().nullable(),
   addressPostalCode: z.string().nullable(),
   addressState: z.string().nullable(),
   addressStateCode: z.string().nullable(),
-  addressCountry: z.string().nullable(),
-  addressCountryCode: z.string().nullable(),
-  addressGranularity: contactAddressGranularitySchema,
-  addressFormatted: z.string().nullable(),
-  addressGeocodeSource: contactAddressGeocodeSourceSchema.nullable(),
   geocodeConfidence: contactAddressConfidenceSchema.nullable(),
+  label: z.string().nullable(),
+  latitude: z.number().nullable(),
+  longitude: z.number().nullable(),
   timezone: z.string().nullable(),
+  type: contactAddressTypeSchema,
+  value: z.string(),
 });
 
 export const contactAddressEntrySchema = addressCoreInputSchema.extend({
-  label: optionalTrimmedString,
-  latitude: z.number().nullable(),
-  longitude: z.number().nullable(),
+  addressCity: optionalTrimmedString,
+  addressCountry: optionalTrimmedString,
+  addressCountryCode: optionalTrimmedString,
+  addressFormatted: optionalTrimmedString,
+  addressGeocodeSource: contactAddressGeocodeSourceSchema.nullable(),
+  addressGranularity: contactAddressGranularitySchema,
   addressLine1: optionalTrimmedString,
   addressLine2: optionalTrimmedString,
-  addressCity: optionalTrimmedString,
   addressPostalCode: optionalTrimmedString,
   addressState: optionalTrimmedString,
   addressStateCode: optionalTrimmedString,
-  addressCountry: optionalTrimmedString,
-  addressCountryCode: optionalTrimmedString,
-  addressGranularity: contactAddressGranularitySchema,
-  addressFormatted: optionalTrimmedString,
-  addressGeocodeSource: contactAddressGeocodeSourceSchema.nullable(),
   geocodeConfidence: contactAddressConfidenceSchema.nullable(),
+  label: optionalTrimmedString,
+  latitude: z.number().nullable(),
+  longitude: z.number().nullable(),
   timezone: optionalTrimmedString,
 });
 

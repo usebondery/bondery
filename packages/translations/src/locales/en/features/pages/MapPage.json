@@ -1,0 +1,26 @@
+{
+  "AddressSearchPlaceholder": "Search by name or address...",
+  "Back": "Back",
+  "Empty": "No contacts with coordinates yet. Add an address or location to start.",
+  "NoAddressesFound": "No contacts with addresses in this area.",
+  "NoAddressesMatchSearch": "No addresses match your search.",
+  "NoContactsFound": "No contacts in this map area.",
+  "NoContactsMatchSearch": "No such contact found.",
+  "PinColumnAddress": "Address",
+  "PinColumnName": "Name",
+  "PinColumnType": "Type",
+  "RefreshingPins": "Refreshing map pins",
+  "SearchLabel": "Search the world",
+  "SearchPlaceholder": "Type address, city, region, country...",
+  "Subtitle": "See where your contacts are on the map.",
+  "Title": "Map",
+  "ViewAddresses": "Addresses",
+  "ViewLocations": "Locations",
+  "VisibleColumns": {
+    "Coordinates": "Coordinates",
+    "Location": "Location",
+    "Name": "Name"
+  },
+  "VisibleContactsTitle": "Contacts in current view ({count})",
+  "VisibleEmpty": "No contacts in this map area."
+}

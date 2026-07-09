@@ -1,27 +1,27 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { ScrollView, StyleSheet, Text } from "react-native";
-import { useRouter } from "expo-router";
-import { IconBell } from "@tabler/icons-react-native";
 import {
   APP_LANGUAGES_DATA,
   countryCodeToFlagEmoji,
-  formatLanguageDisplayLabel,
-  getAppLanguageExonymTranslationKey,
+  formatAppLanguagePickerLabel,
   getDeviceTimezone,
   getTimezoneSelectOptions,
   resolveToCanonicalTimezone,
 } from "@bondery/helpers/locale";
+import { coerceSupportedLocale } from "@bondery/translations";
+import { IconBell } from "@tabler/icons-react-native";
+import { useRouter } from "expo-router";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { ScrollView, StyleSheet, Text } from "react-native";
+import { StackNavBar } from "../../components/chrome";
 import { fetchSettings, updateSettings } from "../../lib/api/client";
+import { useMobileTranslations } from "../../lib/i18n/useMobileTranslations";
 import type {
   MobileLocale,
   MobilePreferencesState,
 } from "../../lib/preferences/useMobilePreferences";
 import { useMobilePreferences } from "../../lib/preferences/useMobilePreferences";
-import { useMobileTranslations } from "../../lib/i18n/useMobileTranslations";
 import { useAppToast } from "../../lib/toast/useAppToast";
-import { StackNavBar } from "../../components/chrome";
-import { useMobileThemeColors } from "../../theme/useMobileThemeColors";
 import { MOBILE_LAYOUT, MOBILE_TYPOGRAPHY } from "../../theme/tokens";
+import { useMobileThemeColors } from "../../theme/useMobileThemeColors";
 import { SettingsAsyncState } from "./components/SettingsAsyncState";
 import { SettingsFieldHint } from "./components/SettingsFieldHint";
 import { SettingsFieldLabel } from "./components/SettingsFieldLabel";
@@ -29,11 +29,6 @@ import { SettingsSelect } from "./components/SettingsSelect";
 
 type TimeFormatValue = "24h" | "12h";
 type ReminderHourValue = `${string}:00:00`;
-
-const LANGUAGE_FLAG_EMOJI: Record<string, string> = {
-  gb: "🇬🇧",
-  cz: "🇨🇿",
-};
 
 function normalizeReminderHour(value?: string): ReminderHourValue {
   const hour = Number.parseInt(value?.split(":")[0] ?? "", 10);
@@ -58,21 +53,17 @@ function formatReminderHourLabel(hour: number, timeFormat: TimeFormatValue): str
 export function SettingsLanguageScreen() {
   const router = useRouter();
   const t = useMobileTranslations();
+  const tLanguages = useMobileTranslations("Languages");
   const { showToast } = useAppToast();
   const colors = useMobileThemeColors();
 
-  const locale = useMobilePreferences(
-    (state: MobilePreferencesState) => state.locale,
-  );
-  const setLocale = useMobilePreferences(
-    (state: MobilePreferencesState) => state.setLocale,
-  );
+  const locale = useMobilePreferences((state: MobilePreferencesState) => state.locale);
+  const setLocale = useMobilePreferences((state: MobilePreferencesState) => state.setLocale);
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [timezone, setTimezone] = useState<string>(getDeviceTimezone());
   const [timeFormat, setTimeFormat] = useState<TimeFormatValue>("24h");
-  const [reminderSendHour, setReminderSendHour] =
-    useState<ReminderHourValue>("08:00:00");
+  const [reminderSendHour, setReminderSendHour] = useState<ReminderHourValue>("08:00:00");
 
   const loadSettings = useCallback(async () => {
     setIsLoading(true);
@@ -81,12 +72,11 @@ export function SettingsLanguageScreen() {
     try {
       const response = await fetchSettings();
 
-      const nextLanguage = response.data.language === "cs" ? "cs" : "en";
+      const nextLanguage = coerceSupportedLocale(response.data.language);
       const nextTimezone = resolveToCanonicalTimezone(
         response.data.timezone || getDeviceTimezone(),
       );
-      const nextTimeFormat: TimeFormatValue =
-        response.data.timeFormat === "12h" ? "12h" : "24h";
+      const nextTimeFormat: TimeFormatValue = response.data.timeFormat === "12h" ? "12h" : "24h";
 
       if (nextLanguage !== locale) {
         setLocale(nextLanguage);
@@ -98,7 +88,7 @@ export function SettingsLanguageScreen() {
       setLoadError(
         err instanceof Error
           ? err.message
-          : t("MobileApp.Settings.LanguageLoadErrorDescription"),
+          : t("LanguageLoadErrorDescription", { ns: "MobileSettings" }),
       );
     } finally {
       setIsLoading(false);
@@ -112,56 +102,47 @@ export function SettingsLanguageScreen() {
   const localeOptions = useMemo(
     () =>
       APP_LANGUAGES_DATA.map((language) => ({
+        label: formatAppLanguagePickerLabel(tLanguages, language),
+        leftSection: <Text style={styles.flag}>{countryCodeToFlagEmoji(language.flag)}</Text>,
         value: language.value as MobileLocale,
-        label: formatLanguageDisplayLabel(
-          t(getAppLanguageExonymTranslationKey(language.value)),
-          language.nativeName,
-        ),
-        leftSection: (
-          <Text style={styles.flag}>
-            {LANGUAGE_FLAG_EMOJI[language.flag] ?? language.flag}
-          </Text>
-        ),
       })),
-    [t],
+    [tLanguages],
   );
 
   const timezoneOptions = useMemo(
     () =>
       getTimezoneSelectOptions(timezone).map((timezoneOption) => ({
-        value: timezoneOption.value,
         label: timezoneOption.label,
-        searchKeywords: `${timezoneOption.value} ${timezoneOption.offsetLabel}`,
         leftSection: (
           <Text style={[styles.offsetLabel, { color: colors.textMuted }]}>
             {timezoneOption.offsetLabel}
           </Text>
         ),
         rightSection: (
-          <Text style={styles.flag}>
-            {countryCodeToFlagEmoji(timezoneOption.flag)}
-          </Text>
+          <Text style={styles.flag}>{countryCodeToFlagEmoji(timezoneOption.flag)}</Text>
         ),
+        searchKeywords: `${timezoneOption.value} ${timezoneOption.offsetLabel}`,
+        value: timezoneOption.value,
       })),
     [colors.textMuted, timezone],
   );
 
   const timeFormatOptions: Array<{ value: TimeFormatValue; label: string }> = [
     {
+      label: t("TimeFormat24h", { ns: "MobileSettings" }),
       value: "24h",
-      label: t("MobileApp.Settings.TimeFormat24h"),
     },
     {
+      label: t("TimeFormat12h", { ns: "MobileSettings" }),
       value: "12h",
-      label: t("MobileApp.Settings.TimeFormat12h"),
     },
   ];
 
   const reminderHourOptions = useMemo(
     () =>
       Array.from({ length: 24 }, (_, hour) => ({
-        value: `${String(hour).padStart(2, "0")}:00:00`,
         label: formatReminderHourLabel(hour, timeFormat),
+        value: `${String(hour).padStart(2, "0")}:00:00`,
       })),
     [timeFormat],
   );
@@ -179,9 +160,9 @@ export function SettingsLanguageScreen() {
     } catch {
       setLocale(previousLocale);
       showToast({
+        description: t("errors.unknown", { ns: "common" }),
+        headline: t("feedback.errorTitle", { ns: "common" }),
         type: "error",
-        headline: t("MobileApp.Common.ErrorTitle"),
-        description: t("MobileApp.Common.UnknownError"),
       });
     }
   };
@@ -199,9 +180,9 @@ export function SettingsLanguageScreen() {
     } catch {
       setTimezone(previousTimezone);
       showToast({
+        description: t("errors.unknown", { ns: "common" }),
+        headline: t("feedback.errorTitle", { ns: "common" }),
         type: "error",
-        headline: t("MobileApp.Common.ErrorTitle"),
-        description: t("MobileApp.Common.UnknownError"),
       });
     }
   };
@@ -219,9 +200,9 @@ export function SettingsLanguageScreen() {
     } catch {
       setTimeFormat(previousTimeFormat);
       showToast({
+        description: t("errors.unknown", { ns: "common" }),
+        headline: t("feedback.errorTitle", { ns: "common" }),
         type: "error",
-        headline: t("MobileApp.Common.ErrorTitle"),
-        description: t("MobileApp.Common.UnknownError"),
       });
     }
   };
@@ -241,9 +222,9 @@ export function SettingsLanguageScreen() {
     } catch {
       setReminderSendHour(previousReminderSendHour);
       showToast({
+        description: t("errors.unknown", { ns: "common" }),
+        headline: t("feedback.errorTitle", { ns: "common" }),
         type: "error",
-        headline: t("MobileApp.Common.ErrorTitle"),
-        description: t("MobileApp.Common.UnknownError"),
       });
     }
   };
@@ -251,72 +232,78 @@ export function SettingsLanguageScreen() {
   return (
     <>
       <StackNavBar
-        variant="elevated"
-        title={t("MobileApp.Settings.LanguageAndTime")}
         onBack={() => router.back()}
+        title={t("LanguageAndTime", { ns: "MobileSettings" })}
+        variant="elevated"
       />
 
       <ScrollView
-        style={[styles.screen, { backgroundColor: colors.appBackground }]}
         contentContainerStyle={styles.content}
+        style={[styles.screen, { backgroundColor: colors.appBackground }]}
       >
         <SettingsAsyncState
-          isLoading={isLoading}
-          errorTitle={t("MobileApp.Settings.LanguageLoadErrorTitle")}
           errorDescription={loadError}
+          errorTitle={t("LanguageLoadErrorTitle", { ns: "MobileSettings" })}
+          isLoading={isLoading}
           loadingMinHeight={120}
           onRetry={() => {
             void loadSettings();
           }}
         >
-          <>
-            <SettingsFieldLabel>{t("MobileApp.Settings.LanguageSelectLabel")}</SettingsFieldLabel>
-            <SettingsSelect
-              label={t("MobileApp.Settings.LanguageSelectLabel")}
-              options={localeOptions}
-              value={locale}
-              onValueChange={(nextLocale) => {
-                void handleLocaleChange(nextLocale as MobileLocale);
-              }}
-            />
+          <SettingsFieldLabel>
+            {t("LanguageSelectLabel", { ns: "MobileSettings" })}
+          </SettingsFieldLabel>
+          <SettingsSelect
+            label={t("LanguageSelectLabel", { ns: "MobileSettings" })}
+            onValueChange={(nextLocale) => {
+              void handleLocaleChange(nextLocale as MobileLocale);
+            }}
+            options={localeOptions}
+            value={locale}
+          />
 
-            <SettingsFieldLabel>{t("MobileApp.Settings.TimezoneSelectLabel")}</SettingsFieldLabel>
-            <SettingsSelect
-              label={t("MobileApp.Settings.TimezoneSelectLabel")}
-              options={timezoneOptions}
-              value={timezone}
-              searchable
-              searchPlaceholder={t("SettingsPage.Profile.TimezoneSearch")}
-              emptySearchLabel={t("Addresses.NoResults")}
-              onValueChange={(nextTimezone) => {
-                void handleTimezoneChange(nextTimezone);
-              }}
-            />
+          <SettingsFieldLabel>
+            {t("TimezoneSelectLabel", { ns: "MobileSettings" })}
+          </SettingsFieldLabel>
+          <SettingsSelect
+            emptySearchLabel={t("feedback.noResults", { ns: "common" })}
+            label={t("TimezoneSelectLabel", { ns: "MobileSettings" })}
+            onValueChange={(nextTimezone) => {
+              void handleTimezoneChange(nextTimezone);
+            }}
+            options={timezoneOptions}
+            searchable
+            searchPlaceholder={t("Profile.TimezoneSearch", { ns: "SettingsPage" })}
+            value={timezone}
+          />
 
-            <SettingsFieldLabel>{t("MobileApp.Settings.TimeFormatSelectLabel")}</SettingsFieldLabel>
-            <SettingsSelect
-              label={t("MobileApp.Settings.TimeFormatSelectLabel")}
-              options={timeFormatOptions}
-              value={timeFormat}
-              onValueChange={(nextTimeFormat) => {
-                void handleTimeFormatChange(nextTimeFormat as TimeFormatValue);
-              }}
-            />
+          <SettingsFieldLabel>
+            {t("TimeFormatSelectLabel", { ns: "MobileSettings" })}
+          </SettingsFieldLabel>
+          <SettingsSelect
+            label={t("TimeFormatSelectLabel", { ns: "MobileSettings" })}
+            onValueChange={(nextTimeFormat) => {
+              void handleTimeFormatChange(nextTimeFormat as TimeFormatValue);
+            }}
+            options={timeFormatOptions}
+            value={timeFormat}
+          />
 
-            <SettingsFieldLabel>{t("SettingsPage.Preferences.ReminderTime")}</SettingsFieldLabel>
-            <SettingsFieldHint>
-              {t("SettingsPage.Preferences.ReminderTimeDescription")}
-            </SettingsFieldHint>
-            <SettingsSelect
-              label={t("SettingsPage.Preferences.ReminderTime")}
-              leadingIcon={<IconBell size={18} stroke={colors.iconSecondary} />}
-              options={reminderHourOptions}
-              value={reminderSendHour}
-              onValueChange={(nextReminderSendHour) => {
-                void handleReminderSendHourChange(nextReminderSendHour);
-              }}
-            />
-          </>
+          <SettingsFieldLabel>
+            {t("Preferences.ReminderTime", { ns: "SettingsPage" })}
+          </SettingsFieldLabel>
+          <SettingsFieldHint>
+            {t("Preferences.ReminderTimeDescription", { ns: "SettingsPage" })}
+          </SettingsFieldHint>
+          <SettingsSelect
+            label={t("Preferences.ReminderTime", { ns: "SettingsPage" })}
+            leadingIcon={<IconBell size={18} stroke={colors.iconSecondary} />}
+            onValueChange={(nextReminderSendHour) => {
+              void handleReminderSendHourChange(nextReminderSendHour);
+            }}
+            options={reminderHourOptions}
+            value={reminderSendHour}
+          />
         </SettingsAsyncState>
       </ScrollView>
     </>
@@ -324,14 +311,11 @@ export function SettingsLanguageScreen() {
 }
 
 const styles = StyleSheet.create({
-  screen: {
-    flex: 1,
-  },
   content: {
-    paddingTop: MOBILE_LAYOUT.spacing.contentTop,
-    paddingHorizontal: MOBILE_LAYOUT.spacing.horizontal,
-    paddingBottom: MOBILE_LAYOUT.spacing.contentBottom,
     gap: 16,
+    paddingBottom: MOBILE_LAYOUT.spacing.contentBottom,
+    paddingHorizontal: MOBILE_LAYOUT.spacing.horizontal,
+    paddingTop: MOBILE_LAYOUT.spacing.contentTop,
   },
   flag: {
     fontSize: 18,
@@ -339,7 +323,10 @@ const styles = StyleSheet.create({
   },
   offsetLabel: {
     fontSize: 12,
-    fontWeight: MOBILE_TYPOGRAPHY.fontWeight.semibold,
     fontVariant: ["tabular-nums"],
+    fontWeight: MOBILE_TYPOGRAPHY.fontWeight.semibold,
+  },
+  screen: {
+    flex: 1,
   },
 });

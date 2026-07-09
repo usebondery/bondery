@@ -1,0 +1,32 @@
+{
+  "AddAction": "Přidat datum",
+  "AddHint": "Pro přidání nového data vyplňte všechny informace.",
+  "AddImportantDate": "Přidat důležité datum",
+  "BirthdayDateLabel": "Vyberte narozeniny",
+  "DatePlaceholder": "Vyberte datum",
+  "DeleteAction": "Smazat",
+  "DraftIncompleteError": "Pro přidání nového data vyplňte všechny informace.",
+  "Empty": "Zatím žádná důležitá data.",
+  "ErrorTitle": "Chyba",
+  "NotePlaceholder": "Volitelná poznámka",
+  "NotifyDayBefore": "Upozornit {count} den předem",
+  "NotifyDaysBefore": "Upozornit {count} dny předem",
+  "NotifyMe": "Upozornit mě",
+  "NotifyNone": "Neupozorňovat",
+  "SuccessTitle": "Úspěch",
+  "Title": "Důležitá data",
+  "TypeDisabledBirthdateHint": "{firstName} už má definované narozeniny",
+  "TypeDisabledHint": "{firstName} už má definované narozeniny nebo jmeniny",
+  "TypeDisabledNamedateHint": "{firstName} už má definované jmeniny",
+  "TypePlaceholder": "Vyberte typ",
+  "Types": {
+    "anniversary": "Výročí",
+    "birthday": "Narozeniny",
+    "graduation": "Promoce",
+    "nameday": "Jmeniny",
+    "other": "Jiné"
+  },
+  "UniqueTypeError": "Lze přidat pouze jedny {type}.",
+  "UpdateError": "Důležitá data se nepodařilo aktualizovat",
+  "UpdateSuccess": "Důležitá data byla úspěšně aktualizována"
+}

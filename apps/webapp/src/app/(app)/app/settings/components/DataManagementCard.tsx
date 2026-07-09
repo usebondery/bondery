@@ -1,22 +1,22 @@
 "use client";
 
-import { Text, Group, Divider, CardSection } from "@mantine/core";
+import { CardSection, Divider, Group, Text } from "@mantine/core";
 import { IconDatabase } from "@tabler/icons-react";
-import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
-import { LogoutSection } from "./LogoutSection";
+import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
 import { DeleteAccountSection } from "./DeleteAccountSection";
-import { LinkedInImportSection } from "./LinkedInImportSection";
 import { InstagramImportSection } from "./InstagramImportSection";
-import { VCardImportSection } from "./VCardImportSection";
+import { LinkedInImportSection } from "./LinkedInImportSection";
+import { LogoutSection } from "./LogoutSection";
 import { SettingsSection } from "./SettingsSection";
+import { VCardImportSection } from "./VCardImportSection";
 
 export function DataManagementCard() {
-  const t = useTranslations("SettingsPage.DataManagement");
+  const t = useWebTranslations("SettingsPage", "DataManagement");
 
   return (
     <SettingsSection
-      id="data-management"
       icon={<IconDatabase size={20} stroke={1.5} />}
+      id="data-management"
       title={t("Title")}
     >
       <CardSection inheritPadding py="md">
@@ -26,10 +26,10 @@ export function DataManagementCard() {
       <Divider />
 
       <CardSection inheritPadding py="md">
-        <Text size="sm" fw={500} mb={4}>
+        <Text fw={500} mb={4} size="sm">
           {t("LinkedInImport.SectionTitle")}
         </Text>
-        <Text size="xs" c="dimmed" mb="md">
+        <Text c="dimmed" mb="md" size="xs">
           {t("ImportContactsDescription")}
         </Text>
         <Group align="flex-start" gap="md" wrap="wrap">

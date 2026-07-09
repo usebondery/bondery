@@ -1,20 +1,20 @@
 {
   "compilerOptions": {
-    "target": "ES2022",
+    "declaration": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "jsx": "react-jsx",
+    "lib": ["ES2022", "DOM"],
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
-    "lib": ["ES2022", "DOM"],
-    "jsx": "react-jsx",
     "outDir": "./dist",
+    "resolveJsonModule": true,
     "rootDir": "./src",
-    "strict": true,
-    "types": ["node"],
-    "esModuleInterop": true,
     "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "declaration": true,
-    "resolveJsonModule": true
+    "strict": true,
+    "target": "ES2022",
+    "types": ["node"]
   },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist", "src/**/*.test.ts"]
+  "exclude": ["node_modules", "dist", "src/**/*.test.ts"],
+  "include": ["src/**/*"]
 }

@@ -7,13 +7,13 @@ import { useContactsSelectionMode } from "../contactsSelectionStore";
 import { ContactsSelectionHeader } from "./ContactsSelectionHeader";
 
 interface GroupContactsScreenHeaderProps {
-  label: string;
   emoji: string;
-  onBack: () => void;
-  onEditGroup: () => void;
-  onDuplicateGroup: () => void;
-  onDeleteGroup: () => void;
   isDuplicating: boolean;
+  label: string;
+  onBack: () => void;
+  onDeleteGroup: () => void;
+  onDuplicateGroup: () => void;
+  onEditGroup: () => void;
 }
 
 /** Elevated stack nav bar matching settings subpages; full-width selection toolbar when active. */
@@ -37,38 +37,37 @@ export function GroupContactsScreenHeader({
 
   return (
     <StackNavBar
-      variant="elevated"
       onBack={onBack}
-      title={headerTitle}
       right={
         <OverflowMenu
-          triggerVariant="nav"
-          accessibilityLabel={t("MobileApp.Groups.MenuAccessibilityLabel")}
+          accessibilityLabel={t("MenuAccessibilityLabel", { ns: "MobileGroups" })}
           disabled={isDuplicating}
           items={[
             {
-              id: "edit",
               icon: <IconEdit size={20} stroke={colors.iconPrimary} />,
-              label: t("MobileApp.Groups.EditGroup"),
+              id: "edit",
+              label: t("EditGroup", { ns: "MobileGroups" }),
               onPress: onEditGroup,
             },
             {
-              id: "duplicate",
-              icon: <IconCopy size={20} stroke={colors.iconPrimary} />,
-              label: t("MobileApp.Groups.DuplicateGroup"),
-              onPress: onDuplicateGroup,
               disabled: isDuplicating,
+              icon: <IconCopy size={20} stroke={colors.iconPrimary} />,
+              id: "duplicate",
+              label: t("DuplicateGroup", { ns: "MobileGroups" }),
+              onPress: onDuplicateGroup,
             },
             {
-              id: "delete",
               icon: <IconTrash size={20} stroke={colors.dangerAccent} />,
-              label: t("MobileApp.Groups.DeleteGroup"),
-              tone: "danger",
+              id: "delete",
+              label: t("DeleteGroup", { ns: "MobileGroups" }),
               onPress: onDeleteGroup,
+              tone: "danger",
             },
           ]}
+          triggerVariant="nav"
         />
       }
+      title={headerTitle}
     />
   );
 }

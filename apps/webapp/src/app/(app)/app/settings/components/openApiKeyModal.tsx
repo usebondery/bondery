@@ -1,12 +1,5 @@
 "use client";
 
-import { Alert, Anchor, Stack, Text, TextInput } from "@mantine/core";
-import { useOs } from "@mantine/hooks";
-import { modals } from "@mantine/modals";
-import { notifications } from "@mantine/notifications";
-import { IconAlertTriangle, IconFileText, IconKey } from "@tabler/icons-react";
-import type { ApiKeyCreated, ApiKeyPermission } from "@bondery/schemas";
-import { API_KEY_LIMITS } from "@bondery/schemas";
 import { docHref } from "@bondery/helpers";
 import {
   CodeBlock,
@@ -15,32 +8,39 @@ import {
   ModalFooter,
   ModalTitle,
 } from "@bondery/mantine-next";
+import type { ApiKeyCreated, ApiKeyPermission } from "@bondery/schemas";
+import { API_KEY_LIMITS } from "@bondery/schemas";
+import { Alert, Anchor, Stack, Text, TextInput } from "@mantine/core";
+import { useOs } from "@mantine/hooks";
+import { modals } from "@mantine/modals";
+import { notifications } from "@mantine/notifications";
+import { IconAlertTriangle, IconFileText, IconKey } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
+import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
+import { createModalId, useModalDismiss } from "@/lib/modals";
 import { useCreateApiKeyMutation } from "@/lib/query/hooks/useApiKeys";
-import { createModalId, useModalBlocking } from "@/lib/modals";
-import { buildApiKeyPermissionOptions } from "./apiKeyPermissionOptions";
-import { buildApiKeyTestSnippets, resolveDefaultTestSnippetId } from "./buildApiKeyTestSnippets";
-
-type TranslateFn = (key: string, values?: Record<string, string | number>) => string;
+import { useApiKeyPermissionOptions } from "../hooks/useApiKeyPermissionOptions";
+import { resolveDefaultTestSnippetId, useApiKeyTestSnippets } from "./buildApiKeyTestSnippets";
 
 interface OpenApiKeyModalOptions {
-  t: TranslateFn;
-  onCreated: (created: ApiKeyCreated) => void;
   apiBaseUrl: string;
+  onCreated: (created: ApiKeyCreated) => void;
 }
 
 interface ApiKeyModalBodyProps extends OpenApiKeyModalOptions {
   modalId: string;
 }
 
-function ApiKeyModalBody({ modalId, t, onCreated, apiBaseUrl }: ApiKeyModalBodyProps) {
+function ApiKeyModalBody({ modalId, onCreated, apiBaseUrl }: ApiKeyModalBodyProps) {
+  const t = useWebTranslations("SettingsPage", "ApiKeys");
   const [step, setStep] = useState<"create" | "reveal">("create");
   const [label, setLabel] = useState("");
   const [permission, setPermission] = useState<ApiKeyPermission>("read");
   const [fullKey, setFullKey] = useState("");
 
   const createMutation = useCreateApiKeyMutation();
-  const permissionOptions = buildApiKeyPermissionOptions(t);
+  const permissionOptions = useApiKeyPermissionOptions();
+  const testSnippets = useApiKeyTestSnippets(apiBaseUrl, fullKey);
   const docsUrl = docHref("api.authentication");
   const os = useOs();
   const defaultTestSnippetId = resolveDefaultTestSnippetId(os);
@@ -48,7 +48,7 @@ function ApiKeyModalBody({ modalId, t, onCreated, apiBaseUrl }: ApiKeyModalBodyP
   const trimmedLabel = label.trim();
   const canCreate = trimmedLabel.length > 0 && !createMutation.isPending;
 
-  useModalBlocking(modalId, createMutation.isPending);
+  const { closeModal } = useModalDismiss(modalId, createMutation.isPending);
 
   useEffect(() => {
     modals.updateModal({
@@ -58,7 +58,9 @@ function ApiKeyModalBody({ modalId, t, onCreated, apiBaseUrl }: ApiKeyModalBodyP
   }, [modalId, step]);
 
   const handleCreate = async () => {
-    if (!canCreate) return;
+    if (!canCreate) {
+      return;
+    }
     try {
       const created = await createMutation.mutateAsync({
         label: trimmedLabel,
@@ -70,8 +72,8 @@ function ApiKeyModalBody({ modalId, t, onCreated, apiBaseUrl }: ApiKeyModalBodyP
     } catch {
       notifications.show({
         ...errorNotificationTemplate({
-          title: t("CreateErrorTitle"),
           description: t("CreateErrorDescription"),
+          title: t("CreateErrorTitle"),
         }),
       });
     }
@@ -79,35 +81,35 @@ function ApiKeyModalBody({ modalId, t, onCreated, apiBaseUrl }: ApiKeyModalBodyP
 
   const handleDone = () => {
     setFullKey("");
-    modals.close(modalId);
+    closeModal();
   };
 
   if (step === "create") {
     return (
       <Stack gap="md">
         <TextInput
-          label={t("LabelField")}
-          placeholder={t("LabelPlaceholder")}
-          value={label}
-          onChange={(event) => setLabel(event.currentTarget.value)}
-          maxLength={API_KEY_LIMITS.labelMaxLength}
           autoFocus
           data-autofocus
+          label={t("LabelField")}
+          maxLength={API_KEY_LIMITS.labelMaxLength}
+          onChange={(event) => setLabel(event.currentTarget.value)}
+          placeholder={t("LabelPlaceholder")}
+          value={label}
         />
         <DescribedSelect
-          label={t("PermissionField")}
-          data={permissionOptions}
-          value={permission}
-          onChange={(value) => setPermission(value as ApiKeyPermission)}
           allowDeselect={false}
+          data={permissionOptions}
+          label={t("PermissionField")}
+          onChange={(value) => setPermission(value as ApiKeyPermission)}
+          value={permission}
         />
         <ModalFooter
-          cancelLabel={t("Cancel")}
-          onCancel={() => modals.close(modalId)}
-          actionLabel={t("CreateButton")}
-          onAction={handleCreate}
           actionDisabled={!canCreate}
+          actionLabel={t("CreateButton")}
           actionLoading={createMutation.isPending}
+          cancelLabel={t("Cancel")}
+          onAction={handleCreate}
+          onCancel={closeModal}
         />
       </Stack>
     );
@@ -120,29 +122,29 @@ function ApiKeyModalBody({ modalId, t, onCreated, apiBaseUrl }: ApiKeyModalBodyP
       </Alert>
 
       <Stack gap={4}>
-        <Text size="sm" fw={500}>
+        <Text fw={500} size="sm">
           {t("SecretCodeLabel")}
         </Text>
         <CodeBlock
+          code={fullKey}
+          copiedLabel={t("CopiedButton")}
+          copyLabel={t("CopyButton")}
           icon={<IconFileText size={14} />}
           language="plaintext"
-          code={fullKey}
-          copyLabel={t("CopyButton")}
-          copiedLabel={t("CopiedButton")}
         />
       </Stack>
 
       <Stack gap={4}>
-        <Text size="sm" fw={500}>
+        <Text fw={500} size="sm">
           {t("TestRequestLabel")}
         </Text>
         <CodeBlock
-          snippets={buildApiKeyTestSnippets(apiBaseUrl, fullKey, t)}
-          defaultSnippetId={defaultTestSnippetId}
-          copyLabel={t("CopyButton")}
           copiedLabel={t("CopiedButton")}
+          copyLabel={t("CopyButton")}
+          defaultSnippetId={defaultTestSnippetId}
+          snippets={testSnippets}
         />
-        <Anchor href={docsUrl} target="_blank" rel="noopener noreferrer" size="sm">
+        <Anchor href={docsUrl} rel="noopener noreferrer" size="sm" target="_blank">
           {t("LearnMoreApiDocs")}
         </Anchor>
       </Stack>
@@ -152,14 +154,19 @@ function ApiKeyModalBody({ modalId, t, onCreated, apiBaseUrl }: ApiKeyModalBodyP
   );
 }
 
+function ApiKeyModalTitle() {
+  const t = useWebTranslations("SettingsPage", "ApiKeys");
+  return <ModalTitle icon={<IconKey size={20} stroke={1.5} />} text={t("CreateTitle")} />;
+}
+
 export function openApiKeyModal(options: OpenApiKeyModalOptions) {
   const modalId = createModalId("api-key-create");
 
   modals.open({
-    modalId,
-    title: <ModalTitle text={options.t("CreateTitle")} icon={<IconKey size={20} stroke={1.5} />} />,
-    size: "md",
     centered: true,
     children: <ApiKeyModalBody modalId={modalId} {...options} />,
+    modalId,
+    size: "md",
+    title: <ApiKeyModalTitle />,
   });
 }

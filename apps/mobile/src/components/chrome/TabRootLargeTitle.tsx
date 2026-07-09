@@ -13,8 +13,8 @@ export function TabRootLargeTitle({ children }: TabRootLargeTitleProps) {
 
   return (
     <Text
-      style={[MOBILE_TEXT_STYLES.largeTitle, styles.title, { color: colors.textPrimary }]}
       numberOfLines={1}
+      style={[MOBILE_TEXT_STYLES.largeTitle, styles.title, { color: colors.textPrimary }]}
     >
       {children}
     </Text>

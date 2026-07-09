@@ -1,0 +1,35 @@
+{
+  "email": {
+    "invalid": "Bitte gib eine gültige E-Mail-Adresse ein",
+    "invalidTitle": "Ungültige E-Mail"
+  },
+  "fields": {
+    "firstName": {
+      "maxLength": "Vorname darf höchstens {max} Zeichen lang sein",
+      "required": "Vorname ist erforderlich"
+    },
+    "generic": {
+      "maxLength": "Wert darf höchstens {max} Zeichen lang sein"
+    },
+    "headline": {
+      "maxLength": "Überschrift darf höchstens {max} Zeichen lang sein"
+    },
+    "label": {
+      "maxLength": "{field} darf höchstens {max} Zeichen lang sein",
+      "required": "{field} ist erforderlich"
+    },
+    "lastName": {
+      "maxLength": "Nachname darf höchstens {max} Zeichen lang sein"
+    },
+    "location": {
+      "maxLength": "Standort darf höchstens {max} Zeichen lang sein"
+    },
+    "middleName": {
+      "maxLength": "Zweiter Vorname darf höchstens {max} Zeichen lang sein"
+    }
+  },
+  "interaction": {
+    "titleRequired": "Titel ist erforderlich"
+  },
+  "title": "Validierungsfehler"
+}

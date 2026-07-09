@@ -1,20 +1,26 @@
-import { AppShellWrapper } from "./components/AppShellWrapper";
-import { AppShellWithQueryBadges } from "./components/AppShellWithQueryBadges";
-import { getAppBootstrap } from "@/lib/app/getAppBootstrap";
-import {
-  resolveServerSession,
-  signOutServerSession,
-} from "@/lib/auth/resolveServerSession";
+import { WEBAPP_NAME } from "@bondery/helpers/globals/paths";
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
+import { getAppBootstrap } from "@/lib/app/getAppBootstrap";
+import { resolveServerSession, signOutServerSession } from "@/lib/auth/resolveServerSession";
+import { SettingsCacheSeed } from "@/lib/query/SettingsCacheSeed";
+import { AppShellWithQueryBadges } from "./components/AppShellWithQueryBadges";
+import { AppShellWrapper } from "./components/AppShellWrapper";
 import "leaflet/dist/leaflet.css";
 import { WEBAPP_ROUTES, WEBSITE_ROUTES } from "@bondery/helpers/globals/paths";
-import { ColorSchemeSync } from "./components/ColorSchemeSync";
-import { EnrichStatusNotificationManager } from "@/lib/extension/EnrichStatusNotificationManager";
-import { EnrichResumeDetector } from "@/lib/extension/EnrichResumeDetector";
-import { ExtensionUpdateNotificationManager } from "@/lib/extension/ExtensionUpdateNotificationManager";
-import { ServiceWorkerRegistration } from "./components/ServiceWorkerRegistration";
-import { Suspense } from "react";
 import { cookies, headers } from "next/headers";
+import { Suspense } from "react";
+import { EnrichResumeDetector } from "@/components/extension/EnrichResumeDetector";
+import { EnrichStatusNotificationManager } from "@/components/extension/EnrichStatusNotificationManager";
+import { ExtensionUpdateNotificationManager } from "@/components/extension/ExtensionUpdateNotificationManager";
+import { SIDEBAR_COOKIE_NAME } from "@/lib/cookies/constants";
+import { ColorSchemeSync } from "./components/ColorSchemeSync";
+import { ServiceWorkerRegistration } from "./components/ServiceWorkerRegistration";
+
+/** Sync fallback while per-route generateMetadata streams on client navigation. */
+export const metadata: Metadata = {
+  title: WEBAPP_NAME,
+};
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const session = await resolveServerSession();
@@ -46,17 +52,18 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     redirect(WEBAPP_ROUTES.HOME);
   }
 
-  const { settings } = bootstrap;
+  const { settings, settingsQueryData } = bootstrap;
 
   if (!settings.onboardingCompletedAt && !pathname.startsWith(WEBAPP_ROUTES.ONBOARDING)) {
     redirect(WEBAPP_ROUTES.ONBOARDING);
   }
 
-  const initialCollapsed = cookieStore.get("bondery-sidebar-collapsed")?.value === "true";
+  const initialCollapsed = cookieStore.get(SIDEBAR_COOKIE_NAME)?.value === "true";
   const { userName, avatarUrl, colorScheme } = settings;
 
   return (
     <>
+      <SettingsCacheSeed data={settingsQueryData} />
       <ServiceWorkerRegistration />
       <ColorSchemeSync colorScheme={colorScheme} />
       <EnrichStatusNotificationManager />
@@ -65,20 +72,20 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       <Suspense
         fallback={
           <AppShellWrapper
-            userName={userName}
             avatarUrl={avatarUrl}
-            initialCollapsed={initialCollapsed}
             hasActiveMergeRecommendations={false}
             hasOverdueKeepInTouch={false}
+            initialCollapsed={initialCollapsed}
+            userName={userName}
           >
             {children}
           </AppShellWrapper>
         }
       >
         <AppShellWithQueryBadges
-          userName={userName}
           avatarUrl={avatarUrl}
           initialCollapsed={initialCollapsed}
+          userName={userName}
         >
           {children}
         </AppShellWithQueryBadges>

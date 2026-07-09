@@ -1,17 +1,17 @@
 "use client";
 
-import { useMantineColorScheme } from "@mantine/core";
-import { notifications } from "@mantine/notifications";
-import type { ColorSchemePreference } from "@bondery/schemas";
-import { useState } from "react";
-import type { ReactNode } from "react";
-import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
 import {
-  ThemePicker as SharedThemePicker,
   errorNotificationTemplate,
   loadingNotificationTemplate,
+  ThemePicker as SharedThemePicker,
   successNotificationTemplate,
 } from "@bondery/mantine-next";
+import type { ColorSchemePreference } from "@bondery/schemas";
+import { useMantineColorScheme } from "@mantine/core";
+import { notifications } from "@mantine/notifications";
+import type { ReactNode } from "react";
+import { useState } from "react";
+import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
 import { useUpdateSettingsMutation } from "@/lib/query/hooks/useSettings";
 
 interface ThemePickerProps {
@@ -20,7 +20,7 @@ interface ThemePickerProps {
 }
 
 export function ThemePicker({ initialValue, label }: ThemePickerProps) {
-  const t = useTranslations("SettingsPage.Preferences");
+  const t = useWebTranslations("SettingsPage", "Preferences");
   const [value, setValue] = useState<ColorSchemePreference>(initialValue);
   const { setColorScheme } = useMantineColorScheme();
   const updateSettings = useUpdateSettingsMutation();
@@ -36,8 +36,8 @@ export function ThemePicker({ initialValue, label }: ThemePickerProps) {
 
     const loadingNotification = notifications.show({
       ...loadingNotificationTemplate({
-        title: t("UpdatingTheme"),
         description: t("PleaseWait"),
+        title: t("UpdatingTheme"),
       }),
     });
 
@@ -47,8 +47,8 @@ export function ThemePicker({ initialValue, label }: ThemePickerProps) {
       notifications.hide(loadingNotification);
       notifications.show(
         successNotificationTemplate({
-          title: t("UpdateSuccess"),
           description: t("ThemeUpdateSuccess"),
+          title: t("UpdateSuccess"),
         }),
       );
 
@@ -62,8 +62,8 @@ export function ThemePicker({ initialValue, label }: ThemePickerProps) {
       notifications.hide(loadingNotification);
       notifications.show(
         errorNotificationTemplate({
-          title: t("UpdateError"),
           description: t("ThemeUpdateError"),
+          title: t("UpdateError"),
         }),
       );
     }
@@ -71,15 +71,15 @@ export function ThemePicker({ initialValue, label }: ThemePickerProps) {
 
   return (
     <SharedThemePicker
-      value={value}
       className="max-w-96"
-      onChange={handleChange}
       labels={{
-        title: label ?? t("Theme"),
-        light: t("Light"),
         dark: t("Dark"),
+        light: t("Light"),
         system: t("System"),
+        title: label ?? t("Theme"),
       }}
+      onChange={handleChange}
+      value={value}
     />
   );
 }

@@ -1,3 +1,4 @@
+import { normalizeWebsiteUrl } from "#socials/normalize-website-url.js";
 import {
   type ContactSocialFieldCommitAction,
   type ContactSocialFieldKey,
@@ -5,7 +6,6 @@ import {
   processContactSocialFieldValue,
   resolveContactSocialFieldCommit,
 } from "#socials/socials-helpers.js";
-import { normalizeWebsiteUrl } from "#socials/normalize-website-url.js";
 
 export type SocialInputRerouteReason = "wrong_platform" | "looks_like_phone" | "looks_like_website";
 
@@ -21,8 +21,8 @@ export type AnalyzeSocialFieldInputResult =
 
 export interface AnalyzeSocialFieldInputOptions {
   dialCode?: string;
-  skipReroute?: boolean;
   persistedByField?: Partial<Record<ContactSocialFieldKey, string>>;
+  skipReroute?: boolean;
 }
 
 const HANDLE_FIELDS = new Set<ContactSocialFieldKey>(["linkedin", "instagram", "facebook"]);
@@ -127,10 +127,10 @@ function suggestReroute(
 
   return {
     outcome: "suggest_reroute",
-    suggestedField,
-    value: processed.value,
     reason,
+    suggestedField,
     targetHasValue: getTargetHasValue(suggestedField, processed.value, options?.persistedByField),
+    value: processed.value,
   };
 }
 
@@ -148,16 +148,16 @@ export function analyzeSocialFieldInput(
   });
 
   if (action.action === "noop" || action.action === "clear" || action.action === "error") {
-    return { outcome: "commit", action };
+    return { action, outcome: "commit" };
   }
 
   if (options?.skipReroute) {
-    return { outcome: "commit", action };
+    return { action, outcome: "commit" };
   }
 
   const inputValue = rawValue.trim();
   if (!inputValue) {
-    return { outcome: "commit", action };
+    return { action, outcome: "commit" };
   }
 
   const detectedPlatform = detectPlatformFromUrl(inputValue);
@@ -200,5 +200,5 @@ export function analyzeSocialFieldInput(
     }
   }
 
-  return { outcome: "commit", action };
+  return { action, outcome: "commit" };
 }

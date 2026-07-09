@@ -1,0 +1,20 @@
+{
+  "And": "und",
+  "AuthenticationError": "Authentifizierungsfehler",
+  "ContinueWith": "Weiter mit {provider}",
+  "Description": "Wir melden dich an oder erstellen ein neues Konto, falls du noch keins hast.",
+  "MobileNotAvailable": "Mobile App demnächst verfügbar",
+  "MobileNotAvailableMessage": "Die Bondery-App ist auf Mobilgeräten noch nicht verfügbar. Besuch uns bitte auf einem Desktop- oder Laptop-Computer, um loszulegen.",
+  "PrivacyPolicy": "Datenschutzerklärung",
+  "Providers": {
+    "GitHub": "GitHub",
+    "LinkedIn": "LinkedIn"
+  },
+  "SignIn": "Anmelden",
+  "TermsAgreement": "Wenn du fortfährst, stimmst du unseren",
+  "TermsOfService": "Nutzungsbedingungen",
+  "TermsText": "Wenn du fortfährst, stimmst du unseren <termsLink>Nutzungsbedingungen</termsLink> und der <privacyLink>Datenschutzerklärung</privacyLink> zu.",
+  "Title": "Bondery",
+  "UnexpectedError": "Unerwarteter Fehler",
+  "UnexpectedErrorMessage": "Ein unerwarteter Fehler ist aufgetreten"
+}

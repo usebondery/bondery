@@ -1,17 +1,17 @@
-import { useCallback, useState } from "react";
 import { IconTrash } from "@tabler/icons-react-native";
+import { useCallback, useState } from "react";
 import { ActionSheetPopup } from "../../../components/ActionSheetPopup";
+import { deleteGroup } from "../../../lib/domains/groups";
 import { useMobileTranslations } from "../../../lib/i18n/useMobileTranslations";
 import { useAppToast } from "../../../lib/toast/useAppToast";
 import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
-import { groupsDomain } from "../../../lib/domains/groups";
 
 interface GroupDeleteDialogProps {
-  open: boolean;
   groupId: string;
   groupTitle: string;
-  onOpenChange: (open: boolean) => void;
   onDeleted: () => void;
+  onOpenChange: (open: boolean) => void;
+  open: boolean;
 }
 
 export function GroupDeleteDialog({
@@ -27,56 +27,62 @@ export function GroupDeleteDialog({
   const [isDeleting, setIsDeleting] = useState(false);
 
   const handleDelete = useCallback(async () => {
-    if (isDeleting) return;
+    if (isDeleting) {
+      return;
+    }
 
     setIsDeleting(true);
 
     try {
-      groupsDomain.delete(groupId);
+      deleteGroup(groupId);
       onOpenChange(false);
       onDeleted();
     } catch {
       showToast({
+        description: t("DeleteFailed", { ns: "MobileGroups" }),
+        headline: t("feedback.errorTitle", { ns: "common" }),
         type: "error",
-        headline: t("MobileApp.Common.ErrorTitle"),
-        description: t("MobileApp.Groups.DeleteFailed"),
       });
       setIsDeleting(false);
     }
   }, [groupId, isDeleting, onDeleted, onOpenChange, showToast, t]);
 
-  const dialogTitle = t("MobileApp.Groups.DeleteDialogTitle").replace("{title}", groupTitle);
+  const dialogTitle = t("DeleteDialogTitle", { ns: "MobileGroups" }).replace("{title}", groupTitle);
 
   return (
     <ActionSheetPopup
-      open={open}
-      title={dialogTitle}
       actions={[
         {
-          label: t("MobileApp.Common.Cancel"),
-          onPress: () => onOpenChange(false),
           disabled: isDeleting,
+          label: t("actions.cancel", { ns: "common" }),
+          onPress: () => onOpenChange(false),
           tone: "neutral",
           variant: "outline",
         },
         {
-          label: t("MobileApp.Groups.DeleteConfirm"),
           icon: <IconTrash size={16} stroke={colors.textOnPrimary} />,
-          onPress: handleDelete,
+          label: t("DeleteConfirm", { ns: "MobileGroups" }),
           loading: isDeleting,
+          onPress: handleDelete,
           tone: "danger",
           variant: "filled",
         },
       ]}
-      onOpenChange={(nextOpen) => {
-        if (!nextOpen && isDeleting) return;
-        onOpenChange(nextOpen);
-      }}
+      isBusy={isDeleting}
       onClose={() => {
-        if (isDeleting) return;
+        if (isDeleting) {
+          return;
+        }
         onOpenChange(false);
       }}
-      isBusy={isDeleting}
+      onOpenChange={(nextOpen) => {
+        if (!nextOpen && isDeleting) {
+          return;
+        }
+        onOpenChange(nextOpen);
+      }}
+      open={open}
+      title={dialogTitle}
     />
   );
 }

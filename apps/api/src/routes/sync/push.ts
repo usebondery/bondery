@@ -1,13 +1,10 @@
-import type { FastifyReply } from "fastify";
-import type { AppRoutePlugin } from "../../lib/fastify-types.js";
-import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
-import { syncPushRequestSchema, syncPushResponseSchema } from "@bondery/schemas/sync";
 import type { SyncPushResult } from "@bondery/schemas/sync";
-import { getAuth } from "../../lib/auth.js";
-import { applyOpenApiRouteMeta } from "../../lib/openapi-route-meta.js";
-import { withOkResponse } from "../../lib/openapi-route-responses.js";
-import { createAdminClient } from "../../lib/supabase.js";
-import { validateSyncProtocolHeaders } from "../../lib/sync/protocol.js";
+import { syncPushRequestSchema, syncPushResponseSchema } from "@bondery/schemas/sync";
+import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
+import { createAdminClient } from "../../lib/data/supabase.js";
+import { getAuth } from "../../lib/platform/auth/strategies.js";
+import type { AppRoutePlugin } from "../../lib/platform/fastify-types.js";
+import { withOkResponse } from "../../lib/platform/openapi/responses.js";
 import { applySyncMutation } from "../../lib/sync/apply-mutation.js";
 import {
   findSyncReceipt,
@@ -15,22 +12,21 @@ import {
   hashSyncMutationPayload,
   storeSyncReceipt,
 } from "../../lib/sync/idempotency.js";
+import { validateSyncProtocolHeaders } from "../../lib/sync/protocol.js";
 
 export const syncPushRoutes: AppRoutePlugin = async (fastify): Promise<void> => {
   fastify.addHook("onRoute", (routeOptions) => {
     if (routeOptions.schema) {
       routeOptions.schema.tags = ["Sync"];
     }
-    applyOpenApiRouteMeta(routeOptions, { area: "session" });
   });
-  fastify.addHook("onRequest", fastify.auth([fastify.verifySession]));
 
   fastify.post(
     "/push",
     {
       schema: {
-        description: "Apply sync mutations from the client device.",
         body: syncPushRequestSchema,
+        description: "Apply sync mutations from the client device.",
         response: withOkResponse(syncPushResponseSchema, "Sync push results"),
       } satisfies FastifyZodOpenApiSchema,
     },
@@ -44,14 +40,12 @@ export const syncPushRoutes: AppRoutePlugin = async (fastify): Promise<void> => 
       const admin = createAdminClient();
       const ctx = {
         client,
-        user,
         log: request.log,
+        user,
         wakeMeta: { sourceDeviceId: deviceId },
       };
 
-      const sortedMutations = [...mutations].sort(
-        (a, b) => a.clientSequence - b.clientSequence,
-      );
+      const sortedMutations = [...mutations].sort((a, b) => a.clientSequence - b.clientSequence);
 
       const results: SyncPushResult[] = [];
 
@@ -62,9 +56,9 @@ export const syncPushRoutes: AppRoutePlugin = async (fastify): Promise<void> => 
         if (existing) {
           if (existing.payload_hash !== payloadHash) {
             results.push({
+              error: "Idempotency payload mismatch",
               id: mutation.id,
               status: "rejected",
-              error: "Idempotency payload mismatch",
             });
             continue;
           }
@@ -73,8 +67,8 @@ export const syncPushRoutes: AppRoutePlugin = async (fastify): Promise<void> => 
           results.push({
             ...stored,
             id: mutation.id,
-            status: "duplicate",
             serverSequence: existing.server_sequence,
+            status: "duplicate",
           });
           continue;
         }
@@ -83,12 +77,12 @@ export const syncPushRoutes: AppRoutePlugin = async (fastify): Promise<void> => 
 
         if (result.status === "applied") {
           await storeSyncReceipt(admin, {
-            userId: user.id,
             mutationId: mutation.id,
             mutationType: mutation.type,
             payloadHash,
-            serverSequence: result.serverSequence,
             result,
+            serverSequence: result.serverSequence,
+            userId: user.id,
           });
         }
 
@@ -98,9 +92,9 @@ export const syncPushRoutes: AppRoutePlugin = async (fastify): Promise<void> => 
       const nextServerSequence = await getLastServerSequence(admin, user.id);
 
       return {
+        nextServerSequence,
         results,
         serverTime: new Date().toISOString(),
-        nextServerSequence,
       };
     },
   );

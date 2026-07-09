@@ -1,17 +1,17 @@
 "use client";
 
 import { useCallback } from "react";
-import type { SocialActionKey } from "@/lib/socialActionTooltips";
-import { useWebTranslations as useTranslations } from "./useWebTranslations";
+import type { SocialActionKey } from "@/lib/contacts/socialActionTooltips";
+import { useWebTranslations } from "./useWebTranslations";
 
 const TOOLTIP_KEY: Record<SocialActionKey, string> = {
-  phone: "TooltipCall",
   email: "TooltipEmail",
-  linkedin: "TooltipLinkedIn",
-  instagram: "TooltipInstagram",
-  whatsapp: "TooltipWhatsApp",
   facebook: "TooltipFacebook",
+  instagram: "TooltipInstagram",
+  linkedin: "TooltipLinkedIn",
+  phone: "TooltipCall",
   signal: "TooltipSignal",
+  whatsapp: "TooltipWhatsApp",
 };
 
 function normalizeFirstName(firstName: string | null | undefined): string {
@@ -20,7 +20,7 @@ function normalizeFirstName(firstName: string | null | undefined): string {
 }
 
 export function useSocialActionTooltips() {
-  const t = useTranslations("Socials");
+  const t = useWebTranslations("Socials");
 
   const getSocialActionTooltip = useCallback(
     (action: SocialActionKey, firstName: string) => {
@@ -54,5 +54,5 @@ export function useSocialActionTooltips() {
     [t],
   );
 
-  return { getSocialActionTooltip, getSocialActionLabel };
+  return { getSocialActionLabel, getSocialActionTooltip };
 }

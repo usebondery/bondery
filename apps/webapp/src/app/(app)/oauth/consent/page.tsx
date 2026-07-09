@@ -1,25 +1,34 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { errorNotificationTemplate } from "@bondery/mantine-next";
 import {
-  Text,
   Button,
-  Stack,
   Card,
-  Group,
-  Loader,
   Center,
-  ThemeIcon,
+  Divider,
+  Group,
   List,
   ListItem,
-  Divider,
+  Loader,
+  Stack,
+  Text,
+  ThemeIcon,
 } from "@mantine/core";
-import { IconShield, IconX, IconCheck } from "@tabler/icons-react";
 import { notifications } from "@mantine/notifications";
+import { IconCheck, IconShield, IconX } from "@tabler/icons-react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
 import { createBrowswerSupabaseClient } from "@/lib/supabase/client";
-import { useSearchParams, useRouter } from "next/navigation";
-import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
-import { errorNotificationTemplate } from "@bondery/mantine-next";
+
+function getOAuthRedirectUrl(data: unknown): string | null {
+  if (!data || typeof data !== "object") {
+    return null;
+  }
+
+  const candidate = data as { redirect_to?: string; redirect_url?: string };
+  return candidate.redirect_to ?? candidate.redirect_url ?? null;
+}
 
 /**
  * OAuth 2.1 Consent Page
@@ -30,7 +39,7 @@ import { errorNotificationTemplate } from "@bondery/mantine-next";
  * URL: /oauth/consent?authorization_id=<id>
  */
 export default function OAuthConsentPage() {
-  const t = useTranslations("OAuthConsent");
+  const t = useWebTranslations("OAuthConsent");
   const searchParams = useSearchParams();
   const router = useRouter();
   const supabase = createBrowswerSupabaseClient();
@@ -48,22 +57,8 @@ export default function OAuthConsentPage() {
   const handledAuthorizationIdRef = useRef<string | null>(null);
   const redirectingRef = useRef(false);
 
-  function logConsent(event: string, data?: Record<string, unknown>) {
-    console.log("[oauth-consent]", event, data ?? {});
-  }
-
-  function getOAuthRedirectUrl(data: unknown): string | null {
-    if (!data || typeof data !== "object") return null;
-
-    const candidate = data as { redirect_to?: string; redirect_url?: string };
-    return candidate.redirect_to ?? candidate.redirect_url ?? null;
-  }
-
   const fetchDetails = useCallback(async () => {
     if (!authorizationId) {
-      logConsent("missing-authorization-id", {
-        search: typeof window !== "undefined" ? window.location.search : "",
-      });
       setError(t("MissingAuthorizationId"));
       setLoading(false);
       return;
@@ -71,36 +66,18 @@ export default function OAuthConsentPage() {
 
     try {
       if (handledAuthorizationIdRef.current === authorizationId || redirectingRef.current) {
-        logConsent("skip-duplicate-fetch", {
-          authorizationId,
-          alreadyHandled: handledAuthorizationIdRef.current === authorizationId,
-          redirecting: redirectingRef.current,
-        });
         return;
       }
 
       handledAuthorizationIdRef.current = authorizationId;
-      logConsent("fetch-details-start", { authorizationId });
-
       // Check if user is logged in
       const {
         data: { user },
       } = await supabase.auth.getUser();
-
-      logConsent("user-check", {
-        authorizationId,
-        hasUser: Boolean(user),
-        userId: user?.id ?? null,
-      });
-
       if (!user) {
         // Redirect to login, preserving authorization_id
         const consentPath = `/oauth/consent?authorization_id=${authorizationId}`;
         redirectingRef.current = true;
-        logConsent("redirect-to-login", {
-          authorizationId,
-          redirect: consentPath,
-        });
         router.push(`/login?redirect=${encodeURIComponent(consentPath)}`);
         return;
       }
@@ -108,13 +85,6 @@ export default function OAuthConsentPage() {
       // Fetch authorization details
       const { data, error: detailsError } =
         await supabase.auth.oauth.getAuthorizationDetails(authorizationId);
-
-      logConsent("authorization-details-response", {
-        authorizationId,
-        hasData: Boolean(data),
-        error: detailsError?.message ?? null,
-      });
-
       if (detailsError || !data) {
         setError(detailsError?.message ?? t("InvalidRequest"));
         setLoading(false);
@@ -125,24 +95,20 @@ export default function OAuthConsentPage() {
       const preApprovedRedirect = getOAuthRedirectUrl(data);
       if (preApprovedRedirect) {
         redirectingRef.current = true;
-        logConsent("preapproved-redirect", {
-          authorizationId,
-          redirectUrl: preApprovedRedirect,
-        });
         window.location.href = preApprovedRedirect;
         return;
       }
-
-      logConsent("consent-ready", {
-        authorizationId,
-        clientName: (data as { client?: { name?: string } }).client?.name ?? null,
+      const details = data as {
+        client?: { name?: string };
+        redirect_uri?: string;
+        scope?: string;
+      };
+      setAuthDetails({
+        client: { name: details.client?.name ?? "" },
+        redirect_uri: details.redirect_uri ?? "",
+        scope: details.scope ?? "",
       });
-      setAuthDetails(data as any);
     } catch (err) {
-      logConsent("fetch-details-error", {
-        authorizationId,
-        error: err instanceof Error ? err.message : String(err),
-      });
       setError(err instanceof Error ? err.message : t("UnexpectedError"));
     } finally {
       if (!redirectingRef.current) {
@@ -156,25 +122,18 @@ export default function OAuthConsentPage() {
   }, [fetchDetails]);
 
   async function handleApprove() {
-    if (!authorizationId) return;
+    if (!authorizationId) {
+      return;
+    }
     setSubmitting(true);
-    logConsent("approve-start", { authorizationId });
-
     try {
       const { data, error: approveError } =
         await supabase.auth.oauth.approveAuthorization(authorizationId);
-
-      logConsent("approve-response", {
-        authorizationId,
-        hasData: Boolean(data),
-        error: approveError?.message ?? null,
-      });
-
       if (approveError) {
         notifications.show(
           errorNotificationTemplate({
-            title: t("ErrorTitle"),
             description: approveError.message,
+            title: t("ErrorTitle"),
           }),
         );
         return;
@@ -184,23 +143,14 @@ export default function OAuthConsentPage() {
       const redirectUrl = getOAuthRedirectUrl(data);
       if (redirectUrl) {
         redirectingRef.current = true;
-        logConsent("approve-redirect", {
-          authorizationId,
-          redirectUrl,
-        });
         window.location.href = redirectUrl;
       } else {
-        logConsent("approve-missing-redirect", { authorizationId });
       }
     } catch (err) {
-      logConsent("approve-error", {
-        authorizationId,
-        error: err instanceof Error ? err.message : String(err),
-      });
       notifications.show(
         errorNotificationTemplate({
-          title: t("ErrorTitle"),
           description: err instanceof Error ? err.message : t("UnexpectedError"),
+          title: t("ErrorTitle"),
         }),
       );
     } finally {
@@ -209,25 +159,18 @@ export default function OAuthConsentPage() {
   }
 
   async function handleDeny() {
-    if (!authorizationId) return;
+    if (!authorizationId) {
+      return;
+    }
     setSubmitting(true);
-    logConsent("deny-start", { authorizationId });
-
     try {
       const { data, error: denyError } =
         await supabase.auth.oauth.denyAuthorization(authorizationId);
-
-      logConsent("deny-response", {
-        authorizationId,
-        hasData: Boolean(data),
-        error: denyError?.message ?? null,
-      });
-
       if (denyError) {
         notifications.show(
           errorNotificationTemplate({
-            title: t("ErrorTitle"),
             description: denyError.message,
+            title: t("ErrorTitle"),
           }),
         );
         return;
@@ -236,23 +179,14 @@ export default function OAuthConsentPage() {
       const redirectUrl = getOAuthRedirectUrl(data);
       if (redirectUrl) {
         redirectingRef.current = true;
-        logConsent("deny-redirect", {
-          authorizationId,
-          redirectUrl,
-        });
         window.location.href = redirectUrl;
       } else {
-        logConsent("deny-missing-redirect", { authorizationId });
       }
     } catch (err) {
-      logConsent("deny-error", {
-        authorizationId,
-        error: err instanceof Error ? err.message : String(err),
-      });
       notifications.show(
         errorNotificationTemplate({
-          title: t("ErrorTitle"),
           description: err instanceof Error ? err.message : t("UnexpectedError"),
+          title: t("ErrorTitle"),
         }),
       );
     } finally {
@@ -273,15 +207,15 @@ export default function OAuthConsentPage() {
   if (error || !authDetails) {
     return (
       <Center mih="100vh">
-        <Card p="xl" maw={480} w="100%" shadow="sm">
-          <Stack gap="md" align="center">
-            <ThemeIcon size={48} radius="xl" color="red" variant="light">
+        <Card maw={480} p="xl" shadow="sm" w="100%">
+          <Stack align="center" gap="md">
+            <ThemeIcon color="red" radius="xl" size={48} variant="light">
               <IconX size={24} />
             </ThemeIcon>
-            <Text size="lg" fw={600}>
+            <Text fw={600} size="lg">
               {t("ErrorTitle")}
             </Text>
-            <Text size="sm" c="dimmed" ta="center">
+            <Text c="dimmed" size="sm" ta="center">
               {error ?? t("InvalidRequest")}
             </Text>
           </Stack>
@@ -295,17 +229,17 @@ export default function OAuthConsentPage() {
 
   return (
     <Center mih="100vh">
-      <Card p="xl" maw={480} w="100%" shadow="sm">
+      <Card maw={480} p="xl" shadow="sm" w="100%">
         <Stack gap="lg">
-          <Group gap="sm" align="center">
-            <ThemeIcon size={40} radius="xl" variant="light">
+          <Group align="center" gap="sm">
+            <ThemeIcon radius="xl" size={40} variant="light">
               <IconShield size={22} />
             </ThemeIcon>
             <Stack gap={0}>
-              <Text size="lg" fw={600}>
+              <Text fw={600} size="lg">
                 {t("Title")}
               </Text>
-              <Text size="sm" c="dimmed">
+              <Text c="dimmed" size="sm">
                 {authDetails.client.name}
               </Text>
             </Stack>
@@ -317,18 +251,18 @@ export default function OAuthConsentPage() {
 
           {scopes.length > 0 && (
             <Stack gap="xs">
-              <Text size="sm" fw={500}>
+              <Text fw={500} size="sm">
                 {t("RequestedPermissions")}
               </Text>
               <List size="sm" spacing="xs">
                 {scopes.map((scope) => (
                   <ListItem
-                    key={scope}
                     icon={
-                      <ThemeIcon size={20} radius="xl" variant="light" color="blue">
+                      <ThemeIcon color="blue" radius="xl" size={20} variant="light">
                         <IconCheck size={12} />
                       </ThemeIcon>
                     }
+                    key={scope}
                   >
                     {t(`Scopes.${scope}`, { defaultValue: scope })}
                   </ListItem>
@@ -339,14 +273,14 @@ export default function OAuthConsentPage() {
 
           <Group grow>
             <Button
-              variant="default"
-              onClick={handleDeny}
-              loading={submitting}
               disabled={submitting}
+              loading={submitting}
+              onClick={handleDeny}
+              variant="default"
             >
               {t("Deny")}
             </Button>
-            <Button onClick={handleApprove} loading={submitting} disabled={submitting}>
+            <Button disabled={submitting} loading={submitting} onClick={handleApprove}>
               {t("Approve")}
             </Button>
           </Group>

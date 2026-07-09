@@ -1,16 +1,24 @@
 "use client";
 
-import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from "react";
-import { I18nProvider } from "next-i18next/client";
+import {
+  i18nConfig,
+  resourceLoader,
+  SUPPORTED_LOCALES,
+  type SupportedLocale,
+} from "@bondery/translations";
 import { DatesProvider } from "@mantine/dates";
 import type { Resource } from "i18next";
-import { i18nConfig, SUPPORTED_LOCALES, type SupportedLocale } from "@bondery/translations";
+import resourcesToBackend from "i18next-resources-to-backend";
+import { I18nProvider } from "next-i18next/client";
+import { createContext, type ReactNode, useCallback, useContext, useEffect, useState } from "react";
 
 export interface UserLocaleSettings {
+  applyUserLocale: (
+    patch: Partial<Pick<UserLocaleSettings, "locale" | "timezone" | "timeFormat">>,
+  ) => void;
   locale: SupportedLocale;
-  timezone: string;
   timeFormat: "24h" | "12h";
-  applyUserLocale: (patch: Partial<Pick<UserLocaleSettings, "locale" | "timezone" | "timeFormat">>) => void;
+  timezone: string;
 }
 
 const UserLocaleContext = createContext<UserLocaleSettings | null>(null);
@@ -31,9 +39,9 @@ export function useCurrentLocale(): SupportedLocale {
 interface LocaleProviderProps {
   children: ReactNode;
   locale: SupportedLocale;
-  timezone: string;
-  timeFormat: "24h" | "12h";
   resources: Resource;
+  timeFormat: "24h" | "12h";
+  timezone: string;
 }
 
 /**
@@ -59,26 +67,34 @@ export function LocaleProvider({
 
   const applyUserLocale = useCallback(
     (patch: Partial<Pick<UserLocaleSettings, "locale" | "timezone" | "timeFormat">>) => {
-      if (patch.locale) setLocale(patch.locale);
-      if (patch.timezone) setTimezone(patch.timezone);
-      if (patch.timeFormat) setTimeFormat(patch.timeFormat);
+      if (patch.locale) {
+        setLocale(patch.locale);
+      }
+      if (patch.timezone) {
+        setTimezone(patch.timezone);
+      }
+      if (patch.timeFormat) {
+        setTimeFormat(patch.timeFormat);
+      }
     },
     [],
   );
 
   return (
-    <UserLocaleContext.Provider value={{ locale, timezone, timeFormat, applyUserLocale }}>
+    <UserLocaleContext.Provider value={{ applyUserLocale, locale, timeFormat, timezone }}>
       <I18nProvider
-        language={locale}
-        resources={resources}
         defaultNS={i18nConfig.defaultNS}
         fallbackLng={i18nConfig.fallbackLng}
-        supportedLngs={[...SUPPORTED_LOCALES]}
         i18nextOptions={{
+          interpolation: i18nConfig.interpolation,
           keySeparator: i18nConfig.keySeparator,
           nsSeparator: i18nConfig.nsSeparator,
-          interpolation: i18nConfig.interpolation,
+          partialBundledLanguages: true,
         }}
+        language={locale}
+        resources={resources}
+        supportedLngs={[...SUPPORTED_LOCALES]}
+        use={[resourcesToBackend(resourceLoader)]}
       >
         <DatesProvider settings={{ locale }}>{children}</DatesProvider>
       </I18nProvider>

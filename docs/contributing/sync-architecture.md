@@ -2,6 +2,8 @@
 
 Bondery mobile is **local-first** with a **server-authoritative** sync engine: Postgres is source of truth, mobile keeps tier-1 data in SQLite, writes go through an outbox (`POST /api/sync/push`), reads through bootstrap + pull (`GET /api/sync/bootstrap`, `GET /api/sync/pull`).
 
+**Related code:** [`apps/mobile`](https://github.com/usebondery/bondery/tree/main/apps/mobile) · [`apps/api/src/routes/sync`](https://github.com/usebondery/bondery/tree/main/apps/api/src/routes/sync) · [`packages/schemas/src/sync`](https://github.com/usebondery/bondery/tree/main/packages/schemas/src/sync)
+
 See `.agents/skills/bondery-specific/references/sync-architecture.md` for the full checklist and protocol details.
 
 ## Stack overview

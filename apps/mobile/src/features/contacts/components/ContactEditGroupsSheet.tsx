@@ -1,32 +1,32 @@
+import type { Group, GroupWithCount } from "@bondery/schemas";
 import { XStack } from "@tamagui/stacks";
 import { Paragraph } from "@tamagui/text";
-import type { Group, GroupWithCount } from "@bondery/schemas";
 import { useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
+  type ListRenderItemInfo,
   Pressable,
   StyleSheet,
   Text,
   View,
-  type ListRenderItemInfo,
 } from "react-native";
-import { contactsDomain } from "../../../lib/domains/contacts";
-import { groupsDomain } from "../../../lib/domains/groups";
-import { MOBILE_OPACITY } from "../../../lib/config";
-import { useMobileTranslations } from "../../../lib/i18n/useMobileTranslations";
-import { useAppToast } from "../../../lib/toast/useAppToast";
 import { SearchActionSheet } from "../../../components/SearchActionSheet";
+import { MOBILE_OPACITY } from "../../../lib/config";
+import { addContactsToGroup, removeContactsFromGroup } from "../../../lib/domains/groups";
+import { useMobileTranslations } from "../../../lib/i18n/useMobileTranslations";
+import { getContactGroups, listGroups } from "../../../lib/sync/hooks/useSyncQuery";
+import { useAppToast } from "../../../lib/toast/useAppToast";
 import { MOBILE_LAYOUT, MOBILE_TYPOGRAPHY } from "../../../theme/tokens";
 import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
 import { GroupSelectRow } from "./GroupSelectRow";
 
 interface ContactEditGroupsSheetProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
   contactId: string;
   contactName: string;
   onGroupsReplaced: (groups: Group[]) => void;
+  onOpenChange: (open: boolean) => void;
+  open: boolean;
 }
 
 function filterGroups(groups: GroupWithCount[], query: string): GroupWithCount[] {
@@ -97,11 +97,9 @@ export function ContactEditGroupsSheet({
           return;
         }
 
-        const allGroups = groupsDomain.list();
+        const allGroups = listGroups();
         setAllGroups(allGroups);
-        const memberIds = new Set(
-          contactsDomain.listGroups(contactId).map((group) => group.id),
-        );
+        const memberIds = new Set(getContactGroups(contactId).map((group) => group.id));
         setInitialSelectedIds(memberIds);
         setSelectedGroupIds(new Set(memberIds));
       })
@@ -111,9 +109,9 @@ export function ContactEditGroupsSheet({
         }
 
         showToast({
+          description: t("GroupsLoadError", { ns: "MobileContactDetail" }),
+          headline: t("feedback.errorTitle", { ns: "common" }),
           type: "error",
-          headline: t("MobileApp.Common.ErrorTitle"),
-          description: t("MobileApp.ContactDetail.GroupsLoadError"),
         });
         onOpenChange(false);
       })
@@ -174,10 +172,10 @@ export function ContactEditGroupsSheet({
 
       try {
         for (const groupId of added) {
-          groupsDomain.addMembers(groupId, [contactId]);
+          addContactsToGroup(groupId, [contactId]);
         }
         for (const groupId of removed) {
-          groupsDomain.removeMembers(groupId, [contactId]);
+          removeContactsFromGroup(groupId, [contactId]);
         }
 
         const newGroups = allGroups.filter((group) => selectedGroupIds.has(group.id));
@@ -185,9 +183,9 @@ export function ContactEditGroupsSheet({
         onGroupsReplaced(newGroups);
       } catch {
         showToast({
+          description: t("EditGroupsFailed", { ns: "MobileContactDetail" }),
+          headline: t("feedback.errorTitle", { ns: "common" }),
           type: "error",
-          headline: t("MobileApp.Common.ErrorTitle"),
-          description: t("MobileApp.ContactDetail.EditGroupsFailed"),
         });
       } finally {
         setIsSaving(false);
@@ -197,10 +195,10 @@ export function ContactEditGroupsSheet({
 
   const renderItem = ({ item }: ListRenderItemInfo<GroupWithCount>) => (
     <GroupSelectRow
+      disabled={isSaving || isLoadingGroups}
       group={item}
       isSelected={selectedGroupIds.has(item.id)}
       onToggle={() => toggleGroup(item.id)}
-      disabled={isSaving || isLoadingGroups}
     />
   );
 
@@ -208,11 +206,11 @@ export function ContactEditGroupsSheet({
 
   const sheetHeader = (
     <Paragraph
+      color={colors.textPrimary}
       fontSize={MOBILE_TYPOGRAPHY.fontSize.sheetTitle}
       fontWeight={MOBILE_TYPOGRAPHY.fontWeight.bold}
-      color={colors.textPrimary}
     >
-      {t("MobileApp.ContactDetail.EditGroupsSheetTitle")}
+      {t("EditGroupsSheetTitle", { ns: "MobileContactDetail" })}
     </Paragraph>
   );
 
@@ -226,14 +224,14 @@ export function ContactEditGroupsSheet({
           styles.footerButton,
           styles.footerButtonOutline,
           {
-            borderColor: colors.borderStrong,
             backgroundColor: colors.surface,
+            borderColor: colors.borderStrong,
             opacity: isSaving ? MOBILE_OPACITY.disabled : pressed ? MOBILE_OPACITY.pressed : 1,
           },
         ]}
       >
         <Text style={[styles.footerButtonText, { color: colors.textPrimary }]}>
-          {t("MobileApp.Common.Cancel")}
+          {t("actions.cancel", { ns: "common" })}
         </Text>
       </Pressable>
 
@@ -244,17 +242,17 @@ export function ContactEditGroupsSheet({
         style={({ pressed }) => [
           styles.footerButton,
           {
-            borderColor: colors.primary,
             backgroundColor: colors.primary,
+            borderColor: colors.primary,
             opacity: !canSave ? MOBILE_OPACITY.disabled : pressed ? MOBILE_OPACITY.pressed : 1,
           },
         ]}
       >
         {isSaving ? (
-          <ActivityIndicator size="small" color={colors.textOnPrimary} />
+          <ActivityIndicator color={colors.textOnPrimary} size="small" />
         ) : (
           <Text style={[styles.footerButtonText, { color: colors.textOnPrimary }]}>
-            {t("MobileApp.ContactDetail.EditGroupsSave")}
+            {t("EditGroupsSave", { ns: "MobileContactDetail" })}
           </Text>
         )}
       </Pressable>
@@ -263,56 +261,56 @@ export function ContactEditGroupsSheet({
 
   return (
     <SearchActionSheet
-      open={open}
-      onOpenChange={handleOpenChange}
-      query={query}
-      onQueryChange={setQuery}
-      searchPlaceholder={t("MobileApp.Contacts.AddToGroupsSearchPlaceholder")}
-      searchEditable={!isSaving && !isLoadingGroups}
       dismissible={!isSaving}
-      header={sheetHeader}
       footer={sheetFooter}
+      header={sheetHeader}
+      onOpenChange={handleOpenChange}
+      onQueryChange={setQuery}
+      open={open}
+      query={query}
+      searchEditable={!isSaving && !isLoadingGroups}
+      searchPlaceholder={t("AddToGroupsSearchPlaceholder", { ns: "MobileContacts" })}
     >
       {isLoadingGroups ? (
         <View style={styles.loadingState}>
-          <ActivityIndicator size="small" color={colors.primary} />
+          <ActivityIndicator color={colors.primary} size="small" />
         </View>
       ) : allGroups.length === 0 ? (
         <View style={styles.emptyState}>
           <Paragraph
+            color={colors.textPrimary}
             fontSize={MOBILE_TYPOGRAPHY.fontSize.body}
             fontWeight={MOBILE_TYPOGRAPHY.fontWeight.semibold}
-            color={colors.textPrimary}
             textAlign="center"
           >
-            {t("MobileApp.Contacts.NoGroupsYet")}
+            {t("NoGroupsYet", { ns: "MobileContacts" })}
           </Paragraph>
           <Paragraph
-            fontSize={MOBILE_TYPOGRAPHY.fontSize.caption}
             color={colors.textSecondary}
-            textAlign="center"
+            fontSize={MOBILE_TYPOGRAPHY.fontSize.caption}
             marginTop={6}
+            textAlign="center"
           >
-            {t("MobileApp.Contacts.NoGroupsYetHint")}
+            {t("NoGroupsYetHint", { ns: "MobileContacts" })}
           </Paragraph>
         </View>
       ) : (
         <FlatList
-          style={styles.searchList}
-          data={filteredGroups}
-          keyExtractor={(item) => item.id}
-          renderItem={renderItem}
-          keyboardShouldPersistTaps="handled"
           automaticallyAdjustKeyboardInsets
-          initialNumToRender={24}
-          maxToRenderPerBatch={24}
-          windowSize={8}
           contentContainerStyle={styles.listContent}
+          data={filteredGroups}
+          initialNumToRender={24}
+          keyboardShouldPersistTaps="handled"
+          keyExtractor={(item) => item.id}
           ListEmptyComponent={
             <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
-              {t("MobileApp.Common.NoResults")}
+              {t("feedback.noResults", { ns: "common" })}
             </Text>
           }
+          maxToRenderPerBatch={24}
+          renderItem={renderItem}
+          style={styles.searchList}
+          windowSize={8}
         />
       )}
     </SearchActionSheet>
@@ -320,40 +318,40 @@ export function ContactEditGroupsSheet({
 }
 
 const styles = StyleSheet.create({
-  searchList: {
-    flex: 1,
-  },
-  listContent: {
-    paddingBottom: 12,
-  },
-  emptyText: {
-    textAlign: "center",
-    paddingVertical: 24,
-    fontSize: MOBILE_TYPOGRAPHY.fontSize.body,
-  },
   emptyState: {
     flex: 1,
     justifyContent: "center",
     paddingHorizontal: 24,
     paddingVertical: 32,
   },
-  loadingState: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 32,
+  emptyText: {
+    fontSize: MOBILE_TYPOGRAPHY.fontSize.body,
+    paddingVertical: 24,
+    textAlign: "center",
   },
   footerButton: {
-    flex: 1,
-    minHeight: MOBILE_LAYOUT.touchTarget,
+    alignItems: "center",
     borderRadius: MOBILE_LAYOUT.borderRadius.control,
     borderWidth: 1,
-    alignItems: "center",
+    flex: 1,
     justifyContent: "center",
+    minHeight: MOBILE_LAYOUT.touchTarget,
   },
   footerButtonOutline: {},
   footerButtonText: {
     fontSize: MOBILE_TYPOGRAPHY.fontSize.body,
     fontWeight: MOBILE_TYPOGRAPHY.fontWeight.semibold,
+  },
+  listContent: {
+    paddingBottom: 12,
+  },
+  loadingState: {
+    alignItems: "center",
+    flex: 1,
+    justifyContent: "center",
+    paddingVertical: 32,
+  },
+  searchList: {
+    flex: 1,
   },
 });

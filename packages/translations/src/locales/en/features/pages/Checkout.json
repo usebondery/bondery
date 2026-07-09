@@ -1,0 +1,12 @@
+{
+  "alreadySubscribedMessage": "You already have an active Premium subscription.",
+  "alreadySubscribedTitle": "Already subscribed",
+  "errorMessage": "Something went wrong. Please try again.",
+  "errorTitle": "Checkout failed",
+  "errorUnauthorized": "Please log in and try again.",
+  "successMessage": "Enjoy unlimited AI chat and all Premium features.",
+  "successTitle": "You're now Premium!",
+  "upgradePendingMessage": "Your account will upgrade to Premium shortly.",
+  "upgradePendingTitle": "Payment received",
+  "upgradeToPremium": "Upgrade to Premium"
+}

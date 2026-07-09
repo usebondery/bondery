@@ -31,11 +31,9 @@ export const idsRequestSchema = z.object({
 
 export const messageSchema = z.string();
 
-export const messageResponseSchema = z
-  .object({
-    message: messageSchema,
-  })
-  ;
+export const messageResponseSchema = z.object({
+  message: messageSchema,
+});
 
 export const personIdsSelectionSchema = z.object({
   personIds: z.array(contactIdSchema).min(1),
@@ -44,12 +42,12 @@ export const personIdsSelectionSchema = z.object({
 export const excludePersonIdsSchema = z.array(contactIdSchema).optional();
 
 export const paginationMetaSchema = z.object({
+  hasMore: z.boolean(),
   limit: z.number().int().positive(),
   offset: z.number().int().nonnegative(),
-  totalCount: z.number().int().nonnegative(),
-  hasMore: z.boolean(),
-  sort: z.string().nullable(),
   search: z.string().nullable(),
+  sort: z.string().nullable(),
+  totalCount: z.number().int().nonnegative(),
 });
 
 export type PaginationMeta = z.infer<typeof paginationMetaSchema>;

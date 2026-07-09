@@ -1,22 +1,22 @@
 "use client";
 
-import { Box, Checkbox, Group, Text } from "@mantine/core";
-import { IconGripVertical } from "@tabler/icons-react";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { Box, Checkbox, Group, Text } from "@mantine/core";
+import { IconGripVertical } from "@tabler/icons-react";
 import type { ReactNode } from "react";
 
 export interface SortableColumnItemColumn {
+  /** If true, checkbox is disabled */
+  fixed?: boolean;
+  /** Optional icon */
+  icon?: ReactNode;
   /** Unique key for the column - used as sortable ID */
   key: string;
   /** Display label */
   label: string;
-  /** Optional icon */
-  icon?: ReactNode;
   /** Whether column is visible */
   visible: boolean;
-  /** If true, checkbox is disabled */
-  fixed?: boolean;
 }
 
 export interface SortableColumnItemProps {
@@ -36,9 +36,9 @@ export function SortableColumnItem({ column, onToggle }: SortableColumnItemProps
   });
 
   const style = {
+    opacity: isDragging ? 0.5 : 1,
     transform: CSS.Transform.toString(transform),
     transition,
-    opacity: isDragging ? 0.5 : 1,
   };
 
   return (
@@ -46,16 +46,16 @@ export function SortableColumnItem({ column, onToggle }: SortableColumnItemProps
       ref={setNodeRef}
       style={style}
       {...attributes}
-      p="xs"
       bg={isDragging ? "gray.1" : undefined}
+      p="xs"
     >
       <Group gap="xs" wrap="nowrap">
-        <Box {...listeners} style={{ cursor: "grab", display: "flex", alignItems: "center" }}>
+        <Box {...listeners} style={{ alignItems: "center", cursor: "grab", display: "flex" }}>
           <IconGripVertical size={16} />
         </Box>
         <Checkbox
-          size="sm"
           checked={column.visible}
+          disabled={column.fixed}
           label={
             <Group gap="xs" wrap="nowrap">
               {column.icon}
@@ -63,7 +63,7 @@ export function SortableColumnItem({ column, onToggle }: SortableColumnItemProps
             </Group>
           }
           onChange={onToggle}
-          disabled={column.fixed}
+          size="sm"
           style={{ flex: 1 }}
         />
       </Group>

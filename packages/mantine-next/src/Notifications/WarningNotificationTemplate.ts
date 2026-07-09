@@ -1,11 +1,11 @@
-import { createElement, type ReactNode } from "react";
 import { IconAlertTriangle } from "@tabler/icons-react";
+import { createElement, type ReactNode } from "react";
 
 export interface WarningNotificationTemplateProps {
-  title: string;
   description: string;
   icon?: ReactNode;
   radius?: string | number;
+  title: string;
 }
 
 /**
@@ -18,11 +18,11 @@ export function warningNotificationTemplate({
   icon = createElement(IconAlertTriangle, { size: 18 }),
 }: WarningNotificationTemplateProps) {
   return {
-    title,
-    radius,
-    message: description,
     color: "yellow",
-    loading: false,
     icon,
+    loading: false,
+    message: description,
+    radius,
+    title,
   };
 }

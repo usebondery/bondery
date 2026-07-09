@@ -1,26 +1,26 @@
 import { useMemo, useState } from "react";
-import { Pressable, StyleSheet, Text, View, type StyleProp, type ViewStyle } from "react-native";
-import { EMOJI_PICKER_LAYOUT } from "../emoji-picker/constants";
+import { Pressable, type StyleProp, StyleSheet, Text, View, type ViewStyle } from "react-native";
 import { useMobileTranslations } from "../../lib/i18n/useMobileTranslations";
+import type { ShowAppToastInput } from "../../lib/toast/useAppToast";
 import { MOBILE_LAYOUT, MOBILE_TYPOGRAPHY } from "../../theme/tokens";
 import { useMobileThemeColors } from "../../theme/useMobileThemeColors";
+import { EMOJI_PICKER_LAYOUT } from "../emoji-picker/constants";
 import { ColorPickerSheet } from "./ColorPickerSheet";
 import { getContrastBorderColor, isValidHex, normalizeHex } from "./colorUtils";
-import type { ShowAppToastInput } from "../../lib/toast/useAppToast";
 
 export interface ColorPickerInputProps {
-  value: string;
-  onChange: (hex: string) => void;
-  label?: string;
-  placeholder?: string;
-  error?: string;
-  disabled?: boolean;
+  accessibilityLabel?: string;
   compact?: boolean;
+  disabled?: boolean;
+  error?: string;
+  label?: string;
+  onChange: (hex: string) => void;
+  placeholder?: string;
+  showToast: (options: ShowAppToastInput) => void;
   /** Fills available width in a flex row. */
   stretch?: boolean;
-  accessibilityLabel?: string;
   triggerStyle?: StyleProp<ViewStyle>;
-  showToast: (options: ShowAppToastInput) => void;
+  value: string;
 }
 
 export function ColorPickerInput({
@@ -43,8 +43,8 @@ export function ColorPickerInput({
   const normalizedValue = normalizeHex(value);
   const hasValue = isValidHex(value);
   const resolvedAccessibilityLabel =
-    accessibilityLabel ?? label ?? t("MobileApp.Groups.EditColorLabel");
-  const resolvedPlaceholder = placeholder ?? t("MobileApp.Groups.EditColorLabel");
+    accessibilityLabel ?? label ?? t("EditColorLabel", { ns: "MobileGroups" });
+  const resolvedPlaceholder = placeholder ?? t("EditColorLabel", { ns: "MobileGroups" });
 
   const triggerBorderColor = error
     ? colors.dangerAccent
@@ -74,11 +74,18 @@ export function ColorPickerInput({
     }
 
     return (
-      <Text style={[styles.placeholder, { color: colors.textSecondary }]} numberOfLines={1}>
+      <Text numberOfLines={1} style={[styles.placeholder, { color: colors.textSecondary }]}>
         {resolvedPlaceholder}
       </Text>
     );
-  }, [colors.textSecondary, compact, hasValue, normalizedValue, resolvedPlaceholder, triggerBorderColor]);
+  }, [
+    colors.textSecondary,
+    compact,
+    hasValue,
+    normalizedValue,
+    resolvedPlaceholder,
+    triggerBorderColor,
+  ]);
 
   return (
     <>
@@ -88,9 +95,9 @@ export function ColorPickerInput({
         ) : null}
 
         <Pressable
-          accessibilityRole="button"
+          accessibilityHint={t("TriggerAccessibilityHint", { ns: "MobileColorPicker" })}
           accessibilityLabel={resolvedAccessibilityLabel}
-          accessibilityHint={t("MobileApp.ColorPicker.TriggerAccessibilityHint")}
+          accessibilityRole="button"
           accessibilityState={{ disabled }}
           disabled={disabled}
           onPress={() => setOpen(true)}
@@ -100,7 +107,8 @@ export function ColorPickerInput({
             compact && stretch ? styles.compactTrigger : null,
             stretch ? styles.stretchTrigger : null,
             {
-              backgroundColor: pressed && !disabled ? colors.surfacePressed : colors.inputBackground,
+              backgroundColor:
+                pressed && !disabled ? colors.surfacePressed : colors.inputBackground,
               borderColor: triggerBorderColor,
               opacity: disabled ? 0.5 : 1,
             },
@@ -115,11 +123,11 @@ export function ColorPickerInput({
 
       {open && !disabled ? (
         <ColorPickerSheet
-          open
-          value={hasValue ? normalizedValue : ""}
           onOpenChange={setOpen}
           onSelect={onChange}
+          open
           showToast={showToast}
+          value={hasValue ? normalizedValue : ""}
         />
       ) : null}
     </>
@@ -127,61 +135,61 @@ export function ColorPickerInput({
 }
 
 const styles = StyleSheet.create({
-  root: {
-    width: "100%",
+  colorSwatch: {
+    borderRadius: 12,
+    borderWidth: 1,
+    height: 24,
+    width: 24,
   },
   compactRoot: {
     alignSelf: "flex-start",
     flexShrink: 0,
   },
-  stretchRoot: {
-    flex: 1,
-    minWidth: 0,
+  compactTrigger: {
+    paddingHorizontal: 8,
+    width: EMOJI_PICKER_LAYOUT.compactTriggerWidth,
+  },
+  error: {
+    fontSize: MOBILE_TYPOGRAPHY.fontSize.caption,
+    marginTop: 6,
   },
   label: {
     fontSize: MOBILE_TYPOGRAPHY.fontSize.caption,
     fontWeight: MOBILE_TYPOGRAPHY.fontWeight.medium,
     marginBottom: MOBILE_LAYOUT.spacing.contentTop / 2,
   },
-  trigger: {
-    minHeight: MOBILE_LAYOUT.touchTarget,
-    borderRadius: MOBILE_LAYOUT.borderRadius.control,
-    borderWidth: 1,
-    paddingHorizontal: 12,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: MOBILE_LAYOUT.spacing.contentTop / 2,
-  },
-  squareTrigger: {
-    width: MOBILE_LAYOUT.touchTarget,
-    height: MOBILE_LAYOUT.touchTarget,
-    paddingHorizontal: 0,
-  },
-  compactTrigger: {
-    width: EMOJI_PICKER_LAYOUT.compactTriggerWidth,
-    paddingHorizontal: 8,
-  },
-  stretchTrigger: {
-    width: "100%",
-  },
-  triggerContent: {
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  colorSwatch: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    borderWidth: 1,
-  },
   placeholder: {
     fontSize: MOBILE_TYPOGRAPHY.fontSize.caption,
     fontWeight: MOBILE_TYPOGRAPHY.fontWeight.medium,
     textAlign: "center",
   },
-  error: {
-    marginTop: 6,
-    fontSize: MOBILE_TYPOGRAPHY.fontSize.caption,
+  root: {
+    width: "100%",
+  },
+  squareTrigger: {
+    height: MOBILE_LAYOUT.touchTarget,
+    paddingHorizontal: 0,
+    width: MOBILE_LAYOUT.touchTarget,
+  },
+  stretchRoot: {
+    flex: 1,
+    minWidth: 0,
+  },
+  stretchTrigger: {
+    width: "100%",
+  },
+  trigger: {
+    alignItems: "center",
+    borderRadius: MOBILE_LAYOUT.borderRadius.control,
+    borderWidth: 1,
+    flexDirection: "row",
+    gap: MOBILE_LAYOUT.spacing.contentTop / 2,
+    justifyContent: "center",
+    minHeight: MOBILE_LAYOUT.touchTarget,
+    paddingHorizontal: 12,
+  },
+  triggerContent: {
+    alignItems: "center",
+    justifyContent: "center",
   },
 });

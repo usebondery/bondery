@@ -12,9 +12,7 @@ const STRICT = process.env.CHECK_MODAL_PATTERNS_STRICT === "1";
 
 type Violation = { file: string; rule: string; detail: string };
 
-const ALLOWED_DECLARATIVE_MODAL_FILES = new Set([
-  "app/(app)/app/onboarding/OnboardingFlow.tsx",
-]);
+const ALLOWED_DECLARATIVE_MODAL_FILES = new Set(["app/(app)/app/onboarding/OnboardingClient.tsx"]);
 
 const ALLOWED_UPDATE_MODAL_FILES = new Set([
   "lib/modals/useModalBlocking.ts",
@@ -32,14 +30,15 @@ const DISMISS_UPDATE_PATTERN =
 const DISMISS_OPEN_PATTERN =
   /modals\.open\(\{(?:(?!\bmodals\.(?:open|updateModal|close)\b)[\s\S])*?(closeOnEscape|closeOnClickOutside|withCloseButton)/;
 
-const BLOCKING_STATE_PATTERN =
-  /\b(isSubmitting|isPending|actionLoading|isParsing|isImporting)\b/;
+const BLOCKING_STATE_PATTERN = /\b(isSubmitting|isPending|actionLoading|isParsing|isImporting)\b/;
 
 function walk(dir: string, acc: string[] = []): string[] {
   for (const entry of readdirSync(dir)) {
     const full = join(dir, entry);
     if (statSync(full).isDirectory()) {
-      if (entry === "node_modules" || entry === ".next") continue;
+      if (entry === "node_modules" || entry === ".next") {
+        continue;
+      }
       walk(full, acc);
     } else if (/\.(tsx?|jsx?)$/.test(entry)) {
       acc.push(full);
@@ -63,30 +62,31 @@ function checkFile(absPath: string): Violation[] {
 
   if (/<Modal[\s>]/.test(content) && !ALLOWED_DECLARATIVE_MODAL_FILES.has(rel)) {
     violations.push({
+      detail:
+        "Use modals.open via open*Modal helpers; OnboardingClient is the only <Modal> exception",
       file: rel,
       rule: "no-declarative-modal",
-      detail: "Use modals.open via open*Modal helpers; OnboardingFlow is the only <Modal> exception",
     });
   }
 
   if (DISMISS_UPDATE_PATTERN.test(content) && rel !== "lib/modals/useModalBlocking.ts") {
     violations.push({
-      file: rel,
-      rule: "no-dismiss-update-modal",
       detail:
         "Use useModalBlocking for dismiss chrome; never set closeOnEscape/closeOnClickOutside/withCloseButton in feature code",
+      file: rel,
+      rule: "no-dismiss-update-modal",
     });
   }
 
   if (
     DISMISS_OPEN_PATTERN.test(content) &&
-    rel !== "app/(app)/app/onboarding/OnboardingFlow.tsx"
+    rel !== "app/(app)/app/onboarding/OnboardingClient.tsx"
   ) {
     violations.push({
-      file: rel,
-      rule: "no-dismiss-open-modal",
       detail:
         "Use useModalBlocking for dismiss chrome; never set closeOnEscape/closeOnClickOutside/withCloseButton in modals.open",
+      file: rel,
+      rule: "no-dismiss-open-modal",
     });
   }
 
@@ -96,9 +96,10 @@ function checkFile(absPath: string): Violation[] {
     rel !== "lib/modals/useModalBlocking.ts"
   ) {
     violations.push({
+      detail:
+        "Route modal chrome updates through useModalBlocking or an allowlisted title/size effect",
       file: rel,
       rule: "no-raw-update-modal",
-      detail: "Route modal chrome updates through useModalBlocking or an allowlisted title/size effect",
     });
   }
 
@@ -110,9 +111,10 @@ function checkFile(absPath: string): Violation[] {
     !rel.includes("openStandardConfirmModal")
   ) {
     violations.push({
+      detail:
+        "Modal bodies with async/blocking state must call useModalBlocking(modalId, isBlocking)",
       file: rel,
       rule: "missing-use-modal-blocking",
-      detail: "Modal bodies with async/blocking state must call useModalBlocking(modalId, isBlocking)",
     });
   }
 
@@ -122,10 +124,10 @@ function checkFile(absPath: string): Violation[] {
     !content.includes("ModalScrollLayout")
   ) {
     violations.push({
-      file: rel,
-      rule: "missing-modal-scroll-layout",
       detail:
         "Modal bodies with ContactsTable must use ModalScrollLayout so footer actions stay visible",
+      file: rel,
+      rule: "missing-modal-scroll-layout",
     });
   }
 

@@ -1,20 +1,20 @@
 import type { SyncMutation, SyncPushResult } from "@bondery/schemas/sync";
+import { type DomainContext, DomainError } from "../../domains/_shared/context.js";
 import {
-  createContact,
-  updateContact,
-  deleteContact,
   addContactTag,
+  createContact,
+  deleteContact,
   removeContactTag,
+  updateContact,
 } from "../../domains/contacts/index.js";
 import {
-  createGroup,
-  updateGroup,
-  deleteGroup,
   addGroupMembers,
+  createGroup,
+  deleteGroup,
   removeGroupMembers,
+  updateGroup,
 } from "../../domains/groups/index.js";
-import { createTag, updateTag, deleteTag } from "../../domains/tags/index.js";
-import { DomainError, type DomainContext } from "../../domains/_shared/context.js";
+import { createTag, deleteTag, updateTag } from "../../domains/tags/index.js";
 import { SyncConflictError } from "./conflict.js";
 
 export async function applySyncMutation(
@@ -26,44 +26,44 @@ export async function applySyncMutation(
       case "contact.create": {
         const { data, txid, serverSequence } = await createContact(ctx, mutation.payload);
         return {
-          txid,
           result: {
-            id: mutation.id,
-            status: "applied",
-            serverSequence,
-            txid,
             data: { contact: data.contact },
+            id: mutation.id,
+            serverSequence,
+            status: "applied",
+            txid,
           },
+          txid,
         };
       }
       case "contact.update": {
         const { data, txid, serverSequence } = await updateContact(ctx, {
-          personId: mutation.entityId,
-          patch: mutation.payload,
           baseUpdatedAt: mutation.baseUpdatedAt,
+          patch: mutation.payload,
+          personId: mutation.entityId,
         });
         return {
-          txid,
           result: {
-            id: mutation.id,
-            status: "applied",
-            serverSequence,
-            txid,
             data: { contact: data.contact },
+            id: mutation.id,
+            serverSequence,
+            status: "applied",
+            txid,
           },
+          txid,
         };
       }
       case "contact.delete": {
         const { txid, serverSequence } = await deleteContact(ctx, mutation.entityId);
         return {
-          txid,
           result: {
-            id: mutation.id,
-            status: "applied",
-            serverSequence,
-            txid,
             data: { deletedId: mutation.entityId },
+            id: mutation.id,
+            serverSequence,
+            status: "applied",
+            txid,
           },
+          txid,
         };
       }
       case "contact.addTag": {
@@ -73,14 +73,14 @@ export async function applySyncMutation(
           mutation.payload.tagId,
         );
         return {
-          txid,
           result: {
-            id: mutation.id,
-            status: "applied",
-            serverSequence,
-            txid,
             data: { tag: data.tag },
+            id: mutation.id,
+            serverSequence,
+            status: "applied",
+            txid,
           },
+          txid,
         };
       }
       case "contact.removeTag": {
@@ -90,27 +90,27 @@ export async function applySyncMutation(
           mutation.payload.tagId,
         );
         return {
-          txid,
           result: {
-            id: mutation.id,
-            status: "applied",
-            serverSequence,
-            txid,
             data: { personId: mutation.entityId, tagId: mutation.payload.tagId },
+            id: mutation.id,
+            serverSequence,
+            status: "applied",
+            txid,
           },
+          txid,
         };
       }
       case "group.create": {
         const { data, txid, serverSequence } = await createGroup(ctx, mutation.payload);
         return {
-          txid,
           result: {
-            id: mutation.id,
-            status: "applied",
-            serverSequence,
-            txid,
             data: { group: data.group },
+            id: mutation.id,
+            serverSequence,
+            status: "applied",
+            txid,
           },
+          txid,
         };
       }
       case "group.update": {
@@ -120,27 +120,27 @@ export async function applySyncMutation(
           mutation.payload,
         );
         return {
-          txid,
           result: {
-            id: mutation.id,
-            status: "applied",
-            serverSequence,
-            txid,
             data: { group: data.group },
+            id: mutation.id,
+            serverSequence,
+            status: "applied",
+            txid,
           },
+          txid,
         };
       }
       case "group.delete": {
         const { txid, serverSequence } = await deleteGroup(ctx, mutation.entityId);
         return {
-          txid,
           result: {
-            id: mutation.id,
-            status: "applied",
-            serverSequence,
-            txid,
             data: { deletedId: mutation.entityId },
+            id: mutation.id,
+            serverSequence,
+            status: "applied",
+            txid,
           },
+          txid,
         };
       }
       case "group.addMembers": {
@@ -150,14 +150,14 @@ export async function applySyncMutation(
           mutation.payload.personIds,
         );
         return {
-          txid,
           result: {
-            id: mutation.id,
-            status: "applied",
-            serverSequence,
-            txid,
             data,
+            id: mutation.id,
+            serverSequence,
+            status: "applied",
+            txid,
           },
+          txid,
         };
       }
       case "group.removeMembers": {
@@ -167,27 +167,27 @@ export async function applySyncMutation(
           mutation.payload.personIds,
         );
         return {
-          txid,
           result: {
-            id: mutation.id,
-            status: "applied",
-            serverSequence,
-            txid,
             data,
+            id: mutation.id,
+            serverSequence,
+            status: "applied",
+            txid,
           },
+          txid,
         };
       }
       case "tag.create": {
         const { data, txid, serverSequence } = await createTag(ctx, mutation.payload);
         return {
-          txid,
           result: {
-            id: mutation.id,
-            status: "applied",
-            serverSequence,
-            txid,
             data: { tag: data.tag },
+            id: mutation.id,
+            serverSequence,
+            status: "applied",
+            txid,
           },
+          txid,
         };
       }
       case "tag.update": {
@@ -197,36 +197,36 @@ export async function applySyncMutation(
           mutation.payload,
         );
         return {
-          txid,
           result: {
-            id: mutation.id,
-            status: "applied",
-            serverSequence,
-            txid,
             data: { tag: data.tag },
+            id: mutation.id,
+            serverSequence,
+            status: "applied",
+            txid,
           },
+          txid,
         };
       }
       case "tag.delete": {
         const { txid, serverSequence } = await deleteTag(ctx, mutation.entityId);
         return {
-          txid,
           result: {
-            id: mutation.id,
-            status: "applied",
-            serverSequence,
-            txid,
             data: { deletedId: mutation.entityId },
+            id: mutation.id,
+            serverSequence,
+            status: "applied",
+            txid,
           },
+          txid,
         };
       }
       default: {
         const exhaustive: never = mutation;
         return {
           result: {
+            error: "Unknown mutation type",
             id: (exhaustive as SyncMutation).id,
             status: "rejected",
-            error: "Unknown mutation type",
           },
         };
       }
@@ -235,10 +235,10 @@ export async function applySyncMutation(
     if (error instanceof SyncConflictError) {
       return {
         result: {
-          id: mutation.id,
-          status: "conflict",
-          server: { contact: error.serverContact },
           error: error.message,
+          id: mutation.id,
+          server: { contact: error.serverContact },
+          status: "conflict",
         },
       };
     }
@@ -246,9 +246,9 @@ export async function applySyncMutation(
     if (error instanceof DomainError) {
       return {
         result: {
+          error: error.message,
           id: mutation.id,
           status: "rejected",
-          error: error.message,
         },
       };
     }

@@ -1,0 +1,21 @@
+{
+  "AllEnrichedDescription": "Alle Kontakte mit LinkedIn-Profil wurden bereits angereichert.",
+  "AllEnrichedTitle": "Alle Kontakte angereichert",
+  "Badge": "LinkedIn",
+  "CurrentlyEnriching": "Wird gerade angereichert:",
+  "EligibleLabel_one": "{count} Person könnte angereichert werden",
+  "EligibleLabel_other": "{count} Personen könnten angereichert werden",
+  "Enrich": "Anreichern",
+  "EnrichAll": "Alle anreichern",
+  "HelpTooltip": "Hole die neuesten LinkedIn-Profildaten in diesen Kontakt. Klicke, um zu erfahren, wie die Anreicherung funktioniert.",
+  "Pause": "Pausieren",
+  "PausingTooltip": "Aktueller Kontakt wird fertiggestellt, dann pausiert...",
+  "PersonEligibleLabel": "Dieser Kontakt könnte von LinkedIn angereichert werden",
+  "ProcessingPerson": "{name} wird angereichert...",
+  "ProgressLabel": "Anreicherung: {completed} von {totalEligible} abgeschlossen",
+  "ProgressLabelWithFailed": "Anreicherung: {completed} von {totalEligible} abgeschlossen ({failed} fehlgeschlagen)",
+  "Resume": "Fortsetzen",
+  "ResumeLabel": "Anreicherung unterbrochen: {completed} erledigt, {pending} ausstehend",
+  "SkipRemaining": "Restliche überspringen",
+  "Tooltip": "Diese Kontakte haben ein LinkedIn-Profil, wurden aber noch nicht angereichert. Reichere sie an, um den neuesten Werdegang, die Ausbildung und die Bio abzurufen."
+}

@@ -1,0 +1,10 @@
+{
+  "CreateFailed": "Tag konnte nicht erstellt werden. Versuche es erneut.",
+  "CreateTag": "Tag erstellen",
+  "DeleteFailed": "Tag konnte nicht gelöscht werden. Versuche es erneut.",
+  "EditFailed": "Tag konnte nicht gespeichert werden. Versuche es erneut.",
+  "EditTagsSearchPlaceholder": "Tags suchen...",
+  "LoadFailed": "Tags konnten nicht geladen werden",
+  "NoTagsYet": "Noch keine Tags",
+  "NoTagsYetHint": "Tags helfen dir, Kontakte zu organisieren und zu finden."
+}

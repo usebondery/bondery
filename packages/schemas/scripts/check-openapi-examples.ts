@@ -5,14 +5,7 @@
  */
 
 import type { z } from "zod";
-import { OPENAPI_SCHEMA_EXAMPLES } from "./openapi-example-fixtures.js";
-import {
-  createApiKeyInputSchema,
-  apiKeyCreatedSchema,
-  apiKeyListItemSchema,
-  apiKeysListResponseSchema,
-  updateApiKeyLabelInputSchema,
-} from "#entities/api-keys.js";
+import { messageResponseSchema } from "#entities/_shared.js";
 import {
   createInteractionInputSchema,
   interactionResponseSchema,
@@ -20,24 +13,36 @@ import {
   updateInteractionInputSchema,
 } from "#entities/activity.js";
 import {
-  apiSuccessResponseSchema,
   apiErrorResponseSchema,
+  apiSuccessResponseSchema,
   feedbackFormSchema,
   photoUploadResponseSchema,
   shareContactRequestSchema,
 } from "#entities/api.js";
 import {
-  geocodeSuggestResponseSchema,
-  geocodeTimezoneResponseSchema,
-} from "#geocode/schemas.js";
+  apiKeyCreatedSchema,
+  apiKeyListItemSchema,
+  apiKeysListResponseSchema,
+  createApiKeyInputSchema,
+  updateApiKeyLabelInputSchema,
+} from "#entities/api-keys.js";
 import {
-  createContactApiInputSchema,
-  createContactBodySchema,
-  createContactRelationshipInputSchema,
+  chatMessagesListResponseSchema,
+  chatRequestSchema,
+  chatSessionCreatedResponseSchema,
+  chatSessionResponseSchema,
+  chatSessionsListResponseSchema,
+  updateChatSessionBodySchema,
+} from "#entities/chat.js";
+import {
+  bySocialLookupResponseSchema,
   contactRelationshipResponseSchema,
   contactRelationshipsResponseSchema,
   contactResponseSchema,
   contactsListResponseSchema,
+  createContactApiInputSchema,
+  createContactBodySchema,
+  createContactRelationshipInputSchema,
   createContactResponseSchema,
   deleteContactResponseSchema,
   deleteContactsRequestSchema,
@@ -45,23 +50,16 @@ import {
   enrichEligibleCountResponseSchema,
   enrichQueueInitBodySchema,
   enrichQueueInitResponseSchema,
-  enrichQueuePatchBodySchema,
   enrichQueueNextBatchResponseSchema,
+  enrichQueuePatchBodySchema,
   enrichQueueStatusCountsSchema,
   linkedInDataResponseSchema,
   linkedInDataUpsertResponseSchema,
   mapAddressPinsResponseSchema,
   mapPinsResponseSchema,
-  bySocialLookupResponseSchema,
   updateContactInputSchema,
   updateContactRelationshipInputSchema,
 } from "#entities/contact.js";
-import {
-  chatMessagesListResponseSchema,
-  chatRequestSchema,
-  chatSessionsListResponseSchema,
-  updateChatSessionBodySchema,
-} from "#entities/chat.js";
 import {
   addContactsToGroupRequestSchema,
   addContactsToGroupResponseSchema,
@@ -74,7 +72,6 @@ import {
   removeGroupMembersResponseSchema,
   updateGroupSchema,
 } from "#entities/group.js";
-import { importantDatesListResponseSchema } from "#entities/important-date.js";
 import {
   enrichContactRequestSchema,
   instagramImportCommitRequestSchema,
@@ -90,30 +87,49 @@ import {
   vcardImportCommitResponseSchema,
   vcardParseResponseSchema,
 } from "#entities/import.js";
-import { mergeContactsRequestSchema, declineMergeRecommendationResponseSchema, mergeContactsResponseSchema, mergeRecommendationsResponseSchema, refreshMergeRecommendationsResponseSchema } from "#entities/merge.js";
-import { reminderDigestRequestSchema, reminderDigestResponseSchema, upcomingRemindersResponseSchema } from "#entities/reminder.js";
-import { updateAccountInputSchema, updateSettingsBodySchema, userAccountResponseSchema, userSettingsResponseSchema } from "#entities/settings.js";
+import { importantDatesListResponseSchema } from "#entities/important-date.js";
 import {
+  declineMergeRecommendationResponseSchema,
+  mergeContactsRequestSchema,
+  mergeContactsResponseSchema,
+  mergeRecommendationsResponseSchema,
+  refreshMergeRecommendationsResponseSchema,
+} from "#entities/merge.js";
+import {
+  reminderDigestRequestSchema,
+  reminderDigestResponseSchema,
+  upcomingRemindersResponseSchema,
+} from "#entities/reminder.js";
+import {
+  updateAccountInputSchema,
+  updateSettingsBodySchema,
+  userAccountResponseSchema,
+  userSettingsResponseSchema,
+} from "#entities/settings.js";
+import {
+  addContactsToTagResponseSchema,
   contactTagBodySchema,
   contactTagListResponseSchema,
   createTagInputSchema,
-  tagMembersListResponseSchema,
+  removeContactsFromTagResponseSchema,
   tagMembershipRequestSchema,
+  tagMembersListResponseSchema,
   tagResponseSchema,
   tagsListResponseSchema,
   tagUpdateResponseSchema,
   updateTagSchema,
 } from "#entities/tag.js";
-import { messageResponseSchema } from "#entities/_shared.js";
-import { syncBootstrapResponseSchema, syncPullResponseSchema } from "#sync/pull.js";
-import { syncPushRequestSchema, syncPushResponseSchema } from "#sync/push.js";
-import { syncConflictErrorResponseSchema } from "#sync/conflict.js";
+import { geocodeSuggestResponseSchema, geocodeTimezoneResponseSchema } from "#geocode/schemas.js";
 import {
   geocodeSuggestResponseWireSchema,
   geocodeTimezoneResponseWireSchema,
   idsRequestBodySchema,
   importantDatesReplaceBodySchema,
 } from "#http/index.js";
+import { syncConflictErrorResponseSchema } from "#sync/conflict.js";
+import { syncBootstrapResponseSchema, syncPullResponseSchema } from "#sync/pull.js";
+import { syncPushRequestSchema, syncPushResponseSchema } from "#sync/push.js";
+import { OPENAPI_SCHEMA_EXAMPLES } from "./openapi-example-fixtures.js";
 
 type ExampleEntry = {
   name: string;
@@ -144,8 +160,14 @@ const RESPONSE_SCHEMA_EXAMPLES: ExampleEntry[] = [
   { name: "linkedInDataUpsertResponseSchema", schema: linkedInDataUpsertResponseSchema },
   { name: "mergeContactsResponseSchema", schema: mergeContactsResponseSchema },
   { name: "mergeRecommendationsResponseSchema", schema: mergeRecommendationsResponseSchema },
-  { name: "declineMergeRecommendationResponseSchema", schema: declineMergeRecommendationResponseSchema },
-  { name: "refreshMergeRecommendationsResponseSchema", schema: refreshMergeRecommendationsResponseSchema },
+  {
+    name: "declineMergeRecommendationResponseSchema",
+    schema: declineMergeRecommendationResponseSchema,
+  },
+  {
+    name: "refreshMergeRecommendationsResponseSchema",
+    schema: refreshMergeRecommendationsResponseSchema,
+  },
   { name: "groupsListResponseSchema", schema: groupsListResponseSchema },
   { name: "groupResponseSchema", schema: groupResponseSchema },
   { name: "groupContactsListResponseSchema", schema: groupContactsListResponseSchema },
@@ -155,6 +177,8 @@ const RESPONSE_SCHEMA_EXAMPLES: ExampleEntry[] = [
   { name: "tagsListResponseSchema", schema: tagsListResponseSchema },
   { name: "tagResponseSchema", schema: tagResponseSchema },
   { name: "tagUpdateResponseSchema", schema: tagUpdateResponseSchema },
+  { name: "addContactsToTagResponseSchema", schema: addContactsToTagResponseSchema },
+  { name: "removeContactsFromTagResponseSchema", schema: removeContactsFromTagResponseSchema },
   { name: "tagMembersListResponseSchema", schema: tagMembersListResponseSchema },
   { name: "contactTagListResponseSchema", schema: contactTagListResponseSchema },
   { name: "interactionsListResponseSchema", schema: interactionsListResponseSchema },
@@ -179,6 +203,8 @@ const RESPONSE_SCHEMA_EXAMPLES: ExampleEntry[] = [
   { name: "apiKeyCreatedSchema", schema: apiKeyCreatedSchema },
   { name: "chatSessionsListResponseSchema", schema: chatSessionsListResponseSchema },
   { name: "chatMessagesListResponseSchema", schema: chatMessagesListResponseSchema },
+  { name: "chatSessionCreatedResponseSchema", schema: chatSessionCreatedResponseSchema },
+  { name: "chatSessionResponseSchema", schema: chatSessionResponseSchema },
   { name: "geocodeSuggestResponseSchema", schema: geocodeSuggestResponseSchema },
   { name: "geocodeTimezoneResponseSchema", schema: geocodeTimezoneResponseSchema },
   { name: "geocodeSuggestResponseWireSchema", schema: geocodeSuggestResponseWireSchema },
@@ -241,7 +267,9 @@ function validateExamples(entries: ExampleEntry[], failures: string[]) {
   for (const { name, schema } of entries) {
     const example = getExample(name, schema);
     if (example === undefined) {
-      failures.push(`${name}: missing OpenAPI example (add to openapi-example-fixtures.ts or .meta({ example }))`);
+      failures.push(
+        `${name}: missing OpenAPI example (add to openapi-example-fixtures.ts or .meta({ example }))`,
+      );
       continue;
     }
 
@@ -259,7 +287,9 @@ function run() {
   validateExamples(REQUEST_SCHEMA_EXAMPLES, failures);
 
   if (failures.length > 0) {
-    console.error("OpenAPI example validation failed:\n" + failures.map((f) => `  - ${f}`).join("\n"));
+    console.error(
+      `OpenAPI example validation failed:\n${failures.map((f) => `  - ${f}`).join("\n")}`,
+    );
     process.exit(1);
   }
 

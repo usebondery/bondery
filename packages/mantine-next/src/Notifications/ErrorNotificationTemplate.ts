@@ -1,11 +1,11 @@
-import { createElement, type ReactNode } from "react";
 import { IconX } from "@tabler/icons-react";
+import { createElement, type ReactNode } from "react";
 
 export interface ErrorNotificationTemplateProps {
-  title: string;
-  radius?: string | number;
   description: string;
   icon?: ReactNode;
+  radius?: string | number;
+  title: string;
 }
 
 export function errorNotificationTemplate({
@@ -15,11 +15,11 @@ export function errorNotificationTemplate({
   radius = "xl",
 }: ErrorNotificationTemplateProps) {
   return {
-    title,
-    radius,
-    message: description,
     color: "red",
-    loading: false,
     icon,
+    loading: false,
+    message: description,
+    radius,
+    title,
   };
 }

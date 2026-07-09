@@ -1,27 +1,19 @@
 "use client";
 
-import { Group, Paper, Stack, Text } from "@mantine/core";
-import { IconApps, IconArrowRight, IconCircleCheck } from "@tabler/icons-react";
-import { modals } from "@mantine/modals";
 import { CHROME_EXTENSION_URL } from "@bondery/helpers";
 import { ModalFooter } from "@bondery/mantine-next";
+import { Group, Paper, Stack, Text } from "@mantine/core";
+import { modals } from "@mantine/modals";
+import { IconApps, IconCircleCheck } from "@tabler/icons-react";
+import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
 import { ExtensionLinkedInAnimation } from "./ExtensionLinkedInAnimation";
-
-interface ChromeExtensionModalTranslations {
-  IntroTitle: string;
-  IntroDescription1: string;
-  IntroDescription2: string;
-  IntroDescription3: string;
-  InstallButton: string;
-  Close: string;
-}
 
 interface ChromeExtensionModalProps {
   modalId: string;
-  t: (key: keyof ChromeExtensionModalTranslations) => string;
 }
 
-export function ChromeExtensionModal({ modalId, t }: ChromeExtensionModalProps) {
+export function ChromeExtensionModal({ modalId }: ChromeExtensionModalProps) {
+  const t = useWebTranslations("SettingsPage", "Integration.ChromeExtensionModal");
   const closeModal = () => modals.close(modalId);
 
   return (
@@ -33,26 +25,26 @@ export function ChromeExtensionModal({ modalId, t }: ChromeExtensionModalProps) 
         </Text>
       </Stack>
 
-      <Paper withBorder p="md" radius="md">
+      <Paper p="md" radius="md" withBorder>
         <Stack gap="sm">
-          <Group gap="sm" wrap="nowrap" align="flex-start">
+          <Group align="flex-start" gap="sm" wrap="nowrap">
             <IconCircleCheck
               size={18}
-              style={{ flexShrink: 0, marginTop: 1, color: "var(--mantine-color-grape-6)" }}
+              style={{ color: "var(--mantine-color-grape-6)", flexShrink: 0, marginTop: 1 }}
             />
             <Text size="sm">{t("IntroDescription1")}</Text>
           </Group>
-          <Group gap="sm" wrap="nowrap" align="flex-start">
+          <Group align="flex-start" gap="sm" wrap="nowrap">
             <IconCircleCheck
               size={18}
-              style={{ flexShrink: 0, marginTop: 1, color: "var(--mantine-color-grape-6)" }}
+              style={{ color: "var(--mantine-color-grape-6)", flexShrink: 0, marginTop: 1 }}
             />
             <Text size="sm">{t("IntroDescription2")}</Text>
           </Group>
-          <Group gap="sm" wrap="nowrap" align="flex-start">
+          <Group align="flex-start" gap="sm" wrap="nowrap">
             <IconCircleCheck
               size={18}
-              style={{ flexShrink: 0, marginTop: 1, color: "var(--mantine-color-grape-6)" }}
+              style={{ color: "var(--mantine-color-grape-6)", flexShrink: 0, marginTop: 1 }}
             />
             <Text size="sm">{t("IntroDescription3")}</Text>
           </Group>
@@ -60,15 +52,15 @@ export function ChromeExtensionModal({ modalId, t }: ChromeExtensionModalProps) 
       </Paper>
 
       <ModalFooter
-        cancelLabel={t("Close")}
-        onCancel={closeModal}
-        actionLabel={t("InstallButton")}
         actionColor="grape"
+        actionLabel={t("InstallButton")}
+        actionRightSection={<IconApps size={16} />}
+        cancelLabel={t("Close")}
         onAction={() => {
           window.open(CHROME_EXTENSION_URL, "_blank", "noopener,noreferrer");
           closeModal();
         }}
-        actionRightSection={<IconApps size={16} />}
+        onCancel={closeModal}
       />
     </Stack>
   );

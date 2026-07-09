@@ -1,0 +1,22 @@
+{
+  "AddError": "Failed to add tag",
+  "AddNewTagTooltip": "Create new tag",
+  "AddSuccess": "Tag added successfully",
+  "AddTagTooltip": "Add tag",
+  "CreateError": "Failed to create tag",
+  "CreateNewTagEmpty": "Create new tag",
+  "CreateNewTagOption": "Create new tag \"{label}\"",
+  "CreateTagCancel": "Cancel",
+  "CreateTagConfirm": "Create & add",
+  "CreateTagMessage": "Tag \"'{name}'\" doesn't exist yet. Do you want to create it and add it to this contact?",
+  "CreateTagTitle": "Create new tag?",
+  "Label": "Tags",
+  "NoTagsFound": "No tags found",
+  "Placeholder": "Add tags...",
+  "RemoveError": "Failed to remove tag",
+  "RemoveTagTooltip": "Remove tag",
+  "SearchPlaceholder": "Search or create a tag...",
+  "TagAlreadyAddedMessage": "Tag \"{name}\" has already been added to this contact.",
+  "TagAlreadyAddedTitle": "Tag already added",
+  "TagAlreadyAppliedTooltip": "Tag already applied"
+}

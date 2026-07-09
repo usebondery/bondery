@@ -1,5 +1,3 @@
-import type { ComponentType } from "react";
-import type { EnrichedMarkdownTextInputInstance } from "react-native-enriched-markdown";
 import {
   IconAt,
   IconBold,
@@ -7,71 +5,73 @@ import {
   IconStrikethrough,
   IconUnderline,
 } from "@tabler/icons-react-native";
+import type { ComponentType } from "react";
+import type { EnrichedMarkdownTextInputInstance } from "react-native-enriched-markdown";
 
 export type SlashCommandId = "mention" | "bold" | "italic" | "underline" | "strikethrough";
 
 export interface SlashCommandDefinition {
-  id: SlashCommandId;
-  label: string;
   description: string;
   group: "Insert" | "Format";
-  keywords: string[];
   icon: ComponentType<{ size?: number; stroke?: string }>;
+  id: SlashCommandId;
+  keywords: string[];
+  label: string;
   run: (editor: EnrichedMarkdownTextInputInstance) => void;
 }
 
 export const SLASH_COMMANDS: SlashCommandDefinition[] = [
   {
-    id: "mention",
-    label: "Mention person",
     description: "Mention a person",
     group: "Insert",
-    keywords: ["mention", "person", "contact", "at"],
     icon: IconAt,
+    id: "mention",
+    keywords: ["mention", "person", "contact", "at"],
+    label: "Mention person",
     run: (editor) => {
       editor.startMention("@");
     },
   },
   {
-    id: "bold",
-    label: "Bold",
     description: "Strong emphasis",
     group: "Format",
-    keywords: ["bold", "strong"],
     icon: IconBold,
+    id: "bold",
+    keywords: ["bold", "strong"],
+    label: "Bold",
     run: (editor) => {
       editor.toggleBold();
     },
   },
   {
-    id: "italic",
-    label: "Italic",
     description: "Emphasis",
     group: "Format",
-    keywords: ["italic", "emphasis"],
     icon: IconItalic,
+    id: "italic",
+    keywords: ["italic", "emphasis"],
+    label: "Italic",
     run: (editor) => {
       editor.toggleItalic();
     },
   },
   {
-    id: "underline",
-    label: "Underline",
     description: "Underlined text",
     group: "Format",
-    keywords: ["underline"],
     icon: IconUnderline,
+    id: "underline",
+    keywords: ["underline"],
+    label: "Underline",
     run: (editor) => {
       editor.toggleUnderline();
     },
   },
   {
-    id: "strikethrough",
-    label: "Strikethrough",
     description: "Crossed out text",
     group: "Format",
-    keywords: ["strikethrough", "strike"],
     icon: IconStrikethrough,
+    id: "strikethrough",
+    keywords: ["strikethrough", "strike"],
+    label: "Strikethrough",
     run: (editor) => {
       editor.toggleStrikethrough();
     },

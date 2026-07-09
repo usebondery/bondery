@@ -1,6 +1,6 @@
-import { forwardRef, type ComponentProps } from "react";
-import type { View as RNView } from "react-native";
 import { View } from "@tamagui/core";
+import { type ComponentProps, forwardRef } from "react";
+import type { View as RNView } from "react-native";
 import { TAMAGUI_TRANSITION } from "./animations";
 import { PRESS_SCALES, type PressScaleVariant } from "./pressFeedback";
 
@@ -35,11 +35,11 @@ export const Tappable = forwardRef<RNView, TappableProps>(function Tappable(
 
   return (
     <View
+      animateOnly={animateOnly}
+      pressStyle={mergedPressStyle}
       ref={ref}
       scale={scale}
       transition={transition}
-      animateOnly={animateOnly}
-      pressStyle={mergedPressStyle}
       {...props}
     />
   );

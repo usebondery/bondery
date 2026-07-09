@@ -5,7 +5,9 @@ function walk(dir, files = []) {
   for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
     const p = path.join(dir, e.name);
     if (e.isDirectory()) {
-      if (!["node_modules", ".next", "dist"].includes(e.name)) walk(p, files);
+      if (!["node_modules", ".next", "dist"].includes(e.name)) {
+        walk(p, files);
+      }
     } else if (/\.(tsx|ts)$/.test(e.name) && !/\.test\./.test(e.name)) {
       files.push(p);
     }
@@ -51,26 +53,44 @@ const results = [];
 for (const file of files) {
   const rel = file.replace(/\\/g, "/");
   const content = fs.readFileSync(file, "utf8");
-  const hasI18n = /useWebTranslations|getWebTranslations|useTranslations|getTranslations|useT\(|getT\(|<Trans\b/.test(
-    content,
-  );
+  const hasI18n =
+    /useWebTranslations|getWebTranslations|useTranslations|getTranslations|useT\(|getT\(|<Trans\b/.test(
+      content,
+    );
 
   for (const { name, re } of patterns) {
     const regex = new RegExp(re.source, re.flags);
-    let m;
-    while ((m = regex.exec(content)) !== null) {
+    let m = regex.exec(content);
+    while (m !== null) {
       const text = m[1].trim();
-      if (!text || text.length < 3) continue;
-      if (/^t\(/.test(text) || /^\{/.test(text)) continue;
-      if (/^https?:/.test(text)) continue;
-      if (/^[A-Z_]+$/.test(text)) continue;
-      if (/^\d/.test(text)) continue;
-      if (skipTexts.has(text)) continue;
-      if (/Promise|void|boolean|string\[\]|ReactNode|Error\b/.test(text)) continue;
-      if (/^Failed to /.test(text) && !rel.includes("components")) continue;
+      if (!text || text.length < 3) {
+        continue;
+      }
+      if (/^t\(/.test(text) || /^\{/.test(text)) {
+        continue;
+      }
+      if (/^https?:/.test(text)) {
+        continue;
+      }
+      if (/^[A-Z_]+$/.test(text)) {
+        continue;
+      }
+      if (/^\d/.test(text)) {
+        continue;
+      }
+      if (skipTexts.has(text)) {
+        continue;
+      }
+      if (/Promise|void|boolean|string\[\]|ReactNode|Error\b/.test(text)) {
+        continue;
+      }
+      if (/^Failed to /.test(text) && !rel.includes("components")) {
+        continue;
+      }
 
       const line = content.slice(0, m.index).split("\n").length;
-      results.push({ file: rel, line, type: name, text, hasI18n });
+      results.push({ file: rel, hasI18n, line, text, type: name });
+      m = regex.exec(content);
     }
   }
 }
@@ -78,7 +98,9 @@ for (const file of files) {
 const seen = new Set();
 const unique = results.filter((r) => {
   const k = `${r.file}|${r.text}`;
-  if (seen.has(k)) return false;
+  if (seen.has(k)) {
+    return false;
+  }
   seen.add(k);
   return true;
 });

@@ -1,20 +1,18 @@
 "use client";
 
-import { useState } from "react";
-import { useQueryClient } from "@tanstack/react-query";
+import { getUserFacingError } from "@bondery/helpers/api";
+import {
+  errorNotificationTemplate,
+  PersonChip,
+  successNotificationTemplate,
+} from "@bondery/mantine-next";
 import { Button, Group, Paper, SegmentedControl, Stack, Text } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { IconArrowMerge, IconEye, IconEyeOff, IconRefresh } from "@tabler/icons-react";
-import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
-import {
-  PersonChip,
-  errorNotificationTemplate,
-  successNotificationTemplate,
-} from "@bondery/mantine-next";
-import { PageWrapper } from "@/app/(app)/app/components/PageWrapper";
+import { useState } from "react";
 import { PageHeader } from "@/app/(app)/app/components/PageHeader";
-import { MergeRecommendationCard } from "../components/contacts/MergeRecommendationCard";
-import { EnrichRecommendationCard } from "./components/EnrichRecommendationCard";
+import { PageWrapper } from "@/app/(app)/app/components/PageWrapper";
+import { useCommonTranslations, useWebTranslations } from "@/lib/i18n/useWebTranslations";
 import {
   useEnrichEligibleCountQuery,
   useEnrichQueueStatusQuery,
@@ -22,12 +20,14 @@ import {
   useRefreshMergeRecommendationsMutation,
   useRestoreMergeRecommendationMutation,
 } from "@/lib/query/hooks/useMergeRecommendations";
-import { invalidateMergeRecommendationDomain } from "@/lib/query/invalidation";
+import { MergeRecommendationCard } from "../components/contacts/MergeRecommendationCard";
+import { EnrichRecommendationCard } from "./components/EnrichRecommendationCard";
 
 export function FixContactsClient() {
-  const t = useTranslations("FixContactsPage");
-  const tMerge = useTranslations("MergeWithModal");
-  const queryClient = useQueryClient();
+  const tCommon = useCommonTranslations();
+
+  const t = useWebTranslations("FixContactsPage");
+  const tMerge = useWebTranslations("MergeWithModal");
   const [showDeclined, setShowDeclined] = useState(false);
   const [restoringIds, setRestoringIds] = useState<Set<string>>(new Set());
 
@@ -38,31 +38,26 @@ export function FixContactsClient() {
   const refreshMutation = useRefreshMergeRecommendationsMutation();
   const restoreMutation = useRestoreMergeRecommendationMutation();
 
-  const invalidateRecommendations = () => invalidateMergeRecommendationDomain(queryClient);
-
   const handleRefreshSuggestions = async () => {
     try {
       const refreshPayload = await refreshMutation.mutateAsync();
-      const recommendationsCount = Math.max(
-        0,
-        Number(refreshPayload.recommendationsCount) || 0,
-      );
+      const recommendationsCount = Math.max(0, Number(refreshPayload.recommendationsCount) || 0);
       setShowDeclined(false);
 
       notifications.show(
         successNotificationTemplate({
-          title: t("SuccessTitle"),
           description:
             recommendationsCount === 0
               ? t("NoNewSuggestionsFound")
               : t("NewSuggestionsFound", { count: recommendationsCount }),
+          title: t("SuccessTitle"),
         }),
       );
     } catch (error) {
       notifications.show(
         errorNotificationTemplate({
+          description: getUserFacingError(error, tCommon),
           title: t("ErrorTitle"),
-          description: error instanceof Error ? error.message : t("RefreshError"),
         }),
       );
     }
@@ -79,15 +74,15 @@ export function FixContactsClient() {
       await restoreMutation.mutateAsync(recommendationId);
       notifications.show(
         successNotificationTemplate({
-          title: t("SuccessTitle"),
           description: t("RestoreSuccess"),
+          title: t("SuccessTitle"),
         }),
       );
     } catch (error) {
       notifications.show(
         errorNotificationTemplate({
+          description: getUserFacingError(error, tCommon),
           title: t("ErrorTitle"),
-          description: error instanceof Error ? error.message : t("RestoreError"),
         }),
       );
     } finally {
@@ -105,47 +100,47 @@ export function FixContactsClient() {
     <PageWrapper>
       <Stack gap="xl">
         <PageHeader
+          helpDoc="concepts.merge"
+          helpLabel={t("Description")}
           icon={IconArrowMerge}
-          title={t("Title")}
+          primaryAction={
+            <Button
+              leftSection={<IconRefresh size={16} />}
+              loading={refreshMutation.isPending}
+              onClick={() => void handleRefreshSuggestions()}
+              size="md"
+            >
+              {t("RefreshSuggestions")}
+            </Button>
+          }
           secondaryAction={
             <SegmentedControl
-              value={showDeclined ? "hidden" : "active"}
-              onChange={(value) => handleRecommendationViewChange(value as "active" | "hidden")}
-              disabled={isRefreshing}
               data={[
                 {
-                  value: "active",
                   label: (
                     <Group gap={6} wrap="nowrap">
                       <IconEye size={14} />
                       <span>{t("ActiveRecommendations")}</span>
                     </Group>
                   ),
+                  value: "active",
                 },
                 {
-                  value: "hidden",
                   label: (
                     <Group gap={6} wrap="nowrap">
                       <IconEyeOff size={14} />
                       <span>{t("HiddenRecommendations")}</span>
                     </Group>
                   ),
+                  value: "hidden",
                 },
               ]}
+              disabled={isRefreshing}
+              onChange={(value) => handleRecommendationViewChange(value as "active" | "hidden")}
+              value={showDeclined ? "hidden" : "active"}
             />
           }
-          primaryAction={
-            <Button
-              size="md"
-              leftSection={<IconRefresh size={16} />}
-              onClick={() => void handleRefreshSuggestions()}
-              loading={refreshMutation.isPending}
-            >
-              {t("RefreshSuggestions")}
-            </Button>
-          }
-          helpLabel={t("Description")}
-          helpDoc="concepts.merge"
+          title={t("Title")}
         />
 
         {!showDeclined && (
@@ -153,7 +148,7 @@ export function FixContactsClient() {
         )}
 
         {recommendations.length === 0 ? (
-          <Paper withBorder radius="md" p="md">
+          <Paper p="md" radius="md" withBorder>
             <Text c="dimmed" size="sm">
               {showDeclined ? t("DeclinedEmpty") : t("Empty")}
             </Text>
@@ -162,20 +157,20 @@ export function FixContactsClient() {
           <Stack gap="sm">
             {recommendations.map((recommendation) =>
               showDeclined ? (
-                <Paper key={recommendation.id} withBorder radius="md" p="md">
-                  <Group justify="space-between" align="center" wrap="nowrap">
+                <Paper key={recommendation.id} p="md" radius="md" withBorder>
+                  <Group align="center" justify="space-between" wrap="nowrap">
                     <Group align="center" wrap="nowrap">
-                      <PersonChip person={recommendation.leftPerson} isClickable />
-                      <Text c="dimmed" size="sm" fw={500}>
+                      <PersonChip isClickable person={recommendation.leftPerson} />
+                      <Text c="dimmed" fw={500} size="sm">
                         {tMerge("MergeWithLabel")}
                       </Text>
-                      <PersonChip person={recommendation.rightPerson} isClickable />
+                      <PersonChip isClickable person={recommendation.rightPerson} />
                     </Group>
                     <Button
-                      variant="default"
                       leftSection={<IconRefresh size={16} />}
-                      onClick={() => void handleRestore(recommendation.id)}
                       loading={restoringIds.has(recommendation.id)}
+                      onClick={() => void handleRestore(recommendation.id)}
+                      variant="default"
                     >
                       {t("RestoreSuggestion")}
                     </Button>
@@ -183,11 +178,9 @@ export function FixContactsClient() {
                 </Paper>
               ) : (
                 <MergeRecommendationCard
+                  contacts={[recommendation.leftPerson, recommendation.rightPerson]}
                   key={recommendation.id}
                   recommendation={recommendation}
-                  contacts={[recommendation.leftPerson, recommendation.rightPerson]}
-                  onAccepted={() => void invalidateRecommendations()}
-                  onDeclined={() => void invalidateRecommendations()}
                 />
               ),
             )}

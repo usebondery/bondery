@@ -1,16 +1,16 @@
 "use client";
 
-import { notifications } from "@mantine/notifications";
-import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
-import { useApplyUserLanguage } from "@/lib/i18n/useApplyUserLanguage";
-import type { SupportedLocale } from "@bondery/translations";
-import { LanguagePicker as SharedLanguagePicker } from "@/components/shared/LanguagePicker";
 import { APP_LANGUAGES_DATA } from "@bondery/helpers/locale";
 import {
   errorNotificationTemplate,
   loadingNotificationTemplate,
   successNotificationTemplate,
 } from "@bondery/mantine-next";
+import type { SupportedLocale } from "@bondery/translations";
+import { notifications } from "@mantine/notifications";
+import { LanguagePicker as SharedLanguagePicker } from "@/components/shared/LanguagePicker";
+import { useApplyUserLanguage } from "@/lib/i18n/useApplyUserLanguage";
+import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
 import { useUpdateSettingsMutation } from "@/lib/query/hooks/useSettings";
 
 interface LanguagePickerProps {
@@ -18,16 +18,15 @@ interface LanguagePickerProps {
 }
 
 export function LanguagePicker({ initialValue }: LanguagePickerProps) {
-  const t = useTranslations("SettingsPage.Profile");
-  const tLanguages = useTranslations("Languages");
+  const t = useWebTranslations("SettingsPage", "Profile");
   const updateSettings = useUpdateSettingsMutation();
   const applyUserLanguage = useApplyUserLanguage();
 
   const handleChange = async (val: string) => {
     const loadingNotification = notifications.show({
       ...loadingNotificationTemplate({
-        title: t("UpdatingLanguage"),
         description: t("PleaseWait"),
+        title: t("UpdatingLanguage"),
       }),
     });
 
@@ -38,17 +37,16 @@ export function LanguagePicker({ initialValue }: LanguagePickerProps) {
       notifications.hide(loadingNotification);
       notifications.show(
         successNotificationTemplate({
-          title: t("UpdateSuccess"),
           description: t("LanguageUpdateSuccess"),
+          title: t("UpdateSuccess"),
         }),
       );
-
     } catch {
       notifications.hide(loadingNotification);
       notifications.show(
         errorNotificationTemplate({
-          title: t("UpdateError"),
           description: t("LanguageUpdateError"),
+          title: t("UpdateError"),
         }),
       );
     }
@@ -57,11 +55,10 @@ export function LanguagePicker({ initialValue }: LanguagePickerProps) {
   return (
     <SharedLanguagePicker
       initialValue={initialValue}
-      onChange={handleChange}
       label={t("Language")}
-      placeholder={t("LanguageSearch")}
       languages={APP_LANGUAGES_DATA}
-      getLocalizedLabel={(language) => tLanguages(language.value)}
+      onChange={handleChange}
+      placeholder={t("LanguageSearch")}
     />
   );
 }

@@ -3,17 +3,17 @@ import { SYNC_TABLE_KEYS, type SyncTableKey } from "#sync/tables.js";
 export const syncChangeOperationSchema = z.enum(["insert", "update", "delete"]);
 
 export const syncChangeSchema = z.object({
-  table: z.enum(SYNC_TABLE_KEYS as [string, ...string[]]),
-  operation: syncChangeOperationSchema,
   entityId: z.string().uuid(),
+  operation: syncChangeOperationSchema,
+  table: z.enum(SYNC_TABLE_KEYS as [string, ...string[]]),
   value: z.record(z.string(), z.unknown()).nullable(),
 });
 
 export type SyncChange = z.infer<typeof syncChangeSchema>;
 
 export const syncBatchSchema = z.object({
-  serverSequence: z.number().int().positive(),
   changes: z.array(syncChangeSchema).min(1),
+  serverSequence: z.number().int().positive(),
 });
 
 export type SyncBatch = z.infer<typeof syncBatchSchema>;
@@ -35,7 +35,7 @@ const bootstrapTablesShape = Object.fromEntries(
 export const syncBootstrapTablesSchema = z.object(bootstrapTablesShape);
 
 export const syncBootstrapResponseSchema = z.object({
-  tables: syncBootstrapTablesSchema,
   nextServerSequence: z.number().int().nonnegative(),
+  tables: syncBootstrapTablesSchema,
 });
 export type SyncBootstrapResponse = z.infer<typeof syncBootstrapResponseSchema>;

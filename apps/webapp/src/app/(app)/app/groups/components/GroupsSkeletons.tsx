@@ -7,19 +7,19 @@ import { PageHeaderSkeleton } from "@/app/(app)/app/components/PageHeaderSkeleto
  */
 function GroupCardSkeleton({ opacity = 1 }: { opacity?: number }) {
   return (
-    <Paper withBorder p="md" radius="md" style={{ opacity }}>
+    <Paper p="md" radius="md" style={{ opacity }} withBorder>
       <Stack gap="sm">
         <Group justify="space-between">
-          <Skeleton height={18} width={110} radius="sm" />
-          <Skeleton height={22} width={40} radius="xl" />
+          <Skeleton height={18} radius="sm" width={110} />
+          <Skeleton height={22} radius="xl" width={40} />
         </Group>
         {/* 3 avatar previews */}
         <Group gap={-8}>
-          <Skeleton height={28} width={28} radius="xl" />
-          <Skeleton height={28} width={28} radius="xl" />
-          <Skeleton height={28} width={28} radius="xl" />
+          <Skeleton height={28} radius="xl" width={28} />
+          <Skeleton height={28} radius="xl" width={28} />
+          <Skeleton height={28} radius="xl" width={28} />
         </Group>
-        <Skeleton height={12} width={80} radius="sm" />
+        <Skeleton height={12} radius="sm" width={80} />
       </Stack>
     </Paper>
   );
@@ -37,26 +37,24 @@ export function GroupsPageSkeleton() {
       {/* Header: Create New Group button (~155px) */}
       <PageHeaderSkeleton primaryActionWidth={155} />
 
-      <Paper withBorder shadow="sm" radius="md" p="md">
+      <Paper p="md" radius="md" shadow="sm" withBorder>
         <Stack gap="md">
           {/* Toolbar: count + sort menu */}
           <Group justify="space-between">
-            <Skeleton height={14} width={60} radius="sm" />
-            <Skeleton height={36} width={110} radius="sm" />
+            <Skeleton height={14} radius="sm" width={60} />
+            <Skeleton height={36} radius="sm" width={110} />
           </Group>
 
           <SimpleGrid
-            cols={{ base: 1, sm: 2, md: 3 }}
+            cols={{ base: 1, md: 3, sm: 2 }}
             spacing="md"
             style={{
-              maskImage:
-                "linear-gradient(to bottom, black 55%, transparent 100%)",
-              WebkitMaskImage:
-                "linear-gradient(to bottom, black 55%, transparent 100%)",
+              maskImage: "linear-gradient(to bottom, black 55%, transparent 100%)",
+              WebkitMaskImage: "linear-gradient(to bottom, black 55%, transparent 100%)",
             }}
           >
-            {cards.map((opacity, i) => (
-              <GroupCardSkeleton key={i} opacity={opacity} />
+            {cards.map((opacity) => (
+              <GroupCardSkeleton key={opacity} opacity={opacity} />
             ))}
           </SimpleGrid>
         </Stack>

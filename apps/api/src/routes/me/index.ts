@@ -3,36 +3,34 @@
  * Handles authenticated user profile operations
  */
 
-import type { FastifyReply } from "fastify";
-import type { AppFastifyInstance, AppRoutePlugin } from "../../lib/fastify-types.js";
-import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
-import { z } from "zod";
-import { createAdminClient, resolveContactAvatarUrl } from "../../lib/supabase.js";
-import { applyOpenApiRouteMeta } from "../../lib/openapi-route-meta.js";
-import { withOkResponse } from "../../lib/openapi-route-responses.js";
-import {
-  uploadContactAvatarAndSetFlag,
-  deleteContactAvatarAndClearFlag,
-} from "../../lib/avatar-storage.js";
-import { getAuth } from "../../lib/auth.js";
-import { validateImageUpload, validateImageMagicBytes } from "../../lib/config.js";
-import { CONTACT_SELECT, extractAvatarOptions } from "../../lib/queries.js";
-import { avatarTransformQuerySchema } from "@bondery/schemas/http";
 import {
   apiSuccessResponseSchema,
   contactResponseSchema,
   updateAccountInputSchema,
   userAccountResponseSchema,
 } from "@bondery/schemas";
+import { avatarTransformQuerySchema } from "@bondery/schemas/http";
 import { EXAMPLE_PROFILE_PHOTO_RESPONSE } from "@bondery/schemas/openapi/fixtures/responses";
-import { attachContactExtras } from "../../lib/contact-enrichment.js";
-
-const LINKEDIN_LOGOS_BUCKET = "linkedin_logos";
+import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
+import { z } from "zod";
+import { attachContactExtras } from "../../lib/contacts/enrichment.js";
+import { CONTACT_SELECT, extractAvatarOptions } from "../../lib/data/select-fragments.js";
+import { getAuth } from "../../lib/platform/auth/strategies.js";
+import { badRequest, internal, notFound } from "../../lib/platform/errors/http-errors.js";
+import type { AppRoutePlugin } from "../../lib/platform/fastify-types.js";
+import { withOkResponse } from "../../lib/platform/openapi/responses.js";
+import { withDomainRoute } from "../../lib/platform/with-domain-route.js";
+import {
+  deleteAccount,
+  deleteProfilePhoto,
+  updateAccountMetadata,
+  uploadProfilePhoto,
+} from "../../services/me/account.js";
 
 const profilePhotoResponseSchema = z
   .object({
-    success: z.boolean(),
     data: z.object({ avatarUrl: z.string() }),
+    success: z.boolean(),
   })
   .meta({ example: EXAMPLE_PROFILE_PHOTO_RESPONSE });
 
@@ -41,9 +39,7 @@ export const meRoutes: AppRoutePlugin = async (fastify) => {
     if (routeOptions.schema) {
       routeOptions.schema.tags = ["Me"];
     }
-    applyOpenApiRouteMeta(routeOptions, { area: "session" });
   });
-  fastify.addHook("onRequest", fastify.auth([fastify.verifySession]));
 
   /**
    * PATCH /api/me - Update user account metadata
@@ -52,25 +48,14 @@ export const meRoutes: AppRoutePlugin = async (fastify) => {
     "/",
     {
       schema: {
-        description: "Update user account metadata (name fields).",
         body: updateAccountInputSchema,
+        description: "Update user account metadata (name fields).",
         response: withOkResponse(userAccountResponseSchema, "Updated account"),
       } satisfies FastifyZodOpenApiSchema,
     },
-    async (request, reply) => {
-      const { client } = getAuth(request);
-      const { name, middlename, surname } = request.body;
-
-      const { data, error } = await client.auth.updateUser({
-        data: { name, middlename, surname },
-      });
-
-      if (error) {
-        return reply.status(500).send({ error: "Failed to update account" });
-      }
-
-      return { success: true, data: data.user };
-    },
+    withDomainRoute(async (ctx, request) => {
+      return updateAccountMetadata(ctx, request.body);
+    }),
   );
 
   /**
@@ -84,41 +69,8 @@ export const meRoutes: AppRoutePlugin = async (fastify) => {
         response: withOkResponse(apiSuccessResponseSchema, "Account deleted"),
       } satisfies FastifyZodOpenApiSchema,
     },
-    async (request, reply) => {
-    const { client, user } = getAuth(request);
-    const adminClient = createAdminClient();
-
-    try {
-      // Delete user's storage files first
-      const { data: avatarFiles } = await adminClient.storage.from("avatars").list(user.id);
-      if (avatarFiles && avatarFiles.length > 0) {
-        const avatarPaths = avatarFiles.map((file) => `${user.id}/${file.name}`);
-        await adminClient.storage.from("avatars").remove(avatarPaths);
-      }
-
-      const { data: logoFiles } = await adminClient.storage
-        .from(LINKEDIN_LOGOS_BUCKET)
-        .list(user.id);
-      if (logoFiles && logoFiles.length > 0) {
-        const logoPaths = logoFiles.map((file) => `${user.id}/${file.name}`);
-        await adminClient.storage.from(LINKEDIN_LOGOS_BUCKET).remove(logoPaths);
-      }
-
-      // Delete user using admin client
-      const { error } = await adminClient.auth.admin.deleteUser(user.id);
-
-      if (error) {
-        return reply.status(500).send({ error: "Failed to delete account" });
-      }
-
-      return { success: true };
-    } catch (error) {
-      request.log.error({ err: error }, "Error deleting account");
-      return reply.status(500).send({
-        error: "Internal server error",
-      });
-    }
-  });
+    withDomainRoute(async (ctx) => deleteAccount(ctx)),
+  );
 
   /**
    * GET /api/me/person - Fetch the authenticated user's "myself" contact
@@ -132,7 +84,7 @@ export const meRoutes: AppRoutePlugin = async (fastify) => {
         response: withOkResponse(contactResponseSchema, "Myself contact"),
       } satisfies FastifyZodOpenApiSchema,
     },
-    async (request, reply) => {
+    async (request) => {
       const { client, user } = getAuth(request);
       const avatarOpts = extractAvatarOptions(request.query);
 
@@ -144,7 +96,7 @@ export const meRoutes: AppRoutePlugin = async (fastify) => {
         .single();
 
       if (error || !contact) {
-        return reply.status(404).send({ error: "Myself contact not found" });
+        throw notFound("Myself contact not found", "not_found");
       }
 
       try {
@@ -155,7 +107,7 @@ export const meRoutes: AppRoutePlugin = async (fastify) => {
         return { contact: enrichedContact };
       } catch (enrichError) {
         request.log.error({ enrichError }, "Failed to enrich myself contact");
-        return reply.status(500).send({ error: "Failed to load profile contact" });
+        throw internal("failed_to_load_profile_contact");
       }
     },
   );
@@ -171,53 +123,16 @@ export const meRoutes: AppRoutePlugin = async (fastify) => {
         response: withOkResponse(profilePhotoResponseSchema, "Profile photo uploaded"),
       } satisfies FastifyZodOpenApiSchema,
     },
-    async (request, reply) => {
-    const { client, user } = getAuth(request);
-    const adminClient = createAdminClient();
+    withDomainRoute(async (ctx, request) => {
+      const data = await request.file();
+      if (!data) {
+        throw badRequest("No file provided", "bad_request");
+      }
 
-    const data = await request.file();
-    if (!data) {
-      return reply.status(400).send({ error: "No file provided" });
-    }
-
-    const buffer = await data.toBuffer();
-    const validation = validateImageUpload({ type: data.mimetype, size: buffer.length });
-    if (!validation.isValid) {
-      return reply.status(400).send({ error: validation.error ?? "Invalid upload" });
-    }
-
-    if (!validateImageMagicBytes(buffer)) {
-      return reply.status(400).send({ error: "File content does not match a valid image format" });
-    }
-
-    try {
-      await uploadContactAvatarAndSetFlag(
-        client,
-        adminClient,
-        user.id,
-        user.id,
-        buffer,
-        data.mimetype,
-      );
-    } catch (uploadError) {
-      request.log.error({ err: uploadError }, "Failed to upload profile photo");
-      return reply.status(500).send({
-        error: "Failed to upload profile photo",
-      });
-    }
-
-    const avatarUrl = resolveContactAvatarUrl(client, user.id, {
-      id: user.id,
-      hasAvatar: true,
-      updatedAt: new Date().toISOString(),
-    });
-
-    if (!avatarUrl) {
-      return reply.status(500).send({ error: "Failed to generate avatar URL" });
-    }
-
-    return { success: true, data: { avatarUrl } };
-  });
+      const buffer = await data.toBuffer();
+      return uploadProfilePhoto(ctx, buffer, data.mimetype);
+    }),
+  );
 
   /**
    * DELETE /api/me/photo - Delete profile photo
@@ -230,12 +145,6 @@ export const meRoutes: AppRoutePlugin = async (fastify) => {
         response: withOkResponse(apiSuccessResponseSchema, "Profile photo deleted"),
       } satisfies FastifyZodOpenApiSchema,
     },
-    async (request, reply) => {
-    const { client, user } = getAuth(request);
-    const adminClient = createAdminClient();
-
-    await deleteContactAvatarAndClearFlag(client, adminClient, user.id, user.id);
-
-    return { success: true };
-  });
-}
+    withDomainRoute(async (ctx) => deleteProfilePhoto(ctx)),
+  );
+};

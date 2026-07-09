@@ -1,5 +1,6 @@
 "use client";
 
+import type { Activity } from "@bondery/schemas";
 import {
   ActionIcon,
   Badge,
@@ -14,22 +15,21 @@ import {
   Text,
 } from "@mantine/core";
 import { IconCopy, IconDotsVertical, IconEdit, IconTrash } from "@tabler/icons-react";
-import type { Activity } from "@bondery/schemas";
 import type { ReactNode } from "react";
-import { getActivityTypeConfig } from "@/lib/activityTypes";
-import { useInteractionTypeLabel } from "@/lib/i18n/useInteractionTypeLabel";
+import { getActivityTypeConfig } from "@/lib/contacts/activityTypes";
 import { useDateFormatter as useFormatter } from "@/lib/i18n/useDateFormatter";
+import { useInteractionTypeLabel } from "@/lib/i18n/useInteractionTypeLabel";
 
 interface ActivityCardProps {
   activity: Activity;
-  editLabel: string;
-  duplicateLabel: string;
   deleteLabel: string;
+  duplicateLabel: string;
+  editLabel: string;
   leftSection?: ReactNode;
-  onOpen: () => void;
-  onEdit: () => void;
-  onDuplicate: () => void;
   onDelete: () => void;
+  onDuplicate: () => void;
+  onEdit: () => void;
+  onOpen: () => void;
 }
 
 export function ActivityCard({
@@ -51,20 +51,20 @@ export function ActivityCard({
 
   return (
     <Paper
-      p={0}
-      withBorder
-      shadow="none"
-      radius="md"
-      onClick={onOpen}
-      style={{ cursor: "pointer", transition: "border-color 0.2s", position: "relative" }}
       className="max-w-md"
+      onClick={onOpen}
+      p={0}
+      radius="md"
+      shadow="none"
+      style={{ cursor: "pointer", position: "relative", transition: "border-color 0.2s" }}
+      withBorder
     >
       <Menu position="bottom-end" shadow="md">
         <MenuTarget>
           <ActionIcon
-            variant="subtle"
             onClick={(event) => event.stopPropagation()}
-            style={{ position: "absolute", top: 8, right: 8, zIndex: 1 }}
+            style={{ position: "absolute", right: 8, top: 8, zIndex: 1 }}
+            variant="subtle"
           >
             <IconDotsVertical size={16} />
           </ActionIcon>
@@ -101,26 +101,26 @@ export function ActivityCard({
         </MenuDropdown>
       </Menu>
 
-      <Group align="stretch" wrap="nowrap" gap={"md"} p="sm">
+      <Group align="stretch" gap={"md"} p="sm" wrap="nowrap">
         {leftSection ? (
           <Box className="flex justify-center items-center shrink-0 min-w-20">{leftSection}</Box>
         ) : null}
 
         <Stack gap="2" style={{ flex: 1 }}>
-          <Group gap="xs" align="center" wrap="nowrap">
+          <Group align="center" gap="xs" wrap="nowrap">
             <Text c="dimmed" size="xs">
               {formatter.dateTime(date, {
-                month: "short",
                 day: "numeric",
+                month: "short",
                 year: "numeric",
               })}
             </Text>
             <Badge
               color={typeConfig.color}
-              variant="light"
+              leftSection={typeConfig.emoji}
               radius="xl"
               size="xs"
-              leftSection={typeConfig.emoji}
+              variant="light"
             >
               {typeLabel}
             </Badge>
@@ -131,7 +131,7 @@ export function ActivityCard({
           </Text>
 
           {activity.description && (
-            <Text size="xs" c="dimmed">
+            <Text c="dimmed" size="xs">
               {activity.description}
             </Text>
           )}

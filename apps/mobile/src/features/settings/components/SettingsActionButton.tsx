@@ -1,7 +1,7 @@
-import type { ReactNode } from "react";
-import { ActivityIndicator } from "react-native";
 import { XStack } from "@tamagui/stacks";
 import { Paragraph } from "@tamagui/text";
+import type { ReactNode } from "react";
+import { ActivityIndicator } from "react-native";
 import { TAMAGUI_TRANSITION } from "../../../theme/animations";
 import type { MobileThemeColors } from "../../../theme/colors";
 import { MOBILE_LAYOUT, MOBILE_TYPOGRAPHY } from "../../../theme/tokens";
@@ -11,11 +11,11 @@ type ButtonTone = "primary" | "danger" | "neutral";
 type ButtonVariant = "filled" | "outline";
 
 interface SettingsActionButtonProps {
-  label: string;
-  icon: ReactNode;
-  onPress: () => void;
   disabled?: boolean;
+  icon: ReactNode;
+  label: string;
   loading?: boolean;
+  onPress: () => void;
   tone?: ButtonTone;
   variant?: ButtonVariant;
 }
@@ -32,16 +32,16 @@ function getPalette(tone: ButtonTone, variant: ButtonVariant, colors: MobileThem
     return {
       backgroundColor: toneColor,
       borderColor: toneColor,
-      textColor: colors.textOnPrimary,
       spinnerColor: colors.textOnPrimary,
+      textColor: colors.textOnPrimary,
     };
   }
 
   return {
     backgroundColor: colors.surface,
     borderColor: tone === "neutral" ? colors.borderStrong : toneColor,
-    textColor: tone === "neutral" ? colors.textSecondary : toneColor,
     spinnerColor: tone === "neutral" ? colors.textSecondary : toneColor,
+    textColor: tone === "neutral" ? colors.textSecondary : toneColor,
   };
 }
 
@@ -62,33 +62,33 @@ export function SettingsActionButton({
 
   return (
     <XStack
-      minHeight={MOBILE_LAYOUT.touchTarget}
+      alignItems="center"
+      backgroundColor={palette.backgroundColor}
+      borderColor={palette.borderColor}
       borderRadius={MOBILE_LAYOUT.borderRadius.control}
       borderWidth={1}
-      borderColor={palette.borderColor}
-      backgroundColor={palette.backgroundColor}
-      alignItems="center"
       justifyContent="space-between"
+      minHeight={MOBILE_LAYOUT.touchTarget}
+      onPress={onPress}
+      opacity={disabled ? 0.6 : 1}
       paddingHorizontal={14}
       paddingVertical={10}
-      opacity={disabled ? 0.6 : 1}
-      transition={TAMAGUI_TRANSITION.quick}
-      pressStyle={{ opacity: 0.88, transition: TAMAGUI_TRANSITION.quick }}
-      onPress={onPress}
       pointerEvents={disabled ? "none" : "auto"}
+      pressStyle={{ opacity: 0.88, transition: TAMAGUI_TRANSITION.quick }}
+      transition={TAMAGUI_TRANSITION.quick}
     >
       <Paragraph
         color={palette.textColor}
+        flex={1}
         fontSize={MOBILE_TYPOGRAPHY.fontSize.body}
         fontWeight={MOBILE_TYPOGRAPHY.fontWeight.semibold}
-        flex={1}
         textAlign="left"
       >
         {label}
       </Paragraph>
 
-      <XStack width={20} justifyContent="center" alignItems="center" marginLeft={10}>
-        {loading ? <ActivityIndicator size="small" color={palette.spinnerColor} /> : icon}
+      <XStack alignItems="center" justifyContent="center" marginLeft={10} width={20}>
+        {loading ? <ActivityIndicator color={palette.spinnerColor} size="small" /> : icon}
       </XStack>
     </XStack>
   );

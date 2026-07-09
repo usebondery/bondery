@@ -1,0 +1,35 @@
+{
+  "email": {
+    "invalid": "Please enter a valid email address",
+    "invalidTitle": "Invalid email"
+  },
+  "fields": {
+    "firstName": {
+      "maxLength": "First name must be at most {max} characters",
+      "required": "First name is required"
+    },
+    "generic": {
+      "maxLength": "Value must be at most {max} characters"
+    },
+    "headline": {
+      "maxLength": "Headline must be at most {max} characters"
+    },
+    "label": {
+      "maxLength": "{field} must be at most {max} characters",
+      "required": "{field} is required"
+    },
+    "lastName": {
+      "maxLength": "Last name must be at most {max} characters"
+    },
+    "location": {
+      "maxLength": "Location must be at most {max} characters"
+    },
+    "middleName": {
+      "maxLength": "Middle name must be at most {max} characters"
+    }
+  },
+  "interaction": {
+    "titleRequired": "Title is required"
+  },
+  "title": "Validation Error"
+}

@@ -1,32 +1,32 @@
 import { z } from "zod";
+import { nullableDateTimeSchema } from "#entities/_shared.js";
 import { contactPreviewSchema } from "#entities/contact.js";
 import { importantDateSchema, importantDateTypeSchema } from "#entities/important-date.js";
-import { nullableDateTimeSchema } from "#entities/_shared.js";
 
 export const upcomingReminderSchema = z.object({
   importantDate: importantDateSchema,
-  person: contactPreviewSchema,
   notificationSent: z.boolean(),
   notificationSentAt: nullableDateTimeSchema,
+  person: contactPreviewSchema,
 });
 
 export const reminderDigestItemSchema = z.object({
+  date: z.string(),
+  note: z.union([z.string(), z.null()]).optional(),
+  notifyDaysBefore: z.union([z.literal(1), z.literal(3), z.literal(7)]),
+  notifyOn: z.string(),
+  personAvatar: z.union([z.string(), z.null()]).optional(),
   personId: z.string(),
   personName: z.string(),
-  personAvatar: z.union([z.string(), z.null()]).optional(),
   type: importantDateTypeSchema,
-  date: z.string(),
-  notifyOn: z.string(),
-  notifyDaysBefore: z.union([z.literal(1), z.literal(3), z.literal(7)]),
-  note: z.union([z.string(), z.null()]).optional(),
 });
 
 export const reminderDigestUserSchema = z.object({
-  userId: z.string(),
   email: z.string(),
-  timezone: z.string().optional(),
-  targetDate: z.string().optional(),
   reminders: z.array(reminderDigestItemSchema),
+  targetDate: z.string().optional(),
+  timezone: z.string().optional(),
+  userId: z.string(),
 });
 
 export const reminderDigestRequestSchema = z.object({
@@ -34,29 +34,25 @@ export const reminderDigestRequestSchema = z.object({
   users: z.array(reminderDigestUserSchema),
 });
 
-export const reminderDigestResponseSchema = z
-  .object({
-    success: z.boolean(),
-    targetDate: z.string(),
-    sentUsers: z.number(),
-    failedUsers: z.number(),
-    failures: z
-      .array(
-        z.object({
-          userId: z.string(),
-          email: z.string(),
-          error: z.string(),
-        }),
-      )
-      .optional(),
-  })
-  ;
+export const reminderDigestResponseSchema = z.object({
+  failedUsers: z.number(),
+  failures: z
+    .array(
+      z.object({
+        email: z.string(),
+        error: z.string(),
+        userId: z.string(),
+      }),
+    )
+    .optional(),
+  sentUsers: z.number(),
+  success: z.boolean(),
+  targetDate: z.string(),
+});
 
-export const upcomingRemindersResponseSchema = z
-  .object({
-    reminders: z.array(upcomingReminderSchema),
-  })
-  ;
+export const upcomingRemindersResponseSchema = z.object({
+  reminders: z.array(upcomingReminderSchema),
+});
 
 export type UpcomingReminder = z.infer<typeof upcomingReminderSchema>;
 export type UpcomingRemindersResponse = z.infer<typeof upcomingRemindersResponseSchema>;

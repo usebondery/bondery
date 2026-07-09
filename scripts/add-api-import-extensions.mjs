@@ -2,7 +2,7 @@
  * Adds .js extensions to relative ESM imports in apps/api/src (NodeNext tsc).
  */
 import { readdir, readFile, writeFile } from "node:fs/promises";
-import { join, dirname } from "node:path";
+import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const srcRoot = join(dirname(fileURLToPath(import.meta.url)), "..", "apps", "api", "src");
@@ -21,11 +21,15 @@ async function walk(dir) {
       await walk(full);
       continue;
     }
-    if (!/\.tsx?$/.test(entry.name)) continue;
+    if (!/\.tsx?$/.test(entry.name)) {
+      continue;
+    }
 
     const original = await readFile(full, "utf8");
     const updated = original.replace(IMPORT_RE, (match, quote, specifier) => {
-      if (!needsExtension(specifier)) return match;
+      if (!needsExtension(specifier)) {
+        return match;
+      }
       return `${quote}${specifier}.js${quote}`;
     });
     if (updated !== original) {

@@ -1,12 +1,15 @@
-import { useCallback, useEffect, useRef, useState } from "react";
 import {
-  ActivityIndicator,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-  type TextInput,
-} from "react-native";
+  buildManualContactAddress,
+  GEOCODE_SUGGEST_DEBOUNCE_MS,
+  GEOCODE_SUGGEST_MIN_QUERY_LENGTH,
+} from "@bondery/helpers/address";
+import { CONTACT_ADDRESS_TYPE_OPTIONS } from "@bondery/helpers/contact";
+import type { ContactAddressEntry, ContactAddressType } from "@bondery/schemas";
+import {
+  type ContactAddressSheetOutput,
+  contactAddressEntrySchema,
+  contactAddressSheetSchema,
+} from "@bondery/schemas";
 import { FlashList } from "@shopify/flash-list";
 import {
   IconCheck,
@@ -15,39 +18,32 @@ import {
   IconMapPinPlus,
   IconTrash,
 } from "@tabler/icons-react-native";
-import type { ContactAddressEntry, ContactAddressType } from "@bondery/schemas";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { ActivityIndicator, Pressable, StyleSheet, Text, type TextInput, View } from "react-native";
 import {
-  buildManualContactAddress,
-  GEOCODE_SUGGEST_DEBOUNCE_MS,
-  GEOCODE_SUGGEST_MIN_QUERY_LENGTH,
-} from "@bondery/helpers/address";
-import { CONTACT_ADDRESS_TYPE_OPTIONS } from "@bondery/helpers/contact";
-import {
-  contactAddressEntrySchema,
-  contactAddressSheetSchema,
-  type ContactAddressSheetOutput,
-} from "@bondery/schemas";
-import { ActionSheetPopup, type ActionSheetPopupAction } from "../../../components/ActionSheetPopup";
+  ActionSheetPopup,
+  type ActionSheetPopupAction,
+} from "../../../components/ActionSheetPopup";
 import { SheetSelectField, SheetTextField } from "../../../components/form";
-import { UI_TIMING_MS } from "../../../lib/config";
 import { fetchGeocodeSuggestions } from "../../../lib/api/client";
+import { UI_TIMING_MS } from "../../../lib/config";
 import { useSheetForm } from "../../../lib/forms/useSheetForm";
 import { useMobileTranslations } from "../../../lib/i18n/useMobileTranslations";
-import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
 import { MOBILE_LAYOUT, MOBILE_TYPOGRAPHY } from "../../../theme/tokens";
+import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
 import { CountryFlag } from "./CountryFlag";
 
 type SheetMode = "add" | "edit";
 
 interface EditAddressSheetProps {
-  open: boolean;
-  mode: SheetMode;
   initialEntry: ContactAddressEntry | null;
   isSubmitting: boolean;
-  onOpenChange: (open: boolean) => void;
+  mode: SheetMode;
   onCancel: () => void;
-  onSave: (entry: ContactAddressEntry) => void;
   onDelete?: () => void;
+  onOpenChange: (open: boolean) => void;
+  onSave: (entry: ContactAddressEntry) => void;
+  open: boolean;
 }
 
 const SUGGESTION_ROW_HEIGHT = 48;
@@ -67,21 +63,22 @@ function buildAddressEntry(
 
   if (!geocodedSuggestion) {
     return buildManualContactAddress({
-      value: addressText,
-      type,
       label: trimmedNickname,
       timezone,
+      type,
+      value: addressText,
     });
   }
 
-  const displayValue = geocodedSuggestion.addressFormatted || geocodedSuggestion.value || addressText.trim();
+  const displayValue =
+    geocodedSuggestion.addressFormatted || geocodedSuggestion.value || addressText.trim();
 
   return {
     ...geocodedSuggestion,
-    value: displayValue,
-    type: type,
     label: trimmedNickname,
     timezone,
+    type: type,
+    value: displayValue,
   };
 }
 
@@ -107,28 +104,28 @@ export function EditAddressSheet({
     handleSubmit,
     formState: { isValid },
   } = useSheetForm({
-    open,
-    schema: contactAddressSheetSchema,
     getDefaultValues: () => {
       const entry = initialEntry;
       return {
-        value: entry?.addressFormatted ?? entry?.value ?? "",
         label: entry?.label ?? "",
         type: entry?.type ?? "home",
+        value: entry?.addressFormatted ?? entry?.value ?? "",
       };
     },
     mode: "onChange",
+    open,
+    schema: contactAddressSheetSchema,
   });
 
   const [suggestions, setSuggestions] = useState<ContactAddressEntry[]>([]);
   const [geocodeStatus, setGeocodeStatus] = useState<GeocodeStatus>("idle");
   const [geocodedSuggestion, setGeocodedSuggestion] = useState<ContactAddressEntry | null>(null);
 
-  function invalidateSuggestionsFetch() {
+  const invalidateSuggestionsFetch = useCallback(() => {
     activeQueryRef.current = null;
     abortControllerRef.current?.abort();
     abortControllerRef.current = null;
-  }
+  }, []);
 
   useEffect(() => {
     if (!open) {
@@ -144,10 +141,12 @@ export function EditAddressSheet({
     setSuggestions([]);
     setGeocodeStatus(entry?.latitude != null ? "geocoded" : "idle");
     setGeocodedSuggestion(null);
-  }, [open, initialEntry]);
+  }, [open, initialEntry, invalidateSuggestionsFetch]);
 
   useEffect(() => {
-    if (!open) return;
+    if (!open) {
+      return;
+    }
 
     const timer = setTimeout(() => {
       inputRef.current?.focus();
@@ -208,21 +207,24 @@ export function EditAddressSheet({
     }, GEOCODE_SUGGEST_DEBOUNCE_MS);
   }
 
-  const handleSelectSuggestion = useCallback((suggestion: ContactAddressEntry) => {
-    invalidateSuggestionsFetch();
-    setValue("value", suggestion.addressFormatted || suggestion.value, {
-      shouldDirty: true,
-      shouldValidate: true,
-    });
-    setGeocodedSuggestion(suggestion);
-    setGeocodeStatus("geocoded");
-    setSuggestions([]);
+  const handleSelectSuggestion = useCallback(
+    (suggestion: ContactAddressEntry) => {
+      invalidateSuggestionsFetch();
+      setValue("value", suggestion.addressFormatted || suggestion.value, {
+        shouldDirty: true,
+        shouldValidate: true,
+      });
+      setGeocodedSuggestion(suggestion);
+      setGeocodeStatus("geocoded");
+      setSuggestions([]);
 
-    if (debounceRef.current) {
-      clearTimeout(debounceRef.current);
-      debounceRef.current = null;
-    }
-  }, [setValue]);
+      if (debounceRef.current) {
+        clearTimeout(debounceRef.current);
+        debounceRef.current = null;
+      }
+    },
+    [setValue, invalidateSuggestionsFetch],
+  );
 
   const renderSuggestionItem = useCallback(
     ({ item, index }: { item: ContactAddressEntry; index: number }) => (
@@ -231,14 +233,14 @@ export function EditAddressSheet({
         style={({ pressed }) => [
           styles.suggestionItem,
           index < suggestions.length - 1 && {
-            borderBottomWidth: StyleSheet.hairlineWidth,
             borderBottomColor: colors.border,
+            borderBottomWidth: StyleSheet.hairlineWidth,
           },
           pressed && { backgroundColor: colors.surfacePressed },
         ]}
       >
         <CountryFlag countryCode={item.addressCountryCode} />
-        <Text style={[styles.suggestionText, { color: colors.textPrimary }]} numberOfLines={2}>
+        <Text numberOfLines={2} style={[styles.suggestionText, { color: colors.textPrimary }]}>
           {item.addressFormatted || item.value}
         </Text>
       </Pressable>
@@ -259,40 +261,49 @@ export function EditAddressSheet({
 
   const canSubmit = isValid && !isSubmitting;
   const onSubmit = handleSubmit((values: ContactAddressSheetOutput) => {
-    const entry = buildAddressEntry(values.value, values.label ?? "", values.type, geocodedSuggestion, initialEntry);
+    const entry = buildAddressEntry(
+      values.value,
+      values.label ?? "",
+      values.type,
+      geocodedSuggestion,
+      initialEntry,
+    );
     const parsedEntry = contactAddressEntrySchema.parse(entry);
     onSave(parsedEntry);
   });
 
   const typeOptions = CONTACT_ADDRESS_TYPE_OPTIONS.map((option) => ({
-    value: option.value,
     label:
       option.value === "work"
-        ? t("ContactAddress.TypeWork")
+        ? t("TypeWork", { ns: "ContactAddress" })
         : option.value === "other"
-          ? t("ContactAddress.TypeOther")
-          : t("ContactAddress.TypeHome"),
+          ? t("TypeOther", { ns: "ContactAddress" })
+          : t("TypeHome", { ns: "ContactAddress" }),
     leftSection: <Text style={styles.typeEmoji}>{option.emoji}</Text>,
+    value: option.value,
   }));
 
   const geocodeTrailingIcon =
     geocodeStatus === "loading" ? (
-      <ActivityIndicator size="small" color={colors.textMuted} />
+      <ActivityIndicator color={colors.textMuted} size="small" />
     ) : geocodeStatus === "geocoded" ? (
       <IconMapPinCheck size={18} stroke={colors.primary} />
     ) : null;
 
   const primaryAction: ActionSheetPopupAction = {
-    label: mode === "add" ? t("ContactAddress.AddAddressAction") : t("ContactAddress.SaveAddressAction"),
+    disabled: !canSubmit,
     icon:
       mode === "add" ? (
         <IconMapPinPlus size={16} stroke={colors.textOnPrimary} />
       ) : (
         <IconCheck size={16} stroke={colors.textOnPrimary} />
       ),
-    onPress: () => void onSubmit(),
-    disabled: !canSubmit,
+    label:
+      mode === "add"
+        ? t("AddAddressAction", { ns: "ContactAddress" })
+        : t("SaveAddressAction", { ns: "ContactAddress" }),
     loading: isSubmitting,
+    onPress: () => void onSubmit(),
     tone: "primary",
     variant: "filled",
   };
@@ -301,10 +312,10 @@ export function EditAddressSheet({
     mode === "edit" && onDelete
       ? [
           {
-            label: t("ContactAddress.DeleteAction"),
-            icon: <IconTrash size={16} stroke={colors.dangerAccent} />,
-            onPress: onDelete,
             disabled: isSubmitting,
+            icon: <IconTrash size={16} stroke={colors.dangerAccent} />,
+            label: t("DeleteAction", { ns: "ContactAddress" }),
+            onPress: onDelete,
             tone: "danger",
             variant: "outline",
           },
@@ -314,60 +325,68 @@ export function EditAddressSheet({
 
   return (
     <ActionSheetPopup
-      open={open}
-      title={mode === "add" ? t("ContactAddress.AddAddressTitle") : t("ContactAddress.EditAddressTitle")}
       actions={actions}
-      onOpenChange={onOpenChange}
-      onClose={onCancel}
       isBusy={isSubmitting}
+      onClose={onCancel}
+      onOpenChange={onOpenChange}
+      open={open}
+      title={
+        mode === "add"
+          ? t("AddAddressTitle", { ns: "ContactAddress" })
+          : t("EditAddressTitle", { ns: "ContactAddress" })
+      }
     >
       <SheetTextField
-        control={control}
-        name="value"
-        inputRef={inputRef}
-        onFieldChange={handleAddressChange}
-        placeholder={t("ContactAddress.LookupPlaceholder")}
-        leadingIcon={<IconMapPin size={16} stroke={colors.iconSecondary} />}
-        trailingAccessory={geocodeTrailingIcon}
-        editable={!isSubmitting}
-        returnKeyType="search"
-        enterKeyHint="search"
-        autoCorrect={false}
         autoCapitalize="words"
+        autoCorrect={false}
+        control={control}
+        editable={!isSubmitting}
+        enterKeyHint="search"
+        inputRef={inputRef}
+        leadingIcon={<IconMapPin size={16} stroke={colors.iconSecondary} />}
+        name="value"
+        onFieldChange={handleAddressChange}
+        placeholder={t("LookupPlaceholder", { ns: "ContactAddress" })}
+        returnKeyType="search"
         showMaxLengthCounter={false}
+        trailingAccessory={geocodeTrailingIcon}
       />
 
       {suggestions.length > 0 ? (
         <View
           style={[
             styles.suggestionsContainer,
-            { backgroundColor: colors.surface, borderColor: colors.border, height: suggestionsListHeight },
+            {
+              backgroundColor: colors.surface,
+              borderColor: colors.border,
+              height: suggestionsListHeight,
+            },
           ]}
         >
           <FlashList
             data={suggestions}
-            keyExtractor={(item, index) => `${item.value}-${index}`}
             keyboardShouldPersistTaps="handled"
-            renderItem={renderSuggestionItem}
+            keyExtractor={(item, index) => `${item.value}-${index}`}
             nestedScrollEnabled
+            renderItem={renderSuggestionItem}
           />
         </View>
       ) : null}
 
       <SheetTextField
+        autoCapitalize="words"
+        autoCorrect={false}
         control={control}
-        name="label"
-        placeholder={t("ContactAddress.LabelFieldPlaceholder")}
         editable={!isSubmitting}
         maxLength={64}
-        autoCorrect={false}
-        autoCapitalize="words"
+        name="label"
+        placeholder={t("LabelFieldPlaceholder", { ns: "ContactAddress" })}
       />
 
       <SheetSelectField
         control={control}
+        label={t("TypeLabel", { ns: "ContactAddress" })}
         name="type"
-        label={t("ContactAddress.TypeLabel")}
         options={typeOptions}
       />
     </ActionSheetPopup>
@@ -375,21 +394,21 @@ export function EditAddressSheet({
 }
 
 const styles = StyleSheet.create({
-  suggestionsContainer: {
-    borderRadius: MOBILE_LAYOUT.borderRadius.control,
-    borderWidth: 1,
-    overflow: "hidden",
+  suggestionIcon: {
+    flexShrink: 0,
+    marginTop: 2,
   },
   suggestionItem: {
-    flexDirection: "row",
     alignItems: "flex-start",
+    flexDirection: "row",
     gap: 8,
     paddingHorizontal: 12,
     paddingVertical: 10,
   },
-  suggestionIcon: {
-    marginTop: 2,
-    flexShrink: 0,
+  suggestionsContainer: {
+    borderRadius: MOBILE_LAYOUT.borderRadius.control,
+    borderWidth: 1,
+    overflow: "hidden",
   },
   suggestionText: {
     flex: 1,

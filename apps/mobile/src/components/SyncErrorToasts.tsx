@@ -1,6 +1,6 @@
 import { useEffect } from "react";
-import { subscribeSyncErrors } from "../lib/sync/outbox/sync-worker";
 import { useMobileTranslations } from "../lib/i18n/useMobileTranslations";
+import { subscribeSyncErrors } from "../lib/sync/outbox/sync-worker";
 import { useAppToast } from "../lib/toast/useAppToast";
 
 /** Surfaces rejected push mutations as toasts. */
@@ -11,9 +11,9 @@ export function SyncErrorToasts() {
   useEffect(() => {
     return subscribeSyncErrors((message) => {
       showToast({
-        type: "error",
-        headline: t("MobileApp.Common.ErrorTitle"),
         description: message,
+        headline: t("feedback.errorTitle", { ns: "common" }),
+        type: "error",
       });
     });
   }, [showToast, t]);

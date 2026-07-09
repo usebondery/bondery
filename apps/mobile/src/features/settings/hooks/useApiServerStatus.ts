@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useState } from "react";
 import * as Network from "expo-network";
 import { useFocusEffect } from "expo-router";
+import { useCallback, useEffect, useState } from "react";
 import { API_URL } from "../../../lib/config";
 
 export type ApiServerStatus = "checking" | "connected" | "offline" | "unreachable";
@@ -81,8 +81,8 @@ export function useApiServerStatus() {
   );
 
   return {
-    status,
     isChecking: status === "checking",
     refresh,
+    status,
   };
 }

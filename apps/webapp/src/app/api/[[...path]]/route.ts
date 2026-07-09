@@ -1,6 +1,7 @@
-import { resolveServerSession } from "@/lib/auth/resolveServerSession";
+import type { NextRequest } from "next/server";
 import { bffProxyFetch } from "@/lib/api/bffProxy";
-import { NextRequest } from "next/server";
+import { buildNestedErrorResponse } from "@/lib/api/buildNestedErrorResponse";
+import { resolveServerSession } from "@/lib/auth/resolveServerSession";
 
 type RouteContext = { params: Promise<{ path?: string[] }> };
 
@@ -12,7 +13,11 @@ async function proxyToApi(request: NextRequest, pathSegments: string[]) {
   const session = await resolveServerSession();
 
   if (session.status !== "ok") {
-    return Response.json({ error: "Unauthorized - Please log in", code: "BFF_UNAUTHORIZED" }, { status: 401 });
+    return buildNestedErrorResponse({
+      code: "auth_required",
+      message: "Unauthorized - Please log in",
+      status: 401,
+    });
   }
 
   const path = pathSegments.length > 0 ? `/${pathSegments.join("/")}` : "";
@@ -31,8 +36,8 @@ async function proxyToApi(request: NextRequest, pathSegments: string[]) {
   }
 
   const init: RequestInit = {
-    method: request.method,
     headers,
+    method: request.method,
   };
 
   if (request.method !== "GET" && request.method !== "HEAD") {
@@ -58,8 +63,8 @@ async function proxyToApi(request: NextRequest, pathSegments: string[]) {
   }
 
   return new Response(apiResponse.body, {
-    status: apiResponse.status,
     headers: responseHeaders,
+    status: apiResponse.status,
   });
 }
 

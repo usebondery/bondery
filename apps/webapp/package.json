@@ -1,45 +1,4 @@
 {
-  "name": "webapp",
-  "version": "1.7.0",
-  "private": true,
-  "type": "module",
-  "description": "Bondery Webapp",
-  "scripts": {
-    "check-env": "tsx scripts/check-env.ts",
-    "generate-icons": "tsx scripts/generate-icons.ts",
-    "predev": "cross-env NODE_ENV=development npm run generate-icons",
-    "prebuild": "cross-env NODE_ENV=production npm run generate-icons",
-    "dev": "next dev --port 3002",
-    "build": "next build",
-    "start": "next start",
-    "lint": "biome lint .",
-    "check-types": "tsc --noEmit && npm run check-api-fetch:strict && npm run check-query-patterns:strict && npm run check-modal-patterns:strict && npm run check-schemas-imports:strict",
-    "check-api-fetch": "tsx scripts/check-api-fetch-patterns.ts",
-    "check-api-fetch:strict": "cross-env CHECK_API_FETCH_STRICT=1 tsx scripts/check-api-fetch-patterns.ts",
-    "check-query-patterns": "tsx scripts/check-query-patterns.ts",
-    "check-query-patterns:strict": "cross-env CHECK_QUERY_PATTERNS_STRICT=1 tsx scripts/check-query-patterns.ts",
-    "check-modal-patterns": "tsx scripts/check-modal-patterns.ts",
-    "check-modal-patterns:strict": "cross-env CHECK_MODAL_PATTERNS_STRICT=1 tsx scripts/check-modal-patterns.ts",
-    "check-schemas-imports": "tsx scripts/check-schemas-imports.ts",
-    "check-schemas-imports:strict": "cross-env CHECK_SCHEMAS_IMPORTS_STRICT=1 tsx scripts/check-schemas-imports.ts",
-    "test:sync": "tsx --test src/lib/sync/sync-wake-client.test.ts",
-    "smoke-ssr": "node scripts/smoke-ssr-boot.mjs"
-  },
-  "browserslist": {
-    "production": [
-      "chrome >= 111",
-      "edge >= 111",
-      "firefox >= 113",
-      "safari >= 16.4",
-      "ios_saf >= 16.4",
-      "and_chr >= 111"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
-  },
   "dependencies": {
     "@ai-sdk/react": "^3.0.208",
     "@bondery/branding": "*",
@@ -69,6 +28,7 @@
     "@tabler/icons-react": "^3.40.0",
     "@tanstack/react-query": "^5.101.1",
     "@tanstack/react-query-devtools": "^5.101.1",
+    "@tiptap/core": "^3.20.4",
     "@tiptap/extension-color": "^3.20.4",
     "@tiptap/extension-emoji": "^3.20.4",
     "@tiptap/extension-highlight": "^3.20.4",
@@ -88,6 +48,7 @@
     "flag-icons": "^7.5.0",
     "highlight.js": "^11.11.1",
     "i18next": "^26.3.3",
+    "i18next-resources-to-backend": "^1.2.1",
     "is-emoji-supported": "^0.0.5",
     "leaflet": "^1.9.4",
     "leaflet.markercluster": "^1.5.3",
@@ -109,6 +70,7 @@
     "tippy.js": "^6.3.7",
     "zod": "^4.3.6"
   },
+  "description": "Bondery Webapp",
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
     "@types/leaflet": "^1.9.21",
@@ -123,5 +85,31 @@
     "tailwindcss": "^4",
     "tsx": "^4.21.0",
     "typescript": "^6"
-  }
+  },
+  "name": "webapp",
+  "private": true,
+  "scripts": {
+    "build": "next build",
+    "check-api-fetch": "tsx scripts/check-api-fetch-patterns.ts",
+    "check-api-fetch:strict": "cross-env CHECK_API_FETCH_STRICT=1 tsx scripts/check-api-fetch-patterns.ts",
+    "check-env": "tsx scripts/check-env.ts",
+    "check-modal-patterns": "tsx scripts/check-modal-patterns.ts",
+    "check-modal-patterns:strict": "cross-env CHECK_MODAL_PATTERNS_STRICT=1 tsx scripts/check-modal-patterns.ts",
+    "check-route-structure": "tsx scripts/check-route-structure.ts",
+    "check-route-structure:strict": "cross-env CHECK_ROUTE_STRUCTURE_STRICT=1 tsx scripts/check-route-structure.ts",
+    "check-route-titles": "tsx scripts/check-route-titles.ts",
+    "check-schemas-imports": "tsx scripts/check-schemas-imports.ts",
+    "check-schemas-imports:strict": "cross-env CHECK_SCHEMAS_IMPORTS_STRICT=1 tsx scripts/check-schemas-imports.ts",
+    "check-types": "tsc --noEmit && npm run check-api-fetch:strict && npm run check-route-titles && npm run check-route-structure:strict && npm run check-modal-patterns:strict && npm run check-schemas-imports:strict",
+    "dev": "next dev --port 26632",
+    "generate-icons": "tsx scripts/generate-icons.ts",
+    "lint": "biome lint .",
+    "prebuild": "cross-env NODE_ENV=production npm run generate-icons",
+    "predev": "cross-env NODE_ENV=development npm run generate-icons",
+    "smoke-ssr": "node scripts/smoke-ssr-boot.mjs",
+    "start": "next start",
+    "test:sync": "tsx --test src/lib/sync/sync-wake-client.test.ts"
+  },
+  "type": "module",
+  "version": "1.7.0"
 }

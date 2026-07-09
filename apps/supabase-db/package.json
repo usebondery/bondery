@@ -1,26 +1,26 @@
 {
-  "name": "supabase-db",
-  "version": "1.7.0",
-  "private": true,
   "description": "Supabase database setup, migrations, and edge functions",
-  "scripts": {
-    "dev": "powershell -ExecutionPolicy Bypass -File ./scripts/dev.ps1",
-    "start": "npx supabase start",
-    "stop": "npx supabase stop",
-    "reset": "npx supabase db reset",
-    "get:service-key": "npx tsx scripts/seed-vault-service-key.ts",
-    "setup:local": "npx tsx scripts/setup.ts --env local",
-    "setup:beta": "npx tsx scripts/setup.ts --env beta",
-    "setup:production": "npx tsx scripts/setup.ts --env production",
-    "upload:secrets": "npx supabase secrets set --env-file .env.beta --project-ref <your-project-ref>",
-    "migration:new": "npx supabase migration new",
-    "db:seed": "npx supabase db seed",
-    "gen-types": "npx supabase gen types typescript --local > ../../packages/schemas/src/supabase.types.ts",
-    "link": "npx supabase link",
-    "push": "npx supabase db push",
-    "pull": "npx supabase db pull"
-  },
   "devDependencies": {
     "supabase": "^2.83.0"
-  }
+  },
+  "name": "supabase-db",
+  "private": true,
+  "scripts": {
+    "db:seed": "npx supabase db seed",
+    "dev": "powershell -ExecutionPolicy Bypass -File ./scripts/dev.ps1",
+    "gen-types": "npx supabase gen types typescript --local > ../../packages/schemas/src/supabase.types.ts",
+    "get:service-key": "npx tsx scripts/seed-vault-service-key.ts",
+    "link": "npx supabase link",
+    "migration:new": "npx supabase migration new",
+    "pull": "npx supabase db pull",
+    "push": "npx supabase db push",
+    "reset": "npx supabase db reset",
+    "setup:beta": "npx tsx scripts/setup.ts --env beta",
+    "setup:local": "npx tsx scripts/setup.ts --env local",
+    "setup:production": "npx tsx scripts/setup.ts --env production",
+    "start": "npx supabase start",
+    "stop": "npx supabase stop",
+    "upload:secrets": "npx supabase secrets set --env-file .env.beta --project-ref <your-project-ref>"
+  },
+  "version": "1.7.0"
 }

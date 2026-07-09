@@ -1,0 +1,32 @@
+{
+  "AddAction": "Add date",
+  "AddHint": "To add a new date, specify all information.",
+  "AddImportantDate": "Add Important Date",
+  "BirthdayDateLabel": "Select birthday",
+  "DatePlaceholder": "Select date",
+  "DeleteAction": "Delete",
+  "DraftIncompleteError": "To add a new date, specify all information.",
+  "Empty": "No important dates yet.",
+  "ErrorTitle": "Error",
+  "NotePlaceholder": "Optional note",
+  "NotifyDayBefore": "Notify {count} day before",
+  "NotifyDaysBefore": "Notify {count} days before",
+  "NotifyMe": "Notify me",
+  "NotifyNone": "Don't notify",
+  "SuccessTitle": "Success",
+  "Title": "Important Dates",
+  "TypeDisabledBirthdateHint": "{firstName} has already defined birthdate",
+  "TypeDisabledHint": "{firstName} has already defined birthdate or name day",
+  "TypeDisabledNamedateHint": "{firstName} has already defined namedate",
+  "TypePlaceholder": "Select type",
+  "Types": {
+    "anniversary": "Anniversary",
+    "birthday": "Birthday",
+    "graduation": "Graduation",
+    "nameday": "Name day",
+    "other": "Other"
+  },
+  "UniqueTypeError": "Only one {type} can be added.",
+  "UpdateError": "Failed to update important dates",
+  "UpdateSuccess": "Important dates updated successfully"
+}

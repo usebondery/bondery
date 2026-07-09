@@ -14,16 +14,16 @@ export async function copyToClipboard(
   try {
     await Clipboard.setStringAsync(text);
     showToast({
-      type: "success",
-      headline: options.successHeadline,
       description: options.successDescription ?? text,
+      headline: options.successHeadline,
+      type: "success",
     });
     return true;
   } catch {
     showToast({
-      type: "error",
-      headline: options.errorHeadline,
       description: options.errorDescription,
+      headline: options.errorHeadline,
+      type: "error",
     });
     return false;
   }

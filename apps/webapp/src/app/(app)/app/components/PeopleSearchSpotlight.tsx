@@ -1,19 +1,22 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
+import type { Contact } from "@bondery/schemas";
 import { Avatar, Group, Loader, Stack, Text } from "@mantine/core";
 import { useDebouncedCallback } from "@mantine/hooks";
 import { createSpotlight, Spotlight } from "@mantine/spotlight";
 import { IconBriefcase, IconCompass, IconSearch, IconUsers } from "@tabler/icons-react";
-import type { Contact } from "@bondery/schemas";
-import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
-import { getAvatarColorFromName } from "@/lib/avatarColor";
-import { searchContacts } from "@/lib/searchContacts";
-import { DEBOUNCE_MS, HOTKEYS } from "@/lib/config";
-import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
+import { useRouter } from "next/navigation";
+import { useCallback, useRef, useState } from "react";
+import { getAvatarColorFromName } from "@/lib/contacts/avatarColor";
+import { searchContacts } from "@/lib/contacts/searchContacts";
+import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
+import { optimisticPersonDocumentTitle } from "@/lib/metadata/optimisticTitles";
+import { useNavigateWithTitle } from "@/lib/metadata/useNavigateWithTitle";
+import { DEBOUNCE_MS, HOTKEYS } from "@/lib/platform/config";
 
 const [peopleStore, peopleSearchActions] = createSpotlight();
+
 export { peopleSearchActions };
 
 const descriptionColor = "var(--action-description-color, var(--mantine-color-dimmed))";
@@ -21,7 +24,8 @@ const descriptionColor = "var(--action-description-color, var(--mantine-color-di
 const MIN_QUERY_LENGTH = 3;
 
 export function PeopleSearchSpotlight() {
-  const t = useTranslations("PeopleSearchSpotlight");
+  const t = useWebTranslations("PeopleSearchSpotlight");
+  const { navigateWithTitle } = useNavigateWithTitle();
   const router = useRouter();
   const [results, setResults] = useState<Contact[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -61,7 +65,10 @@ export function PeopleSearchSpotlight() {
   }
 
   function handlePersonClick(contact: Contact) {
-    router.push(`${WEBAPP_ROUTES.PERSON}/${contact.id}`);
+    navigateWithTitle(
+      `${WEBAPP_ROUTES.PERSON}/${contact.id}`,
+      optimisticPersonDocumentTitle(contact),
+    );
   }
 
   function handleSeeAll() {
@@ -73,14 +80,14 @@ export function PeopleSearchSpotlight() {
 
   return (
     <Spotlight.Root
-      store={peopleStore}
-      query={query}
-      onQueryChange={handleQueryChange}
       clearQueryOnClose
-      shortcut={HOTKEYS.FIND_PERSON}
-      scrollable
       maxHeight={400}
+      onQueryChange={handleQueryChange}
       onSpotlightClose={handleClose}
+      query={query}
+      scrollable
+      shortcut={HOTKEYS.FIND_PERSON}
+      store={peopleStore}
     >
       <Spotlight.Search
         leftSection={<IconSearch size={18} stroke={1.5} />}
@@ -88,9 +95,7 @@ export function PeopleSearchSpotlight() {
       />
 
       <Spotlight.ActionsList>
-        {belowMinLength && !isLoading && (
-          <Spotlight.Empty>{t("TypeMinChars")}</Spotlight.Empty>
-        )}
+        {belowMinLength && !isLoading && <Spotlight.Empty>{t("TypeMinChars")}</Spotlight.Empty>}
 
         {!belowMinLength && isLoading && (
           <Spotlight.Empty>
@@ -113,30 +118,30 @@ export function PeopleSearchSpotlight() {
 
             return (
               <Spotlight.Action key={contact.id} onClick={() => handlePersonClick(contact)}>
-                <Group gap="sm" wrap="nowrap" align="center" w="100%">
+                <Group align="center" gap="sm" w="100%" wrap="nowrap">
                   <Avatar
-                    src={contact.avatar || undefined}
-                    size={32}
-                    radius="xl"
                     color={getAvatarColorFromName(contact.firstName, contact.lastName)}
                     name={fullName}
+                    radius="xl"
+                    size={32}
+                    src={contact.avatar || undefined}
                   />
-                  <Stack gap={2} style={{ minWidth: 0, flex: 1 }}>
-                    <Text size="sm" fw={600} truncate>
+                  <Stack gap={2} style={{ flex: 1, minWidth: 0 }}>
+                    <Text fw={600} size="sm" truncate>
                       {fullName}
                     </Text>
                     {contact.headline && (
-                      <Group gap={4} wrap="nowrap" style={{ minWidth: 0, color: descriptionColor }}>
+                      <Group gap={4} style={{ color: descriptionColor, minWidth: 0 }} wrap="nowrap">
                         <IconBriefcase size={12} stroke={1.5} style={{ flexShrink: 0 }} />
-                        <Text size="xs" truncate c="inherit">
+                        <Text c="inherit" size="xs" truncate>
                           {contact.headline}
                         </Text>
                       </Group>
                     )}
                     {contact.location && (
-                      <Group gap={4} wrap="nowrap" style={{ minWidth: 0, color: descriptionColor }}>
+                      <Group gap={4} style={{ color: descriptionColor, minWidth: 0 }} wrap="nowrap">
                         <IconCompass size={12} stroke={1.5} style={{ flexShrink: 0 }} />
-                        <Text size="xs" truncate c="inherit">
+                        <Text c="inherit" size="xs" truncate>
                           {contact.location}
                         </Text>
                       </Group>
@@ -151,7 +156,7 @@ export function PeopleSearchSpotlight() {
           <Spotlight.Action onClick={handleSeeAll}>
             <Group gap="xs" justify="center" style={{ color: descriptionColor }}>
               <IconUsers size={16} stroke={1.5} />
-              <Text size="sm" c="inherit">
+              <Text c="inherit" size="sm">
                 {t("SeeAllResults")}
               </Text>
             </Group>

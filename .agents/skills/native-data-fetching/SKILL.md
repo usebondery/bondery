@@ -323,7 +323,7 @@ const fetchUsers = async () => {
 
 ```tsx
 // .env.development
-EXPO_PUBLIC_API_URL=http://localhost:3000
+EXPO_PUBLIC_API_URL=http://localhost:26631
 
 // .env.production
 EXPO_PUBLIC_API_URL=https://api.production.com

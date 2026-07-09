@@ -1,13 +1,8 @@
 import { SimpleGrid } from "@mantine/core";
-import { IconMessageCircle, IconUserPlus, IconUser } from "@tabler/icons-react";
+import { IconMessageCircle, IconUser, IconUserPlus } from "@tabler/icons-react";
 import { StatsCard } from "@/app/(app)/app/people/components/StatsCard";
 
 interface HomeStatsGridProps {
-  stats: {
-    totalContacts: number;
-    thisMonthInteractions: number;
-    newContactsThisYear: number;
-  };
   labels: {
     totalContactsTitle: string;
     totalContactsTooltip: string;
@@ -16,34 +11,39 @@ interface HomeStatsGridProps {
     newContactsTitle: string;
     newContactsTooltip: string;
   };
+  stats: {
+    totalContacts: number;
+    thisMonthInteractions: number;
+    newContactsThisYear: number;
+  };
 }
 
 export function HomeStatsGrid({ stats, labels }: HomeStatsGridProps) {
   return (
     <SimpleGrid cols={{ base: 1, sm: 3 }} spacing="md">
       <StatsCard
-        title={labels.totalContactsTitle}
-        value={stats.totalContacts}
-        tooltip={labels.totalContactsTooltip}
-        icon={<IconUser size={32} stroke={1.5} />}
         color="blue"
         href="/app/people"
+        icon={<IconUser size={32} stroke={1.5} />}
+        title={labels.totalContactsTitle}
+        tooltip={labels.totalContactsTooltip}
+        value={stats.totalContacts}
       />
       <StatsCard
-        title={labels.interactionsTitle}
-        value={stats.thisMonthInteractions}
-        tooltip={labels.interactionsTooltip}
-        icon={<IconMessageCircle size={32} stroke={1.5} />}
         color="green"
         href="/app/interactions"
+        icon={<IconMessageCircle size={32} stroke={1.5} />}
+        title={labels.interactionsTitle}
+        tooltip={labels.interactionsTooltip}
+        value={stats.thisMonthInteractions}
       />
       <StatsCard
-        title={labels.newContactsTitle}
-        value={stats.newContactsThisYear}
-        tooltip={labels.newContactsTooltip}
-        icon={<IconUserPlus size={32} stroke={1.5} />}
         color="violet"
         href="/app/people"
+        icon={<IconUserPlus size={32} stroke={1.5} />}
+        title={labels.newContactsTitle}
+        tooltip={labels.newContactsTooltip}
+        value={stats.newContactsThisYear}
       />
     </SimpleGrid>
   );

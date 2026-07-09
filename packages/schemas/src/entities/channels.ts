@@ -19,10 +19,10 @@ function refinePhoneEntryDigits(
 }
 
 export const phoneEntryEntitySchema = z.object({
-  prefix: z.string().trim().min(1, { error: "Country code is required" }),
-  value: z.string().trim().min(1, { error: "Phone number is required" }),
-  type: channelTypeSchema,
   preferred: z.boolean(),
+  prefix: z.string().trim().min(1, { error: "Country code is required" }),
+  type: channelTypeSchema,
+  value: z.string().trim().min(1, { error: "Phone number is required" }),
 });
 
 const phoneEntryBaseSchema = phoneEntryEntitySchema.omit({ preferred: true });
@@ -31,9 +31,9 @@ const phoneEntryOptionalPreferredSchema = phoneEntryBaseSchema.extend({
 });
 
 export const emailEntryEntitySchema = z.object({
-  value: z.string().trim().min(1, { error: "Email is required" }),
-  type: channelTypeSchema,
   preferred: z.boolean(),
+  type: channelTypeSchema,
+  value: z.string().trim().min(1, { error: "Email is required" }),
 });
 
 const emailEntryBaseSchema = emailEntryEntitySchema.omit({ preferred: true });
@@ -43,13 +43,12 @@ const emailEntryOptionalPreferredSchema = emailEntryBaseSchema.extend({
 
 /** Mobile phone sheet — subset of phone fields; pick must run before refinements. */
 export const phoneEntrySheetSchema = phoneEntryOptionalPreferredSchema
-  .pick({ prefix: true, value: true, type: true })
+  .pick({ prefix: true, type: true, value: true })
   .superRefine(refinePhoneEntryDigits);
 
 /** Single phone row before PATCH /api/contacts/:id phones array. */
-export const phoneEntryInputSchema = phoneEntryOptionalPreferredSchema.superRefine(
-  refinePhoneEntryDigits,
-);
+export const phoneEntryInputSchema =
+  phoneEntryOptionalPreferredSchema.superRefine(refinePhoneEntryDigits);
 
 export const phoneEntrySchema = phoneEntryInputSchema.transform((value) => ({
   ...value,
@@ -81,6 +80,14 @@ export const replaceEmailsSchema = z.array(emailEntrySchema).max(CONTACT_LIMITS.
 });
 
 export const shareContactEmailSchema = z.object({
+  message: z
+    .string()
+    .trim()
+    .max(SHARE_CONTACT_EMAIL_MAX_MESSAGE_LENGTH, {
+      error: `Message must be at most ${SHARE_CONTACT_EMAIL_MAX_MESSAGE_LENGTH} characters`,
+    })
+    .transform((value) => value || undefined)
+    .optional(),
   recipients: z
     .array(
       z
@@ -102,14 +109,6 @@ export const shareContactEmailSchema = z.object({
         });
       }
     }),
-  message: z
-    .string()
-    .trim()
-    .max(SHARE_CONTACT_EMAIL_MAX_MESSAGE_LENGTH, {
-      error: `Message must be at most ${SHARE_CONTACT_EMAIL_MAX_MESSAGE_LENGTH} characters`,
-    })
-    .transform((value) => value || undefined)
-    .optional(),
 });
 
 export type ContactType = z.infer<typeof channelTypeSchema>;

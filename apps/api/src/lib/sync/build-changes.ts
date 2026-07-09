@@ -1,21 +1,27 @@
 import type { SyncChange, SyncTableKey } from "@bondery/schemas/sync";
 import type { DomainSupabaseClient } from "../../domains/_shared/context.js";
-import { GROUP_SELECT } from "../queries.js";
+import { GROUP_SELECT } from "../data/select-fragments.js";
 
 type Row = Record<string, unknown>;
 
 function upsertChange(table: SyncTableKey, row: Row): SyncChange {
   const id = String(row.id);
-  return { table, operation: "update", entityId: id, value: row };
+  return { entityId: id, operation: "update", table, value: row };
 }
 
 function deleteChange(table: SyncTableKey, entityId: string): SyncChange {
-  return { table, operation: "delete", entityId, value: null };
+  return { entityId, operation: "delete", table, value: null };
 }
 
 async function listChildIds(
   client: DomainSupabaseClient,
-  table: "people_phones" | "people_emails" | "people_addresses" | "people_socials" | "people_important_dates" | "people_tags",
+  table:
+    | "people_phones"
+    | "people_emails"
+    | "people_addresses"
+    | "people_socials"
+    | "people_important_dates"
+    | "people_tags",
   userId: string,
   personId: string,
 ): Promise<string[]> {
@@ -67,7 +73,9 @@ export async function buildPeopleRowChange(
     throw new Error(error.message);
   }
 
-  if (!data) return null;
+  if (!data) {
+    return null;
+  }
   return upsertChange("people", data as Row);
 }
 
@@ -82,7 +90,9 @@ export async function buildContactSnapshotChanges(
 ): Promise<SyncChange[]> {
   const changes: SyncChange[] = [];
   const peopleChange = await buildPeopleRowChange(client, userId, personId);
-  if (peopleChange) changes.push(peopleChange);
+  if (peopleChange) {
+    changes.push(peopleChange);
+  }
 
   const childTables = [
     "people_phones",
@@ -107,7 +117,12 @@ export async function buildChildTableReplaceChanges(
   client: DomainSupabaseClient,
   userId: string,
   personId: string,
-  table: "people_phones" | "people_emails" | "people_addresses" | "people_socials" | "people_important_dates",
+  table:
+    | "people_phones"
+    | "people_emails"
+    | "people_addresses"
+    | "people_socials"
+    | "people_important_dates",
   priorIds: string[],
 ): Promise<SyncChange[]> {
   const rows = await loadRows(client, table, userId, { column: "person_id", value: personId });
@@ -131,7 +146,13 @@ export async function listContactChildIds(
   client: DomainSupabaseClient,
   userId: string,
   personId: string,
-  table: "people_phones" | "people_emails" | "people_addresses" | "people_socials" | "people_important_dates" | "people_tags",
+  table:
+    | "people_phones"
+    | "people_emails"
+    | "people_addresses"
+    | "people_socials"
+    | "people_important_dates"
+    | "people_tags",
 ): Promise<string[]> {
   return listChildIds(client, table, userId, personId);
 }
@@ -151,7 +172,9 @@ export async function buildPeopleGroupsChanges(
   personIds: string[],
   operation: "insert" | "delete",
 ): Promise<SyncChange[]> {
-  if (personIds.length === 0) return [];
+  if (personIds.length === 0) {
+    return [];
+  }
 
   const { data, error } = await client
     .from("people_groups")
@@ -181,6 +204,10 @@ export function buildTagDeleteChange(tagId: string): SyncChange {
   return deleteChange("tags", tagId);
 }
 
+export function buildPeopleTagChangeFromRow(row: Row): SyncChange {
+  return upsertChange("people_tags", row);
+}
+
 export async function buildPeopleTagChange(
   client: DomainSupabaseClient,
   userId: string,
@@ -199,7 +226,9 @@ export async function buildPeopleTagChange(
     throw new Error(error.message);
   }
 
-  if (!data) return null;
+  if (!data) {
+    return null;
+  }
   return upsertChange("people_tags", data as Row);
 }
 

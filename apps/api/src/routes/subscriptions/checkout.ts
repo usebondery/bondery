@@ -7,17 +7,15 @@
  * Returns the session URL for PolarEmbedCheckout on the web client.
  */
 
-import type { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
+import { conflictResponse } from "@bondery/schemas/http/responses";
+import { EXAMPLE_CHECKOUT_RESPONSE } from "@bondery/schemas/openapi/fixtures/responses";
+import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
 import { z } from "zod";
-import { getAuth } from "../../lib/auth.js";
-import { applyOpenApiRouteMeta } from "../../lib/openapi-route-meta.js";
-import { withOkResponse } from "../../lib/openapi-route-responses.js";
-import { conflictResponse } from "@bondery/schemas/http/responses";
-import {
-  EXAMPLE_CHECKOUT_RESPONSE,
-} from "@bondery/schemas/openapi/fixtures/responses";
-import { getPolarClient, sanitizePolarLocale } from "../../lib/polar.js";
+import { getAuth } from "../../lib/platform/auth/strategies.js";
+import { conflict, internal } from "../../lib/platform/errors/http-errors.js";
+import { withOkResponse } from "../../lib/platform/openapi/responses.js";
+import { getPolarClient, sanitizePolarLocale } from "../../services/billing/polar.js";
 
 const checkoutResponseSchema = z
   .object({
@@ -25,16 +23,12 @@ const checkoutResponseSchema = z
   })
   .meta({ example: EXAMPLE_CHECKOUT_RESPONSE });
 
-export async function subscriptionCheckoutRoutes(
-  fastify: FastifyInstance,
-): Promise<void> {
+export async function subscriptionCheckoutRoutes(fastify: FastifyInstance): Promise<void> {
   fastify.addHook("onRoute", (routeOptions) => {
     if (routeOptions.schema) {
       routeOptions.schema.tags = ["Subscriptions"];
     }
-    applyOpenApiRouteMeta(routeOptions, { area: "session" });
   });
-  fastify.addHook("onRequest", fastify.auth([fastify.verifySession]));
 
   /**
    * POST / — Create a Polar checkout session for embedded upgrade.
@@ -51,44 +45,45 @@ export async function subscriptionCheckoutRoutes(
       } satisfies FastifyZodOpenApiSchema,
     },
     async (request: FastifyRequest, reply: FastifyReply) => {
-    const { client, user } = getAuth(request);
-    const productId = fastify.config.POLAR_PRODUCT_ID;
+      const { client, user } = getAuth(request);
+      const productId = fastify.config.POLAR_PRODUCT_ID;
 
-    if (!productId) {
-      request.log.error("POLAR_PRODUCT_ID is not configured");
-      return reply.status(500).send({ error: "Checkout not configured" });
-    }
+      if (!productId) {
+        request.log.error("POLAR_PRODUCT_ID is not configured");
+        throw internal("checkout_not_configured");
+      }
 
-    const { data: existing } = await client
-      .from("subscriptions")
-      .select("status")
-      .eq("user_id", user.id)
-      .single();
+      const { data: existing } = await client
+        .from("subscriptions")
+        .select("status")
+        .eq("user_id", user.id)
+        .single();
 
-    if (existing?.status === "active" || existing?.status === "canceling") {
-      return reply.status(409).send({ error: "AlreadySubscribed" });
-    }
+      if (existing?.status === "active" || existing?.status === "canceling") {
+        throw conflict("AlreadySubscribed", "conflict");
+      }
 
-    const { data: settings } = await client
-      .from("user_settings")
-      .select("language")
-      .eq("user_id", user.id)
-      .single();
+      const { data: settings } = await client
+        .from("user_settings")
+        .select("language")
+        .eq("user_id", user.id)
+        .single();
 
-    try {
-      const polar = getPolarClient();
-      const session = await polar.checkouts.create({
-        products: [productId],
-        customerEmail: user.email ?? undefined,
-        embedOrigin: fastify.config.NEXT_PUBLIC_WEBAPP_URL,
-        externalCustomerId: user.id,
-        locale: sanitizePolarLocale(settings?.language ?? null),
-      });
+      try {
+        const polar = getPolarClient();
+        const session = await polar.checkouts.create({
+          customerEmail: user.email ?? undefined,
+          embedOrigin: fastify.config.NEXT_PUBLIC_WEBAPP_URL,
+          externalCustomerId: user.id,
+          locale: sanitizePolarLocale(settings?.language ?? null),
+          products: [productId],
+        });
 
-      return reply.send({ url: session.url });
-    } catch (err) {
-      request.log.error({ err, userId: user.id }, "Failed to create Polar checkout session");
-      return reply.status(500).send({ error: "Failed to create checkout session" });
-    }
-  });
+        return reply.send({ url: session.url });
+      } catch (err) {
+        request.log.error({ err, userId: user.id }, "Failed to create Polar checkout session");
+        throw internal("failed_to_create_checkout_session");
+      }
+    },
+  );
 }

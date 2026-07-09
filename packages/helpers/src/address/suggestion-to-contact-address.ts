@@ -3,9 +3,9 @@ import { formatAddressLabel } from "#address/address-utils.js";
 import type { MapSuggestionItem, MapSuggestionRegionalEntry } from "#address/mapy-suggest.js";
 
 export interface SuggestionToContactAddressOptions {
-  type?: ContactAddressType;
   label?: string | null;
   timezone?: string | null;
+  type?: ContactAddressType;
 }
 
 function pickByType(
@@ -21,14 +21,22 @@ function pickLastByType(
   wantedType: string,
 ): MapSuggestionRegionalEntry | null {
   const matches = entries.filter((entry) => entry.type === wantedType);
-  if (matches.length === 0) return null;
+  if (matches.length === 0) {
+    return null;
+  }
   return matches[matches.length - 1] || null;
 }
 
 function deriveGranularity(type: string): ContactAddressEntry["addressGranularity"] {
-  if (type === "regional.country") return "country";
-  if (type === "regional.region") return "state";
-  if (type === "regional.municipality" || type === "regional.municipality_part") return "city";
+  if (type === "regional.country") {
+    return "country";
+  }
+  if (type === "regional.region") {
+    return "state";
+  }
+  if (type === "regional.municipality" || type === "regional.municipality_part") {
+    return "city";
+  }
   return "address";
 }
 
@@ -89,7 +97,9 @@ function normalizeCoordinatePair(
 }
 
 function normalizeLabel(label: string | null | undefined): string | null {
-  if (typeof label !== "string") return null;
+  if (typeof label !== "string") {
+    return null;
+  }
   const trimmed = label.trim();
   return trimmed.length > 0 ? trimmed : null;
 }
@@ -117,30 +127,30 @@ export function mapSuggestionToContactAddress(
   const formattedValue = formatAddressLabel({
     addressLine1,
     city: addressCity,
+    countryCode: addressCountryCode,
     postalCode: addressPostalCode,
     state: addressState,
-    countryCode: addressCountryCode,
   });
 
   return {
-    value: formattedValue || item.label,
-    type: options?.type ?? "home",
-    label: normalizeLabel(options?.label),
-    latitude: normalizedCoordinates.latitude,
-    longitude: normalizedCoordinates.longitude,
+    addressCity,
+    addressCountry,
+    addressCountryCode,
+    addressFormatted: formattedValue || item.label,
+    addressGeocodeSource: "mapy.com",
+    addressGranularity: deriveGranularity(item.type),
     addressLine1,
     addressLine2: null,
-    addressCity,
     addressPostalCode,
     addressState,
     addressStateCode: null,
-    addressCountry,
-    addressCountryCode,
-    addressGranularity: deriveGranularity(item.type),
-    addressFormatted: formattedValue || item.label,
-    addressGeocodeSource: "mapy.com",
     geocodeConfidence: null,
+    label: normalizeLabel(options?.label),
+    latitude: normalizedCoordinates.latitude,
+    longitude: normalizedCoordinates.longitude,
     timezone: normalizeLabel(options?.timezone),
+    type: options?.type ?? "home",
+    value: formattedValue || item.label,
   };
 }
 
@@ -153,23 +163,23 @@ export function buildManualContactAddress(input: {
   const trimmedValue = input.value.trim();
 
   return {
-    value: trimmedValue,
-    type: input.type,
-    label: normalizeLabel(input.label),
-    latitude: null,
-    longitude: null,
+    addressCity: null,
+    addressCountry: null,
+    addressCountryCode: null,
+    addressFormatted: null,
+    addressGeocodeSource: "manual",
+    addressGranularity: "address",
     addressLine1: null,
     addressLine2: null,
-    addressCity: null,
     addressPostalCode: null,
     addressState: null,
     addressStateCode: null,
-    addressCountry: null,
-    addressCountryCode: null,
-    addressGranularity: "address",
-    addressFormatted: null,
-    addressGeocodeSource: "manual",
     geocodeConfidence: null,
+    label: normalizeLabel(input.label),
+    latitude: null,
+    longitude: null,
     timezone: normalizeLabel(input.timezone),
+    type: input.type,
+    value: trimmedValue,
   };
 }

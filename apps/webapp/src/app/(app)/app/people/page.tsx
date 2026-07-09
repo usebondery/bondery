@@ -1,21 +1,21 @@
-import type { Metadata } from "next";
-import { Suspense } from "react";
-import { cookies } from "next/headers";
 import { Stack } from "@mantine/core";
+import type { Metadata } from "next";
+import { cookies } from "next/headers";
+import { Suspense } from "react";
 import { PageWrapper } from "@/app/(app)/app/components/PageWrapper";
-import { PeopleHeaderClient } from "./components/PeopleHeaderClient";
-import { PeopleTableLoader } from "./components/PeopleTableLoader";
-import { PeopleTableSkeleton } from "./components/PeopleSkeletons";
-import { parseContactsListParams } from "@/lib/query/fetchers/contactsListParams";
-import type { ColumnKey } from "@/app/(app)/app/components/contacts/ContactsTableV2";
+import type { ColumnKey } from "@/lib/contacts/table-types";
+import { COLUMN_VISIBILITY_COOKIE } from "@/lib/cookies/constants";
 import { getWebTranslations as getTranslations } from "@/lib/i18n/getWebTranslations";
+import { staticPageTitle } from "@/lib/metadata/pageTitles";
+import { parseContactsListParams } from "@/lib/query/contactsListParams";
+import { PeopleHeaderClient } from "./components/PeopleHeaderClient";
+import { PeopleTableSkeleton } from "./components/PeopleSkeletons";
+import { PeopleTableLoader } from "./components/PeopleTableLoader";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("PeoplePage");
-  return { title: t("Title") };
+  return staticPageTitle(t("Title"));
 }
-
-const COLUMN_VISIBILITY_COOKIE = "bondery_contacts_columns";
 
 /** Matches DEFAULT_COLUMNS in PeopleClient - used to derive the skeleton shape. */
 const DEFAULT_VISIBLE_COLUMNS: ColumnKey[] = [
@@ -36,7 +36,10 @@ export default async function PeoplePage({
   // and the header renders before data arrives.
   const [params, cookieStore] = await Promise.all([searchParams, cookies()]);
 
-  const filter = parseContactsListParams({ search: params.search, sort: params.sort });
+  const filter = parseContactsListParams({
+    search: params.search,
+    sort: params.sort,
+  });
 
   // Read column visibility preferences from cookie so the streamed PeopleClient
   // initialises with the correct columns - no client-side layout shift.
@@ -45,8 +48,9 @@ export default async function PeoplePage({
   try {
     if (raw) {
       const parsed: unknown = JSON.parse(decodeURIComponent(raw));
-      if (Array.isArray(parsed))
+      if (Array.isArray(parsed)) {
         savedColumnVisibility = parsed as { key: string; visible: boolean }[];
+      }
     }
   } catch {
     // Malformed cookie - fall back to defaults
@@ -68,12 +72,9 @@ export default async function PeoplePage({
         {/* Header renders immediately - zero data dependency */}
         <PeopleHeaderClient />
 
-        {/* Table streams in once getContactsData resolves */}
+        {/* Table streams in once contacts query prefetch resolves */}
         <Suspense fallback={<PeopleTableSkeleton columns={visibleColumns} />}>
-          <PeopleTableLoader
-            filter={filter}
-            savedColumnVisibility={savedColumnVisibility}
-          />
+          <PeopleTableLoader filter={filter} savedColumnVisibility={savedColumnVisibility} />
         </Suspense>
       </Stack>
     </PageWrapper>

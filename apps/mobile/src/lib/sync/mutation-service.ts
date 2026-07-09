@@ -1,20 +1,16 @@
 import type { SyncMutation, SyncMutationInput } from "@bondery/schemas/sync";
+import { generateUuid } from "./ids";
 import { applyOptimisticMutation } from "./mutations/optimistic";
-import {
-  enqueuePendingMutation,
-  nextClientSequence,
-} from "./outbox/pending-mutations";
+import { enqueuePendingMutation, nextClientSequence } from "./outbox/pending-mutations";
 import { scheduleSyncDrain } from "./outbox/sync-worker";
 import { notifySyncSubscribers } from "./pull-manager";
 import { logSyncMutationEnqueued } from "./sync-logger";
 
-import { generateUuid } from "./ids";
-
 export function submitSyncMutation(mutation: SyncMutationInput): SyncMutation {
   const full = {
     ...mutation,
-    id: mutation.id ?? generateUuid(),
     clientSequence: nextClientSequence(),
+    id: mutation.id ?? generateUuid(),
   } as SyncMutation;
 
   applyOptimisticMutation(full);

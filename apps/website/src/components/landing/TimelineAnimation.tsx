@@ -1,6 +1,6 @@
 "use client";
 
-import { useMantineTheme, Card, Text, Group, Stack, Badge, Box, ThemeIcon } from "@mantine/core";
+import { Badge, Box, Card, Group, Stack, Text, ThemeIcon, useMantineTheme } from "@mantine/core";
 import { IconBell } from "@tabler/icons-react";
 import { motion } from "motion/react";
 import { useEffect, useState } from "react";
@@ -19,36 +19,36 @@ type TimelineItem = {
 
 const TIMELINE_ITEMS: TimelineItem[] = [
   {
-    id: "1",
-    type: "activity",
-    title: "Prototype hackathon",
+    color: "yellow",
     date: "Feb 15, 2026",
+    delay: 0,
     description: "Built reminder digest prototype with the team.",
     emoji: "🏆",
+    id: "1",
     tag: "COMPETITION",
-    delay: 0,
-    color: "yellow",
+    title: "Prototype hackathon",
+    type: "activity",
   },
   {
-    id: "2",
-    type: "activity",
-    title: "Coffee with Sarah",
+    color: "teal",
     date: "Feb 20, 2026",
+    delay: 1.5,
     description: "Discussed summer trip ideas and catch up.",
     emoji: "☕",
+    id: "2",
     tag: "SOCIAL",
-    delay: 1.5,
-    color: "teal",
+    title: "Coffee with Sarah",
+    type: "activity",
   },
   {
-    id: "3",
-    type: "reminder",
-    title: "Graduation",
+    color: "blue",
     date: "Mar 3, 2026",
+    delay: 3,
     description: "Send congratulations card",
     emoji: "🎓",
-    delay: 3,
-    color: "blue",
+    id: "3",
+    title: "Graduation",
+    type: "reminder",
   },
 ];
 
@@ -75,48 +75,48 @@ export function TimelineAnimation() {
   return (
     <Box
       style={{
+        height: 400,
+        maxWidth: 400,
+        overflow: "hidden",
         position: "relative",
         width: "100%",
-        maxWidth: 400,
-        height: 400,
-        overflow: "hidden",
       }}
     >
       {/* Timeline Line */}
       <div
         style={{
-          position: "absolute",
-          left: "24px",
-          top: "20px",
-          bottom: "20px",
-          width: "2px",
           backgroundColor: "light-dark(var(--mantine-color-gray-2), var(--mantine-color-dark-4))",
+          bottom: "20px",
+          left: "24px",
+          position: "absolute",
+          top: "20px",
+          width: "2px",
           zIndex: 0,
         }}
       />
 
       <Stack
         gap="md"
-        py="xl"
         px="xs"
-        style={{ position: "relative", zIndex: 1, paddingLeft: "40px" }}
+        py="xl"
+        style={{ paddingLeft: "40px", position: "relative", zIndex: 1 }}
       >
         {TIMELINE_ITEMS.map((item, index) => (
-          <TimelineItemCard key={item.id} item={item} isVisible={index < visibleCount} />
+          <TimelineItemCard isVisible={index < visibleCount} item={item} key={item.id} />
         ))}
       </Stack>
 
       {/* Gradient fade at bottom to handle overflow smoothly if list gets long */}
       <div
         style={{
-          position: "absolute",
-          bottom: 0,
-          left: 0,
-          right: 0,
-          height: "60px",
           background:
             "linear-gradient(to top, light-dark(white, var(--mantine-color-dark-7)), transparent)",
+          bottom: 0,
+          height: "60px",
+          left: 0,
           pointerEvents: "none",
+          position: "absolute",
+          right: 0,
           zIndex: 2,
         }}
       />
@@ -127,26 +127,26 @@ export function TimelineAnimation() {
 function TimelineItemCard({ item, isVisible }: { item: TimelineItem; isVisible: boolean }) {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
       animate={isVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-      transition={{ type: "spring", stiffness: 300, damping: 20 }}
-      style={{ width: "100%", position: "relative" }}
+      initial={{ opacity: 0, y: 20 }}
+      style={{ position: "relative", width: "100%" }}
+      transition={{ damping: 20, stiffness: 300, type: "spring" }}
     >
       {/* Timeline Dot */}
       <div
         style={{
-          position: "absolute",
-          left: "-34px",
-          top: "50%",
-          marginTop: "-5px",
-          width: "10px",
-          height: "10px",
-          borderRadius: "50%",
           backgroundColor:
             item.type === "reminder"
               ? "var(--mantine-color-blue-6)"
               : "light-dark(var(--mantine-color-gray-4), var(--mantine-color-dark-3))",
           border: "2px solid light-dark(white, var(--mantine-color-dark-7))",
+          borderRadius: "50%",
+          height: "10px",
+          left: "-34px",
+          marginTop: "-5px",
+          position: "absolute",
+          top: "50%",
+          width: "10px",
           zIndex: 2,
         }}
       />
@@ -154,91 +154,91 @@ function TimelineItemCard({ item, isVisible }: { item: TimelineItem; isVisible: 
       <Card
         padding="md"
         radius="md"
-        withBorder
         style={{
-          overflow: "visible",
+          backgroundColor: "light-dark(var(--mantine-color-white), var(--mantine-color-dark-6))",
           borderColor:
             item.type === "reminder"
               ? "light-dark(var(--mantine-color-blue-2), var(--mantine-color-blue-8))"
               : "light-dark(var(--mantine-color-gray-2), var(--mantine-color-dark-4))",
-          backgroundColor: "light-dark(var(--mantine-color-white), var(--mantine-color-dark-6))",
+          overflow: "visible",
         }}
+        withBorder
       >
         {item.type === "activity" ? (
           <Group align="center" wrap="nowrap">
             {/* Emoji Circle - Colored */}
             <ThemeIcon
-              size={40}
-              radius="xl"
-              variant="light"
               color={item.color}
+              radius="xl"
+              size={40}
               style={{ flexShrink: 0 }}
+              variant="light"
             >
               <span style={{ fontSize: 20 }}>{item.emoji}</span>
             </ThemeIcon>
 
             <div style={{ flex: 1 }}>
               {/* Title Row */}
-              <Group justify="space-between" align="center" wrap="nowrap">
+              <Group align="center" justify="space-between" wrap="nowrap">
                 <Text
+                  c="light-dark(var(--mantine-color-dark-9), var(--mantine-color-white))"
                   fw={700}
                   size="sm"
-                  c="light-dark(var(--mantine-color-dark-9), var(--mantine-color-white))"
                   truncate
                 >
                   {item.title}
                 </Text>
-                <Text size="xs" c="dimmed" fw={500} style={{ whiteSpace: "nowrap", marginLeft: 8 }}>
+                <Text c="dimmed" fw={500} size="xs" style={{ marginLeft: 8, whiteSpace: "nowrap" }}>
                   {item.date}
                 </Text>
               </Group>
 
               {/* Badge Row */}
               {item.tag && (
-                <Badge variant="light" size="xs" color={item.color} radius="sm" mb={4}>
+                <Badge color={item.color} mb={4} radius="sm" size="xs" variant="light">
                   {item.tag}
                 </Badge>
               )}
 
               {/* Description */}
-              <Text size="xs" c="dimmed" lineClamp={2}>
+              <Text c="dimmed" lineClamp={2} size="xs">
                 {item.description}
               </Text>
             </div>
           </Group>
         ) : (
-          <Group wrap="nowrap" align="center">
-            <Stack gap={0} align="center" style={{ minWidth: 40, flexShrink: 0 }}>
-              <Text size="xs" fw={700} c="blue">
+          <Group align="center" wrap="nowrap">
+            <Stack align="center" gap={0} style={{ flexShrink: 0, minWidth: 40 }}>
+              <Text c="blue" fw={700} size="xs">
                 MAR
               </Text>
-              <Text size="lg" fw={700} lh={1}>
+              <Text fw={700} lh={1} size="lg">
                 03
               </Text>
             </Stack>
 
             <div
               style={{
-                flex: 1,
-                paddingLeft: 8,
                 borderLeft:
                   "1px solid light-dark(var(--mantine-color-gray-3), var(--mantine-color-dark-4))",
+                flex: 1,
+                paddingLeft: 8,
               }}
             >
               <Text
+                c="light-dark(var(--mantine-color-dark-9), var(--mantine-color-white))"
                 fw={600}
                 size="sm"
-                c="light-dark(var(--mantine-color-dark-9), var(--mantine-color-white))"
               >
                 {item.emoji} {item.title}
               </Text>
-              <Text size="xs" c="dimmed" lineClamp={1}>
+              <Text c="dimmed" lineClamp={1} size="xs">
                 {item.description}
               </Text>
             </div>
 
             {/* Right side: Bell + "In 3 days" */}
-            <Badge variant="light" color="orange" leftSection={<IconBell size={12} />}>
+            <Badge color="orange" leftSection={<IconBell size={12} />} variant="light">
               In 3 days
             </Badge>
           </Group>

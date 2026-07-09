@@ -1,75 +1,62 @@
 {
-  "name": "@bondery/emails",
-  "version": "1.7.0",
-  "description": "Bondery email templates using React Email",
-  "type": "module",
-  "main": "./dist/index.js",
-  "types": "./src/index.ts",
-  "exports": {
-    ".": {
-      "types": "./src/index.ts",
-      "import": "./dist/index.js",
-      "node": "./dist/index.js",
-      "default": "./dist/index.js"
-    },
-    "./*": {
-      "types": "./src/*.ts",
-      "import": "./dist/*.js",
-      "node": "./dist/*.js",
-      "default": "./dist/*.js"
-    },
-    "./shared/EmailWrapper": {
-      "types": "./src/shared/EmailWrapper.tsx",
-      "import": "./dist/shared/EmailWrapper.js",
-      "node": "./dist/shared/EmailWrapper.js",
-      "default": "./dist/shared/EmailWrapper.js"
-    },
-    "./templates/FeedbackEmail": {
-      "types": "./src/templates/FeedbackEmail.tsx",
-      "import": "./dist/templates/FeedbackEmail.js",
-      "node": "./dist/templates/FeedbackEmail.js",
-      "default": "./dist/templates/FeedbackEmail.js"
-    },
-    "./templates/ReminderDigestEmail": {
-      "types": "./src/templates/ReminderDigestEmail.tsx",
-      "import": "./dist/templates/ReminderDigestEmail.js",
-      "node": "./dist/templates/ReminderDigestEmail.js",
-      "default": "./dist/templates/ReminderDigestEmail.js"
-    },
-    "./templates/ShareContactEmail": {
-      "types": "./src/templates/ShareContactEmail.tsx",
-      "import": "./dist/templates/ShareContactEmail.js",
-      "node": "./dist/templates/ShareContactEmail.js",
-      "default": "./dist/templates/ShareContactEmail.js"
-    }
-  },
-  "files": [
-    "src"
-  ],
-  "scripts": {
-    "preview": "email dev --dir ./src --port 3004",
-    "dev": "tsc --watch --preserveWatchOutput",
-    "build": "rimraf dist && tsc && node ../../scripts/rewrite-package-hash-imports-in-dist.mjs emails"
-  },
   "dependencies": {
     "@bondery/branding": "*",
+    "@bondery/helpers": "*",
     "@react-email/render": "^2.0.4",
     "@react-email/ui": "^6.6.0",
     "react-email": "^6.6.0"
   },
-  "peerDependencies": {
-    "react": "^18.0.0 || ^19.0.0",
-    "react-dom": "^18.0.0 || ^19.0.0"
-  },
+  "description": "Bondery email templates using React Email",
   "devDependencies": {
+    "@bondery/typescript-config": "*",
     "@react-email/preview-server": "^5.2.11",
     "@types/react": "^19",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
     "rimraf": "^6.0.1",
-    "@bondery/typescript-config": "*",
     "typescript": "^6"
   },
+  "exports": {
+    ".": {
+      "default": "./dist/index.js",
+      "import": "./dist/index.js",
+      "node": "./dist/index.js",
+      "types": "./src/index.ts"
+    },
+    "./*": {
+      "default": "./dist/*.js",
+      "import": "./dist/*.js",
+      "node": "./dist/*.js",
+      "types": "./src/*.ts"
+    },
+    "./shared/EmailWrapper": {
+      "default": "./dist/shared/EmailWrapper.js",
+      "import": "./dist/shared/EmailWrapper.js",
+      "node": "./dist/shared/EmailWrapper.js",
+      "types": "./src/shared/EmailWrapper.tsx"
+    },
+    "./templates/FeedbackEmail": {
+      "default": "./dist/templates/FeedbackEmail.js",
+      "import": "./dist/templates/FeedbackEmail.js",
+      "node": "./dist/templates/FeedbackEmail.js",
+      "types": "./src/templates/FeedbackEmail.tsx"
+    },
+    "./templates/ReminderDigestEmail": {
+      "default": "./dist/templates/ReminderDigestEmail.js",
+      "import": "./dist/templates/ReminderDigestEmail.js",
+      "node": "./dist/templates/ReminderDigestEmail.js",
+      "types": "./src/templates/ReminderDigestEmail.tsx"
+    },
+    "./templates/ShareContactEmail": {
+      "default": "./dist/templates/ShareContactEmail.js",
+      "import": "./dist/templates/ShareContactEmail.js",
+      "node": "./dist/templates/ShareContactEmail.js",
+      "types": "./src/templates/ShareContactEmail.tsx"
+    }
+  },
+  "files": [
+    "src"
+  ],
   "imports": {
     "#*": [
       "./dist/*",
@@ -81,5 +68,19 @@
       "./src/*/index.ts",
       "./src/*/index.tsx"
     ]
-  }
+  },
+  "main": "./dist/index.js",
+  "name": "@bondery/emails",
+  "peerDependencies": {
+    "react": "^18.0.0 || ^19.0.0",
+    "react-dom": "^18.0.0 || ^19.0.0"
+  },
+  "scripts": {
+    "build": "rimraf dist && tsc && node ../../scripts/rewrite-package-hash-imports-in-dist.mjs emails",
+    "dev": "tsc --watch --preserveWatchOutput",
+    "preview": "email dev --dir ./src --port 26639"
+  },
+  "type": "module",
+  "types": "./src/index.ts",
+  "version": "1.7.0"
 }

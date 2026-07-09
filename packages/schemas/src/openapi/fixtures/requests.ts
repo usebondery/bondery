@@ -1,16 +1,16 @@
 import {
-  EXAMPLE_CONTACT_ID,
-  EXAMPLE_CONTACT_ID_2,
-  EXAMPLE_DATE,
-  EXAMPLE_ISO_TIMESTAMP,
-} from "./primitives.js";
-import {
   EXAMPLE_CHAT_SESSION,
   EXAMPLE_INSTAGRAM_PREPARED_CONTACT,
   EXAMPLE_LINKEDIN_PREPARED_CONTACT,
   EXAMPLE_TAG,
   EXAMPLE_VCARD_PREPARED_CONTACT,
 } from "./entities.js";
+import {
+  EXAMPLE_CONTACT_ID,
+  EXAMPLE_CONTACT_ID_2,
+  EXAMPLE_DATE,
+  EXAMPLE_ISO_TIMESTAMP,
+} from "./primitives.js";
 
 /** POST /api/contacts body. */
 export const EXAMPLE_CREATE_CONTACT_REQUEST = {
@@ -25,9 +25,9 @@ export const EXAMPLE_PATCH_CONTACT_REQUEST = {
 
 /** POST /api/groups body. */
 export const EXAMPLE_CREATE_GROUP_REQUEST = {
-  label: "Inner Circle",
-  emoji: "⭐",
   color: "#6366f1",
+  emoji: "⭐",
+  label: "Inner Circle",
 };
 
 /** PATCH /api/groups/:id body. */
@@ -47,10 +47,10 @@ export const EXAMPLE_PATCH_TAG_REQUEST = {
 
 /** POST /api/interactions body. */
 export const EXAMPLE_CREATE_INTERACTION_REQUEST = {
-  type: "Coffee",
   date: EXAMPLE_ISO_TIMESTAMP,
   participantIds: [EXAMPLE_CONTACT_ID],
   title: "Coffee catch-up",
+  type: "Coffee",
 };
 
 /** PATCH /api/interactions/:id body. */
@@ -74,10 +74,10 @@ export const EXAMPLE_PATCH_RELATIONSHIP_REQUEST = {
 export const EXAMPLE_REPLACE_IMPORTANT_DATES_REQUEST = {
   dates: [
     {
-      type: "birthday" as const,
       date: EXAMPLE_DATE,
       note: null,
       notifyDaysBefore: 7,
+      type: "birthday" as const,
     },
   ],
 };
@@ -103,11 +103,11 @@ export const EXAMPLE_REMOVE_FROM_GROUP_REQUEST = EXAMPLE_TAG_MEMBERSHIP_REQUEST;
 
 /** POST /api/contacts/merge body. */
 export const EXAMPLE_MERGE_CONTACTS_REQUEST = {
-  leftPersonId: EXAMPLE_CONTACT_ID,
-  rightPersonId: EXAMPLE_CONTACT_ID_2,
   conflictResolutions: {
     firstName: "left" as const,
   },
+  leftPersonId: EXAMPLE_CONTACT_ID,
+  rightPersonId: EXAMPLE_CONTACT_ID_2,
 };
 
 /** POST /api/contacts/:id/enrich body. */
@@ -130,19 +130,19 @@ export const EXAMPLE_ENRICH_QUEUE_PATCH_REQUEST = {
 export const EXAMPLE_LINKEDIN_DATA_REQUEST = {
   workHistory: [
     {
-      title: "Mathematician",
       companyName: "Analytical Engines Ltd",
+      title: "Mathematician",
     },
   ],
 };
 
 /** POST /api/contacts/share body. */
 export const EXAMPLE_SHARE_CONTACT_REQUEST = {
+  message: "Sharing Ada's contact card.",
   personId: EXAMPLE_CONTACT_ID,
   recipientEmails: ["friend@example.com"],
-  message: "Sharing Ada's contact card.",
-  sendCopy: true,
   selectedFields: ["name", "emails", "phones"],
+  sendCopy: true,
 };
 
 /** POST /api/me/api-keys body. */
@@ -170,9 +170,9 @@ export const EXAMPLE_UPDATE_SETTINGS_REQUEST = {
 
 /** POST /api/me/feedback body. */
 export const EXAMPLE_FEEDBACK_REQUEST = {
-  npsScore: 9,
-  npsReason: "Great contact management UX.",
   generalFeedback: "Would love calendar sync.",
+  npsReason: "Great contact management UX.",
+  npsScore: 9,
 };
 
 /** PATCH /api/chat/sessions/:sessionId body. */
@@ -182,14 +182,14 @@ export const EXAMPLE_UPDATE_CHAT_SESSION_REQUEST = {
 
 /** POST /api/chat body. */
 export const EXAMPLE_CHAT_REQUEST = {
-  sessionId: EXAMPLE_CHAT_SESSION.id,
   messages: [
     {
       id: "msg-1",
+      parts: [{ text: "Who should I follow up with?", type: "text" }],
       role: "user",
-      parts: [{ type: "text", text: "Who should I follow up with?" }],
     },
   ],
+  sessionId: EXAMPLE_CHAT_SESSION.id,
 };
 
 /** POST /api/sync/push body. */
@@ -197,13 +197,13 @@ export const EXAMPLE_SYNC_PUSH_REQUEST = {
   deviceId: "6ba7b812-9dad-11d1-80b4-00c04fd430c8",
   mutations: [
     {
-      id: "6ba7b813-9dad-11d1-80b4-00c04fd430c8",
       clientSequence: 1,
-      type: "contact.create" as const,
+      id: "6ba7b813-9dad-11d1-80b4-00c04fd430c8",
       payload: {
         firstName: "Ada",
         lastName: "Lovelace",
       },
+      type: "contact.create" as const,
     },
   ],
 };
@@ -223,9 +223,9 @@ export const EXAMPLE_VCARD_IMPORT_COMMIT_REQUEST = {
 
 /** POST /api/extension/redirect body. */
 export const EXAMPLE_EXTENSION_REDIRECT_REQUEST = {
-  linkedin: "https://linkedin.com/in/ada-lovelace",
   firstName: "Ada",
   lastName: "Lovelace",
+  linkedin: "https://linkedin.com/in/ada-lovelace",
 };
 
 /** POST /api/contacts/:id/tags body. */
@@ -238,21 +238,21 @@ export const EXAMPLE_REMINDER_DIGEST_REQUEST = {
   targetDate: EXAMPLE_DATE,
   users: [
     {
-      userId: "6ba7b810-9dad-11d1-80b4-00c04fd430c8",
       email: "ada@example.com",
-      timezone: "Europe/London",
-      targetDate: EXAMPLE_DATE,
       reminders: [
         {
+          date: EXAMPLE_DATE,
+          note: null,
+          notifyDaysBefore: 7 as const,
+          notifyOn: EXAMPLE_DATE,
           personId: EXAMPLE_CONTACT_ID,
           personName: "Ada Lovelace",
           type: "birthday" as const,
-          date: EXAMPLE_DATE,
-          notifyOn: EXAMPLE_DATE,
-          notifyDaysBefore: 7 as const,
-          note: null,
         },
       ],
+      targetDate: EXAMPLE_DATE,
+      timezone: "Europe/London",
+      userId: "6ba7b810-9dad-11d1-80b4-00c04fd430c8",
     },
   ],
 };

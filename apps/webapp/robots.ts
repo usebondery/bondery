@@ -1,11 +1,11 @@
-import { WEBAPP_URL } from "@/lib/config";
 import type { MetadataRoute } from "next";
+import { WEBAPP_URL } from "@/lib/platform/config";
 
 export default function robots(): MetadataRoute.Robots {
   return {
     rules: {
-      userAgent: "*",
       disallow: ["/api/", "/app/", "*"],
+      userAgent: "*",
     },
     sitemap: `${WEBAPP_URL}/sitemap.xml`,
   };

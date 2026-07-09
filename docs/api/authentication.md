@@ -71,18 +71,15 @@ A read-only key that tries to `POST`, `PATCH`, or `DELETE` receives **403 Forbid
 
 API keys work on integration-focused routes:
 
-- `/api/contacts` (and sub-resources)
-- `/api/groups`
+- `/api/contacts` — list, create, read, update, delete, map pins, by-social lookup, vCard export, and related read paths
+- `/api/groups` and group membership
 - `/api/tags`
 - `/api/interactions`
 - `/api/contacts/share`
 - `/api/contacts/import/*` (LinkedIn, Instagram, vCard)
 - `/api/geocode`
 
-API keys **do not** work on:
-
-- `/api/me/api-keys` (manage keys with a session only)
-- `/api/sync`, `/api/chat`, `/api/admin`, `/api/subscriptions`, `/api/extension`, webhooks, and other account or internal routes
+API keys **do not** work on session-only contact workflows (merge, enrichment, relationships, per-contact tags/photos/important dates), account routes, sync, chat, admin, subscriptions, extension, webhooks, or other internal routes.
 
 Invalid or deleted keys return **401 Unauthorized**. Requests to disallowed routes return **403 Forbidden**.
 

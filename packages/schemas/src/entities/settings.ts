@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { nullableDateTimeSchema } from "#entities/_shared.js";
+import { supportedLocaleSchema } from "#locale/supported-locale.js";
 
 export const colorSchemePreferenceSchema = z.enum(["light", "dark", "auto"]);
 export const timeFormatPreferenceSchema = z.enum(["24h", "12h"]);
@@ -29,8 +30,8 @@ export const importFollowupPlatformSchema = z.enum(["linkedin", "instagram"]);
 
 export const updateImportFollowupBodySchema = z
   .object({
-    status: importFollowupStatusSchema,
     platform: importFollowupPlatformSchema.optional(),
+    status: importFollowupStatusSchema,
   })
   .superRefine((body, ctx) => {
     if (body.status === "awaiting_export" && !body.platform) {
@@ -43,51 +44,50 @@ export const updateImportFollowupBodySchema = z
   });
 
 const mutableUserSettingsInputSchema = z.object({
-  timezone: z.string().nullable(),
-  reminderSendHour: reminderSendHourSchema,
-  timeFormat: timeFormatPreferenceSchema,
-  language: z.string().nullable(),
   colorScheme: colorSchemePreferenceSchema,
-  leftSwipeAction: swipeActionPreferenceSchema,
-  rightSwipeAction: swipeActionPreferenceSchema,
   groupSortOrder: groupSortOrderPreferenceSchema,
+  language: supportedLocaleSchema.nullable(),
+  leftSwipeAction: swipeActionPreferenceSchema,
+  reminderSendHour: reminderSendHourSchema,
+  rightSwipeAction: swipeActionPreferenceSchema,
   tagSortOrder: tagSortOrderPreferenceSchema,
+  timeFormat: timeFormatPreferenceSchema,
+  timezone: z.string().nullable(),
 });
 
-/** Wire shape for GET /api/me/settings — DB columns may be plain strings before narrowing. */
+/** Wire shape for GET /api/me/settings — DB-backed preference fields. */
 const mutableUserSettingsSchema = z.object({
-  timezone: z.string().nullable(),
-  reminderSendHour: reminderSendHourSchema,
-  timeFormat: z.string(),
-  language: z.string().nullable(),
   colorScheme: colorSchemePreferenceSchema,
-  leftSwipeAction: z.string(),
-  rightSwipeAction: z.string(),
   groupSortOrder: z.string(),
+  language: supportedLocaleSchema,
+  leftSwipeAction: z.string(),
+  reminderSendHour: reminderSendHourSchema,
+  rightSwipeAction: z.string(),
   tagSortOrder: z.string(),
+  timeFormat: z.string(),
+  timezone: z.string().nullable(),
 });
 
 /** Wire/API user settings (GET /api/me/settings). */
 export const userSettingsSchema = z.object({
   name: z.string().nullable().optional(),
   ...mutableUserSettingsSchema.shape,
-  avatarUrl: z.string().nullable(),
-  onboardingCompletedAt: nullableDateTimeSchema,
-  importFollowupStatus: importFollowupStatusSchema.nullable().optional(),
-  importFollowupPlatform: importFollowupPlatformSchema.nullable().optional(),
-  importCompletedAt: nullableDateTimeSchema.optional(),
-  gettingStartedDismissedAt: nullableDateTimeSchema.optional(),
   aiMessagesUsed: z.number().optional(),
+  avatarUrl: z.string().nullable(),
+  gettingStartedDismissedAt: nullableDateTimeSchema.optional(),
+  importCompletedAt: nullableDateTimeSchema.optional(),
+  importFollowupPlatform: importFollowupPlatformSchema.nullable().optional(),
+  importFollowupStatus: importFollowupStatusSchema.nullable().optional(),
+  onboardingCompletedAt: nullableDateTimeSchema,
 });
 
 export const updateUserSettingsInputSchema = mutableUserSettingsInputSchema
-  .omit({ timezone: true, language: true })
+  .omit({ language: true, timezone: true })
   .extend({
+    language: supportedLocaleSchema.optional(),
     timezone: z.string().optional(),
-    language: z.string().optional(),
   })
-  .partial()
-  ;
+  .partial();
 
 /** PATCH /api/me/settings body (includes signup-only flag). */
 export const updateSettingsBodySchema = updateUserSettingsInputSchema.extend({
@@ -96,49 +96,45 @@ export const updateSettingsBodySchema = updateUserSettingsInputSchema.extend({
 
 export const userIdentitySchema = z.object({
   id: z.string(),
-  user_id: z.string(),
   identity_id: z.string(),
   provider: z.string(),
+  user_id: z.string(),
 });
 
-export const userSettingsResponseSchema = z
-  .object({
-    success: z.boolean(),
-    data: userSettingsSchema.extend({
-      email: z.string().nullable().optional(),
-      providers: z.array(z.string()).optional(),
-      identities: z.array(userIdentitySchema).optional(),
-    }),
-  })
-  ;
+export const userSettingsResponseSchema = z.object({
+  data: userSettingsSchema.extend({
+    email: z.string().nullable().optional(),
+    identities: z.array(userIdentitySchema).optional(),
+    providers: z.array(z.string()).optional(),
+  }),
+  success: z.boolean(),
+});
 
 export const authUserSchema = z.object({
-  id: z.string(),
   email: z.string(),
+  id: z.string(),
   name: z.string(),
 });
 
-export const userAccountResponseSchema = z
-  .object({
-    success: z.boolean(),
-    data: z.object({
-      id: z.string(),
-      email: z.string().optional(),
-      user_metadata: z
-        .object({
-          name: z.string().optional(),
-          middlename: z.string().optional(),
-          surname: z.string().optional(),
-          avatar_url: z.string().nullable().optional(),
-        })
-        .passthrough(),
-    }),
-  })
-  ;
+export const userAccountResponseSchema = z.object({
+  data: z.object({
+    email: z.string().optional(),
+    id: z.string(),
+    user_metadata: z
+      .object({
+        avatar_url: z.string().nullable().optional(),
+        middlename: z.string().optional(),
+        name: z.string().optional(),
+        surname: z.string().optional(),
+      })
+      .passthrough(),
+  }),
+  success: z.boolean(),
+});
 
 export const updateAccountInputSchema = z.object({
-  name: z.string().trim().min(1, { error: "First name is required" }).optional(),
   middlename: z.string().optional(),
+  name: z.string().trim().min(1, { error: "First name is required" }).optional(),
   surname: z.string().optional(),
 });
 

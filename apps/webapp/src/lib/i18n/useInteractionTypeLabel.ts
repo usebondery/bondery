@@ -1,13 +1,13 @@
 "use client";
 
 import { useCallback } from "react";
-import { useWebTranslations as useTranslations } from "./useWebTranslations";
+import { useWebTranslations } from "./useWebTranslations";
 
 const INTERACTION_TYPE_KEY_MAP: Record<string, string> = {
+  "Competition/Hackathon": "CompetitionHackathon",
   "Networking event": "NetworkingEvent",
   "Party/Social": "PartySocial",
   "Text/Messaging": "TextMessaging",
-  "Competition/Hackathon": "CompetitionHackathon",
 };
 
 export function getInteractionTypeTranslationKey(type: string): string {
@@ -15,7 +15,7 @@ export function getInteractionTypeTranslationKey(type: string): string {
 }
 
 export function useInteractionTypeLabel() {
-  const t = useTranslations("InteractionTypes");
+  const t = useWebTranslations("InteractionTypes");
 
   return useCallback(
     (type: string) => {

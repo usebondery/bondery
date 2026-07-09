@@ -23,7 +23,9 @@ function walkMarkdownFiles(dir, acc = []) {
 
 function parseFrontmatter(content) {
   const match = content.match(/^---\r?\n([\s\S]*?)\r?\n---/);
-  if (!match) return null;
+  if (!match) {
+    return null;
+  }
   try {
     return parseYaml(match[1]);
   } catch {
@@ -33,7 +35,9 @@ function parseFrontmatter(content) {
 
 function defaultDocPath(filePath) {
   const rel = relative(DOCS_DIR, filePath).split(sep).join("/");
-  if (rel === "README.md") return "";
+  if (rel === "README.md") {
+    return "";
+  }
   return rel.replace(/\.md$/, "");
 }
 
@@ -44,7 +48,9 @@ function main() {
   for (const filePath of walkMarkdownFiles(DOCS_DIR)) {
     const content = readFileSync(filePath, "utf8");
     const frontmatter = parseFrontmatter(content);
-    if (!frontmatter?.docId) continue;
+    if (!frontmatter?.docId) {
+      continue;
+    }
 
     const docPath = frontmatter.docPath ?? defaultDocPath(filePath);
     const pageId = frontmatter.docId;
@@ -63,8 +69,8 @@ function main() {
           duplicates.push(sectionId);
         } else {
           entries.set(sectionId, {
-            path: docPath,
             hash: String(anchor),
+            path: docPath,
             sourceFile: filePath,
           });
         }

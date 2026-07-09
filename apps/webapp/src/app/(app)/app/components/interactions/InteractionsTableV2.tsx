@@ -1,6 +1,15 @@
 "use client";
 
-import { useMemo } from "react";
+import {
+  type BulkAction,
+  type DataColumnConfig,
+  DataTable,
+  type DataTableLabels,
+  PersonAvatarGroup,
+  type RowAction,
+  type SortOption,
+} from "@bondery/mantine-next";
+import type { Activity, Contact } from "@bondery/schemas";
 import { Badge, Group, Text, Tooltip } from "@mantine/core";
 import {
   IconCalendar,
@@ -11,20 +20,11 @@ import {
   IconTrash,
   IconUsers,
 } from "@tabler/icons-react";
-import { useCurrentLocale as useLocale } from "@/app/(app)/app/components/UserLocaleProvider";
-import type { Activity, Contact } from "@bondery/schemas";
-import {
-  DataTable,
-  PersonAvatarGroup,
-  type BulkAction,
-  type DataColumnConfig,
-  type RowAction,
-  type DataTableLabels,
-  type SortOption,
-} from "@bondery/mantine-next";
-import { getActivityTypeConfig } from "@/lib/activityTypes";
-import { useInteractionTypeLabel } from "@/lib/i18n/useInteractionTypeLabel";
 import type { ReactNode } from "react";
+import { useMemo } from "react";
+import { useCurrentLocale as useLocale } from "@/app/(app)/app/components/UserLocaleProvider";
+import { getActivityTypeConfig } from "@/lib/contacts/activityTypes";
+import { useInteractionTypeLabel } from "@/lib/i18n/useInteractionTypeLabel";
 
 // --- Column Key Types ---
 export type InteractionColumnKey = "date" | "title" | "type" | "participants" | "notes";
@@ -32,37 +32,15 @@ export type InteractionSortOrder = "dateDesc" | "dateAsc" | "participantsDesc" |
 
 // --- Column Config ---
 export interface InteractionColumnConfig {
+  icon: ReactNode;
   key: InteractionColumnKey;
   label: string;
-  icon: ReactNode;
   visible: boolean;
 }
 
 // --- Labels Interface ---
 export interface InteractionsTableLabels {
-  searchPlaceholder: string;
-  noInteractionsFound: string;
-  noInteractionsMatchSearch: string;
-  // Column visibility
-  visibleColumnsButton: string;
-  visibleColumnsSection: string;
-  hiddenColumnsSection: string;
-  noVisibleColumns: string;
-  noHiddenColumns: string;
-  // Sort
-  sortButton: string;
-  sortDateNewest: string;
-  sortDateOldest: string;
-  sortParticipantsMost: string;
-  sortParticipantsLeast: string;
-  // Row actions
-  editLabel: string;
-  duplicateLabel: string;
-  deleteLabel: string;
-  deleteSelectedAction: string;
   actionsAriaLabel: string;
-  selectedCountTemplate: string;
-  totalCountTemplate: string;
   // Column headers
   columns: {
     date: string;
@@ -71,39 +49,61 @@ export interface InteractionsTableLabels {
     participants: string;
     notes: string;
   };
+  deleteLabel: string;
+  deleteSelectedAction: string;
+  duplicateLabel: string;
+  // Row actions
+  editLabel: string;
+  hiddenColumnsSection: string;
+  noHiddenColumns: string;
+  noInteractionsFound: string;
+  noInteractionsMatchSearch: string;
+  noVisibleColumns: string;
+  searchPlaceholder: string;
+  selectedCountTemplate: string;
+  // Sort
+  sortButton: string;
+  sortDateNewest: string;
+  sortDateOldest: string;
+  sortParticipantsLeast: string;
+  sortParticipantsMost: string;
+  totalCountTemplate: string;
+  // Column visibility
+  visibleColumnsButton: string;
+  visibleColumnsSection: string;
 }
 
 // --- Props Interface ---
 export interface InteractionsTableV2Props {
   activities: Activity[];
-  resolveParticipants: (activity: Activity) => Contact[];
-  // External state for selection
-  selectedIds?: Set<string>;
-  onSelectionChange?: (selectedIds: Set<string>) => void;
   // External state for columns
   columns: InteractionColumnConfig[];
-  onColumnsChange: (columns: InteractionColumnConfig[]) => void;
-  // External state for sort
-  sortOrder: InteractionSortOrder;
-  onSortChange: (order: InteractionSortOrder) => void;
-  // External state for search
-  searchValue: string;
-  onSearchChange: (value: string) => void;
-  searchLoading?: boolean;
-  // Callbacks
-  onEdit: (activity: Activity) => void;
-  onDuplicate: (activity: Activity) => void;
-  onDelete: (activity: Activity) => void;
-  onDeleteSelected?: (activities: Activity[]) => void;
   // Labels
   labels: InteractionsTableLabels;
+  onColumnsChange: (columns: InteractionColumnConfig[]) => void;
+  onDelete: (activity: Activity) => void;
+  onDeleteSelected?: (activities: Activity[]) => void;
+  onDuplicate: (activity: Activity) => void;
+  // Callbacks
+  onEdit: (activity: Activity) => void;
+  onSearchChange: (value: string) => void;
+  onSelectionChange?: (selectedIds: Set<string>) => void;
+  onSortChange: (order: InteractionSortOrder) => void;
+  resolveParticipants: (activity: Activity) => Contact[];
+  searchLoading?: boolean;
+  // External state for search
+  searchValue: string;
+  // External state for selection
+  selectedIds?: Set<string>;
+  // External state for sort
+  sortOrder: InteractionSortOrder;
 }
 
 // --- Derived Row Type ---
 interface DerivedInteractionRow {
   activity: Activity;
-  participants: Contact[];
   participantNames: string;
+  participants: Contact[];
 }
 
 /**
@@ -151,8 +151,8 @@ export function InteractionsTableV2({
 
       return {
         activity,
-        participants,
         participantNames,
+        participants,
       };
     });
   }, [activities, resolveParticipants]);
@@ -181,7 +181,6 @@ export function InteractionsTableV2({
           return right.participants.length - left.participants.length;
         case "participantsAsc":
           return left.participants.length - right.participants.length;
-        case "dateDesc":
         default:
           return new Date(right.activity.date).getTime() - new Date(left.activity.date).getTime();
       }
@@ -190,10 +189,9 @@ export function InteractionsTableV2({
 
   // --- Build data columns ---
   const dataColumns: DataColumnConfig<DerivedInteractionRow>[] = columns.map((col) => ({
+    icon: col.icon,
     key: col.key,
     label: col.label,
-    icon: col.icon,
-    visible: col.visible,
     minWidthClass: col.key === "title" ? "min-w-40" : col.key === "date" ? "min-w-36" : "min-w-24",
     render: ({ activity, participants }: DerivedInteractionRow) => {
       switch (col.key) {
@@ -201,7 +199,7 @@ export function InteractionsTableV2({
           const titleValue = activity.title || "-";
           return (
             <Tooltip label={titleValue} withArrow>
-              <Text size="sm" fw={600} lineClamp={1}>
+              <Text fw={600} lineClamp={1} size="sm">
                 {titleValue}
               </Text>
             </Tooltip>
@@ -217,17 +215,17 @@ export function InteractionsTableV2({
                 </Text>
               ) : (
                 <PersonAvatarGroup
-                  people={participants.map((participant) => ({
-                    id: participant.id,
-                    firstName: participant.firstName,
-                    middleName: participant.middleName,
-                    lastName: participant.lastName,
-                    headline: participant.headline,
-                    avatar: participant.avatar,
-                  }))}
-                  size="sm"
                   isClickable
                   maxDisplayCount={3}
+                  people={participants.map((participant) => ({
+                    avatar: participant.avatar,
+                    firstName: participant.firstName,
+                    headline: participant.headline,
+                    id: participant.id,
+                    lastName: participant.lastName,
+                    middleName: participant.middleName,
+                  }))}
+                  size="sm"
                 />
               )}
             </Group>
@@ -236,7 +234,7 @@ export function InteractionsTableV2({
         case "type": {
           const typeConfig = getActivityTypeConfig(activity.type);
           return (
-            <Badge variant="light" color={typeConfig.color} radius="xl" tt="none">
+            <Badge color={typeConfig.color} radius="xl" tt="none" variant="light">
               {typeConfig.emoji} {getInteractionTypeLabel(activity.type)}
             </Badge>
           );
@@ -244,7 +242,7 @@ export function InteractionsTableV2({
 
         case "date":
           return (
-            <Text size="sm" className="whitespace-nowrap">
+            <Text className="whitespace-nowrap" size="sm">
               {dateFormatter.format(new Date(activity.date))}
             </Text>
           );
@@ -253,7 +251,7 @@ export function InteractionsTableV2({
           const descriptionValue = activity.description || "-";
           return (
             <Tooltip label={descriptionValue} withArrow>
-              <Text size="sm" lineClamp={1} maw={480}>
+              <Text lineClamp={1} maw={480} size="sm">
                 {descriptionValue}
               </Text>
             </Tooltip>
@@ -264,27 +262,28 @@ export function InteractionsTableV2({
           return null;
       }
     },
+    visible: col.visible,
   }));
 
   // --- Build row actions ---
   const rowActions: RowAction<DerivedInteractionRow>[] = [
     {
+      icon: <IconEdit size={14} />,
       key: "edit",
       label: labels.editLabel,
-      icon: <IconEdit size={14} />,
       onClick: ({ activity }) => onEdit(activity),
     },
     {
+      icon: <IconCopy size={14} />,
       key: "duplicate",
       label: labels.duplicateLabel,
-      icon: <IconCopy size={14} />,
       onClick: ({ activity }) => onDuplicate(activity),
     },
     {
+      color: "red",
+      icon: <IconTrash size={14} />,
       key: "delete",
       label: labels.deleteLabel,
-      icon: <IconTrash size={14} />,
-      color: "red",
       onClick: ({ activity }) => onDelete(activity),
     },
   ];
@@ -299,32 +298,32 @@ export function InteractionsTableV2({
 
   // --- Build labels ---
   const dataTableLabels: DataTableLabels = {
-    searchPlaceholder: labels.searchPlaceholder,
+    actionsAriaLabel: labels.actionsAriaLabel,
+    columnVisibility: {
+      buttonLabel: labels.visibleColumnsButton,
+      hiddenSection: labels.hiddenColumnsSection,
+      noHidden: labels.noHiddenColumns,
+      noVisible: labels.noVisibleColumns,
+      visibleSection: labels.visibleColumnsSection,
+    },
     emptyStateMessage:
       searchValue.trim() && activities.length > 0
         ? labels.noInteractionsMatchSearch
         : labels.noInteractionsFound,
-    actionsAriaLabel: labels.actionsAriaLabel,
+    searchPlaceholder: labels.searchPlaceholder,
     selectedCountTemplate: labels.selectedCountTemplate,
-    totalCountTemplate: labels.totalCountTemplate,
-    columnVisibility: {
-      buttonLabel: labels.visibleColumnsButton,
-      visibleSection: labels.visibleColumnsSection,
-      hiddenSection: labels.hiddenColumnsSection,
-      noVisible: labels.noVisibleColumns,
-      noHidden: labels.noHiddenColumns,
-    },
     sort: {
       buttonLabel: labels.sortButton,
     },
+    totalCountTemplate: labels.totalCountTemplate,
   };
 
   // --- Handle columns change ---
   const handleColumnsChange = (cols: DataColumnConfig<DerivedInteractionRow>[]) => {
     const interactionColumns: InteractionColumnConfig[] = cols.map((col) => ({
+      icon: col.icon,
       key: col.key as InteractionColumnKey,
       label: col.label,
-      icon: col.icon,
       visible: col.visible,
     }));
     onColumnsChange(interactionColumns);
@@ -333,10 +332,10 @@ export function InteractionsTableV2({
   const bulkActions: BulkAction[] = onDeleteSelected
     ? [
         {
+          color: "red",
+          icon: <IconTrash size={16} />,
           key: "deleteSelected",
           label: labels.deleteSelectedAction,
-          icon: <IconTrash size={16} />,
-          color: "red",
           onClick: (selected) => {
             const selectedActivities = derivedRows
               .filter(({ activity }) => selected.has(activity.id))
@@ -349,21 +348,21 @@ export function InteractionsTableV2({
 
   return (
     <DataTable<DerivedInteractionRow, InteractionSortOrder>
-      data={filteredAndSortedRows}
-      columns={dataColumns}
-      getRowId={({ activity }) => activity.id}
-      selectedIds={selectedIds}
-      onSelectionChange={onSelectionChange}
-      searchValue={searchValue}
-      onSearchChange={onSearchChange}
-      searchLoading={searchLoading}
-      sortOptions={sortOptions}
-      currentSort={sortOrder}
-      onSortChange={onSortChange}
-      onColumnsChange={handleColumnsChange}
-      rowActions={rowActions}
       bulkActions={bulkActions.length > 0 ? bulkActions : undefined}
+      columns={dataColumns}
+      currentSort={sortOrder}
+      data={filteredAndSortedRows}
+      getRowId={({ activity }) => activity.id}
       labels={dataTableLabels}
+      onColumnsChange={handleColumnsChange}
+      onSearchChange={onSearchChange}
+      onSelectionChange={onSelectionChange}
+      onSortChange={onSortChange}
+      rowActions={rowActions}
+      searchLoading={searchLoading}
+      searchValue={searchValue}
+      selectedIds={selectedIds}
+      sortOptions={sortOptions}
     />
   );
 }
@@ -377,19 +376,19 @@ export function createDefaultInteractionColumns(columnLabels: {
   notes: string;
 }): InteractionColumnConfig[] {
   return [
-    { key: "date", label: columnLabels.date, icon: <IconCalendar size={16} />, visible: true },
-    { key: "type", label: columnLabels.type, icon: <IconTag size={16} />, visible: true },
-    { key: "title", label: columnLabels.title, icon: <IconMessage size={16} />, visible: true },
+    { icon: <IconCalendar size={16} />, key: "date", label: columnLabels.date, visible: true },
+    { icon: <IconTag size={16} />, key: "type", label: columnLabels.type, visible: true },
+    { icon: <IconMessage size={16} />, key: "title", label: columnLabels.title, visible: true },
     {
+      icon: <IconUsers size={16} />,
       key: "participants",
       label: columnLabels.participants,
-      icon: <IconUsers size={16} />,
       visible: true,
     },
     {
+      icon: <IconMessage size={16} />,
       key: "notes",
       label: columnLabels.notes,
-      icon: <IconMessage size={16} />,
       visible: true,
     },
   ];

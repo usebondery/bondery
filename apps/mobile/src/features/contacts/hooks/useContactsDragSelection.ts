@@ -1,22 +1,15 @@
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type RefObject,
-} from "react";
 import type { FlashListRef } from "@shopify/flash-list";
+import { type RefObject, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Gesture } from "react-native-gesture-handler";
 import { runOnJS } from "react-native-reanimated";
 import { UI_TIMING_MS } from "../../../lib/config";
-import type { ContactsFlatRow } from "../contactsFlatList";
 import {
   buildFlatRowOffsetIndex,
   collectSelectableContactIdsInRange,
   resolveContactAnchorIndexAtContentY,
   resolveFlatIndexAtContentY,
 } from "../contactsDragSelection";
+import type { ContactsFlatRow } from "../contactsFlatList";
 import { useContactsSelection } from "../contactsSelectionStore";
 
 const EDGE_ZONE_RATIO = 0.15;
@@ -31,11 +24,11 @@ type DragBaseline = {
 
 interface UseContactsDragSelectionOptions {
   enabled: boolean;
+  flashListRef: RefObject<FlashListRef<ContactsFlatRow> | null>;
   flatRows: ContactsFlatRow[];
-  myselfContactId: string | undefined;
   listHeaderHeight: number;
   listViewportHeight: number;
-  flashListRef: RefObject<FlashListRef<ContactsFlatRow> | null>;
+  myselfContactId: string | undefined;
 }
 
 function getAutoScrollSpeed(localY: number, viewportHeight: number): number {
@@ -55,24 +48,18 @@ function getAutoScrollSpeed(localY: number, viewportHeight: number): number {
   }
 
   if (localY > bottomZoneStart) {
-    const depth =
-      (localY - bottomZoneStart) / (viewportHeight - bottomZoneStart);
-    return (
-      AUTO_SCROLL_MIN_SPEED +
-      (AUTO_SCROLL_MAX_SPEED - AUTO_SCROLL_MIN_SPEED) * depth ** 1.5
-    );
+    const depth = (localY - bottomZoneStart) / (viewportHeight - bottomZoneStart);
+    return AUTO_SCROLL_MIN_SPEED + (AUTO_SCROLL_MAX_SPEED - AUTO_SCROLL_MIN_SPEED) * depth ** 1.5;
   }
 
   return 0;
 }
 
-function cloneDragBaseline(
-  state: ReturnType<typeof useContactsSelection.getState>,
-): DragBaseline {
+function cloneDragBaseline(state: ReturnType<typeof useContactsSelection.getState>): DragBaseline {
   return {
+    excludedIds: new Set(state.excludedIds),
     isAllTotalSelected: state.isAllTotalSelected,
     selectedIds: new Set(state.selectedIds),
-    excludedIds: new Set(state.excludedIds),
   };
 }
 
@@ -97,14 +84,9 @@ export function useContactsDragSelection({
   const isDraggingRef = useRef(false);
   const lastSyncedRangeKeyRef = useRef("");
 
-  const syncDragSelectionRange = useContactsSelection(
-    (state) => state.syncDragSelectionRange,
-  );
+  const syncDragSelectionRange = useContactsSelection((state) => state.syncDragSelectionRange);
 
-  const layoutIndex = useMemo(
-    () => buildFlatRowOffsetIndex(flatRows),
-    [flatRows],
-  );
+  const layoutIndex = useMemo(() => buildFlatRowOffsetIndex(flatRows), [flatRows]);
 
   const maxScrollOffset = useMemo(() => {
     if (layoutIndex.length === 0) {
@@ -112,8 +94,7 @@ export function useContactsDragSelection({
     }
 
     const lastEntry = layoutIndex[layoutIndex.length - 1];
-    const contentHeight =
-      listHeaderHeight + lastEntry.offsetY + lastEntry.height;
+    const contentHeight = listHeaderHeight + lastEntry.offsetY + lastEntry.height;
 
     return Math.max(0, contentHeight - listViewportHeight);
   }, [layoutIndex, listHeaderHeight, listViewportHeight]);
@@ -168,9 +149,9 @@ export function useContactsDragSelection({
       );
 
       syncDragSelectionRange({
+        baseline,
         rangeContactIds,
         selectInRange: selectInRangeRef.current,
-        baseline,
       });
     },
     [layoutIndex, myselfContactId, resolveRowContentY, syncDragSelectionRange],
@@ -185,8 +166,8 @@ export function useContactsDragSelection({
       animatedScrollOffsetRef.current = nextOffset;
       scrollOffsetRef.current = nextOffset;
       flashListRef.current?.scrollToOffset({
-        offset: nextOffset,
         animated: false,
+        offset: nextOffset,
       });
     },
     [flashListRef],
@@ -209,16 +190,10 @@ export function useContactsDragSelection({
       }
 
       const previousTimestamp = dragFrameLastTimestampRef.current || timestamp;
-      const deltaSeconds = Math.min(
-        0.05,
-        Math.max(0, (timestamp - previousTimestamp) / 1000),
-      );
+      const deltaSeconds = Math.min(0.05, Math.max(0, (timestamp - previousTimestamp) / 1000));
       dragFrameLastTimestampRef.current = timestamp;
 
-      const speed = getAutoScrollSpeed(
-        lastLocalYRef.current,
-        listViewportHeight,
-      );
+      const speed = getAutoScrollSpeed(lastLocalYRef.current, listViewportHeight);
 
       if (speed !== 0 && maxScrollOffset > 0) {
         const nextOffset = Math.min(
@@ -231,13 +206,7 @@ export function useContactsDragSelection({
       syncRangeAtLocalY(lastLocalYRef.current);
       dragFrameRef.current = requestAnimationFrame(runDragFrame);
     },
-    [
-      applyScrollOffset,
-      listViewportHeight,
-      maxScrollOffset,
-      stopDragFrameLoop,
-      syncRangeAtLocalY,
-    ],
+    [applyScrollOffset, listViewportHeight, maxScrollOffset, stopDragFrameLoop, syncRangeAtLocalY],
   );
 
   const startDragFrameLoop = useCallback(() => {
@@ -269,7 +238,7 @@ export function useContactsDragSelection({
 
       const anchorRow = layoutIndex[anchorIndex]?.row;
 
-      if (!anchorRow || anchorRow.type !== "contact") {
+      if (anchorRow?.type !== "contact") {
         return;
       }
 
@@ -287,13 +256,7 @@ export function useContactsDragSelection({
       syncRangeAtLocalY(localY);
       startDragFrameLoop();
     },
-    [
-      layoutIndex,
-      myselfContactId,
-      resolveRowContentY,
-      startDragFrameLoop,
-      syncRangeAtLocalY,
-    ],
+    [layoutIndex, myselfContactId, resolveRowContentY, startDragFrameLoop, syncRangeAtLocalY],
   );
 
   const handleDragMove = useCallback((localY: number) => {
@@ -332,15 +295,12 @@ export function useContactsDragSelection({
     [enabled, handleDragEnd, handleDragMove, handleDragStart],
   );
 
-  const onScroll = useCallback(
-    (event: { nativeEvent: { contentOffset: { y: number } } }) => {
-      if (!isDraggingRef.current) {
-        scrollOffsetRef.current = event.nativeEvent.contentOffset.y;
-        animatedScrollOffsetRef.current = event.nativeEvent.contentOffset.y;
-      }
-    },
-    [],
-  );
+  const onScroll = useCallback((event: { nativeEvent: { contentOffset: { y: number } } }) => {
+    if (!isDraggingRef.current) {
+      scrollOffsetRef.current = event.nativeEvent.contentOffset.y;
+      animatedScrollOffsetRef.current = event.nativeEvent.contentOffset.y;
+    }
+  }, []);
 
   return {
     gesture,

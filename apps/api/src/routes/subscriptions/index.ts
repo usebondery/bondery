@@ -3,27 +3,25 @@
  * Returns the authenticated user's subscription status for frontend gating.
  */
 
-import type { FastifyReply } from "fastify";
-import type { AppRoutePlugin } from "../../lib/fastify-types.js";
+import type { SubscriptionStatus } from "@bondery/schemas";
+import { subscriptionStatusSchema } from "@bondery/schemas";
+import { EXAMPLE_SUBSCRIPTION_STATUS_RESPONSE } from "@bondery/schemas/openapi/fixtures/responses";
 import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
 import { z } from "zod";
-import { getAuth } from "../../lib/auth.js";
-import { applyOpenApiRouteMeta } from "../../lib/openapi-route-meta.js";
-import { withOkResponse } from "../../lib/openapi-route-responses.js";
+import { getAuth } from "../../lib/platform/auth/strategies.js";
+import type { AppRoutePlugin } from "../../lib/platform/fastify-types.js";
+import { withOkResponse } from "../../lib/platform/openapi/responses.js";
+import { getPolarClient } from "../../services/billing/polar.js";
 import {
   checkChatQuota,
   FREE_MESSAGE_LIMIT,
   PREMIUM_MESSAGE_LIMIT,
-} from "../../lib/chat/quota.js";
-import type { SubscriptionStatus } from "@bondery/schemas";
-import { subscriptionStatusSchema } from "@bondery/schemas";
-import { EXAMPLE_SUBSCRIPTION_STATUS_RESPONSE } from "@bondery/schemas/openapi/fixtures/responses";
-import { getPolarClient } from "../../lib/polar.js";
+} from "../../services/chat/quota.js";
 
 const subscriptionStatusResponseSchema = z
   .object({
-    success: z.boolean(),
     data: subscriptionStatusSchema,
+    success: z.boolean(),
   })
   .meta({ example: EXAMPLE_SUBSCRIPTION_STATUS_RESPONSE });
 
@@ -37,14 +35,15 @@ const POLAR_STATUSES: SubscriptionStatus["polarStatus"][] = [
   "unpaid",
 ];
 
-const POLAR_INTERVALS: NonNullable<SubscriptionStatus["recurringInterval"]>[] =
-  ["day", "week", "month", "year"];
+const POLAR_INTERVALS: NonNullable<SubscriptionStatus["recurringInterval"]>[] = [
+  "day",
+  "week",
+  "month",
+  "year",
+];
 
-function toPolarStatus(
-  value: string | null | undefined,
-): SubscriptionStatus["polarStatus"] {
-  return value &&
-    POLAR_STATUSES.includes(value as SubscriptionStatus["polarStatus"])
+function toPolarStatus(value: string | null | undefined): SubscriptionStatus["polarStatus"] {
+  return value && POLAR_STATUSES.includes(value as SubscriptionStatus["polarStatus"])
     ? (value as SubscriptionStatus["polarStatus"])
     : null;
 }
@@ -53,9 +52,7 @@ function toPolarInterval(
   value: string | null | undefined,
 ): SubscriptionStatus["recurringInterval"] {
   return value &&
-    POLAR_INTERVALS.includes(
-      value as NonNullable<SubscriptionStatus["recurringInterval"]>,
-    )
+    POLAR_INTERVALS.includes(value as NonNullable<SubscriptionStatus["recurringInterval"]>)
     ? (value as SubscriptionStatus["recurringInterval"])
     : null;
 }
@@ -65,9 +62,7 @@ export const subscriptionRoutes: AppRoutePlugin = async (fastify) => {
     if (routeOptions.schema) {
       routeOptions.schema.tags = ["Subscriptions"];
     }
-    applyOpenApiRouteMeta(routeOptions, { area: "session" });
   });
-  fastify.addHook("onRequest", fastify.auth([fastify.verifySession]));
 
   /**
    * GET /api/subscriptions - Get current user's subscription status
@@ -80,71 +75,69 @@ export const subscriptionRoutes: AppRoutePlugin = async (fastify) => {
         response: withOkResponse(subscriptionStatusResponseSchema, "Subscription status"),
       } satisfies FastifyZodOpenApiSchema,
     },
-    async (request, reply) => {
-    const { client, user } = getAuth(request);
+    async (request) => {
+      const { client, user } = getAuth(request);
 
-    const quota = await checkChatQuota(client, user.id);
+      const quota = await checkChatQuota(client, user.id);
 
-    // Fetch subscription details for period info
-    const { data: subscription } = await client
-      .from("subscriptions")
-      .select("current_period_end, cancel_at_period_end, polar_subscription_id")
-      .eq("user_id", user.id)
-      .single();
+      // Fetch subscription details for period info
+      const { data: subscription } = await client
+        .from("subscriptions")
+        .select("current_period_end, cancel_at_period_end, polar_subscription_id")
+        .eq("user_id", user.id)
+        .single();
 
-    let polarStatus: SubscriptionStatus["polarStatus"] = null;
-    let trialEndsAt: string | null = null;
-    let amount: number | null = null;
-    let currency: string | null = null;
-    let productName: string | null = null;
-    let recurringInterval: SubscriptionStatus["recurringInterval"] = null;
-    let currentPeriodEnd = subscription?.current_period_end ?? null;
+      let polarStatus: SubscriptionStatus["polarStatus"] = null;
+      let trialEndsAt: string | null = null;
+      let amount: number | null = null;
+      let currency: string | null = null;
+      let productName: string | null = null;
+      let recurringInterval: SubscriptionStatus["recurringInterval"] = null;
+      let currentPeriodEnd = subscription?.current_period_end ?? null;
 
-    if (subscription?.polar_subscription_id) {
-      try {
-        const polar = getPolarClient();
-        const polarSubscription = await polar.subscriptions.get({
-          id: subscription.polar_subscription_id,
-        });
+      if (subscription?.polar_subscription_id) {
+        try {
+          const polar = getPolarClient();
+          const polarSubscription = await polar.subscriptions.get({
+            id: subscription.polar_subscription_id,
+          });
 
-        polarStatus = toPolarStatus(polarSubscription.status);
-        trialEndsAt = polarSubscription.trialEnd
-          ? polarSubscription.trialEnd.toISOString()
-          : null;
-        amount = polarSubscription.amount ?? null;
-        currency = polarSubscription.currency ?? null;
-        productName = polarSubscription.product?.name ?? null;
-        recurringInterval = toPolarInterval(
-          polarSubscription.recurringInterval,
-        );
-        currentPeriodEnd = polarSubscription.currentPeriodEnd
-          ? polarSubscription.currentPeriodEnd.toISOString()
-          : currentPeriodEnd;
-      } catch (err) {
-        request.log.warn(
-          { err, userId: user.id },
-          "subscriptions: failed to load Polar subscription details",
-        );
+          polarStatus = toPolarStatus(polarSubscription.status);
+          trialEndsAt = polarSubscription.trialEnd
+            ? polarSubscription.trialEnd.toISOString()
+            : null;
+          amount = polarSubscription.amount ?? null;
+          currency = polarSubscription.currency ?? null;
+          productName = polarSubscription.product?.name ?? null;
+          recurringInterval = toPolarInterval(polarSubscription.recurringInterval);
+          currentPeriodEnd = polarSubscription.currentPeriodEnd
+            ? polarSubscription.currentPeriodEnd.toISOString()
+            : currentPeriodEnd;
+        } catch (err) {
+          request.log.warn(
+            { err, userId: user.id },
+            "subscriptions: failed to load Polar subscription details",
+          );
+        }
       }
-    }
 
-    const status: SubscriptionStatus = {
-      plan: quota.plan,
-      aiMessagesUsed: quota.messagesUsed,
-      aiMessageLimit:
-        quota.plan === "premium" ? PREMIUM_MESSAGE_LIMIT : FREE_MESSAGE_LIMIT,
-      aiMonthlyResetAt: quota.resetAt,
-      canUseChat: quota.allowed,
-      currentPeriodEnd,
-      cancelAtPeriodEnd: subscription?.cancel_at_period_end ?? false,
-      polarStatus,
-      trialEndsAt,
-      amount,
-      currency,
-      productName,
-      recurringInterval,
-    };
+      const status: SubscriptionStatus = {
+        aiMessageLimit: quota.plan === "premium" ? PREMIUM_MESSAGE_LIMIT : FREE_MESSAGE_LIMIT,
+        aiMessagesUsed: quota.messagesUsed,
+        aiMonthlyResetAt: quota.resetAt,
+        amount,
+        cancelAtPeriodEnd: subscription?.cancel_at_period_end ?? false,
+        canUseChat: quota.allowed,
+        currency,
+        currentPeriodEnd,
+        plan: quota.plan,
+        polarStatus,
+        productName,
+        recurringInterval,
+        trialEndsAt,
+      };
 
-    return { success: true, data: status };
-  });
-}
+      return { data: status, success: true };
+    },
+  );
+};

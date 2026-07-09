@@ -34,10 +34,10 @@ export function buildContactsFlatRows(sections: ContactSection[]) {
     if (section.title && section.kind !== "search") {
       const headerIndex = rows.length;
       rows.push({
-        type: "section-header",
         key: `header-${section.title}`,
-        title: section.title,
         letter: section.title,
+        title: section.title,
+        type: "section-header",
       });
       stickyHeaderIndices.push(headerIndex);
       letterToIndex.set(section.title, headerIndex);
@@ -45,13 +45,13 @@ export function buildContactsFlatRows(sections: ContactSection[]) {
 
     for (const contact of section.data) {
       rows.push({
-        type: "contact",
-        key: contact.id,
         contact,
+        key: contact.id,
         sectionKind: section.kind,
+        type: "contact",
       });
     }
   }
 
-  return { rows, stickyHeaderIndices, letterToIndex };
+  return { letterToIndex, rows, stickyHeaderIndices };
 }

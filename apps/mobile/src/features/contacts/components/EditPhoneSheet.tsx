@@ -1,10 +1,17 @@
+import {
+  CONTACT_CHANNEL_TYPE_OPTIONS,
+  countryCodes,
+  TELEPHONE_PREFIX_OPTIONS,
+} from "@bondery/helpers";
+import type { PhoneEntry } from "@bondery/schemas";
+import { phoneEntrySchema, phoneEntrySheetSchema } from "@bondery/schemas";
+import { IconCheck, IconPhonePlus, IconTrash } from "@tabler/icons-react-native";
 import { useMemo } from "react";
 import { StyleSheet, Text, View } from "react-native";
-import { IconCheck, IconPhonePlus, IconTrash } from "@tabler/icons-react-native";
-import type { PhoneEntry } from "@bondery/schemas";
-import { CONTACT_CHANNEL_TYPE_OPTIONS, TELEPHONE_PREFIX_OPTIONS, countryCodes } from "@bondery/helpers";
-import { phoneEntrySchema, phoneEntrySheetSchema } from "@bondery/schemas";
-import { ActionSheetPopup, type ActionSheetPopupAction } from "../../../components/ActionSheetPopup";
+import {
+  ActionSheetPopup,
+  type ActionSheetPopupAction,
+} from "../../../components/ActionSheetPopup";
 import { SheetPhoneField, SheetSelectField } from "../../../components/form";
 import { useSheetForm } from "../../../lib/forms/useSheetForm";
 import { useMobileTranslations } from "../../../lib/i18n/useMobileTranslations";
@@ -15,14 +22,14 @@ import { TelephonePrefixFlag } from "./TelephonePrefixFlag";
 type SheetMode = "add" | "edit";
 
 interface EditPhoneSheetProps {
-  open: boolean;
-  mode: SheetMode;
   initialEntry: PhoneEntry | null;
   isSubmitting: boolean;
-  onOpenChange: (open: boolean) => void;
+  mode: SheetMode;
   onCancel: () => void;
-  onSave: (entry: PhoneEntry) => void;
   onDelete?: () => void;
+  onOpenChange: (open: boolean) => void;
+  onSave: (entry: PhoneEntry) => void;
+  open: boolean;
 }
 
 export function EditPhoneSheet({
@@ -42,17 +49,17 @@ export function EditPhoneSheet({
     handleSubmit,
     formState: { isValid },
   } = useSheetForm({
-    open,
-    schema: phoneEntrySheetSchema,
     getDefaultValues: () => {
       const entry = initialEntry ?? createDraftPhone();
       return {
         prefix: entry.prefix || "+1",
-        value: entry.value || "",
         type: (entry.type === "work" ? "work" : "home") as "home" | "work",
+        value: entry.value || "",
       };
     },
     mode: "onChange",
+    open,
+    schema: phoneEntrySheetSchema,
   });
 
   const prefixOptions = useMemo(() => {
@@ -61,19 +68,22 @@ export function EditPhoneSheet({
     );
 
     return TELEPHONE_PREFIX_OPTIONS.map((option) => ({
-      value: option.value,
       label: option.value,
       leftSection: <TelephonePrefixFlag flag={option.flag} />,
       searchKeywords: `${option.value} ${option.flag} ${namesByDialCode.get(option.value) ?? ""}`,
+      value: option.value,
     }));
   }, []);
 
   const typeOptions = useMemo(
     () =>
       CONTACT_CHANNEL_TYPE_OPTIONS.map((option) => ({
-        value: option.value,
-        label: option.value === "work" ? t("ContactInfo.TypeWork") : t("ContactInfo.TypeHome"),
+        label:
+          option.value === "work"
+            ? t("TypeWork", { ns: "ContactInfo" })
+            : t("TypeHome", { ns: "ContactInfo" }),
         leftSection: <Text style={styles.typeEmoji}>{option.emoji}</Text>,
+        value: option.value,
       })),
     [t],
   );
@@ -89,16 +99,16 @@ export function EditPhoneSheet({
   });
 
   const primaryAction = {
-    label: mode === "add" ? t("ContactInfo.AddPhone") : "Save changes",
+    disabled: !canSubmit,
     icon:
       mode === "add" ? (
         <IconPhonePlus size={16} stroke={colors.textOnPrimary} />
       ) : (
         <IconCheck size={16} stroke={colors.textOnPrimary} />
       ),
-    onPress: () => void onSubmit(),
-    disabled: !canSubmit,
+    label: mode === "add" ? t("AddPhone", { ns: "ContactInfo" }) : "Save changes",
     loading: isSubmitting,
+    onPress: () => void onSubmit(),
     tone: "primary" as const,
     variant: "filled" as const,
   };
@@ -107,10 +117,10 @@ export function EditPhoneSheet({
     mode === "edit" && onDelete
       ? [
           {
-            label: t("ContactInfo.DeleteAction"),
-            icon: <IconTrash size={16} stroke={colors.dangerAccent} />,
-            onPress: onDelete,
             disabled: isSubmitting,
+            icon: <IconTrash size={16} stroke={colors.dangerAccent} />,
+            label: t("DeleteAction", { ns: "ContactInfo" }),
+            onPress: onDelete,
             tone: "danger",
             variant: "outline",
           },
@@ -120,40 +130,44 @@ export function EditPhoneSheet({
 
   return (
     <ActionSheetPopup
-      open={open}
-      title={mode === "add" ? t("ContactInfo.AddPhone") : t("ContactInfo.PhoneNumbers")}
       actions={actions}
-      onOpenChange={onOpenChange}
-      onClose={onCancel}
       isBusy={isSubmitting}
+      onClose={onCancel}
+      onOpenChange={onOpenChange}
+      open={open}
+      title={
+        mode === "add"
+          ? t("AddPhone", { ns: "ContactInfo" })
+          : t("PhoneNumbers", { ns: "ContactInfo" })
+      }
     >
       <View style={styles.phoneRow}>
         <SheetSelectField
+          accessibilityLabel={t("PhonePrefixAccessibilityLabel", { ns: "ContactInfo" })}
           control={control}
+          label={t("PhonePrefixAccessibilityLabel", { ns: "ContactInfo" })}
           name="prefix"
-          label={t("ContactInfo.PhonePrefixAccessibilityLabel")}
-          accessibilityLabel={t("ContactInfo.PhonePrefixAccessibilityLabel")}
           options={prefixOptions}
           searchable
-          searchPlaceholder={t("ContactInfo.PhonePrefixSearchPlaceholder")}
+          searchPlaceholder={t("PhonePrefixSearchPlaceholder", { ns: "ContactInfo" })}
           triggerStyle={styles.prefixTrigger}
         />
         <SheetPhoneField
-          control={control}
-          name="value"
-          prefixName="prefix"
-          placeholder={t("ContactInfo.PhonePlaceholder")}
-          editable={!isSubmitting}
           autoFocus={open}
-          onSubmitEditing={() => void onSubmit()}
           containerStyle={styles.phoneInput}
+          control={control}
+          editable={!isSubmitting}
+          name="value"
+          onSubmitEditing={() => void onSubmit()}
+          placeholder={t("PhonePlaceholder", { ns: "ContactInfo" })}
+          prefixName="prefix"
         />
       </View>
 
       <SheetSelectField
         control={control}
+        label={t("TypeLabel", { ns: "ContactInfo" })}
         name="type"
-        label={t("ContactInfo.TypeLabel")}
         options={typeOptions}
       />
     </ActionSheetPopup>
@@ -161,19 +175,19 @@ export function EditPhoneSheet({
 }
 
 const styles = StyleSheet.create({
-  phoneRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-  prefixTrigger: {
-    width: 108,
-    flexShrink: 0,
-    paddingHorizontal: 10,
-  },
   phoneInput: {
     flex: 1,
     minWidth: 0,
+  },
+  phoneRow: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 8,
+  },
+  prefixTrigger: {
+    flexShrink: 0,
+    paddingHorizontal: 10,
+    width: 108,
   },
   typeEmoji: {
     fontSize: 16,

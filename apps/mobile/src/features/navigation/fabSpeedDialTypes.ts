@@ -10,6 +10,7 @@ export type FabSpeedDialLayoutRect = {
 export type FabSpeedDialAction = {
   id: string;
   labelKey: string;
+  labelNamespace?: string;
   icon: ComponentType<{ size: number; stroke: string }>;
   onPress: () => void;
   testID?: string;

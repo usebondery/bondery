@@ -1,5 +1,4 @@
-import { useMemo, useState } from "react";
-import { Text, View } from "react-native";
+import type { EmailEntry } from "@bondery/schemas";
 import {
   IconCopy,
   IconMail,
@@ -8,23 +7,21 @@ import {
   IconStar,
   IconTrash,
 } from "@tabler/icons-react-native";
-import type { EmailEntry } from "@bondery/schemas";
+import { useMemo, useState } from "react";
+import { Text, View } from "react-native";
 import { useMobileTranslations } from "../../../lib/i18n/useMobileTranslations";
 import { useAppToast } from "../../../lib/toast/useAppToast";
 import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
+import { copyEmailToClipboard, openEmailMailto } from "../contactChannelActions";
 import {
-  copyEmailToClipboard,
-  openEmailMailto,
-} from "../contactChannelActions";
-import {
-  MAX_CONTACT_CHANNELS,
   applyPreferredEmail,
   createDraftEmail,
+  MAX_CONTACT_CHANNELS,
 } from "../contactChannelConstants";
 import { ContactChannelRow } from "./ContactChannelRow";
 import { ContactDetailSectionHeader } from "./ContactDetailSectionHeader";
-import { EditEmailSheet } from "./EditEmailSheet";
 import { contactDetailStyles } from "./contactDetailStyles";
+import { EditEmailSheet } from "./EditEmailSheet";
 
 type SheetState =
   | { open: false }
@@ -44,22 +41,25 @@ export function ContactEmailsSection({ emails, onSaveEmails }: ContactEmailsSect
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const canAdd = emails.length < MAX_CONTACT_CHANNELS;
-  const errorTitle = t("MobileApp.Common.ErrorTitle");
+  const errorTitle = t("feedback.errorTitle", { ns: "common" });
 
   function openAddSheet() {
     if (!canAdd) {
       showToast({
+        headline: t("MaxEmailsReached", { ns: "ContactInfo" }).replace(
+          "{max}",
+          String(MAX_CONTACT_CHANNELS),
+        ),
         type: "error",
-        headline: t("ContactInfo.MaxEmailsReached").replace("{max}", String(MAX_CONTACT_CHANNELS)),
       });
       return;
     }
 
-    setSheet({ open: true, mode: "add" });
+    setSheet({ mode: "add", open: true });
   }
 
   function openEditSheet(index: number) {
-    setSheet({ open: true, mode: "edit", index, entry: emails[index] });
+    setSheet({ entry: emails[index], index, mode: "edit", open: true });
   }
 
   async function persistEmails(nextEmails: EmailEntry[]) {
@@ -70,9 +70,9 @@ export function ContactEmailsSection({ emails, onSaveEmails }: ContactEmailsSect
       setSheet({ open: false });
     } catch {
       showToast({
-        type: "error",
+        description: t("EmailsUpdateError", { ns: "ContactInfo" }),
         headline: errorTitle,
-        description: t("ContactInfo.EmailsUpdateError"),
+        type: "error",
       });
     } finally {
       setIsSubmitting(false);
@@ -80,7 +80,9 @@ export function ContactEmailsSection({ emails, onSaveEmails }: ContactEmailsSect
   }
 
   function handleSaveEntry(entry: EmailEntry) {
-    if (!sheet.open) return;
+    if (!sheet.open) {
+      return;
+    }
 
     let nextEmails: EmailEntry[];
 
@@ -96,7 +98,9 @@ export function ContactEmailsSection({ emails, onSaveEmails }: ContactEmailsSect
   }
 
   function handleDeleteEntry() {
-    if (!sheet.open || sheet.mode !== "edit") return;
+    if (!sheet.open || sheet.mode !== "edit") {
+      return;
+    }
 
     const nextEmails = emails.filter((_, index) => index !== sheet.index);
     void persistEmails(nextEmails);
@@ -119,9 +123,9 @@ export function ContactEmailsSection({ emails, onSaveEmails }: ContactEmailsSect
 
   const copyMessages = useMemo(
     () => ({
-      successTitle: t("ContactInfo.CopySuccessTitle"),
-      successDescription: t("ContactInfo.EmailCopiedMessage"),
       errorTitle,
+      successDescription: t("EmailCopiedMessage", { ns: "ContactInfo" }),
+      successTitle: t("CopySuccessTitle", { ns: "ContactInfo" }),
     }),
     [errorTitle, t],
   );
@@ -129,17 +133,18 @@ export function ContactEmailsSection({ emails, onSaveEmails }: ContactEmailsSect
   return (
     <View style={contactDetailStyles.section}>
       <ContactDetailSectionHeader
-        titleKey="ContactInfo.EmailAddresses"
         action={
           canAdd
             ? {
-                label: t("ContactInfo.Add"),
-                accessibilityLabel: t("ContactInfo.AddEmail"),
+                accessibilityLabel: t("AddEmail", { ns: "ContactInfo" }),
                 icon: <IconMailPlus size={16} stroke={colors.primary} />,
+                label: t("Add", { ns: "ContactInfo" }),
                 onPress: openAddSheet,
               }
             : undefined
         }
+        titleKey="EmailAddresses"
+        titleNamespace="ContactInfo"
       />
 
       {emails.length === 0 ? (
@@ -150,83 +155,90 @@ export function ContactEmailsSection({ emails, onSaveEmails }: ContactEmailsSect
             { backgroundColor: colors.surfaceMuted, borderColor: colors.border },
           ]}
         >
-          <Text style={[contactDetailStyles.emptyText, { color: colors.textMuted }]}>{t("ContactInfo.NoEmails")}</Text>
+          <Text style={[contactDetailStyles.emptyText, { color: colors.textMuted }]}>
+            {t("NoEmails", { ns: "ContactInfo" })}
+          </Text>
         </View>
       ) : (
-        emails.map((email, index) => {
-          const typeLabel = email.type === "work" ? t("ContactInfo.TypeWork") : t("ContactInfo.TypeHome");
-          const accessibilityLabel = `${typeLabel} email, ${email.value}${email.preferred ? `, ${t("ContactInfo.Preferred")}` : ""}`;
+        emails.map((email) => {
+          const typeLabel =
+            email.type === "work"
+              ? t("TypeWork", { ns: "ContactInfo" })
+              : t("TypeHome", { ns: "ContactInfo" });
+          const accessibilityLabel = `${typeLabel} email, ${email.value}${email.preferred ? `, ${t("Preferred", { ns: "ContactInfo" })}` : ""}`;
 
           return (
             <ContactChannelRow
-              key={`${email.value}-${index}`}
-              primaryLabel={email.value}
-              type={email.type}
-              isPreferred={email.preferred}
-              channelIcon={<IconMail size={16} stroke={colors.iconSecondary} />}
-              menuAccessibilityLabel={t("ContactInfo.EmailAddresses")}
-              accessibilityLabel={accessibilityLabel}
               accessibilityHint="Double tap to send email. Long press to copy."
-              onPress={() => openEmailMailto(email, showToast, errorTitle)}
-              onLongPress={() => {
-                void copyEmailToClipboard(email, showToast, copyMessages);
-              }}
+              accessibilityLabel={accessibilityLabel}
+              channelIcon={<IconMail size={16} stroke={colors.iconSecondary} />}
+              isPreferred={email.preferred}
+              key={`${email.type}-${email.value}`}
+              menuAccessibilityLabel={t("EmailAddresses", { ns: "ContactInfo" })}
               menuItems={[
                 {
-                  id: "email",
-                  label: t("ContactInfo.SendEmailAction"),
-                  hint: t("ContactInfo.MenuHintPress"),
-                  icon: <IconMail size={18} stroke={colors.iconPrimary} />,
                   disabled: !email.value.trim(),
+                  hint: t("MenuHintPress", { ns: "ContactInfo" }),
+                  icon: <IconMail size={18} stroke={colors.iconPrimary} />,
+                  id: "email",
+                  label: t("SendEmailAction", { ns: "ContactInfo" }),
                   onPress: () => openEmailMailto(email, showToast, errorTitle),
                 },
                 {
-                  id: "copy",
-                  label: t("ContactInfo.CopyAction"),
-                  hint: t("ContactInfo.MenuHintHold"),
-                  icon: <IconCopy size={18} stroke={colors.iconPrimary} />,
                   disabled: !email.value.trim(),
+                  hint: t("MenuHintHold", { ns: "ContactInfo" }),
+                  icon: <IconCopy size={18} stroke={colors.iconPrimary} />,
+                  id: "copy",
+                  label: t("CopyAction", { ns: "ContactInfo" }),
                   onPress: () => {
                     void copyEmailToClipboard(email, showToast, copyMessages);
                   },
                 },
                 {
-                  id: "edit",
-                  label: t("ContactInfo.EditAction"),
                   icon: <IconPencil size={18} stroke={colors.iconPrimary} />,
+                  id: "edit",
+                  label: t("EditAction", { ns: "ContactInfo" }),
                   onPress: () => openEditSheet(index),
                 },
                 {
-                  id: "preferred",
-                  label: t("ContactInfo.SetAsPreferred"),
-                  icon: <IconStar size={18} stroke={colors.iconPrimary} />,
                   disabled: email.preferred,
+                  icon: <IconStar size={18} stroke={colors.iconPrimary} />,
+                  id: "preferred",
+                  label: t("SetAsPreferred", { ns: "ContactInfo" }),
                   onPress: () => handleSetPreferred(index),
                 },
                 {
-                  id: "delete",
-                  label: t("ContactInfo.DeleteAction"),
                   icon: <IconTrash size={18} stroke={colors.dangerAccent} />,
-                  tone: "danger",
+                  id: "delete",
+                  label: t("DeleteAction", { ns: "ContactInfo" }),
                   onPress: () => handleDeleteAtIndex(index),
+                  tone: "danger",
                 },
               ]}
+              onLongPress={() => {
+                void copyEmailToClipboard(email, showToast, copyMessages);
+              }}
+              onPress={() => openEmailMailto(email, showToast, errorTitle)}
+              primaryLabel={email.value}
+              type={email.type}
             />
           );
         })
       )}
 
       <EditEmailSheet
-        open={sheet.open}
-        mode={sheet.open ? sheet.mode : "add"}
         initialEntry={sheetEntry}
         isSubmitting={isSubmitting}
-        onOpenChange={(open) => {
-          if (!open) setSheet({ open: false });
-        }}
+        mode={sheet.open ? sheet.mode : "add"}
         onCancel={() => setSheet({ open: false })}
-        onSave={handleSaveEntry}
         onDelete={sheet.open && sheet.mode === "edit" ? handleDeleteEntry : undefined}
+        onOpenChange={(open) => {
+          if (!open) {
+            setSheet({ open: false });
+          }
+        }}
+        onSave={handleSaveEntry}
+        open={sheet.open}
       />
     </View>
   );

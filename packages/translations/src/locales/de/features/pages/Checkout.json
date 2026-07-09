@@ -1,0 +1,12 @@
+{
+  "alreadySubscribedMessage": "Du hast bereits ein aktives Premium-Abonnement.",
+  "alreadySubscribedTitle": "Bereits abonniert",
+  "errorMessage": "Etwas ist schiefgelaufen. Bitte versuch es erneut.",
+  "errorTitle": "Checkout fehlgeschlagen",
+  "errorUnauthorized": "Bitte melde dich an und versuch es erneut.",
+  "successMessage": "Genieße unbegrenzten KI-Chat und alle Premium-Funktionen.",
+  "successTitle": "Du bist jetzt Premium!",
+  "upgradePendingMessage": "Dein Konto wird in Kürze auf Premium hochgestuft.",
+  "upgradePendingTitle": "Zahlung erhalten",
+  "upgradeToPremium": "Auf Premium upgraden"
+}

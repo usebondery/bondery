@@ -1,7 +1,8 @@
-import type { SQLiteDatabase } from "expo-sqlite";
 import type { SyncBatch, SyncChange, SyncTableKey } from "@bondery/schemas/sync";
+import type { SQLiteDatabase } from "expo-sqlite";
 import { getSyncDatabase } from "../db";
 import { applyPeopleShapeOp } from "./people";
+import type { ShapeRowMessage } from "./read-row";
 import {
   applyGroupsShapeOp,
   applyPeopleAddressesShapeOp,
@@ -13,32 +14,31 @@ import {
   applyPeopleTagsShapeOp,
   applyTagsShapeOp,
 } from "./tables";
-import type { ShapeRowMessage } from "./read-row";
 
 export type SyncShapeKey = SyncTableKey;
 
-const MATERIALIZERS: Record<
-  SyncShapeKey,
-  (db: SQLiteDatabase, message: ShapeRowMessage) => void
-> = {
-  people: applyPeopleShapeOp,
-  people_phones: applyPeoplePhonesShapeOp,
-  people_emails: applyPeopleEmailsShapeOp,
-  people_addresses: applyPeopleAddressesShapeOp,
-  people_socials: applyPeopleSocialsShapeOp,
-  groups: applyGroupsShapeOp,
-  people_groups: applyPeopleGroupsShapeOp,
-  tags: applyTagsShapeOp,
-  people_tags: applyPeopleTagsShapeOp,
-  people_important_dates: applyPeopleImportantDatesShapeOp,
-};
+const MATERIALIZERS: Record<SyncShapeKey, (db: SQLiteDatabase, message: ShapeRowMessage) => void> =
+  {
+    groups: applyGroupsShapeOp,
+    people: applyPeopleShapeOp,
+    people_addresses: applyPeopleAddressesShapeOp,
+    people_emails: applyPeopleEmailsShapeOp,
+    people_groups: applyPeopleGroupsShapeOp,
+    people_important_dates: applyPeopleImportantDatesShapeOp,
+    people_phones: applyPeoplePhonesShapeOp,
+    people_socials: applyPeopleSocialsShapeOp,
+    people_tags: applyPeopleTagsShapeOp,
+    tags: applyTagsShapeOp,
+  };
 
 export const ALL_SYNC_TABLE_KEYS = Object.keys(MATERIALIZERS) as SyncShapeKey[];
 
 function applyChange(db: SQLiteDatabase, change: SyncChange): void {
   const table = change.table as SyncShapeKey;
   const materializer = MATERIALIZERS[table];
-  if (!materializer) return;
+  if (!materializer) {
+    return;
+  }
 
   const operation =
     change.operation === "insert" ? "insert" : change.operation === "delete" ? "delete" : "update";

@@ -1,4 +1,4 @@
-import { QueryClient, environmentManager } from "@tanstack/react-query";
+import { environmentManager, QueryClient } from "@tanstack/react-query";
 import { isApiUnavailableError } from "@/lib/api/availability";
 import { isUnauthorizedApiError } from "@/lib/auth/unauthorized";
 
@@ -6,15 +6,15 @@ export function makeQueryClient(): QueryClient {
   return new QueryClient({
     defaultOptions: {
       queries: {
-        staleTime: 60_000,
         gcTime: 5 * 60_000,
+        refetchOnWindowFocus: true,
         retry: (failureCount, error) => {
           if (isUnauthorizedApiError(error) || isApiUnavailableError(error)) {
             return false;
           }
           return failureCount < 2;
         },
-        refetchOnWindowFocus: true,
+        staleTime: 60_000,
       },
     },
   });

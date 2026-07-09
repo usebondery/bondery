@@ -1,20 +1,24 @@
 // Types
-export type {
-  DataColumnConfig,
-  SortOption,
-  RowAction,
-  BulkAction,
-  ColumnVisibilityLabels,
-  SortMenuLabels,
-  DataTableLabels,
-} from "#DataTable/types.js";
+
+export {
+  ColumnVisibilityMenu,
+  type ColumnVisibilityMenuProps,
+} from "#DataTable/ColumnVisibilityMenu.js";
 
 // Components
 export { DataTable, type DataTableProps } from "#DataTable/DataTable.js";
-export { ColumnVisibilityMenu, type ColumnVisibilityMenuProps } from "#DataTable/ColumnVisibilityMenu.js";
-export { SortMenu, type SortMenuProps } from "#DataTable/SortMenu.js";
 export {
   SortableColumnItem,
-  type SortableColumnItemProps,
   type SortableColumnItemColumn,
+  type SortableColumnItemProps,
 } from "#DataTable/SortableColumnItem.js";
+export { SortMenu, type SortMenuProps } from "#DataTable/SortMenu.js";
+export type {
+  BulkAction,
+  ColumnVisibilityLabels,
+  DataColumnConfig,
+  DataTableLabels,
+  RowAction,
+  SortMenuLabels,
+  SortOption,
+} from "#DataTable/types.js";

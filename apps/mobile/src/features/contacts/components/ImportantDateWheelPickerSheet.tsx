@@ -1,9 +1,12 @@
-import { useEffect, useMemo, useState } from "react";
-import { AccessibilityInfo, Pressable, StyleSheet, Text, View } from "react-native";
 import { IconCheck } from "@tabler/icons-react-native";
-import { MobileCheckbox, MOBILE_CHECKBOX_TOUCH_ROW_MIN_HEIGHT } from "../../../components/MobileCheckbox";
-import { ActionSheetPopup } from "../../../components/ActionSheetPopup";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { AccessibilityInfo, Pressable, StyleSheet, Text, View } from "react-native";
+import { ActionSheetPopup } from "../../../components/ActionSheetPopup";
+import {
+  MOBILE_CHECKBOX_TOUCH_ROW_MIN_HEIGHT,
+  MobileCheckbox,
+} from "../../../components/MobileCheckbox";
 import { useMobileTranslations } from "../../../lib/i18n/useMobileTranslations";
 import { MOBILE_TYPOGRAPHY } from "../../../theme/tokens";
 import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
@@ -15,19 +18,19 @@ import {
   formatImportantDate,
   fromImportantDateIso,
   getMonthLabels,
+  type ImportantDateWheelValue,
   resolveDateLocale,
   toImportantDateIso,
-  type ImportantDateWheelValue,
 } from "../importantDateUtils";
 import { RotatingWheelColumn } from "./RotatingWheelColumn";
 
 interface ImportantDateWheelPickerSheetProps {
-  open: boolean;
-  initialIso: string | null;
   defaultWithoutYear?: boolean;
-  onOpenChange: (open: boolean) => void;
+  initialIso: string | null;
   onCancel: () => void;
   onConfirm: (iso: string) => void;
+  onOpenChange: (open: boolean) => void;
+  open: boolean;
 }
 
 export function ImportantDateWheelPickerSheet({
@@ -75,10 +78,7 @@ export function ImportantDateWheelPickerSheet({
 
   const dayIndex = Math.min(Math.max(wheelValue.day - 1, 0), dayItems.length - 1);
   const monthIndex = Math.min(Math.max(wheelValue.month - 1, 0), 11);
-  const yearIndex = Math.max(
-    0,
-    years.findIndex((year) => year === wheelValue.year),
-  );
+  const yearIndex = Math.max(0, years.indexOf(wheelValue.year));
 
   function updateWheelValue(patch: Partial<ImportantDateWheelValue>) {
     setWheelValue((current) => {
@@ -93,7 +93,7 @@ export function ImportantDateWheelPickerSheet({
     const iso = toImportantDateIso(wheelValue);
     onConfirm(iso);
     void AccessibilityInfo.announceForAccessibility(
-      t("MobileApp.ContactIdentity.DateSetAnnouncement").replace(
+      t("DateSetAnnouncement", { ns: "MobileContactIdentity" }).replace(
         "{date}",
         formatImportantDate(iso, locale),
       ),
@@ -105,44 +105,44 @@ export function ImportantDateWheelPickerSheet({
     updateWheelValue({ withoutYear: checked });
     void AccessibilityInfo.announceForAccessibility(
       checked
-        ? t("MobileApp.ContactIdentity.YearHiddenAnnouncement")
-        : t("MobileApp.ContactIdentity.YearShownAnnouncement"),
+        ? t("YearHiddenAnnouncement", { ns: "MobileContactIdentity" })
+        : t("YearShownAnnouncement", { ns: "MobileContactIdentity" }),
     );
   }
 
   return (
     <ActionSheetPopup
-      open={open}
-      title={t("MobileApp.ContactIdentity.SelectDateTitle")}
-      onOpenChange={onOpenChange}
-      onClose={onCancel}
       actions={[
         {
-          label: t("MobileApp.Common.Done"),
           icon: <IconCheck size={16} stroke={colors.textOnPrimary} />,
+          label: t("actions.done", { ns: "common" }),
           onPress: handleDone,
           tone: "primary",
           variant: "filled",
         },
       ]}
+      onClose={onCancel}
+      onOpenChange={onOpenChange}
+      open={open}
+      title={t("SelectDateTitle", { ns: "MobileContactIdentity" })}
     >
       <Pressable
+        accessibilityHint={t("WithoutYearHint", { ns: "MobileContactIdentity" })}
+        accessibilityLabel={t("WithoutYearLabel", { ns: "MobileContactIdentity" })}
         accessibilityRole="checkbox"
         accessibilityState={{ checked: wheelValue.withoutYear }}
-        accessibilityLabel={t("MobileApp.ContactIdentity.WithoutYearLabel")}
-        accessibilityHint={t("MobileApp.ContactIdentity.WithoutYearHint")}
         onPress={() => handleWithoutYearToggle(!wheelValue.withoutYear)}
         style={styles.withoutYearRow}
       >
         <Text style={[styles.withoutYearLabel, { color: colors.textPrimary }]}>
-          {t("MobileApp.ContactIdentity.WithoutYearLabel")}
+          {t("WithoutYearLabel", { ns: "MobileContactIdentity" })}
         </Text>
         <View pointerEvents="none">
           <MobileCheckbox
+            accessibilityLabel={t("WithoutYearLabel", { ns: "MobileContactIdentity" })}
             checked={wheelValue.withoutYear}
-            accessibilityLabel={t("MobileApp.ContactIdentity.WithoutYearLabel")}
-            onCheckedChange={() => {}}
             disabled
+            onCheckedChange={() => {}}
           />
         </View>
       </Pressable>
@@ -150,31 +150,29 @@ export function ImportantDateWheelPickerSheet({
       <View style={styles.wheelsRow}>
         <View style={styles.wheelColumn}>
           <RotatingWheelColumn
+            accessibilityLabel={t("DayColumnLabel", { ns: "MobileContactIdentity" })}
             items={dayItems}
-            selectedIndex={dayIndex}
             onIndexChange={(index) => updateWheelValue({ day: index + 1 })}
-            accessibilityLabel={t("MobileApp.ContactIdentity.DayColumnLabel")}
+            selectedIndex={dayIndex}
           />
         </View>
 
         <View style={[styles.wheelColumn, styles.monthColumn]}>
           <RotatingWheelColumn
+            accessibilityLabel={t("MonthColumnLabel", { ns: "MobileContactIdentity" })}
             items={monthLabels}
-            selectedIndex={monthIndex}
             onIndexChange={(index) => updateWheelValue({ month: index + 1 })}
-            accessibilityLabel={t("MobileApp.ContactIdentity.MonthColumnLabel")}
+            selectedIndex={monthIndex}
           />
         </View>
 
         {!wheelValue.withoutYear ? (
           <View style={styles.wheelColumn}>
             <RotatingWheelColumn
+              accessibilityLabel={t("YearColumnLabel", { ns: "MobileContactIdentity" })}
               items={yearItems}
+              onIndexChange={(index) => updateWheelValue({ year: years[index] ?? wheelValue.year })}
               selectedIndex={yearIndex >= 0 ? yearIndex : 0}
-              onIndexChange={(index) =>
-                updateWheelValue({ year: years[index] ?? wheelValue.year })
-              }
-              accessibilityLabel={t("MobileApp.ContactIdentity.YearColumnLabel")}
             />
           </View>
         ) : null}
@@ -184,29 +182,29 @@ export function ImportantDateWheelPickerSheet({
 }
 
 const styles = StyleSheet.create({
-  withoutYearRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    minHeight: MOBILE_CHECKBOX_TOUCH_ROW_MIN_HEIGHT,
-    marginBottom: 8,
-    gap: 12,
-  },
-  withoutYearLabel: {
-    fontSize: MOBILE_TYPOGRAPHY.fontSize.body,
-    fontWeight: MOBILE_TYPOGRAPHY.fontWeight.medium,
-    flex: 1,
-  },
-  wheelsRow: {
-    flexDirection: "row",
-    gap: 8,
-    alignItems: "flex-start",
+  monthColumn: {
+    flex: 1.4,
   },
   wheelColumn: {
     flex: 1,
     minWidth: 0,
   },
-  monthColumn: {
-    flex: 1.4,
+  wheelsRow: {
+    alignItems: "flex-start",
+    flexDirection: "row",
+    gap: 8,
+  },
+  withoutYearLabel: {
+    flex: 1,
+    fontSize: MOBILE_TYPOGRAPHY.fontSize.body,
+    fontWeight: MOBILE_TYPOGRAPHY.fontWeight.medium,
+  },
+  withoutYearRow: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 12,
+    justifyContent: "space-between",
+    marginBottom: 8,
+    minHeight: MOBILE_CHECKBOX_TOUCH_ROW_MIN_HEIGHT,
   },
 });

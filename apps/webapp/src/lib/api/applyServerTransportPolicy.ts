@@ -1,16 +1,10 @@
+import { WEBAPP_ROUTES, WEBSITE_ROUTES } from "@bondery/helpers/globals/paths";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { WEBAPP_ROUTES, WEBSITE_ROUTES } from "@bondery/helpers/globals/paths";
-import {
-  isApiUnavailableError,
-  isApiUnavailableResponseStatus,
-} from "@/lib/api/availability";
+import { isApiUnavailableError, isApiUnavailableResponseStatus } from "@/lib/api/availability";
 import { handleServerUnauthorizedSession } from "@/lib/auth/handleServerUnauthorizedSession";
 import { resolveServerSession } from "@/lib/auth/resolveServerSession";
-import {
-  isUnauthorizedApiError,
-  isUnauthorizedResponseStatus,
-} from "@/lib/auth/unauthorized";
+import { isUnauthorizedApiError, isUnauthorizedResponseStatus } from "@/lib/auth/unauthorized";
 
 async function getPathname(): Promise<string> {
   const headersList = await headers();

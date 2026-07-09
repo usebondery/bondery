@@ -1,34 +1,25 @@
 import { z } from "zod";
-import { contactIdSchema } from "#contact-id.js";
 import { AVATAR_UPLOAD, CONTACT_FIELD_MAX_LENGTHS } from "#constants/index.js";
-import { shareableFieldSchema } from "#entities/contact.js";
+import { contactIdSchema } from "#contact-id.js";
 import { shareContactEmailSchema } from "#entities/channels.js";
+import { shareableFieldSchema } from "#entities/contact.js";
 
-export const apiErrorResponseSchema = z
-  .object({
-    error: z.string(),
-    retryAfter: z.number().int().positive().optional(),
-  })
-  .meta({ id: "ApiError" });
+export { type ApiErrorResponse, apiErrorResponseSchema } from "#errors/api-error-response.js";
 
-export const apiSuccessResponseSchema = z
-  .object({
-    success: z.boolean(),
-    message: z.string().optional(),
-  })
-  ;
+export const apiSuccessResponseSchema = z.object({
+  message: z.string().optional(),
+  success: z.boolean(),
+});
 
-export const photoUploadResponseSchema = z
-  .object({
-    success: z.boolean(),
-    avatarUrl: z.string().nullable().optional(),
-    error: z.string().optional(),
-  })
-  ;
+export const photoUploadResponseSchema = z.object({
+  avatarUrl: z.string().nullable().optional(),
+  error: z.string().optional(),
+  success: z.boolean(),
+});
 
 export const imageValidationResultSchema = z.object({
-  isValid: z.boolean(),
   error: z.string().optional(),
+  isValid: z.boolean(),
 });
 
 export const avatarQualitySchema = z.enum(["low", "medium", "high"]);
@@ -40,27 +31,27 @@ export const avatarTransformOptionsSchema = z.object({
 });
 
 export const shareContactRequestSchema = z.object({
+  message: shareContactEmailSchema.shape.message,
   personId: contactIdSchema,
   recipientEmails: shareContactEmailSchema.shape.recipients,
-  message: shareContactEmailSchema.shape.message,
-  sendCopy: z.boolean(),
   selectedFields: z.array(shareableFieldSchema),
+  sendCopy: z.boolean(),
 });
 
 export const feedbackFormSchema = z.object({
-  npsScore: z.number().min(0).max(10),
-  npsReason: z.string(),
   generalFeedback: z.string(),
+  npsReason: z.string(),
+  npsScore: z.number().min(0).max(10),
 });
 
 export const inputMaxLengthsSchema = z.object({
-  firstName: z.number(),
-  middleName: z.number(),
-  lastName: z.number(),
-  headline: z.number(),
-  location: z.number(),
-  description: z.number(),
   dateName: z.number(),
+  description: z.number(),
+  firstName: z.number(),
+  headline: z.number(),
+  lastName: z.number(),
+  location: z.number(),
+  middleName: z.number(),
 });
 
 export const avatarUploadConfigSchema = z.object({
@@ -70,23 +61,23 @@ export const avatarUploadConfigSchema = z.object({
 });
 
 export const integrationProviderSchema = z.object({
+  active: z.boolean(),
+  backgroundColor: z.string(),
+  displayName: z.string(),
+  icon: z.string(),
+  iconColor: z.string(),
   provider: z.string(),
   providerKey: z.string(),
-  displayName: z.string(),
-  iconColor: z.string(),
-  backgroundColor: z.string(),
-  icon: z.string(),
-  active: z.boolean(),
 });
 
 export const defaultInputMaxLengths = inputMaxLengthsSchema.parse({
-  firstName: CONTACT_FIELD_MAX_LENGTHS.firstName,
-  middleName: CONTACT_FIELD_MAX_LENGTHS.middleName,
-  lastName: CONTACT_FIELD_MAX_LENGTHS.lastName,
-  headline: CONTACT_FIELD_MAX_LENGTHS.headline,
-  location: CONTACT_FIELD_MAX_LENGTHS.location,
-  description: CONTACT_FIELD_MAX_LENGTHS.description,
   dateName: CONTACT_FIELD_MAX_LENGTHS.dateName,
+  description: CONTACT_FIELD_MAX_LENGTHS.description,
+  firstName: CONTACT_FIELD_MAX_LENGTHS.firstName,
+  headline: CONTACT_FIELD_MAX_LENGTHS.headline,
+  lastName: CONTACT_FIELD_MAX_LENGTHS.lastName,
+  location: CONTACT_FIELD_MAX_LENGTHS.location,
+  middleName: CONTACT_FIELD_MAX_LENGTHS.middleName,
 });
 
 export const defaultAvatarUploadConfig = avatarUploadConfigSchema.parse({
@@ -95,7 +86,6 @@ export const defaultAvatarUploadConfig = avatarUploadConfigSchema.parse({
   maxFileSizeMB: AVATAR_UPLOAD.maxFileSizeMB,
 });
 
-export type ApiErrorResponse = z.infer<typeof apiErrorResponseSchema>;
 export type ApiSuccessResponse = z.infer<typeof apiSuccessResponseSchema>;
 export type PhotoUploadResponse = z.infer<typeof photoUploadResponseSchema>;
 export type ImageValidationResult = z.infer<typeof imageValidationResultSchema>;

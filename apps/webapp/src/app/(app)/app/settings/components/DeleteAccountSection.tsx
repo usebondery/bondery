@@ -1,48 +1,44 @@
 "use client";
 
-import { Text, Button, Group } from "@mantine/core";
-import { IconTrash, IconAlertCircle } from "@tabler/icons-react";
-import { notifications } from "@mantine/notifications";
-import { Trans } from "next-i18next/client";
-import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
-import { useDeleteAccountMutation } from "@/lib/query/hooks/useSettings";
-import { endSession } from "@/lib/auth/endSession";
+import { getUserFacingError } from "@bondery/helpers/api";
 import {
   errorNotificationTemplate,
   loadingNotificationTemplate,
   ModalTitle,
   successNotificationTemplate,
 } from "@bondery/mantine-next";
+import { Button, Group, Text } from "@mantine/core";
+import { notifications } from "@mantine/notifications";
+import { IconAlertCircle, IconTrash } from "@tabler/icons-react";
+import { Trans } from "next-i18next/client";
+import { endSession } from "@/lib/auth/endSession";
+import { useCommonTranslations, useWebTranslations } from "@/lib/i18n/useWebTranslations";
+import { useDeleteAccountMutation } from "@/lib/query/hooks/useSettings";
 import { openStandardConfirmModal } from "../../components/modals/openStandardConfirmModal";
 
 export function DeleteAccountSection() {
-  const t = useTranslations("SettingsPage.DataManagement");
+  const tCommon = useCommonTranslations();
+
+  const t = useWebTranslations("SettingsPage", "DataManagement");
   const deleteAccountMutation = useDeleteAccountMutation();
 
   const handleDeleteAccount = () => {
     openStandardConfirmModal({
-      title: (
-        <ModalTitle
-          text={t("DeleteConfirmTitle")}
-          icon={<IconAlertCircle size={24} />}
-          isDangerous={true}
-        />
-      ),
-      message: (
-        <Text size="sm">
-          <Trans t={t} i18nKey="DeleteConfirmMessage" components={{ b: <b /> }} />
-        </Text>
-      ),
-      confirmLabel: t("DeleteConfirmButton"),
       cancelLabel: t("DeleteCancelButton"),
       confirmColor: "red",
+      confirmLabel: t("DeleteConfirmButton"),
       confirmLeftSection: <IconTrash size={16} />,
+      message: (
+        <Text size="sm">
+          <Trans components={{ b: <b /> }} i18nKey="DeleteConfirmMessage" t={t} />
+        </Text>
+      ),
       onConfirm: async () => {
         try {
           notifications.show({
             ...loadingNotificationTemplate({
-              title: t("DeletingAccount"),
               description: t("PleaseWait"),
+              title: t("DeletingAccount"),
             }),
             id: "delete-account",
           });
@@ -52,8 +48,8 @@ export function DeleteAccountSection() {
           notifications.hide("delete-account");
           notifications.show(
             successNotificationTemplate({
-              title: t("DeleteSuccess"),
               description: t("AccountDeleted"),
+              title: t("DeleteSuccess"),
             }),
           );
 
@@ -62,30 +58,37 @@ export function DeleteAccountSection() {
           notifications.hide("delete-account");
           notifications.show(
             errorNotificationTemplate({
+              description: getUserFacingError(error, tCommon),
               title: t("UpdateError"),
-              description: error instanceof Error ? error.message : t("DeleteError"),
             }),
           );
         }
       },
+      title: (
+        <ModalTitle
+          icon={<IconAlertCircle size={24} />}
+          isDangerous={true}
+          text={t("DeleteConfirmTitle")}
+        />
+      ),
     });
   };
 
   return (
-    <Group justify="space-between" align="flex-start">
+    <Group align="flex-start" justify="space-between">
       <div style={{ flex: 1 }}>
-        <Text size="sm" fw={500} mb={4} c="red">
+        <Text c="red" fw={500} mb={4} size="sm">
           {t("DeleteAccount")}
         </Text>
-        <Text size="xs" c="dimmed">
+        <Text c="dimmed" size="xs">
           {t("DeleteAccountDescription")}
         </Text>
       </div>
       <Button
-        leftSection={<IconTrash size={16} />}
         color="red"
-        variant="light"
+        leftSection={<IconTrash size={16} />}
         onClick={handleDeleteAccount}
+        variant="light"
       >
         {t("DeleteButton")}
       </Button>

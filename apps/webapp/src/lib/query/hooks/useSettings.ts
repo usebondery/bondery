@@ -1,29 +1,26 @@
 "use client";
 
+import type { ImportFollowupPlatform } from "@bondery/schemas";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import type { UpdateSettingsPatch } from "@/lib/api/domains/settings";
 import {
   completeOnboarding,
   deleteAccount,
   dismissGettingStarted,
+  getSettings,
   submitFeedback,
   updateImportFollowup,
   updateSettings,
+  uploadMePhoto,
 } from "@/lib/api/domains/settings";
-import { settingsKeys } from "@/lib/query/keys";
 import { invalidateSettings } from "@/lib/query/invalidation";
-import { createClientFetcher } from "@/lib/query/fetchers/createClientFetcher";
-import { API_ROUTES } from "@bondery/helpers/globals/paths";
-import type { UpdateSettingsPatch } from "@/lib/api/domains/settings";
-async function fetchSettingsClient() {
-  const fetch = createClientFetcher();
-  return fetch<{ data?: Record<string, unknown> }>(API_ROUTES.ME_SETTINGS);
-}
+import { settingsKeys } from "@/lib/query/keys";
 
 export function useSettingsQuery(enabled = true) {
   return useQuery({
-    queryKey: settingsKeys.me(),
-    queryFn: fetchSettingsClient,
     enabled,
+    queryFn: getSettings,
+    queryKey: settingsKeys.me(),
   });
 }
 
@@ -31,6 +28,16 @@ export function useUpdateSettingsMutation() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (patch: UpdateSettingsPatch) => updateSettings(patch),
+    onSuccess: async () => {
+      await invalidateSettings(queryClient);
+    },
+  });
+}
+
+export function useUploadMePhotoMutation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: uploadMePhoto,
     onSuccess: async () => {
       await invalidateSettings(queryClient);
     },
@@ -57,6 +64,28 @@ export function useUpdateImportFollowupMutation() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: updateImportFollowup,
+    onSuccess: async () => {
+      await invalidateSettings(queryClient);
+    },
+  });
+}
+
+export type FinishOnboardingInput =
+  | {
+      status: "awaiting_export" | "dismissed";
+      platform?: ImportFollowupPlatform;
+    }
+  | undefined;
+
+export function useFinishOnboardingMutation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (followup?: FinishOnboardingInput) => {
+      if (followup) {
+        await updateImportFollowup(followup);
+      }
+      await completeOnboarding();
+    },
     onSuccess: async () => {
       await invalidateSettings(queryClient);
     },

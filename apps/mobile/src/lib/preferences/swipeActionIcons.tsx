@@ -2,11 +2,7 @@ import { IconMail, IconMessage, IconPhone } from "@tabler/icons-react-native";
 import type { ReactNode } from "react";
 import type { SwipeAction } from "./useMobilePreferences";
 
-export function getSwipeActionIcon(
-  action: SwipeAction,
-  stroke: string,
-  size = 16,
-): ReactNode {
+export function getSwipeActionIcon(action: SwipeAction, stroke: string, size = 16): ReactNode {
   if (action === "call") {
     return <IconPhone size={size} stroke={stroke} />;
   }

@@ -1,10 +1,19 @@
+import type { GroupWithCount, TagWithCount } from "@bondery/schemas";
 import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  getContact,
+  getContactGroups,
+  getContactImportantDates,
+  getContactTags,
+  getMyselfContact,
+  listContacts,
+} from "../../domains/contacts";
+import { getGroup, listGroups as listAllGroups, listGroupMembers } from "../../domains/groups";
+import { listTags as listAllTags } from "../../domains/tags";
+import type { ContactsListParams } from "../../resources/contacts";
 import { useSync } from "../SyncProvider";
-import { getContact, getMyselfContact } from "../repositories/contacts";
-import { listGroups } from "../repositories/groups";
-import { listTags } from "../repositories/tags";
 
-export function useSyncQuery<T>(queryFn: () => T, deps: unknown[] = []): {
+export function useSyncQuery<T>(queryFn: () => T): {
   data: T;
   revision: number;
   isInitialSync: boolean;
@@ -20,7 +29,7 @@ export function useSyncQuery<T>(queryFn: () => T, deps: unknown[] = []): {
 
   useEffect(() => {
     setData(queryFnRef.current());
-  }, [revision, ...deps]);
+  }, []);
 
   const refresh = useCallback(() => {
     setData(queryFnRef.current());
@@ -28,27 +37,67 @@ export function useSyncQuery<T>(queryFn: () => T, deps: unknown[] = []): {
   }, [bumpRevision]);
 
   return {
+    conflictCount,
     data,
-    revision,
     isInitialSync,
     pendingCount,
-    conflictCount,
     refresh,
+    revision,
   };
 }
 
 export function useContact(contactId: string | undefined) {
-  return useSyncQuery(() => (contactId ? getContact(contactId) : null), [contactId]);
+  return useSyncQuery(() => (contactId ? getContact(contactId) : null));
 }
 
 export function useMyselfContact() {
-  return useSyncQuery(() => getMyselfContact(), []);
+  return useSyncQuery(() => getMyselfContact());
 }
 
 export function useGroups() {
-  return useSyncQuery(() => listGroups(), []);
+  return useSyncQuery(() => listAllGroups());
 }
 
 export function useTags() {
-  return useSyncQuery(() => listTags(), []);
+  return useSyncQuery(() => listAllTags());
+}
+
+/** Imperative reads for features (prefer hooks when subscribing to revision). */
+export function readContactsList(params: ContactsListParams) {
+  return listContacts(params);
+}
+
+export {
+  getContact,
+  getContactGroups,
+  getContactTags,
+  getGroup,
+  getMyselfContact,
+  listAllGroups as listGroups,
+  listAllTags as listTags,
+  listGroupMembers,
+};
+
+export function useContactsList(params: ContactsListParams) {
+  return useSyncQuery(() => listContacts(params));
+}
+
+export function useContactTags(contactId: string | undefined) {
+  return useSyncQuery(() =>
+    contactId
+      ? getContactTags(contactId).map((tag): TagWithCount => ({ ...tag, contactCount: 0 }))
+      : [],
+  );
+}
+
+export function useContactGroups(contactId: string | undefined) {
+  return useSyncQuery(() =>
+    contactId
+      ? getContactGroups(contactId).map((group): GroupWithCount => ({ ...group, contactCount: 0 }))
+      : [],
+  );
+}
+
+export function useContactImportantDates(contactId: string | undefined) {
+  return useSyncQuery(() => (contactId ? getContactImportantDates(contactId) : []));
 }

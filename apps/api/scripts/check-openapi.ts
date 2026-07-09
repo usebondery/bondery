@@ -32,10 +32,7 @@ const spec = parse(readFileSync(specPath, "utf8")) as {
           string,
           {
             description?: string;
-            content?: Record<
-              string,
-              { schema?: unknown; example?: unknown }
-            >;
+            content?: Record<string, { schema?: unknown; example?: unknown }>;
           }
         >;
       }
@@ -57,7 +54,9 @@ function isEmptySchema(schema: unknown): boolean {
 
 for (const [path, methods] of Object.entries(spec.paths ?? {})) {
   for (const [method, operation] of Object.entries(methods)) {
-    if (method === "parameters") continue;
+    if (method === "parameters") {
+      continue;
+    }
 
     if (["post", "put", "patch"].includes(method)) {
       const requestJson = operation.requestBody?.content?.["application/json"];
@@ -114,7 +113,7 @@ for (const [path, methods] of Object.entries(spec.paths ?? {})) {
 }
 
 if (violations.length > 0) {
-  console.error("OpenAPI quality check failed:\n" + violations.map((v) => `  - ${v}`).join("\n"));
+  console.error(`OpenAPI quality check failed:\n${violations.map((v) => `  - ${v}`).join("\n")}`);
   process.exit(1);
 }
 

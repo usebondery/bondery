@@ -2,8 +2,8 @@ import { COMMON_PERSON_NAME_TOKEN_SET } from "#name/common-person-name-tokens.js
 
 export interface ParsedInstagramName {
   firstName: string;
-  middleName: string | null;
   lastName: string | null;
+  middleName: string | null;
 }
 
 export interface ParseInstagramUsernameInput {
@@ -12,32 +12,32 @@ export interface ParseInstagramUsernameInput {
 }
 
 const SMALL_CAPS_MAP: Record<string, string> = {
-  ᴀ: "a",
+  x: "x",
+  ǫ: "q",
+  ɢ: "g",
+  ɪ: "i",
+  ɴ: "n",
+  ʀ: "r",
+  ʏ: "y",
   ʙ: "b",
+  ʜ: "h",
+  ʟ: "l",
+  ᴀ: "a",
   ᴄ: "c",
   ᴅ: "d",
   ᴇ: "e",
-  ꜰ: "f",
-  ɢ: "g",
-  ʜ: "h",
-  ɪ: "i",
   ᴊ: "j",
   ᴋ: "k",
-  ʟ: "l",
   ᴍ: "m",
-  ɴ: "n",
   ᴏ: "o",
   ᴘ: "p",
-  ǫ: "q",
-  ʀ: "r",
-  ꜱ: "s",
   ᴛ: "t",
   ᴜ: "u",
   ᴠ: "v",
   ᴡ: "w",
-  x: "x",
-  ʏ: "y",
   ᴢ: "z",
+  ꜰ: "f",
+  ꜱ: "s",
 };
 
 const COMMON_NAME_TOKENS = COMMON_PERSON_NAME_TOKEN_SET;
@@ -154,7 +154,7 @@ function splitCompactUsernameToken(token: string): [string, string] | null {
 }
 
 function parseFromDisplayName(displayName?: string | null): ParsedInstagramName | null {
-  if (!displayName || !displayName.trim()) {
+  if (!displayName?.trim()) {
     return null;
   }
 
@@ -174,15 +174,15 @@ function parseFromDisplayName(displayName?: string | null): ParsedInstagramName 
   if (tokens.length === 1) {
     return {
       firstName: tokens[0],
-      middleName: null,
       lastName: null,
+      middleName: null,
     };
   }
 
   return {
     firstName: tokens[0],
-    middleName: tokens.length > 2 ? tokens.slice(1, -1).join(" ") : null,
     lastName: tokens[tokens.length - 1],
+    middleName: tokens.length > 2 ? tokens.slice(1, -1).join(" ") : null,
   };
 }
 
@@ -199,8 +199,8 @@ function parseFromUsername(username: string): ParsedInstagramName {
   if (tokens.length === 0) {
     return {
       firstName: "Instagram",
-      middleName: null,
       lastName: "Contact",
+      middleName: null,
     };
   }
 
@@ -210,22 +210,22 @@ function parseFromUsername(username: string): ParsedInstagramName {
     if (compactSplit) {
       return {
         firstName: compactSplit[0],
-        middleName: null,
         lastName: compactSplit[1],
+        middleName: null,
       };
     }
 
     return {
       firstName: tokens[0],
-      middleName: null,
       lastName: null,
+      middleName: null,
     };
   }
 
   return {
     firstName: tokens[0],
-    middleName: tokens.length > 2 ? tokens.slice(1, -1).join(" ") : null,
     lastName: tokens[tokens.length - 1],
+    middleName: tokens.length > 2 ? tokens.slice(1, -1).join(" ") : null,
   };
 }
 
@@ -239,7 +239,7 @@ function parseFromUsername(username: string): ParsedInstagramName {
  */
 export function parseInstagramUsername(input: ParseInstagramUsernameInput): ParsedInstagramName {
   const fromDisplayName = parseFromDisplayName(input.displayName);
-  if (fromDisplayName && fromDisplayName.firstName) {
+  if (fromDisplayName?.firstName) {
     return fromDisplayName;
   }
 

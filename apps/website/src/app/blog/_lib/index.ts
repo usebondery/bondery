@@ -1,15 +1,15 @@
-export type { PostMeta, PostCategory } from "./types";
 export {
-  type BlogCategoryConfig,
-  BLOG_CATEGORY_CONFIGS,
   BLOG_CATEGORIES,
+  BLOG_CATEGORY_CONFIGS,
+  type BlogCategoryConfig,
   CATEGORY_ICONS,
   getCategoryConfig,
 } from "./categories";
+export type { PostCategory, PostMeta } from "./types";
 export {
   getAllPosts,
-  getPostsByCategory,
-  getPostMeta,
   getAllSlugs,
   getPostComponent,
+  getPostMeta,
+  getPostsByCategory,
 } from "./utils";

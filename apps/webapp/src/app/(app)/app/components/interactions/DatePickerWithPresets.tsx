@@ -4,11 +4,34 @@ import { DatePickerInput } from "@mantine/dates";
 import { IconCalendar } from "@tabler/icons-react";
 import type { ComponentProps } from "react";
 import { useCallback, useEffect, useMemo, useRef } from "react";
-import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
+import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
 
 type DatePickerWithPresetsProps = Omit<ComponentProps<typeof DatePickerInput>, "onDropdownOpen"> & {
   onDropdownOpen?: () => void;
 };
+
+function toDatePreset(value: Date) {
+  const year = value.getFullYear();
+  const month = `${value.getMonth() + 1}`.padStart(2, "0");
+  const day = `${value.getDate()}`.padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+/**
+ * Normalises any date value to a "YYYY-MM-DD" string so that preset
+ * matching works regardless of whether Mantine passes a Date object (which
+ * it does when valueFormat is overridden to e.g. "MMMM D, YYYY") or
+ * a plain string.
+ */
+function toNormalizedDateString(val: Date | string | null | undefined): string | null {
+  if (val instanceof Date) {
+    return toDatePreset(val);
+  }
+  if (typeof val === "string" && val) {
+    return val.split("T")[0] || null;
+  }
+  return null;
+}
 
 /**
  * Date picker with quick presets for timeline activities.
@@ -22,49 +45,31 @@ export function DatePickerWithPresets({
   classNames,
   ...props
 }: DatePickerWithPresetsProps) {
-  const t = useTranslations("InteractionsPage");
+  const t = useWebTranslations("InteractionsPage");
   const now = new Date();
-  const toDatePreset = (value: Date) => {
-    const year = value.getFullYear();
-    const month = `${value.getMonth() + 1}`.padStart(2, "0");
-    const day = `${value.getDate()}`.padStart(2, "0");
-    return `${year}-${month}-${day}`;
-  };
-
-  /**
-   * Normalises any date value to a "YYYY-MM-DD" string so that preset
-   * matching works regardless of whether Mantine passes a Date object (which
-   * it does when valueFormat is overridden to e.g. "MMMM D, YYYY") or
-   * a plain string.
-   */
-  const toNormalizedDateString = (val: Date | string | null | undefined): string | null => {
-    if (val instanceof Date) return toDatePreset(val);
-    if (typeof val === "string" && val) return val.split("T")[0] || null;
-    return null;
-  };
 
   const presets = useMemo(
     () => [
       {
-        value: toDatePreset(new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1)),
         label: t("DatePresetTomorrow"),
+        value: toDatePreset(new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1)),
       },
-      { value: toDatePreset(new Date(now)), label: t("DatePresetToday") },
+      { label: t("DatePresetToday"), value: toDatePreset(new Date(now)) },
       {
-        value: toDatePreset(new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1)),
         label: t("DatePresetYesterday"),
+        value: toDatePreset(new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1)),
       },
       {
-        value: toDatePreset(new Date(now.getFullYear(), now.getMonth(), now.getDate() - 7)),
         label: t("DatePresetLastWeek"),
+        value: toDatePreset(new Date(now.getFullYear(), now.getMonth(), now.getDate() - 7)),
       },
       {
-        value: toDatePreset(new Date(now.getFullYear(), now.getMonth() - 1, now.getDate())),
         label: t("DatePresetLastMonth"),
+        value: toDatePreset(new Date(now.getFullYear(), now.getMonth() - 1, now.getDate())),
       },
       {
-        value: toDatePreset(new Date(now.getFullYear() - 1, now.getMonth(), now.getDate())),
         label: t("DatePresetLastYear"),
+        value: toDatePreset(new Date(now.getFullYear() - 1, now.getMonth(), now.getDate())),
       },
     ],
     [now, t],
@@ -115,15 +120,21 @@ export function DatePickerWithPresets({
 
   return (
     <DatePickerInput
-      valueFormat="YYYY-MM-DD"
-      leftSection={<IconCalendar size={16} />}
-      presets={presets}
       classNames={{
-        presetsList: "presetsList",
         presetButton: "presetsButton",
+        presetsList: "presetsList",
         ...(classNames as Record<string, string> | undefined),
       }}
+      leftSection={<IconCalendar size={16} />}
+      presets={presets}
+      valueFormat="YYYY-MM-DD"
       {...props}
+      onChange={(val) => {
+        const next = toNormalizedDateString(val as Date | string | null);
+        valueRef.current = next;
+        markActivePreset(next);
+        onChange?.(val);
+      }}
       popoverProps={{
         ...popoverProps,
         onOpen: () => {
@@ -131,12 +142,6 @@ export function DatePickerWithPresets({
           onDropdownOpen?.();
           (popoverProps as { onOpen?: () => void } | undefined)?.onOpen?.();
         },
-      }}
-      onChange={(val) => {
-        const next = toNormalizedDateString(val as Date | string | null);
-        valueRef.current = next;
-        markActivePreset(next);
-        onChange?.(val);
       }}
     />
   );

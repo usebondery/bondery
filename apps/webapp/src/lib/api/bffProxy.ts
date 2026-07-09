@@ -1,9 +1,5 @@
-import { serverApiFetch, type ServerApiFetchOptions } from "@/lib/api/server";
-
-const SERVICE_UNAVAILABLE_BODY = JSON.stringify({
-  error: "Service unavailable",
-  code: "BFF_UPSTREAM_UNAVAILABLE",
-});
+import { buildNestedErrorResponse } from "@/lib/api/buildNestedErrorResponse";
+import { type ServerApiFetchOptions, serverApiFetch } from "@/lib/api/server";
 
 /**
  * BFF-safe upstream fetch: never applies RSC transport redirects.
@@ -17,9 +13,10 @@ export async function bffProxyFetch(
   try {
     return await serverApiFetch(path, init, { ...options, transportPolicy: false });
   } catch {
-    return new Response(SERVICE_UNAVAILABLE_BODY, {
+    return buildNestedErrorResponse({
+      code: "service_unavailable",
+      message: "Service unavailable",
       status: 503,
-      headers: { "Content-Type": "application/json" },
     });
   }
 }

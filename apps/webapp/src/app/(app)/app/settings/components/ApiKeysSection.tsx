@@ -1,5 +1,7 @@
 "use client";
 
+import { DescribedSelect, errorNotificationTemplate, ModalTitle } from "@bondery/mantine-next";
+import { API_KEY_LIMITS, type ApiKeyCreated, type ApiKeyListItem } from "@bondery/schemas";
 import {
   ActionIcon,
   Box,
@@ -14,33 +16,31 @@ import {
 } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { IconAlertCircle, IconKey, IconPlus, IconTrash } from "@tabler/icons-react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { API_KEY_LIMITS, type ApiKeyCreated, type ApiKeyListItem } from "@bondery/schemas";
-import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
-import { formatLastUsedAtWithFormatter, useDateFormatter } from "@/lib/i18n/useDateFormatter";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { openStandardConfirmModal } from "@/app/(app)/app/components/modals/openStandardConfirmModal";
-import { InlineEditableInput } from "@/app/(app)/app/person/[person_id]/components/InlineEditableInput";
-import { DescribedSelect, errorNotificationTemplate, ModalTitle } from "@bondery/mantine-next";
-import { SettingsSection } from "./SettingsSection";
-import { openApiKeyModal } from "./openApiKeyModal";
-import { buildApiKeyPermissionOptions } from "./apiKeyPermissionOptions";
+import { InlineEditableInput } from "@/app/(app)/app/person/[person_id]/components/info/InlineEditableInput";
+import { formatLastUsedAtWithFormatter, useDateFormatter } from "@/lib/i18n/useDateFormatter";
+import { useCommonTranslations, useWebTranslations } from "@/lib/i18n/useWebTranslations";
 import {
+  useApiKeysQuery,
   useDeleteApiKeyMutation,
   useUpdateApiKeyLabelMutation,
 } from "@/lib/query/hooks/useApiKeys";
+import { useApiKeyPermissionOptions } from "../hooks/useApiKeyPermissionOptions";
+import { openApiKeyModal } from "./openApiKeyModal";
+import { SettingsSection } from "./SettingsSection";
 
 interface ApiKeysSectionProps {
-  initialApiKeys: ApiKeyListItem[];
   apiBaseUrl: string;
 }
 
 interface ApiKeyRowProps {
   apiKey: ApiKeyListItem;
-  permissionOptions: ReturnType<typeof buildApiKeyPermissionOptions>;
-  lastUsedLabel: string;
   deleteAriaLabel: string;
+  lastUsedLabel: string;
   onDelete: () => void;
   onLabelUpdated: (label: string) => void;
+  permissionOptions: ReturnType<typeof useApiKeyPermissionOptions>;
 }
 
 const LAST_USED_COLUMN_WIDTH = 180;
@@ -55,7 +55,7 @@ function ApiKeyRow({
   onDelete,
   onLabelUpdated,
 }: ApiKeyRowProps) {
-  const t = useTranslations("SettingsPage.ApiKeys");
+  const t = useWebTranslations("SettingsPage", "ApiKeys");
   const [label, setLabel] = useState(apiKey.label);
   const [isSaving, setIsSaving] = useState(false);
   const persistedLabelRef = useRef(apiKey.label);
@@ -83,8 +83,8 @@ function ApiKeyRow({
       setLabel(persistedLabelRef.current);
       notifications.show({
         ...errorNotificationTemplate({
-          title: t("EditErrorTitle"),
           description: t("EditErrorDescription"),
+          title: t("EditErrorTitle"),
         }),
       });
     } finally {
@@ -93,64 +93,58 @@ function ApiKeyRow({
   }, [apiKey.id, label, onLabelUpdated, t, updateMutation]);
 
   return (
-    <Card withBorder padding="sm" radius="md">
-      <Group wrap="nowrap" gap="sm" align="center">
-        <ThemeIcon variant="light" color="gray" size="lg" radius="md">
+    <Card padding="sm" radius="md" withBorder>
+      <Group align="center" gap="sm" wrap="nowrap">
+        <ThemeIcon color="gray" radius="md" size="lg" variant="light">
           <IconKey size={18} stroke={1.5} />
         </ThemeIcon>
 
         <Box style={{ flex: 1, minWidth: 120 }}>
           <InlineEditableInput
             aria-label={t("LabelField")}
-            value={label}
-            maxLength={API_KEY_LIMITS.labelMaxLength}
             isSaving={isSaving}
-            onChange={setLabel}
+            maxLength={API_KEY_LIMITS.labelMaxLength}
             onBlur={() => void saveLabel()}
-            style={{ width: "100%" }}
+            onChange={setLabel}
             size="sm"
+            style={{ width: "100%" }}
+            value={label}
           />
         </Box>
 
         <DescribedSelect
           aria-label={t("PermissionField")}
           data={permissionOptions}
-          value={apiKey.permission}
-          onChange={() => {}}
           disabled
-          w={PERMISSION_SELECT_WIDTH}
           miw={PERMISSION_SELECT_WIDTH}
+          onChange={() => {}}
           style={{ flexShrink: 0 }}
+          value={apiKey.permission}
+          w={PERMISSION_SELECT_WIDTH}
         />
 
         <Text
-          size="xs"
-          ff="monospace"
           c="dimmed"
+          ff="monospace"
+          size="xs"
+          style={{ flexShrink: 0 }}
           truncate
           w={KEY_PREFIX_COLUMN_WIDTH}
-          style={{ flexShrink: 0 }}
         >
           {apiKey.keyPrefix}
         </Text>
 
-        <Text
-          size="xs"
-          c="dimmed"
-          truncate
-          w={LAST_USED_COLUMN_WIDTH}
-          style={{ flexShrink: 0 }}
-        >
+        <Text c="dimmed" size="xs" style={{ flexShrink: 0 }} truncate w={LAST_USED_COLUMN_WIDTH}>
           {lastUsedLabel}
         </Text>
 
         <ActionIcon
-          variant="subtle"
-          color="red"
-          size="sm"
           aria-label={deleteAriaLabel}
+          color="red"
           onClick={onDelete}
+          size="sm"
           style={{ flexShrink: 0 }}
+          variant="subtle"
         >
           <IconTrash size={16} />
         </ActionIcon>
@@ -159,75 +153,61 @@ function ApiKeyRow({
   );
 }
 
-export function ApiKeysSection({ initialApiKeys, apiBaseUrl }: ApiKeysSectionProps) {
-  const t = useTranslations("SettingsPage.ApiKeys");
-  const tCommon = useTranslations("WebAppCommon");
+export function ApiKeysSection({ apiBaseUrl }: ApiKeysSectionProps) {
+  const t = useWebTranslations("SettingsPage", "ApiKeys");
+  const tCommon = useCommonTranslations();
   const formatter = useDateFormatter();
-  const [apiKeys, setApiKeys] = useState(initialApiKeys);
+  const { data: apiKeys = [] } = useApiKeysQuery();
   const deleteMutation = useDeleteApiKeyMutation();
 
   const atLimit = apiKeys.length >= API_KEY_LIMITS.maxPerUser;
-  const permissionOptions = useMemo(() => buildApiKeyPermissionOptions(t), [t]);
+  const permissionOptions = useApiKeyPermissionOptions();
 
   const lastUsedLabel = (lastUsedAt: string | null) =>
     formatLastUsedAtWithFormatter(lastUsedAt, formatter, {
-      neverUsed: t("NeverUsed"),
-      lessThanMinuteAgo: t("LessThanMinuteAgo"),
       lastUsed: (time) => t("LastUsed", { time }),
+      lessThanMinuteAgo: t("LessThanMinuteAgo"),
+      neverUsed: t("NeverUsed"),
     });
 
-  const handleCreated = useCallback((created: ApiKeyCreated) => {
-    setApiKeys((prev) => [
-      {
-        id: created.id,
-        label: created.label,
-        permission: created.permission,
-        keyPrefix: created.keyPrefix,
-        lastUsedAt: created.lastUsedAt,
-        createdAt: created.createdAt,
-      },
-      ...prev,
-    ]);
-  }, []);
+  const handleCreated = useCallback((_created: ApiKeyCreated) => {}, []);
 
   const openCreateModal = useCallback(() => {
     openApiKeyModal({
-      t,
-      onCreated: handleCreated,
       apiBaseUrl,
+      onCreated: handleCreated,
     });
-  }, [apiBaseUrl, handleCreated, t]);
+  }, [apiBaseUrl, handleCreated]);
 
   const handleDelete = (key: ApiKeyListItem) => {
     openStandardConfirmModal({
-      title: (
-        <ModalTitle
-          text={t("DeleteTitle", { label: key.label })}
-          icon={<IconAlertCircle size={24} />}
-          isDangerous
-        />
-      ),
-      message: <Text size="sm">{t("DeleteMessage")}</Text>,
-      confirmLabel: tCommon("YesDelete"),
-      cancelLabel: tCommon("NoCancel"),
+      cancelLabel: tCommon("confirm.noCancel"),
       confirmColor: "red",
+      confirmLabel: tCommon("confirm.yesDelete"),
       confirmLeftSection: <IconTrash size={16} />,
+      message: <Text size="sm">{t("DeleteMessage")}</Text>,
       onConfirm: async () => {
         await deleteMutation.mutateAsync(key.id);
-        setApiKeys((prev) => prev.filter((item) => item.id !== key.id));
       },
+      title: (
+        <ModalTitle
+          icon={<IconAlertCircle size={24} />}
+          isDangerous
+          text={t("DeleteTitle", { label: key.label })}
+        />
+      ),
     });
   };
 
   const createButton = (
-    <Tooltip label={atLimit ? t("LimitReached") : undefined} disabled={!atLimit}>
+    <Tooltip disabled={!atLimit} label={atLimit ? t("LimitReached") : undefined}>
       <span>
         <Button
-          variant="outline"
-          size="sm"
-          leftSection={<IconPlus size={16} />}
           disabled={atLimit}
+          leftSection={<IconPlus size={16} />}
           onClick={openCreateModal}
+          size="sm"
+          variant="outline"
         >
           {t("CreateButton")}
         </Button>
@@ -237,38 +217,34 @@ export function ApiKeysSection({ initialApiKeys, apiBaseUrl }: ApiKeysSectionPro
 
   return (
     <SettingsSection
-      id="api-keys"
-      icon={<IconKey size={20} stroke={1.5} />}
-      title={t("Title")}
+      action={createButton}
       helpDoc="api.authentication"
       helpLabel={t("DocsHelpLabel")}
-      action={createButton}
+      icon={<IconKey size={20} stroke={1.5} />}
+      id="api-keys"
+      title={t("Title")}
     >
       <CardSection inheritPadding py="md">
         <Stack gap="md">
-          <Text size="sm" c="dimmed">
+          <Text c="dimmed" size="sm">
             {t("Description")}
           </Text>
 
           {apiKeys.length === 0 ? (
-            <Text size="sm" c="dimmed">
+            <Text c="dimmed" size="sm">
               {t("EmptyTitle")}
             </Text>
           ) : (
             <Stack gap="sm">
               {apiKeys.map((key) => (
                 <ApiKeyRow
-                  key={key.id}
                   apiKey={key}
-                  permissionOptions={permissionOptions}
-                  lastUsedLabel={lastUsedLabel(key.lastUsedAt)}
                   deleteAriaLabel={t("DeleteButton")}
+                  key={key.id}
+                  lastUsedLabel={lastUsedLabel(key.lastUsedAt)}
                   onDelete={() => handleDelete(key)}
-                  onLabelUpdated={(label) => {
-                    setApiKeys((prev) =>
-                      prev.map((item) => (item.id === key.id ? { ...item, label } : item)),
-                    );
-                  }}
+                  onLabelUpdated={() => {}}
+                  permissionOptions={permissionOptions}
                 />
               ))}
             </Stack>

@@ -1,33 +1,49 @@
 import { spawn } from "node:child_process";
-import { copyFileSync, readdirSync, watch } from "node:fs";
+import { copyFileSync, existsSync, mkdirSync, readdirSync, watch } from "node:fs";
 import { join } from "node:path";
 
-const srcDir = "src";
-const distDir = "dist";
+const srcLocales = join("src", "locales");
+const distLocales = join("dist", "locales");
 
-function copyJsonFiles() {
-  for (const file of readdirSync(srcDir)) {
-    if (file.endsWith(".json")) {
-      copyFileSync(join(srcDir, file), join(distDir, file));
+function copyRecursive(src, dest) {
+  if (!existsSync(src)) {
+    return;
+  }
+  mkdirSync(dest, { recursive: true });
+  for (const entry of readdirSync(src, { withFileTypes: true })) {
+    const srcPath = join(src, entry.name);
+    const destPath = join(dest, entry.name);
+    if (entry.isDirectory()) {
+      copyRecursive(srcPath, destPath);
+    } else if (entry.name.endsWith(".json")) {
+      copyFileSync(srcPath, destPath);
     }
   }
 }
 
-copyJsonFiles();
+function syncArtifacts() {
+  copyRecursive(srcLocales, distLocales);
+  if (existsSync("manifest.json")) {
+    mkdirSync("dist", { recursive: true });
+    copyFileSync("manifest.json", join("dist", "manifest.json"));
+  }
+}
 
-for (const file of readdirSync(srcDir)) {
-  if (!file.endsWith(".json")) continue;
+syncArtifacts();
 
-  watch(join(srcDir, file), (eventType) => {
+if (existsSync(srcLocales)) {
+  watch(srcLocales, { recursive: true }, (eventType) => {
     if (eventType === "change") {
-      copyJsonFiles();
+      syncArtifacts();
     }
   });
 }
 
+spawn("node", ["scripts/generate-resource-map.mjs"], { shell: true, stdio: "inherit" });
+
 const tsc = spawn("tsc", ["--watch", "--preserveWatchOutput"], {
-  stdio: "inherit",
   shell: true,
+  stdio: "inherit",
 });
 
 tsc.on("exit", (code) => {

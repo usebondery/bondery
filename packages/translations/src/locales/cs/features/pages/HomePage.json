@@ -1,0 +1,58 @@
+{
+  "AddInteraction": "Přidat interakci",
+  "AddPerson": "Přidat osobu",
+  "ExtensionNudge": {
+    "Description": "Importujte kontakty přímo z profilů LinkedIn a Instagramu a udržujte svou síť aktuální bez námahy.",
+    "InstallButton": "Nainstalovat rozšíření",
+    "Title": "Vylepšete Bondery naším Chrome rozšířením"
+  },
+  "HeaderDescription": "Na domovské stránce získáte rychlý přehled o síti kontaktů, připomínkách a posledních interakcích.",
+  "NoRecentlyAdded": "Zatím nebyli přidáni žádní lidé.",
+  "NoRecentlyInteracted": "Zatím žádné nedávné interakce.",
+  "NotificationInDays": "Za {count} dní",
+  "NotificationSent": "Již odesláno",
+  "NotificationToday": "Dnes",
+  "NotificationTomorrow": "Zítra",
+  "NotificationTooltipInDays": "Upozornění přijde za {count} dní",
+  "NotificationTooltipSentAt": "Upozornění už bylo odesláno {sentAt}",
+  "NotificationTooltipToday": "Upozornění přijde dnes",
+  "NotificationTooltipTomorrow": "Upozornění přijde zítra",
+  "NoUpcomingReminders": "Žádné připomínky v příštích 30 dnech.",
+  "ProgressRail": {
+    "AllDone": "Vše je připraveno!",
+    "AwaitingExport": "Váš export z {platform} je na cestě. Obvykle dorazí za 5–15 minut.",
+    "ChoosePlatform": "Vyberte platformu pro import",
+    "Dismiss": "Zavřít",
+    "HaveZipFile": "Mám soubor",
+    "Instagram": "Instagram",
+    "LinkedIn": "LinkedIn",
+    "Progress": "{completed} z {total} dokončeno",
+    "SkipImport": "Přeskočit import",
+    "Tasks": {
+      "AddContacts": "Přidejte první kontakty",
+      "ImportContacts": "Importujte kontakty",
+      "LogInteraction": "Zaznamenejte první interakci",
+      "SetReminder": "Nastavte připomínku"
+    },
+    "Title": "Začínáme"
+  },
+  "RecentlyAddedTitle": "Nedávno přidaní",
+  "RecentlyAddedTooltip": "5 naposledy přidaných lidí ve vaší síti.",
+  "RecentlyInteractedTitle": "Nedávno v kontaktu",
+  "RecentlyInteractedTooltip": "5 lidí, se kterými jste naposledy komunikovali.",
+  "Stats": {
+    "InteractionsTitle": "Interakce tento měsíc",
+    "InteractionsTooltip": "Počet interakcí, které jste uskutečnili v měsíci {month}.",
+    "NewContactsTitle": "Nové kontakty letos",
+    "NewContactsTooltip": "Kolik lidí bylo přidáno do vaší sítě v aktuálním roce ({year}).",
+    "TotalContactsTitle": "Celkem kontaktů",
+    "TotalContactsTooltip": "Počet lidí ve vaší síti na Bondery."
+  },
+  "TimelinePreviewTitle": "Interakce",
+  "TimelinePreviewTooltip": "Posledních 5 interakcí. Kliknutím zobrazíte všechny interakce.",
+  "Title": "Domů",
+  "UnknownPerson": "Neznámá osoba",
+  "UpcomingRemindersMonthInfo": "Zobrazuji připomínky, jejichž upozornění je splatné v příštích 30 dnech.",
+  "UpcomingRemindersTitle": "Nadcházející připomínky",
+  "UpcomingRemindersTooltip": "Nadcházející připomínky splatné v příštích 30 dnech."
+}

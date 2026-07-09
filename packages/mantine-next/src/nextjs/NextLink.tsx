@@ -1,5 +1,5 @@
-import type { ComponentType, ReactNode } from "react";
 import NextLink from "next/link.js";
+import type { ComponentType, ReactNode } from "react";
 
 export type NextLinkComponentProps = {
   href: string;

@@ -13,7 +13,9 @@ export function buildGroupSelectionMemberPersonIds(
 ): string[] {
   if (state.isAllTotalSelected) {
     const excluded = new Set(state.getExcludedIds());
-    return loadedContacts.filter((contact) => !excluded.has(contact.id)).map((contact) => contact.id);
+    return loadedContacts
+      .filter((contact) => !excluded.has(contact.id))
+      .map((contact) => contact.id);
   }
 
   return state.getSelectedContactIds();

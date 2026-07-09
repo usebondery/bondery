@@ -1,18 +1,18 @@
 "use client";
 
+import { PersonAvatar } from "@bondery/mantine-next";
+import type { ImportantDateType, UpcomingReminder } from "@bondery/schemas";
 import { Badge, Card, Divider, Group, Stack, Text, Tooltip } from "@mantine/core";
 import { IconBell, IconCircleCheck } from "@tabler/icons-react";
-import { IMPORTANT_DATE_TYPE_OPTIONS } from "@/lib/config";
-import type { ImportantDateType, UpcomingReminder } from "@bondery/schemas";
-import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
 import { useCurrentLocale as useLocale } from "@/app/(app)/app/components/UserLocaleProvider";
-import { PersonAvatar } from "@bondery/mantine-next";
+import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
+import { IMPORTANT_DATE_TYPE_OPTIONS } from "@/lib/platform/config";
 
 const DAY_IN_MS = 24 * 60 * 60 * 1000;
 
 interface UpcomingReminderCardProps {
-  reminder: UpcomingReminder;
   onClick: () => void;
+  reminder: UpcomingReminder;
 }
 
 function parseDateOnly(value: string | null): Date | null {
@@ -100,8 +100,8 @@ function getDateEmoji(type: ImportantDateType): string {
  */
 export function UpcomingReminderCard({ reminder, onClick }: UpcomingReminderCardProps) {
   const locale = useLocale();
-  const t = useTranslations("HomePage");
-  const dateT = useTranslations("ContactImportantDates");
+  const t = useWebTranslations("HomePage");
+  const dateT = useWebTranslations("ContactImportantDates");
   const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
   const importantDate = parseDateOnly(reminder.importantDate.date) ?? getTodayUtc();
@@ -150,20 +150,20 @@ export function UpcomingReminderCard({ reminder, onClick }: UpcomingReminderCard
 
   return (
     <Card
-      withBorder
-      shadow="none"
-      radius="md"
-      p={0}
+      aria-label={`${dateTypeLabel}, ${personName || t("UnknownPerson")}, ${notificationAriaLabel}`}
       component="button"
       onClick={onClick}
-      style={{ cursor: "pointer", width: "100%", textAlign: "left" }}
-      aria-label={`${dateTypeLabel}, ${personName || t("UnknownPerson")}, ${notificationAriaLabel}`}
+      p={0}
+      radius="md"
+      shadow="none"
+      style={{ cursor: "pointer", textAlign: "left", width: "100%" }}
+      withBorder
     >
       {/* Main row: date | divider | avatar | date info | notification */}
-      <Group wrap="nowrap" gap={"0"} align="stretch">
+      <Group align="stretch" gap={"0"} wrap="nowrap">
         {/* Date rail */}
-        <Stack gap={0} align="center" justify="center" px="md" py="xs" miw={60}>
-          <Text fw={700} size="xs" c="var(--mantine-primary-color-filled)" lh={1.3}>
+        <Stack align="center" gap={0} justify="center" miw={60} px="md" py="xs">
+          <Text c="var(--mantine-primary-color-filled)" fw={700} lh={1.3} size="xs">
             {dateMonth}
           </Text>
           <Text fw={700} fz={24} lh={1}>
@@ -171,26 +171,26 @@ export function UpcomingReminderCard({ reminder, onClick }: UpcomingReminderCard
           </Text>
         </Stack>
 
-        <Divider orientation="vertical" my="xs" />
+        <Divider my="xs" orientation="vertical" />
 
         {/* Avatar */}
-        <Group wrap="nowrap" align="center" px="md" style={{ flexShrink: 0 }}>
+        <Group align="center" px="md" style={{ flexShrink: 0 }} wrap="nowrap">
           <PersonAvatar person={reminder.person} size="md" />
         </Group>
 
         {/* Date content */}
         <Stack gap={2} justify="center" py="xs" style={{ flex: "1 1 0", minWidth: 0 }}>
-          <Group gap="xs" wrap="nowrap" align="center">
-            <Text fz={18} lh={1} aria-hidden>
+          <Group align="center" gap="xs" wrap="nowrap">
+            <Text aria-hidden fz={18} lh={1}>
               {dateEmoji}
             </Text>
-            <Text fw={600} size="md" lh={1.3} truncate>
+            <Text fw={600} lh={1.3} size="md" truncate>
               {dateTypeLabel}
             </Text>
           </Group>
 
           {reminder.importantDate.note ? (
-            <Text size="sm" c="dimmed" lineClamp={1}>
+            <Text c="dimmed" lineClamp={1} size="sm">
               {reminder.importantDate.note}
             </Text>
           ) : null}
@@ -198,31 +198,25 @@ export function UpcomingReminderCard({ reminder, onClick }: UpcomingReminderCard
 
         {/* Notification */}
         <Group
-          wrap="nowrap"
           align="center"
           px="md"
           py="xs"
           style={{ flexShrink: 0, marginLeft: "auto" }}
+          wrap="nowrap"
         >
           <Tooltip label={notificationTooltip} position="left" withArrow>
             <Badge
               color={notificationColor}
-              variant="light"
-              radius="xl"
-              size="md"
               leftSection={
                 isNotificationSent ? (
-                  <IconCircleCheck size={14} aria-hidden />
+                  <IconCircleCheck aria-hidden size={14} />
                 ) : (
-                  <IconBell size={14} aria-hidden />
+                  <IconBell aria-hidden size={14} />
                 )
               }
-              styles={{
-                label: {
-                  textTransform: "none",
-                  fontWeight: 500,
-                },
-              }}
+              radius="xl"
+              size="md"
+              variant="light"
             >
               {notificationLabel}
             </Badge>

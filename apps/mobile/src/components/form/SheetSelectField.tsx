@@ -1,4 +1,4 @@
-import { Controller, type Control, type FieldPath, type FieldValues } from "react-hook-form";
+import { type Control, Controller, type FieldPath, type FieldValues } from "react-hook-form";
 import type { StyleProp, ViewStyle } from "react-native";
 import {
   SettingsSelect,
@@ -30,10 +30,10 @@ export function SheetSelectField<TFieldValues extends FieldValues, TValue extend
       render={({ field }) => (
         <SettingsSelect
           {...props}
-          value={field.value as TValue}
           onValueChange={(value) => {
             field.onChange(value);
           }}
+          value={field.value as TValue}
         />
       )}
     />

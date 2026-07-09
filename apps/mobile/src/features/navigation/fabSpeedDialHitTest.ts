@@ -28,11 +28,5 @@ export function resolveFabHighlightedActionId(
   x: number,
   y: number,
 ): string | null {
-  return resolveFabActionAtPoint(
-    layouts,
-    x,
-    y,
-    MOBILE_HIT_SLOP.nav,
-    FAB_GESTURE.itemBridgePx,
-  );
+  return resolveFabActionAtPoint(layouts, x, y, MOBILE_HIT_SLOP.nav, FAB_GESTURE.itemBridgePx);
 }

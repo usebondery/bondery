@@ -14,14 +14,14 @@ export function ContactsScreenHeader({ accessory }: ContactsScreenHeaderProps) {
 
   return (
     <TabRootScreenHeader
+      accessory={accessory}
       titleRow={
         selectionMode ? (
           <ContactsSelectionHeader />
         ) : (
-          <TabRootLargeTitle>{t("MobileApp.Contacts.Title")}</TabRootLargeTitle>
+          <TabRootLargeTitle>{t("Title", { ns: "MobileContacts" })}</TabRootLargeTitle>
         )
       }
-      accessory={accessory}
     />
   );
 }

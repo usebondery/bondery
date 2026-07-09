@@ -1,44 +1,44 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { getUserFacingError } from "@bondery/helpers/api";
 import {
-  Stack,
-  TextInput,
-  Group,
-  Text,
-  Center,
-  Loader,
-  ColorInput,
-  DEFAULT_THEME,
-  Box,
-} from "@mantine/core";
-import { useForm, schemaResolver } from "@mantine/form";
-import { createGroupSchema } from "@bondery/schemas";
-import { modals } from "@mantine/modals";
-import { notifications } from "@mantine/notifications";
-import { IconUsersGroup } from "@tabler/icons-react";
-import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
-import {
-  PeopleMultiPickerInput,
   EmojiPicker,
   errorNotificationTemplate,
   getRandomEmoji,
   loadingNotificationTemplate,
   ModalFooter,
   ModalTitle,
+  PeopleMultiPickerInput,
   successNotificationTemplate,
 } from "@bondery/mantine-next";
-import { flushSync } from "react-dom";
 import type { Contact, GroupWithCount } from "@bondery/schemas";
-import { DEBOUNCE_MS } from "@/lib/config";
-import { searchContacts } from "@/lib/searchContacts";
+import { createGroupSchema } from "@bondery/schemas";
+import {
+  Box,
+  Center,
+  ColorInput,
+  DEFAULT_THEME,
+  Group,
+  Loader,
+  Stack,
+  Text,
+  TextInput,
+} from "@mantine/core";
+import { schemaResolver, useForm } from "@mantine/form";
+import { modals } from "@mantine/modals";
+import { notifications } from "@mantine/notifications";
+import { IconUsersGroup } from "@tabler/icons-react";
+import { useEffect, useState } from "react";
 import { captureEvent } from "@/lib/analytics/client";
+import { searchContacts } from "@/lib/contacts/searchContacts";
+import { useCommonTranslations, useWebTranslations } from "@/lib/i18n/useWebTranslations";
+import { createModalId, useModalDismiss } from "@/lib/modals";
+import { DEBOUNCE_MS } from "@/lib/platform/config";
 import { useContactsListQuery } from "@/lib/query/hooks/useContacts";
 import {
   useAddContactsToGroupByIdMutation,
   useCreateGroupMutation,
 } from "@/lib/query/hooks/useGroups";
-import { createModalId, useModalBlocking } from "@/lib/modals";
 
 // Predefined color swatches
 const COLOR_SWATCHES = [
@@ -62,39 +62,39 @@ function getRandomColor(): string {
 }
 
 interface OpenAddGroupModalOptions {
-  initialSelectedIds?: string[];
   initialLabel?: string;
+  initialSelectedIds?: string[];
   onCreated?: (group: GroupWithCount) => void;
 }
 
 function AddGroupModalTitle() {
-  const t = useTranslations("GroupsPage");
-  return <ModalTitle text={t("AddGroupModal.Title")} icon={<IconUsersGroup size={24} />} />;
+  const t = useWebTranslations("GroupsPage");
+  return <ModalTitle icon={<IconUsersGroup size={24} />} text={t("AddGroupModal.Title")} />;
 }
 
 export function openAddGroupModal(options: OpenAddGroupModalOptions = {}) {
   const modalId = createModalId("add-group");
 
   modals.open({
-    modalId,
-    title: <AddGroupModalTitle />,
-    trapFocus: true,
-    size: "md",
     children: (
       <AddGroupForm
-        modalId={modalId}
-        initialSelectedIds={options.initialSelectedIds}
         initialLabel={options.initialLabel}
+        initialSelectedIds={options.initialSelectedIds}
+        modalId={modalId}
         onCreated={options.onCreated}
       />
     ),
+    modalId,
+    size: "md",
+    title: <AddGroupModalTitle />,
+    trapFocus: true,
   });
 }
 
 interface AddGroupFormProps {
-  modalId: string;
-  initialSelectedIds?: string[];
   initialLabel?: string;
+  initialSelectedIds?: string[];
+  modalId: string;
   onCreated?: (group: GroupWithCount) => void;
 }
 
@@ -104,11 +104,15 @@ function AddGroupForm({
   initialLabel = "",
   onCreated,
 }: AddGroupFormProps) {
-  const t = useTranslations("GroupsPage");
+  const tCommon = useCommonTranslations();
+  const t = useWebTranslations("GroupsPage");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedIds, setSelectedIds] = useState<string[]>(initialSelectedIds);
-  const { data: contactsData, isLoading: isLoadingContacts, isError: isContactsError } =
-    useContactsListQuery({ limit: 200 });
+  const {
+    data: contactsData,
+    isLoading: isLoadingContacts,
+    isError: isContactsError,
+  } = useContactsListQuery({ limit: 200 });
   const createGroupMutation = useCreateGroupMutation();
   const addContactsMutation = useAddContactsToGroupByIdMutation();
   const contacts = contactsData?.contacts ?? [];
@@ -117,23 +121,23 @@ function AddGroupForm({
     if (isContactsError) {
       notifications.show(
         errorNotificationTemplate({
-          title: t("AddGroupModal.ErrorTitle"),
           description: t("AddGroupModal.LoadContactsError"),
+          title: t("AddGroupModal.ErrorTitle"),
         }),
       );
     }
   }, [isContactsError, t]);
 
   const isBlocking = isSubmitting || isLoadingContacts;
-  useModalBlocking(modalId, isBlocking);
+  const { closeModal, closeModalSync } = useModalDismiss(modalId, isBlocking);
 
   const form = useForm({
-    mode: "controlled",
     initialValues: {
-      label: initialLabel,
-      emoji: getRandomEmoji(),
       color: getRandomColor(),
+      emoji: getRandomEmoji(),
+      label: initialLabel,
     },
+    mode: "controlled",
     validate: schemaResolver(createGroupSchema, { sync: true }),
   });
 
@@ -142,16 +146,16 @@ function AddGroupForm({
 
     const loadingNotification = notifications.show({
       ...loadingNotificationTemplate({
-        title: t("AddGroupModal.LoadingTitle"),
         description: t("AddGroupModal.LoadingDescription"),
+        title: t("AddGroupModal.LoadingTitle"),
       }),
     });
 
     try {
       const createdGroupData = await createGroupMutation.mutateAsync({
-        label: values.label.trim(),
-        emoji: values.emoji.trim(),
         color: values.color.trim(),
+        emoji: values.emoji.trim(),
+        label: values.label.trim(),
       });
 
       const groupId = createdGroupData.group?.id;
@@ -160,7 +164,7 @@ function AddGroupForm({
       }
 
       if (selectedIds.length > 0) {
-        await addContactsMutation.mutateAsync({ groupId, contactIds: selectedIds });
+        await addContactsMutation.mutateAsync({ contactIds: selectedIds, groupId });
       }
 
       captureEvent("group_created");
@@ -169,35 +173,35 @@ function AddGroupForm({
 
       notifications.show(
         successNotificationTemplate({
-          title: t("AddGroupModal.SuccessTitle"),
           description: t("AddGroupModal.SuccessDescription"),
+          title: t("AddGroupModal.SuccessTitle"),
         }),
       );
 
       if (onCreated) {
         const newGroup: GroupWithCount = {
-          id: groupId,
-          userId: "",
-          label: values.label.trim(),
-          emoji: values.emoji.trim(),
           color: values.color.trim(),
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
           contactCount: selectedIds.length,
+          createdAt: new Date().toISOString(),
+          emoji: values.emoji.trim(),
+          id: groupId,
+          label: values.label.trim(),
           previewContacts: [],
+          updatedAt: new Date().toISOString(),
+          userId: "",
         };
-        flushSync(() => modals.close(modalId));
+        closeModalSync();
         onCreated(newGroup);
       } else {
-        modals.close(modalId);
+        closeModal();
       }
     } catch (error) {
       notifications.hide(loadingNotification);
 
       notifications.show(
         errorNotificationTemplate({
+          description: getUserFacingError(error, tCommon),
           title: t("AddGroupModal.ErrorTitle"),
-          description: error instanceof Error ? error.message : t("AddGroupModal.CreateFailed"),
         }),
       );
     } finally {
@@ -211,37 +215,37 @@ function AddGroupForm({
         <Group align="flex-start" gap="md">
           <Box style={{ width: 80 }}>
             <EmojiPicker
-              value={form.values.emoji}
-              onChange={(emoji) => form.setFieldValue("emoji", emoji)}
               error={form.errors.emoji as string | undefined}
+              onChange={(emoji) => form.setFieldValue("emoji", emoji)}
               searchDebounceMs={DEBOUNCE_MS.localFilter}
+              value={form.values.emoji}
             />
           </Box>
           <Box style={{ flex: 1 }}>
             <TextInput
+              data-autofocus
               label={t("AddGroupModal.LabelInput")}
               placeholder={t("AddGroupModal.LabelPlaceholder")}
-              withAsterisk
               required
-              data-autofocus
+              withAsterisk
               {...form.getInputProps("label")}
             />
           </Box>
         </Group>
 
         <ColorInput
+          closeOnColorSwatchClick
+          format="hex"
           label={t("AddGroupModal.ColorInput")}
           placeholder={t("AddGroupModal.ColorPlaceholder")}
-          withAsterisk
-          format="hex"
           swatches={COLOR_SWATCHES}
           swatchesPerRow={9}
-          closeOnColorSwatchClick
+          withAsterisk
           {...form.getInputProps("color")}
         />
 
         <Stack gap="xs">
-          <Text size="sm" fw={500}>
+          <Text fw={500} size="sm">
             {t("AddGroupModal.AddPeople")}
           </Text>
 
@@ -256,26 +260,26 @@ function AddGroupForm({
           ) : (
             <PeopleMultiPickerInput
               contacts={contacts as Contact[]}
-              selectedIds={selectedIds}
-              onChange={setSelectedIds}
-              placeholder={t("AddGroupModal.AddContactsPlaceholder")}
-              noResultsLabel={t("AddGroupModal.NoContactsFound")}
-              onSearch={searchContacts}
-              searchDebounceMs={DEBOUNCE_MS.contactPicker}
               disabled={isSubmitting}
+              noResultsLabel={t("AddGroupModal.NoContactsFound")}
+              onChange={setSelectedIds}
+              onSearch={searchContacts}
+              placeholder={t("AddGroupModal.AddContactsPlaceholder")}
+              searchDebounceMs={DEBOUNCE_MS.contactPicker}
+              selectedIds={selectedIds}
             />
           )}
         </Stack>
 
         <ModalFooter
-          cancelLabel={t("AddGroupModal.Cancel")}
-          onCancel={() => modals.close(modalId)}
-          cancelDisabled={isSubmitting}
-          actionLabel={t("AddGroupModal.CreateGroup")}
-          actionType="submit"
-          actionLoading={isSubmitting}
           actionDisabled={isSubmitting}
+          actionLabel={t("AddGroupModal.CreateGroup")}
           actionLeftSection={<IconUsersGroup size={16} />}
+          actionLoading={isSubmitting}
+          actionType="submit"
+          cancelDisabled={isSubmitting}
+          cancelLabel={t("AddGroupModal.Cancel")}
+          onCancel={closeModal}
         />
       </Stack>
     </form>

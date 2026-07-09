@@ -1,18 +1,18 @@
-import { StyleSheet, Text, View } from "react-native";
 import type { Group } from "@bondery/schemas";
+import { StyleSheet, Text, View } from "react-native";
 import { Tappable } from "../../../theme/Tappable";
-import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
 import { MOBILE_TYPOGRAPHY } from "../../../theme/tokens";
+import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
 
 export type GroupChipGroup = Pick<Group, "id" | "label" | "emoji" | "color"> & {
   contactCount: number;
 };
 
 interface GroupChipProps {
-  group: GroupChipGroup;
-  onPress?: () => void;
   accessibilityLabel?: string;
+  group: GroupChipGroup;
   isClickable?: boolean;
+  onPress?: () => void;
 }
 
 export function GroupChip({
@@ -45,7 +45,7 @@ export function GroupChip({
 
   if (!isClickable) {
     return (
-      <View accessibilityRole="text" accessibilityLabel={label} style={chipStyle}>
+      <View accessibilityLabel={label} accessibilityRole="text" style={chipStyle}>
         {content}
       </View>
     );
@@ -53,11 +53,11 @@ export function GroupChip({
 
   return (
     <Tappable
-      variant="subtle"
-      accessibilityRole="button"
       accessibilityLabel={label}
+      accessibilityRole="button"
       onPress={onPress}
       style={chipStyle}
+      variant="subtle"
     >
       {content}
     </Tappable>
@@ -66,13 +66,22 @@ export function GroupChip({
 
 const styles = StyleSheet.create({
   groupChip: {
-    flexDirection: "row",
     alignItems: "center",
+    borderRadius: 20,
+    borderWidth: 1,
+    flexDirection: "row",
     gap: 6,
     paddingHorizontal: 12,
     paddingVertical: 8,
-    borderRadius: 20,
-    borderWidth: 1,
+  },
+  groupCount: {
+    fontSize: MOBILE_TYPOGRAPHY.fontSize.sectionLabel,
+    fontWeight: MOBILE_TYPOGRAPHY.fontWeight.bold,
+  },
+  groupCountBadge: {
+    borderRadius: 10,
+    paddingHorizontal: 6,
+    paddingVertical: 1,
   },
   groupEmoji: {
     fontSize: 16,
@@ -80,14 +89,5 @@ const styles = StyleSheet.create({
   groupLabel: {
     fontSize: MOBILE_TYPOGRAPHY.fontSize.body,
     fontWeight: MOBILE_TYPOGRAPHY.fontWeight.semibold,
-  },
-  groupCountBadge: {
-    borderRadius: 10,
-    paddingHorizontal: 6,
-    paddingVertical: 1,
-  },
-  groupCount: {
-    fontSize: MOBILE_TYPOGRAPHY.fontSize.sectionLabel,
-    fontWeight: MOBILE_TYPOGRAPHY.fontWeight.bold,
   },
 });

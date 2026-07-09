@@ -1,15 +1,15 @@
-import { useMobileTranslations } from "../../../lib/i18n/useMobileTranslations";
+import { IconMailForward, IconShare, IconTrash } from "@tabler/icons-react-native";
 import { OverflowMenu } from "../../../components/OverflowMenu";
 import type { OverflowMenuItemConfig } from "../../../components/OverflowMenuItem";
-import { IconMailForward, IconShare, IconTrash } from "@tabler/icons-react-native";
+import { useMobileTranslations } from "../../../lib/i18n/useMobileTranslations";
 import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
 
 interface ContactDetailOverflowMenuProps {
-  isMyselfMode: boolean;
   isBusy?: boolean;
+  isMyselfMode: boolean;
+  onDelete: () => void;
   onShare: () => void;
   onShareViaEmail: () => void;
-  onDelete: () => void;
 }
 
 export function ContactDetailOverflowMenu({
@@ -24,34 +24,28 @@ export function ContactDetailOverflowMenu({
 
   const items: OverflowMenuItemConfig[] = [
     {
-      id: "share",
       icon: <IconShare size={18} stroke={colors.iconPrimary} />,
-      label: t("MobileApp.ContactDetail.ShareContact"),
+      id: "share",
+      label: t("ShareContact", { ns: "MobileContactDetail" }),
       onPress: onShare,
     },
     {
-      id: "share-email",
       icon: <IconMailForward size={18} stroke={colors.iconPrimary} />,
-      label: t("MobileApp.ContactDetail.ShareContactViaEmail"),
+      id: "share-email",
+      label: t("ShareContactViaEmail", { ns: "MobileContactDetail" }),
       onPress: onShareViaEmail,
     },
   ];
 
   if (!isMyselfMode) {
     items.push({
-      id: "delete",
       icon: <IconTrash size={18} stroke={colors.dangerAccent} />,
-      label: t("MobileApp.ContactDetail.DeleteContact"),
-      tone: "danger",
+      id: "delete",
+      label: t("DeleteContact", { ns: "MobileContactDetail" }),
       onPress: onDelete,
+      tone: "danger",
     });
   }
 
-  return (
-    <OverflowMenu
-      items={items}
-      accessibilityLabel="Contact actions"
-      disabled={isBusy}
-    />
-  );
+  return <OverflowMenu accessibilityLabel="Contact actions" disabled={isBusy} items={items} />;
 }

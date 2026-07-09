@@ -10,8 +10,8 @@ interface FabSpeedDialMenuItemProps {
   action: FabSpeedDialAction;
   isHighlighted: boolean;
   isLast: boolean;
-  onPress: () => void;
   onLayoutMeasured: (layout: FabSpeedDialMenuItemLayout) => void;
+  onPress: () => void;
 }
 
 export function FabSpeedDialMenuItem({
@@ -24,23 +24,22 @@ export function FabSpeedDialMenuItem({
   const t = useMobileTranslations();
   const colors = useMobileThemeColors();
   const Icon = action.icon;
-  const label = t(action.labelKey);
+  const label = t(action.labelKey, { ns: action.labelNamespace ?? "MobileNavigation" });
   const containerRef = useRef<View>(null);
 
   const reportLayout = useCallback(() => {
     containerRef.current?.measureInWindow((x, y, width, height) => {
-      onLayoutMeasured({ id: action.id, x, y, width, height });
+      onLayoutMeasured({ height, id: action.id, width, x, y });
     });
   }, [action.id, onLayoutMeasured]);
 
   return (
-    <View ref={containerRef} collapsable={false} onLayout={reportLayout}>
+    <View collapsable={false} onLayout={reportLayout} ref={containerRef}>
       <Tappable
-        onPress={onPress}
-        accessibilityRole="button"
         accessibilityLabel={label}
-        testID={action.testID}
-        variant="default"
+        accessibilityRole="button"
+        onPress={onPress}
+        pressStyle={{ opacity: 0.9 }}
         style={[
           styles.row,
           {
@@ -49,10 +48,11 @@ export function FabSpeedDialMenuItem({
             borderBottomWidth: isLast ? 0 : StyleSheet.hairlineWidth,
           },
         ]}
-        pressStyle={{ opacity: 0.9 }}
+        testID={action.testID}
+        variant="default"
       >
         <Icon size={18} stroke={colors.primary} />
-        <Text style={[styles.label, { color: colors.textPrimary }]} numberOfLines={1}>
+        <Text numberOfLines={1} style={[styles.label, { color: colors.textPrimary }]}>
           {label}
         </Text>
       </Tappable>
@@ -61,17 +61,17 @@ export function FabSpeedDialMenuItem({
 }
 
 const styles = StyleSheet.create({
-  row: {
-    minHeight: MOBILE_LAYOUT.touchTarget,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    paddingHorizontal: 14,
-  },
   label: {
-    fontWeight: MOBILE_TYPOGRAPHY.fontWeight.bold,
-    fontSize: MOBILE_TYPOGRAPHY.fontSize.menuAction,
     flexShrink: 1,
+    fontSize: MOBILE_TYPOGRAPHY.fontSize.menuAction,
+    fontWeight: MOBILE_TYPOGRAPHY.fontWeight.bold,
+  },
+  row: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 8,
+    minHeight: MOBILE_LAYOUT.touchTarget,
+    paddingHorizontal: 14,
   },
 });
 

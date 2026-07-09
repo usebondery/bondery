@@ -1,10 +1,10 @@
-import { combinePhoneNumber } from "#phone/index.js";
 import { SOCIAL_PLATFORM_URL_DETAILS } from "#globals/social-platform-urls.js";
+import { combinePhoneNumber } from "#phone/index.js";
 import { normalizeWebsiteUrl } from "#socials/normalize-website-url.js";
 
 export interface SocialPlatformConfig {
-  name: string;
   baseUrl: string;
+  name: string;
   urlPattern: RegExp;
 }
 
@@ -13,33 +13,33 @@ function escapeRegexValue(value: string): string {
 }
 
 export const socialPlatforms: Record<string, SocialPlatformConfig> = {
-  linkedin: {
-    name: "LinkedIn",
-    baseUrl: SOCIAL_PLATFORM_URL_DETAILS.linkedin.profileBaseUrl,
-    urlPattern: new RegExp(
-      `(?:https?:\\/\\/)?(?:www\\.)?${escapeRegexValue(SOCIAL_PLATFORM_URL_DETAILS.linkedin.domain)}\\/in\\/([^\\/\\?]+)`,
-      "i",
-    ),
-  },
-  instagram: {
-    name: "Instagram",
-    baseUrl: SOCIAL_PLATFORM_URL_DETAILS.instagram.profileBaseUrl,
-    urlPattern: new RegExp(
-      `(?:https?:\\/\\/)?(?:www\\.)?${escapeRegexValue(SOCIAL_PLATFORM_URL_DETAILS.instagram.domain)}\\/([^\\/\\?]+)`,
-      "i",
-    ),
-  },
   facebook: {
-    name: "Facebook",
     baseUrl: SOCIAL_PLATFORM_URL_DETAILS.facebook.profileBaseUrl,
+    name: "Facebook",
     urlPattern: new RegExp(
       `(?:https?:\\/\\/)?(?:www\\.)?${escapeRegexValue(SOCIAL_PLATFORM_URL_DETAILS.facebook.domain)}\\/([^\\/\\?]+)`,
       "i",
     ),
   },
+  instagram: {
+    baseUrl: SOCIAL_PLATFORM_URL_DETAILS.instagram.profileBaseUrl,
+    name: "Instagram",
+    urlPattern: new RegExp(
+      `(?:https?:\\/\\/)?(?:www\\.)?${escapeRegexValue(SOCIAL_PLATFORM_URL_DETAILS.instagram.domain)}\\/([^\\/\\?]+)`,
+      "i",
+    ),
+  },
+  linkedin: {
+    baseUrl: SOCIAL_PLATFORM_URL_DETAILS.linkedin.profileBaseUrl,
+    name: "LinkedIn",
+    urlPattern: new RegExp(
+      `(?:https?:\\/\\/)?(?:www\\.)?${escapeRegexValue(SOCIAL_PLATFORM_URL_DETAILS.linkedin.domain)}\\/in\\/([^\\/\\?]+)`,
+      "i",
+    ),
+  },
   whatsapp: {
-    name: "WhatsApp",
     baseUrl: SOCIAL_PLATFORM_URL_DETAILS.whatsapp.deepLinkBaseUrl,
+    name: "WhatsApp",
     urlPattern: /(?:https?:\/\/)?(?:wa\.me|api\.whatsapp\.com\/send\?phone=)\/?([\d]+)/i,
   },
 };
@@ -65,13 +65,17 @@ export const CONTACT_SOCIAL_FIELD_KEYS = [
  * Extracts username from a social media URL.
  */
 export function extractUsername(platform: string, input: string): string {
-  if (!input) return "";
+  if (!input) {
+    return "";
+  }
 
   const platformConfig = socialPlatforms[platform];
-  if (!platformConfig) return input.trim();
+  if (!platformConfig) {
+    return input.trim();
+  }
 
   const match = input.match(platformConfig.urlPattern);
-  if (match && match[1]) {
+  if (match?.[1]) {
     return match[1];
   }
 
@@ -82,7 +86,9 @@ export function extractUsername(platform: string, input: string): string {
  * Creates a full URL from a stored social handle.
  */
 export function createSocialUrl(platform: string, username: string): string {
-  if (!username) return "";
+  if (!username) {
+    return "";
+  }
 
   if (platform === "website") {
     if (username.startsWith("http://") || username.startsWith("https://")) {
@@ -98,7 +104,9 @@ export function createSocialUrl(platform: string, username: string): string {
   }
 
   const platformConfig = socialPlatforms[platform];
-  if (!platformConfig) return username;
+  if (!platformConfig) {
+    return username;
+  }
 
   if (username.startsWith("http://") || username.startsWith("https://")) {
     return username;
@@ -123,7 +131,9 @@ export function formatWhatsAppNumber(phone: string): string {
  */
 export function normalizePhoneSocialValue(platform: "whatsapp" | "signal", input: string): string {
   const trimmed = input.trim();
-  if (!trimmed) return "";
+  if (!trimmed) {
+    return "";
+  }
 
   if (platform === "whatsapp") {
     const fromUrl = extractUsername("whatsapp", trimmed);
@@ -142,8 +152,8 @@ export function normalizePhoneSocialValue(platform: "whatsapp" | "signal", input
 }
 
 export interface ProcessContactSocialFieldResult {
-  value: string;
   error?: string;
+  value: string;
 }
 
 export type ContactSocialFieldCommitErrorCode = "invalid_website";
@@ -220,7 +230,7 @@ export function processContactSocialFieldValue(
     const normalizedWebsite = normalizeWebsiteUrl(inputValue);
 
     if (normalizedWebsite === null) {
-      return { value: "", error: "invalid_website" };
+      return { error: "invalid_website", value: "" };
     }
 
     return { value: normalizedWebsite };

@@ -1,0 +1,10 @@
+{
+  "CreateFailed": "Štítek se nepodařilo vytvořit. Zkuste to znovu.",
+  "CreateTag": "Vytvořit štítek",
+  "DeleteFailed": "Štítek se nepodařilo smazat. Zkuste to znovu.",
+  "EditFailed": "Štítek se nepodařilo uložit. Zkuste to znovu.",
+  "EditTagsSearchPlaceholder": "Hledat štítky...",
+  "LoadFailed": "Štítky se nepodařilo načíst",
+  "NoTagsYet": "Zatím žádné štítky",
+  "NoTagsYetHint": "Štítky vám pomohou organizovat a vyhledávat kontakty."
+}

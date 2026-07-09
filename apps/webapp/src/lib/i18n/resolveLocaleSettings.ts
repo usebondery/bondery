@@ -1,19 +1,19 @@
+import { DEFAULT_LOCALE, type SupportedLocale } from "@bondery/translations";
 import { cache } from "react";
 import { getAppBootstrap } from "@/lib/app/getAppBootstrap";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { getLocaleFromHeaders } from "./getLocaleFromHeaders";
-import type { SupportedLocale } from "@bondery/translations";
 
 export interface LocaleSettings {
   locale: SupportedLocale;
-  timezone: string;
   timeFormat: "24h" | "12h";
+  timezone: string;
 }
 
 const FALLBACK: LocaleSettings = {
-  locale: "en",
-  timezone: "UTC",
+  locale: DEFAULT_LOCALE,
   timeFormat: "24h",
+  timezone: "UTC",
 };
 
 /**
@@ -38,7 +38,7 @@ export const resolveLocaleSettings = cache(async (): Promise<LocaleSettings> => 
 
     if (!session) {
       const locale = await getLocaleFromHeaders();
-      return { locale, timezone: "UTC", timeFormat: "24h" };
+      return { locale, timeFormat: "24h", timezone: "UTC" };
     }
 
     const bootstrap = await getAppBootstrap();
@@ -48,8 +48,8 @@ export const resolveLocaleSettings = cache(async (): Promise<LocaleSettings> => 
 
     return {
       locale: bootstrap.settings.locale,
-      timezone: bootstrap.settings.timezone,
       timeFormat: bootstrap.settings.timeFormat,
+      timezone: bootstrap.settings.timezone,
     };
   } catch {
     return FALLBACK;

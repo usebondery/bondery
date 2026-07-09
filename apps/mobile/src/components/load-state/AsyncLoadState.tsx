@@ -5,12 +5,12 @@ import { useMobileThemeColors } from "../../theme/useMobileThemeColors";
 import { LoadErrorCard } from "./LoadErrorCard";
 
 export interface AsyncLoadStateProps {
-  isLoading: boolean;
-  errorTitle?: string | null;
-  errorDescription?: string | null;
-  onRetry?: () => void;
   children: ReactNode;
+  errorDescription?: string | null;
+  errorTitle?: string | null;
+  isLoading: boolean;
   loadingMinHeight?: number;
+  onRetry?: () => void;
 }
 
 export function AsyncLoadState({
@@ -23,24 +23,20 @@ export function AsyncLoadState({
 }: AsyncLoadStateProps) {
   const t = useMobileTranslations();
   const colors = useMobileThemeColors();
-  const resolvedErrorTitle = errorTitle ?? t("MobileApp.Settings.LoadErrorTitle");
+  const resolvedErrorTitle = errorTitle ?? t("LoadErrorTitle", { ns: "MobileSettings" });
   const hasError = Boolean(errorDescription);
 
   if (isLoading) {
     return (
       <View style={[styles.centered, { minHeight: loadingMinHeight }]}>
-        <ActivityIndicator size="small" color={colors.primary} />
+        <ActivityIndicator color={colors.primary} size="small" />
       </View>
     );
   }
 
-  if (hasError) {
+  if (hasError && errorDescription) {
     return (
-      <LoadErrorCard
-        title={resolvedErrorTitle}
-        description={errorDescription!}
-        onRetry={onRetry}
-      />
+      <LoadErrorCard description={errorDescription} onRetry={onRetry} title={resolvedErrorTitle} />
     );
   }
 

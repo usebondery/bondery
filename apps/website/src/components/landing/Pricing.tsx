@@ -1,12 +1,12 @@
-import { Container, Group, Text, Title, Stack } from "@mantine/core";
 import { ButtonLink } from "@bondery/mantine-next";
+import { Container, Group, Stack, Text, Title } from "@mantine/core";
 import {
-  IconNetwork,
   IconCalendar,
-  IconUsers,
-  IconTopologyStar,
-  IconTimelineEvent,
   IconMessageChatbot,
+  IconNetwork,
+  IconTimelineEvent,
+  IconTopologyStar,
+  IconUsers,
 } from "@tabler/icons-react";
 import { WEBAPP_URL } from "@/lib/config";
 import { PricingCard } from "./PricingCard";
@@ -14,114 +14,108 @@ import { PricingCard } from "./PricingCard";
 export function Pricing() {
   const freeFeatures = [
     {
+      description: "Create unlimited amount of contacts",
       icon: <IconUsers />,
       title: "Contact management",
-      description: "Create unlimited amount of contacts",
     },
     {
+      description: "Track interactions with your contacts",
       icon: <IconTimelineEvent />,
       title: "Log activities",
-      description: "Track interactions with your contacts",
     },
     {
+      description: "Never miss birthdays or important dates",
       icon: <IconCalendar />,
       title: "Reminders",
-      description: "Never miss birthdays or important dates",
     },
   ];
 
   const premiumFeatures = [
     {
+      description: "Unlimited AI chat to search, write, and manage contacts",
       icon: <IconMessageChatbot />,
       title: "AI Assistant",
-      description: "Unlimited AI chat to search, write, and manage contacts",
     },
     {
+      description: "Find the right people with a text query",
       icon: <IconNetwork />,
       title: "Smart search",
-      description: "Find the right people with a text query",
     },
     {
+      description: "Generate personalized outreach drafts",
       icon: <IconTopologyStar />,
       title: "Writing copilot",
-      description: "Generate personalized outreach drafts",
     },
     {
+      description: "Priority of feature requests and questions",
       icon: <IconUsers />,
       title: "Priority support",
-      description: "Priority of feature requests and questions",
     },
   ];
 
   return (
     <Container
-      id="pricing"
       bg="var(--mantine-color-body)"
+      fluid
+      id="pricing"
       py={{
         base: "calc(var(--mantine-spacing-lg) * 1)",
-        xs: "calc(var(--mantine-spacing-lg) * 2)",
         lg: "calc(var(--mantine-spacing-lg) * 3)",
+        xs: "calc(var(--mantine-spacing-lg) * 2)",
       }}
-      fluid
     >
       <Container size="md">
         <Stack align="center" gap="xs" mb="xl">
-          <Title order={2} ta="center" className="text-5xl!" fw={"bold"}>
+          <Title className="text-5xl!" fw={"bold"} order={2} ta="center">
             Simple, Transparent Pricing
           </Title>
-          <Text
-            c="dimmed"
-            ta="center"
-            size="xl"
-            style={{ textWrap: "balance" }}
-          >
+          <Text c="dimmed" size="xl" style={{ textWrap: "balance" }} ta="center">
             Start building your network today, completely free.
           </Text>
         </Stack>
       </Container>
 
       <Group
+        align="stretch"
+        gap="xl"
+        justify="center"
         mt={{
           base: "calc(var(--mantine-spacing-lg) * 2)",
           lg: "calc(var(--mantine-spacing-lg) * 3)",
         }}
-        justify="center"
-        align="stretch"
-        gap="xl"
       >
         <PricingCard
-          title="Free"
-          description="All the core features needed."
-          features={freeFeatures}
           action={
             <ButtonLink
-              href={`${WEBAPP_URL}/login`}
-              size="lg"
               fullWidth
-              variant="primary"
+              href={`${WEBAPP_URL}/login`}
               leftSection={<IconTopologyStar size={18} />}
+              size="lg"
+              variant="primary"
             >
               Get started
             </ButtonLink>
           }
+          description="All the core features needed."
+          features={freeFeatures}
+          title="Free"
         />
 
         <PricingCard
-          title="Premium"
-          oldPrice="$10 USD p.m."
-          description="Advanced features for power users."
-          features={premiumFeatures}
           action={
             <ButtonLink
-              href={`${WEBAPP_URL}/login`}
-              size="lg"
               fullWidth
-              variant="primary"
+              href={`${WEBAPP_URL}/login`}
               leftSection={<IconTopologyStar size={18} />}
+              size="lg"
+              variant="primary"
             >
               Get started
             </ButtonLink>
           }
+          description="Advanced features for power users."
+          features={premiumFeatures}
+          oldPrice="$10 USD p.m."
         />
       </Group>
     </Container>

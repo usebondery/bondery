@@ -3,7 +3,6 @@ import {
   EXAMPLE_CHAT_MESSAGE,
   EXAMPLE_CHAT_SESSION,
   EXAMPLE_CONTACT,
-  EXAMPLE_CONTACT_DUPLICATE,
   EXAMPLE_CONTACT_PREVIEW,
   EXAMPLE_GEOCODE_ADDRESS,
   EXAMPLE_GROUP,
@@ -35,7 +34,7 @@ export const EXAMPLE_MESSAGE_RESPONSE = { message: "OK" };
 
 export const EXAMPLE_DELETE_CONTACT_RESPONSE = EXAMPLE_MESSAGE_RESPONSE;
 
-export const EXAMPLE_API_SUCCESS_RESPONSE = { success: true, message: "Operation completed" };
+export const EXAMPLE_API_SUCCESS_RESPONSE = { message: "Operation completed", success: true };
 
 export const EXAMPLE_WEBHOOK_ACK_RESPONSE = { received: true };
 
@@ -50,24 +49,24 @@ export const EXAMPLE_CONTACTS_LIST_RESPONSE = {
   contacts: [EXAMPLE_CONTACT],
   pagination: EXAMPLE_PAGINATION,
   stats: {
-    totalContacts: 128,
-    thisMonthInteractions: 14,
     newContactsThisYear: 22,
+    thisMonthInteractions: 14,
+    totalContacts: 128,
   },
 };
 
 export const EXAMPLE_MAP_PINS_RESPONSE = {
   pins: [
     {
-      id: EXAMPLE_CONTACT_ID,
-      firstName: "Ada",
-      lastName: "Lovelace",
-      headline: "Mathematician",
-      location: "London, UK",
-      lastInteraction: EXAMPLE_ISO_TIMESTAMP,
-      latitude: 51.5074,
-      longitude: -0.1278,
       avatar: null,
+      firstName: "Ada",
+      headline: "Mathematician",
+      id: EXAMPLE_CONTACT_ID,
+      lastInteraction: EXAMPLE_ISO_TIMESTAMP,
+      lastName: "Lovelace",
+      latitude: 51.5074,
+      location: "London, UK",
+      longitude: -0.1278,
     },
   ],
 };
@@ -75,17 +74,17 @@ export const EXAMPLE_MAP_PINS_RESPONSE = {
 export const EXAMPLE_MAP_ADDRESS_PINS_RESPONSE = {
   pins: [
     {
-      addressId: "addr-1",
-      personId: EXAMPLE_CONTACT_ID,
-      firstName: "Ada",
-      lastName: "Lovelace",
-      addressType: "home",
-      addressFormatted: "London, UK",
       addressCity: "London",
       addressCountry: "United Kingdom",
+      addressFormatted: "London, UK",
+      addressId: "addr-1",
+      addressType: "home",
+      avatar: null,
+      firstName: "Ada",
+      lastName: "Lovelace",
       latitude: 51.5074,
       longitude: -0.1278,
-      avatar: null,
+      personId: EXAMPLE_CONTACT_ID,
     },
   ],
 };
@@ -99,28 +98,28 @@ export const EXAMPLE_CONTACT_RELATIONSHIP_RESPONSE = {
 };
 
 export const EXAMPLE_DELETE_CONTACTS_RESPONSE = {
-  message: "Contacts deleted",
   deletedCount: 3,
+  message: "Contacts deleted",
 };
 
 export const EXAMPLE_BY_SOCIAL_LOOKUP_RESPONSE = {
-  exists: true,
   contact: EXAMPLE_CONTACT_PREVIEW,
+  exists: true,
 };
 
 export const EXAMPLE_LINKEDIN_DATA_RESPONSE = {
+  education: [],
   linkedinBio: "Mathematician and writer.",
   syncedAt: EXAMPLE_ISO_TIMESTAMP,
   workHistory: [],
-  education: [],
 };
 
 export const EXAMPLE_ENRICH_ELIGIBLE_COUNT_RESPONSE = { count: 42 };
 
 export const EXAMPLE_ENRICH_QUEUE_STATUS_COUNTS_RESPONSE = {
-  pending: 5,
   completed: 12,
   failed: 1,
+  pending: 5,
 };
 
 export const EXAMPLE_ENRICH_QUEUE_INIT_RESPONSE = { totalEligible: 42 };
@@ -128,36 +127,36 @@ export const EXAMPLE_ENRICH_QUEUE_INIT_RESPONSE = { totalEligible: 42 };
 export const EXAMPLE_ENRICH_QUEUE_NEXT_BATCH_RESPONSE = {
   items: [
     {
-      queueItemId: "queue-1",
-      personId: EXAMPLE_CONTACT_ID,
-      linkedinHandle: "ada-lovelace",
       firstName: "Ada",
       lastName: "Lovelace",
+      linkedinHandle: "ada-lovelace",
+      personId: EXAMPLE_CONTACT_ID,
+      queueItemId: "queue-1",
     },
   ],
 };
 
-export const EXAMPLE_LINKEDIN_DATA_UPSERT_RESPONSE = { success: true, count: 3 };
+export const EXAMPLE_LINKEDIN_DATA_UPSERT_RESPONSE = { count: 3, success: true };
 
 export const EXAMPLE_MERGE_CONTACTS_RESPONSE = {
+  contact: EXAMPLE_CONTACT,
+  mergedFromPersonId: EXAMPLE_CONTACT_ID_2,
+  mergedIntoPersonId: EXAMPLE_CONTACT_ID,
   personId: EXAMPLE_CONTACT_ID,
   userId: EXAMPLE_USER_ID,
-  mergedIntoPersonId: EXAMPLE_CONTACT_ID,
-  mergedFromPersonId: EXAMPLE_CONTACT_ID_2,
-  contact: EXAMPLE_CONTACT,
 };
 
 export const EXAMPLE_MERGE_RECOMMENDATIONS_RESPONSE = {
-  recommendations: [EXAMPLE_MERGE_RECOMMENDATION],
   pagination: EXAMPLE_PAGINATION,
+  recommendations: [EXAMPLE_MERGE_RECOMMENDATION],
 };
 
 export const EXAMPLE_DECLINE_MERGE_RECOMMENDATION_RESPONSE = { success: true };
 
 export const EXAMPLE_REFRESH_MERGE_RECOMMENDATIONS_RESPONSE = {
-  success: true,
-  recommendationsCount: 1,
   recommendations: [EXAMPLE_MERGE_RECOMMENDATION],
+  recommendationsCount: 1,
+  success: true,
 };
 
 export const EXAMPLE_GROUPS_LIST_RESPONSE = {
@@ -169,13 +168,13 @@ export const EXAMPLE_GROUP_RESPONSE = { group: EXAMPLE_GROUP };
 
 export const EXAMPLE_GROUP_CONTACTS_LIST_RESPONSE = {
   contacts: [EXAMPLE_CONTACT],
-  pagination: EXAMPLE_PAGINATION,
   group: { id: EXAMPLE_GROUP.id, label: EXAMPLE_GROUP.label },
+  pagination: EXAMPLE_PAGINATION,
 };
 
 export const EXAMPLE_ADD_CONTACTS_TO_GROUP_RESPONSE = {
-  message: "Contacts added to group",
   addedCount: 3,
+  message: "Contacts added to group",
   skippedCount: 1,
 };
 
@@ -195,9 +194,14 @@ export const EXAMPLE_TAGS_LIST_RESPONSE = {
 
 export const EXAMPLE_TAG_RESPONSE = { tag: EXAMPLE_TAG };
 
-export const EXAMPLE_TAG_UPDATE_RESPONSE = {
-  message: "Tag updated",
-  tag: EXAMPLE_TAG,
+export const EXAMPLE_TAG_UPDATE_RESPONSE = { tag: EXAMPLE_TAG };
+
+export const EXAMPLE_ADD_CONTACTS_TO_TAG_RESPONSE = {
+  addedCount: 3,
+};
+
+export const EXAMPLE_REMOVE_CONTACTS_FROM_TAG_RESPONSE = {
+  removedCount: 2,
 };
 
 export const EXAMPLE_TAG_MEMBERS_LIST_RESPONSE = {
@@ -216,14 +220,14 @@ export const EXAMPLE_INTERACTIONS_LIST_RESPONSE = {
 
 export const EXAMPLE_INTERACTION_RESPONSE = {
   interaction: {
+    createdAt: EXAMPLE_INTERACTION.createdAt,
+    date: EXAMPLE_INTERACTION.date,
+    description: EXAMPLE_INTERACTION.description,
     id: EXAMPLE_INTERACTION.id,
+    participants: EXAMPLE_INTERACTION.participants,
     title: EXAMPLE_INTERACTION.title,
     type: EXAMPLE_INTERACTION.type,
-    description: EXAMPLE_INTERACTION.description,
-    date: EXAMPLE_INTERACTION.date,
-    createdAt: EXAMPLE_INTERACTION.createdAt,
     updatedAt: EXAMPLE_INTERACTION.updatedAt,
-    participants: EXAMPLE_INTERACTION.participants,
   },
 };
 
@@ -235,62 +239,59 @@ export const EXAMPLE_UPCOMING_REMINDERS_RESPONSE = {
   reminders: [
     {
       importantDate: EXAMPLE_IMPORTANT_DATE,
-      person: EXAMPLE_CONTACT_PREVIEW,
       notificationSent: false,
       notificationSentAt: null,
+      person: EXAMPLE_CONTACT_PREVIEW,
     },
   ],
 };
 
 export const EXAMPLE_REMINDER_DIGEST_RESPONSE = {
+  failedUsers: 0,
+  sentUsers: 10,
   success: true,
   targetDate: EXAMPLE_DATE,
-  sentUsers: 10,
-  failedUsers: 0,
 };
 
 export const EXAMPLE_VCARD_EXPORT =
   "BEGIN:VCARD\nVERSION:3.0\nFN:Ada Lovelace\nN:Lovelace;Ada;;;\nEMAIL:ada@example.com\nEND:VCARD\n";
 
 export const EXAMPLE_REDIRECT_RESPONSE = {
-  contactId: EXAMPLE_CONTACT_ID,
+  contact: EXAMPLE_CONTACT,
   existed: false,
-  firstName: "Ada",
-  lastName: "Lovelace",
-  avatar: null,
 };
 
 export const EXAMPLE_LINKEDIN_PARSE_RESPONSE = {
   contacts: [EXAMPLE_LINKEDIN_PREPARED_CONTACT],
+  invalidCount: 0,
   totalCount: 1,
   validCount: 1,
-  invalidCount: 0,
 };
 
 export const EXAMPLE_LINKEDIN_IMPORT_COMMIT_RESPONSE = {
   importedCount: 5,
-  updatedCount: 2,
   skippedCount: 1,
+  updatedCount: 2,
 };
 
 export const EXAMPLE_INSTAGRAM_PARSE_RESPONSE = {
   contacts: [EXAMPLE_INSTAGRAM_PREPARED_CONTACT],
+  invalidCount: 0,
   totalCount: 1,
   validCount: 1,
-  invalidCount: 0,
 };
 
 export const EXAMPLE_INSTAGRAM_IMPORT_COMMIT_RESPONSE = {
   importedCount: 8,
-  updatedCount: 0,
   skippedCount: 2,
+  updatedCount: 0,
 };
 
 export const EXAMPLE_VCARD_PARSE_RESPONSE = {
   contacts: [EXAMPLE_VCARD_PREPARED_CONTACT],
+  invalidCount: 0,
   totalCount: 1,
   validCount: 1,
-  invalidCount: 0,
 };
 
 export const EXAMPLE_VCARD_IMPORT_COMMIT_RESPONSE = {
@@ -301,66 +302,66 @@ export const EXAMPLE_VCARD_IMPORT_COMMIT_RESPONSE = {
 export const EXAMPLE_SYNC_PULL_RESPONSE = {
   batches: [
     {
-      serverSequence: 1,
       changes: [
         {
-          table: "people",
-          operation: "update" as const,
           entityId: EXAMPLE_CONTACT_ID,
+          operation: "update" as const,
+          table: "people",
           value: { first_name: "Ada" },
         },
       ],
+      serverSequence: 1,
     },
   ],
   nextServerSequence: 2,
 };
 
 export const EXAMPLE_SYNC_BOOTSTRAP_RESPONSE = {
-  tables: {
-    people: [{ id: EXAMPLE_CONTACT_ID, first_name: "Ada", last_name: "Lovelace" }],
-    people_phones: [],
-    people_emails: [],
-    people_addresses: [],
-    people_socials: [],
-    groups: [],
-    people_groups: [],
-    tags: [],
-    people_tags: [],
-    people_important_dates: [],
-  },
   nextServerSequence: 1,
+  tables: {
+    groups: [],
+    people: [{ first_name: "Ada", id: EXAMPLE_CONTACT_ID, last_name: "Lovelace" }],
+    people_addresses: [],
+    people_emails: [],
+    people_groups: [],
+    people_important_dates: [],
+    people_phones: [],
+    people_socials: [],
+    people_tags: [],
+    tags: [],
+  },
 };
 
 export const EXAMPLE_SYNC_PUSH_RESPONSE = {
+  nextServerSequence: 4,
   results: [
     {
-      id: EXAMPLE_CONTACT_ID,
-      status: "applied" as const,
-      serverSequence: 3,
-      txid: "tx-1",
       data: { contact: EXAMPLE_CONTACT },
+      id: EXAMPLE_CONTACT_ID,
+      serverSequence: 3,
+      status: "applied" as const,
+      txid: "tx-1",
     },
   ],
   serverTime: EXAMPLE_ISO_TIMESTAMP,
-  nextServerSequence: 4,
 };
 
 export const EXAMPLE_USER_SETTINGS_RESPONSE = {
-  success: true,
   data: EXAMPLE_USER_SETTINGS,
+  success: true,
 };
 
 export const EXAMPLE_USER_ACCOUNT_RESPONSE = {
-  success: true,
   data: {
-    id: EXAMPLE_USER_ID,
     email: "ada@example.com",
+    id: EXAMPLE_USER_ID,
     user_metadata: {
+      avatar_url: null,
       name: "Ada",
       surname: "Lovelace",
-      avatar_url: null,
     },
   },
+  success: true,
 };
 
 export const EXAMPLE_API_KEYS_LIST_RESPONSE = {
@@ -374,8 +375,8 @@ export const EXAMPLE_API_KEY_CREATED_RESPONSE = {
 };
 
 export const EXAMPLE_PHOTO_UPLOAD_RESPONSE = {
-  success: true,
   avatarUrl: "https://cdn.example.com/avatars/ada.jpg",
+  success: true,
 };
 
 export const EXAMPLE_GEOCODE_SUGGEST_RESPONSE = {
@@ -387,8 +388,8 @@ export const EXAMPLE_GEOCODE_TIMEZONE_RESPONSE = {
 };
 
 export const EXAMPLE_CHAT_SESSIONS_LIST_RESPONSE = {
-  sessions: [EXAMPLE_CHAT_SESSION],
   pagination: EXAMPLE_PAGINATION,
+  sessions: [EXAMPLE_CHAT_SESSION],
 };
 
 export const EXAMPLE_CHAT_MESSAGES_LIST_RESPONSE = {
@@ -397,15 +398,12 @@ export const EXAMPLE_CHAT_MESSAGES_LIST_RESPONSE = {
 };
 
 export const EXAMPLE_CHAT_SESSION_CREATED_RESPONSE = {
-  data: {
-    id: EXAMPLE_CHAT_SESSION.id,
-    createdAt: EXAMPLE_CHAT_SESSION.createdAt,
-  },
+  session: EXAMPLE_CHAT_SESSION,
 };
 
 export const EXAMPLE_SUBSCRIPTION_STATUS_RESPONSE = {
-  success: true,
   data: EXAMPLE_SUBSCRIPTION_STATUS,
+  success: true,
 };
 
 export const EXAMPLE_CHECKOUT_RESPONSE = {
@@ -413,59 +411,59 @@ export const EXAMPLE_CHECKOUT_RESPONSE = {
 };
 
 export const EXAMPLE_SUBSCRIPTION_SYNC_SUCCESS_RESPONSE = {
-  synced: true as const,
   source: "polar_api" as const,
+  synced: true as const,
 };
 
 export const EXAMPLE_SUBSCRIPTION_SYNC_SKIPPED_RESPONSE = {
-  synced: false as const,
   reason: "already_active",
+  synced: false as const,
 };
 
 export const EXAMPLE_PROFILE_PHOTO_RESPONSE = {
-  success: true,
   data: { avatarUrl: "https://cdn.example.com/avatars/profile.jpg" },
+  success: true,
 };
 
 export const EXAMPLE_SETTINGS_PATCH_RESPONSE = {
-  success: true,
   data: {
-    timezone: "Europe/London",
-    reminderSendHour: "09:00",
-    timeFormat: "24h",
-    language: "en",
     colorScheme: "auto",
-    leftSwipeAction: "call",
-    rightSwipeAction: "email",
     groupSortOrder: "alpha-asc",
+    language: "en",
+    leftSwipeAction: "call",
+    reminderSendHour: "09:00",
+    rightSwipeAction: "email",
     tagSortOrder: "count-desc",
+    timeFormat: "24h",
+    timezone: "Europe/London",
   },
+  success: true,
 };
 
 export const EXAMPLE_ACTIVE_USERS_RESPONSE = {
-  timeline: [{ date: EXAMPLE_DATE, dau: 120, wau: 450, mau: 1200 }],
+  timeline: [{ date: EXAMPLE_DATE, dau: 120, mau: 1200, wau: 450 }],
 };
 
 export const EXAMPLE_FUNNEL_RESPONSE = {
   periods: [
     {
+      contacts: 40,
+      contactsToInteractionsPct: 62.5,
+      interactions: 25,
       periodKey: "2026-01",
       periodLabel: "Jan 2026",
       signups: 50,
-      contacts: 40,
-      interactions: 25,
       signupsToContactsPct: 80,
-      contactsToInteractionsPct: 62.5,
     },
   ],
 };
 
 export const EXAMPLE_NPS_RESPONSE = {
-  score: 72,
-  responses: 25,
-  promoters: 18,
-  passives: 4,
   detractors: 3,
+  passives: 4,
+  promoters: 18,
+  responses: 25,
+  score: 72,
 };
 
 export const EXAMPLE_TOTAL_USERS_RESPONSE = {
@@ -473,48 +471,48 @@ export const EXAMPLE_TOTAL_USERS_RESPONSE = {
 };
 
 export const EXAMPLE_GITHUB_STARS_RESPONSE = {
-  stars: 420,
   repo: "bondery/bondery",
+  stars: 420,
 };
 
 export const EXAMPLE_LIVENESS_STATUS_RESPONSE = {
-  status: "ok" as const,
-  timestamp: EXAMPLE_ISO_TIMESTAMP,
   extension: {
     minVersion: "1.0.0",
     storeUrl: "https://chrome.google.com/webstore/detail/bondery/example",
   },
+  status: "ok" as const,
+  timestamp: EXAMPLE_ISO_TIMESTAMP,
 };
 
 export const EXAMPLE_HEALTH_OK_RESPONSE = {
-  status: "ok" as const,
-  timestamp: EXAMPLE_ISO_TIMESTAMP,
   cached: false,
   cacheExpiresAt: EXAMPLE_ISO_TIMESTAMP,
   services: {
+    anthropic: { configured: true, ok: true },
+    mapy: { configured: true, ok: true },
+    polar: { configured: true, ok: true },
+    posthog: { configured: true, ok: true },
+    redis: { latencyMs: 2, ok: true },
+    smtp: { configured: true, ok: true },
     supabase: {
-      auth: { ok: true, latencyMs: 12 },
-      database: { ok: true, latencyMs: 18 },
-      storage: { ok: true, latencyMs: 15 },
+      auth: { latencyMs: 12, ok: true },
+      database: { latencyMs: 18, ok: true },
+      storage: { latencyMs: 15, ok: true },
     },
-    redis: { ok: true, latencyMs: 2 },
-    smtp: { ok: true, configured: true },
-    anthropic: { ok: true, configured: true },
-    polar: { ok: true, configured: true },
-    mapy: { ok: true, configured: true },
-    posthog: { ok: true, configured: true },
   },
+  status: "ok" as const,
+  timestamp: EXAMPLE_ISO_TIMESTAMP,
 };
 
 export const EXAMPLE_HEALTH_UNHEALTHY_RESPONSE = {
   ...EXAMPLE_HEALTH_OK_RESPONSE,
-  status: "unhealthy" as const,
   services: {
     ...EXAMPLE_HEALTH_OK_RESPONSE.services,
     supabase: {
-      auth: { ok: false, error: "Connection refused" },
-      database: { ok: false, error: "Connection refused" },
-      storage: { ok: false, error: "Connection refused" },
+      auth: { error: "Connection refused", ok: false },
+      database: { error: "Connection refused", ok: false },
+      storage: { error: "Connection refused", ok: false },
     },
   },
+  status: "unhealthy" as const,
 };

@@ -1,5 +1,5 @@
-import { Text, View } from "react-native";
 import { countryCodeToFlagEmoji } from "@bondery/helpers/locale";
+import { Text, View } from "react-native";
 import { MOBILE_TYPOGRAPHY } from "../../../theme/tokens";
 
 interface CountryFlagProps {
@@ -8,7 +8,7 @@ interface CountryFlagProps {
 
 export function CountryFlag({ countryCode }: CountryFlagProps) {
   return (
-    <View style={{ width: 24, alignItems: "center" }}>
+    <View style={{ alignItems: "center", width: 24 }}>
       <Text style={{ fontSize: MOBILE_TYPOGRAPHY.fontSize.bodyLarge }}>
         {countryCodeToFlagEmoji(countryCode ?? "")}
       </Text>

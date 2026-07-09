@@ -8,7 +8,10 @@ Screens **never** choose between “online API” and “offline cache” for ti
 
 | Layer | Responsibility |
 |-------|----------------|
-| **Repositories** (`lib/sync/repositories/`) | Read SQLite (joins, search, pagination) |
+| **Resources** (`lib/resources/`) | List params, row mappers, SQL fragments — no React, no I/O |
+| **Repositories** (`lib/sync/repositories/`) | Execute SQLite reads (imports `lib/resources`) |
+| **Domains** (`lib/domains/`) | Public CRUD API; writes via `submitSyncMutation` |
+| **Sync hooks** (`lib/sync/hooks/`) | UI subscription (`useSyncQuery` on `revision`) |
 | **MutationService** (`submitSyncMutation`) | Optimistic SQLite + enqueue outbox + schedule drain |
 | **PullManager** (`pull-manager.ts`) | `GET /api/sync/bootstrap` + long-poll `GET /api/sync/pull` → materializers |
 | **SyncDrainer** (`outbox/sync-worker`) | Push pending mutations; reconcile with server |
@@ -53,7 +56,7 @@ Domain writes (REST + push) emit one **batch** per logical change into `sync_cha
 3. Add domain `emitSyncBatch` after writes in `apps/api/src/domains/`.
 4. Include table in `SYNC_TABLE_KEYS` (`packages/schemas/src/sync/tables.ts`) and bootstrap query.
 5. Add optimistic writer + push mutation type on API.
-6. Add repository read API + domain wrapper on mobile.
+6. Add `lib/resources/` mappers/query builders, repository read API, `lib/domains/` wrapper, and `lib/sync/hooks/` on mobile.
 
 ## Ordering
 

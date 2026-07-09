@@ -1,25 +1,25 @@
 "use client";
 
-import { Group, Stack, Text, ThemeIcon, Timeline } from "@mantine/core";
-import type { Activity, Contact } from "@bondery/schemas";
-import { useMemo } from "react";
-import { getActivityTypeConfig } from "@/lib/activityTypes";
-import { useDateFormatter as useFormatter } from "@/lib/i18n/useDateFormatter";
 import { PersonAvatarGroup } from "@bondery/mantine-next";
+import type { Activity, Contact } from "@bondery/schemas";
+import { Stack, Text, ThemeIcon, Timeline } from "@mantine/core";
+import { useMemo } from "react";
+import { getActivityTypeConfig } from "@/lib/contacts/activityTypes";
+import { useDateFormatter as useFormatter } from "@/lib/i18n/useDateFormatter";
 import { ActivityCard } from "./ActivityCard";
 
 const TIMELINE_BORDER_COLOR = "var(--mantine-color-default-border)";
 
 interface InteractionsListProps {
   activities: Activity[];
-  resolveParticipants: (activity: Activity) => Contact[];
-  editLabel: string;
-  duplicateLabel: string;
   deleteLabel: string;
-  onOpen: (activity: Activity) => void;
-  onEdit: (activity: Activity) => void;
-  onDuplicate: (activity: Activity) => void;
+  duplicateLabel: string;
+  editLabel: string;
   onDelete: (activity: Activity) => void;
+  onDuplicate: (activity: Activity) => void;
+  onEdit: (activity: Activity) => void;
+  onOpen: (activity: Activity) => void;
+  resolveParticipants: (activity: Activity) => Contact[];
 }
 
 /**
@@ -58,7 +58,7 @@ export function InteractionsList({
     <Stack gap="lg">
       {Object.entries(groupedActivities).map(([dateGroup, monthActivities]) => (
         <div key={dateGroup}>
-          <Text c="dimmed" size="sm" mb="md">
+          <Text c="dimmed" mb="md" size="sm">
             {dateGroup}
           </Text>
           <Timeline
@@ -68,8 +68,8 @@ export function InteractionsList({
             style={{ "--tl-color": TIMELINE_BORDER_COLOR } as React.CSSProperties}
             styles={{
               itemBullet: {
-                border: "none",
                 backgroundColor: "transparent",
+                border: "none",
                 padding: 0,
               },
             }}
@@ -81,40 +81,39 @@ export function InteractionsList({
 
               return (
                 <Timeline.Item
-                  key={activity.id}
-                  mt="sm"
                   bullet={
-                    <ThemeIcon size={32} radius="xl" variant="white" color={typeConfig.color}>
+                    <ThemeIcon color={typeConfig.color} radius="xl" size={32} variant="white">
                       {typeConfig.emoji}
                     </ThemeIcon>
                   }
+                  key={activity.id}
                 >
                   <ActivityCard
                     activity={activity}
+                    deleteLabel={deleteLabel}
+                    duplicateLabel={duplicateLabel}
+                    editLabel={editLabel}
                     leftSection={
                       <PersonAvatarGroup
-                        people={visibleParticipants.map((participant) => ({
-                          id: participant.id,
-                          firstName: participant.firstName,
-                          middleName: participant.middleName,
-                          lastName: participant.lastName,
-                          headline: participant.headline,
-                          avatar: participant.avatar,
-                        }))}
-                        totalCount={participants.length}
-                        size="md"
                         isClickable
                         maxDisplayCount={3}
+                        people={visibleParticipants.map((participant) => ({
+                          avatar: participant.avatar,
+                          firstName: participant.firstName,
+                          headline: participant.headline,
+                          id: participant.id,
+                          lastName: participant.lastName,
+                          middleName: participant.middleName,
+                        }))}
+                        size="md"
+                        totalCount={participants.length}
                         wrap
                       />
                     }
-                    editLabel={editLabel}
-                    duplicateLabel={duplicateLabel}
-                    deleteLabel={deleteLabel}
-                    onOpen={() => onOpen(activity)}
-                    onEdit={() => onEdit(activity)}
-                    onDuplicate={() => onDuplicate(activity)}
                     onDelete={() => onDelete(activity)}
+                    onDuplicate={() => onDuplicate(activity)}
+                    onEdit={() => onEdit(activity)}
+                    onOpen={() => onOpen(activity)}
                   />
                 </Timeline.Item>
               );

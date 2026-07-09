@@ -11,7 +11,9 @@
  * @returns HTML string ready for TipTap or API storage
  */
 export function markdownToHtml(markdown: string): string {
-  if (!markdown.trim()) return "";
+  if (!markdown.trim()) {
+    return "";
+  }
 
   const lines = markdown.replace(/\r\n?/g, "\n").split("\n");
   let html = "";
@@ -19,8 +21,11 @@ export function markdownToHtml(markdown: string): string {
   let inBlockquote = false;
 
   const closeList = () => {
-    if (listType === "ol") html += "</ol>";
-    else if (listType === "ul" || listType === "taskList") html += "</ul>";
+    if (listType === "ol") {
+      html += "</ol>";
+    } else if (listType === "ul" || listType === "taskList") {
+      html += "</ul>";
+    }
     listType = null;
   };
 
@@ -85,7 +90,9 @@ export function markdownToHtml(markdown: string): string {
     // ── Blockquote ───────────────────────────────────────────────────────────
     const bqMatch = line.match(/^>\s?(.*)$/);
     if (bqMatch) {
-      if (listType) closeList();
+      if (listType) {
+        closeList();
+      }
       if (!inBlockquote) {
         html += "<blockquote>";
         inBlockquote = true;
@@ -99,7 +106,9 @@ export function markdownToHtml(markdown: string): string {
     const taskMatch = line.match(/^[-*]\s*\[([\s\t]*[xX]?[\s\t]*)\]\s*(.*)$/);
     if (taskMatch) {
       if (listType !== "taskList") {
-        if (listType) closeList();
+        if (listType) {
+          closeList();
+        }
         html += `<ul data-type="taskList">`;
         listType = "taskList";
       }
@@ -116,7 +125,9 @@ export function markdownToHtml(markdown: string): string {
     const ulMatch = line.match(/^[-*+]\s*(.+)$/);
     if (ulMatch) {
       if (listType !== "ul") {
-        if (listType) closeList();
+        if (listType) {
+          closeList();
+        }
         html += "<ul>";
         listType = "ul";
       }
@@ -128,7 +139,9 @@ export function markdownToHtml(markdown: string): string {
     const olMatch = line.match(/^\d+\. (.+)$/);
     if (olMatch) {
       if (listType !== "ol") {
-        if (listType) closeList();
+        if (listType) {
+          closeList();
+        }
         html += "<ol>";
         listType = "ol";
       }

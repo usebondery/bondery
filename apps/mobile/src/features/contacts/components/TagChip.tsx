@@ -1,20 +1,20 @@
+import type { Tag } from "@bondery/schemas";
 import { IconCheck } from "@tabler/icons-react-native";
 import { StyleSheet, Text, View } from "react-native";
-import type { Tag } from "@bondery/schemas";
 import { hexWithAlpha } from "../../../components/color-picker/colorUtils";
 import { Tappable } from "../../../theme/Tappable";
-import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
 import { MOBILE_TYPOGRAPHY } from "../../../theme/tokens";
+import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
 
 export type TagChipTag = Pick<Tag, "id" | "label" | "color">;
 
 interface TagChipProps {
-  tag: TagChipTag;
-  onPress?: () => void;
-  isSelected?: boolean;
+  accessibilityLabel?: string;
   disabled?: boolean;
   isClickable?: boolean;
-  accessibilityLabel?: string;
+  isSelected?: boolean;
+  onPress?: () => void;
+  tag: TagChipTag;
 }
 
 export function TagChip({
@@ -47,16 +47,16 @@ export function TagChip({
 
   const content = (
     <>
-      <Text style={[styles.tagLabel, { color: tagColor }]} numberOfLines={1}>
+      <Text numberOfLines={1} style={[styles.tagLabel, { color: tagColor }]}>
         {tag.label}
       </Text>
-      {isSelected ? <IconCheck size={14} color={colors.primary} /> : null}
+      {isSelected ? <IconCheck color={colors.primary} size={14} /> : null}
     </>
   );
 
   if (!isInteractive) {
     return (
-      <View accessibilityRole="text" accessibilityLabel={label} style={chipStyle}>
+      <View accessibilityLabel={label} accessibilityRole="text" style={chipStyle}>
         {content}
       </View>
     );
@@ -64,12 +64,12 @@ export function TagChip({
 
   return (
     <Tappable
-      variant="subtle"
-      accessibilityRole="button"
       accessibilityLabel={label}
-      accessibilityState={{ selected: isSelected, disabled }}
+      accessibilityRole="button"
+      accessibilityState={{ disabled, selected: isSelected }}
       onPress={onPress}
       style={chipStyle}
+      variant="subtle"
     >
       {content}
     </Tappable>
@@ -78,12 +78,12 @@ export function TagChip({
 
 const styles = StyleSheet.create({
   tagChip: {
-    flexDirection: "row",
     alignItems: "center",
+    borderRadius: 20,
+    flexDirection: "row",
     gap: 6,
     paddingHorizontal: 12,
     paddingVertical: 8,
-    borderRadius: 20,
   },
   tagLabel: {
     fontSize: MOBILE_TYPOGRAPHY.fontSize.body,

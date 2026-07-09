@@ -1,28 +1,28 @@
 import "react-native-get-random-values";
 import "react-native-gesture-handler";
 import "@tamagui/native/setup-teleport";
-import React, { useEffect } from "react";
+import { TamaguiProvider, Theme } from "@tamagui/core";
+import { PortalProvider } from "@tamagui/portal";
 import { Stack } from "expo-router";
+import React, { useEffect } from "react";
+import { I18nextProvider } from "react-i18next";
+import { StyleSheet, Text, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import { SafeAreaProvider } from "react-native-safe-area-context";
-import { TamaguiProvider, Theme } from "@tamagui/core";
-import { PortalProvider } from "@tamagui/portal";
-import { StyleSheet, Text, View } from "react-native";
-import { I18nextProvider } from "react-i18next";
+import { AppNavigationBar, AppStatusBar } from "../src/components/chrome";
 import { AuthProvider } from "../src/lib/auth/AuthProvider";
 import { useAuth } from "../src/lib/auth/useAuth";
-import { SyncProvider } from "../src/lib/sync/SyncProvider";
 import { useAndroidKeyboardResizeMode } from "../src/lib/hooks/useAndroidKeyboardResizeMode";
+import i18n from "../src/lib/i18n/i18n";
+import { useMobilePreferences } from "../src/lib/preferences/useMobilePreferences";
+import { SyncProvider } from "../src/lib/sync/SyncProvider";
 import { AppToastProvider } from "../src/lib/toast/useAppToast";
 import type { MobileThemeColors } from "../src/theme/colors";
 import tamaguiConfig from "../src/theme/tamagui.config";
+import { MOBILE_LAYOUT, MOBILE_TYPOGRAPHY } from "../src/theme/tokens";
 import { useMobileThemeColors } from "../src/theme/useMobileThemeColors";
 import { useResolvedMobileTheme } from "../src/theme/useResolvedMobileTheme";
-import { AppNavigationBar, AppStatusBar } from "../src/components/chrome";
-import { MOBILE_LAYOUT, MOBILE_TYPOGRAPHY } from "../src/theme/tokens";
-import i18n from "../src/lib/i18n/i18n";
-import { useMobilePreferences } from "../src/lib/preferences/useMobilePreferences";
 
 type RootErrorBoundaryState = {
   hasError: boolean;
@@ -33,10 +33,7 @@ type RootErrorBoundaryProps = React.PropsWithChildren<{
   colors: MobileThemeColors;
 }>;
 
-class RootErrorBoundary extends React.Component<
-  RootErrorBoundaryProps,
-  RootErrorBoundaryState
-> {
+class RootErrorBoundary extends React.Component<RootErrorBoundaryProps, RootErrorBoundaryState> {
   constructor(props: RootErrorBoundaryProps) {
     super(props);
     this.state = { hasError: false, message: "" };
@@ -54,12 +51,7 @@ class RootErrorBoundary extends React.Component<
 
     if (this.state.hasError) {
       return (
-        <View
-          style={[
-            styles.errorScreen,
-            { backgroundColor: colors.appBackground },
-          ]}
-        >
+        <View style={[styles.errorScreen, { backgroundColor: colors.appBackground }]}>
           <Text style={[styles.errorTitle, { color: colors.textPrimary }]}>
             Mobile app runtime error
           </Text>
@@ -112,10 +104,7 @@ export default function RootLayout() {
         <LocaleSync />
         <SafeAreaProvider>
           <KeyboardProvider preload={false}>
-            <TamaguiProvider
-              config={tamaguiConfig}
-              defaultTheme={resolvedTheme}
-            >
+            <TamaguiProvider config={tamaguiConfig} defaultTheme={resolvedTheme}>
               <Theme name={resolvedTheme}>
                 <AppStatusBar />
                 <AppNavigationBar />
@@ -140,9 +129,13 @@ export default function RootLayout() {
 }
 
 const styles = StyleSheet.create({
+  errorMessage: {
+    fontSize: MOBILE_TYPOGRAPHY.fontSize.body,
+    textAlign: "center",
+  },
   errorScreen: {
-    flex: 1,
     alignItems: "center",
+    flex: 1,
     justifyContent: "center",
     paddingHorizontal: MOBILE_LAYOUT.spacing.horizontal,
   },
@@ -150,9 +143,5 @@ const styles = StyleSheet.create({
     fontSize: MOBILE_TYPOGRAPHY.fontSize.sheetTitle,
     fontWeight: MOBILE_TYPOGRAPHY.fontWeight.bold,
     marginBottom: 8,
-  },
-  errorMessage: {
-    fontSize: MOBILE_TYPOGRAPHY.fontSize.body,
-    textAlign: "center",
   },
 });

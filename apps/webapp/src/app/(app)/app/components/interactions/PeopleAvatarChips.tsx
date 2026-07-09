@@ -1,7 +1,7 @@
 "use client";
 
 import { Avatar, AvatarGroup, Group, Pill, Text } from "@mantine/core";
-import { getAvatarColorFromName } from "@/lib/avatarColor";
+import { getAvatarColorFromName } from "@/lib/contacts/avatarColor";
 
 type PersonChip = {
   id: string;
@@ -11,12 +11,12 @@ type PersonChip = {
 };
 
 interface PeopleAvatarChipsProps {
-  people: PersonChip[];
-  totalCount?: number;
-  size?: "xs" | "sm" | "md" | "lg" | "xl";
   maxDisplay?: number;
-  variant?: "avatars" | "preview";
+  people: PersonChip[];
   previewVariant?: "filled" | "outline";
+  size?: "xs" | "sm" | "md" | "lg" | "xl";
+  totalCount?: number;
+  variant?: "avatars" | "preview";
 }
 
 export function PeopleAvatarChips({
@@ -41,23 +41,23 @@ export function PeopleAvatarChips({
               previewVariant === "outline"
                 ? {
                     root: {
-                      border: "1px solid var(--mantine-color-default-border)",
                       backgroundColor: "transparent",
+                      border: "1px solid var(--mantine-color-default-border)",
                     },
                   }
                 : undefined
             }
           >
-            <Group gap={8} wrap="nowrap" align="center">
+            <Group align="center" gap={8} wrap="nowrap">
               <Avatar
-                size={22}
-                radius="xl"
-                src={person.avatar || undefined}
                 color={getAvatarColorFromName(person.firstName, person.lastName)}
                 name={`${person.firstName}${person.lastName ? ` ${person.lastName}` : ""}`.trim()}
+                radius="xl"
+                size={22}
+                src={person.avatar || undefined}
               />
 
-              <Text size="sm" fw={500}>
+              <Text fw={500} size="sm">
                 {`${person.firstName}${person.lastName ? ` ${person.lastName}` : ""}`.trim()}
               </Text>
             </Group>
@@ -70,8 +70,8 @@ export function PeopleAvatarChips({
               previewVariant === "outline"
                 ? {
                     root: {
-                      border: "1px solid var(--mantine-color-default-border)",
                       backgroundColor: "transparent",
+                      border: "1px solid var(--mantine-color-default-border)",
                     },
                   }
                 : undefined
@@ -88,16 +88,16 @@ export function PeopleAvatarChips({
     <AvatarGroup spacing="sm">
       {visiblePeople.map((person) => (
         <Avatar
-          key={person.id}
-          size={size}
-          radius="xl"
-          src={person.avatar || undefined}
           color={getAvatarColorFromName(person.firstName, person.lastName)}
+          key={person.id}
           name={`${person.firstName}${person.lastName ? ` ${person.lastName}` : ""}`.trim()}
+          radius="xl"
+          size={size}
+          src={person.avatar || undefined}
         />
       ))}
       {remainingCount > 0 && (
-        <Avatar size={size} radius="xl" color="gray">
+        <Avatar color="gray" radius="xl" size={size}>
           +{remainingCount}
         </Avatar>
       )}

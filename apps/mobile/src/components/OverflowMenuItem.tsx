@@ -1,19 +1,19 @@
+import { Paragraph } from "@tamagui/text";
 import type { ReactNode } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
-import { Paragraph } from "@tamagui/text";
 import { MOBILE_LAYOUT, MOBILE_TYPOGRAPHY } from "../theme/tokens";
 import { useMobileThemeColors } from "../theme/useMobileThemeColors";
 
 export const OVERFLOW_MENU_RADIUS = MOBILE_LAYOUT.borderRadius.control;
 
 export interface OverflowMenuItemConfig {
-  id: string;
-  icon: ReactNode;
-  label: string;
-  hint?: string;
-  tone?: "default" | "danger";
   disabled?: boolean;
+  hint?: string;
+  icon: ReactNode;
+  id: string;
+  label: string;
   onPress: () => void;
+  tone?: "default" | "danger";
 }
 
 interface OverflowMenuItemProps extends OverflowMenuItemConfig {
@@ -36,9 +36,9 @@ export function OverflowMenuItem({
 
   return (
     <Pressable
+      accessibilityHint={hint}
       accessibilityRole="button"
       accessibilityState={{ disabled }}
-      accessibilityHint={hint}
       disabled={disabled}
       onPress={onPress}
       style={({ pressed }) => [
@@ -52,15 +52,15 @@ export function OverflowMenuItem({
       <View style={styles.iconSlot}>{icon}</View>
       <Paragraph
         color={labelColor}
+        flex={1}
         fontSize={MOBILE_TYPOGRAPHY.fontSize.bodyLarge}
         fontWeight={MOBILE_TYPOGRAPHY.fontWeight.medium}
-        flex={1}
         numberOfLines={1}
       >
         {label}
       </Paragraph>
       {hint ? (
-        <Text style={[styles.hint, { color: colors.textMuted }]} numberOfLines={1}>
+        <Text numberOfLines={1} style={[styles.hint, { color: colors.textMuted }]}>
           {hint}
         </Text>
       ) : (
@@ -71,28 +71,28 @@ export function OverflowMenuItem({
 }
 
 const styles = StyleSheet.create({
-  menuItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    alignSelf: "stretch",
-    width: "100%",
-    gap: 10,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-  },
-  iconSlot: {
-    width: 20,
-    alignItems: "center",
-    justifyContent: "center",
-  },
   hint: {
+    flexShrink: 0,
     fontSize: MOBILE_TYPOGRAPHY.fontSize.caption,
     fontWeight: "400",
     marginLeft: 8,
-    flexShrink: 0,
   },
   hintSpacer: {
     width: 0,
+  },
+  iconSlot: {
+    alignItems: "center",
+    justifyContent: "center",
+    width: 20,
+  },
+  menuItem: {
+    alignItems: "center",
+    alignSelf: "stretch",
+    flexDirection: "row",
+    gap: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    width: "100%",
   },
   menuItemDisabled: {
     opacity: 0.45,

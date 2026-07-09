@@ -3,24 +3,24 @@
 import { Group, Indicator, Text, Tooltip, UnstyledButton } from "@mantine/core";
 import { useHover } from "@mantine/hooks";
 import Link from "next/link";
-import { ComponentType, ReactNode } from "react";
+import type { ComponentType, ElementType, ReactNode } from "react";
 
 export interface NavLinkItemProps {
-  /** Render as a link. Required when `onClick` is not provided. */
-  href?: string;
-  /** Render as a button. Required when `href` is not provided. */
-  onClick?: () => void;
-  label: string;
-  icon: ComponentType<{ size?: number; stroke?: number }>;
   active?: boolean;
-  showIndicator?: boolean;
-  collapsed?: boolean;
   /** Draw a subtle border around the item (e.g. search trigger). */
   bordered?: boolean;
-  /** Content rendered after the label when the sidebar is expanded. */
-  rightSection?: ReactNode;
+  collapsed?: boolean;
   /** Render the label in a dimmed colour instead of the default weight. */
   dimLabel?: boolean;
+  /** Render as a link. Required when `onClick` is not provided. */
+  href?: string;
+  icon: ComponentType<{ size?: number; stroke?: number }>;
+  label: string;
+  /** Render as a button. Required when `href` is not provided. */
+  onClick?: () => void;
+  /** Content rendered after the label when the sidebar is expanded. */
+  rightSection?: ReactNode;
+  showIndicator?: boolean;
 }
 
 /**
@@ -30,10 +30,10 @@ export interface NavLinkItemProps {
  * visually symmetric at all sidebar states.
  */
 const ITEM_PADDING = {
+  paddingBottom: "var(--mantine-spacing-xs)",
   paddingLeft: "var(--sidebar-icon-pl)",
   paddingRight: "var(--sidebar-icon-pl)",
   paddingTop: "var(--mantine-spacing-xs)",
-  paddingBottom: "var(--mantine-spacing-xs)",
 } as const;
 
 export function NavLinkItem({
@@ -56,8 +56,8 @@ export function NavLinkItem({
   const { hovered, ref } = useHover<HTMLElement>();
 
   const sharedStyle = {
-    width: "100%",
     borderRadius: "var(--mantine-radius-sm)",
+    width: "100%",
     // outline sits outside the box model so it doesn't shrink the padding area.
     ...(bordered && {
       outline: "1px solid var(--mantine-color-default-border)",
@@ -67,22 +67,22 @@ export function NavLinkItem({
   const innerContent = (
     <>
       <Indicator
-        inline
-        disabled={!showIndicator}
         color="yellow"
+        disabled={!showIndicator}
+        inline
         position="top-end"
-        withBorder
         style={{ color: active ? "white" : undefined }}
+        withBorder
       >
         <Icon size={20} stroke={1.5} />
       </Indicator>
       {!collapsed && (
         <>
           <Text
-            size="sm"
-            fw={dimLabel ? undefined : 500}
             c={active ? "white" : dimLabel ? "dimmed" : undefined}
-            style={{ flex: 1, minWidth: 0, lineHeight: 1.2 }}
+            fw={dimLabel ? undefined : 500}
+            size="sm"
+            style={{ flex: 1, lineHeight: 1.2, minWidth: 0 }}
           >
             {label}
           </Text>
@@ -96,21 +96,21 @@ export function NavLinkItem({
   // h={40} prevents rightSection content (e.g. Kbd) from inflating the row.
   const item = onClick ? (
     <UnstyledButton
-      ref={ref as any}
-      onClick={onClick}
-      h={40}
       className={stateClassName}
+      h={40}
+      onClick={onClick}
+      ref={ref}
       style={{
-        display: "flex",
         alignItems: "center",
-        justifyContent: "flex-start",
-        gap: "var(--mantine-spacing-sm)",
         backgroundColor: active
           ? "var(--mantine-primary-color-filled)"
           : hovered
             ? "var(--mantine-primary-color-light-hover)"
             : "transparent",
         color: active ? "white" : "inherit",
+        display: "flex",
+        gap: "var(--mantine-spacing-sm)",
+        justifyContent: "flex-start",
         ...ITEM_PADDING,
         ...sharedStyle,
       }}
@@ -119,14 +119,13 @@ export function NavLinkItem({
     </UnstyledButton>
   ) : (
     <Group
-      ref={ref as any}
-      component={Link as any}
-      {...({ href } as any)}
-      wrap="nowrap"
-      gap="sm"
-      justify="flex-start"
       aria-current={active ? "page" : undefined}
       className={stateClassName}
+      component={Link as ElementType}
+      gap="sm"
+      href={href}
+      justify="flex-start"
+      ref={ref}
       style={{
         backgroundColor: active
           ? "var(--mantine-primary-color-filled)"
@@ -138,6 +137,7 @@ export function NavLinkItem({
         ...ITEM_PADDING,
         ...sharedStyle,
       }}
+      wrap="nowrap"
     >
       {innerContent}
     </Group>
@@ -146,7 +146,7 @@ export function NavLinkItem({
   if (collapsed) {
     const tooltipLabel = rightSection ? (
       <Group gap="xs" wrap="nowrap">
-        <Text size="xs" inherit>
+        <Text inherit size="xs">
           {label}
         </Text>
         {rightSection}

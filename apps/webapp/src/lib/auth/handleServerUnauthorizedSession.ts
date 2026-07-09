@@ -1,5 +1,5 @@
-import { redirect } from "next/navigation";
 import { WEBSITE_ROUTES } from "@bondery/helpers/globals/paths";
+import { redirect } from "next/navigation";
 import { signOutServerSession } from "@/lib/auth/resolveServerSession";
 
 /**

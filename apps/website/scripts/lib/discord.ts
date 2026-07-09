@@ -1,23 +1,23 @@
-import type { PostMeta } from "@/app/blog/_lib/types";
 import { getCategoryConfig } from "@/app/blog/_lib/categories";
+import type { PostMeta } from "@/app/blog/_lib/types";
 
 /** Discord embed color — Bondery brand primary (#a34bcb as decimal). */
 const BRAND_COLOR = 0xa34bcb;
 
 interface DiscordEmbed {
-  title: string;
-  description: string;
   color: number;
+  description: string;
   image: { url: string };
+  title: string;
 }
 
 function buildEmbed(post: PostMeta, postUrl: string): DiscordEmbed {
   const ogImageUrl = `${new URL(postUrl).origin}/opengraph-image`;
   return {
-    title: post.title,
-    description: post.description,
     color: BRAND_COLOR,
+    description: post.description,
     image: { url: ogImageUrl },
+    title: post.title,
   };
 }
 
@@ -42,12 +42,12 @@ export async function postDiscordAnnouncement(
   const embed = buildEmbed(post, postUrl);
 
   const payload = {
-    // thread_name is required when the webhook targets a Discord forum channel.
-    thread_name: post.title,
     // applied_tags pins the thread under the matching forum tag.
     applied_tags: categoryConfig?.discordTagId ? [categoryConfig.discordTagId] : [],
     content: `${emoji} [${post.title}](${postUrl}) (${readingTime} min read)`,
     embeds: [embed],
+    // thread_name is required when the webhook targets a Discord forum channel.
+    thread_name: post.title,
   };
 
   if (dryRun) {
@@ -57,9 +57,9 @@ export async function postDiscordAnnouncement(
   }
 
   const response = await fetch(webhookUrl, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
+    headers: { "Content-Type": "application/json" },
+    method: "POST",
   });
 
   if (!response.ok) {

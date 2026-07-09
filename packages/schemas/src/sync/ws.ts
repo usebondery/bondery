@@ -3,9 +3,7 @@ import { SYNC_TABLE_KEYS, type SyncTableKey } from "#sync/tables.js";
 
 export const SYNC_WS_PROTOCOL_VERSION = 1 as const;
 
-export const syncTableKeySchema = z.enum(
-  SYNC_TABLE_KEYS as [SyncTableKey, ...SyncTableKey[]],
-);
+export const syncTableKeySchema = z.enum(SYNC_TABLE_KEYS as [SyncTableKey, ...SyncTableKey[]]);
 
 export const syncEmitMetaSchema = z.object({
   sourceDeviceId: z.string().uuid().optional(),
@@ -14,22 +12,22 @@ export const syncEmitMetaSchema = z.object({
 export type SyncEmitMeta = z.infer<typeof syncEmitMetaSchema>;
 
 export const syncWsHelloSchema = z.object({
-  v: z.literal(SYNC_WS_PROTOCOL_VERSION),
-  type: z.literal("sync.hello"),
   serverSequence: z.number().int().nonnegative(),
+  type: z.literal("sync.hello"),
+  v: z.literal(SYNC_WS_PROTOCOL_VERSION),
 });
 
 export const syncWsBatchSchema = z.object({
-  v: z.literal(SYNC_WS_PROTOCOL_VERSION),
-  type: z.literal("sync.batch"),
-  serverSequence: z.number().int().positive(),
   affectedTables: z.array(syncTableKeySchema).min(1),
+  serverSequence: z.number().int().positive(),
   sourceDeviceId: z.string().uuid().optional(),
+  type: z.literal("sync.batch"),
+  v: z.literal(SYNC_WS_PROTOCOL_VERSION),
 });
 
 export const syncWsPingSchema = z.object({
-  v: z.literal(SYNC_WS_PROTOCOL_VERSION),
   type: z.literal("ping"),
+  v: z.literal(SYNC_WS_PROTOCOL_VERSION),
 });
 
 export const syncWsServerMessageSchema = z.discriminatedUnion("type", [
@@ -44,8 +42,8 @@ export type SyncWsPingMessage = z.infer<typeof syncWsPingSchema>;
 export type SyncWsServerMessage = z.infer<typeof syncWsServerMessageSchema>;
 
 export const syncWsPongSchema = z.object({
-  v: z.literal(SYNC_WS_PROTOCOL_VERSION),
   type: z.literal("pong"),
+  v: z.literal(SYNC_WS_PROTOCOL_VERSION),
 });
 
 export type SyncWsClientMessage = z.infer<typeof syncWsPongSchema>;
@@ -58,8 +56,8 @@ export type SyncWakeEvent = {
 };
 
 export const syncWsTicketResponseSchema = z.object({
-  ticket: z.string().min(1),
   expiresAt: z.number().int().positive(),
+  ticket: z.string().min(1),
 });
 
 export type SyncWsTicketResponse = z.infer<typeof syncWsTicketResponseSchema>;
@@ -85,25 +83,25 @@ export function buildSyncWsUrl(apiBaseUrl: string, ticket: string): string {
 
 export function toSyncWsBatchMessage(event: SyncWakeEvent): SyncWsBatchMessage {
   return {
-    v: SYNC_WS_PROTOCOL_VERSION,
-    type: "sync.batch",
-    serverSequence: event.serverSequence,
     affectedTables: event.affectedTables,
+    serverSequence: event.serverSequence,
+    type: "sync.batch",
+    v: SYNC_WS_PROTOCOL_VERSION,
     ...(event.sourceDeviceId ? { sourceDeviceId: event.sourceDeviceId } : {}),
   };
 }
 
 export function toSyncWsHelloMessage(serverSequence: number): SyncWsHelloMessage {
   return {
-    v: SYNC_WS_PROTOCOL_VERSION,
-    type: "sync.hello",
     serverSequence,
+    type: "sync.hello",
+    v: SYNC_WS_PROTOCOL_VERSION,
   };
 }
 
 export function toSyncWsPingMessage(): SyncWsPingMessage {
   return {
-    v: SYNC_WS_PROTOCOL_VERSION,
     type: "ping",
+    v: SYNC_WS_PROTOCOL_VERSION,
   };
 }

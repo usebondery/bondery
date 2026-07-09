@@ -1,0 +1,10 @@
+{
+  "CreateFailed": "Couldn't create tag. Try again.",
+  "CreateTag": "Create tag",
+  "DeleteFailed": "Couldn't delete tag. Try again.",
+  "EditFailed": "Couldn't save tag. Try again.",
+  "EditTagsSearchPlaceholder": "Search tags...",
+  "LoadFailed": "Could not load tags",
+  "NoTagsYet": "No tags yet",
+  "NoTagsYetHint": "Tags help you organize and find contacts."
+}

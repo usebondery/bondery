@@ -4,7 +4,9 @@ import { readBoolInt, readNumber, readString, type ShapeRowMessage } from "./rea
 export function applyPeopleShapeOp(db: SQLiteDatabase, message: ShapeRowMessage): void {
   const { operation, value } = message;
   const id = readString(value, "id");
-  if (!id) return;
+  if (!id) {
+    return;
+  }
 
   if (operation === "delete") {
     db.runSync("DELETE FROM people WHERE id = ?", id);

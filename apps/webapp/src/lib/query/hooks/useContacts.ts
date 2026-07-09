@@ -1,41 +1,46 @@
 "use client";
 
+import type { Contact } from "@bondery/schemas";
+import type { QueryClient } from "@tanstack/react-query";
 import {
+  type UseQueryResult,
   useInfiniteQuery,
   useMutation,
   useQueries,
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
-import type { Contact, LinkedInDataResponse } from "@bondery/schemas";
 import {
+  type ContactsListParams,
   createContact,
   createContactRelationship,
   deleteContact,
   deleteContactRelationship,
   deleteContacts,
   deleteContactsFiltered,
+  getContactDetail,
+  getContactGroups,
+  getContactImportantDates,
+  getContactInteractions,
+  getContactLinkedInData,
+  getContactRelationships,
+  getContactsList,
+  getContactTags,
+  getMapPins,
+  type ImportantDateInput,
+  type MapAddressPinsResult,
+  type MapContactPinsResult,
+  type MapPinsBounds,
+  type MapPinsMode,
   mergeContacts,
   putContactImportantDates,
+  type SortOrder,
   shareContact,
   updateContact,
   updateContactRelationship,
-  type ImportantDateInput,
+  uploadContactPhoto,
 } from "@/lib/api/domains/contacts";
-import {
-  createContactsListQueryFn,
-  createContactDetailQueryFn,
-  createContactLinkedInDataQueryFn,
-  createContactGroupsQueryFn,
-  createMapPinsQueryFn,
-  type ContactsListParams,
-  type MapPinsBounds,
-  type MapPinsMode,
-  type SortOrder,
-} from "@/lib/query/fetchers/contacts";
-import type { ContactsListFilterParams } from "@/lib/query/fetchers/contactsListParams";
-import { contactKeys } from "@/lib/query/keys";
-import type { QueryClient } from "@tanstack/react-query";
+import type { ContactsListFilterParams } from "@/lib/query/contactsListParams";
 import {
   invalidateContactDetail,
   invalidateContactDomain,
@@ -43,7 +48,11 @@ import {
   invalidateContactLists,
   invalidateContactMapPins,
   invalidateContactRelationships,
+  invalidateMergeRecommendationDomain,
+  invalidateSettings,
 } from "@/lib/query/invalidation";
+import { contactKeys } from "@/lib/query/keys";
+import { PERSON_INTERACTIONS } from "@/lib/query/personPageQueryParams";
 
 type UpdateContactPatch = Parameters<typeof updateContact>[1];
 
@@ -85,84 +94,137 @@ export function useContactsListQuery(params: {
   enabled?: boolean;
 }) {
   const listParams: ContactsListParams = {
-    search: params.search,
-    sort: params.sort,
     limit: params.limit ?? PAGE_SIZE,
     offset: 0,
+    search: params.search,
+    sort: params.sort,
   };
   return useQuery({
-    queryKey: contactKeys.list(listParams),
-    queryFn: createContactsListQueryFn(listParams),
     enabled: params.enabled !== false,
+    queryFn: () => getContactsList(listParams),
+    queryKey: contactKeys.list(listParams),
   });
 }
 
 export function useContactsInfiniteQuery(params: ContactsListFilterParams) {
   return useInfiniteQuery({
-    queryKey: contactKeys.infinite(params),
+    getNextPageParam: (lastPage) => {
+      if (!lastPage.pagination.hasMore) {
+        return undefined;
+      }
+      return lastPage.pagination.offset + lastPage.pagination.limit;
+    },
+    initialPageParam: 0,
     queryFn: async ({ pageParam }) => {
       const listParams: ContactsListParams = {
         ...params,
         limit: PAGE_SIZE,
         offset: pageParam as number,
       };
-      return createContactsListQueryFn(listParams)();
+      return getContactsList(listParams);
     },
-    initialPageParam: 0,
-    getNextPageParam: (lastPage) => {
-      if (!lastPage.pagination.hasMore) return undefined;
-      return lastPage.pagination.offset + lastPage.pagination.limit;
-    },
+    queryKey: contactKeys.infinite(params),
   });
 }
 
 export function useContactQuery(id: string, enabled = true) {
   return useQuery({
-    queryKey: contactKeys.detail(id),
-    queryFn: createContactDetailQueryFn(id),
     enabled: enabled && !!id,
+    queryFn: () => getContactDetail(id),
+    queryKey: contactKeys.detail(id),
   });
 }
 
-export function useContactLinkedInDataQuery(
-  id: string,
-  initialData?: LinkedInDataResponse,
+export function useContactLinkedInDataQuery(id: string, enabled = true) {
+  return useQuery({
+    enabled: enabled && !!id,
+    queryFn: () => getContactLinkedInData(id),
+    queryKey: contactKeys.linkedin(id),
+  });
+}
+
+export function useContactRelationshipsQuery(contactId: string, enabled = true) {
+  return useQuery({
+    enabled: enabled && !!contactId,
+    queryFn: () => getContactRelationships(contactId),
+    queryKey: contactKeys.relationships(contactId),
+  });
+}
+
+export function useContactImportantDatesQuery(contactId: string, enabled = true) {
+  return useQuery({
+    enabled: enabled && !!contactId,
+    queryFn: () => getContactImportantDates(contactId),
+    queryKey: contactKeys.importantDates(contactId),
+  });
+}
+
+export function useContactTagsQuery(contactId: string, enabled = true) {
+  return useQuery({
+    enabled: enabled && !!contactId,
+    queryFn: () => getContactTags(contactId),
+    queryKey: contactKeys.tags(contactId),
+  });
+}
+
+export function useContactInteractionsQuery(
+  contactId: string,
+  params: Omit<typeof PERSON_INTERACTIONS, "contactId"> = PERSON_INTERACTIONS,
   enabled = true,
 ) {
   return useQuery({
-    queryKey: contactKeys.linkedin(id),
-    queryFn: createContactLinkedInDataQueryFn(id),
-    enabled: enabled && !!id,
-    initialData,
+    enabled: enabled && !!contactId,
+    queryFn: () => getContactInteractions(contactId, params),
+    queryKey: contactKeys.interactions(contactId, params),
   });
 }
 
 export function useMapPinsQuery(
+  mode: "contact",
+  bounds: MapPinsBounds | null,
+  enabled?: boolean,
+): UseQueryResult<MapContactPinsResult>;
+export function useMapPinsQuery(
+  mode: "address",
+  bounds: MapPinsBounds | null,
+  enabled?: boolean,
+): UseQueryResult<MapAddressPinsResult>;
+export function useMapPinsQuery(
   mode: MapPinsMode,
   bounds: MapPinsBounds | null,
   enabled = true,
-) {
-  return useQuery({
-    queryKey: contactKeys.mapPins(mode, bounds ?? undefined),
-    queryFn: () => createMapPinsQueryFn(mode, bounds!)(),
+): UseQueryResult<MapContactPinsResult | MapAddressPinsResult> {
+  return useQuery<MapContactPinsResult | MapAddressPinsResult>({
     enabled: enabled && bounds != null,
+    placeholderData: (previousData) => previousData,
+    queryFn: async () => {
+      if (!bounds) {
+        throw new Error("Map bounds are required");
+      }
+      if (mode === "contact") {
+        return getMapPins("contact", bounds);
+      }
+      return getMapPins("address", bounds);
+    },
+    queryKey: contactKeys.mapPins(mode, bounds ?? undefined),
+    staleTime: 0,
   });
 }
 
 export function useContactGroupsQuery(contactId: string, enabled = true) {
   return useQuery({
-    queryKey: contactKeys.groups(contactId),
-    queryFn: createContactGroupsQueryFn(contactId),
     enabled: enabled && !!contactId,
+    queryFn: () => getContactGroups(contactId),
+    queryKey: contactKeys.groups(contactId),
   });
 }
 
 export function useContactGroupsQueries(contactIds: string[]) {
   return useQueries({
     queries: contactIds.map((contactId) => ({
-      queryKey: contactKeys.groups(contactId),
-      queryFn: createContactGroupsQueryFn(contactId),
       enabled: !!contactId,
+      queryFn: () => getContactGroups(contactId),
+      queryKey: contactKeys.groups(contactId),
     })),
   });
 }
@@ -172,17 +234,39 @@ export function useCreateContactMutation() {
   return useMutation({
     mutationFn: createContact,
     onSuccess: async () => {
-      await invalidateContactLists(queryClient);
+      await invalidateContactDomain(queryClient);
     },
   });
 }
 
-export function useUpdateContactMutation(contactId: string) {
+export function useUpdateContactMutation(
+  contactId: string,
+  options?: { syncSettingsOnFirstNameChange?: boolean },
+) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (patch: UpdateContactPatch) => updateContact(contactId, patch),
     onSuccess: async (_data, patch) => {
       await invalidateAfterContactUpdate(queryClient, contactId, patch);
+      if (options?.syncSettingsOnFirstNameChange && "firstName" in patch) {
+        await invalidateSettings(queryClient);
+      }
+    },
+  });
+}
+
+export function useUploadContactPhotoMutation(
+  contactId: string,
+  options?: { syncSettings?: boolean },
+) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (file: File) => uploadContactPhoto(contactId, file),
+    onSuccess: async () => {
+      await Promise.all([
+        invalidateContactDetail(queryClient, contactId),
+        options?.syncSettings ? invalidateSettings(queryClient) : Promise.resolve(),
+      ]);
     },
   });
 }
@@ -280,7 +364,10 @@ export function useMergeContactsMutation() {
   return useMutation({
     mutationFn: mergeContacts,
     onSuccess: async () => {
-      await invalidateContactDomain(queryClient);
+      await Promise.all([
+        invalidateContactDomain(queryClient),
+        invalidateMergeRecommendationDomain(queryClient),
+      ]);
     },
   });
 }

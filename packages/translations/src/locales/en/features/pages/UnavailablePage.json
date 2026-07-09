@@ -1,0 +1,16 @@
+{
+  "CheckingAgain": "Checking again in {seconds}s…",
+  "Description": "Your account is safe and you're still signed in. We'll keep checking, this is usually brief.",
+  "MetadataTitle": "Service Unavailable",
+  "Retry": "Try again",
+  "StatusChecking": "Checking connection…",
+  "StatusDegraded": "Some features may be slow right now",
+  "StatusOffline": "Bondery is temporarily unavailable",
+  "StatusOnline": "Back online. Taking you back…",
+  "StatusPageLink": "View status page",
+  "TechnicalBackendStatus": "Backend: {status}",
+  "TechnicalDetails": "Technical details",
+  "TechnicalHttpStatus": "HTTP status: {status}",
+  "TechnicalUnreachable": "unreachable",
+  "Title": "We're having trouble connecting"
+}

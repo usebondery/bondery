@@ -1,8 +1,15 @@
 "use client";
 
+import type { ContactNameFields } from "@bondery/helpers/contact";
+import { formatContactName } from "@bondery/helpers/contact";
+import { geocodeSuggestionDisplayLabel } from "@bondery/helpers/geocode";
+import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
+import type { Contact, ContactAddressEntry } from "@bondery/schemas";
 import {
   Badge,
+  Box,
   Group,
+  Loader,
   Paper,
   SegmentedControl,
   Stack,
@@ -19,40 +26,32 @@ import {
   IconMapPin,
   IconUser,
 } from "@tabler/icons-react";
-import { useCallback, useEffect, useMemo, useRef, useState, useDeferredValue, type ReactNode } from "react";
-import { useQueryClient } from "@tanstack/react-query";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
-import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
-import { DEBOUNCE_MS } from "@/lib/config";
-import {
-  createMapPinsQueryFn,
-  type MapPinsBounds,
-  type MapPinsMode,
-} from "@/lib/query/fetchers/contacts";
-import { contactKeys } from "@/lib/query/keys";
+import { type ReactNode, useDeferredValue, useEffect, useMemo, useState } from "react";
+import type { ColumnKey } from "@/app/(app)/app/components/contacts/ContactsTableV2";
 import ContactsTable, {
   type ColumnConfig,
+  type ContactTableRow,
   type SortOrder,
 } from "@/app/(app)/app/components/contacts/ContactsTableV2";
-import { LocationLookupInput } from "@/app/(app)/app/components/LocationLookupInput";
 import { openDeleteContactModal } from "@/app/(app)/app/components/contacts/openDeleteContactModal";
 import { openDeleteContactsModal } from "@/app/(app)/app/components/contacts/openDeleteContactsModal";
-import { openAddPeopleToGroupSelectionModal } from "@/app/(app)/app/people/components/AddPeopleToGroupSelectionModal";
-import { openMergeWithModal } from "@/app/(app)/app/people/components/MergeWithModal";
-import { formatContactName } from "@/lib/nameHelpers";
-import { PageHeader } from "@/app/(app)/app/components/PageHeader";
-import { PageWrapper } from "@/app/(app)/app/components/PageWrapper";
+import { LocationLookupInput } from "@/app/(app)/app/components/LocationLookupInput";
 import {
-  PeopleMap,
   type MapBounds,
+  PeopleMap,
   type PeopleMapFocus,
 } from "@/app/(app)/app/components/map/PeopleMap";
-import type { MapView, MapPin, AddressPin } from "./types";
-import type { ContactAddressEntry } from "@bondery/schemas";
-import { geocodeSuggestionDisplayLabel } from "@bondery/helpers/geocode";
+import { PageHeader } from "@/app/(app)/app/components/PageHeader";
+import { PageWrapper } from "@/app/(app)/app/components/PageWrapper";
+import { openAddPeopleToGroupSelectionModal } from "@/app/(app)/app/people/components/AddPeopleToGroupSelectionModal";
+import { openMergeWithModal } from "@/app/(app)/app/people/components/MergeWithModal";
+import type { MapPinsBounds } from "@/lib/api/resources/contacts";
 import { useContactsTableCopy } from "@/lib/i18n/useContactsTableCopy";
-import type { ColumnKey } from "@/app/(app)/app/components/contacts/ContactsTableV2";
+import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
+import { DEBOUNCE_MS } from "@/lib/platform/config";
+import { useMapViewportPins } from "@/lib/query/hooks/useMapViewportPins";
+import type { MapView } from "./utils/types";
 
 const MAP_TABLE_COLUMN_KEYS: ColumnKey[] = [
   "name",
@@ -66,10 +65,6 @@ interface MapPageClientProps {
   view: MapView;
 }
 
-function mapViewToMode(view: MapView): MapPinsMode {
-  return view === "addresses" ? "address" : "contact";
-}
-
 function clampBounds(bounds: MapBounds): MapPinsBounds {
   const clampLat = (v: number) => Math.max(-90, Math.min(90, v));
   const clampLon = (v: number) => Math.max(-180, Math.min(180, v));
@@ -77,14 +72,17 @@ function clampBounds(bounds: MapBounds): MapPinsBounds {
   const minLon = lonSpan >= 360 ? -180 : clampLon(bounds.minLon);
   const maxLon = lonSpan >= 360 ? 180 : clampLon(bounds.maxLon);
   return {
-    minLat: clampLat(bounds.minLat),
     maxLat: clampLat(bounds.maxLat),
-    minLon,
     maxLon,
+    minLat: clampLat(bounds.minLat),
+    minLon,
   };
 }
 
-function sortPins(list: MapPin[], order: SortOrder): MapPin[] {
+function sortPins<T extends ContactNameFields & { lastInteraction?: string | null }>(
+  list: T[],
+  order: SortOrder,
+): T[] {
   return [...list].sort((a, b) => {
     switch (order) {
       case "nameAsc":
@@ -106,117 +104,77 @@ function sortPins(list: MapPin[], order: SortOrder): MapPin[] {
 }
 
 export function MapPageClient({ view }: MapPageClientProps) {
-  const t = useTranslations("MapPage");
-  const tPeople = useTranslations("PeoplePage");
+  const t = useWebTranslations("MapPage");
+  const tPeople = useWebTranslations("PeoplePage");
   const { columnDefinitions } = useContactsTableCopy();
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const queryClient = useQueryClient();
 
-  // Map location search
   const [locationQuery, setLocationQuery] = useState("");
   const [mapFocus, setMapFocus] = useState<PeopleMapFocus | null>(null);
+  const [viewportBounds, setViewportBounds] = useState<MapPinsBounds | null>(null);
+  const [visibleMarkerIds, setVisibleMarkerIds] = useState<string[]>([]);
+
+  const { locationPins, addressPins, isFetching, isLoading } = useMapViewportPins(
+    view,
+    viewportBounds,
+  );
+  const showPinsFetching = isFetching && !isLoading;
 
   const handleLocationSelect = (selected: ContactAddressEntry) => {
-    if (selected.latitude === null || selected.longitude === null) return;
+    if (selected.latitude === null || selected.longitude === null) {
+      return;
+    }
     const label = geocodeSuggestionDisplayLabel(selected);
     setLocationQuery(label);
     setMapFocus({
       latitude: selected.latitude,
       longitude: selected.longitude,
-      zoom: 13,
       token: `${label}-${Date.now()}`,
+      zoom: 13,
     });
   };
 
-  // Pins — separate state per view so switching doesn't flash stale data
-  const [locationPins, setLocationPins] = useState<MapPin[]>([]);
-  const [addressPins, setAddressPins] = useState<AddressPin[]>([]);
-  const [visibleMarkerIds, setVisibleMarkerIds] = useState<string[]>([]);
-
-  // viewRef wraps the view prop so fetchPins can read the current view
-  // without being listed in its useCallback deps (keeping it stable).
-  const viewRef = useRef<MapView>(view);
-  useEffect(() => {
-    viewRef.current = view;
-  }, [view]);
-
-  // lastBoundsRef stores the last known viewport bounds so a view switch
-  // can re-fetch without waiting for a map movement event.
-  const lastBoundsRef = useRef<MapBounds | null>(null);
-
-  const fetchPins = useCallback(
-    async (bounds: MapBounds) => {
-      const mode = mapViewToMode(viewRef.current);
-      const clamped = clampBounds(bounds);
-
-      try {
-        const json = await queryClient.fetchQuery({
-          queryKey: contactKeys.mapPins(mode, clamped),
-          queryFn: createMapPinsQueryFn(mode, clamped),
-          // Pins change when contacts are edited; never serve a cached empty viewport.
-          staleTime: 0,
-        });
-        if (mode === "address") {
-          setAddressPins((json.pins as AddressPin[]) || []);
-        } else {
-          setLocationPins((json.pins as MapPin[]) || []);
-        }
-      } catch (error) {
-        console.error("[MapPage] Failed to fetch map pins", error);
-      }
-    },
-    [queryClient],
-  );
-
   const handleBoundsChange = useDebouncedCallback((bounds: MapBounds) => {
-    lastBoundsRef.current = bounds;
-    void fetchPins(bounds);
+    setViewportBounds(clampBounds(bounds));
   }, DEBOUNCE_MS.mapViewport);
 
-  // When view changes: clear stale pins and re-fetch immediately using last known bounds.
   useEffect(() => {
-    setLocationPins([]);
-    setAddressPins([]);
     setVisibleMarkerIds([]);
-    if (lastBoundsRef.current) void fetchPins(lastBoundsRef.current);
-  }, [view, fetchPins]);
+  }, []);
 
-  // SegmentedControl handler — updates the URL to switch view
   const handleViewChange = (value: string) => {
     const params = new URLSearchParams(searchParams.toString());
     params.set("view", value);
     router.replace(`${pathname}?${params.toString()}`);
   };
 
-  // Derive map markers from the active pin set
   const markers = useMemo(() => {
     if (view === "addresses") {
       return addressPins.map((p) => ({
-        id: p.addressId,
-        name: [p.firstName, p.lastName].filter(Boolean).join(" "),
+        avatarUrl: p.avatar,
         firstName: p.firstName,
+        href: `${WEBAPP_ROUTES.PERSON}/${p.personId}`,
+        id: p.addressId,
         lastName: p.lastName,
         latitude: p.latitude,
         longitude: p.longitude,
-        avatarUrl: p.avatar,
-        href: `${WEBAPP_ROUTES.PERSON}/${p.personId}`,
+        name: [p.firstName, p.lastName].filter(Boolean).join(" "),
       }));
     }
     return locationPins.map((p) => ({
-      id: p.id,
-      name: [p.firstName, p.lastName].filter(Boolean).join(" "),
+      avatarUrl: p.avatar,
       firstName: p.firstName,
+      href: `${WEBAPP_ROUTES.PERSON}/${p.id}`,
+      id: p.id,
       lastName: p.lastName,
       latitude: p.latitude,
       longitude: p.longitude,
-      avatarUrl: p.avatar,
-      href: `${WEBAPP_ROUTES.PERSON}/${p.id}`,
+      name: [p.firstName, p.lastName].filter(Boolean).join(" "),
     }));
   }, [view, locationPins, addressPins]);
 
-  // Contacts visible in the current viewport (for the table below the map)
   const visibleLocationPins = useMemo(() => {
     const idSet = new Set(visibleMarkerIds);
     return locationPins.filter((p) => idSet.has(p.id));
@@ -227,31 +185,28 @@ export function MapPageClient({ view }: MapPageClientProps) {
     return addressPins.filter((p) => idSet.has(p.addressId));
   }, [addressPins, visibleMarkerIds]);
 
-  // Map address pins to a contact-shaped object so we can reuse ContactsTable.
-  // id = personId so the PersonChip name link points to the correct person.
-  // _addressType is a custom extra field read by renderAddressLocationCell via `as any`.
   const ADDRESS_TYPE_COLOR: Record<string, string> = {
     home: "blue",
-    work: "grape",
     other: "gray",
+    work: "grape",
   };
 
-  const addressContactRows = useMemo(
+  const addressContactRows = useMemo<ContactTableRow[]>(
     () =>
       visibleAddressPins.map((pin) => ({
-        id: pin.personId,
+        _addressType: pin.addressType,
         _rowKey: pin.addressId,
+        avatar: pin.avatar,
         firstName: pin.firstName,
-        middleName: null,
-        lastName: pin.lastName,
         headline: null,
+        id: pin.personId,
+        lastInteraction: null,
+        lastName: pin.lastName,
         location:
           pin.addressFormatted ??
           [pin.addressCity, pin.addressCountry].filter(Boolean).join(", ") ??
           null,
-        avatar: pin.avatar,
-        lastInteraction: null,
-        _addressType: pin.addressType,
+        middleName: null,
       })),
     [visibleAddressPins],
   );
@@ -259,9 +214,7 @@ export function MapPageClient({ view }: MapPageClientProps) {
   const [tableSearch, setTableSearch] = useState("");
   const [sortOrder, setSortOrder] = useState<SortOrder>("nameAsc");
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
-  const [lastSelectedIndex, setLastSelectedIndex] = useState<number | null>(
-    null,
-  );
+  const [lastSelectedIndex, setLastSelectedIndex] = useState<number | null>(null);
 
   const columnLabels = useMemo(
     () =>
@@ -272,23 +225,23 @@ export function MapPageClient({ view }: MapPageClientProps) {
   );
 
   const columnIcons: Record<ColumnKey, ReactNode> = {
-    name: <IconUser size={16} />,
-    headline: <IconBriefcase size={16} />,
-    location: <IconMapPin size={16} />,
-    lastInteraction: <IconClock size={16} />,
-    social: <IconBrandLinkedin size={16} />,
-    phone: null,
-    email: null,
     avatar: null,
+    email: null,
+    headline: <IconBriefcase size={16} />,
+    lastInteraction: <IconClock size={16} />,
+    location: <IconMapPin size={16} />,
+    name: <IconUser size={16} />,
+    phone: null,
+    social: <IconBrandLinkedin size={16} />,
   };
 
   const [columns, setColumns] = useState<ColumnConfig[]>(() =>
     MAP_TABLE_COLUMN_KEYS.map((key) => ({
+      fixed: key === "name",
+      icon: columnIcons[key],
       key,
       label: columnDefinitions[key].label,
       visible: key !== "social",
-      icon: columnIcons[key],
-      fixed: key === "name",
     })),
   );
 
@@ -304,11 +257,10 @@ export function MapPageClient({ view }: MapPageClientProps) {
   const deferredColumns = useDeferredValue(columns);
   const visibleColumns = deferredColumns.filter((c) => c.visible);
 
-  // Reset selection when viewport changes
   useEffect(() => {
     setSelectedIds(new Set());
     setLastSelectedIndex(null);
-  }, [visibleMarkerIds]);
+  }, []);
 
   const handleTableSearch = useDebouncedCallback(
     (q: string) => setTableSearch(q),
@@ -319,11 +271,7 @@ export function MapPageClient({ view }: MapPageClientProps) {
     const query = tableSearch.trim().toLowerCase();
     const base = query
       ? visibleLocationPins.filter((p) =>
-          [p.firstName, p.lastName]
-            .filter(Boolean)
-            .join(" ")
-            .toLowerCase()
-            .includes(query),
+          [p.firstName, p.lastName].filter(Boolean).join(" ").toLowerCase().includes(query),
         )
       : visibleLocationPins;
     return sortPins(base, sortOrder);
@@ -332,22 +280,13 @@ export function MapPageClient({ view }: MapPageClientProps) {
   const filteredAddressRows = useMemo(() => {
     const query = tableSearch.trim().toLowerCase();
     const base = query
-      ? addressContactRows.filter((r) =>
-          formatContactName(r as any)
-            .toLowerCase()
-            .includes(query),
-        )
+      ? addressContactRows.filter((r) => formatContactName(r).toLowerCase().includes(query))
       : addressContactRows;
-    return sortPins(
-      base as any,
-      sortOrder,
-    ) as unknown as typeof addressContactRows;
+    return sortPins(base, sortOrder);
   }, [addressContactRows, tableSearch, sortOrder]);
 
-  const allSelected =
-    filteredPins.length > 0 && selectedIds.size === filteredPins.length;
-  const someSelected =
-    selectedIds.size > 0 && selectedIds.size < filteredPins.length;
+  const allSelected = filteredPins.length > 0 && selectedIds.size === filteredPins.length;
+  const someSelected = selectedIds.size > 0 && selectedIds.size < filteredPins.length;
 
   const handleSelectAll = () => {
     if (selectedIds.size === filteredPins.length) {
@@ -357,12 +296,8 @@ export function MapPageClient({ view }: MapPageClientProps) {
     }
   };
 
-  const handleSelectOne = (
-    id: string,
-    options?: { shiftKey?: boolean; index?: number },
-  ) => {
-    const currentIndex =
-      options?.index ?? filteredPins.findIndex((p) => p.id === id);
+  const handleSelectOne = (id: string, options?: { shiftKey?: boolean; index?: number }) => {
+    const currentIndex = options?.index ?? filteredPins.findIndex((p) => p.id === id);
 
     if (options?.shiftKey && lastSelectedIndex !== null && currentIndex >= 0) {
       const shouldSelect = !selectedIds.has(id);
@@ -370,9 +305,13 @@ export function MapPageClient({ view }: MapPageClientProps) {
       const end = Math.max(lastSelectedIndex, currentIndex);
       const rangeIds = filteredPins.slice(start, end + 1).map((p) => p.id);
       const next = new Set(selectedIds);
-      rangeIds.forEach((rid) =>
-        shouldSelect ? next.add(rid) : next.delete(rid),
-      );
+      for (const rid of rangeIds) {
+        if (shouldSelect) {
+          next.add(rid);
+        } else {
+          next.delete(rid);
+        }
+      }
       setSelectedIds(next);
       setLastSelectedIndex(currentIndex);
       return;
@@ -381,7 +320,9 @@ export function MapPageClient({ view }: MapPageClientProps) {
     const next = new Set(selectedIds);
     next.has(id) ? next.delete(id) : next.add(id);
     setSelectedIds(next);
-    if (currentIndex >= 0) setLastSelectedIndex(currentIndex);
+    if (currentIndex >= 0) {
+      setLastSelectedIndex(currentIndex);
+    }
   };
 
   const handleDeleteContact = (contactId: string) => {
@@ -393,7 +334,6 @@ export function MapPageClient({ view }: MapPageClientProps) {
         : tPeople("ThisContactFallback"),
       onDeleted: async () => {
         setSelectedIds(new Set());
-        if (lastBoundsRef.current) void fetchPins(lastBoundsRef.current);
       },
     });
   };
@@ -403,22 +343,17 @@ export function MapPageClient({ view }: MapPageClientProps) {
       contactIds: ids,
       onDeleted: async () => {
         setSelectedIds(new Set());
-        if (lastBoundsRef.current) void fetchPins(lastBoundsRef.current);
       },
     });
   };
 
-  const openMergeModal = (
-    leftPersonId: string,
-    rightPersonId?: string,
-    lockBoth?: boolean,
-  ) => {
+  const openMergeModal = (leftPersonId: string, rightPersonId?: string, lockBoth?: boolean) => {
     openMergeWithModal({
-      contacts: visibleLocationPins as any,
-      leftPersonId,
-      rightPersonId,
+      contacts: visibleLocationPins as Contact[],
       disableLeftPicker: true,
       disableRightPicker: Boolean(lockBoth),
+      leftPersonId,
+      rightPersonId,
     });
   };
 
@@ -426,139 +361,123 @@ export function MapPageClient({ view }: MapPageClientProps) {
     <PageWrapper>
       <Stack gap="xl">
         <PageHeader
-          icon={IconMap2}
-          title={t("Title")}
           helpDoc="concepts.map"
           helpLabel={t("Subtitle")}
+          icon={IconMap2}
           secondaryAction={
             <SegmentedControl
-              value={view}
-              onChange={handleViewChange}
-              size="xs"
               data={[
                 {
-                  value: "locations",
                   label: (
                     <Group gap={6} wrap="nowrap">
                       <IconMapPin size={14} />
                       <span>{t("ViewLocations")}</span>
                     </Group>
                   ),
+                  value: "locations",
                 },
                 {
-                  value: "addresses",
                   label: (
                     <Group gap={6} wrap="nowrap">
                       <IconHome size={14} />
                       <span>{t("ViewAddresses")}</span>
                     </Group>
                   ),
+                  value: "addresses",
                 },
               ]}
+              onChange={handleViewChange}
+              size="xs"
+              value={view}
             />
           }
+          title={t("Title")}
         />
 
-        {/* Map location autocomplete */}
         <LocationLookupInput
           label={t("SearchLabel")}
-          placeholder={t("SearchPlaceholder")}
-          value={locationQuery}
           onChange={setLocationQuery}
           onSuggestionSelect={handleLocationSelect}
+          placeholder={t("SearchPlaceholder")}
+          value={locationQuery}
         />
 
-        {/* Map — always rendered; pins are fetched on viewport change */}
-        <PeopleMap
-          markers={markers}
-          center={[35, -25]}
-          zoom={3}
-          height={560}
-          focus={mapFocus}
-          onVisibleMarkerIdsChange={setVisibleMarkerIds}
-          onBoundsChange={handleBoundsChange}
-          disableAutoFit
-        />
+        <Box pos="relative">
+          <PeopleMap
+            center={[35, -25]}
+            disableAutoFit
+            focus={mapFocus}
+            height={560}
+            markers={markers}
+            onBoundsChange={handleBoundsChange}
+            onVisibleMarkerIdsChange={setVisibleMarkerIds}
+            zoom={3}
+          />
+          {showPinsFetching ? (
+            <Box
+              pos="absolute"
+              px="sm"
+              py={6}
+              right={12}
+              style={{
+                backgroundColor: "var(--mantine-color-body)",
+                borderRadius: "var(--mantine-radius-md)",
+                boxShadow: "var(--mantine-shadow-sm)",
+                zIndex: 500,
+              }}
+              top={12}
+            >
+              <Group gap="xs" wrap="nowrap">
+                <Loader aria-hidden size="xs" />
+                <Text c="dimmed" size="xs">
+                  {t("RefreshingPins")}
+                </Text>
+              </Group>
+            </Box>
+          ) : null}
+        </Box>
 
-        {/* Table below map — branches on the active view */}
         {view === "addresses" ? (
-          <Paper withBorder shadow="sm" radius="md" p="md">
+          <Paper p="md" radius="md" shadow="sm" withBorder>
             <ContactsTable
-              contacts={filteredAddressRows as any}
-              selectedIds={selectedIds}
+              allSelected={allSelected}
+              columnsForMenu={columns}
+              contacts={filteredAddressRows}
               isHeaderShown={true}
-              onSearchChange={handleTableSearch}
               noContactsFound={t("NoAddressesFound")}
               noContactsMatchSearch={t("NoAddressesMatchSearch")}
-              columnsForMenu={columns}
-              setColumnsForMenu={setColumns}
-              sortOrderForMenu={sortOrder}
-              setSortOrderForMenu={setSortOrder}
-              visibleColumns={visibleColumns}
+              onSearchChange={handleTableSearch}
               onSelectAll={handleSelectAll}
               onSelectOne={handleSelectOne}
-              allSelected={allSelected}
-              someSelected={someSelected}
-              showSelection
-              standardActions={{
-                onMergeOne: (contactId) => openMergeModal(contactId),
-                onMergeSelected: (leftContactId, rightContactId) =>
-                  openMergeModal(leftContactId, rightContactId, true),
-                onAddToGroupsOne: (contactId) =>
-                  openAddPeopleToGroupSelectionModal({
-                    personIds: [contactId],
-                  }),
-                onAddToGroupsSelected: (contactIds) =>
-                  openAddPeopleToGroupSelectionModal({ personIds: contactIds }),
-                onDeleteOne: handleDeleteContact,
-                onDeleteSelected: handleBulkDelete,
-              }}
               renderLocationCell={(contact) => {
-                const type = (contact as any)._addressType as string;
+                const type = (contact as ContactTableRow)._addressType;
                 const addr = contact.location || "—";
                 return (
-                  <Group gap={6} wrap="nowrap" style={{ minWidth: 0 }}>
+                  <Group gap={6} style={{ minWidth: 0 }} wrap="nowrap">
                     <Badge
-                      size="xs"
-                      variant="light"
                       color={ADDRESS_TYPE_COLOR[type] ?? "gray"}
+                      size="xs"
                       style={{ flexShrink: 0 }}
+                      variant="light"
                     >
                       {type}
                     </Badge>
                     <Tooltip label={addr} withArrow>
-                      <Text size="sm" lineClamp={1}>
+                      <Text lineClamp={1} size="sm">
                         {addr}
                       </Text>
                     </Tooltip>
                   </Group>
                 );
               }}
-            />
-          </Paper>
-        ) : (
-          <Paper withBorder shadow="sm" radius="md" p="md">
-            <ContactsTable
-              contacts={filteredPins as any}
+              searchLoading={showPinsFetching}
               selectedIds={selectedIds}
-              isHeaderShown={true}
-              onSearchChange={handleTableSearch}
-              noContactsFound={t("NoContactsFound")}
-              noContactsMatchSearch={t("NoContactsMatchSearch")}
-              columnsForMenu={columns}
               setColumnsForMenu={setColumns}
-              sortOrderForMenu={sortOrder}
               setSortOrderForMenu={setSortOrder}
-              visibleColumns={visibleColumns}
-              onSelectAll={handleSelectAll}
-              onSelectOne={handleSelectOne}
-              allSelected={allSelected}
-              someSelected={someSelected}
               showSelection
+              someSelected={someSelected}
+              sortOrderForMenu={sortOrder}
               standardActions={{
-                onMergeOne: (contactId) => openMergeModal(contactId),
-                onMergeSelected: (leftContactId, rightContactId) =>
-                  openMergeModal(leftContactId, rightContactId, true),
                 onAddToGroupsOne: (contactId) =>
                   openAddPeopleToGroupSelectionModal({
                     personIds: [contactId],
@@ -567,7 +486,46 @@ export function MapPageClient({ view }: MapPageClientProps) {
                   openAddPeopleToGroupSelectionModal({ personIds: contactIds }),
                 onDeleteOne: handleDeleteContact,
                 onDeleteSelected: handleBulkDelete,
+                onMergeOne: (contactId) => openMergeModal(contactId),
+                onMergeSelected: (leftContactId, rightContactId) =>
+                  openMergeModal(leftContactId, rightContactId, true),
               }}
+              visibleColumns={visibleColumns}
+            />
+          </Paper>
+        ) : (
+          <Paper p="md" radius="md" shadow="sm" withBorder>
+            <ContactsTable
+              allSelected={allSelected}
+              columnsForMenu={columns}
+              contacts={filteredPins as Contact[]}
+              isHeaderShown={true}
+              noContactsFound={t("NoContactsFound")}
+              noContactsMatchSearch={t("NoContactsMatchSearch")}
+              onSearchChange={handleTableSearch}
+              onSelectAll={handleSelectAll}
+              onSelectOne={handleSelectOne}
+              searchLoading={showPinsFetching}
+              selectedIds={selectedIds}
+              setColumnsForMenu={setColumns}
+              setSortOrderForMenu={setSortOrder}
+              showSelection
+              someSelected={someSelected}
+              sortOrderForMenu={sortOrder}
+              standardActions={{
+                onAddToGroupsOne: (contactId) =>
+                  openAddPeopleToGroupSelectionModal({
+                    personIds: [contactId],
+                  }),
+                onAddToGroupsSelected: (contactIds) =>
+                  openAddPeopleToGroupSelectionModal({ personIds: contactIds }),
+                onDeleteOne: handleDeleteContact,
+                onDeleteSelected: handleBulkDelete,
+                onMergeOne: (contactId) => openMergeModal(contactId),
+                onMergeSelected: (leftContactId, rightContactId) =>
+                  openMergeModal(leftContactId, rightContactId, true),
+              }}
+              visibleColumns={visibleColumns}
             />
           </Paper>
         )}

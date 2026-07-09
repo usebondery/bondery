@@ -28,11 +28,11 @@
 
 import fs from "node:fs";
 import path from "node:path";
-import { allPostMeta } from "../content/blog/metadata";
 import { getReadingTime } from "@bondery/helpers";
+import { allPostMeta } from "../content/blog/metadata";
+import { getCategoryConfig } from "../src/app/blog/_lib/categories";
 import { postDiscordAnnouncement } from "./lib/discord";
 import { postRedditAnnouncement, type RedditConfig } from "./lib/reddit";
-import { getCategoryConfig } from "../src/app/blog/_lib/categories";
 
 // ---------------------------------------------------------------------------
 // Argument parsing
@@ -79,7 +79,9 @@ const missingEnv = [...alwaysRequired, ...discordRequired, ...redditRequired].fi
 );
 if (missingEnv.length > 0) {
   console.error("Error: Missing required environment variables:");
-  missingEnv.forEach((key) => console.error(`  - ${key}`));
+  for (const key of missingEnv) {
+    console.error(`  - ${key}`);
+  }
   process.exit(1);
 }
 
@@ -88,8 +90,8 @@ const discordWebhookUrl = process.env.PRIVATE_DISCORD_WEBHOOK_URL ?? "";
 const redditConfig: RedditConfig = {
   clientId: process.env.REDDIT_CLIENT_ID ?? "",
   clientSecret: process.env.REDDIT_CLIENT_SECRET ?? "",
-  username: process.env.REDDIT_USERNAME ?? "",
   password: process.env.REDDIT_PASSWORD ?? "",
+  username: process.env.REDDIT_USERNAME ?? "",
 };
 
 // ---------------------------------------------------------------------------

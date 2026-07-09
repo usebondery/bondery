@@ -1,10 +1,7 @@
-import { Suspense } from "react";
-import { redirect } from "next/navigation";
 import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
-import {
-  resolveServerSession,
-  signOutServerSession,
-} from "@/lib/auth/resolveServerSession";
+import { redirect } from "next/navigation";
+import { Suspense } from "react";
+import { resolveServerSession, signOutServerSession } from "@/lib/auth/resolveServerSession";
 import { LoginClient } from "./LoginClient";
 
 /**

@@ -16,7 +16,7 @@ export function SettingsPreviewSection({ caption, children }: SettingsPreviewSec
 
   return (
     <View style={styles.wrap}>
-      <SettingsFieldLabel>{t("MobileApp.Settings.Preview")}</SettingsFieldLabel>
+      <SettingsFieldLabel>{t("Preview", { ns: "MobileSettings" })}</SettingsFieldLabel>
       <Text style={[styles.caption, { color: colors.textMuted }]}>{caption}</Text>
       {children}
     </View>
@@ -24,12 +24,12 @@ export function SettingsPreviewSection({ caption, children }: SettingsPreviewSec
 }
 
 const styles = StyleSheet.create({
-  wrap: {
-    gap: 12,
-  },
   caption: {
-    marginTop: -4,
     fontSize: MOBILE_TYPOGRAPHY.fontSize.caption,
     lineHeight: 18,
+    marginTop: -4,
+  },
+  wrap: {
+    gap: 12,
   },
 });

@@ -1,23 +1,23 @@
 "use client";
 
-import { Checkbox, ThemeIcon, Chip, Stack, Text } from "@mantine/core";
-import { IconLink, IconLinkOff } from "@tabler/icons-react";
+import { Checkbox, Chip, Stack, Text, ThemeIcon } from "@mantine/core";
 import type { Icon as TablerIconType } from "@tabler/icons-react";
+import { IconLink, IconLinkOff } from "@tabler/icons-react";
 import type { ReactNode } from "react";
 
 interface IntegrationCardProps {
-  provider: string;
+  connectedDescription: string;
+  disabledDescription?: string;
   displayName: string;
   icon?: TablerIconType;
-  iconNode?: ReactNode;
   iconColor?: string;
+  iconNode?: ReactNode;
   isConnected: boolean;
   isDisabled: boolean;
-  connectedDescription: string;
-  unconnectedDescription: string;
-  disabledDescription?: string;
-  onClick: () => void;
   isLinkable?: boolean;
+  onClick: () => void;
+  provider: string;
+  unconnectedDescription: string;
 }
 
 export function IntegrationCard({
@@ -43,35 +43,34 @@ export function IntegrationCard({
 
   return (
     <Checkbox.Card
-      className="button-scale-effect"
       checked={isChecked}
-      p={"md"}
-      onClick={onClick}
-      style={{
-        width: 200,
-        height: 160,
-        position: "relative",
-        cursor: isDisabled ? "not-allowed" : "pointer",
-        opacity: isDisabled ? 0.6 : 1,
-        borderColor: isChecked ? "var(--mantine-color-green-filled)" : undefined,
-      }}
+      className="button-scale-effect"
+      disabled={isDisabled}
       mod={{
         checked: isChecked,
         unchecked: !isChecked,
       }}
-      disabled={isDisabled}
+      onClick={onClick}
+      p={"md"}
+      style={{
+        borderColor: isChecked ? "var(--mantine-color-green-filled)" : undefined,
+        cursor: isDisabled ? "not-allowed" : "pointer",
+        height: 160,
+        opacity: isDisabled ? 0.6 : 1,
+        position: "relative",
+        width: 200,
+      }}
     >
       {isLinkable ? (
         <Chip
           checked={isConnected}
           color={isConnected ? "green" : "red"}
-          variant="light"
           size="xs"
           style={{
-            position: "absolute",
-            top: 8,
-            right: 8,
             pointerEvents: "none",
+            position: "absolute",
+            right: 8,
+            top: 8,
           }}
           styles={{
             label: {
@@ -79,19 +78,20 @@ export function IntegrationCard({
               paddingRight: 8,
             },
           }}
+          variant="light"
         >
           {isConnected ? <IconLink size={12} /> : <IconLinkOff size={12} />}
         </Chip>
       ) : null}
 
-      <Stack gap="xs" align="center" justify="start" h={"full"} pt={"xs"}>
-        <ThemeIcon size={48} variant="filled" color={iconColor}>
+      <Stack align="center" gap="xs" h={"full"} justify="start" pt={"xs"}>
+        <ThemeIcon color={iconColor} size={48} variant="filled">
           {iconNode ?? (Icon ? <Icon size={28} stroke={1.5} /> : null)}
         </ThemeIcon>
-        <Text size="sm" fw={600}>
+        <Text fw={600} size="sm">
           {displayName}
         </Text>
-        <Text size="xs" ta="center" c="dimmed">
+        <Text c="dimmed" size="xs" ta="center">
           {description}
         </Text>
       </Stack>

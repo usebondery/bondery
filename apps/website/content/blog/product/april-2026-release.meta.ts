@@ -1,5 +1,5 @@
-import type { PostMeta } from "../../../src/app/blog/_lib/types";
 import { productCategoryConfig } from "../../../src/app/blog/_lib/categories";
+import type { PostMeta } from "../../../src/app/blog/_lib/types";
 import { sveetya } from "../../../src/data/team";
 
 /**
@@ -7,13 +7,15 @@ import { sveetya } from "../../../src/data/team";
  * Imported by both the MDX file (for Next.js) and metadata.ts (for the announce script).
  */
 export const postMeta: PostMeta = {
-  title: "April 2026 Release: Keep-in-Touch, Instagram Import & More",
-  slug: "april-2026-release",
+  announce: {
+    enabled: true,
+  },
+  author: sveetya.name,
+  category: productCategoryConfig.slug,
   date: "2026-04-01",
   description:
     "Bondery v1.4.0 brings keep-in-touch reminders, Instagram import, vCard support, a Myself contact, and user preferences.",
-  category: productCategoryConfig.slug,
-  author: sveetya.name,
+  slug: "april-2026-release",
   tags: [
     "release",
     "keep-in-touch",
@@ -23,7 +25,5 @@ export const postMeta: PostMeta = {
     "PRM",
     "open source",
   ],
-  announce: {
-    enabled: true,
-  },
+  title: "April 2026 Release: Keep-in-Touch, Instagram Import & More",
 };

@@ -1,68 +1,68 @@
 "use client";
 
-import { Card, Group, Text, Menu, MenuTarget, MenuDropdown, MenuItem, Stack } from "@mantine/core";
-import { IconCopy, IconEdit, IconFolderCog, IconTrash, IconUserPlus } from "@tabler/icons-react";
-import { useState, type MouseEvent, type ReactNode } from "react";
+import { DotsMenuButton, PersonAvatarGroup } from "@bondery/mantine-next";
 import type { GroupWithCount } from "@bondery/schemas";
-import { PersonAvatarGroup, DotsMenuButton } from "@bondery/mantine-next";
-import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
+import { Card, Group, Menu, MenuDropdown, MenuItem, MenuTarget, Stack, Text } from "@mantine/core";
+import { IconCopy, IconEdit, IconFolderCog, IconTrash, IconUserPlus } from "@tabler/icons-react";
+import { type MouseEvent, type ReactNode, useState } from "react";
+import { useCommonTranslations, useWebTranslations } from "@/lib/i18n/useWebTranslations";
 
 // ── Color maps ──────────────────────────────────────────
 
 type HighlightColor = "primary" | "green" | "red";
 
 const BORDER_COLOR: Record<HighlightColor, string> = {
-  primary: "var(--mantine-primary-color-filled)",
   green: "var(--mantine-color-green-filled)",
+  primary: "var(--mantine-primary-color-filled)",
   red: "var(--mantine-color-red-filled)",
 };
 
 const BG_COLOR: Record<HighlightColor, string> = {
-  primary: "var(--mantine-primary-color-light)",
   green: "var(--mantine-color-green-light)",
+  primary: "var(--mantine-primary-color-light)",
   red: "var(--mantine-color-red-light)",
 };
 
 const FILLED_COLOR: Record<"primary" | "green", string> = {
-  primary: "var(--mantine-primary-color-filled)",
   green: "var(--mantine-color-green-filled)",
+  primary: "var(--mantine-primary-color-filled)",
 };
 
 // ── Prop types ──────────────────────────────────────────
 
 interface GroupCardCommonProps {
-  interactive?: boolean;
-  selected?: boolean;
-  showMenu?: boolean;
   cursorType?: "pointer" | "default";
   highlightColor?: HighlightColor;
+  interactive?: boolean;
+  selected?: boolean;
   shadow?: string;
+  showMenu?: boolean;
 }
 
 interface GroupEntityCardProps extends GroupCardCommonProps {
   group: GroupWithCount;
   onAddPeople: (group: GroupWithCount) => void;
-  onEdit: (group: GroupWithCount) => void;
-  onDuplicate: (group: GroupWithCount) => void;
-  onDelete: (groupId: string) => void;
   onClick: (groupId: string) => void;
+  onDelete: (groupId: string) => void;
+  onDuplicate: (group: GroupWithCount) => void;
+  onEdit: (group: GroupWithCount) => void;
   variant?: "default" | "small";
 }
 
 interface GroupActionCardProps extends GroupCardCommonProps {
-  variant: "action";
+  actionColor?: "primary" | "green";
+  actionIcon?: ReactNode;
   actionLabel: string;
   onActionClick: () => void;
-  actionIcon?: ReactNode;
-  actionColor?: "primary" | "green";
+  variant: "action";
 }
 
 type GroupCardProps = GroupEntityCardProps | GroupActionCardProps;
 
 export const GROUP_CARD_MAX_WIDTH_BY_VARIANT: Record<"default" | "small" | "action", string> = {
+  action: "14rem",
   default: "18rem",
   small: "14rem",
-  action: "14rem",
 };
 
 // ── Shared card shell ───────────────────────────────────
@@ -104,26 +104,26 @@ function GroupCardShell({
 }) {
   return (
     <Card
-      shadow={shadow}
+      bd={highlightColor ? `1px solid ${BORDER_COLOR[highlightColor]}` : undefined}
+      bg={highlightColor ? BG_COLOR[highlightColor] : undefined}
+      className={className}
+      onClick={onClick}
       p={compact ? "sm" : "md"}
+      shadow={shadow}
       style={{
         cursor: cursorType || (interactive ? "pointer" : "default"),
         maxWidth,
       }}
-      className={className}
-      bd={highlightColor ? `1px solid ${BORDER_COLOR[highlightColor]}` : undefined}
-      bg={highlightColor ? BG_COLOR[highlightColor] : undefined}
-      onClick={onClick}
     >
       <Card.Section bg={sectionBg} h={compact ? 72 : 80} pos="relative">
         {sectionOverlay}
-        <Group justify="center" h="100%">
+        <Group h="100%" justify="center">
           {sectionContent}
         </Group>
       </Card.Section>
 
-      <Stack gap={compact ? 8 : 10} mt={compact ? "sm" : "md"} align="stretch">
-        <Text fw={600} size={compact ? "sm" : "md"} ta="center" lineClamp={1}>
+      <Stack align="stretch" gap={compact ? 8 : 10} mt={compact ? "sm" : "md"}>
+        <Text fw={600} lineClamp={1} size={compact ? "sm" : "md"} ta="center">
           {label}
         </Text>
         {/* minH matches Mantine Avatar size so all cards share the same
@@ -157,19 +157,19 @@ function GroupCardMenu({
   onDelete: (groupId: string) => void;
   iconSize: "sm" | "md";
 }) {
-  const t = useTranslations("GroupsPage");
-  const tCommon = useTranslations("WebAppCommon");
+  const t = useWebTranslations("GroupsPage");
+  const tCommon = useCommonTranslations();
 
   return (
-    <Menu shadow="md" opened={menuOpened} onChange={setMenuOpened} position="bottom-end">
+    <Menu onChange={setMenuOpened} opened={menuOpened} position="bottom-end" shadow="md">
       <MenuTarget>
         <DotsMenuButton
-          size={iconSize}
-          opened={menuOpened}
           data-menu-trigger
           onClick={(e) => {
             e.stopPropagation();
           }}
+          opened={menuOpened}
+          size={iconSize}
         />
       </MenuTarget>
       <MenuDropdown>
@@ -204,15 +204,15 @@ function GroupCardMenu({
           {t("Duplicate")}
         </MenuItem>
         <MenuItem
-          leftSection={<IconTrash size={16} />}
           color="red"
+          leftSection={<IconTrash size={16} />}
           onClick={(e) => {
             e.stopPropagation();
             setMenuOpened(false);
             onDelete(group.id);
           }}
         >
-          {tCommon("Delete")}
+          {tCommon("actions.delete")}
         </MenuItem>
       </MenuDropdown>
     </Menu>
@@ -223,6 +223,7 @@ function GroupCardMenu({
 
 export function GroupCard(props: GroupCardProps) {
   const [menuOpened, setMenuOpened] = useState(false);
+  const t = useWebTranslations("GroupsPage");
   const {
     interactive = true,
     selected = false,
@@ -246,17 +247,17 @@ export function GroupCard(props: GroupCardProps) {
 
     return (
       <GroupCardShell
-        compact={compact}
-        shadow={shadow}
-        maxWidth={maxWidth}
-        interactive={interactive}
-        cursorType={cursorType}
-        onClick={() => interactive && props.onActionClick()}
+        bottomRow={null}
         className={className}
+        compact={compact}
+        cursorType={cursorType}
+        interactive={interactive}
+        label={props.actionLabel}
+        maxWidth={maxWidth}
+        onClick={() => interactive && props.onActionClick()}
         sectionBg={BG_COLOR[actionColor]}
         sectionContent={<Group c={FILLED_COLOR[actionColor]}>{actionIcon}</Group>}
-        label={props.actionLabel}
-        bottomRow={null}
+        shadow={shadow}
       />
     );
   }
@@ -265,62 +266,62 @@ export function GroupCard(props: GroupCardProps) {
 
   const group = props.group;
   const previewContacts = group.previewContacts || [];
-  const peopleLabel = `${group.contactCount} ${group.contactCount === 1 ? "person" : "people"}`;
+  const peopleLabel = t("ContactCount", { count: group.contactCount });
 
   const handleCardClick = (e: MouseEvent) => {
-    if (!interactive) return;
-    if ((e.target as HTMLElement).closest("[data-menu-trigger]")) return;
+    if (!interactive) {
+      return;
+    }
+    if ((e.target as HTMLElement).closest("[data-menu-trigger]")) {
+      return;
+    }
     props.onClick(group.id);
   };
 
   return (
     <GroupCardShell
-      compact={compact}
-      shadow={shadow}
-      maxWidth={maxWidth}
-      interactive={interactive}
-      cursorType={cursorType}
-      highlightColor={resolvedHighlightColor}
-      onClick={handleCardClick}
-      className={className}
-      sectionBg={group.color ?? undefined}
-      sectionOverlay={
-        showMenu ? (
-          <div style={{ position: "absolute", top: 12, right: 12 }}>
-            <GroupCardMenu
-              group={group}
-              menuOpened={menuOpened}
-              setMenuOpened={setMenuOpened}
-              onAddPeople={props.onAddPeople}
-              onEdit={props.onEdit}
-              onDuplicate={props.onDuplicate}
-              onDelete={props.onDelete}
-              iconSize={compact ? "sm" : "md"}
-            />
-          </div>
-        ) : undefined
-      }
-      sectionContent={
-        <Text style={{ fontSize: compact ? 34 : 40, lineHeight: 1 }}>{group.emoji}</Text>
-      }
-      label={group.label}
       bottomRow={
         previewContacts.length > 0 ? (
           <PersonAvatarGroup
             people={previewContacts.map((contact) => ({
-              id: contact.id,
-              firstName: contact.firstName,
-              lastName: contact.lastName,
               avatar: contact.avatar,
+              firstName: contact.firstName,
+              id: contact.id,
+              lastName: contact.lastName,
             }))}
-            totalCount={group.contactCount}
             size={compact ? "sm" : "md"}
+            totalCount={group.contactCount}
           />
         ) : (
-          <Text size="sm" c="dimmed">
+          <Text c="dimmed" size="sm">
             {peopleLabel}
           </Text>
         )
+      }
+      className={className}
+      compact={compact}
+      cursorType={cursorType}
+      highlightColor={resolvedHighlightColor}
+      interactive={interactive}
+      label={group.label}
+      maxWidth={maxWidth}
+      onClick={handleCardClick}
+      sectionBg={group.color ?? undefined}
+      sectionOverlay={
+        showMenu ? (
+          <div style={{ position: "absolute", right: 12, top: 12 }}>
+            <GroupCardMenu
+              group={group}
+              iconSize={compact ? "sm" : "md"}
+              menuOpened={menuOpened}
+              onAddPeople={props.onAddPeople}
+              onDelete={props.onDelete}
+              onDuplicate={props.onDuplicate}
+              onEdit={props.onEdit}
+              setMenuOpened={setMenuOpened}
+            />
+          </div>
+        ) : undefined
       }
     />
   );

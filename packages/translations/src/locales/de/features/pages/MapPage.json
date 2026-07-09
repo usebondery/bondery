@@ -1,0 +1,26 @@
+{
+  "AddressSearchPlaceholder": "Nach Name oder Adresse suchen...",
+  "Back": "Zurück",
+  "Empty": "Noch keine Kontakte mit Koordinaten. Füge eine Adresse oder einen Standort hinzu, um loszulegen.",
+  "NoAddressesFound": "Keine Kontakte mit Adressen in diesem Bereich.",
+  "NoAddressesMatchSearch": "Keine Adressen entsprechen deiner Suche.",
+  "NoContactsFound": "Keine Kontakte in diesem Kartenbereich.",
+  "NoContactsMatchSearch": "Kein solcher Kontakt gefunden.",
+  "PinColumnAddress": "Adresse",
+  "PinColumnName": "Name",
+  "PinColumnType": "Typ",
+  "RefreshingPins": "Kartenmarkierungen werden aktualisiert",
+  "SearchLabel": "Die Welt durchsuchen",
+  "SearchPlaceholder": "Adresse, Stadt, Region, Land eingeben...",
+  "Subtitle": "Sieh, wo deine Kontakte auf der Karte sind.",
+  "Title": "Karte",
+  "ViewAddresses": "Adressen",
+  "ViewLocations": "Standorte",
+  "VisibleColumns": {
+    "Coordinates": "Koordinaten",
+    "Location": "Standort",
+    "Name": "Name"
+  },
+  "VisibleContactsTitle": "Kontakte in der aktuellen Ansicht ({count})",
+  "VisibleEmpty": "Keine Kontakte in diesem Kartenbereich."
+}

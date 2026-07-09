@@ -1,39 +1,9 @@
 {
-  "name": "website",
-  "version": "1.7.0",
-  "private": true,
-  "description": "Bondery Website",
-  "scripts": {
-    "check-env": "tsx scripts/check-env.ts",
-    "generate-icons": "tsx scripts/generate-icons.ts",
-    "announce": "tsx --env-file=../../.env.local scripts/announce.ts",
-    "predev": "cross-env NODE_ENV=development npm run check-env && npm run generate-icons",
-    "prebuild": "cross-env NODE_ENV=production npm run check-env && npm run generate-icons",
-    "dev": "next dev --port 3000",
-    "build": "next build",
-    "start": "next start",
-    "lint": "biome lint .",
-    "check-types": "tsc --noEmit"
-  },
-  "browserslist": {
-    "production": [
-      "chrome >= 111",
-      "edge >= 111",
-      "firefox >= 113",
-      "safari >= 16.4",
-      "ios_saf >= 16.4",
-      "and_chr >= 111"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
-  },
   "dependencies": {
     "@bondery/branding": "*",
     "@bondery/helpers": "*",
     "@bondery/mantine-next": "*",
+    "@bondery/schemas": "*",
     "@bondery/translations": "*",
     "@mantine/core": "^9.0.0",
     "@mantine/hooks": "^9.0.0",
@@ -50,6 +20,7 @@
     "react-dom": "^19.2.7",
     "react-i18next": "^17.0.8"
   },
+  "description": "Bondery Website",
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
     "@types/mdx": "^2.0.13",
@@ -59,8 +30,24 @@
     "postcss": "^8.5.8",
     "postcss-preset-mantine": "^1.18.0",
     "postcss-simple-vars": "^7.0.1",
+    "schema-dts": "^2.0.0",
     "tailwindcss": "^4",
     "tsx": "^4.21.0",
     "typescript": "^6"
-  }
+  },
+  "name": "website",
+  "private": true,
+  "scripts": {
+    "announce": "tsx --env-file=../../.env.local scripts/announce.ts",
+    "build": "next build",
+    "check-env": "tsx scripts/check-env.ts",
+    "check-types": "tsc --noEmit",
+    "dev": "next dev --port 26630",
+    "generate-icons": "tsx scripts/generate-icons.ts",
+    "lint": "biome lint .",
+    "prebuild": "cross-env NODE_ENV=production npm run check-env && npm run generate-icons",
+    "predev": "cross-env NODE_ENV=development npm run check-env && npm run generate-icons",
+    "start": "next start"
+  },
+  "version": "1.7.0"
 }

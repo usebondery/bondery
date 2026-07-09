@@ -6,9 +6,9 @@
  *   npm run get:service-key
  */
 
-import { execSync } from "child_process";
-import { dirname, resolve } from "path";
-import { fileURLToPath } from "url";
+import { execSync } from "node:child_process";
+import { dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = resolve(__dirname, "..");
@@ -16,8 +16,9 @@ const root = resolve(__dirname, "..");
 let output: string;
 try {
   output = execSync("npx supabase status", { cwd: root, encoding: "utf-8" });
-} catch (e: any) {
-  output = e.stdout ?? "";
+} catch (e: unknown) {
+  const execError = e as { stdout?: string };
+  output = execError.stdout ?? "";
   if (!output) {
     console.error("❌ Could not run supabase status. Is the local instance running?");
     process.exit(1);

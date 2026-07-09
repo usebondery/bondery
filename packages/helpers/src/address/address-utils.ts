@@ -9,8 +9,8 @@
 /** Input fields accepted by {@link formatPlaceLabel}. */
 export interface PlaceLabelFields {
   city?: string | null;
-  state?: string | null;
   countryCode?: string | null;
+  state?: string | null;
 }
 
 /** Input fields accepted by {@link formatAddressLabel}. */
@@ -18,9 +18,9 @@ export interface AddressLabelFields {
   addressLine1?: string | null;
   addressLine2?: string | null;
   city?: string | null;
+  countryCode?: string | null;
   postalCode?: string | null;
   state?: string | null;
-  countryCode?: string | null;
 }
 
 /**
@@ -37,9 +37,15 @@ export interface AddressLabelFields {
 export function formatPlaceLabel(fields: PlaceLabelFields): string {
   const parts: string[] = [];
 
-  if (fields.city?.trim()) parts.push(fields.city.trim());
-  if (fields.state?.trim()) parts.push(fields.state.trim());
-  if (fields.countryCode?.trim()) parts.push(fields.countryCode.trim());
+  if (fields.city?.trim()) {
+    parts.push(fields.city.trim());
+  }
+  if (fields.state?.trim()) {
+    parts.push(fields.state.trim());
+  }
+  if (fields.countryCode?.trim()) {
+    parts.push(fields.countryCode.trim());
+  }
 
   return parts.join(", ");
 }
@@ -58,17 +64,27 @@ export function formatPlaceLabel(fields: PlaceLabelFields): string {
 export function formatAddressLabel(fields: AddressLabelFields): string {
   const parts: string[] = [];
 
-  if (fields.addressLine1?.trim()) parts.push(fields.addressLine1.trim());
-  if (fields.addressLine2?.trim()) parts.push(fields.addressLine2.trim());
+  if (fields.addressLine1?.trim()) {
+    parts.push(fields.addressLine1.trim());
+  }
+  if (fields.addressLine2?.trim()) {
+    parts.push(fields.addressLine2.trim());
+  }
 
   // City + postal code grouped together: "Brno 60200"
   const city = fields.city?.trim() ?? "";
   const zip = fields.postalCode?.trim() ?? "";
   const cityZip = [city, zip].filter(Boolean).join(" ");
-  if (cityZip) parts.push(cityZip);
+  if (cityZip) {
+    parts.push(cityZip);
+  }
 
-  if (fields.state?.trim()) parts.push(fields.state.trim());
-  if (fields.countryCode?.trim()) parts.push(fields.countryCode.trim());
+  if (fields.state?.trim()) {
+    parts.push(fields.state.trim());
+  }
+  if (fields.countryCode?.trim()) {
+    parts.push(fields.countryCode.trim());
+  }
 
   return parts.join(", ");
 }
@@ -83,7 +99,9 @@ export function formatAddressLabel(fields: AddressLabelFields): string {
 let _countryNameToCode: Map<string, string> | null = null;
 
 function getCountryNameToCodeMap(): Map<string, string> {
-  if (_countryNameToCode) return _countryNameToCode;
+  if (_countryNameToCode) {
+    return _countryNameToCode;
+  }
 
   _countryNameToCode = new Map();
   const names = new Intl.DisplayNames(["en"], { type: "region" });
@@ -116,6 +134,7 @@ const US_STATE_ABBREVIATIONS: Record<string, string> = {
   Colorado: "CO",
   Connecticut: "CT",
   Delaware: "DE",
+  "District of Columbia": "DC",
   Florida: "FL",
   Georgia: "GA",
   Hawaii: "HI",
@@ -158,7 +177,6 @@ const US_STATE_ABBREVIATIONS: Record<string, string> = {
   "West Virginia": "WV",
   Wisconsin: "WI",
   Wyoming: "WY",
-  "District of Columbia": "DC",
 };
 
 /**
@@ -178,13 +196,17 @@ const US_STATE_ABBREVIATIONS: Record<string, string> = {
  * @returns Abbreviated location string, or the original if no match is found.
  */
 export function abbreviateLocationCountry(location: string | null | undefined): string {
-  if (!location?.trim()) return location ?? "";
+  if (!location?.trim()) {
+    return location ?? "";
+  }
 
   const parts = location.split(",").map((p) => p.trim());
   const lastPart = parts[parts.length - 1];
 
   const countryCode = getCountryNameToCodeMap().get(lastPart) ?? (lastPart === "US" ? "US" : null);
-  if (!countryCode) return location;
+  if (!countryCode) {
+    return location;
+  }
 
   parts[parts.length - 1] = countryCode;
 

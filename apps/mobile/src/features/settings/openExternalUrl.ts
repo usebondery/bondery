@@ -1,10 +1,7 @@
-import { Linking } from "react-native";
 import * as WebBrowser from "expo-web-browser";
+import { Linking } from "react-native";
 
-export async function openExternalUrl(
-  url: string,
-  onError?: () => void,
-): Promise<void> {
+export async function openExternalUrl(url: string, onError?: () => void): Promise<void> {
   try {
     await WebBrowser.openBrowserAsync(url);
     return;

@@ -1,5 +1,5 @@
-import { OnboardingFlow } from "./OnboardingFlow";
+import { OnboardingClient } from "./OnboardingClient";
 
 export default function OnboardingPage() {
-  return <OnboardingFlow />;
+  return <OnboardingClient />;
 }

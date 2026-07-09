@@ -3,8 +3,8 @@ import { StyleSheet, View } from "react-native";
 import { MOBILE_LAYOUT } from "../../theme/layout";
 
 interface ToolbarHeaderProps {
-  left?: ReactNode;
   center?: ReactNode;
+  left?: ReactNode;
   right?: ReactNode;
 }
 
@@ -20,24 +20,24 @@ export function ToolbarHeader({ left, center, right }: ToolbarHeaderProps) {
 }
 
 const styles = StyleSheet.create({
-  row: {
-    flexDirection: "row",
+  centerSlot: {
     alignItems: "center",
-    justifyContent: "space-between",
-    height: MOBILE_LAYOUT.screenChrome.titleRowHeight,
-    overflow: "hidden",
-  },
-  sideSlot: {
-    minWidth: MOBILE_LAYOUT.screenChrome.toolbarSlotMinWidth,
+    flex: 1,
     justifyContent: "center",
+    paddingHorizontal: 8,
   },
   rightSlot: {
     alignItems: "flex-end",
   },
-  centerSlot: {
-    flex: 1,
+  row: {
     alignItems: "center",
+    flexDirection: "row",
+    height: MOBILE_LAYOUT.screenChrome.titleRowHeight,
+    justifyContent: "space-between",
+    overflow: "hidden",
+  },
+  sideSlot: {
     justifyContent: "center",
-    paddingHorizontal: 8,
+    minWidth: MOBILE_LAYOUT.screenChrome.toolbarSlotMinWidth,
   },
 });

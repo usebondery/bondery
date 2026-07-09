@@ -1,9 +1,9 @@
 /**
  * Debug: hit SSR routes on production next start and log status + TDZ stderr.
  */
-import { appendFileSync } from "node:fs";
+
 import { spawn } from "node:child_process";
-import { existsSync } from "node:fs";
+import { appendFileSync, existsSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -16,19 +16,19 @@ const SESSION = "e4d508";
 
 function log(hypothesisId, location, message, data = {}) {
   const entry = {
-    sessionId: SESSION,
-    runId: process.env.DEBUG_RUN_ID ?? "ssr-routes",
+    data,
     hypothesisId,
     location,
     message,
-    data,
+    runId: process.env.DEBUG_RUN_ID ?? "ssr-routes",
+    sessionId: SESSION,
     timestamp: Date.now(),
   };
   appendFileSync(LOG_PATH, `${JSON.stringify(entry)}\n`, "utf8");
   fetch(INGEST, {
-    method: "POST",
-    headers: { "Content-Type": "application/json", "X-Debug-Session-Id": SESSION },
     body: JSON.stringify(entry),
+    headers: { "Content-Type": "application/json", "X-Debug-Session-Id": SESSION },
+    method: "POST",
   }).catch(() => {});
 }
 
@@ -39,16 +39,16 @@ if (!existsSync(join(webappRoot, ".next"))) {
 
 const port = 31_500 + Math.floor(Math.random() * 500);
 const routes = [
-  { path: "/login", hypothesisId: "D" },
-  { path: "/app/home", hypothesisId: "D" },
-  { path: "/app/unavailable", hypothesisId: "D" },
+  { hypothesisId: "D", path: "/login" },
+  { hypothesisId: "D", path: "/app/home" },
+  { hypothesisId: "D", path: "/app/unavailable" },
 ];
 
 const stderrChunks = [];
 const child = spawn("npx", ["next", "start", "--port", String(port)], {
   cwd: webappRoot,
-  stdio: ["ignore", "pipe", "pipe"],
   shell: true,
+  stdio: ["ignore", "pipe", "pipe"],
 });
 
 child.stderr?.on("data", (chunk) => {
@@ -60,7 +60,9 @@ child.stderr?.on("data", (chunk) => {
 });
 
 function killChild() {
-  if (!child.killed) child.kill("SIGTERM");
+  if (!child.killed) {
+    child.kill("SIGTERM");
+  }
 }
 
 const deadline = Date.now() + 45_000;
@@ -78,15 +80,15 @@ for (const route of routes) {
     const response = await fetch(`http://127.0.0.1:${port}${route.path}`, { redirect: "manual" });
     const bodySnippet = (await response.text()).slice(0, 200);
     log(route.hypothesisId, "debug-ssr-routes.mjs", "route response", {
+      bodySnippet,
       path: route.path,
       status: response.status,
-      bodySnippet,
     });
     console.log(`${route.path} -> ${response.status}`);
   } catch (error) {
     log(route.hypothesisId, "debug-ssr-routes.mjs", "route fetch failed", {
-      path: route.path,
       error: error instanceof Error ? error.message : String(error),
+      path: route.path,
     });
   }
 }

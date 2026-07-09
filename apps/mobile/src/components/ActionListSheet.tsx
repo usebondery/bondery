@@ -1,7 +1,7 @@
+import { Sheet } from "@tamagui/sheet";
 import type { ReactNode } from "react";
 import { Fragment } from "react";
 import { StyleSheet, Text, View } from "react-native";
-import { Sheet } from "@tamagui/sheet";
 import { SettingsNavigationRow } from "../features/settings/components/SettingsNavigationRow";
 import { SettingsSectionCard } from "../features/settings/components/SettingsSectionCard";
 import { MOBILE_LAYOUT, MOBILE_TYPOGRAPHY } from "../theme/tokens";
@@ -17,10 +17,10 @@ export type ActionListSheetRow = {
 };
 
 interface ActionListSheetProps {
-  open: boolean;
-  title: string;
-  rows: ActionListSheetRow[];
   onOpenChange: (open: boolean) => void;
+  open: boolean;
+  rows: ActionListSheetRow[];
+  title: string;
 }
 
 /**
@@ -40,27 +40,27 @@ export function ActionListSheet({ open, title, rows, onOpenChange }: ActionListS
 
   return (
     <Sheet
-      native
-      modal
-      open={open}
-      onOpenChange={onOpenChange}
-      snapPointsMode="fit"
-      dismissOnSnapToBottom
       dismissOnOverlayPress
+      dismissOnSnapToBottom
+      modal
+      native
+      onOpenChange={onOpenChange}
+      open={open}
+      snapPointsMode="fit"
     >
       <Sheet.Overlay backgroundColor={colors.overlay} />
       <Sheet.Frame
         backgroundColor={colors.surface}
         borderTopLeftRadius={20}
         borderTopRightRadius={20}
-        paddingTop={10}
+        flex={0}
         paddingBottom={16}
         paddingHorizontal={MOBILE_LAYOUT.spacing.horizontal}
-        flex={0}
+        paddingTop={10}
       >
-        <Sheet.Handle backgroundColor={colors.borderStrong} marginBottom={12} alignSelf="center" />
+        <Sheet.Handle alignSelf="center" backgroundColor={colors.borderStrong} marginBottom={12} />
 
-        <Text style={[styles.title, { color: colors.textPrimary }]} accessibilityRole="header">
+        <Text accessibilityRole="header" style={[styles.title, { color: colors.textPrimary }]}>
           {title}
         </Text>
 
@@ -76,13 +76,13 @@ export function ActionListSheet({ open, title, rows, onOpenChange }: ActionListS
                   <View style={[styles.separator, { backgroundColor: colors.border }]} />
                 ) : null}
                 <SettingsNavigationRow
+                  disabled={row.disabled}
                   icon={row.icon}
                   label={row.label}
-                  showTrailing={false}
-                  showDivider={!isLast && rows[index + 1]?.tone !== "danger"}
                   labelColor={row.tone === "danger" ? colors.dangerAccent : undefined}
-                  disabled={row.disabled}
                   onPress={() => handleRowPress(row)}
+                  showDivider={!isLast && rows[index + 1]?.tone !== "danger"}
+                  showTrailing={false}
                 />
               </Fragment>
             );
@@ -94,13 +94,13 @@ export function ActionListSheet({ open, title, rows, onOpenChange }: ActionListS
 }
 
 const styles = StyleSheet.create({
+  separator: {
+    alignSelf: "stretch",
+    height: StyleSheet.hairlineWidth,
+  },
   title: {
     fontSize: MOBILE_TYPOGRAPHY.fontSize.bodyLarge,
     fontWeight: MOBILE_TYPOGRAPHY.fontWeight.bold,
     marginBottom: 12,
-  },
-  separator: {
-    height: StyleSheet.hairlineWidth,
-    alignSelf: "stretch",
   },
 });

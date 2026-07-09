@@ -1,22 +1,22 @@
 "use client";
 
-import { Box, Group, Select, Stack, Text, type SelectProps } from "@mantine/core";
+import { Box, Group, Select, type SelectProps, Stack, Text } from "@mantine/core";
 import type { CSSProperties, ReactNode } from "react";
 
 export interface DescribedSelectOption {
-  value: string;
-  label: string;
   description?: string;
-  icon?: ReactNode;
   disabled?: boolean;
+  icon?: ReactNode;
+  label: string;
+  value: string;
 }
 
 export interface DescribedSelectProps
   extends Omit<SelectProps, "data" | "onChange" | "value" | "renderOption" | "leftSection"> {
-  value: string;
   data: DescribedSelectOption[];
   onChange: (value: string) => void;
   style?: CSSProperties;
+  value: string;
 }
 
 /**
@@ -37,16 +37,16 @@ export function DescribedSelect({
   return (
     <Select
       {...selectProps}
-      value={value}
-      onChange={(nextValue) => onChange(nextValue ?? value)}
+      allowDeselect={allowDeselect}
       data={data.map((option) => ({
-        value: option.value,
-        label: option.label,
         disabled: option.disabled,
+        label: option.label,
+        value: option.value,
       }))}
+      disabled={disabled}
       leftSection={
         selectedOption?.icon ? (
-          <Box component="span" style={{ display: "flex", alignItems: "center" }}>
+          <Box component="span" style={{ alignItems: "center", display: "flex" }}>
             {selectedOption.icon}
           </Box>
         ) : undefined
@@ -54,18 +54,18 @@ export function DescribedSelect({
       renderOption={({ option }) => {
         const match = data.find((entry) => entry.value === option.value);
         return (
-          <Group gap="sm" wrap="nowrap" align="flex-start">
+          <Group align="flex-start" gap="sm" wrap="nowrap">
             {match?.icon ? (
               <Box component="span" mt={2} style={{ display: "flex", flexShrink: 0 }}>
                 {match.icon}
               </Box>
             ) : null}
             <Stack gap={0}>
-              <Text size="sm" fw={600}>
+              <Text fw={600} size="sm">
                 {option.label}
               </Text>
               {match?.description ? (
-                <Text size="xs" lineClamp={2}>
+                <Text lineClamp={2} size="xs">
                   {match.description}
                 </Text>
               ) : null}
@@ -73,10 +73,9 @@ export function DescribedSelect({
           </Group>
         );
       }}
-      disabled={disabled}
       size={size}
       style={style}
-      allowDeselect={allowDeselect}
+      value={value}
     />
   );
 }

@@ -7,10 +7,10 @@ import {
 export const SYNC_DB_NAME = "bondery-sync.db";
 
 export const SYNC_META_KEYS = {
-  deviceId: "device_id",
-  clientSequenceCounter: "client_sequence_counter",
-  lastServerSequence: "last_server_sequence",
   bootstrapCompleted: "bootstrap_completed",
+  clientSequenceCounter: "client_sequence_counter",
+  deviceId: "device_id",
+  lastServerSequence: "last_server_sequence",
   sqliteSchemaVersion: "sqlite_schema_version",
 } as const;
 

@@ -21,12 +21,8 @@ export async function capturePersonSyncTxid(
   return data as string;
 }
 
-export async function captureCurrentSyncTxid(
-  client: DomainSupabaseClient,
-): Promise<string> {
-  const { data, error } = await (client as SupabaseClient).rpc(
-    "get_current_sync_txid" as never,
-  );
+export async function captureCurrentSyncTxid(client: DomainSupabaseClient): Promise<string> {
+  const { data, error } = await (client as SupabaseClient).rpc("get_current_sync_txid" as never);
 
   if (error) {
     throw new Error(error.message);

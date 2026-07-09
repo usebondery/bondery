@@ -1,13 +1,5 @@
 {
   "mcpServers": {
-    "plane": {
-      "command": "npx",
-      "args": [
-        "mcp-remote@latest",
-        "https://mcp.plane.so/http/mcp"
-      ],
-      "type": "stdio"
-    },
     "chrome-devtools": {
       "command": "npx -y chrome-devtools-mcp@latest"
     },
@@ -15,10 +7,15 @@
       "type": "http",
       "url": "https://mcp.expo.dev/mcp"
     },
+    "plane": {
+      "args": ["mcp-remote@latest", "https://mcp.plane.so/http/mcp"],
+      "command": "npx",
+      "type": "stdio"
+    },
     "vercel": {
+      "note": "Official Vercel MCP server. Uses OAuth — on first connection the agent will be prompted to authorize via Vercel. Read-only in initial release: search docs, list projects/deployments, inspect logs.",
       "type": "http",
-      "url": "https://mcp.vercel.com",
-      "note": "Official Vercel MCP server. Uses OAuth — on first connection the agent will be prompted to authorize via Vercel. Read-only in initial release: search docs, list projects/deployments, inspect logs."
+      "url": "https://mcp.vercel.com"
     }
   }
 }

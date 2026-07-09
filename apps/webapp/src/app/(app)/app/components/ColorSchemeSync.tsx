@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect } from "react";
-import { useMantineColorScheme } from "@mantine/core";
 import type { ColorSchemePreference } from "@bondery/schemas";
+import { useMantineColorScheme } from "@mantine/core";
+import { useEffect } from "react";
 
 interface ColorSchemeSyncProps {
   colorScheme: ColorSchemePreference;

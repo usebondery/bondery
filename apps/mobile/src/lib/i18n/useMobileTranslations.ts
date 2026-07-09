@@ -1,10 +1,14 @@
 import { useTranslation } from "react-i18next";
 
-/**
- * Thin wrapper around react-i18next `useTranslation`.
- * Returns `t(key, vars?)` — API-compatible with the previous custom hook.
- */
-export function useMobileTranslations() {
-  const { t } = useTranslation();
+export function useMobileTranslations(namespace: string = "common", keyPrefix?: string) {
+  const { t } = useTranslation(namespace, { keyPrefix });
   return t;
+}
+
+export function useCommonTranslations(keyPrefix?: string) {
+  return useMobileTranslations("common", keyPrefix);
+}
+
+export function useValidationTranslations(keyPrefix?: string) {
+  return useMobileTranslations("validation", keyPrefix);
 }

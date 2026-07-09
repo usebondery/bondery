@@ -1,0 +1,16 @@
+{
+  "Description": "Hilf uns, Bondery zu verbessern, indem du deine Gedanken teilst. <3",
+  "ErrorMessage": "Feedback konnte nicht gesendet werden. Bitte versuch es erneut.",
+  "ErrorTitle": "Fehler",
+  "GeneralFeedbackLabel": "Hast du Feedback, Tipps oder Bugs, die du teilen möchtest?",
+  "GeneralFeedbackPlaceholder": "Ich liebe/hasse diesen Teil der App.. Ich würde mir wünschen, dass das hinzugefügt wird.. Ich hatte Schwierigkeiten mit..",
+  "NpsLabel": "Auf einer Skala von 0 bis 10: Wie wahrscheinlich ist es, dass du Bondery einem Freund oder Kollegen empfiehlst?",
+  "NpsReasonLabel": "Warum hast du die Bewertung {score} gewählt?",
+  "NpsReasonPlaceholder": "Weil ich diese Funktion nützlich/fehlerhaft/vermisst habe...",
+  "SubmitButton": "Feedback an die Entwickler senden",
+  "SubmittingMessage": "Bitte warte, während wir dein Feedback senden",
+  "SubmittingTitle": "Feedback wird gesendet...",
+  "SuccessMessage": "Dein Feedback ist eingegangen",
+  "SuccessTitle": "Danke!",
+  "Title": "Feedback"
+}

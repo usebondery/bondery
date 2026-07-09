@@ -1,5 +1,6 @@
+import { createRequire } from "node:module";
+import { DEV_PORTS, DEV_URLS } from "@bondery/schemas/constants";
 import { defineConfig } from "wxt";
-import { createRequire } from "module";
 
 const require = createRequire(import.meta.url);
 const { version } = require("./package.json") as { version: string };
@@ -15,71 +16,50 @@ const getOrigin = (url: string) => {
 };
 
 export default defineConfig({
-  srcDir: "src",
-  entrypointsDir: "entrypoints",
-  publicDir: "public",
-  outDir: "dist",
-
   // Target Chromium browsers
   browser: "chrome",
-
-  // Disable auto-imports for explicit control during migration
-  imports: false,
-
-  // React module for JSX/TSX support
-  modules: ["@wxt-dev/module-react"],
-
-  // Disable automatic browser startup in `wxt` dev
-  webExt: {
-    disabled: true,
-  },
 
   // Keep extension dev server origin stable (prevents CSP/HMR port mismatch)
   dev: {
     server: {
-      port: 3004,
       host: "localhost",
-      origin: "http://localhost:3004",
+      origin: DEV_URLS.extension,
+      port: DEV_PORTS.EXTENSION,
+    },
+  },
+  entrypointsDir: "entrypoints",
+
+  // Build hooks for pre-build tasks (icon generation, env check)
+  hooks: {
+    "build:before": async (wxt) => {
+      console.log("[wxt] Running pre-build checks...");
+
+      // Validate required environment variables
+      const requiredEnvVars = [
+        "WXT_WEBAPP_URL",
+        "WXT_SUPABASE_URL",
+        "WXT_API_URL",
+        "WXT_SUPABASE_OAUTH_CLIENT_ID",
+      ];
+      const missing = requiredEnvVars.filter((key) => !process.env[key]);
+
+      if (missing.length > 0 && wxt.config.mode === "production") {
+        console.warn(`[wxt] Warning: Missing environment variables: ${missing.join(", ")}`);
+      }
     },
   },
 
-  // Configure Vite
-  vite: ({ mode }) => ({
-    // Enable polling-based file watching on Windows where native FS events are unreliable
-    server:
-      mode === "development"
-        ? {
-            watch: {
-              usePolling: true,
-              interval: 300,
-            },
-          }
-        : {},
-    // Note: do NOT override process.env.NODE_ENV in development mode builds.
-    // Forcing "production" here causes a mismatch: Vite's React plugin still
-    // emits jsxDEV() calls (dev JSX transform), but React's production bundle
-    // doesn't export jsxDEV — resulting in a runtime crash in the popup.
-    define: {},
-    build:
-      mode === "development"
-        ? {
-            minify: "oxc",
-            sourcemap: false,
-          }
-        : {},
-    css: {
-      postcss: {},
-    },
-  }),
+  // Disable auto-imports for explicit control during migration
+  imports: false,
 
   // Dynamic manifest configuration using environment variables
   manifest: ({ mode }) => {
-    const isDev = mode === "development";
+    const _isDev = mode === "development";
 
     // Environment variables (WXT_ prefix for Vite compatibility)
-    const webappUrl = process.env.WXT_WEBAPP_URL || "http://localhost:3000";
-    const apiUrl = process.env.WXT_API_URL || webappUrl;
-    const supabaseUrl = process.env.WXT_SUPABASE_URL || "http://127.0.0.1:54321";
+    const webappUrl = process.env.WXT_WEBAPP_URL || DEV_URLS.webapp;
+    const apiUrl = process.env.WXT_API_URL || DEV_URLS.api;
+    const supabaseUrl = process.env.WXT_SUPABASE_URL || DEV_URLS.supabase;
 
     // Build host permissions dynamically
     const hostPermissions = [
@@ -102,20 +82,6 @@ export default defineConfig({
     }
 
     return {
-      name: "Bondery Extension",
-      description: "Import contacts from social media directly to Bondery Webapp",
-      version,
-
-      permissions: ["storage", "identity", "alarms"],
-      host_permissions: hostPermissions,
-
-      // Icons (matched from public/ directory)
-      icons: {
-        16: "icons/icon16.png",
-        48: "icons/icon48.png",
-        128: "icons/icon128.png",
-      },
-
       // Action button configuration
       action: {
         default_icon: {
@@ -125,34 +91,67 @@ export default defineConfig({
         },
         default_title: "Bondery",
       },
+      description: "Import contacts from social media directly to Bondery Webapp",
+      host_permissions: hostPermissions,
+
+      // Icons (matched from public/ directory)
+      icons: {
+        16: "icons/icon16.png",
+        48: "icons/icon48.png",
+        128: "icons/icon128.png",
+      },
+      name: "Bondery Extension",
+
+      permissions: ["storage", "identity", "alarms"],
+      version,
 
       // Web accessible resources for the MAIN world script injection
       web_accessible_resources: [
         {
-          resources: ["instagram-interceptor.js"],
           matches: ["https://www.instagram.com/*", "https://instagram.com/*"],
+          resources: ["instagram-interceptor.js"],
         },
       ],
     };
   },
 
-  // Build hooks for pre-build tasks (icon generation, env check)
-  hooks: {
-    "build:before": async (wxt) => {
-      console.log("[wxt] Running pre-build checks...");
+  // React module for JSX/TSX support
+  modules: ["@wxt-dev/module-react"],
+  outDir: "dist",
+  publicDir: "public",
+  srcDir: "src",
 
-      // Validate required environment variables
-      const requiredEnvVars = [
-        "WXT_WEBAPP_URL",
-        "WXT_SUPABASE_URL",
-        "WXT_API_URL",
-        "WXT_SUPABASE_OAUTH_CLIENT_ID",
-      ];
-      const missing = requiredEnvVars.filter((key) => !process.env[key]);
-
-      if (missing.length > 0 && wxt.config.mode === "production") {
-        console.warn(`[wxt] Warning: Missing environment variables: ${missing.join(", ")}`);
-      }
+  // Configure Vite
+  vite: ({ mode }) => ({
+    build:
+      mode === "development"
+        ? {
+            minify: "oxc",
+            sourcemap: false,
+          }
+        : {},
+    css: {
+      postcss: {},
     },
+    // Note: do NOT override process.env.NODE_ENV in development mode builds.
+    // Forcing "production" here causes a mismatch: Vite's React plugin still
+    // emits jsxDEV() calls (dev JSX transform), but React's production bundle
+    // doesn't export jsxDEV — resulting in a runtime crash in the popup.
+    define: {},
+    // Enable polling-based file watching on Windows where native FS events are unreliable
+    server:
+      mode === "development"
+        ? {
+            watch: {
+              interval: 300,
+              usePolling: true,
+            },
+          }
+        : {},
+  }),
+
+  // Disable automatic browser startup in `wxt` dev
+  webExt: {
+    disabled: true,
   },
 });

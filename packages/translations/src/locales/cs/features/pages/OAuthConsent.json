@@ -1,0 +1,17 @@
+{
+  "Approve": "Schválit",
+  "Deny": "Zamítnout",
+  "Description": "{clientName} žádá o přístup k vašemu účtu Bondery.",
+  "ErrorTitle": "Chyba autorizace",
+  "InvalidRequest": "Neplatný autorizační požadavek.",
+  "MissingAuthorizationId": "Chybí autorizační požadavek. Zkuste to prosím znovu z aplikace.",
+  "RequestedPermissions": "Požadovaná oprávnění",
+  "Scopes": {
+    "email": "Zobrazit vaši e-mailovou adresu",
+    "openid": "Ověřit vaši identitu",
+    "phone": "Zobrazit vaše telefonní číslo",
+    "profile": "Zobrazit informace o vašem profilu"
+  },
+  "Title": "Autorizace aplikace",
+  "UnexpectedError": "Došlo k neočekávané chybě. Zkuste to prosím znovu."
+}

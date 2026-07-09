@@ -1,0 +1,14 @@
+{
+  "Call": "Anruf",
+  "Coffee": "Kaffee",
+  "CompetitionHackathon": "Wettbewerb/Hackathon",
+  "Custom": "Benutzerdefiniert",
+  "Email": "E-Mail",
+  "Meal": "Mahlzeit",
+  "Meeting": "Meeting",
+  "NetworkingEvent": "Networking-Event",
+  "Note": "Notiz",
+  "Other": "Sonstiges",
+  "PartySocial": "Party/Social",
+  "TextMessaging": "SMS/Nachricht"
+}

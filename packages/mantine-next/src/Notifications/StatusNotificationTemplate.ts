@@ -2,8 +2,8 @@ import type { ReactNode } from "react";
 
 export interface StatusNotificationTemplateProps {
   id: string;
-  title: string;
   message: ReactNode;
+  title: string;
 }
 
 /**
@@ -25,13 +25,13 @@ export function statusNotificationTemplate({
   message,
 }: StatusNotificationTemplateProps) {
   return {
-    id,
-    title,
-    message,
     autoClose: false as const,
-    withCloseButton: false,
-    radius: "md" as const,
     color: "blue",
+    id,
     loading: false,
+    message,
+    radius: "md" as const,
+    title,
+    withCloseButton: false,
   };
 }

@@ -1,8 +1,8 @@
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
-import { useLocalSearchParams, useRouter } from "expo-router";
-import { supabase } from "../../../src/lib/supabase/client";
 import { useMobileTranslations } from "../../../src/lib/i18n/useMobileTranslations";
+import { supabase } from "../../../src/lib/supabase/client";
 import { MOBILE_TYPOGRAPHY } from "../../../src/theme/tokens";
 import { useMobileThemeColors } from "../../../src/theme/useMobileThemeColors";
 
@@ -19,7 +19,7 @@ export default function AuthCallbackScreen() {
     const completeSignIn = async () => {
       if (!supabase) {
         if (active) {
-          setStatusError(t("MobileApp.Auth.MissingConfig"));
+          setStatusError(t("MissingConfig", { ns: "MobileAuth" }));
         }
         return;
       }
@@ -38,7 +38,7 @@ export default function AuthCallbackScreen() {
         if (data.session) {
           router.replace("/contacts");
         } else if (active) {
-          setStatusError(t("MobileApp.Auth.MissingCode"));
+          setStatusError(t("MissingCode", { ns: "MobileAuth" }));
         }
         return;
       }
@@ -63,27 +63,31 @@ export default function AuthCallbackScreen() {
   }, [params.code, params.error, router, t]);
 
   return (
-    <View style={[styles.screen, { backgroundColor: colors.surface }]}> 
-      <ActivityIndicator size="large" color={colors.textPrimary} />
-      <Text style={[styles.title, { color: colors.textSecondary }]}>{t("MobileApp.Auth.CompletingLogin")}</Text>
-      {statusError ? <Text style={[styles.error, { color: colors.dangerText }]}>{statusError}</Text> : null}
+    <View style={[styles.screen, { backgroundColor: colors.surface }]}>
+      <ActivityIndicator color={colors.textPrimary} size="large" />
+      <Text style={[styles.title, { color: colors.textSecondary }]}>
+        {t("CompletingLogin", { ns: "MobileAuth" })}
+      </Text>
+      {statusError ? (
+        <Text style={[styles.error, { color: colors.dangerText }]}>{statusError}</Text>
+      ) : null}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  error: {
+    textAlign: "center",
+  },
   screen: {
-    flex: 1,
     alignItems: "center",
-    justifyContent: "center",
+    flex: 1,
     gap: 12,
+    justifyContent: "center",
     paddingHorizontal: 16,
   },
   title: {
     fontSize: MOBILE_TYPOGRAPHY.fontSize.bodyLarge,
     fontWeight: MOBILE_TYPOGRAPHY.fontWeight.semibold,
-  },
-  error: {
-    textAlign: "center",
   },
 });

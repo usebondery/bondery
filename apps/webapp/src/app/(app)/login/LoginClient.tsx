@@ -1,29 +1,29 @@
 "use client";
 
-import { useState } from "react";
-import { Text, Button, Stack, Card } from "@mantine/core";
-import { IconBrandGithubFilled, IconBrandLinkedin } from "@tabler/icons-react";
-import { notifications } from "@mantine/notifications";
-import { createBrowswerSupabaseClient } from "@/lib/supabase/client";
-import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
-import { useSearchParams } from "next/navigation";
-import { INTEGRATION_PROVIDERS, WEBSITE_URL } from "@/lib/config";
-import { setLocalePreferencesCookie } from "@/lib/auth/detectLocale";
-import { Logo } from "./components/Logo";
+import { getUserFacingError } from "@bondery/helpers/api";
 import { WEBSITE_ROUTES } from "@bondery/helpers/globals/paths";
 import { AnchorLink, errorNotificationTemplate } from "@bondery/mantine-next";
+import { Button, Card, Stack, Text } from "@mantine/core";
+import { notifications } from "@mantine/notifications";
+import { IconBrandGithubFilled, IconBrandLinkedin } from "@tabler/icons-react";
+import { useSearchParams } from "next/navigation";
+import { useState } from "react";
+import { setLocalePreferencesCookie } from "@/lib/auth/detectLocale";
+import { useCommonTranslations, useWebTranslations } from "@/lib/i18n/useWebTranslations";
+import { INTEGRATION_PROVIDERS, WEBSITE_URL } from "@/lib/platform/config";
+import { createBrowswerSupabaseClient } from "@/lib/supabase/client";
+import { Logo } from "./components/Logo";
 
 export function LoginClient() {
-  const t = useTranslations("LoginPage");
+  const t = useWebTranslations("LoginPage");
+  const tCommon = useCommonTranslations();
   const [loading, setLoading] = useState(false);
   const supabase = createBrowswerSupabaseClient();
   const searchParams = useSearchParams();
 
   // Preserve redirect parameter for post-login navigation (e.g., OAuth consent flow)
-  const redirectParam =
-    searchParams.get("redirect") ?? searchParams.get("returnUrl");
-  const shouldForceDesktopLoginLayout =
-    redirectParam?.startsWith("/oauth/consent") ?? false;
+  const redirectParam = searchParams.get("redirect") ?? searchParams.get("returnUrl");
+  const shouldForceDesktopLoginLayout = redirectParam?.startsWith("/oauth/consent") ?? false;
 
   const getProviderIcon = (iconName: string) => {
     const icons: Record<string, React.ComponentType<{ size?: number }>> = {
@@ -33,21 +33,15 @@ export function LoginClient() {
     return icons[iconName] || IconBrandGithubFilled;
   };
 
-  const activeProviders = INTEGRATION_PROVIDERS.filter((p) => p.active).sort(
-    (a, b) => {
-      if (
-        a.providerKey === "linkedin_oidc" &&
-        b.providerKey !== "linkedin_oidc"
-      )
-        return -1;
-      if (
-        b.providerKey === "linkedin_oidc" &&
-        a.providerKey !== "linkedin_oidc"
-      )
-        return 1;
-      return 0;
-    },
-  );
+  const activeProviders = INTEGRATION_PROVIDERS.filter((p) => p.active).sort((a, b) => {
+    if (a.providerKey === "linkedin_oidc" && b.providerKey !== "linkedin_oidc") {
+      return -1;
+    }
+    if (b.providerKey === "linkedin_oidc" && a.providerKey !== "linkedin_oidc") {
+      return 1;
+    }
+    return 0;
+  });
 
   const handleOAuthLogin = async (provider: "github" | "linkedin_oidc") => {
     try {
@@ -55,7 +49,7 @@ export function LoginClient() {
 
       // Store detected timezone & time format in a short-lived cookie
       // so the auth callback can apply them to the new user's settings
-      setLocalePreferencesCookie();
+      await setLocalePreferencesCookie();
 
       // Build callback URL, including the redirect param if present
       let callbackUrl = `${window.location.origin}/auth/callback`;
@@ -64,26 +58,25 @@ export function LoginClient() {
       }
 
       const { error } = await supabase.auth.signInWithOAuth({
-        provider,
         options: {
           redirectTo: callbackUrl,
         },
+        provider,
       });
 
       if (error) {
         notifications.show(
           errorNotificationTemplate({
+            description: tCommon("errors.unknown"),
             title: t("AuthenticationError"),
-            description: error.message,
           }),
         );
       }
     } catch (err) {
       notifications.show(
         errorNotificationTemplate({
+          description: getUserFacingError(err, tCommon),
           title: t("UnexpectedError"),
-          description:
-            err instanceof Error ? err.message : t("UnexpectedErrorMessage"),
         }),
       );
     } finally {
@@ -93,26 +86,26 @@ export function LoginClient() {
 
   return (
     <div className="flex min-h-screen items-center justify-center ">
-      <Card p="xl" className="max-w-md">
+      <Card className="max-w-md" p="xl">
         {!shouldForceDesktopLoginLayout && (
-          <Stack gap="lg" align="center" hiddenFrom="sm">
-            <Logo size={60} href={WEBSITE_URL} />
-            <Stack gap="0" align="center">
-              <Text size="lg" fw={600} ta="center">
+          <Stack align="center" gap="lg" hiddenFrom="sm">
+            <Logo href={WEBSITE_URL} size={60} />
+            <Stack align="center" gap="0">
+              <Text fw={600} size="lg" ta="center">
                 {t("MobileNotAvailable")}
               </Text>
-              <Text size="md" c="dimmed" ta="center">
+              <Text c="dimmed" size="md" ta="center">
                 {t("MobileNotAvailableMessage")}
               </Text>
             </Stack>
           </Stack>
         )}
         <Stack
-          gap="md"
           align="center"
+          gap="md"
           {...(!shouldForceDesktopLoginLayout ? { visibleFrom: "sm" } : {})}
         >
-          <Logo size={60} href={WEBSITE_URL} />
+          <Logo href={WEBSITE_URL} size={60} />
           <Text size="md" ta="center">
             {t("Description")}
           </Text>
@@ -122,36 +115,28 @@ export function LoginClient() {
               const IconComponent = getProviderIcon(provider.icon);
               return (
                 <Button
-                  key={provider.provider}
-                  size="lg"
-                  leftSection={<IconComponent size={20} />}
-                  onClick={() =>
-                    handleOAuthLogin(
-                      provider.providerKey as "github" | "linkedin_oidc",
-                    )
-                  }
-                  loading={loading}
-                  fullWidth
                   color={provider.backgroundColor}
+                  fullWidth
+                  key={provider.provider}
+                  leftSection={<IconComponent size={20} />}
+                  loading={loading}
+                  onClick={() =>
+                    handleOAuthLogin(provider.providerKey as "github" | "linkedin_oidc")
+                  }
+                  size="lg"
                 >
                   {t("ContinueWith", { provider: provider.displayName })}
                 </Button>
               );
             })}
           </Stack>
-          <Text size="xs" c="dimmed" ta="center">
+          <Text c="dimmed" size="xs" ta="center">
             {t("TermsAgreement")}{" "}
-            <AnchorLink
-              href={`${WEBSITE_URL}${WEBSITE_ROUTES.TERMS}`}
-              size="xs"
-            >
+            <AnchorLink href={`${WEBSITE_URL}${WEBSITE_ROUTES.TERMS}`} size="xs">
               {t("TermsOfService")}
             </AnchorLink>{" "}
             {t("And")}{" "}
-            <AnchorLink
-              href={`${WEBSITE_URL}${WEBSITE_ROUTES.PRIVACY}`}
-              size="xs"
-            >
+            <AnchorLink href={`${WEBSITE_URL}${WEBSITE_ROUTES.PRIVACY}`} size="xs">
               {t("PrivacyPolicy")}
             </AnchorLink>
           </Text>

@@ -29,27 +29,21 @@ export function PageHeaderSkeleton({
   const hasActions = Boolean(primaryActionWidth ?? secondaryActionWidth);
 
   return (
-    <Group
-      justify={hasActions ? "space-between" : "flex-start"}
-      gap="sm"
-      mb="xl"
-    >
+    <Group gap="sm" justify={hasActions ? "space-between" : "flex-start"} mb="xl">
       {/* Left: page icon + title + help icon */}
       <Group gap="sm">
-        <Skeleton height={32} width={32} radius="sm" />
-        <Skeleton height={32} width={160} radius="sm" />
-        <Skeleton height={28} width={28} radius="xl" />
+        <Skeleton height={32} radius="sm" width={32} />
+        <Skeleton height={32} radius="sm" width={160} />
+        <Skeleton height={28} radius="xl" width={28} />
       </Group>
 
       {/* Right: optional action buttons */}
       {hasActions && (
         <Group gap="sm">
           {secondaryActionWidth && (
-            <Skeleton height={36} width={secondaryActionWidth} radius="sm" />
+            <Skeleton height={36} radius="sm" width={secondaryActionWidth} />
           )}
-          {primaryActionWidth && (
-            <Skeleton height={36} width={primaryActionWidth} radius="sm" />
-          )}
+          {primaryActionWidth && <Skeleton height={36} radius="sm" width={primaryActionWidth} />}
         </Group>
       )}
     </Group>

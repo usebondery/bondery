@@ -1,11 +1,11 @@
 {
-  "name": "@bondery/typescript-config",
-  "version": "1.7.0",
-  "private": true,
   "description": "Shared TypeScript configs for the Bondery monorepo (Turborepo compiled-package model)",
   "exports": {
     "./base.json": "./base.json",
-    "./react-library.json": "./react-library.json",
-    "./nextjs.json": "./nextjs.json"
-  }
+    "./nextjs.json": "./nextjs.json",
+    "./react-library.json": "./react-library.json"
+  },
+  "name": "@bondery/typescript-config",
+  "private": true,
+  "version": "1.7.0"
 }

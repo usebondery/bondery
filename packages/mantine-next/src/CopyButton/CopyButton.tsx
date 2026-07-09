@@ -5,18 +5,18 @@ import { IconCheck, IconCopy } from "@tabler/icons-react";
 import { useState } from "react";
 
 export interface CopyButtonProps extends Omit<ActionIconProps, "onClick" | "children"> {
-  /** The text that will be written to the clipboard on click. */
-  value: string;
-  /** Tooltip label shown before copying. */
-  copyLabel?: string;
-  /** Tooltip label shown after copying. */
-  copiedLabel?: string;
-  /** Size of the icon inside the button. Defaults to 14. */
-  iconSize?: number;
   /** Duration in ms to show the copied state. Defaults to 2000. */
   copiedDuration?: number;
+  /** Tooltip label shown after copying. */
+  copiedLabel?: string;
+  /** Tooltip label shown before copying. */
+  copyLabel?: string;
+  /** Size of the icon inside the button. Defaults to 14. */
+  iconSize?: number;
   /** Called after a successful clipboard write. */
   onCopied?: () => void;
+  /** The text that will be written to the clipboard on click. */
+  value: string;
 }
 
 /**
@@ -53,11 +53,11 @@ export function CopyButton({
   return (
     <Tooltip label={copied ? copiedLabel : copyLabel} withArrow>
       <ActionIcon
-        variant={variant}
-        size={size}
+        aria-label={copied ? copiedLabel : copyLabel}
         color={copied ? "green" : "gray"}
         onClick={handleCopy}
-        aria-label={copied ? copiedLabel : copyLabel}
+        size={size}
+        variant={variant}
         {...props}
       >
         {copied ? <IconCheck size={iconSize} /> : <IconCopy size={iconSize} />}

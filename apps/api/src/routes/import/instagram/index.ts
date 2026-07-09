@@ -1,31 +1,19 @@
-import type { FastifyReply } from "fastify";
-import type { AppFastifyInstance, AppRoutePlugin } from "../../../lib/fastify-types.js";
-import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
-import { getAuth } from "../../../lib/auth.js";
-import { registerApiKeyProtectedHooks } from "../../../lib/api-key-access.js";
-import { applyOpenApiRouteMeta } from "../../../lib/openapi-route-meta.js";
-import { withOkResponse } from "../../../lib/openapi-route-responses.js";
-import {
-  assignContactsToDefaultImportGroup,
-  toInstagramImportGroupKeys,
-  type DefaultImportGroupKey,
-} from "../../../lib/default-import-groups.js";
-import { parseInstagramExportUpload } from "./parser.js";
-import type {
-  InstagramImportCommitResponse,
-  InstagramImportSource,
-  InstagramImportStrategy,
-  InstagramParseResponse,
-  InstagramPreparedContact,
-} from "@bondery/schemas";
+import type { InstagramImportStrategy, InstagramParseResponse } from "@bondery/schemas";
 import {
   instagramImportCommitRequestSchema,
   instagramImportCommitResponseSchema,
   instagramParseResponseSchema,
 } from "@bondery/schemas";
-import { IMPORT_TIER } from "../../../lib/rate-limit.js";
 import { IMPORT_HANDLE_LOOKUP_CHUNK_SIZE } from "@bondery/schemas/constants";
-import { markBulkImportCompleted } from "../../../lib/import-followup.js";
+import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
+import { commitInstagramImport } from "../../../domains/import/instagram.js";
+import { getAuth } from "../../../lib/platform/auth/strategies.js";
+import { badRequest } from "../../../lib/platform/errors/http-errors.js";
+import type { AppRoutePlugin } from "../../../lib/platform/fastify-types.js";
+import { withOkResponse } from "../../../lib/platform/openapi/responses.js";
+import { IMPORT_TIER } from "../../../lib/platform/rate-limit.js";
+import { withDomainRoute } from "../../../lib/platform/with-domain-route.js";
+import { parseInstagramExportUpload } from "./parser.js";
 
 const SUPPORTED_STRATEGIES: InstagramImportStrategy[] = [
   "close_friends",
@@ -49,9 +37,7 @@ export const instagramImportRoutes: AppRoutePlugin = async (fastify) => {
     if (routeOptions.schema) {
       routeOptions.schema.tags = ["Import"];
     }
-    applyOpenApiRouteMeta(routeOptions, { area: "integration" });
   });
-  registerApiKeyProtectedHooks(fastify);
 
   fastify.post(
     "/parse",
@@ -61,296 +47,114 @@ export const instagramImportRoutes: AppRoutePlugin = async (fastify) => {
         response: withOkResponse(instagramParseResponseSchema, "Parsed Instagram contacts"),
       } satisfies FastifyZodOpenApiSchema,
     },
-    async (request, reply) => {
-    const { client, user } = getAuth(request);
+    async (request) => {
+      const { client, user } = getAuth(request);
 
-    try {
-      const files: Array<{ fileName: string; content: Buffer }> = [];
-      let strategy: InstagramImportStrategy = "following_and_followers";
+      try {
+        const files: Array<{ fileName: string; content: Buffer }> = [];
+        let strategy: InstagramImportStrategy = "following_and_followers";
 
-      for await (const part of request.parts()) {
-        if (part.type === "file") {
-          const content = await part.toBuffer();
-          if (!content || !part.filename) {
-            continue;
-          }
-
-          files.push({
-            fileName: part.filename,
-            content,
-          });
-
-          continue;
-        }
-
-        if (part.fieldname === "strategy") {
-          strategy = resolveStrategy(part.value);
-        }
-      }
-
-      const contacts = parseInstagramExportUpload(files, strategy);
-      const normalizedHandles = Array.from(
-        new Set(
-          contacts
-            .map((contact) => contact.instagramUsername.trim().toLowerCase())
-            .filter((handle) => handle.length > 0),
-        ),
-      );
-
-      const existingHandleSet = new Set<string>();
-
-      if (normalizedHandles.length > 0) {
-        for (let index = 0; index < normalizedHandles.length; index += IMPORT_HANDLE_LOOKUP_CHUNK_SIZE) {
-          const handleChunk = normalizedHandles.slice(index, index + IMPORT_HANDLE_LOOKUP_CHUNK_SIZE);
-
-          const { data: existingRows, error: existingError } = await client
-            .from("people_socials")
-            .select("handle")
-            .eq("user_id", user.id)
-            .eq("platform", "instagram")
-            .in("handle", handleChunk);
-
-          if (existingError) {
-            throw new Error(existingError.message);
-          }
-
-          for (const row of existingRows || []) {
-            if (typeof row.handle !== "string") {
+        for await (const part of request.parts()) {
+          if (part.type === "file") {
+            const content = await part.toBuffer();
+            if (!content || !part.filename) {
               continue;
             }
 
-            const normalizedHandle = row.handle.trim().toLowerCase();
-            if (normalizedHandle.length > 0) {
-              existingHandleSet.add(normalizedHandle);
+            files.push({
+              content,
+              fileName: part.filename,
+            });
+
+            continue;
+          }
+
+          if (part.fieldname === "strategy") {
+            strategy = resolveStrategy(part.value);
+          }
+        }
+
+        const contacts = parseInstagramExportUpload(files, strategy);
+        const normalizedHandles = Array.from(
+          new Set(
+            contacts
+              .map((contact) => contact.instagramUsername.trim().toLowerCase())
+              .filter((handle) => handle.length > 0),
+          ),
+        );
+
+        const existingHandleSet = new Set<string>();
+
+        if (normalizedHandles.length > 0) {
+          for (
+            let index = 0;
+            index < normalizedHandles.length;
+            index += IMPORT_HANDLE_LOOKUP_CHUNK_SIZE
+          ) {
+            const handleChunk = normalizedHandles.slice(
+              index,
+              index + IMPORT_HANDLE_LOOKUP_CHUNK_SIZE,
+            );
+
+            const { data: existingRows, error: existingError } = await client
+              .from("people_socials")
+              .select("handle")
+              .eq("user_id", user.id)
+              .eq("platform", "instagram")
+              .in("handle", handleChunk);
+
+            if (existingError) {
+              throw new Error(existingError.message);
+            }
+
+            for (const row of existingRows || []) {
+              if (typeof row.handle !== "string") {
+                continue;
+              }
+
+              const normalizedHandle = row.handle.trim().toLowerCase();
+              if (normalizedHandle.length > 0) {
+                existingHandleSet.add(normalizedHandle);
+              }
             }
           }
         }
-      }
 
-      const contactsWithExistingState = contacts.map((contact) => {
-        const normalizedHandle = contact.instagramUsername.trim().toLowerCase();
-        return {
-          ...contact,
-          alreadyExists: normalizedHandle.length > 0 && existingHandleSet.has(normalizedHandle),
+        const contactsWithExistingState = contacts.map((contact) => {
+          const normalizedHandle = contact.instagramUsername.trim().toLowerCase();
+          return {
+            ...contact,
+            alreadyExists: normalizedHandle.length > 0 && existingHandleSet.has(normalizedHandle),
+          };
+        });
+
+        const response: InstagramParseResponse = {
+          contacts: contactsWithExistingState,
+          invalidCount: contactsWithExistingState.filter((item) => !item.isValid).length,
+          totalCount: contactsWithExistingState.length,
+          validCount: contactsWithExistingState.filter((item) => item.isValid).length,
         };
-      });
 
-      const response: InstagramParseResponse = {
-        contacts: contactsWithExistingState,
-        totalCount: contactsWithExistingState.length,
-        validCount: contactsWithExistingState.filter((item) => item.isValid).length,
-        invalidCount: contactsWithExistingState.filter((item) => !item.isValid).length,
-      };
-
-      return response;
-    } catch (error) {
-      const message = error instanceof Error ? error.message : "Failed to parse Instagram export";
-      return reply.status(400).send({ error: message });
-    }
-  },
+        return response;
+      } catch (error) {
+        const message = error instanceof Error ? error.message : "Failed to parse Instagram export";
+        throw badRequest(message, "bad_request");
+      }
+    },
   );
 
   fastify.post(
     "/commit",
     {
-      schema: {
-        description: "Commit an Instagram import from previously parsed contacts.",
-        body: instagramImportCommitRequestSchema,
-        response: withOkResponse(
-          instagramImportCommitResponseSchema,
-          "Instagram import result",
-        ),
-      } satisfies FastifyZodOpenApiSchema,
       config: { rateLimit: IMPORT_TIER },
+      schema: {
+        body: instagramImportCommitRequestSchema,
+        description: "Commit an Instagram import from previously parsed contacts.",
+        response: withOkResponse(instagramImportCommitResponseSchema, "Instagram import result"),
+      } satisfies FastifyZodOpenApiSchema,
     },
-    async (request, reply) => {
-      const { client, user } = getAuth(request);
-      const rawContacts = request.body.contacts;
-
-      // ── Pre-filter & deduplicate ────────────────────────────────────────────
-      const seenHandles = new Set<string>();
-      const validContacts: InstagramPreparedContact[] = [];
-
-      for (const contact of rawContacts) {
-        if (!contact.isValid || !contact.instagramUsername) continue;
-
-        const handle = contact.instagramUsername.trim().toLowerCase();
-        if (!handle || seenHandles.has(handle)) continue;
-
-        seenHandles.add(handle);
-        validContacts.push(contact);
-      }
-
-      const skippedCount = rawContacts.length - validContacts.length;
-
-      if (validContacts.length === 0) {
-        return {
-          importedCount: 0,
-          updatedCount: 0,
-          skippedCount,
-        } satisfies InstagramImportCommitResponse;
-      }
-
-      const now = new Date().toISOString();
-
-      // ── Step 1: Single bulk lookup for all existing person_ids by handle ────
-      const handles = validContacts.map((c) => c.instagramUsername.trim().toLowerCase());
-
-      // Chunk handles to stay within Postgres IN-list limits
-      const handleToPersonId = new Map<string, string>();
-
-      for (let i = 0; i < handles.length; i += IMPORT_HANDLE_LOOKUP_CHUNK_SIZE) {
-        const chunk = handles.slice(i, i + IMPORT_HANDLE_LOOKUP_CHUNK_SIZE);
-
-        const { data: existingRows, error: lookupError } = await client
-          .from("people_socials")
-          .select("handle, person_id")
-          .eq("user_id", user.id)
-          .eq("platform", "instagram")
-          .in("handle", chunk);
-
-        if (lookupError) {
-          return reply.status(500).send({ error: lookupError.message });
-        }
-
-        for (const row of existingRows ?? []) {
-          if (row.handle && row.person_id) {
-            handleToPersonId.set(row.handle.trim().toLowerCase(), row.person_id);
-          }
-        }
-      }
-
-      const toInsert = validContacts.filter(
-        (c) => !handleToPersonId.has(c.instagramUsername.trim().toLowerCase()),
-      );
-      const toUpdate = validContacts.filter((c) =>
-        handleToPersonId.has(c.instagramUsername.trim().toLowerCase()),
-      );
-
-      // ── Step 2a: Bulk insert new people ─────────────────────────────────────
-      let importedCount = 0;
-      const groupAssignments = new Map<DefaultImportGroupKey, Set<string>>();
-
-      if (toInsert.length > 0) {
-        const { data: insertedPeople, error: insertError } = await client
-          .from("people")
-          .insert(
-            toInsert.map((c) => ({
-              user_id: user.id,
-              first_name: c.firstName,
-              middle_name: c.middleName,
-              last_name: c.lastName,
-              myself: false,
-              last_interaction: now,
-            })),
-          )
-          .select("id");
-
-        if (insertError || !insertedPeople) {
-          return reply.status(500).send({ error: insertError?.message ?? "Insert failed" });
-        }
-
-        // Map back: inserted rows come back in the same order as the input array
-        for (let i = 0; i < toInsert.length; i++) {
-          const inserted = insertedPeople[i];
-          if (inserted) {
-            const handle = toInsert[i].instagramUsername.trim().toLowerCase();
-            handleToPersonId.set(handle, inserted.id);
-
-            // Collect group assignments for newly imported contacts
-            const sources = (toInsert[i].sources ?? []) as InstagramImportSource[];
-            const groupKeys = toInstagramImportGroupKeys(sources);
-            for (const groupKey of groupKeys) {
-              const members = groupAssignments.get(groupKey) ?? new Set<string>();
-              members.add(inserted.id);
-              groupAssignments.set(groupKey, members);
-            }
-          }
-        }
-
-        importedCount = insertedPeople.length;
-      }
-
-      // ── Step 2b: Concurrent update existing people ──────────────────────────
-      // Supabase doesn't support bulk UPDATE with different values per row,
-      // so we run individual updates concurrently (Promise.all) instead of sequentially.
-      let updatedCount = 0;
-
-      if (toUpdate.length > 0) {
-        const updateResults = await Promise.all(
-          toUpdate.map((c) =>
-            client
-              .from("people")
-              .update({
-                first_name: c.firstName,
-                middle_name: c.middleName,
-                last_name: c.lastName,
-              })
-              .eq("user_id", user.id)
-              .eq("id", handleToPersonId.get(c.instagramUsername.trim().toLowerCase())!),
-          ),
-        );
-
-        updatedCount = updateResults.filter((r) => !r.error).length;
-      }
-
-      // ── Step 3: Bulk upsert social media rows ──────────────────────────────
-      const socialRows = validContacts
-        .map((c) => {
-          const handle = c.instagramUsername.trim().toLowerCase();
-          const personId = handleToPersonId.get(handle);
-          if (!personId) return null;
-          return {
-            user_id: user.id,
-            person_id: personId,
-            platform: "instagram" as const,
-            handle,
-            connected_at: c.connectedAt ?? null,
-          };
-        })
-        .filter((row): row is NonNullable<typeof row> => row !== null);
-
-      if (socialRows.length > 0) {
-        const { error: socialUpsertError } = await client
-          .from("people_socials")
-          .upsert(socialRows, { onConflict: "user_id,person_id,platform" });
-
-        if (socialUpsertError) {
-          return reply.status(500).send({ error: socialUpsertError.message });
-        }
-      }
-
-      // ── Step 4: Bulk group assignments (parallel per group key) ─────────────
-      try {
-        await Promise.all(
-          Array.from(groupAssignments.entries()).map(([groupKey, personIds]) =>
-            assignContactsToDefaultImportGroup(client, user.id, groupKey, Array.from(personIds)),
-          ),
-        );
-      } catch (groupError) {
-        const message =
-          groupError instanceof Error ? groupError.message : "Failed to assign imported contacts";
-        return reply.status(500).send({ error: message });
-      }
-
-      if (importedCount + updatedCount > 0) {
-        try {
-          await markBulkImportCompleted(client, user.id);
-        } catch (followupError) {
-          request.log.error(
-            { err: followupError },
-            "[instagram-import] Failed to mark import completed",
-          );
-        }
-      }
-
-      const response: InstagramImportCommitResponse = {
-        importedCount,
-        updatedCount,
-        skippedCount,
-      };
-
-      return response;
-    },
+    withDomainRoute(async (ctx, request) => {
+      return commitInstagramImport(ctx, request.body.contacts);
+    }),
   );
-}
+};

@@ -34,7 +34,10 @@ export function collapsePersonMentionsFromEditor(markdown: string): string {
 /**
  * Builds the display text and URL for inserting a person mention in the mobile editor.
  */
-export function formatPersonMentionLink(displayName: string, contactId: string): {
+export function formatPersonMentionLink(
+  displayName: string,
+  contactId: string,
+): {
   displayText: string;
   url: string;
 } {

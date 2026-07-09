@@ -1,0 +1,21 @@
+{
+  "Category": {
+    "Activities": "Activities",
+    "Animals": "Animals",
+    "Buildings": "Buildings",
+    "Celebrations": "Celebrations",
+    "Food": "Food",
+    "Hearts": "Hearts",
+    "Humans": "Humans",
+    "Miscellaneous": "Miscellaneous",
+    "Nature": "Nature",
+    "Objects": "Objects",
+    "Sports": "Sports",
+    "Travel": "Travel",
+    "Work": "Work"
+  },
+  "EmptySearch": "No emojis found",
+  "RandomAccessibilityLabel": "Pick a random emoji",
+  "SearchPlaceholder": "Search emojis…",
+  "TriggerAccessibilityHint": "Opens emoji picker"
+}

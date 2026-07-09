@@ -1,6 +1,6 @@
-import { Box, Paper, Skeleton, Stack, Group } from "@mantine/core";
-import type { ColumnKey } from "@/app/(app)/app/components/contacts/ContactsTableV2";
+import { Box, Group, Paper, Skeleton, Stack } from "@mantine/core";
 import { PageHeaderSkeleton } from "@/app/(app)/app/components/PageHeaderSkeleton";
+import type { ColumnKey } from "@/lib/contacts/table-types";
 
 const DEFAULT_VISIBLE_COLUMNS: ColumnKey[] = [
   "name",
@@ -15,9 +15,7 @@ const DEFAULT_VISIBLE_COLUMNS: ColumnKey[] = [
  * Import Contacts (~148px) + Add Person (~120px).
  */
 export function PeoplePageHeaderSkeleton() {
-  return (
-    <PageHeaderSkeleton secondaryActionWidth={148} primaryActionWidth={120} />
-  );
+  return <PageHeaderSkeleton primaryActionWidth={120} secondaryActionWidth={148} />;
 }
 
 interface PeopleTableSkeletonProps {
@@ -36,28 +34,23 @@ interface PeopleTableSkeletonProps {
 function ColumnHeaderSkeleton({ col }: { col: ColumnKey }) {
   if (col === "name") {
     // Name column header is hidden in the real table but needs to fill the flex space
-    return (
-      <Skeleton
-        height={14}
-        width={60}
-        radius="sm"
-        style={{ flex: 1, minWidth: 240 }}
-      />
-    );
+    return <Skeleton height={14} radius="sm" style={{ flex: 1, minWidth: 240 }} width={60} />;
   }
   if (col === "social") {
-    return <Skeleton height={14} width={50} radius="sm" mx="md" />;
+    return <Skeleton height={14} mx="md" radius="sm" width={50} />;
   }
   const widthByCol: Partial<Record<ColumnKey, number>> = {
-    headline: 70,
-    location: 60,
-    lastInteraction: 110,
-    phone: 50,
     email: 50,
+    headline: 70,
+    lastInteraction: 110,
+    location: 60,
+    phone: 50,
   };
   const w = widthByCol[col];
-  if (!w) return null;
-  return <Skeleton height={14} width={w} radius="sm" mx="md" />;
+  if (!w) {
+    return null;
+  }
+  return <Skeleton height={14} mx="md" radius="sm" width={w} />;
 }
 
 /**
@@ -71,34 +64,34 @@ function ColumnCellSkeleton({ col }: { col: ColumnKey }) {
   switch (col) {
     case "name":
       return (
-        <Group gap="xs" style={{ flex: 1, minWidth: 240, marginRight: "auto" }}>
-          <Skeleton height={32} width={32} radius="xl" />
-          <Skeleton height={14} width={130} radius="sm" />
+        <Group gap="xs" style={{ flex: 1, marginRight: "auto", minWidth: 240 }}>
+          <Skeleton height={32} radius="xl" width={32} />
+          <Skeleton height={14} radius="sm" width={130} />
         </Group>
       );
     case "social":
       // 7 icon slots matching SOCIAL_ACTION_ORDER, size="md" = 28px, gap-1 = 4px
       return (
         <Group gap={4} mx="md" wrap="nowrap">
-          {Array.from({ length: 7 }).map((_, i) => (
-            <Skeleton key={i} height={28} width={28} radius="sm" />
+          {[0, 1, 2, 3, 4, 5, 6].map((slot) => (
+            <Skeleton height={28} key={slot} radius="sm" width={28} />
           ))}
         </Group>
       );
     case "headline":
-      return <Skeleton height={14} width={110} radius="sm" mx="md" />;
+      return <Skeleton height={14} mx="md" radius="sm" width={110} />;
     case "location":
-      return <Skeleton height={14} width={80} radius="sm" mx="md" />;
+      return <Skeleton height={14} mx="md" radius="sm" width={80} />;
     case "lastInteraction":
-      return <Skeleton height={14} width={70} radius="sm" mx="md" />;
+      return <Skeleton height={14} mx="md" radius="sm" width={70} />;
     case "phone":
-      return <Skeleton height={14} width={100} radius="sm" mx="md" />;
+      return <Skeleton height={14} mx="md" radius="sm" width={100} />;
     case "email":
-      return <Skeleton height={14} width={120} radius="sm" mx="md" />;
+      return <Skeleton height={14} mx="md" radius="sm" width={120} />;
     case "avatar":
-      return <Skeleton height={32} width={32} radius="xl" mx="md" />;
+      return <Skeleton height={32} mx="md" radius="xl" width={32} />;
     default:
-      return <Skeleton height={14} width={90} radius="sm" mx="md" />;
+      return <Skeleton height={14} mx="md" radius="sm" width={90} />;
   }
 }
 
@@ -111,21 +104,21 @@ export function PeopleTableSkeleton({
   columns = DEFAULT_VISIBLE_COLUMNS,
 }: PeopleTableSkeletonProps) {
   return (
-    <Paper withBorder shadow="sm" radius="md" p="md">
+    <Paper p="md" radius="md" shadow="sm" withBorder>
       {/* Toolbar: search + sort + columns button */}
       <Group justify="space-between" mb="md">
-        <Skeleton height={36} width={280} radius="sm" />
+        <Skeleton height={36} radius="sm" width={280} />
         <Group gap="xs">
-          <Skeleton height={36} width={36} radius="sm" />
-          <Skeleton height={36} width={36} radius="sm" />
+          <Skeleton height={36} radius="sm" width={36} />
+          <Skeleton height={36} radius="sm" width={36} />
         </Group>
       </Group>
 
       {/* Table header row */}
       <Group gap={0} mb="xs" px="xs">
-        <Skeleton height={14} width={16} radius="sm" mr={12} />
+        <Skeleton height={14} mr={12} radius="sm" width={16} />
         {columns.map((col) => (
-          <ColumnHeaderSkeleton key={col} col={col} />
+          <ColumnHeaderSkeleton col={col} key={col} />
         ))}
       </Group>
 
@@ -137,23 +130,22 @@ export function PeopleTableSkeleton({
         gap={0}
         style={{
           maskImage: "linear-gradient(to bottom, black 40%, transparent 100%)",
-          WebkitMaskImage:
-            "linear-gradient(to bottom, black 40%, transparent 100%)",
+          WebkitMaskImage: "linear-gradient(to bottom, black 40%, transparent 100%)",
         }}
       >
-        {Array.from({ length: 8 }).map((_, i) => (
+        {Array.from({ length: 8 }, (_, row) => row).map((row) => (
           <Group
-            key={i}
             gap={0}
-            py="sm"
+            key={row}
             px="xs"
+            py="sm"
             style={{
               borderTop: "1px solid var(--mantine-color-default-border)",
             }}
           >
-            <Skeleton height={14} width={16} radius="sm" mr={12} />
+            <Skeleton height={14} mr={12} radius="sm" width={16} />
             {columns.map((col) => (
-              <ColumnCellSkeleton key={col} col={col} />
+              <ColumnCellSkeleton col={col} key={col} />
             ))}
           </Group>
         ))}

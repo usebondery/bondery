@@ -1,0 +1,18 @@
+﻿{
+  "linter": {
+    "rules": {
+      "correctness": {
+        "noUnusedFunctionParameters": "error",
+        "noUnusedVariables": "error"
+      },
+      "style": {
+        "useBlockStatements": "error",
+        "useCollapsedElseIf": "error"
+      },
+      "suspicious": {
+        "noArrayIndexKey": "error",
+        "noUndeclaredEnvVars": "error"
+      }
+    }
+  }
+}

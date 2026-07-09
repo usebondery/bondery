@@ -1,13 +1,9 @@
-import type { FastifyInstance } from "fastify";
-import type { AppFastifyInstance } from "../fastify-types.js";
-import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
-import {
-  CHROME_EXTENSION_URL,
-  MIN_EXTENSION_VERSION,
-} from "@bondery/helpers";
-import { HEALTH_TIER } from "../rate-limit.js";
-import { withOkResponse } from "../openapi-route-responses.js";
+import { CHROME_EXTENSION_URL, MIN_EXTENSION_VERSION } from "@bondery/helpers";
 import { EXAMPLE_HEALTH_UNHEALTHY_RESPONSE } from "@bondery/schemas/openapi/fixtures/responses";
+import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
+import type { AppFastifyInstance } from "../platform/fastify-types.js";
+import { withOkResponse } from "../platform/openapi/responses.js";
+import { HEALTH_TIER } from "../platform/rate-limit.js";
 import { getHealthReport } from "./check.js";
 import { healthReportSchema, livenessStatusSchema } from "./schemas.js";
 
@@ -29,41 +25,44 @@ export function registerHealthRoutes(fastify: AppFastifyInstance): void {
   fastify.get(
     "/health",
     {
+      config: { rateLimit: HEALTH_TIER },
       schema: {
-        tags: ["Health"],
         description: READINESS_DESCRIPTION,
         response: {
-          ...withOkResponse(healthReportSchema, "Readiness report when dependencies are healthy or degraded"),
+          ...withOkResponse(
+            healthReportSchema,
+            "Readiness report when dependencies are healthy or degraded",
+          ),
           503: {
-            description: "Readiness report when critical dependencies are unavailable",
             content: {
               "application/json": {
-                schema: healthReportSchema,
                 example: EXAMPLE_HEALTH_UNHEALTHY_RESPONSE,
+                schema: healthReportSchema,
               },
             },
+            description: "Readiness report when critical dependencies are unavailable",
           },
         },
+        tags: ["Health"],
       } satisfies FastifyZodOpenApiSchema,
-      config: { rateLimit: HEALTH_TIER },
     },
     async (_request, reply) => {
       const report = await getHealthReport({
-        supabaseUrl: fastify.config.NEXT_PUBLIC_SUPABASE_URL,
-        supabasePublishableKey: fastify.config.PUBLIC_SUPABASE_PUBLISHABLE_KEY,
-        redisUrl: fastify.config.PRIVATE_REDIS_URL,
-        smtpHost: fastify.config.PRIVATE_EMAIL_HOST,
-        smtpUser: fastify.config.PRIVATE_EMAIL_USER,
-        smtpPass: fastify.config.PRIVATE_EMAIL_PASS,
-        smtpAddress: fastify.config.PRIVATE_EMAIL_ADDRESS,
-        smtpPort: fastify.config.PRIVATE_EMAIL_PORT,
         anthropicApiKey: fastify.config.PRIVATE_ANTHROPIC_API_KEY,
+        mapsApiKey: fastify.config.PRIVATE_MAPS_KEY,
         polarAccessToken: fastify.config.PRIVATE_POLAR_ACCESS_TOKEN,
         polarProductId: fastify.config.POLAR_PRODUCT_ID,
         polarWebhookSecret: fastify.config.PRIVATE_POLAR_WEBHOOK_SECRET,
-        mapsApiKey: fastify.config.PRIVATE_MAPS_KEY,
         posthogApiSecret: fastify.config.POSTHOG_API_SECRET,
         posthogProjectId: fastify.config.POSTHOG_PROJECT_ID,
+        redisUrl: fastify.config.PRIVATE_REDIS_URL,
+        smtpAddress: fastify.config.PRIVATE_EMAIL_ADDRESS,
+        smtpHost: fastify.config.PRIVATE_EMAIL_HOST,
+        smtpPass: fastify.config.PRIVATE_EMAIL_PASS,
+        smtpPort: fastify.config.PRIVATE_EMAIL_PORT,
+        smtpUser: fastify.config.PRIVATE_EMAIL_USER,
+        supabasePublishableKey: fastify.config.PUBLIC_SUPABASE_PUBLISHABLE_KEY,
+        supabaseUrl: fastify.config.NEXT_PUBLIC_SUPABASE_URL,
       });
 
       const statusCode = report.status === "unhealthy" ? 503 : 200;
@@ -74,21 +73,21 @@ export function registerHealthRoutes(fastify: AppFastifyInstance): void {
   fastify.get(
     "/status",
     {
+      config: { rateLimit: false },
       schema: {
-        tags: ["Health"],
         description: LIVENESS_DESCRIPTION,
         response: withOkResponse(livenessStatusSchema, "Liveness status"),
+        tags: ["Health"],
       } satisfies FastifyZodOpenApiSchema,
-      config: { rateLimit: false },
     },
     async () => {
       return {
-        status: "ok" as const,
-        timestamp: new Date().toISOString(),
         extension: {
           minVersion: MIN_EXTENSION_VERSION,
           storeUrl: CHROME_EXTENSION_URL,
         },
+        status: "ok" as const,
+        timestamp: new Date().toISOString(),
       };
     },
   );

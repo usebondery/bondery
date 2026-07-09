@@ -23,10 +23,7 @@ export async function invalidateContactMapPins(queryClient: QueryClient): Promis
   await queryClient.invalidateQueries({ queryKey: [...contactKeys.all, "map-pins"] });
 }
 
-export async function invalidateContactDetail(
-  queryClient: QueryClient,
-  id: string,
-): Promise<void> {
+export async function invalidateContactDetail(queryClient: QueryClient, id: string): Promise<void> {
   await queryClient.invalidateQueries({ queryKey: contactKeys.detail(id) });
 }
 
@@ -44,6 +41,37 @@ export async function invalidateContactImportantDates(
   await queryClient.invalidateQueries({ queryKey: contactKeys.importantDates(id) });
 }
 
+export async function invalidateContactTags(queryClient: QueryClient, id: string): Promise<void> {
+  await queryClient.invalidateQueries({ queryKey: contactKeys.tags(id) });
+}
+
+export async function invalidateContactInteractions(
+  queryClient: QueryClient,
+  id: string,
+): Promise<void> {
+  await queryClient.invalidateQueries({ queryKey: [...contactKeys.detail(id), "interactions"] });
+}
+
+export async function invalidateAllContactTags(queryClient: QueryClient): Promise<void> {
+  await queryClient.invalidateQueries({
+    predicate: (query) =>
+      Array.isArray(query.queryKey) &&
+      query.queryKey[0] === contactKeys.all[0] &&
+      query.queryKey[1] === "detail" &&
+      query.queryKey.includes("tags"),
+  });
+}
+
+export async function invalidateAllContactInteractions(queryClient: QueryClient): Promise<void> {
+  await queryClient.invalidateQueries({
+    predicate: (query) =>
+      Array.isArray(query.queryKey) &&
+      query.queryKey[0] === contactKeys.all[0] &&
+      query.queryKey[1] === "detail" &&
+      query.queryKey.includes("interactions"),
+  });
+}
+
 export async function invalidateSettings(queryClient: QueryClient): Promise<void> {
   await queryClient.invalidateQueries({ queryKey: settingsKeys.all });
 }
@@ -52,12 +80,19 @@ export async function invalidateApiKeys(queryClient: QueryClient): Promise<void>
   await queryClient.invalidateQueries({ queryKey: settingsKeys.apiKeys() });
 }
 
+export async function invalidateSubscription(queryClient: QueryClient): Promise<void> {
+  await queryClient.invalidateQueries({ queryKey: settingsKeys.subscription() });
+}
+
 export async function invalidateTagDomain(queryClient: QueryClient): Promise<void> {
   await queryClient.invalidateQueries({ queryKey: tagKeys.all });
 }
 
 export async function invalidateInteractionDomain(queryClient: QueryClient): Promise<void> {
-  await queryClient.invalidateQueries({ queryKey: interactionKeys.all });
+  await Promise.all([
+    queryClient.invalidateQueries({ queryKey: interactionKeys.all }),
+    invalidateAllContactInteractions(queryClient),
+  ]);
 }
 
 export async function invalidateGroupDomain(queryClient: QueryClient): Promise<void> {
@@ -74,6 +109,13 @@ export async function invalidateReminderDomain(queryClient: QueryClient): Promis
 
 export async function invalidateChatSessions(queryClient: QueryClient): Promise<void> {
   await queryClient.invalidateQueries({ queryKey: chatKeys.sessions() });
+}
+
+export async function invalidateChatSessionMessages(
+  queryClient: QueryClient,
+  sessionId: string,
+): Promise<void> {
+  await queryClient.invalidateQueries({ queryKey: chatKeys.messages(sessionId) });
 }
 
 /** Post-import burst: contacts, merge recommendations, and groups. */

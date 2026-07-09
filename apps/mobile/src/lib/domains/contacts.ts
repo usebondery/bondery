@@ -1,21 +1,25 @@
 import type {
   Contact,
   CreateContactInput,
+  Group,
+  ImportantDate,
   ReplaceImportantDatesInput,
+  Tag,
   UpdateContactInput,
 } from "@bondery/schemas";
-import { submitSyncMutation } from "../sync/mutation-service";
-import { normalizeSyncDatetime } from "../sync/sync-datetime";
+import type { ContactsListParams } from "../resources/contacts";
 import { generateUuid } from "../sync/ids";
+import { submitSyncMutation } from "../sync/mutation-service";
 import {
-  getContact,
-  getMyselfContact,
-  getMyselfContactId,
+  getContact as getContactFromRepo,
+  getMyselfContact as getMyselfContactFromRepo,
+  getMyselfContactId as getMyselfContactIdFromRepo,
   listContactGroups,
   listContactImportantDates,
+  listContacts as listContactsFromRepo,
   listContactTags,
-  listContacts,
 } from "../sync/repositories/contacts";
+import { normalizeSyncDatetime } from "../sync/sync-datetime";
 
 function newId(): string {
   return generateUuid();
@@ -26,97 +30,144 @@ function optionalBaseUpdatedAt(value?: string | null) {
   return normalized ? { baseUpdatedAt: normalized } : {};
 }
 
-export const contactsDomain = {
-  list: listContacts,
-  get: getContact,
-  getMyself: getMyselfContact,
-  getMyselfId: getMyselfContactId,
-  listGroups: listContactGroups,
-  listTags: listContactTags,
-  listImportantDates: listContactImportantDates,
+export type { ContactsListParams };
 
-  create(input: {
-    firstName: string;
-    middleName?: string;
-    lastName?: string;
-    linkedin?: string;
-  }): Contact {
-    const id = newId();
-    submitSyncMutation({
-      type: "contact.create",
-      payload: { ...input, id },
-    });
-    const contact = getContact(id);
-    if (!contact) {
-      throw new Error("Failed to create contact locally");
-    }
-    return contact;
-  },
+export function listContacts(params: ContactsListParams): {
+  contacts: Contact[];
+  totalCount: number;
+} {
+  return listContactsFromRepo(params);
+}
 
-  update(
-    personId: string,
-    input: UpdateContactInput,
-    baseUpdatedAt?: string | null,
-  ): Contact {
-    submitSyncMutation({
-      type: "contact.update",
-      entityId: personId,
-      payload: input,
-      ...optionalBaseUpdatedAt(baseUpdatedAt),
-    });
+export function getContact(personId: string): Contact | null {
+  return getContactFromRepo(personId);
+}
+
+export function getMyselfContact(): Contact | null {
+  return getMyselfContactFromRepo();
+}
+
+export function getMyselfContactId(): string | null {
+  return getMyselfContactIdFromRepo();
+}
+
+export function getContactGroups(personId: string): Group[] {
+  return listContactGroups(personId);
+}
+
+export function getContactTags(personId: string): Tag[] {
+  return listContactTags(personId);
+}
+
+export function getContactImportantDates(personId: string): ImportantDate[] {
+  return listContactImportantDates(personId);
+}
+
+export function createContact(input: {
+  firstName: string;
+  middleName?: string;
+  lastName?: string;
+  linkedin?: string;
+}): Contact {
+  const id = newId();
+  submitSyncMutation({
+    payload: { ...input, id },
+    type: "contact.create",
+  });
+  const contact = getContact(id);
+  if (!contact) {
+    throw new Error("Failed to create contact locally");
+  }
+  return contact;
+}
+
+export function updateContact(
+  personId: string,
+  input: UpdateContactInput,
+  baseUpdatedAt?: string | null,
+): Contact {
+  submitSyncMutation({
+    entityId: personId,
+    payload: input,
+    type: "contact.update",
+    ...optionalBaseUpdatedAt(baseUpdatedAt),
+  });
+  const contact = getContact(personId);
+  if (!contact) {
+    throw new Error("Failed to update contact locally");
+  }
+  return contact;
+}
+
+export function deleteContact(personId: string, baseUpdatedAt?: string | null): void {
+  submitSyncMutation({
+    entityId: personId,
+    payload: {},
+    type: "contact.delete",
+    ...optionalBaseUpdatedAt(baseUpdatedAt),
+  });
+}
+
+export function deleteContacts(personIds: string[]): void {
+  for (const personId of personIds) {
     const contact = getContact(personId);
-    if (!contact) {
-      throw new Error("Failed to update contact locally");
-    }
-    return contact;
-  },
+    deleteContact(personId, contact?.updatedAt ?? undefined);
+  }
+}
 
-  delete(personId: string, baseUpdatedAt?: string | null): void {
-    submitSyncMutation({
-      type: "contact.delete",
-      entityId: personId,
-      payload: {},
-      ...optionalBaseUpdatedAt(baseUpdatedAt),
-    });
-  },
+export function putContactImportantDates(
+  personId: string,
+  dates: ReplaceImportantDatesInput,
+): Contact {
+  return updateContact(personId, { importantDates: dates });
+}
 
-  deleteMany(personIds: string[]): void {
-    for (const personId of personIds) {
-      const contact = getContact(personId);
-      contactsDomain.delete(personId, contact?.updatedAt ?? undefined);
-    }
-  },
+export function addTagToContact(personId: string, tagId: string): void {
+  submitSyncMutation({
+    entityId: personId,
+    payload: { tagId },
+    type: "contact.addTag",
+  });
+}
 
-  replaceImportantDates(personId: string, dates: ReplaceImportantDatesInput): Contact {
-    return contactsDomain.update(personId, { importantDates: dates });
-  },
+export function removeTagFromContact(personId: string, tagId: string): void {
+  submitSyncMutation({
+    entityId: personId,
+    payload: { tagId },
+    type: "contact.removeTag",
+  });
+}
 
-  addTag(personId: string, tagId: string): void {
-    submitSyncMutation({
-      type: "contact.addTag",
-      entityId: personId,
-      payload: { tagId },
-    });
-  },
-
-  removeTag(personId: string, tagId: string): void {
-    submitSyncMutation({
-      type: "contact.removeTag",
-      entityId: personId,
-      payload: { tagId },
-    });
-  },
-
-  /** Convenience wrapper matching createContactSheet schema output. */
-  createFromFullName(parsed: CreateContactInput & {
+/** Convenience wrapper matching createContactSheet schema output. */
+export function createContactFromFullName(
+  parsed: CreateContactInput & {
     firstName: string;
     middleName?: string | null;
     lastName?: string | null;
-  }): Contact {
-    return contactsDomain.create({
-      firstName: parsed.firstName,
-      middleName: parsed.middleName ?? undefined,
-      lastName: parsed.lastName ?? undefined,
-    });
   },
+): Contact {
+  return createContact({
+    firstName: parsed.firstName,
+    lastName: parsed.lastName ?? undefined,
+    middleName: parsed.middleName ?? undefined,
+  });
+}
+
+/** @deprecated Use named exports (`createContact`, `listContacts`, …). */
+export const contactsDomain = {
+  addTag: addTagToContact,
+  create: createContact,
+  createFromFullName: createContactFromFullName,
+  delete: deleteContact,
+  deleteMany: deleteContacts,
+  get: getContact,
+  getMyself: getMyselfContact,
+  getMyselfId: getMyselfContactId,
+  list: listContacts,
+  listGroups: getContactGroups,
+  listImportantDates: getContactImportantDates,
+  listTags: getContactTags,
+  removeTag: removeTagFromContact,
+  replaceImportantDates: putContactImportantDates,
+  update: updateContact,
 };

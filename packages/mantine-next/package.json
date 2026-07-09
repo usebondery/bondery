@@ -1,395 +1,4 @@
 {
-  "name": "@bondery/mantine-next",
-  "version": "1.7.0",
-  "private": true,
-  "type": "module",
-  "main": "./dist/index.js",
-  "types": "./src/index.ts",
-  "exports": {
-    ".": {
-      "types": "./src/index.ts",
-      "import": "./dist/index.js",
-      "node": "./dist/index.js",
-      "default": "./dist/index.js"
-    },
-    "./*": {
-      "types": "./src/*.ts",
-      "import": "./dist/*.js",
-      "node": "./dist/*.js",
-      "default": "./dist/*.js"
-    },
-    "./CodeBlock": {
-      "types": "./src/CodeBlock/index.ts",
-      "import": "./dist/CodeBlock/index.js",
-      "node": "./dist/CodeBlock/index.js",
-      "default": "./dist/CodeBlock/index.js"
-    },
-    "./CopyButton": {
-      "types": "./src/CopyButton/index.ts",
-      "import": "./dist/CopyButton/index.js",
-      "node": "./dist/CopyButton/index.js",
-      "default": "./dist/CopyButton/index.js"
-    },
-    "./DataTable": {
-      "types": "./src/DataTable/index.ts",
-      "import": "./dist/DataTable/index.js",
-      "node": "./dist/DataTable/index.js",
-      "default": "./dist/DataTable/index.js"
-    },
-    "./DescribedSelect": {
-      "types": "./src/DescribedSelect/index.ts",
-      "import": "./dist/DescribedSelect/index.js",
-      "node": "./dist/DescribedSelect/index.js",
-      "default": "./dist/DescribedSelect/index.js"
-    },
-    "./DotsMenuButton": {
-      "types": "./src/DotsMenuButton/index.ts",
-      "import": "./dist/DotsMenuButton/index.js",
-      "node": "./dist/DotsMenuButton/index.js",
-      "default": "./dist/DotsMenuButton/index.js"
-    },
-    "./Dropzone": {
-      "types": "./src/Dropzone/index.ts",
-      "import": "./dist/Dropzone/index.js",
-      "node": "./dist/Dropzone/index.js",
-      "default": "./dist/Dropzone/index.js"
-    },
-    "./EmojiPicker": {
-      "types": "./src/EmojiPicker/index.ts",
-      "import": "./dist/EmojiPicker/index.js",
-      "node": "./dist/EmojiPicker/index.js",
-      "default": "./dist/EmojiPicker/index.js"
-    },
-    "./LogoIcon": {
-      "types": "./src/LogoIcon/index.ts",
-      "import": "./dist/LogoIcon/index.js",
-      "node": "./dist/LogoIcon/index.js",
-      "default": "./dist/LogoIcon/index.js"
-    },
-    "./Modal": {
-      "types": "./src/Modal/index.ts",
-      "import": "./dist/Modal/index.js",
-      "node": "./dist/Modal/index.js",
-      "default": "./dist/Modal/index.js"
-    },
-    "./Notifications": {
-      "types": "./src/Notifications/index.ts",
-      "import": "./dist/Notifications/index.js",
-      "node": "./dist/Notifications/index.js",
-      "default": "./dist/Notifications/index.js"
-    },
-    "./PeopleMultiPickerInput": {
-      "types": "./src/PeopleMultiPickerInput/index.ts",
-      "import": "./dist/PeopleMultiPickerInput/index.js",
-      "node": "./dist/PeopleMultiPickerInput/index.js",
-      "default": "./dist/PeopleMultiPickerInput/index.js"
-    },
-    "./ThemePicker": {
-      "types": "./src/ThemePicker/index.ts",
-      "import": "./dist/ThemePicker/index.js",
-      "node": "./dist/ThemePicker/index.js",
-      "default": "./dist/ThemePicker/index.js"
-    },
-    "./TypePicker": {
-      "types": "./src/TypePicker/index.ts",
-      "import": "./dist/TypePicker/index.js",
-      "node": "./dist/TypePicker/index.js",
-      "default": "./dist/TypePicker/index.js"
-    },
-    "./UserCard": {
-      "types": "./src/UserCard/index.ts",
-      "import": "./dist/UserCard/index.js",
-      "node": "./dist/UserCard/index.js",
-      "default": "./dist/UserCard/index.js"
-    },
-    "./nextjs/ActionIconLink": {
-      "types": "./src/nextjs/ActionIconLink/index.ts",
-      "import": "./dist/nextjs/ActionIconLink/index.js",
-      "node": "./dist/nextjs/ActionIconLink/index.js",
-      "default": "./dist/nextjs/ActionIconLink/index.js"
-    },
-    "./nextjs/AnchorLink": {
-      "types": "./src/nextjs/AnchorLink/index.ts",
-      "import": "./dist/nextjs/AnchorLink/index.js",
-      "node": "./dist/nextjs/AnchorLink/index.js",
-      "default": "./dist/nextjs/AnchorLink/index.js"
-    },
-    "./nextjs/ButtonLink": {
-      "types": "./src/nextjs/ButtonLink/index.ts",
-      "import": "./dist/nextjs/ButtonLink/index.js",
-      "node": "./dist/nextjs/ButtonLink/index.js",
-      "default": "./dist/nextjs/ButtonLink/index.js"
-    },
-    "./nextjs/PersonAvatar": {
-      "types": "./src/nextjs/PersonAvatar/index.ts",
-      "import": "./dist/nextjs/PersonAvatar/index.js",
-      "node": "./dist/nextjs/PersonAvatar/index.js",
-      "default": "./dist/nextjs/PersonAvatar/index.js"
-    },
-    "./nextjs/PersonAvatarGroup": {
-      "types": "./src/nextjs/PersonAvatarGroup/index.ts",
-      "import": "./dist/nextjs/PersonAvatarGroup/index.js",
-      "node": "./dist/nextjs/PersonAvatarGroup/index.js",
-      "default": "./dist/nextjs/PersonAvatarGroup/index.js"
-    },
-    "./nextjs/PersonCard": {
-      "types": "./src/nextjs/PersonCard/index.ts",
-      "import": "./dist/nextjs/PersonCard/index.js",
-      "node": "./dist/nextjs/PersonCard/index.js",
-      "default": "./dist/nextjs/PersonCard/index.js"
-    },
-    "./nextjs/PersonChip": {
-      "types": "./src/nextjs/PersonChip/index.ts",
-      "import": "./dist/nextjs/PersonChip/index.js",
-      "node": "./dist/nextjs/PersonChip/index.js",
-      "default": "./dist/nextjs/PersonChip/index.js"
-    },
-    "./CodeBlock/CodeBlock": {
-      "types": "./src/CodeBlock/CodeBlock.tsx",
-      "import": "./dist/CodeBlock/CodeBlock.js",
-      "node": "./dist/CodeBlock/CodeBlock.js",
-      "default": "./dist/CodeBlock/CodeBlock.js"
-    },
-    "./CopyButton/CopyButton": {
-      "types": "./src/CopyButton/CopyButton.tsx",
-      "import": "./dist/CopyButton/CopyButton.js",
-      "node": "./dist/CopyButton/CopyButton.js",
-      "default": "./dist/CopyButton/CopyButton.js"
-    },
-    "./DataTable/ColumnVisibilityMenu": {
-      "types": "./src/DataTable/ColumnVisibilityMenu.tsx",
-      "import": "./dist/DataTable/ColumnVisibilityMenu.js",
-      "node": "./dist/DataTable/ColumnVisibilityMenu.js",
-      "default": "./dist/DataTable/ColumnVisibilityMenu.js"
-    },
-    "./DataTable/DataTable": {
-      "types": "./src/DataTable/DataTable.tsx",
-      "import": "./dist/DataTable/DataTable.js",
-      "node": "./dist/DataTable/DataTable.js",
-      "default": "./dist/DataTable/DataTable.js"
-    },
-    "./DataTable/SortMenu": {
-      "types": "./src/DataTable/SortMenu.tsx",
-      "import": "./dist/DataTable/SortMenu.js",
-      "node": "./dist/DataTable/SortMenu.js",
-      "default": "./dist/DataTable/SortMenu.js"
-    },
-    "./DataTable/SortableColumnItem": {
-      "types": "./src/DataTable/SortableColumnItem.tsx",
-      "import": "./dist/DataTable/SortableColumnItem.js",
-      "node": "./dist/DataTable/SortableColumnItem.js",
-      "default": "./dist/DataTable/SortableColumnItem.js"
-    },
-    "./DataTable/types": {
-      "types": "./src/DataTable/types.ts",
-      "import": "./dist/DataTable/types.js",
-      "node": "./dist/DataTable/types.js",
-      "default": "./dist/DataTable/types.js"
-    },
-    "./DescribedSelect/DescribedSelect": {
-      "types": "./src/DescribedSelect/DescribedSelect.tsx",
-      "import": "./dist/DescribedSelect/DescribedSelect.js",
-      "node": "./dist/DescribedSelect/DescribedSelect.js",
-      "default": "./dist/DescribedSelect/DescribedSelect.js"
-    },
-    "./DotsMenuButton/DotsMenuButton": {
-      "types": "./src/DotsMenuButton/DotsMenuButton.tsx",
-      "import": "./dist/DotsMenuButton/DotsMenuButton.js",
-      "node": "./dist/DotsMenuButton/DotsMenuButton.js",
-      "default": "./dist/DotsMenuButton/DotsMenuButton.js"
-    },
-    "./Dropzone/DropzoneContent": {
-      "types": "./src/Dropzone/DropzoneContent.tsx",
-      "import": "./dist/Dropzone/DropzoneContent.js",
-      "node": "./dist/Dropzone/DropzoneContent.js",
-      "default": "./dist/Dropzone/DropzoneContent.js"
-    },
-    "./EmojiPicker/EmojiPicker": {
-      "types": "./src/EmojiPicker/EmojiPicker.tsx",
-      "import": "./dist/EmojiPicker/EmojiPicker.js",
-      "node": "./dist/EmojiPicker/EmojiPicker.js",
-      "default": "./dist/EmojiPicker/EmojiPicker.js"
-    },
-    "./EmojiPicker/EmojiPickerDropdownContent": {
-      "types": "./src/EmojiPicker/EmojiPickerDropdownContent.tsx",
-      "import": "./dist/EmojiPicker/EmojiPickerDropdownContent.js",
-      "node": "./dist/EmojiPicker/EmojiPickerDropdownContent.js",
-      "default": "./dist/EmojiPicker/EmojiPickerDropdownContent.js"
-    },
-    "./EmojiPicker/emojiData": {
-      "types": "./src/EmojiPicker/emojiData.ts",
-      "import": "./dist/EmojiPicker/emojiData.js",
-      "node": "./dist/EmojiPicker/emojiData.js",
-      "default": "./dist/EmojiPicker/emojiData.js"
-    },
-    "./LogoIcon/LogoIcon": {
-      "types": "./src/LogoIcon/LogoIcon.tsx",
-      "import": "./dist/LogoIcon/LogoIcon.js",
-      "node": "./dist/LogoIcon/LogoIcon.js",
-      "default": "./dist/LogoIcon/LogoIcon.js"
-    },
-    "./Modal/ModalFooter": {
-      "types": "./src/Modal/ModalFooter.tsx",
-      "import": "./dist/Modal/ModalFooter.js",
-      "node": "./dist/Modal/ModalFooter.js",
-      "default": "./dist/Modal/ModalFooter.js"
-    },
-    "./Modal/ModalScrollLayout": {
-      "types": "./src/Modal/ModalScrollLayout.tsx",
-      "import": "./dist/Modal/ModalScrollLayout.js",
-      "node": "./dist/Modal/ModalScrollLayout.js",
-      "default": "./dist/Modal/ModalScrollLayout.js"
-    },
-    "./Modal/ModalTitle": {
-      "types": "./src/Modal/ModalTitle.tsx",
-      "import": "./dist/Modal/ModalTitle.js",
-      "node": "./dist/Modal/ModalTitle.js",
-      "default": "./dist/Modal/ModalTitle.js"
-    },
-    "./Notifications/ErrorNotificationTemplate": {
-      "types": "./src/Notifications/ErrorNotificationTemplate.ts",
-      "import": "./dist/Notifications/ErrorNotificationTemplate.js",
-      "node": "./dist/Notifications/ErrorNotificationTemplate.js",
-      "default": "./dist/Notifications/ErrorNotificationTemplate.js"
-    },
-    "./Notifications/InformationNotificationTemplate": {
-      "types": "./src/Notifications/InformationNotificationTemplate.ts",
-      "import": "./dist/Notifications/InformationNotificationTemplate.js",
-      "node": "./dist/Notifications/InformationNotificationTemplate.js",
-      "default": "./dist/Notifications/InformationNotificationTemplate.js"
-    },
-    "./Notifications/LoadingNotificationTemplate": {
-      "types": "./src/Notifications/LoadingNotificationTemplate.ts",
-      "import": "./dist/Notifications/LoadingNotificationTemplate.js",
-      "node": "./dist/Notifications/LoadingNotificationTemplate.js",
-      "default": "./dist/Notifications/LoadingNotificationTemplate.js"
-    },
-    "./Notifications/StatusNotificationTemplate": {
-      "types": "./src/Notifications/StatusNotificationTemplate.ts",
-      "import": "./dist/Notifications/StatusNotificationTemplate.js",
-      "node": "./dist/Notifications/StatusNotificationTemplate.js",
-      "default": "./dist/Notifications/StatusNotificationTemplate.js"
-    },
-    "./Notifications/SuccessNotificationTemplate": {
-      "types": "./src/Notifications/SuccessNotificationTemplate.ts",
-      "import": "./dist/Notifications/SuccessNotificationTemplate.js",
-      "node": "./dist/Notifications/SuccessNotificationTemplate.js",
-      "default": "./dist/Notifications/SuccessNotificationTemplate.js"
-    },
-    "./Notifications/WarningNotificationTemplate": {
-      "types": "./src/Notifications/WarningNotificationTemplate.ts",
-      "import": "./dist/Notifications/WarningNotificationTemplate.js",
-      "node": "./dist/Notifications/WarningNotificationTemplate.js",
-      "default": "./dist/Notifications/WarningNotificationTemplate.js"
-    },
-    "./PeopleMultiPickerInput/PeopleMultiPickerInput": {
-      "types": "./src/PeopleMultiPickerInput/PeopleMultiPickerInput.tsx",
-      "import": "./dist/PeopleMultiPickerInput/PeopleMultiPickerInput.js",
-      "node": "./dist/PeopleMultiPickerInput/PeopleMultiPickerInput.js",
-      "default": "./dist/PeopleMultiPickerInput/PeopleMultiPickerInput.js"
-    },
-    "./ThemePicker/ThemePicker": {
-      "types": "./src/ThemePicker/ThemePicker.tsx",
-      "import": "./dist/ThemePicker/ThemePicker.js",
-      "node": "./dist/ThemePicker/ThemePicker.js",
-      "default": "./dist/ThemePicker/ThemePicker.js"
-    },
-    "./TypePicker/TypePicker": {
-      "types": "./src/TypePicker/TypePicker.tsx",
-      "import": "./dist/TypePicker/TypePicker.js",
-      "node": "./dist/TypePicker/TypePicker.js",
-      "default": "./dist/TypePicker/TypePicker.js"
-    },
-    "./UserCard/UserCard": {
-      "types": "./src/UserCard/UserCard.tsx",
-      "import": "./dist/UserCard/UserCard.js",
-      "node": "./dist/UserCard/UserCard.js",
-      "default": "./dist/UserCard/UserCard.js"
-    },
-    "./nextjs/ActionIconLink/ActionIconLink": {
-      "types": "./src/nextjs/ActionIconLink/ActionIconLink.tsx",
-      "import": "./dist/nextjs/ActionIconLink/ActionIconLink.js",
-      "node": "./dist/nextjs/ActionIconLink/ActionIconLink.js",
-      "default": "./dist/nextjs/ActionIconLink/ActionIconLink.js"
-    },
-    "./nextjs/AnchorLink/AnchorLink": {
-      "types": "./src/nextjs/AnchorLink/AnchorLink.tsx",
-      "import": "./dist/nextjs/AnchorLink/AnchorLink.js",
-      "node": "./dist/nextjs/AnchorLink/AnchorLink.js",
-      "default": "./dist/nextjs/AnchorLink/AnchorLink.js"
-    },
-    "./nextjs/ButtonLink/ButtonLink": {
-      "types": "./src/nextjs/ButtonLink/ButtonLink.tsx",
-      "import": "./dist/nextjs/ButtonLink/ButtonLink.js",
-      "node": "./dist/nextjs/ButtonLink/ButtonLink.js",
-      "default": "./dist/nextjs/ButtonLink/ButtonLink.js"
-    },
-    "./nextjs/NextLink": {
-      "types": "./src/nextjs/NextLink.tsx",
-      "import": "./dist/nextjs/NextLink.js",
-      "node": "./dist/nextjs/NextLink.js",
-      "default": "./dist/nextjs/NextLink.js"
-    },
-    "./nextjs/PersonAvatar/PersonAvatar": {
-      "types": "./src/nextjs/PersonAvatar/PersonAvatar.tsx",
-      "import": "./dist/nextjs/PersonAvatar/PersonAvatar.js",
-      "node": "./dist/nextjs/PersonAvatar/PersonAvatar.js",
-      "default": "./dist/nextjs/PersonAvatar/PersonAvatar.js"
-    },
-    "./nextjs/PersonAvatar/PersonAvatarTooltip": {
-      "types": "./src/nextjs/PersonAvatar/PersonAvatarTooltip.tsx",
-      "import": "./dist/nextjs/PersonAvatar/PersonAvatarTooltip.js",
-      "node": "./dist/nextjs/PersonAvatar/PersonAvatarTooltip.js",
-      "default": "./dist/nextjs/PersonAvatar/PersonAvatarTooltip.js"
-    },
-    "./nextjs/PersonAvatarGroup/PersonAvatarGroup": {
-      "types": "./src/nextjs/PersonAvatarGroup/PersonAvatarGroup.tsx",
-      "import": "./dist/nextjs/PersonAvatarGroup/PersonAvatarGroup.js",
-      "node": "./dist/nextjs/PersonAvatarGroup/PersonAvatarGroup.js",
-      "default": "./dist/nextjs/PersonAvatarGroup/PersonAvatarGroup.js"
-    },
-    "./nextjs/PersonCard/PersonCard": {
-      "types": "./src/nextjs/PersonCard/PersonCard.tsx",
-      "import": "./dist/nextjs/PersonCard/PersonCard.js",
-      "node": "./dist/nextjs/PersonCard/PersonCard.js",
-      "default": "./dist/nextjs/PersonCard/PersonCard.js"
-    },
-    "./nextjs/PersonChip/PersonChip": {
-      "types": "./src/nextjs/PersonChip/PersonChip.tsx",
-      "import": "./dist/nextjs/PersonChip/PersonChip.js",
-      "node": "./dist/nextjs/PersonChip/PersonChip.js",
-      "default": "./dist/nextjs/PersonChip/PersonChip.js"
-    },
-    "./styles.d": {
-      "types": "./src/styles.d.ts",
-      "import": "./dist/styles.d.js",
-      "node": "./dist/styles.d.js",
-      "default": "./dist/styles.d.js"
-    },
-    "./theme": {
-      "types": "./src/theme.ts",
-      "import": "./dist/theme.js",
-      "node": "./dist/theme.js",
-      "default": "./dist/theme.js"
-    },
-    "./utils/avatarColor": {
-      "types": "./src/utils/avatarColor.ts",
-      "import": "./dist/utils/avatarColor.js",
-      "node": "./dist/utils/avatarColor.js",
-      "default": "./dist/utils/avatarColor.js"
-    },
-    "./utils/nameHelpers": {
-      "types": "./src/utils/nameHelpers.ts",
-      "import": "./dist/utils/nameHelpers.js",
-      "node": "./dist/utils/nameHelpers.js",
-      "default": "./dist/utils/nameHelpers.js"
-    },
-    "./styles": {
-      "types": "./src/styles.d.ts",
-      "style": "./src/styles.css",
-      "default": "./src/styles.css"
-    }
-  },
   "dependencies": {
     "@bondery/branding": "*",
     "@bondery/helpers": "*",
@@ -398,13 +7,7 @@
     "@dnd-kit/sortable": "^10.0.0",
     "@dnd-kit/utilities": "^3.2.2"
   },
-  "scripts": {
-    "build": "rimraf dist && tsc && node ../../scripts/rewrite-package-hash-imports-in-dist.mjs mantine-next",
-    "dev": "tsc --watch --preserveWatchOutput",
-    "check-types": "tsc --noEmit"
-  },
   "devDependencies": {
-    "rimraf": "^6.0.1",
     "@bondery/typescript-config": "*",
     "@mantine/core": "^9.0.0",
     "@mantine/hooks": "^9.0.0",
@@ -412,17 +15,429 @@
     "next": "^16.0.0",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
+    "rimraf": "^6.0.1",
     "typescript": "^6"
   },
-  "peerDependencies": {
-    "@mantine/code-highlight": "^9.0.0",
-    "@mantine/core": "^9.0.0",
-    "@mantine/dropzone": "^9.0.0",
-    "@mantine/hooks": "^9.0.0",
-    "@tabler/icons-react": "^3.34.1",
-    "next": "^16.0.0",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+  "exports": {
+    ".": {
+      "default": "./dist/index.js",
+      "import": "./dist/index.js",
+      "node": "./dist/index.js",
+      "types": "./src/index.ts"
+    },
+    "./*": {
+      "default": "./dist/*.js",
+      "import": "./dist/*.js",
+      "node": "./dist/*.js",
+      "types": "./src/*.ts"
+    },
+    "./CodeBlock": {
+      "default": "./dist/CodeBlock/index.js",
+      "import": "./dist/CodeBlock/index.js",
+      "node": "./dist/CodeBlock/index.js",
+      "types": "./src/CodeBlock/index.ts"
+    },
+    "./CodeBlock/CodeBlock": {
+      "default": "./dist/CodeBlock/CodeBlock.js",
+      "import": "./dist/CodeBlock/CodeBlock.js",
+      "node": "./dist/CodeBlock/CodeBlock.js",
+      "types": "./src/CodeBlock/CodeBlock.tsx"
+    },
+    "./CopyButton": {
+      "default": "./dist/CopyButton/index.js",
+      "import": "./dist/CopyButton/index.js",
+      "node": "./dist/CopyButton/index.js",
+      "types": "./src/CopyButton/index.ts"
+    },
+    "./CopyButton/CopyButton": {
+      "default": "./dist/CopyButton/CopyButton.js",
+      "import": "./dist/CopyButton/CopyButton.js",
+      "node": "./dist/CopyButton/CopyButton.js",
+      "types": "./src/CopyButton/CopyButton.tsx"
+    },
+    "./DataTable": {
+      "default": "./dist/DataTable/index.js",
+      "import": "./dist/DataTable/index.js",
+      "node": "./dist/DataTable/index.js",
+      "types": "./src/DataTable/index.ts"
+    },
+    "./DataTable/ColumnVisibilityMenu": {
+      "default": "./dist/DataTable/ColumnVisibilityMenu.js",
+      "import": "./dist/DataTable/ColumnVisibilityMenu.js",
+      "node": "./dist/DataTable/ColumnVisibilityMenu.js",
+      "types": "./src/DataTable/ColumnVisibilityMenu.tsx"
+    },
+    "./DataTable/DataTable": {
+      "default": "./dist/DataTable/DataTable.js",
+      "import": "./dist/DataTable/DataTable.js",
+      "node": "./dist/DataTable/DataTable.js",
+      "types": "./src/DataTable/DataTable.tsx"
+    },
+    "./DataTable/DataTableRow": {
+      "default": "./dist/DataTable/DataTableRow.js",
+      "import": "./dist/DataTable/DataTableRow.js",
+      "node": "./dist/DataTable/DataTableRow.js",
+      "types": "./src/DataTable/DataTableRow.tsx"
+    },
+    "./DataTable/SearchInput": {
+      "default": "./dist/DataTable/SearchInput.js",
+      "import": "./dist/DataTable/SearchInput.js",
+      "node": "./dist/DataTable/SearchInput.js",
+      "types": "./src/DataTable/SearchInput.tsx"
+    },
+    "./DataTable/SortableColumnItem": {
+      "default": "./dist/DataTable/SortableColumnItem.js",
+      "import": "./dist/DataTable/SortableColumnItem.js",
+      "node": "./dist/DataTable/SortableColumnItem.js",
+      "types": "./src/DataTable/SortableColumnItem.tsx"
+    },
+    "./DataTable/SortMenu": {
+      "default": "./dist/DataTable/SortMenu.js",
+      "import": "./dist/DataTable/SortMenu.js",
+      "node": "./dist/DataTable/SortMenu.js",
+      "types": "./src/DataTable/SortMenu.tsx"
+    },
+    "./DataTable/types": {
+      "default": "./dist/DataTable/types.js",
+      "import": "./dist/DataTable/types.js",
+      "node": "./dist/DataTable/types.js",
+      "types": "./src/DataTable/types.ts"
+    },
+    "./DescribedSelect": {
+      "default": "./dist/DescribedSelect/index.js",
+      "import": "./dist/DescribedSelect/index.js",
+      "node": "./dist/DescribedSelect/index.js",
+      "types": "./src/DescribedSelect/index.ts"
+    },
+    "./DescribedSelect/DescribedSelect": {
+      "default": "./dist/DescribedSelect/DescribedSelect.js",
+      "import": "./dist/DescribedSelect/DescribedSelect.js",
+      "node": "./dist/DescribedSelect/DescribedSelect.js",
+      "types": "./src/DescribedSelect/DescribedSelect.tsx"
+    },
+    "./DotsMenuButton": {
+      "default": "./dist/DotsMenuButton/index.js",
+      "import": "./dist/DotsMenuButton/index.js",
+      "node": "./dist/DotsMenuButton/index.js",
+      "types": "./src/DotsMenuButton/index.ts"
+    },
+    "./DotsMenuButton/DotsMenuButton": {
+      "default": "./dist/DotsMenuButton/DotsMenuButton.js",
+      "import": "./dist/DotsMenuButton/DotsMenuButton.js",
+      "node": "./dist/DotsMenuButton/DotsMenuButton.js",
+      "types": "./src/DotsMenuButton/DotsMenuButton.tsx"
+    },
+    "./Dropzone": {
+      "default": "./dist/Dropzone/index.js",
+      "import": "./dist/Dropzone/index.js",
+      "node": "./dist/Dropzone/index.js",
+      "types": "./src/Dropzone/index.ts"
+    },
+    "./Dropzone/DropzoneContent": {
+      "default": "./dist/Dropzone/DropzoneContent.js",
+      "import": "./dist/Dropzone/DropzoneContent.js",
+      "node": "./dist/Dropzone/DropzoneContent.js",
+      "types": "./src/Dropzone/DropzoneContent.tsx"
+    },
+    "./EmojiPicker": {
+      "default": "./dist/EmojiPicker/index.js",
+      "import": "./dist/EmojiPicker/index.js",
+      "node": "./dist/EmojiPicker/index.js",
+      "types": "./src/EmojiPicker/index.ts"
+    },
+    "./EmojiPicker/EmojiPicker": {
+      "default": "./dist/EmojiPicker/EmojiPicker.js",
+      "import": "./dist/EmojiPicker/EmojiPicker.js",
+      "node": "./dist/EmojiPicker/EmojiPicker.js",
+      "types": "./src/EmojiPicker/EmojiPicker.tsx"
+    },
+    "./EmojiPicker/EmojiPickerDropdownContent": {
+      "default": "./dist/EmojiPicker/EmojiPickerDropdownContent.js",
+      "import": "./dist/EmojiPicker/EmojiPickerDropdownContent.js",
+      "node": "./dist/EmojiPicker/EmojiPickerDropdownContent.js",
+      "types": "./src/EmojiPicker/EmojiPickerDropdownContent.tsx"
+    },
+    "./EmojiPicker/emojiData": {
+      "default": "./dist/EmojiPicker/emojiData.js",
+      "import": "./dist/EmojiPicker/emojiData.js",
+      "node": "./dist/EmojiPicker/emojiData.js",
+      "types": "./src/EmojiPicker/emojiData.ts"
+    },
+    "./HelpButton": {
+      "default": "./dist/HelpButton/index.js",
+      "import": "./dist/HelpButton/index.js",
+      "node": "./dist/HelpButton/index.js",
+      "types": "./src/HelpButton/index.ts"
+    },
+    "./HelpButton/HelpButton": {
+      "default": "./dist/HelpButton/HelpButton.js",
+      "import": "./dist/HelpButton/HelpButton.js",
+      "node": "./dist/HelpButton/HelpButton.js",
+      "types": "./src/HelpButton/HelpButton.tsx"
+    },
+    "./Kbd": {
+      "default": "./dist/Kbd/index.js",
+      "import": "./dist/Kbd/index.js",
+      "node": "./dist/Kbd/index.js",
+      "types": "./src/Kbd/index.ts"
+    },
+    "./Kbd/Kbd": {
+      "default": "./dist/Kbd/Kbd.js",
+      "import": "./dist/Kbd/Kbd.js",
+      "node": "./dist/Kbd/Kbd.js",
+      "types": "./src/Kbd/Kbd.tsx"
+    },
+    "./Kbd/resolveShortcutKeyLabel": {
+      "default": "./dist/Kbd/resolveShortcutKeyLabel.js",
+      "import": "./dist/Kbd/resolveShortcutKeyLabel.js",
+      "node": "./dist/Kbd/resolveShortcutKeyLabel.js",
+      "types": "./src/Kbd/resolveShortcutKeyLabel.ts"
+    },
+    "./LogoIcon": {
+      "default": "./dist/LogoIcon/index.js",
+      "import": "./dist/LogoIcon/index.js",
+      "node": "./dist/LogoIcon/index.js",
+      "types": "./src/LogoIcon/index.ts"
+    },
+    "./LogoIcon/LogoIcon": {
+      "default": "./dist/LogoIcon/LogoIcon.js",
+      "import": "./dist/LogoIcon/LogoIcon.js",
+      "node": "./dist/LogoIcon/LogoIcon.js",
+      "types": "./src/LogoIcon/LogoIcon.tsx"
+    },
+    "./Modal": {
+      "default": "./dist/Modal/index.js",
+      "import": "./dist/Modal/index.js",
+      "node": "./dist/Modal/index.js",
+      "types": "./src/Modal/index.ts"
+    },
+    "./Modal/ModalFooter": {
+      "default": "./dist/Modal/ModalFooter.js",
+      "import": "./dist/Modal/ModalFooter.js",
+      "node": "./dist/Modal/ModalFooter.js",
+      "types": "./src/Modal/ModalFooter.tsx"
+    },
+    "./Modal/ModalScrollLayout": {
+      "default": "./dist/Modal/ModalScrollLayout.js",
+      "import": "./dist/Modal/ModalScrollLayout.js",
+      "node": "./dist/Modal/ModalScrollLayout.js",
+      "types": "./src/Modal/ModalScrollLayout.tsx"
+    },
+    "./Modal/ModalTitle": {
+      "default": "./dist/Modal/ModalTitle.js",
+      "import": "./dist/Modal/ModalTitle.js",
+      "node": "./dist/Modal/ModalTitle.js",
+      "types": "./src/Modal/ModalTitle.tsx"
+    },
+    "./Notifications": {
+      "default": "./dist/Notifications/index.js",
+      "import": "./dist/Notifications/index.js",
+      "node": "./dist/Notifications/index.js",
+      "types": "./src/Notifications/index.ts"
+    },
+    "./Notifications/ErrorNotificationTemplate": {
+      "default": "./dist/Notifications/ErrorNotificationTemplate.js",
+      "import": "./dist/Notifications/ErrorNotificationTemplate.js",
+      "node": "./dist/Notifications/ErrorNotificationTemplate.js",
+      "types": "./src/Notifications/ErrorNotificationTemplate.ts"
+    },
+    "./Notifications/InformationNotificationTemplate": {
+      "default": "./dist/Notifications/InformationNotificationTemplate.js",
+      "import": "./dist/Notifications/InformationNotificationTemplate.js",
+      "node": "./dist/Notifications/InformationNotificationTemplate.js",
+      "types": "./src/Notifications/InformationNotificationTemplate.ts"
+    },
+    "./Notifications/LoadingNotificationTemplate": {
+      "default": "./dist/Notifications/LoadingNotificationTemplate.js",
+      "import": "./dist/Notifications/LoadingNotificationTemplate.js",
+      "node": "./dist/Notifications/LoadingNotificationTemplate.js",
+      "types": "./src/Notifications/LoadingNotificationTemplate.ts"
+    },
+    "./Notifications/StatusNotificationTemplate": {
+      "default": "./dist/Notifications/StatusNotificationTemplate.js",
+      "import": "./dist/Notifications/StatusNotificationTemplate.js",
+      "node": "./dist/Notifications/StatusNotificationTemplate.js",
+      "types": "./src/Notifications/StatusNotificationTemplate.ts"
+    },
+    "./Notifications/SuccessNotificationTemplate": {
+      "default": "./dist/Notifications/SuccessNotificationTemplate.js",
+      "import": "./dist/Notifications/SuccessNotificationTemplate.js",
+      "node": "./dist/Notifications/SuccessNotificationTemplate.js",
+      "types": "./src/Notifications/SuccessNotificationTemplate.ts"
+    },
+    "./Notifications/WarningNotificationTemplate": {
+      "default": "./dist/Notifications/WarningNotificationTemplate.js",
+      "import": "./dist/Notifications/WarningNotificationTemplate.js",
+      "node": "./dist/Notifications/WarningNotificationTemplate.js",
+      "types": "./src/Notifications/WarningNotificationTemplate.ts"
+    },
+    "./nextjs/ActionIconLink": {
+      "default": "./dist/nextjs/ActionIconLink/index.js",
+      "import": "./dist/nextjs/ActionIconLink/index.js",
+      "node": "./dist/nextjs/ActionIconLink/index.js",
+      "types": "./src/nextjs/ActionIconLink/index.ts"
+    },
+    "./nextjs/ActionIconLink/ActionIconLink": {
+      "default": "./dist/nextjs/ActionIconLink/ActionIconLink.js",
+      "import": "./dist/nextjs/ActionIconLink/ActionIconLink.js",
+      "node": "./dist/nextjs/ActionIconLink/ActionIconLink.js",
+      "types": "./src/nextjs/ActionIconLink/ActionIconLink.tsx"
+    },
+    "./nextjs/AnchorLink": {
+      "default": "./dist/nextjs/AnchorLink/index.js",
+      "import": "./dist/nextjs/AnchorLink/index.js",
+      "node": "./dist/nextjs/AnchorLink/index.js",
+      "types": "./src/nextjs/AnchorLink/index.ts"
+    },
+    "./nextjs/AnchorLink/AnchorLink": {
+      "default": "./dist/nextjs/AnchorLink/AnchorLink.js",
+      "import": "./dist/nextjs/AnchorLink/AnchorLink.js",
+      "node": "./dist/nextjs/AnchorLink/AnchorLink.js",
+      "types": "./src/nextjs/AnchorLink/AnchorLink.tsx"
+    },
+    "./nextjs/ButtonLink": {
+      "default": "./dist/nextjs/ButtonLink/index.js",
+      "import": "./dist/nextjs/ButtonLink/index.js",
+      "node": "./dist/nextjs/ButtonLink/index.js",
+      "types": "./src/nextjs/ButtonLink/index.ts"
+    },
+    "./nextjs/ButtonLink/ButtonLink": {
+      "default": "./dist/nextjs/ButtonLink/ButtonLink.js",
+      "import": "./dist/nextjs/ButtonLink/ButtonLink.js",
+      "node": "./dist/nextjs/ButtonLink/ButtonLink.js",
+      "types": "./src/nextjs/ButtonLink/ButtonLink.tsx"
+    },
+    "./nextjs/NextLink": {
+      "default": "./dist/nextjs/NextLink.js",
+      "import": "./dist/nextjs/NextLink.js",
+      "node": "./dist/nextjs/NextLink.js",
+      "types": "./src/nextjs/NextLink.tsx"
+    },
+    "./nextjs/PersonAvatar": {
+      "default": "./dist/nextjs/PersonAvatar/index.js",
+      "import": "./dist/nextjs/PersonAvatar/index.js",
+      "node": "./dist/nextjs/PersonAvatar/index.js",
+      "types": "./src/nextjs/PersonAvatar/index.ts"
+    },
+    "./nextjs/PersonAvatar/PersonAvatar": {
+      "default": "./dist/nextjs/PersonAvatar/PersonAvatar.js",
+      "import": "./dist/nextjs/PersonAvatar/PersonAvatar.js",
+      "node": "./dist/nextjs/PersonAvatar/PersonAvatar.js",
+      "types": "./src/nextjs/PersonAvatar/PersonAvatar.tsx"
+    },
+    "./nextjs/PersonAvatar/PersonAvatarTooltip": {
+      "default": "./dist/nextjs/PersonAvatar/PersonAvatarTooltip.js",
+      "import": "./dist/nextjs/PersonAvatar/PersonAvatarTooltip.js",
+      "node": "./dist/nextjs/PersonAvatar/PersonAvatarTooltip.js",
+      "types": "./src/nextjs/PersonAvatar/PersonAvatarTooltip.tsx"
+    },
+    "./nextjs/PersonAvatarGroup": {
+      "default": "./dist/nextjs/PersonAvatarGroup/index.js",
+      "import": "./dist/nextjs/PersonAvatarGroup/index.js",
+      "node": "./dist/nextjs/PersonAvatarGroup/index.js",
+      "types": "./src/nextjs/PersonAvatarGroup/index.ts"
+    },
+    "./nextjs/PersonAvatarGroup/PersonAvatarGroup": {
+      "default": "./dist/nextjs/PersonAvatarGroup/PersonAvatarGroup.js",
+      "import": "./dist/nextjs/PersonAvatarGroup/PersonAvatarGroup.js",
+      "node": "./dist/nextjs/PersonAvatarGroup/PersonAvatarGroup.js",
+      "types": "./src/nextjs/PersonAvatarGroup/PersonAvatarGroup.tsx"
+    },
+    "./nextjs/PersonCard": {
+      "default": "./dist/nextjs/PersonCard/index.js",
+      "import": "./dist/nextjs/PersonCard/index.js",
+      "node": "./dist/nextjs/PersonCard/index.js",
+      "types": "./src/nextjs/PersonCard/index.ts"
+    },
+    "./nextjs/PersonCard/PersonCard": {
+      "default": "./dist/nextjs/PersonCard/PersonCard.js",
+      "import": "./dist/nextjs/PersonCard/PersonCard.js",
+      "node": "./dist/nextjs/PersonCard/PersonCard.js",
+      "types": "./src/nextjs/PersonCard/PersonCard.tsx"
+    },
+    "./nextjs/PersonChip": {
+      "default": "./dist/nextjs/PersonChip/index.js",
+      "import": "./dist/nextjs/PersonChip/index.js",
+      "node": "./dist/nextjs/PersonChip/index.js",
+      "types": "./src/nextjs/PersonChip/index.ts"
+    },
+    "./nextjs/PersonChip/PersonChip": {
+      "default": "./dist/nextjs/PersonChip/PersonChip.js",
+      "import": "./dist/nextjs/PersonChip/PersonChip.js",
+      "node": "./dist/nextjs/PersonChip/PersonChip.js",
+      "types": "./src/nextjs/PersonChip/PersonChip.tsx"
+    },
+    "./PeopleMultiPickerInput": {
+      "default": "./dist/PeopleMultiPickerInput/index.js",
+      "import": "./dist/PeopleMultiPickerInput/index.js",
+      "node": "./dist/PeopleMultiPickerInput/index.js",
+      "types": "./src/PeopleMultiPickerInput/index.ts"
+    },
+    "./PeopleMultiPickerInput/PeopleMultiPickerInput": {
+      "default": "./dist/PeopleMultiPickerInput/PeopleMultiPickerInput.js",
+      "import": "./dist/PeopleMultiPickerInput/PeopleMultiPickerInput.js",
+      "node": "./dist/PeopleMultiPickerInput/PeopleMultiPickerInput.js",
+      "types": "./src/PeopleMultiPickerInput/PeopleMultiPickerInput.tsx"
+    },
+    "./styles": {
+      "default": "./src/styles.css",
+      "style": "./src/styles.css",
+      "types": "./src/styles.d.ts"
+    },
+    "./styles.d": {
+      "default": "./dist/styles.d.js",
+      "import": "./dist/styles.d.js",
+      "node": "./dist/styles.d.js",
+      "types": "./src/styles.d.ts"
+    },
+    "./ThemePicker": {
+      "default": "./dist/ThemePicker/index.js",
+      "import": "./dist/ThemePicker/index.js",
+      "node": "./dist/ThemePicker/index.js",
+      "types": "./src/ThemePicker/index.ts"
+    },
+    "./ThemePicker/ThemePicker": {
+      "default": "./dist/ThemePicker/ThemePicker.js",
+      "import": "./dist/ThemePicker/ThemePicker.js",
+      "node": "./dist/ThemePicker/ThemePicker.js",
+      "types": "./src/ThemePicker/ThemePicker.tsx"
+    },
+    "./TypePicker": {
+      "default": "./dist/TypePicker/index.js",
+      "import": "./dist/TypePicker/index.js",
+      "node": "./dist/TypePicker/index.js",
+      "types": "./src/TypePicker/index.ts"
+    },
+    "./TypePicker/TypePicker": {
+      "default": "./dist/TypePicker/TypePicker.js",
+      "import": "./dist/TypePicker/TypePicker.js",
+      "node": "./dist/TypePicker/TypePicker.js",
+      "types": "./src/TypePicker/TypePicker.tsx"
+    },
+    "./theme": {
+      "default": "./dist/theme.js",
+      "import": "./dist/theme.js",
+      "node": "./dist/theme.js",
+      "types": "./src/theme.ts"
+    },
+    "./UserCard": {
+      "default": "./dist/UserCard/index.js",
+      "import": "./dist/UserCard/index.js",
+      "node": "./dist/UserCard/index.js",
+      "types": "./src/UserCard/index.ts"
+    },
+    "./UserCard/UserCard": {
+      "default": "./dist/UserCard/UserCard.js",
+      "import": "./dist/UserCard/UserCard.js",
+      "node": "./dist/UserCard/UserCard.js",
+      "types": "./src/UserCard/UserCard.tsx"
+    },
+    "./utils/avatarColor": {
+      "default": "./dist/utils/avatarColor.js",
+      "import": "./dist/utils/avatarColor.js",
+      "node": "./dist/utils/avatarColor.js",
+      "types": "./src/utils/avatarColor.ts"
+    }
   },
   "imports": {
     "#*": [
@@ -435,5 +450,26 @@
       "./src/*/index.ts",
       "./src/*/index.tsx"
     ]
-  }
+  },
+  "main": "./dist/index.js",
+  "name": "@bondery/mantine-next",
+  "peerDependencies": {
+    "@mantine/code-highlight": "^9.0.0",
+    "@mantine/core": "^9.0.0",
+    "@mantine/dropzone": "^9.0.0",
+    "@mantine/hooks": "^9.0.0",
+    "@tabler/icons-react": "^3.34.1",
+    "next": "^16.0.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "private": true,
+  "scripts": {
+    "build": "rimraf dist && tsc && node ../../scripts/rewrite-package-hash-imports-in-dist.mjs mantine-next",
+    "check-types": "tsc --noEmit",
+    "dev": "tsc --watch --preserveWatchOutput"
+  },
+  "type": "module",
+  "types": "./src/index.ts",
+  "version": "1.7.0"
 }

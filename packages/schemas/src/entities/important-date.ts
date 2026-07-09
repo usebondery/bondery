@@ -29,8 +29,8 @@ export const importantDateNotifyDaysSchema = z.union([
 const importantDateNotifyDaysWireSchema = z.number().int().nullable();
 
 const importantDateCoreSchema = z.object({
-  type: importantDateTypeSchema,
   date: isoDateSchema,
+  type: importantDateTypeSchema,
 });
 
 const importantDateNoteSchema = z.string().nullable();
@@ -40,11 +40,13 @@ const importantDateBaseFieldsSchema = importantDateCoreSchema.extend({
   notifyDaysBefore: importantDateNotifyDaysWireSchema,
 });
 
-export const importantDateSchema = entityIdentitySchema.extend({
-  personId: z.string(),
-  ...importantDateBaseFieldsSchema.shape,
-  notifyOn: z.string().nullable(),
-}).extend(entityAuditSchema.shape);
+export const importantDateSchema = entityIdentitySchema
+  .extend({
+    personId: z.string(),
+    ...importantDateBaseFieldsSchema.shape,
+    notifyOn: z.string().nullable(),
+  })
+  .extend(entityAuditSchema.shape);
 
 const importantDateNotifyDaysInputSchema = z.preprocess((value) => {
   if (value === "none" || value === "") {
@@ -87,13 +89,11 @@ export const importantDateSheetSchema = z
     notifyDaysBefore: z.enum(["none", "1", "3", "7"]).default("none"),
   })
   .transform((value) => ({
-    type: value.type,
     date: value.date,
     note: value.note.trim() || null,
     notifyDaysBefore:
-      value.notifyDaysBefore === "none"
-        ? null
-        : (Number(value.notifyDaysBefore) as 1 | 3 | 7),
+      value.notifyDaysBefore === "none" ? null : (Number(value.notifyDaysBefore) as 1 | 3 | 7),
+    type: value.type,
   }));
 
 /** Full replace payload with list-level business rules (mirrors web + mobile UI). */

@@ -20,9 +20,6 @@ export function handleApiUnavailable(): void {
   }
 
   isNavigatingToUnavailable = true;
-  sessionStorage.setItem(
-    RETURN_TO_STORAGE_KEY,
-    window.location.pathname + window.location.search,
-  );
+  sessionStorage.setItem(RETURN_TO_STORAGE_KEY, window.location.pathname + window.location.search);
   window.location.assign(WEBAPP_ROUTES.UNAVAILABLE);
 }

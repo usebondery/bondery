@@ -3,46 +3,46 @@
  * CRUD for chat sessions and message persistence
  */
 
-import type { AppRoutePlugin } from "../../lib/fastify-types.js";
-import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
-import { getAuth } from "../../lib/auth.js";
-import { applyOpenApiRouteMeta } from "../../lib/openapi-route-meta.js";
-import {
-  withCreatedResponse,
-  withOkResponse,
-} from "../../lib/openapi-route-responses.js";
 import {
   chatMessagesListResponseSchema,
   chatSessionCreatedResponseSchema,
+  chatSessionResponseSchema,
   chatSessionsListResponseSchema,
   updateChatSessionBodySchema,
 } from "@bondery/schemas";
-import { noContentResponse, standardErrorResponses } from "@bondery/schemas/http/responses";
 import {
   chatMessagesQuerySchema,
   chatSessionIdParamSchema,
   paginationQuerySchema,
 } from "@bondery/schemas/http";
+import { noContentResponse, standardErrorResponses } from "@bondery/schemas/http/responses";
+import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
 import {
   buildPaginatedResponse,
   buildPaginationMeta,
   parsePagination,
-} from "../../lib/pagination.js";
+} from "../../lib/data/pagination.js";
+import { getAuth } from "../../lib/platform/auth/strategies.js";
+import { internal } from "../../lib/platform/errors/http-errors.js";
+import type { AppRoutePlugin } from "../../lib/platform/fastify-types.js";
+import { withCreatedResponse, withOkResponse } from "../../lib/platform/openapi/responses.js";
+import { withDomainRoute } from "../../lib/platform/with-domain-route.js";
+import {
+  createChatSession,
+  deleteChatSession,
+  updateChatSessionTitle,
+} from "../../services/chat/sessions.js";
 
-const CHAT_SESSION_SELECT =
-  "id, userId:user_id, title, createdAt:created_at, updatedAt:updated_at";
+const CHAT_SESSION_SELECT = "id, userId:user_id, title, createdAt:created_at, updatedAt:updated_at";
 
-const CHAT_MESSAGE_SELECT =
-  "id, sessionId:session_id, role, content, createdAt:created_at";
+const CHAT_MESSAGE_SELECT = "id, sessionId:session_id, role, content, createdAt:created_at";
 
 export const chatSessionRoutes: AppRoutePlugin = async (fastify) => {
   fastify.addHook("onRoute", (routeOptions) => {
     if (routeOptions.schema) {
       routeOptions.schema.tags = ["Chat"];
     }
-    applyOpenApiRouteMeta(routeOptions, { area: "session" });
   });
-  fastify.addHook("onRequest", fastify.auth([fastify.verifySession]));
 
   fastify.get(
     "/",
@@ -70,18 +70,18 @@ export const chatSessionRoutes: AppRoutePlugin = async (fastify) => {
 
       if (error) {
         request.log.error(error, "Failed to list chat sessions");
-        return reply.status(500).send({ error: "Failed to list sessions" });
+        throw internal("failed_to_list_sessions");
       }
 
       const items = sessions ?? [];
       const totalCount = typeof count === "number" ? count : items.length;
       const pagination = buildPaginationMeta({
+        itemCount: items.length,
         limit,
         offset,
-        totalCount,
-        itemCount: items.length,
-        sort: "updatedAtDesc",
         search: null,
+        sort: "updatedAtDesc",
+        totalCount,
       });
 
       return reply.send(buildPaginatedResponse("sessions", items, pagination));
@@ -96,51 +96,31 @@ export const chatSessionRoutes: AppRoutePlugin = async (fastify) => {
         response: withCreatedResponse(chatSessionCreatedResponseSchema, "Chat session created"),
       } satisfies FastifyZodOpenApiSchema,
     },
-    async (request, reply) => {
-      const { client, user } = getAuth(request);
-
-      const { data, error } = await client
-        .from("chat_sessions")
-        .insert({ user_id: user.id })
-        .select("id, createdAt:created_at")
-        .single();
-
-      if (error) {
-        request.log.error(error, "Failed to create chat session");
-        return reply.status(500).send({ error: "Failed to create session" });
-      }
-
-      return reply.status(201).send({ data });
-    },
+    withDomainRoute(async (ctx, _request, reply) => {
+      const session = await createChatSession(ctx);
+      reply.status(201);
+      return { session };
+    }),
   );
 
   fastify.patch(
     "/:sessionId",
     {
       schema: {
+        body: updateChatSessionBodySchema,
         description: "Update a chat session title.",
         params: chatSessionIdParamSchema,
-        body: updateChatSessionBodySchema,
-        response: {
-          ...noContentResponse,
-          ...standardErrorResponses,
-        },
+        response: withOkResponse(chatSessionResponseSchema, "Chat session updated"),
       } satisfies FastifyZodOpenApiSchema,
     },
-    async (request, reply) => {
-      const { client } = getAuth(request);
-      const { sessionId } = request.params;
-      const { title } = request.body;
-
-      const { error } = await client.from("chat_sessions").update({ title }).eq("id", sessionId);
-
-      if (error) {
-        request.log.error(error, "Failed to update chat session");
-        return reply.status(500).send({ error: "Failed to update session" });
-      }
-
-      return reply.status(204).send(null);
-    },
+    withDomainRoute(async (ctx, request) => {
+      const session = await updateChatSessionTitle(
+        ctx,
+        request.params.sessionId,
+        request.body.title,
+      );
+      return { session };
+    }),
   );
 
   fastify.delete(
@@ -155,19 +135,10 @@ export const chatSessionRoutes: AppRoutePlugin = async (fastify) => {
         },
       } satisfies FastifyZodOpenApiSchema,
     },
-    async (request, reply) => {
-      const { client } = getAuth(request);
-      const { sessionId } = request.params;
-
-      const { error } = await client.from("chat_sessions").delete().eq("id", sessionId);
-
-      if (error) {
-        request.log.error(error, "Failed to delete chat session");
-        return reply.status(500).send({ error: "Failed to delete session" });
-      }
-
+    withDomainRoute(async (ctx, request, reply) => {
+      await deleteChatSession(ctx, request.params.sessionId);
       return reply.status(204).send(null);
-    },
+    }),
   );
 
   fastify.get(
@@ -198,18 +169,18 @@ export const chatSessionRoutes: AppRoutePlugin = async (fastify) => {
 
       if (error) {
         request.log.error(error, "Failed to load chat messages");
-        return reply.status(500).send({ error: "Failed to load messages" });
+        throw internal("failed_to_load_messages");
       }
 
       const items = messages ?? [];
       const totalCount = typeof count === "number" ? count : items.length;
       const pagination = buildPaginationMeta({
+        itemCount: items.length,
         limit,
         offset,
-        totalCount,
-        itemCount: items.length,
-        sort: "createdAtAsc",
         search: null,
+        sort: "createdAtAsc",
+        totalCount,
       });
 
       return reply.send(buildPaginatedResponse("messages", items, pagination));

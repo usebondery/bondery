@@ -25,8 +25,7 @@ const HASH_IMPORT_RE =
 
 function toRelativePath(fromFile, hashSpecifier) {
   const fromDir = dirname(fromFile);
-  const distRoot =
-    fromFile.match(/^(.*[/\\]dist)(?:[/\\]|$)/)?.[1] ?? join(fromDir, "..");
+  const distRoot = fromFile.match(/^(.*[/\\]dist)(?:[/\\]|$)/)?.[1] ?? join(fromDir, "..");
   const target = join(distRoot, hashSpecifier);
   let rel = relative(fromDir, target).replace(/\\/g, "/");
   if (!rel.startsWith(".")) {
@@ -50,7 +49,7 @@ async function collectJsFiles(dir) {
 }
 
 function rewriteFile(code, filePath) {
-  return code.replace(HASH_IMPORT_RE, (match, fromGroup, dynamicGroup) => {
+  return code.replace(HASH_IMPORT_RE, (_match, fromGroup, dynamicGroup) => {
     const specifier = fromGroup ?? dynamicGroup;
     return toRelativePath(filePath, specifier);
   });
@@ -69,7 +68,9 @@ async function rewritePackage(pkgName) {
   let changed = 0;
   for (const filePath of files) {
     const original = await readFile(filePath, "utf8");
-    if (!original.includes("#")) continue;
+    if (!original.includes("#")) {
+      continue;
+    }
     const updated = rewriteFile(original, filePath);
     if (updated !== original) {
       await writeFile(filePath, updated);
@@ -80,9 +81,7 @@ async function rewritePackage(pkgName) {
   return changed;
 }
 
-const targets = process.argv.slice(2).length
-  ? process.argv.slice(2)
-  : DEFAULT_PACKAGES;
+const targets = process.argv.slice(2).length ? process.argv.slice(2) : DEFAULT_PACKAGES;
 
 for (const pkg of targets) {
   await rewritePackage(pkg);

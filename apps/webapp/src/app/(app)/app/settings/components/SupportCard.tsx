@@ -1,41 +1,41 @@
 "use client";
 
-import { Text, Group, CardSection, Paper, Stack, ThemeIcon, UnstyledButton } from "@mantine/core";
+import { WEBSITE_ROUTES } from "@bondery/helpers/globals/paths";
+import { CardSection, Group, Paper, Stack, Text, ThemeIcon, UnstyledButton } from "@mantine/core";
 import {
-  IconLifebuoy,
   IconBook,
+  IconChevronRight,
+  IconLifebuoy,
   IconMail,
   IconMessageCircle,
-  IconChevronRight,
 } from "@tabler/icons-react";
-import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
-import { WEBSITE_ROUTES } from "@bondery/helpers/globals/paths";
-import { WEBSITE_URL } from "@/lib/config";
+import type { ComponentType } from "react";
+import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
+import { WEBSITE_URL } from "@/lib/platform/config";
 import { openFeedbackModal } from "./openFeedbackModal";
 import { SettingsSection } from "./SettingsSection";
-import type { ComponentType } from "react";
 
 interface SupportItemCardProps {
-  icon: ComponentType<{ size?: number; stroke?: number }>;
-  title: string;
   description: string;
   href?: string;
+  icon: ComponentType<{ size?: number; stroke?: number }>;
   onClick?: () => void;
+  title: string;
 }
 
 function SupportItemCard({ icon: Icon, title, description, href, onClick }: SupportItemCardProps) {
   const inner = (
     <Paper
-      shadow="xs"
-      withBorder
-      p="md"
-      h="100%"
       className="button-scale-effect"
+      h="100%"
+      p="md"
+      shadow="xs"
       style={{ cursor: "pointer" }}
+      withBorder
     >
       <Stack gap="xs">
         <Group justify="space-between" wrap="nowrap">
-          <ThemeIcon variant="light" size="md" radius="sm">
+          <ThemeIcon radius="sm" size="md" variant="light">
             <Icon size={16} stroke={1.5} />
           </ThemeIcon>
           <IconChevronRight
@@ -45,10 +45,10 @@ function SupportItemCard({ icon: Icon, title, description, href, onClick }: Supp
           />
         </Group>
         <Stack gap={2}>
-          <Text size="sm" fw={500}>
+          <Text fw={500} size="sm">
             {title}
           </Text>
-          <Text size="xs" c="dimmed" lineClamp={2}>
+          <Text c="dimmed" lineClamp={2} size="xs">
             {description}
           </Text>
         </Stack>
@@ -61,9 +61,9 @@ function SupportItemCard({ icon: Icon, title, description, href, onClick }: Supp
       <UnstyledButton
         component="a"
         href={href}
-        target="_blank"
         rel="noopener noreferrer"
         style={{ flex: 1 }}
+        target="_blank"
       >
         {inner}
       </UnstyledButton>
@@ -78,34 +78,33 @@ function SupportItemCard({ icon: Icon, title, description, href, onClick }: Supp
 }
 
 export function SupportCard() {
-  const t = useTranslations("SettingsPage.Support");
-  const tFeedback = useTranslations("FeedbackPage");
+  const t = useWebTranslations("SettingsPage", "Support");
 
   const handleOpenFeedbackModal = () => {
-    openFeedbackModal({ title: t("FeedbackTitle"), t: tFeedback });
+    openFeedbackModal();
   };
 
   return (
-    <SettingsSection id="support" icon={<IconLifebuoy size={20} stroke={1.5} />} title={t("Title")}>
+    <SettingsSection icon={<IconLifebuoy size={20} stroke={1.5} />} id="support" title={t("Title")}>
       <CardSection inheritPadding py="md">
-        <Group grow align="stretch" gap="md">
+        <Group align="stretch" gap="md" grow>
           <SupportItemCard
-            icon={IconBook}
-            title={t("DocumentationTitle")}
             description={t("DocumentationDescription")}
             href={`${WEBSITE_URL}${WEBSITE_ROUTES.DOCS}`}
+            icon={IconBook}
+            title={t("DocumentationTitle")}
           />
           <SupportItemCard
-            icon={IconMail}
-            title={t("ContactTitle")}
             description={t("ContactDescription")}
             href={`${WEBSITE_URL}${WEBSITE_ROUTES.CONTACT}`}
+            icon={IconMail}
+            title={t("ContactTitle")}
           />
           <SupportItemCard
-            icon={IconMessageCircle}
-            title={t("FeedbackTitle")}
             description={t("FeedbackDescription")}
+            icon={IconMessageCircle}
             onClick={handleOpenFeedbackModal}
+            title={t("FeedbackTitle")}
           />
         </Group>
       </CardSection>

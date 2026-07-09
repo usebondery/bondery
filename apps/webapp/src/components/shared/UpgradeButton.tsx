@@ -3,8 +3,8 @@
 import type { ButtonProps } from "@mantine/core";
 import { Button } from "@mantine/core";
 import { IconSparkles } from "@tabler/icons-react";
-import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
 import { useEmbeddedCheckout } from "@/hooks/useEmbeddedCheckout";
+import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
 
 type UpgradeButtonProps = Omit<ButtonProps, "onClick" | "loading"> & {
   onSuccess?: () => void;
@@ -18,14 +18,14 @@ type UpgradeButtonProps = Omit<ButtonProps, "onClick" | "loading"> & {
  * @param rest - Any Mantine ButtonProps (e.g. size, mt, display, w) passed through.
  */
 export function UpgradeButton({ onSuccess, ...rest }: UpgradeButtonProps) {
-  const t = useTranslations("Checkout");
+  const t = useWebTranslations("Checkout");
   const { openCheckout, isLoading } = useEmbeddedCheckout({ onSuccess });
 
   return (
     <Button
-      onClick={openCheckout}
-      loading={isLoading}
       leftSection={<IconSparkles size={16} />}
+      loading={isLoading}
+      onClick={openCheckout}
       {...rest}
     >
       {t("upgradeToPremium")}

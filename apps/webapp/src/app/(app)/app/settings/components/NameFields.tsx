@@ -1,21 +1,21 @@
 "use client";
 
-import { TextInput, Group, Text } from "@mantine/core";
-import { IconUser } from "@tabler/icons-react";
-import { useState } from "react";
-import { notifications } from "@mantine/notifications";
-import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
+import { errorNotificationTemplate, successNotificationTemplate } from "@bondery/mantine-next";
 import {
   CONTACT_FIELD_MAX_LENGTHS,
   firstZodErrorMessage,
   updateAccountInputSchema,
 } from "@bondery/schemas";
-import { errorNotificationTemplate, successNotificationTemplate } from "@bondery/mantine-next";
+import { Group, Text, TextInput } from "@mantine/core";
+import { notifications } from "@mantine/notifications";
+import { IconUser } from "@tabler/icons-react";
+import { useState } from "react";
+import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
 import { useUpdateSettingsMutation } from "@/lib/query/hooks/useSettings";
 
 interface NameFieldsProps {
-  initialName: string;
   initialMiddlename: string;
+  initialName: string;
   initialSurname: string;
 }
 
@@ -31,19 +31,19 @@ export function NameFields({ initialName, initialMiddlename, initialSurname }: N
   const [middlenameFocused, setMiddlenameFocused] = useState(false);
   const [surnameFocused, setSurnameFocused] = useState(false);
 
-  const t = useTranslations("SettingsPage.Profile");
+  const t = useWebTranslations("SettingsPage", "Profile");
   const updateSettings = useUpdateSettingsMutation();
 
   const updateName = async (field: "name" | "middlename" | "surname", value: string) => {
     const currentValues = {
-      name,
       middlename,
+      name,
       surname,
     };
 
     const originalValues = {
-      name: originalName,
       middlename: originalMiddlename,
+      name: originalName,
       surname: originalSurname,
     };
 
@@ -65,8 +65,8 @@ export function NameFields({ initialName, initialMiddlename, initialSurname }: N
       }
       notifications.show(
         errorNotificationTemplate({
-          title: t("UpdateError"),
           description: message,
+          title: t("UpdateError"),
         }),
       );
       return;
@@ -79,83 +79,89 @@ export function NameFields({ initialName, initialMiddlename, initialSurname }: N
     try {
       await updateSettings.mutateAsync(validationResult.data);
 
-      if (field === "name") setOriginalName(value);
-      if (field === "middlename") setOriginalMiddlename(value);
-      if (field === "surname") setOriginalSurname(value);
+      if (field === "name") {
+        setOriginalName(value);
+      }
+      if (field === "middlename") {
+        setOriginalMiddlename(value);
+      }
+      if (field === "surname") {
+        setOriginalSurname(value);
+      }
 
       notifications.show(
         successNotificationTemplate({
-          title: t("UpdateSuccess"),
           description: t("NameUpdateSuccess"),
+          title: t("UpdateSuccess"),
         }),
       );
     } catch {
       notifications.show(
         errorNotificationTemplate({
-          title: t("UpdateError"),
           description: t("NameUpdateError"),
+          title: t("UpdateError"),
         }),
       );
     }
   };
 
   return (
-    <Group grow align="flex-start" style={{ flex: 1 }}>
+    <Group align="flex-start" grow style={{ flex: 1 }}>
       <TextInput
+        error={nameError}
         label={t("FirstName")}
-        value={name}
-        onChange={(e) => setName(e.currentTarget.value)}
-        onFocus={() => setNameFocused(true)}
+        leftSection={<IconUser size={16} />}
         onBlur={(e) => {
           setNameFocused(false);
           updateName("name", e.currentTarget.value);
         }}
-        leftSection={<IconUser size={16} />}
+        onChange={(e) => setName(e.currentTarget.value)}
+        onFocus={() => setNameFocused(true)}
+        required
         rightSection={
           nameFocused ? (
-            <Text size="xs" c="dimmed" pr={"xs"}>
+            <Text c="dimmed" pr={"xs"} size="xs">
               {name.length}/{CONTACT_FIELD_MAX_LENGTHS.firstName}
             </Text>
           ) : undefined
         }
-        error={nameError}
-        required
+        value={name}
       />
       <TextInput
         label={t("MiddleNames")}
-        value={middlename}
-        onChange={(e) => setMiddlename(e.currentTarget.value)}
-        onFocus={() => setMiddlenameFocused(true)}
+        leftSection={<IconUser size={16} />}
         onBlur={(e) => {
           setMiddlenameFocused(false);
           updateName("middlename", e.currentTarget.value);
         }}
-        leftSection={<IconUser size={16} />}
+        onChange={(e) => setMiddlename(e.currentTarget.value)}
+        onFocus={() => setMiddlenameFocused(true)}
         rightSection={
           middlenameFocused ? (
-            <Text size="xs" c="dimmed" pr={"xs"}>
+            <Text c="dimmed" pr={"xs"} size="xs">
               {middlename.length}/{CONTACT_FIELD_MAX_LENGTHS.middleName}
             </Text>
           ) : undefined
         }
+        value={middlename}
       />
       <TextInput
         label={t("Surname")}
-        value={surname}
-        onChange={(e) => setSurname(e.currentTarget.value)}
-        onFocus={() => setSurnameFocused(true)}
+        leftSection={<IconUser size={16} />}
         onBlur={(e) => {
           setSurnameFocused(false);
           updateName("surname", e.currentTarget.value);
         }}
-        leftSection={<IconUser size={16} />}
+        onChange={(e) => setSurname(e.currentTarget.value)}
+        onFocus={() => setSurnameFocused(true)}
         rightSection={
           surnameFocused ? (
-            <Text size="xs" c="dimmed" pr={"xs"}>
+            <Text c="dimmed" pr={"xs"} size="xs">
               {surname.length}/{CONTACT_FIELD_MAX_LENGTHS.lastName}
             </Text>
           ) : undefined
         }
+        value={surname}
       />
     </Group>
   );

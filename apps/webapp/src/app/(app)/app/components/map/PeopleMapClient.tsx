@@ -1,29 +1,29 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef } from "react";
+import { bonderyTheme, PersonChip } from "@bondery/mantine-next";
 import { Avatar, MantineProvider, v8CssVariablesResolver } from "@mantine/core";
-import { MapContainer, Marker, TileLayer, useMap, useMapEvents } from "react-leaflet";
+import type { MarkerCluster } from "leaflet";
 import { DivIcon } from "leaflet";
 import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
+import { MapContainer, Marker, TileLayer, useMap, useMapEvents } from "react-leaflet";
 import MarkerClusterGroup from "react-leaflet-cluster";
-import type { MarkerCluster } from "leaflet";
-import { PersonChip, bonderyTheme } from "@bondery/mantine-next";
 import "maplibre-gl/dist/maplibre-gl.css";
 import "leaflet.markercluster/dist/MarkerCluster.css";
 import type { MapBounds, PeopleMapFocus, PeopleMapMarker } from "./PeopleMap";
 
 interface PeopleMapClientProps {
-  markers: PeopleMapMarker[];
   center?: [number, number];
-  zoom?: number;
-  height?: number;
-  scrollWheelZoom?: boolean;
-  focus?: PeopleMapFocus | null;
-  onVisibleMarkerIdsChange?: (markerIds: string[]) => void;
-  onBoundsChange?: (bounds: MapBounds) => void;
   disableAutoFit?: boolean;
   disableChipNavigation?: boolean;
+  focus?: PeopleMapFocus | null;
+  height?: number;
+  markers: PeopleMapMarker[];
+  onBoundsChange?: (bounds: MapBounds) => void;
+  onVisibleMarkerIdsChange?: (markerIds: string[]) => void;
+  scrollWheelZoom?: boolean;
+  zoom?: number;
 }
 
 export function PeopleMapClient({
@@ -54,21 +54,21 @@ export function PeopleMapClient({
 
       const avatarHtml = renderToStaticMarkup(
         <MantineProvider
-          theme={bonderyTheme}
-          defaultColorScheme="auto"
           cssVariablesResolver={v8CssVariablesResolver}
+          defaultColorScheme="auto"
+          theme={bonderyTheme}
         >
           <div style={{ transform: "translate(-6px, -8px)" }}>
             <PersonChip
+              badgeVariant="filled"
+              isClickable={!disableChipNavigation}
               person={{
-                id: marker.id,
-                firstName,
-                lastName,
                 avatar: marker.avatarUrl || null,
+                firstName,
+                id: marker.id,
+                lastName,
               }}
               size="sm"
-              isClickable={!disableChipNavigation}
-              badgeVariant="filled"
             />
           </div>
         </MantineProvider>,
@@ -79,8 +79,8 @@ export function PeopleMapClient({
         new DivIcon({
           className: "person-map-avatar-icon",
           html: avatarHtml,
-          iconSize: [160, 38],
           iconAnchor: [28, 34],
+          iconSize: [160, 38],
         }),
       );
     }
@@ -90,26 +90,26 @@ export function PeopleMapClient({
 
   return (
     <div
-      style={{ position: "relative", zIndex: 0, borderRadius: "12px", overflow: "hidden", height }}
+      style={{ borderRadius: "12px", height, overflow: "hidden", position: "relative", zIndex: 0 }}
     >
       <MapContainer
         center={defaultCenter}
-        zoom={zoom}
-        scrollWheelZoom={scrollWheelZoom}
-        style={{ height: "100%", width: "100%" }}
-        worldCopyJump
         maxBounds={[
           [-85.051129, -100000],
           [85.051129, 100000],
         ]}
         maxBoundsViscosity={0.9}
+        scrollWheelZoom={scrollWheelZoom}
+        style={{ height: "100%", width: "100%" }}
+        worldCopyJump
+        zoom={zoom}
       >
-        <MapFocusController focus={focus} defaultZoom={zoom} />
-        <FitMarkersController markers={markers} defaultZoom={zoom} disabled={disableAutoFit} />
+        <MapFocusController defaultZoom={zoom} focus={focus} />
+        <FitMarkersController defaultZoom={zoom} disabled={disableAutoFit} markers={markers} />
         <VisibleMarkersController
           markers={markers}
-          onVisibleMarkerIdsChange={onVisibleMarkerIdsChange}
           onBoundsChange={onBoundsChange}
+          onVisibleMarkerIdsChange={onVisibleMarkerIdsChange}
         />
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -117,40 +117,36 @@ export function PeopleMapClient({
         />
         <MarkerClusterGroup
           chunkedLoading
-          spiderfyOnMaxZoom
-          maxClusterRadius={50}
           iconCreateFunction={(cluster: MarkerCluster) => {
             const clusterHtml = renderToStaticMarkup(
               <MantineProvider
-                theme={bonderyTheme}
-                defaultColorScheme="auto"
                 cssVariablesResolver={v8CssVariablesResolver}
+                defaultColorScheme="auto"
+                theme={bonderyTheme}
               >
                 <div style={{ opacity: 1 }}>
                   <Avatar
-                    size={38}
-                    radius="xl"
-                    variant="filled"
                     color="blue"
                     name={String(cluster.getChildCount())}
+                    radius="xl"
+                    size={38}
+                    variant="filled"
                   />
                 </div>
               </MantineProvider>,
             );
 
             return new DivIcon({
-              html: clusterHtml,
               className: "person-map-cluster-icon",
-              iconSize: [38, 38],
+              html: clusterHtml,
               iconAnchor: [19, 19],
+              iconSize: [38, 38],
             });
           }}
+          maxClusterRadius={50}
         >
           {markers.map((marker) => (
             <Marker
-              key={`${marker.id}-${marker.latitude}-${marker.longitude}`}
-              position={[marker.latitude, marker.longitude]}
-              icon={iconById.get(marker.id)}
               eventHandlers={
                 marker.href
                   ? {
@@ -160,6 +156,9 @@ export function PeopleMapClient({
                     }
                   : undefined
               }
+              icon={iconById.get(marker.id)}
+              key={`${marker.id}-${marker.latitude}-${marker.longitude}`}
+              position={[marker.latitude, marker.longitude]}
             />
           ))}
         </MarkerClusterGroup>
@@ -169,8 +168,8 @@ export function PeopleMapClient({
 }
 
 interface MapFocusControllerProps {
-  focus?: PeopleMapFocus | null;
   defaultZoom: number;
+  focus?: PeopleMapFocus | null;
 }
 
 function MapFocusController({ focus, defaultZoom }: MapFocusControllerProps) {
@@ -188,9 +187,9 @@ function MapFocusController({ focus, defaultZoom }: MapFocusControllerProps) {
 }
 
 interface FitMarkersControllerProps {
-  markers: PeopleMapMarker[];
   defaultZoom: number;
   disabled?: boolean;
+  markers: PeopleMapMarker[];
 }
 
 /**
@@ -207,34 +206,40 @@ function FitMarkersController({
   const prevKeyRef = useRef("");
 
   useEffect(() => {
-    if (disabled) return;
+    if (disabled) {
+      return;
+    }
 
     const key = markers.map((m) => `${m.latitude}:${m.longitude}`).join("|");
 
-    if (prevKeyRef.current === key) return;
+    if (prevKeyRef.current === key) {
+      return;
+    }
 
     const isFirstLoad = prevKeyRef.current === "";
     prevKeyRef.current = key;
 
-    if (isFirstLoad || markers.length === 0) return;
+    if (isFirstLoad || markers.length === 0) {
+      return;
+    }
 
     if (markers.length === 1) {
       map.flyTo([markers[0].latitude, markers[0].longitude], defaultZoom, { animate: true });
     } else {
       map.fitBounds(
         markers.map((m) => [m.latitude, m.longitude] as [number, number]),
-        { padding: [40, 40], animate: true },
+        { animate: true, padding: [40, 40] },
       );
     }
-  }, [defaultZoom, map, markers]);
+  }, [defaultZoom, map, markers, disabled]);
 
   return null;
 }
 
 interface VisibleMarkersControllerProps {
   markers: PeopleMapMarker[];
-  onVisibleMarkerIdsChange?: (markerIds: string[]) => void;
   onBoundsChange?: (bounds: MapBounds) => void;
+  onVisibleMarkerIdsChange?: (markerIds: string[]) => void;
 }
 
 function VisibleMarkersController({
@@ -257,13 +262,15 @@ function VisibleMarkersController({
   // Only fires on initial mount + map events, NOT when markers change.
   // This breaks the fetch → markers → notify → fetch infinite loop.
   const emitBounds = useCallback((m: ReturnType<typeof useMap>) => {
-    if (!onBoundsChangeRef.current) return;
+    if (!onBoundsChangeRef.current) {
+      return;
+    }
     const b = m.getBounds();
     onBoundsChangeRef.current({
-      minLat: b.getSouth(),
       maxLat: b.getNorth(),
-      minLon: b.getWest(),
       maxLon: b.getEast(),
+      minLat: b.getSouth(),
+      minLon: b.getWest(),
     });
   }, []);
 
@@ -271,7 +278,9 @@ function VisibleMarkersController({
   // Stable (empty deps, reads from refs). Called on map events and when markers change.
   // Does NOT call onBoundsChange — pins arriving from the API never trigger another fetch.
   const emitVisible = useCallback((m: ReturnType<typeof useMap>) => {
-    if (!onVisibleMarkerIdsChangeRef.current) return;
+    if (!onVisibleMarkerIdsChangeRef.current) {
+      return;
+    }
     const b = m.getBounds();
     const visibleIds = markersRef.current
       .filter((marker) => b.contains([marker.latitude, marker.longitude]))
@@ -281,7 +290,9 @@ function VisibleMarkersController({
     const isSame =
       previous.length === visibleIds.length &&
       previous.every((markerId, index) => markerId === visibleIds[index]);
-    if (isSame) return;
+    if (isSame) {
+      return;
+    }
 
     lastVisibleIdsRef.current = visibleIds;
     onVisibleMarkerIdsChangeRef.current(visibleIds);
@@ -307,7 +318,7 @@ function VisibleMarkersController({
   // emitVisible is stable, so this only re-runs when `markers` identity changes.
   useEffect(() => {
     emitVisible(map);
-  }, [markers, map, emitVisible]);
+  }, [map, emitVisible]);
 
   return null;
 }

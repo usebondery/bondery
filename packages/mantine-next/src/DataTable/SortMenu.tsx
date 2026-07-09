@@ -1,19 +1,19 @@
 "use client";
 
-import { useState } from "react";
 import { Button, Menu, MenuDropdown, MenuItem, MenuTarget } from "@mantine/core";
 import { IconArrowsSort } from "@tabler/icons-react";
+import { useState } from "react";
 import type { SortMenuLabels, SortOption } from "#DataTable/types.js";
 
 export interface SortMenuProps<TSortKey extends string> {
-  /** Available sort options */
-  sortOptions: SortOption<TSortKey>[];
   /** Currently selected sort key */
   currentSort: TSortKey;
-  /** Callback when sort changes */
-  onSortChange: (sortKey: TSortKey) => void;
   /** Localized labels */
   labels: SortMenuLabels;
+  /** Callback when sort changes */
+  onSortChange: (sortKey: TSortKey) => void;
+  /** Available sort options */
+  sortOptions: SortOption<TSortKey>[];
   /** Menu dropdown width */
   width?: number;
 }
@@ -32,12 +32,12 @@ export function SortMenu<TSortKey extends string>({
   const [opened, setOpened] = useState(false);
 
   return (
-    <Menu shadow="md" width={width} opened={opened} onChange={setOpened}>
+    <Menu onChange={setOpened} opened={opened} shadow="md" width={width}>
       <MenuTarget>
         <Button
-          variant="light"
-          leftSection={<IconArrowsSort size={16} />}
           className={opened ? "button-scale-effect-active" : undefined}
+          leftSection={<IconArrowsSort size={16} />}
+          variant="light"
         >
           {labels.buttonLabel}
         </Button>
@@ -45,10 +45,10 @@ export function SortMenu<TSortKey extends string>({
       <MenuDropdown>
         {sortOptions.map((option) => (
           <MenuItem
+            bg={currentSort === option.key ? "var(--mantine-primary-color-light)" : undefined}
             key={option.key}
             onClick={() => onSortChange(option.key)}
             rightSection={currentSort === option.key ? "✓" : ""}
-            bg={currentSort === option.key ? "var(--mantine-primary-color-light)" : undefined}
           >
             {option.label}
           </MenuItem>

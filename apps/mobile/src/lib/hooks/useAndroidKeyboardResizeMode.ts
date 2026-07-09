@@ -1,8 +1,5 @@
 import { useEffect } from "react";
-import {
-  AndroidSoftInputModes,
-  KeyboardController,
-} from "react-native-keyboard-controller";
+import { AndroidSoftInputModes, KeyboardController } from "react-native-keyboard-controller";
 
 /**
  * Keeps Android soft-input mode on adjustResize for the app lifetime.

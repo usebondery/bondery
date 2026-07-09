@@ -1,29 +1,31 @@
-import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from "react";
-import { AppState } from "react-native";
 import * as Network from "expo-network";
+import {
+  createContext,
+  type ReactNode,
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
+import { AppState } from "react-native";
 import { useAuth } from "../auth/useAuth";
-import { getSyncDatabase } from "./db";
-import { resetLocalSyncState } from "./reset-local-sync-state";
-import {
-  schedulePull,
-  startPullSync,
-  stopPullSync,
-  subscribeSyncUpdates,
-  getHasInitialSyncSnapshot,
-} from "./pull-manager";
-import {
-  startSyncWakeClient,
-  stopSyncWakeClient,
-} from "./sync-wake-client";
-import {
-  countConflictMutations,
-  countPendingMutations,
-} from "./outbox/pending-mutations";
-import { scheduleSyncDrain } from "./outbox/sync-worker";
 import {
   registerSyncBackgroundTask,
   unregisterSyncBackgroundTask,
 } from "./background/sync-background-task";
+import { getSyncDatabase } from "./db";
+import { countConflictMutations, countPendingMutations } from "./outbox/pending-mutations";
+import { scheduleSyncDrain } from "./outbox/sync-worker";
+import {
+  getHasInitialSyncSnapshot,
+  schedulePull,
+  startPullSync,
+  stopPullSync,
+  subscribeSyncUpdates,
+} from "./pull-manager";
+import { resetLocalSyncState } from "./reset-local-sync-state";
+import { startSyncWakeClient, stopSyncWakeClient } from "./sync-wake-client";
 
 type SyncContextValue = {
   isReady: boolean;
@@ -35,12 +37,12 @@ type SyncContextValue = {
 };
 
 const SyncContext = createContext<SyncContextValue>({
-  isReady: false,
-  revision: 0,
-  isInitialSync: true,
-  pendingCount: 0,
-  conflictCount: 0,
   bumpRevision: () => {},
+  conflictCount: 0,
+  isInitialSync: true,
+  isReady: false,
+  pendingCount: 0,
+  revision: 0,
 });
 
 export function useSync(): SyncContextValue {
@@ -61,11 +63,11 @@ export function SyncProvider({ children }: SyncProviderProps) {
   const [pendingCount, setPendingCount] = useState(0);
   const [conflictCount, setConflictCount] = useState(0);
 
-  const refreshCounts = () => {
+  const refreshCounts = useCallback(() => {
     setPendingCount(countPendingMutations());
     setConflictCount(countConflictMutations());
     setIsInitialSync(!getHasInitialSyncSnapshot() && countContactsLocal() === 0);
-  };
+  }, []);
 
   const bumpRevision = () => setRevision((value) => value + 1);
 
@@ -142,17 +144,17 @@ export function SyncProvider({ children }: SyncProviderProps) {
       stopSyncWakeClient();
       void stopPullSync();
     };
-  }, [isAuthenticated, userId]);
+  }, [isAuthenticated, userId, refreshCounts]);
 
   return (
     <SyncContext.Provider
       value={{
-        isReady,
-        revision,
-        isInitialSync,
-        pendingCount,
-        conflictCount,
         bumpRevision,
+        conflictCount,
+        isInitialSync,
+        isReady,
+        pendingCount,
+        revision,
       }}
     >
       {children}

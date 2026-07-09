@@ -1,39 +1,39 @@
 "use client";
 
-import { Box, Group, SegmentedControl, Text } from "@mantine/core";
 import { CodeHighlight } from "@mantine/code-highlight";
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { Box, Group, SegmentedControl, Text } from "@mantine/core";
+import { type ReactNode, useEffect, useRef, useState } from "react";
 import { CopyButton } from "#CopyButton/index.js";
 
 export interface CodeBlockSnippet {
+  code: string;
+  icon: ReactNode;
   id: string;
   label: string;
-  code: string;
   language: string;
-  icon: ReactNode;
 }
 
 interface CodeBlockBaseProps {
-  copyLabel?: string;
   copiedLabel?: string;
+  copyLabel?: string;
 }
 
 export interface CodeBlockSingleProps extends CodeBlockBaseProps {
-  icon: ReactNode;
-  language: string;
   code: string;
-  label?: string;
-  snippets?: never;
   defaultSnippetId?: never;
+  icon: ReactNode;
+  label?: string;
+  language: string;
+  snippets?: never;
 }
 
 export interface CodeBlockMultiProps extends CodeBlockBaseProps {
-  snippets: CodeBlockSnippet[];
+  code?: never;
   defaultSnippetId?: string;
   icon?: never;
-  language?: never;
-  code?: never;
   label?: never;
+  language?: never;
+  snippets: CodeBlockSnippet[];
 }
 
 export type CodeBlockProps = CodeBlockSingleProps | CodeBlockMultiProps;
@@ -54,26 +54,31 @@ function CodeBlockShell({
   return (
     <Box
       style={{
+        border: "1px solid var(--mantine-color-default-border)",
         borderRadius: "var(--mantine-radius-md)",
         overflow: "hidden",
-        border: "1px solid var(--mantine-color-default-border)",
       }}
     >
       <Group
+        gap="xs"
         justify="space-between"
         px="sm"
         py={6}
-        gap="xs"
-        wrap="nowrap"
         style={{
-          borderBottom: "1px solid var(--mantine-color-default-border)",
           backgroundColor: "var(--mantine-color-body)",
+          borderBottom: "1px solid var(--mantine-color-default-border)",
         }}
+        wrap="nowrap"
       >
         {headerLeft}
-        <CopyButton value={code} copyLabel={copyLabel} copiedLabel={copiedLabel} />
+        <CopyButton copiedLabel={copiedLabel} copyLabel={copyLabel} value={code} />
       </Group>
-      <CodeHighlight key={`${language}-${code}`} code={code.trim()} language={language} withCopyButton={false} />
+      <CodeHighlight
+        code={code.trim()}
+        key={`${language}-${code}`}
+        language={language}
+        withCopyButton={false}
+      />
     </Box>
   );
 }
@@ -87,27 +92,26 @@ export function CodeBlock(props: CodeBlockProps) {
   const copiedLabel = props.copiedLabel ?? "Copied!";
 
   if (props.snippets) {
-    return <MultiCodeBlock {...props} copyLabel={copyLabel} copiedLabel={copiedLabel} />;
+    return <MultiCodeBlock {...props} copiedLabel={copiedLabel} copyLabel={copyLabel} />;
   }
 
   const displayLabel = (props.label ?? props.language).toUpperCase();
 
   return (
     <CodeBlockShell
+      copiedLabel={copiedLabel}
+      copyLabel={copyLabel}
       headerLeft={
         <Group gap={6} wrap="nowrap">
           <Box component="span" style={{ display: "flex", flexShrink: 0 }}>
             {props.icon}
           </Box>
-          <Text size="xs" c="dimmed" tt="uppercase" fw={500}>
+          <Text c="dimmed" fw={500} size="xs" tt="uppercase">
             {displayLabel}
           </Text>
         </Group>
       }
-      code={props.code}
       language={props.language}
-      copyLabel={copyLabel}
-      copiedLabel={copiedLabel}
     />
   );
 }
@@ -122,7 +126,9 @@ function MultiCodeBlock({
   const userPickedTab = useRef(false);
 
   useEffect(() => {
-    if (userPickedTab.current || !defaultSnippetId) return;
+    if (userPickedTab.current || !defaultSnippetId) {
+      return;
+    }
     if (snippets.some((snippet) => snippet.id === defaultSnippetId)) {
       setActiveId(defaultSnippetId);
     }
@@ -136,31 +142,30 @@ function MultiCodeBlock({
 
   return (
     <CodeBlockShell
+      code={activeSnippet.code}
+      copiedLabel={copiedLabel}
+      copyLabel={copyLabel}
       headerLeft={
         <SegmentedControl
-          size="xs"
-          value={activeId}
-          onChange={(value) => {
-            userPickedTab.current = true;
-            setActiveId(value);
-          }}
           data={snippets.map((snippet) => ({
-            value: snippet.id,
             label: (
-              <Group gap={4} wrap="nowrap" justify="center">
+              <Group gap={4} justify="center" wrap="nowrap">
                 <Box component="span" style={{ display: "flex", flexShrink: 0 }}>
                   {snippet.icon}
                 </Box>
                 <span>{snippet.label}</span>
               </Group>
             ),
+            value: snippet.id,
           }))}
+          onChange={(value) => {
+            userPickedTab.current = true;
+            setActiveId(value);
+          }}
+          size="xs"
         />
       }
-      code={activeSnippet.code}
       language={activeSnippet.language}
-      copyLabel={copyLabel}
-      copiedLabel={copiedLabel}
     />
   );
 }

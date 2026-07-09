@@ -7,18 +7,18 @@ import { PageHeaderSkeleton } from "@/app/(app)/app/components/PageHeaderSkeleto
  */
 function InteractionRowSkeleton({ opacity = 1 }: { opacity?: number }) {
   return (
-    <Paper withBorder p="md" radius="md" style={{ opacity }}>
-      <Group gap="sm" align="flex-start">
-        <Skeleton height={36} width={36} radius="xl" />
+    <Paper p="md" radius="md" style={{ opacity }} withBorder>
+      <Group align="flex-start" gap="sm">
+        <Skeleton height={36} radius="xl" width={36} />
         <Stack gap="xs" style={{ flex: 1 }}>
           <Group justify="space-between">
-            <Skeleton height={16} width={180} radius="sm" />
-            <Skeleton height={12} width={70} radius="sm" />
+            <Skeleton height={16} radius="sm" width={180} />
+            <Skeleton height={12} radius="sm" width={70} />
           </Group>
-          <Skeleton height={12} width="70%" radius="sm" />
+          <Skeleton height={12} radius="sm" width="70%" />
           <Group gap="xs">
-            <Skeleton height={24} width={80} radius="xl" />
-            <Skeleton height={24} width={80} radius="xl" />
+            <Skeleton height={24} radius="xl" width={80} />
+            <Skeleton height={24} radius="xl" width={80} />
           </Group>
         </Stack>
       </Group>
@@ -34,18 +34,17 @@ export function InteractionsPageSkeleton() {
   return (
     <Box p="xl">
       {/* Header: SegmentedControl (~180px) + Log Interaction button (~145px) */}
-      <PageHeaderSkeleton secondaryActionWidth={180} primaryActionWidth={145} />
+      <PageHeaderSkeleton primaryActionWidth={145} secondaryActionWidth={180} />
 
       <Stack
         gap="md"
         style={{
           maskImage: "linear-gradient(to bottom, black 50%, transparent 100%)",
-          WebkitMaskImage:
-            "linear-gradient(to bottom, black 50%, transparent 100%)",
+          WebkitMaskImage: "linear-gradient(to bottom, black 50%, transparent 100%)",
         }}
       >
-        {[1, 1, 0.85, 0.65, 0.45, 0.25].map((opacity, i) => (
-          <InteractionRowSkeleton key={i} opacity={opacity} />
+        {Array.from({ length: 6 }, (_, slot) => slot).map((slot) => (
+          <InteractionRowSkeleton key={slot} opacity={[1, 1, 0.85, 0.65, 0.45, 0.25][slot] ?? 1} />
         ))}
       </Stack>
     </Box>

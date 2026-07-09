@@ -1,66 +1,66 @@
-import { Container, Stack, Text, Title, Paper, Group, ThemeIcon } from "@mantine/core";
-import { IconMail, IconBrandDiscord, IconBrandReddit } from "@tabler/icons-react";
-import { AnchorLink } from "@bondery/mantine-next";
 import { SOCIAL_LINKS, SUPPORT_EMAIL } from "@bondery/helpers";
+import { AnchorLink } from "@bondery/mantine-next";
+import { Container, Group, Paper, Stack, Text, ThemeIcon, Title } from "@mantine/core";
+import { IconBrandDiscord, IconBrandReddit, IconMail } from "@tabler/icons-react";
 
 const CONTACT_METHODS = [
   {
-    text: SUPPORT_EMAIL,
+    color: "violet",
     href: `mailto:${SUPPORT_EMAIL}`,
     icon: IconMail,
-    color: "violet",
     target: undefined as string | undefined,
+    text: SUPPORT_EMAIL,
   },
   {
-    text: "Chat with us on Discord",
+    color: "indigo",
     href: SOCIAL_LINKS.discord,
     icon: IconBrandDiscord,
-    color: "indigo",
     target: "_blank" as const,
+    text: "Chat with us on Discord",
   },
   {
-    text: "Post on our Reddit",
+    color: "orange",
     href: SOCIAL_LINKS.reddit,
     icon: IconBrandReddit,
-    color: "orange",
     target: "_blank" as const,
+    text: "Post on our Reddit",
   },
 ];
 
 export function Contact() {
   return (
-    <Container size="md" className="my-20">
+    <Container className="my-20" size="md">
       <Stack align="center" gap="xl">
         <Stack align="center" gap="md">
-          <Title order={1} ta="center" size="h1">
+          <Title order={1} size="h1" ta="center">
             Contact us
           </Title>
-          <Text ta="center" size="lg" c="dimmed" maw={600}>
+          <Text c="dimmed" maw={600} size="lg" ta="center">
             Have questions or feedback? We're here to help or just chat!
           </Text>
         </Stack>
 
         <Paper
-          shadow="sm"
-          radius="lg"
-          p="xl"
-          withBorder
-          w="100%"
-          maw={500}
           className="card-scale-effect"
+          maw={500}
+          p="xl"
+          radius="lg"
+          shadow="sm"
+          w="100%"
+          withBorder
         >
           <Stack gap="lg">
             {CONTACT_METHODS.map((method) => (
-              <Group key={method.text} gap="md">
-                <ThemeIcon size={48} radius="md" variant="light" color={method.color}>
+              <Group gap="md" key={method.text}>
+                <ThemeIcon color={method.color} radius="md" size={48} variant="light">
                   <method.icon size={24} />
                 </ThemeIcon>
                 <AnchorLink
-                  href={method.href}
-                  target={method.target}
-                  size="lg"
-                  fw={600}
                   c={"var(--mantine-color-text)"}
+                  fw={600}
+                  href={method.href}
+                  size="lg"
+                  target={method.target}
                 >
                   {method.text}
                 </AnchorLink>

@@ -1,61 +1,79 @@
 "use client";
 
-import { CardSection, Group, Text } from "@mantine/core";
-import { IconAdjustmentsHorizontal } from "@tabler/icons-react";
-import { getQueryClient } from "@/lib/query/client";
-import { invalidateSettings } from "@/lib/query/invalidation";
-import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
-import type { ColorSchemePreference } from "@bondery/schemas";
-import { notifications } from "@mantine/notifications";
-import { useState } from "react";
+import { APP_LANGUAGES_DATA } from "@bondery/helpers/locale";
 import {
   errorNotificationTemplate,
   HelpButton,
   loadingNotificationTemplate,
   successNotificationTemplate,
 } from "@bondery/mantine-next";
-import { ThemePicker } from "./ThemePicker";
-import { SettingsSection } from "./SettingsSection";
-import { ReminderTimePicker } from "./ReminderTimePicker";
-import { TimeFormatPicker } from "./TimeFormatPicker";
+import type { ColorSchemePreference } from "@bondery/schemas";
+import type { SupportedLocale } from "@bondery/translations";
+import { coerceSupportedLocale, DEFAULT_LOCALE } from "@bondery/translations";
+import { CardSection, Group, Text } from "@mantine/core";
+import { notifications } from "@mantine/notifications";
+import { IconAdjustmentsHorizontal } from "@tabler/icons-react";
+import { useEffect, useMemo, useState } from "react";
 import { LanguagePicker } from "@/components/shared/LanguagePicker";
 import { TimezonePicker } from "@/components/shared/TimezonePicker";
-import { APP_LANGUAGES_DATA } from "@bondery/helpers/locale";
-import { useUpdateSettingsMutation } from "@/lib/query/hooks/useSettings";
 import { useApplyUserLanguage } from "@/lib/i18n/useApplyUserLanguage";
-import type { SupportedLocale } from "@bondery/translations";
+import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
+import { useSettingsQuery, useUpdateSettingsMutation } from "@/lib/query/hooks/useSettings";
+import { ReminderTimePicker } from "./ReminderTimePicker";
+import { SettingsSection } from "./SettingsSection";
+import { ThemePicker } from "./ThemePicker";
+import { TimeFormatPicker } from "./TimeFormatPicker";
 
-interface PreferencesCardProps {
-  initialColorScheme: ColorSchemePreference;
-  initialLanguage: string;
-  initialTimezone: string;
-  initialReminderSendHour: string;
-  initialTimeFormat: "24h" | "12h";
+function parseSettingsPreferences(settings: Record<string, unknown>) {
+  const timezone = typeof settings.timezone === "string" ? settings.timezone : "UTC";
+  const reminderSendHour =
+    typeof settings.reminderSendHour === "string" &&
+    /^([01]\d|2[0-3]):[0-5]\d(:[0-5]\d)?$/.test(settings.reminderSendHour)
+      ? settings.reminderSendHour
+      : "08:00:00";
+  const timeFormat = settings.timeFormat === "12h" ? "12h" : "24h";
+  const rawLanguage = typeof settings.language === "string" ? settings.language : DEFAULT_LOCALE;
+  const language = coerceSupportedLocale(rawLanguage);
+  const colorScheme: ColorSchemePreference =
+    settings.colorScheme === "light" ||
+    settings.colorScheme === "dark" ||
+    settings.colorScheme === "auto"
+      ? settings.colorScheme
+      : "auto";
+
+  return { colorScheme, language, reminderSendHour, timeFormat, timezone };
 }
 
-export function PreferencesCard({
-  initialColorScheme,
-  initialLanguage,
-  initialTimezone,
-  initialReminderSendHour,
-  initialTimeFormat,
-}: PreferencesCardProps) {
-  const t = useTranslations("SettingsPage.Preferences");
-  const tLanguages = useTranslations("Languages");
+export function PreferencesCard() {
+  const t = useWebTranslations("SettingsPage", "Preferences");
+  const { data: settingsResult } = useSettingsQuery();
+  const preferences = useMemo(
+    () => parseSettingsPreferences(settingsResult?.data ?? {}),
+    [settingsResult?.data],
+  );
+
   const updateSettings = useUpdateSettingsMutation();
   const applyUserLanguage = useApplyUserLanguage();
-  const [language, setLanguage] = useState(initialLanguage);
-  const [savedLanguage, setSavedLanguage] = useState(initialLanguage);
-  const [timezone, setTimezone] = useState(initialTimezone);
-  const [savedTimezone, setSavedTimezone] = useState(initialTimezone);
-  const [timeFormat, setTimeFormat] = useState<"24h" | "12h">(initialTimeFormat);
+  const [language, setLanguage] = useState(preferences.language);
+  const [savedLanguage, setSavedLanguage] = useState(preferences.language);
+  const [timezone, setTimezone] = useState(preferences.timezone);
+  const [savedTimezone, setSavedTimezone] = useState(preferences.timezone);
+  const [timeFormat, setTimeFormat] = useState<"24h" | "12h">(preferences.timeFormat);
+
+  useEffect(() => {
+    setLanguage(preferences.language);
+    setSavedLanguage(preferences.language);
+    setTimezone(preferences.timezone);
+    setSavedTimezone(preferences.timezone);
+    setTimeFormat(preferences.timeFormat);
+  }, [preferences.language, preferences.timezone, preferences.timeFormat]);
 
   const renderFieldLabel = (label: string, tooltip: string) => (
-    <Group component="span" gap={4} align="center" wrap="nowrap">
-      <Text component="span" size="sm" fw={500}>
+    <Group align="center" component="span" gap={4} wrap="nowrap">
+      <Text component="span" fw={500} size="sm">
         {label}
       </Text>
-      <HelpButton label={tooltip} ariaLabel={`${label} information`} variant="subtle" />
+      <HelpButton ariaLabel={`${label} information`} label={tooltip} variant="subtle" />
     </Group>
   );
 
@@ -66,8 +84,8 @@ export function PreferencesCard({
 
     const loadingNotification = notifications.show({
       ...loadingNotificationTemplate({
-        title: t("UpdatingTimezone"),
         description: t("PleaseWait"),
+        title: t("UpdatingTimezone"),
       }),
     });
 
@@ -79,8 +97,8 @@ export function PreferencesCard({
       notifications.hide(loadingNotification);
       notifications.show(
         successNotificationTemplate({
-          title: t("UpdateSuccess"),
           description: t("TimezoneUpdateSuccess"),
+          title: t("UpdateSuccess"),
         }),
       );
     } catch {
@@ -89,8 +107,8 @@ export function PreferencesCard({
       notifications.hide(loadingNotification);
       notifications.show(
         errorNotificationTemplate({
-          title: t("UpdateError"),
           description: t("TimezoneUpdateError"),
+          title: t("UpdateError"),
         }),
       );
     }
@@ -103,8 +121,8 @@ export function PreferencesCard({
 
     const loadingNotification = notifications.show({
       ...loadingNotificationTemplate({
-        title: t("UpdatingLanguage"),
         description: t("PleaseWait"),
+        title: t("UpdatingLanguage"),
       }),
     });
 
@@ -117,8 +135,8 @@ export function PreferencesCard({
       notifications.hide(loadingNotification);
       notifications.show(
         successNotificationTemplate({
-          title: t("UpdateSuccess"),
           description: t("LanguageUpdateSuccess"),
+          title: t("UpdateSuccess"),
         }),
       );
     } catch {
@@ -127,8 +145,8 @@ export function PreferencesCard({
       notifications.hide(loadingNotification);
       notifications.show(
         errorNotificationTemplate({
-          title: t("UpdateError"),
           description: t("LanguageUpdateError"),
+          title: t("UpdateError"),
         }),
       );
     }
@@ -138,7 +156,7 @@ export function PreferencesCard({
     <SettingsSection icon={<IconAdjustmentsHorizontal size={20} stroke={1.5} />} title={t("Title")}>
       <CardSection inheritPadding py="md">
         <ThemePicker
-          initialValue={initialColorScheme}
+          initialValue={preferences.colorScheme}
           label={renderFieldLabel(t("Theme"), t("ThemeTooltip"))}
         />
       </CardSection>
@@ -147,28 +165,27 @@ export function PreferencesCard({
         <Group align="flex-start" grow wrap="wrap">
           <div style={{ flex: 1, minWidth: 260 }}>
             <LanguagePicker
-              value={language}
-              initialValue={initialLanguage}
-              onChange={setLanguage}
+              initialValue={preferences.language}
+              label={renderFieldLabel(t("Language"), t("LanguageTooltip"))}
+              languages={APP_LANGUAGES_DATA}
               onBlur={(nextLanguage) => {
                 void persistLanguage(nextLanguage);
               }}
-              label={renderFieldLabel(t("Language"), t("LanguageTooltip"))}
+              onChange={setLanguage}
               placeholder={t("LanguageSearch")}
-              languages={APP_LANGUAGES_DATA}
-              getLocalizedLabel={(appLanguage) => tLanguages(appLanguage.value)}
+              value={language}
             />
           </div>
 
           <div style={{ flex: 1, minWidth: 260 }}>
             <TimezonePicker
-              value={timezone}
-              onChange={setTimezone}
+              label={renderFieldLabel(t("Timezone"), t("TimezoneTooltip"))}
               onBlur={(value) => {
                 void persistTimezone(value);
               }}
-              label={renderFieldLabel(t("Timezone"), t("TimezoneTooltip"))}
+              onChange={setTimezone}
               placeholder={t("TimezoneSearch")}
+              value={timezone}
             />
           </div>
         </Group>
@@ -178,18 +195,17 @@ export function PreferencesCard({
         <Group align="flex-start" grow wrap="wrap">
           <div style={{ flex: 1, minWidth: 260 }}>
             <ReminderTimePicker
-              initialTime={initialReminderSendHour}
-              timeFormat={timeFormat}
+              initialTime={preferences.reminderSendHour}
               label={renderFieldLabel(t("ReminderTime"), t("ReminderTimeTooltip"))}
+              timeFormat={timeFormat}
             />
           </div>
 
           <div style={{ flex: 1, minWidth: 260 }}>
             <TimeFormatPicker
-              initialTimeFormat={initialTimeFormat}
-              onTimeFormatChange={setTimeFormat}
-              onTimeFormatSaved={() => void invalidateSettings(getQueryClient())}
+              initialTimeFormat={preferences.timeFormat}
               label={renderFieldLabel(t("TimeFormat"), t("TimeFormatTooltip"))}
+              onTimeFormatChange={setTimeFormat}
             />
           </div>
         </Group>

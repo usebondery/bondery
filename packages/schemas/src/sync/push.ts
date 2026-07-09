@@ -12,40 +12,40 @@ export const syncPushRequestSchema = z.object({
 export type SyncPushRequest = z.infer<typeof syncPushRequestSchema>;
 
 export const writeResultSchema = z.object({
-  txid: z.string(),
   serverSequence: z.number().int().positive().optional(),
+  txid: z.string(),
 });
 
 export type WriteResult = z.infer<typeof writeResultSchema>;
 
 export const syncPushAppliedResultSchema = z.object({
-  id: z.string().uuid(),
-  status: z.literal("applied"),
-  serverSequence: z.number().int().positive(),
-  txid: z.string(),
   data: z.unknown(),
+  id: z.string().uuid(),
+  serverSequence: z.number().int().positive(),
+  status: z.literal("applied"),
+  txid: z.string(),
 });
 
 export const syncPushDuplicateResultSchema = z.object({
-  id: z.string().uuid(),
-  status: z.literal("duplicate"),
-  serverSequence: z.number().int().positive(),
-  txid: z.string().optional(),
   data: z.unknown().optional(),
+  id: z.string().uuid(),
+  serverSequence: z.number().int().positive(),
+  status: z.literal("duplicate"),
+  txid: z.string().optional(),
 });
 
 export const syncPushConflictResultSchema = z.object({
+  error: z.string().optional(),
   id: z.string().uuid(),
+  server: z.unknown(),
   status: z.literal("conflict"),
   txid: z.string().optional(),
-  server: z.unknown(),
-  error: z.string().optional(),
 });
 
 export const syncPushRejectedResultSchema = z.object({
+  error: z.string(),
   id: z.string().uuid(),
   status: z.literal("rejected"),
-  error: z.string(),
 });
 
 export const syncPushResultSchema = z.discriminatedUnion("status", [
@@ -58,9 +58,9 @@ export const syncPushResultSchema = z.discriminatedUnion("status", [
 export type SyncPushResult = z.infer<typeof syncPushResultSchema>;
 
 export const syncPushResponseSchema = z.object({
+  nextServerSequence: z.number().int().nonnegative(),
   results: z.array(syncPushResultSchema),
   serverTime: createdAtSchema,
-  nextServerSequence: z.number().int().nonnegative(),
 });
 export type SyncPushResponse = z.infer<typeof syncPushResponseSchema>;
 

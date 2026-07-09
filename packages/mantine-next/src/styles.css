@@ -17,13 +17,13 @@
 }
 
 ::selection {
-  background-color: var(--mantine-primary-color-filled) !important;
-  color: white !important;
+  background-color: var(--mantine-primary-color-filled);
+  color: white;
 }
 
 .button-scale-effect:hover:not(:disabled):not([data-disabled]):not([disabled]),
 .button-scale-effect:focus:not(:disabled):not([data-disabled]):not([disabled]) {
-  transform: scale(var(--scale-grow)) !important;
+  transform: scale(var(--scale-grow));
 }
 
 .button-scale-effect:active:not(:disabled):not([data-disabled]):not([disabled]),
@@ -32,18 +32,18 @@
     transform var(--transition-time) var(--transition-ease),
     filter var(--transition-time) var(--transition-ease),
     background-color var(--transition-time) var(--transition-ease);
-  transform: scale(var(--scale-shrink)) !important;
+  transform: scale(var(--scale-shrink));
   filter: var(--active-filter);
 }
 
 .button-scale-effect.button-scale-effect-active:not(:disabled):not([data-disabled]):not([disabled]),
 .button-scale-effect.button-scale-effect-active:hover:not(:disabled):not([data-disabled]):not(
-    [disabled]
-  ),
+  [disabled]
+),
 .button-scale-effect.button-scale-effect-active:focus:not(:disabled):not([data-disabled]):not(
-    [disabled]
-  ) {
-  transform: scale(var(--scale-shrink)) !important;
+  [disabled]
+) {
+  transform: scale(var(--scale-shrink));
   filter: var(--active-filter);
 }
 
@@ -53,20 +53,20 @@
 .no-scale:hover:not(:disabled):not([data-disabled]):not([disabled]),
 .no-scale:focus:not(:disabled):not([data-disabled]):not([disabled]),
 .no-scale:active:not(:disabled):not([data-disabled]):not([disabled]) {
-  transform: none !important;
-  filter: none !important;
+  transform: none;
+  filter: none;
 }
 
 .emoji-picker-trigger {
-  background-color: var(--mantine-color-gray-1) !important;
+  background-color: var(--mantine-color-gray-1);
 }
 
 [data-mantine-color-scheme="light"] .emoji-picker-trigger {
-  background-color: var(--mantine-color-gray-1) !important;
+  background-color: var(--mantine-color-gray-1);
 }
 
 [data-mantine-color-scheme="dark"] .emoji-picker-trigger {
-  background-color: var(--mantine-color-dark-5) !important;
+  background-color: var(--mantine-color-dark-5);
 }
 
 .checkbox-scale-effect:not(:disabled):not([data-disabled]):not([disabled]) {
@@ -78,18 +78,18 @@
 
 .mantine-Checkbox-input:hover:not(:disabled):not([data-disabled]):not([disabled]),
 .mantine-Checkbox-input:focus:not(:disabled):not([data-disabled]):not([disabled]) {
-  transform: scale(var(--scale-grow)) !important;
+  transform: scale(var(--scale-grow));
 }
 
 .mantine-Checkbox-input:active:not(:disabled):not([data-disabled]):not([disabled]),
 .mantine-Checkbox-input[data-checked="true"]:active:not(:disabled):not([data-disabled]):not(
-    [disabled]
-  ) {
+  [disabled]
+) {
   transition:
     transform var(--transition-time) var(--transition-ease),
     filter var(--transition-time) var(--transition-ease),
     background-color var(--transition-time) var(--transition-ease);
-  transform: scale(var(--scale-shrink)) !important;
+  transform: scale(var(--scale-shrink));
   filter: var(--active-filter);
 }
 
@@ -113,7 +113,7 @@ ol {
 .input-scale-effect:hover:not(:disabled):not([data-disabled]):not([disabled]),
 .input-scale-effect:focus-within:not(:disabled):not([data-disabled]):not([disabled]),
 .input-scale-effect:focus:not(:disabled):not([data-disabled]):not([disabled]) {
-  transform: scale(var(--scale-grow)) !important;
+  transform: scale(var(--scale-grow));
 }
 
 .mantine-NavLink-root {
@@ -135,7 +135,7 @@ ol {
 }
 
 .mantine-Combobox-option[data-combobox-selected="true"] .mantine-Text-root {
-  color: white !important;
+  color: white;
 }
 
 .mantine-Combobox-option {
@@ -151,7 +151,7 @@ ol {
 }
 
 .transform-none {
-  transform: none !important;
+  transform: none;
 }
 
 .mantine-Combobox-search {
@@ -172,12 +172,12 @@ ol {
 /* Applied via classNames={{ presetButton: "presetsButton" }} in the component */
 
 .presetsButton[data-active] {
-  background-color: var(--mantine-primary-color-filled) !important;
-  color: var(--mantine-color-white) !important;
+  background-color: var(--mantine-primary-color-filled);
+  color: var(--mantine-color-white);
 }
 
 .presetsButton[data-active]:hover {
-  background-color: var(--mantine-primary-color-filled-hover) !important;
+  background-color: var(--mantine-primary-color-filled-hover);
 }
 
 /* Grow-on-hover + squeeze-on-press for calendar interactive controls,
@@ -210,8 +210,8 @@ ol {
 .mantine-DatePickerInput-monthsListControl:hover:not([data-disabled]),
 .mantine-DatePicker-monthsListControl:hover:not([data-disabled]),
 .presetsButton:hover {
-  transform: scale(var(--scale-grow)) !important;
-  background-color: var(--mantine-color-default-hover) !important;
+  transform: scale(var(--scale-grow));
+  background-color: var(--mantine-color-default-hover);
 }
 
 /* Selected day: keep primary colour on hover instead of defaulting to gray */
@@ -223,7 +223,7 @@ ol {
 .mantine-DatePicker-day[data-first-in-range]:hover:not([data-disabled]),
 .mantine-DatePickerInput-day[data-last-in-range]:hover:not([data-disabled]),
 .mantine-DatePicker-day[data-last-in-range]:hover:not([data-disabled]) {
-  background-color: var(--mantine-primary-color-filled-hover) !important;
+  background-color: var(--mantine-primary-color-filled-hover);
 }
 
 .mantine-DatePickerInput-day:active:not([data-disabled]),
@@ -237,6 +237,6 @@ ol {
 .mantine-DatePickerInput-monthsListControl:active:not([data-disabled]),
 .mantine-DatePicker-monthsListControl:active:not([data-disabled]),
 .presetsButton:active {
-  transform: scale(var(--scale-shrink)) !important;
+  transform: scale(var(--scale-shrink));
   filter: var(--active-filter);
 }

@@ -1,0 +1,11 @@
+{
+  "ColorCopiedMessage": "Farbcode in die Zwischenablage kopiert",
+  "CopyAccessibilityLabel": "Farbcode kopieren",
+  "CopyFailedMessage": "Farbcode konnte nicht kopiert werden. Versuche es erneut.",
+  "CustomColorLabel": "Eigene Farbe",
+  "HexPlaceholder": "#RRGGBB",
+  "InvalidHex": "Gib eine gültige Hex-Farbe ein (z. B. #AE3EC9)",
+  "SheetTitle": "Farbe",
+  "SwatchesLabel": "Schnellfarben",
+  "TriggerAccessibilityHint": "Öffnet die Farbauswahl"
+}

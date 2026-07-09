@@ -2,51 +2,38 @@
 
 import { CardSection, Group } from "@mantine/core";
 import { IconTag } from "@tabler/icons-react";
-import { useState } from "react";
-import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
-import type { TagWithCount } from "@bondery/schemas";
-import { TagPill } from "@/app/(app)/app/components/tags/TagPill";
-import { openTagEditorModal } from "@/app/(app)/app/components/tags/openTagEditorModal";
 import { AddNewTagButton } from "@/app/(app)/app/components/tags/AddNewTagButton";
+import { openTagEditorModal } from "@/app/(app)/app/components/tags/openTagEditorModal";
+import { TagPill } from "@/app/(app)/app/components/tags/TagPill";
+import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
+import { useTagsListQuery } from "@/lib/query/hooks/useTags";
+import { SETTINGS_TAGS_PREVIEW } from "@/lib/query/settingsPageQueryParams";
 import { SettingsSection } from "./SettingsSection";
 
-interface TagsSectionProps {
-  initialTags: TagWithCount[];
-}
-
-export function TagsSection({ initialTags }: TagsSectionProps) {
-  const t = useTranslations("TagsSettings");
-  const [tags, setTags] = useState<TagWithCount[]>(initialTags);
+export function TagsSection() {
+  const t = useWebTranslations("TagsSettings");
+  const { data: tags = [] } = useTagsListQuery(SETTINGS_TAGS_PREVIEW);
 
   return (
-    <SettingsSection id="tags" icon={<IconTag size={20} stroke={1.5} />} title={t("Title")}>
+    <SettingsSection icon={<IconTag size={20} stroke={1.5} />} id="tags" title={t("Title")}>
       <CardSection inheritPadding py="md">
-        <Group gap="sm" align="center">
+        <Group align="center" gap="sm">
           {tags.map((tag) => (
             <TagPill
+              color={tag.color}
               key={tag.id}
               label={tag.label}
-              color={tag.color}
-              tooltipLabel={t("ClickToEdit")}
-              showEditIcon={true}
               onClick={() => {
                 openTagEditorModal({
-                  t,
                   mode: "edit",
-                  tag,
                   onCreated: () => {},
-                  onUpdated: (updatedTag) => {
-                    setTags((prev) =>
-                      prev.map((existing) =>
-                        existing.id === updatedTag.id ? updatedTag : existing,
-                      ),
-                    );
-                  },
-                  onDeleted: (tagId) => {
-                    setTags((prev) => prev.filter((existing) => existing.id !== tagId));
-                  },
+                  onDeleted: () => {},
+                  onUpdated: () => {},
+                  tag,
                 });
               }}
+              showEditIcon={true}
+              tooltipLabel={t("ClickToEdit")}
             />
           ))}
 
@@ -54,13 +41,10 @@ export function TagsSection({ initialTags }: TagsSectionProps) {
             label={t("AddNewTag")}
             onClick={() => {
               openTagEditorModal({
-                t,
                 mode: "create",
-                onCreated: (createdTag) => {
-                  setTags((prev) => [...prev, createdTag]);
-                },
-                onUpdated: () => {},
+                onCreated: () => {},
                 onDeleted: () => {},
+                onUpdated: () => {},
               });
             }}
           />

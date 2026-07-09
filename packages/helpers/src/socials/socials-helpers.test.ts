@@ -32,11 +32,7 @@ describe("resolveContactSocialFieldCommit", () => {
 
   it("normalizes linkedin URLs before comparing", () => {
     assert.deepEqual(
-      resolveContactSocialFieldCommit(
-        "linkedin",
-        "https://www.linkedin.com/in/johndoe",
-        "johndoe",
-      ),
+      resolveContactSocialFieldCommit("linkedin", "https://www.linkedin.com/in/johndoe", "johndoe"),
       { action: "noop" },
     );
   });

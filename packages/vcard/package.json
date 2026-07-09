@@ -1,68 +1,75 @@
 {
-  "name": "@bondery/vcard",
-  "version": "1.7.0",
-  "private": true,
-  "type": "module",
-  "main": "./dist/index.js",
-  "types": "./src/index.ts",
-  "exports": {
-    ".": {
-      "types": "./src/index.ts",
-      "import": "./dist/index.js",
-      "node": "./dist/index.js",
-      "default": "./dist/index.js"
-    },
-    "./*": {
-      "types": "./src/*.ts",
-      "import": "./dist/*.js",
-      "node": "./dist/*.js",
-      "default": "./dist/*.js"
-    },
-    "./attachments": {
-      "types": "./src/attachments.ts",
-      "import": "./dist/attachments.js",
-      "node": "./dist/attachments.js",
-      "default": "./dist/attachments.js"
-    },
-    "./contact-mapping": {
-      "types": "./src/contact-mapping.ts",
-      "import": "./dist/contact-mapping.js",
-      "node": "./dist/contact-mapping.js",
-      "default": "./dist/contact-mapping.js"
-    },
-    "./model": {
-      "types": "./src/model.ts",
-      "import": "./dist/model.js",
-      "node": "./dist/model.js",
-      "default": "./dist/model.js"
-    },
-    "./parse": {
-      "types": "./src/parse.ts",
-      "import": "./dist/parse.js",
-      "node": "./dist/parse.js",
-      "default": "./dist/parse.js"
-    },
-    "./serialize": {
-      "types": "./src/serialize.ts",
-      "import": "./dist/serialize.js",
-      "node": "./dist/serialize.js",
-      "default": "./dist/serialize.js"
-    }
-  },
-  "scripts": {
-    "build": "rimraf dist && tsc && node ../../scripts/rewrite-package-hash-imports-in-dist.mjs vcard",
-    "dev": "tsc --watch --preserveWatchOutput",
-    "check-types": "tsc --noEmit"
-  },
   "dependencies": {
     "@bondery/helpers": "*",
     "@bondery/schemas": "*"
   },
   "devDependencies": {
+    "@bondery/typescript-config": "*",
     "@types/node": "^25",
     "rimraf": "^6.0.1",
-    "@bondery/typescript-config": "*",
     "typescript": "^6"
+  },
+  "exports": {
+    ".": {
+      "default": "./dist/index.js",
+      "import": "./dist/index.js",
+      "node": "./dist/index.js",
+      "types": "./src/index.ts"
+    },
+    "./*": {
+      "default": "./dist/*.js",
+      "import": "./dist/*.js",
+      "node": "./dist/*.js",
+      "types": "./src/*.ts"
+    },
+    "./attachments": {
+      "default": "./dist/attachments.js",
+      "import": "./dist/attachments.js",
+      "node": "./dist/attachments.js",
+      "types": "./src/attachments.ts"
+    },
+    "./contact-mapping": {
+      "default": "./dist/contact-mapping.js",
+      "import": "./dist/contact-mapping.js",
+      "node": "./dist/contact-mapping.js",
+      "types": "./src/contact-mapping.ts"
+    },
+    "./model": {
+      "default": "./dist/model.js",
+      "import": "./dist/model.js",
+      "node": "./dist/model.js",
+      "types": "./src/model.ts"
+    },
+    "./parse": {
+      "default": "./dist/parse.js",
+      "import": "./dist/parse.js",
+      "node": "./dist/parse.js",
+      "types": "./src/parse.ts"
+    },
+    "./parse/line-parsing": {
+      "default": "./dist/parse/line-parsing.js",
+      "import": "./dist/parse/line-parsing.js",
+      "node": "./dist/parse/line-parsing.js",
+      "types": "./src/parse/line-parsing.ts"
+    },
+    "./parse/normalize": {
+      "default": "./dist/parse/normalize.js",
+      "import": "./dist/parse/normalize.js",
+      "node": "./dist/parse/normalize.js",
+      "types": "./src/parse/normalize.ts"
+    },
+    "./parse/property-parsing": {
+      "default": "./dist/parse/property-parsing.js",
+      "import": "./dist/parse/property-parsing.js",
+      "node": "./dist/parse/property-parsing.js",
+      "types": "./src/parse/property-parsing.ts"
+    },
+    "./serialize": {
+      "default": "./dist/serialize.js",
+      "import": "./dist/serialize.js",
+      "node": "./dist/serialize.js",
+      "types": "./src/serialize.ts"
+    }
   },
   "imports": {
     "#*": [
@@ -75,5 +82,16 @@
       "./src/*/index.ts",
       "./src/*/index.tsx"
     ]
-  }
+  },
+  "main": "./dist/index.js",
+  "name": "@bondery/vcard",
+  "private": true,
+  "scripts": {
+    "build": "rimraf dist && tsc && node ../../scripts/rewrite-package-hash-imports-in-dist.mjs vcard",
+    "check-types": "tsc --noEmit",
+    "dev": "tsc --watch --preserveWatchOutput"
+  },
+  "type": "module",
+  "types": "./src/index.ts",
+  "version": "1.7.0"
 }

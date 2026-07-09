@@ -3,105 +3,32 @@
  * Provides KPI data for the internal dashboard.
  */
 
-import type { FastifyReply } from "fastify";
-import type { AppFastifyInstance, AppRoutePlugin } from "../../../lib/fastify-types.js";
 import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
-import { z } from "zod";
-import { GITHUB_REPO_URL } from "@bondery/helpers/globals/paths";
+import { serviceUnavailable } from "../../../lib/platform/errors/http-errors.js";
+import type { AppRoutePlugin } from "../../../lib/platform/fastify-types.js";
+import { withOkResponse } from "../../../lib/platform/openapi/responses.js";
 import {
-  EXAMPLE_ACTIVE_USERS_RESPONSE,
-  EXAMPLE_FUNNEL_RESPONSE,
-  EXAMPLE_GITHUB_STARS_RESPONSE,
-  EXAMPLE_NPS_RESPONSE,
-  EXAMPLE_TOTAL_USERS_RESPONSE,
-} from "@bondery/schemas/openapi/fixtures/responses";
-import { applyOpenApiRouteMeta } from "../../../lib/openapi-route-meta.js";
-import { withOkResponse } from "../../../lib/openapi-route-responses.js";
-import { createAdminClient } from "../../../lib/supabase.js";
-import { getActiveUsersTimeline, getNpsResults } from "../../../lib/posthog.js";
-
-// ── Response schemas ─────────────────────────────────────────────────────────
-
-const activeUsersTimelinePointSchema = z.object({
-  date: z.string(),
-  dau: z.number(),
-  wau: z.number(),
-  mau: z.number(),
-});
-
-const activeUsersResponseSchema = z
-  .object({
-    timeline: z.array(activeUsersTimelinePointSchema),
-  })
-  .meta({ example: EXAMPLE_ACTIVE_USERS_RESPONSE });
-
-const activeUsersQuerySchema = z.object({
-  days: z.coerce.number().int().min(30).max(180).optional().default(90),
-});
-
-const funnelPeriodSchema = z.object({
-  periodKey: z.string(),
-  periodLabel: z.string(),
-  signups: z.number(),
-  contacts: z.number(),
-  interactions: z.number(),
-  signupsToContactsPct: z.number(),
-  contactsToInteractionsPct: z.number(),
-});
-
-const funnelResponseSchema = z
-  .object({
-    periods: z.array(funnelPeriodSchema),
-  })
-  .meta({ example: EXAMPLE_FUNNEL_RESPONSE });
-
-const npsResponseSchema = z
-  .object({
-    score: z.number().nullable(),
-    responses: z.number(),
-    promoters: z.number(),
-    passives: z.number(),
-    detractors: z.number(),
-  })
-  .meta({ example: EXAMPLE_NPS_RESPONSE });
-
-const totalUsersPointSchema = z.object({
-  date: z.string(),
-  total: z.number(),
-});
-
-const totalUsersResponseSchema = z
-  .object({
-    timeline: z.array(totalUsersPointSchema),
-  })
-  .meta({ example: EXAMPLE_TOTAL_USERS_RESPONSE });
-
-const githubStarsResponseSchema = z
-  .object({
-    stars: z.number(),
-    repo: z.string(),
-  })
-  .meta({ example: EXAMPLE_GITHUB_STARS_RESPONSE });
-
-// ── Route plugin ─────────────────────────────────────────────────────────────
+  activeUsersQuerySchema,
+  activeUsersResponseSchema,
+  fetchActiveUsersTimeline,
+  fetchFunnelPeriods,
+  fetchGithubStars,
+  fetchNpsResults,
+  fetchTotalUsersGrowth,
+  funnelResponseSchema,
+  githubStarsResponseSchema,
+  npsResponseSchema,
+  totalUsersResponseSchema,
+} from "../../../services/admin/stats.js";
 
 export const statsRoutes: AppRoutePlugin = async (fastify) => {
-  // Tag all routes in this plugin for OpenAPI docs
   fastify.addHook("onRoute", (routeOptions) => {
     routeOptions.config = { ...routeOptions.config, rateLimit: false };
     if (routeOptions.schema) {
       routeOptions.schema.tags = ["Stats"];
     }
-    applyOpenApiRouteMeta(routeOptions, { area: "session" });
   });
 
-  // All stats routes require admin access
-  fastify.addHook("onRequest", fastify.auth([fastify.verifyAdmin]));
-
-  /**
-   * GET /api/stats/active-users
-   * Returns DAU/WAU/MAU timeline from PostHog.
-   */
   fastify.get(
     "/active-users",
     {
@@ -111,60 +38,35 @@ export const statsRoutes: AppRoutePlugin = async (fastify) => {
         response: withOkResponse(activeUsersResponseSchema, "Active users timeline"),
       } satisfies FastifyZodOpenApiSchema,
     },
-    async (request, reply) => {
+    async (request) => {
       const { POSTHOG_API_SECRET, POSTHOG_PROJECT_ID } = fastify.config;
       if (!POSTHOG_API_SECRET || !POSTHOG_PROJECT_ID) {
-        return reply.status(503).send({ error: "PostHog not configured" });
+        throw serviceUnavailable();
       }
 
       const days = request.query.days ?? 90;
-      const timeline = await getActiveUsersTimeline(POSTHOG_API_SECRET, POSTHOG_PROJECT_ID, days);
-      return { timeline };
+      return fetchActiveUsersTimeline(POSTHOG_API_SECRET, POSTHOG_PROJECT_ID, days);
     },
   );
 
-  /**
-   * GET /api/stats/funnel
-   * Returns period-based signup → contacts → interactions funnel from Supabase.
-   * "contacts" = users who signed up in the period AND have ≥10 people records.
-   */
   fastify.get(
     "/funnel",
     {
       schema: {
-        description:
-          "Returns period-based signup → contacts → interactions funnel from Supabase.",
+        description: "Returns period-based signup → contacts → interactions funnel from Supabase.",
         response: withOkResponse(funnelResponseSchema, "Funnel conversion stats"),
       } satisfies FastifyZodOpenApiSchema,
     },
-    async (request, reply) => {
-      const adminClient = createAdminClient();
-
-      const { data, error } = await adminClient.rpc("get_funnel_periods");
-
-      if (error) {
+    async (request) => {
+      try {
+        return await fetchFunnelPeriods();
+      } catch (error) {
         request.log.error({ error }, "get_funnel_periods RPC failed");
-        return reply.status(500).send({ error: "Failed to fetch funnel stats" });
+        throw error;
       }
-
-      const periods = (data ?? []).map((item) => ({
-        periodKey: item.period_key,
-        periodLabel: item.period_label,
-        signups: Number(item.signups) || 0,
-        contacts: Number(item.contacts) || 0,
-        interactions: Number(item.interactions) || 0,
-        signupsToContactsPct: Number(item.signups_to_contacts_pct) || 0,
-        contactsToInteractionsPct: Number(item.contacts_to_interactions_pct) || 0,
-      }));
-
-      return { periods };
     },
   );
 
-  /**
-   * GET /api/stats/nps
-   * Returns NPS survey results from PostHog (last 90 days).
-   */
   fastify.get(
     "/nps",
     {
@@ -173,21 +75,16 @@ export const statsRoutes: AppRoutePlugin = async (fastify) => {
         response: withOkResponse(npsResponseSchema, "NPS survey results"),
       } satisfies FastifyZodOpenApiSchema,
     },
-    async (_request, reply) => {
+    async () => {
       const { POSTHOG_API_SECRET, POSTHOG_PROJECT_ID } = fastify.config;
       if (!POSTHOG_API_SECRET || !POSTHOG_PROJECT_ID) {
-        return reply.status(503).send({ error: "PostHog not configured" });
+        throw serviceUnavailable();
       }
 
-      const data = await getNpsResults(POSTHOG_API_SECRET, POSTHOG_PROJECT_ID);
-      return data;
+      return fetchNpsResults(POSTHOG_API_SECRET, POSTHOG_PROJECT_ID);
     },
   );
 
-  /**
-   * GET /api/stats/total-users
-   * Returns cumulative user count per day (all-time growth curve).
-   */
   fastify.get(
     "/total-users",
     {
@@ -196,29 +93,16 @@ export const statsRoutes: AppRoutePlugin = async (fastify) => {
         response: withOkResponse(totalUsersResponseSchema, "Total users growth timeline"),
       } satisfies FastifyZodOpenApiSchema,
     },
-    async (request, reply) => {
-      const adminClient = createAdminClient();
-
-      const { data, error } = await adminClient.rpc("get_total_users_growth");
-
-      if (error) {
+    async (request) => {
+      try {
+        return await fetchTotalUsersGrowth();
+      } catch (error) {
         request.log.error({ error }, "get_total_users_growth RPC failed");
-        return reply.status(500).send({ error: "Failed to fetch total users growth" });
+        throw error;
       }
-
-      const timeline = (data ?? []).map((item) => ({
-        date: String(item.date),
-        total: Number(item.total) || 0,
-      }));
-
-      return { timeline };
     },
   );
 
-  /**
-   * GET /api/stats/github-stars
-   * Returns the GitHub star count for the configured repository.
-   */
   fastify.get(
     "/github-stars",
     {
@@ -227,20 +111,6 @@ export const statsRoutes: AppRoutePlugin = async (fastify) => {
         response: withOkResponse(githubStarsResponseSchema, "GitHub star count"),
       } satisfies FastifyZodOpenApiSchema,
     },
-    async (_request, reply) => {
-      const res = await fetch(GITHUB_REPO_URL, {
-        headers: { "User-Agent": "bondery-stats-api" },
-      });
-
-      if (!res.ok) {
-        return reply.status(502).send({ error: "Failed to fetch GitHub repo data" });
-      }
-
-      const payload = (await res.json()) as { stargazers_count?: number };
-      return {
-        stars: payload.stargazers_count ?? 0,
-        repo: GITHUB_REPO_URL.replace("https://api.github.com/repos/", ""),
-      };
-    },
+    async () => fetchGithubStars(),
   );
 };

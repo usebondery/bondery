@@ -3,30 +3,29 @@
  * Handles AI chat assistant streaming responses
  */
 
-import type { FastifyRequest } from "fastify";
-import type { AppRoutePlugin } from "../../lib/fastify-types.js";
-import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
-import type { UIMessage } from "ai";
-import { z } from "zod";
-import { convertToModelMessages } from "ai";
-import type { Json } from "@bondery/schemas/supabase.types";
-import { standardErrorResponses } from "@bondery/schemas/http/responses";
 import { chatRequestSchema } from "@bondery/schemas";
-import { getAuth } from "../../lib/auth.js";
-import { applyOpenApiRouteMeta } from "../../lib/openapi-route-meta.js";
-import { runChatAgent } from "../../lib/chat/agent.js";
-import { generateSessionTitle } from "../../lib/chat/title.js";
-import { checkAndIncrementQuota } from "../../lib/chat/quota.js";
-import { AI_TIER } from "../../lib/rate-limit.js";
+import { standardErrorResponses } from "@bondery/schemas/http/responses";
+import type { UIMessage } from "ai";
+import { convertToModelMessages } from "ai";
+import type { FastifyRequest } from "fastify";
+import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
+import { z } from "zod";
+import { getAuth } from "../../lib/platform/auth/strategies.js";
+import { domainContextFromRequest } from "../../lib/platform/domain-context.js";
+import { badRequest, forbidden } from "../../lib/platform/errors/http-errors.js";
+import type { AppRoutePlugin } from "../../lib/platform/fastify-types.js";
+import { AI_TIER } from "../../lib/platform/rate-limit.js";
+import { runChatAgent } from "../../services/chat/agent.js";
+import { checkAndIncrementQuota } from "../../services/chat/quota.js";
+import { persistChatMessages, setChatSessionTitleIfEmpty } from "../../services/chat/sessions.js";
+import { generateSessionTitle } from "../../services/chat/title.js";
 
 export const chatRoutes: AppRoutePlugin = async (fastify) => {
   fastify.addHook("onRoute", (routeOptions) => {
     if (routeOptions.schema) {
       routeOptions.schema.tags = ["Chat"];
     }
-    applyOpenApiRouteMeta(routeOptions, { area: "session" });
   });
-  fastify.addHook("onRequest", fastify.auth([fastify.verifySession]));
 
   /**
    * POST /api/chat - Stream an AI chat response
@@ -36,16 +35,16 @@ export const chatRoutes: AppRoutePlugin = async (fastify) => {
     {
       config: { rateLimit: AI_TIER },
       schema: {
-        description: "Stream an AI chat assistant response as Server-Sent Events.",
         body: chatRequestSchema,
+        description: "Stream an AI chat assistant response as Server-Sent Events.",
         response: {
           200: {
-            description: "UI message event stream (text/event-stream)",
             content: {
               "text/event-stream": {
                 schema: z.string(),
               },
             },
+            description: "UI message event stream (text/event-stream)",
           },
           ...standardErrorResponses,
         },
@@ -61,7 +60,7 @@ export const chatRoutes: AppRoutePlugin = async (fastify) => {
       const { messages, sessionId } = request.body;
 
       if (!sessionId) {
-        return reply.status(400).send({ error: "sessionId is required" });
+        throw badRequest("sessionId is required", "bad_request");
       }
 
       // Atomically check quota and increment the counter in one DB round-trip.
@@ -69,11 +68,9 @@ export const chatRoutes: AppRoutePlugin = async (fastify) => {
       // user's message is not streamed or persisted.
       const quota = await checkAndIncrementQuota(client, user.id);
       if (!quota.allowed) {
-        return reply.status(403).send({
-          error: "Chat quota exceeded",
-          code: "CHAT_QUOTA_EXCEEDED",
-          messagesUsed: quota.messagesUsed,
+        throw forbidden("Chat quota exceeded", "chat_quota_exceeded", {
           limit: quota.limit,
+          messagesUsed: quota.messagesUsed,
           plan: quota.plan,
           resetAt: quota.resetAt,
         });
@@ -95,106 +92,27 @@ export const chatRoutes: AppRoutePlugin = async (fastify) => {
 
       Promise.resolve(result.text)
         .then(async (fullText) => {
-          await persistMessages(
-            client,
-            sessionId,
-            lastUserMessage,
-            fullText,
-            request,
-          );
-          await generateTitleIfNeeded(
-            client,
-            sessionId,
-            lastUserMessage,
-            fullText,
-            request,
-          );
+          const ctx = domainContextFromRequest(request);
+          await persistChatMessages(ctx, sessionId, lastUserMessage, fullText);
+          const userText =
+            lastUserMessage.parts
+              ?.filter((p): p is { type: "text"; text: string } => p.type === "text")
+              .map((p) => p.text)
+              .join(" ") ?? "";
+          if (userText) {
+            try {
+              const title = await generateSessionTitle(userText);
+              if (title) {
+                await setChatSessionTitleIfEmpty(ctx, sessionId, title);
+              }
+            } catch (err) {
+              request.log.error(err, "Title generation failed");
+            }
+          }
         })
         .catch((err: unknown) => {
           request.log.error(err, "Failed to persist chat messages");
         });
     },
   );
-}
-
-/**
- * Persist the latest user + assistant messages to the database.
- */
-async function persistMessages(
-  client: ReturnType<typeof getAuth>["client"],
-  sessionId: string,
-  userMessage: UIMessage,
-  assistantText: string,
-  request: any,
-) {
-  // Extract user message text
-  const userText =
-    userMessage.parts
-      ?.filter((p): p is { type: "text"; text: string } => p.type === "text")
-      .map((p) => p.text)
-      .join(" ") ?? "";
-
-  // Save user message
-  const { error: userErr } = await client.from("chat_messages").insert({
-    session_id: sessionId,
-    role: "user" as const,
-    content: { text: userText } as unknown as Json,
-  });
-  if (userErr) {
-    request.log.error(userErr, "Failed to save user message");
-  }
-
-  // Save assistant message
-  const { error: assistantErr } = await client.from("chat_messages").insert({
-    session_id: sessionId,
-    role: "assistant" as const,
-    content: { text: assistantText } as unknown as Json,
-  });
-  if (assistantErr) {
-    request.log.error(assistantErr, "Failed to save assistant message");
-  }
-
-  // Bump session updated_at
-  await client
-    .from("chat_sessions")
-    .update({ updated_at: new Date().toISOString() })
-    .eq("id", sessionId);
-}
-
-/**
- * Generate a title for a session if it doesn't have one yet.
- */
-async function generateTitleIfNeeded(
-  client: ReturnType<typeof getAuth>["client"],
-  sessionId: string,
-  userMessage: UIMessage,
-  assistantText: string,
-  request: any,
-) {
-  // Check if session already has a title
-  const { data: session } = await client
-    .from("chat_sessions")
-    .select("title")
-    .eq("id", sessionId)
-    .single();
-
-  if (session?.title) return;
-
-  // Extract text from the user message
-  const userText =
-    userMessage.parts
-      ?.filter((p): p is { type: "text"; text: string } => p.type === "text")
-      .map((p) => p.text)
-      .join(" ") ?? "";
-
-  if (!userText) return;
-
-  try {
-    const title = await generateSessionTitle(userText);
-    if (title) {
-      await client.from("chat_sessions").update({ title }).eq("id", sessionId);
-    }
-  } catch (err) {
-    request.log.error(err, "Title generation failed");
-  }
-}
+};

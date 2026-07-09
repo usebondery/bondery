@@ -72,23 +72,56 @@ Use when JSON helpers are insufficient:
 
 ---
 
-## ApiError (webapp)
+## ApiError (`@bondery/helpers/api`)
+
+Shared by webapp and mobile. All API HTTP errors use a nested envelope:
+
+```json
+{
+  "error": {
+    "type": "authentication_error",
+    "code": "auth_required",
+    "message": "Unauthorized - Please log in",
+    "request_id": "…",
+    "doc_url": "https://usebondery.com/docs/api/errors/auth_required"
+  }
+}
+```
 
 ```typescript
+import {
+  ApiError,
+  buildApiErrorFromResponse,
+  getUserFacingError,
+  isUnauthorizedApiError,
+} from "@bondery/helpers/api";
+
 class ApiError extends Error {
-  status: number;       // HTTP status, e.g. 401, 409
-  code: string | null; // machine-readable, e.g. from { code: "BFF_UNAUTHORIZED" }
-  message: string;     // human-readable from API body or fallback
+  status: number;
+  code: string;              // machine-readable, e.g. auth_required
+  type: ApiErrorType | null;
+  developerMessage: string;  // server message (never shown directly in UI)
+  param: string | null;
+  docUrl: string | null;
+  requestId: string | null;
+  getUserMessage(t): string; // maps common.errors.api.{code}
 }
 ```
 
 **Why it exists:**
 
-1. **One parser** — `{ error, message, code }` JSON, HTML 502 pages, and network failures are normalized in `parseApiError.ts`, not copied at 40 call sites.
-2. **Structured handling** — UI can branch on `error.status === 401` or `error.code === "BFF_UNAUTHORIZED"` instead of string-matching `"Unauthorized"`.
+1. **One parser** — nested `{ error: { … } }` JSON is normalized in `@bondery/helpers/api`, not copied per client.
+2. **Structured handling** — UI can branch on `error.status === 401` or `error.code === "auth_required"` instead of string-matching `"Unauthorized"`.
 3. **Global policy** — `applyTransportErrorPolicy` in `clientApiJson` handles 401 and API-unavailable redirects in one place.
 
-Mobile uses the same idea with `resolveApiErrorMessage()` + plain `Error`; webapp typed it as `ApiError` for instanceof checks.
+**Per-app transport** (not in helpers):
+
+| Client | Parse/throw | Offline / network copy |
+|--------|-------------|------------------------|
+| Webapp | `parseResponse.ts` → `buildApiErrorFromResponse` | Browser `TypeError` via `isApiUnavailableError` |
+| Mobile | `transport.ts` → `buildApiErrorFromResponse` | `resolveFetchFailureMessage` in `parseApiErrorBody.ts` |
+
+Mobile `apiRequest` throws typed `ApiError` (same as webapp). UI shows `getUserFacingError(error, t)` with `t` from `useMobileTranslations()`.
 
 ---
 
@@ -104,11 +137,11 @@ Mobile uses the same idea with `resolveApiErrorMessage()` + plain `Error`; webap
 
 | Signal | Client action | Server action (RSC, `transportPolicy: true`) | Sign out? |
 |--------|---------------|--------------------------------------------|-----------|
-| 401 / `BFF_UNAUTHORIZED` | `handleUnauthorizedSession` → `endSession` | `handleServerUnauthorizedSession` → `signOutServerSession` + redirect login | Yes |
+| 401 / `auth_required` | `handleUnauthorizedSession` → `endSession` | `handleServerUnauthorizedSession` → `signOutServerSession` + redirect login | Yes |
 | 502 / 503 / 504 / network `TypeError` | `handleApiUnavailable` → `/app/unavailable` | `redirect(/app/unavailable)` if session valid; else login | No |
 | `*JsonOrNull` outage | Return `null` | Return `null` | No |
 | `*JsonOrNull` 401 | Ends session | Signs out + redirects | Yes |
-| BFF `app/api/**` | N/A | `bffProxyFetch` — passthrough status or synthetic 503 JSON | Per status |
+| BFF `app/api/**` | N/A | `bffProxyFetch` — passthrough status or nested 503 `service_unavailable` | Per status |
 
 **Health probe:** `GET /api/health` (BFF → Fastify `/health`) for the unavailable page status panel. `GET /api/status` remains the liveness + extension version probe.
 
@@ -118,7 +151,7 @@ Mobile uses the same idea with `resolveApiErrorMessage()` + plain `Error`; webap
 
 **Webapp:** Call transport wrappers directly in components and libs — no domain module layer. Use `clientApiJson` / `serverApiJson` with `API_ROUTES` at the call site.
 
-**Mobile:** Resource helpers live in `apps/mobile/src/lib/api/client.ts` (`createContact`, `fetchContact`, …) — same transport underneath, grouped for RN reuse.
+**Mobile:** Tier-1 CRM data is **local-first** — reads/writes go through `lib/domains/*` and `lib/sync/hooks/*` (SQLite + sync outbox), not REST. Tier-2/3 helpers live in `apps/mobile/src/lib/api/online-only.ts` and `client.ts`. See `apps/mobile/src/lib/README.md` for the webapp ↔ mobile layer map.
 
 ### When to extract a shared helper (any client)
 
@@ -150,7 +183,7 @@ See [api-mutations.md](./api-mutations.md): create/update endpoints return the f
 | Trigger | `reason` | Supabase sign-out scope |
 |---------|----------|-------------------------|
 | Settings → Log out | `user_initiated` | global (revokes refresh tokens) |
-| API 401 / `BFF_UNAUTHORIZED` | `session_expired` | `local` |
+| API 401 / `auth_required` | `session_expired` | `local` |
 | Account deleted | `account_deleted` | `local` |
 
 ### What `endSession()` clears
@@ -226,5 +259,6 @@ npm run check-api-fetch:strict   # part of check-types
 | Webapp session teardown | `apps/webapp/src/lib/auth/endSession.ts` |
 | Webapp 401 → session teardown | `apps/webapp/src/lib/auth/handleUnauthorizedSession.ts` |
 | Mobile transport + helpers | `apps/mobile/src/lib/api/client.ts` |
-| Extension transport | `apps/chrome-extension/src/utils/api.ts` |
+| Extension transport | `apps/chrome-extension/src/lib/api/transport.ts` |
+| Extension API domains | `apps/chrome-extension/src/lib/api/domains/` |
 | Mutation response rule | `references/api-mutations.md` |

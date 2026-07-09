@@ -1,10 +1,10 @@
 "use client";
 
+import { WEBSITE_ROUTES } from "@bondery/helpers/globals/paths";
 import { modals } from "@mantine/modals";
 import { notifications } from "@mantine/notifications";
-import { WEBSITE_ROUTES } from "@bondery/helpers/globals/paths";
 import { resetState } from "@/lib/extension/enrichBatchStore";
-import { statusNotificationsStore } from "@/lib/statusNotificationsStore";
+import { statusNotificationsStore } from "@/lib/extension/statusNotificationsStore";
 import { createBrowswerSupabaseClient } from "@/lib/supabase/client";
 
 export type EndSessionReason = "user_initiated" | "session_expired" | "account_deleted";

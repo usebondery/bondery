@@ -4,19 +4,19 @@ import type {
 } from "@/app/(app)/app/components/contacts/ContactsTableV2";
 
 interface BuildContactMenuActionsOptions {
-  mergeAction?: MenuAction;
   addToGroupsAction?: MenuAction;
-  deleteAction?: MenuAction;
-  prependActions?: MenuAction[];
   appendActions?: MenuAction[];
+  deleteAction?: MenuAction;
+  mergeAction?: MenuAction;
+  prependActions?: MenuAction[];
 }
 
 interface BuildContactBulkActionsOptions {
-  mergeAction?: BulkSelectionAction;
   addToGroupsAction?: BulkSelectionAction;
-  deleteAction?: BulkSelectionAction;
-  prependActions?: BulkSelectionAction[];
   appendActions?: BulkSelectionAction[];
+  deleteAction?: BulkSelectionAction;
+  mergeAction?: BulkSelectionAction;
+  prependActions?: BulkSelectionAction[];
 }
 
 /**

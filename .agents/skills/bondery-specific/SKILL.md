@@ -88,13 +88,38 @@ Published API reference order follows Fastify **registration order**. Read `refe
 
 Do not hardcode user-facing strings in the webapp (or other clients that share `packages/translations`). All visible copy — labels, placeholders, buttons, notifications, aria labels, validation messages — belongs in translation files.
 
-- **Source of truth:** `packages/translations/src/en.json` and `packages/translations/src/cs.json` — add every new key to **both** locales.
-- **Webapp hook:** `useWebTranslations` from `@/lib/i18n/useWebTranslations` (same API as `useTranslations("Namespace")`).
-- **Namespaces:** Group keys by feature/page (e.g. `GroupsPage`, `ContactInfo`). Reuse `WebAppCommon` for shared chrome (`SuccessTitle`, `ErrorTitle`, `Cancel`, etc.).
+- **Stack:** [i18next](https://www.i18next.com/) + [react-i18next](https://react.i18next.com/) (web) / i18next on mobile. Tooling: [i18next-cli](https://github.com/i18next/i18next-cli) (`npm run i18n:status --workspace=@bondery/translations`).
+- **Supported locales:** `en`, `cs`, `de` — source of truth [`packages/schemas/locale/supported-locales.json`](../../packages/schemas/locale/supported-locales.json). Import `SUPPORTED_LOCALES` / `DEFAULT_LOCALE` from `@bondery/schemas/locale` (also re-exported by `@bondery/translations`).
+- **Source of truth (strings):** `packages/translations/src/locales/{en,cs,de}/**` — one JSON file per namespace; add every new key to **all** supported locales.
+- **Webapp hooks:** `useWebTranslations(namespace, keyPrefix?)`, `useCommonTranslations()`, `useValidationTranslations(keyPrefix?)` from `@/lib/i18n/useWebTranslations`.
+- **Namespaces:** Group keys by feature/page (e.g. `GroupsPage`, `ContactInfo`). Shared chrome lives in `common.json` (`actions.cancel`, `feedback.errorTitle`, etc.).
+- **Mobile:** `useMobileTranslations(namespace?, keyPrefix?)` or `t("key", { ns: "MobileContacts" })` — never `MobileApp.*` dotted paths.
 - **Patterns:** Prefer small hooks for repeated copy (e.g. `useContactInfoLabels`, `useContactsTableCopy`) over duplicating `useMemo` blocks. For modals opened outside React, set the title from the modal component via `modals.updateModal` once `t` is available.
 - **Exceptions:** Non-UI strings (logs, API field names, test IDs) and proper nouns/brand names that should not be translated.
 
 When touching UI, wire strings to translations in the same change — do not leave English literals for a follow-up.
+
+
+# API errors (Stripe-style)
+
+Machine-readable API failures use a nested envelope: `{ "error": { "type", "code", "message", "request_id", "doc_url", ... } }`.
+
+- **Catalog:** `@bondery/schemas/errors` — `API_ERROR_CODES`, `getErrorDefinition`, `getErrorDocUrl`. Codes are **snake_case** only; no ad-hoc literals in production.
+- **Before merge:** every new code needs (1) catalog entry via `apps/api/scripts/generate-api-error-catalog.ts`, (2) docs page at `/docs/api/errors/{code}` on the website, (3) `common.errors.api.{code}` in **en/cs/de**.
+- **API:** throw via `badRequest` / `notFound` / `internal` / `new DomainError(...)` with catalog codes; global mapper in `map-to-response.ts` builds the nested body. Never put internal details in `message` for 5xx.
+- **Clients:** import `@bondery/helpers/api` — `ApiError`, `buildApiErrorFromResponse`, `getUserFacingError(error, t)`. Show copy via `getUserMessage(t)` or `getUserFacingError` — **never** surface server `message` in notifications. App transport (`clientApiJson`, `apiRequest`) stays in each app.
+- **CI:** `check-route-errors`, `check-api-error-translations`, `check-error-docs`, `check-user-facing-errors`.
+
+
+# Keyboard shortcuts (display)
+
+Do not use Mantine's `Kbd` from `@mantine/core` for shortcut hints in the UI. Use **`Kbd` from `@bondery/mantine-next`** — it wraps Mantine's chip with platform-aware labels via `useOs` (Ctrl vs ⌘, Shift vs ⇧, etc.).
+
+- **Import:** `import { Kbd, parseShortcutKeys } from "@bondery/mantine-next"`.
+- **API:** `<Kbd keys={["mod", "k"]} size="xs" />` — pass shortcut **tokens**, not pre-formatted strings. Use `"mod"` for the primary modifier (Ctrl on Windows/Linux, ⌘ on macOS/iOS).
+- **With `HOTKEYS`:** `keys={parseShortcutKeys(HOTKEYS.COMMAND_PALETTE)}` — keeps display in sync with `useHotkeys` / Spotlight bindings in `@/lib/platform/config`.
+- **Do not** hardcode `Ctrl`, `Cmd`, or `⌘` in JSX; do not translate shortcut labels via i18n (they are OS conventions, not locale strings).
+- **Binding vs display:** `HOTKEYS` + `useHotkeys` define behavior; `Kbd` + `parseShortcutKeys` define what the user sees. Keep both pointed at the same constant.
 
 
 # Using avatars and logos

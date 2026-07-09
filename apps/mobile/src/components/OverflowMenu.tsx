@@ -1,20 +1,24 @@
-import { Fragment, useRef, useState } from "react";
-import { StyleSheet, View } from "react-native";
 import { IconDotsVertical } from "@tabler/icons-react-native";
 import { Popover } from "@tamagui/popover";
+import { Fragment, useRef, useState } from "react";
+import { StyleSheet, View } from "react-native";
 import { UI_TIMING_MS } from "../lib/config";
 import { POPOVER_MOTION, TAMAGUI_TRANSITION } from "../theme/animations";
 import { SqueezePressable } from "../theme/SqueezePressable";
 import { MOBILE_HIT_SLOP, MOBILE_LAYOUT } from "../theme/tokens";
 import { useMobileThemeColors } from "../theme/useMobileThemeColors";
-import { OVERFLOW_MENU_RADIUS, OverflowMenuItem, type OverflowMenuItemConfig } from "./OverflowMenuItem";
+import {
+  OVERFLOW_MENU_RADIUS,
+  OverflowMenuItem,
+  type OverflowMenuItemConfig,
+} from "./OverflowMenuItem";
 
 type OverflowMenuTriggerVariant = "nav" | "row";
 
 interface OverflowMenuProps {
-  items: OverflowMenuItemConfig[];
   accessibilityLabel: string;
   disabled?: boolean;
+  items: OverflowMenuItemConfig[];
   triggerVariant?: OverflowMenuTriggerVariant;
 }
 
@@ -59,26 +63,26 @@ export function OverflowMenu({
 
   return (
     <Popover
-      key={instanceKey}
-      open={open}
-      onOpenChange={handleOpenChange}
-      placement="bottom-end"
       allowFlip
+      key={instanceKey}
+      onOpenChange={handleOpenChange}
+      open={open}
+      placement="bottom-end"
       stayInFrame
     >
       <Popover.Trigger asChild disabled={disabled}>
         <SqueezePressable
-          variant="subtle"
-          accessibilityRole="button"
           accessibilityLabel={accessibilityLabel}
+          accessibilityRole="button"
           accessibilityState={{ expanded: open }}
-          hitSlop={isRowTrigger ? MOBILE_HIT_SLOP.icon : MOBILE_HIT_SLOP.nav}
+          animateOnly={["scale", "backgroundColor"]}
+          backgroundColor={open ? colors.surfacePressed : "transparent"}
           disabled={disabled}
+          hitSlop={isRowTrigger ? MOBILE_HIT_SLOP.icon : MOBILE_HIT_SLOP.nav}
           overflow="hidden"
           style={styles.menuButton}
-          backgroundColor={open ? colors.surfacePressed : "transparent"}
           transition={TAMAGUI_TRANSITION.quick}
-          animateOnly={["scale", "backgroundColor"]}
+          variant="subtle"
         >
           <IconDotsVertical
             size={isRowTrigger ? 20 : 22}
@@ -89,15 +93,15 @@ export function OverflowMenu({
 
       <Popover.Content
         {...POPOVER_MOTION}
-        elevate
-        bordered
-        borderWidth={1}
-        borderColor={colors.border}
         backgroundColor={colors.surfaceElevated}
+        borderColor={colors.border}
+        bordered
         borderRadius={OVERFLOW_MENU_RADIUS}
+        borderWidth={1}
+        elevate
+        minWidth={MOBILE_LAYOUT.menuMinWidth}
         overflow="hidden"
         padding={0}
-        minWidth={MOBILE_LAYOUT.menuMinWidth}
       >
         {items.map((item, index) => {
           const isFirst = index === 0;
@@ -126,14 +130,14 @@ export function OverflowMenu({
 
 const styles = StyleSheet.create({
   menuButton: {
-    width: MOBILE_LAYOUT.iconButton,
-    height: MOBILE_LAYOUT.iconButton,
     alignItems: "center",
-    justifyContent: "center",
     borderRadius: MOBILE_LAYOUT.borderRadius.control,
+    height: MOBILE_LAYOUT.iconButton,
+    justifyContent: "center",
+    width: MOBILE_LAYOUT.iconButton,
   },
   separator: {
-    height: StyleSheet.hairlineWidth,
     alignSelf: "stretch",
+    height: StyleSheet.hairlineWidth,
   },
 });

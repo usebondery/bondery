@@ -1,20 +1,23 @@
 "use client";
 
-import { Text, Button, Group } from "@mantine/core";
-import { IconLogout } from "@tabler/icons-react";
-import { notifications } from "@mantine/notifications";
-import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
-import { endSession } from "@/lib/auth/endSession";
+import { getUserFacingError } from "@bondery/helpers/api";
 import { errorNotificationTemplate, loadingNotificationTemplate } from "@bondery/mantine-next";
+import { Button, Group, Text } from "@mantine/core";
+import { notifications } from "@mantine/notifications";
+import { IconLogout } from "@tabler/icons-react";
+import { endSession } from "@/lib/auth/endSession";
+import { useCommonTranslations, useWebTranslations } from "@/lib/i18n/useWebTranslations";
 
 export function LogoutSection() {
-  const t = useTranslations("SettingsPage.DataManagement");
+  const tCommon = useCommonTranslations();
+
+  const t = useWebTranslations("SettingsPage", "DataManagement");
 
   const handleLogout = async () => {
     const loadingNotification = notifications.show({
       ...loadingNotificationTemplate({
-        title: t("SigningOut"),
         description: t("SignOutWait"),
+        title: t("SigningOut"),
       }),
     });
 
@@ -23,8 +26,8 @@ export function LogoutSection() {
     } catch (error) {
       notifications.show(
         errorNotificationTemplate({
+          description: getUserFacingError(error, tCommon),
           title: t("UpdateError"),
-          description: error instanceof Error ? error.message : t("SignOutError"),
         }),
       );
     } finally {
@@ -33,20 +36,20 @@ export function LogoutSection() {
   };
 
   return (
-    <Group justify="space-between" align="flex-start">
+    <Group align="flex-start" justify="space-between">
       <div style={{ flex: 1 }}>
-        <Text size="sm" fw={500} mb={4}>
+        <Text fw={500} mb={4} size="sm">
           {t("SignOut")}
         </Text>
-        <Text size="xs" c="dimmed">
+        <Text c="dimmed" size="xs">
           {t("SignOutDescription")}
         </Text>
       </div>
       <Button
-        variant="light"
         color="blue"
         leftSection={<IconLogout size={16} />}
         onClick={handleLogout}
+        variant="light"
       >
         {t("SignOutButton")}
       </Button>

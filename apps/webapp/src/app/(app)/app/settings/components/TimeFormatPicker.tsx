@@ -1,33 +1,31 @@
 "use client";
 
-import { SegmentedControl, Stack, Text } from "@mantine/core";
-import { notifications } from "@mantine/notifications";
-import { useState } from "react";
-import type { ReactNode } from "react";
-import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
-import { useUpdateSettingsMutation } from "@/lib/query/hooks/useSettings";
 import {
   errorNotificationTemplate,
   loadingNotificationTemplate,
   successNotificationTemplate,
 } from "@bondery/mantine-next";
+import { SegmentedControl, Stack, Text } from "@mantine/core";
+import { notifications } from "@mantine/notifications";
+import type { ReactNode } from "react";
+import { useState } from "react";
+import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
+import { useUpdateSettingsMutation } from "@/lib/query/hooks/useSettings";
 
 interface TimeFormatPickerProps {
-  initialTimeFormat: "24h" | "12h";
-  onTimeFormatChange?: (nextFormat: "24h" | "12h") => void;
-  onTimeFormatSaved?: () => void;
-  label?: ReactNode;
   description?: string;
+  initialTimeFormat: "24h" | "12h";
+  label?: ReactNode;
+  onTimeFormatChange?: (nextFormat: "24h" | "12h") => void;
 }
 
 export function TimeFormatPicker({
   initialTimeFormat,
   onTimeFormatChange,
-  onTimeFormatSaved,
   label,
   description,
 }: TimeFormatPickerProps) {
-  const t = useTranslations("SettingsPage.Preferences");
+  const t = useWebTranslations("SettingsPage", "Preferences");
   const updateSettingsMutation = useUpdateSettingsMutation();
   const [timeFormat, setTimeFormat] = useState<"24h" | "12h">(initialTimeFormat);
   const [savedTimeFormat, setSavedTimeFormat] = useState<"24h" | "12h">(initialTimeFormat);
@@ -39,8 +37,8 @@ export function TimeFormatPicker({
 
     const loadingNotification = notifications.show({
       ...loadingNotificationTemplate({
-        title: t("UpdatingTimeFormat"),
         description: t("PleaseWait"),
+        title: t("UpdatingTimeFormat"),
       }),
     });
 
@@ -51,13 +49,12 @@ export function TimeFormatPicker({
 
       setSavedTimeFormat(nextFormat);
       onTimeFormatChange?.(nextFormat);
-      onTimeFormatSaved?.();
 
       notifications.hide(loadingNotification);
       notifications.show(
         successNotificationTemplate({
-          title: t("UpdateSuccess"),
           description: t("TimeFormatUpdateSuccess"),
+          title: t("UpdateSuccess"),
         }),
       );
     } catch {
@@ -67,8 +64,8 @@ export function TimeFormatPicker({
       notifications.hide(loadingNotification);
       notifications.show(
         errorNotificationTemplate({
-          title: t("UpdateError"),
           description: t("TimeFormatUpdateError"),
+          title: t("UpdateError"),
         }),
       );
     }
@@ -76,16 +73,19 @@ export function TimeFormatPicker({
 
   return (
     <Stack gap={4}>
-      <Text size="sm" fw={500}>
+      <Text fw={500} size="sm">
         {label ?? t("TimeFormat")}
       </Text>
       {description && (
-        <Text size="xs" c="dimmed">
+        <Text c="dimmed" size="xs">
           {description}
         </Text>
       )}
       <SegmentedControl
-        value={timeFormat}
+        data={[
+          { label: t("TimeFormat24h"), value: "24h" },
+          { label: t("TimeFormat12h"), value: "12h" },
+        ]}
         onChange={(nextValue) => {
           if (nextValue !== "24h" && nextValue !== "12h") {
             return;
@@ -95,10 +95,7 @@ export function TimeFormatPicker({
           onTimeFormatChange?.(nextValue);
           void persistTimeFormat(nextValue);
         }}
-        data={[
-          { label: t("TimeFormat24h"), value: "24h" },
-          { label: t("TimeFormat12h"), value: "12h" },
-        ]}
+        value={timeFormat}
       />
     </Stack>
   );

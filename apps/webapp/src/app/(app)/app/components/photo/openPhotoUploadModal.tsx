@@ -1,41 +1,30 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { modals } from "@mantine/modals";
-import { notifications } from "@mantine/notifications";
-import { IconPhoto } from "@tabler/icons-react";
+import { getUserFacingError } from "@bondery/helpers/api";
 import {
   errorNotificationTemplate,
   loadingNotificationTemplate,
   ModalTitle,
   successNotificationTemplate,
 } from "@bondery/mantine-next";
-import { clientApiFetch, applyTransportResponsePolicy } from "@/lib/api/client";
-import { createModalId, useModalBlocking } from "@/lib/modals";
-import { PhotoUploadModal } from "./PhotoUploadModal";
+import { modals } from "@mantine/modals";
+import { notifications } from "@mantine/notifications";
+import { IconPhoto } from "@tabler/icons-react";
+import { useEffect, useState } from "react";
+import { useCommonTranslations } from "@/lib/i18n/useCommonTranslations";
+import { createModalId, useModalDismiss } from "@/lib/modals";
+import {
+  type PhotoUploadVariant,
+  usePhotoUploadTranslations,
+} from "./hooks/usePhotoUploadTranslations";
 import { PhotoConfirmModal } from "./PhotoConfirmModal";
+import { PhotoUploadModal } from "./PhotoUploadModal";
 
-export interface PhotoUploadTranslations {
-  TitleModal: string;
-  AttachProfilePhoto: string;
-  UpdateError: string;
-  InvalidFile: string;
-  DragImageHere: string;
-  UpdateProfilePhoto: string;
-  Back?: string;
-  Cancel: string;
-  ConfirmPhoto: string;
-  UploadingPhoto: string;
-  PleaseWait: string;
-  UpdateSuccess: string;
-  PhotoUpdateSuccess: string;
-  PhotoUpdateError: string;
-}
+export type { PhotoUploadVariant } from "./hooks/usePhotoUploadTranslations";
 
 export interface OpenPhotoUploadModalOptions {
-  uploadEndpoint: string;
-  onSuccess?: () => void | Promise<void>;
-  translations: PhotoUploadTranslations;
+  uploadFile: (file: File) => Promise<void>;
+  variant: PhotoUploadVariant;
 }
 
 interface PhotoUploadFlowBodyProps extends OpenPhotoUploadModalOptions {
@@ -44,37 +33,33 @@ interface PhotoUploadFlowBodyProps extends OpenPhotoUploadModalOptions {
 
 type PhotoUploadStep = "pick" | "confirm";
 
-function PhotoUploadFlowBody({
-  modalId,
-  uploadEndpoint,
-  onSuccess,
-  translations,
-}: PhotoUploadFlowBodyProps) {
+function PhotoUploadModalTitle({ variant }: { variant: PhotoUploadVariant }) {
+  const t = usePhotoUploadTranslations(variant);
+  return <ModalTitle icon={<IconPhoto size={20} stroke={1.5} />} text={t("TitleModal")} />;
+}
+
+function PhotoUploadFlowBody({ modalId, uploadFile, variant }: PhotoUploadFlowBodyProps) {
+  const tCommon = useCommonTranslations();
+  const t = usePhotoUploadTranslations(variant);
   const [step, setStep] = useState<PhotoUploadStep>("pick");
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState("");
   const [isUploading, setIsUploading] = useState(false);
 
-  useModalBlocking(modalId, isUploading);
+  const { closeModal } = useModalDismiss(modalId, isUploading);
 
   useEffect(() => {
     modals.updateModal({
       modalId,
+      size: "lg",
       title:
         step === "pick" ? (
-          <ModalTitle
-            text={translations.TitleModal}
-            icon={<IconPhoto size={20} stroke={1.5} />}
-          />
+          <ModalTitle icon={<IconPhoto size={20} stroke={1.5} />} text={t("TitleModal")} />
         ) : (
-          <ModalTitle
-            text={translations.UpdateProfilePhoto}
-            icon={<IconPhoto size={20} stroke={1.5} />}
-          />
+          <ModalTitle icon={<IconPhoto size={20} stroke={1.5} />} text={t("UpdateProfilePhoto")} />
         ),
-      size: "lg",
     });
-  }, [modalId, step, translations.TitleModal, translations.UpdateProfilePhoto]);
+  }, [modalId, step, t]);
 
   const handlePhotoSelect = (selectedFile: File, selectedPreview: string) => {
     setFile(selectedFile);
@@ -83,68 +68,54 @@ function PhotoUploadFlowBody({
   };
 
   const handleBack = () => {
-    if (isUploading) return;
+    if (isUploading) {
+      return;
+    }
     setFile(null);
     setPreview("");
     setStep("pick");
   };
 
   const handleCancel = () => {
-    if (isUploading) return;
-    modals.close(modalId);
+    if (isUploading) {
+      return;
+    }
+    closeModal();
   };
 
   const handleConfirm = async () => {
-    if (!file || isUploading) return;
+    if (!file || isUploading) {
+      return;
+    }
 
     setIsUploading(true);
 
     const loadingNotification = notifications.show({
       ...loadingNotificationTemplate({
-        title: translations.UploadingPhoto,
-        description: translations.PleaseWait,
+        description: t("PleaseWait"),
+        title: t("UploadingPhoto"),
       }),
     });
 
     try {
-      const formData = new FormData();
-      formData.append("file", file);
-
-      const response = await clientApiFetch(uploadEndpoint, {
-        method: "POST",
-        body: formData,
-      });
+      await uploadFile(file);
 
       notifications.hide(loadingNotification);
 
-      if (!response.ok) {
-        applyTransportResponsePolicy(response);
-        const error = await response.json();
-        throw new Error(error.error || "Failed to upload photo");
-      }
-
       notifications.show(
         successNotificationTemplate({
-          title: translations.UpdateSuccess,
-          description: translations.PhotoUpdateSuccess,
+          description: t("PhotoUpdateSuccess"),
+          title: t("UpdateSuccess"),
         }),
       );
 
-      modals.close(modalId);
-
-      if (onSuccess) {
-        await onSuccess();
-      } else {
-        setTimeout(() => {
-          window.location.reload();
-        }, 500);
-      }
+      closeModal();
     } catch (error) {
       notifications.hide(loadingNotification);
       notifications.show(
         errorNotificationTemplate({
-          title: translations.UpdateError,
-          description: error instanceof Error ? error.message : translations.PhotoUpdateError,
+          description: getUserFacingError(error, tCommon),
+          title: t("UpdateError"),
         }),
       );
     } finally {
@@ -153,62 +124,33 @@ function PhotoUploadFlowBody({
   };
 
   if (step === "pick") {
-    return (
-      <PhotoUploadModal
-        onPhotoSelect={handlePhotoSelect}
-        translations={{
-          TitleModal: translations.TitleModal,
-          AttachProfilePhoto: translations.AttachProfilePhoto,
-          UpdateError: translations.UpdateError,
-          InvalidFile: translations.InvalidFile,
-          DragImageHere: translations.DragImageHere,
-        }}
-      />
-    );
+    return <PhotoUploadModal onPhotoSelect={handlePhotoSelect} variant={variant} />;
   }
 
   return (
     <PhotoConfirmModal
-      preview={preview}
+      actionDisabled={isUploading}
+      actionLoading={isUploading}
+      backDisabled={isUploading}
+      cancelDisabled={isUploading}
       onBack={handleBack}
       onCancel={handleCancel}
       onConfirm={() => {
         void handleConfirm();
       }}
-      actionLoading={isUploading}
-      actionDisabled={isUploading}
-      backDisabled={isUploading}
-      cancelDisabled={isUploading}
-      translations={{
-        UpdateProfilePhoto: translations.UpdateProfilePhoto,
-        Back: translations.Back,
-        Cancel: translations.Cancel,
-        ConfirmPhoto: translations.ConfirmPhoto,
-      }}
+      preview={preview}
+      variant={variant}
     />
   );
 }
 
-export function openPhotoUploadModal({
-  uploadEndpoint,
-  onSuccess,
-  translations,
-}: OpenPhotoUploadModalOptions) {
+export function openPhotoUploadModal({ uploadFile, variant }: OpenPhotoUploadModalOptions) {
   const modalId = createModalId("photo-upload");
 
   modals.open({
+    children: <PhotoUploadFlowBody modalId={modalId} uploadFile={uploadFile} variant={variant} />,
     modalId,
-    title: (
-      <ModalTitle text={translations.TitleModal} icon={<IconPhoto size={20} stroke={1.5} />} />
-    ),
     size: "lg",
-    children: (
-      <PhotoUploadFlowBody
-        modalId={modalId}
-        uploadEndpoint={uploadEndpoint}
-        onSuccess={onSuccess}
-        translations={translations}
-      />
-    ),
+    title: <PhotoUploadModalTitle variant={variant} />,
   });
 }

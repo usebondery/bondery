@@ -6,34 +6,32 @@ import type {
   TablesUpdate,
   UpdateContactInput,
 } from "@bondery/schemas";
-import { cachedGeocodeLinkedInLocation } from "../../lib/mapy.js";
-import { loadEnrichedContact } from "../../lib/contact-enrichment.js";
-import { upsertContactSocials } from "../../lib/socials.js";
+import type { SyncChange } from "@bondery/schemas/sync";
+import { parseAddressEntries, replaceContactAddresses } from "../../lib/contacts/addresses.js";
 import {
   parseEmailEntries,
   parsePhoneEntries,
   replaceContactEmails,
   replaceContactPhones,
-} from "../../routes/contacts/channels.js";
-import {
-  parseAddressEntries,
-  replaceContactAddresses,
-} from "../../routes/contacts/addresses.js";
-import { withPersonTxid } from "../_shared/with-txid.js";
-import { DomainError, syncEmitMetaFromContext, type DomainContext } from "../_shared/context.js";
-import { checkContactUpdateConflict } from "../../lib/sync/conflict.js";
-import type { SyncChange } from "@bondery/schemas/sync";
+} from "../../lib/contacts/channels.js";
+import { loadEnrichedContact } from "../../lib/contacts/enrichment.js";
+import { upsertContactSocials } from "../../lib/contacts/socials.js";
+import { cachedGeocodeLinkedInLocation } from "../../lib/integrations/mapy.js";
+import { internal } from "../../lib/platform/errors/http-errors.js";
 import {
   buildChildTableReplaceChanges,
   buildPeopleRowChange,
   listContactChildIds,
 } from "../../lib/sync/build-changes.js";
+import { checkContactUpdateConflict } from "../../lib/sync/conflict.js";
 import { emitSyncBatch } from "../../lib/sync/emit-change.js";
+import { type DomainContext, DomainError, syncEmitMetaFromContext } from "../_shared/context.js";
+import { withPersonTxid } from "../_shared/with-txid.js";
 
 export interface UpdateContactDomainInput {
-  personId: string;
-  patch: UpdateContactInput;
   baseUpdatedAt?: string;
+  patch: UpdateContactInput;
+  personId: string;
 }
 
 export async function updateContact(
@@ -53,20 +51,38 @@ export async function updateContact(
 
   const updates: TablesUpdate<"people"> = {};
 
-  if (body.firstName !== undefined) updates.first_name = body.firstName;
-  if (body.middleName !== undefined) updates.middle_name = body.middleName;
-  if (body.lastName !== undefined) updates.last_name = body.lastName;
-  if (body.headline !== undefined) updates.headline = body.headline;
-  if (body.location !== undefined) updates.location = body.location;
-  if (body.notes !== undefined) updates.notes = body.notes;
-  if (body.language !== undefined) updates.language = body.language;
-  if (body.timezone !== undefined) updates.timezone = body.timezone;
-  if (body.gisPoint !== undefined) updates.gis_point = body.gisPoint;
+  if (body.firstName !== undefined) {
+    updates.first_name = body.firstName;
+  }
+  if (body.middleName !== undefined) {
+    updates.middle_name = body.middleName;
+  }
+  if (body.lastName !== undefined) {
+    updates.last_name = body.lastName;
+  }
+  if (body.headline !== undefined) {
+    updates.headline = body.headline;
+  }
+  if (body.location !== undefined) {
+    updates.location = body.location;
+  }
+  if (body.notes !== undefined) {
+    updates.notes = body.notes;
+  }
+  if (body.language !== undefined) {
+    updates.language = body.language;
+  }
+  if (body.timezone !== undefined) {
+    updates.timezone = body.timezone;
+  }
+  if (body.gisPoint !== undefined) {
+    updates.gis_point = body.gisPoint;
+  }
 
   const clientProvidesCoords =
-    Object.prototype.hasOwnProperty.call(body, "latitude") ||
-    Object.prototype.hasOwnProperty.call(body, "longitude") ||
-    Object.prototype.hasOwnProperty.call(body, "gisPoint");
+    Object.hasOwn(body, "latitude") ||
+    Object.hasOwn(body, "longitude") ||
+    Object.hasOwn(body, "gisPoint");
 
   let geocodedLocation: { lat: number; lon: number } | null = null;
 
@@ -75,9 +91,13 @@ export async function updateContact(
       const geocoded = await cachedGeocodeLinkedInLocation(body.location);
       if (geocoded) {
         const { geo, timezone: tz } = geocoded;
-        if (geo.formattedLabel) updates.location = geo.formattedLabel;
+        if (geo.formattedLabel) {
+          updates.location = geo.formattedLabel;
+        }
         geocodedLocation = { lat: geo.lat, lon: geo.lon };
-        if (tz && body.timezone === undefined) updates.timezone = tz;
+        if (tz && body.timezone === undefined) {
+          updates.timezone = tz;
+        }
       }
     } catch (err) {
       log?.warn({ err }, "[updateContact] Geocode failed, continuing without coordinates");
@@ -92,8 +112,8 @@ export async function updateContact(
     updates.keep_frequency_days = body.keepFrequencyDays;
   }
 
-  const hasLatitudeField = Object.prototype.hasOwnProperty.call(body, "latitude");
-  const hasLongitudeField = Object.prototype.hasOwnProperty.call(body, "longitude");
+  const hasLatitudeField = Object.hasOwn(body, "latitude");
+  const hasLongitudeField = Object.hasOwn(body, "longitude");
 
   let nextLatitude: number | null | undefined;
   let nextLongitude: number | null | undefined;
@@ -103,7 +123,11 @@ export async function updateContact(
     nextLongitude = (body.longitude as number | null | undefined) ?? null;
 
     if ((nextLatitude === null) !== (nextLongitude === null)) {
-      throw new DomainError("Both latitude and longitude must be provided together", 400);
+      throw new DomainError(
+        "Both latitude and longitude must be provided together",
+        400,
+        "contact_location_incomplete",
+      );
     }
 
     if (
@@ -111,7 +135,7 @@ export async function updateContact(
       nextLongitude !== null &&
       (!Number.isFinite(nextLatitude) || !Number.isFinite(nextLongitude))
     ) {
-      throw new DomainError("Invalid latitude/longitude values", 400);
+      throw new DomainError("Invalid latitude/longitude values", 400, "contact_location_invalid");
     }
   }
 
@@ -121,9 +145,8 @@ export async function updateContact(
     try {
       nextPhones = parsePhoneEntries(body.phones);
     } catch (parseError) {
-      const message =
-        parseError instanceof Error ? parseError.message : "Invalid phones payload";
-      throw new DomainError(message, 400);
+      const message = parseError instanceof Error ? parseError.message : "Invalid phones payload";
+      throw new DomainError(message, 400, "contact_invalid");
     }
   }
 
@@ -133,9 +156,8 @@ export async function updateContact(
     try {
       nextEmails = parseEmailEntries(body.emails);
     } catch (parseError) {
-      const message =
-        parseError instanceof Error ? parseError.message : "Invalid emails payload";
-      throw new DomainError(message, 400);
+      const message = parseError instanceof Error ? parseError.message : "Invalid emails payload";
+      throw new DomainError(message, 400, "contact_invalid");
     }
   }
 
@@ -147,7 +169,7 @@ export async function updateContact(
     } catch (parseError) {
       const message =
         parseError instanceof Error ? parseError.message : "Invalid addresses payload";
-      throw new DomainError(message, 400);
+      throw new DomainError(message, 400, "contact_invalid");
     }
   }
 
@@ -156,12 +178,24 @@ export async function updateContact(
     handle: string | null | undefined;
   }> = [];
 
-  if (body.linkedin !== undefined) socialsUpdates.push({ platform: "linkedin", handle: body.linkedin });
-  if (body.instagram !== undefined) socialsUpdates.push({ platform: "instagram", handle: body.instagram });
-  if (body.whatsapp !== undefined) socialsUpdates.push({ platform: "whatsapp", handle: body.whatsapp });
-  if (body.facebook !== undefined) socialsUpdates.push({ platform: "facebook", handle: body.facebook });
-  if (body.website !== undefined) socialsUpdates.push({ platform: "website", handle: body.website });
-  if (body.signal !== undefined) socialsUpdates.push({ platform: "signal", handle: body.signal });
+  if (body.linkedin !== undefined) {
+    socialsUpdates.push({ handle: body.linkedin, platform: "linkedin" });
+  }
+  if (body.instagram !== undefined) {
+    socialsUpdates.push({ handle: body.instagram, platform: "instagram" });
+  }
+  if (body.whatsapp !== undefined) {
+    socialsUpdates.push({ handle: body.whatsapp, platform: "whatsapp" });
+  }
+  if (body.facebook !== undefined) {
+    socialsUpdates.push({ handle: body.facebook, platform: "facebook" });
+  }
+  if (body.website !== undefined) {
+    socialsUpdates.push({ handle: body.website, platform: "website" });
+  }
+  if (body.signal !== undefined) {
+    socialsUpdates.push({ handle: body.signal, platform: "signal" });
+  }
 
   updates.updated_at = new Date().toISOString();
 
@@ -174,31 +208,31 @@ export async function updateContact(
     .single();
 
   if (error) {
-    throw new DomainError(error.message, 500);
+    throw internal("contact_failed", error.message);
   }
 
   if (!updatedContact) {
-    throw new DomainError("Contact not found", 404);
+    throw new DomainError("Contact not found", 404, "contact_not_found");
   }
 
   try {
     if (hasLatitudeField || hasLongitudeField) {
       const { error: locationError } = await client.rpc("set_person_location", {
-        p_person_id: personId,
-        p_user_id: user.id,
         p_latitude: (nextLatitude ?? null) as number,
         p_longitude: (nextLongitude ?? null) as number,
+        p_person_id: personId,
+        p_user_id: user.id,
       });
 
       if (locationError) {
-        throw new DomainError(locationError.message, 500);
+        throw internal("contact_failed", locationError.message);
       }
     } else if (geocodedLocation) {
       const { error: geoRpcError } = await client.rpc("set_person_location", {
-        p_person_id: personId,
-        p_user_id: user.id,
         p_latitude: geocodedLocation.lat as number,
         p_longitude: geocodedLocation.lon as number,
+        p_person_id: personId,
+        p_user_id: user.id,
       });
       if (geoRpcError) {
         log?.warn({ err: geoRpcError }, "[updateContact] Failed to set geocoded coordinates");
@@ -230,32 +264,23 @@ export async function updateContact(
       await Promise.all(parallelOps);
     }
   } catch (channelError) {
-    const message =
-      channelError instanceof Error ? channelError.message : "Unknown channel error";
-    throw new DomainError(message, 500);
+    const message = channelError instanceof Error ? channelError.message : "Unknown channel error";
+    throw internal("contact_failed", message);
   }
 
-  const enrichedContact = await loadEnrichedContact(
-    client,
-    user.id,
-    personId,
-    undefined,
-    log,
-  );
+  const enrichedContact = await loadEnrichedContact(client, user.id, personId, undefined, log);
 
   if (!enrichedContact) {
-    throw new DomainError("Contact not found", 404);
+    throw new DomainError("Contact not found", 404, "contact_not_found");
   }
 
-  const { txid } = await withPersonTxid(
-    client,
-    user.id,
-    async () => ({ personId }),
-  );
+  const { txid } = await withPersonTxid(client, user.id, async () => ({ personId }));
 
   const changes: SyncChange[] = [];
   const peopleChange = await buildPeopleRowChange(client, user.id, personId);
-  if (peopleChange) changes.push(peopleChange);
+  if (peopleChange) {
+    changes.push(peopleChange);
+  }
 
   if (priorPhoneIds) {
     changes.push(
@@ -301,14 +326,14 @@ export async function updateContact(
       .eq("person_id", personId);
 
     if (socialError) {
-      throw new DomainError(socialError.message, 500);
+      throw internal("contact_failed", socialError.message);
     }
 
     for (const row of socialRows ?? []) {
       changes.push({
-        table: "people_socials",
-        operation: "update",
         entityId: String(row.id),
+        operation: "update",
+        table: "people_socials",
         value: row as Record<string, unknown>,
       });
     }
@@ -318,7 +343,7 @@ export async function updateContact(
 
   return {
     data: { contact: enrichedContact, personId },
-    txid,
     serverSequence: serverSequence ?? 0,
+    txid,
   };
 }

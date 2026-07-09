@@ -1,7 +1,7 @@
 export const IMPORTANT_DATE_TYPE_META = {
-  birthday: { emoji: "🎂", label: "Birthday" },
   anniversary: { emoji: "💍", label: "Anniversary" },
-  nameday: { emoji: "🌼", label: "Name day" },
+  birthday: { emoji: "🎂", label: "Birthday" },
   graduation: { emoji: "🎓", label: "Graduation" },
+  nameday: { emoji: "🌼", label: "Name day" },
   other: { emoji: "📅", label: "Important date" },
 } as const;

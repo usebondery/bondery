@@ -131,7 +131,7 @@ Repo checks:
 2. Fix type errors: `npm run check-types -w <workspace>`
 3. Lint: `npm run lint -w <workspace>`
 4. Regenerate artifacts if needed (OpenAPI, Supabase types)
-5. Update `packages/translations` (`en.json` + `cs.json`) when UI copy changes
+5. Update `packages/translations` (`src/locales/{en,cs,de}/**`) when UI copy changes
 
 One ecosystem per commit:
 
@@ -177,7 +177,7 @@ npm run build                          # turbo build (all apps)
 | `apps/mobile` | `check-types` + `expo-doctor` | — |
 | `packages/*` | `npx turbo build --filter=./packages/*` or `npm run build -w @bondery/<name>` | — |
 
-**Webapp note:** `check-types` also runs `check-api-fetch:strict` and `check-query-patterns:strict` — run it even when build passes.
+**Webapp note:** `check-types` also runs `check-api-fetch:strict` — run it even when build passes.
 
 **On failure:** read the error, build dependencies first (turbo graph), fix the break — do not pin old versions without documenting why.
 

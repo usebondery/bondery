@@ -1,11 +1,11 @@
 "use client";
 
-import { useMutation, useQueryClient, type QueryClient } from "@tanstack/react-query";
 import type {
   InstagramImportCommitRequest,
   LinkedInImportCommitRequest,
   VCardImportCommitRequest,
 } from "@bondery/schemas";
+import { type QueryClient, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   commitInstagramImport,
   commitLinkedInImport,
@@ -51,8 +51,7 @@ export function useParseLinkedInImportMutation() {
 export function useCommitLinkedInImportMutation() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ body }: CommitInput<LinkedInImportCommitRequest>) =>
-      commitLinkedInImport(body),
+    mutationFn: ({ body }: CommitInput<LinkedInImportCommitRequest>) => commitLinkedInImport(body),
     onSuccess: async (_data, { finalize = true }) => {
       if (finalize) {
         await afterImportCommit(queryClient);

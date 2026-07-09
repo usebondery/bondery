@@ -16,7 +16,9 @@ function walk(dir: string, acc: string[] = []): string[] {
   for (const entry of readdirSync(dir)) {
     const full = join(dir, entry);
     if (statSync(full).isDirectory()) {
-      if (entry === "node_modules" || entry === ".next") continue;
+      if (entry === "node_modules" || entry === ".next") {
+        continue;
+      }
       walk(full, acc);
     } else if (/\.(tsx?|jsx?)$/.test(entry)) {
       acc.push(full);
@@ -31,10 +33,7 @@ function isClientFile(content: string): boolean {
 
 function isAllowedClientFetchFile(rel: string): boolean {
   const normalized = rel.replace(/\\/g, "/");
-  return (
-    normalized.startsWith("lib/api/") ||
-    normalized === "lib/sync/sync-wake-client.ts"
-  );
+  return normalized.startsWith("lib/api/") || normalized === "lib/sync/sync-wake-client.ts";
 }
 
 function isApiRouteFile(rel: string): boolean {
@@ -64,9 +63,9 @@ function checkApiRouteFile(absPath: string): Violation[] {
   }
 
   violations.push({
+    detail: "app/api route handlers must use bffProxyFetch instead of serverApiFetch",
     file: rel,
     rule: "api-route-use-bff-proxy",
-    detail: "app/api route handlers must use bffProxyFetch instead of serverApiFetch",
   });
 
   return violations;
@@ -85,35 +84,37 @@ function checkFile(absPath: string): Violation[] {
     return violations;
   }
 
-  if (/import\s*\{[^}]*\bAPI_URL\b[^}]*\}\s*from\s*["']@\/lib\/config["']/.test(content)) {
+  if (
+    /import\s*\{[^}]*\bAPI_URL\b[^}]*\}\s*from\s*["']@\/lib\/platform\/config["']/.test(content)
+  ) {
     violations.push({
+      detail: 'Client file imports API_URL from "@/lib/platform/config"',
       file: rel,
       rule: "no-api-url-in-client",
-      detail: 'Client file imports API_URL from "@/lib/config"',
     });
   }
 
   if (/\bfetch\s*\(\s*[`'"]\s*\$\{\s*API_URL/.test(content)) {
     violations.push({
+      detail: "Client file fetches API_URL directly",
       file: rel,
       rule: "no-fetch-api-url-in-client",
-      detail: "Client file fetches API_URL directly",
     });
   }
 
   if (STRICT && /\bfetch\s*\(\s*[`'"]\s*\$\{\s*API_ROUTES/.test(content)) {
     violations.push({
+      detail: "Use clientApiFetch/clientApiJson instead of raw fetch(API_ROUTES...)",
       file: rel,
       rule: "no-raw-fetch-api-routes",
-      detail: "Use clientApiFetch/clientApiJson instead of raw fetch(API_ROUTES...)",
     });
   }
 
   if (STRICT && /\bfetch\s*\(\s*API_ROUTES\./.test(content)) {
     violations.push({
+      detail: "Use clientApiFetch/clientApiJson instead of raw fetch(API_ROUTES...)",
       file: rel,
       rule: "no-raw-fetch-api-routes",
-      detail: "Use clientApiFetch/clientApiJson instead of raw fetch(API_ROUTES...)",
     });
   }
 

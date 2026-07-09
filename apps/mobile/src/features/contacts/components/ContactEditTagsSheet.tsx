@@ -1,34 +1,34 @@
+import type { Tag, TagWithCount } from "@bondery/schemas";
 import { XStack } from "@tamagui/stacks";
 import { Paragraph } from "@tamagui/text";
-import type { Tag, TagWithCount } from "@bondery/schemas";
 import { useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
+  type ListRenderItemInfo,
   Pressable,
   StyleSheet,
   Text,
   View,
-  type ListRenderItemInfo,
 } from "react-native";
-import { contactsDomain } from "../../../lib/domains/contacts";
-import { tagsDomain } from "../../../lib/domains/tags";
+import { SearchActionSheet } from "../../../components/SearchActionSheet";
 import { MOBILE_OPACITY } from "../../../lib/config";
+import { addTagToContact, removeTagFromContact } from "../../../lib/domains/contacts";
 import { useMobileTranslations } from "../../../lib/i18n/useMobileTranslations";
 import { useMobilePreferences } from "../../../lib/preferences/useMobilePreferences";
+import { getContactTags, listTags } from "../../../lib/sync/hooks/useSyncQuery";
 import { useAppToast } from "../../../lib/toast/useAppToast";
-import { SearchActionSheet } from "../../../components/SearchActionSheet";
 import { MOBILE_LAYOUT, MOBILE_TYPOGRAPHY } from "../../../theme/tokens";
 import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
-import { TagSelectRow } from "./TagSelectRow";
 import { sortTags } from "../tagSort";
+import { TagSelectRow } from "./TagSelectRow";
 
 interface ContactEditTagsSheetProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
   contactId: string;
   contactName: string;
+  onOpenChange: (open: boolean) => void;
   onTagsReplaced: (tags: Tag[]) => void;
+  open: boolean;
 }
 
 function filterTags(tags: TagWithCount[], query: string): TagWithCount[] {
@@ -100,11 +100,9 @@ export function ContactEditTagsSheet({
           return;
         }
 
-        const allTags = tagsDomain.list();
+        const allTags = listTags();
         setAllTags(allTags);
-        const memberIds = new Set(
-          contactsDomain.listTags(contactId).map((tag) => tag.id),
-        );
+        const memberIds = new Set(getContactTags(contactId).map((tag) => tag.id));
         setInitialSelectedIds(memberIds);
         setSelectedTagIds(new Set(memberIds));
       })
@@ -114,9 +112,9 @@ export function ContactEditTagsSheet({
         }
 
         showToast({
+          description: t("TagsLoadError", { ns: "MobileContactDetail" }),
+          headline: t("feedback.errorTitle", { ns: "common" }),
           type: "error",
-          headline: t("MobileApp.Common.ErrorTitle"),
-          description: t("MobileApp.ContactDetail.TagsLoadError"),
         });
         onOpenChange(false);
       })
@@ -177,10 +175,10 @@ export function ContactEditTagsSheet({
 
       try {
         for (const tagId of added) {
-          contactsDomain.addTag(contactId, tagId);
+          addTagToContact(contactId, tagId);
         }
         for (const tagId of removed) {
-          contactsDomain.removeTag(contactId, tagId);
+          removeTagFromContact(contactId, tagId);
         }
 
         const newTags = allTags.filter((tag) => selectedTagIds.has(tag.id));
@@ -188,9 +186,9 @@ export function ContactEditTagsSheet({
         onTagsReplaced(newTags);
       } catch {
         showToast({
+          description: t("EditTagsFailed", { ns: "MobileContactDetail" }),
+          headline: t("feedback.errorTitle", { ns: "common" }),
           type: "error",
-          headline: t("MobileApp.Common.ErrorTitle"),
-          description: t("MobileApp.ContactDetail.EditTagsFailed"),
         });
       } finally {
         setIsSaving(false);
@@ -200,10 +198,10 @@ export function ContactEditTagsSheet({
 
   const renderItem = ({ item }: ListRenderItemInfo<TagWithCount>) => (
     <TagSelectRow
-      tag={item}
+      disabled={isSaving || isLoadingTags}
       isSelected={selectedTagIds.has(item.id)}
       onToggle={() => toggleTag(item.id)}
-      disabled={isSaving || isLoadingTags}
+      tag={item}
     />
   );
 
@@ -211,11 +209,11 @@ export function ContactEditTagsSheet({
 
   const sheetHeader = (
     <Paragraph
+      color={colors.textPrimary}
       fontSize={MOBILE_TYPOGRAPHY.fontSize.sheetTitle}
       fontWeight={MOBILE_TYPOGRAPHY.fontWeight.bold}
-      color={colors.textPrimary}
     >
-      {t("MobileApp.ContactDetail.EditTagsSheetTitle")}
+      {t("EditTagsSheetTitle", { ns: "MobileContactDetail" })}
     </Paragraph>
   );
 
@@ -229,14 +227,14 @@ export function ContactEditTagsSheet({
           styles.footerButton,
           styles.footerButtonOutline,
           {
-            borderColor: colors.borderStrong,
             backgroundColor: colors.surface,
+            borderColor: colors.borderStrong,
             opacity: isSaving ? MOBILE_OPACITY.disabled : pressed ? MOBILE_OPACITY.pressed : 1,
           },
         ]}
       >
         <Text style={[styles.footerButtonText, { color: colors.textPrimary }]}>
-          {t("MobileApp.Common.Cancel")}
+          {t("actions.cancel", { ns: "common" })}
         </Text>
       </Pressable>
 
@@ -247,17 +245,17 @@ export function ContactEditTagsSheet({
         style={({ pressed }) => [
           styles.footerButton,
           {
-            borderColor: colors.primary,
             backgroundColor: colors.primary,
+            borderColor: colors.primary,
             opacity: !canSave ? MOBILE_OPACITY.disabled : pressed ? MOBILE_OPACITY.pressed : 1,
           },
         ]}
       >
         {isSaving ? (
-          <ActivityIndicator size="small" color={colors.textOnPrimary} />
+          <ActivityIndicator color={colors.textOnPrimary} size="small" />
         ) : (
           <Text style={[styles.footerButtonText, { color: colors.textOnPrimary }]}>
-            {t("MobileApp.ContactDetail.EditTagsSave")}
+            {t("EditTagsSave", { ns: "MobileContactDetail" })}
           </Text>
         )}
       </Pressable>
@@ -266,56 +264,56 @@ export function ContactEditTagsSheet({
 
   return (
     <SearchActionSheet
-      open={open}
-      onOpenChange={handleOpenChange}
-      query={query}
-      onQueryChange={setQuery}
-      searchPlaceholder={t("MobileApp.Tags.EditTagsSearchPlaceholder")}
-      searchEditable={!isSaving && !isLoadingTags}
       dismissible={!isSaving}
-      header={sheetHeader}
       footer={sheetFooter}
+      header={sheetHeader}
+      onOpenChange={handleOpenChange}
+      onQueryChange={setQuery}
+      open={open}
+      query={query}
+      searchEditable={!isSaving && !isLoadingTags}
+      searchPlaceholder={t("EditTagsSearchPlaceholder", { ns: "MobileTags" })}
     >
       {isLoadingTags ? (
         <View style={styles.loadingState}>
-          <ActivityIndicator size="small" color={colors.primary} />
+          <ActivityIndicator color={colors.primary} size="small" />
         </View>
       ) : allTags.length === 0 ? (
         <View style={styles.emptyState}>
           <Paragraph
+            color={colors.textPrimary}
             fontSize={MOBILE_TYPOGRAPHY.fontSize.body}
             fontWeight={MOBILE_TYPOGRAPHY.fontWeight.semibold}
-            color={colors.textPrimary}
             textAlign="center"
           >
-            {t("MobileApp.Tags.NoTagsYet")}
+            {t("NoTagsYet", { ns: "MobileTags" })}
           </Paragraph>
           <Paragraph
-            fontSize={MOBILE_TYPOGRAPHY.fontSize.caption}
             color={colors.textSecondary}
-            textAlign="center"
+            fontSize={MOBILE_TYPOGRAPHY.fontSize.caption}
             marginTop={6}
+            textAlign="center"
           >
-            {t("MobileApp.Tags.NoTagsYetHint")}
+            {t("NoTagsYetHint", { ns: "MobileTags" })}
           </Paragraph>
         </View>
       ) : (
         <FlatList
-          style={styles.searchList}
-          data={displayedTags}
-          keyExtractor={(item) => item.id}
-          renderItem={renderItem}
-          keyboardShouldPersistTaps="handled"
           automaticallyAdjustKeyboardInsets
-          initialNumToRender={24}
-          maxToRenderPerBatch={24}
-          windowSize={8}
           contentContainerStyle={styles.listContent}
+          data={displayedTags}
+          initialNumToRender={24}
+          keyboardShouldPersistTaps="handled"
+          keyExtractor={(item) => item.id}
           ListEmptyComponent={
             <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
-              {t("MobileApp.Common.NoResults")}
+              {t("feedback.noResults", { ns: "common" })}
             </Text>
           }
+          maxToRenderPerBatch={24}
+          renderItem={renderItem}
+          style={styles.searchList}
+          windowSize={8}
         />
       )}
     </SearchActionSheet>
@@ -323,40 +321,40 @@ export function ContactEditTagsSheet({
 }
 
 const styles = StyleSheet.create({
-  searchList: {
-    flex: 1,
-  },
-  listContent: {
-    paddingBottom: 12,
-  },
-  emptyText: {
-    textAlign: "center",
-    paddingVertical: 24,
-    fontSize: MOBILE_TYPOGRAPHY.fontSize.body,
-  },
   emptyState: {
     flex: 1,
     justifyContent: "center",
     paddingHorizontal: 24,
     paddingVertical: 32,
   },
-  loadingState: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 32,
+  emptyText: {
+    fontSize: MOBILE_TYPOGRAPHY.fontSize.body,
+    paddingVertical: 24,
+    textAlign: "center",
   },
   footerButton: {
-    flex: 1,
-    minHeight: MOBILE_LAYOUT.touchTarget,
+    alignItems: "center",
     borderRadius: MOBILE_LAYOUT.borderRadius.control,
     borderWidth: 1,
-    alignItems: "center",
+    flex: 1,
     justifyContent: "center",
+    minHeight: MOBILE_LAYOUT.touchTarget,
   },
   footerButtonOutline: {},
   footerButtonText: {
     fontSize: MOBILE_TYPOGRAPHY.fontSize.body,
     fontWeight: MOBILE_TYPOGRAPHY.fontWeight.semibold,
+  },
+  listContent: {
+    paddingBottom: 12,
+  },
+  loadingState: {
+    alignItems: "center",
+    flex: 1,
+    justifyContent: "center",
+    paddingVertical: 32,
+  },
+  searchList: {
+    flex: 1,
   },
 });

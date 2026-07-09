@@ -1,11 +1,11 @@
 "use client";
 
-import { Avatar } from "@mantine/core";
-import type { ContactPreview } from "@bondery/schemas";
-import Link from "#nextjs/NextLink.js";
 import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
-import { getAvatarColorFromName } from "#utils/avatarColor.js";
+import type { ContactPreview } from "@bondery/schemas";
+import { Avatar } from "@mantine/core";
+import Link from "#nextjs/NextLink.js";
 import { PersonAvatarTooltip } from "#nextjs/PersonAvatar/PersonAvatarTooltip.js";
+import { getAvatarColorFromName } from "#utils/avatarColor.js";
 
 type PersonAvatarIdentity = ContactPreview & {
   middleName?: string | null;
@@ -13,10 +13,10 @@ type PersonAvatarIdentity = ContactPreview & {
 };
 
 interface PersonAvatarProps {
+  href?: string;
+  isClickable?: boolean;
   person: PersonAvatarIdentity;
   size?: "xs" | "sm" | "md" | "lg" | "xl" | number;
-  isClickable?: boolean;
-  href?: string;
 }
 
 export function PersonAvatar({
@@ -30,11 +30,11 @@ export function PersonAvatar({
 
   const avatar = (
     <Avatar
-      src={person.avatar || undefined}
-      size={size}
-      radius="xl"
       color={getAvatarColorFromName(person.firstName, person.lastName)}
       name={fullName}
+      radius="xl"
+      size={size}
+      src={person.avatar || undefined}
       style={{ cursor: isClickable ? "pointer" : "default" }}
     />
   );

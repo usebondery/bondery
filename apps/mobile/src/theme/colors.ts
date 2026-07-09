@@ -2,33 +2,33 @@ export type MobileThemeMode = "light" | "dark";
 
 export interface MobileThemeColors {
   appBackground: string;
-  surface: string;
-  surfaceMuted: string;
-  surfacePressed: string;
-  surfaceElevated: string;
-  overlay: string;
   border: string;
   borderStrong: string;
-  textPrimary: string;
-  textSecondary: string;
-  textMuted: string;
-  textOnPrimary: string;
+  dangerAccent: string;
+  dangerSurface: string;
+  dangerText: string;
   iconPrimary: string;
   iconSecondary: string;
+  inputBackground: string;
+  neutralAccent: string;
+  overlay: string;
   primary: string;
   primaryHover: string;
   primaryPress: string;
-  neutralAccent: string;
-  successAccent: string;
-  dangerAccent: string;
   selectionBackground: string;
   selectionBackgroundStrong: string;
-  successSurface: string;
-  warningSurface: string;
-  dangerSurface: string;
-  dangerText: string;
-  inputBackground: string;
   shadow: string;
+  successAccent: string;
+  successSurface: string;
+  surface: string;
+  surfaceElevated: string;
+  surfaceMuted: string;
+  surfacePressed: string;
+  textMuted: string;
+  textOnPrimary: string;
+  textPrimary: string;
+  textSecondary: string;
+  warningSurface: string;
 }
 
 const BRAND_PRIMARY = "#a34bcb";
@@ -39,65 +39,65 @@ const BRAND_PRIMARY_PRESS = "#8931b2";
 export const PRIMARY_BUTTON_TEXT = "#ffffff";
 
 export const MOBILE_THEME_COLORS: Record<MobileThemeMode, MobileThemeColors> = {
-  light: {
-    appBackground: "#f8fafc",
-    surface: "#ffffff",
-    surfaceMuted: "#f8fafc",
-    surfacePressed: "#f1f5f9",
-    surfaceElevated: "#ffffff",
-    overlay: "rgba(15,23,42,0.28)",
-    border: "#e2e8f0",
-    borderStrong: "#cbd5e1",
-    textPrimary: "#0f172a",
-    textSecondary: "#334155",
-    textMuted: "#64748b",
-    textOnPrimary: PRIMARY_BUTTON_TEXT,
-    iconPrimary: "#0f172a",
-    iconSecondary: "#64748b",
-    primary: BRAND_PRIMARY,
-    primaryHover: BRAND_PRIMARY_HOVER,
-    primaryPress: BRAND_PRIMARY_PRESS,
-    neutralAccent: "#64748b",
-    successAccent: "#059669",
-    dangerAccent: "#dc2626",
-    selectionBackground: "#ede9fe",
-    selectionBackgroundStrong: "#c4b5fd",
-    successSurface: "#dcfce7",
-    warningSurface: "#fef3c7",
-    dangerSurface: "#fee2e2",
-    dangerText: "#b91c1c",
-    inputBackground: "#ffffff",
-    shadow: "#0f172a",
-  },
   dark: {
     appBackground: "#020617",
-    surface: "#0f172a",
-    surfaceMuted: "#111827",
-    surfacePressed: "#1f2937",
-    surfaceElevated: "#0b1220",
-    overlay: "rgba(2,6,23,0.62)",
     border: "#1f2937",
     borderStrong: "#374151",
-    textPrimary: "#f8fafc",
-    textSecondary: "#cbd5e1",
-    textMuted: "#94a3b8",
-    textOnPrimary: PRIMARY_BUTTON_TEXT,
+    dangerAccent: "#f87171",
+    dangerSurface: "#7f1d1d",
+    dangerText: "#fca5a5",
     iconPrimary: "#f8fafc",
     iconSecondary: "#9ca3af",
+    inputBackground: "#111827",
+    neutralAccent: "#94a3b8",
+    overlay: "rgba(2,6,23,0.62)",
     primary: BRAND_PRIMARY,
     primaryHover: BRAND_PRIMARY_HOVER,
     primaryPress: BRAND_PRIMARY_PRESS,
-    neutralAccent: "#94a3b8",
-    successAccent: "#34d399",
-    dangerAccent: "#f87171",
     selectionBackground: "#1e293b",
     selectionBackgroundStrong: "#312e81",
-    successSurface: "#14532d",
-    warningSurface: "#78350f",
-    dangerSurface: "#7f1d1d",
-    dangerText: "#fca5a5",
-    inputBackground: "#111827",
     shadow: "#000000",
+    successAccent: "#34d399",
+    successSurface: "#14532d",
+    surface: "#0f172a",
+    surfaceElevated: "#0b1220",
+    surfaceMuted: "#111827",
+    surfacePressed: "#1f2937",
+    textMuted: "#94a3b8",
+    textOnPrimary: PRIMARY_BUTTON_TEXT,
+    textPrimary: "#f8fafc",
+    textSecondary: "#cbd5e1",
+    warningSurface: "#78350f",
+  },
+  light: {
+    appBackground: "#f8fafc",
+    border: "#e2e8f0",
+    borderStrong: "#cbd5e1",
+    dangerAccent: "#dc2626",
+    dangerSurface: "#fee2e2",
+    dangerText: "#b91c1c",
+    iconPrimary: "#0f172a",
+    iconSecondary: "#64748b",
+    inputBackground: "#ffffff",
+    neutralAccent: "#64748b",
+    overlay: "rgba(15,23,42,0.28)",
+    primary: BRAND_PRIMARY,
+    primaryHover: BRAND_PRIMARY_HOVER,
+    primaryPress: BRAND_PRIMARY_PRESS,
+    selectionBackground: "#ede9fe",
+    selectionBackgroundStrong: "#c4b5fd",
+    shadow: "#0f172a",
+    successAccent: "#059669",
+    successSurface: "#dcfce7",
+    surface: "#ffffff",
+    surfaceElevated: "#ffffff",
+    surfaceMuted: "#f8fafc",
+    surfacePressed: "#f1f5f9",
+    textMuted: "#64748b",
+    textOnPrimary: PRIMARY_BUTTON_TEXT,
+    textPrimary: "#0f172a",
+    textSecondary: "#334155",
+    warningSurface: "#fef3c7",
   },
 };
 
@@ -122,11 +122,11 @@ export const OAUTH_PROVIDER_COLORS = {
 } as const;
 
 export const SOCIAL_BRAND_COLORS = {
+  discord: "#5865F2",
   github: "#111827",
   linkedin: "#0A66C2",
   reddit: "#FF4500",
   x: "#111827",
-  discord: "#5865F2",
 } as const;
 
 export const AVATAR_COLOR_PALETTE_HEX = [

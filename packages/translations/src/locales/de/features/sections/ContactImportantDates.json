@@ -1,0 +1,32 @@
+{
+  "AddAction": "Termin hinzufügen",
+  "AddHint": "Um einen neuen Termin hinzuzufügen, gib alle Informationen an.",
+  "AddImportantDate": "Wichtigen Termin hinzufügen",
+  "BirthdayDateLabel": "Geburtstag auswählen",
+  "DatePlaceholder": "Datum auswählen",
+  "DeleteAction": "Löschen",
+  "DraftIncompleteError": "Um einen neuen Termin hinzuzufügen, gib alle Informationen an.",
+  "Empty": "Noch keine wichtigen Termine.",
+  "ErrorTitle": "Fehler",
+  "NotePlaceholder": "Optionale Notiz",
+  "NotifyDayBefore": "{count} Tag vorher benachrichtigen",
+  "NotifyDaysBefore": "{count} Tage vorher benachrichtigen",
+  "NotifyMe": "Mich benachrichtigen",
+  "NotifyNone": "Nicht benachrichtigen",
+  "SuccessTitle": "Erfolg",
+  "Title": "Wichtige Termine",
+  "TypeDisabledBirthdateHint": "{firstName} hat bereits ein Geburtsdatum festgelegt",
+  "TypeDisabledHint": "{firstName} hat bereits ein Geburtsdatum oder einen Namenstag festgelegt",
+  "TypeDisabledNamedateHint": "{firstName} hat bereits einen Namenstag festgelegt",
+  "TypePlaceholder": "Typ auswählen",
+  "Types": {
+    "anniversary": "Jahrestag",
+    "birthday": "Geburtstag",
+    "graduation": "Abschluss",
+    "nameday": "Namenstag",
+    "other": "Sonstiges"
+  },
+  "UniqueTypeError": "Es kann nur ein {type} hinzugefügt werden.",
+  "UpdateError": "Wichtige Termine konnten nicht aktualisiert werden",
+  "UpdateSuccess": "Wichtige Termine erfolgreich aktualisiert"
+}

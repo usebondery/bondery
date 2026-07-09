@@ -1,20 +1,19 @@
 "use client";
 
-import { Stack } from "@mantine/core";
-import { modals } from "@mantine/modals";
-import { IconTrash } from "@tabler/icons-react";
 import { ModalFooter } from "@bondery/mantine-next";
-import { useState, type ReactNode } from "react";
-import { useModalBlocking } from "@/lib/modals";
+import { Stack } from "@mantine/core";
+import { IconTrash } from "@tabler/icons-react";
+import { type ReactNode, useState } from "react";
+import { useModalDismiss } from "@/lib/modals";
 
 export interface StandardConfirmModalBodyProps {
-  modalId: string;
-  message: ReactNode;
-  confirmLabel: string;
   cancelLabel: string;
-  onConfirm: () => Promise<void> | void;
   confirmColor?: string;
+  confirmLabel: string;
   confirmLeftSection?: ReactNode;
+  message: ReactNode;
+  modalId: string;
+  onConfirm: () => Promise<void> | void;
 }
 
 export function StandardConfirmModalBody({
@@ -27,15 +26,14 @@ export function StandardConfirmModalBody({
   confirmLeftSection,
 }: StandardConfirmModalBodyProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  useModalBlocking(modalId, isSubmitting);
+  const { closeModal } = useModalDismiss(modalId, isSubmitting);
 
   const handleConfirm = async () => {
     setIsSubmitting(true);
 
     try {
       await onConfirm();
-      modals.close(modalId);
+      closeModal();
     } finally {
       setIsSubmitting(false);
     }
@@ -48,17 +46,17 @@ export function StandardConfirmModalBody({
     <Stack gap="md">
       {message}
       <ModalFooter
-        cancelLabel={cancelLabel}
-        onCancel={() => modals.close(modalId)}
-        cancelDisabled={isSubmitting}
-        actionLabel={confirmLabel}
         actionColor={confirmColor}
+        actionDisabled={isSubmitting}
+        actionLabel={confirmLabel}
         actionLeftSection={resolvedConfirmLeftSection}
         actionLoading={isSubmitting}
-        actionDisabled={isSubmitting}
+        cancelDisabled={isSubmitting}
+        cancelLabel={cancelLabel}
         onAction={() => {
           void handleConfirm();
         }}
+        onCancel={closeModal}
       />
     </Stack>
   );

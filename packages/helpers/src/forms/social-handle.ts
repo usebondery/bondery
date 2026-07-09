@@ -1,5 +1,5 @@
-import { z } from "zod";
 import { socialHandleInputSchema } from "@bondery/schemas";
+import { z } from "zod";
 import { processContactSocialFieldValue } from "#socials/index.js";
 
 export const normalizedSocialHandleSchema = socialHandleInputSchema.transform((value, ctx) => {

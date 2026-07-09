@@ -2,13 +2,11 @@ import createMDX from "@next/mdx";
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  pageExtensions: ["ts", "tsx", "md", "mdx"],
   // Outbound redirects (status, help, docs, login, auth/callback, oauth/consent, app)
   // live in src/app/**/route.ts so they can import @bondery/helpers.
   async headers() {
     return [
       {
-        source: "/:path*",
         headers: [
           {
             key: "Strict-Transport-Security",
@@ -23,9 +21,11 @@ const nextConfig: NextConfig = {
             value: "same-origin",
           },
         ],
+        source: "/:path*",
       },
     ];
   },
+  pageExtensions: ["ts", "tsx", "md", "mdx"],
 };
 
 const withMDX = createMDX();

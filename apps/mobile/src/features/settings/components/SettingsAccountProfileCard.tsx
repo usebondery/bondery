@@ -1,21 +1,21 @@
+import type { Contact } from "@bondery/schemas";
 import { useMemo } from "react";
 import { Image, StyleSheet, Text, View } from "react-native";
-import type { Contact } from "@bondery/schemas";
 import { normalizeMobileUrlForDevice } from "../../../lib/config";
+import { MOBILE_TYPOGRAPHY } from "../../../theme/tokens";
+import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
 import {
   formatContactName,
   getAvatarColorHex,
   getContactInitials,
 } from "../../contacts/contactUtils";
-import { MOBILE_TYPOGRAPHY } from "../../../theme/tokens";
-import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
 import { SettingsSectionCard } from "./SettingsSectionCard";
 
 interface SettingsAccountProfileCardProps {
   contact: Contact | null;
   email: string | null;
-  fallbackName?: string | null;
   fallbackAvatarUrl?: string | null;
+  fallbackName?: string | null;
 }
 
 function buildFallbackContact(name: string): Contact {
@@ -24,34 +24,34 @@ function buildFallbackContact(name: string): Contact {
   const lastName = parts.length > 1 ? parts.slice(1).join(" ") : null;
 
   return {
-    id: "account-profile-fallback",
-    userId: "",
-    firstName,
-    middleName: null,
-    lastName,
-    headline: null,
-    location: null,
-    notes: null,
     avatar: null,
+    createdAt: "",
+    emails: null,
+    facebook: null,
+    firstName,
+    gisPoint: null,
+    headline: null,
+    id: "account-profile-fallback",
+    instagram: null,
+    keepFrequencyDays: null,
+    language: null,
     lastInteraction: null,
     lastInteractionActivityId: null,
-    keepFrequencyDays: null,
-    createdAt: "",
-    updatedAt: "",
-    phones: null,
-    emails: null,
-    linkedin: null,
-    instagram: null,
-    whatsapp: null,
-    facebook: null,
-    website: null,
-    signal: null,
-    myself: true,
-    language: null,
-    timezone: null,
-    gisPoint: null,
+    lastName,
     latitude: null,
+    linkedin: null,
+    location: null,
     longitude: null,
+    middleName: null,
+    myself: true,
+    notes: null,
+    phones: null,
+    signal: null,
+    timezone: null,
+    updatedAt: "",
+    userId: "",
+    website: null,
+    whatsapp: null,
   };
 }
 
@@ -98,15 +98,9 @@ export function SettingsAccountProfileCard({
           ]}
         >
           {shouldShowAvatarImage ? (
-            <Image
-              source={{ uri: avatarUri }}
-              style={styles.avatarImage}
-              resizeMode="cover"
-            />
+            <Image resizeMode="cover" source={{ uri: avatarUri }} style={styles.avatarImage} />
           ) : (
-            <Text style={[styles.avatarText, { color: colors.textOnPrimary }]}>
-              {initials}
-            </Text>
+            <Text style={[styles.avatarText, { color: colors.textOnPrimary }]}>{initials}</Text>
           )}
         </View>
 
@@ -128,38 +122,38 @@ export function SettingsAccountProfileCard({
 }
 
 const styles = StyleSheet.create({
-  row: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 14,
-    paddingHorizontal: 16,
-    paddingVertical: 16,
-  },
   avatar: {
-    width: 52,
-    height: 52,
-    borderRadius: 26,
     alignItems: "center",
+    borderRadius: 26,
+    height: 52,
     justifyContent: "center",
     overflow: "hidden",
+    width: 52,
   },
   avatarImage: {
-    width: "100%",
     height: "100%",
+    width: "100%",
   },
   avatarText: {
     fontSize: 18,
     fontWeight: MOBILE_TYPOGRAPHY.fontWeight.bold,
   },
-  textWrap: {
-    flex: 1,
-    gap: 2,
+  email: {
+    fontSize: MOBILE_TYPOGRAPHY.fontSize.body,
   },
   name: {
     fontSize: MOBILE_TYPOGRAPHY.fontSize.cardTitle,
     fontWeight: MOBILE_TYPOGRAPHY.fontWeight.semibold,
   },
-  email: {
-    fontSize: MOBILE_TYPOGRAPHY.fontSize.body,
+  row: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 14,
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+  },
+  textWrap: {
+    flex: 1,
+    gap: 2,
   },
 });

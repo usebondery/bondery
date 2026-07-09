@@ -2,7 +2,7 @@
  * Ensures runtime schema modules do not import API-only OpenAPI fixture graphs
  * that can create Turbopack SSR initialization cycles.
  */
-import { readFileSync, readdirSync, statSync } from "node:fs";
+import { readdirSync, readFileSync, statSync } from "node:fs";
 import { dirname, join, relative } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -74,10 +74,7 @@ for (const file of collectSourceFiles(srcRoot)) {
       violations.push({ file: rel, forbidden: "#geocode/*" });
     }
 
-    if (
-      normalized.startsWith("entities/") &&
-      /\.meta\(\s*\{[^}]*\bexample\s*:/s.test(content)
-    ) {
+    if (normalized.startsWith("entities/") && /\.meta\(\s*\{[^}]*\bexample\s*:/s.test(content)) {
       violations.push({
         file: rel,
         forbidden: ".meta({ example }) on entity schemas",

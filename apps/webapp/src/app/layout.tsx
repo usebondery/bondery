@@ -1,4 +1,3 @@
-import type { Metadata } from "next";
 import "./globals.css";
 import "@mantine/core/styles.css";
 import "@mantine/notifications/styles.css";
@@ -12,29 +11,19 @@ import "@/components/code-highlight-hljs.css";
 import "flag-icons/css/flag-icons.min.css";
 import "@bondery/mantine-next/styles";
 import { bonderyTheme } from "@bondery/mantine-next";
-import { Notifications } from "@mantine/notifications";
-import { Lexend } from "next/font/google";
 import {
   ColorSchemeScript,
   MantineProvider,
   mantineHtmlProps,
   v8CssVariablesResolver,
 } from "@mantine/core";
+import { Notifications } from "@mantine/notifications";
+import { Lexend } from "next/font/google";
 import { headers } from "next/headers";
-import { WEBAPP_NAME } from "@bondery/helpers";
 import { resolveLocaleSettings } from "@/lib/i18n/resolveLocaleSettings";
-import { loadTranslation } from "@bondery/translations/i18n";
+import { rootMetadata } from "@/lib/metadata/rootMetadata";
 
-export async function generateMetadata(): Promise<Metadata> {
-  const { locale } = await resolveLocaleSettings();
-  const translations = loadTranslation(locale);
-  const common = translations.WebAppCommon as Record<string, string>;
-
-  return {
-    title: WEBAPP_NAME,
-    description: common.AppDescription,
-  };
-}
+export const metadata = rootMetadata;
 
 const lexend = Lexend({
   subsets: ["latin"],
@@ -47,17 +36,18 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const nonce = (await headers()).get("x-nonce") ?? undefined;
+  const { locale } = await resolveLocaleSettings();
 
   return (
-    <html lang="en" {...mantineHtmlProps} className={lexend.variable}>
+    <html lang={locale} {...mantineHtmlProps} className={lexend.variable}>
       <head>
-        <ColorSchemeScript nonce={nonce} defaultColorScheme="auto" />
+        <ColorSchemeScript defaultColorScheme="auto" nonce={nonce} />
       </head>
       <body>
         <MantineProvider
+          cssVariablesResolver={v8CssVariablesResolver}
           defaultColorScheme="auto"
           theme={bonderyTheme}
-          cssVariablesResolver={v8CssVariablesResolver}
         >
           <Notifications autoClose={6000} position="top-center" />
           {children}

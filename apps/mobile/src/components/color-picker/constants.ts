@@ -25,7 +25,7 @@ export function getRandomGroupColor(): string {
 }
 
 export const COLOR_PICKER_LAYOUT = {
-  swatchSize: 28,
   swatchGap: 8,
+  swatchSize: 28,
   wheelMaxSize: 280,
 } as const;

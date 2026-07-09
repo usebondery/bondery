@@ -10,16 +10,14 @@ interface SettingsFieldHintProps {
 export function SettingsFieldHint({ children }: SettingsFieldHintProps) {
   const colors = useMobileThemeColors();
 
-  return (
-    <Text style={[styles.hint, { color: colors.textMuted }]}>{children}</Text>
-  );
+  return <Text style={[styles.hint, { color: colors.textMuted }]}>{children}</Text>;
 }
 
 const styles = StyleSheet.create({
   hint: {
-    marginTop: -4,
-    marginBottom: -4,
     fontSize: MOBILE_TYPOGRAPHY.fontSize.caption,
     lineHeight: 18,
+    marginBottom: -4,
+    marginTop: -4,
   },
 });

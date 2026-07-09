@@ -24,11 +24,11 @@ export const chatSessionSchema = entityIdentitySchema
 export const chatMessageRoleSchema = z.enum(["user", "assistant"]);
 
 export const chatMessageSchema = z.object({
-  id: z.string(),
-  sessionId: z.string(),
-  role: z.string(),
   content: z.unknown(),
   createdAt: createdAtSchema,
+  id: z.string(),
+  role: z.string(),
+  sessionId: z.string(),
 });
 
 export const chatSessionsListResponseSchema = makePaginatedListResponseSchema(
@@ -41,9 +41,16 @@ export const chatMessagesListResponseSchema = makePaginatedListResponseSchema(
   chatMessageSchema,
 );
 
+export const chatSessionResponseSchema = z.object({
+  session: chatSessionSchema,
+});
+
+export type ChatSessionResponse = z.infer<typeof chatSessionResponseSchema>;
+
+/** @deprecated Use chatSessionResponseSchema */
 export const chatSessionCreatedSchema = z.object({
-  id: z.string(),
   createdAt: createdAtSchema,
+  id: z.string(),
 });
 
 export type ChatSession = z.infer<typeof chatSessionSchema>;
@@ -52,10 +59,6 @@ export type ChatMessage = z.infer<typeof chatMessageSchema>;
 export type ChatSessionsListResponse = z.infer<typeof chatSessionsListResponseSchema>;
 export type ChatMessagesListResponse = z.infer<typeof chatMessagesListResponseSchema>;
 export type ChatSessionCreated = z.infer<typeof chatSessionCreatedSchema>;
-export const chatSessionCreatedResponseSchema = z
-  .object({
-    data: chatSessionCreatedSchema,
-  })
-  ;
+export const chatSessionCreatedResponseSchema = chatSessionResponseSchema;
 
 export type ChatSessionCreatedResponse = z.infer<typeof chatSessionCreatedResponseSchema>;

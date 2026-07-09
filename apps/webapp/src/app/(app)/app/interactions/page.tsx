@@ -1,15 +1,13 @@
 import type { Metadata } from "next";
-import { InteractionsClient } from "./InteractionsClient";
-import { getInteractionsData } from "./getInteractionsData";
 import { getWebTranslations as getTranslations } from "@/lib/i18n/getWebTranslations";
+import { staticPageTitle } from "@/lib/metadata/pageTitles";
+import { InteractionsLoader } from "./InteractionsLoader";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("InteractionsPage");
-  return { title: t("PageTitle") };
+  return staticPageTitle(t("PageTitle"));
 }
 
-export default async function InteractionsPage() {
-  const { contacts, activities } = await getInteractionsData();
-
-  return <InteractionsClient initialContacts={contacts} initialActivities={activities} />;
+export default function InteractionsPage() {
+  return <InteractionsLoader />;
 }

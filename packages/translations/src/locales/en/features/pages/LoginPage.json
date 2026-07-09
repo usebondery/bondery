@@ -1,0 +1,20 @@
+{
+  "And": "and",
+  "AuthenticationError": "Authentication Error",
+  "ContinueWith": "Continue with {provider}",
+  "Description": "We'll log you in or create a new account if you don't have one yet.",
+  "MobileNotAvailable": "Mobile App Coming Soon",
+  "MobileNotAvailableMessage": "The Bondery app is not yet available on mobile devices. Please visit us on a desktop or laptop computer to get started.",
+  "PrivacyPolicy": "Privacy Policy",
+  "Providers": {
+    "GitHub": "GitHub",
+    "LinkedIn": "LinkedIn"
+  },
+  "SignIn": "Sign In",
+  "TermsAgreement": "By continuing, you agree to our",
+  "TermsOfService": "Terms of Service",
+  "TermsText": "By continuing, you agree to our <termsLink>Terms of Service</termsLink> and <privacyLink>Privacy Policy</privacyLink>.",
+  "Title": "Bondery",
+  "UnexpectedError": "Unexpected Error",
+  "UnexpectedErrorMessage": "An unexpected error occurred"
+}

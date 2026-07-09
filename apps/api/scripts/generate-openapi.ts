@@ -11,7 +11,7 @@
 process.env.NEXT_PUBLIC_SUPABASE_URL ??= "http://localhost:54321";
 process.env.PUBLIC_SUPABASE_PUBLISHABLE_KEY ??= "dummy";
 process.env.PRIVATE_SUPABASE_SECRET_KEY ??= "dummy";
-process.env.NEXT_PUBLIC_API_URL ??= "http://localhost:3001";
+process.env.NEXT_PUBLIC_API_URL ??= "http://localhost:26631";
 process.env.PRIVATE_EMAIL_HOST ??= "localhost";
 process.env.PRIVATE_EMAIL_USER ??= "dummy";
 process.env.PRIVATE_EMAIL_PASS ??= "dummy";
@@ -22,9 +22,9 @@ process.env.PRIVATE_API_KEY_PEPPER ??= "dummy-pepper-for-openapi-generation";
 process.env.PRIVATE_SUPABASE_JWT_SIGNING_JWK ??=
   '{"kty":"EC","x":"-ztnrq2xtqWzVslfvYg9Ehds97TWbhD6pFWcYJJKFLA","y":"foLtmAT7OJud7d9ltwZuF9podzkTEhyD56tiDRZFSZQ","crv":"P-256","d":"_bKhwEFYFXeOH3IOBLtT0PS7NSDkWP6xbrqWtj37u2A","alg":"ES256","kid":"openapi-dummy","use":"sig"}';
 
-import { writeFileSync } from "fs";
-import { resolve, dirname } from "path";
-import { fileURLToPath } from "url";
+import { writeFileSync } from "node:fs";
+import { dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 import { stringify } from "yaml";
 import { patchOpenApiErrorSchemas } from "./patch-openapi-error-schemas.js";
 import { patchOpenApiRequestExamples } from "./patch-openapi-request-examples.js";

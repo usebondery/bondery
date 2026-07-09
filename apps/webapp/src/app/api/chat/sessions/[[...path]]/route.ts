@@ -1,7 +1,7 @@
-import { resolveServerSession } from "@/lib/auth/resolveServerSession";
-import { bffProxyFetch } from "@/lib/api/bffProxy";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
-import { NextRequest } from "next/server";
+import type { NextRequest } from "next/server";
+import { bffProxyFetch } from "@/lib/api/bffProxy";
+import { resolveServerSession } from "@/lib/auth/resolveServerSession";
 
 /**
  * Proxy handler that forwards chat session API requests to the Fastify backend.
@@ -14,8 +14,8 @@ async function proxyRequest(request: NextRequest, subPath: string) {
   }
 
   const fetchOptions: RequestInit = {
-    method: request.method,
     headers: { "Content-Type": "application/json" },
+    method: request.method,
   };
 
   if (request.method !== "GET" && request.method !== "HEAD") {
@@ -30,8 +30,8 @@ async function proxyRequest(request: NextRequest, subPath: string) {
   const responseBody = await apiResponse.text();
 
   return new Response(responseBody, {
-    status: apiResponse.status,
     headers: { "Content-Type": apiResponse.headers.get("Content-Type") ?? "application/json" },
+    status: apiResponse.status,
   });
 }
 

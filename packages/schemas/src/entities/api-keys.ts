@@ -13,28 +13,23 @@ export const updateApiKeyLabelInputSchema = z.object({
   label: labelFieldSchema(API_KEY_LIMITS.labelMaxLength),
 });
 
-export const apiKeyListItemSchema = z
-  .object({
-    id: z.string().uuid(),
-    label: z.string(),
-    permission: apiKeyPermissionSchema,
-    keyPrefix: z.string(),
-    lastUsedAt: nullableDateTimeSchema,
-    createdAt: createdAtSchema,
-  });
+export const apiKeyListItemSchema = z.object({
+  createdAt: createdAtSchema,
+  id: z.string().uuid(),
+  keyPrefix: z.string(),
+  label: z.string(),
+  lastUsedAt: nullableDateTimeSchema,
+  permission: apiKeyPermissionSchema,
+});
 
-export const apiKeyCreatedSchema = apiKeyListItemSchema
-  .extend({
-    secret: z.string(),
-  })
-  ;
+export const apiKeyCreatedSchema = apiKeyListItemSchema.extend({
+  secret: z.string(),
+});
 
-export const apiKeysListResponseSchema = z
-  .object({
-    apiKeys: z.array(apiKeyListItemSchema),
-    totalCount: z.number(),
-  })
-  ;
+export const apiKeysListResponseSchema = z.object({
+  apiKeys: z.array(apiKeyListItemSchema),
+  totalCount: z.number(),
+});
 
 export type ApiKeyPermission = z.infer<typeof apiKeyPermissionSchema>;
 export type CreateApiKeyInput = z.infer<typeof createApiKeyInputSchema>;

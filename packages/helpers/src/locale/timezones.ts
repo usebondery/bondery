@@ -1,13 +1,13 @@
 import { getTimeZones } from "@vvo/tzdb";
 
 export interface TimezoneData {
-  value: string;
   city: string;
-  country: string;
   continent: string;
+  country: string;
   flag: string;
-  offset: number;
   group: string[];
+  offset: number;
+  value: string;
 }
 
 function normalizeContinent(continentName: string): string {
@@ -24,27 +24,29 @@ function normalizeContinent(continentName: string): string {
 
 export const TIMEZONES_DATA: TimezoneData[] = [
   {
-    value: "UTC",
     city: "UTC",
-    country: "Coordinated Universal Time",
     continent: "UTC",
+    country: "Coordinated Universal Time",
     flag: "",
-    offset: 0,
     group: ["UTC"],
+    offset: 0,
+    value: "UTC",
   },
   ...getTimeZones().map((tz) => ({
-    value: tz.name,
     city: tz.mainCities[0] ?? tz.name,
-    country: tz.countryName,
     continent: normalizeContinent(tz.continentName),
+    country: tz.countryName,
     flag: tz.countryCode.toLowerCase(),
-    offset: tz.rawOffsetInMinutes,
     group: tz.group,
+    offset: tz.rawOffsetInMinutes,
+    value: tz.name,
   })),
 ];
 
 export function resolveToCanonicalTimezone(iana: string): string {
-  if (!iana) return iana;
+  if (!iana) {
+    return iana;
+  }
   const match = TIMEZONES_DATA.find((tz) => tz.group.some((alias) => alias === iana));
   return match ? match.value : iana;
 }
@@ -62,22 +64,20 @@ export function formatTimezoneLabel(timezone: TimezoneData): string {
 }
 
 export interface TimezoneSelectOption {
-  value: string;
+  flag: string;
   label: string;
   offset: number;
   offsetLabel: string;
-  flag: string;
+  value: string;
 }
 
 export function countryCodeToFlagEmoji(countryCode: string): string {
-  if (!countryCode || countryCode.length !== 2) {
+  if (countryCode?.length !== 2) {
     return "🌐";
   }
 
   const upper = countryCode.toUpperCase();
-  return String.fromCodePoint(
-    ...upper.split("").map((char) => 0x1f1e6 + char.charCodeAt(0) - 65),
-  );
+  return String.fromCodePoint(...upper.split("").map((char) => 0x1f1e6 + char.charCodeAt(0) - 65));
 }
 
 function compareTimezoneSelectOptions(a: TimezoneSelectOption, b: TimezoneSelectOption): number {
@@ -90,11 +90,11 @@ function compareTimezoneSelectOptions(a: TimezoneSelectOption, b: TimezoneSelect
 
 function buildTimezoneSelectOptions(): TimezoneSelectOption[] {
   return TIMEZONES_DATA.map((timezone) => ({
-    value: timezone.value,
+    flag: timezone.flag,
     label: formatTimezoneLabel(timezone),
     offset: timezone.offset,
     offsetLabel: formatOffset(timezone.offset),
-    flag: timezone.flag,
+    value: timezone.value,
   })).sort(compareTimezoneSelectOptions);
 }
 
@@ -105,7 +105,10 @@ let cachedTimezoneSelectOptions: TimezoneSelectOption[] | null = null;
  * Sorted by UTC offset, then city label.
  */
 export function getTimezoneSelectOptions(currentTimezone?: string): TimezoneSelectOption[] {
-  const options = cachedTimezoneSelectOptions ??= buildTimezoneSelectOptions();
+  if (cachedTimezoneSelectOptions === null) {
+    cachedTimezoneSelectOptions = buildTimezoneSelectOptions();
+  }
+  const options = cachedTimezoneSelectOptions;
 
   if (!currentTimezone) {
     return options;
@@ -118,11 +121,11 @@ export function getTimezoneSelectOptions(currentTimezone?: string): TimezoneSele
 
   return [
     {
-      value: canonicalCurrent,
+      flag: "",
       label: canonicalCurrent,
       offset: 0,
       offsetLabel: formatOffset(0),
-      flag: "",
+      value: canonicalCurrent,
     },
     ...options,
   ];
@@ -145,16 +148,16 @@ export function getCurrentTimeInTimezone(offsetMinutes: number): string {
   const targetTime = new Date(utc + offsetMinutes * 60000);
   return targetTime.toLocaleTimeString("en-US", {
     hour: "2-digit",
-    minute: "2-digit",
     hour12: false,
+    minute: "2-digit",
   });
 }
 
 export interface GroupedTimezoneItem {
-  value: string;
-  label: string;
   flag: string;
+  label: string;
   offset: number;
+  value: string;
 }
 
 export interface GroupedTimezoneGroup {
@@ -170,10 +173,10 @@ export function getGroupedTimezones(): GroupedTimezoneGroup[] {
       grouped[tz.continent] = [];
     }
     grouped[tz.continent].push({
-      value: tz.value,
-      label: formatTimezoneLabel(tz),
       flag: tz.flag,
+      label: formatTimezoneLabel(tz),
       offset: tz.offset,
+      value: tz.value,
     });
   });
 

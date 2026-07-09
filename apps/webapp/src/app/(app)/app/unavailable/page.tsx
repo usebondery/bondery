@@ -1,10 +1,9 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
-import { Box, Button, Collapse, Group, Loader, Stack, Text, Title } from "@mantine/core";
 import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
-import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
+import { Box, Button, Collapse, Group, Loader, Stack, Text, Title } from "@mantine/core";
+import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   deriveUserHealthStatus,
   fetchApiHealthReport,
@@ -12,24 +11,15 @@ import {
   type UserHealthStatus,
 } from "@/lib/api/health";
 import { RETURN_TO_STORAGE_KEY } from "@/lib/auth/handleApiUnavailable";
-import { STATUS_URL } from "@/lib/config";
+import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
+import { STATUS_URL } from "@/lib/platform/config";
 
 const POLL_INTERVAL_FAST_MS = 5_000;
 const POLL_INTERVAL_SLOW_MS = 30_000;
 const FAILURES_BEFORE_BACKOFF = 5;
 
-function statusLabel(
-  t: ReturnType<typeof useTranslations>,
-  status: UserHealthStatus,
-): string {
-  if (status === "online") return t("StatusOnline");
-  if (status === "degraded") return t("StatusDegraded");
-  if (status === "offline") return t("StatusOffline");
-  return t("StatusChecking");
-}
-
 export default function UnavailablePage() {
-  const t = useTranslations("UnavailablePage");
+  const t = useWebTranslations("UnavailablePage");
   const router = useRouter();
   const [isRetrying, setIsRetrying] = useState(false);
   const [isPolling, setIsPolling] = useState(false);
@@ -47,6 +37,14 @@ export default function UnavailablePage() {
   const userStatus = deriveUserHealthStatus(healthLoading, healthResult);
   const isChecking = healthLoading || isPolling || isRetrying || isNavigating;
   const showPollCountdown = userStatus !== "online" && !isChecking;
+  const statusLabel =
+    userStatus === "online"
+      ? t("StatusOnline")
+      : userStatus === "degraded"
+        ? t("StatusDegraded")
+        : userStatus === "offline"
+          ? t("StatusOffline")
+          : t("StatusChecking");
 
   const navigateBack = useCallback(() => {
     if (isNavigatingRef.current) {
@@ -152,51 +150,56 @@ export default function UnavailablePage() {
   const report = healthResult?.reachable ? healthResult.report : null;
 
   const copyStack = (centered: boolean) => (
-    <Stack gap="sm" align={centered ? "center" : "flex-start"}>
-      <Title order={2} fw={600} ta={centered ? "center" : "left"}>
+    <Stack align={centered ? "center" : "flex-start"} gap="sm">
+      <Title fw={600} order={2} ta={centered ? "center" : "left"}>
         {t("Title")}
       </Title>
-      <Text size="md" c="dimmed" lh={1.6} ta={centered ? "center" : "left"}>
+      <Text c="dimmed" lh={1.6} size="md" ta={centered ? "center" : "left"}>
         {t("Description")}
       </Text>
     </Stack>
   );
 
   const actionStack = (centered: boolean) => (
-    <Stack gap={4} align={centered ? "center" : "flex-start"}>
+    <Stack align={centered ? "center" : "flex-start"} gap={4}>
       {healthLoading ? (
         <Loader />
       ) : (
-        <Group gap="sm" wrap="wrap" justify={centered ? "center" : "flex-start"}>
+        <Group gap="sm" justify={centered ? "center" : "flex-start"} wrap="wrap">
           <Button
-            className="min-w-40"
-            onClick={() => void handleRetry()}
-            loading={isPolling || isRetrying || isNavigating}
-            disabled={isNavigating}
             aria-describedby={showPollCountdown ? "unavailable-poll-description" : undefined}
+            className="min-w-40"
+            disabled={isNavigating}
+            loading={isPolling || isRetrying || isNavigating}
+            onClick={() => void handleRetry()}
           >
             {t("Retry")}
           </Button>
           <Button
-            variant="default"
             component="a"
-            href={STATUS_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            disabled={isNavigating}
             data-disabled={isNavigating || undefined}
+            disabled={isNavigating}
+            href={STATUS_URL}
             onClick={(event) => {
               if (isNavigating) {
                 event.preventDefault();
               }
             }}
+            rel="noopener noreferrer"
+            target="_blank"
+            variant="default"
           >
             {t("StatusPageLink")}
           </Button>
         </Group>
       )}
       {showPollCountdown ? (
-        <Text size="xs" c="dimmed" ta={centered ? "center" : "left"} id="unavailable-poll-description">
+        <Text
+          c="dimmed"
+          id="unavailable-poll-description"
+          size="xs"
+          ta={centered ? "center" : "left"}
+        >
           {t("CheckingAgain", { seconds: secondsUntilPoll })}
         </Text>
       ) : null}
@@ -207,11 +210,11 @@ export default function UnavailablePage() {
     <Box mih="100dvh" style={{ display: "flex", flexDirection: "column" }}>
       <Box
         component="main"
-        style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}
-        px={{ base: "xl", sm: 48, lg: 80 }}
+        px={{ base: "xl", lg: 80, sm: 48 }}
         py="xl"
+        style={{ alignItems: "center", display: "flex", flex: 1, justifyContent: "center" }}
       >
-        <Stack gap="xl" w="100%" maw={720} align="center" mx="auto" hiddenFrom="sm">
+        <Stack align="center" gap="xl" hiddenFrom="sm" maw={720} mx="auto" w="100%">
           <Text aria-hidden fz={72} lh={1} ta="center">
             🤖
           </Text>
@@ -220,24 +223,24 @@ export default function UnavailablePage() {
         </Stack>
 
         <Box
-          w="100%"
           maw={720}
           mx="auto"
-          visibleFrom="sm"
           style={{
+            alignItems: "center",
+            columnGap: "var(--mantine-spacing-xl)",
             display: "grid",
             gridTemplateColumns: "minmax(96px, auto) 1fr",
-            columnGap: "var(--mantine-spacing-xl)",
             rowGap: "var(--mantine-spacing-xl)",
-            alignItems: "center",
           }}
+          visibleFrom="sm"
+          w="100%"
         >
           <Text
             aria-hidden
             fz={96}
             lh={1}
+            style={{ alignSelf: "center", gridRow: "1 / 3" }}
             ta="center"
-            style={{ gridRow: "1 / 3", alignSelf: "center" }}
           >
             🤖
           </Text>
@@ -246,31 +249,31 @@ export default function UnavailablePage() {
         </Box>
       </Box>
 
-      <Box pb="xl" px={{ base: "xl", sm: 48, lg: 80 }}>
-        <Stack gap="xs" align="center">
+      <Box pb="xl" px={{ base: "xl", lg: 80, sm: 48 }}>
+        <Stack align="center" gap="xs">
           {healthLoading ? (
             <Loader />
           ) : (
-            <Text size="sm" c="dimmed" ta="center">
-              {statusLabel(t, userStatus)}
+            <Text c="dimmed" size="sm" ta="center">
+              {statusLabel}
             </Text>
           )}
           <Text
-            component="button"
-            type="button"
-            size="sm"
             c="dimmed"
-            td={technicalOpen ? "underline" : undefined}
-            style={{ background: "none", border: "none", cursor: "pointer", padding: 0 }}
+            component="button"
             onClick={() => setTechnicalOpen((open) => !open)}
+            size="sm"
+            style={{ background: "none", border: "none", cursor: "pointer", padding: 0 }}
+            td={technicalOpen ? "underline" : undefined}
+            type="button"
           >
             {t("TechnicalDetails")}
           </Text>
           <Collapse expanded={technicalOpen}>
-            <Stack gap={4} pt="sm" maw={480} mx="auto" align="center">
+            <Stack align="center" gap={4} maw={480} mx="auto" pt="sm">
               {healthResult ? (
                 <>
-                  <Text size="sm" c="dimmed" ff="monospace" ta="center">
+                  <Text c="dimmed" ff="monospace" size="sm" ta="center">
                     {t("TechnicalHttpStatus", {
                       status: healthResult.reachable
                         ? String(healthResult.status)
@@ -278,17 +281,17 @@ export default function UnavailablePage() {
                     })}
                   </Text>
                   {report ? (
-                    <Text size="sm" c="dimmed" ff="monospace" ta="center">
+                    <Text c="dimmed" ff="monospace" size="sm" ta="center">
                       {t("TechnicalBackendStatus", { status: report.status })}
                     </Text>
                   ) : healthResult.reachable && healthResult.status >= 500 ? (
-                    <Text size="sm" c="dimmed" ff="monospace" ta="center">
+                    <Text c="dimmed" ff="monospace" size="sm" ta="center">
                       {t("TechnicalBackendStatus", { status: t("TechnicalUnreachable") })}
                     </Text>
                   ) : null}
                 </>
               ) : (
-                <Text size="sm" c="dimmed" ta="center">
+                <Text c="dimmed" size="sm" ta="center">
                   {t("StatusChecking")}
                 </Text>
               )}

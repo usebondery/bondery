@@ -1,18 +1,11 @@
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useMemo,
-  useState,
-  type ReactNode,
-} from "react";
+import { createContext, type ReactNode, useCallback, useContext, useMemo, useState } from "react";
 
 export type FloatingActionBarSlot = "contacts-selection" | null;
 
 interface FloatingChromeContextValue {
   actionBarSlot: FloatingActionBarSlot;
-  setActionBarSlot: (slot: FloatingActionBarSlot) => void;
   clearActionBarSlot: () => void;
+  setActionBarSlot: (slot: FloatingActionBarSlot) => void;
 }
 
 const FloatingChromeContext = createContext<FloatingChromeContextValue | null>(null);
@@ -31,8 +24,8 @@ export function FloatingChromeProvider({ children }: { children: ReactNode }) {
   const value = useMemo(
     () => ({
       actionBarSlot,
-      setActionBarSlot,
       clearActionBarSlot,
+      setActionBarSlot,
     }),
     [actionBarSlot, clearActionBarSlot, setActionBarSlot],
   );

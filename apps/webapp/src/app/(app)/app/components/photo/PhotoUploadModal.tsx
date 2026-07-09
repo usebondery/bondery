@@ -1,23 +1,23 @@
 "use client";
 
+import { DropzoneContent, errorNotificationTemplate } from "@bondery/mantine-next";
 import { Dropzone } from "@mantine/dropzone";
 import { notifications } from "@mantine/notifications";
 import { IconPhoto } from "@tabler/icons-react";
-import { AVATAR_UPLOAD } from "@/lib/config";
-import { DropzoneContent, errorNotificationTemplate } from "@bondery/mantine-next";
+import { AVATAR_UPLOAD } from "@/lib/platform/config";
+import {
+  type PhotoUploadVariant,
+  usePhotoUploadTranslations,
+} from "./hooks/usePhotoUploadTranslations";
 
 interface PhotoUploadModalProps {
   onPhotoSelect: (file: File, preview: string) => void;
-  translations: {
-    TitleModal: string;
-    AttachProfilePhoto: string;
-    UpdateError: string;
-    InvalidFile: string;
-    DragImageHere: string;
-  };
+  variant: PhotoUploadVariant;
 }
 
-export function PhotoUploadModal({ onPhotoSelect, translations }: PhotoUploadModalProps) {
+export function PhotoUploadModal({ variant, onPhotoSelect }: PhotoUploadModalProps) {
+  const t = usePhotoUploadTranslations(variant);
+
   const handleDrop = (files: File[]) => {
     if (files.length > 0) {
       const file = files[0];
@@ -32,24 +32,23 @@ export function PhotoUploadModal({ onPhotoSelect, translations }: PhotoUploadMod
 
   return (
     <Dropzone
+      accept={AVATAR_UPLOAD.allowedMimeTypes as unknown as string[]}
+      maxSize={AVATAR_UPLOAD.maxFileSize}
       onDrop={handleDrop}
       onReject={(files) => {
         notifications.show(
           errorNotificationTemplate({
-            title: translations.UpdateError,
-            description: files[0]?.errors[0]?.message || translations.InvalidFile,
+            description: files[0]?.errors[0]?.message || t("InvalidFile"),
+            title: t("UpdateError"),
           }),
         );
       }}
-      maxSize={AVATAR_UPLOAD.maxFileSize}
-      accept={AVATAR_UPLOAD.allowedMimeTypes as unknown as string[]}
     >
       <DropzoneContent
-        title={translations.DragImageHere}
-        description={translations.AttachProfilePhoto}
-        idleIcon={<IconPhoto size={52} stroke={1.5} color="var(--mantine-color-dimmed)" />}
-        acceptIcon={<IconPhoto size={52} stroke={1.5} color="var(--mantine-color-green-6)" />}
-        rejectIcon={<IconPhoto size={52} stroke={1.5} color="var(--mantine-color-red-6)" />}
+        acceptIcon={<IconPhoto color="var(--mantine-color-green-6)" size={52} stroke={1.5} />}
+        description={t("AttachProfilePhoto")}
+        idleIcon={<IconPhoto color="var(--mantine-color-dimmed)" size={52} stroke={1.5} />}
+        title={t("DragImageHere")}
       />
     </Dropzone>
   );

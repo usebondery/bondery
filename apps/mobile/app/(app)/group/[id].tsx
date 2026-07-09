@@ -7,5 +7,5 @@ export default function GroupPage() {
     label: string;
     emoji: string;
   }>();
-  return <GroupContactsScreen groupId={id} label={label ?? ""} emoji={emoji ?? ""} />;
+  return <GroupContactsScreen emoji={emoji ?? ""} groupId={id} label={label ?? ""} />;
 }

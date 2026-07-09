@@ -11,86 +11,86 @@ export interface VCardProperty {
 }
 
 export interface VCardRaw {
-  version: string | null;
   properties: VCardProperty[];
+  version: string | null;
   warnings: string[];
 }
 
 export interface VCardTextValue {
-  value: string;
+  altId?: string;
   language?: string;
+  pid?: string[];
   pref?: number;
   types: string[];
-  altId?: string;
-  pid?: string[];
+  value: string;
 }
 
 export interface VCardName {
+  additionalNames: string[];
   familyNames: string[];
   givenNames: string[];
-  additionalNames: string[];
   honorificPrefixes: string[];
   honorificSuffixes: string[];
 }
 
 export interface VCardMedia {
-  uri: string;
-  mediaType?: string;
-  pref?: number;
-  types: string[];
   altId?: string;
+  mediaType?: string;
   pid?: string[];
+  pref?: number;
   source: "uri" | "data-uri" | "legacy-inline";
+  types: string[];
+  uri: string;
 }
 
 export interface VCardPhone {
-  value: string;
-  uri: string;
-  pref?: number;
-  types: string[];
   altId?: string;
   pid?: string[];
+  pref?: number;
+  types: string[];
+  uri: string;
+  value: string;
 }
 
 export interface VCardAddress {
-  poBox: string[];
-  extended: string[];
-  street: string[];
-  locality: string[];
-  region: string[];
-  postalCode: string[];
-  country: string[];
-  label?: string;
-  geo?: string;
-  tz?: string;
-  pref?: number;
-  types: string[];
   altId?: string;
+  country: string[];
+  extended: string[];
+  geo?: string;
+  label?: string;
+  locality: string[];
   pid?: string[];
+  poBox: string[];
+  postalCode: string[];
+  pref?: number;
+  region: string[];
+  street: string[];
+  types: string[];
+  tz?: string;
 }
 
 export interface VCardOrganization {
-  values: string[];
+  altId?: string;
+  language?: string;
+  pid?: string[];
   pref?: number;
   types: string[];
-  language?: string;
-  altId?: string;
-  pid?: string[];
+  values: string[];
 }
 
 export interface VCardRelated {
-  value: string;
-  valueType: "uri" | "text";
-  pref?: number;
-  types: string[];
   altId?: string;
   pid?: string[];
+  pref?: number;
+  types: string[];
+  value: string;
+  valueType: "uri" | "text";
 }
 
 export interface VCardDateValue {
+  calscale?: string;
   value: string;
   valueType: "date-and-or-time" | "text";
-  calscale?: string;
 }
 
 export interface VCardTimezone {
@@ -99,40 +99,40 @@ export interface VCardTimezone {
 }
 
 export interface VCard {
-  kind: string;
+  addresses: VCardAddress[];
+  anniversary?: VCardDateValue;
+  birthday?: VCardDateValue;
+  categories: string[];
+  customProperties: VCardProperty[];
+  emails: VCardTextValue[];
   fullName: string;
+  geo?: string;
+  instantMessaging: VCardTextValue[];
+  keys: VCardMedia[];
+  kind: string;
+  languages: VCardTextValue[];
+  logos: VCardMedia[];
   name?: VCardName;
   nicknames: string[];
-  phones: VCardPhone[];
-  emails: VCardTextValue[];
-  addresses: VCardAddress[];
-  instantMessaging: VCardTextValue[];
-  urls: VCardTextValue[];
-  languages: VCardTextValue[];
-  titles: VCardTextValue[];
-  roles: VCardTextValue[];
-  organizations: VCardOrganization[];
   notes: VCardTextValue[];
-  categories: string[];
+  organizations: VCardOrganization[];
+  phones: VCardPhone[];
   photos: VCardMedia[];
-  logos: VCardMedia[];
-  sounds: VCardMedia[];
-  keys: VCardMedia[];
-  related: VCardRelated[];
-  birthday?: VCardDateValue;
-  anniversary?: VCardDateValue;
-  timezone?: VCardTimezone;
-  geo?: string;
-  uid?: string;
-  revision?: string;
   productId?: string;
   raw: VCardRaw;
-  customProperties: VCardProperty[];
+  related: VCardRelated[];
+  revision?: string;
+  roles: VCardTextValue[];
+  sounds: VCardMedia[];
+  timezone?: VCardTimezone;
+  titles: VCardTextValue[];
+  uid?: string;
+  urls: VCardTextValue[];
 }
 
 export interface ParsedVCard {
-  raw: VCardRaw;
   card: VCard;
+  raw: VCardRaw;
 }
 
 export interface VCardParseOptions {
@@ -145,28 +145,16 @@ export interface VCardSerializeOptions {
 }
 
 export interface VCardMediaAttachmentInput {
-  uri?: string;
   data?: Uint8Array | ArrayBuffer | string;
   mediaType?: string;
   pref?: number;
   types?: string[];
+  uri?: string;
 }
 
 export type VCardMediaPropertyName = "PHOTO" | "LOGO" | "SOUND" | "KEY";
 
 export interface VCardContactDraft {
-  firstName: string;
-  middleName: string | null;
-  lastName: string | null;
-  headline: string | null;
-  notes: string | null;
-  website: string | null;
-  language: string | null;
-  timezone: string | null;
-  latitude: number | null;
-  longitude: number | null;
-  emails: Array<{ value: string; type: "home" | "work"; preferred: boolean }>;
-  phones: Array<{ prefix: string; value: string; type: "home" | "work"; preferred: boolean }>;
   addresses: Array<{
     value: string;
     type: "home" | "work" | "other";
@@ -180,16 +168,28 @@ export interface VCardContactDraft {
     latitude: number | null;
     longitude: number | null;
   }>;
-  linkedin: string | null;
-  instagram: string | null;
-  whatsapp: string | null;
-  facebook: string | null;
-  signal: string | null;
   avatarUri: string | null;
+  emails: Array<{ value: string; type: "home" | "work"; preferred: boolean }>;
+  facebook: string | null;
+  firstName: string;
+  headline: string | null;
   importantDates: Array<{
     type: "birthday" | "anniversary" | "nameday" | "graduation" | "other";
     date: string;
     note: string | null;
   }> | null;
+  instagram: string | null;
+  language: string | null;
+  lastName: string | null;
+  latitude: number | null;
+  linkedin: string | null;
+  longitude: number | null;
+  middleName: string | null;
+  notes: string | null;
+  phones: Array<{ prefix: string; value: string; type: "home" | "work"; preferred: boolean }>;
   raw: VCardRaw;
+  signal: string | null;
+  timezone: string | null;
+  website: string | null;
+  whatsapp: string | null;
 }

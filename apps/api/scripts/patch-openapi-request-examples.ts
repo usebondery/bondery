@@ -28,13 +28,19 @@ type OpenApiSpec = {
 export function patchOpenApiRequestExamples(spec: OpenApiSpec): void {
   for (const methods of Object.values(spec.paths ?? {})) {
     for (const [method, operation] of Object.entries(methods)) {
-      if (!["post", "put", "patch"].includes(method)) continue;
+      if (!["post", "put", "patch"].includes(method)) {
+        continue;
+      }
 
       const requestJson = operation?.requestBody?.content?.["application/json"];
-      if (!requestJson || requestJson.example !== undefined) continue;
+      if (!requestJson || requestJson.example !== undefined) {
+        continue;
+      }
 
       const schema = requestJson.schema;
-      if (!schema || typeof schema !== "object" || !("example" in schema)) continue;
+      if (!schema || typeof schema !== "object" || !("example" in schema)) {
+        continue;
+      }
 
       requestJson.example = schema.example;
       delete schema.example;

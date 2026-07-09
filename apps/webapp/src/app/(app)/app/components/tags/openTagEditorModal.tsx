@@ -1,6 +1,20 @@
 "use client";
 
 import {
+  errorNotificationTemplate,
+  loadingNotificationTemplate,
+  ModalFooter,
+  ModalTitle,
+  PeopleMultiPickerInput,
+  successNotificationTemplate,
+} from "@bondery/mantine-next";
+import {
+  type Contact,
+  type ContactPreview,
+  createTagSchema,
+  type TagWithCount,
+} from "@bondery/schemas";
+import {
   Center,
   ColorInput,
   DEFAULT_THEME,
@@ -13,22 +27,15 @@ import {
 import { schemaResolver, useForm } from "@mantine/form";
 import { modals } from "@mantine/modals";
 import { notifications } from "@mantine/notifications";
-import { flushSync } from "react-dom";
 import { IconTag, IconTagPlus, IconTrash } from "@tabler/icons-react";
-import { createTagSchema, type Contact, type ContactPreview, type TagWithCount } from "@bondery/schemas";
-import {
-  errorNotificationTemplate,
-  loadingNotificationTemplate,
-  ModalFooter,
-  ModalTitle,
-  PeopleMultiPickerInput,
-  successNotificationTemplate,
-} from "@bondery/mantine-next";
 import { useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { DEBOUNCE_MS } from "@/lib/config";
 import { openStandardConfirmModal } from "@/app/(app)/app/components/modals/openStandardConfirmModal";
 import { captureEvent } from "@/lib/analytics/client";
+import { getContactsList } from "@/lib/api/domains/contacts";
+import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
+import { createModalId, useModalDismiss } from "@/lib/modals";
+import { DEBOUNCE_MS } from "@/lib/platform/config";
 import { useContactsListQuery } from "@/lib/query/hooks/useContacts";
 import {
   useCreateTagMutation,
@@ -37,9 +44,7 @@ import {
   useTagMembersQuery,
   useUpdateTagByIdMutation,
 } from "@/lib/query/hooks/useTags";
-import { createContactsListQueryFn } from "@/lib/query/fetchers/contacts";
 import { contactKeys } from "@/lib/query/keys";
-import { createModalId, useModalBlocking } from "@/lib/modals";
 
 const COLOR_SWATCHES = [
   ...DEFAULT_THEME.colors.red.slice(5, 8),
@@ -62,17 +67,14 @@ function randomHexColor() {
     .padStart(6, "0")}`;
 }
 
-type TranslateFn = (key: string, values?: Record<string, string | number>) => string;
-
 interface OpenTagEditorModalOptions {
-  t: TranslateFn;
-  mode: "create" | "edit";
-  tag?: TagWithCount;
   initialLabel?: string;
   initialSelectedPersonIds?: string[];
+  mode: "create" | "edit";
   onCreated: (tag: TagWithCount, selectedPersonIds: string[]) => void;
-  onUpdated: (tag: TagWithCount, selectedPersonIds: string[]) => void;
   onDeleted: (tagId: string) => void;
+  onUpdated: (tag: TagWithCount, selectedPersonIds: string[]) => void;
+  tag?: TagWithCount;
 }
 
 interface TagEditorModalBodyProps extends OpenTagEditorModalOptions {
@@ -81,7 +83,6 @@ interface TagEditorModalBodyProps extends OpenTagEditorModalOptions {
 
 function TagEditorModalBody({
   modalId,
-  t,
   mode,
   tag,
   initialLabel,
@@ -90,6 +91,7 @@ function TagEditorModalBody({
   onUpdated,
   onDeleted,
 }: TagEditorModalBodyProps) {
+  const t = useWebTranslations("TagsSettings");
   const queryClient = useQueryClient();
   const createTagMutation = useCreateTagMutation();
   const updateTagByIdMutation = useUpdateTagByIdMutation();
@@ -106,11 +108,11 @@ function TagEditorModalBody({
   );
 
   const form = useForm<{ label: string; color: string }>({
-    mode: "controlled",
     initialValues: {
-      label: initialLabel ?? tag?.label ?? "",
       color: tag?.color ?? randomHexColor(),
+      label: initialLabel ?? tag?.label ?? "",
     },
+    mode: "controlled",
     validate: schemaResolver(createTagSchema, { sync: true }),
   });
 
@@ -125,25 +127,26 @@ function TagEditorModalBody({
   const submitLockRef = useRef(false);
 
   useEffect(() => {
-    if (mode !== "edit" || !tagMembers) return;
+    if (mode !== "edit" || !tagMembers) {
+      return;
+    }
     const ids = tagMembers.contacts.map((person) => person.id);
     setSelectedIds(ids);
     setInitialSelectedIds(ids);
   }, [mode, tagMembers]);
 
-  const isLoadingContacts =
-    isLoadingContactsList || (mode === "edit" && !!tag && isLoadingMembers);
+  const isLoadingContacts = isLoadingContactsList || (mode === "edit" && !!tag && isLoadingMembers);
 
   const isBlocking = isSubmitting || isLoadingContacts;
-  useModalBlocking(modalId, isBlocking);
+  const { closeModal, closeModalSync } = useModalDismiss(modalId, isBlocking);
 
   const handleSearch = useCallback(
     async (query: string): Promise<Contact[]> => {
       try {
-        const params = { search: query, limit: 10 };
+        const params = { limit: 10, search: query };
         const data = await queryClient.fetchQuery({
+          queryFn: () => getContactsList(params),
           queryKey: contactKeys.list(params),
-          queryFn: createContactsListQueryFn(params),
         });
         return data.contacts ?? [];
       } catch {
@@ -157,13 +160,13 @@ function TagEditorModalBody({
     const map = new Map(allContacts.map((contact) => [contact.id, contact]));
     return ids
       .map((id) => map.get(id))
-      .filter(Boolean)
+      .filter((contact): contact is Contact => contact != null)
       .slice(0, 3)
       .map((contact) => ({
-        id: contact!.id,
-        firstName: contact!.firstName,
-        lastName: contact!.lastName,
-        avatar: contact!.avatar,
+        avatar: contact.avatar,
+        firstName: contact.firstName,
+        id: contact.id,
+        lastName: contact.lastName,
       }));
   };
 
@@ -174,25 +177,31 @@ function TagEditorModalBody({
     const toAdd = selectedIds.filter((id) => !initial.has(id));
     const toRemove = initialSelectedIds.filter((id) => !current.has(id));
 
-    if (toAdd.length === 0 && toRemove.length === 0) return;
+    if (toAdd.length === 0 && toRemove.length === 0) {
+      return;
+    }
 
     await syncTagContactsMutation.mutateAsync({ tagId, toAdd, toRemove });
   };
 
   const handleSave = async (values: typeof form.values) => {
-    if (submitLockRef.current || isSubmitting) return;
+    if (submitLockRef.current || isSubmitting) {
+      return;
+    }
 
     const trimmedLabel = values.label.trim();
     const color = values.color.trim();
-    if (!trimmedLabel || !color) return;
+    if (!trimmedLabel || !color) {
+      return;
+    }
 
     submitLockRef.current = true;
     setIsSubmitting(true);
 
     const loadingId = notifications.show(
       loadingNotificationTemplate({
-        title: t("SavingTitle"),
         description: t("SavingDescription"),
+        title: t("SavingTitle"),
       }),
     );
 
@@ -203,8 +212,8 @@ function TagEditorModalBody({
         let isPatchSuccessful = true;
         try {
           await updateTagByIdMutation.mutateAsync({
+            patch: { color, label: trimmedLabel },
             tagId: created.tag.id,
-            patch: { label: trimmedLabel, color },
           });
         } catch {
           isPatchSuccessful = false;
@@ -226,19 +235,19 @@ function TagEditorModalBody({
         notifications.hide(loadingId);
         captureEvent("tag_created");
 
-        flushSync(() => modals.close(modalId));
+        closeModalSync();
         notifications.show(
           successNotificationTemplate({
-            title: t("CreateSuccessTitle"),
             description: t("CreateSuccessDescription"),
+            title: t("CreateSuccessTitle"),
           }),
         );
 
         if (!isPatchSuccessful || !areMembersSynced) {
           notifications.show(
             errorNotificationTemplate({
-              title: t("SaveErrorTitle"),
               description: t("SaveErrorDescription"),
+              title: t("SaveErrorTitle"),
             }),
           );
         }
@@ -247,9 +256,9 @@ function TagEditorModalBody({
           onCreated(
             {
               ...created.tag,
-              label: trimmedLabel,
               color: isPatchSuccessful ? color : created.tag.color,
               contactCount: areMembersSynced ? selectedIds.length : created.tag.contactCount,
+              label: trimmedLabel,
               previewContacts: areMembersSynced
                 ? buildPreviewContacts(selectedIds)
                 : created.tag.previewContacts,
@@ -261,8 +270,8 @@ function TagEditorModalBody({
         }
       } else if (tag) {
         await updateTagByIdMutation.mutateAsync({
+          patch: { color, label: trimmedLabel },
           tagId: tag.id,
-          patch: { label: trimmedLabel, color },
         });
 
         await syncMembers(tag.id);
@@ -270,11 +279,11 @@ function TagEditorModalBody({
         captureEvent("tag_updated");
 
         notifications.hide(loadingId);
-        flushSync(() => modals.close(modalId));
+        closeModalSync();
         notifications.show(
           successNotificationTemplate({
-            title: t("SaveSuccessTitle"),
             description: t("SaveSuccessDescription"),
+            title: t("SaveSuccessTitle"),
           }),
         );
 
@@ -282,9 +291,9 @@ function TagEditorModalBody({
           onUpdated(
             {
               ...tag,
-              label: trimmedLabel,
               color,
               contactCount: selectedIds.length,
+              label: trimmedLabel,
               previewContacts: buildPreviewContacts(selectedIds),
             },
             selectedIds,
@@ -297,8 +306,8 @@ function TagEditorModalBody({
       notifications.hide(loadingId);
       notifications.show(
         errorNotificationTemplate({
-          title: t("SaveErrorTitle"),
           description: t("SaveErrorDescription"),
+          title: t("SaveErrorTitle"),
         }),
       );
     } finally {
@@ -308,73 +317,75 @@ function TagEditorModalBody({
   };
 
   const requestDelete = () => {
-    if (!tag) return;
+    if (!tag) {
+      return;
+    }
 
     openStandardConfirmModal({
-      title: (
-        <ModalTitle
-          text={t("DeleteConfirmTitle")}
-          icon={<IconTrash size={20} stroke={1.5} />}
-          isDangerous
-        />
-      ),
-      message: <Text size="sm">{t("DeleteConfirmMessage", { label: tag.label })}</Text>,
-      confirmLabel: t("DeleteConfirmButton"),
       cancelLabel: t("CancelButton"),
       confirmColor: "red",
+      confirmLabel: t("DeleteConfirmButton"),
+      message: <Text size="sm">{t("DeleteConfirmMessage", { label: tag.label })}</Text>,
       onConfirm: async () => {
         try {
           await deleteTagMutation.mutateAsync(tag.id);
 
           captureEvent("tag_deleted");
 
-          flushSync(() => modals.close(modalId));
+          closeModalSync();
           notifications.show(
             successNotificationTemplate({
-              title: t("DeleteSuccessTitle"),
               description: t("DeleteSuccessDescription"),
+              title: t("DeleteSuccessTitle"),
             }),
           );
           onDeleted(tag.id);
         } catch {
           notifications.show(
             errorNotificationTemplate({
-              title: t("DeleteErrorTitle"),
               description: t("DeleteErrorDescription"),
+              title: t("DeleteErrorTitle"),
             }),
           );
         }
       },
+      title: (
+        <ModalTitle
+          icon={<IconTrash size={20} stroke={1.5} />}
+          isDangerous
+          text={t("DeleteConfirmTitle")}
+        />
+      ),
     });
   };
 
   return (
     <form onSubmit={form.onSubmit(handleSave)}>
       <Stack gap="md">
-        <Group gap="md" grow align="flex-start">
+        <Group align="flex-start" gap="md" grow>
           <ColorInput
+            format="hex"
             label={t("ColorLabel")}
-            withAsterisk
+            placeholder="#A1B2C3"
             required
             swatches={COLOR_SWATCHES}
             swatchesPerRow={9}
-            format="hex"
-            placeholder="#A1B2C3"
+            withAsterisk
             {...form.getInputProps("color")}
           />
 
           <TextInput
-            label={t("LabelLabel")}
-            withAsterisk
-            required
-            placeholder={t("LabelPlaceholder")}
             data-autofocus
+            label={t("LabelLabel")}
+            placeholder={t("LabelPlaceholder")}
+            required
+            withAsterisk
             {...form.getInputProps("label")}
           />
         </Group>
 
         <Stack gap="xs">
-          <Text size="sm" fw={500}>
+          <Text fw={500} size="sm">
             {t("PeopleWithTagLabel")}
           </Text>
           {isLoadingContacts ? (
@@ -384,32 +395,48 @@ function TagEditorModalBody({
           ) : (
             <PeopleMultiPickerInput
               contacts={allContacts}
-              selectedIds={selectedIds}
-              onChange={setSelectedIds}
-              placeholder={t("AddFirstPersonPlaceholder")}
-              noResultsLabel={t("NoPeopleFound")}
-              onSearch={handleSearch}
-              searchDebounceMs={DEBOUNCE_MS.contactPicker}
               disabled={isSubmitting}
+              noResultsLabel={t("NoPeopleFound")}
+              onChange={setSelectedIds}
+              onSearch={handleSearch}
+              placeholder={t("AddFirstPersonPlaceholder")}
+              searchDebounceMs={DEBOUNCE_MS.contactPicker}
+              selectedIds={selectedIds}
             />
           )}
         </Stack>
 
         <ModalFooter
-          dangerLabel={mode === "edit" ? t("DeleteButton") : undefined}
-          onDanger={mode === "edit" ? requestDelete : undefined}
-          dangerDisabled={isSubmitting}
-          cancelLabel={t("CancelButton")}
-          onCancel={() => modals.close(modalId)}
-          cancelDisabled={isSubmitting}
+          actionDisabled={isSubmitting || !form.values.label.trim() || !form.values.color.trim()}
           actionLabel={mode === "create" ? t("CreateButton") : t("SaveButton")}
           actionLeftSection={mode === "create" ? <IconTagPlus size={16} /> : undefined}
           actionLoading={isSubmitting}
-          actionDisabled={isSubmitting || !form.values.label.trim() || !form.values.color.trim()}
           actionType="submit"
+          cancelDisabled={isSubmitting}
+          cancelLabel={t("CancelButton")}
+          dangerDisabled={isSubmitting}
+          dangerLabel={mode === "edit" ? t("DeleteButton") : undefined}
+          onCancel={closeModal}
+          onDanger={mode === "edit" ? requestDelete : undefined}
         />
       </Stack>
     </form>
+  );
+}
+
+function TagEditorModalTitle({ mode }: { mode: "create" | "edit" }) {
+  const t = useWebTranslations("TagsSettings");
+  return (
+    <ModalTitle
+      icon={
+        mode === "create" ? (
+          <IconTagPlus size={20} stroke={1.5} />
+        ) : (
+          <IconTag size={20} stroke={1.5} />
+        )
+      }
+      text={mode === "edit" ? t("EditTitle") : t("CreateTitle")}
+    />
   );
 }
 
@@ -417,21 +444,10 @@ export function openTagEditorModal(options: OpenTagEditorModalOptions) {
   const modalId = createModalId("tag-editor");
 
   modals.open({
-    modalId,
-    title: (
-      <ModalTitle
-        text={options.mode === "edit" ? options.t("EditTitle") : options.t("CreateTitle")}
-        icon={
-          options.mode === "create" ? (
-            <IconTagPlus size={20} stroke={1.5} />
-          ) : (
-            <IconTag size={20} stroke={1.5} />
-          )
-        }
-      />
-    ),
-    size: "md",
     centered: true,
     children: <TagEditorModalBody modalId={modalId} {...options} />,
+    modalId,
+    size: "md",
+    title: <TagEditorModalTitle mode={options.mode} />,
   });
 }

@@ -1,7 +1,7 @@
 export function getModalDismissProps(isBlocking: boolean) {
   return {
-    closeOnEscape: !isBlocking,
     closeOnClickOutside: !isBlocking,
+    closeOnEscape: !isBlocking,
     withCloseButton: !isBlocking,
   };
 }

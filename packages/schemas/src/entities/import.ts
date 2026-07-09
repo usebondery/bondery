@@ -3,59 +3,60 @@ import {
   SOCIAL_IMPORT_COMMIT_BATCH_SIZE,
   VCARD_IMPORT_COMMIT_BATCH_SIZE,
 } from "#constants/import.js";
-import { contactAddressTypeSchema } from "#entities/address.js";
 import { nullableDateTimeSchema } from "#entities/_shared.js";
-import { channelTypeSchema } from "#primitives/index.js";
+import { contactAddressTypeSchema } from "#entities/address.js";
+import { contactSchema } from "#entities/contact.js";
 import { importantDateTypeSchema } from "#entities/important-date.js";
+import { channelTypeSchema } from "#primitives/index.js";
 
 export const scrapedWorkHistoryEntrySchema = z.object({
-  title: z.string().optional(),
-  companyName: z.string(),
   companyLinkedinId: z.string().optional(),
   companyLogoUrl: z.string().optional(),
-  startDate: z.string().optional(),
-  endDate: z.string().optional(),
-  employmentType: z.string().optional(),
-  location: z.string().optional(),
+  companyName: z.string(),
   description: z.string().optional(),
+  employmentType: z.string().optional(),
+  endDate: z.string().optional(),
+  location: z.string().optional(),
+  startDate: z.string().optional(),
+  title: z.string().optional(),
 });
 
 export const scrapedEducationEntrySchema = z.object({
-  schoolName: z.string(),
-  schoolLinkedinId: z.string().optional(),
-  schoolLogoUrl: z.string().optional(),
   degree: z.string().optional(),
   description: z.string().optional(),
-  startDate: z.string().optional(),
   endDate: z.string().optional(),
+  schoolLinkedinId: z.string().optional(),
+  schoolLogoUrl: z.string().optional(),
+  schoolName: z.string(),
+  startDate: z.string().optional(),
 });
 
 export const redirectRequestSchema = z.object({
-  instagram: z.string().optional(),
-  linkedin: z.string().optional(),
+  educationHistory: z.array(scrapedEducationEntrySchema).optional(),
   facebook: z.string().optional(),
   firstName: z.string().optional(),
-  middleName: z.string().optional(),
-  lastName: z.string().optional(),
-  profileImageUrl: z.string().optional(),
   headline: z.string().optional(),
-  location: z.string().optional(),
-  notes: z.string().optional(),
-  workHistory: z.array(scrapedWorkHistoryEntrySchema).optional(),
-  educationHistory: z.array(scrapedEducationEntrySchema).optional(),
+  instagram: z.string().optional(),
+  lastName: z.string().optional(),
+  linkedin: z.string().optional(),
   linkedinBio: z.string().optional(),
+  location: z.string().optional(),
+  middleName: z.string().optional(),
+  notes: z.string().optional(),
+  profileImageUrl: z.string().optional(),
+  workHistory: z.array(scrapedWorkHistoryEntrySchema).optional(),
 });
 
 export const enrichContactRequestSchema = z.object({
-  firstName: z.string().optional(),
-  middleName: z.string().nullable().optional(),
-  lastName: z.string().nullable().optional(),
-  profileImageUrl: z.string().nullable().optional(),
-  headline: z.string().nullable().optional(),
-  location: z.string().nullable().optional(),
-  linkedinBio: z.string().nullable().optional(),
-  workHistory: z.array(scrapedWorkHistoryEntrySchema).optional(),
   educationHistory: z.array(scrapedEducationEntrySchema).optional(),
+  firstName: z.string().optional(),
+  headline: z.string().nullable().optional(),
+  lastName: z.string().nullable().optional(),
+  linkedinBio: z.string().nullable().optional(),
+  location: z.string().nullable().optional(),
+  middleName: z.string().nullable().optional(),
+  profileImageUrl: z.string().nullable().optional(),
+  workHistory: z.array(scrapedWorkHistoryEntrySchema).optional(),
 });
 
 /** POST /api/contacts/:id/linkedin-data body. */
@@ -63,53 +64,44 @@ export const linkedInDataRequestSchema = z.object({
   workHistory: z.array(scrapedWorkHistoryEntrySchema).optional(),
 });
 
-export const redirectResponseSchema = z
-  .object({
-    contactId: z.string(),
-    existed: z.boolean(),
-    firstName: z.string().optional(),
-    lastName: z.string().nullable().optional(),
-    avatar: z.string().nullable().optional(),
-  })
-  ;
+export const redirectResponseSchema = z.object({
+  contact: contactSchema,
+  existed: z.boolean(),
+});
 
 export const linkedInPreparedContactSchema = z.object({
-  tempId: z.string(),
+  alreadyExists: z.boolean(),
+  company: z.string().nullable(),
+  connectedAt: nullableDateTimeSchema,
+  connectedOnRaw: z.string().nullable(),
+  email: z.string().nullable(),
   firstName: z.string(),
-  middleName: z.string().nullable(),
+  issues: z.array(z.string()),
+  isValid: z.boolean(),
   lastName: z.string(),
   linkedinUrl: z.string(),
   linkedinUsername: z.string(),
-  alreadyExists: z.boolean(),
-  email: z.string().nullable(),
-  company: z.string().nullable(),
+  middleName: z.string().nullable(),
   position: z.string().nullable(),
-  connectedAt: nullableDateTimeSchema,
-  connectedOnRaw: z.string().nullable(),
-  isValid: z.boolean(),
-  issues: z.array(z.string()),
+  tempId: z.string(),
 });
 
-export const linkedInParseResponseSchema = z
-  .object({
-    contacts: z.array(linkedInPreparedContactSchema),
-    totalCount: z.number(),
-    validCount: z.number(),
-    invalidCount: z.number(),
-  })
-  ;
+export const linkedInParseResponseSchema = z.object({
+  contacts: z.array(linkedInPreparedContactSchema),
+  invalidCount: z.number(),
+  totalCount: z.number(),
+  validCount: z.number(),
+});
 
 export const linkedInImportCommitRequestSchema = z.object({
   contacts: z.array(linkedInPreparedContactSchema).max(SOCIAL_IMPORT_COMMIT_BATCH_SIZE),
 });
 
-export const linkedInImportCommitResponseSchema = z
-  .object({
-    importedCount: z.number(),
-    updatedCount: z.number(),
-    skippedCount: z.number(),
-  })
-  ;
+export const linkedInImportCommitResponseSchema = z.object({
+  importedCount: z.number(),
+  skippedCount: z.number(),
+  updatedCount: z.number(),
+});
 
 export const instagramImportStrategySchema = z.enum([
   "close_friends",
@@ -122,121 +114,113 @@ export const instagramImportStrategySchema = z.enum([
 export const instagramImportSourceSchema = z.enum(["following", "followers", "close_friends"]);
 
 export const instagramPreparedContactSchema = z.object({
-  tempId: z.string(),
-  firstName: z.string(),
-  middleName: z.string().nullable(),
-  lastName: z.string(),
-  instagramUrl: z.string(),
-  instagramUsername: z.string(),
   alreadyExists: z.boolean(),
-  likelyPerson: z.boolean(),
   connectedAt: nullableDateTimeSchema,
   connectedOnRaw: z.number().nullable(),
-  sources: z.array(instagramImportSourceSchema),
-  isValid: z.boolean(),
+  firstName: z.string(),
+  instagramUrl: z.string(),
+  instagramUsername: z.string(),
   issues: z.array(z.string()),
+  isValid: z.boolean(),
+  lastName: z.string(),
+  likelyPerson: z.boolean(),
+  middleName: z.string().nullable(),
+  sources: z.array(instagramImportSourceSchema),
+  tempId: z.string(),
 });
 
-export const instagramParseResponseSchema = z
-  .object({
-    contacts: z.array(instagramPreparedContactSchema),
-    totalCount: z.number(),
-    validCount: z.number(),
-    invalidCount: z.number(),
-  })
-  ;
+export const instagramParseResponseSchema = z.object({
+  contacts: z.array(instagramPreparedContactSchema),
+  invalidCount: z.number(),
+  totalCount: z.number(),
+  validCount: z.number(),
+});
 
 export const instagramImportCommitRequestSchema = z.object({
   contacts: z.array(instagramPreparedContactSchema).max(SOCIAL_IMPORT_COMMIT_BATCH_SIZE),
 });
 
-export const instagramImportCommitResponseSchema = z
-  .object({
-    importedCount: z.number(),
-    updatedCount: z.number(),
-    skippedCount: z.number(),
-  })
-  ;
+export const instagramImportCommitResponseSchema = z.object({
+  importedCount: z.number(),
+  skippedCount: z.number(),
+  updatedCount: z.number(),
+});
 
 const vcardPreparedPhoneSchema = z.object({
-  prefix: z.string(),
-  value: z.string(),
-  type: channelTypeSchema,
   preferred: z.boolean(),
+  prefix: z.string(),
+  type: channelTypeSchema,
+  value: z.string(),
 });
 
 const vcardPreparedEmailSchema = z.object({
-  value: z.string(),
-  type: channelTypeSchema,
   preferred: z.boolean(),
+  type: channelTypeSchema,
+  value: z.string(),
 });
 
 const vcardPreparedAddressSchema = z.object({
-  value: z.string(),
-  type: contactAddressTypeSchema,
-  preferred: z.boolean(),
-  addressLine1: z.string().nullable(),
-  addressLine2: z.string().nullable(),
   addressCity: z.string().nullable(),
-  addressPostalCode: z.string().nullable(),
-  addressState: z.string().nullable(),
-  addressStateCode: z.string().nullable(),
   addressCountry: z.string().nullable(),
   addressCountryCode: z.string().nullable(),
   addressFormatted: z.string().nullable(),
+  addressLine1: z.string().nullable(),
+  addressLine2: z.string().nullable(),
+  addressPostalCode: z.string().nullable(),
+  addressState: z.string().nullable(),
+  addressStateCode: z.string().nullable(),
+  geocodeSource: z.literal("mapy.com").nullable(),
   latitude: z.number().nullable(),
   longitude: z.number().nullable(),
-  geocodeSource: z.literal("mapy.com").nullable(),
-  validity: z.enum(["valid", "unverifiable", "invalid"]),
+  preferred: z.boolean(),
   timezone: z.string().nullable(),
+  type: contactAddressTypeSchema,
+  validity: z.enum(["valid", "unverifiable", "invalid"]),
+  value: z.string(),
 });
 
 const vcardPreparedImportantDateSchema = z.object({
-  type: importantDateTypeSchema,
   date: z.string(),
   note: z.string().nullable(),
+  type: importantDateTypeSchema,
 });
 
 export const vcardPreparedContactSchema = z.object({
-  tempId: z.string(),
-  firstName: z.string(),
-  middleName: z.string().nullable(),
-  lastName: z.string(),
-  headline: z.string().nullable(),
-  phones: z.array(vcardPreparedPhoneSchema),
-  emails: z.array(vcardPreparedEmailSchema),
   addresses: z.array(vcardPreparedAddressSchema),
-  linkedin: z.string().nullable(),
-  instagram: z.string().nullable(),
-  whatsapp: z.string().nullable(),
-  facebook: z.string().nullable(),
-  signal: z.string().nullable(),
-  website: z.string().nullable(),
   avatarUri: z.string().nullable(),
+  emails: z.array(vcardPreparedEmailSchema),
+  facebook: z.string().nullable(),
+  firstName: z.string(),
+  headline: z.string().nullable(),
   importantDates: z.array(vcardPreparedImportantDateSchema).nullable(),
-  isValid: z.boolean(),
+  instagram: z.string().nullable(),
   issues: z.array(z.string()),
+  isValid: z.boolean(),
+  lastName: z.string(),
+  linkedin: z.string().nullable(),
+  middleName: z.string().nullable(),
+  phones: z.array(vcardPreparedPhoneSchema),
+  signal: z.string().nullable(),
+  tempId: z.string(),
+  website: z.string().nullable(),
+  whatsapp: z.string().nullable(),
 });
 
-export const vcardParseResponseSchema = z
-  .object({
-    contacts: z.array(vcardPreparedContactSchema),
-    totalCount: z.number(),
-    validCount: z.number(),
-    invalidCount: z.number(),
-  })
-  ;
+export const vcardParseResponseSchema = z.object({
+  contacts: z.array(vcardPreparedContactSchema),
+  invalidCount: z.number(),
+  totalCount: z.number(),
+  validCount: z.number(),
+});
 
 export const vcardImportCommitRequestSchema = z.object({
   contacts: z.array(vcardPreparedContactSchema).max(VCARD_IMPORT_COMMIT_BATCH_SIZE),
 });
 
-export const vcardImportCommitResponseSchema = z
-  .object({
-    importedCount: z.number(),
-    skippedCount: z.number(),
-  })
-  ;
+export const vcardImportCommitResponseSchema = z.object({
+  importedCount: z.number(),
+  skippedCount: z.number(),
+});
 
 export type ScrapedWorkHistoryEntry = z.infer<typeof scrapedWorkHistoryEntrySchema>;
 export type ScrapedEducationEntry = z.infer<typeof scrapedEducationEntrySchema>;

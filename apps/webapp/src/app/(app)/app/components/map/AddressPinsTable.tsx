@@ -1,34 +1,26 @@
 "use client";
 
-import { useDebouncedCallback } from "@mantine/hooks";
-import { DEBOUNCE_MS } from "@/lib/config";
-import {
-  Badge,
-  Center,
-  Paper,
-  Stack,
-  Table,
-  Text,
-  TextInput,
-} from "@mantine/core";
-import { IconHome, IconMapPin, IconSearch } from "@tabler/icons-react";
-import { useMemo, useState } from "react";
 import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import { AnchorLink } from "@bondery/mantine-next";
-import type { AddressPin } from "@/app/(app)/app/map/types";
-import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
+import type { AddressPin } from "@bondery/schemas";
+import { Badge, Center, Paper, Stack, Table, Text, TextInput } from "@mantine/core";
+import { useDebouncedCallback } from "@mantine/hooks";
+import { IconHome, IconMapPin, IconSearch } from "@tabler/icons-react";
+import { useMemo, useState } from "react";
+import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
+import { DEBOUNCE_MS } from "@/lib/platform/config";
 
 interface AddressPinsTableProps {
-  pins: AddressPin[];
-  searchPlaceholder: string;
   noAddressesFound: string;
   noAddressesMatchSearch: string;
+  pins: AddressPin[];
+  searchPlaceholder: string;
 }
 
 const ADDRESS_TYPE_COLORS: Record<string, string> = {
   home: "blue",
-  work: "grape",
   other: "gray",
+  work: "grape",
 };
 
 function formatPinName(pin: AddressPin): string {
@@ -46,8 +38,8 @@ export function AddressPinsTable({
   noAddressesFound,
   noAddressesMatchSearch,
 }: AddressPinsTableProps) {
-  const t = useTranslations("MapPage");
-  const tAddress = useTranslations("ContactAddress");
+  const t = useWebTranslations("MapPage");
+  const tAddress = useWebTranslations("ContactAddress");
   const [search, setSearch] = useState("");
 
   const addressTypeLabel = (type: string) => {
@@ -65,7 +57,9 @@ export function AddressPinsTable({
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
-    if (!q) return pins;
+    if (!q) {
+      return pins;
+    }
     return pins.filter((p) => {
       const name = formatPinName(p).toLowerCase();
       const addr = (p.addressFormatted ?? "").toLowerCase();
@@ -76,10 +70,10 @@ export function AddressPinsTable({
 
   if (pins.length === 0) {
     return (
-      <Paper withBorder shadow="sm" radius="md" p="xl">
+      <Paper p="xl" radius="md" shadow="sm" withBorder>
         <Center>
           <Stack align="center" gap="xs">
-            <IconMapPin size={32} stroke={1.2} color="var(--mantine-color-dimmed)" />
+            <IconMapPin color="var(--mantine-color-dimmed)" size={32} stroke={1.2} />
             <Text c="dimmed" size="sm">
               {noAddressesFound}
             </Text>
@@ -90,12 +84,12 @@ export function AddressPinsTable({
   }
 
   return (
-    <Paper withBorder shadow="sm" radius="md" p="md">
+    <Paper p="md" radius="md" shadow="sm" withBorder>
       <Stack gap="md">
         <TextInput
           leftSection={<IconSearch size={16} />}
-          placeholder={searchPlaceholder}
           onChange={(e) => handleSearch(e.currentTarget.value)}
+          placeholder={searchPlaceholder}
         />
 
         {filtered.length === 0 ? (
@@ -124,25 +118,25 @@ export function AddressPinsTable({
                   <Table.Tr key={pin.addressId}>
                     <Table.Td>
                       <AnchorLink
+                        fw={500}
                         href={`${WEBAPP_ROUTES.PERSON}/${pin.personId}`}
                         size="sm"
-                        fw={500}
                       >
                         {formatPinName(pin)}
                       </AnchorLink>
                     </Table.Td>
                     <Table.Td>
                       <Badge
-                        size="sm"
-                        variant="light"
                         color={ADDRESS_TYPE_COLORS[pin.addressType] ?? "gray"}
                         leftSection={<IconHome size={10} />}
+                        size="sm"
+                        variant="light"
                       >
                         {addressTypeLabel(pin.addressType)}
                       </Badge>
                     </Table.Td>
                     <Table.Td>
-                      <Text size="sm" c={displayAddress ? undefined : "dimmed"}>
+                      <Text c={displayAddress ? undefined : "dimmed"} size="sm">
                         {displayAddress || "—"}
                       </Text>
                     </Table.Td>

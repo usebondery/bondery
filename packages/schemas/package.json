@@ -1,332 +1,393 @@
 {
-  "name": "@bondery/schemas",
-  "version": "1.7.0",
-  "private": true,
-  "type": "module",
-  "main": "./dist/index.js",
-  "types": "./src/index.ts",
-  "exports": {
-    ".": {
-      "types": "./src/index.ts",
-      "import": "./dist/index.js",
-      "node": "./dist/index.js",
-      "default": "./dist/index.js"
-    },
-    "./*": {
-      "types": "./src/*.ts",
-      "import": "./dist/*.js",
-      "node": "./dist/*.js",
-      "default": "./dist/*.js"
-    },
-    "./constants": {
-      "types": "./src/constants/index.ts",
-      "import": "./dist/constants/index.js",
-      "node": "./dist/constants/index.js",
-      "default": "./dist/constants/index.js"
-    },
-    "./entities": {
-      "types": "./src/entities/index.ts",
-      "import": "./dist/entities/index.js",
-      "node": "./dist/entities/index.js",
-      "default": "./dist/entities/index.js"
-    },
-    "./geocode": {
-      "types": "./src/geocode/index.ts",
-      "import": "./dist/geocode/index.js",
-      "node": "./dist/geocode/index.js",
-      "default": "./dist/geocode/index.js"
-    },
-    "./http": {
-      "types": "./src/http/index.ts",
-      "import": "./dist/http/index.js",
-      "node": "./dist/http/index.js",
-      "default": "./dist/http/index.js"
-    },
-    "./openapi/fixtures": {
-      "types": "./src/openapi/fixtures/index.ts",
-      "import": "./dist/openapi/fixtures/index.js",
-      "node": "./dist/openapi/fixtures/index.js",
-      "default": "./dist/openapi/fixtures/index.js"
-    },
-    "./primitives": {
-      "types": "./src/primitives/index.ts",
-      "import": "./dist/primitives/index.js",
-      "node": "./dist/primitives/index.js",
-      "default": "./dist/primitives/index.js"
-    },
-    "./sync": {
-      "types": "./src/sync/index.ts",
-      "import": "./dist/sync/index.js",
-      "node": "./dist/sync/index.js",
-      "default": "./dist/sync/index.js"
-    },
-    "./contact-id": {
-      "types": "./src/contact-id.ts",
-      "import": "./dist/contact-id.js",
-      "node": "./dist/contact-id.js",
-      "default": "./dist/contact-id.js"
-    },
-    "./contracts.assertions": {
-      "types": "./src/contracts.assertions.ts",
-      "import": "./dist/contracts.assertions.js",
-      "node": "./dist/contracts.assertions.js",
-      "default": "./dist/contracts.assertions.js"
-    },
-    "./entities/_shared": {
-      "types": "./src/entities/_shared.ts",
-      "import": "./dist/entities/_shared.js",
-      "node": "./dist/entities/_shared.js",
-      "default": "./dist/entities/_shared.js"
-    },
-    "./entities/activity": {
-      "types": "./src/entities/activity.ts",
-      "import": "./dist/entities/activity.js",
-      "node": "./dist/entities/activity.js",
-      "default": "./dist/entities/activity.js"
-    },
-    "./entities/address": {
-      "types": "./src/entities/address.ts",
-      "import": "./dist/entities/address.js",
-      "node": "./dist/entities/address.js",
-      "default": "./dist/entities/address.js"
-    },
-    "./entities/api": {
-      "types": "./src/entities/api.ts",
-      "import": "./dist/entities/api.js",
-      "node": "./dist/entities/api.js",
-      "default": "./dist/entities/api.js"
-    },
-    "./entities/api-keys": {
-      "types": "./src/entities/api-keys.ts",
-      "import": "./dist/entities/api-keys.js",
-      "node": "./dist/entities/api-keys.js",
-      "default": "./dist/entities/api-keys.js"
-    },
-    "./entities/channels": {
-      "types": "./src/entities/channels.ts",
-      "import": "./dist/entities/channels.js",
-      "node": "./dist/entities/channels.js",
-      "default": "./dist/entities/channels.js"
-    },
-    "./entities/chat": {
-      "types": "./src/entities/chat.ts",
-      "import": "./dist/entities/chat.js",
-      "node": "./dist/entities/chat.js",
-      "default": "./dist/entities/chat.js"
-    },
-    "./entities/contact": {
-      "types": "./src/entities/contact.ts",
-      "import": "./dist/entities/contact.js",
-      "node": "./dist/entities/contact.js",
-      "default": "./dist/entities/contact.js"
-    },
-    "./entities/group": {
-      "types": "./src/entities/group.ts",
-      "import": "./dist/entities/group.js",
-      "node": "./dist/entities/group.js",
-      "default": "./dist/entities/group.js"
-    },
-    "./entities/import": {
-      "types": "./src/entities/import.ts",
-      "import": "./dist/entities/import.js",
-      "node": "./dist/entities/import.js",
-      "default": "./dist/entities/import.js"
-    },
-    "./entities/important-date": {
-      "types": "./src/entities/important-date.ts",
-      "import": "./dist/entities/important-date.js",
-      "node": "./dist/entities/important-date.js",
-      "default": "./dist/entities/important-date.js"
-    },
-    "./entities/merge": {
-      "types": "./src/entities/merge.ts",
-      "import": "./dist/entities/merge.js",
-      "node": "./dist/entities/merge.js",
-      "default": "./dist/entities/merge.js"
-    },
-    "./entities/notes": {
-      "types": "./src/entities/notes.ts",
-      "import": "./dist/entities/notes.js",
-      "node": "./dist/entities/notes.js",
-      "default": "./dist/entities/notes.js"
-    },
-    "./entities/reminder": {
-      "types": "./src/entities/reminder.ts",
-      "import": "./dist/entities/reminder.js",
-      "node": "./dist/entities/reminder.js",
-      "default": "./dist/entities/reminder.js"
-    },
-    "./entities/settings": {
-      "types": "./src/entities/settings.ts",
-      "import": "./dist/entities/settings.js",
-      "node": "./dist/entities/settings.js",
-      "default": "./dist/entities/settings.js"
-    },
-    "./entities/social": {
-      "types": "./src/entities/social.ts",
-      "import": "./dist/entities/social.js",
-      "node": "./dist/entities/social.js",
-      "default": "./dist/entities/social.js"
-    },
-    "./entities/subscription": {
-      "types": "./src/entities/subscription.ts",
-      "import": "./dist/entities/subscription.js",
-      "node": "./dist/entities/subscription.js",
-      "default": "./dist/entities/subscription.js"
-    },
-    "./entities/tag": {
-      "types": "./src/entities/tag.ts",
-      "import": "./dist/entities/tag.js",
-      "node": "./dist/entities/tag.js",
-      "default": "./dist/entities/tag.js"
-    },
-    "./format": {
-      "types": "./src/format.ts",
-      "import": "./dist/format.js",
-      "node": "./dist/format.js",
-      "default": "./dist/format.js"
-    },
-    "./geocode/client": {
-      "types": "./src/geocode/client.ts",
-      "import": "./dist/geocode/client.js",
-      "node": "./dist/geocode/client.js",
-      "default": "./dist/geocode/client.js"
-    },
-    "./http/ids": {
-      "types": "./src/http/ids.ts",
-      "import": "./dist/http/ids.js",
-      "node": "./dist/http/ids.js",
-      "default": "./dist/http/ids.js"
-    },
-    "./http/responses": {
-      "types": "./src/http/responses.ts",
-      "import": "./dist/http/responses.js",
-      "node": "./dist/http/responses.js",
-      "default": "./dist/http/responses.js"
-    },
-    "./openapi/document-opts": {
-      "types": "./src/openapi/document-opts.ts",
-      "import": "./dist/openapi/document-opts.js",
-      "node": "./dist/openapi/document-opts.js",
-      "default": "./dist/openapi/document-opts.js"
-    },
-    "./openapi/fixtures/entities": {
-      "types": "./src/openapi/fixtures/entities.ts",
-      "import": "./dist/openapi/fixtures/entities.js",
-      "node": "./dist/openapi/fixtures/entities.js",
-      "default": "./dist/openapi/fixtures/entities.js"
-    },
-    "./openapi/fixtures/errors": {
-      "types": "./src/openapi/fixtures/errors.ts",
-      "import": "./dist/openapi/fixtures/errors.js",
-      "node": "./dist/openapi/fixtures/errors.js",
-      "default": "./dist/openapi/fixtures/errors.js"
-    },
-    "./openapi/fixtures/primitives": {
-      "types": "./src/openapi/fixtures/primitives.ts",
-      "import": "./dist/openapi/fixtures/primitives.js",
-      "node": "./dist/openapi/fixtures/primitives.js",
-      "default": "./dist/openapi/fixtures/primitives.js"
-    },
-    "./openapi/fixtures/responses": {
-      "types": "./src/openapi/fixtures/responses.ts",
-      "import": "./dist/openapi/fixtures/responses.js",
-      "node": "./dist/openapi/fixtures/responses.js",
-      "default": "./dist/openapi/fixtures/responses.js"
-    },
-    "./openapi/fixtures/schema-examples": {
-      "types": "./src/openapi/fixtures/schema-examples.ts",
-      "import": "./dist/openapi/fixtures/schema-examples.js",
-      "node": "./dist/openapi/fixtures/schema-examples.js",
-      "default": "./dist/openapi/fixtures/schema-examples.js"
-    },
-    "./openapi/get-schema-example": {
-      "types": "./src/openapi/get-schema-example.ts",
-      "import": "./dist/openapi/get-schema-example.js",
-      "node": "./dist/openapi/get-schema-example.js",
-      "default": "./dist/openapi/get-schema-example.js"
-    },
-    "./openapi/registry": {
-      "types": "./src/openapi/registry.ts",
-      "import": "./dist/openapi/registry.js",
-      "node": "./dist/openapi/registry.js",
-      "default": "./dist/openapi/registry.js"
-    },
-    "./primitives/channel": {
-      "types": "./src/primitives/channel.ts",
-      "import": "./dist/primitives/channel.js",
-      "node": "./dist/primitives/channel.js",
-      "default": "./dist/primitives/channel.js"
-    },
-    "./primitives/color": {
-      "types": "./src/primitives/color.ts",
-      "import": "./dist/primitives/color.js",
-      "node": "./dist/primitives/color.js",
-      "default": "./dist/primitives/color.js"
-    },
-    "./supabase.types": {
-      "types": "./src/supabase.types.ts",
-      "import": "./dist/supabase.types.js",
-      "node": "./dist/supabase.types.js",
-      "default": "./dist/supabase.types.js"
-    },
-    "./sync/conflict": {
-      "types": "./src/sync/conflict.ts",
-      "import": "./dist/sync/conflict.js",
-      "node": "./dist/sync/conflict.js",
-      "default": "./dist/sync/conflict.js"
-    },
-    "./sync/mutations": {
-      "types": "./src/sync/mutations.ts",
-      "import": "./dist/sync/mutations.js",
-      "node": "./dist/sync/mutations.js",
-      "default": "./dist/sync/mutations.js"
-    },
-    "./sync/protocol": {
-      "types": "./src/sync/protocol.ts",
-      "import": "./dist/sync/protocol.js",
-      "node": "./dist/sync/protocol.js",
-      "default": "./dist/sync/protocol.js"
-    },
-    "./sync/pull": {
-      "types": "./src/sync/pull.ts",
-      "import": "./dist/sync/pull.js",
-      "node": "./dist/sync/pull.js",
-      "default": "./dist/sync/pull.js"
-    },
-    "./sync/push": {
-      "types": "./src/sync/push.ts",
-      "import": "./dist/sync/push.js",
-      "node": "./dist/sync/push.js",
-      "default": "./dist/sync/push.js"
-    },
-    "./sync/tables": {
-      "types": "./src/sync/tables.ts",
-      "import": "./dist/sync/tables.js",
-      "node": "./dist/sync/tables.js",
-      "default": "./dist/sync/tables.js"
-    },
-    "./database": {
-      "types": "./src/supabase.types.ts",
-      "import": "./dist/supabase.types.js",
-      "node": "./dist/supabase.types.js",
-      "default": "./dist/supabase.types.js"
-    }
-  },
-  "scripts": {
-    "build": "rimraf dist && tsc && node ../../scripts/rewrite-package-hash-imports-in-dist.mjs schemas",
-    "dev": "tsc --watch --preserveWatchOutput",
-    "check-types": "tsc --noEmit",
-    "test:contracts": "node scripts/check-no-internal-deps.mjs && node scripts/check-no-init-cycles.mjs && npm run build && npx tsx ./src/contracts.assertions.ts && npx tsx ./scripts/check-openapi-examples.ts"
+  "dependencies": {
+    "zod": "^4.3.6",
+    "zod-openapi": "^5.4.6"
   },
   "description": "Canonical types, Zod validation schemas, and constants for Bondery. Contract layer — no runtime business logic.",
-  "dependencies": {
-    "zod": "^4.3.6"
-  },
   "devDependencies": {
-    "rimraf": "^6.0.1",
     "@bondery/typescript-config": "*",
+    "rimraf": "^6.0.1",
     "typescript": "^6"
+  },
+  "exports": {
+    ".": {
+      "default": "./dist/index.js",
+      "import": "./dist/index.js",
+      "node": "./dist/index.js",
+      "types": "./src/index.ts"
+    },
+    "./*": {
+      "default": "./dist/*.js",
+      "import": "./dist/*.js",
+      "node": "./dist/*.js",
+      "types": "./src/*.ts"
+    },
+    "./constants": {
+      "default": "./dist/constants/index.js",
+      "import": "./dist/constants/index.js",
+      "node": "./dist/constants/index.js",
+      "types": "./src/constants/index.ts"
+    },
+    "./constants/dev-ports": {
+      "default": "./dist/constants/dev-ports.js",
+      "import": "./dist/constants/dev-ports.js",
+      "node": "./dist/constants/dev-ports.js",
+      "types": "./src/constants/dev-ports.ts"
+    },
+    "./constants/import": {
+      "default": "./dist/constants/import.js",
+      "import": "./dist/constants/import.js",
+      "node": "./dist/constants/import.js",
+      "types": "./src/constants/import.ts"
+    },
+    "./contact-id": {
+      "default": "./dist/contact-id.js",
+      "import": "./dist/contact-id.js",
+      "node": "./dist/contact-id.js",
+      "types": "./src/contact-id.ts"
+    },
+    "./contracts.assertions": {
+      "default": "./dist/contracts.assertions.js",
+      "import": "./dist/contracts.assertions.js",
+      "node": "./dist/contracts.assertions.js",
+      "types": "./src/contracts.assertions.ts"
+    },
+    "./database": {
+      "default": "./dist/supabase.types.js",
+      "import": "./dist/supabase.types.js",
+      "node": "./dist/supabase.types.js",
+      "types": "./src/supabase.types.ts"
+    },
+    "./entities": {
+      "default": "./dist/entities/index.js",
+      "import": "./dist/entities/index.js",
+      "node": "./dist/entities/index.js",
+      "types": "./src/entities/index.ts"
+    },
+    "./entities/_shared": {
+      "default": "./dist/entities/_shared.js",
+      "import": "./dist/entities/_shared.js",
+      "node": "./dist/entities/_shared.js",
+      "types": "./src/entities/_shared.ts"
+    },
+    "./entities/activity": {
+      "default": "./dist/entities/activity.js",
+      "import": "./dist/entities/activity.js",
+      "node": "./dist/entities/activity.js",
+      "types": "./src/entities/activity.ts"
+    },
+    "./entities/address": {
+      "default": "./dist/entities/address.js",
+      "import": "./dist/entities/address.js",
+      "node": "./dist/entities/address.js",
+      "types": "./src/entities/address.ts"
+    },
+    "./entities/api": {
+      "default": "./dist/entities/api.js",
+      "import": "./dist/entities/api.js",
+      "node": "./dist/entities/api.js",
+      "types": "./src/entities/api.ts"
+    },
+    "./entities/api-keys": {
+      "default": "./dist/entities/api-keys.js",
+      "import": "./dist/entities/api-keys.js",
+      "node": "./dist/entities/api-keys.js",
+      "types": "./src/entities/api-keys.ts"
+    },
+    "./entities/channels": {
+      "default": "./dist/entities/channels.js",
+      "import": "./dist/entities/channels.js",
+      "node": "./dist/entities/channels.js",
+      "types": "./src/entities/channels.ts"
+    },
+    "./entities/chat": {
+      "default": "./dist/entities/chat.js",
+      "import": "./dist/entities/chat.js",
+      "node": "./dist/entities/chat.js",
+      "types": "./src/entities/chat.ts"
+    },
+    "./entities/contact": {
+      "default": "./dist/entities/contact.js",
+      "import": "./dist/entities/contact.js",
+      "node": "./dist/entities/contact.js",
+      "types": "./src/entities/contact.ts"
+    },
+    "./entities/group": {
+      "default": "./dist/entities/group.js",
+      "import": "./dist/entities/group.js",
+      "node": "./dist/entities/group.js",
+      "types": "./src/entities/group.ts"
+    },
+    "./entities/import": {
+      "default": "./dist/entities/import.js",
+      "import": "./dist/entities/import.js",
+      "node": "./dist/entities/import.js",
+      "types": "./src/entities/import.ts"
+    },
+    "./entities/important-date": {
+      "default": "./dist/entities/important-date.js",
+      "import": "./dist/entities/important-date.js",
+      "node": "./dist/entities/important-date.js",
+      "types": "./src/entities/important-date.ts"
+    },
+    "./entities/merge": {
+      "default": "./dist/entities/merge.js",
+      "import": "./dist/entities/merge.js",
+      "node": "./dist/entities/merge.js",
+      "types": "./src/entities/merge.ts"
+    },
+    "./entities/notes": {
+      "default": "./dist/entities/notes.js",
+      "import": "./dist/entities/notes.js",
+      "node": "./dist/entities/notes.js",
+      "types": "./src/entities/notes.ts"
+    },
+    "./entities/reminder": {
+      "default": "./dist/entities/reminder.js",
+      "import": "./dist/entities/reminder.js",
+      "node": "./dist/entities/reminder.js",
+      "types": "./src/entities/reminder.ts"
+    },
+    "./entities/settings": {
+      "default": "./dist/entities/settings.js",
+      "import": "./dist/entities/settings.js",
+      "node": "./dist/entities/settings.js",
+      "types": "./src/entities/settings.ts"
+    },
+    "./entities/social": {
+      "default": "./dist/entities/social.js",
+      "import": "./dist/entities/social.js",
+      "node": "./dist/entities/social.js",
+      "types": "./src/entities/social.ts"
+    },
+    "./entities/subscription": {
+      "default": "./dist/entities/subscription.js",
+      "import": "./dist/entities/subscription.js",
+      "node": "./dist/entities/subscription.js",
+      "types": "./src/entities/subscription.ts"
+    },
+    "./entities/tag": {
+      "default": "./dist/entities/tag.js",
+      "import": "./dist/entities/tag.js",
+      "node": "./dist/entities/tag.js",
+      "types": "./src/entities/tag.ts"
+    },
+    "./errors": {
+      "default": "./dist/errors/index.js",
+      "import": "./dist/errors/index.js",
+      "node": "./dist/errors/index.js",
+      "types": "./src/errors/index.ts"
+    },
+    "./errors/api-error-codes.generated": {
+      "default": "./dist/errors/api-error-codes.generated.js",
+      "import": "./dist/errors/api-error-codes.generated.js",
+      "node": "./dist/errors/api-error-codes.generated.js",
+      "types": "./src/errors/api-error-codes.generated.ts"
+    },
+    "./errors/api-error-response": {
+      "default": "./dist/errors/api-error-response.js",
+      "import": "./dist/errors/api-error-response.js",
+      "node": "./dist/errors/api-error-response.js",
+      "types": "./src/errors/api-error-response.ts"
+    },
+    "./errors/api-error-types": {
+      "default": "./dist/errors/api-error-types.js",
+      "import": "./dist/errors/api-error-types.js",
+      "node": "./dist/errors/api-error-types.js",
+      "types": "./src/errors/api-error-types.ts"
+    },
+    "./format": {
+      "default": "./dist/format.js",
+      "import": "./dist/format.js",
+      "node": "./dist/format.js",
+      "types": "./src/format.ts"
+    },
+    "./geocode": {
+      "default": "./dist/geocode/index.js",
+      "import": "./dist/geocode/index.js",
+      "node": "./dist/geocode/index.js",
+      "types": "./src/geocode/index.ts"
+    },
+    "./geocode/client": {
+      "default": "./dist/geocode/client.js",
+      "import": "./dist/geocode/client.js",
+      "node": "./dist/geocode/client.js",
+      "types": "./src/geocode/client.ts"
+    },
+    "./geocode/schemas": {
+      "default": "./dist/geocode/schemas.js",
+      "import": "./dist/geocode/schemas.js",
+      "node": "./dist/geocode/schemas.js",
+      "types": "./src/geocode/schemas.ts"
+    },
+    "./http": {
+      "default": "./dist/http/index.js",
+      "import": "./dist/http/index.js",
+      "node": "./dist/http/index.js",
+      "types": "./src/http/index.ts"
+    },
+    "./http/ids": {
+      "default": "./dist/http/ids.js",
+      "import": "./dist/http/ids.js",
+      "node": "./dist/http/ids.js",
+      "types": "./src/http/ids.ts"
+    },
+    "./http/responses": {
+      "default": "./dist/http/responses.js",
+      "import": "./dist/http/responses.js",
+      "node": "./dist/http/responses.js",
+      "types": "./src/http/responses.ts"
+    },
+    "./locale": {
+      "default": "./dist/locale/index.js",
+      "import": "./dist/locale/index.js",
+      "node": "./dist/locale/index.js",
+      "types": "./src/locale/index.ts"
+    },
+    "./locale/supported-locale": {
+      "default": "./dist/locale/supported-locale.js",
+      "import": "./dist/locale/supported-locale.js",
+      "node": "./dist/locale/supported-locale.js",
+      "types": "./src/locale/supported-locale.ts"
+    },
+    "./openapi/document-opts": {
+      "default": "./dist/openapi/document-opts.js",
+      "import": "./dist/openapi/document-opts.js",
+      "node": "./dist/openapi/document-opts.js",
+      "types": "./src/openapi/document-opts.ts"
+    },
+    "./openapi/fixtures": {
+      "default": "./dist/openapi/fixtures/index.js",
+      "import": "./dist/openapi/fixtures/index.js",
+      "node": "./dist/openapi/fixtures/index.js",
+      "types": "./src/openapi/fixtures/index.ts"
+    },
+    "./openapi/fixtures/entities": {
+      "default": "./dist/openapi/fixtures/entities.js",
+      "import": "./dist/openapi/fixtures/entities.js",
+      "node": "./dist/openapi/fixtures/entities.js",
+      "types": "./src/openapi/fixtures/entities.ts"
+    },
+    "./openapi/fixtures/errors": {
+      "default": "./dist/openapi/fixtures/errors.js",
+      "import": "./dist/openapi/fixtures/errors.js",
+      "node": "./dist/openapi/fixtures/errors.js",
+      "types": "./src/openapi/fixtures/errors.ts"
+    },
+    "./openapi/fixtures/primitives": {
+      "default": "./dist/openapi/fixtures/primitives.js",
+      "import": "./dist/openapi/fixtures/primitives.js",
+      "node": "./dist/openapi/fixtures/primitives.js",
+      "types": "./src/openapi/fixtures/primitives.ts"
+    },
+    "./openapi/fixtures/requests": {
+      "default": "./dist/openapi/fixtures/requests.js",
+      "import": "./dist/openapi/fixtures/requests.js",
+      "node": "./dist/openapi/fixtures/requests.js",
+      "types": "./src/openapi/fixtures/requests.ts"
+    },
+    "./openapi/fixtures/responses": {
+      "default": "./dist/openapi/fixtures/responses.js",
+      "import": "./dist/openapi/fixtures/responses.js",
+      "node": "./dist/openapi/fixtures/responses.js",
+      "types": "./src/openapi/fixtures/responses.ts"
+    },
+    "./openapi/fixtures/schema-examples": {
+      "default": "./dist/openapi/fixtures/schema-examples.js",
+      "import": "./dist/openapi/fixtures/schema-examples.js",
+      "node": "./dist/openapi/fixtures/schema-examples.js",
+      "types": "./src/openapi/fixtures/schema-examples.ts"
+    },
+    "./openapi/get-schema-example": {
+      "default": "./dist/openapi/get-schema-example.js",
+      "import": "./dist/openapi/get-schema-example.js",
+      "node": "./dist/openapi/get-schema-example.js",
+      "types": "./src/openapi/get-schema-example.ts"
+    },
+    "./openapi/registry": {
+      "default": "./dist/openapi/registry.js",
+      "import": "./dist/openapi/registry.js",
+      "node": "./dist/openapi/registry.js",
+      "types": "./src/openapi/registry.ts"
+    },
+    "./openapi/route-order": {
+      "default": "./dist/openapi/route-order.js",
+      "import": "./dist/openapi/route-order.js",
+      "node": "./dist/openapi/route-order.js",
+      "types": "./src/openapi/route-order.ts"
+    },
+    "./primitives": {
+      "default": "./dist/primitives/index.js",
+      "import": "./dist/primitives/index.js",
+      "node": "./dist/primitives/index.js",
+      "types": "./src/primitives/index.ts"
+    },
+    "./primitives/channel": {
+      "default": "./dist/primitives/channel.js",
+      "import": "./dist/primitives/channel.js",
+      "node": "./dist/primitives/channel.js",
+      "types": "./src/primitives/channel.ts"
+    },
+    "./primitives/color": {
+      "default": "./dist/primitives/color.js",
+      "import": "./dist/primitives/color.js",
+      "node": "./dist/primitives/color.js",
+      "types": "./src/primitives/color.ts"
+    },
+    "./supabase.types": {
+      "default": "./dist/supabase.types.js",
+      "import": "./dist/supabase.types.js",
+      "node": "./dist/supabase.types.js",
+      "types": "./src/supabase.types.ts"
+    },
+    "./sync": {
+      "default": "./dist/sync/index.js",
+      "import": "./dist/sync/index.js",
+      "node": "./dist/sync/index.js",
+      "types": "./src/sync/index.ts"
+    },
+    "./sync/conflict": {
+      "default": "./dist/sync/conflict.js",
+      "import": "./dist/sync/conflict.js",
+      "node": "./dist/sync/conflict.js",
+      "types": "./src/sync/conflict.ts"
+    },
+    "./sync/mutations": {
+      "default": "./dist/sync/mutations.js",
+      "import": "./dist/sync/mutations.js",
+      "node": "./dist/sync/mutations.js",
+      "types": "./src/sync/mutations.ts"
+    },
+    "./sync/protocol": {
+      "default": "./dist/sync/protocol.js",
+      "import": "./dist/sync/protocol.js",
+      "node": "./dist/sync/protocol.js",
+      "types": "./src/sync/protocol.ts"
+    },
+    "./sync/pull": {
+      "default": "./dist/sync/pull.js",
+      "import": "./dist/sync/pull.js",
+      "node": "./dist/sync/pull.js",
+      "types": "./src/sync/pull.ts"
+    },
+    "./sync/push": {
+      "default": "./dist/sync/push.js",
+      "import": "./dist/sync/push.js",
+      "node": "./dist/sync/push.js",
+      "types": "./src/sync/push.ts"
+    },
+    "./sync/tables": {
+      "default": "./dist/sync/tables.js",
+      "import": "./dist/sync/tables.js",
+      "node": "./dist/sync/tables.js",
+      "types": "./src/sync/tables.ts"
+    },
+    "./sync/ws": {
+      "default": "./dist/sync/ws.js",
+      "import": "./dist/sync/ws.js",
+      "node": "./dist/sync/ws.js",
+      "types": "./src/sync/ws.ts"
+    }
   },
   "imports": {
     "#*": [
@@ -339,5 +400,17 @@
       "./src/*/index.ts",
       "./src/*/index.tsx"
     ]
-  }
+  },
+  "main": "./dist/index.js",
+  "name": "@bondery/schemas",
+  "private": true,
+  "scripts": {
+    "build": "rimraf dist && tsc && node ../../scripts/rewrite-package-hash-imports-in-dist.mjs schemas",
+    "check-types": "tsc --noEmit",
+    "dev": "tsc --watch --preserveWatchOutput",
+    "test:contracts": "node scripts/check-no-internal-deps.mjs && node scripts/check-no-init-cycles.mjs && npm run build && npx tsx ./src/contracts.assertions.ts && npx tsx ./scripts/check-openapi-examples.ts"
+  },
+  "type": "module",
+  "types": "./src/index.ts",
+  "version": "1.7.0"
 }

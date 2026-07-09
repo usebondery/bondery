@@ -1,19 +1,19 @@
-import { useMemo, useState } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
-import { IconBell, IconCalendar, IconCalendarPlus, IconPencil } from "@tabler/icons-react-native";
-import { useTranslation } from "react-i18next";
 import { IMPORTANT_DATE_TYPE_META } from "@bondery/helpers";
 import type { ImportantDate } from "@bondery/schemas";
+import { IconBell, IconCalendar, IconCalendarPlus, IconPencil } from "@tabler/icons-react-native";
+import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 import { OverflowMenu } from "../../../components/OverflowMenu";
 import { LIMITS } from "../../../lib/config";
 import { useMobileTranslations } from "../../../lib/i18n/useMobileTranslations";
 import { useAppToast } from "../../../lib/toast/useAppToast";
-import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
 import { MOBILE_TYPOGRAPHY } from "../../../theme/tokens";
+import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
 import { formatImportantDate, resolveDateLocale } from "../importantDateUtils";
 import { ContactDetailSectionHeader } from "./ContactDetailSectionHeader";
-import { EditImportantDateSheet } from "./EditImportantDateSheet";
 import { contactDetailStyles } from "./contactDetailStyles";
+import { EditImportantDateSheet } from "./EditImportantDateSheet";
 
 type SheetState =
   | { open: false }
@@ -21,8 +21,8 @@ type SheetState =
   | { open: true; mode: "edit"; index: number; entry: ImportantDate };
 
 interface ContactImportantDatesSectionProps {
-  dates: ImportantDate[];
   contactFirstName: string;
+  dates: ImportantDate[];
   onSaveDates: (dates: ImportantDate[]) => Promise<void>;
 }
 
@@ -31,13 +31,13 @@ function notifyLabel(
   t: (key: string, params?: Record<string, unknown>) => string,
 ): string | null {
   if (notifyDaysBefore === 1) {
-    return t("ContactImportantDates.NotifyDayBefore", { count: 1 });
+    return t("NotifyDayBefore", { count: 1, ns: "ContactImportantDates" });
   }
   if (notifyDaysBefore === 3) {
-    return t("ContactImportantDates.NotifyDaysBefore", { count: 3 });
+    return t("NotifyDaysBefore", { count: 3, ns: "ContactImportantDates" });
   }
   if (notifyDaysBefore === 7) {
-    return t("ContactImportantDates.NotifyDaysBefore", { count: 7 });
+    return t("NotifyDaysBefore", { count: 7, ns: "ContactImportantDates" });
   }
   return null;
 }
@@ -59,30 +59,28 @@ export function ContactImportantDatesSection({
 
   const sortedDates = useMemo(
     () =>
-      [...dates].sort(
-        (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
-      ),
+      [...dates].sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()),
     [dates],
   );
 
   function openAddSheet() {
     if (!canAdd) {
       showToast({
-        type: "error",
-        headline: t("MobileApp.Common.ErrorTitle"),
-        description: t("MobileApp.ContactIdentity.MaxDatesReached").replace(
+        description: t("MaxDatesReached", { ns: "MobileContactIdentity" }).replace(
           "{max}",
           String(LIMITS.maxImportantDates),
         ),
+        headline: t("feedback.errorTitle", { ns: "common" }),
+        type: "error",
       });
       return;
     }
 
-    setSheet({ open: true, mode: "add" });
+    setSheet({ mode: "add", open: true });
   }
 
   function openEditSheet(index: number) {
-    setSheet({ open: true, mode: "edit", index, entry: dates[index] });
+    setSheet({ entry: dates[index], index, mode: "edit", open: true });
   }
 
   async function persistDates(nextDates: ImportantDate[]) {
@@ -93,10 +91,10 @@ export function ContactImportantDatesSection({
       setSheet({ open: false });
     } catch (err) {
       showToast({
-        type: "error",
-        headline: t("ContactImportantDates.ErrorTitle"),
         description:
-          err instanceof Error ? err.message : t("ContactImportantDates.UpdateError"),
+          err instanceof Error ? err.message : t("UpdateError", { ns: "ContactImportantDates" }),
+        headline: t("ErrorTitle", { ns: "ContactImportantDates" }),
+        type: "error",
       });
     } finally {
       setIsSubmitting(false);
@@ -133,17 +131,18 @@ export function ContactImportantDatesSection({
   return (
     <View style={contactDetailStyles.section}>
       <ContactDetailSectionHeader
-        titleKey="ContactImportantDates.Title"
         action={
           canAdd
             ? {
-                label: t("ContactInfo.Add"),
-                accessibilityLabel: t("ContactImportantDates.AddAction"),
+                accessibilityLabel: t("AddAction", { ns: "ContactImportantDates" }),
                 icon: <IconCalendarPlus size={16} stroke={colors.primary} />,
+                label: t("Add", { ns: "ContactInfo" }),
                 onPress: openAddSheet,
               }
             : undefined
         }
+        titleKey="Title"
+        titleNamespace="ContactImportantDates"
       />
 
       {sortedDates.length === 0 ? (
@@ -155,7 +154,7 @@ export function ContactImportantDatesSection({
           ]}
         >
           <Text style={[contactDetailStyles.emptyText, { color: colors.textMuted }]}>
-            {t("ContactImportantDates.Empty")}
+            {t("Empty", { ns: "ContactImportantDates" })}
           </Text>
         </View>
       ) : (
@@ -179,8 +178,8 @@ export function ContactImportantDatesSection({
                 </View>
 
                 <Pressable
-                  accessibilityRole="button"
                   accessibilityLabel={`${typeLabel}, ${formatImportantDate(dateEntry.date, dateLocale)}`}
+                  accessibilityRole="button"
                   onPress={() => openEditSheet(sourceIndex)}
                   style={contactDetailStyles.cardPressable}
                 >
@@ -208,15 +207,15 @@ export function ContactImportantDatesSection({
                 </Pressable>
 
                 <OverflowMenu
+                  accessibilityLabel={t("Title", { ns: "ContactImportantDates" })}
                   items={[
                     {
-                      id: "edit",
-                      label: t("ContactInfo.EditAction"),
                       icon: <IconPencil size={18} stroke={colors.iconPrimary} />,
+                      id: "edit",
+                      label: t("EditAction", { ns: "ContactInfo" }),
                       onPress: () => openEditSheet(sourceIndex),
                     },
                   ]}
-                  accessibilityLabel={t("ContactImportantDates.Title")}
                   triggerVariant="row"
                 />
               </View>
@@ -226,20 +225,20 @@ export function ContactImportantDatesSection({
       )}
 
       <EditImportantDateSheet
-        open={sheet.open}
-        mode={sheet.open ? sheet.mode : "add"}
-        initialEntry={sheet.open && sheet.mode === "edit" ? sheet.entry : null}
-        existingDates={dates}
         contactFirstName={contactFirstName}
+        existingDates={dates}
+        initialEntry={sheet.open && sheet.mode === "edit" ? sheet.entry : null}
         isSubmitting={isSubmitting}
+        mode={sheet.open ? sheet.mode : "add"}
+        onCancel={() => setSheet({ open: false })}
+        onDelete={sheet.open && sheet.mode === "edit" ? handleDeleteEntry : undefined}
         onOpenChange={(open) => {
           if (!open) {
             setSheet({ open: false });
           }
         }}
-        onCancel={() => setSheet({ open: false })}
         onSave={handleSaveEntry}
-        onDelete={sheet.open && sheet.mode === "edit" ? handleDeleteEntry : undefined}
+        open={sheet.open}
       />
     </View>
   );
@@ -251,8 +250,8 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   reminderRow: {
-    flexDirection: "row",
     alignItems: "center",
+    flexDirection: "row",
     gap: 4,
     marginTop: 4,
   },

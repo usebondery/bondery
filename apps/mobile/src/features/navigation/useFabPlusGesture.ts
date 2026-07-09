@@ -6,8 +6,8 @@ import { useFabSpeedDial } from "./fabSpeedDialContext";
 import { resolveFabHighlightedActionId } from "./fabSpeedDialHitTest";
 
 interface UseFabPlusGestureOptions {
-  measurePlusBubble: () => void;
   getPlusCancelY: () => number | null;
+  measurePlusBubble: () => void;
 }
 
 type PanSession = {
@@ -33,8 +33,8 @@ export function useFabPlusGesture({ measurePlusBubble, getPlusCancelY }: UseFabP
 
   const sessionRef = useRef<PanSession>({
     isDragMode: false,
-    wasOpenAtPanStart: false,
     openedDuringPan: false,
+    wasOpenAtPanStart: false,
   });
 
   const isOpenRef = useRef(isOpen);
@@ -47,16 +47,16 @@ export function useFabPlusGesture({ measurePlusBubble, getPlusCancelY }: UseFabP
     const resetSession = () => {
       sessionRef.current = {
         isDragMode: false,
-        wasOpenAtPanStart: false,
         openedDuringPan: false,
+        wasOpenAtPanStart: false,
       };
     };
 
     const handlePanBegin = () => {
       sessionRef.current = {
         isDragMode: false,
-        wasOpenAtPanStart: isOpenRef.current,
         openedDuringPan: false,
+        wasOpenAtPanStart: isOpenRef.current,
       };
       measurePlusBubble();
     };

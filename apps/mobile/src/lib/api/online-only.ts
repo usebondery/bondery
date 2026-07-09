@@ -1,6 +1,6 @@
-import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import { GEOCODE_SUGGEST_MIN_QUERY_LENGTH } from "@bondery/helpers/address";
 import { buildGeocodeSuggestQuery } from "@bondery/helpers/geocode";
+import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import type {
   Contact,
   ContactAddressEntry,
@@ -11,8 +11,8 @@ import type {
 import { parseGeocodeSuggestResponse } from "@bondery/schemas/geocode";
 import { File, UploadTask, UploadType } from "expo-file-system";
 import { API_URL, normalizeMobileUrlForDevice } from "../config";
-import { apiRequest, getBearerHeaders, throwApiResponseError } from "./transport";
 import { resolveFetchFailureMessage } from "./parseApiErrorBody";
+import { apiRequest, getBearerHeaders, throwApiResponseError } from "./transport";
 
 const ALL_SHAREABLE_FIELDS: ShareableField[] = [
   "name",
@@ -92,9 +92,9 @@ export async function fetchContactVCard(
   if (!response.ok) {
     const text = await response.text();
     await throwApiResponseError({
-      status: response.status,
       bodyText: text,
       contentType: response.headers.get("content-type"),
+      status: response.status,
     });
   }
 
@@ -120,14 +120,14 @@ export async function uploadContactPhoto(
 
   const authHeaders = await getBearerHeaders();
   const uploadTask = new UploadTask(new File(uri), `${API_URL}${API_ROUTES.CONTACTS}/${id}/photo`, {
-    httpMethod: "POST",
-    uploadType: UploadType.MULTIPART,
     fieldName: "file",
-    mimeType,
     headers: authHeaders,
+    httpMethod: "POST",
+    mimeType,
+    uploadType: UploadType.MULTIPART,
   });
 
-  let result;
+  let result: Awaited<ReturnType<UploadTask["uploadAsync"]>>;
   try {
     result = await uploadTask.uploadAsync();
   } catch (error) {
@@ -136,8 +136,8 @@ export async function uploadContactPhoto(
 
   if (result.status < 200 || result.status >= 300) {
     await throwApiResponseError({
-      status: result.status,
       bodyText: result.body ?? "",
+      status: result.status,
     });
   }
 
@@ -172,8 +172,8 @@ export async function updateSettings(input: UpdateUserSettingsInput): Promise<{
   data: UserSettingsResponse["data"];
 }> {
   return apiRequest(API_ROUTES.ME_SETTINGS, {
-    method: "PATCH",
     body: JSON.stringify(input),
+    method: "PATCH",
   });
 }
 
@@ -189,7 +189,9 @@ export async function fetchGeocodeSuggestions(
   signal?: AbortSignal,
 ): Promise<ContactAddressEntry[]> {
   const trimmed = query.trim();
-  if (trimmed.length < GEOCODE_SUGGEST_MIN_QUERY_LENGTH) return [];
+  if (trimmed.length < GEOCODE_SUGGEST_MIN_QUERY_LENGTH) {
+    return [];
+  }
 
   const result = await apiRequest(
     `${API_ROUTES.GEOCODE_SUGGEST}?${buildGeocodeSuggestQuery(trimmed, mode)}`,
@@ -204,12 +206,12 @@ export async function shareContactEmail(input: {
   message?: string;
 }): Promise<void> {
   await apiRequest<{ success: boolean }>(API_ROUTES.CONTACTS_SHARE, {
-    method: "POST",
     body: JSON.stringify({
+      message: input.message,
       personId: input.personId,
       recipientEmails: input.recipientEmails,
-      message: input.message,
       selectedFields: ALL_SHAREABLE_FIELDS,
     }),
+    method: "POST",
   });
 }

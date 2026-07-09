@@ -1,25 +1,25 @@
 "use client";
 
-import { Group, Stack, Text } from "@mantine/core";
-import { TimePicker } from "@mantine/dates";
-import { notifications } from "@mantine/notifications";
-import { IconBell } from "@tabler/icons-react";
-import { useState } from "react";
-import type { ReactNode } from "react";
-import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
-import { useUpdateSettingsMutation } from "@/lib/query/hooks/useSettings";
 import {
   errorNotificationTemplate,
   loadingNotificationTemplate,
   successNotificationTemplate,
 } from "@bondery/mantine-next";
 import { firstZodErrorMessage, reminderSendHourSchema } from "@bondery/schemas";
+import { Group, Stack, Text } from "@mantine/core";
+import { TimePicker } from "@mantine/dates";
+import { notifications } from "@mantine/notifications";
+import { IconBell } from "@tabler/icons-react";
+import type { ReactNode } from "react";
+import { useState } from "react";
+import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
+import { useUpdateSettingsMutation } from "@/lib/query/hooks/useSettings";
 
 interface ReminderTimePickerProps {
-  initialTime: string;
-  timeFormat: "24h" | "12h";
-  label?: ReactNode;
   description?: string;
+  initialTime: string;
+  label?: ReactNode;
+  timeFormat: "24h" | "12h";
 }
 
 function parseInputTimeTo24h(value: string): string | null {
@@ -121,7 +121,7 @@ export function ReminderTimePicker({
   label,
   description,
 }: ReminderTimePickerProps) {
-  const t = useTranslations("SettingsPage.Preferences");
+  const t = useWebTranslations("SettingsPage", "Preferences");
   const updateSettingsMutation = useUpdateSettingsMutation();
   const initialHourValue = roundToHourValue(toInputTime(initialTime));
   const [value24h, setValue24h] = useState(initialHourValue);
@@ -151,8 +151,8 @@ export function ReminderTimePicker({
     if (!apiTime) {
       notifications.show(
         errorNotificationTemplate({
-          title: t("UpdateError"),
           description: t("InvalidReminderTime"),
+          title: t("UpdateError"),
         }),
       );
       setValue24h(savedTime24h);
@@ -163,8 +163,8 @@ export function ReminderTimePicker({
     if (!parsedReminderTime.success) {
       notifications.show(
         errorNotificationTemplate({
-          title: t("UpdateError"),
           description: firstZodErrorMessage(parsedReminderTime.error),
+          title: t("UpdateError"),
         }),
       );
       setValue24h(savedTime24h);
@@ -177,8 +177,8 @@ export function ReminderTimePicker({
 
     const loadingNotification = notifications.show({
       ...loadingNotificationTemplate({
-        title: t("UpdatingReminderTime"),
         description: t("PleaseWait"),
+        title: t("UpdatingReminderTime"),
       }),
     });
 
@@ -193,8 +193,8 @@ export function ReminderTimePicker({
       notifications.hide(loadingNotification);
       notifications.show(
         successNotificationTemplate({
-          title: t("UpdateSuccess"),
           description: t("ReminderTimeUpdateSuccess"),
+          title: t("UpdateSuccess"),
         }),
       );
     } catch {
@@ -203,8 +203,8 @@ export function ReminderTimePicker({
       notifications.hide(loadingNotification);
       notifications.show(
         errorNotificationTemplate({
-          title: t("UpdateError"),
           description: t("ReminderTimeUpdateError"),
+          title: t("UpdateError"),
         }),
       );
     }
@@ -212,20 +212,24 @@ export function ReminderTimePicker({
 
   return (
     <Stack gap={4}>
-      <Text size="sm" fw={500}>
+      <Text fw={500} size="sm">
         {label ?? t("ReminderTime")}
       </Text>
       {description && (
-        <Text size="xs" c="dimmed">
+        <Text c="dimmed" size="xs">
           {description}
         </Text>
       )}
       <Group align="flex-end" grow wrap="wrap">
         <div style={{ flex: 1, minWidth: 220 }}>
           <TimePicker
+            format={timeFormat}
             key={timeFormat}
-            value={value24h}
             leftSection={<IconBell size={16} />}
+            minutesStep={60}
+            onBlur={() => {
+              void persistReminderHour(value24h);
+            }}
             onChange={(nextValue) => {
               if (!nextValue) {
                 return;
@@ -238,13 +242,9 @@ export function ReminderTimePicker({
 
               setValue24h(parsedValue);
             }}
-            onBlur={() => {
-              void persistReminderHour(value24h);
-            }}
-            withDropdown
             presets={presetGroups}
-            minutesStep={60}
-            format={timeFormat}
+            value={value24h}
+            withDropdown
           />
         </div>
       </Group>

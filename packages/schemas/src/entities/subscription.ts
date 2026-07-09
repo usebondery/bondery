@@ -12,13 +12,13 @@ export const subscriptionStatusValueSchema = z.enum([
 /** Subscription table row shape (internal). */
 export const subscriptionSchema = z
   .object({
+    cancelAtPeriodEnd: z.boolean(),
+    currentPeriodEnd: nullableDateTimeSchema,
     id: z.string(),
-    userId: z.string(),
     polarCustomerId: z.string(),
     polarSubscriptionId: z.string(),
     status: subscriptionStatusValueSchema,
-    currentPeriodEnd: nullableDateTimeSchema,
-    cancelAtPeriodEnd: z.boolean(),
+    userId: z.string(),
   })
   .extend(entityAuditSchema.shape);
 
@@ -37,19 +37,19 @@ export const polarSubscriptionStatusSchema = z.enum([
 export const polarRecurringIntervalSchema = z.enum(["day", "week", "month", "year"]);
 
 export const subscriptionStatusSchema = z.object({
-  plan: planTierSchema,
-  aiMessagesUsed: z.number(),
   aiMessageLimit: z.number(),
+  aiMessagesUsed: z.number(),
   aiMonthlyResetAt: nullableDateTimeSchema,
-  canUseChat: z.boolean(),
-  currentPeriodEnd: nullableDateTimeSchema,
-  cancelAtPeriodEnd: z.boolean(),
-  polarStatus: polarSubscriptionStatusSchema.nullable(),
-  trialEndsAt: nullableDateTimeSchema,
   amount: z.number().nullable(),
+  cancelAtPeriodEnd: z.boolean(),
+  canUseChat: z.boolean(),
   currency: z.string().nullable(),
+  currentPeriodEnd: nullableDateTimeSchema,
+  plan: planTierSchema,
+  polarStatus: polarSubscriptionStatusSchema.nullable(),
   productName: z.string().nullable(),
   recurringInterval: polarRecurringIntervalSchema.nullable(),
+  trialEndsAt: nullableDateTimeSchema,
 });
 
 export type SubscriptionStatusValue = z.infer<typeof subscriptionStatusValueSchema>;

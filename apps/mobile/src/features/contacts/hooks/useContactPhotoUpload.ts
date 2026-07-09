@@ -1,7 +1,8 @@
-import { useCallback, useState } from "react";
 import * as ImagePicker from "expo-image-picker";
 import * as Network from "expo-network";
-import { deleteContactPhoto, uploadContactPhoto } from "../../../lib/api/client";import { AVATAR_UPLOAD } from "../../../lib/config";
+import { useCallback, useState } from "react";
+import { deleteContactPhoto, uploadContactPhoto } from "../../../lib/api/client";
+import { AVATAR_UPLOAD } from "../../../lib/config";
 import { useMobileTranslations } from "../../../lib/i18n/useMobileTranslations";
 import { useAppToast } from "../../../lib/toast/useAppToast";
 
@@ -25,9 +26,9 @@ export function useContactPhotoUpload({
       return true;
     }
     showToast({
+      description: t("PhotoRequiresConnection", { ns: "MobileContactIdentity" }),
+      headline: t("feedback.errorTitle", { ns: "common" }),
       type: "error",
-      headline: t("MobileApp.Common.ErrorTitle"),
-      description: t("MobileApp.ContactIdentity.PhotoRequiresConnection"),
     });
     return false;
   }, [showToast, t]);
@@ -44,12 +45,12 @@ export function useContactPhotoUpload({
         onAvatarUpdated(avatarUrl);
       } catch (err) {
         showToast({
-          type: "error",
-          headline: t("MobileApp.Common.ErrorTitle"),
           description:
             err instanceof Error
               ? err.message
-              : t("MobileApp.ContactIdentity.PhotoUploadFailed"),
+              : t("PhotoUploadFailed", { ns: "MobileContactIdentity" }),
+          headline: t("feedback.errorTitle", { ns: "common" }),
+          type: "error",
         });
       } finally {
         setIsPhotoBusy(false);
@@ -66,17 +67,17 @@ export function useContactPhotoUpload({
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!permission.granted) {
       showToast({
+        description: t("PhotoPermissionDenied", { ns: "MobileContactIdentity" }),
+        headline: t("feedback.errorTitle", { ns: "common" }),
         type: "error",
-        headline: t("MobileApp.Common.ErrorTitle"),
-        description: t("MobileApp.ContactIdentity.PhotoPermissionDenied"),
       });
       return;
     }
 
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ["images"],
       allowsEditing: true,
       aspect: [1, 1],
+      mediaTypes: ["images"],
       quality: 0.9,
     });
 
@@ -93,9 +94,9 @@ export function useContactPhotoUpload({
       )
     ) {
       showToast({
+        description: t("InvalidPhotoType", { ns: "MobileContactIdentity" }),
+        headline: t("feedback.errorTitle", { ns: "common" }),
         type: "error",
-        headline: t("MobileApp.Common.ErrorTitle"),
-        description: t("MobileApp.ContactIdentity.InvalidPhotoType"),
       });
       return;
     }
@@ -115,19 +116,19 @@ export function useContactPhotoUpload({
       setRemoveConfirmOpen(false);
     } catch {
       showToast({
+        description: t("PhotoRemoveFailed", { ns: "MobileContactIdentity" }),
+        headline: t("feedback.errorTitle", { ns: "common" }),
         type: "error",
-        headline: t("MobileApp.Common.ErrorTitle"),
-        description: t("MobileApp.ContactIdentity.PhotoRemoveFailed"),
       });
     } finally {
       setIsPhotoBusy(false);
     }
   }, [contactId, ensureOnline, onAvatarUpdated, showToast, t]);
   return {
+    choosePhotoFromLibrary,
     isPhotoBusy,
     isRemoveConfirmOpen,
-    setRemoveConfirmOpen,
-    choosePhotoFromLibrary,
     removePhoto,
+    setRemoveConfirmOpen,
   };
 }

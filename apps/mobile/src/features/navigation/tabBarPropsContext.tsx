@@ -1,18 +1,18 @@
 import type { BottomTabBarProps } from "@react-navigation/bottom-tabs";
 import {
   createContext,
+  type ReactNode,
   useCallback,
   useContext,
   useLayoutEffect,
   useMemo,
   useRef,
   useState,
-  type ReactNode,
 } from "react";
 
 interface TabBarPropsContextValue {
-  tabBarProps: BottomTabBarProps | null;
   syncTabBarProps: (props: BottomTabBarProps) => void;
+  tabBarProps: BottomTabBarProps | null;
   tabBarRevision: number;
 }
 
@@ -30,7 +30,8 @@ export function TabBarPropsProvider({ children }: { children: ReactNode }) {
     const previous = tabBarPropsRef.current;
     tabBarPropsRef.current = props;
 
-    const focusChanged = getFocusedRouteKey(props) !== (previous ? getFocusedRouteKey(previous) : undefined);
+    const focusChanged =
+      getFocusedRouteKey(props) !== (previous ? getFocusedRouteKey(previous) : undefined);
     const routeCountChanged = previous?.state.routes.length !== props.state.routes.length;
 
     if (!previous || focusChanged || routeCountChanged) {
@@ -40,8 +41,8 @@ export function TabBarPropsProvider({ children }: { children: ReactNode }) {
 
   const value = useMemo(
     () => ({
-      tabBarProps: tabBarPropsRef.current,
       syncTabBarProps,
+      tabBarProps: tabBarPropsRef.current,
       tabBarRevision,
     }),
     [syncTabBarProps, tabBarRevision],

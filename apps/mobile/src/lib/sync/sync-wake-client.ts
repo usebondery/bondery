@@ -2,18 +2,14 @@ import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import {
   buildSyncWsUrl,
   parseSyncWsServerMessage,
-  syncWsTicketResponseSchema,
   type SyncWsBatchMessage,
+  syncWsTicketResponseSchema,
 } from "@bondery/schemas/sync";
 import { API_URL } from "../config";
 import { supabase } from "../supabase/client";
 import { syncRequestHeaders } from "./constants";
 import { ensureDeviceId } from "./outbox/pending-mutations";
-import {
-  onSyncWakeEvent,
-  onSyncWakeReconnect,
-  setSyncPullMode,
-} from "./pull-manager";
+import { onSyncWakeEvent, onSyncWakeReconnect, setSyncPullMode } from "./pull-manager";
 
 const MIN_RECONNECT_MS = 1_000;
 const MAX_RECONNECT_MS = 30_000;
@@ -25,7 +21,9 @@ type SyncWakeClient = {
 let activeClient: SyncWakeClient | null = null;
 
 async function getAccessToken(): Promise<string | null> {
-  if (!supabase) return null;
+  if (!supabase) {
+    return null;
+  }
   const { data } = await supabase.auth.getSession();
   return data.session?.access_token ?? null;
 }
@@ -54,14 +52,16 @@ async function fetchWsTicket(): Promise<string> {
 }
 
 function sendPong(socket: WebSocket): void {
-  socket.send(JSON.stringify({ v: 1, type: "pong" }));
+  socket.send(JSON.stringify({ type: "pong", v: 1 }));
 }
 
 function handleServerMessage(
   message: ReturnType<typeof parseSyncWsServerMessage>,
   myDeviceId: string,
 ): void {
-  if (!message) return;
+  if (!message) {
+    return;
+  }
 
   if (message.type === "ping") {
     return;
@@ -75,9 +75,9 @@ function handleServerMessage(
   if (message.type === "sync.batch") {
     const batch = message as SyncWsBatchMessage;
     onSyncWakeEvent({
+      myDeviceId,
       serverSequence: batch.serverSequence,
       sourceDeviceId: batch.sourceDeviceId,
-      myDeviceId,
     });
   }
 }
@@ -91,7 +91,9 @@ export async function startSyncWakeClient(): Promise<SyncWakeClient> {
   const myDeviceId = await ensureDeviceId();
 
   const connect = async () => {
-    if (stopped) return;
+    if (stopped) {
+      return;
+    }
 
     try {
       const ticket = await fetchWsTicket();
@@ -136,7 +138,9 @@ export async function startSyncWakeClient(): Promise<SyncWakeClient> {
   };
 
   const scheduleReconnect = () => {
-    if (reconnectTimer || stopped) return;
+    if (reconnectTimer || stopped) {
+      return;
+    }
     const jitter = Math.floor(Math.random() * 250);
     reconnectTimer = setTimeout(() => {
       reconnectTimer = null;

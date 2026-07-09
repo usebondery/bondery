@@ -1,19 +1,19 @@
 import type { ReactNode } from "react";
 import type { StyleProp, ViewStyle } from "react-native";
-import { MOBILE_HIT_SLOP, MOBILE_LAYOUT } from "../theme/tokens";
 import { Tappable } from "../theme/Tappable";
+import { MOBILE_HIT_SLOP, MOBILE_LAYOUT } from "../theme/tokens";
 import { useMobileThemeColors } from "../theme/useMobileThemeColors";
 
 type MobileIconButtonTone = "default" | "danger" | "primary";
 
 interface MobileIconButtonProps {
-  icon: ReactNode;
   accessibilityLabel: string;
-  onPress: () => void;
   disabled?: boolean;
-  tone?: MobileIconButtonTone;
+  icon: ReactNode;
+  onPress: () => void;
   size?: number;
   style?: StyleProp<ViewStyle>;
+  tone?: MobileIconButtonTone;
 }
 
 export function MobileIconButton({
@@ -34,27 +34,26 @@ export function MobileIconButton({
         ? colors.primary
         : colors.surfaceElevated;
 
-  const borderColor =
-    tone === "danger" ? colors.dangerAccent : colors.borderStrong;
+  const borderColor = tone === "danger" ? colors.dangerAccent : colors.borderStrong;
 
   return (
     <Tappable
-      accessibilityRole="button"
       accessibilityLabel={accessibilityLabel}
-      disabled={disabled}
-      hitSlop={MOBILE_HIT_SLOP.compact}
-      onPress={onPress}
-      width={size}
-      height={size}
+      accessibilityRole="button"
+      alignItems="center"
+      backgroundColor={backgroundColor}
+      borderColor={borderColor}
       borderRadius={MOBILE_LAYOUT.borderRadius.pill}
       borderWidth={1}
-      borderColor={borderColor}
-      backgroundColor={backgroundColor}
-      alignItems="center"
+      disabled={disabled}
+      height={size}
+      hitSlop={MOBILE_HIT_SLOP.compact}
       justifyContent="center"
+      onPress={onPress}
       opacity={disabled ? 0.5 : 1}
       style={style}
       variant="subtle"
+      width={size}
     >
       {icon}
     </Tappable>

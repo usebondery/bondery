@@ -1,14 +1,10 @@
 "use client";
 
-import { useMemo, useState } from "react";
-
-import { useRouter } from "next/navigation";
-import { Stack, TextInput, Text } from "@mantine/core";
-import { schemaResolver, useForm } from "@mantine/form";
-import { modals } from "@mantine/modals";
-import { notifications } from "@mantine/notifications";
-import { IconBrandLinkedin, IconUserPlus } from "@tabler/icons-react";
-import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
+import { extractUsername } from "@bondery/helpers";
+import { getUserFacingError } from "@bondery/helpers/api";
+import { createContactFromFullNameSchema } from "@bondery/helpers/forms";
+import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
+import { getRandomExampleName } from "@bondery/helpers/name";
 import {
   errorNotificationTemplate,
   loadingNotificationTemplate,
@@ -16,20 +12,25 @@ import {
   ModalTitle,
   successNotificationTemplate,
 } from "@bondery/mantine-next";
-import { z } from "zod";
-import { useCreateContactMutation } from "@/lib/query/hooks/useContacts";
-import { getRandomExampleName } from "@bondery/helpers/name";
-import { createContactFromFullNameSchema } from "@bondery/helpers/forms";
 import {
   CONTACT_FIELD_MAX_LENGTHS,
+  type Contact,
   createContactInputSchema,
   firstZodErrorMessage,
-  type Contact,
 } from "@bondery/schemas";
-import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
+import { Stack, Text, TextInput } from "@mantine/core";
+import { schemaResolver, useForm } from "@mantine/form";
+import { modals } from "@mantine/modals";
+import { notifications } from "@mantine/notifications";
+import { IconBrandLinkedin, IconUserPlus } from "@tabler/icons-react";
+import { useMemo, useState } from "react";
+import { z } from "zod";
 import { captureEvent } from "@/lib/analytics/client";
-import { extractUsername } from "@bondery/helpers";
-import { createModalId, useModalBlocking } from "@/lib/modals";
+import { useCommonTranslations, useWebTranslations } from "@/lib/i18n/useWebTranslations";
+import { optimisticPersonDocumentTitle } from "@/lib/metadata/optimisticTitles";
+import { useNavigateWithTitle } from "@/lib/metadata/useNavigateWithTitle";
+import { createModalId, useModalDismiss } from "@/lib/modals";
+import { useCreateContactMutation } from "@/lib/query/hooks/useContacts";
 
 const addContactFormSchema = z
   .object({
@@ -42,17 +43,17 @@ const addContactFormSchema = z
       for (const issue of result.error.issues) {
         context.addIssue({
           code: "custom",
-          path: issue.path,
           message: issue.message,
+          path: issue.path,
         });
       }
     }
   });
 
 interface OpenAddContactModalOptions {
-  onCreated?: (contact: Contact) => void;
   initialFullName?: string;
   initialLinkedin?: string;
+  onCreated?: (contact: Contact) => void;
 }
 
 interface AddContactFormProps extends OpenAddContactModalOptions {
@@ -60,18 +61,18 @@ interface AddContactFormProps extends OpenAddContactModalOptions {
 }
 
 function AddContactModalTitle() {
-  const t = useTranslations("PeoplePage");
-  return <ModalTitle text={t("AddContactModal.Title")} icon={<IconUserPlus size={24} />} />;
+  const t = useWebTranslations("PeoplePage");
+  return <ModalTitle icon={<IconUserPlus size={24} />} text={t("AddContactModal.Title")} />;
 }
 
 export function openAddContactModal(options: OpenAddContactModalOptions = {}) {
   const modalId = createModalId("add-contact");
 
   modals.open({
+    children: <AddContactForm modalId={modalId} {...options} />,
     modalId,
     title: <AddContactModalTitle />,
     trapFocus: true,
-    children: <AddContactForm modalId={modalId} {...options} />,
   });
 }
 
@@ -81,22 +82,23 @@ export function AddContactForm({
   initialFullName = "",
   initialLinkedin = "",
 }: AddContactFormProps) {
-  const router = useRouter();
-  const t = useTranslations("PeoplePage");
+  const { navigateWithTitle } = useNavigateWithTitle();
+  const t = useWebTranslations("PeoplePage");
+  const tCommon = useCommonTranslations();
   const [focusedField, setFocusedField] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const createContactMutation = useCreateContactMutation();
 
-  useModalBlocking(modalId, isSubmitting);
+  const { closeModal } = useModalDismiss(modalId, isSubmitting);
 
   const exampleName = useMemo(() => getRandomExampleName(), []);
 
   const form = useForm({
-    mode: "controlled",
     initialValues: {
       fullName: initialFullName,
       linkedin: initialLinkedin,
     },
+    mode: "controlled",
     validate: schemaResolver(addContactFormSchema, { sync: true }),
   });
 
@@ -105,8 +107,8 @@ export function AddContactForm({
 
     const loadingNotification = notifications.show({
       ...loadingNotificationTemplate({
-        title: t("AddContactModal.LoadingTitle"),
         description: t("AddContactModal.LoadingDescription"),
+        title: t("AddContactModal.LoadingTitle"),
       }),
     });
 
@@ -128,35 +130,35 @@ export function AddContactForm({
 
       notifications.show(
         successNotificationTemplate({
-          title: t("AddContactModal.SuccessTitle"),
           description: t("AddContactModal.SuccessDescription"),
+          title: t("AddContactModal.SuccessTitle"),
         }),
       );
 
       captureEvent("contact_created");
 
-      modals.close(modalId);
+      closeModal();
 
       if (onCreated) {
         onCreated(createdContact);
         return;
       }
 
-      router.refresh();
-      router.push(`${WEBAPP_ROUTES.PERSON}/${createdContact.id}`);
+      navigateWithTitle(
+        `${WEBAPP_ROUTES.PERSON}/${createdContact.id}`,
+        optimisticPersonDocumentTitle(createdContact),
+      );
     } catch (error) {
       notifications.hide(loadingNotification);
 
       const fallbackMessage =
         error instanceof z.ZodError
           ? firstZodErrorMessage(error)
-          : error instanceof Error
-            ? error.message
-            : t("AddContactModal.CreateFailed");
+          : getUserFacingError(error, tCommon);
       notifications.show(
         errorNotificationTemplate({
-          title: t("AddContactModal.ErrorTitle"),
           description: fallbackMessage,
+          title: t("AddContactModal.ErrorTitle"),
         }),
       );
 
@@ -168,20 +170,20 @@ export function AddContactForm({
     <form onSubmit={form.onSubmit(handleSubmit)}>
       <Stack>
         <TextInput
+          key={form.key("fullName")}
           label={t("AddContactModal.FullNameInput")}
+          maxLength={CONTACT_FIELD_MAX_LENGTHS.fullName}
           placeholder={`${exampleName.firstName} ${exampleName.lastName}`}
           withAsterisk
-          maxLength={CONTACT_FIELD_MAX_LENGTHS.fullName}
-          key={form.key("fullName")}
           {...form.getInputProps("fullName")}
-          disabled={isSubmitting}
-          data-autofocus
           autoFocus
-          onFocus={() => setFocusedField("fullName")}
+          data-autofocus
+          disabled={isSubmitting}
           onBlur={() => setFocusedField(null)}
+          onFocus={() => setFocusedField("fullName")}
           rightSection={
             focusedField === "fullName" ? (
-              <Text size="10px" c="dimmed">
+              <Text c="dimmed" size="10px">
                 {form.values.fullName.length}/{CONTACT_FIELD_MAX_LENGTHS.fullName}
               </Text>
             ) : null
@@ -189,13 +191,13 @@ export function AddContactForm({
         />
 
         <TextInput
-          label={t("AddContactModal.LinkedInInput")}
-          placeholder={t("AddContactModal.LinkedInPlaceholder")}
-          maxLength={200}
-          leftSection={<IconBrandLinkedin size={16} />}
           key={form.key("linkedin")}
+          label={t("AddContactModal.LinkedInInput")}
+          leftSection={<IconBrandLinkedin size={16} />}
+          maxLength={200}
+          placeholder={t("AddContactModal.LinkedInPlaceholder")}
           {...form.getInputProps("linkedin")}
-          onFocus={() => setFocusedField("linkedin")}
+          disabled={isSubmitting}
           onBlur={(e) => {
             setFocusedField(null);
             const raw = e.currentTarget.value.trim();
@@ -204,18 +206,18 @@ export function AddContactForm({
               form.setFieldValue("linkedin", extracted);
             }
           }}
-          disabled={isSubmitting}
+          onFocus={() => setFocusedField("linkedin")}
         />
 
         <ModalFooter
-          cancelLabel={t("AddContactModal.Cancel")}
-          onCancel={() => modals.close(modalId)}
-          cancelDisabled={isSubmitting}
-          actionLabel={t("AddContactModal.AddToBondery")}
-          actionType="submit"
-          actionLoading={isSubmitting}
           actionDisabled={isSubmitting}
+          actionLabel={t("AddContactModal.AddToBondery")}
           actionLeftSection={!isSubmitting ? <IconUserPlus size={16} /> : undefined}
+          actionLoading={isSubmitting}
+          actionType="submit"
+          cancelDisabled={isSubmitting}
+          cancelLabel={t("AddContactModal.Cancel")}
+          onCancel={closeModal}
         />
       </Stack>
     </form>

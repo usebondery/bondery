@@ -9,8 +9,12 @@ on:
 jobs:
   contract:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       - uses: actions/setup-node@v4
         with:
@@ -19,6 +23,16 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
+
+      - uses: biomejs/setup-biome@v2
+        with:
+          version: 2.5.0
+
+      - name: Biome
+        run: biome ci .
+
+      - name: Check dev ports
+        run: npm run check-dev-ports
 
       - name: Validate doc links
         run: npm run check-doc-links
@@ -31,3 +45,24 @@ jobs:
 
       - name: Typecheck
         run: npm run check-types
+
+      - name: Translation checks
+        run: |
+          npm run check-translations
+          npm run check-api-error-translations
+          npm run i18n:types:check
+          npm run i18n:status:check
+          node packages/translations/scripts/verify-i18next-hook-extraction.mjs
+          npm run i18n:lint
+
+      - name: API error checks
+        run: |
+          npm run check-route-errors -w apps/api
+          npm run check-error-docs
+          npm run check-user-facing-errors
+
+      - name: API sync unit tests
+        run: npm run test:sync -w apps/api
+
+      - name: API smoke tests
+        run: npm run test:api -w apps/api

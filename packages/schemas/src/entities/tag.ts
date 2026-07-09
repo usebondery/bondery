@@ -1,7 +1,5 @@
 import { z } from "zod";
 import { GROUP_LABEL_MAX_LENGTH } from "#constants/index.js";
-import { hexColorSchema } from "#primitives/index.js";
-import { contactPreviewSchema, contactSchema } from "#entities/contact.js";
 import {
   createdAtSchema,
   entityAuditSchema,
@@ -11,21 +9,24 @@ import {
   makeCollectionResponseSchema,
   makeListResponseSchema,
   makePaginatedListResponseSchema,
-  messageResponseSchema,
   personIdsSelectionSchema,
 } from "#entities/_shared.js";
+import { contactPreviewSchema, contactSchema } from "#entities/contact.js";
+import { hexColorSchema } from "#primitives/index.js";
 
 const tagLabelSchema = labelFieldSchema(GROUP_LABEL_MAX_LENGTH);
 
 const tagEditableFieldsSchema = z.object({
-  label: tagLabelSchema,
   color: hexColorSchema,
+  label: tagLabelSchema,
 });
 
-export const tagSchema = entityIdentitySchema.extend({
-  label: z.string(),
-  color: z.string().nullable(),
-}).extend(entityAuditSchema.shape);
+export const tagSchema = entityIdentitySchema
+  .extend({
+    color: z.string().nullable(),
+    label: z.string(),
+  })
+  .extend(entityAuditSchema.shape);
 
 export const tagWithCountSchema = tagSchema.extend({
   contactCount: z.number(),
@@ -33,11 +34,11 @@ export const tagWithCountSchema = tagSchema.extend({
 });
 
 export const peopleTagSchema = z.object({
+  created_at: createdAtSchema,
   id: z.string(),
   personId: z.string(),
   tagId: z.string(),
   userId: z.string(),
-  created_at: createdAtSchema,
 });
 
 export const createTagSchema = tagEditableFieldsSchema;
@@ -47,27 +48,26 @@ export const createTagInputSchema = z.object({ label: tagLabelSchema });
 
 export const updateTagSchema = createTagSchema.partial();
 
-export const tagResponseSchema = z
-  .object({
-    tag: tagSchema,
-  })
-  ;
+export const tagResponseSchema = z.object({
+  tag: tagSchema,
+});
 
-export const tagUpdateResponseSchema = messageResponseSchema
-  .extend({
-    tag: tagSchema,
-  })
-  ;
+export const tagUpdateResponseSchema = tagResponseSchema;
+
+export const addContactsToTagResponseSchema = z.object({
+  addedCount: z.number(),
+});
+
+export const removeContactsFromTagResponseSchema = z.object({
+  removedCount: z.number(),
+});
 
 export const tagContactsListResponseSchema = makePaginatedListResponseSchema(
   "contacts",
   contactSchema,
 );
 
-export const tagsListResponseSchema = makeListResponseSchema(
-  "tags",
-  tagWithCountSchema,
-);
+export const tagsListResponseSchema = makeListResponseSchema("tags", tagWithCountSchema);
 
 export const tagMembersListResponseSchema = makePaginatedListResponseSchema(
   "contacts",
@@ -76,10 +76,7 @@ export const tagMembersListResponseSchema = makePaginatedListResponseSchema(
 
 export const contactTagsResponseSchema = makeCollectionResponseSchema("tags", tagWithCountSchema);
 
-export const contactTagListResponseSchema = makeCollectionResponseSchema(
-  "tags",
-  tagSchema,
-);
+export const contactTagListResponseSchema = makeCollectionResponseSchema("tags", tagSchema);
 
 export const tagMembershipRequestSchema = personIdsSelectionSchema;
 

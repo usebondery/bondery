@@ -2,13 +2,11 @@
  * Production server factory: buildApp + runtime lifecycle (auth verify, sync wake).
  */
 
-import type { AppFastifyInstance } from "./lib/fastify-types.js";
-import { verifyAuthAtStartup } from "./lib/auth.js";
-import {
-  initSyncWakeRuntime,
-  shutdownSyncWakeRuntime,
-} from "./lib/sync/wake/index.js";
 import { buildApp } from "./build-app.js";
+import { shutdownRedis } from "./lib/data/redis.js";
+import { verifyAuthAtStartup } from "./lib/platform/auth/strategies.js";
+import type { AppFastifyInstance } from "./lib/platform/fastify-types.js";
+import { initSyncWakeRuntime, shutdownSyncWakeRuntime } from "./lib/sync/wake/index.js";
 
 export async function buildServer(): Promise<AppFastifyInstance> {
   const fastify = await buildApp();
@@ -20,6 +18,7 @@ export async function buildServer(): Promise<AppFastifyInstance> {
 
   fastify.addHook("onClose", async () => {
     await shutdownSyncWakeRuntime();
+    await shutdownRedis();
   });
 
   return fastify;

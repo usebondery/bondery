@@ -3,41 +3,41 @@
 import dynamic from "next/dynamic";
 
 export interface PeopleMapMarker {
-  id: string;
-  name: string;
+  avatarUrl?: string | null;
   firstName?: string;
+  href?: string;
+  id: string;
   lastName?: string | null;
   latitude: number;
   longitude: number;
-  avatarUrl?: string | null;
-  href?: string;
+  name: string;
 }
 
 export interface PeopleMapFocus {
   latitude: number;
   longitude: number;
-  zoom?: number;
   token: string;
+  zoom?: number;
 }
 
 export interface MapBounds {
-  minLat: number;
   maxLat: number;
-  minLon: number;
   maxLon: number;
+  minLat: number;
+  minLon: number;
 }
 
 interface PeopleMapProps {
-  markers: PeopleMapMarker[];
   center?: [number, number];
-  zoom?: number;
-  height?: number;
-  scrollWheelZoom?: boolean;
-  focus?: PeopleMapFocus | null;
-  onVisibleMarkerIdsChange?: (markerIds: string[]) => void;
-  onBoundsChange?: (bounds: MapBounds) => void;
   disableAutoFit?: boolean;
   disableChipNavigation?: boolean;
+  focus?: PeopleMapFocus | null;
+  height?: number;
+  markers: PeopleMapMarker[];
+  onBoundsChange?: (bounds: MapBounds) => void;
+  onVisibleMarkerIdsChange?: (markerIds: string[]) => void;
+  scrollWheelZoom?: boolean;
+  zoom?: number;
 }
 
 const PeopleMapClient = dynamic(
@@ -59,16 +59,16 @@ export function PeopleMap({
 }: PeopleMapProps) {
   return (
     <PeopleMapClient
-      markers={markers}
       center={center}
-      zoom={zoom}
-      height={height}
-      scrollWheelZoom={scrollWheelZoom}
-      focus={focus}
-      onVisibleMarkerIdsChange={onVisibleMarkerIdsChange}
-      onBoundsChange={onBoundsChange}
       disableAutoFit={disableAutoFit}
       disableChipNavigation={disableChipNavigation}
+      focus={focus}
+      height={height}
+      markers={markers}
+      onBoundsChange={onBoundsChange}
+      onVisibleMarkerIdsChange={onVisibleMarkerIdsChange}
+      scrollWheelZoom={scrollWheelZoom}
+      zoom={zoom}
     />
   );
 }

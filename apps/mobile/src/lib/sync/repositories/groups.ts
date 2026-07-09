@@ -1,32 +1,11 @@
 import type { Contact, Group, GroupWithCount } from "@bondery/schemas";
+import { GROUPS_ORDER_BY_LABEL, type GroupRow, mapGroupRow } from "../../resources/groups";
 import { getSyncDatabase } from "../db";
 import { listContacts } from "./contacts";
 
-type GroupRow = {
-  id: string;
-  user_id: string;
-  label: string;
-  emoji: string | null;
-  color: string | null;
-  created_at: string;
-  updated_at: string;
-};
-
-function mapGroupRow(row: GroupRow): Group {
-  return {
-    id: row.id,
-    userId: row.user_id,
-    label: row.label,
-    emoji: row.emoji ?? "👥",
-    color: row.color ?? "#868e96",
-    createdAt: row.created_at,
-    updatedAt: row.updated_at,
-  };
-}
-
 export function listGroups(): GroupWithCount[] {
   const db = getSyncDatabase();
-  const rows = db.getAllSync<GroupRow>("SELECT * FROM groups ORDER BY label ASC");
+  const rows = db.getAllSync<GroupRow>(`SELECT * FROM groups ${GROUPS_ORDER_BY_LABEL}`);
 
   return rows.map((row) => {
     const countRow = db.getFirstSync<{ count: number }>(
@@ -44,7 +23,9 @@ export function getGroup(groupId: string): Group | null {
   const db = getSyncDatabase();
   const row = db.getFirstSync<GroupRow>("SELECT * FROM groups WHERE id = ?", groupId);
 
-  if (!row) return null;
+  if (!row) {
+    return null;
+  }
 
   return mapGroupRow(row);
 }
@@ -56,11 +37,11 @@ export function listGroupContacts(options: {
   offset: number;
 }): { contacts: Contact[]; totalCount: number } {
   return listContacts({
+    excludeMyself: true,
     groupId: options.groupId,
-    query: options.query,
     limit: options.limit,
     offset: options.offset,
-    excludeMyself: true,
+    query: options.query,
   });
 }
 

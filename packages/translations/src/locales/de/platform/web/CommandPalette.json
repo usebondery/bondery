@@ -1,0 +1,18 @@
+{
+  "ActionsGroup": "Aktionen",
+  "AddPerson": "Person hinzufügen",
+  "AddPersonDescription": "Neuen Kontakt in deinem Netzwerk erstellen",
+  "ContactUs": "Kontakt",
+  "ContactUsDescription": "Kontaktiere das Bondery-Team",
+  "Documentation": "Dokumentation",
+  "DocumentationDescription": "Bondery-Dokumentation lesen",
+  "FindPerson": "Person finden",
+  "FindPersonDescription": "Dein Netzwerk nach Namen durchsuchen",
+  "GoToDescription": "Zu {label}",
+  "HelpGroup": "Hilfe",
+  "LogInteraction": "Interaktion erfassen",
+  "LogInteractionDescription": "Neues Treffen, Gespräch oder Nachricht erfassen",
+  "NavigateGroup": "Navigation",
+  "NothingFound": "Keine Aktionen gefunden",
+  "SearchPlaceholder": "Aktionen suchen oder navigieren…"
+}

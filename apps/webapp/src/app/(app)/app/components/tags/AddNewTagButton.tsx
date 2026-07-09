@@ -2,10 +2,11 @@ import { Button } from "@mantine/core";
 import { IconPlus } from "@tabler/icons-react";
 
 interface AddNewTagButtonProps {
-  label: string;
-  onClick: () => void;
-  preventInputBlur?: boolean;
   className?: string;
+  label: string;
+  /** Omit when the button sits inside `Combobox.Option` — selection is handled by `onOptionSubmit`. */
+  onClick?: () => void;
+  preventInputBlur?: boolean;
 }
 
 export function AddNewTagButton({
@@ -16,17 +17,17 @@ export function AddNewTagButton({
 }: AddNewTagButtonProps) {
   return (
     <Button
-      variant="default"
-      radius="xl"
-      size="xs"
-      leftSection={<IconPlus size={14} />}
       className={`button-scale-effect${className ? ` ${className}` : ""}`}
+      leftSection={<IconPlus size={14} />}
+      onClick={onClick}
       onMouseDown={(event) => {
         if (preventInputBlur) {
           event.preventDefault();
         }
       }}
-      onClick={onClick}
+      radius="xl"
+      size="xs"
+      variant="default"
     >
       {label}
     </Button>

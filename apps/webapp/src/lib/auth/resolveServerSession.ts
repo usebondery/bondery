@@ -1,5 +1,5 @@
-import { cache } from "react";
 import type { User } from "@supabase/supabase-js";
+import { cache } from "react";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
 export type ServerSessionResult =
@@ -23,14 +23,16 @@ export const resolveServerSession = cache(async (): Promise<ServerSessionResult>
     return { status: "unauthorized" };
   }
 
-  const { data: { session } } = await supabase.auth.getSession();
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
   const accessToken = session?.access_token;
 
   if (!accessToken) {
     return { status: "unauthorized" };
   }
 
-  return { status: "ok", user, accessToken };
+  return { accessToken, status: "ok", user };
 });
 
 /** Clears Supabase auth cookies on the server (e.g. stale or deleted-user sessions). */

@@ -1,30 +1,30 @@
 "use client";
 
-import { Autocomplete, Group } from "@mantine/core";
-import { useEffect, useRef, useState } from "react";
-import { IconCompass } from "@tabler/icons-react";
 import { GEOCODE_SUGGEST_MIN_QUERY_LENGTH } from "@bondery/helpers/address";
 import {
   geocodeSuggestionDisplayKey,
   geocodeSuggestionDisplayLabel,
 } from "@bondery/helpers/geocode";
 import type { ContactAddressEntry } from "@bondery/schemas";
-import { DEBOUNCE_MS } from "@/lib/config";
-import { fetchGeocodeSuggestions } from "@/lib/geocode";
+import { Autocomplete, Group } from "@mantine/core";
+import { IconCompass } from "@tabler/icons-react";
+import { useEffect, useRef, useState } from "react";
+import { fetchGeocodeSuggestions } from "@/lib/api/geocode";
+import { DEBOUNCE_MS } from "@/lib/platform/config";
 
 interface LocationLookupInputProps {
-  label?: string;
-  placeholder?: string;
-  value: string;
-  disabled?: boolean;
   ariaLabel?: string;
-  style?: React.CSSProperties;
+  disabled?: boolean;
+  label?: string;
   /** "place" shows only city/region/country suggestions (e.g. for a person's LinkedIn-style location field).
    *  "address" (default) also includes streets and full addresses. */
   mode?: "place" | "address";
+  onBlur?: () => void;
   onChange: (value: string) => void;
   onSuggestionSelect: (item: ContactAddressEntry) => void;
-  onBlur?: () => void;
+  placeholder?: string;
+  style?: React.CSSProperties;
+  value: string;
 }
 
 function getSuggestionCountryFlag(entry: ContactAddressEntry): string {
@@ -76,7 +76,9 @@ export function LocationLookupInput({
   useEffect(() => {
     // Skip the initial API call when the component mounts with a pre-populated value.
     // Only start fetching suggestions after the user types.
-    if (!userHasTyped.current) return;
+    if (!userHasTyped.current) {
+      return;
+    }
 
     const timeoutId = setTimeout(() => {
       const text = value.trim();
@@ -142,45 +144,47 @@ export function LocationLookupInput({
 
   return (
     <Autocomplete
-      label={label}
-      placeholder={placeholder}
-      value={value}
-      disabled={disabled}
-      style={style}
       aria-label={ariaLabel}
+      data={options}
+      disabled={disabled}
+      filter={({ options: inputOptions }) => inputOptions}
+      label={label}
       leftSection={<IconCompass size={16} />}
+      loading={loading}
+      onBlur={onBlur}
+      onChange={(v) => {
+        userHasTyped.current = true;
+        onChange(v);
+        setSelectedFlag(optionFlagByLabel.current[v] ?? null);
+      }}
+      onOptionSubmit={(selectedLabel) => {
+        const selected = suggestionsByLabel.current[selectedLabel];
+        if (!selected) {
+          return;
+        }
+
+        onChange(selectedLabel);
+        setSelectedFlag(optionFlagByLabel.current[selectedLabel] ?? null);
+        onSuggestionSelect(selected);
+      }}
+      placeholder={placeholder}
+      renderOption={({ option }) => (
+        <Group gap="xs" wrap="nowrap">
+          <span
+            className={`fi fi-${optionFlagByLabel.current[option.value] || "aq"}`}
+            style={{ flexShrink: 0, width: 18 }}
+          />
+          <span>{option.value}</span>
+        </Group>
+      )}
       rightSection={
         selectedFlag ? (
           <span className={`fi fi-${selectedFlag}`} style={{ width: 18 }} />
         ) : undefined
       }
       rightSectionPointerEvents="none"
-      loading={loading}
-      onChange={(v) => {
-        userHasTyped.current = true;
-        onChange(v);
-        setSelectedFlag(optionFlagByLabel.current[v] ?? null);
-      }}
-      data={options}
-      onOptionSubmit={(selectedLabel) => {
-        const selected = suggestionsByLabel.current[selectedLabel];
-        if (!selected) return;
-
-        onChange(selectedLabel);
-        setSelectedFlag(optionFlagByLabel.current[selectedLabel] ?? null);
-        onSuggestionSelect(selected);
-      }}
-      onBlur={onBlur}
-      filter={({ options: inputOptions }) => inputOptions}
-      renderOption={({ option }) => (
-        <Group gap="xs" wrap="nowrap">
-          <span
-            className={`fi fi-${optionFlagByLabel.current[option.value] || "aq"}`}
-            style={{ width: 18, flexShrink: 0 }}
-          />
-          <span>{option.value}</span>
-        </Group>
-      )}
+      style={style}
+      value={value}
     />
   );
 }

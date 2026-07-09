@@ -1,0 +1,12 @@
+{
+  "alreadySubscribedMessage": "Již máte aktivní předplatné Premium.",
+  "alreadySubscribedTitle": "Již předplaceno",
+  "errorMessage": "Něco se pokazilo. Zkuste to prosím znovu.",
+  "errorTitle": "Platba se nezdařila",
+  "errorUnauthorized": "Přihlaste se prosím a zkuste to znovu.",
+  "successMessage": "Užijte si neomezený AI chat a všechny Premium funkce.",
+  "successTitle": "Nyní jste Premium!",
+  "upgradePendingMessage": "Váš účet bude brzy upgradován na Premium.",
+  "upgradePendingTitle": "Platba přijata",
+  "upgradeToPremium": "Přejít na Premium"
+}

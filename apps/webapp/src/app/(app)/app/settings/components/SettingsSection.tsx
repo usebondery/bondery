@@ -1,18 +1,18 @@
 "use client";
 
-import { Card, CardSection, Group, Text } from "@mantine/core";
 import type { DocId } from "@bondery/helpers";
-import type { ReactNode } from "react";
 import { HelpButton } from "@bondery/mantine-next";
+import { Card, CardSection, Group, Text } from "@mantine/core";
+import type { ReactNode } from "react";
 
 interface SettingsSectionProps {
-  id?: string;
-  icon: ReactNode;
-  title: string;
-  helpDoc?: DocId;
-  helpLabel?: string;
   action?: ReactNode;
   children: ReactNode;
+  helpDoc?: DocId;
+  helpLabel?: string;
+  icon: ReactNode;
+  id?: string;
+  title: string;
 }
 
 /**
@@ -33,15 +33,15 @@ export function SettingsSection({
   return (
     <Card
       id={id}
-      withBorder
       shadow="sm"
       style={id ? { scrollMarginTop: "var(--mantine-spacing-md)" } : undefined}
+      withBorder
     >
-      <CardSection withBorder inheritPadding py="md">
-        <Group justify="space-between" wrap="nowrap" gap="sm">
-          <Group gap="xs" wrap="nowrap" style={{ minWidth: 0 }}>
+      <CardSection inheritPadding py="md" withBorder>
+        <Group gap="sm" justify="space-between" wrap="nowrap">
+          <Group gap="xs" style={{ minWidth: 0 }} wrap="nowrap">
             {icon}
-            <Text size="lg" fw={600}>
+            <Text fw={600} size="lg">
               {title}
             </Text>
             {helpLabel ? <HelpButton doc={helpDoc} label={helpLabel} /> : null}

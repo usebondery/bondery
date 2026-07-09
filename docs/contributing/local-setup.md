@@ -116,7 +116,7 @@ Also set `PRIVATE_API_KEY_PEPPER` and `PRIVATE_SUPABASE_JWT_SIGNING_JWK` — see
 For mobile sync, set CORS for Expo web if needed:
 
 ```text
-EXTRA_ALLOWED_ORIGINS=http://localhost:8081
+EXTRA_ALLOWED_ORIGINS=http://localhost:26634
 ```
 
 See [Mobile sync (Postgres changelog)](#mobile-sync-postgres-changelog). `EXTRA_ALLOWED_ORIGINS` allows Expo web dev server CORS when testing mobile web.
@@ -235,7 +235,7 @@ Restart the API after changing either env var (`npm run dev` in `apps/api`).
 
 ```bash
 curl -H "Authorization: Bearer bondery_key_<keyId>_<secret>" \
-  http://localhost:3001/api/contacts
+  http://localhost:26631/api/contacts
 ```
 
 You should get `200` with your contacts. A deleted or wrong key returns `401`.
@@ -272,7 +272,7 @@ cd apps/api
 npm run dev
 ```
 
-The API server starts on **port 3001** with hot reload enabled.
+The API server starts on **port 26631** with hot reload enabled.
 
 ---
 
@@ -301,7 +301,7 @@ cd apps/webapp
 npm run dev
 ```
 
-The webapp starts on **port 3002**. Open [http://localhost:3002](http://localhost:3002) in your browser.
+The webapp starts on **port 26632**. Open [http://localhost:26632](http://localhost:26632) in your browser.
 
 ---
 
@@ -316,7 +316,7 @@ cd apps/website
 npm run dev
 ```
 
-The website starts on **port 3000**. Open [http://localhost:3000](http://localhost:3000) in your browser.
+The website starts on **port 26630**. Open [http://localhost:26630](http://localhost:26630) in your browser.
 
 ---
 
@@ -401,7 +401,7 @@ The example is at [apps/mobile/.env.example](../../apps/mobile/.env.example). `n
 
 | Variable | Description |
 |---|---|
-| `EXPO_PUBLIC_API_URL` | API base URL **without** `/api` suffix (e.g. `http://127.0.0.1:3001`) |
+| `EXPO_PUBLIC_API_URL` | API base URL **without** `/api` suffix (e.g. `http://127.0.0.1:26631`) |
 | `EXPO_PUBLIC_SUPABASE_URL` | Supabase project URL (local: `http://127.0.0.1:54321`) |
 | `EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Supabase anon/publishable key from `npx supabase status` |
 
@@ -415,10 +415,10 @@ The example is at [apps/mobile/.env.example](../../apps/mobile/.env.example). `n
 #### Example — emulator / simulator
 
 ```text
-EXPO_PUBLIC_API_URL=http://127.0.0.1:3001
+EXPO_PUBLIC_API_URL=http://127.0.0.1:26631
 EXPO_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321
 EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY=sb_publishable_<your-key>
-EXPO_PUBLIC_WEBSITE_URL=http://localhost:3000
+EXPO_PUBLIC_WEBSITE_URL=http://localhost:26630
 ```
 
 #### Example — physical device on the same Wi‑Fi
@@ -426,12 +426,12 @@ EXPO_PUBLIC_WEBSITE_URL=http://localhost:3000
 Replace `127.0.0.1` with your machine's LAN IP (e.g. `192.168.1.42`). The phone cannot reach your laptop's loopback interface.
 
 ```text
-EXPO_PUBLIC_API_URL=http://192.168.1.42:3001
+EXPO_PUBLIC_API_URL=http://192.168.1.42:26631
 EXPO_PUBLIC_SUPABASE_URL=http://192.168.1.42:54321
 EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY=sb_publishable_<your-key>
 ```
 
-Also ensure Supabase and the API are reachable on the LAN and your firewall allows inbound connections on ports `3001` and `54321`.
+Also ensure Supabase and the API are reachable on the LAN and your firewall allows inbound connections on ports `26631` and `54321`.
 
 #### Android emulator note
 
@@ -554,11 +554,14 @@ Cold start builds packages once (`dev` → `^build`); edits under `packages/*/sr
 
 ## Quick reference
 
-| App | Dev port | Start command (from app folder) |
-|---|---|---|
-| `supabase-db` | — | `npm run dev` |
-| `api` | 3001 | `npm run dev` |
-| `webapp` | 3002 | `npm run dev` |
-| `website` | 3000 | `npm run dev` |
-| `mobile` | — | `npm run dev` |
-| `chrome-extension` | — | `npx wxt` |
+Port registry: [architecture.md](architecture.md#apps) (`npm run check-dev-ports` in CI).
+
+| App | Source | Dev port | Start command (from app folder) |
+|---|---|---|---|
+| `supabase-db` | [`apps/supabase-db`](https://github.com/usebondery/bondery/tree/main/apps/supabase-db) | — (API `54321`, Studio `54323`) | `npm run dev` |
+| `api` | [`apps/api`](https://github.com/usebondery/bondery/tree/main/apps/api) | 26631 | `npm run dev` |
+| `webapp` | [`apps/webapp`](https://github.com/usebondery/bondery/tree/main/apps/webapp) | 26632 | `npm run dev` |
+| `website` | [`apps/website`](https://github.com/usebondery/bondery/tree/main/apps/website) | 26630 | `npm run dev` |
+| `mobile` | [`apps/mobile`](https://github.com/usebondery/bondery/tree/main/apps/mobile) | 26634 (Expo Metro) | `npm run dev` |
+| `chrome-extension` | [`apps/chrome-extension`](https://github.com/usebondery/bondery/tree/main/apps/chrome-extension) | 26633 (WXT HMR) | `npx wxt` |
+| `@bondery/emails` preview | [`packages/emails`](https://github.com/usebondery/bondery/tree/main/packages/emails) | 26639 | `npm run preview` |

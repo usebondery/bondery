@@ -1,5 +1,4 @@
-import { Box, Group, Stack, Title } from "@mantine/core";
-import type { Icon } from "@tabler/icons-react";
+import { Box } from "@mantine/core";
 
 interface PageWrapperProps {
   children: React.ReactNode;

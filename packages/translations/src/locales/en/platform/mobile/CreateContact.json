@@ -1,0 +1,12 @@
+{
+  "Create": "Add to Bondery",
+  "ErrorDescription": "Something went wrong while creating this person.",
+  "ErrorTitle": "Could not create person",
+  "FullNameLabel": "Full name",
+  "FullNamePlaceholder": "e.g. Jane Doe",
+  "InvalidName": "Please add a valid name",
+  "NameRequired": "Please add a name",
+  "SuccessDescription": "The new person was added to your contacts.",
+  "SuccessTitle": "Person created",
+  "Title": "Create person"
+}

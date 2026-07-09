@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { Box } from "@mantine/core";
-import { motion, AnimatePresence } from "motion/react";
-import { IconBrandLinkedin } from "@tabler/icons-react";
 import { BonderyIcon } from "@bondery/branding/react";
-import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
+import { Box } from "@mantine/core";
+import { IconBrandLinkedin } from "@tabler/icons-react";
+import { AnimatePresence, motion } from "motion/react";
+import { useEffect, useMemo, useState } from "react";
+import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
 
 const LINKEDIN_BLUE = "#0A66C2";
 
@@ -21,11 +21,11 @@ const GRAPE = "var(--mantine-color-grape-5)";
 const PILL_H = 44;
 const ANIM_H = 110; // trimmed to remove excess bottom space
 const NODE_Y = 55;
-const BONDERY = { x: 90, y: NODE_Y, size: 68, radius: 16 };
-const LINKEDIN = { x: 210, y: NODE_Y, size: 60 };
+const BONDERY = { radius: 16, size: 68, x: 90, y: NODE_Y };
+const LINKEDIN = { size: 60, x: 210, y: NODE_Y };
 
 export function ExtensionLinkedInAnimation() {
-  const t = useTranslations("SettingsPage.Integration.ChromeExtensionModal");
+  const t = useWebTranslations("SettingsPage", "Integration.ChromeExtensionModal");
   const labels = useMemo(
     () => [
       t("AnimationProfilePicture"),
@@ -49,51 +49,51 @@ export function ExtensionLinkedInAnimation() {
   }, [labels.length]);
 
   return (
-    <Box style={{ width: 300, margin: "0 auto", position: "relative", height: PILL_H + ANIM_H }}>
+    <Box style={{ height: PILL_H + ANIM_H, margin: "0 auto", position: "relative", width: 300 }}>
       {/* Notification Pill */}
       <Box
         style={{
-          display: "flex",
-          justifyContent: "center",
           alignItems: "center",
+          display: "flex",
           height: PILL_H,
+          justifyContent: "center",
           pointerEvents: "none",
         }}
       >
         <AnimatePresence mode="wait">
           <motion.div
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.9, y: 8 }}
+            initial={{ opacity: 0, scale: 0.9, y: -8 }}
             key={labels[labelIndex]}
-            initial={{ opacity: 0, y: -8, scale: 0.9 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 8, scale: 0.9 }}
-            transition={{ duration: 0.3 }}
             style={{
-              display: "flex",
               alignItems: "center",
-              gap: 8,
-              padding: "6px 14px",
               backgroundColor: NODE_BG,
               border: `1px solid ${BORDER_COL}`,
               borderRadius: 999,
               boxShadow: "var(--mantine-shadow-sm)",
+              display: "flex",
+              gap: 8,
+              padding: "6px 14px",
               whiteSpace: "nowrap",
             }}
+            transition={{ duration: 0.3 }}
           >
             <div
               style={{
-                width: 22,
-                height: 22,
-                borderRadius: "50%",
-                backgroundColor: LINKEDIN_BLUE,
-                display: "flex",
                 alignItems: "center",
-                justifyContent: "center",
+                backgroundColor: LINKEDIN_BLUE,
+                borderRadius: "50%",
+                display: "flex",
                 flexShrink: 0,
+                height: 22,
+                justifyContent: "center",
+                width: 22,
               }}
             >
-              <IconBrandLinkedin size={13} color="white" />
+              <IconBrandLinkedin color="white" size={13} />
             </div>
-            <span style={{ fontSize: 13, fontWeight: 500, color: TEXT_COL }}>
+            <span style={{ color: TEXT_COL, fontSize: 13, fontWeight: 500 }}>
               {labels[labelIndex]}
             </span>
           </motion.div>
@@ -101,114 +101,114 @@ export function ExtensionLinkedInAnimation() {
       </Box>
 
       {/* Animation area: nodes, line, bubble */}
-      <Box style={{ position: "absolute", top: PILL_H, left: 0, right: 0, height: ANIM_H }}>
+      <Box style={{ height: ANIM_H, left: 0, position: "absolute", right: 0, top: PILL_H }}>
         {/* Connecting line */}
         <svg
           style={{
-            position: "absolute",
-            inset: 0,
-            width: "100%",
             height: "100%",
+            inset: 0,
             overflow: "visible",
-            zIndex: 10,
             pointerEvents: "none",
+            position: "absolute",
+            width: "100%",
+            zIndex: 10,
           }}
         >
           <line
-            x1={BONDERY.x}
-            y1={BONDERY.y}
-            x2={LINKEDIN.x}
-            y2={LINKEDIN.y}
             stroke={LINE_COL}
             strokeWidth={1.5}
+            x1={BONDERY.x}
+            x2={LINKEDIN.x}
+            y1={BONDERY.y}
+            y2={LINKEDIN.y}
           />
         </svg>
 
         {/* Data bubble: LinkedIn → Bondery */}
         <AnimatePresence>
           <motion.div
-            key={bubbleKey}
-            style={{
-              position: "absolute",
-              width: 10,
-              height: 10,
-              borderRadius: "50%",
-              backgroundColor: LINKEDIN_BLUE,
-              top: BONDERY.y - 5,
-              left: 0,
-              zIndex: 25,
-              pointerEvents: "none",
-            }}
-            initial={{ x: LINKEDIN.x - 5, opacity: 0, scale: 0 }}
             animate={{
-              x: [LINKEDIN.x - 5, BONDERY.x - 5],
               opacity: [0, 1, 1, 0],
               scale: [0, 1, 1, 0],
+              x: [LINKEDIN.x - 5, BONDERY.x - 5],
             }}
             exit={{ opacity: 0 }}
+            initial={{ opacity: 0, scale: 0, x: LINKEDIN.x - 5 }}
+            key={bubbleKey}
+            style={{
+              backgroundColor: LINKEDIN_BLUE,
+              borderRadius: "50%",
+              height: 10,
+              left: 0,
+              pointerEvents: "none",
+              position: "absolute",
+              top: BONDERY.y - 5,
+              width: 10,
+              zIndex: 25,
+            }}
             transition={{ duration: 1.2, ease: "easeInOut" }}
           />
         </AnimatePresence>
 
         {/* Bondery node */}
         <motion.div
-          whileHover={{ scale: 1.05 }}
-          transition={{ type: "spring", stiffness: 400, damping: 17 }}
           style={{
-            position: "absolute",
-            left: BONDERY.x - BONDERY.size / 2,
-            top: BONDERY.y - BONDERY.size / 2,
-            width: BONDERY.size,
-            height: BONDERY.size,
-            borderRadius: BONDERY.radius,
+            alignItems: "center",
             backgroundColor: NODE_BG,
             border: `1px solid ${BORDER_COL}`,
+            borderRadius: BONDERY.radius,
             boxShadow: "var(--mantine-shadow-md)",
             display: "flex",
-            alignItems: "center",
+            height: BONDERY.size,
             justifyContent: "center",
+            left: BONDERY.x - BONDERY.size / 2,
+            position: "absolute",
+            top: BONDERY.y - BONDERY.size / 2,
+            width: BONDERY.size,
             zIndex: 20,
           }}
+          transition={{ damping: 17, stiffness: 400, type: "spring" }}
+          whileHover={{ scale: 1.05 }}
         >
-          <BonderyIcon width={40} height={40} />
+          <BonderyIcon height={40} width={40} />
 
           <AnimatePresence>
             <motion.div
+              animate={{ opacity: [0, 0.3, 0], scale: [1, 1.4, 1.6] }}
+              initial={{ opacity: 0, scale: 0.8 }}
               key={`pulse-${pulseKey}`}
               style={{
-                position: "absolute",
-                inset: 0,
-                borderRadius: BONDERY.radius,
                 backgroundColor: GRAPE,
+                borderRadius: BONDERY.radius,
+                inset: 0,
+                position: "absolute",
                 zIndex: -1,
               }}
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: [0, 0.3, 0], scale: [1, 1.4, 1.6] }}
-              transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
+              transition={{ delay: 0.2, duration: 0.8, ease: "easeOut" }}
             />
           </AnimatePresence>
         </motion.div>
 
         {/* LinkedIn node */}
         <motion.div
-          whileHover={{ scale: 1.05 }}
-          transition={{ type: "spring", stiffness: 400, damping: 17 }}
           style={{
-            position: "absolute",
+            alignItems: "center",
+            backgroundColor: LINKEDIN_BLUE,
+            borderRadius: "50%",
+            boxShadow: "var(--mantine-shadow-md)",
+            display: "flex",
+            height: LINKEDIN.size,
+            justifyContent: "center",
             left: LINKEDIN.x - LINKEDIN.size / 2,
+            position: "absolute",
             top: LINKEDIN.y - LINKEDIN.size / 2,
             width: LINKEDIN.size,
-            height: LINKEDIN.size,
-            borderRadius: "50%",
-            backgroundColor: LINKEDIN_BLUE,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
             zIndex: 20,
-            boxShadow: "var(--mantine-shadow-md)",
           }}
+          transition={{ damping: 17, stiffness: 400, type: "spring" }}
+          whileHover={{ scale: 1.05 }}
         >
-          <IconBrandLinkedin size={30} color="white" />
+          <IconBrandLinkedin color="white" size={30} />
         </motion.div>
       </Box>
     </Box>

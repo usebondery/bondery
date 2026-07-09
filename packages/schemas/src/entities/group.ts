@@ -1,7 +1,5 @@
 import { z } from "zod";
 import { GROUP_LABEL_MAX_LENGTH } from "#constants/index.js";
-import { hexColorSchema } from "#primitives/index.js";
-import { contactPreviewSchema, contactSchema, contactsFilterSchema } from "#entities/contact.js";
 import {
   createdAtSchema,
   entityAuditSchema,
@@ -15,18 +13,22 @@ import {
   messageResponseSchema,
   personIdsSelectionSchema,
 } from "#entities/_shared.js";
+import { contactPreviewSchema, contactSchema, contactsFilterSchema } from "#entities/contact.js";
+import { hexColorSchema } from "#primitives/index.js";
 
 const groupEditableFieldsSchema = z.object({
-  label: labelFieldSchema(GROUP_LABEL_MAX_LENGTH),
-  emoji: z.string().trim().min(1, { error: "Emoji is required" }),
   color: hexColorSchema,
+  emoji: z.string().trim().min(1, { error: "Emoji is required" }),
+  label: labelFieldSchema(GROUP_LABEL_MAX_LENGTH),
 });
 
-export const groupSchema = entityIdentitySchema.extend({
-  label: z.string(),
-  emoji: z.string().nullable(),
-  color: z.string().nullable(),
-}).extend(entityAuditSchema.shape);
+export const groupSchema = entityIdentitySchema
+  .extend({
+    color: z.string().nullable(),
+    emoji: z.string().nullable(),
+    label: z.string(),
+  })
+  .extend(entityAuditSchema.shape);
 
 export const groupWithCountSchema = groupSchema.extend({
   contactCount: z.number(),
@@ -34,11 +36,11 @@ export const groupWithCountSchema = groupSchema.extend({
 });
 
 export const peopleGroupSchema = z.object({
+  created_at: createdAtSchema,
+  groupId: z.string(),
   id: z.string(),
   personId: z.string(),
-  groupId: z.string(),
   userId: z.string(),
-  created_at: createdAtSchema,
 });
 
 export const createGroupSchema = groupEditableFieldsSchema;
@@ -53,31 +55,24 @@ export const addContactsToGroupRequestSchema = z.union([
   }),
 ]);
 
-export const addContactsToGroupResponseSchema = messageResponseSchema
-  .extend({
-    addedCount: z.number(),
-    skippedCount: z.number(),
-  })
-  ;
+export const addContactsToGroupResponseSchema = messageResponseSchema.extend({
+  addedCount: z.number(),
+  skippedCount: z.number(),
+});
 
 export const removeGroupMembersRequestSchema = z.union([
   personIdsSelectionSchema,
   z.object({
-    memberFilter: contactsFilterSchema,
     excludePersonIds: excludePersonIdsSchema,
+    memberFilter: contactsFilterSchema,
   }),
 ]);
 
-export const removeGroupMembersResponseSchema = messageResponseSchema
-  .extend({
-    removedCount: z.number().optional(),
-  })
-  ;
+export const removeGroupMembersResponseSchema = messageResponseSchema.extend({
+  removedCount: z.number().optional(),
+});
 
-export const groupsListResponseSchema = makeListResponseSchema(
-  "groups",
-  groupWithCountSchema,
-);
+export const groupsListResponseSchema = makeListResponseSchema("groups", groupWithCountSchema);
 
 export const groupMembersListResponseSchema = makePaginatedListResponseSchema(
   "contacts",
@@ -87,20 +82,16 @@ export const groupMembersListResponseSchema = makePaginatedListResponseSchema(
 export const groupContactsListResponseSchema = makePaginatedListResponseSchema(
   "contacts",
   contactSchema,
-)
-  .extend({
-    group: z.object({
-      id: z.string(),
-      label: z.string(),
-    }),
-  })
-  ;
+).extend({
+  group: z.object({
+    id: z.string(),
+    label: z.string(),
+  }),
+});
 
-export const groupResponseSchema = z
-  .object({
-    group: groupSchema,
-  })
-  ;
+export const groupResponseSchema = z.object({
+  group: groupSchema,
+});
 
 export const contactGroupsResponseSchema = makeCollectionResponseSchema(
   "groups",

@@ -1,22 +1,22 @@
 "use client";
 
-import { Text, Stack, Combobox, useCombobox, Input, ScrollArea, Group } from "@mantine/core";
-import { IconWorld } from "@tabler/icons-react";
-import { useState, useEffect, forwardRef } from "react";
-import { notifications } from "@mantine/notifications";
-import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
-import { useUpdateSettingsMutation } from "@/lib/query/hooks/useSettings";
+import {
+  formatOffset,
+  getCurrentTimeInTimezone,
+  getGroupedTimezones,
+  TIMEZONES_DATA,
+} from "@bondery/helpers/locale";
 import {
   errorNotificationTemplate,
   loadingNotificationTemplate,
   successNotificationTemplate,
 } from "@bondery/mantine-next";
-import {
-  getGroupedTimezones,
-  getCurrentTimeInTimezone,
-  formatOffset,
-  TIMEZONES_DATA,
-} from "@bondery/helpers/locale";
+import { Combobox, Group, Input, ScrollArea, Stack, Text, useCombobox } from "@mantine/core";
+import { notifications } from "@mantine/notifications";
+import { IconWorld } from "@tabler/icons-react";
+import { forwardRef, useEffect, useState } from "react";
+import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
+import { useUpdateSettingsMutation } from "@/lib/query/hooks/useSettings";
 
 const TimezoneItem = forwardRef<
   HTMLDivElement,
@@ -45,30 +45,30 @@ const TimezoneItem = forwardRef<
       ref={ref}
       {...others}
       style={{
+        alignItems: "center",
         display: "flex",
         gap: 8,
-        alignItems: "center",
         justifyContent: "space-between",
         width: "100%",
       }}
     >
-      <div style={{ display: "flex", gap: 8, alignItems: "center", flex: 1 }}>
-        <span className={`fi fi-${flag || "aq"}`} style={{ width: 20, flexShrink: 0 }} />
+      <div style={{ alignItems: "center", display: "flex", flex: 1, gap: 8 }}>
+        <span className={`fi fi-${flag || "aq"}`} style={{ flexShrink: 0, width: 20 }} />
         <div style={{ flex: 1 }}>
           {isSelected && (
-            <Text component="span" c="var(--mantine-color-default-color)" size="sm" mr={4} fw={400}>
+            <Text c="var(--mantine-color-default-color)" component="span" fw={400} mr={4} size="sm">
               ✓ {currentlySelectedText}:
             </Text>
           )}
-          <Text component="span" size="sm" fw={400}>
+          <Text component="span" fw={400} size="sm">
             {label}{" "}
           </Text>
-          <Text component="span" c={isSelected ? "white" : "dimmed"} size="xs">
+          <Text c={isSelected ? "white" : "dimmed"} component="span" size="xs">
             ({utcLabel})
           </Text>
         </div>
       </div>
-      <Text size="xs" c={isSelected ? "white" : "dimmed"}>
+      <Text c={isSelected ? "white" : "dimmed"} size="xs">
         {currentTime}
       </Text>
     </div>
@@ -84,7 +84,7 @@ interface TimezonePickerProps {
 export function TimezonePicker({ initialValue }: TimezonePickerProps) {
   const [timezone, setTimezone] = useState(initialValue);
   const [timezoneSearch, setTimezoneSearch] = useState("");
-  const t = useTranslations("SettingsPage.Profile");
+  const t = useWebTranslations("SettingsPage", "Profile");
   const updateSettingsMutation = useUpdateSettingsMutation();
   const [currentTimezoneTime, setCurrentTimezoneTime] = useState(() => {
     const tzData = TIMEZONES_DATA.find((tz) => tz.value === initialValue);
@@ -104,7 +104,9 @@ export function TimezonePicker({ initialValue }: TimezonePickerProps) {
 
   useEffect(() => {
     const tzData = TIMEZONES_DATA.find((tz) => tz.value === timezone);
-    if (!tzData) return;
+    if (!tzData) {
+      return;
+    }
 
     const interval = setInterval(() => {
       setCurrentTimezoneTime(getCurrentTimeInTimezone(tzData.offset));
@@ -114,12 +116,14 @@ export function TimezonePicker({ initialValue }: TimezonePickerProps) {
   }, [timezone]);
 
   const handleChange = async (val: string | null) => {
-    if (!val) return;
+    if (!val) {
+      return;
+    }
 
     const loadingNotification = notifications.show({
       ...loadingNotificationTemplate({
-        title: t("UpdatingTimezone"),
         description: t("PleaseWait"),
+        title: t("UpdatingTimezone"),
       }),
     });
 
@@ -134,8 +138,8 @@ export function TimezonePicker({ initialValue }: TimezonePickerProps) {
       notifications.hide(loadingNotification);
       notifications.show(
         successNotificationTemplate({
-          title: t("UpdateSuccess"),
           description: t("TimezoneUpdateSuccess"),
+          title: t("UpdateSuccess"),
         }),
       );
 
@@ -146,8 +150,8 @@ export function TimezonePicker({ initialValue }: TimezonePickerProps) {
       notifications.hide(loadingNotification);
       notifications.show(
         errorNotificationTemplate({
-          title: t("UpdateError"),
           description: t("TimezoneUpdateError"),
+          title: t("UpdateError"),
         }),
       );
     }
@@ -157,23 +161,22 @@ export function TimezonePicker({ initialValue }: TimezonePickerProps) {
 
   return (
     <Stack gap={4}>
-      <Text size="sm" fw={500}>
+      <Text fw={500} size="sm">
         {t("Timezone")}
       </Text>
-      <Combobox store={combobox} onOptionSubmit={handleChange}>
+      <Combobox onOptionSubmit={handleChange} store={combobox}>
         <Combobox.Target>
           <Input
-            component="button"
-            type="button"
-            pointer
-            leftSection={<IconWorld size={16} />}
-            rightSection={<Combobox.Chevron />}
-            onClick={() => combobox.toggleDropdown()}
-            rightSectionPointerEvents="none"
             className={combobox.dropdownOpened ? "" : "input-scale-effect"}
+            component="button"
+            leftSection={<IconWorld size={16} />}
+            onClick={() => combobox.toggleDropdown()}
+            pointer
+            rightSection={<Combobox.Chevron />}
+            rightSectionPointerEvents="none"
             style={{
-              transform: combobox.dropdownOpened ? "scale(0.98)" : undefined,
               filter: combobox.dropdownOpened ? "brightness(0.9)" : undefined,
+              transform: combobox.dropdownOpened ? "scale(0.98)" : undefined,
               transition:
                 "transform var(--transition-time) var(--transition-ease), filter var(--transition-time) var(--transition-ease), border-color var(--transition-time) var(--transition-ease)",
             }}
@@ -184,17 +187,18 @@ export function TimezonePicker({ initialValue }: TimezonePickerProps) {
                   : undefined,
               },
             }}
+            type="button"
           >
             {selectedTimezone ? (
-              <Group gap="xs" wrap="nowrap" style={{ flex: 1, overflow: "hidden" }}>
+              <Group gap="xs" style={{ flex: 1, overflow: "hidden" }} wrap="nowrap">
                 <span className={`fi fi-${selectedTimezone.flag || "aq"}`} />
-                <Text size="sm" truncate style={{ flex: 1 }} fw={400}>
+                <Text fw={400} size="sm" style={{ flex: 1 }} truncate>
                   {selectedTimezone.city}, {selectedTimezone.country}{" "}
-                  <Text component="span" c="var(--mantine-color-default-color)" size="xs" fw={400}>
+                  <Text c="var(--mantine-color-default-color)" component="span" fw={400} size="xs">
                     ({formatOffset(selectedTimezone.offset)})
                   </Text>
                 </Text>
-                <Text component="span" c="dimmed" size="xs" fw={400}>
+                <Text c="dimmed" component="span" fw={400} size="xs">
                   {currentTimezoneTime}
                 </Text>
               </Group>
@@ -212,10 +216,10 @@ export function TimezonePicker({ initialValue }: TimezonePickerProps) {
           }}
         >
           <Combobox.Search
-            value={timezoneSearch}
             className="transform-none"
             onChange={(event) => setTimezoneSearch(event.currentTarget.value)}
             placeholder={t("TimezoneSearch")}
+            value={timezoneSearch}
           />
           <Combobox.Options>
             <ScrollArea.Autosize className="max-h-60">
@@ -228,12 +232,11 @@ export function TimezonePicker({ initialValue }: TimezonePickerProps) {
                 }))
                 .filter((group) => group.items.length > 0)
                 .map((group) => (
-                  <Combobox.Group label={group.group} key={group.group}>
+                  <Combobox.Group key={group.group} label={group.group}>
                     {group.items.map((item) => {
                       const isSelected = item.value === timezone;
                       return (
                         <Combobox.Option
-                          value={item.value}
                           key={item.value}
                           style={{
                             backgroundColor: isSelected
@@ -241,11 +244,12 @@ export function TimezonePicker({ initialValue }: TimezonePickerProps) {
                               : undefined,
                             color: isSelected ? "white" : undefined,
                           }}
+                          value={item.value}
                         >
                           <TimezoneItem
                             {...item}
-                            isSelected={isSelected}
                             currentlySelectedText={t("CurrentlySelected")}
+                            isSelected={isSelected}
                           />
                         </Combobox.Option>
                       );

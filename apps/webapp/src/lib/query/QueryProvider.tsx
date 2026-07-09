@@ -2,7 +2,7 @@
 
 import { QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-import { useState, type ReactNode } from "react";
+import { type ReactNode, useState } from "react";
 import { getQueryClient } from "./client";
 import { useEnrichBatchInvalidation } from "./enrichInvalidation";
 import { useSyncWakeInvalidation } from "./useSyncWakeInvalidation";
@@ -20,7 +20,7 @@ export function QueryProvider({ children }: { children: ReactNode }) {
     <QueryClientProvider client={queryClient}>
       <QueryProviderInner>{children}</QueryProviderInner>
       {process.env.NODE_ENV === "development" ? (
-        <ReactQueryDevtools initialIsOpen={false} buttonPosition="bottom-left" />
+        <ReactQueryDevtools buttonPosition="bottom-left" initialIsOpen={false} />
       ) : null}
     </QueryClientProvider>
   );

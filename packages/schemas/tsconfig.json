@@ -1,9 +1,9 @@
 {
-  "extends": "@bondery/typescript-config/base.json",
   "compilerOptions": {
     "outDir": "./dist",
     "rootDir": "./src"
   },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist", "src/contracts.assertions.ts"]
+  "exclude": ["node_modules", "dist", "src/contracts.assertions.ts"],
+  "extends": "@bondery/typescript-config/base.json",
+  "include": ["src/**/*"]
 }

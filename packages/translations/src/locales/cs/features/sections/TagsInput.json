@@ -1,0 +1,22 @@
+{
+  "AddError": "Nepodařilo se přidat štítek",
+  "AddNewTagTooltip": "Vytvořit nový štítek",
+  "AddSuccess": "Štítek úspěšně přidán",
+  "AddTagTooltip": "Přidat štítek",
+  "CreateError": "Nepodařilo se vytvořit štítek",
+  "CreateNewTagEmpty": "Vytvořit nový štítek",
+  "CreateNewTagOption": "Vytvořit nový štítek \"{label}\"",
+  "CreateTagCancel": "Zrušit",
+  "CreateTagConfirm": "Vytvořit a přidat",
+  "CreateTagMessage": "Štítek \"{name}\" ještě neexistuje. Chcete ho vytvořit a přidat ke kontaktu?",
+  "CreateTagTitle": "Vytvořit nový štítek?",
+  "Label": "Štítky",
+  "NoTagsFound": "Žádné štítky nenalezeny",
+  "Placeholder": "Přidat štítky...",
+  "RemoveError": "Nepodařilo se odebrat štítek",
+  "RemoveTagTooltip": "Odebrat štítek",
+  "SearchPlaceholder": "Hledat nebo vytvořit štítek...",
+  "TagAlreadyAddedMessage": "Štítek \"{name}\" již byl ke kontaktu přidán.",
+  "TagAlreadyAddedTitle": "Štítek již přidán",
+  "TagAlreadyAppliedTooltip": "Štítek je již přiřazen"
+}

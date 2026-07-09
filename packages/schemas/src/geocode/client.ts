@@ -1,7 +1,7 @@
 import {
+  type GeocodeSuggestAddressWire,
   geocodeSuggestResponseSchema,
   geocodeTimezoneResponseSchema,
-  type GeocodeSuggestAddressWire,
 } from "#geocode/schemas.js";
 
 export type ContactAddressEntry = GeocodeSuggestAddressWire;

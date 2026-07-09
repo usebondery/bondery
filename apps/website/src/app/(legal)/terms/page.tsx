@@ -1,22 +1,22 @@
-import type { Metadata } from "next";
 import { formatMetadataTitle } from "@bondery/helpers";
+import type { Metadata } from "next";
 import { Terms } from "@/components/legal";
 
 export const metadata: Metadata = {
-  title: "Terms of Service",
-  description: "Bondery Terms of Service page. This legal text is currently in progress.",
   alternates: {
     canonical: "/terms",
   },
+  description: "Bondery Terms of Service page. This legal text is currently in progress.",
   openGraph: {
-    title: formatMetadataTitle("Terms of Service"),
     description: "Bondery Terms of Service page. This legal text is currently in progress.",
-    url: "/terms",
+    title: formatMetadataTitle("Terms of Service"),
     type: "article",
+    url: "/terms",
   },
+  title: "Terms of Service",
   twitter: {
-    title: formatMetadataTitle("Terms of Service"),
     description: "Bondery Terms of Service page. This legal text is currently in progress.",
+    title: formatMetadataTitle("Terms of Service"),
   },
 };
 

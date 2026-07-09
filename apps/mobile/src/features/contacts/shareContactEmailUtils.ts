@@ -63,37 +63,27 @@ export function processRecipientInputChange(
     seen.add(token);
   }
 
-  return { type: "multi", added, remainder, hasInvalid };
+  return { added, hasInvalid, remainder, type: "multi" };
 }
 
-export function buildFinalRecipients(
-  recipients: string[],
-  emailInput: string,
-): string[] {
+export function buildFinalRecipients(recipients: string[], emailInput: string): string[] {
   const trimmed = emailInput.trim().toLowerCase();
 
-  if (
-    trimmed &&
-    isValidRecipientEmail(trimmed) &&
-    !recipients.includes(trimmed)
-  ) {
+  if (trimmed && isValidRecipientEmail(trimmed) && !recipients.includes(trimmed)) {
     return [...recipients, trimmed];
   }
 
   return recipients;
 }
 
-export function formatShareEmailSendButtonLabel(
-  count: number,
-  t: (key: string) => string,
-): string {
+export function formatShareEmailSendButtonLabel(count: number, t: (key: string) => string): string {
   if (count <= 0) {
-    return t("MobileApp.ShareContactEmail.SendButton");
+    return t("SendButton", { ns: "MobileShareContactEmail" });
   }
 
   if (count === 1) {
-    return t("MobileApp.ShareContactEmail.SendButtonOne");
+    return t("SendButtonOne", { ns: "MobileShareContactEmail" });
   }
 
-  return t("MobileApp.ShareContactEmail.SendButtonMany").replace("{count}", String(count));
+  return t("SendButtonMany", { ns: "MobileShareContactEmail" }).replace("{count}", String(count));
 }

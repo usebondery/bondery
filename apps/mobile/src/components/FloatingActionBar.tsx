@@ -19,8 +19,8 @@ export type FloatingActionBarAction = {
 };
 
 interface FloatingActionBarProps {
-  actions: FloatingActionBarAction[];
   accessibilityLabel?: string;
+  actions: FloatingActionBarAction[];
 }
 
 /**
@@ -35,10 +35,10 @@ export function FloatingActionBar({
 
   return (
     <View
+      accessibilityLabel={accessibilityLabel}
+      accessibilityRole="toolbar"
       pointerEvents="box-none"
       style={[floatingBarStyles.container, { paddingBottom: Math.max(insets.bottom, 8) }]}
-      accessibilityRole="toolbar"
-      accessibilityLabel={accessibilityLabel}
     >
       <View
         style={[
@@ -61,29 +61,23 @@ export function FloatingActionBar({
 
           return (
             <Tappable
-              key={action.id}
-              variant="subtle"
-              accessibilityRole="button"
-              accessibilityLabel={action.accessibilityLabel}
               accessibilityHint={action.accessibilityHint}
+              accessibilityLabel={action.accessibilityLabel}
+              accessibilityRole="button"
               accessibilityState={{
                 disabled: isDisabled,
                 selected: action.isActive,
               }}
+              backgroundColor={action.isActive ? colors.selectionBackground : "transparent"}
               disabled={isDisabled}
-              opacity={isDisabled ? 0.38 : 1}
-              style={floatingBarStyles.actionBubble}
-              backgroundColor={
-                action.isActive ? colors.selectionBackground : "transparent"
-              }
-              pressStyle={{ opacity: 0.9, transition: TAMAGUI_TRANSITION.quick }}
+              key={action.id}
               onPress={action.onPress}
+              opacity={isDisabled ? 0.38 : 1}
+              pressStyle={{ opacity: 0.9, transition: TAMAGUI_TRANSITION.quick }}
+              style={floatingBarStyles.actionBubble}
+              variant="subtle"
             >
-              {action.loading ? (
-                <ActivityIndicator size="small" color={iconColor} />
-              ) : (
-                action.icon
-              )}
+              {action.loading ? <ActivityIndicator color={iconColor} size="small" /> : action.icon}
             </Tappable>
           );
         })}

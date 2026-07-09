@@ -13,32 +13,42 @@ const SESSION = "e4d508";
 
 function log(hypothesisId, location, message, data = {}) {
   const entry = {
-    sessionId: SESSION,
-    runId: process.env.DEBUG_RUN_ID ?? "probe",
+    data,
     hypothesisId,
     location,
     message,
-    data,
+    runId: process.env.DEBUG_RUN_ID ?? "probe",
+    sessionId: SESSION,
     timestamp: Date.now(),
   };
   const line = `${JSON.stringify(entry)}\n`;
   appendFileSync(LOG_PATH, line, "utf8");
   fetch(INGEST, {
-    method: "POST",
-    headers: { "Content-Type": "application/json", "X-Debug-Session-Id": SESSION },
     body: JSON.stringify(entry),
+    headers: { "Content-Type": "application/json", "X-Debug-Session-Id": SESSION },
+    method: "POST",
   }).catch(() => {});
 }
 
 const probes = [
-  { id: "A", hypothesisId: "A", label: "root barrel", spec: "@bondery/schemas" },
-  { id: "B", hypothesisId: "B", label: "entities barrel", spec: "@bondery/schemas/entities" },
-  { id: "C", hypothesisId: "C", label: "geocode", spec: "@bondery/schemas/geocode" },
-  { id: "D", hypothesisId: "D", label: "http (api-only)", spec: "@bondery/schemas/http" },
-  { id: "E", hypothesisId: "E", label: "helpers root", spec: "@bondery/helpers" },
-  { id: "F", hypothesisId: "F", label: "helpers/forms", spec: "@bondery/helpers/forms" },
-  { id: "G", hypothesisId: "G", label: "contact entity", spec: "@bondery/schemas/entities/contact" },
-  { id: "H", hypothesisId: "H", label: "schema-examples fixture", spec: "@bondery/schemas/openapi/fixtures/schema-examples" },
+  { hypothesisId: "A", id: "A", label: "root barrel", spec: "@bondery/schemas" },
+  { hypothesisId: "B", id: "B", label: "entities barrel", spec: "@bondery/schemas/entities" },
+  { hypothesisId: "C", id: "C", label: "geocode", spec: "@bondery/schemas/geocode" },
+  { hypothesisId: "D", id: "D", label: "http (api-only)", spec: "@bondery/schemas/http" },
+  { hypothesisId: "E", id: "E", label: "helpers root", spec: "@bondery/helpers" },
+  { hypothesisId: "F", id: "F", label: "helpers/forms", spec: "@bondery/helpers/forms" },
+  {
+    hypothesisId: "G",
+    id: "G",
+    label: "contact entity",
+    spec: "@bondery/schemas/entities/contact",
+  },
+  {
+    hypothesisId: "H",
+    id: "H",
+    label: "schema-examples fixture",
+    spec: "@bondery/schemas/openapi/fixtures/schema-examples",
+  },
 ];
 
 log("INIT", "debug-schemas-ssr-init.mjs", "probe start", { probeCount: probes.length });
@@ -47,17 +57,17 @@ for (const probe of probes) {
   try {
     const mod = await import(probe.spec);
     log(probe.hypothesisId, "debug-schemas-ssr-init.mjs", "import ok", {
-      probe: probe.id,
-      label: probe.label,
       exportCount: Object.keys(mod).length,
+      label: probe.label,
+      probe: probe.id,
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     const stack = error instanceof Error ? error.stack : undefined;
     log(probe.hypothesisId, "debug-schemas-ssr-init.mjs", "import failed", {
-      probe: probe.id,
-      label: probe.label,
       error: message,
+      label: probe.label,
+      probe: probe.id,
       stack: stack?.split("\n").slice(0, 6),
     });
     console.error(`[FAIL] ${probe.label}: ${message}`);

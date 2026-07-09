@@ -8,7 +8,7 @@ The public marketing website for [bondery.app](https://bondery.app), built with 
 npm run dev -w apps/website
 ```
 
-The dev server starts at `http://localhost:3000`.
+The dev server starts at `http://localhost:26630`.
 
 ## Scripts
 

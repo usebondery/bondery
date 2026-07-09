@@ -1,15 +1,15 @@
-import { ScrollView, StyleSheet } from "react-native";
-import { useRouter } from "expo-router";
-import { IconBrandGithub, IconWorld } from "@tabler/icons-react-native";
 import { SOCIAL_LINKS } from "@bondery/helpers/globals/paths";
+import { IconBrandGithub, IconWorld } from "@tabler/icons-react-native";
+import { useRouter } from "expo-router";
+import { ScrollView, StyleSheet } from "react-native";
 import { StackNavBar } from "../../components/chrome";
 import { WEBSITE_URL } from "../../lib/config";
 import { useMobileTranslations } from "../../lib/i18n/useMobileTranslations";
 import { MOBILE_LAYOUT } from "../../theme/tokens";
 import { useMobileThemeColors } from "../../theme/useMobileThemeColors";
-import { openExternalUrl } from "./openExternalUrl";
 import { SettingsNavigationRow } from "./components/SettingsNavigationRow";
 import { SettingsSectionCard } from "./components/SettingsSectionCard";
+import { openExternalUrl } from "./openExternalUrl";
 
 export function SettingsAboutScreen() {
   const router = useRouter();
@@ -19,35 +19,35 @@ export function SettingsAboutScreen() {
   return (
     <>
       <StackNavBar
-        variant="elevated"
-        title={t("MobileApp.Settings.AboutUs")}
         onBack={() => router.back()}
+        title={t("AboutUs", { ns: "MobileSettings" })}
+        variant="elevated"
       />
 
       <ScrollView
-        style={[styles.screen, { backgroundColor: colors.appBackground }]}
         contentContainerStyle={styles.content}
+        style={[styles.screen, { backgroundColor: colors.appBackground }]}
       >
         <SettingsSectionCard>
           <SettingsNavigationRow
-            icon={<IconWorld size={18} stroke={colors.iconPrimary} />}
-            label={t("MobileApp.Settings.Website")}
             destination="external"
-            externalLabel={t("MobileApp.Settings.External")}
+            externalLabel={t("External", { ns: "MobileSettings" })}
+            icon={<IconWorld size={18} stroke={colors.iconPrimary} />}
+            label={t("Website", { ns: "MobileSettings" })}
             onPress={() => {
               void openExternalUrl(WEBSITE_URL);
             }}
           />
 
           <SettingsNavigationRow
-            icon={<IconBrandGithub size={18} stroke={colors.iconPrimary} />}
-            label={t("MobileApp.Settings.Repository")}
             destination="external"
-            externalLabel={t("MobileApp.Settings.External")}
-            showDivider={false}
+            externalLabel={t("External", { ns: "MobileSettings" })}
+            icon={<IconBrandGithub size={18} stroke={colors.iconPrimary} />}
+            label={t("Repository", { ns: "MobileSettings" })}
             onPress={() => {
               void openExternalUrl(SOCIAL_LINKS.github);
             }}
+            showDivider={false}
           />
         </SettingsSectionCard>
       </ScrollView>
@@ -56,13 +56,13 @@ export function SettingsAboutScreen() {
 }
 
 const styles = StyleSheet.create({
+  content: {
+    gap: 16,
+    paddingBottom: MOBILE_LAYOUT.spacing.contentBottom,
+    paddingHorizontal: MOBILE_LAYOUT.spacing.horizontal,
+    paddingTop: MOBILE_LAYOUT.spacing.contentTop,
+  },
   screen: {
     flex: 1,
-  },
-  content: {
-    paddingTop: MOBILE_LAYOUT.spacing.contentTop,
-    paddingHorizontal: MOBILE_LAYOUT.spacing.horizontal,
-    paddingBottom: MOBILE_LAYOUT.spacing.contentBottom,
-    gap: 16,
   },
 });

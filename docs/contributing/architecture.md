@@ -2,6 +2,8 @@
 
 Bondery is a monorepo managed with [Turborepo](https://turbo.build/repo) and npm workspaces. Apps and shared packages share tooling, types, and translations; Turborepo orchestrates dev, build, lint, and type-check across the tree.
 
+**Repository:** [github.com/usebondery/bondery](https://github.com/usebondery/bondery)
+
 ## Mental model
 
 | Layer | Role |
@@ -27,8 +29,8 @@ bondery/
 │   └── supabase-db/      # Database migrations and seeds
 ├── packages/
 │   ├── schemas/          # Zod schemas, domain types, Supabase generated types, sync protocol
-│   ├── translations/     # Localization strings (EN, CS)
-│   ├── helpers/          # Shared utilities, route constants, dev ports
+│   ├── translations/     # i18next resources (en, cs, de)
+│   ├── helpers/          # Shared utilities, route constants
 │   ├── emails/           # Transactional email templates (React Email)
 │   ├── mantine-next/     # Shared Mantine components for Next.js apps
 │   ├── branding/         # Logos, icons, brand assets
@@ -39,6 +41,8 @@ bondery/
 ## Apps
 
 ### `apps/webapp` — Web application
+
+**Source:** [`apps/webapp`](https://github.com/usebondery/bondery/tree/main/apps/webapp) · **Local dev:** port `26632` · [http://localhost:26632](http://localhost:26632)
 
 The primary user-facing product at [app.usebondery.com](https://app.usebondery.com).
 
@@ -52,16 +56,18 @@ The primary user-facing product at [app.usebondery.com](https://app.usebondery.c
 | API transport | `clientApi*` / `serverApi*` wrappers in `lib/api/client.ts` |
 | Authentication | [Supabase Auth](https://supabase.com/) (`@supabase/ssr`) — sessions only; no direct DB reads for app data |
 | Rich text | [Tiptap](https://tiptap.dev/) |
-| Localization | `@bondery/translations` via `useWebTranslations` |
+| Localization | [i18next](https://www.i18next.com/) + [react-i18next](https://react.i18next.com/) via `@bondery/translations` (`useWebTranslations`) |
 | Icons | [Tabler Icons](https://tabler.io/icons) |
 
 Server components and client hooks call the Fastify API with the user's Supabase JWT. A small set of Next.js route handlers (e.g. streaming chat) proxy to the API after verifying the session locally.
 
-**Dev port:** `3002`
-
 ---
 
 ### `apps/api` — REST API server
+
+**Source:** [`apps/api`](https://github.com/usebondery/bondery/tree/main/apps/api) · **Local dev:** port `26631` · [http://localhost:26631](http://localhost:26631) · **Production:** [api.usebondery.com](https://api.usebondery.com)
+
+Mobile sync WebSocket: `ws://localhost:26631/api/sync/ws` (same port as the API).
 
 Central backend for all product data and privileged operations.
 
@@ -88,11 +94,11 @@ CI enforces: every public route has `description` + `response`; `openapi.yaml` i
 
 Every authenticated request validates the Supabase JWT. List endpoints follow a shared [pagination contract](../../.agents/skills/bondery-specific/references/api-design.md) (`limit`, `offset`, `search`, `sort`, nested `pagination` object).
 
-**Dev port:** `3001` | **Production:** `api.usebondery.com`
-
 ---
 
 ### `apps/mobile` — Mobile application
+
+**Source:** [`apps/mobile`](https://github.com/usebondery/bondery/tree/main/apps/mobile) · **Local dev (Metro):** port `26634` · [http://localhost:26634](http://localhost:26634)
 
 Native iOS and Android client built with Expo. Offline-capable via local SQLite and server-authoritative pull sync.
 
@@ -105,6 +111,7 @@ Native iOS and Android client built with Expo. Offline-capable via local SQLite 
 | Read sync | `GET /api/sync/bootstrap` + `GET /api/sync/pull` (batched `sync_change_log`) |
 | Write sync | REST when online; `pending_mutations` outbox → `POST /api/sync/push` when offline |
 | Authentication | Supabase Auth |
+| Localization | i18next via `@bondery/translations` (`useMobileTranslations`) |
 
 See [Local development setup](local-setup.md#7-mobile-application-appsmobile) for running the sync stack locally.
 
@@ -112,19 +119,21 @@ See [Local development setup](local-setup.md#7-mobile-application-appsmobile) fo
 
 ### `apps/website` — Marketing site
 
+**Source:** [`apps/website`](https://github.com/usebondery/bondery/tree/main/apps/website) · **Local dev:** port `26630` · [http://localhost:26630](http://localhost:26630)
+
 Public landing page at [usebondery.com](https://usebondery.com).
 
 | Concern | Technology |
 |---|---|
 | Framework | [Next.js](https://nextjs.org/) (App Router) |
 | UI | [Mantine v9](https://mantine.dev/) |
-| Localization | `@bondery/translations` |
-
-**Dev port:** `3000`
+| Localization | i18next via `@bondery/translations` |
 
 ---
 
 ### `apps/chrome-extension` — Browser extension
+
+**Source:** [`apps/chrome-extension`](https://github.com/usebondery/bondery/tree/main/apps/chrome-extension) · **Local dev (WXT HMR):** port `26633` · [http://localhost:26633](http://localhost:26633)
 
 Saves contacts from social networks while browsing.
 
@@ -140,6 +149,8 @@ Saves contacts from social networks while browsing.
 
 ### `apps/supabase-db` — Database
 
+**Source:** [`apps/supabase-db`](https://github.com/usebondery/bondery/tree/main/apps/supabase-db)
+
 PostgreSQL schema, Row Level Security, seeds, and local dev tooling.
 
 | Concern | Technology |
@@ -148,9 +159,24 @@ PostgreSQL schema, Row Level Security, seeds, and local dev tooling.
 | Auth | Supabase Auth (GitHub, LinkedIn OAuth) |
 | Migrations | Supabase CLI |
 
+**Local dev ports** (via `npm run dev` in this folder; full list in [`supabase/config.toml`](../../apps/supabase-db/supabase/config.toml)):
+
+| Port | Service |
+|---|---|
+| 54321 | Supabase gateway (REST, Auth, Storage, Realtime) |
+| 54322 | Postgres direct |
+| 54323 | Studio |
+| 54324 | Inbucket (local email catcher) |
+
+Realtime shares **54321** — no separate port.
+
 Run `npm run gen-types` after schema changes to refresh `packages/schemas/src/supabase.types.ts`.
 
 ---
+
+{% hint style="info" %}
+**Fun fact:** Bondery local apps use consecutive ports in the `2663x` block — phone keypad **B-O-N-D** → **2-6-6-3** ("Dial BOND"). Supabase stays on the industry-standard `5432x` block. Port constants live in [`packages/schemas/src/constants/dev-ports.ts`](../../packages/schemas/src/constants/dev-ports.ts); CI enforces them with `npm run check-dev-ports`.
+{% endhint %}
 
 ## Shared packages
 
@@ -158,14 +184,14 @@ All compilable packages extend `@bondery/typescript-config` (NodeNext, `declarat
 
 | Package | Role |
 |---------|------|
-| `packages/typescript-config` | Shared `base.json`, `react-library.json`, `nextjs.json` tsconfigs |
-| `packages/schemas` | Zod schemas, types, Supabase DB types, sync protocol |
-| `packages/translations` | User-facing strings (EN, CS) |
-| `packages/helpers` | Shared utilities, `API_ROUTES`, dev port constants |
-| `packages/emails` | React Email templates (`preview` for dev server, `dev` for `tsc --watch`) |
-| `packages/mantine-next` | Reusable Mantine components for Next.js apps |
-| `packages/branding` | Logos, icon assets, React icon components (`@bondery/branding/react`) |
-| `packages/vcard` | vCard generation for API export and share flows |
+| [`packages/typescript-config`](https://github.com/usebondery/bondery/tree/main/packages/typescript-config) | Shared `base.json`, `react-library.json`, `nextjs.json` tsconfigs |
+| [`packages/schemas`](https://github.com/usebondery/bondery/tree/main/packages/schemas) | Zod schemas, types, Supabase DB types, sync protocol, locale catalog |
+| [`packages/translations`](https://github.com/usebondery/bondery/tree/main/packages/translations) | i18next namespaces and JSON locale files (`en`, `cs`, `de`) |
+| [`packages/helpers`](https://github.com/usebondery/bondery/tree/main/packages/helpers) | Shared utilities, `API_ROUTES`, global URLs |
+| [`packages/emails`](https://github.com/usebondery/bondery/tree/main/packages/emails) | React Email templates (`preview` for local dev, `dev` for `tsc --watch`) |
+| [`packages/mantine-next`](https://github.com/usebondery/bondery/tree/main/packages/mantine-next) | Reusable Mantine components for Next.js apps |
+| [`packages/branding`](https://github.com/usebondery/bondery/tree/main/packages/branding) | Logos, icon assets, React icon components (`@bondery/branding/react`) |
+| [`packages/vcard`](https://github.com/usebondery/bondery/tree/main/packages/vcard) | vCard generation for API export and share flows |
 
 **Build:** `rimraf dist && tsc` per package. **Exports:** run `npm run sync-exports` after adding public subpaths. **Go-to-definition:** `declarationMap` maps from `dist/*.d.ts` back to `src/`.
 
@@ -173,17 +199,40 @@ All compilable packages extend `@bondery/typescript-config` (NodeNext, `declarat
 
 Single source of truth for Zod schemas, inferred TypeScript types, Supabase database types, and the mobile sync protocol (`src/sync/`). Import domain types from here — do not redefine them in apps.
 
+Supported UI locales are declared in [`packages/schemas/locale/supported-locales.json`](https://github.com/usebondery/bondery/blob/main/packages/schemas/locale/supported-locales.json) and exported as `SUPPORTED_LOCALES`, `DEFAULT_LOCALE`, and `APP_LOCALE_METADATA` from `@bondery/schemas/locale`.
+
 ### `packages/translations`
 
-User-facing strings for webapp, website, and mobile. English and Czech. Add keys to both locale files.
+User-facing copy for webapp, website, mobile, and the Chrome extension. Built on **[i18next](https://www.i18next.com/)** with **[react-i18next](https://react.i18next.com/)** (web) / **expo-localization** + i18next (mobile). Namespace layout and preload groups live in `manifest.json`; CI runs **[i18next-cli](https://github.com/i18next/i18next-cli)** for types, lint, and locale parity checks.
+
+**Supported locales** (source of truth: `supported-locales.json` above — add every new key under `src/locales/{locale}/` for each):
+
+| Code | Language |
+|------|----------|
+| `en` | English (reference / fallback) |
+| `cs` | Czech |
+| `de` | German |
+
+In application code, import locale constants from the schemas package (translations re-exports them for convenience):
+
+```typescript
+import { DEFAULT_LOCALE, SUPPORTED_LOCALES } from "@bondery/schemas/locale";
+import { i18nConfig, resourceLoader } from "@bondery/translations";
+```
+
+Markdown docs cannot import TypeScript modules; keep `supported-locales.json` in sync when adding a locale and update this table in the same change.
+
+See also [`packages/translations/README.md`](https://github.com/usebondery/bondery/blob/main/packages/translations/README.md).
 
 ### `packages/helpers`
 
-Shared pure utilities, `API_ROUTES`, dev port constants, and platform helpers used across apps.
+Shared pure utilities, `API_ROUTES`, global URL constants, and platform helpers used across apps.
 
 ### `packages/emails`
 
 React Email templates rendered and sent by the API.
+
+**Local dev:** port `26639` · `npm run preview --workspace=@bondery/emails` → [http://localhost:26639](http://localhost:26639). Runs alongside the Chrome extension dev server (`26633`) without a port conflict.
 
 ### `packages/mantine-next`
 

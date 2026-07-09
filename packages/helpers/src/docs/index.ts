@@ -1,1 +1,1 @@
-export { docHref, DOC_LINKS, type DocId } from "#docs/docHref.js";
+export { DOC_LINKS, type DocId, docHref } from "#docs/docHref.js";

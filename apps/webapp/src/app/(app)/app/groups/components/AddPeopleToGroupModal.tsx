@@ -1,28 +1,27 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef, useMemo } from "react";
-import { Stack, Text, Loader, Center } from "@mantine/core";
-import { modals } from "@mantine/modals";
-import { notifications } from "@mantine/notifications";
-import { IconUserPlus } from "@tabler/icons-react";
-import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
+import { getUserFacingError } from "@bondery/helpers/api";
 import {
-  PeopleMultiPickerInput,
   errorNotificationTemplate,
   loadingNotificationTemplate,
   ModalFooter,
   ModalTitle,
+  PeopleMultiPickerInput,
   successNotificationTemplate,
 } from "@bondery/mantine-next";
 import type { Contact } from "@bondery/schemas";
-import { DEBOUNCE_MS } from "@/lib/config";
-import { searchContacts } from "@/lib/searchContacts";
+import { Center, Loader, Stack, Text } from "@mantine/core";
+import { modals } from "@mantine/modals";
+import { notifications } from "@mantine/notifications";
+import { IconUserPlus } from "@tabler/icons-react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { searchContacts } from "@/lib/contacts/searchContacts";
+import { optionalPluralFragment } from "@/lib/i18n/optionalPluralFragment";
+import { useCommonTranslations, useWebTranslations } from "@/lib/i18n/useWebTranslations";
+import { createModalId, useModalDismiss } from "@/lib/modals";
+import { DEBOUNCE_MS } from "@/lib/platform/config";
 import { useContactsListQuery } from "@/lib/query/hooks/useContacts";
-import {
-  useAddContactsToGroupMutation,
-  useGroupMembersQuery,
-} from "@/lib/query/hooks/useGroups";
-import { createModalId, useModalBlocking } from "@/lib/modals";
+import { useAddContactsToGroupMutation, useGroupMembersQuery } from "@/lib/query/hooks/useGroups";
 
 interface AddPeopleToGroupModalProps {
   groupId: string;
@@ -34,11 +33,11 @@ interface AddPeopleToGroupFormProps extends AddPeopleToGroupModalProps {
 }
 
 function AddPeopleToGroupModalTitle({ groupLabel }: { groupLabel: string }) {
-  const t = useTranslations("GroupsPage");
+  const t = useWebTranslations("GroupsPage");
   return (
     <ModalTitle
-      text={t("AddPeopleModal.Title", { groupLabel })}
       icon={<IconUserPlus size={24} />}
+      text={t("AddPeopleModal.Title", { groupLabel })}
     />
   );
 }
@@ -50,23 +49,30 @@ export function openAddPeopleToGroupModal(props: AddPeopleToGroupModalProps) {
   const modalId = createModalId("add-people-to-group");
 
   modals.open({
+    children: <AddPeopleToGroupForm {...props} modalId={modalId} />,
     modalId,
+    size: "md",
     title: <AddPeopleToGroupModalTitle groupLabel={props.groupLabel} />,
     trapFocus: true,
-    size: "md",
-    children: <AddPeopleToGroupForm {...props} modalId={modalId} />,
   });
 }
 
 function AddPeopleToGroupForm({ groupId, groupLabel, modalId }: AddPeopleToGroupFormProps) {
-  const t = useTranslations("GroupsPage");
+  const tCommon = useCommonTranslations();
+  const t = useWebTranslations("GroupsPage");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const existingMemberIdsRef = useRef<Set<string>>(new Set());
-  const { data: allContactsData, isLoading: isLoadingAll, isError: isAllContactsError } =
-    useContactsListQuery({ limit: 200 });
-  const { data: groupMembersData, isLoading: isLoadingMembers, isError: isMembersError } =
-    useGroupMembersQuery(groupId, { limit: 200, offset: 0 });
+  const {
+    data: allContactsData,
+    isLoading: isLoadingAll,
+    isError: isAllContactsError,
+  } = useContactsListQuery({ limit: 200 });
+  const {
+    data: groupMembersData,
+    isLoading: isLoadingMembers,
+    isError: isMembersError,
+  } = useGroupMembersQuery(groupId, { limit: 200, offset: 0 });
   const addContactsMutation = useAddContactsToGroupMutation(groupId);
 
   const contacts = useMemo(() => {
@@ -84,15 +90,15 @@ function AddPeopleToGroupForm({ groupId, groupLabel, modalId }: AddPeopleToGroup
     if (isAllContactsError || isMembersError) {
       notifications.show(
         errorNotificationTemplate({
-          title: t("AddPeopleModal.ErrorTitle"),
           description: t("AddPeopleModal.LoadError"),
+          title: t("AddPeopleModal.ErrorTitle"),
         }),
       );
     }
   }, [isAllContactsError, isMembersError, t]);
 
   const isBlocking = isSubmitting || isLoading;
-  useModalBlocking(modalId, isBlocking);
+  const { closeModal } = useModalDismiss(modalId, isBlocking);
 
   const handleSearch = useCallback(async (query: string): Promise<Contact[]> => {
     const results = await searchContacts(query);
@@ -102,9 +108,9 @@ function AddPeopleToGroupForm({ groupId, groupLabel, modalId }: AddPeopleToGroup
   const handleSubmit = async () => {
     if (selectedIds.length === 0) {
       notifications.show({
-        title: t("AddPeopleModal.NoSelectionTitle"),
-        message: t("AddPeopleModal.NoSelectionDescription"),
         color: "yellow",
+        message: t("AddPeopleModal.NoSelectionDescription"),
+        title: t("AddPeopleModal.NoSelectionTitle"),
       });
       return;
     }
@@ -113,8 +119,8 @@ function AddPeopleToGroupForm({ groupId, groupLabel, modalId }: AddPeopleToGroup
 
     const loadingNotification = notifications.show({
       ...loadingNotificationTemplate({
-        title: t("AddPeopleModal.AddingTitle"),
         description: t("AddPeopleModal.AddingDescription"),
+        title: t("AddPeopleModal.AddingTitle"),
       }),
     });
 
@@ -125,36 +131,35 @@ function AddPeopleToGroupForm({ groupId, groupLabel, modalId }: AddPeopleToGroup
 
       notifications.hide(loadingNotification);
 
-      const skippedSuffix =
+      const skippedDetails =
         skippedCount > 0 && addedCount > 0
-          ? ` ${
-              skippedCount === 1
-                ? t("AddPeopleModal.SkippedAlreadyInGroupSingular", { count: skippedCount })
-                : t("AddPeopleModal.SkippedAlreadyInGroupPlural", { count: skippedCount })
-            }`
+          ? optionalPluralFragment(t, "AddPeopleModal.SkippedAlreadyInGroup", skippedCount, {
+              skippedCount,
+            })
           : "";
 
       notifications.show(
         successNotificationTemplate({
-          title: t("AddPeopleModal.SuccessTitle"),
           description:
             addedCount === 0
               ? t("AddPeopleModal.AllAlreadyInGroup", { groupLabel })
-              : addedCount === 1
-                ? t("AddPeopleModal.SuccessMessageSingular", { groupLabel }) + skippedSuffix
-                : t("AddPeopleModal.SuccessMessagePlural", { count: addedCount, groupLabel }) +
-                  skippedSuffix,
+              : t("AddPeopleModal.SuccessMessage", {
+                  count: addedCount,
+                  groupLabel,
+                  skippedDetails,
+                }),
+          title: t("AddPeopleModal.SuccessTitle"),
         }),
       );
 
-      modals.close(modalId);
+      closeModal();
     } catch (error) {
       notifications.hide(loadingNotification);
 
       notifications.show(
         errorNotificationTemplate({
+          description: getUserFacingError(error, tCommon),
           title: t("AddPeopleModal.ErrorTitle"),
-          description: error instanceof Error ? error.message : t("AddPeopleModal.AddError"),
         }),
       );
     } finally {
@@ -176,10 +181,7 @@ function AddPeopleToGroupForm({ groupId, groupLabel, modalId }: AddPeopleToGroup
         <Text c="dimmed" ta="center">
           {t("AddPeopleModal.EmptyState")}
         </Text>
-        <ModalFooter
-          cancelLabel={t("AddPeopleModal.Close")}
-          onCancel={() => modals.close(modalId)}
-        />
+        <ModalFooter cancelLabel={t("AddPeopleModal.Close")} onCancel={closeModal} />
       </Stack>
     );
   }
@@ -187,34 +189,32 @@ function AddPeopleToGroupForm({ groupId, groupLabel, modalId }: AddPeopleToGroup
   const actionLabel =
     selectedIds.length === 0
       ? t("AddPeopleModal.ActionDefault")
-      : selectedIds.length === 1
-        ? t("AddPeopleModal.ActionSingular")
-        : t("AddPeopleModal.ActionPlural", { count: selectedIds.length });
+      : t("AddPeopleModal.Action", { count: selectedIds.length });
 
   return (
     <Stack gap="md">
       <PeopleMultiPickerInput
         contacts={contacts as Contact[]}
-        selectedIds={selectedIds}
-        onChange={setSelectedIds}
-        placeholder={t("AddPeopleModal.AddContactsPlaceholder")}
-        noResultsLabel={t("AddPeopleModal.NoContactsFound")}
-        onSearch={handleSearch}
-        searchDebounceMs={DEBOUNCE_MS.contactPicker}
         disabled={isSubmitting}
+        noResultsLabel={t("AddPeopleModal.NoContactsFound")}
+        onChange={setSelectedIds}
+        onSearch={handleSearch}
+        placeholder={t("AddPeopleModal.AddContactsPlaceholder")}
+        searchDebounceMs={DEBOUNCE_MS.contactPicker}
+        selectedIds={selectedIds}
       />
 
       <ModalFooter
-        cancelLabel={t("AddPeopleModal.Cancel")}
-        onCancel={() => modals.close(modalId)}
-        cancelDisabled={isSubmitting}
+        actionDisabled={selectedIds.length === 0 || isSubmitting}
         actionLabel={actionLabel}
+        actionLeftSection={<IconUserPlus size={16} />}
+        actionLoading={isSubmitting}
+        cancelDisabled={isSubmitting}
+        cancelLabel={t("AddPeopleModal.Cancel")}
         onAction={() => {
           void handleSubmit();
         }}
-        actionLoading={isSubmitting}
-        actionDisabled={selectedIds.length === 0 || isSubmitting}
-        actionLeftSection={<IconUserPlus size={16} />}
+        onCancel={closeModal}
       />
     </Stack>
   );

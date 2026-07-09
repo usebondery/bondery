@@ -7,33 +7,21 @@
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { parse } from "yaml";
 import {
   getHttpMethodRank,
   getPathTier,
   OPENAPI_TAG_ORDER,
 } from "@bondery/schemas/openapi/route-order";
+import { parse } from "yaml";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const specPath = join(__dirname, "..", "openapi.yaml");
 
-const HTTP_METHODS = [
-  "get",
-  "post",
-  "put",
-  "patch",
-  "delete",
-  "head",
-  "options",
-  "trace",
-] as const;
+const HTTP_METHODS = ["get", "post", "put", "patch", "delete", "head", "options", "trace"] as const;
 
 type OpenApiSpec = {
   tags?: Array<{ name: string }>;
-  paths?: Record<
-    string,
-    Partial<Record<(typeof HTTP_METHODS)[number], { tags?: string[] }>>
-  >;
+  paths?: Record<string, Partial<Record<(typeof HTTP_METHODS)[number], { tags?: string[] }>>>;
 };
 
 const spec = parse(readFileSync(specPath, "utf8")) as OpenApiSpec;
@@ -49,16 +37,20 @@ if (declaredTags.join("\0") !== OPENAPI_TAG_ORDER.join("\0")) {
 const opsByTag = new Map<string, Array<{ path: string; method: string }>>();
 
 for (const [path, pathItem] of Object.entries(spec.paths ?? {})) {
-  if (!pathItem) continue;
+  if (!pathItem) {
+    continue;
+  }
 
   for (const method of HTTP_METHODS) {
     const operation = pathItem[method];
-    if (!operation) continue;
+    if (!operation) {
+      continue;
+    }
 
     const tags = operation.tags ?? ["Untagged"];
-    const primaryTag = tags[0]!;
+    const primaryTag = tags[0] ?? "Untagged";
     const list = opsByTag.get(primaryTag) ?? [];
-    list.push({ path, method });
+    list.push({ method, path });
     opsByTag.set(primaryTag, list);
   }
 }
@@ -93,7 +85,7 @@ for (const [tag, operations] of opsByTag) {
 }
 
 if (violations.length > 0) {
-  console.error("API route order check failed:\n" + violations.map((v) => `  - ${v}`).join("\n"));
+  console.error(`API route order check failed:\n${violations.map((v) => `  - ${v}`).join("\n")}`);
   process.exit(1);
 }
 

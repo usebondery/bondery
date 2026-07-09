@@ -1,10 +1,10 @@
-import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from "react";
 import type { Contact } from "@bondery/schemas";
+import { createContext, type ReactNode, useCallback, useContext, useMemo, useState } from "react";
 import { CreateContactSheet } from "./components/CreateContactSheet";
 
 interface CreateContactSheetContextValue {
-  openCreateContact: () => void;
   contactsListVersion: number;
+  openCreateContact: () => void;
 }
 
 const CreateContactSheetContext = createContext<CreateContactSheetContextValue | null>(null);
@@ -23,8 +23,8 @@ export function CreateContactSheetProvider({ children }: { children: ReactNode }
 
   const value = useMemo(
     () => ({
-      openCreateContact,
       contactsListVersion,
+      openCreateContact,
     }),
     [contactsListVersion, openCreateContact],
   );
@@ -32,7 +32,7 @@ export function CreateContactSheetProvider({ children }: { children: ReactNode }
   return (
     <CreateContactSheetContext.Provider value={value}>
       {children}
-      <CreateContactSheet open={open} onOpenChange={setOpen} onCreated={handleCreated} />
+      <CreateContactSheet onCreated={handleCreated} onOpenChange={setOpen} open={open} />
     </CreateContactSheetContext.Provider>
   );
 }

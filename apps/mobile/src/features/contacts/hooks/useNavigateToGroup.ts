@@ -1,6 +1,6 @@
-import { useCallback, useRef } from "react";
-import { useFocusEffect, useRouter } from "expo-router";
 import type { Group, GroupWithCount } from "@bondery/schemas";
+import { useFocusEffect, useRouter } from "expo-router";
+import { useCallback, useRef } from "react";
 
 /**
  * Navigates to a group detail screen without stacking duplicate routes on rapid taps.
@@ -24,12 +24,12 @@ export function useNavigateToGroup() {
       navigatingToGroupIdRef.current = group.id;
 
       router.navigate({
-        pathname: "/group/[id]",
         params: {
+          emoji: group.emoji || "",
           id: group.id,
           label: group.label,
-          emoji: group.emoji || "",
         },
+        pathname: "/group/[id]",
       });
     },
     [router],

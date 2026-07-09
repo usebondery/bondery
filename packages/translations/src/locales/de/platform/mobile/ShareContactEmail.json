@@ -1,0 +1,22 @@
+{
+  "AddButton": "Hinzufügen",
+  "Description": "Wir senden die Details an die Personen unten. Du erhältst auch eine Kopie.",
+  "DuplicateEmail": "Diese Adresse ist bereits hinzugefügt",
+  "ErrorDescription": "Prüfe deine Verbindung und versuche es erneut.",
+  "ErrorHeadline": "Kontakt konnte nicht gesendet werden",
+  "InvalidEmail": "Gib eine gültige E-Mail-Adresse ein",
+  "MaxRecipients": "Du kannst bis zu 10 Empfänger hinzufügen",
+  "MaxRecipientsHint": "Maximal 10 Empfänger",
+  "MessagePlaceholder": "Notiz hinzufügen (optional)",
+  "NoRecipients": "Füge mindestens einen Empfänger hinzu",
+  "RecipientsLabel": "An",
+  "RecipientsPlaceholder": "E-Mail-Adresse des Empfängers",
+  "RemoveRecipient": "{email} entfernen",
+  "SendButton": "Senden",
+  "SendButtonMany": "An {count} Personen senden",
+  "SendButtonOne": "An 1 Person senden",
+  "SuccessDescription": "Deine Empfänger erhalten ihn in Kürze.",
+  "SuccessHeadline": "Kontakt gesendet",
+  "Title": "Kontakt von {name} per E-Mail senden",
+  "WhatsIncluded": "Enthält Kontaktinfos, Social-Media-Links und gespeicherte Notizen."
+}

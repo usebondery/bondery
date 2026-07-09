@@ -1,12 +1,12 @@
 "use client";
 
-import { Avatar, AvatarProps } from "@mantine/core";
+import { Avatar, type AvatarProps } from "@mantine/core";
 
 interface UserAvatarProps extends Omit<AvatarProps, "name" | "alt" | "src"> {
   avatarUrl: string | null;
-  userName: string;
   onClick?: () => void;
   style?: React.CSSProperties;
+  userName: string;
 }
 
 /**
@@ -26,12 +26,12 @@ export function UserAvatar({
 
   return (
     <Avatar
-      src={avatarUrl}
       alt={`${userName}'s avatar`}
-      radius="xl"
-      size={size}
       name={userName}
       onClick={onClick}
+      radius="xl"
+      size={size}
+      src={avatarUrl}
       style={combinedStyle}
       {...props}
     />

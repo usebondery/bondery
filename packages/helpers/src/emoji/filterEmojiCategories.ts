@@ -1,5 +1,5 @@
-import { EMOJI_CATEGORIES } from "#emoji/emojiData.js";
 import type { EmojiData } from "#emoji/emojiData.js";
+import { EMOJI_CATEGORIES } from "#emoji/emojiData.js";
 
 /**
  * Filters emoji categories by keyword substring match.

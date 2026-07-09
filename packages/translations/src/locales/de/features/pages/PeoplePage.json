@@ -1,0 +1,49 @@
+{
+  "AddContactModal": {
+    "AddToBondery": "Zu Bondery hinzufügen",
+    "Cancel": "Abbrechen",
+    "CreateFailed": "Kontakt konnte nicht erstellt werden. Bitte versuche es erneut.",
+    "ErrorTitle": "Fehler",
+    "FullNameInput": "Vollständiger Name",
+    "InvalidName": "Bitte gib einen gültigen Namen an",
+    "LinkedInInput": "LinkedIn",
+    "LinkedInPlaceholder": "linkedin.com/in/username oder nur Username",
+    "LoadingDescription": "Bitte warte, während wir den neuen Kontakt erstellen",
+    "LoadingTitle": "Kontakt wird erstellt...",
+    "NameRequired": "Bitte gib einen Namen an",
+    "NameTooLong": "Der Name darf höchstens {max} Zeichen lang sein",
+    "SuccessDescription": "Kontakt erfolgreich erstellt",
+    "SuccessTitle": "Erfolg",
+    "Title": "Person erstellen"
+  },
+  "AddPerson": "Person erstellen",
+  "DeleteContact": {
+    "ErrorDescription": "Kontakt konnte nicht gelöscht werden. Bitte versuche es erneut.",
+    "LoadingDescription": "Bitte warte, während wir diesen Kontakt löschen",
+    "LoadingTitle": "Kontakt wird gelöscht...",
+    "Message": "Möchtest du {name} wirklich löschen? Die Daten dieser Person, Erwähnungen und zugehörige Informationen werden gelöscht. Diese Aktion kann nicht rückgängig gemacht werden.",
+    "SuccessDescription": "Kontakt erfolgreich gelöscht",
+    "Title": "{name} löschen?"
+  },
+  "DeleteContacts": {
+    "ErrorDescription": "Kontakte konnten nicht gelöscht werden. Bitte versuche es erneut.",
+    "LoadingDescription": "Bitte warte, während wir die ausgewählten Kontakte löschen",
+    "LoadingTitle": "Kontakte werden gelöscht...",
+    "Message_one": "Möchtest du {count} ausgewählten Kontakt wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.",
+    "Message_other": "Möchtest du {count} ausgewählte Kontakte wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.",
+    "MessageAllMatching": "Möchtest du wirklich alle passenden Kontakte löschen? Diese Aktion kann nicht rückgängig gemacht werden.",
+    "SuccessDescription": "{count} Kontakt(e) erfolgreich gelöscht",
+    "Title_one": "{count} Kontakt löschen?",
+    "Title_other": "{count} Kontakte löschen?",
+    "TitleAllMatching": "Alle passenden Kontakte löschen?"
+  },
+  "HeaderDescription": "Überblick über alle deine Kontakte.",
+  "ImportContacts": "Kontakte importieren",
+  "LoadMoreBatch": "Weitere 50 Kontakte laden",
+  "LoadMoreError": "Weitere Kontakte konnten nicht geladen werden. Bitte versuche es erneut.",
+  "NoContactsFound": "Du hast noch keine Kontakte hinzugefügt.",
+  "NoContactsMatchSearch": "Kein passender Kontakt gefunden.",
+  "SearchPlaceholder": "Nach Name suchen...",
+  "ThisContactFallback": "diesen Kontakt",
+  "Title": "Personen"
+}

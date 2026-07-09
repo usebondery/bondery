@@ -73,7 +73,10 @@ export function parseInlineTokens(text: string): InlineToken[] {
   let lastIndex = 0;
 
   for (const match of text.matchAll(re)) {
-    const idx = match.index!;
+    const idx = match.index;
+    if (idx === undefined) {
+      continue;
+    }
 
     // Push preceding plain text
     if (idx > lastIndex) {
@@ -88,7 +91,7 @@ export function parseInlineTokens(text: string): InlineToken[] {
       tokens.push(token);
     } else if (linkLabel !== undefined && linkUrl !== undefined) {
       // [label](https://...)
-      tokens.push({ type: "link", href: linkUrl, label: linkLabel });
+      tokens.push({ href: linkUrl, label: linkLabel, type: "link" });
     }
 
     lastIndex = idx + fullMatch.length;
@@ -115,20 +118,20 @@ function bpTokenToInlineToken(rawType: string, value: string): InlineToken {
 
   switch (tokenType) {
     case "person":
-      return { type: "person", id: value };
+      return { id: value, type: "person" };
     case "interaction":
-      return { type: "interaction", id: value };
+      return { id: value, type: "interaction" };
     case "group":
-      return { type: "group", id: value };
+      return { id: value, type: "group" };
     case "tag":
-      return { type: "tag", id: value };
+      return { id: value, type: "tag" };
     case "date":
-      return { type: "date", iso: value };
+      return { iso: value, type: "date" };
     case "action": {
       const pipeIdx = value.indexOf("|");
       const name = pipeIdx === -1 ? value : value.slice(0, pipeIdx);
       const id = pipeIdx === -1 ? "" : value.slice(pipeIdx + 1);
-      return { type: "action", name, id };
+      return { id, name, type: "action" };
     }
   }
 }

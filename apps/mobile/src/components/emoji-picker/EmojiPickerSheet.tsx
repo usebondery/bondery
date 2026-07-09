@@ -1,21 +1,21 @@
 import { getRandomEmoji } from "@bondery/helpers/emoji";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Pressable, StyleSheet, Text } from "react-native";
-import { SearchActionSheet } from "../SearchActionSheet";
 import { useMobileTranslations } from "../../lib/i18n/useMobileTranslations";
 import { MOBILE_LAYOUT, MOBILE_TYPOGRAPHY } from "../../theme/tokens";
 import { useMobileThemeColors } from "../../theme/useMobileThemeColors";
+import { SearchActionSheet } from "../SearchActionSheet";
 import { EmojiPickerGrid, type EmojiPickerGridRef } from "./EmojiPickerGrid";
 import { useEmojiPickerFilter } from "./useEmojiPickerFilter";
 
 interface EmojiPickerSheetProps {
-  open: boolean;
-  value: string;
-  searchPlaceholder: string;
   emptySearchLabel: string;
   getCategoryLabel: (categoryKey: string) => string;
   onOpenChange: (open: boolean) => void;
   onSelect: (emoji: string) => void;
+  open: boolean;
+  searchPlaceholder: string;
+  value: string;
 }
 
 export function EmojiPickerSheet({
@@ -88,14 +88,14 @@ export function EmojiPickerSheet({
 
   const randomEmojiAction = (
     <Pressable
+      accessibilityLabel={t("RandomAccessibilityLabel", { ns: "MobileEmojiPicker" })}
       accessibilityRole="button"
-      accessibilityLabel={t("MobileApp.EmojiPicker.RandomAccessibilityLabel")}
       onPress={handleRandomEmoji}
       style={({ pressed }) => [
         styles.randomButton,
         {
-          borderColor: colors.borderStrong,
           backgroundColor: pressed ? colors.surfacePressed : colors.inputBackground,
+          borderColor: colors.borderStrong,
         },
       ]}
     >
@@ -105,21 +105,21 @@ export function EmojiPickerSheet({
 
   return (
     <SearchActionSheet
-      open={open}
+      elevated
       onOpenChange={handleOpenChange}
-      query={query}
       onQueryChange={setQuery}
+      open={open}
+      query={query}
       searchPlaceholder={searchPlaceholder}
       searchRightAction={randomEmojiAction}
-      elevated
     >
       <EmojiPickerGrid
-        ref={gridRef}
-        sections={sections}
-        value={value}
         emptySearchLabel={emptySearchLabel}
         getCategoryLabel={getCategoryLabel}
         onSelect={handleGridSelect}
+        ref={gridRef}
+        sections={sections}
+        value={value}
       />
     </SearchActionSheet>
   );
@@ -127,12 +127,12 @@ export function EmojiPickerSheet({
 
 const styles = StyleSheet.create({
   randomButton: {
-    width: MOBILE_LAYOUT.inputCompact,
-    height: MOBILE_LAYOUT.inputCompact,
+    alignItems: "center",
     borderRadius: MOBILE_LAYOUT.borderRadius.control,
     borderWidth: 1,
-    alignItems: "center",
+    height: MOBILE_LAYOUT.inputCompact,
     justifyContent: "center",
+    width: MOBILE_LAYOUT.inputCompact,
   },
   randomButtonEmoji: {
     fontSize: MOBILE_TYPOGRAPHY.fontSize.cardTitle,

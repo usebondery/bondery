@@ -20,7 +20,10 @@ type EmojiCategoryName =
 
 const EMOJI_LIST: EmojiData[] = [
   // People & Groups
-  { emoji: "👨‍👩‍👧‍👦", keywords: ["family", "parents", "children", "kids", "relatives", "household"] },
+  {
+    emoji: "👨‍👩‍👧‍👦",
+    keywords: ["family", "parents", "children", "kids", "relatives", "household"],
+  },
   { emoji: "👥", keywords: ["group", "people", "users", "team", "community", "members"] },
   { emoji: "👤", keywords: ["person", "user", "individual", "profile", "account"] },
   { emoji: "🧑‍🤝‍🧑", keywords: ["couple", "partners", "friends", "pair", "duo", "together"] },
@@ -39,7 +42,10 @@ const EMOJI_LIST: EmojiData[] = [
     emoji: "👩‍💼",
     keywords: ["businesswoman", "professional", "office", "work", "corporate", "manager"],
   },
-  { emoji: "🧑‍🎓", keywords: ["student", "graduate", "school", "university", "education", "alumni"] },
+  {
+    emoji: "🧑‍🎓",
+    keywords: ["student", "graduate", "school", "university", "education", "alumni"],
+  },
   {
     emoji: "👨‍🎓",
     keywords: ["graduate", "student", "education", "university", "alumni", "scholar"],
@@ -298,75 +304,75 @@ const BASE_CATEGORY_RANGES: Array<{
   start: number;
   end: number;
 }> = [
-  { name: "Humans", start: 0, end: 13 },
-  { name: "Work", start: 13, end: 26 },
-  { name: "Celebrations", start: 26, end: 39 },
-  { name: "Sports", start: 39, end: 51 },
-  { name: "Travel", start: 51, end: 64 },
-  { name: "Nature", start: 64, end: 77 },
-  { name: "Food", start: 77, end: 90 },
-  { name: "Activities", start: 90, end: 102 },
-  { name: "Hearts", start: 102, end: 110 },
-  { name: "Objects", start: 110, end: 122 },
-  { name: "Miscellaneous", start: 122, end: EMOJI_LIST.length },
+  { end: 13, name: "Humans", start: 0 },
+  { end: 26, name: "Work", start: 13 },
+  { end: 39, name: "Celebrations", start: 26 },
+  { end: 51, name: "Sports", start: 39 },
+  { end: 64, name: "Travel", start: 51 },
+  { end: 77, name: "Nature", start: 64 },
+  { end: 90, name: "Food", start: 77 },
+  { end: 102, name: "Activities", start: 90 },
+  { end: 110, name: "Hearts", start: 102 },
+  { end: 122, name: "Objects", start: 110 },
+  { end: EMOJI_LIST.length, name: "Miscellaneous", start: 122 },
 ];
 
 const CATEGORY_OVERRIDES: Record<string, EmojiCategoryName> = {
-  "🐕": "Animals",
-  "🐈": "Animals",
-  "🦋": "Animals",
-  "🐰": "Animals",
-  "🦃": "Animals",
-
-  "🏢": "Buildings",
-  "🏠": "Buildings",
-  "🏡": "Buildings",
-  "💒": "Buildings",
-  "🏥": "Buildings",
-  "🏫": "Buildings",
-  "🏛️": "Buildings",
+  "⏰": "Objects",
+  "☀️": "Nature",
+  "⛈️": "Nature",
   "⛪": "Buildings",
-  "🕌": "Buildings",
-  "🛕": "Buildings",
-  "🕍": "Buildings",
-
-  "🌸": "Nature",
-  "🌺": "Nature",
-  "🌻": "Nature",
-  "🌹": "Nature",
-  "🌷": "Nature",
+  "❄️": "Nature",
+  "🌈": "Nature",
+  "🌙": "Nature",
   "🌱": "Nature",
-  "🌿": "Nature",
-  "🍀": "Nature",
   "🌳": "Nature",
   "🌴": "Nature",
-  "🌈": "Nature",
-  "☀️": "Nature",
-  "🌙": "Nature",
-  "⛈️": "Nature",
-  "❄️": "Nature",
+  "🌷": "Nature",
 
-  "📅": "Objects",
-  "⏰": "Objects",
-  "🔔": "Objects",
-  "📧": "Objects",
-  "💬": "Objects",
-  "💍": "Objects",
-
-  "🎄": "Celebrations",
+  "🌸": "Nature",
+  "🌹": "Nature",
+  "🌺": "Nature",
+  "🌻": "Nature",
+  "🌿": "Nature",
+  "🍀": "Nature",
   "🎃": "Celebrations",
 
-  "🏋️‍♀️": "Sports",
-  "🧗": "Sports",
-  "🏊": "Sports",
-  "🎿": "Sports",
-  "🏄": "Sports",
+  "🎄": "Celebrations",
 
   "🎓": "Humans",
-  "🤝": "Humans",
+  "🎿": "Sports",
+  "🏄": "Sports",
+  "🏊": "Sports",
+
+  "🏋️‍♀️": "Sports",
+  "🏛️": "Buildings",
+  "🏠": "Buildings",
+  "🏡": "Buildings",
+
+  "🏢": "Buildings",
+  "🏥": "Buildings",
+  "🏫": "Buildings",
+  "🐈": "Animals",
+  "🐕": "Animals",
+  "🐰": "Animals",
   "👋": "Humans",
-  "🙏": "Humans",
+  "💍": "Objects",
+  "💒": "Buildings",
   "💪": "Humans",
+  "💬": "Objects",
+
+  "📅": "Objects",
+  "📧": "Objects",
+  "🔔": "Objects",
+  "🕌": "Buildings",
+  "🕍": "Buildings",
+  "🙏": "Humans",
+  "🛕": "Buildings",
+  "🤝": "Humans",
+  "🦃": "Animals",
+  "🦋": "Animals",
+  "🧗": "Sports",
   "🧠": "Humans",
 };
 
@@ -394,19 +400,19 @@ const getBaseCategoryByIndex = (index: number): EmojiCategoryName => {
 const grouped = CATEGORY_ORDER.reduce<Record<EmojiCategoryName, EmojiData[]>>(
   (acc, category) => ({ ...acc, [category]: [] }),
   {
-    Humans: [],
-    Work: [],
-    Celebrations: [],
-    Sports: [],
-    Travel: [],
+    Activities: [],
     Animals: [],
     Buildings: [],
-    Nature: [],
+    Celebrations: [],
     Food: [],
-    Activities: [],
     Hearts: [],
-    Objects: [],
+    Humans: [],
     Miscellaneous: [],
+    Nature: [],
+    Objects: [],
+    Sports: [],
+    Travel: [],
+    Work: [],
   },
 );
 
@@ -442,4 +448,4 @@ export function getRandomEmoji(): string {
   return ALL_EMOJIS[Math.floor(Math.random() * ALL_EMOJIS.length)];
 }
 
-export type { EmojiData, EmojiCategoryName };
+export type { EmojiCategoryName, EmojiData };

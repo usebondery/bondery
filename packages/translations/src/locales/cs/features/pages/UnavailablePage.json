@@ -1,0 +1,16 @@
+{
+  "CheckingAgain": "Další kontrola za {seconds} s…",
+  "Description": "Váš účet je v bezpečí a jste stále přihlášeni. Budeme to dál kontrolovat — obvykle to netrvá dlouho.",
+  "MetadataTitle": "Služba nedostupná",
+  "Retry": "Zkusit znovu",
+  "StatusChecking": "Kontroluji připojení…",
+  "StatusDegraded": "Některé funkce mohou být pomalejší",
+  "StatusOffline": "Bondery je dočasně nedostupné",
+  "StatusOnline": "Jsme zpět online — vracíme vás…",
+  "StatusPageLink": "Zobrazit stav služby",
+  "TechnicalBackendStatus": "Backend: {status}",
+  "TechnicalDetails": "Technické podrobnosti",
+  "TechnicalHttpStatus": "HTTP stav: {status}",
+  "TechnicalUnreachable": "nedostupné",
+  "Title": "Máme potíže s připojením"
+}

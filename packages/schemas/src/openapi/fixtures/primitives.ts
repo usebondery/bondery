@@ -16,10 +16,10 @@ export const EXAMPLE_DATE = "2026-01-15";
 
 /** Shared pagination metadata for list responses. */
 export const EXAMPLE_PAGINATION = {
+  hasMore: false,
   limit: 50,
   offset: 0,
-  totalCount: 1,
-  hasMore: false,
-  sort: null,
   search: null,
+  sort: null,
+  totalCount: 1,
 } as const;

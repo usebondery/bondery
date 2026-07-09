@@ -1,5 +1,7 @@
 "use client";
 
+import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
+import type { ContactPreview } from "@bondery/schemas";
 import {
   Avatar,
   Badge,
@@ -8,19 +10,17 @@ import {
   Combobox,
   Group,
   Loader,
+  type MantineColor,
   Text,
   UnstyledButton,
   useCombobox,
-  type MantineColor,
 } from "@mantine/core";
 import { useDebouncedCallback } from "@mantine/hooks";
 import { IconChevronDown, IconX } from "@tabler/icons-react";
-import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import type { ContactPreview } from "@bondery/schemas";
+import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "#nextjs/NextLink.js";
-import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
-import { getAvatarColorFromName } from "#utils/avatarColor.js";
 import { PersonAvatarTooltip } from "#nextjs/PersonAvatar/PersonAvatarTooltip.js";
+import { getAvatarColorFromName } from "#utils/avatarColor.js";
 
 type PersonChipIdentity = ContactPreview & {
   middleName?: string | null;
@@ -32,31 +32,33 @@ function formatPersonName(candidate: PersonChipIdentity): string {
   return [candidate.firstName, candidate.middleName, candidate.lastName].filter(Boolean).join(" ");
 }
 
-interface PersonChipProps {
-  person: PersonChipIdentity | null;
-  size?: "sm" | "md";
-  color?: MantineColor;
+export interface PersonChipProps {
   avatarEdge?: boolean;
-  onClear?: () => void;
-  isSelectable?: boolean;
-  showChevronWhenEmpty?: boolean;
-  disabled?: boolean;
-  placeholder?: string;
-  people?: ContactPreview[];
-  searchPlaceholder?: string;
-  noResultsLabel?: string;
-  onSelectPerson?: (personId: string) => void;
-  isClickable?: boolean;
-  href?: string;
   badgeVariant?: BadgeProps["variant"];
-  showHoverCard?: boolean;
-  openInNewTab?: boolean;
-  /** Custom right section override — rendered instead of the default chevron/clear icon. */
-  rightSection?: ReactNode;
+  color?: MantineColor;
+  disabled?: boolean;
+  href?: string;
+  isClickable?: boolean;
+  isSelectable?: boolean;
+  noResultsLabel?: string;
+  onClear?: () => void;
+  /** Called immediately before client navigation (e.g. optimistic document title). */
+  onNavigate?: () => void;
   /** Async server-side search handler. When provided, triggers after the user stops typing. */
   onSearch?: (query: string) => Promise<ContactPreview[]>;
+  onSelectPerson?: (personId: string) => void;
+  openInNewTab?: boolean;
+  people?: ContactPreview[];
+  person: PersonChipIdentity | null;
+  placeholder?: string;
+  /** Custom right section override — rendered instead of the default chevron/clear icon. */
+  rightSection?: ReactNode;
   /** Debounce delay for `onSearch` in milliseconds. Defaults to 300. */
   searchDebounceMs?: number;
+  searchPlaceholder?: string;
+  showChevronWhenEmpty?: boolean;
+  showHoverCard?: boolean;
+  size?: "sm" | "md";
 }
 
 export function PersonChip({
@@ -78,6 +80,7 @@ export function PersonChip({
   badgeVariant = "light",
   showHoverCard = false,
   openInNewTab = false,
+  onNavigate,
   rightSection,
   onSearch,
   searchDebounceMs = 300,
@@ -88,28 +91,31 @@ export function PersonChip({
   const chevronSize = size === "sm" ? 12 : 14;
   const clearSize = size === "sm" ? 12 : 14;
 
-  const getDisplayName = (candidate: PersonChipIdentity | null) => {
-    if (!candidate) {
-      return placeholder;
-    }
+  const getDisplayName = useCallback(
+    (candidate: PersonChipIdentity | null) => {
+      if (!candidate) {
+        return placeholder;
+      }
 
-    return formatPersonName(candidate);
-  };
+      return formatPersonName(candidate);
+    },
+    [placeholder],
+  );
 
   const searchInputRef = useRef<HTMLInputElement | null>(null);
 
   const combobox = useCombobox({
-    onDropdownOpen: () => {
-      requestAnimationFrame(() => {
-        searchInputRef.current?.focus();
-      });
-    },
     onDropdownClose: () => {
       combobox.resetSelectedOption();
       setSearch("");
       searchGenRef.current += 1;
       setAsyncResults([]);
       setIsSearching(false);
+    },
+    onDropdownOpen: () => {
+      requestAnimationFrame(() => {
+        searchInputRef.current?.focus();
+      });
     },
   });
   const [search, setSearch] = useState("");
@@ -119,15 +125,23 @@ export function PersonChip({
   const knownPeopleRef = useRef<Map<string, ContactPreview>>(new Map());
 
   useEffect(() => {
-    people.forEach((p) => knownPeopleRef.current.set(p.id, p));
+    for (const p of people) {
+      knownPeopleRef.current.set(p.id, p);
+    }
   }, [people]);
 
   const triggerSearch = useDebouncedCallback(async (query: string) => {
-    if (!onSearch) return;
+    if (!onSearch) {
+      return;
+    }
     const gen = ++searchGenRef.current;
     const results = await onSearch(query);
-    if (gen !== searchGenRef.current) return;
-    results.forEach((r) => knownPeopleRef.current.set(r.id, r));
+    if (gen !== searchGenRef.current) {
+      return;
+    }
+    for (const r of results) {
+      knownPeopleRef.current.set(r.id, r);
+    }
     setAsyncResults(results);
     setIsSearching(false);
   }, searchDebounceMs);
@@ -137,9 +151,11 @@ export function PersonChip({
       return asyncResults;
     }
     const query = search.trim().toLowerCase();
-    if (!query) return people;
+    if (!query) {
+      return people;
+    }
     return people.filter((candidate) => getDisplayName(candidate).toLowerCase().includes(query));
-  }, [people, search, onSearch, asyncResults]);
+  }, [people, search, onSearch, asyncResults, getDisplayName]);
 
   const fullName = getDisplayName(person);
   const resolvedHref = href || (person ? `${WEBAPP_ROUTES.PERSON}/${person.id}` : undefined);
@@ -152,16 +168,16 @@ export function PersonChip({
   const leftAvatar = person ? (
     <span
       style={{
-        display: "inline-flex",
         alignItems: "center",
+        display: "inline-flex",
       }}
     >
       <Avatar
-        src={person.avatar || undefined}
-        size={avatarEdge ? avatarEdgeSize : avatarSize}
-        radius="xl"
         color={personAvatarColor}
         name={`${person.firstName} ${person.lastName || ""}`.trim()}
+        radius="xl"
+        size={avatarEdge ? avatarEdgeSize : avatarSize}
+        src={person.avatar || undefined}
       />
     </span>
   ) : null;
@@ -171,60 +187,74 @@ export function PersonChip({
 
   const renderBadge = () => (
     <Badge
-      variant={badgeVariant}
       color={person ? color || "branding-primary" : "gray"}
-      size={badgeSize}
       leftSection={leftAvatar}
       rightSection={
         rightSection !== undefined ? (
-          <span style={{ display: "inline-flex", alignItems: "center", marginInlineEnd: -2 }}>
+          <span
+            style={{
+              alignItems: "center",
+              display: "inline-flex",
+              marginInlineEnd: -2,
+            }}
+          >
             {rightSection}
           </span>
         ) : onClear && person ? (
-          <span
-            onMouseDown={(event) => {
-              event.preventDefault();
-              event.stopPropagation();
-            }}
+          <UnstyledButton
+            aria-label="Clear"
             onClick={(event) => {
               event.preventDefault();
               event.stopPropagation();
               onClear();
             }}
+            onMouseDown={(event) => {
+              event.preventDefault();
+              event.stopPropagation();
+            }}
             style={{
-              display: "inline-flex",
               alignItems: "center",
               cursor: "pointer",
+              display: "inline-flex",
+              marginInlineEnd: -2,
+            }}
+            type="button"
+          >
+            <IconX size={clearSize} />
+          </UnstyledButton>
+        ) : shouldShowChevron ? (
+          <span
+            style={{
+              alignItems: "center",
+              display: "inline-flex",
               marginInlineEnd: -2,
             }}
           >
-            <IconX size={clearSize} />
-          </span>
-        ) : shouldShowChevron ? (
-          <span style={{ display: "inline-flex", alignItems: "center", marginInlineEnd: -2 }}>
             <IconChevronDown size={chevronSize} />
           </span>
         ) : undefined
       }
+      size={badgeSize}
       styles={{
+        label: {
+          color: person ? undefined : "var(--mantine-color-dimmed)",
+          fontWeight: 400,
+          overflow: "visible",
+          textTransform: "none",
+        },
         root: {
           cursor: (isSelectable || isClickable) && !disabled ? "pointer" : "default",
           opacity: disabled ? 0.6 : 1,
-          paddingInlineStart: person && avatarEdge ? 0 : undefined,
           paddingInlineEnd:
             person && (onClear || isSelectable || rightSection !== undefined)
               ? size === "sm"
                 ? 8
                 : 10
               : undefined,
-        },
-        label: {
-          textTransform: "none",
-          fontWeight: 400,
-          overflow: "visible",
-          color: person ? undefined : "var(--mantine-color-dimmed)",
+          paddingInlineStart: person && avatarEdge ? 0 : undefined,
         },
       }}
+      variant={badgeVariant}
     >
       {fullName}
     </Badge>
@@ -236,8 +266,9 @@ export function PersonChip({
       isClickable && !disabled && resolvedHref ? (
         <Link
           href={resolvedHref}
-          target={openInNewTab ? "_blank" : undefined}
+          onClick={() => onNavigate?.()}
           rel={openInNewTab ? "noopener noreferrer" : undefined}
+          target={openInNewTab ? "_blank" : undefined}
         >
           {badge}
         </Link>
@@ -253,7 +284,6 @@ export function PersonChip({
 
   return (
     <Combobox
-      store={combobox}
       onOptionSubmit={(value) => {
         if (disabled || !onSelectPerson) {
           return;
@@ -262,15 +292,16 @@ export function PersonChip({
         onSelectPerson(value);
         combobox.closeDropdown();
       }}
+      store={combobox}
     >
       <Combobox.Target>
         <UnstyledButton
+          disabled={disabled}
           onClick={() => {
             if (!disabled) {
               combobox.toggleDropdown();
             }
           }}
-          disabled={disabled}
         >
           {renderBadge()}
         </UnstyledButton>
@@ -278,8 +309,8 @@ export function PersonChip({
 
       <Combobox.Dropdown className="min-w-80">
         <Combobox.Search
-          ref={searchInputRef}
-          value={search}
+          autoFocus
+          loading={isSearching}
           onChange={(event) => {
             const value = event.currentTarget.value;
             setSearch(value);
@@ -296,10 +327,10 @@ export function PersonChip({
             }
           }}
           placeholder={searchPlaceholder}
-          loading={isSearching}
-          autoFocus
+          ref={searchInputRef}
+          value={search}
         />
-        <Combobox.Options style={{ overflowY: "auto" }} className="max-h-60">
+        <Combobox.Options className="max-h-60" style={{ overflowY: "auto" }}>
           {isSearching ? (
             <Combobox.Empty>
               <Center>
@@ -311,16 +342,16 @@ export function PersonChip({
               const candidateName = formatPersonName(candidate);
 
               return (
-                <Combobox.Option value={candidate.id} key={candidate.id}>
+                <Combobox.Option key={candidate.id} value={candidate.id}>
                   <Group gap="sm" wrap="nowrap">
                     <Avatar
-                      src={candidate.avatar || undefined}
-                      size="sm"
-                      radius="xl"
                       color={getAvatarColorFromName(candidate.firstName, candidate.lastName)}
                       name={`${candidate.firstName} ${candidate.lastName || ""}`.trim()}
+                      radius="xl"
+                      size="sm"
+                      src={candidate.avatar || undefined}
                     />
-                    <Text size="sm" fw={500}>
+                    <Text fw={500} size="sm">
                       {candidateName}
                     </Text>
                   </Group>

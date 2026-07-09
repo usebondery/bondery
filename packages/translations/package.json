@@ -1,48 +1,83 @@
 {
-  "name": "@bondery/translations",
-  "version": "1.7.0",
+  "dependencies": {
+    "@bondery/schemas": "*"
+  },
   "description": "Bondery internationalization translations",
-  "private": true,
-  "type": "module",
-  "main": "./dist/index.js",
-  "types": "./src/index.ts",
+  "devDependencies": {
+    "@bondery/typescript-config": "*",
+    "i18next-cli": "^1.65.0",
+    "rimraf": "^6.0.1",
+    "typescript": "^6"
+  },
   "exports": {
     ".": {
-      "types": "./src/index.ts",
+      "default": "./dist/index.js",
       "import": "./dist/index.js",
       "node": "./dist/index.js",
-      "default": "./dist/index.js"
+      "types": "./src/index.ts"
     },
     "./*": {
-      "types": "./src/*.ts",
+      "default": "./dist/*.js",
       "import": "./dist/*.js",
       "node": "./dist/*.js",
-      "default": "./dist/*.js"
-    },
-    "./i18n": {
-      "types": "./src/i18n.ts",
-      "import": "./dist/i18n.js",
-      "node": "./dist/i18n.js",
-      "default": "./dist/i18n.js"
+      "types": "./src/*.ts"
     },
     "./*.json": {
       "default": "./dist/*.json"
+    },
+    "./config": {
+      "default": "./dist/config.js",
+      "import": "./dist/config.js",
+      "node": "./dist/config.js",
+      "types": "./src/config.ts"
+    },
+    "./generated/i18next-cli/i18next.d": {
+      "default": "./dist/generated/i18next-cli/i18next.d.js",
+      "import": "./dist/generated/i18next-cli/i18next.d.js",
+      "node": "./dist/generated/i18next-cli/i18next.d.js",
+      "types": "./src/generated/i18next-cli/i18next.d.ts"
+    },
+    "./generated/i18next-cli/resources.d": {
+      "default": "./dist/generated/i18next-cli/resources.d.js",
+      "import": "./dist/generated/i18next-cli/resources.d.js",
+      "node": "./dist/generated/i18next-cli/resources.d.js",
+      "types": "./src/generated/i18next-cli/resources.d.ts"
+    },
+    "./generated/resources": {
+      "default": "./dist/generated/resources.js",
+      "import": "./dist/generated/resources.js",
+      "node": "./dist/generated/resources.js",
+      "types": "./src/generated/resources.ts"
+    },
+    "./i18n": {
+      "default": "./dist/i18n.js",
+      "import": "./dist/i18n.js",
+      "node": "./dist/i18n.js",
+      "types": "./src/i18n.ts"
+    },
+    "./json-modules.d": {
+      "default": "./dist/json-modules.d.js",
+      "import": "./dist/json-modules.d.js",
+      "node": "./dist/json-modules.d.js",
+      "types": "./src/json-modules.d.ts"
+    },
+    "./loader": {
+      "default": "./dist/loader.js",
+      "import": "./dist/loader.js",
+      "node": "./dist/loader.js",
+      "types": "./src/loader.ts"
+    },
+    "./manifest": {
+      "default": "./dist/manifest.js",
+      "import": "./dist/manifest.js",
+      "node": "./dist/manifest.js",
+      "types": "./src/manifest.ts"
     }
   },
   "files": [
     "src",
     "dist"
   ],
-  "scripts": {
-    "build": "rimraf dist && tsc && node ../../scripts/rewrite-package-hash-imports-in-dist.mjs translations && node scripts/copy-json.mjs",
-    "dev": "node scripts/dev.mjs",
-    "check-types": "tsc --noEmit"
-  },
-  "devDependencies": {
-    "rimraf": "^6.0.1",
-    "@bondery/typescript-config": "*",
-    "typescript": "^6"
-  },
   "imports": {
     "#*": [
       "./dist/*",
@@ -54,5 +89,21 @@
       "./src/*/index.ts",
       "./src/*/index.tsx"
     ]
-  }
+  },
+  "main": "./dist/index.js",
+  "name": "@bondery/translations",
+  "private": true,
+  "scripts": {
+    "build": "node scripts/sync-locale-mirror.mjs && node scripts/run-i18next-cli.mjs types && node scripts/generate-resource-map.mjs && rimraf dist && tsc && node ../../scripts/rewrite-package-hash-imports-in-dist.mjs translations && node scripts/copy-json.mjs && node scripts/validate-manifest.mjs",
+    "check-types": "tsc --noEmit",
+    "dev": "node scripts/dev.mjs",
+    "i18n:lint": "node scripts/run-i18next-cli.mjs lint --quiet",
+    "i18n:status": "node scripts/sync-locale-mirror.mjs && node scripts/run-i18next-cli.mjs status",
+    "i18n:status:check": "node scripts/i18n-status-check.mjs",
+    "i18n:types": "node scripts/run-i18next-cli.mjs types",
+    "i18n:types:check": "node scripts/run-i18next-cli.mjs types --ci"
+  },
+  "type": "module",
+  "types": "./src/index.ts",
+  "version": "1.7.0"
 }

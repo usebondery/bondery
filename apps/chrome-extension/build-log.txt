@@ -1,0 +1,266 @@
+﻿node.exe : npm warn Unknown env config "devdir". This will stop working in the next major version of npm. See `npm help
+ npmrc` for supported config options.
+At line:1 char:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Users\msmar\AppData\Roaming\ ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (npm warn Unknow...config options.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+
+WXT 0.20.27
+[wxt] Running pre-build checks...
+i Building chrome-mv3 for production with Vite 8.1.0
+- Preparing...
+Γ£ù Build failed in 192ms
+[1G
+ ERROR  Build failed with 6 errors:
+
+[31m[ASSIGN_TO_IMPORT] [0mCannot assign to import 'pendingPreview'
+    [38;5;246mΓò¡[0m[38;5;246mΓöÇ[0m[38;5;246m[[0m src/features/background/message-router.ts:29:5 [38;5;246m][0
+m
+    [38;5;246mΓöé[0m
+ [38;5;246m 8 Γöé[0m [38;5;249mi[0m[38;5;249mm[0m[38;5;249mp[0m[38;5;249mo[0m[38;5;249mr[0m[38;5;249mt[0m
+[38;5;249m [0m[38;5;249m{[0m[38;5;249m [0m[38;5;249mp[0m[38;5;249me[0m[38;5;249mn[0m[38;5;249md[0m[38;5;
+249mi[0m[38;5;249mn[0m[38;5;249mg[0m[38;5;249mE[0m[38;5;249mn[0m[38;5;249mr[0m[38;5;249mi[0m[38;5;249mc[
+0m[38;5;249mh[0m[38;5;249m,[0m[38;5;249m [0mpendingPreview[38;5;249m [0m[38;5;249m}[0m[38;5;249m [0m[38;5;
+249mf[0m[38;5;249mr[0m[38;5;249mo[0m[38;5;249mm[0m[38;5;249m [0m[38;5;249m"[0m[38;5;249m.[0m[38;5;249m/[
+0m[38;5;249ms[0m[38;5;249mt[0m[38;5;249ma[0m[38;5;249mt[0m[38;5;249me[0m[38;5;249m"[0m[38;5;249m;[0m
+ [38;5;240m   Γöé[0m                         ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓö¼ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ  
+ [38;5;240m   Γöé[0m                                Γò░ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ 'pendingPreview' is imported here
+ [38;5;240m   Γöé[0m 
+ [38;5;246m29 Γöé[0m [38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m
+[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0mpendingPreview[38;5;249m [0m[38;5;249m=[0m[38;5;24
+9m [0m[38;5;249mn[0m[38;5;249mu[0m[38;5;249ml[0m[38;5;249ml[0m[38;5;249m;[0m
+ [38;5;240m   Γöé[0m           ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓö¼ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ  
+ [38;5;240m   Γöé[0m                  Γò░ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ Imports are immutable in JavaScript. To modify the 
+value of this import, you must export a setter function in the imported file (e.g. 'setPendingPreview') and then import
+ and call that function here instead.
+[38;5;246mΓöÇΓöÇΓöÇΓöÇΓò»[0m
+
+[31m[ASSIGN_TO_IMPORT] [0mCannot assign to import 'indicatorUpdateTimer'
+    [38;5;246mΓò¡[0m[38;5;246mΓöÇ[0m[38;5;246m[[0m src/features/background/badge.ts:79:2 [38;5;246m][0m
+    [38;5;246mΓöé[0m
+ [38;5;246m 4 Γöé[0m [38;5;249mi[0m[38;5;249mm[0m[38;5;249mp[0m[38;5;249mo[0m[38;5;249mr[0m[38;5;249mt[0m
+[38;5;249m [0m[38;5;249m{[0m[38;5;249m [0mindicatorUpdateTimer[38;5;249m [0m[38;5;249m}[0m[38;5;249m [0m[3
+8;5;249mf[0m[38;5;249mr[0m[38;5;249mo[0m[38;5;249mm[0m[38;5;249m [0m[38;5;249m"[0m[38;5;249m.[0m[38;5;249
+m/[0m[38;5;249ms[0m[38;5;249mt[0m[38;5;249ma[0m[38;5;249mt[0m[38;5;249me[0m[38;5;249m"[0m[38;5;249m;[0m
+ [38;5;240m   Γöé[0m          ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓö¼ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ  
+ [38;5;240m   Γöé[0m                    Γò░ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ 'indicatorUpdateTimer' is imported here
+ [38;5;240m   Γöé[0m 
+ [38;5;246m79 Γöé[0m [38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0mindicatorUpdateTimer[38;5;249m 
+[0m[38;5;249m=[0m[38;5;249m [0m[38;5;249ms[0m[38;5;249me[0m[38;5;249mt[0m[38;5;249mT[0m[38;5;249mi[0m[3
+8;5;249mm[0m[38;5;249me[0m[38;5;249mo[0m[38;5;249mu[0m[38;5;249mt[0m[38;5;249m([0m[38;5;249m([0m[38;5;249
+m)[0m[38;5;249m [0m[38;5;249m=[0m[38;5;249m>[0m[38;5;249m [0m[38;5;249m{[0m
+ [38;5;240m   Γöé[0m     ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓö¼ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ  
+ [38;5;240m   Γöé[0m               Γò░ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ Imports are immutable in JavaScript. To modif
+y the value of this import, you must export a setter function in the imported file (e.g. 'setIndicatorUpdateTimer') and
+ then import and call that function here instead.
+[38;5;246mΓöÇΓöÇΓöÇΓöÇΓò»[0m
+
+[31m[ASSIGN_TO_IMPORT] [0mCannot assign to import 'pendingEnrich'
+    [38;5;246mΓò¡[0m[38;5;246mΓöÇ[0m[38;5;246m[[0m src/features/background/enrich.ts:71:3 [38;5;246m][0m
+    [38;5;246mΓöé[0m
+ [38;5;246m 4 Γöé[0m [38;5;249mi[0m[38;5;249mm[0m[38;5;249mp[0m[38;5;249mo[0m[38;5;249mr[0m[38;5;249mt[0m
+[38;5;249m [0m[38;5;249m{[0m[38;5;249m [0mpendingEnrich[38;5;249m [0m[38;5;249m}[0m[38;5;249m [0m[38;5;249
+mf[0m[38;5;249mr[0m[38;5;249mo[0m[38;5;249mm[0m[38;5;249m [0m[38;5;249m"[0m[38;5;249m.[0m[38;5;249m/[0m
+[38;5;249ms[0m[38;5;249mt[0m[38;5;249ma[0m[38;5;249mt[0m[38;5;249me[0m[38;5;249m"[0m[38;5;249m;[0m
+ [38;5;240m   Γöé[0m          ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓö¼ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ  
+ [38;5;240m   Γöé[0m                Γò░ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ 'pendingEnrich' is imported here
+ [38;5;240m   Γöé[0m 
+ [38;5;246m71 Γöé[0m [38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m
+[38;5;249m [0mpendingEnrich[38;5;249m [0m[38;5;249m=[0m[38;5;249m [0m[38;5;249mv[0m[38;5;249ma[0m[38;5;249
+ml[0m[38;5;249mu[0m[38;5;249me[0m[38;5;249m;[0m
+ [38;5;240m   Γöé[0m        ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓö¼ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ  
+ [38;5;240m   Γöé[0m              Γò░ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ Imports are immutable in JavaScript. To modify the valu
+e of this import, you must export a setter function in the imported file (e.g. 'setPendingEnrich') and then import and 
+call that function here instead.
+[38;5;246mΓöÇΓöÇΓöÇΓöÇΓò»[0m
+
+[31m[ASSIGN_TO_IMPORT] [0mCannot assign to import 'pendingEnrich'
+    [38;5;246mΓò¡[0m[38;5;246mΓöÇ[0m[38;5;246m[[0m src/features/background/enrich.ts:86:2 [38;5;246m][0m
+    [38;5;246mΓöé[0m
+ [38;5;246m 4 Γöé[0m [38;5;249mi[0m[38;5;249mm[0m[38;5;249mp[0m[38;5;249mo[0m[38;5;249mr[0m[38;5;249mt[0m
+[38;5;249m [0m[38;5;249m{[0m[38;5;249m [0mpendingEnrich[38;5;249m [0m[38;5;249m}[0m[38;5;249m [0m[38;5;249
+mf[0m[38;5;249mr[0m[38;5;249mo[0m[38;5;249mm[0m[38;5;249m [0m[38;5;249m"[0m[38;5;249m.[0m[38;5;249m/[0m
+[38;5;249ms[0m[38;5;249mt[0m[38;5;249ma[0m[38;5;249mt[0m[38;5;249me[0m[38;5;249m"[0m[38;5;249m;[0m
+ [38;5;240m   Γöé[0m          ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓö¼ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ  
+ [38;5;240m   Γöé[0m                Γò░ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ 'pendingEnrich' is imported here
+ [38;5;240m   Γöé[0m 
+ [38;5;246m86 Γöé[0m [38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0mpendingEnrich[38;5;249m [0m[3
+8;5;249m=[0m[38;5;249m [0m[38;5;249mn[0m[38;5;249mu[0m[38;5;249ml[0m[38;5;249ml[0m[38;5;249m;[0m
+ [38;5;240m   Γöé[0m     ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓö¼ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ  
+ [38;5;240m   Γöé[0m           Γò░ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ Imports are immutable in JavaScript. To modify the value o
+f this import, you must export a setter function in the imported file (e.g. 'setPendingEnrich') and then import and cal
+l that function here instead.
+[38;5;246mΓöÇΓöÇΓöÇΓöÇΓò»[0m
+
+[31m[ASSIGN_TO_IMPORT] [0mCannot assign to import 'pendingEnrich'
+     [38;5;246mΓò¡[0m[38;5;246mΓöÇ[0m[38;5;246m[[0m src/features/background/enrich.ts:131:2 [38;5;246m][0m
+     [38;5;246mΓöé[0m
+ [38;5;246m  4 Γöé[0m [38;5;249mi[0m[38;5;249mm[0m[38;5;249mp[0m[38;5;249mo[0m[38;5;249mr[0m[38;5;249mt[0
+m[38;5;249m [0m[38;5;249m{[0m[38;5;249m [0mpendingEnrich[38;5;249m [0m[38;5;249m}[0m[38;5;249m [0m[38;5;24
+9mf[0m[38;5;249mr[0m[38;5;249mo[0m[38;5;249mm[0m[38;5;249m [0m[38;5;249m"[0m[38;5;249m.[0m[38;5;249m/[0m
+[38;5;249ms[0m[38;5;249mt[0m[38;5;249ma[0m[38;5;249mt[0m[38;5;249me[0m[38;5;249m"[0m[38;5;249m;[0m
+ [38;5;240m    Γöé[0m          ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓö¼ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ  
+ [38;5;240m    Γöé[0m                Γò░ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ 'pendingEnrich' is imported here
+ [38;5;240m    Γöé[0m 
+ [38;5;246m131 Γöé[0m [38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0mpendingEnrich[38;5;249m [0m[
+38;5;249m=[0m[38;5;249m [0m[38;5;249m{[0m
+ [38;5;240m    Γöé[0m     ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓö¼ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ  
+ [38;5;240m    Γöé[0m           Γò░ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ Imports are immutable in JavaScript. To modify the value 
+of this import, you must export a setter function in the imported file (e.g. 'setPendingEnrich') and then import and ca
+ll that function here instead.
+[38;5;246mΓöÇΓöÇΓöÇΓöÇΓöÇΓò»[0m
+
+...
+
+    at aggregateBindingErrorsIntoJsError (/C:/Users/msmar/Documents/GitHub/bondery/node_modules/rolldown/dist/shared/er
+ror-B68YLzl3.mjs:48:18)
+    at unwrapBindingResult (/C:/Users/msmar/Documents/GitHub/bondery/node_modules/rolldown/dist/shared/error-B68YLzl3.m
+js:18:128)
+    at RolldownBuild.#build (/C:/Users/msmar/Documents/GitHub/bondery/node_modules/rolldown/dist/shared/rolldown-build-
+DR0wzp0V.mjs:3256:34)
+    at buildEnvironment (/C:/Users/msmar/Documents/GitHub/bondery/node_modules/vite/dist/node/chunks/node.js:32575:66)
+    at Object.build (/C:/Users/msmar/Documents/GitHub/bondery/node_modules/vite/dist/node/chunks/node.js:32997:19)
+    at Object.build (/C:/Users/msmar/Documents/GitHub/bondery/node_modules/wxt/dist/core/builders/vite/index.mjs:206:72
+)
+    at buildEntrypoints (/C:/Users/msmar/Documents/GitHub/bondery/node_modules/wxt/dist/core/utils/building/build-entry
+points.mjs:16:15)
+    at rebuild (/C:/Users/msmar/Documents/GitHub/bondery/node_modules/wxt/dist/core/utils/building/rebuild.mjs:34:20)
+    at internalBuild (/C:/Users/msmar/Documents/GitHub/bondery/node_modules/wxt/dist/core/utils/building/internal-build
+.mjs:46:31)
+    at build (/C:/Users/msmar/Documents/GitHub/bondery/node_modules/wxt/dist/core/build.mjs:21:9)
+
+├ù Command failed after 601 ms
+
+ ERROR  Failed to build background
+
+    at buildEntrypoints (/C:/Users/msmar/Documents/GitHub/bondery/node_modules/wxt/dist/core/utils/building/build-entry
+points.mjs:21:10)
+    at rebuild (/C:/Users/msmar/Documents/GitHub/bondery/node_modules/wxt/dist/core/utils/building/rebuild.mjs:34:20)
+    at internalBuild (/C:/Users/msmar/Documents/GitHub/bondery/node_modules/wxt/dist/core/utils/building/internal-build
+.mjs:46:31)
+    at build (/C:/Users/msmar/Documents/GitHub/bondery/node_modules/wxt/dist/core/build.mjs:21:9)
+    at /C:/Users/msmar/Documents/GitHub/bondery/node_modules/wxt/dist/cli/commands.mjs:31:2
+    at CAC.<anonymous> (/C:/Users/msmar/Documents/GitHub/bondery/node_modules/wxt/dist/cli/cli-utils.mjs:22:10)
+    at /C:/Users/msmar/Documents/GitHub/bondery/node_modules/wxt/dist/cli/index.mjs:11:1
+
+  [cause]: Build failed with 6 errors:
+
+[31m[ASSIGN_TO_IMPORT] [0mCannot assign to import 'pendingPreview'
+    [38;5;246mΓò¡[0m[38;5;246mΓöÇ[0m[38;5;246m[[0m src/features/background/message-router.ts:29:5 [38;5;246m][0
+m
+    [38;5;246mΓöé[0m
+ [38;5;246m 8 Γöé[0m [38;5;249mi[0m[38;5;249mm[0m[38;5;249mp[0m[38;5;249mo[0m[38;5;249mr[0m[38;5;249mt[0m
+[38;5;249m [0m[38;5;249m{[0m[38;5;249m [0m[38;5;249mp[0m[38;5;249me[0m[38;5;249mn[0m[38;5;249md[0m[38;5;
+249mi[0m[38;5;249mn[0m[38;5;249mg[0m[38;5;249mE[0m[38;5;249mn[0m[38;5;249mr[0m[38;5;249mi[0m[38;5;249mc[
+0m[38;5;249mh[0m[38;5;249m,[0m[38;5;249m [0mpendingPreview[38;5;249m [0m[38;5;249m}[0m[38;5;249m [0m[38;5;
+249mf[0m[38;5;249mr[0m[38;5;249mo[0m[38;5;249mm[0m[38;5;249m [0m[38;5;249m"[0m[38;5;249m.[0m[38;5;249m/[
+0m[38;5;249ms[0m[38;5;249mt[0m[38;5;249ma[0m[38;5;249mt[0m[38;5;249me[0m[38;5;249m"[0m[38;5;249m;[0m
+ [38;5;240m   Γöé[0m                         ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓö¼ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ  
+ [38;5;240m   Γöé[0m                                Γò░ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ 'pendingPreview' is imported here
+ [38;5;240m   Γöé[0m 
+ [38;5;246m29 Γöé[0m [38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m
+[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0mpendingPreview[38;5;249m [0m[38;5;249m=[0m[38;5;24
+9m [0m[38;5;249mn[0m[38;5;249mu[0m[38;5;249ml[0m[38;5;249ml[0m[38;5;249m;[0m
+ [38;5;240m   Γöé[0m           ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓö¼ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ  
+ [38;5;240m   Γöé[0m                  Γò░ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ Imports are immutable in JavaScript. To modify the 
+value of this import, you must export a setter function in the imported file (e.g. 'setPendingPreview') and then import
+ and call that function here instead.
+[38;5;246mΓöÇΓöÇΓöÇΓöÇΓò»[0m
+
+[31m[ASSIGN_TO_IMPORT] [0mCannot assign to import 'indicatorUpdateTimer'
+    [38;5;246mΓò¡[0m[38;5;246mΓöÇ[0m[38;5;246m[[0m src/features/background/badge.ts:79:2 [38;5;246m][0m
+    [38;5;246mΓöé[0m
+ [38;5;246m 4 Γöé[0m [38;5;249mi[0m[38;5;249mm[0m[38;5;249mp[0m[38;5;249mo[0m[38;5;249mr[0m[38;5;249mt[0m
+[38;5;249m [0m[38;5;249m{[0m[38;5;249m [0mindicatorUpdateTimer[38;5;249m [0m[38;5;249m}[0m[38;5;249m [0m[3
+8;5;249mf[0m[38;5;249mr[0m[38;5;249mo[0m[38;5;249mm[0m[38;5;249m [0m[38;5;249m"[0m[38;5;249m.[0m[38;5;249
+m/[0m[38;5;249ms[0m[38;5;249mt[0m[38;5;249ma[0m[38;5;249mt[0m[38;5;249me[0m[38;5;249m"[0m[38;5;249m;[0m
+ [38;5;240m   Γöé[0m          ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓö¼ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ  
+ [38;5;240m   Γöé[0m                    Γò░ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ 'indicatorUpdateTimer' is imported here
+ [38;5;240m   Γöé[0m 
+ [38;5;246m79 Γöé[0m [38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0mindicatorUpdateTimer[38;5;249m 
+[0m[38;5;249m=[0m[38;5;249m [0m[38;5;249ms[0m[38;5;249me[0m[38;5;249mt[0m[38;5;249mT[0m[38;5;249mi[0m[3
+8;5;249mm[0m[38;5;249me[0m[38;5;249mo[0m[38;5;249mu[0m[38;5;249mt[0m[38;5;249m([0m[38;5;249m([0m[38;5;249
+m)[0m[38;5;249m [0m[38;5;249m=[0m[38;5;249m>[0m[38;5;249m [0m[38;5;249m{[0m
+ [38;5;240m   Γöé[0m     ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓö¼ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ  
+ [38;5;240m   Γöé[0m               Γò░ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ Imports are immutable in JavaScript. To modif
+y the value of this import, you must export a setter function in the imported file (e.g. 'setIndicatorUpdateTimer') and
+ then import and call that function here instead.
+[38;5;246mΓöÇΓöÇΓöÇΓöÇΓò»[0m
+
+[31m[ASSIGN_TO_IMPORT] [0mCannot assign to import 'pendingEnrich'
+    [38;5;246mΓò¡[0m[38;5;246mΓöÇ[0m[38;5;246m[[0m src/features/background/enrich.ts:71:3 [38;5;246m][0m
+    [38;5;246mΓöé[0m
+ [38;5;246m 4 Γöé[0m [38;5;249mi[0m[38;5;249mm[0m[38;5;249mp[0m[38;5;249mo[0m[38;5;249mr[0m[38;5;249mt[0m
+[38;5;249m [0m[38;5;249m{[0m[38;5;249m [0mpendingEnrich[38;5;249m [0m[38;5;249m}[0m[38;5;249m [0m[38;5;249
+mf[0m[38;5;249mr[0m[38;5;249mo[0m[38;5;249mm[0m[38;5;249m [0m[38;5;249m"[0m[38;5;249m.[0m[38;5;249m/[0m
+[38;5;249ms[0m[38;5;249mt[0m[38;5;249ma[0m[38;5;249mt[0m[38;5;249me[0m[38;5;249m"[0m[38;5;249m;[0m
+ [38;5;240m   Γöé[0m          ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓö¼ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ  
+ [38;5;240m   Γöé[0m                Γò░ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ 'pendingEnrich' is imported here
+ [38;5;240m   Γöé[0m 
+ [38;5;246m71 Γöé[0m [38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0m
+[38;5;249m [0mpendingEnrich[38;5;249m [0m[38;5;249m=[0m[38;5;249m [0m[38;5;249mv[0m[38;5;249ma[0m[38;5;249
+ml[0m[38;5;249mu[0m[38;5;249me[0m[38;5;249m;[0m
+ [38;5;240m   Γöé[0m        ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓö¼ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ  
+ [38;5;240m   Γöé[0m              Γò░ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ Imports are immutable in JavaScript. To modify the valu
+e of this import, you must export a setter function in the imported file (e.g. 'setPendingEnrich') and then import and 
+call that function here instead.
+[38;5;246mΓöÇΓöÇΓöÇΓöÇΓò»[0m
+
+[31m[ASSIGN_TO_IMPORT] [0mCannot assign to import 'pendingEnrich'
+    [38;5;246mΓò¡[0m[38;5;246mΓöÇ[0m[38;5;246m[[0m src/features/background/enrich.ts:86:2 [38;5;246m][0m
+    [38;5;246mΓöé[0m
+ [38;5;246m 4 Γöé[0m [38;5;249mi[0m[38;5;249mm[0m[38;5;249mp[0m[38;5;249mo[0m[38;5;249mr[0m[38;5;249mt[0m
+[38;5;249m [0m[38;5;249m{[0m[38;5;249m [0mpendingEnrich[38;5;249m [0m[38;5;249m}[0m[38;5;249m [0m[38;5;249
+mf[0m[38;5;249mr[0m[38;5;249mo[0m[38;5;249mm[0m[38;5;249m [0m[38;5;249m"[0m[38;5;249m.[0m[38;5;249m/[0m
+[38;5;249ms[0m[38;5;249mt[0m[38;5;249ma[0m[38;5;249mt[0m[38;5;249me[0m[38;5;249m"[0m[38;5;249m;[0m
+ [38;5;240m   Γöé[0m          ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓö¼ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ  
+ [38;5;240m   Γöé[0m                Γò░ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ 'pendingEnrich' is imported here
+ [38;5;240m   Γöé[0m 
+ [38;5;246m86 Γöé[0m [38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0mpendingEnrich[38;5;249m [0m[3
+8;5;249m=[0m[38;5;249m [0m[38;5;249mn[0m[38;5;249mu[0m[38;5;249ml[0m[38;5;249ml[0m[38;5;249m;[0m
+ [38;5;240m   Γöé[0m     ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓö¼ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ  
+ [38;5;240m   Γöé[0m           Γò░ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ Imports are immutable in JavaScript. To modify the value o
+f this import, you must export a setter function in the imported file (e.g. 'setPendingEnrich') and then import and cal
+l that function here instead.
+[38;5;246mΓöÇΓöÇΓöÇΓöÇΓò»[0m
+
+[31m[ASSIGN_TO_IMPORT] [0mCannot assign to import 'pendingEnrich'
+     [38;5;246mΓò¡[0m[38;5;246mΓöÇ[0m[38;5;246m[[0m src/features/background/enrich.ts:131:2 [38;5;246m][0m
+     [38;5;246mΓöé[0m
+ [38;5;246m  4 Γöé[0m [38;5;249mi[0m[38;5;249mm[0m[38;5;249mp[0m[38;5;249mo[0m[38;5;249mr[0m[38;5;249mt[0
+m[38;5;249m [0m[38;5;249m{[0m[38;5;249m [0mpendingEnrich[38;5;249m [0m[38;5;249m}[0m[38;5;249m [0m[38;5;24
+9mf[0m[38;5;249mr[0m[38;5;249mo[0m[38;5;249mm[0m[38;5;249m [0m[38;5;249m"[0m[38;5;249m.[0m[38;5;249m/[0m
+[38;5;249ms[0m[38;5;249mt[0m[38;5;249ma[0m[38;5;249mt[0m[38;5;249me[0m[38;5;249m"[0m[38;5;249m;[0m
+ [38;5;240m    Γöé[0m          ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓö¼ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ  
+ [38;5;240m    Γöé[0m                Γò░ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ 'pendingEnrich' is imported here
+ [38;5;240m    Γöé[0m 
+ [38;5;246m131 Γöé[0m [38;5;249m [0m[38;5;249m [0m[38;5;249m [0m[38;5;249m [0mpendingEnrich[38;5;249m [0m[
+38;5;249m=[0m[38;5;249m [0m[38;5;249m{[0m
+ [38;5;240m    Γöé[0m     ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓö¼ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ  
+ [38;5;240m    Γöé[0m           Γò░ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ Imports are immutable in JavaScript. To modify the value 
+of this import, you must export a setter function in the imported file (e.g. 'setPendingEnrich') and then import and ca
+ll that function here instead.
+[38;5;246mΓöÇΓöÇΓöÇΓöÇΓöÇΓò»[0m
+
+...
+
+      at aggregateBindingErrorsIntoJsError (/C:/Users/msmar/Documents/GitHub/bondery/node_modules/rolldown/dist/shared/
+error-B68YLzl3.mjs:48:18)
+      at unwrapBindingResult (/C:/Users/msmar/Documents/GitHub/bondery/node_modules/rolldown/dist/shared/error-B68YLzl3
+.mjs:18:128)
+      at RolldownBuild.#build (/C:/Users/msmar/Documents/GitHub/bondery/node_modules/rolldown/dist/shared/rolldown-buil
+d-DR0wzp0V.mjs:3256:34)
+      at buildEnvironment (/C:/Users/msmar/Documents/GitHub/bondery/node_modules/vite/dist/node/chunks/node.js:32575:66
+)
+      at Object.build (/C:/Users/msmar/Documents/GitHub/bondery/node_modules/vite/dist/node/chunks/node.js:32997:19)
+      at Object.build (/C:/Users/msmar/Documents/GitHub/bondery/node_modules/wxt/dist/core/builders/vite/index.mjs:206:
+72)
+      at buildEntrypoints (/C:/Users/msmar/Documents/GitHub/bondery/node_modules/wxt/dist/core/utils/building/build-ent
+rypoints.mjs:16:15)
+      at rebuild (/C:/Users/msmar/Documents/GitHub/bondery/node_modules/wxt/dist/core/utils/building/rebuild.mjs:34:20)
+      at internalBuild (/C:/Users/msmar/Documents/GitHub/bondery/node_modules/wxt/dist/core/utils/building/internal-bui
+ld.mjs:46:31)
+      at build (/C:/Users/msmar/Documents/GitHub/bondery/node_modules/wxt/dist/core/build.mjs:21:9)
+

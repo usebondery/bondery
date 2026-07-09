@@ -1,6 +1,6 @@
+import { dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 import { checkEnvVariables } from "@bondery/helpers/env";
-import { resolve, dirname } from "path";
-import { fileURLToPath } from "url";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -26,7 +26,7 @@ if (environment === "production" && isCi) {
 }
 
 checkEnvVariables({
-  environment,
   appPath: resolve(__dirname, ".."),
+  environment,
   requiredVars,
 });

@@ -1,21 +1,21 @@
-import { useMemo } from "react";
-import { ScrollView, StyleSheet, View } from "react-native";
+import { getRandomExampleName } from "@bondery/helpers/name";
+import type { Contact } from "@bondery/schemas";
 import { useRouter } from "expo-router";
 import type { ReactNode } from "react";
-import type { Contact } from "@bondery/schemas";
-import { getRandomExampleName } from "@bondery/helpers/name";
+import { useMemo } from "react";
+import { ScrollView, StyleSheet, View } from "react-native";
+import { StackNavBar } from "../../components/chrome";
 import { updateSettings } from "../../lib/api/client";
-import { ContactRow } from "../contacts/components/ContactRow";
+import { useMobileTranslations } from "../../lib/i18n/useMobileTranslations";
 import { getSwipeActionIcon } from "../../lib/preferences/swipeActionIcons";
 import type {
   MobilePreferencesState,
   SwipeAction,
 } from "../../lib/preferences/useMobilePreferences";
 import { useMobilePreferences } from "../../lib/preferences/useMobilePreferences";
-import { useMobileTranslations } from "../../lib/i18n/useMobileTranslations";
-import { StackNavBar } from "../../components/chrome";
-import { useMobileThemeColors } from "../../theme/useMobileThemeColors";
 import { MOBILE_LAYOUT } from "../../theme/tokens";
+import { useMobileThemeColors } from "../../theme/useMobileThemeColors";
+import { ContactRow } from "../contacts/components/ContactRow";
 import { SettingsFieldLabel } from "./components/SettingsFieldLabel";
 import { SettingsPreviewSection } from "./components/SettingsPreviewSection";
 import { SettingsSelect } from "./components/SettingsSelect";
@@ -24,34 +24,34 @@ const PREVIEW_CONTACT_ID = "swipe-actions-preview";
 
 function createPreviewContact(name: ReturnType<typeof getRandomExampleName>): Contact {
   return {
-    id: PREVIEW_CONTACT_ID,
-    userId: "preview",
-    firstName: name.firstName,
-    middleName: name.middleName,
-    lastName: name.lastName,
-    headline: null,
-    location: null,
-    notes: null,
     avatar: null,
+    createdAt: new Date(0).toISOString(),
+    emails: null,
+    facebook: null,
+    firstName: name.firstName,
+    gisPoint: null,
+    headline: null,
+    id: PREVIEW_CONTACT_ID,
+    instagram: null,
+    keepFrequencyDays: null,
+    language: null,
     lastInteraction: null,
     lastInteractionActivityId: null,
-    keepFrequencyDays: null,
-    createdAt: new Date(0).toISOString(),
-    updatedAt: new Date(0).toISOString(),
-    phones: null,
-    emails: null,
-    linkedin: null,
-    instagram: null,
-    whatsapp: null,
-    facebook: null,
-    website: null,
-    signal: null,
-    myself: false,
-    language: null,
-    timezone: null,
-    gisPoint: null,
+    lastName: name.lastName,
     latitude: null,
+    linkedin: null,
+    location: null,
     longitude: null,
+    middleName: name.middleName,
+    myself: false,
+    notes: null,
+    phones: null,
+    signal: null,
+    timezone: null,
+    updatedAt: new Date(0).toISOString(),
+    userId: "preview",
+    website: null,
+    whatsapp: null,
   };
 }
 
@@ -76,16 +76,13 @@ export function SettingsSwipeActionsScreen() {
     (state: MobilePreferencesState) => state.setRightSwipeAction,
   );
 
-  const previewContact = useMemo(
-    () => createPreviewContact(getRandomExampleName()),
-    [],
-  );
+  const previewContact = useMemo(() => createPreviewContact(getRandomExampleName()), []);
 
   const swipeTexts = useMemo(
     () => ({
-      call: t("MobileApp.Common.Call"),
-      message: t("MobileApp.Common.Message"),
-      email: t("MobileApp.Common.Email"),
+      call: t("actions.call", { ns: "common" }),
+      email: t("actions.email", { ns: "common" }),
+      message: t("actions.message", { ns: "common" }),
     }),
     [t],
   );
@@ -96,19 +93,19 @@ export function SettingsSwipeActionsScreen() {
     icon: ReactNode;
   }> = [
     {
-      value: "call",
-      label: t("MobileApp.Common.Call"),
       icon: getSwipeActionIcon("call", iconStroke),
+      label: t("actions.call", { ns: "common" }),
+      value: "call",
     },
     {
-      value: "message",
-      label: t("MobileApp.Common.Message"),
       icon: getSwipeActionIcon("message", iconStroke),
+      label: t("actions.message", { ns: "common" }),
+      value: "message",
     },
     {
-      value: "email",
-      label: t("MobileApp.Common.Email"),
       icon: getSwipeActionIcon("email", iconStroke),
+      label: t("actions.email", { ns: "common" }),
+      value: "email",
     },
   ];
 
@@ -133,32 +130,32 @@ export function SettingsSwipeActionsScreen() {
   return (
     <>
       <StackNavBar
-        variant="elevated"
-        title={t("MobileApp.Settings.SwipeActions")}
         onBack={() => router.back()}
+        title={t("SwipeActions", { ns: "MobileSettings" })}
+        variant="elevated"
       />
 
       <ScrollView
-        style={[styles.screen, { backgroundColor: colors.appBackground }]}
         contentContainerStyle={styles.content}
+        style={[styles.screen, { backgroundColor: colors.appBackground }]}
       >
-        <SettingsFieldLabel>{t("MobileApp.Settings.LeftSwipe")}</SettingsFieldLabel>
+        <SettingsFieldLabel>{t("LeftSwipe", { ns: "MobileSettings" })}</SettingsFieldLabel>
         <SettingsSelect
-          label={t("MobileApp.Settings.LeftSwipe")}
+          label={t("LeftSwipe", { ns: "MobileSettings" })}
+          onValueChange={handleLeftSwipeChange}
           options={swipeOptions}
           value={leftSwipeAction}
-          onValueChange={handleLeftSwipeChange}
         />
 
-        <SettingsFieldLabel>{t("MobileApp.Settings.RightSwipe")}</SettingsFieldLabel>
+        <SettingsFieldLabel>{t("RightSwipe", { ns: "MobileSettings" })}</SettingsFieldLabel>
         <SettingsSelect
-          label={t("MobileApp.Settings.RightSwipe")}
+          label={t("RightSwipe", { ns: "MobileSettings" })}
+          onValueChange={handleRightSwipeChange}
           options={swipeOptions}
           value={rightSwipeAction}
-          onValueChange={handleRightSwipeChange}
         />
 
-        <SettingsPreviewSection caption={t("MobileApp.Settings.PreviewHintSwipeActions")}>
+        <SettingsPreviewSection caption={t("PreviewHintSwipeActions", { ns: "MobileSettings" })}>
           <View
             style={[
               styles.previewCard,
@@ -167,15 +164,15 @@ export function SettingsSwipeActionsScreen() {
           >
             <ContactRow
               contact={previewContact}
-              selected={false}
-              selectionMode={false}
-              previewMode
               leftSwipeAction={leftSwipeAction}
-              rightSwipeAction={rightSwipeAction}
-              texts={swipeTexts}
-              onToggleSelect={noop}
               onEnterSelection={noop}
               onExecuteAction={noop}
+              onToggleSelect={noop}
+              previewMode
+              rightSwipeAction={rightSwipeAction}
+              selected={false}
+              selectionMode={false}
+              texts={swipeTexts}
             />
           </View>
         </SettingsPreviewSection>
@@ -185,18 +182,18 @@ export function SettingsSwipeActionsScreen() {
 }
 
 const styles = StyleSheet.create({
-  screen: {
-    flex: 1,
-  },
   content: {
-    paddingTop: MOBILE_LAYOUT.spacing.contentTop,
-    paddingHorizontal: MOBILE_LAYOUT.spacing.horizontal,
-    paddingBottom: MOBILE_LAYOUT.spacing.contentBottom,
     gap: 16,
+    paddingBottom: MOBILE_LAYOUT.spacing.contentBottom,
+    paddingHorizontal: MOBILE_LAYOUT.spacing.horizontal,
+    paddingTop: MOBILE_LAYOUT.spacing.contentTop,
   },
   previewCard: {
     borderRadius: 14,
     borderWidth: 1,
     overflow: "hidden",
+  },
+  screen: {
+    flex: 1,
   },
 });

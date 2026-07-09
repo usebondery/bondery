@@ -1,6 +1,6 @@
 import { z } from "zod";
-import { contactSchema } from "#entities/contact.js";
 import { makePaginatedListResponseSchema } from "#entities/_shared.js";
+import { contactSchema } from "#entities/contact.js";
 
 export const mergeConflictChoiceSchema = z.enum(["left", "right"]);
 
@@ -34,45 +34,41 @@ export const mergeRecommendationReasonSchema = z.enum(["fullName", "email", "pho
 export const mergeRecommendationSchema = z.object({
   id: z.string(),
   leftPerson: contactSchema,
+  reasons: z.array(mergeRecommendationReasonSchema),
   rightPerson: contactSchema,
   score: z.number(),
-  reasons: z.array(mergeRecommendationReasonSchema),
 });
 
 export const mergeContactsRequestSchema = z.object({
+  conflictResolutions: z
+    .partialRecord(mergeConflictFieldSchema, mergeConflictChoiceSchema)
+    .optional(),
   leftPersonId: z.string(),
   rightPersonId: z.string(),
-  conflictResolutions: z.partialRecord(mergeConflictFieldSchema, mergeConflictChoiceSchema).optional(),
 });
 
-export const mergeContactsResponseSchema = z
-  .object({
-    personId: z.string(),
-    userId: z.string(),
-    mergedIntoPersonId: z.string(),
-    mergedFromPersonId: z.string(),
-    contact: contactSchema.nullable(),
-  })
-  ;
+export const mergeContactsResponseSchema = z.object({
+  contact: contactSchema.nullable(),
+  mergedFromPersonId: z.string(),
+  mergedIntoPersonId: z.string(),
+  personId: z.string(),
+  userId: z.string(),
+});
 
 export const mergeRecommendationsResponseSchema = makePaginatedListResponseSchema(
   "recommendations",
   mergeRecommendationSchema,
 );
 
-export const declineMergeRecommendationResponseSchema = z
-  .object({
-    success: z.boolean(),
-  })
-  ;
+export const declineMergeRecommendationResponseSchema = z.object({
+  success: z.boolean(),
+});
 
-export const refreshMergeRecommendationsResponseSchema = z
-  .object({
-    success: z.boolean(),
-    recommendationsCount: z.number(),
-    recommendations: z.array(mergeRecommendationSchema),
-  })
-  ;
+export const refreshMergeRecommendationsResponseSchema = z.object({
+  recommendations: z.array(mergeRecommendationSchema),
+  recommendationsCount: z.number(),
+  success: z.boolean(),
+});
 
 export type MergeConflictChoice = z.infer<typeof mergeConflictChoiceSchema>;
 export type MergeConflictField = z.infer<typeof mergeConflictFieldSchema>;

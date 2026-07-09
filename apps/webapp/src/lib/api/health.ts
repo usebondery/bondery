@@ -59,10 +59,10 @@ export function parseHealthReport(body: unknown): ClientHealthReport | null {
   }
 
   return {
-    status: candidate.status,
-    timestamp: candidate.timestamp,
     cached: candidate.cached,
     cacheExpiresAt: candidate.cacheExpiresAt,
+    status: candidate.status,
+    timestamp: candidate.timestamp,
   };
 }
 
@@ -108,7 +108,7 @@ export async function fetchApiHealthReport(): Promise<HealthCheckResult> {
       }
     }
 
-    return { reachable: true, status: response.status, report };
+    return { reachable: true, report, status: response.status };
   } catch {
     return { reachable: false, status: null };
   }

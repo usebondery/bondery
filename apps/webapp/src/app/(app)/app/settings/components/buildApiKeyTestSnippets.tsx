@@ -1,22 +1,30 @@
+"use client";
+
 import type { CodeBlockSnippet } from "@bondery/mantine-next";
 import Image from "next/image";
 import type { ReactNode } from "react";
-
-type TranslateFn = (key: string) => string;
+import { useMemo } from "react";
+import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
 
 const BRAND_ICON_SIZE = 14;
 /** apple.svg intrinsic ratio (height / width) — non-square unlike windows/linux */
 const APPLE_ICON_HEIGHT = Math.round(BRAND_ICON_SIZE * (1000 / 842.32007));
 
-function BrandOsIcon({ name, alt }: { name: "windows" | "apple" | "linux"; alt: string }): ReactNode {
+function BrandOsIcon({
+  name,
+  alt,
+}: {
+  name: "windows" | "apple" | "linux";
+  alt: string;
+}): ReactNode {
   const height = name === "apple" ? APPLE_ICON_HEIGHT : BRAND_ICON_SIZE;
   return (
     <Image
-      src={`/icons/brands/${name}.svg`}
       alt={alt}
-      width={BRAND_ICON_SIZE}
       height={height}
-      style={{ width: BRAND_ICON_SIZE, height: "auto", display: "block", flexShrink: 0 }}
+      src={`/icons/brands/${name}.svg`}
+      style={{ display: "block", flexShrink: 0, height: "auto", width: BRAND_ICON_SIZE }}
+      width={BRAND_ICON_SIZE}
     />
   );
 }
@@ -38,34 +46,34 @@ export function resolveDefaultTestSnippetId(os: string | undefined): ApiKeyTestS
   }
 }
 
-export function buildApiKeyTestSnippets(
-  apiBaseUrl: string,
-  fullKey: string,
-  t: TranslateFn,
-): CodeBlockSnippet[] {
-  const url = `${apiBaseUrl}/api/contacts`;
+export function useApiKeyTestSnippets(apiBaseUrl: string, fullKey: string): CodeBlockSnippet[] {
+  const t = useWebTranslations("SettingsPage", "ApiKeys");
 
-  return [
-    {
-      id: "windows",
-      label: t("TestSnippetWindows"),
-      language: "powershell",
-      icon: <BrandOsIcon name="windows" alt={t("TestSnippetWindows")} />,
-      code: `Invoke-RestMethod -Uri "${url}" -Headers @{ Authorization = "Bearer ${fullKey}" }`,
-    },
-    {
-      id: "macos",
-      label: t("TestSnippetMac"),
-      language: "bash",
-      icon: <BrandOsIcon name="apple" alt={t("TestSnippetMac")} />,
-      code: `curl -H "Authorization: Bearer ${fullKey}" "${url}"`,
-    },
-    {
-      id: "linux",
-      label: t("TestSnippetLinux"),
-      language: "bash",
-      icon: <BrandOsIcon name="linux" alt={t("TestSnippetLinux")} />,
-      code: `curl -H "Authorization: Bearer ${fullKey}" "${url}"`,
-    },
-  ];
+  return useMemo(() => {
+    const url = `${apiBaseUrl}/api/contacts`;
+
+    return [
+      {
+        code: `Invoke-RestMethod -Uri "${url}" -Headers @{ Authorization = "Bearer ${fullKey}" }`,
+        icon: <BrandOsIcon alt={t("TestSnippetWindows")} name="windows" />,
+        id: "windows",
+        label: t("TestSnippetWindows"),
+        language: "powershell",
+      },
+      {
+        code: `curl -H "Authorization: Bearer ${fullKey}" "${url}"`,
+        icon: <BrandOsIcon alt={t("TestSnippetMac")} name="apple" />,
+        id: "macos",
+        label: t("TestSnippetMac"),
+        language: "bash",
+      },
+      {
+        code: `curl -H "Authorization: Bearer ${fullKey}" "${url}"`,
+        icon: <BrandOsIcon alt={t("TestSnippetLinux")} name="linux" />,
+        id: "linux",
+        label: t("TestSnippetLinux"),
+        language: "bash",
+      },
+    ];
+  }, [apiBaseUrl, fullKey, t]);
 }

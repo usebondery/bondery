@@ -1,15 +1,15 @@
 "use client";
 
-import type { ReactNode } from "react";
 import { Group, Stack, Text, ThemeIcon, UnstyledButton } from "@mantine/core";
 import { IconCircle, IconCircleCheck } from "@tabler/icons-react";
+import type { ReactNode } from "react";
 
 interface ProgressRailItemProps {
-  label: string;
+  children?: ReactNode;
   isComplete: boolean;
   isExpanded: boolean;
+  label: string;
   onToggle: () => void;
-  children?: ReactNode;
 }
 
 export function ProgressRailItem({
@@ -24,28 +24,28 @@ export function ProgressRailItem({
       <UnstyledButton
         onClick={isComplete ? undefined : onToggle}
         style={{
-          width: "100%",
           borderRadius: "var(--mantine-radius-sm)",
-          padding: "6px 8px",
           cursor: isComplete ? "default" : "pointer",
+          padding: "6px 8px",
+          width: "100%",
         }}
       >
-        <Group gap="sm" wrap="nowrap" align="flex-start">
+        <Group align="flex-start" gap="sm" wrap="nowrap">
           {isComplete ? (
-            <ThemeIcon size={22} radius="xl" color="teal" variant="light">
+            <ThemeIcon color="teal" radius="xl" size={22} variant="light">
               <IconCircleCheck size={14} stroke={2} />
             </ThemeIcon>
           ) : (
-            <ThemeIcon size={22} radius="xl" color="gray" variant="light">
+            <ThemeIcon color="gray" radius="xl" size={22} variant="light">
               <IconCircle size={14} stroke={1.5} />
             </ThemeIcon>
           )}
           <Text
-            size="sm"
-            fw={500}
-            td={isComplete ? "line-through" : undefined}
             c={isComplete ? "dimmed" : undefined}
+            fw={500}
+            size="sm"
             style={{ flex: 1, textAlign: "left" }}
+            td={isComplete ? "line-through" : undefined}
           >
             {label}
           </Text>

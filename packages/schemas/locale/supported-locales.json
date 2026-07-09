@@ -1,0 +1,9 @@
+{
+  "default": "en",
+  "postgresEnum": "supported_locale",
+  "supported": [
+    { "code": "en", "flag": "gb", "nativeName": "English" },
+    { "code": "cs", "flag": "cz", "nativeName": "čeština" },
+    { "code": "de", "flag": "de", "nativeName": "Deutsch" }
+  ]
+}

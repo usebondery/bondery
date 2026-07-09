@@ -9,9 +9,10 @@ export function useRootFabSpeedDialActions(): FabSpeedDialAction[] {
   return useMemo(
     () => [
       {
-        id: "create-person",
-        labelKey: "MobileApp.Navigation.CreatePerson",
         icon: IconUserPlus,
+        id: "create-person",
+        labelKey: "CreatePerson",
+        labelNamespace: "MobileNavigation",
         onPress: openCreateContact,
         testID: "fab-create-person",
       },

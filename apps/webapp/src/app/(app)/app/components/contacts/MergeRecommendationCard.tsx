@@ -1,29 +1,30 @@
 "use client";
 
-import { useState } from "react";
-import { Button, Group, Paper, Text, Tooltip } from "@mantine/core";
-import { notifications } from "@mantine/notifications";
-import { IconCheck, IconCopy, IconUser, IconUsers, IconX } from "@tabler/icons-react";
-import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
-import { useDeclineMergeRecommendationMutation } from "@/lib/query/hooks/useMergeRecommendations";
+import { getUserFacingError } from "@bondery/helpers/api";
+import {
+  errorNotificationTemplate,
+  PersonChip,
+  successNotificationTemplate,
+} from "@bondery/mantine-next";
 import type {
   Contact,
   MergeConflictChoice,
   MergeConflictField,
   MergeRecommendation,
 } from "@bondery/schemas";
-import {
-  PersonChip,
-  errorNotificationTemplate,
-  successNotificationTemplate,
-} from "@bondery/mantine-next";
-import { MERGE_CONFLICT_FIELDS, openMergeWithModal } from "../../people/components/MergeWithModal";
+import { Button, Group, Paper, Text, Tooltip } from "@mantine/core";
+import { notifications } from "@mantine/notifications";
+import { IconCheck, IconUsers, IconX } from "@tabler/icons-react";
+import { useState } from "react";
+import { useCommonTranslations, useWebTranslations } from "@/lib/i18n/useWebTranslations";
+import { useDeclineMergeRecommendationMutation } from "@/lib/query/hooks/useMergeRecommendations";
+import { openMergeWithModal } from "../../people/components/MergeWithModal";
 
 interface MergeRecommendationCardProps {
-  recommendation: MergeRecommendation;
   contacts: Contact[];
-  onAccepted: () => void;
-  onDeclined: () => void;
+  onAccepted?: () => void;
+  onDeclined?: () => void;
+  recommendation: MergeRecommendation;
   redirectAfterMerge?: boolean;
 }
 
@@ -45,11 +46,17 @@ function preferLocalizedName(
 ): MergeConflictChoice | null {
   const l = left?.trim() ?? "";
   const r = right?.trim() ?? "";
-  if (!l || !r) return null;
+  if (!l || !r) {
+    return null;
+  }
   const leftHas = hasDiacritics(l);
   const rightHas = hasDiacritics(r);
-  if (leftHas && !rightHas) return "left";
-  if (!leftHas && rightHas) return "right";
+  if (leftHas && !rightHas) {
+    return "left";
+  }
+  if (!leftHas && rightHas) {
+    return "right";
+  }
   return null;
 }
 
@@ -66,7 +73,9 @@ function computeNameConflictChoices(
   const choices: Partial<Record<MergeConflictField, MergeConflictChoice>> = {};
   for (const field of NAME_FIELDS) {
     const preference = preferLocalizedName(left[field], right[field]);
-    if (preference) choices[field] = preference;
+    if (preference) {
+      choices[field] = preference;
+    }
   }
   return choices;
 }
@@ -82,8 +91,9 @@ export function MergeRecommendationCard({
   onDeclined,
   redirectAfterMerge = false,
 }: MergeRecommendationCardProps) {
-  const t = useTranslations("FixContactsPage");
-  const tMerge = useTranslations("MergeWithModal");
+  const tCommon = useCommonTranslations();
+  const t = useWebTranslations("FixContactsPage");
+  const tMerge = useWebTranslations("MergeWithModal");
   const [isDeclining, setIsDeclining] = useState(false);
   const declineMutation = useDeclineMergeRecommendationMutation();
 
@@ -94,13 +104,13 @@ export function MergeRecommendationCard({
     );
     openMergeWithModal({
       contacts,
-      leftPersonId: recommendation.leftPerson.id,
-      rightPersonId: recommendation.rightPerson.id,
       disableLeftPicker: true,
       disableRightPicker: true,
-      redirectToMergedPerson: redirectAfterMerge,
-      onSuccess: onAccepted,
       initialConflictChoices,
+      leftPersonId: recommendation.leftPerson.id,
+      onSuccess: onAccepted,
+      redirectToMergedPerson: redirectAfterMerge,
+      rightPersonId: recommendation.rightPerson.id,
     });
   };
 
@@ -110,16 +120,16 @@ export function MergeRecommendationCard({
       await declineMutation.mutateAsync(recommendation.id);
       notifications.show(
         successNotificationTemplate({
-          title: t("SuccessTitle"),
           description: t("DeclineSuccess"),
+          title: t("SuccessTitle"),
         }),
       );
-      onDeclined();
+      onDeclined?.();
     } catch (error) {
       notifications.show(
         errorNotificationTemplate({
+          description: getUserFacingError(error, tCommon),
           title: t("ErrorTitle"),
-          description: error instanceof Error ? error.message : t("DeclineError"),
         }),
       );
     } finally {
@@ -129,33 +139,33 @@ export function MergeRecommendationCard({
 
   return (
     <Paper
-      withBorder
-      radius="md"
       p="md"
+      radius="md"
       style={{ borderLeft: "2px solid var(--mantine-color-yellow-6)" }}
+      withBorder
     >
-      <Group justify="space-between" align="center" wrap="nowrap">
+      <Group align="center" justify="space-between" wrap="nowrap">
         <Group align="center" wrap="nowrap">
-          <Tooltip label={t("PossibleDuplicateTooltip")} multiline maw={280} withArrow>
-            <Group gap={4} align="center" wrap="nowrap" style={{ cursor: "default" }}>
-              <IconUsers size={14} color="var(--mantine-color-yellow-6)" />
-              <Text size="sm" fw={600} c="yellow.6">
+          <Tooltip label={t("PossibleDuplicateTooltip")} maw={280} multiline withArrow>
+            <Group align="center" gap={4} style={{ cursor: "default" }} wrap="nowrap">
+              <IconUsers color="var(--mantine-color-yellow-6)" size={14} />
+              <Text c="yellow.6" fw={600} size="sm">
                 {t("PossibleDuplicateBadge")}
               </Text>
             </Group>
           </Tooltip>
-          <PersonChip person={recommendation.leftPerson} isClickable />
-          <Text c="dimmed" size="sm" fw={500}>
+          <PersonChip isClickable person={recommendation.leftPerson} />
+          <Text c="dimmed" fw={500} size="sm">
             {tMerge("MergeWithLabel")}
           </Text>
-          <PersonChip person={recommendation.rightPerson} isClickable />
+          <PersonChip isClickable person={recommendation.rightPerson} />
         </Group>
         <Group>
           <Button
-            variant="default"
             leftSection={<IconX size={16} />}
-            onClick={handleDecline}
             loading={isDeclining}
+            onClick={handleDecline}
+            variant="default"
           >
             {t("DeclineMerge")}
           </Button>

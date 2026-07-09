@@ -1,241 +1,76 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import type { JSX } from "react";
-import { useRouter } from "next/navigation";
+import { getUserFacingError } from "@bondery/helpers/api";
+import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import {
-  Divider,
-  Group,
-  Paper,
-  Stack,
-  Text,
-  Title,
-  Alert,
-  Badge,
-  List,
-  Anchor,
-  ThemeIcon,
-  Center,
-  Loader,
-  Progress,
-} from "@mantine/core";
-import { Dropzone, MIME_TYPES } from "@mantine/dropzone";
-import {
-  IconArrowLeft,
-  IconArrowRight,
-  IconUpload,
-  IconX,
-  IconFileZip,
-  IconBrandLinkedin,
-  IconCircleCheck,
-  IconAlertTriangle,
-} from "@tabler/icons-react";
-import { notifications } from "@mantine/notifications";
-import { modals } from "@mantine/modals";
-import type { Contact, LinkedInPreparedContact } from "@bondery/schemas";
-import { SOCIAL_IMPORT_COMMIT_BATCH_SIZE } from "@bondery/schemas/constants";
-import {
-  DropzoneContent,
-  ModalFooter,
-  ModalScrollLayout,
   errorNotificationTemplate,
   ModalTitle,
   successNotificationTemplate,
 } from "@bondery/mantine-next";
+import type { LinkedInPreparedContact } from "@bondery/schemas";
+import { SOCIAL_IMPORT_COMMIT_BATCH_SIZE } from "@bondery/schemas/constants";
+import { modals } from "@mantine/modals";
+import { notifications } from "@mantine/notifications";
 import { NavigationProgress } from "@mantine/nprogress";
-import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
-import ContactsTable from "@/app/(app)/app/components/contacts/ContactsTableV2";
+import { IconBrandLinkedin } from "@tabler/icons-react";
+import { useRouter } from "next/navigation";
+import type { JSX } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useCommonTranslations, useWebTranslations } from "@/lib/i18n/useWebTranslations";
+import { useModalDismiss } from "@/lib/modals";
 import {
   useCommitLinkedInImportMutation,
   useParseLinkedInImportMutation,
 } from "@/lib/query/hooks/useImports";
 import { useUpdateImportFollowupMutation } from "@/lib/query/hooks/useSettings";
-import { useModalBlocking } from "@/lib/modals";
-import { useImporterNavigationProgress } from "./useImporterNavigationProgress";
+import { useImportContactSelection } from "../hooks/useImportContactSelection";
+import { useImporterNavigationProgress } from "../hooks/useImporterNavigationProgress";
+import {
+  LINKEDIN_STEP_PROGRESS,
+  type LinkedInImportStep,
+  sortLinkedInContactsForPreview,
+  toLinkedInPreviewContact,
+} from "../utils/linkedin-import-helpers";
+import { ImportProcessingStep, ImportProgressStep } from "./ImportModalProcessingSteps";
+import { LinkedInImportInstructionsStep } from "./LinkedInImportInstructionsStep";
+import { LinkedInImportIntroStep } from "./LinkedInImportIntroStep";
+import { LinkedInImportPreviewStep } from "./LinkedInImportPreviewStep";
+import { LinkedInImportUploadStep } from "./LinkedInImportUploadStep";
 
-type Step = "intro" | "instructions" | "upload" | "processing" | "preview";
-
-export type LinkedInImportStep = Step;
-
-const STEP_PROGRESS: Record<Step, number> = {
-  intro: 12,
-  instructions: 30,
-  upload: 50,
-  processing: 68,
-  preview: 84,
-};
-
-interface LinkedInImportTranslations {
-  ModalTitle: string;
-  InstructionsTitle: string;
-  InstructionStep1Prefix: string;
-  InstructionStep1LinkLabel: string;
-  InstructionStep2: string;
-  InstructionStep3: string;
-  InstructionStep4: string;
-  HaveZipFile: string;
-  DropzoneTitle: string;
-  DropzoneDescription: string;
-  SelectZipFile: string;
-  UploadAnother: string;
-  Total: string;
-  Valid: string;
-  Invalid: string;
-  AlreadyExists: string;
-  ExistingHandleTooltip: string;
-  ImportSelected: string;
-  ChooseContactsHint: string;
-  ImportSuccess: string;
-  NoContactsSelected: string;
-  ParseError: string;
-  ImportError: string;
-  InvalidFile: string;
-  Back: string;
-  Cancel: string;
-  SuccessTitle: string;
-  ErrorTitle: string;
-  IntroTitle: string;
-  IntroDescription1: string;
-  IntroDescription2: string;
-  IntroDescription3: string;
-  Continue: string;
-  FilesAlertTitle: string;
-  FilesAlertDescriptionPrefix: string;
-  FilesAlertFileConnectionsBold: string;
-  FilesAlertDescriptionSuffix: string;
-  ComeBackWhenReady: string;
-  RequestedExport: string;
-  ProcessingConnections: string;
-  ImportingTitle: string;
-  ImportingProgress: string;
-  NoContactsFound: string;
-  NoContactsMatchSearch: string;
-}
-
-function buildImportedTitle(
-  position: string | null,
-  company: string | null,
-): string | null {
-  const normalizedPosition =
-    typeof position === "string" ? position.trim() : "";
-  const normalizedCompany = typeof company === "string" ? company.trim() : "";
-
-  if (normalizedPosition && normalizedCompany) {
-    return `${normalizedPosition} @${normalizedCompany}`;
-  }
-
-  if (normalizedPosition) {
-    return normalizedPosition;
-  }
-
-  return normalizedCompany || null;
-}
-
-function toPreviewContact(contact: LinkedInPreparedContact): Contact {
-  return {
-    id: contact.tempId,
-    userId: "",
-    firstName: contact.firstName,
-    middleName: contact.middleName,
-    lastName: contact.lastName,
-    headline: buildImportedTitle(contact.position, contact.company),
-    location: null,
-    notes: null,
-    avatar: null,
-    lastInteraction: null,
-    lastInteractionActivityId: null,
-    keepFrequencyDays: null,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-    phones: [],
-    emails: [],
-    linkedin: contact.linkedinUrl,
-    instagram: null,
-    whatsapp: null,
-    facebook: null,
-    website: null,
-    signal: null,
-    importantDates: null,
-    myself: false,
-    language: null,
-    timezone: null,
-    latitude: null,
-    longitude: null,
-    gisPoint: null,
-  };
-}
-
-function sortLinkedInContactsForPreview(
-  contacts: LinkedInPreparedContact[],
-): LinkedInPreparedContact[] {
-  return contacts
-    .map((contact, index) => ({ contact, index }))
-    .sort((left, right) => {
-      const leftRank =
-        left.contact.isValid && !left.contact.alreadyExists
-          ? 0
-          : left.contact.alreadyExists
-            ? 1
-            : 2;
-      const rightRank =
-        right.contact.isValid && !right.contact.alreadyExists
-          ? 0
-          : right.contact.alreadyExists
-            ? 1
-            : 2;
-
-      if (leftRank !== rightRank) {
-        return leftRank - rightRank;
-      }
-
-      return left.index - right.index;
-    })
-    .map((entry) => entry.contact);
-}
+export type { LinkedInImportStep };
 
 export function LinkedInImportModal({
-  t,
   modalId,
   onSuccess,
   showNavigationProgress = true,
   initialStep = "intro",
   onAwaitingExport,
 }: {
-  t: (
-    key: keyof LinkedInImportTranslations,
-    values?: Record<string, string | number>,
-  ) => string;
   modalId: string;
-  onSuccess?: (stats: {
-    imported: number;
-    updated: number;
-    skipped: number;
-  }) => void;
+  onSuccess?: (stats: { imported: number; updated: number; skipped: number }) => void;
   showNavigationProgress?: boolean;
-  initialStep?: Step;
+  initialStep?: LinkedInImportStep;
   onAwaitingExport?: () => void | Promise<void>;
 }) {
+  const tCommon = useCommonTranslations();
+  const t = useWebTranslations("SettingsPage", "DataManagement.LinkedInImport");
   const router = useRouter();
   const parseImport = useParseLinkedInImportMutation();
   const commitImport = useCommitLinkedInImportMutation();
   const followupMutation = useUpdateImportFollowupMutation();
-  const [step, setStep] = useState<Step>(initialStep);
+  const [step, setStep] = useState<LinkedInImportStep>(initialStep);
   const [isParsing, setIsParsing] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
   const [importProgress, setImportProgress] = useState<{
     current: number;
     total: number;
   } | null>(null);
-  const [parsedContacts, setParsedContacts] = useState<
-    LinkedInPreparedContact[]
-  >([]);
+  const [parsedContacts, setParsedContacts] = useState<LinkedInPreparedContact[]>([]);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const openRef = useRef<() => void>(null);
-  const lastSelectedIndexRef = useRef<number | null>(null);
 
   const previewContacts = useMemo(
-    () =>
-      parsedContacts.filter((contact) => contact.isValid).map(toPreviewContact),
+    () => parsedContacts.filter((contact) => contact.isValid).map(toLinkedInPreviewContact),
     [parsedContacts],
   );
 
@@ -252,29 +87,28 @@ export function LinkedInImportModal({
   const nonSelectableIds = useMemo(
     () =>
       new Set(
-        parsedContacts
-          .filter((contact) => contact.alreadyExists)
-          .map((contact) => contact.tempId),
+        parsedContacts.filter((contact) => contact.alreadyExists).map((contact) => contact.tempId),
       ),
     [parsedContacts],
   );
   const selectableIds = useMemo(
-    () =>
-      previewContacts
-        .map((contact) => contact.id)
-        .filter((id) => !nonSelectableIds.has(id)),
+    () => previewContacts.map((contact) => contact.id).filter((id) => !nonSelectableIds.has(id)),
     [previewContacts, nonSelectableIds],
   );
 
-  const allSelected =
-    selectableIds.length > 0 &&
-    selectableIds.every((id) => selectedIds.has(id));
-  const someSelected = selectedIds.size > 0 && !allSelected;
+  const { allSelected, someSelected, handleToggleAll, handleToggleOne, resetSelectionAnchor } =
+    useImportContactSelection({
+      nonSelectableIds,
+      previewContacts,
+      selectableIds,
+      selectedIds,
+      setSelectedIds,
+    });
 
   useImporterNavigationProgress({
-    step,
-    stepProgress: STEP_PROGRESS,
     importProgress,
+    step,
+    stepProgress: LINKEDIN_STEP_PROGRESS,
   });
 
   const renderWithNavigationProgress = (content: JSX.Element) => (
@@ -284,9 +118,8 @@ export function LinkedInImportModal({
     </>
   );
 
-  const closeModal = () => {
-    modals.close(modalId);
-  };
+  const isBlocking = isParsing || isImporting || step === "processing";
+  const { closeModal } = useModalDismiss(modalId, isBlocking);
 
   const isOnboardingFlow = Boolean(onAwaitingExport);
 
@@ -295,14 +128,12 @@ export function LinkedInImportModal({
       await onAwaitingExport();
     } else {
       await followupMutation.mutateAsync({
-        status: "awaiting_export",
         platform: "linkedin",
+        status: "awaiting_export",
       });
     }
     closeModal();
   };
-
-  useModalBlocking(modalId, isParsing || isImporting || step === "processing");
 
   useEffect(() => {
     modals.updateModal({
@@ -318,67 +149,10 @@ export function LinkedInImportModal({
             ? "lg"
             : "xl",
       title: (
-        <ModalTitle
-          text={t("ModalTitle")}
-          icon={<IconBrandLinkedin size={20} stroke={1.5} />}
-        />
+        <ModalTitle icon={<IconBrandLinkedin size={20} stroke={1.5} />} text={t("ModalTitle")} />
       ),
     });
-  }, [isImporting, isParsing, modalId, step, t]);
-
-  const handleToggleAll = useCallback(() => {
-    setSelectedIds((prev) => {
-      const isAllSelected =
-        selectableIds.length > 0 && selectableIds.every((id) => prev.has(id));
-      if (isAllSelected) {
-        return new Set<string>();
-      }
-      return new Set(selectableIds);
-    });
-  }, [selectableIds]);
-
-  const handleToggleOne = useCallback(
-    (id: string, options?: { shiftKey?: boolean; index?: number }) => {
-      if (nonSelectableIds.has(id)) {
-        return;
-      }
-
-      setSelectedIds((prev) => {
-        const next = new Set(prev);
-
-        const rowIndex = options?.index;
-        const hasRangeSelection =
-          options?.shiftKey &&
-          typeof rowIndex === "number" &&
-          lastSelectedIndexRef.current !== null;
-
-        if (hasRangeSelection && typeof rowIndex === "number") {
-          const start = Math.min(lastSelectedIndexRef.current!, rowIndex);
-          const end = Math.max(lastSelectedIndexRef.current!, rowIndex);
-
-          for (let index = start; index <= end; index += 1) {
-            const row = previewContacts[index];
-            if (!row || nonSelectableIds.has(row.id)) {
-              continue;
-            }
-
-            next.add(row.id);
-          }
-        } else if (next.has(id)) {
-          next.delete(id);
-        } else {
-          next.add(id);
-        }
-
-        return next;
-      });
-
-      if (typeof options?.index === "number") {
-        lastSelectedIndexRef.current = options.index;
-      }
-    },
-    [nonSelectableIds, previewContacts],
-  );
+  }, [isImporting, modalId, step, t]);
 
   const parseUpload = async (files: File[]) => {
     if (files.length === 0) {
@@ -391,11 +165,7 @@ export function LinkedInImportModal({
     const formData = new FormData();
     files.forEach((file) => {
       const webkitFile = file as File & { webkitRelativePath?: string };
-      formData.append(
-        "files",
-        file,
-        webkitFile.webkitRelativePath || file.name,
-      );
+      formData.append("files", file, webkitFile.webkitRelativePath || file.name);
     });
 
     try {
@@ -405,7 +175,7 @@ export function LinkedInImportModal({
       const sortedContacts = sortLinkedInContactsForPreview(contacts);
 
       setParsedContacts(sortedContacts);
-      lastSelectedIndexRef.current = null;
+      resetSelectionAnchor();
       setSelectedIds(
         new Set(
           sortedContacts
@@ -417,8 +187,8 @@ export function LinkedInImportModal({
     } catch (error) {
       notifications.show(
         errorNotificationTemplate({
+          description: getUserFacingError(error, tCommon),
           title: t("ErrorTitle"),
-          description: error instanceof Error ? error.message : t("ParseError"),
         }),
       );
       setStep("upload");
@@ -428,15 +198,13 @@ export function LinkedInImportModal({
   };
 
   const handleImport = async () => {
-    const selectedContacts = parsedContacts.filter((contact) =>
-      selectedIds.has(contact.tempId),
-    );
+    const selectedContacts = parsedContacts.filter((contact) => selectedIds.has(contact.tempId));
 
     if (selectedContacts.length === 0) {
       notifications.show({
-        title: t("ErrorTitle"),
-        message: t("NoContactsSelected"),
         color: "yellow",
+        message: t("NoContactsSelected"),
+        title: t("ErrorTitle"),
       });
       return;
     }
@@ -471,22 +239,22 @@ export function LinkedInImportModal({
 
       notifications.show(
         successNotificationTemplate({
-          title: t("SuccessTitle"),
           description: t("ImportSuccess", {
             imported: totalImported,
-            updated: totalUpdated,
             skipped: totalSkipped,
+            updated: totalUpdated,
           }),
+          title: t("SuccessTitle"),
         }),
       );
 
-      modals.close(modalId);
+      closeModal();
 
       if (onSuccess) {
         onSuccess({
           imported: totalImported,
-          updated: totalUpdated,
           skipped: totalSkipped,
+          updated: totalUpdated,
         });
       } else {
         router.push(WEBAPP_ROUTES.PEOPLE);
@@ -494,9 +262,8 @@ export function LinkedInImportModal({
     } catch (error) {
       notifications.show(
         errorNotificationTemplate({
+          description: getUserFacingError(error, tCommon),
           title: t("ErrorTitle"),
-          description:
-            error instanceof Error ? error.message : t("ImportError"),
         }),
       );
     } finally {
@@ -507,311 +274,128 @@ export function LinkedInImportModal({
 
   if (step === "intro") {
     return renderWithNavigationProgress(
-      <Stack gap="xl">
-        <Stack align="center" gap="md" pt="sm">
-          <ThemeIcon size={110} radius="xl" variant="light" color="blue">
-            <IconBrandLinkedin size={64} />
-          </ThemeIcon>
-          <Title order={4} ta="center">
-            {t("IntroTitle")}
-          </Title>
-        </Stack>
-
-        <Paper withBorder p="md" radius="md">
-          <Stack gap="sm">
-            <Group gap="sm" wrap="nowrap" align="flex-start">
-              <IconCircleCheck
-                size={18}
-                style={{
-                  flexShrink: 0,
-                  marginTop: 1,
-                  color: "var(--mantine-color-blue-6)",
-                }}
-              />
-              <Text size="sm">{t("IntroDescription1")}</Text>
-            </Group>
-            <Group gap="sm" wrap="nowrap" align="flex-start">
-              <IconCircleCheck
-                size={18}
-                style={{
-                  flexShrink: 0,
-                  marginTop: 1,
-                  color: "var(--mantine-color-blue-6)",
-                }}
-              />
-              <Text size="sm">{t("IntroDescription2")}</Text>
-            </Group>
-            <Group gap="sm" wrap="nowrap" align="flex-start">
-              <IconCircleCheck
-                size={18}
-                style={{
-                  flexShrink: 0,
-                  marginTop: 1,
-                  color: "var(--mantine-color-blue-6)",
-                }}
-              />
-              <Text size="sm">{t("IntroDescription3")}</Text>
-            </Group>
-          </Stack>
-        </Paper>
-
-        <ModalFooter
-          cancelLabel={t("Cancel")}
-          onCancel={closeModal}
-          actionLabel={t("Continue")}
-          onAction={() => setStep("instructions")}
-          actionRightSection={<IconArrowRight size={16} />}
-        />
-      </Stack>,
+      <LinkedInImportIntroStep
+        cancelLabel={t("Cancel")}
+        continueLabel={t("Continue")}
+        descriptions={[t("IntroDescription1"), t("IntroDescription2"), t("IntroDescription3")]}
+        introTitle={t("IntroTitle")}
+        onCancel={closeModal}
+        onContinue={() => setStep("instructions")}
+      />,
     );
   }
 
   if (step === "instructions") {
     return renderWithNavigationProgress(
-      <Stack gap="md">
-        <Paper withBorder p="md" radius="md">
-          <Stack gap="sm">
-            <Text fw={600} size="sm" ta="center">
-              {t("InstructionsTitle")}
-            </Text>
-            <Divider />
-            <Group gap="sm" wrap="nowrap" align="center">
-              <ThemeIcon
-                size={22}
-                radius="xl"
-                variant="filled"
-                color="blue"
-                style={{ flexShrink: 0 }}
-              >
-                <Text component="span" size="xs" fw={700} lh={1}>
-                  1
-                </Text>
-              </ThemeIcon>
-              <Text size="sm">
-                {t("InstructionStep1Prefix")}{" "}
-                <Anchor
-                  href="https://www.linkedin.com/mypreferences/d/download-my-data"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  {t("InstructionStep1LinkLabel")}
-                </Anchor>
-              </Text>
-            </Group>
-            {[
-              t("InstructionStep2"),
-              t("InstructionStep3"),
-              t("InstructionStep4"),
-            ].map((s, i) => (
-              <Group key={i} gap="sm" wrap="nowrap" align="center">
-                <ThemeIcon
-                  size={22}
-                  radius="xl"
-                  variant="filled"
-                  color="blue"
-                  style={{ flexShrink: 0 }}
-                >
-                  <Text component="span" size="xs" fw={700} lh={1}>
-                    {i + 2}
-                  </Text>
-                </ThemeIcon>
-                <Text size="sm">{s}</Text>
-              </Group>
-            ))}
-          </Stack>
-        </Paper>
-
-        <Alert color="blue" variant="light" title={t("FilesAlertTitle")}>
-          <Text size="sm">
-            {t("FilesAlertDescriptionPrefix")}{" "}
-            <Text component="span" fw={700}>
-              {t("FilesAlertFileConnectionsBold")}
-            </Text>
-            . {t("FilesAlertDescriptionSuffix")}
-          </Text>
-        </Alert>
-
-        <ModalFooter
-          backLabel={t("Back")}
-          backLeftSection={<IconArrowLeft size={16} />}
-          onBack={() => setStep("intro")}
-          {...(isOnboardingFlow
-            ? {
-                cancelLabel: t("HaveZipFile"),
-                onCancel: () => setStep("upload"),
-                actionLabel: t("RequestedExport"),
-                onAction: () => void handleRequestedExport(),
-              }
-            : {
-                actionLabel: t("HaveZipFile"),
-                onAction: () => setStep("upload"),
-                actionLeftSection: <IconFileZip size={16} />,
-              })}
-        />
-      </Stack>,
+      <LinkedInImportInstructionsStep
+        actionLabel={isOnboardingFlow ? t("RequestedExport") : t("HaveZipFile")}
+        backLabel={t("Back")}
+        cancelLabel={isOnboardingFlow ? t("HaveZipFile") : undefined}
+        filesAlertDescriptionPrefix={t("FilesAlertDescriptionPrefix")}
+        filesAlertDescriptionSuffix={t("FilesAlertDescriptionSuffix")}
+        filesAlertFileConnectionsBold={t("FilesAlertFileConnectionsBold")}
+        filesAlertTitle={t("FilesAlertTitle")}
+        instructionStep1LinkHref="https://www.linkedin.com/mypreferences/d/download-my-data"
+        instructionStep1LinkLabel={t("InstructionStep1LinkLabel")}
+        instructionStep1Prefix={t("InstructionStep1Prefix")}
+        instructionsTitle={t("InstructionsTitle")}
+        isOnboardingFlow={isOnboardingFlow}
+        numberedSteps={[
+          { number: 2, text: t("InstructionStep2") },
+          { number: 3, text: t("InstructionStep3") },
+          { number: 4, text: t("InstructionStep4") },
+        ]}
+        onAction={() => {
+          if (isOnboardingFlow) {
+            void handleRequestedExport();
+          } else {
+            setStep("upload");
+          }
+        }}
+        onBack={() => setStep("intro")}
+        onCancel={isOnboardingFlow ? () => setStep("upload") : undefined}
+      />,
     );
   }
 
   if (step === "upload") {
     return renderWithNavigationProgress(
-      <Stack gap="md">
-        <Dropzone
-          openRef={openRef}
-          onDrop={(files) => {
-            void parseUpload(files);
-          }}
-          onReject={() => {
-            notifications.show(
-              errorNotificationTemplate({
-                title: t("ErrorTitle"),
-                description: t("InvalidFile"),
-              }),
-            );
-          }}
-          loading={isParsing}
-          maxSize={30 * 1024 * 1024}
-          maxFiles={1}
-          accept={{
-            [MIME_TYPES.zip]: [".zip"],
-            "application/x-zip-compressed": [".zip"],
-            "application/x-zip": [".zip"],
-            "multipart/x-zip": [".zip"],
-            "application/octet-stream": [".zip", ".csv"],
-            [MIME_TYPES.csv]: [".csv"],
-            "application/csv": [".csv"],
-            "text/plain": [".csv"],
-            "application/vnd.ms-excel": [".csv"],
-          }}
-        >
-          <DropzoneContent
-            title={t("DropzoneTitle")}
-            description={t("DropzoneDescription")}
-          />
-        </Dropzone>
-
-        <ModalFooter
-          backLabel={t("Back")}
-          backLeftSection={<IconArrowLeft size={16} />}
-          onBack={() => setStep("instructions")}
-          cancelLabel={t("Cancel")}
-          onCancel={closeModal}
-          actionLabel={t("SelectZipFile")}
-          onAction={() => openRef.current?.()}
-          actionLeftSection={<IconFileZip size={16} />}
-        />
-      </Stack>,
+      <LinkedInImportUploadStep
+        backLabel={t("Back")}
+        cancelLabel={t("Cancel")}
+        dropzoneDescription={t("DropzoneDescription")}
+        dropzoneTitle={t("DropzoneTitle")}
+        isParsing={isParsing}
+        onBack={() => setStep("instructions")}
+        onCancel={closeModal}
+        onDrop={(files) => {
+          void parseUpload(files);
+        }}
+        onReject={() => {
+          notifications.show(
+            errorNotificationTemplate({
+              description: t("InvalidFile"),
+              title: t("ErrorTitle"),
+            }),
+          );
+        }}
+        onSelectFile={() => openRef.current?.()}
+        openRef={openRef}
+        selectZipFileLabel={t("SelectZipFile")}
+      />,
     );
   }
 
   if (step === "processing") {
     return renderWithNavigationProgress(
-      <Stack gap="lg" py="md">
-        <Center>
-          <Stack align="center" gap="sm">
-            <Loader size="md" />
-            <Text>{t("ProcessingConnections")}</Text>
-          </Stack>
-        </Center>
-      </Stack>,
+      <ImportProcessingStep message={t("ProcessingConnections")} />,
     );
   }
 
   if (isImporting && importProgress !== null) {
-    const percentage = Math.round(
-      (importProgress.current / importProgress.total) * 100,
-    );
     return renderWithNavigationProgress(
-      <Stack gap="lg" py="md">
-        <Center>
-          <Stack align="center" gap="md" w="100%" maw={400}>
-            <Text fw={600}>{t("ImportingTitle")}</Text>
-            <Progress value={percentage} w="100%" size="lg" />
-            <Text size="sm" c="dimmed">
-              {t("ImportingProgress", {
-                current: importProgress.current,
-                total: importProgress.total,
-              })}
-            </Text>
-          </Stack>
-        </Center>
-      </Stack>,
+      <ImportProgressStep
+        current={importProgress.current}
+        importingProgressLabel={t("ImportingProgress", {
+          current: importProgress.current,
+          total: importProgress.total,
+        })}
+        importingTitle={t("ImportingTitle")}
+        total={importProgress.total}
+      />,
     );
   }
 
   return renderWithNavigationProgress(
-    <ModalScrollLayout
-      footer={
-        <ModalFooter
-          mt={0}
-          backLabel={t("Back")}
-          backLeftSection={<IconArrowLeft size={16} />}
-          onBack={() => setStep("upload")}
-          backDisabled={isImporting}
-          cancelLabel={t("Cancel")}
-          onCancel={closeModal}
-          cancelDisabled={isImporting}
-          actionLabel={t("ImportSelected", { count: selectedIds.size })}
-          onAction={() => {
-            void handleImport();
-          }}
-          actionLeftSection={
-            !isImporting ? <IconBrandLinkedin size={16} /> : undefined
-          }
-          actionLoading={isImporting}
-          actionDisabled={isImporting}
-        />
-      }
-    >
-      <Stack gap="md">
-        <Group justify="space-between">
-          <Group gap="xs">
-            <Badge color="blue" variant="light">
-              {t("Total", { count: parsedContacts.length })}
-            </Badge>
-            <Badge
-              color="green"
-              variant="light"
-              leftSection={<IconCircleCheck size={12} />}
-            >
-              {t("Valid", { count: validContactsCount })}
-            </Badge>
-            {invalidContactsCount > 0 ? (
-              <Badge
-                color="orange"
-                variant="light"
-                leftSection={<IconAlertTriangle size={12} />}
-              >
-                {t("Invalid", { count: invalidContactsCount })}
-              </Badge>
-            ) : null}
-            {alreadyExistsCount > 0 ? (
-              <Badge color="gray" variant="light">
-                {t("AlreadyExists", { count: alreadyExistsCount })}
-              </Badge>
-            ) : null}
-          </Group>
-        </Group>
-
-        <Text size="sm" c="dimmed">
-          {t("ChooseContactsHint")}
-        </Text>
-
-        <ContactsTable
-          contacts={previewContacts}
-          visibleColumns={["name", "headline", "social"]}
-          selectedIds={selectedIds}
-          showSelection
-          allSelected={allSelected}
-          someSelected={someSelected}
-          onSelectAll={handleToggleAll}
-          onSelectOne={handleToggleOne}
-          nonSelectableIds={nonSelectableIds}
-          nonSelectableTooltip={t("ExistingHandleTooltip")}
-          disableNameLink
-          noContactsFound={t("NoContactsFound")}
-          noContactsMatchSearch={t("NoContactsMatchSearch")}
-        />
-      </Stack>
-    </ModalScrollLayout>,
+    <LinkedInImportPreviewStep
+      allSelected={allSelected}
+      alreadyExistsCount={alreadyExistsCount}
+      backLabel={t("Back")}
+      cancelLabel={t("Cancel")}
+      chooseContactsHint={t("ChooseContactsHint")}
+      existingHandleTooltip={t("ExistingHandleTooltip")}
+      importSelectedLabel={t("ImportSelected", { count: selectedIds.size })}
+      invalidContactsCount={invalidContactsCount}
+      isImporting={isImporting}
+      labels={{
+        alreadyExists: t("AlreadyExists", { count: alreadyExistsCount }),
+        invalid: t("Invalid", { count: invalidContactsCount }),
+        total: t("Total", { count: parsedContacts.length }),
+        valid: t("Valid", { count: validContactsCount }),
+      }}
+      noContactsFound={t("NoContactsFound")}
+      noContactsMatchSearch={t("NoContactsMatchSearch")}
+      nonSelectableIds={nonSelectableIds}
+      onBack={() => setStep("upload")}
+      onCancel={closeModal}
+      onImport={() => {
+        void handleImport();
+      }}
+      onSelectAll={handleToggleAll}
+      onSelectOne={handleToggleOne}
+      previewContacts={previewContacts}
+      selectedIds={selectedIds}
+      someSelected={someSelected}
+    />,
   );
 }

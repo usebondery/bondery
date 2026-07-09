@@ -1,42 +1,47 @@
 "use client";
 
-import { Group, Stack, Text } from "@mantine/core";
-import { IconUnlink } from "@tabler/icons-react";
-import { IconBrandGithub, IconBrandLinkedin, IconBrowser } from "@tabler/icons-react";
-import { useEffect, useState } from "react";
-import { notifications } from "@mantine/notifications";
-import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
-import { Trans } from "next-i18next/client";
-import { INTEGRATION_PROVIDERS } from "@/lib/config";
-import { detectBonderyChromeExtension } from "@/lib/extension/detectBonderyChromeExtension";
-import { IntegrationCard } from "./IntegrationCard";
-import { createBrowswerSupabaseClient } from "@/lib/supabase/client";
+import { getUserFacingError } from "@bondery/helpers/api";
 import {
   errorNotificationTemplate,
   loadingNotificationTemplate,
   ModalTitle,
   successNotificationTemplate,
 } from "@bondery/mantine-next";
-import { openStandardConfirmModal } from "../../components/modals/openStandardConfirmModal";
-import { openChromeExtensionModal } from "./openChromeExtensionModal";
+import { Group, Stack, Text } from "@mantine/core";
+import { notifications } from "@mantine/notifications";
+import {
+  IconBrandGithub,
+  IconBrandLinkedin,
+  IconBrowser,
+  IconDeviceDesktop,
+  IconUnlink,
+} from "@tabler/icons-react";
+import { Trans } from "next-i18next/client";
+import { useEffect, useState } from "react";
 import { usePWAInstall } from "@/hooks/usePWAInstall";
-import { IconDeviceDesktop } from "@tabler/icons-react";
+import { detectBonderyChromeExtension } from "@/lib/extension/detectBonderyChromeExtension";
+import { useCommonTranslations, useWebTranslations } from "@/lib/i18n/useWebTranslations";
+import { INTEGRATION_PROVIDERS } from "@/lib/platform/config";
+import { createBrowswerSupabaseClient } from "@/lib/supabase/client";
+import { openStandardConfirmModal } from "../../components/modals/openStandardConfirmModal";
+import { IntegrationCard } from "./IntegrationCard";
+import { openChromeExtensionModal } from "./openChromeExtensionModal";
 
 interface UserIdentity {
   id: string;
-  user_id: string;
   identity_id: string;
   provider: string;
+  user_id: string;
 }
 
 interface ProviderIntegrationsProps {
+  description?: string;
   providers: string[];
-  userIdentities: UserIdentity[];
-  showOAuthProviders?: boolean;
   showExtensionProvider?: boolean;
+  showOAuthProviders?: boolean;
   showPWAProvider?: boolean;
   title?: string;
-  description?: string;
+  userIdentities: UserIdentity[];
 }
 
 export function ProviderIntegrations({
@@ -55,9 +60,9 @@ export function ProviderIntegrations({
   const { canInstall, isChromiumDesktop, isPWAInstalled, isInstalledFromBrowser, install } =
     usePWAInstall();
 
-  const t = useTranslations("SettingsPage.Profile");
-  const tIntegration = useTranslations("SettingsPage.Integration");
-  const tCommon = useTranslations("WebAppCommon");
+  const t = useWebTranslations("SettingsPage", "Profile");
+  const tIntegration = useWebTranslations("SettingsPage", "Integration");
+  const tCommon = useCommonTranslations();
 
   useEffect(() => {
     let isMounted = true;
@@ -79,10 +84,10 @@ export function ProviderIntegrations({
   const linkProvider = async (provider: "github" | "linkedin") => {
     const loadingNotification = notifications.show({
       ...loadingNotificationTemplate({
-        title: tIntegration("LinkingAccount"),
         description: tIntegration("Connecting", {
           provider: provider === "github" ? "GitHub" : "LinkedIn",
         }),
+        title: tIntegration("LinkingAccount"),
       }),
     });
 
@@ -104,9 +109,8 @@ export function ProviderIntegrations({
       notifications.hide(loadingNotification);
       notifications.show(
         errorNotificationTemplate({
-          title: tCommon("ErrorTitle"),
-          description:
-            error instanceof Error ? error.message : tIntegration("LinkError", { provider }),
+          description: getUserFacingError(error, tCommon),
+          title: tCommon("feedback.errorTitle"),
         }),
       );
     }
@@ -116,31 +120,31 @@ export function ProviderIntegrations({
     if (providers.length <= 1) {
       notifications.show(
         errorNotificationTemplate({
-          title: tIntegration("CannotUnlink"),
           description: tIntegration("MustHaveOneMethod"),
+          title: tIntegration("CannotUnlink"),
         }),
       );
       return;
     }
 
     openStandardConfirmModal({
-      title: (
-        <ModalTitle text={t("UnlinkAccountTitle")} icon={<IconUnlink size={20} stroke={1.5} />} />
-      ),
+      cancelLabel: t("Cancel"),
+      confirmColor: "red",
+      confirmLabel: t("UnlinkAccountButton"),
       message: (
         <Text size="sm">
           <Trans
-            t={t}
-            i18nKey="UnlinkAccountMessage"
-            values={{ provider: provider === "github" ? "GitHub" : "LinkedIn" }}
             components={{ b: <b /> }}
+            i18nKey="UnlinkAccountMessage"
+            t={t}
+            values={{ provider: provider === "github" ? "GitHub" : "LinkedIn" }}
           />
         </Text>
       ),
-      confirmLabel: t("UnlinkAccountButton"),
-      cancelLabel: t("Cancel"),
-      confirmColor: "red",
       onConfirm: () => confirmUnlinkProvider(provider),
+      title: (
+        <ModalTitle icon={<IconUnlink size={20} stroke={1.5} />} text={t("UnlinkAccountTitle")} />
+      ),
     });
   };
 
@@ -165,16 +169,15 @@ export function ProviderIntegrations({
 
       notifications.show(
         successNotificationTemplate({
-          title: t("UpdateSuccess"),
           description: tIntegration("UnlinkSuccess", { provider }),
+          title: t("UpdateSuccess"),
         }),
       );
     } catch (error) {
       notifications.show(
         errorNotificationTemplate({
-          title: tCommon("ErrorTitle"),
-          description:
-            error instanceof Error ? error.message : tIntegration("UnlinkError", { provider }),
+          description: getUserFacingError(error, tCommon),
+          title: tCommon("feedback.errorTitle"),
         }),
       );
     }
@@ -183,10 +186,10 @@ export function ProviderIntegrations({
   return (
     <Stack gap="md">
       <div>
-        <Text size="sm" fw={500} mb={4}>
+        <Text fw={500} mb={4} size="sm">
           {title || t("ConnectedAccounts")}
         </Text>
-        <Text size="xs" c="dimmed">
+        <Text c="dimmed" size="xs">
           {description || t("ConnectedAccountsDescription")}
         </Text>
       </div>
@@ -199,8 +202,11 @@ export function ProviderIntegrations({
 
               return (
                 <IntegrationCard
-                  key={provider}
-                  provider={provider}
+                  connectedDescription={tIntegration("ClickToUnlink", {
+                    provider:
+                      provider === "github" ? tIntegration("GitHub") : tIntegration("LinkedIn"),
+                  })}
+                  disabledDescription={tIntegration("LinkedButCannotUnlink")}
                   displayName={
                     provider === "github" ? tIntegration("GitHub") : tIntegration("LinkedIn")
                   }
@@ -208,35 +214,28 @@ export function ProviderIntegrations({
                   iconColor={iconColor}
                   isConnected={isConnected}
                   isDisabled={isDisabled}
-                  connectedDescription={tIntegration("ClickToUnlink", {
-                    provider:
-                      provider === "github" ? tIntegration("GitHub") : tIntegration("LinkedIn"),
-                  })}
-                  unconnectedDescription={tIntegration("ClickToLink", {
-                    provider:
-                      provider === "github" ? tIntegration("GitHub") : tIntegration("LinkedIn"),
-                  })}
-                  disabledDescription={tIntegration("LinkedButCannotUnlink")}
+                  key={provider}
                   onClick={() => {
-                    if (isDisabled) return;
+                    if (isDisabled) {
+                      return;
+                    }
                     if (isConnected) {
                       handleUnlinkClick(provider as "github" | "linkedin");
                     } else {
                       linkProvider(provider as "github" | "linkedin");
                     }
                   }}
+                  provider={provider}
+                  unconnectedDescription={tIntegration("ClickToLink", {
+                    provider:
+                      provider === "github" ? tIntegration("GitHub") : tIntegration("LinkedIn"),
+                  })}
                 />
               );
             })
           : null}
         {showExtensionProvider ? (
           <IntegrationCard
-            provider="bondery_chrome_extension"
-            displayName={tIntegration("BonderyChromeExtension")}
-            icon={IconBrowser}
-            iconColor="grape"
-            isConnected={isExtensionInstalled}
-            isDisabled={isExtensionInstalled}
             connectedDescription={
               extensionVersion
                 ? tIntegration("ExtensionLinkedDescriptionWithVersion", {
@@ -244,17 +243,20 @@ export function ProviderIntegrations({
                   })
                 : tIntegration("ExtensionLinkedDescription")
             }
-            unconnectedDescription={tIntegration("ExtensionInstallDescription")}
+            displayName={tIntegration("BonderyChromeExtension")}
+            icon={IconBrowser}
+            iconColor="grape"
+            isConnected={isExtensionInstalled}
+            isDisabled={isExtensionInstalled}
             onClick={() => {
               if (isExtensionInstalled) {
                 return;
               }
 
-              openChromeExtensionModal({
-                title: tIntegration("ExtensionModalTitle"),
-                t: (key) => tIntegration(`ChromeExtensionModal.${key}` as never),
-              });
+              openChromeExtensionModal();
             }}
+            provider="bondery_chrome_extension"
+            unconnectedDescription={tIntegration("ExtensionInstallDescription")}
           />
         ) : null}
         {showPWAProvider
@@ -271,18 +273,20 @@ export function ProviderIntegrations({
 
               return (
                 <IntegrationCard
-                  provider="pwa"
+                  connectedDescription={tIntegration("DesktopAppInstalledDescription")}
+                  disabledDescription={disabledDescription}
                   displayName={tIntegration("DesktopApp")}
                   icon={IconDeviceDesktop}
                   iconColor="grape"
                   isConnected={isInstalled}
                   isDisabled={isDisabled}
-                  connectedDescription={tIntegration("DesktopAppInstalledDescription")}
-                  unconnectedDescription={tIntegration("DesktopAppInstallDescription")}
-                  disabledDescription={disabledDescription}
                   onClick={() => {
-                    if (canInstall) void install();
+                    if (canInstall) {
+                      void install();
+                    }
                   }}
+                  provider="pwa"
+                  unconnectedDescription={tIntegration("DesktopAppInstallDescription")}
                 />
               );
             })()

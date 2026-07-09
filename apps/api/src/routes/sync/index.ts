@@ -1,19 +1,19 @@
-import type { AppRoutePlugin } from "../../lib/fastify-types.js";
-import { applyOpenApiRouteMeta } from "../../lib/openapi-route-meta.js";
-import { syncPushRoutes } from "./push.js";
-import { syncPullRoutes } from "./pull.js";
+import type { AppRoutePlugin } from "../../lib/platform/fastify-types.js";
+import { openApiAreaRoutes, sessionRoutes } from "../../lib/platform/route-areas.js";
 import { syncBootstrapRoutes } from "./bootstrap.js";
-import { syncWsTicketRoutes } from "./ws-ticket.js";
+import { syncPullRoutes } from "./pull.js";
+import { syncPushRoutes } from "./push.js";
 import { syncWsRoutes } from "./ws.js";
+import { syncWsTicketRoutes } from "./ws-ticket.js";
 
 export const syncRoutes: AppRoutePlugin = async (fastify): Promise<void> => {
-  fastify.addHook("onRoute", (routeOptions) => {
-    applyOpenApiRouteMeta(routeOptions, { area: "session" });
-  });
-
-  await fastify.register(syncBootstrapRoutes);
-  await fastify.register(syncPullRoutes);
-  await fastify.register(syncPushRoutes);
-  await fastify.register(syncWsTicketRoutes);
-  await fastify.register(syncWsRoutes);
-}
+  await fastify.register(
+    sessionRoutes(async (http) => {
+      await http.register(syncBootstrapRoutes);
+      await http.register(syncPullRoutes);
+      await http.register(syncPushRoutes);
+      await http.register(syncWsTicketRoutes);
+    }),
+  );
+  await fastify.register(openApiAreaRoutes("session", syncWsRoutes));
+};

@@ -1,9 +1,10 @@
-import { createServerClient } from "@supabase/ssr";
-import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
 import { API_ROUTES, WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
-import { LOCALE_PREFS_COOKIE } from "@/lib/auth/detectLocale";
+import { createServerClient } from "@supabase/ssr";
+import { cookies } from "next/headers";
+import { NextResponse } from "next/server";
 import { serverApiFetch } from "@/lib/api/server";
+import { LOCALE_PREFS_COOKIE } from "@/lib/auth/detectLocale";
+import { PUBLIC_SUPABASE_PUBLISHABLE_KEY, PUBLIC_SUPABASE_URL } from "@/lib/platform/config";
 
 /**
  * Parses the locale preferences cookie set during OAuth login.
@@ -12,14 +13,18 @@ import { serverApiFetch } from "@/lib/api/server";
 function parseLocalePrefs(
   raw: string | undefined,
 ): { timezone: string; timeFormat: "12h" | "24h" } | null {
-  if (!raw) return null;
+  if (!raw) {
+    return null;
+  }
   try {
     const parsed = JSON.parse(decodeURIComponent(raw));
     const timezone = typeof parsed.timezone === "string" ? parsed.timezone.trim() : null;
     const timeFormat =
       parsed.timeFormat === "12h" || parsed.timeFormat === "24h" ? parsed.timeFormat : null;
-    if (!timezone || !timeFormat) return null;
-    return { timezone, timeFormat };
+    if (!timezone || !timeFormat) {
+      return null;
+    }
+    return { timeFormat, timezone };
   } catch {
     return null;
   }
@@ -33,13 +38,13 @@ async function applyLocalePrefsViaApi(localePrefs: {
     await serverApiFetch(
       API_ROUTES.ME_SETTINGS,
       {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          timezone: localePrefs.timezone,
-          timeFormat: localePrefs.timeFormat,
           onlyIfNewSignup: true,
+          timeFormat: localePrefs.timeFormat,
+          timezone: localePrefs.timezone,
         }),
+        headers: { "Content-Type": "application/json" },
+        method: "PATCH",
       },
       { transportPolicy: false },
     );
@@ -56,28 +61,25 @@ export async function GET(request: Request) {
   if (code) {
     const cookieStore = await cookies();
     const redirectPath = requestUrl.searchParams.get("redirect");
-    const postLoginUrl =
-      redirectPath && redirectPath.startsWith("/") ? `${origin}${redirectPath}` : `${origin}/app`;
+    const postLoginUrl = redirectPath?.startsWith("/")
+      ? `${origin}${redirectPath}`
+      : `${origin}/app`;
 
     const response = NextResponse.redirect(postLoginUrl);
 
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
-      {
-        cookies: {
-          getAll() {
-            return cookieStore.getAll();
-          },
-          setAll(cookiesToSet) {
-            cookiesToSet.forEach(({ name, value, options }) => {
-              cookieStore.set(name, value, options);
-              response.cookies.set(name, value, options);
-            });
-          },
+    const supabase = createServerClient(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_PUBLISHABLE_KEY, {
+      cookies: {
+        getAll() {
+          return cookieStore.getAll();
+        },
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value, options }) => {
+            cookieStore.set(name, value, options);
+            response.cookies.set(name, value, options);
+          });
         },
       },
-    );
+    });
 
     const { error } = await supabase.auth.exchangeCodeForSession(code);
 
@@ -87,12 +89,10 @@ export async function GET(request: Request) {
 
       if (localePrefs) {
         await applyLocalePrefsViaApi(localePrefs);
-        response.cookies.set(LOCALE_PREFS_COOKIE, "", { path: "/", maxAge: 0 });
+        response.cookies.set(LOCALE_PREFS_COOKIE, "", { maxAge: 0, path: "/" });
       }
 
       return response;
-    } else {
-      console.error("Error exchanging code for session:", error.message);
     }
   }
 

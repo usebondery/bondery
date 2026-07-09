@@ -1,6 +1,6 @@
 import { z } from "zod";
-import { createContactApiInputSchema, updateContactInputSchema } from "#entities/contact.js";
 import { updatedAtSchema } from "#entities/_shared.js";
+import { createContactApiInputSchema, updateContactInputSchema } from "#entities/contact.js";
 
 export const syncMutationTypeSchema = z.enum([
   "contact.create",
@@ -21,9 +21,9 @@ export const syncMutationTypeSchema = z.enum([
 export type SyncMutationType = z.infer<typeof syncMutationTypeSchema>;
 
 const syncMutationBaseSchema = z.object({
-  id: z.uuid(),
-  clientSequence: z.number().int().positive(),
   baseUpdatedAt: updatedAtSchema.optional(),
+  clientSequence: z.number().int().positive(),
+  id: z.uuid(),
 });
 
 export const contactCreatePayloadSchema = createContactApiInputSchema.extend({
@@ -39,16 +39,16 @@ export const contactTagPayloadSchema = z.object({
 });
 
 export const groupCreatePayloadSchema = z.object({
+  color: z.string().min(1),
+  emoji: z.string().min(1),
   id: z.uuid().optional(),
   label: z.string().min(1),
-  emoji: z.string().min(1),
-  color: z.string().min(1),
 });
 
 export const groupUpdatePayloadSchema = z.object({
-  label: z.string().min(1).optional(),
-  emoji: z.string().min(1).optional(),
   color: z.string().min(1).optional(),
+  emoji: z.string().min(1).optional(),
+  label: z.string().min(1).optional(),
 });
 
 export const groupMembersPayloadSchema = z.object({
@@ -56,78 +56,78 @@ export const groupMembersPayloadSchema = z.object({
 });
 
 export const tagCreatePayloadSchema = z.object({
+  color: z.string().optional(),
   id: z.uuid().optional(),
   label: z.string().min(1),
-  color: z.string().optional(),
 });
 
 export const tagUpdatePayloadSchema = z.object({
-  label: z.string().min(1).optional(),
   color: z.string().optional(),
+  label: z.string().min(1).optional(),
 });
 
 export const syncMutationSchema = z.discriminatedUnion("type", [
   syncMutationBaseSchema.extend({
-    type: z.literal("contact.create"),
     payload: contactCreatePayloadSchema,
+    type: z.literal("contact.create"),
   }),
   syncMutationBaseSchema.extend({
-    type: z.literal("contact.update"),
     entityId: z.string().uuid(),
     payload: contactUpdatePayloadSchema,
+    type: z.literal("contact.update"),
   }),
   syncMutationBaseSchema.extend({
-    type: z.literal("contact.delete"),
     entityId: z.string().uuid(),
     payload: contactDeletePayloadSchema,
+    type: z.literal("contact.delete"),
   }),
   syncMutationBaseSchema.extend({
+    entityId: z.string().uuid(),
+    payload: contactTagPayloadSchema,
     type: z.literal("contact.addTag"),
-    entityId: z.string().uuid(),
-    payload: contactTagPayloadSchema,
   }),
   syncMutationBaseSchema.extend({
+    entityId: z.string().uuid(),
+    payload: contactTagPayloadSchema,
     type: z.literal("contact.removeTag"),
-    entityId: z.string().uuid(),
-    payload: contactTagPayloadSchema,
   }),
   syncMutationBaseSchema.extend({
-    type: z.literal("group.create"),
     payload: groupCreatePayloadSchema,
+    type: z.literal("group.create"),
   }),
   syncMutationBaseSchema.extend({
-    type: z.literal("group.update"),
     entityId: z.string().uuid(),
     payload: groupUpdatePayloadSchema,
+    type: z.literal("group.update"),
   }),
   syncMutationBaseSchema.extend({
-    type: z.literal("group.delete"),
     entityId: z.string().uuid(),
     payload: z.object({}).optional(),
+    type: z.literal("group.delete"),
   }),
   syncMutationBaseSchema.extend({
+    entityId: z.string().uuid(),
+    payload: groupMembersPayloadSchema,
     type: z.literal("group.addMembers"),
-    entityId: z.string().uuid(),
-    payload: groupMembersPayloadSchema,
   }),
   syncMutationBaseSchema.extend({
+    entityId: z.string().uuid(),
+    payload: groupMembersPayloadSchema,
     type: z.literal("group.removeMembers"),
-    entityId: z.string().uuid(),
-    payload: groupMembersPayloadSchema,
   }),
   syncMutationBaseSchema.extend({
-    type: z.literal("tag.create"),
     payload: tagCreatePayloadSchema,
+    type: z.literal("tag.create"),
   }),
   syncMutationBaseSchema.extend({
-    type: z.literal("tag.update"),
     entityId: z.string().uuid(),
     payload: tagUpdatePayloadSchema,
+    type: z.literal("tag.update"),
   }),
   syncMutationBaseSchema.extend({
-    type: z.literal("tag.delete"),
     entityId: z.string().uuid(),
     payload: z.object({}).optional(),
+    type: z.literal("tag.delete"),
   }),
 ]);
 

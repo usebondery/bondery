@@ -1,5 +1,5 @@
-import { Tabs } from "expo-router";
 import { IconSettings, IconUser } from "@tabler/icons-react-native";
+import { Tabs } from "expo-router";
 import { View } from "react-native";
 import { CreateContactSheetProvider } from "../../../src/features/contacts/createContactSheetContext";
 import { FabSpeedDialShell } from "../../../src/features/navigation/FabSpeedDialShell";
@@ -18,7 +18,6 @@ function TabsLayoutContent() {
         <View style={{ flex: 1 }}>
           <Tabs
             initialRouteName="contacts"
-            tabBar={(props) => <TabBarPropsSync {...props} />}
             screenOptions={{
               headerShown: false,
               tabBarShowLabel: false,
@@ -26,21 +25,18 @@ function TabsLayoutContent() {
                 display: "none",
               },
             }}
+            tabBar={(props) => <TabBarPropsSync {...props} />}
           >
             <Tabs.Screen
               name="contacts"
               options={{
-                tabBarIcon: ({ color, size }) => (
-                  <IconUser stroke={color} size={size} />
-                ),
+                tabBarIcon: ({ color, size }) => <IconUser size={size} stroke={color} />,
               }}
             />
             <Tabs.Screen
               name="settings"
               options={{
-                tabBarIcon: ({ color, size }) => (
-                  <IconSettings stroke={color} size={size} />
-                ),
+                tabBarIcon: ({ color, size }) => <IconSettings size={size} stroke={color} />,
               }}
             />
           </Tabs>

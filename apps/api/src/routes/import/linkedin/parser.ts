@@ -1,15 +1,15 @@
-import AdmZip from "adm-zip";
-import { parse as parseCsv } from "csv-parse/sync";
-import type { LinkedInPreparedContact } from "@bondery/schemas";
 import { SOCIAL_PLATFORM_URL_DETAILS } from "@bondery/helpers";
 import {
+  extractNameParts,
+  normalizeNameCase,
   stripEmojis,
   stripNameParentheticals,
   stripNameTitles,
-  extractNameParts,
-  normalizeNameCase,
 } from "@bondery/helpers/name";
-import type { UploadFile } from "../../../lib/queries.js";
+import type { LinkedInPreparedContact } from "@bondery/schemas";
+import AdmZip from "adm-zip";
+import { parse as parseCsv } from "csv-parse/sync";
+import type { UploadFile } from "../../../lib/data/select-fragments.js";
 
 const LINKEDIN_REQUIRED_HEADERS = [
   "First Name",
@@ -50,7 +50,7 @@ function parseLinkedInUsername(rawUrl: string): { username: string | null; norma
   const fallback = normalizeNullableString(rawUrl) || "";
 
   if (!fallback) {
-    return { username: null, normalizedUrl: "" };
+    return { normalizedUrl: "", username: null };
   }
 
   try {
@@ -70,7 +70,7 @@ function parseLinkedInUsername(rawUrl: string): { username: string | null; norma
     const raw = normalizeNullableString(username?.replace(/\?.*$/, "").replace(/#.*$/, "")) || null;
 
     if (!raw) {
-      return { username: null, normalizedUrl: fallback };
+      return { normalizedUrl: fallback, username: null };
     }
 
     // Decode percent-encoding so handles are stored consistently with the
@@ -83,11 +83,11 @@ function parseLinkedInUsername(rawUrl: string): { username: string | null; norma
     }
 
     return {
-      username: cleaned,
       normalizedUrl: `${SOCIAL_PLATFORM_URL_DETAILS.linkedin.profileBaseUrlWithWww}${cleaned}`,
+      username: cleaned,
     };
   } catch {
-    return { username: null, normalizedUrl: fallback };
+    return { normalizedUrl: fallback, username: null };
   }
 }
 
@@ -247,20 +247,20 @@ export function parseLinkedInCsvUpload(files: UploadFile[]): LinkedInPreparedCon
     }
 
     return {
-      tempId: `linkedin-row-${index + 1}`,
+      alreadyExists: false,
+      company,
+      connectedAt,
+      connectedOnRaw,
+      email,
       firstName,
-      middleName: cleanedMiddleName || null,
+      issues,
+      isValid: issues.length === 0,
       lastName: cleanedLastName,
       linkedinUrl: normalizedUrl,
       linkedinUsername: linkedinUsername || "",
-      alreadyExists: false,
-      email,
-      company,
+      middleName: cleanedMiddleName || null,
       position,
-      connectedAt,
-      connectedOnRaw,
-      isValid: issues.length === 0,
-      issues,
+      tempId: `linkedin-row-${index + 1}`,
     };
   });
 }

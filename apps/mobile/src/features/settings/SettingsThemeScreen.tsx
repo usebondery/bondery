@@ -1,18 +1,18 @@
-import { ScrollView, StyleSheet, Text } from "react-native";
-import { useRouter } from "expo-router";
 import { IconMoon, IconSettings, IconSun } from "@tabler/icons-react-native";
+import { useRouter } from "expo-router";
 import type { ReactNode } from "react";
+import { ScrollView, StyleSheet, Text } from "react-native";
+import { StackNavBar } from "../../components/chrome";
 import { updateSettings } from "../../lib/api/client";
+import { useMobileTranslations } from "../../lib/i18n/useMobileTranslations";
 import type {
   MobilePreferencesState,
   ThemePreference,
 } from "../../lib/preferences/useMobilePreferences";
 import { useMobilePreferences } from "../../lib/preferences/useMobilePreferences";
-import { useMobileTranslations } from "../../lib/i18n/useMobileTranslations";
 import { useAppToast } from "../../lib/toast/useAppToast";
-import { StackNavBar } from "../../components/chrome";
-import { useMobileThemeColors } from "../../theme/useMobileThemeColors";
 import { MOBILE_LAYOUT, MOBILE_TEXT_STYLES } from "../../theme/tokens";
+import { useMobileThemeColors } from "../../theme/useMobileThemeColors";
 import { SettingsSelect } from "./components/SettingsSelect";
 
 export function SettingsThemeScreen() {
@@ -36,19 +36,19 @@ export function SettingsThemeScreen() {
     icon: ReactNode;
   }> = [
     {
-      value: "system",
-      label: t("MobileApp.Settings.ThemeMatchSystem"),
       icon: <IconSettings size={16} stroke={iconStroke} />,
+      label: t("ThemeMatchSystem", { ns: "MobileSettings" }),
+      value: "system",
     },
     {
-      value: "light",
-      label: t("MobileApp.Settings.ThemeLight"),
       icon: <IconSun size={16} stroke={iconStroke} />,
+      label: t("ThemeLight", { ns: "MobileSettings" }),
+      value: "light",
     },
     {
-      value: "dark",
-      label: t("MobileApp.Settings.ThemeDark"),
       icon: <IconMoon size={16} stroke={iconStroke} />,
+      label: t("ThemeDark", { ns: "MobileSettings" }),
+      value: "dark",
     },
   ];
 
@@ -62,15 +62,14 @@ export function SettingsThemeScreen() {
 
     try {
       await updateSettings({
-        colorScheme:
-          nextThemePreference === "system" ? "auto" : nextThemePreference,
+        colorScheme: nextThemePreference === "system" ? "auto" : nextThemePreference,
       });
     } catch {
       setThemePreference(previousThemePreference);
       showToast({
+        description: t("errors.unknown", { ns: "common" }),
+        headline: t("feedback.errorTitle", { ns: "common" }),
         type: "error",
-        headline: t("MobileApp.Common.ErrorTitle"),
-        description: t("MobileApp.Common.UnknownError"),
       });
     }
   };
@@ -78,25 +77,25 @@ export function SettingsThemeScreen() {
   return (
     <>
       <StackNavBar
-        variant="elevated"
-        title={t("MobileApp.Settings.Theme")}
         onBack={() => router.back()}
+        title={t("Theme", { ns: "MobileSettings" })}
+        variant="elevated"
       />
 
       <ScrollView
-        style={[styles.screen, { backgroundColor: colors.appBackground }]}
         contentContainerStyle={styles.content}
+        style={[styles.screen, { backgroundColor: colors.appBackground }]}
       >
         <Text style={[styles.label, { color: colors.textSecondary }]}>
-          {t("MobileApp.Settings.Theme")}
+          {t("Theme", { ns: "MobileSettings" })}
         </Text>
         <SettingsSelect
-          label={t("MobileApp.Settings.Theme")}
-          options={themeOptions}
-          value={themePreference}
+          label={t("Theme", { ns: "MobileSettings" })}
           onValueChange={(nextThemePreference) => {
             void handleThemeChange(nextThemePreference as ThemePreference);
           }}
+          options={themeOptions}
+          value={themePreference}
         />
       </ScrollView>
     </>
@@ -104,18 +103,18 @@ export function SettingsThemeScreen() {
 }
 
 const styles = StyleSheet.create({
-  screen: {
-    flex: 1,
-  },
   content: {
-    paddingTop: MOBILE_LAYOUT.spacing.contentTop,
-    paddingHorizontal: MOBILE_LAYOUT.spacing.horizontal,
-    paddingBottom: MOBILE_LAYOUT.spacing.contentBottom,
     gap: 16,
+    paddingBottom: MOBILE_LAYOUT.spacing.contentBottom,
+    paddingHorizontal: MOBILE_LAYOUT.spacing.horizontal,
+    paddingTop: MOBILE_LAYOUT.spacing.contentTop,
   },
   label: {
-    marginTop: 4,
     marginBottom: -8,
+    marginTop: 4,
     ...MOBILE_TEXT_STYLES.fieldLabel,
+  },
+  screen: {
+    flex: 1,
   },
 });

@@ -1,40 +1,39 @@
 "use client";
 
-import { Menu, Button, MenuTarget, MenuDropdown, MenuItem } from "@mantine/core";
-import { useMemo, useState } from "react";
+import { Button, Menu, MenuDropdown, MenuItem, MenuTarget } from "@mantine/core";
 import { IconArrowsSort } from "@tabler/icons-react";
-import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
+import { useMemo, useState } from "react";
+import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
 
 export type SortOption = "count-desc" | "count-asc" | "alpha-asc" | "alpha-desc";
 
 interface SortMenuProps {
-  sortBy: SortOption;
   setSortBy: (option: SortOption) => void;
+  sortBy: SortOption;
 }
 
 export function SortMenu({ sortBy, setSortBy }: SortMenuProps) {
-  const t = useTranslations("GroupsPage.SortMenu");
+  const t = useWebTranslations("GroupsPage", "SortMenu");
   const [opened, setOpened] = useState(false);
 
   const sortOptions = useMemo(
-    () =>
-      [
-        { value: "count-desc" as const, label: t("CountDesc") },
-        { value: "count-asc" as const, label: t("CountAsc") },
-        { value: "alpha-asc" as const, label: t("AlphaAsc") },
-        { value: "alpha-desc" as const, label: t("AlphaDesc") },
-      ],
+    () => [
+      { label: t("CountDesc"), value: "count-desc" as const },
+      { label: t("CountAsc"), value: "count-asc" as const },
+      { label: t("AlphaAsc"), value: "alpha-asc" as const },
+      { label: t("AlphaDesc"), value: "alpha-desc" as const },
+    ],
     [t],
   );
 
   return (
-    <Menu shadow="md" width={180} opened={opened} onChange={setOpened}>
+    <Menu onChange={setOpened} opened={opened} shadow="md" width={180}>
       <MenuTarget>
         <Button
+          className={opened ? "button-scale-effect-active" : undefined}
+          leftSection={<IconArrowsSort size={16} />}
           size="md"
           variant="light"
-          leftSection={<IconArrowsSort size={16} />}
-          className={opened ? "button-scale-effect-active" : undefined}
         >
           {t("Label")}
         </Button>
@@ -42,10 +41,10 @@ export function SortMenu({ sortBy, setSortBy }: SortMenuProps) {
       <MenuDropdown>
         {sortOptions.map((option) => (
           <MenuItem
+            bg={sortBy === option.value ? "var(--mantine-primary-color-light)" : undefined}
             key={option.value}
             onClick={() => setSortBy(option.value)}
             rightSection={sortBy === option.value ? "✓" : ""}
-            bg={sortBy === option.value ? "var(--mantine-primary-color-light)" : undefined}
           >
             {option.label}
           </MenuItem>

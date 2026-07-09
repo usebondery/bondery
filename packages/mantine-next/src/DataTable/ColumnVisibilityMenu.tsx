@@ -1,46 +1,36 @@
 "use client";
 
-import { useState } from "react";
 import {
-  Box,
-  Button,
-  Divider,
-  Menu,
-  MenuDropdown,
-  MenuTarget,
-  Text,
-} from "@mantine/core";
-import { IconEye } from "@tabler/icons-react";
-import {
+  closestCenter,
   DndContext,
+  type DragEndEvent,
   KeyboardSensor,
   PointerSensor,
-  closestCenter,
   useSensor,
   useSensors,
-  type DragEndEvent,
 } from "@dnd-kit/core";
 import {
-  SortableContext,
   arrayMove,
+  SortableContext,
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
+import { Box, Button, Divider, Menu, MenuDropdown, MenuTarget, Text } from "@mantine/core";
+import { IconEye } from "@tabler/icons-react";
+import { useState } from "react";
 import {
   SortableColumnItem,
   type SortableColumnItemColumn,
 } from "#DataTable/SortableColumnItem.js";
 import type { ColumnVisibilityLabels } from "#DataTable/types.js";
 
-export interface ColumnVisibilityMenuProps<
-  TColumn extends SortableColumnItemColumn,
-> {
+export interface ColumnVisibilityMenuProps<TColumn extends SortableColumnItemColumn> {
   /** Array of column configurations */
   columns: TColumn[];
-  /** Callback when columns change (visibility or order) */
-  onColumnsChange: (columns: TColumn[]) => void;
   /** Localized labels for the menu */
   labels: ColumnVisibilityLabels;
+  /** Callback when columns change (visibility or order) */
+  onColumnsChange: (columns: TColumn[]) => void;
   /** Menu dropdown width */
   width?: number;
 }
@@ -64,7 +54,7 @@ export function ColumnVisibilityMenu<TColumn extends SortableColumnItemColumn>({
     }),
   );
 
-  const fixedColumns = columns.filter((col) => col.fixed);
+  const _fixedColumns = columns.filter((col) => col.fixed);
   const visibleColumns = columns.filter((col) => col.visible && !col.fixed);
   const hiddenColumns = columns.filter((col) => !col.visible && !col.fixed);
 
@@ -105,39 +95,39 @@ export function ColumnVisibilityMenu<TColumn extends SortableColumnItemColumn>({
   };
 
   return (
-    <Menu width={width} opened={opened} onChange={setOpened}>
+    <Menu onChange={setOpened} opened={opened} width={width}>
       <MenuTarget>
         <Button
-          variant="light"
-          leftSection={<IconEye size={16} />}
           className={opened ? "button-scale-effect-active" : undefined}
+          leftSection={<IconEye size={16} />}
+          variant="light"
         >
           {labels.buttonLabel}
         </Button>
       </MenuTarget>
       <MenuDropdown>
         <Box p="xs">
-          <Text size="xs" fw={600} c="dimmed" mb="xs">
+          <Text c="dimmed" fw={600} mb="xs" size="xs">
             {labels.visibleSection}
           </Text>
           <DndContext
-            sensors={sensors}
             collisionDetection={closestCenter}
             onDragEnd={(e) => handleDragEnd(e, true)}
+            sensors={sensors}
           >
             <SortableContext
               items={visibleColumns.map((c) => c.key)}
               strategy={verticalListSortingStrategy}
             >
               {visibleColumns.length === 0 ? (
-                <Text size="sm" c="dimmed" ta="center" py="sm">
+                <Text c="dimmed" py="sm" size="sm" ta="center">
                   {labels.noVisible}
                 </Text>
               ) : (
                 visibleColumns.map((column) => (
                   <SortableColumnItem
-                    key={column.key}
                     column={column}
+                    key={column.key}
                     onToggle={() => toggleColumn(column.key)}
                   />
                 ))
@@ -147,27 +137,27 @@ export function ColumnVisibilityMenu<TColumn extends SortableColumnItemColumn>({
 
           <Divider my="sm" />
 
-          <Text size="xs" fw={600} c="dimmed" mb="xs">
+          <Text c="dimmed" fw={600} mb="xs" size="xs">
             {labels.hiddenSection}
           </Text>
           <DndContext
-            sensors={sensors}
             collisionDetection={closestCenter}
             onDragEnd={(e) => handleDragEnd(e, false)}
+            sensors={sensors}
           >
             <SortableContext
               items={hiddenColumns.map((c) => c.key)}
               strategy={verticalListSortingStrategy}
             >
               {hiddenColumns.length === 0 ? (
-                <Text size="sm" c="dimmed" ta="center" py="sm">
+                <Text c="dimmed" py="sm" size="sm" ta="center">
                   {labels.noHidden}
                 </Text>
               ) : (
                 hiddenColumns.map((column) => (
                   <SortableColumnItem
-                    key={column.key}
                     column={column}
+                    key={column.key}
                     onToggle={() => toggleColumn(column.key)}
                   />
                 ))

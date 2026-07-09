@@ -16,9 +16,9 @@ export function FabSpeedDialOverflowSheet() {
         const Icon = action.icon;
 
         return {
-          id: action.id,
           icon: <Icon size={18} stroke={colors.primary} />,
-          label: t(action.labelKey),
+          id: action.id,
+          label: t(action.labelKey, { ns: action.labelNamespace ?? "MobileNavigation" }),
           onPress: () => runAction(action.id),
         };
       }),
@@ -31,14 +31,14 @@ export function FabSpeedDialOverflowSheet() {
 
   return (
     <ActionListSheet
-      open={isOverflowSheetOpen}
-      title={t("MobileApp.Navigation.Add")}
-      rows={rows}
       onOpenChange={(open) => {
         if (!open) {
           closeOverflowSheet();
         }
       }}
+      open={isOverflowSheetOpen}
+      rows={rows}
+      title={t("Add", { ns: "MobileNavigation" })}
     />
   );
 }

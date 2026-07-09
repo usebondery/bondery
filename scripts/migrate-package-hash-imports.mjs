@@ -28,12 +28,7 @@ const DYNAMIC_IMPORT_RE = /\bimport\s*\(\s*(["'])(\.\.?\/[^"']+)\1\s*\)/g;
 
 function resolveSourcePath(fileDir, specifier) {
   const base = resolve(fileDir, specifier);
-  const candidates = [
-    `${base}.ts`,
-    `${base}.tsx`,
-    join(base, "index.ts"),
-    join(base, "index.tsx"),
-  ];
+  const candidates = [`${base}.ts`, `${base}.tsx`, join(base, "index.ts"), join(base, "index.tsx")];
   for (const candidate of candidates) {
     if (existsSync(candidate)) {
       return candidate;
@@ -51,11 +46,7 @@ function toHashImport(fileDir, srcRoot, specifier) {
 
 function migrateCode(code, fileDir, srcRoot) {
   const replaceSpecifier = (full, prefix, quote, specifier) => {
-    if (
-      specifier.endsWith(".json") ||
-      specifier.endsWith(".css") ||
-      specifier.endsWith(".svg")
-    ) {
+    if (specifier.endsWith(".json") || specifier.endsWith(".css") || specifier.endsWith(".svg")) {
       return full;
     }
     const hash = toHashImport(fileDir, srcRoot, specifier);
@@ -65,11 +56,7 @@ function migrateCode(code, fileDir, srcRoot) {
   return code
     .replace(IMPORT_RE, replaceSpecifier)
     .replace(DYNAMIC_IMPORT_RE, (full, quote, specifier) => {
-      if (
-        specifier.endsWith(".json") ||
-        specifier.endsWith(".css") ||
-        specifier.endsWith(".svg")
-      ) {
+      if (specifier.endsWith(".json") || specifier.endsWith(".css") || specifier.endsWith(".svg")) {
         return full;
       }
       const hash = toHashImport(fileDir, srcRoot, specifier);

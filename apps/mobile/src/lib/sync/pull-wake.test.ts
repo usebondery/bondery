@@ -6,8 +6,8 @@ describe("shouldSchedulePullOnWake", () => {
   it("schedules when sequence is ahead", () => {
     assert.equal(
       shouldSchedulePullOnWake({
-        serverSequence: 5,
         lastServerSequence: 4,
+        serverSequence: 5,
       }),
       true,
     );
@@ -16,8 +16,8 @@ describe("shouldSchedulePullOnWake", () => {
   it("skips stale or equal sequence", () => {
     assert.equal(
       shouldSchedulePullOnWake({
-        serverSequence: 4,
         lastServerSequence: 4,
+        serverSequence: 4,
       }),
       false,
     );
@@ -26,10 +26,10 @@ describe("shouldSchedulePullOnWake", () => {
   it("skips self-echo from same device", () => {
     assert.equal(
       shouldSchedulePullOnWake({
-        serverSequence: 10,
         lastServerSequence: 5,
-        sourceDeviceId: "device-a",
         myDeviceId: "device-a",
+        serverSequence: 10,
+        sourceDeviceId: "device-a",
       }),
       false,
     );
@@ -38,10 +38,10 @@ describe("shouldSchedulePullOnWake", () => {
   it("accepts wake from another device", () => {
     assert.equal(
       shouldSchedulePullOnWake({
-        serverSequence: 10,
         lastServerSequence: 5,
-        sourceDeviceId: "device-a",
         myDeviceId: "device-b",
+        serverSequence: 10,
+        sourceDeviceId: "device-a",
       }),
       true,
     );

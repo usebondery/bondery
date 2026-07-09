@@ -1,21 +1,20 @@
-import type { FastifyBaseLogger } from "fastify";
-import type { Redis } from "ioredis";
 import type { SyncWakeEvent } from "@bondery/schemas/sync";
-import type { SyncWakeBus } from "./types.js";
-import { InMemorySyncWakeBus } from "./in-memory-bus.js";
-import { RedisSyncWakeBus } from "./redis-bus.js";
+import type { FastifyBaseLogger } from "fastify";
+
+import { getRedisCommands, getRedisSubscriber } from "../../data/redis.js";
 import { SyncConnectionHub } from "./hub.js";
-import {
-  createSyncWsTicketStore,
-  type SyncWsTicketStore,
-} from "./tickets.js";
+
+import { InMemorySyncWakeBus } from "./in-memory-bus.js";
+
+import { RedisSyncWakeBus } from "./redis-bus.js";
+import { createSyncWsTicketStore, type SyncWsTicketStore } from "./tickets.js";
+import type { SyncWakeBus } from "./types.js";
 
 export type SyncWakeRuntime = {
   hub: SyncConnectionHub;
   bus: SyncWakeBus;
   tickets: SyncWsTicketStore;
   redisWakeBus: RedisSyncWakeBus | null;
-  ticketsRedis: Redis | null;
   enabled: boolean;
 };
 
@@ -23,37 +22,42 @@ let runtime: SyncWakeRuntime | null = null;
 
 function isWakeEnabled(): boolean {
   const flag = process.env.SYNC_WAKE_ENABLED;
-  if (flag === undefined) return true;
+  if (flag === undefined) {
+    return true;
+  }
   return flag !== "0" && flag.toLowerCase() !== "false";
 }
 
 export function createSyncWakeRuntime(log?: FastifyBaseLogger): SyncWakeRuntime {
   const redisUrl = process.env.PRIVATE_REDIS_URL?.trim() ?? "";
   const hub = new SyncConnectionHub(log);
-  const { store: tickets, redis: ticketsRedis } = createSyncWsTicketStore(redisUrl || undefined);
+  const commands = getRedisCommands(redisUrl || undefined);
+  const subscriber = getRedisSubscriber(redisUrl || undefined);
+  const tickets = createSyncWsTicketStore(commands);
 
   let bus: SyncWakeBus;
   let redisWakeBus: RedisSyncWakeBus | null = null;
 
-  if (redisUrl) {
-    redisWakeBus = new RedisSyncWakeBus(redisUrl);
+  if (commands && subscriber) {
+    redisWakeBus = new RedisSyncWakeBus(commands, subscriber);
     bus = redisWakeBus;
   } else {
     bus = new InMemorySyncWakeBus();
   }
 
   return {
-    hub,
     bus,
-    tickets,
-    redisWakeBus,
-    ticketsRedis,
     enabled: isWakeEnabled(),
+    hub,
+    redisWakeBus,
+    tickets,
   };
 }
 
 export async function initSyncWakeRuntime(log?: FastifyBaseLogger): Promise<SyncWakeRuntime> {
-  if (runtime) return runtime;
+  if (runtime) {
+    return runtime;
+  }
 
   runtime = createSyncWakeRuntime(log);
   await runtime.bus.start((userId, event) => {
@@ -62,9 +66,9 @@ export async function initSyncWakeRuntime(log?: FastifyBaseLogger): Promise<Sync
 
   log?.info(
     {
-      event: "sync.wake.init",
-      redis: Boolean(process.env.PRIVATE_REDIS_URL?.trim()),
       enabled: runtime.enabled,
+      event: "sync.wake.init",
+      redis: Boolean(runtime.redisWakeBus),
     },
     "sync wake runtime initialized",
   );
@@ -73,11 +77,10 @@ export async function initSyncWakeRuntime(log?: FastifyBaseLogger): Promise<Sync
 }
 
 export async function shutdownSyncWakeRuntime(): Promise<void> {
-  if (!runtime) return;
-  await runtime.bus.stop();
-  if (runtime.ticketsRedis) {
-    await runtime.ticketsRedis.quit();
+  if (!runtime) {
+    return;
   }
+  await runtime.bus.stop();
   runtime = null;
 }
 
@@ -91,16 +94,18 @@ export async function notifySyncWake(
   log?: FastifyBaseLogger,
 ): Promise<void> {
   const rt = runtime ?? (await initSyncWakeRuntime(log));
-  if (!rt.enabled) return;
+  if (!rt.enabled) {
+    return;
+  }
 
   try {
     await rt.bus.publish(userId, event);
     log?.info(
       {
-        event: "sync.wake.publish",
-        userId,
-        serverSequence: event.serverSequence,
         affectedTables: event.affectedTables,
+        event: "sync.wake.publish",
+        serverSequence: event.serverSequence,
+        userId,
       },
       "sync wake published",
     );

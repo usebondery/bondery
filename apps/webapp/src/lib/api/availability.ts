@@ -1,4 +1,4 @@
-import { ApiError } from "@/lib/api/ApiError";
+import { ApiError } from "@bondery/helpers/api";
 
 /** Server-safe check for API gateway / upstream outage responses. */
 export function isApiUnavailableResponseStatus(status: number): boolean {

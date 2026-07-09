@@ -1,14 +1,14 @@
-import { existsSync, readFileSync } from "fs";
-import { resolve } from "path";
+import { existsSync, readFileSync } from "node:fs";
+import { resolve } from "node:path";
 
 /**
  * Configuration for environment variable validation
  */
 export interface EnvCheckConfig {
-  /** Environment type: 'production' or 'development' */
-  environment: "production" | "development";
   /** Absolute path to the app directory */
   appPath: string;
+  /** Environment type: 'production' or 'development' */
+  environment: "production" | "development";
   /** List of required environment variable names */
   requiredVars: string[];
 }
@@ -17,11 +17,11 @@ export interface EnvCheckConfig {
  * ANSI color codes for terminal output
  */
 const colors = {
-  red: "\x1b[31m",
-  green: "\x1b[32m",
-  yellow: "\x1b[33m",
   blue: "\x1b[34m",
+  green: "\x1b[32m",
+  red: "\x1b[31m",
   reset: "\x1b[0m",
+  yellow: "\x1b[33m",
 };
 
 /**

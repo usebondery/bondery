@@ -4,8 +4,8 @@ import { MOBILE_TEXT_STYLES } from "../../../theme/tokens";
 import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
 
 interface SettingsSectionCardProps {
-  title?: string;
   children: ReactNode;
+  title?: string;
 }
 
 export function SettingsSectionCard({ title, children }: SettingsSectionCardProps) {
@@ -16,7 +16,9 @@ export function SettingsSectionCard({ title, children }: SettingsSectionCardProp
       {title ? (
         <Text style={[MOBILE_TEXT_STYLES.cardTitle, { color: colors.textPrimary }]}>{title}</Text>
       ) : null}
-      <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.borderStrong }]}>
+      <View
+        style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.borderStrong }]}
+      >
         {children}
       </View>
     </View>
@@ -24,12 +26,12 @@ export function SettingsSectionCard({ title, children }: SettingsSectionCardProp
 }
 
 const styles = StyleSheet.create({
-  wrapper: {
-    gap: 8,
-  },
   card: {
     borderRadius: 14,
     borderWidth: 1,
     overflow: "hidden",
+  },
+  wrapper: {
+    gap: 8,
   },
 });

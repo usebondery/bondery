@@ -1,15 +1,15 @@
 "use client";
 
+import { Button, Popover, Stack, Text } from "@mantine/core";
 import { useState } from "react";
-import { Popover, Button, Text, Stack } from "@mantine/core";
 import { EmojiPickerDropdownContent } from "#EmojiPicker/EmojiPickerDropdownContent.js";
 
 interface EmojiPickerProps {
-  value: string;
-  onChange: (emoji: string) => void;
   error?: string;
+  onChange: (emoji: string) => void;
   /** Debounce delay in ms for the emoji search input. Defaults to 200 (local filter). */
   searchDebounceMs?: number;
+  value: string;
 }
 
 export function EmojiPicker({ value, onChange, error, searchDebounceMs }: EmojiPickerProps) {
@@ -22,10 +22,10 @@ export function EmojiPicker({ value, onChange, error, searchDebounceMs }: EmojiP
 
   return (
     <Stack gap={4}>
-      <Text size="sm" fw={500}>
+      <Text fw={500} size="sm">
         Emoji <span style={{ color: "var(--mantine-color-red-6)" }}>*</span>
       </Text>
-      <Popover opened={opened} onChange={setOpened} position="bottom-start" width={320} shadow="md">
+      <Popover onChange={setOpened} opened={opened} position="bottom-start" shadow="md" width={320}>
         <Popover.Target>
           <Button
             className={`emoji-picker-trigger button-scale-effect ${opened ? "button-scale-effect-active" : ""}`}
@@ -35,7 +35,7 @@ export function EmojiPicker({ value, onChange, error, searchDebounceMs }: EmojiP
             {value ? (
               <Text size="xl">{value}</Text>
             ) : (
-              <Text size="sm" c="dimmed">
+              <Text c="dimmed" size="sm">
                 Select emoji
               </Text>
             )}
@@ -44,14 +44,14 @@ export function EmojiPicker({ value, onChange, error, searchDebounceMs }: EmojiP
 
         <Popover.Dropdown>
           <EmojiPickerDropdownContent
-            value={value}
             onSelect={handleSelect}
             searchDebounceMs={searchDebounceMs}
+            value={value}
           />
         </Popover.Dropdown>
       </Popover>
       {error && (
-        <Text size="xs" c="red">
+        <Text c="red" size="xs">
           {error}
         </Text>
       )}

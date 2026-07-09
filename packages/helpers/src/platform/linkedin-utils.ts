@@ -13,7 +13,9 @@
  * @returns Full URL (e.g. "https://www.linkedin.com/company/zs-associates/"), or null.
  */
 export function linkedinCompanyUrl(id: string | null | undefined): string | null {
-  if (!id) return null;
+  if (!id) {
+    return null;
+  }
   return `https://www.linkedin.com/company/${id}/`;
 }
 
@@ -29,7 +31,9 @@ export function linkedinCompanyUrl(id: string | null | undefined): string | null
  * @returns The extracted handle/ID, or null if input is falsy.
  */
 export function extractLinkedinId(urlOrId: string | null | undefined): string | null {
-  if (!urlOrId) return null;
+  if (!urlOrId) {
+    return null;
+  }
   const match = urlOrId.match(
     /linkedin\.com\/(?:company|school|organization|showcase)\/([^/?#]+)/i,
   );

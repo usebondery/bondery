@@ -1,7 +1,7 @@
-import { Card, Text, Group, ThemeIcon } from "@mantine/core";
+import { Card, Group, Text, ThemeIcon } from "@mantine/core";
 import { IconStar } from "@tabler/icons-react";
+import type { GithubStarsData } from "@/lib/api/resources/stats";
 import { getWebTranslations as getTranslations } from "@/lib/i18n/getWebTranslations";
-import type { GithubStarsData } from "../getStatsData";
 
 interface GithubStarsCardProps {
   data: GithubStarsData;
@@ -11,17 +11,17 @@ export async function GithubStarsCard({ data }: GithubStarsCardProps) {
   const t = await getTranslations("StatsPage");
 
   return (
-    <Card withBorder padding="lg">
+    <Card padding="lg" withBorder>
       <Group gap="sm" mb="xs">
-        <ThemeIcon variant="light" color="yellow" size="md" radius="md">
+        <ThemeIcon color="yellow" radius="md" size="md" variant="light">
           <IconStar size={16} />
         </ThemeIcon>
         <Text fw={500}>{t("GithubStars")}</Text>
       </Group>
-      <Text size="xs" c="dimmed" mb="md">
+      <Text c="dimmed" mb="md" size="xs">
         {t("GithubStarsDescription", { repo: data.repo })}
       </Text>
-      <Text fz={48} fw={700} lh={1}>
+      <Text fw={700} fz={48} lh={1}>
         {data.stars.toLocaleString()}
       </Text>
     </Card>

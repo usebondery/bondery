@@ -3,41 +3,31 @@
  * Handles important dates (birthdays, anniversaries, etc.) and upcoming reminders.
  */
 
-import type { FastifyReply } from "fastify";
-import type { AppFastifyInstance } from "../../../lib/fastify-types.js";
-import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
-import { getAuth } from "../../../lib/auth.js";
-import { withOkResponse } from "../../../lib/openapi-route-responses.js";
-import { resolveContactAvatarUrl } from "../../../lib/supabase.js";
-import type { ImportantDateType, UpcomingReminder, Database } from "@bondery/schemas";
+import type { Database, ImportantDateType, UpcomingReminder } from "@bondery/schemas";
 import {
   importantDatesListResponseSchema,
   upcomingRemindersResponseSchema,
 } from "@bondery/schemas";
-import { extractAvatarOptions } from "../../../lib/queries.js";
-import {
-  conflictResponse,
-} from "@bondery/schemas/http/responses";
 import {
   avatarTransformQuerySchema,
   importantDatesReplaceBodySchema,
   uuidParamSchema,
 } from "@bondery/schemas/http";
-
-// ── Constants ────────────────────────────────────────────────────
-
-const IMPORTANT_DATE_SELECT = `
-  id,
-  user_id,
-  person_id,
-  type,
-  date,
-  note,
-  notify_on,
-  notify_days_before,
-  created_at,
-  updated_at
-`;
+import { conflictResponse } from "@bondery/schemas/http/responses";
+import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
+import { replaceImportantDates } from "../../../domains/contacts/important-dates.js";
+import {
+  deriveReminderDateKey,
+  IMPORTANT_DATE_SELECT,
+  toImportantDate,
+} from "../../../lib/contacts/important-dates.js";
+import { extractAvatarOptions } from "../../../lib/data/select-fragments.js";
+import { resolveContactAvatarUrl } from "../../../lib/data/supabase.js";
+import { getAuth } from "../../../lib/platform/auth/strategies.js";
+import { internal, notFound } from "../../../lib/platform/errors/http-errors.js";
+import type { AppFastifyInstance } from "../../../lib/platform/fastify-types.js";
+import { withOkResponse } from "../../../lib/platform/openapi/responses.js";
+import { withDomainRoute } from "../../../lib/platform/with-domain-route.js";
 
 export const IMPORTANT_DATE_TYPES = [
   "birthday",
@@ -68,78 +58,18 @@ function toContactPreview(
   avatarUrl: string | null,
 ) {
   return {
-    id: person.id,
-    firstName: person.first_name,
-    lastName: person.last_name,
     avatar: avatarUrl,
+    firstName: person.first_name,
+    id: person.id,
+    lastName: person.last_name,
   };
 }
 
-export function toImportantDate(event: {
-  id: string;
-  user_id: string;
-  person_id: string;
-  type: string;
-  date: string;
-  note: string | null;
-  notify_on: string | null;
-  notify_days_before: number | null;
-  created_at: string;
-  updated_at: string;
-}) {
-  return {
-    id: event.id,
-    userId: event.user_id,
-    personId: event.person_id,
-    type: event.type as ImportantDateType,
-    date: event.date,
-    note: event.note,
-    notifyOn: event.notify_on,
-    notifyDaysBefore: event.notify_days_before,
-    createdAt: event.created_at,
-    updatedAt: event.updated_at,
-  };
-}
-
-export function toIsoDateKey(value: string): string | null {
-  const dateOnly = value.slice(0, 10);
-  const [year, month, day] = dateOnly.split("-").map(Number);
-
-  if (!year || !month || !day) {
-    return null;
-  }
-
-  return `${year.toString().padStart(4, "0")}-${month.toString().padStart(2, "0")}-${day.toString().padStart(2, "0")}`;
-}
-
-export function deriveReminderDateKey(entry: {
-  date: string;
-  notify_on: string | null;
-  notify_days_before: number | null;
-}): string | null {
-  if (entry.notify_on) {
-    return toIsoDateKey(entry.notify_on);
-  }
-
-  if (entry.notify_days_before === null) {
-    return null;
-  }
-
-  const dateKey = toIsoDateKey(entry.date);
-  if (!dateKey) {
-    return null;
-  }
-
-  const [year, month, day] = dateKey.split("-").map(Number);
-  if (!year || !month || !day) {
-    return null;
-  }
-
-  const notificationDate = new Date(Date.UTC(year, month - 1, day));
-  notificationDate.setUTCDate(notificationDate.getUTCDate() - entry.notify_days_before);
-
-  return notificationDate.toISOString().slice(0, 10);
-}
+export {
+  deriveReminderDateKey,
+  toImportantDate,
+  toIsoDateKey,
+} from "../../../lib/contacts/important-dates.js";
 
 // ── Route Registration ───────────────────────────────────────────
 
@@ -156,7 +86,7 @@ export function registerUpcomingImportantDateRoutes(fastify: AppFastifyInstance)
         response: withOkResponse(upcomingRemindersResponseSchema, "Upcoming reminders"),
       } satisfies FastifyZodOpenApiSchema,
     },
-    async (request, reply) => {
+    async (request) => {
       const { client, user } = getAuth(request);
       const avatarOptions = extractAvatarOptions(request.query);
 
@@ -180,7 +110,7 @@ export function registerUpcomingImportantDateRoutes(fastify: AppFastifyInstance)
         .order("date", { ascending: true });
 
       if (error) {
-        return reply.status(500).send({ error: error.message });
+        throw internal("internal_server_error", error.message);
       }
 
       const reminderRows = (rows || []).filter((row) => {
@@ -210,7 +140,7 @@ export function registerUpcomingImportantDateRoutes(fastify: AppFastifyInstance)
           .order("created_at", { ascending: false });
 
         if (dispatchError) {
-          return reply.status(500).send({ error: dispatchError.message });
+          throw internal("internal_server_error", dispatchError.message);
         }
 
         latestDispatchByReminderDate = (dispatchRows || []).reduce((accumulator, row) => {
@@ -241,34 +171,34 @@ export function registerUpcomingImportantDateRoutes(fastify: AppFastifyInstance)
 
           return {
             importantDate: toImportantDate(row),
+            notificationSent: Boolean(notificationSentAt),
+            notificationSentAt,
             person: toContactPreview(
               person,
               resolveContactAvatarUrl(
                 client,
                 user.id,
                 {
-                  id: person.id,
                   hasAvatar: person.has_avatar,
+                  id: person.id,
                   updatedAt: person.updated_at,
                 },
                 avatarOptions,
               ),
             ),
-            notificationSent: Boolean(notificationSentAt),
-            notificationSentAt,
           };
         })
         .filter((value): value is NonNullable<typeof value> => value != null)
         .sort((a, b) => {
           const aReminderDate = deriveReminderDateKey({
             date: a.importantDate.date,
-            notify_on: a.importantDate.notifyOn,
             notify_days_before: a.importantDate.notifyDaysBefore,
+            notify_on: a.importantDate.notifyOn,
           });
           const bReminderDate = deriveReminderDateKey({
             date: b.importantDate.date,
-            notify_on: b.importantDate.notifyOn,
             notify_days_before: b.importantDate.notifyDaysBefore,
+            notify_on: b.importantDate.notifyOn,
           });
 
           if (aReminderDate && bReminderDate && aReminderDate !== bReminderDate) {
@@ -296,7 +226,7 @@ export function registerContactImportantDateRoutes(fastify: AppFastifyInstance):
         response: withOkResponse(importantDatesListResponseSchema, "Important dates"),
       } satisfies FastifyZodOpenApiSchema,
     },
-    async (request, reply) => {
+    async (request) => {
       const { client, user } = getAuth(request);
       const { id: personId } = request.params;
 
@@ -308,7 +238,7 @@ export function registerContactImportantDateRoutes(fastify: AppFastifyInstance):
         .single();
 
       if (personError || !person) {
-        return reply.status(404).send({ error: "Contact not found" });
+        throw notFound("Contact not found", "not_found");
       }
 
       const { data: rows, error: rowsError } = await client
@@ -319,7 +249,7 @@ export function registerContactImportantDateRoutes(fastify: AppFastifyInstance):
         .order("created_at", { ascending: true });
 
       if (rowsError) {
-        return reply.status(500).send({ error: rowsError.message });
+        throw internal("internal_server_error", rowsError.message);
       }
 
       return {
@@ -335,72 +265,20 @@ export function registerContactImportantDateRoutes(fastify: AppFastifyInstance):
     "/:id/important-dates",
     {
       schema: {
+        body: importantDatesReplaceBodySchema,
         description: "Replace all important dates for a contact.",
         params: uuidParamSchema,
-        body: importantDatesReplaceBodySchema,
         response: {
           ...withOkResponse(importantDatesListResponseSchema, "Important dates replaced"),
           ...conflictResponse,
         },
       } satisfies FastifyZodOpenApiSchema,
     },
-    async (request, reply) => {
-      const { client, user } = getAuth(request);
+    withDomainRoute(async (ctx, request) => {
       const { id: personId } = request.params;
       const dates = request.body.dates;
-
-      const { data: person, error: personError } = await client
-        .from("people")
-        .select("id")
-        .eq("id", personId)
-        .eq("user_id", user.id)
-        .single();
-
-      if (personError || !person) {
-        return reply.status(404).send({ error: "Contact not found" });
-      }
-
-      const replaceRows = dates.map((event) => ({
-        id: event.id,
-        user_id: user.id,
-        person_id: personId,
-        type: event.type,
-        date: event.date,
-        note: event.note?.trim() ? event.note.trim() : null,
-        notify_days_before: event.notifyDaysBefore ?? null,
-      }));
-
-      const { error: deleteError } = await client
-        .from("people_important_dates")
-        .delete()
-        .eq("user_id", user.id)
-        .eq("person_id", personId);
-
-      if (deleteError) {
-        return reply.status(500).send({ error: deleteError.message });
-      }
-
-      if (replaceRows.length === 0) {
-        return { dates: [] };
-      }
-
-      const { data: insertedRows, error: insertError } = await client
-        .from("people_important_dates")
-        .insert(replaceRows)
-        .select(IMPORTANT_DATE_SELECT)
-        .order("created_at", { ascending: true });
-
-      if (insertError) {
-        if (insertError.code === "23505") {
-          return reply.status(409).send({ error: "Duplicate important date" });
-        }
-
-        return reply.status(500).send({ error: insertError.message });
-      }
-
-      return {
-        dates: (insertedRows || []).map(toImportantDate),
-      };
-    },
+      const { data } = await replaceImportantDates(ctx, personId, dates);
+      return { dates: data.dates };
+    }),
   );
 }

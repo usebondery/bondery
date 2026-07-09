@@ -1,25 +1,12 @@
 "use client";
 
 import {
-  memo,
-  useCallback,
-  useMemo,
-  useRef,
-  useState,
-  type ReactElement,
-  type ReactNode,
-} from "react";
-import {
   Anchor,
   Box,
   Button,
   ButtonGroup,
   Checkbox,
   Group,
-  Menu,
-  MenuDropdown,
-  MenuItem,
-  MenuTarget,
   Stack,
   Table,
   TableTbody,
@@ -28,305 +15,26 @@ import {
   TableThead,
   TableTr,
   Text,
-  TextInput,
   Tooltip,
   VisuallyHidden,
 } from "@mantine/core";
-import { IconChecks, IconSearch } from "@tabler/icons-react";
-import { DotsMenuButton } from "#DotsMenuButton/index.js";
+import { IconChecks } from "@tabler/icons-react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { ColumnVisibilityMenu } from "#DataTable/ColumnVisibilityMenu.js";
+import { DataTableRow } from "#DataTable/DataTableRow.js";
+import { SearchInput } from "#DataTable/SearchInput.js";
 import { SortMenu } from "#DataTable/SortMenu.js";
+import type { DataTableProps } from "#DataTable/types.js";
 
-/**
- * Isolated search input that owns its own local state.
- * Keeping state here prevents the parent DataTable (and all its rows)
- * from re-rendering on every keystroke.
- */
-function SearchInput({
-  initialValue,
-  placeholder,
-  onChange,
-  loading,
-}: {
-  initialValue: string;
-  placeholder?: string;
-  onChange: (value: string) => void;
-  loading?: boolean;
-}) {
-  const [value, setValue] = useState(initialValue);
-  return (
-    <TextInput
-      placeholder={placeholder}
-      aria-label={placeholder}
-      leftSection={<IconSearch size={16} />}
-      value={value}
-      onChange={(e) => {
-        setValue(e.currentTarget.value);
-        onChange(e.currentTarget.value);
-      }}
-      style={{ flex: 1 }}
-      loading={loading}
-    />
-  );
-}
-import type {
-  BulkAction,
-  DataColumnConfig,
-  DataTableLabels,
-  RowAction,
-  SortOption,
-} from "#DataTable/types.js";
-
-interface DataTableRowInternalProps<TRow> {
-  row: TRow;
-  rowId: string;
-  rowIndex: number;
-  isSelected: boolean;
-  isMenuOpen: boolean;
-  isNonSelectable: boolean;
-  showSelection: boolean;
-  showRowActions: boolean;
-  visibleColumns: DataColumnConfig<TRow>[];
-  rowActions?: RowAction<TRow>[];
-  nonSelectableTooltip?: string;
-  rowSelectionAriaLabel: string;
-  onSelectOne: (
-    row: TRow,
-    rowIndex: number,
-    options?: { shiftKey?: boolean },
-  ) => void;
-  onMenuOpen: (rowId: string) => void;
-  onMenuClose: () => void;
-  actionsLabel: string;
-}
-
-function DataTableRowComponent<TRow>({
-  row,
-  rowId,
-  rowIndex,
-  isSelected,
-  isMenuOpen,
-  isNonSelectable,
-  showSelection,
-  showRowActions,
-  visibleColumns,
-  rowActions,
-  nonSelectableTooltip,
-  rowSelectionAriaLabel,
-  onSelectOne,
-  onMenuOpen,
-  onMenuClose,
-  actionsLabel,
-}: DataTableRowInternalProps<TRow>): ReactElement | null {
-  return (
-    <TableTr
-      style={
-        isSelected
-          ? { backgroundColor: "var(--mantine-primary-color-light)" }
-          : undefined
-      }
-    >
-      {showSelection ? (
-        <TableTd>
-          {isNonSelectable ? (
-            <Tooltip label={nonSelectableTooltip} withArrow>
-              <span>
-                <Checkbox
-                  checked={isSelected}
-                  indeterminate
-                  disabled
-                  aria-label={rowSelectionAriaLabel}
-                />
-              </span>
-            </Tooltip>
-          ) : (
-            <Checkbox
-              checked={isSelected}
-              aria-label={rowSelectionAriaLabel}
-              onChange={(event) =>
-                onSelectOne(row, rowIndex, {
-                  shiftKey: (event.nativeEvent as MouseEvent).shiftKey,
-                })
-              }
-            />
-          )}
-        </TableTd>
-      ) : null}
-
-      {visibleColumns.map((col) => (
-        <TableTd key={col.key} className={col.minWidthClass}>
-          {col.render(row, rowIndex)}
-        </TableTd>
-      ))}
-
-      {showRowActions ? (
-        <TableTd>
-          <Menu
-            shadow="md"
-            position="bottom-end"
-            opened={isMenuOpen}
-            onChange={(opened) => (opened ? onMenuOpen(rowId) : onMenuClose())}
-          >
-            <MenuTarget>
-              <DotsMenuButton aria-label={actionsLabel} opened={isMenuOpen} />
-            </MenuTarget>
-            <MenuDropdown>
-              {rowActions!.map((action) => {
-                const isDisabled = action.disabled?.(row) ?? false;
-                const item = (
-                  <MenuItem
-                    key={action.key}
-                    leftSection={action.icon}
-                    color={action.color}
-                    onClick={() => action.onClick(row)}
-                    disabled={isDisabled}
-                  >
-                    {action.label}
-                  </MenuItem>
-                );
-                if (isDisabled && action.disabledTooltip) {
-                  return (
-                    <Tooltip
-                      key={action.key}
-                      label={action.disabledTooltip}
-                      withArrow
-                      multiline
-                      maw={220}
-                    >
-                      <div>{item}</div>
-                    </Tooltip>
-                  );
-                }
-                return item;
-              })}
-            </MenuDropdown>
-          </Menu>
-        </TableTd>
-      ) : null}
-    </TableTr>
-  );
-}
-
-const DataTableRow = memo(
-  DataTableRowComponent,
-  (prev, next) =>
-    prev.rowId === next.rowId &&
-    prev.rowIndex === next.rowIndex &&
-    prev.isSelected === next.isSelected &&
-    prev.isMenuOpen === next.isMenuOpen &&
-    prev.isNonSelectable === next.isNonSelectable &&
-    prev.row === next.row &&
-    prev.visibleColumns === next.visibleColumns,
-) as typeof DataTableRowComponent;
-
-export interface DataTableProps<TRow, TSortKey extends string = string> {
-  /** Data rows to display */
-  data: TRow[];
-  /** Column configurations with render functions */
-  columns: DataColumnConfig<TRow>[];
-  /** Function to extract unique ID from each row */
-  getRowId: (row: TRow) => string;
-
-  // --- Selection ---
-  /** Set of selected row IDs (enables selection when provided) */
-  selectedIds?: Set<string>;
-  /** Callback when selection changes */
-  onSelectionChange?: (selectedIds: Set<string>) => void;
-  /** Callback for toggling all rows (compatibility mode) */
-  onSelectAll?: () => void;
-  /** Callback for toggling one row (compatibility mode) */
-  onSelectOne?: (
-    id: string,
-    options?: { shiftKey?: boolean; index?: number },
-  ) => void;
-  /** Explicit all-selected state (compatibility mode) */
-  allSelected?: boolean;
-  /** Explicit some-selected state (compatibility mode) */
-  someSelected?: boolean;
-  /** If true, show select all checkbox */
-  showSelectAll?: boolean;
-  /** Set of row IDs that cannot be selected */
-  nonSelectableIds?: Set<string>;
-  /** Tooltip shown on non-selectable rows */
-  nonSelectableTooltip?: string;
-  /** Custom aria-label generator for row selection checkbox */
-  getRowSelectionAriaLabel?: (row: TRow) => string;
-
-  // --- Search ---
-  /** Search input value (enables search when onSearchChange provided) */
-  searchValue?: string;
-  /** Callback when search value changes */
-  onSearchChange?: (value: string) => void;
-  /** Show loading indicator on search input */
-  searchLoading?: boolean;
-
-  // --- Sort ---
-  /** Available sort options */
-  sortOptions?: SortOption<TSortKey>[];
-  /** Currently selected sort key */
-  currentSort?: TSortKey;
-  /** Callback when sort changes */
-  onSortChange?: (sortKey: TSortKey) => void;
-
-  // --- Columns ---
-  /** Callback when columns change (visibility/order) - enables column menu when provided */
-  onColumnsChange?: (columns: DataColumnConfig<TRow>[]) => void;
-
-  // --- Row Actions ---
-  /** Actions shown in each row's menu */
-  rowActions?: RowAction<TRow>[];
-
-  // --- Bulk Actions ---
-  /** Actions shown when items are selected */
-  bulkActions?: BulkAction[];
-
-  // --- All-total selection ---
-  /** When true, shows IconChecks in the header checkbox to indicate all items across all pages are selected */
-  allTotalSelected?: boolean;
-  /** Set of row IDs explicitly excluded from the "all total" selection */
-  excludedIds?: Set<string>;
-
-  // --- Pagination ---
-  /** Whether more data can be loaded */
-  hasMore?: boolean;
-  /** Callback to load more data */
-  onLoadMore?: () => void;
-  /** Whether load more is in progress */
-  loadMoreLoading?: boolean;
-  /** Total number of items available (across all pages) */
-  totalCount?: number;
-  /** Callback to select all items across all pages */
-  onSelectAllTotal?: () => void;
-
-  // --- Layout ---
-  /** Whether to show sticky header with controls */
-  showHeader?: boolean;
-  /** Top offset for sticky header */
-  stickyHeaderOffset?: number;
-
-  // --- Labels ---
-  /** All localized labels */
-  labels: DataTableLabels;
-
-  // --- Customization ---
-  /** Custom header content to render after built-in controls */
-  headerContent?: ReactNode;
-  /** Additional class name for the table */
-  className?: string;
-}
+export type { DataTableProps } from "#DataTable/types.js";
 
 /**
  * Generic data table component with search, sort, column visibility,
  * selection, row actions, bulk actions, and pagination.
  */
 /** Checkbox icon that renders IconChecks (used when all items across all pages are selected) */
-function AllCheckedIcon({
-  className,
-}: {
-  indeterminate: boolean | undefined;
-  className: string;
-}) {
-  return <IconChecks size={18} className={className} />;
+function AllCheckedIcon({ className }: { indeterminate: boolean | undefined; className: string }) {
+  return <IconChecks className={className} size={18} />;
 }
 
 export function DataTable<TRow, TSortKey extends string = string>({
@@ -394,25 +102,16 @@ export function DataTable<TRow, TSortKey extends string = string>({
 
   const showSelection =
     selectedIds !== undefined &&
-    (onSelectionChange !== undefined ||
-      onSelectAll !== undefined ||
-      onSelectOne !== undefined);
+    (onSelectionChange !== undefined || onSelectAll !== undefined || onSelectOne !== undefined);
   const showRowActions = rowActions && rowActions.length > 0;
-  const visibleColumns = useMemo(
-    () => columns.filter((col) => col.visible),
-    [columns],
-  );
+  const visibleColumns = useMemo(() => columns.filter((col) => col.visible), [columns]);
 
   // --- Selection helpers ---
-  const selectableData = data.filter(
-    (row) => !nonSelectableIds?.has(getRowId(row)),
-  );
+  const selectableData = data.filter((row) => !nonSelectableIds?.has(getRowId(row)));
   const computedAllSelected =
-    selectableData.length > 0 &&
-    selectableData.every((row) => selectedIds?.has(getRowId(row)));
+    selectableData.length > 0 && selectableData.every((row) => selectedIds?.has(getRowId(row)));
   const computedSomeSelected =
-    !computedAllSelected &&
-    selectableData.some((row) => selectedIds?.has(getRowId(row)));
+    !computedAllSelected && selectableData.some((row) => selectedIds?.has(getRowId(row)));
   const allSelected = allSelectedOverride ?? computedAllSelected;
   const someSelected = someSelectedOverride ?? computedSomeSelected;
 
@@ -428,16 +127,18 @@ export function DataTable<TRow, TSortKey extends string = string>({
       onSelectAllRef.current();
       return;
     }
-    if (!onSelectionChangeRef.current) return;
+    if (!onSelectionChangeRef.current) {
+      return;
+    }
     const newSelectedIds = new Set(selectedIdsRef.current);
     if (allSelectedRef.current) {
-      selectableDataRef.current.forEach((row) =>
-        newSelectedIds.delete(getRowId(row)),
-      );
+      for (const row of selectableDataRef.current) {
+        newSelectedIds.delete(getRowId(row));
+      }
     } else {
-      selectableDataRef.current.forEach((row) =>
-        newSelectedIds.add(getRowId(row)),
-      );
+      for (const row of selectableDataRef.current) {
+        newSelectedIds.add(getRowId(row));
+      }
     }
     onSelectionChangeRef.current(newSelectedIds);
   }, [getRowId]);
@@ -449,14 +150,16 @@ export function DataTable<TRow, TSortKey extends string = string>({
 
       if (onSelectOneRef.current) {
         onSelectOneRef.current(rowId, {
-          shiftKey: options?.shiftKey,
           index: rowIndex,
+          shiftKey: options?.shiftKey,
         });
         lastSelectedIndexRef.current = rowIndex;
         return;
       }
 
-      if (!onSelectionChangeRef.current || !selectedIdsRef.current) return;
+      if (!onSelectionChangeRef.current || !selectedIdsRef.current) {
+        return;
+      }
       const newSelectedIds = new Set(selectedIdsRef.current);
 
       if (options?.shiftKey && lastSelectedIndexRef.current !== null) {
@@ -493,65 +196,52 @@ export function DataTable<TRow, TSortKey extends string = string>({
   const showSelectAllTotal =
     onSelectAllTotal &&
     totalCount !== undefined &&
-    (effectiveSelectedCount > 0 ||
-      (selectedIds !== undefined && selectedIds.size > 0)) &&
+    (effectiveSelectedCount > 0 || (selectedIds !== undefined && selectedIds.size > 0)) &&
     totalCount > data.length;
 
   const bulkActionsContent = showSelection ? (
-    <Group justify="space-between" align="center" className="min-h-9">
+    <Group align="center" className="min-h-9" justify="space-between">
       <Stack gap={2}>
-        <Text size="sm" c="dimmed">
+        <Text c="dimmed" size="sm">
           {effectiveSelectedCount > 0
-            ? effectiveSelectedCount === 1 &&
-              labels.selectedSingularCountTemplate
+            ? effectiveSelectedCount === 1 && labels.selectedSingularCountTemplate
               ? labels.selectedSingularCountTemplate
-              : (labels.selectedCountTemplate?.replace(
-                  "{count}",
-                  String(effectiveSelectedCount),
-                ) ?? `${effectiveSelectedCount} selected`)
-            : (labels.totalCountTemplate?.replace(
-                "{count}",
-                String(data.length),
-              ) ?? `${data.length} total items`)}
+              : (labels.selectedCountTemplate?.replace("{count}", String(effectiveSelectedCount)) ??
+                `${effectiveSelectedCount} selected`)
+            : (labels.totalCountTemplate?.replace("{count}", String(data.length)) ??
+              `${data.length} total items`)}
         </Text>
         {showSelectAllTotal ? (
           allTotalSelected ? (
-            <Anchor size="sm" component="span" onClick={handleSelectAll}>
-              {labels.clearAllTotalTemplate?.replace(
-                "{count}",
-                String(totalCount),
-              ) ?? `Clear selection (${totalCount})`}
+            <Anchor component="span" onClick={handleSelectAll} size="sm">
+              {labels.clearAllTotalTemplate?.replace("{count}", String(totalCount)) ??
+                `Clear selection (${totalCount})`}
             </Anchor>
           ) : (
-            <Anchor size="sm" component="span" onClick={onSelectAllTotal}>
-              {labels.selectAllTotalTemplate?.replace(
-                "{count}",
-                String(totalCount),
-              ) ?? `Select all ${totalCount}`}
+            <Anchor component="span" onClick={onSelectAllTotal} size="sm">
+              {labels.selectAllTotalTemplate?.replace("{count}", String(totalCount)) ??
+                `Select all ${totalCount}`}
             </Anchor>
           )
         ) : null}
       </Stack>
 
-      {selectedIds &&
-      effectiveSelectedCount > 0 &&
-      bulkActions &&
-      bulkActions.length > 0 ? (
+      {selectedIds && effectiveSelectedCount > 0 && bulkActions && bulkActions.length > 0 ? (
         <ButtonGroup>
           {bulkActions.map((action) => (
             <Tooltip
+              disabled={!action.disabled || !action.disabledTooltip}
               key={action.key}
               label={action.disabled ? action.disabledTooltip : undefined}
-              disabled={!action.disabled || !action.disabledTooltip}
               withArrow
             >
               <Button
                 color={action.color}
-                variant={action.variant ?? "default"}
-                leftSection={action.icon}
-                onClick={() => action.onClick(selectedIds)}
                 disabled={action.disabled}
+                leftSection={action.icon}
                 loading={action.loading}
+                onClick={() => action.onClick(selectedIds)}
+                variant={action.variant ?? "default"}
               >
                 {action.label}
               </Button>
@@ -573,32 +263,31 @@ export function DataTable<TRow, TSortKey extends string = string>({
       {onSearchChange !== undefined ? (
         <SearchInput
           initialValue={searchValue ?? ""}
-          placeholder={labels.searchPlaceholder}
-          onChange={onSearchChange}
           loading={searchLoading}
+          onChange={onSearchChange}
+          placeholder={labels.searchPlaceholder}
         />
       ) : null}
       {onColumnsChange !== undefined ? (
         <ColumnVisibilityMenu
           columns={columns}
-          onColumnsChange={onColumnsChange}
           labels={labels.columnVisibility}
+          onColumnsChange={onColumnsChange}
         />
       ) : null}
       {sortOptions && currentSort !== undefined && onSortChange ? (
         <SortMenu
-          sortOptions={sortOptions}
           currentSort={currentSort}
-          onSortChange={onSortChange}
           labels={labels.sort}
+          onSortChange={onSortChange}
+          sortOptions={sortOptions}
         />
       ) : null}
     </Group>
   ) : null;
 
   // --- Column span calculation ---
-  const totalColSpan =
-    visibleColumns.length + (showSelection ? 1 : 0) + (showRowActions ? 1 : 0);
+  const totalColSpan = visibleColumns.length + (showSelection ? 1 : 0) + (showRowActions ? 1 : 0);
 
   return (
     <>
@@ -607,10 +296,10 @@ export function DataTable<TRow, TSortKey extends string = string>({
           gap="md"
           py="md"
           style={{
+            backgroundColor: "var(--mantine-color-body)",
             position: "sticky",
             top: stickyHeaderOffset,
             zIndex: 20,
-            backgroundColor: "var(--mantine-color-body)",
           }}
         >
           {headerControlsContent}
@@ -622,17 +311,17 @@ export function DataTable<TRow, TSortKey extends string = string>({
       )}
 
       <Box style={{ overflowX: "auto" }}>
-        <Table striped highlightOnHover className={className}>
+        <Table className={className} highlightOnHover striped>
           <TableThead>
             <TableTr>
               {showSelection && showSelectAll ? (
                 <TableTh style={{ width: 40 }}>
                   <Checkbox
-                    icon={allTotalSelected ? AllCheckedIcon : undefined}
+                    aria-label="Select all rows"
                     checked={allSelected || Boolean(allTotalSelected)}
+                    icon={allTotalSelected ? AllCheckedIcon : undefined}
                     indeterminate={someSelected && !allTotalSelected}
                     onChange={handleSelectAll}
-                    aria-label="Select all rows"
                   />
                 </TableTh>
               ) : showSelection ? (
@@ -640,21 +329,17 @@ export function DataTable<TRow, TSortKey extends string = string>({
               ) : null}
 
               {visibleColumns.map((col) => (
-                <TableTh key={col.key} className={col.minWidthClass}>
+                <TableTh className={col.minWidthClass} key={col.key}>
                   {!col.hideHeader &&
                     (col.icon ? (
-                      <Group
-                        gap="xxs"
-                        wrap="nowrap"
-                        style={{ width: "fit-content" }}
-                      >
+                      <Group gap="xxs" style={{ width: "fit-content" }} wrap="nowrap">
                         {col.icon}
-                        <Text size="sm" fw={500}>
+                        <Text fw={500} size="sm">
                           {col.label}
                         </Text>
                       </Group>
                     ) : (
-                      <Text size="sm" fw={500}>
+                      <Text fw={500} size="sm">
                         {col.label}
                       </Text>
                     ))}
@@ -663,9 +348,7 @@ export function DataTable<TRow, TSortKey extends string = string>({
 
               {showRowActions ? (
                 <TableTh style={{ width: 48 }}>
-                  <VisuallyHidden>
-                    {labels.actionsAriaLabel ?? "Actions"}
-                  </VisuallyHidden>
+                  <VisuallyHidden>{labels.actionsAriaLabel ?? "Actions"}</VisuallyHidden>
                 </TableTh>
               ) : null}
             </TableTr>
@@ -675,7 +358,7 @@ export function DataTable<TRow, TSortKey extends string = string>({
             {data.length === 0 ? (
               <TableTr>
                 <TableTd colSpan={totalColSpan}>
-                  <Text ta="center" c="dimmed">
+                  <Text c="dimmed" ta="center">
                     {labels.emptyStateMessage}
                   </Text>
                 </TableTd>
@@ -685,29 +368,27 @@ export function DataTable<TRow, TSortKey extends string = string>({
                 const rowId = getRowId(row);
                 return (
                   <DataTableRow
-                    key={rowId}
-                    row={row}
-                    rowId={rowId}
-                    rowIndex={rowIndex}
+                    actionsLabel={labels.actionsAriaLabel ?? "Actions"}
+                    isMenuOpen={openedMenuRowId === rowId}
+                    isNonSelectable={nonSelectableIds?.has(rowId) ?? false}
                     isSelected={
                       allTotalSelected
                         ? !(excludedIds?.has(rowId) ?? false)
                         : (selectedIds?.has(rowId) ?? false)
                     }
-                    isMenuOpen={openedMenuRowId === rowId}
-                    isNonSelectable={nonSelectableIds?.has(rowId) ?? false}
-                    showSelection={showSelection}
-                    showRowActions={Boolean(showRowActions)}
-                    visibleColumns={visibleColumns}
-                    rowActions={rowActions}
+                    key={rowId}
                     nonSelectableTooltip={nonSelectableTooltip}
-                    rowSelectionAriaLabel={
-                      getRowSelectionAriaLabel?.(row) ?? "Select row"
-                    }
-                    onSelectOne={handleSelectOne}
-                    onMenuOpen={handleMenuOpen}
                     onMenuClose={handleMenuClose}
-                    actionsLabel={labels.actionsAriaLabel ?? "Actions"}
+                    onMenuOpen={handleMenuOpen}
+                    onSelectOne={handleSelectOne}
+                    row={row}
+                    rowActions={rowActions}
+                    rowId={rowId}
+                    rowIndex={rowIndex}
+                    rowSelectionAriaLabel={getRowSelectionAriaLabel?.(row) ?? "Select row"}
+                    showRowActions={Boolean(showRowActions)}
+                    showSelection={showSelection}
+                    visibleColumns={visibleColumns}
                   />
                 );
               })
@@ -718,11 +399,7 @@ export function DataTable<TRow, TSortKey extends string = string>({
 
       {hasMore && onLoadMore ? (
         <Group justify="center" pt="sm">
-          <Button
-            variant="light"
-            onClick={onLoadMore}
-            loading={loadMoreLoading}
-          >
+          <Button loading={loadMoreLoading} onClick={onLoadMore} variant="light">
             {labels.loadMoreLabel ?? "Load more"}
           </Button>
         </Group>

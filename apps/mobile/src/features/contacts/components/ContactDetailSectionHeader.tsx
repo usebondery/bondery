@@ -6,41 +6,53 @@ import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
 import { contactDetailStyles } from "./contactDetailStyles";
 
 interface ContactDetailSectionHeaderAction {
-  label: string;
   accessibilityLabel: string;
   icon: ReactNode;
+  label: string;
   onPress: () => void;
 }
 
 interface ContactDetailSectionHeaderProps {
+  action?: ContactDetailSectionHeaderAction;
   title?: string;
   titleKey?: string;
-  action?: ContactDetailSectionHeaderAction;
+  titleNamespace?: string;
 }
 
-export function ContactDetailSectionHeader({ title, titleKey, action }: ContactDetailSectionHeaderProps) {
+export function ContactDetailSectionHeader({
+  title,
+  titleKey,
+  titleNamespace,
+  action,
+}: ContactDetailSectionHeaderProps) {
   const colors = useMobileThemeColors();
-  const t = useMobileTranslations();
+  const t = useMobileTranslations(titleNamespace ?? "common");
   const resolvedTitle = title ?? (titleKey ? t(titleKey) : "");
 
   return (
     <View style={contactDetailStyles.sectionHeaderRow}>
       <Text
         accessibilityRole="header"
-        style={[contactDetailStyles.sectionTitle, MOBILE_TEXT_STYLES.sectionLabel, { color: colors.textMuted }]}
+        style={[
+          contactDetailStyles.sectionTitle,
+          MOBILE_TEXT_STYLES.sectionLabel,
+          { color: colors.textMuted },
+        ]}
       >
         {resolvedTitle.toUpperCase()}
       </Text>
 
       {action ? (
         <Pressable
-          accessibilityRole="button"
           accessibilityLabel={action.accessibilityLabel}
+          accessibilityRole="button"
           onPress={action.onPress}
           style={contactDetailStyles.sectionHeaderAction}
         >
           {action.icon}
-          <Text style={[contactDetailStyles.sectionHeaderActionText, { color: colors.primary }]}>{action.label}</Text>
+          <Text style={[contactDetailStyles.sectionHeaderActionText, { color: colors.primary }]}>
+            {action.label}
+          </Text>
         </Pressable>
       ) : null}
     </View>

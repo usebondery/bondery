@@ -18,16 +18,16 @@ export function buildEmojiFlatRows(sections: EmojiPickerSection[]): EmojiFlatRow
 
   for (const section of sections) {
     rows.push({
-      type: "header",
-      key: `header-${section.title}`,
       categoryKey: section.title,
+      key: `header-${section.title}`,
+      type: "header",
     });
 
     for (const gridRow of chunkEmojiRows(section.data)) {
       rows.push({
-        type: "row",
-        key: gridRow.id,
         items: gridRow.items,
+        key: gridRow.id,
+        type: "row",
       });
     }
   }

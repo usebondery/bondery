@@ -1,33 +1,36 @@
 "use client";
 
+import { Kbd, parseShortcutKeys } from "@bondery/mantine-next";
 import {
   ActionIcon,
   AppShell,
   AppShellMain,
   AppShellNavbar,
   Group,
-  Kbd,
   Text,
   Tooltip,
 } from "@mantine/core";
 import { useHotkeys } from "@mantine/hooks";
-import { useState } from "react";
 import { IconChevronsLeft, IconChevronsRight } from "@tabler/icons-react";
-import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
-import { NavigationSidebarContent } from "./NavigationSidebar";
-import { HOTKEYS } from "@/lib/config";
+import { useState } from "react";
+import { setClientCookie } from "@/lib/cookies/client";
+import { SIDEBAR_COOKIE_NAME } from "@/lib/cookies/constants";
+import { DocumentTitleProvider } from "@/lib/documentTitle";
+import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
+import { HOTKEYS } from "@/lib/platform/config";
 import { CommandPalette } from "./CommandPalette";
+import { NavigationSidebarContent } from "./NavigationSidebar";
 import { PeopleSearchSpotlight } from "./PeopleSearchSpotlight";
 
-export const SIDEBAR_COOKIE_NAME = "bondery-sidebar-collapsed";
+export { SIDEBAR_COOKIE_NAME } from "@/lib/cookies/constants";
 
 interface AppShellWrapperProps {
-  children: React.ReactNode;
-  userName: string;
   avatarUrl: string | null;
+  children: React.ReactNode;
   hasActiveMergeRecommendations: boolean;
   hasOverdueKeepInTouch: boolean;
   initialCollapsed: boolean;
+  userName: string;
 }
 
 export const SIDEBAR_COLLAPSED_WIDTH = 80;
@@ -42,12 +45,12 @@ export function AppShellWrapper({
   initialCollapsed,
 }: AppShellWrapperProps) {
   const [collapsed, setCollapsed] = useState(initialCollapsed);
-  const t = useTranslations("AppNavigation");
+  const t = useWebTranslations("AppNavigation");
 
   function handleToggle() {
     setCollapsed((prev) => {
       const next = !prev;
-      document.cookie = `${SIDEBAR_COOKIE_NAME}=${next}; path=/; max-age=31536000; SameSite=Lax`;
+      void setClientCookie(SIDEBAR_COOKIE_NAME, String(next)).catch(() => {});
       return next;
     });
   }
@@ -55,24 +58,24 @@ export function AppShellWrapper({
   useHotkeys([[HOTKEYS.SIDEBAR_TOGGLE, handleToggle]]);
 
   return (
-    <>
+    <DocumentTitleProvider>
       <AppShell
-        padding="md"
         navbar={{
-          width: collapsed ? SIDEBAR_COLLAPSED_WIDTH : SIDEBAR_EXPANDED_WIDTH,
           breakpoint: "sm",
           collapsed: { mobile: true },
+          width: collapsed ? SIDEBAR_COLLAPSED_WIDTH : SIDEBAR_EXPANDED_WIDTH,
         }}
+        padding="md"
         transitionDuration={250}
         transitionTimingFunction="ease"
       >
         <AppShellNavbar p="md" style={{ overflow: "hidden" }}>
           <NavigationSidebarContent
-            userName={userName}
             avatarUrl={avatarUrl}
+            collapsed={collapsed}
             hasActiveMergeRecommendations={hasActiveMergeRecommendations}
             hasOverdueKeepInTouch={hasOverdueKeepInTouch}
-            collapsed={collapsed}
+            userName={userName}
           />
         </AppShellNavbar>{" "}
         <AppShellMain>{children}</AppShellMain>
@@ -82,31 +85,29 @@ export function AppShellWrapper({
       <Tooltip
         label={
           <Group gap="xs" wrap="nowrap">
-            <Text size="xs" inherit>
+            <Text inherit size="xs">
               {collapsed ? t("ExpandSidebar") : t("CollapseSidebar")}
             </Text>
-            <Kbd size="xs">Ctrl+B</Kbd>
+            <Kbd keys={parseShortcutKeys(HOTKEYS.SIDEBAR_TOGGLE)} size="xs" />
           </Group>
         }
         position="right"
         withArrow
       >
         <ActionIcon
-          visibleFrom="sm"
+          aria-label={collapsed ? t("ExpandSidebar") : t("CollapseSidebar")}
+          onClick={handleToggle}
           radius="xl"
           size={"lg"}
-          variant="default"
-          onClick={handleToggle}
-          aria-label={collapsed ? t("ExpandSidebar") : t("CollapseSidebar")}
           style={{
+            left: collapsed ? "var(--sidebar-collapsed-width)" : "var(--sidebar-expanded-width)",
             position: "fixed",
-            left: collapsed
-              ? "var(--sidebar-collapsed-width)"
-              : "var(--sidebar-expanded-width)",
             top: "calc(var(--mantine-spacing-md) + 18px)",
             translate: "-50% -50%",
             zIndex: 150,
           }}
+          variant="default"
+          visibleFrom="sm"
         >
           {collapsed ? (
             <IconChevronsRight size={12} stroke={2} />
@@ -118,6 +119,6 @@ export function AppShellWrapper({
 
       <CommandPalette />
       <PeopleSearchSpotlight />
-    </>
+    </DocumentTitleProvider>
   );
 }

@@ -10,10 +10,10 @@
  *   npx tsx scripts/setup.ts --env production
  */
 
-import { existsSync, readFileSync } from "fs";
-import { resolve, dirname } from "path";
-import { fileURLToPath } from "url";
-import { execSync } from "child_process";
+import { execSync } from "node:child_process";
+import { existsSync, readFileSync } from "node:fs";
+import { dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = resolve(__dirname, "..");
@@ -21,13 +21,13 @@ const root = resolve(__dirname, "..");
 // ── Colors ────────────────────────────────────────────────────────────────────
 
 const c = {
-  red: "\x1b[31m",
-  green: "\x1b[32m",
-  yellow: "\x1b[33m",
   blue: "\x1b[34m",
-  cyan: "\x1b[36m",
   bold: "\x1b[1m",
+  cyan: "\x1b[36m",
+  green: "\x1b[32m",
+  red: "\x1b[31m",
   reset: "\x1b[0m",
+  yellow: "\x1b[33m",
 };
 
 // ── Env parsing ───────────────────────────────────────────────────────────────
@@ -37,12 +37,18 @@ function parseEnvFile(filePath: string): Record<string, string> {
   const env: Record<string, string> = {};
   content.split("\n").forEach((line) => {
     const trimmed = line.trim();
-    if (!trimmed || trimmed.startsWith("#")) return;
+    if (!trimmed || trimmed.startsWith("#")) {
+      return;
+    }
     const eqIdx = trimmed.indexOf("=");
-    if (eqIdx === -1) return;
+    if (eqIdx === -1) {
+      return;
+    }
     const key = trimmed.slice(0, eqIdx).trim();
     const raw = trimmed.slice(eqIdx + 1).trim();
-    if (key) env[key] = raw.replace(/^["']|["']$/g, "");
+    if (key) {
+      env[key] = raw.replace(/^["']|["']$/g, "");
+    }
   });
   return env;
 }
@@ -64,7 +70,9 @@ function checkEnv(envFile: string, requiredVars: string[]): Record<string, strin
 
   if (missing.length > 0) {
     console.error(`${c.red}❌ Missing required variables in ${envFile}:${c.reset}\n`);
-    missing.forEach((v) => console.error(`   ${c.red}✗${c.reset} ${v}`));
+    for (const v of missing) {
+      console.error(`   ${c.red}✗${c.reset} ${v}`);
+    }
     console.error(`\n${c.yellow}Please set these variables before running setup.${c.reset}\n`);
     process.exit(1);
   }
@@ -116,7 +124,7 @@ if (env === "local") {
 } else {
   const envFile = `.env.${env}`;
   const vars = checkEnv(envFile, REMOTE_VARS);
-  const projectRef = vars["SUPABASE_PROJECT_REF"];
+  const projectRef = vars.SUPABASE_PROJECT_REF;
 
   console.log(`\n${c.blue}🔑 Uploading secrets to Supabase (${env})...${c.reset}`);
   run(`npx supabase secrets set --env-file ${envFile} --project-ref ${projectRef}`);

@@ -1,27 +1,38 @@
 "use client";
 
-import { useEffect } from "react";
+import type { SyncTableKey } from "@bondery/schemas/sync";
 import type { QueryClient } from "@tanstack/react-query";
+import { useEffect } from "react";
+import { startSyncWakeWebClient, stopSyncWakeWebClient } from "@/lib/sync/sync-wake-client";
 import {
   affectedTablesTouchContacts,
   affectedTablesTouchGroups,
   affectedTablesTouchTags,
 } from "@/lib/sync/sync-wake-tables";
-import {
-  startSyncWakeWebClient,
-  stopSyncWakeWebClient,
-} from "@/lib/sync/sync-wake-client";
 import { getQueryClient } from "./client";
 import {
+  invalidateAllContactTags,
   invalidateContactDomain,
   invalidateGroupDomain,
   invalidateTagDomain,
 } from "./invalidation";
 
+function isTagsOnlyWake(affectedTables: SyncTableKey[]): boolean {
+  return (
+    affectedTables.length > 0 &&
+    affectedTables.every((table) => table === "tags" || table === "people_tags")
+  );
+}
+
 async function invalidateForAffectedTables(
   queryClient: QueryClient,
-  affectedTables: Parameters<typeof affectedTablesTouchContacts>[0],
+  affectedTables: SyncTableKey[],
 ): Promise<void> {
+  if (isTagsOnlyWake(affectedTables)) {
+    await Promise.all([invalidateTagDomain(queryClient), invalidateAllContactTags(queryClient)]);
+    return;
+  }
+
   const tasks: Promise<void>[] = [];
 
   if (affectedTablesTouchContacts(affectedTables)) {
@@ -54,7 +65,9 @@ async function invalidateForAffectedTables(
  */
 export function useSyncWakeInvalidation(enabled = true) {
   useEffect(() => {
-    if (!enabled) return;
+    if (!enabled) {
+      return;
+    }
 
     const client = startSyncWakeWebClient((message) => {
       void invalidateForAffectedTables(getQueryClient(), message.affectedTables);

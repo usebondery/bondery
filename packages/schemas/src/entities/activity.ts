@@ -3,8 +3,8 @@ import {
   createdAtSchema,
   entityAuditSchema,
   entityIdentitySchema,
-  updatedAtSchema,
   makePaginatedListResponseSchema,
+  updatedAtSchema,
 } from "#entities/_shared.js";
 
 export const interactionTypeSchema = z.enum([
@@ -23,45 +23,45 @@ export const interactionTypeSchema = z.enum([
 ]);
 
 export const interactionParticipantSchema = z.object({
-  id: z.string(),
-  firstName: z.string(),
-  lastName: z.string().nullable(),
   avatar: z.string().nullable(),
+  firstName: z.string(),
+  id: z.string(),
+  lastName: z.string().nullable(),
   updatedAt: updatedAtSchema.optional(),
 });
 
 export const interactionSchema = entityIdentitySchema
   .extend({
+    date: createdAtSchema,
+    description: z.string().nullable(),
+    participants: z.union([z.array(interactionParticipantSchema), z.array(z.string())]).optional(),
     title: z.string().nullable(),
     type: interactionTypeSchema,
-    description: z.string().nullable(),
-    date: createdAtSchema,
-    participants: z.union([z.array(interactionParticipantSchema), z.array(z.string())]).optional(),
   })
   .extend(entityAuditSchema.shape);
 
 export const createInteractionInputSchema = z.object({
+  date: createdAtSchema,
+  description: z.string().optional(),
+  participantIds: z.array(z.string()),
   title: z.string().optional(),
   type: z.string(),
-  description: z.string().optional(),
-  date: createdAtSchema,
-  participantIds: z.array(z.string()),
 });
 
 export const interactionFormSchema = z.object({
-  title: z.string().trim().min(1, { error: "Title is required" }),
-  participantIds: z.array(z.string()).min(1, { error: "Please select at least one contact" }),
   date: z.string().min(1, { error: "Please select a date" }),
-  type: z.string().min(1, { error: "Please select a type" }),
   description: z.string(),
+  participantIds: z.array(z.string()).min(1, { error: "Please select at least one contact" }),
+  title: z.string().trim().min(1, { error: "Title is required" }),
+  type: z.string().min(1, { error: "Please select a type" }),
 });
 
 export const updateInteractionInputSchema = z.object({
+  date: createdAtSchema.optional(),
+  description: z.string().optional(),
+  participantIds: z.array(z.string()).optional(),
   title: z.string().optional(),
   type: z.string().optional(),
-  description: z.string().optional(),
-  date: createdAtSchema.optional(),
-  participantIds: z.array(z.string()).optional(),
 });
 
 export const interactionsListResponseSchema = makePaginatedListResponseSchema(
@@ -69,20 +69,20 @@ export const interactionsListResponseSchema = makePaginatedListResponseSchema(
   interactionSchema,
 );
 
-const interactionDetailSchema = z.object({
-  id: z.string(),
-  title: z.string().nullable(),
-  type: z.string(),
-  description: z.string().nullable(),
-  date: createdAtSchema,
-  participants: z.array(z.object({}).passthrough()),
-}).extend(entityAuditSchema.shape);
-
-export const interactionResponseSchema = z
+const interactionDetailSchema = z
   .object({
-    interaction: interactionDetailSchema,
+    date: createdAtSchema,
+    description: z.string().nullable(),
+    id: z.string(),
+    participants: z.array(z.object({}).passthrough()),
+    title: z.string().nullable(),
+    type: z.string(),
   })
-  ;
+  .extend(entityAuditSchema.shape);
+
+export const interactionResponseSchema = z.object({
+  interaction: interactionDetailSchema,
+});
 
 export type InteractionType = z.infer<typeof interactionTypeSchema>;
 export type InteractionParticipant = z.infer<typeof interactionParticipantSchema>;

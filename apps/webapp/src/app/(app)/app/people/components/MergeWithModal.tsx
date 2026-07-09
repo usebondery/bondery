@@ -1,378 +1,54 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
-import { useRouter } from "next/navigation";
+import { getUserFacingError } from "@bondery/helpers/api";
+import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import {
-  Center,
-  Group,
-  Loader,
-  Paper,
-  SimpleGrid,
-  Stack,
-  Text,
-  Avatar,
-  UnstyledButton,
-} from "@mantine/core";
-import { modals } from "@mantine/modals";
-import { notifications } from "@mantine/notifications";
-import { IconArrowLeft, IconArrowMerge, IconArrowRight, IconCheck } from "@tabler/icons-react";
-import {
-  ModalFooter,
-  ModalScrollLayout,
-  PersonChip,
   errorNotificationTemplate,
   loadingNotificationTemplate,
   ModalTitle,
   successNotificationTemplate,
 } from "@bondery/mantine-next";
-import { API_ROUTES, WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
-import { useMergeContactsMutation } from "@/lib/query/hooks/useContacts";
 import type {
   Contact,
   ContactPreview,
   MergeConflictChoice,
   MergeConflictField,
-  MergeContactsResponse,
 } from "@bondery/schemas";
-import { SelectableCard } from "@/app/(app)/app/components/SelectableCard";
-import { getAvatarColorFromName } from "@/lib/avatarColor";
-import { DEBOUNCE_MS } from "@/lib/config";
-import { createModalId, useModalBlocking } from "@/lib/modals";
+import { Center, Loader, Stack, Text } from "@mantine/core";
+import { modals } from "@mantine/modals";
+import { notifications } from "@mantine/notifications";
+import { IconArrowMerge } from "@tabler/icons-react";
+import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCommonTranslations, useWebTranslations } from "@/lib/i18n/useWebTranslations";
+import { createModalId, useModalDismiss } from "@/lib/modals";
+import { useMergeContactsMutation } from "@/lib/query/hooks/useContacts";
+import {
+  areValuesEquivalent,
+  getAutoLastInteractionChoice,
+  hasMeaningfulValue,
+  MERGE_CONFLICT_FIELDS,
+} from "../utils/merge-conflict-helpers";
+import { MergeWithPickStep } from "./MergeWithPickStep";
+import { MergeWithResolveStep } from "./MergeWithResolveStep";
 
 interface OpenMergeWithModalParams {
   contacts: Contact[];
-  leftPersonId: string;
-  rightPersonId?: string;
   disableLeftPicker?: boolean;
   disableRightPicker?: boolean;
-  redirectToMergedPerson?: boolean;
+  initialConflictChoices?: Partial<Record<MergeConflictField, MergeConflictChoice>>;
+  leftPersonId: string;
   onSearch?: (query: string) => Promise<Contact[]>;
   onSuccess?: () => void;
-  initialConflictChoices?: Partial<Record<MergeConflictField, MergeConflictChoice>>;
+  redirectToMergedPerson?: boolean;
+  rightPersonId?: string;
 }
 
 type Step = "pick" | "resolve" | "processing";
 
-export const MERGE_CONFLICT_FIELDS: MergeConflictField[] = [
-  "avatar",
-  "firstName",
-  "middleName",
-  "lastName",
-  "headline",
-  "location",
-  "notes",
-  "lastInteraction",
-  "phones",
-  "emails",
-  "importantDates",
-  "language",
-  "timezone",
-  "gisPoint",
-  "latitude",
-  "longitude",
-  "linkedin",
-  "instagram",
-  "whatsapp",
-  "facebook",
-  "website",
-  "signal",
-];
-
 function MergeWithModalTitle() {
-  const t = useTranslations("MergeWithModal");
-  return <ModalTitle text={t("ModalTitle")} icon={<IconArrowMerge size={22} />} />;
-}
-
-function hasMeaningfulValue(value: unknown): boolean {
-  if (value === null || value === undefined) {
-    return false;
-  }
-
-  if (typeof value === "string") {
-    return value.trim().length > 0;
-  }
-
-  if (Array.isArray(value)) {
-    return value.length > 0;
-  }
-
-  if (typeof value === "number") {
-    return Number.isFinite(value);
-  }
-
-  return true;
-}
-
-function normalizePhoneSet(value: unknown): string[] {
-  if (!Array.isArray(value)) {
-    return [];
-  }
-
-  return value
-    .map((entry) => {
-      if (!entry || typeof entry !== "object") {
-        return "";
-      }
-
-      const row = entry as { prefix?: unknown; value?: unknown; type?: unknown };
-      const prefix = String(row.prefix || "").trim();
-      const phone = String(row.value || "").trim();
-      const type = String(row.type || "home")
-        .trim()
-        .toLowerCase();
-      if (!phone) {
-        return "";
-      }
-
-      return `${prefix}|${phone}|${type}`;
-    })
-    .filter(Boolean)
-    .sort();
-}
-
-function normalizeEmailSet(value: unknown): string[] {
-  if (!Array.isArray(value)) {
-    return [];
-  }
-
-  return value
-    .map((entry) => {
-      if (!entry || typeof entry !== "object") {
-        return "";
-      }
-
-      const row = entry as { value?: unknown; type?: unknown };
-      const email = String(row.value || "")
-        .trim()
-        .toLowerCase();
-      const type = String(row.type || "home")
-        .trim()
-        .toLowerCase();
-      if (!email) {
-        return "";
-      }
-
-      return `${email}|${type}`;
-    })
-    .filter(Boolean)
-    .sort();
-}
-
-function normalizeImportantDatesSet(value: unknown): string[] {
-  if (!Array.isArray(value)) {
-    return [];
-  }
-
-  return value
-    .map((entry) => {
-      if (!entry || typeof entry !== "object") {
-        return "";
-      }
-
-      const row = entry as { type?: unknown; date?: unknown; note?: unknown };
-      const dateType = String(row.type || "")
-        .trim()
-        .toLowerCase();
-      const dateValue = String(row.date || "")
-        .trim()
-        .slice(0, 10);
-      const note = String(row.note || "").trim();
-      if (!dateType || !dateValue) {
-        return "";
-      }
-
-      return `${dateType}|${dateValue}|${note}`;
-    })
-    .filter(Boolean)
-    .sort();
-}
-
-function areValuesEquivalent(field: MergeConflictField, left: unknown, right: unknown): boolean {
-  if (field === "phones") {
-    return JSON.stringify(normalizePhoneSet(left)) === JSON.stringify(normalizePhoneSet(right));
-  }
-
-  if (field === "emails") {
-    return JSON.stringify(normalizeEmailSet(left)) === JSON.stringify(normalizeEmailSet(right));
-  }
-
-  if (field === "importantDates") {
-    return (
-      JSON.stringify(normalizeImportantDatesSet(left)) ===
-      JSON.stringify(normalizeImportantDatesSet(right))
-    );
-  }
-
-  if (typeof left === "string" && typeof right === "string") {
-    return left.trim() === right.trim();
-  }
-
-  return JSON.stringify(left) === JSON.stringify(right);
-}
-
-function normalizeDisplayText(value: unknown): string {
-  if (value === null || value === undefined) {
-    return "";
-  }
-
-  if (typeof value === "string") {
-    return value.trim();
-  }
-
-  if (typeof value === "number") {
-    return Number.isFinite(value) ? String(value) : "";
-  }
-
-  return "";
-}
-
-function parseTimestampValue(value: unknown): number | null {
-  if (value === null || value === undefined) {
-    return null;
-  }
-
-  if (typeof value === "number") {
-    return Number.isFinite(value) ? value : null;
-  }
-
-  const raw = typeof value === "string" ? value.trim() : String(value);
-  if (!raw) {
-    return null;
-  }
-
-  const time = new Date(raw).getTime();
-  return Number.isFinite(time) ? time : null;
-}
-
-function getAutoLastInteractionChoice(
-  leftValue: unknown,
-  rightValue: unknown,
-): MergeConflictChoice | null {
-  const leftTimestamp = parseTimestampValue(leftValue);
-  const rightTimestamp = parseTimestampValue(rightValue);
-
-  if (leftTimestamp === null && rightTimestamp === null) {
-    return null;
-  }
-
-  if (leftTimestamp === null) {
-    return "right";
-  }
-
-  if (rightTimestamp === null) {
-    return "left";
-  }
-
-  if (leftTimestamp === rightTimestamp) {
-    return null;
-  }
-
-  return leftTimestamp > rightTimestamp ? "left" : "right";
-}
-
-function toPersonPreview(contact: Contact | null) {
-  if (!contact) {
-    return null;
-  }
-
-  return {
-    id: contact.id,
-    firstName: contact.firstName,
-    middleName: contact.middleName,
-    lastName: contact.lastName,
-    avatar: contact.avatar,
-  };
-}
-
-function formatConflictDisplayValue(field: MergeConflictField, value: unknown): string {
-  if (field === "importantDates") {
-    const count = normalizeImportantDatesSet(value).length;
-    return count > 0 ? `${count}` : "";
-  }
-
-  if (Array.isArray(value)) {
-    return value.length > 0 ? `${value.length}` : "";
-  }
-
-  if (value && typeof value === "object") {
-    return JSON.stringify(value);
-  }
-
-  return normalizeDisplayText(value);
-}
-
-interface AvatarConflictPickerProps {
-  leftContact: Contact;
-  rightContact: Contact;
-  choice: MergeConflictChoice;
-  label: string;
-  onChange: (side: MergeConflictChoice) => void;
-}
-
-function AvatarConflictPicker({
-  leftContact,
-  rightContact,
-  choice,
-  label,
-  onChange,
-}: AvatarConflictPickerProps) {
-  const sides: Array<{ side: MergeConflictChoice; contact: Contact }> = [
-    { side: "left", contact: leftContact },
-    { side: "right", contact: rightContact },
-  ];
-
-  return (
-    <Stack gap="sm">
-      <SimpleGrid cols={2} spacing="sm">
-        {sides.map(({ side, contact }) => {
-          const selected = choice === side;
-          const avatarColor = getAvatarColorFromName(contact.firstName, contact.lastName);
-          const fullName = `${contact.firstName} ${contact.lastName ?? ""}`.trim();
-          return (
-            <UnstyledButton
-              key={side}
-              onClick={() => onChange(side)}
-              w="100%"
-              h="100%"
-              style={{ textAlign: "left" }}
-              aria-pressed={selected}
-            >
-              <Paper
-                p="xs"
-                radius="md"
-                withBorder
-                h="100%"
-                style={{
-                  borderColor: selected ? "var(--mantine-primary-color-filled)" : undefined,
-                  backgroundColor: selected
-                    ? "var(--mantine-primary-color-light-hover)"
-                    : undefined,
-                  cursor: "pointer",
-                }}
-              >
-                <Stack gap={6} align="center">
-                  <Group justify="space-between" wrap="nowrap" w="100%">
-                    <Text size="sm" fw={500}>
-                      {label}
-                    </Text>
-                    {selected && <IconCheck size={14} />}
-                  </Group>
-                  <Avatar
-                    src={contact.avatar ?? undefined}
-                    size={48}
-                    radius="xl"
-                    color={avatarColor}
-                    name={fullName}
-                  />
-                </Stack>
-              </Paper>
-            </UnstyledButton>
-          );
-        })}
-      </SimpleGrid>
-    </Stack>
-  );
+  const t = useWebTranslations("MergeWithModal");
+  return <ModalTitle icon={<IconArrowMerge size={22} />} text={t("ModalTitle")} />;
 }
 
 export function openMergeWithModal({
@@ -389,39 +65,39 @@ export function openMergeWithModal({
   const modalId = createModalId("merge-with");
 
   modals.open({
-    modalId,
-    trapFocus: true,
-    className: "min-h-80",
-    size: "lg",
-    title: <MergeWithModalTitle />,
     children: (
       <MergeWithModal
         contacts={contacts}
-        initialLeftPersonId={leftPersonId}
-        initialRightPersonId={rightPersonId}
         disableLeftPicker={disableLeftPicker}
         disableRightPicker={disableRightPicker}
-        redirectToMergedPerson={redirectToMergedPerson}
+        initialConflictChoices={initialConflictChoices}
+        initialLeftPersonId={leftPersonId}
+        initialRightPersonId={rightPersonId}
         modalId={modalId}
         onSearch={onSearch}
         onSuccess={onSuccess}
-        initialConflictChoices={initialConflictChoices}
+        redirectToMergedPerson={redirectToMergedPerson}
       />
     ),
+    className: "min-h-80",
+    modalId,
+    size: "lg",
+    title: <MergeWithModalTitle />,
+    trapFocus: true,
   });
 }
 
 interface MergeWithModalProps {
   contacts: Contact[];
-  initialLeftPersonId: string;
-  initialRightPersonId?: string;
   disableLeftPicker: boolean;
   disableRightPicker: boolean;
-  redirectToMergedPerson: boolean;
+  initialConflictChoices?: Partial<Record<MergeConflictField, MergeConflictChoice>>;
+  initialLeftPersonId: string;
+  initialRightPersonId?: string;
   modalId: string;
   onSearch?: (query: string) => Promise<Contact[]>;
   onSuccess?: () => void;
-  initialConflictChoices?: Partial<Record<MergeConflictField, MergeConflictChoice>>;
+  redirectToMergedPerson: boolean;
 }
 
 function MergeWithModal({
@@ -436,9 +112,10 @@ function MergeWithModal({
   onSuccess,
   initialConflictChoices,
 }: MergeWithModalProps) {
+  const tCommon = useCommonTranslations();
   const router = useRouter();
   const mergeContactsMutation = useMergeContactsMutation();
-  const t = useTranslations("MergeWithModal");
+  const t = useWebTranslations("MergeWithModal");
   const shouldSkipPickStep =
     disableLeftPicker && disableRightPicker && Boolean(initialRightPersonId);
 
@@ -452,25 +129,30 @@ function MergeWithModal({
     Partial<Record<MergeConflictField, MergeConflictChoice>>
   >(initialConflictChoices ?? {});
 
-  useModalBlocking(modalId, isSubmitting);
+  const { closeModal, closeModalSync } = useModalDismiss(modalId, isSubmitting);
 
   useEffect(() => {
-    contacts.forEach((c) => knownContactsRef.current.set(c.id, c));
+    for (const c of contacts) {
+      knownContactsRef.current.set(c.id, c);
+    }
   }, [contacts]);
 
-  // Left picker: onSearch not wired — disabled in all current callers (disableLeftPicker: true).
   const handleRightSearch = useCallback(
     async (query: string): Promise<ContactPreview[]> => {
-      if (!onSearch) return [];
+      if (!onSearch) {
+        return [];
+      }
       const results = await onSearch(query);
-      results.forEach((c) => knownContactsRef.current.set(c.id, c));
+      for (const c of results) {
+        knownContactsRef.current.set(c.id, c);
+      }
       return results
         .filter((c) => !c.myself && c.id !== leftPersonId)
         .map((c) => ({
-          id: c.id,
-          firstName: c.firstName,
-          lastName: c.lastName,
           avatar: c.avatar,
+          firstName: c.firstName,
+          id: c.id,
+          lastName: c.lastName,
         }));
     },
     [onSearch, leftPersonId],
@@ -481,10 +163,10 @@ function MergeWithModal({
       contacts
         .filter((contact) => !contact.myself)
         .map((contact) => ({
-          id: contact.id,
-          firstName: contact.firstName,
-          lastName: contact.lastName,
           avatar: contact.avatar,
+          firstName: contact.firstName,
+          id: contact.id,
+          lastName: contact.lastName,
         })),
     [contacts],
   );
@@ -513,7 +195,11 @@ function MergeWithModal({
 
   const conflicts = useMemo(() => {
     if (!leftContact || !rightContact) {
-      return [] as Array<{ field: MergeConflictField; leftValue: unknown; rightValue: unknown }>;
+      return [] as Array<{
+        field: MergeConflictField;
+        leftValue: unknown;
+        rightValue: unknown;
+      }>;
     }
 
     return MERGE_CONFLICT_FIELDS.map((field) => ({
@@ -546,8 +232,8 @@ function MergeWithModal({
     if (!leftPersonId || !rightPersonId) {
       notifications.show(
         errorNotificationTemplate({
-          title: t("ErrorTitle"),
           description: t("SelectBothPeopleError"),
+          title: t("ErrorTitle"),
         }),
       );
       return;
@@ -556,8 +242,8 @@ function MergeWithModal({
     if (leftPersonId === rightPersonId) {
       notifications.show(
         errorNotificationTemplate({
-          title: t("ErrorTitle"),
           description: t("DifferentPeopleError"),
+          title: t("ErrorTitle"),
         }),
       );
       return;
@@ -571,7 +257,7 @@ function MergeWithModal({
     setStep("resolve");
   };
 
-  const handleMerge = async () => {
+  const handleMerge = useCallback(async () => {
     if (!leftPersonId || !rightPersonId) {
       return;
     }
@@ -581,16 +267,16 @@ function MergeWithModal({
 
     const loadingNotificationId = notifications.show({
       ...loadingNotificationTemplate({
-        title: t("MergingTitle"),
         description: t("MergingDescription"),
+        title: t("MergingTitle"),
       }),
     });
 
     try {
       const result = await mergeContactsMutation.mutateAsync({
+        conflictResolutions,
         leftPersonId,
         rightPersonId,
-        conflictResolutions,
       });
 
       if (!("personId" in result)) {
@@ -600,12 +286,12 @@ function MergeWithModal({
       notifications.hide(loadingNotificationId);
       notifications.show(
         successNotificationTemplate({
-          title: t("SuccessTitle"),
           description: t("MergeSuccess"),
+          title: t("SuccessTitle"),
         }),
       );
 
-      modals.close(modalId);
+      closeModalSync();
       onSuccess?.();
       if (redirectToMergedPerson) {
         router.push(`${WEBAPP_ROUTES.PERSON}/${result.personId}`);
@@ -614,15 +300,26 @@ function MergeWithModal({
       notifications.hide(loadingNotificationId);
       notifications.show(
         errorNotificationTemplate({
+          description: getUserFacingError(error, tCommon),
           title: t("ErrorTitle"),
-          description: error instanceof Error ? error.message : t("MergeFailed"),
         }),
       );
       setStep("resolve");
     } finally {
       setIsSubmitting(false);
     }
-  };
+  }, [
+    closeModalSync,
+    conflictResolutions,
+    leftPersonId,
+    mergeContactsMutation,
+    onSuccess,
+    redirectToMergedPerson,
+    rightPersonId,
+    router,
+    t,
+    tCommon,
+  ]);
 
   useEffect(() => {
     if (
@@ -637,203 +334,84 @@ function MergeWithModal({
       autoMergeRef.current = true;
       void handleMerge();
     }
-  }, [shouldSkipPickStep, step, leftPersonId, rightPersonId, conflicts.length, isSubmitting]);
+  }, [
+    shouldSkipPickStep,
+    step,
+    leftPersonId,
+    rightPersonId,
+    conflicts.length,
+    isSubmitting,
+    handleMerge,
+  ]);
+
+  const fieldLabel = useCallback(
+    (field: MergeConflictField | "latLng") => t(`Fields.${field}`),
+    [t],
+  );
+
+  const showAvatarPicker =
+    Boolean(leftContact && rightContact) && (!shouldSkipPickStep || conflicts.length > 0);
 
   return (
     <Stack gap="md">
       {step === "pick" ? (
-        <Stack gap="md">
-          <Group align="center" justify="space-between" wrap="nowrap">
-            <PersonChip
-              person={toPersonPreview(leftContact)}
-              isSelectable
-              people={leftSelectablePeople}
-              onSelectPerson={(personId) => {
-                setLeftPersonId(personId);
-                if (personId === rightPersonId) {
-                  setRightPersonId("");
-                }
-              }}
-              disabled={disableLeftPicker}
-              placeholder={t("SelectLeftPerson")}
-              searchPlaceholder={t("SearchPeople")}
-              noResultsLabel={t("NoPeopleFound")}
-            />
-
-            <Text c="dimmed" size="sm" fw={500}>
-              {t("MergeWithLabel")}
-            </Text>
-
-            <PersonChip
-              person={toPersonPreview(rightContact)}
-              isSelectable
-              people={rightSelectablePeople}
-              onSelectPerson={(personId) => setRightPersonId(personId)}
-              disabled={disableRightPicker}
-              placeholder={t("SelectRightPerson")}
-              searchPlaceholder={t("SearchPeople")}
-              noResultsLabel={t("NoPeopleFound")}
-              onSearch={onSearch ? handleRightSearch : undefined}
-              searchDebounceMs={DEBOUNCE_MS.contactPicker}
-            />
-          </Group>
-
-          <ModalFooter
-            cancelLabel={t("Cancel")}
-            onCancel={() => modals.close(modalId)}
-            cancelDisabled={isSubmitting}
-            actionLabel={t("Continue")}
-            onAction={goToResolve}
-            actionRightSection={<IconArrowRight size={16} />}
-            actionDisabled={isSubmitting}
-          />
-        </Stack>
+        <MergeWithPickStep
+          cancelLabel={t("Cancel")}
+          continueLabel={t("Continue")}
+          disableLeftPicker={disableLeftPicker}
+          disableRightPicker={disableRightPicker}
+          isSubmitting={isSubmitting}
+          leftContact={leftContact}
+          leftSelectablePeople={leftSelectablePeople}
+          mergeWithLabel={t("MergeWithLabel")}
+          noPeopleFoundLabel={t("NoPeopleFound")}
+          onCancel={closeModal}
+          onContinue={goToResolve}
+          onRightSearch={onSearch ? handleRightSearch : undefined}
+          onSelectLeft={(personId) => {
+            setLeftPersonId(personId);
+            if (personId === rightPersonId) {
+              setRightPersonId("");
+            }
+          }}
+          onSelectRight={setRightPersonId}
+          rightContact={rightContact}
+          rightSelectablePeople={rightSelectablePeople}
+          searchPeopleLabel={t("SearchPeople")}
+          selectLeftPersonLabel={t("SelectLeftPerson")}
+          selectRightPersonLabel={t("SelectRightPerson")}
+        />
       ) : null}
 
       {step === "resolve" ? (
-        <ModalScrollLayout
-          footer={
-            <ModalFooter
-              mt={0}
-              {...(shouldSkipPickStep
-                ? {}
-                : {
-                    backLabel: t("Back"),
-                    backLeftSection: <IconArrowLeft size={16} />,
-                    onBack: () => setStep("pick"),
-                    backDisabled: isSubmitting,
-                  })}
-              cancelLabel={t("Cancel")}
-              onCancel={() => modals.close(modalId)}
-              cancelDisabled={isSubmitting}
-              actionLabel={t("Merge")}
-              onAction={() => {
-                void handleMerge();
-              }}
-              actionLeftSection={<IconArrowMerge size={16} />}
-              actionLoading={isSubmitting}
-              actionDisabled={isSubmitting}
-            />
-          }
-        >
-          <Stack gap="sm">
-            {(() => {
-            // Show avatar picker when the user is explicitly in the resolve step
-            // (not the auto-merge fast path where shouldSkipPickStep && no field conflicts)
-            const showAvatarPicker =
-              Boolean(leftContact && rightContact) && (!shouldSkipPickStep || conflicts.length > 0);
-
-            if (conflicts.length === 0) {
-              return (
-                <>
-                  {showAvatarPicker && leftContact && rightContact ? (
-                    <AvatarConflictPicker
-                      leftContact={leftContact}
-                      rightContact={rightContact}
-                      choice={conflictChoices.avatar ?? "left"}
-                      label={t("Fields.avatar")}
-                      onChange={(side) => setConflictChoices((prev) => ({ ...prev, avatar: side }))}
-                    />
-                  ) : (
-                    <Paper withBorder radius="md" p="md">
-                      <Text size="sm" c="dimmed">
-                        {t("NoConflicts")}
-                      </Text>
-                    </Paper>
-                  )}
-                </>
-              );
-            }
-
-            return (
-              <Stack gap="sm">
-                <Text size="sm" c="dimmed">
-                  {t("ConflictHint")}
-                </Text>
-                <SimpleGrid cols={2} spacing="sm" mt={"md"} mb="xs">
-                  <Center>
-                    <PersonChip person={toPersonPreview(leftContact)} isClickable />
-                  </Center>
-                  <Center>
-                    <PersonChip person={toPersonPreview(rightContact)} isClickable />
-                  </Center>
-                </SimpleGrid>
-                {/* Avatar conflict picker alongside field conflicts */}
-                {leftContact && rightContact ? (
-                  <AvatarConflictPicker
-                    leftContact={leftContact}
-                    rightContact={rightContact}
-                    choice={conflictChoices.avatar ?? "left"}
-                    label={t("Fields.avatar")}
-                    onChange={(side) => setConflictChoices((prev) => ({ ...prev, avatar: side }))}
-                  />
-                ) : null}
-                {(() => {
-                  const hasLatLngPair =
-                    conflicts.some((c) => c.field === "latitude") &&
-                    conflicts.some((c) => c.field === "longitude");
-                  const lngConflict = conflicts.find((c) => c.field === "longitude");
-
-                  return conflicts
-                    .filter((c) => !(c.field === "longitude" && hasLatLngPair))
-                    .map((conflict) => {
-                      const isLatLng = conflict.field === "latitude" && hasLatLngPair;
-                      const selectedChoice = conflictChoices[conflict.field] || "left";
-
-                      const label = isLatLng
-                        ? `${t("Fields.latitude")} / ${t("Fields.longitude")}`
-                        : t(`Fields.${conflict.field}`);
-
-                      const leftDesc = isLatLng
-                        ? `${normalizeDisplayText(conflict.leftValue)}, ${normalizeDisplayText(lngConflict?.leftValue)}`
-                        : formatConflictDisplayValue(conflict.field, conflict.leftValue) ||
-                          undefined;
-
-                      const rightDesc = isLatLng
-                        ? `${normalizeDisplayText(conflict.rightValue)}, ${normalizeDisplayText(lngConflict?.rightValue)}`
-                        : formatConflictDisplayValue(conflict.field, conflict.rightValue) ||
-                          undefined;
-
-                      const handleSelect = (side: MergeConflictChoice) => {
-                        setConflictChoices((prev) => {
-                          const next = { ...prev, [conflict.field]: side };
-                          if (isLatLng) next.longitude = side;
-                          return next;
-                        });
-                      };
-
-                      return (
-                        <Stack key={conflict.field} gap="sm">
-                          <SimpleGrid cols={2} spacing="sm">
-                            <SelectableCard
-                              selected={selectedChoice === "left"}
-                              label={label}
-                              description={leftDesc || undefined}
-                              onClick={() => handleSelect("left")}
-                            />
-                            <SelectableCard
-                              selected={selectedChoice === "right"}
-                              label={label}
-                              description={rightDesc || undefined}
-                              onClick={() => handleSelect("right")}
-                            />
-                          </SimpleGrid>
-                        </Stack>
-                      );
-                    });
-                })()}
-              </Stack>
-            );
-            })()}
-          </Stack>
-        </ModalScrollLayout>
+        <MergeWithResolveStep
+          backLabel={t("Back")}
+          cancelLabel={t("Cancel")}
+          conflictChoices={conflictChoices}
+          conflictHint={t("ConflictHint")}
+          conflicts={conflicts}
+          fieldLabel={fieldLabel}
+          isSubmitting={isSubmitting}
+          leftContact={leftContact}
+          mergeLabel={t("Merge")}
+          noConflictsLabel={t("NoConflicts")}
+          onBack={shouldSkipPickStep ? undefined : () => setStep("pick")}
+          onCancel={closeModal}
+          onChangeChoice={setConflictChoices}
+          onMerge={() => {
+            void handleMerge();
+          }}
+          rightContact={rightContact}
+          showAvatarPicker={showAvatarPicker}
+          showBackButton={!shouldSkipPickStep}
+        />
       ) : null}
 
       {step === "processing" ? (
         <Center py="xl">
           <Stack align="center" gap="sm">
             <Loader />
-            <Text size="sm" c="dimmed">
+            <Text c="dimmed" size="sm">
               {t("Processing")}
             </Text>
           </Stack>

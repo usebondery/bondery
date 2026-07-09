@@ -1,28 +1,24 @@
-import { StyleSheet, Text } from "react-native";
 import { IconPlus } from "@tabler/icons-react-native";
-import { Tappable } from "../../../theme/Tappable";
-import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
-import { MOBILE_TYPOGRAPHY } from "../../../theme/tokens";
+import { StyleSheet, Text } from "react-native";
 import { useMobileTranslations } from "../../../lib/i18n/useMobileTranslations";
+import { Tappable } from "../../../theme/Tappable";
+import { MOBILE_TYPOGRAPHY } from "../../../theme/tokens";
+import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
 
 interface CreateGroupChipProps {
-  onPress: () => void;
   disabled?: boolean;
+  onPress: () => void;
 }
 
-export function CreateGroupChip({
-  onPress,
-  disabled = false,
-}: CreateGroupChipProps) {
+export function CreateGroupChip({ onPress, disabled = false }: CreateGroupChipProps) {
   const t = useMobileTranslations();
   const colors = useMobileThemeColors();
-  const label = t("MobileApp.Groups.CreateGroup");
+  const label = t("CreateGroup", { ns: "MobileGroups" });
 
   return (
     <Tappable
-      variant="subtle"
-      accessibilityRole="button"
       accessibilityLabel={label}
+      accessibilityRole="button"
       accessibilityState={{ disabled }}
       onPress={disabled ? undefined : onPress}
       style={[
@@ -33,6 +29,7 @@ export function CreateGroupChip({
           opacity: disabled ? 0.5 : 1,
         },
       ]}
+      variant="subtle"
     >
       <IconPlus size={16} stroke={colors.textMuted} />
       <Text style={[styles.label, { color: colors.textPrimary }]}>{label}</Text>
@@ -42,14 +39,14 @@ export function CreateGroupChip({
 
 const styles = StyleSheet.create({
   chip: {
-    flexDirection: "row",
     alignItems: "center",
+    borderRadius: 20,
+    borderStyle: "dashed",
+    borderWidth: 1,
+    flexDirection: "row",
     gap: 6,
     paddingHorizontal: 12,
     paddingVertical: 8,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderStyle: "dashed",
   },
   label: {
     fontSize: MOBILE_TYPOGRAPHY.fontSize.body,

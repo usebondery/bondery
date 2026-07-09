@@ -31,8 +31,8 @@ export const ContactsSectionHeader = memo(function ContactsSectionHeader({
 
 const styles = StyleSheet.create({
   sectionHeader: {
+    borderBottomWidth: 1,
     paddingHorizontal: 16,
     paddingVertical: 6,
-    borderBottomWidth: 1,
   },
 });

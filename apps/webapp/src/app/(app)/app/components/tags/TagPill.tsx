@@ -2,18 +2,18 @@ import { Group, Text, Tooltip, UnstyledButton } from "@mantine/core";
 import { IconPencil, IconPlus, IconX } from "@tabler/icons-react";
 
 interface TagPillProps {
-  label: string;
-  color?: string | null;
-  onClick?: () => void;
-  tooltipLabel?: string;
-  showEditIcon?: boolean;
-  showAddIcon?: boolean;
-  preventInputBlur?: boolean;
   className?: string;
   clearable?: boolean;
+  color?: string | null;
+  label: string;
+  onClick?: () => void;
   onRemove?: () => void;
+  preventInputBlur?: boolean;
   removeTooltipLabel?: string;
+  showAddIcon?: boolean;
+  showEditIcon?: boolean;
   size?: "xs" | "sm" | "md";
+  tooltipLabel?: string;
 }
 
 export function TagPill({
@@ -34,9 +34,9 @@ export function TagPill({
     NonNullable<TagPillProps["size"]>,
     { px: number; py: number; font: string }
   > = {
-    xs: { px: 10, py: 4, font: "xs" },
-    sm: { px: 12, py: 6, font: "sm" },
-    md: { px: 14, py: 8, font: "md" },
+    md: { font: "md", px: 14, py: 8 },
+    sm: { font: "sm", px: 12, py: 6 },
+    xs: { font: "xs", px: 10, py: 4 },
   };
 
   const resolved = spacingBySize[size];
@@ -45,34 +45,34 @@ export function TagPill({
 
   return (
     <Group
-      gap={0}
-      wrap="nowrap"
       className={`button-scale-effect ${className ?? ""}`}
+      gap={0}
       style={{
+        backgroundColor,
+        border: `1px solid ${borderColor}`,
         borderRadius: 999,
         overflow: "hidden",
-        border: `1px solid ${borderColor}`,
-        backgroundColor,
       }}
+      wrap="nowrap"
     >
       {onClick ? (
         <Tooltip label={tooltipLabel} withArrow>
           <UnstyledButton
+            onClick={onClick}
             onMouseDown={(event) => {
               if (preventInputBlur) {
                 event.preventDefault();
               }
             }}
-            onClick={onClick}
             style={{
-              display: "flex",
               alignItems: "center",
+              color: color || undefined,
+              display: "flex",
               gap: 6,
               padding: `${resolved.py}px ${resolved.px}px`,
-              color: color || undefined,
             }}
           >
-            <Text size={resolved.font} fw={500} c="inherit">
+            <Text c="inherit" fw={500} size={resolved.font}>
               {label}
             </Text>
             {showEditIcon ? <IconPencil size={14} /> : null}
@@ -82,14 +82,14 @@ export function TagPill({
       ) : (
         <span
           style={{
-            display: "inline-flex",
             alignItems: "center",
+            color: color || undefined,
+            display: "inline-flex",
             gap: 6,
             padding: `${resolved.py}px ${resolved.px}px`,
-            color: color || undefined,
           }}
         >
-          <Text size={resolved.font} fw={500} c="inherit">
+          <Text c="inherit" fw={500} size={resolved.font}>
             {label}
           </Text>
         </span>
@@ -99,24 +99,24 @@ export function TagPill({
         <Tooltip label={removeTooltipLabel} withArrow>
           <UnstyledButton
             aria-label={removeTooltipLabel}
-            title={removeTooltipLabel}
+            onClick={(event) => {
+              event.stopPropagation();
+              onRemove();
+            }}
             onMouseDown={(event) => {
               if (preventInputBlur) {
                 event.preventDefault();
               }
             }}
-            onClick={(event) => {
-              event.stopPropagation();
-              onRemove();
-            }}
             style={{
-              display: "flex",
               alignItems: "center",
-              justifyContent: "center",
-              padding: `${resolved.py}px ${Math.max(8, resolved.py + 4)}px`,
               borderLeft: `1px solid ${borderColor}`,
               color: color || "var(--mantine-color-gray-7)",
+              display: "flex",
+              justifyContent: "center",
+              padding: `${resolved.py}px ${Math.max(8, resolved.py + 4)}px`,
             }}
+            title={removeTooltipLabel}
           >
             <IconX size={14} />
           </UnstyledButton>

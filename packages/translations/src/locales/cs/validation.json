@@ -1,0 +1,35 @@
+{
+  "email": {
+    "invalid": "Zadejte prosím platnou e-mailovou adresu",
+    "invalidTitle": "Neplatný e-mail"
+  },
+  "fields": {
+    "firstName": {
+      "maxLength": "Jméno musí mít nejvýše {max} znaků",
+      "required": "Jméno je povinné"
+    },
+    "generic": {
+      "maxLength": "Value must be at most {max} characters"
+    },
+    "headline": {
+      "maxLength": "Titul musí mít nejvýše {max} znaků"
+    },
+    "label": {
+      "maxLength": "{field} must be at most {max} characters",
+      "required": "{field} is required"
+    },
+    "lastName": {
+      "maxLength": "Příjmení musí mít nejvýše {max} znaků"
+    },
+    "location": {
+      "maxLength": "Lokalita musí mít nejvýše {max} znaků"
+    },
+    "middleName": {
+      "maxLength": "Prostřední jméno musí mít nejvýše {max} znaků"
+    }
+  },
+  "interaction": {
+    "titleRequired": "Název je povinný"
+  },
+  "title": "Chyba validace"
+}

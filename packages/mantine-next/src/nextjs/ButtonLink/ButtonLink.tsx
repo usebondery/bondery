@@ -1,13 +1,10 @@
 "use client";
 
 import { Button, type ButtonProps } from "@mantine/core";
+import type { ElementType, ReactNode } from "react";
 import Link from "#nextjs/NextLink.js";
-import type { ReactNode } from "react";
 
-export type ButtonLinkProps = Omit<
-  ButtonProps,
-  "component" | "href" | "children"
-> & {
+export type ButtonLinkProps = Omit<ButtonProps, "component" | "href" | "children"> & {
   href: string;
   children: ReactNode;
   target?: string;
@@ -33,12 +30,12 @@ export function ButtonLink({
 }: ButtonLinkProps) {
   return (
     <Button
-      component={Link as any}
+      className={className}
+      component={Link as ElementType}
       href={href}
-      target={target}
       rel={rel}
       scroll={scroll}
-      className={className}
+      target={target}
       {...buttonProps}
     >
       {children}

@@ -1,0 +1,26 @@
+{
+  "AddressSearchPlaceholder": "Hledat podle jména nebo adresy...",
+  "Back": "Zpět",
+  "Empty": "Zatím nejsou žádné kontakty se souřadnicemi. Přidejte adresu nebo místo.",
+  "NoAddressesFound": "V této oblasti mapy nejsou žádné kontakty s adresami.",
+  "NoAddressesMatchSearch": "Žádná adresa neodpovídá vašemu vyhledávání.",
+  "NoContactsFound": "V této oblasti mapy nejsou žádné kontakty.",
+  "NoContactsMatchSearch": "Žádný takový kontakt nenalezen.",
+  "PinColumnAddress": "Adresa",
+  "PinColumnName": "Jméno",
+  "PinColumnType": "Typ",
+  "RefreshingPins": "Obnovuji značky na mapě",
+  "SearchLabel": "Prohledejte svět",
+  "SearchPlaceholder": "Zadejte adresu, město, region nebo zemi...",
+  "Subtitle": "Zobrazte všechny kontakty na jedné mapě s počátečním pohledem na Detroit.",
+  "Title": "Mapa",
+  "ViewAddresses": "Adresy",
+  "ViewLocations": "Polohy",
+  "VisibleColumns": {
+    "Coordinates": "Souřadnice",
+    "Location": "Místo",
+    "Name": "Jméno"
+  },
+  "VisibleContactsTitle": "Kontakty v aktuálním výřezu mapy ({count})",
+  "VisibleEmpty": "V této oblasti mapy nejsou žádné kontakty."
+}
