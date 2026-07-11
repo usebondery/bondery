@@ -457,7 +457,7 @@
   "name": "@bondery/helpers",
   "private": true,
   "scripts": {
-    "build": "node ../../scripts/generate-doc-links.mjs && rimraf dist && tsc && node ../../scripts/rewrite-package-hash-imports-in-dist.mjs helpers",
+    "build": "node ../../scripts/generate-doc-links.mjs && rimraf dist tsconfig.tsbuildinfo && tsc && node ../../scripts/rewrite-package-hash-imports-in-dist.mjs helpers",
     "check-types": "tsc --noEmit",
     "compile": "tsc",
     "dev": "tsc --watch --preserveWatchOutput",

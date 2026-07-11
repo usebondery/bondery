@@ -408,7 +408,7 @@
   "name": "@bondery/schemas",
   "private": true,
   "scripts": {
-    "build": "rimraf dist && tsc && node scripts/copy-locale-json.mjs && node ../../scripts/rewrite-package-hash-imports-in-dist.mjs schemas",
+    "build": "rimraf dist tsconfig.tsbuildinfo && tsc && node scripts/copy-locale-json.mjs && node ../../scripts/rewrite-package-hash-imports-in-dist.mjs schemas",
     "check-types": "tsc --noEmit",
     "compile": "tsc && node scripts/copy-locale-json.mjs",
     "dev": "tsc --watch --preserveWatchOutput",

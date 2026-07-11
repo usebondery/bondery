@@ -89,7 +89,7 @@
     "react": "^19.0.0"
   },
   "scripts": {
-    "build": "rimraf dist && tsc && node ../../scripts/rewrite-package-hash-imports-in-dist.mjs branding",
+    "build": "rimraf dist tsconfig.tsbuildinfo && tsc && node ../../scripts/rewrite-package-hash-imports-in-dist.mjs branding",
     "compile": "tsc",
     "dev": "tsc --watch --preserveWatchOutput"
   },
