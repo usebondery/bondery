@@ -22,7 +22,7 @@ export function LoginClient() {
   const searchParams = useSearchParams();
 
   // Preserve redirect parameter for post-login navigation (e.g., OAuth consent flow)
-  const redirectParam = searchParams.get("redirect") ?? searchParams.get("returnUrl");
+  const redirectParam = searchParams.get("redirect");
   const shouldForceDesktopLoginLayout = redirectParam?.startsWith("/oauth/consent") ?? false;
 
   const getProviderIcon = (iconName: string) => {

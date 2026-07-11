@@ -3,7 +3,12 @@ import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { serverApiFetch } from "@/lib/api/server";
+import { BYPASS_ONBOARDING_ONCE_COOKIE } from "@/lib/auth/constants";
 import { LOCALE_PREFS_COOKIE } from "@/lib/auth/detectLocale";
+import {
+  parseReturnIntent,
+  shouldBypassOnboardingForReturnPath,
+} from "@/lib/auth/returnIntent";
 import { PUBLIC_SUPABASE_PUBLISHABLE_KEY, PUBLIC_SUPABASE_URL } from "@/lib/platform/config";
 
 /**
@@ -65,14 +70,13 @@ export async function GET(request: Request) {
   const requestUrl = new URL(request.url);
   const code = requestUrl.searchParams.get("code");
   const origin = requestUrl.origin;
+  const safeRedirectPath = parseReturnIntent(requestUrl.searchParams);
+  const postLoginUrl = safeRedirectPath
+    ? `${origin}${safeRedirectPath}`
+    : `${origin}${WEBAPP_ROUTES.DEFAULT_PAGE_AFTER_LOGIN}`;
 
   if (code) {
     const cookieStore = await cookies();
-    const redirectPath = requestUrl.searchParams.get("redirect");
-    const postLoginUrl = redirectPath?.startsWith("/")
-      ? `${origin}${redirectPath}`
-      : `${origin}/app`;
-
     const response = NextResponse.redirect(postLoginUrl);
 
     const supabase = createServerClient(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_PUBLISHABLE_KEY, {
@@ -100,6 +104,13 @@ export async function GET(request: Request) {
       if (localePrefs) {
         await applyLocalePrefsViaApi(localePrefs);
         response.cookies.set(LOCALE_PREFS_COOKIE, "", { maxAge: 0, path: "/" });
+      }
+
+      if (shouldBypassOnboardingForReturnPath(safeRedirectPath)) {
+        response.cookies.set(BYPASS_ONBOARDING_ONCE_COOKIE, "1", {
+          maxAge: 60,
+          path: "/app",
+        });
       }
 
       return response;
