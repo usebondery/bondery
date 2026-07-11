@@ -36,11 +36,6 @@ import { useKeepInTouchQuery } from "@/lib/query/hooks/useKeepInTouch";
 import { KeepInTouchSelect } from "./components/KeepInTouchSelect";
 import { computeNextDueDate } from "./utils/keepInTouchConfig";
 
-interface KeepInTouchContact extends Contact {
-  /** Computed: days until next follow-up. Negative = overdue. */
-  daysUntilDue: number;
-}
-
 function computeDaysUntilDue(contact: Contact): number {
   const frequencyDays = contact.keepFrequencyDays;
   if (!frequencyDays) {

@@ -32,6 +32,7 @@ const FILLED_COLOR: Record<"primary" | "green", string> = {
 
 interface GroupCardCommonProps {
   cursorType?: "pointer" | "default";
+  fullWidth?: boolean;
   highlightColor?: HighlightColor;
   interactive?: boolean;
   selected?: boolean;
@@ -77,6 +78,7 @@ function GroupCardShell({
   compact,
   shadow,
   maxWidth,
+  fullWidth = false,
   interactive,
   cursorType,
   highlightColor,
@@ -91,6 +93,7 @@ function GroupCardShell({
   compact: boolean;
   shadow: string;
   maxWidth: string;
+  fullWidth?: boolean;
   interactive: boolean;
   cursorType?: "pointer" | "default";
   highlightColor?: HighlightColor;
@@ -107,13 +110,14 @@ function GroupCardShell({
       bd={highlightColor ? `1px solid ${BORDER_COLOR[highlightColor]}` : undefined}
       bg={highlightColor ? BG_COLOR[highlightColor] : undefined}
       className={className}
+      maw={fullWidth ? "100%" : maxWidth}
       onClick={onClick}
       p={compact ? "sm" : "md"}
       shadow={shadow}
       style={{
         cursor: cursorType || (interactive ? "pointer" : "default"),
-        maxWidth,
       }}
+      w="100%"
     >
       <Card.Section bg={sectionBg} h={compact ? 72 : 80} pos="relative">
         {sectionOverlay}
@@ -229,13 +233,14 @@ export function GroupCard(props: GroupCardProps) {
     selected = false,
     showMenu = true,
     cursorType,
+    fullWidth = false,
     highlightColor,
     shadow = "none",
   } = props;
 
   const variant = props.variant || "default";
   const compact = variant !== "default";
-  const maxWidth = GROUP_CARD_MAX_WIDTH_BY_VARIANT[variant];
+  const maxWidth = fullWidth ? "100%" : GROUP_CARD_MAX_WIDTH_BY_VARIANT[variant];
   const resolvedHighlightColor = highlightColor || (selected ? "primary" : undefined);
   const className = `w-full ${interactive ? "card-scale-effect" : ""}`.trim();
 
@@ -251,6 +256,7 @@ export function GroupCard(props: GroupCardProps) {
         className={className}
         compact={compact}
         cursorType={cursorType}
+        fullWidth={fullWidth}
         interactive={interactive}
         label={props.actionLabel}
         maxWidth={maxWidth}
@@ -301,15 +307,23 @@ export function GroupCard(props: GroupCardProps) {
       className={className}
       compact={compact}
       cursorType={cursorType}
+      fullWidth={fullWidth}
       highlightColor={resolvedHighlightColor}
       interactive={interactive}
       label={group.label}
       maxWidth={maxWidth}
       onClick={handleCardClick}
       sectionBg={group.color ?? undefined}
+      sectionContent={
+        group.emoji ? (
+          <Text component="span" fz={compact ? 32 : 40} lh={1}>
+            {group.emoji}
+          </Text>
+        ) : null
+      }
       sectionOverlay={
         showMenu ? (
-          <div style={{ position: "absolute", right: 12, top: 12 }}>
+          <div className="absolute top-3 right-3">
             <GroupCardMenu
               group={group}
               iconSize={compact ? "sm" : "md"}

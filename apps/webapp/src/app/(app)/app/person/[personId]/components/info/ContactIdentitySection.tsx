@@ -161,7 +161,8 @@ function usePersonNameFields(
  */
 function usePersonProfileFields(
   personId: string,
-  initialValues: Record<ProfileField, string>,
+  initialHeadline: string,
+  initialLocation: string,
   fieldConfigs: ProfileFieldConfig[],
   profileFieldValidationSchemas: ReturnType<
     typeof useContactIdentityFieldConfigs
@@ -174,16 +175,28 @@ function usePersonProfileFields(
     headline: false,
     location: false,
   });
-  const [values, setValues] = useState<Record<ProfileField, string>>(initialValues);
+  const [values, setValues] = useState<Record<ProfileField, string>>({
+    headline: initialHeadline,
+    location: initialLocation,
+  });
 
-  const persistedValuesRef = useRef<Record<ProfileField, string>>(initialValues);
+  const persistedValuesRef = useRef<Record<ProfileField, string>>({
+    headline: initialHeadline,
+    location: initialLocation,
+  });
   const placeCoordinatesRef = useRef<{ latitude: number; longitude: number } | null>(null);
 
   useEffect(() => {
-    setValues(initialValues);
-    persistedValuesRef.current = initialValues;
+    setValues({
+      headline: initialHeadline,
+      location: initialLocation,
+    });
+    persistedValuesRef.current = {
+      headline: initialHeadline,
+      location: initialLocation,
+    };
     placeCoordinatesRef.current = null;
-  }, [initialValues.location, initialValues.headline, initialValues]);
+  }, [initialHeadline, initialLocation]);
 
   const updateField = useCallback((field: ProfileField, value: string) => {
     setValues((previous) => ({
@@ -422,10 +435,8 @@ export function ContactIdentitySection({
     handleBlur: handleProfileBlur,
   } = usePersonProfileFields(
     personId,
-    {
-      headline: contact.headline || "",
-      location: contact.location || "",
-    },
+    contact.headline || "",
+    contact.location || "",
     profileFieldConfigs,
     profileFieldValidationSchemas,
     copy,

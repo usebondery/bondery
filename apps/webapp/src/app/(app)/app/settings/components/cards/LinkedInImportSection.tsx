@@ -3,7 +3,7 @@
 import { IconBrandLinkedin } from "@tabler/icons-react";
 import { IntegrationCard } from "@/components/shared/IntegrationCard";
 import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
-import { openLinkedInImportModal } from "./modals/openLinkedInImportModal";
+import { openLinkedInImportModal } from "../modals/openLinkedInImportModal";
 
 export function LinkedInImportSection() {
   const t = useWebTranslations("SettingsPage", "DataManagement.LinkedInImport");

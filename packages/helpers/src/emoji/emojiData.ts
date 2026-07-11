@@ -397,24 +397,21 @@ const getBaseCategoryByIndex = (index: number): EmojiCategoryName => {
   return range?.name ?? "Miscellaneous";
 };
 
-const grouped = CATEGORY_ORDER.reduce<Record<EmojiCategoryName, EmojiData[]>>(
-  (acc, category) => ({ ...acc, [category]: [] }),
-  {
-    Activities: [],
-    Animals: [],
-    Buildings: [],
-    Celebrations: [],
-    Food: [],
-    Hearts: [],
-    Humans: [],
-    Miscellaneous: [],
-    Nature: [],
-    Objects: [],
-    Sports: [],
-    Travel: [],
-    Work: [],
-  },
-);
+const grouped: Record<EmojiCategoryName, EmojiData[]> = {
+  Activities: [],
+  Animals: [],
+  Buildings: [],
+  Celebrations: [],
+  Food: [],
+  Hearts: [],
+  Humans: [],
+  Miscellaneous: [],
+  Nature: [],
+  Objects: [],
+  Sports: [],
+  Travel: [],
+  Work: [],
+};
 
 EMOJI_LIST.forEach((emojiData, index) => {
   const overriddenCategory = CATEGORY_OVERRIDES[emojiData.emoji];

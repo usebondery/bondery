@@ -2,24 +2,28 @@
 
 import {
   errorNotificationTemplate,
+  loadingNotificationTemplate,
   ModalTitle,
   successNotificationTemplate,
 } from "@bondery/mantine-next";
 import type { Activity, Contact } from "@bondery/schemas";
-import { Stack, Text } from "@mantine/core";
+import { Button, Center, Stack, Text } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { IconCopy, IconTrash } from "@tabler/icons-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useRef } from "react";
-import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
-import { useContactInteractionsQuery, useContactsListQuery } from "@/lib/query/hooks/useContacts";
+import { InteractionsList } from "@/components/interactions/InteractionsList";
+import { openStandardConfirmModal } from "@/components/modals/openStandardConfirmModal";
+import { useCommonTranslations, useWebTranslations } from "@/lib/i18n/useWebTranslations";
+import {
+  useContactInteractionsInfiniteQuery,
+  useContactsSelectableListQuery,
+} from "@/lib/query/hooks/useContacts";
 import {
   useCreateInteractionMutation,
   useDeleteInteractionMutation,
 } from "@/lib/query/hooks/useInteractions";
 import { PERSON_SELECTABLE_CONTACTS } from "@/lib/query/personPageQueryParams";
-import { InteractionsList } from "../../../../components/interactions/InteractionsList";
-import { openStandardConfirmModal } from "../../../../components/modals/openStandardConfirmModal";
 import { openNewActivityModal } from "../../../../interactions/components/NewActivityModal";
 
 interface PersonInteractionsSectionProps {
@@ -32,11 +36,21 @@ export function PersonInteractionsSection({ personId, contact }: PersonInteracti
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const t = useWebTranslations("InteractionsPage");
+  const tCommon = useCommonTranslations();
   const deleteInteractionMutation = useDeleteInteractionMutation(personId);
   const createInteractionMutation = useCreateInteractionMutation(personId);
   const addInteractionTriggeredRef = useRef(false);
-  const { data: activities = [] } = useContactInteractionsQuery(personId);
-  const { data: selectableContactsData } = useContactsListQuery(PERSON_SELECTABLE_CONTACTS);
+  const {
+    data: interactionsData,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useContactInteractionsInfiniteQuery(personId);
+  const activities = interactionsData?.pages.flatMap((page) => page.activities) ?? [];
+  const hasMore = hasNextPage ?? false;
+  const { data: selectableContactsData } = useContactsSelectableListQuery(
+    PERSON_SELECTABLE_CONTACTS,
+  );
 
   const selectableContacts = useMemo(
     () => (selectableContactsData?.contacts ?? []).filter((candidate) => candidate.id !== personId),
@@ -148,6 +162,13 @@ export function PersonInteractionsSection({ personId, contact }: PersonInteracti
       .map((participant) => (typeof participant === "string" ? participant : participant.id))
       .filter((id): id is string => Boolean(id));
 
+    const loadingNotificationId = notifications.show({
+      ...loadingNotificationTemplate({
+        description: t("DuplicateInteraction.LoadingDescription"),
+        title: tCommon("feedback.duplicating"),
+      }),
+    });
+
     try {
       await createInteractionMutation.mutateAsync({
         date: activity.date,
@@ -157,20 +178,22 @@ export function PersonInteractionsSection({ personId, contact }: PersonInteracti
         type: activity.type,
       });
 
-      notifications.show(
-        successNotificationTemplate({
+      notifications.update({
+        ...successNotificationTemplate({
           description: t("ActivityDuplicated"),
           icon: <IconCopy size={18} />,
           title: t("SuccessTitle"),
         }),
-      );
+        id: loadingNotificationId,
+      });
     } catch {
-      notifications.show(
-        errorNotificationTemplate({
+      notifications.update({
+        ...errorNotificationTemplate({
           description: t("DuplicateFailed"),
           title: t("ErrorTitle"),
         }),
-      );
+        id: loadingNotificationId,
+      });
     }
   };
 
@@ -192,6 +215,20 @@ export function PersonInteractionsSection({ personId, contact }: PersonInteracti
         onOpen={handleActivityClick}
         resolveParticipants={resolveParticipants}
       />
+
+      {hasMore ? (
+        <Center>
+          <Button
+            loading={isFetchingNextPage}
+            onClick={() => {
+              void fetchNextPage();
+            }}
+            variant="light"
+          >
+            {t("LoadMoreBatch")}
+          </Button>
+        </Center>
+      ) : null}
 
       {activities.length === 0 && (
         <Text c="dimmed" py="xl" size="sm" ta="center">

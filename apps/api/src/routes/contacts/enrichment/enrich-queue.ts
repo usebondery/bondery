@@ -5,7 +5,7 @@
 
 import {
   apiSuccessResponseSchema,
-  enrichEligibleCountResponseSchema,
+  enrichQueueCountResponseSchema,
   enrichQueueInitBodySchema,
   enrichQueueInitResponseSchema,
   enrichQueueNextBatchResponseSchema,
@@ -16,6 +16,7 @@ import { uuidParamSchema } from "@bondery/schemas/http";
 import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
 import {
   cancelEnrichQueue,
+  getEnrichQueueEligibleCount,
   initEnrichQueue,
   updateEnrichQueueItem,
 } from "../../../domains/contacts/enrichment/enrich-queue.js";
@@ -27,31 +28,18 @@ import { withDomainRoute } from "../../../lib/platform/with-domain-route.js";
 
 export function registerEnrichQueueRoutes(fastify: AppFastifyInstance): void {
   /**
-   * GET /api/contacts/enrich-queue/eligible-count
+   * GET /api/contacts/enrich-queue/count
    * Count people with a LinkedIn handle but no people_linkedin record (never synced).
-   * Uses the get_linkedin_enrich_eligible RPC for a single efficient join.
    */
   fastify.get(
-    "/enrich-queue/eligible-count",
+    "/enrich-queue/count",
     {
       schema: {
         description: "Count contacts with a LinkedIn handle but no synced LinkedIn profile data.",
-        response: withOkResponse(enrichEligibleCountResponseSchema, "Eligible enrichment count"),
+        response: withOkResponse(enrichQueueCountResponseSchema, "Eligible enrichment count"),
       } satisfies FastifyZodOpenApiSchema,
     },
-    async (request) => {
-      const { client, user } = getAuth(request);
-
-      const { data, error } = await client.rpc("get_linkedin_enrich_eligible", {
-        p_user_id: user.id,
-      });
-
-      if (error) {
-        throw internal("internal_server_error", error.message);
-      }
-
-      return { count: (data || []).length };
-    },
+    withDomainRoute(async (ctx) => getEnrichQueueEligibleCount(ctx)),
   );
 
   /**

@@ -33,6 +33,9 @@
   "DescriptionPlaceholder": "Důležité informace, například co jste probírali, důležité momenty, URL na fotoalba...",
   "DuplicateAction": "Duplikovat",
   "DuplicateFailed": "Interakci se nepodařilo duplikovat",
+  "DuplicateInteraction": {
+    "LoadingDescription": "Duplikování interakce..."
+  },
   "EditAction": "Upravit",
   "ErrorTitle": "Chyba",
   "FrequencyBiannually": "Každé půl roku",
@@ -53,6 +56,7 @@
   "LastInteractionUpdated": "Poslední interakce aktualizována",
   "LastInteractionUpdateFailed": "Nepodařilo se aktualizovat poslední interakci",
   "LastInteractionViaActivity": "Z {type}",
+  "LoadMoreBatch": "Načíst dalších 20 interakcí",
   "MorePeople": "+{count} dalších",
   "NextDue": "Příští kontakt",
   "NoActivitiesFiltered": "Žádná taková interakce nenalezena.",

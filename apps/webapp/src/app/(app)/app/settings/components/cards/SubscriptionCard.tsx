@@ -4,11 +4,11 @@ import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import type { SubscriptionStatus } from "@bondery/schemas";
 import { Badge, Button, CardSection, Group, Progress, Stack, Text } from "@mantine/core";
 import { IconCreditCard, IconExternalLink } from "@tabler/icons-react";
-import { UpgradeButton } from "@/components/shared";
+import { UpgradeButton } from "@/components/shared/UpgradeButton";
 import { useDateFormatter as useFormatter } from "@/lib/i18n/useDateFormatter";
 import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
 import { useSubscriptionQuery } from "@/lib/query/hooks/useSubscription";
-import { SettingsSection } from "./cards/SettingsSection";
+import { SettingsSection } from "./SettingsSection";
 
 function SubscriptionCardContent({
   subscriptionStatus,

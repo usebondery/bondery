@@ -2,6 +2,7 @@ import type { QueryClient } from "@tanstack/react-query";
 import {
   chatKeys,
   contactKeys,
+  enrichQueueKeys,
   groupKeys,
   interactionKeys,
   mergeRecommendationKeys,
@@ -103,6 +104,22 @@ export async function invalidateMergeRecommendationDomain(queryClient: QueryClie
   await queryClient.invalidateQueries({ queryKey: mergeRecommendationKeys.all });
 }
 
+export async function invalidateEnrichQueueDomain(queryClient: QueryClient): Promise<void> {
+  await queryClient.invalidateQueries({ queryKey: enrichQueueKeys.all });
+}
+
+/** Shell badge: merge + enrich count queries and related list/status caches. */
+export async function invalidateContactsAttention(queryClient: QueryClient): Promise<void> {
+  await Promise.all([
+    invalidateMergeRecommendationDomain(queryClient),
+    invalidateEnrichQueueDomain(queryClient),
+  ]);
+}
+
+export async function invalidateKeepInTouchCount(queryClient: QueryClient): Promise<void> {
+  await queryClient.invalidateQueries({ queryKey: contactKeys.keepInTouchCount() });
+}
+
 export async function invalidateReminderDomain(queryClient: QueryClient): Promise<void> {
   await queryClient.invalidateQueries({ queryKey: reminderKeys.all });
 }
@@ -122,7 +139,8 @@ export async function invalidateChatSessionMessages(
 export async function invalidateAfterImport(queryClient: QueryClient): Promise<void> {
   await Promise.all([
     invalidateContactDomain(queryClient),
-    invalidateMergeRecommendationDomain(queryClient),
+    invalidateContactsAttention(queryClient),
+    invalidateKeepInTouchCount(queryClient),
     invalidateGroupDomain(queryClient),
     invalidateSettings(queryClient),
   ]);
@@ -132,7 +150,7 @@ export async function invalidateAfterImport(queryClient: QueryClient): Promise<v
 export async function invalidateAfterEnrichBatch(queryClient: QueryClient): Promise<void> {
   await Promise.all([
     invalidateContactDomain(queryClient),
-    invalidateMergeRecommendationDomain(queryClient),
+    invalidateContactsAttention(queryClient),
     invalidateSettings(queryClient),
   ]);
 }

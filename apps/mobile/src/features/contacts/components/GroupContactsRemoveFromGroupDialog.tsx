@@ -4,7 +4,7 @@ import { removeContactsFromGroup } from "../../../lib/domains/groups";
 import { useMobileTranslations } from "../../../lib/i18n/useMobileTranslations";
 import { useAppToast } from "../../../lib/toast/useAppToast";
 import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
-import { useContactsEffectiveSelectedCount, useContactsSelection } from "../contactsSelectionStore";
+import { useContactsSelection } from "../contactsSelectionStore";
 import { resolveContactsSelectionPersonIds } from "../resolveContactsSelectionPersonIds";
 
 interface GroupContactsRemoveFromGroupDialogProps {
@@ -21,7 +21,6 @@ export function GroupContactsRemoveFromGroupDialog({
   const t = useMobileTranslations();
   const colors = useMobileThemeColors();
   const { showToast } = useAppToast();
-  const effectiveSelectedCount = useContactsEffectiveSelectedCount();
   const isRemoveFromGroupConfirmOpen = useContactsSelection(
     (state) => state.isRemoveFromGroupConfirmOpen,
   );

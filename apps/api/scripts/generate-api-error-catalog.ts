@@ -18,7 +18,7 @@ type CodeMeta = { httpStatus: number; usages: Set<string> };
 const codeMeta = new Map<string, CodeMeta>();
 
 /** Snake_case API error codes used across the API after the catalog migration. */
-const CODE = String.raw`[a-z][a-z0-9_]*`;
+const CODE = "[a-z][a-z0-9_]*";
 
 function addCode(code: string, httpStatus: number, usage: string) {
   const existing = codeMeta.get(code) ?? { httpStatus, usages: new Set<string>() };

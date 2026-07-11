@@ -72,6 +72,7 @@
   },
   "description": "Bondery Webapp",
   "devDependencies": {
+    "@bondery/typescript-config": "*",
     "@tailwindcss/postcss": "^4",
     "@types/leaflet": "^1.9.21",
     "@types/leaflet.markercluster": "^1.5.6",
@@ -95,18 +96,18 @@
     "check-env": "tsx scripts/check-env.ts",
     "check-modal-patterns": "tsx scripts/check-modal-patterns.ts",
     "check-modal-patterns:strict": "cross-env CHECK_MODAL_PATTERNS_STRICT=1 tsx scripts/check-modal-patterns.ts",
-    "check-route-titles": "tsx scripts/check-route-titles.ts",
     "check-schemas-imports": "tsx scripts/check-schemas-imports.ts",
-    "check-schemas-imports:strict": "cross-env CHECK_SCHEMAS_IMPORTS_STRICT=1 tsx scripts/check-schemas-imports.ts",
-    "check-types": "tsc --noEmit && npm run check-api-fetch:strict && npm run check-route-titles && npm run check-modal-patterns:strict && npm run check-schemas-imports:strict",
+    "check-theme-patterns": "tsx scripts/check-theme-patterns.ts",
+    "check-theme-patterns:strict": "cross-env CHECK_THEME_PATTERNS_STRICT=1 tsx scripts/check-theme-patterns.ts",
+    "check-types": "tsc --noEmit && npm run check-api-fetch:strict && npm run check-modal-patterns:strict && npm run check-schemas-imports:strict && npm run check-theme-patterns:strict",
     "dev": "next dev --port 26632",
     "generate-icons": "tsx scripts/generate-icons.ts",
-    "lint": "biome lint .",
     "prebuild": "cross-env NODE_ENV=production npm run generate-icons",
     "predev": "cross-env NODE_ENV=development npm run generate-icons",
     "smoke-ssr": "node scripts/smoke-ssr-boot.mjs",
     "start": "next start",
-    "test:sync": "tsx --test src/lib/sync/sync-wake-client.test.ts"
+    "test:sync": "tsx --test src/lib/sync/sync-wake-client.test.ts",
+    "test:theme": "tsx --test src/lib/theme/theme.test.ts"
   },
   "type": "module",
   "version": "1.7.0"

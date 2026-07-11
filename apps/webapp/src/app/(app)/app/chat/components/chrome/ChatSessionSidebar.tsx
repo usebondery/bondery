@@ -18,7 +18,7 @@ import { formatRelativeTime } from "@/lib/i18n/formatRelativeTime";
 import { useDateFormatter as useFormatter } from "@/lib/i18n/useDateFormatter";
 import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
 import { useChatSessionsQuery, useDeleteChatSessionMutation } from "@/lib/query/hooks/useChat";
-import { useChatSessions } from "../hooks/ChatSessionsContext";
+import { useChatSessions } from "../../hooks/ChatSessionsContext";
 
 interface SessionListItemProps {
   isActive: boolean;

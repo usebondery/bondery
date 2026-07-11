@@ -76,6 +76,7 @@
   },
   "scripts": {
     "build": "rimraf dist && tsc && node ../../scripts/rewrite-package-hash-imports-in-dist.mjs emails",
+    "compile": "tsc",
     "dev": "tsc --watch --preserveWatchOutput",
     "preview": "email dev --dir ./src --port 26639"
   },

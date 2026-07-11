@@ -51,6 +51,54 @@ Ask:
 
 If yes to any of those, skip the success notification.
 
+### Async duplication — loading notification, then success or error
+
+Duplicating an entity (group, interaction, etc.) is a **background async action** with no immediate on-screen change. Without feedback, users cannot tell whether the tap registered — especially on slow networks — and may duplicate again.
+
+**Rule:** On duplicate trigger, show a **loading notification immediately**, then **update the same notification** to success or error when the request settles. Do not wait silently until success.
+
+| Phase | What to show |
+|-------|----------------|
+| **Request starts** | Loading toast — title from `common.feedback.duplicating`, description names what is being copied |
+| **Success** | Update same toast to success — brief confirmation the copy was created |
+| **Failure** | Update same toast to error — user can retry |
+
+**Why update in place:** One toast morphs from spinner → checkmark (or error). A second toast on success feels noisy; no toast during the wait feels broken.
+
+**Implementation (webapp):** Use `@bondery/mantine-next` templates and Mantine `notifications.show` + `notifications.update` with the returned `id`:
+
+```tsx
+const loadingNotificationId = notifications.show({
+  ...loadingNotificationTemplate({
+    title: tCommon("feedback.duplicating"),
+    description: t("DuplicateGroup.LoadingDescription", { label: group.label }),
+  }),
+});
+
+try {
+  await duplicateMutation.mutateAsync(/* … */);
+  notifications.update({
+    ...successNotificationTemplate({
+      title: tCommon("feedback.successTitle"),
+      description: t("DuplicateGroup.SuccessDescription"),
+    }),
+    id: loadingNotificationId,
+  });
+} catch {
+  notifications.update({
+    ...errorNotificationTemplate({
+      title: tCommon("feedback.errorTitle"),
+      description: t("DuplicateGroup.ErrorDescription"),
+    }),
+    id: loadingNotificationId,
+  });
+}
+```
+
+**Reference implementations:** `GroupsClient.tsx`, `useGroupDetailActions.tsx` (groups); `InteractionsClient.tsx`, `PersonInteractionsSection.tsx`, `HomeClient.tsx` (interactions).
+
+**When this applies:** Any user-initiated **duplicate / copy entity** action that awaits an API response. Not for optimistic local-only copies or clipboard copy (see copy-button rule above).
+
 ---
 
 ## Progressive disclosure — start minimal, reveal on demand
@@ -302,12 +350,18 @@ When modal body content can exceed viewport height (tables, long card grids, mer
 |-----------|---------|
 | Short form or confirm dialog | `Stack` + inline `ModalFooter` (unchanged) |
 | Table, long list, or tall card grid in modal | `ModalScrollLayout` with `footer={<ModalFooter mt={0} ... />}` |
+| Filters, search, or summary chips above a long list | `ModalScrollLayout` with `header={...}` and scrollable `children` |
 | Per-modal `ScrollArea h={…}` for footer reachability | Do not — use `ModalScrollLayout` instead |
 
 **Web parity:** Mobile `ActionSheetPopup` already splits header · scrollable body · fixed action footer. Web long modals should match that contract.
 
 ```tsx
 <ModalScrollLayout
+  header={
+    <Stack gap="md">
+      {/* search, chips, badges — stays visible */}
+    </Stack>
+  }
   footer={
     <ModalFooter
       mt={0}
@@ -318,9 +372,7 @@ When modal body content can exceed viewport height (tables, long card grids, mer
     />
   }
 >
-  <Stack gap="md">
-    {/* scrollable content */}
-  </Stack>
+  {/* only this region scrolls */}
 </ModalScrollLayout>
 ```
 

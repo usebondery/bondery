@@ -4,7 +4,7 @@ import { Stack } from "@mantine/core";
 import { IconBrandInstagram } from "@tabler/icons-react";
 import { IntegrationCard } from "@/components/shared/IntegrationCard";
 import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
-import { openInstagramImportModal } from "./modals/openInstagramImportModal";
+import { openInstagramImportModal } from "../modals/openInstagramImportModal";
 
 export function InstagramImportSection() {
   const t = useWebTranslations("SettingsPage", "DataManagement.InstagramImport");

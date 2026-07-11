@@ -9,13 +9,13 @@ import { IconBrandInstagram } from "@tabler/icons-react";
 import type { JSX } from "react";
 import { useEffect } from "react";
 import { useInstagramImportModal } from "../../hooks/useInstagramImportModal";
-import type { InstagramImportStep } from "../utils/instagram-import-helpers";
-import { ImportProcessingStep, ImportProgressStep } from "./import/ImportModalProcessingSteps";
-import { InstagramImportInstructionsStep } from "./import/InstagramImportInstructionsStep";
-import { InstagramImportIntroStep } from "./import/InstagramImportIntroStep";
-import { InstagramImportPreviewStep } from "./import/InstagramImportPreviewStep";
-import { InstagramImportStrategyStep } from "./import/InstagramImportStrategyStep";
-import { InstagramImportUploadStep } from "./import/InstagramImportUploadStep";
+import type { InstagramImportStep } from "../../utils/instagram-import-helpers";
+import { ImportProcessingStep, ImportProgressStep } from "../import/ImportModalProcessingSteps";
+import { InstagramImportInstructionsStep } from "../import/InstagramImportInstructionsStep";
+import { InstagramImportIntroStep } from "../import/InstagramImportIntroStep";
+import { InstagramImportPreviewStep } from "../import/InstagramImportPreviewStep";
+import { InstagramImportStrategyStep } from "../import/InstagramImportStrategyStep";
+import { InstagramImportUploadStep } from "../import/InstagramImportUploadStep";
 
 export type { InstagramImportStep };
 

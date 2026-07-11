@@ -5,6 +5,18 @@
       "command": "node",
       "isBackground": true,
       "label": "ngrok: ngrok.yml",
+      "linux": {
+        "options": {
+          "cwd": "${workspaceFolder}",
+          "env": {
+            "PATH": "/snap/bin:/usr/local/bin:/usr/bin:/bin:${env:PATH}"
+          },
+          "shell": {
+            "args": ["-lc"],
+            "executable": "/bin/bash"
+          }
+        }
+      },
       "options": {
         "cwd": "${workspaceFolder}"
       },
@@ -21,9 +33,6 @@
         },
         "owner": "ngrok",
         "pattern": { "regexp": "^$" }
-      },
-      "runOptions": {
-        "runOn": "folderOpen"
       },
       "type": "shell"
     },
@@ -32,6 +41,18 @@
       "command": "node",
       "isBackground": true,
       "label": "ngrok: ngrok1.yml (supabase)",
+      "linux": {
+        "options": {
+          "cwd": "${workspaceFolder}",
+          "env": {
+            "PATH": "/snap/bin:/usr/local/bin:/usr/bin:/bin:${env:PATH}"
+          },
+          "shell": {
+            "args": ["-lc"],
+            "executable": "/bin/bash"
+          }
+        }
+      },
       "options": {
         "cwd": "${workspaceFolder}"
       },
@@ -48,9 +69,6 @@
         },
         "owner": "ngrok",
         "pattern": { "regexp": "^$" }
-      },
-      "runOptions": {
-        "runOn": "folderOpen"
       },
       "type": "shell"
     },
@@ -59,6 +77,18 @@
       "command": "node",
       "isBackground": true,
       "label": "ngrok: ngrok2.yml (api)",
+      "linux": {
+        "options": {
+          "cwd": "${workspaceFolder}",
+          "env": {
+            "PATH": "/snap/bin:/usr/local/bin:/usr/bin:/bin:${env:PATH}"
+          },
+          "shell": {
+            "args": ["-lc"],
+            "executable": "/bin/bash"
+          }
+        }
+      },
       "options": {
         "cwd": "${workspaceFolder}"
       },
@@ -75,9 +105,6 @@
         },
         "owner": "ngrok",
         "pattern": { "regexp": "^$" }
-      },
-      "runOptions": {
-        "runOn": "folderOpen"
       },
       "type": "shell"
     }

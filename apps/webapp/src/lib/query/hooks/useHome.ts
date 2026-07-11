@@ -2,7 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 
-import { getContactsList } from "@/lib/api/domains/contacts";
+import { getContactsList, getContactsSelectableList } from "@/lib/api/domains/contacts";
 
 import { getInteractionsList } from "@/lib/api/domains/interactions";
 
@@ -32,8 +32,8 @@ export function useUpcomingRemindersQuery() {
 
 export function useHomeTimelineQuery() {
   const contactsQuery = useQuery({
-    queryFn: () => getContactsList(SELECTABLE_CONTACTS),
-    queryKey: contactKeys.list(SELECTABLE_CONTACTS),
+    queryFn: () => getContactsSelectableList(SELECTABLE_CONTACTS),
+    queryKey: contactKeys.selectable.list(SELECTABLE_CONTACTS),
   });
 
   const activitiesQuery = useQuery({

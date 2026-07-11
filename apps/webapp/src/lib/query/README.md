@@ -16,7 +16,7 @@ Client cache on top of [`lib/api`](../api/README.md). Components use **hooks** a
 
 **New reads:** add `resources/` + client domain + server domain — not `createXQueryFn` factories.
 
-Layout seeds `settingsKeys.me()` via `SettingsCacheSeed` after `getAppBootstrap()` so child loaders need not prefetch settings again.
+Layout loads **session** via `getAppSession()` → `GET /api/me/session` (shell identity + routing). **Settings** (`useSettingsQuery`) are for Home and Settings only — prefetch in those loaders, never for shell identity. After identity-changing mutations, call `refreshAppShell()`. Theme: see [`lib/theme/README.md`](../theme/README.md).
 
 ## Invalidate-first policy
 
@@ -61,8 +61,4 @@ See bondery-specific `references/api-usage.md` § Session teardown and § API un
 
 ## Document titles
 
-Dual-layer: server `generateMetadata` + client `DocumentTitleProvider`. See [`lib/metadata/README.md`](../metadata/README.md).
-
-```bash
-npm run check-route-titles
-```
+Server `generateMetadata` for all routes; client `DocumentTitleProvider` for entity routes only. See [`lib/metadata/README.md`](../metadata/README.md).

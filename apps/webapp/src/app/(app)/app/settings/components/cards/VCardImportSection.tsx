@@ -3,7 +3,7 @@
 import { IconAddressBook } from "@tabler/icons-react";
 import { IntegrationCard } from "@/components/shared/IntegrationCard";
 import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
-import { openVCardImportModal } from "./modals/openVCardImportModal";
+import { openVCardImportModal } from "../modals/openVCardImportModal";
 
 export function VCardImportSection() {
   const t = useWebTranslations("SettingsPage", "DataManagement.VCardImport");

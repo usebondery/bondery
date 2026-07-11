@@ -1,20 +1,12 @@
 {
   "compilerOptions": {
-    "declaration": true,
-    "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true,
     "jsx": "react-jsx",
     "lib": ["ES2022", "DOM"],
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
     "outDir": "./dist",
-    "resolveJsonModule": true,
     "rootDir": "./src",
-    "skipLibCheck": true,
-    "strict": true,
-    "target": "ES2022",
     "types": ["node"]
   },
   "exclude": ["node_modules", "dist", "src/**/*.test.ts"],
+  "extends": "@bondery/typescript-config/base.json",
   "include": ["src/**/*"]
 }

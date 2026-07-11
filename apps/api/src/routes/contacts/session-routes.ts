@@ -6,6 +6,7 @@
 import type { AppRoutePlugin } from "../../lib/platform/fastify-types.js";
 import { registerContactEnrichmentRoutes, registerEnrichQueueRoutes } from "./enrichment/index.js";
 import { registerContactImportantDateRoutes } from "./important-dates/index.js";
+import { registerKeepInTouchRoutes } from "./keep-in-touch.js";
 import { registerMergeRoutes } from "./merge/index.js";
 import { registerPhotoRoutes } from "./photo/index.js";
 import { registerRelationshipRoutes } from "./relationships/index.js";
@@ -25,4 +26,5 @@ export const contactSessionRoutes: AppRoutePlugin = async (fastify) => {
   registerContactEnrichmentRoutes(fastify);
   registerMergeRoutes(fastify);
   registerEnrichQueueRoutes(fastify);
+  registerKeepInTouchRoutes(fastify);
 };

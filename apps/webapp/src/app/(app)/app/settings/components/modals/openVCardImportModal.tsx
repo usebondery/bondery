@@ -2,8 +2,8 @@
 
 import { modals } from "@mantine/modals";
 import { createModalId } from "@/lib/modals";
-import { VCardImportModal } from "./modals/VCardImportModal";
-import { VCardImportModalTitle } from "./modals/VCardImportModalTitle";
+import { VCardImportModal } from "./VCardImportModal";
+import { VCardImportModalTitle } from "./VCardImportModalTitle";
 
 interface OpenVCardImportModalOptions {
   showNavigationProgress?: boolean;

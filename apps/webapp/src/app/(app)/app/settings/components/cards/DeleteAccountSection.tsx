@@ -11,10 +11,10 @@ import { Button, Group, Text } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { IconAlertCircle, IconTrash } from "@tabler/icons-react";
 import { Trans } from "next-i18next/client";
+import { openStandardConfirmModal } from "@/components/modals/openStandardConfirmModal";
 import { endSession } from "@/lib/auth/endSession";
 import { useCommonTranslations, useWebTranslations } from "@/lib/i18n/useWebTranslations";
 import { useDeleteAccountMutation } from "@/lib/query/hooks/useSettings";
-import { openStandardConfirmModal } from "../../components/modals/openStandardConfirmModal";
 
 export function DeleteAccountSection() {
   const tCommon = useCommonTranslations();

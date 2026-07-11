@@ -64,6 +64,10 @@ export const declineMergeRecommendationResponseSchema = z.object({
   success: z.boolean(),
 });
 
+export const mergeRecommendationsCountResponseSchema = z.object({
+  activeCount: z.number().int().nonnegative(),
+});
+
 export const refreshMergeRecommendationsResponseSchema = z.object({
   recommendations: z.array(mergeRecommendationSchema),
   recommendationsCount: z.number(),
@@ -82,4 +86,7 @@ export type DeclineMergeRecommendationResponse = z.infer<
 >;
 export type RefreshMergeRecommendationsResponse = z.infer<
   typeof refreshMergeRecommendationsResponseSchema
+>;
+export type MergeRecommendationsCountResponse = z.infer<
+  typeof mergeRecommendationsCountResponseSchema
 >;

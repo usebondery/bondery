@@ -74,6 +74,16 @@ export const contactPreviewSchema = contactSchema.pick({
   lastName: true,
 });
 
+/** Lean contact shape for pickers, comboboxes, and activity participant selection. */
+export const contactSelectableSchema = contactPreviewSchema.extend({
+  headline: z.string().nullable(),
+  location: z.string().nullable(),
+  middleName: z.string().nullable(),
+  myself: z.boolean().nullable(),
+});
+
+export type ContactSelectable = z.infer<typeof contactSelectableSchema>;
+
 export const contactRelationshipSchema = entityIdentitySchema
   .extend({
     relationshipType: relationshipTypeSchema,
@@ -212,6 +222,11 @@ export const contactsListResponseSchema = makePaginatedListResponseSchema(
   stats: contactsListStatsSchema,
 });
 
+export const contactsSelectableListResponseSchema = makePaginatedListResponseSchema(
+  "contacts",
+  contactSelectableSchema,
+);
+
 export const createContactRelationshipInputSchema = z.object({
   relatedPersonId: contactIdSchema,
   relationshipType: relationshipTypeSchema,
@@ -307,8 +322,17 @@ export const enrichQueueItemSchema = entityIdentitySchema
   })
   .extend(entityAuditSchema.shape);
 
+/** @deprecated Use enrichQueueCountResponseSchema */
 export const enrichEligibleCountResponseSchema = z.object({
   count: z.number(),
+});
+
+export const enrichQueueCountResponseSchema = z.object({
+  eligibleCount: z.number().int().nonnegative(),
+});
+
+export const keepInTouchCountResponseSchema = z.object({
+  overdueCount: z.number().int().nonnegative(),
 });
 
 export const enrichQueueStatusCountsSchema = z.object({
@@ -393,6 +417,8 @@ export type LinkedInDataResponse = z.infer<typeof linkedInDataResponseSchema>;
 export type EnrichQueueStatus = z.infer<typeof enrichQueueStatusSchema>;
 export type EnrichQueueItem = z.infer<typeof enrichQueueItemSchema>;
 export type EnrichEligibleCountResponse = z.infer<typeof enrichEligibleCountResponseSchema>;
+export type EnrichQueueCountResponse = z.infer<typeof enrichQueueCountResponseSchema>;
+export type KeepInTouchCountResponse = z.infer<typeof keepInTouchCountResponseSchema>;
 export type EnrichQueueStatusCounts = z.infer<typeof enrichQueueStatusCountsSchema>;
 export type EnrichQueueInitResponse = z.infer<typeof enrichQueueInitResponseSchema>;
 export type EnrichQueueNextBatchItem = z.infer<typeof enrichQueueNextBatchItemSchema>;

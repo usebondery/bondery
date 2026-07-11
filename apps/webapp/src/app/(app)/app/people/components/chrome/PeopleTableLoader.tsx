@@ -3,7 +3,7 @@ import { getContactsListServer } from "@/lib/api/domains/server/contacts";
 import { getQueryClient } from "@/lib/query/client";
 import type { ContactsListFilterParams } from "@/lib/query/contactsListParams";
 import { contactKeys } from "@/lib/query/keys";
-import { PeopleClient } from "../PeopleClient";
+import { PeopleClient } from "../../PeopleClient";
 
 interface PeopleTableLoaderProps {
   filter: ContactsListFilterParams;

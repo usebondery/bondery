@@ -18,7 +18,7 @@ Client infrastructure for the Next.js webapp. **`lib/` root has no `.ts` files**
 | `sync/` | Sync wake WebSocket client |
 | `analytics/` | Client/server analytics capture |
 | `shared/` | Cross-cutting utilities without a feature owner |
-| `app/` | Server bootstrap probes (`getAppBootstrap`) |
+| `app/` | Server session probes (`getAppSession`) |
 | `home/` | Home feature config (`gettingStartedItems`) |
 
 Chrome extension **UI** (notification managers, enrich hook) lives in [`src/components/extension/`](../components/extension/).
@@ -105,7 +105,7 @@ Page-specific prefetch orchestration (e.g. `prefetchPersonPageQueries.ts`) may s
 
 **Avoid:** `lib/` → `app/` (hooks importing route-tree component types). Shared types belong in `@bondery/schemas` or a dedicated `lib/types/` module.
 
-`lib/` holds infrastructure and hooks, not feature UI. `QueryProvider` and `SettingsCacheSeed` stay in `lib/query/` because they wire TanStack at the app boundary.
+`lib/` holds infrastructure and hooks, not feature UI. `QueryProvider` and `UserSessionProvider` wire TanStack and shell identity at the app boundary.
 
 ## No barrels (except documented)
 

@@ -27,6 +27,10 @@ import { checkContactUpdateConflict } from "../../lib/sync/conflict.js";
 import { emitSyncBatch } from "../../lib/sync/emit-change.js";
 import { type DomainContext, DomainError, syncEmitMetaFromContext } from "../_shared/context.js";
 import { withPersonTxid } from "../_shared/with-txid.js";
+import {
+  patchAffectsMergeRecommendations,
+  scheduleMergeRecommendationsRefresh,
+} from "./merge-recommendations.js";
 
 export interface UpdateContactDomainInput {
   baseUpdatedAt?: string;
@@ -340,6 +344,10 @@ export async function updateContact(
   }
 
   const serverSequence = await emitSyncBatch(user.id, changes, syncEmitMetaFromContext(ctx));
+
+  if (patchAffectsMergeRecommendations(body)) {
+    scheduleMergeRecommendationsRefresh(ctx);
+  }
 
   return {
     data: { contact: enrichedContact, personId },

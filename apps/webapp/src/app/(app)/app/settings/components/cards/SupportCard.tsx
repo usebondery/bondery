@@ -12,8 +12,8 @@ import {
 import type { ComponentType } from "react";
 import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
 import { WEBSITE_URL } from "@/lib/platform/config";
-import { SettingsSection } from "./cards/SettingsSection";
-import { openFeedbackModal } from "./modals/openFeedbackModal";
+import { openFeedbackModal } from "../modals/openFeedbackModal";
+import { SettingsSection } from "./SettingsSection";
 
 interface SupportItemCardProps {
   description: string;

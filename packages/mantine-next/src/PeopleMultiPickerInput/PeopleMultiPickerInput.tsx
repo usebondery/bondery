@@ -1,11 +1,12 @@
 "use client";
 
 import { formatContactName } from "@bondery/helpers/contact";
-import type { Contact } from "@bondery/schemas";
+import type { ContactSelectable } from "@bondery/schemas";
 import {
   Avatar,
   Combobox,
   Group,
+  getDefaultZIndex,
   Loader,
   Pill,
   PillsInput,
@@ -13,14 +14,14 @@ import {
   useCombobox,
 } from "@mantine/core";
 import { useDebouncedCallback } from "@mantine/hooks";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { PersonChip } from "#nextjs/PersonChip/index.js";
 import { getAvatarColorFromName } from "#utils/avatarColor.js";
 
 const MAX_DROPDOWN_OPTIONS = 5;
 
 interface PeopleMultiPickerInputProps {
-  contacts: Contact[];
+  contacts: ContactSelectable[];
   disabled?: boolean;
   error?: React.ReactNode;
   inputRef?: React.Ref<HTMLInputElement>;
@@ -32,7 +33,7 @@ interface PeopleMultiPickerInputProps {
    * client-side. Results are merged into the internal known-contacts map so
    * that chips for async-found contacts continue to render after selection.
    */
-  onSearch?: (query: string) => Promise<Contact[]>;
+  onSearch?: (query: string) => Promise<ContactSelectable[]>;
   placeholder?: string;
   /**
    * Debounce delay in ms before `onSearch` is called after the user stops typing.
@@ -70,11 +71,12 @@ export function PeopleMultiPickerInput({
   onSearch,
 }: PeopleMultiPickerInputProps) {
   const [search, setSearch] = useState("");
-  const [asyncResults, setAsyncResults] = useState<Contact[]>([]);
+  const [asyncResults, setAsyncResults] = useState<ContactSelectable[]>([]);
   const [isSearching, setIsSearching] = useState(false);
+  const searchGenerationRef = useRef(0);
 
   // Accumulates contacts prop + any async-found contacts so chips always resolve.
-  const [knownContacts, setKnownContacts] = useState<Contact[]>(contacts);
+  const [knownContacts, setKnownContacts] = useState<ContactSelectable[]>(contacts);
 
   // Merge incoming prop updates into knownContacts without discarding async finds.
   useEffect(() => {
@@ -94,14 +96,24 @@ export function PeopleMultiPickerInput({
       setAsyncResults([]);
       setIsSearching(false);
     },
+    onDropdownOpen: () => {
+      contactsCombobox.selectFirstOption();
+    },
   });
 
   const triggerSearch = useDebouncedCallback(async (query: string) => {
     if (!onSearch) {
       return;
     }
+
+    const generation = ++searchGenerationRef.current;
+
     try {
       const results = await onSearch(query);
+      if (generation !== searchGenerationRef.current) {
+        return;
+      }
+
       setAsyncResults(results);
       setKnownContacts((prev) => {
         const merged = new Map(prev.map((c) => [c.id, c]));
@@ -110,8 +122,11 @@ export function PeopleMultiPickerInput({
         }
         return Array.from(merged.values());
       });
+      contactsCombobox.selectFirstOption();
     } finally {
-      setIsSearching(false);
+      if (generation === searchGenerationRef.current) {
+        setIsSearching(false);
+      }
     }
   }, searchDebounceMs);
 
@@ -125,7 +140,7 @@ export function PeopleMultiPickerInput({
     () =>
       selectedIds
         .map((id) => contactsById.get(id))
-        .filter((contact): contact is Contact => Boolean(contact)),
+        .filter((contact): contact is ContactSelectable => Boolean(contact)),
     [contactsById, selectedIds],
   );
 
@@ -133,14 +148,13 @@ export function PeopleMultiPickerInput({
     const query = search.trim().toLowerCase();
 
     if (onSearch && query) {
-      // Async mode: server results drive the dropdown.
       if (isSearching) {
         return [];
       }
+
       return asyncResults.filter((contact) => !selectedIds.includes(contact.id) && !contact.myself);
     }
 
-    // Local mode: client-side filter of the contacts prop.
     const availableContacts = contacts.filter(
       (contact) => !selectedIds.includes(contact.id) && !contact.myself,
     );
@@ -172,6 +186,7 @@ export function PeopleMultiPickerInput({
         setAsyncResults([]);
       }}
       store={contactsCombobox}
+      zIndex={getDefaultZIndex("max")}
     >
       <Combobox.DropdownTarget>
         <PillsInput
@@ -202,15 +217,16 @@ export function PeopleMultiPickerInput({
             <Combobox.EventsTarget>
               <PillsInput.Field
                 disabled={disabled}
-                onBlur={() => contactsCombobox.closeDropdown()}
                 onChange={(event) => {
                   const value = event.currentTarget.value;
                   setSearch(value);
                   contactsCombobox.openDropdown();
+                  contactsCombobox.updateSelectedOptionIndex("active");
                   if (onSearch && value.trim()) {
                     setIsSearching(true);
                     void triggerSearch(value.trim());
                   } else {
+                    searchGenerationRef.current += 1;
                     setAsyncResults([]);
                     setIsSearching(false);
                   }

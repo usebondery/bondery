@@ -4,6 +4,7 @@
     "baseUrl": ".",
     "esModuleInterop": true,
     "ignoreDeprecations": "6.0",
+    "incremental": true,
     "jsx": "react-jsx",
     "module": "ESNext",
     "moduleResolution": "bundler",

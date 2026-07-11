@@ -11,6 +11,7 @@ import { assignContactsToDefaultImportGroup } from "../../lib/import/default-gro
 import { validateImageMagicBytes, validateImageUpload } from "../../lib/platform/config.js";
 import { internal } from "../../lib/platform/errors/http-errors.js";
 import type { DomainContext } from "../_shared/context.js";
+import { scheduleMergeRecommendationsRefresh } from "../contacts/merge-recommendations.js";
 
 export async function commitVCardImport(
   ctx: DomainContext,
@@ -323,6 +324,10 @@ export async function commitVCardImport(
     const message =
       groupError instanceof Error ? groupError.message : "Failed to assign imported contacts";
     throw internal("import_vcard_failed", message);
+  }
+
+  if (importedCount > 0) {
+    scheduleMergeRecommendationsRefresh(ctx);
   }
 
   return {

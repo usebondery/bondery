@@ -21,7 +21,7 @@ export function registerPhotoRoutes(fastify: AppFastifyInstance): void {
         response: withOkResponse(photoUploadResponseSchema, "Photo uploaded"),
       } satisfies FastifyZodOpenApiSchema,
     },
-    withDomainRoute(async (ctx, request, reply) => {
+    withDomainRoute(async (ctx, request, _reply) => {
       const { id: contactId } = request.params;
       const data = await request.file();
       if (!data) {

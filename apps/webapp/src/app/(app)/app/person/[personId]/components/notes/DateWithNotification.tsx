@@ -2,9 +2,9 @@
 
 import { Checkbox, Group, Loader, Text, TextInput } from "@mantine/core";
 import { IconGift } from "@tabler/icons-react";
+import { DatePickerWithPresets } from "@/components/interactions/DatePickerWithPresets";
 import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
 import { INPUT_MAX_LENGTHS } from "@/lib/platform/config";
-import { DatePickerWithPresets } from "../../../../components/interactions/DatePickerWithPresets";
 
 interface DateWithNotificationProps {
   dateLabel?: string;

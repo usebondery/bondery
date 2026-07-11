@@ -8,7 +8,6 @@ Run from this directory (`apps/supabase-db`):
 
 | Command | Description |
 |---------|-------------|
-| `npm run dev` | Start Supabase if not already running |
 | `npm run start` | `supabase start` |
 | `npm run stop` | `supabase stop` |
 | `npm run reset` | `supabase db reset` |
@@ -19,7 +18,7 @@ Run from this directory (`apps/supabase-db`):
 
 1. Copy and fill env: `.env.local.example` → `.env.local`
 2. `npm run setup:local`
-3. `npm run dev`
+3. `npm run start`
 
 API URL: `http://127.0.0.1:54321`  
 DB port: `54322` (see `supabase/config.toml`)

@@ -2,9 +2,9 @@
 
 import { Alert, Center, Loader, SimpleGrid, Stack, Text, Title } from "@mantine/core";
 import { IconChartBar } from "@tabler/icons-react";
+import { PageWrapper } from "@/components/shell/PageWrapper";
 import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
 import { useAdminStatsDashboardQuery } from "@/lib/query/hooks/useAdminStats";
-import { PageWrapper } from "../../components/PageWrapper";
 import { ActiveUsersChart } from "./components/ActiveUsersCards";
 import { FunnelChart } from "./components/FunnelChart";
 import { GithubStarsCard } from "./components/GithubStarsCard";

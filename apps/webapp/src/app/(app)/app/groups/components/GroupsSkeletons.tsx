@@ -30,7 +30,7 @@ export function GroupCardSkeleton({ opacity = 1 }: { opacity?: number }) {
  * Mirrors: PageHeader (New Group button) + Paper (count + sort) + SimpleGrid of cards.
  */
 export function GroupsPageSkeleton() {
-  const cards = [1, 1, 0.9, 0.85, 0.75, 0.65];
+  const opacities = [1, 1, 0.9, 0.85, 0.75, 0.65];
 
   return (
     <Box p="xl">
@@ -53,8 +53,8 @@ export function GroupsPageSkeleton() {
               WebkitMaskImage: "linear-gradient(to bottom, black 55%, transparent 100%)",
             }}
           >
-            {cards.map((opacity) => (
-              <GroupCardSkeleton key={opacity} opacity={opacity} />
+            {Array.from({ length: opacities.length }, (_, slot) => slot).map((slot) => (
+              <GroupCardSkeleton key={slot} opacity={opacities[slot] ?? 1} />
             ))}
           </SimpleGrid>
         </Stack>

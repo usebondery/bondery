@@ -17,7 +17,7 @@ The dev server starts at `http://localhost:26630`.
 | `npm run dev -w apps/website` | Start local dev server |
 | `npx turbo build --filter=website` | Production build (from repo root) |
 | `npm run check-types -w apps/website` | TypeScript type check |
-| `npm run lint -w apps/website` | Biome lint |
+| `npm run lint` (repo root) | Biome format (write fixes) |
 | `npm run announce -w apps/website -- --slug <slug>` | Announce a blog post |
 
 ## Blog

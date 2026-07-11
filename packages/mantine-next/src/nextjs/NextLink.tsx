@@ -1,5 +1,5 @@
 import NextLink from "next/link.js";
-import type { AnchorHTMLAttributes, ReactNode } from "react";
+import type { AnchorHTMLAttributes, ElementType, ReactNode } from "react";
 
 export type NextLinkComponentProps = Omit<AnchorHTMLAttributes<HTMLAnchorElement>, "href"> & {
   href: string;
@@ -17,6 +17,6 @@ const Link = NextLink as unknown as React.ComponentType<NextLinkComponentProps>;
  * Mantine 9 polymorphic `component` + TypeScript 6 cannot reconcile Next.js Link;
  * keep the cast here so call sites stay typed.
  */
-export const mantineLinkComponent = Link as any;
+export const mantineLinkComponent = Link as ElementType<NextLinkComponentProps>;
 
 export default Link;

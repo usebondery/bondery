@@ -6,8 +6,7 @@ export interface MergeRecommendationsParams {
   declined?: boolean;
 }
 
-export const ENRICH_ELIGIBLE_COUNT_PATH = `${API_ROUTES.CONTACTS}/enrich-queue/eligible-count`;
-export const ENRICH_QUEUE_STATUS_PATH = `${API_ROUTES.CONTACTS}/enrich-queue/status`;
+export const MERGE_RECOMMENDATIONS_COUNT_PATH = API_ROUTES.CONTACTS_MERGE_RECOMMENDATIONS_COUNT;
 
 export function buildMergeRecommendationsPath(params?: MergeRecommendationsParams): string {
   const search = new URLSearchParams();
@@ -30,21 +29,6 @@ export function parseMergeRecommendations(
   return items;
 }
 
-export function parseEnrichEligibleCount(raw: { count?: number }): number {
-  return raw.count ?? 0;
-}
-
-export interface EnrichQueueStatus {
-  completed: number;
-  failed: number;
-  pending: number;
-}
-
-export function parseEnrichQueueStatus(
-  raw: EnrichQueueStatus | null | undefined,
-): EnrichQueueStatus | null {
-  if (!raw || raw.pending <= 0) {
-    return null;
-  }
-  return raw;
+export function parseMergeRecommendationsCount(raw: { activeCount?: number }): number {
+  return raw.activeCount ?? 0;
 }

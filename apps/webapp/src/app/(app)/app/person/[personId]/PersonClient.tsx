@@ -20,7 +20,7 @@ import {
   useContactLinkedInDataQuery,
   useContactQuery,
   useContactRelationshipsQuery,
-  useContactsListQuery,
+  useContactsSelectableListQuery,
   useCreateContactRelationshipMutation,
   useDeleteContactRelationshipMutation,
   usePutContactImportantDatesMutation,
@@ -83,7 +83,9 @@ export function PersonClient({ personId, initialTab, myselfMode = false }: Perso
   const { data: personGroups = [] } = useContactGroupsQuery(personId);
   const { data: personActivities = [] } = useContactInteractionsQuery(personId);
   const { data: mergeRecommendation = null } = useContactMergeRecommendation(personId);
-  const { data: selectableContactsData } = useContactsListQuery(PERSON_SELECTABLE_CONTACTS);
+  const { data: selectableContactsData } = useContactsSelectableListQuery(
+    PERSON_SELECTABLE_CONTACTS,
+  );
 
   const selectableContacts = useMemo(
     () => (selectableContactsData?.contacts ?? []).filter((candidate) => candidate.id !== personId),

@@ -1,4 +1,5 @@
 ﻿import { Box, Group, Paper, SimpleGrid, Skeleton, Stack } from "@mantine/core";
+import { GettingStartedRailSkeleton } from "@/components/home/GettingStartedRailSkeleton";
 import { PageHeaderSkeleton } from "@/components/shell/PageHeaderSkeleton";
 
 /**
@@ -66,6 +67,8 @@ export function HomePageSkeleton() {
       <PageHeaderSkeleton primaryActionWidth={140} secondaryActionWidth={110} />
 
       <Stack gap="xl">
+        <GettingStartedRailSkeleton />
+
         {/* Stats row: 3 equal-width cards */}
         <SimpleGrid cols={{ base: 1, sm: 3 }} spacing="md">
           <StatCardSkeleton />

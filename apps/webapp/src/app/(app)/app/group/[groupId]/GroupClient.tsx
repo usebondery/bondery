@@ -224,6 +224,7 @@ export function GroupClient({ groupId }: GroupClientProps) {
             }
           }}
           icon={IconUsersGroup}
+          title={tGroupDetail("DetailPageTitle")}
         />
 
         <GroupCard

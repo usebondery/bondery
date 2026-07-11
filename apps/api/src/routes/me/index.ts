@@ -105,8 +105,8 @@ export const meRoutes: AppRoutePlugin = async (fastify) => {
           avatarOptions: avatarOpts,
         });
         return { contact: enrichedContact };
-      } catch (enrichError) {
-        request.log.error({ enrichError }, "Failed to enrich myself contact");
+      } catch (error) {
+        request.log.error({ err: error }, "Failed to enrich myself contact");
         throw internal("failed_to_load_profile_contact");
       }
     },

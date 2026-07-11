@@ -3,13 +3,10 @@ import "server-only";
 import type { MergeRecommendation, MergeRecommendationsResponse } from "@bondery/schemas";
 import {
   buildMergeRecommendationsPath,
-  ENRICH_ELIGIBLE_COUNT_PATH,
-  ENRICH_QUEUE_STATUS_PATH,
-  type EnrichQueueStatus,
+  MERGE_RECOMMENDATIONS_COUNT_PATH,
   type MergeRecommendationsParams,
-  parseEnrichEligibleCount,
-  parseEnrichQueueStatus,
   parseMergeRecommendations,
+  parseMergeRecommendationsCount,
 } from "@/lib/api/resources/mergeRecommendations";
 import { type ServerApiFetchOptions, serverApiJson } from "@/lib/api/server";
 
@@ -29,20 +26,13 @@ export async function getMergeRecommendationsServer(
   return parseMergeRecommendations(raw);
 }
 
-export async function getEnrichEligibleCountServer(options: ReadOptions = {}): Promise<number> {
-  const raw = await serverApiJson<{ count?: number }>(ENRICH_ELIGIBLE_COUNT_PATH, undefined, {
-    ...MERGE_TAG,
-    ...options,
-  });
-  return parseEnrichEligibleCount(raw);
-}
-
-export async function getEnrichQueueStatusServer(
+export async function getMergeRecommendationsCountServer(
   options: ReadOptions = {},
-): Promise<EnrichQueueStatus | null> {
-  const raw = await serverApiJson<EnrichQueueStatus>(ENRICH_QUEUE_STATUS_PATH, undefined, {
-    ...MERGE_TAG,
-    ...options,
-  });
-  return parseEnrichQueueStatus(raw);
+): Promise<number> {
+  const raw = await serverApiJson<{ activeCount: number }>(
+    MERGE_RECOMMENDATIONS_COUNT_PATH,
+    undefined,
+    { ...MERGE_TAG, ...options },
+  );
+  return parseMergeRecommendationsCount(raw);
 }

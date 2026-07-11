@@ -104,7 +104,7 @@ export function PeopleClient({ savedColumnVisibility }: PeopleClientProps) {
   });
   const searchDefaultValue = listFilter.search ?? "";
 
-  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isFetching, isError, refetch } =
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isFetching } =
     useContactsInfiniteQuery(listFilter);
 
   const contacts = data?.pages.flatMap((page) => page.contacts) ?? [];

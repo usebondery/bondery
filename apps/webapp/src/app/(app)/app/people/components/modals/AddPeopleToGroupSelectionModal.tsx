@@ -36,13 +36,16 @@ import { compoundPluralKey } from "@/lib/i18n/compoundPluralKey";
 import { optionalPluralFragment } from "@/lib/i18n/optionalPluralFragment";
 import { useCommonTranslations, useWebTranslations } from "@/lib/i18n/useWebTranslations";
 import { createModalId, useModalDismiss } from "@/lib/modals";
-import { useContactGroupsQueries, useContactsListQuery } from "@/lib/query/hooks/useContacts";
+import {
+  useContactGroupsQueries,
+  useContactsSelectableListQuery,
+} from "@/lib/query/hooks/useContacts";
 import {
   useGroupsListQuery,
   useSyncContactGroupMembershipsMutation,
 } from "@/lib/query/hooks/useGroups";
-import { openAddGroupModal } from "../../groups/components/AddGroupModal";
-import { GROUP_CARD_MAX_WIDTH_BY_VARIANT, GroupCard } from "../../groups/components/GroupCard";
+import { openAddGroupModal } from "../../../groups/components/AddGroupModal";
+import { GROUP_CARD_MAX_WIDTH_BY_VARIANT, GroupCard } from "../../../groups/components/GroupCard";
 
 export interface GroupMembershipUpdate {
   groups: GroupWithCount[];
@@ -103,7 +106,7 @@ function AddPeopleToGroupSelectionForm({
     data: contactsData,
     isLoading: isLoadingContacts,
     isError: isContactsError,
-  } = useContactsListQuery({ enabled: deduplicatedPersonIds.length > 0, limit: 200 });
+  } = useContactsSelectableListQuery({ enabled: deduplicatedPersonIds.length > 0, limit: 200 });
   const syncMembershipsMutation = useSyncContactGroupMembershipsMutation();
 
   const isLoadingMemberships = membershipQueries.some((query) => query.isLoading);
@@ -316,32 +319,35 @@ function AddPeopleToGroupSelectionForm({
           onCancel={closeModal}
         />
       }
+      header={
+        <Stack gap="md">
+          {selectedPeople.length > 0 && (
+            <Group align="center" gap="xs" wrap="wrap">
+              {selectedPeople.map((person) => (
+                <PersonChip isClickable={false} key={person.id} person={person} size="sm" />
+              ))}
+            </Group>
+          )}
+
+          <TextInput
+            label={t("SearchLabel")}
+            leftSection={<IconSearch size={16} />}
+            onChange={(event) => setSearch(event.currentTarget.value)}
+            placeholder={t("SearchPlaceholder")}
+            value={search}
+          />
+        </Stack>
+      }
     >
       <Stack gap="md">
-        {selectedPeople.length > 0 && (
-          <Group align="center" gap="xs" wrap="wrap">
-            {selectedPeople.map((person) => (
-              <PersonChip isClickable={false} key={person.id} person={person} size="sm" />
-            ))}
-          </Group>
-        )}
+        {filteredGroups.length === 0 && groups.length > 0 && search.trim() ? (
+          <Text c="dimmed" py="lg" ta="center" w="100%">
+            {t("NoGroupsMatch")}
+          </Text>
+        ) : null}
 
-        <TextInput
-          label={t("SearchLabel")}
-          leftSection={<IconSearch size={16} />}
-          onChange={(event) => setSearch(event.currentTarget.value)}
-          placeholder={t("SearchPlaceholder")}
-          value={search}
-        />
-
-        <Group align="flex-start" gap="sm" justify="flex-start" w="full" wrap="wrap">
-          <Box
-            style={{
-              flex: `1 1 ${modalGroupCardWidth}`,
-              maxWidth: modalGroupCardWidth,
-              width: modalGroupCardWidth,
-            }}
-          >
+        <Group align="flex-start" gap="md" justify="space-between" w="100%" wrap="wrap">
+          <Box style={{ flex: "0 0 auto", width: modalGroupCardWidth }}>
             <GroupCard
               actionColor="green"
               actionIcon={<IconFolderPlus size={20} />}
@@ -361,23 +367,11 @@ function AddPeopleToGroupSelectionForm({
             />
           </Box>
 
-          {filteredGroups.length === 0 ? (
-            groups.length > 0 && search.trim() ? (
-              <Text c="dimmed" py="lg" style={{ width: "100%" }} ta="center">
-                {t("NoGroupsMatch")}
-              </Text>
-            ) : null
-          ) : (
-            filteredGroups.map((group) => (
+          {filteredGroups.map((group) => (
+            <Box key={group.id} style={{ flex: "0 0 auto", width: modalGroupCardWidth }}>
               <UnstyledButton
-                key={group.id}
+                className="w-full text-left"
                 onClick={() => handleToggleGroup(group.id)}
-                style={{
-                  flex: `1 1 ${modalGroupCardWidth}`,
-                  maxWidth: modalGroupCardWidth,
-                  textAlign: "left",
-                  width: modalGroupCardWidth,
-                }}
               >
                 {(() => {
                   const isInitiallySelected = initialSelectedGroupIds.has(group.id);
@@ -392,10 +386,10 @@ function AddPeopleToGroupSelectionForm({
                       : "none";
 
                   return (
-                    <Box pos="relative">
+                    <div className="relative">
                       {selectionState === "remove" && (
                         <Badge
-                          className="top-2 absolute right-2 z-10"
+                          className="absolute top-2 right-2 z-10"
                           leftSection={<IconMinus size={10} />}
                           size="xs"
                           style={{
@@ -408,7 +402,7 @@ function AddPeopleToGroupSelectionForm({
                       )}
                       {selectionState === "add" && (
                         <Badge
-                          className="top-2 absolute right-2 z-10"
+                          className="absolute top-2 right-2 z-10"
                           leftSection={<IconPlus size={10} />}
                           size="xs"
                           style={{
@@ -421,7 +415,7 @@ function AddPeopleToGroupSelectionForm({
                       )}
                       {selectionState === "already" && (
                         <Badge
-                          className="top-2 absolute right-2 z-10"
+                          className="absolute top-2 right-2 z-10"
                           size="xs"
                           style={{
                             backgroundColor: "var(--mantine-primary-color-filled)",
@@ -454,12 +448,12 @@ function AddPeopleToGroupSelectionForm({
                         showMenu={false}
                         variant={modalGroupCardVariant}
                       />
-                    </Box>
+                    </div>
                   );
                 })()}
               </UnstyledButton>
-            ))
-          )}
+            </Box>
+          ))}
         </Group>
       </Stack>
     </ModalScrollLayout>

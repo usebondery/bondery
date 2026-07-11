@@ -13,19 +13,13 @@ import {
 } from "@bondery/schemas";
 import { DEFAULT_LOCALE } from "@bondery/schemas/locale/supported-locale";
 import { EXAMPLE_SETTINGS_PATCH_RESPONSE } from "@bondery/schemas/openapi/fixtures/responses";
-import type { Database } from "@bondery/schemas/supabase.types";
-import type { SupabaseClient } from "@supabase/supabase-js";
 import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
 import { z } from "zod";
-import { uploadContactAvatarAndSetFlag } from "../../../lib/contacts/avatar-storage.js";
 import { getMyselfProfile } from "../../../lib/contacts/myself.js";
-import { createAdminClient } from "../../../lib/data/supabase.js";
 import { getAuth } from "../../../lib/platform/auth/strategies.js";
-import { validateImageMagicBytes, validateImageUpload } from "../../../lib/platform/config.js";
 import { domainContextFromRequest } from "../../../lib/platform/domain-context.js";
 import { internal } from "../../../lib/platform/errors/http-errors.js";
 import type { AppRoutePlugin } from "../../../lib/platform/fastify-types.js";
-import logger from "../../../lib/platform/logger.js";
 import { withOkResponse } from "../../../lib/platform/openapi/responses.js";
 import { withDomainRoute } from "../../../lib/platform/with-domain-route.js";
 import { dismissGettingStarted } from "../../../services/me/onboarding.js";
@@ -56,7 +50,6 @@ const settingsPatchResponseSchema = z
   })
   .meta({ example: EXAMPLE_SETTINGS_PATCH_RESPONSE });
 
-const AVATARS_BUCKET = "avatars";
 const DEFAULT_REMINDER_SEND_HOUR = "08:00:00";
 const DEFAULT_TIME_FORMAT = "24h" as const;
 const DEFAULT_LEFT_SWIPE_ACTION = "message" as const;
@@ -161,126 +154,6 @@ function parseImportFollowupPlatform(
   return null;
 }
 
-function getAccountAvatarFileName(userId: string): string {
-  return `${userId}/${userId}.jpg`;
-}
-
-type UserMetadata = {
-  name?: string;
-  full_name?: string;
-  given_name?: string;
-  family_name?: string;
-  avatar_url?: string;
-  picture?: string;
-};
-
-type SupabaseUserWithMetadata = {
-  user_metadata?: UserMetadata;
-  identities?: Array<{
-    provider?: string;
-    identity_data?: UserMetadata;
-  }>;
-};
-
-function getEffectiveUserMetadata(user: SupabaseUserWithMetadata | undefined): UserMetadata {
-  const baseMetadata = user?.user_metadata || {};
-  const linkedInIdentity = (user?.identities || []).find(
-    (identity) => identity.provider === "linkedin_oidc",
-  );
-  const identityMetadata = linkedInIdentity?.identity_data || {};
-
-  return {
-    ...identityMetadata,
-    ...baseMetadata,
-  };
-}
-
-/**
- * Returns avatar URL from auth metadata, including provider-specific keys.
- */
-function getMetadataAvatarUrl(userMetadata: UserMetadata | undefined): string | null {
-  return userMetadata?.avatar_url || userMetadata?.picture || null;
-}
-
-async function importMetadataAvatarToStorage(
-  client: SupabaseClient<Database>,
-  userId: string,
-  avatarUrl: string,
-): Promise<string | null> {
-  try {
-    const response = await fetch(avatarUrl, {
-      headers: {
-        Accept: "image/avif,image/webp,image/apng,image/*,*/*;q=0.8",
-        "User-Agent":
-          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36",
-      },
-    });
-    if (!response.ok) {
-      logger.warn(
-        { avatarUrl, status: response.status, userId },
-        "[settings] Failed to fetch provider avatar",
-      );
-      return null;
-    }
-
-    const contentType = response.headers.get("content-type")?.split(";")[0]?.trim() || "";
-    const arrayBuffer = await response.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
-
-    const normalizedType = contentType.toLowerCase();
-    const validationType =
-      normalizedType.startsWith("image/") || normalizedType === "" ? "image/jpeg" : contentType;
-
-    const validation = validateImageUpload({
-      size: buffer.length,
-      type: validationType,
-    });
-
-    if (!validation.isValid) {
-      logger.warn(
-        { avatarUrl, contentType, size: buffer.length, userId },
-        "[settings] Provider avatar failed validation",
-      );
-      return null;
-    }
-
-    if (!validateImageMagicBytes(buffer)) {
-      logger.warn(
-        { avatarUrl, userId },
-        "[settings] Provider avatar failed magic bytes validation",
-      );
-      return null;
-    }
-
-    const adminClient = createAdminClient();
-
-    await uploadContactAvatarAndSetFlag(
-      client,
-      adminClient,
-      userId,
-      userId,
-      buffer,
-      validationType,
-    );
-
-    const { data: publicUrlData } = adminClient.storage
-      .from(AVATARS_BUCKET)
-      .getPublicUrl(getAccountAvatarFileName(userId));
-
-    return publicUrlData?.publicUrl ? `${publicUrlData.publicUrl}?t=${Date.now()}` : null;
-  } catch (error) {
-    logger.warn(
-      {
-        avatarUrl,
-        message: error instanceof Error ? error.message : String(error),
-        userId,
-      },
-      "[settings] Provider avatar import crashed",
-    );
-    return null;
-  }
-}
-
 export const meSettingsRoutes: AppRoutePlugin = async (fastify) => {
   fastify.addHook("onRoute", (routeOptions) => {
     if (routeOptions.schema) {
@@ -306,21 +179,6 @@ export const meSettingsRoutes: AppRoutePlugin = async (fastify) => {
         const resolvedSettings = await ensureDefaultSettings(domainContextFromRequest(request));
 
         const { data: userData } = await client.auth.getUser();
-        const userMetadata = getEffectiveUserMetadata(userData?.user as SupabaseUserWithMetadata);
-        const metadataAvatarUrl = getMetadataAvatarUrl(userMetadata);
-
-        const { data: myselfRow } = await client
-          .from("people")
-          .select("has_avatar")
-          .eq("user_id", user.id)
-          .eq("myself", true)
-          .single();
-
-        const hasStoredAvatar = myselfRow?.has_avatar ?? false;
-
-        if (!hasStoredAvatar && metadataAvatarUrl) {
-          await importMetadataAvatarToStorage(client, user.id, metadataAvatarUrl);
-        }
 
         const { firstName, avatarUrl: resolvedAvatarUrl } = await getMyselfProfile(client, user.id);
 

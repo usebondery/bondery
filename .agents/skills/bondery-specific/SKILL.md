@@ -16,7 +16,7 @@ references/
   api-usage.md      Transport wrappers (clientApi*/serverApi*/apiRequest), *Json vs *JsonOrNull, ApiError
   api-mutations.md  Mutation responses — return full objects, no post-mutation GET
   sync-architecture.md  Mobile offline sync — pull/bootstrap, push mutations, server-authoritative merge, versioning
-  ux-patterns.md    Feedback, progressive disclosure, destructive actions, autofocus, modal blocking dismiss, mobile settings previews & async states, mobile sheets & forms
+  ux-patterns.md    Feedback, async duplication loading→success toasts, progressive disclosure, destructive actions, autofocus, modal blocking dismiss, mobile settings previews & async states, mobile sheets & forms
   mobile-forms.md   React Hook Form patterns for ActionSheetPopup forms (typed useSheetForm, Sheet*Field wrappers, schema output, audit guardrails)
 ```
 
@@ -43,8 +43,8 @@ Shared packages follow the [Turborepo compiled-package model](https://turborepo.
 - **TypeScript:** extend `@bondery/typescript-config` (`base.json` or `react-library.json`); `module` / `moduleResolution` = NodeNext.
 - **Exports:** `types` → `src/`, `default` → `dist/`; run `npm run sync-exports` after adding public subpaths.
 - **Internal imports:** `#*` hash paths with `.js` suffix (not `tsconfig` paths).
-- **Build:** `rimraf dist && tsc`; **dev:** `tsc --watch`; root `npm run dev` runs `turbo watch dev` with `^build` on cold start.
-- **Apps:** consume `dist/` via exports — no `transpilePackages`, no `packages/*/src` aliases.
+- **Build:** `rimraf dist && tsc` (+ rewrite hash imports); **compile:** incremental `tsc` for dev cold start; **dev:** `tsc --watch` run alongside apps via Turbo `with`.
+- **Apps:** consume `dist/` via exports — no `transpilePackages`, no `packages/*/src` aliases (mobile Metro resolves workspace packages from `src/` separately).
 
 # API usage
 

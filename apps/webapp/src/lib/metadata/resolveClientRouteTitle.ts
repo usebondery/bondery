@@ -1,15 +1,11 @@
 import { formatContactName } from "@bondery/helpers/contact";
-import { WEBAPP_NAME } from "@bondery/helpers/globals/paths";
 import type { Contact, GroupWithCount } from "@bondery/schemas";
 import type { QueryClient } from "@tanstack/react-query";
-import { formatEntityTitleString, formatStaticTitleString } from "@/lib/metadata/pageTitles";
-import { getStaticRouteTitleEntry, matchDynamicRoute } from "@/lib/metadata/routeTitleRegistry";
+import { formatEntityTitleString } from "@/lib/metadata/pageTitles";
+import { matchDynamicRoute } from "@/lib/metadata/routeTitleRegistry";
 import { contactKeys, groupKeys, settingsKeys } from "@/lib/query/keys";
 
-export type RouteTitleTranslate = (namespace: string, key: string) => string;
-
 export type ResolveClientRouteTitleOptions = {
-  translate: RouteTitleTranslate;
   queryClient: QueryClient;
   optimisticTitle?: string;
   entityTitleOverride?: string | null;
@@ -20,14 +16,13 @@ const ME_PERSON_AVATAR_PRESETS = ["large", "small"] as const;
 function resolveEntityTitleFromCache(
   queryClient: QueryClient,
   match: NonNullable<ReturnType<typeof matchDynamicRoute>>,
-  translate: RouteTitleTranslate,
 ): string | null {
   if (match.kind === "person" && match.id) {
     const contact = queryClient.getQueryData<Contact>(contactKeys.detail(match.id));
     if (contact) {
       return formatEntityTitleString(formatContactName(contact));
     }
-    return formatEntityTitleString(translate("SingleContactPage", "PersonFallbackTitle"));
+    return null;
   }
 
   if (match.kind === "group" && match.id) {
@@ -35,7 +30,7 @@ function resolveEntityTitleFromCache(
     if (group?.label) {
       return formatEntityTitleString(group.label);
     }
-    return formatEntityTitleString(translate("GroupsPage", "FallbackTitle"));
+    return null;
   }
 
   if (match.kind === "myself") {
@@ -45,21 +40,21 @@ function resolveEntityTitleFromCache(
         return formatEntityTitleString(formatContactName(me));
       }
     }
-    return formatEntityTitleString(translate("SingleContactPage", "MyselfPageTitle"));
+    return null;
   }
 
   return null;
 }
 
 /**
- * Resolves the browser tab title for client-side navigation.
- * Returns null only when no title could be determined (caller should use WEBAPP_NAME).
+ * Resolves the browser tab title for entity routes on client-side navigation.
+ * Returns null for static routes and cache misses — caller must not overwrite document.title.
  */
 export function resolveClientRouteTitle(
   pathname: string,
   options: ResolveClientRouteTitleOptions,
-): string {
-  const { translate, queryClient, optimisticTitle, entityTitleOverride } = options;
+): string | null {
+  const { queryClient, optimisticTitle, entityTitleOverride } = options;
 
   if (entityTitleOverride?.trim()) {
     return formatEntityTitleString(entityTitleOverride.trim());
@@ -69,15 +64,10 @@ export function resolveClientRouteTitle(
     return optimisticTitle.trim();
   }
 
-  const staticEntry = getStaticRouteTitleEntry(pathname);
-  if (staticEntry) {
-    return formatStaticTitleString(translate(staticEntry.titleNamespace, staticEntry.titleKey));
-  }
-
   const dynamicMatch = matchDynamicRoute(pathname);
-  if (dynamicMatch) {
-    return resolveEntityTitleFromCache(queryClient, dynamicMatch, translate) ?? WEBAPP_NAME;
+  if (!dynamicMatch) {
+    return null;
   }
 
-  return WEBAPP_NAME;
+  return resolveEntityTitleFromCache(queryClient, dynamicMatch);
 }

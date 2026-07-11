@@ -22,6 +22,7 @@
   },
   "description": "Bondery Website",
   "devDependencies": {
+    "@bondery/typescript-config": "*",
     "@tailwindcss/postcss": "^4",
     "@types/mdx": "^2.0.13",
     "@types/node": "^25",
@@ -44,7 +45,6 @@
     "check-types": "tsc --noEmit",
     "dev": "next dev --port 26630",
     "generate-icons": "tsx scripts/generate-icons.ts",
-    "lint": "biome lint .",
     "prebuild": "cross-env NODE_ENV=production npm run check-env && npm run generate-icons",
     "predev": "cross-env NODE_ENV=development npm run check-env && npm run generate-icons",
     "start": "next start"

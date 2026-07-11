@@ -1,27 +1,13 @@
 "use client";
 
-import { useKeepInTouchQuery } from "@/lib/query/hooks/useKeepInTouch";
-import { useHasActiveMergeRecommendationsBadge } from "@/lib/query/hooks/useMergeRecommendations";
+import { useUserSession } from "@/components/shell/UserSessionProvider";
+import { useContactsAttentionBadge } from "@/lib/query/hooks/useContactsAttentionBadge";
+import { useKeepInTouchCountQuery } from "@/lib/query/hooks/useKeepInTouch";
 import { AppShellWrapper } from "./AppShellWrapper";
 
 interface AppShellWithQueryBadgesProps {
-  avatarUrl: string | null;
   children: React.ReactNode;
   initialCollapsed: boolean;
-  userName: string;
-}
-
-function computeHasOverdueKeepInTouch(
-  contacts: { keepFrequencyDays?: number | null; lastInteraction?: string | Date | null }[],
-): boolean {
-  return contacts.some((c) => {
-    if (!c.keepFrequencyDays || !c.lastInteraction) {
-      return true;
-    }
-    const nextDue = new Date(c.lastInteraction);
-    nextDue.setDate(nextDue.getDate() + c.keepFrequencyDays);
-    return nextDue <= new Date();
-  });
 }
 
 /**
@@ -29,13 +15,12 @@ function computeHasOverdueKeepInTouch(
  */
 export function AppShellWithQueryBadges({
   children,
-  userName,
-  avatarUrl,
   initialCollapsed,
 }: AppShellWithQueryBadgesProps) {
-  const hasActiveMergeRecommendations = useHasActiveMergeRecommendationsBadge();
-  const { data: keepInTouchData } = useKeepInTouchQuery();
-  const hasOverdueKeepInTouch = computeHasOverdueKeepInTouch(keepInTouchData?.contacts ?? []);
+  const { displayName, avatarUrl } = useUserSession();
+  const hasActiveMergeRecommendations = useContactsAttentionBadge();
+  const { data: overdueCount = 0 } = useKeepInTouchCountQuery();
+  const hasOverdueKeepInTouch = overdueCount > 0;
 
   return (
     <AppShellWrapper
@@ -43,7 +28,7 @@ export function AppShellWithQueryBadges({
       hasActiveMergeRecommendations={hasActiveMergeRecommendations}
       hasOverdueKeepInTouch={hasOverdueKeepInTouch}
       initialCollapsed={initialCollapsed}
-      userName={userName}
+      userName={displayName}
     >
       {children}
     </AppShellWrapper>

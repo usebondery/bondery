@@ -8,7 +8,7 @@ import { TagPill } from "@/components/tags/TagPill";
 import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
 import { useTagsListQuery } from "@/lib/query/hooks/useTags";
 import { SETTINGS_TAGS_PREVIEW } from "@/lib/query/settingsPageQueryParams";
-import { SettingsSection } from "./cards/SettingsSection";
+import { SettingsSection } from "./SettingsSection";
 
 export function TagsSection() {
   const t = useWebTranslations("TagsSettings");

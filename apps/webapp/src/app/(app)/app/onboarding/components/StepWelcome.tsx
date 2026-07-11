@@ -2,8 +2,8 @@
 
 import { Button, Center, Stack, Text, Title } from "@mantine/core";
 import { useMemo } from "react";
+import { useUserSession } from "@/components/shell/UserSessionProvider";
 import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
-import { useSettingsQuery } from "@/lib/query/hooks/useSettings";
 
 interface StepProps {
   onNext: () => void;
@@ -11,15 +11,14 @@ interface StepProps {
 
 export function StepWelcome({ onNext }: StepProps) {
   const t = useWebTranslations("Onboarding", "Welcome");
-  const { data: settingsData } = useSettingsQuery();
+  const { displayName } = useUserSession();
 
   const firstName = useMemo(() => {
-    const name = settingsData?.data?.name;
-    if (typeof name !== "string" || !name) {
+    if (!displayName) {
       return null;
     }
-    return name.split(" ")[0] || null;
-  }, [settingsData?.data?.name]);
+    return displayName.split(" ")[0] || null;
+  }, [displayName]);
 
   const greeting = firstName != null ? t("TitleWithName", { name: firstName }) : t("TitleGeneric");
 

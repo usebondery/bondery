@@ -53,7 +53,7 @@ const SCAN_FILES = [
   ".agents/skills/native-data-fetching/SKILL.md",
 ];
 
-const ALLOWLIST = new Set(["scripts/check-dev-ports.mjs", "scripts/print-dev-urls.mjs"]);
+const ALLOWLIST = new Set(["scripts/check-dev-ports.mjs"]);
 
 function _walk(dir, acc = []) {
   for (const entry of readdirSync(dir)) {

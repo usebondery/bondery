@@ -7,6 +7,7 @@ import { settingsKeys } from "@/lib/query/keys";
 import {
   prefetchApiKeys,
   prefetchMePerson,
+  prefetchSettings,
   prefetchSubscription,
   prefetchTagsList,
 } from "@/lib/query/prefetch";
@@ -17,6 +18,7 @@ export async function SettingsLoader() {
   const queryClient = getQueryClient();
 
   await Promise.all([
+    prefetchSettings(queryClient),
     prefetchTagsList(queryClient, SETTINGS_TAGS_PREVIEW),
 
     prefetchMePerson(queryClient, "small"),

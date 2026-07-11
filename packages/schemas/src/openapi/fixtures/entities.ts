@@ -88,6 +88,14 @@ export const EXAMPLE_CONTACT_PREVIEW = {
   lastName: "Lovelace",
 };
 
+export const EXAMPLE_CONTACT_SELECTABLE = {
+  ...EXAMPLE_CONTACT_PREVIEW,
+  headline: "Mathematician",
+  location: "London, UK",
+  middleName: null,
+  myself: false,
+};
+
 export const EXAMPLE_GROUP = {
   color: "#6366f1",
   createdAt: EXAMPLE_ISO_TIMESTAMP,
@@ -257,6 +265,16 @@ export const EXAMPLE_API_KEY_LIST_ITEM = {
   label: "Zapier integration",
   lastUsedAt: EXAMPLE_ISO_TIMESTAMP,
   permission: "read" as const,
+};
+
+export const EXAMPLE_USER_SESSION = {
+  avatarUrl: null,
+  colorScheme: "auto" as const,
+  displayName: "Ada Lovelace",
+  language: "en",
+  onboardingCompletedAt: EXAMPLE_ISO_TIMESTAMP,
+  timeFormat: "24h" as const,
+  timezone: "Europe/London",
 };
 
 export const EXAMPLE_USER_SETTINGS = {

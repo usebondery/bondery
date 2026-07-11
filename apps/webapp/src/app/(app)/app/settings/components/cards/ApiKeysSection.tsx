@@ -27,8 +27,8 @@ import {
   useUpdateApiKeyLabelMutation,
 } from "@/lib/query/hooks/useApiKeys";
 import { useApiKeyPermissionOptions } from "../../hooks/useApiKeyPermissionOptions";
-import { SettingsSection } from "./cards/SettingsSection";
-import { openApiKeyModal } from "./modals/openApiKeyModal";
+import { openApiKeyModal } from "../modals/openApiKeyModal";
+import { SettingsSection } from "./SettingsSection";
 
 interface ApiKeysSectionProps {
   apiBaseUrl: string;

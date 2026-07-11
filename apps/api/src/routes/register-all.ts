@@ -31,8 +31,10 @@ import { reminderDigestRoutes } from "./internal/reminder-digest.js";
 import { meApiKeysRoutes } from "./me/api-keys/index.js";
 import { meFeedbackRoutes } from "./me/feedback/index.js";
 import { meRoutes } from "./me/index.js";
+import { meInitializeRoutes } from "./me/initialize/index.js";
 import { meOnboardingImportFollowupRoutes } from "./me/onboarding/import-followup.js";
 import { meOnboardingRoutes } from "./me/onboarding/index.js";
+import { meSessionRoutes } from "./me/session/index.js";
 import { meSettingsRoutes } from "./me/settings/index.js";
 import { subscriptionCheckoutRoutes } from "./subscriptions/checkout.js";
 import { subscriptionRoutes } from "./subscriptions/index.js";
@@ -81,6 +83,8 @@ const ROUTE_MOUNTS: RouteMount[] = [
   { area: "integration", plugin: shareRoutes, prefix: API_ROUTES.CONTACTS_SHARE },
   { area: "integration", plugin: geocodeRoutes, prefix: API_ROUTES.GEOCODE },
   { area: "session", plugin: meRoutes, prefix: API_ROUTES.ME },
+  { area: "session", plugin: meInitializeRoutes, prefix: API_ROUTES.ME_INITIALIZE },
+  { area: "session", plugin: meSessionRoutes, prefix: API_ROUTES.ME_SESSION },
   { area: "session", plugin: meOnboardingRoutes, prefix: API_ROUTES.ME_ONBOARDING_COMPLETE },
   {
     area: "session",

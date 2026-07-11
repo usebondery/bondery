@@ -2,8 +2,8 @@
 
 import { modals } from "@mantine/modals";
 import { createModalId } from "@/lib/modals";
-import { LinkedInImportModal, type LinkedInImportStep } from "./modals/LinkedInImportModal";
-import { LinkedInImportModalTitle } from "./modals/LinkedInImportModalTitle";
+import { LinkedInImportModal, type LinkedInImportStep } from "./LinkedInImportModal";
+import { LinkedInImportModalTitle } from "./LinkedInImportModalTitle";
 
 interface OpenLinkedInImportModalOptions {
   initialStep?: LinkedInImportStep;

@@ -1,8 +1,8 @@
-import type { Contact } from "@bondery/schemas";
-
-export type ContactNameFields =
-  | Contact
-  | { firstName: string; middleName?: string | null; lastName: string };
+export type ContactNameFields = {
+  firstName: string;
+  middleName?: string | null;
+  lastName?: string | null;
+};
 
 /**
  * Formats a contact's display name from structured name fields.

@@ -11,7 +11,6 @@ import {
   useMemo,
   useRef,
 } from "react";
-import { useTranslation } from "react-i18next";
 import {
   clearOptimisticDocumentTitle,
   peekOptimisticDocumentTitle,
@@ -33,13 +32,7 @@ function applyDocumentTitle(title: string): void {
 export function DocumentTitleProvider({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const queryClient = useQueryClient();
-  const { i18n } = useTranslation();
   const entityTitleOverrideRef = useRef<string | null>(null);
-
-  const translate = useCallback(
-    (namespace: string, key: string) => i18n.getFixedT(namespace)(key),
-    [i18n],
-  );
 
   const resolveTitle = useCallback(
     (optimisticTitle?: string) =>
@@ -47,15 +40,17 @@ export function DocumentTitleProvider({ children }: { children: ReactNode }) {
         entityTitleOverride: entityTitleOverrideRef.current,
         optimisticTitle,
         queryClient,
-        translate,
       }),
-    [pathname, queryClient, translate],
+    [pathname, queryClient],
   );
 
   useLayoutEffect(() => {
     entityTitleOverrideRef.current = null;
     const optimistic = peekOptimisticDocumentTitle();
-    applyDocumentTitle(resolveTitle(optimistic ?? undefined));
+    const title = resolveTitle(optimistic ?? undefined);
+    if (title) {
+      applyDocumentTitle(title);
+    }
     if (optimistic) {
       clearOptimisticDocumentTitle();
     }
@@ -65,7 +60,10 @@ export function DocumentTitleProvider({ children }: { children: ReactNode }) {
     (name: string) => {
       entityTitleOverrideRef.current = name.trim() || null;
       if (entityTitleOverrideRef.current) {
-        applyDocumentTitle(resolveTitle());
+        const title = resolveTitle();
+        if (title) {
+          applyDocumentTitle(title);
+        }
       }
     },
     [resolveTitle],

@@ -7,7 +7,7 @@ import {
   PeopleMultiPickerInput,
   successNotificationTemplate,
 } from "@bondery/mantine-next";
-import { type Activity, type Contact, interactionFormSchema } from "@bondery/schemas";
+import { type Activity, type ContactSelectable, interactionFormSchema } from "@bondery/schemas";
 
 type ActivityParticipantRef = string | { id: string };
 
@@ -18,6 +18,7 @@ import { modals } from "@mantine/modals";
 import { notifications } from "@mantine/notifications";
 import { IconCalendarPlus, IconCheck } from "@tabler/icons-react";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { DatePickerWithPresets } from "@/components/interactions/DatePickerWithPresets";
 import { captureEvent } from "@/lib/analytics/client";
 import { ACTIVITY_TYPE_OPTIONS, getActivityTypeConfig } from "@/lib/contacts/activityTypes";
 import { searchContacts } from "@/lib/contacts/searchContacts";
@@ -29,19 +30,18 @@ import {
   useCreateInteractionMutation,
   useUpdateInteractionMutation,
 } from "@/lib/query/hooks/useInteractions";
-import { DatePickerWithPresets } from "../../components/interactions/DatePickerWithPresets";
 import { openAddContactModal } from "../../people/components/modals/AddContactModal";
 
 interface OpenNewActivityModalParams {
   activity?: Activity | null;
-  contacts: Contact[];
+  contacts: ContactSelectable[];
   initialParticipantIds?: string[];
   onCreated?: (activityId: string) => void;
 }
 
 interface NewActivityFormProps {
   activity: Activity | null;
-  contacts: Contact[];
+  contacts: ContactSelectable[];
   initialParticipantIds?: string[];
   modalId: string;
   onCreated?: (activityId: string) => void;
@@ -65,7 +65,7 @@ function parseLocalDateInputValue(value: string): Date {
  * activity so chips can resolve to a name even when the participant is not in
  * the caller's `contacts` prop.
  */
-function buildParticipantSeed(p: unknown): Contact | null {
+function buildParticipantSeed(p: unknown): ContactSelectable | null {
   if (!p || typeof p === "string") {
     return null;
   }
@@ -76,33 +76,13 @@ function buildParticipantSeed(p: unknown): Contact | null {
   }
   return {
     avatar: (raw.avatar ?? null) as string | null,
-    createdAt: typeof raw.createdAt === "string" ? raw.createdAt : "1970-01-01T00:00:00.000Z",
-    emails: null,
-    facebook: null,
     firstName: (raw.firstName ?? "") as string,
-    gisPoint: null,
     headline: null,
     id,
-    instagram: null,
-    keepFrequencyDays: null,
-    language: null,
-    lastInteraction: null,
-    lastInteractionActivityId: null,
     lastName: (raw.lastName ?? null) as string | null,
-    latitude: null,
-    linkedin: null,
     location: null,
-    longitude: null,
     middleName: (raw.middleName ?? null) as string | null,
     myself: null,
-    notes: null,
-    phones: null,
-    signal: null,
-    timezone: null,
-    updatedAt: typeof raw.updatedAt === "string" ? raw.updatedAt : "1970-01-01T00:00:00.000Z",
-    userId: "",
-    website: null,
-    whatsapp: null,
   };
 }
 
@@ -145,7 +125,7 @@ function NewActivityForm({
   const createInteractionMutation = useCreateInteractionMutation();
   const updateInteractionMutation = useUpdateInteractionMutation(activity?.id ?? "");
   const [loading, setLoading] = useState(false);
-  const [availableContacts, setAvailableContacts] = useState<Contact[]>(() => {
+  const [availableContacts, setAvailableContacts] = useState<ContactSelectable[]>(() => {
     if (!activity?.participants?.length) {
       return contacts;
     }
@@ -210,7 +190,7 @@ function NewActivityForm({
 
   const selectedTypeConfig = getActivityTypeConfig(form.values.type);
 
-  const handleContactCreated = (createdContact: Contact) => {
+  const handleContactCreated = (createdContact: ContactSelectable) => {
     setAvailableContacts((currentContacts) => {
       if (currentContacts.some((contact) => contact.id === createdContact.id)) {
         return currentContacts;

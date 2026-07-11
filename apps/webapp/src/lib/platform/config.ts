@@ -20,19 +20,29 @@ import {
   AVATAR_UPLOAD as SCHEMA_AVATAR_UPLOAD,
 } from "@bondery/schemas";
 
-function requirePublicEnv(name: string): string {
-  const value = process.env[name];
+function requireValue(name: string, value: string | undefined): string {
   if (!value) {
     throw new Error(`Missing required environment variable: ${name}`);
   }
   return value;
 }
 
-export const WEBAPP_URL = requirePublicEnv("NEXT_PUBLIC_WEBAPP_URL");
-export const WEBSITE_URL = requirePublicEnv("NEXT_PUBLIC_WEBSITE_URL");
-export const PUBLIC_SUPABASE_URL = requirePublicEnv("NEXT_PUBLIC_SUPABASE_URL");
-export const PUBLIC_SUPABASE_PUBLISHABLE_KEY = requirePublicEnv(
+// Static process.env.* access — Next.js only inlines NEXT_PUBLIC_* for the client this way.
+export const WEBAPP_URL = requireValue(
+  "NEXT_PUBLIC_WEBAPP_URL",
+  process.env.NEXT_PUBLIC_WEBAPP_URL,
+);
+export const WEBSITE_URL = requireValue(
+  "NEXT_PUBLIC_WEBSITE_URL",
+  process.env.NEXT_PUBLIC_WEBSITE_URL,
+);
+export const PUBLIC_SUPABASE_URL = requireValue(
+  "NEXT_PUBLIC_SUPABASE_URL",
+  process.env.NEXT_PUBLIC_SUPABASE_URL,
+);
+export const PUBLIC_SUPABASE_PUBLISHABLE_KEY = requireValue(
   "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY",
+  process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
 );
 
 /**
@@ -44,7 +54,9 @@ function normalizeApiBaseUrl(rawUrl: string): string {
   return rawUrl.replace(/\/+$/, "").replace(/\/api$/, "");
 }
 
-export const API_URL = normalizeApiBaseUrl(requirePublicEnv("NEXT_PUBLIC_API_URL"));
+export const API_URL = normalizeApiBaseUrl(
+  requireValue("NEXT_PUBLIC_API_URL", process.env.NEXT_PUBLIC_API_URL),
+);
 
 export const INPUT_MAX_LENGTHS = CONTACT_FIELD_MAX_LENGTHS;
 

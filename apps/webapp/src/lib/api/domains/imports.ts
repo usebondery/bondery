@@ -10,7 +10,7 @@ import type {
   VCardImportCommitResponse,
   VCardParseResponse,
 } from "@bondery/schemas";
-import { clientApiFetch, clientApiJson } from "@/lib/api/client";
+import { clientApiJson } from "@/lib/api/client";
 
 export async function parseVCardImport(formData: FormData): Promise<VCardParseResponse> {
   return clientApiJson<VCardParseResponse>(`${API_ROUTES.CONTACTS_IMPORT_VCARD}/parse`, {
@@ -67,11 +67,4 @@ export async function commitInstagramImport(
       method: "POST",
     },
   );
-}
-
-/** Fire-and-forget merge refresh after import; matches import modal behavior. */
-export async function refreshMergeRecommendationsAfterImport(): Promise<void> {
-  await clientApiFetch(API_ROUTES.CONTACTS_MERGE_RECOMMENDATIONS_REFRESH, {
-    method: "POST",
-  }).catch(() => undefined);
 }

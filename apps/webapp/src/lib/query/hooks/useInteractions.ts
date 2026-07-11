@@ -1,7 +1,7 @@
 "use client";
 
 import type { Activity } from "@bondery/schemas";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import {
   createInteraction,
@@ -13,17 +13,41 @@ import {
 import {
   invalidateContactInteractions,
   invalidateInteractionDomain,
+  invalidateKeepInTouchCount,
 } from "@/lib/query/invalidation";
 import { interactionKeys } from "@/lib/query/keys";
+import { INTERACTIONS_TIMELINE } from "@/lib/query/sharedListParams";
 
 export type { InteractionsListParams };
 
+export const INTERACTIONS_PAGE_SIZE = INTERACTIONS_TIMELINE.limit;
+
 export function useInteractionsListQuery(params?: InteractionsListParams) {
-  const listParams = params ?? { limit: 50, offset: 0 };
+  const listParams = params ?? INTERACTIONS_TIMELINE;
 
   return useQuery({
     queryFn: () => getInteractionsList(listParams),
     queryKey: interactionKeys.list(listParams),
+  });
+}
+
+export function useInteractionsInfiniteQuery() {
+  const infiniteParams = { limit: INTERACTIONS_PAGE_SIZE };
+
+  return useInfiniteQuery({
+    getNextPageParam: (lastPage) => {
+      if (!lastPage.pagination.hasMore) {
+        return undefined;
+      }
+      return lastPage.pagination.offset + lastPage.pagination.limit;
+    },
+    initialPageParam: 0,
+    queryFn: async ({ pageParam }) =>
+      getInteractionsList({
+        limit: INTERACTIONS_PAGE_SIZE,
+        offset: pageParam as number,
+      }),
+    queryKey: interactionKeys.infinite(infiniteParams),
   });
 }
 
@@ -34,7 +58,10 @@ export function useCreateInteractionMutation(contactId?: string) {
     mutationFn: createInteraction,
 
     onSuccess: async () => {
-      await invalidateInteractionDomain(queryClient);
+      await Promise.all([
+        invalidateInteractionDomain(queryClient),
+        invalidateKeepInTouchCount(queryClient),
+      ]);
 
       if (contactId) {
         await invalidateContactInteractions(queryClient, contactId);
@@ -50,7 +77,10 @@ export function useUpdateInteractionMutation(interactionId: string, contactId?: 
     mutationFn: (body: Record<string, unknown>) => updateInteraction(interactionId, body),
 
     onSuccess: async () => {
-      await invalidateInteractionDomain(queryClient);
+      await Promise.all([
+        invalidateInteractionDomain(queryClient),
+        invalidateKeepInTouchCount(queryClient),
+      ]);
 
       if (contactId) {
         await invalidateContactInteractions(queryClient, contactId);
@@ -66,7 +96,10 @@ export function useDeleteInteractionMutation(contactId?: string) {
     mutationFn: deleteInteraction,
 
     onSuccess: async () => {
-      await invalidateInteractionDomain(queryClient);
+      await Promise.all([
+        invalidateInteractionDomain(queryClient),
+        invalidateKeepInTouchCount(queryClient),
+      ]);
 
       if (contactId) {
         await invalidateContactInteractions(queryClient, contactId);

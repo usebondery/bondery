@@ -38,7 +38,6 @@
     "dev": "npx wxt",
     "dev:firefox": "npx wxt -b firefox",
     "generate-icons": "tsx scripts/generate-icons.ts",
-    "lint": "biome lint src",
     "postinstall": "npm run build -w @bondery/schemas && npx wxt prepare",
     "prebuild": "tsx scripts/check-env.ts && tsx scripts/generate-icons.ts",
     "zip": "npx wxt zip",

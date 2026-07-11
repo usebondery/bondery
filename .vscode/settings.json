@@ -1,3 +1,36 @@
 {
-  "task.allowAutomaticTasks": "on"
+  "bondery.ngrok.autoStart": false,
+  "editor.defaultFormatter": "biomejs.biome",
+  "editor.formatOnSave": true,
+  "remote.autoForwardPorts": true,
+  "remote.portsAttributes": {
+    "26630": {
+      "label": "website",
+      "requireLocalPort": true
+    },
+    "26631": {
+      "label": "api",
+      "requireLocalPort": true
+    },
+    "26632": {
+      "label": "webapp",
+      "onAutoForward": "notify",
+      "requireLocalPort": true
+    },
+    "26633": {
+      "label": "extension",
+      "requireLocalPort": true
+    },
+    "26634": {
+      "label": "mobile",
+      "requireLocalPort": true
+    },
+    "54321": {
+      "label": "supabase",
+      "requireLocalPort": true
+    }
+  },
+  "remote.restoreForwardedPorts": true,
+  "sherlock.previewLanguageTag": "en",
+  "task.allowAutomaticTasks": "off"
 }

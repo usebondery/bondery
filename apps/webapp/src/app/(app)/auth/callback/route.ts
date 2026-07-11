@@ -30,6 +30,14 @@ function parseLocalePrefs(
   }
 }
 
+async function initializeUserViaApi(): Promise<void> {
+  try {
+    await serverApiFetch(API_ROUTES.ME_INITIALIZE, { method: "POST" }, { transportPolicy: false });
+  } catch {
+    // Non-blocking: signup initialization is best-effort
+  }
+}
+
 async function applyLocalePrefsViaApi(localePrefs: {
   timezone: string;
   timeFormat: "12h" | "24h";
@@ -84,6 +92,8 @@ export async function GET(request: Request) {
     const { error } = await supabase.auth.exchangeCodeForSession(code);
 
     if (!error) {
+      await initializeUserViaApi();
+
       const localePrefsRaw = cookieStore.get(LOCALE_PREFS_COOKIE)?.value;
       const localePrefs = parseLocalePrefs(localePrefsRaw);
 

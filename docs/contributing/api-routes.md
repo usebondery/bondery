@@ -270,7 +270,7 @@ Existing query modules: `services/contacts/queries.ts`, `services/tags/queries.t
 
 Each app (`apps/api`, `apps/webapp`, …) is its own Vercel project with **Root Directory** set to that app folder (for the API: `apps/api`, **not** the monorepo root).
 
-Workspace packages follow the [Turborepo compiled-package model](https://turborepo.dev/docs/guides/tools/typescript#compiled-packages): `types` → `./src/*.ts` (editor IntelliSense), `import` / `node` / `default` → `./dist/*.js` (runtime). All `build` and `dev` tasks depend on `^build`, so `packages/*/dist` exists before apps start. When adding package subpaths (especially directory barrels like `src/foo/index.ts`), run `npm run sync-exports` from the repo root.
+Workspace packages follow the [Turborepo compiled-package model](https://turborepo.dev/docs/guides/tools/typescript#compiled-packages): `types` → `./src/*.ts` (editor IntelliSense), `import` / `node` / `default` → `./dist/*.js` (runtime). Production `build` depends on `^build`; local dev cold-starts via `compile` (`tsc` to `dist/`) with package `tsc --watch` companions. When adding package subpaths (especially directory barrels like `src/foo/index.ts`), run `npm run sync-exports` from the repo root.
 
 The API project uses [`apps/api/vercel.json`](../../apps/api/vercel.json):
 

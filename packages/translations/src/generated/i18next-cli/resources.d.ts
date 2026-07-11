@@ -678,6 +678,9 @@ export default interface Resources {
     "DescriptionPlaceholder": "Any relevant information about the interaction. That can be anything like what you talked about, important moments, URLs to photo albums...",
     "DuplicateAction": "Duplicate",
     "DuplicateFailed": "Failed to duplicate interaction",
+    "DuplicateInteraction": {
+      "LoadingDescription": "Duplicating interaction..."
+    },
     "EditAction": "Edit",
     "ErrorTitle": "Error",
     "FrequencyBiannually": "Biannually",
@@ -698,6 +701,7 @@ export default interface Resources {
     "LastInteractionUpdateFailed": "Failed to update last interaction",
     "LastInteractionUpdated": "Last interaction updated",
     "LastInteractionViaActivity": "From a {type}",
+    "LoadMoreBatch": "Load another 20 interactions",
     "MorePeople": "+{count} more",
     "NextDue": "Next due",
     "NoActivitiesFiltered": "No such interaction found.",

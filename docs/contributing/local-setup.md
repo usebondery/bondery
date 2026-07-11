@@ -53,7 +53,7 @@ The example file is at [apps/supabase-db/.env.local.example](../../apps/supabase
 
 ```bash
 cd apps/supabase-db
-npm run dev
+npm run start
 # or: npx supabase start
 ```
 
@@ -197,7 +197,7 @@ Restart local Supabase so Auth loads the key:
 ```bash
 cd apps/supabase-db
 npx supabase stop
-npm run dev
+npm run start
 ```
 
 Without this step, the API can mint JWTs but **local Auth will reject them** — API key requests return `401 Invalid API key` even for keys you just created.
@@ -441,10 +441,10 @@ iOS Simulator can use `127.0.0.1` directly. Physical iOS devices need the LAN IP
 
 ### Start
 
-**Option A — sync stack from repo root** (Supabase must already be running):
+**Option A — API + mobile from repo root** (Supabase must already be running):
 
 ```bash
-npm run dev:sync
+npm run mobile
 ```
 
 **Option B — mobile only** (with Supabase and API already running):
@@ -481,7 +481,7 @@ If bootstrap or pull return **401**, confirm the mobile session token and API `P
 
 | Command | Description |
 |---|---|
-| `npm run dev --workspace=mobile` | Start Metro from repo root |
+| `npm run mobile` | Start API + Metro from repo root |
 | `npm run check-env --workspace=mobile` | Validate required env vars |
 | `npm run check-sync-patterns --workspace=mobile` | Lint tier-1 data access patterns |
 | `npm run check-types --workspace=mobile` | TypeScript check |
@@ -508,20 +508,17 @@ See also [Sync architecture (mobile)](sync-architecture.md) and [apps/mobile/REA
 From the repo root:
 
 ```bash
-# Start supabase-db + api + webapp
-npm run dev:core
+# Start api + webapp (Supabase must be running separately)
+npm run dev:webapp-api
 
-# Start supabase-db + api + webapp + website + chrome-extension
+# Start api + webapp + website + chrome-extension
 npm run dev:extension
 
 # Start api + mobile (Supabase must be running separately)
-npm run dev:sync
-
-# Start only supabase-db
-npm run dev:supabase
+npm run mobile
 ```
 
-These scripts are defined in the root `package.json` and orchestrated by Turborepo.
+Start Supabase separately from `apps/supabase-db` (`npm run start`). These scripts are defined in the root `package.json` and orchestrated by Turborepo (`turbo watch`).
 
 ### Production builds
 
@@ -544,11 +541,16 @@ Shortcuts in root `package.json`: `npm run build` (all apps), `npm run build:api
 ### Local dev watch
 
 ```bash
-npm run dev              # turbo watch dev — package tsc --watch + app dev servers
-npm run dev:core         # webapp + api + React Email preview
+npm run dev                    # turbo watch dev — all apps with a dev script
+npm run dev:webapp-api         # webapp + api (usual local stack)
+npm run dev:emails             # React Email preview only (port 26639)
+npm run dev:webapp-api-emails  # webapp + api + React Email preview
+npm run compile:packages       # one-shot package compile without starting dev servers
 ```
 
-Cold start builds packages once (`dev` → `^build`); edits under `packages/*/src` rebuild `dist/` via each package's `dev` script (`tsc --watch`).
+`dev:webapp-api` cold-starts packages via `compile` (`tsc` to `dist/`, no `rimraf`), then runs app dev servers with package `tsc --watch` companions (`with` in `apps/webapp/turbo.json` and `apps/api/turbo.json`). Production `build` + `^build` is unchanged.
+
+Lint the whole repo from the root: `npm run lint` (Biome format, write fixes). CI runs `biome ci .` read-only.
 
 ---
 
@@ -558,7 +560,7 @@ Port registry: [architecture.md](architecture.md#apps) (`npm run check-dev-ports
 
 | App | Source | Dev port | Start command (from app folder) |
 |---|---|---|---|
-| `supabase-db` | [`apps/supabase-db`](https://github.com/usebondery/bondery/tree/main/apps/supabase-db) | — (API `54321`, Studio `54323`) | `npm run dev` |
+| `supabase-db` | [`apps/supabase-db`](https://github.com/usebondery/bondery/tree/main/apps/supabase-db) | — (API `54321`, Studio `54323`) | `npm run start` |
 | `api` | [`apps/api`](https://github.com/usebondery/bondery/tree/main/apps/api) | 26631 | `npm run dev` |
 | `webapp` | [`apps/webapp`](https://github.com/usebondery/bondery/tree/main/apps/webapp) | 26632 | `npm run dev` |
 | `website` | [`apps/website`](https://github.com/usebondery/bondery/tree/main/apps/website) | 26630 | `npm run dev` |

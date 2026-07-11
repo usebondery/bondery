@@ -6,6 +6,6 @@ Pure modules: URL builders and response parsers. **No** React, **no** `clientApi
 |-------|------------------------|
 | `lib/api/domains/*` | Client reads/writes |
 | `lib/api/domains/server/*` | Server reads (cache tags, `server-only`) |
-| `lib/app/getAppBootstrap` | Routing probes (optional) |
+| `lib/app/getAppSession` | Layout session probe |
 
 Hooks and loaders call **domains**, not resources directly.

@@ -5,7 +5,7 @@ import type { Contact, ContactPreview } from "@bondery/schemas";
 import { Group, Stack, Text } from "@mantine/core";
 import { IconArrowRight } from "@tabler/icons-react";
 import { DEBOUNCE_MS } from "@/lib/platform/config";
-import { toPersonPreview } from "../utils/merge-conflict-helpers";
+import { toPersonPreview } from "../../utils/merge-conflict-helpers";
 
 interface MergeWithPickStepProps {
   cancelLabel: string;

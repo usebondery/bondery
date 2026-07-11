@@ -1,11 +1,14 @@
 import { WEBAPP_NAME } from "@bondery/helpers/globals/paths";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
+import { AppShellRefreshRegistrar } from "@/components/shell/AppShellRefreshRegistrar";
 import { AppShellWithQueryBadges } from "@/components/shell/AppShellWithQueryBadges";
 import { AppShellWrapper } from "@/components/shell/AppShellWrapper";
-import { getAppBootstrap } from "@/lib/app/getAppBootstrap";
+import { ColorSchemeSync } from "@/components/shell/ColorSchemeSync";
+import { SessionResyncOnFocus } from "@/components/shell/SessionResyncOnFocus";
+import { UserSessionProvider } from "@/components/shell/UserSessionProvider";
+import { getAppSession } from "@/lib/app/getAppSession";
 import { resolveServerSession, signOutServerSession } from "@/lib/auth/resolveServerSession";
-import { SettingsCacheSeed } from "@/lib/query/SettingsCacheSeed";
 import "leaflet/dist/leaflet.css";
 import { WEBAPP_ROUTES, WEBSITE_ROUTES } from "@bondery/helpers/globals/paths";
 import { cookies, headers } from "next/headers";
@@ -13,7 +16,6 @@ import { Suspense } from "react";
 import { EnrichResumeDetector } from "@/components/extension/EnrichResumeDetector";
 import { EnrichStatusNotificationManager } from "@/components/extension/EnrichStatusNotificationManager";
 import { ExtensionUpdateNotificationManager } from "@/components/extension/ExtensionUpdateNotificationManager";
-import { ColorSchemeSync } from "@/components/shell/ColorSchemeSync";
 import { ServiceWorkerRegistration } from "@/components/shell/ServiceWorkerRegistration";
 import { SIDEBAR_COOKIE_NAME } from "@/lib/cookies/constants";
 
@@ -33,15 +35,15 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   const [cookieStore, headersList] = await Promise.all([cookies(), headers()]);
   const pathname = headersList.get("x-pathname") ?? "";
 
-  // getAppBootstrap() is cache()-wrapped: shared with resolveLocaleSettings().
-  const bootstrap = await getAppBootstrap();
+  // getAppSession() is cache()-wrapped: shared with resolveLocaleSettings().
+  const appSession = await getAppSession();
 
-  if (bootstrap.status === "unauthorized") {
+  if (appSession.status === "unauthorized") {
     await signOutServerSession();
     redirect(WEBSITE_ROUTES.LOGIN);
   }
 
-  if (bootstrap.status === "unavailable") {
+  if (appSession.status === "unavailable") {
     if (!pathname.startsWith(WEBAPP_ROUTES.UNAVAILABLE)) {
       redirect(WEBAPP_ROUTES.UNAVAILABLE);
     }
@@ -52,20 +54,25 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     redirect(WEBAPP_ROUTES.HOME);
   }
 
-  const { settings, settingsQueryData } = bootstrap;
+  const { session: userSession } = appSession;
 
-  if (!settings.onboardingCompletedAt && !pathname.startsWith(WEBAPP_ROUTES.ONBOARDING)) {
+  if (!userSession.onboardingCompletedAt && !pathname.startsWith(WEBAPP_ROUTES.ONBOARDING)) {
     redirect(WEBAPP_ROUTES.ONBOARDING);
   }
 
+  if (userSession.onboardingCompletedAt && pathname.startsWith(WEBAPP_ROUTES.ONBOARDING)) {
+    redirect(WEBAPP_ROUTES.HOME);
+  }
+
   const initialCollapsed = cookieStore.get(SIDEBAR_COOKIE_NAME)?.value === "true";
-  const { userName, avatarUrl, colorScheme } = settings;
+  const { displayName, avatarUrl, colorScheme } = userSession;
 
   return (
-    <>
-      <SettingsCacheSeed data={settingsQueryData} />
+    <UserSessionProvider avatarUrl={avatarUrl} colorScheme={colorScheme} displayName={displayName}>
+      <AppShellRefreshRegistrar />
+      <SessionResyncOnFocus />
       <ServiceWorkerRegistration />
-      <ColorSchemeSync colorScheme={colorScheme} />
+      <ColorSchemeSync />
       <EnrichStatusNotificationManager />
       <EnrichResumeDetector />
       <ExtensionUpdateNotificationManager />
@@ -76,20 +83,16 @@ export default async function AppLayout({ children }: { children: React.ReactNod
             hasActiveMergeRecommendations={false}
             hasOverdueKeepInTouch={false}
             initialCollapsed={initialCollapsed}
-            userName={userName}
+            userName={displayName}
           >
             {children}
           </AppShellWrapper>
         }
       >
-        <AppShellWithQueryBadges
-          avatarUrl={avatarUrl}
-          initialCollapsed={initialCollapsed}
-          userName={userName}
-        >
+        <AppShellWithQueryBadges initialCollapsed={initialCollapsed}>
           {children}
         </AppShellWithQueryBadges>
       </Suspense>
-    </>
+    </UserSessionProvider>
   );
 }

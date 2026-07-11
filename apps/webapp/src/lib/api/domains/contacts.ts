@@ -11,7 +11,6 @@ import type {
   LinkedInDataResponse,
   MapPin,
   MergeContactsResponse,
-  RefreshMergeRecommendationsResponse,
   RelationshipType,
   Tag,
   UpdateContactInput,
@@ -25,17 +24,21 @@ import {
   buildContactLinkedInDataPath,
   buildContactRelationshipsPath,
   buildContactsListPath,
+  buildContactsSelectPath,
   buildContactTagsPath,
   buildMapPinsPath,
   type ContactInteractionsParams,
   type ContactsApiResponse,
   type ContactsDataResult,
   type ContactsListParams,
+  type ContactsSelectableApiResponse,
+  type ContactsSelectableDataResult,
   type MapAddressPinsResult,
   type MapContactPinsResult,
   type MapPinsBounds,
   type MapPinsMode,
   normalizeContactsList,
+  normalizeContactsSelectableList,
   parseContactDetail,
   parseContactGroups,
   parseContactImportantDates,
@@ -50,6 +53,7 @@ import type { AvatarPreset } from "@/lib/contacts/avatarParams";
 export type {
   ContactsDataResult,
   ContactsListParams,
+  ContactsSelectableDataResult,
   MapAddressPinsResult,
   MapContactPinsResult,
   MapPinsBounds,
@@ -60,6 +64,13 @@ export type {
 export async function getContactsList(params: ContactsListParams): Promise<ContactsDataResult> {
   const raw = await clientApiJson<ContactsApiResponse>(buildContactsListPath(params));
   return normalizeContactsList(raw, params.limit ?? 50);
+}
+
+export async function getContactsSelectableList(
+  params: ContactsListParams,
+): Promise<ContactsSelectableDataResult> {
+  const raw = await clientApiJson<ContactsSelectableApiResponse>(buildContactsSelectPath(params));
+  return normalizeContactsSelectableList(raw, params.limit ?? 50);
 }
 
 export async function getContactDetail(
@@ -212,31 +223,6 @@ export async function shareContact(body: Record<string, unknown>): Promise<void>
   });
 }
 
-export async function refreshMergeRecommendations(): Promise<RefreshMergeRecommendationsResponse> {
-  return clientApiJson<RefreshMergeRecommendationsResponse>(
-    API_ROUTES.CONTACTS_MERGE_RECOMMENDATIONS_REFRESH,
-    { method: "POST" },
-  );
-}
-
-export async function acceptMergeRecommendation(recommendationId: string): Promise<void> {
-  await clientApiJson(`${API_ROUTES.CONTACTS_MERGE_RECOMMENDATIONS}/${recommendationId}/accept`, {
-    method: "PATCH",
-  });
-}
-
-export async function restoreMergeRecommendation(recommendationId: string): Promise<void> {
-  await clientApiJson(`${API_ROUTES.CONTACTS_MERGE_RECOMMENDATIONS}/${recommendationId}/restore`, {
-    method: "PATCH",
-  });
-}
-
-export async function declineMergeRecommendation(recommendationId: string): Promise<void> {
-  await clientApiJson(`${API_ROUTES.CONTACTS_MERGE_RECOMMENDATIONS}/${recommendationId}/decline`, {
-    method: "PATCH",
-  });
-}
-
 export async function downloadContactVcard(id: string): Promise<Response> {
   const response = await clientApiFetch(`${API_ROUTES.CONTACTS}/${id}/vcard`);
   if (!response.ok) {
@@ -307,10 +293,4 @@ export async function uploadContactPhoto(contactId: string, file: File): Promise
     const error = (await response.json()) as { error?: string };
     throw new Error(error.error || "Failed to upload photo");
   }
-}
-
-export async function discardEnrichQueue(): Promise<void> {
-  await clientApiFetch(`${API_ROUTES.CONTACTS}/enrich-queue`, {
-    method: "DELETE",
-  });
 }

@@ -2,7 +2,12 @@
  * Path segments that classify a route as tier-5 auxiliary in API documentation order.
  * First segment after the resource root (e.g. `/api/contacts/{segment}/…`).
  */
-export const AUXILIARY_FIRST_SEGMENTS = ["merge", "merge-recommendations", "enrich-queue"] as const;
+export const AUXILIARY_FIRST_SEGMENTS = [
+  "merge",
+  "merge-recommendations",
+  "enrich-queue",
+  "keep-in-touch",
+] as const;
 
 export type AuxiliaryFirstSegment = (typeof AUXILIARY_FIRST_SEGMENTS)[number];
 

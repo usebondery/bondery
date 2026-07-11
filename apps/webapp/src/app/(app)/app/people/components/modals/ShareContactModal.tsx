@@ -190,10 +190,6 @@ export interface ShareContactTexts {
   successTitle: string;
 }
 
-interface OpenShareContactModalParams {
-  contact: Contact;
-}
-
 function ShareContactModalContent({ contact, modalId }: { contact: Contact; modalId: string }) {
   const tShare = useWebTranslations("ShareContactModal");
   const shareContactMutation = useShareContactMutation();

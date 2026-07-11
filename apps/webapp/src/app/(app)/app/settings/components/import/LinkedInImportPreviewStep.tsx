@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { ModalFooter, ModalScrollLayout } from "@bondery/mantine-next";
 import type { Contact } from "@bondery/schemas";
@@ -82,49 +82,50 @@ export function LinkedInImportPreviewStep({
           onCancel={onCancel}
         />
       }
-    >
-      <Stack gap="md">
-        <Group justify="space-between">
-          <Group gap="xs">
-            <Badge color="blue" variant="light">
-              {labels.total}
-            </Badge>
-            <Badge color="green" leftSection={<IconCircleCheck size={12} />} variant="light">
-              {labels.valid}
-            </Badge>
-            {invalidContactsCount > 0 ? (
-              <Badge color="orange" leftSection={<IconAlertTriangle size={12} />} variant="light">
-                {labels.invalid}
+      header={
+        <Stack gap="md">
+          <Group justify="space-between">
+            <Group gap="xs">
+              <Badge color="blue" variant="light">
+                {labels.total}
               </Badge>
-            ) : null}
-            {alreadyExistsCount > 0 ? (
-              <Badge color="gray" variant="light">
-                {labels.alreadyExists}
+              <Badge color="green" leftSection={<IconCircleCheck size={12} />} variant="light">
+                {labels.valid}
               </Badge>
-            ) : null}
+              {invalidContactsCount > 0 ? (
+                <Badge color="orange" leftSection={<IconAlertTriangle size={12} />} variant="light">
+                  {labels.invalid}
+                </Badge>
+              ) : null}
+              {alreadyExistsCount > 0 ? (
+                <Badge color="gray" variant="light">
+                  {labels.alreadyExists}
+                </Badge>
+              ) : null}
+            </Group>
           </Group>
-        </Group>
 
-        <Text c="dimmed" size="sm">
-          {chooseContactsHint}
-        </Text>
-
-        <ContactsTable
-          allSelected={allSelected}
-          contacts={previewContacts}
-          disableNameLink
-          noContactsFound={noContactsFound}
-          noContactsMatchSearch={noContactsMatchSearch}
-          nonSelectableIds={nonSelectableIds}
-          nonSelectableTooltip={existingHandleTooltip}
-          onSelectAll={onSelectAll}
-          onSelectOne={onSelectOne}
-          selectedIds={selectedIds}
-          showSelection
-          someSelected={someSelected}
-          visibleColumns={["name", "headline", "social"]}
-        />
-      </Stack>
+          <Text c="dimmed" size="sm">
+            {chooseContactsHint}
+          </Text>
+        </Stack>
+      }
+    >
+      <ContactsTable
+        allSelected={allSelected}
+        contacts={previewContacts}
+        disableNameLink
+        noContactsFound={noContactsFound}
+        noContactsMatchSearch={noContactsMatchSearch}
+        nonSelectableIds={nonSelectableIds}
+        nonSelectableTooltip={existingHandleTooltip}
+        onSelectAll={onSelectAll}
+        onSelectOne={onSelectOne}
+        selectedIds={selectedIds}
+        showSelection
+        someSelected={someSelected}
+        visibleColumns={["name", "headline", "social"]}
+      />
     </ModalScrollLayout>
   );
 }

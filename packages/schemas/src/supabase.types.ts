@@ -1346,6 +1346,18 @@ export type Database = {
           person_id: string;
         }[];
       };
+      get_linkedin_enrich_eligible_count: {
+        Args: { p_user_id: string };
+        Returns: number;
+      };
+      get_keep_in_touch_overdue_count: {
+        Args: { p_user_id: string };
+        Returns: number;
+      };
+      get_contact_extras: {
+        Args: { p_person_ids: string[]; p_user_id: string };
+        Returns: Json;
+      };
       get_map_address_pins_in_bbox: {
         Args: {
           p_limit?: number;

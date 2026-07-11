@@ -4,6 +4,7 @@ import type {
   AddressPin,
   Contact,
   ContactRelationshipWithPeople,
+  ContactSelectable,
   GroupWithCount,
   ImportantDate,
   MapPin,
@@ -62,6 +63,16 @@ export interface ContactsApiResponse {
   stats?: Partial<ContactsStats>;
 }
 
+export interface ContactsSelectableDataResult {
+  contacts: ContactSelectable[];
+  pagination: PaginationMeta;
+}
+
+export interface ContactsSelectableApiResponse {
+  contacts?: ContactSelectable[];
+  pagination?: PaginationMeta;
+}
+
 export function buildContactsListPath({
   search,
   sort,
@@ -82,6 +93,26 @@ export function buildContactsListPath({
   return `${API_ROUTES.CONTACTS}?${params.toString()}`;
 }
 
+export function buildContactsSelectPath({
+  search,
+  sort,
+  limit = 50,
+  offset = 0,
+  avatarPreset = "small",
+}: ContactsListParams): string {
+  const params = new URLSearchParams();
+  params.set("limit", String(limit));
+  params.set("offset", String(offset));
+  if (search) {
+    params.set("search", search);
+  }
+  if (sort) {
+    params.set("sort", sort);
+  }
+  appendAvatarParams(params, avatarPreset);
+  return `${API_ROUTES.CONTACTS_SELECT}?${params.toString()}`;
+}
+
 export function normalizeContactsList(
   raw: ContactsApiResponse,
   fallbackLimit = 50,
@@ -100,6 +131,18 @@ export function normalizeContactsList(
       totalContacts: raw.stats?.totalContacts ?? pagination.totalCount,
     },
   };
+}
+
+export function normalizeContactsSelectableList(
+  raw: ContactsSelectableApiResponse,
+  fallbackLimit = 50,
+): ContactsSelectableDataResult {
+  const { items: contacts, pagination } = normalizePaginatedList<ContactSelectable, "contacts">(
+    raw as Record<string, unknown>,
+    "contacts",
+    fallbackLimit,
+  );
+  return { contacts, pagination };
 }
 
 export function buildContactDetailPath(id: string, avatarPreset: AvatarPreset = "large"): string {

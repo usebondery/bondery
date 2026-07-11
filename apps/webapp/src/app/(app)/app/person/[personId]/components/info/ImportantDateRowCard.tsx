@@ -3,7 +3,7 @@
 import type { ImportantDateType } from "@bondery/schemas";
 import { ActionIcon, Card, Group, Loader, Select, TextInput, Tooltip } from "@mantine/core";
 import { IconBell, IconCalendarEvent, IconTrash } from "@tabler/icons-react";
-import { DatePickerWithPresets } from "../../../../components/interactions/DatePickerWithPresets";
+import { DatePickerWithPresets } from "@/components/interactions/DatePickerWithPresets";
 import { getDateFormat, normalizePickerDate } from "../../utils/importantDateUtils";
 
 export type DateTypeOption = {

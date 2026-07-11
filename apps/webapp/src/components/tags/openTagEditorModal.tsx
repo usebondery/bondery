@@ -9,8 +9,8 @@ import {
   successNotificationTemplate,
 } from "@bondery/mantine-next";
 import {
-  type Contact,
   type ContactPreview,
+  type ContactSelectable,
   createTagSchema,
   type TagWithCount,
 } from "@bondery/schemas";
@@ -32,11 +32,11 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { openStandardConfirmModal } from "@/components/modals/openStandardConfirmModal";
 import { captureEvent } from "@/lib/analytics/client";
-import { getContactsList } from "@/lib/api/domains/contacts";
+import { getContactsSelectableList } from "@/lib/api/domains/contacts";
 import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
 import { createModalId, useModalDismiss } from "@/lib/modals";
 import { DEBOUNCE_MS } from "@/lib/platform/config";
-import { useContactsListQuery } from "@/lib/query/hooks/useContacts";
+import { useContactsSelectableListQuery } from "@/lib/query/hooks/useContacts";
 import {
   useCreateTagMutation,
   useDeleteTagMutation,
@@ -98,7 +98,7 @@ function TagEditorModalBody({
   const syncTagContactsMutation = useSyncTagContactsByIdMutation();
   const deleteTagMutation = useDeleteTagMutation();
 
-  const { data: contactsData, isLoading: isLoadingContactsList } = useContactsListQuery({
+  const { data: contactsData, isLoading: isLoadingContactsList } = useContactsSelectableListQuery({
     limit: 200,
   });
   const { data: tagMembers, isLoading: isLoadingMembers } = useTagMembersQuery(
@@ -141,12 +141,12 @@ function TagEditorModalBody({
   const { closeModal, closeModalSync } = useModalDismiss(modalId, isBlocking);
 
   const handleSearch = useCallback(
-    async (query: string): Promise<Contact[]> => {
+    async (query: string): Promise<ContactSelectable[]> => {
       try {
         const params = { limit: 10, search: query };
         const data = await queryClient.fetchQuery({
-          queryFn: () => getContactsList(params),
-          queryKey: contactKeys.list(params),
+          queryFn: () => getContactsSelectableList(params),
+          queryKey: contactKeys.selectable.list(params),
         });
         return data.contacts ?? [];
       } catch {
@@ -160,7 +160,7 @@ function TagEditorModalBody({
     const map = new Map(allContacts.map((contact) => [contact.id, contact]));
     return ids
       .map((id) => map.get(id))
-      .filter((contact): contact is Contact => contact != null)
+      .filter((contact): contact is ContactSelectable => contact != null)
       .slice(0, 3)
       .map((contact) => ({
         avatar: contact.avatar,

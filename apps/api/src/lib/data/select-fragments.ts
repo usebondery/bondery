@@ -43,6 +43,19 @@ export const CONTACT_SELECT = `
   hasAvatar:has_avatar
 `;
 
+/** Lean identity fields for picker / combobox surfaces. */
+export const SELECTABLE_CONTACT_SELECT = `
+  id,
+  firstName:first_name,
+  middleName:middle_name,
+  lastName:last_name,
+  headline,
+  location,
+  myself,
+  updatedAt:updated_at,
+  hasAvatar:has_avatar
+`;
+
 /** Group fields selection query for Supabase */
 export const GROUP_SELECT = `
   id,

@@ -90,6 +90,18 @@ export const bonderyTheme = createTheme({
         transitionDuration: 500,
       },
     },
+    ScrollArea: {
+      defaultProps: {
+        offsetScrollbars: true,
+        scrollbarSize: 12,
+      },
+    },
+    ScrollAreaAutosize: {
+      defaultProps: {
+        offsetScrollbars: true,
+        scrollbarSize: 12,
+      },
+    },
     Select: {
       defaultProps: {
         variant: "filled",

@@ -62,7 +62,7 @@ for (const file of walk(root)) {
         lines.splice(
           hookImport + 1,
           0,
-          'import { useCommonTranslations } from "@/lib/i18n/useCommonTranslations";',
+          'import { useCommonTranslations } from "@/lib/i18n/useWebTranslations";',
         );
       }
     } else {
@@ -70,7 +70,7 @@ for (const file of walk(root)) {
       lines.splice(
         lastImport + 1,
         0,
-        'import { useCommonTranslations } from "@/lib/i18n/useCommonTranslations";',
+        'import { useCommonTranslations } from "@/lib/i18n/useWebTranslations";',
       );
     }
     content = lines.join("\n");

@@ -3,7 +3,7 @@
 import type { SubscriptionStatus } from "@bondery/schemas";
 import { Progress, Stack, Text } from "@mantine/core";
 import { IconLock } from "@tabler/icons-react";
-import { UpgradeButton } from "@/components/shared";
+import { UpgradeButton } from "@/components/shared/UpgradeButton";
 import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
 
 /**

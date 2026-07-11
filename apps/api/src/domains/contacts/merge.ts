@@ -21,6 +21,7 @@ import { persistSyncChanges } from "../../lib/sync/persist-changes.js";
 import { type DomainContext, DomainError, syncEmitMetaFromContext } from "../_shared/context.js";
 import { captureCurrentSyncTxid } from "../_shared/with-txid.js";
 import { mergeContactEmails, mergeContactPhones } from "./merge-channels.js";
+import { scheduleMergeRecommendationsRefresh } from "./merge-recommendations.js";
 import {
   mergeContactAvatar,
   mergeContactGroupMemberships,
@@ -169,6 +170,8 @@ export async function mergeContacts(
   const txid = await captureCurrentSyncTxid(client);
   const serverSequence =
     (await persistSyncChanges(user.id, changes, syncEmitMetaFromContext(ctx))) ?? 0;
+
+  scheduleMergeRecommendationsRefresh(ctx);
 
   return { data: response, serverSequence, txid };
 }

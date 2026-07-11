@@ -20,7 +20,7 @@ import { optionalPluralFragment } from "@/lib/i18n/optionalPluralFragment";
 import { useCommonTranslations, useWebTranslations } from "@/lib/i18n/useWebTranslations";
 import { createModalId, useModalDismiss } from "@/lib/modals";
 import { DEBOUNCE_MS } from "@/lib/platform/config";
-import { useContactsListQuery } from "@/lib/query/hooks/useContacts";
+import { useContactsSelectableListQuery } from "@/lib/query/hooks/useContacts";
 import { useAddContactsToGroupMutation, useGroupMembersQuery } from "@/lib/query/hooks/useGroups";
 
 interface AddPeopleToGroupModalProps {
@@ -67,7 +67,7 @@ function AddPeopleToGroupForm({ groupId, groupLabel, modalId }: AddPeopleToGroup
     data: allContactsData,
     isLoading: isLoadingAll,
     isError: isAllContactsError,
-  } = useContactsListQuery({ limit: 200 });
+  } = useContactsSelectableListQuery({ limit: 200 });
   const {
     data: groupMembersData,
     isLoading: isLoadingMembers,

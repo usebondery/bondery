@@ -13,7 +13,6 @@ import {
   parseInstagramImport,
   parseLinkedInImport,
   parseVCardImport,
-  refreshMergeRecommendationsAfterImport,
 } from "@/lib/api/domains/imports";
 import { invalidateAfterImport } from "@/lib/query/invalidation";
 
@@ -24,7 +23,6 @@ type CommitInput<T> = {
 };
 
 async function afterImportCommit(queryClient: QueryClient) {
-  await refreshMergeRecommendationsAfterImport();
   await invalidateAfterImport(queryClient);
 }
 

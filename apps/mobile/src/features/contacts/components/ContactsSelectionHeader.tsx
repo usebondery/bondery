@@ -8,14 +8,12 @@ import { MOBILE_TYPOGRAPHY } from "../../../theme/tokens";
 
 import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
 
-import { useContactsEffectiveSelectedCount, useContactsSelection } from "../contactsSelectionStore";
+import { useContactsSelection } from "../contactsSelectionStore";
 
 export function ContactsSelectionHeader() {
   const t = useMobileTranslations();
 
   const colors = useMobileThemeColors();
-
-  const effectiveSelectedCount = useContactsEffectiveSelectedCount();
 
   const totalCount = useContactsSelection((state) => state.totalCount);
 

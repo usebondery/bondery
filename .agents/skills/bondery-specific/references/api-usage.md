@@ -17,7 +17,7 @@ This mirrors how Stripe SDKs work: a thin HTTP client (`StripeClient`) plus opti
 
 **Webapp BFF:** Browser calls `/api/contacts`; Next.js route handler validates the session and proxies to Fastify with Bearer. The browser never calls `API_URL` for authenticated resources.
 
-**Webapp server session:** Route guards and server transport share `resolveServerSession()` (`lib/auth/resolveServerSession.ts`) — one cached `getUser()` + access token per request. Layout, BFF, `serverApiFetch`, and `getAppBootstrap` all read from it. Do not call `supabase.auth.getUser()` directly in server code for auth gates.
+**Webapp server session:** Route guards and server transport share `resolveServerSession()` (`lib/auth/resolveServerSession.ts`) — one cached `getUser()` + access token per request. Layout, BFF, `serverApiFetch`, and `getAppSession` all read from it. Do not call `supabase.auth.getUser()` directly in server code for auth gates.
 
 **Status probe (webapp):** The webapp exposes `GET /api/status` as a BFF route (`app/api/status/route.ts`) that proxies to Fastify `/status` with normal auth headers. Browser code calls `clientApiFetch("/api/status")` — same as other BFF routes. The chrome extension calls `${config.apiUrl}/status` directly (no webapp hop).
 
@@ -129,11 +129,15 @@ Mobile `apiRequest` throws typed `ApiError` (same as webapp). UI shows `getUserF
 
 | Layer | Location | Responsibility |
 |-------|----------|----------------|
-| **1 — Server bootstrap** | `lib/app/getAppBootstrap.ts`, `app/(app)/app/layout.tsx` | Routing probe + layout guards: unauthorized → login, unavailable → `/app/unavailable` |
+| **1 — Server bootstrap** | `lib/app/getAppSession.ts`, `app/(app)/app/layout.tsx` | Session probe + layout guards: unauthorized → login, unavailable → `/app/unavailable` |
 | **2 — Classification** | `lib/api/availability.ts`, `lib/auth/unauthorized.ts` | `isApiUnavailableError`, `isUnauthorizedApiError` (no side effects) |
 | **3 — Transport policy** | `applyTransportErrorPolicy.ts` + `client.ts`; `applyServerTransportPolicy.ts` + `server.ts` | Apply 401 / unavailable side effects per runtime |
 
 **React Query** (`lib/query/client.ts`) owns cache config and retry rules only — not session or outage redirects.
+
+### Session vs settings (webapp)
+
+Layout loads **session** (who you are, shell + locale inputs, onboarding guard). Home and Settings load the full **settings** blob on demand via `useSettingsQuery()`. Never use `useSettingsQuery` for shell identity — use `useUserSession()` from `UserSessionProvider`. After identity-changing mutations, call `refreshAppShell()` so the layout re-probes session and guards stay aligned.
 
 | Signal | Client action | Server action (RSC, `transportPolicy: true`) | Sign out? |
 |--------|---------------|--------------------------------------------|-----------|
@@ -215,7 +219,7 @@ When the BFF or upstream API is down (502/503/504 or fetch network failure):
 
 - `clientApiJson` → `handleApiUnavailable()` → `/app/unavailable` (session stays active)
 - `serverApiFetch` / `serverApiJson` (default) → `redirect(/app/unavailable)` when session valid; login when not
-- `getAppBootstrap()` with `transportPolicy: false` → layout redirects (probe, not sole gate)
+- `getAppSession()` with `transportPolicy: false` → layout redirects (probe, not sole gate)
 - BFF routes → `bffProxyFetch` returns 503 JSON on network failure; browser client policy handles redirect
 - `*JsonOrNull` does **not** redirect on unavailable — optional fetches degrade to `null`
 
@@ -253,7 +257,7 @@ npm run check-api-fetch:strict   # part of check-types
 | Webapp transport policy | `apps/webapp/src/lib/api/applyTransportErrorPolicy.ts` |
 | Webapp server transport policy | `apps/webapp/src/lib/api/applyServerTransportPolicy.ts` |
 | Webapp BFF proxy | `apps/webapp/src/lib/api/bffProxy.ts` |
-| Webapp server bootstrap | `apps/webapp/src/lib/app/getAppBootstrap.ts` |
+| Webapp server bootstrap | `apps/webapp/src/lib/app/getAppSession.ts` |
 | Webapp API unavailable redirect | `apps/webapp/src/lib/auth/handleApiUnavailable.ts` |
 | Webapp server transport | `apps/webapp/src/lib/api/server.ts` |
 | Webapp session teardown | `apps/webapp/src/lib/auth/endSession.ts` |

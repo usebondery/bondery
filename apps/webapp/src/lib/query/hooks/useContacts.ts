@@ -1,5 +1,6 @@
 "use client";
 
+import { patchAffectsMergeRecommendations } from "@bondery/helpers/contact";
 import type { Contact } from "@bondery/schemas";
 import type { QueryClient } from "@tanstack/react-query";
 import {
@@ -25,6 +26,7 @@ import {
   getContactLinkedInData,
   getContactRelationships,
   getContactsList,
+  getContactsSelectableList,
   getContactTags,
   getMapPins,
   type ImportantDateInput,
@@ -40,7 +42,9 @@ import {
   updateContactRelationship,
   uploadContactPhoto,
 } from "@/lib/api/domains/contacts";
-import type { ContactsListFilterParams } from "@/lib/query/contactsListParams";
+import { getInteractionsList } from "@/lib/api/domains/interactions";
+import { refreshAppShell } from "@/lib/app/refreshAppShell";
+import { syncMergeRecommendationsAfterChange } from "@/lib/merge/syncMergeRecommendations";
 import {
   invalidateContactDetail,
   invalidateContactDomain,
@@ -48,11 +52,12 @@ import {
   invalidateContactLists,
   invalidateContactMapPins,
   invalidateContactRelationships,
-  invalidateMergeRecommendationDomain,
+  invalidateKeepInTouchCount,
   invalidateSettings,
 } from "@/lib/query/invalidation";
 import { contactKeys } from "@/lib/query/keys";
 import { PERSON_INTERACTIONS } from "@/lib/query/personPageQueryParams";
+import { INTERACTIONS_TIMELINE } from "@/lib/query/sharedListParams";
 
 type UpdateContactPatch = Parameters<typeof updateContact>[1];
 
@@ -80,7 +85,10 @@ async function invalidateAfterContactUpdate(
     invalidateContactLists(queryClient),
     ...(patchAffectsMapPins(patch) ? [invalidateContactMapPins(queryClient)] : []),
     ...(patchAffectsKeepInTouch(patch)
-      ? [queryClient.invalidateQueries({ queryKey: contactKeys.keepInTouch() })]
+      ? [
+          queryClient.invalidateQueries({ queryKey: contactKeys.keepInTouch() }),
+          invalidateKeepInTouchCount(queryClient),
+        ]
       : []),
   ]);
 }
@@ -103,6 +111,25 @@ export function useContactsListQuery(params: {
     enabled: params.enabled !== false,
     queryFn: () => getContactsList(listParams),
     queryKey: contactKeys.list(listParams),
+  });
+}
+
+export function useContactsSelectableListQuery(params: {
+  search?: string;
+  sort?: SortOrder;
+  limit?: number;
+  enabled?: boolean;
+}) {
+  const listParams: ContactsListParams = {
+    limit: params.limit ?? PAGE_SIZE,
+    offset: 0,
+    search: params.search,
+    sort: params.sort,
+  };
+  return useQuery({
+    enabled: params.enabled !== false,
+    queryFn: () => getContactsSelectableList(listParams),
+    queryKey: contactKeys.selectable.list(listParams),
   });
 }
 
@@ -179,6 +206,28 @@ export function useContactInteractionsQuery(
   });
 }
 
+export function useContactInteractionsInfiniteQuery(contactId: string, enabled = true) {
+  const infiniteParams = { limit: INTERACTIONS_TIMELINE.limit };
+
+  return useInfiniteQuery({
+    enabled: enabled && !!contactId,
+    getNextPageParam: (lastPage) => {
+      if (!lastPage.pagination.hasMore) {
+        return undefined;
+      }
+      return lastPage.pagination.offset + lastPage.pagination.limit;
+    },
+    initialPageParam: 0,
+    queryFn: async ({ pageParam }) =>
+      getInteractionsList({
+        contactId,
+        limit: INTERACTIONS_TIMELINE.limit,
+        offset: pageParam as number,
+      }),
+    queryKey: contactKeys.interactionsInfinite(contactId, infiniteParams),
+  });
+}
+
 export function useMapPinsQuery(
   mode: "contact",
   bounds: MapPinsBounds | null,
@@ -250,6 +299,10 @@ export function useUpdateContactMutation(
       await invalidateAfterContactUpdate(queryClient, contactId, patch);
       if (options?.syncSettingsOnFirstNameChange && "firstName" in patch) {
         await invalidateSettings(queryClient);
+        refreshAppShell();
+      }
+      if (patchAffectsMergeRecommendations(patch)) {
+        await syncMergeRecommendationsAfterChange(queryClient);
       }
     },
   });
@@ -265,7 +318,9 @@ export function useUploadContactPhotoMutation(
     onSuccess: async () => {
       await Promise.all([
         invalidateContactDetail(queryClient, contactId),
-        options?.syncSettings ? invalidateSettings(queryClient) : Promise.resolve(),
+        options?.syncSettings
+          ? Promise.all([invalidateSettings(queryClient), Promise.resolve(refreshAppShell())])
+          : Promise.resolve(),
       ]);
     },
   });
@@ -278,6 +333,9 @@ export function usePatchContactMutation() {
       updateContact(id, patch),
     onSuccess: async (_data, { id, patch }) => {
       await invalidateAfterContactUpdate(queryClient, id, patch);
+      if (patchAffectsMergeRecommendations(patch)) {
+        await syncMergeRecommendationsAfterChange(queryClient);
+      }
     },
   });
 }
@@ -366,7 +424,7 @@ export function useMergeContactsMutation() {
     onSuccess: async () => {
       await Promise.all([
         invalidateContactDomain(queryClient),
-        invalidateMergeRecommendationDomain(queryClient),
+        syncMergeRecommendationsAfterChange(queryClient),
       ]);
     },
   });
@@ -387,7 +445,10 @@ export async function mergeContactsWithInvalidation(
   input: Parameters<typeof mergeContacts>[0],
 ) {
   await mergeContacts(input);
-  await invalidateContactDomain(queryClient);
+  await Promise.all([
+    invalidateContactDomain(queryClient),
+    syncMergeRecommendationsAfterChange(queryClient),
+  ]);
 }
 
 /** Imperative create for modal confirm handlers (no hook context). */

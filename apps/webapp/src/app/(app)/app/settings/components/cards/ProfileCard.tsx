@@ -7,8 +7,8 @@ import { IconChevronRight, IconMail, IconUserCircle } from "@tabler/icons-react"
 import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
 import { useMePersonQuery } from "@/lib/query/hooks/useMePerson";
 import { useSettingsQuery } from "@/lib/query/hooks/useSettings";
-import { ProviderIntegrations } from "./cards/ProviderIntegrations";
-import { SettingsSection } from "./cards/SettingsSection";
+import { ProviderIntegrations } from "./ProviderIntegrations";
+import { SettingsSection } from "./SettingsSection";
 
 export function ProfileCard() {
   const t = useWebTranslations("SettingsPage", "Profile");
@@ -51,6 +51,7 @@ export function ProfileCard() {
 
       <CardSection inheritPadding py="md">
         <TextInput
+          disabled
           label={
             <Group align="center" gap={4}>
               <Text fw={500} size="sm">
@@ -66,7 +67,6 @@ export function ProfileCard() {
           }
           leftSection={<IconMail size={16} />}
           placeholder={t("EmailPlaceholder")}
-          readOnly
           type="email"
           value={email}
         />

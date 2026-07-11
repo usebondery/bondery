@@ -9,14 +9,18 @@ import {
 import { Button, Group, Paper, SegmentedControl, Stack, Text } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { IconArrowMerge, IconEye, IconEyeOff, IconRefresh } from "@tabler/icons-react";
-import { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import { useEffect, useRef, useState } from "react";
 import { MergeRecommendationCard } from "@/components/contacts/MergeRecommendationCard";
 import { PageHeader } from "@/components/shell/PageHeader";
 import { PageWrapper } from "@/components/shell/PageWrapper";
 import { useCommonTranslations, useWebTranslations } from "@/lib/i18n/useWebTranslations";
+import { syncMergeRecommendationsAfterChange } from "@/lib/merge/syncMergeRecommendations";
 import {
-  useEnrichEligibleCountQuery,
+  useEnrichQueueCountQuery,
   useEnrichQueueStatusQuery,
+} from "@/lib/query/hooks/useEnrichQueue";
+import {
   useMergeRecommendationsQuery,
   useRefreshMergeRecommendationsMutation,
   useRestoreMergeRecommendationMutation,
@@ -30,13 +34,27 @@ export function FixClient() {
   const tMerge = useWebTranslations("MergeWithModal");
   const [showDeclined, setShowDeclined] = useState(false);
   const [restoringIds, setRestoringIds] = useState<Set<string>>(new Set());
+  const queryClient = useQueryClient();
+  const didBootstrapRefresh = useRef(false);
 
   const { data: recommendations = [], isFetching: isListFetching } =
     useMergeRecommendationsQuery(showDeclined);
-  const { data: eligibleCount = 0 } = useEnrichEligibleCountQuery();
+  const { data: eligibleCount = 0 } = useEnrichQueueCountQuery();
   const { data: queueStatus = null } = useEnrichQueueStatusQuery();
   const refreshMutation = useRefreshMergeRecommendationsMutation();
   const restoreMutation = useRestoreMergeRecommendationMutation();
+
+  useEffect(() => {
+    if (didBootstrapRefresh.current || showDeclined || isListFetching) {
+      return;
+    }
+    if (recommendations.length > 0) {
+      didBootstrapRefresh.current = true;
+      return;
+    }
+    didBootstrapRefresh.current = true;
+    void syncMergeRecommendationsAfterChange(queryClient, { requestRefresh: true });
+  }, [isListFetching, queryClient, recommendations.length, showDeclined]);
 
   const handleRefreshSuggestions = async () => {
     try {

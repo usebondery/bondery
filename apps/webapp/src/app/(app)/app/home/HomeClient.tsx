@@ -5,6 +5,7 @@ import {
   ActionIconLink,
   errorNotificationTemplate,
   Kbd,
+  loadingNotificationTemplate,
   ModalTitle,
   PersonChip,
   parseShortcutKeys,
@@ -30,7 +31,7 @@ import { useRouter } from "next/navigation";
 import { useMemo } from "react";
 import { openNewActivityModal } from "@/app/(app)/app/interactions/components/NewActivityModal";
 import { openAddContactModal } from "@/app/(app)/app/people/components/modals/AddContactModal";
-import { GettingStartedProgressRail } from "@/components/home/GettingStartedProgressRail";
+import { GettingStartedRailSlot } from "@/components/home/GettingStartedRailSlot";
 import { HomeStatsGrid } from "@/components/home/HomeStatsGrid";
 import { UpcomingReminderCard } from "@/components/home/UpcomingReminderCard";
 import { InteractionsList } from "@/components/interactions/InteractionsList";
@@ -39,7 +40,7 @@ import { PageHeader } from "@/components/shell/PageHeader";
 import { PageWrapper } from "@/components/shell/PageWrapper";
 import { peopleSearchActions } from "@/components/shell/PeopleSearchSpotlight";
 import { useDateFormatter as useFormatter } from "@/lib/i18n/useDateFormatter";
-import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
+import { useCommonTranslations, useWebTranslations } from "@/lib/i18n/useWebTranslations";
 import { setOptimisticDocumentTitle } from "@/lib/metadata/navigationTitleStore";
 import { optimisticPersonDocumentTitle } from "@/lib/metadata/optimisticTitles";
 import { useNavigateWithTitle } from "@/lib/metadata/useNavigateWithTitle";
@@ -58,16 +59,17 @@ import {
 } from "@/lib/query/hooks/useInteractions";
 import { useSettingsQuery } from "@/lib/query/hooks/useSettings";
 
-export function HomeClient() {
+export function HomeClient({ initialSettings }: { initialSettings?: Record<string, unknown> }) {
   const _router = useRouter();
   const { navigateWithTitle } = useNavigateWithTitle();
   const t = useWebTranslations("HomePage");
   const timelineT = useWebTranslations("InteractionsPage");
+  const tCommon = useCommonTranslations();
   const deleteInteractionMutation = useDeleteInteractionMutation();
   const createInteractionMutation = useCreateInteractionMutation();
-  const { data: stats } = useHomeStatsQuery();
-  const { data: settingsResult } = useSettingsQuery();
-  const { data: hasInteraction = false } = useHasAnyInteractionQuery();
+  const { data: stats, isFetched: statsReady } = useHomeStatsQuery();
+  const { data: settingsResult, isFetched: settingsReady } = useSettingsQuery();
+  const { data: hasInteraction, isFetched: hasInteractionReady } = useHasAnyInteractionQuery();
   const { data: reminders = [] } = useUpcomingRemindersQuery();
   const { contacts: timelineContacts, activities: timelineActivities } = useHomeTimelineQuery();
   const { data: recentlyAdded = [] } = useRecentlyAddedContactsQuery();
@@ -178,6 +180,13 @@ export function HomeClient() {
       )
       .filter((id): id is string => Boolean(id));
 
+    const loadingNotificationId = notifications.show({
+      ...loadingNotificationTemplate({
+        description: timelineT("DuplicateInteraction.LoadingDescription"),
+        title: tCommon("feedback.duplicating"),
+      }),
+    });
+
     try {
       await createInteractionMutation.mutateAsync({
         date: activity.date,
@@ -187,20 +196,22 @@ export function HomeClient() {
         type: activity.type,
       });
 
-      notifications.show(
-        successNotificationTemplate({
+      notifications.update({
+        ...successNotificationTemplate({
           description: timelineT("ActivityDuplicated"),
           icon: <IconCopy size={18} />,
           title: timelineT("SuccessTitle"),
         }),
-      );
+        id: loadingNotificationId,
+      });
     } catch {
-      notifications.show(
-        errorNotificationTemplate({
+      notifications.update({
+        ...errorNotificationTemplate({
           description: timelineT("DuplicateFailed"),
           title: timelineT("ErrorTitle"),
         }),
-      );
+        id: loadingNotificationId,
+      });
     }
   };
 
@@ -255,9 +266,13 @@ export function HomeClient() {
           title={t("Title")}
         />
 
-        <GettingStartedProgressRail
-          hasInteraction={hasInteraction}
+        <GettingStartedRailSlot
+          hasInteraction={hasInteraction ?? false}
+          hasInteractionReady={hasInteractionReady}
+          initialSettings={initialSettings}
           settingsData={settingsResult?.data}
+          settingsReady={settingsReady}
+          statsReady={statsReady}
           timelineContacts={timelineContacts}
           totalContacts={stats?.totalContacts ?? 0}
         />

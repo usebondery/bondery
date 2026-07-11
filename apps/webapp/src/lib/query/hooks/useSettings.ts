@@ -13,14 +13,40 @@ import {
   updateSettings,
   uploadMePhoto,
 } from "@/lib/api/domains/settings";
+import { refreshAppShell } from "@/lib/app/refreshAppShell";
 import { invalidateSettings } from "@/lib/query/invalidation";
 import { settingsKeys } from "@/lib/query/keys";
+
+const SETTINGS_STALE_TIME_MS = 15 * 60_000;
+
+function settingsPatchAffectsSession(patch: UpdateSettingsPatch): boolean {
+  return (
+    patch.colorScheme !== undefined ||
+    patch.name !== undefined ||
+    patch.middlename !== undefined ||
+    patch.surname !== undefined ||
+    patch.language !== undefined ||
+    patch.timezone !== undefined ||
+    patch.timeFormat !== undefined
+  );
+}
+
+function sessionPatchFromSettingsUpdate(
+  patch: UpdateSettingsPatch,
+): Parameters<typeof refreshAppShell>[0] | undefined {
+  if (patch.colorScheme !== undefined) {
+    return { colorScheme: patch.colorScheme };
+  }
+  return undefined;
+}
 
 export function useSettingsQuery(enabled = true) {
   return useQuery({
     enabled,
     queryFn: getSettings,
     queryKey: settingsKeys.me(),
+    refetchOnWindowFocus: false,
+    staleTime: SETTINGS_STALE_TIME_MS,
   });
 }
 
@@ -28,8 +54,11 @@ export function useUpdateSettingsMutation() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (patch: UpdateSettingsPatch) => updateSettings(patch),
-    onSuccess: async () => {
+    onSuccess: async (_data, patch) => {
       await invalidateSettings(queryClient);
+      if (settingsPatchAffectsSession(patch)) {
+        refreshAppShell(sessionPatchFromSettingsUpdate(patch));
+      }
     },
   });
 }
@@ -40,6 +69,7 @@ export function useUploadMePhotoMutation() {
     mutationFn: uploadMePhoto,
     onSuccess: async () => {
       await invalidateSettings(queryClient);
+      refreshAppShell();
     },
   });
 }
@@ -56,6 +86,7 @@ export function useCompleteOnboardingMutation() {
     mutationFn: completeOnboarding,
     onSuccess: async () => {
       await invalidateSettings(queryClient);
+      refreshAppShell();
     },
   });
 }
@@ -88,6 +119,7 @@ export function useFinishOnboardingMutation() {
     },
     onSuccess: async () => {
       await invalidateSettings(queryClient);
+      refreshAppShell();
     },
   });
 }

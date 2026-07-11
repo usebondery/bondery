@@ -19,17 +19,21 @@ import {
   buildContactLinkedInDataPath,
   buildContactRelationshipsPath,
   buildContactsListPath,
+  buildContactsSelectPath,
   buildContactTagsPath,
   buildMapPinsPath,
   type ContactInteractionsParams,
   type ContactsApiResponse,
   type ContactsDataResult,
   type ContactsListParams,
+  type ContactsSelectableApiResponse,
+  type ContactsSelectableDataResult,
   type MapAddressPinsResult,
   type MapContactPinsResult,
   type MapPinsBounds,
   type MapPinsMode,
   normalizeContactsList,
+  normalizeContactsSelectableList,
   parseContactDetail,
   parseContactGroups,
   parseContactImportantDates,
@@ -55,6 +59,21 @@ export async function getContactsListServer(
     ...options,
   });
   return normalizeContactsList(raw, params.limit ?? 50);
+}
+
+export async function getContactsSelectableListServer(
+  params: ContactsListParams,
+  options: ContactReadOptions = {},
+): Promise<ContactsSelectableDataResult> {
+  const raw = await serverApiJson<ContactsSelectableApiResponse>(
+    buildContactsSelectPath(params),
+    undefined,
+    {
+      ...CONTACTS_TAG,
+      ...options,
+    },
+  );
+  return normalizeContactsSelectableList(raw, params.limit ?? 50);
 }
 
 export async function getContactDetailServer(

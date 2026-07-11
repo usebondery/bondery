@@ -16,6 +16,7 @@ export * from "#entities/important-date.js";
 export * from "#entities/merge.js";
 export * from "#entities/notes.js";
 export * from "#entities/reminder.js";
+export * from "#entities/session.js";
 export * from "#entities/settings.js";
 export * from "#entities/social.js";
 export * from "#entities/subscription.js";

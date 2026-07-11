@@ -17,8 +17,11 @@ export const contactKeys = {
     [...contactKeys.lists(), "infinite", params] as const,
   interactions: (id: string, params?: { limit?: number; offset?: number }) =>
     [...contactKeys.detail(id), "interactions", params ?? {}] as const,
+  interactionsInfinite: (id: string, params: { limit?: number }) =>
+    [...contactKeys.detail(id), "interactions", "infinite", params] as const,
   keepInTouch: (params?: { endDate?: string }) =>
     [...contactKeys.all, "keep-in-touch", params ?? {}] as const,
+  keepInTouchCount: () => [...contactKeys.all, "keep-in-touch-count"] as const,
   linkedin: (id: string) => [...contactKeys.detail(id), "linkedin"] as const,
   list: (params: ContactsListParams) => [...contactKeys.lists(), params] as const,
   lists: () => [...contactKeys.all, "list"] as const,
@@ -26,6 +29,12 @@ export const contactKeys = {
     [...contactKeys.all, "map-pins", mode, bounds ?? {}] as const,
   relationships: (id: string) => [...contactKeys.detail(id), "relationships"] as const,
   search: (search: string) => [...contactKeys.all, "search", search] as const,
+  selectable: {
+    all: () => [...contactKeys.all, "selectable"] as const,
+    list: (params: ContactsListParams) => [...contactKeys.selectable.lists(), params] as const,
+    lists: () => [...contactKeys.selectable.all(), "list"] as const,
+    search: (search: string) => [...contactKeys.selectable.all(), "search", search] as const,
+  },
   stats: () => [...contactKeys.all, "stats"] as const,
   tags: (id: string) => [...contactKeys.detail(id), "tags"] as const,
 };
@@ -52,6 +61,8 @@ export const interactionKeys = {
   all: ["interactions"] as const,
   detail: (id: string) => [...interactionKeys.details(), id] as const,
   details: () => [...interactionKeys.all, "detail"] as const,
+  infinite: (params: { limit?: number; contactId?: string }) =>
+    [...interactionKeys.lists(), "infinite", params] as const,
   list: (params?: { limit?: number; offset?: number; contactId?: string }) =>
     [...interactionKeys.lists(), params ?? {}] as const,
   lists: () => [...interactionKeys.all, "list"] as const,
@@ -73,10 +84,15 @@ export const groupKeys = {
 
 export const mergeRecommendationKeys = {
   all: ["merge-recommendations"] as const,
-  enrichEligibleCount: () => [...mergeRecommendationKeys.all, "enrich-eligible-count"] as const,
-  enrichQueueStatus: () => [...mergeRecommendationKeys.all, "enrich-queue-status"] as const,
+  count: () => [...mergeRecommendationKeys.all, "count"] as const,
   list: (params?: { declined?: boolean }) =>
     [...mergeRecommendationKeys.all, "list", params ?? {}] as const,
+};
+
+export const enrichQueueKeys = {
+  all: ["enrich-queue"] as const,
+  count: () => [...enrichQueueKeys.all, "count"] as const,
+  status: () => [...enrichQueueKeys.all, "status"] as const,
 };
 
 export const reminderKeys = {

@@ -54,4 +54,6 @@ closes while async loading can still complete (rare).
 
 When a modal can scroll (tables, long card grids, merge conflicts), use **`ModalScrollLayout`** from `@bondery/mantine-next` so `ModalFooter` stays visible. Pass `footer={<ModalFooter mt={0} ... />}` and put scrollable content in `children`.
 
+When filters, search, summary chips, or badges should stay visible while a list or table scrolls, pass them in `header`. Only `children` scrolls; `header` and `footer` stay pinned (same layout split as mobile `ActionSheetPopup`).
+
 Short forms and confirm dialogs keep `Stack` + inline `ModalFooter` — no layout wrapper needed.

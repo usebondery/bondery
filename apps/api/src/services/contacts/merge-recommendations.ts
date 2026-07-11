@@ -53,8 +53,8 @@ export async function hydrateMergeRecommendations(
       addresses: true,
       avatarOptions,
     });
-  } catch (enrichError) {
-    log?.error({ enrichError }, "Failed to attach contact extras for merge recommendations");
+  } catch (error) {
+    log?.error({ err: error }, "Failed to attach contact extras for merge recommendations");
     enrichedContacts = withEmptySocials(withEmptyChannels(personRows || []));
   }
 

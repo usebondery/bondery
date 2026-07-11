@@ -34,13 +34,13 @@ Import from `@/lib/api/server`. Used in RSC pages and loaders.
 | Function | `transportPolicy` | Use when |
 |----------|-------------------|----------|
 | `serverApiFetch` / `serverApiJson` | default `true` | RSC data loads |
-| `serverApiFetch` / `serverApiJson` | `false` | Routing probes (`probeSettingsServer`) |
+| `serverApiFetch` / `serverApiJson` | `false` | Routing probes (`probeMeSessionServer`) |
 | `serverApiJsonOrNull` | always off for outage | Optional RSC prefetch |
 | `bffProxyFetch` | N/A (imports from `@/lib/api/bffProxy`) | **`app/api/**` route handlers only** |
 
 Auth: `serverApiFetch` attaches `Authorization: Bearer …` via `resolveServerSession()`. Route guards and BFF 401 gates use the same function — do not duplicate `getUser()` in server code.
 
-`getAppBootstrap()` delegates to `probeSettingsServer()` for layout routing; TanStack settings cache is seeded in the app layout via `SettingsCacheSeed`.
+`getAppSession()` delegates to `probeMeSessionServer()` for layout routing and shell identity. Full settings load via `useSettingsQuery` only on Home and Settings (prefetched in their loaders).
 
 ## Domain-first data access
 

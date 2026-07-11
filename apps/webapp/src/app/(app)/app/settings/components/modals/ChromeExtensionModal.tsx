@@ -6,7 +6,7 @@ import { Group, Paper, Stack, Text } from "@mantine/core";
 import { modals } from "@mantine/modals";
 import { IconApps, IconCircleCheck } from "@tabler/icons-react";
 import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
-import { ExtensionLinkedInAnimation } from "./import/ExtensionLinkedInAnimation";
+import { ExtensionLinkedInAnimation } from "../import/ExtensionLinkedInAnimation";
 
 interface ChromeExtensionModalProps {
   modalId: string;

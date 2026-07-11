@@ -2,7 +2,7 @@
 
 import { Alert } from "@mantine/core";
 import { IconSparkles } from "@tabler/icons-react";
-import { UpgradeButton } from "@/components/shared";
+import { UpgradeButton } from "@/components/shared/UpgradeButton";
 import { useDateFormatter as useFormatter } from "@/lib/i18n/useDateFormatter";
 import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
 

@@ -1,7 +1,6 @@
 import type { QueryClient } from "@tanstack/react-query";
 import {
   PERSON_ALL_TAGS,
-  PERSON_INTERACTIONS,
   PERSON_MERGE_RECOMMENDATIONS,
   PERSON_SELECTABLE_CONTACTS,
 } from "@/lib/query/personPageQueryParams";
@@ -9,10 +8,10 @@ import {
   prefetchContactDetail,
   prefetchContactGroups,
   prefetchContactImportantDates,
-  prefetchContactInteractions,
+  prefetchContactInteractionsInfinite,
   prefetchContactLinkedInData,
   prefetchContactRelationships,
-  prefetchContactsList,
+  prefetchContactsSelectableList,
   prefetchContactTags,
   prefetchMergeRecommendations,
   prefetchTagsList,
@@ -33,8 +32,8 @@ export async function prefetchPersonPageQueries(
     prefetchContactImportantDates(queryClient, personId),
     prefetchContactTags(queryClient, personId),
     prefetchContactGroups(queryClient, personId),
-    prefetchContactInteractions(queryClient, personId, PERSON_INTERACTIONS),
-    prefetchContactsList(queryClient, PERSON_SELECTABLE_CONTACTS),
+    prefetchContactInteractionsInfinite(queryClient, personId),
+    prefetchContactsSelectableList(queryClient, PERSON_SELECTABLE_CONTACTS),
     prefetchTagsList(queryClient, PERSON_ALL_TAGS),
     prefetchMergeRecommendations(queryClient, PERSON_MERGE_RECOMMENDATIONS),
   ];

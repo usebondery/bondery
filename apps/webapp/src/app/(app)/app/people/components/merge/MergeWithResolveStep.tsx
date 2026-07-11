@@ -9,7 +9,7 @@ import {
   formatConflictDisplayValue,
   normalizeDisplayText,
   toPersonPreview,
-} from "../utils/merge-conflict-helpers";
+} from "../../utils/merge-conflict-helpers";
 import { MergeAvatarConflictPicker } from "./MergeAvatarConflictPicker";
 
 interface ConflictEntry {

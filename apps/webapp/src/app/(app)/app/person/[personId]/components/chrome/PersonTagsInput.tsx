@@ -13,7 +13,6 @@ import {
   useCombobox,
 } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
-import { IconTag } from "@tabler/icons-react";
 import { useMemo, useRef, useState } from "react";
 import { AddNewTagButton } from "@/components/tags/AddNewTagButton";
 import { openTagEditorModal } from "@/components/tags/openTagEditorModal";

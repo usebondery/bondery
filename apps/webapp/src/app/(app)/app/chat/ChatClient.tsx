@@ -7,13 +7,13 @@ import { IconMessageChatbot, IconSend } from "@tabler/icons-react";
 import { DefaultChatTransport } from "ai";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { PageHeader } from "@/components/shell/PageHeader";
+import { useUserSession } from "@/components/shell/UserSessionProvider";
 import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
 import {
   useChatSessionMessagesQuery,
   useChatSessionsRefreshOnStreamEnd,
   useCreateChatSessionMutation,
 } from "@/lib/query/hooks/useChat";
-import { useSettingsQuery } from "@/lib/query/hooks/useSettings";
 import { useSubscriptionQuery } from "@/lib/query/hooks/useSubscription";
 import { ChatMessage } from "./components/message/ChatMessage";
 import { ChatQuotaAlert } from "./components/quota/ChatQuotaAlert";
@@ -31,10 +31,7 @@ const SUGGESTED_PROMPT_KEYS = [
 
 export function ChatClient({ sessionId }: { sessionId?: string }) {
   const t = useWebTranslations("ChatPage");
-  const { data: settingsResult } = useSettingsQuery();
-  const settings = settingsResult?.data ?? {};
-  const userAvatarUrl = (settings.avatarUrl as string | null | undefined) ?? null;
-  const userName = (settings.name as string | null | undefined) ?? null;
+  const { avatarUrl: userAvatarUrl, displayName: userName } = useUserSession();
   const { data: subscriptionStatus = null } = useSubscriptionQuery();
   const { data: hydratedMessages = [] } = useChatSessionMessagesQuery(sessionId, !!sessionId);
   const suggestedPrompts = useMemo(
@@ -59,7 +56,7 @@ export function ChatClient({ sessionId }: { sessionId?: string }) {
     sessionIdRef.current = sessionId;
   }, [sessionId]);
 
-  const { messages, sendMessage, status, error, setMessages } = useChat({
+  const { messages, sendMessage, status, setMessages } = useChat({
     messages: sessionId ? hydratedMessages : undefined,
     onError: (error) => {
       // Handle 403 quota exceeded from API — extract resetAt if present

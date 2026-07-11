@@ -9,11 +9,11 @@ import type { ReactNode } from "react";
 import { InlineDateDisplay } from "@/app/(app)/app/person/[personId]/components/notes/InlineDateDisplay";
 import { useDateFormatter as useFormatter } from "@/lib/i18n/useDateFormatter";
 import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
-import { ChatPersonChip } from "./message/ChatPersonChip";
-import { ChatShareCard } from "./message/ChatShareCard";
-import { InlineGroupDisplay } from "./message/InlineGroupDisplay";
-import { InlineInteractionDisplay } from "./message/InlineInteractionDisplay";
-import { InlineTagDisplay } from "./message/InlineTagDisplay";
+import { ChatPersonChip } from "./ChatPersonChip";
+import { ChatShareCard } from "./ChatShareCard";
+import { InlineGroupDisplay } from "./InlineGroupDisplay";
+import { InlineInteractionDisplay } from "./InlineInteractionDisplay";
+import { InlineTagDisplay } from "./InlineTagDisplay";
 
 interface ChatMessageProps {
   message: UIMessage;

@@ -34,7 +34,7 @@ import { searchContacts } from "@/lib/contacts/searchContacts";
 import { useCommonTranslations, useWebTranslations } from "@/lib/i18n/useWebTranslations";
 import { createModalId, useModalDismiss } from "@/lib/modals";
 import { DEBOUNCE_MS } from "@/lib/platform/config";
-import { useContactsListQuery } from "@/lib/query/hooks/useContacts";
+import { useContactsSelectableListQuery } from "@/lib/query/hooks/useContacts";
 import {
   useAddContactsToGroupByIdMutation,
   useCreateGroupMutation,
@@ -112,7 +112,7 @@ function AddGroupForm({
     data: contactsData,
     isLoading: isLoadingContacts,
     isError: isContactsError,
-  } = useContactsListQuery({ limit: 200 });
+  } = useContactsSelectableListQuery({ limit: 200 });
   const createGroupMutation = useCreateGroupMutation();
   const addContactsMutation = useAddContactsToGroupByIdMutation();
   const contacts = contactsData?.contacts ?? [];

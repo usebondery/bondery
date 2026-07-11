@@ -33,6 +33,7 @@
   },
   "description": "Bondery API",
   "devDependencies": {
+    "@bondery/typescript-config": "*",
     "@types/adm-zip": "^0.5.8",
     "@types/node": "^25",
     "@types/nodemailer": "^8.0.1",
@@ -53,7 +54,7 @@
     "dev": "npm run check-env && tsx watch --env-file=.env.development.local src/index.ts",
     "generate-openapi": "tsx scripts/generate-openapi.ts",
     "start": "node dist/index.js",
-    "test:api": "tsx --test src/test/status.test.ts src/test/api-key-access.test.ts src/test/route-security-audit.test.ts src/test/interactions-list-query.test.ts src/test/map-error-to-response.test.ts src/test/error-response-smoke.test.ts",
+    "test:api": "tsx --test src/test/status.test.ts src/test/api-key-access.test.ts src/test/route-security-audit.test.ts src/test/interactions-list-query.test.ts src/test/map-error-to-response.test.ts src/test/error-response-smoke.test.ts src/test/contacts-attention-count-schemas.test.ts src/test/keep-in-touch-count.test.ts src/test/fetch-contact-extras.test.ts src/test/contacts-select-list.test.ts",
     "test:sync": "tsx --test src/lib/data/redis.test.ts src/lib/sync/build-changes.test.ts src/lib/sync/emit-wake.test.ts src/lib/sync/wake/hub.test.ts src/lib/sync/wake/tickets.test.ts src/lib/sync/wake/in-memory-bus.test.ts"
   },
   "type": "module",

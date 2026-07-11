@@ -2,8 +2,8 @@
 
 import { modals } from "@mantine/modals";
 import { createModalId } from "@/lib/modals";
-import { InstagramImportModal, type InstagramImportStep } from "./modals/InstagramImportModal";
-import { InstagramImportModalTitle } from "./modals/InstagramImportModalTitle";
+import { InstagramImportModal, type InstagramImportStep } from "./InstagramImportModal";
+import { InstagramImportModalTitle } from "./InstagramImportModalTitle";
 
 interface OpenInstagramImportModalOptions {
   initialStep?: InstagramImportStep;

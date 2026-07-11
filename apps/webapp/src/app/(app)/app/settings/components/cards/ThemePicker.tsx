@@ -7,10 +7,10 @@ import {
   successNotificationTemplate,
 } from "@bondery/mantine-next";
 import type { ColorSchemePreference } from "@bondery/schemas";
-import { useMantineColorScheme } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import type { ReactNode } from "react";
 import { useState } from "react";
+import { useUserSession } from "@/components/shell/UserSessionProvider";
 import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
 import { useUpdateSettingsMutation } from "@/lib/query/hooks/useSettings";
 
@@ -22,7 +22,7 @@ interface ThemePickerProps {
 export function ThemePicker({ initialValue, label }: ThemePickerProps) {
   const t = useWebTranslations("SettingsPage", "Preferences");
   const [value, setValue] = useState<ColorSchemePreference>(initialValue);
-  const { setColorScheme } = useMantineColorScheme();
+  const { applyUserSession } = useUserSession();
   const updateSettings = useUpdateSettingsMutation();
 
   const handleChange = async (nextValue: string) => {
@@ -32,7 +32,7 @@ export function ThemePicker({ initialValue, label }: ThemePickerProps) {
 
     const previousValue = value;
     setValue(nextValue);
-    setColorScheme(nextValue);
+    applyUserSession({ colorScheme: nextValue });
 
     const loadingNotification = notifications.show({
       ...loadingNotificationTemplate({
@@ -51,13 +51,9 @@ export function ThemePicker({ initialValue, label }: ThemePickerProps) {
           title: t("UpdateSuccess"),
         }),
       );
-
-      setTimeout(() => {
-        window.location.reload();
-      }, 300);
     } catch {
       setValue(previousValue);
-      setColorScheme(previousValue);
+      applyUserSession({ colorScheme: previousValue });
 
       notifications.hide(loadingNotification);
       notifications.show(

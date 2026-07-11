@@ -16,13 +16,14 @@ import { IconAdjustmentsHorizontal } from "@tabler/icons-react";
 import { useEffect, useMemo, useState } from "react";
 import { LanguagePicker } from "@/components/shared/LanguagePicker";
 import { TimezonePicker } from "@/components/shared/TimezonePicker";
+import { refreshAppShell } from "@/lib/app/refreshAppShell";
 import { useApplyUserLanguage } from "@/lib/i18n/useApplyUserLanguage";
 import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
 import { useSettingsQuery, useUpdateSettingsMutation } from "@/lib/query/hooks/useSettings";
-import { ReminderTimePicker } from "./cards/ReminderTimePicker";
-import { SettingsSection } from "./cards/SettingsSection";
-import { ThemePicker } from "./cards/ThemePicker";
-import { TimeFormatPicker } from "./cards/TimeFormatPicker";
+import { ReminderTimePicker } from "./ReminderTimePicker";
+import { SettingsSection } from "./SettingsSection";
+import { ThemePicker } from "./ThemePicker";
+import { TimeFormatPicker } from "./TimeFormatPicker";
 
 function parseSettingsPreferences(settings: Record<string, unknown>) {
   const timezone = typeof settings.timezone === "string" ? settings.timezone : "UTC";
@@ -93,6 +94,7 @@ export function PreferencesCard() {
       await updateSettings.mutateAsync({ timezone: nextTimezone });
 
       setSavedTimezone(nextTimezone);
+      refreshAppShell();
 
       notifications.hide(loadingNotification);
       notifications.show(
@@ -131,6 +133,7 @@ export function PreferencesCard() {
 
       setSavedLanguage(nextLanguage);
       await applyUserLanguage(nextLanguage as SupportedLocale);
+      refreshAppShell();
 
       notifications.hide(loadingNotification);
       notifications.show(

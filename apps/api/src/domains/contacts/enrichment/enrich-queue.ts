@@ -1,6 +1,22 @@
 import { internal } from "../../../lib/platform/errors/http-errors.js";
 import { type DomainContext, DomainError } from "../../_shared/context.js";
 
+export async function getEnrichQueueEligibleCount(
+  ctx: DomainContext,
+): Promise<{ eligibleCount: number }> {
+  const { client, user } = ctx;
+
+  const { data, error } = await client.rpc("get_linkedin_enrich_eligible_count", {
+    p_user_id: user.id,
+  });
+
+  if (error) {
+    throw internal("contact_enrich_failed", error.message);
+  }
+
+  return { eligibleCount: typeof data === "number" ? data : 0 };
+}
+
 export async function initEnrichQueue(
   ctx: DomainContext,
   personId?: string,

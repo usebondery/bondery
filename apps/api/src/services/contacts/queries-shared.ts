@@ -1,4 +1,9 @@
-import type { ImportantDateType, SocialPlatform } from "@bondery/schemas";
+import type {
+  ContactPreview,
+  ContactSelectable,
+  ImportantDateType,
+  SocialPlatform,
+} from "@bondery/schemas";
 import type { AvatarTransformQuery } from "@bondery/schemas/http";
 import type { Database } from "@bondery/schemas/supabase.types";
 import type { SupabaseClient } from "@supabase/supabase-js";
@@ -47,7 +52,7 @@ export function toContactPreview(
     updated_at?: string | null;
   },
   avatarOptions?: Parameters<typeof resolveContactAvatarUrl>[3],
-) {
+): ContactPreview {
   return {
     avatar: resolveContactAvatarUrl(
       client,
@@ -62,5 +67,42 @@ export function toContactPreview(
     firstName: person.first_name,
     id: person.id,
     lastName: person.last_name,
+  };
+}
+
+export function toContactSelectable(
+  client: SupabaseClient<Database>,
+  userId: string,
+  person: {
+    id: string;
+    firstName: string;
+    middleName?: string | null;
+    lastName: string | null;
+    headline?: string | null;
+    location?: string | null;
+    myself?: boolean | null;
+    hasAvatar: boolean;
+    updatedAt?: string | null;
+  },
+  avatarOptions?: Parameters<typeof resolveContactAvatarUrl>[3],
+): ContactSelectable {
+  return {
+    avatar: resolveContactAvatarUrl(
+      client,
+      userId,
+      {
+        hasAvatar: person.hasAvatar,
+        id: person.id,
+        updatedAt: person.updatedAt,
+      },
+      avatarOptions,
+    ),
+    firstName: person.firstName,
+    headline: person.headline ?? null,
+    id: person.id,
+    lastName: person.lastName,
+    location: person.location ?? null,
+    middleName: person.middleName ?? null,
+    myself: person.myself ?? null,
   };
 }

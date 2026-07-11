@@ -2,8 +2,8 @@
 
 import { modals } from "@mantine/modals";
 import { createModalId } from "@/lib/modals";
-import { FeedbackModal } from "./modals/FeedbackModal";
-import { FeedbackModalTitle } from "./modals/FeedbackModalTitle";
+import { FeedbackModal } from "./FeedbackModal";
+import { FeedbackModalTitle } from "./FeedbackModalTitle";
 
 export function openFeedbackModal() {
   const modalId = createModalId("feedback");

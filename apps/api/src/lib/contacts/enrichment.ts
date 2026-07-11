@@ -9,9 +9,11 @@ import type {
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { CONTACT_SELECT, type ContactWithId } from "../data/select-fragments.js";
 import { resolveContactAvatarUrl } from "../data/supabase.js";
-import { attachContactAddresses } from "./addresses.js";
-import { attachContactChannels } from "./channels.js";
-import { attachContactSocials } from "./socials.js";
+import {
+  type ContactExtrasPayload,
+  fetchContactExtras,
+  getEmptyContactExtras,
+} from "./fetch-contact-extras.js";
 
 type ChannelsAndSocialExtras = {
   phones: PhoneEntry[];
@@ -69,27 +71,48 @@ function withEmptySocials<
   }));
 }
 
+function mergeExtrasIntoContact<T extends ContactWithId>(
+  client: SupabaseClient<Database>,
+  userId: string,
+  contact: T,
+  extras: ContactExtrasPayload,
+  options?: { addresses?: boolean; avatarOptions?: AvatarTransformOptions },
+): T & ChannelsAndSocialExtras & { addresses?: ContactAddressEntry[] } {
+  const base: T & ChannelsAndSocialExtras = {
+    ...contact,
+    avatar: resolveContactAvatarUrl(
+      client,
+      userId,
+      {
+        hasAvatar: contact.hasAvatar,
+        id: contact.id,
+        updatedAt: contact.updatedAt,
+      },
+      options?.avatarOptions,
+    ),
+    emails: extras.emails,
+    facebook: extras.facebook,
+    instagram: extras.instagram,
+    linkedin: extras.linkedin,
+    phones: extras.phones,
+    signal: extras.signal,
+    website: extras.website,
+    whatsapp: extras.whatsapp,
+  };
+
+  if (options?.addresses !== true) {
+    return base;
+  }
+
+  return {
+    ...base,
+    addresses: extras.addresses,
+  };
+}
+
 /**
  * Enriches a list of contacts with channels (phones + emails), optional addresses,
- * and socials — all fetched in parallel.
- *
- * The overload accepting `{ addresses: true }` widens the return type to include
- * the `addresses` field, while the default (no option / `{ addresses: false }`)
- * omits it, skipping the extra DB query.
- *
- * @param client  Authenticated Supabase client.
- * @param userId  Authenticated user ID.
- * @param contacts  Contacts loaded from the `people` table.
- * @param options  Optional enrichment flags. Pass `{ addresses: true }` to include addresses.
- * @returns  Contacts with the requested extra fields attached.
- *
- * @example
- * // All three (channels + addresses + social):
- * const enriched = await attachContactExtras(client, userId, contacts, { addresses: true });
- *
- * @example
- * // Channels + social only (e.g. group contacts view):
- * const enriched = await attachContactExtras(client, userId, contacts);
+ * and socials via a single RPC batch load.
  */
 export async function attachContactExtras<T extends ContactWithId>(
   client: SupabaseClient<Database>,
@@ -116,56 +139,21 @@ export async function attachContactExtras<T extends ContactWithId>(
   }
 
   const includeAddresses = options?.addresses === true;
+  const extrasByPersonId = await fetchContactExtras(
+    client,
+    userId,
+    contacts.map((contact) => contact.id),
+  );
 
-  const [channelsResult, maybeAddresses, socialResult] = await Promise.all([
-    attachContactChannels(client, userId, contacts),
-    includeAddresses ? attachContactAddresses(client, userId, contacts) : Promise.resolve(null),
-    attachContactSocials(client, userId, contacts),
-  ]);
-
-  const socialMap = new Map<string, (typeof socialResult)[number]>();
-  for (const row of socialResult) {
-    socialMap.set(row.id, row);
-  }
-
-  const addressMap = new Map<string, ContactAddressEntry[]>();
-  if (maybeAddresses) {
-    for (const row of maybeAddresses) {
-      addressMap.set(row.id, row.addresses ?? []);
-    }
-  }
-
-  return channelsResult.map((contact) => {
-    const social = socialMap.get(contact.id);
-    const base: T & ChannelsAndSocialExtras = {
-      ...contact,
-      avatar: resolveContactAvatarUrl(
-        client,
-        userId,
-        {
-          hasAvatar: contact.hasAvatar,
-          id: contact.id,
-          updatedAt: contact.updatedAt,
-        },
-        options?.avatarOptions,
-      ),
-      facebook: social?.facebook ?? null,
-      instagram: social?.instagram ?? null,
-      linkedin: social?.linkedin ?? null,
-      signal: social?.signal ?? null,
-      website: social?.website ?? null,
-      whatsapp: social?.whatsapp ?? null,
-    };
-
-    if (!includeAddresses) {
-      return base;
-    }
-
-    return {
-      ...base,
-      addresses: addressMap.get(contact.id) ?? [],
-    };
-  });
+  return contacts.map((contact) =>
+    mergeExtrasIntoContact(
+      client,
+      userId,
+      contact,
+      extrasByPersonId.get(contact.id) ?? getEmptyContactExtras(),
+      { addresses: includeAddresses, avatarOptions: options?.avatarOptions },
+    ),
+  ) as Array<T & ChannelsAndSocialExtras>;
 }
 
 export async function loadEnrichedContact(
@@ -191,8 +179,9 @@ export async function loadEnrichedContact(
       avatarOptions: options?.avatarOptions,
     });
     return enrichedContact as Contact;
-  } catch (channelError) {
-    log?.error({ channelError }, "Failed to attach contact extras");
+  } catch (error) {
+    // Single-contact reads degrade gracefully so detail/vCard routes still return base identity.
+    log?.error({ err: error }, "Failed to attach contact extras");
     return withEmptySocials(withEmptyChannels([contact]))[0] as Contact;
   }
 }

@@ -4,6 +4,14 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   // Outbound redirects (status, help, docs, login, auth/callback, oauth/consent, app)
   // live in src/app/**/route.ts so they can import @bondery/helpers.
+  experimental: {
+    optimizePackageImports: [
+      "@bondery/mantine-next",
+      "@mantine/core",
+      "@mantine/hooks",
+      "@mantine/notifications",
+    ],
+  },
   async headers() {
     return [
       {

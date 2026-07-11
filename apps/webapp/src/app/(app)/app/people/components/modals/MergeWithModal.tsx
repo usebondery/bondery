@@ -28,9 +28,9 @@ import {
   getAutoLastInteractionChoice,
   hasMeaningfulValue,
   MERGE_CONFLICT_FIELDS,
-} from "../utils/merge-conflict-helpers";
-import { MergeWithPickStep } from "./MergeWithPickStep";
-import { MergeWithResolveStep } from "./MergeWithResolveStep";
+} from "../../utils/merge-conflict-helpers";
+import { MergeWithPickStep } from "../merge/MergeWithPickStep";
+import { MergeWithResolveStep } from "../merge/MergeWithResolveStep";
 
 interface OpenMergeWithModalParams {
   contacts: Contact[];
@@ -38,7 +38,7 @@ interface OpenMergeWithModalParams {
   disableRightPicker?: boolean;
   initialConflictChoices?: Partial<Record<MergeConflictField, MergeConflictChoice>>;
   leftPersonId: string;
-  onSearch?: (query: string) => Promise<Contact[]>;
+  onSearch?: (query: string) => Promise<ContactPreview[]>;
   onSuccess?: () => void;
   redirectToMergedPerson?: boolean;
   rightPersonId?: string;
@@ -95,7 +95,7 @@ interface MergeWithModalProps {
   initialLeftPersonId: string;
   initialRightPersonId?: string;
   modalId: string;
-  onSearch?: (query: string) => Promise<Contact[]>;
+  onSearch?: (query: string) => Promise<ContactPreview[]>;
   onSuccess?: () => void;
   redirectToMergedPerson: boolean;
 }

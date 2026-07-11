@@ -220,9 +220,9 @@ export function registerGroupContactRoutes(fastify: AppFastifyInstance): void {
         enrichedContacts = await attachContactExtras(client, user.id, contacts || [], {
           avatarOptions,
         });
-      } catch (enrichError) {
+      } catch (error) {
         fastify.log.error(
-          { enrichError },
+          { err: error },
           "Failed to attach contact channels/social media for group contacts",
         );
         enrichedContacts = (contacts || []).map((contact) => ({

@@ -30,12 +30,12 @@ import {
   type LinkedInImportStep,
   sortLinkedInContactsForPreview,
   toLinkedInPreviewContact,
-} from "../utils/linkedin-import-helpers";
-import { ImportProcessingStep, ImportProgressStep } from "./import/ImportModalProcessingSteps";
-import { LinkedInImportInstructionsStep } from "./import/LinkedInImportInstructionsStep";
-import { LinkedInImportIntroStep } from "./import/LinkedInImportIntroStep";
-import { LinkedInImportPreviewStep } from "./import/LinkedInImportPreviewStep";
-import { LinkedInImportUploadStep } from "./import/LinkedInImportUploadStep";
+} from "../../utils/linkedin-import-helpers";
+import { ImportProcessingStep, ImportProgressStep } from "../import/ImportModalProcessingSteps";
+import { LinkedInImportInstructionsStep } from "../import/LinkedInImportInstructionsStep";
+import { LinkedInImportIntroStep } from "../import/LinkedInImportIntroStep";
+import { LinkedInImportPreviewStep } from "../import/LinkedInImportPreviewStep";
+import { LinkedInImportUploadStep } from "../import/LinkedInImportUploadStep";
 
 export type { LinkedInImportStep };
 

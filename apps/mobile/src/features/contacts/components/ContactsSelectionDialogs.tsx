@@ -4,7 +4,7 @@ import { deleteContacts } from "../../../lib/domains/contacts";
 import { useMobileTranslations } from "../../../lib/i18n/useMobileTranslations";
 import { useAppToast } from "../../../lib/toast/useAppToast";
 import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
-import { useContactsEffectiveSelectedCount, useContactsSelection } from "../contactsSelectionStore";
+import { useContactsSelection } from "../contactsSelectionStore";
 import { resolveContactsSelectionPersonIds } from "../resolveContactsSelectionPersonIds";
 
 interface ContactsSelectionDialogsProps {
@@ -22,7 +22,6 @@ export function ContactsSelectionDialogs({
   const t = useMobileTranslations();
   const colors = useMobileThemeColors();
   const { showToast } = useAppToast();
-  const effectiveSelectedCount = useContactsEffectiveSelectedCount();
   const isDeleteConfirmOpen = useContactsSelection((state) => state.isDeleteConfirmOpen);
   const isDeleting = useContactsSelection((state) => state.isDeleting);
   const setDeleteConfirmOpen = useContactsSelection((state) => state.setDeleteConfirmOpen);

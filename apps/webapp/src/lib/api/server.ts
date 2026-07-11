@@ -20,7 +20,7 @@ export type ServerApiFetchOptions = {
   cache?: RequestCache;
   /**
    * Default true for RSC. When true, 401/outage signals redirect via transport policy.
-   * Set false for BFF routes and routing probes (getAppBootstrap).
+   * Set false for BFF routes and routing probes (getAppSession).
    */
   transportPolicy?: boolean;
 };

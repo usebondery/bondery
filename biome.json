@@ -87,7 +87,7 @@
         "noUndeclaredEnvVars": {
           "level": "error",
           "options": {
-            "allowedEnvVars": ["DEV", "WXT_.*", "CHECK_.*_STRICT", "DEBUG_RUN_ID"]
+            "allowedEnvVars": ["DEV", "WXT_.*", "CHECK_.*_STRICT", "DEBUG_RUN_ID", "NGROK"]
           }
         }
       }

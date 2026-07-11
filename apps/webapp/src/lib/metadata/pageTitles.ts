@@ -11,11 +11,6 @@ export function entityPageTitle(name: string): Pick<Metadata, "title"> {
   return { title: { absolute: formatEntityTitleString(name) } };
 }
 
-/** Client coordinator: plain page title string. */
-export function formatStaticTitleString(title: string): string {
-  return title;
-}
-
 /** Client coordinator: "{Name} • Bondery". */
 export function formatEntityTitleString(name: string): string {
   return formatMetadataTitle(name);

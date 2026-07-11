@@ -410,6 +410,7 @@
   "scripts": {
     "build": "rimraf dist && tsc && node scripts/copy-locale-json.mjs && node ../../scripts/rewrite-package-hash-imports-in-dist.mjs schemas",
     "check-types": "tsc --noEmit",
+    "compile": "tsc && node scripts/copy-locale-json.mjs",
     "dev": "tsc --watch --preserveWatchOutput",
     "prepare": "npm run build",
     "test:contracts": "node scripts/check-no-internal-deps.mjs && node scripts/check-no-init-cycles.mjs && npm run build && npx tsx ./src/contracts.assertions.ts && npx tsx ./scripts/check-openapi-examples.ts"

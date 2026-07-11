@@ -6,10 +6,10 @@ import { Button, Group, Text, Tooltip } from "@mantine/core";
 import { useHotkeys } from "@mantine/hooks";
 import { IconAddressBook, IconUser, IconUserPlus } from "@tabler/icons-react";
 import { PageHeader } from "@/components/shell/PageHeader";
+import { peopleSearchActions } from "@/components/shell/PeopleSearchSpotlight";
 import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
 import { HOTKEYS } from "@/lib/platform/config";
-import { peopleSearchActions } from "../../components/PeopleSearchSpotlight";
-import { openAddContactModal } from "./AddContactModal";
+import { openAddContactModal } from "../modals/AddContactModal";
 
 /**
  * Client component for the People page header.
@@ -61,6 +61,7 @@ export function PeopleHeaderClient() {
           {t("ImportContacts")}
         </ButtonLink>
       }
+      title={t("Title")}
     />
   );
 }

@@ -3,12 +3,12 @@
 import { CardSection, Divider, Group, Text } from "@mantine/core";
 import { IconDatabase } from "@tabler/icons-react";
 import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
-import { DeleteAccountSection } from "./cards/DeleteAccountSection";
-import { InstagramImportSection } from "./cards/InstagramImportSection";
-import { LinkedInImportSection } from "./cards/LinkedInImportSection";
-import { LogoutSection } from "./cards/LogoutSection";
-import { SettingsSection } from "./cards/SettingsSection";
-import { VCardImportSection } from "./cards/VCardImportSection";
+import { DeleteAccountSection } from "./DeleteAccountSection";
+import { InstagramImportSection } from "./InstagramImportSection";
+import { LinkedInImportSection } from "./LinkedInImportSection";
+import { LogoutSection } from "./LogoutSection";
+import { SettingsSection } from "./SettingsSection";
+import { VCardImportSection } from "./VCardImportSection";
 
 export function DataManagementCard() {
   const t = useWebTranslations("SettingsPage", "DataManagement");

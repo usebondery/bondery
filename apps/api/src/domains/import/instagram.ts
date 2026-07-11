@@ -12,6 +12,7 @@ import {
 import { internal } from "../../lib/platform/errors/http-errors.js";
 import { markBulkImportCompleted } from "../../services/import/followup.js";
 import type { DomainContext } from "../_shared/context.js";
+import { scheduleMergeRecommendationsRefresh } from "../contacts/merge-recommendations.js";
 
 export async function commitInstagramImport(
   ctx: DomainContext,
@@ -192,6 +193,7 @@ export async function commitInstagramImport(
     } catch (followupError) {
       log?.error({ err: followupError }, "[instagram-import] Failed to mark import completed");
     }
+    scheduleMergeRecommendationsRefresh(ctx);
   }
 
   return {

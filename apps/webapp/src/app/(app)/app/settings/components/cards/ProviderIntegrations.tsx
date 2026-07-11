@@ -18,14 +18,14 @@ import {
 } from "@tabler/icons-react";
 import { Trans } from "next-i18next/client";
 import { useEffect, useState } from "react";
+import { openStandardConfirmModal } from "@/components/modals/openStandardConfirmModal";
 import { usePWAInstall } from "@/hooks/usePWAInstall";
 import { detectBonderyChromeExtension } from "@/lib/extension/detectBonderyChromeExtension";
 import { useCommonTranslations, useWebTranslations } from "@/lib/i18n/useWebTranslations";
 import { INTEGRATION_PROVIDERS } from "@/lib/platform/config";
 import { createBrowswerSupabaseClient } from "@/lib/supabase/client";
-import { openStandardConfirmModal } from "../../components/modals/openStandardConfirmModal";
-import { IntegrationCard } from "./cards/IntegrationCard";
-import { openChromeExtensionModal } from "./modals/openChromeExtensionModal";
+import { openChromeExtensionModal } from "../modals/openChromeExtensionModal";
+import { IntegrationCard } from "./IntegrationCard";
 
 interface UserIdentity {
   id: string;

@@ -544,42 +544,43 @@ export function VCardImportModal({
           onCancel={closeModal}
         />
       }
-    >
-      <Stack gap="md">
-        <Group justify="space-between">
-          <Group gap="xs">
-            <Badge color="blue" variant="light">
-              {t("Total", { count: parsedContacts.length })}
-            </Badge>
-            <Badge color="green" leftSection={<IconCircleCheck size={12} />} variant="light">
-              {t("Valid", { count: validContactsCount })}
-            </Badge>
-            {invalidContactsCount > 0 ? (
-              <Badge color="orange" leftSection={<IconAlertTriangle size={12} />} variant="light">
-                {t("Invalid", { count: invalidContactsCount })}
+      header={
+        <Stack gap="md">
+          <Group justify="space-between">
+            <Group gap="xs">
+              <Badge color="blue" variant="light">
+                {t("Total", { count: parsedContacts.length })}
               </Badge>
-            ) : null}
+              <Badge color="green" leftSection={<IconCircleCheck size={12} />} variant="light">
+                {t("Valid", { count: validContactsCount })}
+              </Badge>
+              {invalidContactsCount > 0 ? (
+                <Badge color="orange" leftSection={<IconAlertTriangle size={12} />} variant="light">
+                  {t("Invalid", { count: invalidContactsCount })}
+                </Badge>
+              ) : null}
+            </Group>
           </Group>
-        </Group>
 
-        <Text c="dimmed" size="sm">
-          {t("ChooseContactsHint")}
-        </Text>
-
-        <ContactsTable
-          allSelected={allSelected}
-          contacts={previewContacts}
-          disableNameLink
-          noContactsFound={t("NoContactsFound")}
-          noContactsMatchSearch={t("NoContactsMatchSearch")}
-          onSelectAll={handleToggleAll}
-          onSelectOne={handleToggleOne}
-          selectedIds={selectedIds}
-          showSelection
-          someSelected={someSelected}
-          visibleColumns={["name", "headline", "phone", "email"]}
-        />
-      </Stack>
+          <Text c="dimmed" size="sm">
+            {t("ChooseContactsHint")}
+          </Text>
+        </Stack>
+      }
+    >
+      <ContactsTable
+        allSelected={allSelected}
+        contacts={previewContacts}
+        disableNameLink
+        noContactsFound={t("NoContactsFound")}
+        noContactsMatchSearch={t("NoContactsMatchSearch")}
+        onSelectAll={handleToggleAll}
+        onSelectOne={handleToggleOne}
+        selectedIds={selectedIds}
+        showSelection
+        someSelected={someSelected}
+        visibleColumns={["name", "headline", "phone", "email"]}
+      />
     </ModalScrollLayout>,
   );
 }

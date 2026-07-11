@@ -5,7 +5,7 @@ import { Stack } from "@mantine/core";
 import { Dropzone, MIME_TYPES } from "@mantine/dropzone";
 import { IconArrowLeft, IconFileZip } from "@tabler/icons-react";
 import type { RefObject } from "react";
-import { INSTAGRAM_MAX_FILE_SIZE_BYTES } from "../utils/instagram-import-helpers";
+import { INSTAGRAM_MAX_FILE_SIZE_BYTES } from "../../utils/instagram-import-helpers";
 
 interface InstagramImportUploadStepProps {
   backLabel: string;

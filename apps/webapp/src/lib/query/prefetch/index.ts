@@ -5,25 +5,27 @@ export {
   prefetchContactGroups,
   prefetchContactImportantDates,
   prefetchContactInteractions,
+  prefetchContactInteractionsInfinite,
   prefetchContactLinkedInData,
   prefetchContactRelationships,
   prefetchContactsList,
+  prefetchContactsSelectableList,
   prefetchContactTags,
 } from "./contacts";
+export {
+  prefetchEnrichQueueCount,
+  prefetchEnrichQueueStatus,
+} from "./enrichQueue";
 export {
   prefetchGroupDetail,
   prefetchGroupMembers,
   prefetchGroupMembersInfinite,
   prefetchGroupsList,
 } from "./groups";
-export { prefetchInteractionsList } from "./interactions";
+export { prefetchInteractionsInfinite, prefetchInteractionsList } from "./interactions";
 export { prefetchKeepInTouch } from "./keepInTouch";
 export { prefetchMePerson } from "./mePerson";
-export {
-  prefetchEnrichEligibleCount,
-  prefetchEnrichQueueStatus,
-  prefetchMergeRecommendations,
-} from "./mergeRecommendations";
+export { prefetchMergeRecommendations } from "./mergeRecommendations";
 export { prefetchUpcomingReminders } from "./reminders";
 export { prefetchSettings } from "./settings";
 export { prefetchAdminStatsDashboard } from "./stats";

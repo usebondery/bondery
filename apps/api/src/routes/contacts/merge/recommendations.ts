@@ -3,12 +3,10 @@
  * Lists, refreshes, declines, and restores merge recommendations.
  */
 
-import type {
-  MergeRecommendationsResponse,
-  RefreshMergeRecommendationsResponse,
-} from "@bondery/schemas";
+import type { MergeRecommendationsResponse } from "@bondery/schemas";
 import {
   declineMergeRecommendationResponseSchema,
+  mergeRecommendationsCountResponseSchema,
   mergeRecommendationsResponseSchema,
   refreshMergeRecommendationsResponseSchema,
 } from "@bondery/schemas";
@@ -16,7 +14,8 @@ import { avatarTransformQuerySchema, uuidParamSchema } from "@bondery/schemas/ht
 import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
 import {
   declineMergeRecommendation,
-  recomputeMergeRecommendations,
+  getMergeRecommendationsCount,
+  refreshMergeRecommendations,
   restoreMergeRecommendation,
 } from "../../../domains/contacts/merge-recommendations.js";
 import { mergeRecommendationsQuerySchema } from "../../../lib/contacts/merge-helpers.js";
@@ -35,6 +34,23 @@ import { withDomainRoute } from "../../../lib/platform/with-domain-route.js";
 import { hydrateMergeRecommendations } from "../../../services/contacts/merge-recommendations.js";
 
 export function registerRecommendationRoutes(fastify: AppFastifyInstance): void {
+  fastify.get(
+    "/merge-recommendations/count",
+    {
+      schema: {
+        description: "Count active merge recommendations for the current user.",
+        response: withOkResponse(
+          mergeRecommendationsCountResponseSchema,
+          "Merge recommendations count",
+        ),
+      } satisfies FastifyZodOpenApiSchema,
+    },
+    async (request) => {
+      const { client, user } = getAuth(request);
+      return getMergeRecommendationsCount(domainContextFromClient(client, user, request.log));
+    },
+  );
+
   fastify.get(
     "/merge-recommendations",
     {
@@ -56,7 +72,7 @@ export function registerRecommendationRoutes(fastify: AppFastifyInstance): void 
             ? declinedQuery.toLowerCase() === "true"
             : false;
 
-      let {
+      const {
         data: recommendationRows,
         error: recommendationsError,
         count,
@@ -71,47 +87,6 @@ export function registerRecommendationRoutes(fastify: AppFastifyInstance): void 
 
       if (recommendationsError) {
         throw internal("internal_server_error", recommendationsError.message);
-      }
-
-      if (!showDeclined && (!recommendationRows || recommendationRows.length === 0)) {
-        const { data: existingRows, error: existingRowsError } = await client
-          .from("people_merge_recommendations")
-          .select("id")
-          .eq("user_id", user.id)
-          .limit(1);
-
-        if (existingRowsError) {
-          throw internal("internal_server_error", existingRowsError.message);
-        }
-
-        if (!existingRows || existingRows.length === 0) {
-          try {
-            await recomputeMergeRecommendations(domainContextFromClient(client, user, request.log));
-          } catch (recomputeError) {
-            const message =
-              recomputeError instanceof Error
-                ? recomputeError.message
-                : "Failed to generate merge recommendations";
-            throw internal("internal_server_error", message);
-          }
-
-          const refreshed = await client
-            .from("people_merge_recommendations")
-            .select("id, left_person_id, right_person_id, score, reasons", { count: "exact" })
-            .eq("user_id", user.id)
-            .eq("is_declined", false)
-            .order("score", { ascending: false })
-            .order("created_at", { ascending: false })
-            .range(offset, offset + limit - 1);
-
-          recommendationRows = refreshed.data || [];
-          recommendationsError = refreshed.error;
-          count = refreshed.count;
-
-          if (recommendationsError) {
-            throw internal("internal_server_error", recommendationsError.message);
-          }
-        }
       }
 
       const totalCount = typeof count === "number" ? count : (recommendationRows || []).length;
@@ -175,35 +150,10 @@ export function registerRecommendationRoutes(fastify: AppFastifyInstance): void 
       const avatarOptions = extractAvatarOptions(request.query);
 
       try {
-        await recomputeMergeRecommendations(domainContextFromClient(client, user, request.log));
-
-        const { data: recommendationRows, error: recommendationsError } = await client
-          .from("people_merge_recommendations")
-          .select("id, left_person_id, right_person_id, score, reasons")
-          .eq("user_id", user.id)
-          .eq("is_declined", false)
-          .order("score", { ascending: false })
-          .order("created_at", { ascending: false });
-
-        if (recommendationsError) {
-          throw internal("internal_server_error", recommendationsError.message);
-        }
-
-        const recommendations = await hydrateMergeRecommendations(
-          client,
-          user.id,
-          recommendationRows || [],
-          avatarOptions,
-          fastify.log,
+        return await refreshMergeRecommendations(
+          domainContextFromClient(client, user, request.log),
+          { avatarOptions, hydrate: true },
         );
-
-        const response: RefreshMergeRecommendationsResponse = {
-          recommendations,
-          recommendationsCount: recommendations.length,
-          success: true,
-        };
-
-        return response;
       } catch (error) {
         const message =
           error instanceof Error ? error.message : "Failed to refresh merge recommendations";

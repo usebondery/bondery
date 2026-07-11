@@ -201,6 +201,7 @@ export function GroupsClient() {
           helpDoc="concepts.groups"
           helpLabel={t("HeaderDescription")}
           icon={IconUsersGroup}
+          title={t("Title")}
         />
 
         <Paper p="md" radius="md" shadow="sm" withBorder>

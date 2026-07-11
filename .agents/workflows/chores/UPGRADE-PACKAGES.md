@@ -119,7 +119,7 @@ Repo checks:
 | Trigger | Command / file |
 |---------|----------------|
 | API schema change | `npm run generate-openapi` |
-| Supabase client bump | `npm run generate-types` (needs `npm run dev:supabase`) |
+| Supabase client bump | `npm run generate-types` (needs `npm run start -w apps/supabase-db`) |
 | Env renames | `.env.*.example` per app |
 | Extension API break | `packages/helpers/src/constants.ts` (`MIN_EXTENSION_VERSION`) |
 
@@ -129,7 +129,7 @@ Repo checks:
 
 1. Run codemods (`npx @next/codemod@latest upgrade`, etc.)
 2. Fix type errors: `npm run check-types -w <workspace>`
-3. Lint: `npm run lint -w <workspace>`
+3. Lint: `npm run lint` (from repo root; Biome format with write)
 4. Regenerate artifacts if needed (OpenAPI, Supabase types)
 5. Update `packages/translations` (`src/locales/{en,cs,de}/**`) when UI copy changes
 

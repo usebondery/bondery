@@ -2,7 +2,20 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   experimental: {
-    proxyClientMaxBodySize: "50mb",
+    optimizePackageImports: [
+      "@bondery/mantine-next",
+      "@mantine/core",
+      "@mantine/dates",
+      "@mantine/dropzone",
+      "@mantine/form",
+      "@mantine/hooks",
+      "@mantine/modals",
+      "@mantine/notifications",
+      "@mantine/nprogress",
+      "@mantine/spotlight",
+      "@mantine/tiptap",
+    ],
+    proxyClientMaxBodySize: "20mb",
   },
   async headers() {
     return [

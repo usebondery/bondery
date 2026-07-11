@@ -10,3 +10,4 @@ export {
 } from "#contact/channel-type-options.js";
 export type { ContactNameFields } from "#contact/format-contact-name.js";
 export { formatContactName } from "#contact/format-contact-name.js";
+export { patchAffectsMergeRecommendations } from "#contact/merge-recommendations.js";

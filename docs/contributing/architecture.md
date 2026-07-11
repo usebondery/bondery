@@ -159,7 +159,7 @@ PostgreSQL schema, Row Level Security, seeds, and local dev tooling.
 | Auth | Supabase Auth (GitHub, LinkedIn OAuth) |
 | Migrations | Supabase CLI |
 
-**Local dev ports** (via `npm run dev` in this folder; full list in [`supabase/config.toml`](../../apps/supabase-db/supabase/config.toml)):
+**Local dev ports** (via `npm run start` in this folder; full list in [`supabase/config.toml`](../../apps/supabase-db/supabase/config.toml)):
 
 | Port | Service |
 |---|---|

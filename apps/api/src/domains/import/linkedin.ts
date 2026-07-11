@@ -3,6 +3,7 @@ import { assignContactsToDefaultImportGroup } from "../../lib/import/default-gro
 import { internal } from "../../lib/platform/errors/http-errors.js";
 import { markBulkImportCompleted } from "../../services/import/followup.js";
 import type { DomainContext } from "../_shared/context.js";
+import { scheduleMergeRecommendationsRefresh } from "../contacts/merge-recommendations.js";
 
 function buildImportedTitle(position: string | null, company: string | null): string | null {
   const normalizedPosition = typeof position === "string" ? position.trim() : "";
@@ -254,6 +255,7 @@ export async function commitLinkedInImport(
     } catch (followupError) {
       log?.error({ err: followupError }, "[linkedin-import] Failed to mark import completed");
     }
+    scheduleMergeRecommendationsRefresh(ctx);
   }
 
   const response: LinkedInImportCommitResponse = {

@@ -1,4 +1,8 @@
-import type { MergeRecommendationReason } from "@bondery/schemas";
+import type {
+  MergeRecommendationReason,
+  MergeRecommendationsCountResponse,
+  RefreshMergeRecommendationsResponse,
+} from "@bondery/schemas";
 import {
   countSetOverlap,
   diceCoefficient,
@@ -9,8 +13,81 @@ import {
   normalizeSocialHandle,
   toFullNameKey,
 } from "../../lib/contacts/merge-helpers.js";
+import type { extractAvatarOptions } from "../../lib/data/select-fragments.js";
 import { internal } from "../../lib/platform/errors/http-errors.js";
+import { hydrateMergeRecommendations } from "../../services/contacts/merge-recommendations.js";
 import { type DomainContext, DomainError } from "../_shared/context.js";
+
+export { patchAffectsMergeRecommendations } from "@bondery/helpers/contact";
+
+export interface RefreshMergeRecommendationsOptions {
+  avatarOptions?: ReturnType<typeof extractAvatarOptions>;
+  hydrate?: boolean;
+}
+
+export async function getMergeRecommendationsCount(
+  ctx: DomainContext,
+): Promise<MergeRecommendationsCountResponse> {
+  const { client, user } = ctx;
+
+  const { count, error } = await client
+    .from("people_merge_recommendations")
+    .select("id", { count: "exact", head: true })
+    .eq("user_id", user.id)
+    .eq("is_declined", false);
+
+  if (error) {
+    throw internal("internal_server_error", error.message);
+  }
+
+  return { activeCount: count ?? 0 };
+}
+
+export async function refreshMergeRecommendations(
+  ctx: DomainContext,
+  options: RefreshMergeRecommendationsOptions = {},
+): Promise<RefreshMergeRecommendationsResponse | { recommendationsCount: number; success: true }> {
+  await recomputeMergeRecommendations(ctx);
+
+  if (!options.hydrate) {
+    const { activeCount } = await getMergeRecommendationsCount(ctx);
+    return { recommendationsCount: activeCount, success: true };
+  }
+
+  const { client, user, log } = ctx;
+  const { data: recommendationRows, error: recommendationsError } = await client
+    .from("people_merge_recommendations")
+    .select("id, left_person_id, right_person_id, score, reasons")
+    .eq("user_id", user.id)
+    .eq("is_declined", false)
+    .order("score", { ascending: false })
+    .order("created_at", { ascending: false });
+
+  if (recommendationsError) {
+    throw internal("internal_server_error", recommendationsError.message);
+  }
+
+  const recommendations = await hydrateMergeRecommendations(
+    client,
+    user.id,
+    recommendationRows || [],
+    options.avatarOptions ?? {},
+    log,
+  );
+
+  return {
+    recommendations,
+    recommendationsCount: recommendations.length,
+    success: true,
+  };
+}
+
+/** Fire-and-forget recompute after mutations that affect merge matching. */
+export function scheduleMergeRecommendationsRefresh(ctx: DomainContext): void {
+  void refreshMergeRecommendations(ctx).catch((error) => {
+    ctx.log?.error({ error }, "Failed to refresh merge recommendations after mutation");
+  });
+}
 
 export async function declineMergeRecommendation(
   ctx: DomainContext,

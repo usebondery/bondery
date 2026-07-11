@@ -23,7 +23,7 @@ import {
 } from "@/lib/extension/enrichBatchStore";
 import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
 import { getQueryClient } from "@/lib/query/client";
-import { useDiscardEnrichQueueMutation } from "@/lib/query/hooks/useMergeRecommendations";
+import { useDiscardEnrichQueueMutation } from "@/lib/query/hooks/useEnrichQueue";
 import { contactKeys } from "@/lib/query/keys";
 import { deleteEnrichQueue, getResponseErrorDescription } from "./batch-enrich-api";
 import { useEnrichLoop } from "./useEnrichLoop";

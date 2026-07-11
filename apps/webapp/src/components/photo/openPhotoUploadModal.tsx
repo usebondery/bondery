@@ -11,7 +11,7 @@ import { modals } from "@mantine/modals";
 import { notifications } from "@mantine/notifications";
 import { IconPhoto } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
-import { useCommonTranslations } from "@/lib/i18n/useCommonTranslations";
+import { useCommonTranslations } from "@/lib/i18n/useWebTranslations";
 import { createModalId, useModalDismiss } from "@/lib/modals";
 import {
   type PhotoUploadVariant,

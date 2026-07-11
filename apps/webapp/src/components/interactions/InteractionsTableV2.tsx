@@ -78,14 +78,18 @@ export interface InteractionsTableV2Props {
   activities: Activity[];
   // External state for columns
   columns: InteractionColumnConfig[];
+  hasMore?: boolean;
   // Labels
   labels: InteractionsTableLabels;
+  loadMoreLabel?: string;
+  loadMoreLoading?: boolean;
   onColumnsChange: (columns: InteractionColumnConfig[]) => void;
   onDelete: (activity: Activity) => void;
   onDeleteSelected?: (activities: Activity[]) => void;
   onDuplicate: (activity: Activity) => void;
   // Callbacks
   onEdit: (activity: Activity) => void;
+  onLoadMore?: () => void;
   onSearchChange: (value: string) => void;
   onSelectionChange?: (selectedIds: Set<string>) => void;
   onSortChange: (order: InteractionSortOrder) => void;
@@ -127,6 +131,10 @@ export function InteractionsTableV2({
   onDelete,
   onDeleteSelected,
   labels,
+  hasMore,
+  loadMoreLabel,
+  loadMoreLoading,
+  onLoadMore,
 }: InteractionsTableV2Props) {
   const locale = useLocale();
   const getInteractionTypeLabel = useInteractionTypeLabel();
@@ -310,6 +318,7 @@ export function InteractionsTableV2({
       searchValue.trim() && activities.length > 0
         ? labels.noInteractionsMatchSearch
         : labels.noInteractionsFound,
+    loadMoreLabel,
     searchPlaceholder: labels.searchPlaceholder,
     selectedCountTemplate: labels.selectedCountTemplate,
     sort: {
@@ -353,8 +362,11 @@ export function InteractionsTableV2({
       currentSort={sortOrder}
       data={filteredAndSortedRows}
       getRowId={({ activity }) => activity.id}
+      hasMore={Boolean(hasMore && onLoadMore)}
       labels={dataTableLabels}
+      loadMoreLoading={loadMoreLoading}
       onColumnsChange={handleColumnsChange}
+      onLoadMore={onLoadMore}
       onSearchChange={onSearchChange}
       onSelectionChange={onSelectionChange}
       onSortChange={onSortChange}

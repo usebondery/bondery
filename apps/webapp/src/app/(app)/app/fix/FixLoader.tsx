@@ -3,7 +3,7 @@ import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { getQueryClient } from "@/lib/query/client";
 
 import {
-  prefetchEnrichEligibleCount,
+  prefetchEnrichQueueCount,
   prefetchEnrichQueueStatus,
   prefetchMergeRecommendations,
 } from "@/lib/query/prefetch";
@@ -14,7 +14,7 @@ export async function FixLoader() {
 
   await Promise.all([
     prefetchMergeRecommendations(queryClient, { declined: false }),
-    prefetchEnrichEligibleCount(queryClient),
+    prefetchEnrichQueueCount(queryClient),
     prefetchEnrichQueueStatus(queryClient),
   ]);
 

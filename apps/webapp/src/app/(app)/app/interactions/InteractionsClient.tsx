@@ -12,7 +12,16 @@ import type { Activity, Contact } from "@bondery/schemas";
 
 type ActivityParticipantRef = string | { id: string };
 
-import { Button, Group, Paper, SegmentedControl, Stack, Text, Tooltip } from "@mantine/core";
+import {
+  Button,
+  Center,
+  Group,
+  Paper,
+  SegmentedControl,
+  Stack,
+  Text,
+  Tooltip,
+} from "@mantine/core";
 import { useDebouncedCallback, useHotkeys } from "@mantine/hooks";
 import { notifications } from "@mantine/notifications";
 import {
@@ -34,23 +43,30 @@ import { openStandardConfirmModal } from "@/components/modals/openStandardConfir
 import { PageHeader } from "@/components/shell/PageHeader";
 import { PageWrapper } from "@/components/shell/PageWrapper";
 import { peopleSearchActions } from "@/components/shell/PeopleSearchSpotlight";
-import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
+import { useCommonTranslations, useWebTranslations } from "@/lib/i18n/useWebTranslations";
 import { DEBOUNCE_MS, HOTKEYS } from "@/lib/platform/config";
-import { useContactsListQuery } from "@/lib/query/hooks/useContacts";
+import { useContactsSelectableListQuery } from "@/lib/query/hooks/useContacts";
 import {
   useCreateInteractionMutation,
   useDeleteInteractionMutation,
-  useInteractionsListQuery,
+  useInteractionsInfiniteQuery,
 } from "@/lib/query/hooks/useInteractions";
-import { INTERACTIONS_TIMELINE, SELECTABLE_CONTACTS } from "@/lib/query/sharedListParams";
+import { SELECTABLE_CONTACTS } from "@/lib/query/sharedListParams";
 import { openNewActivityModal } from "./components/NewActivityModal";
 
 export function InteractionsClient() {
   const t = useWebTranslations("InteractionsPage");
-  const { data: contactsData } = useContactsListQuery(SELECTABLE_CONTACTS);
-  const { data: interactionsData } = useInteractionsListQuery(INTERACTIONS_TIMELINE);
+  const tCommon = useCommonTranslations();
+  const { data: contactsData } = useContactsSelectableListQuery(SELECTABLE_CONTACTS);
+  const {
+    data: interactionsData,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInteractionsInfiniteQuery();
   const contacts = contactsData?.contacts ?? [];
-  const activities = interactionsData?.activities ?? [];
+  const activities = interactionsData?.pages.flatMap((page) => page.activities) ?? [];
+  const hasMore = hasNextPage ?? false;
   const deleteInteractionMutation = useDeleteInteractionMutation();
   const createInteractionMutation = useCreateInteractionMutation();
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -169,6 +185,13 @@ export function InteractionsClient() {
       )
       .filter((id): id is string => Boolean(id));
 
+    const loadingNotificationId = notifications.show({
+      ...loadingNotificationTemplate({
+        description: t("DuplicateInteraction.LoadingDescription"),
+        title: tCommon("feedback.duplicating"),
+      }),
+    });
+
     try {
       await createInteractionMutation.mutateAsync({
         date: activity.date,
@@ -178,20 +201,22 @@ export function InteractionsClient() {
         type: activity.type,
       });
 
-      notifications.show(
-        successNotificationTemplate({
+      notifications.update({
+        ...successNotificationTemplate({
           description: t("ActivityDuplicated"),
           icon: <IconCopy size={18} />,
           title: t("SuccessTitle"),
         }),
-      );
+        id: loadingNotificationId,
+      });
     } catch {
-      notifications.show(
-        errorNotificationTemplate({
+      notifications.update({
+        ...errorNotificationTemplate({
           description: t("DuplicateFailed"),
           title: t("ErrorTitle"),
         }),
-      );
+        id: loadingNotificationId,
+      });
     }
   };
 
@@ -253,6 +278,10 @@ export function InteractionsClient() {
     () => [...activities].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()),
     [activities],
   );
+
+  const handleLoadMore = () => {
+    void fetchNextPage();
+  };
 
   return (
     <PageWrapper>
@@ -316,22 +345,32 @@ export function InteractionsClient() {
         />
 
         {viewMode === "interactions" ? (
-          <InteractionsList
-            activities={sortedInteractionsActivities}
-            deleteLabel={t("DeleteAction")}
-            duplicateLabel={t("DuplicateAction")}
-            editLabel={t("EditAction")}
-            onDelete={handleDelete}
-            onDuplicate={handleDuplicate}
-            onEdit={handleActivityClick}
-            onOpen={handleActivityClick}
-            resolveParticipants={resolveParticipants}
-          />
+          <Stack gap="md">
+            <InteractionsList
+              activities={sortedInteractionsActivities}
+              deleteLabel={t("DeleteAction")}
+              duplicateLabel={t("DuplicateAction")}
+              editLabel={t("EditAction")}
+              onDelete={handleDelete}
+              onDuplicate={handleDuplicate}
+              onEdit={handleActivityClick}
+              onOpen={handleActivityClick}
+              resolveParticipants={resolveParticipants}
+            />
+            {hasMore ? (
+              <Center>
+                <Button loading={isFetchingNextPage} onClick={handleLoadMore} variant="light">
+                  {t("LoadMoreBatch")}
+                </Button>
+              </Center>
+            ) : null}
+          </Stack>
         ) : (
           <Paper p="md" radius="md" shadow="sm" withBorder>
             <InteractionsTableV2
               activities={activities}
               columns={columns}
+              hasMore={hasMore}
               labels={{
                 actionsAriaLabel: t("TableColumnActions"),
                 columns: {
@@ -361,11 +400,14 @@ export function InteractionsClient() {
                 visibleColumnsButton: t("VisibleColumnsButton"),
                 visibleColumnsSection: t("VisibleColumnsSection"),
               }}
+              loadMoreLabel={t("LoadMoreBatch")}
+              loadMoreLoading={isFetchingNextPage}
               onColumnsChange={setColumns}
               onDelete={handleDelete}
               onDeleteSelected={handleDeleteSelected}
               onDuplicate={handleDuplicate}
               onEdit={handleActivityClick}
+              onLoadMore={handleLoadMore}
               onSearchChange={handleSearchChange}
               onSelectionChange={setSelectedIds}
               onSortChange={setSortOrder}

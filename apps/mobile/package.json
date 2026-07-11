@@ -85,7 +85,6 @@
     "dev": "cross-env EXPO_UNSTABLE_MCP_SERVER=1 expo start --port 26634",
     "dev:prebuild": "npx expo prebuild --clean",
     "ios": "expo run:ios",
-    "lint": "eslint .",
     "predev": "npm run check-env",
     "test:sync": "tsx --test src/lib/sync/pull-wake.test.ts"
   },

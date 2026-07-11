@@ -4,9 +4,9 @@ import type { ImportFollowupPlatform } from "@bondery/schemas";
 import { Button, Card, Center, SimpleGrid, Stack, Text, ThemeIcon, Title } from "@mantine/core";
 import { IconBrandInstagram, IconBrandLinkedin, IconCheck } from "@tabler/icons-react";
 import { useState } from "react";
-import { openInstagramImportModal } from "@/app/(app)/app/settings/components/openInstagramImportModal";
+import { openInstagramImportModal } from "@/app/(app)/app/settings/components/modals/openInstagramImportModal";
 
-import { openLinkedInImportModal } from "@/app/(app)/app/settings/components/openLinkedInImportModal";
+import { openLinkedInImportModal } from "@/app/(app)/app/settings/components/modals/openLinkedInImportModal";
 import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
 
 interface StepProps {
