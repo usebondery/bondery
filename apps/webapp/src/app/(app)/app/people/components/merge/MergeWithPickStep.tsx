@@ -54,7 +54,7 @@ export function MergeWithPickStep({
     <Stack gap="md">
       <Group align="center" justify="space-between" wrap="nowrap">
         <PersonChip
-          disabled={disableLeftPicker}
+          disabled={disableLeftPicker || isSubmitting}
           isSelectable
           noResultsLabel={noPeopleFoundLabel}
           onSelectPerson={onSelectLeft}
@@ -69,7 +69,7 @@ export function MergeWithPickStep({
         </Text>
 
         <PersonChip
-          disabled={disableRightPicker}
+          disabled={disableRightPicker || isSubmitting}
           isSelectable
           noResultsLabel={noPeopleFoundLabel}
           onSearch={onRightSearch}

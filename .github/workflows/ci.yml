@@ -34,6 +34,9 @@ jobs:
       - name: Check dev ports
         run: npm run check-dev-ports
 
+      - name: Check package imports
+        run: npm run check-package-imports
+
       - name: Validate doc links
         run: npm run check-doc-links
 

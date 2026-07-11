@@ -209,19 +209,21 @@ for (const [name] of Object.entries(manifest.namespaces)) {
   }
 }
 
-const mirrorResult = spawnSync("node", [path.join(packageRoot, "scripts/sync-locale-mirror.mjs")], {
-  cwd: repoRoot,
-  shell: true,
-  stdio: "inherit",
-});
+const mirrorResult = spawnSync(
+  process.execPath,
+  [path.join(packageRoot, "scripts/sync-locale-mirror.mjs")],
+  { cwd: repoRoot, stdio: "inherit" },
+);
 if (mirrorResult.status !== 0) {
   process.exit(mirrorResult.status ?? 1);
 }
 
+const i18nextCliPath = path.join(repoRoot, "node_modules/i18next-cli/dist/esm/cli.js");
+
 const statusResult = spawnSync(
-  "npx",
-  ["i18next-cli", "status", "-c", "packages/translations/i18next.config.ts"],
-  { cwd: repoRoot, shell: true, stdio: "inherit" },
+  process.execPath,
+  [i18nextCliPath, "status", "-c", "packages/translations/i18next.config.ts"],
+  { cwd: repoRoot, stdio: "inherit" },
 );
 
 if (statusResult.status !== 0) {

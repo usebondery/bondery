@@ -284,8 +284,9 @@ While blocking:
 - Hide the **X** close button.
 - Disable **click outside** to dismiss.
 - Disable **Escape** to dismiss.
+- Disable **every editable control** in the modal body — text inputs, pickers, toggles, tables/checkboxes where selection would change payload — via `disabled={isBlocking}` (web) or `editable={!isBusy}` / `disabled={isBusy}` on sheet fields (mobile). Users must not edit form state while data is loading or a mutation is in flight; only footer actions (e.g. cancel when safe) stay available as designed.
 
-Re-enable all three when the action finishes (success or error). Cancel buttons that explicitly abort a safe operation are fine when they are part of the footer — the point is to prevent accidental dismiss via chrome gestures while work is in progress.
+Re-enable all three dismiss gestures and editable controls when the action finishes (success or error). Cancel buttons that explicitly abort a safe operation are fine when they are part of the footer — the point is to prevent accidental dismiss via chrome gestures while work is in progress.
 
 Derive blocking from submit **and** load/parse/import states — not submit alone.
 
@@ -298,7 +299,13 @@ Derive blocking from submit **and** load/parse/import states — not submit alon
 ```tsx
 const isBlocking = isSubmitting || isLoading || mutation.isPending;
 useModalBlocking(modalId, isBlocking);
+
+// Every input, picker, and toggle in the body:
+<TextInput disabled={isBlocking} {...form.getInputProps("label")} />
+<PeopleMultiPickerInput disabled={isBlocking} ... />
 ```
+
+Prefer `useModalDismiss(modalId, isBlocking)` in modal bodies that close on success — it wraps blocking and guarded close helpers. Pass `disabled={isBlocking}` to **all** editable controls, not only the submit button.
 
 Never call `modals.updateModal` for dismiss flags in feature code. Title/size-only `updateModal` is allowlisted in rare cases (import preview sizing, API key reveal step).
 
@@ -321,6 +328,7 @@ See `apps/webapp/src/lib/modals/README.md`. CI enforces via `npm run check-modal
 
 - Leaving the X visible while `actionLoading` is true on the footer — users will close and lose context.
 - Only disabling the submit button without locking dismiss — both are required.
+- Leaving inputs or pickers editable while `isBlocking` — users can change values that are ignored or race the in-flight request.
 - Forgetting to restore closability after an error — the user should be able to leave once the request has settled.
 - Passing `onClose` props that disable blocking logic, or nesting a second `<Modal>` instead of stacking `modals.open`.
 

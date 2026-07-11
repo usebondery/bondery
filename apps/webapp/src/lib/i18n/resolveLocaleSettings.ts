@@ -1,3 +1,5 @@
+import "server-only";
+
 import type { SupportedLocale } from "@bondery/translations";
 import { DEFAULT_LOCALE } from "@bondery/translations";
 import { cache } from "react";

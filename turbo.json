@@ -197,5 +197,5 @@
       "dependsOn": ["^transit"]
     }
   },
-  "ui": "stream"
+  "ui": "tui"
 }

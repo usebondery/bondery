@@ -8,7 +8,7 @@ import {
   type ReactElement,
   type ReactNode,
 } from "react";
-import { mantineLinkComponent } from "#nextjs/NextLink.js";
+import Link from "#nextjs/NextLink.js";
 
 export type ActionIconLinkProps = Omit<ActionIconProps, "component" | "href" | "children"> & {
   href?: string;
@@ -74,10 +74,7 @@ export function ActionIconLink({
   return (
     <ActionIcon
       aria-label={ariaLabel}
-      component={mantineLinkComponent}
-      href={href}
-      rel={rel}
-      target={target}
+      renderRoot={(props) => <Link href={href} rel={rel} target={target} {...props} />}
       {...actionIconProps}
     >
       {renderedIcon}

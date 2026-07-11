@@ -219,19 +219,6 @@ function TagEditorModalBody({
           isPatchSuccessful = false;
         }
 
-        let areMembersSynced = true;
-        if (selectedIds.length > 0) {
-          try {
-            await syncTagContactsMutation.mutateAsync({
-              tagId: created.tag.id,
-              toAdd: selectedIds,
-              toRemove: [],
-            });
-          } catch {
-            areMembersSynced = false;
-          }
-        }
-
         notifications.hide(loadingId);
         captureEvent("tag_created");
 
@@ -242,6 +229,20 @@ function TagEditorModalBody({
             title: t("CreateSuccessTitle"),
           }),
         );
+
+        let areMembersSynced = selectedIds.length === 0;
+        if (selectedIds.length > 0) {
+          try {
+            await syncTagContactsMutation.mutateAsync({
+              tagId: created.tag.id,
+              toAdd: selectedIds,
+              toRemove: [],
+            });
+            areMembersSynced = true;
+          } catch {
+            areMembersSynced = false;
+          }
+        }
 
         if (!isPatchSuccessful || !areMembersSynced) {
           notifications.show(
@@ -364,6 +365,7 @@ function TagEditorModalBody({
       <Stack gap="md">
         <Group align="flex-start" gap="md" grow>
           <ColorInput
+            disabled={isBlocking}
             format="hex"
             label={t("ColorLabel")}
             placeholder="#A1B2C3"
@@ -376,6 +378,7 @@ function TagEditorModalBody({
 
           <TextInput
             data-autofocus
+            disabled={isBlocking}
             label={t("LabelLabel")}
             placeholder={t("LabelPlaceholder")}
             required
@@ -395,7 +398,7 @@ function TagEditorModalBody({
           ) : (
             <PeopleMultiPickerInput
               contacts={allContacts}
-              disabled={isSubmitting}
+              disabled={isBlocking}
               noResultsLabel={t("NoPeopleFound")}
               onChange={setSelectedIds}
               onSearch={handleSearch}

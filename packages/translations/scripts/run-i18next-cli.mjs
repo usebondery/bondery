@@ -7,9 +7,10 @@ const repoRoot = path.resolve(packageRoot, "../..");
 const configPath = "packages/translations/i18next.config.ts";
 const args = process.argv.slice(2);
 
-const result = spawnSync("npx", ["i18next-cli", ...args, "-c", configPath], {
+const i18nextCliPath = path.join(repoRoot, "node_modules/i18next-cli/dist/esm/cli.js");
+
+const result = spawnSync(process.execPath, [i18nextCliPath, ...args, "-c", configPath], {
   cwd: repoRoot,
-  shell: true,
   stdio: "inherit",
 });
 

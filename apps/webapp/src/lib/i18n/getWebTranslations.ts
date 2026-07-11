@@ -1,3 +1,5 @@
+import "server-only";
+
 import { getT } from "next-i18next/server";
 import { resolveLocaleSettings } from "@/lib/i18n/resolveLocaleSettings";
 

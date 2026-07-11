@@ -3,6 +3,7 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   experimental: {
     optimizePackageImports: [
+      "@tabler/icons-react",
       "@bondery/mantine-next",
       "@mantine/core",
       "@mantine/dates",

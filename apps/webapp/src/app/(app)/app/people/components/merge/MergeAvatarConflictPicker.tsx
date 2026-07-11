@@ -7,6 +7,7 @@ import { getAvatarColorFromName } from "@/lib/contacts/avatarColor";
 
 interface AvatarConflictPickerProps {
   choice: MergeConflictChoice;
+  disabled?: boolean;
   label: string;
   leftContact: Contact;
   onChange: (side: MergeConflictChoice) => void;
@@ -17,6 +18,7 @@ export function MergeAvatarConflictPicker({
   leftContact,
   rightContact,
   choice,
+  disabled = false,
   label,
   onChange,
 }: AvatarConflictPickerProps) {
@@ -35,9 +37,14 @@ export function MergeAvatarConflictPicker({
           return (
             <UnstyledButton
               aria-pressed={selected}
+              disabled={disabled}
               h="100%"
               key={side}
-              onClick={() => onChange(side)}
+              onClick={() => {
+                if (!disabled) {
+                  onChange(side);
+                }
+              }}
               style={{ textAlign: "left" }}
               w="100%"
             >

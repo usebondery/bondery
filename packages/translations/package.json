@@ -94,7 +94,7 @@
   "name": "@bondery/translations",
   "private": true,
   "scripts": {
-    "build": "node scripts/sync-locale-mirror.mjs && node scripts/run-i18next-cli.mjs types && node scripts/generate-resource-map.mjs && rimraf dist && tsc && node ../../scripts/rewrite-package-hash-imports-in-dist.mjs translations && node scripts/copy-json.mjs && node scripts/validate-manifest.mjs",
+    "build": "node scripts/sync-locale-mirror.mjs && node scripts/run-i18next-cli.mjs types && node scripts/generate-resource-map.mjs && rimraf dist tsconfig.tsbuildinfo && tsc && node ../../scripts/rewrite-package-hash-imports-in-dist.mjs translations && node scripts/copy-json.mjs && node scripts/validate-manifest.mjs",
     "check-types": "tsc --noEmit",
     "compile": "node scripts/sync-locale-mirror.mjs && node scripts/generate-resource-map.mjs && tsc && node scripts/copy-json.mjs",
     "dev": "node scripts/dev.mjs",

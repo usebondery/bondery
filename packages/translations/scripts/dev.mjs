@@ -1,6 +1,10 @@
 import { spawn } from "node:child_process";
 import { copyFileSync, existsSync, mkdirSync, readdirSync, watch } from "node:fs";
-import { join } from "node:path";
+import { join, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
+
+const packageRoot = resolve(fileURLToPath(new URL(".", import.meta.url)), "..");
+const repoRoot = resolve(packageRoot, "../..");
 
 const srcLocales = join("src", "locales");
 const distLocales = join("dist", "locales");
@@ -39,12 +43,16 @@ if (existsSync(srcLocales)) {
   });
 }
 
-spawn("node", ["scripts/generate-resource-map.mjs"], { shell: true, stdio: "inherit" });
-
-const tsc = spawn("tsc", ["--watch", "--preserveWatchOutput"], {
-  shell: true,
+spawn(process.execPath, [join(packageRoot, "scripts/generate-resource-map.mjs")], {
+  cwd: packageRoot,
   stdio: "inherit",
 });
+
+const tsc = spawn(
+  process.execPath,
+  [join(repoRoot, "node_modules/typescript/bin/tsc"), "--watch", "--preserveWatchOutput"],
+  { cwd: packageRoot, stdio: "inherit" },
+);
 
 tsc.on("exit", (code) => {
   process.exit(code ?? 0);

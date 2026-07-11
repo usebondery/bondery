@@ -57,15 +57,16 @@
   filter: none;
 }
 
-.emoji-picker-trigger {
+.emoji-picker-trigger:not(:disabled):not([data-disabled]) {
+  background-color: var(--mantine-color-gray-1);
+  border-radius: var(--input-radius, var(--mantine-radius-default));
+}
+
+[data-mantine-color-scheme="light"] .emoji-picker-trigger:not(:disabled):not([data-disabled]) {
   background-color: var(--mantine-color-gray-1);
 }
 
-[data-mantine-color-scheme="light"] .emoji-picker-trigger {
-  background-color: var(--mantine-color-gray-1);
-}
-
-[data-mantine-color-scheme="dark"] .emoji-picker-trigger {
+[data-mantine-color-scheme="dark"] .emoji-picker-trigger:not(:disabled):not([data-disabled]) {
   background-color: var(--mantine-color-dark-5);
 }
 

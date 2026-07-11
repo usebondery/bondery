@@ -65,6 +65,9 @@ async function collectSourceFiles(dir) {
         return collectSourceFiles(fullPath);
       }
       if (/\.(ts|tsx)$/.test(entry)) {
+        if (fullPath.includes("/generated/")) {
+          return [];
+        }
         return [fullPath];
       }
       return [];

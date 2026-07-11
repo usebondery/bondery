@@ -330,6 +330,7 @@ function AddPeopleToGroupSelectionForm({
           )}
 
           <TextInput
+            disabled={isBlocking}
             label={t("SearchLabel")}
             leftSection={<IconSearch size={16} />}
             onChange={(event) => setSearch(event.currentTarget.value)}
@@ -352,7 +353,12 @@ function AddPeopleToGroupSelectionForm({
               actionColor="green"
               actionIcon={<IconFolderPlus size={20} />}
               actionLabel={t("CreateNewGroup")}
+              interactive={!isBlocking}
               onActionClick={() => {
+                if (isBlocking) {
+                  return;
+                }
+
                 openAddGroupModal({
                   initialLabel: search.trim(),
                   initialSelectedIds: deduplicatedPersonIds,
@@ -371,6 +377,7 @@ function AddPeopleToGroupSelectionForm({
             <Box key={group.id} style={{ flex: "0 0 auto", width: modalGroupCardWidth }}>
               <UnstyledButton
                 className="w-full text-left"
+                disabled={isBlocking}
                 onClick={() => handleToggleGroup(group.id)}
               >
                 {(() => {

@@ -6,6 +6,7 @@
     "bradlc.vscode-tailwindcss",
     "aaron-bond.better-comments",
     "akamud.vscode-theme-onedark",
-    "mikestead.dotenv"
+    "mikestead.dotenv",
+    "github.vscode-github-actions"
   ]
 }

@@ -105,9 +105,7 @@ export function PersonTagsInput({ personId }: PersonTagsInputProps) {
       initialLabel: prefillLabel,
       initialSelectedPersonIds: [personId],
       mode: "create",
-      onCreated: () => {
-        setSearch("");
-      },
+      onCreated: () => {},
       onDeleted: () => {},
       onUpdated: () => {},
     });
@@ -161,6 +159,7 @@ export function PersonTagsInput({ personId }: PersonTagsInputProps) {
     }
 
     combobox.closeDropdown();
+    setSearch("");
     openCreateModal(trimmed);
   };
 
@@ -298,7 +297,6 @@ export function PersonTagsInput({ personId }: PersonTagsInputProps) {
                           ? t("CreateNewTagOption", { label: search.trim() })
                           : t("CreateNewTagEmpty")
                       }
-                      onClick={handleCreateRequest}
                       preventInputBlur
                     />
                   </Combobox.Option>

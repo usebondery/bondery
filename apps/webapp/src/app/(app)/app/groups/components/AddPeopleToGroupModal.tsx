@@ -195,7 +195,7 @@ function AddPeopleToGroupForm({ groupId, groupLabel, modalId }: AddPeopleToGroup
     <Stack gap="md">
       <PeopleMultiPickerInput
         contacts={contacts as Contact[]}
-        disabled={isSubmitting}
+        disabled={isBlocking}
         noResultsLabel={t("AddPeopleModal.NoContactsFound")}
         onChange={setSelectedIds}
         onSearch={handleSearch}

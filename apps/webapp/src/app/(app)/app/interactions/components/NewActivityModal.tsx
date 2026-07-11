@@ -124,7 +124,8 @@ function NewActivityForm({
   const getInteractionTypeLabel = useInteractionTypeLabel();
   const createInteractionMutation = useCreateInteractionMutation();
   const updateInteractionMutation = useUpdateInteractionMutation(activity?.id ?? "");
-  const [loading, setLoading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const isBlocking = isSubmitting;
   const [availableContacts, setAvailableContacts] = useState<ContactSelectable[]>(() => {
     if (!activity?.participants?.length) {
       return contacts;
@@ -156,7 +157,7 @@ function NewActivityForm({
     });
   }, [contacts]);
 
-  const { closeModal } = useModalDismiss(modalId, loading);
+  const { closeModal } = useModalDismiss(modalId, isBlocking);
 
   const resolvedInitialParticipantIds = useMemo(
     () =>
@@ -212,7 +213,7 @@ function NewActivityForm({
   };
 
   const handleSubmit = async (values: typeof form.values) => {
-    setLoading(true);
+    setIsSubmitting(true);
 
     try {
       const dateValue = parseLocalDateInputValue(values.date);
@@ -252,7 +253,7 @@ function NewActivityForm({
         }),
       );
     } finally {
-      setLoading(false);
+      setIsSubmitting(false);
     }
   };
 
@@ -262,6 +263,7 @@ function NewActivityForm({
         <TextInput
           autoFocus
           data-autofocus
+          disabled={isBlocking}
           label={t("Title")}
           placeholder={t("TitlePlaceholder")}
           {...form.getInputProps("title")}
@@ -270,7 +272,7 @@ function NewActivityForm({
         <Stack gap={4}>
           <PeopleMultiPickerInput
             contacts={availableContacts}
-            disabled={loading}
+            disabled={isBlocking}
             error={form.errors.participantIds}
             inputRef={participantsInputRef}
             noResultsLabel={t("NoContactsFound")}
@@ -286,7 +288,7 @@ function NewActivityForm({
           />
 
           <Button
-            disabled={loading}
+            disabled={isBlocking}
             onClick={() => {
               openAddContactModal({ onCreated: handleContactCreated });
             }}
@@ -305,6 +307,7 @@ function NewActivityForm({
             </Text>
           </Group>
           <Textarea
+            disabled={isBlocking}
             minRows={6}
             placeholder={t("DescriptionPlaceholder")}
             {...form.getInputProps("description")}
@@ -319,12 +322,14 @@ function NewActivityForm({
         <Group mt="md">
           <Group grow w="100%">
             <DatePickerWithPresets
+              disabled={isBlocking}
               placeholder={t("PickDate")}
               {...form.getInputProps("date")}
               w="100%"
             />
             <Select
               data={activityTypeSelectOptions}
+              disabled={isBlocking}
               placeholder={t("Type")}
               {...form.getInputProps("type")}
               allowDeselect={false}
@@ -349,12 +354,12 @@ function NewActivityForm({
         </Group>
 
         <ModalFooter
-          actionDisabled={loading}
+          actionDisabled={isBlocking}
           actionLabel={isEditMode ? t("SaveChanges") : t("AddActivity")}
           actionLeftSection={isEditMode ? <IconCheck size={16} /> : <IconCalendarPlus size={16} />}
-          actionLoading={loading}
+          actionLoading={isBlocking}
           actionType="submit"
-          cancelDisabled={loading}
+          cancelDisabled={isBlocking}
           cancelLabel={t("Cancel")}
           onCancel={closeModal}
         />

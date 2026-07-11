@@ -29,7 +29,8 @@ interface FeedbackModalProps {
 export function FeedbackModal({ modalId }: FeedbackModalProps) {
   const t = useWebTranslations("FeedbackPage");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { closeModal } = useModalDismiss(modalId, isSubmitting);
+  const isBlocking = isSubmitting;
+  const { closeModal } = useModalDismiss(modalId, isBlocking);
 
   const form = useForm<FeedbackFormInput>({
     initialValues: {
@@ -88,6 +89,7 @@ export function FeedbackModal({ modalId }: FeedbackModalProps) {
         <Stack gap="md">
           <Text fw={500}>{t("NpsLabel")}</Text>
           <Slider
+            disabled={isBlocking}
             label={(value) => value.toString()}
             marks={SLIDER_MARKS}
             max={10}
@@ -101,6 +103,7 @@ export function FeedbackModal({ modalId }: FeedbackModalProps) {
 
         <Textarea
           autosize
+          disabled={isBlocking}
           label={t("NpsReasonLabel", { score: form.values.npsScore })}
           minRows={3}
           placeholder={t("NpsReasonPlaceholder")}
@@ -109,6 +112,7 @@ export function FeedbackModal({ modalId }: FeedbackModalProps) {
 
         <Textarea
           autosize
+          disabled={isBlocking}
           label={t("GeneralFeedbackLabel")}
           minRows={3}
           placeholder={t("GeneralFeedbackPlaceholder")}

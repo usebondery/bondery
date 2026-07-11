@@ -61,6 +61,8 @@ export function MergeWithResolveStep({
   showAvatarPicker,
   showBackButton,
 }: MergeWithResolveStepProps) {
+  const isBlocking = isSubmitting;
+
   const renderConflictContent = () => {
     if (conflicts.length === 0) {
       return (
@@ -68,6 +70,7 @@ export function MergeWithResolveStep({
           {showAvatarPicker && leftContact && rightContact ? (
             <MergeAvatarConflictPicker
               choice={conflictChoices.avatar ?? "left"}
+              disabled={isBlocking}
               label={fieldLabel("avatar")}
               leftContact={leftContact}
               onChange={(side) =>
@@ -110,6 +113,7 @@ export function MergeWithResolveStep({
         {leftContact && rightContact ? (
           <MergeAvatarConflictPicker
             choice={conflictChoices.avatar ?? "left"}
+            disabled={isBlocking}
             label={fieldLabel("avatar")}
             leftContact={leftContact}
             onChange={(side) =>
@@ -152,12 +156,14 @@ export function MergeWithResolveStep({
                 <SimpleGrid cols={2} spacing="sm">
                   <SelectableCard
                     description={leftDesc || undefined}
+                    disabled={isBlocking}
                     label={label}
                     onClick={() => handleSelect("left")}
                     selected={selectedChoice === "left"}
                   />
                   <SelectableCard
                     description={rightDesc || undefined}
+                    disabled={isBlocking}
                     label={label}
                     onClick={() => handleSelect("right")}
                     selected={selectedChoice === "right"}

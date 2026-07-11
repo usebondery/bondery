@@ -1,10 +1,11 @@
 "use client";
 
-import { Button, Popover, Stack, Text } from "@mantine/core";
+import { Input, Popover, Text } from "@mantine/core";
 import { useState } from "react";
 import { EmojiPickerDropdownContent } from "#EmojiPicker/EmojiPickerDropdownContent.js";
 
 interface EmojiPickerProps {
+  disabled?: boolean;
   error?: string;
   onChange: (emoji: string) => void;
   /** Debounce delay in ms for the emoji search input. Defaults to 200 (local filter). */
@@ -12,7 +13,13 @@ interface EmojiPickerProps {
   value: string;
 }
 
-export function EmojiPicker({ value, onChange, error, searchDebounceMs }: EmojiPickerProps) {
+export function EmojiPicker({
+  value,
+  onChange,
+  error,
+  searchDebounceMs,
+  disabled = false,
+}: EmojiPickerProps) {
   const [opened, setOpened] = useState(false);
 
   const handleSelect = (emoji: string) => {
@@ -21,25 +28,59 @@ export function EmojiPicker({ value, onChange, error, searchDebounceMs }: EmojiP
   };
 
   return (
-    <Stack gap={4}>
-      <Text fw={500} size="sm">
-        Emoji <span style={{ color: "var(--mantine-color-red-6)" }}>*</span>
-      </Text>
-      <Popover onChange={setOpened} opened={opened} position="bottom-start" shadow="md" width={320}>
+    <Input.Wrapper
+      error={error}
+      label="Emoji"
+      required
+      styles={{
+        label: disabled ? { color: "var(--mantine-color-disabled-color)" } : undefined,
+      }}
+      withAsterisk
+    >
+      <Popover
+        onChange={(nextOpened) => {
+          if (!disabled) {
+            setOpened(nextOpened);
+          }
+        }}
+        opened={disabled ? false : opened}
+        position="bottom-start"
+        shadow="md"
+        width={320}
+      >
         <Popover.Target>
-          <Button
-            className={`emoji-picker-trigger button-scale-effect ${opened ? "button-scale-effect-active" : ""}`}
-            onClick={() => setOpened((o) => !o)}
-            variant="light"
+          <Input
+            classNames={{
+              input: `emoji-picker-trigger button-scale-effect ${opened && !disabled ? "button-scale-effect-active" : ""}`,
+            }}
+            component="button"
+            disabled={disabled}
+            onClick={() => {
+              if (!disabled) {
+                setOpened((current) => !current);
+              }
+            }}
+            pointer={!disabled}
+            styles={{
+              input: {
+                alignItems: "center",
+                display: "flex",
+                justifyContent: "center",
+                textAlign: "center",
+              },
+            }}
+            type="button"
           >
             {value ? (
-              <Text size="xl">{value}</Text>
+              <Text inherit lh={1} size="xl">
+                {value}
+              </Text>
             ) : (
-              <Text c="dimmed" size="sm">
+              <Text c="dimmed" inherit lh={1} size="sm">
                 Select emoji
               </Text>
             )}
-          </Button>
+          </Input>
         </Popover.Target>
 
         <Popover.Dropdown>
@@ -50,11 +91,6 @@ export function EmojiPicker({ value, onChange, error, searchDebounceMs }: EmojiP
           />
         </Popover.Dropdown>
       </Popover>
-      {error && (
-        <Text c="red" size="xs">
-          {error}
-        </Text>
-      )}
-    </Stack>
+    </Input.Wrapper>
   );
 }

@@ -1,17 +1,29 @@
 "use client";
 
 import { bonderyTheme, PersonChip } from "@bondery/mantine-next";
-import { Avatar, MantineProvider, v8CssVariablesResolver } from "@mantine/core";
+import { ActionIcon, Avatar, MantineProvider, v8CssVariablesResolver } from "@mantine/core";
+import { IconMinus, IconPlus } from "@tabler/icons-react";
 import type { MarkerCluster } from "leaflet";
 import { DivIcon } from "leaflet";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useMemo, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { MapContainer, Marker, TileLayer, useMap, useMapEvents } from "react-leaflet";
+import {
+  AttributionControl,
+  MapContainer,
+  Marker,
+  TileLayer,
+  useMap,
+  useMapEvents,
+} from "react-leaflet";
 import MarkerClusterGroup from "react-leaflet-cluster";
 import "maplibre-gl/dist/maplibre-gl.css";
 import "leaflet.markercluster/dist/MarkerCluster.css";
+import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
 import type { MapBounds, PeopleMapFocus, PeopleMapMarker } from "./PeopleMap";
+
+const OSM_ATTRIBUTION =
+  '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
 
 interface PeopleMapClientProps {
   center?: [number, number];
@@ -93,6 +105,7 @@ export function PeopleMapClient({
       style={{ borderRadius: "12px", height, overflow: "hidden", position: "relative", zIndex: 0 }}
     >
       <MapContainer
+        attributionControl={false}
         center={defaultCenter}
         maxBounds={[
           [-85.051129, -100000],
@@ -103,7 +116,10 @@ export function PeopleMapClient({
         style={{ height: "100%", width: "100%" }}
         worldCopyJump
         zoom={zoom}
+        zoomControl={false}
       >
+        <AttributionControl prefix={false} />
+        <MapZoomControls />
         <MapFocusController defaultZoom={zoom} focus={focus} />
         <FitMarkersController defaultZoom={zoom} disabled={disableAutoFit} markers={markers} />
         <VisibleMarkersController
@@ -112,7 +128,7 @@ export function PeopleMapClient({
           onVisibleMarkerIdsChange={onVisibleMarkerIdsChange}
         />
         <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          attribution={OSM_ATTRIBUTION}
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
         <MarkerClusterGroup
@@ -164,6 +180,54 @@ export function PeopleMapClient({
         </MarkerClusterGroup>
       </MapContainer>
     </div>
+  );
+}
+
+function MapZoomControls() {
+  const map = useMap();
+  const t = useWebTranslations("MapCommon");
+  const [currentZoom, setCurrentZoom] = useState(() => map.getZoom());
+
+  useMapEvents({
+    zoomend: () => {
+      setCurrentZoom(map.getZoom());
+    },
+  });
+
+  const minZoom = map.getMinZoom();
+  const maxZoom = map.getMaxZoom();
+
+  return (
+    <ActionIcon.Group
+      aria-label={t("ZoomControls")}
+      orientation="vertical"
+      style={{
+        left: 12,
+        pointerEvents: "auto",
+        position: "absolute",
+        top: 12,
+        zIndex: 1000,
+      }}
+    >
+      <ActionIcon
+        aria-label={t("ZoomIn")}
+        disabled={currentZoom >= maxZoom}
+        onClick={() => map.zoomIn()}
+        size="lg"
+        variant="default"
+      >
+        <IconPlus size={20} />
+      </ActionIcon>
+      <ActionIcon
+        aria-label={t("ZoomOut")}
+        disabled={currentZoom <= minZoom}
+        onClick={() => map.zoomOut()}
+        size="lg"
+        variant="default"
+      >
+        <IconMinus size={20} />
+      </ActionIcon>
+    </ActionIcon.Group>
   );
 }
 

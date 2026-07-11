@@ -1,14 +1,16 @@
+"use client";
+
 import { Card, Group, Text, ThemeIcon } from "@mantine/core";
 import { IconStar } from "@tabler/icons-react";
 import type { GithubStarsData } from "@/lib/api/resources/stats";
-import { getWebTranslations as getTranslations } from "@/lib/i18n/getWebTranslations";
+import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
 
 interface GithubStarsCardProps {
   data: GithubStarsData;
 }
 
-export async function GithubStarsCard({ data }: GithubStarsCardProps) {
-  const t = await getTranslations("StatsPage");
+export function GithubStarsCard({ data }: GithubStarsCardProps) {
+  const t = useWebTranslations("StatsPage");
 
   return (
     <Card padding="lg" withBorder>

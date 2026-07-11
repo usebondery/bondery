@@ -53,6 +53,7 @@
     "build:website": "turbo build --filter=website",
     "check-api-error-translations": "node scripts/check-api-error-translations.mjs",
     "check-dev-ports": "node scripts/check-dev-ports.mjs",
+    "check-doc-links": "node scripts/check-doc-links.mjs",
     "check-error-docs": "node scripts/check-error-docs.mjs",
     "check-openapi": "npm run check-openapi -w apps/api && npm run check-api-schema-patterns -w apps/api && npx redocly lint apps/api/openapi.yaml",
     "check-package-imports": "node scripts/check-package-import-extensions.mjs",

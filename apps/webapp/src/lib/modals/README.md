@@ -48,6 +48,7 @@ closes while async loading can still complete (rare).
 - Never call `modals.close(modalId)` directly in modal bodies that use blocking state — use `closeModal` / `closeModalSync` from `useModalDismiss`.
 - Do not use `<Modal>` in feature code; onboarding shell is the only exception.
 - Derive `isBlocking` from submit **and** load/parse/import states.
+- Pass `disabled={isBlocking}` to every editable control in the modal body (inputs, pickers, toggles).
 - Web `isBlocking` matches mobile `ActionSheetPopup` `isBusy`.
 
 ## Scrollable modal bodies

@@ -72,7 +72,8 @@ function EditGroupForm({
   const t = useWebTranslations("GroupsPage");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const updateGroupMutation = useUpdateGroupMutation(groupId);
-  const { closeModal } = useModalDismiss(modalId, isSubmitting);
+  const isBlocking = isSubmitting;
+  const { closeModal } = useModalDismiss(modalId, isBlocking);
 
   const form = useForm({
     initialValues: {
@@ -131,6 +132,7 @@ function EditGroupForm({
         <Group align="flex-start" gap="md">
           <Box style={{ width: 80 }}>
             <EmojiPicker
+              disabled={isBlocking}
               error={form.errors.emoji as string | undefined}
               onChange={(emoji) => form.setFieldValue("emoji", emoji)}
               searchDebounceMs={DEBOUNCE_MS.localFilter}
@@ -140,6 +142,7 @@ function EditGroupForm({
           <Box style={{ flex: 1 }}>
             <TextInput
               data-autofocus
+              disabled={isBlocking}
               label={t("EditGroupModal.LabelInput")}
               placeholder={t("EditGroupModal.LabelPlaceholder")}
               required
@@ -151,6 +154,7 @@ function EditGroupForm({
 
         <ColorInput
           closeOnColorSwatchClick
+          disabled={isBlocking}
           format="hex"
           label={t("EditGroupModal.ColorInput")}
           placeholder={t("EditGroupModal.ColorPlaceholder")}

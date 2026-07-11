@@ -1,6 +1,30 @@
 {
   "tasks": [
     {
+      "args": ["scripts/kill-webapp-dev.mjs"],
+      "command": "node",
+      "label": "dev: kill webapp (port 26632)",
+      "linux": {
+        "options": {
+          "cwd": "${workspaceFolder}",
+          "shell": {
+            "args": ["-lc"],
+            "executable": "/bin/bash"
+          }
+        }
+      },
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "group": "dev",
+        "panel": "shared",
+        "reveal": "always"
+      },
+      "problemMatcher": [],
+      "type": "shell"
+    },
+    {
       "args": ["scripts/start-ngrok-config.mjs", "ngrok.yml"],
       "command": "node",
       "isBackground": true,

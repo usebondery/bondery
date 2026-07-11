@@ -32,5 +32,6 @@
   },
   "remote.restoreForwardedPorts": true,
   "sherlock.previewLanguageTag": "en",
-  "task.allowAutomaticTasks": "off"
+  "task.allowAutomaticTasks": "off",
+  "terminal.integrated.enablePersistentSessions": false
 }

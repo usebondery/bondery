@@ -194,7 +194,8 @@ function ShareContactModalContent({ contact, modalId }: { contact: Contact; moda
   const tShare = useWebTranslations("ShareContactModal");
   const shareContactMutation = useShareContactMutation();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { closeModal } = useModalDismiss(modalId, isSubmitting);
+  const isBlocking = isSubmitting;
+  const { closeModal } = useModalDismiss(modalId, isBlocking);
   const form = useForm({
     initialValues: {
       message: "",
@@ -293,6 +294,7 @@ function ShareContactModalContent({ contact, modalId }: { contact: Contact; moda
         <TagsInput
           clearable
           data-autofocus
+          disabled={isBlocking}
           error={form.errors.recipientEmails}
           label={tShare("RecipientsLabel")}
           onChange={(values) => form.setFieldValue("recipientEmails", values)}
@@ -305,6 +307,7 @@ function ShareContactModalContent({ contact, modalId }: { contact: Contact; moda
         />
 
         <Textarea
+          disabled={isBlocking}
           label={tShare("MessageLabel")}
           onChange={(e) => form.setFieldValue("message", e.currentTarget.value)}
           placeholder={tShare("MessagePlaceholder")}
@@ -342,7 +345,7 @@ function ShareContactModalContent({ contact, modalId }: { contact: Contact; moda
                         ? tShare("AvatarDescription", { name: contactName })
                         : getFieldPreview(contact, field) || undefined
                     }
-                    disabled={isRequiredField}
+                    disabled={isRequiredField || isBlocking}
                     label={tShare(`Fields.${field}`)}
                     onClick={() => toggleField(field)}
                     selected={selectedFields.has(field)}

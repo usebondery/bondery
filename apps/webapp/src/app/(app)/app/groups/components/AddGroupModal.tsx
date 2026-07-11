@@ -215,6 +215,7 @@ function AddGroupForm({
         <Group align="flex-start" gap="md">
           <Box style={{ width: 80 }}>
             <EmojiPicker
+              disabled={isBlocking}
               error={form.errors.emoji as string | undefined}
               onChange={(emoji) => form.setFieldValue("emoji", emoji)}
               searchDebounceMs={DEBOUNCE_MS.localFilter}
@@ -224,6 +225,7 @@ function AddGroupForm({
           <Box style={{ flex: 1 }}>
             <TextInput
               data-autofocus
+              disabled={isBlocking}
               label={t("AddGroupModal.LabelInput")}
               placeholder={t("AddGroupModal.LabelPlaceholder")}
               required
@@ -235,6 +237,7 @@ function AddGroupForm({
 
         <ColorInput
           closeOnColorSwatchClick
+          disabled={isBlocking}
           format="hex"
           label={t("AddGroupModal.ColorInput")}
           placeholder={t("AddGroupModal.ColorPlaceholder")}
@@ -260,7 +263,7 @@ function AddGroupForm({
           ) : (
             <PeopleMultiPickerInput
               contacts={contacts as Contact[]}
-              disabled={isSubmitting}
+              disabled={isBlocking}
               noResultsLabel={t("AddGroupModal.NoContactsFound")}
               onChange={setSelectedIds}
               onSearch={searchContacts}

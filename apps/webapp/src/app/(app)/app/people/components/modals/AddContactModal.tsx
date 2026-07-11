@@ -87,9 +87,10 @@ export function AddContactForm({
   const tCommon = useCommonTranslations();
   const [focusedField, setFocusedField] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const isBlocking = isSubmitting;
   const createContactMutation = useCreateContactMutation();
 
-  const { closeModal } = useModalDismiss(modalId, isSubmitting);
+  const { closeModal } = useModalDismiss(modalId, isBlocking);
 
   const exampleName = useMemo(() => getRandomExampleName(), []);
 
@@ -178,7 +179,7 @@ export function AddContactForm({
           {...form.getInputProps("fullName")}
           autoFocus
           data-autofocus
-          disabled={isSubmitting}
+          disabled={isBlocking}
           onBlur={() => setFocusedField(null)}
           onFocus={() => setFocusedField("fullName")}
           rightSection={
@@ -197,7 +198,7 @@ export function AddContactForm({
           maxLength={200}
           placeholder={t("AddContactModal.LinkedInPlaceholder")}
           {...form.getInputProps("linkedin")}
-          disabled={isSubmitting}
+          disabled={isBlocking}
           onBlur={(e) => {
             setFocusedField(null);
             const raw = e.currentTarget.value.trim();

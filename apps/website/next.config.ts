@@ -6,6 +6,7 @@ const nextConfig: NextConfig = {
   // live in src/app/**/route.ts so they can import @bondery/helpers.
   experimental: {
     optimizePackageImports: [
+      "@tabler/icons-react",
       "@bondery/mantine-next",
       "@mantine/core",
       "@mantine/hooks",

@@ -49,9 +49,10 @@ function ApiKeyModalBody({ modalId, onCreated, apiBaseUrl }: ApiKeyModalBodyProp
   const defaultTestSnippetId = resolveDefaultTestSnippetId(os);
 
   const trimmedLabel = label.trim();
-  const canCreate = trimmedLabel.length > 0 && !createMutation.isPending;
+  const isBlocking = createMutation.isPending;
+  const canCreate = trimmedLabel.length > 0 && !isBlocking;
 
-  const { closeModal } = useModalDismiss(modalId, createMutation.isPending);
+  const { closeModal } = useModalDismiss(modalId, isBlocking);
 
   useEffect(() => {
     modals.updateModal({
@@ -93,6 +94,7 @@ function ApiKeyModalBody({ modalId, onCreated, apiBaseUrl }: ApiKeyModalBodyProp
         <TextInput
           autoFocus
           data-autofocus
+          disabled={isBlocking}
           label={t("LabelField")}
           maxLength={API_KEY_LIMITS.labelMaxLength}
           onChange={(event) => setLabel(event.currentTarget.value)}
@@ -102,6 +104,7 @@ function ApiKeyModalBody({ modalId, onCreated, apiBaseUrl }: ApiKeyModalBodyProp
         <DescribedSelect
           allowDeselect={false}
           data={permissionOptions}
+          disabled={isBlocking}
           label={t("PermissionField")}
           onChange={(value) => setPermission(value as ApiKeyPermission)}
           value={permission}
