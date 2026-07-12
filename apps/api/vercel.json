@@ -2,5 +2,11 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "buildCommand": "cd ../.. && npx turbo build --filter=api",
   "framework": null,
-  "outputDirectory": ".vercel/output"
+  "functions": {
+    "api/index.js": {
+      "maxDuration": 60,
+      "memory": 1024
+    }
+  },
+  "rewrites": [{ "destination": "/api", "source": "/(.*)" }]
 }
