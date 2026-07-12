@@ -19,7 +19,6 @@
   "NotificationTooltipTomorrow": "Du wirst morgen benachrichtigt",
   "NoUpcomingReminders": "Keine anstehenden Erinnerungen in den nächsten 30 Tagen.",
   "ProgressRail": {
-    "AllDone": "Alles erledigt!",
     "AwaitingExport": "Dein {platform}-Export ist unterwegs. Exporte kommen in der Regel in 5–15 Minuten an.",
     "ChoosePlatform": "Wähle eine Plattform zum Importieren",
     "Dismiss": "Ausblenden",
