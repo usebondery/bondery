@@ -50,10 +50,23 @@ All Bondery clients call the Fastify API through a transport wrapper layer — n
 - `*Json` vs `*JsonOrNull` — throw on error vs graceful `null`
 - `@bondery/helpers/api` — `ApiError`, nested error parsing, `getUserFacingError`
 - **Unauthorized (401):** clear caches, local sign-out, hard redirect — see `references/api/api-usage.md` § Unauthorized sessions
-- Webapp: `lib/api/domains/*` + `lib/query/hooks/*` for app data (transport stays in `lib/api/client.ts`)
 - Status probe — webapp uses BFF `GET /api/status`; chrome extension calls Fastify `/status` directly
 
 Pair with `references/api/api-mutations.md` when implementing create/update flows.
+
+## Webapp domain module layer
+
+The webapp has a **domain module layer** on top of transport — same idea as mobile `lib/domains/*`, but backed by REST + TanStack Query instead of SQLite sync.
+
+| Layer | Location | Use |
+|-------|----------|-----|
+| **Resources** | `lib/api/resources/*` | Path builders, response normalizers |
+| **Domains** | `lib/api/domains/*`, `lib/api/domains/server/*` | Typed API calls per feature |
+| **Query hooks** | `lib/query/hooks/*` | Cache keys, mutations, invalidation |
+
+**Rule:** Feature components and pages call **domain hooks** (`useContactsQuery`, mutation hooks, etc.) — not `clientApiJson` / `serverApiJson` directly. Transport stays in `lib/api/client.ts` and `lib/api/server.ts`.
+
+See `apps/webapp/src/lib/api/README.md` and `references/api/api-usage.md` § Domain modules.
 
 
 # Mobile local-first data
@@ -163,6 +176,8 @@ CREATE EXTENSION IF NOT EXISTS pg_trgm;
 ```
 
 When an extension lives in `extensions`, all references to its functions and operators must be schema-qualified as `extensions.<function>` (e.g., `extensions.unaccent(...)`, `extensions.gin_trgm_ops`, `extensions.word_similarity(...)`).
+
+**Legacy migrations:** `pg_trgm` / `unaccent` were once created in `public` (`20260404100000`) and moved to `extensions` in `20260408100000_move_extensions_to_extensions_schema.sql`. `uuid-ossp` remains in `public` from the initial schema and is unused (tables use `gen_random_uuid()`). New installs should not repeat `CREATE EXTENSION` in `public`; remediate with `ALTER EXTENSION … SET SCHEMA extensions` or drop unused extensions.
 
 # Naming Conventions
 
