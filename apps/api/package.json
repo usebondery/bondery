@@ -45,7 +45,7 @@
   "name": "api",
   "private": true,
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && node scripts/prepare-vercel.mjs",
     "check-env": "tsx scripts/check-env.ts",
     "check-no-route-writes": "tsx scripts/check-no-route-writes.ts",
     "check-openapi": "npm run generate-openapi && tsx scripts/check-openapi.ts && tsx scripts/check-api-route-order.ts",
