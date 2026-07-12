@@ -92,7 +92,7 @@ Route Zod schema (apps/api/src/routes/*)
 
 CI enforces: every public route has `description` + `response`; `openapi.yaml` is up to date; Redocly lint passes. See [API routes](api-routes.md).
 
-Every authenticated request validates the Supabase JWT. List endpoints follow a shared [pagination contract](../../.agents/skills/bondery-specific/references/api-design.md) (`limit`, `offset`, `search`, `sort`, nested `pagination` object).
+Every authenticated request validates the Supabase JWT. List endpoints follow a shared [pagination contract](../../.agents/skills/bondery-specific/references/api/api-design.md) (`limit`, `offset`, `search`, `sort`, nested `pagination` object).
 
 ---
 
@@ -288,5 +288,5 @@ Protocol version headers (`X-Bondery-Sync-Protocol`, `X-Bondery-SQLite-Schema`) 
 
 * [Local development setup](local-setup.md)
 * [Sync architecture (mobile)](sync-architecture.md)
-* [API design reference](../../.agents/skills/bondery-specific/references/api-design.md)
-* [API usage reference](../../.agents/skills/bondery-specific/references/api-usage.md)
+* [API design reference](../../.agents/skills/bondery-specific/references/api/api-design.md)
+* [API usage reference](../../.agents/skills/bondery-specific/references/api/api-usage.md)

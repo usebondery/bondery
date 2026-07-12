@@ -50,7 +50,7 @@ flowchart TB
 
 ## Adding a tier-1 entity
 
-1. API domain + `emitSyncBatch` (see [sync-architecture.md](../../../.agents/skills/bondery-specific/references/sync-architecture.md))
+1. API domain + `emitSyncBatch` (see [sync-architecture.md](../../../.agents/skills/bondery-specific/references/api/sync-architecture.md))
 2. Mobile materializer + optimistic writer
 3. `lib/resources/<entity>.ts` — mappers and query builders
 4. `lib/sync/repositories/<entity>.ts` — `db.getAllSync` / `db.run`

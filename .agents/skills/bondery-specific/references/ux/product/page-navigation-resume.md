@@ -29,39 +29,50 @@ Users lose context when:
 
 **Helpers:** `apps/webapp/src/lib/auth/returnIntent.ts`
 
-- `isSafeReturnPath` — same-origin app paths only; blocks `/login`, `/app/unavailable`, `/auth/*`; allows `/oauth/consent` (extension)
+- `isSafeReturnPath` — same-origin `/app/*` paths; blocks `/login`, `/app/unavailable`, `/auth/*`; allows `/oauth/consent` (extension)
 - `buildLoginUrl`, `buildUnavailableUrl`, `parseReturnIntent`, `captureReturnPath`, `getRequestReturnPath`
 
-**Server capture:** middleware sets `x-pathname` + `x-search`; layout uses `getRequestReturnPath()`.
+**Server capture:** `apps/webapp/src/proxy.ts` sets `x-pathname` + `x-search`; layout uses `getRequestReturnPath()`.
+
+---
+
+## Two redirect layers (do not confuse)
+
+| Layer | When | Mechanism |
+|-------|------|-----------|
+| **Route auth** | No session visiting `/app/*` | `proxy.ts` → `supabase/proxy.ts` `updateSession` → `buildLoginUrl` |
+| **API transport** | Valid session but API returns 401/503 | `applyTransportErrorPolicy` / `applyServerTransportPolicy` → `endSession` or unavailable redirect |
+
+API 401 is **not** handled in `supabase/proxy.ts` — it runs in the client/server transport after the app shell is loaded.
 
 ---
 
 ## Outage recovery UX
 
 1. User on deep screen → API fails → `/app/unavailable?redirect=…`
-2. Recovery: **“Back online…”** (not “Redirecting…”)
+2. Recovery: **“Back online…”** (`UnavailableClient.tsx`)
 3. Wait **`OUTAGE_RESUME_DELAY_MS`** (300ms) — `apps/webapp/src/lib/auth/constants.ts`
 4. `router.replace(redirect)` or `/app`
 
-**Unavailable empty state:** [../common/empty-states.md](../common/empty-states.md) — opportunity framing, primary “Try again”.
+**Unavailable empty state:** [../common/empty-states.md](../common/empty-states.md).
 
 ---
 
 ## Login & OAuth
 
 - **No** contextual subtitle on login when `redirect` is present.
-- After OAuth: `auth/callback` reads `redirect` from cookie → `isSafeReturnPath` → navigate.
+- OAuth: `auth/callback/route.ts` reads safe `redirect` from query → navigates after session established.
 - Default when missing/invalid: `/app`.
 
 ---
 
 ## Onboarding bypass (deep links)
 
-One-time cookie `bondery_bypass_onboarding_once` when OAuth return target is a **safe deep link** (not `/app` home, not `/oauth/consent`).
+When OAuth return target is a **safe deep link** (not `/app` home, not `/oauth/consent`):
 
-- Short TTL (~2 min), `Secure`, `SameSite=Lax`
-- `app/layout.tsx` reads cookie → skip onboarding gate once → clear cookie
-- Rationale: power users / shared links should land on target, not wizard
+- Cookie: `BYPASS_ONBOARDING_ONCE_COOKIE` = `bondery:bypassOnboardingOnce` (`constants.ts`)
+- Set in callback: `maxAge: 60`, `path: /app`
+- `app/(app)/app/layout.tsx` reads → skips onboarding gate once → clears cookie
 
 Details: [onboarding.md](./onboarding.md).
 
@@ -71,15 +82,17 @@ Details: [onboarding.md](./onboarding.md).
 
 | Area | Location |
 |------|----------|
-| URL builders / validation | `lib/auth/returnIntent.ts` |
-| Constants | `lib/auth/constants.ts` |
-| 401 client | `handleServerUnauthorizedSession`, `endSession({ reason: 'session_expired' })` |
-| 401 middleware | `supabase/proxy.ts` |
-| Outage client | `handleApiUnavailable`, `applyServerTransportPolicy` |
-| Outage server | `app/(app)/app/layout.tsx` |
-| Recovery UI | `UnavailableClient.tsx` |
-| OAuth | `auth/callback/route.ts` |
-| API policy | `lib/api/README.md` |
+| URL builders / validation | `apps/webapp/src/lib/auth/returnIntent.ts` |
+| Constants | `apps/webapp/src/lib/auth/constants.ts` |
+| Middleware headers | `apps/webapp/src/proxy.ts` |
+| Unauthenticated route guard | `apps/webapp/src/supabase/proxy.ts` |
+| 401 client transport | `handleUnauthorizedSession`, `endSession({ reason: 'session_expired' })` |
+| 401 server transport | `handleServerUnauthorizedSession`, `applyServerTransportPolicy` |
+| Outage client | `handleApiUnavailable`, `applyTransportErrorPolicy` |
+| Outage server | `app/(app)/app/layout.tsx` (`getAppSession`) |
+| Recovery UI | `apps/webapp/src/app/(app)/app/unavailable/UnavailableClient.tsx` |
+| OAuth | `apps/webapp/src/app/(app)/auth/callback/route.ts` |
+| API policy | `apps/webapp/src/lib/api/README.md` |
 
 ---
 
@@ -109,5 +122,5 @@ Details: [onboarding.md](./onboarding.md).
 ## Related
 
 - [onboarding.md](./onboarding.md)
-- [../common/ux-writing.md](../common/ux-writing.md) — outage/login copy rules
-- [../../api-usage.md](../../api-usage.md) — transport policy
+- [../common/ux-writing.md](../common/ux-writing.md)
+- [../../api/api-usage.md](../../api/api-usage.md) — transport policy

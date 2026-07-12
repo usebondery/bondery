@@ -41,7 +41,7 @@ Nested route modules (e.g. `contacts/enrichment/*`) inherit metadata from the pa
 
 ## Route ordering in API docs
 
-GitBook renders endpoints in **Fastify registration order** — there is no separate sort step. Full rationale and examples: [`.agents/skills/bondery-specific/references/api-route-ordering.md`](../../.agents/skills/bondery-specific/references/api-route-ordering.md).
+GitBook renders endpoints in **Fastify registration order** — there is no separate sort step. Full rationale and examples: [`.agents/skills/bondery-specific/references/api/api-route-ordering.md`](../../.agents/skills/bondery-specific/references/api/api-route-ordering.md).
 
 ### Path tiers
 

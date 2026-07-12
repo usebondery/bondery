@@ -2,7 +2,7 @@
 
 import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import type { Contact } from "@bondery/schemas";
-import { ActionIcon, Button, Group, Paper, Progress, Stack, Text, Title } from "@mantine/core";
+import { ActionIcon, Group, Paper, Progress, Stack, Text, Title } from "@mantine/core";
 import { IconX } from "@tabler/icons-react";
 import { useRouter } from "next/navigation";
 import { useMemo } from "react";
@@ -161,11 +161,6 @@ export function GettingStartedProgressRail({
           })}
         </Stack>
 
-        {state.completedCount === state.totalCount ? (
-          <Button onClick={() => void handleDismissRail()} variant="light">
-            {t("AllDone")}
-          </Button>
-        ) : null}
       </Stack>
     </Paper>
   );

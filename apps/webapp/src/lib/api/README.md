@@ -68,7 +68,7 @@ API bodies use the nested `{ error: { type, code, message, request_id, doc_url }
 
 ## Mutations
 
-Follow [api-mutations.md](../../../.agents/skills/bondery-specific/references/api-mutations.md): use the object returned by create/update endpoints for **navigation only**; update UI via TanStack Query `invalidateQueries`.
+Follow [api-mutations.md](../../../.agents/skills/bondery-specific/references/api/api-mutations.md): use the object returned by create/update endpoints for **navigation only**; update UI via TanStack Query `invalidateQueries`.
 
 ## Regression checks
 
