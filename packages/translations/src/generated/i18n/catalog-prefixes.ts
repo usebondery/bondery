@@ -38,7 +38,7 @@ export type EnrichRecommendationCardPrefix = never;
 
 export type ExtensionPopupPrefix = "LoggedOut" | "UpdateRequired";
 
-export type ExtensionSocialButtonsPrefix = "LinkedIn" | "Instagram";
+export type ExtensionSocialButtonsPrefix = "Instagram" | "LinkedIn";
 
 export type ExtensionVersionCheckPrefix = never;
 

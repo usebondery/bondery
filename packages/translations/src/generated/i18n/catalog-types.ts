@@ -553,25 +553,25 @@ export type EnrichRecommendationCardCatalog = {
 
 export type ExtensionPopupCatalog = {
   LoggedOut: {
-    Title: string;
     Description: string;
     SignIn: string;
+    Title: string;
   };
   UpdateRequired: {
-    Title: string;
     Description: string;
     OpenExtensionsPage: string;
+    Title: string;
   };
 };
 
 export type ExtensionSocialButtonsCatalog = {
-  LinkedIn: {
+  Instagram: {
     ExtensionError: string;
     OpenInBondery: string;
     SignInRequired: string;
     SomethingWrong: string;
   };
-  Instagram: {
+  LinkedIn: {
     ExtensionError: string;
     OpenInBondery: string;
     SignInRequired: string;

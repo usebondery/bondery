@@ -5,23 +5,22 @@ import { useHover } from "@mantine/hooks";
 import Link from "next/link";
 import type { ComponentType, ReactNode, Ref } from "react";
 
-export interface NavLinkItemProps {
+type NavLinkItemBaseProps = {
   active?: boolean;
   /** Draw a subtle border around the item (e.g. search trigger). */
   bordered?: boolean;
   collapsed?: boolean;
   /** Render the label in a dimmed colour instead of the default weight. */
   dimLabel?: boolean;
-  /** Render as a link. Required when `onClick` is not provided. */
-  href?: string;
   icon: ComponentType<{ size?: number; stroke?: number }>;
   label: string;
-  /** Render as a button. Required when `href` is not provided. */
-  onClick?: () => void;
   /** Content rendered after the label when the sidebar is expanded. */
   rightSection?: ReactNode;
   showIndicator?: boolean;
-}
+};
+
+export type NavLinkItemProps = NavLinkItemBaseProps &
+  ({ href: string; onClick?: undefined } | { href?: undefined; onClick: () => void });
 
 /**
  * Padding keeps the icon horizontally centred inside the collapsed sidebar
