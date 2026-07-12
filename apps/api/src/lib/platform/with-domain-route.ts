@@ -1,7 +1,8 @@
-import type { FastifyReply, FastifyRequest, RouteHandlerMethod } from "fastify";
+import type { FastifyReply, FastifyRequest } from "fastify";
 import type { z } from "zod";
 import type { DomainContext } from "../../domains/_shared/context.js";
 import { domainContextFromRequest } from "./domain-context.js";
+import type { AppRouteHandler } from "./fastify-types.js";
 
 export type DomainRouteSchemas = {
   body?: z.ZodTypeAny;
@@ -53,21 +54,23 @@ function parseDomainRouteInput<T extends DomainRouteSchemas>(
 }
 
 /** Bridge return: response typing is enforced by route `schema.response`, not handler inference. */
-export function withDomainRoute(handler: DomainRouteHandlerNoSchemas): RouteHandlerMethod;
+// biome-ignore lint/suspicious/noExplicitAny: must be assignable to every Zod OpenAPI route handler slot under TS 7
+export function withDomainRoute(handler: DomainRouteHandlerNoSchemas): any;
+// biome-ignore lint/suspicious/noExplicitAny: must be assignable to every Zod OpenAPI route handler slot under TS 7
 export function withDomainRoute<T extends DomainRouteSchemas>(
   schemas: T,
   handler: DomainRouteHandler<T>,
-): RouteHandlerMethod;
+): any;
 export function withDomainRoute<T extends DomainRouteSchemas>(
   schemasOrHandler: T | DomainRouteHandlerNoSchemas,
   maybeHandler?: DomainRouteHandler<T>,
-): RouteHandlerMethod {
+): AppRouteHandler {
   if (typeof schemasOrHandler === "function") {
     const handler = schemasOrHandler;
     return (async (request: FastifyRequest, reply: FastifyReply) => {
       const ctx = domainContextFromRequest(request);
       return await handler(ctx, { request }, reply);
-    }) as unknown as RouteHandlerMethod;
+    }) as unknown as AppRouteHandler;
   }
 
   const schemas = schemasOrHandler;
@@ -77,5 +80,5 @@ export function withDomainRoute<T extends DomainRouteSchemas>(
     const ctx = domainContextFromRequest(request);
     const route = parseDomainRouteInput(schemas, request);
     return await handler(ctx, route, reply);
-  }) as unknown as RouteHandlerMethod;
+  }) as unknown as AppRouteHandler;
 }
