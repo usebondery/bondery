@@ -15,6 +15,7 @@ The UI already changes in a way the user directly caused and can immediately per
 | Pattern | Confirmation the user already sees | Bondery examples |
 |--------|-------------------------------------|------------------|
 | **Navigation after create** | The new screen opens | Mobile: create contact sheet → `/contact/[id]` |
+| **Outage / session resume** | Same page reappears (filters intact) | Webapp: `/app/people?sort=name` → unavailable → auto-return |
 | **Inline control update** | The selected value, toggle, or theme updates on screen | Mobile: theme / language / timezone / swipe-action selects |
 | **Optimistic local preference** | The control reflects the new value instantly | Mobile: group sort order (local only) |
 | **Sheet closes into updated context** | Parent list or detail already shows the new state | Social link saved on contact detail |
@@ -50,6 +51,53 @@ Ask:
 3. Would the toast only repeat what they already know?
 
 If yes to any of those, skip the success notification.
+
+---
+
+## Page navigation — resume after interruption
+
+When the user is pulled away from their work — API outage, session expiry, or a login gate on a deep link — put them back where they were. Interruptions are temporary; the app remembers context. The user should not re-navigate or choose a destination.
+
+### Mental model
+
+| Interruption | User stays signed in? | Where they land | After recovery |
+|--------------|----------------------|-----------------|----------------|
+| **API unavailable** | Yes | `/app/unavailable?redirect=…` | Auto-return to captured path |
+| **Session expired** | No | `/login?redirect=…` | OAuth → captured path |
+| **User sign-out** | No | `/login` (no `redirect`) | Clean break — do not boomerang |
+| **Account deleted** | No | `/login` (no `redirect`) | Same as sign-out |
+
+### What to preserve
+
+- **`pathname + search` only** — table filters, tabs, sort query params.
+- **Not** modal open state, form drafts, or URL hashes (`#section`).
+
+### UX rules
+
+1. **Invisible plumbing** — never show the raw `redirect` URL or a "Return to…" button. Navigation back **is** the confirmation (no success toast).
+2. **Auto-resume on outage recovery** — when health turns online, briefly show existing copy ("Back online. Taking you back…"), then navigate after `OUTAGE_RESUME_DELAY_MS` (`lib/auth/constants.ts`). No instant snap.
+3. **No login copy changes** — do not add "Sign in to continue where you left off" or similar; login stays the same UI.
+4. **Chained interruptions** — if session expires on the unavailable page, forward the **original** `redirect`, never `/app/unavailable`.
+5. **Deep links + onboarding** — OAuth return to a non-home app path may skip onboarding once (short-lived cookie); user-initiated browsing before onboarding still hits the gate.
+
+### Implementation (webapp)
+
+- **Module:** `lib/auth/returnIntent.ts` — `isSafeReturnPath`, `buildLoginUrl`, `buildUnavailableUrl`, `parseReturnIntent`.
+- **Param:** `redirect` only (no `returnUrl` alias).
+- **Storage:** URL query param only — not `sessionStorage` or `localStorage`.
+- **Server capture:** middleware sets `x-pathname` + `x-search`; layout and transport policy build full return paths from headers.
+- **Valid return paths:** `/app/*` (blocklisted: login, unavailable, auth); `/oauth/consent` for Chrome extension OAuth.
+
+See `lib/api/README.md` § Transport policy for entry points.
+
+### What to avoid
+
+- Capturing return intent on **user-initiated** sign-out or account deletion.
+- Success toasts when auto-resuming — the screen change is enough.
+- Dual storage (URL + sessionStorage) for the same intent.
+- Open redirects — always validate with `isSafeReturnPath` before navigation.
+
+---
 
 ### Async duplication — loading notification, then success or error
 

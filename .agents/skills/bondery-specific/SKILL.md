@@ -16,7 +16,7 @@ references/
   api-usage.md      Transport wrappers (clientApi*/serverApi*/apiRequest), *Json vs *JsonOrNull, ApiError
   api-mutations.md  Mutation responses — return full objects, no post-mutation GET
   sync-architecture.md  Mobile offline sync — pull/bootstrap, push mutations, server-authoritative merge, versioning
-  ux-patterns.md    Feedback, async duplication loading→success toasts, progressive disclosure, destructive actions, autofocus, modal blocking dismiss & disabled fields, mobile settings previews & async states, mobile sheets & forms
+  ux-patterns.md    Feedback, page navigation (resume after outage/session), async duplication toasts, progressive disclosure, destructive actions, autofocus, modal blocking dismiss & disabled fields, mobile settings previews & async states, mobile sheets & forms
   mobile-forms.md   React Hook Form patterns for ActionSheetPopup forms (typed useSheetForm, Sheet*Field wrappers, schema output, audit guardrails)
 ```
 

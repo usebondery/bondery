@@ -141,8 +141,8 @@ Layout loads **session** (who you are, shell + locale inputs, onboarding guard).
 
 | Signal | Client action | Server action (RSC, `transportPolicy: true`) | Sign out? |
 |--------|---------------|--------------------------------------------|-----------|
-| 401 / `auth_required` | `handleUnauthorizedSession` → `endSession` | `handleServerUnauthorizedSession` → `signOutServerSession` + redirect login | Yes |
-| 502 / 503 / 504 / network `TypeError` | `handleApiUnavailable` → `/app/unavailable` | `redirect(/app/unavailable)` if session valid; else login | No |
+| 401 / `auth_required` | `endSession` → `/login?redirect=…` (`session_expired` only) | `handleServerUnauthorizedSession` → login with `redirect` | Yes |
+| 502 / 503 / 504 / network `TypeError` | `handleApiUnavailable` → `/app/unavailable?redirect=…` | `redirect(/app/unavailable?redirect=…)` if session valid; else login | No |
 | `*JsonOrNull` outage | Return `null` | Return `null` | No |
 | `*JsonOrNull` 401 | Ends session | Signs out + redirects | Yes |
 | BFF `app/api/**` | N/A | `bffProxyFetch` — passthrough status or nested 503 `service_unavailable` | Per status |
@@ -199,14 +199,14 @@ In order, each step is best-effort (failures do not block later steps):
 3. Mantine notifications — default store and `statusNotificationsStore`
 4. Mantine modals — `closeAll()`
 5. Supabase session — `signOut()` per scope above
-6. Hard navigation — `window.location.replace` to login (never `router.push`)
+6. Hard navigation — `window.location.replace` to login (never `router.push`). On `session_expired` only, append `?redirect=` with captured pathname + search (`lib/auth/returnIntent.ts`). User-initiated sign-out and account deletion use bare `/login`.
 
 ### 401 handling
 
 The **transport layer** detects expired sessions and delegates to session teardown:
 
-- `clientApiJson` → `applyTransportErrorPolicy` → `handleUnauthorizedSession()` → `endSession({ reason: "session_expired" })`
-- `serverApiJson` / `serverApiFetch` (default) → `applyServerTransportPolicy` → `handleServerUnauthorizedSession()` → `signOutServerSession` + redirect login
+- `clientApiJson` → `applyTransportErrorPolicy` → `handleUnauthorizedSession()` → `endSession({ reason: "session_expired" })` → `/login?redirect=…`
+- `serverApiJson` / `serverApiFetch` (default) → `applyServerTransportPolicy` → `handleServerUnauthorizedSession()` → `signOutServerSession` + redirect login with `redirect`
 - `clientApiJsonOrNull` / `serverApiJsonOrNull` → 401 on response status (same session teardown)
 - Raw `clientApiFetch` callers → `applyTransportResponsePolicy(response)` when `!response.ok`
 - BFF routes → passthrough 401 JSON; browser transport handles teardown
@@ -217,11 +217,12 @@ Do not handle 401 in feature components or React Query global handlers.
 
 When the BFF or upstream API is down (502/503/504 or fetch network failure):
 
-- `clientApiJson` → `handleApiUnavailable()` → `/app/unavailable` (session stays active)
-- `serverApiFetch` / `serverApiJson` (default) → `redirect(/app/unavailable)` when session valid; login when not
+- `clientApiJson` → `handleApiUnavailable()` → `/app/unavailable?redirect=…` (session stays active)
+- `serverApiFetch` / `serverApiJson` (default) → `redirect(/app/unavailable?redirect=…)` when session valid; login when not
 - `getAppSession()` with `transportPolicy: false` → layout redirects (probe, not sole gate)
 - BFF routes → `bffProxyFetch` returns 503 JSON on network failure; browser client policy handles redirect
 - `*JsonOrNull` does **not** redirect on unavailable — optional fetches degrade to `null`
+- Recovery: unavailable page auto-navigates to `redirect` after health OK + `OUTAGE_RESUME_DELAY_MS` (see `references/ux-patterns.md` § Page navigation)
 
 Do not call `endSession()` for outage responses.
 
