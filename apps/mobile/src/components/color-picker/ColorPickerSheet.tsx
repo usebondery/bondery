@@ -6,7 +6,12 @@ import type { ColorFormatsObject } from "reanimated-color-picker";
 import ColorPicker, { Panel3 } from "reanimated-color-picker";
 import { copyToClipboard } from "../../lib/clipboard/copyToClipboard";
 import { SHEET_SNAP_POINTS } from "../../lib/config";
-import { useMobileTranslations } from "../../lib/i18n/useMobileTranslations";
+import {
+  useCommonTranslations,
+  useContactInfoTranslations,
+  useMobileColorPickerTranslations,
+  useMobileGroupsTranslations,
+} from "../../lib/i18n/generated/hooks";
 import type { ShowAppToastInput } from "../../lib/toast/useAppToast";
 import { MOBILE_HIT_SLOP, MOBILE_LAYOUT, MOBILE_TYPOGRAPHY } from "../../theme/tokens";
 import { useMobileThemeColors } from "../../theme/useMobileThemeColors";
@@ -30,7 +35,10 @@ export function ColorPickerSheet({
   onSelect,
   showToast,
 }: ColorPickerSheetProps) {
-  const t = useMobileTranslations();
+  const tContactInfo = useContactInfoTranslations();
+  const tMobileColorPicker = useMobileColorPickerTranslations();
+  const tMobileGroups = useMobileGroupsTranslations();
+  const t = useCommonTranslations();
   const colors = useMobileThemeColors();
   const { width: windowWidth } = useWindowDimensions();
 
@@ -116,7 +124,7 @@ export function ColorPickerSheet({
     const normalized = normalizeHex(hexInput);
 
     if (!normalized) {
-      setHexError(t("InvalidHex", { ns: "MobileColorPicker" }));
+      setHexError(tMobileColorPicker("InvalidHex"));
       return;
     }
 
@@ -124,7 +132,7 @@ export function ColorPickerSheet({
     setDraftColor(normalized);
     setHexInput(normalized);
     onSelect(normalized);
-  }, [hexInput, onSelect, t]);
+  }, [hexInput, onSelect, tMobileColorPicker]);
 
   const handleCopyHex = useCallback(async () => {
     const normalized = normalizeHex(draftColor);
@@ -134,12 +142,12 @@ export function ColorPickerSheet({
     }
 
     await copyToClipboard(normalized, showToast, {
-      errorDescription: t("CopyFailedMessage", { ns: "MobileColorPicker" }),
-      errorHeadline: t("feedback.errorTitle", { ns: "common" }),
-      successDescription: t("ColorCopiedMessage", { ns: "MobileColorPicker" }),
-      successHeadline: t("CopySuccessTitle", { ns: "ContactInfo" }),
+      errorDescription: tMobileColorPicker("CopyFailedMessage"),
+      errorHeadline: t("feedback.errorTitle"),
+      successDescription: tMobileColorPicker("ColorCopiedMessage"),
+      successHeadline: tContactInfo("CopySuccessTitle"),
     });
-  }, [draftColor, showToast, t]);
+  }, [draftColor, showToast, t, tMobileColorPicker, tContactInfo]);
 
   const colorPreview = (
     <View
@@ -197,7 +205,7 @@ export function ColorPickerSheet({
             <View style={styles.hexRow}>
               <View style={styles.hexInputSlot}>
                 <MobileTextInput
-                  accessibilityLabel={`${t("EditColorLabel", { ns: "MobileGroups" })} ${draftColor}`}
+                  accessibilityLabel={`${tMobileGroups("EditColorLabel")} ${draftColor}`}
                   autoCapitalize="characters"
                   autoCorrect={false}
                   enterKeyHint="done"
@@ -211,14 +219,14 @@ export function ColorPickerSheet({
                     }
                   }}
                   onSubmitEditing={commitHexInput}
-                  placeholder={t("HexPlaceholder", { ns: "MobileColorPicker" })}
+                  placeholder={tMobileColorPicker("HexPlaceholder")}
                   returnKeyType="done"
                   value={hexInput}
                 />
               </View>
 
               <Pressable
-                accessibilityLabel={t("CopyAccessibilityLabel", { ns: "MobileColorPicker" })}
+                accessibilityLabel={tMobileColorPicker("CopyAccessibilityLabel")}
                 accessibilityRole="button"
                 onPress={() => void handleCopyHex()}
                 style={({ pressed }) => [
@@ -238,13 +246,13 @@ export function ColorPickerSheet({
             ) : null}
 
             <Text style={[styles.sectionLabel, { color: colors.textSecondary }]}>
-              {t("SwatchesLabel", { ns: "MobileColorPicker" })}
+              {tMobileColorPicker("SwatchesLabel")}
             </Text>
 
             <ColorSwatchGrid onSelect={handleSwatchSelect} value={draftColor} />
 
             <Text style={[styles.sectionLabel, { color: colors.textSecondary }]}>
-              {t("CustomColorLabel", { ns: "MobileColorPicker" })}
+              {tMobileColorPicker("CustomColorLabel")}
             </Text>
 
             <ColorPicker

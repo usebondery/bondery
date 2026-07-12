@@ -18,7 +18,11 @@ import { openDeleteContactModal } from "@/components/contacts/openDeleteContactM
 import { openDeleteContactsModal } from "@/components/contacts/openDeleteContactsModal";
 import { openStandardConfirmModal } from "@/components/modals/openStandardConfirmModal";
 import { searchContacts } from "@/lib/contacts/searchContacts";
-import { useCommonTranslations, useWebTranslations } from "@/lib/i18n/useWebTranslations";
+import {
+  useCommonTranslations,
+  useGroupDetailPageTranslations,
+  useGroupsPageTranslations,
+} from "@/lib/i18n/generated/hooks";
 import type { ContactsListFilterParams } from "@/lib/query/contactsListParams";
 import {
   useDeleteGroupMutation,
@@ -58,8 +62,8 @@ export function useGroupDetailActions({
   listFilter,
   clearSelection,
 }: UseGroupDetailActionsParams) {
-  const t = useWebTranslations("GroupsPage");
-  const tGroupDetail = useWebTranslations("GroupDetailPage");
+  const t = useGroupsPageTranslations();
+  const tGroupDetail = useGroupDetailPageTranslations();
   const tCommon = useCommonTranslations();
   const router = useRouter();
 

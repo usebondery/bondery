@@ -5,7 +5,11 @@ import { useCallback, useMemo, useState } from "react";
 import { Pressable, ScrollView, StyleSheet } from "react-native";
 import { StackNavBar } from "../../components/chrome";
 import { updateSettings } from "../../lib/api/client";
-import { useMobileTranslations } from "../../lib/i18n/useMobileTranslations";
+import {
+  useCommonTranslations,
+  useMobileSettingsTranslations,
+  useTagsSettingsTranslations,
+} from "../../lib/i18n/generated/hooks";
 import type {
   MobilePreferencesState,
   TagSortOrder,
@@ -23,8 +27,10 @@ import { SettingsPreviewSection } from "./components/SettingsPreviewSection";
 import { SettingsSelect } from "./components/SettingsSelect";
 
 export function SettingsTagsScreen() {
+  const tMobileSettings = useMobileSettingsTranslations();
+  const tTagsSettings = useTagsSettingsTranslations();
+  const _t = useCommonTranslations();
   const router = useRouter();
-  const t = useMobileTranslations();
   const colors = useMobileThemeColors();
 
   const { data: syncedTags, isInitialSync, refresh: refreshTags } = useTags();
@@ -42,10 +48,10 @@ export function SettingsTagsScreen() {
   const editTags = useMemo(() => sortTags(syncedTags, "alpha-asc"), [syncedTags]);
 
   const sortOptions: Array<{ value: TagSortOrder; label: string }> = [
-    { label: t("GroupSortCountDesc", { ns: "MobileSettings" }), value: "count-desc" },
-    { label: t("GroupSortCountAsc", { ns: "MobileSettings" }), value: "count-asc" },
-    { label: t("GroupSortAlphaAsc", { ns: "MobileSettings" }), value: "alpha-asc" },
-    { label: t("GroupSortAlphaDesc", { ns: "MobileSettings" }), value: "alpha-desc" },
+    { label: tMobileSettings("GroupSortCountDesc"), value: "count-desc" },
+    { label: tMobileSettings("GroupSortCountAsc"), value: "count-asc" },
+    { label: tMobileSettings("GroupSortAlphaAsc"), value: "alpha-asc" },
+    { label: tMobileSettings("GroupSortAlphaDesc"), value: "alpha-desc" },
   ];
 
   const handleSortChange = (nextOrder: TagSortOrder) => {
@@ -79,12 +85,12 @@ export function SettingsTagsScreen() {
 
   const previewCaption =
     syncedTags.length === 0 && !isLoading && !loadError
-      ? t("PreviewHintTagsEmpty", { ns: "MobileSettings" })
-      : t("PreviewHintTags", { ns: "MobileSettings" });
+      ? tMobileSettings("PreviewHintTagsEmpty")
+      : tMobileSettings("PreviewHintTags");
 
   const createButton = (
     <Pressable
-      accessibilityLabel={t("AddNewTag", { ns: "TagsSettings" })}
+      accessibilityLabel={tTagsSettings("AddNewTag")}
       accessibilityRole="button"
       hitSlop={MOBILE_HIT_SLOP}
       onPress={() => setCreateOpen(true)}
@@ -99,7 +105,7 @@ export function SettingsTagsScreen() {
       <StackNavBar
         onBack={() => router.back()}
         right={createButton}
-        title={t("Title", { ns: "TagsSettings" })}
+        title={tTagsSettings("Title")}
         variant="elevated"
       />
 
@@ -107,9 +113,9 @@ export function SettingsTagsScreen() {
         contentContainerStyle={styles.content}
         style={[styles.screen, { backgroundColor: colors.appBackground }]}
       >
-        <SettingsFieldLabel>{t("TagSortSelectLabel", { ns: "MobileSettings" })}</SettingsFieldLabel>
+        <SettingsFieldLabel>{tMobileSettings("TagSortSelectLabel")}</SettingsFieldLabel>
         <SettingsSelect
-          label={t("TagSortSelectLabel", { ns: "MobileSettings" })}
+          label={tMobileSettings("TagSortSelectLabel")}
           onValueChange={handleSortChange}
           options={sortOptions}
           value={tagSortOrder}
@@ -118,7 +124,7 @@ export function SettingsTagsScreen() {
         <SettingsPreviewSection caption={previewCaption}>
           <SettingsAsyncState
             errorDescription={loadError}
-            errorTitle={t("TagsLoadErrorTitle", { ns: "MobileSettings" })}
+            errorTitle={tMobileSettings("TagsLoadErrorTitle")}
             isLoading={isLoading}
             onRetry={() => {
               void reloadTags();
@@ -135,7 +141,7 @@ export function SettingsTagsScreen() {
 
         {!isLoading && !loadError ? (
           <>
-            <SettingsFieldLabel>{t("ManageTags", { ns: "TagsSettings" })}</SettingsFieldLabel>
+            <SettingsFieldLabel>{tTagsSettings("ManageTags")}</SettingsFieldLabel>
             <ContactsTagsHeader
               layout="wrap"
               onCreatePress={() => setCreateOpen(true)}

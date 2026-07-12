@@ -4,7 +4,7 @@ import type { CodeBlockSnippet } from "@bondery/mantine-next";
 import Image from "next/image";
 import type { ReactNode } from "react";
 import { useMemo } from "react";
-import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
+import { useSettingsPageTranslations } from "@/lib/i18n/generated/hooks";
 
 const BRAND_ICON_SIZE = 14;
 /** apple.svg intrinsic ratio (height / width) — non-square unlike windows/linux */
@@ -47,7 +47,7 @@ export function resolveDefaultTestSnippetId(os: string | undefined): ApiKeyTestS
 }
 
 export function useApiKeyTestSnippets(apiBaseUrl: string, fullKey: string): CodeBlockSnippet[] {
-  const t = useWebTranslations("SettingsPage", "ApiKeys");
+  const t = useSettingsPageTranslations("ApiKeys");
 
   return useMemo(() => {
     const url = `${apiBaseUrl}/api/contacts`;

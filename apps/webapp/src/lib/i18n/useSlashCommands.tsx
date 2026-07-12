@@ -1,5 +1,6 @@
 "use client";
 
+import type { LooseTranslateFn } from "@bondery/translations";
 import type { TablerIcon } from "@tabler/icons-react";
 import {
   IconAt,
@@ -24,7 +25,7 @@ import {
 } from "@tabler/icons-react";
 import { useMemo } from "react";
 import type { SlashCommandItem } from "@/lib/contacts/slash-command-types";
-import { useWebTranslations } from "./useWebTranslations";
+import { useNotesSlashCommandsTranslations } from "@/lib/i18n/generated/hooks";
 
 type SlashCommandDefinition = {
   id: string;
@@ -274,7 +275,7 @@ const SLASH_COMMAND_DEFINITIONS: SlashCommandDefinition[] = [
 ];
 
 export function useSlashCommands(): SlashCommandItem[] {
-  const t = useWebTranslations("NotesSlashCommands");
+  const t = useNotesSlashCommandsTranslations() as LooseTranslateFn;
 
   return useMemo(
     () =>

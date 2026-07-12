@@ -2,7 +2,7 @@
 
 import { formatContactName } from "@bondery/helpers/contact";
 import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
-import type { Contact } from "@bondery/schemas";
+import type { Contact, ContactSelectable } from "@bondery/schemas";
 import { useRouter } from "next/navigation";
 import { useCallback } from "react";
 import { openDeleteContactModal } from "@/components/contacts/openDeleteContactModal";
@@ -15,14 +15,14 @@ interface UsePersonModalActionsOptions {
   contact: Contact | null;
   personId: string;
   resolvedContact: Contact | undefined;
-  selectableContacts: Contact[];
+  selectableContacts: ContactSelectable[];
 }
 
 export function usePersonModalActions({
   contact,
   personId,
   resolvedContact,
-  selectableContacts,
+  selectableContacts: _selectableContacts,
 }: UsePersonModalActionsOptions) {
   const router = useRouter();
 
@@ -39,26 +39,13 @@ export function usePersonModalActions({
   );
 
   const openMergeWithModalForCurrentPerson = useCallback(() => {
-    const mergeContacts = [resolvedContact, ...selectableContacts].reduce<Contact[]>(
-      (acc, item) => {
-        if (!item) {
-          return acc;
-        }
-        if (!acc.some((existing) => existing.id === item.id)) {
-          acc.push(item);
-        }
-        return acc;
-      },
-      [],
-    );
-
     openMergeWithModal({
-      contacts: mergeContacts,
+      contacts: resolvedContact ? [resolvedContact] : [],
       disableLeftPicker: true,
       leftPersonId: resolvedContact?.id ?? personId,
       onSearch: searchContacts,
     });
-  }, [personId, resolvedContact, selectableContacts]);
+  }, [personId, resolvedContact]);
 
   const openShareModal = useCallback(() => {
     if (!contact) {

@@ -3,7 +3,11 @@
 import { CONTACT_FIELD_MAX_LENGTHS } from "@bondery/schemas";
 import { useMemo } from "react";
 import { z } from "zod";
-import { useCommonTranslations, useWebTranslations } from "./useWebTranslations";
+import {
+  useCommonTranslations,
+  useContactIdentityFieldsTranslations,
+  useValidationTranslations,
+} from "@/lib/i18n/generated/hooks";
 
 export type NameField = "firstName" | "middleName" | "lastName";
 export type ProfileField = "headline" | "location";
@@ -24,9 +28,9 @@ export interface ProfileFieldConfig {
 }
 
 export function useContactIdentityFieldConfigs() {
-  const t = useWebTranslations("ContactIdentityFields");
-  const tVal = useWebTranslations("validation", "fields");
-  const tValRoot = useWebTranslations("validation");
+  const t = useContactIdentityFieldsTranslations();
+  const tVal = useValidationTranslations("fields");
+  const tValRoot = useValidationTranslations();
   const tCommon = useCommonTranslations();
 
   const nameFieldConfigs = useMemo<NameFieldConfig[]>(

@@ -33,8 +33,11 @@ import {
 } from "@tabler/icons-react";
 import { useEffect, useMemo, useState } from "react";
 import { compoundPluralKey } from "@/lib/i18n/compoundPluralKey";
+import {
+  useAddPeopleToGroupSelectionModalTranslations,
+  useCommonTranslations,
+} from "@/lib/i18n/generated/hooks";
 import { optionalPluralFragment } from "@/lib/i18n/optionalPluralFragment";
-import { useCommonTranslations, useWebTranslations } from "@/lib/i18n/useWebTranslations";
 import { createModalId, useModalDismiss } from "@/lib/modals";
 import {
   useContactGroupsQueries,
@@ -62,7 +65,7 @@ interface AddPeopleToGroupSelectionFormProps extends AddPeopleToGroupSelectionMo
 }
 
 function EditGroupsModalTitle() {
-  const t = useWebTranslations("AddPeopleToGroupSelectionModal");
+  const t = useAddPeopleToGroupSelectionModalTranslations();
   return <ModalTitle icon={<IconUsersGroup size={24} />} text={t("Title")} />;
 }
 
@@ -83,7 +86,7 @@ function AddPeopleToGroupSelectionForm({
   onUpdated,
   modalId,
 }: AddPeopleToGroupSelectionFormProps) {
-  const t = useWebTranslations("AddPeopleToGroupSelectionModal");
+  const t = useAddPeopleToGroupSelectionModalTranslations();
   const tCommon = useCommonTranslations();
   const modalGroupCardVariant = "small" as const;
   const modalGroupCardWidth = GROUP_CARD_MAX_WIDTH_BY_VARIANT[modalGroupCardVariant];
@@ -248,7 +251,7 @@ function AddPeopleToGroupSelectionForm({
       const membershipSummary =
         totalAdded === 0 && totalSkipped > 0
           ? t("AllAlreadyInGroups")
-          : t(compoundPluralKey("AddedSummary", [totalAdded, targetGroupIds.length]), {
+          : t(compoundPluralKey("AddedSummary", [totalAdded, targetGroupIds.length]) as never, {
               count: totalAdded,
               groupCount: targetGroupIds.length,
               skippedDetails,
@@ -262,7 +265,7 @@ function AddPeopleToGroupSelectionForm({
                   compoundPluralKey("MembershipUpdated", [
                     deduplicatedPersonIds.length,
                     selectedGroupIds.size,
-                  ]),
+                  ]) as never,
                   {
                     count: deduplicatedPersonIds.length,
                     groupCount: selectedGroupIds.size,

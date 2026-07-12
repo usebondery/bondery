@@ -3,7 +3,7 @@ import { IconBrandGithub, IconBrandLinkedin } from "@tabler/icons-react-native";
 import * as ExpoLinking from "expo-linking";
 import { useRouter } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Linking,
@@ -13,8 +13,9 @@ import {
   Text,
   View,
 } from "react-native";
+import { useLoginPageTranslations, useMobileAuthTranslations } from "@/lib/i18n/generated/hooks";
 import { WEBSITE_URL } from "../../src/lib/config";
-import { useMobileTranslations } from "../../src/lib/i18n/useMobileTranslations";
+import { preloadMobileNamespaces } from "../../src/lib/i18n/preloadMobileNamespaces";
 import { supabase } from "../../src/lib/supabase/client";
 import { OAUTH_PROVIDER_COLORS } from "../../src/theme/colors";
 import { MOBILE_TYPOGRAPHY } from "../../src/theme/tokens";
@@ -57,15 +58,20 @@ function getCallbackUrl() {
 }
 
 export default function LoginScreen() {
-  const t = useMobileTranslations();
   const router = useRouter();
   const colors = useMobileThemeColors();
+  const tLoginPage = useLoginPageTranslations();
+  const tMobileAuth = useMobileAuthTranslations();
   const [loadingProvider, setLoadingProvider] = useState<Provider | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  useEffect(() => {
+    void preloadMobileNamespaces(["mobile.auth"]);
+  }, []);
+
   const startOAuth = async (provider: Provider) => {
     if (!supabase) {
-      setError(t("MissingConfig", { ns: "MobileAuth" }));
+      setError(tMobileAuth("MissingConfig"));
       return;
     }
 
@@ -101,13 +107,13 @@ export default function LoginScreen() {
       }
 
       if (!data?.url) {
-        throw new Error(t("MissingAuthUrl", { ns: "MobileAuth" }));
+        throw new Error(tMobileAuth("MissingAuthUrl"));
       }
 
       const result = await WebBrowser.openAuthSessionAsync(data.url, redirectTo);
 
       if (result.type !== "success" || !result.url) {
-        setError(t("LoginCancelled", { ns: "MobileAuth" }));
+        setError(tMobileAuth("LoginCancelled"));
         return;
       }
 
@@ -127,9 +133,7 @@ export default function LoginScreen() {
       });
     } catch (oauthError) {
       setError(
-        oauthError instanceof Error
-          ? oauthError.message
-          : t("UnexpectedErrorMessage", { ns: "LoginPage" }),
+        oauthError instanceof Error ? oauthError.message : tLoginPage("UnexpectedErrorMessage"),
       );
     } finally {
       setLoadingProvider(null);
@@ -141,7 +145,7 @@ export default function LoginScreen() {
       <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
         <Text style={[styles.logo, { color: colors.textPrimary }]}>Bondery</Text>
         <Text style={[styles.description, { color: colors.textSecondary }]}>
-          {t("Description", { ns: "LoginPage" })}
+          {tLoginPage("Description")}
         </Text>
 
         <View style={styles.providers}>
@@ -171,10 +175,7 @@ export default function LoginScreen() {
                       )}
                     </View>
                     <Text style={[styles.providerText, { color: textColor }]}>
-                      {t("ContinueWith", { ns: "LoginPage" }).replace(
-                        "{provider}",
-                        t(labelKey, { ns: "LoginPage" }),
-                      )}
+                      {tLoginPage("ContinueWith").replace("{provider}", tLoginPage(labelKey))}
                     </Text>
                   </View>
                 </Pressable>
@@ -184,19 +185,19 @@ export default function LoginScreen() {
         </View>
 
         <Text style={[styles.termsText, { color: colors.textMuted }]}>
-          {t("TermsAgreement", { ns: "LoginPage" })}{" "}
+          {tLoginPage("TermsAgreement")}{" "}
           <Text
             onPress={() => Linking.openURL(`${WEBSITE_URL}${WEBSITE_ROUTES.TERMS}`)}
             style={[styles.link, { color: colors.primary }]}
           >
-            {t("TermsOfService", { ns: "LoginPage" })}
+            {tLoginPage("TermsOfService")}
           </Text>{" "}
-          {t("And", { ns: "LoginPage" })}{" "}
+          {tLoginPage("And")}{" "}
           <Text
             onPress={() => Linking.openURL(`${WEBSITE_URL}${WEBSITE_ROUTES.PRIVACY}`)}
             style={[styles.link, { color: colors.primary }]}
           >
-            {t("PrivacyPolicy", { ns: "LoginPage" })}
+            {tLoginPage("PrivacyPolicy")}
           </Text>
         </Text>
 

@@ -1,9 +1,12 @@
 import * as ImagePicker from "expo-image-picker";
 import * as Network from "expo-network";
 import { useCallback, useState } from "react";
+import {
+  useCommonTranslations,
+  useMobileContactIdentityTranslations,
+} from "@/lib/i18n/generated/hooks";
 import { deleteContactPhoto, uploadContactPhoto } from "../../../lib/api/client";
 import { AVATAR_UPLOAD } from "../../../lib/config";
-import { useMobileTranslations } from "../../../lib/i18n/useMobileTranslations";
 import { useAppToast } from "../../../lib/toast/useAppToast";
 
 interface UseContactPhotoUploadOptions {
@@ -15,7 +18,8 @@ export function useContactPhotoUpload({
   contactId,
   onAvatarUpdated,
 }: UseContactPhotoUploadOptions) {
-  const t = useMobileTranslations();
+  const tMobileContactIdentity = useMobileContactIdentityTranslations();
+  const t = useCommonTranslations();
   const { showToast } = useAppToast();
   const [isPhotoBusy, setIsPhotoBusy] = useState(false);
   const [isRemoveConfirmOpen, setRemoveConfirmOpen] = useState(false);
@@ -26,12 +30,12 @@ export function useContactPhotoUpload({
       return true;
     }
     showToast({
-      description: t("PhotoRequiresConnection", { ns: "MobileContactIdentity" }),
-      headline: t("feedback.errorTitle", { ns: "common" }),
+      description: tMobileContactIdentity("PhotoRequiresConnection"),
+      headline: t("feedback.errorTitle"),
       type: "error",
     });
     return false;
-  }, [showToast, t]);
+  }, [showToast, t, tMobileContactIdentity]);
 
   const uploadPhoto = useCallback(
     async (uri: string, mimeType: string) => {
@@ -46,17 +50,15 @@ export function useContactPhotoUpload({
       } catch (err) {
         showToast({
           description:
-            err instanceof Error
-              ? err.message
-              : t("PhotoUploadFailed", { ns: "MobileContactIdentity" }),
-          headline: t("feedback.errorTitle", { ns: "common" }),
+            err instanceof Error ? err.message : tMobileContactIdentity("PhotoUploadFailed"),
+          headline: t("feedback.errorTitle"),
           type: "error",
         });
       } finally {
         setIsPhotoBusy(false);
       }
     },
-    [contactId, ensureOnline, onAvatarUpdated, showToast, t],
+    [contactId, ensureOnline, onAvatarUpdated, showToast, t, tMobileContactIdentity],
   );
 
   const choosePhotoFromLibrary = useCallback(async () => {
@@ -67,8 +69,8 @@ export function useContactPhotoUpload({
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!permission.granted) {
       showToast({
-        description: t("PhotoPermissionDenied", { ns: "MobileContactIdentity" }),
-        headline: t("feedback.errorTitle", { ns: "common" }),
+        description: tMobileContactIdentity("PhotoPermissionDenied"),
+        headline: t("feedback.errorTitle"),
         type: "error",
       });
       return;
@@ -94,15 +96,15 @@ export function useContactPhotoUpload({
       )
     ) {
       showToast({
-        description: t("InvalidPhotoType", { ns: "MobileContactIdentity" }),
-        headline: t("feedback.errorTitle", { ns: "common" }),
+        description: tMobileContactIdentity("InvalidPhotoType"),
+        headline: t("feedback.errorTitle"),
         type: "error",
       });
       return;
     }
 
     await uploadPhoto(asset.uri, mimeType);
-  }, [ensureOnline, showToast, t, uploadPhoto]);
+  }, [ensureOnline, showToast, t, uploadPhoto, tMobileContactIdentity]);
 
   const removePhoto = useCallback(async () => {
     if (!(await ensureOnline())) {
@@ -116,14 +118,14 @@ export function useContactPhotoUpload({
       setRemoveConfirmOpen(false);
     } catch {
       showToast({
-        description: t("PhotoRemoveFailed", { ns: "MobileContactIdentity" }),
-        headline: t("feedback.errorTitle", { ns: "common" }),
+        description: tMobileContactIdentity("PhotoRemoveFailed"),
+        headline: t("feedback.errorTitle"),
         type: "error",
       });
     } finally {
       setIsPhotoBusy(false);
     }
-  }, [contactId, ensureOnline, onAvatarUpdated, showToast, t]);
+  }, [contactId, ensureOnline, onAvatarUpdated, showToast, t, tMobileContactIdentity]);
   return {
     choosePhotoFromLibrary,
     isPhotoBusy,

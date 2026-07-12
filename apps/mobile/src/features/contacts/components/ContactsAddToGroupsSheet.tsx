@@ -11,10 +11,10 @@ import {
   Text,
   View,
 } from "react-native";
+import { useCommonTranslations, useMobileContactsTranslations } from "@/lib/i18n/generated/hooks";
 import { SearchActionSheet } from "../../../components/SearchActionSheet";
 import { MOBILE_OPACITY } from "../../../lib/config";
 import { addContactsToGroup } from "../../../lib/domains/groups";
-import { useMobileTranslations } from "../../../lib/i18n/useMobileTranslations";
 import { useAppToast } from "../../../lib/toast/useAppToast";
 import { MOBILE_LAYOUT, MOBILE_TYPOGRAPHY } from "../../../theme/tokens";
 import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
@@ -48,7 +48,8 @@ export function ContactsAddToGroupsSheet({
   onGroupsReloaded,
   loadedGroupMembers,
 }: ContactsAddToGroupsSheetProps) {
-  const t = useMobileTranslations();
+  const tMobileContacts = useMobileContactsTranslations();
+  const t = useCommonTranslations();
   const colors = useMobileThemeColors();
   const { showToast } = useAppToast();
   const effectiveSelectedCount = useContactsEffectiveSelectedCount();
@@ -65,8 +66,8 @@ export function ContactsAddToGroupsSheet({
 
   const subtitle =
     effectiveSelectedCount === 1
-      ? t("AddToGroupsSheetSubtitleSingular", { ns: "MobileContacts" })
-      : t("AddToGroupsSheetSubtitle", { ns: "MobileContacts" }).replace(
+      ? tMobileContacts("AddToGroupsSheetSubtitleSingular")
+      : tMobileContacts("AddToGroupsSheetSubtitle").replace(
           "{count}",
           String(effectiveSelectedCount),
         );
@@ -133,8 +134,8 @@ export function ContactsAddToGroupsSheet({
         await onGroupsReloaded();
       } catch {
         showToast({
-          description: t("AddToGroupsFailed", { ns: "MobileContacts" }),
-          headline: t("feedback.errorTitle", { ns: "common" }),
+          description: tMobileContacts("AddToGroupsFailed"),
+          headline: t("feedback.errorTitle"),
           type: "error",
         });
       } finally {
@@ -160,7 +161,7 @@ export function ContactsAddToGroupsSheet({
         fontSize={MOBILE_TYPOGRAPHY.fontSize.sheetTitle}
         fontWeight={MOBILE_TYPOGRAPHY.fontWeight.bold}
       >
-        {t("AddToGroupsSheetTitle", { ns: "MobileContacts" })}
+        {tMobileContacts("AddToGroupsSheetTitle")}
       </Paragraph>
       <Paragraph
         color={colors.textSecondary}
@@ -193,7 +194,7 @@ export function ContactsAddToGroupsSheet({
         ]}
       >
         <Text style={[styles.footerButtonText, { color: colors.textSecondary }]}>
-          {t("actions.cancel", { ns: "common" })}
+          {t("actions.cancel")}
         </Text>
       </Pressable>
 
@@ -214,7 +215,7 @@ export function ContactsAddToGroupsSheet({
           <ActivityIndicator color={colors.textOnPrimary} size="small" />
         ) : (
           <Text style={[styles.footerButtonText, { color: colors.textOnPrimary }]}>
-            {t("AddToGroupsConfirm", { ns: "MobileContacts" })}
+            {tMobileContacts("AddToGroupsConfirm")}
           </Text>
         )}
       </Pressable>
@@ -231,7 +232,7 @@ export function ContactsAddToGroupsSheet({
       open={isOpen}
       query={query}
       searchEditable={!isAddingToGroups}
-      searchPlaceholder={t("AddToGroupsSearchPlaceholder", { ns: "MobileContacts" })}
+      searchPlaceholder={tMobileContacts("AddToGroupsSearchPlaceholder")}
     >
       {groups.length === 0 ? (
         <View style={styles.emptyState}>
@@ -241,7 +242,7 @@ export function ContactsAddToGroupsSheet({
             fontWeight={MOBILE_TYPOGRAPHY.fontWeight.semibold}
             textAlign="center"
           >
-            {t("NoGroupsYet", { ns: "MobileContacts" })}
+            {tMobileContacts("NoGroupsYet")}
           </Paragraph>
           <Paragraph
             color={colors.textSecondary}
@@ -249,7 +250,7 @@ export function ContactsAddToGroupsSheet({
             marginTop={6}
             textAlign="center"
           >
-            {t("NoGroupsYetHint", { ns: "MobileContacts" })}
+            {tMobileContacts("NoGroupsYetHint")}
           </Paragraph>
         </View>
       ) : (
@@ -262,7 +263,7 @@ export function ContactsAddToGroupsSheet({
           keyExtractor={(item) => item.id}
           ListEmptyComponent={
             <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
-              {t("feedback.noResults", { ns: "common" })}
+              {t("feedback.noResults")}
             </Text>
           }
           maxToRenderPerBatch={24}

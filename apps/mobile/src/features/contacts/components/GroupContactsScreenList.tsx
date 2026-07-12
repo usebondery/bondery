@@ -3,7 +3,7 @@ import { FlashList, type FlashListRef } from "@shopify/flash-list";
 import { useCallback, useMemo } from "react";
 import { Text, View } from "react-native";
 import { GestureDetector, type GestureType } from "react-native-gesture-handler";
-import { useMobileTranslations } from "../../../lib/i18n/useMobileTranslations";
+import { useCommonTranslations, useMobileContactsTranslations } from "@/lib/i18n/generated/hooks";
 import type { SwipeAction } from "../../../lib/preferences/useMobilePreferences";
 import type { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
 import type { ContactsFlatRow } from "../contactsFlatList";
@@ -55,7 +55,8 @@ export function GroupContactsScreenList({
   setListViewportHeight,
   stickyHeaderIndices,
 }: GroupContactsScreenListProps) {
-  const t = useMobileTranslations();
+  const tMobileContacts = useMobileContactsTranslations();
+  const _t = useCommonTranslations();
 
   const renderFlatItem = useCallback(
     ({ item }: { item: ContactsFlatRow }) => {
@@ -84,13 +85,11 @@ export function GroupContactsScreenList({
     () => (
       <View style={styles.centeredState}>
         <Text style={[styles.emptyText, { color: colors.textMuted }]}>
-          {debouncedQuery
-            ? t("NoMatchSearch", { ns: "MobileContacts" })
-            : t("Empty", { ns: "MobileContacts" })}
+          {debouncedQuery ? tMobileContacts("NoMatchSearch") : tMobileContacts("Empty")}
         </Text>
       </View>
     ),
-    [colors.textMuted, debouncedQuery, t],
+    [colors.textMuted, debouncedQuery, tMobileContacts],
   );
 
   const listExtraData = useMemo(

@@ -1,7 +1,6 @@
 "use client";
 
 import { Card, Text } from "@mantine/core";
-import type { ReactElement } from "react";
 import {
   CartesianGrid,
   Legend,
@@ -13,23 +12,14 @@ import {
   YAxis,
 } from "recharts";
 import type { ActiveUsersData } from "@/lib/api/resources/stats";
-import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
+import { useStatsPageTranslations } from "@/lib/i18n/generated/hooks";
 
 interface ActiveUsersChartProps {
   data: ActiveUsersData;
 }
 
-interface AxisTickProps {
-  index?: number;
-  payload?: {
-    value?: string | number;
-  };
-  x?: number;
-  y?: number;
-}
-
 export function ActiveUsersChart({ data }: ActiveUsersChartProps) {
-  const t = useWebTranslations("StatsPage");
+  const t = useStatsPageTranslations();
 
   const chartData = data.timeline.map((point, index) => ({
     ...point,
@@ -56,19 +46,24 @@ export function ActiveUsersChart({ data }: ActiveUsersChartProps) {
               axisLine={false}
               dataKey="dateLabel"
               minTickGap={24}
-              tick={
-                (({ x = 0, y = 0, payload, index }: AxisTickProps) => {
-                  const point = chartData[index ?? 0];
-                  if (!point?.showTick) {
-                    return <g />;
-                  }
-                  return (
-                    <text fill="var(--mantine-color-gray-5)" textAnchor="middle" x={x} y={y + 12}>
-                      {payload?.value}
-                    </text>
-                  );
-                }) as (props: AxisTickProps) => ReactElement
-              }
+              tick={({ x = 0, y = 0, payload, index }) => {
+                const point = chartData[index ?? 0];
+                if (!point?.showTick) {
+                  return <g />;
+                }
+                const tickX = typeof x === "number" ? x : Number(x);
+                const tickY = typeof y === "number" ? y : Number(y);
+                return (
+                  <text
+                    fill="var(--mantine-color-gray-5)"
+                    textAnchor="middle"
+                    x={tickX}
+                    y={tickY + 12}
+                  >
+                    {payload?.value}
+                  </text>
+                );
+              }}
             />
             <YAxis allowDecimals={false} axisLine={false} tickLine={false} width={34} />
             <Tooltip

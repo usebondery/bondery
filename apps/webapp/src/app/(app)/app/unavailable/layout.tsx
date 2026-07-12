@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
-import { getWebTranslations as getTranslations } from "@/lib/i18n/getWebTranslations";
+import { getUnavailablePageTranslations } from "@/lib/i18n/generated/hooks.server";
 import { preloadWebNamespaces } from "@/lib/i18n/preloadNamespaces.server";
 import { resolveLocaleSettings } from "@/lib/i18n/resolveLocaleSettings";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const t = await getTranslations("UnavailablePage");
+  const t = await getUnavailablePageTranslations();
   return { title: t("MetadataTitle") };
 }
 

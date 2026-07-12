@@ -1,7 +1,6 @@
 {
   "compilerOptions": {
     "allowSyntheticDefaultImports": true,
-    "baseUrl": ".",
     "esModuleInterop": true,
     "ignoreDeprecations": "6.0",
     "incremental": true,
@@ -9,14 +8,15 @@
     "module": "ESNext",
     "moduleResolution": "bundler",
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["./src/*"]
     },
     "resolveJsonModule": true,
     "skipLibCheck": true,
     "strict": true,
-    "target": "ES2020"
+    "target": "ES2020",
+    "types": ["node"]
   },
-  "exclude": ["**/*.test.ts"],
+  "exclude": ["**/*.test.ts", "scripts/**"],
   "extends": "expo/tsconfig.base",
   "include": [
     "expo-env.d.ts",

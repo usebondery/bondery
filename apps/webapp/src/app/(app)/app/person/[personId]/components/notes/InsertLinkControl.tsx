@@ -6,22 +6,23 @@ import { RichTextEditor, useRichTextEditorContext } from "@mantine/tiptap";
 import { IconLink } from "@tabler/icons-react";
 import { useEditorState } from "@tiptap/react";
 import { useState } from "react";
-import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
+import { useNotesEditorTranslations } from "@/lib/i18n/generated/hooks";
 
 /**
  * Custom insert-link control for RichTextEditor.
  */
 export function InsertLinkControl() {
-  const t = useWebTranslations("NotesEditor");
+  const t = useNotesEditorTranslations();
   const { editor } = useRichTextEditorContext();
   const [opened, setOpened] = useState(false);
   const [url, setUrl] = useState("");
 
-  const isLinkActive =
+  const isLinkActive = Boolean(
     useEditorState({
       editor,
       selector: ({ editor: ed }) => ed?.isActive("link") ?? false,
-    }) ?? false;
+    }),
+  );
 
   const handleOpen = () => {
     const linkData = editor?.getAttributes("link");

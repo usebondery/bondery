@@ -1,7 +1,10 @@
 import { getRandomEmoji } from "@bondery/helpers/emoji";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Pressable, StyleSheet, Text } from "react-native";
-import { useMobileTranslations } from "../../lib/i18n/useMobileTranslations";
+import {
+  useCommonTranslations,
+  useMobileEmojiPickerTranslations,
+} from "@/lib/i18n/generated/hooks";
 import { MOBILE_LAYOUT, MOBILE_TYPOGRAPHY } from "../../theme/tokens";
 import { useMobileThemeColors } from "../../theme/useMobileThemeColors";
 import { SearchActionSheet } from "../SearchActionSheet";
@@ -27,7 +30,8 @@ export function EmojiPickerSheet({
   onOpenChange,
   onSelect,
 }: EmojiPickerSheetProps) {
-  const t = useMobileTranslations();
+  const tMobileEmojiPicker = useMobileEmojiPickerTranslations();
+  const _t = useCommonTranslations();
   const colors = useMobileThemeColors();
   const [query, setQuery] = useState("");
   const gridRef = useRef<EmojiPickerGridRef>(null);
@@ -88,7 +92,7 @@ export function EmojiPickerSheet({
 
   const randomEmojiAction = (
     <Pressable
-      accessibilityLabel={t("RandomAccessibilityLabel", { ns: "MobileEmojiPicker" })}
+      accessibilityLabel={tMobileEmojiPicker("RandomAccessibilityLabel")}
       accessibilityRole="button"
       onPress={handleRandomEmoji}
       style={({ pressed }) => [

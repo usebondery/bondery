@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { ModalFooter, ModalScrollLayout, PersonChip } from "@bondery/mantine-next";
 import type { Contact, MergeConflictChoice, MergeConflictField } from "@bondery/schemas";

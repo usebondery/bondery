@@ -3,9 +3,9 @@
 import { WEBSITE_ROUTES } from "@bondery/helpers/globals/paths";
 import { modals } from "@mantine/modals";
 import { notifications } from "@mantine/notifications";
+import { buildLoginUrl, getClientReturnPathForLogin } from "@/lib/auth/returnIntent";
 import { resetState } from "@/lib/extension/enrichBatchStore";
 import { statusNotificationsStore } from "@/lib/extension/statusNotificationsStore";
-import { buildLoginUrl, getClientReturnPathForLogin } from "@/lib/auth/returnIntent";
 import { createBrowswerSupabaseClient } from "@/lib/supabase/client";
 
 export type EndSessionReason = "user_initiated" | "session_expired" | "account_deleted";

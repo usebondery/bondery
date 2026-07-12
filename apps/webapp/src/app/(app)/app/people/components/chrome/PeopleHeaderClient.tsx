@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import { ButtonLink, Kbd, parseShortcutKeys } from "@bondery/mantine-next";
@@ -7,7 +7,7 @@ import { useHotkeys } from "@mantine/hooks";
 import { IconAddressBook, IconUser, IconUserPlus } from "@tabler/icons-react";
 import { PageHeader } from "@/components/shell/PageHeader";
 import { peopleSearchActions } from "@/components/shell/PeopleSearchSpotlight";
-import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
+import { usePeoplePageTranslations } from "@/lib/i18n/generated/hooks";
 import { HOTKEYS } from "@/lib/platform/config";
 import { openAddContactModal } from "../modals/AddContactModal";
 
@@ -17,7 +17,7 @@ import { openAddContactModal } from "../modals/AddContactModal";
  * dependency) while the contacts table streams in via Suspense.
  */
 export function PeopleHeaderClient() {
-  const t = useWebTranslations("PeoplePage");
+  const t = usePeoplePageTranslations();
 
   useHotkeys([
     [HOTKEYS.ADD_PERSON, () => openAddContactModal()],

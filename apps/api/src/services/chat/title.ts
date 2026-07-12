@@ -14,13 +14,13 @@ import { getChatModel } from "./provider.js";
  */
 export async function generateSessionTitle(userMessage: string): Promise<string | null> {
   const { text } = await generateText({
-    maxOutputTokens: 30,
-    model: getChatModel(),
-    prompt: userMessage,
-    system:
+    instructions:
       "Generate a very short title (3-6 words) for a chat conversation based on the user's first message. " +
       "The title should capture the main topic. Do not use quotes or punctuation at the end. " +
       "Reply with only the title, nothing else.",
+    maxOutputTokens: 30,
+    model: getChatModel(),
+    prompt: userMessage,
   });
 
   const title = text.trim();

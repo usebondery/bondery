@@ -1,8 +1,12 @@
 import type { Contact } from "@bondery/schemas";
 import { IconPencil } from "@tabler/icons-react-native";
 import { Image, Pressable, Text, View } from "react-native";
+import {
+  useCommonTranslations,
+  useContactInfoTranslations,
+  useMobileContactIdentityTranslations,
+} from "@/lib/i18n/generated/hooks";
 import { normalizeMobileUrlForDevice } from "../../../lib/config";
-import { useMobileTranslations } from "../../../lib/i18n/useMobileTranslations";
 import type { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
 import {
   formatContactLocation,
@@ -24,7 +28,9 @@ export function ContactDetailHeroSection({
   contact,
   onEditPress,
 }: ContactDetailHeroSectionProps) {
-  const t = useMobileTranslations();
+  const tContactInfo = useContactInfoTranslations();
+  const tMobileContactIdentity = useMobileContactIdentityTranslations();
+  const _t = useCommonTranslations();
   const initials = getContactInitials(contact);
   const avatarColor = getAvatarColorHex(contact);
   const avatarUri = contact.avatar ? normalizeMobileUrlForDevice(contact.avatar) : null;
@@ -37,14 +43,14 @@ export function ContactDetailHeroSection({
       <View style={contactDetailStyles.sectionHeaderRow}>
         <View style={styles.heroHeaderSpacer} />
         <Pressable
-          accessibilityLabel={t("EditProfile", { ns: "MobileContactIdentity" })}
+          accessibilityLabel={tMobileContactIdentity("EditProfile")}
           accessibilityRole="button"
           onPress={onEditPress}
           style={contactDetailStyles.sectionHeaderAction}
         >
           <IconPencil size={16} stroke={colors.primary} />
           <Text style={[contactDetailStyles.sectionHeaderActionText, { color: colors.primary }]}>
-            {t("EditAction", { ns: "ContactInfo" })}
+            {tContactInfo("EditAction")}
           </Text>
         </Pressable>
       </View>

@@ -18,7 +18,7 @@ import { notifications } from "@mantine/notifications";
 import { IconCheck, IconShield, IconX } from "@tabler/icons-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
+import { useOAuthConsentTranslations } from "@/lib/i18n/generated/hooks";
 import { createBrowswerSupabaseClient } from "@/lib/supabase/client";
 
 function getOAuthRedirectUrl(data: unknown): string | null {
@@ -39,7 +39,7 @@ function getOAuthRedirectUrl(data: unknown): string | null {
  * URL: /oauth/consent?authorization_id=<id>
  */
 export default function OAuthConsentPage() {
-  const t = useWebTranslations("OAuthConsent");
+  const t = useOAuthConsentTranslations();
   const searchParams = useSearchParams();
   const router = useRouter();
   const supabase = createBrowswerSupabaseClient();

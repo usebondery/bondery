@@ -1,11 +1,14 @@
-﻿"use client";
+"use client";
 
 import { PersonAvatar } from "@bondery/mantine-next";
 import type { ImportantDateType, UpcomingReminder } from "@bondery/schemas";
 import { Badge, Card, Divider, Group, Stack, Text, Tooltip } from "@mantine/core";
 import { IconBell, IconCircleCheck } from "@tabler/icons-react";
 import { useCurrentLocale as useLocale } from "@/components/shell/UserLocaleProvider";
-import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
+import {
+  useContactImportantDatesTranslations,
+  useHomePageTranslations,
+} from "@/lib/i18n/generated/hooks";
 import { IMPORTANT_DATE_TYPE_OPTIONS } from "@/lib/platform/config";
 
 const DAY_IN_MS = 24 * 60 * 60 * 1000;
@@ -100,8 +103,8 @@ function getDateEmoji(type: ImportantDateType): string {
  */
 export function UpcomingReminderCard({ reminder, onClick }: UpcomingReminderCardProps) {
   const locale = useLocale();
-  const t = useWebTranslations("HomePage");
-  const dateT = useWebTranslations("ContactImportantDates");
+  const t = useHomePageTranslations();
+  const dateT = useContactImportantDatesTranslations();
   const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
   const importantDate = parseDateOnly(reminder.importantDate.date) ?? getTodayUtc();

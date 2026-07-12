@@ -15,5 +15,11 @@ export async function setClientCookie(
   value: string,
   { maxAge = DEFAULT_MAX_AGE, path = "/", sameSite = "lax" }: SetClientCookieOptions = {},
 ): Promise<void> {
-  await cookieStore.set({ maxAge, name, path, sameSite, value });
+  await cookieStore.set({
+    expires: Math.floor(Date.now() / 1000) + maxAge,
+    name,
+    path,
+    sameSite,
+    value,
+  });
 }

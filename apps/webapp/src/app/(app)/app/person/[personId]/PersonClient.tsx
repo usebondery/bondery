@@ -10,9 +10,21 @@ import { useBatchEnrichFromLinkedIn } from "@/components/extension/useBatchEnric
 import { PageHeader } from "@/components/shell/PageHeader";
 import { PageWrapper } from "@/components/shell/PageWrapper";
 import { usePatchDocumentTitle } from "@/lib/documentTitle";
+import {
+  useAddPeopleToGroupSelectionModalTranslations,
+  useCommonTranslations,
+  useContactAddressTranslations,
+  useContactImportantDatesTranslations,
+  useContactInfoTranslations,
+  useEnrichFromLinkedInTranslations,
+  useInteractionsPageTranslations,
+  usePersonRelationshipsTranslations,
+  usePersonTabsTranslations,
+  useSingleContactPageTranslations,
+  useValidationTranslations,
+} from "@/lib/i18n/generated/hooks";
 import { useInteractionTypeLabel } from "@/lib/i18n/useInteractionTypeLabel";
 import { useSlashCommands } from "@/lib/i18n/useSlashCommands";
-import { useCommonTranslations, useWebTranslations } from "@/lib/i18n/useWebTranslations";
 import {
   useContactGroupsQuery,
   useContactImportantDatesQuery,
@@ -52,16 +64,16 @@ interface PersonClientProps {
 export function PersonClient({ personId, initialTab, myselfMode = false }: PersonClientProps) {
   const router = useRouter();
   const tCommon = useCommonTranslations();
-  const tEnrich = useWebTranslations("EnrichFromLinkedIn");
-  const tImportantDates = useWebTranslations("ContactImportantDates");
-  const tPersonPage = useWebTranslations("SingleContactPage");
-  const tVal = useWebTranslations("validation");
-  const tAddress = useWebTranslations("ContactAddress");
-  const tTabs = useWebTranslations("PersonTabs");
-  const tInteractions = useWebTranslations("InteractionsPage");
-  const tContactInfo = useWebTranslations("ContactInfo");
-  const tEditGroups = useWebTranslations("AddPeopleToGroupSelectionModal");
-  const tRelationships = useWebTranslations("PersonRelationships");
+  const tEnrich = useEnrichFromLinkedInTranslations();
+  const tImportantDates = useContactImportantDatesTranslations();
+  const tPersonPage = useSingleContactPageTranslations();
+  const tVal = useValidationTranslations();
+  const tAddress = useContactAddressTranslations();
+  const tTabs = usePersonTabsTranslations();
+  const tInteractions = useInteractionsPageTranslations();
+  const tContactInfo = useContactInfoTranslations();
+  const tEditGroups = useAddPeopleToGroupSelectionModalTranslations();
+  const tRelationships = usePersonRelationshipsTranslations();
   const getInteractionTypeLabel = useInteractionTypeLabel();
   const slashCommands = useSlashCommands();
   const slashCommandSuggestion = useMemo(

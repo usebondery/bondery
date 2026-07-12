@@ -30,8 +30,14 @@ import { downloadContactVcard } from "@/lib/api/domains/contacts";
 import { searchContacts } from "@/lib/contacts/searchContacts";
 import { setClientCookie } from "@/lib/cookies/client";
 import { COLUMN_VISIBILITY_COOKIE } from "@/lib/cookies/constants";
+import {
+  useCommonTranslations,
+  useContactActionMenuTranslations,
+  useEnrichFromLinkedInTranslations,
+  usePeoplePageTranslations,
+  useShareContactModalTranslations,
+} from "@/lib/i18n/generated/hooks";
 import { useContactsTableCopy } from "@/lib/i18n/useContactsTableCopy";
-import { useCommonTranslations, useWebTranslations } from "@/lib/i18n/useWebTranslations";
 import { DEBOUNCE_MS } from "@/lib/platform/config";
 import { parseContactsListParams } from "@/lib/query/contactsListParams";
 import { useContactsInfiniteQuery } from "@/lib/query/hooks/useContacts";
@@ -91,12 +97,12 @@ export function PeopleClient({ savedColumnVisibility }: PeopleClientProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const t = useWebTranslations("PeoplePage");
+  const t = usePeoplePageTranslations();
   const tCommon = useCommonTranslations();
   const { columnDefinitions } = useContactsTableCopy();
-  const tShare = useWebTranslations("ShareContactModal");
-  const tEnrich = useWebTranslations("EnrichFromLinkedIn");
-  const tActions = useWebTranslations("ContactActionMenu");
+  const tShare = useShareContactModalTranslations();
+  const tEnrich = useEnrichFromLinkedInTranslations();
+  const tActions = useContactActionMenuTranslations();
   const { startForPerson } = useBatchEnrichFromLinkedIn();
   const listFilter = parseContactsListParams({
     search: searchParams.get("search") ?? undefined,

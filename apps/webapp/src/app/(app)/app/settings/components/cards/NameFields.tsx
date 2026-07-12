@@ -10,7 +10,7 @@ import { Group, Text, TextInput } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { IconUser } from "@tabler/icons-react";
 import { useState } from "react";
-import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
+import { useSettingsPageTranslations } from "@/lib/i18n/generated/hooks";
 import { useUpdateSettingsMutation } from "@/lib/query/hooks/useSettings";
 
 interface NameFieldsProps {
@@ -31,7 +31,7 @@ export function NameFields({ initialName, initialMiddlename, initialSurname }: N
   const [middlenameFocused, setMiddlenameFocused] = useState(false);
   const [surnameFocused, setSurnameFocused] = useState(false);
 
-  const t = useWebTranslations("SettingsPage", "Profile");
+  const t = useSettingsPageTranslations("Profile");
   const updateSettings = useUpdateSettingsMutation();
 
   const updateName = async (field: "name" | "middlename" | "surname", value: string) => {

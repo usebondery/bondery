@@ -1,7 +1,7 @@
 import { IconCopy } from "@tabler/icons-react-native";
 import { Text } from "react-native";
+import { useCommonTranslations, useMobileGroupsTranslations } from "@/lib/i18n/generated/hooks";
 import { ActionSheetPopup } from "../../../components/ActionSheetPopup";
-import { useMobileTranslations } from "../../../lib/i18n/useMobileTranslations";
 import type { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
 import { groupContactsScreenStyles as styles } from "./groupContactsScreenStyles";
 
@@ -24,21 +24,22 @@ export function GroupContactsDuplicateDialog({
   open,
   title,
 }: GroupContactsDuplicateDialogProps) {
-  const t = useMobileTranslations();
+  const tMobileGroups = useMobileGroupsTranslations();
+  const t = useCommonTranslations();
 
   return (
     <ActionSheetPopup
       actions={[
         {
           disabled: isDuplicating,
-          label: t("actions.cancel", { ns: "common" }),
+          label: t("actions.cancel"),
           onPress: onClose,
           tone: "neutral",
           variant: "outline",
         },
         {
           icon: <IconCopy size={16} stroke={colors.textOnPrimary} />,
-          label: t("DuplicateConfirm", { ns: "MobileGroups" }),
+          label: tMobileGroups("DuplicateConfirm"),
           loading: isDuplicating,
           onPress: onConfirm,
           tone: "primary",
@@ -62,7 +63,7 @@ export function GroupContactsDuplicateDialog({
       title={title}
     >
       <Text style={[styles.duplicateDialogBody, { color: colors.textSecondary }]}>
-        {t("DuplicateDialogBody", { ns: "MobileGroups" })}
+        {tMobileGroups("DuplicateDialogBody")}
       </Text>
     </ActionSheetPopup>
   );

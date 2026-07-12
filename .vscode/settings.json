@@ -2,6 +2,9 @@
   "bondery.ngrok.autoStart": false,
   "editor.defaultFormatter": "biomejs.biome",
   "editor.formatOnSave": true,
+  // TypeScript 7 native language service (tsgo)
+  "js/ts.experimental.useTsgo": true,
+  "js/ts.tsdk.path": "./node_modules/typescript",
   "remote.autoForwardPorts": true,
   "remote.portsAttributes": {
     "26630": {

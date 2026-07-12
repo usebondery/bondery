@@ -1,4 +1,4 @@
-import { EXAMPLE_CONTACT_ID } from "#contact-id.js";
+import { EXAMPLE_CONTACT_ID } from "#contact-id/index.js";
 
 export { EXAMPLE_CONTACT_ID };
 

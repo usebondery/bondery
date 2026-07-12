@@ -1,5 +1,6 @@
 "use client";
 
+import type { InfiniteData, UseInfiniteQueryResult } from "@tanstack/react-query";
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import {
@@ -15,13 +16,18 @@ import {
   updateGroup,
 } from "@/lib/api/domains/groups";
 
-import type { GroupMembersParams, GroupsListParams } from "@/lib/api/resources/groups";
+import type {
+  GroupMembersParams,
+  GroupMembersResult,
+  GroupsListParams,
+} from "@/lib/api/resources/groups";
 
 import type { ContactsListFilterParams } from "@/lib/query/contactsListParams";
 
 import { GROUP_MEMBERS_PAGE_SIZE } from "@/lib/query/groupDetailQueryParams";
 import { invalidateContactDomain, invalidateGroupDomain } from "@/lib/query/invalidation";
 import { groupKeys } from "@/lib/query/keys";
+import { nextPaginatedOffset } from "@/lib/query/paginatedInfiniteQuery";
 
 export function useGroupsListQuery(params?: GroupsListParams) {
   const listParams = params ?? { previewLimit: 3 };
@@ -50,7 +56,10 @@ export function useGroupMembersQuery(groupId: string, params?: GroupMembersParam
   });
 }
 
-export function useGroupMembersInfiniteQuery(groupId: string, filter: ContactsListFilterParams) {
+export function useGroupMembersInfiniteQuery(
+  groupId: string,
+  filter: ContactsListFilterParams,
+): UseInfiniteQueryResult<InfiniteData<GroupMembersResult>, Error> {
   const infiniteParams = {
     limit: GROUP_MEMBERS_PAGE_SIZE,
     search: filter.search,
@@ -58,16 +67,10 @@ export function useGroupMembersInfiniteQuery(groupId: string, filter: ContactsLi
     sort: filter.sort,
   };
 
-  return useInfiniteQuery({
+  return useInfiniteQuery<GroupMembersResult>({
     enabled: !!groupId,
 
-    getNextPageParam: (lastPage) => {
-      if (!lastPage.pagination.hasMore) {
-        return undefined;
-      }
-
-      return lastPage.pagination.offset + lastPage.pagination.limit;
-    },
+    getNextPageParam: nextPaginatedOffset,
 
     initialPageParam: 0,
 

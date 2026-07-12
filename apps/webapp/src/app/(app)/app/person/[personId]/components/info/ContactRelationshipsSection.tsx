@@ -10,7 +10,7 @@ import { ActionIcon, Card, Group, Select, Stack, Text, Tooltip } from "@mantine/
 import { IconPlus, IconTrash } from "@tabler/icons-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { searchContacts } from "@/lib/contacts/searchContacts";
-import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
+import { usePersonRelationshipsTranslations } from "@/lib/i18n/generated/hooks";
 import { DEBOUNCE_MS, RELATIONSHIP_TYPE_OPTIONS } from "@/lib/platform/config";
 
 interface ContactRelationshipsSectionProps {
@@ -60,7 +60,7 @@ export function ContactRelationshipsSection({
   onUpdateRelationship,
   onDeleteRelationship,
 }: ContactRelationshipsSectionProps) {
-  const t = useWebTranslations("PersonRelationships");
+  const t = usePersonRelationshipsTranslations();
 
   const relationshipTypeOptions = RELATIONSHIP_TYPE_OPTIONS.map((typeOption) => ({
     label: `${typeOption.emoji} ${t(`Types.${typeOption.value}`)}`,

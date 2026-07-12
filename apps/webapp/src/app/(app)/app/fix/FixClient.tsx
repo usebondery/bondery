@@ -14,7 +14,11 @@ import { useEffect, useRef, useState } from "react";
 import { MergeRecommendationCard } from "@/components/contacts/MergeRecommendationCard";
 import { PageHeader } from "@/components/shell/PageHeader";
 import { PageWrapper } from "@/components/shell/PageWrapper";
-import { useCommonTranslations, useWebTranslations } from "@/lib/i18n/useWebTranslations";
+import {
+  useCommonTranslations,
+  useFixContactsPageTranslations,
+  useMergeWithModalTranslations,
+} from "@/lib/i18n/generated/hooks";
 import { syncMergeRecommendationsAfterChange } from "@/lib/merge/syncMergeRecommendations";
 import {
   useEnrichQueueCountQuery,
@@ -30,8 +34,8 @@ import { EnrichRecommendationCard } from "./components/EnrichRecommendationCard"
 export function FixClient() {
   const tCommon = useCommonTranslations();
 
-  const t = useWebTranslations("FixContactsPage");
-  const tMerge = useWebTranslations("MergeWithModal");
+  const t = useFixContactsPageTranslations();
+  const tMerge = useMergeWithModalTranslations();
   const [showDeclined, setShowDeclined] = useState(false);
   const [restoringIds, setRestoringIds] = useState<Set<string>>(new Set());
   const queryClient = useQueryClient();

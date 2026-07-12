@@ -1,7 +1,7 @@
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { buildLoginUrl, getRequestReturnPathForLogin } from "@/lib/auth/returnIntent";
 import { signOutServerSession } from "@/lib/auth/resolveServerSession";
+import { buildLoginUrl, getRequestReturnPathForLogin } from "@/lib/auth/returnIntent";
 
 /**
  * Clears Supabase auth cookies and redirects to login when the API reports

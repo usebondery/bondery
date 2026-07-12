@@ -1,6 +1,6 @@
 import type { z } from "zod";
-import type { ApiErrorResponse } from "#entities/api.js";
-import { apiErrorResponseSchema } from "#entities/api.js";
+import { apiErrorResponseSchema } from "#errors/api-error-response/index.js";
+import type { ApiErrorResponse } from "#errors/api-error-response/types.js";
 import {
   EXAMPLE_ERROR_400,
   EXAMPLE_ERROR_401,
@@ -12,7 +12,7 @@ import {
   EXAMPLE_ERROR_503,
 } from "#openapi/fixtures/errors.js";
 import { getSchemaExample } from "#openapi/get-schema-example.js";
-import { syncConflictErrorResponseSchema } from "#sync/conflict.js";
+import { syncConflictErrorResponseSchema } from "#sync/conflict/index.js";
 
 function jsonResponse<T extends z.ZodType>(
   schema: T,

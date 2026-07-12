@@ -3,7 +3,7 @@
 import { Group, Indicator, Text, Tooltip, UnstyledButton } from "@mantine/core";
 import { useHover } from "@mantine/hooks";
 import Link from "next/link";
-import type { ComponentType, ElementType, ReactNode } from "react";
+import type { ComponentType, ReactNode, Ref } from "react";
 
 export interface NavLinkItemProps {
   active?: boolean;
@@ -121,11 +121,10 @@ export function NavLinkItem({
     <Group
       aria-current={active ? "page" : undefined}
       className={stateClassName}
-      component={Link as ElementType}
       gap="sm"
-      href={href}
       justify="flex-start"
-      ref={ref}
+      ref={ref as Ref<HTMLDivElement>}
+      renderRoot={(props) => <Link href={href} {...props} />}
       style={{
         backgroundColor: active
           ? "var(--mantine-primary-color-filled)"

@@ -1,7 +1,7 @@
 import type { ServerResponse } from "node:http";
 import type { Database } from "@bondery/schemas/supabase.types";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { type ModelMessage, stepCountIs, streamText } from "ai";
+import { isStepCount, type ModelMessage, streamText } from "ai";
 import { getChatModel } from "./provider.js";
 import { SYSTEM_PROMPT } from "./system-prompt.js";
 import { createContactTools } from "./tools/contacts.js";
@@ -38,10 +38,10 @@ export function runChatAgent(
   const today = new Date().toISOString().split("T")[0];
 
   return streamText({
+    instructions: `${SYSTEM_PROMPT}\n\nToday's date: ${today}`,
     messages,
     model: getChatModel(),
-    stopWhen: stepCountIs(5),
-    system: `${SYSTEM_PROMPT}\n\nToday's date: ${today}`,
+    stopWhen: isStepCount(5),
     tools: {
       ...contactTools,
       ...interactionTools,

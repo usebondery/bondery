@@ -5,7 +5,7 @@ import { AnchorLink } from "@bondery/mantine-next";
 import type { WorkHistoryEntry } from "@bondery/schemas";
 import { Avatar, Group, Spoiler, Stack, Text } from "@mantine/core";
 import { IconBriefcase } from "@tabler/icons-react";
-import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
+import { useLinkedInDataTranslations } from "@/lib/i18n/generated/hooks";
 
 interface WorkHistoryCardProps {
   entry: WorkHistoryEntry;
@@ -18,7 +18,7 @@ interface WorkHistoryCardProps {
  * @param entry The work history entry to display.
  */
 export function WorkHistoryCard({ entry }: WorkHistoryCardProps) {
-  const t = useWebTranslations("LinkedInData");
+  const t = useLinkedInDataTranslations();
 
   const dateRange = formatDateRange(entry.startDate, entry.endDate, t("Present"));
   const duration = formatDuration(entry.startDate, entry.endDate);

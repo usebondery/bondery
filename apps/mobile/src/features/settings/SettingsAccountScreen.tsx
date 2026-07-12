@@ -7,7 +7,12 @@ import { Alert, ScrollView, StyleSheet, Text, View } from "react-native";
 import { ActionSheetPopup } from "../../components/ActionSheetPopup";
 import { StackNavBar } from "../../components/chrome";
 import { deleteMyAccount, fetchSettings } from "../../lib/api/client";
-import { useMobileTranslations } from "../../lib/i18n/useMobileTranslations";
+import {
+  useCommonTranslations,
+  useMobileAuthTranslations,
+  useMobileSettingsTranslations,
+  useSettingsPageTranslations,
+} from "../../lib/i18n/generated/hooks";
 import { supabase } from "../../lib/supabase/client";
 import { useMyselfContact } from "../../lib/sync/hooks/useSyncQuery";
 import { MOBILE_LAYOUT } from "../../theme/tokens";
@@ -17,8 +22,11 @@ import { SettingsActionButton } from "./components/SettingsActionButton";
 import { SettingsAsyncState } from "./components/SettingsAsyncState";
 
 export function SettingsAccountScreen() {
+  const tMobileAuth = useMobileAuthTranslations();
+  const tMobileSettings = useMobileSettingsTranslations();
+  const tSettingsPage = useSettingsPageTranslations();
+  const t = useCommonTranslations();
   const router = useRouter();
-  const t = useMobileTranslations();
   const colors = useMobileThemeColors();
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -57,7 +65,7 @@ export function SettingsAccountScreen() {
 
   const signOut = async () => {
     if (!supabase) {
-      throw new Error(t("MissingConfig", { ns: "MobileAuth" }));
+      throw new Error(tMobileAuth("MissingConfig"));
     }
 
     const { error } = await supabase.auth.signOut();
@@ -100,8 +108,8 @@ export function SettingsAccountScreen() {
 
       setDeleteConfirmOpen(false);
       Alert.alert(
-        t("DataManagement.DeleteSuccess", { ns: "SettingsPage" }),
-        t("DataManagement.AccountDeleted", { ns: "SettingsPage" }),
+        tSettingsPage("DataManagement.DeleteSuccess"),
+        tSettingsPage("DataManagement.AccountDeleted"),
       );
     } catch (deleteError) {
       setActionError(getUserFacingError(deleteError, t));
@@ -118,7 +126,7 @@ export function SettingsAccountScreen() {
     <>
       <StackNavBar
         onBack={() => router.back()}
-        title={t("Account", { ns: "MobileSettings" })}
+        title={tMobileSettings("Account")}
         variant="elevated"
       />
 
@@ -128,7 +136,7 @@ export function SettingsAccountScreen() {
       >
         <SettingsAsyncState
           errorDescription={loadError}
-          errorTitle={t("AccountLoadErrorTitle", { ns: "MobileSettings" })}
+          errorTitle={tMobileSettings("AccountLoadErrorTitle")}
           isLoading={isLoading}
           loadingMinHeight={120}
           onRetry={() => {
@@ -148,7 +156,7 @@ export function SettingsAccountScreen() {
             <SettingsActionButton
               disabled={pendingAction !== null}
               icon={<IconLogout color={colors.textSecondary} size={16} />}
-              label={t("DataManagement.SignOutButton", { ns: "SettingsPage" })}
+              label={tSettingsPage("DataManagement.SignOutButton")}
               onPress={() => {
                 void handleLogout();
               }}
@@ -159,7 +167,7 @@ export function SettingsAccountScreen() {
             <SettingsActionButton
               disabled={pendingAction !== null}
               icon={<IconTrash color={colors.dangerAccent} size={16} />}
-              label={t("DataManagement.DeleteButton", { ns: "SettingsPage" })}
+              label={tSettingsPage("DataManagement.DeleteButton")}
               onPress={() => setDeleteConfirmOpen(true)}
               tone="danger"
               variant="outline"
@@ -176,7 +184,7 @@ export function SettingsAccountScreen() {
         actions={[
           {
             disabled: pendingAction === "delete",
-            label: t("DataManagement.DeleteCancelButton", { ns: "SettingsPage" }),
+            label: tSettingsPage("DataManagement.DeleteCancelButton"),
             onPress: () => setDeleteConfirmOpen(false),
             tone: "neutral",
             variant: "outline",
@@ -184,7 +192,7 @@ export function SettingsAccountScreen() {
           {
             disabled: pendingAction === "delete",
             icon: <IconTrash color={colors.textOnPrimary} size={16} />,
-            label: t("DataManagement.DeleteConfirmButton", { ns: "SettingsPage" }),
+            label: tSettingsPage("DataManagement.DeleteConfirmButton"),
             loading: pendingAction === "delete",
             onPress: confirmDeleteAccount,
             tone: "danger",
@@ -195,7 +203,7 @@ export function SettingsAccountScreen() {
         onClose={() => setDeleteConfirmOpen(false)}
         onOpenChange={setDeleteConfirmOpen}
         open={isDeleteConfirmOpen}
-        title={t("DataManagement.DeleteConfirmTitle", { ns: "SettingsPage" })}
+        title={tSettingsPage("DataManagement.DeleteConfirmTitle")}
       />
     </>
   );

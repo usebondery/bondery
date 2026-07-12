@@ -1,5 +1,4 @@
-﻿import { preloadGroup } from "@bondery/translations";
-import { ModalsProvider } from "@mantine/modals";
+﻿import { ModalsProvider } from "@mantine/modals";
 import { getResources, getT, initServerI18next } from "next-i18next/server";
 import { CodeHighlightProvider } from "@/components/CodeHighlightProvider";
 import { LocaleProvider } from "@/components/shell/UserLocaleProvider";
@@ -8,7 +7,7 @@ import { preloadWebNamespaces } from "@/lib/i18n/preloadNamespaces.server";
 import { resolveLocaleSettings } from "@/lib/i18n/resolveLocaleSettings";
 import { QueryProvider } from "@/lib/query/QueryProvider";
 
-initServerI18next(i18nConfig, preloadGroup("web.shell"));
+initServerI18next(i18nConfig);
 
 /**
  * Force dynamic rendering because resolveLocaleSettings() reads request headers

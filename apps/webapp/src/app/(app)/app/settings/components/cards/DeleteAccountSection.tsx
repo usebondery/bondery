@@ -10,16 +10,16 @@ import {
 import { Button, Group, Text } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { IconAlertCircle, IconTrash } from "@tabler/icons-react";
-import { Trans } from "next-i18next/client";
 import { openStandardConfirmModal } from "@/components/modals/openStandardConfirmModal";
 import { endSession } from "@/lib/auth/endSession";
-import { useCommonTranslations, useWebTranslations } from "@/lib/i18n/useWebTranslations";
+import { useCommonTranslations, useSettingsPageTranslations } from "@/lib/i18n/generated/hooks";
+import { TypedTrans } from "@/lib/i18n/TypedTrans";
 import { useDeleteAccountMutation } from "@/lib/query/hooks/useSettings";
 
 export function DeleteAccountSection() {
   const tCommon = useCommonTranslations();
 
-  const t = useWebTranslations("SettingsPage", "DataManagement");
+  const t = useSettingsPageTranslations("DataManagement");
   const deleteAccountMutation = useDeleteAccountMutation();
 
   const handleDeleteAccount = () => {
@@ -30,7 +30,7 @@ export function DeleteAccountSection() {
       confirmLeftSection: <IconTrash size={16} />,
       message: (
         <Text size="sm">
-          <Trans components={{ b: <b /> }} i18nKey="DeleteConfirmMessage" t={t} />
+          <TypedTrans components={{ b: <b /> }} i18nKey="DeleteConfirmMessage" t={t} />
         </Text>
       ),
       onConfirm: async () => {

@@ -76,14 +76,17 @@ export function buildFinalRecipients(recipients: string[], emailInput: string): 
   return recipients;
 }
 
-export function formatShareEmailSendButtonLabel(count: number, t: (key: string) => string): string {
+export function formatShareEmailSendButtonLabel(
+  count: number,
+  t: (key: "SendButton" | "SendButtonOne" | "SendButtonMany") => string,
+): string {
   if (count <= 0) {
-    return t("SendButton", { ns: "MobileShareContactEmail" });
+    return t("SendButton");
   }
 
   if (count === 1) {
-    return t("SendButtonOne", { ns: "MobileShareContactEmail" });
+    return t("SendButtonOne");
   }
 
-  return t("SendButtonMany", { ns: "MobileShareContactEmail" }).replace("{count}", String(count));
+  return t("SendButtonMany").replace("{count}", String(count));
 }

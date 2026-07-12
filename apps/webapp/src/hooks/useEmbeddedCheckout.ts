@@ -14,7 +14,7 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ApiError, clientApiJson } from "@/lib/api/client";
 import { isUnauthorizedApiError } from "@/lib/auth/handleUnauthorizedSession";
-import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
+import { useCheckoutTranslations } from "@/lib/i18n/generated/hooks";
 import { invalidateSubscription } from "@/lib/query/invalidation";
 import { createBrowswerSupabaseClient } from "@/lib/supabase/client";
 
@@ -57,7 +57,7 @@ export function useEmbeddedCheckout({
   const router = useRouter();
   const queryClient = useQueryClient();
   const colorScheme = useComputedColorScheme("light");
-  const t = useWebTranslations("Checkout");
+  const t = useCheckoutTranslations();
 
   const handleCheckoutConfirmed = useCallback(() => {
     void invalidateSubscription(queryClient);

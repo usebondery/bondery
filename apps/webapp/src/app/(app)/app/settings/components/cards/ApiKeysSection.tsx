@@ -19,8 +19,8 @@ import { IconAlertCircle, IconKey, IconPlus, IconTrash } from "@tabler/icons-rea
 import { useCallback, useEffect, useRef, useState } from "react";
 import { InlineEditableInput } from "@/app/(app)/app/person/[personId]/components/info/InlineEditableInput";
 import { openStandardConfirmModal } from "@/components/modals/openStandardConfirmModal";
+import { useCommonTranslations, useSettingsPageTranslations } from "@/lib/i18n/generated/hooks";
 import { formatLastUsedAtWithFormatter, useDateFormatter } from "@/lib/i18n/useDateFormatter";
-import { useCommonTranslations, useWebTranslations } from "@/lib/i18n/useWebTranslations";
 import {
   useApiKeysQuery,
   useDeleteApiKeyMutation,
@@ -55,7 +55,7 @@ function ApiKeyRow({
   onDelete,
   onLabelUpdated,
 }: ApiKeyRowProps) {
-  const t = useWebTranslations("SettingsPage", "ApiKeys");
+  const t = useSettingsPageTranslations("ApiKeys");
   const [label, setLabel] = useState(apiKey.label);
   const [isSaving, setIsSaving] = useState(false);
   const persistedLabelRef = useRef(apiKey.label);
@@ -154,7 +154,7 @@ function ApiKeyRow({
 }
 
 export function ApiKeysSection({ apiBaseUrl }: ApiKeysSectionProps) {
-  const t = useWebTranslations("SettingsPage", "ApiKeys");
+  const t = useSettingsPageTranslations("ApiKeys");
   const tCommon = useCommonTranslations();
   const formatter = useDateFormatter();
   const { data: apiKeys = [] } = useApiKeysQuery();

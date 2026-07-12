@@ -1,13 +1,14 @@
 import { StyleSheet, Text, View } from "react-native";
-import { useMobileTranslations } from "../../../lib/i18n/useMobileTranslations";
+import { useCommonTranslations, useMobileContactsTranslations } from "@/lib/i18n/generated/hooks";
 import { MOBILE_TYPOGRAPHY } from "../../../theme/tokens";
 import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
 
 /** Static placeholder chip matching {@link CreateGroupChip} styling — not tappable. */
 export function EmptyGroupsChip() {
-  const t = useMobileTranslations();
+  const tMobileContacts = useMobileContactsTranslations();
+  const _t = useCommonTranslations();
   const colors = useMobileThemeColors();
-  const label = t("NoGroupsYet", { ns: "MobileContacts" });
+  const label = tMobileContacts("NoGroupsYet");
 
   return (
     <View

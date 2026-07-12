@@ -1,7 +1,7 @@
 {
   "description": "Supabase database setup, migrations, and edge functions",
   "devDependencies": {
-    "supabase": "^2.83.0"
+    "supabase": "^2.109.1"
   },
   "name": "supabase-db",
   "private": true,

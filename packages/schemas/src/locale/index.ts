@@ -7,4 +7,4 @@ export {
   SUPPORTED_LOCALES,
   type SupportedLocale,
   supportedLocaleSchema,
-} from "#locale/supported-locale.js";
+} from "#locale/supported-locale/index.js";

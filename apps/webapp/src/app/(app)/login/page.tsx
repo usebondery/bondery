@@ -1,8 +1,8 @@
 import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
-import { RETURN_INTENT_PARAM, parseReturnIntent } from "@/lib/auth/returnIntent";
 import { resolveServerSession, signOutServerSession } from "@/lib/auth/resolveServerSession";
+import { parseReturnIntent, RETURN_INTENT_PARAM } from "@/lib/auth/returnIntent";
 import { LoginClient } from "./LoginClient";
 
 type LoginPageProps = {

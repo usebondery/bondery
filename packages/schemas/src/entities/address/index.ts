@@ -1,0 +1,26 @@
+export {
+  contactAddressConfidenceSchema,
+  contactAddressEntrySchema,
+  contactAddressGeocodeSourceSchema,
+  contactAddressGranularitySchema,
+  contactAddressReadSchema,
+  contactAddressSheetSchema,
+  contactAddressTypeSchema,
+  geocodeSuggestAddressSchema,
+  replaceAddressesSchema,
+} from "./schema.js";
+export type {
+  ContactAddressConfidence,
+  ContactAddressEntry,
+  ContactAddressEntryInput,
+  ContactAddressEntryOutput,
+  ContactAddressGeocodeSource,
+  ContactAddressGranularity,
+  ContactAddressRead,
+  ContactAddressSheetInput,
+  ContactAddressSheetOutput,
+  ContactAddressType,
+  GeocodeSuggestAddressInput,
+  GeocodeSuggestAddressOutput,
+  ReplaceAddressesInput,
+} from "./types.js";

@@ -13,7 +13,7 @@ import { ActionIcon, Stack, Text, Tooltip } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { IconPlus } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
-import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
+import { useContactImportantDatesTranslations } from "@/lib/i18n/generated/hooks";
 import { IMPORTANT_DATE_NOTIFY_OPTIONS, IMPORTANT_DATE_TYPE_OPTIONS } from "@/lib/platform/config";
 import {
   areDatesEqual,
@@ -40,7 +40,7 @@ export function ContactImportantDatesSection({
   onDatesChange,
   onSave,
 }: ContactImportantDatesSectionProps) {
-  const t = useWebTranslations("ContactImportantDates");
+  const t = useContactImportantDatesTranslations();
 
   const [localDates, setLocalDates] = useState<ImportantDate[]>(dates);
   const [draftDate, setDraftDate] = useState<ImportantDateDraft>(createDraftDate());

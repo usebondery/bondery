@@ -5,13 +5,13 @@ import { IconTag } from "@tabler/icons-react";
 import { AddNewTagButton } from "@/components/tags/AddNewTagButton";
 import { openTagEditorModal } from "@/components/tags/openTagEditorModal";
 import { TagPill } from "@/components/tags/TagPill";
-import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
+import { useTagsSettingsTranslations } from "@/lib/i18n/generated/hooks";
 import { useTagsListQuery } from "@/lib/query/hooks/useTags";
 import { SETTINGS_TAGS_PREVIEW } from "@/lib/query/settingsPageQueryParams";
 import { SettingsSection } from "./SettingsSection";
 
 export function TagsSection() {
-  const t = useWebTranslations("TagsSettings");
+  const t = useTagsSettingsTranslations();
   const { data: tags = [] } = useTagsListQuery(SETTINGS_TAGS_PREVIEW);
 
   return (

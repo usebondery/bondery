@@ -10,9 +10,13 @@ import {
 } from "@tabler/icons-react-native";
 import { useState } from "react";
 import { Linking, Platform, StyleSheet, Text, View } from "react-native";
+import {
+  useCommonTranslations,
+  useContactAddressTranslations,
+  useContactInfoTranslations,
+} from "@/lib/i18n/generated/hooks";
 import { copyToClipboard } from "../../../lib/clipboard/copyToClipboard";
 import { LIMITS } from "../../../lib/config";
-import { useMobileTranslations } from "../../../lib/i18n/useMobileTranslations";
 import { useAppToast } from "../../../lib/toast/useAppToast";
 import { MOBILE_TYPOGRAPHY } from "../../../theme/tokens";
 import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
@@ -56,8 +60,10 @@ export function ContactAddressesSection({
   addresses,
   onSaveAddresses,
 }: ContactAddressesSectionProps) {
+  const tContactAddress = useContactAddressTranslations();
+  const tContactInfo = useContactInfoTranslations();
+  const t = useCommonTranslations();
   const colors = useMobileThemeColors();
-  const t = useMobileTranslations();
   const { showToast } = useAppToast();
   const [sheet, setSheet] = useState<SheetState>({ open: false });
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -95,9 +101,8 @@ export function ContactAddressesSection({
       closeSheet();
     } catch (err) {
       showToast({
-        description:
-          err instanceof Error ? err.message : t("SaveErrorMessage", { ns: "ContactAddress" }),
-        headline: t("SaveErrorTitle", { ns: "ContactAddress" }),
+        description: err instanceof Error ? err.message : tContactAddress("SaveErrorMessage"),
+        headline: tContactAddress("SaveErrorTitle"),
         type: "error",
       });
     } finally {
@@ -113,9 +118,8 @@ export function ContactAddressesSection({
       closeSheet();
     } catch (err) {
       showToast({
-        description:
-          err instanceof Error ? err.message : t("SaveErrorMessage", { ns: "ContactAddress" }),
-        headline: t("SaveErrorTitle", { ns: "ContactAddress" }),
+        description: err instanceof Error ? err.message : tContactAddress("SaveErrorMessage"),
+        headline: tContactAddress("SaveErrorTitle"),
         type: "error",
       });
     } finally {
@@ -135,9 +139,8 @@ export function ContactAddressesSection({
       await onSaveAddresses(nextAddresses);
     } catch (err) {
       showToast({
-        description:
-          err instanceof Error ? err.message : t("SaveErrorMessage", { ns: "ContactAddress" }),
-        headline: t("SaveErrorTitle", { ns: "ContactAddress" }),
+        description: err instanceof Error ? err.message : tContactAddress("SaveErrorMessage"),
+        headline: tContactAddress("SaveErrorTitle"),
         type: "error",
       });
     }
@@ -148,7 +151,7 @@ export function ContactAddressesSection({
     Linking.openURL(url).catch(() => {
       showToast({
         description: "Could not open maps",
-        headline: t("feedback.errorTitle", { ns: "common" }),
+        headline: t("feedback.errorTitle"),
         type: "error",
       });
     });
@@ -162,9 +165,9 @@ export function ContactAddressesSection({
 
     await copyToClipboard(label, showToast, {
       errorDescription: "Could not copy address",
-      errorHeadline: t("feedback.errorTitle", { ns: "common" }),
+      errorHeadline: t("feedback.errorTitle"),
       successDescription: label,
-      successHeadline: t("CopySuccessTitle", { ns: "ContactAddress" }),
+      successHeadline: tContactAddress("CopySuccessTitle"),
     });
   }
 
@@ -177,9 +180,9 @@ export function ContactAddressesSection({
         action={
           canAdd
             ? {
-                accessibilityLabel: t("AddAddressAction", { ns: "ContactAddress" }),
+                accessibilityLabel: tContactAddress("AddAddressAction"),
                 icon: <IconMapPinPlus size={16} stroke={colors.primary} />,
-                label: t("Add", { ns: "ContactInfo" }),
+                label: tContactInfo("Add"),
                 onPress: openAddSheet,
               }
             : undefined
@@ -197,7 +200,7 @@ export function ContactAddressesSection({
           ]}
         >
           <Text style={[styles.emptyText, { color: colors.textMuted }]}>
-            {t("NoAddresses", { ns: "ContactAddress" })}
+            {tContactAddress("NoAddresses")}
           </Text>
         </View>
       ) : (
@@ -210,37 +213,35 @@ export function ContactAddressesSection({
             {
               icon: <IconMapPin size={16} stroke={colors.iconPrimary} />,
               id: "native-maps",
-              label: t("OpenInMapsAction", { ns: "ContactAddress" }),
+              label: tContactAddress("OpenInMapsAction"),
               onPress: () => openInMaps(address),
             },
             {
               icon: <IconPencil size={16} stroke={colors.iconPrimary} />,
               id: "edit",
-              label: t("EditAction", { ns: "ContactAddress" }),
+              label: tContactAddress("EditAction"),
               onPress: () => openEditSheet(index, address),
             },
             {
               disabled: isPreferred,
-              hint: isPreferred
-                ? t("DisabledReasonAlreadyPreferred", { ns: "ContactAddress" })
-                : undefined,
+              hint: isPreferred ? tContactAddress("DisabledReasonAlreadyPreferred") : undefined,
               icon: (
                 <IconStar size={16} stroke={isPreferred ? colors.textMuted : colors.iconPrimary} />
               ),
               id: "set-preferred",
-              label: t("SetAsPreferred", { ns: "ContactAddress" }),
+              label: tContactAddress("SetAsPreferred"),
               onPress: () => void handleSetPreferred(index),
             },
             {
               icon: <IconCopy size={16} stroke={colors.iconPrimary} />,
               id: "copy",
-              label: t("CopyAction", { ns: "ContactAddress" }),
+              label: tContactAddress("CopyAction"),
               onPress: () => void copyAddress(address),
             },
             {
               icon: <IconTrash size={16} stroke={colors.dangerAccent} />,
               id: "delete",
-              label: t("DeleteAction", { ns: "ContactAddress" }),
+              label: tContactAddress("DeleteAction"),
               onPress: () => void handleDelete(index),
               tone: "danger" as const,
             },
@@ -249,7 +250,7 @@ export function ContactAddressesSection({
           return (
             <ContactChannelRow
               accessibilityHint="Tap to open in maps"
-              accessibilityLabel={`${accessibilityAddressLabel}${isPreferred ? `, ${t("Preferred", { ns: "ContactInfo" })}` : ""}`}
+              accessibilityLabel={`${accessibilityAddressLabel}${isPreferred ? `, ${tContactInfo("Preferred")}` : ""}`}
               channelIcon={<IconMapPin size={16} stroke={colors.iconSecondary} />}
               isPreferred={isPreferred}
               key={address.formatted || address.value}
@@ -279,7 +280,7 @@ export function ContactAddressesSection({
                   ) : null}
                 </View>
               }
-              menuAccessibilityLabel={t("ActionsLabel", { ns: "ContactAddress" })}
+              menuAccessibilityLabel={tContactAddress("ActionsLabel")}
               menuItems={menuItems}
               onLongPress={() => void copyAddress(address)}
               onPress={() => openInMaps(address)}

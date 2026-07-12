@@ -12,7 +12,7 @@ import { Combobox, Group, Input, ScrollArea, Stack, Text, useCombobox } from "@m
 import { IconLanguage } from "@tabler/icons-react";
 import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
-import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
+import { useLanguagesTranslations, useSettingsPageTranslations } from "@/lib/i18n/generated/hooks";
 
 type PickerLanguage = AppLanguageData | LanguageData;
 
@@ -51,8 +51,8 @@ export function LanguagePicker({
   const currentValue = value ?? initialValue;
   const [language, setLanguage] = useState(currentValue);
   const [searchValue, setSearchValue] = useState("");
-  const t = useWebTranslations("SettingsPage", "Profile");
-  const tLanguages = useWebTranslations("Languages");
+  const t = useSettingsPageTranslations("Profile");
+  const tLanguages = useLanguagesTranslations();
 
   useEffect(() => {
     setLanguage(currentValue);
@@ -84,14 +84,14 @@ export function LanguagePicker({
 
   const selectedLanguage = languages.find((lang) => lang.value === language);
 
-  const getExonym = (lang: PickerLanguage) => {
+  const getExonym = (lang: PickerLanguage): string => {
     if (getLocalizedLabel) {
       return getLocalizedLabel(lang);
     }
     if (isWorldLanguage(lang)) {
       return lang.label;
     }
-    return tLanguages(getAppLanguageExonymKey(lang.value));
+    return tLanguages(getAppLanguageExonymKey(lang.value) as never);
   };
 
   const getDisplayLabel = (lang: PickerLanguage) =>

@@ -24,8 +24,12 @@ import {
   TabRootScreenHeader,
   useScrollBottomInset,
 } from "../../components/chrome";
+import {
+  useCommonTranslations,
+  useMobileSettingsTranslations,
+  useTagsSettingsTranslations,
+} from "../../lib/i18n/generated/hooks";
 import { preloadMobileNamespaces } from "../../lib/i18n/preloadMobileNamespaces";
-import { useMobileTranslations } from "../../lib/i18n/useMobileTranslations";
 import { useAppToast } from "../../lib/toast/useAppToast";
 import { SOCIAL_BRAND_COLORS } from "../../theme/colors";
 import { MOBILE_LAYOUT } from "../../theme/tokens";
@@ -75,7 +79,9 @@ const SOCIAL_BUTTONS = [
 ] as const;
 
 export function SettingsScreen() {
-  const t = useMobileTranslations();
+  const tMobileSettings = useMobileSettingsTranslations();
+  const tTagsSettings = useTagsSettingsTranslations();
+  const _t = useCommonTranslations();
   useEffect(() => {
     void preloadMobileNamespaces(["mobile.settingsTab"]);
   }, []);
@@ -88,8 +94,8 @@ export function SettingsScreen() {
   const openDocs = () => {
     void openExternalUrl(HELP_DOCS_URL, () => {
       showToast({
-        description: t("OpenDocsErrorDescription", { ns: "MobileSettings" }),
-        headline: t("OpenDocsErrorHeadline", { ns: "MobileSettings" }),
+        description: tMobileSettings("OpenDocsErrorDescription"),
+        headline: tMobileSettings("OpenDocsErrorHeadline"),
         type: "error",
       });
     });
@@ -98,7 +104,7 @@ export function SettingsScreen() {
   return (
     <View style={[styles.screen, { backgroundColor: colors.appBackground }]}>
       <TabRootScreenHeader
-        titleRow={<TabRootLargeTitle>{t("Title", { ns: "MobileSettings" })}</TabRootLargeTitle>}
+        titleRow={<TabRootLargeTitle>{tMobileSettings("Title")}</TabRootLargeTitle>}
       />
 
       <ScrollView
@@ -107,78 +113,78 @@ export function SettingsScreen() {
         scrollEventThrottle={16}
         style={styles.scroll}
       >
-        <SettingsSectionCard title={t("Account", { ns: "MobileSettings" })}>
+        <SettingsSectionCard title={tMobileSettings("Account")}>
           <SettingsNavigationRow
             icon={<IconSettings size={18} stroke={colors.iconPrimary} />}
-            label={t("Account", { ns: "MobileSettings" })}
+            label={tMobileSettings("Account")}
             onPress={() => router.push("/settings/account")}
           />
         </SettingsSectionCard>
 
-        <SettingsSectionCard title={t("Preferences", { ns: "MobileSettings" })}>
+        <SettingsSectionCard title={tMobileSettings("Preferences")}>
           <SettingsNavigationRow
             icon={<IconMessage size={18} stroke={colors.iconPrimary} />}
-            label={t("SwipeActions", { ns: "MobileSettings" })}
+            label={tMobileSettings("SwipeActions")}
             onPress={() => router.push("/settings/swipe-actions")}
           />
 
           <SettingsNavigationRow
             icon={<IconUsers size={18} stroke={colors.iconPrimary} />}
-            label={t("GroupSort", { ns: "MobileSettings" })}
+            label={tMobileSettings("GroupSort")}
             onPress={() => router.push("/settings/group-sort")}
           />
 
           <SettingsNavigationRow
             icon={<IconTag size={18} stroke={colors.iconPrimary} />}
-            label={t("Title", { ns: "TagsSettings" })}
+            label={tTagsSettings("Title")}
             onPress={() => router.push("/settings/tags")}
           />
 
           <SettingsNavigationRow
             icon={<IconWorld size={18} stroke={colors.iconPrimary} />}
-            label={t("LanguageAndTime", { ns: "MobileSettings" })}
+            label={tMobileSettings("LanguageAndTime")}
             onPress={() => router.push("/settings/language")}
           />
 
           <SettingsNavigationRow
             icon={<IconSun size={18} stroke={colors.iconPrimary} />}
-            label={t("Theme", { ns: "MobileSettings" })}
+            label={tMobileSettings("Theme")}
             onPress={() => router.push("/settings/theme")}
             showDivider={false}
           />
         </SettingsSectionCard>
 
-        <SettingsSectionCard title={t("Links", { ns: "MobileSettings" })}>
+        <SettingsSectionCard title={tMobileSettings("Links")}>
           <SettingsNavigationRow
             destination="external"
-            externalLabel={t("External", { ns: "MobileSettings" })}
+            externalLabel={tMobileSettings("External")}
             icon={<IconBook size={18} stroke={colors.iconPrimary} />}
-            label={t("Guides", { ns: "MobileSettings" })}
+            label={tMobileSettings("Guides")}
             onPress={openDocs}
           />
 
           <SettingsNavigationRow
             icon={<IconInfoCircle size={18} stroke={colors.iconPrimary} />}
-            label={t("AboutUs", { ns: "MobileSettings" })}
+            label={tMobileSettings("AboutUs")}
             onPress={() => router.push("/settings/about")}
           />
 
           <SettingsNavigationRow
             icon={<IconShield size={18} stroke={colors.iconPrimary} />}
-            label={t("Legal", { ns: "MobileSettings" })}
+            label={tMobileSettings("Legal")}
             onPress={() => router.push("/settings/legal")}
             showDivider={false}
           />
         </SettingsSectionCard>
 
-        <SettingsSectionCard title={t("FollowUs", { ns: "MobileSettings" })}>
+        <SettingsSectionCard title={tMobileSettings("FollowUs")}>
           <View style={styles.socialsRow}>
             {SOCIAL_BUTTONS.map((social) => {
               const Icon = social.icon;
 
               return (
                 <ContactSocialButton
-                  accessibilityLabel={t(social.labelKey, { ns: "MobileSettings" })}
+                  accessibilityLabel={tMobileSettings(social.labelKey)}
                   color={social.color}
                   icon={<Icon size={20} stroke={social.color} />}
                   key={social.id}
@@ -191,10 +197,10 @@ export function SettingsScreen() {
           </View>
         </SettingsSectionCard>
 
-        <SettingsSectionCard title={t("Technical", { ns: "MobileSettings" })}>
+        <SettingsSectionCard title={tMobileSettings("Technical")}>
           <SettingsNavigationRow
             icon={<IconServer size={18} stroke={colors.iconPrimary} />}
-            label={t("Technical", { ns: "MobileSettings" })}
+            label={tMobileSettings("Technical")}
             onPress={() => router.push("/settings/technical")}
             showDivider={false}
           />

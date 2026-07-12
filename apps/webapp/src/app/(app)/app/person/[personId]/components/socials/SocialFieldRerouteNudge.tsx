@@ -2,7 +2,7 @@
 
 import { Alert, Button, Group, Text } from "@mantine/core";
 import { IconInfoCircle } from "@tabler/icons-react";
-import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
+import { useSocialsTranslations } from "@/lib/i18n/generated/hooks";
 import type { RerouteSuggestion, SocialFieldKey } from "../../hooks/useSocialFieldEditor";
 
 interface SocialFieldRerouteNudgeProps {
@@ -24,7 +24,7 @@ export function SocialFieldRerouteNudge({
   onKeepHere,
   disabled,
 }: SocialFieldRerouteNudgeProps) {
-  const t = useWebTranslations("Socials");
+  const t = useSocialsTranslations();
 
   if (suggestion.fromField !== field) {
     return null;

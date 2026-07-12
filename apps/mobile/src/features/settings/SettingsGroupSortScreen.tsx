@@ -5,7 +5,11 @@ import { useCallback, useMemo, useState } from "react";
 import { Pressable, ScrollView, StyleSheet } from "react-native";
 import { StackNavBar } from "../../components/chrome";
 import { updateSettings } from "../../lib/api/client";
-import { useMobileTranslations } from "../../lib/i18n/useMobileTranslations";
+import {
+  useCommonTranslations,
+  useMobileGroupsTranslations,
+  useMobileSettingsTranslations,
+} from "../../lib/i18n/generated/hooks";
 import type {
   GroupSortOrder,
   MobilePreferencesState,
@@ -23,8 +27,10 @@ import { SettingsPreviewSection } from "./components/SettingsPreviewSection";
 import { SettingsSelect } from "./components/SettingsSelect";
 
 export function SettingsGroupSortScreen() {
+  const tMobileGroups = useMobileGroupsTranslations();
+  const tMobileSettings = useMobileSettingsTranslations();
+  const _t = useCommonTranslations();
   const router = useRouter();
-  const t = useMobileTranslations();
   const colors = useMobileThemeColors();
   const { data: syncedGroups, isInitialSync, refresh: refreshGroups } = useGroups();
   const [loadError, _setLoadError] = useState<string | null>(null);
@@ -59,13 +65,13 @@ export function SettingsGroupSortScreen() {
 
   const sortOptions: Array<{ value: GroupSortOrder; label: string }> = [
     {
-      label: t("GroupSortRecentOpened", { ns: "MobileSettings" }),
+      label: tMobileSettings("GroupSortRecentOpened"),
       value: "recent-opened",
     },
-    { label: t("GroupSortCountDesc", { ns: "MobileSettings" }), value: "count-desc" },
-    { label: t("GroupSortCountAsc", { ns: "MobileSettings" }), value: "count-asc" },
-    { label: t("GroupSortAlphaAsc", { ns: "MobileSettings" }), value: "alpha-asc" },
-    { label: t("GroupSortAlphaDesc", { ns: "MobileSettings" }), value: "alpha-desc" },
+    { label: tMobileSettings("GroupSortCountDesc"), value: "count-desc" },
+    { label: tMobileSettings("GroupSortCountAsc"), value: "count-asc" },
+    { label: tMobileSettings("GroupSortAlphaAsc"), value: "alpha-asc" },
+    { label: tMobileSettings("GroupSortAlphaDesc"), value: "alpha-desc" },
   ];
 
   const handleSortChange = (nextOrder: GroupSortOrder) => {
@@ -93,12 +99,12 @@ export function SettingsGroupSortScreen() {
 
   const previewCaption =
     syncedGroups.length === 0 && !isLoading && !loadError
-      ? t("PreviewHintGroupsEmpty", { ns: "MobileSettings" })
-      : t("PreviewHintGroups", { ns: "MobileSettings" });
+      ? tMobileSettings("PreviewHintGroupsEmpty")
+      : tMobileSettings("PreviewHintGroups");
 
   const createButton = (
     <Pressable
-      accessibilityLabel={t("CreateGroup", { ns: "MobileGroups" })}
+      accessibilityLabel={tMobileGroups("CreateGroup")}
       accessibilityRole="button"
       hitSlop={MOBILE_HIT_SLOP}
       onPress={() => setCreateOpen(true)}
@@ -113,7 +119,7 @@ export function SettingsGroupSortScreen() {
       <StackNavBar
         onBack={() => router.back()}
         right={createButton}
-        title={t("GroupSort", { ns: "MobileSettings" })}
+        title={tMobileSettings("GroupSort")}
         variant="elevated"
       />
 
@@ -121,11 +127,9 @@ export function SettingsGroupSortScreen() {
         contentContainerStyle={styles.content}
         style={[styles.screen, { backgroundColor: colors.appBackground }]}
       >
-        <SettingsFieldLabel>
-          {t("GroupSortSelectLabel", { ns: "MobileSettings" })}
-        </SettingsFieldLabel>
+        <SettingsFieldLabel>{tMobileSettings("GroupSortSelectLabel")}</SettingsFieldLabel>
         <SettingsSelect
-          label={t("GroupSortSelectLabel", { ns: "MobileSettings" })}
+          label={tMobileSettings("GroupSortSelectLabel")}
           onValueChange={handleSortChange}
           options={sortOptions}
           value={groupSortOrder}
@@ -134,7 +138,7 @@ export function SettingsGroupSortScreen() {
         <SettingsPreviewSection caption={previewCaption}>
           <SettingsAsyncState
             errorDescription={loadError}
-            errorTitle={t("GroupsLoadErrorTitle", { ns: "MobileSettings" })}
+            errorTitle={tMobileSettings("GroupsLoadErrorTitle")}
             isLoading={isLoading}
             onRetry={() => {
               void reloadGroups();
@@ -152,7 +156,7 @@ export function SettingsGroupSortScreen() {
 
         {!isLoading && !loadError ? (
           <>
-            <SettingsFieldLabel>{t("ManageGroups", { ns: "MobileSettings" })}</SettingsFieldLabel>
+            <SettingsFieldLabel>{tMobileSettings("ManageGroups")}</SettingsFieldLabel>
             <ContactsGroupsHeader
               groups={manageGroups}
               layout="wrap"

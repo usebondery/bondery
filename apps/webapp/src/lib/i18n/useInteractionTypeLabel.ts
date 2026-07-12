@@ -1,7 +1,8 @@
 "use client";
 
+import type { LooseTranslateFn } from "@bondery/translations";
 import { useCallback } from "react";
-import { useWebTranslations } from "./useWebTranslations";
+import { useInteractionTypesTranslations } from "@/lib/i18n/generated/hooks";
 
 const INTERACTION_TYPE_KEY_MAP: Record<string, string> = {
   "Competition/Hackathon": "CompetitionHackathon",
@@ -15,12 +16,12 @@ export function getInteractionTypeTranslationKey(type: string): string {
 }
 
 export function useInteractionTypeLabel() {
-  const t = useWebTranslations("InteractionTypes");
+  const t = useInteractionTypesTranslations() as LooseTranslateFn;
 
   return useCallback(
     (type: string) => {
       const key = getInteractionTypeTranslationKey(type);
-      const translated = t(key as Parameters<typeof t>[0]);
+      const translated = t(key);
       return translated === key ? type : translated;
     },
     [t],

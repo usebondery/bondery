@@ -1,7 +1,7 @@
 "use client";
 
 import { Button, Group } from "@mantine/core";
-import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
+import { useContactImportantDatesTranslations } from "@/lib/i18n/generated/hooks";
 import DateWithNotification from "../notes/DateWithNotification";
 
 interface ContactDatesSectionProps {
@@ -25,7 +25,7 @@ export function ContactDatesSection({
   focusedField,
   setFocusedField,
 }: ContactDatesSectionProps) {
-  const t = useWebTranslations("ContactImportantDates");
+  const t = useContactImportantDatesTranslations();
 
   return (
     <>

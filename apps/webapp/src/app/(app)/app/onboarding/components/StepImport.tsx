@@ -5,9 +5,8 @@ import { Button, Card, Center, SimpleGrid, Stack, Text, ThemeIcon, Title } from 
 import { IconBrandInstagram, IconBrandLinkedin, IconCheck } from "@tabler/icons-react";
 import { useState } from "react";
 import { openInstagramImportModal } from "@/app/(app)/app/settings/components/modals/openInstagramImportModal";
-
 import { openLinkedInImportModal } from "@/app/(app)/app/settings/components/modals/openLinkedInImportModal";
-import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
+import { useOnboardingTranslations } from "@/lib/i18n/generated/hooks";
 
 interface StepProps {
   onAwaitingExportFromModal: (platform: ImportFollowupPlatform) => void | Promise<void>;
@@ -31,7 +30,7 @@ export function StepImport({
 
   onAwaitingExportFromModal,
 }: StepProps) {
-  const t = useWebTranslations("Onboarding", "Import");
+  const t = useOnboardingTranslations("Import");
 
   const [importResult, setImportResult] = useState<ImportStats | null>(null);
 

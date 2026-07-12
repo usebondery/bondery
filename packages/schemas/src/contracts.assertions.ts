@@ -1,20 +1,23 @@
-import { EXAMPLE_CONTACT_ID } from "#contact-id.js";
-import { createInteractionInputSchema, interactionParticipantSchema } from "#entities/activity.js";
-import { contactPreviewSchema, deleteContactsRequestSchema } from "#entities/contact.js";
+import { EXAMPLE_CONTACT_ID } from "#contact-id/index.js";
+import {
+  createInteractionInputSchema,
+  interactionParticipantSchema,
+} from "#entities/activity/index.js";
+import { contactPreviewSchema, deleteContactsRequestSchema } from "#entities/contact/index.js";
 import {
   createGroupSchema,
   deleteGroupsRequestSchema,
   updateGroupSchema,
-} from "#entities/group.js";
-import { instagramImportCommitRequestSchema } from "#entities/import.js";
-import { importantDateSheetSchema } from "#entities/important-date.js";
+} from "#entities/group/index.js";
+import { instagramImportCommitRequestSchema } from "#entities/import/index.js";
+import { importantDateSheetSchema } from "#entities/important-date/index.js";
 import {
   mergeContactsRequestSchema,
   mergeRecommendationSchema,
   mergeRecommendationsResponseSchema,
-} from "#entities/merge.js";
-import { subscriptionStatusSchema } from "#entities/subscription.js";
-import { createTagSchema, deleteTagsRequestSchema, updateTagSchema } from "#entities/tag.js";
+} from "#entities/merge/index.js";
+import { subscriptionStatusSchema } from "#entities/subscription/index.js";
+import { createTagSchema, deleteTagsRequestSchema, updateTagSchema } from "#entities/tag/index.js";
 import { paginationQuerySchema } from "#http/index.js";
 import { EXAMPLE_MERGE_RECOMMENDATION, EXAMPLE_PAGINATION } from "#openapi/fixtures/index.js";
 

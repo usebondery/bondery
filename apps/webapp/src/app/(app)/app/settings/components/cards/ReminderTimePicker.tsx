@@ -12,7 +12,7 @@ import { notifications } from "@mantine/notifications";
 import { IconBell } from "@tabler/icons-react";
 import type { ReactNode } from "react";
 import { useState } from "react";
-import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
+import { useSettingsPageTranslations } from "@/lib/i18n/generated/hooks";
 import { useUpdateSettingsMutation } from "@/lib/query/hooks/useSettings";
 
 interface ReminderTimePickerProps {
@@ -121,7 +121,7 @@ export function ReminderTimePicker({
   label,
   description,
 }: ReminderTimePickerProps) {
-  const t = useWebTranslations("SettingsPage", "Preferences");
+  const t = useSettingsPageTranslations("Preferences");
   const updateSettingsMutation = useUpdateSettingsMutation();
   const initialHourValue = roundToHourValue(toInputTime(initialTime));
   const [value24h, setValue24h] = useState(initialHourValue);

@@ -16,7 +16,7 @@ import { modals } from "@mantine/modals";
 import { notifications } from "@mantine/notifications";
 import { IconAlertTriangle, IconFileText, IconKey } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
-import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
+import { useSettingsPageTranslations } from "@/lib/i18n/generated/hooks";
 import { createModalId, useModalDismiss } from "@/lib/modals";
 import { useCreateApiKeyMutation } from "@/lib/query/hooks/useApiKeys";
 import { useApiKeyPermissionOptions } from "../../hooks/useApiKeyPermissionOptions";
@@ -35,7 +35,7 @@ interface ApiKeyModalBodyProps extends OpenApiKeyModalOptions {
 }
 
 function ApiKeyModalBody({ modalId, onCreated, apiBaseUrl }: ApiKeyModalBodyProps) {
-  const t = useWebTranslations("SettingsPage", "ApiKeys");
+  const t = useSettingsPageTranslations("ApiKeys");
   const [step, setStep] = useState<"create" | "reveal">("create");
   const [label, setLabel] = useState("");
   const [permission, setPermission] = useState<ApiKeyPermission>("read");
@@ -161,7 +161,7 @@ function ApiKeyModalBody({ modalId, onCreated, apiBaseUrl }: ApiKeyModalBodyProp
 }
 
 function ApiKeyModalTitle() {
-  const t = useWebTranslations("SettingsPage", "ApiKeys");
+  const t = useSettingsPageTranslations("ApiKeys");
   return <ModalTitle icon={<IconKey size={20} stroke={1.5} />} text={t("CreateTitle")} />;
 }
 

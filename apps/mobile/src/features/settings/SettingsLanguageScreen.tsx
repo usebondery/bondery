@@ -13,7 +13,12 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { ScrollView, StyleSheet, Text } from "react-native";
 import { StackNavBar } from "../../components/chrome";
 import { fetchSettings, updateSettings } from "../../lib/api/client";
-import { useMobileTranslations } from "../../lib/i18n/useMobileTranslations";
+import {
+  useCommonTranslations,
+  useLanguagesTranslations,
+  useMobileSettingsTranslations,
+  useSettingsPageTranslations,
+} from "../../lib/i18n/generated/hooks";
 import type {
   MobileLocale,
   MobilePreferencesState,
@@ -51,9 +56,11 @@ function formatReminderHourLabel(hour: number, timeFormat: TimeFormatValue): str
 }
 
 export function SettingsLanguageScreen() {
+  const tMobileSettings = useMobileSettingsTranslations();
+  const tSettingsPage = useSettingsPageTranslations();
+  const t = useCommonTranslations();
   const router = useRouter();
-  const t = useMobileTranslations();
-  const tLanguages = useMobileTranslations("Languages");
+  const tLanguages = useLanguagesTranslations();
   const { showToast } = useAppToast();
   const colors = useMobileThemeColors();
 
@@ -86,14 +93,12 @@ export function SettingsLanguageScreen() {
       setReminderSendHour(normalizeReminderHour(response.data.reminderSendHour));
     } catch (err) {
       setLoadError(
-        err instanceof Error
-          ? err.message
-          : t("LanguageLoadErrorDescription", { ns: "MobileSettings" }),
+        err instanceof Error ? err.message : tMobileSettings("LanguageLoadErrorDescription"),
       );
     } finally {
       setIsLoading(false);
     }
-  }, [locale, setLocale, t]);
+  }, [locale, setLocale, tMobileSettings]);
 
   useEffect(() => {
     void loadSettings();
@@ -129,11 +134,11 @@ export function SettingsLanguageScreen() {
 
   const timeFormatOptions: Array<{ value: TimeFormatValue; label: string }> = [
     {
-      label: t("TimeFormat24h", { ns: "MobileSettings" }),
+      label: tMobileSettings("TimeFormat24h"),
       value: "24h",
     },
     {
-      label: t("TimeFormat12h", { ns: "MobileSettings" }),
+      label: tMobileSettings("TimeFormat12h"),
       value: "12h",
     },
   ];
@@ -160,8 +165,8 @@ export function SettingsLanguageScreen() {
     } catch {
       setLocale(previousLocale);
       showToast({
-        description: t("errors.unknown", { ns: "common" }),
-        headline: t("feedback.errorTitle", { ns: "common" }),
+        description: t("errors.unknown"),
+        headline: t("feedback.errorTitle"),
         type: "error",
       });
     }
@@ -180,8 +185,8 @@ export function SettingsLanguageScreen() {
     } catch {
       setTimezone(previousTimezone);
       showToast({
-        description: t("errors.unknown", { ns: "common" }),
-        headline: t("feedback.errorTitle", { ns: "common" }),
+        description: t("errors.unknown"),
+        headline: t("feedback.errorTitle"),
         type: "error",
       });
     }
@@ -200,8 +205,8 @@ export function SettingsLanguageScreen() {
     } catch {
       setTimeFormat(previousTimeFormat);
       showToast({
-        description: t("errors.unknown", { ns: "common" }),
-        headline: t("feedback.errorTitle", { ns: "common" }),
+        description: t("errors.unknown"),
+        headline: t("feedback.errorTitle"),
         type: "error",
       });
     }
@@ -222,8 +227,8 @@ export function SettingsLanguageScreen() {
     } catch {
       setReminderSendHour(previousReminderSendHour);
       showToast({
-        description: t("errors.unknown", { ns: "common" }),
-        headline: t("feedback.errorTitle", { ns: "common" }),
+        description: t("errors.unknown"),
+        headline: t("feedback.errorTitle"),
         type: "error",
       });
     }
@@ -233,7 +238,7 @@ export function SettingsLanguageScreen() {
     <>
       <StackNavBar
         onBack={() => router.back()}
-        title={t("LanguageAndTime", { ns: "MobileSettings" })}
+        title={tMobileSettings("LanguageAndTime")}
         variant="elevated"
       />
 
@@ -243,18 +248,16 @@ export function SettingsLanguageScreen() {
       >
         <SettingsAsyncState
           errorDescription={loadError}
-          errorTitle={t("LanguageLoadErrorTitle", { ns: "MobileSettings" })}
+          errorTitle={tMobileSettings("LanguageLoadErrorTitle")}
           isLoading={isLoading}
           loadingMinHeight={120}
           onRetry={() => {
             void loadSettings();
           }}
         >
-          <SettingsFieldLabel>
-            {t("LanguageSelectLabel", { ns: "MobileSettings" })}
-          </SettingsFieldLabel>
+          <SettingsFieldLabel>{tMobileSettings("LanguageSelectLabel")}</SettingsFieldLabel>
           <SettingsSelect
-            label={t("LanguageSelectLabel", { ns: "MobileSettings" })}
+            label={tMobileSettings("LanguageSelectLabel")}
             onValueChange={(nextLocale) => {
               void handleLocaleChange(nextLocale as MobileLocale);
             }}
@@ -262,26 +265,22 @@ export function SettingsLanguageScreen() {
             value={locale}
           />
 
-          <SettingsFieldLabel>
-            {t("TimezoneSelectLabel", { ns: "MobileSettings" })}
-          </SettingsFieldLabel>
+          <SettingsFieldLabel>{tMobileSettings("TimezoneSelectLabel")}</SettingsFieldLabel>
           <SettingsSelect
-            emptySearchLabel={t("feedback.noResults", { ns: "common" })}
-            label={t("TimezoneSelectLabel", { ns: "MobileSettings" })}
+            emptySearchLabel={t("feedback.noResults")}
+            label={tMobileSettings("TimezoneSelectLabel")}
             onValueChange={(nextTimezone) => {
               void handleTimezoneChange(nextTimezone);
             }}
             options={timezoneOptions}
             searchable
-            searchPlaceholder={t("Profile.TimezoneSearch", { ns: "SettingsPage" })}
+            searchPlaceholder={tSettingsPage("Profile.TimezoneSearch")}
             value={timezone}
           />
 
-          <SettingsFieldLabel>
-            {t("TimeFormatSelectLabel", { ns: "MobileSettings" })}
-          </SettingsFieldLabel>
+          <SettingsFieldLabel>{tMobileSettings("TimeFormatSelectLabel")}</SettingsFieldLabel>
           <SettingsSelect
-            label={t("TimeFormatSelectLabel", { ns: "MobileSettings" })}
+            label={tMobileSettings("TimeFormatSelectLabel")}
             onValueChange={(nextTimeFormat) => {
               void handleTimeFormatChange(nextTimeFormat as TimeFormatValue);
             }}
@@ -289,14 +288,12 @@ export function SettingsLanguageScreen() {
             value={timeFormat}
           />
 
-          <SettingsFieldLabel>
-            {t("Preferences.ReminderTime", { ns: "SettingsPage" })}
-          </SettingsFieldLabel>
+          <SettingsFieldLabel>{tSettingsPage("Preferences.ReminderTime")}</SettingsFieldLabel>
           <SettingsFieldHint>
-            {t("Preferences.ReminderTimeDescription", { ns: "SettingsPage" })}
+            {tSettingsPage("Preferences.ReminderTimeDescription")}
           </SettingsFieldHint>
           <SettingsSelect
-            label={t("Preferences.ReminderTime", { ns: "SettingsPage" })}
+            label={tSettingsPage("Preferences.ReminderTime")}
             leadingIcon={<IconBell size={18} stroke={colors.iconSecondary} />}
             onValueChange={(nextReminderSendHour) => {
               void handleReminderSendHourChange(nextReminderSendHour);

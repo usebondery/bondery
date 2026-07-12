@@ -42,7 +42,7 @@ import { useRouter } from "next/navigation";
 import type { JSX } from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import ContactsTable from "@/components/contacts/ContactsTableV2";
-import { useCommonTranslations, useWebTranslations } from "@/lib/i18n/useWebTranslations";
+import { useCommonTranslations, useSettingsPageTranslations } from "@/lib/i18n/generated/hooks";
 import { useModalDismiss } from "@/lib/modals";
 import {
   useCommitVCardImportMutation,
@@ -116,7 +116,7 @@ export function VCardImportModal({
   showNavigationProgress?: boolean;
 }) {
   const tCommon = useCommonTranslations();
-  const t = useWebTranslations("SettingsPage", "DataManagement.VCardImport");
+  const t = useSettingsPageTranslations("DataManagement.VCardImport");
   const router = useRouter();
   const parseImport = useParseVCardImportMutation();
   const commitImport = useCommitVCardImportMutation();

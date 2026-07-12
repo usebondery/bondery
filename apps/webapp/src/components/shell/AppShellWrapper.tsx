@@ -16,7 +16,7 @@ import { useState } from "react";
 import { setClientCookie } from "@/lib/cookies/client";
 import { SIDEBAR_COOKIE_NAME } from "@/lib/cookies/constants";
 import { DocumentTitleProvider } from "@/lib/documentTitle";
-import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
+import { useAppNavigationTranslations } from "@/lib/i18n/generated/hooks";
 import { HOTKEYS } from "@/lib/platform/config";
 import { CommandPalette } from "./CommandPalette";
 import { NavigationSidebarContent } from "./NavigationSidebar";
@@ -45,7 +45,7 @@ export function AppShellWrapper({
   initialCollapsed,
 }: AppShellWrapperProps) {
   const [collapsed, setCollapsed] = useState(initialCollapsed);
-  const t = useWebTranslations("AppNavigation");
+  const t = useAppNavigationTranslations();
 
   function handleToggle() {
     setCollapsed((prev) => {

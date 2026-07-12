@@ -11,6 +11,7 @@ import {
 import type {
   Contact,
   ContactPreview,
+  ContactSelectable,
   MergeConflictChoice,
   MergeConflictField,
 } from "@bondery/schemas";
@@ -20,7 +21,7 @@ import { notifications } from "@mantine/notifications";
 import { IconArrowMerge } from "@tabler/icons-react";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useCommonTranslations, useWebTranslations } from "@/lib/i18n/useWebTranslations";
+import { useCommonTranslations, useMergeWithModalTranslations } from "@/lib/i18n/generated/hooks";
 import { createModalId, useModalDismiss } from "@/lib/modals";
 import { useMergeContactsMutation } from "@/lib/query/hooks/useContacts";
 import {
@@ -38,7 +39,7 @@ interface OpenMergeWithModalParams {
   disableRightPicker?: boolean;
   initialConflictChoices?: Partial<Record<MergeConflictField, MergeConflictChoice>>;
   leftPersonId: string;
-  onSearch?: (query: string) => Promise<ContactPreview[]>;
+  onSearch?: (query: string) => Promise<ContactSelectable[]>;
   onSuccess?: () => void;
   redirectToMergedPerson?: boolean;
   rightPersonId?: string;
@@ -47,7 +48,7 @@ interface OpenMergeWithModalParams {
 type Step = "pick" | "resolve" | "processing";
 
 function MergeWithModalTitle() {
-  const t = useWebTranslations("MergeWithModal");
+  const t = useMergeWithModalTranslations();
   return <ModalTitle icon={<IconArrowMerge size={22} />} text={t("ModalTitle")} />;
 }
 
@@ -95,7 +96,7 @@ interface MergeWithModalProps {
   initialLeftPersonId: string;
   initialRightPersonId?: string;
   modalId: string;
-  onSearch?: (query: string) => Promise<ContactPreview[]>;
+  onSearch?: (query: string) => Promise<ContactSelectable[]>;
   onSuccess?: () => void;
   redirectToMergedPerson: boolean;
 }
@@ -115,7 +116,7 @@ function MergeWithModal({
   const tCommon = useCommonTranslations();
   const router = useRouter();
   const mergeContactsMutation = useMergeContactsMutation();
-  const t = useWebTranslations("MergeWithModal");
+  const t = useMergeWithModalTranslations();
   const shouldSkipPickStep =
     disableLeftPicker && disableRightPicker && Boolean(initialRightPersonId);
 
@@ -143,9 +144,6 @@ function MergeWithModal({
         return [];
       }
       const results = await onSearch(query);
-      for (const c of results) {
-        knownContactsRef.current.set(c.id, c);
-      }
       return results
         .filter((c) => !c.myself && c.id !== leftPersonId)
         .map((c) => ({

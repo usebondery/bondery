@@ -1,8 +1,7 @@
 import { Pressable, StyleSheet, Text } from "react-native";
+import { useCommonTranslations, useMobileContactsTranslations } from "@/lib/i18n/generated/hooks";
 
 import { ToolbarHeader } from "../../../components/chrome";
-
-import { useMobileTranslations } from "../../../lib/i18n/useMobileTranslations";
 
 import { MOBILE_TYPOGRAPHY } from "../../../theme/tokens";
 
@@ -11,7 +10,8 @@ import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
 import { useContactsSelection } from "../contactsSelectionStore";
 
 export function ContactsSelectionHeader() {
-  const t = useMobileTranslations();
+  const tMobileContacts = useMobileContactsTranslations();
+  const t = useCommonTranslations();
 
   const colors = useMobileThemeColors();
 
@@ -46,9 +46,7 @@ export function ContactsSelectionHeader() {
       left={
         <Pressable
           accessibilityLabel={
-            showSelectAll
-              ? t("SelectAll", { ns: "MobileContacts" })
-              : t("DeselectAll", { ns: "MobileContacts" })
+            showSelectAll ? tMobileContacts("SelectAll") : tMobileContacts("DeselectAll")
           }
           accessibilityRole="button"
           disabled={totalCount === 0}
@@ -57,21 +55,19 @@ export function ContactsSelectionHeader() {
           style={({ pressed }) => [{ opacity: totalCount === 0 ? 0.45 : pressed ? 0.7 : 1 }]}
         >
           <Text style={[styles.headerAction, { color: colors.primary }]}>
-            {showSelectAll
-              ? t("SelectAll", { ns: "MobileContacts" })
-              : t("DeselectAll", { ns: "MobileContacts" })}
+            {showSelectAll ? tMobileContacts("SelectAll") : tMobileContacts("DeselectAll")}
           </Text>
         </Pressable>
       }
       right={
         <Pressable
-          accessibilityLabel={t("actions.cancel", { ns: "common" })}
+          accessibilityLabel={t("actions.cancel")}
           accessibilityRole="button"
           hitSlop={8}
           onPress={handleCancel}
         >
           <Text style={[styles.headerAction, styles.headerActionRight, { color: colors.primary }]}>
-            {t("actions.cancel", { ns: "common" })}
+            {t("actions.cancel")}
           </Text>
         </Pressable>
       }

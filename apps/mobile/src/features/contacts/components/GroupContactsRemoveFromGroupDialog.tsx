@@ -1,7 +1,7 @@
 import { IconUsersMinus } from "@tabler/icons-react-native";
+import { useCommonTranslations, useMobileContactsTranslations } from "@/lib/i18n/generated/hooks";
 import { ActionSheetPopup } from "../../../components/ActionSheetPopup";
 import { removeContactsFromGroup } from "../../../lib/domains/groups";
-import { useMobileTranslations } from "../../../lib/i18n/useMobileTranslations";
 import { useAppToast } from "../../../lib/toast/useAppToast";
 import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
 import { useContactsSelection } from "../contactsSelectionStore";
@@ -18,7 +18,8 @@ export function GroupContactsRemoveFromGroupDialog({
   debouncedQuery,
   onMembersReloaded,
 }: GroupContactsRemoveFromGroupDialogProps) {
-  const t = useMobileTranslations();
+  const tMobileContacts = useMobileContactsTranslations();
+  const t = useCommonTranslations();
   const colors = useMobileThemeColors();
   const { showToast } = useAppToast();
   const isRemoveFromGroupConfirmOpen = useContactsSelection(
@@ -48,8 +49,8 @@ export function GroupContactsRemoveFromGroupDialog({
         await onMembersReloaded();
       } catch {
         showToast({
-          description: t("RemoveFromGroupFailed", { ns: "MobileContacts" }),
-          headline: t("feedback.errorTitle", { ns: "common" }),
+          description: tMobileContacts("RemoveFromGroupFailed"),
+          headline: t("feedback.errorTitle"),
           type: "error",
         });
       } finally {
@@ -63,7 +64,7 @@ export function GroupContactsRemoveFromGroupDialog({
       actions={[
         {
           disabled: isRemovingFromGroup,
-          label: t("actions.cancel", { ns: "common" }),
+          label: t("actions.cancel"),
           onPress: () => setRemoveFromGroupConfirmOpen(false),
           tone: "neutral",
           variant: "outline",
@@ -71,7 +72,7 @@ export function GroupContactsRemoveFromGroupDialog({
         {
           disabled: isRemovingFromGroup,
           icon: <IconUsersMinus color={colors.textOnPrimary} size={16} />,
-          label: t("RemoveFromGroup", { ns: "MobileContacts" }),
+          label: tMobileContacts("RemoveFromGroup"),
           loading: isRemovingFromGroup,
           onPress: handleConfirmRemoveFromGroup,
           tone: "danger",

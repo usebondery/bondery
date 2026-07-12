@@ -4,6 +4,8 @@ import { patchAffectsMergeRecommendations } from "@bondery/helpers/contact";
 import type { Contact } from "@bondery/schemas";
 import type { QueryClient } from "@tanstack/react-query";
 import {
+  type InfiniteData,
+  type UseInfiniteQueryResult,
   type UseQueryResult,
   useInfiniteQuery,
   useMutation,
@@ -43,8 +45,11 @@ import {
   uploadContactPhoto,
 } from "@/lib/api/domains/contacts";
 import { getInteractionsList } from "@/lib/api/domains/interactions";
+import type { ContactsDataResult } from "@/lib/api/resources/contacts";
+import type { InteractionsListResult } from "@/lib/api/resources/interactions";
 import { refreshAppShell } from "@/lib/app/refreshAppShell";
 import { syncMergeRecommendationsAfterChange } from "@/lib/merge/syncMergeRecommendations";
+import type { ContactsListFilterParams } from "@/lib/query/contactsListParams";
 import {
   invalidateContactDetail,
   invalidateContactDomain,
@@ -56,6 +61,7 @@ import {
   invalidateSettings,
 } from "@/lib/query/invalidation";
 import { contactKeys } from "@/lib/query/keys";
+import { nextPaginatedOffset } from "@/lib/query/paginatedInfiniteQuery";
 import { PERSON_INTERACTIONS } from "@/lib/query/personPageQueryParams";
 import { INTERACTIONS_TIMELINE } from "@/lib/query/sharedListParams";
 
@@ -133,14 +139,11 @@ export function useContactsSelectableListQuery(params: {
   });
 }
 
-export function useContactsInfiniteQuery(params: ContactsListFilterParams) {
-  return useInfiniteQuery({
-    getNextPageParam: (lastPage) => {
-      if (!lastPage.pagination.hasMore) {
-        return undefined;
-      }
-      return lastPage.pagination.offset + lastPage.pagination.limit;
-    },
+export function useContactsInfiniteQuery(
+  params: ContactsListFilterParams,
+): UseInfiniteQueryResult<InfiniteData<ContactsDataResult>, Error> {
+  return useInfiniteQuery<ContactsDataResult>({
+    getNextPageParam: nextPaginatedOffset,
     initialPageParam: 0,
     queryFn: async ({ pageParam }) => {
       const listParams: ContactsListParams = {
@@ -206,17 +209,15 @@ export function useContactInteractionsQuery(
   });
 }
 
-export function useContactInteractionsInfiniteQuery(contactId: string, enabled = true) {
+export function useContactInteractionsInfiniteQuery(
+  contactId: string,
+  enabled = true,
+): UseInfiniteQueryResult<InfiniteData<InteractionsListResult>, Error> {
   const infiniteParams = { limit: INTERACTIONS_TIMELINE.limit };
 
-  return useInfiniteQuery({
+  return useInfiniteQuery<InteractionsListResult>({
     enabled: enabled && !!contactId,
-    getNextPageParam: (lastPage) => {
-      if (!lastPage.pagination.hasMore) {
-        return undefined;
-      }
-      return lastPage.pagination.offset + lastPage.pagination.limit;
-    },
+    getNextPageParam: nextPaginatedOffset,
     initialPageParam: 0,
     queryFn: async ({ pageParam }) =>
       getInteractionsList({

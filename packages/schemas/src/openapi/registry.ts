@@ -1,15 +1,15 @@
 import { z } from "zod";
-import { contactIdSchema } from "#contact-id.js";
-import { paginationMetaSchema } from "#entities/_shared.js";
-import { interactionSchema } from "#entities/activity.js";
-import { apiErrorResponseSchema } from "#entities/api.js";
+import { contactIdSchema } from "#contact-id/index.js";
+import { paginationMetaSchema } from "#entities/_shared/index.js";
+import { interactionSchema } from "#entities/activity/index.js";
 import {
   contactSchema,
   deleteContactResponseSchema,
   deleteContactsResponseSchema,
-} from "#entities/contact.js";
-import { groupSchema } from "#entities/group.js";
-import { tagSchema } from "#entities/tag.js";
+} from "#entities/contact/index.js";
+import { groupSchema } from "#entities/group/index.js";
+import { tagSchema } from "#entities/tag/index.js";
+import { apiErrorResponseSchema } from "#errors/api-error-response/index.js";
 import {
   EXAMPLE_CONTACT,
   EXAMPLE_GROUP,
@@ -22,7 +22,7 @@ import {
   EXAMPLE_DELETE_CONTACT_RESPONSE,
   EXAMPLE_DELETE_CONTACTS_RESPONSE,
 } from "#openapi/fixtures/responses.js";
-import { syncConflictErrorResponseSchema } from "#sync/conflict.js";
+import { syncConflictErrorResponseSchema } from "#sync/conflict/index.js";
 
 /**
  * Registers shared schemas for OpenAPI component $refs.

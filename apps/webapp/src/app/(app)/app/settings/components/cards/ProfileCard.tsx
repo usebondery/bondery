@@ -4,14 +4,14 @@ import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import { HelpButton, PersonChip } from "@bondery/mantine-next";
 import { CardSection, Divider, Group, Text, TextInput } from "@mantine/core";
 import { IconChevronRight, IconMail, IconUserCircle } from "@tabler/icons-react";
-import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
+import { useSettingsPageTranslations } from "@/lib/i18n/generated/hooks";
 import { useMePersonQuery } from "@/lib/query/hooks/useMePerson";
 import { useSettingsQuery } from "@/lib/query/hooks/useSettings";
 import { ProviderIntegrations } from "./ProviderIntegrations";
 import { SettingsSection } from "./SettingsSection";
 
 export function ProfileCard() {
-  const t = useWebTranslations("SettingsPage", "Profile");
+  const t = useSettingsPageTranslations("Profile");
   const { data: settingsResult } = useSettingsQuery();
   const { data: myselfPerson = null } = useMePersonQuery("small");
 

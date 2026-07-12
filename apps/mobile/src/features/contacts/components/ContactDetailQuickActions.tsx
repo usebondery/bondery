@@ -1,7 +1,7 @@
 import type { EmailEntry, PhoneEntry } from "@bondery/schemas";
 import { IconMail, IconMessage, IconPhone } from "@tabler/icons-react-native";
 import { View } from "react-native";
-import { useMobileTranslations } from "../../../lib/i18n/useMobileTranslations";
+import { useCommonTranslations, useContactInfoTranslations } from "@/lib/i18n/generated/hooks";
 import { ScalePressable } from "../../../theme/ScalePressable";
 import type { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
 import { contactDetailScreenStyles as styles } from "./contactDetailScreenStyles";
@@ -23,7 +23,8 @@ export function ContactDetailQuickActions({
   onOpenSms,
   phones,
 }: ContactDetailQuickActionsProps) {
-  const t = useMobileTranslations();
+  const tContactInfo = useContactInfoTranslations();
+  const t = useCommonTranslations();
 
   if (phones.length === 0 && emails.length === 0) {
     return null;
@@ -36,7 +37,7 @@ export function ContactDetailQuickActions({
     <View style={[styles.quickActions, { borderBottomColor: colors.border }]}>
       {phones.length > 0 ? (
         <ScalePressable
-          accessibilityLabel={t("actions.call", { ns: "common" })}
+          accessibilityLabel={t("actions.call")}
           onPress={() => {
             if (primaryPhone) {
               onOpenPhone(primaryPhone);
@@ -51,7 +52,7 @@ export function ContactDetailQuickActions({
       ) : null}
       {phones.length > 0 ? (
         <ScalePressable
-          accessibilityLabel={t("actions.message", { ns: "common" })}
+          accessibilityLabel={t("actions.message")}
           onPress={() => {
             if (primaryPhone) {
               onOpenSms(primaryPhone);
@@ -66,7 +67,7 @@ export function ContactDetailQuickActions({
       ) : null}
       {emails.length > 0 ? (
         <ScalePressable
-          accessibilityLabel={t("SendEmailAction", { ns: "ContactInfo" })}
+          accessibilityLabel={tContactInfo("SendEmailAction")}
           onPress={() => {
             if (primaryEmail) {
               onOpenEmail(primaryEmail);

@@ -1,9 +1,13 @@
 import { IconTrash } from "@tabler/icons-react-native";
 import { useCallback, useState } from "react";
 import { Text } from "react-native";
+import {
+  useCommonTranslations,
+  useMobileTagsTranslations,
+  useTagsSettingsTranslations,
+} from "@/lib/i18n/generated/hooks";
 import { ActionSheetPopup } from "../../../components/ActionSheetPopup";
 import { deleteTag } from "../../../lib/domains/tags";
-import { useMobileTranslations } from "../../../lib/i18n/useMobileTranslations";
 import { useAppToast } from "../../../lib/toast/useAppToast";
 import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
 
@@ -22,7 +26,9 @@ export function TagDeleteDialog({
   onOpenChange,
   onDeleted,
 }: TagDeleteDialogProps) {
-  const t = useMobileTranslations();
+  const tMobileTags = useMobileTagsTranslations();
+  const tTagsSettings = useTagsSettingsTranslations();
+  const t = useCommonTranslations();
   const colors = useMobileThemeColors();
   const { showToast } = useAppToast();
   const [isDeleting, setIsDeleting] = useState(false);
@@ -40,33 +46,30 @@ export function TagDeleteDialog({
       onDeleted();
     } catch {
       showToast({
-        description: t("DeleteFailed", { ns: "MobileTags" }),
-        headline: t("feedback.errorTitle", { ns: "common" }),
+        description: tMobileTags("DeleteFailed"),
+        headline: t("feedback.errorTitle"),
         type: "error",
       });
       setIsDeleting(false);
     }
-  }, [isDeleting, onDeleted, onOpenChange, showToast, t, tagId]);
+  }, [isDeleting, onDeleted, onOpenChange, showToast, t, tagId, tMobileTags]);
 
-  const dialogTitle = t("DeleteConfirmTitle", { ns: "TagsSettings" });
-  const dialogMessage = t("DeleteConfirmMessage", { ns: "TagsSettings" }).replace(
-    "{label}",
-    tagLabel,
-  );
+  const dialogTitle = tTagsSettings("DeleteConfirmTitle");
+  const dialogMessage = tTagsSettings("DeleteConfirmMessage").replace("{label}", tagLabel);
 
   return (
     <ActionSheetPopup
       actions={[
         {
           disabled: isDeleting,
-          label: t("actions.cancel", { ns: "common" }),
+          label: t("actions.cancel"),
           onPress: () => onOpenChange(false),
           tone: "neutral",
           variant: "outline",
         },
         {
           icon: <IconTrash size={16} stroke={colors.textOnPrimary} />,
-          label: t("DeleteConfirmButton", { ns: "TagsSettings" }),
+          label: tTagsSettings("DeleteConfirmButton"),
           loading: isDeleting,
           onPress: handleDelete,
           tone: "danger",

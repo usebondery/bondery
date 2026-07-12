@@ -6,7 +6,7 @@ import { ActionIcon, Group, Title } from "@mantine/core";
 import type { Icon } from "@tabler/icons-react";
 import { IconArrowLeft } from "@tabler/icons-react";
 import type { ReactNode } from "react";
-import { useCommonTranslations } from "@/lib/i18n/useWebTranslations";
+import { useCommonTranslations } from "@/lib/i18n/generated/hooks";
 
 interface PageHeaderProps {
   action?: ReactNode;

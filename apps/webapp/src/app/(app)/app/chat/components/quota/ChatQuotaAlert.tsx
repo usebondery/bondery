@@ -3,8 +3,8 @@
 import { Alert } from "@mantine/core";
 import { IconSparkles } from "@tabler/icons-react";
 import { UpgradeButton } from "@/components/shared/UpgradeButton";
+import { useChatPageTranslations } from "@/lib/i18n/generated/hooks";
 import { useDateFormatter as useFormatter } from "@/lib/i18n/useDateFormatter";
-import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
 
 /**
  * Inline alert shown when the user has exhausted their message quota.
@@ -21,7 +21,7 @@ export function ChatQuotaAlert({
   variant?: "free" | "premium";
   resetAt?: string | null;
 }) {
-  const t = useWebTranslations("ChatPage");
+  const t = useChatPageTranslations();
   const format = useFormatter();
 
   if (variant === "premium") {

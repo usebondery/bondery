@@ -9,7 +9,7 @@ import {
 } from "@tabler/icons-react-native";
 import { useMemo, useState } from "react";
 import { Text, View } from "react-native";
-import { useMobileTranslations } from "../../../lib/i18n/useMobileTranslations";
+import { useCommonTranslations, useContactInfoTranslations } from "@/lib/i18n/generated/hooks";
 import { useAppToast } from "../../../lib/toast/useAppToast";
 import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
 import { copyEmailToClipboard, openEmailMailto } from "../contactChannelActions";
@@ -34,22 +34,20 @@ interface ContactEmailsSectionProps {
 }
 
 export function ContactEmailsSection({ emails, onSaveEmails }: ContactEmailsSectionProps) {
+  const t = useCommonTranslations();
+  const tContactInfo = useContactInfoTranslations();
   const colors = useMobileThemeColors();
-  const t = useMobileTranslations();
   const { showToast } = useAppToast();
   const [sheet, setSheet] = useState<SheetState>({ open: false });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const canAdd = emails.length < MAX_CONTACT_CHANNELS;
-  const errorTitle = t("feedback.errorTitle", { ns: "common" });
+  const errorTitle = t("feedback.errorTitle");
 
   function openAddSheet() {
     if (!canAdd) {
       showToast({
-        headline: t("MaxEmailsReached", { ns: "ContactInfo" }).replace(
-          "{max}",
-          String(MAX_CONTACT_CHANNELS),
-        ),
+        headline: tContactInfo("MaxEmailsReached").replace("{max}", String(MAX_CONTACT_CHANNELS)),
         type: "error",
       });
       return;
@@ -70,7 +68,7 @@ export function ContactEmailsSection({ emails, onSaveEmails }: ContactEmailsSect
       setSheet({ open: false });
     } catch {
       showToast({
-        description: t("EmailsUpdateError", { ns: "ContactInfo" }),
+        description: tContactInfo("EmailsUpdateError"),
         headline: errorTitle,
         type: "error",
       });
@@ -124,10 +122,10 @@ export function ContactEmailsSection({ emails, onSaveEmails }: ContactEmailsSect
   const copyMessages = useMemo(
     () => ({
       errorTitle,
-      successDescription: t("EmailCopiedMessage", { ns: "ContactInfo" }),
-      successTitle: t("CopySuccessTitle", { ns: "ContactInfo" }),
+      successDescription: tContactInfo("EmailCopiedMessage"),
+      successTitle: tContactInfo("CopySuccessTitle"),
     }),
-    [errorTitle, t],
+    [errorTitle, tContactInfo],
   );
 
   return (
@@ -136,9 +134,9 @@ export function ContactEmailsSection({ emails, onSaveEmails }: ContactEmailsSect
         action={
           canAdd
             ? {
-                accessibilityLabel: t("AddEmail", { ns: "ContactInfo" }),
+                accessibilityLabel: tContactInfo("AddEmail"),
                 icon: <IconMailPlus size={16} stroke={colors.primary} />,
-                label: t("Add", { ns: "ContactInfo" }),
+                label: tContactInfo("Add"),
                 onPress: openAddSheet,
               }
             : undefined
@@ -156,16 +154,14 @@ export function ContactEmailsSection({ emails, onSaveEmails }: ContactEmailsSect
           ]}
         >
           <Text style={[contactDetailStyles.emptyText, { color: colors.textMuted }]}>
-            {t("NoEmails", { ns: "ContactInfo" })}
+            {tContactInfo("NoEmails")}
           </Text>
         </View>
       ) : (
         emails.map((email) => {
           const typeLabel =
-            email.type === "work"
-              ? t("TypeWork", { ns: "ContactInfo" })
-              : t("TypeHome", { ns: "ContactInfo" });
-          const accessibilityLabel = `${typeLabel} email, ${email.value}${email.preferred ? `, ${t("Preferred", { ns: "ContactInfo" })}` : ""}`;
+            email.type === "work" ? tContactInfo("TypeWork") : tContactInfo("TypeHome");
+          const accessibilityLabel = `${typeLabel} email, ${email.value}${email.preferred ? `, ${tContactInfo("Preferred")}` : ""}`;
 
           return (
             <ContactChannelRow
@@ -174,22 +170,22 @@ export function ContactEmailsSection({ emails, onSaveEmails }: ContactEmailsSect
               channelIcon={<IconMail size={16} stroke={colors.iconSecondary} />}
               isPreferred={email.preferred}
               key={`${email.type}-${email.value}`}
-              menuAccessibilityLabel={t("EmailAddresses", { ns: "ContactInfo" })}
+              menuAccessibilityLabel={tContactInfo("EmailAddresses")}
               menuItems={[
                 {
                   disabled: !email.value.trim(),
-                  hint: t("MenuHintPress", { ns: "ContactInfo" }),
+                  hint: tContactInfo("MenuHintPress"),
                   icon: <IconMail size={18} stroke={colors.iconPrimary} />,
                   id: "email",
-                  label: t("SendEmailAction", { ns: "ContactInfo" }),
+                  label: tContactInfo("SendEmailAction"),
                   onPress: () => openEmailMailto(email, showToast, errorTitle),
                 },
                 {
                   disabled: !email.value.trim(),
-                  hint: t("MenuHintHold", { ns: "ContactInfo" }),
+                  hint: tContactInfo("MenuHintHold"),
                   icon: <IconCopy size={18} stroke={colors.iconPrimary} />,
                   id: "copy",
-                  label: t("CopyAction", { ns: "ContactInfo" }),
+                  label: tContactInfo("CopyAction"),
                   onPress: () => {
                     void copyEmailToClipboard(email, showToast, copyMessages);
                   },
@@ -197,20 +193,20 @@ export function ContactEmailsSection({ emails, onSaveEmails }: ContactEmailsSect
                 {
                   icon: <IconPencil size={18} stroke={colors.iconPrimary} />,
                   id: "edit",
-                  label: t("EditAction", { ns: "ContactInfo" }),
+                  label: tContactInfo("EditAction"),
                   onPress: () => openEditSheet(index),
                 },
                 {
                   disabled: email.preferred,
                   icon: <IconStar size={18} stroke={colors.iconPrimary} />,
                   id: "preferred",
-                  label: t("SetAsPreferred", { ns: "ContactInfo" }),
+                  label: tContactInfo("SetAsPreferred"),
                   onPress: () => handleSetPreferred(index),
                 },
                 {
                   icon: <IconTrash size={18} stroke={colors.dangerAccent} />,
                   id: "delete",
-                  label: t("DeleteAction", { ns: "ContactInfo" }),
+                  label: tContactInfo("DeleteAction"),
                   onPress: () => handleDeleteAtIndex(index),
                   tone: "danger",
                 },

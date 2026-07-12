@@ -5,7 +5,7 @@ import type { GroupWithCount } from "@bondery/schemas";
 import { Card, Group, Menu, MenuDropdown, MenuItem, MenuTarget, Stack, Text } from "@mantine/core";
 import { IconCopy, IconEdit, IconFolderCog, IconTrash, IconUserPlus } from "@tabler/icons-react";
 import { type MouseEvent, type ReactNode, useState } from "react";
-import { useCommonTranslations, useWebTranslations } from "@/lib/i18n/useWebTranslations";
+import { useCommonTranslations, useGroupsPageTranslations } from "@/lib/i18n/generated/hooks";
 
 // ── Color maps ──────────────────────────────────────────
 
@@ -161,7 +161,7 @@ function GroupCardMenu({
   onDelete: (groupId: string) => void;
   iconSize: "sm" | "md";
 }) {
-  const t = useWebTranslations("GroupsPage");
+  const t = useGroupsPageTranslations();
   const tCommon = useCommonTranslations();
 
   return (
@@ -227,7 +227,7 @@ function GroupCardMenu({
 
 export function GroupCard(props: GroupCardProps) {
   const [menuOpened, setMenuOpened] = useState(false);
-  const t = useWebTranslations("GroupsPage");
+  const t = useGroupsPageTranslations();
   const {
     interactive = true,
     selected = false,
@@ -337,6 +337,7 @@ export function GroupCard(props: GroupCardProps) {
           </div>
         ) : undefined
       }
+      shadow={shadow}
     />
   );
 }

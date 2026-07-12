@@ -7,7 +7,7 @@ import { Badge, Center, Paper, Stack, Table, Text, TextInput } from "@mantine/co
 import { useDebouncedCallback } from "@mantine/hooks";
 import { IconHome, IconMapPin, IconSearch } from "@tabler/icons-react";
 import { useMemo, useState } from "react";
-import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
+import { useContactAddressTranslations, useMapPageTranslations } from "@/lib/i18n/generated/hooks";
 import { DEBOUNCE_MS } from "@/lib/platform/config";
 
 interface AddressPinsTableProps {
@@ -38,8 +38,8 @@ export function AddressPinsTable({
   noAddressesFound,
   noAddressesMatchSearch,
 }: AddressPinsTableProps) {
-  const t = useWebTranslations("MapPage");
-  const tAddress = useWebTranslations("ContactAddress");
+  const t = useMapPageTranslations();
+  const tAddress = useContactAddressTranslations();
   const [search, setSearch] = useState("");
 
   const addressTypeLabel = (type: string) => {

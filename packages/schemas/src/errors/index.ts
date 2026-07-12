@@ -12,7 +12,7 @@ export {
   type ApiErrorResponse,
   apiErrorBodySchema,
   apiErrorResponseSchema,
-} from "./api-error-response.js";
+} from "./api-error-response/index.js";
 export { API_ERROR_TYPES, type ApiErrorType } from "./api-error-types.js";
 
 export function getErrorDocUrl(code: string, websiteBaseUrl: string): string {

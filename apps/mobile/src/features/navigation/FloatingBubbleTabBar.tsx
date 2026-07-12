@@ -19,7 +19,7 @@ import Animated, {
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { FAB_GESTURE, UI_TIMING_MS } from "../../lib/config";
-import { useMobileTranslations } from "../../lib/i18n/useMobileTranslations";
+import { useMobileNavigationTranslations } from "../../lib/i18n/generated/hooks";
 import { FAB_SPEED_DIAL_MOTION, TAMAGUI_TRANSITION } from "../../theme/animations";
 import { floatingBarStyles } from "../../theme/floatingBarStyles";
 import { Tappable } from "../../theme/Tappable";
@@ -49,8 +49,8 @@ export const FloatingBubbleTabBar = forwardRef<View, FloatingBubbleTabBarProps>(
     { state, descriptors, navigation, onChromeBoundsChange },
     forwardedRef,
   ) {
+    const tMobileNavigation = useMobileNavigationTranslations();
     const insets = useSafeAreaInsets();
-    const t = useMobileTranslations();
     const colors = useMobileThemeColors();
     const { width: windowWidth, height: windowHeight } = useWindowDimensions();
     const plusRef = useRef<View>(null);
@@ -234,9 +234,7 @@ export const FloatingBubbleTabBar = forwardRef<View, FloatingBubbleTabBarProps>(
       const options = descriptor.options;
       const isFocused = state.index === routeIndex;
       const defaultLabel =
-        routeName === "contacts"
-          ? t("Contacts", { ns: "MobileNavigation" })
-          : t("Settings", { ns: "MobileNavigation" });
+        routeName === "contacts" ? tMobileNavigation("Contacts") : tMobileNavigation("Settings");
 
       const icon = options.tabBarIcon
         ? options.tabBarIcon({
@@ -347,9 +345,7 @@ export const FloatingBubbleTabBar = forwardRef<View, FloatingBubbleTabBarProps>(
                 <GestureDetector gesture={plusGesture}>
                   <Tappable
                     accessibilityLabel={
-                      isOpen
-                        ? t("CloseAddMenu", { ns: "MobileNavigation" })
-                        : t("Add", { ns: "MobileNavigation" })
+                      isOpen ? tMobileNavigation("CloseAddMenu") : tMobileNavigation("Add")
                     }
                     accessibilityRole="button"
                     accessibilityState={{ expanded: isOpen }}

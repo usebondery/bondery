@@ -1,10 +1,10 @@
-﻿"use client";
+"use client";
 
 import { ModalFooter } from "@bondery/mantine-next";
 import { Group, Stack } from "@mantine/core";
 import { IconArrowLeft, IconCheck } from "@tabler/icons-react";
 import { UserAvatar } from "@/components/shell/UserAvatar";
-import { useCommonTranslations } from "@/lib/i18n/useWebTranslations";
+import { useCommonTranslations } from "@/lib/i18n/generated/hooks";
 import {
   type PhotoUploadVariant,
   usePhotoUploadTranslations,

@@ -1,8 +1,8 @@
 import { IconTrash } from "@tabler/icons-react-native";
 import { useCallback, useState } from "react";
+import { useCommonTranslations, useMobileGroupsTranslations } from "@/lib/i18n/generated/hooks";
 import { ActionSheetPopup } from "../../../components/ActionSheetPopup";
 import { deleteGroup } from "../../../lib/domains/groups";
-import { useMobileTranslations } from "../../../lib/i18n/useMobileTranslations";
 import { useAppToast } from "../../../lib/toast/useAppToast";
 import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
 
@@ -21,7 +21,8 @@ export function GroupDeleteDialog({
   onOpenChange,
   onDeleted,
 }: GroupDeleteDialogProps) {
-  const t = useMobileTranslations();
+  const tMobileGroups = useMobileGroupsTranslations();
+  const t = useCommonTranslations();
   const colors = useMobileThemeColors();
   const { showToast } = useAppToast();
   const [isDeleting, setIsDeleting] = useState(false);
@@ -39,29 +40,29 @@ export function GroupDeleteDialog({
       onDeleted();
     } catch {
       showToast({
-        description: t("DeleteFailed", { ns: "MobileGroups" }),
-        headline: t("feedback.errorTitle", { ns: "common" }),
+        description: tMobileGroups("DeleteFailed"),
+        headline: t("feedback.errorTitle"),
         type: "error",
       });
       setIsDeleting(false);
     }
-  }, [groupId, isDeleting, onDeleted, onOpenChange, showToast, t]);
+  }, [groupId, isDeleting, onDeleted, onOpenChange, showToast, t, tMobileGroups]);
 
-  const dialogTitle = t("DeleteDialogTitle", { ns: "MobileGroups" }).replace("{title}", groupTitle);
+  const dialogTitle = tMobileGroups("DeleteDialogTitle").replace("{title}", groupTitle);
 
   return (
     <ActionSheetPopup
       actions={[
         {
           disabled: isDeleting,
-          label: t("actions.cancel", { ns: "common" }),
+          label: t("actions.cancel"),
           onPress: () => onOpenChange(false),
           tone: "neutral",
           variant: "outline",
         },
         {
           icon: <IconTrash size={16} stroke={colors.textOnPrimary} />,
-          label: t("DeleteConfirm", { ns: "MobileGroups" }),
+          label: tMobileGroups("DeleteConfirm"),
           loading: isDeleting,
           onPress: handleDelete,
           tone: "danger",

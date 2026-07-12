@@ -4,6 +4,7 @@ import { emailEntryInputSchema, emailEntrySchema } from "@bondery/schemas";
 import { IconCheck, IconMailPlus, IconTrash } from "@tabler/icons-react-native";
 import { useEffect, useMemo, useRef } from "react";
 import { StyleSheet, Text, type TextInput } from "react-native";
+import { useCommonTranslations, useContactInfoTranslations } from "@/lib/i18n/generated/hooks";
 import {
   ActionSheetPopup,
   type ActionSheetPopupAction,
@@ -11,7 +12,6 @@ import {
 import { SheetSelectField, SheetTextField } from "../../../components/form";
 import { UI_TIMING_MS } from "../../../lib/config";
 import { useSheetForm } from "../../../lib/forms/useSheetForm";
-import { useMobileTranslations } from "../../../lib/i18n/useMobileTranslations";
 import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
 import { createDraftEmail } from "../contactChannelConstants";
 
@@ -38,7 +38,8 @@ export function EditEmailSheet({
   onSave,
   onDelete,
 }: EditEmailSheetProps) {
-  const t = useMobileTranslations();
+  const tContactInfo = useContactInfoTranslations();
+  const _t = useCommonTranslations();
   const colors = useMobileThemeColors();
   const inputRef = useRef<TextInput>(null);
   const {
@@ -73,14 +74,11 @@ export function EditEmailSheet({
   const typeOptions = useMemo(
     () =>
       CONTACT_CHANNEL_TYPE_OPTIONS.map((option) => ({
-        label:
-          option.value === "work"
-            ? t("TypeWork", { ns: "ContactInfo" })
-            : t("TypeHome", { ns: "ContactInfo" }),
+        label: option.value === "work" ? tContactInfo("TypeWork") : tContactInfo("TypeHome"),
         leftSection: <Text style={styles.typeEmoji}>{option.emoji}</Text>,
         value: option.value,
       })),
-    [t],
+    [tContactInfo],
   );
 
   const canSubmit = isValid && !isSubmitting;
@@ -101,7 +99,7 @@ export function EditEmailSheet({
       ) : (
         <IconCheck size={16} stroke={colors.textOnPrimary} />
       ),
-    label: mode === "add" ? t("AddEmail", { ns: "ContactInfo" }) : "Save changes",
+    label: mode === "add" ? tContactInfo("AddEmail") : "Save changes",
     loading: isSubmitting,
     onPress: () => void onSubmit(),
     tone: "primary" as const,
@@ -114,7 +112,7 @@ export function EditEmailSheet({
           {
             disabled: isSubmitting,
             icon: <IconTrash size={16} stroke={colors.dangerAccent} />,
-            label: t("DeleteAction", { ns: "ContactInfo" }),
+            label: tContactInfo("DeleteAction"),
             onPress: onDelete,
             tone: "danger",
             variant: "outline",
@@ -130,11 +128,7 @@ export function EditEmailSheet({
       onClose={onCancel}
       onOpenChange={onOpenChange}
       open={open}
-      title={
-        mode === "add"
-          ? t("AddEmail", { ns: "ContactInfo" })
-          : t("EmailAddresses", { ns: "ContactInfo" })
-      }
+      title={mode === "add" ? tContactInfo("AddEmail") : tContactInfo("EmailAddresses")}
     >
       <SheetTextField
         autoCapitalize="none"
@@ -146,13 +140,13 @@ export function EditEmailSheet({
         keyboardType="email-address"
         name="value"
         onSubmitEditing={() => void onSubmit()}
-        placeholder={t("EmailPlaceholder", { ns: "ContactInfo" })}
+        placeholder={tContactInfo("EmailPlaceholder")}
         returnKeyType="done"
       />
 
       <SheetSelectField
         control={control}
-        label={t("TypeLabel", { ns: "ContactInfo" })}
+        label={tContactInfo("TypeLabel")}
         name="type"
         options={typeOptions}
       />

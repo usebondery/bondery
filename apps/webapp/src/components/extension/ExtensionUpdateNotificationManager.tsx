@@ -8,7 +8,7 @@ import { useEffect } from "react";
 import { clientApiFetch } from "@/lib/api/client";
 import { detectBonderyChromeExtension } from "@/lib/extension/detectBonderyChromeExtension";
 import { statusNotificationsStore } from "@/lib/extension/statusNotificationsStore";
-import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
+import { useExtensionVersionCheckTranslations } from "@/lib/i18n/generated/hooks";
 
 const EXTENSION_UPDATE_ID = "extension-update";
 
@@ -21,7 +21,7 @@ const EXTENSION_UPDATE_ID = "extension-update";
  * Mount once in the authenticated app layout.
  */
 export function ExtensionUpdateNotificationManager() {
-  const t = useWebTranslations("ExtensionVersionCheck");
+  const t = useExtensionVersionCheckTranslations();
 
   useEffect(() => {
     let cancelled = false;

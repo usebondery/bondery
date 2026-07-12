@@ -4,7 +4,11 @@ import { useRouter } from "expo-router";
 import { ScrollView, StyleSheet } from "react-native";
 import { StackNavBar } from "../../components/chrome";
 import { WEBSITE_URL } from "../../lib/config";
-import { useMobileTranslations } from "../../lib/i18n/useMobileTranslations";
+import {
+  useCommonTranslations,
+  useLoginPageTranslations,
+  useMobileSettingsTranslations,
+} from "../../lib/i18n/generated/hooks";
 import { MOBILE_LAYOUT } from "../../theme/tokens";
 import { useMobileThemeColors } from "../../theme/useMobileThemeColors";
 import { SettingsNavigationRow } from "./components/SettingsNavigationRow";
@@ -12,15 +16,17 @@ import { SettingsSectionCard } from "./components/SettingsSectionCard";
 import { openExternalUrl } from "./openExternalUrl";
 
 export function SettingsLegalScreen() {
+  const tLoginPage = useLoginPageTranslations();
+  const tMobileSettings = useMobileSettingsTranslations();
+  const _t = useCommonTranslations();
   const router = useRouter();
-  const t = useMobileTranslations();
   const colors = useMobileThemeColors();
 
   return (
     <>
       <StackNavBar
         onBack={() => router.back()}
-        title={t("Legal", { ns: "MobileSettings" })}
+        title={tMobileSettings("Legal")}
         variant="elevated"
       />
 
@@ -31,9 +37,9 @@ export function SettingsLegalScreen() {
         <SettingsSectionCard>
           <SettingsNavigationRow
             destination="external"
-            externalLabel={t("External", { ns: "MobileSettings" })}
+            externalLabel={tMobileSettings("External")}
             icon={<IconShieldLock size={18} stroke={colors.iconPrimary} />}
-            label={t("PrivacyPolicy", { ns: "LoginPage" })}
+            label={tLoginPage("PrivacyPolicy")}
             onPress={() => {
               void openExternalUrl(`${WEBSITE_URL}${WEBSITE_ROUTES.PRIVACY}`);
             }}
@@ -41,9 +47,9 @@ export function SettingsLegalScreen() {
 
           <SettingsNavigationRow
             destination="external"
-            externalLabel={t("External", { ns: "MobileSettings" })}
+            externalLabel={tMobileSettings("External")}
             icon={<IconFileText size={18} stroke={colors.iconPrimary} />}
-            label={t("TermsOfService", { ns: "LoginPage" })}
+            label={tLoginPage("TermsOfService")}
             onPress={() => {
               void openExternalUrl(`${WEBSITE_URL}${WEBSITE_ROUTES.TERMS}`);
             }}

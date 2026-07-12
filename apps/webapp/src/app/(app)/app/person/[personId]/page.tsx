@@ -1,4 +1,4 @@
-﻿import { formatContactName } from "@bondery/helpers/contact";
+import { formatContactName } from "@bondery/helpers/contact";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import { Stack, Text } from "@mantine/core";
 import type { Metadata } from "next";
@@ -6,7 +6,7 @@ import { cache } from "react";
 import { ErrorPageHeader } from "@/components/shell/ErrorPageHeader";
 import { PageWrapper } from "@/components/shell/PageWrapper";
 import { getContactDetailServer } from "@/lib/api/domains/server/contacts";
-import { getWebTranslations as getTranslations } from "@/lib/i18n/getWebTranslations";
+import { getSingleContactPageTranslations } from "@/lib/i18n/generated/hooks.server";
 import { entityPageTitle } from "@/lib/metadata/pageTitles";
 import { PersonLoader } from "./PersonLoader";
 
@@ -22,7 +22,7 @@ export async function generateMetadata({
     const contact = await getContactForPage(personId);
     return entityPageTitle(formatContactName(contact));
   } catch {
-    const t = await getTranslations("SingleContactPage");
+    const t = await getSingleContactPageTranslations();
     return entityPageTitle(t("PersonFallbackTitle"));
   }
 }
@@ -36,7 +36,7 @@ export default async function PersonPage({
 }) {
   const { personId } = await params;
   const { tab } = await searchParams;
-  const t = await getTranslations("SingleContactPage");
+  const t = await getSingleContactPageTranslations();
 
   if (!personId) {
     return (

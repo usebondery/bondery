@@ -16,7 +16,7 @@ import { modals } from "@mantine/modals";
 import { notifications } from "@mantine/notifications";
 import { IconCheck, IconUsersGroup } from "@tabler/icons-react";
 import { useState } from "react";
-import { useCommonTranslations, useWebTranslations } from "@/lib/i18n/useWebTranslations";
+import { useCommonTranslations, useGroupsPageTranslations } from "@/lib/i18n/generated/hooks";
 import { createModalId, useModalDismiss } from "@/lib/modals";
 import { DEBOUNCE_MS } from "@/lib/platform/config";
 import { useUpdateGroupMutation } from "@/lib/query/hooks/useGroups";
@@ -45,7 +45,7 @@ interface EditGroupModalProps {
 }
 
 function EditGroupModalTitle() {
-  const t = useWebTranslations("GroupsPage");
+  const t = useGroupsPageTranslations();
   return <ModalTitle icon={<IconUsersGroup size={24} />} text={t("EditGroupModal.Title")} />;
 }
 
@@ -69,7 +69,7 @@ function EditGroupForm({
   modalId,
 }: EditGroupModalProps & { modalId: string }) {
   const tCommon = useCommonTranslations();
-  const t = useWebTranslations("GroupsPage");
+  const t = useGroupsPageTranslations();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const updateGroupMutation = useUpdateGroupMutation(groupId);
   const isBlocking = isSubmitting;

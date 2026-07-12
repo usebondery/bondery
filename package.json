@@ -1,7 +1,7 @@
 {
   "allowScripts": {
     "@parcel/watcher@2.5.6": true,
-    "@swc/core@1.15.41": true,
+    "@swc/core@1.15.43": true,
     "core-js-pure@3.49.0": true,
     "core-js@3.49.0": true,
     "esbuild@0.27.4": true,
@@ -34,15 +34,39 @@
     "mcp-remote": "^0.1.38"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.5.0",
+    "@biomejs/biome": "^2.5.3",
     "@bondery/schemas": "*",
-    "@redocly/cli": "^2.33.0",
+    "@redocly/cli": "^2.38.0",
     "husky": "^9.1.7",
-    "lint-staged": "^16.1.5",
-    "turbo": "^2.10.2",
-    "yaml": "^2.8.3"
+    "lint-staged": "^17.0.8",
+    "turbo": "^2.10.4",
+    "typescript": "^7.0.2",
+    "yaml": "^2.9.0"
   },
   "name": "bondery-monorepo",
+  "overrides": {
+    "@tiptap/core": "3.27.1",
+    "@tiptap/extension-bubble-menu": "3.27.1",
+    "@tiptap/extension-color": "3.27.1",
+    "@tiptap/extension-emoji": "3.27.1",
+    "@tiptap/extension-floating-menu": "3.27.1",
+    "@tiptap/extension-highlight": "3.27.1",
+    "@tiptap/extension-link": "3.27.1",
+    "@tiptap/extension-list": "3.27.1",
+    "@tiptap/extension-mention": "3.27.1",
+    "@tiptap/extension-placeholder": "3.27.1",
+    "@tiptap/extension-task-item": "3.27.1",
+    "@tiptap/extension-task-list": "3.27.1",
+    "@tiptap/extension-text-style": "3.27.1",
+    "@tiptap/extensions": "3.27.1",
+    "@tiptap/pm": "3.27.1",
+    "@tiptap/react": "3.27.1",
+    "@tiptap/starter-kit": "3.27.1",
+    "@tiptap/suggestion": "3.27.1",
+    "next": "16.3.0-canary.83",
+    "postcss": "^8.5.17",
+    "zod-openapi": "^6.0.0"
+  },
   "packageManager": "npm@11.12.0",
   "private": true,
   "scripts": {
@@ -82,6 +106,7 @@
     "start": "turbo start",
     "sync-exports": "node scripts/sync-package-exports.mjs",
     "test:contracts": "npm run test:contracts -w @bondery/schemas",
+    "tsc-native": "node scripts/tsc-native.mjs",
     "turbo:clean": "turbo daemon clean"
   },
   "version": "1.7.0",

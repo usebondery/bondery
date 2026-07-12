@@ -3,7 +3,7 @@
 import { Button, Menu, MenuDropdown, MenuItem, MenuTarget } from "@mantine/core";
 import { IconArrowsSort } from "@tabler/icons-react";
 import { useMemo, useState } from "react";
-import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
+import { useGroupsPageTranslations } from "@/lib/i18n/generated/hooks";
 
 export type SortOption = "count-desc" | "count-asc" | "alpha-asc" | "alpha-desc";
 
@@ -13,7 +13,7 @@ interface SortMenuProps {
 }
 
 export function SortMenu({ sortBy, setSortBy }: SortMenuProps) {
-  const t = useWebTranslations("GroupsPage", "SortMenu");
+  const t = useGroupsPageTranslations("SortMenu");
   const [opened, setOpened] = useState(false);
 
   const sortOptions = useMemo(

@@ -10,7 +10,7 @@ import {
   IconMessageCircle,
 } from "@tabler/icons-react";
 import type { ComponentType } from "react";
-import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
+import { useSettingsPageTranslations } from "@/lib/i18n/generated/hooks";
 import { WEBSITE_URL } from "@/lib/platform/config";
 import { openFeedbackModal } from "../modals/openFeedbackModal";
 import { SettingsSection } from "./SettingsSection";
@@ -78,7 +78,7 @@ function SupportItemCard({ icon: Icon, title, description, href, onClick }: Supp
 }
 
 export function SupportCard() {
-  const t = useWebTranslations("SettingsPage", "Support");
+  const t = useSettingsPageTranslations("Support");
 
   const handleOpenFeedbackModal = () => {
     openFeedbackModal();

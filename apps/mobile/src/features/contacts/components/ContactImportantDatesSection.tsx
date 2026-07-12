@@ -4,9 +4,14 @@ import { IconBell, IconCalendar, IconCalendarPlus, IconPencil } from "@tabler/ic
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Pressable, StyleSheet, Text, View } from "react-native";
+import {
+  useCommonTranslations,
+  useContactImportantDatesTranslations,
+  useContactInfoTranslations,
+  useMobileContactIdentityTranslations,
+} from "@/lib/i18n/generated/hooks";
 import { OverflowMenu } from "../../../components/OverflowMenu";
 import { LIMITS } from "../../../lib/config";
-import { useMobileTranslations } from "../../../lib/i18n/useMobileTranslations";
 import { useAppToast } from "../../../lib/toast/useAppToast";
 import { MOBILE_TYPOGRAPHY } from "../../../theme/tokens";
 import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
@@ -28,16 +33,16 @@ interface ContactImportantDatesSectionProps {
 
 function notifyLabel(
   notifyDaysBefore: ImportantDate["notifyDaysBefore"],
-  t: (key: string, params?: Record<string, unknown>) => string,
+  tContactImportantDates: (key: string) => string,
 ): string | null {
   if (notifyDaysBefore === 1) {
-    return t("NotifyDayBefore", { count: 1, ns: "ContactImportantDates" });
+    return tContactImportantDates("NotifyDayBefore");
   }
   if (notifyDaysBefore === 3) {
-    return t("NotifyDaysBefore", { count: 3, ns: "ContactImportantDates" });
+    return tContactImportantDates("NotifyDaysBefore");
   }
   if (notifyDaysBefore === 7) {
-    return t("NotifyDaysBefore", { count: 7, ns: "ContactImportantDates" });
+    return tContactImportantDates("NotifyDaysBefore");
   }
   return null;
 }
@@ -47,8 +52,11 @@ export function ContactImportantDatesSection({
   contactFirstName,
   onSaveDates,
 }: ContactImportantDatesSectionProps) {
+  const tContactImportantDates = useContactImportantDatesTranslations();
+  const tContactInfo = useContactInfoTranslations();
+  const tMobileContactIdentity = useMobileContactIdentityTranslations();
+  const t = useCommonTranslations();
   const colors = useMobileThemeColors();
-  const t = useMobileTranslations();
   const { i18n } = useTranslation();
   const dateLocale = resolveDateLocale(i18n.language);
   const { showToast } = useAppToast();
@@ -66,11 +74,11 @@ export function ContactImportantDatesSection({
   function openAddSheet() {
     if (!canAdd) {
       showToast({
-        description: t("MaxDatesReached", { ns: "MobileContactIdentity" }).replace(
+        description: tMobileContactIdentity("MaxDatesReached").replace(
           "{max}",
           String(LIMITS.maxImportantDates),
         ),
-        headline: t("feedback.errorTitle", { ns: "common" }),
+        headline: t("feedback.errorTitle"),
         type: "error",
       });
       return;
@@ -91,9 +99,8 @@ export function ContactImportantDatesSection({
       setSheet({ open: false });
     } catch (err) {
       showToast({
-        description:
-          err instanceof Error ? err.message : t("UpdateError", { ns: "ContactImportantDates" }),
-        headline: t("ErrorTitle", { ns: "ContactImportantDates" }),
+        description: err instanceof Error ? err.message : tContactImportantDates("UpdateError"),
+        headline: tContactImportantDates("ErrorTitle"),
         type: "error",
       });
     } finally {
@@ -134,9 +141,9 @@ export function ContactImportantDatesSection({
         action={
           canAdd
             ? {
-                accessibilityLabel: t("AddAction", { ns: "ContactImportantDates" }),
+                accessibilityLabel: tContactImportantDates("AddAction"),
                 icon: <IconCalendarPlus size={16} stroke={colors.primary} />,
-                label: t("Add", { ns: "ContactInfo" }),
+                label: tContactInfo("Add"),
                 onPress: openAddSheet,
               }
             : undefined
@@ -154,14 +161,14 @@ export function ContactImportantDatesSection({
           ]}
         >
           <Text style={[contactDetailStyles.emptyText, { color: colors.textMuted }]}>
-            {t("Empty", { ns: "ContactImportantDates" })}
+            {tContactImportantDates("Empty")}
           </Text>
         </View>
       ) : (
         sortedDates.map((dateEntry) => {
           const sourceIndex = dates.findIndex((item) => item.id === dateEntry.id);
           const meta = IMPORTANT_DATE_TYPE_META[dateEntry.type];
-          const reminder = notifyLabel(dateEntry.notifyDaysBefore, t);
+          const reminder = notifyLabel(dateEntry.notifyDaysBefore, tContactImportantDates);
           const typeLabel = t(`ContactImportantDates.Types.${dateEntry.type}`);
 
           return (
@@ -207,12 +214,12 @@ export function ContactImportantDatesSection({
                 </Pressable>
 
                 <OverflowMenu
-                  accessibilityLabel={t("Title", { ns: "ContactImportantDates" })}
+                  accessibilityLabel={tContactImportantDates("Title")}
                   items={[
                     {
                       icon: <IconPencil size={18} stroke={colors.iconPrimary} />,
                       id: "edit",
-                      label: t("EditAction", { ns: "ContactInfo" }),
+                      label: tContactInfo("EditAction"),
                       onPress: () => openEditSheet(sourceIndex),
                     },
                   ]}

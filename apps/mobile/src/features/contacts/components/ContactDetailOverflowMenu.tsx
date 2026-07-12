@@ -1,7 +1,10 @@
 import { IconMailForward, IconShare, IconTrash } from "@tabler/icons-react-native";
+import {
+  useCommonTranslations,
+  useMobileContactDetailTranslations,
+} from "@/lib/i18n/generated/hooks";
 import { OverflowMenu } from "../../../components/OverflowMenu";
 import type { OverflowMenuItemConfig } from "../../../components/OverflowMenuItem";
-import { useMobileTranslations } from "../../../lib/i18n/useMobileTranslations";
 import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
 
 interface ContactDetailOverflowMenuProps {
@@ -19,20 +22,21 @@ export function ContactDetailOverflowMenu({
   onShareViaEmail,
   onDelete,
 }: ContactDetailOverflowMenuProps) {
-  const t = useMobileTranslations();
+  const tMobileContactDetail = useMobileContactDetailTranslations();
+  const _t = useCommonTranslations();
   const colors = useMobileThemeColors();
 
   const items: OverflowMenuItemConfig[] = [
     {
       icon: <IconShare size={18} stroke={colors.iconPrimary} />,
       id: "share",
-      label: t("ShareContact", { ns: "MobileContactDetail" }),
+      label: tMobileContactDetail("ShareContact"),
       onPress: onShare,
     },
     {
       icon: <IconMailForward size={18} stroke={colors.iconPrimary} />,
       id: "share-email",
-      label: t("ShareContactViaEmail", { ns: "MobileContactDetail" }),
+      label: tMobileContactDetail("ShareContactViaEmail"),
       onPress: onShareViaEmail,
     },
   ];
@@ -41,7 +45,7 @@ export function ContactDetailOverflowMenu({
     items.push({
       icon: <IconTrash size={18} stroke={colors.dangerAccent} />,
       id: "delete",
-      label: t("DeleteContact", { ns: "MobileContactDetail" }),
+      label: tMobileContactDetail("DeleteContact"),
       onPress: onDelete,
       tone: "danger",
     });

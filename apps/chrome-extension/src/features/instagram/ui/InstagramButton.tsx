@@ -4,6 +4,7 @@ import { Button, Text } from "@mantine/core";
 import type React from "react";
 import { useRef, useState } from "react";
 import { browser } from "wxt/browser";
+import { useExtensionSocialButtonsTranslations } from "../../../lib/i18n/generated/hooks";
 import { extLog } from "../../../lib/log";
 import type { AddPersonResult } from "../../../lib/messaging/types";
 
@@ -26,6 +27,7 @@ interface InstagramProfileSnapshot {
 }
 
 const InstagramButton: React.FC<InstagramButtonProps> = ({ username, getSnapshot }) => {
+  const t = useExtensionSocialButtonsTranslations("Instagram");
   const [isLoading, setIsLoading] = useState(false);
   const requestInFlightRef = useRef(false);
 
@@ -129,14 +131,14 @@ const InstagramButton: React.FC<InstagramButtonProps> = ({ username, getSnapshot
         return;
       } else {
         if (result.payload.requiresAuth) {
-          setStatusMessage("Sign in required — click the Bondery icon");
+          setStatusMessage(t("SignInRequired"));
         } else {
-          setStatusMessage(result.payload.error ?? "Something went wrong");
+          setStatusMessage(result.payload.error ?? t("SomethingWrong"));
         }
       }
     } catch (error) {
       extLog.error("Error opening in Bondery:", error);
-      setStatusMessage("Extension error — try again");
+      setStatusMessage(t("ExtensionError"));
     } finally {
       setIsLoading(false);
       requestInFlightRef.current = false;
@@ -151,7 +153,7 @@ const InstagramButton: React.FC<InstagramButtonProps> = ({ username, getSnapshot
         loading={isLoading}
         onClick={handleClick}
       >
-        Open in Bondery
+        {t("OpenInBondery")}
       </Button>
       {statusMessage && (
         <Text c="dimmed" mt={4} size="xs" ta="center">

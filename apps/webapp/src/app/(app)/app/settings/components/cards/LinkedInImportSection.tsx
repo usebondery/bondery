@@ -2,11 +2,11 @@
 
 import { IconBrandLinkedin } from "@tabler/icons-react";
 import { IntegrationCard } from "@/components/shared/IntegrationCard";
-import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
+import { useSettingsPageTranslations } from "@/lib/i18n/generated/hooks";
 import { openLinkedInImportModal } from "../modals/openLinkedInImportModal";
 
 export function LinkedInImportSection() {
-  const t = useWebTranslations("SettingsPage", "DataManagement.LinkedInImport");
+  const t = useSettingsPageTranslations("DataManagement.LinkedInImport");
 
   return (
     <IntegrationCard

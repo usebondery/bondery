@@ -4,14 +4,14 @@
     "@bondery/translations": "*",
     "@vvo/tzdb": "^6.198.0",
     "transliteration": "^2.6.1",
-    "zod": "^4.3.6"
+    "zod": "^4.4.3"
   },
   "description": "Shared runtime utilities and form normalization pipelines for Bondery. Depends on @bondery/schemas.",
   "devDependencies": {
     "@bondery/typescript-config": "*",
-    "dotenv": "^17.3.1",
-    "rimraf": "^6.0.1",
-    "typescript": "^6"
+    "dotenv": "^17.4.2",
+    "rimraf": "^6.1.3",
+    "typescript": "^7.0.2"
   },
   "exports": {
     ".": {
@@ -115,6 +115,18 @@
       "import": "./dist/contact/format-contact-name.test.js",
       "node": "./dist/contact/format-contact-name.test.js",
       "types": "./src/contact/format-contact-name.test.ts"
+    },
+    "./contact/merge-recommendations": {
+      "default": "./dist/contact/merge-recommendations.js",
+      "import": "./dist/contact/merge-recommendations.js",
+      "node": "./dist/contact/merge-recommendations.js",
+      "types": "./src/contact/merge-recommendations.ts"
+    },
+    "./contact/merge-recommendations.test": {
+      "default": "./dist/contact/merge-recommendations.test.js",
+      "import": "./dist/contact/merge-recommendations.test.js",
+      "node": "./dist/contact/merge-recommendations.test.js",
+      "types": "./src/contact/merge-recommendations.test.ts"
     },
     "./date": {
       "default": "./dist/date/index.js",

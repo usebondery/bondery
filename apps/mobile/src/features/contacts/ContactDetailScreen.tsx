@@ -8,8 +8,11 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ActionSheetPopup } from "../../components/ActionSheetPopup";
 import { StackNavBar } from "../../components/chrome";
 import { LoadErrorCard, loadErrorStackInset } from "../../components/load-state";
+import {
+  useCommonTranslations,
+  useMobileSettingsTranslations,
+} from "../../lib/i18n/generated/hooks";
 import { preloadMobileNamespaces } from "../../lib/i18n/preloadMobileNamespaces";
-import { useMobileTranslations } from "../../lib/i18n/useMobileTranslations";
 import {
   useContact,
   useContactGroups,
@@ -78,10 +81,10 @@ function ContactDetailScreenLoaded({
   refreshTags,
   tagsLoading,
 }: ContactDetailScreenLoadedProps) {
+  const t = useCommonTranslations();
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const colors = useMobileThemeColors();
-  const t = useMobileTranslations();
   const handlers = useContactDetailHandlers({
     contact,
     isMyselfMode,
@@ -111,7 +114,7 @@ function ContactDetailScreenLoaded({
         actions={[
           {
             disabled: handlers.isDeleting,
-            label: t("actions.cancel", { ns: "common" }),
+            label: t("actions.cancel"),
             onPress: () => handlers.setDeleteConfirmOpen(false),
             tone: "neutral",
             variant: "outline",
@@ -119,7 +122,7 @@ function ContactDetailScreenLoaded({
           {
             disabled: handlers.isDeleting,
             icon: <IconTrash color={colors.textOnPrimary} size={16} />,
-            label: t("actions.delete", { ns: "common" }),
+            label: t("actions.delete"),
             loading: handlers.isDeleting,
             onPress: handlers.handleDeleteContact,
             tone: "danger",
@@ -230,9 +233,10 @@ function ContactDetailScreenLoaded({
 }
 
 export function ContactDetailScreen({ id, isMyselfMode = false }: ContactDetailScreenProps) {
+  const t = useCommonTranslations();
+  const tMobileSettings = useMobileSettingsTranslations();
   const router = useRouter();
   const colors = useMobileThemeColors();
-  const t = useMobileTranslations();
   useEffect(() => {
     void preloadMobileNamespaces(["mobile.contactDetail"]);
   }, []);
@@ -326,9 +330,9 @@ export function ContactDetailScreen({ id, isMyselfMode = false }: ContactDetailS
         ) : (
           <View style={loadErrorStackInset}>
             <LoadErrorCard
-              description={error ?? t("errors.unknown", { ns: "common" })}
+              description={error ?? t("errors.unknown")}
               onRetry={reloadContact}
-              title={t("LoadErrorTitle", { ns: "MobileSettings" })}
+              title={tMobileSettings("LoadErrorTitle")}
             />
           </View>
         )}

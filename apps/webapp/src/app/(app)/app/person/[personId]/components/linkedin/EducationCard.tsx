@@ -5,7 +5,7 @@ import { AnchorLink } from "@bondery/mantine-next";
 import type { EducationEntry } from "@bondery/schemas";
 import { Avatar, Group, Spoiler, Stack, Text } from "@mantine/core";
 import { IconSchool } from "@tabler/icons-react";
-import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
+import { useLinkedInDataTranslations } from "@/lib/i18n/generated/hooks";
 
 interface EducationCardProps {
   entry: EducationEntry;
@@ -18,7 +18,7 @@ interface EducationCardProps {
  * @param entry The education entry to display.
  */
 export function EducationCard({ entry }: EducationCardProps) {
-  const t = useWebTranslations("LinkedInData");
+  const t = useLinkedInDataTranslations();
 
   const dateRange = formatDateRange(entry.startDate, entry.endDate, t("Present"));
   const duration = formatDuration(entry.startDate, entry.endDate);

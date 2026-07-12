@@ -6,8 +6,8 @@
   "devDependencies": {
     "@bondery/typescript-config": "*",
     "i18next-cli": "^1.65.0",
-    "rimraf": "^6.0.1",
-    "typescript": "^6"
+    "rimraf": "^6.1.3",
+    "typescript": "^7.0.2"
   },
   "exports": {
     ".": {
@@ -94,7 +94,7 @@
   "name": "@bondery/translations",
   "private": true,
   "scripts": {
-    "build": "node scripts/sync-locale-mirror.mjs && node scripts/run-i18next-cli.mjs types && node scripts/generate-resource-map.mjs && rimraf dist tsconfig.tsbuildinfo && tsc && node ../../scripts/rewrite-package-hash-imports-in-dist.mjs translations && node scripts/copy-json.mjs && node scripts/validate-manifest.mjs",
+    "build": "node scripts/sync-locale-mirror.mjs && node scripts/run-i18next-cli.mjs types && node scripts/generate-resource-map.mjs && node scripts/generate-i18n-catalog.mjs && node scripts/generate-client-i18n-hooks.mjs && rimraf dist tsconfig.tsbuildinfo && tsc && node ../../scripts/rewrite-package-hash-imports-in-dist.mjs translations && node scripts/copy-json.mjs && node scripts/validate-manifest.mjs",
     "check-types": "tsc --noEmit",
     "compile": "node scripts/sync-locale-mirror.mjs && node scripts/generate-resource-map.mjs && tsc && node scripts/copy-json.mjs",
     "dev": "node scripts/dev.mjs",

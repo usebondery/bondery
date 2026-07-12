@@ -1,5 +1,9 @@
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
-import type { UpdateAccountInput, UpdateUserSettingsInput } from "@bondery/schemas";
+import type {
+  FeedbackFormInput,
+  UpdateAccountInput,
+  UpdateUserSettingsInput,
+} from "@bondery/schemas";
 import { applyTransportResponsePolicy, clientApiFetch, clientApiJson } from "@/lib/api/client";
 import {
   parseSettingsQueryResult,
@@ -24,7 +28,7 @@ export async function updateSettings(patch: UpdateSettingsPatch): Promise<UserSe
   });
 }
 
-export async function submitFeedback(body: Record<string, unknown>): Promise<void> {
+export async function submitFeedback(body: FeedbackFormInput): Promise<void> {
   await clientApiJson(API_ROUTES.ME_FEEDBACK, {
     body: JSON.stringify(body),
     headers: { "Content-Type": "application/json" },

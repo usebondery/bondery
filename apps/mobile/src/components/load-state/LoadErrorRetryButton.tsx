@@ -1,6 +1,6 @@
 import { IconReload } from "@tabler/icons-react-native";
 import { Pressable, StyleSheet, Text } from "react-native";
-import { useMobileTranslations } from "../../lib/i18n/useMobileTranslations";
+import { useCommonTranslations } from "@/lib/i18n/generated/hooks";
 import { PRIMARY_BUTTON_TEXT } from "../../theme/colors";
 import { MOBILE_TYPOGRAPHY } from "../../theme/tokens";
 import { useMobileThemeColors } from "../../theme/useMobileThemeColors";
@@ -10,12 +10,12 @@ interface LoadErrorRetryButtonProps {
 }
 
 export function LoadErrorRetryButton({ onPress }: LoadErrorRetryButtonProps) {
-  const t = useMobileTranslations();
+  const t = useCommonTranslations();
   const colors = useMobileThemeColors();
 
   return (
     <Pressable
-      accessibilityLabel={t("actions.retry", { ns: "common" })}
+      accessibilityLabel={t("actions.retry")}
       accessibilityRole="button"
       onPress={onPress}
       style={({ pressed }) => [
@@ -26,9 +26,7 @@ export function LoadErrorRetryButton({ onPress }: LoadErrorRetryButtonProps) {
       ]}
     >
       <IconReload color={PRIMARY_BUTTON_TEXT} size={14} stroke={PRIMARY_BUTTON_TEXT} />
-      <Text style={[styles.label, { color: PRIMARY_BUTTON_TEXT }]}>
-        {t("actions.retry", { ns: "common" })}
-      </Text>
+      <Text style={[styles.label, { color: PRIMARY_BUTTON_TEXT }]}>{t("actions.retry")}</Text>
     </Pressable>
   );
 }

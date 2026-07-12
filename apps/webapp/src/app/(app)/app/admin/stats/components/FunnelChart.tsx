@@ -3,7 +3,7 @@
 import { Box, Card, Group, SimpleGrid, Stack, Text } from "@mantine/core";
 import { IconArrowNarrowDown } from "@tabler/icons-react";
 import type { FunnelPeriod } from "@/lib/api/resources/stats";
-import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
+import { useStatsPageTranslations } from "@/lib/i18n/generated/hooks";
 
 interface FunnelStepProps {
   color: string;
@@ -58,7 +58,7 @@ interface FunnelChartProps {
 }
 
 export function FunnelChart({ data }: FunnelChartProps) {
-  const t = useWebTranslations("StatsPage");
+  const t = useStatsPageTranslations();
 
   return (
     <Card padding="lg" withBorder>

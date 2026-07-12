@@ -2,9 +2,14 @@ import type { Group, GroupWithCount } from "@bondery/schemas";
 import { IconPencil } from "@tabler/icons-react-native";
 import { useCallback, useMemo, useState } from "react";
 import { ScrollView, StyleSheet, View } from "react-native";
+import {
+  useCommonTranslations,
+  useMobileContactDetailTranslations,
+  useMobileGroupsTranslations,
+  useMobileSettingsTranslations,
+} from "@/lib/i18n/generated/hooks";
 import { LoadErrorCard } from "../../../components/load-state";
 import { addContactsToGroup } from "../../../lib/domains/groups";
-import { useMobileTranslations } from "../../../lib/i18n/useMobileTranslations";
 import { useMobilePreferences } from "../../../lib/preferences/useMobilePreferences";
 import { useAppToast } from "../../../lib/toast/useAppToast";
 import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
@@ -58,7 +63,10 @@ export function ContactGroupsSection({
   onGroupAdded,
   onGroupsReplaced,
 }: ContactGroupsSectionProps) {
-  const t = useMobileTranslations();
+  const tMobileContactDetail = useMobileContactDetailTranslations();
+  const tMobileGroups = useMobileGroupsTranslations();
+  const tMobileSettings = useMobileSettingsTranslations();
+  const t = useCommonTranslations();
   const colors = useMobileThemeColors();
   const { showToast } = useAppToast();
   const navigateToGroup = useNavigateToGroup();
@@ -72,9 +80,10 @@ export function ContactGroupsSection({
     [groupLastOpenedAt, groupSortOrder, groups],
   );
 
-  const editAccessibilityLabel = t("GroupsEditAccessibility", {
-    ns: "MobileContactDetail",
-  }).replace("{name}", contactName);
+  const editAccessibilityLabel = tMobileContactDetail("GroupsEditAccessibility").replace(
+    "{name}",
+    contactName,
+  );
 
   const handleGroupCreated = useCallback(
     (group: Group) => {
@@ -83,13 +92,13 @@ export function ContactGroupsSection({
         onGroupAdded(group);
       } catch {
         showToast({
-          description: t("CreateFailed", { ns: "MobileGroups" }),
-          headline: t("feedback.errorTitle", { ns: "common" }),
+          description: tMobileGroups("CreateFailed"),
+          headline: t("feedback.errorTitle"),
           type: "error",
         });
       }
     },
-    [contactId, onGroupAdded, showToast, t],
+    [contactId, onGroupAdded, showToast, tMobileGroups, t],
   );
 
   return (
@@ -101,7 +110,7 @@ export function ContactGroupsSection({
             : {
                 accessibilityLabel: editAccessibilityLabel,
                 icon: <IconPencil size={16} stroke={colors.primary} />,
-                label: t("GroupsEdit", { ns: "MobileContactDetail" }),
+                label: tMobileContactDetail("GroupsEdit"),
                 onPress: () => setEditSheetOpen(true),
               }
         }
@@ -115,7 +124,7 @@ export function ContactGroupsSection({
         <LoadErrorCard
           description={error}
           onRetry={onRetry}
-          title={t("GroupsLoadErrorTitle", { ns: "MobileSettings" })}
+          title={tMobileSettings("GroupsLoadErrorTitle")}
         />
       ) : (
         <ContactsGroupsHeader

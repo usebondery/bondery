@@ -5,6 +5,7 @@ import { parsePhoneNumber } from "@bondery/helpers/phone";
 import type {
   Contact,
   ContactPreview,
+  ContactSelectable,
   EmailEntry,
   ImportantDate,
   PhoneEntry,
@@ -17,7 +18,7 @@ interface UsePersonContactFormStateOptions {
   fetchedImportantDates: ImportantDate[] | undefined;
   personActivities: Array<{ id: string; type: string }>;
   personId: string;
-  selectableContacts: Contact[];
+  selectableContacts: ContactSelectable[];
 }
 
 export function usePersonContactFormState({

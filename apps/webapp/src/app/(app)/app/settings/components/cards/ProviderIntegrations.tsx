@@ -16,12 +16,12 @@ import {
   IconDeviceDesktop,
   IconUnlink,
 } from "@tabler/icons-react";
-import { Trans } from "next-i18next/client";
 import { useEffect, useState } from "react";
 import { openStandardConfirmModal } from "@/components/modals/openStandardConfirmModal";
 import { usePWAInstall } from "@/hooks/usePWAInstall";
 import { detectBonderyChromeExtension } from "@/lib/extension/detectBonderyChromeExtension";
-import { useCommonTranslations, useWebTranslations } from "@/lib/i18n/useWebTranslations";
+import { useCommonTranslations, useSettingsPageTranslations } from "@/lib/i18n/generated/hooks";
+import { TypedTrans } from "@/lib/i18n/TypedTrans";
 import { INTEGRATION_PROVIDERS } from "@/lib/platform/config";
 import { createBrowswerSupabaseClient } from "@/lib/supabase/client";
 import { openChromeExtensionModal } from "../modals/openChromeExtensionModal";
@@ -60,8 +60,8 @@ export function ProviderIntegrations({
   const { canInstall, isChromiumDesktop, isPWAInstalled, isInstalledFromBrowser, install } =
     usePWAInstall();
 
-  const t = useWebTranslations("SettingsPage", "Profile");
-  const tIntegration = useWebTranslations("SettingsPage", "Integration");
+  const t = useSettingsPageTranslations("Profile");
+  const tIntegration = useSettingsPageTranslations("Integration");
   const tCommon = useCommonTranslations();
 
   useEffect(() => {
@@ -133,7 +133,7 @@ export function ProviderIntegrations({
       confirmLabel: t("UnlinkAccountButton"),
       message: (
         <Text size="sm">
-          <Trans
+          <TypedTrans
             components={{ b: <b /> }}
             i18nKey="UnlinkAccountMessage"
             t={t}

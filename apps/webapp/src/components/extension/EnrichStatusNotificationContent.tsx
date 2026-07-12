@@ -4,7 +4,7 @@ import { PersonChip } from "@bondery/mantine-next";
 import { Group, Progress, Stack, Text } from "@mantine/core";
 import { useSyncExternalStore } from "react";
 import { defaultState, getState, subscribe } from "@/lib/extension/enrichBatchStore";
-import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
+import { useEnrichFromLinkedInTranslations } from "@/lib/i18n/generated/hooks";
 
 /**
  * Live notification body for the batch LinkedIn enrichment status tray.
@@ -15,7 +15,7 @@ import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
  * any external `notifications.update()` calls.
  */
 export function EnrichStatusNotificationContent() {
-  const t = useWebTranslations("EnrichFromLinkedIn");
+  const t = useEnrichFromLinkedInTranslations();
   const { completed, failed, totalEligible, currentPerson } = useSyncExternalStore(
     subscribe,
     getState,

@@ -1,13 +1,17 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
-import { useMobileTranslations } from "../../../src/lib/i18n/useMobileTranslations";
+import {
+  useCommonTranslations,
+  useMobileAuthTranslations,
+} from "../../../src/lib/i18n/generated/hooks";
 import { supabase } from "../../../src/lib/supabase/client";
 import { MOBILE_TYPOGRAPHY } from "../../../src/theme/tokens";
 import { useMobileThemeColors } from "../../../src/theme/useMobileThemeColors";
 
 export default function AuthCallbackScreen() {
-  const t = useMobileTranslations();
+  const tMobileAuth = useMobileAuthTranslations();
+  const _t = useCommonTranslations();
   const router = useRouter();
   const colors = useMobileThemeColors();
   const params = useLocalSearchParams<{ code?: string; error?: string }>();
@@ -19,7 +23,7 @@ export default function AuthCallbackScreen() {
     const completeSignIn = async () => {
       if (!supabase) {
         if (active) {
-          setStatusError(t("MissingConfig", { ns: "MobileAuth" }));
+          setStatusError(tMobileAuth("MissingConfig"));
         }
         return;
       }
@@ -38,7 +42,7 @@ export default function AuthCallbackScreen() {
         if (data.session) {
           router.replace("/contacts");
         } else if (active) {
-          setStatusError(t("MissingCode", { ns: "MobileAuth" }));
+          setStatusError(tMobileAuth("MissingCode"));
         }
         return;
       }
@@ -60,13 +64,13 @@ export default function AuthCallbackScreen() {
     return () => {
       active = false;
     };
-  }, [params.code, params.error, router, t]);
+  }, [params.code, params.error, router, tMobileAuth]);
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.surface }]}>
       <ActivityIndicator color={colors.textPrimary} size="large" />
       <Text style={[styles.title, { color: colors.textSecondary }]}>
-        {t("CompletingLogin", { ns: "MobileAuth" })}
+        {tMobileAuth("CompletingLogin")}
       </Text>
       {statusError ? (
         <Text style={[styles.error, { color: colors.dangerText }]}>{statusError}</Text>

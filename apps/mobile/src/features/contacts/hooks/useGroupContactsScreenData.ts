@@ -1,8 +1,8 @@
 import type { Contact } from "@bondery/schemas";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCommonTranslations } from "@/lib/i18n/generated/hooks";
 import { DEBOUNCE_MS, GROUP_CONTACTS_FETCH_LIMIT } from "../../../lib/config";
 import { useDebouncedValue } from "../../../lib/hooks/useDebouncedValue";
-import { useMobileTranslations } from "../../../lib/i18n/useMobileTranslations";
 import {
   type MobilePreferencesState,
   useMobilePreferences,
@@ -17,7 +17,7 @@ interface UseGroupContactsScreenDataOptions {
 }
 
 export function useGroupContactsScreenData({ groupId }: UseGroupContactsScreenDataOptions) {
-  const t = useMobileTranslations();
+  const t = useCommonTranslations();
   const latestRequestRef = useRef(0);
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [totalCount, setTotalCount] = useState(0);
@@ -75,11 +75,7 @@ export function useGroupContactsScreenData({ groupId }: UseGroupContactsScreenDa
           return;
         }
 
-        setError(
-          loadError instanceof Error
-            ? loadError.message
-            : t("feedback.errorTitle", { ns: "common" }),
-        );
+        setError(loadError instanceof Error ? loadError.message : t("feedback.errorTitle"));
       } finally {
         if (requestId === latestRequestRef.current) {
           setLoading(false);

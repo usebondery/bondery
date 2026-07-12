@@ -1,9 +1,9 @@
 import type { Contact } from "@bondery/schemas";
 import { useLocalSearchParams } from "expo-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCommonTranslations, useMobileContactsTranslations } from "@/lib/i18n/generated/hooks";
 import { CONTACTS_PAGE_SIZE, DEBOUNCE_MS } from "../../../lib/config";
 import { useDebouncedValue } from "../../../lib/hooks/useDebouncedValue";
-import { useMobileTranslations } from "../../../lib/i18n/useMobileTranslations";
 import {
   type MobilePreferencesState,
   useMobilePreferences,
@@ -20,7 +20,8 @@ import { useCreateContactSheet } from "../createContactSheetContext";
 import { sortGroups } from "../groupSort";
 
 export function useContactsScreenData() {
-  const t = useMobileTranslations();
+  const tMobileContacts = useMobileContactsTranslations();
+  const t = useCommonTranslations();
   const { refresh } = useLocalSearchParams<{ refresh?: string | string[] }>();
   const refreshKey = Array.isArray(refresh) ? refresh[0] : refresh;
   const { contactsListVersion } = useCreateContactSheet();
@@ -109,8 +110,7 @@ export function useContactsScreenData() {
           return;
         }
 
-        const errorMessage =
-          loadError instanceof Error ? loadError.message : t("errors.unknown", { ns: "common" });
+        const errorMessage = loadError instanceof Error ? loadError.message : t("errors.unknown");
         setError(errorMessage);
       } finally {
         if (requestId === latestRequestRef.current) {
@@ -163,7 +163,7 @@ export function useContactsScreenData() {
     return contactMatchesQuery(myselfContact, debouncedQuery) ? myselfContact : null;
   }, [myselfContact, debouncedQuery]);
 
-  const myselfSectionTitle = t("Myself", { ns: "MobileContacts" });
+  const myselfSectionTitle = tMobileContacts("Myself");
 
   const alphabetSections = useMemo<ContactSection[]>(() => {
     const grouped = new Map<string, Contact[]>();

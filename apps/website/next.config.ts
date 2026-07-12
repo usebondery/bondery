@@ -12,6 +12,7 @@ const nextConfig: NextConfig = {
       "@mantine/hooks",
       "@mantine/notifications",
     ],
+    useTypeScriptCli: true,
   },
   async headers() {
     return [

@@ -13,7 +13,12 @@ import {
 import { useState } from "react";
 import { useBatchEnrichFromLinkedIn } from "@/components/extension/useBatchEnrichFromLinkedIn";
 import { downloadContactVcard } from "@/lib/api/domains/contacts";
-import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
+import {
+  useContactActionMenuTranslations,
+  useEnrichFromLinkedInTranslations,
+  useMergeWithModalTranslations,
+  useShareContactModalTranslations,
+} from "@/lib/i18n/generated/hooks";
 
 interface ContactActionMenuProps {
   contact: Contact;
@@ -33,10 +38,10 @@ export function ContactActionMenu({
   onShare,
   myselfMode = false,
 }: ContactActionMenuProps) {
-  const tMerge = useWebTranslations("MergeWithModal");
-  const tShare = useWebTranslations("ShareContactModal");
-  const tEnrich = useWebTranslations("EnrichFromLinkedIn");
-  const tActions = useWebTranslations("ContactActionMenu");
+  const tMerge = useMergeWithModalTranslations();
+  const tShare = useShareContactModalTranslations();
+  const tEnrich = useEnrichFromLinkedInTranslations();
+  const tActions = useContactActionMenuTranslations();
   const { startForPerson } = useBatchEnrichFromLinkedIn();
 
   const handleExport = async () => {

@@ -3,6 +3,7 @@
 import { getUserFacingError } from "@bondery/helpers/api";
 import { errorNotificationTemplate, successNotificationTemplate } from "@bondery/mantine-next";
 import type { RelationshipType } from "@bondery/schemas";
+import type { TranslateFn } from "@bondery/translations";
 import { notifications } from "@mantine/notifications";
 import { useCallback, useState } from "react";
 import type {
@@ -18,8 +19,8 @@ type DeleteRelationshipMutation = ReturnType<typeof useDeleteContactRelationship
 interface UsePersonRelationshipHandlersOptions {
   createRelationshipMutation: CreateRelationshipMutation;
   deleteRelationshipMutation: DeleteRelationshipMutation;
-  tCommon: (key: string) => string;
-  tRelationships: (key: string) => string;
+  tCommon: TranslateFn<"common">;
+  tRelationships: TranslateFn<"PersonRelationships">;
   updateRelationshipMutation: UpdateRelationshipMutation;
 }
 

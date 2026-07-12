@@ -15,7 +15,7 @@ import { Combobox, Group, Input, ScrollArea, Stack, Text, useCombobox } from "@m
 import { notifications } from "@mantine/notifications";
 import { IconWorld } from "@tabler/icons-react";
 import { forwardRef, useEffect, useState } from "react";
-import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
+import { useSettingsPageTranslations } from "@/lib/i18n/generated/hooks";
 import { useUpdateSettingsMutation } from "@/lib/query/hooks/useSettings";
 
 const TimezoneItem = forwardRef<
@@ -84,7 +84,7 @@ interface TimezonePickerProps {
 export function TimezonePicker({ initialValue }: TimezonePickerProps) {
   const [timezone, setTimezone] = useState(initialValue);
   const [timezoneSearch, setTimezoneSearch] = useState("");
-  const t = useWebTranslations("SettingsPage", "Profile");
+  const t = useSettingsPageTranslations("Profile");
   const updateSettingsMutation = useUpdateSettingsMutation();
   const [currentTimezoneTime, setCurrentTimezoneTime] = useState(() => {
     const tzData = TIMEZONES_DATA.find((tz) => tz.value === initialValue);

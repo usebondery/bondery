@@ -1,6 +1,6 @@
 import type { TagWithCount } from "@bondery/schemas";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
-import { useMobileTranslations } from "../../../lib/i18n/useMobileTranslations";
+import { useTagsInputTranslations } from "@/lib/i18n/generated/hooks";
 import { MOBILE_TYPOGRAPHY } from "../../../theme/tokens";
 import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
 import { CreateTagChip } from "./CreateTagChip";
@@ -85,12 +85,12 @@ export function ContactsTagsHeader({
   shouldShowCreateAction,
   showEmptyPlaceholder = false,
 }: ContactsTagsHeaderProps) {
-  const t = useMobileTranslations();
+  const tTagsInput = useTagsInputTranslations();
   const colors = useMobileThemeColors();
   const isChipRowLayout = layout === "chipRow";
   const isWrapLayout = layout === "wrap";
   const isEmbeddedLayout = isChipRowLayout || isWrapLayout;
-  const sectionTitle = headerText ?? title ?? t("Label", { ns: "TagsInput" });
+  const sectionTitle = headerText ?? title ?? tTagsInput("Label");
   const showCreateAction =
     (shouldShowCreateAction ?? onCreatePress !== undefined) && onCreatePress !== undefined;
 

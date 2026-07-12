@@ -5,7 +5,7 @@ import { Notifications, notifications } from "@mantine/notifications";
 import { useEffect, useSyncExternalStore } from "react";
 import { defaultState, getState, subscribe } from "@/lib/extension/enrichBatchStore";
 import { statusNotificationsStore } from "@/lib/extension/statusNotificationsStore";
-import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
+import { useEnrichFromLinkedInTranslations } from "@/lib/i18n/generated/hooks";
 import { EnrichResumeNotificationContent } from "./EnrichResumeNotificationContent";
 import { EnrichStatusNotificationContent } from "./EnrichStatusNotificationContent";
 
@@ -26,7 +26,7 @@ const ENRICH_RESUME_ID = "enrich-resume";
  * Mount once in the authenticated app layout.
  */
 export function EnrichStatusNotificationManager() {
-  const t = useWebTranslations("EnrichFromLinkedIn");
+  const t = useEnrichFromLinkedInTranslations();
   const { isRunning, pendingQueueStatus } = useSyncExternalStore(
     subscribe,
     getState,

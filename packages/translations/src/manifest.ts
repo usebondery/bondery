@@ -5,7 +5,7 @@ import {
 } from "@bondery/schemas/locale/supported-locale";
 import manifestJson from "../manifest.json" with { type: "json" };
 
-export type Platform = "web" | "mobile" | "website";
+export type Platform = "web" | "mobile" | "website" | "extension";
 
 export interface NamespaceEntry {
   path: string;

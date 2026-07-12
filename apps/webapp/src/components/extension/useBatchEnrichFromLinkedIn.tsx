@@ -21,7 +21,7 @@ import {
   setState,
   subscribe,
 } from "@/lib/extension/enrichBatchStore";
-import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
+import { useEnrichFromLinkedInTranslations } from "@/lib/i18n/generated/hooks";
 import { getQueryClient } from "@/lib/query/client";
 import { useDiscardEnrichQueueMutation } from "@/lib/query/hooks/useEnrichQueue";
 import { contactKeys } from "@/lib/query/keys";
@@ -29,7 +29,7 @@ import { deleteEnrichQueue, getResponseErrorDescription } from "./batch-enrich-a
 import { useEnrichLoop } from "./useEnrichLoop";
 
 function showCompletionNotification(
-  t: ReturnType<typeof useWebTranslations>,
+  t: ReturnType<typeof useEnrichFromLinkedInTranslations>,
   completedCount: number,
 ) {
   if (completedCount <= 0) {
@@ -74,7 +74,7 @@ function finalizeEnrichRun(abortReason: "circuit_breaker" | null) {
  * Hook for batch-enriching contacts from LinkedIn via the Chrome extension.
  */
 export function useBatchEnrichFromLinkedIn() {
-  const t = useWebTranslations("EnrichFromLinkedIn");
+  const t = useEnrichFromLinkedInTranslations();
   const discardEnrichQueueMutation = useDiscardEnrichQueueMutation();
 
   const storeState = useSyncExternalStore(subscribe, getState, () => defaultState);

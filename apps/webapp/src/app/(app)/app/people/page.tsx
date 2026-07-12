@@ -5,7 +5,7 @@ import { Suspense } from "react";
 import { PageWrapper } from "@/components/shell/PageWrapper";
 import type { ColumnKey } from "@/lib/contacts/table-types";
 import { COLUMN_VISIBILITY_COOKIE } from "@/lib/cookies/constants";
-import { getWebTranslations as getTranslations } from "@/lib/i18n/getWebTranslations";
+import { getPeoplePageTranslations } from "@/lib/i18n/generated/hooks.server";
 import { staticPageTitle } from "@/lib/metadata/pageTitles";
 import { parseContactsListParams } from "@/lib/query/contactsListParams";
 import { PeopleHeaderClient } from "./components/chrome/PeopleHeaderClient";
@@ -13,7 +13,7 @@ import { PeopleTableSkeleton } from "./components/chrome/PeopleSkeletons";
 import { PeopleTableLoader } from "./components/chrome/PeopleTableLoader";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const t = await getTranslations("PeoplePage");
+  const t = await getPeoplePageTranslations();
   return staticPageTitle(t("Title"));
 }
 

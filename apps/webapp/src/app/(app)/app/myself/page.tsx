@@ -2,7 +2,7 @@ import { formatContactName } from "@bondery/helpers/contact";
 import type { Metadata } from "next";
 import { cache } from "react";
 import { getMePersonServer } from "@/lib/api/domains/server/mePerson";
-import { getWebTranslations as getTranslations } from "@/lib/i18n/getWebTranslations";
+import { getSingleContactPageTranslations } from "@/lib/i18n/generated/hooks.server";
 import { entityPageTitle } from "@/lib/metadata/pageTitles";
 import { MyselfLoader } from "./MyselfLoader";
 
@@ -16,7 +16,7 @@ export async function generateMetadata(): Promise<Metadata> {
     }
     return entityPageTitle(formatContactName(me));
   } catch {
-    const t = await getTranslations("SingleContactPage");
+    const t = await getSingleContactPageTranslations();
     return entityPageTitle(t("MyselfPageTitle"));
   }
 }

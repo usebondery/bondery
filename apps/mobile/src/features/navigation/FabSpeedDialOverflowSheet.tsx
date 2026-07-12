@@ -1,11 +1,12 @@
 import { useMemo } from "react";
+import { useCommonTranslations, useMobileNavigationTranslations } from "@/lib/i18n/generated/hooks";
 import { ActionListSheet } from "../../components/ActionListSheet";
-import { useMobileTranslations } from "../../lib/i18n/useMobileTranslations";
 import { useMobileThemeColors } from "../../theme/useMobileThemeColors";
 import { useFabSpeedDial } from "./fabSpeedDialContext";
 
 export function FabSpeedDialOverflowSheet() {
-  const t = useMobileTranslations();
+  const tMobileNavigation = useMobileNavigationTranslations();
+  const _t = useCommonTranslations();
   const colors = useMobileThemeColors();
   const { actions, isOverflowSheetOpen, closeOverflowSheet, runAction, usesInlineMenu } =
     useFabSpeedDial();
@@ -18,11 +19,11 @@ export function FabSpeedDialOverflowSheet() {
         return {
           icon: <Icon size={18} stroke={colors.primary} />,
           id: action.id,
-          label: t(action.labelKey, { ns: action.labelNamespace ?? "MobileNavigation" }),
+          label: tMobileNavigation(action.labelKey),
           onPress: () => runAction(action.id),
         };
       }),
-    [actions, colors.primary, runAction, t],
+    [actions, colors.primary, runAction, tMobileNavigation],
   );
 
   if (usesInlineMenu) {
@@ -38,7 +39,7 @@ export function FabSpeedDialOverflowSheet() {
       }}
       open={isOverflowSheetOpen}
       rows={rows}
-      title={t("Add", { ns: "MobileNavigation" })}
+      title={tMobileNavigation("Add")}
     />
   );
 }

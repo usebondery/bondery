@@ -6,12 +6,12 @@ import { Button, Group, Text } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { IconLogout } from "@tabler/icons-react";
 import { endSession } from "@/lib/auth/endSession";
-import { useCommonTranslations, useWebTranslations } from "@/lib/i18n/useWebTranslations";
+import { useCommonTranslations, useSettingsPageTranslations } from "@/lib/i18n/generated/hooks";
 
 export function LogoutSection() {
   const tCommon = useCommonTranslations();
 
-  const t = useWebTranslations("SettingsPage", "DataManagement");
+  const t = useSettingsPageTranslations("DataManagement");
 
   const handleLogout = async () => {
     const loadingNotification = notifications.show({

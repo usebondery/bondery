@@ -8,7 +8,7 @@ import { DefaultChatTransport } from "ai";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { PageHeader } from "@/components/shell/PageHeader";
 import { useUserSession } from "@/components/shell/UserSessionProvider";
-import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
+import { useChatPageTranslations } from "@/lib/i18n/generated/hooks";
 import {
   useChatSessionMessagesQuery,
   useChatSessionsRefreshOnStreamEnd,
@@ -30,7 +30,7 @@ const SUGGESTED_PROMPT_KEYS = [
 ] as const;
 
 export function ChatClient({ sessionId }: { sessionId?: string }) {
-  const t = useWebTranslations("ChatPage");
+  const t = useChatPageTranslations();
   const { avatarUrl: userAvatarUrl, displayName: userName } = useUserSession();
   const { data: subscriptionStatus = null } = useSubscriptionQuery();
   const { data: hydratedMessages = [] } = useChatSessionMessagesQuery(sessionId, !!sessionId);

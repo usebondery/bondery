@@ -5,8 +5,8 @@ import { Combobox, Group, Input, ScrollArea, Stack, Text, useCombobox } from "@m
 import { IconWorld } from "@tabler/icons-react";
 import type { ReactNode } from "react";
 import { forwardRef, useEffect, useState } from "react";
+import { useSettingsPageTranslations } from "@/lib/i18n/generated/hooks";
 import { useDateFormatter as useFormatter } from "@/lib/i18n/useDateFormatter";
-import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
 
 const TimezoneItem = forwardRef<
   HTMLDivElement,
@@ -94,7 +94,7 @@ export function TimezonePicker({
   const currentValue = value ?? initialValue;
   const [timezone, setTimezone] = useState(currentValue);
   const [timezoneSearch, setTimezoneSearch] = useState("");
-  const t = useWebTranslations("SettingsPage", "Profile");
+  const t = useSettingsPageTranslations("Profile");
   const formatter = useFormatter();
   const [isMounted, setIsMounted] = useState(false);
   const [now, setNow] = useState(() => new Date());

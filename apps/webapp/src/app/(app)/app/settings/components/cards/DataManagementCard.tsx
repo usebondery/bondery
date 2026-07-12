@@ -2,7 +2,7 @@
 
 import { CardSection, Divider, Group, Text } from "@mantine/core";
 import { IconDatabase } from "@tabler/icons-react";
-import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
+import { useSettingsPageTranslations } from "@/lib/i18n/generated/hooks";
 import { DeleteAccountSection } from "./DeleteAccountSection";
 import { InstagramImportSection } from "./InstagramImportSection";
 import { LinkedInImportSection } from "./LinkedInImportSection";
@@ -11,7 +11,7 @@ import { SettingsSection } from "./SettingsSection";
 import { VCardImportSection } from "./VCardImportSection";
 
 export function DataManagementCard() {
-  const t = useWebTranslations("SettingsPage", "DataManagement");
+  const t = useSettingsPageTranslations("DataManagement");
 
   return (
     <SettingsSection

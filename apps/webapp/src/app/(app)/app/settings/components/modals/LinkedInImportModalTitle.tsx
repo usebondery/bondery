@@ -2,9 +2,9 @@
 
 import { ModalTitle } from "@bondery/mantine-next";
 import { IconDownload } from "@tabler/icons-react";
-import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
+import { useSettingsPageTranslations } from "@/lib/i18n/generated/hooks";
 
 export function LinkedInImportModalTitle() {
-  const t = useWebTranslations("SettingsPage", "DataManagement.LinkedInImport");
+  const t = useSettingsPageTranslations("DataManagement.LinkedInImport");
   return <ModalTitle icon={<IconDownload size={20} stroke={1.5} />} text={t("ModalTitle")} />;
 }

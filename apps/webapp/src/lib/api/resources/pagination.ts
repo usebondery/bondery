@@ -3,18 +3,19 @@ import type { PaginationMeta } from "@bondery/schemas";
 export type { PaginationMeta };
 
 export function normalizePaginatedList<T, K extends string>(
-  raw: Record<string, unknown>,
+  raw: object,
   key: K,
   fallbackLimit = 50,
 ): { items: T[]; pagination: PaginationMeta } {
-  const items = (raw[key] as T[] | undefined) ?? [];
-  const pagination = raw.pagination as PaginationMeta | undefined;
+  const record = raw as Record<string, unknown>;
+  const items = (record[key] as T[] | undefined) ?? [];
+  const pagination = record.pagination as PaginationMeta | undefined;
 
   if (pagination) {
     return { items, pagination };
   }
 
-  const legacyTotalCount = raw.totalCount;
+  const legacyTotalCount = record.totalCount;
   const totalCount =
     typeof legacyTotalCount === "number" && Number.isFinite(legacyTotalCount)
       ? legacyTotalCount

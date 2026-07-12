@@ -1,13 +1,13 @@
 {
   "dependencies": {
-    "zod": "^4.3.6",
-    "zod-openapi": "^5.4.6"
+    "zod": "^4.4.3",
+    "zod-openapi": "^6.0.0"
   },
   "description": "Canonical types, Zod validation schemas, and constants for Bondery. Contract layer — no runtime business logic.",
   "devDependencies": {
     "@bondery/typescript-config": "*",
-    "rimraf": "^6.0.1",
-    "typescript": "^6"
+    "rimraf": "^6.1.3",
+    "typescript": "^7.0.2"
   },
   "exports": {
     ".": {
@@ -41,10 +41,28 @@
       "types": "./src/constants/import.ts"
     },
     "./contact-id": {
-      "default": "./dist/contact-id.js",
-      "import": "./dist/contact-id.js",
-      "node": "./dist/contact-id.js",
-      "types": "./src/contact-id.ts"
+      "default": "./dist/contact-id/index.js",
+      "import": "./dist/contact-id/index.js",
+      "node": "./dist/contact-id/index.js",
+      "types": "./src/contact-id/index.ts"
+    },
+    "./contact-id/contract": {
+      "default": "./dist/contact-id/contract.js",
+      "import": "./dist/contact-id/contract.js",
+      "node": "./dist/contact-id/contract.js",
+      "types": "./src/contact-id/contract.ts"
+    },
+    "./contact-id/schema": {
+      "default": "./dist/contact-id/schema.js",
+      "import": "./dist/contact-id/schema.js",
+      "node": "./dist/contact-id/schema.js",
+      "types": "./src/contact-id/schema.ts"
+    },
+    "./contact-id/types": {
+      "default": "./dist/contact-id/types.js",
+      "import": "./dist/contact-id/types.js",
+      "node": "./dist/contact-id/types.js",
+      "types": "./src/contact-id/types.ts"
     },
     "./contracts.assertions": {
       "default": "./dist/contracts.assertions.js",
@@ -65,112 +83,460 @@
       "types": "./src/entities/index.ts"
     },
     "./entities/_shared": {
-      "default": "./dist/entities/_shared.js",
-      "import": "./dist/entities/_shared.js",
-      "node": "./dist/entities/_shared.js",
-      "types": "./src/entities/_shared.ts"
+      "default": "./dist/entities/_shared/index.js",
+      "import": "./dist/entities/_shared/index.js",
+      "node": "./dist/entities/_shared/index.js",
+      "types": "./src/entities/_shared/index.ts"
+    },
+    "./entities/_shared/contract": {
+      "default": "./dist/entities/_shared/contract.js",
+      "import": "./dist/entities/_shared/contract.js",
+      "node": "./dist/entities/_shared/contract.js",
+      "types": "./src/entities/_shared/contract.ts"
+    },
+    "./entities/_shared/schema": {
+      "default": "./dist/entities/_shared/schema.js",
+      "import": "./dist/entities/_shared/schema.js",
+      "node": "./dist/entities/_shared/schema.js",
+      "types": "./src/entities/_shared/schema.ts"
+    },
+    "./entities/_shared/types": {
+      "default": "./dist/entities/_shared/types.js",
+      "import": "./dist/entities/_shared/types.js",
+      "node": "./dist/entities/_shared/types.js",
+      "types": "./src/entities/_shared/types.ts"
     },
     "./entities/activity": {
-      "default": "./dist/entities/activity.js",
-      "import": "./dist/entities/activity.js",
-      "node": "./dist/entities/activity.js",
-      "types": "./src/entities/activity.ts"
+      "default": "./dist/entities/activity/index.js",
+      "import": "./dist/entities/activity/index.js",
+      "node": "./dist/entities/activity/index.js",
+      "types": "./src/entities/activity/index.ts"
+    },
+    "./entities/activity/contract": {
+      "default": "./dist/entities/activity/contract.js",
+      "import": "./dist/entities/activity/contract.js",
+      "node": "./dist/entities/activity/contract.js",
+      "types": "./src/entities/activity/contract.ts"
+    },
+    "./entities/activity/schema": {
+      "default": "./dist/entities/activity/schema.js",
+      "import": "./dist/entities/activity/schema.js",
+      "node": "./dist/entities/activity/schema.js",
+      "types": "./src/entities/activity/schema.ts"
+    },
+    "./entities/activity/types": {
+      "default": "./dist/entities/activity/types.js",
+      "import": "./dist/entities/activity/types.js",
+      "node": "./dist/entities/activity/types.js",
+      "types": "./src/entities/activity/types.ts"
     },
     "./entities/address": {
-      "default": "./dist/entities/address.js",
-      "import": "./dist/entities/address.js",
-      "node": "./dist/entities/address.js",
-      "types": "./src/entities/address.ts"
+      "default": "./dist/entities/address/index.js",
+      "import": "./dist/entities/address/index.js",
+      "node": "./dist/entities/address/index.js",
+      "types": "./src/entities/address/index.ts"
+    },
+    "./entities/address/contract": {
+      "default": "./dist/entities/address/contract.js",
+      "import": "./dist/entities/address/contract.js",
+      "node": "./dist/entities/address/contract.js",
+      "types": "./src/entities/address/contract.ts"
+    },
+    "./entities/address/schema": {
+      "default": "./dist/entities/address/schema.js",
+      "import": "./dist/entities/address/schema.js",
+      "node": "./dist/entities/address/schema.js",
+      "types": "./src/entities/address/schema.ts"
+    },
+    "./entities/address/types": {
+      "default": "./dist/entities/address/types.js",
+      "import": "./dist/entities/address/types.js",
+      "node": "./dist/entities/address/types.js",
+      "types": "./src/entities/address/types.ts"
     },
     "./entities/api": {
-      "default": "./dist/entities/api.js",
-      "import": "./dist/entities/api.js",
-      "node": "./dist/entities/api.js",
-      "types": "./src/entities/api.ts"
+      "default": "./dist/entities/api/index.js",
+      "import": "./dist/entities/api/index.js",
+      "node": "./dist/entities/api/index.js",
+      "types": "./src/entities/api/index.ts"
     },
     "./entities/api-keys": {
-      "default": "./dist/entities/api-keys.js",
-      "import": "./dist/entities/api-keys.js",
-      "node": "./dist/entities/api-keys.js",
-      "types": "./src/entities/api-keys.ts"
+      "default": "./dist/entities/api-keys/index.js",
+      "import": "./dist/entities/api-keys/index.js",
+      "node": "./dist/entities/api-keys/index.js",
+      "types": "./src/entities/api-keys/index.ts"
+    },
+    "./entities/api-keys/contract": {
+      "default": "./dist/entities/api-keys/contract.js",
+      "import": "./dist/entities/api-keys/contract.js",
+      "node": "./dist/entities/api-keys/contract.js",
+      "types": "./src/entities/api-keys/contract.ts"
+    },
+    "./entities/api-keys/schema": {
+      "default": "./dist/entities/api-keys/schema.js",
+      "import": "./dist/entities/api-keys/schema.js",
+      "node": "./dist/entities/api-keys/schema.js",
+      "types": "./src/entities/api-keys/schema.ts"
+    },
+    "./entities/api-keys/types": {
+      "default": "./dist/entities/api-keys/types.js",
+      "import": "./dist/entities/api-keys/types.js",
+      "node": "./dist/entities/api-keys/types.js",
+      "types": "./src/entities/api-keys/types.ts"
+    },
+    "./entities/api/contract": {
+      "default": "./dist/entities/api/contract.js",
+      "import": "./dist/entities/api/contract.js",
+      "node": "./dist/entities/api/contract.js",
+      "types": "./src/entities/api/contract.ts"
+    },
+    "./entities/api/schema": {
+      "default": "./dist/entities/api/schema.js",
+      "import": "./dist/entities/api/schema.js",
+      "node": "./dist/entities/api/schema.js",
+      "types": "./src/entities/api/schema.ts"
+    },
+    "./entities/api/types": {
+      "default": "./dist/entities/api/types.js",
+      "import": "./dist/entities/api/types.js",
+      "node": "./dist/entities/api/types.js",
+      "types": "./src/entities/api/types.ts"
     },
     "./entities/channels": {
-      "default": "./dist/entities/channels.js",
-      "import": "./dist/entities/channels.js",
-      "node": "./dist/entities/channels.js",
-      "types": "./src/entities/channels.ts"
+      "default": "./dist/entities/channels/index.js",
+      "import": "./dist/entities/channels/index.js",
+      "node": "./dist/entities/channels/index.js",
+      "types": "./src/entities/channels/index.ts"
+    },
+    "./entities/channels/contract": {
+      "default": "./dist/entities/channels/contract.js",
+      "import": "./dist/entities/channels/contract.js",
+      "node": "./dist/entities/channels/contract.js",
+      "types": "./src/entities/channels/contract.ts"
+    },
+    "./entities/channels/schema": {
+      "default": "./dist/entities/channels/schema.js",
+      "import": "./dist/entities/channels/schema.js",
+      "node": "./dist/entities/channels/schema.js",
+      "types": "./src/entities/channels/schema.ts"
+    },
+    "./entities/channels/types": {
+      "default": "./dist/entities/channels/types.js",
+      "import": "./dist/entities/channels/types.js",
+      "node": "./dist/entities/channels/types.js",
+      "types": "./src/entities/channels/types.ts"
     },
     "./entities/chat": {
-      "default": "./dist/entities/chat.js",
-      "import": "./dist/entities/chat.js",
-      "node": "./dist/entities/chat.js",
-      "types": "./src/entities/chat.ts"
+      "default": "./dist/entities/chat/index.js",
+      "import": "./dist/entities/chat/index.js",
+      "node": "./dist/entities/chat/index.js",
+      "types": "./src/entities/chat/index.ts"
+    },
+    "./entities/chat/contract": {
+      "default": "./dist/entities/chat/contract.js",
+      "import": "./dist/entities/chat/contract.js",
+      "node": "./dist/entities/chat/contract.js",
+      "types": "./src/entities/chat/contract.ts"
+    },
+    "./entities/chat/schema": {
+      "default": "./dist/entities/chat/schema.js",
+      "import": "./dist/entities/chat/schema.js",
+      "node": "./dist/entities/chat/schema.js",
+      "types": "./src/entities/chat/schema.ts"
+    },
+    "./entities/chat/types": {
+      "default": "./dist/entities/chat/types.js",
+      "import": "./dist/entities/chat/types.js",
+      "node": "./dist/entities/chat/types.js",
+      "types": "./src/entities/chat/types.ts"
     },
     "./entities/contact": {
-      "default": "./dist/entities/contact.js",
-      "import": "./dist/entities/contact.js",
-      "node": "./dist/entities/contact.js",
-      "types": "./src/entities/contact.ts"
+      "default": "./dist/entities/contact/index.js",
+      "import": "./dist/entities/contact/index.js",
+      "node": "./dist/entities/contact/index.js",
+      "types": "./src/entities/contact/index.ts"
+    },
+    "./entities/contact/contract": {
+      "default": "./dist/entities/contact/contract.js",
+      "import": "./dist/entities/contact/contract.js",
+      "node": "./dist/entities/contact/contract.js",
+      "types": "./src/entities/contact/contract.ts"
+    },
+    "./entities/contact/schema": {
+      "default": "./dist/entities/contact/schema.js",
+      "import": "./dist/entities/contact/schema.js",
+      "node": "./dist/entities/contact/schema.js",
+      "types": "./src/entities/contact/schema.ts"
+    },
+    "./entities/contact/types": {
+      "default": "./dist/entities/contact/types.js",
+      "import": "./dist/entities/contact/types.js",
+      "node": "./dist/entities/contact/types.js",
+      "types": "./src/entities/contact/types.ts"
     },
     "./entities/group": {
-      "default": "./dist/entities/group.js",
-      "import": "./dist/entities/group.js",
-      "node": "./dist/entities/group.js",
-      "types": "./src/entities/group.ts"
+      "default": "./dist/entities/group/index.js",
+      "import": "./dist/entities/group/index.js",
+      "node": "./dist/entities/group/index.js",
+      "types": "./src/entities/group/index.ts"
+    },
+    "./entities/group/contract": {
+      "default": "./dist/entities/group/contract.js",
+      "import": "./dist/entities/group/contract.js",
+      "node": "./dist/entities/group/contract.js",
+      "types": "./src/entities/group/contract.ts"
+    },
+    "./entities/group/schema": {
+      "default": "./dist/entities/group/schema.js",
+      "import": "./dist/entities/group/schema.js",
+      "node": "./dist/entities/group/schema.js",
+      "types": "./src/entities/group/schema.ts"
+    },
+    "./entities/group/types": {
+      "default": "./dist/entities/group/types.js",
+      "import": "./dist/entities/group/types.js",
+      "node": "./dist/entities/group/types.js",
+      "types": "./src/entities/group/types.ts"
     },
     "./entities/import": {
-      "default": "./dist/entities/import.js",
-      "import": "./dist/entities/import.js",
-      "node": "./dist/entities/import.js",
-      "types": "./src/entities/import.ts"
+      "default": "./dist/entities/import/index.js",
+      "import": "./dist/entities/import/index.js",
+      "node": "./dist/entities/import/index.js",
+      "types": "./src/entities/import/index.ts"
+    },
+    "./entities/import/contract": {
+      "default": "./dist/entities/import/contract.js",
+      "import": "./dist/entities/import/contract.js",
+      "node": "./dist/entities/import/contract.js",
+      "types": "./src/entities/import/contract.ts"
+    },
+    "./entities/import/schema": {
+      "default": "./dist/entities/import/schema.js",
+      "import": "./dist/entities/import/schema.js",
+      "node": "./dist/entities/import/schema.js",
+      "types": "./src/entities/import/schema.ts"
+    },
+    "./entities/import/types": {
+      "default": "./dist/entities/import/types.js",
+      "import": "./dist/entities/import/types.js",
+      "node": "./dist/entities/import/types.js",
+      "types": "./src/entities/import/types.ts"
     },
     "./entities/important-date": {
-      "default": "./dist/entities/important-date.js",
-      "import": "./dist/entities/important-date.js",
-      "node": "./dist/entities/important-date.js",
-      "types": "./src/entities/important-date.ts"
+      "default": "./dist/entities/important-date/index.js",
+      "import": "./dist/entities/important-date/index.js",
+      "node": "./dist/entities/important-date/index.js",
+      "types": "./src/entities/important-date/index.ts"
+    },
+    "./entities/important-date/contract": {
+      "default": "./dist/entities/important-date/contract.js",
+      "import": "./dist/entities/important-date/contract.js",
+      "node": "./dist/entities/important-date/contract.js",
+      "types": "./src/entities/important-date/contract.ts"
+    },
+    "./entities/important-date/schema": {
+      "default": "./dist/entities/important-date/schema.js",
+      "import": "./dist/entities/important-date/schema.js",
+      "node": "./dist/entities/important-date/schema.js",
+      "types": "./src/entities/important-date/schema.ts"
+    },
+    "./entities/important-date/types": {
+      "default": "./dist/entities/important-date/types.js",
+      "import": "./dist/entities/important-date/types.js",
+      "node": "./dist/entities/important-date/types.js",
+      "types": "./src/entities/important-date/types.ts"
     },
     "./entities/merge": {
-      "default": "./dist/entities/merge.js",
-      "import": "./dist/entities/merge.js",
-      "node": "./dist/entities/merge.js",
-      "types": "./src/entities/merge.ts"
+      "default": "./dist/entities/merge/index.js",
+      "import": "./dist/entities/merge/index.js",
+      "node": "./dist/entities/merge/index.js",
+      "types": "./src/entities/merge/index.ts"
+    },
+    "./entities/merge/contract": {
+      "default": "./dist/entities/merge/contract.js",
+      "import": "./dist/entities/merge/contract.js",
+      "node": "./dist/entities/merge/contract.js",
+      "types": "./src/entities/merge/contract.ts"
+    },
+    "./entities/merge/schema": {
+      "default": "./dist/entities/merge/schema.js",
+      "import": "./dist/entities/merge/schema.js",
+      "node": "./dist/entities/merge/schema.js",
+      "types": "./src/entities/merge/schema.ts"
+    },
+    "./entities/merge/types": {
+      "default": "./dist/entities/merge/types.js",
+      "import": "./dist/entities/merge/types.js",
+      "node": "./dist/entities/merge/types.js",
+      "types": "./src/entities/merge/types.ts"
     },
     "./entities/notes": {
-      "default": "./dist/entities/notes.js",
-      "import": "./dist/entities/notes.js",
-      "node": "./dist/entities/notes.js",
-      "types": "./src/entities/notes.ts"
+      "default": "./dist/entities/notes/index.js",
+      "import": "./dist/entities/notes/index.js",
+      "node": "./dist/entities/notes/index.js",
+      "types": "./src/entities/notes/index.ts"
+    },
+    "./entities/notes/contract": {
+      "default": "./dist/entities/notes/contract.js",
+      "import": "./dist/entities/notes/contract.js",
+      "node": "./dist/entities/notes/contract.js",
+      "types": "./src/entities/notes/contract.ts"
+    },
+    "./entities/notes/schema": {
+      "default": "./dist/entities/notes/schema.js",
+      "import": "./dist/entities/notes/schema.js",
+      "node": "./dist/entities/notes/schema.js",
+      "types": "./src/entities/notes/schema.ts"
+    },
+    "./entities/notes/types": {
+      "default": "./dist/entities/notes/types.js",
+      "import": "./dist/entities/notes/types.js",
+      "node": "./dist/entities/notes/types.js",
+      "types": "./src/entities/notes/types.ts"
     },
     "./entities/reminder": {
-      "default": "./dist/entities/reminder.js",
-      "import": "./dist/entities/reminder.js",
-      "node": "./dist/entities/reminder.js",
-      "types": "./src/entities/reminder.ts"
+      "default": "./dist/entities/reminder/index.js",
+      "import": "./dist/entities/reminder/index.js",
+      "node": "./dist/entities/reminder/index.js",
+      "types": "./src/entities/reminder/index.ts"
+    },
+    "./entities/reminder/contract": {
+      "default": "./dist/entities/reminder/contract.js",
+      "import": "./dist/entities/reminder/contract.js",
+      "node": "./dist/entities/reminder/contract.js",
+      "types": "./src/entities/reminder/contract.ts"
+    },
+    "./entities/reminder/schema": {
+      "default": "./dist/entities/reminder/schema.js",
+      "import": "./dist/entities/reminder/schema.js",
+      "node": "./dist/entities/reminder/schema.js",
+      "types": "./src/entities/reminder/schema.ts"
+    },
+    "./entities/reminder/types": {
+      "default": "./dist/entities/reminder/types.js",
+      "import": "./dist/entities/reminder/types.js",
+      "node": "./dist/entities/reminder/types.js",
+      "types": "./src/entities/reminder/types.ts"
+    },
+    "./entities/session": {
+      "default": "./dist/entities/session/index.js",
+      "import": "./dist/entities/session/index.js",
+      "node": "./dist/entities/session/index.js",
+      "types": "./src/entities/session/index.ts"
+    },
+    "./entities/session/contract": {
+      "default": "./dist/entities/session/contract.js",
+      "import": "./dist/entities/session/contract.js",
+      "node": "./dist/entities/session/contract.js",
+      "types": "./src/entities/session/contract.ts"
+    },
+    "./entities/session/schema": {
+      "default": "./dist/entities/session/schema.js",
+      "import": "./dist/entities/session/schema.js",
+      "node": "./dist/entities/session/schema.js",
+      "types": "./src/entities/session/schema.ts"
+    },
+    "./entities/session/types": {
+      "default": "./dist/entities/session/types.js",
+      "import": "./dist/entities/session/types.js",
+      "node": "./dist/entities/session/types.js",
+      "types": "./src/entities/session/types.ts"
     },
     "./entities/settings": {
-      "default": "./dist/entities/settings.js",
-      "import": "./dist/entities/settings.js",
-      "node": "./dist/entities/settings.js",
-      "types": "./src/entities/settings.ts"
+      "default": "./dist/entities/settings/index.js",
+      "import": "./dist/entities/settings/index.js",
+      "node": "./dist/entities/settings/index.js",
+      "types": "./src/entities/settings/index.ts"
+    },
+    "./entities/settings/contract": {
+      "default": "./dist/entities/settings/contract.js",
+      "import": "./dist/entities/settings/contract.js",
+      "node": "./dist/entities/settings/contract.js",
+      "types": "./src/entities/settings/contract.ts"
+    },
+    "./entities/settings/schema": {
+      "default": "./dist/entities/settings/schema.js",
+      "import": "./dist/entities/settings/schema.js",
+      "node": "./dist/entities/settings/schema.js",
+      "types": "./src/entities/settings/schema.ts"
+    },
+    "./entities/settings/types": {
+      "default": "./dist/entities/settings/types.js",
+      "import": "./dist/entities/settings/types.js",
+      "node": "./dist/entities/settings/types.js",
+      "types": "./src/entities/settings/types.ts"
     },
     "./entities/social": {
-      "default": "./dist/entities/social.js",
-      "import": "./dist/entities/social.js",
-      "node": "./dist/entities/social.js",
-      "types": "./src/entities/social.ts"
+      "default": "./dist/entities/social/index.js",
+      "import": "./dist/entities/social/index.js",
+      "node": "./dist/entities/social/index.js",
+      "types": "./src/entities/social/index.ts"
+    },
+    "./entities/social/contract": {
+      "default": "./dist/entities/social/contract.js",
+      "import": "./dist/entities/social/contract.js",
+      "node": "./dist/entities/social/contract.js",
+      "types": "./src/entities/social/contract.ts"
+    },
+    "./entities/social/schema": {
+      "default": "./dist/entities/social/schema.js",
+      "import": "./dist/entities/social/schema.js",
+      "node": "./dist/entities/social/schema.js",
+      "types": "./src/entities/social/schema.ts"
+    },
+    "./entities/social/types": {
+      "default": "./dist/entities/social/types.js",
+      "import": "./dist/entities/social/types.js",
+      "node": "./dist/entities/social/types.js",
+      "types": "./src/entities/social/types.ts"
     },
     "./entities/subscription": {
-      "default": "./dist/entities/subscription.js",
-      "import": "./dist/entities/subscription.js",
-      "node": "./dist/entities/subscription.js",
-      "types": "./src/entities/subscription.ts"
+      "default": "./dist/entities/subscription/index.js",
+      "import": "./dist/entities/subscription/index.js",
+      "node": "./dist/entities/subscription/index.js",
+      "types": "./src/entities/subscription/index.ts"
+    },
+    "./entities/subscription/contract": {
+      "default": "./dist/entities/subscription/contract.js",
+      "import": "./dist/entities/subscription/contract.js",
+      "node": "./dist/entities/subscription/contract.js",
+      "types": "./src/entities/subscription/contract.ts"
+    },
+    "./entities/subscription/schema": {
+      "default": "./dist/entities/subscription/schema.js",
+      "import": "./dist/entities/subscription/schema.js",
+      "node": "./dist/entities/subscription/schema.js",
+      "types": "./src/entities/subscription/schema.ts"
+    },
+    "./entities/subscription/types": {
+      "default": "./dist/entities/subscription/types.js",
+      "import": "./dist/entities/subscription/types.js",
+      "node": "./dist/entities/subscription/types.js",
+      "types": "./src/entities/subscription/types.ts"
     },
     "./entities/tag": {
-      "default": "./dist/entities/tag.js",
-      "import": "./dist/entities/tag.js",
-      "node": "./dist/entities/tag.js",
-      "types": "./src/entities/tag.ts"
+      "default": "./dist/entities/tag/index.js",
+      "import": "./dist/entities/tag/index.js",
+      "node": "./dist/entities/tag/index.js",
+      "types": "./src/entities/tag/index.ts"
+    },
+    "./entities/tag/contract": {
+      "default": "./dist/entities/tag/contract.js",
+      "import": "./dist/entities/tag/contract.js",
+      "node": "./dist/entities/tag/contract.js",
+      "types": "./src/entities/tag/contract.ts"
+    },
+    "./entities/tag/schema": {
+      "default": "./dist/entities/tag/schema.js",
+      "import": "./dist/entities/tag/schema.js",
+      "node": "./dist/entities/tag/schema.js",
+      "types": "./src/entities/tag/schema.ts"
+    },
+    "./entities/tag/types": {
+      "default": "./dist/entities/tag/types.js",
+      "import": "./dist/entities/tag/types.js",
+      "node": "./dist/entities/tag/types.js",
+      "types": "./src/entities/tag/types.ts"
     },
     "./errors": {
       "default": "./dist/errors/index.js",
@@ -185,10 +551,28 @@
       "types": "./src/errors/api-error-codes.generated.ts"
     },
     "./errors/api-error-response": {
-      "default": "./dist/errors/api-error-response.js",
-      "import": "./dist/errors/api-error-response.js",
-      "node": "./dist/errors/api-error-response.js",
-      "types": "./src/errors/api-error-response.ts"
+      "default": "./dist/errors/api-error-response/index.js",
+      "import": "./dist/errors/api-error-response/index.js",
+      "node": "./dist/errors/api-error-response/index.js",
+      "types": "./src/errors/api-error-response/index.ts"
+    },
+    "./errors/api-error-response/contract": {
+      "default": "./dist/errors/api-error-response/contract.js",
+      "import": "./dist/errors/api-error-response/contract.js",
+      "node": "./dist/errors/api-error-response/contract.js",
+      "types": "./src/errors/api-error-response/contract.ts"
+    },
+    "./errors/api-error-response/schema": {
+      "default": "./dist/errors/api-error-response/schema.js",
+      "import": "./dist/errors/api-error-response/schema.js",
+      "node": "./dist/errors/api-error-response/schema.js",
+      "types": "./src/errors/api-error-response/schema.ts"
+    },
+    "./errors/api-error-response/types": {
+      "default": "./dist/errors/api-error-response/types.js",
+      "import": "./dist/errors/api-error-response/types.js",
+      "node": "./dist/errors/api-error-response/types.js",
+      "types": "./src/errors/api-error-response/types.ts"
     },
     "./errors/api-error-types": {
       "default": "./dist/errors/api-error-types.js",
@@ -214,11 +598,23 @@
       "node": "./dist/geocode/client.js",
       "types": "./src/geocode/client.ts"
     },
-    "./geocode/schemas": {
-      "default": "./dist/geocode/schemas.js",
-      "import": "./dist/geocode/schemas.js",
-      "node": "./dist/geocode/schemas.js",
-      "types": "./src/geocode/schemas.ts"
+    "./geocode/contract": {
+      "default": "./dist/geocode/contract.js",
+      "import": "./dist/geocode/contract.js",
+      "node": "./dist/geocode/contract.js",
+      "types": "./src/geocode/contract.ts"
+    },
+    "./geocode/schema": {
+      "default": "./dist/geocode/schema.js",
+      "import": "./dist/geocode/schema.js",
+      "node": "./dist/geocode/schema.js",
+      "types": "./src/geocode/schema.ts"
+    },
+    "./geocode/types": {
+      "default": "./dist/geocode/types.js",
+      "import": "./dist/geocode/types.js",
+      "node": "./dist/geocode/types.js",
+      "types": "./src/geocode/types.ts"
     },
     "./http": {
       "default": "./dist/http/index.js",
@@ -226,17 +622,47 @@
       "node": "./dist/http/index.js",
       "types": "./src/http/index.ts"
     },
+    "./http/contract": {
+      "default": "./dist/http/contract.js",
+      "import": "./dist/http/contract.js",
+      "node": "./dist/http/contract.js",
+      "types": "./src/http/contract.ts"
+    },
     "./http/ids": {
-      "default": "./dist/http/ids.js",
-      "import": "./dist/http/ids.js",
-      "node": "./dist/http/ids.js",
-      "types": "./src/http/ids.ts"
+      "default": "./dist/http/ids/index.js",
+      "import": "./dist/http/ids/index.js",
+      "node": "./dist/http/ids/index.js",
+      "types": "./src/http/ids/index.ts"
+    },
+    "./http/ids/schema": {
+      "default": "./dist/http/ids/schema.js",
+      "import": "./dist/http/ids/schema.js",
+      "node": "./dist/http/ids/schema.js",
+      "types": "./src/http/ids/schema.ts"
     },
     "./http/responses": {
       "default": "./dist/http/responses.js",
       "import": "./dist/http/responses.js",
       "node": "./dist/http/responses.js",
       "types": "./src/http/responses.ts"
+    },
+    "./http/schema": {
+      "default": "./dist/http/schema.js",
+      "import": "./dist/http/schema.js",
+      "node": "./dist/http/schema.js",
+      "types": "./src/http/schema.ts"
+    },
+    "./http/types": {
+      "default": "./dist/http/types.js",
+      "import": "./dist/http/types.js",
+      "node": "./dist/http/types.js",
+      "types": "./src/http/types.ts"
+    },
+    "./internal/type-equality": {
+      "default": "./dist/internal/type-equality.js",
+      "import": "./dist/internal/type-equality.js",
+      "node": "./dist/internal/type-equality.js",
+      "types": "./src/internal/type-equality.ts"
     },
     "./locale": {
       "default": "./dist/locale/index.js",
@@ -245,10 +671,28 @@
       "types": "./src/locale/index.ts"
     },
     "./locale/supported-locale": {
-      "default": "./dist/locale/supported-locale.js",
-      "import": "./dist/locale/supported-locale.js",
-      "node": "./dist/locale/supported-locale.js",
-      "types": "./src/locale/supported-locale.ts"
+      "default": "./dist/locale/supported-locale/index.js",
+      "import": "./dist/locale/supported-locale/index.js",
+      "node": "./dist/locale/supported-locale/index.js",
+      "types": "./src/locale/supported-locale/index.ts"
+    },
+    "./locale/supported-locale/contract": {
+      "default": "./dist/locale/supported-locale/contract.js",
+      "import": "./dist/locale/supported-locale/contract.js",
+      "node": "./dist/locale/supported-locale/contract.js",
+      "types": "./src/locale/supported-locale/contract.ts"
+    },
+    "./locale/supported-locale/schema": {
+      "default": "./dist/locale/supported-locale/schema.js",
+      "import": "./dist/locale/supported-locale/schema.js",
+      "node": "./dist/locale/supported-locale/schema.js",
+      "types": "./src/locale/supported-locale/schema.ts"
+    },
+    "./locale/supported-locale/types": {
+      "default": "./dist/locale/supported-locale/types.js",
+      "import": "./dist/locale/supported-locale/types.js",
+      "node": "./dist/locale/supported-locale/types.js",
+      "types": "./src/locale/supported-locale/types.ts"
     },
     "./locale/supported-locales.json": {
       "default": "./dist/locale/supported-locales.json"
@@ -326,16 +770,52 @@
       "types": "./src/primitives/index.ts"
     },
     "./primitives/channel": {
-      "default": "./dist/primitives/channel.js",
-      "import": "./dist/primitives/channel.js",
-      "node": "./dist/primitives/channel.js",
-      "types": "./src/primitives/channel.ts"
+      "default": "./dist/primitives/channel/index.js",
+      "import": "./dist/primitives/channel/index.js",
+      "node": "./dist/primitives/channel/index.js",
+      "types": "./src/primitives/channel/index.ts"
+    },
+    "./primitives/channel/contract": {
+      "default": "./dist/primitives/channel/contract.js",
+      "import": "./dist/primitives/channel/contract.js",
+      "node": "./dist/primitives/channel/contract.js",
+      "types": "./src/primitives/channel/contract.ts"
+    },
+    "./primitives/channel/schema": {
+      "default": "./dist/primitives/channel/schema.js",
+      "import": "./dist/primitives/channel/schema.js",
+      "node": "./dist/primitives/channel/schema.js",
+      "types": "./src/primitives/channel/schema.ts"
+    },
+    "./primitives/channel/types": {
+      "default": "./dist/primitives/channel/types.js",
+      "import": "./dist/primitives/channel/types.js",
+      "node": "./dist/primitives/channel/types.js",
+      "types": "./src/primitives/channel/types.ts"
     },
     "./primitives/color": {
-      "default": "./dist/primitives/color.js",
-      "import": "./dist/primitives/color.js",
-      "node": "./dist/primitives/color.js",
-      "types": "./src/primitives/color.ts"
+      "default": "./dist/primitives/color/index.js",
+      "import": "./dist/primitives/color/index.js",
+      "node": "./dist/primitives/color/index.js",
+      "types": "./src/primitives/color/index.ts"
+    },
+    "./primitives/color/contract": {
+      "default": "./dist/primitives/color/contract.js",
+      "import": "./dist/primitives/color/contract.js",
+      "node": "./dist/primitives/color/contract.js",
+      "types": "./src/primitives/color/contract.ts"
+    },
+    "./primitives/color/schema": {
+      "default": "./dist/primitives/color/schema.js",
+      "import": "./dist/primitives/color/schema.js",
+      "node": "./dist/primitives/color/schema.js",
+      "types": "./src/primitives/color/schema.ts"
+    },
+    "./primitives/color/types": {
+      "default": "./dist/primitives/color/types.js",
+      "import": "./dist/primitives/color/types.js",
+      "node": "./dist/primitives/color/types.js",
+      "types": "./src/primitives/color/types.ts"
     },
     "./supabase.types": {
       "default": "./dist/supabase.types.js",
@@ -350,16 +830,52 @@
       "types": "./src/sync/index.ts"
     },
     "./sync/conflict": {
-      "default": "./dist/sync/conflict.js",
-      "import": "./dist/sync/conflict.js",
-      "node": "./dist/sync/conflict.js",
-      "types": "./src/sync/conflict.ts"
+      "default": "./dist/sync/conflict/index.js",
+      "import": "./dist/sync/conflict/index.js",
+      "node": "./dist/sync/conflict/index.js",
+      "types": "./src/sync/conflict/index.ts"
+    },
+    "./sync/conflict/contract": {
+      "default": "./dist/sync/conflict/contract.js",
+      "import": "./dist/sync/conflict/contract.js",
+      "node": "./dist/sync/conflict/contract.js",
+      "types": "./src/sync/conflict/contract.ts"
+    },
+    "./sync/conflict/schema": {
+      "default": "./dist/sync/conflict/schema.js",
+      "import": "./dist/sync/conflict/schema.js",
+      "node": "./dist/sync/conflict/schema.js",
+      "types": "./src/sync/conflict/schema.ts"
+    },
+    "./sync/conflict/types": {
+      "default": "./dist/sync/conflict/types.js",
+      "import": "./dist/sync/conflict/types.js",
+      "node": "./dist/sync/conflict/types.js",
+      "types": "./src/sync/conflict/types.ts"
     },
     "./sync/mutations": {
-      "default": "./dist/sync/mutations.js",
-      "import": "./dist/sync/mutations.js",
-      "node": "./dist/sync/mutations.js",
-      "types": "./src/sync/mutations.ts"
+      "default": "./dist/sync/mutations/index.js",
+      "import": "./dist/sync/mutations/index.js",
+      "node": "./dist/sync/mutations/index.js",
+      "types": "./src/sync/mutations/index.ts"
+    },
+    "./sync/mutations/contract": {
+      "default": "./dist/sync/mutations/contract.js",
+      "import": "./dist/sync/mutations/contract.js",
+      "node": "./dist/sync/mutations/contract.js",
+      "types": "./src/sync/mutations/contract.ts"
+    },
+    "./sync/mutations/schema": {
+      "default": "./dist/sync/mutations/schema.js",
+      "import": "./dist/sync/mutations/schema.js",
+      "node": "./dist/sync/mutations/schema.js",
+      "types": "./src/sync/mutations/schema.ts"
+    },
+    "./sync/mutations/types": {
+      "default": "./dist/sync/mutations/types.js",
+      "import": "./dist/sync/mutations/types.js",
+      "node": "./dist/sync/mutations/types.js",
+      "types": "./src/sync/mutations/types.ts"
     },
     "./sync/protocol": {
       "default": "./dist/sync/protocol.js",
@@ -368,16 +884,52 @@
       "types": "./src/sync/protocol.ts"
     },
     "./sync/pull": {
-      "default": "./dist/sync/pull.js",
-      "import": "./dist/sync/pull.js",
-      "node": "./dist/sync/pull.js",
-      "types": "./src/sync/pull.ts"
+      "default": "./dist/sync/pull/index.js",
+      "import": "./dist/sync/pull/index.js",
+      "node": "./dist/sync/pull/index.js",
+      "types": "./src/sync/pull/index.ts"
+    },
+    "./sync/pull/contract": {
+      "default": "./dist/sync/pull/contract.js",
+      "import": "./dist/sync/pull/contract.js",
+      "node": "./dist/sync/pull/contract.js",
+      "types": "./src/sync/pull/contract.ts"
+    },
+    "./sync/pull/schema": {
+      "default": "./dist/sync/pull/schema.js",
+      "import": "./dist/sync/pull/schema.js",
+      "node": "./dist/sync/pull/schema.js",
+      "types": "./src/sync/pull/schema.ts"
+    },
+    "./sync/pull/types": {
+      "default": "./dist/sync/pull/types.js",
+      "import": "./dist/sync/pull/types.js",
+      "node": "./dist/sync/pull/types.js",
+      "types": "./src/sync/pull/types.ts"
     },
     "./sync/push": {
-      "default": "./dist/sync/push.js",
-      "import": "./dist/sync/push.js",
-      "node": "./dist/sync/push.js",
-      "types": "./src/sync/push.ts"
+      "default": "./dist/sync/push/index.js",
+      "import": "./dist/sync/push/index.js",
+      "node": "./dist/sync/push/index.js",
+      "types": "./src/sync/push/index.ts"
+    },
+    "./sync/push/contract": {
+      "default": "./dist/sync/push/contract.js",
+      "import": "./dist/sync/push/contract.js",
+      "node": "./dist/sync/push/contract.js",
+      "types": "./src/sync/push/contract.ts"
+    },
+    "./sync/push/schema": {
+      "default": "./dist/sync/push/schema.js",
+      "import": "./dist/sync/push/schema.js",
+      "node": "./dist/sync/push/schema.js",
+      "types": "./src/sync/push/schema.ts"
+    },
+    "./sync/push/types": {
+      "default": "./dist/sync/push/types.js",
+      "import": "./dist/sync/push/types.js",
+      "node": "./dist/sync/push/types.js",
+      "types": "./src/sync/push/types.ts"
     },
     "./sync/tables": {
       "default": "./dist/sync/tables.js",
@@ -386,10 +938,28 @@
       "types": "./src/sync/tables.ts"
     },
     "./sync/ws": {
-      "default": "./dist/sync/ws.js",
-      "import": "./dist/sync/ws.js",
-      "node": "./dist/sync/ws.js",
-      "types": "./src/sync/ws.ts"
+      "default": "./dist/sync/ws/index.js",
+      "import": "./dist/sync/ws/index.js",
+      "node": "./dist/sync/ws/index.js",
+      "types": "./src/sync/ws/index.ts"
+    },
+    "./sync/ws/contract": {
+      "default": "./dist/sync/ws/contract.js",
+      "import": "./dist/sync/ws/contract.js",
+      "node": "./dist/sync/ws/contract.js",
+      "types": "./src/sync/ws/contract.ts"
+    },
+    "./sync/ws/schema": {
+      "default": "./dist/sync/ws/schema.js",
+      "import": "./dist/sync/ws/schema.js",
+      "node": "./dist/sync/ws/schema.js",
+      "types": "./src/sync/ws/schema.ts"
+    },
+    "./sync/ws/types": {
+      "default": "./dist/sync/ws/types.js",
+      "import": "./dist/sync/ws/types.js",
+      "node": "./dist/sync/ws/types.js",
+      "types": "./src/sync/ws/types.ts"
     }
   },
   "imports": {
@@ -413,7 +983,7 @@
     "compile": "tsc && node scripts/copy-locale-json.mjs",
     "dev": "tsc --watch --preserveWatchOutput",
     "prepare": "npm run build",
-    "test:contracts": "node scripts/check-no-internal-deps.mjs && node scripts/check-no-init-cycles.mjs && npm run build && npx tsx ./src/contracts.assertions.ts && npx tsx ./scripts/check-openapi-examples.ts"
+    "test:contracts": "node scripts/check-no-internal-deps.mjs && node scripts/check-no-init-cycles.mjs && node scripts/check-no-zod-infer-exports.mjs && npm run build && npx tsx ./src/contracts.assertions.ts && npx tsx ./scripts/check-openapi-examples.ts"
   },
   "type": "module",
   "types": "./src/index.ts",

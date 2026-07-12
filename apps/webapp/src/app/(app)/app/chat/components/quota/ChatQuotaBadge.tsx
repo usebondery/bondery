@@ -2,7 +2,7 @@
 
 import type { SubscriptionStatus } from "@bondery/schemas";
 import { Badge, Tooltip } from "@mantine/core";
-import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
+import { useChatPageTranslations } from "@/lib/i18n/generated/hooks";
 
 /**
  * Small badge showing remaining messages.
@@ -10,7 +10,7 @@ import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
  * - Premium users: shown only when ≥80% of the monthly limit is consumed.
  */
 export function ChatQuotaBadge({ subscriptionStatus }: { subscriptionStatus: SubscriptionStatus }) {
-  const t = useWebTranslations("ChatPage");
+  const t = useChatPageTranslations();
 
   if (subscriptionStatus.plan === "premium") {
     const { aiMessagesUsed, aiMessageLimit } = subscriptionStatus;

@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import {
   errorNotificationTemplate,
@@ -24,7 +24,7 @@ import { IconSend2, IconShare } from "@tabler/icons-react";
 import { useState } from "react";
 import { z } from "zod";
 import { SelectableCard } from "@/components/shell/SelectableCard";
-import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
+import { useShareContactModalTranslations } from "@/lib/i18n/generated/hooks";
 import { createModalId, useModalDismiss } from "@/lib/modals";
 import { useShareContactMutation } from "@/lib/query/hooks/useContacts";
 
@@ -56,7 +56,7 @@ interface OpenShareContactModalParams {
 }
 
 function ShareContactModalTitle() {
-  const tShare = useWebTranslations("ShareContactModal");
+  const tShare = useShareContactModalTranslations();
 
   return <ModalTitle icon={<IconShare size={22} />} text={tShare("ModalTitle")} />;
 }
@@ -191,7 +191,7 @@ export interface ShareContactTexts {
 }
 
 function ShareContactModalContent({ contact, modalId }: { contact: Contact; modalId: string }) {
-  const tShare = useWebTranslations("ShareContactModal");
+  const tShare = useShareContactModalTranslations();
   const shareContactMutation = useShareContactMutation();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const isBlocking = isSubmitting;

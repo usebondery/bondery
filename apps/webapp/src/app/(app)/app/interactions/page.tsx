@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
-import { getWebTranslations as getTranslations } from "@/lib/i18n/getWebTranslations";
+import { getInteractionsPageTranslations } from "@/lib/i18n/generated/hooks.server";
 import { staticPageTitle } from "@/lib/metadata/pageTitles";
 import { InteractionsLoader } from "./InteractionsLoader";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const t = await getTranslations("InteractionsPage");
+  const t = await getInteractionsPageTranslations();
   return staticPageTitle(t("PageTitle"));
 }
 

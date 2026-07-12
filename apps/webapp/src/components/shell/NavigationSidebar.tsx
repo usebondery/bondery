@@ -25,8 +25,7 @@ import {
 } from "@tabler/icons-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import type { ElementType } from "react";
-import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
+import { useAppNavigationTranslations } from "@/lib/i18n/generated/hooks";
 import {
   type AppNavLabelKey,
   type AppNavLinkDef,
@@ -64,7 +63,7 @@ export function useAppNavigationLinks(): {
   primaryLinks: ResolvedNavigationLink[];
   secondaryLinks: ResolvedNavigationLink[];
 } {
-  const t = useWebTranslations("AppNavigation");
+  const t = useAppNavigationTranslations();
 
   const resolve = (defs: NavigationLinkDef[]): ResolvedNavigationLink[] =>
     defs.map((link) => ({
@@ -94,10 +93,10 @@ export function NavigationSidebarContent({
   collapsed,
 }: NavigationSidebarContentProps) {
   const pathname = usePathname();
-  const t = useWebTranslations("AppNavigation");
+  const t = useAppNavigationTranslations();
   const { primaryLinks, secondaryLinks } = useAppNavigationLinks();
   const isMyselfActive = pathname === WEBAPP_ROUTES.MYSELF;
-  const { hovered: userCardHovered, ref: userCardRef } = useHover<HTMLAnchorElement>();
+  const { hovered: userCardHovered, ref: userCardRef } = useHover<HTMLDivElement>();
 
   return (
     <Box style={{ display: "flex", flexDirection: "column", height: "100%" }}>
@@ -185,11 +184,10 @@ export function NavigationSidebarContent({
             // Same reasoning as NavLinkItem: active state = background color only.
             // button-scale-effect-active would apply brightness(0.9) permanently.
             className="button-scale-effect"
-            component={Link as ElementType}
             gap="sm"
-            href={WEBAPP_ROUTES.MYSELF}
             justify="flex-start"
             ref={userCardRef}
+            renderRoot={(props) => <Link href={WEBAPP_ROUTES.MYSELF} {...props} />}
             style={{
               // No inline transition — the button-scale-effect CSS class already
               // defines transition for transform, filter, AND background-color.

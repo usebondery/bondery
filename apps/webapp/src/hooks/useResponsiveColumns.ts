@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { type RefObject, useEffect, useMemo, useState } from "react";
 import type { ColumnConfig } from "@/components/contacts/ContactsTableV2";

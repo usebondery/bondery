@@ -5,7 +5,7 @@ import { Box } from "@mantine/core";
 import { IconBrandLinkedin } from "@tabler/icons-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useMemo, useState } from "react";
-import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
+import { useSettingsPageTranslations } from "@/lib/i18n/generated/hooks";
 
 const LINKEDIN_BLUE = "#0A66C2";
 
@@ -25,7 +25,7 @@ const BONDERY = { radius: 16, size: 68, x: 90, y: NODE_Y };
 const LINKEDIN = { size: 60, x: 210, y: NODE_Y };
 
 export function ExtensionLinkedInAnimation() {
-  const t = useWebTranslations("SettingsPage", "Integration.ChromeExtensionModal");
+  const t = useSettingsPageTranslations("Integration.ChromeExtensionModal");
   const labels = useMemo(
     () => [
       t("AnimationProfilePicture"),

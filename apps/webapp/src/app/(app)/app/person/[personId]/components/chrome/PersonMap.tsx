@@ -1,9 +1,9 @@
-﻿"use client";
+"use client";
 
 import { Stack, Text } from "@mantine/core";
 import { useMemo } from "react";
 import { PeopleMap } from "@/components/map/PeopleMap";
-import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
+import { useMapCommonTranslations } from "@/lib/i18n/generated/hooks";
 
 interface PersonMapProps {
   avatarUrl?: string | null;
@@ -13,7 +13,7 @@ interface PersonMapProps {
 }
 
 export function PersonMap({ latitude, longitude, name, avatarUrl }: PersonMapProps) {
-  const t = useWebTranslations("MapCommon");
+  const t = useMapCommonTranslations();
 
   const markers = useMemo(() => {
     return [

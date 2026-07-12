@@ -9,8 +9,8 @@ import {
 import type { SupportedLocale } from "@bondery/translations";
 import { notifications } from "@mantine/notifications";
 import { LanguagePicker as SharedLanguagePicker } from "@/components/shared/LanguagePicker";
+import { useSettingsPageTranslations } from "@/lib/i18n/generated/hooks";
 import { useApplyUserLanguage } from "@/lib/i18n/useApplyUserLanguage";
-import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
 import { useUpdateSettingsMutation } from "@/lib/query/hooks/useSettings";
 
 interface LanguagePickerProps {
@@ -18,7 +18,7 @@ interface LanguagePickerProps {
 }
 
 export function LanguagePicker({ initialValue }: LanguagePickerProps) {
-  const t = useWebTranslations("SettingsPage", "Profile");
+  const t = useSettingsPageTranslations("Profile");
   const updateSettings = useUpdateSettingsMutation();
   const applyUserLanguage = useApplyUserLanguage();
 

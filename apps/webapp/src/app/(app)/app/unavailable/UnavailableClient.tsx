@@ -12,7 +12,7 @@ import {
 } from "@/lib/api/health";
 import { OUTAGE_RESUME_DELAY_MS } from "@/lib/auth/constants";
 import { parseReturnIntent } from "@/lib/auth/returnIntent";
-import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
+import { useUnavailablePageTranslations } from "@/lib/i18n/generated/hooks";
 import { STATUS_URL } from "@/lib/platform/config";
 
 const POLL_INTERVAL_FAST_MS = 5_000;
@@ -20,7 +20,7 @@ const POLL_INTERVAL_SLOW_MS = 30_000;
 const FAILURES_BEFORE_BACKOFF = 5;
 
 export function UnavailableClient() {
-  const t = useWebTranslations("UnavailablePage");
+  const t = useUnavailablePageTranslations();
   const router = useRouter();
   const searchParams = useSearchParams();
   const [isRetrying, setIsRetrying] = useState(false);

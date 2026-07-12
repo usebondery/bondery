@@ -9,7 +9,7 @@ import { SegmentedControl, Stack, Text } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import type { ReactNode } from "react";
 import { useState } from "react";
-import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
+import { useSettingsPageTranslations } from "@/lib/i18n/generated/hooks";
 import { useUpdateSettingsMutation } from "@/lib/query/hooks/useSettings";
 
 interface TimeFormatPickerProps {
@@ -25,7 +25,7 @@ export function TimeFormatPicker({
   label,
   description,
 }: TimeFormatPickerProps) {
-  const t = useWebTranslations("SettingsPage", "Preferences");
+  const t = useSettingsPageTranslations("Preferences");
   const updateSettingsMutation = useUpdateSettingsMutation();
   const [timeFormat, setTimeFormat] = useState<"24h" | "12h">(initialTimeFormat);
   const [savedTimeFormat, setSavedTimeFormat] = useState<"24h" | "12h">(initialTimeFormat);

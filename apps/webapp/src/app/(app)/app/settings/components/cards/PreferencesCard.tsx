@@ -7,7 +7,7 @@ import {
   loadingNotificationTemplate,
   successNotificationTemplate,
 } from "@bondery/mantine-next";
-import type { ColorSchemePreference } from "@bondery/schemas";
+import type { ColorSchemePreference, TimeFormatPreference } from "@bondery/schemas";
 import type { SupportedLocale } from "@bondery/translations";
 import { coerceSupportedLocale, DEFAULT_LOCALE } from "@bondery/translations";
 import { CardSection, Group, Text } from "@mantine/core";
@@ -17,22 +17,28 @@ import { useEffect, useMemo, useState } from "react";
 import { LanguagePicker } from "@/components/shared/LanguagePicker";
 import { TimezonePicker } from "@/components/shared/TimezonePicker";
 import { refreshAppShell } from "@/lib/app/refreshAppShell";
+import { useSettingsPageTranslations } from "@/lib/i18n/generated/hooks";
 import { useApplyUserLanguage } from "@/lib/i18n/useApplyUserLanguage";
-import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
 import { useSettingsQuery, useUpdateSettingsMutation } from "@/lib/query/hooks/useSettings";
 import { ReminderTimePicker } from "./ReminderTimePicker";
 import { SettingsSection } from "./SettingsSection";
 import { ThemePicker } from "./ThemePicker";
 import { TimeFormatPicker } from "./TimeFormatPicker";
 
-function parseSettingsPreferences(settings: Record<string, unknown>) {
+function parseSettingsPreferences(settings: Record<string, unknown>): {
+  colorScheme: ColorSchemePreference;
+  language: SupportedLocale;
+  reminderSendHour: string;
+  timeFormat: TimeFormatPreference;
+  timezone: string;
+} {
   const timezone = typeof settings.timezone === "string" ? settings.timezone : "UTC";
   const reminderSendHour =
     typeof settings.reminderSendHour === "string" &&
     /^([01]\d|2[0-3]):[0-5]\d(:[0-5]\d)?$/.test(settings.reminderSendHour)
       ? settings.reminderSendHour
       : "08:00:00";
-  const timeFormat = settings.timeFormat === "12h" ? "12h" : "24h";
+  const timeFormat: TimeFormatPreference = settings.timeFormat === "12h" ? "12h" : "24h";
   const rawLanguage = typeof settings.language === "string" ? settings.language : DEFAULT_LOCALE;
   const language = coerceSupportedLocale(rawLanguage);
   const colorScheme: ColorSchemePreference =
@@ -46,7 +52,7 @@ function parseSettingsPreferences(settings: Record<string, unknown>) {
 }
 
 export function PreferencesCard() {
-  const t = useWebTranslations("SettingsPage", "Preferences");
+  const t = useSettingsPageTranslations("Preferences");
   const { data: settingsResult } = useSettingsQuery();
   const preferences = useMemo(
     () => parseSettingsPreferences(settingsResult?.data ?? {}),
@@ -59,7 +65,7 @@ export function PreferencesCard() {
   const [savedLanguage, setSavedLanguage] = useState(preferences.language);
   const [timezone, setTimezone] = useState(preferences.timezone);
   const [savedTimezone, setSavedTimezone] = useState(preferences.timezone);
-  const [timeFormat, setTimeFormat] = useState<"24h" | "12h">(preferences.timeFormat);
+  const [timeFormat, setTimeFormat] = useState<TimeFormatPreference>(preferences.timeFormat);
 
   useEffect(() => {
     setLanguage(preferences.language);

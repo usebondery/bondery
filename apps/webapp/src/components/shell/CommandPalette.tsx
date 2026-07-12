@@ -15,7 +15,10 @@ import {
 import { useRouter } from "next/navigation";
 import { openNewActivityModal } from "@/app/(app)/app/interactions/components/NewActivityModal";
 import { openAddContactModal } from "@/app/(app)/app/people/components/modals/AddContactModal";
-import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
+import {
+  useAppNavigationTranslations,
+  useCommandPaletteTranslations,
+} from "@/lib/i18n/generated/hooks";
 import { optimisticPersonDocumentTitle } from "@/lib/metadata/optimisticTitles";
 import { useNavigateWithTitle } from "@/lib/metadata/useNavigateWithTitle";
 import { HOTKEYS, WEBSITE_URL } from "@/lib/platform/config";
@@ -25,8 +28,8 @@ import { peopleSearchActions } from "./PeopleSearchSpotlight";
 export { spotlight };
 
 export function CommandPalette() {
-  const t = useWebTranslations("CommandPalette");
-  const tNav = useWebTranslations("AppNavigation");
+  const t = useCommandPaletteTranslations();
+  const tNav = useAppNavigationTranslations();
   const router = useRouter();
   const { navigateWithTitle } = useNavigateWithTitle();
   const { primaryLinks, secondaryLinks } = useAppNavigationLinks();

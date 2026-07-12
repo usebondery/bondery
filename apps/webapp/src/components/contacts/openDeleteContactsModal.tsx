@@ -12,7 +12,7 @@ import { modals } from "@mantine/modals";
 import { notifications } from "@mantine/notifications";
 import { IconAlertCircle, IconTrash } from "@tabler/icons-react";
 import { captureEvent } from "@/lib/analytics/client";
-import { useCommonTranslations, useWebTranslations } from "@/lib/i18n/useWebTranslations";
+import { useCommonTranslations, usePeoplePageTranslations } from "@/lib/i18n/generated/hooks";
 import { createModalId } from "@/lib/modals";
 import {
   useDeleteContactsFilteredMutation,
@@ -35,7 +35,7 @@ interface DeleteContactsModalTitleProps {
 }
 
 function DeleteContactsModalTitle({ isFilterMode, contactCount }: DeleteContactsModalTitleProps) {
-  const t = useWebTranslations("PeoplePage", "DeleteContacts");
+  const t = usePeoplePageTranslations("DeleteContacts");
 
   return (
     <ModalTitle
@@ -60,7 +60,7 @@ function DeleteContactsModalBody({
   isFilterMode,
   contactCount,
 }: DeleteContactsModalBodyProps) {
-  const t = useWebTranslations("PeoplePage", "DeleteContacts");
+  const t = usePeoplePageTranslations("DeleteContacts");
   const tCommon = useCommonTranslations();
   const deleteContactsMutation = useDeleteContactsMutation();
   const deleteContactsFilteredMutation = useDeleteContactsFilteredMutation();

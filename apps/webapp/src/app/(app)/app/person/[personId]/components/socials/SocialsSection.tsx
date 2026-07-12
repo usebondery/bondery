@@ -13,9 +13,14 @@ import {
 } from "@tabler/icons-react";
 import Image from "next/image";
 import { useCallback, useMemo } from "react";
+import {
+  useCommonTranslations,
+  useContactInfoTranslations,
+  useSocialsTranslations,
+  useValidationTranslations,
+} from "@/lib/i18n/generated/hooks";
 import { useContactInfoLabels } from "@/lib/i18n/useContactInfoLabels";
 import { useSocialActionTooltips } from "@/lib/i18n/useSocialActionTooltips";
-import { useCommonTranslations, useWebTranslations } from "@/lib/i18n/useWebTranslations";
 import { useSocialFieldEditor } from "../../hooks/useSocialFieldEditor";
 import { openContactEmailsModal, openContactPhonesModal } from "../chrome/openContactInfoModals";
 import { SocialPopoverButton } from "./SocialPopoverButton";
@@ -42,10 +47,10 @@ export function SocialsSection({
   onEmailsChange,
   onSaveContactInfo,
 }: SocialsSectionProps) {
-  const t = useWebTranslations("Socials");
-  const tContactInfo = useWebTranslations("ContactInfo");
+  const t = useSocialsTranslations();
+  const tContactInfo = useContactInfoTranslations();
   const _tCommon = useCommonTranslations();
-  const tVal = useWebTranslations("validation");
+  const tVal = useValidationTranslations();
   const contactInfoLabels = useContactInfoLabels();
   const { getSocialActionTooltip } = useSocialActionTooltips();
 

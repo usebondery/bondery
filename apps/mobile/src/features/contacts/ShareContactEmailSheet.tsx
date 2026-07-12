@@ -8,7 +8,8 @@ import { MobileTextInput } from "../../components/MobileTextInput";
 import { shareContactEmail } from "../../lib/api/client";
 import { UI_TIMING_MS } from "../../lib/config";
 import { useSheetForm } from "../../lib/forms/useSheetForm";
-import { useMobileTranslations } from "../../lib/i18n/useMobileTranslations";
+import { useMobileShareContactEmailTranslations } from "../../lib/i18n/generated/hooks";
+import { preloadMobileNamespaces } from "../../lib/i18n/preloadMobileNamespaces";
 import { useAppToast } from "../../lib/toast/useAppToast";
 import { MOBILE_LAYOUT, MOBILE_TEXT_STYLES, MOBILE_TYPOGRAPHY } from "../../theme/tokens";
 import { useMobileThemeColors } from "../../theme/useMobileThemeColors";
@@ -42,7 +43,7 @@ export function ShareContactEmailSheet({
   onOpenChange,
   onClose,
 }: ShareContactEmailSheetProps) {
-  const t = useMobileTranslations();
+  const tMobileShareContactEmail = useMobileShareContactEmailTranslations();
   const colors = useMobileThemeColors();
   const { showToast } = useAppToast();
   const inputRef = useRef<TextInput>(null);
@@ -69,6 +70,8 @@ export function ShareContactEmailSheet({
     if (!open) {
       return;
     }
+
+    void preloadMobileNamespaces(["mobile.shareContact"]);
     setEmailInput("");
     setInputError(null);
     setIsSubmitting(false);
@@ -96,15 +99,15 @@ export function ShareContactEmailSheet({
         });
 
         showToast({
-          description: t("SuccessDescription", { ns: "MobileShareContactEmail" }),
-          headline: t("SuccessHeadline", { ns: "MobileShareContactEmail" }),
+          description: tMobileShareContactEmail("SuccessDescription"),
+          headline: tMobileShareContactEmail("SuccessHeadline"),
           type: "success",
         });
         onClose();
       } catch {
         showToast({
-          description: t("ErrorDescription", { ns: "MobileShareContactEmail" }),
-          headline: t("ErrorHeadline", { ns: "MobileShareContactEmail" }),
+          description: tMobileShareContactEmail("ErrorDescription"),
+          headline: tMobileShareContactEmail("ErrorHeadline"),
           type: "error",
         });
       } finally {
@@ -136,7 +139,6 @@ export function ShareContactEmailSheet({
       setEmailInput={setEmailInput}
       setInputError={setInputError}
       setValue={setValue}
-      t={t}
     />
   );
 }
@@ -156,7 +158,6 @@ function ShareContactEmailSheetContent({
   onOpenChange,
   onClose,
   open,
-  t,
   colors,
 }: {
   control: Control<ShareEmailFormValues>;
@@ -173,9 +174,9 @@ function ShareContactEmailSheetContent({
   onOpenChange: (open: boolean) => void;
   onClose: () => void;
   open: boolean;
-  t: ReturnType<typeof useMobileTranslations>;
   colors: ReturnType<typeof useMobileThemeColors>;
 }) {
+  const tMobileShareContactEmail = useMobileShareContactEmailTranslations();
   const recipients = useWatch({ control, name: "recipients" }) ?? [];
 
   const trimmedInput = emailInput.trim().toLowerCase();
@@ -245,7 +246,7 @@ function ShareContactEmailSheetContent({
     setEmailInput(result.remainder);
 
     if (result.hasInvalid && result.remainder) {
-      setInputError(t("InvalidEmail", { ns: "MobileShareContactEmail" }));
+      setInputError(tMobileShareContactEmail("InvalidEmail"));
       return;
     }
 
@@ -264,7 +265,10 @@ function ShareContactEmailSheetContent({
     }
   }
 
-  const sendButtonLabel = formatShareEmailSendButtonLabel(pendingRecipientCount, t);
+  const sendButtonLabel = formatShareEmailSendButtonLabel(
+    pendingRecipientCount,
+    tMobileShareContactEmail,
+  );
 
   const addButton = (
     <Pressable
@@ -275,7 +279,7 @@ function ShareContactEmailSheetContent({
     >
       <IconPlus size={16} stroke={canAdd ? colors.primary : colors.textMuted} />
       <Text style={[styles.addButtonText, { color: canAdd ? colors.primary : colors.textMuted }]}>
-        {t("AddButton", { ns: "MobileShareContactEmail" })}
+        {tMobileShareContactEmail("AddButton")}
       </Text>
     </Pressable>
   );
@@ -302,7 +306,7 @@ function ShareContactEmailSheetContent({
       onClose={onClose}
       onOpenChange={onOpenChange}
       open={open}
-      title={t("Title", { ns: "MobileShareContactEmail" }).replace("{name}", contactName)}
+      title={tMobileShareContactEmail("Title").replace("{name}", contactName)}
     >
       <ScrollView
         contentContainerStyle={styles.scrollContent}
@@ -311,15 +315,15 @@ function ShareContactEmailSheetContent({
         showsVerticalScrollIndicator={false}
       >
         <Text style={[styles.description, { color: colors.textSecondary }]}>
-          {t("Description", { ns: "MobileShareContactEmail" })}
+          {tMobileShareContactEmail("Description")}
         </Text>
         <Text style={[styles.whatsIncluded, { color: colors.textMuted }]}>
-          {t("WhatsIncluded", { ns: "MobileShareContactEmail" })}
+          {tMobileShareContactEmail("WhatsIncluded")}
         </Text>
 
         <View style={styles.section}>
           <Text style={[MOBILE_TEXT_STYLES.fieldLabel, { color: colors.textMuted }]}>
-            {t("RecipientsLabel", { ns: "MobileShareContactEmail" })}
+            {tMobileShareContactEmail("RecipientsLabel")}
           </Text>
 
           <MobileTextInput
@@ -333,7 +337,7 @@ function ShareContactEmailSheetContent({
             onBlur={handleEmailBlur}
             onChangeText={handleEmailInputChange}
             onSubmitEditing={handleSubmitEditing}
-            placeholder={t("RecipientsPlaceholder", { ns: "MobileShareContactEmail" })}
+            placeholder={tMobileShareContactEmail("RecipientsPlaceholder")}
             ref={inputRef}
             returnKeyType="next"
             trailingAccessory={addButton}
@@ -346,7 +350,7 @@ function ShareContactEmailSheetContent({
 
           {atRecipientCap ? (
             <Text style={[styles.hintText, { color: colors.textMuted }]}>
-              {t("MaxRecipientsHint", { ns: "MobileShareContactEmail" })}
+              {tMobileShareContactEmail("MaxRecipientsHint")}
             </Text>
           ) : null}
 
@@ -364,9 +368,10 @@ function ShareContactEmailSheetContent({
                     {email}
                   </Text>
                   <Pressable
-                    accessibilityLabel={t("RemoveRecipient", {
-                      ns: "MobileShareContactEmail",
-                    }).replace("{email}", email)}
+                    accessibilityLabel={tMobileShareContactEmail("RemoveRecipient").replace(
+                      "{email}",
+                      email,
+                    )}
                     accessibilityRole="button"
                     disabled={isSubmitting}
                     hitSlop={{ bottom: 6, left: 6, right: 6, top: 6 }}
@@ -385,7 +390,6 @@ function ShareContactEmailSheetContent({
           control={control}
           isSubmitting={isSubmitting}
           setValue={setValue}
-          t={t}
         />
       </ScrollView>
     </ActionSheetPopup>
@@ -396,15 +400,14 @@ function ShareMessageField({
   control,
   setValue,
   isSubmitting,
-  t,
   colors,
 }: {
   control: Control<ShareEmailFormValues>;
   setValue: UseFormSetValue<ShareEmailFormValues>;
   isSubmitting: boolean;
-  t: ReturnType<typeof useMobileTranslations>;
   colors: ReturnType<typeof useMobileThemeColors>;
 }) {
+  const tMobileShareContactEmail = useMobileShareContactEmailTranslations();
   const message = useWatch({ control, name: "message" }) ?? "";
 
   return (
@@ -418,7 +421,7 @@ function ShareMessageField({
         onChangeText={(value) =>
           setValue("message", value, { shouldDirty: true, shouldValidate: true })
         }
-        placeholder={t("MessagePlaceholder", { ns: "MobileShareContactEmail" })}
+        placeholder={tMobileShareContactEmail("MessagePlaceholder")}
         style={styles.messageInput}
         value={message}
       />

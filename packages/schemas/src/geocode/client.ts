@@ -1,12 +1,7 @@
-import {
-  type GeocodeSuggestAddressWire,
-  geocodeSuggestResponseSchema,
-  geocodeTimezoneResponseSchema,
-} from "#geocode/schemas.js";
+import { geocodeSuggestResponseSchema, geocodeTimezoneResponseSchema } from "./schema.js";
+import type { GeocodeSuggestAddress } from "./types.js";
 
-export type ContactAddressEntry = GeocodeSuggestAddressWire;
-
-export function parseGeocodeSuggestResponse(json: unknown): ContactAddressEntry[] {
+export function parseGeocodeSuggestResponse(json: unknown): GeocodeSuggestAddress[] {
   const parsed = geocodeSuggestResponseSchema.parse(json);
   return parsed.addresses;
 }

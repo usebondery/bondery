@@ -1,9 +1,12 @@
 import { createRequire } from "node:module";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { DEV_PORTS, DEV_URLS } from "@bondery/schemas/constants";
 import { defineConfig } from "wxt";
 
 const require = createRequire(import.meta.url);
 const { version } = require("./package.json") as { version: string };
+const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 
 // Helper to extract origin from URL for host permissions
 const getOrigin = (url: string) => {
@@ -138,6 +141,11 @@ export default defineConfig({
     // emits jsxDEV() calls (dev JSX transform), but React's production bundle
     // doesn't export jsxDEV — resulting in a runtime crash in the popup.
     define: {},
+    resolve: {
+      alias: {
+        "@bondery/translations": path.join(repoRoot, "packages/translations/src"),
+      },
+    },
     // Enable polling-based file watching on Windows where native FS events are unreliable
     server:
       mode === "development"

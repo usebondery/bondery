@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { geocodeSuggestionDisplayLabel } from "@bondery/helpers/geocode";
 import { resolveToCanonicalTimezone } from "@bondery/helpers/locale";
@@ -9,6 +9,7 @@ import {
   TypePicker,
 } from "@bondery/mantine-next";
 import type { ContactAddressEntry, ContactAddressType } from "@bondery/schemas";
+import type { TranslateFn } from "@bondery/translations";
 import { ActionIcon, Card, Group, Menu, Stack, Tooltip } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import {
@@ -64,7 +65,7 @@ interface ContactAddressEntryCardProps {
   onSetSuggestionsByValue: React.Dispatch<
     React.SetStateAction<Record<string, ContactAddressEntry>>
   >;
-  t: (key: string) => string;
+  t: TranslateFn<"ContactAddress">;
 }
 
 export function ContactAddressEntryCard({

@@ -4,11 +4,13 @@ import type {
   Contact,
   ContactPreview,
   ContactRelationshipWithPeople,
+  ContactSelectable,
   GroupWithCount,
   ImportantDate,
   LinkedInDataResponse,
   RelationshipType,
 } from "@bondery/schemas";
+import type { TranslateFn } from "@bondery/translations";
 import { Button, Group, Stack, Tabs, Text } from "@mantine/core";
 import {
   IconBrandLinkedin,
@@ -66,11 +68,11 @@ interface PersonDetailTabsProps {
   router: AppRouterInstance;
   savingField: string | null;
   savingLastInteraction: boolean;
-  selectableContacts: Contact[];
+  selectableContacts: ContactSelectable[];
   selectablePeople: ContactPreview[];
   tEditGroupsTitle: string;
-  tInteractions: (key: string, values?: Record<string, string>) => string;
-  tTabs: (key: string) => string;
+  tInteractions: TranslateFn<"InteractionsPage">;
+  tTabs: TranslateFn<"PersonTabs">;
 }
 
 export function PersonDetailTabs({

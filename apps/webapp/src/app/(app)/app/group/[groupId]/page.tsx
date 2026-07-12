@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { cache } from "react";
 import { getGroupDetailServer } from "@/lib/api/domains/server/groups";
-import { getWebTranslations as getTranslations } from "@/lib/i18n/getWebTranslations";
+import { getGroupsPageTranslations } from "@/lib/i18n/generated/hooks.server";
 import { entityPageTitle } from "@/lib/metadata/pageTitles";
 import { parseContactsListParams } from "@/lib/query/contactsListParams";
 import { GroupLoader } from "./GroupLoader";
@@ -19,7 +19,7 @@ export async function generateMetadata({
     const group = await getGroupForPage(groupId);
     return entityPageTitle(group.label);
   } catch {
-    const t = await getTranslations("GroupsPage");
+    const t = await getGroupsPageTranslations();
     return entityPageTitle(t("FallbackTitle"));
   }
 }

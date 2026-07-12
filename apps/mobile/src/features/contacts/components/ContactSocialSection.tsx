@@ -2,7 +2,7 @@ import { type ContactSocialFieldKey, createSocialUrl } from "@bondery/helpers";
 import type { Contact } from "@bondery/schemas";
 import { useMemo, useState } from "react";
 import { Linking, StyleSheet, Text, View } from "react-native";
-import { useMobileTranslations } from "../../../lib/i18n/useMobileTranslations";
+import { useCommonTranslations, useSocialsTranslations } from "@/lib/i18n/generated/hooks";
 import { useAppToast } from "../../../lib/toast/useAppToast";
 import { MOBILE_TEXT_STYLES } from "../../../theme/tokens";
 import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
@@ -29,7 +29,8 @@ export function ContactSocialSection({
   contactFirstName,
   onUpdateSocial,
 }: ContactSocialSectionProps) {
-  const t = useMobileTranslations();
+  const tSocials = useSocialsTranslations();
+  const t = useCommonTranslations();
   const colors = useMobileThemeColors();
   const { showToast } = useAppToast();
   const [sheet, setSheet] = useState<SheetState>({ open: false });
@@ -112,7 +113,7 @@ export function ContactSocialSection({
       <Text
         style={[styles.sectionTitle, MOBILE_TEXT_STYLES.sectionLabel, { color: colors.textMuted }]}
       >
-        {t("Title", { ns: "Socials" }).toUpperCase()}
+        {tSocials("Title").toUpperCase()}
       </Text>
 
       <View accessibilityLabel="Social links" accessibilityRole="none" style={styles.row}>

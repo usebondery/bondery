@@ -2,7 +2,7 @@
 
 import { Center, Loader, Stack, Text } from "@mantine/core";
 import { useEffect } from "react";
-import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
+import { useOnboardingTranslations } from "@/lib/i18n/generated/hooks";
 
 interface StepProps {
   onNext: () => void;
@@ -11,7 +11,7 @@ interface StepProps {
 const AUTO_ADVANCE_MS = 3000;
 
 export function StepLoading({ onNext }: StepProps) {
-  const t = useWebTranslations("Onboarding", "Loading");
+  const t = useOnboardingTranslations("Loading");
 
   useEffect(() => {
     const timer = setTimeout(onNext, AUTO_ADVANCE_MS);

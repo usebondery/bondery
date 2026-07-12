@@ -3,8 +3,8 @@
 import type { EducationEntry, WorkHistoryEntry } from "@bondery/schemas";
 import { Button, Divider, Stack, Text } from "@mantine/core";
 import { IconBrandLinkedin } from "@tabler/icons-react";
+import { useLinkedInDataTranslations } from "@/lib/i18n/generated/hooks";
 import { useDateFormatter as useFormatter } from "@/lib/i18n/useDateFormatter";
-import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
 import { EducationCard } from "./EducationCard";
 import { LinkedInBioSection } from "./LinkedInBioSection";
 import { WorkHistoryCard } from "./WorkHistoryCard";
@@ -37,7 +37,7 @@ export function LinkedInTab({
   onEnrich,
   enrichLabel,
 }: LinkedInTabProps) {
-  const t = useWebTranslations("LinkedInData");
+  const t = useLinkedInDataTranslations();
   const format = useFormatter();
 
   const isEmpty = workHistory.length === 0 && education.length === 0 && !linkedinBio;

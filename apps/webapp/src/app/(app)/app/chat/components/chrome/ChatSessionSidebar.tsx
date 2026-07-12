@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import {
@@ -15,8 +15,8 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { openStandardConfirmModal } from "@/components/modals/openStandardConfirmModal";
 import { formatRelativeTime } from "@/lib/i18n/formatRelativeTime";
+import { useChatPageTranslations } from "@/lib/i18n/generated/hooks";
 import { useDateFormatter as useFormatter } from "@/lib/i18n/useDateFormatter";
-import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
 import { useChatSessionsQuery, useDeleteChatSessionMutation } from "@/lib/query/hooks/useChat";
 import { useChatSessions } from "../../hooks/ChatSessionsContext";
 
@@ -28,7 +28,7 @@ interface SessionListItemProps {
 }
 
 function SessionListItem({ session, isActive, relativeTime, onDelete }: SessionListItemProps) {
-  const t = useWebTranslations("ChatPage");
+  const t = useChatPageTranslations();
   const [menuOpened, setMenuOpened] = useState(false);
 
   return (
@@ -72,7 +72,7 @@ function SessionListItem({ session, isActive, relativeTime, onDelete }: SessionL
 }
 
 export function ChatSessionSidebar() {
-  const t = useWebTranslations("ChatPage");
+  const t = useChatPageTranslations();
   const formatter = useFormatter();
   const pathname = usePathname();
   const { triggerChatReset } = useChatSessions();

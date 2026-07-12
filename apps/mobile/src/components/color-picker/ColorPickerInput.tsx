@@ -1,6 +1,9 @@
 import { useMemo, useState } from "react";
 import { Pressable, type StyleProp, StyleSheet, Text, View, type ViewStyle } from "react-native";
-import { useMobileTranslations } from "../../lib/i18n/useMobileTranslations";
+import {
+  useMobileColorPickerTranslations,
+  useMobileGroupsTranslations,
+} from "../../lib/i18n/generated/hooks";
 import type { ShowAppToastInput } from "../../lib/toast/useAppToast";
 import { MOBILE_LAYOUT, MOBILE_TYPOGRAPHY } from "../../theme/tokens";
 import { useMobileThemeColors } from "../../theme/useMobileThemeColors";
@@ -36,15 +39,15 @@ export function ColorPickerInput({
   triggerStyle,
   showToast,
 }: ColorPickerInputProps) {
-  const t = useMobileTranslations();
+  const tMobileColorPicker = useMobileColorPickerTranslations();
+  const tMobileGroups = useMobileGroupsTranslations();
   const colors = useMobileThemeColors();
   const [open, setOpen] = useState(false);
 
   const normalizedValue = normalizeHex(value);
   const hasValue = isValidHex(value);
-  const resolvedAccessibilityLabel =
-    accessibilityLabel ?? label ?? t("EditColorLabel", { ns: "MobileGroups" });
-  const resolvedPlaceholder = placeholder ?? t("EditColorLabel", { ns: "MobileGroups" });
+  const resolvedAccessibilityLabel = accessibilityLabel ?? label ?? tMobileGroups("EditColorLabel");
+  const resolvedPlaceholder = placeholder ?? tMobileGroups("EditColorLabel");
 
   const triggerBorderColor = error
     ? colors.dangerAccent
@@ -95,7 +98,7 @@ export function ColorPickerInput({
         ) : null}
 
         <Pressable
-          accessibilityHint={t("TriggerAccessibilityHint", { ns: "MobileColorPicker" })}
+          accessibilityHint={tMobileColorPicker("TriggerAccessibilityHint")}
           accessibilityLabel={resolvedAccessibilityLabel}
           accessibilityRole="button"
           accessibilityState={{ disabled }}

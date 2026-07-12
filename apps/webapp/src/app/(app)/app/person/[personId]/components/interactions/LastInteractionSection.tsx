@@ -2,15 +2,15 @@
 
 import type { Contact } from "@bondery/schemas";
 import { Text } from "@mantine/core";
+import { useInteractionsPageTranslations } from "@/lib/i18n/generated/hooks";
 import { useDateFormatter as useFormatter } from "@/lib/i18n/useDateFormatter";
-import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
 
 interface LastInteractionSectionProps {
   contact: Contact;
 }
 
 export function LastInteractionSection({ contact }: LastInteractionSectionProps) {
-  const t = useWebTranslations("InteractionsPage");
+  const t = useInteractionsPageTranslations();
   const formatter = useFormatter();
 
   return (

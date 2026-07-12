@@ -1,20 +1,19 @@
 "use client";
 
 import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
-import type { Contact } from "@bondery/schemas";
+import type { ContactSelectable } from "@bondery/schemas";
 import { ActionIcon, Group, Paper, Progress, Stack, Text, Title } from "@mantine/core";
 import { IconX } from "@tabler/icons-react";
 import { useRouter } from "next/navigation";
 import { useMemo } from "react";
 import { openNewActivityModal } from "@/app/(app)/app/interactions/components/NewActivityModal";
-
 import { openAddContactModal } from "@/app/(app)/app/people/components/modals/AddContactModal";
 import {
   buildGettingStartedState,
   type GettingStartedTaskId,
   parseGettingStartedSettings,
 } from "@/lib/home/gettingStartedItems";
-import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
+import { useHomePageTranslations } from "@/lib/i18n/generated/hooks";
 import { useDismissGettingStartedMutation } from "@/lib/query/hooks/useSettings";
 import { ProgressRailItem } from "./ProgressRailItem";
 
@@ -22,17 +21,19 @@ interface GettingStartedProgressRailProps {
   hasInteraction: boolean;
   settingsData?: Record<string, unknown>;
 
-  timelineContacts: Contact[];
+  timelineContacts: ContactSelectable[];
 
   totalContacts: number;
 }
 
-const TASK_LABEL_KEYS: Record<GettingStartedTaskId, string> = {
+const TASK_LABEL_KEYS = {
   addContacts: "Tasks.AddContacts",
   importContacts: "Tasks.ImportContacts",
-
   logInteraction: "Tasks.LogInteraction",
-};
+} as const satisfies Record<
+  GettingStartedTaskId,
+  "Tasks.AddContacts" | "Tasks.ImportContacts" | "Tasks.LogInteraction"
+>;
 
 const SETTINGS_IMPORT_SECTION = `${WEBAPP_ROUTES.SETTINGS}#data-management`;
 
@@ -45,7 +46,7 @@ export function GettingStartedProgressRail({
 
   timelineContacts,
 }: GettingStartedProgressRailProps) {
-  const t = useWebTranslations("HomePage", "ProgressRail");
+  const t = useHomePageTranslations("ProgressRail");
 
   const router = useRouter();
 
@@ -160,7 +161,6 @@ export function GettingStartedProgressRail({
             );
           })}
         </Stack>
-
       </Stack>
     </Paper>
   );

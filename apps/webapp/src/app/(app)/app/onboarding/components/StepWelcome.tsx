@@ -3,14 +3,14 @@
 import { Button, Center, Stack, Text, Title } from "@mantine/core";
 import { useMemo } from "react";
 import { useUserSession } from "@/components/shell/UserSessionProvider";
-import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
+import { useOnboardingTranslations } from "@/lib/i18n/generated/hooks";
 
 interface StepProps {
   onNext: () => void;
 }
 
 export function StepWelcome({ onNext }: StepProps) {
-  const t = useWebTranslations("Onboarding", "Welcome");
+  const t = useOnboardingTranslations("Welcome");
   const { displayName } = useUserSession();
 
   const firstName = useMemo(() => {

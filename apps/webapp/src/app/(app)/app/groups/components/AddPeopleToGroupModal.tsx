@@ -9,15 +9,15 @@ import {
   PeopleMultiPickerInput,
   successNotificationTemplate,
 } from "@bondery/mantine-next";
-import type { Contact } from "@bondery/schemas";
+import type { Contact, ContactSelectable } from "@bondery/schemas";
 import { Center, Loader, Stack, Text } from "@mantine/core";
 import { modals } from "@mantine/modals";
 import { notifications } from "@mantine/notifications";
 import { IconUserPlus } from "@tabler/icons-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { searchContacts } from "@/lib/contacts/searchContacts";
+import { useCommonTranslations, useGroupsPageTranslations } from "@/lib/i18n/generated/hooks";
 import { optionalPluralFragment } from "@/lib/i18n/optionalPluralFragment";
-import { useCommonTranslations, useWebTranslations } from "@/lib/i18n/useWebTranslations";
 import { createModalId, useModalDismiss } from "@/lib/modals";
 import { DEBOUNCE_MS } from "@/lib/platform/config";
 import { useContactsSelectableListQuery } from "@/lib/query/hooks/useContacts";
@@ -33,7 +33,7 @@ interface AddPeopleToGroupFormProps extends AddPeopleToGroupModalProps {
 }
 
 function AddPeopleToGroupModalTitle({ groupLabel }: { groupLabel: string }) {
-  const t = useWebTranslations("GroupsPage");
+  const t = useGroupsPageTranslations();
   return (
     <ModalTitle
       icon={<IconUserPlus size={24} />}
@@ -59,7 +59,7 @@ export function openAddPeopleToGroupModal(props: AddPeopleToGroupModalProps) {
 
 function AddPeopleToGroupForm({ groupId, groupLabel, modalId }: AddPeopleToGroupFormProps) {
   const tCommon = useCommonTranslations();
-  const t = useWebTranslations("GroupsPage");
+  const t = useGroupsPageTranslations();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const existingMemberIdsRef = useRef<Set<string>>(new Set());
@@ -100,7 +100,7 @@ function AddPeopleToGroupForm({ groupId, groupLabel, modalId }: AddPeopleToGroup
   const isBlocking = isSubmitting || isLoading;
   const { closeModal } = useModalDismiss(modalId, isBlocking);
 
-  const handleSearch = useCallback(async (query: string): Promise<Contact[]> => {
+  const handleSearch = useCallback(async (query: string): Promise<ContactSelectable[]> => {
     const results = await searchContacts(query);
     return results.filter((c) => !existingMemberIdsRef.current.has(c.id));
   }, []);

@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
-import { getWebTranslations as getTranslations } from "@/lib/i18n/getWebTranslations";
+import { getMapPageTranslations } from "@/lib/i18n/generated/hooks.server";
 import { staticPageTitle } from "@/lib/metadata/pageTitles";
 import { MapClient } from "./MapClient";
 import type { MapView } from "./utils/types";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const t = await getTranslations("MapPage");
+  const t = await getMapPageTranslations();
   return staticPageTitle(t("Title"));
 }
 

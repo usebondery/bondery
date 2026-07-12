@@ -1,6 +1,7 @@
 "use client";
 
 import type { Activity } from "@bondery/schemas";
+import type { InfiniteData, UseInfiniteQueryResult } from "@tanstack/react-query";
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import {
@@ -10,12 +11,14 @@ import {
   type InteractionsListParams,
   updateInteraction,
 } from "@/lib/api/domains/interactions";
+import type { InteractionsListResult } from "@/lib/api/resources/interactions";
 import {
   invalidateContactInteractions,
   invalidateInteractionDomain,
   invalidateKeepInTouchCount,
 } from "@/lib/query/invalidation";
 import { interactionKeys } from "@/lib/query/keys";
+import { nextPaginatedOffset } from "@/lib/query/paginatedInfiniteQuery";
 import { INTERACTIONS_TIMELINE } from "@/lib/query/sharedListParams";
 
 export type { InteractionsListParams };
@@ -31,16 +34,14 @@ export function useInteractionsListQuery(params?: InteractionsListParams) {
   });
 }
 
-export function useInteractionsInfiniteQuery() {
+export function useInteractionsInfiniteQuery(): UseInfiniteQueryResult<
+  InfiniteData<InteractionsListResult>,
+  Error
+> {
   const infiniteParams = { limit: INTERACTIONS_PAGE_SIZE };
 
-  return useInfiniteQuery({
-    getNextPageParam: (lastPage) => {
-      if (!lastPage.pagination.hasMore) {
-        return undefined;
-      }
-      return lastPage.pagination.offset + lastPage.pagination.limit;
-    },
+  return useInfiniteQuery<InteractionsListResult>({
+    getNextPageParam: nextPaginatedOffset,
     initialPageParam: 0,
     queryFn: async ({ pageParam }) =>
       getInteractionsList({

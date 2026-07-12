@@ -34,7 +34,7 @@ export function getAppLanguageByValue(value: string): AppLanguageData | undefine
   return APP_LANGUAGES_DATA.find((language) => language.value === value);
 }
 
-/** Key within the `Languages` namespace — use with `useWebTranslations("Languages")` / `useMobileTranslations("Languages")`. */
+/** Key within the `Languages` namespace — use with `useLanguagesTranslations()`. */
 export function getAppLanguageExonymKey(languageCode: string): string {
   return languageCode;
 }

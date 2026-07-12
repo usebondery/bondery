@@ -7,8 +7,11 @@ import { IconChecklist, IconCode, IconCopy, IconMarkdown } from "@tabler/icons-r
 import { type Editor, useEditorState } from "@tiptap/react";
 import { useEffect, useRef, useState } from "react";
 import { formatRelativeTime } from "@/lib/i18n/formatRelativeTime";
+import {
+  useNotesEditorTranslations,
+  useSingleContactPageTranslations,
+} from "@/lib/i18n/generated/hooks";
 import { useDateFormatter as useFormatter } from "@/lib/i18n/useDateFormatter";
-import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
 import { htmlToMarkdown } from "../../editor/htmlToMarkdown";
 import { markdownToHtml } from "../../editor/markdownToHtml";
 import { InsertLinkControl } from "./InsertLinkControl";
@@ -51,8 +54,8 @@ export function ContactNotesSection({
   savingField,
   notesUpdatedAt,
 }: ContactNotesSectionProps) {
-  const t = useWebTranslations("SingleContactPage");
-  const tNotes = useWebTranslations("NotesEditor");
+  const t = useSingleContactPageTranslations();
+  const tNotes = useNotesEditorTranslations();
   const formatter = useFormatter();
   const [mode, setMode] = useState<"editor" | "source" | "markdown">("editor");
   const [editableText, setEditableText] = useState("");

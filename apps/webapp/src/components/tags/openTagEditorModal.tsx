@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import {
   errorNotificationTemplate,
@@ -33,7 +33,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { openStandardConfirmModal } from "@/components/modals/openStandardConfirmModal";
 import { captureEvent } from "@/lib/analytics/client";
 import { getContactsSelectableList } from "@/lib/api/domains/contacts";
-import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
+import { useTagsSettingsTranslations } from "@/lib/i18n/generated/hooks";
 import { createModalId, useModalDismiss } from "@/lib/modals";
 import { DEBOUNCE_MS } from "@/lib/platform/config";
 import { useContactsSelectableListQuery } from "@/lib/query/hooks/useContacts";
@@ -91,7 +91,7 @@ function TagEditorModalBody({
   onUpdated,
   onDeleted,
 }: TagEditorModalBodyProps) {
-  const t = useWebTranslations("TagsSettings");
+  const t = useTagsSettingsTranslations();
   const queryClient = useQueryClient();
   const createTagMutation = useCreateTagMutation();
   const updateTagByIdMutation = useUpdateTagByIdMutation();
@@ -428,7 +428,7 @@ function TagEditorModalBody({
 }
 
 function TagEditorModalTitle({ mode }: { mode: "create" | "edit" }) {
-  const t = useWebTranslations("TagsSettings");
+  const t = useTagsSettingsTranslations();
   return (
     <ModalTitle
       icon={

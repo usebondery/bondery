@@ -20,8 +20,11 @@ import ContactsTable, {
 import { PageHeader } from "@/components/shell/PageHeader";
 import { PageWrapper } from "@/components/shell/PageWrapper";
 import { usePatchDocumentTitle } from "@/lib/documentTitle";
+import {
+  useGroupDetailPageTranslations,
+  usePeoplePageTranslations,
+} from "@/lib/i18n/generated/hooks";
 import { useContactsTableCopy } from "@/lib/i18n/useContactsTableCopy";
-import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
 import { DEBOUNCE_MS } from "@/lib/platform/config";
 import { parseContactsListParams } from "@/lib/query/contactsListParams";
 import { GROUP_CARD_PREVIEW } from "@/lib/query/groupDetailQueryParams";
@@ -40,8 +43,8 @@ interface GroupClientProps {
 }
 
 export function GroupClient({ groupId }: GroupClientProps) {
-  const tGroupDetail = useWebTranslations("GroupDetailPage");
-  const tPeople = useWebTranslations("PeoplePage");
+  const tGroupDetail = useGroupDetailPageTranslations();
+  const tPeople = usePeoplePageTranslations();
   const { columnDefinitions } = useContactsTableCopy();
   const router = useRouter();
   const pathname = usePathname();

@@ -1,6 +1,6 @@
 import { IconPlus } from "@tabler/icons-react-native";
 import { StyleSheet, Text } from "react-native";
-import { useMobileTranslations } from "../../../lib/i18n/useMobileTranslations";
+import { useMobileTagsTranslations } from "@/lib/i18n/generated/hooks";
 import { Tappable } from "../../../theme/Tappable";
 import { MOBILE_TYPOGRAPHY } from "../../../theme/tokens";
 import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
@@ -11,9 +11,9 @@ interface CreateTagChipProps {
 }
 
 export function CreateTagChip({ onPress, disabled = false }: CreateTagChipProps) {
-  const t = useMobileTranslations();
+  const tMobileTags = useMobileTagsTranslations();
   const colors = useMobileThemeColors();
-  const label = t("CreateTag", { ns: "MobileTags" });
+  const label = tMobileTags("CreateTag");
 
   return (
     <Tappable

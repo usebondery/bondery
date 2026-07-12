@@ -7,10 +7,11 @@ import {
   getUserFacingError,
   isUnauthorizedApiError,
 } from "./index.js";
+import type { ApiErrorTranslateFn } from "./types.js";
 
-function mockT(translations: Record<string, string>) {
-  return (key: string, options?: { defaultValue?: string }) =>
-    translations[key] ?? options?.defaultValue ?? key;
+function mockT(translations: Record<string, string>): ApiErrorTranslateFn {
+  return ((key: string, options?: { defaultValue?: string }) =>
+    translations[key] ?? options?.defaultValue ?? key) as ApiErrorTranslateFn;
 }
 
 describe("extractApiErrorFields", () => {

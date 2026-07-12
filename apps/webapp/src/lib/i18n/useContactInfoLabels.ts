@@ -2,11 +2,11 @@
 
 import { useMemo } from "react";
 import type { ContactInfoLabels } from "@/lib/contacts/contact-info-labels";
-import { useWebTranslations } from "./useWebTranslations";
+import { useContactInfoTranslations, useValidationTranslations } from "@/lib/i18n/generated/hooks";
 
 export function useContactInfoLabels(): ContactInfoLabels {
-  const t = useWebTranslations("ContactInfo");
-  const tVal = useWebTranslations("validation", "email");
+  const t = useContactInfoTranslations();
+  const tVal = useValidationTranslations("email");
 
   return useMemo(
     () => ({

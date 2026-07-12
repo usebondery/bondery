@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { Skeleton } from "@mantine/core";
 import { TagPill } from "@/components/tags/TagPill";

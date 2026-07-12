@@ -3,14 +3,14 @@
 import { Card, Group, RingProgress, SimpleGrid, Stack, Text, ThemeIcon } from "@mantine/core";
 import { IconMoodNeutral, IconMoodSad, IconMoodSmile } from "@tabler/icons-react";
 import type { NpsData } from "@/lib/api/resources/stats";
-import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
+import { useStatsPageTranslations } from "@/lib/i18n/generated/hooks";
 
 interface NpsCardProps {
   data: NpsData;
 }
 
 export function NpsCard({ data }: NpsCardProps) {
-  const t = useWebTranslations("StatsPage");
+  const t = useStatsPageTranslations();
 
   const total = data.promoters + data.passives + data.detractors;
   const promoterPct = total > 0 ? Math.round((data.promoters / total) * 100) : 0;

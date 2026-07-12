@@ -2,7 +2,7 @@ import { GEOCODE_SUGGEST_MIN_QUERY_LENGTH } from "@bondery/helpers/address";
 import { buildGeocodeSuggestQuery, buildGeocodeTimezoneQuery } from "@bondery/helpers/geocode";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import {
-  type ContactAddressEntry,
+  type GeocodeSuggestAddress,
   parseGeocodeSuggestResponse,
   parseGeocodeTimezoneResponse,
 } from "@bondery/schemas/geocode";
@@ -15,7 +15,7 @@ export async function fetchGeocodeSuggestions(
   query: string,
   mode: "address" | "place" = "address",
   signal?: AbortSignal,
-): Promise<ContactAddressEntry[]> {
+): Promise<GeocodeSuggestAddress[]> {
   const trimmed = query.trim();
   if (trimmed.length < GEOCODE_SUGGEST_MIN_QUERY_LENGTH) {
     return [];

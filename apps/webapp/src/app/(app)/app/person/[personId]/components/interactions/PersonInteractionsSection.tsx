@@ -14,7 +14,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useRef } from "react";
 import { InteractionsList } from "@/components/interactions/InteractionsList";
 import { openStandardConfirmModal } from "@/components/modals/openStandardConfirmModal";
-import { useCommonTranslations, useWebTranslations } from "@/lib/i18n/useWebTranslations";
+import { useCommonTranslations, useInteractionsPageTranslations } from "@/lib/i18n/generated/hooks";
 import {
   useContactInteractionsInfiniteQuery,
   useContactsSelectableListQuery,
@@ -35,7 +35,7 @@ export function PersonInteractionsSection({ personId, contact }: PersonInteracti
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const t = useWebTranslations("InteractionsPage");
+  const t = useInteractionsPageTranslations();
   const tCommon = useCommonTranslations();
   const deleteInteractionMutation = useDeleteInteractionMutation(personId);
   const createInteractionMutation = useCreateInteractionMutation(personId);

@@ -63,6 +63,21 @@ For form submit flows that start from a single full-name field or raw social inp
 
 OpenAPI documents wire **input** shapes. Zod transforms/refines still run at runtime but may not appear fully in generated docs — behavioral contracts live in `src/contracts.assertions.ts`.
 
+## Types vs schemas module split
+
+Public types and Zod validators live in separate files inside a **module subfolder** so consumers doing `import type { Contact }` never load Zod generic trees:
+
+| File | Role |
+|------|------|
+| `types.ts` | Plain `interface` / `type` aliases — **no `zod` import** |
+| `schema.ts` | Zod schemas with `satisfies z.ZodType<T>` |
+| `contract.ts` | Compile-time `Assert<IsEqual<…>>` locks (not exported) |
+| `index.ts` | Thin barrel re-exporting types and schemas |
+
+Example layout: `src/entities/contact/{types,schema,contract,index}.ts`, `src/sync/pull/…`, `src/geocode/…`.
+
+Types are the consumer-facing contract; schemas are the behavioral source of truth. `contract.ts` welds them in CI via `tsc`.
+
 ## Scripts
 
 - `npm run build` — compile to `dist/` (`tsc` with NodeNext; required before Node consumers run)

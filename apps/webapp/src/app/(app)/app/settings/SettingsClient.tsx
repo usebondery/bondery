@@ -4,7 +4,7 @@ import { Stack } from "@mantine/core";
 import { ErrorPageHeader } from "@/components/shell/ErrorPageHeader";
 import { HashScrollOnMount } from "@/components/shell/HashScrollOnMount";
 import { PageWrapper } from "@/components/shell/PageWrapper";
-import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
+import { useSettingsPageTranslations } from "@/lib/i18n/generated/hooks";
 import { API_URL } from "@/lib/platform/config";
 import { ApiKeysSection } from "./components/cards/ApiKeysSection";
 import { DataManagementCard } from "./components/cards/DataManagementCard";
@@ -15,7 +15,7 @@ import { SupportCard } from "./components/cards/SupportCard";
 import { TagsSection } from "./components/cards/TagsSection";
 
 export function SettingsClient() {
-  const t = useWebTranslations("SettingsPage");
+  const t = useSettingsPageTranslations();
 
   return (
     <PageWrapper>

@@ -16,7 +16,7 @@ import { openStandardConfirmModal } from "@/components/modals/openStandardConfir
 import { PageHeader } from "@/components/shell/PageHeader";
 import { PageWrapper } from "@/components/shell/PageWrapper";
 import { captureEvent } from "@/lib/analytics/client";
-import { useCommonTranslations, useWebTranslations } from "@/lib/i18n/useWebTranslations";
+import { useCommonTranslations, useGroupsPageTranslations } from "@/lib/i18n/generated/hooks";
 import { optimisticGroupDocumentTitle } from "@/lib/metadata/optimisticTitles";
 import { useNavigateWithTitle } from "@/lib/metadata/useNavigateWithTitle";
 import {
@@ -33,7 +33,7 @@ import { SortMenu, type SortOption } from "./components/SortMenu";
 const LIST_PARAMS = { previewLimit: 3 };
 
 export function GroupsClient() {
-  const t = useWebTranslations("GroupsPage");
+  const t = useGroupsPageTranslations();
   const tCommon = useCommonTranslations();
   const router = useRouter();
   const { navigateWithTitle } = useNavigateWithTitle();

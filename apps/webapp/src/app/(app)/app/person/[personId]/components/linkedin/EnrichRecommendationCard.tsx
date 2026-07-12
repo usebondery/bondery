@@ -9,7 +9,7 @@ import {
   IconTrash,
 } from "@tabler/icons-react";
 import { useBatchEnrichFromLinkedIn } from "@/components/extension/useBatchEnrichFromLinkedIn";
-import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
+import { useEnrichRecommendationCardTranslations } from "@/lib/i18n/generated/hooks";
 
 interface EnrichRecommendationCardProps {
   linkedinHandle: string | null;
@@ -28,7 +28,7 @@ export function EnrichRecommendationCard({
   personId,
   linkedinHandle,
 }: EnrichRecommendationCardProps) {
-  const t = useWebTranslations("EnrichRecommendationCard");
+  const t = useEnrichRecommendationCardTranslations();
   const {
     startForPerson,
     resume,

@@ -1,3 +1,5 @@
+/// <reference types="@bondery/translations/generated/i18next-cli/i18next.d" />
+
 // Augment ImportMetaEnv to declare WXT_ environment variables.
 // WXT/Vite injects these at build time from .env.[mode].local files.
 interface ImportMetaEnv {

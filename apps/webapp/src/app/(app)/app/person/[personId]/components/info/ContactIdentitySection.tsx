@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { geocodeSuggestionDisplayLabel } from "@bondery/helpers/geocode";
 import { errorNotificationTemplate, successNotificationTemplate } from "@bondery/mantine-next";

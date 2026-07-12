@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { ActivityIndicator, StyleSheet, View } from "react-native";
-import { useMobileTranslations } from "../../lib/i18n/useMobileTranslations";
+import { useMobileSettingsTranslations } from "@/lib/i18n/generated/hooks";
 import { useMobileThemeColors } from "../../theme/useMobileThemeColors";
 import { LoadErrorCard } from "./LoadErrorCard";
 
@@ -21,9 +21,9 @@ export function AsyncLoadState({
   children,
   loadingMinHeight = 80,
 }: AsyncLoadStateProps) {
-  const t = useMobileTranslations();
+  const tMobileSettings = useMobileSettingsTranslations();
   const colors = useMobileThemeColors();
-  const resolvedErrorTitle = errorTitle ?? t("LoadErrorTitle", { ns: "MobileSettings" });
+  const resolvedErrorTitle = errorTitle ?? tMobileSettings("LoadErrorTitle");
   const hasError = Boolean(errorDescription);
 
   if (isLoading) {

@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { openPhotoUploadModal } from "@/components/photo/openPhotoUploadModal";
 import { useUploadContactPhotoMutation } from "@/lib/query/hooks/useContacts";

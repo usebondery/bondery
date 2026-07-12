@@ -13,13 +13,17 @@ import { useWatch } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import {
+  useCommonTranslations,
+  useContactImportantDatesTranslations,
+  useMobileContactIdentityTranslations,
+} from "@/lib/i18n/generated/hooks";
+import {
   ActionSheetPopup,
   type ActionSheetPopupAction,
 } from "../../../components/ActionSheetPopup";
 import { SheetSelectField, SheetTextField } from "../../../components/form";
 import { INPUT_MAX_LENGTHS } from "../../../lib/config";
 import { useSheetForm } from "../../../lib/forms/useSheetForm";
-import { useMobileTranslations } from "../../../lib/i18n/useMobileTranslations";
 import { MOBILE_LAYOUT, MOBILE_TYPOGRAPHY } from "../../../theme/tokens";
 import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
 import {
@@ -105,7 +109,9 @@ export function EditImportantDateSheet({
   onSave,
   onDelete,
 }: EditImportantDateSheetProps) {
-  const t = useMobileTranslations();
+  const tContactImportantDates = useContactImportantDatesTranslations();
+  const tMobileContactIdentity = useMobileContactIdentityTranslations();
+  const t = useCommonTranslations();
   const { i18n } = useTranslation();
   const colors = useMobileThemeColors();
   const dateLocale = resolveDateLocale(i18n.language);
@@ -173,7 +179,7 @@ export function EditImportantDateSheet({
           value,
         };
       }),
-    [t, usedTypes],
+    [usedTypes, t],
   );
 
   const notifyOptions = useMemo(
@@ -181,14 +187,14 @@ export function EditImportantDateSheet({
       (["none", "1", "3", "7"] as const).map((value) => ({
         label:
           value === "none"
-            ? t("NotifyNone", { ns: "ContactImportantDates" })
+            ? tContactImportantDates("NotifyNone")
             : value === "1"
-              ? t("NotifyDayBefore", { count: 1, ns: "ContactImportantDates" })
-              : t("NotifyDaysBefore", { count: Number(value), ns: "ContactImportantDates" }),
+              ? tContactImportantDates("NotifyDayBefore")
+              : tContactImportantDates("NotifyDaysBefore"),
         leftSection: <NotifyBellIcon color={colors.iconSecondary} muted={value === "none"} />,
         value,
       })),
-    [colors.iconSecondary, t],
+    [colors.iconSecondary, tContactImportantDates],
   );
 
   const canSubmit = isValid && !isSubmitting;
@@ -217,9 +223,7 @@ export function EditImportantDateSheet({
         <IconCheck size={16} stroke={colors.textOnPrimary} />
       ),
     label:
-      mode === "add"
-        ? t("AddAction", { ns: "ContactImportantDates" })
-        : t("SaveChanges", { ns: "MobileContactIdentity" }),
+      mode === "add" ? tContactImportantDates("AddAction") : tMobileContactIdentity("SaveChanges"),
     loading: isSubmitting,
     onPress: () => void onSubmit(),
     tone: "primary",
@@ -232,7 +236,7 @@ export function EditImportantDateSheet({
           {
             disabled: isSubmitting,
             icon: <IconTrash size={16} stroke={colors.dangerAccent} />,
-            label: t("DeleteAction", { ns: "ContactImportantDates" }),
+            label: tContactImportantDates("DeleteAction"),
             onPress: () => setDeleteConfirmOpen(true),
             tone: "danger",
             variant: "outline",
@@ -242,12 +246,12 @@ export function EditImportantDateSheet({
       : [primaryAction];
 
   const sheetTitle = isDeleteConfirmOpen
-    ? t("DeleteDateConfirmTitle", { ns: "MobileContactIdentity" }).replace(
+    ? tMobileContactIdentity("DeleteDateConfirmTitle").replace(
         "{type}",
         t(`ContactImportantDates.Types.${type}`),
       )
     : mode === "add"
-      ? t("AddAction", { ns: "ContactImportantDates" })
+      ? tContactImportantDates("AddAction")
       : t(`ContactImportantDates.Types.${type}`);
 
   return (
@@ -258,7 +262,7 @@ export function EditImportantDateSheet({
             ? [
                 {
                   disabled: isSubmitting,
-                  label: t("actions.cancel", { ns: "common" }),
+                  label: t("actions.cancel"),
                   onPress: () => setDeleteConfirmOpen(false),
                   tone: "neutral",
                   variant: "outline",
@@ -266,7 +270,7 @@ export function EditImportantDateSheet({
                 {
                   disabled: isSubmitting,
                   icon: <IconTrash size={16} stroke={colors.textOnPrimary} />,
-                  label: t("actions.delete", { ns: "common" }),
+                  label: t("actions.delete"),
                   loading: isSubmitting,
                   onPress: () => onDelete?.(),
                   tone: "danger",
@@ -283,16 +287,13 @@ export function EditImportantDateSheet({
       >
         {isDeleteConfirmOpen ? (
           <Text style={[styles.confirmBody, { color: colors.textSecondary }]}>
-            {t("DeleteDateConfirmBody", { ns: "MobileContactIdentity" }).replace(
-              "{name}",
-              contactFirstName,
-            )}
+            {tMobileContactIdentity("DeleteDateConfirmBody").replace("{name}", contactFirstName)}
           </Text>
         ) : (
           <>
             <SheetSelectField
               control={control}
-              label={t("TypePlaceholder", { ns: "ContactImportantDates" })}
+              label={tContactImportantDates("TypePlaceholder")}
               name="type"
               options={typeOptions}
             />
@@ -317,17 +318,17 @@ export function EditImportantDateSheet({
             </Pressable>
 
             <SheetTextField
-              accessibilityLabel={t("NotePlaceholder", { ns: "ContactImportantDates" })}
+              accessibilityLabel={tContactImportantDates("NotePlaceholder")}
               control={control}
               editable={!isSubmitting}
               maxLength={INPUT_MAX_LENGTHS.dateName}
               name="note"
-              placeholder={t("NotePlaceholder", { ns: "ContactImportantDates" })}
+              placeholder={tContactImportantDates("NotePlaceholder")}
             />
 
             <SheetSelectField
               control={control}
-              label={t("RemindMeLabel", { ns: "MobileContactIdentity" })}
+              label={tMobileContactIdentity("RemindMeLabel")}
               name="notifyDaysBefore"
               options={notifyOptions}
             />

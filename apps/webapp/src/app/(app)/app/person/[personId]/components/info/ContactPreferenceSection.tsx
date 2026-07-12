@@ -7,7 +7,7 @@ import { Group } from "@mantine/core";
 import { useEffect, useState } from "react";
 import { LanguagePicker } from "@/components/shared/LanguagePicker";
 import { TimezonePicker } from "@/components/shared/TimezonePicker";
-import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
+import { useContactPreferenceSectionTranslations } from "@/lib/i18n/generated/hooks";
 
 interface ContactPreferenceSectionProps {
   contact: Contact;
@@ -20,7 +20,7 @@ export function ContactPreferenceSection({
   savingField,
   handleBlur,
 }: ContactPreferenceSectionProps) {
-  const t = useWebTranslations("ContactPreferenceSection");
+  const t = useContactPreferenceSectionTranslations();
   const [language, setLanguage] = useState(contact.language || DEFAULT_LOCALE);
   const [timezone, setTimezone] = useState(contact.timezone || "UTC");
 

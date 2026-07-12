@@ -11,11 +11,14 @@ import { useRouter } from "expo-router";
 import { useCallback, useState } from "react";
 import { Linking } from "react-native";
 import {
+  useCommonTranslations,
+  useMobileContactDetailTranslations,
+} from "@/lib/i18n/generated/hooks";
+import {
   deleteContact,
   putContactImportantDates,
   updateContact,
 } from "../../../lib/domains/contacts";
-import { useMobileTranslations } from "../../../lib/i18n/useMobileTranslations";
 import { ShareUnavailableError, shareContactVCard } from "../../../lib/share/shareContactVCard";
 import { useAppToast } from "../../../lib/toast/useAppToast";
 import { normalizeEmailsForSave, normalizePhonesForSave } from "../contactChannelConstants";
@@ -32,8 +35,9 @@ export function useContactDetailHandlers({
   isMyselfMode,
   onContactUpdated,
 }: UseContactDetailHandlersOptions) {
+  const tMobileContactDetail = useMobileContactDetailTranslations();
+  const t = useCommonTranslations();
   const router = useRouter();
-  const t = useMobileTranslations();
   const { showToast } = useAppToast();
   const [isDeleting, setIsDeleting] = useState(false);
   const [isSharing, setIsSharing] = useState(false);
@@ -56,22 +60,22 @@ export function useContactDetailHandlers({
       } catch (err) {
         if (err instanceof ShareUnavailableError) {
           showToast({
-            headline: t("ShareUnavailable", { ns: "MobileContactDetail" }),
+            headline: tMobileContactDetail("ShareUnavailable"),
             type: "error",
           });
           return;
         }
 
         showToast({
-          description: t("ShareFailedDescription", { ns: "MobileContactDetail" }),
-          headline: t("ShareFailed", { ns: "MobileContactDetail" }),
+          description: tMobileContactDetail("ShareFailedDescription"),
+          headline: tMobileContactDetail("ShareFailed"),
           type: "error",
         });
       } finally {
         setIsSharing(false);
       }
     })();
-  }, [contact, name, showToast, t]);
+  }, [contact, name, showToast, tMobileContactDetail]);
 
   const handleDeleteContact = useCallback(() => {
     void (async () => {
@@ -83,15 +87,15 @@ export function useContactDetailHandlers({
         router.back();
       } catch {
         showToast({
-          description: t("DeleteFailed", { ns: "MobileContactDetail" }),
-          headline: t("feedback.errorTitle", { ns: "common" }),
+          description: tMobileContactDetail("DeleteFailed"),
+          headline: t("feedback.errorTitle"),
           type: "error",
         });
       } finally {
         setIsDeleting(false);
       }
     })();
-  }, [contact.id, contact.updatedAt, router, showToast, t]);
+  }, [contact.id, contact.updatedAt, router, showToast, t, tMobileContactDetail]);
 
   const handleUpdateSocial = useCallback(
     (platform: ContactSocialFieldKey, value: string) => {
@@ -154,7 +158,7 @@ export function useContactDetailHandlers({
       Linking.openURL(`tel:${phone.prefix}${phone.value}`).catch(() => {
         showToast({
           description: "Could not open phone dialer",
-          headline: t("feedback.errorTitle", { ns: "common" }),
+          headline: t("feedback.errorTitle"),
           type: "error",
         });
       });
@@ -167,7 +171,7 @@ export function useContactDetailHandlers({
       Linking.openURL(`sms:${phone.prefix}${phone.value}`).catch(() => {
         showToast({
           description: "Could not open messages",
-          headline: t("feedback.errorTitle", { ns: "common" }),
+          headline: t("feedback.errorTitle"),
           type: "error",
         });
       });
@@ -180,7 +184,7 @@ export function useContactDetailHandlers({
       Linking.openURL(`mailto:${email.value}`).catch(() => {
         showToast({
           description: "Could not open email app",
-          headline: t("feedback.errorTitle", { ns: "common" }),
+          headline: t("feedback.errorTitle"),
           type: "error",
         });
       });

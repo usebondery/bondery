@@ -5,7 +5,10 @@ import { useRouter } from "expo-router";
 import { ScrollView, StyleSheet, Text } from "react-native";
 import { StackNavBar, useScrollBottomInset } from "../../components/chrome";
 import { API_URL } from "../../lib/config";
-import { useMobileTranslations } from "../../lib/i18n/useMobileTranslations";
+import {
+  useCommonTranslations,
+  useMobileSettingsTranslations,
+} from "../../lib/i18n/generated/hooks";
 import { useAppToast } from "../../lib/toast/useAppToast";
 import { MOBILE_LAYOUT, MOBILE_TYPOGRAPHY } from "../../theme/tokens";
 import { useMobileThemeColors } from "../../theme/useMobileThemeColors";
@@ -21,8 +24,9 @@ const OFFLINE_STATUS_DOT_COLOR = "#ca8a04";
 const APP_VERSION = Constants.expoConfig?.version ?? "—";
 
 export function SettingsTechnicalScreen() {
+  const tMobileSettings = useMobileSettingsTranslations();
+  const _t = useCommonTranslations();
   const router = useRouter();
-  const t = useMobileTranslations();
   const { showToast } = useAppToast();
   const colors = useMobileThemeColors();
   const scrollBottomInset = useScrollBottomInset("stack");
@@ -31,8 +35,8 @@ export function SettingsTechnicalScreen() {
   const openDocs = () => {
     void openExternalUrl(HELP_DOCS_URL, () => {
       showToast({
-        description: t("OpenDocsErrorDescription", { ns: "MobileSettings" }),
-        headline: t("OpenDocsErrorHeadline", { ns: "MobileSettings" }),
+        description: tMobileSettings("OpenDocsErrorDescription"),
+        headline: tMobileSettings("OpenDocsErrorHeadline"),
         type: "error",
       });
     });
@@ -40,12 +44,12 @@ export function SettingsTechnicalScreen() {
 
   const serverStatusDescription =
     apiServerStatus === "connected"
-      ? t("ServerStatusConnected", { ns: "MobileSettings" })
+      ? tMobileSettings("ServerStatusConnected")
       : apiServerStatus === "offline"
-        ? t("ServerStatusOffline", { ns: "MobileSettings" })
+        ? tMobileSettings("ServerStatusOffline")
         : apiServerStatus === "unreachable"
-          ? t("ServerStatusUnreachable", { ns: "MobileSettings" })
-          : t("ServerStatusChecking", { ns: "MobileSettings" });
+          ? tMobileSettings("ServerStatusUnreachable")
+          : tMobileSettings("ServerStatusChecking");
 
   const serverStatusDotColor =
     apiServerStatus === "connected"
@@ -60,7 +64,7 @@ export function SettingsTechnicalScreen() {
     <>
       <StackNavBar
         onBack={() => router.back()}
-        title={t("Technical", { ns: "MobileSettings" })}
+        title={tMobileSettings("Technical")}
         variant="elevated"
       />
 
@@ -71,9 +75,9 @@ export function SettingsTechnicalScreen() {
         <SettingsSectionCard>
           <SettingsNavigationRow
             destination="external"
-            externalLabel={t("External", { ns: "MobileSettings" })}
+            externalLabel={tMobileSettings("External")}
             icon={<IconClipboardList size={18} stroke={colors.iconPrimary} />}
-            label={t("Changelog", { ns: "MobileSettings" })}
+            label={tMobileSettings("Changelog")}
             onPress={() => {
               void openExternalUrl(CHANGELOG_URL);
             }}
@@ -81,27 +85,27 @@ export function SettingsTechnicalScreen() {
 
           <SettingsNavigationRow
             destination="external"
-            externalLabel={t("External", { ns: "MobileSettings" })}
+            externalLabel={tMobileSettings("External")}
             icon={<IconBook size={18} stroke={colors.iconPrimary} />}
-            label={t("Docs", { ns: "MobileSettings" })}
+            label={tMobileSettings("Docs")}
             onPress={openDocs}
             showDivider={false}
           />
         </SettingsSectionCard>
 
-        <SettingsFieldLabel>{t("ApiServerUrl", { ns: "MobileSettings" })}</SettingsFieldLabel>
+        <SettingsFieldLabel>{tMobileSettings("ApiServerUrl")}</SettingsFieldLabel>
         <SettingsReadOnlyField
           description={serverStatusDescription}
           loading={isChecking}
           onReload={() => {
             void refresh();
           }}
-          reloadAccessibilityLabel={t("RecheckConnection", { ns: "MobileSettings" })}
+          reloadAccessibilityLabel={tMobileSettings("RecheckConnection")}
           statusDotColor={serverStatusDotColor}
-          value={API_URL || t("ApiServerNotConfigured", { ns: "MobileSettings" })}
+          value={API_URL || tMobileSettings("ApiServerNotConfigured")}
         />
 
-        <SettingsFieldLabel>{t("AppVersion", { ns: "MobileSettings" })}</SettingsFieldLabel>
+        <SettingsFieldLabel>{tMobileSettings("AppVersion")}</SettingsFieldLabel>
         <Text style={[styles.versionValue, { color: colors.textPrimary }]}>{APP_VERSION}</Text>
       </ScrollView>
     </>

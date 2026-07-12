@@ -8,6 +8,7 @@ import {
   successNotificationTemplate,
 } from "@bondery/mantine-next";
 import { type Activity, type ContactSelectable, interactionFormSchema } from "@bondery/schemas";
+import { useCommonTranslations, useInteractionsPageTranslations } from "@/lib/i18n/generated/hooks";
 
 type ActivityParticipantRef = string | { id: string };
 
@@ -23,7 +24,6 @@ import { captureEvent } from "@/lib/analytics/client";
 import { ACTIVITY_TYPE_OPTIONS, getActivityTypeConfig } from "@/lib/contacts/activityTypes";
 import { searchContacts } from "@/lib/contacts/searchContacts";
 import { useInteractionTypeLabel } from "@/lib/i18n/useInteractionTypeLabel";
-import { useCommonTranslations, useWebTranslations } from "@/lib/i18n/useWebTranslations";
 import { createModalId, useModalDismiss } from "@/lib/modals";
 import { DEBOUNCE_MS } from "@/lib/platform/config";
 import {
@@ -108,7 +108,7 @@ function withFallbackTime(date: Date, fallback: Date): Date {
 }
 
 function NewActivityModalTitle() {
-  const t = useWebTranslations("InteractionsPage");
+  const t = useInteractionsPageTranslations();
   return <ModalTitle icon={<IconCalendarPlus size={24} />} text={t("WhoAreYouMeeting")} />;
 }
 
@@ -120,7 +120,7 @@ function NewActivityForm({
   onCreated,
 }: NewActivityFormProps) {
   const tCommon = useCommonTranslations();
-  const t = useWebTranslations("InteractionsPage");
+  const t = useInteractionsPageTranslations();
   const getInteractionTypeLabel = useInteractionTypeLabel();
   const createInteractionMutation = useCreateInteractionMutation();
   const updateInteractionMutation = useUpdateInteractionMutation(activity?.id ?? "");

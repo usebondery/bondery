@@ -8,13 +8,13 @@ import { phoneEntrySchema, phoneEntrySheetSchema } from "@bondery/schemas";
 import { IconCheck, IconPhonePlus, IconTrash } from "@tabler/icons-react-native";
 import { useMemo } from "react";
 import { StyleSheet, Text, View } from "react-native";
+import { useCommonTranslations, useContactInfoTranslations } from "@/lib/i18n/generated/hooks";
 import {
   ActionSheetPopup,
   type ActionSheetPopupAction,
 } from "../../../components/ActionSheetPopup";
 import { SheetPhoneField, SheetSelectField } from "../../../components/form";
 import { useSheetForm } from "../../../lib/forms/useSheetForm";
-import { useMobileTranslations } from "../../../lib/i18n/useMobileTranslations";
 import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
 import { createDraftPhone } from "../contactChannelConstants";
 import { TelephonePrefixFlag } from "./TelephonePrefixFlag";
@@ -42,7 +42,8 @@ export function EditPhoneSheet({
   onSave,
   onDelete,
 }: EditPhoneSheetProps) {
-  const t = useMobileTranslations();
+  const tContactInfo = useContactInfoTranslations();
+  const _t = useCommonTranslations();
   const colors = useMobileThemeColors();
   const {
     control,
@@ -78,14 +79,11 @@ export function EditPhoneSheet({
   const typeOptions = useMemo(
     () =>
       CONTACT_CHANNEL_TYPE_OPTIONS.map((option) => ({
-        label:
-          option.value === "work"
-            ? t("TypeWork", { ns: "ContactInfo" })
-            : t("TypeHome", { ns: "ContactInfo" }),
+        label: option.value === "work" ? tContactInfo("TypeWork") : tContactInfo("TypeHome"),
         leftSection: <Text style={styles.typeEmoji}>{option.emoji}</Text>,
         value: option.value,
       })),
-    [t],
+    [tContactInfo],
   );
 
   const canSubmit = isValid && !isSubmitting;
@@ -106,7 +104,7 @@ export function EditPhoneSheet({
       ) : (
         <IconCheck size={16} stroke={colors.textOnPrimary} />
       ),
-    label: mode === "add" ? t("AddPhone", { ns: "ContactInfo" }) : "Save changes",
+    label: mode === "add" ? tContactInfo("AddPhone") : "Save changes",
     loading: isSubmitting,
     onPress: () => void onSubmit(),
     tone: "primary" as const,
@@ -119,7 +117,7 @@ export function EditPhoneSheet({
           {
             disabled: isSubmitting,
             icon: <IconTrash size={16} stroke={colors.dangerAccent} />,
-            label: t("DeleteAction", { ns: "ContactInfo" }),
+            label: tContactInfo("DeleteAction"),
             onPress: onDelete,
             tone: "danger",
             variant: "outline",
@@ -135,21 +133,17 @@ export function EditPhoneSheet({
       onClose={onCancel}
       onOpenChange={onOpenChange}
       open={open}
-      title={
-        mode === "add"
-          ? t("AddPhone", { ns: "ContactInfo" })
-          : t("PhoneNumbers", { ns: "ContactInfo" })
-      }
+      title={mode === "add" ? tContactInfo("AddPhone") : tContactInfo("PhoneNumbers")}
     >
       <View style={styles.phoneRow}>
         <SheetSelectField
-          accessibilityLabel={t("PhonePrefixAccessibilityLabel", { ns: "ContactInfo" })}
+          accessibilityLabel={tContactInfo("PhonePrefixAccessibilityLabel")}
           control={control}
-          label={t("PhonePrefixAccessibilityLabel", { ns: "ContactInfo" })}
+          label={tContactInfo("PhonePrefixAccessibilityLabel")}
           name="prefix"
           options={prefixOptions}
           searchable
-          searchPlaceholder={t("PhonePrefixSearchPlaceholder", { ns: "ContactInfo" })}
+          searchPlaceholder={tContactInfo("PhonePrefixSearchPlaceholder")}
           triggerStyle={styles.prefixTrigger}
         />
         <SheetPhoneField
@@ -159,14 +153,14 @@ export function EditPhoneSheet({
           editable={!isSubmitting}
           name="value"
           onSubmitEditing={() => void onSubmit()}
-          placeholder={t("PhonePlaceholder", { ns: "ContactInfo" })}
+          placeholder={tContactInfo("PhonePlaceholder")}
           prefixName="prefix"
         />
       </View>
 
       <SheetSelectField
         control={control}
-        label={t("TypeLabel", { ns: "ContactInfo" })}
+        label={tContactInfo("TypeLabel")}
         name="type"
         options={typeOptions}
       />

@@ -62,7 +62,7 @@
     },
     "common": {
       "path": "common.json",
-      "platforms": ["web", "mobile", "website"]
+      "platforms": ["web", "mobile", "website", "extension"]
     },
     "EnrichFromLinkedIn": {
       "path": "features/sections/EnrichFromLinkedIn.json",
@@ -72,9 +72,17 @@
       "path": "features/sections/EnrichRecommendationCard.json",
       "platforms": ["web", "mobile"]
     },
+    "ExtensionPopup": {
+      "path": "platform/extension/ExtensionPopup.json",
+      "platforms": ["extension"]
+    },
+    "ExtensionSocialButtons": {
+      "path": "platform/extension/ExtensionSocialButtons.json",
+      "platforms": ["extension"]
+    },
     "ExtensionVersionCheck": {
       "path": "features/sections/ExtensionVersionCheck.json",
-      "platforms": ["web", "mobile"]
+      "platforms": ["web", "mobile", "extension"]
     },
     "FeedbackPage": {
       "path": "features/pages/FeedbackPage.json",
@@ -94,7 +102,7 @@
     },
     "glossary": {
       "path": "glossary.json",
-      "platforms": ["web", "mobile", "website"]
+      "platforms": ["web", "mobile", "website", "extension"]
     },
     "HomePage": {
       "path": "features/pages/HomePage.json",
@@ -258,10 +266,17 @@
     },
     "validation": {
       "path": "validation.json",
-      "platforms": ["web", "mobile"]
+      "platforms": ["web", "mobile", "extension"]
     }
   },
   "preload": {
+    "extension.shell": [
+      "common",
+      "validation",
+      "glossary",
+      "ExtensionPopup",
+      "ExtensionSocialButtons"
+    ],
     "mobile.auth": ["LoginPage", "MobileAuth"],
     "mobile.contactDetail": [
       "MobileContactDetail",

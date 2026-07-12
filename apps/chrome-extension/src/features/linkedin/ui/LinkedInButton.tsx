@@ -5,6 +5,7 @@ import type React from "react";
 import { useEffect, useState } from "react";
 import { browser } from "wxt/browser";
 import { config } from "../../../config";
+import { useExtensionSocialButtonsTranslations } from "../../../lib/i18n/generated/hooks";
 import { extLog } from "../../../lib/log";
 import type { AddPersonResult } from "../../../lib/messaging/types";
 import { profileCache, scrapeLinkedInProfile } from "../scrape/scrapeProfile";
@@ -44,6 +45,7 @@ export function extractProfilePhotoUrl(): string | null {
 }
 
 const LinkedInButton: React.FC<LinkedInButtonProps> = ({ username }) => {
+  const t = useExtensionSocialButtonsTranslations("LinkedIn");
   const [isLoading, setIsLoading] = useState(false);
   const [isPreloading, setIsPreloading] = useState(!profileCache.has(username));
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
@@ -97,13 +99,13 @@ const LinkedInButton: React.FC<LinkedInButtonProps> = ({ username }) => {
       }
 
       if (result.payload.requiresAuth) {
-        setStatusMessage("Sign in required — click the Bondery icon");
+        setStatusMessage(t("SignInRequired"));
       } else {
-        setStatusMessage(result.payload.error ?? "Something went wrong");
+        setStatusMessage(result.payload.error ?? t("SomethingWrong"));
       }
     } catch (error) {
       extLog.error("Error opening in Bondery:", error);
-      setStatusMessage("Extension error — try again");
+      setStatusMessage(t("ExtensionError"));
     } finally {
       setIsLoading(false);
     }
@@ -118,7 +120,7 @@ const LinkedInButton: React.FC<LinkedInButtonProps> = ({ username }) => {
           onClick={handleClick}
           radius="xl"
         >
-          Open in Bondery
+          {t("OpenInBondery")}
         </Button>
       </div>
       {statusMessage && (

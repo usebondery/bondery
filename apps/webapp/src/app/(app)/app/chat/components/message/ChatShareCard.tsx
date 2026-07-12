@@ -2,7 +2,7 @@
 
 import { Button, Skeleton } from "@mantine/core";
 import { IconShare } from "@tabler/icons-react";
-import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
+import { useShareContactModalTranslations } from "@/lib/i18n/generated/hooks";
 import { useChatContactQuery } from "@/lib/query/hooks/useChat";
 import { openShareContactModal } from "../../../people/components/modals/ShareContactModal";
 
@@ -19,7 +19,7 @@ interface ChatShareCardProps {
  * standard ShareContactModal when clicked.
  */
 export function ChatShareCard({ name, id }: ChatShareCardProps) {
-  const tShare = useWebTranslations("ShareContactModal");
+  const tShare = useShareContactModalTranslations();
   const { data: contact, isLoading } = useChatContactQuery(id);
 
   if (name !== "share-contact") {

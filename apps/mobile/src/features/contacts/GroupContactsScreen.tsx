@@ -9,7 +9,11 @@ import { useScrollBottomInset } from "../../components/chrome";
 import type { FloatingActionBarAction } from "../../components/FloatingActionBar";
 import { LoadErrorCard, loadErrorTabRootInset } from "../../components/load-state";
 import { MobileTextInput } from "../../components/MobileTextInput";
-import { useMobileTranslations } from "../../lib/i18n/useMobileTranslations";
+import {
+  useCommonTranslations,
+  useMobileContactsTranslations,
+  useMobileSettingsTranslations,
+} from "../../lib/i18n/generated/hooks";
 import {
   type MobilePreferencesState,
   type SwipeAction,
@@ -50,7 +54,9 @@ interface GroupContactsScreenProps {
 }
 
 export function GroupContactsScreen({ groupId, label, emoji }: GroupContactsScreenProps) {
-  const t = useMobileTranslations();
+  const t = useCommonTranslations();
+  const tMobileContacts = useMobileContactsTranslations();
+  const tMobileSettings = useMobileSettingsTranslations();
   const { showToast } = useAppToast();
   const router = useRouter();
   const colors = useMobileThemeColors();
@@ -113,9 +119,9 @@ export function GroupContactsScreen({ groupId, label, emoji }: GroupContactsScre
 
   const rowTexts = useMemo(
     () => ({
-      call: t("actions.call", { ns: "common" }),
-      email: t("actions.email", { ns: "common" }),
-      message: t("actions.message", { ns: "common" }),
+      call: t("actions.call"),
+      email: t("actions.email"),
+      message: t("actions.message"),
     }),
     [t],
   );
@@ -123,12 +129,12 @@ export function GroupContactsScreen({ groupId, label, emoji }: GroupContactsScre
   const executeAction = useCallback(
     (contact: Contact, action: SwipeAction) => {
       executeContactSwipeAction(contact, action, showToast, {
-        errorTitle: t("feedback.errorTitle", { ns: "common" }),
-        missingEmail: t("MissingEmail", { ns: "MobileContacts" }),
-        missingPhone: t("MissingPhone", { ns: "MobileContacts" }),
+        errorTitle: t("feedback.errorTitle"),
+        missingEmail: tMobileContacts("MissingEmail"),
+        missingPhone: tMobileContacts("MissingPhone"),
       });
     },
-    [showToast, t],
+    [showToast, t, tMobileContacts],
   );
 
   const handleOpenContact = useCallback(
@@ -157,7 +163,7 @@ export function GroupContactsScreen({ groupId, label, emoji }: GroupContactsScre
 
   const removeFromGroupAction = useMemo<FloatingActionBarAction>(
     () => ({
-      accessibilityLabel: t("RemoveFromGroup", { ns: "MobileContacts" }),
+      accessibilityLabel: tMobileContacts("RemoveFromGroup"),
       disabled: effectiveSelectedCount === 0 || isSelectionBusy,
       icon: <IconUsersMinus size={20} stroke={colors.iconSecondary} />,
       id: "remove-from-group",
@@ -170,7 +176,7 @@ export function GroupContactsScreen({ groupId, label, emoji }: GroupContactsScre
       isRemovingFromGroup,
       isSelectionBusy,
       setRemoveFromGroupConfirmOpen,
-      t,
+      tMobileContacts,
     ],
   );
 
@@ -194,7 +200,7 @@ export function GroupContactsScreen({ groupId, label, emoji }: GroupContactsScre
           backgroundColor={colors.surfaceMuted}
           leadingIcon={<IconSearch size={16} stroke={colors.iconSecondary} />}
           onChangeText={screenData.handleSearchChange}
-          placeholder={t("SearchPlaceholder", { ns: "MobileContacts" })}
+          placeholder={tMobileContacts("SearchPlaceholder")}
           style={styles.searchInput}
           trailingAccessory={
             screenData.isSearching ? (
@@ -223,7 +229,7 @@ export function GroupContactsScreen({ groupId, label, emoji }: GroupContactsScre
             onRetry={() => {
               void screenData.reloadMembers();
             }}
-            title={t("LoadErrorTitle", { ns: "MobileSettings" })}
+            title={tMobileSettings("LoadErrorTitle")}
           />
         </View>
       ) : null}

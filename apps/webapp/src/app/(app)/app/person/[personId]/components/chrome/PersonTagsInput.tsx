@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { errorNotificationTemplate, warningNotificationTemplate } from "@bondery/mantine-next";
 import type { Tag, TagWithCount } from "@bondery/schemas";
@@ -17,7 +17,7 @@ import { useMemo, useRef, useState } from "react";
 import { AddNewTagButton } from "@/components/tags/AddNewTagButton";
 import { openTagEditorModal } from "@/components/tags/openTagEditorModal";
 import { TagPill } from "@/components/tags/TagPill";
-import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
+import { useTagsInputTranslations, useTagsSettingsTranslations } from "@/lib/i18n/generated/hooks";
 import { useContactTagsQuery } from "@/lib/query/hooks/useContacts";
 import {
   useAddTagToContactMutation,
@@ -42,8 +42,8 @@ function toTag(tag: TagWithCount | Tag): Tag {
 }
 
 export function PersonTagsInput({ personId }: PersonTagsInputProps) {
-  const t = useWebTranslations("TagsInput");
-  const tSettings = useWebTranslations("TagsSettings");
+  const t = useTagsInputTranslations();
+  const tSettings = useTagsSettingsTranslations();
   const addTagMutation = useAddTagToContactMutation(personId);
   const removeTagMutation = useRemoveTagFromContactMutation(personId);
   const { data: personTags = [] } = useContactTagsQuery(personId);

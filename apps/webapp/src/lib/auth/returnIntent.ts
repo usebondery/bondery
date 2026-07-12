@@ -1,8 +1,5 @@
 import { WEBAPP_ROUTES, WEBSITE_ROUTES } from "@bondery/helpers/globals/paths";
-import {
-  REQUEST_PATHNAME_HEADER,
-  REQUEST_SEARCH_HEADER,
-} from "@/lib/auth/constants";
+import { REQUEST_PATHNAME_HEADER, REQUEST_SEARCH_HEADER } from "@/lib/auth/constants";
 
 export const RETURN_INTENT_PARAM = "redirect";
 

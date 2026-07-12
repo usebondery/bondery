@@ -50,20 +50,35 @@ import about from "@bondery/translations/locales/en/features/pages/AboutPage.jso
 
 ## App hooks
 
+Generated per namespace from `manifest.json` (run `npm run build -w @bondery/translations`).
+
 **Webapp**
 
 ```typescript
-useWebTranslations("SettingsPage", "Profile"); // t("Title") → SettingsPage.Profile.Title
-useCommonTranslations(); // t("actions.cancel")
-useValidationTranslations("fields"); // prefer useWebTranslations("validation", "fields") for static analysis
+import { useGroupsPageTranslations, useCommonTranslations } from "@/lib/i18n/generated/hooks";
+import { getGroupsPageTranslations } from "@/lib/i18n/generated/hooks.server";
+
+const t = useGroupsPageTranslations("AddGroupModal");
+const tCommon = useCommonTranslations();
 ```
 
 **Mobile**
 
 ```typescript
-useMobileTranslations("MobileContacts"); // t("Title")
-t("actions.cancel", { ns: "common" });
+import { useMobileSettingsTranslations } from "@/lib/i18n/generated/hooks";
+
+const t = useMobileSettingsTranslations();
 ```
+
+**Chrome extension**
+
+```typescript
+import { useExtensionPopupTranslations } from "../lib/i18n/generated/hooks";
+
+const t = useExtensionPopupTranslations("LoggedOut");
+```
+
+Legacy generic hooks (`useWebTranslations`, `useMobileTranslations`, `getWebTranslations`) and per-call `{ ns: }` overrides are removed — use generated namespace hooks instead. See [`docs/contributing/i18n.md`](../../docs/contributing/i18n.md).
 
 ## Supported locales
 

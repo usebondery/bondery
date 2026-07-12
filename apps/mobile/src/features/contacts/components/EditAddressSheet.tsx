@@ -20,6 +20,7 @@ import {
 } from "@tabler/icons-react-native";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ActivityIndicator, Pressable, StyleSheet, Text, type TextInput, View } from "react-native";
+import { useContactAddressTranslations } from "@/lib/i18n/generated/hooks";
 import {
   ActionSheetPopup,
   type ActionSheetPopupAction,
@@ -28,7 +29,6 @@ import { SheetSelectField, SheetTextField } from "../../../components/form";
 import { fetchGeocodeSuggestions } from "../../../lib/api/client";
 import { UI_TIMING_MS } from "../../../lib/config";
 import { useSheetForm } from "../../../lib/forms/useSheetForm";
-import { useMobileTranslations } from "../../../lib/i18n/useMobileTranslations";
 import { MOBILE_LAYOUT, MOBILE_TYPOGRAPHY } from "../../../theme/tokens";
 import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
 import { CountryFlag } from "./CountryFlag";
@@ -92,7 +92,7 @@ export function EditAddressSheet({
   onSave,
   onDelete,
 }: EditAddressSheetProps) {
-  const t = useMobileTranslations();
+  const tContactAddress = useContactAddressTranslations();
   const colors = useMobileThemeColors();
   const inputRef = useRef<TextInput>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -275,10 +275,10 @@ export function EditAddressSheet({
   const typeOptions = CONTACT_ADDRESS_TYPE_OPTIONS.map((option) => ({
     label:
       option.value === "work"
-        ? t("TypeWork", { ns: "ContactAddress" })
+        ? tContactAddress("TypeWork")
         : option.value === "other"
-          ? t("TypeOther", { ns: "ContactAddress" })
-          : t("TypeHome", { ns: "ContactAddress" }),
+          ? tContactAddress("TypeOther")
+          : tContactAddress("TypeHome"),
     leftSection: <Text style={styles.typeEmoji}>{option.emoji}</Text>,
     value: option.value,
   }));
@@ -299,9 +299,7 @@ export function EditAddressSheet({
         <IconCheck size={16} stroke={colors.textOnPrimary} />
       ),
     label:
-      mode === "add"
-        ? t("AddAddressAction", { ns: "ContactAddress" })
-        : t("SaveAddressAction", { ns: "ContactAddress" }),
+      mode === "add" ? tContactAddress("AddAddressAction") : tContactAddress("SaveAddressAction"),
     loading: isSubmitting,
     onPress: () => void onSubmit(),
     tone: "primary",
@@ -314,7 +312,7 @@ export function EditAddressSheet({
           {
             disabled: isSubmitting,
             icon: <IconTrash size={16} stroke={colors.dangerAccent} />,
-            label: t("DeleteAction", { ns: "ContactAddress" }),
+            label: tContactAddress("DeleteAction"),
             onPress: onDelete,
             tone: "danger",
             variant: "outline",
@@ -331,9 +329,7 @@ export function EditAddressSheet({
       onOpenChange={onOpenChange}
       open={open}
       title={
-        mode === "add"
-          ? t("AddAddressTitle", { ns: "ContactAddress" })
-          : t("EditAddressTitle", { ns: "ContactAddress" })
+        mode === "add" ? tContactAddress("AddAddressTitle") : tContactAddress("EditAddressTitle")
       }
     >
       <SheetTextField
@@ -346,7 +342,7 @@ export function EditAddressSheet({
         leadingIcon={<IconMapPin size={16} stroke={colors.iconSecondary} />}
         name="value"
         onFieldChange={handleAddressChange}
-        placeholder={t("LookupPlaceholder", { ns: "ContactAddress" })}
+        placeholder={tContactAddress("LookupPlaceholder")}
         returnKeyType="search"
         showMaxLengthCounter={false}
         trailingAccessory={geocodeTrailingIcon}
@@ -380,12 +376,12 @@ export function EditAddressSheet({
         editable={!isSubmitting}
         maxLength={64}
         name="label"
-        placeholder={t("LabelFieldPlaceholder", { ns: "ContactAddress" })}
+        placeholder={tContactAddress("LabelFieldPlaceholder")}
       />
 
       <SheetSelectField
         control={control}
-        label={t("TypeLabel", { ns: "ContactAddress" })}
+        label={tContactAddress("TypeLabel")}
         name="type"
         options={typeOptions}
       />

@@ -2,8 +2,11 @@ import { BonderyIcon } from "@bondery/branding";
 import { Button, Stack, Text } from "@mantine/core";
 import { IconPuzzle } from "@tabler/icons-react";
 import { browser } from "wxt/browser";
+import { useExtensionPopupTranslations } from "../../../lib/i18n/generated/hooks";
 
 export function UpdateRequiredView() {
+  const t = useExtensionPopupTranslations("UpdateRequired");
+
   function openExtensionsPage() {
     const extensionId = browser.runtime.id;
     browser.tabs.create({ url: `chrome://extensions/?id=${extensionId}` });
@@ -15,10 +18,10 @@ export function UpdateRequiredView() {
       <BonderyIcon height={48} width={48} />
       <Stack align="center" gap="xs">
         <Text fw={600} size="lg">
-          Update Required
+          {t("Title")}
         </Text>
         <Text c="dimmed" size="sm" ta="center">
-          Your Bondery extension is outdated and may not work correctly. Please update to continue.
+          {t("Description")}
         </Text>
       </Stack>
       <Button
@@ -28,7 +31,7 @@ export function UpdateRequiredView() {
         onClick={openExtensionsPage}
         size="md"
       >
-        Open Extensions Page
+        {t("OpenExtensionsPage")}
       </Button>
     </Stack>
   );

@@ -1,7 +1,7 @@
 "use client";
 
 import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
-import type { Contact } from "@bondery/schemas";
+import type { ContactSelectable } from "@bondery/schemas";
 import { Avatar, Group, Loader, Stack, Text } from "@mantine/core";
 import { useDebouncedCallback } from "@mantine/hooks";
 import { createSpotlight, Spotlight } from "@mantine/spotlight";
@@ -10,7 +10,7 @@ import { useRouter } from "next/navigation";
 import { useCallback, useRef, useState } from "react";
 import { getAvatarColorFromName } from "@/lib/contacts/avatarColor";
 import { searchContacts } from "@/lib/contacts/searchContacts";
-import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
+import { usePeopleSearchSpotlightTranslations } from "@/lib/i18n/generated/hooks";
 import { optimisticPersonDocumentTitle } from "@/lib/metadata/optimisticTitles";
 import { useNavigateWithTitle } from "@/lib/metadata/useNavigateWithTitle";
 import { DEBOUNCE_MS, HOTKEYS } from "@/lib/platform/config";
@@ -24,10 +24,10 @@ const descriptionColor = "var(--action-description-color, var(--mantine-color-di
 const MIN_QUERY_LENGTH = 3;
 
 export function PeopleSearchSpotlight() {
-  const t = useWebTranslations("PeopleSearchSpotlight");
+  const t = usePeopleSearchSpotlightTranslations();
   const { navigateWithTitle } = useNavigateWithTitle();
   const router = useRouter();
-  const [results, setResults] = useState<Contact[]>([]);
+  const [results, setResults] = useState<ContactSelectable[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [query, setQuery] = useState("");
   const latestRequestRef = useRef(0);
@@ -64,7 +64,7 @@ export function PeopleSearchSpotlight() {
     setIsLoading(false);
   }
 
-  function handlePersonClick(contact: Contact) {
+  function handlePersonClick(contact: ContactSelectable) {
     navigateWithTitle(
       `${WEBAPP_ROUTES.PERSON}/${contact.id}`,
       optimisticPersonDocumentTitle(contact),

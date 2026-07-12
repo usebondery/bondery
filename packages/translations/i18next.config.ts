@@ -4,6 +4,9 @@ import { fileURLToPath } from "node:url";
 
 const packageRoot = dirname(fileURLToPath(import.meta.url));
 const repoRoot = join(packageRoot, "../..");
+const manifest = JSON.parse(readFileSync(join(packageRoot, "manifest.json"), "utf8")) as {
+  namespaces: Record<string, unknown>;
+};
 const catalog = JSON.parse(
   readFileSync(join(repoRoot, "packages/schemas/locale/supported-locales.json"), "utf8"),
 ) as {
@@ -28,6 +31,31 @@ const typesOutDir = fromPackage("src/generated/i18next-cli");
 
 const extractIgnore = ["**/*.test.{ts,tsx}", "**/scripts/**", "**/node_modules/**", "apps/api/**"];
 
+function hookBaseName(namespace: string) {
+  if (namespace === "common") {
+    return "Common";
+  }
+  if (namespace === "validation") {
+    return "Validation";
+  }
+  if (namespace === "glossary") {
+    return "Glossary";
+  }
+  return namespace;
+}
+
+const generatedClientHooks = Object.keys(manifest.namespaces).map((namespace) => ({
+  keyPrefixArg: 0,
+  name: `use${hookBaseName(namespace)}Translations`,
+  nsArg: -1,
+}));
+
+const generatedServerHooks = Object.keys(manifest.namespaces).map((namespace) => ({
+  keyPrefixArg: 0,
+  name: `get${hookBaseName(namespace)}Translations`,
+  nsArg: -1,
+}));
+
 /** Run from repo root: `npx i18next-cli status -c packages/translations/i18next.config.ts` */
 export default {
   extract: {
@@ -37,6 +65,8 @@ export default {
     input: [
       fromRepo("apps/webapp/src/**/*.{ts,tsx}"),
       fromRepo("apps/mobile/src/**/*.{ts,tsx}"),
+      fromRepo("apps/mobile/app/**/*.{ts,tsx}"),
+      fromRepo("apps/chrome-extension/src/**/*.{ts,tsx}"),
       fromRepo("apps/website/src/**/*.{ts,tsx}"),
     ],
     interpolationPrefix: "{",
@@ -47,31 +77,8 @@ export default {
     useTranslationNames: [
       "useT",
       "useTranslation",
-      {
-        keyPrefixArg: -1,
-        name: "useCommonTranslations",
-        nsArg: -1,
-      },
-      {
-        keyPrefixArg: 1,
-        name: "useWebTranslations",
-        nsArg: 0,
-      },
-      {
-        keyPrefixArg: 1,
-        name: "useMobileTranslations",
-        nsArg: 0,
-      },
-      {
-        keyPrefixArg: 1,
-        name: "getWebTranslations",
-        nsArg: 0,
-      },
-      {
-        keyPrefixArg: 1,
-        name: "getTranslations",
-        nsArg: 0,
-      },
+      ...generatedClientHooks,
+      ...generatedServerHooks,
     ],
   },
 

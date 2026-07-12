@@ -5,6 +5,7 @@ import { IconCheck, IconTrash } from "@tabler/icons-react-native";
 import { type RefObject, useEffect, useRef, useState } from "react";
 import { type Control, type UseFormSetValue, useWatch } from "react-hook-form";
 import { StyleSheet, type TextInput, View } from "react-native";
+import { useCommonTranslations, useMobileGroupsTranslations } from "@/lib/i18n/generated/hooks";
 import {
   ActionSheetPopup,
   type ActionSheetPopupAction,
@@ -19,7 +20,6 @@ import { SheetTextField } from "../../../components/form";
 import { UI_TIMING_MS } from "../../../lib/config";
 import { createGroup, updateGroup } from "../../../lib/domains/groups";
 import { useSheetForm } from "../../../lib/forms/useSheetForm";
-import { useMobileTranslations } from "../../../lib/i18n/useMobileTranslations";
 import { useAppToast } from "../../../lib/toast/useAppToast";
 import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
 import { GroupDeleteDialog } from "./GroupDeleteDialog";
@@ -44,13 +44,14 @@ type GroupEditSheetProps =
     };
 
 export function GroupEditSheet(props: GroupEditSheetProps) {
+  const tMobileGroups = useMobileGroupsTranslations();
+  const t = useCommonTranslations();
   const { mode, open, onOpenChange } = props;
   const editInitialLabel = mode === "edit" ? props.initialLabel : "";
   const editInitialEmoji = mode === "edit" ? props.initialEmoji : "";
   const editInitialColor =
     mode === "edit" ? props.initialColor || DEFAULT_GROUP_COLOR : DEFAULT_GROUP_COLOR;
 
-  const t = useMobileTranslations();
   const colors = useMobileThemeColors();
   const { showToast } = useAppToast();
   const labelRef = useRef<TextInput>(null);
@@ -121,23 +122,16 @@ export function GroupEditSheet(props: GroupEditSheetProps) {
     } catch {
       showToast({
         description:
-          mode === "create"
-            ? t("CreateFailed", { ns: "MobileGroups" })
-            : t("EditFailed", { ns: "MobileGroups" }),
-        headline: t("feedback.errorTitle", { ns: "common" }),
+          mode === "create" ? tMobileGroups("CreateFailed") : tMobileGroups("EditFailed"),
+        headline: t("feedback.errorTitle"),
         type: "error",
       });
     }
   });
 
   const sheetTitle =
-    mode === "create"
-      ? t("CreateSheetTitle", { ns: "MobileGroups" })
-      : t("EditSheetTitle", { ns: "MobileGroups" });
-  const saveLabel =
-    mode === "create"
-      ? t("CreateSave", { ns: "MobileGroups" })
-      : t("EditSave", { ns: "MobileGroups" });
+    mode === "create" ? tMobileGroups("CreateSheetTitle") : tMobileGroups("EditSheetTitle");
+  const saveLabel = mode === "create" ? tMobileGroups("CreateSave") : tMobileGroups("EditSave");
 
   const primaryAction: ActionSheetPopupAction = {
     disabled: !canSave,
@@ -155,7 +149,7 @@ export function GroupEditSheet(props: GroupEditSheetProps) {
           {
             disabled: isSubmitting,
             icon: <IconTrash size={16} stroke={colors.dangerAccent} />,
-            label: t("DeleteGroup", { ns: "MobileGroups" }),
+            label: tMobileGroups("DeleteGroup"),
             onPress: () => setDeleteDialogOpen(true),
             tone: "danger",
             variant: "outline",
@@ -186,7 +180,6 @@ export function GroupEditSheet(props: GroupEditSheetProps) {
           onSubmit={() => void onSubmit()}
           setValue={setValue}
           showToast={showToast}
-          t={t}
         />
       </ActionSheetPopup>
 
@@ -218,7 +211,6 @@ function GroupEditFields({
   isSubmitting,
   labelRef,
   onSubmit,
-  t,
   showToast,
 }: {
   control: Control<GroupFormValues>;
@@ -226,9 +218,9 @@ function GroupEditFields({
   isSubmitting: boolean;
   labelRef: RefObject<TextInput | null>;
   onSubmit: () => void;
-  t: ReturnType<typeof useMobileTranslations>;
   showToast: ReturnType<typeof useAppToast>["showToast"];
 }) {
+  const tMobileGroups = useMobileGroupsTranslations();
   const emoji = useWatch({ control, name: "emoji" }) ?? "";
   const selectedColor = useWatch({ control, name: "color" }) ?? DEFAULT_GROUP_COLOR;
 
@@ -236,7 +228,7 @@ function GroupEditFields({
     <View style={styles.fields}>
       <View style={styles.pickerRow}>
         <EmojiPickerInput
-          accessibilityLabel={t("EditEmojiLabel", { ns: "MobileGroups" })}
+          accessibilityLabel={tMobileGroups("EditEmojiLabel")}
           compact
           disabled={isSubmitting}
           onChange={(next) => setValue("emoji", next, { shouldDirty: true, shouldValidate: true })}
@@ -245,7 +237,7 @@ function GroupEditFields({
         />
 
         <ColorPickerInput
-          accessibilityLabel={t("EditColorLabel", { ns: "MobileGroups" })}
+          accessibilityLabel={tMobileGroups("EditColorLabel")}
           compact
           disabled={isSubmitting}
           onChange={(next) => setValue("color", next, { shouldDirty: true, shouldValidate: true })}
@@ -263,7 +255,7 @@ function GroupEditFields({
         maxLength={GROUP_LABEL_MAX_LENGTH}
         name="label"
         onSubmitEditing={onSubmit}
-        placeholder={t("EditLabelPlaceholder", { ns: "MobileGroups" })}
+        placeholder={tMobileGroups("EditLabelPlaceholder")}
         returnKeyType="done"
       />
     </View>

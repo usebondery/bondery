@@ -17,9 +17,9 @@ import {
   useMapEvents,
 } from "react-leaflet";
 import MarkerClusterGroup from "react-leaflet-cluster";
+import { useMapCommonTranslations } from "@/lib/i18n/generated/hooks";
 import "maplibre-gl/dist/maplibre-gl.css";
 import "leaflet.markercluster/dist/MarkerCluster.css";
-import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
 import type { MapBounds, PeopleMapFocus, PeopleMapMarker } from "./PeopleMap";
 
 const OSM_ATTRIBUTION =
@@ -185,7 +185,7 @@ export function PeopleMapClient({
 
 function MapZoomControls() {
   const map = useMap();
-  const t = useWebTranslations("MapCommon");
+  const t = useMapCommonTranslations();
   const [currentZoom, setCurrentZoom] = useState(() => map.getZoom());
 
   useMapEvents({

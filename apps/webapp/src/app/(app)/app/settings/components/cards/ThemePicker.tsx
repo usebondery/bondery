@@ -11,7 +11,7 @@ import { notifications } from "@mantine/notifications";
 import type { ReactNode } from "react";
 import { useState } from "react";
 import { useUserSession } from "@/components/shell/UserSessionProvider";
-import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
+import { useSettingsPageTranslations } from "@/lib/i18n/generated/hooks";
 import { useUpdateSettingsMutation } from "@/lib/query/hooks/useSettings";
 
 interface ThemePickerProps {
@@ -20,7 +20,7 @@ interface ThemePickerProps {
 }
 
 export function ThemePicker({ initialValue, label }: ThemePickerProps) {
-  const t = useWebTranslations("SettingsPage", "Preferences");
+  const t = useSettingsPageTranslations("Preferences");
   const [value, setValue] = useState<ColorSchemePreference>(initialValue);
   const { applyUserSession } = useUserSession();
   const updateSettings = useUpdateSettingsMutation();

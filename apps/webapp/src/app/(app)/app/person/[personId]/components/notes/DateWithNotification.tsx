@@ -3,7 +3,7 @@
 import { Checkbox, Group, Loader, Text, TextInput } from "@mantine/core";
 import { IconGift } from "@tabler/icons-react";
 import { DatePickerWithPresets } from "@/components/interactions/DatePickerWithPresets";
-import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
+import { useContactImportantDatesTranslations } from "@/lib/i18n/generated/hooks";
 import { INPUT_MAX_LENGTHS } from "@/lib/platform/config";
 
 interface DateWithNotificationProps {
@@ -65,7 +65,7 @@ export default function DateWithNotification({
   fieldPrefix = "",
   notifyLabel,
 }: DateWithNotificationProps) {
-  const t = useWebTranslations("ContactImportantDates");
+  const t = useContactImportantDatesTranslations();
   const dateFieldName = fieldPrefix ? `${fieldPrefix}-date` : "date";
   const nameFieldName = fieldPrefix ? `${fieldPrefix}-name` : "name";
 

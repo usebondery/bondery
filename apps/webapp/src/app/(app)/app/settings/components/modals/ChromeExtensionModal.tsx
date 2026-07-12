@@ -5,7 +5,7 @@ import { ModalFooter } from "@bondery/mantine-next";
 import { Group, Paper, Stack, Text } from "@mantine/core";
 import { modals } from "@mantine/modals";
 import { IconApps, IconCircleCheck } from "@tabler/icons-react";
-import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
+import { useSettingsPageTranslations } from "@/lib/i18n/generated/hooks";
 import { ExtensionLinkedInAnimation } from "../import/ExtensionLinkedInAnimation";
 
 interface ChromeExtensionModalProps {
@@ -13,7 +13,7 @@ interface ChromeExtensionModalProps {
 }
 
 export function ChromeExtensionModal({ modalId }: ChromeExtensionModalProps) {
-  const t = useWebTranslations("SettingsPage", "Integration.ChromeExtensionModal");
+  const t = useSettingsPageTranslations("Integration.ChromeExtensionModal");
   const closeModal = () => modals.close(modalId);
 
   return (

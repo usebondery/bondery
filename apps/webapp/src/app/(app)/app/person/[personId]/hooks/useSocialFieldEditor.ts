@@ -6,7 +6,7 @@ import { errorNotificationTemplate, successNotificationTemplate } from "@bondery
 import type { Contact } from "@bondery/schemas";
 import { notifications } from "@mantine/notifications";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useCommonTranslations, useWebTranslations } from "@/lib/i18n/useWebTranslations";
+import { useCommonTranslations, useSocialsTranslations } from "@/lib/i18n/generated/hooks";
 import { useUpdateContactMutation } from "@/lib/query/hooks/useContacts";
 import {
   createEmptySavingByField,
@@ -36,7 +36,7 @@ export function useSocialFieldEditor({
   fieldLabels,
   validationErrorTitle,
 }: UseSocialFieldEditorOptions) {
-  const t = useWebTranslations("Socials");
+  const t = useSocialsTranslations();
   const tCommon = useCommonTranslations();
   const updateContactMutation = useUpdateContactMutation(personId);
 

@@ -1,6 +1,6 @@
 "use client";
 
-import type { Contact } from "@bondery/schemas";
+import type { ContactSelectable } from "@bondery/schemas";
 import { GettingStartedProgressRail } from "@/components/home/GettingStartedProgressRail";
 import { GettingStartedRailSkeleton } from "@/components/home/GettingStartedRailSkeleton";
 
@@ -11,7 +11,7 @@ interface GettingStartedRailSlotProps {
   settingsData?: Record<string, unknown>;
   settingsReady: boolean;
   statsReady: boolean;
-  timelineContacts: Contact[];
+  timelineContacts: ContactSelectable[];
   totalContacts: number;
 }
 

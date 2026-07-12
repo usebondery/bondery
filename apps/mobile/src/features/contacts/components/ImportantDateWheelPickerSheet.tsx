@@ -2,12 +2,15 @@ import { IconCheck } from "@tabler/icons-react-native";
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { AccessibilityInfo, Pressable, StyleSheet, Text, View } from "react-native";
+import {
+  useCommonTranslations,
+  useMobileContactIdentityTranslations,
+} from "@/lib/i18n/generated/hooks";
 import { ActionSheetPopup } from "../../../components/ActionSheetPopup";
 import {
   MOBILE_CHECKBOX_TOUCH_ROW_MIN_HEIGHT,
   MobileCheckbox,
 } from "../../../components/MobileCheckbox";
-import { useMobileTranslations } from "../../../lib/i18n/useMobileTranslations";
 import { MOBILE_TYPOGRAPHY } from "../../../theme/tokens";
 import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
 import {
@@ -41,7 +44,8 @@ export function ImportantDateWheelPickerSheet({
   onCancel,
   onConfirm,
 }: ImportantDateWheelPickerSheetProps) {
-  const t = useMobileTranslations();
+  const tMobileContactIdentity = useMobileContactIdentityTranslations();
+  const t = useCommonTranslations();
   const { i18n } = useTranslation();
   const colors = useMobileThemeColors();
   const locale = resolveDateLocale(i18n.language);
@@ -93,7 +97,7 @@ export function ImportantDateWheelPickerSheet({
     const iso = toImportantDateIso(wheelValue);
     onConfirm(iso);
     void AccessibilityInfo.announceForAccessibility(
-      t("DateSetAnnouncement", { ns: "MobileContactIdentity" }).replace(
+      tMobileContactIdentity("DateSetAnnouncement").replace(
         "{date}",
         formatImportantDate(iso, locale),
       ),
@@ -105,8 +109,8 @@ export function ImportantDateWheelPickerSheet({
     updateWheelValue({ withoutYear: checked });
     void AccessibilityInfo.announceForAccessibility(
       checked
-        ? t("YearHiddenAnnouncement", { ns: "MobileContactIdentity" })
-        : t("YearShownAnnouncement", { ns: "MobileContactIdentity" }),
+        ? tMobileContactIdentity("YearHiddenAnnouncement")
+        : tMobileContactIdentity("YearShownAnnouncement"),
     );
   }
 
@@ -115,7 +119,7 @@ export function ImportantDateWheelPickerSheet({
       actions={[
         {
           icon: <IconCheck size={16} stroke={colors.textOnPrimary} />,
-          label: t("actions.done", { ns: "common" }),
+          label: t("actions.done"),
           onPress: handleDone,
           tone: "primary",
           variant: "filled",
@@ -124,22 +128,22 @@ export function ImportantDateWheelPickerSheet({
       onClose={onCancel}
       onOpenChange={onOpenChange}
       open={open}
-      title={t("SelectDateTitle", { ns: "MobileContactIdentity" })}
+      title={tMobileContactIdentity("SelectDateTitle")}
     >
       <Pressable
-        accessibilityHint={t("WithoutYearHint", { ns: "MobileContactIdentity" })}
-        accessibilityLabel={t("WithoutYearLabel", { ns: "MobileContactIdentity" })}
+        accessibilityHint={tMobileContactIdentity("WithoutYearHint")}
+        accessibilityLabel={tMobileContactIdentity("WithoutYearLabel")}
         accessibilityRole="checkbox"
         accessibilityState={{ checked: wheelValue.withoutYear }}
         onPress={() => handleWithoutYearToggle(!wheelValue.withoutYear)}
         style={styles.withoutYearRow}
       >
         <Text style={[styles.withoutYearLabel, { color: colors.textPrimary }]}>
-          {t("WithoutYearLabel", { ns: "MobileContactIdentity" })}
+          {tMobileContactIdentity("WithoutYearLabel")}
         </Text>
         <View pointerEvents="none">
           <MobileCheckbox
-            accessibilityLabel={t("WithoutYearLabel", { ns: "MobileContactIdentity" })}
+            accessibilityLabel={tMobileContactIdentity("WithoutYearLabel")}
             checked={wheelValue.withoutYear}
             disabled
             onCheckedChange={() => {}}
@@ -150,7 +154,7 @@ export function ImportantDateWheelPickerSheet({
       <View style={styles.wheelsRow}>
         <View style={styles.wheelColumn}>
           <RotatingWheelColumn
-            accessibilityLabel={t("DayColumnLabel", { ns: "MobileContactIdentity" })}
+            accessibilityLabel={tMobileContactIdentity("DayColumnLabel")}
             items={dayItems}
             onIndexChange={(index) => updateWheelValue({ day: index + 1 })}
             selectedIndex={dayIndex}
@@ -159,7 +163,7 @@ export function ImportantDateWheelPickerSheet({
 
         <View style={[styles.wheelColumn, styles.monthColumn]}>
           <RotatingWheelColumn
-            accessibilityLabel={t("MonthColumnLabel", { ns: "MobileContactIdentity" })}
+            accessibilityLabel={tMobileContactIdentity("MonthColumnLabel")}
             items={monthLabels}
             onIndexChange={(index) => updateWheelValue({ month: index + 1 })}
             selectedIndex={monthIndex}
@@ -169,7 +173,7 @@ export function ImportantDateWheelPickerSheet({
         {!wheelValue.withoutYear ? (
           <View style={styles.wheelColumn}>
             <RotatingWheelColumn
-              accessibilityLabel={t("YearColumnLabel", { ns: "MobileContactIdentity" })}
+              accessibilityLabel={tMobileContactIdentity("YearColumnLabel")}
               items={yearItems}
               onIndexChange={(index) => updateWheelValue({ year: years[index] ?? wheelValue.year })}
               selectedIndex={yearIndex >= 0 ? yearIndex : 0}

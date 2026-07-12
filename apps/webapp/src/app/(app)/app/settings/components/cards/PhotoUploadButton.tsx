@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { openPhotoUploadModal } from "@/components/photo/openPhotoUploadModal";
 import { UserAvatar } from "@/components/shell/UserAvatar";

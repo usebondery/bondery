@@ -5,27 +5,26 @@
  */
 
 import type { z } from "zod";
-import { messageResponseSchema } from "#entities/_shared.js";
+import { messageResponseSchema } from "#entities/_shared/index.js";
 import {
   createInteractionInputSchema,
   interactionResponseSchema,
   interactionsListResponseSchema,
   updateInteractionInputSchema,
-} from "#entities/activity.js";
+} from "#entities/activity/index.js";
 import {
-  apiErrorResponseSchema,
   apiSuccessResponseSchema,
   feedbackFormSchema,
   photoUploadResponseSchema,
   shareContactRequestSchema,
-} from "#entities/api.js";
+} from "#entities/api/index.js";
 import {
   apiKeyCreatedSchema,
   apiKeyListItemSchema,
   apiKeysListResponseSchema,
   createApiKeyInputSchema,
   updateApiKeyLabelInputSchema,
-} from "#entities/api-keys.js";
+} from "#entities/api-keys/index.js";
 import {
   chatMessagesListResponseSchema,
   chatRequestSchema,
@@ -33,7 +32,7 @@ import {
   chatSessionResponseSchema,
   chatSessionsListResponseSchema,
   updateChatSessionBodySchema,
-} from "#entities/chat.js";
+} from "#entities/chat/index.js";
 import {
   bySocialLookupResponseSchema,
   contactRelationshipResponseSchema,
@@ -62,7 +61,7 @@ import {
   mapPinsResponseSchema,
   updateContactInputSchema,
   updateContactRelationshipInputSchema,
-} from "#entities/contact.js";
+} from "#entities/contact/index.js";
 import {
   addContactsToGroupRequestSchema,
   addContactsToGroupResponseSchema,
@@ -74,7 +73,7 @@ import {
   removeGroupMembersRequestSchema,
   removeGroupMembersResponseSchema,
   updateGroupSchema,
-} from "#entities/group.js";
+} from "#entities/group/index.js";
 import {
   enrichContactRequestSchema,
   instagramImportCommitRequestSchema,
@@ -89,8 +88,8 @@ import {
   vcardImportCommitRequestSchema,
   vcardImportCommitResponseSchema,
   vcardParseResponseSchema,
-} from "#entities/import.js";
-import { importantDatesListResponseSchema } from "#entities/important-date.js";
+} from "#entities/import/index.js";
+import { importantDatesListResponseSchema } from "#entities/important-date/index.js";
 import {
   declineMergeRecommendationResponseSchema,
   mergeContactsRequestSchema,
@@ -98,19 +97,19 @@ import {
   mergeRecommendationsCountResponseSchema,
   mergeRecommendationsResponseSchema,
   refreshMergeRecommendationsResponseSchema,
-} from "#entities/merge.js";
+} from "#entities/merge/index.js";
 import {
   reminderDigestRequestSchema,
   reminderDigestResponseSchema,
   upcomingRemindersResponseSchema,
-} from "#entities/reminder.js";
-import { userSessionResponseSchema } from "#entities/session.js";
+} from "#entities/reminder/index.js";
+import { userSessionResponseSchema } from "#entities/session/index.js";
 import {
   updateAccountInputSchema,
   updateSettingsBodySchema,
   userAccountResponseSchema,
   userSettingsResponseSchema,
-} from "#entities/settings.js";
+} from "#entities/settings/index.js";
 import {
   addContactsToTagResponseSchema,
   contactTagBodySchema,
@@ -123,17 +122,18 @@ import {
   tagsListResponseSchema,
   tagUpdateResponseSchema,
   updateTagSchema,
-} from "#entities/tag.js";
-import { geocodeSuggestResponseSchema, geocodeTimezoneResponseSchema } from "#geocode/schemas.js";
+} from "#entities/tag/index.js";
+import { apiErrorResponseSchema } from "#errors/api-error-response/index.js";
+import { geocodeSuggestResponseSchema, geocodeTimezoneResponseSchema } from "#geocode/schema.js";
 import {
   geocodeSuggestResponseWireSchema,
   geocodeTimezoneResponseWireSchema,
   idsRequestBodySchema,
   importantDatesReplaceBodySchema,
 } from "#http/index.js";
-import { syncConflictErrorResponseSchema } from "#sync/conflict.js";
-import { syncBootstrapResponseSchema, syncPullResponseSchema } from "#sync/pull.js";
-import { syncPushRequestSchema, syncPushResponseSchema } from "#sync/push.js";
+import { syncConflictErrorResponseSchema } from "#sync/conflict/index.js";
+import { syncBootstrapResponseSchema, syncPullResponseSchema } from "#sync/pull/index.js";
+import { syncPushRequestSchema, syncPushResponseSchema } from "#sync/push/index.js";
 import { OPENAPI_SCHEMA_EXAMPLES } from "./openapi-example-fixtures.js";
 
 type ExampleEntry = {

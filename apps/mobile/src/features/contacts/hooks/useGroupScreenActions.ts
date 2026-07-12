@@ -1,8 +1,8 @@
 import type { Contact, Group } from "@bondery/schemas";
 import { useRouter } from "expo-router";
 import { useCallback, useState } from "react";
+import { useCommonTranslations, useMobileGroupsTranslations } from "@/lib/i18n/generated/hooks";
 import { addContactsToGroup, createGroup } from "../../../lib/domains/groups";
-import { useMobileTranslations } from "../../../lib/i18n/useMobileTranslations";
 import { getGroup } from "../../../lib/sync/hooks/useSyncQuery";
 import { useAppToast } from "../../../lib/toast/useAppToast";
 
@@ -19,7 +19,8 @@ export function useGroupScreenActions({
   initialEmoji,
   initialLabel,
 }: UseGroupScreenActionsOptions) {
-  const t = useMobileTranslations();
+  const tMobileGroups = useMobileGroupsTranslations();
+  const t = useCommonTranslations();
   const { showToast } = useAppToast();
   const router = useRouter();
   const [localLabel, setLocalLabel] = useState(initialLabel);
@@ -67,8 +68,8 @@ export function useGroupScreenActions({
       ensureGroupDetails();
     } catch {
       showToast({
-        description: t("errors.unknown", { ns: "common" }),
-        headline: t("feedback.errorTitle", { ns: "common" }),
+        description: t("errors.unknown"),
+        headline: t("feedback.errorTitle"),
         type: "error",
       });
       return;
@@ -108,16 +109,16 @@ export function useGroupScreenActions({
       navigateToGroup(newGroup);
     } catch {
       showToast({
-        description: t("DuplicateFailed", { ns: "MobileGroups" }),
-        headline: t("feedback.errorTitle", { ns: "common" }),
+        description: tMobileGroups("DuplicateFailed"),
+        headline: t("feedback.errorTitle"),
         type: "error",
       });
     } finally {
       setIsDuplicating(false);
     }
-  }, [contacts, ensureGroupDetails, isDuplicating, navigateToGroup, showToast, t]);
+  }, [contacts, ensureGroupDetails, isDuplicating, navigateToGroup, showToast, t, tMobileGroups]);
 
-  const duplicateDialogTitle = t("DuplicateDialogTitle", { ns: "MobileGroups" }).replace(
+  const duplicateDialogTitle = tMobileGroups("DuplicateDialogTitle").replace(
     "{title}",
     localEmoji ? `${localEmoji} ${localLabel}` : localLabel,
   );

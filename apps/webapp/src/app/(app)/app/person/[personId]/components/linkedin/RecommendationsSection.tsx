@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import type { MergeRecommendation } from "@bondery/schemas";
 import { Stack } from "@mantine/core";

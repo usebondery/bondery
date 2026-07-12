@@ -1,7 +1,10 @@
 import { IconCamera, IconTrash } from "@tabler/icons-react-native";
 import { StyleSheet, View } from "react-native";
+import {
+  useCommonTranslations,
+  useMobileContactIdentityTranslations,
+} from "@/lib/i18n/generated/hooks";
 import { MobileIconButton } from "../../../components/MobileIconButton";
-import { useMobileTranslations } from "../../../lib/i18n/useMobileTranslations";
 import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
 
 interface AvatarPhotoOverlayControlsProps {
@@ -17,14 +20,15 @@ export function AvatarPhotoOverlayControls({
   onChangePhoto,
   onRemovePhoto,
 }: AvatarPhotoOverlayControlsProps) {
-  const t = useMobileTranslations();
+  const tMobileContactIdentity = useMobileContactIdentityTranslations();
+  const _t = useCommonTranslations();
   const colors = useMobileThemeColors();
 
   return (
     <>
       <View style={avatarPhotoOverlayStyles.topLeft}>
         <MobileIconButton
-          accessibilityLabel={t("ChangePhoto", { ns: "MobileContactIdentity" })}
+          accessibilityLabel={tMobileContactIdentity("ChangePhoto")}
           disabled={disabled}
           icon={<IconCamera size={16} stroke={colors.iconPrimary} />}
           onPress={onChangePhoto}
@@ -34,7 +38,7 @@ export function AvatarPhotoOverlayControls({
       {showRemove ? (
         <View style={avatarPhotoOverlayStyles.topRight}>
           <MobileIconButton
-            accessibilityLabel={t("RemovePhoto", { ns: "MobileContactIdentity" })}
+            accessibilityLabel={tMobileContactIdentity("RemovePhoto")}
             disabled={disabled}
             icon={<IconTrash size={16} stroke={colors.dangerAccent} />}
             onPress={onRemovePhoto}

@@ -7,7 +7,7 @@ import Animated, {
   withSpring,
   withTiming,
 } from "react-native-reanimated";
-import { useMobileTranslations } from "../../lib/i18n/useMobileTranslations";
+import { useMobileNavigationTranslations } from "@/lib/i18n/generated/hooks";
 import { FAB_SPEED_DIAL_MOTION } from "../../theme/animations";
 import { MOBILE_Z_INDEX } from "../../theme/tokens";
 import { useMobileThemeColors } from "../../theme/useMobileThemeColors";
@@ -20,7 +20,7 @@ interface FabSpeedDialScrimProps {
 }
 
 export function FabSpeedDialScrim({ visible, height, onDismiss }: FabSpeedDialScrimProps) {
-  const t = useMobileTranslations();
+  const tMobileNavigation = useMobileNavigationTranslations();
   const colors = useMobileThemeColors();
   const opacity = useSharedValue(0);
   const [mounted, setMounted] = useState(visible);
@@ -61,7 +61,7 @@ export function FabSpeedDialScrim({ visible, height, onDismiss }: FabSpeedDialSc
 
   return (
     <Pressable
-      accessibilityLabel={t("CloseAddMenu", { ns: "MobileNavigation" })}
+      accessibilityLabel={tMobileNavigation("CloseAddMenu")}
       accessibilityRole="button"
       onPress={onDismiss}
       pointerEvents={visible ? "auto" : "none"}

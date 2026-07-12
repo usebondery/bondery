@@ -1,7 +1,7 @@
 import { ActionIcon, Group, Paper, Text, ThemeIcon, Tooltip } from "@mantine/core";
 import { IconInfoCircle } from "@tabler/icons-react";
 import type { ReactNode } from "react";
-import { useCommonTranslations } from "@/lib/i18n/useWebTranslations";
+import { useCommonTranslations } from "@/lib/i18n/generated/hooks";
 
 interface StatsCardProps {
   color?: string;

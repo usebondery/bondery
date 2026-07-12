@@ -17,7 +17,11 @@ import { notifications } from "@mantine/notifications";
 import { IconCheck, IconUsers, IconX } from "@tabler/icons-react";
 import { useState } from "react";
 import { openMergeWithModal } from "@/app/(app)/app/people/components/modals/MergeWithModal";
-import { useCommonTranslations, useWebTranslations } from "@/lib/i18n/useWebTranslations";
+import {
+  useCommonTranslations,
+  useFixContactsPageTranslations,
+  useMergeWithModalTranslations,
+} from "@/lib/i18n/generated/hooks";
 import { useDeclineMergeRecommendationMutation } from "@/lib/query/hooks/useMergeRecommendations";
 
 interface MergeRecommendationCardProps {
@@ -92,8 +96,8 @@ export function MergeRecommendationCard({
   redirectAfterMerge = false,
 }: MergeRecommendationCardProps) {
   const tCommon = useCommonTranslations();
-  const t = useWebTranslations("FixContactsPage");
-  const tMerge = useWebTranslations("MergeWithModal");
+  const t = useFixContactsPageTranslations();
+  const tMerge = useMergeWithModalTranslations();
   const [isDeclining, setIsDeclining] = useState(false);
   const declineMutation = useDeclineMergeRecommendationMutation();
 

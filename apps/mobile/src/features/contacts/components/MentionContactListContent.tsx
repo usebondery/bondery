@@ -9,8 +9,8 @@ import {
   Text,
   View,
 } from "react-native";
+import { useCommonTranslations } from "@/lib/i18n/generated/hooks";
 import { normalizeMobileUrlForDevice } from "../../../lib/config";
-import { useMobileTranslations } from "../../../lib/i18n/useMobileTranslations";
 import { MOBILE_TYPOGRAPHY } from "../../../theme/tokens";
 import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
 import { formatContactName, getAvatarColorHex, getContactInitials } from "../contactUtils";
@@ -62,8 +62,8 @@ export function MentionContactListContent({
   loading,
   onSelect,
 }: MentionContactListContentProps) {
+  const t = useCommonTranslations();
   const colors = useMobileThemeColors();
-  const t = useMobileTranslations();
 
   function renderItem({ item }: ListRenderItemInfo<Contact>) {
     return <MentionContactRow contact={item} onPress={() => onSelect(item)} />;
@@ -96,7 +96,7 @@ export function MentionContactListContent({
       ListEmptyComponent={
         <View style={styles.centered}>
           <Text style={[styles.emptyTitle, { color: colors.textSecondary }]}>
-            {t("feedback.noResults", { ns: "common" })}
+            {t("feedback.noResults")}
           </Text>
         </View>
       }

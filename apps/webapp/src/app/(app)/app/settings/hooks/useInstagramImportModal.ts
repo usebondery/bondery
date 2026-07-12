@@ -8,7 +8,7 @@ import { SOCIAL_IMPORT_COMMIT_BATCH_SIZE } from "@bondery/schemas/constants";
 import { notifications } from "@mantine/notifications";
 import { useRouter } from "next/navigation";
 import { useMemo, useRef, useState } from "react";
-import { useCommonTranslations, useWebTranslations } from "@/lib/i18n/useWebTranslations";
+import { useCommonTranslations, useSettingsPageTranslations } from "@/lib/i18n/generated/hooks";
 import { useModalDismiss } from "@/lib/modals";
 import {
   useCommitInstagramImportMutation,
@@ -41,7 +41,7 @@ export function useInstagramImportModal({
   onAwaitingExport,
 }: UseInstagramImportModalParams) {
   const tCommon = useCommonTranslations();
-  const t = useWebTranslations("SettingsPage", "DataManagement.InstagramImport");
+  const t = useSettingsPageTranslations("DataManagement.InstagramImport");
   const router = useRouter();
   const parseImport = useParseInstagramImportMutation();
   const commitImport = useCommitInstagramImportMutation();

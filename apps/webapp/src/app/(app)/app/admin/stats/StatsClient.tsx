@@ -3,7 +3,7 @@
 import { Alert, Center, Loader, SimpleGrid, Stack, Text, Title } from "@mantine/core";
 import { IconChartBar } from "@tabler/icons-react";
 import { PageWrapper } from "@/components/shell/PageWrapper";
-import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
+import { useStatsPageTranslations } from "@/lib/i18n/generated/hooks";
 import { useAdminStatsDashboardQuery } from "@/lib/query/hooks/useAdminStats";
 import { ActiveUsersChart } from "./components/ActiveUsersCards";
 import { FunnelChart } from "./components/FunnelChart";
@@ -12,7 +12,7 @@ import { NpsCard } from "./components/NpsCard";
 import { TotalUsersChart } from "./components/TotalUsersChart";
 
 export function StatsClient() {
-  const t = useWebTranslations("StatsPage");
+  const t = useStatsPageTranslations();
   const { data, isLoading } = useAdminStatsDashboardQuery();
 
   if (isLoading && !data) {

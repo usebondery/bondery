@@ -4,7 +4,7 @@ import { DatePickerInput } from "@mantine/dates";
 import { IconCalendar } from "@tabler/icons-react";
 import type { ComponentProps } from "react";
 import { useCallback, useEffect, useMemo, useRef } from "react";
-import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
+import { useInteractionsPageTranslations } from "@/lib/i18n/generated/hooks";
 
 type DatePickerWithPresetsProps = Omit<ComponentProps<typeof DatePickerInput>, "onDropdownOpen"> & {
   onDropdownOpen?: () => void;
@@ -45,7 +45,7 @@ export function DatePickerWithPresets({
   classNames,
   ...props
 }: DatePickerWithPresetsProps) {
-  const t = useWebTranslations("InteractionsPage");
+  const t = useInteractionsPageTranslations();
   const now = new Date();
 
   const presets = useMemo(

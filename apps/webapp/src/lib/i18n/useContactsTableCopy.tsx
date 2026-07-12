@@ -13,10 +13,10 @@ import {
 import type { ReactNode } from "react";
 import { useMemo } from "react";
 import type { ColumnKey, SortOrder } from "@/lib/contacts/table-types";
-import { useWebTranslations } from "./useWebTranslations";
+import { useContactsTableTranslations } from "@/lib/i18n/generated/hooks";
 
 export function useContactsTableCopy() {
-  const t = useWebTranslations("ContactsTable");
+  const t = useContactsTableTranslations();
 
   const columnDefinitions = useMemo<Record<ColumnKey, { label: string; icon: ReactNode }>>(
     () => ({

@@ -1,6 +1,6 @@
 import type { GroupWithCount } from "@bondery/schemas";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
-import { useMobileTranslations } from "../../../lib/i18n/useMobileTranslations";
+import { useMobileContactsTranslations } from "@/lib/i18n/generated/hooks";
 import { MOBILE_TYPOGRAPHY } from "../../../theme/tokens";
 import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
 import { CreateGroupChip } from "./CreateGroupChip";
@@ -85,12 +85,12 @@ export function ContactsGroupsHeader({
   onCreatePress,
   showEmptyPlaceholder = false,
 }: ContactsGroupsHeaderProps) {
-  const t = useMobileTranslations();
+  const tMobileContacts = useMobileContactsTranslations();
   const colors = useMobileThemeColors();
   const isChipRowLayout = layout === "chipRow";
   const isWrapLayout = layout === "wrap";
   const isEmbeddedLayout = isChipRowLayout || isWrapLayout;
-  const sectionTitle = headerText ?? title ?? t("Groups", { ns: "MobileContacts" });
+  const sectionTitle = headerText ?? title ?? tMobileContacts("Groups");
   const showCreateAction =
     (shouldShowCreateAction ?? onCreatePress !== undefined) && onCreatePress !== undefined;
 

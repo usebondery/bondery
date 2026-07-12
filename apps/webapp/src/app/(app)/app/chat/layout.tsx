@@ -3,9 +3,8 @@ import type { SubscriptionStatus } from "@bondery/schemas";
 import { Box } from "@mantine/core";
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import type { Metadata } from "next";
-
 import { serverApiFetch } from "@/lib/api/server";
-import { getWebTranslations as getTranslations } from "@/lib/i18n/getWebTranslations";
+import { getAppNavigationTranslations } from "@/lib/i18n/generated/hooks.server";
 import { preloadWebNamespaces } from "@/lib/i18n/preloadNamespaces.server";
 import { resolveLocaleSettings } from "@/lib/i18n/resolveLocaleSettings";
 import { staticPageTitle } from "@/lib/metadata/pageTitles";
@@ -16,7 +15,7 @@ import { ChatSessionSidebar } from "./components/chrome/ChatSessionSidebar";
 import { ChatSessionsProvider } from "./hooks/ChatSessionsContext";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const t = await getTranslations("AppNavigation");
+  const t = await getAppNavigationTranslations();
   return staticPageTitle(t("Chat"));
 }
 

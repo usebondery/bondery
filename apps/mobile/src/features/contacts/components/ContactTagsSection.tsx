@@ -2,9 +2,14 @@ import type { Tag, TagWithCount } from "@bondery/schemas";
 import { IconPencil } from "@tabler/icons-react-native";
 import { useCallback, useMemo, useState } from "react";
 import { ScrollView, StyleSheet, View } from "react-native";
+import {
+  useCommonTranslations,
+  useMobileContactDetailTranslations,
+  useMobileSettingsTranslations,
+  useMobileTagsTranslations,
+} from "@/lib/i18n/generated/hooks";
 import { LoadErrorCard } from "../../../components/load-state";
 import { addTagToContact } from "../../../lib/domains/contacts";
-import { useMobileTranslations } from "../../../lib/i18n/useMobileTranslations";
 import { useMobilePreferences } from "../../../lib/preferences/useMobilePreferences";
 import { useAppToast } from "../../../lib/toast/useAppToast";
 import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
@@ -61,7 +66,10 @@ export function ContactTagsSection({
   onTagAdded,
   onTagsReplaced,
 }: ContactTagsSectionProps) {
-  const t = useMobileTranslations();
+  const tMobileContactDetail = useMobileContactDetailTranslations();
+  const tMobileSettings = useMobileSettingsTranslations();
+  const tMobileTags = useMobileTagsTranslations();
+  const t = useCommonTranslations();
   const colors = useMobileThemeColors();
   const { showToast } = useAppToast();
   const [isEditSheetOpen, setEditSheetOpen] = useState(false);
@@ -70,7 +78,7 @@ export function ContactTagsSection({
 
   const sortedTags = useMemo(() => sortTags(tags, tagSortOrder), [tagSortOrder, tags]);
 
-  const editAccessibilityLabel = t("TagsEditAccessibility", { ns: "MobileContactDetail" }).replace(
+  const editAccessibilityLabel = tMobileContactDetail("TagsEditAccessibility").replace(
     "{name}",
     contactName,
   );
@@ -82,13 +90,13 @@ export function ContactTagsSection({
         onTagAdded(tag);
       } catch {
         showToast({
-          description: t("CreateFailed", { ns: "MobileTags" }),
-          headline: t("feedback.errorTitle", { ns: "common" }),
+          description: tMobileTags("CreateFailed"),
+          headline: t("feedback.errorTitle"),
           type: "error",
         });
       }
     },
-    [contactId, onTagAdded, showToast, t],
+    [contactId, onTagAdded, showToast, tMobileTags, t],
   );
 
   return (
@@ -100,7 +108,7 @@ export function ContactTagsSection({
             : {
                 accessibilityLabel: editAccessibilityLabel,
                 icon: <IconPencil size={16} stroke={colors.primary} />,
-                label: t("TagsEdit", { ns: "MobileContactDetail" }),
+                label: tMobileContactDetail("TagsEdit"),
                 onPress: () => setEditSheetOpen(true),
               }
         }
@@ -114,7 +122,7 @@ export function ContactTagsSection({
         <LoadErrorCard
           description={error}
           onRetry={onRetry}
-          title={t("TagsLoadErrorTitle", { ns: "MobileSettings" })}
+          title={tMobileSettings("TagsLoadErrorTitle")}
         />
       ) : (
         <ContactsTagsHeader

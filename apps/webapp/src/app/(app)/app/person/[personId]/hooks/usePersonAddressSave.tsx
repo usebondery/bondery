@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { getUserFacingError } from "@bondery/helpers/api";
 import { resolveToCanonicalTimezone } from "@bondery/helpers/locale";
@@ -8,6 +8,7 @@ import {
   successNotificationTemplate,
 } from "@bondery/mantine-next";
 import type { Contact, ContactAddressEntry } from "@bondery/schemas";
+import type { TranslateFn } from "@bondery/translations";
 import { Text } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { IconClock, IconMapPin } from "@tabler/icons-react";
@@ -25,8 +26,8 @@ interface UsePersonAddressSaveOptions {
   personId: string;
   setContact: Dispatch<SetStateAction<Contact | null>>;
   setSavingField: Dispatch<SetStateAction<string | null>>;
-  tAddress: (key: string) => string;
-  tCommon: (key: string) => string;
+  tAddress: TranslateFn<"ContactAddress">;
+  tCommon: TranslateFn<"common">;
   updateContactMutation: UpdateContactMutation;
 }
 

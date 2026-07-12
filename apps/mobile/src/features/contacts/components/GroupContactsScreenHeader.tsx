@@ -1,7 +1,7 @@
 import { IconCopy, IconEdit, IconTrash } from "@tabler/icons-react-native";
+import { useCommonTranslations, useMobileGroupsTranslations } from "@/lib/i18n/generated/hooks";
 import { StackNavBar, TabRootScreenHeader } from "../../../components/chrome";
 import { OverflowMenu } from "../../../components/OverflowMenu";
-import { useMobileTranslations } from "../../../lib/i18n/useMobileTranslations";
 import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
 import { useContactsSelectionMode } from "../contactsSelectionStore";
 import { ContactsSelectionHeader } from "./ContactsSelectionHeader";
@@ -26,7 +26,8 @@ export function GroupContactsScreenHeader({
   onDeleteGroup,
   isDuplicating,
 }: GroupContactsScreenHeaderProps) {
-  const t = useMobileTranslations();
+  const tMobileGroups = useMobileGroupsTranslations();
+  const _t = useCommonTranslations();
   const colors = useMobileThemeColors();
   const selectionMode = useContactsSelectionMode();
   const headerTitle = emoji ? `${emoji} ${label}` : label;
@@ -40,26 +41,26 @@ export function GroupContactsScreenHeader({
       onBack={onBack}
       right={
         <OverflowMenu
-          accessibilityLabel={t("MenuAccessibilityLabel", { ns: "MobileGroups" })}
+          accessibilityLabel={tMobileGroups("MenuAccessibilityLabel")}
           disabled={isDuplicating}
           items={[
             {
               icon: <IconEdit size={20} stroke={colors.iconPrimary} />,
               id: "edit",
-              label: t("EditGroup", { ns: "MobileGroups" }),
+              label: tMobileGroups("EditGroup"),
               onPress: onEditGroup,
             },
             {
               disabled: isDuplicating,
               icon: <IconCopy size={20} stroke={colors.iconPrimary} />,
               id: "duplicate",
-              label: t("DuplicateGroup", { ns: "MobileGroups" }),
+              label: tMobileGroups("DuplicateGroup"),
               onPress: onDuplicateGroup,
             },
             {
               icon: <IconTrash size={20} stroke={colors.dangerAccent} />,
               id: "delete",
-              label: t("DeleteGroup", { ns: "MobileGroups" }),
+              label: tMobileGroups("DeleteGroup"),
               onPress: onDeleteGroup,
               tone: "danger",
             },

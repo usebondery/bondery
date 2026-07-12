@@ -1932,6 +1932,32 @@ export default interface Resources {
       "name": "Bondery"
     }
   },
+  "platform/extension/ExtensionPopup": {
+    "LoggedOut": {
+      "Description": "Connect your account to save contacts from social media.",
+      "SignIn": "Sign in",
+      "Title": "Sign in to Bondery"
+    },
+    "UpdateRequired": {
+      "Description": "Your Bondery extension is outdated and may not work correctly. Please update to continue.",
+      "OpenExtensionsPage": "Open Extensions Page",
+      "Title": "Update Required"
+    }
+  },
+  "platform/extension/ExtensionSocialButtons": {
+    "Instagram": {
+      "ExtensionError": "Extension error — try again",
+      "OpenInBondery": "Open in Bondery",
+      "SignInRequired": "Sign in required — click the Bondery icon",
+      "SomethingWrong": "Something went wrong"
+    },
+    "LinkedIn": {
+      "ExtensionError": "Extension error — try again",
+      "OpenInBondery": "Open in Bondery",
+      "SignInRequired": "Sign in required — click the Bondery icon",
+      "SomethingWrong": "Something went wrong"
+    }
+  },
   "platform/mobile/Auth": {
     "CompletingLogin": "Completing login...",
     "LoginCancelled": "Login was cancelled.",

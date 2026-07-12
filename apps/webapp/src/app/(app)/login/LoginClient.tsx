@@ -9,13 +9,13 @@ import { IconBrandGithubFilled, IconBrandLinkedin } from "@tabler/icons-react";
 import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { setLocalePreferencesCookie } from "@/lib/auth/detectLocale";
-import { useCommonTranslations, useWebTranslations } from "@/lib/i18n/useWebTranslations";
+import { useCommonTranslations, useLoginPageTranslations } from "@/lib/i18n/generated/hooks";
 import { INTEGRATION_PROVIDERS, WEBSITE_URL } from "@/lib/platform/config";
 import { createBrowswerSupabaseClient } from "@/lib/supabase/client";
 import { Logo } from "./components/Logo";
 
 export function LoginClient() {
-  const t = useWebTranslations("LoginPage");
+  const t = useLoginPageTranslations();
   const tCommon = useCommonTranslations();
   const [loading, setLoading] = useState(false);
   const supabase = createBrowswerSupabaseClient();

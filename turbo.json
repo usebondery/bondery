@@ -117,7 +117,13 @@
         "apps/website/.env.production.local",
         "apps/api/.env.production.local"
       ],
-      "outputs": [".next/**", "!.next/cache/**", "dist/**", "public/**"],
+      "outputs": [
+        ".next/**",
+        "!.next/cache/**",
+        ".cache/tsconfig.tsbuildinfo",
+        "dist/**",
+        "public/**"
+      ],
       "passThroughEnv": [
         "SYSTEMROOT",
         "WINDIR",
@@ -135,7 +141,8 @@
     },
 
     "check-types": {
-      "dependsOn": ["transit"]
+      "dependsOn": ["transit"],
+      "outputs": [".cache/tsconfig.tsbuildinfo"]
     },
     "compile": {
       "dependsOn": ["^compile"],

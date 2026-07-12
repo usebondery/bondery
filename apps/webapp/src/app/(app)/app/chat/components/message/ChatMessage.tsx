@@ -7,8 +7,8 @@ import { IconMessageChatbot } from "@tabler/icons-react";
 import type { UIMessage } from "ai";
 import type { ReactNode } from "react";
 import { InlineDateDisplay } from "@/app/(app)/app/person/[personId]/components/notes/InlineDateDisplay";
+import { useChatPageTranslations } from "@/lib/i18n/generated/hooks";
 import { useDateFormatter as useFormatter } from "@/lib/i18n/useDateFormatter";
-import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
 import { ChatPersonChip } from "./ChatPersonChip";
 import { ChatShareCard } from "./ChatShareCard";
 import { InlineGroupDisplay } from "./InlineGroupDisplay";
@@ -145,7 +145,7 @@ function parseContentBlocks(text: string): ContentBlock[] {
 
 export function ChatMessage({ message, userAvatarUrl, userName, sentAt }: ChatMessageProps) {
   const isUser = message.role === "user";
-  const t = useWebTranslations("ChatPage");
+  const t = useChatPageTranslations();
   const formatter = useFormatter();
 
   const copyValue = message.parts

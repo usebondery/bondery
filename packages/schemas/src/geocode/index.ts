@@ -1,6 +1,6 @@
-export type { ContactAddressEntry } from "#geocode/client.js";
-export { parseGeocodeSuggestResponse, parseGeocodeTimezoneResponse } from "#geocode/client.js";
+export { parseGeocodeSuggestResponse, parseGeocodeTimezoneResponse } from "./client.js";
 export {
   geocodeSuggestResponseSchema,
   geocodeTimezoneResponseSchema,
-} from "#geocode/schemas.js";
+} from "./schema.js";
+export type { GeocodeSuggestAddress } from "./types.js";

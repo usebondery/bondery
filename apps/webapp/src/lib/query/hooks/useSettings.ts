@@ -19,22 +19,26 @@ import { settingsKeys } from "@/lib/query/keys";
 
 const SETTINGS_STALE_TIME_MS = 15 * 60_000;
 
+const SESSION_AFFECTING_KEYS = [
+  "colorScheme",
+  "name",
+  "middlename",
+  "surname",
+  "language",
+  "timezone",
+  "timeFormat",
+] as const;
+
 function settingsPatchAffectsSession(patch: UpdateSettingsPatch): boolean {
-  return (
-    patch.colorScheme !== undefined ||
-    patch.name !== undefined ||
-    patch.middlename !== undefined ||
-    patch.surname !== undefined ||
-    patch.language !== undefined ||
-    patch.timezone !== undefined ||
-    patch.timeFormat !== undefined
+  return SESSION_AFFECTING_KEYS.some(
+    (key) => key in patch && patch[key as keyof UpdateSettingsPatch] !== undefined,
   );
 }
 
 function sessionPatchFromSettingsUpdate(
   patch: UpdateSettingsPatch,
 ): Parameters<typeof refreshAppShell>[0] | undefined {
-  if (patch.colorScheme !== undefined) {
+  if ("colorScheme" in patch && patch.colorScheme !== undefined) {
     return { colorScheme: patch.colorScheme };
   }
   return undefined;

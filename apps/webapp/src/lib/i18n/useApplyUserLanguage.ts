@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import type { SupportedLocale } from "@bondery/translations";
 import { useChangeLanguage } from "next-i18next/client";

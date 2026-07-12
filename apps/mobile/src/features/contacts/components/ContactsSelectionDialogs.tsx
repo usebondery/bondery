@@ -1,7 +1,7 @@
 import { IconTrash } from "@tabler/icons-react-native";
+import { useCommonTranslations, useMobileContactsTranslations } from "@/lib/i18n/generated/hooks";
 import { ActionSheetPopup } from "../../../components/ActionSheetPopup";
 import { deleteContacts } from "../../../lib/domains/contacts";
-import { useMobileTranslations } from "../../../lib/i18n/useMobileTranslations";
 import { useAppToast } from "../../../lib/toast/useAppToast";
 import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
 import { useContactsSelection } from "../contactsSelectionStore";
@@ -19,7 +19,8 @@ export function ContactsSelectionDialogs({
   onContactsReloaded,
   loadedGroupMembers,
 }: ContactsSelectionDialogsProps) {
-  const t = useMobileTranslations();
+  const tMobileContacts = useMobileContactsTranslations();
+  const t = useCommonTranslations();
   const colors = useMobileThemeColors();
   const { showToast } = useAppToast();
   const isDeleteConfirmOpen = useContactsSelection((state) => state.isDeleteConfirmOpen);
@@ -47,8 +48,8 @@ export function ContactsSelectionDialogs({
         await onContactsReloaded();
       } catch {
         showToast({
-          description: t("DeleteFailed", { ns: "MobileContacts" }),
-          headline: t("feedback.errorTitle", { ns: "common" }),
+          description: tMobileContacts("DeleteFailed"),
+          headline: t("feedback.errorTitle"),
           type: "error",
         });
       } finally {
@@ -62,7 +63,7 @@ export function ContactsSelectionDialogs({
       actions={[
         {
           disabled: isDeleting,
-          label: t("actions.cancel", { ns: "common" }),
+          label: t("actions.cancel"),
           onPress: () => setDeleteConfirmOpen(false),
           tone: "neutral",
           variant: "outline",
@@ -70,7 +71,7 @@ export function ContactsSelectionDialogs({
         {
           disabled: isDeleting,
           icon: <IconTrash color={colors.textOnPrimary} size={16} />,
-          label: t("actions.delete", { ns: "common" }),
+          label: t("actions.delete"),
           loading: isDeleting,
           onPress: handleConfirmDeleteSelected,
           tone: "danger",

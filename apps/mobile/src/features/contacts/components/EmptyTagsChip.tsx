@@ -1,13 +1,14 @@
 import { StyleSheet, Text, View } from "react-native";
-import { useMobileTranslations } from "../../../lib/i18n/useMobileTranslations";
+import { useCommonTranslations, useMobileTagsTranslations } from "@/lib/i18n/generated/hooks";
 import { MOBILE_TYPOGRAPHY } from "../../../theme/tokens";
 import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
 
 /** Static placeholder chip matching {@link CreateTagChip} styling — not tappable. */
 export function EmptyTagsChip() {
-  const t = useMobileTranslations();
+  const tMobileTags = useMobileTagsTranslations();
+  const _t = useCommonTranslations();
   const colors = useMobileThemeColors();
-  const label = t("NoTagsYet", { ns: "MobileTags" });
+  const label = tMobileTags("NoTagsYet");
 
   return (
     <View

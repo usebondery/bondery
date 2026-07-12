@@ -26,7 +26,7 @@ import { IconBrandLinkedin, IconUserPlus } from "@tabler/icons-react";
 import { useMemo, useState } from "react";
 import { z } from "zod";
 import { captureEvent } from "@/lib/analytics/client";
-import { useCommonTranslations, useWebTranslations } from "@/lib/i18n/useWebTranslations";
+import { useCommonTranslations, usePeoplePageTranslations } from "@/lib/i18n/generated/hooks";
 import { optimisticPersonDocumentTitle } from "@/lib/metadata/optimisticTitles";
 import { useNavigateWithTitle } from "@/lib/metadata/useNavigateWithTitle";
 import { createModalId, useModalDismiss } from "@/lib/modals";
@@ -61,7 +61,7 @@ interface AddContactFormProps extends OpenAddContactModalOptions {
 }
 
 function AddContactModalTitle() {
-  const t = useWebTranslations("PeoplePage");
+  const t = usePeoplePageTranslations();
   return <ModalTitle icon={<IconUserPlus size={24} />} text={t("AddContactModal.Title")} />;
 }
 
@@ -83,7 +83,7 @@ export function AddContactForm({
   initialLinkedin = "",
 }: AddContactFormProps) {
   const { navigateWithTitle } = useNavigateWithTitle();
-  const t = useWebTranslations("PeoplePage");
+  const t = usePeoplePageTranslations();
   const tCommon = useCommonTranslations();
   const [focusedField, setFocusedField] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);

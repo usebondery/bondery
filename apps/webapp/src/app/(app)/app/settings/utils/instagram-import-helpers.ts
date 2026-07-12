@@ -19,8 +19,8 @@ export const INSTAGRAM_STEP_PROGRESS: Record<InstagramImportStep, number> = {
   upload: 40,
 };
 
-export function readNumberField(data: Record<string, unknown> | null, key: string): number {
-  const value = data?.[key];
+export function readNumberField(data: object | null, key: string): number {
+  const value = data && key in data ? (data as Record<string, unknown>)[key] : undefined;
   return typeof value === "number" && Number.isFinite(value) ? value : 0;
 }
 

@@ -13,7 +13,7 @@ import { notifications } from "@mantine/notifications";
 import { useState } from "react";
 import { captureEvent } from "@/lib/analytics/client";
 import { submitFeedback } from "@/lib/api/domains/settings";
-import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
+import { useFeedbackPageTranslations } from "@/lib/i18n/generated/hooks";
 import { useModalDismiss } from "@/lib/modals";
 
 const SLIDER_MARKS = [
@@ -27,7 +27,7 @@ interface FeedbackModalProps {
 }
 
 export function FeedbackModal({ modalId }: FeedbackModalProps) {
-  const t = useWebTranslations("FeedbackPage");
+  const t = useFeedbackPageTranslations();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const isBlocking = isSubmitting;
   const { closeModal } = useModalDismiss(modalId, isBlocking);

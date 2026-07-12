@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { buildManualContactAddress } from "@bondery/helpers/address";
 import { formatContactName } from "@bondery/helpers/contact";
@@ -18,7 +18,7 @@ import { IconPlus } from "@tabler/icons-react";
 import { useEffect, useMemo, useState } from "react";
 import { PeopleMap, type PeopleMapFocus } from "@/components/map/PeopleMap";
 import { LocationLookupInput } from "@/components/shell/LocationLookupInput";
-import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
+import { useContactAddressTranslations } from "@/lib/i18n/generated/hooks";
 import { ADDRESS_TYPE_OPTIONS } from "@/lib/platform/config";
 import {
   applyGeocodedSuggestion,
@@ -38,7 +38,7 @@ interface ContactAddressSectionProps {
 }
 
 export function ContactAddressSection({ contact, isSaving, onSave }: ContactAddressSectionProps) {
-  const t = useWebTranslations("ContactAddress");
+  const t = useContactAddressTranslations();
   const typeOptions = useMemo(
     () =>
       ADDRESS_TYPE_OPTIONS.map((option) => ({

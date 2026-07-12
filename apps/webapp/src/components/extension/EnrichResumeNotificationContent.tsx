@@ -4,14 +4,14 @@ import { Button, Group, Text } from "@mantine/core";
 import { IconPlayerPlayFilled, IconTrash } from "@tabler/icons-react";
 import { useSyncExternalStore } from "react";
 import { defaultState, getState, subscribe } from "@/lib/extension/enrichBatchStore";
-import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
+import { useEnrichFromLinkedInTranslations } from "@/lib/i18n/generated/hooks";
 import { useBatchEnrichFromLinkedIn } from "./useBatchEnrichFromLinkedIn";
 
 /**
  * Live notification body for the interrupted-enrichment resume prompt.
  */
 export function EnrichResumeNotificationContent() {
-  const t = useWebTranslations("EnrichFromLinkedIn");
+  const t = useEnrichFromLinkedInTranslations();
   const { resume, discard } = useBatchEnrichFromLinkedIn();
 
   const { pendingQueueStatus } = useSyncExternalStore(subscribe, getState, () => defaultState);

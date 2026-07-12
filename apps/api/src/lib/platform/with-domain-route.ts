@@ -52,6 +52,7 @@ function parseDomainRouteInput<T extends DomainRouteSchemas>(
   return route;
 }
 
+/** Bridge return: response typing is enforced by route `schema.response`, not handler inference. */
 export function withDomainRoute(handler: DomainRouteHandlerNoSchemas): RouteHandlerMethod;
 export function withDomainRoute<T extends DomainRouteSchemas>(
   schemas: T,
@@ -63,18 +64,18 @@ export function withDomainRoute<T extends DomainRouteSchemas>(
 ): RouteHandlerMethod {
   if (typeof schemasOrHandler === "function") {
     const handler = schemasOrHandler;
-    return (async (request, reply) => {
+    return (async (request: FastifyRequest, reply: FastifyReply) => {
       const ctx = domainContextFromRequest(request);
       return await handler(ctx, { request }, reply);
-    }) as RouteHandlerMethod;
+    }) as unknown as RouteHandlerMethod;
   }
 
   const schemas = schemasOrHandler;
   const handler = maybeHandler as DomainRouteHandler<T>;
 
-  return (async (request, reply) => {
+  return (async (request: FastifyRequest, reply: FastifyReply) => {
     const ctx = domainContextFromRequest(request);
     const route = parseDomainRouteInput(schemas, request);
     return await handler(ctx, route, reply);
-  }) as RouteHandlerMethod;
+  }) as unknown as RouteHandlerMethod;
 }

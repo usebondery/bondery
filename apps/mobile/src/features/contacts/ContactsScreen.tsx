@@ -7,8 +7,12 @@ import { ActivityIndicator, View } from "react-native";
 import { useScrollBottomInset } from "../../components/chrome";
 import { LoadErrorCard, loadErrorTabRootInset } from "../../components/load-state";
 import { MobileTextInput } from "../../components/MobileTextInput";
+import {
+  useCommonTranslations,
+  useMobileContactsTranslations,
+  useMobileSettingsTranslations,
+} from "../../lib/i18n/generated/hooks";
 import { preloadMobileNamespaces } from "../../lib/i18n/preloadMobileNamespaces";
-import { useMobileTranslations } from "../../lib/i18n/useMobileTranslations";
 import {
   type MobilePreferencesState,
   type SwipeAction,
@@ -35,7 +39,9 @@ import { useFlashListScrollToIndex } from "./hooks/useFlashListScrollToIndex";
 import { useNavigateToGroup } from "./hooks/useNavigateToGroup";
 
 export function ContactsScreen() {
-  const t = useMobileTranslations();
+  const tMobileContacts = useMobileContactsTranslations();
+  const tMobileSettings = useMobileSettingsTranslations();
+  const t = useCommonTranslations();
   useEffect(() => {
     void preloadMobileNamespaces(["mobile.contactsTab"]);
   }, []);
@@ -79,9 +85,9 @@ export function ContactsScreen() {
 
   const rowTexts = useMemo(
     () => ({
-      call: t("actions.call", { ns: "common" }),
-      email: t("actions.email", { ns: "common" }),
-      message: t("actions.message", { ns: "common" }),
+      call: t("actions.call"),
+      email: t("actions.email"),
+      message: t("actions.message"),
     }),
     [t],
   );
@@ -97,12 +103,12 @@ export function ContactsScreen() {
   const executeAction = useCallback(
     (contact: Contact, action: SwipeAction) => {
       executeContactSwipeAction(contact, action, showToast, {
-        errorTitle: t("feedback.errorTitle", { ns: "common" }),
-        missingEmail: t("MissingEmail", { ns: "MobileContacts" }),
-        missingPhone: t("MissingPhone", { ns: "MobileContacts" }),
+        errorTitle: t("feedback.errorTitle"),
+        missingEmail: tMobileContacts("MissingEmail"),
+        missingPhone: tMobileContacts("MissingPhone"),
       });
     },
-    [showToast, t],
+    [showToast, t, tMobileContacts],
   );
 
   const handleOpenContact = useCallback(
@@ -146,7 +152,7 @@ export function ContactsScreen() {
             backgroundColor={colors.surfaceMuted}
             leadingIcon={<IconSearch size={16} stroke={colors.iconSecondary} />}
             onChangeText={screenData.handleSearchChange}
-            placeholder={t("SearchPlaceholder", { ns: "MobileContacts" })}
+            placeholder={tMobileContacts("SearchPlaceholder")}
             style={styles.searchInput}
             trailingAccessory={
               screenData.isSearching ? (
@@ -176,7 +182,7 @@ export function ContactsScreen() {
             onRetry={() => {
               void screenData.reloadContacts();
             }}
-            title={t("LoadErrorTitle", { ns: "MobileSettings" })}
+            title={tMobileSettings("LoadErrorTitle")}
           />
         </View>
       ) : null}

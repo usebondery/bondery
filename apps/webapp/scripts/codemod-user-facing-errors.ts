@@ -51,18 +51,18 @@ for (const file of walk(root)) {
   if (!content.includes("useCommonTranslations")) {
     const lines = content.split("\n");
     const hookImport = lines.findIndex((line) =>
-      line.includes('from "@/lib/i18n/useWebTranslations"'),
+      line.includes('from "@/lib/i18n/generated/hooks"'),
     );
     if (hookImport >= 0) {
       lines[hookImport] = lines[hookImport].replace(
-        "useWebTranslations",
-        "useCommonTranslations, useWebTranslations",
+        "useCommonTranslations",
+        "useCommonTranslations",
       );
       if (!lines[hookImport].includes("useCommonTranslations")) {
         lines.splice(
           hookImport + 1,
           0,
-          'import { useCommonTranslations } from "@/lib/i18n/useWebTranslations";',
+          'import { useCommonTranslations } from "@/lib/i18n/generated/hooks";',
         );
       }
     } else {
@@ -70,7 +70,7 @@ for (const file of walk(root)) {
       lines.splice(
         lastImport + 1,
         0,
-        'import { useCommonTranslations } from "@/lib/i18n/useWebTranslations";',
+        'import { useCommonTranslations } from "@/lib/i18n/generated/hooks";',
       );
     }
     content = lines.join("\n");

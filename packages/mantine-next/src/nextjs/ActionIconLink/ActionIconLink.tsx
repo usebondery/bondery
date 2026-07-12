@@ -14,6 +14,7 @@ export type ActionIconLinkProps = Omit<ActionIconProps, "component" | "href" | "
   href?: string;
   ariaLabel: string;
   icon: ReactNode;
+  onClick?: () => void;
   target?: "_blank" | "_self" | "_parent" | "_top";
   rel?: string;
 };
@@ -28,6 +29,7 @@ export function ActionIconLink({
   href,
   ariaLabel,
   icon,
+  onClick,
   target,
   rel,
   ...actionIconProps
@@ -65,7 +67,7 @@ export function ActionIconLink({
 
   if (!href) {
     return (
-      <ActionIcon aria-label={ariaLabel} {...actionIconProps}>
+      <ActionIcon aria-label={ariaLabel} onClick={onClick} {...actionIconProps}>
         {renderedIcon}
       </ActionIcon>
     );
@@ -74,6 +76,7 @@ export function ActionIconLink({
   return (
     <ActionIcon
       aria-label={ariaLabel}
+      onClick={onClick}
       renderRoot={(props) => <Link href={href} rel={rel} target={target} {...props} />}
       {...actionIconProps}
     >

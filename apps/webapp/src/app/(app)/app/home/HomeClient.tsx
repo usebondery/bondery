@@ -11,9 +11,14 @@ import {
   parseShortcutKeys,
   successNotificationTemplate,
 } from "@bondery/mantine-next";
-import type { Activity, Contact } from "@bondery/schemas";
+import type { Activity, Contact, InteractionParticipant } from "@bondery/schemas";
+import {
+  useCommonTranslations,
+  useHomePageTranslations,
+  useInteractionsPageTranslations,
+} from "@/lib/i18n/generated/hooks";
 
-type ActivityParticipantRef = string | { id: string };
+type ActivityParticipantRef = string | InteractionParticipant;
 
 import { Button, Group, Paper, SimpleGrid, Stack, Text, Title, Tooltip } from "@mantine/core";
 import { useHotkeys } from "@mantine/hooks";
@@ -40,7 +45,6 @@ import { PageHeader } from "@/components/shell/PageHeader";
 import { PageWrapper } from "@/components/shell/PageWrapper";
 import { peopleSearchActions } from "@/components/shell/PeopleSearchSpotlight";
 import { useDateFormatter as useFormatter } from "@/lib/i18n/useDateFormatter";
-import { useCommonTranslations, useWebTranslations } from "@/lib/i18n/useWebTranslations";
 import { setOptimisticDocumentTitle } from "@/lib/metadata/navigationTitleStore";
 import { optimisticPersonDocumentTitle } from "@/lib/metadata/optimisticTitles";
 import { useNavigateWithTitle } from "@/lib/metadata/useNavigateWithTitle";
@@ -62,8 +66,8 @@ import { useSettingsQuery } from "@/lib/query/hooks/useSettings";
 export function HomeClient({ initialSettings }: { initialSettings?: Record<string, unknown> }) {
   const _router = useRouter();
   const { navigateWithTitle } = useNavigateWithTitle();
-  const t = useWebTranslations("HomePage");
-  const timelineT = useWebTranslations("InteractionsPage");
+  const t = useHomePageTranslations();
+  const timelineT = useInteractionsPageTranslations();
   const tCommon = useCommonTranslations();
   const deleteInteractionMutation = useDeleteInteractionMutation();
   const createInteractionMutation = useCreateInteractionMutation();

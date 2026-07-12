@@ -6,7 +6,10 @@ import { useMemo } from "react";
 import { ScrollView, StyleSheet, View } from "react-native";
 import { StackNavBar } from "../../components/chrome";
 import { updateSettings } from "../../lib/api/client";
-import { useMobileTranslations } from "../../lib/i18n/useMobileTranslations";
+import {
+  useCommonTranslations,
+  useMobileSettingsTranslations,
+} from "../../lib/i18n/generated/hooks";
 import { getSwipeActionIcon } from "../../lib/preferences/swipeActionIcons";
 import type {
   MobilePreferencesState,
@@ -58,8 +61,9 @@ function createPreviewContact(name: ReturnType<typeof getRandomExampleName>): Co
 const noop = () => {};
 
 export function SettingsSwipeActionsScreen() {
+  const tMobileSettings = useMobileSettingsTranslations();
+  const t = useCommonTranslations();
   const router = useRouter();
-  const t = useMobileTranslations();
   const colors = useMobileThemeColors();
   const iconStroke = colors.iconSecondary;
 
@@ -80,9 +84,9 @@ export function SettingsSwipeActionsScreen() {
 
   const swipeTexts = useMemo(
     () => ({
-      call: t("actions.call", { ns: "common" }),
-      email: t("actions.email", { ns: "common" }),
-      message: t("actions.message", { ns: "common" }),
+      call: t("actions.call"),
+      email: t("actions.email"),
+      message: t("actions.message"),
     }),
     [t],
   );
@@ -94,17 +98,17 @@ export function SettingsSwipeActionsScreen() {
   }> = [
     {
       icon: getSwipeActionIcon("call", iconStroke),
-      label: t("actions.call", { ns: "common" }),
+      label: t("actions.call"),
       value: "call",
     },
     {
       icon: getSwipeActionIcon("message", iconStroke),
-      label: t("actions.message", { ns: "common" }),
+      label: t("actions.message"),
       value: "message",
     },
     {
       icon: getSwipeActionIcon("email", iconStroke),
-      label: t("actions.email", { ns: "common" }),
+      label: t("actions.email"),
       value: "email",
     },
   ];
@@ -131,7 +135,7 @@ export function SettingsSwipeActionsScreen() {
     <>
       <StackNavBar
         onBack={() => router.back()}
-        title={t("SwipeActions", { ns: "MobileSettings" })}
+        title={tMobileSettings("SwipeActions")}
         variant="elevated"
       />
 
@@ -139,23 +143,23 @@ export function SettingsSwipeActionsScreen() {
         contentContainerStyle={styles.content}
         style={[styles.screen, { backgroundColor: colors.appBackground }]}
       >
-        <SettingsFieldLabel>{t("LeftSwipe", { ns: "MobileSettings" })}</SettingsFieldLabel>
+        <SettingsFieldLabel>{tMobileSettings("LeftSwipe")}</SettingsFieldLabel>
         <SettingsSelect
-          label={t("LeftSwipe", { ns: "MobileSettings" })}
+          label={tMobileSettings("LeftSwipe")}
           onValueChange={handleLeftSwipeChange}
           options={swipeOptions}
           value={leftSwipeAction}
         />
 
-        <SettingsFieldLabel>{t("RightSwipe", { ns: "MobileSettings" })}</SettingsFieldLabel>
+        <SettingsFieldLabel>{tMobileSettings("RightSwipe")}</SettingsFieldLabel>
         <SettingsSelect
-          label={t("RightSwipe", { ns: "MobileSettings" })}
+          label={tMobileSettings("RightSwipe")}
           onValueChange={handleRightSwipeChange}
           options={swipeOptions}
           value={rightSwipeAction}
         />
 
-        <SettingsPreviewSection caption={t("PreviewHintSwipeActions", { ns: "MobileSettings" })}>
+        <SettingsPreviewSection caption={tMobileSettings("PreviewHintSwipeActions")}>
           <View
             style={[
               styles.previewCard,

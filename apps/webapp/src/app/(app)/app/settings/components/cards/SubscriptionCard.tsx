@@ -5,8 +5,8 @@ import type { SubscriptionStatus } from "@bondery/schemas";
 import { Badge, Button, CardSection, Group, Progress, Stack, Text } from "@mantine/core";
 import { IconCreditCard, IconExternalLink } from "@tabler/icons-react";
 import { UpgradeButton } from "@/components/shared/UpgradeButton";
+import { useSettingsPageTranslations } from "@/lib/i18n/generated/hooks";
 import { useDateFormatter as useFormatter } from "@/lib/i18n/useDateFormatter";
-import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
 import { useSubscriptionQuery } from "@/lib/query/hooks/useSubscription";
 import { SettingsSection } from "./SettingsSection";
 
@@ -15,7 +15,7 @@ function SubscriptionCardContent({
 }: {
   subscriptionStatus: SubscriptionStatus;
 }) {
-  const t = useWebTranslations("SettingsPage", "Subscription");
+  const t = useSettingsPageTranslations("Subscription");
   const format = useFormatter();
   const isPremium = subscriptionStatus.plan === "premium";
   const portalUrl = API_ROUTES.SUBSCRIPTIONS_PORTAL;

@@ -11,10 +11,14 @@ import {
   Text,
   View,
 } from "react-native";
+import {
+  useCommonTranslations,
+  useMobileContactDetailTranslations,
+  useMobileContactsTranslations,
+} from "@/lib/i18n/generated/hooks";
 import { SearchActionSheet } from "../../../components/SearchActionSheet";
 import { MOBILE_OPACITY } from "../../../lib/config";
 import { addContactsToGroup, removeContactsFromGroup } from "../../../lib/domains/groups";
-import { useMobileTranslations } from "../../../lib/i18n/useMobileTranslations";
 import { getContactGroups, listGroups } from "../../../lib/sync/hooks/useSyncQuery";
 import { useAppToast } from "../../../lib/toast/useAppToast";
 import { MOBILE_LAYOUT, MOBILE_TYPOGRAPHY } from "../../../theme/tokens";
@@ -62,7 +66,9 @@ export function ContactEditGroupsSheet({
   contactName: _contactName,
   onGroupsReplaced,
 }: ContactEditGroupsSheetProps) {
-  const t = useMobileTranslations();
+  const tMobileContactDetail = useMobileContactDetailTranslations();
+  const tMobileContacts = useMobileContactsTranslations();
+  const t = useCommonTranslations();
   const colors = useMobileThemeColors();
   const { showToast } = useAppToast();
 
@@ -109,8 +115,8 @@ export function ContactEditGroupsSheet({
         }
 
         showToast({
-          description: t("GroupsLoadError", { ns: "MobileContactDetail" }),
-          headline: t("feedback.errorTitle", { ns: "common" }),
+          description: tMobileContactDetail("GroupsLoadError"),
+          headline: t("feedback.errorTitle"),
           type: "error",
         });
         onOpenChange(false);
@@ -124,7 +130,7 @@ export function ContactEditGroupsSheet({
     return () => {
       cancelled = true;
     };
-  }, [contactId, onOpenChange, open, showToast, t]);
+  }, [contactId, onOpenChange, open, showToast, tMobileContactDetail, t]);
 
   function handleOpenChange(nextOpen: boolean) {
     if (!nextOpen && isSaving) {
@@ -183,8 +189,8 @@ export function ContactEditGroupsSheet({
         onGroupsReplaced(newGroups);
       } catch {
         showToast({
-          description: t("EditGroupsFailed", { ns: "MobileContactDetail" }),
-          headline: t("feedback.errorTitle", { ns: "common" }),
+          description: tMobileContactDetail("EditGroupsFailed"),
+          headline: t("feedback.errorTitle"),
           type: "error",
         });
       } finally {
@@ -210,7 +216,7 @@ export function ContactEditGroupsSheet({
       fontSize={MOBILE_TYPOGRAPHY.fontSize.sheetTitle}
       fontWeight={MOBILE_TYPOGRAPHY.fontWeight.bold}
     >
-      {t("EditGroupsSheetTitle", { ns: "MobileContactDetail" })}
+      {tMobileContactDetail("EditGroupsSheetTitle")}
     </Paragraph>
   );
 
@@ -231,7 +237,7 @@ export function ContactEditGroupsSheet({
         ]}
       >
         <Text style={[styles.footerButtonText, { color: colors.textPrimary }]}>
-          {t("actions.cancel", { ns: "common" })}
+          {t("actions.cancel")}
         </Text>
       </Pressable>
 
@@ -252,7 +258,7 @@ export function ContactEditGroupsSheet({
           <ActivityIndicator color={colors.textOnPrimary} size="small" />
         ) : (
           <Text style={[styles.footerButtonText, { color: colors.textOnPrimary }]}>
-            {t("EditGroupsSave", { ns: "MobileContactDetail" })}
+            {tMobileContactDetail("EditGroupsSave")}
           </Text>
         )}
       </Pressable>
@@ -269,7 +275,7 @@ export function ContactEditGroupsSheet({
       open={open}
       query={query}
       searchEditable={!isSaving && !isLoadingGroups}
-      searchPlaceholder={t("AddToGroupsSearchPlaceholder", { ns: "MobileContacts" })}
+      searchPlaceholder={tMobileContacts("AddToGroupsSearchPlaceholder")}
     >
       {isLoadingGroups ? (
         <View style={styles.loadingState}>
@@ -283,7 +289,7 @@ export function ContactEditGroupsSheet({
             fontWeight={MOBILE_TYPOGRAPHY.fontWeight.semibold}
             textAlign="center"
           >
-            {t("NoGroupsYet", { ns: "MobileContacts" })}
+            {tMobileContacts("NoGroupsYet")}
           </Paragraph>
           <Paragraph
             color={colors.textSecondary}
@@ -291,7 +297,7 @@ export function ContactEditGroupsSheet({
             marginTop={6}
             textAlign="center"
           >
-            {t("NoGroupsYetHint", { ns: "MobileContacts" })}
+            {tMobileContacts("NoGroupsYetHint")}
           </Paragraph>
         </View>
       ) : (
@@ -304,7 +310,7 @@ export function ContactEditGroupsSheet({
           keyExtractor={(item) => item.id}
           ListEmptyComponent={
             <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
-              {t("feedback.noResults", { ns: "common" })}
+              {t("feedback.noResults")}
             </Text>
           }
           maxToRenderPerBatch={24}

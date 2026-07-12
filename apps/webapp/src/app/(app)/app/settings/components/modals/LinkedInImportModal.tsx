@@ -16,7 +16,7 @@ import { IconBrandLinkedin } from "@tabler/icons-react";
 import { useRouter } from "next/navigation";
 import type { JSX } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useCommonTranslations, useWebTranslations } from "@/lib/i18n/useWebTranslations";
+import { useCommonTranslations, useSettingsPageTranslations } from "@/lib/i18n/generated/hooks";
 import { useModalDismiss } from "@/lib/modals";
 import {
   useCommitLinkedInImportMutation,
@@ -53,7 +53,7 @@ export function LinkedInImportModal({
   onAwaitingExport?: () => void | Promise<void>;
 }) {
   const tCommon = useCommonTranslations();
-  const t = useWebTranslations("SettingsPage", "DataManagement.LinkedInImport");
+  const t = useSettingsPageTranslations("DataManagement.LinkedInImport");
   const router = useRouter();
   const parseImport = useParseLinkedInImportMutation();
   const commitImport = useCommitLinkedInImportMutation();

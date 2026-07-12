@@ -3,11 +3,11 @@
 import { Stack } from "@mantine/core";
 import { IconBrandInstagram } from "@tabler/icons-react";
 import { IntegrationCard } from "@/components/shared/IntegrationCard";
-import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
+import { useSettingsPageTranslations } from "@/lib/i18n/generated/hooks";
 import { openInstagramImportModal } from "../modals/openInstagramImportModal";
 
 export function InstagramImportSection() {
-  const t = useWebTranslations("SettingsPage", "DataManagement.InstagramImport");
+  const t = useSettingsPageTranslations("DataManagement.InstagramImport");
 
   return (
     <Stack gap="sm">

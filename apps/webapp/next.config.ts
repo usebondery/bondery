@@ -17,6 +17,7 @@ const nextConfig: NextConfig = {
       "@mantine/tiptap",
     ],
     proxyClientMaxBodySize: "20mb",
+    useTypeScriptCli: true,
   },
   async headers() {
     return [

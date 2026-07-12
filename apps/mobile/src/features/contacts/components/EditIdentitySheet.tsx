@@ -4,6 +4,10 @@ import { IconBriefcase, IconCheck, IconTrash } from "@tabler/icons-react-native"
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Image, StyleSheet, Text, type TextInput, View } from "react-native";
 import {
+  useCommonTranslations,
+  useMobileContactIdentityTranslations,
+} from "@/lib/i18n/generated/hooks";
+import {
   ActionSheetPopup,
   type ActionSheetPopupAction,
 } from "../../../components/ActionSheetPopup";
@@ -12,7 +16,6 @@ import { fetchSettings } from "../../../lib/api/client";
 import { INPUT_MAX_LENGTHS, UI_TIMING_MS } from "../../../lib/config";
 import { updateContact } from "../../../lib/domains/contacts";
 import { useSheetForm } from "../../../lib/forms/useSheetForm";
-import { useMobileTranslations } from "../../../lib/i18n/useMobileTranslations";
 import { useAppToast } from "../../../lib/toast/useAppToast";
 import { ScalePressable } from "../../../theme/ScalePressable";
 import { MOBILE_TYPOGRAPHY } from "../../../theme/tokens";
@@ -38,7 +41,8 @@ export function EditIdentitySheet({
   onClose,
   onContactUpdated,
 }: EditIdentitySheetProps) {
-  const t = useMobileTranslations();
+  const tMobileContactIdentity = useMobileContactIdentityTranslations();
+  const t = useCommonTranslations();
   const colors = useMobileThemeColors();
   const { showToast } = useAppToast();
   const firstNameRef = useRef<TextInput>(null);
@@ -130,22 +134,21 @@ export function EditIdentitySheet({
       onClose();
     } catch (err) {
       showToast({
-        description:
-          err instanceof Error ? err.message : t("SaveFailed", { ns: "MobileContactIdentity" }),
-        headline: t("feedback.errorTitle", { ns: "common" }),
+        description: err instanceof Error ? err.message : tMobileContactIdentity("SaveFailed"),
+        headline: t("feedback.errorTitle"),
         type: "error",
       });
     }
   });
 
   const title = isMyselfMode
-    ? t("EditYourProfile", { ns: "MobileContactIdentity" })
-    : t("EditProfile", { ns: "MobileContactIdentity" });
+    ? tMobileContactIdentity("EditYourProfile")
+    : tMobileContactIdentity("EditProfile");
 
   const primaryAction: ActionSheetPopupAction = {
     disabled: !canSubmit,
     icon: <IconCheck size={16} stroke={colors.textOnPrimary} />,
-    label: t("SaveChanges", { ns: "MobileContactIdentity" }),
+    label: tMobileContactIdentity("SaveChanges"),
     loading: isSubmitting,
     onPress: () => void onSubmit(),
     tone: "primary",
@@ -171,7 +174,7 @@ export function EditIdentitySheet({
         <View style={styles.avatarSection}>
           <View style={avatarPhotoOverlayStyles.avatarFrame}>
             <ScalePressable
-              accessibilityLabel={t("ChangePhoto", { ns: "MobileContactIdentity" })}
+              accessibilityLabel={tMobileContactIdentity("ChangePhoto")}
               accessibilityRole="button"
               onPress={() => void choosePhotoFromLibrary()}
               opacity={isBusy ? 0.6 : 1}
@@ -197,45 +200,45 @@ export function EditIdentitySheet({
         </View>
 
         <SheetTextField
-          accessibilityLabel={t("FirstNameLabel", { ns: "MobileContactIdentity" })}
+          accessibilityLabel={tMobileContactIdentity("FirstNameLabel")}
           control={control}
           editable={!isBusy}
           inputRef={firstNameRef}
           maxLength={INPUT_MAX_LENGTHS.firstName}
           name="firstName"
-          placeholder={t("FirstNameLabel", { ns: "MobileContactIdentity" })}
+          placeholder={tMobileContactIdentity("FirstNameLabel")}
           returnKeyType="next"
         />
 
         <SheetTextField
-          accessibilityLabel={t("MiddleNameLabel", { ns: "MobileContactIdentity" })}
+          accessibilityLabel={tMobileContactIdentity("MiddleNameLabel")}
           control={control}
           editable={!isBusy}
           maxLength={INPUT_MAX_LENGTHS.middleName}
           name="middleName"
-          placeholder={t("MiddleNameLabel", { ns: "MobileContactIdentity" })}
+          placeholder={tMobileContactIdentity("MiddleNameLabel")}
           returnKeyType="next"
         />
 
         <SheetTextField
-          accessibilityLabel={t("LastNameLabel", { ns: "MobileContactIdentity" })}
+          accessibilityLabel={tMobileContactIdentity("LastNameLabel")}
           control={control}
           editable={!isBusy}
           maxLength={INPUT_MAX_LENGTHS.lastName}
           name="lastName"
-          placeholder={t("LastNameLabel", { ns: "MobileContactIdentity" })}
+          placeholder={tMobileContactIdentity("LastNameLabel")}
           returnKeyType="next"
         />
 
         <SheetTextField
-          accessibilityLabel={t("HeadlineLabel", { ns: "MobileContactIdentity" })}
+          accessibilityLabel={tMobileContactIdentity("HeadlineLabel")}
           control={control}
           editable={!isBusy}
           leadingIcon={headlineLeadingIcon}
           maxLength={INPUT_MAX_LENGTHS.headline}
           name="headline"
           onSubmitEditing={() => void onSubmit()}
-          placeholder={t("HeadlineLabel", { ns: "MobileContactIdentity" })}
+          placeholder={tMobileContactIdentity("HeadlineLabel")}
           returnKeyType="done"
         />
       </ActionSheetPopup>
@@ -244,7 +247,7 @@ export function EditIdentitySheet({
         actions={[
           {
             disabled: isPhotoBusy,
-            label: t("actions.cancel", { ns: "common" }),
+            label: t("actions.cancel"),
             onPress: () => setRemoveConfirmOpen(false),
             tone: "neutral",
             variant: "outline",
@@ -252,7 +255,7 @@ export function EditIdentitySheet({
           {
             disabled: isPhotoBusy,
             icon: <IconTrash size={16} stroke={colors.textOnPrimary} />,
-            label: t("RemovePhoto", { ns: "MobileContactIdentity" }),
+            label: tMobileContactIdentity("RemovePhoto"),
             loading: isPhotoBusy,
             onPress: () => void removePhoto(),
             tone: "danger",
@@ -263,7 +266,7 @@ export function EditIdentitySheet({
         onClose={() => setRemoveConfirmOpen(false)}
         onOpenChange={setRemoveConfirmOpen}
         open={isRemoveConfirmOpen}
-        title={t("RemovePhotoConfirmTitle", { ns: "MobileContactIdentity" })}
+        title={tMobileContactIdentity("RemovePhotoConfirmTitle")}
       />
     </>
   );

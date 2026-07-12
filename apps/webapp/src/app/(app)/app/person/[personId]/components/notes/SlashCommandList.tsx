@@ -11,7 +11,7 @@ import {
 } from "@mantine/core";
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react";
 import type { SlashCommandItem } from "@/lib/contacts/slash-command-types";
-import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
+import { useNotesSlashCommandsTranslations } from "@/lib/i18n/generated/hooks";
 
 export type { SlashCommandItem } from "@/lib/contacts/slash-command-types";
 
@@ -26,7 +26,7 @@ export interface SlashCommandListHandle {
 
 export const SlashCommandList = forwardRef<SlashCommandListHandle, SlashCommandListProps>(
   function SlashCommandList({ items, command }, ref) {
-    const t = useWebTranslations("NotesSlashCommands");
+    const t = useNotesSlashCommandsTranslations();
     const [selectedIndex, setSelectedIndex] = useState(0);
     const scrollAreaRef = useRef<HTMLDivElement>(null);
 

@@ -31,7 +31,7 @@ import { IconUsersGroup } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
 import { captureEvent } from "@/lib/analytics/client";
 import { searchContacts } from "@/lib/contacts/searchContacts";
-import { useCommonTranslations, useWebTranslations } from "@/lib/i18n/useWebTranslations";
+import { useCommonTranslations, useGroupsPageTranslations } from "@/lib/i18n/generated/hooks";
 import { createModalId, useModalDismiss } from "@/lib/modals";
 import { DEBOUNCE_MS } from "@/lib/platform/config";
 import { useContactsSelectableListQuery } from "@/lib/query/hooks/useContacts";
@@ -68,7 +68,7 @@ interface OpenAddGroupModalOptions {
 }
 
 function AddGroupModalTitle() {
-  const t = useWebTranslations("GroupsPage");
+  const t = useGroupsPageTranslations();
   return <ModalTitle icon={<IconUsersGroup size={24} />} text={t("AddGroupModal.Title")} />;
 }
 
@@ -105,7 +105,7 @@ function AddGroupForm({
   onCreated,
 }: AddGroupFormProps) {
   const tCommon = useCommonTranslations();
-  const t = useWebTranslations("GroupsPage");
+  const t = useGroupsPageTranslations();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedIds, setSelectedIds] = useState<string[]>(initialSelectedIds);
   const {

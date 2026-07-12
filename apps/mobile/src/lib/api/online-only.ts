@@ -3,12 +3,11 @@ import { buildGeocodeSuggestQuery } from "@bondery/helpers/geocode";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import type {
   Contact,
-  ContactAddressEntry,
   ShareableField,
   UpdateUserSettingsInput,
   UserSettingsResponse,
 } from "@bondery/schemas";
-import { parseGeocodeSuggestResponse } from "@bondery/schemas/geocode";
+import { type GeocodeSuggestAddress, parseGeocodeSuggestResponse } from "@bondery/schemas/geocode";
 import { File, UploadTask, UploadType } from "expo-file-system";
 import { API_URL, normalizeMobileUrlForDevice } from "../config";
 import { resolveFetchFailureMessage } from "./parseApiErrorBody";
@@ -187,7 +186,7 @@ export async function fetchGeocodeSuggestions(
   query: string,
   mode: "address" | "place" = "address",
   signal?: AbortSignal,
-): Promise<ContactAddressEntry[]> {
+): Promise<GeocodeSuggestAddress[]> {
   const trimmed = query.trim();
   if (trimmed.length < GEOCODE_SUGGEST_MIN_QUERY_LENGTH) {
     return [];

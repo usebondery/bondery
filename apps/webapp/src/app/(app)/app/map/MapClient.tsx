@@ -1,3 +1,4 @@
+// biome-ignore-all lint/style/noExcessiveLinesPerFile: map client coordinates pins, table, and filters in one place
 "use client";
 
 import type { ContactNameFields } from "@bondery/helpers/contact";
@@ -43,8 +44,8 @@ import { LocationLookupInput } from "@/components/shell/LocationLookupInput";
 import { PageHeader } from "@/components/shell/PageHeader";
 import { PageWrapper } from "@/components/shell/PageWrapper";
 import type { MapPinsBounds } from "@/lib/api/resources/contacts";
+import { useMapPageTranslations, usePeoplePageTranslations } from "@/lib/i18n/generated/hooks";
 import { useContactsTableCopy } from "@/lib/i18n/useContactsTableCopy";
-import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
 import { DEBOUNCE_MS } from "@/lib/platform/config";
 import { useMapViewportPins } from "@/lib/query/hooks/useMapViewportPins";
 import type { MapView } from "./utils/types";
@@ -100,8 +101,8 @@ function sortPins<T extends ContactNameFields & { lastInteraction?: string | nul
 }
 
 export function MapClient({ view }: MapClientProps) {
-  const t = useWebTranslations("MapPage");
-  const tPeople = useWebTranslations("PeoplePage");
+  const t = useMapPageTranslations();
+  const tPeople = usePeoplePageTranslations();
   const { columnDefinitions } = useContactsTableCopy();
   const router = useRouter();
   const pathname = usePathname();
@@ -187,23 +188,46 @@ export function MapClient({ view }: MapClientProps) {
     work: "grape",
   };
 
-  const addressContactRows = useMemo<ContactTableRow[]>(
+  const addressContactRows = useMemo(
     () =>
-      visibleAddressPins.map((pin) => ({
-        _addressType: pin.addressType,
-        _rowKey: pin.addressId,
-        avatar: pin.avatar,
-        firstName: pin.firstName,
-        headline: null,
-        id: pin.personId,
-        lastInteraction: null,
-        lastName: pin.lastName,
-        location:
-          pin.addressFormatted ??
-          [pin.addressCity, pin.addressCountry].filter(Boolean).join(", ") ??
-          null,
-        middleName: null,
-      })),
+      visibleAddressPins.map(
+        (pin): ContactTableRow => ({
+          _addressType: pin.addressType,
+          _rowKey: pin.addressId,
+          avatar: pin.avatar,
+          createdAt: "",
+          emails: [],
+          facebook: null,
+          firstName: pin.firstName,
+          gisPoint: null,
+          headline: null,
+          id: pin.personId,
+          importantDates: null,
+          instagram: null,
+          keepFrequencyDays: null,
+          language: null,
+          lastInteraction: null,
+          lastInteractionActivityId: null,
+          lastName: pin.lastName,
+          latitude: null,
+          linkedin: null,
+          location:
+            pin.addressFormatted ??
+            [pin.addressCity, pin.addressCountry].filter(Boolean).join(", ") ??
+            null,
+          longitude: null,
+          middleName: null,
+          myself: false,
+          notes: null,
+          phones: [],
+          signal: null,
+          timezone: null,
+          updatedAt: "",
+          userId: "",
+          website: null,
+          whatsapp: null,
+        }),
+      ),
     [visibleAddressPins],
   );
 
@@ -451,7 +475,7 @@ export function MapClient({ view }: MapClientProps) {
                 return (
                   <Group gap={6} style={{ minWidth: 0 }} wrap="nowrap">
                     <Badge
-                      color={ADDRESS_TYPE_COLOR[type] ?? "gray"}
+                      color={ADDRESS_TYPE_COLOR[type ?? "other"] ?? "gray"}
                       size="xs"
                       style={{ flexShrink: 0 }}
                       variant="light"

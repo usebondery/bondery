@@ -3,14 +3,14 @@
 import { Card, Group, Text, ThemeIcon } from "@mantine/core";
 import { IconStar } from "@tabler/icons-react";
 import type { GithubStarsData } from "@/lib/api/resources/stats";
-import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
+import { useStatsPageTranslations } from "@/lib/i18n/generated/hooks";
 
 interface GithubStarsCardProps {
   data: GithubStarsData;
 }
 
 export function GithubStarsCard({ data }: GithubStarsCardProps) {
-  const t = useWebTranslations("StatsPage");
+  const t = useStatsPageTranslations();
 
   return (
     <Card padding="lg" withBorder>

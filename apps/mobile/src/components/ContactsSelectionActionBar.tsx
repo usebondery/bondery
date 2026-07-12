@@ -1,10 +1,10 @@
 import { IconTrash, IconUsersPlus } from "@tabler/icons-react-native";
 import { useMemo } from "react";
+import { useCommonTranslations, useMobileContactsTranslations } from "@/lib/i18n/generated/hooks";
 import {
   useContactsEffectiveSelectedCount,
   useContactsSelection,
 } from "../features/contacts/contactsSelectionStore";
-import { useMobileTranslations } from "../lib/i18n/useMobileTranslations";
 import { useMobileThemeColors } from "../theme/useMobileThemeColors";
 import { FloatingActionBar, type FloatingActionBarAction } from "./FloatingActionBar";
 
@@ -18,7 +18,8 @@ interface ContactsSelectionActionBarProps {
  * selection store so tab chrome only mounts once per selection session.
  */
 export function ContactsSelectionActionBar({ extraActions = [] }: ContactsSelectionActionBarProps) {
-  const t = useMobileTranslations();
+  const t = useCommonTranslations();
+  const tMobileContacts = useMobileContactsTranslations();
   const colors = useMobileThemeColors();
   const effectiveSelectedCount = useContactsEffectiveSelectedCount();
   const isDeleting = useContactsSelection((state) => state.isDeleting);
@@ -31,7 +32,7 @@ export function ContactsSelectionActionBar({ extraActions = [] }: ContactsSelect
   const actions = useMemo<FloatingActionBarAction[]>(
     () => [
       {
-        accessibilityLabel: t("AddToGroups", { ns: "MobileContacts" }),
+        accessibilityLabel: tMobileContacts("AddToGroups"),
         disabled: effectiveSelectedCount === 0 || isBusy,
         icon: <IconUsersPlus size={20} stroke={colors.iconSecondary} />,
         id: "add-to-groups",
@@ -40,7 +41,7 @@ export function ContactsSelectionActionBar({ extraActions = [] }: ContactsSelect
       },
       ...extraActions,
       {
-        accessibilityLabel: t("actions.delete", { ns: "common" }),
+        accessibilityLabel: t("actions.delete"),
         disabled: effectiveSelectedCount === 0 || isBusy,
         icon: <IconTrash size={20} stroke={colors.dangerAccent} />,
         id: "delete",
@@ -60,12 +61,13 @@ export function ContactsSelectionActionBar({ extraActions = [] }: ContactsSelect
       setAddToGroupsSheetOpen,
       setDeleteConfirmOpen,
       t,
+      tMobileContacts,
     ],
   );
 
   return (
     <FloatingActionBar
-      accessibilityLabel={t("SelectionActionsTitle", { ns: "MobileContacts" })}
+      accessibilityLabel={tMobileContacts("SelectionActionsTitle")}
       actions={actions}
     />
   );

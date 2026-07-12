@@ -2,7 +2,10 @@ import type { EmojiCategoryName } from "@bondery/helpers/emoji";
 import { IconChevronDown } from "@tabler/icons-react-native";
 import { useCallback, useMemo, useState } from "react";
 import { Pressable, type StyleProp, StyleSheet, Text, View, type ViewStyle } from "react-native";
-import { useMobileTranslations } from "../../lib/i18n/useMobileTranslations";
+import {
+  useMobileEmojiPickerTranslations,
+  useMobileGroupsTranslations,
+} from "@/lib/i18n/generated/hooks";
 import { MOBILE_LAYOUT, MOBILE_TYPOGRAPHY } from "../../theme/tokens";
 import { useMobileThemeColors } from "../../theme/useMobileThemeColors";
 import { EMOJI_PICKER_LAYOUT } from "./constants";
@@ -50,21 +53,21 @@ export function EmojiPickerInput({
   accessibilityLabel,
   triggerStyle,
 }: EmojiPickerInputProps) {
-  const t = useMobileTranslations();
+  const tMobileEmojiPicker = useMobileEmojiPickerTranslations();
+  const tMobileGroups = useMobileGroupsTranslations();
   const colors = useMobileThemeColors();
   const [open, setOpen] = useState(false);
 
-  const resolvedPlaceholder = placeholder ?? t("EditEmojiPlaceholder", { ns: "MobileGroups" });
-  const resolvedAccessibilityLabel =
-    accessibilityLabel ?? label ?? t("EditEmojiLabel", { ns: "MobileGroups" });
+  const resolvedPlaceholder = placeholder ?? tMobileGroups("EditEmojiPlaceholder");
+  const resolvedAccessibilityLabel = accessibilityLabel ?? label ?? tMobileGroups("EditEmojiLabel");
   const hasValue = value.trim().length > 0;
 
   const getCategoryLabel = useCallback(
     (categoryKey: string) => {
       const translationKey = CATEGORY_TRANSLATION_KEYS[categoryKey as EmojiCategoryName];
-      return translationKey ? t(translationKey, { ns: "MobileEmojiPicker" }) : categoryKey;
+      return translationKey ? tMobileEmojiPicker(translationKey) : categoryKey;
     },
-    [t],
+    [tMobileEmojiPicker],
   );
 
   const triggerBorderColor = error ? colors.dangerAccent : colors.borderStrong;
@@ -94,7 +97,7 @@ export function EmojiPickerInput({
         ) : null}
 
         <Pressable
-          accessibilityHint={t("TriggerAccessibilityHint", { ns: "MobileEmojiPicker" })}
+          accessibilityHint={tMobileEmojiPicker("TriggerAccessibilityHint")}
           accessibilityLabel={resolvedAccessibilityLabel}
           accessibilityRole="button"
           accessibilityState={{ disabled }}
@@ -124,12 +127,12 @@ export function EmojiPickerInput({
 
       {open && !disabled ? (
         <EmojiPickerSheet
-          emptySearchLabel={t("EmptySearch", { ns: "MobileEmojiPicker" })}
+          emptySearchLabel={tMobileEmojiPicker("EmptySearch")}
           getCategoryLabel={getCategoryLabel}
           onOpenChange={setOpen}
           onSelect={onChange}
           open
-          searchPlaceholder={t("SearchPlaceholder", { ns: "MobileEmojiPicker" })}
+          searchPlaceholder={tMobileEmojiPicker("SearchPlaceholder")}
           value={value}
         />
       ) : null}

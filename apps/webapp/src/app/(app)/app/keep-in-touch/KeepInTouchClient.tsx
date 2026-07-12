@@ -27,8 +27,8 @@ import { useCallback, useMemo, useState } from "react";
 import { openNewActivityModal } from "@/app/(app)/app/interactions/components/NewActivityModal";
 import { PageHeader } from "@/components/shell/PageHeader";
 import { useCurrentLocale as useLocale } from "@/components/shell/UserLocaleProvider";
+import { useKeepInTouchTranslations } from "@/lib/i18n/generated/hooks";
 import { useDateFormatter as useFormatter } from "@/lib/i18n/useDateFormatter";
-import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
 import { setOptimisticDocumentTitle } from "@/lib/metadata/navigationTitleStore";
 import { optimisticPersonDocumentTitle } from "@/lib/metadata/optimisticTitles";
 import { usePatchContactMutation } from "@/lib/query/hooks/useContacts";
@@ -86,7 +86,7 @@ function endDateToWindowValue(endDate: string): string {
 }
 
 export function KeepInTouchClient({ endDate }: KeepInTouchClientProps) {
-  const t = useWebTranslations("KeepInTouch");
+  const t = useKeepInTouchTranslations();
   const locale = useLocale();
   const formatter = useFormatter();
   const router = useRouter();

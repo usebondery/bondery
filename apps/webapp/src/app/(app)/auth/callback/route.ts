@@ -5,10 +5,7 @@ import { NextResponse } from "next/server";
 import { serverApiFetch } from "@/lib/api/server";
 import { BYPASS_ONBOARDING_ONCE_COOKIE } from "@/lib/auth/constants";
 import { LOCALE_PREFS_COOKIE } from "@/lib/auth/detectLocale";
-import {
-  parseReturnIntent,
-  shouldBypassOnboardingForReturnPath,
-} from "@/lib/auth/returnIntent";
+import { parseReturnIntent, shouldBypassOnboardingForReturnPath } from "@/lib/auth/returnIntent";
 import { PUBLIC_SUPABASE_PUBLISHABLE_KEY, PUBLIC_SUPABASE_URL } from "@/lib/platform/config";
 
 /**

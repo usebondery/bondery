@@ -1,10 +1,8 @@
 import { ImageResponse } from "next/og";
 
 // NOTE: BonderyLogotypeBlack uses React.useId() which is not supported in the
-// next/og edge runtime (satori). The SVG is inlined here with a static gradient
+// next/og ImageResponse renderer (satori). The SVG is inlined here with a static gradient
 // ID as a workaround. Keep this in sync with packages/branding/src/react/BonderyLogotypeBlack.tsx.
-
-export const runtime = "edge";
 
 export const alt = "Bondery: Manage your personal and professional relationships";
 export const size = {

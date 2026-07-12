@@ -8,9 +8,10 @@ import {
   parseShortcutKeys,
   successNotificationTemplate,
 } from "@bondery/mantine-next";
-import type { Activity, Contact } from "@bondery/schemas";
+import type { Activity, Contact, InteractionParticipant } from "@bondery/schemas";
+import { useCommonTranslations, useInteractionsPageTranslations } from "@/lib/i18n/generated/hooks";
 
-type ActivityParticipantRef = string | { id: string };
+type ActivityParticipantRef = string | InteractionParticipant;
 
 import {
   Button,
@@ -43,7 +44,6 @@ import { openStandardConfirmModal } from "@/components/modals/openStandardConfir
 import { PageHeader } from "@/components/shell/PageHeader";
 import { PageWrapper } from "@/components/shell/PageWrapper";
 import { peopleSearchActions } from "@/components/shell/PeopleSearchSpotlight";
-import { useCommonTranslations, useWebTranslations } from "@/lib/i18n/useWebTranslations";
 import { DEBOUNCE_MS, HOTKEYS } from "@/lib/platform/config";
 import { useContactsSelectableListQuery } from "@/lib/query/hooks/useContacts";
 import {
@@ -55,7 +55,7 @@ import { SELECTABLE_CONTACTS } from "@/lib/query/sharedListParams";
 import { openNewActivityModal } from "./components/NewActivityModal";
 
 export function InteractionsClient() {
-  const t = useWebTranslations("InteractionsPage");
+  const t = useInteractionsPageTranslations();
   const tCommon = useCommonTranslations();
   const { data: contactsData } = useContactsSelectableListQuery(SELECTABLE_CONTACTS);
   const {
@@ -128,7 +128,7 @@ export function InteractionsClient() {
             firstName: participant.firstName || t("UnknownPerson"),
             id: participantId,
             lastName: participant.lastName || null,
-            middleName: participant.middleName || participant.middle_name || null,
+            middleName: null,
           } as Contact;
         })
         .filter((participant): participant is Contact => Boolean(participant));

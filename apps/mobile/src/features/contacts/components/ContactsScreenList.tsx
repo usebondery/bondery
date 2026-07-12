@@ -3,7 +3,7 @@ import { FlashList, type FlashListRef } from "@shopify/flash-list";
 import { useCallback, useMemo } from "react";
 import { ActivityIndicator, Text, View } from "react-native";
 import { GestureDetector, type GestureType } from "react-native-gesture-handler";
-import { useMobileTranslations } from "../../../lib/i18n/useMobileTranslations";
+import { useCommonTranslations, useMobileContactsTranslations } from "@/lib/i18n/generated/hooks";
 import type { SwipeAction } from "../../../lib/preferences/useMobilePreferences";
 import type { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
 import type { ContactsFlatRow } from "../contactsFlatList";
@@ -72,7 +72,8 @@ export function ContactsScreenList({
   sortedGroups,
   stickyHeaderIndices,
 }: ContactsScreenListProps) {
-  const t = useMobileTranslations();
+  const tMobileContacts = useMobileContactsTranslations();
+  const _t = useCommonTranslations();
 
   const renderFlatItem = useCallback(
     ({ item }: { item: ContactsFlatRow }) => {
@@ -121,11 +122,18 @@ export function ContactsScreenList({
           isDisabled={selectionMode}
           onCreatePress={onCreateGroupPress}
           onGroupPress={onGroupPress}
-          title={t("Groups", { ns: "MobileContacts" })}
+          title={tMobileContacts("Groups")}
         />
       </View>
     ),
-    [onCreateGroupPress, onGroupPress, selectionMode, setListHeaderHeight, sortedGroups, t],
+    [
+      onCreateGroupPress,
+      onGroupPress,
+      selectionMode,
+      setListHeaderHeight,
+      sortedGroups,
+      tMobileContacts,
+    ],
   );
 
   const listFooter = useMemo(
@@ -142,13 +150,11 @@ export function ContactsScreenList({
     () => (
       <View style={styles.centeredState}>
         <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
-          {debouncedQuery
-            ? t("NoMatchSearch", { ns: "MobileContacts" })
-            : t("Empty", { ns: "MobileContacts" })}
+          {debouncedQuery ? tMobileContacts("NoMatchSearch") : tMobileContacts("Empty")}
         </Text>
       </View>
     ),
-    [colors.textSecondary, debouncedQuery, t],
+    [colors.textSecondary, debouncedQuery, tMobileContacts],
   );
 
   const listExtraData = useMemo(

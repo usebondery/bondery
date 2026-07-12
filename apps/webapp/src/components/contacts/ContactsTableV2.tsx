@@ -11,8 +11,8 @@ import type { Contact } from "@bondery/schemas";
 import { IconArrowMerge, IconTrash, IconUsersPlus } from "@tabler/icons-react";
 import { useCallback, useMemo, useState } from "react";
 import type { SortOrder } from "@/lib/contacts/table-types";
+import { useContactsTableTranslations } from "@/lib/i18n/generated/hooks";
 import { useContactsTableCopy } from "@/lib/i18n/useContactsTableCopy";
-import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
 import type {
   BulkSelectionAction,
   ContactsTableV2Props,
@@ -70,7 +70,7 @@ export default function ContactsTableV2({
   renderLocationCell,
 }: ContactsTableV2Props) {
   const { columnDefinitions, sortOptions, buildTableLabels } = useContactsTableCopy();
-  const t = useWebTranslations("ContactsTable");
+  const t = useContactsTableTranslations();
   const [searchIsActive, setSearchIsActive] = useState(() =>
     Boolean(searchValue ?? searchDefaultValue),
   );

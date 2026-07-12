@@ -9,13 +9,13 @@ import { SessionResyncOnFocus } from "@/components/shell/SessionResyncOnFocus";
 import { UserSessionProvider } from "@/components/shell/UserSessionProvider";
 import { getAppSession } from "@/lib/app/getAppSession";
 import { BYPASS_ONBOARDING_ONCE_COOKIE } from "@/lib/auth/constants";
+import { resolveServerSession, signOutServerSession } from "@/lib/auth/resolveServerSession";
 import {
   buildLoginUrl,
   buildUnavailableUrl,
   getRequestReturnPath,
   getRequestReturnPathForLogin,
 } from "@/lib/auth/returnIntent";
-import { resolveServerSession, signOutServerSession } from "@/lib/auth/resolveServerSession";
 import "leaflet/dist/leaflet.css";
 import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import { cookies, headers } from "next/headers";
@@ -70,7 +70,11 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     cookieStore.set(BYPASS_ONBOARDING_ONCE_COOKIE, "", { maxAge: 0, path: "/app" });
   }
 
-  if (!userSession.onboardingCompletedAt && !bypassOnboarding && !pathname.startsWith(WEBAPP_ROUTES.ONBOARDING)) {
+  if (
+    !userSession.onboardingCompletedAt &&
+    !bypassOnboarding &&
+    !pathname.startsWith(WEBAPP_ROUTES.ONBOARDING)
+  ) {
     redirect(WEBAPP_ROUTES.ONBOARDING);
   }
 

@@ -11,10 +11,14 @@ import {
   Text,
   View,
 } from "react-native";
+import {
+  useCommonTranslations,
+  useMobileContactDetailTranslations,
+  useMobileTagsTranslations,
+} from "@/lib/i18n/generated/hooks";
 import { SearchActionSheet } from "../../../components/SearchActionSheet";
 import { MOBILE_OPACITY } from "../../../lib/config";
 import { addTagToContact, removeTagFromContact } from "../../../lib/domains/contacts";
-import { useMobileTranslations } from "../../../lib/i18n/useMobileTranslations";
 import { useMobilePreferences } from "../../../lib/preferences/useMobilePreferences";
 import { getContactTags, listTags } from "../../../lib/sync/hooks/useSyncQuery";
 import { useAppToast } from "../../../lib/toast/useAppToast";
@@ -61,7 +65,9 @@ export function ContactEditTagsSheet({
   contactName: _contactName,
   onTagsReplaced,
 }: ContactEditTagsSheetProps) {
-  const t = useMobileTranslations();
+  const tMobileContactDetail = useMobileContactDetailTranslations();
+  const tMobileTags = useMobileTagsTranslations();
+  const t = useCommonTranslations();
   const colors = useMobileThemeColors();
   const { showToast } = useAppToast();
   const tagSortOrder = useMobilePreferences((state) => state.tagSortOrder);
@@ -112,8 +118,8 @@ export function ContactEditTagsSheet({
         }
 
         showToast({
-          description: t("TagsLoadError", { ns: "MobileContactDetail" }),
-          headline: t("feedback.errorTitle", { ns: "common" }),
+          description: tMobileContactDetail("TagsLoadError"),
+          headline: t("feedback.errorTitle"),
           type: "error",
         });
         onOpenChange(false);
@@ -127,7 +133,7 @@ export function ContactEditTagsSheet({
     return () => {
       cancelled = true;
     };
-  }, [contactId, onOpenChange, open, showToast, t]);
+  }, [contactId, onOpenChange, open, showToast, tMobileContactDetail, t]);
 
   function handleOpenChange(nextOpen: boolean) {
     if (!nextOpen && isSaving) {
@@ -186,8 +192,8 @@ export function ContactEditTagsSheet({
         onTagsReplaced(newTags);
       } catch {
         showToast({
-          description: t("EditTagsFailed", { ns: "MobileContactDetail" }),
-          headline: t("feedback.errorTitle", { ns: "common" }),
+          description: tMobileContactDetail("EditTagsFailed"),
+          headline: t("feedback.errorTitle"),
           type: "error",
         });
       } finally {
@@ -213,7 +219,7 @@ export function ContactEditTagsSheet({
       fontSize={MOBILE_TYPOGRAPHY.fontSize.sheetTitle}
       fontWeight={MOBILE_TYPOGRAPHY.fontWeight.bold}
     >
-      {t("EditTagsSheetTitle", { ns: "MobileContactDetail" })}
+      {tMobileContactDetail("EditTagsSheetTitle")}
     </Paragraph>
   );
 
@@ -234,7 +240,7 @@ export function ContactEditTagsSheet({
         ]}
       >
         <Text style={[styles.footerButtonText, { color: colors.textPrimary }]}>
-          {t("actions.cancel", { ns: "common" })}
+          {t("actions.cancel")}
         </Text>
       </Pressable>
 
@@ -255,7 +261,7 @@ export function ContactEditTagsSheet({
           <ActivityIndicator color={colors.textOnPrimary} size="small" />
         ) : (
           <Text style={[styles.footerButtonText, { color: colors.textOnPrimary }]}>
-            {t("EditTagsSave", { ns: "MobileContactDetail" })}
+            {tMobileContactDetail("EditTagsSave")}
           </Text>
         )}
       </Pressable>
@@ -272,7 +278,7 @@ export function ContactEditTagsSheet({
       open={open}
       query={query}
       searchEditable={!isSaving && !isLoadingTags}
-      searchPlaceholder={t("EditTagsSearchPlaceholder", { ns: "MobileTags" })}
+      searchPlaceholder={tMobileTags("EditTagsSearchPlaceholder")}
     >
       {isLoadingTags ? (
         <View style={styles.loadingState}>
@@ -286,7 +292,7 @@ export function ContactEditTagsSheet({
             fontWeight={MOBILE_TYPOGRAPHY.fontWeight.semibold}
             textAlign="center"
           >
-            {t("NoTagsYet", { ns: "MobileTags" })}
+            {tMobileTags("NoTagsYet")}
           </Paragraph>
           <Paragraph
             color={colors.textSecondary}
@@ -294,7 +300,7 @@ export function ContactEditTagsSheet({
             marginTop={6}
             textAlign="center"
           >
-            {t("NoTagsYetHint", { ns: "MobileTags" })}
+            {tMobileTags("NoTagsYetHint")}
           </Paragraph>
         </View>
       ) : (
@@ -307,7 +313,7 @@ export function ContactEditTagsSheet({
           keyExtractor={(item) => item.id}
           ListEmptyComponent={
             <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
-              {t("feedback.noResults", { ns: "common" })}
+              {t("feedback.noResults")}
             </Text>
           }
           maxToRenderPerBatch={24}

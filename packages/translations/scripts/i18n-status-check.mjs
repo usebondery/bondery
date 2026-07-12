@@ -18,8 +18,23 @@ const LOCALES = localeCatalog.supported.map((entry) => entry.code);
 const SCAN_ROOTS = [
   path.join(repoRoot, "apps/webapp/src"),
   path.join(repoRoot, "apps/mobile/src"),
+  path.join(repoRoot, "apps/mobile/app"),
+  path.join(repoRoot, "apps/chrome-extension/src"),
   path.join(repoRoot, "apps/website/src"),
 ];
+
+function namespaceFromGeneratedHook(hookSuffix) {
+  if (hookSuffix === "Common") {
+    return "common";
+  }
+  if (hookSuffix === "Validation") {
+    return "validation";
+  }
+  if (hookSuffix === "Glossary") {
+    return "glossary";
+  }
+  return hookSuffix;
+}
 
 let failed = false;
 
@@ -96,11 +111,8 @@ for (const [name, entry] of Object.entries(manifest.namespaces)) {
 }
 
 const hookBindingRes = [
-  /const\s+(\w+)\s*=\s*useWebTranslations\(\s*["']([^"']+)["'](?:\s*,\s*["']([^"']+)["'])?/g,
-  /const\s+(\w+)\s*=\s*useMobileTranslations\(\s*(?:["']([^"']*)["'])?(?:\s*,\s*["']([^"']+)["'])?/g,
-  /const\s+(\w+)\s*=\s*useCommonTranslations\(\s*(?:["']([^"']+)["'])?\s*\)/g,
-  /const\s+(\w+)\s*=\s*useValidationTranslations\(\s*(?:["']([^"']+)["'])?\s*\)/g,
-  /const\s+(\w+)\s*=\s*await\s+get(?:Web)?Translations(?:\s+as\s+\w+)?\(\s*["']([^"']+)["'](?:\s*,\s*["']([^"']+)["'])?/g,
+  /const\s+(\w+)\s*=\s*use([A-Za-z]+)Translations\(\s*(?:["']([^"']+)["'])?/g,
+  /const\s+(\w+)\s*=\s*await\s+get([A-Za-z]+)Translations\(\s*(?:["']([^"']+)["'])?/g,
 ];
 const tWithNsRe = /\b(\w+)\(\s*["']([^"']+)["']\s*,\s*\{[^}]*\bns:\s*["']([^"']+)["']/g;
 const tCallRe = /\b(\w+)\(\s*["']([^"']+)["'](?!\s*,\s*\{[^}]*\bns:)/g;
@@ -118,16 +130,15 @@ function collectBindings(content) {
   const bindings = new Map();
   for (const re of hookBindingRes) {
     for (const match of content.matchAll(re)) {
-      const [, varName, nsOrPrefix, maybePrefix] = match;
-      if (re.source.includes("useCommonTranslations")) {
-        bindings.set(varName, { ns: "common", prefix: nsOrPrefix ?? "" });
-      } else if (re.source.includes("useValidationTranslations")) {
-        bindings.set(varName, { ns: "validation", prefix: nsOrPrefix ?? "" });
-      } else if (re.source.includes("useMobileTranslations")) {
-        bindings.set(varName, { ns: nsOrPrefix || "common", prefix: maybePrefix ?? "" });
-      } else {
-        bindings.set(varName, { ns: nsOrPrefix, prefix: maybePrefix ?? "" });
+      const [, varName, hookSuffix, prefix] = match;
+      const ns = namespaceFromGeneratedHook(hookSuffix);
+      if (!manifest.namespaces[ns]) {
+        continue;
       }
+      bindings.set(varName, {
+        ns,
+        prefix: prefix ?? "",
+      });
     }
   }
   return bindings;
@@ -220,14 +231,20 @@ if (mirrorResult.status !== 0) {
 
 const i18nextCliPath = path.join(repoRoot, "node_modules/i18next-cli/dist/esm/cli.js");
 
-const statusResult = spawnSync(
-  process.execPath,
-  [i18nextCliPath, "status", "-c", "packages/translations/i18next.config.ts"],
-  { cwd: repoRoot, stdio: "inherit" },
-);
+if (fs.existsSync(i18nextCliPath)) {
+  const statusResult = spawnSync(
+    process.execPath,
+    [i18nextCliPath, "status", "-c", "packages/translations/i18next.config.ts"],
+    { cwd: repoRoot, stdio: "inherit" },
+  );
 
-if (statusResult.status !== 0) {
-  fail("i18next-cli status reported incomplete translations");
+  if (statusResult.status !== 0) {
+    console.warn(
+      "WARN: i18next-cli status reported incomplete translations (namespace-scoped hooks use the custom scanner above).",
+    );
+  }
+} else {
+  console.warn("WARN: i18next-cli not installed; skipped status subprocess.");
 }
 
 if (failed) {

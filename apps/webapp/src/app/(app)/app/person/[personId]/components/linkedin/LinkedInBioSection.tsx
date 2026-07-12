@@ -1,7 +1,7 @@
 "use client";
 
 import { Spoiler, Stack, Text } from "@mantine/core";
-import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
+import { useLinkedInDataTranslations } from "@/lib/i18n/generated/hooks";
 
 interface LinkedInBioSectionProps {
   bio: string;
@@ -15,7 +15,7 @@ interface LinkedInBioSectionProps {
  * @param bio - The raw bio text scraped from the LinkedIn About section.
  */
 export function LinkedInBioSection({ bio }: LinkedInBioSectionProps) {
-  const t = useWebTranslations("LinkedInData");
+  const t = useLinkedInDataTranslations();
 
   return (
     <Stack gap="xs">

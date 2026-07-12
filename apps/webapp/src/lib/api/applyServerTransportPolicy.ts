@@ -4,13 +4,13 @@ import { redirect } from "next/navigation";
 import { isApiUnavailableError, isApiUnavailableResponseStatus } from "@/lib/api/availability";
 import { handleServerUnauthorizedSession } from "@/lib/auth/handleServerUnauthorizedSession";
 import { resolveServerSession } from "@/lib/auth/resolveServerSession";
-import { isUnauthorizedApiError, isUnauthorizedResponseStatus } from "@/lib/auth/unauthorized";
 import {
   buildUnavailableUrl,
   getRequestReturnPath,
   getRequestReturnPathForLogin,
   parseReturnIntent,
 } from "@/lib/auth/returnIntent";
+import { isUnauthorizedApiError, isUnauthorizedResponseStatus } from "@/lib/auth/unauthorized";
 
 async function getPathname(): Promise<string> {
   const headersList = await headers();

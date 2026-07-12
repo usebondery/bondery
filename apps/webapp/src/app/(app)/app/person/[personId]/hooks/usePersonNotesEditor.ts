@@ -2,6 +2,7 @@
 
 import { successNotificationTemplate } from "@bondery/mantine-next";
 import type { Contact } from "@bondery/schemas";
+import type { TranslateFn } from "@bondery/translations";
 import { notifications } from "@mantine/notifications";
 import { Link } from "@mantine/tiptap";
 import { Color } from "@tiptap/extension-color";
@@ -31,7 +32,7 @@ interface UsePersonNotesEditorOptions {
   slashCommandSuggestion: ReturnType<
     typeof import("../editor/slashCommandSuggestion").createSlashCommandSuggestion
   >;
-  tPersonPage: (key: string) => string;
+  tPersonPage: TranslateFn<"SingleContactPage">;
 }
 
 export function usePersonNotesEditor({

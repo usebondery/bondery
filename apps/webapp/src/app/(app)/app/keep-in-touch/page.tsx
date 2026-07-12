@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
-import { getWebTranslations as getTranslations } from "@/lib/i18n/getWebTranslations";
+import { getKeepInTouchTranslations } from "@/lib/i18n/generated/hooks.server";
 import { staticPageTitle } from "@/lib/metadata/pageTitles";
 import { KeepInTouchLoader } from "./KeepInTouchLoader";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const t = await getTranslations("KeepInTouch");
+  const t = await getKeepInTouchTranslations();
   return staticPageTitle(t("Title"));
 }
 

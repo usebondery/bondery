@@ -5,6 +5,11 @@ import { type RefObject, useEffect, useRef, useState } from "react";
 import { type Control, type UseFormSetValue, useWatch } from "react-hook-form";
 import { StyleSheet, type TextInput, View } from "react-native";
 import {
+  useCommonTranslations,
+  useMobileTagsTranslations,
+  useTagsSettingsTranslations,
+} from "@/lib/i18n/generated/hooks";
+import {
   ActionSheetPopup,
   type ActionSheetPopupAction,
 } from "../../../components/ActionSheetPopup";
@@ -17,7 +22,6 @@ import { SheetTextField } from "../../../components/form";
 import { UI_TIMING_MS } from "../../../lib/config";
 import { createTag, updateTag } from "../../../lib/domains/tags";
 import { useSheetForm } from "../../../lib/forms/useSheetForm";
-import { useMobileTranslations } from "../../../lib/i18n/useMobileTranslations";
 import { useAppToast } from "../../../lib/toast/useAppToast";
 import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
 import { TagDeleteDialog } from "./TagDeleteDialog";
@@ -41,12 +45,14 @@ type TagEditSheetProps =
     };
 
 export function TagEditSheet(props: TagEditSheetProps) {
+  const tMobileTags = useMobileTagsTranslations();
+  const tTagsSettings = useTagsSettingsTranslations();
+  const t = useCommonTranslations();
   const { mode, open, onOpenChange } = props;
   const editInitialLabel = mode === "edit" ? props.initialLabel : "";
   const editInitialColor =
     mode === "edit" ? props.initialColor || DEFAULT_GROUP_COLOR : DEFAULT_GROUP_COLOR;
 
-  const t = useMobileTranslations();
   const colors = useMobileThemeColors();
   const { showToast } = useAppToast();
   const labelRef = useRef<TextInput>(null);
@@ -109,24 +115,15 @@ export function TagEditSheet(props: TagEditSheetProps) {
       props.onSaved(updated);
     } catch {
       showToast({
-        description:
-          mode === "create"
-            ? t("CreateFailed", { ns: "MobileTags" })
-            : t("EditFailed", { ns: "MobileTags" }),
-        headline: t("feedback.errorTitle", { ns: "common" }),
+        description: mode === "create" ? tMobileTags("CreateFailed") : tMobileTags("EditFailed"),
+        headline: t("feedback.errorTitle"),
         type: "error",
       });
     }
   });
 
-  const sheetTitle =
-    mode === "create"
-      ? t("CreateTitle", { ns: "TagsSettings" })
-      : t("EditTitle", { ns: "TagsSettings" });
-  const saveLabel =
-    mode === "create"
-      ? t("CreateButton", { ns: "TagsSettings" })
-      : t("SaveButton", { ns: "TagsSettings" });
+  const sheetTitle = mode === "create" ? tTagsSettings("CreateTitle") : tTagsSettings("EditTitle");
+  const saveLabel = mode === "create" ? tTagsSettings("CreateButton") : tTagsSettings("SaveButton");
 
   const primaryAction: ActionSheetPopupAction = {
     disabled: !canSave,
@@ -144,7 +141,7 @@ export function TagEditSheet(props: TagEditSheetProps) {
           {
             disabled: isSubmitting,
             icon: <IconTrash size={16} stroke={colors.dangerAccent} />,
-            label: t("DeleteButton", { ns: "TagsSettings" }),
+            label: tTagsSettings("DeleteButton"),
             onPress: () => setDeleteDialogOpen(true),
             tone: "danger",
             variant: "outline",
@@ -170,7 +167,6 @@ export function TagEditSheet(props: TagEditSheetProps) {
           onSubmit={() => void onSubmit()}
           setValue={setValue}
           showToast={showToast}
-          t={t}
         />
       </ActionSheetPopup>
 
@@ -201,7 +197,6 @@ function TagColorLabelRow({
   isSubmitting,
   labelRef,
   onSubmit,
-  t,
   showToast,
 }: {
   control: Control<TagFormValues>;
@@ -209,15 +204,15 @@ function TagColorLabelRow({
   isSubmitting: boolean;
   labelRef: RefObject<TextInput | null>;
   onSubmit: () => void;
-  t: ReturnType<typeof useMobileTranslations>;
   showToast: ReturnType<typeof useAppToast>["showToast"];
 }) {
+  const tTagsSettings = useTagsSettingsTranslations();
   const selectedColor = useWatch({ control, name: "color" }) ?? DEFAULT_GROUP_COLOR;
 
   return (
     <View style={styles.labelRow}>
       <ColorPickerInput
-        accessibilityLabel={t("ColorLabel", { ns: "TagsSettings" })}
+        accessibilityLabel={tTagsSettings("ColorLabel")}
         compact
         disabled={isSubmitting}
         onChange={(next) => setValue("color", next, { shouldDirty: true, shouldValidate: true })}
@@ -234,7 +229,7 @@ function TagColorLabelRow({
         maxLength={GROUP_LABEL_MAX_LENGTH}
         name="label"
         onSubmitEditing={onSubmit}
-        placeholder={t("LabelPlaceholder", { ns: "TagsSettings" })}
+        placeholder={tTagsSettings("LabelPlaceholder")}
         returnKeyType="done"
       />
     </View>

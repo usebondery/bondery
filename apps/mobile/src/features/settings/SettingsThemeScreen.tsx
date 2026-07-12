@@ -4,7 +4,10 @@ import type { ReactNode } from "react";
 import { ScrollView, StyleSheet, Text } from "react-native";
 import { StackNavBar } from "../../components/chrome";
 import { updateSettings } from "../../lib/api/client";
-import { useMobileTranslations } from "../../lib/i18n/useMobileTranslations";
+import {
+  useCommonTranslations,
+  useMobileSettingsTranslations,
+} from "../../lib/i18n/generated/hooks";
 import type {
   MobilePreferencesState,
   ThemePreference,
@@ -16,8 +19,9 @@ import { useMobileThemeColors } from "../../theme/useMobileThemeColors";
 import { SettingsSelect } from "./components/SettingsSelect";
 
 export function SettingsThemeScreen() {
+  const tMobileSettings = useMobileSettingsTranslations();
+  const t = useCommonTranslations();
   const router = useRouter();
-  const t = useMobileTranslations();
   const { showToast } = useAppToast();
   const colors = useMobileThemeColors();
 
@@ -37,17 +41,17 @@ export function SettingsThemeScreen() {
   }> = [
     {
       icon: <IconSettings size={16} stroke={iconStroke} />,
-      label: t("ThemeMatchSystem", { ns: "MobileSettings" }),
+      label: tMobileSettings("ThemeMatchSystem"),
       value: "system",
     },
     {
       icon: <IconSun size={16} stroke={iconStroke} />,
-      label: t("ThemeLight", { ns: "MobileSettings" }),
+      label: tMobileSettings("ThemeLight"),
       value: "light",
     },
     {
       icon: <IconMoon size={16} stroke={iconStroke} />,
-      label: t("ThemeDark", { ns: "MobileSettings" }),
+      label: tMobileSettings("ThemeDark"),
       value: "dark",
     },
   ];
@@ -67,8 +71,8 @@ export function SettingsThemeScreen() {
     } catch {
       setThemePreference(previousThemePreference);
       showToast({
-        description: t("errors.unknown", { ns: "common" }),
-        headline: t("feedback.errorTitle", { ns: "common" }),
+        description: t("errors.unknown"),
+        headline: t("feedback.errorTitle"),
         type: "error",
       });
     }
@@ -78,7 +82,7 @@ export function SettingsThemeScreen() {
     <>
       <StackNavBar
         onBack={() => router.back()}
-        title={t("Theme", { ns: "MobileSettings" })}
+        title={tMobileSettings("Theme")}
         variant="elevated"
       />
 
@@ -87,10 +91,10 @@ export function SettingsThemeScreen() {
         style={[styles.screen, { backgroundColor: colors.appBackground }]}
       >
         <Text style={[styles.label, { color: colors.textSecondary }]}>
-          {t("Theme", { ns: "MobileSettings" })}
+          {tMobileSettings("Theme")}
         </Text>
         <SettingsSelect
-          label={t("Theme", { ns: "MobileSettings" })}
+          label={tMobileSettings("Theme")}
           onValueChange={(nextThemePreference) => {
             void handleThemeChange(nextThemePreference as ThemePreference);
           }}

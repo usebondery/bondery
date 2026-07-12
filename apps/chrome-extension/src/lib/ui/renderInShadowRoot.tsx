@@ -18,6 +18,7 @@ import { StrictMode } from "react";
 import ReactDOM from "react-dom/client";
 import type { ContentScriptAppendMode } from "wxt/utils/content-script-ui/types";
 import { type ContentScriptContext, createShadowRootUi } from "#imports";
+import { I18nProvider } from "../i18n/I18nProvider";
 import { MantineWrapper } from "./MantineWrapper";
 
 // CSS imports — WXT's `cssInjectionMode: "ui"` will bundle these and
@@ -52,9 +53,11 @@ export async function renderInShadowRoot(
       const root = ReactDOM.createRoot(uiContainer);
       root.render(
         <StrictMode>
-          <MantineWrapper cssVariablesSelector=":host" getRootElement={() => shadowHost}>
-            {options.render(uiContainer)}
-          </MantineWrapper>
+          <I18nProvider>
+            <MantineWrapper cssVariablesSelector=":host" getRootElement={() => shadowHost}>
+              {options.render(uiContainer)}
+            </MantineWrapper>
+          </I18nProvider>
         </StrictMode>,
       );
       return root;

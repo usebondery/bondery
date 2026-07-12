@@ -2,7 +2,7 @@
 
 import { SimpleGrid, Stack, Text, Title, UnstyledButton } from "@mantine/core";
 import { IconBriefcase, IconFriends, IconWorld } from "@tabler/icons-react";
-import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
+import { useOnboardingTranslations } from "@/lib/i18n/generated/hooks";
 import type { OnboardingIntent } from "../hooks/OnboardingContext";
 import { useOnboardingContext } from "../hooks/OnboardingContext";
 
@@ -21,7 +21,7 @@ const INTENT_OPTIONS: {
 ];
 
 export function StepIntent({ onNext }: StepProps) {
-  const t = useWebTranslations("Onboarding", "Intent");
+  const t = useOnboardingTranslations("Intent");
   const { setIntent } = useOnboardingContext();
 
   const handleSelect = (value: NonNullable<OnboardingIntent>) => {

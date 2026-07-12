@@ -3342,8 +3342,6 @@ paths:
             schema:
               type: object
               properties:
-                userId:
-                  type: string
                 addresses:
                   nullable: true
                   type: array
@@ -3468,6 +3466,48 @@ paths:
                 headline:
                   nullable: true
                   type: string
+                importantDates:
+                  nullable: true
+                  maxItems: 5
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      date:
+                        type: string
+                        pattern: ^\d{4}-\d{2}-\d{2}$
+                      type:
+                        type: string
+                        enum:
+                          - birthday
+                          - anniversary
+                          - nameday
+                          - graduation
+                          - other
+                      note:
+                        nullable: true
+                        type: string
+                        maxLength: 50
+                      notifyDaysBefore:
+                        anyOf:
+                          - type: number
+                            enum:
+                              - 1
+                          - type: number
+                            enum:
+                              - 3
+                          - type: number
+                            enum:
+                              - 7
+                          - type: string
+                            nullable: true
+                            enum:
+                              - null
+                    required:
+                      - date
+                      - type
                 instagram:
                   nullable: true
                   type: string
@@ -3544,57 +3584,14 @@ paths:
                 timezone:
                   nullable: true
                   type: string
+                userId:
+                  type: string
                 website:
                   nullable: true
                   type: string
                 whatsapp:
                   nullable: true
                   type: string
-                updatedAt:
-                  type: string
-                  pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
-                importantDates:
-                  nullable: true
-                  maxItems: 5
-                  type: array
-                  items:
-                    type: object
-                    properties:
-                      id:
-                        type: string
-                      date:
-                        type: string
-                        pattern: ^\d{4}-\d{2}-\d{2}$
-                      type:
-                        type: string
-                        enum:
-                          - birthday
-                          - anniversary
-                          - nameday
-                          - graduation
-                          - other
-                      note:
-                        nullable: true
-                        type: string
-                        maxLength: 50
-                      notifyDaysBefore:
-                        anyOf:
-                          - type: number
-                            enum:
-                              - 1
-                          - type: number
-                            enum:
-                              - 3
-                          - type: number
-                            enum:
-                              - 7
-                          - type: string
-                            nullable: true
-                            enum:
-                              - null
-                    required:
-                      - date
-                      - type
       parameters:
         - schema:
             $ref: "#/components/schemas/ContactId"
@@ -14412,16 +14409,6 @@ paths:
           description: User session
           content:
             application/json:
-              example:
-                data:
-                  avatarUrl: null
-                  colorScheme: auto
-                  displayName: Ada Lovelace
-                  language: en
-                  onboardingCompletedAt: 2024-01-15T10:00:00+00:00
-                  timeFormat: 24h
-                  timezone: Europe/London
-                success: true
               schema:
                 type: object
                 properties:
@@ -14473,16 +14460,6 @@ paths:
                   - data
                   - success
                 additionalProperties: false
-                example:
-                  data:
-                    avatarUrl: null
-                    colorScheme: auto
-                    displayName: Ada Lovelace
-                    language: en
-                    onboardingCompletedAt: 2024-01-15T10:00:00+00:00
-                    timeFormat: 24h
-                    timezone: Europe/London
-                  success: true
         "400":
           description: Invalid request
           content:
@@ -16538,8 +16515,6 @@ paths:
                           payload:
                             type: object
                             properties:
-                              userId:
-                                type: string
                               addresses:
                                 nullable: true
                                 type: array
@@ -16664,6 +16639,48 @@ paths:
                               headline:
                                 nullable: true
                                 type: string
+                              importantDates:
+                                nullable: true
+                                maxItems: 5
+                                type: array
+                                items:
+                                  type: object
+                                  properties:
+                                    id:
+                                      type: string
+                                    date:
+                                      type: string
+                                      pattern: ^\d{4}-\d{2}-\d{2}$
+                                    type:
+                                      type: string
+                                      enum:
+                                        - birthday
+                                        - anniversary
+                                        - nameday
+                                        - graduation
+                                        - other
+                                    note:
+                                      nullable: true
+                                      type: string
+                                      maxLength: 50
+                                    notifyDaysBefore:
+                                      anyOf:
+                                        - type: number
+                                          enum:
+                                            - 1
+                                        - type: number
+                                          enum:
+                                            - 3
+                                        - type: number
+                                          enum:
+                                            - 7
+                                        - type: string
+                                          nullable: true
+                                          enum:
+                                            - null
+                                  required:
+                                    - date
+                                    - type
                               instagram:
                                 nullable: true
                                 type: string
@@ -16740,57 +16757,14 @@ paths:
                               timezone:
                                 nullable: true
                                 type: string
+                              userId:
+                                type: string
                               website:
                                 nullable: true
                                 type: string
                               whatsapp:
                                 nullable: true
                                 type: string
-                              updatedAt:
-                                type: string
-                                pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
-                              importantDates:
-                                nullable: true
-                                maxItems: 5
-                                type: array
-                                items:
-                                  type: object
-                                  properties:
-                                    id:
-                                      type: string
-                                    date:
-                                      type: string
-                                      pattern: ^\d{4}-\d{2}-\d{2}$
-                                    type:
-                                      type: string
-                                      enum:
-                                        - birthday
-                                        - anniversary
-                                        - nameday
-                                        - graduation
-                                        - other
-                                    note:
-                                      nullable: true
-                                      type: string
-                                      maxLength: 50
-                                    notifyDaysBefore:
-                                      anyOf:
-                                        - type: number
-                                          enum:
-                                            - 1
-                                        - type: number
-                                          enum:
-                                            - 3
-                                        - type: number
-                                          enum:
-                                            - 7
-                                        - type: string
-                                          nullable: true
-                                          enum:
-                                            - null
-                                  required:
-                                    - date
-                                    - type
                           type:
                             type: string
                             enum:

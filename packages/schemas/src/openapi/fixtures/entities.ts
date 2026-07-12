@@ -45,6 +45,11 @@ export const EXAMPLE_CONTACT = {
   ...nullContactFields,
 };
 
+/** Paginated list row — omits nullable `addresses` (list items use optional array, not null). */
+export const EXAMPLE_CONTACT_LIST_ITEM = (({ addresses: _addresses, ...contact }) => contact)(
+  EXAMPLE_CONTACT,
+);
+
 /** Duplicate candidate for merge examples. */
 export const EXAMPLE_CONTACT_DUPLICATE = {
   addresses: null,

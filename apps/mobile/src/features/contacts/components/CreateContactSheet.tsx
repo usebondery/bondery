@@ -5,12 +5,13 @@ import { IconUserPlus } from "@tabler/icons-react-native";
 import { useRouter } from "expo-router";
 import { useEffect, useMemo, useRef } from "react";
 import { StyleSheet, Text, type TextInput } from "react-native";
+import { useMobileCreateContactTranslations } from "@/lib/i18n/generated/hooks";
 import { ActionSheetPopup } from "../../../components/ActionSheetPopup";
 import { SheetTextField } from "../../../components/form";
 import { UI_TIMING_MS } from "../../../lib/config";
 import { createContact } from "../../../lib/domains/contacts";
 import { useSheetForm } from "../../../lib/forms/useSheetForm";
-import { useMobileTranslations } from "../../../lib/i18n/useMobileTranslations";
+import { preloadMobileNamespaces } from "../../../lib/i18n/preloadMobileNamespaces";
 import { useAppToast } from "../../../lib/toast/useAppToast";
 import { MOBILE_TYPOGRAPHY } from "../../../theme/tokens";
 import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
@@ -25,7 +26,7 @@ interface CreateContactSheetProps {
  * Bottom sheet for creating a contact from a single full-name field.
  */
 export function CreateContactSheet({ open, onOpenChange, onCreated }: CreateContactSheetProps) {
-  const t = useMobileTranslations();
+  const tMobileCreateContact = useMobileCreateContactTranslations();
   const router = useRouter();
   const colors = useMobileThemeColors();
   const { showToast } = useAppToast();
@@ -46,6 +47,8 @@ export function CreateContactSheet({ open, onOpenChange, onCreated }: CreateCont
     if (!open) {
       return;
     }
+
+    void preloadMobileNamespaces(["mobile.createContact"]);
 
     const timer = setTimeout(() => {
       inputRef.current?.focus();
@@ -80,11 +83,11 @@ export function CreateContactSheet({ open, onOpenChange, onCreated }: CreateCont
       const message =
         createError instanceof Error && createError.message.trim().length > 0
           ? createError.message
-          : t("ErrorDescription", { ns: "MobileCreateContact" });
+          : tMobileCreateContact("ErrorDescription");
 
       showToast({
         description: message,
-        headline: t("ErrorTitle", { ns: "MobileCreateContact" }),
+        headline: tMobileCreateContact("ErrorTitle"),
         type: "error",
       });
     }
@@ -101,7 +104,7 @@ export function CreateContactSheet({ open, onOpenChange, onCreated }: CreateCont
         {
           disabled: !canSubmit,
           icon: createActionIcon,
-          label: t("Create", { ns: "MobileCreateContact" }),
+          label: tMobileCreateContact("Create"),
           loading: isSubmitting,
           onPress: () => void onSubmit(),
           tone: "primary",
@@ -112,10 +115,10 @@ export function CreateContactSheet({ open, onOpenChange, onCreated }: CreateCont
       onClose={handleClose}
       onOpenChange={onOpenChange}
       open={open}
-      title={t("Title", { ns: "MobileCreateContact" })}
+      title={tMobileCreateContact("Title")}
     >
       <Text style={[styles.label, { color: colors.textSecondary }]}>
-        {t("FullNameLabel", { ns: "MobileCreateContact" })}
+        {tMobileCreateContact("FullNameLabel")}
       </Text>
 
       <SheetTextField
@@ -131,7 +134,7 @@ export function CreateContactSheet({ open, onOpenChange, onCreated }: CreateCont
             void onSubmit();
           }
         }}
-        placeholder={t("FullNamePlaceholder", { ns: "MobileCreateContact" })}
+        placeholder={tMobileCreateContact("FullNamePlaceholder")}
         returnKeyType="done"
       />
     </ActionSheetPopup>
