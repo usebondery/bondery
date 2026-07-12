@@ -1506,24 +1506,6 @@ paths:
       description: List contacts with pagination, search, sort, and list stats.
       parameters:
         - schema:
-            default: 50
-            type: integer
-            minimum: 1
-            maximum: 200
-          in: query
-          name: limit
-        - schema:
-            default: 0
-            type: integer
-            minimum: 0
-            maximum: 9007199254740991
-          in: query
-          name: offset
-        - schema:
-            type: string
-          in: query
-          name: search
-        - schema:
             type: string
             enum:
               - low
@@ -1543,6 +1525,24 @@ paths:
             type: boolean
           in: query
           name: keepInTouch
+        - schema:
+            default: 50
+            type: integer
+            minimum: 1
+            maximum: 200
+          in: query
+          name: limit
+        - schema:
+            default: 0
+            type: integer
+            minimum: 0
+            maximum: 9007199254740991
+          in: query
+          name: offset
+        - schema:
+            type: string
+          in: query
+          name: search
         - schema:
             type: string
             enum:
@@ -2220,24 +2220,6 @@ paths:
       description: List contacts for pickers and comboboxes (identity fields only, no channel enrichment).
       parameters:
         - schema:
-            default: 50
-            type: integer
-            minimum: 1
-            maximum: 200
-          in: query
-          name: limit
-        - schema:
-            default: 0
-            type: integer
-            minimum: 0
-            maximum: 9007199254740991
-          in: query
-          name: offset
-        - schema:
-            type: string
-          in: query
-          name: search
-        - schema:
             type: string
             enum:
               - low
@@ -2257,6 +2239,24 @@ paths:
             type: boolean
           in: query
           name: keepInTouch
+        - schema:
+            default: 50
+            type: integer
+            minimum: 1
+            maximum: 200
+          in: query
+          name: limit
+        - schema:
+            default: 0
+            type: integer
+            minimum: 0
+            maximum: 9007199254740991
+          in: query
+          name: offset
+        - schema:
+            type: string
+          in: query
+          name: search
         - schema:
             type: string
             enum:
@@ -6601,20 +6601,6 @@ paths:
       description: List merge recommendations for duplicate contacts.
       parameters:
         - schema:
-            default: 50
-            type: integer
-            minimum: 1
-            maximum: 200
-          in: query
-          name: limit
-        - schema:
-            default: 0
-            type: integer
-            minimum: 0
-            maximum: 9007199254740991
-          in: query
-          name: offset
-        - schema:
             type: string
             enum:
               - low
@@ -6634,6 +6620,20 @@ paths:
             type: string
           in: query
           name: declined
+        - schema:
+            default: 50
+            type: integer
+            minimum: 1
+            maximum: 200
+          in: query
+          name: limit
+        - schema:
+            default: 0
+            type: integer
+            minimum: 0
+            maximum: 9007199254740991
+          in: query
+          name: offset
       security: *a2
       responses:
         "200":
@@ -10375,24 +10375,6 @@ paths:
       description: List paginated contacts in a group.
       parameters:
         - schema:
-            default: 50
-            type: integer
-            minimum: 1
-            maximum: 200
-          in: query
-          name: limit
-        - schema:
-            default: 0
-            type: integer
-            minimum: 0
-            maximum: 9007199254740991
-          in: query
-          name: offset
-        - schema:
-            type: string
-          in: query
-          name: search
-        - schema:
             type: string
             enum:
               - low
@@ -10412,6 +10394,24 @@ paths:
             type: boolean
           in: query
           name: keepInTouch
+        - schema:
+            default: 50
+            type: integer
+            minimum: 1
+            maximum: 200
+          in: query
+          name: limit
+        - schema:
+            default: 0
+            type: integer
+            minimum: 0
+            maximum: 9007199254740991
+          in: query
+          name: offset
+        - schema:
+            type: string
+          in: query
+          name: search
         - schema:
             type: string
             enum:
@@ -11930,24 +11930,6 @@ paths:
       description: List paginated contacts that have this tag.
       parameters:
         - schema:
-            default: 50
-            type: integer
-            minimum: 1
-            maximum: 200
-          in: query
-          name: limit
-        - schema:
-            default: 0
-            type: integer
-            minimum: 0
-            maximum: 9007199254740991
-          in: query
-          name: offset
-        - schema:
-            type: string
-          in: query
-          name: search
-        - schema:
             type: string
             enum:
               - low
@@ -11967,6 +11949,24 @@ paths:
             type: boolean
           in: query
           name: keepInTouch
+        - schema:
+            default: 50
+            type: integer
+            minimum: 1
+            maximum: 200
+          in: query
+          name: limit
+        - schema:
+            default: 0
+            type: integer
+            minimum: 0
+            maximum: 9007199254740991
+          in: query
+          name: offset
+        - schema:
+            type: string
+          in: query
+          name: search
         - schema:
             type: string
             enum:
@@ -12386,20 +12386,6 @@ paths:
       description: List interactions with pagination.
       parameters:
         - schema:
-            default: 50
-            type: integer
-            minimum: 1
-            maximum: 200
-          in: query
-          name: limit
-        - schema:
-            default: 0
-            type: integer
-            minimum: 0
-            maximum: 9007199254740991
-          in: query
-          name: offset
-        - schema:
             type: string
             enum:
               - low
@@ -12420,6 +12406,20 @@ paths:
               - $ref: "#/components/schemas/ContactId"
           in: query
           name: contactId
+        - schema:
+            default: 50
+            type: integer
+            minimum: 1
+            maximum: 200
+          in: query
+          name: limit
+        - schema:
+            default: 0
+            type: integer
+            minimum: 0
+            maximum: 9007199254740991
+          in: query
+          name: offset
       security: *a1
       responses:
         "200":
