@@ -6,13 +6,14 @@
 import {
   addContactsToGroupRequestSchema,
   addContactsToGroupResponseSchema,
-  type Contact,
+  contactListItemSchema,
   groupContactsListResponseSchema,
   removeGroupMembersRequestSchema,
   removeGroupMembersResponseSchema,
 } from "@bondery/schemas";
 import { peopleListQuerySchema, uuidParamSchema } from "@bondery/schemas/http";
 import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
+import { z } from "zod";
 import { addGroupMembers, removeGroupMembers } from "../../domains/groups/index.js";
 import { attachContactExtras } from "../../lib/contacts/enrichment.js";
 import { resolveGroupMemberPersonIds } from "../../lib/contacts/resolve-group-member-ids.js";
@@ -253,7 +254,11 @@ export function registerGroupContactRoutes(fastify: AppFastifyInstance): void {
 
       return {
         group: { id: group.id, label: group.label },
-        ...buildPaginatedResponse("contacts", enrichedContacts as unknown as Contact[], pagination),
+        ...buildPaginatedResponse(
+          "contacts",
+          z.array(contactListItemSchema).parse(enrichedContacts),
+          pagination,
+        ),
       };
     },
   );

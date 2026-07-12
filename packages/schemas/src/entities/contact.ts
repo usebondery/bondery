@@ -84,6 +84,48 @@ export const contactSelectableSchema = contactPreviewSchema.extend({
 
 export type ContactSelectable = z.infer<typeof contactSelectableSchema>;
 
+/**
+ * Paginated people list row — `CONTACT_SELECT` fields plus channel/social enrichment.
+ * Detail routes use full `contactSchema` (important dates, position, etc.).
+ */
+export const contactListItemSchema = contactSchema
+  .pick({
+    avatar: true,
+    createdAt: true,
+    emails: true,
+    facebook: true,
+    firstName: true,
+    gisPoint: true,
+    headline: true,
+    id: true,
+    instagram: true,
+    keepFrequencyDays: true,
+    language: true,
+    lastInteraction: true,
+    lastInteractionActivityId: true,
+    lastName: true,
+    latitude: true,
+    linkedin: true,
+    location: true,
+    longitude: true,
+    middleName: true,
+    myself: true,
+    notes: true,
+    notesUpdatedAt: true,
+    phones: true,
+    signal: true,
+    timezone: true,
+    updatedAt: true,
+    userId: true,
+    website: true,
+    whatsapp: true,
+  })
+  .extend({
+    addresses: z.array(contactAddressReadSchema).optional(),
+  });
+
+export type ContactListItem = z.infer<typeof contactListItemSchema>;
+
 export const contactRelationshipSchema = entityIdentitySchema
   .extend({
     relationshipType: relationshipTypeSchema,
@@ -217,7 +259,7 @@ export const contactsListStatsSchema = z.object({
 
 export const contactsListResponseSchema = makePaginatedListResponseSchema(
   "contacts",
-  contactSchema,
+  contactListItemSchema,
 ).extend({
   stats: contactsListStatsSchema,
 });
