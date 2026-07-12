@@ -1,4 +1,4 @@
-import type { Customer, Polar } from "@polar-sh/sdk";
+import type { Polar } from "@polar-sh/sdk";
 import type { DomainContext } from "../../domains/_shared/context.js";
 import { createAdminClient } from "../../lib/data/supabase.js";
 import { getPolarClient } from "../../services/billing/polar.js";
@@ -71,7 +71,7 @@ export async function syncSubscriptionFromPolar(
     return { reason: "polar_not_configured", synced: false };
   }
 
-  let polarCustomer: Customer;
+  let polarCustomer: Awaited<ReturnType<Polar["customers"]["getExternal"]>>;
   try {
     polarCustomer = await polar.customers.getExternal({
       externalId: user.id,

@@ -75,7 +75,7 @@ export async function queryPeoplePage(
         throw internal("internal_server_error", fetchError.message);
       }
 
-      rows = restoreRankedOrder((fetchedContacts || []) as PeoplePageRow[], rankedIds);
+      rows = restoreRankedOrder((fetchedContacts || []) as unknown as PeoplePageRow[], rankedIds);
     }
   } else {
     let peopleQuery = client
@@ -139,7 +139,7 @@ export async function queryPeoplePage(
     peopleQuery = peopleQuery.range(offset, offset + limit - 1);
 
     const result = await peopleQuery;
-    rows = (result.data || []) as PeoplePageRow[];
+    rows = (result.data || []) as unknown as PeoplePageRow[];
     count = result.count;
     error = result.error;
   }

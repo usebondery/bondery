@@ -58,7 +58,7 @@ export async function listContacts(
   const pagination = buildPeopleListPagination(query, enrichedContacts.length, page.count);
 
   return {
-    ...buildPaginatedResponse("contacts", enrichedContacts as Contact[], pagination),
+    ...buildPaginatedResponse("contacts", enrichedContacts as unknown as Contact[], pagination),
     stats: {
       newContactsThisYear: newContactsYearCount || 0,
       thisMonthInteractions: monthInteractionsCount || 0,

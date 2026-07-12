@@ -3,7 +3,10 @@
  * Lists, refreshes, declines, and restores merge recommendations.
  */
 
-import type { MergeRecommendationsResponse } from "@bondery/schemas";
+import type {
+  MergeRecommendationsResponse,
+  RefreshMergeRecommendationsResponse,
+} from "@bondery/schemas";
 import {
   declineMergeRecommendationResponseSchema,
   mergeRecommendationsCountResponseSchema,
@@ -150,10 +153,10 @@ export function registerRecommendationRoutes(fastify: AppFastifyInstance): void 
       const avatarOptions = extractAvatarOptions(request.query);
 
       try {
-        return await refreshMergeRecommendations(
+        return (await refreshMergeRecommendations(
           domainContextFromClient(client, user, request.log),
           { avatarOptions, hydrate: true },
-        );
+        )) as RefreshMergeRecommendationsResponse;
       } catch (error) {
         const message =
           error instanceof Error ? error.message : "Failed to refresh merge recommendations";

@@ -194,9 +194,7 @@ export function mapErrorToResponse(
 
   const rawCode = error.code ?? "";
   const code = isApiErrorCode(rawCode) ? rawCode : "internal_server_error";
-  const { type } = isApiErrorCode(code)
-    ? codeTypeAndStatus(code)
-    : { status: statusCode, type: "api_error" as ApiErrorType };
+  const type = isApiErrorCode(code) ? codeTypeAndStatus(code).type : "api_error";
 
   return {
     body: wrap(

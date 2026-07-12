@@ -2,10 +2,11 @@ import type { FastifyReply, FastifyRequest, RouteHandlerMethod } from "fastify";
 import type { DomainContext } from "../../domains/_shared/context.js";
 import { domainContextFromRequest } from "./domain-context.js";
 
+/** Validated by route schema at runtime; loosened for handler ergonomics. */
 type DomainRouteRequest = FastifyRequest & {
-  body: unknown;
-  params: Record<string, string>;
-  query: Record<string, unknown>;
+  body: any;
+  params: any;
+  query: any;
 };
 
 export function withDomainRoute(

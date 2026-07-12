@@ -29,7 +29,11 @@ import {
   restoreRankedOrder,
   searchPeopleIds,
 } from "../../lib/data/search.js";
-import { CONTACT_SELECT, extractAvatarOptions } from "../../lib/data/select-fragments.js";
+import {
+  CONTACT_SELECT,
+  type ContactWithId,
+  extractAvatarOptions,
+} from "../../lib/data/select-fragments.js";
 import { getAuth } from "../../lib/platform/auth/strategies.js";
 import { badRequest, internal, notFound } from "../../lib/platform/errors/http-errors.js";
 import type { AppFastifyInstance } from "../../lib/platform/fastify-types.js";
@@ -104,7 +108,7 @@ export function registerGroupContactRoutes(fastify: AppFastifyInstance): void {
       // When a search query is active, use the search_people_ids RPC with
       // p_group_id to scope results to this group. Then fetch full rows
       // via .in() to preserve CONTACT_SELECT aliasing.
-      let contacts: Contact[];
+      let contacts: ContactWithId[];
       let totalCount: number;
 
       if (search) {
@@ -249,7 +253,7 @@ export function registerGroupContactRoutes(fastify: AppFastifyInstance): void {
 
       return {
         group: { id: group.id, label: group.label },
-        ...buildPaginatedResponse("contacts", enrichedContacts, pagination),
+        ...buildPaginatedResponse("contacts", enrichedContacts as unknown as Contact[], pagination),
       };
     },
   );
