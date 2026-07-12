@@ -2,7 +2,7 @@
 
 import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import { Box, Button, Collapse, Group, Loader, Stack, Text, Title } from "@mantine/core";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   deriveUserHealthStatus,
@@ -10,7 +10,8 @@ import {
   type HealthCheckResult,
   type UserHealthStatus,
 } from "@/lib/api/health";
-import { RETURN_TO_STORAGE_KEY } from "@/lib/auth/handleApiUnavailable";
+import { OUTAGE_RESUME_DELAY_MS } from "@/lib/auth/constants";
+import { parseReturnIntent } from "@/lib/auth/returnIntent";
 import { useWebTranslations } from "@/lib/i18n/useWebTranslations";
 import { STATUS_URL } from "@/lib/platform/config";
 
@@ -21,6 +22,7 @@ const FAILURES_BEFORE_BACKOFF = 5;
 export function UnavailableClient() {
   const t = useWebTranslations("UnavailablePage");
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [isRetrying, setIsRetrying] = useState(false);
   const [isPolling, setIsPolling] = useState(false);
   const [isNavigating, setIsNavigating] = useState(false);
@@ -46,17 +48,21 @@ export function UnavailableClient() {
           ? t("StatusOffline")
           : t("StatusChecking");
 
-  const navigateBack = useCallback(() => {
+  const navigateBack = useCallback(async () => {
     if (isNavigatingRef.current) {
       return;
     }
     isNavigatingRef.current = true;
     setIsNavigating(true);
-    const returnTo = sessionStorage.getItem(RETURN_TO_STORAGE_KEY);
-    sessionStorage.removeItem(RETURN_TO_STORAGE_KEY);
-    router.replace(returnTo ?? WEBAPP_ROUTES.HOME);
+
+    await new Promise<void>((resolve) => {
+      setTimeout(resolve, OUTAGE_RESUME_DELAY_MS);
+    });
+
+    const returnTo = parseReturnIntent(searchParams) ?? WEBAPP_ROUTES.HOME;
+    router.replace(returnTo);
     router.refresh();
-  }, [router]);
+  }, [router, searchParams]);
 
   const loadHealth = useCallback(
     async (options?: { initial?: boolean }): Promise<UserHealthStatus> => {
@@ -78,7 +84,7 @@ export function UnavailableClient() {
 
         const status = deriveUserHealthStatus(false, result);
         if (status === "online") {
-          navigateBack();
+          void navigateBack();
         } else {
           consecutiveFailuresRef.current += 1;
           if (consecutiveFailuresRef.current >= FAILURES_BEFORE_BACKOFF) {

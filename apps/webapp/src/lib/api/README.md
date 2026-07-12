@@ -18,8 +18,10 @@ Import from `@/lib/api/client`. Always use same-origin paths from `API_ROUTES` (
 
 | Runtime | Policy module | On 401 | On outage |
 |---------|---------------|--------|-----------|
-| Browser | `applyTransportErrorPolicy` | `endSession` → login | `handleApiUnavailable` → `/app/unavailable` |
-| Server RSC | `applyServerTransportPolicy` | `signOutServerSession` → login | `redirect(/app/unavailable)` if session valid, else login |
+| Browser | `applyTransportErrorPolicy` | `endSession` → `/login?redirect=…` (session expired only) | `handleApiUnavailable` → `/app/unavailable?redirect=…` |
+| Server RSC | `applyServerTransportPolicy` | `signOutServerSession` → `/login?redirect=…` | `redirect(/app/unavailable?redirect=…)` if session valid, else login |
+
+Return intent is captured as `pathname + search` in the `redirect` query param (see `lib/auth/returnIntent.ts`). Middleware forwards `x-pathname` and `x-search` for server-side capture. User-initiated sign-out does not set `redirect`.
 
 `clientApiJson` and `serverApiFetch` (default) apply policy automatically. Unavailable redirects on the server are **session-gated** — no valid session routes to login, not unavailable (matches BFF 401-before-upstream on the client).
 

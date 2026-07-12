@@ -16,7 +16,8 @@ references/
   api-usage.md      Transport wrappers (clientApi*/serverApi*/apiRequest), *Json vs *JsonOrNull, ApiError
   api-mutations.md  Mutation responses — return full objects, no post-mutation GET
   sync-architecture.md  Mobile offline sync — pull/bootstrap, push mutations, server-authoritative merge, versioning
-  ux-patterns.md    Feedback, async duplication loading→success toasts, progressive disclosure, destructive actions, autofocus, modal blocking dismiss & disabled fields, mobile settings previews & async states, mobile sheets & forms
+  ux/               UX patterns — common/, mobile/, desktop/, product/ (see ux/README.md)
+  ux-patterns.md    Redirect to ux/ (legacy path)
   mobile-forms.md   React Hook Form patterns for ActionSheetPopup forms (typed useSheetForm, Sheet*Field wrappers, schema output, audit guardrails)
 ```
 
@@ -148,7 +149,7 @@ When reviewing code, focus on the following aspects:
 4. **Security**: Check for any security vulnerabilities or potential risks in the code.
 5. **Edge Cases**: Consider how the code handles edge cases and unexpected inputs.
 6. **Documentation**: Verify that the code is well-documented, with clear comments and explanations where necessary.
-7. **UX** Consider the user experience implications of the code, ensuring it provides a smooth and intuitive experience for users. Read `references/ux-patterns.md` for Bondery-specific patterns covering feedback, progressive disclosure, destructive actions, autofocus, non-dismissible modals during blocking work, and disabling editable fields while blocked.
+7. **UX** Consider the user experience implications of the code, ensuring it provides a smooth and intuitive experience for users. Read `references/ux/README.md` — start with `common/` (empty states, loading, lists, writing), then `mobile/`, `desktop/`, or `product/` as needed.
 
 # Supabase extensions schema
 

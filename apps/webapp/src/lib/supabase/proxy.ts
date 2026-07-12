@@ -1,6 +1,7 @@
 import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import { createServerClient } from "@supabase/ssr";
 import { type NextRequest, NextResponse } from "next/server";
+import { buildLoginUrl, buildPathWithSearch } from "@/lib/auth/returnIntent";
 import { PUBLIC_SUPABASE_PUBLISHABLE_KEY, PUBLIC_SUPABASE_URL } from "@/lib/platform/config";
 
 /**
@@ -53,9 +54,9 @@ export async function updateSession(request: NextRequest, requestHeaders?: Heade
 
   // 1. If no user and trying to access protected routes (/app/*), redirect to login
   if (!user && request.nextUrl.pathname.startsWith(WEBAPP_ROUTES.APP_GROUP)) {
-    const url = request.nextUrl.clone();
-    url.pathname = WEBAPP_ROUTES.LOGIN;
-    return NextResponse.redirect(url);
+    const returnPath = buildPathWithSearch(request.nextUrl.pathname, request.nextUrl.search);
+    const loginUrl = new URL(buildLoginUrl(returnPath), request.nextUrl.origin);
+    return NextResponse.redirect(loginUrl);
   }
 
   // 2. Redirect /app to the default app page
