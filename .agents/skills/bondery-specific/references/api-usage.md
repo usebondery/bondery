@@ -222,7 +222,7 @@ When the BFF or upstream API is down (502/503/504 or fetch network failure):
 - `getAppSession()` with `transportPolicy: false` → layout redirects (probe, not sole gate)
 - BFF routes → `bffProxyFetch` returns 503 JSON on network failure; browser client policy handles redirect
 - `*JsonOrNull` does **not** redirect on unavailable — optional fetches degrade to `null`
-- Recovery: unavailable page auto-navigates to `redirect` after health OK + `OUTAGE_RESUME_DELAY_MS` (see `references/ux-patterns.md` § Page navigation)
+- Recovery: unavailable page auto-navigates to `redirect` after health OK + `OUTAGE_RESUME_DELAY_MS` (see `references/ux/product/page-navigation-resume.md`)
 
 Do not call `endSession()` for outage responses.
 
@@ -260,6 +260,7 @@ npm run check-api-fetch:strict   # part of check-types
 | Webapp BFF proxy | `apps/webapp/src/lib/api/bffProxy.ts` |
 | Webapp server bootstrap | `apps/webapp/src/lib/app/getAppSession.ts` |
 | Webapp API unavailable redirect | `apps/webapp/src/lib/auth/handleApiUnavailable.ts` |
+| Webapp return intent | `apps/webapp/src/lib/auth/returnIntent.ts` |
 | Webapp server transport | `apps/webapp/src/lib/api/server.ts` |
 | Webapp session teardown | `apps/webapp/src/lib/auth/endSession.ts` |
 | Webapp 401 → session teardown | `apps/webapp/src/lib/auth/handleUnauthorizedSession.ts` |
