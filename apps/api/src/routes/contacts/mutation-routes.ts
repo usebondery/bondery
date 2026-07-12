@@ -51,8 +51,7 @@ export function registerContactMutationRoutes(fastify: AppFastifyInstance): void
         response: withOkResponse(deleteContactsResponseSchema, "Contacts deleted successfully"),
       } satisfies FastifyZodOpenApiSchema,
     },
-    withDomainRoute(async (ctx, request) => {
-      const body = request.body;
+    withDomainRoute({ body: deleteContactsRequestSchema }, async (ctx, { body }) => {
       const { client, user } = ctx;
 
       let uniqueIds: string[];

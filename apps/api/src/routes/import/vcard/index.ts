@@ -75,8 +75,8 @@ export const vcardImportRoutes: AppRoutePlugin = async (fastify) => {
         response: withOkResponse(vcardImportCommitResponseSchema, "vCard import result"),
       } satisfies FastifyZodOpenApiSchema,
     },
-    withDomainRoute(async (ctx, request) => {
-      return commitVCardImport(ctx, request.body.contacts);
-    }),
+    withDomainRoute({ body: vcardImportCommitRequestSchema }, async (ctx, { body }) =>
+      commitVCardImport(ctx, body.contacts),
+    ),
   );
 };

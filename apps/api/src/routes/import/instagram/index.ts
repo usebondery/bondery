@@ -153,8 +153,8 @@ export const instagramImportRoutes: AppRoutePlugin = async (fastify) => {
         response: withOkResponse(instagramImportCommitResponseSchema, "Instagram import result"),
       } satisfies FastifyZodOpenApiSchema,
     },
-    withDomainRoute(async (ctx, request) => {
-      return commitInstagramImport(ctx, request.body.contacts);
-    }),
+    withDomainRoute({ body: instagramImportCommitRequestSchema }, async (ctx, { body }) =>
+      commitInstagramImport(ctx, body.contacts),
+    ),
   );
 };

@@ -82,8 +82,8 @@ export const meApiKeysRoutes: AppRoutePlugin = async (fastify) => {
         },
       } satisfies FastifyZodOpenApiSchema,
     },
-    withDomainRoute(async (ctx, request, reply) => {
-      const result = await createApiKey(ctx, request.body, pepper);
+    withDomainRoute({ body: createApiKeyInputSchema }, async (ctx, { body }, reply) => {
+      const result = await createApiKey(ctx, body, pepper);
       reply.status(201);
       return result;
     }),
@@ -99,8 +99,9 @@ export const meApiKeysRoutes: AppRoutePlugin = async (fastify) => {
         response: withOkResponse(apiKeyListItemSchema, "Updated API key"),
       } satisfies FastifyZodOpenApiSchema,
     },
-    withDomainRoute(async (ctx, request) =>
-      updateApiKeyLabel(ctx, request.params.id, request.body.label),
+    withDomainRoute(
+      { body: updateApiKeyLabelInputSchema, params: uuidParamSchema },
+      async (ctx, { body, params }) => updateApiKeyLabel(ctx, params.id, body.label),
     ),
   );
 
@@ -116,8 +117,8 @@ export const meApiKeysRoutes: AppRoutePlugin = async (fastify) => {
         },
       } satisfies FastifyZodOpenApiSchema,
     },
-    withDomainRoute(async (ctx, request, reply) => {
-      await deleteApiKey(ctx, request.params.id);
+    withDomainRoute({ params: uuidParamSchema }, async (ctx, { params }, reply) => {
+      await deleteApiKey(ctx, params.id);
       return reply.status(204).send(null);
     }),
   );

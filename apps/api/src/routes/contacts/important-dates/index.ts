@@ -274,11 +274,12 @@ export function registerContactImportantDateRoutes(fastify: AppFastifyInstance):
         },
       } satisfies FastifyZodOpenApiSchema,
     },
-    withDomainRoute(async (ctx, request) => {
-      const { id: personId } = request.params;
-      const dates = request.body.dates;
-      const { data } = await replaceImportantDates(ctx, personId, dates);
-      return { dates: data.dates };
-    }),
+    withDomainRoute(
+      { body: importantDatesReplaceBodySchema, params: uuidParamSchema },
+      async (ctx, { body, params }) => {
+        const { data } = await replaceImportantDates(ctx, params.id, body.dates);
+        return { dates: data.dates };
+      },
+    ),
   );
 }

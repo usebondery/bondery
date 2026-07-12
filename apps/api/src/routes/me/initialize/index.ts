@@ -26,7 +26,7 @@ export const meInitializeRoutes: AppRoutePlugin = async (fastify) => {
         },
       } satisfies FastifyZodOpenApiSchema,
     },
-    withDomainRoute(async (ctx, _request, reply) => {
+    withDomainRoute(async (ctx, _route, reply) => {
       await initializeUserDefaults(ctx);
       return reply.status(204).send(null);
     }),

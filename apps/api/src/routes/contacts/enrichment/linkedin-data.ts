@@ -30,9 +30,11 @@ export function registerLinkedInDataRoutes(fastify: AppFastifyInstance): void {
         response: withOkResponse(linkedInDataUpsertResponseSchema, "LinkedIn data upserted"),
       } satisfies FastifyZodOpenApiSchema,
     },
-    withDomainRoute(async (ctx, request) => {
-      return upsertLinkedInWorkHistory(ctx, request.params.id, request.body.workHistory ?? []);
-    }),
+    withDomainRoute(
+      { body: linkedInDataRequestSchema, params: uuidParamSchema },
+      async (ctx, { body, params }) =>
+        upsertLinkedInWorkHistory(ctx, params.id, body.workHistory ?? []),
+    ),
   );
 
   fastify.get(

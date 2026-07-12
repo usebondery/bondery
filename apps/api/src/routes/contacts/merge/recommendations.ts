@@ -177,8 +177,8 @@ export function registerRecommendationRoutes(fastify: AppFastifyInstance): void 
         ),
       } satisfies FastifyZodOpenApiSchema,
     },
-    withDomainRoute(async (ctx, request) => {
-      const { data } = await declineMergeRecommendation(ctx, request.params.id);
+    withDomainRoute({ params: uuidParamSchema }, async (ctx, { params }) => {
+      const { data } = await declineMergeRecommendation(ctx, params.id);
       return data;
     }),
   );
@@ -195,8 +195,8 @@ export function registerRecommendationRoutes(fastify: AppFastifyInstance): void 
         ),
       } satisfies FastifyZodOpenApiSchema,
     },
-    withDomainRoute(async (ctx, request) => {
-      const { data } = await restoreMergeRecommendation(ctx, request.params.id);
+    withDomainRoute({ params: uuidParamSchema }, async (ctx, { params }) => {
+      const { data } = await restoreMergeRecommendation(ctx, params.id);
       return data;
     }),
   );

@@ -26,10 +26,10 @@ export const meOnboardingImportFollowupRoutes: AppRoutePlugin = async (fastify) 
         response: withOkResponse(apiSuccessResponseSchema, "Import follow-up updated"),
       } satisfies FastifyZodOpenApiSchema,
     },
-    withDomainRoute(async (ctx, request) =>
+    withDomainRoute({ body: updateImportFollowupBodySchema }, async (ctx, { body }) =>
       updateImportFollowup(ctx, {
-        platform: request.body.platform,
-        status: request.body.status,
+        platform: body.platform,
+        status: body.status,
       }),
     ),
   );

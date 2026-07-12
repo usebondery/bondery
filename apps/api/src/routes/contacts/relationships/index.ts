@@ -216,17 +216,18 @@ export function registerRelationshipRoutes(fastify: AppFastifyInstance): void {
         },
       } satisfies FastifyZodOpenApiSchema,
     },
-    withDomainRoute(async (ctx, request, reply) => {
-      const { id: sourcePersonId } = request.params;
-      const { relatedPersonId, relationshipType } = request.body;
-      const { data } = await createRelationship(
-        ctx,
-        sourcePersonId,
-        relatedPersonId,
-        relationshipType,
-      );
-      return reply.status(201).send({ relationship: data.relationship });
-    }),
+    withDomainRoute(
+      { body: createContactRelationshipInputSchema, params: uuidParamSchema },
+      async (ctx, { body, params }, reply) => {
+        const { data } = await createRelationship(
+          ctx,
+          params.id,
+          body.relatedPersonId,
+          body.relationshipType,
+        );
+        return reply.status(201).send({ relationship: data.relationship });
+      },
+    ),
   );
 
   /**
@@ -245,18 +246,19 @@ export function registerRelationshipRoutes(fastify: AppFastifyInstance): void {
         },
       } satisfies FastifyZodOpenApiSchema,
     },
-    withDomainRoute(async (ctx, request) => {
-      const { id: personId, relationshipId } = request.params;
-      const { relatedPersonId, relationshipType } = request.body;
-      const { data } = await updateRelationship(
-        ctx,
-        personId,
-        relationshipId,
-        relatedPersonId,
-        relationshipType,
-      );
-      return { relationship: data.relationship };
-    }),
+    withDomainRoute(
+      { body: updateContactRelationshipInputSchema, params: contactRelationshipIdParamSchema },
+      async (ctx, { body, params }) => {
+        const { data } = await updateRelationship(
+          ctx,
+          params.id,
+          params.relationshipId,
+          body.relatedPersonId,
+          body.relationshipType,
+        );
+        return { relationship: data.relationship };
+      },
+    ),
   );
 
   /**
@@ -271,9 +273,8 @@ export function registerRelationshipRoutes(fastify: AppFastifyInstance): void {
         response: withOkResponse(messageResponseSchema, "Relationship deleted"),
       } satisfies FastifyZodOpenApiSchema,
     },
-    withDomainRoute(async (ctx, request) => {
-      const { id: personId, relationshipId } = request.params;
-      await deleteRelationship(ctx, personId, relationshipId);
+    withDomainRoute({ params: contactRelationshipIdParamSchema }, async (ctx, { params }) => {
+      await deleteRelationship(ctx, params.id, params.relationshipId);
       return { message: "Relationship deleted successfully" };
     }),
   );

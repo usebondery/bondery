@@ -96,7 +96,7 @@ export const chatSessionRoutes: AppRoutePlugin = async (fastify) => {
         response: withCreatedResponse(chatSessionCreatedResponseSchema, "Chat session created"),
       } satisfies FastifyZodOpenApiSchema,
     },
-    withDomainRoute(async (ctx, _request, reply) => {
+    withDomainRoute(async (ctx, _route, reply) => {
       const session = await createChatSession(ctx);
       reply.status(201);
       return { session };
@@ -113,14 +113,13 @@ export const chatSessionRoutes: AppRoutePlugin = async (fastify) => {
         response: withOkResponse(chatSessionResponseSchema, "Chat session updated"),
       } satisfies FastifyZodOpenApiSchema,
     },
-    withDomainRoute(async (ctx, request) => {
-      const session = await updateChatSessionTitle(
-        ctx,
-        request.params.sessionId,
-        request.body.title,
-      );
-      return { session };
-    }),
+    withDomainRoute(
+      { body: updateChatSessionBodySchema, params: chatSessionIdParamSchema },
+      async (ctx, { body, params }) => {
+        const session = await updateChatSessionTitle(ctx, params.sessionId, body.title);
+        return { session };
+      },
+    ),
   );
 
   fastify.delete(
@@ -135,8 +134,8 @@ export const chatSessionRoutes: AppRoutePlugin = async (fastify) => {
         },
       } satisfies FastifyZodOpenApiSchema,
     },
-    withDomainRoute(async (ctx, request, reply) => {
-      await deleteChatSession(ctx, request.params.sessionId);
+    withDomainRoute({ params: chatSessionIdParamSchema }, async (ctx, { params }, reply) => {
+      await deleteChatSession(ctx, params.sessionId);
       return reply.status(204).send(null);
     }),
   );

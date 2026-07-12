@@ -45,7 +45,7 @@ export const createInteractionInputSchema = z.object({
   description: z.string().optional(),
   participantIds: z.array(z.string()),
   title: z.string().optional(),
-  type: z.string(),
+  type: interactionTypeSchema,
 });
 
 export const interactionFormSchema = z.object({
@@ -61,7 +61,7 @@ export const updateInteractionInputSchema = z.object({
   description: z.string().optional(),
   participantIds: z.array(z.string()).optional(),
   title: z.string().optional(),
-  type: z.string().optional(),
+  type: interactionTypeSchema.optional(),
 });
 
 export const interactionsListResponseSchema = makePaginatedListResponseSchema(

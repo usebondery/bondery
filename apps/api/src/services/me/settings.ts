@@ -1,4 +1,4 @@
-import type { Tables, TablesUpdate } from "@bondery/schemas";
+import type { Tables, TablesUpdate, UpdateSettingsBody } from "@bondery/schemas";
 import { DEFAULT_LOCALE } from "@bondery/schemas/locale/supported-locale";
 import { type DomainContext, DomainError } from "../../domains/_shared/context.js";
 import { internal } from "../../lib/platform/errors/http-errors.js";
@@ -78,20 +78,7 @@ export async function ensureDefaultSettings(ctx: DomainContext) {
   return newSettings;
 }
 
-export interface UpdateSettingsInput {
-  colorScheme?: string;
-  groupSortOrder?: string;
-  language?: UserSettingsLanguage;
-  leftSwipeAction?: string;
-  onlyIfNewSignup?: boolean;
-  reminderSendHour?: string;
-  rightSwipeAction?: string;
-  tagSortOrder?: string;
-  timeFormat?: string;
-  timezone?: string;
-}
-
-export async function updateUserSettings(ctx: DomainContext, input: UpdateSettingsInput) {
+export async function updateUserSettings(ctx: DomainContext, input: UpdateSettingsBody) {
   const { client, user } = ctx;
 
   const updatePayload: TablesUpdate<"user_settings"> = {};

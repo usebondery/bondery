@@ -233,7 +233,9 @@ export const meSettingsRoutes: AppRoutePlugin = async (fastify) => {
         response: withOkResponse(settingsPatchResponseSchema, "Updated settings"),
       } satisfies FastifyZodOpenApiSchema,
     },
-    withDomainRoute(async (ctx, request) => updateUserSettings(ctx, request.body)),
+    withDomainRoute({ body: updateSettingsBodySchema }, async (ctx, { body }) =>
+      updateUserSettings(ctx, body),
+    ),
   );
 
   /**

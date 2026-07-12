@@ -1,9 +1,5 @@
 import { cleanPersonName } from "@bondery/helpers/name";
-import type {
-  ScrapedEducationEntry,
-  ScrapedWorkHistoryEntry,
-  TablesUpdate,
-} from "@bondery/schemas";
+import type { EnrichContactRequest, TablesUpdate } from "@bondery/schemas";
 import {
   toPostgresDate,
   updateContactPhoto,
@@ -13,22 +9,10 @@ import { cachedGeocodeLinkedInLocation } from "../../../lib/integrations/mapy.js
 import { internal } from "../../../lib/platform/errors/http-errors.js";
 import { type DomainContext, DomainError } from "../../_shared/context.js";
 
-export interface EnrichContactInput {
-  educationHistory?: ScrapedEducationEntry[];
-  firstName?: string;
-  headline?: string;
-  lastName?: string | null;
-  linkedinBio?: string | null;
-  location?: string;
-  middleName?: string | null;
-  profileImageUrl?: string;
-  workHistory?: ScrapedWorkHistoryEntry[];
-}
-
 export async function enrichContact(
   ctx: DomainContext,
   personId: string,
-  input: EnrichContactInput,
+  input: EnrichContactRequest,
 ): Promise<{ success: true }> {
   const { client, user, log } = ctx;
   const {

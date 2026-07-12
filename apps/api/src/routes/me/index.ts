@@ -53,9 +53,9 @@ export const meRoutes: AppRoutePlugin = async (fastify) => {
         response: withOkResponse(userAccountResponseSchema, "Updated account"),
       } satisfies FastifyZodOpenApiSchema,
     },
-    withDomainRoute(async (ctx, request) => {
-      return updateAccountMetadata(ctx, request.body);
-    }),
+    withDomainRoute({ body: updateAccountInputSchema }, async (ctx, { body }) =>
+      updateAccountMetadata(ctx, body),
+    ),
   );
 
   /**
@@ -123,7 +123,7 @@ export const meRoutes: AppRoutePlugin = async (fastify) => {
         response: withOkResponse(profilePhotoResponseSchema, "Profile photo uploaded"),
       } satisfies FastifyZodOpenApiSchema,
     },
-    withDomainRoute(async (ctx, request) => {
+    withDomainRoute(async (ctx, { request }) => {
       const data = await request.file();
       if (!data) {
         throw badRequest("No file provided", "bad_request");

@@ -68,12 +68,13 @@ export function registerTagRoutes(fastify: AppFastifyInstance): void {
         response: withOkResponse(tagResponseSchema, "Tag added to contact"),
       } satisfies FastifyZodOpenApiSchema,
     },
-    withDomainRoute(async (ctx, request) => {
-      const { id: personId } = request.params;
-      const { tagId } = request.body;
-      const { data } = await addContactTag(ctx, personId, tagId);
-      return { tag: data.tag };
-    }),
+    withDomainRoute(
+      { body: contactTagBodySchema, params: uuidParamSchema },
+      async (ctx, { body, params }) => {
+        const { data } = await addContactTag(ctx, params.id, body.tagId);
+        return { tag: data.tag };
+      },
+    ),
   );
 
   fastify.delete(
@@ -85,9 +86,8 @@ export function registerTagRoutes(fastify: AppFastifyInstance): void {
         response: withOkResponse(messageResponseSchema, "Tag removed from contact"),
       } satisfies FastifyZodOpenApiSchema,
     },
-    withDomainRoute(async (ctx, request) => {
-      const { id: personId, tagId } = request.params;
-      await removeContactTag(ctx, personId, tagId);
+    withDomainRoute({ params: contactTagIdParamsSchema }, async (ctx, { params }) => {
+      await removeContactTag(ctx, params.id, params.tagId);
       return { message: "Tag removed from contact" };
     }),
   );

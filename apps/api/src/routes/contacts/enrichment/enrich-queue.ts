@@ -106,9 +106,9 @@ export function registerEnrichQueueRoutes(fastify: AppFastifyInstance): void {
         response: withOkResponse(enrichQueueInitResponseSchema, "Enrichment queue initialized"),
       } satisfies FastifyZodOpenApiSchema,
     },
-    withDomainRoute(async (ctx, request) => {
-      return initEnrichQueue(ctx, request.body?.personId);
-    }),
+    withDomainRoute({ body: enrichQueueInitBodySchema }, async (ctx, { body }) =>
+      initEnrichQueue(ctx, body?.personId),
+    ),
   );
 
   /**
@@ -201,14 +201,11 @@ export function registerEnrichQueueRoutes(fastify: AppFastifyInstance): void {
         response: withOkResponse(apiSuccessResponseSchema, "Queue item updated"),
       } satisfies FastifyZodOpenApiSchema,
     },
-    withDomainRoute(async (ctx, request) => {
-      return updateEnrichQueueItem(
-        ctx,
-        request.params.id,
-        request.body.status,
-        request.body.errorMessage,
-      );
-    }),
+    withDomainRoute(
+      { body: enrichQueuePatchBodySchema, params: uuidParamSchema },
+      async (ctx, { body, params }) =>
+        updateEnrichQueueItem(ctx, params.id, body.status, body.errorMessage),
+    ),
   );
 
   /**
