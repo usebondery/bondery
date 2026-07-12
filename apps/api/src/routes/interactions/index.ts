@@ -67,8 +67,7 @@ export const interactionRoutes: AppRoutePlugin = async (fastify) => {
         response: withCreatedResponse(interactionResponseSchema, "Interaction created"),
       } satisfies FastifyZodOpenApiSchema,
     },
-    withDomainRoute(async (ctx, request, reply) => {
-      const body = request.body;
+    withDomainRoute({ body: createInteractionInputSchema }, async (ctx, { body }, reply) => {
       const interaction = await createInteraction(ctx, {
         date: body.date,
         description: body.description,
@@ -124,26 +123,31 @@ export const interactionRoutes: AppRoutePlugin = async (fastify) => {
         response: withOkResponse(interactionResponseSchema, "Updated interaction"),
       } satisfies FastifyZodOpenApiSchema,
     },
-    withDomainRoute(async (ctx, request) => {
-      const { id } = request.params;
-      const body = request.body;
-      const avatarOptions = extractAvatarOptions(request.query);
+    withDomainRoute(
+      {
+        body: updateInteractionInputSchema,
+        params: uuidParamSchema,
+        query: avatarTransformQuerySchema,
+      },
+      async (ctx, { body, params, query }) => {
+        const avatarOptions = extractAvatarOptions(query);
 
-      const interaction = await updateInteraction(
-        ctx,
-        id,
-        {
-          date: body.date,
-          description: body.description,
-          participantIds: body.participantIds,
-          title: body.title,
-          type: body.type,
-        },
-        avatarOptions,
-      );
+        const interaction = await updateInteraction(
+          ctx,
+          params.id,
+          {
+            date: body.date,
+            description: body.description,
+            participantIds: body.participantIds,
+            title: body.title,
+            type: body.type,
+          },
+          avatarOptions,
+        );
 
-      return { interaction };
-    }),
+        return { interaction };
+      },
+    ),
   );
 
   /**
@@ -158,8 +162,8 @@ export const interactionRoutes: AppRoutePlugin = async (fastify) => {
         response: withOkResponse(messageResponseSchema, "Interaction deleted successfully"),
       } satisfies FastifyZodOpenApiSchema,
     },
-    withDomainRoute(async (ctx, request) => {
-      await deleteInteraction(ctx, request.params.id);
+    withDomainRoute({ params: uuidParamSchema }, async (ctx, { params }) => {
+      await deleteInteraction(ctx, params.id);
       return { message: "Interaction deleted successfully" };
     }),
   );

@@ -6,13 +6,14 @@
 import {
   addContactsToGroupRequestSchema,
   addContactsToGroupResponseSchema,
-  type Contact,
+  contactListItemSchema,
   groupContactsListResponseSchema,
   removeGroupMembersRequestSchema,
   removeGroupMembersResponseSchema,
 } from "@bondery/schemas";
 import { peopleListQuerySchema, uuidParamSchema } from "@bondery/schemas/http";
 import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
+import { z } from "zod";
 import { addGroupMembers, removeGroupMembers } from "../../domains/groups/index.js";
 import { attachContactExtras } from "../../lib/contacts/enrichment.js";
 import { resolveGroupMemberPersonIds } from "../../lib/contacts/resolve-group-member-ids.js";
@@ -29,7 +30,11 @@ import {
   restoreRankedOrder,
   searchPeopleIds,
 } from "../../lib/data/search.js";
-import { CONTACT_SELECT, extractAvatarOptions } from "../../lib/data/select-fragments.js";
+import {
+  CONTACT_SELECT,
+  type ContactWithId,
+  extractAvatarOptions,
+} from "../../lib/data/select-fragments.js";
 import { getAuth } from "../../lib/platform/auth/strategies.js";
 import { badRequest, internal, notFound } from "../../lib/platform/errors/http-errors.js";
 import type { AppFastifyInstance } from "../../lib/platform/fastify-types.js";
@@ -104,7 +109,7 @@ export function registerGroupContactRoutes(fastify: AppFastifyInstance): void {
       // When a search query is active, use the search_people_ids RPC with
       // p_group_id to scope results to this group. Then fetch full rows
       // via .in() to preserve CONTACT_SELECT aliasing.
-      let contacts: Contact[];
+      let contacts: ContactWithId[];
       let totalCount: number;
 
       if (search) {
@@ -249,7 +254,11 @@ export function registerGroupContactRoutes(fastify: AppFastifyInstance): void {
 
       return {
         group: { id: group.id, label: group.label },
-        ...buildPaginatedResponse("contacts", enrichedContacts, pagination),
+        ...buildPaginatedResponse(
+          "contacts",
+          z.array(contactListItemSchema).parse(enrichedContacts),
+          pagination,
+        ),
       };
     },
   );
@@ -267,50 +276,52 @@ export function registerGroupContactRoutes(fastify: AppFastifyInstance): void {
         response: withOkResponse(addContactsToGroupResponseSchema, "Contacts added to group"),
       } satisfies FastifyZodOpenApiSchema,
     },
-    withDomainRoute(async (ctx, request) => {
-      const { id: groupId } = request.params;
-      const body = request.body;
-      const { client, user } = ctx;
+    withDomainRoute(
+      { body: addContactsToGroupRequestSchema, params: uuidParamSchema },
+      async (ctx, { body, params }) => {
+        const groupId = params.id;
+        const { client, user } = ctx;
 
-      let personIds: string[];
+        let personIds: string[];
 
-      if ("personIds" in body && Array.isArray(body.personIds)) {
-        personIds = await resolveContactPersonIds(
-          client,
-          user.id,
-          { personIds: body.personIds },
-          { rejectEmptyExplicit: true },
-        );
-      } else if ("contactFilter" in body && body.contactFilter) {
-        personIds = await resolveContactPersonIds(client, user.id, {
-          contactFilter: body.contactFilter as { search?: string; sort?: string },
-          excludePersonIds: Array.isArray(body.excludePersonIds)
-            ? body.excludePersonIds
-            : undefined,
-        });
-      } else {
-        throw badRequest(
-          "Invalid request body. Provide either 'personIds' or 'contactFilter'.",
-          "group_add_contacts_invalid_body",
-        );
-      }
+        if ("personIds" in body && Array.isArray(body.personIds)) {
+          personIds = await resolveContactPersonIds(
+            client,
+            user.id,
+            { personIds: body.personIds },
+            { rejectEmptyExplicit: true },
+          );
+        } else if ("contactFilter" in body && body.contactFilter) {
+          personIds = await resolveContactPersonIds(client, user.id, {
+            contactFilter: body.contactFilter as { search?: string; sort?: string },
+            excludePersonIds: Array.isArray(body.excludePersonIds)
+              ? body.excludePersonIds
+              : undefined,
+          });
+        } else {
+          throw badRequest(
+            "Invalid request body. Provide either 'personIds' or 'contactFilter'.",
+            "group_add_contacts_invalid_body",
+          );
+        }
 
-      if (personIds.length === 0) {
+        if (personIds.length === 0) {
+          return {
+            addedCount: 0,
+            message: "No contacts matched the contact filter",
+            skippedCount: 0,
+          };
+        }
+
+        const { data } = await addGroupMembers(ctx, groupId, personIds);
+
         return {
-          addedCount: 0,
-          message: "No contacts matched the contact filter",
-          skippedCount: 0,
+          addedCount: data.addedCount,
+          message: "Contacts added to group successfully",
+          skippedCount: data.skippedCount,
         };
-      }
-
-      const { data } = await addGroupMembers(ctx, groupId, personIds);
-
-      return {
-        addedCount: data.addedCount,
-        message: "Contacts added to group successfully",
-        skippedCount: data.skippedCount,
-      };
-    }),
+      },
+    ),
   );
 
   /**
@@ -327,48 +338,50 @@ export function registerGroupContactRoutes(fastify: AppFastifyInstance): void {
         response: withOkResponse(removeGroupMembersResponseSchema, "Contacts removed from group"),
       } satisfies FastifyZodOpenApiSchema,
     },
-    withDomainRoute(async (ctx, request) => {
-      const { id: groupId } = request.params;
-      const body = request.body;
-      const { client, user } = ctx;
+    withDomainRoute(
+      { body: removeGroupMembersRequestSchema, params: uuidParamSchema },
+      async (ctx, { body, params }) => {
+        const groupId = params.id;
+        const { client, user } = ctx;
 
-      let personIds: string[];
+        let personIds: string[];
 
-      if ("personIds" in body && Array.isArray(body.personIds)) {
-        personIds = await resolveGroupMemberPersonIds(
-          client,
-          user.id,
-          groupId,
-          { personIds: body.personIds },
-          {
-            emptyExplicitError: "Invalid request body. 'personIds' must be a non-empty array.",
-            rejectEmptyExplicit: true,
-          },
-        );
-      } else if ("memberFilter" in body && body.memberFilter) {
-        personIds = await resolveGroupMemberPersonIds(client, user.id, groupId, {
-          excludePersonIds: Array.isArray(body.excludePersonIds)
-            ? body.excludePersonIds
-            : undefined,
-          memberFilter: body.memberFilter as { search?: string; sort?: string },
-        });
-      } else {
-        throw badRequest(
-          "Invalid request body. Provide either 'personIds' or 'memberFilter'.",
-          "group_remove_members_invalid_body",
-        );
-      }
+        if ("personIds" in body && Array.isArray(body.personIds)) {
+          personIds = await resolveGroupMemberPersonIds(
+            client,
+            user.id,
+            groupId,
+            { personIds: body.personIds },
+            {
+              emptyExplicitError: "Invalid request body. 'personIds' must be a non-empty array.",
+              rejectEmptyExplicit: true,
+            },
+          );
+        } else if ("memberFilter" in body && body.memberFilter) {
+          personIds = await resolveGroupMemberPersonIds(client, user.id, groupId, {
+            excludePersonIds: Array.isArray(body.excludePersonIds)
+              ? body.excludePersonIds
+              : undefined,
+            memberFilter: body.memberFilter as { search?: string; sort?: string },
+          });
+        } else {
+          throw badRequest(
+            "Invalid request body. Provide either 'personIds' or 'memberFilter'.",
+            "group_remove_members_invalid_body",
+          );
+        }
 
-      if (personIds.length === 0) {
-        return { message: "No group members matched the member filter" };
-      }
+        if (personIds.length === 0) {
+          return { message: "No group members matched the member filter" };
+        }
 
-      const { data } = await removeGroupMembers(ctx, groupId, personIds);
+        const { data } = await removeGroupMembers(ctx, groupId, personIds);
 
-      return {
-        message: "Contacts removed from group successfully",
-        removedCount: data.removedCount,
-      };
-    }),
+        return {
+          message: "Contacts removed from group successfully",
+          removedCount: data.removedCount,
+        };
+      },
+    ),
   );
 }

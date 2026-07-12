@@ -3,7 +3,10 @@
  * Lists, refreshes, declines, and restores merge recommendations.
  */
 
-import type { MergeRecommendationsResponse } from "@bondery/schemas";
+import type {
+  MergeRecommendationsResponse,
+  RefreshMergeRecommendationsResponse,
+} from "@bondery/schemas";
 import {
   declineMergeRecommendationResponseSchema,
   mergeRecommendationsCountResponseSchema,
@@ -150,10 +153,10 @@ export function registerRecommendationRoutes(fastify: AppFastifyInstance): void 
       const avatarOptions = extractAvatarOptions(request.query);
 
       try {
-        return await refreshMergeRecommendations(
+        return (await refreshMergeRecommendations(
           domainContextFromClient(client, user, request.log),
           { avatarOptions, hydrate: true },
-        );
+        )) as RefreshMergeRecommendationsResponse;
       } catch (error) {
         const message =
           error instanceof Error ? error.message : "Failed to refresh merge recommendations";
@@ -174,8 +177,8 @@ export function registerRecommendationRoutes(fastify: AppFastifyInstance): void 
         ),
       } satisfies FastifyZodOpenApiSchema,
     },
-    withDomainRoute(async (ctx, request) => {
-      const { data } = await declineMergeRecommendation(ctx, request.params.id);
+    withDomainRoute({ params: uuidParamSchema }, async (ctx, { params }) => {
+      const { data } = await declineMergeRecommendation(ctx, params.id);
       return data;
     }),
   );
@@ -192,8 +195,8 @@ export function registerRecommendationRoutes(fastify: AppFastifyInstance): void 
         ),
       } satisfies FastifyZodOpenApiSchema,
     },
-    withDomainRoute(async (ctx, request) => {
-      const { data } = await restoreMergeRecommendation(ctx, request.params.id);
+    withDomainRoute({ params: uuidParamSchema }, async (ctx, { params }) => {
+      const { data } = await restoreMergeRecommendation(ctx, params.id);
       return data;
     }),
   );

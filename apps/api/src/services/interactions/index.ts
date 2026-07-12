@@ -1,4 +1,10 @@
-import type { AvatarTransformOptions, InteractionType, TablesUpdate } from "@bondery/schemas";
+import type {
+  AvatarTransformOptions,
+  CreateInteractionInput,
+  InteractionType,
+  TablesUpdate,
+  UpdateInteractionInput,
+} from "@bondery/schemas";
 import { type DomainContext, DomainError } from "../../domains/_shared/context.js";
 import { internal } from "../../lib/platform/errors/http-errors.js";
 import { loadFormattedInteraction } from "./format.js";
@@ -6,22 +12,6 @@ import { loadFormattedInteraction } from "./format.js";
 export type FormattedInteraction = NonNullable<
   Awaited<ReturnType<typeof loadFormattedInteraction>>
 >;
-
-export interface CreateInteractionInput {
-  date: string;
-  description?: string | null;
-  participantIds?: string[];
-  title?: string | null;
-  type: InteractionType;
-}
-
-export interface UpdateInteractionInput {
-  date?: string;
-  description?: string | null;
-  participantIds?: string[];
-  title?: string | null;
-  type?: InteractionType;
-}
 
 export { loadFormattedInteraction, mapInteractionParticipant } from "./format.js";
 
@@ -200,9 +190,9 @@ export async function logInteraction(
 
   const interaction = await createInteraction(ctx, {
     date: input.date,
-    description: input.description ?? null,
+    description: input.description,
     participantIds: input.participantIds,
-    title: input.title ?? null,
+    title: input.title,
     type: input.type,
   });
 

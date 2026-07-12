@@ -141,6 +141,8 @@ export const updateAccountInputSchema = z.object({
 /** Alias retained for naming consistency in docs/plans. */
 export const updateUserSettingsSchema = updateUserSettingsInputSchema;
 
+export type UpdateSettingsBody = z.infer<typeof updateSettingsBodySchema>;
+
 export type ColorSchemePreference = z.infer<typeof colorSchemePreferenceSchema>;
 export type TimeFormatPreference = z.infer<typeof timeFormatPreferenceSchema>;
 export type SwipeActionPreference = z.infer<typeof swipeActionPreferenceSchema>;

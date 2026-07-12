@@ -20,8 +20,8 @@ export function registerPostRoute(fastify: AppFastifyInstance): void {
         response: withOkResponse(redirectResponseSchema, "Extension contact result"),
       } satisfies FastifyZodOpenApiSchema,
     },
-    withDomainRoute(async (ctx, request) => {
-      return upsertContactFromExtension(ctx, request.body);
-    }),
+    withDomainRoute({ body: redirectBodySchema }, async (ctx, { body }) =>
+      upsertContactFromExtension(ctx, body),
+    ),
   );
 }

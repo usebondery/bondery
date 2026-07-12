@@ -1,3 +1,4 @@
+import type { InteractionType } from "@bondery/schemas";
 import type { AvatarTransformQuery } from "@bondery/schemas/http";
 import type { Database } from "@bondery/schemas/supabase.types";
 import type { SupabaseClient } from "@supabase/supabase-js";
@@ -81,7 +82,7 @@ export async function listInteractions(
       mapInteractionParticipant(client, userId, participant.person, avatarOptions),
     ),
     title: interaction.title,
-    type: interaction.type,
+    type: interaction.type as InteractionType,
     updatedAt: interaction.updated_at,
     userId: interaction.user_id,
   }));

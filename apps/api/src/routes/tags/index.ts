@@ -66,8 +66,7 @@ export const tagRoutes: AppRoutePlugin = async (fastify) => {
         response: withCreatedResponse(tagResponseSchema, "Tag created"),
       } satisfies FastifyZodOpenApiSchema,
     },
-    withDomainRoute(async (ctx, request, reply) => {
-      const body = request.body;
+    withDomainRoute({ body: createTagInputSchema }, async (ctx, { body }, reply) => {
       const { data } = await createTag(ctx, { label: body.label });
       return reply.status(201).send({ tag: data.tag });
     }),
@@ -82,9 +81,8 @@ export const tagRoutes: AppRoutePlugin = async (fastify) => {
         response: withOkResponse(messageResponseSchema, "Tags deleted successfully"),
       } satisfies FastifyZodOpenApiSchema,
     },
-    withDomainRoute(async (ctx, request) => {
-      const { ids } = request.body;
-      for (const id of ids) {
+    withDomainRoute({ body: idsRequestBodySchema }, async (ctx, { body }) => {
+      for (const id of body.ids) {
         await deleteTag(ctx, id);
       }
       return { message: "Tags deleted successfully" };
@@ -117,15 +115,16 @@ export const tagRoutes: AppRoutePlugin = async (fastify) => {
         response: withOkResponse(tagUpdateResponseSchema, "Tag updated"),
       } satisfies FastifyZodOpenApiSchema,
     },
-    withDomainRoute(async (ctx, request) => {
-      const { id } = request.params;
-      const body = request.body;
-      const { data } = await updateTag(ctx, id, {
-        color: body.color,
-        label: body.label,
-      });
-      return { tag: data.tag };
-    }),
+    withDomainRoute(
+      { body: updateTagSchema, params: uuidParamSchema },
+      async (ctx, { body, params }) => {
+        const { data } = await updateTag(ctx, params.id, {
+          color: body.color,
+          label: body.label,
+        });
+        return { tag: data.tag };
+      },
+    ),
   );
 
   fastify.delete(
@@ -137,9 +136,8 @@ export const tagRoutes: AppRoutePlugin = async (fastify) => {
         response: withOkResponse(messageResponseSchema, "Tag deleted successfully"),
       } satisfies FastifyZodOpenApiSchema,
     },
-    withDomainRoute(async (ctx, request) => {
-      const { id } = request.params;
-      await deleteTag(ctx, id);
+    withDomainRoute({ params: uuidParamSchema }, async (ctx, { params }) => {
+      await deleteTag(ctx, params.id);
       return { message: "Tag deleted successfully" };
     }),
   );
@@ -171,12 +169,13 @@ export const tagRoutes: AppRoutePlugin = async (fastify) => {
         response: withOkResponse(addContactsToTagResponseSchema, "Contacts added to tag"),
       } satisfies FastifyZodOpenApiSchema,
     },
-    withDomainRoute(async (ctx, request) => {
-      const { id: tagId } = request.params;
-      const { personIds } = request.body;
-      const { data } = await addTagMembers(ctx, tagId, personIds);
-      return { addedCount: data.addedCount };
-    }),
+    withDomainRoute(
+      { body: tagMembershipRequestSchema, params: uuidParamSchema },
+      async (ctx, { body, params }) => {
+        const { data } = await addTagMembers(ctx, params.id, body.personIds);
+        return { addedCount: data.addedCount };
+      },
+    ),
   );
 
   fastify.delete(
@@ -189,11 +188,12 @@ export const tagRoutes: AppRoutePlugin = async (fastify) => {
         response: withOkResponse(removeContactsFromTagResponseSchema, "Contacts removed from tag"),
       } satisfies FastifyZodOpenApiSchema,
     },
-    withDomainRoute(async (ctx, request) => {
-      const { id: tagId } = request.params;
-      const { personIds } = request.body;
-      const { data } = await removeTagMembers(ctx, tagId, personIds);
-      return { removedCount: data.removedCount };
-    }),
+    withDomainRoute(
+      { body: tagMembershipRequestSchema, params: uuidParamSchema },
+      async (ctx, { body, params }) => {
+        const { data } = await removeTagMembers(ctx, params.id, body.personIds);
+        return { removedCount: data.removedCount };
+      },
+    ),
   );
 };

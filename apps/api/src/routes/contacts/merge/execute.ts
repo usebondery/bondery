@@ -21,8 +21,7 @@ export function registerMergeExecuteRoute(fastify: AppFastifyInstance): void {
         response: withOkResponse(mergeContactsResponseSchema, "Contacts merged"),
       } satisfies FastifyZodOpenApiSchema,
     },
-    withDomainRoute(async (ctx, request) => {
-      const body = request.body;
+    withDomainRoute({ body: mergeContactsBodySchema }, async (ctx, { body }) => {
       const { data } = await mergeContacts(ctx, {
         conflictResolutions: body.conflictResolutions,
         leftPersonId: body.leftPersonId,

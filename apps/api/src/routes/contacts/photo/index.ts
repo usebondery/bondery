@@ -21,8 +21,8 @@ export function registerPhotoRoutes(fastify: AppFastifyInstance): void {
         response: withOkResponse(photoUploadResponseSchema, "Photo uploaded"),
       } satisfies FastifyZodOpenApiSchema,
     },
-    withDomainRoute(async (ctx, request, _reply) => {
-      const { id: contactId } = request.params;
+    withDomainRoute({ params: uuidParamSchema }, async (ctx, { params, request }, _reply) => {
+      const contactId = params.id;
       const data = await request.file();
       if (!data) {
         throw badRequest("No file provided", "bad_request");
@@ -55,9 +55,8 @@ export function registerPhotoRoutes(fastify: AppFastifyInstance): void {
         response: withOkResponse(apiSuccessResponseSchema, "Photo deleted"),
       } satisfies FastifyZodOpenApiSchema,
     },
-    withDomainRoute(async (ctx, request) => {
-      const { id: contactId } = request.params;
-      const { data } = await deleteContactPhoto(ctx, contactId);
+    withDomainRoute({ params: uuidParamSchema }, async (ctx, { params }) => {
+      const { data } = await deleteContactPhoto(ctx, params.id);
       return data;
     }),
   );

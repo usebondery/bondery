@@ -54,8 +54,7 @@ export const groupRoutes: AppRoutePlugin = async (fastify) => {
         response: withCreatedResponse(groupResponseSchema, "Group created"),
       } satisfies FastifyZodOpenApiSchema,
     },
-    withDomainRoute(async (ctx, request, reply) => {
-      const body = request.body;
+    withDomainRoute({ body: createGroupSchema }, async (ctx, { body }, reply) => {
       const { data } = await createGroup(ctx, {
         color: body.color,
         emoji: body.emoji,
@@ -74,9 +73,8 @@ export const groupRoutes: AppRoutePlugin = async (fastify) => {
         response: withOkResponse(messageResponseSchema, "Groups deleted successfully"),
       } satisfies FastifyZodOpenApiSchema,
     },
-    withDomainRoute(async (ctx, request) => {
-      const { ids } = request.body;
-      for (const id of ids) {
+    withDomainRoute({ body: idsRequestBodySchema }, async (ctx, { body }) => {
+      for (const id of body.ids) {
         await deleteGroup(ctx, id);
       }
       return { message: "Groups deleted successfully" };
@@ -109,16 +107,17 @@ export const groupRoutes: AppRoutePlugin = async (fastify) => {
         response: withOkResponse(groupResponseSchema, "Updated group"),
       } satisfies FastifyZodOpenApiSchema,
     },
-    withDomainRoute(async (ctx, request) => {
-      const { id } = request.params;
-      const body = request.body;
-      const { data } = await updateGroup(ctx, id, {
-        color: body.color,
-        emoji: body.emoji,
-        label: body.label,
-      });
-      return { group: data.group };
-    }),
+    withDomainRoute(
+      { body: updateGroupSchema, params: uuidParamSchema },
+      async (ctx, { body, params }) => {
+        const { data } = await updateGroup(ctx, params.id, {
+          color: body.color,
+          emoji: body.emoji,
+          label: body.label,
+        });
+        return { group: data.group };
+      },
+    ),
   );
 
   fastify.delete(
@@ -130,9 +129,8 @@ export const groupRoutes: AppRoutePlugin = async (fastify) => {
         response: withOkResponse(messageResponseSchema, "Group deleted successfully"),
       } satisfies FastifyZodOpenApiSchema,
     },
-    withDomainRoute(async (ctx, request) => {
-      const { id } = request.params;
-      await deleteGroup(ctx, id);
+    withDomainRoute({ params: uuidParamSchema }, async (ctx, { params }) => {
+      await deleteGroup(ctx, params.id);
       return { message: "Group deleted successfully" };
     }),
   );

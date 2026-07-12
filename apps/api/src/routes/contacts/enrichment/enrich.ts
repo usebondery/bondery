@@ -23,8 +23,9 @@ export function registerEnrichRoutes(fastify: AppFastifyInstance): void {
         response: withOkResponse(apiSuccessResponseSchema, "Contact enriched"),
       } satisfies FastifyZodOpenApiSchema,
     },
-    withDomainRoute(async (ctx, request) => {
-      return enrichContact(ctx, request.params.id, request.body);
-    }),
+    withDomainRoute(
+      { body: enrichContactRequestSchema, params: uuidParamSchema },
+      async (ctx, { body, params }) => enrichContact(ctx, params.id, body),
+    ),
   );
 }

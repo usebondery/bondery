@@ -13,7 +13,11 @@ import {
   messageResponseSchema,
   personIdsSelectionSchema,
 } from "#entities/_shared.js";
-import { contactPreviewSchema, contactSchema, contactsFilterSchema } from "#entities/contact.js";
+import {
+  contactListItemSchema,
+  contactPreviewSchema,
+  contactsFilterSchema,
+} from "#entities/contact.js";
 import { hexColorSchema } from "#primitives/index.js";
 
 const groupEditableFieldsSchema = z.object({
@@ -81,7 +85,7 @@ export const groupMembersListResponseSchema = makePaginatedListResponseSchema(
 
 export const groupContactsListResponseSchema = makePaginatedListResponseSchema(
   "contacts",
-  contactSchema,
+  contactListItemSchema,
 ).extend({
   group: z.object({
     id: z.string(),

@@ -1,3 +1,4 @@
+import type { ContactAddressType } from "@bondery/schemas";
 import type { Database } from "@bondery/schemas/supabase.types";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { extractAvatarOptions } from "../../lib/data/select-fragments.js";
@@ -47,7 +48,7 @@ export async function getMapAddressPins(
       addressCountry: row.address_country,
       addressFormatted: row.address_formatted,
       addressId: row.address_id,
-      addressType: row.address_type,
+      addressType: row.address_type as ContactAddressType,
       avatar: resolveContactAvatarUrl(
         client,
         userId,

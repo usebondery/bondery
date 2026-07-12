@@ -140,8 +140,8 @@ export const linkedInImportRoutes: AppRoutePlugin = async (fastify) => {
         response: withOkResponse(linkedInImportCommitResponseSchema, "LinkedIn import result"),
       } satisfies FastifyZodOpenApiSchema,
     },
-    withDomainRoute(async (ctx, request) => {
-      return commitLinkedInImport(ctx, request.body.contacts);
-    }),
+    withDomainRoute({ body: linkedInImportCommitRequestSchema }, async (ctx, { body }) =>
+      commitLinkedInImport(ctx, body.contacts),
+    ),
   );
 };

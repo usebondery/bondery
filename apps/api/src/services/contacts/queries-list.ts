@@ -1,7 +1,8 @@
-import type { Contact } from "@bondery/schemas";
+import { contactListItemSchema } from "@bondery/schemas";
 import type { PeopleListQuery } from "@bondery/schemas/http";
 import type { Database } from "@bondery/schemas/supabase.types";
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { z } from "zod";
 import { attachContactExtras } from "../../lib/contacts/enrichment.js";
 import { buildPaginatedResponse } from "../../lib/data/pagination.js";
 import { CONTACT_SELECT, extractAvatarOptions } from "../../lib/data/select-fragments.js";
@@ -58,7 +59,11 @@ export async function listContacts(
   const pagination = buildPeopleListPagination(query, enrichedContacts.length, page.count);
 
   return {
-    ...buildPaginatedResponse("contacts", enrichedContacts as Contact[], pagination),
+    ...buildPaginatedResponse(
+      "contacts",
+      z.array(contactListItemSchema).parse(enrichedContacts),
+      pagination,
+    ),
     stats: {
       newContactsThisYear: newContactsYearCount || 0,
       thisMonthInteractions: monthInteractionsCount || 0,
