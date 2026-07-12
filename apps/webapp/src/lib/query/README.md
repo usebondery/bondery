@@ -45,7 +45,7 @@ Keep **local state** while typing. On save: show loader → domain mutation → 
 - `clientApiJson` → `applyTransportErrorPolicy` → `endSession` (401) or `/app/unavailable` (502/503/504/network)
 - This module only configures cache defaults and skips retries for classified transport errors
 
-See bondery-specific `references/api-usage.md` § Session teardown and § API unavailable handling.
+See bondery-specific `references/api/api-usage.md` § Session teardown and § API unavailable handling.
 
 ## Adding a resource
 

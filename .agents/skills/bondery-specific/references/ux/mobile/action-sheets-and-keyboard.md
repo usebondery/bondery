@@ -1,6 +1,6 @@
 # Action sheets and keyboard (mobile)
 
-`ActionSheetPopup` forms and confirms. Shared validation: [forms-validation.md](../common/forms-validation.md). RHF wiring: `references/mobile-forms.md`.
+`ActionSheetPopup` forms and confirms. Shared validation: [forms-validation.md](../common/forms-validation.md). RHF wiring: [forms.md](./forms.md).
 
 ---
 

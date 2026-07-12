@@ -526,7 +526,6 @@ export default interface Resources {
     "NotificationTooltipToday": "You will be notified today",
     "NotificationTooltipTomorrow": "You will be notified tomorrow",
     "ProgressRail": {
-      "AllDone": "You're all set!",
       "AwaitingExport": "Your {platform} export is on the way. Exports usually arrive in 5–15 minutes.",
       "ChoosePlatform": "Choose a platform to import from",
       "Dismiss": "Dismiss",

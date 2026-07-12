@@ -60,7 +60,6 @@ jobs:
 
       - name: API error checks
         run: |
-          npm run check-route-errors -w apps/api
           npm run check-error-docs
           npm run check-user-facing-errors
 

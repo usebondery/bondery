@@ -11,7 +11,7 @@ ux/
   product/            Bondery-only features (onboarding, imports, resume intent, …)
 ```
 
-Also see `references/mobile-forms.md` (technical RHF patterns for mobile sheets).
+Also see [mobile/forms.md](./mobile/forms.md) (technical RHF patterns for mobile sheets).
 
 ## Common
 
@@ -48,4 +48,4 @@ Also see `references/mobile-forms.md` (technical RHF patterns for mobile sheets)
 |------|--------|
 | [page-navigation-resume.md](./product/page-navigation-resume.md) | Return intent after outage / session expiry |
 | [onboarding.md](./product/onboarding.md) | Wizard, Getting Started rail |
-| [platform-parity.md](./product/platform-parity.md) | Web vs mobile feature matrix |
+| [import-flow.md](./product/import-flow.md) | Social + vCard import modals |

@@ -42,7 +42,7 @@ When rows are selectable:
 | Select page | Header checkbox | Header control in selection mode |
 | Select all matching | `IconChecks` / select-all-total | `ContactsSelectionHeader` select-all-total |
 | Bulk actions | Bulk bar above table | `FloatingActionBar` |
-| Exit selection | Clear selection / Esc | Done / back |
+| Exit selection | Clear selection control | Done / back |
 
 **Gmail rule:** drag-to-select and shift-range should feel continuous — no per-row tap marathon.
 
@@ -60,7 +60,7 @@ When rows are selectable:
 
 ## Pagination
 
-- **Paginated API** (`hasMore` from server — see `api-design.md`): use **Load more** in `DataTable`, not fake pagination.
+- **Paginated API** (`hasMore` from server — see [../../api/api-design.md](../../api/api-design.md)): use **Load more** in `DataTable`, not fake pagination.
 - Server `hasMore` is the single source of truth — do not infer from client page size.
 - Infinite query pattern: `useContactsInfiniteQuery` on People.
 

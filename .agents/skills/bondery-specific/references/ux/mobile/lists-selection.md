@@ -20,8 +20,8 @@ Shared list rules: [lists-and-selection.md](../common/lists-and-selection.md). T
 
 ## Select all
 
-- **Select all on screen** vs **select all matching** (total count) — `ContactsSelectionHeader.tsx`.
-- Mirror web `DataTable` select-all-total semantics.
+- **Select all matching** (total count) — `ContactsSelectionHeader.tsx` toggles `selectAllTotal` / `deselectAllInSession`.
+- No separate “select all on screen” control (unlike web `DataTable` header checkbox for current page).
 
 ---
 

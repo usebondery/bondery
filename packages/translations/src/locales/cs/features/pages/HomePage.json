@@ -19,7 +19,6 @@
   "NotificationTooltipTomorrow": "Upozornění přijde zítra",
   "NoUpcomingReminders": "Žádné připomínky v příštích 30 dnech.",
   "ProgressRail": {
-    "AllDone": "Vše je připraveno!",
     "AwaitingExport": "Váš export z {platform} je na cestě. Obvykle dorazí za 5–15 minut.",
     "ChoosePlatform": "Vyberte platformu pro import",
     "Dismiss": "Zavřít",

@@ -2,7 +2,7 @@
 
 Do not let users submit a form that cannot succeed. Disable primary action until valid.
 
-Mobile sheet implementation: `references/mobile-forms.md`. Mobile phone layout: [mobile/action-sheets-and-keyboard.md](../mobile/action-sheets-and-keyboard.md).
+Mobile sheet implementation: [../mobile/forms.md](../mobile/forms.md). Mobile phone layout: [mobile/action-sheets-and-keyboard.md](../mobile/action-sheets-and-keyboard.md).
 
 ---
 

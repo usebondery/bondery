@@ -4,7 +4,7 @@ Bondery mobile is **local-first** with a **server-authoritative** sync engine: P
 
 **Related code:** [`apps/mobile`](https://github.com/usebondery/bondery/tree/main/apps/mobile) · [`apps/api/src/routes/sync`](https://github.com/usebondery/bondery/tree/main/apps/api/src/routes/sync) · [`packages/schemas/src/sync`](https://github.com/usebondery/bondery/tree/main/packages/schemas/src/sync)
 
-See `.agents/skills/bondery-specific/references/sync-architecture.md` for the full checklist and protocol details.
+See `.agents/skills/bondery-specific/references/api/sync-architecture.md` for the full checklist and protocol details.
 
 ## Stack overview
 

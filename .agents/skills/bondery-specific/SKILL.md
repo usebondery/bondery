@@ -11,14 +11,9 @@ Consult these resources as needed:
 
 ```
 references/
-  api-design.md        List API tiers, pagination contract, query/response rules
-  api-route-ordering.md  Published API doc order (registration order, path tiers, tag sidebar)
-  api-usage.md      Transport wrappers (clientApi*/serverApi*/apiRequest), *Json vs *JsonOrNull, ApiError
-  api-mutations.md  Mutation responses — return full objects, no post-mutation GET
-  sync-architecture.md  Mobile offline sync — pull/bootstrap, push mutations, server-authoritative merge, versioning
+  api/              API design, usage, mutations, route ordering, sync (see api/README.md)
   ux/               UX patterns — common/, mobile/, desktop/, product/ (see ux/README.md)
   ux-patterns.md    Redirect to ux/ (legacy path)
-  mobile-forms.md   React Hook Form patterns for ActionSheetPopup forms (typed useSheetForm, Sheet*Field wrappers, schema output, audit guardrails)
 ```
 
 # Package boundaries
@@ -49,16 +44,29 @@ Shared packages follow the [Turborepo compiled-package model](https://turborepo.
 
 # API usage
 
-All Bondery clients call the Fastify API through a transport wrapper layer — never ad-hoc `fetch` with duplicated auth and error parsing. Read `references/api-usage.md` for:
+All Bondery clients call the Fastify API through a transport wrapper layer — never ad-hoc `fetch` with duplicated auth and error parsing. Read `references/api/api-usage.md` for:
 
 - Which wrapper to use per runtime (webapp browser vs server, mobile, chrome extension)
 - `*Json` vs `*JsonOrNull` — throw on error vs graceful `null`
 - `@bondery/helpers/api` — `ApiError`, nested error parsing, `getUserFacingError`
-- **Unauthorized (401):** clear caches, local sign-out, hard redirect — see `references/api-usage.md` § Unauthorized sessions
-- Webapp: `lib/api/domains/*` + `lib/query/hooks/*` for app data (transport stays in `lib/api/client.ts`)
+- **Unauthorized (401):** clear caches, local sign-out, hard redirect — see `references/api/api-usage.md` § Unauthorized sessions
 - Status probe — webapp uses BFF `GET /api/status`; chrome extension calls Fastify `/status` directly
 
-Pair with `references/api-mutations.md` when implementing create/update flows.
+Pair with `references/api/api-mutations.md` when implementing create/update flows.
+
+## Webapp domain module layer
+
+The webapp has a **domain module layer** on top of transport — same idea as mobile `lib/domains/*`, but backed by REST + TanStack Query instead of SQLite sync.
+
+| Layer | Location | Use |
+|-------|----------|-----|
+| **Resources** | `lib/api/resources/*` | Path builders, response normalizers |
+| **Domains** | `lib/api/domains/*`, `lib/api/domains/server/*` | Typed API calls per feature |
+| **Query hooks** | `lib/query/hooks/*` | Cache keys, mutations, invalidation |
+
+**Rule:** Feature components and pages call **domain hooks** (`useContactsQuery`, mutation hooks, etc.) — not `clientApiJson` / `serverApiJson` directly. Transport stays in `lib/api/client.ts` and `lib/api/server.ts`.
+
+See `apps/webapp/src/lib/api/README.md` and `references/api/api-usage.md` § Domain modules.
 
 
 # Mobile local-first data
@@ -70,19 +78,19 @@ Tier-1 domain data (contacts, groups, tags, and child tables in `SYNC_TABLE_KEYS
 - **Sync:** `PullManager` bootstraps and long-polls `GET /api/sync/pull`; materializers apply server rows into SQLite (server wins on pull).
 - **Online-only:** `lib/api/online-only.ts` (settings, geocode, photos, share, vCard, account delete).
 
-Run `npm run check-sync-patterns --workspace=mobile` in CI. Full architecture: `references/sync-architecture.md`.
+Run `npm run check-sync-patterns --workspace=mobile` locally when touching mobile sync code. Full architecture: `references/api/sync-architecture.md`.
 
 
 # API design
 
-List endpoints follow a shared pagination contract. Read `references/api-design.md` for:
+List endpoints follow a shared pagination contract. Read `references/api/api-design.md` for:
 
 - Three response tiers (Paginated / Collection / Capped)
 - Query params: `limit`, `offset`, `search`, `sort` — no abbreviations
 - Nested `pagination` with `totalCount`, `hasMore`, and echoed `sort`/`search`
 - Server-side `hasMore` as the single source of truth for table “load more” UI
 
-Published API reference order follows Fastify **registration order**. Read `references/api-route-ordering.md` when adding or reordering routes — path tiers, HTTP method order, sidebar tag order, and CI enforcement.
+Published API reference order follows Fastify **registration order**. Read `references/api/api-route-ordering.md` when adding or reordering routes — path tiers, HTTP method order, sidebar tag order, and CI enforcement.
 
 
 # UI translations
@@ -96,6 +104,7 @@ Do not hardcode user-facing strings in the webapp (or other clients that share `
 - **Namespaces:** Group keys by feature/page (e.g. `GroupsPage`, `ContactInfo`). Shared chrome lives in `common.json` (`actions.cancel`, `feedback.errorTitle`, etc.).
 - **Mobile:** `useMobileTranslations(namespace?, keyPrefix?)` or `t("key", { ns: "MobileContacts" })` — never `MobileApp.*` dotted paths.
 - **Patterns:** Prefer small hooks for repeated copy (e.g. `useContactInfoLabels`, `useContactsTableCopy`) over duplicating `useMemo` blocks. For modals opened outside React, set the title from the modal component via `modals.updateModal` once `t` is available.
+- **CI (translations):** `check-translations`, `check-api-error-translations`, `i18n:types:check`, `i18n:status:check`, `i18n:lint`, `verify-i18next-hook-extraction.mjs` (see root `package.json` / `.github/workflows/ci.yml`).
 - **Exceptions:** Non-UI strings (logs, API field names, test IDs) and proper nouns/brand names that should not be translated.
 
 When touching UI, wire strings to translations in the same change — do not leave English literals for a follow-up.
@@ -107,9 +116,9 @@ Machine-readable API failures use a nested envelope: `{ "error": { "type", "code
 
 - **Catalog:** `@bondery/schemas/errors` — `API_ERROR_CODES`, `getErrorDefinition`, `getErrorDocUrl`. Codes are **snake_case** only; no ad-hoc literals in production.
 - **Before merge:** every new code needs (1) catalog entry via `apps/api/scripts/generate-api-error-catalog.ts`, (2) docs page at `/docs/api/errors/{code}` on the website, (3) `common.errors.api.{code}` in **en/cs/de**.
-- **API:** throw via `badRequest` / `notFound` / `internal` / `new DomainError(...)` with catalog codes; global mapper in `map-to-response.ts` builds the nested body. Never put internal details in `message` for 5xx.
+- **API:** throw via `badRequest` / `notFound` / `internal` / `new DomainError(...)` with catalog codes; global mapper in `apps/api/src/lib/platform/errors/map-to-response.ts` builds the nested body. Never put internal details in `message` for 5xx.
 - **Clients:** import `@bondery/helpers/api` — `ApiError`, `buildApiErrorFromResponse`, `getUserFacingError(error, t)`. Show copy via `getUserMessage(t)` or `getUserFacingError` — **never** surface server `message` in notifications. App transport (`clientApiJson`, `apiRequest`) stays in each app.
-- **CI:** `check-route-errors`, `check-api-error-translations`, `check-error-docs`, `check-user-facing-errors`.
+- **CI:** `check-route-errors` runs inside `npm run check-types -w apps/api`; also `check-api-error-translations`, `check-error-docs`, `check-user-facing-errors` at repo root.
 
 
 # Keyboard shortcuts (display)
@@ -137,7 +146,7 @@ LinkedIn company/school logos use the separate `linkedin_logos` bucket and are u
 
 Use Fastify built in console logging functions of `request.log` and `reply.log` instead of `console.log` for better performance, structured logging, and integration with Fastify's logging ecosystem.
 
-**Route schemas:** Use Zod from `@bondery/schemas` and `@bondery/schemas/http` with `fastify-zod-openapi` — not TypeBox. Export route plugins as `AppRoutePlugin` from `lib/fastify-types.ts`. Put `satisfies FastifyZodOpenApiSchema` on the inner `schema` object (not the route options wrapper). Do not annotate handlers with `reply: FastifyReply` — it breaks request type inference. In `onRoute` hooks, mutate `routeOptions.schema.tags` in place; never `{ ...routeOptions.schema }` (spread drops the plugin symbol config and breaks OpenAPI generation). Call `applyOpenApiRouteMeta(routeOptions, { area })` from `lib/openapi-route-meta.ts` on every top-level route plugin (`integration` = API key + bearer, `session` = bearer only, `internal` = hidden from public docs). Every route `schema` must include `description` and `response` — use `withOkResponse` / `withCreatedResponse` from `lib/openapi-route-responses.ts` for standard success + error shapes. Shared read models are registered for OpenAPI `$ref`s via `registerOpenApiComponentSchemas()` at API bootstrap. **Registration order is published doc order** — follow `references/api-route-ordering.md` when adding routes. Regenerate `apps/api/openapi.yaml` after route changes; see `docs/contributing/api-routes.md`.
+**Route schemas:** Use Zod from `@bondery/schemas` and `@bondery/schemas/http` with `fastify-zod-openapi` — not TypeBox. Export route plugins as `AppRoutePlugin` from `apps/api/src/lib/platform/fastify-types.ts`. Put `satisfies FastifyZodOpenApiSchema` on the inner `schema` object (not the route options wrapper). Do not annotate handlers with `reply: FastifyReply` — it breaks request type inference. In `onRoute` hooks, mutate `routeOptions.schema.tags` in place; never `{ ...routeOptions.schema }` (spread drops the plugin symbol config and breaks OpenAPI generation). Call `applyOpenApiRouteMeta(routeOptions, { area })` from `apps/api/src/lib/platform/openapi/meta.ts` on every top-level route plugin (`integration` = API key + bearer, `session` = bearer only, `internal` = hidden from public docs). Every route `schema` must include `description` and `response` — use `withOkResponse` / `withCreatedResponse` from `apps/api/src/lib/platform/openapi/responses.ts` for standard success + error shapes. Shared read models are registered for OpenAPI `$ref`s via `registerOpenApiComponentSchemas()` at API bootstrap. **Registration order is published doc order** — follow `references/api/api-route-ordering.md` when adding routes. Regenerate `apps/api/openapi.yaml` after route changes; see `docs/contributing/api-routes.md`.
 
 # Code review
 
@@ -167,6 +176,8 @@ CREATE EXTENSION IF NOT EXISTS pg_trgm;
 ```
 
 When an extension lives in `extensions`, all references to its functions and operators must be schema-qualified as `extensions.<function>` (e.g., `extensions.unaccent(...)`, `extensions.gin_trgm_ops`, `extensions.word_similarity(...)`).
+
+**Legacy migrations:** `pg_trgm` / `unaccent` were once created in `public` (`20260404100000`) and moved to `extensions` in `20260408100000_move_extensions_to_extensions_schema.sql`. `uuid-ossp` remains in `public` from the initial schema and is unused (tables use `gen_random_uuid()`). New installs should not repeat `CREATE EXTENSION` in `public`; remediate with `ALTER EXTENSION … SET SCHEMA extensions` or drop unused extensions.
 
 # Naming Conventions
 
