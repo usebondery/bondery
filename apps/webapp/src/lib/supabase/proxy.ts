@@ -2,7 +2,7 @@ import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import { createServerClient } from "@supabase/ssr";
 import { type NextRequest, NextResponse } from "next/server";
 import { buildLoginUrl, buildPathWithSearch } from "@/lib/auth/returnIntent";
-import { PUBLIC_SUPABASE_PUBLISHABLE_KEY, PUBLIC_SUPABASE_URL } from "@/lib/platform/config";
+import { buildWebappRuntimeConfigFromEnv } from "@/lib/platform/runtimeConfig.server";
 
 /**
  * Synchronizes Supabase auth cookies for the current request and applies route-based redirects.
@@ -22,10 +22,11 @@ export async function updateSession(request: NextRequest, requestHeaders?: Heade
     });
 
   let supabaseResponse = buildNextResponse();
+  const cfg = buildWebappRuntimeConfigFromEnv();
 
   // With Fluid compute, don't put this client in a global environment
   // variable. Always create a new one on each request.
-  const supabase = createServerClient(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_PUBLISHABLE_KEY, {
+  const supabase = createServerClient(cfg.supabaseUrl, cfg.supabasePublishableKey, {
     cookies: {
       getAll() {
         return request.cookies.getAll();

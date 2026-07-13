@@ -1,12 +1,13 @@
 import type { Database } from "@bondery/schemas/supabase.types";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
-import { PUBLIC_SUPABASE_PUBLISHABLE_KEY, PUBLIC_SUPABASE_URL } from "@/lib/platform/config";
+import { buildWebappRuntimeConfigFromEnv } from "@/lib/platform/runtimeConfig.server";
 
 export async function createServerSupabaseClient() {
   const cookieStore = await cookies();
+  const cfg = buildWebappRuntimeConfigFromEnv();
 
-  return createServerClient<Database>(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_PUBLISHABLE_KEY, {
+  return createServerClient<Database>(cfg.supabaseUrl, cfg.supabasePublishableKey, {
     cookies: {
       getAll() {
         return cookieStore.getAll();

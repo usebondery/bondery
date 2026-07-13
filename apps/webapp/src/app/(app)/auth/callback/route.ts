@@ -6,7 +6,7 @@ import { serverApiFetch } from "@/lib/api/server";
 import { BYPASS_ONBOARDING_ONCE_COOKIE } from "@/lib/auth/constants";
 import { LOCALE_PREFS_COOKIE } from "@/lib/auth/detectLocale";
 import { parseReturnIntent, shouldBypassOnboardingForReturnPath } from "@/lib/auth/returnIntent";
-import { PUBLIC_SUPABASE_PUBLISHABLE_KEY, PUBLIC_SUPABASE_URL } from "@/lib/platform/config";
+import { buildWebappRuntimeConfigFromEnv } from "@/lib/platform/runtimeConfig.server";
 
 /**
  * Parses the locale preferences cookie set during OAuth login.
@@ -75,8 +75,9 @@ export async function GET(request: Request) {
   if (code) {
     const cookieStore = await cookies();
     const response = NextResponse.redirect(postLoginUrl);
+    const cfg = buildWebappRuntimeConfigFromEnv();
 
-    const supabase = createServerClient(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_PUBLISHABLE_KEY, {
+    const supabase = createServerClient(cfg.supabaseUrl, cfg.supabasePublishableKey, {
       cookies: {
         getAll() {
           return cookieStore.getAll();

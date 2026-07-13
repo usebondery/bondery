@@ -5,7 +5,7 @@ import {
 import { handleServerUnauthorizedSession } from "@/lib/auth/handleServerUnauthorizedSession";
 import { resolveServerSession } from "@/lib/auth/resolveServerSession";
 import { isUnauthorizedResponseStatus } from "@/lib/auth/unauthorized";
-import { API_URL } from "@/lib/platform/config";
+import { buildWebappRuntimeConfigFromEnv } from "@/lib/platform/runtimeConfig.server";
 import { parseApiJsonResponse, parseApiJsonResponseOrNull } from "./parseResponse";
 
 export { ApiError } from "@bondery/helpers/api";
@@ -26,19 +26,20 @@ export type ServerApiFetchOptions = {
 };
 
 function resolveServerUrl(path: string): string {
+  const { apiBaseUrl } = buildWebappRuntimeConfigFromEnv();
   if (path.startsWith("http://") || path.startsWith("https://")) {
     return path;
   }
 
   if (path.startsWith("/api/")) {
-    return `${API_URL}${path}`;
+    return `${apiBaseUrl}${path}`;
   }
 
   if (path.startsWith("/")) {
-    return `${API_URL}${path}`;
+    return `${apiBaseUrl}${path}`;
   }
 
-  return `${API_URL}/api/${path}`;
+  return `${apiBaseUrl}/api/${path}`;
 }
 
 async function buildServerHeaders(init: RequestInit | undefined): Promise<Headers> {

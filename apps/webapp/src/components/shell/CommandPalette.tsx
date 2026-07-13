@@ -21,7 +21,8 @@ import {
 } from "@/lib/i18n/generated/hooks";
 import { optimisticPersonDocumentTitle } from "@/lib/metadata/optimisticTitles";
 import { useNavigateWithTitle } from "@/lib/metadata/useNavigateWithTitle";
-import { HOTKEYS, WEBSITE_URL } from "@/lib/platform/config";
+import { HOTKEYS } from "@/lib/platform/config";
+import { getWebappRuntimeConfigSync } from "@/lib/platform/runtimeConfig.client";
 import { useAppNavigationLinks } from "./NavigationSidebar";
 import { peopleSearchActions } from "./PeopleSearchSpotlight";
 
@@ -33,6 +34,7 @@ export function CommandPalette() {
   const router = useRouter();
   const { navigateWithTitle } = useNavigateWithTitle();
   const { primaryLinks, secondaryLinks } = useAppNavigationLinks();
+  const { websiteUrl } = getWebappRuntimeConfigSync();
 
   const navActions = [
     ...primaryLinks,
@@ -105,7 +107,7 @@ export function CommandPalette() {
               keywords: ["docs", "help", "documentation", "guide", "learn"],
               label: t("Documentation"),
               leftSection: <IconBook2 size={20} stroke={1.5} />,
-              onClick: () => window.open(`${WEBSITE_URL}${WEBSITE_ROUTES.DOCS}`, "_blank"),
+              onClick: () => window.open(`${websiteUrl}${WEBSITE_ROUTES.DOCS}`, "_blank"),
             },
             {
               description: t("ContactUsDescription"),
@@ -113,7 +115,7 @@ export function CommandPalette() {
               keywords: ["contact", "support", "help", "feedback", "email"],
               label: t("ContactUs"),
               leftSection: <IconMail size={20} stroke={1.5} />,
-              onClick: () => window.open(`${WEBSITE_URL}${WEBSITE_ROUTES.CONTACT}`, "_blank"),
+              onClick: () => window.open(`${websiteUrl}${WEBSITE_ROUTES.CONTACT}`, "_blank"),
             },
           ],
           group: t("HelpGroup"),

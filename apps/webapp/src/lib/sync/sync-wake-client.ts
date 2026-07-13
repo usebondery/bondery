@@ -4,7 +4,7 @@ import {
   type SyncWsBatchMessage,
   syncWsTicketResponseSchema,
 } from "@bondery/schemas/sync";
-import { API_URL } from "@/lib/platform/config";
+import { getWebappRuntimeConfigSync } from "@/lib/platform/runtimeConfig.client";
 
 const MIN_RECONNECT_MS = 1_000;
 const MAX_RECONNECT_MS = 30_000;
@@ -51,7 +51,8 @@ export function startSyncWakeWebClient(onBatch: SyncWakeBatchHandler): SyncWakeW
 
     try {
       const ticket = await fetchWsTicket();
-      const url = buildSyncWsUrl(API_URL, ticket);
+      const { apiBaseUrl } = getWebappRuntimeConfigSync();
+      const url = buildSyncWsUrl(apiBaseUrl, ticket);
       socket = new WebSocket(url);
 
       socket.onopen = () => {

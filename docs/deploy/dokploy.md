@@ -1,14 +1,18 @@
 # Dokploy deployment (webapp + website)
 
-Apps deploy from the monorepo root via Nixpacks/Railpack and `turbo build --filter=<app>`.
+This doc covers the recommended Dokploy setup:
+
+- **Webapp** (`app.usebondery.com`): deploy from a **prebuilt GHCR image** (no server builds)
+- **Website** (`usebondery.com`): can stay on Nixpacks/Railpack (or migrate similarly later)
 
 ## Environment variables
 
-### `NEXT_PUBLIC_*` must be literal URLs at build time
+### Webapp runtime config (build once, deploy many)
 
-Next.js inlines `NEXT_PUBLIC_*` during `next build`. Dokploy project references like `${{project.BONDERY_SUPABASE_URL}}` are **not** expanded reliably for client bundles — you may get the literal string or broken auth redirects.
+The webapp exposes `GET /runtime-config.json` and injects `window.__BONDERY_RUNTIME_CONFIG__` during SSR.
+This allows the same webapp container image to be deployed across environments without rebuilding the client bundle.
 
-Set **literal values** on each app (webapp, website):
+However, **these variables are still required at runtime** (for SSR + runtime-config output). Set **literal values** on the webapp service:
 
 ```env
 NEXT_PUBLIC_SUPABASE_URL=https://slusayyjuoxwoukhjjqh.supabase.co
@@ -20,7 +24,14 @@ NEXT_PUBLIC_API_URL=https://api.usebondery.com
 
 Use Dokploy **project** env vars for secrets consumed only at runtime (`PRIVATE_*` on API). Duplicate the public URLs on each Next.js app if needed — do not rely on `{{project.*}}` for `NEXT_PUBLIC_*`.
 
-After changing any `NEXT_PUBLIC_*` variable, **rebuild** the app (clean build if unsure).
+After changing any `NEXT_PUBLIC_*` variable, **redeploy** the webapp (no rebuild required if you deploy from a prebuilt image).
+
+Optional build metadata (nice for `/runtime-config.json` debugging):
+
+```env
+BONDERY_VERSION=1.7.1
+BONDERY_GIT_SHA=abcdef123456
+```
 
 ### Turbo remote cache (optional)
 
@@ -42,11 +53,15 @@ TURBO_TOKEN=your-remote-cache-token
 
 | Setting | Value |
 |---------|-------|
-| Build path | `.` |
-| Build | `npx turbo build --filter=webapp` |
-| Start | `npx turbo start --filter=webapp` |
-| Container port | `3000` |
+| Provider | Docker Image |
+| Image | `ghcr.io/usebondery/webapp:production` (floating) or `:X.Y.Z` (pin) |
+| Registry URL | `ghcr.io` (optional; leave empty if Dokploy accepts full image ref) |
+| Username | empty (public package) |
+| Password | empty (public package) |
+| Container port | `26632` |
 | Domain | `app.usebondery.com` |
+
+If GHCR packages are private, set Username to the PAT owner and Password to a fine-grained PAT with **Packages → Read**.
 
 ## Supabase Auth URLs
 

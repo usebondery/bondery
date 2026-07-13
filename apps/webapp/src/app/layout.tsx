@@ -16,6 +16,7 @@ import { headers } from "next/headers";
 import { WebappMantineProvider } from "@/components/shell/WebappMantineProvider";
 import { resolveLocaleSettings } from "@/lib/i18n/resolveLocaleSettings";
 import { rootMetadata } from "@/lib/metadata/rootMetadata";
+import { buildWebappRuntimeConfigFromEnv } from "@/lib/platform/runtimeConfig.server";
 import { computeColorScheme } from "@/lib/theme/computeColorScheme";
 import { resolveSsrColorScheme } from "@/lib/theme/resolveSsrColorScheme";
 
@@ -39,6 +40,8 @@ export default async function RootLayout({
   ]);
   const prefersDark = headersList.get("sec-ch-prefers-color-scheme") === "dark";
   const computedColorScheme = computeColorScheme(colorScheme, prefersDark);
+  const runtimeConfig = buildWebappRuntimeConfigFromEnv();
+  const runtimeConfigJson = JSON.stringify(runtimeConfig).replaceAll("<", "\\u003c");
 
   return (
     <html
@@ -53,6 +56,9 @@ export default async function RootLayout({
           forceColorScheme={colorScheme !== "auto" ? computedColorScheme : undefined}
           nonce={nonce}
         />
+        <script id="bondery-runtime-config" nonce={nonce}>
+          {`window.__BONDERY_RUNTIME_CONFIG__=${runtimeConfigJson};`}
+        </script>
       </head>
       <body>
         <WebappMantineProvider defaultColorScheme={colorScheme}>{children}</WebappMantineProvider>

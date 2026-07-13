@@ -10,7 +10,8 @@ import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { setLocalePreferencesCookie } from "@/lib/auth/detectLocale";
 import { useCommonTranslations, useLoginPageTranslations } from "@/lib/i18n/generated/hooks";
-import { INTEGRATION_PROVIDERS, WEBSITE_URL } from "@/lib/platform/config";
+import { INTEGRATION_PROVIDERS } from "@/lib/platform/config";
+import { getWebappRuntimeConfigSync } from "@/lib/platform/runtimeConfig.client";
 import { createBrowswerSupabaseClient } from "@/lib/supabase/client";
 import { Logo } from "./components/Logo";
 
@@ -20,6 +21,7 @@ export function LoginClient() {
   const [loading, setLoading] = useState(false);
   const supabase = createBrowswerSupabaseClient();
   const searchParams = useSearchParams();
+  const { websiteUrl } = getWebappRuntimeConfigSync();
 
   // Preserve redirect parameter for post-login navigation (e.g., OAuth consent flow)
   const redirectParam = searchParams.get("redirect");
@@ -89,7 +91,7 @@ export function LoginClient() {
       <Card className="max-w-md" p="xl">
         {!shouldForceDesktopLoginLayout && (
           <Stack align="center" gap="lg" hiddenFrom="sm">
-            <Logo href={WEBSITE_URL} size={60} />
+            <Logo href={websiteUrl} size={60} />
             <Stack align="center" gap="0">
               <Text fw={600} size="lg" ta="center">
                 {t("MobileNotAvailable")}
@@ -105,7 +107,7 @@ export function LoginClient() {
           gap="md"
           {...(!shouldForceDesktopLoginLayout ? { visibleFrom: "sm" } : {})}
         >
-          <Logo href={WEBSITE_URL} size={60} />
+          <Logo href={websiteUrl} size={60} />
           <Text size="md" ta="center">
             {t("Description")}
           </Text>
@@ -132,11 +134,11 @@ export function LoginClient() {
           </Stack>
           <Text c="dimmed" size="xs" ta="center">
             {t("TermsAgreement")}{" "}
-            <AnchorLink href={`${WEBSITE_URL}${WEBSITE_ROUTES.TERMS}`} size="xs">
+            <AnchorLink href={`${websiteUrl}${WEBSITE_ROUTES.TERMS}`} size="xs">
               {t("TermsOfService")}
             </AnchorLink>{" "}
             {t("And")}{" "}
-            <AnchorLink href={`${WEBSITE_URL}${WEBSITE_ROUTES.PRIVACY}`} size="xs">
+            <AnchorLink href={`${websiteUrl}${WEBSITE_ROUTES.PRIVACY}`} size="xs">
               {t("PrivacyPolicy")}
             </AnchorLink>
           </Text>

@@ -5,7 +5,7 @@ import { ErrorPageHeader } from "@/components/shell/ErrorPageHeader";
 import { HashScrollOnMount } from "@/components/shell/HashScrollOnMount";
 import { PageWrapper } from "@/components/shell/PageWrapper";
 import { useSettingsPageTranslations } from "@/lib/i18n/generated/hooks";
-import { API_URL } from "@/lib/platform/config";
+import { getWebappRuntimeConfigSync } from "@/lib/platform/runtimeConfig.client";
 import { ApiKeysSection } from "./components/cards/ApiKeysSection";
 import { DataManagementCard } from "./components/cards/DataManagementCard";
 import { PreferencesCard } from "./components/cards/PreferencesCard";
@@ -16,6 +16,7 @@ import { TagsSection } from "./components/cards/TagsSection";
 
 export function SettingsClient() {
   const t = useSettingsPageTranslations();
+  const { apiBaseUrl } = getWebappRuntimeConfigSync();
 
   return (
     <PageWrapper>
@@ -24,7 +25,7 @@ export function SettingsClient() {
       <Stack gap="xl">
         <SupportCard />
         <ProfileCard />
-        <ApiKeysSection apiBaseUrl={API_URL} />
+        <ApiKeysSection apiBaseUrl={apiBaseUrl} />
         <SubscriptionCard />
         <PreferencesCard />
         <TagsSection />

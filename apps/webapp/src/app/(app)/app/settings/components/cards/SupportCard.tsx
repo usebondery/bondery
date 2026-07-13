@@ -11,7 +11,7 @@ import {
 } from "@tabler/icons-react";
 import type { ComponentType } from "react";
 import { useSettingsPageTranslations } from "@/lib/i18n/generated/hooks";
-import { WEBSITE_URL } from "@/lib/platform/config";
+import { getWebappRuntimeConfigSync } from "@/lib/platform/runtimeConfig.client";
 import { openFeedbackModal } from "../modals/openFeedbackModal";
 import { SettingsSection } from "./SettingsSection";
 
@@ -79,6 +79,7 @@ function SupportItemCard({ icon: Icon, title, description, href, onClick }: Supp
 
 export function SupportCard() {
   const t = useSettingsPageTranslations("Support");
+  const { websiteUrl } = getWebappRuntimeConfigSync();
 
   const handleOpenFeedbackModal = () => {
     openFeedbackModal();
@@ -90,13 +91,13 @@ export function SupportCard() {
         <Group align="stretch" gap="md" grow>
           <SupportItemCard
             description={t("DocumentationDescription")}
-            href={`${WEBSITE_URL}${WEBSITE_ROUTES.DOCS}`}
+            href={`${websiteUrl}${WEBSITE_ROUTES.DOCS}`}
             icon={IconBook}
             title={t("DocumentationTitle")}
           />
           <SupportItemCard
             description={t("ContactDescription")}
-            href={`${WEBSITE_URL}${WEBSITE_ROUTES.CONTACT}`}
+            href={`${websiteUrl}${WEBSITE_ROUTES.CONTACT}`}
             icon={IconMail}
             title={t("ContactTitle")}
           />
