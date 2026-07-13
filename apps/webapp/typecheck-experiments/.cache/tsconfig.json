@@ -1,0 +1,6 @@
+{
+  "extends": "../tsconfig.shared.json",
+  "include": [
+    "../issue3-i18n-loose.tsx"
+  ]
+}

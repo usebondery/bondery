@@ -1,0 +1,26 @@
+[
+  {
+    "configFilePath": "/home/sveetya/projects/bondery/apps/webapp/typecheck-experiments/.cache/tsconfig.json",
+    "tracePath": "/home/sveetya/projects/bondery/apps/webapp/typecheck-experiments/.cache/trace/trace.json",
+    "typesPath": "/home/sveetya/projects/bondery/apps/webapp/typecheck-experiments/.cache/trace/types_0.json",
+    "checkerId": 0
+  },
+  {
+    "configFilePath": "/home/sveetya/projects/bondery/apps/webapp/typecheck-experiments/.cache/tsconfig.json",
+    "tracePath": "/home/sveetya/projects/bondery/apps/webapp/typecheck-experiments/.cache/trace/trace.json",
+    "typesPath": "/home/sveetya/projects/bondery/apps/webapp/typecheck-experiments/.cache/trace/types_1.json",
+    "checkerId": 1
+  },
+  {
+    "configFilePath": "/home/sveetya/projects/bondery/apps/webapp/typecheck-experiments/.cache/tsconfig.json",
+    "tracePath": "/home/sveetya/projects/bondery/apps/webapp/typecheck-experiments/.cache/trace/trace.json",
+    "typesPath": "/home/sveetya/projects/bondery/apps/webapp/typecheck-experiments/.cache/trace/types_2.json",
+    "checkerId": 2
+  },
+  {
+    "configFilePath": "/home/sveetya/projects/bondery/apps/webapp/typecheck-experiments/.cache/tsconfig.json",
+    "tracePath": "/home/sveetya/projects/bondery/apps/webapp/typecheck-experiments/.cache/trace/trace.json",
+    "typesPath": "/home/sveetya/projects/bondery/apps/webapp/typecheck-experiments/.cache/trace/types_3.json",
+    "checkerId": 3
+  }
+]
