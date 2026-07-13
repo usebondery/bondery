@@ -1,0 +1,144 @@
+name: API Image (Release)
+
+on:
+  push:
+    tags:
+      - "api-v*.*.*"
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: "Release tag (format: api-vX.Y.Z)"
+        required: true
+        type: string
+
+permissions:
+  contents: write
+  packages: write
+
+env:
+  IMAGE_NAME: ghcr.io/usebondery/bondery-api
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.release_meta.outputs.tag }}
+      version: ${{ steps.release_meta.outputs.version }}
+      minor_version: ${{ steps.release_meta.outputs.minor_version }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Resolve release metadata
+        id: release_meta
+        run: |
+          if [ "${GITHUB_EVENT_NAME}" = "workflow_dispatch" ]; then
+            TAG="${{ inputs.release_tag }}"
+          else
+            TAG="${GITHUB_REF_NAME}"
+          fi
+
+          if ! echo "$TAG" | grep -Eq '^api-v[0-9]+\.[0-9]+\.[0-9]+$'; then
+            echo "Invalid release tag: $TAG"
+            echo "Expected format: api-vX.Y.Z"
+            exit 1
+          fi
+
+          VERSION="${TAG#api-v}"
+          MINOR_VERSION="${VERSION%.*}"
+
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "minor_version=$MINOR_VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Ensure tag commit is on release branch
+        run: |
+          git fetch origin release
+          if ! git merge-base --is-ancestor "${GITHUB_SHA}" "origin/release"; then
+            echo "Tagged commit is not on the release branch."
+            echo "Create production tags only from commits merged into release."
+            exit 1
+          fi
+
+      - name: Ensure release tag exists for manual runs
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          TAG="${{ steps.release_meta.outputs.tag }}"
+          git fetch --tags
+          if git rev-parse "$TAG" >/dev/null 2>&1; then
+            echo "Tag already exists: $TAG"
+          else
+            git tag "$TAG" "$GITHUB_SHA"
+            git push origin "$TAG"
+          fi
+
+  build-push:
+    needs: validate
+    runs-on: ubuntu-latest
+    env:
+      TURBO_TEAM: ${{ secrets.PRIVATE_TURBO_TEAM }}
+      TURBO_TOKEN: ${{ secrets.PRIVATE_TURBO_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.validate.outputs.tag }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Docker metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.IMAGE_NAME }}
+          tags: |
+            type=raw,value=${{ needs.validate.outputs.version }}
+            type=raw,value=${{ needs.validate.outputs.minor_version }}
+            type=raw,value=prod
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: apps/api/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            GIT_SHA=${{ github.sha }}
+            VERSION=${{ needs.validate.outputs.version }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  github-release:
+    needs: [validate, build-push]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.validate.outputs.tag }}
+          persist-credentials: false
+
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ needs.validate.outputs.tag }}
+          name: Bondery API ${{ needs.validate.outputs.version }}
+          generate_release_notes: true
+          body: |
+            ## Bondery API ${{ needs.validate.outputs.version }}
+
+            Container image: `${{ env.IMAGE_NAME }}:${{ needs.validate.outputs.version }}`
+
+            Deploy in Dokploy by pinning the application image to this tag.

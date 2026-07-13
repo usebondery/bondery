@@ -1,0 +1,35 @@
+# Dependencies and build caches
+**/node_modules
+**/.turbo
+**/.next
+**/.vercel
+**/.cache
+**/dist
+!packages/**/dist
+
+# Local secrets
+**/.env
+**/.env.*
+!**/.env.*.example
+
+# Apps not needed for API image
+apps/mobile
+apps/webapp
+apps/website
+apps/chrome-extension
+
+# Dev / test / docs
+.git
+.github
+.agents
+.cursor
+**/*.test.ts
+**/__tests__
+*.md
+!packages/**/README.md
+
+# IDE and OS
+.DS_Store
+*.log
+.vscode
+.idea
