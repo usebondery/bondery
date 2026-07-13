@@ -61,6 +61,8 @@ TURBO_TOKEN=your-remote-cache-token
 | Container port | `26632` |
 | Domain | `app.usebondery.com` |
 
+**Docker Swarm / Dokploy:** The image healthcheck uses `GET /api/live` (process liveness only). Do not point it at `/api/status` — that route proxies to the API and will mark the container unhealthy when the API is down, leaving the service at `0/1` and breaking Traefik DNS routing.
+
 If GHCR packages are private, set Username to the PAT owner and Password to a fine-grained PAT with **Packages → Read**.
 
 ## Supabase Auth URLs
