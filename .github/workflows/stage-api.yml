@@ -1,0 +1,67 @@
+name: Stage · API
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "apps/api/**"
+      - "packages/**"
+      - "scripts/**"
+      - "docs/**"
+      - "package.json"
+      - "package-lock.json"
+      - "turbo.json"
+      - ".dockerignore.api"
+      - ".github/actions/shared/**"
+      - ".github/workflows/stage-api.yml"
+      - ".github/workflows/release-api.yml"
+      - ".github/workflows/shared-docker-build-push.yml"
+
+permissions:
+  contents: read
+  packages: write
+
+env:
+  IMAGE_NAME: ghcr.io/usebondery/api
+
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: API sync unit tests
+        run: npm run test:sync -w api
+
+      - name: API smoke tests
+        run: npm run test:api -w api
+
+  build-push:
+    needs: gate
+    uses: ./.github/workflows/shared-docker-build-push.yml
+    secrets: inherit
+    with:
+      dockerfile: apps/api/Dockerfile
+      dockerignore_file: .dockerignore.api
+      image_name: ${{ env.IMAGE_NAME }}
+      docker_tags: |
+        type=raw,value=beta
+        type=sha,prefix=sha-,format=short
+      oci_title: Bondery API
+      oci_description: Bondery API server (integration builds from main)
+      oci_documentation: https://github.com/usebondery/bondery/blob/main/docs/deploy/api-container.md
+      oci_version: beta
+      git_sha: ${{ github.sha }}
+      build_args: |
+        GIT_SHA=${{ github.sha }}

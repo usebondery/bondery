@@ -104,7 +104,7 @@ Do not hardcode user-facing strings in the webapp (or other clients that share `
 - **Namespaces:** Group keys by feature/page (e.g. `GroupsPage`, `ContactInfo`). Shared chrome lives in `common.json` (`actions.cancel`, `feedback.errorTitle`, etc.).
 - **Mobile:** `useMobileTranslations(namespace?, keyPrefix?)` or `t("key", { ns: "MobileContacts" })` — never `MobileApp.*` dotted paths.
 - **Patterns:** Prefer small hooks for repeated copy (e.g. `useContactInfoLabels`, `useContactsTableCopy`) over duplicating `useMemo` blocks. For modals opened outside React, set the title from the modal component via `modals.updateModal` once `t` is available.
-- **CI (translations):** `check-translations`, `check-api-error-translations`, `i18n:types:check`, `i18n:status:check`, `i18n:lint`, `verify-i18next-hook-extraction.mjs` (see root `package.json` / `.github/workflows/ci.yml`).
+- **CI (translations):** `check-translations`, `check-api-error-translations`, `i18n:types:check`, `i18n:status:check`, `i18n:lint`, `verify-i18next-hook-extraction.mjs` (see root `package.json` / `.github/workflows/verify.yml`).
 - **Exceptions:** Non-UI strings (logs, API field names, test IDs) and proper nouns/brand names that should not be translated.
 
 When touching UI, wire strings to translations in the same change — do not leave English literals for a follow-up.

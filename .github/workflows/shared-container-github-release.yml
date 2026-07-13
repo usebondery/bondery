@@ -1,0 +1,45 @@
+name: Shared · Container GitHub release
+
+on:
+  workflow_call:
+    inputs:
+      tag:
+        required: true
+        type: string
+      version:
+        required: true
+        type: string
+      image_name:
+        required: true
+        type: string
+      product_name:
+        description: Human-readable product name for release title/body
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  github-release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag }}
+          persist-credentials: false
+
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ inputs.tag }}
+          name: ${{ inputs.product_name }} ${{ inputs.version }}
+          generate_release_notes: true
+          body: |
+            ## ${{ inputs.product_name }} ${{ inputs.version }}
+
+            Container image: `${{ inputs.image_name }}:${{ inputs.version }}`
+
+            Floating channel tag: `${{ inputs.image_name }}:production`
+
+            Deploy in Dokploy by pinning the application image to the semver tag.

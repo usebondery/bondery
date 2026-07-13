@@ -78,7 +78,7 @@ The Chrome extension must be released **before** the web app because Google requ
    git tag ext-X.Y.Z
    git push origin ext-X.Y.Z
    ```
-   This triggers the `release-extension` GitHub Actions workflow automatically. You can also trigger it manually — see [apps/chrome-extension/RELEASE.md](../../apps/chrome-extension/RELEASE.md) for details.
+   This triggers the `release-extension` GitHub Actions workflow automatically (`Release · Extension`). You can also trigger it manually — see [apps/chrome-extension/RELEASE.md](../../apps/chrome-extension/RELEASE.md) for details.
 2. **STOP. Do not continue to Step 2.** Wait for the user to confirm that Google's review is complete and the extension is live in the Chrome Web Store.
 3. Once the user confirms the extension is published, proceed to Step 2.
 

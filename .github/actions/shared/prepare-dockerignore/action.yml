@@ -1,0 +1,14 @@
+name: Prepare Docker ignore file
+description: Copy a service-specific dockerignore file to .dockerignore for the build context.
+
+inputs:
+  dockerignore_file:
+    description: Source dockerignore file (for example .dockerignore.api)
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Copy dockerignore
+      shell: bash
+      run: cp "${{ inputs.dockerignore_file }}" .dockerignore

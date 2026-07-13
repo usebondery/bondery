@@ -1,0 +1,71 @@
+name: Stage · Webapp
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "apps/webapp/**"
+      - "packages/**"
+      - "scripts/**"
+      - "docs/**"
+      - "package.json"
+      - "package-lock.json"
+      - "turbo.json"
+      - ".dockerignore.webapp"
+      - ".github/actions/shared/**"
+      - ".github/workflows/stage-webapp.yml"
+      - ".github/workflows/release-webapp.yml"
+      - ".github/workflows/shared-docker-build-push.yml"
+
+permissions:
+  contents: read
+  packages: write
+
+env:
+  IMAGE_NAME: ghcr.io/usebondery/webapp
+
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Webapp typechecks and policies
+        run: npm run check-types -w webapp
+
+      - name: Webapp tests
+        run: |
+          npm run test:theme -w webapp
+          npm run test:sync -w webapp
+          npm run test:runtime-config -w webapp
+
+  build-push:
+    needs: gate
+    uses: ./.github/workflows/shared-docker-build-push.yml
+    secrets: inherit
+    with:
+      dockerfile: apps/webapp/Dockerfile
+      dockerignore_file: .dockerignore.webapp
+      image_name: ${{ env.IMAGE_NAME }}
+      docker_tags: |
+        type=raw,value=beta
+        type=sha,prefix=sha-,format=short
+      oci_title: Bondery Webapp
+      oci_description: Bondery webapp (integration builds from main)
+      oci_documentation: https://github.com/usebondery/bondery/blob/main/docs/deploy/dokploy.md
+      oci_version: beta
+      git_sha: ${{ github.sha }}
+      build_args: |
+        BONDERY_GIT_SHA=${{ github.sha }}
+        BONDERY_VERSION=beta

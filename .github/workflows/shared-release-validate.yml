@@ -1,0 +1,82 @@
+name: Shared · Release validate
+
+on:
+  workflow_call:
+    inputs:
+      tag_prefix:
+        description: Git tag prefix (api, webapp, ext)
+        required: true
+        type: string
+      manual_release_tag:
+        description: Optional tag override for workflow_dispatch callers
+        required: false
+        type: string
+        default: ""
+      require_release_branch:
+        description: Require the tagged commit to be on origin/release
+        required: false
+        type: boolean
+        default: true
+    outputs:
+      tag:
+        description: Resolved release tag
+        value: ${{ jobs.validate.outputs.tag }}
+      version:
+        description: Semver extracted from the tag
+        value: ${{ jobs.validate.outputs.version }}
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.release_meta.outputs.tag }}
+      version: ${{ steps.release_meta.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Resolve release metadata
+        id: release_meta
+        env:
+          MANUAL_RELEASE_TAG: ${{ inputs.manual_release_tag }}
+          TAG_PREFIX: ${{ inputs.tag_prefix }}
+        run: |
+          if [ -n "$MANUAL_RELEASE_TAG" ]; then
+            TAG="$MANUAL_RELEASE_TAG"
+          else
+            TAG="${GITHUB_REF_NAME}"
+          fi
+
+          if ! echo "$TAG" | grep -Eq "^${TAG_PREFIX}-[0-9]+\\.[0-9]+\\.[0-9]+$"; then
+            echo "Invalid release tag: $TAG"
+            echo "Expected format: ${TAG_PREFIX}-X.Y.Z"
+            exit 1
+          fi
+
+          VERSION="${TAG#${TAG_PREFIX}-}"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Ensure tag commit is on release branch
+        if: inputs.require_release_branch
+        run: |
+          git fetch origin release
+          if ! git merge-base --is-ancestor "${GITHUB_SHA}" "origin/release"; then
+            echo "Tagged commit is not on the release branch."
+            echo "Create production tags only from commits merged into release."
+            exit 1
+          fi
+
+      - name: Ensure release tag exists for manual runs
+        if: inputs.manual_release_tag != ''
+        run: |
+          TAG="${{ steps.release_meta.outputs.tag }}"
+          git fetch --tags
+          if git rev-parse "$TAG" >/dev/null 2>&1; then
+            echo "Tag already exists: $TAG"
+          else
+            git tag "$TAG" "$GITHUB_SHA"
+            git push origin "$TAG"
+          fi

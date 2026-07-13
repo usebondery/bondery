@@ -1,0 +1,56 @@
+name: Release · API
+
+on:
+  push:
+    tags:
+      - "api-*.*.*"
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: "Release tag (format: api-X.Y.Z)"
+        required: true
+        type: string
+
+permissions:
+  contents: write
+  packages: write
+
+env:
+  IMAGE_NAME: ghcr.io/usebondery/api
+
+jobs:
+  validate:
+    uses: ./.github/workflows/shared-release-validate.yml
+    with:
+      tag_prefix: api
+      manual_release_tag: ${{ github.event_name == 'workflow_dispatch' && inputs.release_tag || '' }}
+
+  build-push:
+    needs: validate
+    uses: ./.github/workflows/shared-docker-build-push.yml
+    secrets: inherit
+    with:
+      checkout_ref: ${{ needs.validate.outputs.tag }}
+      dockerfile: apps/api/Dockerfile
+      dockerignore_file: .dockerignore.api
+      image_name: ${{ env.IMAGE_NAME }}
+      docker_tags: |
+        type=raw,value=${{ needs.validate.outputs.version }}
+        type=raw,value=production
+      oci_title: Bondery API
+      oci_description: Bondery production API server
+      oci_documentation: https://github.com/usebondery/bondery/blob/main/docs/deploy/api-container.md
+      oci_version: ${{ needs.validate.outputs.version }}
+      git_sha: ${{ github.sha }}
+      build_args: |
+        GIT_SHA=${{ github.sha }}
+        VERSION=${{ needs.validate.outputs.version }}
+
+  github-release:
+    needs: [validate, build-push]
+    uses: ./.github/workflows/shared-container-github-release.yml
+    with:
+      tag: ${{ needs.validate.outputs.tag }}
+      version: ${{ needs.validate.outputs.version }}
+      image_name: ${{ env.IMAGE_NAME }}
+      product_name: Bondery API

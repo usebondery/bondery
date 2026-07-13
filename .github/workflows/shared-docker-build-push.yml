@@ -1,0 +1,136 @@
+name: Shared · Docker build and push
+
+on:
+  workflow_call:
+    inputs:
+      dockerfile:
+        description: Dockerfile path relative to repository root
+        required: true
+        type: string
+      dockerignore_file:
+        description: Service-specific dockerignore file
+        required: true
+        type: string
+      image_name:
+        description: Fully qualified GHCR image name
+        required: true
+        type: string
+      docker_tags:
+        description: Multiline tag list for docker/metadata-action
+        required: true
+        type: string
+      oci_title:
+        required: true
+        type: string
+      oci_description:
+        required: true
+        type: string
+      oci_documentation:
+        required: true
+        type: string
+      oci_version:
+        required: true
+        type: string
+      git_sha:
+        required: true
+        type: string
+      build_args:
+        description: Multiline Docker build args (BUILD_DATE is appended automatically)
+        required: false
+        type: string
+        default: ""
+      checkout_ref:
+        description: Optional git ref to checkout before building
+        required: false
+        type: string
+        default: ""
+
+permissions:
+  contents: read
+  packages: write
+
+env:
+  TURBO_TELEMETRY_DISABLED: 1
+  OCI_VENDOR: Bondery
+  OCI_AUTHORS: Bondery <team@usebondery.com>
+  OCI_SOURCE: https://github.com/usebondery/bondery
+  OCI_URL: https://usebondery.com
+  OCI_LICENSES: AGPL-3.0
+
+jobs:
+  build-push:
+    runs-on: ubuntu-latest
+    env:
+      TURBO_TEAM: ${{ secrets.PRIVATE_TURBO_TEAM }}
+      TURBO_TOKEN: ${{ secrets.PRIVATE_TURBO_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.checkout_ref != '' && inputs.checkout_ref || github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Resolve build timestamp
+        id: build_time
+        run: echo "created=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> "$GITHUB_OUTPUT"
+
+      - name: Prepare Docker ignore file
+        uses: ./.github/actions/shared/prepare-dockerignore
+        with:
+          dockerignore_file: ${{ inputs.dockerignore_file }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: ./.github/actions/shared/ghcr-login
+        with:
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GHCR_WRITE_TOKEN }}
+
+      - name: Docker metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ inputs.image_name }}
+          tags: ${{ inputs.docker_tags }}
+          labels: |
+            org.opencontainers.image.title=${{ inputs.oci_title }}
+            org.opencontainers.image.description=${{ inputs.oci_description }}
+            org.opencontainers.image.vendor=${{ env.OCI_VENDOR }}
+            org.opencontainers.image.authors=${{ env.OCI_AUTHORS }}
+            org.opencontainers.image.source=${{ env.OCI_SOURCE }}
+            org.opencontainers.image.url=${{ env.OCI_URL }}
+            org.opencontainers.image.documentation=${{ inputs.oci_documentation }}
+            org.opencontainers.image.licenses=${{ env.OCI_LICENSES }}
+            org.opencontainers.image.version=${{ inputs.oci_version }}
+            org.opencontainers.image.revision=${{ inputs.git_sha }}
+            org.opencontainers.image.created=${{ steps.build_time.outputs.created }}
+          annotations: |
+            org.opencontainers.image.title=${{ inputs.oci_title }}
+            org.opencontainers.image.description=${{ inputs.oci_description }}
+            org.opencontainers.image.vendor=${{ env.OCI_VENDOR }}
+            org.opencontainers.image.authors=${{ env.OCI_AUTHORS }}
+            org.opencontainers.image.source=${{ env.OCI_SOURCE }}
+            org.opencontainers.image.url=${{ env.OCI_URL }}
+            org.opencontainers.image.documentation=${{ inputs.oci_documentation }}
+            org.opencontainers.image.licenses=${{ env.OCI_LICENSES }}
+            org.opencontainers.image.version=${{ inputs.oci_version }}
+            org.opencontainers.image.revision=${{ inputs.git_sha }}
+            org.opencontainers.image.created=${{ steps.build_time.outputs.created }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ${{ inputs.dockerfile }}
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            ${{ inputs.build_args }}
+            BUILD_DATE=${{ steps.build_time.outputs.created }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          provenance: false
+          sbom: false

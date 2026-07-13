@@ -1,4 +1,4 @@
-name: Release Chrome Extension
+name: Release · Extension
 
 permissions:
   contents: write

@@ -33,7 +33,8 @@
       "!**/*.generated.ts",
       "!**/generated",
       "!packages/schemas/src/supabase.types.ts",
-      "!packages/schemas/src/openapi/fixtures"
+      "!packages/schemas/src/openapi/fixtures",
+      "!**/.dockerignore*"
     ]
   },
   "formatter": {

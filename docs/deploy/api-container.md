@@ -150,7 +150,7 @@ If **`api`** does not exist on GitHub Packages yet, the last successful build ma
 ghcr.io/usebondery/bondery-api:prod
 ```
 
-Switch to `ghcr.io/usebondery/api:…` after **API Image (Release)** succeeds with the current workflow.
+Switch to `ghcr.io/usebondery/api:…` after **Release · API** succeeds with the current workflow.
 
 ### Verify on the Hetzner host before Dokploy
 
