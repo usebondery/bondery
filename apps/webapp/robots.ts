@@ -1,12 +1,16 @@
 import type { MetadataRoute } from "next";
-import { WEBAPP_URL } from "@/lib/platform/config";
+import { buildWebappRuntimeConfigFromEnv } from "@/lib/platform/runtimeConfig.server";
+
+export const dynamic = "force-dynamic";
 
 export default function robots(): MetadataRoute.Robots {
+  const { webappUrl } = buildWebappRuntimeConfigFromEnv();
+
   return {
     rules: {
       disallow: ["/api/", "/app/", "*"],
       userAgent: "*",
     },
-    sitemap: `${WEBAPP_URL}/sitemap.xml`,
+    sitemap: `${webappUrl}/sitemap.xml`,
   };
 }

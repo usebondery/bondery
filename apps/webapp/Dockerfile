@@ -16,6 +16,13 @@ COPY --from=prune /app/out/full/ .
 COPY scripts ./scripts
 COPY docs ./docs
 ENV npm_config_ignore_scripts=true
+# Placeholder public env vars for build-time typecheck/static analysis only.
+# Runtime values come from container env when the app starts.
+ENV NEXT_PUBLIC_API_URL=https://api.example.com
+ENV NEXT_PUBLIC_WEBAPP_URL=https://app.example.com
+ENV NEXT_PUBLIC_WEBSITE_URL=https://example.com
+ENV NEXT_PUBLIC_SUPABASE_URL=https://example.supabase.co
+ENV NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=build-placeholder
 RUN npm ci
 RUN npx turbo build --filter=webapp
 RUN npm prune --omit=dev
