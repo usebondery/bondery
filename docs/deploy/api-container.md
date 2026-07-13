@@ -20,7 +20,13 @@ Repo → **Settings** → **Actions** → **General** → **Workflow permissions
 - Select **Read and write permissions**
 - Enable **Allow GitHub Actions to create and approve pull requests** (optional)
 
-Required so `GITHUB_TOKEN` can push to GHCR (`packages: write`).
+If org policy disables **Read and write permissions** for `GITHUB_TOKEN`, add a repo secret:
+
+| Secret | Value |
+|--------|--------|
+| `GHCR_WRITE_TOKEN` | Fine-grained PAT with **Packages → Read and write** on `usebondery/bondery` |
+
+Workflows push to GHCR with that token (username = org owner `usebondery`).
 
 ### 2. Branch protection on `main`
 
@@ -79,7 +85,7 @@ Dokploy → **Settings** → **Registry** (or per-app registry):
 |-------|-------|
 | Registry | `ghcr.io` |
 | Username | Your GitHub username |
-| Password | Fine-grained PAT with `read:packages` |
+| Password | Fine-grained PAT with **Packages → Read** (separate from `GHCR_WRITE_TOKEN`) |
 
 ### Application
 
