@@ -84,12 +84,13 @@ Repo → **Settings** → **Secrets and variables** → **Actions**:
 
 ### GHCR package visibility
 
-After the first successful run:
+Packages are **public** so self-hosters can pull without GitHub credentials.
 
-1. `https://github.com/orgs/usebondery/packages`
-2. Open **`api`**
-3. **Package settings** → **Private** (recommended)
-4. Link package to this repository
+To change visibility: `https://github.com/orgs/usebondery/packages` → **`api`** → **Package settings** → **Change visibility** → **Public**.
+
+Link the package to this repository if prompted.
+
+> Legacy package **`bondery-api`** may still exist from early CI runs. New releases publish to **`api`** only.
 
 ### `release` branch
 
@@ -117,13 +118,49 @@ git push origin api-1.7.1
 
 3. CI publishes `ghcr.io/usebondery/api:1.7.1` and `ghcr.io/usebondery/api:production`.
 
-## Dokploy — registry (all API apps)
+## Dokploy — Docker provider fields
+
+Use the **full image reference** in the Docker image field. If you enter only `usebondery/api:production`, Docker pulls from **Docker Hub** (`docker.io/usebondery/api`), not GHCR — that causes `repository does not exist or may require 'docker login'`.
+
+### Production (public package, no registry login)
 
 | Field | Value |
-|-------|-------|
-| Registry URL | `ghcr.io` |
-| Username | GitHub username (PAT owner) |
-| Password | Fine-grained PAT with **Packages → Read** |
+|-------|--------|
+| **Docker image** | `ghcr.io/usebondery/api:1.7.0` or `ghcr.io/usebondery/api:production` |
+| **Registry URL** | leave empty, or `ghcr.io` (only if your Dokploy version requires it) |
+| **Username** | leave empty |
+| **Password** | leave empty |
+
+Pin **semver** (`:1.7.0`) for immutable prod; use `:production` only for floating latest release.
+
+### If the package is still private (temporary)
+
+| Field | Value |
+|-------|--------|
+| **Docker image** | `ghcr.io/usebondery/api:1.7.0` |
+| **Registry URL** | `ghcr.io` |
+| **Username** | GitHub username (PAT owner) |
+| **Password** | Fine-grained PAT with **Packages → Read** |
+
+### Legacy image (before package rename)
+
+If **`api`** does not exist on GitHub Packages yet, the last successful build may be under the old name:
+
+```text
+ghcr.io/usebondery/bondery-api:prod
+```
+
+Switch to `ghcr.io/usebondery/api:…` after **API Image (Release)** succeeds with the current workflow.
+
+### Verify on the Hetzner host before Dokploy
+
+```bash
+docker pull ghcr.io/usebondery/api:production
+# or
+docker pull ghcr.io/usebondery/bondery-api:prod
+```
+
+If both fail, the tag was never pushed or the package name differs — check **Actions** and **Packages** on GitHub.
 
 ## Dokploy — production app
 
@@ -131,7 +168,7 @@ git push origin api-1.7.1
 |---------|-------|
 | Name | `api` |
 | Provider | Docker Image |
-| Image | `ghcr.io/usebondery/api:1.7.1` (pin semver) |
+| Image | `ghcr.io/usebondery/api:1.7.0` (full path — see above) |
 | Container port | `26631` |
 | Domain | `api.usebondery.com` |
 
