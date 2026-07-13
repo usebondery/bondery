@@ -3,6 +3,7 @@
 FROM node:22-alpine AS base
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
+ENV TURBO_TELEMETRY_DISABLED=1
 
 FROM base AS prune
 COPY . .

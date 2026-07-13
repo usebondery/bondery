@@ -75,14 +75,14 @@ The Chrome extension must be released **before** the web app because Google requ
 
 1. Create and push the extension git tag:
    ```bash
-   git tag ext-vX.Y.Z
-   git push origin ext-vX.Y.Z
+   git tag ext-X.Y.Z
+   git push origin ext-X.Y.Z
    ```
    This triggers the `release-extension` GitHub Actions workflow automatically. You can also trigger it manually — see [apps/chrome-extension/RELEASE.md](../../apps/chrome-extension/RELEASE.md) for details.
 2. **STOP. Do not continue to Step 2.** Wait for the user to confirm that Google's review is complete and the extension is live in the Chrome Web Store.
 3. Once the user confirms the extension is published, proceed to Step 2.
 
-> **If the review is rejected:** fix the issues on `main`, create a new patch tag (`ext-vX.Y.Z+1`), and re-submit. Do **not** proceed with the web app release until the extension is live.
+> **If the review is rejected:** fix the issues on `main`, create a new patch tag (`ext-X.Y.Z+1`), and re-submit. Do **not** proceed with the web app release until the extension is live.
 
 ### 2. Web App & Other Apps
 

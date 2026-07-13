@@ -273,7 +273,7 @@ The API runs as a long-lived Node process in Docker, not serverless. See [`docs/
 Build pipeline:
 
 1. **Image build** — `apps/api/Dockerfile` uses `turbo prune api --docker`, `npm ci`, and `turbo build --filter=api`.
-2. **CI** — GitHub Actions pushes to `ghcr.io/usebondery/bondery-api` (`:beta` on `main`, semver tags on `release`).
+2. **CI** — GitHub Actions pushes to `ghcr.io/usebondery/api` (`:beta` on `main`, semver tags on `release`).
 3. **Runtime** — `node apps/api/dist/index.js` listens on `PORT` (default `26631`).
 
 Workspace packages follow the [Turborepo compiled-package model](https://turborepo.dev/docs/guides/tools/typescript#compiled-packages): `types` → `./src/*.ts` (editor IntelliSense), `import` / `node` / `default` → `./dist/*.js` (runtime). Production `build` depends on `^build`; local dev cold-starts via `compile` (`tsc` to `dist/`) with package `tsc --watch` companions. When adding package subpaths (especially directory barrels like `src/foo/index.ts`), run `npm run sync-exports` from the repo root.

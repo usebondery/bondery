@@ -3,11 +3,11 @@ name: API Image (Release)
 on:
   push:
     tags:
-      - "api-v*.*.*"
+      - "api-*.*.*"
   workflow_dispatch:
     inputs:
       release_tag:
-        description: "Release tag (format: api-vX.Y.Z)"
+        description: "Release tag (format: api-X.Y.Z)"
         required: true
         type: string
 
@@ -16,7 +16,8 @@ permissions:
   packages: write
 
 env:
-  IMAGE_NAME: ghcr.io/usebondery/bondery-api
+  IMAGE_NAME: ghcr.io/usebondery/api
+  TURBO_TELEMETRY_DISABLED: 1
 
 jobs:
   validate:
@@ -24,7 +25,6 @@ jobs:
     outputs:
       tag: ${{ steps.release_meta.outputs.tag }}
       version: ${{ steps.release_meta.outputs.version }}
-      minor_version: ${{ steps.release_meta.outputs.minor_version }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -40,18 +40,16 @@ jobs:
             TAG="${GITHUB_REF_NAME}"
           fi
 
-          if ! echo "$TAG" | grep -Eq '^api-v[0-9]+\.[0-9]+\.[0-9]+$'; then
+          if ! echo "$TAG" | grep -Eq '^api-[0-9]+\.[0-9]+\.[0-9]+$'; then
             echo "Invalid release tag: $TAG"
-            echo "Expected format: api-vX.Y.Z"
+            echo "Expected format: api-X.Y.Z"
             exit 1
           fi
 
-          VERSION="${TAG#api-v}"
-          MINOR_VERSION="${VERSION%.*}"
+          VERSION="${TAG#api-}"
 
           echo "tag=$TAG" >> "$GITHUB_OUTPUT"
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
-          echo "minor_version=$MINOR_VERSION" >> "$GITHUB_OUTPUT"
 
       - name: Ensure tag commit is on release branch
         run: |
@@ -104,8 +102,7 @@ jobs:
           images: ${{ env.IMAGE_NAME }}
           tags: |
             type=raw,value=${{ needs.validate.outputs.version }}
-            type=raw,value=${{ needs.validate.outputs.minor_version }}
-            type=raw,value=prod
+            type=raw,value=production
 
       - name: Build and push
         uses: docker/build-push-action@v6
@@ -120,6 +117,9 @@ jobs:
             VERSION=${{ needs.validate.outputs.version }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+          # Avoid extra GHCR manifests shown as unknown/unknown (BuildKit attestations).
+          provenance: false
+          sbom: false
 
   github-release:
     needs: [validate, build-push]
@@ -141,4 +141,6 @@ jobs:
 
             Container image: `${{ env.IMAGE_NAME }}:${{ needs.validate.outputs.version }}`
 
-            Deploy in Dokploy by pinning the application image to this tag.
+            Floating channel tag: `${{ env.IMAGE_NAME }}:production`
+
+            Deploy in Dokploy by pinning the application image to the semver tag.

@@ -21,7 +21,8 @@ permissions:
   packages: write
 
 env:
-  IMAGE_NAME: ghcr.io/usebondery/bondery-api
+  IMAGE_NAME: ghcr.io/usebondery/api
+  TURBO_TELEMETRY_DISABLED: 1
 
 jobs:
   gate:
@@ -88,3 +89,5 @@ jobs:
             BUILD_DATE=${{ github.event.head_commit.timestamp }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+          provenance: false
+          sbom: false
