@@ -82,6 +82,10 @@ function assertProductionRuntimeConfig(config: WebappRuntimeConfig): void {
     errors.push(`${WEBAPP_RUNTIME_ENV.websiteUrl} is still the Docker build placeholder`);
   }
 
+  if (/localhost|127\.0\.0\.1/i.test(config.webappUrl)) {
+    errors.push(`${WEBAPP_RUNTIME_ENV.webappUrl} must not point at localhost in production`);
+  }
+
   if (errors.length > 0) {
     throw new Error(
       `Invalid webapp runtime config:\n${errors.map((message) => `- ${message}`).join("\n")}`,
@@ -98,4 +102,9 @@ export function validateWebappRuntimeConfigAtStartup(): WebappRuntimeConfig {
   }
 
   return config;
+}
+
+/** Canonical public origin for redirects (uses BONDERY_PUBLIC_WEBAPP_URL, not request host). */
+export function getWebappPublicOrigin(config: WebappRuntimeConfig): string {
+  return new URL(config.webappUrl).origin;
 }

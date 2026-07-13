@@ -2,7 +2,10 @@ import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import { createServerClient } from "@supabase/ssr";
 import { type NextRequest, NextResponse } from "next/server";
 import { buildLoginUrl, buildPathWithSearch } from "@/lib/auth/returnIntent";
-import { buildWebappRuntimeConfigFromEnv } from "@/lib/platform/runtimeConfig.server";
+import {
+  buildWebappRuntimeConfigFromEnv,
+  getWebappPublicOrigin,
+} from "@/lib/platform/runtimeConfig.server";
 
 /**
  * Synchronizes Supabase auth cookies for the current request and applies route-based redirects.
@@ -23,6 +26,7 @@ export async function updateSession(request: NextRequest, requestHeaders?: Heade
 
   let supabaseResponse = buildNextResponse();
   const cfg = buildWebappRuntimeConfigFromEnv();
+  const webappOrigin = getWebappPublicOrigin(cfg);
 
   // With Fluid compute, don't put this client in a global environment
   // variable. Always create a new one on each request.
@@ -56,7 +60,7 @@ export async function updateSession(request: NextRequest, requestHeaders?: Heade
   // 1. If no user and trying to access protected routes (/app/*), redirect to login
   if (!user && request.nextUrl.pathname.startsWith(WEBAPP_ROUTES.APP_GROUP)) {
     const returnPath = buildPathWithSearch(request.nextUrl.pathname, request.nextUrl.search);
-    const loginUrl = new URL(buildLoginUrl(returnPath), request.nextUrl.origin);
+    const loginUrl = new URL(buildLoginUrl(returnPath), webappOrigin);
     return NextResponse.redirect(loginUrl);
   }
 

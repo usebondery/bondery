@@ -6,7 +6,10 @@ import { serverApiFetch } from "@/lib/api/server";
 import { BYPASS_ONBOARDING_ONCE_COOKIE } from "@/lib/auth/constants";
 import { LOCALE_PREFS_COOKIE } from "@/lib/auth/detectLocale";
 import { parseReturnIntent, shouldBypassOnboardingForReturnPath } from "@/lib/auth/returnIntent";
-import { buildWebappRuntimeConfigFromEnv } from "@/lib/platform/runtimeConfig.server";
+import {
+  buildWebappRuntimeConfigFromEnv,
+  getWebappPublicOrigin,
+} from "@/lib/platform/runtimeConfig.server";
 
 /**
  * Parses the locale preferences cookie set during OAuth login.
@@ -66,16 +69,16 @@ async function applyLocalePrefsViaApi(localePrefs: {
 export async function GET(request: Request) {
   const requestUrl = new URL(request.url);
   const code = requestUrl.searchParams.get("code");
-  const origin = requestUrl.origin;
+  const cfg = buildWebappRuntimeConfigFromEnv();
+  const webappOrigin = getWebappPublicOrigin(cfg);
   const safeRedirectPath = parseReturnIntent(requestUrl.searchParams);
   const postLoginUrl = safeRedirectPath
-    ? `${origin}${safeRedirectPath}`
-    : `${origin}${WEBAPP_ROUTES.DEFAULT_PAGE_AFTER_LOGIN}`;
+    ? `${webappOrigin}${safeRedirectPath}`
+    : `${webappOrigin}${WEBAPP_ROUTES.DEFAULT_PAGE_AFTER_LOGIN}`;
 
   if (code) {
     const cookieStore = await cookies();
     const response = NextResponse.redirect(postLoginUrl);
-    const cfg = buildWebappRuntimeConfigFromEnv();
 
     const supabase = createServerClient(cfg.supabaseUrl, cfg.supabasePublishableKey, {
       cookies: {
@@ -115,5 +118,5 @@ export async function GET(request: Request) {
     }
   }
 
-  return NextResponse.redirect(`${origin}${WEBAPP_ROUTES.LOGIN}`);
+  return NextResponse.redirect(`${webappOrigin}${WEBAPP_ROUTES.LOGIN}`);
 }

@@ -7,11 +7,11 @@ import { Button, Card, Stack, Text } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { IconBrandGithubFilled, IconBrandLinkedin } from "@tabler/icons-react";
 import { useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { setLocalePreferencesCookie } from "@/lib/auth/detectLocale";
 import { useCommonTranslations, useLoginPageTranslations } from "@/lib/i18n/generated/hooks";
 import { INTEGRATION_PROVIDERS } from "@/lib/platform/config";
-import { getWebappRuntimeConfigSync } from "@/lib/platform/runtimeConfig.client";
+import { useWebappRuntimeConfig } from "@/lib/platform/runtimeConfig.client";
 import { createBrowswerSupabaseClient } from "@/lib/supabase/client";
 import { Logo } from "./components/Logo";
 
@@ -19,9 +19,10 @@ export function LoginClient() {
   const t = useLoginPageTranslations();
   const tCommon = useCommonTranslations();
   const [loading, setLoading] = useState(false);
-  const supabase = createBrowswerSupabaseClient();
+  const runtimeConfig = useWebappRuntimeConfig();
+  const supabase = useMemo(() => createBrowswerSupabaseClient(runtimeConfig), [runtimeConfig]);
   const searchParams = useSearchParams();
-  const { websiteUrl } = getWebappRuntimeConfigSync();
+  const { websiteUrl } = runtimeConfig;
 
   // Preserve redirect parameter for post-login navigation (e.g., OAuth consent flow)
   const redirectParam = searchParams.get("redirect");

@@ -14,6 +14,7 @@ import { ColorSchemeScript, mantineHtmlProps } from "@mantine/core";
 import { Lexend } from "next/font/google";
 import { headers } from "next/headers";
 import { WebappMantineProvider } from "@/components/shell/WebappMantineProvider";
+import { WebappRuntimeConfigShell } from "@/components/shell/WebappRuntimeConfigShell";
 import { resolveLocaleSettings } from "@/lib/i18n/resolveLocaleSettings";
 import { rootMetadata } from "@/lib/metadata/rootMetadata";
 import { buildWebappRuntimeConfigFromEnv } from "@/lib/platform/runtimeConfig.server";
@@ -61,7 +62,9 @@ export default async function RootLayout({
         </script>
       </head>
       <body>
-        <WebappMantineProvider defaultColorScheme={colorScheme}>{children}</WebappMantineProvider>
+        <WebappRuntimeConfigShell config={runtimeConfig}>
+          <WebappMantineProvider defaultColorScheme={colorScheme}>{children}</WebappMantineProvider>
+        </WebappRuntimeConfigShell>
       </body>
     </html>
   );

@@ -31,9 +31,9 @@ describe("webapp runtime config", () => {
   });
 
   it("rejects Docker build placeholders in production", () => {
-    const previous = { ...process.env, NODE_ENV: process.env.NODE_ENV };
+    const previous = { ...process.env };
 
-    process.env.NODE_ENV = "production";
+    process.env = { ...process.env, NODE_ENV: "production" };
     process.env[WEBAPP_RUNTIME_ENV.apiUrl] = "https://api.example.com";
     process.env[WEBAPP_RUNTIME_ENV.webappUrl] = "https://app.example.com";
     process.env[WEBAPP_RUNTIME_ENV.websiteUrl] = "https://example.com";

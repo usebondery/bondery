@@ -11,7 +11,7 @@ import {
 } from "@tabler/icons-react";
 import type { ComponentType } from "react";
 import { useSettingsPageTranslations } from "@/lib/i18n/generated/hooks";
-import { getWebappRuntimeConfigSync } from "@/lib/platform/runtimeConfig.client";
+import { useWebappRuntimeConfig } from "@/lib/platform/runtimeConfig.client";
 import { openFeedbackModal } from "../modals/openFeedbackModal";
 import { SettingsSection } from "./SettingsSection";
 
@@ -79,7 +79,7 @@ function SupportItemCard({ icon: Icon, title, description, href, onClick }: Supp
 
 export function SupportCard() {
   const t = useSettingsPageTranslations("Support");
-  const { websiteUrl } = getWebappRuntimeConfigSync();
+  const { websiteUrl } = useWebappRuntimeConfig();
 
   const handleOpenFeedbackModal = () => {
     openFeedbackModal();

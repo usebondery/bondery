@@ -22,7 +22,7 @@ import {
 import { optimisticPersonDocumentTitle } from "@/lib/metadata/optimisticTitles";
 import { useNavigateWithTitle } from "@/lib/metadata/useNavigateWithTitle";
 import { HOTKEYS } from "@/lib/platform/config";
-import { getWebappRuntimeConfigSync } from "@/lib/platform/runtimeConfig.client";
+import { useWebappRuntimeConfig } from "@/lib/platform/runtimeConfig.client";
 import { useAppNavigationLinks } from "./NavigationSidebar";
 import { peopleSearchActions } from "./PeopleSearchSpotlight";
 
@@ -34,7 +34,7 @@ export function CommandPalette() {
   const router = useRouter();
   const { navigateWithTitle } = useNavigateWithTitle();
   const { primaryLinks, secondaryLinks } = useAppNavigationLinks();
-  const { websiteUrl } = getWebappRuntimeConfigSync();
+  const { websiteUrl } = useWebappRuntimeConfig();
 
   const navActions = [
     ...primaryLinks,
