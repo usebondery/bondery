@@ -51,7 +51,7 @@ async function applyUnauthorizedPolicy(errorToRethrow?: unknown): Promise<never>
     }
   }
 
-  return handleServerUnauthorizedSession(getRequestReturnPathForLogin(headersList));
+  return handleServerUnauthorizedSession(getRequestReturnPathForLogin(headersList) ?? undefined);
 }
 
 async function applyUnavailablePolicy(error: unknown): Promise<never> {

@@ -5,6 +5,11 @@ export const RETURN_INTENT_PARAM = "redirect";
 
 const MAX_RETURN_PATH_LENGTH = 2_048;
 
+const DEFAULT_POST_LOGIN_PATHS = new Set<string>([
+  WEBAPP_ROUTES.HOME,
+  WEBAPP_ROUTES.DEFAULT_PAGE_AFTER_LOGIN,
+]);
+
 const BLOCKED_PATH_PREFIXES = [
   WEBAPP_ROUTES.UNAVAILABLE,
   WEBAPP_ROUTES.LOGIN,
@@ -74,9 +79,13 @@ export function parseReturnIntent(searchParams: SearchParamsLike): string | null
   return isSafeReturnPath(raw) ? raw : null;
 }
 
-export function buildLoginUrl(returnPath: string): string {
-  const captured = captureReturnPath(returnPath);
-  if (!captured) {
+function shouldPreserveReturnIntent(path: string | null | undefined): path is string {
+  return Boolean(path && isSafeReturnPath(path) && !DEFAULT_POST_LOGIN_PATHS.has(path));
+}
+
+export function buildLoginUrl(returnPath?: string | null): string {
+  const captured = returnPath ? captureReturnPath(returnPath) : null;
+  if (!shouldPreserveReturnIntent(captured)) {
     return WEBSITE_ROUTES.LOGIN;
   }
 
@@ -100,8 +109,8 @@ export function captureClientReturnPath(): string {
   return buildPathWithSearch(window.location.pathname, window.location.search);
 }
 
-export function getClientReturnPathForLogin(): string {
-  return captureReturnPath(captureClientReturnPath()) ?? WEBAPP_ROUTES.HOME;
+export function getClientReturnPathForLogin(): string | null {
+  return captureReturnPath(captureClientReturnPath());
 }
 
 export function getRequestReturnPath(headersList: { get(name: string): string | null }): string {
@@ -112,8 +121,8 @@ export function getRequestReturnPath(headersList: { get(name: string): string | 
 
 export function getRequestReturnPathForLogin(headersList: {
   get(name: string): string | null;
-}): string {
-  return captureReturnPath(getRequestReturnPath(headersList)) ?? WEBAPP_ROUTES.HOME;
+}): string | null {
+  return captureReturnPath(getRequestReturnPath(headersList));
 }
 
 export function shouldBypassOnboardingForReturnPath(path: string | null): path is string {

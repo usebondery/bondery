@@ -1,8 +1,8 @@
 import { API_ROUTES, WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
+import type { Database } from "@bondery/schemas/supabase.types";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
-import { serverApiFetch } from "@/lib/api/server";
 import { BYPASS_ONBOARDING_ONCE_COOKIE } from "@/lib/auth/constants";
 import { LOCALE_PREFS_COOKIE } from "@/lib/auth/detectLocale";
 import { parseReturnIntent, shouldBypassOnboardingForReturnPath } from "@/lib/auth/returnIntent";
@@ -10,6 +10,7 @@ import {
   buildWebappRuntimeConfigFromEnv,
   getWebappPublicOrigin,
 } from "@/lib/platform/runtimeConfig.server";
+import { getSupabaseCookieOptions } from "@/lib/supabase/cookieOptions";
 
 /**
  * Parses the locale preferences cookie set during OAuth login.
@@ -35,32 +36,45 @@ function parseLocalePrefs(
   }
 }
 
-async function initializeUserViaApi(): Promise<void> {
+async function postAuthApiRequest(
+  path: string,
+  accessToken: string,
+  init?: RequestInit,
+): Promise<void> {
+  const { apiBaseUrl } = buildWebappRuntimeConfigFromEnv();
+  const url = path.startsWith("http") ? path : `${apiBaseUrl}${path}`;
+
+  await fetch(url, {
+    ...init,
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      ...(init?.body ? { "Content-Type": "application/json" } : {}),
+      ...init?.headers,
+    },
+  });
+}
+
+async function initializeUserViaApi(accessToken: string): Promise<void> {
   try {
-    await serverApiFetch(API_ROUTES.ME_INITIALIZE, { method: "POST" }, { transportPolicy: false });
+    await postAuthApiRequest(API_ROUTES.ME_INITIALIZE, accessToken, { method: "POST" });
   } catch {
     // Non-blocking: signup initialization is best-effort
   }
 }
 
-async function applyLocalePrefsViaApi(localePrefs: {
-  timezone: string;
-  timeFormat: "12h" | "24h";
-}): Promise<void> {
+async function applyLocalePrefsViaApi(
+  accessToken: string,
+  localePrefs: { timezone: string; timeFormat: "12h" | "24h" },
+): Promise<void> {
   try {
-    await serverApiFetch(
-      API_ROUTES.ME_SETTINGS,
-      {
-        body: JSON.stringify({
-          onlyIfNewSignup: true,
-          timeFormat: localePrefs.timeFormat,
-          timezone: localePrefs.timezone,
-        }),
-        headers: { "Content-Type": "application/json" },
-        method: "PATCH",
-      },
-      { transportPolicy: false },
-    );
+    await postAuthApiRequest(API_ROUTES.ME_SETTINGS, accessToken, {
+      body: JSON.stringify({
+        onlyIfNewSignup: true,
+        timeFormat: localePrefs.timeFormat,
+        timezone: localePrefs.timezone,
+      }),
+      method: "PATCH",
+    });
   } catch {
     // Non-blocking: signup locale seeding is best-effort
   }
@@ -80,7 +94,8 @@ export async function GET(request: Request) {
     const cookieStore = await cookies();
     const response = NextResponse.redirect(postLoginUrl);
 
-    const supabase = createServerClient(cfg.supabaseUrl, cfg.supabasePublishableKey, {
+    const supabase = createServerClient<Database>(cfg.supabaseUrl, cfg.supabasePublishableKey, {
+      cookieOptions: getSupabaseCookieOptions(),
       cookies: {
         getAll() {
           return cookieStore.getAll();
@@ -97,14 +112,21 @@ export async function GET(request: Request) {
     const { error } = await supabase.auth.exchangeCodeForSession(code);
 
     if (!error) {
-      await initializeUserViaApi();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      const accessToken = session?.access_token;
 
-      const localePrefsRaw = cookieStore.get(LOCALE_PREFS_COOKIE)?.value;
-      const localePrefs = parseLocalePrefs(localePrefsRaw);
+      if (accessToken) {
+        await initializeUserViaApi(accessToken);
 
-      if (localePrefs) {
-        await applyLocalePrefsViaApi(localePrefs);
-        response.cookies.set(LOCALE_PREFS_COOKIE, "", { maxAge: 0, path: "/" });
+        const localePrefsRaw = cookieStore.get(LOCALE_PREFS_COOKIE)?.value;
+        const localePrefs = parseLocalePrefs(localePrefsRaw);
+
+        if (localePrefs) {
+          await applyLocalePrefsViaApi(accessToken, localePrefs);
+          response.cookies.set(LOCALE_PREFS_COOKIE, "", { maxAge: 0, path: "/" });
+        }
       }
 
       if (shouldBypassOnboardingForReturnPath(safeRedirectPath)) {

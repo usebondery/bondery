@@ -22,7 +22,7 @@ export function LoginClient() {
   const runtimeConfig = useWebappRuntimeConfig();
   const supabase = useMemo(() => createBrowswerSupabaseClient(runtimeConfig), [runtimeConfig]);
   const searchParams = useSearchParams();
-  const { websiteUrl } = runtimeConfig;
+  const { webappUrl, websiteUrl } = runtimeConfig;
 
   // Preserve redirect parameter for post-login navigation (e.g., OAuth consent flow)
   const redirectParam = searchParams.get("redirect");
@@ -55,7 +55,7 @@ export function LoginClient() {
       await setLocalePreferencesCookie();
 
       // Build callback URL, including the redirect param if present
-      let callbackUrl = `${window.location.origin}/auth/callback`;
+      let callbackUrl = `${webappUrl.replace(/\/$/, "")}/auth/callback`;
       if (redirectParam) {
         callbackUrl += `?redirect=${encodeURIComponent(redirectParam)}`;
       }

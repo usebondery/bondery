@@ -6,6 +6,22 @@ import {
   buildWebappRuntimeConfigFromEnv,
   getWebappPublicOrigin,
 } from "@/lib/platform/runtimeConfig.server";
+import { getSupabaseCookieOptions } from "@/lib/supabase/cookieOptions";
+
+function copyResponseCookies(from: NextResponse, to: NextResponse): void {
+  for (const cookie of from.cookies.getAll()) {
+    to.cookies.set(cookie);
+  }
+}
+
+function redirectWithSupabaseCookies(
+  url: URL | string,
+  supabaseResponse: NextResponse,
+): NextResponse {
+  const redirectResponse = NextResponse.redirect(url);
+  copyResponseCookies(supabaseResponse, redirectResponse);
+  return redirectResponse;
+}
 
 /**
  * Synchronizes Supabase auth cookies for the current request and applies route-based redirects.
@@ -31,6 +47,7 @@ export async function updateSession(request: NextRequest, requestHeaders?: Heade
   // With Fluid compute, don't put this client in a global environment
   // variable. Always create a new one on each request.
   const supabase = createServerClient(cfg.supabaseUrl, cfg.supabasePublishableKey, {
+    cookieOptions: getSupabaseCookieOptions(),
     cookies: {
       getAll() {
         return request.cookies.getAll();
@@ -61,14 +78,14 @@ export async function updateSession(request: NextRequest, requestHeaders?: Heade
   if (!user && request.nextUrl.pathname.startsWith(WEBAPP_ROUTES.APP_GROUP)) {
     const returnPath = buildPathWithSearch(request.nextUrl.pathname, request.nextUrl.search);
     const loginUrl = new URL(buildLoginUrl(returnPath), webappOrigin);
-    return NextResponse.redirect(loginUrl);
+    return redirectWithSupabaseCookies(loginUrl, supabaseResponse);
   }
 
   // 2. Redirect /app to the default app page
   if (user && request.nextUrl.pathname === WEBAPP_ROUTES.APP_GROUP) {
     const url = request.nextUrl.clone();
     url.pathname = WEBAPP_ROUTES.DEFAULT_PAGE_AFTER_LOGIN;
-    return NextResponse.redirect(url);
+    return redirectWithSupabaseCookies(url, supabaseResponse);
   }
 
   // IMPORTANT: You *must* return the supabaseResponse object as it is. If you're
