@@ -1,4 +1,4 @@
-name: Stage · Webapp
+name: Stage - Webapp
 
 on:
   push:
@@ -15,15 +15,11 @@ on:
       - ".dockerignore.webapp"
       - ".github/actions/shared/**"
       - ".github/workflows/stage-webapp.yml"
-      - ".github/workflows/release-webapp.yml"
       - ".github/workflows/shared-docker-build-push.yml"
 
 permissions:
   contents: read
   packages: write
-
-env:
-  IMAGE_NAME: ghcr.io/usebondery/webapp
 
 jobs:
   gate:
@@ -57,7 +53,7 @@ jobs:
     with:
       dockerfile: apps/webapp/Dockerfile
       dockerignore_file: .dockerignore.webapp
-      image_name: ${{ env.IMAGE_NAME }}
+      image_name: ghcr.io/usebondery/webapp
       docker_tags: |
         type=raw,value=beta
         type=sha,prefix=sha-,format=short

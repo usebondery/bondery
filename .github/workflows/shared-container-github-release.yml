@@ -1,4 +1,4 @@
-name: Shared · Container GitHub release
+name: Shared - Container GitHub release
 
 on:
   workflow_call:

@@ -1,4 +1,4 @@
-name: Shared · Release validate
+name: Shared - Release validate
 
 on:
   workflow_call:

@@ -33,6 +33,8 @@ shared/
 | `release-*` | Production releases | Git tags `*-X.Y.Z` |
 | `shared-*` | Reusable workflows (not triggered directly) | `workflow_call` only |
 
+Display names use ASCII hyphens (for example `Stage - Webapp`) because GitHub rejects some workflow expressions when combined with certain name encodings, and because reusable-workflow `with:` blocks cannot use the `env` context.
+
 ## Docker channels
 
 | Channel | Git trigger | Docker tags |

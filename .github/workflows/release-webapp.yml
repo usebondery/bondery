@@ -1,4 +1,4 @@
-name: Release · Webapp
+name: Release - Webapp
 
 on:
   push:
@@ -15,9 +15,6 @@ permissions:
   contents: write
   packages: write
 
-env:
-  IMAGE_NAME: ghcr.io/usebondery/webapp
-
 jobs:
   validate:
     uses: ./.github/workflows/shared-release-validate.yml
@@ -33,7 +30,7 @@ jobs:
       checkout_ref: ${{ needs.validate.outputs.tag }}
       dockerfile: apps/webapp/Dockerfile
       dockerignore_file: .dockerignore.webapp
-      image_name: ${{ env.IMAGE_NAME }}
+      image_name: ghcr.io/usebondery/webapp
       docker_tags: |
         type=raw,value=${{ needs.validate.outputs.version }}
         type=raw,value=production
@@ -52,5 +49,5 @@ jobs:
     with:
       tag: ${{ needs.validate.outputs.tag }}
       version: ${{ needs.validate.outputs.version }}
-      image_name: ${{ env.IMAGE_NAME }}
+      image_name: ghcr.io/usebondery/webapp
       product_name: Bondery Webapp

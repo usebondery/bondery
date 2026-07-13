@@ -1,4 +1,4 @@
-name: Stage · API
+name: Stage - API
 
 on:
   push:
@@ -15,15 +15,11 @@ on:
       - ".dockerignore.api"
       - ".github/actions/shared/**"
       - ".github/workflows/stage-api.yml"
-      - ".github/workflows/release-api.yml"
       - ".github/workflows/shared-docker-build-push.yml"
 
 permissions:
   contents: read
   packages: write
-
-env:
-  IMAGE_NAME: ghcr.io/usebondery/api
 
 jobs:
   gate:
@@ -54,7 +50,7 @@ jobs:
     with:
       dockerfile: apps/api/Dockerfile
       dockerignore_file: .dockerignore.api
-      image_name: ${{ env.IMAGE_NAME }}
+      image_name: ghcr.io/usebondery/api
       docker_tags: |
         type=raw,value=beta
         type=sha,prefix=sha-,format=short
