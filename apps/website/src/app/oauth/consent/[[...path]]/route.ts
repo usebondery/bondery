@@ -5,7 +5,9 @@ type RouteContext = {
   params: Promise<{ path?: string[] }>;
 };
 
-export async function GET(_request: Request, { params }: RouteContext) {
+export async function GET(request: Request, { params }: RouteContext) {
   const { path } = await params;
-  redirect(webappUrl("/oauth/consent", path ?? []));
+  const requestUrl = new URL(request.url);
+  const target = webappUrl("/oauth/consent", path ?? []);
+  redirect(`${target}${requestUrl.search}`);
 }

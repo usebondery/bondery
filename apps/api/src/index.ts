@@ -2,7 +2,6 @@
  * Bondery API Server entry point.
  */
 
-import type { IncomingMessage, ServerResponse } from "node:http";
 import "fastify";
 import { buildApp } from "./build-app.js";
 import { buildServer } from "./build-server.js";
@@ -35,7 +34,7 @@ async function start() {
 
   try {
     await server.listen({ host, port });
-    server.log.info(`Bondery API Server running at http://${host}:${port}`);
+    server.log.info(`Bondery API running at http://${host}:${port}`);
   } catch (err) {
     server.log.error(err);
     process.exit(1);
@@ -44,17 +43,4 @@ async function start() {
 
 export { buildApp, buildServer };
 
-let serverPromise: ReturnType<typeof buildServer> | null = null;
-
-export default async function handler(req: IncomingMessage, res: ServerResponse) {
-  if (!serverPromise) {
-    serverPromise = buildServer();
-  }
-  const server = await serverPromise;
-  await server.ready();
-  server.server.emit("request", req, res);
-}
-
-if (process.env.NODE_ENV !== "production" || !process.env.VERCEL) {
-  start();
-}
+void start();

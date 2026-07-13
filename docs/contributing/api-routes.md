@@ -142,7 +142,7 @@ The API separates **app assembly** from **runtime boot**:
 | `buildServer()` | [`apps/api/src/build-server.ts`](../../apps/api/src/build-server.ts) | `buildApp()` plus `onReady` (auth JWKS verify, sync wake) and `onClose` shutdown |
 | `registerAllRoutes()` | [`apps/api/src/routes/register-all.ts`](../../apps/api/src/routes/register-all.ts) | Ordered route mount table — add new route modules here |
 
-[`apps/api/scripts/generate-openapi.ts`](../../apps/api/scripts/generate-openapi.ts) imports `build-app.ts` directly so OpenAPI generation never loads `index.ts` side effects (auto-listen, Vercel handler). New runtime startup hooks belong in `build-server.ts`, not `build-app.ts`.
+[`apps/api/scripts/generate-openapi.ts`](../../apps/api/scripts/generate-openapi.ts) imports `build-app.ts` directly so OpenAPI generation never loads `index.ts` side effects (auto-listen). New runtime startup hooks belong in `build-server.ts`, not `build-app.ts`.
 
 ### Redis
 
@@ -266,19 +266,17 @@ fastify.get("/", { schema: { ... } }, async (request) => {
 
 Existing query modules: `services/contacts/queries.ts`, `services/tags/queries.ts`, `services/groups/queries.ts`, `services/interactions/queries.ts`.
 
-## Vercel (separate API project)
+## Container deployment (GHCR + Dokploy)
 
-Each app (`apps/api`, `apps/webapp`, …) is its own Vercel project with **Root Directory** set to that app folder (for the API: `apps/api`, **not** the monorepo root).
+The API runs as a long-lived Node process in Docker, not serverless. See [`docs/deploy/api-container.md`](../../deploy/api-container.md).
+
+Build pipeline:
+
+1. **Image build** — `apps/api/Dockerfile` uses `turbo prune api --docker`, `npm ci`, and `turbo build --filter=api`.
+2. **CI** — GitHub Actions pushes to `ghcr.io/usebondery/bondery-api` (`:beta` on `main`, semver tags on `release`).
+3. **Runtime** — `node apps/api/dist/index.js` listens on `PORT` (default `26631`).
 
 Workspace packages follow the [Turborepo compiled-package model](https://turborepo.dev/docs/guides/tools/typescript#compiled-packages): `types` → `./src/*.ts` (editor IntelliSense), `import` / `node` / `default` → `./dist/*.js` (runtime). Production `build` depends on `^build`; local dev cold-starts via `compile` (`tsc` to `dist/`) with package `tsc --watch` companions. When adding package subpaths (especially directory barrels like `src/foo/index.ts`), run `npm run sync-exports` from the repo root.
-
-The API project uses [`apps/api/vercel.json`](../../apps/api/vercel.json):
-
-1. **Install** — Vercel installs npm workspaces from the monorepo root.
-2. **Build** — `turbo build --filter=api` builds workspace packages (`^build`) then the API. No separate package compile step in `vercel.json`.
-3. **No API bundler** — no `tsup`, no custom Build Output API scripts.
-
-In the Vercel project settings, enable **Include source files outside of the Root Directory** so builds can read `packages/*`.
 
 `openapi.yaml` is committed; generation is not part of the deploy build.
 

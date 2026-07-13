@@ -522,7 +522,7 @@ Start Supabase separately from `apps/supabase-db` (`npm run start`). These scrip
 
 ### Production builds
 
-From the **repo root**, use Turborepo to build apps (caching, correct workspace context, same as CI/Vercel):
+From the **repo root**, use Turborepo to build apps (caching, correct workspace context, same as CI):
 
 ```bash
 npx turbo build --filter=api

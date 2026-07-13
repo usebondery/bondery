@@ -16,10 +16,11 @@ interface SectionProps {
 // Third-party providers data
 const subprocessors = [
   {
-    location: "",
-    name: "Vercel",
-    notes: "",
-    privacy: "https://vercel.com/legal/privacy-policy",
+    location: "EU",
+    name: "Hetzner",
+    notes:
+      "Self-managed infrastructure on Hetzner cloud servers, including in-memory caching for rate limiting and real-time sync.",
+    privacy: "https://www.hetzner.com/legal/privacy-policy",
     useCase: "Website, webapp, and API hosting",
   },
   {
@@ -68,13 +69,6 @@ const subprocessors = [
   },
   {
     location: "",
-    name: "Upstash",
-    notes: "Transient request metadata (e.g. IP address) for rate limiting and sync notifications.",
-    privacy: "https://upstash.com/trust/privacy.pdf",
-    useCase: "Rate limiting and real-time sync",
-  },
-  {
-    location: "",
     name: "OpenStreetMap",
     notes: "Map tiles are loaded directly in your browser when you use the map view.",
     privacy: "https://wiki.osmfoundation.org/wiki/Privacy_Policy",
@@ -118,7 +112,7 @@ function _BulletList({ items }: { items: ReactNode[] }) {
 
 export function Privacy() {
   return (
-    <LegalDocumentLayout lastUpdated="July 8, 2026" title="Privacy Policy">
+    <LegalDocumentLayout lastUpdated="July 13, 2026" title="Privacy Policy">
       <Text mb="lg">
         PixelDev s.r.o., IČ: 23476800 (&quot;PixelDev,&quot; &quot;Bondery,&quot; &quot;we,&quot;
         &quot;us,&quot; or &quot;our&quot;) respects the privacy of its users (&quot;User,&quot;

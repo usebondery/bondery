@@ -4,8 +4,8 @@
  * - commands: rate limit, WS tickets, wake PUBLISH
  * - subscriber: wake SUBSCRIBE only (Redis pub/sub constraint)
  *
- * Serverless note: Vercel may freeze/kill without running onClose. Graceful quit
- * matters for local dev, tests, and long-lived Node — not for next cold start.
+ * Container note: on SIGTERM, prefer graceful quit via Fastify onClose when the process
+ * receives a shutdown signal. In-memory-only deployments may still lose connections abruptly.
  */
 
 import { Redis } from "ioredis";

@@ -73,7 +73,7 @@ export function checkEnvVariables(config: EnvCheckConfig): void {
   console.log(`\n${colors.blue}🔍 Checking environment variables...${colors.reset}`);
   console.log(`   Environment: ${colors.green}${environment}${colors.reset}`);
 
-  // Check if env file exists (optional for CI/CD environments like Vercel)
+  // Check if env file exists (optional for CI/CD and container deployments)
   const fileExists = existsSync(envFilePath);
 
   if (fileExists) {
@@ -110,7 +110,7 @@ export function checkEnvVariables(config: EnvCheckConfig): void {
       );
     } else {
       console.error(
-        `\n${colors.yellow}Please set these variables in your CI/CD environment (e.g., Vercel dashboard)${colors.reset}`,
+        `\n${colors.yellow}Please set these variables in your deployment environment (e.g. Dokploy, GitHub Actions)${colors.reset}`,
       );
     }
     process.exit(1);
